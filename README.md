@@ -1,5 +1,5 @@
 # TRAINS - Web Application
-## TRAINS - Magic Version Control &amp; Experiment Manager for AI
+## TRAINS - Automagical Version Control &amp; Experiment Manager for AI
 
 [![GitHub license](https://img.shields.io/github/license/allegroai/trains-web.svg)](https://img.shields.io/github/license/allegroai/trains-web.svg)
 [![GitHub version](https://img.shields.io/github/release-pre/allegroai/trains-web.svg)](https://img.shields.io/github/release-pre/allegroai/trains-web.svg)
