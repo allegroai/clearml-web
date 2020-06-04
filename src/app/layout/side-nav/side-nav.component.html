@@ -1,0 +1,60 @@
+<!-- DON'T FORGET TO ADD LINK TO 404 PAGE TOO -->
+
+<div class="side-nav">
+  <div class="item logo">
+    <div class="item-icon">
+      <img src="../../../assets/t-logo-w.svg" class="logo-a">
+    </div>
+    <div class="caption">
+<!--      <img src="../../../assets/logo-white.png" class="logo-full">-->
+    </div>
+  </div>
+
+  <ng-container *ngIf="currentUser">
+    <a class="item d-block" #rlaHome="routerLinkActive" routerLink="/dashboard" routerLinkActive (click)="resetSearch()"
+      smTooltip="HOMEPAGE" showDelay="0" position="right">
+      <div class="item-icon">
+        <img [src]="'./app/webapp-common/assets/icons/side-nav/' + (rlaHome.isActive ? 'home-neon.svg': 'home.svg')">
+      </div>
+      <div class="caption">homepage</div>
+    </a>
+
+    <a class="item d-block" smTooltip="PROJECTS" showDelay="0" position="right" routerLink="/projects"
+      [routerLinkActive] #rlaProjects="routerLinkActive">
+      <div class="item-icon">
+        <img [src]="'./app/webapp-common/assets/icons/side-nav/' + (rlaProjects.isActive ? 'projects-neon.svg': 'projects.svg')">
+      </div>
+      <div class="caption">projects</div>
+    </a>
+    <a class="item d-block"
+       routerLink="/workers-and-queues"
+       routerLinkActive
+       #rlaQueues="routerLinkActive"
+       smTooltip="WORKERS & QUEUES"
+       showDelay="0"
+       position="right">
+      <div class="item-icon">
+        <img [src]="'./app/webapp-common/assets/icons/side-nav/' + (rlaQueues.isActive?'queues-neon.svg': 'queues.svg')">
+      </div>
+      <div class="caption">workers & queues</div>
+    </a>
+
+  </ng-container>
+    <div class="account">
+      <a *ngIf="currentUser" class="item d-block" routerLink="/profile" routerLinkActive
+         #rlaAdmin="routerLinkActive" smTooltip="PROFILE"showDelay="0" position="right"
+      >
+        <div class="item-icon">
+          <i class="fa fa-user-alt fa-2x" [ngClass]="{'neon': rlaAdmin.isActive}"></i>
+        </div>
+        <div class="caption">Profile</div>
+      </a>
+      <a class="item d-block" href="https://github.com/allegroai" target="_blank" smTooltip="Fork us on GitHub"
+        showDelay="0" position="right">
+        <div class="item-icon">
+          <i class="fab fa-github fa-2x"></i>
+        </div>
+        <div class="caption">Fork us on GitHub</div>
+      </a>
+    </div>
+</div>

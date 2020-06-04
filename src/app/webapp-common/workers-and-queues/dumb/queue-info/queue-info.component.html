@@ -1,0 +1,103 @@
+<div class="d-flex justify-content-center tabs-container">
+  <sm-navbar-item header="Experiments" [active]="activeTab==='experiments'"
+                  (click)="activeTab = 'experiments'"></sm-navbar-item>
+  <sm-navbar-item header="Workers" [active]="activeTab==='workers'" (click)="activeTab = 'workers'">
+  </sm-navbar-item>
+  <div class="pull-right pointer" (click)="deselectQueueClicked()">
+    <i class="fa fa-times"></i>
+  </div>
+</div>
+
+<div *ngIf="activeTab === 'experiments' &&  selectedQueue?.entries.length===0"
+     class="d-flex align-items-center justify-content-center p-4">No experiments currently enqueued
+</div>
+<div *ngIf="activeTab === 'workers' &&  selectedQueue?.workers.length===0"
+     class="d-flex align-items-center justify-content-center p-4">No workers currently assigned to this queue
+</div>
+<sm-simple-table-2
+  *ngIf="activeTab==='workers' && selectedQueue?.workers?.length>0"
+  [cols]="workersCols"
+  [rowsData]="selectedQueue?.workers"
+  noDataMessage=" "
+>
+  <ng-template
+    let-col
+    let-i="rowIndex"
+    let-row="row">
+    <div class="col-9">
+      {{row.name}}
+    </div>
+    <div class="col-6">
+      {{row.ip}}
+    </div>
+    <div class="col-9">
+      <a
+        [href]="'/projects/'+ ((row?.task?.project?.id) ? row?.task?.project?.id : '*') + '/experiments/' +row?.task?.id"> {{row?.task?.name}}</a>
+    </div>
+  </ng-template>
+
+</sm-simple-table-2>
+
+<sm-menu
+  *ngIf="menuOpen"
+  buttonClass="icon sm i-list-view"
+  smMenuClass="bigger-width experiments-in-queue-list"
+  [position]="menuPosition"
+  [header]=""
+  [showCart]="false"
+  [showOverlay]="false"
+  [showButton]="false"
+  [openOnInit]="true"
+  (onMenuClosed)="menuClosed()"
+>
+  <sm-menu-item itemLabel="Move to top"
+                [disabled]="selectedQueue.entries.length <= 0"
+                (itemClicked)="moveToTop($event)"
+                iconClass="icon sm mr-2 i-arrow-to-top">
+  </sm-menu-item>
+  <sm-menu-item itemLabel="Move to bottom"
+                [disabled]="selectedQueue.entries.length <= 0"
+                (itemClicked)="moveToBottom($event)"
+                iconClass="icon sm mr-2 i-arrow-to-bottom">
+  </sm-menu-item>
+  <sm-menu-item itemLabel="Move to queue..."
+                [disabled]="selectedQueue.entries.length <= 0"
+                (itemClicked)="moveToQueue($event)"
+                iconClass="icon sm mr-2 i-arrow-from-left">
+  </sm-menu-item>
+  <sm-menu-item itemLabel="Remove from queue"
+                [disabled]="selectedQueue.entries.length <= 0"
+                (itemClicked)="removeFromQueue($event)"
+                [iconFontSize]="12"
+                iconClass="fas fa-trash">
+  </sm-menu-item>
+
+</sm-menu>
+
+<sm-simple-table-2
+  *ngIf="activeTab==='experiments'"
+  [cols]="experimentsCols"
+  [rowsData]="selectedQueue?.entries"
+  [enableDragAndDrop]="true"
+  noDataMessage=" "
+  (entryDropped)="experimentDropped($event)"
+>
+  <ng-template
+    let-col
+    let-i="rowIndex"
+    let-row="row">
+    <div class="col-1">
+      <i class="fas fa-th drag-grid"></i>
+    </div>
+    <div class="col-1">
+      {{i + 1}}
+    </div>
+    <div class="col-21">
+      <a
+        [href]="'/projects/'+ ((row?.task?.project?.id) ? row?.task?.project?.id : '*') + '/experiments/' +row?.task?.id">{{row?.task?.name}}</a>
+    </div>
+    <div class="col-1">
+      <i class="fas fa-ellipsis-v pointer p-2" (click)="openContextMenu($event, row?.task)"></i>
+    </div>
+  </ng-template>
+</sm-simple-table-2>

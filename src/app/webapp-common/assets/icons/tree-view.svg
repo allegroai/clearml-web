@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+    <g fill="none" fill-rule="evenodd">
+        <rect width="5" height="3" x="11" fill="#A7B2D8" rx=".5"/>
+        <rect width="5" height="3" fill="#A7B2D8" rx=".5"/>
+        <rect width="5" height="3" x="11" y="6" fill="#A7B2D8" rx=".5"/>
+        <rect width="5" height="3" x="11" y="12" fill="#A7B2D8" rx=".5"/>
+        <g stroke="#A7B2D8">
+            <path d="M2 1.5h12M8.5 1v3.5a3 3 0 0 0 3 3h2"/>
+            <path d="M8.5 4v6.5a3 3 0 0 0 3 3h4"/>
+        </g>
+    </g>
+</svg>

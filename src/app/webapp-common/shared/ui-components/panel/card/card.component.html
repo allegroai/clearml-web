@@ -1,0 +1,22 @@
+<div class="card" role="button">
+  <div class="card-container">
+    <header>
+      {{header}}
+      <ng-content select="[header-content]"></ng-content>
+      <ng-content select="[headerButtons]"></ng-content>
+    </header>
+    <div *ngIf="showSeperator" class="line"></div>
+    <div class="card-body">
+      <ng-content></ng-content>
+    </div>
+    <footer>
+      <ng-content select="[footer]">
+      </ng-content>
+      <div *ngIf="isExample" class="ribbon">
+        <div class="txt">
+          <i class="fas fa-lightbulb-on mr-1"></i>EXAMPLE
+        </div>
+      </div>
+    </footer>
+  </div>
+</div>

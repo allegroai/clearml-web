@@ -1,0 +1,17 @@
+<sm-dialog-template [header]="title">
+  <textarea [(ngModel)]="textData" class="data-text" [disabled]="readOnly" [placeholder]="placeHolder? placeHolder:''"></textarea>
+  <div>
+    <small *ngIf="this.showErrors && this.errors"
+           class="text-danger">*Not a valid json.
+    </small>
+  </div>
+  <div class="buttons">
+    <button (click)="closeDialog(false)" class="btn btn-outline-neon yes-button">
+      Cancel
+    </button>
+    <button (click)="closeDialog(!readOnly)" class="btn btn-neon">
+      OK
+    </button>
+  </div>
+
+</sm-dialog-template>

@@ -1,0 +1,193 @@
+@import "../../../shared/ui-components/styles/variables";
+
+:host {
+  display: flex;
+  height: 100%;
+
+  /deep/ .list-container {
+    display: flex;
+    flex-direction: column;
+    width: 360px;
+    height: 100%;
+    border-right: 1px solid #efefef;
+
+    input {
+      padding-left: 0;
+    }
+  }
+
+  /deep/ sm-checked-filter-list {
+
+    .title {
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .purple-v {
+      width: 20px !important;
+      height: 20px !important;
+    }
+  }
+
+  /deep/ .mat-expansion-panel-body {
+    padding: 0;
+  }
+}
+
+.toggle-all {
+  font-size: 10px;
+  padding-right: 2px;
+  cursor: pointer;
+}
+
+.graphs-container {
+  flex: 1;
+  overflow: auto;
+  padding: 0 !important;
+}
+
+
+.metrics-container {
+  padding: 20px 32px 0;
+  // search icon
+  i.fa {
+    position: absolute;
+    right: 0;
+    top: 10px;
+    color: $blue-480;
+  }
+
+  .value-types {
+    display: block;
+    margin-top: 16px;
+    font-size: 11px;
+
+    mat-radio-button {
+      margin-right: 22px;
+    }
+  }
+}
+
+.metric-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: $blue-400;
+}
+
+.metrics-search {
+  position: relative;
+
+  input {
+    width: 100%;
+    font-size: 14px;
+    border: none;
+    border-bottom: 2px solid $light-periwinkle;
+    border-radius: 0;
+    padding-right: 32px;
+
+    &:focus {
+      border-bottom-color: $blue-480;
+    }
+  }
+}
+
+sm-checked-filter-list {
+  flex: 1;
+  overflow: auto;
+  margin: 0 12px 0 32px;
+}
+
+.separate-margins {
+  margin: 24px 0 20px 0;
+}
+
+.metric-list {
+  overflow: scroll;
+  overflow-x: hidden;
+  max-height: 0;
+  width: calc(100% + 20px);
+  padding-right: 14px;
+  transition: max-height 0.2s;
+
+  &__panel {
+    box-shadow: none;
+    border-radius: 0;
+
+    & .mat-expanded .metric-list__title {
+      color: $purple;
+    }
+  }
+
+  &__header {
+    padding: 0 2px 0 0;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0) !important;
+    }
+  }
+
+  &__title {
+    color: $blue-400;
+    font-size: 14px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    display: inline-block;
+
+    &:hover {
+      color: $purple;
+    }
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    font-family: 'Heebo', sans-serif;
+    font-size: 12px;
+    height: 32px;
+    color: $blue-400;
+    padding: 0 16px;
+    border-radius: 4px;
+    cursor: pointer;
+
+    &.selected {
+      background: $blue-50;
+    }
+
+    &:hover {
+      background: $very-light-blue;
+    }
+
+  }
+
+  // Modify
+  &.mat-expanded {
+    .metric-list__title {
+      color: $purple;
+    }
+  }
+
+  &--show {
+    transition: max-height 0.35s ease-in-out;
+    max-height: 300px;
+  }
+}
+
+.graph-container {
+  height: 100%;
+  overflow: hidden;
+}
+
+.no-data {
+  color: #707ba3;
+  font-weight: 400;
+
+  .no-data-title {
+    font-size: 16px;
+  }
+}
+
+.i-no-data-graph {
+  width: 300px;
+  height: 300px;
+}

@@ -1,0 +1,25 @@
+<div *ngFor="let kpi of kpis">
+  <sm-labeled-row label="{{kpi.label}}:">
+    <div *ngIf="!kpi.href">
+      {{kpi.value}}
+    </div>
+    <div *ngIf="kpi.href && kpi.value">
+      <a [routerLink]="kpi.href">
+        {{kpi.value}}
+      </a>
+      <sm-copy-clipboard  [clipboardText]="kpi.task" [hideBackground]="true" label=""></sm-copy-clipboard>
+    </div>
+    <div *ngIf="kpi.href && (!kpi.value) ">N/A</div>
+  </sm-labeled-row>
+</div>
+
+<sm-labeled-row label="DESCRIPTION:">
+  <sm-inline-edit
+    [fieldValue]="model?.comment"
+    [originalText]="model?.comment"
+    [editable]="true"
+    [multiline]="true"
+    (textChanged)="commentValueChanged($event)"
+    >
+    <span class="general-description">{{model?.comment | NA}}</span></sm-inline-edit>
+</sm-labeled-row>

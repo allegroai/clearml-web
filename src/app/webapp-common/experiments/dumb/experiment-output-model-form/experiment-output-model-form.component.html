@@ -1,0 +1,23 @@
+<sm-editable-section [editable]="false">
+  <sm-experiment-output-model-view
+    [editable]="false"
+    [modelLabels]="modelLabels"
+    [model]="formData?.input"
+    [networkDesign]="formData.prototext"
+    [output]="formData.output"
+    [projectId]="modelProjectId"
+    [source]="formData?.source">
+    >
+  </sm-experiment-output-model-view>
+
+</sm-editable-section>
+<sm-editable-section class="editable-design" [editable]="false">
+  <sm-section-header label="MODEL CONFIGURATION"></sm-section-header>
+  <sm-experiment-network-design-form
+    [editable]="false"
+    [formData]="formData?.output.design"
+    fieldName="prototext"
+    inputClassName="preview-text resize-none"
+    >
+  </sm-experiment-network-design-form>
+</sm-editable-section>

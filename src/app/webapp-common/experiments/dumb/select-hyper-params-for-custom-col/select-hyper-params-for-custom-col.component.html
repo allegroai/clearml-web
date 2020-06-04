@@ -1,0 +1,14 @@
+<div smClickStopPropagation class="d-flex justify-content-between hyper-params-container">
+  <i (click)="goBack.emit()" class="icon sm-md i-back pointer" smClickStopPropagation></i>
+  <div class="hyper-param-header">SELECT HYPER PARAMETERS TO DISPLAY
+  </div>
+</div>
+<hr style="margin: 0">
+<sm-checked-filter-list
+  smClickStopPropagation
+  [itemsList]="hyperParams"
+  [selectedItemsList]="metricsCols"
+  (selectedItems)="toggleParamToDisplay($event)"
+  (clearSelection)="clearSelection.emit()"
+>
+</sm-checked-filter-list>

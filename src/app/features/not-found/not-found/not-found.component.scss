@@ -1,0 +1,53 @@
+:host{
+  #not-found-container {
+    margin-top: 5%;
+    color: white;
+
+    h1 {
+      font-size: 200px;
+      font-weight: bold;
+
+    }
+    h2 {
+      font-size: 44px;
+      font-weight: 100;
+    }
+    h3 {
+      font-size: 30px;
+      font-weight: 100;
+    }
+  }
+  .navbar-links {
+    li {
+      list-style: none;
+      height: 130px;
+      width: 130px;
+      border: 1px solid white;
+      border-radius: 4px;
+      margin-left: 15px;
+      margin-right: 15px;
+    }
+    li:hover {
+      background: #2C3246;
+    }
+    .icon {
+      margin: 10px auto;
+      width: 55px;
+      height: 55px;
+      display: block;
+    }
+    span {
+      text-align: center;
+      font-size: 17px;
+      font-weight: 400;
+      display: block;
+      color: white;
+    }
+  }
+  .cat{
+    width:140px;
+    height:140px;
+    margin-top:44px;
+  }
+}
+

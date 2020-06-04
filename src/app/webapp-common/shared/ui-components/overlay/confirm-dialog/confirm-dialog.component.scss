@@ -1,0 +1,48 @@
+@import '../../styles/variables';
+
+:host {
+  width: 640px;
+  display: block;
+
+  .reference {
+    background: #F4F7FF;
+    padding: 6px;
+    border-radius: 4px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .body {
+    width: 400px;
+    line-height: 1.29;
+    font-size: 14px;
+    margin: 0 auto;
+    overflow-wrap: break-word;
+  }
+
+  .buttons {
+    display: inline-block;
+    left: 50%;
+    position: relative;
+    transform: translateX(-50%);
+    margin-top: 41px;
+
+    button {
+      text-transform: uppercase;
+    }
+
+    .yes-button {
+      margin-right: 16px;
+    }
+
+    //.btn {
+    //  border-radius: 4px;
+    //  background-color: $white;
+    //  border: solid 1px $neon-yellow-hover;
+    //  padding: 8px 40px;
+    //  cursor: pointer;
+    //}
+  }
+}

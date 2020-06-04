@@ -1,0 +1,18 @@
+<sm-workers-graph [worker]="selectedWorker$ | async" class="overflow-hidden"></sm-workers-graph>
+<as-split class="flex-grow-1">
+  <as-split-area size="50">
+    <sm-workers-table class="mt-2"
+                      [workers]="workers$ | async"
+                      [selectedWorker]="selectedWorker$ | async"
+                      (sortedChanged)="sortedChanged($event)"
+                      [tableSortField]="tableSortField$ | async"
+                      [tableSortOrder]="tableSortOrder$ | async"
+                      (workerSelected)="selectWorker($event)">
+    </sm-workers-table>
+  </as-split-area>
+  <as-split-area size="50" [visible]="!!(selectedWorker$| async)">
+    <sm-worker-info [selectedWorker]="selectedWorker$ | async"
+      (deselectWorker)="selectWorker(null)">
+    </sm-worker-info>
+  </as-split-area>
+</as-split>

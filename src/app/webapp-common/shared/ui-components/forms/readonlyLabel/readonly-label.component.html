@@ -1,0 +1,4 @@
+<div *ngIf="readonly && (label || label===0)">
+  <sm-labeled-row [label]="label">{{value}}</sm-labeled-row>
+</div>
+<span *ngIf="readonly && !(label || label===0)" [class]="readonlyClassName">{{value}}</span>

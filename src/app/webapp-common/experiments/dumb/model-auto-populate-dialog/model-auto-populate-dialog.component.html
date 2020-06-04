@@ -1,0 +1,37 @@
+<sm-dialog-template
+  header="PLEASE CONFIRM CHANGES"
+  subHeader="Please confirm that you want to overwrite the current values for the following fields of the experiment. Uncheck those you don't want to overwrite:"
+>
+
+  <div class="body">
+    <sm-checkbox-control
+      *ngIf="data.populateLabels"
+      label="Label enumeration"
+      fieldName="labelEnum"
+      [formData]="formData.labelEnum"
+      (formDataChanged)="updateFormData($event)"
+    >
+
+    </sm-checkbox-control>
+    <sm-checkbox-control
+      *ngIf="data.populateDesign"
+      label="Model Configuration"
+      fieldName="networkDesign"
+      [formData]="formData.networkDesign"
+      (formDataChanged)="updateFormData($event)"
+    >
+    </sm-checkbox-control>
+  </div>
+
+  <div class="buttons">
+
+    <button (click)="closeDialog(false)" class="btn btn-outline-neon yes-button">
+      Cancel
+    </button>
+    <button (click)="closeDialog(true)" class="btn btn-neon">
+      Confirm
+    </button>
+
+  </div>
+
+</sm-dialog-template>

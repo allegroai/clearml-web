@@ -1,0 +1,30 @@
+<sm-compare-card-list
+  *ngIf="comparedTasks"
+  [experiments]="experiments"
+  [baseExperiment]="experiments[0]"
+  (experimentListChanged)="experimentListChanged($event)"
+>
+  <div *compareCardHeader="let experiment;">
+    <sm-experiment-compare-general-data [experiment]="experiment" (copyIdClicked)="copyIdToClipboard()">
+    </sm-experiment-compare-general-data>
+  </div>
+  <div class="tree-card-body" smSyncScroll *compareCardBody="let experiment; let i = index;">
+    <div *ngFor="let node of comparedTasks[i]" class="node" [ngClass]="node?.metaData?.classStyle">
+      <div class="content" (click)="collapsedToggled(node)">
+        <i class="fas" [style.margin-left.px]="2 + node.level * 20" [ngClass]="realIsNodeOpen(node) ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
+        {{node.data.key}}
+      </div>
+      <al-table-diff *ngIf="realIsNodeOpen(node)"
+                     [valueTitle]="valuesMode.name | uppercase" keyTitle="VARIANT"
+                     [isOrigin]="i===0"
+                     (sortByChanged)="metricSortChanged($event,node.data)"
+                     [sortConfig]="(sortOrder$| async)[node.data.key] || {order:'asc', keyOrValue: 'key'}"
+                     [keyValueArray]="node.data | getKeyValueArrayPipe:allKeysEmptyObject:(sortOrder$| async)[node.data.key]:valuesMode.key">
+        <ng-template
+          let-metricValue>
+          {{metricValue}}
+        </ng-template>
+      </al-table-diff>
+    </div>
+  </div>
+</sm-compare-card-list>

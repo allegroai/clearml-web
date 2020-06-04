@@ -1,0 +1,10 @@
+<sm-search-results-page
+  *ngIf="activeSearch$ | async"
+  (projectSelected)="projectCardClicked($event)"
+  (experimentSelected)="taskSelected($event)"
+  (modelSelected)="modelSelected($event)"
+  (activeLinkChanged)="activeLinkChanged($event)"
+  [projectsList]="projectsResults$ | async"
+  [experimentsList]="experimentsResults$ | async"
+  [modelsList]="modelsResults$ | async"
+  [activeLink]="activeLink"></sm-search-results-page>

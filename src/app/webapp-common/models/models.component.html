@@ -1,0 +1,61 @@
+<div class="h-100 row no-gutters">
+  <div class="w-100 model-header">
+    <sm-model-header
+      [isArchived]="isArchived$ | async"
+      [disableCreateNewButton]="isExampleProject"
+      [autoRefreshState]="autoRefreshState$ | async"
+      (isArchivedChanged)="archivedChanged($event)"
+      (setAutoRefresh)="setAutoRefresh($event)"
+      (refreshListClicked)="refreshList(false)"
+      (selectedTableColsChanged)="selectedTableColsChanged($event)"
+      [tableCols]="tableCols"
+    ></sm-model-header>
+  </div>
+  <div class="models-body">
+    <as-split>
+      <as-split-area size="30">
+        <sm-models-table
+          class="w-100 align-self-stretch"
+          selectionMode="single"
+          [models]="models$ | async"
+          [tableCols]="filteredTableCols"
+          [minimizedView]="(showInfo$ | async)"
+          [noMoreModels]="noMoreModels$ | async"
+          [users]="users$ |async"
+          [tags]="tags$ | async"
+          [systemTags]="systemTags$ | async"
+          [tableSortField]="(tableSortField$ | async)"
+          [tableSortOrder]="(tableSortOrder$ | async)"
+          [tableFilters]="(tableFilters$ | async)"
+          [colsOrder]="(tableColsOrder$ | async)"
+          [selectedModels]="selectedModels$ | async"
+          [selectedModel]="selectedModel$ | async"
+          (onColumnsReordered)="columnsReordered($event)"
+          (modelSelectionChanged)="modelSelectionChanged($event)"
+          (modelsSelectionChanged)="modelsSelectionChanged($event)"
+          (tagsMenuOpened)="refreshTagsList()"
+          (sortedChanged)="sortedChanged($event)"
+          (filterChanged)="filterChanged($event)"
+          (loadMoreModels)="getNextModels()"
+        >
+        </sm-models-table>
+      </as-split-area>
+      <as-split-area size="70" class="light-theme" [visible]="(this.showInfo$ | async)">
+        <router-outlet></router-outlet>
+      </as-split-area>
+    </as-split>
+  </div>
+  <sm-model-footer
+    [visible]="((selectedModels$ | async) && (selectedModels$ | async)?.length > 1)|| (showAllSelectedIsActive$ |async)"
+    [numberOfSelectedModels]="(selectedModels$ | async)?.length"
+    [isArchivedMode]="isArchived$ | async"
+    [disableArchive]="(selectedModels$ | async) | hasExampleItem"
+    [archiveToolTipMessage]="((selectedModels$ | async) | hasExampleItem)?'Archiving is disabled as one or more of the models you chose are example models':null"
+    [showAllSelectedIsActive]="showAllSelectedIsActive$ |async"
+    (compareModelsClicked)="compareModels()"
+    (archiveModelsClicked)="archiveModels()"
+    (restoreModelsClicked)="restoreModels()"
+    (showAllSelectedClicked)="showAllSelected($event)"
+  >
+  </sm-model-footer>
+</div>

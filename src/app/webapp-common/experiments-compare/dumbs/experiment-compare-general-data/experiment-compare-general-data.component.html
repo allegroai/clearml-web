@@ -1,0 +1,19 @@
+<header>
+  <div class="project ellipsis">{{experiment.project.name}}</div>
+  <h3 [smTooltip]="experiment.name" class="experiment-name al-header"><a smEllipsisMiddleDirective [href]="buildUrl()">{{experiment.name}}</a>
+  </h3>
+  <i class="icon i-id-fix id-icon pointer"
+     [smTooltip]="experiment.id"
+     ngxClipboard
+     [cbContent]="experiment.id"
+     (cbOnSuccess)="copyToClipboard()"></i>
+</header>
+<sm-tag-list [tags]="tags"></sm-tag-list>
+<div class="general-info">
+  <i [class]="'mr-1 icon sm bw i-'+ experiment.status"></i>
+  <span>{{EXPERIMENTS_STATUS_LABELS[experiment.status]}}</span>
+  <span class="dot"></span>
+  <span class="flex-shrink-0">{{experiment.last_iteration | number | NA}} iterations</span>
+  <span class="dot"></span>
+  <span class="flex-shrink-1" [smTooltip]="(experiment.last_update | date : TIME_FORMAT_STRING) || ''">Last updated {{experiment.last_update | timeAgo | NA}}</span>
+</div>

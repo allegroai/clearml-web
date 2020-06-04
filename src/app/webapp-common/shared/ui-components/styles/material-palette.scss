@@ -1,0 +1,33 @@
+@import "./variables";
+$sm-purple: (
+  50: $blue-50,
+  100: $blue-100,
+  200: $blue-200,
+  300: $blue-300,
+  400: $blue-400,
+  500: $blue-500,
+  600: $blue-600,
+  700: $blue-700,
+  800: $blue-800,
+  900: $blue-900,
+  A100: $purple,
+  A200: $purple,
+  A400: $purple,
+  A700: $purple,
+  contrast: (
+    50: white,
+    100: white,
+    200: white,
+    300: white,
+    400: white,
+    500: white,
+    600: white,
+    700: white,
+    800: white,
+    900: white,
+    A100: white,
+    A200: white,
+    A400: white,
+    A700: white,
+  )
+);

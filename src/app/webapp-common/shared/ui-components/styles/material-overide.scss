@@ -1,0 +1,54 @@
+body .mat-form-field-outline-gap {
+  display: none;
+}
+
+body .mat-form-field-appearance-outline .mat-form-field-outline {
+  top: 10px;
+  background-color: white;
+}
+
+body .mat-form-field-infix {
+  padding-bottom: 8px;
+}
+
+body .mat-form-field-label-wrapper {
+
+  &.mat-form-field-empty {
+    top: 22px;
+  }
+}
+
+body .mat-form-field.mat-form-field-should-float .mat-form-field-label-wrapper {
+  .mat-form-field-label {
+    top: 22px;
+  }
+}
+
+body .mat-form-field-subscript-wrapper {
+  margin-top: 3px;
+}
+
+body .mat-select-arrow-wrapper {
+  transform: translateY(0%) !important;
+}
+
+//input {
+//  background-color: transparent;
+//  height: initial;
+//}
+
+body .mat-form-field-infix .mat-input-element {
+  height: 16px;
+}
+
+body .mat-checkbox-checked.mat-accent .mat-checkbox-background, .mat-checkbox-indeterminate.mat-accent .mat-checkbox-background {
+  background-color: $purple;
+}
+
+body .mat-form-field-appearance-outline.mat-focused .mat-form-field-outline-thick {
+  color: $purple;
+}
+
+body .mat-checkbox:not(.mat-checkbox-disabled).mat-accent .mat-checkbox-ripple .mat-ripple-element {
+  background-color: initial;
+}

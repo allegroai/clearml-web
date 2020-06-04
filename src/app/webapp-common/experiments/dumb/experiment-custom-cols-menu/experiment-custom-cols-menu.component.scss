@@ -1,0 +1,62 @@
+@import '../../../../webapp-common/shared/ui-components/styles/variables';
+
+.add-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 15px 15px;
+}
+
+.custom-column-header {
+  display: flex;
+  justify-content: center;
+  font-weight: bold;
+  background: #f9fafb;
+  color: #5a658e;
+}
+
+.custom-column-buttons {
+  display: flex;
+  border-top: 1px solid #C3CDEF;
+  font-weight: bold;
+  color: $light-grey-blue;
+  background: #f4f7ff;
+  cursor: pointer;
+
+  div:not(.disabled):hover {
+    color: #5a658e;
+    transition: color 0.3s;
+  }
+}
+
+
+
+.metrics-button {
+  width: 50%;
+  border-right: 1px solid #C3CDEF;
+}
+
+.loading {
+  overflow: hidden;
+  height: 0;
+  opacity: 0;
+}
+
+.loaded {
+  height: initial;
+  opacity: 1;
+  transition: opacity 0.3s;
+}
+
+.loader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  height: 100px;
+}
+
+.disabled {
+  opacity: 0.5;
+  cursor: default;
+}

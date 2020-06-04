@@ -1,0 +1,23 @@
+<div *ngIf="!isReadonly">
+  <span *ngIf="header" class="input-title">{{header}}</span>
+
+  <input
+    type="number"
+    [step]="step"
+    [min]="min"
+    [max]="max"
+    [value]="formData"
+    [class]="inputClassName + (getCurrentError() && showErrors? ' danger' : '') "
+    [readonly]="isReadonly"
+    [placeholder]="placeHolder"
+    [smTooltip]="getCurrentError()"
+    [disabled]="disabled"
+    tooltipType='validation'
+    [showTooltip]="showErrors"
+    [showDelay]="0"
+    (keydown)="beforeValueChanged($event)"
+    (input)="fieldValueChanged($event)"
+  >
+</div>
+<sm-readonly-label [readonlyClassName]="readonlyClassName" [label]="readonlyLabel" [readonly]="isReadonly"
+                   [value]="formData"></sm-readonly-label>

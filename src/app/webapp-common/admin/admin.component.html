@@ -1,0 +1,23 @@
+<sm-card class='empty-card' [header]="(userTitle | async)">
+  <div header-content class="d-inline ml-1"> ( {{version}} ) </div>
+  <div headerButtons class="d-inline">
+    <button class="btn btn-primary" style="float: right" (click)="logoutClicked()"> logout </button>
+  </div>
+  <sm-usage-stats></sm-usage-stats>
+</sm-card>
+<sm-card header="App Credentials" *smCheckPermission="'manageAppCredentials'">
+  <div>
+    <div><br><h5>Credentials</h5>
+      <sm-admin-credential-table [credentials]="credentials | async"
+                                 (credentialRevoked)="onCredentialRevoked($event)">
+      </sm-admin-credential-table>
+      <button class="btn btn-primary btn-token pointer new-credentials" (click)="createCredential()">
+        <i class="i-plus-blue sm icon"> </i>&nbsp; Create new credentials
+      </button>
+    </div>
+  </div>
+</sm-card>
+<sm-card header="Cloud Access">
+  <sm-s3-access [S3BucketCredentials]="S3BucketCredentials | async"
+                (S3BucketCredentialsChanged)="onS3BucketCredentialsChanged($event)"></sm-s3-access>
+</sm-card>

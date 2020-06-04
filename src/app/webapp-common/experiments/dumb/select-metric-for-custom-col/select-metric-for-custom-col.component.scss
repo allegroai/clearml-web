@@ -1,0 +1,120 @@
+@import "../../../shared/ui-components/styles/variables";
+
+:host {
+  .variant-label {
+    display: flex;
+    height: 26px;
+
+    sm-checkbox-control {
+      width: 100%;
+    }
+
+    /deep/ .checkbox-label {
+      margin-left: 5px;
+    }
+  }
+
+  .value-type {
+    display: flex;
+    align-items: center;
+    height: 30px;
+    margin-left: 24px;
+    font-size: 11px;
+    font-weight: bold;
+    background-color: #f9fafb;
+
+    sm-checkbox-control {
+      width: 100%;
+      padding-right: 24px;
+
+      /deep/ span.purple-v {
+        transform: scale(0.9);
+      }
+    }
+  }
+
+  /deep/ .mat-expansion-panel-header {
+    &:hover {
+      background: #f4f7ff !important;
+    }
+
+    .mat-expansion-indicator {
+      height: 25px;
+      width: 45px;
+      text-align: center;
+    }
+
+    .mat-expansion-indicator::after {
+      color: $light-grey-blue;
+    }
+
+    &.mat-expanded, mat-expanded:focus {
+      background: #f4f7ff !important;
+      font-weight: bold;
+
+      .mat-expansion-indicator {
+        height: 22px;
+      }
+    }
+
+
+  }
+
+  /deep/ .mat-expansion-panel {
+    font-size: 13px !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+
+    .mat-expansion-panel-header {
+      font-size: 13px !important;
+    }
+
+    .mat-expansion-panel-content {
+      margin-left: 5px;
+      font-size: 13px !important;
+    }
+  }
+
+  /deep/ .mat-expansion-panel-body {
+    padding: 0;
+
+    li {
+      &.list-item {
+        padding: 0 47px 0 24px;
+        line-height: 40px;
+        list-style: none;
+
+        &.even {
+          background-color: #f9fafb;
+        }
+
+        &:hover {
+          background-color: $blue-50;
+          transition: background-color 0.2s;
+        }
+
+      }
+
+    }
+
+  }
+
+  /deep/ .mat-expansion-panel-header-description {
+    flex-grow: 0;
+    color: #5a658e;
+  }
+
+  /deep/ .mat-expansion-panel {
+    box-shadow: none;
+    //border-bottom: 1px solid rgba(2, 2, 2, 0.07);
+    color: #5a658e;
+  }
+
+  /deep/ .mat-content {
+    padding-left: 5px;
+
+    .mat-expansion-panel-header-title {
+      color: #5a658e;
+    }
+  }
+
+}

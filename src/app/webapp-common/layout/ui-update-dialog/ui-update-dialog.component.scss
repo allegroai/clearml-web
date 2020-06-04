@@ -1,0 +1,13 @@
+.buttons {
+  margin-top: 41px;
+  display: inline-block;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+
+  button {
+    &:first-of-type {
+      margin-right: 16px;
+    }
+  }
+}

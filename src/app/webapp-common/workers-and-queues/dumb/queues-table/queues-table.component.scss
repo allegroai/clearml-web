@@ -1,0 +1,50 @@
+@import "../../../../webapp-common/shared/ui-components/styles/variables";
+
+:host {
+  .first {
+    padding-left: 44px;
+  }
+  /deep/ .copy-btn .selected {
+    background-color: $lightish-blue;
+    .light-color {
+      color: $blue-100;
+    }
+    &:hover {
+      background-color: $lightish-blue-dark;
+    }
+    border: none;
+  }
+}
+
+.queues-container {
+  margin-bottom: 40px;
+}
+
+.table-cell {
+  font-size: 13px;
+}
+
+.id-cell {
+  align-items: center;
+
+  .value {
+    flex: 1;
+    line-height: 32px;
+    padding-left: 10px;
+    &.first {
+      padding-left: 42px;
+    }
+  }
+
+  .copy-btn {
+    min-width: 30px;
+    margin-left: 5px;
+    display: none;
+  }
+
+  &:hover {
+    .copy-btn {
+      display: inline-block;
+    }
+  }
+}

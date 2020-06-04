@@ -1,0 +1,13 @@
+<sm-compare-footer [visible]="visible" class="d-flex align-items-center justify-content-start">
+  <div class="model-selected-number">
+    <span class="show-all pointer" (click)="showAllSelectedClicked.emit(!showAllSelectedIsActive)">
+      {{'SHOW ' + (showAllSelectedIsActive? 'ALL MODELS' : (numberOfSelectedModels + ' MODELS SELECTED'))}} </span>
+  </div>
+  <div class="d-flex align-items-center">
+    <sm-icon-label *ngIf="!isArchivedMode" label="ARCHIVE" iconClass="icon i-archive-black" [disabled]="disableArchive" [smTooltip]="archiveToolTipMessage"
+                   (iconLabelClicked)="archiveModels()"></sm-icon-label>
+    <sm-icon-label *ngIf="isArchivedMode" label="RESTORE" iconClass="icon i-archive-black" [disabled]="disableArchive" [smTooltip]="archiveToolTipMessage"
+                   (iconLabelClicked)="restoreModels()"></sm-icon-label>
+  </div>
+</sm-compare-footer>
+

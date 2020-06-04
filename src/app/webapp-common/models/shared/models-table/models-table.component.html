@@ -1,0 +1,195 @@
+<sm-model-menu #contextMenu
+               [model]="this.contextModel"
+               [selectedModel]="selectedModel"
+               [numSelected]="selectedModels.length"
+               [allTags]="tags$ | async"
+               (tagSelected)="addTag($event)"
+               [showButton]="false"
+></sm-model-menu>
+<div class="table-header" [hidden]="!minimizedView">
+  <div class="table-header-title">MODEL LIST</div>
+  <div class="table-actions">
+    <div class="recent-title">
+      <sm-menu [header]="getColName(tableSortField)" class="menu" smMenuClass="bigger-width">
+        <div *ngFor="let col of sortableCols">
+          <sm-menu-item [itemLabel]="col.header"
+                        [sortOrder]="(tableSortField === col.id) && sortOrder"
+                        (itemClicked)="onSortChanged(sortOrder, col.id); sortOrder = -sortOrder;"></sm-menu-item>
+        </div>
+      </sm-menu>
+    </div>
+    <sm-table-card-filter-template [options]="MODELS_ALL_FILTER_OPTIONS"
+                                   [value]="allFiltersValue"
+                                   [subValue]="systemTagsFiltersValue"
+                                   [subOptions]="systemTags | labelValue"
+                                   fixedOptionsSubheader="System tags"
+                                   (subFilterChanged)="tableFilterChanged({id:'system_tags'}, $event)"
+                                   (filterChanged)="tableAllFiltersChanged($event)"
+                                   (searchValueChanged)="searchValueChanged($event)"
+                                   (menuClosed)="sortOptionalUsersList()"
+                                   (menuOpened)="tagsMenuOpened.emit()"
+    ></sm-table-card-filter-template>
+  </div>
+</div>
+<div class="table-container" [class.card-view]="minimizedView" #tableContainer>
+  <sm-table
+    [selectionMode]="selectionMode"
+    [tableData]="models"
+    [noMoreData]="noMoreModels"
+    [resizableColumns]="true"
+    [columns]="tableCols"
+    [reorderableColumns]="true"
+    [columnsOrder]="colsOrder"
+    [lazyLoading]="true"
+    [selection]="selectedModel"
+    [minimizedView]="minimizedView"
+    (colReordered)="columnsReordered($event)"
+    [keyboardControl]="true"
+    (rowSelectionChanged)="onRowSelectionChanged($event)"
+    (loadMoreClicked)="onLoadMoreClicked()"
+    (onRowRightClick)="openContextMenu($event)"
+  >
+    <!--CHECKBOX TEMPLATE-->
+    <ng-template let-col pTemplate="checkbox">
+      <sm-checkbox-control *ngIf="col.id === MODELS_TABLE_COL_FIELDS.SELECTED"
+                           class="checkbox-col header"
+                           fieldName="selected"
+                           [formData]="selectionState"
+                           (formDataChanged)="headerCheckboxClicked()"
+                           inputClassName="table-check-box select-col-checkbox">
+      </sm-checkbox-control>
+    </ng-template>
+
+    <!--SORT FILTER TEMPLATE-->
+
+    <ng-template let-col pTemplate="sort-filter">
+      <sm-table-filter-sort-template
+        *ngIf="col.id === MODELS_TABLE_COL_FIELDS.FRAMEWORK"
+        [header]="col.header"
+        [value]="frameworkFiltersValue"
+        [options]="MODELS_FRAMEWORK_OPTIONS"
+        [sortOrder]="col.id === tableSortField ? tableSortOrder : false"
+        (sortOrderChanged)="onSortChanged($event, col.id)"
+        (filterChanged)="tableFilterChanged(col, $event);"
+      >
+      </sm-table-filter-sort-template>
+      <sm-table-filter-sort-template
+        *ngIf="col.id === MODELS_TABLE_COL_FIELDS.READY"
+        [header]="col.header"
+        [value]="readyFiltersValue"
+        [options]="MODELS_READY_OPTIONS"
+        [sortOrder]="col.id === tableSortField ? tableSortOrder : false"
+        (sortOrderChanged)="onSortChanged($event, col.id)"
+        (filterChanged)="tableFilterChanged(col, $event)"
+      ></sm-table-filter-sort-template>
+      <sm-table-filter-sort-template
+        *ngIf="col.id === MODELS_TABLE_COL_FIELDS.USER"
+        [header]="col.header"
+        [enableSort]="col.sortable"
+        [enableSearch]="col.searchableFilter"
+        [searchValue]="userSearchValue"
+        [options]="MODELS_ALL_FILTER_OPTIONS.users |filter:userSearchValue:'label'"
+        [value]="userFiltersValue"
+        (filterChanged)="tableFilterChanged(col, $event)"
+        (searchValueChanged)="userSearchValueChanged($event)"
+        (menuClosed)="sortOptionalUsersList()"
+      >
+      </sm-table-filter-sort-template>
+      <sm-table-filter-sort-template
+        *ngIf="col.id === MODELS_TABLE_COL_FIELDS.TAGS"
+        [header]="col.header"
+        [enableSort]="col.sortable"
+        [enableSearch]="col.searchableFilter"
+        [searchValue]="tagSearchValue"
+        [options]="MODELS_ALL_FILTER_OPTIONS.tags |filter:tagSearchValue:'label'"
+        [subOptions]="systemTags | labelValue"
+        fixedOptionsSubheader="System tags"
+        [value]="tagsFiltersValue"
+        [subValue]="systemTagsFiltersValue"
+        (filterChanged)="tableFilterChanged(col, $event)"
+        (subFilterChanged)="tableFilterChanged({id:'system_tags'}, $event)"
+        (searchValueChanged)="tagSearchValueChanged($event)"
+        (menuClosed)="sortOptionalTagsList()"
+        (menuOpened)="tagsMenuOpened.emit()"
+      >
+      </sm-table-filter-sort-template>
+    </ng-template>
+
+    <!--SORT TEMPLATE-->
+    <ng-template let-col pTemplate="sort">
+      <sm-table-sort-template
+        [header]="col.header"
+        [sortOrder]="col.id === tableSortField ? tableSortOrder : false"
+        (sortOrderChanged)="onSortChanged($event, col.id)">
+      </sm-table-sort-template>
+    </ng-template>
+
+    <!--BODY TEMPLATE-->
+
+    <ng-template let-col
+                 let-model="rowData"
+                 pTemplate="body">
+      <ng-container [ngSwitch]="col.id">
+        <ng-container *ngSwitchCase="MODELS_TABLE_COL_FIELDS.NAME">
+          <div class="d-flex flex-row flex-nowrap">
+            <div class="font-weight-bold flex-grow-1" [smTooltip]="model.name">{{model.name}}</div>
+            <sm-tag *ngIf="model &&  model.company && ! model.company.id" label="EXAMPLE" className="example"></sm-tag>
+          </div>
+        </ng-container>
+        <ng-container *ngSwitchCase="MODELS_TABLE_COL_FIELDS.TAGS">
+          <sm-tag-list [tags]="model.tags" [sysTags]="getSysTags(model)"></sm-tag-list>
+        </ng-container>
+        <ng-container *ngSwitchCase="MODELS_TABLE_COL_FIELDS.USER">
+          {{model.user?.name ? model.user?.name : 'Unknown User'}}
+        </ng-container>
+        <div *ngSwitchCase="MODELS_TABLE_COL_FIELDS.TASK" [smTooltip]="model.name" class="ellipsis">
+          {{model.task?.name}}
+        </div>
+        <ng-container *ngSwitchCase="MODELS_TABLE_COL_FIELDS.READY">
+          <div class="d-flex justify-content-start">
+            <sm-experiment-status-icon-label
+              [status]="model?.ready? 'published': 'created'"></sm-experiment-status-icon-label>
+          </div>
+        </ng-container>
+        <ng-container *ngSwitchCase="MODELS_TABLE_COL_FIELDS.CREATED">
+          <span [smTooltip]="model.created | date : TIME_FORMAT_STRING">{{model.created | timeAgo}}</span>
+        </ng-container>
+        <sm-checkbox-control
+          *ngSwitchCase="MODELS_TABLE_COL_FIELDS.SELECTED"
+          smClickStopPropagation
+          class="checkbox-col"
+          fieldName="selected"
+          [formData]="isRowSelected(model)"
+          (formDataChanged)="rowSelectedChanged($event, model)"
+          inputClassName="table-check-box table-body">
+        </sm-checkbox-control>
+        <ng-container *ngSwitchCase="MODELS_TABLE_COL_FIELDS.COMMENT">
+          <span class="ellipsis" [smTooltip]="model.comment">{{model.comment}}</span>
+        </ng-container>
+        <div *ngSwitchDefault class="ellipsis">
+          {{model[col.id]}}
+        </div>
+      </ng-container>
+    </ng-template>
+
+    <ng-template let-model="rowData" let-selected="selected" let-rowNumber="rowNumber" pTemplate="card">
+      <sm-table-card [selected]="selected"
+                     [rowNumber]="rowNumber"
+                     [cardName]="model.name"
+                     [columns]="tableCols"
+                     [rowData]="model"
+                     (contextmenu)="openContextMenu({e: $event, rowData: model})"
+      >
+        <sm-tag-list class="mb-1" [sysTags]="getSysTags(model)" [tags]="model?.tags"></sm-tag-list>
+        <div compact-columns-data>Created {{model.created | timeAgo}} by {{model.user?.name || 'Unknown User'}}
+          <ng-container *ngIf="model.task"><BR>{{model.task.name}}</ng-container>
+        </div>
+        <sm-experiment-status-icon-label
+          [status]="model?.ready? 'published': 'created'"></sm-experiment-status-icon-label>
+        <sm-checkbox-control fieldName="selected" [formData]="isRowSelected(model)"
+                             (formDataChanged)="rowSelectedChanged($event, model)"
+                             [inputClassName]="'table-check-box table-body' + (selected ? ' row-selected' : '')"></sm-checkbox-control>
+      </sm-table-card>
+    </ng-template>
+  </sm-table>
+</div>

@@ -1,0 +1,62 @@
+@import "../../styles/variables";
+
+.filter{
+  font-size: 14px;
+  font-weight: 500;
+
+  &::placeholder {
+    font-size: 14px;
+  }
+}
+
+.buttons-container {
+  height: 300px;
+  overflow: auto;
+  &.searching {
+    height: unset;
+  }
+}
+
+.item {
+  user-select: none;
+  cursor: pointer;
+  outline: none;
+  border: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  line-height: 40px;
+  height: 40px;
+  padding: 0 16px;
+  text-align: left;
+  text-decoration: none;
+  max-width: 100%;
+  position: relative;
+  font-size: 14px;
+  font-weight: 500;
+  background-color: transparent;
+  width: 100%;
+
+  &:hover {
+    background-color: $blue-100;
+  }
+
+  .new {
+    font-weight: normal;
+  }
+}
+
+hr {
+  margin: 0 !important;
+}
+
+:host {
+  display: block;
+  width: 260px;
+
+  mat-form-field {
+    width: 100%;
+  }
+}
+

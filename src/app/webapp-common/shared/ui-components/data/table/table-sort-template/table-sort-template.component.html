@@ -1,0 +1,15 @@
+<div
+     [ngClass]="{'active': sortOrder !== TABLE_SORT_ORDER.DESC && sortOrder !== TABLE_SORT_ORDER.ASC}">
+  <i
+    (click)="switchSortOrder()"
+    class="icon sm sort-icon pointer"
+    [ngClass]="{
+      'i-sort-on-up': sortOrder === TABLE_SORT_ORDER.DESC,
+      'i-sort-on-down': sortOrder === TABLE_SORT_ORDER.ASC,
+      'i-sort-off': sortOrder !== TABLE_SORT_ORDER.DESC && sortOrder !== TABLE_SORT_ORDER.ASC
+    }"
+  >
+  </i>
+  <span *ngIf="tooltip" class="text pointer" [smTooltip]="header" (click)="switchSortOrder()">{{header}}</span>
+  <span *ngIf="!tooltip" class="text pointer" (click)="switchSortOrder()">{{header}}</span>
+</div>

@@ -1,0 +1,30 @@
+<div class="header d-flex justify-content-between">
+  <div class="d-flex">
+    <div *ngIf="!activeWorker" class="title">Workers Utilization</div>
+    <div *ngIf="activeWorker" class="param-selector">
+      <sm-select-autocomplete
+        class="dark"
+        [multiple]="false"
+        [items]="chartParamOptions"
+        [formControl]="paramFormControl"></sm-select-autocomplete>
+    </div>
+    <i *ngIf="statsError$ | async"
+      class="warnning fas fa-exclamation-triangle"
+      smTooltip="Data temporarily not available">
+    </i>
+  </div>
+  <div class="time-selector">
+    <sm-select-autocomplete
+      class="dark"
+      [multiple]="false"
+      [items]="timeFrameOptions"
+      [formControl]="timeFormControl"></sm-select-autocomplete>
+  </div>
+</div>
+<div #chart class="line-chart-container">
+  <sm-line-chart
+    [showLoadingOverlay]="refreshChart"
+    [data]="chartData"
+    [yLabel]="yAxisLabel"
+    [tooltipVerticalOffset]="-75"></sm-line-chart>
+</div>

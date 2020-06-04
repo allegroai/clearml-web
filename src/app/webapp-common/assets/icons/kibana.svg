@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <title>kibana-white</title>
+  <g>
+    <path d="M12,11.21,20,2H4V9.46A16.49,16.49,0,0,1,12,11.21Z" fill="#8F9DC9" fill-rule="evenodd" opacity="0.7" style="isolation: isolate"/>
+    <path d="M4,22H20a15.63,15.63,0,0,0-8-10.79L4,20.44Z" fill="#8F9DC9" fill-rule="evenodd" opacity="0.7" style="isolation: isolate"/>
+    <path d="M4,20.43V22H6.81l7.77-9.09s-.5-.41-1.22-.89A15,15,0,0,0,12,11.21Z" fill="#8F9DC9" fill-rule="evenodd" opacity="0.5" style="isolation: isolate"/>
+    <path d="M4.3,9.45H4v11l8-9.22A15.71,15.71,0,0,0,4.3,9.45" fill="#8F9DC9" fill-rule="evenodd"/>
+  </g>
+</svg>

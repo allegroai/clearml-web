@@ -1,0 +1,24 @@
+:host {
+  .center-buttons-container {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .search-container {
+    width: 0;
+    overflow: hidden;
+    transition: 0.3s;
+    &.open {
+      width: 250px;
+    }
+  }
+  sm-search {
+    display: contents;
+  }
+  .search-block {
+    display: inline-block;
+  }
+  .create-new-icon {
+    margin-left: 8px;
+  }
+}

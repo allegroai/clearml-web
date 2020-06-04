@@ -1,0 +1,11 @@
+@import "../../../shared/ui-components/styles/mixins/common";
+
+.recent {
+  @include recent-title();
+  padding-top: 0;
+
+  .right {
+    text-align: right;
+  }
+
+}

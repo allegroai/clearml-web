@@ -1,0 +1,79 @@
+@import "../../../../webapp-common/shared/ui-components/styles/variables";
+
+$header-height: 45px;
+
+/deep/ .bigger-width {
+  width: 236px;
+}
+
+:host {
+  display: block;
+  position: relative;
+  height: 100%;
+  width: 100%;
+
+  sm-table {
+    display: block;
+    height: 100%;
+  }
+
+  .table-container {
+    height: 100%;
+
+    &.card-view {
+      height: calc(100% - #{$header-height});
+    }
+  }
+
+  .table-header {
+    height: $header-height;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid $blue-500;
+  }
+
+  .table-header-title {
+    font-weight: bold;
+  }
+
+  .table-actions {
+    padding-top: 1px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: 24px;
+  }
+
+  .experiment-name {
+    font-weight: 500;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .italic {
+    font-style: italic;
+    padding-right: 2px;
+  }
+
+  .checkbox-align-top {
+    margin-top: -10px;
+  }
+
+  .checkbox-col {
+    display: block;
+    float: left;
+    padding-left: 10px;
+
+    &.header {
+      padding-left: 17px;
+    }
+  }
+
+}
+
+/deep/ sm-models footer.d-flex.justify-content-center {
+  align-items: center;
+  height: 100px;
+}

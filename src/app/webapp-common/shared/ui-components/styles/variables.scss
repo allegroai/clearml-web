@@ -1,0 +1,236 @@
+// colors
+$white: #fff;
+$blue-50: #f2f4fc; //242,244,252
+$blue-100: #dce0ee; //220,224,238
+$blue-200: #c3cdf0; //195,205,240
+$blue-250: #A4ADCD;
+$blue-300: #8492c2; //132,146,19
+$blue-480: #707ba3;
+$blue-450: #657099;
+$blue-400: #5a658e; //90,101,142
+$blue-500: #384161; //56,65,97
+$blue-600: #2c3246; //44,50,70
+$blue-700: #202432; //32,36,50
+$blue-800: #1a1e2c; //26,30,44
+$blue-900: #141722; //20,23,34
+
+$blue-rgb-50: rgb(242, 244, 252);
+$blue-rgb-100: rgb(220, 224, 238);
+$blue-rgb-200: rgb(195, 205, 240);
+$blue-rgb-300: rgb(132, 146, 194);
+$blue-rgb-400: rgb(90, 101, 142);
+$blue-rgb-500: rgb(56, 65, 97);
+$blue-rgb-600: rgb(44, 50, 70);
+$blue-rgb-700: rgb(32, 36, 50);
+$blue-rgb-800: rgb(26, 30, 44);
+$blue-rgb-900: rgb(20, 23, 34);
+
+$very-light-blue: #f5f7ff;
+$cloudy-blue: #a7b2d8;
+$cloudy-blue-two: #ced1dc;
+$dark-grey-blue-two: #39415b;
+$dark-grey-blue-three: #bdc5e1;
+$dark-grey-blue-four: #e1e4ed;
+$dark-grey-blue-nine: #565b6b;
+$light-dusk: rgba(90, 101, 142, 0.5);
+$dusk-two: #515c85;
+$dusk-four: #32394f;
+$neon-yellow-original-notgoodinchrome: #d3ff00;
+$neon-yellow-betterinchrome: #caff00;
+$neon-yellow-hover: #c6ef06;
+$purple: #4d66ff;
+$eggplant-purple: #222838;
+$yellow-example: #D3FF00;
+
+$completed-blue: #009aff;
+$blue-sky: #4a90e2;
+$running-green: #50e3c3;
+$pending-gray: $blue-300;
+
+$orangada: #fd8934;
+
+
+$dataset_import: #f57e23;
+$testing: #f8e71c;
+$training: #f57e23;
+$grey-purple: #7480aa;
+$strong-red: #ff001f;
+$almost-white: #fdfdff;
+
+$info-color: #0080ff;
+$success-color: #00e309;
+$error-color: #de3232;
+$warn-color: #ffa301;
+
+$level-colors: (
+  info: $info-color,
+  success: $success-color,
+  warn: $warn-color,
+  error: $error-color,
+);
+
+// from josh
+$dark: #191e2c;
+$black: #000000;
+$dark-three: #212431;
+$white-10: rgba(255, 255, 255, 0.1);
+$light-periwinkle: #c3cdf0;
+$dark-grey-blue: #39405f;
+$light-periwinkle-two: #c1cdf3;
+$neon-yellow: #d3ff00;
+$light-grey-blue: #8f9dc9;
+$white: #ffffff;
+$blue-grey: #8693be;
+$lightish-blue: #4d66ff;
+$lightish-blue-dark: #4551AF;
+$dark-four: #0f131c;
+
+// charts
+$chart-background: $black;
+
+// padding
+$spacer: 1rem; // TODO:
+$spacers: (); // TODO:
+$spacers: map-merge((// TODO:
+  0: 0,
+  1: ($spacer * .25),
+  2: ($spacer * .5),
+  3: $spacer,
+  4: ($spacer * 1.5),
+  5: ($spacer * 3)
+), $spacers);
+
+//sizes
+$sizes: (); // TODO:
+$sizes: map-merge((// TODO:
+  25: 25%,
+  50: 50%,
+  75: 75%,
+  100: 100%,
+  auto: auto
+), $sizes);
+
+// borders
+$line-height-lg: 1; // TODO:
+$line-height-sm: 0.5; // TODO:
+
+$line-color: $blue-600; // TODO:
+
+$border-width: 1px; // TODO:
+//$border-color: $gray-300; // TODO:
+
+$border-radius: .25rem; // TODO:
+$border-radius-lg: .3rem; // TODO:
+$border-radius-sm: .2rem; // TODO:
+
+// fonts
+$font-family-base: 'Heebo'; // Assumes the browser default, typically `16px`
+$font-default-color: $blue-100; // Assumes the browser default, typically `16px`
+
+$font-size-base: 1rem; // Assumes the browser default, typically `16px`
+$font-size-lg: ($font-size-base * 1.25);
+$font-size-sm: ($font-size-base * .875);
+
+$font-weight-normal: 400; // TODO:
+$font-weight-base: $font-weight-normal; // TODO:
+$font-weight-light: 300; // TODO:
+$font-weight-bold: 700; // TODO:
+
+$h1-font-size: $font-size-base * 2.5; // TODO:
+$h2-font-size: $font-size-base * 2; // TODO:
+$h3-font-size: $font-size-base * 1.55; // TODO:
+$h4-font-size: $font-size-base * 1.25; // TODO:
+$h5-font-size: $font-size-base * 1.15; // TODO:
+$h6-font-size: $font-size-base; // TODO:
+$h7-font-size: $font-size-base * 0.75; // TODO:
+
+// grid
+$grid-gutter: 30px;
+
+$grid-cols: 24;
+
+$grid-max-widths: (
+  sm: 540px,
+  md: 720px,
+  lg: 960px,
+  xl: 1528px
+);
+
+$grid-breakpoints: (// TODO:
+  xs: 0,
+  sm: 576px,
+  md: 768px,
+  lg: 992px,
+  xl: 1200px,
+  xxl: 1600px,
+  xxxl: 1900px
+);
+
+$nav-bar-height: 64px;
+$nav-bar-bg: $blue-900;
+$side-bar-close-width: 64px;
+$side-bar-open-width: 220px;
+
+//transitions
+$transition-slow: 0.6s;
+$transition-fast: 0.3s;
+
+// Z-index master list
+//
+// Warning: Avoid customizing these values. They're used for a bird's eye view
+// of components dependent on the z-axis and are designed to all work together.
+
+$zindex-dropdown: 1000;
+$zindex-sticky: 999; //$zindex-sticky: 1020;
+$zindex-colorpicker: 1001;
+$zindex-fixed: 1030;
+$zindex-modal-backdrop: 1040;
+$zindex-modal: 1050;
+$zindex-popover: 1060;
+$zindex-tooltip: 1070;
+
+// card
+$card-spacer-y: $grid-gutter / 2;
+$card-spacer-x: $grid-gutter / 2;
+$card-border-radius: 6px;
+$card-bg: $blue-500;
+$card-footer-bg: $blue-600;
+$card-footer-font-color: $blue-300;
+$card-header-color: $blue-300;
+
+// chips
+$chip-border-radius: 12px;
+$chip-bg-opacity: 0.1;
+$chip-height: 15px;
+
+// circle counter
+
+// table
+$table-cell-padding: .75rem;
+$table-cell-padding-sm: .3rem;
+
+$table-bg: $blue-700;
+$table-even-bg: $blue-800;
+$table-hover-bg: $blue-600;
+$table-active-bg: $table-hover-bg;
+
+$table-header-bg: $blue-600;
+$table-header-color: $blue-300;
+
+$table-border-radius: 2px; // TODO
+$table-border-color: transparent; // TODO
+
+$body-bg-color: $blue-700;
+
+$assets-icons-path: '/app/webapp-common/assets/icons';
+
+// dialog
+$leaf-height: 55vh;
+$generic-base-z-index: 99999;
+
+
+// code
+$code-height: 160px;
+$leaf-code-height: 55vh;
+
+

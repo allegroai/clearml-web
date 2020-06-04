@@ -1,0 +1,105 @@
+@import "../shared/ui-components/styles/variables";
+@import "../layout/layout";
+
+$container-padding-top: 24px;
+$nav-height: 65px;
+$header-height: 60px;
+
+:host {
+
+
+  .experiment-compare-container {
+    height: 100%;
+    position: relative;
+    display: block;
+
+    sm-experiment-compare-header {
+      display: block;
+      height: $header-height;
+
+    }
+
+    nav {
+      height: $nav-height
+    }
+
+    /deep/ nav {
+      border-top: 1px solid rgba(2, 2, 2, 0.07);
+    }
+
+    .experiment-compare-body {
+      padding: 0;
+      //height: calc(100vh - #{$top-bar-height + $nav-height + $header-height});
+      height: calc(100% - #{$nav-height + $header-height});
+      //overflow-x: scroll;
+    }
+
+  }
+
+  /deep/ sm-experiment-graphs, /deep/ sm-debug-images, /deep/ sm-experiment-output-log {
+    display: block;
+    height: 100%;
+  }
+
+  /deep/ .no-output {
+    text-align: center;
+    color: $cloudy-blue-two;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateY(-50%) translateX(-50%);
+    display: block;
+  }
+
+  /deep/ .no-output-icon {
+    height: 200px;
+    width: 200px;
+    left: 50%;
+    margin-bottom: 10px;
+  }
+
+  /* width */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  /* Track */
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background: $blue-100;
+  }
+
+  /deep/ al-drawer sm-card2 .card-container {
+    border-radius: 6px 0 0 6px !important;
+    border-right: none !important;
+
+    &.bordered {
+      box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.1) !important;
+    }
+  }
+
+  /deep/ al-drawer button.drawer-toggle {
+    border-radius: 0 6px 6px 0;
+  }
+
+  /deep/ .labeled-row {
+    .label-container {
+
+      width: 100px !important;
+      flex: 0 0 100px;
+    }
+
+    .content {
+      display: block;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+}

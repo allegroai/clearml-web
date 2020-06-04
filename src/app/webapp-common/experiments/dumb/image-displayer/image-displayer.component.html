@@ -1,0 +1,66 @@
+<div class="modal-container">
+  <div class="viewer-header d-flex align-items-center">
+    <div class="image-title">
+      {{title}}
+    </div>
+    <div (click)="imageARef.click()" smTooltip="Download" class="download icon-container" [style.visibility]="(imageSources[currentIndex] | isVideo)?'hidden':'visible'">
+      <i class="icon i-download"></i>
+      <a #imageARef [href]="imageSources[currentIndex]" download style.visibility="hidden" target="_blank"></a>
+    </div>
+    <div (click)="closeImageDisplayer()" smTooltip="Close" class="icon-container">
+      <i class="icon i-dialog-x gray"></i>
+    </div>
+  </div>
+  <div class="debug-image-container" #imageContainer>
+    <div #sizeCont class="sizeable-container"
+         (dragstart)="disableNativeDrag()"
+         (mousemove)="dragImage($event)"
+         (wheel)="wheelZoom($event)"
+         [style.height.px]="imageHeight"
+         [style.transform]="'translate(' +imageTranslateX +'px, '+ imageTranslateY + 'px)'" [style.width.px]="imageWidth" [style.top.px]="this.imageTop" [style.left.px]="this.imageLeft"
+         [style.visibility]="((imageSources[currentIndex] | isVideo) || (imageSources[currentIndex] | isAudio))?'hidden':'visible'">
+      <img #debugImage [src]="imageSources[currentIndex]" (mousemove)="changeCords($event)" (load)="fitToScreen(); resetDrag()" (mousedown)="setDragging(true)"
+           (mouseup)="setDragging(false)" (mouseout)="setDragging(false); resetCords()" [class.dragging]="dragging">
+    </div>
+    <video #debugVideo [src]="imageSources[currentIndex]" autoplay controls [style.visibility]="(imageSources[currentIndex] | isVideo) || (imageSources[currentIndex] | isAudio)?'visible':'hidden'"></video>
+    <div class="d-flex flex-column controllers" [style.visibility]="(imageSources[currentIndex] | isVideo) || (imageSources[currentIndex] | isAudio)?'hidden':'visible'">
+      <div (click)="fitToScreen()" class="fit-to-screen d-flex flex-column justify-content-around align-items-center controller icon-container" smTooltip="Fit to window" position="left"
+           [class.disabled]="scale===autoFitScale">
+        <i class="icon i-zoom-to-fit"></i>
+      </div>
+
+      <div class="zoom controller d-flex flex-column justify-content-around align-items-center">
+        <div class="icon-container">
+          <i class="icon i-zoom-plus" (click)="calculateNewScale(true)" smTooltip="Zoom in" position="left"></i>
+        </div>
+        <div class="d-flex flex-column justify-content-around align-items-center icon-container" (click)="resetScale()" smTooltip="Zoom to 1:1" position="left"
+             [class.disabled]="scale===1">
+          <i class="icon i-zoom-reset sm-md"></i>
+        </div>
+        <div class="icon-container">
+          <div class="icon i-zoom-minus" (click)="calculateNewScale(false)" smTooltip="Zoom out" position="left"></div>
+        </div>
+      </div>
+    </div>
+    <div class="navigation">
+      <div class="icon-container controller d-flex flex-column justify-content-around align-items-center next" (click)="canGoNext() && next()" [class.disabled]="!canGoNext()">
+        <i class="icon i-next"></i></div>
+      <div class="icon-container controller d-flex flex-column justify-content-around align-items-center previous" (click)="canGoBack() && previous()" [class.disabled]="!canGoBack()">
+        <i class="icon i-previous"></i></div>
+    </div>
+  </div>
+
+  <div class="footer-info d-flex align-items-center justify-content-between" [style.visibility]="(imageSources[currentIndex] | isVideo) || (imageSources[currentIndex] | isAudio)?'hidden':'visible'">
+    <div class="d-flex justify-content-center params" smTooltip="Image Width & Height in pixels">
+      <div class="single-parameter"><label>w: </label>{{debugImage.naturalWidth}}</div>
+      <div class="single-parameter"><label>h: </label>{{debugImage.naturalHeight}}</div>
+    </div>
+    <div class="d-flex justify-content-center params" smTooltip="Tracks cursor coordinates">
+      <div class="single-parameter"><label>x: </label> <span [style.visibility]="dragging?'hidden':'visible'">{{xCord}}</span></div>
+      <div class="single-parameter"><label>y: </label><span [style.visibility]="dragging?'hidden':'visible'">{{yCord}}</span></div>
+    </div>
+    <div class="d-flex justify-content-center params" smTooltip="Image zoom">
+      <div class="double-parameter"><label>Zoom: </label>{{this.scale | toPercentage}}%</div>
+    </div>
+  </div>
+</div>

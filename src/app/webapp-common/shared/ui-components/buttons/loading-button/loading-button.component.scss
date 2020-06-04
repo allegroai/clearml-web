@@ -1,0 +1,127 @@
+.full-width {
+  width: 100%;
+}
+
+.ld-ext-right {
+  position: relative;
+  transition: all 0.15s;
+  transition-timing-function: ease-in;
+  overflow: hidden;
+}
+
+.ld-ext-right > .ld {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: -0.5em;
+  opacity: 0;
+  z-index: -100;
+  transition: all 0.15s;
+  transition-timing-function: ease-in;
+}
+
+.ld-ext-right.running > .ld {
+  opacity: 1;
+  z-index: auto;
+  visibility: visible;
+}
+
+.ld-ext-right.running {
+  padding-right: 2.5em !important;
+}
+
+.ld-ext-right > .ld {
+  top: 50%;
+  left: auto;
+  right: 1em;
+}
+
+.ld.running {
+  -webkit-animation-play-state: running;
+  animation-play-state: running;
+}
+
+.ld-ring {
+  width: 1em;
+  height: 1em;
+  position: relative;
+  color: inherit;
+  display: inline-block;
+  /*
+    &:before
+      content: "◎"
+      display: block
+      visibility: hidden
+    */
+}
+
+.ld-ring:after {
+  position: absolute;
+  margin: auto;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  content: " ";
+  display: inline-block;
+  background: center center no-repeat;
+  background-size: cover;
+}
+
+.ld-ring:after {
+  border-radius: 50%;
+  border-style: solid;
+  border-width: 0.15em;
+  -webkit-background-clip: padding-box;
+  border-color: currentColor currentColor currentColor transparent;
+  box-sizing: border-box;
+}
+
+@keyframes ld-cycle {
+  0%, 50%, 100% {
+    animation-timing-function: cubic-bezier(0.5, 0.5, 0.5, 0.5);
+  }
+  0% {
+    -webkit-transform: rotate(0);
+    transform: rotate(0);
+  }
+  50% {
+    -webkit-transform: rotate(180deg);
+    transform: rotate(180deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+@-webkit-keyframes ld-cycle {
+  0%, 50%, 100% {
+    animation-timing-function: cubic-bezier(0.5, 0.5, 0.5, 0.5);
+  }
+  0% {
+    -webkit-transform: rotate(0);
+    transform: rotate(0);
+  }
+  50% {
+    -webkit-transform: rotate(180deg);
+    transform: rotate(180deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+.ld.ld-cycle {
+  -webkit-animation: ld-cycle 1s infinite linear;
+  animation: ld-cycle 1s infinite linear;
+}
+
+.button-label {
+  display: inline-block;
+  font-size: 11px;
+  text-align: center;
+}

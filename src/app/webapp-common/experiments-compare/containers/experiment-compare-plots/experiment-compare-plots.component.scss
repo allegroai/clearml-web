@@ -1,0 +1,23 @@
+:host {
+  .toggle-all {
+    font-size: 10px;
+    padding-right: 2px;
+    cursor: pointer;
+  }
+
+  /deep/.list-container {
+    display: block;
+    height: 100%;
+    width: 343px;
+    flex: 0 0 343px;
+    padding: 20px 32px 0 32px;
+    overflow-y: hidden;
+    border-right: 1px solid #efefef;
+  }
+
+  .graphs-container {
+    padding: 0 !important;
+    width: calc(100vw - 420px);
+  }
+
+}

@@ -1,0 +1,33 @@
+@import "./../../webapp-common/shared/ui-components/styles/variables";
+@import "./../../webapp-common/layout/layout.scss";
+
+:host {
+  .experiment-body {
+    width: 100%;
+    height: calc(100% - #{$project-header-height});
+    &.compare {
+      height: calc(100% - #{$project-header-height + $project-footer-height});
+    }
+  }
+
+  /deep/ sm-overlay .overlay {
+    background-color: rgba(0, 0, 0, 0.2);
+  }
+
+  .info-disabled {
+    pointer-events: none;
+  }
+
+  .experiment-table-container {
+    transition: all 0.3s;
+
+  }
+
+  .experiment-info-container {
+    transition: 0.3s;
+    &.hide-experiment-info {
+      width: 0 !important;
+      max-width: 0 !important;
+    }
+  }
+}

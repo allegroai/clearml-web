@@ -1,0 +1,20 @@
+<sm-dialog-template [displayX]="displayX" [header]="title" (xClicked)="closeDialog(undefined)" [closeOnX]="false"
+                    [iconClass]="iconClass">
+  <div *ngIf="reference" class="reference">{{reference}}</div>
+  <div class="body" [innerHTML]='body'>
+  </div>
+  <ng-content></ng-content>
+
+
+  <div class="buttons">
+
+    <button *ngIf="no" (click)="closeDialog(false)" class="btn btn-outline-neon yes-button">
+      {{no}}
+    </button>
+    <button (click)="closeDialog(true)" class="btn btn-neon" *ngIf="yes">
+      {{yes}}
+    </button>
+
+  </div>
+
+</sm-dialog-template>

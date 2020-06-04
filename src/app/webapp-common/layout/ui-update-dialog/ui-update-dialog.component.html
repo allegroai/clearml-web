@@ -1,0 +1,10 @@
+<sm-dialog-template subHeader="Click the reload button below to reload the web page" (xClicked)="cancel()" header="New version available">
+  <div class="buttons">
+    <button (click)="cancel()" class="btn btn-outline-neon">
+      CANCEL
+    </button>
+    <button (click)="reload()" class="btn btn-neon yes-button">
+      RELOAD
+    </button>
+  </div>
+</sm-dialog-template>

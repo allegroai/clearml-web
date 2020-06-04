@@ -1,0 +1,22 @@
+@import "../shared/ui-components/styles/variables";
+
+$top-bar-height: $nav-bar-height;
+
+
+// Projects
+$projects-header-padding: 20px;
+$projects-header-height: 2 * $projects-header-padding + 32px;
+
+//Project
+$project-header-height: 66px;
+$project-footer-height: 60px;
+
+$project-info-progress-height: 46px;
+
+//Experiment Info
+$experiment-info-header-height: 64px;
+$experiment-info-tabs-height: 65px;
+
+// Workers & Queues
+$wnq-tabs-height: 66px;
+$graph-height: 364px;

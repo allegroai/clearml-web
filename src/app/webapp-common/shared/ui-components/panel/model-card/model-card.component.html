@@ -1,0 +1,32 @@
+<sm-card class="model-card" (click)="modelClicked()" [isExample]=" ! model?.company?.id">
+  <div header-content>
+    <div class="d-flex justify-content-between">
+      <div class="title mr-auto">{{model?.name }}</div>
+    </div>
+    <div style="padding-top: 5px">
+      <div class="d-flex align-items-center justify-content-start">
+        <span class="sub-title">ID:  {{ model?.id}} </span>
+        <sm-copy-clipboard [clipboardText]="model?.id" [label]="''" [hideBackground]="true"></sm-copy-clipboard>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-around">
+    <sm-circle-status [status]="model.framework"></sm-circle-status>
+    <sm-circle-counter [counter]="numberOfLabels(model?.labels)" label="LABELS" type="model-labels"></sm-circle-counter>
+    <sm-circle-status [status]="model.ready? 'published' : 'created'"></sm-circle-status>
+  </div>
+
+
+  <div footer class="brio-footer">
+    <div class="model-footer">
+      <div class="top-labels ellipsis" [smTooltip]="model?.task?.name">CREATOR EXPERIMENT:
+          {{model?.task?.name}}
+      </div>
+      <div class="top-labels ellipsis d-flex justify-content-between">
+        <span [smTooltip]="model.created | date : TIME_FORMAT_STRING">Created {{model.created | timeAgo}}</span>
+        <span>{{model?.user?.name}}</span>
+      </div>
+    </div>
+  </div>
+</sm-card>

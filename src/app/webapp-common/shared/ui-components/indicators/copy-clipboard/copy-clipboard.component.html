@@ -1,0 +1,13 @@
+<button smTooltip="{{label? tooltipText: ''}}"
+        type="button"
+        ngxClipboard
+        smClickStopPropagation
+        class="btn btn-primary"
+        [ngClass]="{hideBackground:hideBackground}"
+        [cbContent]="clipboardText"
+        [disabled]="disabled"
+        (cbOnSuccess)="copyToClipboard()"
+>
+  <i [ngClass]="{'fa-check':copied, 'fa-clipboard': ! copied, 'fa': true}"></i>
+  {{label ? '&nbsp;' : ''}}{{label}}
+</button>

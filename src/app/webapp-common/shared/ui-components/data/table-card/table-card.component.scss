@@ -1,0 +1,47 @@
+@import "../../styles/variables";
+
+.table-card {
+  padding: 15px 25px 15px 6px;
+  background-color: $blue-800;
+
+  &.odd {
+    background-color: $blue-700;
+  }
+
+  &.selected {
+    background-color: $purple;
+  }
+
+  /deep/ .created {
+    margin-left: 10px;
+  }
+
+  /deep/ sm-experiment-status-icon-label {
+    margin-right: 10px;
+  }
+}
+
+.content-row {
+  padding: 2px;
+  color: $cloudy-blue-two;
+
+  .name {
+    flex: 1;
+    font-weight: bold;
+    color: $blue-50;
+    min-width: 0;
+  }
+}
+
+.columns-container {
+  min-width: 0;
+
+  .name-container {
+    min-width: 0;
+  }
+}
+
+/deep/ sm-model-tags .tag {
+  margin-left: 0px !important;
+  margin-right: 5px;
+}

@@ -1,0 +1,10 @@
+@import '../../styles/variables';
+
+:host {
+  .label {
+    font-size: 13px;
+  }
+  .value {
+    font-size: 15px;
+  }
+}

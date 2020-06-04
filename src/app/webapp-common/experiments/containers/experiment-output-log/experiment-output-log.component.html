@@ -1,0 +1,24 @@
+<div class="px-4 py-2 row align-items-center" *ngIf="hasLog">
+  <div class="p-2 mr-auto">
+    <span>
+      <b>Hostname:</b> {{creator}}
+    </span>
+  </div>
+  <span style="width: 45px;">Filter: </span>
+  <input
+    placeholder="Filter By Regex"
+    class="form-control"
+    style="width: 250px;"
+    [value]="filter$ |async"
+    (keyup)="filterLog($event)"
+  />
+</div>
+<div *ngIf="hasLog !== undefined && !hasLog" class="no-output">
+  <i class="icon i-no-log no-output-icon"></i>
+  <h3>NO LOG DATA</h3>
+</div>
+
+<sm-experiment-log-info *ngIf="hasLog"
+  [logs]="log$ | async"
+  [filterString]="filter$ | async"
+></sm-experiment-log-info>

@@ -1,0 +1,10 @@
+<sm-textarea-control
+  #diff
+  class="dark"
+  inputClassName=""
+  [rows]="12"
+  [class.hidden]="!editable && !formData"
+  [isReadonly]="!editable"
+  [formData]="formData">
+</sm-textarea-control>
+<span *ngIf="!formData && !editable">No changes logged</span>

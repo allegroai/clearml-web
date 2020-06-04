@@ -1,0 +1,150 @@
+@import "../../styles/variables";
+
+:host {
+  /deep/ th.resize-enabled span.ui-column-resizer.ui-clickable {
+    width: 8px;
+    border: none;
+    padding-left: 6px;
+
+    &:hover {
+      background: #8492c2;
+      background-clip: content-box;
+    }
+  }
+
+  /deep/ th.resize-disabled span.ui-column-resizer.ui-clickable {
+    cursor: auto;
+  }
+
+  /deep/ .ui-table-scrollable-header.ui-widget-header {
+    position: sticky;
+    top: -1px;
+    z-index: 20;
+  }
+
+  /deep/ .ui-column-resizer-helper {
+    background-color: #8492c2;
+  }
+
+  .selected-col-header {
+    pointer-events: none;
+  }
+
+  .table-load-more {
+    &:hover {
+      background-color: transparent !important;
+    }
+  }
+
+  .load-more-wrapper {
+    padding: 32px 0 12px 0;
+    text-align: center;
+
+    button {
+      padding: 8px 40px;
+    }
+
+    .load-spinner {
+      display: inline-block;
+      vertical-align: middle;
+      background-image: url("#{$assets-icons-path}/Spinner.svg");
+      background-repeat: no-repeat;
+      background-size: 16px;
+      width: 16px;
+      height: 16px;
+      margin-right: 6px;
+
+    }
+  }
+
+
+  .no-data {
+    text-align: center;
+    padding-top: 25px;
+    font-size: 14px;
+  }
+
+  tr {
+    &:hover:not(.header):not(.selected):not(.no-data-row) {
+      background-color: $blue-600;
+    }
+
+    &.selected {
+      background-color: $purple;
+    }
+
+    &.even:not(.selected):not(:hover) {
+      background-color: $blue-700;
+    }
+
+    &.header {
+      height: 48px;
+    }
+
+    th {
+      position: sticky;
+      top: -1px;
+      background-color: $blue-700;
+      vertical-align: middle;
+      color: $blue-300;
+
+      .col-header {
+        text-align: left !important;
+        font-size: 12px !important;
+      }
+
+      &:hover {
+        background-color: $blue-600;
+      }
+    }
+
+    td {
+      vertical-align: middle;
+      color: $blue-100;
+      font-size: 1rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+
+      &.no-data {
+        color: $cloudy-blue;
+        text-align: center;
+        padding-top: 25px;
+      }
+    }
+  }
+
+  :host-context(.light-theme) {
+    tr {
+      &:hover:not(.header):not(.no-data-row) {
+        background-color: $blue-100;
+      }
+
+      &.even:not(.selected):not(:hover) {
+        background-color: $blue-50;
+      }
+
+      &.header {
+        @supports (-moz-appearance:meterbar) {
+          border-bottom: 3px solid #364164;
+        }
+      }
+
+      th {
+        background-color: white;
+        color: $blue-400;
+        font-weight: 500;
+        border-bottom: 1px solid #364164;
+
+      }
+
+      td {
+        color: $blue-400;
+
+        &.no-data {
+          color: $blue-300;
+        }
+      }
+    }
+  }
+}

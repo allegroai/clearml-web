@@ -1,0 +1,124 @@
+@import "../../../shared/ui-components/styles/variables";
+
+:host {
+  position: relative;
+
+  /deep/ #searchDiff {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    background-color: white;
+
+    button {
+      font-size: 13px;
+
+      &.prev {
+        border-right-color: transparent !important;
+      }
+
+      &.next {
+        border-left-color: transparent !important;
+      }
+    }
+
+    .btn-group sm-search {
+      width: 243px;
+
+      .search-input-container {
+
+        input.search-input {
+          border: 1px solid #a7b2d8 !important;
+          border-radius: 4px 0 0 4px !important;
+          padding-left: 6px !important;
+        }
+
+        i.fa {
+          right: 4px !important;
+        }
+      }
+    }
+  }
+
+  /deep/ .btn-arrow {
+    width: 42px;
+  }
+
+  /deep/ #refreshIcon .btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    background-color: #e4e5e8;
+    font-size: 15px;
+    color: #9aa5cd;
+    margin: 0 5px;
+
+  }
+
+  /deep/ mat-select.view-mode {
+    width: 142px;
+
+    .mat-select-trigger {
+      width: 142px;
+      border: 1px solid $cloudy-blue;
+      border-radius: 4px;
+      height: 32px;
+      padding: 7px 14px;
+
+      mat-select-trigger {
+        color: $blue-400;
+      }
+    }
+
+    .mat-select-arrow {
+      color: $blue-400;
+    }
+  }
+}
+
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+  padding: 0 32px;
+  border-top: 1px solid $blue-50;
+  border-bottom: 1px solid $blue-50;
+
+  .actions-container {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+
+    > * {
+      margin-right: 12px;
+    }
+  }
+
+  button {
+    font-weight: 500;
+    font-size: 13px;
+  }
+
+  .btn-add-experiment {
+    width: 146px;
+    background-color: $very-light-blue;
+  }
+
+
+}
+
+/deep/ mat-option.compare-mat-option {
+  color: $blue-400 !important;
+
+  &.mat-selected {
+    background-color: $white !important;
+
+    &:hover {
+      background-color: rgba(0, 0, 0, .04) !important;
+    }
+
+  }
+}
+
+

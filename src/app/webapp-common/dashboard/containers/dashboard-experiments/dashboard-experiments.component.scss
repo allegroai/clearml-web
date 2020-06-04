@@ -1,0 +1,17 @@
+@import "../../../shared/ui-components/styles/mixins/common";
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 10px;
+}
+
+.table-container{
+  height: calc(100% - 38px);
+  min-height: 180px;
+  overflow-y: auto;
+}
+
+.recent-title {
+  @include recent-title();
+}

@@ -1,0 +1,56 @@
+@import "../../../layout/layout.scss";
+
+:host{
+  display: block;
+  position: relative;
+  height: $experiment-info-header-height;
+
+  .alert-warning {
+    padding: 3px 6px;
+    margin-bottom: 3px;
+  }
+
+  .experiment-icon {
+    margin: 10px 20px 0 5px;
+    height: 37px;
+    width: 23px;
+  }
+
+  .middle-col {
+    width: calc(100% - 100px);
+  }
+   .experiment-name {
+    font-size: 15px;
+    min-height:24px;
+    font-weight: bold;
+    max-width: 80ch;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .experiment-type {
+    width: 180px;
+    font-size: 15px;
+    margin-right: 12px;
+  }
+
+  .experiment-id {
+    top: 4px;
+    position: relative;
+    font-weight: bold;
+  }
+  .id-icon{
+    width: 41px;
+    height: 31px;
+  }
+  .edit-name {
+    margin-top:5px;
+  }
+  .menu-button, .menu-button &:hover, .menu-button &:focus {
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 12px;
+    text-decoration: none;
+  }
+}

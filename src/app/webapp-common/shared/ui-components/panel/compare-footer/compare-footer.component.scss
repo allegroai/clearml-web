@@ -1,0 +1,18 @@
+@import "../../styles/variables";
+
+.footer-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  height: 60px;
+  width: 100%;
+  transition: height 0.5s;
+  padding-left: 64px;
+  background-color: $neon-yellow-betterinchrome;
+  color: $blue-900;
+  z-index: 10;
+  &.hide-container {
+    height: 0;
+  }
+}
+

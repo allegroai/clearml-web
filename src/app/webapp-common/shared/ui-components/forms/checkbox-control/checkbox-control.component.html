@@ -1,0 +1,32 @@
+<span class="layout"
+      [ngClass]="inputClassName"
+      [class.disabled]="disabled"
+      (click)="fieldValueChanged($event)"
+>
+  <span
+    *ngIf="!isReadonly"
+    role="button"
+    class="purple-v"
+    [ngClass]="inputClassName"
+    [class.checked] = "state === 'All' || state === 'Partial'"
+    [class.readonly] = "isReadonly"
+    [smTooltip]="getCurrentError()"
+    tooltipType='validation'
+    [showTooltip]="showErrors"
+  >
+    <i class="fas" [ngClass]="{
+    'fa-plus': special && !formData,
+    'fa-trash fa-sm': special && !!formData,
+    'icon xs i-v-white': state === 'All',
+    spacer: state === 'None',
+    'fa-minus': state === 'Partial'
+    }">
+    </i>
+  </span>
+  <span
+    *ngIf="label"
+    [class]="readonlyClassName + ' checkbox-label ellipsis'"
+    [ngClass]="isReadonly ? '' : 'pointer'"
+  >{{label}}
+  </span>
+</span>

@@ -1,0 +1,38 @@
+<div class="d-flex justify-content-between header-container align-items-center"
+     [ngClass]="{'archive-mode': isArchived}">
+  <sm-toggle-archive
+    [showArchived]="isArchived"
+    (toggleArchived)="onIsArchivedChanged($event)"
+  ></sm-toggle-archive>
+
+  <sm-project-context-navbar
+    activeFeature="experiments"
+    [archivedMode]="isArchived"
+  ></sm-project-context-navbar>
+
+  <div class="d-flex justify-content-end align-items-center">
+
+    <sm-experiment-custom-cols-menu
+      [hidden]="minimizedView"
+      [metricVariants]="metricVariants"
+      [hyperParams]="hyperParams"
+      [tableCols]="tableCols"
+      [customColumnMode]="selectMetricActive"
+      [isLoading]="isMetricsLoading"
+      (selectedMetricToShow)="selectedMetricToShow.emit($event)"
+      (selectedHyperParamToShow)="selectedHyperParamToShow.emit($event)"
+      (selectedTableColsChanged)="selectedTableColsChanged.emit($event)"
+      (getMetricsToDisplay)="getMetricsToDisplay.emit($event)"
+      (removeColFromList)="removeColFromList.emit($event)"
+      (selectMetricActiveChanged)="setCustomColumnMode($event)"
+      (clearSelection)="clearSelection.emit()"
+    ></sm-experiment-custom-cols-menu>
+    <sm-refresh-button
+      [autoRefreshState]="autoRefreshState"
+      [allowAutoRefresh]="true"
+      (refreshList)="refreshListClicked.emit()"
+      (setAutoRefresh)="setAutoRefresh.emit($event)"
+    >
+    </sm-refresh-button>
+  </div>
+</div>

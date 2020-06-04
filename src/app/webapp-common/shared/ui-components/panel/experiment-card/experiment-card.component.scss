@@ -1,0 +1,55 @@
+@import "../../styles/variables";
+@import "../../styles/mixins/common";
+
+.title {
+  @include card-title();
+}
+
+.top-labels {
+  @include counter-label();
+  text-align: left;
+  padding-top: 8px;
+}
+
+.sub-title {
+  @include counter-label();
+  padding-right: 10px;
+}
+
+.experiment-tag {
+  @include card-header-tag();
+  color: #8492c2;
+}
+
+.experiment-footer {
+  font-size: 10px;
+  padding: 5px 10px;
+}
+
+/deep/ .experiment-card {
+  cursor: pointer;
+  height: 228px;
+  overflow: hidden;
+  .chips{
+    margin-top: 4px;
+    margin-bottom: 20px;
+    padding-top: 8px;
+  }
+}
+
+/deep/ .experiment-card {
+  .card-container:hover {
+    background-color: $blue-400 !important;
+  }
+}
+
+.brio-footer {
+  height: 60px;
+  overflow: hidden
+}
+
+:host{
+  .content-subtitle{
+    font-size: 10px;
+  }
+}

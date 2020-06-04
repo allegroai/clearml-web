@@ -1,0 +1,32 @@
+@mixin common-leaf() {
+  border-radius: 0 0 6px 6px;
+  position: absolute;
+  width: 99.8%;
+  height: 100%;
+  transition: all $transition-slow;
+}
+
+@mixin choose-leaf() {
+  @include common-leaf;
+  background-color: #FFFFFF;
+  top: 0;
+  z-index: 10;
+  border-bottom: 8px solid #FFFFFF;
+  &:hover {
+    border-bottom: 8px solid $neon-yellow-betterinchrome;
+    /deep/ .step-number {
+      color: $dark-grey-blue-three;
+    }
+  }
+  &.open-code {
+    transition-delay: $transition-slow;
+    height: 75%;
+  }
+}
+
+
+@mixin gradiented-background() {
+  height: $leaf-height;
+  background-image: linear-gradient(to bottom, #ffffff, rgba(0, 0, 0, 0));
+  position: relative;
+}

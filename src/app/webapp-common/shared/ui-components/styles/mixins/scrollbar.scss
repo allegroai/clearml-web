@@ -1,0 +1,33 @@
+@import "../themes";
+
+@mixin generate-scroll($themes: $themes) {
+  @each $theme, $map in $themes {
+    .#{$theme}-theme {
+      $scrollbar: map-get($map, scrollbar);
+
+      /* width */
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+
+      /* Track */
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      /* Handle */
+      ::-webkit-scrollbar-thumb {
+        border-radius: 4px;
+        background: map-get($scrollbar, tumb-background);
+      }
+
+      scrollbar-color: map-get($scrollbar, tumb-background) transparent;
+
+      ::-webkit-scrollbar-corner {
+        background: transparent
+      }
+
+    }
+  }
+}

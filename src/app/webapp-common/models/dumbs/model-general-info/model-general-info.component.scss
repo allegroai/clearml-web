@@ -1,0 +1,15 @@
+@import "../../../layout/layout.scss";
+
+:host {
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+
+  a[href] {
+    text-decoration: underline;
+  }
+
+  .general-description {
+    white-space: pre-wrap;
+  }
+}

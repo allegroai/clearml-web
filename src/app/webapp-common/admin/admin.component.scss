@@ -1,0 +1,14 @@
+:host {
+  margin: 0 auto;
+  width: 97%;
+
+  /deep/ .empty-card .line {
+    display: none;
+  }
+
+  .new-credentials {
+    display: flex;
+    align-items: center;
+    margin-top: 20px;
+  }
+}

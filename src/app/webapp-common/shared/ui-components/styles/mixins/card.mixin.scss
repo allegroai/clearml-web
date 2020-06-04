@@ -1,0 +1,30 @@
+@import "../themes";
+
+@mixin generate-card($themes: $themes) {
+  @each $theme, $map in $themes {
+    $card: map-get($map, card);
+    :host-context(.#{$theme}-theme) {
+      .al-card {
+        .card-container {
+          background-color: map_get($card, body-bg-color);
+          border: 1px solid rgba(map_get($card, border-color), 0);
+          //transition: border 0.3s;
+          &.bordered {
+            border: 1px solid map_get($card, border-color);
+            box-shadow: map_get($card, box-shadow);
+          }
+
+          .line {
+            border: solid map_get($card, seperator-line-color) 0.5px;
+          }
+        }
+
+        footer {
+          background-color: map_get($card, footer-bg-color);
+        }
+      }
+    }
+  }
+}
+
+

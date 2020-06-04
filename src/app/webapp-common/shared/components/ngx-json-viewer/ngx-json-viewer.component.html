@@ -1,0 +1,24 @@
+<section class="ngx-json-viewer">
+  <section
+    *ngFor="let segment of segments"
+    [ngClass]="['segment', 'segment-type-' + segment.type]">
+    <section
+      (click)="toggle(segment)"
+      [ngClass]="{
+        'segment-main': true,
+        'expandable': isExpandable(segment),
+        'expanded': segment.expanded
+      }">
+      <div *ngIf="isExpandable(segment)" class="toggler"></div>
+      <span class="segment-key">{{ segment.key }}</span>
+      <span class="segment-separator">: </span>
+      <span *ngIf="segment.type !== 'link' && (!segment.expanded || !isExpandable(segment))" class="segment-value">{{ segment.description }}</span>
+      <span *ngIf="segment.type === 'link' && (!segment.expanded || !isExpandable(segment))" class="segment-value">
+        <a href="" (click)="linkActionWrapper($event, segment.value)">{{ segment.description }}</a>
+      </span>
+    </section>
+    <section *ngIf="segment.expanded && isExpandable(segment)" class="children">
+      <ngx-json-viewer [testLink]="testLink" (linkAction)="subsectionAction($event)" [json]="segment.value" [expanded]="expanded"></ngx-json-viewer>
+    </section>
+  </section>
+</section>

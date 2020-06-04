@@ -1,0 +1,60 @@
+@import "../../../../webapp-common/shared/ui-components/styles/variables";
+
+:host {
+  .worker-info-container {
+    padding: 0px 5px;
+  }
+
+  /deep/ .table-row {
+    background-color: $blue-800 !important;
+    border-bottom: 1px solid #323950 !important;
+  }
+
+  /deep/ .row.headers {
+    //border-bottom: none !important;
+    font-weight: bold;
+    border-bottom: 1px solid #323950 !important;
+  }
+
+  .queues-table-container {
+    padding: 0 20px;
+  }
+
+  .tabs-container {
+    position: relative;
+    background-color: $blue-800;
+    border-bottom: 1px solid #383F60;
+    margin: 0 20px 10px 20px;
+    height: 42px;
+
+    /deep/ .navbar-item {
+      height: 42px;
+      padding: 0 15px;
+      margin: 0 20px;
+    }
+  }
+
+  .pull-right {
+    position: absolute;
+    right: 5px;
+    top: 5px;
+  }
+
+  .id-cell {
+    .value {
+      flex: 1;
+    }
+
+    .copy-btn {
+      min-width: 30px;
+      margin-left: 5px;
+      display: none;
+    }
+
+    &:hover {
+      .copy-btn {
+        display: inline-block;
+      }
+    }
+  }
+}

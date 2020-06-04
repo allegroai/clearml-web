@@ -1,0 +1,417 @@
+/*@import "";*/
+//@import url('https://fonts.googleapis.com/css?family=Heebo:100,300,400,500,600,700,900');
+@import "variables";
+@import "mixins";
+@import "themes";
+@import './bootstrap-settings.scss';
+/*@import 'material-theme';*/
+@import './icons';
+@import '../styles/variables';
+@import 'material-overide';
+@import "~@ng-select/ng-select/themes/default.theme.css";
+/* You can add global styles to this file, and also import other style files */
+$dark-theme-input: map-get($dark-theme, input);
+$light-theme-input: map-get($light-theme, input);
+
+$light-theme-input-highlight: map-get($light-theme, input-highlight);
+$dark-theme-input-highlight: map-get($dark-theme, input-highlight);
+$light-theme-select: map-get($light-theme, input-select);
+$dark-theme-select: map-get($dark-theme, input-select);
+
+* {
+  scrollbar-width: thin;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0px;
+  padding: 0px;
+
+  @include generate-input();
+  @include generate-scroll();
+  @include generate-general();
+  scrollbar-width: thin;
+
+  .dark-theme {
+
+    h4 {
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    option {
+      color: map-get($dark-theme-select, option-color);
+      background-color: map-get($dark-theme-select, option-bg);
+    }
+
+    a {
+      color: $cloudy-blue;
+
+      &:hover {
+        color: #FFFFFF;
+      }
+    }
+
+    input {
+      &.highlight {
+        &::placeholder {
+          color: map-get($dark-theme-input-highlight, placeholder-color);
+        }
+
+        color: map-get($dark-theme-input-highlight, color);
+        height: map-get($dark-theme-input-highlight, height);
+        line-height: map-get($dark-theme-input-highlight, height);
+        background-color: map-get($dark-theme-input-highlight, background-color);
+        border: map-get($dark-theme-input-highlight, border);
+        border-radius: map-get($dark-theme-input-highlight, border-radius);
+
+        &:focus {
+          background-color: map-get($dark-theme-input-highlight, background-color);
+          color: map-get($dark-theme-input-highlight, focus-color);
+        }
+      }
+    }
+
+    select {
+      &.highlight {
+        height: map-get($dark-theme-input-highlight, height);
+        line-height: map-get($dark-theme-input-highlight, height);
+        border: map-get($dark-theme-input-highlight, border);
+        border-radius: map-get($dark-theme-input-highlight, border-radius);
+        background-color: map-get($dark-theme-input-highlight, background-color);
+      }
+    }
+
+    sm-menu .btn {
+      color: $cloudy-blue;
+    }
+
+    sm-menu .btn:hover {
+      color: $cloudy-blue-two;
+    }
+
+    &.ng-dropdown-panel {
+      margin-top: 5px;
+      border: 1px solid #5a658e;
+    }
+
+    &.ng-dropdown-panel .ng-dropdown-panel-items .ng-option {
+      background: black;
+      color: #8693be;
+
+    }
+
+    &.ng-dropdown-panel .ng-option.ng-option-selected, &.ng-dropdown-panel .ng-option.ng-option-selected.ng-option-marked {
+      background-color: #1f2333;
+      color: #a4b2db;
+      font-weight: bold;
+    }
+
+    &.ng-dropdown-panel .ng-option.ng-option-marked {
+      background-color: $blue-900;
+      color: #a4b2db;
+    }
+
+    ng-select, ng-select.ng-select-opened {
+      .ng-option {
+        color: map-get($dark-theme-input-highlight, color) !important;
+      }
+
+      .ng-select-container, .ng-option, .ng-dropdown-panel {
+        background-color: black;
+        color: map-get($dark-theme-input-highlight, color);
+
+      }
+
+      .ng-option.ng-option-selected, .ng-option.ng-option-marked, .ng-option.ng-option-selected.ng-option-marked {
+        background-color: #1f2333;
+        color: #a4b2db;
+        font-weight: bold;
+      }
+
+      &.ng-select-focused > .ng-select-container{
+        border-color: $blue-300 !important;
+        box-shadow: none !important;
+      }
+
+      .ng-dropdown-panel, .ng-dropdown-panel.ng-select-bottom {
+        border: 1.3px solid $blue-400;
+      }
+
+      .ng-select-container {
+        border: 1.3px solid $blue-500;
+
+        &:hover {
+          border: 1.3px solid $blue-400;
+
+        }
+      }
+
+      .ng-placeholder {
+        color: map-get($dark-theme-input-highlight, placeholder-color);
+      }
+    }
+  }
+
+  .light-theme {
+    a {
+      color: $purple;
+
+      &:hover {
+        color: $purple;
+        text-decoration: underline;
+      }
+    }
+
+    h4 {
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    option {
+      color: map-get($light-theme-select, option-color);
+      background-color: map-get($light-theme-select, option-bg);
+    }
+
+    input {
+      &.highlight {
+        &::placeholder {
+          color: $light-dusk;
+        }
+
+        font-size: 14px;
+        font-weight: 500;
+        color: $blue-400;
+        height: map-get($light-theme-input-highlight, height);
+        line-height: map-get($light-theme-input-highlight, height);
+        background-color: map-get($light-theme-input-highlight, background-color);
+        border: map-get($light-theme-input-highlight, border);
+        border-radius: map-get($light-theme-input-highlight, border-radius);
+
+        &:focus {
+          background-color: map-get($light-theme-input-highlight, background-color);
+          border: solid 1px $cloudy-blue-two;
+        }
+
+        &:hover {
+          background-color: map-get($light-theme-input-highlight, background-color);
+          border: solid 1px $cloudy-blue-two;
+        }
+      }
+    }
+
+    textarea {
+      &.highlight {
+        &::placeholder {
+          color: $light-dusk;
+        }
+
+        font-size: 14px;
+        font-weight: 500;
+        background-color: map-get($light-theme-input-highlight, background-color);
+        border: map-get($light-theme-input-highlight, border);
+        border-radius: map-get($light-theme-input-highlight, border-radius);
+        color: $blue-400;
+
+        &:focus {
+          background-color: map-get($light-theme-input-highlight, background-color);
+          border: solid 1px $cloudy-blue-two;
+
+        }
+
+        &:hover {
+          border: solid 1px $blue-300;
+        }
+      }
+    }
+
+    select {
+      &.highlight {
+        color: $dusk-two;
+        font-size: 14px;
+        font-weight: 500;
+        height: map-get($light-theme-input-highlight, height);
+        line-height: map-get($light-theme-input-highlight, height);
+        border: map-get($light-theme-input-highlight, border);
+        border-radius: map-get($light-theme-input-highlight, border-radius);
+        background-color: map-get($light-theme-input-highlight, background-color);
+
+        &:focus {
+          background-color: map-get($light-theme-input-highlight, background-color);
+          border: solid 1px $cloudy-blue-two;
+          color: $blue-400;
+        }
+      }
+    }
+
+    ng-select, ng-select.ng-select-opened {
+      .ng-option {
+        color: black !important;
+      }
+
+      .ng-select-container, .ng-option, .ng-dropdown-panel {
+        background-color: white;
+
+      }
+
+      .ng-option.ng-option-selected, .ng-option.ng-option-marked, .ng-option.ng-option-selected.ng-option-marked {
+        background-color: map-get($light-theme-input-highlight, background-color);
+        color: black;
+      }
+
+      &.ng-select-focused > .ng-select-container{
+        border-color: $blue-400 !important;
+        box-shadow: none !important;
+      }
+
+      .ng-dropdown-panel, .ng-dropdown-panel.ng-select-bottom {
+        border: 1.3px solid $cloudy-blue-two;
+      }
+
+      .ng-select-container {
+        border: 1.3px solid $cloudy-blue-two;
+
+        &:hover {
+          border: 1.3px solid $blue-300;
+        }
+        &:focus {
+          border: 1.3px solid $blue-400;
+        }
+      }
+
+
+      .ng-placeholder {
+        color: map-get($light-theme-input-highlight, placeholder-color);
+      }
+    }
+  }
+}
+
+.mat-slider-track-background {
+  background-color: #384161;
+}
+
+.mat-slider-track-fill {
+  background-color: $cloudy-blue-two !important;
+}
+
+.mat-slider-thumb {
+  background-color: $cloudy-blue !important;
+
+  &:hover {
+    background-color: $cloudy-blue !important;
+  }
+}
+
+.sm-navbar {
+  min-height: $nav-bar-height;
+  background-color: $nav-bar-bg;
+  //margin-left: $side-bar-close-width;
+  position: absolute;
+  top: 0;
+  width: calc(100% - #{$side-bar-close-width}) //64px);
+}
+
+.container {
+  padding: 0 !important;
+}
+
+.stick-to-corner {
+  position: absolute;
+  top: 0;
+  right: 0px;
+  z-index: $generic-base-z-index + 99;
+  margin: 16px;
+
+}
+
+.row {
+  margin: 0 !important;
+}
+
+.no-gutters > [class*="col-"] {
+  padding-right: 0 !important;
+  padding-left: 0 !important;
+}
+
+.pallete-cursor {
+  cursor: url(/app/webapp-common/assets/icons/pallete-cursor.png) 6 0, pointer;
+}
+
+.resize-none {
+  resize: none !important;
+}
+
+//TODO: move to code component...
+pre {
+  .prettyprint {
+    display: block;
+    background-color: $blue-600;
+  }
+
+  .nocode {
+    background-color: none;
+    color: #000
+  }
+
+  .str {
+    color: $neon-yellow-original-notgoodinchrome !important
+  }
+
+  /* string  - pink */
+  .kwd {
+    color: $training !important;
+    font-weight: bold !important;
+  }
+
+  .com {
+    color: #87ceeb !important
+  }
+
+  /* comment - skyblue */
+  .typ {
+    color: #EA4925 !important
+  }
+
+  /* type    - lightgreen */
+  .lit {
+    color: #cd5c5c !important
+  }
+
+  /* literal - darkred */
+  .pun {
+    color: $white !important
+  }
+
+  /* punctuation */
+  .pln {
+    color: $white !important
+  }
+
+  /* plaintext */
+  .tag {
+    color: $training;
+    font-weight: bold !important
+  }
+
+  /* html/xml tag    - lightyellow */
+  .atn {
+    color: #bdb76b !important;
+    font-weight: bold !important
+  }
+
+  /* attribute name  - khaki */
+  .atv {
+    color: $neon-yellow-original-notgoodinchrome !important
+  }
+
+  /* attribute value - pink */
+  .dec {
+    color: #EA4925 !important
+  }
+
+  /* decimal         - lightgreen */
+}
+
+

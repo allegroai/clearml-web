@@ -1,0 +1,60 @@
+<div *ngIf="showButton" mat-button [matMenuTriggerFor]="experimentMenu" class="p-0 cell menu-button btn icon sm i-list-view"></div>
+<div *ngIf="!showButton" #contextTrigger
+     style="visibility: hidden; position: fixed"
+     [style.left.px]="position.x"
+     [style.top.px]="position.y"
+     [matMenuTriggerFor]="experimentMenu">
+</div>
+<mat-menu #experimentMenu="matMenu" [hasBackdrop]="false">
+  <button mat-menu-item (click)="showExperimentMetrics()" [disabled]="experiment?.status == TaskStatusEnum.Created">
+    <i [class]="'fa '+ ICONS.CHART"></i>Results
+  </button>
+  <button mat-menu-item (click)="manageQueueClicked()" [disabled]="experiment?.status !== TaskStatusEnum.Queued">
+    <i [class]="'fa '+ ICONS.QUEUED"></i>Manage Queue
+  </button>
+  <button mat-menu-item (click)="viewWorkerClicked()" [disabled]="experiment?.status !== TaskStatusEnum.InProgress">
+    <i [class]="'fa '+ ICONS.WORKER"></i>View worker
+  </button>
+  <hr>
+  <button mat-menu-item (click)="restoreArchivePopup()" [disabled]="isExample">
+    <i [class]="'fa ' + (experiment && experiment?.system_tags && experiment?.system_tags.includes('archived') ? ICONS.SHOW : ICONS.HIDE)"></i>
+    {{experiment?.system_tags && experiment?.system_tags.includes('archived') ? 'Restore from archive' : 'Archive' + (numSelected > 1 ? ' (' + numSelected + ' items)' : '')}}
+  </button>
+  <button mat-menu-item (click)="enqueueDequeue()" [disabled]="enqueueDequeueDisabled()">
+    <i [class]="'fa ' + enqueueDequeueIcon()"></i>{{enqueueDequeueLabel()}}
+  </button>
+  <button mat-menu-item (click)="resetPopup()" [disabled]="isExample || [TaskStatusEnum.Created, TaskStatusEnum.Published, TaskStatusEnum.Publishing].includes(experiment?.status)">
+    <i class="fa fa-power-off"></i>Reset
+  </button>
+  <button mat-menu-item (click)="stopPopup()" [disabled]="isExample || TaskStatusEnum.InProgress !== experiment?.status">
+    <i [class]="'fa ' + ICONS.STOPPED"></i>Abort
+  </button>
+  <button
+    mat-menu-item
+    (click)="publishPopup()"
+    [disabled]="isExample || !([TaskStatusEnum.Stopped, TaskStatusEnum.Closed, 'completed', TaskStatusEnum.Failed].includes(experiment?.status))">
+    <i [class]="'fa ' + ICONS.PUBLISHED"></i>Publish
+  </button>
+  <hr>
+  <button mat-menu-item [matMenuTriggerFor]="tagMenu" (menuOpened)="tagMenuOpened()" (menuClosed)="tagMenuContent.clear()">
+    <i class="fas fa-tag rotate-135"></i>
+    <span>{{'Add Tag' + (numSelected > 1 ? ' (' + numSelected + ' items)' : '')}}</span>
+  </button>
+  <hr>
+  <button mat-menu-item (click)="clonePopup()">
+    <i class="fa fa-clone"></i>Clone
+  </button>
+  <button mat-menu-item (click)="moveToProjectPopup()" [disabled]="isExample">
+    <i class="fa fa-arrow-right"></i>Move To Project
+  </button>
+</mat-menu>
+
+<mat-menu #tagMenu="matMenu">
+  <sm-tags-menu
+    #tagMenuContent
+    class="light-theme"
+    [tags]="experiment?.tags"
+    [allTags]="allTags"
+    (tagSelected)="tagSelected.emit($event)">
+  </sm-tags-menu>
+</mat-menu>

@@ -1,0 +1,34 @@
+<div class="h-100 row">
+  <div *ngIf=" ! minimized" class="list-container col-4">
+    <sm-selectable-filter-list
+      titleLabel="Select scalars to display"
+      checkAllIcon="fa-eye"
+      [list]="scalarList"
+      [selected]="selectedGraph"
+      [checkedList]="listOfHidden | async"
+      [searchTerm]="searchTerm$ | async"
+      (itemSelect)="metricSelected($event)"
+      (hiddenChanged)="hiddenListChanged($event)"
+      (searchTermChanged)="searchTermChanged($event)"
+    >
+    </sm-selectable-filter-list>
+  </div>
+  <div class="graphs-container" [ngClass]="{'col-20': ! minimized, 'col-24': minimized}">
+    <sm-experiment-graphs
+      [isGroupGraphs]="false"
+      [metrics]="graphs"
+      [hiddenList]="listOfHidden | async"
+      [legendStringLength]="minimized? 14 : undefined"
+      [minimized]="minimized"
+      [smoothWeight]="(smoothWeight$ | async)"
+      [xAxisType]="(xAxisType$ | async)"
+      [showSettings]="showSettingsBar"
+      [splitSize]="splitSize$ | async"
+      (changeWeight)="changeSmoothness($event)"
+      (resetGraphs)="resetMetrics()"
+      (toggleSettings)="toggleSettingsBar()"
+      (changeXAxisType)="changeXAxisType($event)"
+    >
+    </sm-experiment-graphs>
+  </div>
+</div>

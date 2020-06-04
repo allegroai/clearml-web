@@ -1,0 +1,50 @@
+@import "../../styles/variables";
+
+mat-form-field {
+  width: 100%;
+  /deep/ .mat-form-field-flex {
+    background-color: unset;
+  }
+}
+.color-picker-wrapper {
+  position: absolute;
+  top: calc(50% - 200px);
+  left: calc(50% + 260px);
+
+  /deep/ .arrow {
+    display: none;
+  }
+}
+
+.tags-list {
+  height: 300px;
+}
+
+.tag-line {
+  display: flex;
+  justify-content: space-between;
+  height: 32px;
+  font-size: 14px;
+  padding-right: 12px;
+
+  .caption {
+    color: $blue-800;
+  }
+
+  .tag {
+    padding: 0 14px;
+    height: 18px;
+    line-height: 17px;
+    border-radius: 4px;
+  }
+}
+
+.btn-row {
+  padding-top: 24px;
+
+  button {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 15px;
+  }
+}

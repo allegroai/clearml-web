@@ -1,0 +1,24 @@
+@import "../../../shared/ui-components/styles/variables";
+@import "../../../layout/layout";
+
+:host {
+  display: block;
+  padding: $projects-header-padding 0 $projects-header-padding;
+
+  .menu {
+    padding-left: 5px;
+    color: $blue-300;
+  }
+  .recent-title {
+    display: flex;
+    align-items: center;
+  }
+  .headers-container {
+    margin-top: 30px;
+    /deep/ sm-search {
+      input {
+        width: 328px; //TODO:
+      }
+    }
+  }
+}

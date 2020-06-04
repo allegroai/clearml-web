@@ -1,0 +1,91 @@
+@import "../../shared/ui-components/styles/variables.scss";
+
+span {
+  font-size: 15px;
+}
+
+:host {
+  display: flex;
+  align-items: center;
+}
+
+.breadcrumbLink a, .breadcrumbLink span {
+  max-width: 700px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: $dark-grey-blue-four;
+  font-weight: 400;
+  display: inline-block;
+  padding-right: 4px;
+  height: 100%;
+}
+
+.breadcrumbLink {
+  height: 22px;
+  display: flex;
+  align-items: center;
+}
+
+.breadcrumbLink:first-of-type a {
+  text-transform: uppercase;
+}
+
+.breadcrumbLink:last-of-type a {
+  pointer-events: none;
+  cursor: default;
+  font-weight: bold;
+  color: white;
+}
+
+.share {
+  color: #00e3b9;
+  border: 1px solid #00e3b9;
+  height: 22px;
+  width: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  margin-left: 12px;
+}
+
+.close-icon {
+  margin-left: auto;
+}
+
+.share-menu-container {
+  padding: 24px
+}
+
+.link-box {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  width: 372px;
+  height: 36px;
+  border-radius: 4px;
+  border: solid 1px #ced1dc;
+  font-size: 14px;
+  color: #404040;
+  margin: 2px 0 24px;
+}
+
+.share-title {
+  font-size: 16px;
+  font-weight: 500;
+  text-align: left;
+  color: #1a1e2b;
+}
+.top{
+  margin-bottom: 17px;
+}
+
+.copy-title {
+  font-size: 12px;
+  color: #8492c2;
+}
+.close-dialog{
+  color: #8491c2;
+  font-size: 20px;
+}

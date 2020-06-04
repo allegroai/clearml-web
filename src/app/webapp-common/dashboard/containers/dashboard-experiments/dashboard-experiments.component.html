@@ -1,0 +1,13 @@
+<div class="row h-100">
+  <div *ngIf="(recentTasks$ | async).length >= 0" class="col-24 h-100">
+    <div class="header">
+      <div class="recent-title">RECENT EXPERIMENTS</div>
+      <ng-content select="[header-buttons]"></ng-content>
+    </div>
+    <div class="table-container">
+      <sm-recent-tasks-table [tasks]="recentTasks$ | async"
+                             (taskSelected)="taskSelected($event)">
+      </sm-recent-tasks-table>
+    </div>
+  </div>
+</div>

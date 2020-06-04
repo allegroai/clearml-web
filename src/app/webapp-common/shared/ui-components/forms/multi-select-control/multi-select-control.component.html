@@ -1,0 +1,28 @@
+<div *ngIf="!isReadonly">
+<span *ngIf="header" class="input-title">{{header}}</span>
+  <sm-select-autocomplete
+    [items]="options"
+    [formControl]="formControl"
+    [multiple]="multiple"
+    (customOptionAdded)="customOptionAdded.emit($event)"
+    [placeholder]="placeHolder"
+    [optionAddable]="optionAddable"
+    [disable]="disabled"
+    [clearable]="clearable"
+    [autofocus]="autofocus"
+    [focusIt]="focusIt"
+    [appendTo]="appendTo"
+  >
+  </sm-select-autocomplete>
+</div>
+<div *ngIf="isReadonly">
+  <div *ngIf="multiple"  #chipsContainer class="chips-container">
+    <div *ngFor="let data of formData">
+      <sm-chips [isDarkBackground]="false" [label]="data"></sm-chips>
+
+    </div>
+  </div>
+  <div *ngIf="!multiple">
+    <sm-chips [isDarkBackground]="false" [label]="formData" maxWidth="80%"></sm-chips>
+  </div>
+</div>

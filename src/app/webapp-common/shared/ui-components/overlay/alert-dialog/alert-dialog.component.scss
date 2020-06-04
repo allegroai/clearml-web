@@ -1,0 +1,32 @@
+.more-info {
+  height: 0;
+  padding: 0;
+  max-width: 500px;
+  border: none;
+  overflow: hidden;
+  transition: height 0.3s, padding 0.3s;
+  margin-left: 20px;
+
+  &.info-open {
+    height: 100px;
+    padding: 3px;
+    border: 1px solid #efefef;
+    overflow: auto;
+    transition: height 0.3s, padding 0.3s;
+  }
+
+  .entities {
+    padding-left: 20px;
+  }
+}
+
+.more-info-icon {
+  width: 20px;
+  text-align: center;
+  transform: rotate(0);
+  transition: transform 0.3s ease-in-out;
+
+  &.info-open {
+    transform: rotate(90deg);
+  }
+}

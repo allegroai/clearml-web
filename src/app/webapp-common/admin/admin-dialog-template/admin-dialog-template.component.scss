@@ -1,0 +1,21 @@
+:host {
+  &{
+    display: block;
+    height: 300px;
+    width: 600px;
+  }
+  .usage-content {
+    margin-top: 6px;
+    border: solid 1px #a3a3a3;
+    padding: 16px;
+  }
+  .code-snippet {
+    pre {
+      margin: 0;
+    }
+
+    .greyout {
+      color: #a3a3a3;
+    }
+  }
+}

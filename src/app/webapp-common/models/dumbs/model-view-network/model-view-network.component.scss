@@ -1,0 +1,11 @@
+@import "../../../layout/layout.scss";
+
+:host {
+  display: block;
+  height: calc(100% - #{$experiment-info-header-height + 5});
+
+  .dark {
+    background-color: #2c3246;
+    color: #ffffff;
+  }
+}

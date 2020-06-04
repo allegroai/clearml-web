@@ -1,0 +1,53 @@
+<div
+  #detailsContainer
+  id="experiment-details-container"
+  cdkDropList
+  cdkDropListOrientation="horizontal"
+  (cdkDropListDropped)="drop($event)"
+>
+  <al-drawer
+    *ngFor="let experiment of experiments; let i = index; trackBy: trackByFn"
+    class="light-theme"
+    cdkDrag
+    cdkDragLockAxis="x"
+    [displayOnHover]="i > 0"
+    [label]="experiments[i].name"
+    (mouseenter)="changeHovered(i, true)"
+    (mouseleave)="changeHovered(i, false)">
+    <sm-card2
+      [showBorder]="baseExperiment.id === experiment.id || hovered[i]"
+    >
+      <!--[cdkAutoScroller]="detailsContainer"-->
+      <div extra-header style="width: 100%">
+        <ng-container *ngTemplateOutlet="extraHeaderTemplate; context: {$implicit: experiment, index: i}">
+        </ng-container>
+      </div>
+      <div headerButtons class="actions-container">
+        <div class="actions" [ngClass]="{'invisible': ! hovered[i]}">
+          <!--<div class="actions">-->
+          <i class="fas fa-minus-circle pointer"
+             *ngIf="experiments.length > 1"
+             (click)="experimentRemoved(experiment)"
+             smTooltip="Remove from comparison matrix"></i>
+          <i *ngIf="baseExperiment.id !== experiment.id"
+             class="fas fa-adjust pointer"
+             (click)="setAsBase(experiment)"
+             smTooltip="Set as base comparison">
+          </i>
+          <i class="fas fa-arrows-alt"
+             cdkDragHandle
+             smTooltip="Click and drag to reposition the experiment"
+             [ngClass]="{'invisible': experiments.length === 1}"
+          >
+          </i>
+        </div>
+      </div>
+      <div header-content>
+        <ng-container *ngTemplateOutlet="headerTemplate; context: {$implicit: experiment, index: i}">
+        </ng-container>
+      </div>
+        <ng-container *ngTemplateOutlet="bodyTemplate; context: {$implicit: experiment, index: i}">
+        </ng-container>
+    </sm-card2>
+  </al-drawer>
+</div>

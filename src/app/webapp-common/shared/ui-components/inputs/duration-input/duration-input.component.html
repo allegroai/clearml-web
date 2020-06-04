@@ -1,0 +1,58 @@
+<ng-form #templateForm="ngForm">
+  <div class="inputs-container">
+    <input #hoursInput
+           matInput
+           name="hour"
+           [(ngModel)]="hours"
+           (keypress)="checkChars($event)"
+           (keyup)=" ($event.target.selectionStart===2 )  && mins.focus()"
+           (keyup.enter)="onChangePartial($event)"
+           (keyup.arrowRight)="($event.target.selectionStart===2 || $event.target.value.length <= 1) && mins.focus()"
+           (blur)="focusOutInput()"
+           maxlength="2"
+           smKeyDownStopPropagation
+           (focus)="$event.target.select()"
+           smTooltip="Hours"><span>:</span>
+    <input #mins
+           matInput
+           name="min"
+           [(ngModel)]="minutes"
+           (keypress)="checkChars($event)"
+           (keyup)="($event.target.selectionStart===2 ) && secs.focus()"
+           (keyup.enter)="onChangePartial($event)"
+           (keyup.arrowRight)="($event.target.selectionStart===2 || $event.target.value.length <= 1)  && secs.focus()"
+           (keyup.arrowLeft)="$event.target.selectionEnd===0 && hoursInput.focus()"
+           (blur)="focusOutInput()"
+           maxlength="2"
+           smKeyDownStopPropagation
+           (focus)="$event.target.select()"
+           smTooltip="Minuets"><span>:</span>
+    <input #secs
+           matInput
+           name="sec"
+           [(ngModel)]="seconds"
+           (keypress)="checkChars($event)"
+           (keyup)="(($event.target.selectionStart===2 ) && mill.focus())"
+           (keyup.enter)="onChangePartial($event)"
+           (keyup.arrowRight)="($event.target.selectionStart===2 || $event.target.value.length <= 1) && mill.focus()"
+           (keyup.arrowLeft)="$event.target.selectionEnd===0 && mins.focus()"
+           (blur)="focusOutInput()"
+           maxlength="2"
+           smKeyDownStopPropagation
+           (focus)="$event.target.select()"
+           smTooltip="Seconds"><span>.</span>
+    <input #mill
+           [(ngModel)]="ms"
+           matInput
+           name="ms"
+           (keypress)="checkChars($event)"
+           (keyup.enter)="onChangePartial($event)"
+           (keyup.arrowLeft)="$event.target.selectionEnd===0 && secs.focus()"
+           (blur)="focusOutInput()"
+           maxlength="3"
+           smKeyDownStopPropagation
+           (focus)="$event.target.select()"
+           smTooltip="Milliseconds">
+    <div class="submit" [ngClass]="{'in-edit-mode':inEdit}" (click)="onChangePartial($event)"><i class="icon xs i-v-neon"></i></div>
+  </div>
+</ng-form>

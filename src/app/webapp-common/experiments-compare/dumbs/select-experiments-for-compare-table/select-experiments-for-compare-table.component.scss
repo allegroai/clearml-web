@@ -1,0 +1,33 @@
+@import "../../../shared/ui-components/styles/variables";
+
+:host {
+  .experiment-name {
+    margin-right: 20px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .italic {
+    font-style: italic;
+  }
+}
+
+/deep/ body sm-experiments-table .ui-table {
+  .table-cell-outline {
+    margin-left: 10px;
+  }
+
+  .middle {
+    display: inline-block;
+    position: absolute;
+  }
+}
+
+.grayed{
+  color: #ced1db !important;
+}
+
+/deep/ sm-experiments .load-more {
+  margin-bottom: 80px;
+}

@@ -1,0 +1,33 @@
+@import '~@angular/material/theming';
+@import "./themes/dark";
+@import "./themes/light";
+@import "material-palette";
+
+
+.dark-theme {
+  // Define the palettes for your theme using the Material Design palettes available in palette.scss
+  // (imported above). For each palette, you can optionally specify a default, lighter, and darker
+  // hue. Available color palettes: https://material.io/design/color/
+  $custom-dark-primary: mat-palette($mat-light-green);
+  $custom-dark-accent: mat-palette($mat-light-green, A200, A100, A400);
+
+  // The warn palette is optional (defaults to red).
+  $custom-dark-warn: mat-palette($mat-red);
+
+  // Create the theme object (a Sass map containing all of the palettes).
+  $custom-dark-theme: mat-dark-theme($custom-dark-primary, $custom-dark-accent, $custom-dark-warn);
+  @include angular-material-theme($custom-dark-theme);
+}
+.light-theme{
+  $custom-light-primary: mat-palette($sm-purple);
+  $custom-light-accent: mat-palette($sm-purple, A200, A100, A400);
+
+  // The warn palette is optional (defaults to red).
+  $custom-light-warn: mat-palette($mat-red);
+
+  // Create the theme object (a Sass map containing all of the palettes).
+  $custom-light-theme: mat-light-theme($custom-light-primary, $custom-light-accent, $custom-light-warn);
+  @include angular-material-theme($custom-light-theme);
+
+}
+

@@ -1,0 +1,9 @@
+:host {
+  display: block;
+  height: calc(100% - 40px);
+  position: relative;
+
+  .cursor-default {
+    cursor: default;
+  }
+}

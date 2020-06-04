@@ -1,0 +1,24 @@
+.toggle-all {
+  font-size: 10px;
+  padding-right: 2px;
+  cursor: pointer;
+}
+
+.list-container {
+  display: block;
+  height: calc(100vh - 209px);
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  padding-top: 20px;
+  border-right: 1px solid #efefef;
+}
+
+.graphs-container {
+  height: 100%;
+  padding: 0 !important;
+}
+
+/deep/ sm-experiment-output-scalars .cursor-crosshair {
+  cursor: default !important;
+}

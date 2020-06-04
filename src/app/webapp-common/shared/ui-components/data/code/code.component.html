@@ -1,0 +1,15 @@
+<div class="code-footer" [ngClass]="{'open-code': isCodeOpen}" [style.top]="isCodeOpen? openCodeTop: closedCodeTop" >
+  <div class="code" [ngClass]="{'open-code': isCodeOpen}" [style.height]="isCodeOpen && codeHeight">
+      <pre class="prettyprint" *ngIf="hack">
+        <div class="lang-python">{{codeResult}}</div>
+      </pre>
+    </div>
+  <div *ngIf="!isCodeOpen" class="closed-code-label pointer" (click)="isCodeOpen = true">
+    {{closedCodeLabel}}
+  </div>
+  <div *ngIf="isCodeOpen" class="closed-code-label pointer" ngxClipboard [cbContent]="codeResult"
+       (cbOnSuccess)="textCopied()" [ngClass]="{'copied': copied}">
+    <div *ngIf="copied" class="icon i-v-neon copied-v"></div>
+    {{copied? ' COPIED': 'COPY TO CLIPBOARD'}}
+  </div>
+</div>

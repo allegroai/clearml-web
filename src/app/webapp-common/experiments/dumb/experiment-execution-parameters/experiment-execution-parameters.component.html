@@ -1,0 +1,56 @@
+<form #hyperParameters="ngForm">
+  <div [hidden]="!editable">
+    <ng-template ngFor let-parameter [ngForOf]="form" let-index="index">
+      <div class="row w-100">
+        <div class="input-container col-11">
+          <mat-form-field [hintLabel]="parameterKey.invalid && parameterKey?.errors?.required? '*Required': ''" appearance="outline" class="strength w-100">
+            <input
+                #parameterKey="ngModel"
+                [(ngModel)]="parameter.key"
+                (blur)="parameter.key=parameter.key.trim()"
+                name="parameterKey-{{parameter.id}}"
+                matInput
+                required/>
+            <mat-error *ngIf="parameterKey.invalid && parameterKey?.errors?.required">
+              Required
+            </mat-error>
+            <mat-error *ngIf="parameterKey.invalid && parameterKey?.errors?.smNotAllowedStringsValidator">
+              .(dot) $(dollar) and space are not allowed in parameter key.
+            </mat-error>
+          </mat-form-field>
+
+
+        </div>
+        <div class="input-container col-11">
+          <mat-form-field appearance="outline" class="strength w-100">
+            <input
+                #parameterLabel="ngModel"
+                [(ngModel)]="parameter.label"
+                name="parameterLabel-{{parameter.id}}"
+                matInput/>
+          </mat-form-field>
+
+        </div>
+        <div class="input-container col-2 remove-step">
+          <i (click)="removeRow(index)" class="icon i-trash sm-md pointer flashing-icon mb-2"></i>
+        </div>
+      </div>
+    </ng-template>
+  </div>
+</form>
+<button *ngIf="editable" class="btn btn-primary" (click)="addRow()"><i class="icon sm i-plus-blue"></i>
+</button>
+<div *ngIf="!editable">
+  <sm-simple-table-2 [cols]="cols" [rowsData]="formData">
+    <ng-template
+      let-col
+      let-i="rowIndex"
+      let-row="row">
+      <div class="row w-100 param-row">
+        <div class="input-container col-11"><span class="allow-multi-space" smTooltip="{{row.key}}">{{row.key}}</span></div>
+        <div class="input-container col-13"><span class="allow-multi-space" smTooltip="{{row.label}}">{{row.label}}</span></div>
+      </div>
+    </ng-template>
+  </sm-simple-table-2>
+</div>
+

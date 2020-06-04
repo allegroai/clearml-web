@@ -1,0 +1,32 @@
+<div class="d-flex h-100">
+  <div class="list-container">
+    <sm-selectable-grouped-filter-list
+      titleLabel="Select scalars to display"
+      checkAllIcon="fa-eye"
+      [list]="graphList"
+      [selected]="selectedGraph"
+      [checkedList]="listOfHidden | async"
+      [searchTerm]="searchTerm$ | async"
+      (itemSelect)="metricSelected($event)"
+      (hiddenChanged)="hiddenListChanged($event)"
+      (searchTermChanged)="searchTermChanged($event)"
+    >
+    </sm-selectable-grouped-filter-list>
+  </div>
+  <div class="graphs-container h-100">
+    <sm-experiment-graphs
+      [metrics]="graphs"
+      [hiddenList]="listOfHidden | async"
+      [isGroupGraphs]="false"
+      [isCompare]="true"
+      [showSettings]="showSettingsBar$ | async"
+      [smoothWeight]="(smoothWeight$ | async)"
+      [xAxisType]="xAxisType$ | async"
+      (resetGraphs)="resetMetrics()"
+      (changeWeight)="changeSmoothness($event)"
+      (changeXAxisType)="changeXAxisType($event)"
+      (toggleSettings)="toggleSettingsBar()"
+    >
+    </sm-experiment-graphs>
+  </div>
+</div>

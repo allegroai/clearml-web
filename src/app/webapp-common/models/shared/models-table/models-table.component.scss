@@ -1,0 +1,61 @@
+@import "../../../shared/ui-components/styles/variables";
+
+$header-height: 45px;
+
+/deep/ sm-models footer.d-flex.justify-content-center {
+  align-items: center;
+  height: 100px;
+}
+
+/deep/ .bigger-width {
+  width: 236px;
+}
+
+:host {
+
+  sm-table {
+    display: block;
+    height: 100%;
+  }
+
+  .table-container {
+    overflow-y: scroll;
+    height: 100%;
+
+    &.card-view {
+      height: calc(100% - #{$header-height});
+    }
+  }
+
+
+  .table-header {
+    background-color: #202332;
+    height: $header-height;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid $blue-500;
+  }
+  .table-header-title {
+    font-weight: bold;
+  }
+  .table-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: 24px;
+    padding-top: 1px;
+  }
+
+  .checkbox-col {
+    display: block;
+    float: left;
+    padding-left: 10px;
+
+    &.header {
+      padding-left: 17px;
+    }
+  }
+
+}
+

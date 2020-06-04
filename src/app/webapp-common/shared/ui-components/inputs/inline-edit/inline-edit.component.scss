@@ -1,0 +1,134 @@
+@import "../../styles/variables";
+
+$inline-edit-base-width: 93%;
+
+:host.dark {
+  // input
+  .inline-edit-input,
+  .inline-edit-input:active,
+  .inline-edit-input:focus {
+    background-color: $blue-600;
+    color: $blue-100;
+    border: none;
+  }
+
+  // textarea
+  .inline-edit-textarea,
+  .inline-edit-textarea:active,
+  .inline-edit-textarea:focus {
+    background-color: transparent;
+    color: $blue-100;
+    border: none;
+  }
+
+
+  .inline-edit-close {
+    color: $blue-200;
+
+    &:hover {
+      color: white;
+    }
+  }
+
+  .inline-edit-approve {
+    color: $blue-200;
+
+    &:hover {
+      color: white;
+    }
+  }
+
+}
+
+
+:host {
+  /deep/ .ui-inplace .ui-inplace-display {
+    background-color: transparent;
+    padding: 0px;
+  }
+
+  .inline-edit-close {
+    position: absolute;
+    font-size: 12px;
+    top: 10px;
+    left: calc(#{$inline-edit-base-width} - 15px);
+    transition: color 300ms;
+
+    &:hover {
+      color: $purple;
+    }
+  }
+
+  .inline-edit-approve {
+    position: absolute;
+    font-size: 12px;
+    top: 10px;
+    left: calc(#{$inline-edit-base-width} + 5px);
+    transition: color 300ms;
+
+    &:hover {
+      color: $purple;
+    }
+  }
+
+  .inline-edit-form {
+    position: relative;
+  }
+
+  .inline-edit-input,
+  .inline-edit-textarea {
+    padding-right: 10%;
+    width: $inline-edit-base-width;
+  }
+
+
+  .editable-pen {
+    position: relative;
+    top: 3px;
+    left: 2px;
+  }
+}
+
+
+body .ui-inplace .ui-inplace-display.ui-state-disabled {
+  opacity: 1;
+}
+
+body .ui-inplace .ui-inplace-display {
+  display: block;
+}
+
+body .ui-inplace .ui-inplace-content input:not(:focus) {
+  border-color: indianred;
+}
+
+body .inline-select select:not(:focus).active {
+  border-color: indianred;
+}
+
+body .text-edit .ui-inplace .ui-inplace-display {
+  padding: 0;
+  display: block;
+}
+
+body .text-edit .ui-inplace .ui-inplace-display.ui-state-disabled {
+  opacity: 1;
+}
+
+body .text-edit .ui-inplace .ui-inplace-content textarea:not(:focus) {
+  border-color: indianred;
+}
+
+.editable-div {
+  .editable-pen {
+    opacity: 0;
+    height: 100%;
+    transition: opacity 1s;
+  }
+
+  &:hover {
+    .editable-pen {
+      opacity: 1;
+    }
+  }
+}

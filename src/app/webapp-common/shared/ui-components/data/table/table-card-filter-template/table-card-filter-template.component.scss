@@ -1,0 +1,48 @@
+@import "../../../styles/variables";
+
+:host {
+  .filter-sort-container {
+    /deep/ .menu-button {
+      color: $blue-400;
+      font-weight: bold;
+
+      &.active {
+        color: $cloudy-blue;
+      }
+    }
+    .cell{
+      display: flex;
+    }
+
+
+    .sort-icon {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 100%;
+      text-align: center;
+    }
+  }
+}
+
+button {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.filter-point {
+  margin-right: 4px;
+  display: inline-block;
+  &.hidden {
+    visibility: hidden;
+  }
+}
+
+.filter{
+  font-size: 14px;
+  font-weight: 500;
+
+  &::placeholder {
+    font-size: 14px;
+  }
+}

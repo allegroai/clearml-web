@@ -1,0 +1,37 @@
+<div class="d-flex">
+  <div class="chart-contatiner overflow-hidden">
+    <div class="header">
+      <div class="d-flex">
+        <div class="title">{{selectedQueue ? selectedQueue.name : 'Overall'}} Experiment Wait Time</div>
+        <i *ngIf="statsError$ | async"
+          class="warnning fas fa-exclamation-triangle"
+          smTooltip="Data temporarily not available">
+        </i>
+      </div>
+    </div>
+    <div #waitchart class="line-chart-container">
+      <sm-line-chart [data]="waitChartData" [showLoadingOverlay]="refreshChart" [tooltipVerticalOffset]="-60"></sm-line-chart>
+    </div>
+  </div>
+  <div class="chart-contatiner right overflow-hidden">
+    <div class="header d-flex justify-content-between">
+      <div class="d-flex">
+        <div class="title">{{selectedQueue ? selectedQueue.name : 'Overall'}} Queued Experiment</div>
+        <i *ngIf="statsError$ | async"
+          class="warnning fas fa-exclamation-triangle"
+          smTooltip="Data temporarily not available">
+        </i>
+      </div>
+      <div class="time-selector">
+        <sm-select-autocomplete
+          class="dark"
+          [multiple]="false"
+          [items]="timeFrameOptions"
+          [formControl]="timeFormControl"></sm-select-autocomplete>
+      </div>
+    </div>
+    <div #lenchart class="line-chart-container" >
+      <sm-line-chart [data]="lenChartData" [showLoadingOverlay]="refreshChart" [tooltipVerticalOffset]="-60"></sm-line-chart>
+    </div>
+  </div>
+</div>

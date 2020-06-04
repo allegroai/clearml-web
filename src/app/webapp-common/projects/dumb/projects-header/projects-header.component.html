@@ -1,0 +1,13 @@
+<div class="col-24 d-flex justify-content-between">
+  <div class="recent-title">
+    <sm-menu [header]="sortByTitle" [iconClass]="sortOrder===1?'fa fa-caret-down':'fa fa-caret-up' " class="menu">
+      <sm-menu-item itemLabel="RECENT" (itemClicked)="orderByChanged.emit('-last_update')"></sm-menu-item>
+      <sm-menu-item itemLabel="NAME" (itemClicked)="orderByChanged.emit('name')"></sm-menu-item>
+    </sm-menu>
+  </div>
+  <div>
+    <button *ngIf="!hideCreateButton" class="btn btn-primary d-flex align-items-center" (click)="createProjectClicked.emit()">
+      <i class="icon sm i-plus-blue"></i> &nbsp; NEW PROJECT
+    </button>
+  </div>
+</div>

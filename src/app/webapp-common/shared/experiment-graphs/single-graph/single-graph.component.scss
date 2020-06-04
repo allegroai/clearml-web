@@ -1,0 +1,55 @@
+:host {
+  display: block;
+  position: relative;
+
+  .whitebg {
+    display: block;
+    background: white;
+    height: 452px;
+    border: 1px solid #efefef;
+    margin-left: -1px;
+    margin-top: -1px;
+
+    &.whitebg-table {
+      height: unset;
+      overflow-y: hidden;
+      overflow-x: auto;
+      padding-bottom:12px;
+      margin-left: 24px;
+      margin-right: 24px;
+      &::-webkit-scrollbar {
+        height: 8px !important;
+      }
+    }
+  }
+
+  /deep/ sm-color-picker-wrapper {
+    display: block;
+    top: 0px;
+
+  }
+
+  /deep/ .legendlines path, /deep/ .legendpoints path {
+    cursor: url(/app/webapp-common/assets/icons/pallete-cursor.png) 6 0, pointer;
+  }
+
+  /deep/ .legendpoints path:not(.scatterpts) {
+    d: path('M8,8H-8V-8H8Z') !important;
+  }
+
+  /deep/ .legendlines path {
+    stroke-width: 10px !important;
+  }
+
+  /deep/ #header.column-block .column-cells {
+     .column-cell .cell-rect {
+      stroke-width: 2px;
+      stroke: rgb(238, 239, 241) !important;
+       fill: white !important;
+    }
+  }
+
+  /deep/ .infolayer > .g-gtitle > .gtitle {
+    transform: translateY(12px);
+  }
+}

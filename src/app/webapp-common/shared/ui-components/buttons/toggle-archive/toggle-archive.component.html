@@ -1,0 +1,4 @@
+<button (click)="toggleArchived.emit(!showArchived)" class="btn btn-primary d-flex justify-content-between align-items-center">
+  <i [class]="'fa-flip-horizontal ' + (showArchived? 'fas fa-sign-out-alt' : 'fa fa-archive' )"></i>
+  <span class="button-label">{{showArchived? 'EXIT': 'OPEN'}} ARCHIVE</span>
+</button>

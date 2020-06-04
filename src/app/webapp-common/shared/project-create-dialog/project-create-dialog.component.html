@@ -1,0 +1,4 @@
+<sm-dialog-template iconClass="i-projects" header="NEW PROJECT">
+  <sm-create-new-project-form [projects]="projects$| async" (projectCreated)="createProject($event)">
+  </sm-create-new-project-form>
+</sm-dialog-template>

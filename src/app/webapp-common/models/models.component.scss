@@ -1,0 +1,37 @@
+@import "../shared/ui-components/styles/variables";
+@import "../layout/layout.scss";
+
+:host {
+
+  .models-body {
+    width: 100%;
+    height: calc(100% - #{$project-header-height})
+  }
+
+  /* width */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  /* Track */
+  ::-webkit-scrollbar-track {
+    background: $blue-600;
+  }
+
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background: #565b6b;
+  }
+  .model-table-container {
+    transition: all 0.3s;
+
+  }
+  .model-info-container {
+    transition: 0.3s;
+    &.hide-model-info {
+      width: 0 !important;
+      max-width: 0 !important;
+    }
+  }
+}

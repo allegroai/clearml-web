@@ -1,0 +1,27 @@
+<div class="d-flex h-100">
+  <div class="list-container">
+    <sm-selectable-filter-list
+      titleLabel="Select plots to display"
+      checkAllIcon="fa-eye"
+      [list]="graphList"
+      [selected]="selectedGraph"
+      [checkedList]="listOfHidden | async"
+      [searchTerm]="searchTerm$ | async"
+      (itemSelect)="metricSelected($event)"
+      (hiddenChanged)="hiddenListChanged($event)"
+      (searchTermChanged)="searchTermChanged($event)"
+    >
+    </sm-selectable-filter-list>
+  </div>
+  <div class="graphs-container h-100">
+    <sm-experiment-graphs
+      [metrics]="graphs"
+      [isCompare]="true"
+      [isGroupGraphs]="true"
+      [hiddenList]="listOfHidden | async"
+      (resetGraphs)="resetMetrics()"
+    >
+    </sm-experiment-graphs>
+  </div>
+</div>
+

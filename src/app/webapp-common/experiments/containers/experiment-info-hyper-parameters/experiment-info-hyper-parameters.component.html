@@ -1,0 +1,13 @@
+<sm-overlay [backdropActive]="backdropActive$|async"></sm-overlay>
+<sm-experiment-hyper-params-form
+  *ngIf="hyperParamsInfo$ | async"
+  fieldName="hyperParams"
+  [editable]="editable$ | async"
+  [isInDev]="isInDev$ | async"
+  [formData]="hyperParamsInfo$ | async"
+  [saving]="saving$ |async"
+  (formDataChanged)="onFormValuesChanged($event)"
+  (saveFormData)="saveHyperParametersData()"
+  (cancelFormDataChange)="cancelHyperParametersChange()"
+  (activateEdit)="activateEditChanged($event)"
+></sm-experiment-hyper-params-form>

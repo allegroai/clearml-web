@@ -1,0 +1,10 @@
+<div [class]="'progress-bar-container ' + status">
+  <sm-experiment-info-header-status-icon-label
+    (closeInfoClicked)="closeInfoClicked.emit()"
+    (maximizedClicked)="maximizedClicked.emit()"
+    [showMaximize]="showMaximize"
+    [status]="status"
+    [viewOnly]="!editable"
+    class="w-100">
+  </sm-experiment-info-header-status-icon-label>
+</div>

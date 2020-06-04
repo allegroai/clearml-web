@@ -1,0 +1,67 @@
+@import "../../../../../webapp-common/shared/ui-components/styles/variables";
+
+.label {
+  align-items: center;
+  justify-content: center;
+  margin-left: 5px;
+}
+
+.created, .queued {
+  color: $grey-purple
+}
+
+.completed {
+  color: $completed-blue;
+
+}
+.aborted {
+  color: $completed-blue;
+}
+.running {
+  color: $running-green;
+}
+
+.failed {
+  color: $strong-red;
+}
+
+.in_progress {
+  color: $running-green;
+}
+
+.published {
+  color: $neon-yellow-original-notgoodinchrome;
+  line-height: 23px;
+}
+
+.closed {
+  color: $blue-sky;
+}
+
+.stopped {
+  color: $blue-sky;
+}
+
+/deep/ .ui-state-highlight{
+  sm-experiment-status-icon-label, sm-experiment-type-icon-label {
+    .published, .created, .in_progress, .queued, .failed, .stopped, .training, .testing, .completed, .aborted{
+      color: $almost-white;
+      filter: brightness(0) invert(1);
+    }
+  }
+}
+
+/deep/ .selected {
+  sm-experiment-status-icon-label, sm-experiment-type-icon-label {
+    .published, .created, .in_progress, .queued, .failed, .stopped, .training, .testing, .completed, .aborted{
+      color: $almost-white;
+      filter: brightness(0) invert(1);
+    }
+  }
+}
+
+.middle {
+  height: 14px;
+  margin-top: 2px
+}
+

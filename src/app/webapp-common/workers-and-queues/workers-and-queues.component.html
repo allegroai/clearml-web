@@ -1,0 +1,19 @@
+<div class="navbar-header-container">
+  <div class="d-flex justify-content-between header-container align-items-center">
+    <div></div>
+    <div class="nav-bar-items-container">
+      <span [routerLink]="['workers']" routerLinkActive #rlaWorkers="routerLinkActive">
+        <sm-navbar-item direction="top" header="workers" [active]="rlaWorkers.isActive"></sm-navbar-item>
+      </span>
+      <span [routerLink]="['queues']" routerLinkActive #rlaQueues="routerLinkActive">
+        <sm-navbar-item direction="top" header="queues" [active]="rlaQueues.isActive"></sm-navbar-item>
+      </span>
+    </div>
+    <div *ngIf="rlaQueues.isActive">
+      <button class="btn btn-primary d-flex align-items-center" (click)="addQueue()">
+        <i class="icon sm i-plus-blue"></i> &nbsp; NEW QUEUE
+      </button>
+    </div>
+  </div>
+</div>
+<router-outlet></router-outlet>

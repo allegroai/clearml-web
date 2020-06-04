@@ -1,0 +1,6 @@
+<ng-container *ngIf="!demo">
+  <div class="separator"></div>
+  <mat-slide-toggle
+    (change)="statsChange($event)"
+    [checked]="allowed$ | async">Send anonymous usage data (Global setting)</mat-slide-toggle>
+</ng-container>

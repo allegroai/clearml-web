@@ -1,0 +1,148 @@
+import {EXPERIMENTS_TABLE_COL_FIELDS} from './shared/experiments.const';
+import {ColHeaderTypeEnum, ISmCol} from '../../webapp-common/shared/ui-components/data/table/table.consts';
+import {MODELS_TABLE_COL_FIELDS} from '../../webapp-common/models/shared/models.const';
+
+export const EXPERIMENT_INFO_ONLY_FIELDS = [
+  'id',
+  'name',
+  'user.name',
+  'company',
+  'type',
+  'status',
+  'status_changed',
+  'status_message',
+  'status_reason',
+  'comment',
+  'created',
+  'last_update',
+  'completed',
+  'started',
+  'parent',
+  'project.name',
+  'output',
+  'output.model.name',
+  'output.model.project',
+  'output.model.design',
+  'output.model.uri',
+  'execution',
+  'execution.model.name',
+  'execution.model.uri',
+  'execution.model.task.name',
+  'execution.model.created',
+  'execution.model.task.project.id',
+  'execution.model.project.id',
+  'execution.model.labels',
+  'script',
+  'system_tags',
+  'published',
+  'last_iteration',
+  'tags'
+];
+
+export const INITIAL_EXPERIMENT_TABLE_COLS: ISmCol[] = [
+  {
+    id              : EXPERIMENTS_TABLE_COL_FIELDS.SELECTED,
+    sortable        : false,
+    filterable      : false,
+    headerType      : ColHeaderTypeEnum.checkBox,
+    header          : '',
+    hidden          : false,
+    static          : true,
+    bodyStyleClass  : 'selected-col-body type-col',
+    headerStyleClass: 'selected-col-header',
+    style           : {width: '50px'},
+    disableDrag     : true
+  },
+  {
+    id            : EXPERIMENTS_TABLE_COL_FIELDS.TYPE,
+    headerType    : ColHeaderTypeEnum.sortFilter,
+    sortable      : true,
+    filterable    : true,
+    static        : true,
+    header        : 'TYPE',
+    bodyStyleClass: 'type-col',
+    style         : {width: '115px'},
+    },
+  {
+    id          : EXPERIMENTS_TABLE_COL_FIELDS.NAME,
+    headerType  : ColHeaderTypeEnum.sort,
+    sortable    : true,
+    static      : true,
+    header      : 'NAME',
+    style       : {width: '400px'},
+    },
+  {
+    id: EXPERIMENTS_TABLE_COL_FIELDS.TAGS,
+    headerType      : ColHeaderTypeEnum.sortFilter,
+    filterable: true,
+    searchableFilter: true,
+    sortable: false,
+    static: true,
+    header: 'TAGS',
+    style: {width: '300px'},
+    },
+  {
+    id          : EXPERIMENTS_TABLE_COL_FIELDS.STATUS,
+    headerType  : ColHeaderTypeEnum.sortFilter,
+    filterable  : true,
+    static      : true,
+    header      : 'STATUS',
+    style       : {width: '115px'},
+    },
+  {
+    id          : EXPERIMENTS_TABLE_COL_FIELDS.PROJECT,
+    headerType  : ColHeaderTypeEnum.title,
+    static      : true,
+    header      : 'PROJECT',
+    style       : {width: '150px'},
+    },
+  {
+    id              : EXPERIMENTS_TABLE_COL_FIELDS.USER,
+    headerType      : ColHeaderTypeEnum.sortFilter,
+    searchableFilter: true,
+    filterable      : true,
+    sortable        : false,
+    static          : true,
+    header          : 'USER',
+    style           : {width: '115px'},
+    },
+  {
+    id          : EXPERIMENTS_TABLE_COL_FIELDS.STARTED,
+    headerType  : ColHeaderTypeEnum.sort,
+    sortable    : true,
+    static      : true,
+    header      : 'STARTED',
+    style       : {width: '150px'},
+    },
+  {
+    id          : EXPERIMENTS_TABLE_COL_FIELDS.LAST_UPDATE,
+    headerType  : ColHeaderTypeEnum.sort,
+    sortable    : true,
+    static      : true,
+    header      : 'UPDATED',
+    label       : 'Updated',
+    style       : {width: '150px'},
+    },
+  {
+    id          : EXPERIMENTS_TABLE_COL_FIELDS.LAST_ITERATION,
+    headerType  : ColHeaderTypeEnum.sort,
+    sortable    : true,
+    static      : true,
+    header      : 'ITERATION',
+    label       : 'Iterations:',
+    style       : {width: '115px'},
+    },
+  {
+    id        : EXPERIMENTS_TABLE_COL_FIELDS.COMMENT,
+    headerType: ColHeaderTypeEnum.sort,
+    sortable  : true,
+    hidden    : true,
+    header    : 'DESCRIPTION',
+    style     : {width: '300px'}
+  },
+];
+
+export const GET_ALL_QUERY_ANY_FIELDS = ['id', 'name', 'comment', 'system_tags', 'output.model', 'execution.model'];
+
+
+export const DEFAULT_EXPERIMENT_TAB = 'execution';

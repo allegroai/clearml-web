@@ -1,0 +1,90 @@
+@import "../../styles/variables";
+
+.editable-container {
+  position: relative;
+  background-color: white;
+  padding: 24px;
+  border: 1px solid transparent;
+
+  &.edit-mode {
+    z-index: 101;
+    border: 1px dashed #8f9cc9;
+    box-shadow: 0 0 10px rgba(0, 0, 0, .15);
+    border-radius: 4px;
+  }
+
+  .edit-wrapper {
+    position: sticky;
+    z-index: 99;
+    text-align: right;
+    top: 10px;
+    right: 10px;
+    height: 0;
+    opacity: 0;
+  }
+
+  .edit-pen {
+    z-index: 1;
+    transition: opacity 0.5s, background-color ease-in-out 0.3s;
+    background-color: #7786b5;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 3px;
+
+    &:hover {
+      background-color: $purple;
+    }
+  }
+
+  /deep/ sm-labeled-row {
+    height: calc(100% - 45px);
+  }
+
+  .cancel-save {
+    position: sticky;
+    bottom: 10px;
+    text-align: right;
+    opacity: 0;
+    z-index: -1;
+    width: 180px;
+    margin-left: auto;
+
+    &.edit-mode {
+      opacity: 1;
+      z-index: 99;
+      margin-top: 10px;
+      height: initial;
+      display: flex;
+      justify-content: flex-end;
+      width: 100%;
+    }
+
+    .cancel {
+      border: 1px solid $grey-purple;
+      background-color: #ffffff;
+      color: $grey-purple;
+      margin-right: 10px;
+      transition: all ease-in-out 0.15s, border ease-in-out 0.15s;
+
+      &:hover {
+        border: 1px solid $purple;
+        background-color: $purple;
+        color: #FFFFFF;
+      }
+    }
+
+  }
+
+  &:hover {
+    .edit-wrapper {
+      opacity: 1;
+    }
+  }
+
+}
+
+:host {
+  /deep/ .action-button button {
+    min-width: 70px;
+  }
+}

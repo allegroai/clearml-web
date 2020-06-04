@@ -1,0 +1,97 @@
+@import "../shared/ui-components/styles/variables";
+
+sm-debug-images-view {
+  display: block;
+}
+
+.debug-images {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.images-container {
+  display: flex;
+  min-height: 100%;
+}
+
+.no-images {
+  height: 100%;
+  color: $cloudy-blue-two;
+  width: 100%;
+  background-repeat: repeat-y;
+  background-position: center calc(50vh - 300px);
+  background-size: unset;
+}
+
+.metric-bar {
+  grid-gap: 12px;
+  display: inline-grid;
+  grid-template-columns: auto 200px auto auto auto auto auto auto auto;
+  align-items: center;
+  margin-bottom: 24px;
+
+  .i-next-batch, .i-prev-batch, .i-back-to-top {
+    cursor: pointer;
+  }
+
+  label {
+    color: #5a658e;
+    margin: 0;
+  }
+
+  select {
+    font-weight: bold;
+  }
+
+  .disabled {
+    cursor: auto;
+    opacity: 0.5;
+  }
+
+  b {
+    min-width: 45px
+  }
+}
+
+.single-debug-images-container {
+  display: block;
+  overflow: hidden;
+  flex: 1;
+  min-width: 640px;
+  min-height: 100%;
+  color: $blue-500;
+  margin: 0 12px;
+}
+
+.bordered-experiments {
+  .single-debug-images-container {
+    border: 1px solid $blue-250;
+    border-radius: 6px;
+    padding: 24px;
+  }
+}
+
+.i-no-debug-samples {
+  width: 300px;
+  height: 250px;
+}
+
+.experiment-name {
+  display: block;
+}
+
+.experiment-name {
+  margin-bottom: 24px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-right: auto;
+}
+
+.experiment-name {
+  margin-bottom: 24px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-right: auto;
+}

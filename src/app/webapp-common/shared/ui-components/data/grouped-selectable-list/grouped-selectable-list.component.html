@@ -1,0 +1,25 @@
+<mat-expansion-panel *ngFor="let item of list | keyvalue | sort:'key'" [expanded]="expanded[item.key]">
+  <mat-expansion-panel-header expandedHeight="40px" collapsedHeight="40px">
+    <div class="d-flex align-items-center justify-content-between w-100"
+         [ngClass]="{'unchecked' : isHideAllMode(item)}">
+      <div class="ellipsis item-key" [smTooltip]="item.key" [showDelay]="500">{{item.key}}</div>
+      <div>
+        <i (click)="onGroupCheck.emit( {key: item.key, hide: !isHideAllMode(item)}); $event.stopPropagation()"
+           [class]="checkIcon + ' fa icon'"
+           ></i>
+      </div>
+    </div>
+
+  </mat-expansion-panel-header>
+  <ul class="list">
+    <li
+      *ngFor="let listItem of item.value | keyvalue; let odd=odd; let even=even;"
+      class="list-item"
+      (click)="onItemSelect.emit(item.key + listItem.key)"
+      [ngClass]="{odd: odd, even: even, unchecked: checkedList?.includes(item.key + listItem.key)}"
+    >
+      <span class="pointer ellipsis w-100 pl-2 list-item-key" [smTooltip]="listItem.key" [showDelay]="500">{{listItem.key}}</span>
+      <i (click)="onItemCheck.emit( item.key+ listItem.key); $event.stopPropagation()" [class]="checkIcon + ' fa icon'"></i>
+    </li>
+  </ul>
+</mat-expansion-panel>

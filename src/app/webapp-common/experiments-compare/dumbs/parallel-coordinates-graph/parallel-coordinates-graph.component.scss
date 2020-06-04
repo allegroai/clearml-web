@@ -1,0 +1,67 @@
+:host {
+  .dot {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    margin: auto;
+    height: 8px;
+    width: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    vertical-align: middle;
+    transition: width 0.2s ease-in-out, height 0.2s ease-in-out;
+  }
+
+  .dot-container {
+    position: relative;
+    display: inline-block;
+    width: 9px;
+    height: 0.5rem;
+    padding-right: 10px;
+  }
+
+  .experiment-name {
+    padding: 10px;
+    min-width: 200px;
+    display: flex;
+    align-items: center;
+  }
+
+  .graph-container {
+    overflow: auto;
+    height: 100%;
+    padding: 20px;
+  }
+
+  .legend-container {
+    padding: 0 67px;
+    flex-wrap: wrap;
+  }
+
+  .task-name {
+    padding-left: 5px;
+    &.hide{
+      opacity: 0.5;
+    }
+  }
+
+  .graph-title {
+    width: 100%;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 500;
+    color: #5a658e;
+  }
+  /deep/ .parcoords-control-view .y-axis.metric-column {
+    text.axis-title {
+      font-weight: bold;
+    }
+
+    path.domain {
+      stroke-width: 2px;
+      stroke: #141722;
+      stroke-opacity: 1;
+    }
+  }
+}

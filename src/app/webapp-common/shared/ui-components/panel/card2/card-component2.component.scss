@@ -1,0 +1,46 @@
+@import "../../styles/mixins/card.mixin";
+@import "../../styles/variables";
+
+@include generate-card();
+.al-card {
+  //margin-top: 15px;
+  //margin-bottom: 15px;
+  border: solid 0;
+
+  .extra-header {
+    background: #ededed;
+    padding: 0 15px;
+    margin-bottom: 15px;
+    display: flex;
+  }
+
+  .card-container {
+    transition: border 0.3s;
+    border-radius: 6px 6px;
+    //&.bordered {
+    //  border: 1px solid;
+    //  //box-shadow: 3px 3px 6px 0 rgba(0, 0, 0, 0.1);
+    //}
+  }
+
+  header {
+    padding: 0 15px;
+    position: relative;
+  }
+
+  .line {
+    margin: 15px 15px;
+    width: auto;
+  }
+
+  .card-body {
+    padding: 15px;
+  }
+
+  footer {
+    //min-height: 20px;
+    //padding: 10px 15px;
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+  }
+}

@@ -1,0 +1,58 @@
+<form class="create-project-form" #projectForm='ngForm'>
+
+  <div class="row position-relative">
+    <small *ngIf="name.touched && name.errors?.required"
+           class="col-24 text-danger">*Please add name.
+    </small>
+    <small *ngIf="name.touched && name.errors?.uniqueName"
+           class="col-24 text-danger">*Project name already exists.
+    </small>
+    <small *ngIf="name.touched && name.errors?.minlength"
+           class="col-24 text-danger">*Project name should contain more than 3 characters.
+    </small>
+    <input id="project-name"
+           class="col-24 highlight"
+           name="name"
+           [(ngModel)]="project.name"
+           #name="ngModel"
+           smUniqueNameValidator
+           [existingNames]="projectsNames"
+           placeholder="Project name"
+           required minlength="3">
+  </div>
+  <br/>
+  <div class="row position-relative">
+    <small *ngIf="description?.touched && description?.invalid"
+           class="col-24 text-danger">*Please add description.
+    </small>
+    <textarea id="project-description"
+              class="col-24 highlight"
+              name="description"
+              [(ngModel)]="project.description"
+              #description="ngModel"
+              placeholder="Project description"
+              required></textarea>
+  </div>
+  <br/>
+  <div class="row position-relative">
+    <small *ngIf="default_output_destination?.touched && default_output_destination?.errors?.required"
+           class="col-24 text-danger">*Please add default destination.
+    </small>
+    <small *ngIf="default_output_destination?.touched && default_output_destination?.errors?.pattern"
+           class="col-24 text-danger">*Illegal output destination (e.g. s3://bucket. gs://bucket)
+    </small>
+    <input id="project-output-dest"
+           class="col-24 highlight"
+           name="default_output_destination"
+           [(ngModel)]="project.default_output_destination"
+           #default_output_destination="ngModel"
+           [pattern]="outputDestPattern"
+           placeholder="Default output destination">
+  </div>
+  <div class="row">
+    <div class="col-24 create-project-button">
+      <button class="btn btn-dark-fill center" [disabled]="projectForm.invalid" (click)="send()">CREATE PROJECT
+      </button>
+    </div>
+  </div>
+</form>

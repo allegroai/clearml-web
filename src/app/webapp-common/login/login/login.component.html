@@ -1,0 +1,63 @@
+<div class="container text-center">
+    <div class="banner">
+      {{banner}}
+    </div>
+    <br><br><br>
+    <div id="mobile-warn" class="alert alert-warning mobile-warn" [class.show]="mobile" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close" (click)="acknowlage()">
+            <span aria-hidden="true">×</span></button>
+        <strong>Notice!</strong> The Web-App is not yet optimized for mobile devices.
+    </div>
+    <div class="login-box-wrapper" [class.mobile]="mobile">
+      <div class="jumbotron">
+          <div class="row login-section">
+              <section class="mx-auto">
+                <img src="../../../../assets/logo-white.svg?v=2" class="logo">
+                <div *ngIf="notice" class="login-notice">{{notice}}</div>
+                <div *ngIf="!loginMode" class="circle" ></div>
+                  <form class="form-horizontal" #loginForm="ngForm" [ngClass]="{'d-none':!loginMode}">
+                      <div class="username-input">
+                          <input type="text"
+                                 #nameInput
+                                 [placeholder]="loginMode === LoginModeEnum.password ? 'Username' : 'Full Name'"
+                                 id="name"
+                                 name="name"
+                                 autofocus
+                                 [(ngModel)]="loginModel.name"
+                                 [matAutocomplete]="auto"
+                                 pattern=".*\S.*"
+                                 required>
+                      </div>
+                      <div class="username-input" *ngIf="loginMode === LoginModeEnum.password">
+                          <input type="password"
+                                 placeholder="Password"
+                                 id="password"
+                                 name="password"
+                                 [(ngModel)]="loginModel.password"
+                                 required>
+                      </div>
+                      <div *ngIf="loginFailed" class="alert alert-danger" role="alert">
+                        Invalid User/Password combination
+                      </div>
+                      <button class="btn" (click)="login()" [disabled]="!loginForm.valid">
+                        {{buttonCaption}}
+                      </button>
+
+                      <mat-autocomplete #auto="matAutocomplete">
+                          <mat-option *ngFor="let option of filteredOptions | async" [value]="option.name">
+                              {{option.name}}
+                          </mat-option>
+                      </mat-autocomplete>
+                  </form>
+              </section>
+          </div>
+      </div>
+      <div class="community" *ngIf="showGitHub">
+        <a class="link" target="_blank" href="https://github.com/allegroai/trains/stargazers">
+          <i class="fas fa-star"></i>Star<span class="gazer" *ngIf="stars"> ({{(stars | filesize:{base: 10, round: 1, symbols: {kB: 'k', B: '', mB: 'm'} })}})</span> </a>
+        <a class="link" target="_blank" href="https://github.com/allegroai/trains"><i class="fab fa-github"></i>Fork on Github</a>
+        <a class="link" target="_blank" href="https://join.slack.com/t/allegroai-trains/shared_invite/enQtOTQyMTI1MzQxMzE4LTY5NTUxOTY1NmQ1MzQ5MjRhMGRhZmM4ODE5NTNjMTg2NTBlZGQzZGVkMWU3ZDg1MGE1MjQxNDEzMWU2NmVjZmY">
+          <i class="fab fa-slack-hash"></i>Community on Slack</a>
+      </div>
+    </div>
+</div>

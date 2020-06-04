@@ -1,0 +1,21 @@
+@import "../../../../webapp-common/shared/ui-components/styles/variables";
+@import "../../../../webapp-common/shared/ui-components/styles/mixins/common";
+
+.category-link{
+  padding-right: 10px;
+  font-size: $font-size-lg;
+  color: $blue-100;
+  opacity: 0.3;
+  &.active{
+    opacity: 1;
+  }
+}
+.search-container{
+  @include recent-title();
+  height: calc(100% - 20px);
+}
+
+.page-container {
+  height: calc(100% - 31px);
+  overflow: auto;
+}

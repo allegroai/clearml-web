@@ -1,0 +1,26 @@
+<div class="dialog-template-container">
+
+  <div *ngIf="displayX" style="position: relative">
+    <i (click)="onXPressed()" class="pointer stick-to-corner icon i-dialog-x sm-md">
+    </i>
+  </div>
+
+  <div class="generic-container {{theme || 'light-theme'}}">
+    <div>
+      <div class="d-flex flex-column" *ngIf="iconClass">
+        <div [class]="'icon xxl mx-auto '+ [iconClass]"></div>
+      </div>
+      <div class="d-flex flex-column" *ngIf="header">
+        <div class="create-title mx-auto">{{header}}</div>
+      </div>
+      <div class="d-flex flex-column" *ngIf="subHeader">
+        <p class="sub-header mx-auto" [innerHTML]="subHeader"></p>
+      </div>
+      <ng-content></ng-content>
+    </div>
+  </div>
+  <sm-code *ngIf="codeTemplateFileName"
+           [closedCodeLabel]="closedCodeLabel"
+           [codeTemplateFileName]="codeTemplateFileName"
+           [params]="codeParams"></sm-code>
+</div>

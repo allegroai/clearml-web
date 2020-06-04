@@ -1,0 +1,44 @@
+@import "../../../shared/ui-components/styles/variables";
+
+span{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.created {
+  color: #7480aa;
+}
+
+.completed {
+  color: greenyellow;
+}
+
+.running {
+  color: $running-green;
+}
+.failed{
+  color: #ff001f;
+}
+
+.queued {
+  color: $neon-yellow-original-notgoodinchrome;
+  opacity: 0.5;
+}
+
+.in_progress{
+  color: $neon-yellow-original-notgoodinchrome;
+}
+
+.published {
+  color: #4a90e2;
+}
+
+.stopped {
+  color: #7480aa;
+}
+
+.middle {
+  height: 14px;
+  margin-top: 2px
+}

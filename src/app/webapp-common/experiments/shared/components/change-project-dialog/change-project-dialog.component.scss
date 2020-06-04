@@ -1,0 +1,31 @@
+:host {
+  /deep/ sm-dialog-template {
+    .dialog-template-container {
+      width: 640px;
+    }
+  }
+  .message {
+    padding: 6px;
+    margin-bottom: 12px;
+    overflow-wrap: break-word;
+  }
+
+  .description {
+    max-height: 68px;
+  }
+  .buttons {
+    margin-top: 48px;
+    display: inline-block;
+    left: 50%;
+    position: relative;
+    transform: translateX(-50%);
+
+    button {
+      width: 130px;
+      text-transform: uppercase;
+    }
+    .yes-button {
+      margin-left: 16px;
+    }
+  }
+}

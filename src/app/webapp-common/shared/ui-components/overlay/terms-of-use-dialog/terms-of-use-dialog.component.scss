@@ -1,0 +1,56 @@
+.content {
+  position: relative;
+}
+
+.box {
+  border: 1px solid #ced1dc;
+  padding: 10px;
+  max-height: calc(100vh - 400px);
+  min-height: 100px;
+  overflow-y: scroll;
+  position: relative;
+  margin-top: 10px;
+}
+
+.new-tab {
+    position: absolute;
+    top: -22px;
+    right:0;
+    cursor: pointer;
+  img {
+    width: 11px;
+    height: 11px;
+  }
+}
+
+.read-through-notice {
+  margin: 40px auto 0 30%;
+  font-size: 11px;
+  color: lightslategray;
+
+  p {
+    margin-bottom: 0;
+  }
+}
+
+.buttons {
+  margin-top: 10px;
+  margin: 10px auto 0 40%;
+
+    button {
+      text-transform: uppercase;
+    }
+    .yes-button {
+      margin-right: 16px;
+    }
+
+    .btn-accept{
+        background-color: #E7E7E8;
+    }
+  }
+
+:host {
+  sm-confirm-dialog {
+    width: 60vw;
+  }
+}

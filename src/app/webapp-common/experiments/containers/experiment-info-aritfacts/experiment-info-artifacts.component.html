@@ -1,0 +1,14 @@
+<sm-overlay [backdropActive]="backdropActive$|async"></sm-overlay>
+<div class="h-100 row">
+  <sm-experiment-artifacts-navbar
+    class="col-6"
+    [artifacts]="(modelInfo$| async)?.artifacts"
+    [outputModel]="(ExperimentInfo$ | async)?.model?.output"
+    [activeSection]="activeSection"
+    [routerConfig]="routerConfig$ | async"
+    [selectedArtifactKey]="artifactKey$ | async"
+  ></sm-experiment-artifacts-navbar>
+  <div class="col-18 artifacts-col">
+    <router-outlet></router-outlet>
+  </div>
+</div>

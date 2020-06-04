@@ -1,0 +1,18 @@
+@import '../../styles/variables';
+
+:host {
+  /deep/ color-picker .color-picker {
+    z-index: $zindex-colorpicker;
+
+    .arrow {
+      display: none;
+
+    }
+  }
+
+  .color-picker-wrapper {
+    position: absolute;
+  }
+}
+
+

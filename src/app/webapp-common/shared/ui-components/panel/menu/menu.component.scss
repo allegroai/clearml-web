@@ -1,0 +1,31 @@
+:host {
+  .menu-button, .menu-button &:hover, .menu-button &:focus {
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 12px;
+    text-decoration: none;
+  }
+
+
+  .cell {
+    padding-right: 3px;
+    padding-left: 3px;
+    //height: 30px;
+    display: flex;
+    align-items: center;
+
+    .fa-caret-down {
+      transition: transform 0.3s;
+
+    }
+  }
+
+  .hidden-button {
+    opacity: 0;
+    padding: 0;
+  }
+
+  &:hover .cell .fa-caret-down {
+    transform: scale(1.6);
+  }
+}

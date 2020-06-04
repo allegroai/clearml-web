@@ -1,0 +1,57 @@
+<div class="d-flex justify-content-center tabs-container">
+  <sm-navbar-item header="info" [active]="activeTab==='info'" (click)="activeTab = 'info'"></sm-navbar-item>
+  <sm-navbar-item header="queues" [active]="activeTab==='queues'" (click)="activeTab = 'queues'"></sm-navbar-item>
+  <div class="pull-right pointer" (click)="deselectWorkerClicked()">
+    <i class="fa fa-times"></i>
+  </div>
+</div>
+<div *ngIf="activeTab === 'queues' &&  selectedWorker?.queues.length===0"
+     class="d-flex align-items-center justify-content-center p-4">No queues currently assigned to this worker
+</div>
+<div class="queues-table-container" *ngIf="activeTab==='queues' && selectedWorker?.queues.length>0">
+  <sm-simple-table-2 [cols]="cols" [rowsData]="selectedWorker?.queues">
+    <ng-template
+      let-col
+      let-i="rowIndex"
+      let-row="row">
+      <!--QUEUE-->
+      <div class="col-8 id-cell d-flex">
+        <div class="value">{{row?.name}}</div>
+        <sm-copy-clipboard
+          class="copy-btn"
+          [hideBackground]="true"
+          [label]="''"
+          [tooltipText]="'Copy Queue ID'"
+          [clipboardText]="row?.id">
+        </sm-copy-clipboard>
+      </div>
+
+      <!--NEXT EXPERIMENT-->
+      <div class="col-12">
+        {{row?.next_task?.name}}
+      </div>
+
+      <!--IN QUEUE-->
+      <div class="col-4">
+        {{row?.num_tasks}}
+      </div>
+    </ng-template>
+  </sm-simple-table-2>
+</div>
+
+<div *ngIf="activeTab==='info'" class="worker-info-container">
+  <div class="row">
+    <div class="col-12">
+      <sm-vertical-labeled-row label="Worker Name">{{selectedWorker?.id ? selectedWorker?.id : '—' }}</sm-vertical-labeled-row>
+      <sm-vertical-labeled-row label="Update Time">{{selectedWorker?.last_report_time | timeAgo}}</sm-vertical-labeled-row>
+      <sm-vertical-labeled-row label="Current Experiment"><a
+        [href]="'/projects/'+ ((selectedWorker?.task?.project?.id) ? selectedWorker?.task?.project?.id : '*') + '/experiments/' + selectedWorker?.task?.id"
+        target="_blank">{{selectedWorker?.task?.name ? selectedWorker?.task?.name : '—'}}</a></sm-vertical-labeled-row>
+    </div>
+    <div class="col-12">
+      <sm-vertical-labeled-row label="Experiment Run Time">{{selectedWorker?.task?.running_time ? (selectedWorker?.task?.running_time | msToSec) : '—'}}</sm-vertical-labeled-row>
+      <sm-vertical-labeled-row label="Experiment Iteration">{{selectedWorker?.task?.last_iteration ? selectedWorker?.task?.last_iteration : '—'}}</sm-vertical-labeled-row>
+    </div>
+  </div>
+</div>
+

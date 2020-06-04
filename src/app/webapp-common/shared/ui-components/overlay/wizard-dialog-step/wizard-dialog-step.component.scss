@@ -1,0 +1,130 @@
+@import "../../styles/variables";
+
+@keyframes hide-step {
+  0% {
+    opacity: 1;
+    height: 88px;
+  }
+  100% {
+    margin-top: 0px;
+    margin-bottom: 0px;
+    opacity: 0;
+    height: 0px;
+  }
+}
+
+@keyframes show-step {
+  100% {
+    opacity: 1;
+  }
+  33% {
+    opacity: 1;
+  }
+  0% {
+    padding-top: 0px;
+    padding-bottom: 0px;
+    opacity: 0;
+  }
+}
+
+.step {
+}
+
+.icon-image {
+  opacity: 1;
+  padding-top: 5vh;
+  padding-bottom: 2vh;
+  animation: show-step $transition-slow;
+  animation-fill-mode: forwards;
+  &.hide-step {
+    animation: hide-step $transition-slow;
+    animation-fill-mode: forwards;
+
+  }
+}
+
+.label {
+  font-size: 28px;
+  font-weight: 300;
+  color: $blue-800;
+}
+
+.sub-label {
+  font-size: 14px;
+  line-height: 1.29;
+  color: $dusk-two;
+  white-space: pre-line;
+  padding: 2vh;
+}
+
+.step-number {
+  margin-top: 2vh;
+  font-size: 10vh;
+  font-weight: 900;
+  color: #e7e9f0;
+  animation: show-step $transition-slow;
+  animation-fill-mode: forwards;
+  &.hide-step {
+    animation: hide-step $transition-slow;
+    animation-fill-mode: forwards;
+  }
+}
+.choose-section {
+  height: 16vh;
+}
+
+.divider {
+  padding: 2vh;
+  width: 100%;
+  height: 2px;
+  border-bottom: solid 2px $blue-50;
+}
+
+.step-icon {
+
+  margin-top: 4vh;
+  margin-bottom: 4vh;
+  width: 10vh;
+  height: 10vh;
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+  &.dataset {
+    background-image: url('../../../../assets/icons/first-experiment/annotator.svg');
+  }
+  &.model{
+    background-image: url('../../../../assets/icons/first-experiment/annotator.svg');
+  }
+  &.monitor{
+    background-image: url('../../../../assets/icons/first-experiment/monitor-88.svg');
+  }
+  &.filters{
+    background-image: url('../../../../assets/icons/first-experiment/filters-icon.svg');
+  }
+  &.iteration{
+    background-image: url('../../../../assets/icons/first-experiment/iterations-icon.svg');
+  }
+  &.hide-step {
+    animation: hide-step $transition-slow;
+    animation-fill-mode: forwards;
+  }
+}
+
+.choose-box {
+  visibility: hidden;
+  &.hide-step {
+    visibility: visible;
+    transition-delay: $transition-slow;
+  }
+}
+
+.buttons-footer-content {
+  padding: 2.5vh;
+}
+.step{
+  &.hide-step{
+    transition-delay: $transition-slow;
+  }
+}
+
+

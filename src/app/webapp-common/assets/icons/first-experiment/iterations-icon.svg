@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90.5 91">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #323950;
+      }
+
+      .cls-2 {
+        fill: #d3ff02;
+        stroke: #d3ff00;
+        stroke-width: 2px;
+      }
+    </style>
+  </defs>
+  <g id="Group_163" data-name="Group 163" transform="translate(-1404 -224.5)">
+    <path id="np_steps_249968_000000" class="cls-1" d="M10,90V70H30V50H50V30H70V10H90V90Z" transform="translate(1404.5 225.5)"/>
+    <path id="np_stairs_789570_000000" class="cls-2" d="M6.967,85.5H5V64.659H24.856V44.712H44.712V24.856H64.659V5H85.5V6.967H66.625V26.823H46.77V46.77H26.823V66.626H6.967Z" transform="translate(1400 220.5)"/>
+  </g>
+</svg>

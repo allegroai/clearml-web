@@ -1,0 +1,26 @@
+@import "../../../styles/variables";
+
+:host {
+
+  .filter-sort-container {
+    position: relative;
+    z-index: 20;
+    height: 45px;
+
+
+    /deep/ .menu-button {
+      color: $blue-400;
+      font-weight: bold;
+
+      &.active {
+        color: $cloudy-blue;
+      }
+    }
+
+
+
+    .sort-icon {
+      margin-left: -4px;
+    }
+  }
+}

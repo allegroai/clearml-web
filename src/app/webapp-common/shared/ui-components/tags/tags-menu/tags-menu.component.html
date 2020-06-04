@@ -1,0 +1,24 @@
+<form class="filter-form" (ngSubmit)="addTag(filterText)">
+  <mat-form-field appearance="standard"
+                  hideRequiredMarker="true"
+                  floatLabel="never">
+    <input #nameInput cdkFocusInitial smClickStopPropagation  matInput placeholder="Add Tag" name="filter" [(ngModel)]="filterText" class="filter" autocomplete="off">
+    <i matSuffix [class]="'fa mr2 ' + (filterText? 'fa-times pointer':'fa-search')" (click)="filterText && clear()" smClickStopPropagation></i>
+  </mat-form-field>
+</form>
+<div class="buttons-container" [class.searching]="filterText">
+  <button
+    class="item"
+    smClickStopPropagation
+    *ngIf="filterText && !allTags.includes(filterText)"
+    (click)="addTag(filterText)"
+  >"{{filterText}}" <span class="new">(Create New)</span></button>
+  <button
+    smClickStopPropagation
+    *ngFor="let tag of allTags | filter:tags | filter:filterText"
+    class="item"
+    (click)="addTag(tag)"
+  >{{tag}}</button>
+</div>
+<hr>
+<button class="item" (click)="openTagColors()">Tag Colors</button>

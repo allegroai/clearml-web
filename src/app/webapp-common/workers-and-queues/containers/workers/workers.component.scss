@@ -1,0 +1,16 @@
+@import "../../../../webapp-common/layout/layout.scss";
+
+:host {
+  display: flex;
+  flex-direction: column;
+  height: calc(100% - #{$wnq-tabs-height});
+
+  sm-workers-graph {
+    margin: 0 50px 20px;
+  }
+
+  as-split {
+    height: calc(100% - #{$graph-height});
+    min-height: 180px;
+  }
+}

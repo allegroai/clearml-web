@@ -1,0 +1,15 @@
+<div class="refresh-wrapper d-flex flex-row-reverse align-items-center" [ngClass]="{'allow-autorefresh': allowAutoRefresh}">
+
+<i
+  class="fa fa-sync refresh-icon pointer"
+  style="padding-left: 3px; position:relative"
+  (click)="refreshList.emit( ! autoRefreshState )">
+  <i *ngIf="allowAutoRefresh && autoRefreshState === false" class="fa fa-pause pause-icon" ></i>
+  <i *ngIf="allowAutoRefresh && autoRefreshState === true" class="fa fa-play pause-icon"></i>
+
+</i>
+  <mat-checkbox [ngModel]="autoRefreshState" name="autoRefresh" (ngModelChange)="setAutoRefresh.emit($event)" class="autorefresh-checkbox">
+    Auto Refresh
+  </mat-checkbox>
+
+</div>

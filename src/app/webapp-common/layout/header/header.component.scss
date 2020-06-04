@@ -1,0 +1,23 @@
+@import "../../layout/layout";
+
+:host {
+  display: block;
+  height: $top-bar-height;
+
+  .header-container {
+    background-color: #141822;
+    height: 100%;
+    padding: 0 24px;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+
+  .logo-full{
+    display: flex;
+    position:relative;
+    left:50%;
+    transform: translateX(-50%);
+  }
+
+}

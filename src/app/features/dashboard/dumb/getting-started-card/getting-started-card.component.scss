@@ -1,0 +1,34 @@
+@import "../../../../webapp-common/shared/ui-components/styles/variables";
+
+.no-data-box {
+  text-align: center;
+  padding: 32px;
+  margin-top: 15px;
+  margin-bottom: 15px;
+  height: 359px;
+  border-radius: 6px;
+  background-color: $blue-800;
+}
+
+.main-image {
+  margin: 15px;
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+}
+
+.empty-label{
+  padding: 15px;
+  font-size: 22px;
+  font-weight: bold;
+  color: $blue-100;
+}
+.empty-sub-label{
+  padding: 15px;
+  font-size: 16px;
+  line-height: 1.31;
+  color: $blue-300;
+}
+.line-breaker {
+  white-space: pre-line;
+}
