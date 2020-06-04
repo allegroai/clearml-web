@@ -1,0 +1,37 @@
+<sm-table [tableData]="tasks"
+          [columns]="cols"
+          [rowHeight]="52"
+          [selectionMode]="null"
+          (rowClicked)="onExperimentSelected($event)"
+>
+  <ng-template let-col
+               let-experiment="rowData"
+               pTemplate="body">
+    <div [ngSwitch]="col.id">
+      <div *ngSwitchCase="RECENT_TASKS_TABLE_COL_FIELDS.TYPE" class="table-cell-outline">
+        <sm-experiment-type-icon-label [type]="experiment?.type"></sm-experiment-type-icon-label>
+      </div>
+      <div *ngSwitchCase="RECENT_TASKS_TABLE_COL_FIELDS.NAME" class="ellipsis">
+        {{experiment.name}}
+      </div>
+      <div *ngSwitchCase="RECENT_TASKS_TABLE_COL_FIELDS.PROJECT" class="ellipsis">
+        {{experiment.project?.name}}
+      </div>
+      <div *ngSwitchCase="RECENT_TASKS_TABLE_COL_FIELDS.STARTED">
+        {{experiment.started | date : TIME_FORMAT_STRING}}
+      </div>
+      <div *ngSwitchCase="RECENT_TASKS_TABLE_COL_FIELDS.LAST_UPDATE">
+        {{experiment.last_update | date : TIME_FORMAT_STRING}}
+      </div>
+      <div *ngSwitchCase="RECENT_TASKS_TABLE_COL_FIELDS.USER" class="ellipsis">
+        {{experiment.user?.name}}
+      </div>
+      <div *ngSwitchCase="RECENT_TASKS_TABLE_COL_FIELDS.STATUS">
+        <sm-experiment-status-icon-label [status]="experiment?.status"></sm-experiment-status-icon-label>
+      </div>
+      <div *ngSwitchDefault class="ellipsis">
+        {{experiment[col.id]}}
+      </div>
+    </div>
+  </ng-template>
+</sm-table>

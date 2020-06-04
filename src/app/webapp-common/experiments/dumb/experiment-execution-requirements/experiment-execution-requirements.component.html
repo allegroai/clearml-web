@@ -1,0 +1,13 @@
+<sm-textarea-control
+  #pip
+  *ngIf="formData.pip || editable"
+  class="dark"
+  fieldName="pip"
+  inputClassName=""
+  [isReadonly]="!editable"
+  [formData]="formData.pip"
+  [rows]="12"
+  (formDataChanged)="fieldValueChanged($event)">
+  >
+</sm-textarea-control>
+<span *ngIf="!formData.pip && !editable">No packages identified</span>

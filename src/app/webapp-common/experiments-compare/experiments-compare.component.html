@@ -1,0 +1,28 @@
+<div class="experiment-compare-container light-theme">
+  <nav class="d-flex justify-content-center">
+    <span [routerLink]="['details']" routerLinkActive #rlaDetails="routerLinkActive" queryParamsHandling="preserve">
+      <sm-navbar-item direction="bottom" [header]="'details'" [active]="rlaDetails.isActive"></sm-navbar-item>
+    </span>
+    <span [routerLink]="['hyper-params/graph']" routerLinkActive #rlaHyperParamsGraph="routerLinkActive" queryParamsHandling="preserve"></span>
+    <span [routerLink]="['hyper-params/values']" routerLinkActive #rlaHyperParams="routerLinkActive" queryParamsHandling="preserve">
+      <sm-navbar-item direction="bottom" [header]="'hyper parameters'" [active]="rlaHyperParams.isActive || rlaHyperParamsGraph.isActive"></sm-navbar-item>
+    </span>
+    <span [routerLink]="['scalars/values']" routerLinkActive #rlaScalarsGraph="routerLinkActive" queryParamsHandling="preserve"></span>
+    <span [routerLink]="['scalars/graph']" [queryParams]="{scalars: 'graph'}" routerLinkActive #rlaScalars="routerLinkActive" queryParamsHandling="merge">
+      <sm-navbar-item [active]="rlaScalarsGraph.isActive || rlaScalars.isActive" header="Scalars" direction="bottom"></sm-navbar-item>
+    </span>
+    <span [routerLink]="['metrics-plots']" routerLinkActive #rlaPlots="routerLinkActive" queryParamsHandling="preserve">
+      <sm-navbar-item header="Plots" [active]="rlaPlots.isActive" direction="bottom"></sm-navbar-item>
+    </span>
+    <span #rlaGeneral="routerLinkActive" [routerLink]="['debug-images']" routerLinkActive queryParamsHandling="preserve">
+      <sm-navbar-item [active]="rlaGeneral.isActive" header="Debug Samples" direction="bottom"></sm-navbar-item>
+    </span>
+  </nav>
+  <sm-experiment-compare-header>
+
+  </sm-experiment-compare-header>
+  <div class="experiment-compare-body" [ngClass]="{'pt-3': !rlaHyperParamsGraph.isActive && !rlaScalarsGraph.isActive && !rlaPlots.isActive}">
+    <router-outlet></router-outlet>
+  </div>
+</div>
+

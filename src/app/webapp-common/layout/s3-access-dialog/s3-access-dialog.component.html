@@ -1,0 +1,52 @@
+<div class="row s3-header">
+  <div class="col-24" [innerHTML]="header"></div>
+</div>
+
+<div *ngIf="S3Form" class="container">
+  <form [formGroup]="S3Form">
+    <!--<div class="row position-relative">-->
+    <div class="row position-relative">
+      <input class="col-24 highlight" type="text" formControlName="Bucket" hidden>
+    </div>
+    <div class="row" [ngClass]="{'hidden-important': isAzure, 'position-relative': !isAzure}">
+      <small *ngIf="S3Key.invalid && S3Key.touched" class="form-text text-danger">*Required</small>
+      <input class="col-24 highlight" type="text" formControlName="Key" required placeholder="Key">
+    </div>
+    <br>
+    <div class="row position-relative">
+      <small *ngIf="S3Secret.invalid && S3Secret.touched" class="form-text text-danger">*Required
+      </small>
+      <input class="col-24 highlight" type="text" formControlName="Secret" required
+             [placeholder]="isAzure ? 'Shared access signature (SAS)' : 'Secret'">
+    </div>
+    <br>
+    <div *ngIf=" ! isAzure" class="row position-relative">
+      <input class="col-24 highlight" type="text" formControlName="Region" placeholder="Region">
+    </div>
+    <br>
+    <div *ngIf=" ! isAzure" class="row position-relative">
+      <input class="col-24 highlight" *ngIf="endpoint" type="text" formControlName="Endpoint" readonly
+             placeholder="Host (Endpoint)">
+    </div>
+    <br>
+    <div *ngIf=" ! isAzure" class="row position-relative">
+      <sm-checkbox-control label=""
+                           [formData]="useSSL"
+                           (formDataChanged)="toggleSSL()"
+      ></sm-checkbox-control>
+
+      <span> Connect using https (SSL)</span>
+
+    </div>
+    <br/>
+    <!--</div>-->
+    <div class="row position-relative">
+      <div class="col-24 highlight">
+        <button class="btn-dark-fill center" (click)="saveNewCredentials()" [disabled]="!saveEnabled">Save Credentials
+        </button>
+        <!--<button class="btn btn-secondary pull-left" style="margin-right: 10px;" (click)="cancel()">Cancel</button>-->
+      </div>
+
+    </div>
+  </form>
+</div>

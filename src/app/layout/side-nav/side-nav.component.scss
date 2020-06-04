@@ -1,0 +1,117 @@
+@import "../../webapp-common/shared/ui-components/styles/variables";
+
+:host {
+  position: fixed;
+  height: 100%;
+  top: 0;
+}
+
+$transition-delay: 0.1;
+$transition-speed: 0.15;
+
+.side-nav {
+  z-index: 1000;
+  background-color: $blue-600;
+  height: 100%;
+  width: $side-bar-close-width;
+  position: relative;
+  transition: width $transition-speed + s;
+  transition-delay: $transition-delay + s;
+  overflow: hidden;
+
+  //&:hover {
+  //  width: $side-bar-open-width;
+  //  .item.logo {
+  //    .item-icon {
+  //      transition: opacity $transition-speed + $transition-delay + s;
+  //      opacity: 0;
+  //    }
+  //.caption {
+  //  opacity: 1;
+  //}
+  //}
+  //}
+
+  .item.logo {
+    background: $eggplant-purple;
+    cursor: default;
+
+    .item-icon {
+      transition: opacity $transition-speed + $transition-delay + s;
+      opacity: 1;
+      height: 100%;
+
+      .logo-a {
+        max-height: $side-bar-close-width * 0.5;
+        width: auto;
+      }
+    }
+
+    &:hover {
+      background-color: $eggplant-purple;
+      box-shadow: unset;
+
+    }
+  }
+
+  a:hover {
+    color: $cloudy-blue;
+  }
+
+  .item {
+    width: 100%;
+    height: $side-bar-close-width;
+    line-height: $side-bar-close-width;
+    color: #fff;
+    text-align: center;
+    cursor: pointer;
+
+    &:hover {
+      background-color: $dark-grey-blue-two;
+      box-shadow: inset 0 -1px 0 0 #252b3d;
+
+      .caption {
+        opacity: 1;
+      }
+    }
+
+    .item-icon {
+      width: $side-bar-close-width;
+      display: inline-block;
+      position: absolute;
+      left: 0;
+      color: #a7b2d8;
+
+      img {
+        max-width: 48%;
+        height: 100%;
+        padding: 4px;
+
+        &.resized-icon {
+          max-width: 62%;
+        }
+      }
+
+      .neon {
+        color: $neon-yellow-betterinchrome;
+      }
+    }
+
+    .caption {
+      transition: opacity $transition-speed + s;
+      position: absolute;
+      left: $side-bar-close-width;
+      text-transform: uppercase;
+      font-size: 15px;
+      opacity: 0.4;
+      color: $cloudy-blue;
+    }
+  }
+
+  .account {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+  }
+}
+

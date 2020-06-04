@@ -1,0 +1,34 @@
+@import "../../../../webapp-common/shared/ui-components/styles/variables";
+@import "../../../../webapp-common/layout/layout.scss";
+
+:host {
+  display: block;
+  height: 100%;
+
+  .experiment-info-body {
+    height: calc(100% - #{$experiment-info-header-height + $experiment-info-tabs-height});
+    flex-grow: 1;
+    overflow: auto;
+  }
+
+  .experiment-info-container {
+    height: calc(100% - #{$project-info-progress-height});
+    padding: 15px 5px 0;
+    display: flex;
+    flex-direction: column;
+
+    nav {
+      height: $experiment-info-tabs-height;
+      border-bottom: 2px solid rgba(2, 2, 2, 0.07);
+    }
+  }
+
+  /deep/ nav {
+    border-bottom: 1px solid rgba(2, 2, 2, 0.07);
+  }
+
+  /deep/ sm-simple-table-2 .headers {
+    font-size: 12px;
+  }
+
+}

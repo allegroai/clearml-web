@@ -1,0 +1,38 @@
+<div class="filter-sort-container d-flex align-items-center"
+     [ngClass]="isFiltered() ? 'active' : 'deactive'">
+  <div class='cell pointer'>
+    <i [class]="'icon md ' + (isFiltered()? 'i-filter-on':'i-filter-off')" mat-button [matMenuTriggerFor]="menu" (menuOpened)="menuOpened.emit()"></i>
+  </div>
+  <mat-menu #menu="matMenu" class="table-card-filter-menu" (closed)="closeMenu()">
+    <ng-container *ngFor="let option of options | keyvalue">
+      <button mat-menu-item [matMenuTriggerFor]="subMenu"><i [class.hidden]="!isOptionFiltered(option.key)" class="filter-point icon i-v-black xs"></i> {{option.key | titlecase}}</button>
+      <mat-menu #subMenu="matMenu" class="table-card-filter-menu">
+        <form class="filter-form">
+          <mat-form-field *ngIf="['users', 'tags'].includes(option.key)" smClickStopPropagation [style.width]="'222px'">
+            <input matInput (input)="setSearchTerm($event, option.key)" name="filter" [(ngModel)]="searchTerms[option.key]" autocomplete="off">
+            <i matSuffix [class]="'fa mr2 ' + (searchTerms[option.key]? 'fa-times pointer':'fa-search')" (click)="searchTerms[option.key] && clearSearch(option.key)"></i>
+          </mat-form-field>
+        </form>
+        <div class="results" [class.search-results]="option.key==='users' || option.key==='tags'">
+          <sm-menu-item *ngFor="let subOption of option.value |filter:searchTerms[option.key]:'label'" [itemLabel]="subOption.label"
+                        [checked]="value[option.key]?.includes(subOption.value)" [selectable]="true"
+                        [itemValue]="subOption.value"
+                        (itemClicked)="onFilterChanged(option.key, $event)">
+          </sm-menu-item>
+          <div *ngIf="(option.value |filter:searchTerms[option.key]:'label').length===0" class="flex-middle">No item found</div>
+        </div>
+        <div class="fixed-options" *ngIf="option.key==='tags'">
+          <mat-divider></mat-divider>
+          <div *ngIf="subOptions?.length" class="fixed-options-subheader">
+            {{fixedOptionsSubheader}}
+          </div>
+          <sm-menu-item *ngFor="let option of subOptions" [itemLabel]="option.label"
+                        [checked]="subValue?.includes(option.value)" [selectable]="true" [itemValue]="option.value"
+                        (itemClicked)="onSubFilterChanged({id:'system_tags'},$event)">
+          </sm-menu-item>
+        </div>
+      </mat-menu>
+    </ng-container>
+  </mat-menu>
+</div>
+

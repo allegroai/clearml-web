@@ -1,0 +1,4 @@
+<div class="icon-label d-flex align-items-center" (click)="!disabled && iconLabelClicked.emit()" [ngClass]="{'disabled': disabled, 'pointer': !disabled}">
+  <i [class]="iconClass"></i>
+  <span>{{label}}</span>
+</div>

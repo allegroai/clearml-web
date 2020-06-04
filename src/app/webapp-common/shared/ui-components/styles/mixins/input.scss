@@ -1,0 +1,26 @@
+@import "../themes";
+
+@mixin generate-input($themes: $themes) {
+  @each $theme, $map in $themes {
+    $input: map-get($map, input);
+    .#{$theme}-theme input {
+      background-color: inherit;
+      border: 0;
+      border-radius: map_get($input, border-radius);
+      outline: none;
+      -webkit-appearance: none;
+      font-family: Heebo;
+      color: map_get($input, color);
+      padding-left: 4px;
+      height: 32px;
+
+      &::-webkit-input-placeholder {
+        color: map_get($input, place-holder-color);
+      }
+
+      &::-moz-placeholder {
+        color: map_get($input, place-holder-color);
+      }
+    }
+  }
+}

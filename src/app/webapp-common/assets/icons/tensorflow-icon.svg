@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28.315 30">
+    <defs>
+        <style>
+            .cls-1{fill:#ccc}.cls-2{fill:#fff}.cls-3{fill:#e6e6e6}
+        </style>
+    </defs>
+    <g id="tensorflow-icon" transform="translate(-605 -496)">
+        <g id="Group_14" data-name="Group 14" transform="translate(605 496)">
+            <path id="Path_9" d="M0 27v4.719l3.708 2.36V29.36z" class="cls-1" data-name="Path 9" transform="translate(0 -17.899)"/>
+            <path id="Path_10" d="M0 9.1l3.708 2.36L16.18 4.382 24.27 9.1l4.045-2.022L15.843 0z" class="cls-2" data-name="Path 10"/>
+            <path id="Path_11" d="M76.045 25.382V21L72 23.022v4.719z" class="cls-3" data-name="Path 11" transform="translate(-47.73 -13.921)"/>
+            <path id="Path_12" d="M48 13v4.719l8.09 4.719v-4.719z" class="cls-1" data-name="Path 12" transform="translate(-31.82 -8.618)"/>
+            <path id="Path_13" d="M11 24.8l8.09-4.382V24.8l4.382-2.7V13L11 20.079z" class="cls-3" data-name="Path 13" transform="translate(-7.292 -8.618)"/>
+            <path id="Path_14" d="M27.642 35L23.9 37.022l.034 13.82 3.708 2.36V35z" class="cls-1" data-name="Path 14" transform="translate(-15.844 -23.202)"/>
+            <path id="Path_15" d="M39.382 40l4.045 2.36-4.045 2.7L35 42.7z" class="cls-2" data-name="Path 15" transform="translate(-23.202 -26.517)"/>
+            <path id="Path_16" d="M39.382 55.079V50.36L35 48v4.719z" class="cls-1" data-name="Path 16" transform="translate(-23.202 -31.82)"/>
+            <path id="Path_17" d="M52.045 47v4.719L48 54.416V49.7z" class="cls-3" data-name="Path 17" transform="translate(-31.82 -31.157)"/>
+            <path id="Path_18" d="M35 62l4.382 2.36v4.382L35 71.1z" class="cls-3" data-name="Path 18" transform="translate(-23.202 -41.101)"/>
+        </g>
+    </g>
+</svg>

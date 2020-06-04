@@ -1,0 +1,29 @@
+<div class="row">
+  <div *ngIf=" ! minimized" class="list-container col-4">
+    <sm-selectable-filter-list
+      titleLabel="Select plots to display"
+      checkAllIcon="fa-eye"
+      [list]="plotsList"
+      [selected]="selectedGraph"
+      [checkedList]="listOfHidden | async"
+      [searchTerm]="searchTerm$ | async"
+      (itemSelect)="metricSelected($event)"
+      (hiddenChanged)="hiddenListChanged($event)"
+      (searchTermChanged)="searchTermChanged($event)"
+    >
+    </sm-selectable-filter-list>
+  </div>
+  <div class="graphs-container" [ngClass]="{'col-20': !minimized, 'col-24': minimized}">
+    <sm-experiment-graphs
+      [isGroupGraphs]="true"
+      [hiddenList]="listOfHidden | async"
+      [metrics]="graphs"
+      [legendStringLength]="minimized? 14 : undefined"
+      [minimized]="minimized"
+      [splitSize]="splitSize$ | async"
+      (resetGraphs)="resetMetrics()"
+    >
+    </sm-experiment-graphs>
+  </div>
+</div>
+

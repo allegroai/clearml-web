@@ -1,0 +1,75 @@
+<sm-editable-section
+  [editable]=" ! model?.ready"
+  [saving]="saving"
+  (activateEditClicked)="activateEdit()"
+  (saveClicked)="saveClicked()"
+  (cancelClicked)="cancelEdit()"
+>
+  <ng-template #na>N/A</ng-template>
+
+
+    <sm-section-header label="LABELS"></sm-section-header>
+    <form #labels="ngForm"
+    >
+      <div [hidden]="!editable">
+        <div *ngFor="let parameter of formData; let i = index">
+          <div class="row w-100">
+            <div class="input-container col-11">
+              <mat-form-field appearance="outline" class="strength w-100">
+                <input #parameterLabel="ngModel"
+                       [(ngModel)]="parameter.label"
+                       [name]="'parameterLabel-' + parameter.id"
+                       matInput>
+              </mat-form-field>
+
+            </div>
+
+            <div class="input-container col-11">
+              <mat-form-field [hintLabel]="parameterKey.invalid && parameterKey?.errors?.required? '*Required': ''" appearance="outline" class="strength w-100">
+                <input #parameterKey="ngModel" [(ngModel)]="parameter.id"
+                       type="number"
+                       [name]="'parameterKey-' + parameter.id"
+                       matInput
+                       required>
+                <mat-error *ngIf="parameterKey.invalid && parameterKey?.errors?.required">
+                  Required
+                </mat-error>
+                <mat-error *ngIf="parameterKey.invalid && parameterKey?.errors?.smNotAllowedStringsValidator">
+                  .(dot) $(dollar) and space are not allowed in parameter id.
+                </mat-error>
+              </mat-form-field>
+
+
+            </div>
+
+            <div class="input-container col-2 remove-step">
+              <i (click)="removeRow(i)" class="icon i-trash sm-md pointer flashing-icon mb-2"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+    <button *ngIf="editable" class="btn btn-primary" (click)="addRow()"><i class="icon sm i-plus-blue"></i>
+    </button>
+    <div *ngIf="!editable">
+
+      <sm-simple-table-2 [cols]="cols" [rowsData]="formData">
+        <ng-template
+          let-col
+          let-i="rowIndex"
+          let-row="row">
+          <div class="row w-100">
+            <div class="input-container col-10">
+              <b>{{row.label}}</b>
+            </div>
+            <div class="input-container col-4">
+              <b>{{row.id}}</b>
+            </div>
+          </div>
+        </ng-template>
+      </sm-simple-table-2>
+    </div>
+</sm-editable-section>
+
+
+

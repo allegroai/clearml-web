@@ -1,0 +1,10 @@
+<div class="row header-container">
+  <div *ngIf="!isDashboard">
+    <sm-breadcrumbs></sm-breadcrumbs>
+  </div>
+  <div *ngIf="isDashboard" class="logo-full">
+    <img src="../../../../assets/logo-white.svg?v=2">
+  </div>
+  <sm-common-search *ngIf="user | async"></sm-common-search>
+</div>
+<ng-content></ng-content>

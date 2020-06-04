@@ -1,0 +1,22 @@
+@import "../../../layout/layout.scss";
+
+:host {
+  display: block;
+  height: calc(100% - #{$projects-header-height});
+  overflow-y: auto;
+
+  .projects {
+    display: flex;
+    flex-wrap: wrap;
+    width: 95%;
+  }
+
+  .load-more {
+    padding: 15px;
+
+    .load-more-btn {
+      padding: 8px 40px;
+    }
+  }
+
+}

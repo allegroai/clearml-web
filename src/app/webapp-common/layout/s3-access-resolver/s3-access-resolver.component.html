@@ -1,0 +1,15 @@
+<sm-dialog-template iconClass="i-annotation" header="S3 credentials" (xClicked)="xClicked()" [header]="isAzure? 'Azure credentials': 'S3 credentials'">
+  <sm-s3-access-dialog
+    [header]="header"
+    [bucket]="bucket"
+    [endpoint]="endpoint"
+    [region]="region"
+    [secret]="secret"
+    [key]="key"
+    [useSSL]="useSSL"
+    [editMode]="editMode"
+    [isAzure]="isAzure"
+    (closeSave)="saveS3Credentials($event)"
+    (closeCancel)="cancelClicked()">
+  </sm-s3-access-dialog>
+</sm-dialog-template>

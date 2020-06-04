@@ -1,0 +1,28 @@
+<div class="search-container">
+  <div class="container">
+    <div class="pl-3 py-3">
+      <span [ngClass]="{'active': activeLink === 'projects'}" class="pointer category-link"
+            (click)="activeLinkChanged.emit('projects')">PROJECTS {{'(' + projectsList.length + ')'}}  </span>
+      <span [ngClass]="{'active': activeLink === 'experiments'}" class="pointer category-link"
+            (click)="activeLinkChanged.emit('experiments')">EXPERIMENTS {{'(' + experimentsList.length + ')'}}  </span>
+      <span [ngClass]="{'active': activeLink === 'models'}" class="pointer category-link"
+            (click)="activeLinkChanged.emit('models')">MODELS {{'(' + modelsList.length + ')'}}  </span>
+    </div>
+  </div>
+  <div *ngIf="activeLink === 'projects'"  class="page-container">
+    <sm-projects-search-results [projectsList]="projectsList"
+                                (projectClicked)="projectClicked($event)"></sm-projects-search-results>
+  </div>
+
+
+  <div *ngIf="activeLink === 'experiments'" class="page-container">
+    <sm-experiments-search-results [experimentsList]="experimentsList"
+                                   (experimentClicked)="experimentClicked($event)"></sm-experiments-search-results>
+  </div>
+
+  <div *ngIf="activeLink === 'models'" class="page-container">
+    <sm-models-search-results [modelsList]="modelsList"
+                              (modelClicked)="modelClicked($event)"></sm-models-search-results>
+  </div>
+
+</div>

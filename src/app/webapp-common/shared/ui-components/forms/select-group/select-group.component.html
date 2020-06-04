@@ -1,0 +1,31 @@
+<div *ngIf="!isReadonly">
+  <span class="input-title" *ngIf="header">{{header}}</span>
+  <!--<sm-input-error-->
+  <!--*ngFor="let error of errors; let i = index"-->
+  <!--class="input-error"-->
+  <!--[visibleWhen]="showErrors && formControl?.errors && formControl?.errors[error.errKey]"-->
+  <!--[message]="error.errMsg"-->
+  <!--[ngClass]="{'hidden': i > 0}"-->
+  <!--&gt;-->
+  <!--</sm-input-error>-->
+
+  <select
+    [class]="'form-control '+ inputClassName + (getCurrentError() && showErrors? ' danger' : '')"
+    [smTooltip]="getCurrentError()"
+    tooltipType='validation'
+    [showDelay]="0"
+    [showTooltip]="showErrors"
+    (change)="fieldValueChanged($event.target.value)"
+  >
+    <option *ngIf="placeHolder" value=""> {{placeHolder}}</option>
+    <option *ngFor="let option of options"
+            [value]="option.value" [selected]="formData === option.value ? 'selected' : ''">{{ option.label }}
+    </option>
+  </select>
+  {{getCurrentError()}}
+</div>
+
+<div class="d-flex" *ngIf="isReadonly">
+  <div [class.key]="readonlyLabel">{{readonlyLabel}}</div>
+  <div class="flex-grow-1">{{getSelectedOption()?.label}}</div>
+</div>

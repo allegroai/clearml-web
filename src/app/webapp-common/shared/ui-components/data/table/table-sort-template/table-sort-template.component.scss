@@ -1,0 +1,33 @@
+:host {
+  display: block;
+  position: relative;
+  z-index: 20;
+
+  div {
+    display: flex;
+    align-items: baseline;
+    padding-top: 11px;
+    padding-bottom: 13px;
+    color: #a7b2d8;
+
+    &.active {
+      color: #5a658e;
+    }
+    .sort-icon {
+      transform: translateY(25%);
+      position: relative;
+    }
+
+    i {
+      display: block;
+      margin-left: -4px;
+    }
+
+    .text {
+      margin-left: 2px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+  }
+}

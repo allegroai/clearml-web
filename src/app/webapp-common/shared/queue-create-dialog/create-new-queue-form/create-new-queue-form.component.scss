@@ -1,0 +1,18 @@
+:host {
+  .create-queue-form {
+    width: 600px;
+  }
+
+  .create-queue-button {
+    padding-top: 32px;
+  }
+
+  small.text-danger {
+    position: absolute !important;
+    top: -15px;
+  }
+
+  #queue-description {
+    max-height: 250px;
+  }
+}

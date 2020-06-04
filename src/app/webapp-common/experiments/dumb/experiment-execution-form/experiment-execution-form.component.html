@@ -1,0 +1,92 @@
+<div>
+  <sm-editable-section #sourceSection
+                       [saving]="saving"
+                       [editable]="editable"
+                       (cancelClicked)="sectionCancelled()"
+                       (saveClicked)="sourceCode.sourceCodeForm.valid? sectionSaved(): sourceCode.sourceCodeForm.onSubmit(null)"
+                       (activateEditClicked)="activateEditClicked($event, 'source')">
+    <sm-section-header label="SOURCE CODE" [helpText]="HELP_TEXTS.EXECUTION_SOURCE_CODE"></sm-section-header>
+    <sm-experiment-execution-source-code
+        #sourceCode
+        class="form-section"
+        fieldName="source"
+        [editable]="(editable && !isInDev) && sourceSection.inEditMode"
+        [formData]="formData.source"
+        (formDataChanged)="fieldValueChanged($event)"
+    ></sm-experiment-execution-source-code>
+  </sm-editable-section>
+
+  <sm-editable-section #diffSection
+                       [saving]="saving"
+                       [editable]="editable"
+                       (cancelClicked)="sectionCancelled()"
+                       (saveClicked)="sectionSaved()"
+                       (activateEditClicked)="activateEditClicked($event, 'diff'); editDiff()">
+    <sm-section-header label="UNCOMMITED CHANGES"></sm-section-header>
+    <sm-experiment-diff
+      class="form-section"
+      fieldName="diff"
+      [editable]="editable && diffSection.inEditMode"
+      [isInDev]="isInDev"
+      [formData]="formData.diff"
+      (formDataChanged)="fieldValueChanged($event)"
+      (freezeForm)="freezeForm.emit($event)"></sm-experiment-diff>
+    <button extra-buttons
+            *ngIf="formData.diff"
+            class="btn-dark-fill mr-3 flex-1"
+            (click)="discardDiff()">
+      <i class="p-1 fa fa-trash"></i>
+      DISCARD DIFFS
+    </button>
+  </sm-editable-section>
+
+  <sm-editable-section #requirementsSection
+                       [saving]="saving"
+                       [editable]="editable"
+                       (cancelClicked)="sectionCancelled()"
+                       (saveClicked)="sectionSaved()"
+                       (activateEditClicked)="activateEditClicked($event, 'source'); editInstallPackages()">
+    <sm-section-header label="INSTALLED PACKAGES"></sm-section-header>
+
+    <sm-experiment-requirements-code
+      #requirementsForm
+      class="form-section"
+      fieldName="requirements"
+      [editable]="editable && requirementsSection.inEditMode"
+      [isInDev]="isInDev"
+      [formData]="formData.requirements"
+      (formDataChanged)="fieldValueChanged($event)">
+    </sm-experiment-requirements-code>
+  </sm-editable-section>
+  <sm-editable-section #orchestrationSection
+                       [saving]="saving"
+                       [editable]="editable"
+                       (cancelClicked)="sectionCancelled()"
+                       (saveClicked)="sectionSaved()"
+                       (activateEditClicked)="activateEditClicked($event, 'orchestration')">
+    <sm-section-header label="AGENT CONFIGURATION"></sm-section-header>
+    <sm-experiment-orchestration-form #orchestration
+                                      [ngModel]="formData.docker_cmd"
+                                      (ngModelChange)="fieldValueChanged({field:'docker_cmd', value: $event})"
+                                      [inEditMode]="(editable && !isInDev) && orchestrationSection.inEditMode"
+    >
+      <div *ngIf="!((editable && !isInDev) && orchestrationSection.inEditMode)">{{formData.docker_cmd}}</div>
+    </sm-experiment-orchestration-form>
+
+  </sm-editable-section>
+  <sm-editable-section #outputSection
+                       [saving]="saving"
+                       [editable]="editable"
+                       (cancelClicked)="sectionCancelled()"
+                       (saveClicked)="sectionSaved()"
+                       (activateEditClicked)="activateEditClicked($event, 'output')">
+    <sm-section-header label="OUTPUT" [helpText]="HELP_TEXTS.EXECUTION_OUTPUT"></sm-section-header>
+    <sm-experiment-execution-output
+      fieldName="output"
+      [editable]="editable && outputSection.inEditMode"
+      [formData]="formData.output"
+      (formDataChanged)="fieldValueChanged($event)"
+    ></sm-experiment-execution-output>
+  </sm-editable-section>
+</div>
+

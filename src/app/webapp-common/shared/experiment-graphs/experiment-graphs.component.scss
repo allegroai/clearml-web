@@ -1,0 +1,73 @@
+:host {
+  display: block;
+  position: relative;
+  height: 100%;
+
+  /deep/ .single-graph sm-single-graph{
+    margin-left: auto;
+    margin-right: auto;
+    .whitebg {
+      border: none;
+    }
+  }
+
+  .metrics-section {
+    height: 100%;
+    overflow-y: hidden;
+
+    &.with-settings {
+      height: calc(100% - 64px);
+    }
+  }
+
+  .all-metrics {
+    height: 100%;
+    padding: 0px;
+    overflow-y: scroll;
+  }
+
+  .metric-group-container {
+    padding-bottom: 20px;
+    width: 100%;
+
+    .less-padding {
+      padding: 0;
+    }
+
+    &.less-padding {
+      padding: 0 !important;
+    }
+
+    .less-padding:last-child {
+      margin-bottom: 20px;
+    }
+
+    &:last-of-type {
+      margin-bottom: 20px;
+    }
+    &:not(:first-of-type) .metric-group-header{
+      margin-top: 20px;
+      border-top: 1px solid #efefef;
+    }
+  }
+
+  .metric-group-header {
+    flex-basis: 100%;
+    text-align: center;
+    padding: 20px 0;
+  }
+
+  .hidden {
+    display: none !important;
+  }
+
+  sm-graph-settings-bar {
+    height: 0;
+    overflow: hidden;
+    transition: height 0.3s;
+
+    &.showSettings {
+      height: 64px;
+    }
+  }
+}

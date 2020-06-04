@@ -1,0 +1,4 @@
+<div [ngClass]="showIcon && status" class="d-flex align-items-center">
+  <i *ngIf="showIcon" [class]="'icon xs i-'+ status" [smTooltip]="EXPERIMENTS_STATUS_LABELS[status]"></i>
+  <div class="label" *ngIf="showLabel">{{EXPERIMENTS_STATUS_LABELS[status]}}</div>
+</div>

@@ -1,0 +1,16 @@
+:host {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 0 10px 0;
+  h4 {
+    display: block;
+    position: relative;
+    span.error.ng-star-inserted {
+      border: solid red 4px;
+      border-radius: 35px;
+      position: absolute;
+      right: -14px;
+      top: 1px;
+    }
+  }
+}

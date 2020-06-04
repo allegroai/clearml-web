@@ -1,0 +1,31 @@
+@import "../../../../shared/ui-components/styles/variables";
+
+/deep/ .dark-theme {
+  .legend-entry-name, .legend-entry-value {
+    fill: $cloudy-blue;
+  }
+
+  .donut-text {
+    fill: $cloudy-blue;
+
+    tspan:nth-child(3) {
+      stroke: $blue-rgb-800;
+      stroke-width: 0.3px;
+    }
+  }
+}
+
+/deep/ .legend-circle {
+  &:hover {
+    cursor: url(../../../../assets/icons/pallete-cursor.png) 6 0, pointer;
+  }
+}
+
+.donut-legend {
+  height: 673px;
+  overflow: auto;
+}
+
+/deep/ .britechart-legend .legend-entry.is-faded .legend-entry-name {
+  transition: unset !important;
+}

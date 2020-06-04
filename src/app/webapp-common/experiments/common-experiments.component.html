@@ -1,0 +1,67 @@
+<sm-overlay [backdropActive]="backdropActive$|async"></sm-overlay>
+<sm-experiment-header
+  [tableCols]="filteredTableCols$| async"
+  [isArchived]="isArchived$ | async"
+  [metricVariants]="metricVariants$ | async"
+  [hyperParams]="hyperParams$ | async"
+  [minimizedView]="(showInfo$ | async)"
+  [isMetricsLoading]="metricLoading$ | async"
+  [autoRefreshState]="autoRefreshState$ | async"
+  (isArchivedChanged)="onIsArchivedChanged($event)"
+  (selectedTableColsChanged)="selectedTableColsChanged($event)"
+  (refreshListClicked)="refreshList(false)"
+  (getMetricsToDisplay)="getMetricsToDisplay()"
+  (selectedMetricToShow)="selectedMetricToShow($event)"
+  (selectedHyperParamToShow)="selectedHyperParamToShow($event)"
+  (removeColFromList)="removeColFromList($event)"
+  (setAutoRefresh)="setAutoRefresh($event)"
+  (clearSelection)="clearSelection()"
+></sm-experiment-header>
+<div class="experiment-body" [class.compare]="((selectedExperiments$ | async) && (selectedExperiments$ | async)?.length > 1) || (showAllSelectedIsActive$ |async)">
+  <as-split gutterDblClickDuration="400" (gutterDblClick)="closeExperimentPanel()" (dragEnd)="splitSizeChange($event)" (dragStart)="disableInfoPanel()">
+    <as-split-area [size]="100 - (selectSplitSize$ | async)">
+      <sm-experiments-table
+        class="align-self-stretch"
+        selectionMode="multiple"
+        [colsOrder]="(tableColsOrder$ | async)"
+        [tableCols]="tableCols$| async"
+        [experiments]="experiments$ | async"
+        [users]="users$ | async"
+        [experimentTypes]=" types$ | async"
+        [tags]="tags$ | async"
+        [systemTags]="systemTags$ | async"
+        [tableSortField]="(tableSortField$ | async)"
+        [tableSortOrder]="(tableSortOrder$ | async)"
+        [tableFilters]="(tableFilters$ | async)"
+        [selectedExperiments]="selectedExperiments$ | async"
+        [selectedExperiment]="selectedExperiment$ |async"
+        [minimizedView]="(showInfo$ | async)"
+        [noMoreExperiments]="noMoreExperiments$ | async"
+        (experimentSelectionChanged)="experimentSelectionChanged($event)"
+        (experimentsSelectionChanged)="experimentsSelectionChanged($event)"
+        (sortedChanged)="sortedChanged($event)"
+        (filterChanged)="filterChanged($event)"
+        (tagsMenuOpened)="refreshTagsList()"
+        (typesMenuOpened)="refreshTypesList()"
+        (loadMoreExperiments)="getNextExperiments()"
+        (onColumnsReordered)="columnsReordered($event)"
+      >
+      </sm-experiments-table>
+    </as-split-area>
+    <as-split-area [size]="selectSplitSize$ | async" class="light-theme" [class.info-disabled]="infoDisabled" [visible]="(showInfo$ | async)">
+      <router-outlet></router-outlet>
+    </as-split-area>
+  </as-split>
+</div>
+<sm-experiment-footer
+  [visible]="((selectedExperiments$ | async) && (selectedExperiments$ | async)?.length > 1) || (showAllSelectedIsActive$ |async)"
+  [numberOfSelectedExperiments]="(selectedExperiments$ | async)?.length"
+  [disableArchive]="(selectedExperiments$ | async) | hasExampleItem"
+  [archiveToolTipMessage]="((selectedExperiments$ | async) | hasExampleItem)?'Archiving is disabled as one or more of the experiments you chose are example experiments':null"
+  [showAllSelectedIsActive]="showAllSelectedIsActive$ |async"
+  [isArchivedMode]="isArchived$ | async"
+  (restoreExperimentsClicked)="restoreExperiments()"
+  (compareExperimentsClicked)="compareExperiments()"
+  (archiveExperimentsClicked)="archiveExperiments()"
+  (showAllSelectedClicked)="showAllSelected($event)"
+></sm-experiment-footer>

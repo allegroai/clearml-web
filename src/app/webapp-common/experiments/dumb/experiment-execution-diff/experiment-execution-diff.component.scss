@@ -1,0 +1,7 @@
+sm-textarea-control {
+  display: block;
+  height: 180px;
+  &.hidden {
+   display: none;
+  }
+}

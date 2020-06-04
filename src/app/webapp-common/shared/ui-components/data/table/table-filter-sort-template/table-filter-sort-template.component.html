@@ -1,0 +1,30 @@
+<div class="filter-sort-container d-flex align-items-center" [class.active]="value?.length>0 || subValue?.length>0">
+  <div class='d-flex pointer'>
+    <i class="sort-icon" [class]="enableSort?  'icon sm ' + sortedClass():''" (click)="switchSortOrder()"></i>
+  </div>
+  <sm-menu [header]="header"
+           smMenuClass="light-theme"
+           [enableSearch]="enableSearch"
+           [fixedOptionsSubheader]="subOptions?.length ? fixedOptionsSubheader : ''"
+           (searchValueChanged)="searchValueChanged.emit($event.target.value)"
+           [searchValue]="searchValue"
+           [buttonClass]="'table-filter-button ' + (isFiltered() ? 'active' : 'deactive')"
+           [iconClass]="'icon md ' + (isFiltered()? 'i-filter-on':'i-filter-off')"
+           (menuClosed)="menuClosed.emit()"
+           (menuOpened)="menuOpened.emit()"
+  >
+    <sm-menu-item *ngFor="let option of options" [itemLabel]="option.label"
+                  [checked]="value?.includes(option.value)" [selectable]="true" [itemValue]="option.value"
+                  (itemClicked)="onFilterChanged($event)">
+    </sm-menu-item>
+    <div *ngIf="options?.length===0" class="empty-menu flex-middle">No item found</div>
+    <div fixedOptions>
+      <sm-menu-item *ngFor="let option of subOptions" [itemLabel]="option.label"
+                    [checked]="subValue?.includes(option.value)" [selectable]="true" [itemValue]="option.value"
+                    (itemClicked)="onSubFilterChanged($event)">
+      </sm-menu-item>
+    </div>
+  </sm-menu>
+
+</div>
+

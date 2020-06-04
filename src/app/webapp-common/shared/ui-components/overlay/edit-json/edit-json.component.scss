@@ -1,0 +1,25 @@
+:host {
+  .data-text {
+    width: 70vw;
+    height: 65vh;
+    overflow: auto;
+    color: #141822;
+    font-family: monospace;
+    padding: 12px;
+    border-radius: 4px;
+    resize: none;
+  }
+
+  .buttons {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+
+    button {
+      margin: 0 3px;
+    }
+  }
+}
+
+
+

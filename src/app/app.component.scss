@@ -1,0 +1,32 @@
+@import "webapp-common/shared/ui-components/styles/variables";
+@import "webapp-common/layout/layout.scss";
+
+$notifier-height: 30px;
+
+.app-container {
+  margin-left: $side-bar-close-width;
+}
+
+.main-router + * {
+  display: block;
+  height: calc(100vh - #{$top-bar-height});
+}
+
+.notifier-open {
+  .main-router + * {
+    height: calc(100vh - #{$top-bar-height + $notifier-height});
+  }
+}
+
+sm-side-nav {
+  z-index: 999;
+}
+
+#color-picker-outlet {
+  position: absolute;
+  visibility: hidden;
+}
+
+
+
+

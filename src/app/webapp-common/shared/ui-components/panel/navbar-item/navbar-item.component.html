@@ -1,0 +1,10 @@
+<div [class]="'navbar-item ' + direction" [ngClass]="{'active': active}">
+  <b>{{header?.toUpperCase()}}</b><br>
+  <b>{{subHeader? subHeader: ''}}</b>
+
+  <!--<span class="triangle" mat-button [matMenuTriggerFor]="menu" *ngIf="multi"></span>-->
+  <sm-menu *ngIf="multi">
+    <ng-content select="[menuItems]"></ng-content>
+  </sm-menu>
+
+</div>

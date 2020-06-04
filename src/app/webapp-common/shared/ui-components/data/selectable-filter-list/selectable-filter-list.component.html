@@ -1,0 +1,17 @@
+<div class="d-flex justify-content-between mb-2">
+  <span class="font-weight-bold">{{titleLabel}}</span>
+  <div class="toggle-all d-flex justify-content-between align-items-center" (click)="toggleHideAll()">
+    <span class="toggle-all-text">{{checkedList.length > 0 ? 'SHOW ALL' : 'HIDE ALL'}} </span>
+    <i [class]="checkAllIcon + ' fa toggle-icon'" [ngClass]="{'uncheckedAll': checkedList.length > 0}"></i>
+  </div>
+</div>
+<input class="form-control mb-3" (keyup)="onSearchTermChanged($event.target.value)"/>
+<sm-selectable-list
+  [list]="filteredList"
+  [selected]="selected"
+  [checkIcon]="checkAllIcon"
+  [checkedList]="checkedList"
+  (onItemSelect)="itemSelect.emit($event)"
+  (onItemCheck)="toggleHide($event)"
+>
+</sm-selectable-list>

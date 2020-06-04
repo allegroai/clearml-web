@@ -1,0 +1,25 @@
+:host {
+  /deep/ tr:hover {
+    cursor: auto !important;
+    transition: background-color 0.3s;
+  }
+  .separator {
+    width: 100%;
+    //border-bottom: solid 1px #dee1e9;
+  }
+  .i-trash{
+    padding-top: 60px;
+  }
+
+  .param-row {
+    font-weight: 500;
+    & > div {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+  .allow-multi-space{
+    white-space: pre;
+  }
+}

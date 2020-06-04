@@ -1,0 +1,8 @@
+<div class="d-flex align-items-center">
+  <sm-tag [className]="i > TAGS_NUMBER_SHORT - 1 ? 'd-none' : ''" class="m-1" smTooltip="{{tag}}" [label]="tag"
+          *ngFor="let tag of tags | slice:0:TAGS_NUMBER_LONG; let i = index">
+  </sm-tag>
+  <span class="hideOnOpen" *ngIf="tags.length > TAGS_NUMBER_LONG"
+        smTooltip="{{tags.join(', ')}}">+{{ tags.length - TAGS_NUMBER_SHORT}} more</span>
+  <span class="hideOnClose" *ngIf="tags.length > TAGS_NUMBER_SHORT" smTooltip="{{tags.join(', ')}}">+{{ tags.length - TAGS_NUMBER_SHORT}} more</span>
+</div>

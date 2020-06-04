@@ -1,0 +1,24 @@
+@import "../themes";
+
+@mixin generate-button-toggle-group($themes: $themes) {
+  @each $theme, $map in $themes {
+    $button: map-get($map, button-toggle-group);
+    :host-context(.#{$theme}-theme) mat-button-toggle-group {
+      /deep/ .mat-button-toggle-label-content {
+        font-family: heebo;
+        font-size: 1rem;
+      }
+
+      .mat-button-toggle-appearance-standard {
+        background-color: map_get($button, background-color);
+        color: map_get($button, color);
+
+        &.mat-button-toggle-checked {
+          background-color: map_get($button, background-color-active);
+          color: map_get($button, color-active);
+
+        }
+      }
+    }
+  }
+}

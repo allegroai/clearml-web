@@ -1,0 +1,37 @@
+@import "../../../../shared/ui-components/styles/variables";
+
+:host {
+  display: block;
+  max-width: 600px;
+
+  p {
+    text-align: center;
+    font-size: 14px;
+    color: $dusk-two;
+    overflow-wrap: break-word;
+  }
+
+  .buttons {
+    margin-top: 41px;
+    display: inline-block;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+
+    button {
+      &:first-of-type {
+        margin-right: 16px;
+      }
+    }
+  }
+
+  .enqueu-warning {
+    opacity: 0;
+    height: 0;
+    &.show {
+      height: auto;
+      transition: opacity 1s;
+      opacity: 1;
+    }
+  }
+}

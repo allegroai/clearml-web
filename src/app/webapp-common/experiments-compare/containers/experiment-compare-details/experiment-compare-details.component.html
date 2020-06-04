@@ -1,0 +1,90 @@
+<sm-compare-card-list
+  #cardList
+  [experiments]="experiments"
+  [baseExperiment]="baseExperiment"
+  [ngClass]="calculatingTree ? 'pending' : ''"
+  (experimentListChanged)="experimentListChanged($event)"
+>
+  <div *compareCardHeader="let experiment; let i = index">
+    <sm-experiment-compare-general-data
+      [experiment]="experiment"
+      [tags]="experimentTags[experiment.id]"
+      (copyIdClicked)="copyIdToClipboard()">
+    </sm-experiment-compare-general-data>
+  </div>
+  <div class="tree-card-body" *compareCardBody="let experiment; let i = index">
+    <div class="section h-100" *ngIf="experimentsDataControl[experiment.id]">
+      <!--      TODO: move is-not-origin class outside nodes tree-->
+      <ng-template let-dataSource="dataSource"
+                   let-treeControl="treeControl"
+                   [ngTemplateOutletContext]="{dataSource: experimentsDataControl[experiment.id][0],
+                                               treeControl: experimentsDataControl[experiment.id][1]}"
+                   [ngTemplateOutlet]="selfie" #selfie>
+        <cdk-virtual-scroll-viewport #virtualScrollRef class="virtual-scroll-container" [class.is-not-origin]="i > 0" itemSize="28" minBufferPx="280" maxBufferPx="560">
+          <ng-container *cdkVirtualFor="let node of dataSource; let i = index">
+            <div class="node" [class.parent]="node.hasChildren">
+              <div *ngIf="node.hasChildren" class="section" [ngClass]="'depth-' + node.level">
+                <div class="content"
+                     (click)="toggleNode(node)"
+                     [ngClass]="node?.metaData?.classStyle"
+                     [class.selected-diff]="checkIfSelectedPath(node.data)"
+                     [class.identical-row]="!allPaths[node.data.path]">
+                  <i class="fas" [style.margin-left.px]="2 + node.level * 20" [ngClass]="treeControl.isExpanded(node) ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
+                  <span>{{node.data.key | prettifyTitleKeyPipe}}</span>
+                </div>
+              </div>
+              <div *ngIf="!node.hasChildren" class="section" (click)="keyClicked(node.data, $event)">
+                <div [style.padding-left.px]="2 + node.level * 20" [ngClass]="{
+                  'node-item-container': true,
+                  'identical-row': checkIfIdenticalRow(node.data),
+                  'selected-diff': checkIfSelectedPath(node.data),
+                  'not-existing-on-origin': !node.data.existOnOrigin,
+                  'not-existing-on-compared': !node.data.existOnCompared,
+                  'diff-row': !node.data.isValueEqualToOrigin,
+                  'equal-row': node.data.isValueEqualToOrigin,
+                  'hide-identical-mode': hideIdenticalFields
+                }">
+                  <div>
+                    <!--                    TODO: check if we can remove "node.data.existOnCompared" and show no keys when no values-->
+                    <pre *ngIf="(node.data.value !== undefined) || (node.data.existOnOrigin && node.data.existOnCompared)">{{node.data.key  | hideHash}}{{node.data.value}}</pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+        </cdk-virtual-scroll-viewport>
+      </ng-template>
+    </div>
+  </div>
+</sm-compare-card-list>
+
+
+<sm-portal outletId="searchDiff">
+  <div class="btn-group mr-2" role="group">
+    <sm-search [value]="searchText"
+               [minimumChars]="1"
+               [debounceTime]="300"
+               (keydown.enter)="findNext()"
+               (valueChanged)="find($event)"
+    ></sm-search>
+
+    <button class="btn btn-secondary prev" smTooltip="Previous occurrence" [disabled]="foundPaths.length === 0 " (click)="findPrev()">
+      <i class="fas fa-chevron-up"></i>
+    </button>
+
+    <button class="btn btn-secondary next" smTooltip="Next occurrence" [disabled]="foundPaths.length === 0 " (click)="findNext()">
+      <i class="fas fa-chevron-down"></i>
+    </button>
+  </div>
+  <span [class.hidden]="searchText.length === 0 "> Match {{foundPaths.length === 0 ? '0' : foundIndex + 1}} / {{foundPaths.length}}</span>
+</sm-portal>
+
+<sm-portal outletId="nextDiff">
+  <button class="btn btn-secondary btn-arrow mr-3" smTooltip="Previous diff" (click)="goToNextDiff('up')">
+    <i class="fas fa-arrow-up"></i>
+  </button>
+
+  <button class="btn btn-secondary btn-arrow" smTooltip="Next diff" (click)="goToNextDiff('down')">
+    <i class="fas fa-arrow-down"></i>
+  </button>
+</sm-portal>

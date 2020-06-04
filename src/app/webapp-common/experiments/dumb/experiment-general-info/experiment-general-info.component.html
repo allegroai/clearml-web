@@ -1,0 +1,67 @@
+<sm-labeled-row label="ARCHIVED:">
+  <div style="width: 93px">{{experiment?.system_tags?.includes('archived') ? 'Yes' : 'No'}}</div>
+</sm-labeled-row>
+
+
+<sm-labeled-row label="CHANGED AT:">
+  {{(experiment?.status_changed | date : TIME_FORMAT_STRING) | NA}}
+</sm-labeled-row>
+
+<sm-labeled-row label="LAST ITERATION:">
+  {{(experiment?.last_iteration) | NA}}
+</sm-labeled-row>
+
+
+<sm-labeled-row label="STATUS MESSAGE:">
+  {{experiment?.status_message | NA}}
+</sm-labeled-row>
+
+
+<sm-labeled-row label="STATUS REASON:">
+  {{experiment?.status_reason | NA}}
+</sm-labeled-row>
+
+
+<sm-labeled-row label="CREATED AT:">
+  {{(experiment?.created | date : TIME_FORMAT_STRING) | NA}}
+</sm-labeled-row>
+
+
+<sm-labeled-row label="STARTED AT:">
+  {{(experiment?.started | date : TIME_FORMAT_STRING) | NA}}
+</sm-labeled-row>
+
+
+<sm-labeled-row label="LAST UPDATED AT:">
+  {{(experiment?.last_update | date:'MMM d yyyy H:mm') | NA}}
+</sm-labeled-row>
+
+
+<sm-labeled-row label="COMPLETED AT:">
+  {{(experiment?.completed | date : TIME_FORMAT_STRING) | NA}}
+</sm-labeled-row>
+
+
+<sm-labeled-row label="CREATED BY:">
+  {{experiment?.user?.name | NA}}
+</sm-labeled-row>
+
+
+<sm-labeled-row label="DESCRIPTION:" labelClass="pt-2">
+  <sm-inline-edit
+    [fieldValue]="experimentComment"
+    [originalText]="experimentComment"
+    [editable]=" ! isExample"
+    (textChanged)="commentValueChanged($event)"
+  >
+    <span class="general-description">{{experimentComment}}</span>
+  </sm-inline-edit>
+
+</sm-labeled-row>
+
+
+<sm-labeled-row label="PROJECT:">
+  {{experiment?.project?.name | NA}}
+</sm-labeled-row>
+
+

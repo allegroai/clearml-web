@@ -1,0 +1,41 @@
+<div *ngIf="showButton" mat-button [matMenuTriggerFor]="modelMenu" class="p-0 cell menu-button btn icon sm i-list-view"></div>
+<div *ngIf="!showButton" #contextTrigger
+     style="visibility: hidden; position: fixed"
+     [style.left.px]="position.x"
+     [style.top.px]="position.y"
+     [matMenuTriggerFor]="modelMenu">
+</div>
+<mat-menu #modelMenu="matMenu" [hasBackdrop]="false">
+  <button mat-menu-item (click)="publishPopup()" [disabled]="isExample || model?.ready">
+    <i [class]="'fa ' + ICONS.PUBLISHED"></i>Publish
+  </button>
+  <button mat-menu-item (click)="restoreArchivePopup()" [disabled]="isExample">
+    <i [class]="'fa ' + (model?.system_tags?.includes('archived') ? ICONS.SHOW : ICONS.HIDE)"></i>
+    {{model?.system_tags?.includes('archived') ? 'Restore from archive' : 'Archive'}}
+  </button>
+  <hr>
+  <button mat-menu-item [matMenuTriggerFor]="tagMenu"
+          (menuOpened)="tagMenuOpened()"
+          (menuClosed)="tagMenuContent.clear()"
+  >
+    <i class="fas fa-tag rotate-135"></i>
+    <span>{{'Add Tag' + (numSelected > 1 ? ' (' + numSelected + ' items)' : '')}}</span>
+  </button>
+  <hr>
+  <button mat-menu-item (click)="downloadModelFileClicked()">
+    <i [class]="'fa ' + ICONS.DOWNLOAD"></i>Download
+  </button>
+  <button mat-menu-item (click)="moveToProjectPopup()" [disabled]="isExample">
+    <i class="fa fa-arrow-right"></i>Move To Project
+  </button>
+</mat-menu>
+
+<mat-menu #tagMenu="matMenu">
+  <sm-tags-menu
+    #tagMenuContent
+    class="light-theme"
+    [tags]="model?.tags"
+    [allTags]="allTags"
+    (tagSelected)="tagSelected.emit($event)">
+  </sm-tags-menu>
+</mat-menu>

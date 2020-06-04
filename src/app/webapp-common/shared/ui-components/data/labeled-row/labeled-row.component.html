@@ -1,0 +1,7 @@
+<div *ngIf="showRow" class="labeled-row">
+  <div class="label-container" [ngClass]="labelClass">{{label}}</div>
+  <div class="content">
+    <ng-content></ng-content>
+  </div>
+</div>
+

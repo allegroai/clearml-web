@@ -1,0 +1,72 @@
+@import '../../styles/variables';
+
+$generic-font-size: 11px;
+
+:host {
+
+  ///* Handle on hover */
+  //::-webkit-scrollbar-thumb:hover {
+  //  //background: #555;
+  //}
+
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  /* Track */
+  ::-webkit-scrollbar-track {
+    background: $blue-600;
+  }
+
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background: #565b6b;
+  }
+
+  .code-footer {
+    margin-right: 1px;
+    position: relative;
+    transition: all $transition-slow;
+    background-color: rgba(26, 30, 44, 0.5);
+    .code {
+      background-color: $blue-600;
+      height: 0;
+      overflow-y: auto;
+      overflow-x: auto;
+      transition: all $transition-slow;
+      &.open-code{
+        border: solid 4px $blue-600;
+      }
+      pre {
+        padding-top: 16px;
+        padding-left: 32px;
+        margin-bottom: 0;
+        text-align: left;
+        background: $blue-600;
+      }
+    }
+    .closed-code-label {
+      border-radius: 0 0 6px 6px;
+      padding: 10px;
+      font-size: $generic-font-size;
+      font-weight: bold;
+      text-align: center;
+      color: $blue-300;
+      transition: all $transition-slow;
+      &:hover, &.copied {
+        color: $neon-yellow-hover;
+      }
+      background-color: $dusk-four;
+    }
+
+    .copied-v {
+      width: $generic-font-size;
+      height: $generic-font-size;
+      margin: 0;
+    }
+  }
+}
+
+

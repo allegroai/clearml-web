@@ -1,0 +1,27 @@
+<sm-dialog-template
+  iconClass="i-move-to-project"
+  header="MOVE TO PROJECT"
+>
+  <div class="message">
+    <b *ngIf="reference" [smTooltip]="reference.length > 80 ? reference : undefined">{{reference.length > 80 ? (reference | slice:0:77) + '...' : reference }}</b> will be moved <span *ngIf="project?.name"> from <b [smTooltip]="project.name.length > 80 ? project.name : undefined">{{project.name.length > 80 ? (project.name | slice:0:77) + '...' : project.name}}</b></span> to the selected project.
+  </div>
+  <sm-select-group
+    fieldName="project"
+    inputClassName="highlight"
+    [options]="projects$ | async"
+    [placeHolder]=""
+    [formData]="selectedProjectId"
+    (formDataChanged)="projectChanged($event)">
+  </sm-select-group>
+
+  <div class="buttons">
+    <button (click)="closeDialog(false)" class="btn btn-outline-neon">
+      CANCEL
+    </button>
+    <button [disabled]="currentProject === selectedProjectId" (click)="closeDialog(true)"
+            class="btn btn-neon yes-button">
+      MOVE
+    </button>
+  </div>
+
+</sm-dialog-template>

@@ -1,0 +1,21 @@
+<div class="status-icon-container">
+  <div [ngClass]="status" class="d-flex align-items-center justify-content-between">
+    <div></div>
+    <div class="d-flex">
+      <i [class]="'icon xs i-'+status+' bw'" [smTooltip]="EXPERIMENTS_STATUS_LABELS[status]"></i>
+      <div class="label" *ngIf="showLabel">
+        {{'  ' + (EXPERIMENTS_STATUS_LABELS[status] ? EXPERIMENTS_STATUS_LABELS[status] : '') | uppercase}}
+      </div>
+      <span class="view-only d-inline" *ngIf="viewOnly === true">  (view only) </span>
+    </div>
+    <div>
+      <button *ngIf="showMaximize" class="btn btn-icon" (click)="maximizedClicked.emit()"
+        smTooltip="View full screen" position="left">
+        <i class="icon i-info-maximize"></i>
+      </button>
+      <button class="btn btn-icon" (click)="closeInfoClicked.emit()">
+        <i class="icon i-dialog-x pointer"></i>
+      </button>
+    </div>
+  </div>
+</div>

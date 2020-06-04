@@ -1,0 +1,16 @@
+@import "../../styles/mixins/common";
+@import "../../styles/variables";
+
+$reqWidth: 56px;
+.number-counter-container {
+  text-align: center;
+  .number-counter {
+    @include counter-title();
+  }
+  .number-counter-label {
+    @include counter-label();
+  }
+}
+
+
+

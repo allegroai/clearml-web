@@ -1,0 +1,50 @@
+@import "variables.scss";
+
+$levels-list: error warn info success;
+
+.notifier__notification {
+  display: flex;
+  align-items: center;
+  padding-left: 15px;
+  color: $blue-200;
+  background-color: $blue-500;
+  min-height: 50px;
+
+  .notifier__notification-button {
+    position: absolute;
+    right: 10px;
+    top: -2px;
+    fill: $blue-300;
+
+    .notifier__notification-button-icon {
+      height: 15px;
+    }
+  }
+
+  &:before {
+    content: '';
+    width: 15px;
+    height: 15px;
+    background-repeat: no-repeat;
+    display: block;
+    margin-left: 10px;
+  }
+
+  @each $level in $levels-list {
+    &.notifier__notification--#{$level} {
+      border-left: solid 4px map-get($level-colors, $level);
+
+      &:before {
+        background-image: url("#{$assets-icons-path}/#{$level}.svg");
+      }
+    }
+  }
+
+  .notifier__notification-message {
+    width: 400px;
+    font-size: 12px;
+    line-height: 1.73;
+    padding-left: 25px;
+    padding-right: 10px;
+  }
+}

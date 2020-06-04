@@ -1,0 +1,19 @@
+<sm-experiment-output-model-form
+  *ngIf="modelInfo$ | async"
+  fieldName="model"
+  [editable]="editable$ | async"
+  [formData]="modelInfo$ | async"
+  [modelLabels]="modelLabels$ | async"
+  [saving]="saving$ |async"
+  [userKnowledge]="(userKnowledge$ | async)"
+  (activateEdit)="activateEditChanged($event)"
+  (cancelFormDataChange)="cancelModelChange()"
+  (errorsChanged)="onFormErrorsChanged($event)"
+  (formDataChanged)="onFormValuesChanged($event)"
+  (modelSelected)="onModelSelected($event)"
+  (saveFormData)="saveModelData()"
+  (showModelClicked)="showModel()"
+  (updateSectionKnowledge)="updateSectionKnowledge($event)"
+>
+</sm-experiment-output-model-form>
+

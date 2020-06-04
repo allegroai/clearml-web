@@ -1,0 +1,21 @@
+:host {
+  width: 370px;
+  min-height: 470px;
+}
+
+sm-checked-filter-list {
+  padding: 15px 15px 0 15px;
+  max-height: 419px;
+  /deep/ .actions {
+    padding-top: 10px;
+  }
+}
+
+.hyper-param-header {
+  color: #5a658e;
+  flex-basis: 84%
+}
+
+.hyper-params-container {
+  padding: 15px
+}

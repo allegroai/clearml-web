@@ -1,0 +1,89 @@
+@import "../themes";
+@import "../variables";
+
+
+@mixin generate-navbar-item($themes: $themes) {
+  @each $theme, $map in $themes {
+    $navbar-item: map-get($map, navbar-item);
+    :host-context(.#{$theme}-theme) .navbar-item {
+      color: map-get($navbar-item, color);
+      &.active.top {
+        @include generate-navbar-item-active('top',  map-get($navbar-item, active-color))
+      }
+
+      &.active.bottom {
+        @include generate-navbar-item-active('bottom',  map-get($navbar-item, active-color))
+      }
+
+      &.top {
+          @include generate-slide-effect('top', map-get($navbar-item, active-color))
+      }
+
+      &.bottom {
+          @include generate-slide-effect('bottom', map-get($navbar-item, active-color))
+      }
+    }
+  }
+}
+
+@mixin generate-navbar-item-active($direction, $active-color) {
+  color: $active-color;
+  @if $direction == 'top' {
+    border-top: solid 6px $active-color;
+    padding-top: 16px;
+  } @else {
+    border-bottom: solid 6px $active-color;
+    padding-bottom: 16px;
+  }
+}
+
+@mixin generate-slide-effect($direction, $active-color) {
+  &:not(.active) {
+    position: relative;
+  }
+  &:hover {
+    color: $active-color
+  }
+  @if $direction == 'bottom' {
+    &:not(.active)::after {
+      content: "";
+      background: $active-color;
+      height: 6px;
+      position: absolute;
+      bottom: 0;
+      //transition: .16s all 0.025s;
+    }
+    &:not(.active)::after {
+      left: 100%;
+      right: 0;
+    }
+
+    &:hover::after {
+      left: 0;
+      right: 0;
+    }
+    &:hover ~ .navbar-item::after {
+      left: 0;
+      right: 100%;
+    }
+  } @else {
+    &:hover ~ &::before {
+      left: 0;
+      right: 100%;
+    }
+
+    &:hover::before {
+      left: 0;
+      right: 0;
+    }
+    &:not(.active)::before {
+      content: "";
+      background: $active-color;
+      height: 6px;
+      position: absolute;
+      top: 0;
+      //transition: .16s all 0.025s;
+
+    }
+  }
+}

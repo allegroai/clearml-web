@@ -1,0 +1,39 @@
+<div *ngIf="noGraphs" class="no-output">
+  <i class="icon i-no-plots no-output-icon"></i>
+  <h3>NO CHART DATA</h3>
+</div>
+<sm-graph-settings-bar
+  [ngClass]="{showSettings: showSettings}"
+  [smoothWeight]="smoothWeight"
+  [xAxisType]="xAxisType"
+  (changeWeight)="changeWeight.emit($event)"
+  (toggleSettings)="toggleSettings.emit()"
+  (changeXAxisType)="changeXAxisType.emit($event)"
+></sm-graph-settings-bar>
+<div class="metrics-section" [class.with-settings]="showSettings">
+  <div class="all-metrics" [ngClass]="{'row': !isGroupGraphs}" #allMetrics>
+    <div *ngFor="let metric of graphList;trackBy: trackByFn" class="metric-group-container less-padding"
+         [ngClass]="{'hidden': hiddenList.includes(metric), 'col-xl-24  ': !isGroupGraphs }"
+         [class.col-xxl-12]="!isGroupGraphs && graphList.length > 1">
+      <div [id]="EXPERIMENT_GRAPH_ID_PREFIX + metric" class="graph-id">
+        <div>
+          <h3 class="metric-group-header" *ngIf="isGroupGraphs">{{metric}}</h3>
+          <div [ngClass]="{'row': isGroupGraphs, 'single-graph': graphsData[metric].length === 1}">
+            <sm-single-graph *ngFor="let chartItem of graphsData[metric];trackBy: trackByIdFn.bind(this, metric)"
+                             [ngClass]="{'col-xl-24 less-padding': isGroupGraphs}"
+                             [class.col-xxl-12]="isGroupGraphs && chartItem?.data[0]?.type !== 'table' && graphsData[metric].length > 1"
+                             [legendStringLength]="legendStringLength"
+                             [chart]="chartItem"
+                             [id]="SINGLE_GRAPH_ID_PREFIX + EXPERIMENT_GRAPH_ID_PREFIX + metric + chartItem.layout.title + chartItem.iter + (chartItem.layout.images && chartItem.layout.images[0]?.source)"
+                             [isCompare]="isCompare"
+                             [smoothWeight]="smoothWeight"
+                             [xAxisType]="xAxisType"
+                             [identifier]="SINGLE_GRAPH_ID_PREFIX + EXPERIMENT_GRAPH_ID_PREFIX + metric + chartItem.layout.title + chartItem.iter + (chartItem.layout.images && chartItem.layout.images[0]?.source)">
+            </sm-single-graph>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

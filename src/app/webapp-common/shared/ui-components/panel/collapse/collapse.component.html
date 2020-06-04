@@ -1,0 +1,38 @@
+<mat-expansion-panel
+  #panel
+  [disabled]="disabled"
+  [expanded]="expanded"
+  [class]="panelClass"
+  [ngClass]="{'finish-expanding': isFinishExpanding, animationActive: animationActive}"
+  (afterExpand)="afterAnimation(true)"
+  (afterCollapse)="afterAnimation(false)"
+
+>
+  <mat-expansion-panel-header
+    class="pointer"
+    collapsedHeight="48px"
+    expandedHeight="48px"
+    [ngClass]="[headerClass || '', expandLoadingActive? 'loading-collapse': '']"
+    (click)="toggleOpen()"
+  >
+    <mat-panel-title>
+      <div class="header-content">
+        <div class="header-container">
+          <ng-content select="[header-content]">
+          </ng-content>
+        </div>
+      </div>
+      <h3 class="al-header">{{header}}</h3>
+      <div class="loading-container">
+        <div class="mini-circle-loader"></div>
+      </div>
+    </mat-panel-title>
+    <mat-panel-description>
+    </mat-panel-description>
+  </mat-expansion-panel-header>
+  <div *ngIf="contentAttached">
+    <ng-content></ng-content>
+  </div>
+</mat-expansion-panel>
+
+

@@ -1,0 +1,20 @@
+@import "../../styles/mixins/navbar-item";
+@import '../../styles/variables';
+
+.navbar-item {
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+  cursor: pointer;
+  padding: 22px;
+  display: inline-block;
+  position: relative;
+
+  sm-menu {
+    position: absolute;
+  }
+}
+
+
+
+@include generate-navbar-item();

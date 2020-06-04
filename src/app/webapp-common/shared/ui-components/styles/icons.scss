@@ -1,0 +1,655 @@
+@import "variables";
+@import "mixins/icon";
+
+.icon {
+  width: 24px;
+  height: 24px;
+
+  &.flashing-icon {
+    transition: opacity 0.3s;
+  }
+
+  &.flashing-icon:hover {
+    opacity: 1 !important;
+  }
+
+  &.white {
+    filter: brightness(0) contrast(1) grayscale(1) invert(1);
+  }
+
+  &.xs {
+    width: 10px;
+    height: 10px;
+  }
+
+  &.sm {
+    width: 16px;
+    min-width: 16px;
+    height: 16px;
+  }
+
+  &.sm-md {
+    width: 20px;
+    height: 20px;
+  }
+
+  &.md {
+    width: 24px;
+    height: 24px;
+  }
+
+  &.lg {
+    width: 32px;
+    height: 32px;
+  }
+
+  &.xl {
+    width: 48px;
+    height: 48px;
+  }
+
+  &.xxl {
+    width: 88px;
+    height: 88px;
+  }
+}
+
+.i-back {
+  @include icon('#{$assets-icons-path}/back.svg');
+}
+
+.i-expand-collapse-all {
+  @include icon('#{$assets-icons-path}/expand-collapse-all.svg');
+}
+
+.i-expand-collapse-all-inactive {
+  @include icon('#{$assets-icons-path}/expand-collapse-inactive.svg');
+}
+
+.i-home-neon {
+  @include icon('#{$assets-icons-path}/home-neon.svg');
+}
+
+.i-datasets {
+  @include icon('#{$assets-icons-path}/side-nav/datasets.svg');
+}
+
+.i-datasets-white {
+  @include icon('#{$assets-icons-path}/datasets-white.svg');
+}
+
+.i-plus-black {
+  @include icon('#{$assets-icons-path}/plus-black.svg');
+}
+
+.i-projects-neon {
+  @include icon('#{$assets-icons-path}/projects-neon.svg');
+}
+
+.type {
+  @include icon('#{$assets-icons-path}/custom-task-type.svg');
+
+  &.training {
+    @include icon('#{$assets-icons-path}/training.svg');
+  }
+
+  &.testing {
+    @include icon('#{$assets-icons-path}/testing.svg');
+  }
+}
+
+.i-training {
+  @include icon('#{$assets-icons-path}/training.svg');
+}
+
+.i-dataview {
+  @include icon('#{$assets-icons-path}/dataview-icon.svg');
+}
+
+.i-clone {
+  @include icon('#{$assets-icons-path}/clone.svg');
+}
+
+.i-clone-black {
+  @include icon('#{$assets-icons-path}/clone-black.svg');
+}
+
+.i-extand-copy-1 {
+  @include icon('#{$assets-icons-path}/extand-copy-1.svg');
+}
+
+.i-home-off {
+  @include icon('#{$assets-icons-path}/home-off.svg');
+}
+
+.i-list-view {
+  @include icon('#{$assets-icons-path}/bars-menu.svg');
+}
+
+.i-plus-blue {
+  @include icon('#{$assets-icons-path}/plus-blue.svg');
+}
+
+.i-projects-off {
+  @include icon('#{$assets-icons-path}/projects-off.svg');
+}
+
+.i-trash {
+  @include icon('#{$assets-icons-path}/trash.svg');
+}
+
+.i-compare-copy {
+  @include icon('#{$assets-icons-path}/compare-copy.svg');
+}
+
+.i-extand {
+  @include icon('#{$assets-icons-path}/extand.svg');
+}
+
+.i-extand-black {
+  @include icon('#{$assets-icons-path}/extand-black.svg');
+}
+
+.i-home {
+  @include icon('#{$assets-icons-path}/home.svg');
+}
+
+.i-plus-purple-light {
+  @include icon('#{$assets-icons-path}/plus-purple-light.svg');
+}
+
+.i-projects {
+  @include icon('#{$assets-icons-path}/projects.svg');
+}
+
+.i-projects-white {
+  @include icon('#{$assets-icons-path}/projects-white.svg');
+}
+
+.i-sort-off {
+  @include icon('#{$assets-icons-path}/sort-off.svg');
+}
+
+.i-cursor {
+  @include icon('#{$assets-icons-path}/cursor.svg');
+}
+
+.i-filter-focus {
+  @include icon('#{$assets-icons-path}/filter-focus.svg');
+}
+
+.i-plus-thin {
+  @include icon('#{$assets-icons-path}/plus-thin.svg');
+}
+
+.i-queues-neon {
+  @include icon('#{$assets-icons-path}/queues-neon.svg');
+}
+
+.i-queues-white {
+  @include icon('#{$assets-icons-path}/queues-white.svg');
+}
+
+.i-queue {
+  @include icon('#{$assets-icons-path}/queue.svg');
+}
+
+.i-queues-icon {
+  @include icon('#{$assets-icons-path}/queues-icon.svg');
+}
+
+.i-sort-on-down {
+  @include icon('#{$assets-icons-path}/sort-on-down.svg');
+}
+
+.i-draft-light-blue {
+  @include icon('#{$assets-icons-path}/draft-light-blue.svg');
+}
+
+.i-edit {
+  @include icon('#{$assets-icons-path}/edit.svg');
+}
+
+.i-filter-off {
+  @include icon('#{$assets-icons-path}/filter-off.svg');
+}
+
+.i-how-to-white {
+  @include icon('#{$assets-icons-path}/how-to-white.svg');
+}
+
+.i-move-to-project {
+  @include icon('#{$assets-icons-path}/move-to-project.svg');
+}
+
+.i-queues {
+  @include icon('#{$assets-icons-path}/queues.svg');
+}
+
+.i-sort-on-up {
+  @include icon('#{$assets-icons-path}/sort-on-up.svg');
+}
+
+.i-gear {
+  @include icon('#{$assets-icons-path}/settings_gear.svg');
+}
+
+.i-filter-on {
+  @include icon('#{$assets-icons-path}/filter-on.svg');
+}
+
+.i-datasets-neon {
+  @include icon('#{$assets-icons-path}/datasets-neon.svg');
+}
+
+.i-custom-type {
+  @include icon('#{$assets-icons-path}/custom-task-type.svg');
+}
+
+.i-testing {
+  @include icon('#{$assets-icons-path}/testing.svg');
+
+  &.dark {
+    @include icon('#{$assets-icons-path}/testing-dark.svg');
+  }
+
+  &.black {
+    @include icon('#{$assets-icons-path}/test-icon.svg');
+  }
+}
+
+.i-queued {
+  @include icon('#{$assets-icons-path}/pending.svg');
+
+  &.bw {
+    @include icon('#{$assets-icons-path}/pending-dark.svg');
+
+  }
+}
+
+.i-in_progress {
+  @include icon('#{$assets-icons-path}/running-green.svg');
+
+  &.bw {
+    @include icon('#{$assets-icons-path}/running-title.svg');
+  }
+
+  &.dark {
+    @include icon('#{$assets-icons-path}/running-dark.svg');
+  }
+}
+
+.i-completed {
+  @include icon('#{$assets-icons-path}/completed.svg');
+
+  &.bw {
+    @include icon('#{$assets-icons-path}/completed-white.svg');
+  }
+}
+
+.i-stopped {
+  @include icon('#{$assets-icons-path}/completed.svg');
+
+  &.bw {
+    @include icon('#{$assets-icons-path}/completed-white.svg');
+  }
+}
+
+.i-dequeu {
+  @include icon('#{$assets-icons-path}/dequeue.svg');
+}
+
+.i-closed {
+  @include icon('#{$assets-icons-path}/completed.svg');
+}
+
+.i-copy-to-clipboard {
+  @include icon('#{$assets-icons-path}/copy-to-clipboard.svg');
+}
+
+.i-failed {
+  @include icon('#{$assets-icons-path}/failed.svg');
+
+  &.bw {
+    @include icon('#{$assets-icons-path}/failed-white.svg');
+  }
+}
+
+.i-published {
+  @include icon('#{$assets-icons-path}/published-neon.svg');
+
+  &.bw {
+    @include icon('#{$assets-icons-path}/published-title.svg');
+  }
+
+}
+
+.i-unpublish {
+  @include icon('#{$assets-icons-path}/unpublish.svg');
+}
+
+.i-x {
+  @include icon('#{$assets-icons-path}/x.svg');
+}
+
+.i-x-white {
+  @include icon('#{$assets-icons-path}/x-white.svg');
+}
+
+.i-id {
+  @include icon('#{$assets-icons-path}/id.svg');
+}
+
+.i-id-fix {
+  @include icon('#{$assets-icons-path}/id-fix.svg');
+}
+
+.i-dialog-x {
+  @include icon('#{$assets-icons-path}/close.svg');
+
+  &.gray {
+    @include icon('#{$assets-icons-path}/close-gray.svg');
+  }
+}
+
+.i-annotation {
+  @include icon('#{$assets-icons-path}/annotation.svg');
+}
+
+.i-annotation-white {
+  @include icon('#{$assets-icons-path}/annotation-white.svg');
+}
+
+.i-v-neon {
+  @include icon('#{$assets-icons-path}/v.svg');
+}
+
+.i-v-green {
+  @include icon('#{$assets-icons-path}/v-green.svg');
+}
+
+.i-v {
+  @include icon('#{$assets-icons-path}/v-copy.svg');
+}
+
+.i-v-white {
+  @include icon('#{$assets-icons-path}/white-v.svg');
+}
+
+.i-v-black {
+  @include icon('#{$assets-icons-path}/black-v.svg');
+}
+
+.i-compare {
+  @include icon('#{$assets-icons-path}/compare-icon.svg');
+}
+
+.i-compare {
+  @include icon('#{$assets-icons-path}/compare-icon.svg');
+}
+
+.i-archive-black {
+  @include icon('#{$assets-icons-path}/archive-icon.svg');
+}
+
+.i-archive {
+  @include icon('#{$assets-icons-path}/archive.svg');
+}
+
+.i-archive-light-blue {
+  @include icon('#{$assets-icons-path}/archive-light-blue.svg');
+}
+
+.i-alert {
+  @include icon('#{$assets-icons-path}/alert.svg');
+}
+
+.i-alert-all-neon {
+  @include icon('#{$assets-icons-path}/alert-all-neon.svg');
+}
+
+.i-alert-all-grey {
+  @include icon('#{$assets-icons-path}/alert-all-grey.svg');
+}
+
+.i-created {
+  @include icon('#{$assets-icons-path}/draft-light-blue.svg');
+}
+
+.i-annotation-blue-neon {
+  @include icon('#{$assets-icons-path}/annotation-blue-neon.svg');
+}
+
+.i-publish {
+  @include icon('#{$assets-icons-path}/publish.svg');
+
+  &.grey {
+    @include icon('#{$assets-icons-path}/publish-grey.svg');
+  }
+}
+
+.i-rectangle {
+  @include icon('#{$assets-icons-path}/rectangle-icon-purple.svg');
+
+  &.neon {
+    @include icon('#{$assets-icons-path}/rectangle-icon-purple-neon.svg');
+  }
+}
+
+.i-polygon {
+  @include icon('#{$assets-icons-path}/polygon-icon-purple.svg');
+
+  &.neon {
+    @include icon('#{$assets-icons-path}/polygon-icon-purple-neon.svg');
+  }
+}
+
+.i-keypoint {
+  @include icon('#{$assets-icons-path}/keypoint-icon-purple.svg');
+
+  &.neon {
+    @include icon('#{$assets-icons-path}/keypoint-icon-purple-neon.svg');
+  }
+}
+
+.i-ellipse {
+  @include icon('#{$assets-icons-path}/ellipse-icon-purple.svg');
+
+  &.neon {
+    @include icon('#{$assets-icons-path}/ellipse-icon-purple-neon.svg');
+  }
+}
+
+.i-terms {
+  @include icon('#{$assets-icons-path}/terms-icon.svg');
+}
+
+.i-model {
+  @include icon('#{$assets-icons-path}/model.svg');
+}
+
+.i-generate-code {
+  @include icon('#{$assets-icons-path}/generate-code-copy.svg');
+}
+
+.i-alert-purple {
+  @include icon('#{$assets-icons-path}/alert-purple.svg');
+}
+
+.i-input-model {
+  @include icon('#{$assets-icons-path}/input-model.svg');
+}
+
+.i-output-model {
+  @include icon('#{$assets-icons-path}/output-model.svg');
+}
+
+.i-data-audit {
+  @include icon('#{$assets-icons-path}/data-audit.svg');
+
+}
+
+.i-alert-red {
+  @include icon('#{$assets-icons-path}/alert-red.svg');
+}
+
+.i-blob {
+  @include icon('#{$assets-icons-path}/blob.svg');
+}
+
+.i-cat {
+  @include icon('#{$assets-icons-path}/cat-icon.svg');
+}
+
+.i-Caffe {
+  @include icon('#{$assets-icons-path}/caffe-icon.svg');
+}
+
+.i-PyTorch {
+  @include icon('#{$assets-icons-path}/pytorch-icon.svg');
+}
+
+.i-Custom {
+  @include icon('#{$assets-icons-path}/custom-icon.svg');
+}
+
+.i-Keras {
+  @include icon('#{$assets-icons-path}/keras-icon.svg');
+}
+
+.i-Tensor.Flow {
+  @include icon('#{$assets-icons-path}/tensorflow-icon.svg');
+  filter: none;
+}
+
+.i-no-plots {
+  @include icon('#{$assets-icons-path}/no-plots.svg');
+}
+
+.i-no-log {
+  @include icon('#{$assets-icons-path}/no-log.svg');
+}
+
+.i-no-debug {
+  @include icon('#{$assets-icons-path}/no-debug.svg');
+}
+
+.i-no-debug-white {
+  @include icon('#{$assets-icons-path}/no-debug-white.svg');
+}
+
+.i-no-data-graph {
+  @include icon('#{$assets-icons-path}/no-data-graph.svg');
+}
+
+.i-arrow-from-left {
+  @include icon('#{$assets-icons-path}/arrow-from-left.svg');
+}
+
+.i-arrow-from-right {
+  @include icon('#{$assets-icons-path}/arrow-from-right.svg');
+}
+
+.i-arrow-to-top {
+  @include icon('#{$assets-icons-path}/arrow-to-top.svg');
+}
+
+.i-arrow-to-bottom {
+  @include icon('#{$assets-icons-path}/arrow-to-bottom.svg');
+}
+
+.i-info-maximize {
+  @include icon('#{$assets-icons-path}/info-max.svg');
+}
+
+.i-info-minimize {
+  @include icon('#{$assets-icons-path}/info-min.svg');
+}
+
+.i-redo {
+  @include icon('#{$assets-icons-path}/redo.svg');
+}
+
+.i-undo {
+  @include icon('#{$assets-icons-path}/undo.svg');
+}
+
+.i-reset {
+  @include icon('#{$assets-icons-path}/reset.svg');
+}
+
+.i-zoom-in {
+  @include icon('#{$assets-icons-path}/zoom-in.svg');
+}
+
+.i-zoom-out {
+  @include icon('#{$assets-icons-path}/zoom-out.svg');
+}
+
+.i-zoom-to-fit {
+  @include icon('#{$assets-icons-path}/fit.svg');
+}
+
+.i-zoom-plus {
+  @include icon('#{$assets-icons-path}/plus2020.svg');
+}
+
+.i-zoom-minus {
+  @include icon('#{$assets-icons-path}/minus.svg');
+}
+
+.i-zoom-reset {
+  @include icon('#{$assets-icons-path}/zoom-1-to-1.svg');
+}
+
+.i-previous {
+  @include icon('#{$assets-icons-path}/previous.svg');
+}
+
+.i-next {
+  @include icon('#{$assets-icons-path}/next.svg');
+}
+
+.i-download {
+  @include icon('#{$assets-icons-path}/download.svg');
+}
+
+.i-next-batch {
+  @include icon('#{$assets-icons-path}/next-batch.svg');
+}
+
+.i-prev-batch {
+  @include icon('#{$assets-icons-path}/prev-batch.svg');
+}
+
+.i-between {
+  @include icon('#{$assets-icons-path}/between.svg');
+}
+
+.i-back-to-top {
+  @include icon('#{$assets-icons-path}/back-to-top.svg');
+}
+
+.i-kibana {
+  @include icon('#{$assets-icons-path}/kibana.svg');
+}
+
+.i-download-frames {
+  @include icon('#{$assets-icons-path}/download-frames.svg');
+}
+
+.i-kibana-code {
+  @include icon('#{$assets-icons-path}/kibana-code.svg');
+}
+
+.i-audio {
+  @include icon('#{$assets-icons-path}/audio.svg');
+}
+
+.i-no-debug-samples {
+  @include icon('#{$assets-icons-path}/no-debug-samples.svg');
+}
+
+.i-no-debug-samples-with-text {
+  @include icon('#{$assets-icons-path}/no-debug-samples-with-text.svg');
+}

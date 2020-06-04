@@ -1,0 +1,36 @@
+<div class="editable-div">
+  <div [style.display]="active ? 'none': 'block'" >
+    <div class="d-flex" #template (click)="(!inlineDisabled) && inlineActivated()"
+      ><ng-content></ng-content>
+      <i *ngIf="editable" class='p2 fa pull-right editable-pen' [ngClass]="(!inlineDisabled)? ICONS.EDITABLE :''"></i>
+    </div>
+  </div>
+    <div *ngIf="editable" [style.display]=" ! active ? 'none': 'block'" tabindex="12">
+      <div class="inline-edit-form" #inlineInputContainer>
+
+        <input type="text" class="form-control inline-edit-input"
+               *ngIf="!multiline"
+               (blur)="inlineCanceled()"
+               [(ngModel)]="inlineValue"
+               [pattern]="pattern"
+               (keydown.tab)="inlineSaved()"
+               (keydown.escape)="inlineCanceled()"
+               (keydown.enter)="inlineSaved()"
+               #inlineInput />
+
+        <textarea class="form-control inline-edit-textarea"
+                  *ngIf="multiline"
+                  (blur)="inlineCanceled()"
+                  [(ngModel)]="inlineValue"
+                  [pattern]="pattern"
+                  (keydown.tab)="inlineSaved()"
+                  (keydown.escape)="inlineCanceled()"
+                  [rows]="multiline?rows:1"
+                  #inlineInput>{{inlineValue}}
+        </textarea>
+        <i class="fa fa-times inline-edit-close pointer" [id]="CANCEL_BUTTON" (click)="stopProp($event)"
+           (mousedown)="cancelClicked()"></i>
+        <i class="fas fa-check inline-edit-approve pointer" (click)="stopProp($event)" (mousedown)="inlineSaved()"></i>
+      </div>
+    </div>
+</div>

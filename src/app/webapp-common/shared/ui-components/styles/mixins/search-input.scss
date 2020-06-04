@@ -1,0 +1,33 @@
+@import "../themes";
+@import "../variables";
+
+@mixin generate-search-input($themes: $themes) {
+  @each $theme, $map in $themes {
+    $search-input: map-get($map, search-input);
+    :host-context(.#{$theme}-theme) {
+      .search-input-container {
+
+        .search-input {
+          color: map_get($search-input, color);
+          border-color: map_get($search-input, border-color);
+          &:focus {
+            border-color: map_get($search-input, border-color-focus);
+          }
+
+          &::-webkit-input-placeholder {
+            color: map_get($search-input, ph-color);
+          }
+
+          &::-moz-placeholder {
+            color: map_get($search-input, ph-color);
+          }
+        }
+
+        i.fa {
+          color: map_get($search-input, icon-color);
+        }
+      }
+    }
+  }
+}
+

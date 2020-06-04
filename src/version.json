@@ -1,0 +1,10 @@
+{
+  "version": "0.0.0-120",
+  "trains-server-treeish": "master",
+  "trains-server-commit": "372205e3bd60955f277d89fde17446d715e1ec9c",
+  "webapp-treeish": "master",
+  "webapp-commit": "06b54f8a33dc6f7013ac0b1809b5d1c9ed10c4d3",
+  "webapp-common-treeish": "master",
+  "webapp-common-commit": "4bb4844af450a2269432a1eeadb537ad24cb2658",
+  "date": "Sun Aug 4 08:44:21 UTC 2019"
+}

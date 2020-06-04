@@ -1,0 +1,21 @@
+.toggle-all {
+  margin-top: 2px;
+  cursor: pointer;
+
+  .toggle-all-text {
+    font-size: 10px;
+  }
+  .uncheckedAll {
+    opacity: 0.4;
+  }
+}
+
+i.toggle-icon {
+  font-size: 15px;
+  height: 18px;
+  padding-left: 5px;
+
+  &.unchecked {
+    opacity: 0.4;
+  }
+}

@@ -1,0 +1,19 @@
+<div
+  class="color-picker-wrapper"
+  [class.light-theme]="props?.theme === 'light'"
+  [style.top.px]="props?.top"
+  [style.left.px]="props?.left">
+  <div
+    [(colorPicker)]="defaultColor"
+    [(cpToggle)]="toggle"
+    [cpOKButton]="true"
+    [cpCancelButton]="true"
+    [cpSaveClickOutside]="false"
+    [cpOKButtonClass]="'btn btn-primary btn-xs'"
+    [cpCancelButtonClass]="'btn btn-primary btn-xs m-3'"
+    [cpAlphaChannel]="'disabled'"
+    [cpDisableInput]="true"
+    [cpPresetColors]="presetColors"
+    (colorPickerSelect)="selectColor($event)">
+  </div>
+</div>

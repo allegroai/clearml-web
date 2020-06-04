@@ -1,0 +1,11 @@
+<ul class="list">
+  <li
+    *ngFor="let item of list"
+    class="item"
+    [ngClass]="{'unchecked' : checkedList?.includes(item.value)}"
+    (click)="onItemSelect.emit(item.value)"
+  >
+    <div class="pointer ellipsis pr-3" [smTooltip]="item.value" [showDelay]="500">{{item.value}}</div>
+    <i (click)="onItemCheck.emit(item.value); $event.stopPropagation()" [class]="checkIcon + ' fa icon'"></i>
+  </li>
+</ul>

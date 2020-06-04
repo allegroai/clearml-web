@@ -1,0 +1,4 @@
+@mixin line($height, $width: auto) {
+  width: $width;
+  border: solid $height $line-color;
+}

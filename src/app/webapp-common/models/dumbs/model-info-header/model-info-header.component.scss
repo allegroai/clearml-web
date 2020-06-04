@@ -1,0 +1,42 @@
+:host{
+  .model-icon {
+    margin-right: 9px;
+  }
+  .middle-col {
+    width: calc(100% - 100px);
+  }
+
+  .model-name {
+    font-size: 15px;
+    min-height:24px;
+    font-weight: bold;
+    max-width: 80ch;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .experiment-type {
+    font-size: 11px;
+    color: #8492c2;
+  }
+
+  .model-id {
+    top: 4px;
+    position: relative;
+    font-weight: bold;
+  }
+  .id-icon{
+    width: 41px;
+    height: 31px;
+  }
+  .edit-name {
+    margin-top:5px;
+  }
+  .menu-button, .menu-button &:hover, .menu-button &:focus {
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 12px;
+    text-decoration: none;
+  }
+}

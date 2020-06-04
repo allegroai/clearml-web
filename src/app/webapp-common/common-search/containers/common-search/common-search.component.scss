@@ -1,0 +1,44 @@
+@import "../../../shared/ui-components/styles/variables";
+
+
+:host {
+  position: relative;
+  height: 32px;
+  display: block;
+}
+
+.search-icon-container {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  i.fa {
+    color: $blue-grey;
+    font-size: 18px;
+    margin-left: auto;
+    &:hover {
+      color: $blue-200;
+    }
+  }
+  i.fa-times {
+    margin-right:4px;
+  }
+}
+
+.search-container {
+  width: 0;
+  overflow: hidden;
+  transition: width 0.35s ease-in-out;
+  display: inline-block;
+
+  &.open {
+    width: 300px;
+  }
+}
+
+sm-search {
+  display: contents;
+}

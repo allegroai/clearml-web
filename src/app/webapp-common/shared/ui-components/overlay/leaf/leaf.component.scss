@@ -1,0 +1,16 @@
+@import "../../styles/mixins";
+
+.gradiented-background {
+  @include gradiented-background;
+  &.no-code{
+    height: 68vh;
+  }
+}
+.choose-container {
+  @include choose-leaf;
+}
+
+.code-select{
+  position: absolute;
+  bottom: 5px;
+}

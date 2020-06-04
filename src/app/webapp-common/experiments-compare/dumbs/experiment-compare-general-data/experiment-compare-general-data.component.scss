@@ -1,0 +1,67 @@
+@import "../../../shared/ui-components/styles/variables";
+
+:host {
+  header {
+    .project {
+      font-size: 12px;
+      width: 330px;
+      line-height: 1.5;
+      margin-bottom: 6px;
+    }
+
+    h3 {
+      font-size: 19px;
+      margin: 0;
+    }
+
+    .experiment-name {
+      height: 22px;
+      max-width: 93%;
+      display: inline-block;
+      white-space: nowrap;
+      a {
+        display: block;
+        width: 100%;
+        color: inherit;
+      }
+    }
+
+    .id-icon {
+      width: 16px;
+      height: 13px;
+      margin-left: 6px;
+    }
+  }
+
+  sm-tag-list {
+    margin-top: 4px;
+    height: 18px;
+  }
+
+  .general-info {
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    height: 40px;
+
+    .dot {
+      background-color: $blue-400;
+      opacity: 0.5;
+      width: 3px;
+      height: 3px;
+      margin: 0 10px;
+      border-radius: 50%;
+    }
+
+    .iterations {
+      flex: 1;
+    }
+
+    .bw.i-completed.icon {
+      background-image: url('/app/webapp-common/assets/icons/completed-dark.svg') !important;
+    }
+    .bw.i-stopped.icon {
+      background-image: url('/app/webapp-common/assets/icons/completed-dark.svg') !important;
+    }
+  }
+}

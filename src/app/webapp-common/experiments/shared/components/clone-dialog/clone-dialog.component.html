@@ -1,0 +1,50 @@
+<sm-dialog-template iconClass="i-clone-black" [header]="header">
+  <div class="reference">
+    A draft copy of <b *ngIf="reference" [smTooltip]="reference.length > 80 ? reference : undefined">{{reference.length > 80 ? (reference | slice:0:77) + '...' : reference }}</b> will be created.
+  </div>
+<div class="form-container">
+  <h5>Project</h5>
+  <sm-select-group
+    *ngIf="projects$ | async"
+    fieldName="project"
+    inputClassName="highlight"
+    [options]="projects$ | async"
+    [placeHolder]=""
+    [formData]="formData.project"
+    (formDataChanged)="formDataChanged($event)">
+  </sm-select-group>
+
+  <h5>Name</h5>
+  <sm-input-group
+    fieldName="name"
+    inputClassName="highlight"
+    placeHolder="Name"
+    [validators]="validators.name"
+    [formData]="formData.name"
+    [errorMessages]="errorMessages.name"
+    [errors]="errors.name"
+    (formDataChanged)="formDataChanged($event)"
+    (errorsChanged)="formErrorChanged($event)"
+  >
+  </sm-input-group>
+
+  <h5>Description</h5>
+  <sm-textarea-control
+    fieldName="comment"
+    inputClassName="highlight description"
+    [rows]="4"
+    [formData]="formData.comment"
+    (formDataChanged)="formDataChanged($event)">
+    >
+  </sm-textarea-control>
+
+  <div class="buttons">
+    <button (click)="closeDialog(false)" class="btn btn-outline-neon">
+      CANCEL
+    </button>
+    <button (click)="closeDialog(true)" [disabled]="!isFormValid()" class="btn btn-neon yes-button">
+      CLONE
+    </button>
+  </div>
+</div>
+</sm-dialog-template>

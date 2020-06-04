@@ -1,0 +1,32 @@
+:host {
+  display: block;
+  position: relative;
+  height: 100%;
+
+  .col-6 {
+    padding: 0;
+  }
+
+  .artifacts-col {
+    overflow: auto;
+    height: 100%;
+    padding: 0;
+  }
+
+  /deep/ sm-labeled-row {
+    border-bottom: none !important;
+  }
+
+  /deep/ hr {
+    margin: 0 26px;
+  }
+
+  /deep/ sm-textarea-control textarea{
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  }
+
+  sm-experiment-artifacts-navbar {
+    border-right: 1px solid #dee1e9;
+  }
+
+}

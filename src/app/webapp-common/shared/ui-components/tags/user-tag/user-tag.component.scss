@@ -1,0 +1,69 @@
+:host {
+  display: flex;
+  position: relative;
+  height: 18px;
+  overflow: hidden;
+  padding-right: 20px;
+
+  &:hover {
+    .remove {
+      display: block;
+    }
+  }
+
+  .content {
+    border-radius: 3px 0 0 3px;
+    display: inline-block;
+    position: relative;
+    height: 18px;
+    line-height: 18px;
+    flex: 1;
+    padding-left: 8px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 12px;
+    z-index: 10;
+    white-space: nowrap;
+
+    &.add-button {
+      border-left: solid 1px #a7b2d8;
+      border-top: solid 1px #a7b2d8;
+      border-bottom: solid 1px #a7b2d8;
+      cursor: pointer;
+      line-height: 18px;
+      font-size: 10px;
+      font-weight: 500;
+    }
+  }
+
+  .remove {
+    display: none;
+    position: absolute;
+    right: 5px;
+    top: 0px;
+    z-index: 100;
+    padding: 5px;
+    cursor: pointer;
+
+    @supports (-moz-appearance:meterbar) {
+      top: -1px;
+    }
+  }
+
+  .arrow {
+    transform: rotate(45deg);
+    content: '';
+    position: absolute;
+    right: 6px;
+    top: -6px;
+    width: 30px;
+    height: 30px;
+    background-color: inherit;
+
+    &.add-button {
+      border-right: solid 1px #a7b2d8;
+      border-top: solid 1px #a7b2d8;
+      right: 17px;
+    }
+  }
+}

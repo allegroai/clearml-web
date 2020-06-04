@@ -1,0 +1,28 @@
+<div class="al-card">
+  <div
+       class="card-container"
+       [ngClass]="{'bordered': showBorder}"
+       >
+    <div class="extra-header">
+      <ng-content select="[extra-header]">
+      </ng-content>
+    </div>
+    <header>
+      <div>
+        <h4 *ngIf="header" class="al-header">{{header}}</h4>
+        <ng-content select="[header-content]"></ng-content>
+      </div>
+      <div>
+        <ng-content select="[headerButtons]"></ng-content>
+      </div>
+    </header>
+    <div class="card-body">
+      <ng-content></ng-content>
+      {{text}}
+    </div>
+    <footer>
+      <ng-content select="[footer]">
+      </ng-content>
+    </footer>
+  </div>
+</div>

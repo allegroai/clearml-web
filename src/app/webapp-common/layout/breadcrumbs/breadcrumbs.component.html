@@ -1,0 +1,34 @@
+<span *ngFor="let crumb of breadcrumbs; let i=index" class="breadcrumbLink">
+  <a [routerLink]="crumb.url">{{crumb.name}}</a>
+  <a *ngIf="i < breadcrumbs?.length - 1"> > </a>
+</span>
+<div *ngIf="checkIfBreadcrumbsInitiated()">
+  <i *ngIf="showShareButton"
+     class="fa fa-share-alt share pointer"
+     smTooltip="Share"
+     mat-icon-button
+     [matMenuTriggerFor]="shareModal"
+     (click)="openShareModal()"
+  ></i>
+  <mat-menu #shareModal="matMenu" #menuTrigger="matMenuTrigger" [matMenuTriggerFor]="shareModal">
+    <div class="share-menu-container" smClickStopPropagation>
+      <div class="d-flex align-items-center justify-content-between top">
+        <div class="share-title">SHARE</div>
+        <i class="pointer icon i-dialog-x sm-md close-dialog" (click)="menuTrigger.closeMenu()" smClickStopPropagation></i>
+      </div>
+      <div class="copy-title">Copy the following URL to share this view with others</div>
+      <div class="link-box">
+        <div class="ellipsis">{{currentUrl}}</div>
+      </div>
+      <div class="d-flex justify-content-end">
+        <button class="btn btn-neon"
+                ngxClipboard
+                smClickStopPropagation
+                [cbContent]="currentUrl"
+                (cbOnSuccess)="copyToClipboardSuccess(); menuTrigger.closeMenu()">COPY LINK
+        </button>
+      </div>
+    </div>
+  </mat-menu>
+</div>
+

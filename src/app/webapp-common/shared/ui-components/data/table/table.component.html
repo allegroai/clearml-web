@@ -1,0 +1,117 @@
+<p-table
+  class="table"
+  *ngIf="!minimizedView"
+  dataKey="id"
+  [scrollHeight]="'100%'"
+  [autoLayout]="false"
+  [columns]="columns"
+  [selectionMode]="selectionMode"
+  [rows]="rowsNumber"
+  [value]="tableData"
+  [sortField]="sortField"
+  [sortOrder]="sortOrder"
+  [selection]="selection"
+  [reorderableColumns]="reorderableColumns"
+  [resizableColumns]="resizableColumns"
+  columnResizeMode="expand"
+  [scrollable]="resizableColumns"
+  (onColReorder)="onColReorder($event)"
+  [first]="first"
+  [rowHover]="true"
+  [contextMenu]="cm"
+  (firstChange)="onFirstChanged($event)"
+  (onSort)="onSortChanged($event)"
+  (onRowSelect)="onRowSelected($event)"
+  (onRowUnselect)="onRowDeselected($event)"
+  (onContextMenuSelect)="openContext($event)"
+  #dataTable>
+  <ng-template pTemplate="colgroup" let-columns>
+    <colgroup>
+      <col *ngFor="let col of columns" [style.width]="col.style?.width">
+    </colgroup>
+  </ng-template>
+  <ng-template pTemplate="emptymessage">
+    <tr class="no-data-row">
+      <td [attr.colspan]="columns.length" class="no-data">
+        {{noDataMessage}}
+      </td>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="header" let-columns let-rowData>
+    <tr class="header ui-state-default">
+      <th *ngFor="let col of columns"
+          pReorderableColumn
+          resizableColumn
+          [pResizableColumnDisabled]="col?.disableDrag"
+          [pReorderableColumnDisabled]="col?.disableDrag"
+          [class.grab]="reorderableColumns"
+          [class.resize-enabled]="resizableColumns"
+          [class.resize-disabled]="!resizableColumns"
+          [class.selected-col-header]="col?.disableDrag">
+        <ng-container [ngSwitch]="col?.headerType">
+          <ng-container *ngSwitchCase="ColHeaderTypeEnum.sort">
+            <ng-container *ngTemplateOutlet="sortTemplate; context: {$implicit: col}"></ng-container>
+          </ng-container>
+          <ng-container *ngSwitchCase="ColHeaderTypeEnum.sortFilter">
+            <ng-container *ngTemplateOutlet="sortFilterTemplate; context: {$implicit: col}"></ng-container>
+          </ng-container>
+          <ng-container *ngSwitchCase="ColHeaderTypeEnum.checkBox">
+            <ng-container *ngTemplateOutlet="checkboxTemplate; context: {$implicit: col}"></ng-container>
+          </ng-container>
+          <ng-container *ngSwitchDefault>
+            <div class="col-header">{{col.header}}</div>
+          </ng-container>
+        </ng-container>
+      </th>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="body" let-rowData let-columns="columns" let-index="rowIndex">
+    <tr
+      [pSelectableRow]="rowData"
+      [pContextMenuRow]="rowData"
+      [style.height.px]="this.rowHeight"
+      [class.even]="(index + 1) % 2 === 0"
+      [class.selected]="selectionMode==='single'? selection?.id === rowData?.id : selection?.includes(rowData)"
+      class="pointer"
+      (click)="rowClicked.emit({e: $event, data: rowData})"
+    >
+      <td *ngFor="let col of columns; index as i" [class.ui-resizable-column]="resizableColumns">
+        <ng-container *ngIf="bodyTemplate">
+          <ng-container *ngTemplateOutlet="bodyTemplate; context: {$implicit: col, rowData: rowData, rowIndex: index}">
+          </ng-container>
+        </ng-container>
+        <ng-container *ngIf="!bodyTemplate">
+          {{getBodyData(rowData, col)}}
+        </ng-container>
+      </td>
+    </tr>
+    <tr *ngIf="index === rowsNumber - 1 && lazyLoading && !noMoreData" class="table-load-more">
+      <td [colSpan]="columns.length" class="load-more-wrapper">
+        <ng-template [ngTemplateOutlet]="loadMoreButton"></ng-template>
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+<p-contextMenu #cm [model]="menuItems" class="d-none"></p-contextMenu>
+
+<div class="cards-table" *ngIf="minimizedView">
+  <div *ngFor="let rowData of tableData ; let i= index"
+       class="pointer"
+       role="button"
+       (click)="onCardClicked(rowData)">
+    <ng-container
+      *ngTemplateOutlet="cardTemplate;  context: {rowData: rowData, rowNumber: i, selected:  (selectionMode==='single'? selection?.id === rowData.id :  selection?.includes(rowData))}">
+    </ng-container>
+  </div>
+  <div *ngIf="lazyLoading && !noMoreData" class="load-more-wrapper">
+    <ng-template [ngTemplateOutlet]="loadMoreButton"></ng-template>
+  </div>
+</div>
+
+<ng-template #loadMoreButton>
+  <button class="btn btn-primary" (click)="loadMore()">
+    <i *ngIf="loading" class="load-spinner"></i>
+    {{loading? 'LOADING...': 'LOAD MORE' }}
+  </button>
+</ng-template>

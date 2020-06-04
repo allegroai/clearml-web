@@ -1,0 +1,18 @@
+<div class="container">
+  <sm-projects-header
+    (createProjectClicked)="openCreateProjectDialog()"
+    (orderByChanged)="orderByChanged($event)"
+    [hideCreateButton]="false"
+    [sortByField]="projectsOrderBy$ | async"
+    [sortOrder]="projectsSortOrder$ | async"
+  ></sm-projects-header>
+</div>
+<sm-projects-list
+  (deleteProjectClicked)="deleteProject($event)"
+  (loadMore)="loadMore()"
+  (projectCardClicked)="projectCardClicked($event)"
+  (projectNameChanged)="projectNameChanged($event)"
+  [noMoreProjects]="noMoreProjects$ | async"
+  [projects]="projectsList$ | async"
+>
+</sm-projects-list>

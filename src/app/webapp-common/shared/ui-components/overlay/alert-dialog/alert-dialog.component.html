@@ -1,0 +1,22 @@
+<sm-dialog-template [header]="alertMessage" [subHeader]="alertSubMessage" iconClass="i-alert">
+  <div *ngIf="moreInfo || resultMessage" (click)="openToggle()" class="pointer">
+    <i class="more-info-icon fa fa-angle-right" [ngClass]="{'info-open': isOpen}"></i>More info
+  </div>
+  <div *ngIf="moreInfo || resultMessage" class="more-info" [ngClass]="{'info-open': isOpen}">
+    <a></a>
+    <div>{{resultMessage}}</div>
+    <div *ngFor="let entityName of moreInfoEntities">
+      <br>
+      <div>Relevant {{entityName}}:</div>
+      <div *ngFor="let entity of moreInfo[entityName]" class="entities">
+        <a [href]="buildUrl(entity, entityName)" target="_blank"> {{entity.name}}</a>
+      </div>
+    </div>
+  </div>
+  <div class="d-flex justify-content-center" style="margin-top: 40px">
+    <button class="btn btn-neon" mat-dialog-close>
+      {{okMessage}}
+    </button>
+  </div>
+
+</sm-dialog-template>

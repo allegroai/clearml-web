@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="214" height="214" viewBox="0 0 214 214">
+    <g fill="none" fill-rule="evenodd">
+        <rect width="213" height="213" x=".5" y=".5" fill="#F5F7FF" stroke="#E9EDFE" rx="4"/>
+        <g fill="#A7B2D8" opacity=".5" transform="matrix(-1 0 0 1 198 192)">
+            <rect width="52.684" height="6" x="129.316" rx="3"/>
+            <rect width="54.6" height="6" x="32.568" rx="3"/>
+            <rect width="24.905" height="6" x="94.832" rx="3"/>
+            <rect width="24.905" height="6" rx="3"/>
+        </g>
+        <g fill="#A7B2D8" opacity=".5" transform="translate(16 180)">
+            <rect width="52.684" height="6" x="129.316" rx="3"/>
+            <rect width="54.6" height="6" x="32.568" rx="3"/>
+            <rect width="24.905" height="6" x="94.832" rx="3"/>
+            <rect width="24.905" height="6" rx="3"/>
+        </g>
+        <g opacity=".7">
+            <g transform="translate(36 87)">
+                <path stroke="#A7B2D8" stroke-width="2" d="M16 8v32" opacity=".5"/>
+                <rect width="32" height="11" fill="#A7B2D8" rx="4"/>
+                <rect width="32" height="11" y="30" fill="#A7B2D8" rx="4"/>
+            </g>
+            <g transform="translate(145 87)">
+                <path stroke="#A7B2D8" stroke-width="2" d="M16 8v32" opacity=".5"/>
+                <rect width="32" height="11" fill="#A7B2D8" rx="4"/>
+                <rect width="32" height="11" y="30" fill="#A7B2D8" rx="4"/>
+            </g>
+            <g transform="translate(51 36)">
+                <rect width="32" height="11" x="40" y="67" fill="#A7B2D8" rx="4"/>
+                <rect width="40" height="10" x="36" y="25" fill="#A7B2D8" rx="4"/>
+                <path stroke="#A7B2D8" stroke-width="2" d="M1 62.5C.66 40.167 18.902 29 55.726 29S110.642 40.167 110 62.5" opacity=".5"/>
+                <rect width="60" height="10" x="26" fill="#A7B2D8" rx="4"/>
+                <rect width="32" height="11" x="40" y="105" fill="#A7B2D8" rx="4"/>
+            </g>
+            <path stroke="#A7B2D8" stroke-width="2" d="M107 37v109" opacity=".5"/>
+        </g>
+    </g>
+</svg>

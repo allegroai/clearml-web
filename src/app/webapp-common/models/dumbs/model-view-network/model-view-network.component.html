@@ -1,0 +1,21 @@
+<sm-editable-section
+  #prototext
+  [editable]="!model?.ready"
+  [saving]="saving"
+  (activateEditClicked)="activateEdit(); editPrototext()"
+  (saveClicked)="saveClicked()"
+  (cancelClicked)="cancelEdit()"
+  >
+  <sm-section-header label="MODEL CONFIGURATION"></sm-section-header>
+  <div class="light-theme h-100">
+    <sm-textarea-control
+      [formData]="design ? design : ''"
+      [inputClassName]="!inEditMode? ' cursor-default':''"
+      [isReadonly]="!inEditMode"
+      placeHolder="Empty Model Configuration"
+      class="dark"
+      (input)="fieldValueChanged($event.target.value)"
+      >
+    </sm-textarea-control>
+  </div>
+</sm-editable-section>

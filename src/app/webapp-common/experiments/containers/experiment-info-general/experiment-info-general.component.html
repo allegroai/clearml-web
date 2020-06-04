@@ -1,0 +1,7 @@
+<sm-experiment-general-info
+  [experiment]="selectedExperiment$ | async"
+  [experimentComment]="(experimentInfoData$ | async)?.comment"
+  [editable]="(editable$ | async)"
+  [isExample]="isExample"
+  (commentChanged)="commentChanged($event)"
+></sm-experiment-general-info>

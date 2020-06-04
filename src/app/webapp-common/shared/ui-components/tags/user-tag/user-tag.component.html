@@ -1,0 +1,17 @@
+<span
+  class=content
+  [style.backgroundColor]="colors?.background"
+  [style.color]="colors?.foreground"
+  [class.add-button]="add.observers.length > 0"
+  (click)="add.emit($event)"
+  [smTooltip]="tooltip ? caption : undefined"
+>
+  <i class="fas fa-plus" *ngIf="add.observers.length > 0"></i>
+  {{caption}}
+</span>
+<i class="fas fa-xs fa-times remove"
+   [style.color]="colors?.foreground"
+   *ngIf="remove.observers.length > 0"
+   (click)="remove.emit(caption)">
+</i>
+<div class="arrow" [class.add-button]="add.observers.length > 0" [style.backgroundColor]="colors?.background"></div>

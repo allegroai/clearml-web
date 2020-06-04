@@ -1,0 +1,24 @@
+<div class="row headers" *ngIf="!hideHeaders">
+  <div *ngFor="let col of cols" [class]="col.class">{{col.header}}</div>
+</div>
+<div cdkDropList (cdkDropListDropped)="drop($event)" [cdkDropListDisabled]="!enableDragAndDrop">
+  <div *ngFor="let row of rowsData; let i = index; trackBy: trackByFn" cdkDrag
+       class="table-row"
+       [ngClass]="{
+        'toggleable': isRowToggleable(i),
+        'open': open[i],
+        'draggable': enableDragAndDrop
+        }"
+       (click)="toggleRow(i)"
+  >
+    <div class="row align-items-center">
+      <ng-template
+        [ngTemplateOutlet]="templateRef"
+        [ngTemplateOutletContext]="{$implicit: cols[i], row: row, rowIndex: i}">
+      </ng-template>
+    </div>
+  </div>
+  <div *ngIf="rowsData?.length === 0" class="empty-state">
+    {{ noDataMessage || 'No data to show'}}
+  </div>
+</div>

@@ -1,0 +1,7 @@
+<div>
+  <button class="sm-button" [disabled]="disabled">
+    <i  *ngIf="iconClass" [class]="'icon xs ' + iconClass"></i>
+    <div class="button-label">{{'  '+ label}}</div>
+    <ng-content></ng-content>
+  </button>
+</div>

@@ -1,0 +1,15 @@
+<mat-expansion-panel *ngFor="let iteration of iterations; let i = index; trackBy:trackKey"
+                     class="images-section" togglePosition="before" [expanded]="i===0">
+  <mat-expansion-panel-header class="debug-header" [collapsedHeight]="null">
+    <mat-panel-title> {{iteration.iter}}</mat-panel-title>
+  </mat-expansion-panel-header>
+  <ng-template matExpansionPanelContent>
+    <div class="d-flex justify-content flex-wrap">
+      <sm-debug-image-snippet [frame]="frame"
+                              *ngFor="let frame of iteration.events; let i = index; trackBy:trackFrame"
+                              (imageError)="imageUrlError({frame: frame, experimentId: experimentId})"
+                              (imageClicked)="imageClicked.emit({frame: frame, snippetKey: frame.key, frames: iteration.events})">
+      </sm-debug-image-snippet>
+    </div>
+  </ng-template>
+</mat-expansion-panel>

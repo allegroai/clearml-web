@@ -1,0 +1,31 @@
+<div class="credentials">
+  <sm-labeled-row label="Access key">{{newCredential.access_key || 'Loading...'}}</sm-labeled-row>
+  <sm-labeled-row label="Secret key">{{newCredential.secret_key || 'Loading...'}}</sm-labeled-row>
+</div>
+<div>
+  <br>
+  <div class="d-flex align-items-end justify-content-between">
+    <div class="p-1">
+      <h5>Usage</h5>
+    </div>
+    <div class="p-1">
+      <sm-copy-clipboard [clipboardText]="codeSnippet.innerText"></sm-copy-clipboard>
+    </div>
+  </div>
+  <div class="usage-content">
+    <div>
+      <span>~/trains.conf</span>
+    </div>
+    <div class="code-snippet" #codeSnippet>
+      <pre class="greyout">{{'api {'}}</pre>
+      <pre class="greyout">{{'    web_server: ' + WEB_SERVER_URL}}</pre>
+      <pre class="greyout">{{'    api_server: ' + API_BASE_URL}}</pre>
+      <pre class="greyout" *ngIf="fileBaseUrl">{{'    files_server: ' + fileBaseUrl}}</pre>
+      <pre>{{'    credentials {'}}</pre>
+      <pre>{{'        "access_key" = "' + newCredential.access_key + '"'}}</pre>
+      <pre>{{'        "secret_key" = "' + newCredential.secret_key + '"'}}</pre>
+      <pre>{{'    }'}}</pre>
+      <pre class="greyout">{{'}'}}</pre>
+    </div>
+  </div>
+</div>

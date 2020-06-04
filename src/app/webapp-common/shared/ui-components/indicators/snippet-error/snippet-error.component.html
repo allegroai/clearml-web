@@ -1,0 +1,28 @@
+<div class="frame text-center" [ngClass]="{
+'dark-theme':theme===ThemeEnum.Dark,
+'light-theme': theme===ThemeEnum.Light
+}" >
+  <div class="labeled-icon">
+    <i class=" mb-3 icon xl" [ngClass]="{
+    'i-alert-all-grey': theme=== ThemeEnum.Light,
+    'i-alert-all-neon': theme===ThemeEnum.Dark
+   }"></i>
+    <div class="label">Unable to load image</div>
+    <div class="label">{{baseFile}}</div>
+  </div>
+  <div class="d-flex justify-content-between buttons-footer align-items-center">
+    <div class="clickable-icon d-flex align-items-center justify-content-center pointer"
+         ngxClipboard
+         smTooltip="Copy Image URL"
+         [cbContent]="copyContent"
+         (cbOnSuccess)="copyToClipboardSuccess(true)">
+      <i class="fas fa-copy"></i>
+    </div>
+    <div class="clickable-icon d-flex align-items-center justify-content-center pointer"
+         smTooltip="Open Image"
+         (click)="openImageClicked.emit()"
+    >
+      <i class="fas fa-external-link-alt"></i>
+    </div>
+  </div>
+</div>

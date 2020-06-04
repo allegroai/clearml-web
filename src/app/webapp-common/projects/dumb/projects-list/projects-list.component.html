@@ -1,0 +1,14 @@
+<div class="projects container">
+  <div *ngFor="let project of projects; let last=last" class="col-lg-6 col-md-12">
+    <sm-project-card
+      (deleteProjectClicked)="deleteProjectClicked.emit($event)"
+      (projectCardClicked)="projectCardClicked.emit($event)" (projectNameChanged)="projectNameChanged.emit({project: project.id, name:$event})"
+      *ngIf="!last || (last && noMoreProjects)"
+      [hideMenu]="project.id === '*'"
+      [project]="project">
+    </sm-project-card>
+  </div>
+  <div class="d-flex justify-content-center load-more w-100">
+    <button (click)="loadMore.emit()" *ngIf="!noMoreProjects" class="btn btn-primary load-more-btn">LOAD MORE</button>
+  </div>
+</div>

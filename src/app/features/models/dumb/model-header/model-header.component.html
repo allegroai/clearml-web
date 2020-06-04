@@ -1,0 +1,21 @@
+<div class="d-flex justify-content-between header-container align-items-center"
+     [ngClass]="{'archive-mode': isArchived}">
+  <sm-toggle-archive *ngIf="!hideArchiveToggle" [showArchived]="isArchived"
+                     (toggleArchived)="archivedChanged($event)"></sm-toggle-archive>
+  <sm-project-context-navbar *ngIf="!hideCreateNewButton"
+                             activeFeature="models" [archivedMode]="isArchived"></sm-project-context-navbar>
+  <div class="d-flex justify-content-end align-items-center">
+    <sm-model-custom-cols-menu
+      [hidden]="minimizedView"
+      [tableCols]="tableCols"
+      (selectedTableColsChanged)="selectedTableColsChanged.emit($event)"
+    ></sm-model-custom-cols-menu>
+        <sm-refresh-button
+          [autoRefreshState]="autoRefreshState"
+          [allowAutoRefresh]="true"
+          (refreshList)="refreshListClicked.emit()"
+          (setAutoRefresh)="setAutoRefresh.emit($event)"
+        >
+        </sm-refresh-button>
+  </div>
+</div>

@@ -1,0 +1,26 @@
+@import "../../webapp-common/shared/ui-components/styles/variables";
+@import "../../webapp-common/layout/layout";
+
+:host {
+  .navbar-header-container {
+    min-height: $nav-bar-height;
+
+    .nav-bar-items-container {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .header-container {
+      padding-left: 24px;
+      padding-right: 24px;
+      height: 66px;
+      transition: background-color 0.5s;
+
+      /deep/ button {
+        border-color: #2c3246;
+        box-shadow: none;
+      }
+    }
+  }
+}

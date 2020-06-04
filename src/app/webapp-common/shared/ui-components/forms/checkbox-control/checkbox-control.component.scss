@@ -1,0 +1,89 @@
+@import "../../styles/variables";
+
+.layout {
+  display: flex;
+  align-content: space-between;
+  align-items: center;
+
+  &.select-col-checkbox {
+    pointer-events: none;
+  }
+
+  &.table-body {
+    padding: 12px 7px;
+  }
+}
+
+
+.purple-v {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 19px;
+  border: solid 2px $purple;
+  border-radius: 4px;
+  background-clip: unset;
+
+  &.select-col-checkbox {
+    pointer-events: auto;
+  }
+
+  &.add-or-remove {
+    width: 20px;
+    height: 20px;
+  }
+
+  &.table-check-box {
+    margin: 0 auto;
+    border-color: #7480aa;
+    opacity: 1;
+  }
+
+  &.add-or-remove {
+    border: none;
+    opacity: 1;
+  }
+
+  &.checked {
+    background-color: $purple;
+    border-color: $purple;
+
+    &.row-selected {
+      border-color: #7480aa;
+    }
+  }
+
+  &:hover {
+    opacity: 1;
+
+    &.readonly,
+    &.readonly:hover {
+      opacity: 0.8;
+    }
+  }
+}
+
+.disabled {
+  cursor: default;
+  opacity: 0.5;
+
+  .purple-v {
+    cursor: default;
+  }
+}
+
+.spacer {
+  min-height: 10px;
+}
+
+.fa-minus {
+  color: #FFF;
+}
+
+.checkbox-label {
+  padding-left: 4px;
+}

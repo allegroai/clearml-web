@@ -1,0 +1,21 @@
+export const EXPERIMENT_INFO_ONLY_FIELDS = [
+  'id',
+  'name',
+  'type',
+  'status',
+  'last_update',
+  'project.name',
+  'execution',
+  'execution.model.name',
+  'execution.model.uri',
+  'execution.model.framework',
+  'script',
+  'tags',
+  'published',
+  'last_iteration',
+  'output.model.name',
+  'output.model.uri',
+  'output.model.framework',
+  'output.model.design',
+
+];

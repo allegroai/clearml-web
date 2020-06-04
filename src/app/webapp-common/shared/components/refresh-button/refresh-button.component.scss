@@ -1,0 +1,57 @@
+:host {
+  & {
+    display: inline-block;
+  }
+
+  &.light-theme {
+    .refresh-wrapper.allow-autorefresh:hover {
+      background: transparent !important;
+    }
+
+    .pause-icon {
+      color: #384161
+    }
+
+    .refresh-icon {
+      color: #8f9dc9
+    }
+  }
+
+  /deep/ .mat-checkbox-frame {
+    color: #a4b2db;
+  }
+
+  .pause-icon {
+    position: absolute;
+    right: -5px;
+    height: 10px;
+    width: 10px;
+    font-size: 10px;
+    bottom: 0px;
+    color: #d3ff00
+  }
+
+  .refresh-wrapper {
+    width: 45px;
+    padding: 5px;
+    overflow: hidden;
+    transition: all 0.5s 0.5s, background 0.5s 0s;
+  }
+
+  .refresh-wrapper.allow-autorefresh:hover {
+    background: #323950;
+    border-radius: 4px;
+    width: 170px;
+  }
+
+  .refresh-icon {
+    margin: 10px;
+    font-size: 20px;
+    color: #5a658e;
+  }
+
+  .autorefresh-checkbox {
+    margin-left: 6px;
+    margin-top: 7px;
+  }
+}

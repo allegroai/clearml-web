@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="66.152" viewBox="0 0 64 66.152">
+  <defs>
+    <style>
+      .cls-1{fill:#414a65}.cls-2{fill:#d3ff00}
+    </style>
+  </defs>
+  <g id="worker-icon-popup" transform="translate(-1087.001 -226)">
+    <path id="np_server_736733_000000"
+          d="M67.624 25.48H6.371A1.4 1.4 0 0 0 5 26.9v17.068a1.4 1.4 0 0 0 1.371 1.422h61.256A1.4 1.4 0 0 0 69 43.968V26.9a1.4 1.4 0 0 0-1.375-1.422zM15.979 38.516a3.08 3.08 0 1 1 3.083-3.08 3.079 3.079 0 0 1-3.083 3.08zm11.613 0a3.08 3.08 0 1 1 3.083-3.08 3.079 3.079 0 0 1-3.082 3.08zm35.2-.769a.711.711 0 0 1-.711.711h-13.75a.711.711 0 0 1-.711-.711v-4.623a.711.711 0 0 1 .711-.711H62.08a.711.711 0 0 1 .711.711zm4.832-34.263H6.371A1.4 1.4 0 0 0 5 4.906v17.066a1.4 1.4 0 0 0 1.372 1.422h61.255A1.4 1.4 0 0 0 69 21.972V4.906a1.4 1.4 0 0 0-1.375-1.422zM15.979 16.519a3.08 3.08 0 1 1 3.083-3.08 3.079 3.079 0 0 1-3.083 3.08zm11.613 0a3.08 3.08 0 1 1 3.083-3.08 3.079 3.079 0 0 1-3.082 3.08zm35.2-.769a.711.711 0 0 1-.711.711H48.33a.711.711 0 0 1-.711-.711v-4.622a.711.711 0 0 1 .711-.711h13.75a.711.711 0 0 1 .711.711zm4.833 31.726H6.371A1.4 1.4 0 0 0 5 48.9v17.064a1.4 1.4 0 0 0 1.372 1.422H14.3v1.539a.709.709 0 0 0 .711.711h10.667a.709.709 0 0 0 .711-.711v-1.539H47.6v1.539a.709.709 0 0 0 .711.711h10.668a.709.709 0 0 0 .711-.711v-1.539h7.933A1.4 1.4 0 0 0 69 65.964V48.9a1.4 1.4 0 0 0-1.372-1.422zM15.979 60.511a3.08 3.08 0 1 1 3.083-3.08 3.079 3.079 0 0 1-3.083 3.08zm11.613 0a3.08 3.08 0 1 1 3.083-3.08 3.079 3.079 0 0 1-3.082 3.08zm35.2-.769a.711.711 0 0 1-.711.711H48.33a.711.711 0 0 1-.711-.711V55.12a.711.711 0 0 1 .711-.711h13.75a.711.711 0 0 1 .711.711z"
+          class="cls-1" transform="translate(1082.002 222.516)"/>
+    <circle id="Ellipse_76" cx="3.5" cy="3.5" r="3.5" class="cls-2" data-name="Ellipse 76"
+            transform="translate(1106 233)"/>
+    <circle id="Ellipse_77" cx="3.5" cy="3.5" r="3.5" class="cls-2" data-name="Ellipse 77"
+            transform="translate(1106 254)"/>
+    <circle id="Ellipse_78" cx="3.5" cy="3.5" r="3.5" class="cls-2" data-name="Ellipse 78"
+            transform="translate(1106 276)"/>
+    <circle id="Ellipse_79" cx="3.5" cy="3.5" r="3.5" class="cls-2" data-name="Ellipse 79"
+            transform="translate(1094 233)"/>
+    <circle id="Ellipse_80" cx="3.5" cy="3.5" r="3.5" class="cls-2" data-name="Ellipse 80"
+            transform="translate(1094 254)"/>
+    <circle id="Ellipse_81" cx="3.5" cy="3.5" r="3.5" class="cls-2" data-name="Ellipse 81"
+            transform="translate(1094 276)"/>
+    <rect id="Rectangle_641" width="16" height="6" class="cls-2" data-name="Rectangle 641" rx="1"
+          transform="translate(1129 233)"/>
+    <rect id="Rectangle_642" width="16" height="6" class="cls-2" data-name="Rectangle 642" rx="1"
+          transform="translate(1129 255)"/>
+    <rect id="Rectangle_643" width="16" height="6" class="cls-2" data-name="Rectangle 643" rx="1"
+          transform="translate(1129 277)"/>
+  </g>
+</svg>

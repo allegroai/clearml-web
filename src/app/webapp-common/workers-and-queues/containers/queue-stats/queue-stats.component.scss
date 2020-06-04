@@ -1,0 +1,44 @@
+@import "../../../../webapp-common/shared/ui-components/styles/variables";
+@import "../../../../webapp-common/layout/layout.scss";
+
+:host {
+  display: block;
+  margin: 0 50px 20px;
+
+  > div {
+    height: $graph-height;
+  }
+
+  .chart-contatiner {
+    padding: 20px 20px 0;
+    background-color: $black;
+    border: 1px solid $dark-grey-blue;
+    width: 50%;
+
+    &.right {
+      margin-left: 20px;
+    }
+
+    .line-chart-container {
+      position: relative;
+      z-index: 500;
+    }
+
+    .header {
+
+      .title {
+        font-size: 15px;
+        text-transform: uppercase;
+      }
+
+      .time-selector, .param-selector {
+        width: 150px;
+      }
+    }
+
+    .warnning {
+      margin-left: 10px;
+      color: $neon-yellow;
+    }
+  }
+}

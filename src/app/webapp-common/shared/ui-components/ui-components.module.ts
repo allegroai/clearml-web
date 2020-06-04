@@ -1,0 +1,204 @@
+import {NgModule} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+
+import {CircleCounterComponent} from './indicators/circle-counter/circle-counter.component';
+import {CardComponent} from './panel/card/card.component';
+import {PlusCardComponent} from './panel/plus-card/plus-card.component';
+import {NumberCounterComponent} from './indicators/number-counter/number-counter.component';
+
+import {ClipboardModule} from 'ngx-clipboard';
+
+import {NeonButtonComponent} from './buttons/neon-button/neon-button.component';
+import {MenuComponent} from './panel/menu/menu.component';
+import {SearchComponent} from './inputs/search/search.component';
+import {NavbarItemComponent} from './panel/navbar-item/navbar-item.component';
+import {ButtonToggleComponent} from './inputs/button-toggle/button-toggle.component';
+import {ConfirmDialogComponent} from './overlay/confirm-dialog/confirm-dialog.component';
+
+import {CodeComponent} from './data/code/code.component';
+import {DialogTemplateComponent} from './overlay/dialog-template/dialog-template.component';
+import {SMMaterialModule} from '../material/material.module';
+import {AlertDialogComponent} from './overlay/alert-dialog/alert-dialog.component';
+import {TooltipDirective} from './indicators/tooltip/tooltip.directive';
+import {InputErrorComponent} from './forms/input-error/input-error.component';
+import {InputGroupComponent} from './forms/input-group/input-group.component';
+import {SelectGroupComponent} from './forms/select-group/select-group.component';
+import {CheckboxControlComponent} from './forms/checkbox-control/checkbox-control.component';
+import {NumberControlComponent} from './forms/number-control/number-control.component';
+import {MultiSelectControlComponent} from './forms/multi-select-control/multi-select-control.component';
+import {CheckboxGroupControlComponent} from './forms/checkbox-group-control/checkbox-group-control.component';
+import {DynamicInputComponent} from './forms/dynamic-input/dynamic-input.component';
+import {TextareaControlComponent} from './forms/textarea-control/textarea-control.component';
+import {SimpleTableComponent2} from './data/simple-table/simple-table.component';
+import {ChipsModule} from './buttons/chips/chips.module';
+import {TermsOfUseDialogComponent} from './overlay/terms-of-use-dialog/terms-of-use-dialog.component';
+import {LeafComponent} from './overlay/leaf/leaf.component';
+import {WizardDialogStepComponent} from './overlay/wizard-dialog-step/wizard-dialog-step.component';
+import {SwitchComponent} from './forms/switch/switch.component';
+import {ReadonlyLabelComponent} from './forms/readonlyLabel/readonly-label.component';
+import {LabeledRowComponent} from './data/labeled-row/labeled-row.component';
+import {CircleStatusComponent} from './indicators/circle-status/circle-status.component';
+import {MenuItemComponent} from './panel/menu-item/menu-item.component';
+import {ClickStopPropagationDirective} from './directives/click-stop-propagation.directive';
+import {TableComponent} from './data/table/table.component';
+import {TableSortTemplateComponent} from './data/table/table-sort-template/table-sort-template.component';
+import {TableFilterSortTemplateComponent} from './data/table/table-filter-sort-template/table-filter-sort-template.component';
+import {CompareFooterComponent} from './panel/compare-footer/compare-footer.component';
+import {IconLabelComponent} from './data/icon-label/icon-label.component';
+import {SelectableListComponent} from './data/selectable-list/selectable-list.component';
+import {SelectableFilterListComponent} from './data/selectable-filter-list/selectable-filter-list.component';
+import {ThrottledScrollListenerDirective} from './directives/throttled-scroll-listener.directive';
+
+import {SharedPipesModule} from '../pipes/shared-pipes.module';
+import {TableCardComponent} from './data/table-card/table-card.component';
+import {ToggleArchiveComponent} from './buttons/toggle-archive/toggle-archive.component';
+import {MatButtonToggleModule} from '@angular/material/button-toggle';
+import {MatExpansionModule} from '@angular/material/expansion';
+import {TableCardFilterTemplateComponent} from './data/table/table-card-filter-template/table-card-filter-template.component';
+import {EditableSectionComponent} from './panel/editable-section/editable-section.component';
+import {LoadingButtonComponent} from './buttons/loading-button/loading-button.component';
+import {OverlayComponent} from './overlay/overlay/overlay.component';
+import {NgSelectModule} from '@ng-select/ng-select';
+import {SelectAutocompleteComponent} from './inputs/select-autocomplete/select-autocomplete.component';
+import {ChooseColorModule} from './directives/choose-color/choose-color.module';
+import {PortalModule} from '@angular/cdk/portal';
+import {SMPortalModule} from '../portal/portal.module';
+import {TableModule} from 'primeng/table';
+import {ContextMenuModule} from 'primeng/contextmenu';
+import {ClickPreventDefaultDirective} from './directives/click-prevent-default.directive';
+import {TagComponent} from './indicators/tag/tag.component';
+import {UniqueNameValidatorDirective} from './template-forms-ui/unique-name-validator.directive';
+import {ForceInvalidValidatorDirective} from './template-forms-ui/force-invalid-validator.directive';
+import {SelectableGroupedFilterListComponent} from './data/selectable-grouped-filter-list/selectable-grouped-filter-list.component';
+import {GroupedSelectableListComponent} from './data/grouped-selectable-list/grouped-selectable-list.component';
+import {DragDropModule} from '@angular/cdk/drag-drop';
+import {SnippetErrorComponent} from './indicators/snippet-error/snippet-error.component';
+import {UpdateNotifierComponent} from './overlay/update-notifier/update-notifier.component';
+import {SelectAutocompleteForTemplateFormsComponent} from './inputs/select-autocomplete-for-template-forms/select-autocomplete-for-template-forms.component';
+import {UniqueInListValidatorDirective} from './template-forms-ui/unique-in-list-validator.directive';
+import {UniqueInListSyncValidatorDirective} from './template-forms-ui/unique-in-list-sync-validator.directive';
+import {UniqueInListSync2ValidatorDirective} from './template-forms-ui/unique-in-list-sync-validator-2.directive';
+import {MaxNumberValidatorDirective} from './template-forms-ui/max-number-validator.directive';
+import {NotAllowedStringsValidatorValidatorDirective} from './template-forms-ui/dont-allow-strings-validator.directive';
+import {VerticalLabeledRowComponent} from './data/veritical-labeled-row/vertical-labeled-row.component';
+import {RefreshButtonComponent} from '../components/refresh-button/refresh-button.component';
+import {DurationInputComponent} from './inputs/duration-input/duration-input.component';
+import {CheckedFilterListComponent} from './data/checked-filter-list/checked-filter-list.component';
+import {KeydownStopPropagationDirective} from './directives/keydown-stop-propagation.directive';
+import {PreventArrowKeysDirective} from './directives/prevent-arrow-keys.directive';
+import {EllipsisMiddleDirective} from './directives/ellipsis-middle.directive';
+import { UserTagComponent } from './tags/user-tag/user-tag.component';
+import { TagListComponent } from './tags/tag-list/tag-list.component';
+import { TagsMenuComponent } from './tags/tags-menu/tags-menu.component';
+import { TagColorMenuComponent } from './tags/tag-color-menu/tag-color-menu.component';
+import {ScrollingModule} from '@angular/cdk/scrolling';
+import {ColorPickerModule} from 'ngx-color-picker';
+import {EditJsonComponent} from './overlay/edit-json/edit-json.component';
+import {ResizableColumnDirective} from './data/table/resizable-column.directive';
+
+
+const _declarations = [
+  DurationInputComponent,
+  UpdateNotifierComponent,
+  SnippetErrorComponent,
+  UniqueInListValidatorDirective,
+  UniqueInListSyncValidatorDirective,
+  UniqueInListSync2ValidatorDirective,
+  MaxNumberValidatorDirective,
+  SelectAutocompleteForTemplateFormsComponent,
+  TableComponent,
+  TableSortTemplateComponent,
+  TableFilterSortTemplateComponent,
+  TableCardFilterTemplateComponent,
+  CircleStatusComponent,
+  WizardDialogStepComponent,
+  LeafComponent,
+  NumberControlComponent,
+  ButtonToggleComponent,
+  SearchComponent,
+  CircleCounterComponent,
+  MenuComponent,
+  MenuItemComponent,
+  CardComponent,
+  PlusCardComponent,
+  NumberCounterComponent,
+  NeonButtonComponent,
+  NavbarItemComponent,
+  CodeComponent,
+  DialogTemplateComponent,
+  ConfirmDialogComponent,
+  EditJsonComponent,
+  ClickStopPropagationDirective,
+  EllipsisMiddleDirective,
+  KeydownStopPropagationDirective,
+  PreventArrowKeysDirective,
+  ThrottledScrollListenerDirective,
+  AlertDialogComponent,
+  TooltipDirective,
+  InputGroupComponent,
+  ReadonlyLabelComponent,
+  SelectGroupComponent,
+  CheckboxControlComponent,
+  NumberControlComponent,
+  TextareaControlComponent,
+  InputErrorComponent,
+  MultiSelectControlComponent,
+  SwitchComponent,
+  CheckboxGroupControlComponent,
+  DynamicInputComponent,
+  SimpleTableComponent2,
+  SelectableListComponent,
+  CheckedFilterListComponent,
+  GroupedSelectableListComponent,
+  ClickPreventDefaultDirective,
+  SelectableFilterListComponent,
+  SelectableGroupedFilterListComponent,
+  LabeledRowComponent,
+  VerticalLabeledRowComponent,
+  CompareFooterComponent,
+  IconLabelComponent,
+  TableCardComponent,
+  ToggleArchiveComponent,
+  EditableSectionComponent,
+  OverlayComponent,
+  ToggleArchiveComponent,
+  SelectAutocompleteComponent,
+  TermsOfUseDialogComponent,
+  LoadingButtonComponent,
+  TagComponent,
+  UniqueNameValidatorDirective,
+  ForceInvalidValidatorDirective,
+  NotAllowedStringsValidatorValidatorDirective,
+  RefreshButtonComponent,
+  UserTagComponent,
+  TagListComponent
+];
+
+@NgModule({
+  imports: [
+    MatExpansionModule,
+    DragDropModule,
+    NgSelectModule,
+    CommonModule,
+    ChipsModule,
+    FormsModule,
+    ReactiveFormsModule,
+    ClipboardModule,
+    TableModule,
+    ContextMenuModule,
+    SMMaterialModule,
+    MatButtonToggleModule,
+    SharedPipesModule,
+    ChooseColorModule,
+    PortalModule,
+    SMPortalModule,
+    ScrollingModule,
+    ColorPickerModule,
+  ],
+  providers: [],
+  declarations: [..._declarations, TagsMenuComponent, TagColorMenuComponent, ResizableColumnDirective],
+  exports: [..._declarations, NgSelectModule, ChipsModule, SMMaterialModule, ChooseColorModule, SMPortalModule, TagsMenuComponent]
+})
+export class UiComponentsModule {
+}

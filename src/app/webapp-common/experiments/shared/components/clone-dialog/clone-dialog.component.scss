@@ -1,0 +1,33 @@
+:host {
+  h5 {
+    padding-top: 10px;
+  }
+
+  .reference {
+    padding: 6px;
+    margin-bottom: 12px;
+    overflow-wrap: break-word;
+  }
+
+  sm-textarea-control {
+    display: block;
+    max-height: 100px;
+    height: 20vh;
+  }
+
+  .buttons {
+    display: inline-block;
+    left: 50%;
+    position: relative;
+    transform: translateX(-50%);
+
+    button {
+      width: 130px;
+      text-transform: uppercase;
+    }
+
+    .yes-button {
+      margin-left: 16px;
+    }
+  }
+}

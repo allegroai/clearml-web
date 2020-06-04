@@ -1,0 +1,19 @@
+<div class="d-flex flex-column step" [ngClass]="{'hide-step' : hideStep}">
+  <div [class]="'mx-auto step-icon ' + icon" [ngClass]="{'hide-step' : hideStep && enableIconAnimation}"></div>
+  <div class="text-center label">{{label}}</div>
+  <div class="text-center sub-label">{{subLabel}}</div>
+  <div class="text-center step-number" [ngClass]="{'hide-step' : hideStep}">{{stepNumber}}</div>
+  <div class="choose-box" [ngClass]="{'hide-step' : hideStep}">
+    <div class="choose-section row">
+      <ng-content select="[choose-section]"></ng-content>
+    </div>
+    <div class="buttons-footer row" *ngIf="showFooter">
+      <div class="col-24">
+        <div class="divider"></div>
+      </div>
+      <div class="col-24 buttons-footer-content" *ngIf="showFooter">
+      <ng-content select="[buttons-footer]"></ng-content>
+      </div>
+    </div>
+  </div>
+</div>

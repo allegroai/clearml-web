@@ -1,0 +1,72 @@
+@import "../../../ui-components/styles/variables";
+
+:host {
+  /deep/ svg.britechart.line-chart {
+    overflow: visible;
+  }
+
+  display: block;
+  position: relative;
+  background-color: $black;
+
+
+
+  .overlay {
+    height: 310px;
+    position: absolute;
+    background-color: $black;
+    width: 100%;
+
+    .text {
+      font-size: 30px;
+      margin-left: 20px;
+      &.no-data{
+       font-size: 14px;
+        color: #a7b2d8;
+        opacity: 0.5;
+      }
+    }
+  }
+
+  /deep/ .masking-rectangle {
+    fill: $black;
+  }
+
+  /deep/ .horizontal-grid-line {
+    stroke: $dark-grey-blue;
+    stroke-dasharray: unset;
+  }
+
+  /deep/ .extended-x-line {
+    stroke: $dark-grey-blue;
+  }
+
+  /deep/ .tick {
+    text {
+      fill: $light-periwinkle-two;
+    }
+  }
+
+  /deep/ .legend-entry-name {
+    fill: $light-periwinkle-two;
+  }
+
+  /deep/ rect.tooltip-text-container {
+    fill: black !important;
+    stroke: $blue-300 !important;
+  }
+
+  /deep/ .tooltip-title {
+    fill: $blue-200 !important;
+  }
+
+  /deep/ .tooltip-divider {
+    stroke: $blue-300 !important;
+    stroke-width: 0.5px;
+
+  }
+
+  /deep/ .tooltip-left-text, /deep/ .tooltip-right-text {
+    fill: $blue-200 !important;
+  }
+}

@@ -1,0 +1,57 @@
+:host {
+  display: block;
+  height: 64px;
+  z-index: 1000;
+  width: 100%;
+  top: -64px;
+  background-color: #f2f3f6;
+  padding: 0 10px;
+}
+
+button.btn-primary.axis-option {
+  margin: auto 5px;
+
+  border: solid 1px #7480aa !important;
+  color: #7480aa !important;
+  border-radius: 4px;
+  background: transparent !important;
+  width: 100px !important;
+  height: 37px;
+}
+
+button.btn-primary.axis-option.active {
+  background: #7480aa !important;
+  color: white !important;
+}
+
+sm-number-control {
+  width: 60px;
+  text-align: center;
+  margin: auto 0;
+  margin-left: 6px;
+}
+
+.smooth-options {
+  padding: 10px;
+}
+
+.axis-text {
+  margin: auto 0;
+  padding-right: 6px;
+  font-size: 15px;
+}
+.smoothing-text {
+  margin: auto 0;
+  margin-left: auto;
+  padding-right: 6px;
+  font-size: 15px;
+}
+
+.smooth-options i {
+  margin: auto 0;
+  margin-left: 25px;
+}
+
+.x-axis-options {
+  margin: auto;
+}

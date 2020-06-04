@@ -1,0 +1,48 @@
+<mat-expansion-panel expanded="true">
+  <mat-expansion-panel-header collapsedHeight="40px" expandedHeight="40px" [ngClass]="{'active': activeSection === ACTIVE_SECTIONS.model}">
+    MODELS
+  </mat-expansion-panel-header>
+  <div
+    queryParamsHandling="preserve"
+    [ngClass]="{'selected': routerConfig.includes('input-model')}"
+    class="artifact-container pointer"
+    routerLink="input-model"
+  >
+    <i class="icon sm i-input-model"></i> Input Model
+  </div>
+  <div
+    queryParamsHandling="preserve"
+    [ngClass]="{'selected': routerConfig.includes('output-model'), 'hide-output-model':!outputModel?.id}"
+    class="artifact-container pointer"
+    routerLink="output-model"
+  >
+    <i class="icon sm i-output-model"></i> Output Model
+  </div>
+</mat-expansion-panel>
+
+<mat-expansion-panel [expanded]="true" *ngIf="dataAuditArtifacts?.length > 0">
+  <mat-expansion-panel-header collapsedHeight="40px" expandedHeight="40px" [ngClass]="{'active': activeSection === ACTIVE_SECTIONS.artifact}">
+    DATA AUDIT
+  </mat-expansion-panel-header>
+  <div *ngFor="let artifact of dataAuditArtifacts; trackBy: trackByFn"
+       class="artifact-container pointer"
+       queryParamsHandling="preserve"
+       [routerLink]="'artifact/' + artifact.key+ '/' + artifact.mode"
+       [ngClass]="{'selected': selectedArtifactKey === artifact.key}"
+  >
+    <i class="icon sm i-data-audit"></i> {{artifact.key}}
+  </div>
+</mat-expansion-panel>
+<mat-expansion-panel [expanded]="true" *ngIf="otherArtifacts?.length > 0">
+  <mat-expansion-panel-header collapsedHeight="40px" expandedHeight="40px" [ngClass]="{'active': activeSection === ACTIVE_SECTIONS.other}">
+    OTHER
+  </mat-expansion-panel-header>
+  <div *ngFor="let artifact of otherArtifacts; trackBy: trackByFn"
+       class="artifact-container pointer"
+       queryParamsHandling="preserve"
+       [routerLink]="'other/' + artifact.key+'/' +artifact.mode"
+       [ngClass]="{'selected': selectedArtifactKey===artifact.key}"
+  >
+    <i class="icon sm i-data-audit"></i> {{artifact.key}}
+  </div>
+</mat-expansion-panel>

@@ -1,0 +1,77 @@
+@import "../../webapp-common/shared/ui-components/styles/mixins/common";
+@import "../../webapp-common/shared/ui-components/styles/variables";
+
+:host {
+  .projects.row {
+    min-height: 228px;
+  }
+
+  .datasets.row {
+    min-height: 228px;
+  }
+
+  .recent {
+    height: 100%;
+    overflow: auto;
+    @include recent-title();
+
+    .recent-title {
+      color: #5d6787;
+      margin-top: 20px;
+    }
+
+    .right {
+      text-align: right;
+    }
+
+    .recent-row {
+      margin-top: 30px;
+    }
+  }
+
+  .search-bar {
+    padding-top: 16px;
+    padding-bottom: 16px;
+    margin-left: 64px;
+    background-color: $blue-900;
+    text-align: center;
+    position: relative;
+
+    /deep/ sm-search {
+      input {
+        font-size: 16px;
+
+        &::-webkit-input-placeholder {
+          font-size: 16px;
+        }
+
+        &::-moz-placeholder {
+          font-size: 16px;
+        }
+      }
+    }
+  }
+
+  .clear-search {
+    font-size: 14px;
+    text-align: center;
+    color: #a7b2d8;
+  }
+
+  .view-all {
+    font-size: 12px;
+    font-weight: bold;
+    color: $blue-400;
+  }
+
+  sm-dashboard-experiments {
+    display: block;
+    height: calc(100% - 320px);
+  }
+
+  .dashboard-search {
+    display: block;
+    overflow: auto;
+    height: 100%;
+  }
+}

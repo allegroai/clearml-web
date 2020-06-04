@@ -1,0 +1,17 @@
+@import "../../styles/variables";
+
+button.hideBackground {
+  background: none !important;
+  border: none !important;
+  transition: color 0.3s;
+  &:hover {
+    color: $blue-200 !important;
+    transition: color 0.3s;
+  }
+}
+
+:host.light {
+  button.hideBackground:hover {
+    color: $blue-400 !important;
+  }
+}

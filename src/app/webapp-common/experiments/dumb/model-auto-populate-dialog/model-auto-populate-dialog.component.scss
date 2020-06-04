@@ -1,0 +1,29 @@
+:host {
+  width: 640px;
+  display: block;
+  .body {
+    text-align: center;
+    line-height: 1.29;
+    font-size: 14px;
+    margin: 0 auto;
+    margin-top: 24px;
+    sm-checkbox-control {
+      display: inline-block;
+      margin: 0 12px;
+    }
+  }
+  .buttons {
+    display: inline-block;
+    left: 50%;
+    position: relative;
+    transform: translateX(-50%);
+    margin-top: 42px;
+
+    button {
+      text-transform: uppercase;
+    }
+    .yes-button {
+      margin-right: 16px;
+    }
+  }
+}

@@ -1,0 +1,11 @@
+.icon-label {
+  &.disabled {
+    opacity: 0.5;
+  }
+
+  padding: 10px;
+
+  i {
+    margin: 10px;
+  }
+}

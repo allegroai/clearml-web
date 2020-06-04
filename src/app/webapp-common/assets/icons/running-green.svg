@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="13.125" height="15.001" viewBox="0 0 13.125 15.001">
+    <defs>
+        <style>
+            .cls-1{fill:#50e3c3}
+        </style>
+    </defs>
+    <path id="status-running" d="M12.434-6.835l-10.312-6.1A1.4 1.4 0 0 0 0-11.722V.469a1.4 1.4 0 0 0 2.121 1.21l10.313-6.094a1.4 1.4 0 0 0 0-2.42zM1.406.161v-11.572a.178.178 0 0 1 .267-.152l9.791 5.786a.176.176 0 0 1 0 .3L1.673.313a.178.178 0 0 1-.267-.152z" class="cls-1" transform="translate(0 13.124)"/>
+</svg>

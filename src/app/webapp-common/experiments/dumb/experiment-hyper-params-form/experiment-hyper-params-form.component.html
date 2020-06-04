@@ -1,0 +1,17 @@
+ <sm-editable-section #parameterSection
+                      [saving]="saving"
+                      [editable]="editable"
+                      [disableSave]="!executionParamsForm?.hyperParameters?.form?.valid"
+                      (cancelClicked)="sectionCancelled()"
+                      (saveClicked)="sectionSaved()"
+                      (activateEditClicked)="activateEditClicked($event, 'parameter')">
+   <sm-section-header label="HYPER PARAMETERS" [helpText]="HELP_TEXTS.EXECUTION_HYPER_PARAMETERS"></sm-section-header>
+   <sm-experiment-execution-parameters
+     #executionParamsForm
+     class="form-section"
+     fieldName="parameters"
+     [editable]="editable && parameterSection.inEditMode"
+     [formData]="formData.parameters"
+     (formDataChanged)="fieldValueChanged($event)"
+   ></sm-experiment-execution-parameters>
+ </sm-editable-section>

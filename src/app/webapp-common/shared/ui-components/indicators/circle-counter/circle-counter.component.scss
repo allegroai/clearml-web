@@ -1,0 +1,55 @@
+@import "../../styles/mixins/common";
+@import "../../styles/variables";
+
+$reqWidth: 56px;
+$font-size: 18px;
+.completed {
+  background-color: $completed-blue;
+}
+
+.pending {
+  background-color: $pending-gray;
+}
+
+.empty {
+  background-color: #313955;
+}
+
+.running {
+  background-color: $running-green;
+}
+
+.model-labels {
+  background-color: $orangada;
+}
+
+.dataview-versions {
+  background-color: #00e3b9;
+}
+
+.dataview-enumeration {
+  background-color: $orangada;
+}
+
+.counter-container {
+  text-align: center;
+  padding: 8px;
+  .circle-counter {
+    display: inline-block;
+    width: $reqWidth;
+    height: $reqWidth;
+    border-radius: 50%;
+    margin-bottom: 8px;
+    .counter {
+      @include vertical-align();
+      @include counter-title();
+    }
+  }
+  .counter-label {
+    @include counter-label();
+  }
+}
+
+.leave-space {
+  min-height: 17px;
+}

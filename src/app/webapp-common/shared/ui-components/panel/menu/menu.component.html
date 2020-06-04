@@ -1,0 +1,29 @@
+<div class="d-flex justify-content-start align-items-center">
+  <div mat-button [matMenuTriggerFor]="menu" [class]="'p-0 cell menu-button btn ' + buttonClass" [ngClass]="{'hidden-button': ! showButton}" (menuOpened)="menuOpened.emit()"
+       smClickStopPropagation>
+    {{header}}
+  </div>
+  <div class='cell pointer'>
+    <i [class]="iconClass" *ngIf="showCart" (click)="trigger.openMenu()"></i>
+  </div>
+</div>
+<mat-menu (closed)="menuClosed.emit()" #menu="matMenu" [overlapTrigger]="false" [hasBackdrop]="showOverlay"
+          [class]="smMenuClass + ' sm-menu'"
+>
+  <mat-form-field *ngIf="enableSearch" smClickStopPropagation>
+    <input #searchInput matInput (input)="searchValueChanged.emit($event)" [(ngModel)]="searchValue">
+    <i matSuffix [class]="'fa mr2 ' + (searchValue? 'fa-times pointer':'fa-search')" (click)="searchValue && clearSearch()"></i>
+  </mat-form-field>
+  <div class="results" [class.search-results]="enableSearch">
+    <ng-content></ng-content>
+  </div>
+  <div class="fixed-options">
+    <mat-divider></mat-divider>
+    <div *ngIf="fixedOptionsSubheader" class="fixed-options-subheader">
+      {{fixedOptionsSubheader}}
+    </div>
+    <ng-content select="[fixedOptions]">
+
+    </ng-content>
+  </div>
+</mat-menu>

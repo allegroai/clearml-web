@@ -1,0 +1,26 @@
+@import "../../../shared/ui-components/styles/variables";
+:host{
+  display: flex;
+  align-items: center;
+  justify-content: left;
+  color: $light-grey-blue
+}
+
+
+
+.dataset_import {
+  color: $dataset_import;
+}
+
+.testing {
+  color: $testing;
+}
+
+.training {
+  color: $training;
+}
+
+.middle {
+  height: 14px;
+  margin-top: 2px
+}

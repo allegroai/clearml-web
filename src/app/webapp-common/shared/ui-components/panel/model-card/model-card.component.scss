@@ -1,0 +1,58 @@
+@import "../../styles/mixins/common";
+
+.title {
+  @include card-title();
+}
+
+.top-labels {
+  @include counter-label();
+  text-align: left;
+  padding-top: 8px;
+}
+
+.sub-title {
+  @include counter-label();
+  padding-right: 10px;
+}
+
+.model-tag {
+  @include card-header-tag();
+  color: #8492c2;
+}
+
+.model-footer {
+  font-size: 10px;
+  padding: 5px 10px;
+}
+
+/deep/ .model-card {
+  cursor: pointer;
+
+  height: 228px;
+  overflow: hidden;
+  .chips{
+    margin-top: 4px;
+    margin-bottom: 20px;
+    padding-top: 8px;
+  }
+}
+
+/deep/ .model-card {
+  .card-container:hover {
+    background-color: $blue-400 !important;
+  }
+}
+
+.brio-footer {
+  height: 60px;
+  overflow: hidden
+}
+
+:host{
+  .content-subtitle{
+    font-size: 10px;
+  }
+  .model-name{
+    width: 280px;
+  }
+}

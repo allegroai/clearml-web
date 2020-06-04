@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="pytorch-icon" viewBox="0 0 24.814 30">
+    <defs>
+        <style>
+            .cls-1{fill:#fff}
+        </style>
+    </defs>
+    <path id="Path_8" d="M21.153 8.746l-2.237 2.237A9.276 9.276 0 1 1 5.8 24.1a9.207 9.207 0 0 1 0-13.119l5.8-5.8.814-.814V0L3.661 8.746a12.4 12.4 0 0 0 0 17.593 12.277 12.277 0 0 0 17.492 0 12.4 12.4 0 0 0 0-17.593z" class="cls-1" data-name="Path 8"/>
+    <circle id="Ellipse_7" cx="1.627" cy="1.627" r="1.627" class="cls-1" data-name="Ellipse 7" transform="translate(15.153 4.983)"/>
+</svg>

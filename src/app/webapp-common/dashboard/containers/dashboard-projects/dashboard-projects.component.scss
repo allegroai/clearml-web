@@ -1,0 +1,11 @@
+@import "../../../shared/ui-components/styles/mixins/common";
+@import "../../../shared/ui-components/styles/variables";
+
+.view-all {
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.recent-title {
+  @include recent-title();
+}

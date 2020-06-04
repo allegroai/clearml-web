@@ -1,0 +1,19 @@
+<sm-dashboard-search [ngClass]="{'dashboard-search': (activeSearch$ | async)}"></sm-dashboard-search>
+<div *ngIf="!(activeSearch$ | async)" class="recent">
+  <div  class="container h-100">
+<div *ngIf="!(activeSearch$ | async)" class="container h-100">
+  <div class="recent">
+    <sm-dashboard-projects></sm-dashboard-projects>
+    <sm-dashboard-experiments>
+        <div header-buttons>
+          <button
+            class="btn btn-primary d-flex align-items-center"
+            (click)="redirectToWorkers()"
+          >
+            <i class="icon sm i-queues"></i>&nbsp; MANAGE WORKERS AND QUEUES
+          </button>
+        </div>
+      </sm-dashboard-experiments>
+  </div>
+</div>
+

@@ -1,0 +1,40 @@
+:host {
+  display: block;
+
+  .viewport {
+    height: 100%;
+    width: 100%;
+    background-color: #000;
+    overflow-x: scroll;
+
+    /deep/ .cdk-virtual-scroll-content-wrapper {
+      min-width: 103%;
+    }
+  }
+
+  .log-line {
+    font: 12px monospace;
+    border-bottom: 1px solid transparent;
+
+    .timestamp {
+      background-color: #1d1d1d;
+      width: 170px;
+      color: lightgray;
+      float: left;
+      height: 25px;
+      padding: 5px 0 0 20px;
+    }
+
+    .entry {
+      background-color: #000;
+      color: #FFFFFF;
+      height: 25px;
+      padding: 5px 190px 0;
+      white-space: nowrap;
+    }
+
+    &.separator {
+      border-bottom: 1px solid #343a40;
+    }
+  }
+}

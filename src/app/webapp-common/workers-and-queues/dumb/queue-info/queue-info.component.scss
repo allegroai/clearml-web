@@ -1,0 +1,70 @@
+@import "../../../../webapp-common/shared/ui-components/styles/variables";
+
+/deep/ .mat-menu-panel.experiments-in-queue-list {
+  border-radius: 3px;
+  box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
+  border: solid 1px $blue-400;
+  background-color: #000000;
+
+  .mat-menu-item {
+    color: $light-periwinkle-two;
+
+    &:hover {
+      background-color: $dark-grey-blue;
+    }
+  }
+}
+
+:host {
+
+
+  /deep/ .table-row {
+    background-color: $blue-800 !important;
+    border-bottom: 1px solid $grey-purple !important;
+  }
+
+  /deep/ .row.headers {
+    border-bottom: none !important;
+  }
+
+
+  .tabs-container {
+    position: relative;
+    background-color: $blue-800;
+    height: 42px;
+
+    /deep/ .navbar-item {
+      height: 42px;
+      padding: 11px;
+    }
+  }
+
+  .pull-right {
+    position: absolute;
+    right: 5px;
+    top: 5px;
+  }
+
+  sm-navbar-item[disabled] {
+    pointer-events: none;
+
+    .bottom {
+      display: none;
+    }
+  }
+
+  /deep/ .drag-grid {
+    color: $dark;
+    transition: color 0.5s;
+  }
+
+  /deep/ .table-row:hover .drag-grid {
+    transition: color 0.5s;
+    color: $dark-grey-blue;
+  }
+}
+
+/deep/ .bigger-width {
+  width: 236px;
+}
+

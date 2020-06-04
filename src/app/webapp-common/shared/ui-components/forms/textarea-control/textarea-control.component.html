@@ -1,0 +1,20 @@
+<div class="form-group"
+     (window:resize)="onResize()"
+     #group>
+  <textarea
+    cdkTextareaAutosize
+    [cdkAutosizeMinRows]="rows"
+    [cdkAutosizeMaxRows]="rows"
+    [ngClass]="inputClassName"
+    [class.danger]="hasErrors() && showErrors"
+    [readonly]="isReadonly"
+    [placeholder]="placeHolder"
+    [smTooltip]="getCurrentError()"
+    tooltipType='validation'
+    [showTooltip]="showErrors"
+    [showDelay]="0"
+    (input)="fieldValueChanged($event.target.value)"
+    [value]="formData"
+    [rows]="rows">
+  </textarea>
+</div>

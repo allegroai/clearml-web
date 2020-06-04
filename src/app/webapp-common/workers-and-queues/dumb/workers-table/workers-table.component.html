@@ -1,0 +1,39 @@
+<div #tableContainer class="worker-container">
+  <sm-table [tableData]="workers"
+            [selection]="selectedWorker"
+            [columns]="cols"
+            [rowsNumber]="100"
+            [rowHeight]="20"
+            (rowSelectionChanged)="onRowClicked($event)"
+  >
+    <ng-template let-col
+                 let-worker="rowData"
+                 pTemplate="body">
+      <div [ngSwitch]="col.id">
+        <div *ngSwitchCase="WORKERS_TABLE_COL_FIELDS.TASK_RUNNING_TIME">
+          <span>{{worker?.task?.running_time | msToSec}}</span>
+          <span *ngIf="!worker?.task?.running_time">&mdash;</span>
+        </div>
+        <div *ngSwitchCase="WORKERS_TABLE_COL_FIELDS.ID" class="first-content">
+          {{getBodyData(worker, col)}}
+        </div>
+        <div *ngSwitchDefault>
+          {{getBodyData(worker, col)}}
+          <span *ngIf="(getBodyData(worker, col)!==0) && !getBodyData(worker, col)">&mdash;</span>
+        </div>
+      </div>
+    </ng-template>
+
+    <ng-template let-col pTemplate="sort">
+      <sm-table-sort-template
+        [class.first]="col.id === WORKERS_TABLE_COL_FIELDS.ID"
+        (sortOrderChanged)="onSortChanged($event, col.id)"
+        [header]="col.header"
+        [sortOrder]="col.id === tableSortField ? tableSortOrder : false">
+      </sm-table-sort-template>
+    </ng-template>
+  </sm-table>
+</div>
+
+
+

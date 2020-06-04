@@ -1,0 +1,43 @@
+<sm-dialog-template header="SELECT MODEL">
+
+  <div
+    class="model-table-container col-24">
+    <div class="w-100 model-header">
+      <sm-select-model-header
+        [searchActive]="true"
+        [searchValue]="searchValue$ | async"
+        [isAllProjects]="isAllProjects$ | async"
+        [viewMode]="viewMode$ | async"
+        [hideArchiveToggle]="true"
+        [hideCreateNewButton]="true"
+        [showAllProjectsToggle]="true"
+        (searchValueChanged)="onSearchValueChanged($event)"
+        (isAllProjectsChanged)="onIsAllProjectsChanged($event)"
+      ></sm-select-model-header>
+    </div>
+    <div class="space-line"></div>
+    <sm-models-table
+      class="model-info-container w-100 align-self-stretch"
+      selectionMode="single"
+      [enableMultiSelect]="false"
+      [models]="models$ | async"
+      [tableCols]="tableCols"
+      [noMoreModels]="noMoreModels$ | async"
+      [users]="users$ |async"
+      [tags]="tags$ | async"
+      [systemTags]="systemTags$ | async"
+      [tableSortField]="(tableSortField$ | async)"
+      [tableSortOrder]="(tableSortOrder$ | async)"
+      [tableFilters]="(tableFilters$ | async)"
+      [selectedModels]="selectedModels$ | async"
+      [onlyPublished]="true"
+      [colRatio]="0.75"
+      (modelSelectionChanged)="modelSelectionChanged($event)"
+      (sortedChanged)="sortedChanged($event)"
+      (filterChanged)="filterChanged($event)"
+      (loadMoreModels)="getNextModels()"
+    >
+    </sm-models-table>
+  </div>
+
+</sm-dialog-template>

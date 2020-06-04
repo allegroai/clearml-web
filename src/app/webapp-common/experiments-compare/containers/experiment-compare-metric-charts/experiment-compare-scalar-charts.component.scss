@@ -1,0 +1,16 @@
+.toggle-all {
+  font-size: 10px;
+  padding-right: 2px;
+  cursor: pointer;
+}
+
+.list-container {
+  width: 343px;
+  padding: 20px 32px 0 32px;
+  overflow-y: hidden;
+  border-right: 1px solid #efefef;
+}
+.graphs-container {
+  flex: 1;
+  padding: 0 !important;
+}

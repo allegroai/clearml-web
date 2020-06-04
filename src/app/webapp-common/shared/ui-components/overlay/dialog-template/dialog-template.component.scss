@@ -1,0 +1,58 @@
+@import '../../styles/variables';
+
+$generic-font-size: 11px;
+:host {
+  .dialog-template-container {
+    min-height: 150px;
+    overflow-y: auto;
+    background-color: transparent;
+  }
+
+  .create-title {
+    margin: 10px 10px 30px;
+    font-size: 24px;
+    font-weight: 300;
+    width: 430px;
+    height: 35px;
+    text-align: center;
+    color: #1a1e2c;
+    text-transform: uppercase;
+  }
+
+  .sub-header {
+    font-size: 13px;
+    text-align: center;
+    color: $dusk-two;
+  }
+
+  .icon {
+    margin: 10px;
+  }
+
+
+
+  .generic-container {
+    overflow: hidden;
+    background-color: $white;
+    z-index: $zindex-modal;
+    border-radius: 4px;
+    padding: 32px 50px;
+    overflow-y: auto;
+    min-height: 200px;
+    max-height: 90vh;
+  }
+
+  /deep/ .background-transparent {
+    .mat-dialog-container {
+      max-height: none !important;
+      height: 97vh !important;
+      background-color: transparent;
+      box-shadow: none !important;
+      overflow: hidden;
+    }
+  }
+
+  .rotate-right {
+    transform: rotate(135deg);
+  }
+}

@@ -1,0 +1,6 @@
+<i [class]="'icon sm type '+ type"></i>
+
+<span style="margin-left: 6px" [ngClass]="type" *ngIf="showLabel">
+             {{type | noUnderscore | titlecase}}
+</span>
+

@@ -1,0 +1,170 @@
+@import "../../shared/ui-components/styles/variables";
+
+:host {
+  background-color: #202432;
+}
+
+.login-box-wrapper {
+  width: 100%;
+  height: 70vh;
+  min-height: 310px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  &.mobile {
+    height: 60vh;
+  }
+
+  .jumbotron {
+    width: 400px;
+    background-color: #384161;
+    color: #c3cdf0;
+    font-family: Heebo;
+    margin-bottom: 15px;
+
+    .username-input {
+      margin-top: 12px;
+
+      input {
+        background-color: black;
+        width: 250px;
+      }
+    }
+
+    .btn {
+      background-color: #5a658e;
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: bold;
+      margin-top: 12px;
+      width: 250px;
+      border: 0px solid transparent; /* this was 1px earlier */
+
+      &:hover {
+        background-color: #c3cdf0;
+        color: #2c3246;
+        border: 0px solid transparent; /* this was 1px earlier */
+      }
+      &:disabled {
+        background-color: #424b6b;
+        color: #2c3246;
+      }
+    }
+  }
+
+  .community {
+    display: flex;
+    justify-content: space-between;
+    width: 400px;
+    padding: 0 24px;
+
+    .link {
+      line-height: 15px;
+      font-size: 12px;
+      color: $blue-grey;
+
+      &:hover {
+        color: #ffffff;
+        text-decoration: unset;
+      }
+
+      i {
+        font-size: 14px;
+        margin-right: 4px;
+      }
+    }
+  }
+}
+
+
+
+form {
+  margin-bottom: 30px;
+}
+
+
+.mobile-warn {
+  font-size: 40px;
+  display: none;
+
+  &.show {
+    display: block;
+  }
+
+  & > strong {
+    margin-right: 5px;
+  }
+
+  @media (max-width: 750px) {
+    font-size: 18px;
+  }
+}
+
+.logo {
+  width: 150px;
+  margin-bottom: 30px;
+}
+
+.or-container {
+  position: relative;
+  margin-top: 50px;
+  background-color: #384161;
+  padding-bottom: 20px;
+
+  hr {
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+  }
+}
+
+.or {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -10px;
+  margin: auto;
+  width: 30px;
+  font-size: 15px;
+  font-weight: bold;
+  text-align: center;
+  color: $blue-grey;
+  background-color: inherit;
+}
+
+.login-notice {
+  color: #fff;
+  margin-bottom: 5px;
+}
+
+.banner {
+  position: absolute;
+  color: #ffffff;
+  text-align: left;
+  font-size: 12px;
+  bottom: 10px;
+
+}
+
+.circle {
+  margin: auto;
+  width: 80px;
+  height: 80px;
+  border-radius: 100%;
+  border: 10px solid rgba(255, 255, 255, 0.5);
+  border-top-color: #FFFFFF;
+  animation: spin 1s infinite linear;
+  margin-bottom: 40px;
+  @keyframes spin {
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+}
+
+@media (min-width: 992px) {
+  .banner {
+    left: 33.333%;
+    width: 33.333%;
+  }
+}

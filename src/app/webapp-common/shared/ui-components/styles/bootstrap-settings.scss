@@ -1,0 +1,279 @@
+@import "variables";
+@import "themes";
+
+$dark-bootstrap-theme: map-get($dark-theme, bootstrap);
+$light-bootstrap-theme: map-get($light-theme, bootstrap);
+
+$dark-theme-input: map-get($dark-theme, input);
+$light-theme-input: map-get($light-theme, input);
+
+$btn-font-weight: bold;
+$font-family-base: $font-family-base;
+//override bootstrap
+.dark-theme {
+  $primary: map-get($dark-bootstrap-theme, primary);
+  $grid-columns: $grid-cols;
+  $grid-gutter-width: $grid-gutter;
+  $container-max-widths: $grid-max-widths;
+  $input-color: map-get($dark-theme-input, color);
+  $input-placeholder-color: map-get($dark-theme-input, place-holder-color);
+  $input-bg: map-get($dark-theme-input, background-color);
+  //$input-disabled-bg: map-get($dark-theme-input, background-color-disabled);
+  $input-border-radius: map-get($dark-theme-input, border-radius);
+  $input-border-color: map-get($dark-theme-input, border-color);
+  $input-border-width: map-get($dark-theme-input, border-width);
+  $input-focus-color: map-get($dark-theme-input, focus-color);
+  $input-focus-border-color: map-get($dark-theme-input, focus-border-color);
+  $input-height: map-get($light-theme-input, height);
+  $link-hover-color: $blue-200;
+  $link-color: $blue-300;
+
+  @import '~bootstrap/scss/bootstrap.scss';
+
+  .btn-neon {
+    font-size: 12px;
+    font-weight: bold;
+    color: $dark-grey-blue-two;
+    height: 32px;
+    border-radius: 4px;
+    background-color: $neon-yellow-original-notgoodinchrome;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.13);
+    padding: 0px 32px;
+
+    &:hover:not([disabled]) {
+      background-color: $neon-yellow-hover;
+    }
+
+    &:focus {
+      border: none;
+      outline: none;
+    }
+
+    border: none;
+
+  }
+
+  .btn-primary {
+    color: map-get($light-bootstrap-theme, primary-font-color) !important;
+  }
+
+  .btn:disabled {
+    opacity: 0.4;
+  }
+
+  .form-control {
+    &:disabled {
+      background-color: $black;
+    }
+
+    &:hover {
+      border-color: $blue-400
+    }
+
+    &:hover:focus {
+      border-color: $blue-300
+    }
+  }
+
+  .btn-outline-neon {
+    height: 32px;
+    border-radius: 4px;
+    font-weight: bold;
+    background-color: $white;
+    border: solid 1px $neon-yellow-original-notgoodinchrome;
+    padding: 0 40px;
+    color: $dark-grey-blue-two;
+    box-shadow: none !important;
+
+    &:hover {
+      background-color: #f8f9fa; // TODO: ask brio.
+      border: solid 1px $neon-yellow-hover;
+    }
+
+    &:focus {
+      background-color: #f8f9fa; // TODO: ask brio.
+      border: solid 1px $neon-yellow-hover;
+    }
+  }
+
+  .table {
+    color: $blue-100;
+  }
+}
+
+.light-theme {
+  $primary: map-get($light-bootstrap-theme, primary);
+  $secondary: $white;
+  $grid-columns: $grid-cols;
+  $grid-gutter-width: $grid-gutter;
+  $container-max-widths: $grid-max-widths;
+
+  $input-color: map-get($light-theme-input, color);
+  $input-placeholder-color: map-get($light-theme-input, place-holder-color);
+  $input-bg: map-get($light-theme-input, background-color);
+  //$input-disabled-bg: map-get($light-theme-input, background-color-disabled);
+  $input-border-radius: map-get($light-theme-input, border-radius);
+  $input-border-color: map-get($light-theme-input, border-color);
+  $input-border-width: map-get($light-theme-input, border-width);
+  $input-focus-color: map-get($light-theme-input, focus-color);
+  $input-focus-border-color: map-get($light-theme-input, focus-border-color);
+  $input-active-border-color: map-get($light-theme-input, focus-border-color);
+  $input-focus-box-shadow: map-get($light-theme-input, focus-box-shadow);
+  $input-focus-bg: map-get($light-theme-input, focus-bg);
+  $input-height: map-get($light-theme-input, height);
+
+
+  @import '~bootstrap/scss/bootstrap.scss';
+
+  .btn-primary {
+    color: map-get($light-bootstrap-theme, primary-font-color) !important;
+  }
+
+  .btn-secondary {
+    height: 32px;
+    border: solid 1px $cloudy-blue;
+    color: $blue-480;
+    font-size: 11px;
+
+    &:hover {
+      border: solid 1px $blue-300;
+      color: #8492c2;
+      background-color: $white;
+    }
+
+    &:active,
+    &:focus {
+      border: solid 1px $cloudy-blue !important;
+      color: $blue-400 !important;
+      background-color: white !important;
+      box-shadow: none !important;
+    }
+
+    &:focus {
+      color: $blue-480 !important;
+    }
+
+    &:disabled {
+      border-color: $cloudy-blue;
+      color: $cloudy-blue;
+      opacity: 0.4;
+    }
+  }
+
+  .btn-dark-fill {
+    height: 32px;
+    border-width: 0;
+    border-radius: 4px;
+    background-color: $grey-purple;
+    font-size: 11px;
+    font-weight: bold;
+    text-align: center;
+    color: #ffffff;
+    transition: background-color ease-in-out 0.3s;
+
+    &:hover:enabled {
+      background-color: $purple;
+      color: white;
+    }
+
+    &:active:enabled {
+      background-color: $purple;
+    }
+
+    &:disabled {
+      cursor: auto;
+      pointer-events: none !important;
+    }
+  }
+
+  .btn-neon {
+    font-size: 12px;
+    font-weight: bold;
+    color: $dark-grey-blue-two;
+    height: 32px;
+    border-radius: 4px;
+    background-color: $neon-yellow-original-notgoodinchrome;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.13);
+    padding: 0px 32px;
+    transition: background-color ease-in-out 0.3s;
+
+    &:hover:not([disabled]) {
+      background-color: $neon-yellow-hover;
+    }
+
+    &:focus {
+      border: none;
+      outline: none;
+    }
+
+    border: none;
+
+  }
+
+  .btn-outline-neon {
+    height: 32px;
+    border-radius: 4px;
+    font-weight: bold;
+    background-color: $white;
+    border: solid 1px $neon-yellow-original-notgoodinchrome;
+    padding: 0 40px;
+    color: $dark-grey-blue-two;
+    box-shadow: none !important;
+
+    &:hover {
+      background-color: #f8f9fa; // TODO: ask brio.
+      border: solid 1px $neon-yellow-hover;
+    }
+
+    &:focus {
+      background-color: #f8f9fa; // TODO: ask brio.
+      border: solid 1px $neon-yellow-hover;
+    }
+  }
+
+  .form-control {
+    &:hover {
+      border-color: $blue-300
+    }
+
+    &:hover:focus {
+      border-color: $blue-400
+    }
+  }
+
+}
+
+
+/*  ALERT */
+.ai-alert {
+  max-width: 400px;
+
+  i {
+    margin-top: 1px;
+  }
+}
+
+label.mat-slide-toggle-label {
+  display: flex;
+  margin-bottom: 0;
+}
+
+.btn.btn-icon {
+  padding: 6px;
+  border: none;
+  line-height: 0;
+
+  &:not([disabled]) {
+    &:hover {
+      filter: brightness(100);
+    }
+  }
+
+  &:focus {
+    box-shadow: none;
+  }
+
+  &[disabled] {
+    cursor: default;
+  }
+}

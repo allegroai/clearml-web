@@ -1,0 +1,20 @@
+@import '../../styles/variables';
+
+.labeled-row {
+  display: flex;
+  align-content: center;
+  align-items: center;
+  font-size: 12px;
+  padding: 6px 6px 6px 0;
+  height: 100%;
+  align-content: flex-start;
+
+  .label-container {
+    font-weight: bold;
+    width: 155px;
+  }
+
+  .content {
+    flex: 1;
+  }
+}

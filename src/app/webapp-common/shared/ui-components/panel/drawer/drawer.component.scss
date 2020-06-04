@@ -1,0 +1,80 @@
+@import "../../styles/variables";
+
+:host {
+
+  display: block;
+  width: fit-content;
+
+  * {
+    overflow-anchor: none;
+  }
+
+  .content-container {
+    display: block;
+  }
+
+  .drawer-container {
+    display: flex;
+    flex-flow: row-reverse;
+    width: 100%;
+    overflow: hidden;
+    transition: width 0.3s ease-in-out;
+  }
+
+  .drawer-closed {
+    transition: width 0.3s ease-in-out;
+
+    width: 24px !important;
+  }
+
+  button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    outline: none !important;
+    overflow: hidden;
+    height: 100%;
+    width: 24px;
+    padding: 0 1px 0 0;
+    border: 1px solid;
+    background-color: $blue-200;
+    border-color: rgba(44, 50, 70, 0.2);
+    color: $blue-400;
+    box-shadow: 3px 3px 6px 0 rgba(0, 0, 0, .1);
+    transition: background-color 0.3s ease, color 0.3s ease;
+
+    &:hover {
+      background-color: #7480aa;
+      color: #ffffff;
+    }
+
+    .arrows-icon {
+      font-size: 18px;
+    }
+
+    .label {
+      font-size: 13px;
+      font-weight: bold;
+
+      writing-mode: tb;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  .display-on-hover {
+    transition: opacity 0.3s ease-in-out;
+    opacity: 0;
+  }
+
+  &:hover {
+    .display-on-hover {
+      opacity: 1;
+    }
+  }
+}

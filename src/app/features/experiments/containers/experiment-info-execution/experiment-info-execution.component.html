@@ -1,0 +1,15 @@
+<div style="position: relative">
+  <sm-overlay [backdropActive]="backdropActive$|async"></sm-overlay>
+  <sm-experiment-execution-form
+    *ngIf="executionInfo$ | async"
+    fieldName="execution"
+    [editable]="editable$ | async"
+    [isInDev]="isInDev$ | async"
+    [formData]="executionInfo$ | async"
+    [saving]="saving$ |async"
+    (formDataChanged)="onFormValuesChanged($event)"
+    (saveFormData)="saveExecutionData()"
+    (cancelFormDataChange)="cancelExecutionData()"
+    (activateEdit)="activateEditChanged($event)"
+  ></sm-experiment-execution-form>
+</div>

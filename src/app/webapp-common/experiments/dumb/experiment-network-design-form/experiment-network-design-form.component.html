@@ -1,0 +1,15 @@
+<sm-textarea-control
+  #textarearef
+  cols='60'
+  [formData]="(formData || formData === 0) ? formData : ''"
+  [inputClassName]="inputClassName + (hasErrors() && showErrors? ' danger' : '')  + (!editable? ' cursor-default':'')"
+  [isReadonly]="!editable"
+  tooltipType='validation'
+  [smTooltip]="getCurrentError()"
+  [showTooltip]="showErrors"
+  [showDelay]="0"
+  [placeHolder]="placeHolder"
+  class="dark"
+  (input)="fieldValueChanged($event.target.value)"
+  >
+</sm-textarea-control>

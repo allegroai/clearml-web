@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
+    <defs>
+        <filter id="a" width="422.2%" height="467.1%" x="-161.1%" y="-183.5%" filterUnits="objectBoundingBox">
+            <feOffset in="SourceAlpha" result="shadowOffsetOuter1"/>
+            <feGaussianBlur in="shadowOffsetOuter1" result="shadowBlurOuter1" stdDeviation="15"/>
+            <feColorMatrix in="shadowBlurOuter1" result="shadowMatrixOuter1" values="0 0 0 0 0.517647059 0 0 0 0 0.57254902 0 0 0 0 0.760784314 0 0 0 0.25 0"/>
+            <feMerge>
+                <feMergeNode in="shadowMatrixOuter1"/>
+                <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+        </filter>
+        <filter id="b" width="433.3%" height="479.7%" x="-166.7%" y="-189.9%" filterUnits="objectBoundingBox">
+            <feOffset in="SourceAlpha" result="shadowOffsetOuter1"/>
+            <feGaussianBlur in="shadowOffsetOuter1" result="shadowBlurOuter1" stdDeviation="50"/>
+            <feColorMatrix in="shadowBlurOuter1" result="shadowMatrixOuter1" values="0 0 0 0 0.51874958 0 0 0 0 0.572536049 0 0 0 0 0.76078869 0 0 0 0.491140172 0"/>
+            <feMerge>
+                <feMergeNode in="shadowMatrixOuter1"/>
+                <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+        </filter>
+    </defs>
+    <g fill="none" fill-rule="evenodd" filter="url(#a)" transform="translate(5 10)">
+        <g filter="url(#b)">
+            <path fill="#5A658E" d="M22 0h46a4 4 0 0 1 4 4v30a4 4 0 0 1-4 4H22a4 4 0 0 1-4-4V4a4 4 0 0 1 4-4z" opacity=".2"/>
+            <path fill="#8492C2" d="M12 10h66a4 4 0 0 1 4 4v39a4 4 0 0 1-4 4H12a4 4 0 0 1-4-4V14a4 4 0 0 1 4-4z" opacity=".3"/>
+            <path fill="#8492C2" d="M4 22h82a4 4 0 0 1 4 4v49a4 4 0 0 1-4 4H4a4 4 0 0 1-4-4V26a4 4 0 0 1 4-4z" opacity=".8"/>
+        </g>
+        <path fill="#D3FF00" fill-rule="nonzero" d="M52.683 68c-1.756 0-3.512-.45-5.049-1.575L34.024 59c-1.097-.9-1.975-1.35-2.853-2.25C28.537 54.05 27 50.225 27 46.4c0-3.825 1.537-7.425 4.17-10.125C33.806 33.575 37.318 32 41.05 32c3.731 0 7.244 1.575 10.097 4.275.878.9 1.317 1.575 2.195 2.7l7.683 14.4c2.196 3.825 1.537 8.55-1.536 11.7C57.512 67.1 55.318 68 52.683 68zM41.049 34.25c-3.073 0-6.147 1.35-8.342 3.6-2.195 2.25-3.512 5.4-3.512 8.55 0 3.375 1.317 6.3 3.512 8.55.659.675 1.317 1.125 2.415 1.8l13.83 7.65c1.316.9 2.633 1.125 3.95 1.125 1.976 0 3.732-.675 5.05-2.25 2.414-2.475 2.853-6.075 1.097-9l-7.683-14.4c-.659-.9-1.098-1.575-1.756-2.25-2.415-2.025-5.269-3.375-8.561-3.375z"/>
+        <path fill="#D3FF00" d="M57 58.5c0 1.934-1.566 3.5-3.5 3.5a3.499 3.499 0 0 1-3.5-3.5c0-1.934 1.566-3.5 3.5-3.5s3.5 1.566 3.5 3.5z"/>
+        <path fill="#32394F" d="M56 58.5a2.5 2.5 0 1 1-4.999.001A2.5 2.5 0 0 1 56 58.5zM51.146 47.75V45.5l-3.073-1.125c-.22-.45-.22-.675-.439-1.125l1.317-2.925-1.536-1.575-2.854 1.35c-.439-.225-.659-.225-1.098-.45l-1.097-3.15H40.17l-1.098 3.15c-.439.225-.658.225-1.097.45l-2.854-1.35-1.537 1.575 1.317 2.925c-.22.45-.22.675-.439 1.125L31.39 45.5v2.25l3.073 1.125c.22.45.22.675.44 1.125l-1.318 2.925 1.537 1.575 2.854-1.35c.439.225.658.45 1.097.45l1.098 3.15h2.195l1.097-3.15c.44-.225.659-.225 1.098-.45l2.854 1.35 1.536-1.575L47.634 50c.22-.45.44-.675.44-1.125l3.072-1.125z"/>
+        <path fill="#8492C2" stroke="#D3FF00" d="M41.268 50c-1.756 0-3.292-1.575-3.292-3.375s1.536-3.375 3.292-3.375c1.756 0 3.293 1.575 3.293 3.375S43.024 50 41.268 50z"/>
+    </g>
+</svg>

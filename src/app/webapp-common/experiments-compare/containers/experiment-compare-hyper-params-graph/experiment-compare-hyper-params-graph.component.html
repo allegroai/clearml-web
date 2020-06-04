@@ -1,0 +1,85 @@
+<div class="list-container light-theme">
+
+  <!--#######  Metrics Autocomplete  ######-->
+  <div smClickStopPropagation class="metrics-container">
+    <div class="metric-title">Performance Metric</div>
+    <div class="metrics-search" (click)="openList()">
+      <input #searchMetric
+             type="text"
+             (keydown.escape)="clearMetricSearch(); searchMetric.value= ''"
+             placeholder="Search metric"
+             [smTooltip]="selectedMetric?.name"
+             [showDelay]="500"
+             [value]="(!metrics || listOpen) ? '' : selectedMetric?.name"
+             (input)="updateMetricsList($event)"
+      >
+      <i *ngIf="searchMetric.value.length === 0" class="fa fa-search pr-2"></i>
+      <i *ngIf="searchMetric.value.length > 0" class="fa fa-times pointer pr-2" (click)="clearMetricSearchAndSelected(); searchMetric.value= ''"></i>
+    </div>
+  <mat-radio-group
+    *ngIf="!listOpen"
+    class="value-types"
+    [value]="metricValueType$ | async"
+    [disabled]="searchMetric.value=== ''"
+    (change)="valueTypeChange($event)">
+    <mat-radio-button class="sm" [value]="'value'">LAST</mat-radio-button>
+    <mat-radio-button class="sm" [value]="'min_value'">MIN</mat-radio-button>
+    <mat-radio-button class="sm" [value]="'max_value'">MAX</mat-radio-button>
+  </mat-radio-group>
+    <div class="metric-list" [ngClass]="{'metric-list--show': listOpen}">
+      <mat-expansion-panel *ngFor="let metricGroup of metricsOptions; trackBy: trackMetricByFn"
+                           class="metric-list__panel"
+                           [expanded]="listOpen && searchMetric.value.length > 0">
+        <mat-expansion-panel-header (click)="searchMetric.focus()" class="metric-list__header" expandedHeight="40px" collapsedHeight="40px">
+          <mat-panel-title class="metric-list__title">
+            {{metricGroup.metricName}}
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <ng-template matExpansionPanelContent>
+          <div *ngFor="let variant of metricGroup.variants; trackBy: trackVariantByFn"
+               class="metric-list__item"
+               [class.selected]="variant.value.name === selectedMetric?.name"
+               (click)="metricSelected(variant)">
+            <span class="ellipsis">{{variant.name}}</span>
+          </div>
+        </ng-template>
+      </mat-expansion-panel>
+    </div>
+
+  </div>
+  <hr class="separate-margins">
+
+  <!--#######  Hyper Params Checked List  ######-->
+  <sm-checked-filter-list
+    titleText="Parameters"
+    [itemsList]="hyperParams"
+    [selectedItemsList]="selectedHyperParams"
+    [selectFilteredItems]="selectShowIdenticalHyperParams$ | async"
+    [limitSelection]="10"
+    (selectedItems)="selectedParamsChanged($event)"
+    (clearSelection)="clearSelection()"
+  >
+    <mat-slide-toggle
+      (change)="showIdenticalParamsToggled()"
+      [checked]="!showIdenticalParamsActive">Hide identical fields
+    </mat-slide-toggle>
+  </sm-checked-filter-list>
+
+</div>
+<div class="graphs-container h-100">
+  <div class="graph-container">
+    <sm-parallel-coordinates-graph *ngIf="(experiments$ | async).length > 1 && selectedHyperParams.length > 0 && !!selectedMetric; else no_data"
+                                   [experiments]="experiments$ | async"
+                                   [parameters]="selectedHyperParams"
+                                   [metric]="selectedMetric"
+                                   [metricValueType]="metricValueType$ | async"
+    ></sm-parallel-coordinates-graph>
+    <ng-template #no_data>
+      <div class="d-flex align-items-center justify-content-center flex-column h-100 no-data">
+        <div class="icon i-no-data-graph"></div>
+        <div class="no-data-title">No data to show</div>
+        <div>Please select parameters & metric</div>
+      </div>
+    </ng-template>
+  </div>
+</div>

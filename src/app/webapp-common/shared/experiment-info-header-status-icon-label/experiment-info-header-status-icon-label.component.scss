@@ -1,0 +1,60 @@
+@import "../ui-components/styles/variables";
+
+:host {
+  .label {
+    display: flex;
+    justify-content: center;
+    margin-left: 5px;
+  }
+
+  .icon {
+    margin: auto 0;
+  }
+
+  .status-icon-container {
+    padding: 0 6px;
+    width: 100%;
+  }
+
+  .failed,
+  .completed,
+  .stopped
+  {
+    font-size: 11px;
+    font-weight: 500;
+    filter: brightness(0) invert(1);
+  }
+
+  .created,
+  .running,
+  .queued,
+  .in_progress,
+  .published {
+    opacity: 0.8;
+    font-family: Heebo;
+    font-size: 11px;
+    font-weight: 500;
+    color: #38446e;
+  }
+
+  .middle {
+    height: 14px;
+    margin-top: 2px
+  }
+
+  .view-only {
+    padding-left: 4px;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  .maximize{
+    font-size: 18px;
+    color: $blue-300;
+    &:hover{
+      color: $blue-200;
+    }
+  }
+}
+
+

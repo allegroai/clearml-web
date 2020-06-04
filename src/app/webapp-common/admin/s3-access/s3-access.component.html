@@ -1,0 +1,40 @@
+<form [formGroup]="S3Form" *ngIf="S3Form">
+  <div class="row s3-row" *ngIf="BucketCredentials.controls.length>0">
+    <div class="col-6">Bucket</div>
+    <div class="col-4">Key</div>
+    <div class="col-6">Secret / SAS</div>
+    <div class="col-2">Region</div>
+    <div class="col-6">Host (Endpoint)</div>
+  </div>
+  <div *ngFor="let bucket of BucketCredentials.controls; let i = index; trackBy: trackByFn"
+       formArrayName="BucketCredentials">
+    <div class="row s3-row" [formGroupName]="i">
+      <div class="col-6">
+        <input class="form-control" formControlName="Bucket">
+      </div>
+      <div class="col-4">
+        <input class="form-control" formControlName="Key">
+      </div>
+      <div class="col-6">
+        <input class="form-control" formControlName="Secret">
+      </div>
+      <div class="col-2">
+        <input class="form-control" formControlName="Region">
+      </div>
+      <div class="col-4">
+        <input class="form-control" formControlName="Endpoint" placeholder="Leave empty for AWS S3">
+      </div>
+      <div class="col-2">
+        <button class="pull-left btn btn-info" (click)="removeBucket(i)" type="button" smTooltip="Remove">
+          <i class="fa" [ngClass]="ICONS.REMOVE"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="col-6">
+    <button class="pull-left btn btn-primary d-flex align-items-center" (click)="addBucket()" type="button">
+      <i class="icon i-plus-blue sm"></i>
+    </button>
+  </div>
+  <div style="height: 40px"></div>
+</form>

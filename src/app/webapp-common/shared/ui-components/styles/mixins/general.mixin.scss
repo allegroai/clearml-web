@@ -1,0 +1,16 @@
+@import "../themes";
+
+@mixin generate-general($themes: $themes) {
+  @each $theme, $map in $themes {
+
+    .#{$theme}-theme {
+      background: map-get($map, bg-color);
+      color: map-get($map, color);
+
+      .al-header {
+        color: map-get($map, al-header);
+      }
+    }
+  }
+}
+
