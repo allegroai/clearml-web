@@ -28,7 +28,7 @@ Contains only logic. no declarations. no dependency with any other module beside
 Application feature modules. each module can contain declarations and providers **specific to the the feature**  
 Depend only on shared module for ui components
 
-#####each feature can contain the following: 
+##### Each feature can contain the following: 
 * **module** - the feature module: `<featureName>.module.ts`. 
 * **component** - the feature main component js file, should contain the feature's containers components only: `<featureName>.component.ts`. 
 * **component** html - the feature component html: `<featureName>.component.html`. 
