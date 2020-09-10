@@ -20,25 +20,36 @@ export class CommonExperimentReverterService {
 
   commonRevertExperiment(experiment: ISelectedExperiment): IExperimentInfo {
     return {
-      id: experiment.id,
-      name: experiment.name,
-      comment: experiment.comment,
-      execution: this.revertExecution(experiment),
-      model: this.revertModel(experiment),
-      hyperParams: {parameters: this.revertExecutionParameters(experiment.execution.parameters)},
+      id         : experiment.id,
+      name       : experiment.name,
+      comment    : experiment.comment,
+      execution  : this.revertExecution(experiment),
+      model      : this.revertModel(experiment),
+      hyperparams: this.revertHyperParams(experiment.hyperparams),
     };
   }
 
+  revertHyperParams(hyperparams) {
+    if (!hyperparams) {
+      hyperparams = {};
+    }
+    if (!('properties' in hyperparams)) {
+      hyperparams['properties'] = {};
+    }
+    return hyperparams;
+  }
+
+
   revertExecution(experiment: ISelectedExperiment): IExecutionForm {
     return {
-      source: this.revertExecutionSource(experiment.script),
-      output: {
+      source      : this.revertExecutionSource(experiment.script),
+      output      : {
         destination: get('destination', experiment.output) || '',
-        logLevel: 'basic'// TODO: should be enum from gencode.
+        logLevel   : 'basic'// TODO: should be enum from gencode.
       },
       requirements: experiment.script ? this.revertRequirements(experiment.script) : {pip: ''},
-      diff: get('diff', experiment.script) || '',
-      docker_cmd: get('docker_cmd', experiment.execution)
+      diff        : get('diff', experiment.script) || '',
+      docker_cmd  : get('docker_cmd', experiment.execution)
     };
   }
 
@@ -51,13 +62,13 @@ export class CommonExperimentReverterService {
 
   revertExecutionSource(script: Task['script']): IExecutionForm['source'] {
     return {
-      repository: get('repository', script) || '',
-      tag: get('tag', script) || '',
+      repository : get('repository', script) || '',
+      tag        : get('tag', script) || '',
       version_num: get('version_num', script) || '',
-      branch: get('branch', script) || '',
+      branch     : get('branch', script) || '',
       entry_point: get('entry_point', script) || '',
       working_dir: get('working_dir', script) || '',
-      scriptType: this.revertScriptType(script)
+      scriptType : this.revertScriptType(script)
     };
   }
 
@@ -74,74 +85,54 @@ export class CommonExperimentReverterService {
 
   revertModel(experiment: ISelectedExperiment): IExperimentModelInfo {
     return {
-      input: {
-        id: get('model.id', experiment.execution),
-        name: get('model.name', experiment.execution),
-        url: get('model.uri', experiment.execution),
+      input    : {
+        id       : get('model.id', experiment.execution),
+        name     : get('model.name', experiment.execution),
+        url      : get('model.uri', experiment.execution),
         framework: get('framework', experiment.execution),
-        labels: get('model.labels', experiment.execution),
-        project: get('model.project', experiment.execution),
+        labels   : get('model.labels', experiment.execution),
+        project  : get('model.project', experiment.execution),
+        design   : get('model.design', experiment.execution) || '',
       },
-      output: {
-        id: get('model.id', experiment.output) || '',
-        name: get('model.name', experiment.output) || '',
-        url: get('model.uri', experiment.output) || '',
+      output   : {
+        id     : get('model.id', experiment.output) || '',
+        name   : get('model.name', experiment.output) || '',
+        url    : get('model.uri', experiment.output) || '',
         project: get('model.project', experiment.output) || '',
-        design: get('model.design.design', experiment.output) || '',
+        design : get('model.design', experiment.output) || '',
       },
       artifacts: get('artifacts', experiment.execution) || [],
-      source: {
+      source   : {
         experimentName: get('model.task.name', experiment.execution),
-        experimentId: get('model.task.id', experiment.execution),
-        projectName: get('model.task.project.name', experiment.execution),
-        projectId: get('model.task.project.id', experiment.execution),
-        userName: get('model.user.name', experiment.execution),
-        timeCreated: get('model.created', experiment.execution),
+        experimentId  : get('model.task.id', experiment.execution),
+        projectName   : get('model.task.project.name', experiment.execution),
+        projectId     : get('model.task.project.id', experiment.execution),
+        userName      : get('model.user.name', experiment.execution),
+        timeCreated   : get('model.created', experiment.execution),
       },
-      prototext: this.getModelDesign(get('model_desc', experiment.execution)),
     };
   }
 
 
   revertModelFromModel(model: Model, populatePrototext: boolean): Partial<IExperimentModelInfo> {
     const modelData: Partial<IExperimentModelInfo> = {
-      input: model.id ? {
-        id: model.id,
-        name: model.name,
-        url: model.uri,
+      input : model.id ? {
+        id       : model.id,
+        name     : model.name,
+        url      : model.uri,
         framework: model.framework,
-        labels: model.labels,
+        labels   : model.labels,
       } : undefined,
-      output: { // TODO: no need?
-        id: null,
-        name: null,
-        url: null
-      },
       source: {
-        experimentId: get('task.id', model),
-        projectId: get('project.id', model),
+        experimentId  : get('task.id', model),
+        projectId     : get('project.id', model),
         experimentName: get('task.name', model),
-        projectName: get('project.name', model),
-        userName: get('user.name', model),
-        timeCreated: model.created,
+        projectName   : get('project.name', model),
+        userName      : get('user.name', model),
+        timeCreated   : model.created,
       },
     };
-
-    if (populatePrototext) {
-      modelData.prototext = this.getModelDesign(model.design);
-    }
-
     return modelData;
-  }
-
-  public getModelDesign(modelDesc: Task['execution']['model_desc']) {
-    const modelDesign = get('design', modelDesc) || get('prototxt', modelDesc);
-    return typeof modelDesign === 'string' ? modelDesign : JSON.stringify(modelDesign);
-  }
-
-  public getOutputModelDesign(modelDesc: Task['execution']['model_desc']) {
-    const modelDesign = get('design', modelDesc) || get('prototxt', modelDesc);
-    return typeof modelDesign === 'string' ? modelDesign : JSON.stringify(modelDesign);
   }
 
   private revertRequirements(script: Script) {

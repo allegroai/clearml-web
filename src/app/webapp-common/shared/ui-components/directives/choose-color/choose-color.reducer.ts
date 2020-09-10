@@ -7,7 +7,7 @@ export interface ColorPreferenceState {
 }
 
 export const initialState: ColorPreferenceState = {
-  colorPreferences: {},
+  colorPreferences: null,
   pickerProps: null
 };
 

@@ -11,6 +11,7 @@ export class UserTagComponent implements OnInit {
   @Input() colors: TagColor;
   @Input() foreground: string;
   @Input() tooltip: boolean;
+  @Input() disabledRemove: boolean;
   @Output() remove = new EventEmitter<string>();
   @Output() add = new EventEmitter<MouseEvent>();
 
@@ -19,4 +20,7 @@ export class UserTagComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  onRemoveClicked(caption: string) {
+    this.remove.emit(caption);
+  }
 }

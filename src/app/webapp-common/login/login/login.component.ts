@@ -18,10 +18,11 @@ import {LoginMode, LoginModeEnum, LoginService} from '../../shared/services/logi
 })
 export class LoginComponent implements OnInit, OnDestroy {
 
-  loginModel: { name: any; password: any; } = {
+  loginModel: { name: any; password: any } = {
     name: '',
     password: ''
   };
+
   @ViewChild('loginForm', {static: true}) loginForm: NgForm;
   @ViewChild('nameInput', {static: true}) nameInput: ElementRef;
   options: any[] = [];
@@ -35,13 +36,18 @@ export class LoginComponent implements OnInit, OnDestroy {
   public demo: boolean;
   public mobile: boolean;
   public newUser: boolean;
+  public environment = environment;
   public loginFailed = false;
   public showGitHub: boolean;
   private redirectUrl: string;
   stars: number = 0;
+  showSpinner: boolean;
+  public guestUser: { enabled: boolean; username: string; password: string };
 
-  constructor(private router: Router, private loginService: LoginService,
-    private store: Store<any>, private route: ActivatedRoute) {
+  constructor(
+    private router: Router, private loginService: LoginService,
+    private store: Store<any>, private route: ActivatedRoute)
+  {
     this.mobile = mobilecheck();
   }
 
@@ -63,7 +69,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.route.queryParams.subscribe((params: Params) => this.redirectUrl = params['redirect']);
 
     if (this.showGitHub) {
-      fetch('https://api.github.com/repos/allegroai/trains', { method: 'GET' })
+      fetch('https://api.github.com/repos/allegroai/trains', {method: 'GET'})
         .then(response => response.json()
           .then(json => this.stars = json['stargazers_count'])
         );
@@ -71,12 +77,13 @@ export class LoginComponent implements OnInit, OnDestroy {
 
     this.loginService.getLoginMode().pipe(
       finalize(() => {
+        this.guestUser = this.loginService.guestUser;
         if (this.loginMode === LoginModeEnum.simple) {
           this.loginService.getUsers().subscribe(users => {
             this.options = users;
           });
           if (environment.autoLogin && this.redirectUrl &&
-              !['/dashboard'].includes(this.redirectUrl)) {
+            !['/dashboard'].includes(this.redirectUrl)) {
             this.loginForm.controls['name'].setValue((new Date()).getTime().toString());
             this.simpleLogin();
           }
@@ -118,17 +125,23 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   login() {
+    this.showSpinner = true;
     if (this.loginMode === LoginModeEnum.password) {
       const user = this.loginModel.name.trim();
       const password = this.loginModel.password.trim();
       this.loginService.passwordLogin(user, password)
-        .subscribe((res: any) => {
-          this.afterLogin();
-        },
-        () => this.loginFailed = true);
-
+        .subscribe(
+          () => this.afterLogin(),
+          () => {
+            this.showSpinner = false;
+            this.loginFailed = true;
+          });
     } else {
-      this.simpleLogin();
+      const observer = this.simpleLogin();
+      observer?.subscribe(
+        () => this.showSpinner = false,
+        () => this.showSpinner = false
+      );
     }
   }
 
@@ -136,9 +149,11 @@ export class LoginComponent implements OnInit, OnDestroy {
     const user = this.options.find(x => x.name === this.loginModel.name);
 
     if (user) {
-      this.loginService.login(user.id).subscribe((res: any) => {
+      const loginObserver = this.loginService.login(user.id);
+      loginObserver.subscribe((res: any) => {
         this.afterLogin();
       });
+      return loginObserver;
     } else {
       const name = this.loginModel.name.trim();
       this.loginService.autoLogin(name, () => this.afterLogin());
@@ -167,7 +182,19 @@ export class LoginComponent implements OnInit, OnDestroy {
     return this.redirectUrl ? this.redirectUrl : '/dashboard';
   }
 
-  acknowlage() {
+  acknowledge() {
     this.mobile = false;
+  }
+
+  loginGuest() {
+    this.showSpinner = true;
+    this.loginService.passwordLogin(this.guestUser.username, this.guestUser.password)
+      .subscribe((res: any) => {
+        this.afterLogin();
+      },
+      () => {
+        this.showSpinner = false;
+        this.loginFailed = true;
+      });
   }
 }

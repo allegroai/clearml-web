@@ -1,6 +1,6 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {IModelInfoInput, IModelInfoOutput, IModelInfoSource} from '../../shared/common-experiment-model.model';
-import { MatDialog } from '@angular/material/dialog';
+import {MatDialog} from '@angular/material/dialog';
 import {filter} from 'rxjs/operators';
 import {ModelAutoPopulateDialogComponent} from '../model-auto-populate-dialog/model-auto-populate-dialog.component';
 import {Model} from '../../../../business-logic/model/models/model';
@@ -26,9 +26,10 @@ export class ExperimentModelsFormViewComponent extends BaseClickableArtifact {
   @Input() modelLabels: Model['labels'];
   @Input() source: IModelInfoSource;
   @Input() output: IModelInfoOutput;
+  @Input() experimentName: string;
 
   @Input() set model(model: IModelInfoInput) {
-    this._model      = model;
+    this._model = model;
     this.isLocalFile = model && model.url && this.adminService.isLocalFile(model.url);
   }
 
@@ -38,7 +39,7 @@ export class ExperimentModelsFormViewComponent extends BaseClickableArtifact {
 
   @Output() modelSelected = new EventEmitter<{
     model: Model;
-    fieldsToPopulate: { labelEnum: boolean; networkDesign: boolean};
+    fieldsToPopulate: { labelEnum: boolean; networkDesign: boolean };
   }>();
 
   constructor(private dialog: MatDialog, protected adminService: AdminService, protected store: Store<any>) {
@@ -59,26 +60,30 @@ export class ExperimentModelsFormViewComponent extends BaseClickableArtifact {
   }
 
   confirmModelSelection(selectedModel: Model, isDesignEqual: boolean, areLabelsEquals: boolean) {
-    const autoPopulateModelDialog = this.dialog.open(
-      ModelAutoPopulateDialogComponent,
-      {data:
-          {
-            populateLabels: !areLabelsEquals,
-            populateDesign: !isDesignEqual
-          }
-      }
-    );
-    autoPopulateModelDialog.afterClosed().pipe(filter(confirmed => !!confirmed))
-      .subscribe((populateFields) => {
-        this.emitModelSelected(selectedModel, populateFields);
-      });
+    this.emitModelSelected(selectedModel, {
+      labelEnum    : false,
+      networkDesign: false,
+    });
+    // const autoPopulateModelDialog = this.dialog.open(
+    //   ModelAutoPopulateDialogComponent,
+    //   {data:
+    //       {
+    //         populateLabels: !areLabelsEquals,
+    //         populateDesign: !isDesignEqual,
+    //         experimentName: this.experimentName,
+    //         modelName: selectedModel.name,
+    //       }
+    //   }
+    // );
+    // autoPopulateModelDialog.afterClosed().pipe(filter(confirmed => !!confirmed))
+    //   .subscribe((populateFields) => {
+    //     this.emitModelSelected(selectedModel, populateFields);
+    //   });
   }
 
-  private emitModelSelected(model: Model, fieldsToPopulate: {labelEnum: boolean; networkDesign: boolean}) {
+  private emitModelSelected(model: Model, fieldsToPopulate: { labelEnum: boolean; networkDesign: boolean }) {
     this.modelSelected.emit({model: model, fieldsToPopulate: fieldsToPopulate});
   }
-
-
 
   private isDesignEqual(modelDesign: object, design: string) {
     return JSON.stringify(modelDesign) === design;

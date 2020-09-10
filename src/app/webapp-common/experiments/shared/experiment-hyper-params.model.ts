@@ -1,6 +1,10 @@
+import {ParamsItem} from '../../../business-logic/model/tasks/paramsItem';
+
 export interface IHyperParamsForm {
-  parameters: Array<IExecutionParameter>;
-}
+  [key: string]: ParamsItem[]
+};
+
+
 
 export interface IExecutionParameter {
   id?: string;

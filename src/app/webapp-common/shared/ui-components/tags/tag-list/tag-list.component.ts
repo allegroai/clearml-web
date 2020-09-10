@@ -17,9 +17,12 @@ export interface Tag {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TagListComponent implements OnInit {
+  public disableRemove: boolean;
   tagsList = [] as Tag[];
+
   @Input() set tags (tags: string[]) {
     this.tagsList = tags?.map((tag: string) => ({caption: tag, colorObservable: this.colorService.getColor(tag)}));
+    this.disableRemove = false;
   }
   @Input() sysTags = [] as string[];
   @Input() tooltip: boolean = false;
@@ -31,7 +34,13 @@ export class TagListComponent implements OnInit {
   ngOnInit(): void {
   }
 
-  public trackFn (tag: Tag) {
+  // Why the first arg is index??
+  public trackFn (index: number, tag: Tag) {
     return tag.caption;
+  }
+
+  removeTag(tag: string) {
+    this.remove.emit(tag);
+    this.disableRemove = true;
   }
 }

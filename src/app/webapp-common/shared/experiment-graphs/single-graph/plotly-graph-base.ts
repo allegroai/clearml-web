@@ -1,7 +1,9 @@
 import {hslToRgb, rgbToHsl} from '../../services/color-hash/color-hash.utils';
 import {Subscription} from 'rxjs';
-import {Input, OnDestroy, Directive} from '@angular/core';
+import {Input, OnDestroy, Directive, Renderer2, ElementRef} from '@angular/core';
 import {Data, Frame, Layout, LayoutAxis, Legend, PlotData} from 'plotly.js';
+import {selectScaleFactor} from '../../../core/reducers/view-reducer';
+import {Store} from '@ngrx/store';
 
 export interface ExtFrame extends  Omit<Frame, 'data' | 'layout'> {
   iter: number;
@@ -18,7 +20,7 @@ export interface ExtLegend extends Legend {
   valign:  'top' | 'middle' | 'bottom';
 }
 
-export interface ExtLayoutAxis extends LayoutAxis {
+export interface ExtLayoutAxis extends Omit<LayoutAxis, 'spikesnap'> {
   spikesnap: string;
 }
 
@@ -43,8 +45,25 @@ export class PlotlyGraphBase implements OnDestroy {
   public isSmooth = false;
   public colorSub: Subscription;
   @Input() isCompare: boolean = false;
+  protected dimension: number;
+  protected scale: number;
+  private scaleSub: Subscription;
 
-  constructor() {
+  constructor(
+    protected store: Store,
+    protected renderer: Renderer2,
+    protected elementRef: ElementRef
+  ) {
+    this.scaleSub = store.select(selectScaleFactor).subscribe(scaleFactor => {
+      if (scaleFactor !== 100) {
+        this.dimension = 1 / scaleFactor * 10000;
+        this.scale = scaleFactor / 100;
+        this.renderer.setStyle(this.elementRef.nativeElement, 'transform', `scale(${this.scale})`);
+        this.renderer.setStyle(this.elementRef.nativeElement, 'transform-origin', '50% 0%');
+        this.renderer.setStyle(this.elementRef.nativeElement, 'min-height', '600px');
+        this.renderer.setStyle(this.elementRef.nativeElement, 'width', `${this.dimension}%`);
+      }
+    });
   }
 
   public _reColorTrace(trace, newColor: string[]) {
@@ -111,9 +130,8 @@ export class PlotlyGraphBase implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.colorSub) {
-      this.colorSub.unsubscribe();
-    }
+    this.colorSub?.unsubscribe();
+    this.scaleSub?.unsubscribe();
   }
 
 }

@@ -24,15 +24,15 @@
       <sm-navbar-item header="DEBUG SAMPLES" [active]="routerConfig.includes('debugImages')"></sm-navbar-item>
     </span>
     <span class="refresh-position">
-      <span id="refreshIcon"></span>
       <sm-experiment-settings
+        [class.maximized]="!minimized"
         [showSettings]="routerConfig.includes('scalar')"
         (toggleSettings)="toggleSettingsBar()">
       </sm-experiment-settings>
       <span *ngIf="routerConfig.includes('log')">
           <button class="btn btn-primary mb-2 mr-2" (click)="downloadLog()" [disabled]="!experimentId">
             <i class="fa fa-download"></i>
-            download full log
+            Download full log
           </button>
       </span>
       <sm-refresh-button

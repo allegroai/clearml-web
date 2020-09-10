@@ -9,17 +9,19 @@ import {ProjectsListComponent} from './dumb/projects-list/projects-list.componen
 import {ProjectsHeaderComponent} from './dumb/projects-header/projects-header.component';
 import {ProjectCreateDialogModule} from '../shared/project-create-dialog/project-create-dialog.module';
 import {ProjectsSharedModule} from '../../features/projects/shared/projects-shared.module';
+import {SharedModule} from '../../shared/shared.module';
 
 @NgModule({
-  imports        : [
-    CommonModule,
-    SMSharedModule,
-    FormsModule,
-    ReactiveFormsModule,
-    ProjectCreateDialogModule,
-    ProjectsSharedModule,
-    EffectsModule.forFeature([CommonProjectsEffects]),
-  ],
+    imports: [
+        CommonModule,
+        SMSharedModule,
+        FormsModule,
+        ReactiveFormsModule,
+        ProjectCreateDialogModule,
+        ProjectsSharedModule,
+        EffectsModule.forFeature([CommonProjectsEffects]),
+        SharedModule,
+    ],
   declarations   : [CommonProjectsPageComponent, ProjectsListComponent, ProjectsHeaderComponent],
   exports        : [CommonProjectsPageComponent, ProjectsListComponent, ProjectsHeaderComponent]
 })

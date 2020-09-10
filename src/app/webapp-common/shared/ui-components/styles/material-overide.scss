@@ -2,10 +2,17 @@ body .mat-form-field-outline-gap {
   display: none;
 }
 
-body .mat-form-field-appearance-outline .mat-form-field-outline {
+body .mat-form-field-appearance-outline:not(.data-text) .mat-form-field-outline {
   top: 10px;
   background-color: white;
 }
+
+body .data-text.mat-form-field-appearance-outline .mat-form-field-outline {
+  .mat-form-field-outline-end, .mat-form-field-outline-start {
+    border: none;
+  }
+}
+
 
 body .mat-form-field-infix {
   padding-bottom: 8px;

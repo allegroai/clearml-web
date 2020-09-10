@@ -256,7 +256,7 @@ export const NAVIGATION_ACTIONS = {
 
 
 
-export const ENVIRONMENT = {API_VERSION: '/v2.8'};
+export const ENVIRONMENT = {API_VERSION: '/v2.9'};
 const url                = window.location.origin;
 let apiBaseUrl: string;
 if (environment.apiBaseUrl) {

@@ -1,11 +1,3 @@
-@import "../../../webapp-common/shared/ui-components/styles/variables.scss";
-@import "../../../webapp-common/shared/ui-components/styles/mixins/lines.scss";
-
-.separator {
-  margin: $card-spacer-y / 2 $card-spacer-x;
-  @include line($line-height-sm + px)
-}
-
 .mat-slide-toggle {
   margin: 10px 0;
 }

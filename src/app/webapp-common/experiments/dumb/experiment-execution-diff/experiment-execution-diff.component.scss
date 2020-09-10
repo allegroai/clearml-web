@@ -1,7 +1,20 @@
-sm-textarea-control {
-  display: block;
-  height: 180px;
-  &.hidden {
-   display: none;
+@import "../../../shared/ui-components/styles/variables";
+
+:host {
+  .diff-container {
+    background-color: $blue-600;
+    padding: 12px 0 12px 12px;
+    border-radius: 4px;
+
+    .viewport {
+      height: 250px;
+      color: $white;
+      overflow-x: scroll;
+
+      .line {
+        height: 19px;
+        white-space: pre;
+      }
+    }
   }
 }

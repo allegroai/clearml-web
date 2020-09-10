@@ -1,20 +1,21 @@
 <span class="sys-tag" *ngFor="let tag of sysTags">{{tag}}</span>
 <ng-container *ngIf="remove.observers.length > 0; else:noRemove">
   <sm-user-tag class="tag-item"
-    *ngFor="let tag of tagsList; trackBy: trackFn"
-    [colors]="tag.colorObservable | async"
-    [caption]="tag.caption"
-    (remove)="remove.emit($event)"
-    [tooltip]="tooltip"
+               *ngFor="let tag of tagsList; trackBy: trackFn"
+               [colors]="tag.colorObservable | async"
+               [caption]="tag.caption"
+               [tooltip]="tooltip"
+               [disabledRemove]="disableRemove"
+               (remove)="removeTag($event)"
   ></sm-user-tag>
 </ng-container>
 
 <ng-template #noRemove>
   <sm-user-tag class="tag-item"
-    *ngFor="let tag of tagsList; trackBy: trackFn"
-    [colors]="tag.colorObservable | async"
-    [caption]="tag.caption"
-    [tooltip]="tooltip"
+               *ngFor="let tag of tagsList; trackBy: trackFn"
+               [colors]="tag.colorObservable | async"
+               [caption]="tag.caption"
+               [tooltip]="tooltip"
   ></sm-user-tag>
 </ng-template>
 

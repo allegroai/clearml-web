@@ -24,6 +24,8 @@ import {MatDialog} from '@angular/material/dialog';
 import {ApiOrganizationService} from '../../../business-logic/api-services/organization.service';
 import {OrganizationGetTagsResponse} from '../../../business-logic/model/organization/organizationGetTagsResponse';
 
+const ALL_PROJECTS_OBJECT = {id: '*', name: 'All Projects'};
+
 @Injectable()
 export class ProjectsEffects {
 
@@ -36,7 +38,7 @@ export class ProjectsEffects {
   getProjects$ = this.actions$.pipe(
     ofType<GetAllProjects>(actions.GET_PROJECTS),
     switchMap(() =>
-      this.projectsApi.projectsGetAllEx({})
+      this.projectsApi.projectsGetAllEx({only_fields:['name', 'company']})
         .pipe(map(res => new actions.SetAllProjects(res.projects)))
     )
   );
@@ -77,7 +79,7 @@ export class ProjectsEffects {
     filter(([action, projects]) => !!action.payload.projectId),
     switchMap(([action, projects]) => {
       if (action.payload.projectId === '*') {
-        return [new actions.SetSelectedProject({id: '*', name: 'All Projects'})];
+        return [new actions.SetSelectedProject(ALL_PROJECTS_OBJECT)];
       } else {
         const proj = projects.find(proj => proj.id === action.payload.projectId);
         if (proj) {

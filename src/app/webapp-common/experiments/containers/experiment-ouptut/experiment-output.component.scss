@@ -30,6 +30,11 @@ $output-tabs-height: 64px;
     padding: 7px 10px 0 10px;
     border-bottom: 1px solid #efefef;
   }
+  sm-experiment-settings.maximized {
+    display: block;
+    height: 50px;
+    padding-top: 6px;
+  }
 
   nav{
     height: $output-tabs-height;
@@ -41,6 +46,8 @@ $output-tabs-height: 64px;
       position: absolute;
       right: 10px;
       top: 6px;
+      display: flex;
+      align-items: center;
     }
     .refreshIcon{
       margin-right: 10px;
@@ -50,7 +57,7 @@ $output-tabs-height: 64px;
       text-align: left;
 
       .refresh-position {
-        top: 16px;
+        top: 12px;
       }
     }
   }

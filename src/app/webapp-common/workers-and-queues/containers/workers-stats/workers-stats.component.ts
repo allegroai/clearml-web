@@ -71,14 +71,14 @@ export class WorkersStatsComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.selectionSubscription = combineLatest(this.timeFormControl.valueChanges, this.paramFormControl.valueChanges)
+    this.selectionSubscription = combineLatest([this.timeFormControl.valueChanges, this.paramFormControl.valueChanges])
       .pipe(filter(([timeFrame, param]) => !!timeFrame && !!param &&
         (param !== this.currentParam || timeFrame !== this.currentTimeFrame)))
       .subscribe(([timeFrame, param]) => {
         this.store.dispatch(new SetStatsParams({timeFrame, param}));
       });
 
-    this.chartParamSubscription = combineLatest(this.store.select(selectStatsTimeFrame), this.store.select(selectStatsParams))
+    this.chartParamSubscription = combineLatest([this.store.select(selectStatsTimeFrame), this.store.select(selectStatsParams)])
       .pipe(filter(([timeFrame, param]) => !!timeFrame && !!param))
       .subscribe(([timeFrame, param]) => {
         this.currentParam = param;

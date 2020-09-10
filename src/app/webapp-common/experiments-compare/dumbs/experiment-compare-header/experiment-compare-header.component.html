@@ -55,12 +55,12 @@
 
   <div id="searchDiff"></div>
 
-  <div>
+  <div class="settings">
     <button *ngIf="currentPage === 'scalars' && viewMode === 'graph'"
-            class="btn btn-secondary"
+            class="btn"
             smTooltip="Settings"
             (click)="toggleSettings()">
-      <i class="fas fa-cog"></i>
+      <i class="fas fa-cog fa-lg"></i>
     </button>
 <!--    <sm-experiment-refresh-->
 <!--      [disabled]="(selectRefreshing$ | async)?.refreshing"-->

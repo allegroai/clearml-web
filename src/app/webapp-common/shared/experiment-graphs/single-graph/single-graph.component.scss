@@ -9,11 +9,11 @@
     border: 1px solid #efefef;
     margin-left: -1px;
     margin-top: -1px;
+    overflow-y: hidden;
+    overflow-x: auto;
 
     &.whitebg-table {
       height: unset;
-      overflow-y: hidden;
-      overflow-x: auto;
       padding-bottom:12px;
       margin-left: 24px;
       margin-right: 24px;
@@ -51,5 +51,9 @@
 
   /deep/ .infolayer > .g-gtitle > .gtitle {
     transform: translateY(12px);
+  }
+  /deep/ .modebar-container svg.icon {
+    height: unset;
+    width: unset;
   }
 }

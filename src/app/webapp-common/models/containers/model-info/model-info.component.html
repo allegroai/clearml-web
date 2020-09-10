@@ -1,13 +1,13 @@
 <sm-experiment-info-header-status-progress-bar
-  [status]="getReadyStatus(selectedModel?.ready)"
+  [status]="getReadyStatus((selectedTableModel$ | async)?.ready || selectedModel?.ready)"
   (closeInfoClicked)="deselectModel()"
 >
 </sm-experiment-info-header-status-progress-bar>
 <div class="model-info-container light-theme">
   <sm-model-info-header #modelInfoHeader
-                        [model]="selectedModel"
-                        [editable]=" !isExample"
-                        [backdropActive]="backdropActive$ | async "
+                        [model]="((selectedTableModel$ | async) || selectedModel)"
+                        [editable]="!isExample"
+                        [backdropActive]="backdropActive$ | async"
                         (deselectModel)="deselectModel()"
                         (modelNameChanged)="updateModelName($event)"
   >

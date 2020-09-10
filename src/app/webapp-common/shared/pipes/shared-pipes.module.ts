@@ -29,13 +29,18 @@ import {ToPercentagePipe} from './to-precentage.pipe';
 import {ShowSelectedFirstPipe} from './show-selected-first.pipe';
 import {CountPipe} from './count.pipe';
 import {LabelValuePipe} from './label-value.pipe';
+import {HideHashTitlePipe} from './hide-hash-title.pipe';
+import {safeAngularUrlParameterPipe} from './safeAngularUrlParameter.pipe';
+import {ReplaceViaMapPipe} from './replaceViaMap';
+import {FilterByIdPipe} from './filterById.pipe';
+import {FilterOutPipe} from './filterOut.pipe';
 
 
 const pipes = [
   CamelToTitlePipe, FilenameFromPath, FilterPipe, FloorPipe, KeyValuePipe, NAPipe, SortPipe, IsVideoPipe, IsAudioPipe,
   JoinPipe, KeyvalPipe, LabelValuePipe, NoUnderscorePipe, NumberToKPipe, UniqueByPipe, MsToHoursPipe, MsToSecPipe,
-  ToExponentialPipe, HighlightSearchTextPipe, HideHashPipe, TimeAgoPipe, TimeTillNowPipe, HasExampleItemPipe,
-  AdvancedFilterPipe, SafePipe, SelectOptionValueToLabelPipe, ToPercentagePipe
+  ToExponentialPipe, HighlightSearchTextPipe, HideHashPipe, HideHashTitlePipe, TimeAgoPipe, TimeTillNowPipe, HasExampleItemPipe,safeAngularUrlParameterPipe,
+  AdvancedFilterPipe, SafePipe, SelectOptionValueToLabelPipe, ToPercentagePipe, ReplaceViaMapPipe, FilterByIdPipe, FilterOutPipe
 ];
 
 @NgModule({

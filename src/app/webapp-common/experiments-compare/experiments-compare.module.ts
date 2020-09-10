@@ -40,8 +40,9 @@ import {ParallelCoordinatesGraphComponent} from './dumbs/parallel-coordinates-gr
 import {ExperimentCompareHyperParamsGraphComponent} from './containers/experiment-compare-hyper-params-graph/experiment-compare-hyper-params-graph.component';
 import {ExperimentsCompareScalarsGraphEffects} from './effects/experiments-compare-scalars-graph.effects';
 import {ScrollingModule} from '@angular/cdk/scrolling';
-import {PrettifyTitleKeyPipe} from './prettify-title-key.pipe';
 import {MatRadioModule} from '@angular/material/radio';
+import {ExperimentCompareParamsComponent} from './containers/experiment-compare-params/experiment-compare-params.component';
+import {ExperimentsCompareParamsEffects} from './effects/experiments-compare-params.effects';
 
 const syncedKeys = [
   'charts.settingsList',
@@ -57,13 +58,13 @@ export function localStorageReducer(reducer: ActionReducer<any>): ActionReducer<
   declarations: [
     ExperimentsCompareComponent,
     ExperimentCompareDetailsComponent,
+    ExperimentCompareParamsComponent,
     ExperimentCompareMetricValuesComponent,
     ExperimentCompareScalarChartsComponent,
     ExperimentComparePlotsComponent,
     ExperimentCompareHeaderComponent,
     ExperimentCompareGeneralDataComponent,
     GetKeyValueArrayPipePipe,
-    PrettifyTitleKeyPipe,
     SelectExperimentsForCompareComponent,
     SelectExperimentsForCompareTableComponent,
     CompareCardListComponent,
@@ -93,6 +94,7 @@ export function localStorageReducer(reducer: ActionReducer<any>): ActionReducer<
     StoreModule.forFeature('experimentsCompare', experimentsCompareReducers, {metaReducers: [localStorageReducer]}),
     EffectsModule.forFeature([
       ExperimentsCompareDetailsEffects,
+      ExperimentsCompareParamsEffects,
       ExperimentsCompareDebugImagesEffects,
       ExperimentsCompareChartsEffects,
       ExperimentsCompareMetricsValuesEffects,

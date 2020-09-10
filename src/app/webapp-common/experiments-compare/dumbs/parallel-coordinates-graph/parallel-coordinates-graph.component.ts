@@ -2,16 +2,27 @@ import {ChangeDetectorRef, Component, ElementRef, HostListener, Input, OnInit, R
 import {PlotlyGraphBase} from '../../../shared/experiment-graphs/single-graph/plotly-graph-base';
 import {debounceTime, filter} from 'rxjs/operators';
 import {ColorHashService} from '../../../shared/services/color-hash/color-hash.service';
-import {get, isEqual, max, min, uniq, cloneDeep} from 'lodash/fp';
+import {get, getOr, isEqual, max, min, uniq, cloneDeep} from 'lodash/fp';
 import {MetricValueType, SelectedMetric} from '../../reducers/experiments-compare-charts.reducer';
 import {Task} from '../../../../business-logic/model/tasks/task';
 import {select} from 'd3-selection';
+import {sortCol} from '../../../shared/utils/tableParamEncode';
+import {Store} from '@ngrx/store';
 
 declare let Plotly;
 
 interface ExtraTask extends Task {
   duplicateName: boolean;
   hidden: boolean;
+}
+
+interface ParaPlotData {
+  type: string;
+  dimensions: any[];
+  line: {
+    color: Plotly.Color;
+    colorscale?: Plotly.ColorScale;
+  };
 }
 
 @Component({
@@ -21,7 +32,7 @@ interface ExtraTask extends Task {
 })
 export class ParallelCoordinatesGraphComponent extends PlotlyGraphBase implements OnInit {
 
-  private data: { line: { color: Task[]; colorscale: (number | string)[][] }; type: string; dimensions: unknown[] }[];
+  private data: ParaPlotData[];
   private _experiments: ExtraTask[];
   private _metric: SelectedMetric;
   public experimentsColors = {};
@@ -32,6 +43,8 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBase implement
   @ViewChild('parallelGraph', {static: true}) parallelGraph: ElementRef;
   private graphWidth: any;
   private _metricValueType: MetricValueType;
+  private highlighted: ExtraTask;
+  private dimensionsOrder: string[];
 
   @HostListener('window:resize')
   redrawChart() {
@@ -122,10 +135,12 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBase implement
   }
 
   constructor(
-    public renderer: Renderer2,
-    public colorHash: ColorHashService,
-    public changeDetector: ChangeDetectorRef) {
-    super();
+    protected store: Store,
+    protected renderer: Renderer2,
+    protected elementRef: ElementRef,
+    private colorHash: ColorHashService,
+    private changeDetector: ChangeDetectorRef) {
+    super(store, renderer, elementRef);
   }
 
   ngOnInit(): void {
@@ -142,46 +157,50 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBase implement
     this.prepareGraph();
   }
 
-  getStringColor(name): string {
-    const colorArr = this.colorHash.initColor(name);
+  getStringColor(experiment: ExtraTask): string {
+    const colorArr = this.colorHash.initColor(experiment.id);
     return `rgb(${colorArr[0]},${colorArr[1]},${colorArr[2]})`;
   }
 
-  getColorsArray(experiments): Task[] {
-    return experiments.map((experiment, index) => (index === (experiments.length - 1)) ? 1.0 : index / 10);
+  getColorsArray(experiments): number[] {
+    return experiments.map((experiment, index) => index / (experiments.length - 1));
   }
 
   private prepareGraph(): void {
-    this.experiments.forEach(experiment => this.experimentsColors[experiment.id] = this.getStringColor(experiment.id));
-    const filteredExperiments = this.experiments.filter(experiment => !this.filteredExperiments.includes(experiment.id));
+    this.experiments.forEach(experiment => this.experimentsColors[experiment.id] = this.getStringColor(experiment));
+    const filteredExperiments = this.experiments.filter(experiment => !experiment.hidden);
     if (this.parameters && filteredExperiments.length > 0) {
-      const trace: any = {
+      const trace = {
         type: 'parcoords',
         dimensions: this.parameters.map((parameter) => {
-          const dimension: any = {};
-          const allValuesIncludingNull = filteredExperiments.map(experiment => experiment.execution.parameters[parameter]);
+          parameter = `${parameter}.value`;
+          const allValuesIncludingNull = this.experiments.map(experiment => get(parameter, experiment.hyperparams));
           const allValues = allValuesIncludingNull.filter(value => (value !== undefined)).filter(value => (value !== ''));
-          dimension.label = parameter;
           const textVal: any = {};
-          dimension.ticktext = this.naturalCompare(uniq(allValues).filter(text => text !== ''));
-          (allValuesIncludingNull.length > allValues.length) && (dimension.ticktext = ['N/A'].concat(dimension.ticktext));
-          dimension.tickvals = dimension.ticktext.map((text, index) => {
+          let ticktext = this.naturalCompare(uniq(allValues).filter(text => text !== ''));
+          (allValuesIncludingNull.length > allValues.length) && (ticktext = ['N/A'].concat(ticktext));
+          const tickvals = ticktext.map((text, index) => {
             textVal[text] = index;
             return index;
           });
-          dimension.values = filteredExperiments.map((experiment) => (textVal[['', undefined].includes(experiment.execution.parameters[parameter]) ? 'N/A' : experiment.execution.parameters[parameter]]));
-          dimension.range = [0, max(dimension.tickvals)];
-          return dimension;
+          return {
+            label: parameter,
+            ticktext,
+            tickvals,
+            values: filteredExperiments.map((experiment) => (textVal[['', undefined].includes(get(parameter, experiment.hyperparams)) ? 'N/A' : get(parameter, experiment.hyperparams)])),
+            range: [0, max(tickvals)]
+          };
         })
-      };
+      } as ParaPlotData ;
       if (filteredExperiments.length > 1) {
         trace.line = {
           color: this.getColorsArray(filteredExperiments),
-          colorscale: filteredExperiments.map((experiment, index) => [index === filteredExperiments.length - 1 ? 1.0 : index / 10, this.getStringColor(experiment.id)])
+          colorscale: filteredExperiments.map((experiment, index) =>
+            [index / (filteredExperiments.length - 1), this.getStringColor(experiment)] as [number, string]),
         };
       } else {
         trace.line = {
-          color: this.getStringColor(filteredExperiments[0].id)
+          color: this.getStringColor(filteredExperiments[0])
         };
       }
 
@@ -190,18 +209,25 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBase implement
       // this.drawChart();
 
       if (this.metric) {
-        const metricDimension: any = {};
-        const allValuesIncludingNull = filteredExperiments.map(experiment => get(`${this.metric.path}.${this.metricValueType}`, experiment.last_metrics));
+        const allValuesIncludingNull = this.experiments.map(experiment => get(`${this.metric.path}.${this.metricValueType}`, experiment.last_metrics));
         const allValues = allValuesIncludingNull.filter(value => value !== undefined);
         const NAVal = this.getNAValue(allValues);
-        metricDimension.label = this.metric.name;
-        metricDimension.ticktext = uniq(allValuesIncludingNull.map(value => value !== undefined ? value : 'N/A'));
-        metricDimension.tickvals = metricDimension.ticktext.map(text => text === 'N/A' ? NAVal : text);
-        metricDimension.values = filteredExperiments.map((experiment) => get(`${this.metric.path}.${this.metricValueType}`, experiment.last_metrics) === undefined ? NAVal :
-          parseFloat(get(`${this.metric.path}.${this.metricValueType}`, experiment.last_metrics)));
-        trace.dimensions.push(metricDimension);
+        const ticktext = uniq(allValuesIncludingNull.map(value => value !== undefined ? value : 'N/A'));
+        const tickvals = ticktext.map(text => text === 'N/A' ? NAVal : text);
+        trace.dimensions.push({
+          label: this.metric.name,
+          ticktext,
+          tickvals,
+          values: filteredExperiments.map((experiment) =>
+            parseFloat(getOr(NAVal, `${this.metric.path}.${this.metricValueType}`, experiment.last_metrics))
+          ),
+          range: [min(tickvals), max(tickvals)]
+        });
       }
       this.data = [trace];
+      if (this.dimensionsOrder) {
+        this.data[0].dimensions.sort((a, b) => sortCol(a.label, b.label, this.dimensionsOrder));
+      }
       this.drawChart();
     }
   }
@@ -212,7 +238,7 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBase implement
     }
     const valuesMax = max(values);
     const valuesMin = min(values);
-    return valuesMax === valuesMin ? (valuesMin - 1) : valuesMin - ((valuesMax - valuesMin) / 10);
+    return valuesMax === valuesMin ? (valuesMin - 1) : valuesMin - ((valuesMax - valuesMin) / values.length);
   }
 
   private drawChart() {
@@ -260,5 +286,21 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBase implement
   private naturalCompare(myArray) {
     const collator = new Intl.Collator(undefined, {numeric: true, sensitivity: 'base'});
     return (myArray.sort(collator.compare));
+  }
+
+  highlightExperiment(experiment: ExtraTask) {
+    if (this.highlighted?.id != experiment?.id) {
+      this.highlighted = experiment;
+      this.dimensionsOrder = this.parallelGraph.nativeElement.data?.[0].dimensions.map(d => d.label);
+      this._experiments = this.experiments.map(exp => ({...exp, hidden: exp.id !== experiment.id}));
+      this.prepareGraph();
+    }
+  }
+
+  removeHighlightExperiment() {
+    this.highlighted = null;
+    this._experiments = this.experiments.map(experiment => ({...experiment, hidden: this.filteredExperiments.includes(experiment.id)}));
+    this.prepareGraph();
+    this.dimensionsOrder = null;
   }
 }

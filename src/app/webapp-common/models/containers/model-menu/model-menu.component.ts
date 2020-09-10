@@ -3,7 +3,7 @@ import * as menuActions from '../../actions/models-menu.actions';
 import {ChangeProjectRequested, PublishModelClicked} from '../../actions/models-menu.actions';
 import {isExample, htmlTextShorte} from '../../../shared/utils/shared-utils';
 import {ICONS} from '../../../../app.constants';
-import { MatDialog } from '@angular/material/dialog';
+import {MatDialog} from '@angular/material/dialog';
 import {Store} from '@ngrx/store';
 import {AdminService} from '../../../../features/admin/admin.service';
 import {selectS3BucketCredentials} from '../../../core/reducers/common-auth-reducer';
@@ -15,6 +15,7 @@ import {filter, first, skip} from 'rxjs/operators';
 import {ChangeProjectDialogComponent} from '../../../experiments/shared/components/change-project-dialog/change-project-dialog.component';
 import {resetDontShowAgainForBucketEndpoint} from '../../../core/actions/common-auth.actions';
 import {BaseContextMenuComponent} from '../../../shared/components/base-context-menu/base-context-menu.component';
+import {ArchivedSelectedModels, RestoreSelectedModels, SetSelectedModels} from '../../actions/models-view.actions';
 
 
 @Component({
@@ -55,34 +56,15 @@ export class BaseModelMenuComponent extends BaseContextMenuComponent {
     this.S3BucketCredentials = store.select(selectS3BucketCredentials);
   }
 
-  restoreArchivePopup() {
-    const isArchived = this.model.system_tags && this.model.system_tags.includes('archived');
-    const confirmDialogRef = this.dialog.open(ConfirmDialogComponent, {
-      data: {
-        title: isArchived ? 'Restore models' : 'Archive models',
-        body: `<b>${htmlTextShorte(this.model.name)}</b> will be ${
-          isArchived ? 'restored. It will be visible using "Exit Archive"'
-            : 'archived. It will be visible using "Open Archive"'
-        }.`,
-        yes: isArchived ? 'Restore from archive' : 'Archive',
-        no: 'keep',
-        iconClass: 'i-archive',
-      }
-    });
-
-    confirmDialogRef.afterClosed().subscribe((confirmed) => {
-      if (confirmed) {
-        this.archiveClicked();
-      }
-    });
-  }
-
   archiveClicked() {
-    const payload = {model: this.model, selectedModel: this.selectedModel};
+    //info header case
+    if (this.showButton) {
+      this.store.dispatch(new SetSelectedModels([this.model]));
+    }
     if (this.model.system_tags && this.model.system_tags.includes('archived')) {
-      this.store.dispatch(new menuActions.RestoreClicked(payload));
+      this.store.dispatch(new RestoreSelectedModels());
     } else {
-      this.store.dispatch(new menuActions.ArchiveClicked(payload));
+      this.store.dispatch(new ArchivedSelectedModels());
     }
   }
 
@@ -127,7 +109,8 @@ export class BaseModelMenuComponent extends BaseContextMenuComponent {
         currentProject: get('project.id', this.model),
         defaultProject: get('project.id', this.model),
         reference: this.model.name,
-        type: 'model' }
+        type: 'model'
+      }
     });
     dialog.afterClosed().pipe(filter(project => !!project)).subscribe(project => {
       this.moveToProjectClicked(project);

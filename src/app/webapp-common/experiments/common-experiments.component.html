@@ -17,8 +17,8 @@
   (setAutoRefresh)="setAutoRefresh($event)"
   (clearSelection)="clearSelection()"
 ></sm-experiment-header>
-<div class="experiment-body" [class.compare]="((selectedExperiments$ | async) && (selectedExperiments$ | async)?.length > 1) || (showAllSelectedIsActive$ |async)">
-  <as-split gutterDblClickDuration="400" (gutterDblClick)="closeExperimentPanel()" (dragEnd)="splitSizeChange($event)" (dragStart)="disableInfoPanel()">
+<div class="experiment-body" [class.footer-visible]="((selectedExperiments$ | async) && (selectedExperiments$ | async)?.length > 1) || (showAllSelectedIsActive$ |async)">
+  <as-split gutterDblClickDuration="400" (gutterClick)="clickOnSplit()" (gutterDblClick)="closeExperimentPanel()" (dragEnd)="splitSizeChange($event)" (dragStart)="disableInfoPanel()">
     <as-split-area [size]="100 - (selectSplitSize$ | async)">
       <sm-experiments-table
         class="align-self-stretch"
@@ -37,6 +37,7 @@
         [selectedExperiment]="selectedExperiment$ |async"
         [minimizedView]="(showInfo$ | async)"
         [noMoreExperiments]="noMoreExperiments$ | async"
+        [split]="selectSplitSize$ | async"
         (experimentSelectionChanged)="experimentSelectionChanged($event)"
         (experimentsSelectionChanged)="experimentsSelectionChanged($event)"
         (sortedChanged)="sortedChanged($event)"
@@ -53,15 +54,14 @@
     </as-split-area>
   </as-split>
 </div>
-<sm-experiment-footer
-  [visible]="((selectedExperiments$ | async) && (selectedExperiments$ | async)?.length > 1) || (showAllSelectedIsActive$ |async)"
-  [numberOfSelectedExperiments]="(selectedExperiments$ | async)?.length"
-  [disableArchive]="(selectedExperiments$ | async) | hasExampleItem"
-  [archiveToolTipMessage]="((selectedExperiments$ | async) | hasExampleItem)?'Archiving is disabled as one or more of the experiments you chose are example experiments':null"
+<sm-entity-footer
+  entitiesType="experiments"
+  [visible]="(selectedExperiments$ | async)?.length > 1 || (showAllSelectedIsActive$ |async)"
+  [numberOfSelectedEntities]="(selectedExperiments$ | async)?.length"
   [showAllSelectedIsActive]="showAllSelectedIsActive$ |async"
   [isArchivedMode]="isArchived$ | async"
-  (restoreExperimentsClicked)="restoreExperiments()"
-  (compareExperimentsClicked)="compareExperiments()"
-  (archiveExperimentsClicked)="archiveExperiments()"
+  (compareEntitiesClicked)="compareExperiments()"
   (showAllSelectedClicked)="showAllSelected($event)"
-></sm-experiment-footer>
+  (archiveEntitiesClicked)="archiveExperiments()"
+  (restoreEntitiesClicked)="restoreExperiments()"
+></sm-entity-footer>

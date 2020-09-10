@@ -9,6 +9,7 @@ import {ExperimentComparePlotsComponent} from './containers/experiment-compare-p
 import {DebugImagesComponent} from '../debug-images/debug-images.component';
 import {ExperimentCompareHyperParamsGraphComponent} from './containers/experiment-compare-hyper-params-graph/experiment-compare-hyper-params-graph.component';
 import {RouterHelperGuard} from './experiment-compare-router-helper.guard';
+import {ExperimentCompareParamsComponent} from './containers/experiment-compare-params/experiment-compare-params.component';
 
 
 export const routes: Routes = [
@@ -22,7 +23,7 @@ export const routes: Routes = [
       {path: 'metrics-charts', redirectTo: 'scalars/graph', pathMatch: 'full'},
 
       {path: 'details', component: ExperimentCompareDetailsComponent, data: {mode: 'details'}},
-      {path: 'hyper-params/values', component: ExperimentCompareDetailsComponent, canActivate: [RouterHelperGuard], data: {mode: 'hyper-params'}},
+      {path: 'hyper-params/values', component: ExperimentCompareParamsComponent, canActivate: [RouterHelperGuard], data: {mode: 'hyper-params'}},
       {path: 'hyper-params/graph', component: ExperimentCompareHyperParamsGraphComponent},
       {path: 'scalars/values', component: ExperimentCompareMetricValuesComponent, canActivate: [RouterHelperGuard]},
       {path: 'scalars/graph', component: ExperimentCompareScalarChartsComponent},

@@ -47,7 +47,7 @@ export class ProjectCreateDialogEffects {
   @Effect()
   getAllProjects = this.actions.pipe(
     ofType<createNewProjectActions.GetProjects>(CREATE_PROJECT_ACTIONS.GET_PROJECTS),
-    switchMap(action => this.projectsApiService.projectsGetAllEx({})
+    switchMap(action => this.projectsApiService.projectsGetAllEx({only_fields:['name']})
       .pipe(
         flatMap(res => [new createNewProjectActions.SetProjects(res.projects)]),
         catchError(error => [new RequestFailed(error)])

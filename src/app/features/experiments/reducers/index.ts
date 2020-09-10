@@ -34,6 +34,8 @@ export const selectMetricsLoading         = createSelector(experimentsView, (sta
 export const experimentInfo           = createSelector(experiments, (state): IExperimentInfoState => state ? state.info : {});
 export const selectSelectedExperiment = createSelector(experimentInfo, (state): ISelectedExperiment => state.selectedExperiment);
 export const selectExperimentInfoData = createSelector(experimentInfo, (state): IExperimentInfo => state.infoData);
+export const selectShowExtraDataSpinner = createSelector(experimentInfo, state => state.showExtraDataSpinner);
+
 
 
 // output selectors

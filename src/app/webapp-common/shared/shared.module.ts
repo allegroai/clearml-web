@@ -26,6 +26,8 @@ import {ExperimentRefreshComponent} from './components/experiment-refresh/experi
 import {LeavingBeforeSaveAlertGuard} from './guards/leaving-before-save-alert.guard';
 import {CustomColumnsListComponent} from './components/custom-columns-list/custom-columns-list.component';
 import { BaseContextMenuComponent } from './components/base-context-menu/base-context-menu.component';
+import {EntityFooterComponent} from './entity-page/entity-footer/entity-footer.component';
+import {SharedModule} from '../../shared/shared.module';
 
 const _declarations = [
   ExperimentInfoHeaderStatusProgressBarComponent,
@@ -41,24 +43,26 @@ const _declarations = [
   NgxJsonViewerComponent,
   ExperimentRefreshComponent,
   CustomColumnsListComponent,
+  EntityFooterComponent
 ];
 
 @NgModule({
-  imports     : [
-    CommonModule,
-    RouterModule,
-    FormsModule,
-    ReactiveFormsModule,
-    TableModule,
-    ClipboardModule,
-    UiComponentsModule,
-    SharedPipesModule,
-    MatProgressSpinnerModule,
-    MatButtonToggleModule,
-    MatSnackBarModule,
-    NgxFilesizeModule,
-    ChipsModule
-  ],
+    imports: [
+        CommonModule,
+        RouterModule,
+        FormsModule,
+        ReactiveFormsModule,
+        TableModule,
+        ClipboardModule,
+        UiComponentsModule,
+        SharedPipesModule,
+        MatProgressSpinnerModule,
+        MatButtonToggleModule,
+        MatSnackBarModule,
+        NgxFilesizeModule,
+        ChipsModule,
+        SharedModule
+    ],
   declarations: [
     _declarations,
     BaseContextMenuComponent,

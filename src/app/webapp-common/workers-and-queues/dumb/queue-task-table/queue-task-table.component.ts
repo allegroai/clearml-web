@@ -23,22 +23,25 @@ export class QueueTaskTableComponent {
   constructor() {
     this.cols = [
       {
-        id    : QUEUES_TABLE_COL_FIELDS.NAME,
-        header: 'Experiment Name',
-        style : {width: '680px'},
-        headerType: ColHeaderTypeEnum.title,
+        id         : QUEUES_TABLE_COL_FIELDS.NAME,
+        header     : 'Experiment Name',
+        style      : {width: '680px'},
+        headerType : ColHeaderTypeEnum.title,
+        disableDrag: true,
       },
       {
-        id    : QUEUES_TABLE_COL_FIELDS.ID,
-        header: 'Experiment ID',
-        style : {width: '300px'},
-        headerType: ColHeaderTypeEnum.title,
+        id         : QUEUES_TABLE_COL_FIELDS.ID,
+        header     : 'Experiment ID',
+        style      : {width: '300px'},
+        headerType : ColHeaderTypeEnum.title,
+        disableDrag: true,
       },
       {
-        id    : QUEUES_TABLE_COL_FIELDS.QUEUED,
-        header: 'Queued At',
-        style : {width: '150px'},
-        headerType: ColHeaderTypeEnum.title,
+        id         : QUEUES_TABLE_COL_FIELDS.QUEUED,
+        header     : 'Queued At',
+        style      : {width: '150px'},
+        headerType : ColHeaderTypeEnum.title,
+        disableDrag: true,
       },
     ];
   }

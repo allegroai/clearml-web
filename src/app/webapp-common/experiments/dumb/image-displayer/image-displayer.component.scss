@@ -129,6 +129,12 @@
 
         &.zoom {
           height: 120px;
+
+          // todo: Amir to fix
+          .al-ico-plus {
+            font-size: 15px;
+            padding-top: 8px;
+          }
         }
 
         &:hover {

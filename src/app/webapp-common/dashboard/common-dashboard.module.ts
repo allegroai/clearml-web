@@ -13,22 +13,25 @@ import {EffectsModule} from '@ngrx/effects';
 import {ProjectsSharedModule} from '../../features/projects/shared/projects-shared.module';
 import {CommonSearchResultsModule} from '../search/common-search-results.module';
 import {CommonExperimentSharedModule} from '../experiments/shared/common-experiment-shared.module';
+import {SharedModule} from '../../shared/shared.module';
 
 @NgModule({
   declarations: [DashboardProjectsComponent, DashboardExperimentsComponent, RecentExperimentTableComponent],
   exports     : [DashboardProjectsComponent, DashboardExperimentsComponent],
-  imports     : [
-    SMSharedModule,
-    ExperimentsCommonModule,
-    CommonModule,
-    ExperimentSharedModule,
-    CommonSearchModule,
-    CommonSearchResultsModule,
-    ProjectsSharedModule,
-    CommonExperimentSharedModule,
-    EffectsModule.forFeature([CommonDashboardEffects]),
-    CommonLayoutModule,
-    ExperimentSharedModule]
+    imports: [
+        SMSharedModule,
+        ExperimentsCommonModule,
+        CommonModule,
+        ExperimentSharedModule,
+        CommonSearchModule,
+        CommonSearchResultsModule,
+        ProjectsSharedModule,
+        CommonExperimentSharedModule,
+        EffectsModule.forFeature([CommonDashboardEffects]),
+        CommonLayoutModule,
+        ExperimentSharedModule,
+        SharedModule
+    ]
 })
 export class CommonDashboardModule {
 }

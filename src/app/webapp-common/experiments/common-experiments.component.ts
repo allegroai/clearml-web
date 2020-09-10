@@ -1,12 +1,12 @@
 import {ChangeDetectionStrategy, Component, OnDestroy, OnInit} from '@angular/core';
-import {selectExperimentsHiddenTableCols, selectExperimentsList, selectExperimentsMetricsCols, selectExperimentsTableCols, selectExperimentsTableColsOrder, selectGlobalFilter, selectHyperParamsVariants, selectIsExperimentInEditMode, selectNoMoreExperiments, selectSelectedExperiments, selectSelectedTableExperiment, selectShowAllSelectedIsActive, selectTableFilters, selectTableSortField, selectTableSortOrder, selectExperimentsUsers, selectExperimentsTypes} from './reducers/index';
+import {selectExperimentsHiddenTableCols, selectExperimentsList, selectExperimentsMetricsCols, selectExperimentsTableCols, selectExperimentsTableColsOrder, selectGlobalFilter, selectHyperParamsVariants, selectIsExperimentInEditMode, selectNoMoreExperiments, selectSelectedExperiments, selectSelectedTableExperiment, selectShowAllSelectedIsActive, selectTableFilters, selectTableSortField, selectTableSortOrder, selectExperimentsUsers, selectExperimentsTypes, selectExperimentsTags} from './reducers/index';
 import {selectIsArchivedMode, selectProjectSystemTags, selectProjectTags} from '../core/reducers/projects.reducer';
 import {select, Store} from '@ngrx/store';
 import {ColHeaderTypeEnum, ISmCol, TableSortOrderEnum} from '../shared/ui-components/data/table/table.consts';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {get, isEqual} from 'lodash/fp';
 import {selectRouterParams} from '../core/reducers/router-reducer';
-import {filter, map, skip, tap, withLatestFrom} from 'rxjs/operators';
+import {filter, map, skip, tap, withLatestFrom, distinctUntilChanged} from 'rxjs/operators';
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {combineLatest, Observable, Subscription} from 'rxjs';
 import {ConfirmDialogComponent} from '../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
@@ -29,6 +29,7 @@ import {getTags, ResetProjectSelection} from '../core/actions/projects.actions';
 import {decodeColumns, decodeFilter, decodeOrder, MetricColumn} from '../shared/utils/tableParamEncode';
 import {BaseEntityPage} from '../shared/entity-page/base-entity-page';
 import {User} from '../../business-logic/model/users/user';
+import {groupHyperParams} from '../shared/utils/shared-utils';
 
 @Component({
   selector       : 'sm-common-experiments',
@@ -53,7 +54,7 @@ export class CommonExperimentsComponent extends BaseEntityPage implements OnInit
   public filteredTableCols$: Observable<ISmCol[]>;
   public tableCols$: Observable<ISmCol[]>;
   public metricVariants$: Observable<any>;
-  public hyperParams$: Observable<any>;
+  public hyperParams$: Observable<any[] >;
   private hiddenTableCols$: Observable<any>;
   private metricTableCols$: Observable<any>;
   private searchSubs: Subscription;
@@ -81,7 +82,7 @@ export class CommonExperimentsComponent extends BaseEntityPage implements OnInit
 
   constructor(
     protected store: Store<IExperimentsViewState>, private route: ActivatedRoute,
-    private router: Router, private dialog: MatDialog, private syncSelector: SmSyncStateSelectorService
+    private router: Router, private dialog: MatDialog
   ) {
     super(store);
     this.tableSortField$ = this.store.select(selectTableSortField).pipe(tap(field => this.sortField = field));
@@ -100,7 +101,7 @@ export class CommonExperimentsComponent extends BaseEntityPage implements OnInit
     this.isExperimentInEditMode$ = this.store.select(selectIsExperimentInEditMode);
     this.users$ = this.store.select(selectExperimentsUsers);
     this.types$ = this.store.select(selectExperimentsTypes);
-    this.tags$ = this.store.select(selectProjectTags);
+    this.tags$ = this.store.select(selectExperimentsTags);
     this.systemTags$ = this.store.select(selectProjectSystemTags);
 
 
@@ -112,12 +113,14 @@ export class CommonExperimentsComponent extends BaseEntityPage implements OnInit
     this.columns$ = this.store.select(selectExperimentsTableCols);
     this.metricVariants$ = this.store.select(selectMetricVariants);
     this.metricLoading$ = this.store.select(selectMetricsLoading);
-    this.hyperParams$ = this.store.select(selectHyperParamsVariants);
+    this.hyperParams$ = this.store.select(selectHyperParamsVariants).pipe(
+      map(hyperParams => groupHyperParams(hyperParams))
+    );
     this.experiments$ = this.store.select(selectExperimentsList).pipe(
       withLatestFrom(this.isArchived$),
       // lil hack for hiding archived task after they been archived from task info or footer...
       map(([experiments, showArchived]) => this.filterArchivedExperiments(experiments, showArchived)),
-      tap(_ => this.refreshing = false)
+      tap(() => this.refreshing = false)
     );
     this.showInfo$ = this.store.pipe(
       select(selectRouterParams),
@@ -137,14 +140,14 @@ export class CommonExperimentsComponent extends BaseEntityPage implements OnInit
       .pipe(
         map(([tableCols, hiddenCols, metricCols]) =>
           tableCols.concat(metricCols.map(col => ({...col, metric: true})))
-            .map(col => ({...col, hidden: hiddenCols[col.id] || null}))),
-        filter(col => col.id !== EXPERIMENTS_TABLE_COL_FIELDS.PROJECT || this.selectedProject == '*')
+            .map(col => ({...col, hidden: hiddenCols[col.id] || null}))
+            .filter(col => col.id !== EXPERIMENTS_TABLE_COL_FIELDS.PROJECT || this.selectedProject == '*'))
       ); // Only show project col on "all projects"
 
     this.tableCols$ = this.filteredTableCols$.pipe(map(cols => cols.filter(col => !col.hidden)));
     let prevQueryParams: Params;
 
-    this.selectedProjectSubs = combineLatest( [
+    this.selectedProjectSubs = combineLatest([
       this.store.select(selectRouterParams),
       this.route.queryParams
     ]).pipe(
@@ -188,6 +191,7 @@ export class CommonExperimentsComponent extends BaseEntityPage implements OnInit
       }
       this.dispatchAndLock(new experimentsActions.GetExperiments());
       this.store.dispatch(experimentsActions.getUsers());
+      this.store.dispatch(experimentsActions.getTags());
       this.store.dispatch(getTags());
       this.store.dispatch(getProjectTypes());
     });
@@ -220,12 +224,13 @@ export class CommonExperimentsComponent extends BaseEntityPage implements OnInit
   }
 
   selectExperimentFromUrl() {
-    this.ExperimentFromUrlSub = combineLatest(
+    this.ExperimentFromUrlSub = combineLatest([
       this.store.select(selectRouterParams)
         .pipe(map(params => get('experimentId', params))),
       this.experiments$
-    ).pipe(
-      map(([experimentId, experiments]) => experiments.find(experiment => experiment.id === experimentId))
+    ]).pipe(
+      map(([experimentId, experiments]) => experiments.find(experiment => experiment.id === experimentId)),
+      distinctUntilChanged()
     ).subscribe((selectedExperiment) => {
       this.store.dispatch(new experimentsActions.SetSelectedExperiment(selectedExperiment));
     });
@@ -237,9 +242,9 @@ export class CommonExperimentsComponent extends BaseEntityPage implements OnInit
 
   filterArchivedExperiments(experiments, showArchived) {
     if (showArchived) {
-      return experiments.filter(ex => ex.system_tags && ex.system_tags.includes('archived'));
+      return experiments.filter(ex => ex?.system_tags?.includes('archived'));
     } else {
-      return experiments.filter(ex => !ex.system_tags || !(ex.system_tags.includes('archived')));
+      return experiments.filter(ex => !(ex?.system_tags?.includes('archived')));
     }
   }
 
@@ -269,11 +274,11 @@ export class CommonExperimentsComponent extends BaseEntityPage implements OnInit
   }
 
   archiveExperiments() {
-    this.store.dispatch(new experimentsActions.ArchivedSelectedExperiments({projectId: this.projectId}));
+    this.store.dispatch(new experimentsActions.ArchivedSelectedExperiments({}));
   }
 
   restoreExperiments() {
-    this.store.dispatch(new experimentsActions.RestoreSelectedExperiments({projectId: this.projectId}));
+    this.store.dispatch(new experimentsActions.RestoreSelectedExperiments({}));
   }
 
   onSearchValueChanged(value: string) {
@@ -363,7 +368,7 @@ export class CommonExperimentsComponent extends BaseEntityPage implements OnInit
 
   createParamColumn(param: string) {
     return {
-      id        : `execution.parameters.${param}`,
+      id        : `hyperparams.${param}`,
       headerType  : ColHeaderTypeEnum.sort,
       sortable  : true,
       filterable: false,
@@ -406,8 +411,12 @@ export class CommonExperimentsComponent extends BaseEntityPage implements OnInit
   }
 
   closeExperimentPanel() {
-    const params = this.syncSelector.selectSync(selectRouterParams);
-    this.router.navigate([`projects/${params.projectId}/experiments`], {queryParamsHandling: 'merge'});
+    this.router.navigate([`projects/${this.projectId}/experiments`], {queryParamsHandling: 'merge'});
+    window.setTimeout(() => this.infoDisabled = false);
+  }
+
+  clickOnSplit() {
+    this.infoDisabled = false;
   }
 
   setAutoRefresh($event: boolean) {
@@ -423,7 +432,7 @@ export class CommonExperimentsComponent extends BaseEntityPage implements OnInit
   }
 
   refreshTagsList() {
-    this.store.dispatch(getTags());
+    this.store.dispatch(experimentsActions.getTags());
   }
 
   refreshTypesList() {

@@ -70,7 +70,7 @@ export class CommonProjectsEffects {
         include_stats  : true,
         page           : page,
         page_size      : pageSize,
-        order_by       : [sortOrder === TABLE_SORT_ORDER.DESC ? '-' + orderBy : orderBy],
+        order_by       : ['featured', sortOrder === TABLE_SORT_ORDER.DESC ? '-' + orderBy : orderBy],
         _any_          : {
           pattern: searchQuery ? escapeRegex(searchQuery) : '',
           fields : ['id', 'name', 'description', 'system_tags']

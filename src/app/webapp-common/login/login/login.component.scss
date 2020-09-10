@@ -2,6 +2,10 @@
 
 :host {
   background-color: #202432;
+
+  /deep/ .mat-spinner circle {
+    stroke: #FFFFFF !important;
+  }
 }
 
 .login-box-wrapper {
@@ -34,22 +38,43 @@
     }
 
     .btn {
+      position: relative;
       background-color: #5a658e;
       color: #ffffff;
-      font-size: 13px;
-      font-weight: bold;
+      font-size: 12px;
+      font-weight: 500;
       margin-top: 12px;
+      padding: 7px 0;
       width: 250px;
-      border: 0px solid transparent; /* this was 1px earlier */
+      border: 0; /* this was 1px earlier */
+      opacity: unset;
 
       &:hover {
         background-color: #c3cdf0;
         color: #2c3246;
         border: 0px solid transparent; /* this was 1px earlier */
       }
+
       &:disabled {
         background-color: #424b6b;
         color: #2c3246;
+      }
+
+      .spinner {
+        position: absolute;
+        left: 75px;
+      }
+    }
+
+    .separator {
+      display: flex;
+      color: $blue-250;
+      font-size: 11px;
+
+      .line {
+        border-bottom: 1px solid $blue-250;
+        width: 104px;
+        margin-bottom: 10px;
       }
     }
   }
@@ -79,11 +104,31 @@
 }
 
 
-
 form {
   margin-bottom: 30px;
 }
 
+.white-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  .white-label-title {
+    width: 400px;
+    height: 70px;
+    font-size: 24px;
+    line-height: 1.42;
+    text-align: center;
+    color: $blue-100;
+  }
+  .white-label-subtitle{
+    width: 400px;
+    height: 49px;
+    font-family: Heebo;
+    font-size: 12px;
+    line-height: 1.17;
+    text-align: center;
+  }
+}
 
 .mobile-warn {
   font-size: 40px;
@@ -104,32 +149,6 @@ form {
 
 .logo {
   width: 150px;
-  margin-bottom: 30px;
-}
-
-.or-container {
-  position: relative;
-  margin-top: 50px;
-  background-color: #384161;
-  padding-bottom: 20px;
-
-  hr {
-    border-top: 1px solid rgba(255, 255, 255, 0.3);
-  }
-}
-
-.or {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: -10px;
-  margin: auto;
-  width: 30px;
-  font-size: 15px;
-  font-weight: bold;
-  text-align: center;
-  color: $blue-grey;
-  background-color: inherit;
 }
 
 .login-notice {

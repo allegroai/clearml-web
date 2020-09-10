@@ -24,6 +24,6 @@ export class ExperimentCompareGeneralDataComponent {
   }
 
   buildUrl() {
-    return `/projects/${this.experiment.project.id}/experiments/${this.experiment.id}`;
+    return `/projects/${this.experiment.project ? this.experiment.project.id : '*'}/experiments/${this.experiment.id}`;
   }
 }

@@ -1,5 +1,5 @@
 <sm-card class="project-card" (click)="projectClicked()"
-         [isExample]=" project.name !== 'All projects' && (! project.company || ! project.company.id)">
+         [isExample]=" project.name !== 'All projects' && !project.company?.id">
   <div header-content>
     <div class="d-flex justify-content-between align-items-center">
       <sm-inline-edit #projectName
@@ -16,11 +16,12 @@
       </sm-inline-edit>
       <div *ngIf="project.system_tags?.includes('default')" class="justify-content-end project-tag">Sample</div>
       <div class="menu-wrapper" *ngIf="!hideMenu">
-        <sm-menu buttonClass="icon sm i-list-view" [showCart]="false">
+        <sm-menu buttonClass="al-icon sm al-ico-bars-menu al-color light-grey-blue" [showCart]="false">
           <sm-menu-item itemLabel="Rename"
                         [disabled]="!project.company?.id"
                         (itemClicked)="projectName.inlineActivated()"></sm-menu-item>
           <sm-menu-item itemLabel="Delete"
+                        [disabled]="!project.company?.id"
                         (itemClicked)="deleteProjectClicked.emit(project.id)"></sm-menu-item>
         </sm-menu>
       </div>

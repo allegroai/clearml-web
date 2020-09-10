@@ -1,7 +1,9 @@
-<cdk-virtual-scroll-viewport itemSize="26" minBufferPx="1000" maxBufferPx="2000"
+<cdk-virtual-scroll-viewport itemSize="25" minBufferPx="1000" maxBufferPx="2000"
   class="viewport" tabindex="0" #LogContainer>
   <div *cdkVirtualFor="let line of lines; trackBy: trackByTimestampFn" class="log-line" [class.separator]="line.separator">
     <div class="timestamp">{{line.timestamp | date:'y-MM-dd HH:mm:ss'}}</div>
     <div class="entry" [innerHTML]="line.entry | safe:'html'"></div>
   </div>
 </cdk-virtual-scroll-viewport>
+<mat-spinner *ngIf="fetching" [diameter]="80" [strokeWidth]="5"></mat-spinner>
+<button class="btn btn-primary get-last" [class.at-end]="canRefresh" (click)="getLast()">Jump to end</button>

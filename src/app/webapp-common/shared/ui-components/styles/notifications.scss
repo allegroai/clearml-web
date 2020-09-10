@@ -3,8 +3,6 @@
 $levels-list: error warn info success;
 
 .notifier__notification {
-  display: flex;
-  align-items: center;
   padding-left: 15px;
   color: $blue-200;
   background-color: $blue-500;
@@ -12,8 +10,8 @@ $levels-list: error warn info success;
 
   .notifier__notification-button {
     position: absolute;
-    right: 10px;
-    top: -2px;
+    right: 5px;
+    top: -5px;
     fill: $blue-300;
 
     .notifier__notification-button-icon {
@@ -26,8 +24,9 @@ $levels-list: error warn info success;
     width: 15px;
     height: 15px;
     background-repeat: no-repeat;
-    display: block;
-    margin-left: 10px;
+    display: inline-block;
+    margin-left: 2px;
+    margin-top: 6px;
   }
 
   @each $level in $levels-list {
@@ -36,6 +35,12 @@ $levels-list: error warn info success;
 
       &:before {
         background-image: url("#{$assets-icons-path}/#{$level}.svg");
+      }
+      &has-actions {
+        &:before {
+          margin-top: 2px;
+          align-self: flex-start;
+        }
       }
     }
   }

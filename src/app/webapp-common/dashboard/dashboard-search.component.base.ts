@@ -60,7 +60,7 @@ export abstract class DashboardSearchComponentBase {
 
   public searchTermChanged(term: string) {
     if (term && term.length > 0) {
-      this.store.dispatch(new SearchStart(term));
+      this.store.dispatch(new SearchStart(term, term.length < 3));
     } else {
       this.activeLink = 'projects';
       this.store.dispatch(new SearchDeactivate());

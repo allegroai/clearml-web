@@ -23,7 +23,7 @@
     }
 
     .btn-group sm-search {
-      width: 243px;
+      width: 200px;
 
       .search-input-container {
 
@@ -60,7 +60,7 @@
 
     .mat-select-trigger {
       width: 142px;
-      border: 1px solid $cloudy-blue;
+      border: 1px solid $blue-250;
       border-radius: 4px;
       height: 32px;
       padding: 7px 14px;
@@ -95,6 +95,18 @@
     }
   }
 
+  .settings {
+    display: flex;
+    align-items: center;
+
+    .btn {
+      color: $blue-300;
+      width: 40px;
+      height: 40px;
+      font-size: 15px;
+    }
+  }
+
   button {
     font-weight: 500;
     font-size: 13px;
@@ -102,7 +114,7 @@
 
   .btn-add-experiment {
     width: 146px;
-    background-color: $very-light-blue;
+    background-color: $blue-50;
   }
 
 

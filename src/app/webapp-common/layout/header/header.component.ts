@@ -3,6 +3,8 @@ import {Store} from '@ngrx/store';
 import {selectCurrentUser} from '../../core/reducers/users-reducer';
 import {Observable} from 'rxjs';
 import {User} from '../../../business-logic/model/users/user';
+import {environment} from '../../../../environments/environment';
+import {Logout} from '../../core/actions/users.actions';
 
 @Component({
   selector   : 'sm-header',
@@ -11,9 +13,15 @@ import {User} from '../../../business-logic/model/users/user';
 })
 export class HeaderComponent {
   @Input() isDashboard: boolean;
+  @Input() isLogin: boolean;
   public user: Observable<User>;
+  environment = environment;
 
   constructor(private store: Store<any>) {
     this.user = this.store.select(selectCurrentUser);
+  }
+
+  logout() {
+    this.store.dispatch(new Logout());
   }
 }

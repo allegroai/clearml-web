@@ -8,7 +8,7 @@ import {RequestFailed} from '../../core/actions/http.actions';
 import {ApiTasksService} from '../../../business-logic/api-services/tasks.service';
 import {getExperimentsHyperParams, setHyperParamsList, setMetricsList, setTasks} from '../actions/experiments-compare-scalars-graph.actions';
 import {setRefreshing} from '../actions/compare-header.actions';
-import {HyperParams} from '../reducers/experiments-compare-charts.reducer';
+import {GroupedHyperParams, HyperParams} from '../reducers/experiments-compare-charts.reducer';
 
 @Injectable()
 export class ExperimentsCompareScalarsGraphEffects {
@@ -20,32 +20,32 @@ export class ExperimentsCompareScalarsGraphEffects {
   activeLoader = createEffect(() => this.actions$.pipe(
     ofType(getExperimentsHyperParams),
     map(action => new ActiveLoader(action.type))
-  )
+    )
   );
 
   loadMovies$ = createEffect(() => this.actions$.pipe(
     ofType(getExperimentsHyperParams),
     flatMap((action) => this.tasksApiService.tasksGetAllEx({
-      id: action.experimentsIds,
-      only_fields: ['last_metrics', 'name', 'last_iteration', 'execution.parameters']
-    })
-      .pipe(
-        // map(res => res.tasks)),
-        flatMap(res => {
-          const metricsList = this.getMetricOptions(res.tasks);
-          const paramsHasDiffs = this.getParametersHasDiffs(res.tasks);
-          return [
-            setTasks({tasks: res.tasks}),
-            setMetricsList({metricsList: metricsList}),
-            setHyperParamsList({hyperParams: paramsHasDiffs}),
-            setRefreshing({payload: false}),
-            new DeactiveLoader(action.type)];
-        }),
-        catchError(error => [
-          new RequestFailed(error), new DeactiveLoader(action.type), setRefreshing({payload: false}),
-          new SetServerError(error, null, 'Failed to get Compared Experiments')
-        ])
-      )
+        id: action.experimentsIds,
+        only_fields: ['last_metrics', 'name', 'last_iteration', 'hyperparams']
+      })
+        .pipe(
+          // map(res => res.tasks)),
+          flatMap(res => {
+            const metricsList = this.getMetricOptions(res.tasks);
+            const paramsHasDiffs = this.getParametersHasDiffs(res.tasks);
+            return [
+              setTasks({tasks: res.tasks}),
+              setMetricsList({metricsList: metricsList}),
+              setHyperParamsList({hyperParams: paramsHasDiffs}),
+              setRefreshing({payload: false}),
+              new DeactiveLoader(action.type)];
+          }),
+          catchError(error => [
+            new RequestFailed(error), new DeactiveLoader(action.type), setRefreshing({payload: false}),
+            new SetServerError(error, null, 'Failed to get Compared Experiments')
+          ])
+        )
     ))
   );
 
@@ -65,7 +65,7 @@ export class ExperimentsCompareScalarsGraphEffects {
         }
       }
     }
-    const metricsList = Object.keys(metrics).sort((a, b) => a.toLowerCase() > b.toLowerCase() ? 1 :  -1).map(metricName => ({
+    const metricsList = Object.keys(metrics).sort((a, b) => a.toLowerCase() > b.toLowerCase() ? 1 : -1).map(metricName => ({
       metricName,
       variants: Object.keys(metrics[metricName]).sort().map(variant => ({
         name: variant,
@@ -75,18 +75,27 @@ export class ExperimentsCompareScalarsGraphEffects {
     return metricsList;
   }
 
-  private getParametersHasDiffs(tasks): HyperParams  {
+  private getParametersHasDiffs(tasks): GroupedHyperParams {
     const numberOfTasks = tasks.length;
-    const paramsValues: {string?: any[]} = {};
+    let paramsValues: { [section: string]: { [param: string]: any[] } } = {};
     tasks.forEach(task => {
-      Object.entries(task.execution.parameters).forEach( ([param, value]) =>
-        paramsValues.hasOwnProperty(param) ? paramsValues[param].push(value) : (paramsValues[param] = [value])
-      );
+      paramsValues = task.hyperparams ? Object.values(task.hyperparams).reduce((acc, paramsObj) => {
+        Object.values(paramsObj).forEach((paramObj) => {
+          acc[paramObj.section] = acc[paramObj.section] || {};
+          acc[paramObj.section][paramObj.name] = acc[paramObj.section][paramObj.name] || [];
+          acc[paramObj.section][paramObj.name].push(paramObj.value);
+        });
+        return acc;
+      }, paramsValues) as { [section: string]: { [param: string]: any[] } } : paramsValues;
     });
 
-    return Object.entries(paramsValues).reduce((acc, [paramKey, values]) => {
-      acc[paramKey] = values.every(value => value !== '') && (numberOfTasks != values.length || values.some(val => val !== values[0]));
-      return acc;
-    }, {});
+    const paramsValuesHasDiff: { [section: string]: HyperParams } = {};
+    Object.entries(paramsValues).forEach(([section, params]) => {
+      paramsValuesHasDiff[section] = Object.entries(params).reduce((acc, [paramKey, values]) => {
+        acc[paramKey] = values.every(value => value !== '') && (numberOfTasks != values.length || values.some(val => val !== values[0]));
+        return acc;
+      }, {});
+    });
+    return paramsValuesHasDiff;
   }
 }

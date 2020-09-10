@@ -6,7 +6,7 @@ import {ISelectedModel} from '../../shared/models.model';
 import {selectSelectedModel} from '../../reducers';
 import {filter} from 'rxjs/operators';
 import {resetDontShowAgainForBucketEndpoint} from '../../../core/actions/common-auth.actions';
-import {createModelLink} from '../../../shared/utils/shared-utils';
+import {createModelLink, isExample} from '../../../shared/utils/shared-utils';
 import {AdminService} from '../../../../features/admin/admin.service';
 import {ModelDetailsUpdated, updateModelDetails} from '../../actions/models-info.actions';
 
@@ -17,12 +17,16 @@ import {ModelDetailsUpdated, updateModelDetails} from '../../actions/models-info
 export class ModelInfoGeneralComponent implements OnDestroy {
 
   public selectedModel: ISelectedModel;
+  public isExample: boolean;
   private selectedModelSubscription: Subscription;
 
   constructor(private store: Store<IModelInfoState>, private adminService: AdminService) {
     this.selectedModelSubscription = this.store.select(selectSelectedModel).pipe(
       filter(model => !!model))
-      .subscribe(model => this.selectedModel = model);
+      .subscribe(model => {
+        this.isExample     = isExample(model);
+        this.selectedModel = model;
+      });
   }
 
   showModel(model) {

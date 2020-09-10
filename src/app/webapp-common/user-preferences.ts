@@ -9,50 +9,6 @@ import {environment} from '../../environments/environment';
 import {Store} from '@ngrx/store';
 
 const USER_PREFERENCES_STORAGE_KEY = '_USER_PREFERENCES_';
-
-export function loadUserAndPreferences(userService: ApiUsersService, loginService: LoginService, store: Store<any>): () => Promise<any> {
-  return (): Promise<any> => {
-
-    return new Promise((resolve, reject) => {
-      const loginFlow = () => {
-        userPreferences.setUserService(userService);
-        userPreferences.loadPreferences().pipe(
-          tap(_ => resolve()),   // resolve in case user is logged-in and preferences are loaded
-          catchError((err) => {
-            const redirectUrl: string = window.location.pathname;
-            if (environment.autoLogin && err.status === 401 && !['/login', '/dashboard', '/'].includes(redirectUrl)) {
-              const name = `${(new Date()).getTime().toString()}`;
-              loginService.autoLogin(name, afterLogin.bind(this, resolve, store));
-            } else {
-              resolve();
-            }
-            return EMPTY;
-          })
-        ).subscribe(() => {
-          // Do nothing
-        }, (error) => {
-          // Do nothing
-        });
-      };
-
-
-      if (environment.spaLogin) {
-        loginService.initCredentials().subscribe(() => loginFlow());
-      } else {
-        loginFlow();
-      }
-    });
-  };
-}
-
-function afterLogin(resolve, store) {
-  userPreferences.loadPreferences()
-    .subscribe(() => {
-      store.dispatch(new FetchCurrentUser());
-      resolve();
-    });
-}
-
 class UserPreferences {
 
   private preferences: object;
@@ -146,3 +102,49 @@ class UserPreferences {
 }
 
 export const userPreferences = new UserPreferences();
+
+function afterLogin(resolve, store) {
+  userPreferences.loadPreferences()
+    .subscribe(() => {
+      store.dispatch(new FetchCurrentUser());
+      resolve();
+    });
+}
+
+export function loadUserAndPreferences(userService: ApiUsersService, loginService: LoginService, store: Store<any>): () => Promise<any> {
+  return (): Promise<any> => new Promise((resolve) => {
+    const loginFlow = () => {
+      userPreferences.setUserService(userService);
+      userPreferences.loadPreferences().pipe(
+        tap(_ => resolve()),   // resolve in case user is logged-in and preferences are loaded
+        catchError((err) => {
+          const redirectUrl: string = window.location.pathname;
+          if (err.status === 401 && !['/login', '/dashboard', '/'].includes(redirectUrl)) {
+            if (loginService.guestUser?.enabled) {
+              loginService.passwordLogin(loginService.guestUser.username, loginService.guestUser.password)
+                .subscribe(() => afterLogin.bind(this)(resolve, store));
+            } else if (environment.autoLogin) {
+              const name = `${(new Date()).getTime().toString()}`;
+              loginService.autoLogin(name, afterLogin.bind(this, resolve, store));
+            } else {
+              resolve();
+            }
+          } else {
+            resolve();
+          }
+          return EMPTY;
+        })
+      ).subscribe(() => {
+        // Do nothing
+      }, (error) => {
+        // Do nothing
+      });
+    };
+
+    if (environment.spaLogin) {
+      loginService.initCredentials().subscribe(() => loginFlow());
+    } else {
+      loginFlow();
+    }
+  });
+}

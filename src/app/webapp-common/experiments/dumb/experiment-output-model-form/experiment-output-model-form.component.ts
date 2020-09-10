@@ -5,6 +5,7 @@ import {ImmutableFormContainer} from '../../../shared/ui-components/forms/immuta
 import {IExperimentInfoFormComponent} from '../../../../features/experiments/shared/experiment-info.model';
 import {experimentSectionsEnum, experimentSections} from '../../../../features/experiments/shared/experiments.const';
 import {HELP_TEXTS} from '../../shared/common-experiments.const';
+import {getModelDesign} from '../../../tasks/tasks.utils';
 
 @Component({
   selector   : 'sm-experiment-output-model-form',
@@ -21,7 +22,18 @@ export class ExperimentOutputModelFormComponent extends ImmutableFormContainer i
 
   @Input() editable: boolean;
   @Input() controlName = 'model';
-  @Input() formData: IExperimentModelInfo;
+  _formData: IExperimentModelInfo;
+  public outputDesign: any;
+  private designKey: string;
+  @Input() set formData(formData: IExperimentModelInfo){
+    this._formData = formData;
+    const design = getModelDesign(formData?.output?.design)
+    this.outputDesign = design.value ;
+    this.designKey = design.key;
+  };
+  get formData(){
+    return this._formData;
+  }
   @Input() userKnowledge: Map<experimentSectionsEnum, boolean>;
   @Input() modelLabels: Model['labels'];
   @Input() saving;

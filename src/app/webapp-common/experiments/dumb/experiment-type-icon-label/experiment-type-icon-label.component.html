@@ -1,6 +1,6 @@
-<i [class]="'icon sm type '+ type"></i>
+<i class="al-icon" [class]="iconClass + ' al-ico-type-' + (type ? type.replace('_', '-') : 'training')"></i>
 
 <span style="margin-left: 6px" [ngClass]="type" *ngIf="showLabel">
-             {{type | noUnderscore | titlecase}}
+  {{type?.length < 4 ? type.toUpperCase() : (type | noUnderscore | titlecase)}}
 </span>
 

@@ -1,7 +1,7 @@
 @import "~@angular/material/prebuilt-themes/indigo-pink.css";
 @import '~@angular/material/theming';
-@import "~angular-notifier/styles.scss";
-@import "~angular-notifier/styles/themes/theme-material.scss";
+@import "angular-notifier/styles.scss";
+@import "angular-notifier/styles/themes/theme-material.scss";
 @import "shared/ui-components/styles/notifications";
 @import "~britecharts/src/styles/charts/line";
 @import "~britecharts/src/styles/charts/donut";
@@ -10,6 +10,7 @@
 @import "~britecharts/src/styles/common/axes";
 @import "~britecharts/src/styles/common/grid";
 @import "shared/ui-components/styles/material-palette";
+@import "assets/fonts/trains-icons.scss";
 
 @include mat-core();
 //@import "../webapp-common/shared/ui-components/styles/material-theme.scss";
@@ -35,14 +36,16 @@ $sm-theme: mat-light-theme($sm-theme-primary, $sm-theme-accent, $sm-theme-warn);
   @include mat-radio-theme($sm-theme);
 
   .mat-checkbox-frame,
-  .mat-radio-outer-circle{
+  .mat-radio-outer-circle {
     border-color: $purple;
   }
+
   .light-theme .mat-radio-button.mat-radio-disabled .mat-radio-outer-circle,
-  .light-theme .mat-radio-button.mat-radio-disabled .mat-radio-label-content{
+  .light-theme .mat-radio-button.mat-radio-disabled .mat-radio-label-content {
     border-color: $blue-200 !important;
     color: $blue-200 !important;
   }
+
   .light-theme .mat-radio-button.mat-radio-disabled .mat-radio-inner-circle {
     background-color: transparent !important;
   }
@@ -52,13 +55,13 @@ $sm-theme: mat-light-theme($sm-theme-primary, $sm-theme-accent, $sm-theme-warn);
   outline: none !important;
 }
 
-html,
-body {
+html, body {
   height: 100%;
   margin: 0;
   padding: 0;
   font-family: 'Heebo', sans-serif;
   font-size: 13px;
+  overflow: hidden;
 }
 
 
@@ -96,6 +99,22 @@ h5.al-header {
 
   &:active {
     background: #ff7272 !important;
+  }
+}
+
+mat-expansion-panel {
+  box-shadow: unset;
+
+  &:hover {
+    background: transparent !important;
+  }
+
+  .mat-expansion-panel-header {
+    margin-bottom: 0;
+
+    &:hover {
+      background: transparent !important;
+    }
   }
 }
 
@@ -397,10 +416,10 @@ as-split {
 }
 
 $type-colors: (
-  string: #ff8400,
-  number: $neon-yellow-betterinchrome,
-  boolean: #b938a4,
-  date: #05668D,
+        string: #ff8400,
+        number: $neon-yellow-betterinchrome,
+        boolean: #b938a4,
+        date: #05668D,
 );
 
 .dark-theme {
@@ -418,7 +437,7 @@ $type-colors: (
       }
 
       .segment-key {
-        color: $cloudy-blue !important;
+        color: $blue-250 !important;
       }
     }
   }
@@ -528,4 +547,10 @@ body .mat-menu-panel .mat-form-field {
       bottom: unset;
     }
   }
+}
+
+.hyper-parameters-tooltip {
+  white-space: pre-line;
+  text-align: left !important;
+  font-size: 14px !important;
 }

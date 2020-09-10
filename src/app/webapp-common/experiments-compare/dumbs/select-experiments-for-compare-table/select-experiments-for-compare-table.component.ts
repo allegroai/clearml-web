@@ -10,7 +10,7 @@ export const EXPERIMENTS_TABLE_COL_FIELDS = {
   USER    : 'user.name' as ExperimentTableColFieldsEnum,
   TAGS    : 'tags' as ExperimentTableColFieldsEnum,
   STATUS  : 'status' as ExperimentTableColFieldsEnum,
-  PROJECT  : 'project.name' as ExperimentTableColFieldsEnum,
+  PROJECT : 'project.name' as ExperimentTableColFieldsEnum,
 };
 
 export const INITIAL_EXPERIMENT_TABLE_COLS = [
@@ -23,64 +23,72 @@ export const INITIAL_EXPERIMENT_TABLE_COLS = [
     static          : true,
     headerStyleClass: 'selected-col-header',
     style           : {width: '20px'},
+    disableDrag     : true,
   },
   {
-    id            : EXPERIMENTS_TABLE_COL_FIELDS.TYPE,
-    sortable      : false,
-    filterable    : false,
-    static        : true,
-    header        : 'TYPE',
-    style         : {width: '40px'},
+    id         : EXPERIMENTS_TABLE_COL_FIELDS.TYPE,
+    sortable   : false,
+    filterable : false,
+    static     : true,
+    header     : 'TYPE',
+    style      : {width: '40px'},
+    disableDrag: true,
   },
   {
-    id              : EXPERIMENTS_TABLE_COL_FIELDS.ID,
-    sortable        : false,
-    filterable      : false,
-    header          : 'ID',
-    hidden          : true,
-    static          : true,
-    style           : {width: '150px'},
+    id         : EXPERIMENTS_TABLE_COL_FIELDS.ID,
+    sortable   : false,
+    filterable : false,
+    header     : 'ID',
+    hidden     : true,
+    static     : true,
+    style      : {width: '150px'},
+    disableDrag: true,
   },
   {
-    id          : EXPERIMENTS_TABLE_COL_FIELDS.NAME,
-    sortable    : false,
-    static      : true,
-    header      : 'NAME',
-    style       : {width: '170px'},
+    id         : EXPERIMENTS_TABLE_COL_FIELDS.NAME,
+    sortable   : false,
+    static     : true,
+    header     : 'NAME',
+    style      : {width: '170px'},
+    disableDrag: true,
   },
   {
-    id      : EXPERIMENTS_TABLE_COL_FIELDS.USER,
-    sortable: false,
-    static  : true,
-    header  : 'USER',
-    style   : {width: '115px'}
+    id         : EXPERIMENTS_TABLE_COL_FIELDS.USER,
+    sortable   : false,
+    static     : true,
+    header     : 'USER',
+    style      : {width: '115px'},
+    disableDrag: true,
   },
   {
-    id      : EXPERIMENTS_TABLE_COL_FIELDS.TAGS,
-    sortable: false,
-    static  : true,
-    header  : 'TAGS',
-    style   : {width: '110px'}
+    id         : EXPERIMENTS_TABLE_COL_FIELDS.TAGS,
+    sortable   : false,
+    static     : true,
+    header     : 'TAGS',
+    style      : {width: '110px'},
+    disableDrag: true,
   },
   {
-    id          : EXPERIMENTS_TABLE_COL_FIELDS.STATUS,
-    filterable  : false,
-    static      : true,
-    header      : 'STATUS',
-    style       : {width: '80px'},
+    id         : EXPERIMENTS_TABLE_COL_FIELDS.STATUS,
+    filterable : false,
+    static     : true,
+    header     : 'STATUS',
+    style      : {width: '80px'},
+    disableDrag: true,
   },
   {
-    id          : EXPERIMENTS_TABLE_COL_FIELDS.PROJECT,
-    filterable  : false,
-    static      : true,
-    header      : 'PROJECT',
-    style       : {width: '80px'},
+    id         : EXPERIMENTS_TABLE_COL_FIELDS.PROJECT,
+    filterable : false,
+    static     : true,
+    header     : 'PROJECT',
+    style      : {width: '80px'},
+    disableDrag: true,
   }
 ];
 
 export enum ExperimentTagsEnum {
   Development = 'development',
-  Hidden      = 'archived'
+  Hidden = 'archived'
 }
 
 export interface AddExperimentEvent {
@@ -106,11 +114,11 @@ export class SelectExperimentsForCompareTableComponent implements OnInit {
   public typeFiltersValue: any;
   public menuPosition: { x: number; y: number };
   public menuData;
-  public menuOpen: boolean                      = false;
+  public menuOpen: boolean = false;
   @Input() searchTerm;
   @Input() tableCols;
   @Input() experiments: Array<ITableExperiment> = [];
-  @Input() selectedExperiments: Array<any>      = [];
+  @Input() selectedExperiments: Array<any> = [];
   @Output() experimentsSelectionChanged = new EventEmitter<AddExperimentEvent>();
 
 

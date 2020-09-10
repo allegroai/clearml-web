@@ -4,15 +4,19 @@
     </div>
     <br><br><br>
     <div id="mobile-warn" class="alert alert-warning mobile-warn" [class.show]="mobile" role="alert">
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close" (click)="acknowlage()">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close" (click)="acknowledge()">
             <span aria-hidden="true">×</span></button>
         <strong>Notice!</strong> The Web-App is not yet optimized for mobile devices.
     </div>
+  <div class="white-label" *ngIf="environment.whiteLabelLoginTitle">
+    <div class="white-label-title">{{environment.whiteLabelLoginTitle}}</div>
+    <div class="white-label-subtitle">{{environment.whiteLabelLoginSubtitle}}</div>
+  </div>
     <div class="login-box-wrapper" [class.mobile]="mobile">
       <div class="jumbotron">
           <div class="row login-section">
               <section class="mx-auto">
-                <img src="../../../../assets/logo-white.svg?v=2" class="logo">
+                <img src="../../../../assets/logo-white.svg?v=3" class="logo">
                 <div *ngIf="notice" class="login-notice">{{notice}}</div>
                 <div *ngIf="!loginMode" class="circle" ></div>
                   <form class="form-horizontal" #loginForm="ngForm" [ngClass]="{'d-none':!loginMode}">
@@ -39,10 +43,19 @@
                       <div *ngIf="loginFailed" class="alert alert-danger" role="alert">
                         Invalid User/Password combination
                       </div>
-                      <button class="btn" (click)="login()" [disabled]="!loginForm.valid">
+                      <button class="btn" (click)="login()" [disabled]="!loginForm.valid || showSpinner">
+                        <mat-spinner class="spinner" *ngIf="showSpinner" diameter="16"></mat-spinner>
                         {{buttonCaption}}
                       </button>
 
+                    <div class="mb-n4" *ngIf="guestUser?.enabled">
+                      <div class="separator d-flex mt-4">
+                        <div class="line"></div>
+                        <div class="px-3">OR</div>
+                        <div class="line"></div>
+                      </div>
+                      <button [disabled]="showSpinner" class="btn mt-3" (click)="loginGuest()">LOGIN AS A GUEST</button>
+                    </div>
                       <mat-autocomplete #auto="matAutocomplete">
                           <mat-option *ngFor="let option of filteredOptions | async" [value]="option.name">
                               {{option.name}}

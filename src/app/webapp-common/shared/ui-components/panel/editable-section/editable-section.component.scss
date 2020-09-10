@@ -1,7 +1,10 @@
 @import "../../styles/variables";
 
 .editable-container {
+  display: flex;
+  flex-direction: column;
   position: relative;
+  height: 100%;
   background-color: white;
   padding: 24px;
   border: 1px solid transparent;
@@ -41,7 +44,7 @@
   }
 
   .cancel-save {
-    position: sticky;
+    position: relative;
     bottom: 10px;
     text-align: right;
     opacity: 0;
@@ -52,11 +55,8 @@
     &.edit-mode {
       opacity: 1;
       z-index: 99;
-      margin-top: 10px;
-      height: initial;
       display: flex;
       justify-content: flex-end;
-      width: 100%;
     }
 
     .cancel {

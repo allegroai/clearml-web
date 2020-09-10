@@ -31,6 +31,8 @@ export const selectNoMoreModels = createSelector(modelsView, (state): boolean =>
 export const selectShowAllSelectedIsActive = createSelector(modelsView, (state): boolean => state.showAllSelectedIsActive);
 export const selectModelsTableColsOrder = createSelector([modelsView, selectSelectedProjectId], (state, projectId): string[] => (state.colsOrder && projectId) ? state.colsOrder[projectId] : undefined);
 export const selectModelsUsers = createSelector(modelsView, (state): Array<any> => state.users);
+export const selectModelsFrameworks = createSelector(modelsView, (state): Array<string> => state.frameworks);
+export const selectModelsTags = createSelector(modelsView, (state): Array<string> => state.projectTags);
 export const selectModelsHiddenTableCols = createSelector(modelsView, (state): { [key: string]: boolean } => state.hiddenTableCols);
 
 

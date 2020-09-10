@@ -6,7 +6,7 @@
     background-color: $blue-400;
   }
   /deep/ .mat-slide-toggle-bar {
-    background: rgba($blue-rgb-300, 0.5);
+    background: rgba($blue-300, 0.5);
   }
 
   /deep/.mat-slide-toggle.mat-checked:not(.mat-disabled) {
@@ -17,7 +17,7 @@
     }
 
     .mat-slide-toggle-bar {
-      background: rgba($blue-rgb-300, 0.5);
+      background: rgba($blue-300, 0.5);
     }
   }
 }

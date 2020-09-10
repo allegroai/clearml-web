@@ -6,6 +6,7 @@
     [editable]="editable$ | async"
     [isInDev]="isInDev$ | async"
     [formData]="executionInfo$ | async"
+    [showExtraDataSpinner]="showExtraDataloader$ | async"
     [saving]="saving$ |async"
     (formDataChanged)="onFormValuesChanged($event)"
     (saveFormData)="saveExecutionData()"

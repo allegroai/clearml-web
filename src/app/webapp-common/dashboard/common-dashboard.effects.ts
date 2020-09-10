@@ -28,7 +28,7 @@ export class CommonDashboardEffects {
     flatMap((action) => this.projectsApi.projectsGetAllEx(action.payload.getAllFilter)
       .pipe(
         flatMap(res => [new SetRecentProjects(res.projects), new DeactiveLoader(action.type)]),
-        catchError(error => [new DeactiveLoader(action.type), new AddMessage(MESSAGES_SEVERITY.ERROR, 'Fetching projects failed'), new RequestFailed(error)])
+        catchError(error => [new DeactiveLoader(action.type), new RequestFailed(error)])
       )
     )
   );
@@ -47,7 +47,7 @@ export class CommonDashboardEffects {
       })
         .pipe(
           flatMap(res => [new SetRecentTasks(res.tasks as Array<IRecentTask>), new DeactiveLoader(action.type)]),
-          catchError(err => [new RequestFailed(err), new AddMessage(MESSAGES_SEVERITY.ERROR, 'Fetching recent experiments failed'), new DeactiveLoader(action.type)])
+          catchError(err => [new RequestFailed(err), new DeactiveLoader(action.type)])
         )
     )
   );

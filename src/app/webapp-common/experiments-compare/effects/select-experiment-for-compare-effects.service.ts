@@ -13,7 +13,7 @@ import {select, Store} from '@ngrx/store';
 import {get, isEmpty} from 'lodash/fp';
 import {escapeRegex} from '../../shared/utils/shared-utils';
 import {NONE_USER_TASK_TYPES} from '../../experiments/shared/common-experiments.const';
-import {selectExperimentIds, selectExperimentsUpdateTime} from '../reducers';
+import {selectExperimentsUpdateTime} from '../reducers';
 import {EmptyAction} from '../../../app.constants';
 import {selectRouterParams} from '../../core/reducers/router-reducer';
 import {selectAppVisible} from '../../core/reducers/view-reducer';

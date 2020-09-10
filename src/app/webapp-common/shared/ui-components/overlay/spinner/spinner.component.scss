@@ -28,8 +28,8 @@
   position: absolute;
   top: 60px;
   left: 60px;
-  width: calc(100vw - 60px);
-  height: calc(100vh - 60px);
+  width: calc(100% - 60px);
+  height: calc(100% - 60px);
   background: #1A1E2C;
   opacity: 0;
   z-index: 999998;

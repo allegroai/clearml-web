@@ -11,7 +11,6 @@ import {reducers} from './reducers';
 import {ModelsViewEffects} from './effects/models-view.effects';
 import {ModelInfoHeaderComponent} from './dumbs/model-info-header/model-info-header.component';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {ModelFooterComponent} from './dumbs/model-footer/model-footer.component';
 import {ModelsInfoEffects} from './effects/models-info.effects';
 import {ModelInfoGeneralComponent} from './containers/model-info-general/model-info-general.component';
 import {ModelGeneralInfoComponent} from './dumbs/model-general-info/model-general-info.component';
@@ -30,6 +29,7 @@ import {createLocalStorageReducer} from '../core/meta-reducers/local-storage-red
 import {ModelCustomColsMenuComponent} from './dumbs/model-custom-cols-menu/model-custom-cols-menu.component';
 import {BaseModelMenuComponent} from './containers/model-menu/model-menu.component';
 import {ModelHeaderComponent} from '../../features/models/dumb/model-header/model-header.component';
+import {SharedModule} from '../../shared/shared.module';
 
 const syncedKeys    = [
   'view.colsOrder'
@@ -41,24 +41,25 @@ export function localStorageReducer(reducer: ActionReducer<any>): ActionReducer<
   return createLocalStorageReducer(key, syncedKeys, actionsPrefix)(reducer);
 }
 @NgModule({
-  imports        : [
-    ExperimentSharedModule,
-    FormsModule,
-    ReactiveFormsModule,
-    CommonModule,
-    CommonLayoutModule,
-    ModelRouterModule,
-    ModelSharedModule,
-    SMSharedModule,
-    FeatureModelsModule,
-    AngularSplitModule.forRoot(),
-    StoreModule.forFeature(MODELS_STORE_KEY, reducers, {metaReducers: [localStorageReducer]}),
-    EffectsModule.forFeature([ModelsViewEffects, ModelsInfoEffects, ModelsMenuEffects]),
-    FeatureModelsModule,
-  ],
+    imports: [
+        ExperimentSharedModule,
+        FormsModule,
+        ReactiveFormsModule,
+        CommonModule,
+        CommonLayoutModule,
+        ModelRouterModule,
+        ModelSharedModule,
+        SMSharedModule,
+        FeatureModelsModule,
+        AngularSplitModule.forRoot(),
+        StoreModule.forFeature(MODELS_STORE_KEY, reducers, {metaReducers: [localStorageReducer]}),
+        EffectsModule.forFeature([ModelsViewEffects, ModelsInfoEffects, ModelsMenuEffects]),
+        FeatureModelsModule,
+        SharedModule,
+    ],
   providers      : [SmFormBuilderService, DatePipe],
   declarations   : [ModelInfoComponent, ModelsComponent, ModelInfoHeaderComponent,
-    ModelViewNetworkComponent, ModelInfoNetworkComponent, ModelFooterComponent,
+    ModelViewNetworkComponent, ModelInfoNetworkComponent,
     ModelInfoLabelsComponent, ModelInfoLabelsViewComponent, ModelInfoGeneralComponent,
     ModelGeneralInfoComponent, ModelHeaderComponent, BaseModelMenuComponent,
     ModelCustomColsMenuComponent]

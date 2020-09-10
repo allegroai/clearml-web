@@ -4,7 +4,7 @@ import {ModelsViewModesEnum} from '../models.consts';
 import {ITableModel} from '../shared/models.model';
 import {TableFilter} from '../../shared/utils/tableParamEncode';
 import {User} from '../../../business-logic/model/users/user';
-import {TOGGLE_COL_HIDDEN} from '../../experiments/actions/common-experiments-view.actions';
+import {EXPERIMENTS_PREFIX, TOGGLE_COL_HIDDEN} from '../../experiments/actions/common-experiments-view.actions';
 
 const MODELS_PREFIX = 'MODELS_';
 
@@ -64,7 +64,7 @@ export class SetModels implements Action {
 
 export const setModelsInPlace = createAction(
   MODELS_PREFIX + '[set models in place]',
-  props<{models: ITableModel[]}>()
+  props<{ models: ITableModel[] }>()
 );
 
 export class SetNoMoreModels implements Action {
@@ -77,6 +77,14 @@ export class SetNoMoreModels implements Action {
 export const toggleColHidden = createAction(
   MODELS_PREFIX + 'TOGGLE_COL_HIDDEN',
   props<{ colName: string }>()
+);
+
+export const getTags = createAction(
+  MODELS_PREFIX + 'GET_TAGS');
+
+export const setTags = createAction(
+  MODELS_PREFIX + 'SET_TAGS',
+  props<{ tags: string[] }>()
 );
 
 export const setHiddenCols = createAction(
@@ -100,6 +108,17 @@ export const setUsers = createAction(
 
 export const getUsers = createAction(
   MODELS_PREFIX + 'GET_USERS');
+
+export const setFrameworks = createAction(
+  MODELS_PREFIX + 'SET_FRAMEWORKS',
+  props<{ frameworks: string[] }>()
+);
+
+export const getFrameworks = createAction(
+  MODELS_PREFIX + 'GET_FRAMEWORKS');
+
+export const getFilteredUsers = createAction(
+  MODELS_PREFIX + 'GET_FILTERED_USERS');
 
 export class AddModels implements Action {
   readonly type = ADD_MANY_MODELS;
@@ -202,19 +221,19 @@ export class ArchivedModeChanged implements Action {
 
 export class ArchivedSelectedModels implements Action {
   public type = ARCHIVE_SELECTED_MODELS;
-  public payload: { projectId: string };
+  public payload: { skipUndo: boolean };
 
-  constructor(projectId: string) {
-    this.payload = {projectId};
+  constructor(skipUndo?: boolean) {
+    this.payload = {skipUndo};
   }
 }
 
 export class RestoreSelectedModels implements Action {
   public type = RESTORE_SELECTED_MODELS;
-  public payload: { projectId: string };
+  public payload: { skipUndo: boolean };
 
-  constructor(projectId: string) {
-    this.payload = {projectId};
+  constructor(skipUndo?: boolean) {
+    this.payload = {skipUndo};
   }
 }
 

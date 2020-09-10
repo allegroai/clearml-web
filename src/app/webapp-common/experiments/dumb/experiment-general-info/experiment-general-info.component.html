@@ -47,21 +47,21 @@
 </sm-labeled-row>
 
 
-<sm-labeled-row label="DESCRIPTION:" labelClass="pt-2">
-  <sm-inline-edit
-    [fieldValue]="experimentComment"
-    [originalText]="experimentComment"
-    [editable]=" ! isExample"
-    (textChanged)="commentValueChanged($event)"
-  >
-    <span class="general-description">{{experimentComment}}</span>
-  </sm-inline-edit>
-
-</sm-labeled-row>
-
-
 <sm-labeled-row label="PROJECT:">
   {{experiment?.project?.name | NA}}
 </sm-labeled-row>
 
 
+<sm-labeled-row label="DESCRIPTION:" labelClass="pt-2">
+  <sm-inline-edit
+    [fieldValue]="experimentComment"
+    [originalText]="experimentComment"
+    [editable]="!isExample"
+    [multiline]="true"
+    (textChanged)="commentValueChanged($event)"
+    (inlineActiveStateChanged)="editExperimentComment($event)"
+  >
+    <span class="general-description">{{experimentComment}}</span>
+  </sm-inline-edit>
+
+</sm-labeled-row>

@@ -5,11 +5,12 @@
   <div class="middle-col">
     <div class="d-flex p2">
         <sm-inline-edit
-          class="edit-name"
+          class="edit-name pr-3"
           [originalText]="model?.name"
           [editable]="editable"
           [minWidth]="250"
           (textChanged)="onNameChanged($event)"
+          (inlineActiveStateChanged)="editExperimentName($event)"
         >
           <span class="model-name">{{model?.name}}</span>
         </sm-inline-edit>
@@ -18,13 +19,22 @@
       </div>
     <div class="d-flex align-items-center">
       <sm-tag-list
+        *smCheckPermission="editable; else readOnlyTags"
         class="w-100"
-        [class.menu-open]="tagMenu.trigger.menuOpen"
+        [class.menu-open]="tagMenu?.trigger.menuOpen"
         [sysTags]="sysTags"
         [tags]="model?.tags"
         (add)="openTagMenu($event)"
         (remove)="removeTag($event)"></sm-tag-list>
+      <ng-template #readOnlyTags>
+        <sm-tag-list
+          class="w-100"
+          [class.menu-open]="tagMenu?.trigger.menuOpen"
+          [sysTags]="sysTags"
+          [tags]="model?.tags"></sm-tag-list>
+      </ng-template>
       <sm-menu
+        *smCheckPermission="true"
         #tagMenu
         [showCart]="false"
         [showButton]="false"
@@ -41,7 +51,7 @@
       </sm-menu>
     </div>
   </div>
-  <div class="p-2 light-theme">
+  <div *smCheckPermission="true" class="p-2 light-theme">
     <sm-model-menu
       [model]="model"
       [selectedModel]="model"

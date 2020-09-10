@@ -1,14 +1,17 @@
-export const EXPERIMENT_INFO_ONLY_FIELDS = [
+export const COMPARE_DETAILS_ONLY_FIELDS = [
   'id',
   'name',
   'type',
   'status',
   'last_update',
   'project.name',
-  'execution',
+  'execution.artifacts',
+  'execution.docker_cmd',
+  'execution.model_labels',
   'execution.model.name',
   'execution.model.uri',
   'execution.model.framework',
+  'execution.model.design',
   'script',
   'tags',
   'published',
@@ -17,5 +20,18 @@ export const EXPERIMENT_INFO_ONLY_FIELDS = [
   'output.model.uri',
   'output.model.framework',
   'output.model.design',
+  'configuration'
+];
 
+export const COMPARE_PARAMS_ONLY_FIELDS = [
+  'id',
+  'name',
+  'type',
+  'status',
+  'last_update',
+  'project.name',
+  'tags',
+  'published',
+  'last_iteration',
+  'hyperparams'
 ];

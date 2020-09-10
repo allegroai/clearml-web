@@ -50,7 +50,7 @@ export class EditJsonComponent {
   closeDialog(isConfirmed) {
     if (isConfirmed) {
       if (!this.errors || !this.textData) {
-        this.dialogRef.close(this.textData ? (this.typeJson ? this.jsonPipe.transform(this.textData) : this.textData) : null);
+        this.dialogRef.close(this.textData ? (this.typeJson ? this.jsonPipe.transform(this.textData) : this.textData) : '');
       } else {
         this.showErrors = true;
       }

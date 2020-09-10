@@ -1,8 +1,11 @@
-import {Action} from '@ngrx/store';
+import {Action, createAction, props} from '@ngrx/store';
 import {Task} from '../../../business-logic/model/tasks/task';
 import {IExperimentInfo, ISelectedExperiment} from '../../../features/experiments/shared/experiment-info.model';
 import {Model} from '../../../business-logic/model/models/model';
 import {ITableExperiment} from '../shared/common-experiment-model.model';
+import {ParamsItem} from '../../../business-logic/model/tasks/paramsItem';
+import {ConfigurationItem} from '../../../business-logic/model/tasks/configurationItem';
+
 export const EXPERIMENTS_INFO_PREFIX = 'EXPERIMENTS_INFO_';
 export const GET_EXPERIMENT_INFO             = EXPERIMENTS_INFO_PREFIX + 'GET_EXPERIMENT_INFO';
 export const AUTO_REFRESH_EXPERIMENT_INFO    = EXPERIMENTS_INFO_PREFIX + 'AUTO_REFRESH_EXPERIMENT_INFO';
@@ -40,6 +43,8 @@ export class SetExperiment implements Action {
 
 export class ExperimentUpdatedSuccessfully implements Action {
   readonly type = EXPERIMENT_UPDATED_SUCCESSFULLY;
+  constructor(public payload: string) {
+  }
 }
 
 export class SetExperimentInfoData implements Action {
@@ -48,6 +53,21 @@ export class SetExperimentInfoData implements Action {
   constructor(public payload: IExperimentInfo) {
   }
 }
+
+export const getExperiment= createAction(
+  EXPERIMENTS_INFO_PREFIX + '[set experiment]',
+  props<{experimentId: string}>()
+);
+
+export const getExperimentUncommittedChanges = createAction(
+  EXPERIMENTS_INFO_PREFIX + '[get uncommitted change]',
+  props<{experimentId: string}>()
+);
+
+export const setExperimentUncommittedChanges = createAction(
+  EXPERIMENTS_INFO_PREFIX + '[set uncommitted change]',
+  props<{diff: string}>()
+);
 
 export class ModelSelected implements Action {
   readonly type = MODEL_SELECTED;
@@ -67,6 +87,29 @@ export class ModelSelected implements Action {
 export class UpdateExperimentInfoData implements Action {
   readonly type = UPDATE_EXPERIMENT_INFO_DATA;
 
-  constructor(public payload: { id: ITableExperiment['id'], changes: Partial<ITableExperiment> }) {
+  constructor(public payload: { id: ITableExperiment['id'], changes: Partial<IExperimentInfo> }) {
   }
 }
+export const saveHyperParamsSection = createAction(
+  EXPERIMENTS_INFO_PREFIX + 'SAVE_HYPERPARAMS', props<{ hyperparams: ParamsItem[] }>());
+
+export const saveExperimentConfigObj = createAction(
+  EXPERIMENTS_INFO_PREFIX + 'SAVE_CONFIG_OBJ', props<{ configuration: Array<ConfigurationItem>; }>());
+
+export const deleteHyperParamsSection = createAction(
+  EXPERIMENTS_INFO_PREFIX + 'DELETE_HYPERPARAMS_SECTION', props<{ section: string }>());
+
+export const hyperParamsSectionUpdated = createAction(
+  EXPERIMENTS_INFO_PREFIX + 'UPDATE_HYPERPARAMS', props<{ section: string, hyperparams: ParamsItem[] }>());
+
+export const getExperimentConfigurationNames = createAction(
+  EXPERIMENTS_INFO_PREFIX + 'GET_CONFIGURATION',props<{ experimentId: string }>());
+
+export const setExperimentSaving = createAction(
+  EXPERIMENTS_INFO_PREFIX + 'SET_SAVING',props<{ saving: boolean }>());
+
+export const getExperimentConfigurationObj = createAction(
+  EXPERIMENTS_INFO_PREFIX + 'GET_CONFIGURATION_OBJ');
+
+export const updateExperimentAtPath = createAction(
+  EXPERIMENTS_INFO_PREFIX + 'UPDATE_EXPERIMENT_AT_PATH',props<{ path: string, value:any}>());

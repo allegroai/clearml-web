@@ -12,7 +12,7 @@ export interface IModelInfoState {
 const initialState: IModelInfoState = {
   selectedModel: null,
   activeSectionEdit: null,
-  infoDataFreeze: {},
+  infoDataFreeze: null,
   saving: false,
 };
 
@@ -24,7 +24,7 @@ export function modelsInfoReducer(state: IModelInfoState = initialState, action)
     case SET_MODEL:
       return {...state, selectedModel: action.payload};
     case MODEL_DETAILS_UPDATED: {
-      const newSelectedModel = Object.assign({}, {...state.selectedModel, ...action.payload.changes});
+      const newSelectedModel = {...state.selectedModel, ...action.payload.changes};
       return {...state, selectedModel: newSelectedModel};
     }
     case ACTIVATE_MODEL_EDIT:
@@ -34,7 +34,7 @@ export function modelsInfoReducer(state: IModelInfoState = initialState, action)
     case SET_IS_MODEL_SAVING:
       return {...state, saving: action.payload};
     case EDIT_MODEL:
-      return {...state, activeSectionEdit: null}
+      return {...state, activeSectionEdit: null};
     default:
       return state;
   }

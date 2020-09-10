@@ -1,4 +1,4 @@
-<sm-dialog-template [displayX]="displayX" [header]="title" (xClicked)="closeDialog(undefined)" [closeOnX]="false"
+<sm-dialog-template [displayX]="displayX && !dialogRef.disableClose" [header]="title" (xClicked)="closeDialog(undefined)" [closeOnX]="false"
                     [iconClass]="iconClass">
   <div *ngIf="reference" class="reference">{{reference}}</div>
   <div class="body" [innerHTML]='body'>

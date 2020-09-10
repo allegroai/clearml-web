@@ -1,29 +1,34 @@
-<div class="model-info-container" *ngIf="artifact">
-  <sm-labeled-row label="FILE PATH">
-    <a *ngIf="artifact?.uri && !isLocalFile && isLinkable" [href]="artifact?.uri" target="_blank">{{artifact?.uri}}</a>
-    <span *ngIf="!isLinkable">{{artifact?.uri}}</span>
-    <i *ngIf="artifact?.uri && !isLocalFile && !isLinkable"
-       class="pointer fa fa-download ml-2"
-       (click)="artifactFilePathClicked(artifact.uri)"
-    ></i>
-    <sm-copy-clipboard *ngIf="artifact?.uri && isLocalFile"
-                       label="" [clipboardText]="artifact.uri"
-                       class="pl-2"
-                       [hideBackground]="true"
-    ></sm-copy-clipboard>
-  </sm-labeled-row>
-  <sm-labeled-row label="FILE SIZE">{{artifact?.content_size ? (artifact?.content_size | filesize) : ''}}</sm-labeled-row>
-  <sm-labeled-row label="HASH">{{artifact?.hash}}</sm-labeled-row>
-  <sm-labeled-row *ngFor="let data of artifact?.display_data" [label]="data[0]| uppercase">{{data[1]}}</sm-labeled-row>
-  <sm-section-header label="PREVIEW"></sm-section-header>
-  <div class="preview">
-    <sm-textarea-control
-      [formData]="artifact?.type_data?.preview"
-      [isReadonly]="true"
-      class="dark"
-      [rows]="8"
-      inputClassName="preview-text resize-none">
-    </sm-textarea-control>
-  </div>
-</div>
+  <sm-editable-section [disableInEditMode]="true" [editable]="false" *ngIf="artifact">
+    <div>
+      <sm-labeled-row label="FILE PATH">
+        <a *ngIf="artifact?.uri && !isLocalFile && isLinkable" [href]="artifact?.uri" target="_blank">{{artifact?.uri}}</a>
+        <span *ngIf="!isLinkable">{{artifact?.uri}}</span>
+        <i *ngIf="artifact?.uri && !isLocalFile && !isLinkable"
+           class="pointer fa fa-download ml-2"
+           (click)="artifactFilePathClicked(artifact.uri)"
+        ></i>
+        <sm-copy-clipboard *ngIf="artifact?.uri && isLocalFile"
+                           label="" [clipboardText]="artifact.uri"
+                           class="pl-2"
+                           [hideBackground]="true"
+        ></sm-copy-clipboard>
+      </sm-labeled-row>
+      <sm-labeled-row label="FILE SIZE">{{artifact?.content_size ? (artifact?.content_size | filesize) : ''}}</sm-labeled-row>
+      <sm-labeled-row label="HASH">{{artifact?.hash}}</sm-labeled-row>
+      <sm-labeled-row *ngFor="let data of artifact?.display_data" [label]="data[0]| uppercase">{{data[1]}}</sm-labeled-row>
+    </div>
+  </sm-editable-section>
+  <sm-editable-section class="editable-design"
+                       [editable]="false"
+                       [disableInEditMode]="true"
+                       containerClass="h-100">
+    <sm-section-header label="PREVIEW"></sm-section-header>
+    <sm-experiment-network-design-form
+      fieldName="prototext"
+      inputClassName="preview-text resize-none"
+      [editable]="false"
+      [formData]="artifact?.type_data?.preview">
+    </sm-experiment-network-design-form>
+  </sm-editable-section>
+
 

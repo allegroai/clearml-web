@@ -1,7 +1,29 @@
+@import "../../../shared/ui-components/styles/variables";
+@import "../../../../webapp-common/layout/layout.scss";
+
 :host {
   display: block;
   position: relative;
   height: 100%;
+
+  .no-data{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    .i-no-data-artifacts{
+      width: 200px;
+      height: 160px;
+    }
+    span{
+      font-size: 20px;
+      font-weight: bold;
+      line-height: 1.45;
+      color: $cloudy-blue-two;
+    }
+  }
 
   .col-6 {
     padding: 0;

@@ -13,21 +13,6 @@ export const PUBLISH_MODEL_CLICKED = MODELS_PREFIX + 'PUBLISH_MODEL_CLICKED';
 export const CHANGE_PROJECT_REQUESTED = MODELS_PREFIX + 'CHANGE_PROJECT_REQUESTED';
 
 
-
-export class ArchiveClicked implements Action {
-  readonly type = ARCHIVE_CLICKED;
-
-  constructor(public payload: { model: ISelectedModel; selectedModel: any }) {
-  }
-}
-
-export class RestoreClicked implements Action {
-  readonly type = RESTORE_CLICKED;
-
-  constructor(public payload: { model: ISelectedModel; selectedModel: any }) {
-  }
-}
-
 export class PublishModelClicked implements Action {
   readonly type = PUBLISH_MODEL_CLICKED;
 

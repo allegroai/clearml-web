@@ -3,12 +3,12 @@
     <div class="image-title">
       {{title}}
     </div>
-    <div (click)="imageARef.click()" smTooltip="Download" class="download icon-container" [style.visibility]="(imageSources[currentIndex] | isVideo)?'hidden':'visible'">
-      <i class="icon i-download"></i>
+    <div (click)="downloadImage(); imageARef.click()" smTooltip="Download" class="download icon-container" [style.visibility]="(imageSources[currentIndex] | isVideo)?'hidden':'visible'">
+      <i class="al-icon al-ico-download al-color light-grey-blue"></i>
       <a #imageARef [href]="imageSources[currentIndex]" download style.visibility="hidden" target="_blank"></a>
     </div>
     <div (click)="closeImageDisplayer()" smTooltip="Close" class="icon-container">
-      <i class="icon i-dialog-x gray"></i>
+      <i class="al-icon al-ico-dialog-x al-color blue-400 light-grey-blue"></i>
     </div>
   </div>
   <div class="debug-image-container" #imageContainer>
@@ -26,27 +26,27 @@
     <div class="d-flex flex-column controllers" [style.visibility]="(imageSources[currentIndex] | isVideo) || (imageSources[currentIndex] | isAudio)?'hidden':'visible'">
       <div (click)="fitToScreen()" class="fit-to-screen d-flex flex-column justify-content-around align-items-center controller icon-container" smTooltip="Fit to window" position="left"
            [class.disabled]="scale===autoFitScale">
-        <i class="icon i-zoom-to-fit"></i>
+        <i class="al-icon al-ico-fit al-color light-grey-blue"></i>
       </div>
 
       <div class="zoom controller d-flex flex-column justify-content-around align-items-center">
         <div class="icon-container">
-          <i class="icon i-zoom-plus" (click)="calculateNewScale(true)" smTooltip="Zoom in" position="left"></i>
+          <i class="al-icon al-ico-plus al-color light-grey-blue" (click)="calculateNewScale(true)" smTooltip="Zoom in" position="left"></i>
         </div>
         <div class="d-flex flex-column justify-content-around align-items-center icon-container" (click)="resetScale()" smTooltip="Zoom to 1:1" position="left"
              [class.disabled]="scale===1">
-          <i class="icon i-zoom-reset sm-md"></i>
+          <i class="al-icon al-ico-zoom-1-to-1 al-color light-grey-blue sm-md"></i>
         </div>
         <div class="icon-container">
-          <div class="icon i-zoom-minus" (click)="calculateNewScale(false)" smTooltip="Zoom out" position="left"></div>
+          <div class="al-icon al-ico-minus al-color light-grey-blue" (click)="calculateNewScale(false)" smTooltip="Zoom out" position="left"></div>
         </div>
       </div>
     </div>
     <div class="navigation">
       <div class="icon-container controller d-flex flex-column justify-content-around align-items-center next" (click)="canGoNext() && next()" [class.disabled]="!canGoNext()">
-        <i class="icon i-next"></i></div>
+        <i class="al-icon al-ico-next al-color light-grey-blue"></i></div>
       <div class="icon-container controller d-flex flex-column justify-content-around align-items-center previous" (click)="canGoBack() && previous()" [class.disabled]="!canGoBack()">
-        <i class="icon i-previous"></i></div>
+        <i class="al-icon al-ico-previous al-color light-grey-blue"></i></div>
     </div>
   </div>
 

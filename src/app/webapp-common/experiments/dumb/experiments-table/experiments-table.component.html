@@ -1,10 +1,12 @@
 <script src="../../../models/shared/models-table/models-table.component.ts"></script>
-<sm-experiment-menu #contextMenu
+<sm-experiment-menu #contextMenu *smCheckPermission="true"
                     [experiment]="contextExperiment"
                     [selectedExperiment]="selectedExperiment"
                     [numSelected]="selectedExperiments.length"
                     [allTags]="tags$ | async"
                     (tagSelected)="addTag($event)"
+                    (menuOpened)="setContextMenuStatus(true)"
+                    (menuClosed)="setContextMenuStatus(false)"
                     [showButton]="false"
 ></sm-experiment-menu>
 <div class="table-header" [hidden]="!minimizedView">
@@ -23,8 +25,8 @@
     <div id="experiments-table-actions"></div>
     <sm-table-card-filter-template [options]="EXPERIMENTS_ALL_FILTER_OPTIONS"
                                    [value]="allFiltersValue"
-                                   [subOptions]="systemTags | labelValue"
                                    [subValue]="systemTagsFiltersValue"
+                                   [columns]="initialColumns"
                                    fixedOptionsSubheader="System tags"
                                    (subFilterChanged)="tableFilterChanged({id:'system_tags'}, $event)"
                                    (filterChanged)="tableAllFiltersChanged($event)"
@@ -36,6 +38,7 @@
 </div>
 <div class="table-container" [class.card-view]="minimizedView" #tableContainer>
   <sm-table
+    #table
     selectionMode="single"
     [tableData]="experiments"
     [columnsOrder]="colsOrder"
@@ -46,6 +49,9 @@
     [minimizedView]="minimizedView"
     [noMoreData]="noMoreExperiments"
     [selection]="selectedExperiment"
+    [activeContextRow]="contextExperiment"
+    [contextMenuOpen]="contextMenuActive"
+    [checkedItems]="selectedExperiments"
     [keyboardControl]="true"
     (rowSelectionChanged)="onRowSelectionChanged($event)"
     (loadMoreClicked)="onLoadMoreClicked()"
@@ -106,7 +112,6 @@
         [enableSort]="col.sortable"
         [enableSearch]="col.searchableFilter"
         [options]="EXPERIMENTS_ALL_FILTER_OPTIONS.tags |filter:tagSearchValue:'label'"
-        [subOptions]="systemTags | labelValue"
         fixedOptionsSubheader="System tags"
         [value]="tagsFiltersValue"
         [subValue]="systemTagsFiltersValue"
@@ -143,9 +148,6 @@
               [smTooltip]="experiment.name">
               {{experiment.name}}
             </div>
-            <sm-tag *ngIf="experiment &&  experiment.company && !experiment.company.id"
-                    label="EXAMPLE" className="example" class="ml-3">
-            </sm-tag>
           </div>
         </ng-container>
         <ng-container *ngSwitchCase="EXPERIMENTS_TABLE_COL_FIELDS.TAGS">
@@ -189,7 +191,7 @@
         </ng-container>
         <!--  Case for hyper params and custom metrics/variants  -->
         <ng-container *ngSwitchDefault>
-          {{col.isParam ? getHyperParam(experiment?.execution?.parameters, col) : getVarient(experiment?.last_metrics, col)}}
+          {{col.isParam ? getHyperParam(experiment?.hyperparams, col) : getVarient(experiment?.last_metrics, col)}}
         </ng-container>
       </div>
     </ng-template>
@@ -200,10 +202,12 @@
                      [cardName]="experiment.name"
                      [columns]="tableCols"
                      [rowData]="experiment"
-                     (contextmenu)="onContextMenu({e: $event, rowData: experiment})"
+                     [checked]="isRowSelected(experiment)"
+                     [activeContextRow]="contextExperiment"
+                     [contextMenuOpen]="contextMenuActive"
       >
         <sm-tag-list class="mb-2" [sysTags]="getSystemTags(experiment)" [tags]="experiment?.tags"></sm-tag-list>
-        <div compact-columns-data>Updated {{experiment.last_update | timeAgo}} &bull; Created by {{experiment.user?.name || 'Unknown User'}}
+        <div class="ellipsis compact-columns-data" compact-columns-data>Updated {{experiment.last_update | timeAgo}} &bull; Created by {{experiment.user?.name || 'Unknown User'}}
           <ng-container *ngIf="experiment.last_iteration"><BR>{{experiment.last_iteration}} Iterations</ng-container>
         </div>
         <sm-experiment-type-icon-label [type]="experiment?.type" [showLabel]="false"></sm-experiment-type-icon-label>

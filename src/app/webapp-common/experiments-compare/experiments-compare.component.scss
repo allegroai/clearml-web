@@ -87,19 +87,4 @@ $header-height: 60px;
   /deep/ al-drawer button.drawer-toggle {
     border-radius: 0 6px 6px 0;
   }
-
-  /deep/ .labeled-row {
-    .label-container {
-
-      width: 100px !important;
-      flex: 0 0 100px;
-    }
-
-    .content {
-      display: block;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-  }
 }

@@ -4,19 +4,20 @@ import {Observable, Subscription} from 'rxjs';
 import {IExecutionForm} from '../../shared/experiment-execution.model';
 import {ISelectedExperiment} from '../../shared/experiment-info.model';
 import {IExperimentInfoState} from '../../reducers/experiment-info.reducer';
-import {selectIsExperimentEditable, selectSelectedExperiment} from '../../reducers';
+import {selectIsExperimentEditable, selectSelectedExperiment, selectShowExtraDataSpinner} from '../../reducers';
 import * as infoActions from '../../actions/experiments-info.actions';
 import {selectExperimentExecutionInfoData, selectIsExperimentSaving, selectIsSelectedExperimentInDev} from '../../../../webapp-common/experiments/reducers';
 import {selectBackdropActive} from '../../../../webapp-common/core/reducers/view-reducer';
 
 @Component({
-  selector   : 'sm-experiment-info-input-model',
+  selector   : 'sm-experiment-info-execution',
   templateUrl: './experiment-info-execution.component.html',
   styleUrls  : ['./experiment-info-execution.component.scss']
 })
 export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
 
   public executionInfo$: Observable<IExecutionForm>;
+  public showExtraDataloader$: Observable<boolean>;
   public selectedExperimentSubscrition: Subscription;
   private selectedExperiment: ISelectedExperiment;
   public editable$: Observable<boolean>;
@@ -26,6 +27,7 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
 
   constructor(private store: Store<IExperimentInfoState>) {
     this.executionInfo$  = this.store.select(selectExperimentExecutionInfoData);
+    this.showExtraDataloader$  = this.store.select(selectShowExtraDataSpinner);
     this.editable$       = this.store.select(selectIsExperimentEditable);
     this.isInDev$        = this.store.select(selectIsSelectedExperimentInDev);
     this.saving$         = this.store.select(selectIsExperimentSaving);

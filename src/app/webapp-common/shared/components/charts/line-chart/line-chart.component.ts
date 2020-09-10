@@ -1,5 +1,5 @@
 import {Component, OnInit, Input, ChangeDetectionStrategy, ViewChild, ViewContainerRef, ChangeDetectorRef} from '@angular/core';
-import line from './line';
+import line from 'britecharts/src/charts/line';
 import tooltip from 'britecharts/src/charts/tooltip';
 import legend from 'britecharts/src/charts/legend';
 import {select, Selection} from 'd3-selection';

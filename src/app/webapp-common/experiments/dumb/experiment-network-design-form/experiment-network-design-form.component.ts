@@ -1,4 +1,4 @@
-import {Component, Input, ViewChild, ElementRef} from '@angular/core';
+import {Component, Input, ViewChild} from '@angular/core';
 import {AbstractControl} from '@angular/forms';
 import {ImmutableFormField} from '../../../shared/ui-components/forms/immutableFormField';
 import {TextareaControlComponent} from '../../../shared/ui-components/forms/textarea-control/textarea-control.component';
@@ -10,18 +10,27 @@ import {TextareaControlComponent} from '../../../shared/ui-components/forms/text
 })
 export class ExperimentNetworkDesignFormComponent extends ImmutableFormField {
 
-  @ViewChild('textarearef', { static: true }) textarea: TextareaControlComponent;
+  @ViewChild('textarearef', {static: true}) textarea: TextareaControlComponent;
   private _editable: boolean;
+  public lines: string;
 
-  @Input() set editable( isEditable: boolean) {
+  @Input() set editable(isEditable: boolean) {
     if (isEditable != this._editable) {
       this._editable = isEditable;
-      window.setTimeout(() => this.textarea.onResize(), 50);
     }
   }
 
   get editable() {
     return this._editable;
+  }
+
+  @Input() set formData(formData) {
+    this._formData = formData
+    this.lines = this._formData ? this._formData.split('\n') : [];
+  }
+
+  get formData() {
+    return this._formData;
   }
 
   public Object = Object;
@@ -40,7 +49,7 @@ export class ExperimentNetworkDesignFormComponent extends ImmutableFormField {
       return {json: true};
     }
     return null;
-  }
+  };
 
 }
 

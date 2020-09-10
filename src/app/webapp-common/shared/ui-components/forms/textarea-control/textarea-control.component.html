@@ -1,10 +1,5 @@
-<div class="form-group"
-     (window:resize)="onResize()"
-     #group>
+<div class="form-group">
   <textarea
-    cdkTextareaAutosize
-    [cdkAutosizeMinRows]="rows"
-    [cdkAutosizeMaxRows]="rows"
     [ngClass]="inputClassName"
     [class.danger]="hasErrors() && showErrors"
     [readonly]="isReadonly"

@@ -25,8 +25,9 @@ export class InlineEditComponent implements OnDestroy {
   @Input() inlineDisabled     = false;
 
   @Output() inlineActiveStateChanged = new EventEmitter<boolean>();
-  @Output() textChanged              = new EventEmitter<any>();
-  @Output() inlineFocusOutEvent      = new EventEmitter<any>();
+  @Output() textChanged              = new EventEmitter<string>();
+  @Output() inlineFocusOutEvent      = new EventEmitter<boolean>();
+  @Output() cancel = new EventEmitter();
   @ViewChild('inlineInput') inlineInput: ElementRef;
   @ViewChild('inlineInputContainer') inlineInputContainer: ElementRef;
   @ViewChild('template', { static: true }) template;
@@ -38,6 +39,7 @@ export class InlineEditComponent implements OnDestroy {
     this.inlineValue = this.originalText;
     this.active      = false;
     this.inlineActiveStateChanged.emit(false);
+    this.cancel.emit();
   }
 
   public inlineSaved() {

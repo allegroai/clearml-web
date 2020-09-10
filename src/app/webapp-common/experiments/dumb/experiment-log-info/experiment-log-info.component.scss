@@ -1,5 +1,7 @@
 :host {
   display: block;
+  position: relative;
+  overflow: hidden;
 
   .viewport {
     height: 100%;
@@ -14,7 +16,6 @@
 
   .log-line {
     font: 12px monospace;
-    border-bottom: 1px solid transparent;
 
     .timestamp {
       background-color: #1d1d1d;
@@ -23,18 +24,41 @@
       float: left;
       height: 25px;
       padding: 5px 0 0 20px;
+      border-bottom: 1px solid #1d1d1d;
     }
 
     .entry {
       background-color: #000;
       color: #FFFFFF;
       height: 25px;
-      padding: 5px 190px 0;
+      padding: 5px 0 0 190px;
       white-space: nowrap;
+      border-bottom: 1px solid transparent;
     }
 
     &.separator {
-      border-bottom: 1px solid #343a40;
+      .timestamp, .entry {
+        border-bottom: 1px solid #343a40;
+      }
     }
+  }
+
+  .get-last {
+    position: absolute;
+    right: -100px;
+    bottom: 30px;
+    transition: right 0.5s;
+  }
+
+  &:hover {
+    .get-last:not(.at-end) {
+      right: 30px;
+    }
+  }
+
+  mat-spinner {
+    position: absolute;
+    left: 45%;
+    top: 45%;
   }
 }

@@ -88,14 +88,17 @@ import {CheckedFilterListComponent} from './data/checked-filter-list/checked-fil
 import {KeydownStopPropagationDirective} from './directives/keydown-stop-propagation.directive';
 import {PreventArrowKeysDirective} from './directives/prevent-arrow-keys.directive';
 import {EllipsisMiddleDirective} from './directives/ellipsis-middle.directive';
-import { UserTagComponent } from './tags/user-tag/user-tag.component';
-import { TagListComponent } from './tags/tag-list/tag-list.component';
-import { TagsMenuComponent } from './tags/tags-menu/tags-menu.component';
-import { TagColorMenuComponent } from './tags/tag-color-menu/tag-color-menu.component';
+import {UserTagComponent} from './tags/user-tag/user-tag.component';
+import {TagListComponent} from './tags/tag-list/tag-list.component';
+import {TagsMenuComponent} from './tags/tags-menu/tags-menu.component';
+import {TagColorMenuComponent} from './tags/tag-color-menu/tag-color-menu.component';
 import {ScrollingModule} from '@angular/cdk/scrolling';
 import {ColorPickerModule} from 'ngx-color-picker';
 import {EditJsonComponent} from './overlay/edit-json/edit-json.component';
 import {ResizableColumnDirective} from './data/table/resizable-column.directive';
+import {JsonValidatorDirective} from './template-forms-ui/json-validator.directive';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {GroupedCheckedFilterListComponent} from './data/grouped-checked-filter-list/grouped-checked-filter-list.component';
 
 
 const _declarations = [
@@ -134,6 +137,7 @@ const _declarations = [
   KeydownStopPropagationDirective,
   PreventArrowKeysDirective,
   ThrottledScrollListenerDirective,
+  JsonValidatorDirective,
   AlertDialogComponent,
   TooltipDirective,
   InputGroupComponent,
@@ -150,6 +154,7 @@ const _declarations = [
   SimpleTableComponent2,
   SelectableListComponent,
   CheckedFilterListComponent,
+  GroupedCheckedFilterListComponent,
   GroupedSelectableListComponent,
   ClickPreventDefaultDirective,
   SelectableFilterListComponent,
@@ -176,26 +181,27 @@ const _declarations = [
 ];
 
 @NgModule({
-  imports: [
-    MatExpansionModule,
-    DragDropModule,
-    NgSelectModule,
-    CommonModule,
-    ChipsModule,
-    FormsModule,
-    ReactiveFormsModule,
-    ClipboardModule,
-    TableModule,
-    ContextMenuModule,
-    SMMaterialModule,
-    MatButtonToggleModule,
-    SharedPipesModule,
-    ChooseColorModule,
-    PortalModule,
-    SMPortalModule,
-    ScrollingModule,
-    ColorPickerModule,
-  ],
+    imports: [
+        MatExpansionModule,
+        DragDropModule,
+        NgSelectModule,
+        CommonModule,
+        ChipsModule,
+        FormsModule,
+        ReactiveFormsModule,
+        ClipboardModule,
+        TableModule,
+        ContextMenuModule,
+        SMMaterialModule,
+        MatButtonToggleModule,
+        SharedPipesModule,
+        ChooseColorModule,
+        PortalModule,
+        SMPortalModule,
+        ScrollingModule,
+        ColorPickerModule,
+        MatProgressSpinnerModule,
+    ],
   providers: [],
   declarations: [..._declarations, TagsMenuComponent, TagColorMenuComponent, ResizableColumnDirective],
   exports: [..._declarations, NgSelectModule, ChipsModule, SMMaterialModule, ChooseColorModule, SMPortalModule, TagsMenuComponent]

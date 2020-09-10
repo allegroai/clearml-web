@@ -19,12 +19,12 @@
       (loadedmetadata)="loadedMedia()"
       (click)="imageClicked.emit()"
     ></video>
-    <ng-container *ngIf="isHtml">
+    <div class="html-snippet" *ngIf="isHtml">
       <div class="html-wrap">
         <iframe class="html-viewer" width="400" height="400" referrerpolicy="origin-when-cross-origin" [src]="frame.url | safe:'url'"></iframe>
       </div>
-      <div class="d-flex justify-content-between buttons-footer align-items-center">
-        <div class="clickable-icon d-flex align-items-center justify-content-center pointer"
+      <div class="toolbar">
+        <div class="clickable-icon d-flex align-items-center justify-content-center pointer mr-2"
              ngxClipboard
              smTooltip="Copy URL"
              [cbContent]="frame.url || frame.oldSrc"
@@ -38,7 +38,7 @@
           <i class="fas fa-external-link-alt"></i>
         </div>
       </div>
-    </ng-container>
+    </div>
     <div *ngIf="!isLoading" class="image-var ellipsis" [smTooltip]="frame?.variant">{{frame?.variant}}</div>
   </div>
 

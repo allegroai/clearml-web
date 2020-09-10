@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {Store} from '@ngrx/store';
-import {catchError, debounceTime, filter, flatMap, map, shareReplay, switchMap, withLatestFrom} from 'rxjs/operators';
+import {catchError, debounceTime, filter, map, mergeMap, shareReplay, switchMap, withLatestFrom} from 'rxjs/operators';
 import {ApiModelsService} from '../../../business-logic/api-services/models.service';
 import {ModelsGetAllResponse} from '../../../business-logic/model/models/modelsGetAllResponse';
 import {RequestFailed} from '../../core/actions/http.actions';
@@ -11,6 +11,8 @@ import * as infoActions from '../actions/models-info.actions';
 import * as viewActions from '../actions/models-view.actions';
 import {IModelInfoState} from '../reducers/model-info.reducer';
 import {MODELS_INFO_ONLY_FIELDS} from '../shared/models.const';
+import {selectSelectedModel} from '../reducers';
+import {EmptyAction} from '../../../app.constants';
 
 @Injectable()
 export class ModelsInfoEffects {
@@ -27,13 +29,12 @@ export class ModelsInfoEffects {
   @Effect()
   getModelInfo$ = this.actions$.pipe(
     ofType<infoActions.GetModelInfo>(infoActions.GET_MODEL_INFO, infoActions.REFRESH_MODEL_INFO),
-    withLatestFrom(
-      this.store.select(selectAppVisible)),
+    withLatestFrom(this.store.select(selectAppVisible)),
     filter(([action, visible]) => visible),
     switchMap(([action])=>
       this.apiModels.modelsGetAllEx({id: [action.payload], only_fields: MODELS_INFO_ONLY_FIELDS})
         .pipe(
-          flatMap((res: ModelsGetAllResponse) => [
+          mergeMap((res: ModelsGetAllResponse) => [
             new infoActions.SetModel(res.models[0]),
             new DeactiveLoader(action.type)
           ]),
@@ -47,13 +48,13 @@ export class ModelsInfoEffects {
   );
   @Effect()
   editModel$ = this.actions$.pipe(
-      ofType<infoActions.EditModel>(infoActions.EDIT_MODEL),
+    ofType<infoActions.EditModel>(infoActions.EDIT_MODEL),
     debounceTime(1000),
-    switchMap((action) =>{
-      const parent =  action.payload.parent ? (action.payload.parent as any).id : undefined;
-      return this.apiModels.modelsEdit({model: action.payload.id, ...action.payload, project: action.payload.project.id, task: action.payload.task.id, parent: parent})
+    switchMap((action) => {
+      const parent = action.payload.parent ? (action.payload.parent as any).id : undefined;
+      return this.apiModels.modelsEdit({model: action.payload.id, ...action.payload, project: action.payload.project.id, task: action.payload.task?.id, parent: parent})
         .pipe(
-          flatMap((res) => [
+          mergeMap(() => [
             new infoActions.GetModelInfo(action.payload.id),
             new infoActions.SetIsModelSaving(false),
             new SetBackdrop(false)
@@ -64,22 +65,23 @@ export class ModelsInfoEffects {
             new SetBackdrop(false),
             new infoActions.GetModelInfo(action.payload.id)
           ])
-        )}
-    ),
+        );
+    }),
     shareReplay(1)
   );
 
   @Effect()
   updateModelDetails$ = this.actions$.pipe(
     ofType(infoActions.updateModelDetails),
-    flatMap((action) =>
+    withLatestFrom(this.store.select(selectSelectedModel)),
+    mergeMap(([action, selectedModel]) =>
       this.apiModels.modelsUpdate({model: action.id, ...action.changes})
         .pipe(
-          flatMap((res) => {
+          mergeMap((res) => {
             const changes = res?.fields || action.changes;
             return [
               new viewActions.UpdateModel({id: action.id, changes}),
-              new infoActions.ModelDetailsUpdated({id: action.id, changes})
+              selectedModel?.id === action.id ? new infoActions.ModelDetailsUpdated({id: action.id, changes}): new EmptyAction()
             ];
           }),
           catchError(err => [

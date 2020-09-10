@@ -11,7 +11,7 @@ import {ApiAuthService} from '../../../business-logic/api-services/auth.service'
 import {BlTasksService} from '../../../business-logic/services/tasks.service';
 import {ApiEventsService} from '../../../business-logic/api-services/events.service';
 import {RequestFailed} from '../../core/actions/http.actions';
-import {selectCompareSelectedSettingsxAxisType} from '../reducers';
+import {selectCompareHistogramCacheAxisType, selectCompareSelectedSettingsxAxisType} from '../reducers';
 import {setRefreshing} from '../actions/compare-header.actions';
 import {ScalarKeyEnum} from '../../../business-logic/model/events/scalarKeyEnum';
 
@@ -33,39 +33,28 @@ export class ExperimentsCompareChartsEffects {
   getMultiScalarCharts = this.actions$.pipe(
     ofType<GetMultiScalarCharts>(chartActions.GET_MULTI_SCALAR_CHARTS),
     debounceTime(200),
-    withLatestFrom(this.store.select(selectCompareSelectedSettingsxAxisType)),
-    flatMap(([action, axisType]) => this.eventsApi.eventsMultiTaskScalarMetricsIterHistogram({
-      tasks: action.payload.taskIds,
-      key: !axisType || axisType === ScalarKeyEnum.IsoTime ? ScalarKeyEnum.Timestamp : axisType
-    }).pipe(
-      flatMap(res => {
-        if (!axisType || axisType === ScalarKeyEnum.IsoTime) {
-          res = {metrics: Object.keys(res.metrics).reduce((metricAcc, metricName) => {
-            const metric = res.metrics[metricName];
-            metricAcc[metricName] = Object.keys(metric).reduce((groupAcc, groupName) => {
-              const group = metric[groupName];
-              groupAcc[groupName] = Object.keys(group).reduce((graphAcc, graphName) => {
-                const graph = group[graphName];
-                graphAcc[graphName] = {...graph, x: graph.x.map(ts => new Date(ts))};
-                return graphAcc;
-              }, {});
-              return groupAcc;
-            }, {});
-            return metricAcc;
-          }, {})};
-        }
-        return [
+    withLatestFrom(this.store.select(selectCompareSelectedSettingsxAxisType), this.store.select(selectCompareHistogramCacheAxisType)),
+    flatMap(([action, axisType, prevAxisType]) => {
+      if ([ScalarKeyEnum.IsoTime, ScalarKeyEnum.Timestamp].includes(prevAxisType) &&
+        [ScalarKeyEnum.IsoTime, ScalarKeyEnum.Timestamp].includes(axisType)) {
+        return [setRefreshing({payload: false}), new DeactiveLoader(action.type)];
+      }
+      return this.eventsApi.eventsMultiTaskScalarMetricsIterHistogram({
+        tasks: action.payload.taskIds,
+        key: !axisType || axisType === ScalarKeyEnum.IsoTime ? ScalarKeyEnum.Timestamp : axisType
+      }).pipe(
+        flatMap(res => [
           // also here
-          new chartActions.SetExperimentHistogram(res),
+          new chartActions.SetExperimentHistogram(res, axisType),
           setRefreshing({payload: false}),
-          new DeactiveLoader(action.type)];
-      }),
-      catchError(error => [
-        new RequestFailed(error), new DeactiveLoader(action.type), setRefreshing({payload: false}),
-        new SetServerError(error, null, 'Failed to get Scalar Charts', action.payload.autoRefresh)
-      ])
-    )
-    )
+          new DeactiveLoader(action.type)]
+        ),
+        catchError(error => [
+          new RequestFailed(error), new DeactiveLoader(action.type), setRefreshing({payload: false}),
+          new SetServerError(error, null, 'Failed to get Scalar Charts', action.payload.autoRefresh)
+        ])
+      );
+    })
   );
 
   @Effect()

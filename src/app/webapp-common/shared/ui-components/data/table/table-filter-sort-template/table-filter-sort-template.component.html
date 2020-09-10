@@ -9,7 +9,7 @@
            (searchValueChanged)="searchValueChanged.emit($event.target.value)"
            [searchValue]="searchValue"
            [buttonClass]="'table-filter-button ' + (isFiltered() ? 'active' : 'deactive')"
-           [iconClass]="'icon md ' + (isFiltered()? 'i-filter-on':'i-filter-off')"
+           [iconClass]="'icon ' + (isFiltered()? 'i-filter-on':'i-filter-off')"
            (menuClosed)="menuClosed.emit()"
            (menuOpened)="menuOpened.emit()"
   >

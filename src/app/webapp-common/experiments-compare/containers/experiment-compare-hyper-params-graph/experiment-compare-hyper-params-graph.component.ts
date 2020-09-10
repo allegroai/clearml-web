@@ -5,11 +5,11 @@ import {select, Store} from '@ngrx/store';
 import {IExperimentInfoState} from '../../../../features/experiments/reducers/experiment-info.reducer';
 import {distinctUntilChanged, distinctUntilKeyChanged, filter, map} from 'rxjs/operators';
 import {selectRouterParams} from '../../../core/reducers/router-reducer';
-import {get} from 'lodash/fp';
+import {get, has} from 'lodash/fp';
 import {SetExperimentSettings, SetSelectedExperiments} from '../../actions/experiments-compare-charts.actions';
 import {selectRefreshing, selectScalarsGraphHyperParams, selectScalarsGraphMetrics, selectScalarsGraphShowIdenticalHyperParams, selectScalarsGraphTasks, selectMetricValueType, selectSelectedSettigsHyperParams, selectSelectedSettigsMetric} from '../../reducers';
 import {getExperimentsHyperParams, setShowIdenticalHyperParams, setvalueType} from '../../actions/experiments-compare-scalars-graph.actions';
-import {HyperParams, MetricOption, MetricValueType, SelectedMetric, VariantOption} from '../../reducers/experiments-compare-charts.reducer';
+import {GroupedHyperParams, HyperParams, MetricOption, MetricValueType, SelectedMetric, VariantOption} from '../../reducers/experiments-compare-charts.reducer';
 import {MatRadioChange} from '@angular/material/radio';
 
 
@@ -32,7 +32,7 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
   private refreshingSubscription: Subscription;
 
   public selectShowIdenticalHyperParams$: Observable<boolean>;
-  public hyperParams$: Observable<HyperParams>;
+  public hyperParams$: Observable<GroupedHyperParams>;
   public metrics$: Observable<MetricOption[]>;
   public selectedHyperParams$: Observable<string[]>;
   private selectedMetric$: Observable<SelectedMetric>;
@@ -42,7 +42,7 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
   public graphs: { [key: string]: ExperimentGraph };
   public selectedHyperParams: string[];
   public selectedMetric: SelectedMetric;
-  public hyperParams: string[];
+  public hyperParams: { [section: string]: string[] };
   public showIdenticalParamsActive: boolean;
 
   public metrics: MetricOption[];
@@ -76,7 +76,7 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
   ngOnInit() {
     this.selectMetricSubscription = this.selectedMetric$.pipe(
       distinctUntilChanged((x, y) => x?.path === y?.path)
-    ).subscribe((selectedMetric: SelectedMetric) => this.selectedMetric = {...selectedMetric});
+    ).subscribe((selectedMetric: SelectedMetric) => this.selectedMetric = selectedMetric?.name? {...selectedMetric} : null);
 
     this.metricSubscription = this.metrics$.pipe(filter(metrics => !!metrics)).subscribe(metrics => {
       this.metrics = metrics;
@@ -93,8 +93,19 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
       )
       .subscribe(([selectedParams, allParams, showIdentical]) => {
         this.showIdenticalParamsActive = showIdentical;
-        this.hyperParams = Object.entries(allParams).filter(([param, hasDiff]) => showIdentical || hasDiff).map(([param, hasDiff]) => param).sort((a, b) => a.toLowerCase() > b.toLowerCase() ? 1 : -1);
-        this.selectedHyperParams = selectedParams.filter(selectedParam => this.hyperParams.includes(selectedParam));
+        this.hyperParams = Object.entries(allParams).reduce((acc, [sectionKey, params]) => {
+          const section = Object.keys(params).sort((a, b) => a.toLowerCase() > b.toLowerCase() ? 1 : -1).reduce((acc2, paramKey) => {
+            if (showIdentical || params[paramKey]) {
+              acc2[paramKey] = true;
+            }
+            return acc2;
+          }, {});
+          if (Object.keys(section).length > 0) {
+            acc[sectionKey] = section;
+          }
+          return acc;
+        }, {});
+        this.selectedHyperParams = selectedParams.filter(selectedParam => has(selectedParam, this.hyperParams));
       });
 
     this.routerParamsSubscription = this.store.pipe(
@@ -179,11 +190,11 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
     this.listOpen = true;
   }
 
-  trackMetricByFn(item: MetricOption): string {
+  trackMetricByFn(index: number, item: MetricOption): string {
     return item.metricName;
   }
 
-  trackVariantByFn(item: VariantOption['value']): string {
+  trackVariantByFn(index: number, item: VariantOption['value']): string {
     return item.path;
   }
 

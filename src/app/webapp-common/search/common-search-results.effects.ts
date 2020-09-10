@@ -41,7 +41,7 @@ export class CommonSearchResultsEffects {
         actionsToFire.push(new SearchClear());
         actionsToFire.push(new SearchActivate());
       }
-      actionsToFire.push(new SearchSetTerm(action.payload));
+      actionsToFire.push(new SearchSetTerm(action.payload, action.force));
       actionsToFire.push(new SearchProjects(action.payload));
       actionsToFire.push(new SearchExperiments(action.payload));
       actionsToFire.push(new SearchModels(action.payload));
@@ -85,7 +85,7 @@ export class CommonSearchResultsEffects {
       page       : 0,
       page_size  : SEARCH_PAGE_SIZE,
       only_fields: EXPERIMENT_SEARCH_ONLY_FIELDS,
-      type       : [TaskTypeEnum.Training, TaskTypeEnum.Testing],
+      type       : ['__$not', 'annotation_manual', '__$not', 'annotation', '__$not', 'dataset_import'],
       system_tags: ['-archived']
     }).pipe(
       flatMap(res => [new SetExperimentsResults(res.tasks), new DeactiveLoader(action.type)]),

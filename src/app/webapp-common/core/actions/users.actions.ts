@@ -1,4 +1,4 @@
-import {Action} from '@ngrx/store';
+import {Action, createAction, props} from '@ngrx/store';
 import {USERS_ACTIONS} from '../../../app.constants';
 import {User} from '../../../business-logic/model/users/user';
 
@@ -8,11 +8,10 @@ export class FetchCurrentUser implements Action {
 
 }
 
-export class SetCurrentUser implements Action {
-  type = USERS_ACTIONS.SET_CURRENT_USER;
-
-  constructor(public payload: User) {}
-}
+export const setCurrentUser = createAction(
+  USERS_ACTIONS.SET_CURRENT_USER,
+  props<{user: User; terms_of_use?: any}>()
+);
 
 export class Logout implements Action {
   type = USERS_ACTIONS.LOGOUT;

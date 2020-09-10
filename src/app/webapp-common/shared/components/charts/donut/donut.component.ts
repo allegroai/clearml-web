@@ -52,8 +52,6 @@ export class DonutComponent implements OnInit {
     }
   }
 
-  @ViewChild('drawHere', {static: true, read: ViewContainerRef}) singleGraphContainerViewRef: ViewContainerRef;
-
   constructor(private colorHash: ColorHashService, private store: Store<any>) {}
 
   ngOnInit() {

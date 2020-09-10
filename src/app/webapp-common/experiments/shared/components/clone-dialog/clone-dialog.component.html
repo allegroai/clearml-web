@@ -1,14 +1,14 @@
-<sm-dialog-template iconClass="i-clone-black" [header]="header">
+<sm-dialog-template iconClass="al-icon al-ico-clone" [header]="header">
   <div class="reference">
     A draft copy of <b *ngIf="reference" [smTooltip]="reference.length > 80 ? reference : undefined">{{reference.length > 80 ? (reference | slice:0:77) + '...' : reference }}</b> will be created.
   </div>
 <div class="form-container">
   <h5>Project</h5>
   <sm-select-group
-    *ngIf="projects$ | async"
+    *ngIf="projects"
     fieldName="project"
     inputClassName="highlight"
-    [options]="projects$ | async"
+    [options]="projects"
     [placeHolder]=""
     [formData]="formData.project"
     (formDataChanged)="formDataChanged($event)">
@@ -32,7 +32,7 @@
   <sm-textarea-control
     fieldName="comment"
     inputClassName="highlight description"
-    [rows]="4"
+    [rows]="3"
     [formData]="formData.comment"
     (formDataChanged)="formDataChanged($event)">
     >

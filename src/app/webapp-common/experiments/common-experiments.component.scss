@@ -1,11 +1,11 @@
-@import "./../../webapp-common/shared/ui-components/styles/variables";
-@import "./../../webapp-common/layout/layout.scss";
+@import "./../shared/ui-components/styles/variables";
+@import "./../layout/layout.scss";
 
 :host {
   .experiment-body {
     width: 100%;
     height: calc(100% - #{$project-header-height});
-    &.compare {
+    &.footer-visible {
       height: calc(100% - #{$project-header-height + $project-footer-height});
     }
   }

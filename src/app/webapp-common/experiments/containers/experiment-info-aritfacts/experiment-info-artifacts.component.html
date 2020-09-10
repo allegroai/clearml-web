@@ -1,14 +1,37 @@
-<sm-overlay [backdropActive]="backdropActive$|async"></sm-overlay>
-<div class="h-100 row">
-  <sm-experiment-artifacts-navbar
-    class="col-6"
-    [artifacts]="(modelInfo$| async)?.artifacts"
-    [outputModel]="(ExperimentInfo$ | async)?.model?.output"
-    [activeSection]="activeSection"
-    [routerConfig]="routerConfig$ | async"
-    [selectedArtifactKey]="artifactKey$ | async"
-  ></sm-experiment-artifacts-navbar>
-  <div class="col-18 artifacts-col">
-    <router-outlet></router-outlet>
+<ng-template
+  let-experimentInfo="experimentInfo"
+  let-modelInfo="modelInfo"
+  let-editable="editable"
+  [ngTemplateOutletContext]="{
+    experimentInfo: ExperimentInfo$ | async,
+    modelInfo: modelInfo$ | async,
+    editable: editable$ | async
+  }" [ngTemplateOutlet]="selfie" #selfie>
+  <sm-overlay [backdropActive]="backdropActive$|async"></sm-overlay>
+  <div class="h-100 row" *ngIf="(experimentInfo?.model?.output?.id) ||
+                                (experimentInfo?.model?.input?.id) ||
+                                (modelInfo?.artifacts?.length>0) ||
+                                editable; else noData">
+    <sm-experiment-artifacts-navbar
+      class="col-6"
+      [artifacts]="modelInfo?.artifacts"
+      [outputModel]="experimentInfo?.model?.output"
+      [inputModel]="experimentInfo?.model?.input"
+      [editable]="editable"
+      [activeSection]="activeSection"
+      [routerConfig]="routerConfig$ | async"
+      [selectedArtifactKey]="artifactKey$ | async"
+    ></sm-experiment-artifacts-navbar>
+    <div class="col-18 artifacts-col">
+      <router-outlet></router-outlet>
+    </div>
   </div>
-</div>
+  <ng-template #noData>
+    <div class="d-flex h-100" *ngIf="experimentInfo?.model">
+      <div class="no-data">
+        <i class="icon i-no-data-artifacts"></i>
+        <span>NO ARTIFACTS RECORDED</span>
+      </div>
+    </div>
+  </ng-template>
+</ng-template>

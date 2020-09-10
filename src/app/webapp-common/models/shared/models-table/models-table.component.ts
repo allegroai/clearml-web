@@ -1,13 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  EventEmitter,
-  HostListener,
-  Input,
-  Output,
-  ViewChild
-} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, HostListener, Input, Output, ViewChild} from '@angular/core';
 import {ICONS} from '../../../../app.constants';
 import {ColHeaderTypeEnum, ISmCol, TableSortOrderEnum} from '../../../shared/ui-components/data/table/table.consts';
 import {get} from 'lodash/fp';
@@ -23,12 +14,14 @@ import {Store} from '@ngrx/store';
 import {addTag} from '../../actions/models-menu.actions';
 import {ModelMenuComponent} from '../../../../features/models/containers/model-menu/model-menu.component';
 import {TIME_FORMAT_STRING} from '../../../constants';
-import { getSysTags } from '../../model.utils';
+import {getSysTags} from '../../model.utils';
+import {TableComponent} from '../../../shared/ui-components/data/table/table.component';
+import { MODELS_TABLE_COLS } from '../../models.consts';
 
 @Component({
-  selector: 'sm-models-table',
-  templateUrl: './models-table.component.html',
-  styleUrls: ['./models-table.component.scss'],
+  selector       : 'sm-models-table',
+  templateUrl    : './models-table.component.html',
+  styleUrls      : ['./models-table.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ModelsTableComponent extends BaseTableView {
@@ -36,10 +29,10 @@ export class ModelsTableComponent extends BaseTableView {
   readonly MODELS_FRAMEWORK_OPTIONS = Object.entries(MODELS_FRAMEWORK_LABELS).map(([key, val]) => ({label: val, value: key}));
   readonly MODELS_READY_OPTIONS = Object.entries(MODELS_READY_LABELS).map(([key, val]) => ({label: val, value: key}));
   readonly MODELS_ALL_FILTER_OPTIONS = {
-    framework: this.MODELS_FRAMEWORK_OPTIONS,
-    ready: this.MODELS_READY_OPTIONS,
-    users: [],
-    tags: [],
+    framework: [],
+    ready    : this.MODELS_READY_OPTIONS,
+    users    : [],
+    tags     : [],
   };
   readonly ICONS = ICONS;
   public userSearchValue: string;
@@ -51,7 +44,6 @@ export class ModelsTableComponent extends BaseTableView {
   public tagsFiltersValue: any;
   public systemTagsFiltersValue: any;
   public menuOpen: boolean;
-  public menuPosition: { x: number; y: number };
   public allFiltersValue: { framework: any; ready: any; users: any, tags: any };
   public sortOrder = 1;
 
@@ -121,8 +113,17 @@ export class ModelsTableComponent extends BaseTableView {
     }
   }
 
+  private _selectedModel;
+  @Input() set selectedModel(model) {
+    if(model !== this._selectedModel) {
+      window.setTimeout(() => this.table.focusSelected());
+    }
+    this._selectedModel = model;
+  }
 
-  @Input() selectedModel;
+  get selectedModel() {
+    return this._selectedModel;
+  }
 
   @Input() set tableFilters(filters: { [s: string]: FilterMetadata }) {
     this.frameworkFiltersValue = get([MODELS_TABLE_COL_FIELDS.FRAMEWORK, 'value'], filters) || [];
@@ -138,13 +139,29 @@ export class ModelsTableComponent extends BaseTableView {
     this.sortOptionalUsersList();
   }
 
+  @Input() set frameworks(frameworks: string[]) {
+    const frameworksAndActiveFilter = Array.from(new Set(frameworks.concat(this.frameworkFiltersValue)));
+    this.MODELS_ALL_FILTER_OPTIONS.framework = frameworksAndActiveFilter.map(framework => ({
+      label: framework ? framework :
+        (framework === null ? '(No framework)' : 'Unknown'), value: framework
+    }));
+    this.sortOptionalFrameworksList();
+  }
+
   @Input() set tags(tags) {
     const tagsAndActiveFilter = Array.from(new Set(tags.concat(this.tagsFiltersValue)));
-    this.MODELS_ALL_FILTER_OPTIONS.tags = tagsAndActiveFilter.map(tag => ({label: tag, value: tag}));
+    this.MODELS_ALL_FILTER_OPTIONS.tags = tagsAndActiveFilter.map(tag => ({label: tag===null? 'No tag':tag , value: tag}));
     this.sortOptionalTagsList();
   }
 
-  @Input() systemTags;
+  @Input() systemTags = [] as string[];
+  get validSystemTags() {
+    return this.systemTags.filter(tag => tag !== 'archived');
+  }
+
+  @Input() set split(size: number) {
+    this.table?.resize();
+  }
 
   @Output() modelsSelectionChanged = new EventEmitter<Array<ITableModel>>();
   @Output() modelSelectionChanged = new EventEmitter<ITableModel>();
@@ -152,10 +169,11 @@ export class ModelsTableComponent extends BaseTableView {
   @Output() tagsMenuOpened = new EventEmitter();
   @Output() sortedChanged = new EventEmitter<{ sortOrder: TableSortOrderEnum; colId: ISmCol['id'] }>();
   @Output() filterChanged = new EventEmitter() as EventEmitter<{ col: ISmCol; value: any }>;
-  @ViewChild('tableContainer', {static: true}) tableContainer;
+  @ViewChild('table', {static: true}) table: TableComponent;
   @ViewChild('contextMenu') contextMenu: ModelMenuComponent;
   SYSTEM_TAGS_OPTIONS = [{label: 'DEV', value: 'development'}];
   TIME_FORMAT_STRING = TIME_FORMAT_STRING;
+  public readonly initialColumns = MODELS_TABLE_COLS;
 
   @HostListener('document:click', ['$event'])
   clickHandler(event) {
@@ -164,11 +182,17 @@ export class ModelsTableComponent extends BaseTableView {
     }
   }
 
-  constructor(private changeDetector: ChangeDetectorRef, private store: Store) {
+  constructor(private changeDetector: ChangeDetectorRef, private store: Store<any>) {
     super();
     this.tags$ = this.store.select(selectProjectTags);
     this.entitiesKey = 'models';
     this.selectedEntitiesKey = 'selectedModels';
+  }
+
+  afterTableInit() {
+    if (this._selectedModel) {
+      this.table.scrollToElement(this._selectedModel);
+    }
   }
 
   sortOptionalUsersList() {
@@ -179,12 +203,16 @@ export class ModelsTableComponent extends BaseTableView {
     this.MODELS_ALL_FILTER_OPTIONS.tags.sort((a, b) => sortByArr(a.value, b.value, this.tagsFiltersValue));
   }
 
+  sortOptionalFrameworksList() {
+    this.MODELS_ALL_FILTER_OPTIONS.framework.sort((a, b) => sortByArr(a.value, b.value, [null].concat(this.frameworkFiltersValue)));
+  }
+
   onRowSelectionChanged(event) {
     this.modelSelectionChanged.emit(event.data);
   }
 
   scrollTableToTop() {
-    this.tableContainer.nativeElement.scroll({top: 0});
+    this.table.table.scrollTo({top: 0});
   }
 
   tableFilterChanged(col: ISmCol, event) {
@@ -196,9 +224,6 @@ export class ModelsTableComponent extends BaseTableView {
   }
 
   tableAllFiltersChanged(event) {
-    if (event.col === 'users') {
-      event.col = 'user.name';
-    }
     this.filterChanged.emit({col: {id: event.col}, value: event.value});
     this.scrollTableToTop();
   }
@@ -268,8 +293,11 @@ export class ModelsTableComponent extends BaseTableView {
 
   openContextMenu(data) {
     this.contextModel = this.models.find(model => model.id === data.rowData.id);
+    if (!this.selectedModels.map(model => model.id).includes(this.contextModel.id)) {
+      this.emitSelection([this.contextModel]);
+    }
     const event = data.e as MouseEvent;
     event.preventDefault();
-    this.contextMenu.openMenu({x: event.clientX, y: event.clientY});
+    this.contextMenu?.openMenu({x: event.clientX, y: event.clientY});
   }
 }

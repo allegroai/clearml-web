@@ -1,13 +1,16 @@
-import {Component, OnDestroy, OnInit, ChangeDetectorRef} from '@angular/core';
-import {select, Store} from '@ngrx/store';
-import {selectExperimentLog, selectIsExperimentInProgress, selectLogFilter} from '../../reducers';
+import {Component, OnDestroy, OnInit, ChangeDetectorRef, ViewChild} from '@angular/core';
+import {Store} from '@ngrx/store';
+import {selectExperimentBeginningOfLog, selectExperimentLog, selectLogFilter} from '../../reducers';
 import {Observable, Subscription} from 'rxjs';
-import {distinctUntilChanged, filter, tap} from 'rxjs/operators';
+import {distinctUntilChanged, filter} from 'rxjs/operators';
+import {last} from 'lodash/fp';
 import {HTTP} from '../../../../app.constants';
 import {ISelectedExperiment} from '../../../../features/experiments/shared/experiment-info.model';
 import {IExperimentInfoState} from '../../../../features/experiments/reducers/experiment-info.reducer';
 import {selectSelectedExperiment} from '../../../../features/experiments/reducers';
-import {GetExperimentLog, ResetLogFilter, ResetOutput, SetLogFilter} from '../../actions/common-experiment-output.actions';
+import {ResetLogFilter, ResetOutput, SetLogFilter, getExperimentLog} from '../../actions/common-experiment-output.actions';
+import {ExperimentLogInfoComponent} from '../../dumb/experiment-log-info/experiment-log-info.component';
+import {selectRefreshing} from '../../../experiments-compare/reducers';
 
 @Component({
   selector: 'sm-experiment-output-log',
@@ -20,19 +23,21 @@ export class ExperimentOutputLogComponent implements OnInit, OnDestroy {
   private experiment: ISelectedExperiment;
 
   public API_BASE_URL = HTTP.API_BASE_URL;
-  public log$: Observable<Array<any>>;
-  public experiment$: Observable<any>;
+  public log$: Observable<any[]>;
+  public experiment$: Observable<ISelectedExperiment>;
   public filter$: Observable<string>;
+  public logBeginning$: Observable<boolean>;
   public creator: string | Worker;
   public disabled: boolean;
   public hasLog: boolean;
-  public selectIsExperimentPendingRunning: Observable<boolean>;
   public logSubscription: Subscription;
+  private refreshingSubscription: Subscription;
 
+  @ViewChild('log', {static: false}) private logRef: ExperimentLogInfoComponent;
 
-  constructor(private store: Store<IExperimentInfoState>,
-              private cdr: ChangeDetectorRef) {
+  constructor(private store: Store<IExperimentInfoState>, private cdr: ChangeDetectorRef) {
     this.log$ = this.store.select(selectExperimentLog);
+    this.logBeginning$ = this.store.select(selectExperimentBeginningOfLog);
     this.filter$ = this.store.select(selectLogFilter);
     this.experiment$ = this.store.select(selectSelectedExperiment);
   }
@@ -52,15 +57,30 @@ export class ExperimentOutputLogComponent implements OnInit, OnDestroy {
         distinctUntilChanged()
       )
       .subscribe(experiment => {
-        if (this.experiment && this.experiment.id !== experiment.id) {
+        if (this.experiment?.id !== experiment.id || this.experiment?.started !== experiment.started) {
           this.store.dispatch(new ResetOutput());
+          this.logRef?.reset();
+          this.experiment = experiment;
+          this.store.dispatch(getExperimentLog({
+            id: this.experiment.id,
+            direction: null
+          }));
+        } else if (!this.logRef?.lines?.length || this.logRef?.canRefresh) {
+          this.store.dispatch(getExperimentLog({
+            id: this.experiment.id,
+            direction: !this.logRef?.orgLogs ? 'prev' : 'next',
+            from: last(this.logRef?.orgLogs)?.timestamp
+          }));
         }
-        this.experiment = experiment;
-        this.store.dispatch(new GetExperimentLog(experiment.id));
       });
-    this.selectIsExperimentPendingRunning = this.store.pipe(
-      select(selectIsExperimentInProgress)
-    );
+
+    this.refreshingSubscription = this.store.select(selectRefreshing)
+      .pipe(filter(({refreshing}) => refreshing))
+      .subscribe(({autoRefresh}) => this.store.dispatch(getExperimentLog({
+        id: this.experiment.id,
+        direction: autoRefresh ? 'prev' : 'next',
+        from: last(this.logRef?.orgLogs)?.timestamp
+      })));
   }
 
   ngOnDestroy(): void {
@@ -70,11 +90,11 @@ export class ExperimentOutputLogComponent implements OnInit, OnDestroy {
     this.store.dispatch(new ResetOutput());
   }
 
-  refreshExperimentLog() {
-    this.store.dispatch(new GetExperimentLog(this.experiment.id));
+  public filterLog(event: KeyboardEvent) {
+    this.store.dispatch(new SetLogFilter((event.target as HTMLInputElement).value));
   }
 
-  public filterLog(event: KeyboardEvent) {
-    this.store.dispatch(new SetLogFilter((<HTMLInputElement>event.target).value));
+  getLogs({direction, from}: {direction: string; from?: number}) {
+    this.store.dispatch(getExperimentLog({id: this.experiment.id, direction, from, refresh: !from}));
   }
 }

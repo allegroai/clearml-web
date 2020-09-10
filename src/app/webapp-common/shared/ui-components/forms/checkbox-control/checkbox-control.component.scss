@@ -21,11 +21,11 @@
   justify-content: center;
   cursor: pointer;
   user-select: none;
-  width: 18px;
-  height: 18px;
-  flex: 0 0 19px;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
   border: solid 2px $purple;
-  border-radius: 4px;
+  border-radius: 2px;
   background-clip: unset;
 
   &.select-col-checkbox {
@@ -39,7 +39,7 @@
 
   &.table-check-box {
     margin: 0 auto;
-    border-color: #7480aa;
+    border-color: $blue-50;
     opacity: 1;
   }
 
@@ -64,6 +64,10 @@
     &.readonly:hover {
       opacity: 0.8;
     }
+  }
+
+  .fa-minus {
+    padding: 1px 0 0 1px;
   }
 }
 

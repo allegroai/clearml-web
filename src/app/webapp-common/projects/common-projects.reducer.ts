@@ -25,8 +25,8 @@ export const commonProjectsInitState: ICommonProjectsState = {
   data                   : [],
   selectedProjectId      : '',
   selectedProject        : {},
-  orderBy                : '-last_update',
-  sortOrder              : TABLE_SORT_ORDER.ASC,
+  orderBy                : 'last_update',
+  sortOrder              : TABLE_SORT_ORDER.DESC,
   searchQuery            : '',
   projectsNonFilteredList: [],
   projectReadyForDeletion: {
@@ -41,7 +41,7 @@ const getCorrectSortingOrder = (currentSortOrder: TableSortOrderEnum, currentOrd
   if (currentOrderField === nextOrderField) {
     return currentSortOrder === TABLE_SORT_ORDER.DESC ? TABLE_SORT_ORDER.ASC : TABLE_SORT_ORDER.DESC;
   } else {
-    return TABLE_SORT_ORDER.ASC;
+    return nextOrderField === 'last_update' ? TABLE_SORT_ORDER.DESC : TABLE_SORT_ORDER.ASC;
   }
 };
 

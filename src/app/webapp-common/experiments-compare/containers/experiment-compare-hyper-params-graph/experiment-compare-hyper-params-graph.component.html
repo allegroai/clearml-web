@@ -50,7 +50,7 @@
   <hr class="separate-margins">
 
   <!--#######  Hyper Params Checked List  ######-->
-  <sm-checked-filter-list
+  <sm-grouped-checked-filter-list
     titleText="Parameters"
     [itemsList]="hyperParams"
     [selectedItemsList]="selectedHyperParams"
@@ -63,7 +63,7 @@
       (change)="showIdenticalParamsToggled()"
       [checked]="!showIdenticalParamsActive">Hide identical fields
     </mat-slide-toggle>
-  </sm-checked-filter-list>
+  </sm-grouped-checked-filter-list>
 
 </div>
 <div class="graphs-container h-100">

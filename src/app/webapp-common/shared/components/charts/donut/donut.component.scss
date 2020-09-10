@@ -2,14 +2,14 @@
 
 /deep/ .dark-theme {
   .legend-entry-name, .legend-entry-value {
-    fill: $cloudy-blue;
+    fill: $blue-250;
   }
 
   .donut-text {
-    fill: $cloudy-blue;
+    fill: $blue-250;
 
     tspan:nth-child(3) {
-      stroke: $blue-rgb-800;
+      stroke: $blue-800;
       stroke-width: 0.3px;
     }
   }

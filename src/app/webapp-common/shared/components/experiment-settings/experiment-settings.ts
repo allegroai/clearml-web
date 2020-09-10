@@ -1,21 +1,14 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {Store} from '@ngrx/store';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 
 @Component({
   selector   : 'sm-experiment-settings',
   templateUrl: './experiment-settings.html',
   styleUrls  : ['./experiment-settings.scss']
 })
-export class ExperimentSettingsComponent implements OnInit {
+export class ExperimentSettingsComponent {
 
   @Input() disabled                  = false;
   @Input() showSettings              = false;
   @Output() toggleSettings           = new EventEmitter();
-
-  constructor(private store: Store<any>) {
-  }
-
-  ngOnInit() {  }
-
 }
 

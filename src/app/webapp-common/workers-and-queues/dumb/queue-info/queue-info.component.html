@@ -40,7 +40,7 @@
 
 <sm-menu
   *ngIf="menuOpen"
-  buttonClass="icon sm i-list-view"
+  buttonClass="al-icon sm-md al-ico-bars-menu al-color light-grey-blue"
   smMenuClass="bigger-width experiments-in-queue-list"
   [position]="menuPosition"
   [header]=""
@@ -53,17 +53,17 @@
   <sm-menu-item itemLabel="Move to top"
                 [disabled]="selectedQueue.entries.length <= 0"
                 (itemClicked)="moveToTop($event)"
-                iconClass="icon sm mr-2 i-arrow-to-top">
+                iconClass="al-icon al-ico-arrow-to-top al-color light-periwinkle-two sm mr-2">
   </sm-menu-item>
   <sm-menu-item itemLabel="Move to bottom"
                 [disabled]="selectedQueue.entries.length <= 0"
                 (itemClicked)="moveToBottom($event)"
-                iconClass="icon sm mr-2 i-arrow-to-bottom">
+                iconClass="sm mr-2 al-icon al-ico-arrow-to-bottom al-color light-periwinkle-two">
   </sm-menu-item>
   <sm-menu-item itemLabel="Move to queue..."
                 [disabled]="selectedQueue.entries.length <= 0"
                 (itemClicked)="moveToQueue($event)"
-                iconClass="icon sm mr-2 i-arrow-from-left">
+                iconClass="icon sm mr-2 al-icon al-ico-arrow-from-left al-color light-periwinkle-two">
   </sm-menu-item>
   <sm-menu-item itemLabel="Remove from queue"
                 [disabled]="selectedQueue.entries.length <= 0"

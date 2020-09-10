@@ -3,7 +3,13 @@
   <div headerButtons class="d-inline">
     <button class="btn btn-primary" style="float: right" (click)="logoutClicked()"> logout </button>
   </div>
+  <div class="separator"></div>
   <sm-usage-stats></sm-usage-stats>
+  <mat-slide-toggle
+    *ngIf="isChrome"
+    (change)="HidpiChange($event)"
+    [checked]="disableHidpi">Disable HiDPI browser scale override. <span class="reload" [class.highlight]="disableHidpiChanged" (click)="reload($event)">Reload to apply</span>
+  </mat-slide-toggle>
 </sm-card>
 <sm-card header="App Credentials" *smCheckPermission="'manageAppCredentials'">
   <div>
@@ -12,7 +18,7 @@
                                  (credentialRevoked)="onCredentialRevoked($event)">
       </sm-admin-credential-table>
       <button class="btn btn-primary btn-token pointer new-credentials" (click)="createCredential()">
-        <i class="i-plus-blue sm icon"> </i>&nbsp; Create new credentials
+        <i class="al-icon al-color blue-400 msm al-ico-plus"> </i>&nbsp; Create new credentials
       </button>
     </div>
   </div>

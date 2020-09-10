@@ -1,12 +1,11 @@
 import {createSelector} from '@ngrx/store';
-import {ExperimentTableColFieldsEnum, ITableExperiment} from '../shared/common-experiment-model.model';
+import {ITableExperiment} from '../shared/common-experiment-model.model';
 import {TableSortOrderEnum} from '../../shared/ui-components/data/table/table.consts';
-import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {experimentInfo, experimentOutput, experimentsView, selectExperimentInfoData, selectSelectedExperiment} from '../../../features/experiments/reducers';
 import {IExperimentInfo, ISelectedExperiment} from '../../../features/experiments/shared/experiment-info.model';
 import {experimentSectionsEnum} from '../../../features/experiments/shared/experiments.const';
 import {IExperimentSettings} from './common-experiment-output.reducer';
-import {get} from 'lodash/fp';
+import {get, getOr} from 'lodash/fp';
 import {TaskStatusEnum} from '../../../business-logic/model/tasks/taskStatusEnum';
 import {IExecutionForm} from '../../../features/experiments/shared/experiment-execution.model';
 import {ExperimentsViewModesEnum} from '../shared/common-experiments.const';
@@ -15,12 +14,16 @@ import {IHyperParamsForm} from '../shared/experiment-hyper-params.model';
 import {ScalarKeyEnum} from '../../../business-logic/model/events/scalarKeyEnum';
 import {IExperimentModelInfo} from '../shared/common-experiment-model.model';
 import {selectSelectedProjectId} from '../../core/reducers/projects.reducer';
+import {ParamsItem} from '../../../business-logic/model/tasks/paramsItem';
+import {selectRouterParams} from '../../core/reducers/router-reducer';
+import {map} from 'rxjs/operators';
 
 export const selectExperimentsList = createSelector(experimentsView, (state): ITableExperiment[] => state.experiments);
 export const selectSelectedTableExperiment = createSelector(experimentsView, (state): ITableExperiment => state.selectedExperiment);
 
 export const selectExperimentsTableCols = createSelector(experimentsView, (state): Array<any> => state.tableCols);
 export const selectExperimentsUsers = createSelector(experimentsView, (state): Array<any> => state.users);
+export const selectExperimentsTags = createSelector(experimentsView, (state): Array<string> => state.projectTags);
 export const selectExperimentsTypes = createSelector(experimentsView, (state): Array<any> => state.types);
 
 export const selectExperimentsTableColsOrder = createSelector([experimentsView, selectSelectedProjectId], (state, projectId): string[] => (state.colsOrder && projectId) ? state.colsOrder[projectId] : undefined);
@@ -44,9 +47,10 @@ export const selectIsSelectedExperimentInDev = createSelector(experimentInfo, (s
 export const selectIsExperimentSaving = createSelector(experimentInfo, (state): boolean => state.saving);
 export const selectIsExperimentInEditMode = createSelector(experimentInfo, (state): boolean => !!state.activeSectionEdit);
 
-export const selectExperimentLog = createSelector(experimentOutput, (state): Array<any> => state.experimentLog);
+export const selectExperimentLog = createSelector(experimentOutput, (state) => state.experimentLog);
+export const selectExperimentBeginningOfLog = createSelector(experimentOutput, (state) => state.beginningOfLog);
 export const selectExperimentInfoPlots = createSelector(experimentOutput, (state) => state.metricsPlotsCharts);
-export const selectExperimentInfoHistograms = createSelector(experimentOutput, (state) => state.metricsHistogramCharts);
+export const selectExperimentHistogramCacheAxisType = createSelector(experimentOutput, (state) => state.cachedAxisType);
 export const selectExperimentMetricsSearchTerm = createSelector(experimentOutput, (state) => state.searchTerm);
 export const selectHyperParamsVariants = createSelector(experimentsView, (state): Array<any> => state.hyperParams);
 
@@ -54,7 +58,7 @@ export const selectExperimentUserKnowledge = createSelector(experimentInfo,
   (state): Map<experimentSectionsEnum, boolean> => state.userKnowledge);
 
 export const selectLogFilter = createSelector(experimentOutput, (state) => state.logFilter);
-export const selectLogScrollID = createSelector(experimentOutput, (state) => state.logScrollID);
+export const selectTotalLogLines = createSelector(experimentOutput, (state) => state.totalLogLines);
 
 export const selectShowSettings = createSelector(experimentOutput, (state) => state.showSettings);
 export const selectSelectedExperimentSettings = createSelector(experimentOutput, selectSelectedExperiment,
@@ -78,5 +82,46 @@ export const selectExperimentExecutionInfoData = createSelector(selectExperiment
   (info: IExperimentInfo): IExecutionForm => get('execution', info));
 
 export const selectExperimentHyperParamsInfoData = createSelector(selectExperimentInfoData,
-  (info: IExperimentInfo): IHyperParamsForm => get('hyperParams', info));
+  (info: IExperimentInfo): IExperimentInfo['hyperparams'] => info?.hyperparams);
 
+export const selectExperimentConfiguration = createSelector(selectExperimentInfoData,
+  (info: IExperimentInfo): IExperimentInfo['configuration'] => info?.configuration);
+
+export const selectExperimentHyperParamsSelectedSectionFromRoute = createSelector(selectRouterParams,
+  (params): string => get('hyperParamId', params));
+
+export const selectExperimentSelectedConfigObjectFromRoute = createSelector(selectRouterParams,
+  (params): string => get('configObject', params));
+
+
+export const selectSelectedExperimentFromRouter = createSelector(selectRouterParams,
+  (params): string => get('experimentId', params));
+
+export const selectExperimentConfigObj =
+  createSelector(selectExperimentConfiguration, selectExperimentSelectedConfigObjectFromRoute,
+    (configuration: IExperimentInfo['configuration'], configObj: string): any =>getOr(null,configObj, configuration ) );
+
+
+
+export const selectExperimentHyperParamsSelectedSectionParams =
+  createSelector(selectExperimentHyperParamsInfoData, selectExperimentHyperParamsSelectedSectionFromRoute,
+    (hyperparams: IExperimentInfo['hyperparams'], section: string): ParamsItem[] => Object.entries(getOr({},section,hyperparams)).map(([key, value]) => value));
+
+
+export const selectExperimentInfoHistograms = createSelector(
+  selectSelectedSettingsxAxisType,
+  experimentOutput,
+  (axisType, state) => {
+    if (axisType === ScalarKeyEnum.IsoTime) {
+      return Object.keys(state.metricsHistogramCharts).reduce((groupAcc, groupName) => {
+        const group = state.metricsHistogramCharts[groupName];
+        groupAcc[groupName] = Object.keys(group).reduce((graphAcc, graphName) => {
+          const graph = group[graphName];
+          graphAcc[graphName] = {...graph, x: graph.x.map(ts => new Date(ts))};
+          return graphAcc;
+        }, {});
+        return groupAcc;
+      }, {});
+    }
+    return state.metricsHistogramCharts;
+  });

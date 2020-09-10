@@ -20,7 +20,16 @@ export interface ExperimentDetailBase {
   tags?: string[];
 }
 
-
+export interface ExperimentParams {
+  id?: Task['id'];
+  name?: string;
+  status?: Task['status'];
+  last_iteration?: Task['last_iteration'];
+  last_update?: Task['last_update'];
+  project?: Project;
+  hyperparams?: any[];
+  tags?: string[];
+}
 
 export interface ModelDetails {
   model?: ModelDetailsInput;
@@ -53,7 +62,6 @@ export interface ExecutionDetails {
     script_path?: string; // Script.entry_point;
     branch?: string; // Script.branch;
   };
-  parameters?: { [key: string]: any };
   uncommitted_changes?: { [key: string]: any };
   installed_packages?: { [key: string]: any };
   base_docker_image?: { [key: string]: any };

@@ -1,6 +1,7 @@
 import {Project} from '../../../business-logic/model/projects/project';
 import {createFeatureSelector, createSelector} from '@ngrx/store';
 import {CREATE_PROJECT_ACTIONS} from './project-create-dialog.actions';
+import {sortBy} from 'lodash/fp';
 
 export type CreationStatusEnum = 'success' | 'failed' | 'inProgress';
 export const CREATION_STATUS = {
@@ -28,7 +29,7 @@ export function projectCreateDialogReducer<ActionReducer>(state: ICreateProjectD
     case CREATE_PROJECT_ACTIONS.SET_CREATION_STATUS:
       return {...state, creationStatus: action.payload.creationStatus};
     case CREATE_PROJECT_ACTIONS.SET_PROJECTS:
-      return {...state, projects: action.payload.projects};
+      return {...state, projects: sortBy('name', action.payload.projects)};
     case CREATE_PROJECT_ACTIONS.RESET_STATE:
       return {...createProjectInitState};
     default:

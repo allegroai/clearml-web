@@ -16,7 +16,6 @@ export class CommonExperimentConverterService {
   }
 
   convertCommonExperiment(experimentInfo: IExperimentInfo, selectedExperiment: ISelectedExperiment, experimentInfoBeforeChange: IExperimentInfo): TasksEditRequest {
-
     const convertedExperiment: TasksEditRequest = {
       task: selectedExperiment.id,
       type: selectedExperiment.type,
@@ -40,14 +39,9 @@ export class CommonExperimentConverterService {
 
   }
 
-  commonConvertExecution(execution: IExecutionForm, model: IExperimentModelInfo,
-                         hyperParams: IHyperParamsForm): Execution {
+  commonConvertExecution(execution: IExecutionForm, model: IExperimentModelInfo): Execution {
     return {
-      parameters: this.convertParams(hyperParams),
       model     : getOr(<string>null, 'input.id', model),
-      model_desc: {
-        design: getOr('', 'prototext', model)
-      },
       framework : get('input.framework', model),
       docker_cmd: get('docker_cmd', execution)
     };
@@ -75,15 +69,6 @@ export class CommonExperimentConverterService {
       case sourceTypesEnum.VersionNum:
         return {[sourceTypesEnum.Branch]: source.branch, [sourceTypesEnum.Tag]: source.tag, [sourceTypesEnum.VersionNum]: source.version_num};
     }
-  }
-
-  convertParams(parameters: IHyperParamsForm): Execution['parameters'] {
-    return parameters.parameters.reduce((acc, cur) => {
-      if (cur.key) {
-        acc[cur.key] = cur.label;
-      }
-      return acc;
-    }, {});
   }
 
   private convertRequirments(requirements: any) {

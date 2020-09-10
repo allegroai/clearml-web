@@ -2,6 +2,8 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {ISelectedExperiment} from '../../../../features/experiments/shared/experiment-info.model';
 import {TIME_FORMAT_STRING} from '../../../constants';
+import {ActivateEdit, DeactivateEdit} from '../../../../features/experiments/actions/experiments-info.actions';
+import {Store} from '@ngrx/store';
 
 @Component({
   selector   : 'sm-experiment-general-info',
@@ -9,6 +11,7 @@ import {TIME_FORMAT_STRING} from '../../../constants';
   styleUrls  : ['./experiment-general-info.component.scss']
 })
 export class ExperimentGeneralInfoComponent {
+  constructor(private store: Store<any>) {}
 
   commentControl = new FormControl();
 
@@ -37,6 +40,13 @@ export class ExperimentGeneralInfoComponent {
 
   commentValueChanged(value) {
     this.commentChanged.emit(value);
+  }
+  editExperimentComment(edit) {
+    if (edit) {
+      this.store.dispatch(new ActivateEdit('ExperimentComment'));
+    } else {
+      this.store.dispatch(new DeactivateEdit());
+    }
   }
 
 }

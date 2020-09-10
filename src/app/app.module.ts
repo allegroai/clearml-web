@@ -16,39 +16,42 @@ import {ApiUsersService} from './business-logic/api-services/users.service';
 import {loadUserAndPreferences} from './webapp-common/user-preferences';
 import {AdminModule} from './webapp-common/admin/admin.module';
 import {AngularSplitModule} from 'angular-split';
-import {NotifierModule} from 'angular-notifier';
+import {NotifierModule} from './webapp-common/angular-notifier';
 import {LayoutModule} from './layout/layout.module';
 import {ColorHashService} from './webapp-common/shared/services/color-hash/color-hash.service';
-import {LoginModule} from './webapp-common/login/login.module';
 import {LoginService} from './webapp-common/shared/services/login.service';
 import {Store} from '@ngrx/store';
-import {TitleCasePipe} from '@angular/common';
+import {SharedModule} from './shared/shared.module';
 
 @NgModule({
   declarations   : [AppComponent],
-  imports        : [
+  imports: [
     FormsModule,
     BrowserAnimationsModule,
     BrowserModule,
     SMCoreModule,
     BusinessLogicModule,
     SMSharedModule,
-    LoginModule,
     AngularSplitModule.forRoot(),
-    RouterModule.forRoot(routes, {preloadingStrategy: PreloadAllModules, scrollPositionRestoration: 'top', onSameUrlNavigation: 'reload'}),
+    RouterModule.forRoot(routes, {
+      preloadingStrategy: PreloadAllModules,
+      scrollPositionRestoration: 'top',
+      onSameUrlNavigation: 'reload'
+    }),
     AdminModule,
     NotifierModule.withConfig({
-      theme    : 'material',
+      theme: 'material',
       behaviour: {
         autoHide: {default: 5000, error: false}
       },
-      position : {
-        vertical  : {position: 'top', distance: 12, gap: 10},
+      position: {
+        vertical: {position: 'top', distance: 12, gap: 10},
         horizontal: {position: 'right', distance: 12}
       }
     }),
     CommonLayoutModule,
     LayoutModule,
+    SharedModule,
   ],
   providers      : [
     {
@@ -65,19 +68,4 @@ import {TitleCasePipe} from '@angular/common';
   exports        : []
 })
 
-export class AppModule {
-
-  constructor() {
-
-    // store.select(selectRouter)
-    // // .filter(state => !state.skipNextNavigation)
-    //   .subscribe(state => {
-    //     this.store.dispatch(new ResetDontShowAgainForBucketEndpoint());
-    //     (!state.params || !state.url) ?
-    //       this.router.navigateByUrl(state.url, { queryParams: { unGuard: state.unGuard } }) :
-    //       this.router.navigate([state.url, state.params], { queryParams: { unGuard: state.unGuard } });
-    //   });
-
-  }
-
-}
+export class AppModule {}

@@ -5,7 +5,7 @@ import {isEmpty, isEqual} from 'lodash/fp';
 
 @Directive()
 export class ImmutableFormField implements OnInit, OnDestroy, ImmutableForm {
-  private _formData;
+  protected _formData;
 
   @Input() set formData(formData: any) {
     this._formData = formData;

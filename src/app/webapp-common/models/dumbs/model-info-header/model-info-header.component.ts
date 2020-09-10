@@ -9,6 +9,7 @@ import { removeTag, addTag } from '../../actions/models-menu.actions';
 import {ISelectedModel, ITableModel} from '../../shared/models.model';
 import {MenuComponent} from '../../../shared/ui-components/panel/menu/menu.component';
 import {getSysTags} from '../../model.utils';
+import {ActivateModelEdit, CancelModelEdit} from '../../actions/models-info.actions';
 
 @Component({
   selector   : 'sm-model-info-header',
@@ -28,17 +29,17 @@ export class ModelInfoHeaderComponent {
   @ViewChild('tagMenu') tagMenu: MenuComponent;
   @ViewChild('tagsMenuContent') tagMenuContent: TagsMenuComponent;
 
-  constructor(private store: Store) {
+  constructor(private store: Store<any>) {
     this.tags$ = this.store.select(selectProjectTags);
   }
 
-  private _model: Model;
+  private _model: Model | ITableModel | ISelectedModel;
 
   get model() {
     return this._model;
   }
 
-  @Input() set model(model: Model) {
+  @Input() set model(model: Model | ITableModel | ISelectedModel) {
     this._model = model;
     this.viewId = false;
     this.sysTags = getSysTags(model as ITableModel);
@@ -49,6 +50,9 @@ export class ModelInfoHeaderComponent {
   }
 
   openTagMenu(event: MouseEvent) {
+    if (!this.tagMenu) {
+      return;
+    }
     this.store.dispatch(getTags());
     this.tagMenu.position = {x: event.clientX, y: event.clientY};
     window.setTimeout(() => {
@@ -67,5 +71,13 @@ export class ModelInfoHeaderComponent {
 
   tagsMenuClosed() {
     this.tagMenuContent.clear();
+  }
+
+  editExperimentName(edit: boolean) {
+    if (edit) {
+      this.store.dispatch(new ActivateModelEdit('ModelName'));
+    } else {
+      this.store.dispatch(new CancelModelEdit());
+    }
   }
 }

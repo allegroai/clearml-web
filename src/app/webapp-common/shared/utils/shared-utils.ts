@@ -52,8 +52,15 @@ export const isSourceVideo = (source) => {
 };
 
 export function isHtmlPage(url: string) {
-  const path = url.split('?')[0];
-  return ['html', 'htm'].includes(last(path.split('.')));
+  const parsed = new URL(url);
+  const ext = last(parsed.pathname.split('.'));
+  return ['html', 'htm'].includes(ext);
+}
+
+export function isTextFileURL(url: string) {
+  const parsed = new URL(url);
+  const ext = last(parsed.pathname.split('.'));
+  return ['txt', 'text'].includes(ext);
 }
 
 export function createModelLink(uri, modelId, modelSignedUri) {
@@ -189,3 +196,39 @@ export function findRegexRecursively(object, field: string, regex: RegExp) {
   }
   return false;
 }
+
+export function groupHyperParams(hyperParams: any[]) {
+  return hyperParams.reduce((acc, {section, name, value}) => {
+    acc[section] = acc[section] || {};
+    acc[section][name] = acc[section][name] || {};
+    acc[section][name] = value;
+    return acc;
+  }, {});
+}
+export function getScaleFactor() {
+  const is_mac = (navigator.platform.indexOf('Mac') !== -1 || navigator.platform.indexOf('iPad') !== -1);
+  const is_win = navigator.platform.indexOf('Win') !== -1;
+  let dimensionRatio = 100;
+  let screenHeight: number;
+
+  try {
+    if (is_win) {
+      if (window['chrome']) {
+        screenHeight = window.screen.height < window.screen.width ? window.screen.height : window.screen.width;
+        dimensionRatio = Math.max(60, Math.min(100, Math.round((100 * (screenHeight / 1080) / 10)) * 10));
+
+      }
+    } else if (is_mac) {
+      screenHeight = (window.screen.height < window.screen.width ? window.screen.height : window.screen.width);
+      if (!window['chrome']) {
+        screenHeight *= devicePixelRatio / 2;
+      }
+      dimensionRatio = Math.max(60, Math.min(100, Math.round((100 * (screenHeight / 1080) / 10)) * 10));
+    }
+  } catch (err) {
+    dimensionRatio = 100;
+  }
+  dimensionRatio = 10000 / dimensionRatio;
+  return dimensionRatio;
+}
+

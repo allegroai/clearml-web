@@ -1,5 +1,4 @@
 <sm-compare-card-list
-  #cardList
   [experiments]="experiments"
   [baseExperiment]="baseExperiment"
   [ngClass]="calculatingTree ? 'pending' : ''"
@@ -30,7 +29,8 @@
                      [class.selected-diff]="checkIfSelectedPath(node.data)"
                      [class.identical-row]="!allPaths[node.data.path]">
                   <i class="fas" [style.margin-left.px]="2 + node.level * 20" [ngClass]="treeControl.isExpanded(node) ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
-                  <span>{{node.data.key | prettifyTitleKeyPipe}}</span>
+                  <span class="title-key" [class.ellipsis]="showEllipsis">{{(RENAME_MAP[node.data.key] || node.data.key) | hideHashTitle}}</span>
+                  <i *ngIf="node.metaData.tooltip" class="al-icon sm al-ico-description node-icon" customClass="hyper-parameters-tooltip" [smTooltip]="node.metaData.tooltip"></i>
                 </div>
               </div>
               <div *ngIf="!node.hasChildren" class="section" (click)="keyClicked(node.data, $event)">
@@ -45,8 +45,12 @@
                   'hide-identical-mode': hideIdenticalFields
                 }">
                   <div>
-                    <!--                    TODO: check if we can remove "node.data.existOnCompared" and show no keys when no values-->
-                    <pre *ngIf="(node.data.value !== undefined) || (node.data.existOnOrigin && node.data.existOnCompared)">{{node.data.key  | hideHash}}{{node.data.value}}</pre>
+                    <pre *ngIf="(node.data.value !== undefined) || (node.data.existOnOrigin && node.data.existOnCompared)"
+                         [class.no-ellipsis]="((node.data.key | hideHash) + node.data.value).length < 51"
+                         [class.with-ellipsis]="showEllipsis"
+                         [style.width.px]="showEllipsis? 410 - node.level * 20 : null"
+                    >{{node.data.key | hideHash}}{{node.data.value}}<i class="al-icon sm al-ico-line-expand extend-toggle" [class.fa-rotate-180]="!showEllipsis" (click)="toggleEllipsis(); $event.stopPropagation()"></i>
+                    </pre>
                   </div>
                 </div>
               </div>

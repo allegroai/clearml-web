@@ -24,6 +24,7 @@ export const EXPERIMENT_INFO_ONLY_FIELDS = [
   'output.model.project',
   'output.model.design',
   'output.model.uri',
+  'hyperparams',
   'execution',
   'execution.model.name',
   'execution.model.uri',
@@ -32,11 +33,19 @@ export const EXPERIMENT_INFO_ONLY_FIELDS = [
   'execution.model.task.project.id',
   'execution.model.project.id',
   'execution.model.labels',
-  'script',
+  'execution.model.design',
+  'script.binary',
+  'script.repository',
+  'script.tag',
+  'script.branch',
+  'script.version_num',
+  'script.entry_point',
+  'script.working_dir',
+  'script.requirements',
   'system_tags',
   'published',
   'last_iteration',
-  'tags'
+  'tags',
 ];
 
 export const INITIAL_EXPERIMENT_TABLE_COLS: ISmCol[] = [
@@ -98,6 +107,7 @@ export const INITIAL_EXPERIMENT_TABLE_COLS: ISmCol[] = [
     },
   {
     id              : EXPERIMENTS_TABLE_COL_FIELDS.USER,
+    getter          : 'user.name',
     headerType      : ColHeaderTypeEnum.sortFilter,
     searchableFilter: true,
     filterable      : true,

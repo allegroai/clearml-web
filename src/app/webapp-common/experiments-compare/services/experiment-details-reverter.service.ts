@@ -9,6 +9,7 @@ import {Task} from '../../../business-logic/model/tasks/task';
 import {ExperimentDetailsReverterServiceBase} from '../../../features/experiments-compare/experiment-details-reverter-service.base';
 import {ARTIFACTS_TYPES} from '../../tasks/tasks.constants';
 import {Artifact} from '../../../business-logic/model/tasks/artifact';
+import {crc32} from '../../shared/utils/shared-utils';
 
 @Injectable({
   providedIn: 'root'
@@ -38,18 +39,17 @@ export class ExperimentDetailsReverterService extends ExperimentDetailsReverterS
   }
 
   revertAuditLog(artifact: Artifact): any {
-    const {uri, content_size, hash, timestamp, display_data, type_data, ...restArtifact} = artifact;
+    const {uri, content_size, hash, timestamp, display_data, mode, key, type_data, ...restArtifact} = artifact;
     const result = {
       ...restArtifact,
-      'file path': uri,
       'file size': content_size,
       'file hash': hash,
-      'timestamp': timestamp
     };
 
     if (type_data) {
+      const preview  = type_data.preview && type_data.preview.trim().split('\n') || [];
       result['content type'] = type_data['content_type'] || '';
-      result['preview'] = type_data.preview && type_data.preview.trim().split('\n') || [];
+      result['preview'] = (preview.length < 3000 && preview[0]?.length < 3000) ? preview : [`** Content is too large to display. Hash: ${crc32(type_data.preview)}`];
       result['data hash'] = type_data.data_hash || '';
     }
     display_data.forEach(pair => result[pair[0]] = pair[1]);
@@ -67,26 +67,27 @@ export class ExperimentDetailsReverterService extends ExperimentDetailsReverterS
   revertModel(experiment: ISelectedExperiment): ModelDetails {
     return {
       model: this.revertModelInput(experiment.execution),
-      network_design: this.revertNetworkDesign(experiment.execution),
+      network_design: this.revertNetworkDesign(experiment.execution.model),
     };
   }
 
-  revertNetworkDesign(execution) {
-    let networkDesign = get('design.design', execution) || get('model_desc.design', execution) || get('model_desc.prototxt', execution);
+  revertNetworkDesign(model): string {
+    let networkDesign = get('design.design', model) || get('design', model);
     networkDesign = typeof networkDesign === 'string' ? networkDesign.split('\n') : {};
     return networkDesign;
   }
 
   revertExecution(experiment: ISelectedExperiment): ExecutionDetails {
     let pip = get('script.requirements.pip', experiment);
-    let diff = get('script.diff', experiment);
     pip = (pip === undefined || Array.isArray(pip)) ? pip : pip.split('\n');
     pip = pip?.filter(row => !row.startsWith('#') && row.length > 0); // Should we remove comments????
 
-    diff = (!diff || Array.isArray(diff)) ? diff : diff.split('\n');
-
-    let base_docker_image = get('execution.docker_cmd', experiment) || '';
-    // base_docker_image = base_docker_image ? {'': base_docker_image} : undefined;
+    let diff = get('script.diff', experiment);
+    if (diff) {
+      diff = (Array.isArray(diff)) ? diff : diff.split('\n');
+      diff = (diff.length < 3000 && diff[0]?.length < 3000) ? diff : [`** Content is too large to display. Hash: ${crc32(get('script.diff', experiment))}`];
+    }
+    const base_docker_image = get('execution.docker_cmd', experiment) || '';
 
     return {
       source: experiment.script ? this.revertExecutionSource(experiment.script) : undefined,
@@ -114,7 +115,7 @@ export class ExperimentDetailsReverterService extends ExperimentDetailsReverterS
       script_path: script.entry_point,
       branch: script.branch,
       commit_id: script.version_num,
-      tag_name: script.tag
+      tag_name: script.tag || '' // In tag_name we want undefined == null == ""
     };
   }
 

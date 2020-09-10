@@ -1,7 +1,7 @@
 import {Component, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {SetBackdrop} from '../../../../core/actions/layout.actions';
-import { MatDialog } from '@angular/material/dialog';
+import {MatDialog} from '@angular/material/dialog';
 
 @Component({
   selector   : 'sm-editable-section',
@@ -11,7 +11,10 @@ import { MatDialog } from '@angular/material/dialog';
 export class EditableSectionComponent implements OnInit, OnDestroy {
   @Input() editable;
   @Input() disableEditable = false;
-  @Input() disableSave     = false;
+  @Input() disableSave = false;
+  @Input() disableInEditMode = false;
+  @Input() hideSaveButton = false;
+  @Input() containerClass = '';
 
   @Input() set saving(saving) {
     if (this._saving && !saving) {
@@ -26,8 +29,8 @@ export class EditableSectionComponent implements OnInit, OnDestroy {
     return this._saving;
   }
 
-  private _saving         = false;
-  @Output() saveClicked   = new EventEmitter();
+  private _saving = false;
+  @Output() saveClicked = new EventEmitter();
   @Output() cancelClicked = new EventEmitter();
 
   @Output() activateEditClicked = new EventEmitter();

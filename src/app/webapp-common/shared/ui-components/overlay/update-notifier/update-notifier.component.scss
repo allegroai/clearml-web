@@ -2,8 +2,8 @@
 
 .circle-container {
   position: fixed;
-  bottom: 40px;
-  left: 40px;
+  bottom: 36px;
+  left: 42px;
   z-index: 1000;
   opacity: 0;
   transition: opacity;
@@ -29,7 +29,7 @@
 .header-container {
   position: absolute;
   z-index: 999;
-  top: calc(100vh - 40px);
+  top: calc(100% - 40px);
   background-color: $neon-yellow-original-notgoodinchrome;
   width: 0;
   height: 15px;
@@ -66,12 +66,11 @@
     }
   }
 
-  //transition: all 0.6s;
-  //transition-delay: 0.6s;
   opacity: 0;
   align-items: center;
   justify-content: space-between;
   display: none;
+  padding: 0 6px;
 
   &.show {
     opacity: 1;

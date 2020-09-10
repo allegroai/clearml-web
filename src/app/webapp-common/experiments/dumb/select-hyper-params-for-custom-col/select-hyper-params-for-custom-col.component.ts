@@ -10,14 +10,14 @@ export class SelectHyperParamsForCustomColComponent {
 
   public metricsCols: string[];
 
-  @Input() hyperParams: string[];
+  @Input() hyperParams: {[section: string]: any[]};
   @Output() getMetricsToDisplay      = new EventEmitter();
   @Output() selectedHyperParamToShow = new EventEmitter();
   @Output() goBack                   = new EventEmitter();
   @Output() clearSelection           = new EventEmitter();
 
   @Input() set tableCols(tableCols) {
-    this.metricsCols = tableCols.map(tableCol => tableCol.id.replace('execution.parameters.',''));
+    this.metricsCols = tableCols.map(tableCol => tableCol.id.replace('hyperparams.',''));
   }
 
 

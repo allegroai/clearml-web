@@ -8,5 +8,6 @@ import {Component, Input} from '@angular/core';
 export class OverlayComponent {
 
   @Input() backdropActive;
+  @Input() transparent: boolean = false;
 
 }

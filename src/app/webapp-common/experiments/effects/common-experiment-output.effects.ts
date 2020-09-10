@@ -11,79 +11,82 @@ import {RequestFailed} from '../../core/actions/http.actions';
 import * as outputActions from '../actions/common-experiment-output.actions';
 import {ExperimentOutputState} from '../../../features/experiments/reducers/experiment-output.reducer';
 import {LOG_BATCH_SIZE} from '../shared/common-experiments.const';
-import {selectSelectedSettingsxAxisType, selectLogScrollID} from '../reducers';
+import {selectSelectedSettingsxAxisType} from '../reducers';
 import {REFRESH_EXPERIMENTS} from '../actions/common-experiments-view.actions';
 import {EventsGetTaskLogResponse} from '../../../business-logic/model/events/eventsGetTaskLogResponse';
 import {HTTP} from '../../../app.constants';
 import {ScalarKeyEnum} from '../../../business-logic/model/events/scalarKeyEnum';
+import {selectCompareHistogramCacheAxisType} from '../../experiments-compare/reducers';
+import {EXPERIMENT_PLOTS_REQUESTED} from '../actions/common-experiment-output.actions';
 
 
 @Injectable()
 export class CommonExperimentOutputEffects {
   @Effect()
   activeLoader = this.actions$.pipe(
-    ofType(outputActions.CHANGE_PROJECT_REQUESTED, outputActions.GET_EXPERIMENT_LOG),
+    ofType(outputActions.CHANGE_PROJECT_REQUESTED, outputActions.getExperimentLog, outputActions.EXPERIMENT_SCALAR_REQUESTED, outputActions.EXPERIMENT_PLOTS_REQUESTED),
+    filter(action => !action?.['from']),
     map(action => new ActiveLoader(action.type))
   );
 
   @Effect()
   getLog$ = this.actions$.pipe(
-    ofType<outputActions.GetExperimentLog>(outputActions.GET_EXPERIMENT_LOG),
-    withLatestFrom(this.store.select(selectLogScrollID)),
-    flatMap(([action, logScrollID]) => this.eventsApi.eventsGetTaskLog({
-      task      : action.payload,
-      order     : 'asc',
-      from      : 'tail',
-      batch_size: LOG_BATCH_SIZE,
-      // scroll_id: logScrollID
-    }).pipe(
-      flatMap((res: EventsGetTaskLogResponse) => [
-        new outputActions.SetExperimentLog(res.events, res.scroll_id),
-        new DeactiveLoader(action.type),
-        new DeactiveLoader(REFRESH_EXPERIMENTS)
-      ]),
-      catchError(error => [
-        new RequestFailed(error),
-        new DeactiveLoader(action.type),
-        new DeactiveLoader(REFRESH_EXPERIMENTS),
-        new SetServerError(error, null, 'Failed to fetch log')
-      ])
-    ))
+    ofType(outputActions.getExperimentLog),
+    switchMap((action) =>
+      this.eventsApi.eventsGetTaskLog({
+        task: action.id,
+        batch_size: LOG_BATCH_SIZE,
+        navigate_earlier: action.direction !== 'next',
+        from_timestamp: action.refresh ? null : action.from,
+      }).pipe(
+        flatMap((res: EventsGetTaskLogResponse) => [
+          outputActions.setExperimentLog({
+            events: res.events,
+            total: res.total,
+            direction: action.direction,
+            refresh: action.refresh
+          }),
+          new DeactiveLoader(action.type),
+          new DeactiveLoader(REFRESH_EXPERIMENTS)
+        ]),
+        catchError(error => [
+          new RequestFailed(error),
+          new DeactiveLoader(action.type),
+          new DeactiveLoader(REFRESH_EXPERIMENTS),
+          new SetServerError(error, null, 'Failed to fetch log')
+        ])
+      )
+    )
   );
 
   @Effect()
   fetchExperimentScalar$ = this.actions$.pipe(
     ofType<outputActions.ExperimentScalarRequested>(outputActions.EXPERIMENT_SCALAR_REQUESTED),
     debounceTime(200),
-    withLatestFrom(this.store.select(selectSelectedSettingsxAxisType)),
-    switchMap(([action, axisType]) =>
-      this.eventsApi.eventsScalarMetricsIterHistogram({task: action.payload, key: axisType === ScalarKeyEnum.IsoTime ? ScalarKeyEnum.Timestamp : axisType})
+    withLatestFrom(this.store.select(selectSelectedSettingsxAxisType), this.store.select(selectCompareHistogramCacheAxisType)),
+    switchMap(([action, axisType, prevAxisType]) => {
+      if ([ScalarKeyEnum.IsoTime, ScalarKeyEnum.Timestamp].includes(prevAxisType) &&
+        [ScalarKeyEnum.IsoTime, ScalarKeyEnum.Timestamp].includes(axisType)) {
+        return [
+          new DeactiveLoader(REFRESH_EXPERIMENTS),
+          new DeactiveLoader(action.type)
+        ];
+      }
+
+      return this.eventsApi.eventsScalarMetricsIterHistogram({task: action.payload, key: axisType === ScalarKeyEnum.IsoTime ? ScalarKeyEnum.Timestamp : axisType})
         .pipe(
-          flatMap(res => {
-            if (axisType === ScalarKeyEnum.IsoTime) {
-              res = Object.keys(res).reduce((groupAcc, groupName) => {
-                const group = res[groupName];
-                groupAcc[groupName] = Object.keys(group).reduce((graphAcc, graphName) => {
-                  const graph = group[graphName];
-                  graphAcc[graphName] = {...graph, x: graph.x.map(ts => new Date(ts))};
-                  return graphAcc;
-                }, {});
-                return groupAcc;
-              }, {});
-            }
-            return [
-              new outputActions.SetExperimentHistogram(res),
-              new DeactiveLoader(REFRESH_EXPERIMENTS),
-              new DeactiveLoader(action.type)
-            ];
-          }),
+          flatMap(res => [
+            new outputActions.SetExperimentHistogram(res, axisType),
+            new DeactiveLoader(REFRESH_EXPERIMENTS),
+            new DeactiveLoader(action.type)
+          ]),
           catchError(error => [
             new RequestFailed(error),
             new DeactiveLoader(action.type),
             new DeactiveLoader(REFRESH_EXPERIMENTS),
             new SetServerError(error, null, 'Failed to get Scalar Charts')
           ])
-        )
+        );}
     )
   );
 

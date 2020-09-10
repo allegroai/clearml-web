@@ -71,6 +71,9 @@ $header-height: 45px;
     }
   }
 
+  .compact-columns-data {
+    color: $blue-250;
+  }
 }
 
 /deep/ sm-models footer.d-flex.justify-content-center {

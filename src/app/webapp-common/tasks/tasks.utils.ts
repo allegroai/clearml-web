@@ -44,9 +44,20 @@ export function mergeTasks(tableTask, task) {
 }
 
 
-export function getModelDesign(modelDesc: Task['execution']['model_desc']) {
-  const modelStr = typeof modelDesc == 'string' ? modelDesc : '';
-  return get('design', modelDesc) || get('prototxt', modelDesc) || modelStr;
+export function getModelDesign(modelDesc: Task['execution']['model_desc']): { key: string, value: any } {
+  const key = getModelDesignKey(modelDesc);
+  return{key: key, value: key ? modelDesc[key] : modelDesc};
+}
+
+function getModelDesignKey(modelDes): string {
+  const modelStr = typeof modelDes == 'string';
+  if (!modelDes || modelStr) {
+    return undefined;
+  } else {
+    const desKeys = Object.keys(modelDes);
+    const firstNonEmptyKey = desKeys.find(key => !!modelDes[key]);
+    return firstNonEmptyKey ? firstNonEmptyKey : desKeys[0];
+  }
 }
 
 export function convertPlots(plots): { [key: string]: ExperimentGraph } {
@@ -63,16 +74,16 @@ export function convertPlots(plots): { [key: string]: ExperimentGraph } {
 
 export function prepareGraph(data: object, layout: object, config: object, graph): ExperimentGraph {
   return {
-    data: data,
-    layout: layout,
-    config: config,
-    iter: graph.iter,
-    metric: graph.metric,
-    task: graph.task,
+    data     : data,
+    layout   : layout,
+    config   : config,
+    iter     : graph.iter,
+    metric   : graph.metric,
+    task     : graph.task,
     timestamp: graph.timestamp,
-    type: graph.type,
-    variant: graph.variant,
-    worker: graph.worker,
+    type     : graph.type,
+    variant  : graph.variant,
+    worker   : graph.worker,
   };
 }
 
@@ -308,7 +319,7 @@ export function timeInWords(milliseconds, granularityLevel = 3) {
 }
 
 export function chooseTimeUnit(data) {
-  if (!data[0].x || !data[0].x[0] || !data[0].x[1]) {
+  if (!data[0]?.x || !data[0]?.x[0] || !data[0]?.x[1]) {
     return {time: 1000, str: 'Seconds'};
   }
   const first = data[0].x[0];
