@@ -15,7 +15,7 @@ export const MODELS_VIEW_MODES = {
   TREE : 'tree' as ModelsViewModesEnum,
 };
 
-export const MODELS_PAGE_SIZE = 11;
+export const MODELS_PAGE_SIZE = 15;
 export const MODELS_STORE_KEY = 'models';
 
 export const MODELS_PREFIX_INFO = 'MODELS_INFO_';
@@ -48,20 +48,6 @@ export const MODELS_TABLE_COLS: ISmCol[] = [
     disableDrag     : true
   },
   {
-    id          : MODELS_TABLE_COL_FIELDS.NAME,
-    headerType  : ColHeaderTypeEnum.sort,
-    sortable    : true,
-    header      : 'MODEL',
-  },
-  {
-    id        : MODELS_TABLE_COL_FIELDS.CREATED,
-    headerType: ColHeaderTypeEnum.sort,
-    sortable  : true,
-    header    : 'CREATED',
-    label     : 'Created',
-    style     : {width: '120px'}
-  },
-  {
     id          : MODELS_TABLE_COL_FIELDS.FRAMEWORK,
     headerType  : ColHeaderTypeEnum.sortFilter,
     sortable    : true,
@@ -70,13 +56,10 @@ export const MODELS_TABLE_COLS: ISmCol[] = [
     style       : {width: '140px'},
   },
   {
-    id          : MODELS_TABLE_COL_FIELDS.READY,
-    headerType  : ColHeaderTypeEnum.sortFilter,
+    id          : MODELS_TABLE_COL_FIELDS.NAME,
+    headerType  : ColHeaderTypeEnum.sort,
     sortable    : true,
-    filterable  : true,
-    header      : 'PUBLISHED',
-    hidden      : false,
-    style       : {width: '135px'},
+    header      : 'NAME',
   },
   {
     id          : MODELS_TABLE_COL_FIELDS.TAGS,
@@ -86,6 +69,20 @@ export const MODELS_TABLE_COLS: ISmCol[] = [
     searchableFilter: true,
     header      : 'TAGS',
     style       : {width: '240px'},
+  },
+  {
+    id          : MODELS_TABLE_COL_FIELDS.READY,
+    headerType  : ColHeaderTypeEnum.sortFilter,
+    sortable    : true,
+    filterable  : true,
+    header      : 'STATUS',
+    hidden      : false,
+    style       : {width: '135px'},
+  },
+  {
+    id          : MODELS_TABLE_COL_FIELDS.PROJECT,
+    header      : 'PROJECT',
+    style       : {width: '135px'}
   },
   {
     id              : MODELS_TABLE_COL_FIELDS.USER,
@@ -103,6 +100,14 @@ export const MODELS_TABLE_COLS: ISmCol[] = [
     sortable  : false,
     header    : 'TASK',
     style     : {width: '240px'}
+  },
+  {
+    id        : MODELS_TABLE_COL_FIELDS.CREATED,
+    headerType: ColHeaderTypeEnum.sort,
+    sortable  : true,
+    header    : 'CREATED',
+    label     : 'Created',
+    style     : {width: '120px'}
   },
   {
     id        : MODELS_TABLE_COL_FIELDS.COMMENT,

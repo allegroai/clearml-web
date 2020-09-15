@@ -1,4 +1,5 @@
 <sm-textarea-control
+  *ngIf="editable"
   #textarearef
   cols='60'
   [formData]="(formData || formData === 0) ? formData : ''"
@@ -13,3 +14,11 @@
   (input)="fieldValueChanged($event.target.value)"
   >
 </sm-textarea-control>
+<div *ngIf="!editable" class="design-container">
+  <cdk-virtual-scroll-viewport itemSize="19" minBufferPx = 400, maxBufferPx = 600
+                               class="viewport"
+                               [class.isReadonly]="!editable">
+    <div *cdkVirtualFor="let line of lines" class="line">{{line}}</div>
+  </cdk-virtual-scroll-viewport>
+</div>
+

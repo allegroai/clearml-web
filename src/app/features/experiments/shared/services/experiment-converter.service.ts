@@ -24,19 +24,18 @@ export class ExperimentConverterService {
 
     if (!isEqual(executionInfoNoOutputDest, executionInfoNoOutputDestBeforeChange) ||
       !isEqual(experimentInfo.model, experimentInfoBeforeChange.model) ||
-      !isEqual(experimentInfo.hyperParams, experimentInfoBeforeChange.hyperParams) ||
+      !isEqual(experimentInfo.hyperparams, experimentInfoBeforeChange.hyperparams) ||
       !isEqual(experimentInfo.model, experimentInfoBeforeChange.model)
     ) {
       convertedExperiment.execution = this.convertExecution(experimentInfo.execution,
-        experimentInfo.model, experimentInfo.hyperParams);
+        experimentInfo.model);
     }
     return convertedExperiment;
   }
 
-  convertExecution(execution: IExecutionForm, model: IExperimentModelInfo,
-                   hyperParams: IHyperParamsForm): Execution {
+  convertExecution(execution: IExecutionForm, model: IExperimentModelInfo): Execution {
     return {
-      ...this.commonExperimentConverterService.commonConvertExecution(execution, model, hyperParams),
+      ...this.commonExperimentConverterService.commonConvertExecution(execution, model),
     };
   }
 

@@ -14,12 +14,14 @@ import * as commonInfoActions from '../../../../webapp-common/experiments/action
 import * as infoActions from '../../actions/experiments-info.actions';
 import {AddMessage} from '../../../../webapp-common/core/actions/layout.actions';
 import {IExperimentInfo, ISelectedExperiment} from '../../shared/experiment-info.model';
+import {selectSelectedTableExperiment} from '../../../../webapp-common/experiments/reducers';
+import {ITableExperiment} from '../../../../webapp-common/experiments/shared/common-experiment-model.model';
 
 
 @Component({
-  selector   : 'sm-experiment-info',
+  selector: 'sm-experiment-info',
   templateUrl: './experiment-info.component.html',
-  styleUrls  : ['./experiment-info.component.scss']
+  styleUrls: ['./experiment-info.component.scss']
 })
 export class ExperimentInfoComponent implements OnInit, OnDestroy {
 
@@ -32,20 +34,22 @@ export class ExperimentInfoComponent implements OnInit, OnDestroy {
   public isExample: boolean;
   private projectId: string;
   private experimentId: string;
-  public showMaximize: boolean;
+  public resultsTab: boolean;
   public queryParams$: Observable<Params>;
   public routerConfig: string[];
   private routerConfigSubscription: Subscription;
+  public tableSelectedExperiment$: Observable<ITableExperiment>;
 
   constructor(
     private router: Router,
     private store: Store<IExperimentInfoState>,
     private route: ActivatedRoute
   ) {
-    this.editable$       = this.store.select(selectIsExperimentEditable);
-    this.infoData$       = this.store.select(selectExperimentInfoData);
+    this.editable$ = this.store.select(selectIsExperimentEditable);
+    this.infoData$ = this.store.select(selectExperimentInfoData);
     this.backdropActive$ = this.store.select(selectBackdropActive);
-    this.queryParams$    = this.store.select(selectRouterQueryParams);
+    this.queryParams$ = this.store.select(selectRouterQueryParams);
+    this.tableSelectedExperiment$ = this.store.select(selectSelectedTableExperiment)
 
   }
 
@@ -53,16 +57,17 @@ export class ExperimentInfoComponent implements OnInit, OnDestroy {
     this.selectedExperimentSubscription = this.store.select(selectSelectedExperiment)
       .subscribe(experiment => {
         this.selectedExperiment = experiment;
-        this.isExample          = isExample(experiment);
+        this.isExample = isExample(experiment);
       });
-    this.routerConfigSubscription       = this.store.select(selectRouterConfig).subscribe(routerConfig => {
+    this.routerConfigSubscription = this.store.select(selectRouterConfig).subscribe(routerConfig => {
       this.routerConfig = routerConfig;
     });
-    this.paramsSubscription             = this.store.select(selectRouterParams)
+
+    this.paramsSubscription = this.store.select(selectRouterParams)
       .pipe(
         tap((params) => {
-          this.projectId    = get('projectId', params);
-          this.showMaximize = 'info-output' === this.route.firstChild.routeConfig.path;
+          this.projectId = get('projectId', params);
+          this.resultsTab = 'info-output' === this.route.firstChild.routeConfig.path;
         }),
         debounceTime(150),
         map(params => get('experimentId', params)),
@@ -71,8 +76,12 @@ export class ExperimentInfoComponent implements OnInit, OnDestroy {
       )
       .subscribe(experimentId => {
         this.experimentId = experimentId;
-        this.store.dispatch(new commonInfoActions.ResetExperimentInfo());
-        this.store.dispatch(new commonInfoActions.GetExperimentInfo(experimentId));
+
+        // We already have GetExperimentInfo in output (results) component
+        if (!this.resultsTab) {
+          this.store.dispatch(new commonInfoActions.ResetExperimentInfo());
+          this.store.dispatch(new commonInfoActions.GetExperimentInfo(experimentId));
+        }
       });
   }
 
@@ -80,7 +89,7 @@ export class ExperimentInfoComponent implements OnInit, OnDestroy {
     this.paramsSubscription.unsubscribe();
     this.selectedExperimentSubscription.unsubscribe();
     this.routerConfigSubscription.unsubscribe();
-    this.store.dispatch(new commonInfoActions.SetExperiment(null));
+    // this.store.dispatch(new commonInfoActions.SetExperiment(null));
     this.store.dispatch(new commonInfoActions.ResetExperimentInfo());
   }
 

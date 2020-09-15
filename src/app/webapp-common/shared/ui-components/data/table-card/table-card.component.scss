@@ -1,23 +1,30 @@
 @import "../../styles/variables";
 
 .table-card {
-  padding: 15px 25px 15px 6px;
-  background-color: $blue-800;
+  padding: 15px 15px 15px 0;
+  min-height: 90px;
 
-  &.odd {
-    background-color: $blue-700;
+  &:hover {
+    background-color: $blue-650;
+  }
+
+  &.checked:not(.selected) {
+    background-color: $blue-500;
+    &:hover, &.contexted {
+      background-color: $blue-550;
+    }
   }
 
   &.selected {
-    background-color: $purple;
-  }
+    background-color: $blue-400;
 
-  /deep/ .created {
-    margin-left: 10px;
+    &:hover {
+      background-color: $blue-480;
+    }
   }
 
   /deep/ sm-experiment-status-icon-label {
-    margin-right: 10px;
+    width: 80px;
   }
 }
 

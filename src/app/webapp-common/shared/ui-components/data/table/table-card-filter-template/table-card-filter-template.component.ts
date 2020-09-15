@@ -1,5 +1,5 @@
 import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
-import {TABLE_SORT_ORDER} from '../table.consts';
+import {ISmCol, TABLE_SORT_ORDER} from '../table.consts';
 import {addOrRemoveFromArray} from '../../../../utils/shared-utils';
 import {MatMenuTrigger} from '@angular/material/menu';
 
@@ -25,9 +25,10 @@ export class TableCardFilterTemplateComponent {
 
   @Input() fixedOptionsSubheader;
   @Input() subValue: string[] = [];
-  @Input() subOptions: Array<{ label: string, value: string }>;
+  @Input() subOptions: {label: string; value: string}[];
+  @Input() options: { [col: string]: { label: string; value: string }[] };
+  @Input() columns: ISmCol[];
   @Output() subFilterChanged = new EventEmitter();
-  @Input() options: { [col: string]: Array<{ label: string, value: string }> };
   @Output() filterChanged = new EventEmitter();
   @Output() menuClosed = new EventEmitter();
   @Output() menuOpened = new EventEmitter();
@@ -71,5 +72,9 @@ export class TableCardFilterTemplateComponent {
   clearSearch(key: string) {
     this.searchTerms[key]='';
     this.setSearchTerm({target:{value:''}}, key)
+  }
+
+  getColName(id: string) {
+    return this.columns.find(col => col.id === id)?.header || id;
   }
 }

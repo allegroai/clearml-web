@@ -11,19 +11,21 @@ import {SelectModelHeaderComponent} from './select-model-header/select-model-hea
 import {CommonLayoutModule} from '../../layout/layout.module';
 import {CommonExperimentSharedModule} from '../../experiments/shared/common-experiment-shared.module';
 import {FeatureModelsModule} from '../../../features/models/feature-models.module';
+import {SharedModule} from '../../../shared/shared.module';
 
 const DECLERATIONS = [ModelTypeIconLabelComponent, ModelStatusIconLabelComponent, SelectModelHeaderComponent, ModelsTableComponent, ModelTagsComponent];
 
 @NgModule({
-  imports     : [
-    CommonExperimentSharedModule,
-    LayoutModule,
-    ExperimentSharedModule,
-    SMSharedModule,
-    CommonModule,
-    CommonLayoutModule,
-    FeatureModelsModule
-  ],
+    imports: [
+        CommonExperimentSharedModule,
+        LayoutModule,
+        ExperimentSharedModule,
+        SMSharedModule,
+        CommonModule,
+        CommonLayoutModule,
+        FeatureModelsModule,
+        SharedModule
+    ],
   declarations: DECLERATIONS,
   exports     : DECLERATIONS
 })

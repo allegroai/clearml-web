@@ -5,19 +5,57 @@
   height: $top-bar-height;
 
   .header-container {
+    display: flex;
     background-color: #141822;
     height: 100%;
-    padding: 0 24px;
+    padding: 0 12px 0 24px;
     align-items: center;
     justify-content: space-between;
+    .spacer{
+      min-width: 50px;
+    }
+
+    sm-breadcrumbs :not(.login){
+      width: 95%;
+    }
+
+
+    sm-common-search {
+      margin-right: 24px;
+    }
+
+    .item {
+      display: block;
+      width: 24px;
+      height: 24px;
+      background-color: $light-grey-blue;
+      color: #141822;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 24px;
+      &.neon {
+        background-color: $neon-yellow-betterinchrome;
+      }
+    }
+
+    .logout {
+      color: #141822;
+    }
   }
 
 
-  .logo-full{
+  .logo-full {
     display: flex;
-    position:relative;
-    left:50%;
-    transform: translateX(-50%);
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+    &.make-room-for-slogan {
+      justify-content: start;
+      .slogan{
+        padding: 12px;
+      }
+
+    }
   }
 
 }

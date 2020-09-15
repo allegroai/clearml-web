@@ -4,19 +4,22 @@
   </div>
   <div class="d-flex legend-container">
     <div *ngFor="let experiment of experiments" class="experiment-name">
-    <span class="dot-container">
-          <span #dot class="dot pallete-cursor"
-                [style.background-color]="experimentsColors[experiment.id]"
-                smChooseColor [colorButtonRef]="dot"
-                [defaultColor]="experimentsColors[experiment.id]"
-                [stringToColor]="experiment.id">
+      <span class="dot-container">
+        <span #dot class="dot pallete-cursor"
+              [style.background-color]="experimentsColors[experiment.id]"
+              smChooseColor [colorButtonRef]="dot"
+              [defaultColor]="experimentsColors[experiment.id]"
+              [stringToColor]="experiment.id">
+        </span>
       </span>
-  </span>
-      <div class="task-name" (click)="((experiments.length> filteredExperiments.length + 1) || experiment.hidden) && toggleHideExperiment(experiment.id)"
-           [ngClass]="{'hide':filteredExperiments.includes(experiment.id),
-           'pointer': (experiments.length> filteredExperiments.length + 1) || experiment.hidden}">
+      <span
+        class="task-name pointer"
+        (click)="toggleHideExperiment(experiment.id)"
+        (mouseover)="highlightExperiment(experiment)"
+        (mouseout)="removeHighlightExperiment()"
+        [class.hide]="experiment.hidden">
         {{experiment.name + (experiment.duplicateName ? ('.' + (experiment.id|slice:0:5)) : '')}}
-      </div>
+      </span>
     </div>
   </div>
 </div>

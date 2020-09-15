@@ -23,7 +23,7 @@
   &.show-table {
     height: auto;
     overflow: initial;
-    max-height: 500px;
+    max-height: 400px;
   }
 }
 
@@ -38,7 +38,7 @@
 :host {
   sm-select-experiments-for-compare-table {
     overflow: auto;
-    height: 500px;
+    max-height: 500px;
   }
 
   /deep/ .form-control.table-container footer.d-flex.justify-content-center {

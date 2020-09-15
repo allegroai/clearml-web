@@ -1,6 +1,6 @@
 @import "../../../layout/layout.scss";
 
-:host{
+:host {
   display: block;
   position: relative;
   height: $experiment-info-header-height;
@@ -11,17 +11,19 @@
   }
 
   .experiment-icon {
-    margin: 10px 20px 0 5px;
-    height: 37px;
-    width: 23px;
+    margin: 0px 20px 0 5px;
   }
-
+  .menu-container{
+    margin-right: 4px;
+  }
   .middle-col {
     width: calc(100% - 100px);
+
   }
-   .experiment-name {
+
+  .experiment-name {
     font-size: 15px;
-    min-height:24px;
+    min-height: 24px;
     font-weight: bold;
     max-width: 80ch;
     text-overflow: ellipsis;
@@ -30,7 +32,7 @@
   }
 
   .experiment-type {
-    width: 180px;
+    white-space: nowrap;
     font-size: 15px;
     margin-right: 12px;
   }
@@ -40,17 +42,29 @@
     position: relative;
     font-weight: bold;
   }
-  .id-icon{
+  .id-icon {
     width: 41px;
     height: 31px;
   }
   .edit-name {
-    margin-top:5px;
+    margin-top: 5px;
+    max-width: 100%;
   }
   .menu-button, .menu-button &:hover, .menu-button &:focus {
     cursor: pointer;
     font-weight: bold;
     font-size: 12px;
     text-decoration: none;
+  }
+  .btn.btn-icon:not([disabled]):hover {
+    filter: none;
+  }
+
+  .btn {
+    &:hover{
+      .al-icon.al-ico-info-min {
+        color: #212529;
+      }
+    }
   }
 }

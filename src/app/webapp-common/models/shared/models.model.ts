@@ -6,7 +6,7 @@ import {Project} from '../../../business-logic/model/projects/project';
 
 export type ModelTableColFieldsEnum = 'system_tags' | 'id' | 'project.name' | 'name' | 'created' | 'framework' | 'user.name' | 'ready' | 'task.name' | 'selected';
 
-export interface ISelectedModel extends Omit<Model, 'user'|'task'|'project'> {
+export interface ISelectedModel extends Omit<Model, 'user' | 'task' | 'project'> {
   user?: User;
   company?: any;
   task?: Task;
@@ -18,6 +18,7 @@ export type ITableModel = {
   system_tags: Model['system_tags'];
   ready: Model['ready'];
   name: Model['name'];
+  tags: Model['tags'];
 }; // TODO:
 
 // export interface IModelInfo {

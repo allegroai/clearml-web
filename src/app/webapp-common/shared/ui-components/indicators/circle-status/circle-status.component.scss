@@ -55,12 +55,7 @@ $font-size: 18px;
     &.closed {
       background-color: $pending-gray;
     }
-    &.training {
-      background-color: $training;
-    }
-    &.testing {
-      background-color: $testing;
-    }
+
     &.Caffe, &.PyTorch, &.Keras, &.Tensor.Flow, &.Custom {
       background-color: $blue-300;
     }

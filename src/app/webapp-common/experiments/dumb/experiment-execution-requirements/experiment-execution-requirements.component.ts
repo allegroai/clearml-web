@@ -10,12 +10,13 @@ import {ImmutableFormContainer} from '../../../shared/ui-components/forms/immuta
   styleUrls  : ['./experiment-execution-requirements.component.scss'],
 })
 export class ExperimentExecutionRequirementsComponent extends ImmutableFormContainer implements IExperimentInfoFormComponent {
+  lines: string[];
 
-  @Input() formData: IExecutionForm['requirements'];
+  @Input() set formData (data: IExecutionForm['requirements']) {
+    this.lines = data?.pip ? data?.pip?.split('\n') : [];
+  }
   @Input() isInDev: boolean = false;
   @Input() editable: boolean;
 
   HELP_TEXTS = HELP_TEXTS;
-
-
 }

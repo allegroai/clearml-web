@@ -6,10 +6,11 @@ import {TaskStatusEnum} from '../../../business-logic/model/tasks/taskStatusEnum
 import {Project} from '../../../business-logic/model/projects/project';
 import {Script} from '../../../business-logic/model/tasks/script';
 import {IExecutionForm} from './experiment-execution.model';
-import {Execution} from '../../../business-logic/model/tasks/execution';
 import {IHyperParamsForm} from '../../../webapp-common/experiments/shared/experiment-hyper-params.model';
 import {Artifact} from '../../../business-logic/model/tasks/artifact';
 import {IExperimentModelInfo} from '../../../webapp-common/experiments/shared/common-experiment-model.model';
+import {ParamsItem} from '../../../business-logic/model/tasks/paramsItem';
+import {ConfigurationItem} from '../../../business-logic/model/tasks/configurationItem';
 
 /**
  * an extended object of task that includes projection, will come from the server as an api response.
@@ -38,6 +39,8 @@ export interface ISelectedExperiment {
   status_message?: string;
   status_reason?: string;
   last_iteration?: number;
+  hyperparams?: { [section: string]: { [key: string]: ParamsItem } };
+  configuration?: { [key: string]: ConfigurationItem };
 }
 
 /**
@@ -49,7 +52,8 @@ export interface IExperimentInfo {
   comment?: string;
   model?: IExperimentModelInfo;
   execution?: IExecutionForm;
-  hyperParams?: IHyperParamsForm;
+  hyperparams?: { [key: string]: { [key: string]: ParamsItem }; };
+  configuration?: any;
   artifacts?: Artifact[];
 }
 
@@ -70,6 +74,7 @@ export interface ISelectedExperimentExecution {
     id: Model['id'],
     name: Model['name'],
     uri: Model['uri'],
+    design?: Model['design'];
     created: Model['created'],
     labels: Model['labels'],
     task: {
@@ -85,8 +90,6 @@ export interface ISelectedExperimentExecution {
       name: User['name'];
     },
   };
-  parameters: Execution['parameters'];
-  model_desc?: any;
   framework?: any;
   model_labels?: { [key: string]: number; };
   artifacts?: Artifact[];

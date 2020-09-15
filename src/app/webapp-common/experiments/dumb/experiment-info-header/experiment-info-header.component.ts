@@ -8,10 +8,9 @@ import {Store} from '@ngrx/store';
 import {selectProjectTags} from '../../../core/reducers/projects.reducer';
 import {getTags} from '../../../core/actions/projects.actions';
 import {addTag, removeTag} from '../../actions/common-experiments-menu.actions';
-import {MatMenuTrigger} from '@angular/material/menu';
 import {TagsMenuComponent} from '../../../shared/ui-components/tags/tags-menu/tags-menu.component';
-import {EXPERIMENTS_TAGS} from '../../../../features/experiments/shared/experiments.const';
 import {MenuComponent} from '../../../shared/ui-components/panel/menu/menu.component';
+import {ActivateEdit, DeactivateEdit} from '../../../../features/experiments/actions/experiments-info.actions';
 
 @Component({
   selector   : 'sm-experiment-info-header',
@@ -38,29 +37,36 @@ export class ExperimentInfoHeaderComponent {
   @ViewChild('tagMenu') tagMenu: MenuComponent;
   @ViewChild('tagsMenuContent') tagMenuContent: TagsMenuComponent;
 
-  constructor(private store: Store) {
+  constructor(private store: Store<any>) {
     this.tags$ = this.store.select(selectProjectTags);
   }
 
   private _experiment: ISelectedExperiment;
+  private previousId: string;
 
   get experiment() {
     return this._experiment;
   }
 
   @Input() set experiment(experiment: ISelectedExperiment) {
-
     this._experiment = experiment;
     this.isDev = isDevelopment(experiment);
     this.systemTags = getSystemTags(experiment);
-    this.viewId      = false;
+    if (experiment?.id !== this.previousId) {
+      this.viewId = false;
+    }
+    this.previousId = experiment?.id;
   }
+
 
   onNameChanged(name) {
     this.experimentNameChanged.emit(name);
   }
 
   openTagMenu(event: MouseEvent) {
+    if (!this.tagMenu) {
+      return;
+    }
     this.store.dispatch(getTags());
     this.tagMenu.position = {x: event.clientX, y: event.clientY};
     window.setTimeout(() => {
@@ -79,5 +85,17 @@ export class ExperimentInfoHeaderComponent {
 
   tagsMenuClosed() {
     this.tagMenuContent.clear();
+  }
+
+  editExperimentName(edit) {
+    if (edit) {
+      this.store.dispatch(new ActivateEdit('ExperimentName'));
+    } else {
+      this.store.dispatch(new DeactivateEdit());
+    }
+  }
+
+  showID() {
+    this.viewId = true;
   }
 }

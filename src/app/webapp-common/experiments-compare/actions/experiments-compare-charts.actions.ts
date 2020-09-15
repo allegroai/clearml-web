@@ -1,6 +1,7 @@
 import {Action} from '@ngrx/store';
 import {ISmAction} from '../../core/models/actions';
 import {IExperimentSettings} from '../../experiments/reducers/common-experiment-output.reducer';
+import {ScalarKeyEnum} from '../../../business-logic/model/events/scalarKeyEnum';
 
 
 export const EXPERIMENTS_COMPARE_METRICS_CHARTS_ = 'EXPERIMENTS_COMPARE_METRICS_CHARTS_';
@@ -29,7 +30,7 @@ export const RESET_EXPERIMENT_METRICS          = EXPERIMENTS_COMPARE_METRICS_CHA
 export class GetMultiScalarCharts implements ISmAction {
   public type = GET_MULTI_SCALAR_CHARTS;
 
-  constructor(public payload: { taskIds: string[]; autoRefresh?: boolean }) {}
+  constructor(public payload: { taskIds: string[]; autoRefresh?: boolean; cached?: boolean }) {}
 }
 
 export class GetMultiPlotCharts implements ISmAction {
@@ -47,7 +48,7 @@ export class SetSelectedExperiments implements Action {
 export class SetExperimentHistogram implements Action {
   readonly type = SET_EXPERIMENT_HISTOGRAM;
 
-  constructor(public payload: any) {
+  constructor(public payload: any,  public axisType: ScalarKeyEnum) {
   }
 }
 

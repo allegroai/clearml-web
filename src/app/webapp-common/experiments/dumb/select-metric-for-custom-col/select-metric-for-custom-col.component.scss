@@ -34,9 +34,6 @@
   }
 
   /deep/ .mat-expansion-panel-header {
-    &:hover {
-      background: #f4f7ff !important;
-    }
 
     .mat-expansion-indicator {
       height: 25px;
@@ -48,7 +45,7 @@
       color: $light-grey-blue;
     }
 
-    &.mat-expanded, mat-expanded:focus {
+    &.mat-expanded, .mat-expanded:focus {
       background: #f4f7ff !important;
       font-weight: bold;
 

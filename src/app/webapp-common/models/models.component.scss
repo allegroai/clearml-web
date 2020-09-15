@@ -5,7 +5,10 @@
 
   .models-body {
     width: 100%;
-    height: calc(100% - #{$project-header-height})
+    height: calc(100% - #{$project-header-height});
+    &.footer-visible {
+      height: calc(100% - #{$project-header-height + $project-footer-height})
+    }
   }
 
   /* width */

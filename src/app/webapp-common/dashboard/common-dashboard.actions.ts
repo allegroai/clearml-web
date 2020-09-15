@@ -11,7 +11,7 @@ export class GetRecentProjects implements ISmAction {
   public type = DASHBOARD_ACTIONS.GET_RECENT_PROJECTS;
   public payload: { getAllFilter: ProjectsGetAllRequest };
 
-  constructor(getAllFilter: any = {stats_for_state: ProjectsGetAllExRequest.StatsForStateEnum.Active, include_stats: true, order_by: ['-last_update'], page: 0, page_size: CARDS_IN_ROW}) {
+  constructor(getAllFilter: any = {stats_for_state: ProjectsGetAllExRequest.StatsForStateEnum.Active, include_stats: true, order_by: ['featured', '-last_update'], page: 0, page_size: CARDS_IN_ROW}) {
     this.payload = {getAllFilter};
   }
 }

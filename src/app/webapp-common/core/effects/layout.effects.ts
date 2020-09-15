@@ -1,15 +1,15 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
-import {VIEW_ACTIONS} from '../../../app.constants';
+import {EmptyAction, VIEW_ACTIONS} from '../../../app.constants';
 import * as layoutActions from '../actions/layout.actions';
-import {filter, flatMap, map, switchMap, tap, take} from 'rxjs/operators';
+import {filter, map, switchMap, take, flatMap} from 'rxjs/operators';
 import {get} from 'lodash/fp';
 import {ApiTasksService} from '../../../business-logic/api-services/tasks.service';
 import {Observable, of} from 'rxjs';
 import {ApiModelsService} from '../../../business-logic/api-services/models.service';
-import {NotifierService} from 'angular-notifier';
 import { MatDialogRef, MatDialog } from '@angular/material/dialog';
 import {AlertDialogComponent} from '../../shared/ui-components/overlay/alert-dialog/alert-dialog.component';
+import {NotifierService} from '../../angular-notifier';
 
 const ERROR_AGGREGATION = 600000;
 
@@ -46,6 +46,7 @@ export class LayoutEffects {
   @Effect({dispatch: false})
   popupError = this.actions.pipe(
     ofType<layoutActions.SetServerError>(VIEW_ACTIONS.SET_SERVER_ERROR),
+    filter(action => action.payload.serverError?.status !== 401),
     map((action) => {
       const customMessage: string = action.payload.customMessage;
       if (action.payload.aggregateSimilar) {
@@ -70,13 +71,12 @@ export class LayoutEffects {
     })
   );
 
-  @Effect({dispatch: false})
+  @Effect()
   addMessage: Observable<any> = this.actions.pipe(
     ofType<layoutActions.AddMessage>(VIEW_ACTIONS.ADD_MESSAGE),
     map((action: layoutActions.AddMessage) => action.payload),
-    tap(payload => {
-      this.notifierService.show({type: payload.severity, message: payload.msg});
-    })
+    flatMap(payload => this.notifierService.show({type: payload.severity, message: payload.msg, actions: payload.userActions})),
+    flatMap(actions => actions.length > 0? actions : [new EmptyAction()])
   );
 
   private parseError(errorMessage) {

@@ -1,16 +1,16 @@
 <sm-experiment-info-header-status-progress-bar
-  [status]="selectedExperiment?.status"
+  [status]="(tableSelectedExperiment$| async)?.status || selectedExperiment?.status"
   [editable]="editable$ | async"
-  [showMaximize]="showMaximize"
+  [showMaximize]="resultsTab"
   (closeInfoClicked)="deselectExperiment()"
   (maximizedClicked)="maximize()">
 </sm-experiment-info-header-status-progress-bar>
 
 <div class="experiment-info-container light-theme">
   <sm-experiment-info-header
-    [experiment]="selectedExperiment"
+    [experiment]="(tableSelectedExperiment$| async) || selectedExperiment"
     [infoData]="infoData$ | async"
-    [editable]=" ! isExample"
+    [editable]=" !isExample"
     [showMenu]="true"
     [backdropActive]="backdropActive$|async"
     (experimentNameChanged)="updateExperimentName($event)"
@@ -20,8 +20,9 @@
     <span routerLink="execution" queryParamsHandling="merge">
       <sm-navbar-item header="execution" [active]="routerConfig.includes('execution')"></sm-navbar-item>
     </span>
-    <span [routerLink]="['hyper-params']" queryParamsHandling="merge">
-      <sm-navbar-item header="hyper parameters" [active]="routerConfig.includes('hyper-params')"></sm-navbar-item>
+
+    <span [routerLink]="['hyper-params/hyper-param/_empty_']" queryParamsHandling="merge">
+      <sm-navbar-item header="configuration" [active]="routerConfig.includes('hyper-params')"></sm-navbar-item>
     </span>
     <span [routerLink]="['artifacts']"  queryParamsHandling="preserve">
       <sm-navbar-item header="artifacts" [active]="routerConfig.includes('artifacts')"></sm-navbar-item>

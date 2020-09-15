@@ -1,5 +1,6 @@
 import {USERS_ACTIONS} from '../../../app.constants';
 import {createSelector} from '@ngrx/store';
+import {setCurrentUser} from '../actions/users.actions';
 
 export interface IUsersState {
   currentUser: string;
@@ -21,11 +22,11 @@ export function usersReducer(state = initUsers, action) {
   switch (action.type) {
     case USERS_ACTIONS.FETCH_CURRENT_USER:
       return {...state};
-    case USERS_ACTIONS.SET_CURRENT_USER:
+    case setCurrentUser.type:
       return {
         ...state,
-        currentUser: action.payload.user,
-        termsOfUse: action.payload.terms_of_use
+        currentUser: action.user,
+        termsOfUse: action.terms_of_use
       };
     case USERS_ACTIONS.LOGOUT:
       return {

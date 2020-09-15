@@ -1,4 +1,4 @@
-<sm-experiment-models-form
+<sm-experiment-input-models-form
   (activateEdit)="activateEditChanged($event)"
   (cancelFormDataChange)="cancelModelChange()"
   (errorsChanged)="onFormErrorsChanged($event)"
@@ -10,10 +10,11 @@
   [editable]="editable$ | async"
   [errors]="(errors$ | async)?.model"
   [formData]="modelInfo$ | async"
+  [experimentName]="(selectedExperiment$ | async).name"
   [modelLabels]="modelLabels$ | async"
   [saving]="saving$ |async"
   [userKnowledge]="(userKnowledge$ | async)"
   fieldName="model"
 >
-</sm-experiment-models-form>
+</sm-experiment-input-models-form>
 

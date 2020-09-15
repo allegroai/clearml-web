@@ -9,12 +9,10 @@
 <div class="buttons-container" [class.searching]="filterText">
   <button
     class="item"
-    smClickStopPropagation
     *ngIf="filterText && !allTags.includes(filterText)"
     (click)="addTag(filterText)"
   >"{{filterText}}" <span class="new">(Create New)</span></button>
   <button
-    smClickStopPropagation
     *ngFor="let tag of allTags | filter:tags | filter:filterText"
     class="item"
     (click)="addTag(tag)"

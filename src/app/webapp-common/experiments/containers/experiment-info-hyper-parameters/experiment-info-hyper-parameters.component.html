@@ -1,13 +1,14 @@
 <sm-overlay [backdropActive]="backdropActive$|async"></sm-overlay>
-<sm-experiment-hyper-params-form
-  *ngIf="hyperParamsInfo$ | async"
-  fieldName="hyperParams"
-  [editable]="editable$ | async"
-  [isInDev]="isInDev$ | async"
-  [formData]="hyperParamsInfo$ | async"
-  [saving]="saving$ |async"
-  (formDataChanged)="onFormValuesChanged($event)"
-  (saveFormData)="saveHyperParametersData()"
-  (cancelFormDataChange)="cancelHyperParametersChange()"
-  (activateEdit)="activateEditChanged($event)"
-></sm-experiment-hyper-params-form>
+<div class="h-100 row">
+  <sm-experiment-hyper-params-navbar
+    class="col-6"
+    [hyperParams]="(hyperParamsInfo$| async)"
+    [configuration]="configuration$ | async"
+    [routerConfig]="routerConfig$ | async"
+    [routerParams]="routerParams$ | async"
+    [disableAdd]="!(selectedExperiment?.status === 'created')"
+  ></sm-experiment-hyper-params-navbar>
+  <div class="col-18 hyper-col">
+    <router-outlet></router-outlet>
+  </div>
+</div>

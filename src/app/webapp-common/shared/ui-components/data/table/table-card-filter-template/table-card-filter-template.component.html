@@ -1,11 +1,13 @@
 <div class="filter-sort-container d-flex align-items-center"
      [ngClass]="isFiltered() ? 'active' : 'deactive'">
   <div class='cell pointer'>
-    <i [class]="'icon md ' + (isFiltered()? 'i-filter-on':'i-filter-off')" mat-button [matMenuTriggerFor]="menu" (menuOpened)="menuOpened.emit()"></i>
+    <i [class]="'icon ' + (isFiltered()? 'i-filter-on':'i-filter-off')" mat-button [matMenuTriggerFor]="menu" (menuOpened)="menuOpened.emit()"></i>
   </div>
   <mat-menu #menu="matMenu" class="table-card-filter-menu" (closed)="closeMenu()">
     <ng-container *ngFor="let option of options | keyvalue">
-      <button mat-menu-item [matMenuTriggerFor]="subMenu"><i [class.hidden]="!isOptionFiltered(option.key)" class="filter-point icon i-v-black xs"></i> {{option.key | titlecase}}</button>
+      <button mat-menu-item [matMenuTriggerFor]="subMenu">
+        <i [class.hidden]="!isOptionFiltered(option.key)" class="filter-point icon i-v-black xs"></i> {{getColName(option.key)}}
+      </button>
       <mat-menu #subMenu="matMenu" class="table-card-filter-menu">
         <form class="filter-form">
           <mat-form-field *ngIf="['users', 'tags'].includes(option.key)" smClickStopPropagation [style.width]="'222px'">

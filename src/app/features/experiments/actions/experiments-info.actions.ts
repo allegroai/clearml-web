@@ -37,21 +37,6 @@ export class CustomOutputLabelAdded implements Action {
 
 
 
-export class ModelSelected implements Action {
-  readonly type = MODEL_SELECTED;
-  public payload: {
-    model: Model;
-    fieldsToPopulate: { labelEnum: boolean; networkDesign: boolean };
-  };
-
-  constructor(payload: {
-    model: Model;
-    fieldsToPopulate: { labelEnum: boolean; networkDesign: boolean };
-  }) {
-    this.payload = payload;
-  }
-}
-
 export class UpdateSectionKnowledge implements Action {
   readonly type = UPDATE_SECTION_KNOWLEDGE;
 
@@ -61,7 +46,6 @@ export class UpdateSectionKnowledge implements Action {
 
 export class ExperimentDataUpdated implements Action {
   readonly type = EXPERIMENT_DATA_UPDATED;
-
   constructor(public payload: { id: Task['id']; changes: Partial<IExperimentInfo> }) {
   }
 }

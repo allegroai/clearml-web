@@ -10,5 +10,5 @@
     <div class="ellipsis">{{itemLabel}}</div>
     <i *ngIf="sortOrder" class="pt-1 ml-2" [class]="sortOrder === TABLE_SORT_ORDER.DESC ? 'fa fa-arrow-down' : 'fa fa-arrow-up' "></i>
   </div>
-  <div *ngIf="removable" (click)="removeItem($event)" class="remove-button"><i class="icon i-trash pointer"></i></div>
+  <div *ngIf="removable" (click)="removeItem($event)" class="remove-button"><i class="al-icon al-ico-trash al-color blue-300 pointer"></i></div>
 </div>

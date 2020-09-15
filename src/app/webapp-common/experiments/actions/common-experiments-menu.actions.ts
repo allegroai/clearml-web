@@ -39,20 +39,6 @@ export class StopClicked implements Action {
   }
 }
 
-export class ArchiveClicked implements Action {
-  readonly type = ARCHIVE_CLICKED;
-
-  constructor(public payload: { experiment: ISelectedExperiment; selectedExperiment: any; projectId: string }) {
-  }
-}
-
-export class RestoreClicked implements Action {
-  readonly type = RESTORE_CLICKED;
-
-  constructor(public payload: { experiment: ISelectedExperiment; selectedExperiment: any; projectId: string }) {
-  }
-}
-
 export class ChangeProjectRequested implements Action {
   readonly type = CHANGE_PROJECT_REQUESTED;
 

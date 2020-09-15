@@ -7,7 +7,7 @@ import {BlTasksService} from '../../../business-logic/services/tasks.service';
 import {ApiEventsService} from '../../../business-logic/api-services/events.service';
 import {Router} from '@angular/router';
 import {catchError, flatMap, map, switchMap, tap, withLatestFrom} from 'rxjs/operators';
-import {ActiveLoader, DeactiveLoader, SetServerError} from '../../core/actions/layout.actions';
+import {ActiveLoader, AddMessage, DeactiveLoader, SetServerError} from '../../core/actions/layout.actions';
 import * as menuActions from '../actions/common-experiments-menu.actions';
 import * as viewActions from '../../../webapp-common/experiments/actions/common-experiments-view.actions';
 import {of} from 'rxjs';
@@ -22,11 +22,12 @@ import * as infoActions from '../actions/common-experiments-info.actions';
 import {EmptyAction} from '../../../app.constants';
 import * as commonViewActions from '../actions/common-experiments-view.actions';
 import {SmSyncStateSelectorService} from '../../core/services/sync-state-selector.service';
-import {ResetExperiments, SetSelectedExperiments} from '../actions/common-experiments-view.actions';
+import {RefreshExperiments, ResetExperiments, SetSelectedExperiments} from '../actions/common-experiments-view.actions';
 import {AutoRefreshExperimentInfo} from '../actions/common-experiments-info.actions';
-import {setArchive} from '../../core/actions/projects.actions';
 import {addTag, removeTag} from '../actions/common-experiments-menu.actions';
 import {ExperimentDetailsUpdated} from '../../../features/experiments/actions/experiments-info.actions';
+import {ISelectedExperiment} from '../../../features/experiments/shared/experiment-info.model';
+import {ResetOutput} from '../actions/common-experiment-output.actions';
 
 
 @Injectable()
@@ -92,10 +93,10 @@ export class CommonExperimentsMenuEffects {
   cloneExperimentRequested$ = this.actions$.pipe(
     ofType<menuActions.CloneExperimentClicked>(menuActions.CLONE_EXPERIMENT_CLICKED),
     switchMap(action => this.apiTasks.tasksClone({
-        task            : action.payload.originExperiment.id,
+        task: action.payload.originExperiment.id,
         new_task_project: action.payload.cloneData.project,
         new_task_comment: action.payload.cloneData.comment,
-        new_task_name   : action.payload.cloneData.name
+        new_task_name: action.payload.cloneData.name
       })
         .pipe(
           flatMap(res => [
@@ -118,7 +119,8 @@ export class CommonExperimentsMenuEffects {
     switchMap(
       action => this.apiTasks.tasksReset({task: action.payload.id})
         .pipe(
-          flatMap((res) => this.updateExperimentSuccess(action.payload.id, action.type, res.fields)),
+          flatMap((res) => [new ResetOutput()]
+            .concat(this.updateExperimentSuccess(action.payload.id, action.type, res.fields))),
           catchError(error => this.updateExperimentFailed(action.type, error))
         )
     )
@@ -149,58 +151,7 @@ export class CommonExperimentsMenuEffects {
   );
 
   @Effect()
-  archiveExperiment$ = this.actions$.pipe(
-    ofType<menuActions.ArchiveClicked>(menuActions.ARCHIVE_CLICKED),
-    tap((action) => {
-      if (action.payload.selectedExperiment && action.payload.selectedExperiment.id === action.payload.experiment.id) {
-        this.router.navigate([`projects/${action.payload.projectId}/experiments/`]);
-      }
-    }),
-    map(action => [action, this.taskBl.addHiddenTag(action.payload.experiment.system_tags)]),
-    withLatestFrom(this.store.pipe(select(selectSelectedExperiments))),
-    switchMap(([[action, system_tags], selectedExperiments]: [[menuActions.ArchiveClicked, Array<string>], Array<ITableExperiment>]) =>
-      this.apiTasks.tasksUpdate({task: action.payload.experiment.id, system_tags: system_tags})
-        .pipe(
-          flatMap(res => [...this.updateExperimentSuccess(action.payload.experiment.id, action.type, res.fields),
-            new commonViewActions.SetSelectedExperiments(selectedExperiments.filter(experiment => experiment.id !== action.payload.experiment.id))]),
-          catchError(error => this.updateExperimentFailed(action.type, error)),
-        )
-    )
-  );
-
-  @Effect()
-  restoreExperiment$ = this.actions$.pipe(
-    ofType<menuActions.RestoreClicked>(menuActions.RESTORE_CLICKED),
-    // (nir) not working anyway
-    // tap((action) => {
-    //   let path = `projects/${action.payload.projectId}/experiments/`;
-    //   if (action.payload.selectedExperiment && action.payload.selectedExperiment.id !== action.payload.experiment.id) {
-    //     path += action.payload.experiment.id;
-    //   }
-    //   this.store.dispatch(setArchive({archive: true}));
-    //   this.router.navigate([path]);
-    // }),
-    map(action => [action, this.taskBl.removeHiddenTag(action.payload.experiment.system_tags)]),
-    withLatestFrom(this.store.pipe(select(selectSelectedExperiments))),
-    switchMap(([[action, system_tags], selectedExperiments]: [[menuActions.RestoreClicked, Array<string>], Array<ITableExperiment>]) =>
-      this.apiTasks.tasksUpdate({task: action.payload.experiment.id, system_tags: system_tags})
-        .pipe(
-          flatMap(() => [
-            this.setExperimentIfSelected(action.payload.experiment.id, {changes: {system_tags: system_tags}}),
-            new commonViewActions.SetSelectedExperiments(selectedExperiments.filter(experiment => experiment.id !== action.payload.experiment.id)),
-            new DeactiveLoader(action.type),
-            new commonViewActions.GetExperiments()
-          ]),
-          catchError(error => [
-            new RequestFailed(error),
-            new DeactiveLoader(action.type),
-            new SetServerError(error, null, 'Update Experiment failed')
-          ])
-        )
-    )
-  );
-  @Effect()
-  changeProject$     = this.actions$.pipe(
+  changeProject$ = this.actions$.pipe(
     ofType<menuActions.ChangeProjectRequested>(menuActions.CHANGE_PROJECT_REQUESTED),
     switchMap(
       action => this.apiTasks.tasksUpdate({task: action.payload.experiment.id, project: action.payload.project.id})
@@ -245,19 +196,24 @@ export class CommonExperimentsMenuEffects {
   @Effect()
   addTag$ = this.actions$.pipe(
     ofType(addTag),
-    switchMap((action) =>
-      action.experiments.map( experiment =>
-        new ExperimentDetailsUpdated({
+    withLatestFrom(this.store.select(selectSelectedExperiments), this.store.select(selectSelectedExperiment)),
+    switchMap(([action, selectedExperiments, selectedExperimentInfo]) => {
+      const experimentsFromState = selectedExperimentInfo ? selectedExperiments.concat(selectedExperimentInfo) as ISelectedExperiment[] : selectedExperiments;
+      return action.experiments.map(experiment => {
+        const experimentFromState = experimentsFromState.find(exp => exp.id === experiment.id);
+        return new ExperimentDetailsUpdated({
           id: experiment.id,
-          changes: {tags: (experiment.tags || []).concat([action.tag]) }}))
-    )
+          changes: {tags: Array.from(new Set((experimentFromState?.tags || experiment.tags || []).concat([action.tag]))).sort()}
+        });
+      });
+    })
   );
 
   @Effect()
   removeTag$ = this.actions$.pipe(
     ofType(removeTag),
     switchMap((action) =>
-      action.experiments.map( experiment => {
+      action.experiments.map(experiment => {
         if (experiment.tags.includes(action.tag)) {
           return new ExperimentDetailsUpdated({
             id: experiment.id,
@@ -267,6 +223,20 @@ export class CommonExperimentsMenuEffects {
           return false;
         }
       }).filter(update => update !== false)
+        .concat(new AddMessage('success', `“${action.tag}” tag has been removed from “${action.experiments[0]?.name}” experiment`, [
+            {
+              name: 'Undo',
+              actions: [
+                new AddMessage('success', `“${action.tag}” tag has been restored`),
+                ...action.experiments.map(experiment => addTag({
+                    experiments: action.experiments,
+                    tag: action.tag
+                  })
+                )
+              ]
+            }
+          ]
+        ) as any)
     )
   );
 }

@@ -1,10 +1,24 @@
-<div class="row header-container">
-  <div *ngIf="!isDashboard">
-    <sm-breadcrumbs></sm-breadcrumbs>
+<div class="header-container" [class.login]="isLogin">
+  <div *ngIf="isDashboard && !isLogin" class="logo-full" [class.make-room-for-slogan]="environment.whiteLabelSlogan">
+    <img [src]="environment.whiteLabelLogo || '../../../../assets/logo-white.svg?v=3'">
+    <div *ngIf="environment.whiteLabelSlogan" class="slogan">{{environment.whiteLabelSlogan}}</div>
   </div>
-  <div *ngIf="isDashboard" class="logo-full">
-    <img src="../../../../assets/logo-white.svg?v=2">
+  <sm-breadcrumbs *ngIf="!isDashboard" class="spacer"></sm-breadcrumbs>
+  <div *ngIf="isLogin && environment.whiteLabelLogo"  class="logo-full">
+    <img [src]="environment.whiteLabelLogo">
   </div>
-  <sm-common-search *ngIf="user | async"></sm-common-search>
+  <div *ngIf="isLogin" class="spacer"></div>
+  <div  *ngIf="user | async" class="d-flex align-items-center right-buttons">
+    <sm-common-search></sm-common-search>
+    <a *smCheckPermission="true; else guestLogOut" class="item" routerLink="/profile" routerLinkActive="neon"
+       smTooltip="PROFILE" showDelay="0" position="below">
+      <i class="fa fa-user-alt"></i>
+    </a>
+    <ng-template #guestLogOut >
+      <a class="logout pointer" (click)="logout()" smTooltip="Logout" showDelay="0" position="below">
+          <i class="al-icon al-ico-user-logout al-color blue-300"></i>
+      </a>
+    </ng-template>
+  </div>
 </div>
 <ng-content></ng-content>

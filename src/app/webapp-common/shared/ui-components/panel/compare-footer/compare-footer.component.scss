@@ -1,18 +1,24 @@
 @import "../../styles/variables";
+@import "../../../../layout/layout";
+
 
 .footer-container {
+  border-top:solid 2px $neon-yellow-betterinchrome;
   position: fixed;
-  bottom: 0;
+  bottom: -$project-footer-height;
   left: 0;
-  height: 60px;
+  height: $project-footer-height;
   width: 100%;
-  transition: height 0.5s;
-  padding-left: 64px;
-  background-color: $neon-yellow-betterinchrome;
-  color: $blue-900;
+  padding-left: 76px;
+  background-color:#3a425c;
+  color: #dce0ee;
+  font-size: 13px;
+  font-weight: 500;
   z-index: 10;
-  &.hide-container {
-    height: 0;
+  transition:bottom 0.3s ease-out;
+
+  &.show-container {
+    bottom: 0;
   }
 }
 

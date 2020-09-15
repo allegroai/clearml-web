@@ -69,7 +69,9 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
       distinctUntilChanged(),
       tap(() => this.refreshDisabled = true)
     );
-    this.xAxisSub = this.xAxisType$.pipe(filter((axis) => !!axis)).subscribe((axis) => this.store.dispatch(new GetMultiScalarCharts({taskIds: this.taskIds})));
+    this.xAxisSub = this.xAxisType$
+      .pipe(filter((axis) => !!axis))
+      .subscribe((axis) => this.store.dispatch(new GetMultiScalarCharts({taskIds: this.taskIds, cached: true})));
   }
 
   ngOnInit() {

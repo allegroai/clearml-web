@@ -26,25 +26,29 @@ export interface IModelsViewState {
   globalFilter: string;
   showAllSelectedIsActive: boolean;
   users: User[];
+  frameworks: string[];
+  projectTags: string[];
 }
 
 const initialState: IModelsViewState = {
-  models                 : [],
-  colsOrder              : {},
-  hiddenTableCols        : {'comment': true},
-  selectedModels         : [],
-  selectedModel          : null,
-  noMoreModels           : false,
-  selectedModelSource    : null,
-  modelToken             : null,
-  viewMode               : MODELS_VIEW_MODES.TABLE,
-  tableFilters           : null,
-  tableSortField         : MODELS_TABLE_COL_FIELDS.CREATED,
-  tableSortOrder         : TABLE_SORT_ORDER.ASC,
-  page                   : -1, // -1 so the "getNextModels" will send 0.
-  globalFilter           : null,
+  models: [],
+  frameworks: [],
+  colsOrder: {},
+  hiddenTableCols: {'comment': true},
+  selectedModels: [],
+  selectedModel: null,
+  noMoreModels: false,
+  selectedModelSource: null,
+  modelToken: null,
+  viewMode: MODELS_VIEW_MODES.TABLE,
+  tableFilters: null,
+  tableSortField: MODELS_TABLE_COL_FIELDS.CREATED,
+  tableSortOrder: TABLE_SORT_ORDER.ASC,
+  page: -1, // -1 so the "getNextModels" will send 0.
+  globalFilter: null,
   showAllSelectedIsActive: false,
-  users                  : []
+  users: [],
+  projectTags: [],
 };
 
 export function modelsViewReducer(state: IModelsViewState = initialState, action: any): IModelsViewState {
@@ -59,10 +63,18 @@ export function modelsViewReducer(state: IModelsViewState = initialState, action
     case  actions.SET_SHOW_ALL_SELECTED_IS_ACTIVE:
       return {...state, showAllSelectedIsActive: action.payload, globalFilter: initialState.globalFilter, tableFilters: initialState.tableFilters};
     case actions.UPDATE_ONE_MODELS:
-      return {
+      const payload = (action as actions.UpdateModel).payload;
+      const newState = {
         ...state, models:
-          state.models.map(ex => ex.id === action.payload.id ? {...ex, ...action.payload.changes} : ex)
+          state.models.map(ex => ex.id === payload.id ? {...ex, ...payload.changes} : ex)
       };
+      if (state.selectedModel?.id === payload.id) {
+        newState.selectedModel = {...state.selectedModel, ...payload.changes};
+      }
+      if (state.selectedModels.find(ex => ex.id === payload.id)) {
+        newState.selectedModels = state.selectedModels.map(ex => ex.id === payload.id ? {...ex, ...payload.changes} : ex);
+      }
+      return newState;
     case actions.SET_MODELS:
       return {...state, models: action.payload};
     case setModelsInPlace.type:
@@ -87,6 +99,10 @@ export function modelsViewReducer(state: IModelsViewState = initialState, action
       return {...state, hiddenTableCols: action.hiddenCols};
     case actions.setUsers.type:
       return {...state, users: action.users};
+    case actions.setFrameworks.type:
+      return {...state, frameworks: action.frameworks};
+    case actions.setTags.type:
+      return {...state, projectTags: action.tags};
     case actions.TABLE_SORT_CHANGED:
       return {...state, tableSortOrder: action.payload.sortOrder, tableSortField: action.payload.colId};
     case actions.TABLE_FILTER_CHANGED: {

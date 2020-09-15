@@ -9,6 +9,8 @@ import {IExperimentInfoState} from '../../../../features/experiments/reducers/ex
 import {experimentSectionsEnum} from '../../../../features/experiments/shared/experiments.const';
 import {selectIsExperimentEditable, selectSelectedExperiment} from '../../../../features/experiments/reducers';
 import * as infoActions from '../../../../features/experiments/actions/experiments-info.actions';
+import { ModelSelected } from '../../actions/common-experiments-info.actions';
+
 
 @Component({
   selector   : 'sm-experiment-info-input-model',
@@ -18,12 +20,13 @@ import * as infoActions from '../../../../features/experiments/actions/experimen
 export class ExperimentInfoInputModelComponent implements OnInit, OnDestroy {
   public modelInfo$: Observable<IExperimentModelInfo>;
   public selectedExperimentSubscription: Subscription;
-  private selectedExperiment: ISelectedExperiment;
+  public selectedExperiment: ISelectedExperiment;
   public editable$: Observable<boolean>;
   public errors$: Observable<IExperimentInfoState['errors']>;
   public userKnowledge$: Observable<Map<experimentSectionsEnum, boolean>>;
   public modelLabels$: Observable<Model['labels']>;
   public saving$: Observable<boolean>;
+  public selectedExperiment$: Observable<ISelectedExperiment>;
 
   constructor(private store: Store<IExperimentInfoState>) {
     this.modelInfo$      = this.store.select(selectExperimentModelInfoData);
@@ -31,6 +34,7 @@ export class ExperimentInfoInputModelComponent implements OnInit, OnDestroy {
     this.errors$         = this.store.select(selectExperimentInfoErrors);
     this.userKnowledge$  = this.store.select(selectExperimentUserKnowledge);
     this.saving$         = this.store.select(selectIsExperimentSaving);
+    this.selectedExperiment$  = this.store.select(selectSelectedExperiment)
   }
 
   ngOnInit() {
@@ -54,7 +58,7 @@ export class ExperimentInfoInputModelComponent implements OnInit, OnDestroy {
   }
 
   onModelSelected(event) {
-    this.store.dispatch(new infoActions.ModelSelected(event));
+    this.store.dispatch(new ModelSelected(event));
   }
 
   updateSectionKnowledge(section: experimentSectionsEnum) {

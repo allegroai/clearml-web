@@ -29,26 +29,30 @@ export class WorkersTableComponent {
         headerType: ColHeaderTypeEnum.sort,
         header    : 'AVAILABLE WORKERS',
         style     : {width: '30%', minWidth: '500px'},
-        sortable  : true
+        sortable  : true,
+        disableDrag   : true,
       },
       {
         id      : WORKERS_TABLE_COL_FIELDS.TASK,
         headerType: ColHeaderTypeEnum.sort,
         header  : 'CURRENTLY RUNNING EXPERIMENT',
         style   : {width: '30%', minWidth: '500px'},
-        sortable: true
+        sortable: true,
+        disableDrag   : true,
       },
       {
         id      : WORKERS_TABLE_COL_FIELDS.TASK_RUNNING_TIME,
         headerType: ColHeaderTypeEnum.sort,
         header  : 'EXPERIMENT RUNNING TIME',
-        sortable: true
+        sortable: true,
+        disableDrag   : true,
       },
       {
         id      : WORKERS_TABLE_COL_FIELDS.TASK_ITERATIONS,
         headerType: ColHeaderTypeEnum.sort,
         header  : 'ITERATION',
-        sortable: true
+        sortable: true,
+        disableDrag   : true,
       },
     ];
   }

@@ -1,9 +1,9 @@
 import {createSelector} from '@ngrx/store';
 import * as projectsActions from '../actions/projects.actions';
-import {Project} from '../../../business-logic/model/projects/project';
-import {sortBy} from 'lodash/fp';
 import {setTagColors, setTags, TagColor} from '../actions/projects.actions';
+import {Project} from '../../../business-logic/model/projects/project';
 import {getSystemTags} from '../../../features/experiments/shared/experiments.utils';
+
 export const SYSTEM_TAGS_BLACK_LIST = ['archived'];
 
 interface RootProjects {
@@ -25,7 +25,7 @@ const initRootProjects: RootProjects = {
 };
 
 export const projects = state => state.rootProjects as RootProjects;
-export const selectProjects = createSelector(projects, (state): Project[] => sortBy('name', state.projects));
+export const selectProjects = createSelector(projects, (state): Project[] =>  state.projects);
 export const selectSelectedProject = createSelector(projects, state => state.selectedProject);
 export const selectSelectedProjectId = createSelector(selectSelectedProject, (selectedProject): string => selectedProject ? selectedProject.id : '');
 export const selectIsArchivedMode = createSelector(projects, state => state.archive);

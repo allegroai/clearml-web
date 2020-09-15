@@ -2,13 +2,13 @@
 
 $dark-theme: (
   bg-color: $blue-800,
-  color: $cloudy-blue,
+  color: $blue-250,
   al-header: $blue-100,
   card: (
     body-bg-color: $blue-500,
     footer-bg-color: $blue-600,
     border-color: $blue-250,
-    seperator-line-color: $cloudy-blue,
+    seperator-line-color: $blue-250,
     box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.1)
   ),
   scrollbar: (
@@ -43,29 +43,29 @@ $dark-theme: (
     stateDefaultTextColor: $blue-300,
     //Active State,
     stateActiveBorderColor: $blue-600,
-    stateActiveBgColor: $dark-grey-blue-two,
+    stateActiveBgColor: $blue-500,
     stateActiveTextColor: $blue-100,
     //Highlight State,
     stateHighlightBorderColor: transparent,
     stateHighlightBgColor: $blue-300,
     stateHighlightTextColor: #ffffff,
     //Focus State,
-    stateFocusBorderColor: $dark-grey-blue-two,
-    stateFocusBgColor: $dark-grey-blue-two,
+    stateFocusBorderColor: $blue-500,
+    stateFocusBgColor: $blue-500,
     stateFocusTextColor: $blue-100,
     //Error State,
     stateErrorBorderColor: #ec4e4e,
     stateErrorBgColor: #ec4e4e,
     stateErrorTextColor: #ffffff,
     //Hover State,
-    stateHoverBorderColor: $dark-grey-blue-two,
-    stateHoverBgColor: $dark-grey-blue-two,
+    stateHoverBorderColor: $blue-500,
+    stateHoverBgColor: $blue-500,
     stateHoverTextColor: #a7b2d8,
     //Forms,
     inputBgColor: $blue-50,
-    inputTextColor: $dusk-four,
+    inputTextColor: $blue-600,
     invalidInputBorderColor: #ec4e4e,
-    inputGroupTextColor: $dusk-four,
+    inputGroupTextColor: $blue-600,
   ),
   navbar-item: (
     color: #8f9cc8,
@@ -140,7 +140,7 @@ $dark-theme: (
     //option-highlighted-bg: #ec4e4e
   ),
   button-toggle-group: (
-    background-color-active: $dark-grey-blue-two,
+    background-color-active: $blue-500,
     background-color: $blue-600,
     color-active: $blue-100,
     color: $blue-300

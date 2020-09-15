@@ -79,13 +79,14 @@ export class DebugImagesComponent implements OnInit, OnDestroy {
         map(([bucketCredentials, debugImages]) => {
           const debugImagesP = Object.entries(debugImages).reduce(((previousValue, currentValue: any) => {
             previousValue[currentValue[0]] = currentValue[1].metrics[0].iterations.map(iteration => {
-                const events = iteration.events.map(event => {
-                  const signedUrl = this.adminService.signUrlIfNeeded(event.url);
-                  return {...event, oldSrc: event.url, url: signedUrl};
-                });
-                return {...iteration, events};
-              }
-            );
+              const events = iteration.events.map(event => {
+                const signedUrl = this.adminService.signUrlIfNeeded(event.url);
+                const parsed = new URL(signedUrl);
+                parsed.searchParams.append('X-Amz-Date', event.timestamp);
+                return {...event, oldSrc: event.url, url: parsed.toString()};
+              });
+              return {...iteration, events};
+            });
             previousValue[currentValue[0]].metric = currentValue[1].metrics[0].metric;
             previousValue[currentValue[0]].scrollId = currentValue[1].scroll_id;
             return previousValue;

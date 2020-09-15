@@ -1,9 +1,12 @@
+@import '../../../../shared/ui-components/styles/variables';
+
 :host {
   .data-text {
     width: 70vw;
-    height: 65vh;
+    height: calc(90vh - 200px);
     overflow: auto;
-    color: #141822;
+    background-color: $blue-600;
+    color: #ffffff;
     font-family: monospace;
     padding: 12px;
     border-radius: 4px;

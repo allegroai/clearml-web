@@ -24,6 +24,7 @@
       [xAxisType]="(xAxisType$ | async)"
       [showSettings]="showSettingsBar"
       [splitSize]="splitSize$ | async"
+      [breakPoint]="900"
       (changeWeight)="changeSmoothness($event)"
       (resetGraphs)="resetMetrics()"
       (toggleSettings)="toggleSettingsBar()"

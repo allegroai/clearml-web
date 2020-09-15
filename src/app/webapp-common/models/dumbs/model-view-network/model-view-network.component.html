@@ -1,7 +1,8 @@
 <sm-editable-section
   #prototext
-  [editable]="!model?.ready"
+  [editable]="!model?.ready && model?.company?.id"
   [saving]="saving"
+  [disableInEditMode]="true"
   (activateEditClicked)="activateEdit(); editPrototext()"
   (saveClicked)="saveClicked()"
   (cancelClicked)="cancelEdit()"
@@ -18,4 +19,11 @@
       >
     </sm-textarea-control>
   </div>
+  <button extra-buttons
+          *ngIf="design"
+          class="btn-dark-fill mr-3 flex-1"
+          (click)="clearPrototext()">
+    <i class="p-1 fa fa-trash"></i>
+    CLEAR
+  </button>
 </sm-editable-section>

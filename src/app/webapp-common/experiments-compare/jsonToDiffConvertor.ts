@@ -1,9 +1,9 @@
 import {get, has, isArray, isEqual, mergeWith} from 'lodash/fp';
-import hoconParser from 'hocon-parser';
-import hash from 'object-hash';
 import {IExperimentDetail} from '../../features/experiments-compare/experiments-compare-models';
 import {treeBuilderService} from './services/tree-builder.service';
 import {TreeNode} from './shared/experiments-compare-details.model';
+import {getAlternativeConvertedExperiment, getDisplayTextForTitles} from '../../features/experiments-compare/experiment-compare-utils';
+import {ConfigurationItem} from '../../business-logic/model/tasks/configurationItem';
 
 export interface TreeNodeJsonData {
   key: string;
@@ -35,14 +35,10 @@ function isObject(val) {
   return val && typeof val === 'object';
 }
 
-function isArrayOrderNotImportant2(val, key, allExperiments = []) {
-  const allIsOne = allExperiments.every(experiment => experiment && experiment[key] && experiment[key].length === 1);
-  return Array.isArray(val) && !allIsOne && (arrayOrderIsNotImportant(key));
-}
 
-function convertToHashItem(item, originItem) {
-  const itemHash = hash(item);
-  const convertedItemHash = (originItem && isArray(originItem) && originItem.map(element => hash(element)).includes(itemHash) ? 'a_hash_' : 'hash_') + itemHash;
+function convertToHashItem(item, originItem, path) {
+  const itemHash = getDisplayTextForTitles(item, path);
+  const convertedItemHash = (originItem && isArray(originItem) && originItem.map(element => getDisplayTextForTitles(element, path)).includes(itemHash) ? 'a_hash_' : 'hash_') + itemHash;
   return convertedItemHash;
 }
 
@@ -62,7 +58,7 @@ function convertnetworkDesign(networkDesign: string): any {
   if (!networkDesign) {
     return [];
   }
-  if (typeof networkDesign !== 'string'){
+  if (typeof networkDesign !== 'string') {
     return networkDesign;
   }
   return networkDesign;
@@ -86,7 +82,11 @@ function convertUncommittedChanges(diff: string[]): { [files: string]: string[] 
       acc[curr] = [];
     } else {
       if (currKey === null) {
-        acc[`hash_${curr}`] = curr;
+        if (curr.startsWith('** Content is too large to display.')) {
+          acc['a_hash_'] = curr;
+        } else {
+          acc[`hash_${curr}`] = curr;
+        }
       } else {
         acc[currKey].push(curr);
       }
@@ -95,9 +95,42 @@ function convertUncommittedChanges(diff: string[]): { [files: string]: string[] 
   }, {}) : diff;
 }
 
-export function convertExperimentsArrays(experiment, origin, experiments): IExperimentDetail {
+function convertHyperParams(hyperParams: { [section: string]: { [name: string]: any } }, originHyperParams): { [section: string]: { [name: string]: any } } {
+  if (!hyperParams) {
+    return {};
+  }
+
+  if (isParamsConverted(hyperParams)) {
+    return hyperParams;
+  }
+
+  return Object.entries(hyperParams).reduce((result, [sectionName, section]) => {
+    result[sectionName] = Object.entries(section).reduce((acc, [paramName, param]) => {
+      const hasInOrigin = has(`${sectionName}.${paramName}`, originHyperParams);
+      acc[(hasInOrigin ? ' ' : '') + paramName] = param.value;
+      return acc;
+    }, {});
+    return result;
+  }, {});
+}
+
+function convertConfiguration(confParams: { [name: string]: ConfigurationItem }, originConfParams): { [name: string]: string | string[] } {
+  if (!confParams) {
+    return {};
+  }
+
+  return Object.entries(confParams).reduce((acc, [paramName, {value}]) => {
+    const hasInOrigin = has(paramName, originConfParams.configuration);
+    acc[(hasInOrigin ? ' ' : '') + paramName] = value? value.split('\n'): undefined;
+    return acc;
+  }, {});
+}
+
+export function convertExperimentsArrays(experiment, origin, experiments, path = ''): IExperimentDetail {
   const convertedExperiment: IExperimentDetail = {};
+  let counter = 1;
   Object.keys(experiment).forEach(key => {
+      const newPath = `${path}.${key}`;
       switch (key) {
         case 'installed_packages':
           convertedExperiment[key] = convertInstalledPackages(experiment[key]);
@@ -108,16 +141,35 @@ export function convertExperimentsArrays(experiment, origin, experiments): IExpe
         case 'uncommitted_changes':
           convertedExperiment[key] = convertUncommittedChanges(experiment[key]);
           break;
+        case 'tags':
+          convertedExperiment[key] = experiment[key];
+          break;
+        case 'configuration':
+          convertedExperiment[key] = convertConfiguration(experiment[key], origin);
+          break;
         default:
-          if (isObject(experiment[key]) && (!isArrayOrderNotImportant(experiment[key], key, experiments))) {
-            convertedExperiment[key] = convertExperimentsArrays(experiment[key], origin ? origin[key] : null, experiments.map(exp => exp ? exp[key] : null));
+          const alternativeConvertedExperiment = getAlternativeConvertedExperiment(newPath, experiment[key]);
+          if (alternativeConvertedExperiment) {
+            convertedExperiment[key] = alternativeConvertedExperiment;
+          } else if (isObject(experiment[key]) && (!isArrayOrderNotImportant(experiment[key], key, experiments))) {
+            let newKey = getDisplayTextForTitles(experiment[key], newPath) || key;
+
+            // Makes base/origin rows first
+            if (origin && Array.isArray(origin) && origin.map(item => getDisplayTextForTitles(item, newPath)).includes(newKey)) {
+              newKey = `0${newKey}`;
+            }
+            convertedExperiment[newKey] = convertExperimentsArrays(experiment[key], origin ? origin[key] : null, experiments.map(exp => exp ? exp[key] : null), newPath);
           } else if (isArrayOrderNotImportant(experiment[key], key, experiments)) {
             const hashedObj = {};
             experiment[key].forEach(item => {
-              const convertedItemHash = convertToHashItem(item, origin && origin[key]);
+              let convertedItemHash = convertToHashItem(item, origin && (Array.isArray(origin) ? (origin.map(item => item[key]) as any).flat() : origin[key]), newPath);
+              if (hashedObj[convertedItemHash]) {
+                convertedItemHash = `${counter}${convertedItemHash}`;
+                counter++;
+              }
               if (isObject(item)) {
                 hashedObj[convertedItemHash] =
-                  convertExperimentsArrays(item, origin ? origin[key] : null, experiments.map(exp => exp ? exp[key] : null));
+                  convertExperimentsArrays(item, origin ? origin[key] : null, experiments.map(exp => exp ? exp[key] : null), newPath);
               } else {
                 hashedObj[convertedItemHash] = item;
               }
@@ -130,6 +182,13 @@ export function convertExperimentsArrays(experiment, origin, experiments): IExpe
     }
   );
   return convertedExperiment;
+}
+
+export function convertExperimentsArraysParams(experiment, origin): IExperimentDetail {
+  return Object.keys(experiment).reduce((acc, key) => {
+    acc[key] = key === 'hyperparams' ? convertHyperParams(experiment[key], origin.hyperparams) : experiment[key];
+    return acc;
+  }, {} as IExperimentDetail);
 }
 
 function abSort(obj) {
@@ -149,6 +208,16 @@ function sortObject(obj, origin, parentKey: string) {
     }
   });
   return orderedObj;
+}
+
+export function isDetailsConverted(exp) {
+  return exp.execution?.installed_packages && !Array.isArray(exp.execution?.installed_packages)
+}
+
+export function isParamsConverted(hyperparams) {
+  const firstKey = hyperparams && Object.keys(hyperparams)[0];
+  const firstParam = firstKey && Object.values(hyperparams[firstKey])[0];
+  return typeof firstParam === 'string';
 }
 
 export function getAllKeysEmptyObject(jsons) {

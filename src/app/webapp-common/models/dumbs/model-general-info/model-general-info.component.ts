@@ -5,15 +5,17 @@ import {NA} from '../../../../app.constants';
 import {TAGS} from '../../../tasks/tasks.constants';
 import {DatePipe} from '@angular/common';
 import {TIME_FORMAT_STRING} from '../../../constants';
+import {Store} from '@ngrx/store';
+import {ActivateModelEdit, CancelModelEdit} from '../../actions/models-info.actions';
 
 @Component({
-  selector       : 'sm-model-general-info',
-  templateUrl    : './model-general-info.component.html',
-  styleUrls      : ['./model-general-info.component.scss'],
+  selector: 'sm-model-general-info',
+  templateUrl: './model-general-info.component.html',
+  styleUrls: ['./model-general-info.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ModelGeneralInfoComponent {
-  constructor(private datePipe: DatePipe) {
+  constructor(private datePipe: DatePipe, private store: Store<any>) {
   }
 
   public kpis;
@@ -33,8 +35,8 @@ export class ModelGeneralInfoComponent {
         {label: 'USER', value: getOr(NA, 'user.name', model)},
         {
           label: 'CREATING EXPERIMENT', value: getOr(false, 'task.name', model),
-          href : `/projects/${getOr('*', 'task.project.id', model)}/experiments/${getOr('', 'task.id', model)}`,
-          task : getOr(false, 'task.id', model)
+          href: `/projects/${getOr('*', 'task.project.id', model)}/experiments/${getOr('', 'task.id', model)}`,
+          task: getOr(false, 'task.id', model)
         },
         {label: 'ARCHIVED', value: model && model.system_tags && model.system_tags.includes(TAGS.HIDDEN) ? 'Yes' : 'No'},
         {label: 'PROJECT', value: getOr(NA, 'project.name', model)},
@@ -59,5 +61,13 @@ export class ModelGeneralInfoComponent {
 
   onShowModel() {
     this.showModel.emit(this.model);
+  }
+
+  editExperimentComment(edit) {
+    edit && this.store.dispatch(new ActivateModelEdit('ModelComment'));
+  }
+
+  cancelEdit() {
+    this.store.dispatch(new CancelModelEdit());
   }
 }

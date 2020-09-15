@@ -8,14 +8,14 @@
       </div>
       <span class="view-only d-inline" *ngIf="viewOnly === true">  (view only) </span>
     </div>
-    <div>
-      <button *ngIf="showMaximize" class="btn btn-icon" (click)="maximizedClicked.emit()"
-        smTooltip="View full screen" position="left">
-        <i class="icon i-info-maximize"></i>
-      </button>
-      <button class="btn btn-icon" (click)="closeInfoClicked.emit()">
-        <i class="icon i-dialog-x pointer"></i>
-      </button>
+    <div class="right-buttons d-flex align-items-center">
+      <div *ngIf="showMaximize"  (click)="maximizedClicked.emit()"
+        smTooltip="View full screen" position="left" class="ico-container">
+        <i class="al-icon al-ico-info-max pointer"></i>
+      </div>
+      <div (click)="closeInfoClicked.emit()" class="d-flex align-items-center ico-container">
+        <i class="al-icon al-ico-dialog-x pointer"></i>
+      </div>
     </div>
   </div>
 </div>

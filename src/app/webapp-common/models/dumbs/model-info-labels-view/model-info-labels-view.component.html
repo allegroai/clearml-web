@@ -1,5 +1,5 @@
 <sm-editable-section
-  [editable]=" ! model?.ready"
+  [editable]=" ! model?.ready && model.company?.id"
   [saving]="saving"
   (activateEditClicked)="activateEdit()"
   (saveClicked)="saveClicked()"
@@ -43,13 +43,13 @@
             </div>
 
             <div class="input-container col-2 remove-step">
-              <i (click)="removeRow(i)" class="icon i-trash sm-md pointer flashing-icon mb-2"></i>
+              <i (click)="removeRow(i)" class="al-icon al-ico-trash al-color blue-300 sm-md pointer flashing-icon mb-2"></i>
             </div>
           </div>
         </div>
       </div>
     </form>
-    <button *ngIf="editable" class="btn btn-primary" (click)="addRow()"><i class="icon sm i-plus-blue"></i>
+    <button *ngIf="editable" class="btn btn-primary" (click)="addRow()"><i class="al-icon al-color blue-400 msm al-ico-plus"></i>
     </button>
     <div *ngIf="!editable">
 

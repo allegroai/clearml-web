@@ -16,10 +16,10 @@ export class QueuesTableComponent implements OnInit {
   public menuOpen: boolean;
   @Input() queues: Array<Queue>;
   @Input() selectedQueue: Queue;
-  @Output() queueSelected                 = new EventEmitter();
-  @Output() deleteQueue                   = new EventEmitter();
-  @Output() renameQueue                   = new EventEmitter();
-  @Output() sortedChanged                 = new EventEmitter<{ sortOrder: TableSortOrderEnum, colId: ISmCol['id'] }>();
+  @Output() queueSelected = new EventEmitter();
+  @Output() deleteQueue = new EventEmitter();
+  @Output() renameQueue = new EventEmitter();
+  @Output() sortedChanged = new EventEmitter<{ sortOrder: TableSortOrderEnum, colId: ISmCol['id'] }>();
   @Input() tableSortField: string;
   @Input() tableSortOrder: number;
   @ViewChild('tableContainer', {static: true}) tableContainer;
@@ -36,31 +36,35 @@ export class QueuesTableComponent implements OnInit {
   constructor(private changeDetector: ChangeDetectorRef) {
     this.cols = [
       {
-        id            : QUEUES_TABLE_COL_FIELDS.NAME,
-        headerType: ColHeaderTypeEnum.sort,
-        header        : 'QUEUE',
-        style         : {width: '25%', minWidth: '500px'},
-        sortable      : true
+        id         : QUEUES_TABLE_COL_FIELDS.NAME,
+        headerType : ColHeaderTypeEnum.sort,
+        header     : 'QUEUE',
+        style      : {width: '25%', minWidth: '500px'},
+        sortable   : true,
+        disableDrag: true,
       },
       {
-        id      : QUEUES_TABLE_COL_FIELDS.TASK,
-        headerType: ColHeaderTypeEnum.sort,
-        header  : 'NEXT EXPERIMENT',
-        style   : {width: '35%', minWidth: '800px'},
-        sortable: true
+        id         : QUEUES_TABLE_COL_FIELDS.TASK,
+        headerType : ColHeaderTypeEnum.sort,
+        header     : 'NEXT EXPERIMENT',
+        style      : {width: '35%', minWidth: '800px'},
+        sortable   : true,
+        disableDrag: true,
       },
       {
-        id      : QUEUES_TABLE_COL_FIELDS.LAST_UPDATED,
-        headerType: ColHeaderTypeEnum.sort,
-        header  : 'LAST UPDATED',
-        style   : {width: '25%', minWidth: '400px'},
-        sortable: true
+        id         : QUEUES_TABLE_COL_FIELDS.LAST_UPDATED,
+        headerType : ColHeaderTypeEnum.sort,
+        header     : 'LAST UPDATED',
+        style      : {width: '25%', minWidth: '400px'},
+        sortable   : true,
+        disableDrag: true,
       },
       {
-        id      : QUEUES_TABLE_COL_FIELDS.IN_QUEUE,
-        headerType: ColHeaderTypeEnum.sort,
-        header  : 'IN QUEUE',
-        sortable: true
+        id         : QUEUES_TABLE_COL_FIELDS.IN_QUEUE,
+        headerType : ColHeaderTypeEnum.sort,
+        header     : 'IN QUEUE',
+        sortable   : true,
+        disableDrag: true,
       }
     ];
   }
@@ -91,7 +95,7 @@ export class QueuesTableComponent implements OnInit {
     this.menuOpen = false;
     setTimeout(() => {
       this.menuPosition = {x: data.e.clientX, y: data.e.clientY};
-      this.menuOpen     = true;
+      this.menuOpen = true;
       this.changeDetector.detectChanges();
     }, 0);
 

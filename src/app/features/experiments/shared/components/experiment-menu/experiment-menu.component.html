@@ -1,4 +1,4 @@
-<div *ngIf="showButton" mat-button [matMenuTriggerFor]="experimentMenu" class="p-0 cell menu-button btn icon sm i-list-view"></div>
+<div *ngIf="showButton" mat-button [matMenuTriggerFor]="experimentMenu" class="p-0 cell menu-button btn al-icon sm-md al-ico-bars-menu al-color light-grey-blue"></div>
 <div *ngIf="!showButton" #contextTrigger
      style="visibility: hidden; position: fixed"
      [style.left.px]="position.x"
@@ -13,10 +13,10 @@
     <i [class]="'fa '+ ICONS.QUEUED"></i>Manage Queue
   </button>
   <button mat-menu-item (click)="viewWorkerClicked()" [disabled]="experiment?.status !== TaskStatusEnum.InProgress">
-    <i [class]="'fa '+ ICONS.WORKER"></i>View worker
+    <i [class]="'fa '+ ICONS.WORKER"></i>View Worker
   </button>
   <hr>
-  <button mat-menu-item (click)="restoreArchivePopup()" [disabled]="isExample">
+  <button mat-menu-item (click)="restoreArchive()" [disabled]="isExample">
     <i [class]="'fa ' + (experiment && experiment?.system_tags && experiment?.system_tags.includes('archived') ? ICONS.SHOW : ICONS.HIDE)"></i>
     {{experiment?.system_tags && experiment?.system_tags.includes('archived') ? 'Restore from archive' : 'Archive' + (numSelected > 1 ? ' (' + numSelected + ' items)' : '')}}
   </button>
@@ -36,7 +36,11 @@
     <i [class]="'fa ' + ICONS.PUBLISHED"></i>Publish
   </button>
   <hr>
-  <button mat-menu-item [matMenuTriggerFor]="tagMenu" (menuOpened)="tagMenuOpened()" (menuClosed)="tagMenuContent.clear()">
+  <button mat-menu-item
+          [matMenuTriggerFor]="tagMenu"
+          [disabled]="isExample"
+          (menuOpened)="tagMenuOpened()"
+          (menuClosed)="tagMenuContent.clear()">
     <i class="fas fa-tag rotate-135"></i>
     <span>{{'Add Tag' + (numSelected > 1 ? ' (' + numSelected + ' items)' : '')}}</span>
   </button>
@@ -45,7 +49,7 @@
     <i class="fa fa-clone"></i>Clone
   </button>
   <button mat-menu-item (click)="moveToProjectPopup()" [disabled]="isExample">
-    <i class="fa fa-arrow-right"></i>Move To Project
+    <i class="fa fa-arrow-right"></i>Move to Project
   </button>
 </mat-menu>
 

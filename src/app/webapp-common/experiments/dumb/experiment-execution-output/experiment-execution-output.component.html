@@ -2,7 +2,7 @@
   <sm-labeled-row label="DESTINATION">
     <sm-input-group fieldName="destination"
                     [isReadonly]="!editable"
-                    [formData]="formData.destination"
+                    [formData]="formData?.destination"
                     (formDataChanged)="fieldValueChanged($event)"
     >
     </sm-input-group>
@@ -10,7 +10,7 @@
   <sm-labeled-row label="LOG LEVEL">
     <sm-input-group
       fieldName="logLevel"
-      [formData]="formData.logLevel"
+      [formData]="formData?.logLevel"
       [isReadonly]="!editable"
       (formDataChanged)="fieldValueChanged($event)"
     ></sm-input-group>

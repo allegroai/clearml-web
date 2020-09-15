@@ -44,9 +44,11 @@
     <div class="col-12">
       <sm-vertical-labeled-row label="Worker Name">{{selectedWorker?.id ? selectedWorker?.id : '—' }}</sm-vertical-labeled-row>
       <sm-vertical-labeled-row label="Update Time">{{selectedWorker?.last_report_time | timeAgo}}</sm-vertical-labeled-row>
-      <sm-vertical-labeled-row label="Current Experiment"><a
-        [href]="'/projects/'+ ((selectedWorker?.task?.project?.id) ? selectedWorker?.task?.project?.id : '*') + '/experiments/' + selectedWorker?.task?.id"
-        target="_blank">{{selectedWorker?.task?.name ? selectedWorker?.task?.name : '—'}}</a></sm-vertical-labeled-row>
+      <sm-vertical-labeled-row label="Current Experiment">
+        <a *ngIf="selectedWorker?.task?.name ; else notRelevant" [href]="'/projects/'+ ((selectedWorker?.task?.project?.id) ? selectedWorker?.task?.project?.id : '*') + '/experiments/' + selectedWorker?.task?.id"
+        target="_blank">{{selectedWorker?.task?.name}}</a>
+        <ng-template #notRelevant>—</ng-template>
+      </sm-vertical-labeled-row>
     </div>
     <div class="col-12">
       <sm-vertical-labeled-row label="Experiment Run Time">{{selectedWorker?.task?.running_time ? (selectedWorker?.task?.running_time | msToSec) : '—'}}</sm-vertical-labeled-row>

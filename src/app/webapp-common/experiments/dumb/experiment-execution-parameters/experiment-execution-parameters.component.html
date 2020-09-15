@@ -1,56 +1,70 @@
-<form #hyperParameters="ngForm">
-  <div [hidden]="!editable">
-    <ng-template ngFor let-parameter [ngForOf]="form" let-index="index">
-      <div class="row w-100">
-        <div class="input-container col-11">
-          <mat-form-field [hintLabel]="parameterKey.invalid && parameterKey?.errors?.required? '*Required': ''" appearance="outline" class="strength w-100">
-            <input
-                #parameterKey="ngModel"
-                [(ngModel)]="parameter.key"
-                (blur)="parameter.key=parameter.key.trim()"
-                name="parameterKey-{{parameter.id}}"
-                matInput
-                required/>
-            <mat-error *ngIf="parameterKey.invalid && parameterKey?.errors?.required">
-              Required
-            </mat-error>
-            <mat-error *ngIf="parameterKey.invalid && parameterKey?.errors?.smNotAllowedStringsValidator">
-              .(dot) $(dollar) and space are not allowed in parameter key.
-            </mat-error>
-          </mat-form-field>
-
-
-        </div>
-        <div class="input-container col-11">
-          <mat-form-field appearance="outline" class="strength w-100">
-            <input
-                #parameterLabel="ngModel"
-                [(ngModel)]="parameter.label"
-                name="parameterLabel-{{parameter.id}}"
-                matInput/>
-          </mat-form-field>
-
-        </div>
-        <div class="input-container col-2 remove-step">
-          <i (click)="removeRow(index)" class="icon i-trash sm-md pointer flashing-icon mb-2"></i>
+<form [class.editable]="editable" #hyperParameters="ngForm">
+  <cdk-virtual-scroll-viewport #formContainer class="form-container" itemSize="73" minBufferPx="280" maxBufferPx="560">
+    <ng-container *ngIf="editable">
+      <div *ngFor="let parameter of formData; let index= index" class="w-100 d-flex">
+        <mat-form-field
+          [hintLabel]="parameterKey.invalid && parameterKey?.errors?.required? '*Required': ''"
+          appearance="outline"
+          class="strength ">
+          <input
+            #parameterKey="ngModel"
+            [(ngModel)]="parameter['name']"
+            placeholder="Parameter"
+            name="parameterKey-{{parameter.id}}"
+            matInput
+            smUniqueNameValidator
+            [existingNames]="formNames(parameter.id)"
+            [smNotAllowedStringsValidator]="['.', '$']"
+            required/>
+          <mat-error *ngIf="parameterKey.invalid && parameterKey?.errors?.required">
+            Required
+          </mat-error>
+          <mat-error *ngIf="parameterKey.invalid && parameterKey?.errors?.smNotAllowedStringsValidator">
+            .(dot) $(dollar) and space are not allowed in parameter key.
+          </mat-error>
+          <mat-error *ngIf="parameterKey.invalid && parameterKey?.errors?.uniqueName">
+            key already exists
+          </mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="strength">
+          <input
+            #parameterValue="ngModel"
+            [(ngModel)]="parameter['value']"
+            name="parameterValue-{{parameter.id}}"
+            placeholder="Value"
+            matInput/>
+        </mat-form-field>
+        <div class="remove-step">
+          <i (click)="removeRow(index)" class="al-icon al-ico-trash al-color blue-300 sm-md pointer flashing-icon mb-2"></i>
         </div>
       </div>
-    </ng-template>
-  </div>
+    </ng-container>
+  </cdk-virtual-scroll-viewport>
 </form>
-<button *ngIf="editable" class="btn btn-primary" (click)="addRow()"><i class="icon sm i-plus-blue"></i>
-</button>
-<div *ngIf="!editable">
-  <sm-simple-table-2 [cols]="cols" [rowsData]="formData">
-    <ng-template
-      let-col
-      let-i="rowIndex"
-      let-row="row">
-      <div class="row w-100 param-row">
-        <div class="input-container col-11"><span class="allow-multi-space" smTooltip="{{row.key}}">{{row.key}}</span></div>
-        <div class="input-container col-13"><span class="allow-multi-space" smTooltip="{{row.label}}">{{row.label}}</span></div>
-      </div>
+<button *ngIf="editable" class="btn btn-dark-fill add-parameter" (click)="addRow()"><i class="fas fa-plus"></i> ADD PARAMETER</button>
+<div class="table-container" *ngIf="!editable">
+  <sm-table
+    [columns]="cols"
+    [tableData]="formData"
+    [resizableColumns]="true"
+    [noHeader]="true"
+    [simple]="true"
+    [virtualScroll]="true"
+    rowHeight="32"
+    (rowClicked)="rowActivated($event)"
+  >
+    <ng-template pTemplate="body"
+                 let-col
+                 let-i="rowIndex"
+                 let-row="rowData">
+      <ng-container *ngIf="col.id === 'description'; else defaultRow">
+        <span *ngIf="row.type!=='legacy' && (row.description || row.type)" class="allow-multi-space pointer" customClass="hyper-parameters-tooltip parameter-tooltip"
+              smTooltip="{{(row.type ? ('Type: '+ row.type+'\n') : '') + (row?.description|| '')}}"><i class="al-icon al-ico-description"></i></span>
+      </ng-container>
+      <ng-template #defaultRow>
+        <span class="allow-multi-space" [class.name]="col.id==='name'" smTooltip="{{row[col.id]}}">{{row[col.id]}}</span>
+      </ng-template>
     </ng-template>
-  </sm-simple-table-2>
+  </sm-table>
 </div>
 

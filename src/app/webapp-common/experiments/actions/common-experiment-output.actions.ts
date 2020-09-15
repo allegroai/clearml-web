@@ -1,6 +1,7 @@
 import {Action, createAction, props} from '@ngrx/store';
 import {ISelectedExperiment} from '../../../features/experiments/shared/experiment-info.model';
 import {IExperimentSettings} from '../reducers/common-experiment-output.reducer';
+import {ScalarKeyEnum} from '../../../business-logic/model/events/scalarKeyEnum';
 
 export const EXPERIMENTS_OUTPUT_PREFIX = 'EXPERIMENTS_OUTPUT_';
 
@@ -56,7 +57,7 @@ export class ExperimentScalarRequested implements Action {
 export class SetExperimentHistogram implements Action {
   readonly type = SET_EXPERIMENT_HISTOGRAM;
 
-  constructor(public payload: any) {
+  constructor(public payload: any, public axisType: ScalarKeyEnum) {
   }
 }
 
@@ -67,19 +68,15 @@ export class SetExperimentPlots implements Action {
   }
 }
 
-export class GetExperimentLog implements Action {
-  readonly type = GET_EXPERIMENT_LOG;
+export const getExperimentLog = createAction(
+  GET_EXPERIMENT_LOG,
+  props<{id: string; direction?: string; refresh?: boolean; from?: number}>()
+);
 
-  constructor(public payload: ISelectedExperiment['id']) {
-  }
-}
-
-export class SetExperimentLog implements Action {
-  readonly type = SET_EXPERIMENT_LOG;
-
-  constructor(public events: Array<any>, public scrollID: string) {
-  }
-}
+export const setExperimentLog = createAction(
+  SET_EXPERIMENT_LOG,
+  props<{events: any[]; direction?: string; total: number; refresh?: boolean}>()
+);
 
 export class SetExperimentSettings implements Action {
   readonly type = UPDATE_EXPERIMENT_SETTINGS;

@@ -22,10 +22,11 @@ import {decodeFilter, decodeOrder} from '../shared/utils/tableParamEncode';
 import * as modelsActions from './actions/models-view.actions';
 import {MODELS_TABLE_COLS, ModelsViewModesEnum} from './models.consts';
 import * as modelsSelectors from './reducers';
-import {selectModelsHiddenTableCols, selectModelsUsers} from './reducers';
+import {selectModelsFrameworks, selectModelsHiddenTableCols, selectModelsTags, selectModelsUsers} from './reducers';
 import {IModelsViewState} from './reducers/models-view.reducer';
 import {ITableModel, ModelTableColFieldsEnum} from './shared/models.model';
 import {User} from '../../business-logic/model/users/user';
+import * as experimentsActions from '../experiments/actions/common-experiments-view.actions';
 
 
 @Component({
@@ -68,6 +69,7 @@ export class ModelsComponent extends BaseEntityPage implements OnInit, OnDestroy
   public tableCols = MODELS_TABLE_COLS;
   public filteredTableCols= MODELS_TABLE_COLS;
   private hiddenTableColsSub: Subscription;
+  public frameworks$: Observable<Array<string>>;
 
 
   constructor(
@@ -90,9 +92,10 @@ export class ModelsComponent extends BaseEntityPage implements OnInit, OnDestroy
     this.activeSectionEdit$ = this.store.select(modelsSelectors.selectActiveSectionEdit);
     this.tableColsOrder$ = this.store.select(modelsSelectors.selectModelsTableColsOrder);
     this.selectedProjectId$ = this.store.select(selectRouterParams).pipe(map(params => get('projectId', params)));
-    this.tags$ = this.store.select(selectProjectTags);
+    this.tags$ = this.store.select(selectModelsTags);
     this.systemTags$ = this.store.select(selectProjectSystemTags);
     this.users$ = this.store.select(selectModelsUsers);
+    this.frameworks$ = this.store.select(selectModelsFrameworks);
     this.hiddenTableCols$ = this.store.select(selectModelsHiddenTableCols);
 
     this.models$ = this.store.select(modelsSelectors.selectModelsList).pipe(
@@ -115,7 +118,7 @@ export class ModelsComponent extends BaseEntityPage implements OnInit, OnDestroy
         tableCol.hidden = hiddenCols[tableCol.id];
         return tableCol;
       });
-      this.filteredTableCols = MODELS_TABLE_COLS.filter(tableCol=> !hiddenCols[tableCol.id])
+      this.filteredTableCols = MODELS_TABLE_COLS.filter(tableCol=> !hiddenCols[tableCol.id]);
     });
 
     this.selectedModelSubs = combineLatest([
@@ -176,6 +179,8 @@ export class ModelsComponent extends BaseEntityPage implements OnInit, OnDestroy
     this.selectModelFromUrl();
     this.syncAppSearch();
     this.store.dispatch(modelsActions.getUsers());
+    this.store.dispatch(modelsActions.getFrameworks());
+    this.store.dispatch(modelsActions.getTags());
     this.store.dispatch(getTags());
   }
 
@@ -207,7 +212,7 @@ export class ModelsComponent extends BaseEntityPage implements OnInit, OnDestroy
   }
 
   selectModelFromUrl() {
-    this.ModelFromUrlSub = combineLatest(this.store.pipe(select(selectRouterParams), map(params => get('modelId', params))), this.models$)
+    this.ModelFromUrlSub = combineLatest([this.store.pipe(select(selectRouterParams), map(params => get('modelId', params))), this.models$])
       .pipe(
         map(([modelId, models]) => models.find(model => model.id === modelId))
       )
@@ -251,11 +256,11 @@ export class ModelsComponent extends BaseEntityPage implements OnInit, OnDestroy
   }
 
   archiveModels() {
-    this.store.dispatch(new modelsActions.ArchivedSelectedModels(this.projectId));
+    this.store.dispatch(new modelsActions.ArchivedSelectedModels());
   }
 
   restoreModels() {
-    this.store.dispatch(new modelsActions.RestoreSelectedModels(this.projectId));
+    this.store.dispatch(new modelsActions.RestoreSelectedModels());
   }
 
   onSearchValueChanged(value: string) {
@@ -322,6 +327,6 @@ export class ModelsComponent extends BaseEntityPage implements OnInit, OnDestroy
   }
 
   refreshTagsList() {
-    this.store.dispatch(getTags());
+    this.store.dispatch(modelsActions.getTags());
   }
 }

@@ -7,7 +7,7 @@
     padding-left: 6px;
 
     &:hover {
-      background: #8492c2;
+      background: $blue-300;
       background-clip: content-box;
     }
   }
@@ -26,6 +26,10 @@
     background-color: #8492c2;
   }
 
+  /deep/ .ui-table-scrollable-view .ui-table-scrollable-body {
+    flex: 1 1 0 !important;
+  }
+
   .selected-col-header {
     pointer-events: none;
   }
@@ -38,7 +42,6 @@
 
   .load-more-wrapper {
     padding: 32px 0 12px 0;
-    text-align: center;
 
     button {
       padding: 8px 40px;
@@ -60,22 +63,38 @@
 
   .no-data {
     text-align: center;
-    padding-top: 25px;
+    padding: 15px 0 10px 0;
     font-size: 14px;
   }
 
   tr {
-    &:hover:not(.header):not(.selected):not(.no-data-row) {
-      background-color: $blue-600;
+    transition: height 0.5s cubic-bezier(.55,.06,.68,.19);
+    &:hover:not(.header):not(.selected):not(.no-data-row):not(.simple) {
+      background-color: $blue-650;
+    }
+
+    &.checked:not(.header):not(.selected):not(.no-data-row):not(.simple) {
+      background-color: $blue-500;
+      .td{
+        border-bottom-color: $blue-600;
+      }
+
+      &:hover, &.contexted {
+        background-color: $blue-550;
+      }
     }
 
     &.selected {
-      background-color: $purple;
+      .td{
+        border-bottom-color: $blue-600;
+      }
+      background-color: $blue-400;
+
+      &:hover {
+        background-color: $blue-480;
+      }
     }
 
-    &.even:not(.selected):not(:hover) {
-      background-color: $blue-700;
-    }
 
     &.header {
       height: 48px;
@@ -87,6 +106,7 @@
       background-color: $blue-700;
       vertical-align: middle;
       color: $blue-300;
+      border-bottom: 1px solid $blue-600;
 
       .col-header {
         text-align: left !important;
@@ -105,22 +125,31 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      &:not(.no-data):not(.load-more-wrapper){
+        border-bottom: 1px solid #303443;
+        &.simple{
+          border-bottom-color: $blue-100;
+
+        }
+      }
+
+
 
       &.no-data {
-        color: $cloudy-blue;
+        color: $blue-250;
         text-align: center;
-        padding-top: 25px;
+        padding: 15px 0 10px 0;;
       }
     }
   }
 
   :host-context(.light-theme) {
     tr {
-      &:hover:not(.header):not(.no-data-row) {
+      &:hover:not(.header):not(.no-data-row):not(.simple) {
         background-color: $blue-100;
       }
 
-      &.even:not(.selected):not(:hover) {
+      &:not(.even):not(.selected):not(.no-data-row):not(:hover):not(.simple) {
         background-color: $blue-50;
       }
 
@@ -134,13 +163,12 @@
         background-color: white;
         color: $blue-400;
         font-weight: 500;
-        border-bottom: 1px solid #364164;
-
+        border-bottom: none;
       }
 
       td {
         color: $blue-400;
-
+        border-bottom: none;
         &.no-data {
           color: $blue-300;
         }

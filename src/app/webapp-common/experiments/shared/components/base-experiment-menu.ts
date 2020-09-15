@@ -40,9 +40,9 @@ import * as experimentsActions from '../../actions/common-experiments-view.actio
   template: ''
 })
 export class BaseExperimentMenuComponent extends BaseContextMenuComponent {
-  readonly ICONS          = ICONS;
+  readonly ICONS = ICONS;
   readonly TaskStatusEnum = TaskStatusEnum;
-  readonly TaskTypeEnum   = TaskTypeEnum;
+  readonly TaskTypeEnum = TaskTypeEnum;
 
   public isExample: boolean;
   protected _experiment: ISelectedExperiment;
@@ -63,54 +63,20 @@ export class BaseExperimentMenuComponent extends BaseContextMenuComponent {
     super(store, eRef);
   }
 
-  public restoreArchivePopup() {
-    const isArchived = this._experiment.system_tags && this._experiment.system_tags.includes('archived');
-    let title: string, bodyName: string;
-    if (this.numSelected > 1) {
-      title = isArchived ? `Restore ${this.numSelected} experiments` : `Archive ${this.numSelected} experiments`;
-      bodyName = `${this.numSelected} Experiments`;
-    } else {
-      title = isArchived ? 'Restore experiment' : 'Archive experiment';
-      bodyName = htmlTextShorte(this._experiment?.name || '');
-    }
-    const confirmDialogRef: MatDialogRef<any, boolean> = this.dialog.open(ConfirmDialogComponent, {
-      data: {
-        title,
-        body     : `<b>${bodyName}</b> will be ${
-          isArchived ? 'restored. It will be visible using "Exit Archive".'
-            : 'archived. It will be visible using "Open Archive"'
-        }.`,
-        yes      : isArchived ? 'Restore from archive' : 'Archive',
-        no       : 'keep',
-        iconClass: 'i-archive',
-      }
-    });
-
-    confirmDialogRef.afterClosed().subscribe((confirmed) => {
-      if (confirmed) {
-        this.restoreArchive();
-      }
-    });
-  }
-
   public getProjectId() {
     const params = this.syncSelector.selectSync(selectRouterParams);
     return get('projectId', params);
   }
 
-  private restoreArchive() {
+  public restoreArchive() {
+    //info header case
+    if (this.showButton) {
+      this.store.dispatch(new experimentsActions.SetSelectedExperiments([this._experiment as any]));
+    }
     if (this._experiment.system_tags && this._experiment.system_tags.includes('archived')) {
-      if (this.numSelected > 1) {
-        this.store.dispatch(new experimentsActions.RestoreSelectedExperiments({projectId: this.getProjectId()}));
-      } else {
-        this.store.dispatch(new commonMenuActions.RestoreClicked({experiment: this._experiment, selectedExperiment: this.selectedExperiment, projectId: this.getProjectId()}));
-      }
+      this.store.dispatch(new experimentsActions.RestoreSelectedExperiments({}));
     } else {
-      if (this.numSelected > 1) {
-        this.store.dispatch(new experimentsActions.ArchivedSelectedExperiments({projectId: this.getProjectId()}));
-      } else {
-        this.store.dispatch(new commonMenuActions.ArchiveClicked({experiment: this._experiment, selectedExperiment: this.selectedExperiment, projectId: this.getProjectId()}));
-      }
+      this.store.dispatch(new experimentsActions.ArchivedSelectedExperiments({}));
     }
   }
 
@@ -136,9 +102,9 @@ export class BaseExperimentMenuComponent extends BaseContextMenuComponent {
 
   enqueuePopup() {
     const selectQueueDialog: MatDialogRef<SelectQueueComponent, { confirmed: boolean; queue: Queue }> =
-            this.dialog.open(SelectQueueComponent, {
-              data: {taskId: this._experiment.id, reference: this._experiment.name}
-            });
+      this.dialog.open(SelectQueueComponent, {
+        data: {taskId: this._experiment.id, reference: this._experiment.name}
+      });
 
     selectQueueDialog.afterClosed().subscribe((res) => {
       if (res && res.confirmed) {
@@ -153,10 +119,10 @@ export class BaseExperimentMenuComponent extends BaseContextMenuComponent {
     this.store.dispatch(new GetQueuesForEnqueue());
     const confirmDialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
-        title    : 'Dequeue Experiment',
-        body     : getBody(null),
-        yes      : 'Dequeue',
-        no       : 'Cancel',
+        title: 'Dequeue Experiment',
+        body: getBody(null),
+        yes: 'Dequeue',
+        no: 'Cancel',
         iconClass: 'i-alert',
       }
     });
@@ -190,17 +156,17 @@ export class BaseExperimentMenuComponent extends BaseContextMenuComponent {
 
   public resetPopup() {
     const devWarning: boolean = isDevelopment(this._experiment);
-    const body                = `<b>${htmlTextShorte(this._experiment?.name || '')}</b>
+    const body = `<b>${htmlTextShorte(this._experiment?.name || '')}</b>
 will be reset.<br>
 Resetting an experiment deletes all of its data, including statistics, debug samples, logs, and temporary models.` +
       (devWarning ? `<br><br><b>Note: this is a DEV experiment</b> Any subsequent runs of the experiment will overwrite any changes made to it in the Web-App.<br>
 To avoid this, <b>clone the experiment</b> and work with the cloned experiment.` : '');
-    const confirmDialogRef    = this.dialog.open(ConfirmDialogComponent, {
+    const confirmDialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
-        title    : 'RESET',
-        body     : body,
-        yes      : 'Reset',
-        no       : 'Cancel',
+        title: 'RESET',
+        body: body,
+        yes: 'Reset',
+        no: 'Cancel',
         iconClass: 'i-alert',
       }
     });
@@ -218,13 +184,13 @@ To avoid this, <b>clone the experiment</b> and work with the cloned experiment.`
   public stopPopup() {
     const confirmDialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
-        title    : 'ABORT',
-        body     : `<b>${htmlTextShorte(this._experiment?.name || '')}</b> will be stopped and
+        title: 'ABORT',
+        body: `<b>${htmlTextShorte(this._experiment?.name || '')}</b> will be stopped and
                 additional model updates will not be allowed.<br>
                 `,
-        yes      : 'Abort',
-        no       : 'Cancel',
-        iconClass: 'i-archive',
+        yes: 'Abort',
+        no: 'Cancel',
+        iconClass: 'al-icon al-ico-archive al-color',
       }
     });
     confirmDialogRef.afterClosed().subscribe((confirmed) => {
@@ -244,10 +210,10 @@ To avoid this, <b>clone the experiment</b> and work with the cloned experiment.`
   public publishPopup() {
     const confirmDialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
-        title    : 'PUBLISH',
-        body     : this.publishPopupBody,
-        yes      : 'Publish',
-        no       : 'Cancel',
+        title: 'PUBLISH',
+        body: this.publishPopupBody,
+        yes: 'Publish',
+        no: 'Cancel',
         iconClass: 'd-block fas fa-cloud-upload-alt fa-7x w-auto',
       }
     });
@@ -267,8 +233,8 @@ To avoid this, <b>clone the experiment</b> and work with the cloned experiment.`
       data: {
         currentProject: get('project.id', this._experiment) || this.getProjectId(),
         defaultProject: get('project.id', this._experiment),
-        reference     : this._experiment.name,
-        type          : 'experiment'
+        reference: this._experiment.name,
+        type: 'experiment'
       }
     });
     dialog.afterClosed().pipe(filter(project => !!project)).subscribe(project => {
@@ -291,9 +257,9 @@ To avoid this, <b>clone the experiment</b> and work with the cloned experiment.`
   clonePopup() {
     const confirmDialogRef = this.dialog.open(CloneDialogComponent, {
       data: {
-        type          : 'Experiment',
+        type: 'Experiment',
         defaultProject: get('project.id', this._experiment),
-        defaultName   : this._experiment.name
+        defaultName: this._experiment.name
       }
     });
 

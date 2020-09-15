@@ -4,7 +4,7 @@ import {selectBackdropActive} from '../../../core/reducers/view-reducer';
 import {combineLatest, Observable, Subscription} from 'rxjs';
 import {IExperimentInfoState} from '../../../../features/experiments/reducers/experiment-info.reducer';
 import {selectExperimentModelInfoData} from '../../reducers';
-import {selectExperimentInfoData} from '../../../../features/experiments/reducers';
+import {selectExperimentInfoData, selectIsExperimentEditable} from '../../../../features/experiments/reducers';
 import {IExperimentInfo} from '../../../../features/experiments/shared/experiment-info.model';
 import {selectRouterConfig, selectRouterParams} from '../../../core/reducers/router-reducer';
 import {map} from 'rxjs/operators';
@@ -29,10 +29,12 @@ export class ExperimentInfoArtifactsComponent implements OnDestroy {
   private onOutputModel$: Observable<boolean>;
   private experimentKey$: Observable<string>;
   public routerConfig$: Observable<string[]>;
+  public editable$: Observable<boolean>;
 
   constructor(private store: Store<IExperimentInfoState>, public router: Router, private route: ActivatedRoute
   ) {
     this.backdropActive$ = this.store.select(selectBackdropActive);
+    this.editable$       = this.store.select(selectIsExperimentEditable);
     this.modelInfo$ = this.store.select(selectExperimentModelInfoData);
     this.ExperimentInfo$ = this.store.select(selectExperimentInfoData);
     this.routerConfig$       = this.store.select(selectRouterConfig);

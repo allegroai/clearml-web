@@ -9,6 +9,10 @@ export interface SelectedMetric {
   path: string;
 }
 
+export interface GroupedHyperParams {
+  [section: string]: HyperParams;
+}
+
 export interface HyperParams {
   [name: string]: boolean;
 }
@@ -26,6 +30,7 @@ export interface MetricOption {
 export interface IExperimentCompareChartsState {
   metricsMultiScalarsCharts: any;
   metricsHistogramCharts: any;
+  cachedAxisType: ScalarKeyEnum;
   metricsPlotsCharts: any;
   settingsList: Array<IExperimentCompareSettings>;
   searchTerm: string;
@@ -48,6 +53,7 @@ export interface IExperimentCompareSettings {
 export const initialState: IExperimentCompareChartsState = {
   metricsMultiScalarsCharts: null,
   metricsHistogramCharts: null,
+  cachedAxisType: null,
   metricsPlotsCharts: null,
   settingsList: [],  // TODO, Make this an object with ID's as key YK
   searchTerm: '',
@@ -62,7 +68,7 @@ export function experimentsCompareChartsReducer(state: IExperimentCompareChartsS
     case SET_EXPERIMENT_METRICS_SEARCH_TERM:
       return {...state, searchTerm: action.payload.searchTerm};
     case SET_EXPERIMENT_HISTOGRAM:
-      return {...state, metricsHistogramCharts: action.payload};
+      return {...state, metricsHistogramCharts: action.payload, cachedAxisType: action.axisType};
     case SET_EXPERIMENT_PLOTS:
       return {...state, metricsPlotsCharts: action.payload};
     case UPDATE_EXPERIMENT_SETTINGS: {
@@ -77,7 +83,13 @@ export function experimentsCompareChartsReducer(state: IExperimentCompareChartsS
       return {...state, settingsList: newSettings};
     }
     case RESET_EXPERIMENT_METRICS:
-      return {...state, metricsMultiScalarsCharts: null, metricsHistogramCharts: null, metricsPlotsCharts: null};
+      return {
+        ...state,
+        metricsMultiScalarsCharts: initialState.metricsMultiScalarsCharts,
+        metricsHistogramCharts: initialState.metricsHistogramCharts,
+        metricsPlotsCharts: initialState.metricsPlotsCharts,
+        cachedAxisType: initialState.cachedAxisType
+      };
     default:
       return state;
   }

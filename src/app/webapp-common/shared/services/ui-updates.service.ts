@@ -17,7 +17,6 @@ export class UiUpdatesService {
   }
 
   checkForUiUpdate() {
-    //remove the assets before qa
     window.setInterval(this.checkForUpdate.bind(this), (1000 * 60  * 3));
   }
 

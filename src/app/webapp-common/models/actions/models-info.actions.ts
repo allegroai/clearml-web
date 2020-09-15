@@ -2,7 +2,6 @@ import {Action, createAction, props} from '@ngrx/store';
 import {Model} from '../../../business-logic/model/models/model';
 import {ISelectedModel} from '../shared/models.model';
 import {ModelsUpdateRequest} from '../../../business-logic/model/models/modelsUpdateRequest';
-import {EXPERIMENT_CANCEL_EDIT} from '../../../features/experiments/actions/experiments-info.actions';
 
 
 const MODELS_PREFIX = 'MODELS_INFO_';

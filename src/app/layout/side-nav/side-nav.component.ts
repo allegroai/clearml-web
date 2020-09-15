@@ -5,6 +5,7 @@ import {selectSelectedProjectId} from '../../webapp-common/core/reducers/project
 import {Observable} from 'rxjs';
 import {Router} from '@angular/router';
 import {SearchDeactivate} from '../../webapp-common/search/common-search-results.actions';
+import {environment} from '../../../environments/environment';
 
 
 @Component({
@@ -15,6 +16,8 @@ import {SearchDeactivate} from '../../webapp-common/search/common-search-results
 export class SideNavComponent {
   public selectedProjectId$: Observable<any>;
   currentUser: any;
+  environment = environment;
+
 
   constructor(public store: Store<any>, private router: Router) {
     this.selectedProjectId$ = this.store.select(selectSelectedProjectId);
@@ -24,5 +27,9 @@ export class SideNavComponent {
 
   public resetSearch() {
     this.store.dispatch(new SearchDeactivate());
+  }
+
+  get guestUser(): boolean {
+    return this.currentUser && this.currentUser?.role === 'guest';
   }
 }

@@ -1,4 +1,5 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {User} from '../../../../../business-logic/model/users/user';
 
 @Component({
   selector   : 'sm-update-notifier',
@@ -15,13 +16,27 @@ export class UpdateNotifierComponent implements OnInit {
   @Input() dismissedVersion: string;
 
   @Input() set availableUpdates(availableUpdates) {
-    this.areAvailableUpdates = availableUpdates && (availableUpdates['trains-server']['newer_available']);
-    this.newVersionUrl       = availableUpdates && (availableUpdates['trains-server']['url']);
-    this.newVersionName      = availableUpdates && (availableUpdates['trains-server']['version']);
+    this.areAvailableUpdates = availableUpdates?.['trains-server']?.['newer_available'];
+    this.newVersionUrl       = availableUpdates?.['trains-server']?.['url'];
+    this.newVersionName      = availableUpdates?.['trains-server']?.['version'];
     this._availableUpdates   = availableUpdates;
     if (this.areAvailableUpdates && this.dismissedVersion !== this.newVersionName) {
       this.active = true;
       this.notifierActive.emit(true);
+    }
+  }
+
+  @Input() set currentUser(user: User) {
+    if (user && user.role == 'guest') {
+      this.areAvailableUpdates = false;
+      this.active = false;
+      this.notifierActive.emit(false);
+    } else {
+      this.areAvailableUpdates = this._availableUpdates?.['trains-server']?.['newer_available'];
+      if (this.areAvailableUpdates && this.dismissedVersion !== this.newVersionName) {
+        this.active = true;
+        this.notifierActive.emit(true);
+      }
     }
   }
 

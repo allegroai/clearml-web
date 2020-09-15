@@ -7,6 +7,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 87.5%;
 
   &.header {
     font-size: 11px;
@@ -14,6 +16,7 @@
     color: #5a658e;
     border-top: #ededed solid 1px;
     background-color: #f4f7ff;
+    font-family: 'Heebo', sans-serif;
   }
 
   div {

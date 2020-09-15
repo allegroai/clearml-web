@@ -32,7 +32,7 @@ export const EXPERIMENTS_METRICS_TYPES = {
   SCALAR: 'scalar',
   PLOTS : 'plots'
 };
-export const EXPERIMENTS_PAGE_SIZE = 10;
+export const EXPERIMENTS_PAGE_SIZE = 15;
 export const EXPERIMENT_TABLE_ONLY_FIELDS = ['id', 'type', 'name', 'started', 'completed', 'status', 'system_tags', 'user.name', 'last_metrics', 'last_update'];
 
 export const FILTERED_EXPERIMENTS_STATUS_OPTIONS = Object.entries(EXPERIMENTS_STATUS_LABELS)
@@ -52,7 +52,7 @@ export const TASK_TAGS = {
   HIDDEN: 'archived' as TaskTagsEnum
 };
 
-export const LOG_BATCH_SIZE = 150;
+export const LOG_BATCH_SIZE = 40;
 
 export enum ThemeEnum {
   Dark = 'dark',

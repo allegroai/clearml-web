@@ -1,11 +1,25 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, HostListener, Input, OnInit, Output, ViewChild} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  HostListener,
+  Input,
+  AfterViewInit,
+  Output,
+  ViewChild,
+  ViewChildren, QueryList
+} from '@angular/core';
 import {ICONS} from '../../../../app.constants';
 import {ColHeaderTypeEnum, ISmCol, TableSortOrderEnum} from '../../../shared/ui-components/data/table/table.consts';
 import {FILTERED_EXPERIMENTS_STATUS_OPTIONS} from '../../shared/common-experiments.const';
-import {get} from 'lodash/fp';
+import {get, uniq} from 'lodash/fp';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {ITableExperiment} from '../../shared/common-experiment-model.model';
-import {DIGITS_AFTER_DECIMAL, EXPERIMENTS_TABLE_COL_FIELDS} from '../../../../features/experiments/shared/experiments.const';
+import {
+  DIGITS_AFTER_DECIMAL,
+  EXPERIMENTS_TABLE_COL_FIELDS
+} from '../../../../features/experiments/shared/experiments.const';
 import {BaseTableView} from '../../../shared/ui-components/data/table/base-table-view';
 import {getSystemTags, isDevelopment} from '../../../../features/experiments/shared/experiments.utils';
 import {User} from '../../../../business-logic/model/users/user';
@@ -18,21 +32,24 @@ import {ExperimentMenuComponent} from '../../../../features/experiments/shared/c
 import {TIME_FORMAT_STRING} from '../../../constants';
 import {NoUnderscorePipe} from '../../../shared/pipes/no-underscore.pipe';
 import {TitleCasePipe} from '@angular/common';
+import {TableComponent} from '../../../shared/ui-components/data/table/table.component';
+import {INITIAL_EXPERIMENT_TABLE_COLS} from '../../../../features/experiments/experiments.consts';
+import {filter, take} from 'rxjs/operators';
 
 @Component({
-  selector       : 'sm-experiments-table',
-  templateUrl    : './experiments-table.component.html',
-  styleUrls      : ['./experiments-table.component.scss'],
+  selector: 'sm-experiments-table',
+  templateUrl: './experiments-table.component.html',
+  styleUrls: ['./experiments-table.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ExperimentsTableComponent extends BaseTableView implements OnInit {
+export class ExperimentsTableComponent extends BaseTableView {
   readonly EXPERIMENTS_TABLE_COL_FIELDS = EXPERIMENTS_TABLE_COL_FIELDS;
   readonly FILTERED_EXPERIMENTS_STATUS_OPTIONS = FILTERED_EXPERIMENTS_STATUS_OPTIONS;
   public EXPERIMENTS_ALL_FILTER_OPTIONS = {
     status: this.FILTERED_EXPERIMENTS_STATUS_OPTIONS,
-    type  :[],
-    users : [],
-    tags  : [],
+    type: [],
+    users: [],
+    tags: [],
   };
   readonly ICONS = ICONS;
   readonly getSystemTags = getSystemTags;
@@ -40,16 +57,19 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit {
   public sortOrder = 1;
   public statusFiltersValue: any;
   public typeFiltersValue: any;
-  public allFiltersValue: { type: any; status: any; users: any, tags: any };
+  public allFiltersValue: { type: any; status: any; users: any; tags: any };
   public tagsFiltersValue: any;
   public systemTagsFiltersValue: any;
   public isDevelopment = isDevelopment;
   public menuOpen: boolean = false;
   private _selectedExperiments: ITableExperiment[] = [];
   readonly ColHeaderTypeEnum = ColHeaderTypeEnum;
+  public readonly initialColumns = INITIAL_EXPERIMENT_TABLE_COLS;
 
   @Input() tableCols: Array<ISmCol>;
   private _experiments: Array<ITableExperiment> = [];
+  private _selectedExperiment: ITableExperiment;
+
   @Input() set experiments(value: Array<ITableExperiment>) {
     this._experiments = value;
     if (this.contextExperiment) {
@@ -67,9 +87,10 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit {
   public tags$: Observable<string[]>;
 
   @Input() set users(users: User[]) {
-    this.EXPERIMENTS_ALL_FILTER_OPTIONS.users = users.map(user => {
-      return {label: user.name ? user.name : 'Unknown User', value: user.id};
-    });
+    this.EXPERIMENTS_ALL_FILTER_OPTIONS.users = users.map(user => ({
+      label: user.name ? user.name : 'Unknown User',
+      value: user.id
+    }));
     this.sortOptionalUsersList();
   }
 
@@ -82,27 +103,59 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit {
     return this._selectedExperiments;
   }
 
-  @Input() selectedExperiment: ITableExperiment;
+  @Input() set selectedExperiment(experiment: ITableExperiment) {
+    if (this._selectedExperiment !== experiment) {
+      window.setTimeout(() => this.table?.focusSelected());
+    }
+    this._selectedExperiment = experiment;
+  }
+  get selectedExperiment() {
+    return this._selectedExperiment;
+  }
   @Input() noMoreExperiments: boolean;
 
   @Input() set tags(tags) {
     const tagsAndActiveFilter = Array.from(new Set(tags.concat(this.tagsFiltersValue)));
-    this.EXPERIMENTS_ALL_FILTER_OPTIONS.tags = tagsAndActiveFilter.map(tag => ({label: tag, value: tag}));
+    this.EXPERIMENTS_ALL_FILTER_OPTIONS.tags = tagsAndActiveFilter.map(tag => ({
+      label: tag === null ? '(No tags)' : tag,
+      value: tag
+    }));
     this.sortOptionalTagsList();
   }
 
-  @Input() systemTags;
-  @Input() set experimentTypes(types: string[]){
-    this.EXPERIMENTS_ALL_FILTER_OPTIONS.type = types.map((type) => ({label: this.titleCasePipe.transform(this.noUnderscorePipe.transform(type)), value: type}))
-  };
+  @Input() set experimentTypes(types: string[]) {
+    const typesAndActiveFilter = uniq(types.concat(this.typeFiltersValue));
+    // under 4 letters assume an acronym and capitalize.
+    this.EXPERIMENTS_ALL_FILTER_OPTIONS.type = typesAndActiveFilter.map((type: string) =>
+      ({
+        label: (type?.length < 4 ? type.toUpperCase() : this.titleCasePipe.transform(this.noUnderscorePipe.transform(type))),
+        value: type
+      })
+    );
+  }
+
+  @Input() systemTags = [] as string[];
+
+  get validSystemTags() {
+    return this.systemTags.filter(tag => tag !== 'archived');
+  }
 
   @Input() set tableFilters(filters: { [s: string]: FilterMetadata }) {
     this.statusFiltersValue = get([EXPERIMENTS_TABLE_COL_FIELDS.STATUS, 'value'], filters) || [];
     this.typeFiltersValue = get([EXPERIMENTS_TABLE_COL_FIELDS.TYPE, 'value'], filters) || [];
     this.userFiltersValue = get([EXPERIMENTS_TABLE_COL_FIELDS.USER, 'value'], filters) || [];
     this.tagsFiltersValue = get([EXPERIMENTS_TABLE_COL_FIELDS.TAGS, 'value'], filters) || [];
-    this.systemTagsFiltersValue = get(['system_tags', 'value'], filters) || [];
-    this.allFiltersValue = {status: this.statusFiltersValue, type: this.typeFiltersValue, users: this.userFiltersValue, tags: this.tagsFiltersValue};
+    this.systemTagsFiltersValue = (get(['system_tags', 'value'], filters) || []);
+    this.allFiltersValue = {
+      status: this.statusFiltersValue,
+      type: this.typeFiltersValue,
+      users: this.userFiltersValue,
+      tags: this.tagsFiltersValue
+    };
+  }
+
+  @Input() set split(size: number) {
+    this.table?.resize();
   }
 
   @Output() experimentSelectionChanged = new EventEmitter<ITableExperiment>();
@@ -112,8 +165,6 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit {
   @Output() filterChanged = new EventEmitter();
   @Output() tagsMenuOpened = new EventEmitter();
   @Output() typesMenuOpened = new EventEmitter();
-
-  @ViewChild('tableContainer', {static: true}) tableContainer;
   @ViewChild('contextMenu') contextMenu: ExperimentMenuComponent;
   TIME_FORMAT_STRING = TIME_FORMAT_STRING;
 
@@ -124,15 +175,17 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit {
     }
   }
 
-  constructor(private changeDetector: ChangeDetectorRef, private store: Store, private noUnderscorePipe: NoUnderscorePipe, private titleCasePipe: TitleCasePipe) {
+  constructor(private changeDetector: ChangeDetectorRef, private store: Store<any>, private noUnderscorePipe: NoUnderscorePipe, private titleCasePipe: TitleCasePipe) {
     super();
     this.tags$ = this.store.select(selectProjectTags);
     this.entitiesKey = 'experiments';
     this.selectedEntitiesKey = 'selectedExperiments';
   }
 
-  ngOnInit(): void {
-
+  afterTableInit() {
+    if (this.selectedExperiment) {
+      this.table.scrollToElement(this.selectedExperiment);
+    }
   }
 
   onRowSelectionChanged(event) {
@@ -144,7 +197,7 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit {
   }
 
   sortOptionalTagsList() {
-    this.EXPERIMENTS_ALL_FILTER_OPTIONS.tags.sort((a, b) => sortByArr(a.value, b.value, this.tagsFiltersValue));
+    this.EXPERIMENTS_ALL_FILTER_OPTIONS.tags.sort((a, b) => sortByArr(a.value, b.value, [null].concat(this.tagsFiltersValue)));
   }
 
   tagSearchValueChanged(searchTerm) {
@@ -158,13 +211,10 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit {
   }
 
   scrollTableToTop() {
-    this.tableContainer.nativeElement.scroll({top: 0});
+    this.table?.table?.scrollTo({top: 0});
   }
 
   tableAllFiltersChanged(event) {
-    if (event.col === 'users') {
-      event.col = 'user.name';
-    }
     this.filterChanged.emit({col: {id: event.col}, value: event.value});
     this.scrollTableToTop();
   }
@@ -205,8 +255,8 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit {
 
   getHyperParam(params, col) {
     if (params && col.isParam) {
-      const param = col.id.replace('execution.parameters.', '');
-      return params[param];
+      const param = col.id.replace('hyperparams.', '');
+      return get(`${param}.value`, params);
     }
     return '';
   }
@@ -245,8 +295,13 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit {
 
   onContextMenu(data) {
     this.contextExperiment = this._experiments.find(experiment => experiment.id === data.rowData.id);
+    if (!this.selectedExperiments.map(exp => exp.id).includes(this.contextExperiment.id)) {
+      this.emitSelection([this.contextExperiment]);
+    }
     const event = data.e as MouseEvent;
     event.preventDefault();
-    this.contextMenu.openMenu({x: event.clientX, y: event.clientY});
+    this.contextMenu?.openMenu({x: event.clientX, y: event.clientY});
   }
+
+
 }

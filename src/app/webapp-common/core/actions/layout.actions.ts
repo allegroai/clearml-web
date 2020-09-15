@@ -1,7 +1,5 @@
-import { MatSnackBarConfig } from '@angular/material/snack-bar';
 import {MessageSeverityEnum, VIEW_ACTIONS} from '../../../app.constants';
-import {Action} from '@ngrx/store';
-import {ISmAction} from '../models/actions';
+import {Action, createAction, props} from '@ngrx/store';
 import {omit} from 'lodash/fp';
 
 export class SetAutoRefresh {
@@ -87,16 +85,15 @@ export class AddMessage implements Action {
   public payload: {
     severity: string;
     msg: string;
-    action?: string;
-    config?: MatSnackBarConfig;
+    userActions?: {actions: any[]; name: string}[];
   };
 
-  constructor(severity: MessageSeverityEnum, msg: string, action?: string, config?: MatSnackBarConfig) {
-    this.payload = {severity, msg, action, config};
+  constructor(severity: MessageSeverityEnum, msg: string, userActions?: {actions: any[]; name: string}[]) {
+    this.payload = {severity, msg, userActions};
   }
 }
 
-export class SetServerUpdatesAvailable implements ISmAction {
+export class SetServerUpdatesAvailable implements Action {
   public type = VIEW_ACTIONS.SET_SERVER_UPDATES_AVAILABLE;
   public payload: { availableUpdates: any };
 
@@ -104,5 +101,10 @@ export class SetServerUpdatesAvailable implements ISmAction {
     this.payload = {availableUpdates};
   }
 }
+
+export const setScaleFactor = createAction(
+  VIEW_ACTIONS + '[set scale]',
+  props<{scale: number}>()
+  );
 
 

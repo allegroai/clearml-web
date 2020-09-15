@@ -1,3 +1,5 @@
+@import "../../../shared/ui-components/styles/variables";
+
 .no-metric {
   background-color: #f2f3f6;
 }
@@ -14,6 +16,10 @@
 
       .content {
         cursor: pointer;
+        font-size: 13px;
+        font-weight: 500;
+        color: $blue-500;
+
         .fas {
           margin-left: 6px;
           font-size: 11px;

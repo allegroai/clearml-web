@@ -17,6 +17,6 @@ export class UiUpdateDialogComponent {
   }
 
   reload() {
-    window.location.reload();
+    window.location.reload(true);
   }
 }

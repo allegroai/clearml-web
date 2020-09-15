@@ -5,7 +5,7 @@
 .box {
   border: 1px solid #ced1dc;
   padding: 10px;
-  max-height: calc(100vh - 400px);
+  max-height: calc(100% - 400px);
   min-height: 100px;
   overflow-y: scroll;
   position: relative;

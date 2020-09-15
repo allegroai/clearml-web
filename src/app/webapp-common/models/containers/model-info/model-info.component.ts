@@ -5,8 +5,8 @@ import {Store} from '@ngrx/store';
 import {IModelInfoState} from '../../reducers/model-info.reducer';
 import {get} from 'lodash/fp';
 import * as infoActions from '../../actions/models-info.actions';
-import {selectSelectedModel} from '../../reducers';
-import {ISelectedModel} from '../../shared/models.model';
+import {selectSelectedModel, selectSelectedTableModel} from '../../reducers';
+import {ISelectedModel, ITableModel} from '../../shared/models.model';
 import {AdminService} from '../../../../features/admin/admin.service';
 import {selectS3BucketCredentials} from '../../../core/reducers/common-auth-reducer';
 import {SmSyncStateSelectorService} from '../../../core/services/sync-state-selector.service';
@@ -34,10 +34,12 @@ export class ModelInfoComponent implements OnInit, OnDestroy {
   public isExample: boolean;
   public backdropActive$: Observable<any>;
   private projectId: string;
+  public selectedTableModel$: Observable<ITableModel>;
 
   constructor(private router: Router, private store: Store<IModelInfoState>, private route: ActivatedRoute, private adminService: AdminService, private syncSelector: SmSyncStateSelectorService) {
     this.S3BucketCredentials = store.select(selectS3BucketCredentials);
     this.backdropActive$ = this.store.select(selectBackdropActive);
+    this.selectedTableModel$ = this.store.select(selectSelectedTableModel);
   }
 
   ngOnInit() {

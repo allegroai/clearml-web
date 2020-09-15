@@ -19,6 +19,9 @@
 </div>
 
 <sm-experiment-log-info *ngIf="hasLog"
+  #log
   [logs]="log$ | async"
+  [beginningOfLog]="logBeginning$ | async"
   [filterString]="filter$ | async"
+  (fetchMore)="getLogs($event)"
 ></sm-experiment-log-info>

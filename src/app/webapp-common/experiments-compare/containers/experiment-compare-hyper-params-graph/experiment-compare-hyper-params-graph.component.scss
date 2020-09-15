@@ -16,19 +16,6 @@
     }
   }
 
-  /deep/ sm-checked-filter-list {
-
-    .title {
-      font-size: 16px;
-      font-weight: 500;
-    }
-
-    .purple-v {
-      width: 20px !important;
-      height: 20px !important;
-    }
-  }
-
   /deep/ .mat-expansion-panel-body {
     padding: 0;
   }
@@ -91,12 +78,6 @@
   }
 }
 
-sm-checked-filter-list {
-  flex: 1;
-  overflow: auto;
-  margin: 0 12px 0 32px;
-}
-
 .separate-margins {
   margin: 24px 0 20px 0;
 }
@@ -121,9 +102,6 @@ sm-checked-filter-list {
   &__header {
     padding: 0 2px 0 0;
 
-    &:hover {
-      background: rgba(0, 0, 0, 0) !important;
-    }
   }
 
   &__title {
@@ -155,7 +133,7 @@ sm-checked-filter-list {
     }
 
     &:hover {
-      background: $very-light-blue;
+      background: $blue-50;
     }
 
   }
@@ -190,4 +168,8 @@ sm-checked-filter-list {
 .i-no-data-graph {
   width: 300px;
   height: 300px;
+}
+
+sm-grouped-checked-filter-list {
+  margin: 0 12px 0 32px;
 }

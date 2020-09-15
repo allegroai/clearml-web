@@ -17,14 +17,11 @@
     .plus-icon {
       height: 40px;
       width: 40px;
-      background-size: cover;
-      background-position: 50%, 50%;
-      background-image: url('../../../../assets/icons/plus.svg');
     }
     &:hover {
       background-color: $blue-500;
       .plus-icon {
-        background-image: url('../../../../assets/icons/plus-hover.svg');
+       color: $blue-700;
       }
     }
   }

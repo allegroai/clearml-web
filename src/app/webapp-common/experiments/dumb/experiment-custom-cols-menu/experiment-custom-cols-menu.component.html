@@ -1,5 +1,5 @@
 <sm-menu
-  [iconClass]="'icon sm-md i-gear pointer create-new-icon '"
+  [iconClass]="'sm-md al-icon al-ico-settings al-color blue-400 pointer create-new-icon '"
   smMenuClass="light-theme custom-columns"
   [showButton]="false"
   (click)="getMetricsToDisplay.emit()"
@@ -27,8 +27,8 @@
         </div>
         <div class="add-button"
              smClickStopPropagation
-             [ngClass]="{disabled: !hyperParams.length}"
-             (click)="hyperParams.length && selectMetricActiveChanged.emit(CustomColumnMode.HyperParams); $event.stopPropagation()"
+             [ngClass]="{disabled: !hasHyperParams}"
+             (click)="hasHyperParams && selectMetricActiveChanged.emit(CustomColumnMode.HyperParams); $event.stopPropagation()"
         ><i class="fas fa-plus pr-1"></i> HYPER PARAMETERS
         </div>
       </div>

@@ -1,4 +1,4 @@
-import {Component, ElementRef, HostListener, OnInit, ViewChild} from '@angular/core';
+import {Component, ElementRef, EventEmitter, HostListener, OnInit, Output, ViewChild} from '@angular/core';
 import {MatMenuTrigger} from '@angular/material/menu';
 import {TagsMenuComponent} from '../../ui-components/tags/tags-menu/tags-menu.component';
 import {getTags} from '../../../core/actions/projects.actions';
@@ -13,11 +13,14 @@ export class BaseContextMenuComponent {
 
   @ViewChild('tagMenuContent') tagMenu: TagsMenuComponent;
   @ViewChild(MatMenuTrigger) trigger: MatMenuTrigger;
+  @Output() menuOpened = new EventEmitter();
+  @Output() menuClosed = new EventEmitter();
 
   @HostListener('document:click', ['$event'])
   clickOut(event) {
     if(!this.eRef.nativeElement.contains(event.target)) {
-      this.trigger.closeMenu();
+      this.trigger?.closeMenu();
+      this.menuClosed.emit();
     }
   }
 
@@ -27,12 +30,14 @@ export class BaseContextMenuComponent {
   ) {}
 
   openMenu(position: {x: number; y: number}) {
-    if (this.trigger.menuOpen) {
+    if (this.trigger?.menuOpen) {
       this.trigger.closeMenu();
+      this.menuClosed.emit();
     }
     this.position = position;
     window.setTimeout(() => {
       this.trigger.openMenu();
+      this.menuOpened.emit();
     }, 100);
   }
 

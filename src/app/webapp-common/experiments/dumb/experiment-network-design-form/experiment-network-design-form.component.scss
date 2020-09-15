@@ -1,8 +1,25 @@
-:host {
-  display: block;
-  height: calc(100% - 40px);
-  position: relative;
+@import "../../../shared/ui-components/styles/variables";
 
+:host {
+  .design-container {
+    background-color: $blue-600;
+    padding: 12px 0 12px 12px;
+    border-radius: 4px;
+    height: 100%;
+    font-family: monospace;
+    .viewport {
+      height: 100%;
+      color: $white;
+      overflow-x: scroll;
+      .line {
+        height: 19px;
+        white-space: pre;
+      }
+    }
+  }
+  display: block;
+  flex: 1;
+  position: relative;
   .cursor-default {
     cursor: default;
   }

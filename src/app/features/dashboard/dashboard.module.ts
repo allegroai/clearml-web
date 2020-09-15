@@ -12,18 +12,20 @@ import {commonDashboardReducer} from '../../webapp-common/dashboard/common-dashb
 import {CommonSearchResultsModule} from '../../webapp-common/search/common-search-results.module';
 import {DashboardSearchComponent} from './containers/dashboard-search/dashboard-search.component';
 import {SearchResultsPageComponent} from './dumb/search-results-page/search-results-page.component';
+import {SharedModule} from '../../shared/shared.module';
 
 @NgModule({
-  imports        : [
-    ProjectCreateDialogModule,
-    CommonModule,
-    SMSharedModule,
-    ExperimentSharedModule,
-    DashboardRoutingModule,
-    CommonSearchResultsModule,
-    StoreModule.forFeature('dashboard', commonDashboardReducer),
-    CommonDashboardModule,
-  ],
+    imports: [
+        ProjectCreateDialogModule,
+        CommonModule,
+        SMSharedModule,
+        ExperimentSharedModule,
+        DashboardRoutingModule,
+        CommonSearchResultsModule,
+        StoreModule.forFeature('dashboard', commonDashboardReducer),
+        CommonDashboardModule,
+        SharedModule,
+    ],
   declarations   : [DashboardComponent, GettingStartedCardComponent, DashboardSearchComponent, SearchResultsPageComponent]
 })
 export class DashboardModule {

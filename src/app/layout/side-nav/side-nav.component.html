@@ -3,7 +3,7 @@
 <div class="side-nav">
   <div class="item logo">
     <div class="item-icon">
-      <img src="../../../assets/t-logo-w.svg" class="logo-a">
+      <img src="../../../assets/t-logo-w.svg?v=3" class="logo-a">
     </div>
     <div class="caption">
 <!--      <img src="../../../assets/logo-white.png" class="logo-full">-->
@@ -14,7 +14,7 @@
     <a class="item d-block" #rlaHome="routerLinkActive" routerLink="/dashboard" routerLinkActive (click)="resetSearch()"
       smTooltip="HOMEPAGE" showDelay="0" position="right">
       <div class="item-icon">
-        <img [src]="'./app/webapp-common/assets/icons/side-nav/' + (rlaHome.isActive ? 'home-neon.svg': 'home.svg')">
+        <i [class]="'al-icon al-ico-home al-color ' + (rlaHome.isActive ? 'neon-yellow': 'blue-300')" ></i>
       </div>
       <div class="caption">homepage</div>
     </a>
@@ -22,11 +22,12 @@
     <a class="item d-block" smTooltip="PROJECTS" showDelay="0" position="right" routerLink="/projects"
       [routerLinkActive] #rlaProjects="routerLinkActive">
       <div class="item-icon">
-        <img [src]="'./app/webapp-common/assets/icons/side-nav/' + (rlaProjects.isActive ? 'projects-neon.svg': 'projects.svg')">
+        <i [class]="'al-icon al-ico-projects al-color ' + (rlaProjects.isActive ? 'neon-yellow': 'blue-300')" ></i>
       </div>
       <div class="caption">projects</div>
     </a>
     <a class="item d-block"
+       *smCheckPermission="true"
        routerLink="/workers-and-queues"
        routerLinkActive
        #rlaQueues="routerLinkActive"
@@ -34,27 +35,51 @@
        showDelay="0"
        position="right">
       <div class="item-icon">
-        <img [src]="'./app/webapp-common/assets/icons/side-nav/' + (rlaQueues.isActive?'queues-neon.svg': 'queues.svg')">
+        <i [class]="'al-icon al-ico-queues al-color ' + (rlaQueues.isActive ? 'neon-yellow': 'blue-300')" ></i>
       </div>
       <div class="caption">workers & queues</div>
     </a>
 
   </ng-container>
-    <div class="account">
-      <a *ngIf="currentUser" class="item d-block" routerLink="/profile" routerLinkActive
-         #rlaAdmin="routerLinkActive" smTooltip="PROFILE"showDelay="0" position="right"
+  <div *ngIf="currentUser" class="account">
+    <a *ngIf="environment.whiteLabelLink" class="item d-block" target="_blank"
+       [smTooltip]="environment.whiteLabelLink.tooltip" showDelay="0" position="right"
+       [href]="environment.whiteLabelLink.link">
+      <div class="item-icon"
+           [style.background-image]="'url(' + environment.whiteLabelLink.logo + ')'"
+           style="width: 64px; height: 64px"
       >
-        <div class="item-icon">
-          <i class="fa fa-user-alt fa-2x" [ngClass]="{'neon': rlaAdmin.isActive}"></i>
-        </div>
-        <div class="caption">Profile</div>
-      </a>
-      <a class="item d-block" href="https://github.com/allegroai" target="_blank" smTooltip="Fork us on GitHub"
-        showDelay="0" position="right">
-        <div class="item-icon">
-          <i class="fab fa-github fa-2x"></i>
-        </div>
-        <div class="caption">Fork us on GitHub</div>
-      </a>
-    </div>
+      </div>
+      <div class="caption">Ignite</div>
+    </a>
+    <a class="item d-block" target="_blank"
+       smTooltip="Community on Slack" showDelay="0" position="right"
+       href="https://join.slack.com/t/allegroai-trains/shared_invite/enQtOTQyMTI1MzQxMzE4LTY5NTUxOTY1NmQ1MzQ5MjRhMGRhZmM4ODE5NTNjMTg2NTBlZGQzZGVkMWU3ZDg1MGE1MjQxNDEzMWU2NmVjZmY">
+      <div class="item-icon">
+        <i class="fab fa-slack fa-24 al-color blue-300"></i>
+      </div>
+      <div class="caption">Slack</div>
+    </a>
+    <a class="item d-block" href="https://allegro.ai/docs" target="_blank"
+       smTooltip="Allegro Trains Documentation" showDelay="0" position="right">
+      <div class="item-icon">
+        <i class="al-icon al-ico-documentation al-color blue-300"></i>
+      </div>
+      <div class="caption">Documentation</div>
+    </a>
+    <a class="item d-block" href="https://www.youtube.com/c/AllegroAI/featured" target="_blank"
+       smTooltip="Allegro Trains on YouTube" showDelay="0" position="right">
+      <div class="item-icon">
+        <i class="fab fa-youtube fa-24 al-color blue-300"></i>
+      </div>
+      <div class="caption">YouTube</div>
+    </a>
+    <a class="item d-block" href="https://github.com/allegroai/trains" target="_blank"
+       smTooltip="GitHub Repository" showDelay="0" position="right">
+      <div class="item-icon">
+        <i class="fab fa-github fa-24 al-color blue-300"></i>
+      </div>
+      <div class="caption">GitHub</div>
+    </a>
+  </div>
 </div>

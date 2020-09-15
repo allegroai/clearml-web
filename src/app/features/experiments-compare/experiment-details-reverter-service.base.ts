@@ -15,19 +15,17 @@ export abstract class ExperimentDetailsReverterServiceBase {
     return experimentIds.map(id => {
       const exp = experiments.find(ex => ex.id === id);
       return {
-        id            : exp.id,
-        name          : exp.name,
-        status        : exp.status,
+        id: exp.id,
+        name: exp.name,
+        status: exp.status,
         last_iteration: exp.last_iteration,
-        last_update   : exp.last_update,
-        project       : exp.project,
-        completed     : exp.completed,
-        tags          : exp.tags,
-        execution     : this.revertExecution(exp),
-        artifacts     : this.revertArtifacts(exp),
-        parameters    : get('execution.parameters', exp) ?
-          this.revertExecutionParameters(exp.execution.parameters) :
-          undefined,
+        last_update: exp.last_update,
+        project: exp.project,
+        completed: exp.completed,
+        tags: exp.tags,
+        execution: this.revertExecution(exp),
+        artifacts: this.revertArtifacts(exp),
+        configuration: exp.configuration
       };
     });
   }
@@ -35,18 +33,13 @@ export abstract class ExperimentDetailsReverterServiceBase {
   protected sortObjectByKey(obj) {
     const orderedLabels = {};
     Object.keys(obj).sort().forEach((key) => {
-      orderedLabels[key] = obj[key];
+      orderedLabels[key] = typeof obj[key] === 'string' ? obj[key] : this.sortObjectByKey(obj[key]);
     });
 
     return orderedLabels;
   }
 
-  public revertExecutionParameters(parameters: Execution['parameters']) {
-    return this.sortObjectByKey(parameters);
-  }
-
   abstract revertArtifacts(exp: ISelectedExperiment);
 
   abstract revertExecution(exp: ISelectedExperiment);
-
 }

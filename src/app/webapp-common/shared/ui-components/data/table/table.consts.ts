@@ -16,6 +16,7 @@ declare type FilterMatchModeEnum = 'startsWith' | 'contains' | 'endsWidth' | 'eq
 
 export interface ISmCol {
   id: string; // unique id, by default, will be use as the table data param (e.g name and data[name]).
+  getter?: string;
   header?: string; // the title header.
   label?: string; // Labels to show in cards mode..
   hidden?: boolean; // the column visibility.

@@ -10,34 +10,24 @@ import {TextareaControlComponent} from '../../../shared/ui-components/forms/text
   templateUrl: './experiment-execution-diff.component.html',
   styleUrls  : ['./experiment-execution-diff.component.scss'],
 })
-export class ExperimentExecutionDiffComponent implements IExperimentInfoFormComponent, OnInit, OnDestroy {
+export class ExperimentExecutionDiffComponent implements IExperimentInfoFormComponent {
 
-  @Input() formData: IExecutionForm['diff'];
+  lines: string[];
+  @Input() set formData(data: IExecutionForm['diff']) {
+    this.lines = data ? data.split('\n') : [];
+  }
+
   @Input() isInDev: boolean    = false;
   private _editable: boolean;
   @Input() set editable(editable: boolean) {
     this._editable = editable;
-    window.setTimeout(() => this.diff.onResize());
   }
   get editable() {
     return this._editable;
   }
+  @Input() showSpinner: boolean;
   @Output() freezeForm         = new EventEmitter();
   @Output() formDataChanged = new EventEmitter<{ field: string; value: any }>();
   HELP_TEXTS                   = HELP_TEXTS;
 
-  @ViewChild('diff', {static: true}) diff: TextareaControlComponent;
-  private formChangesSubscription: Subscription;
-
-  ngOnInit(): void {
-    this.formChangesSubscription = this.diff.formDataChanged.subscribe(formValue => {
-      if (this.editable) {
-        this.formDataChanged.emit({field: 'diff', value: formValue.value});
-      }
-    });
-  }
-
-  ngOnDestroy(): void {
-    this.formChangesSubscription.unsubscribe();
-  }
 }

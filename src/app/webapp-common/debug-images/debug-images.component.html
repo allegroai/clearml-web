@@ -15,20 +15,20 @@
         <label>Iterations:</label>
 
         <div [ngClass]="{'disabled': (beginningOfTime$| async)[experimentId]}" (click)="nextBatch({task: experimentId, metric: metricSelect.value})"
-             class="icon i-next-batch"
+             class="al-icon al-ico-next-batch al-color light-grey-blue"
              smTooltip="Older images"></div>
 
         <b class="text-right">{{debugImages && debugImages[experimentId] && debugImages[experimentId][debugImages[experimentId].length - 1].iter}}</b>
 
-        <div class="icon i-between"></div>
+        <div class="al-icon al-ico-between al-color light-blue-grey"></div>
 
         <b>{{debugImages && debugImages[experimentId] && debugImages[experimentId][0].iter}}</b>
 
-        <div [ngClass]="{'disabled': (timeIsNow$| async)[experimentId]}" (click)="(!timeIsNow[experimentId]) && previousBatch({task: experimentId, metric: metricSelect.value})" class="icon i-prev-batch"
+        <div [ngClass]="{'disabled': (timeIsNow$| async)[experimentId]}" (click)="(!timeIsNow[experimentId]) && previousBatch({task: experimentId, metric: metricSelect.value})" class="al-icon al-ico-prev-batch al-color light-grey-blue"
              smTooltip="Newer images"></div>
 
         <div [ngClass]="{'disabled': (timeIsNow$| async)[experimentId] && !allowAutorefresh }"
-             (click)="(!(timeIsNow[experimentId] && !allowAutorefresh)) && backToNow({task: experimentId, metric: metricSelect.value})" class="icon i-back-to-top"
+             (click)="(!(timeIsNow[experimentId] && !allowAutorefresh)) && backToNow({task: experimentId, metric: metricSelect.value})" class="al-icon al-ico-back-to-top al-color light-grey-blue"
              smTooltip="Newest images"></div>
       </div>
       <div class="no-images icon i-no-debug-samples-with-text" *ngIf="shouldShowNoImagesForExperiment(experimentId)">

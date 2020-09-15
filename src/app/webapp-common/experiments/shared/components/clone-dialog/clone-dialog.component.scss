@@ -7,12 +7,15 @@
     padding: 6px;
     margin-bottom: 12px;
     overflow-wrap: break-word;
+    max-width: 500px;
   }
 
-  sm-textarea-control {
-    display: block;
+  /deep/ sm-textarea-control {
     max-height: 100px;
-    height: 20vh;
+
+    textarea {
+      min-height: unset !important;
+    }
   }
 
   .buttons {

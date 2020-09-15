@@ -6,40 +6,41 @@ import {MetricVariantResult} from '../../../business-logic/model/projects/metric
 import {TableFilter} from '../../shared/utils/tableParamEncode';
 import {PROJECTS_PREFIX} from '../../core/actions/projects.actions';
 import {User} from '../../../business-logic/model/users/user';
+import {ParamsItem} from '../../../business-logic/model/tasks/paramsItem';
 
 export const EXPERIMENTS_PREFIX = 'EXPERIMENTS_';
 
 // COMMANDS:
 export const ARCHIVE_SELECTED_EXPERIMENTS = EXPERIMENTS_PREFIX + 'ARCHIVE_SELECTED_EXPERIMENTS';
 export const RESTORE_SELECTED_EXPERIMENTS = EXPERIMENTS_PREFIX + 'RESTORE_SELECTED_EXPERIMENTS';
-export const ADD_MANY_EXPERIMENTS         = EXPERIMENTS_PREFIX + 'ADD_MANY_EXPERIMENTS';
-export const GET_EXPERIMENTS              = EXPERIMENTS_PREFIX + 'GET_EXPERIMENTS';
-export const REFRESH_EXPERIMENTS          = EXPERIMENTS_PREFIX + 'REFRESH_EXPERIMENTS';
-export const GET_NEXT_EXPERIMENTS         = EXPERIMENTS_PREFIX + 'GET_NEXT_EXPERIMENTS';
-export const SET_EXPERIMENTS              = EXPERIMENTS_PREFIX + 'SET_EXPERIMENTS';
-export const SET_NEXT_PAGE                = EXPERIMENTS_PREFIX + 'SET_NEXT_PAGE';
-export const SET_SELECTED_EXPERIMENTS     = EXPERIMENTS_PREFIX + 'SET_SELECTED_EXPERIMENTS';
-export const SET_SELECTED_EXPERIMENT      = EXPERIMENTS_PREFIX + 'SET_SELECTED_EXPERIMENT';
-export const SET_VIEW_MODE                = EXPERIMENTS_PREFIX + 'SET_VIEW_MODE';
-export const SET_NO_MORE_EXPERIMENTS      = EXPERIMENTS_PREFIX + 'SET_NO_MORE_EXPERIMENTS';
-export const REMOVE_MANY_EXPERIMENTS      = EXPERIMENTS_PREFIX + 'REMOVE_MANY_EXPERIMENTS';
-export const UPDATE_ONE_EXPERIMENTS       = EXPERIMENTS_PREFIX + 'UPDATE_ONE_EXPERIMENTS';
-export const RESET_EXPERIMENTS            = EXPERIMENTS_PREFIX + 'RESET_EXPERIMENTS';
+export const ADD_MANY_EXPERIMENTS = EXPERIMENTS_PREFIX + 'ADD_MANY_EXPERIMENTS';
+export const GET_EXPERIMENTS = EXPERIMENTS_PREFIX + 'GET_EXPERIMENTS';
+export const REFRESH_EXPERIMENTS = EXPERIMENTS_PREFIX + 'REFRESH_EXPERIMENTS';
+export const GET_NEXT_EXPERIMENTS = EXPERIMENTS_PREFIX + 'GET_NEXT_EXPERIMENTS';
+export const SET_EXPERIMENTS = EXPERIMENTS_PREFIX + 'SET_EXPERIMENTS';
+export const SET_NEXT_PAGE = EXPERIMENTS_PREFIX + 'SET_NEXT_PAGE';
+export const SET_SELECTED_EXPERIMENTS = EXPERIMENTS_PREFIX + 'SET_SELECTED_EXPERIMENTS';
+export const SET_SELECTED_EXPERIMENT = EXPERIMENTS_PREFIX + 'SET_SELECTED_EXPERIMENT';
+export const SET_VIEW_MODE = EXPERIMENTS_PREFIX + 'SET_VIEW_MODE';
+export const SET_NO_MORE_EXPERIMENTS = EXPERIMENTS_PREFIX + 'SET_NO_MORE_EXPERIMENTS';
+export const REMOVE_MANY_EXPERIMENTS = EXPERIMENTS_PREFIX + 'REMOVE_MANY_EXPERIMENTS';
+export const UPDATE_ONE_EXPERIMENTS = EXPERIMENTS_PREFIX + 'UPDATE_ONE_EXPERIMENTS';
+export const RESET_EXPERIMENTS = EXPERIMENTS_PREFIX + 'RESET_EXPERIMENTS';
 
-export const SHOW_ALL_SELECTED               = EXPERIMENTS_PREFIX + 'SHOW_ALL_SELECTED';
+export const SHOW_ALL_SELECTED = EXPERIMENTS_PREFIX + 'SHOW_ALL_SELECTED';
 export const SET_SHOW_ALL_SELECTED_IS_ACTIVE = EXPERIMENTS_PREFIX + 'SET_SHOW_ALL_SELECTED_IS_ACTIVE';
 // EVENTS:
-export const ARCHIVE_MODE_CHANGED            = EXPERIMENTS_PREFIX + 'ARCHIVE_MODE_CHANGED';
+export const ARCHIVE_MODE_CHANGED = EXPERIMENTS_PREFIX + 'ARCHIVE_MODE_CHANGED';
 
-export const GLOBAL_FILTER_CHANGED        = EXPERIMENTS_PREFIX + 'GLOBAL_FILTER_CHANGED';
-export const TABLE_SORT_CHANGED           = EXPERIMENTS_PREFIX + 'TABLE_SORT_CHANGED';
-export const TABLE_FILTER_CHANGED         = EXPERIMENTS_PREFIX + 'TABLE_FILTER_CHANGED';
+export const GLOBAL_FILTER_CHANGED = EXPERIMENTS_PREFIX + 'GLOBAL_FILTER_CHANGED';
+export const TABLE_SORT_CHANGED = EXPERIMENTS_PREFIX + 'TABLE_SORT_CHANGED';
+export const TABLE_FILTER_CHANGED = EXPERIMENTS_PREFIX + 'TABLE_FILTER_CHANGED';
 export const SET_TABLE_FILTERS = EXPERIMENTS_PREFIX + 'SET_TABLE_FILTERS';
 export const GET_PROJECT_TYPES = EXPERIMENTS_PREFIX + 'GET_PROJECT_TYPES';
 export const SET_PROJECT_TYPES = EXPERIMENTS_PREFIX + 'SET_PROJECT_TYPES';
 export const EXPERIMENT_SELECTION_CHANGED = EXPERIMENTS_PREFIX + 'EXPERIMENT_SELECTION_CHANGED';
 // export const EXPERIMENTS_SELECTION_CHANGED = EXPERIMENTS_PREFIX + 'EXPERIMENTS_SELECTION_CHANGED';
-export const TOGGLE_COL_HIDDEN            = EXPERIMENTS_PREFIX + 'TOGGLE_COL_HIDDEN';
+export const TOGGLE_COL_HIDDEN = EXPERIMENTS_PREFIX + 'TOGGLE_COL_HIDDEN';
 
 export class GetExperiments implements Action {
   readonly type = GET_EXPERIMENTS;
@@ -73,7 +74,7 @@ export class SetExperiments implements Action {
 
 export const setExperimentInPlace = createAction(
   EXPERIMENTS_PREFIX + '[set experiment in place]',
-  props<{experiments: ITableExperiment[]}>()
+  props<{ experiments: ITableExperiment[] }>()
 );
 
 export class SetNoMoreExperiments implements Action {
@@ -136,16 +137,29 @@ export class ToggleColHidden implements Action {
 
 export const setHiddenColumns = createAction(
   EXPERIMENTS_PREFIX + 'SET_HIDDEN_COLS',
-  props<{visibleColumns: string[]}>()
+  props<{ visibleColumns: string[] }>()
 );
 
 export const setUsers = createAction(
   EXPERIMENTS_PREFIX + 'SET_USERS',
-  props<{users: User[]}>()
+  props<{ users: User[] }>()
 );
+
+
 
 export const getUsers = createAction(
   EXPERIMENTS_PREFIX + 'GET_USERS');
+
+export const getFilteredUsers = createAction(
+  EXPERIMENTS_PREFIX + 'GET_FILTERED_USERS');
+
+export const getTags = createAction(
+  EXPERIMENTS_PREFIX + 'GET_TAGS');
+
+export const setTags = createAction(
+  EXPERIMENTS_PREFIX + 'SET_TAGS',
+  props<{ tags: string[] }>()
+);
 
 export class TableSortChanged implements Action {
   public type = TABLE_SORT_CHANGED;
@@ -159,17 +173,18 @@ export class TableSortChanged implements Action {
 export class TableFilterChanged implements Action {
   public type = TABLE_FILTER_CHANGED;
 
-  constructor(public payload: TableFilter) {}
+  constructor(public payload: TableFilter) {
+  }
 }
 
 export const setTableFilters = createAction(
   SET_TABLE_FILTERS,
-  props<{filters: TableFilter[]}>()
+  props<{ filters: TableFilter[] }>()
 );
 
 export const setProjectsTypes = createAction(
   SET_PROJECT_TYPES,
-  props<{ types?: Array<string>}>()
+  props<{ types?: Array<string> }>()
 );
 
 export const getProjectTypes = createAction(
@@ -210,14 +225,14 @@ export class ArchivedModeChanged implements Action {
 export class ArchivedSelectedExperiments implements Action {
   public type = ARCHIVE_SELECTED_EXPERIMENTS;
 
-  constructor(public payload: { projectId: string }) {
+  constructor(public payload: { skipUndo?: boolean }) {
   }
 }
 
 export class RestoreSelectedExperiments implements Action {
   public type = RESTORE_SELECTED_EXPERIMENTS;
 
-  constructor(public payload: { projectId: string }) {
+  constructor(public payload: { skipUndo?: boolean }) {
   }
 }
 
@@ -237,16 +252,16 @@ export class ResetExperiments implements Action {
   }
 }
 
-export const GET_CUSTOM_METRICS      = EXPERIMENTS_PREFIX + 'GET_CUSTOM_METRICS';
+export const GET_CUSTOM_METRICS = EXPERIMENTS_PREFIX + 'GET_CUSTOM_METRICS';
 export const GET_CUSTOM_HYPER_PARAMS = EXPERIMENTS_PREFIX + 'GET_CUSTOM_HYPER_PARAMS';
-export const SET_CUSTOM_METRICS      = EXPERIMENTS_PREFIX + 'SET_CUSTOM_METRICS';
+export const SET_CUSTOM_METRICS = EXPERIMENTS_PREFIX + 'SET_CUSTOM_METRICS';
 export const SET_CUSTOM_HYPER_PARAMS = EXPERIMENTS_PREFIX + 'SET_CUSTOM_HYPER_PARAMS';
-export const ADD_COL                 = EXPERIMENTS_PREFIX + 'ADD_COL';
-export const REMOVE_COL              = EXPERIMENTS_PREFIX + 'REMOVE_COL';
+export const ADD_COL = EXPERIMENTS_PREFIX + 'ADD_COL';
+export const REMOVE_COL = EXPERIMENTS_PREFIX + 'REMOVE_COL';
 export const SET_COLS_ORDER = EXPERIMENTS_PREFIX + 'SET_COLS_ORDER';
 export const CHANGE_COLS_ORDER = EXPERIMENTS_PREFIX + 'CHANGE_COLS_ORDER';
 export const CLEAR_HYPER_PARAMS_COLS = EXPERIMENTS_PREFIX + 'CLEAR_COLS';
-export const RESET_SORT_ORDER        = EXPERIMENTS_PREFIX + 'RESET_SORT_ORDER';
+export const RESET_SORT_ORDER = EXPERIMENTS_PREFIX + 'RESET_SORT_ORDER';
 
 export class GetCustomMetrics implements Action {
   readonly type = GET_CUSTOM_METRICS;
@@ -276,7 +291,7 @@ export class SetCustomHyperParams implements Action {
 
 export const setExtraColumns = createAction(
   EXPERIMENTS_PREFIX + 'SET_EXTRA_COLUMNS',
-  props<{columns: any[]}>()
+  props<{ columns: any[] }>()
 );
 
 export class AddCol implements Action {
@@ -290,22 +305,24 @@ export class AddCol implements Action {
 
 export class RemoveCol implements Action {
   public type = REMOVE_COL;
-  public payload: { col: {id: string; projectId: string} };
+  public payload: { col: { id: string; projectId: string } };
 
-  constructor(col: {id: string; projectId: string}) {
+  constructor(col: { id: string; projectId: string }) {
     this.payload = {col};
   }
 }
+
 export const changeColsOrder = createAction(
   EXPERIMENTS_PREFIX + 'CHANGE_COLS_ORDER',
-  props<{cols: string[]}>()
+  props<{ cols: string[] }>()
 );
 
 
 export const setColsOrderForProject = createAction(
   EXPERIMENTS_PREFIX + 'SET_COLS_ORDER',
-  props<{cols: string[]; project: string}>()
+  props<{ cols: string[]; project: string }>()
 );
+
 export class ClearHyperParamsCols implements Action {
   public type = CLEAR_HYPER_PARAMS_COLS;
   public payload: { projectId };
@@ -321,10 +338,10 @@ export class ResetSortOrder implements Action {
 
 export const setArchive = createAction(
   EXPERIMENTS_PREFIX + 'SET_ARCHIVE',
-  props<{archive: boolean}>()
+  props<{ archive: boolean }>()
 );
 
 export const afterSetArchive = createAction(EXPERIMENTS_PREFIX + 'AFTER_SET_ARCHIVE');
 
-export const setSplitSize = createAction( EXPERIMENTS_PREFIX + 'SET_SPLIT_SIZE', props<{splitSize: number}>()
+export const setSplitSize = createAction(EXPERIMENTS_PREFIX + 'SET_SPLIT_SIZE', props<{ splitSize: number }>()
 );

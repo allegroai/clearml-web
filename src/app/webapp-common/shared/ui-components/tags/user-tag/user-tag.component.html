@@ -10,8 +10,9 @@
   {{caption}}
 </span>
 <i class="fas fa-xs fa-times remove"
+   *ngIf="remove.observers.length > 0 && !disabledRemove"
    [style.color]="colors?.foreground"
-   *ngIf="remove.observers.length > 0"
-   (click)="remove.emit(caption)">
+   (click)="onRemoveClicked(caption)">
 </i>
+<mat-spinner *ngIf="disabledRemove" class="icon sm white remove" [diameter]="17" [strokeWidth]="3"></mat-spinner>
 <div class="arrow" [class.add-button]="add.observers.length > 0" [style.backgroundColor]="colors?.background"></div>

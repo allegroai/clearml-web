@@ -8,17 +8,19 @@ import { LoginComponent } from './login/login.component';
 
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import {NgxFilesizeModule} from 'ngx-filesize';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 
 @NgModule({
   declarations: [LoginComponent],
   providers: [],
-    imports: [
-        CommonModule,
-        LoginRoutingModule,
-        FormsModule,
-        MatAutocompleteModule,
-        HttpClientModule,
-        NgxFilesizeModule
-    ]
+  imports: [
+    CommonModule,
+    LoginRoutingModule,
+    FormsModule,
+    MatAutocompleteModule,
+    HttpClientModule,
+    NgxFilesizeModule,
+    MatProgressSpinnerModule
+  ]
 })
 export class LoginModule { }

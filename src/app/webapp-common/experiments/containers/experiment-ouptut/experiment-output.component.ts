@@ -16,6 +16,7 @@ import {SetAutoRefresh} from '../../../core/actions/layout.actions';
 import {SmSyncStateSelectorService} from '../../../core/services/sync-state-selector.service';
 import {interval} from 'rxjs/internal/observable/interval';
 import {AUTO_REFRESH_INTERVAL} from '../../../../app.constants';
+import {selectSelectedExperiments} from '../../reducers';
 
 @Component({
   selector   : 'sm-experiment-output',
@@ -38,41 +39,44 @@ export class ExperimentOutputComponent implements OnInit, OnDestroy {
   private routerConfigSubscription: Subscription;
   public routerConfig: string[];
   private isAppVisible$: Observable<boolean>;
+  private selectedExperiments$: Observable<Array<any>>;
 
   constructor(private store: Store<ExperimentOutputState>, private router: Router, private route: ActivatedRoute, private syncSelector: SmSyncStateSelectorService) {
-    this.infoData$         = this.store.select(selectExperimentInfoData);
+    this.infoData$ = this.store.select(selectExperimentInfoData);
     this.autoRefreshState$ = this.store.select(selectAutoRefresh);
     this.isAppVisible$ = this.store.select(selectAppVisible);
 
   }
 
   ngOnInit() {
-    this.minimized                      = getOr(false, 'data.minimized', this.route.snapshot.routeConfig);
-    this.routerConfigSubscription       = this.store.select(selectRouterConfig).subscribe(routerConfig => {
+    this.minimized = getOr(false, 'data.minimized', this.route.snapshot.routeConfig);
+    this.routerConfigSubscription = this.store.select(selectRouterConfig).subscribe(routerConfig => {
       this.routerConfig = routerConfig;
     });
-    this.paramsSubscription             = this.store.pipe(
+    this.paramsSubscription = this.store.pipe(
       select(selectRouterParams),
       tap((params) => this.projectId = params.projectId),
       map(params => get('experimentId', params)),
       filter(experimentId => !!experimentId),
       tap((experimentId) => this.experimentId = experimentId),
-      distinctUntilChanged()
+      distinctUntilChanged(),
+      withLatestFrom(this.store.select(selectSelectedExperiments))
     )
-      .subscribe((experimentId) => {
+      .subscribe(([experimentId, selectedExperiments]) => {
+        this.selectedExperiment = selectedExperiments.find(experiment => experiment.id === experimentId);
         this.store.dispatch(new ResetExperimentMetrics());
         this.store.dispatch(new infoActions.ResetExperimentInfo());
         this.store.dispatch(new infoActions.GetExperimentInfo(experimentId));
       });
-    this.autoRefreshSub                = interval(AUTO_REFRESH_INTERVAL).pipe(
+    this.autoRefreshSub = interval(AUTO_REFRESH_INTERVAL).pipe(
       withLatestFrom(this.autoRefreshState$, this.isAppVisible$),
       filter(([iteration, autoRefreshState, isVisible]) => isVisible && autoRefreshState && !this.minimized)
     ).subscribe(() => {
       this.refresh(true);
     });
-    this.selectedExperimentSubscription = this.store.select(selectSelectedExperiment)
+    this.selectedExperimentSubscription = this.store.pipe(select(selectSelectedExperiment),
+      filter(experiment => experiment?.id === this.experimentId))
       .subscribe(experiment => this.selectedExperiment = experiment);
-
   }
 
 

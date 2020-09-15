@@ -17,9 +17,11 @@
   <sm-inline-edit
     [fieldValue]="model?.comment"
     [originalText]="model?.comment"
-    [editable]="true"
+    [editable]="model?.company?.id"
     [multiline]="true"
     (textChanged)="commentValueChanged($event)"
+    (inlineActiveStateChanged)="editExperimentComment($event)"
+    (cancel)="cancelEdit()"
     >
     <span class="general-description">{{model?.comment | NA}}</span></sm-inline-edit>
 </sm-labeled-row>

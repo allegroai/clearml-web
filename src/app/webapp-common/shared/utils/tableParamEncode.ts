@@ -93,7 +93,7 @@ export function decodeColumns(columns: string[]): [string[], MetricColumn[], str
       });
     } else if (col.startsWith('p.')) {
       const colParts = col.split('.');
-      params.push(colParts[1]);
+      params.push(colParts[1] + (colParts[2] ? `.${colParts[2]}` : ''));
     } else {
       cols.push(col);
     }

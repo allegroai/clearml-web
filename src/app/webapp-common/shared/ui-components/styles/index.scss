@@ -46,7 +46,7 @@ body {
     }
 
     a {
-      color: $cloudy-blue;
+      color: $blue-250;
 
       &:hover {
         color: #FFFFFF;
@@ -84,7 +84,7 @@ body {
     }
 
     sm-menu .btn {
-      color: $cloudy-blue;
+      color: $blue-250;
     }
 
     sm-menu .btn:hover {
@@ -297,10 +297,10 @@ body {
 }
 
 .mat-slider-thumb {
-  background-color: $cloudy-blue !important;
+  background-color: $blue-250 !important;
 
   &:hover {
-    background-color: $cloudy-blue !important;
+    background-color: $blue-250 !important;
   }
 }
 

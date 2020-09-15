@@ -15,6 +15,7 @@ import {EditJsonComponent} from '../../../shared/ui-components/overlay/edit-json
 })
 export class ExperimentExecutionFormComponent extends ImmutableFormContainer implements IExperimentInfoFormComponent, OnInit, OnDestroy {
   @Input() formData: IExecutionForm;
+  @Input() showExtraDataSpinner: boolean;
   @Input() editable: boolean;
   @Input() isInDev: boolean;
   @Input() saving = false;
@@ -41,13 +42,13 @@ export class ExperimentExecutionFormComponent extends ImmutableFormContainer imp
         body: 'Uncommitted changes will be discarded',
         yes: 'Discard',
         no: 'Cancel',
-        iconClass: 'i-trash',
+        iconClass: 'al-icon al-ico-trash al-color blue-300',
       }
     });
 
     confirmDialogRef.afterClosed().pipe(take(1)).subscribe((confirmed) => {
       if (confirmed) {
-        this.freezeForm.emit();
+        this.activateEdit.emit({editMode: true, sectionName: 'diff'});
         this.fieldValueChanged({field: 'diff', value: ''});
         this.saveFormData.emit();
       }
@@ -95,6 +96,26 @@ export class ExperimentExecutionFormComponent extends ImmutableFormContainer imp
       } else {
         this.fieldValueChanged({field: 'diff', value: data});
         this.sectionSaved();
+      }
+    });
+  }
+
+  clearInstalledPackages() {
+    const confirmDialogRef: MatDialogRef<any, boolean> = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Clear installed packages',
+        body: 'Are you sure you want to clear the entire contents of Installed packages?',
+        yes: 'Clear',
+        no: 'Keep',
+        iconClass: 'al-icon al-ico-trash al-color blue-300',
+      }
+    });
+
+    confirmDialogRef.afterClosed().pipe(take(1)).subscribe((confirmed) => {
+      if (confirmed) {
+        this.activateEdit.emit({editMode: true, sectionName: 'requirements'});
+        this.fieldValueChanged({field: 'requirements', value: ''});
+        this.saveFormData.emit();
       }
     });
   }

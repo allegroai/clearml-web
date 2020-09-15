@@ -1,3 +1,14 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+sm-selectable-list {
+  flex: 1;
+  overflow: hidden;
+  margin: 0 -16px 0 0;
+}
 .toggle-all {
   margin-top: 2px;
   cursor: pointer;

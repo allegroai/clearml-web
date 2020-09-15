@@ -58,11 +58,28 @@
   transform: scale(0.44);
   transform-origin: 0 0;
 }
+.html-snippet {
+  &:hover {
+    .toolbar {
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+
+  .toolbar {
+    display: flex;
+    position: absolute;
+    bottom: 8px;
+    left: 16px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s, visibility 0.5s;
+  }
+}
 
 .clickable-icon {
   background-color: #efefef;
   padding: 4px 24px;
-  margin: 0 auto;
   border-radius: 4px;
 }
 

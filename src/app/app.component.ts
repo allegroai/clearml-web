@@ -1,6 +1,6 @@
 import {ApiUsersService} from './business-logic/api-services/users.service';
 import {selectCurrentUser} from './webapp-common/core/reducers/users-reducer';
-import {Component, OnDestroy, OnInit, ViewEncapsulation, HostListener} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewEncapsulation, HostListener, Renderer2} from '@angular/core';
 import {ActivatedRoute, NavigationEnd, Router, Params} from '@angular/router';
 import {Title} from '@angular/platform-browser';
 import {selectLoggedOut} from './webapp-common/core/reducers/view-reducer';
@@ -11,12 +11,17 @@ import {ApiProjectsService} from './business-logic/api-services/projects.service
 import {Project} from './business-logic/model/projects/project';
 import {GetAllProjects, SetSelectedProjectId, UpdateProject} from './webapp-common/core/actions/projects.actions';
 import {selectSelectedProject} from './webapp-common/core/reducers/projects.reducer';
-import {selectS3BucketCredentialsBucketCredentials, selectS3PopUpDetails, selectShowLocalFilesPopUp, selectShowS3PopUp} from './webapp-common/core/reducers/common-auth-reducer';
+import {
+  selectS3BucketCredentialsBucketCredentials,
+  selectS3PopUpDetails,
+  selectShowLocalFilesPopUp,
+  selectShowS3PopUp
+} from './webapp-common/core/reducers/common-auth-reducer';
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {S3AccessResolverComponent} from './webapp-common/layout/s3-access-resolver/s3-access-resolver.component';
 import {cancelS3Credentials, getTutorialBucketCredentials} from './webapp-common/core/actions/common-auth.actions';
 import {FetchCurrentUser} from './webapp-common/core/actions/users.actions';
-import {filter, map, take, withLatestFrom} from 'rxjs/operators';
+import {distinct, distinctUntilChanged, filter, map, take, withLatestFrom} from 'rxjs/operators';
 import * as routerActions from './webapp-common/core/actions/router.actions';
 import {combineLatest, Observable, Subscription} from 'rxjs';
 import {selectBreadcrumbsStrings} from './webapp-common/layout/layout.reducer';
@@ -25,17 +30,19 @@ import {formatStaticCrumb} from './webapp-common/layout/breadcrumbs/breadcrumbs-
 import {ServerUpdatesService} from './webapp-common/shared/services/server-updates.service';
 import {selectAvailableUpdates, selectShowSurvey} from './core/reducers/view-reducer';
 import {UPDATE_SERVER_PATH} from './app.constants';
-import {VisibilityChanged} from './webapp-common/core/actions/layout.actions';
+import {setScaleFactor, VisibilityChanged} from './webapp-common/core/actions/layout.actions';
 import {UiUpdatesService} from './webapp-common/shared/services/ui-updates.service';
 import {UsageStatsService} from './core/Services/usage-stats.service';
 import {UiUpdateDialogComponent} from './webapp-common/layout/ui-update-dialog/ui-update-dialog.component';
 import {dismissSurvey} from './core/Actions/layout.actions';
 import {environment} from '../environments/environment';
+import {getScaleFactor} from './webapp-common/shared/utils/shared-utils';
+import {User} from './business-logic/model/users/user';
 
 @Component({
-  selector     : 'sm-root',
-  templateUrl  : 'app.component.html',
-  styleUrls    : ['app.component.scss'],
+  selector: 'sm-root',
+  templateUrl: 'app.component.html',
+  styleUrls: ['app.component.scss'],
   encapsulation: ViewEncapsulation.None
 })
 export class AppComponent implements OnInit, OnDestroy {
@@ -57,12 +64,14 @@ export class AppComponent implements OnInit, OnDestroy {
   public showNotification: boolean = true;
   public showSurvey$: Observable<boolean>;
   public demo = environment.demo;
+  public isLoginContext: boolean;
+  public currentUser: User;
 
   @HostListener('document:visibilitychange') onVisibilityChange() {
     this.store.dispatch(new VisibilityChanged(!document.hidden));
   }
 
-  constructor (
+  constructor(
     private router: Router,
     private route: ActivatedRoute,
     private titleService: Title,
@@ -72,15 +81,16 @@ export class AppComponent implements OnInit, OnDestroy {
     public serverUpdatesService: ServerUpdatesService,
     private uiUpdatesService: UiUpdatesService,
     private matDialog: MatDialog,
-    private userStats: UsageStatsService
+    private userStats: UsageStatsService,
+    private renderer: Renderer2
   ) {
-    this.showS3Popup$            = this.store.select(selectShowS3PopUp);
-    this.showLocalFilePopup$     = this.store.pipe(select(selectShowLocalFilesPopUp));
-    this.loggedOut$              = store.select(selectLoggedOut);
-    this.selectedProject$        = this.store.select(selectSelectedProject);
-    this.updatesAvailable$       = this.store.select(selectAvailableUpdates);
-    this.showSurvey$       = this.store.select(selectShowSurvey);
-    this.selectedCurrentUser$    = this.store.select(selectCurrentUser);
+    this.showS3Popup$ = this.store.select(selectShowS3PopUp);
+    this.showLocalFilePopup$ = this.store.pipe(select(selectShowLocalFilesPopUp));
+    this.loggedOut$ = store.select(selectLoggedOut);
+    this.selectedProject$ = this.store.select(selectSelectedProject);
+    this.updatesAvailable$ = this.store.select(selectAvailableUpdates);
+    this.showSurvey$ = this.store.select(selectShowSurvey);
+    this.selectedCurrentUser$ = this.store.select(selectCurrentUser);
     this.selectedProjectFromUrl$ = this.store.select(selectRouterParams)
       .pipe(
         filter((params: Params) => !!params),
@@ -100,8 +110,11 @@ export class AppComponent implements OnInit, OnDestroy {
     this.store.dispatch(new FetchCurrentUser());
     this.selectedCurrentUser$.pipe(
       filter( user => !!user),
-      take(1))
-      .subscribe(() => this.serverUpdatesService.checkForUpdates(UPDATE_SERVER_PATH));
+      distinctUntilChanged())
+      .subscribe((user) => {
+        this.currentUser = user;
+        this.serverUpdatesService.checkForUpdates(UPDATE_SERVER_PATH);
+      } );
 
     this.selectedProjectFromUrl$.subscribe((projectId: string) => {
       this.store.dispatch(new SetSelectedProjectId(projectId));
@@ -116,7 +129,7 @@ export class AppComponent implements OnInit, OnDestroy {
         )
           .subscribe(([data, bucketCredentials, popupDetails]) => {
             if (!(data && data.success)) {
-              const emptyCredentials          = bucketCredentials.find((cred => cred.Bucket === popupDetails.credentials.Bucket)) === undefined;
+              const emptyCredentials = bucketCredentials.find((cred => cred.Bucket === popupDetails.credentials.Bucket)) === undefined;
               const dontAskAgainForBucketName = emptyCredentials ? '' : popupDetails.credentials.Bucket + popupDetails.credentials.Endpoint;
               this.store.dispatch(cancelS3Credentials({dontAskAgainForBucketName}));
             }
@@ -126,9 +139,10 @@ export class AppComponent implements OnInit, OnDestroy {
 
     this.urlSubscription = combineLatest([this.store.select(selectRouterUrl), this.store.select(selectRouterParams)])
       .subscribe(([url, params]) => {
-        this.projectId          = get('projectId', params);
+        this.projectId = get('projectId', params);
         this.isDashboardContext = url && url.includes('dashboard');
-        this.isWorkersContext   = url && url.includes('workers-and-queues');
+        this.isLoginContext = url && url.includes('login');
+        this.isWorkersContext = url && url.includes('workers-and-queues');
         if (this.projectId) {
           try { // TODO: refactor to a better solution after all navbar are declared...
             this.activeFeature = url.split(this.projectId)[1].split('/')[1];
@@ -147,11 +161,24 @@ export class AppComponent implements OnInit, OnDestroy {
         this.updateTitle();
       }
     );
+    if (window.localStorage.getItem('disableHidpi') !== 'true') {
+      this.setScale();
+    }
 
     // TODO: move to somewhere else...
     this.store.dispatch(new GetAllProjects());
     this.store.dispatch(getTutorialBucketCredentials());
     this.uiUpdatesService.checkForUiUpdate();
+  }
+
+  private setScale() {
+    const dimensionRatio = getScaleFactor();
+    this.store.dispatch(setScaleFactor({scale: dimensionRatio}));
+    const scale = 100 / dimensionRatio;
+    this.renderer.setStyle(document.body, 'transform', `scale(${scale})`);
+    this.renderer.setStyle(document.body, 'transform-origin', '0 0');
+    this.renderer.setStyle(document.body, 'height', `${dimensionRatio}vh`);
+    this.renderer.setStyle(document.body, 'width', `${dimensionRatio}vw`);
   }
 
   nameChanged(name) {
@@ -172,13 +199,13 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   updateTitle() {
-    let route       = this.route.snapshot.firstChild;
+    let route = this.route.snapshot.firstChild;
     let routeConfig = [];
 
     while (route) {
-      const path  = route.routeConfig.path.split('/').filter((item) => !!item);
+      const path = route.routeConfig.path.split('/').filter((item) => !!item);
       routeConfig = routeConfig.concat(path);
-      route       = route.firstChild;
+      route = route.firstChild;
     }
     const crumbs = routeConfig
       .reduce((acc, config) => {
@@ -200,6 +227,10 @@ export class AppComponent implements OnInit, OnDestroy {
   dismissSurvey() {
     this.store.dispatch(dismissSurvey());
 
+  }
+
+  get guestUser(): boolean {
+    return !this.currentUser || this.currentUser?.role === 'guest';
   }
 }
 

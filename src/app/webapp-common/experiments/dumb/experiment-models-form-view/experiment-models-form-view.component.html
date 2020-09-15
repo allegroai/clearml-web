@@ -14,13 +14,13 @@
         ></sm-copy-clipboard>
       </span>
       <div *ngIf="editable">
-        <i class="icon i-edit sm-md pointer mr-2"  smTooltip="Select model" (click)="chooseModel()"></i>
-        <i *ngIf="model?.id" class="icon i-trash sm-md pointer" smTooltip="Remove model" (click)="removeModel()"></i>
+        <i class="al-icon al-ico-edit al-color blue-300 sm-md pointer mr-2"  smTooltip="Select model" (click)="chooseModel()"></i>
+        <i *ngIf="model?.id" class="al-icon al-ico-trash al-color blue-300 sm-md pointer" smTooltip="Remove model" (click)="removeModel()"></i>
       </div>
     </div>
   </sm-labeled-row>
   <sm-labeled-row label="CREATING EXPERIMENT">
-    <a [href]="'/projects/'+ ((source?.projectId) ? source?.projectId : '*') + '/experiments/' + source.experimentId"
+    <a [href]="'/projects/'+ ((source?.projectId) ? source?.projectId : '*') + '/experiments/' + (source? source?.experimentId: '')"
        target="_blank">
       {{source?.experimentName}}
     </a>

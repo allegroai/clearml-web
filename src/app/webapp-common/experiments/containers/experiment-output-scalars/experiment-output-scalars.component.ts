@@ -9,7 +9,7 @@ import {scrollToElement} from '../../../shared/utils/shared-utils';
 import {ActivatedRoute,  Router} from '@angular/router';
 import {of} from 'rxjs';
 import {IExperimentInfoState} from '../../../../features/experiments/reducers/experiment-info.reducer';
-import {ExperimentScalarRequested, GetExperimentLog, ResetExperimentMetrics, SetExperimentMetricsSearchTerm, SetExperimentSettings} from '../../actions/common-experiment-output.actions';
+import {ExperimentScalarRequested, ResetExperimentMetrics, SetExperimentMetricsSearchTerm, SetExperimentSettings} from '../../actions/common-experiment-output.actions';
 import {ExperimentGraph} from '../../../tasks/tasks.model';
 import {convertScalars, sortMetricsList} from '../../../tasks/tasks.utils';
 import {ScalarKeyEnum} from '../../../../business-logic/model/events/scalarKeyEnum';

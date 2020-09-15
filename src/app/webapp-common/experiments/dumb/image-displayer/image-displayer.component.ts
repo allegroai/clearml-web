@@ -1,6 +1,7 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, HostListener, Inject, ViewChild} from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import {ConfirmDialogComponent} from '../../../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
+import {last} from 'lodash/fp';
 
 @Component({
   selector: 'sm-image-displayer',
@@ -149,5 +150,14 @@ export class ImageDisplayerComponent {
   wheelZoom($event: WheelEvent) {
     this.scale = Math.max(this.scale - (0.005 * $event.deltaY), 0.1);
     this.changeScale();
+  }
+
+  downloadImage() {
+    const src = new URL(this.imageSources[this.currentIndex]);
+    const a = document.createElement('a') as HTMLAnchorElement;
+    a.href = this.imageSources[this.currentIndex];
+    a.download = last(src.pathname.split('/'));
+    a.target = '_blank';
+    a.click();
   }
 }

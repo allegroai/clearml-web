@@ -13,6 +13,8 @@ export * from './modelsGetByIdRequest';
 export * from './modelsGetByIdResponse';
 export * from './modelsGetByTaskIdRequest';
 export * from './modelsGetByTaskIdResponse';
+export * from './modelsGetFrameworksRequest';
+export * from './modelsGetFrameworksResponse';
 export * from './modelsSetReadyRequest';
 export * from './modelsSetReadyResponse';
 export * from './modelsSetReadyResponsePublishedTask';

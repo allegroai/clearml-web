@@ -28,6 +28,8 @@ export class ExperimentArtifactsNavbarComponent {
 
   @Input() selectedArtifactKey;
   @Input() outputModel;
+  @Input() inputModel;
+  @Input() editable;
   @Input() activeSection;
   @Input() routerConfig: string[];
   @Output() artifactSelected = new EventEmitter();

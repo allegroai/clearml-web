@@ -11,6 +11,7 @@ export interface IModelInfoInput {
   name: Model['name'];
   labels: Model['labels'];
   project?: Project;
+  design?: any;
 }
 
 export interface IModelFormOutput {
@@ -44,7 +45,6 @@ export interface IExperimentModelInfo {
   output: IModelInfoOutput;
   source: IModelInfoSource;
   artifacts: Artifact[];
-  prototext: string;
 }
 
 export type ExperimentTableColFieldsEnum = 'output.result' | 'comment' | 'id' | 'project.name' | 'name' | 'type' | 'status' | 'created' | 'completed' | 'user.name' | 'queue.name' | 'last_worker' | 'selected' |'last_iteration' | 'last_update' | 'tags';

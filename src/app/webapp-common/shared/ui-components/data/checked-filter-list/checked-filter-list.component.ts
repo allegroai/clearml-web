@@ -63,7 +63,7 @@ export class CheckedFilterListComponent {
     this.clearSelection.emit();
   }
 
-  trackByFn(item) {
+  trackByFn(index: number, item) {
     return item.value;
   }
 }

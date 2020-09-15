@@ -1,9 +1,11 @@
-<sm-model-menu #contextMenu
+<sm-model-menu #contextMenu *smCheckPermission="true"
                [model]="this.contextModel"
                [selectedModel]="selectedModel"
                [numSelected]="selectedModels.length"
                [allTags]="tags$ | async"
                (tagSelected)="addTag($event)"
+               (menuOpened)="setContextMenuStatus(true)"
+               (menuClosed)="setContextMenuStatus(false)"
                [showButton]="false"
 ></sm-model-menu>
 <div class="table-header" [hidden]="!minimizedView">
@@ -21,7 +23,7 @@
     <sm-table-card-filter-template [options]="MODELS_ALL_FILTER_OPTIONS"
                                    [value]="allFiltersValue"
                                    [subValue]="systemTagsFiltersValue"
-                                   [subOptions]="systemTags | labelValue"
+                                   [columns]="initialColumns"
                                    fixedOptionsSubheader="System tags"
                                    (subFilterChanged)="tableFilterChanged({id:'system_tags'}, $event)"
                                    (filterChanged)="tableAllFiltersChanged($event)"
@@ -31,8 +33,8 @@
     ></sm-table-card-filter-template>
   </div>
 </div>
-<div class="table-container" [class.card-view]="minimizedView" #tableContainer>
-  <sm-table
+<div class="table-container" [class.card-view]="minimizedView">
+  <sm-table #table
     [selectionMode]="selectionMode"
     [tableData]="models"
     [noMoreData]="noMoreModels"
@@ -42,6 +44,9 @@
     [columnsOrder]="colsOrder"
     [lazyLoading]="true"
     [selection]="selectedModel"
+    [checkedItems]="selectedModels"
+    [activeContextRow]="contextModel"
+    [contextMenuOpen]="contextMenuActive"
     [minimizedView]="minimizedView"
     (colReordered)="columnsReordered($event)"
     [keyboardControl]="true"
@@ -67,10 +72,11 @@
         *ngIf="col.id === MODELS_TABLE_COL_FIELDS.FRAMEWORK"
         [header]="col.header"
         [value]="frameworkFiltersValue"
-        [options]="MODELS_FRAMEWORK_OPTIONS"
+        [options]="MODELS_ALL_FILTER_OPTIONS.framework"
         [sortOrder]="col.id === tableSortField ? tableSortOrder : false"
         (sortOrderChanged)="onSortChanged($event, col.id)"
-        (filterChanged)="tableFilterChanged(col, $event);"
+        (filterChanged)="tableFilterChanged(col, $event)"
+        (menuClosed)="sortOptionalFrameworksList()"
       >
       </sm-table-filter-sort-template>
       <sm-table-filter-sort-template
@@ -102,7 +108,6 @@
         [enableSearch]="col.searchableFilter"
         [searchValue]="tagSearchValue"
         [options]="MODELS_ALL_FILTER_OPTIONS.tags |filter:tagSearchValue:'label'"
-        [subOptions]="systemTags | labelValue"
         fixedOptionsSubheader="System tags"
         [value]="tagsFiltersValue"
         [subValue]="systemTagsFiltersValue"
@@ -133,7 +138,6 @@
         <ng-container *ngSwitchCase="MODELS_TABLE_COL_FIELDS.NAME">
           <div class="d-flex flex-row flex-nowrap">
             <div class="font-weight-bold flex-grow-1" [smTooltip]="model.name">{{model.name}}</div>
-            <sm-tag *ngIf="model &&  model.company && ! model.company.id" label="EXAMPLE" className="example"></sm-tag>
           </div>
         </ng-container>
         <ng-container *ngSwitchCase="MODELS_TABLE_COL_FIELDS.TAGS">
@@ -141,6 +145,9 @@
         </ng-container>
         <ng-container *ngSwitchCase="MODELS_TABLE_COL_FIELDS.USER">
           {{model.user?.name ? model.user?.name : 'Unknown User'}}
+        </ng-container>
+        <ng-container *ngSwitchCase="MODELS_TABLE_COL_FIELDS.PROJECT">
+          {{model?.project?.name}}
         </ng-container>
         <div *ngSwitchCase="MODELS_TABLE_COL_FIELDS.TASK" [smTooltip]="model.name" class="ellipsis">
           {{model.task?.name}}
@@ -178,10 +185,12 @@
                      [cardName]="model.name"
                      [columns]="tableCols"
                      [rowData]="model"
-                     (contextmenu)="openContextMenu({e: $event, rowData: model})"
+                     [checked]="isRowSelected(model)"
+                     [activeContextRow]="contextModel"
+                     [contextMenuOpen]="contextMenuActive"
       >
         <sm-tag-list class="mb-1" [sysTags]="getSysTags(model)" [tags]="model?.tags"></sm-tag-list>
-        <div compact-columns-data>Created {{model.created | timeAgo}} by {{model.user?.name || 'Unknown User'}}
+        <div  class="ellipsis compact-columns-data" compact-columns-data>Created {{model.created | timeAgo}} by {{model.user?.name || 'Unknown User'}}
           <ng-container *ngIf="model.task"><BR>{{model.task.name}}</ng-container>
         </div>
         <sm-experiment-status-icon-label

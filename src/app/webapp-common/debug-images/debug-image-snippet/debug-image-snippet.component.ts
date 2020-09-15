@@ -1,5 +1,5 @@
 import {Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
-import {isHtmlPage} from '../../shared/utils/shared-utils';
+import {isHtmlPage, isTextFileURL} from '../../shared/utils/shared-utils';
 import {IsAudioPipe} from '../../shared/pipes/is-audio.pipe';
 import {IsVideoPipe} from '../../shared/pipes/is-video.pipe';
 import {AddMessage} from '../../core/actions/layout.actions';
@@ -21,7 +21,7 @@ export class DebugImageSnippetComponent implements OnInit {
     if (frame.url) {
       this.isVideo = (new IsVideoPipe().transform(frame.url));
       this.isAudio = (new IsAudioPipe()).transform(frame.url);
-      this.isHtml = isHtmlPage(frame.url);
+      this.isHtml = isHtmlPage(frame.url) || isTextFileURL(frame.url);
     }
     this._frame = frame;
   }
@@ -35,7 +35,7 @@ export class DebugImageSnippetComponent implements OnInit {
   isFailed = false;
   isLoading = true;
 
-  constructor(private store: Store) {
+  constructor(private store: Store<any>) {
   }
 
   ngOnInit() {

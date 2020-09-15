@@ -3,6 +3,7 @@ export abstract class ExperimentCompareDetailsBase {
     return {
       artifacts: this.buildSectionTree(experiment, 'artifacts', mergedExperiment),
       execution: this.buildSectionTree(experiment, 'execution', mergedExperiment),
+      configuration: this.buildSectionTree(experiment, 'configuration', mergedExperiment),
     };
   }
 

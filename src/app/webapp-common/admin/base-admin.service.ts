@@ -49,7 +49,11 @@ export class BaseAdminService {
     this.store.dispatch(showLocalFilePopUp({url}));
   }
 
-  signUrlIfNeeded(url, skipLocalFile = false) {
+  signUrlIfNeeded(url, skipLocalFile = true, skipFileServer = true) {
+    if (isFileserverUrl(url, window.location.hostname) && !skipFileServer) {
+      return converToReverseProxy(url);
+    }
+
     if (this.isLocalFile(url) && !skipLocalFile) {
       this.checkLocalServerRunning(url);
       return this.redirectToLocalServer(url);
@@ -59,9 +63,6 @@ export class BaseAdminService {
       return this.signGoogleCloudUrl(url);
     }
 
-    if (isFileserverUrl(url, window.location.hostname)) {
-      return converToReverseProxy(url);
-    }
     const now = new Date();
     if (this.previouslySignedUrls[url] && (new Date(this.previouslySignedUrls[url].expires).getTime() > now.getTime())) {
       return this.previouslySignedUrls[url].signedURL;
@@ -180,11 +181,11 @@ export class BaseAdminService {
   }
 
   public isS3Url(src) {
-    return src.startsWith('s3://');
+    return src?.startsWith('s3://');
   }
 
   public isGoogleCloudUrl(src) {
-    return src.startsWith('gs://');
+    return src?.startsWith('gs://');
   }
 
   public getBucketAndKeyFromSrc = (src) => {
@@ -214,6 +215,7 @@ export class BaseAdminService {
       };
     } else {
       try {
+        src = this.encodeSpecialCharacters(src);
         const amazon = AmazonS3URI(src);
         return {
           Bucket: amazon.bucket,
@@ -229,7 +231,7 @@ export class BaseAdminService {
 
   // Uses Allegro Chrome extension injecting patch_local_link function to window - hack to get local files.
   redirectToLocalServer(url: string): string {
-    return `http://localhost:${LOCAL_SERVER_PORT}${url.replace('file://','/')}`;
+    return `http://localhost:${LOCAL_SERVER_PORT}${url.replace('file://', '/')}`;
   }
 
   isLocalFile(url: string): boolean {
@@ -262,5 +264,20 @@ export class BaseAdminService {
   isAzureUrl(url: string) {
     return url.startsWith('azure://');
   }
+
+  public replaceAll(baseString: string, toReplace: string, replaceWith: string, ignore= false): string{
+    return baseString.replace(new RegExp(toReplace.replace(/([\/\,\!\\\^\$\{\}\[\]\(\)\.\*\+\?\|\<\>\-\&])/g,"\\$&"),(ignore?"gi":"g")),(typeof(replaceWith)=="string")?replaceWith.replace(/\$/g,"$$$$"):replaceWith);
+
+  }
+
+
+  private encodeSpecialCharacters(src: string) {
+    src = this.replaceAll(src, '%','%25');
+    src = this.replaceAll(src, '#','%23');
+    src = this.replaceAll(src, '\\','%5C');
+    src = this.replaceAll(src, '^','%5E');
+    return src;
+  }
+
 
 }

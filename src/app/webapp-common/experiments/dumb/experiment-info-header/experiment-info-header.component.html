@@ -1,34 +1,44 @@
-<sm-overlay [backdropActive]="backdropActive"></sm-overlay>
 <small class="alert-warning" *ngIf="editName.active && isDev">Renaming a DEV experiment without changing the
   code to reflect the rename, will create a new experiment the next time the code is executed.
 </small>
 <div class="d-flex w-100">
-  <img class="experiment-icon" src="./app/webapp-common/assets/icons/experiment.svg">
+  <sm-experiment-type-icon-label class="experiment-icon" [showLabel]="false" [type]="experiment?.type" iconClass="xl" >
+  </sm-experiment-type-icon-label>
   <div class="middle-col">
     <div class="d-flex p2">
       <sm-inline-edit
         #editName
-        class="edit-name"
-        [originalText]="infoData?.name"
+        class="edit-name pr-3"
+        [originalText]="infoData?.name || experiment?.name"
         [editable]="editable"
         [minWidth]="250"
         (textChanged)="onNameChanged($event)"
+        (inlineActiveStateChanged)="editExperimentName($event)"
       >
-        <span class="experiment-name">{{infoData?.name}}</span>
+        <span class="experiment-name">{{experiment?.name}}</span>
       </sm-inline-edit>
-      <i class="icon i-id id-icon pointer" (click)="viewId = true" *ngIf="!viewId"></i>
+      <i class="icon i-id id-icon pointer" (click)="showID()" *ngIf="!viewId"></i>
       <span class="experiment-id" *ngIf="viewId">{{experiment.id}}</span>
     </div>
     <div class="d-flex align-items-center">
-      <span class="experiment-type">{{experiment?.type |noUnderscore| titlecase }}</span>
+      <span class="experiment-type">{{ experiment?.type |noUnderscore| titlecase }}</span>
       <sm-tag-list
+        *smCheckPermission="editable; else readOnlyTags"
         class="w-100"
-        [class.menu-open]="tagMenu.trigger.menuOpen"
+        [class.menu-open]="!!tagMenu && tagMenu.trigger.menuOpen"
         [sysTags]="systemTags"
         [tags]="experiment?.tags"
         (add)="openTagMenu($event)"
         (remove)="removeTag($event)"></sm-tag-list>
+      <ng-template #readOnlyTags>
+        <sm-tag-list
+          class="w-100"
+          [class.menu-open]="!!tagMenu && tagMenu.trigger.menuOpen"
+          [sysTags]="systemTags"
+          [tags]="experiment?.tags"></sm-tag-list>
+      </ng-template>
       <sm-menu
+        *smCheckPermission="true"
         #tagMenu
         [showCart]="false"
         [showButton]="false"
@@ -45,10 +55,10 @@
       </sm-menu>
     </div>
   </div>
-  <div class="p-2 light-theme">
+  <div *smCheckPermission="true" class="p-2 light-theme menu-container">
     <button class="btn btn-icon" (click)="minimizeClicked.emit()" *ngIf="showMinimize"
             smTooltip="View in experiment table" position="left">
-      <i class="icon i-info-minimize"></i>
+      <i class="al-icon al-ico-info-min al-color light-grey-blue"></i>
     </button>
     <sm-experiment-menu
       *ngIf="showMenu && experiment"

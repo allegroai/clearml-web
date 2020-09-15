@@ -11,6 +11,8 @@ import {CreateCredentialDialogComponent} from './create-credential-dialog/create
 import {filter, map} from 'rxjs/operators';
 import {Logout} from '../core/actions/users.actions';
 import * as versions from '../../../version.json';
+import {MatSlideToggleChange} from '@angular/material/slide-toggle';
+
 
 @Component({
   selector   : 'sm-admin',
@@ -24,13 +26,17 @@ export class AdminComponent implements OnInit, OnDestroy {
   public credentials: Observable<any>;
   public newCredential: Observable<any>;
   public S3BucketCredentials: Observable<any>;
-  public version = versions['webapp-treeish'];
+  public version = versions['version'];
+  public disableHidpi: boolean = false;
+  public disableHidpiChanged: boolean = false;
+  public isChrome: boolean;
 
   constructor(
     public adminService: AdminService,
     private store: Store<any>,
     private dialog: MatDialog
   ) {
+    this.isChrome = window['chrome'];
     this.currentUser         = store.select(selectCurrentUser);
     this.userTitle           = this.currentUser.pipe(
       map((user) => [
@@ -45,6 +51,9 @@ export class AdminComponent implements OnInit, OnDestroy {
 
 
   ngOnInit() {
+
+    this.disableHidpi = window.localStorage.getItem('disableHidpi') === 'true';
+
     this.store.dispatch(getAllCredentials());
     this.newCredentialSub = this.newCredential.pipe(filter(credential => Object.keys(credential).length > 0)).subscribe(credential => {
       const dialog = this.dialog.open(CreateCredentialDialogComponent, {data: {credential}});
@@ -73,5 +82,18 @@ export class AdminComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.newCredentialSub.unsubscribe();
+  }
+
+  HidpiChange(event: MatSlideToggleChange) {
+    window.localStorage.setItem('disableHidpi', JSON.stringify(event.checked));
+    this.disableHidpiChanged = !this.disableHidpiChanged;
+  }
+
+  reload(event) {
+    if (this.disableHidpiChanged) {
+      event.stopPropagation();
+      event.preventDefault();
+      window.location.reload();
+    }
   }
 }

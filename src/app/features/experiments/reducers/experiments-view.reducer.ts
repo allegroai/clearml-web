@@ -12,7 +12,7 @@ export function experimentsViewReducer(state: IExperimentsViewState = initialSta
 
   switch (action.type) {
     case commonActions.RESET_EXPERIMENTS:
-      return {...state, experiments: [], selectedExperiment: null, metricVariants: []};
+      return {...state, experiments: [], selectedExperiment: null, metricVariants: [], showAllSelectedIsActive: false};
     default:
       return <IExperimentsViewState>commonExperimentsViewReducer(state, action);
   }

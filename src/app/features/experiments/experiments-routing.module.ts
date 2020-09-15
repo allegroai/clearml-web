@@ -18,6 +18,8 @@ import {ExperimentInfoInputModelComponent} from '../../webapp-common/experiments
 import {ExperimentInfoOutputModelComponent} from '../../webapp-common/experiments/containers/experiment-info-output-model/experiment-info-output-model.component';
 import {ExperimentInfoArtifactItemComponent} from '../../webapp-common/experiments/containers/experiment-info-artifact-item/experiment-info-artifact-item.component';
 import {LeavingBeforeSaveAlertGuard} from '../../webapp-common/shared/guards/leaving-before-save-alert.guard';
+import {ExperimentInfoTaskModelComponent} from '../../webapp-common/experiments/containers/experiment-info-task-model/experiment-info-task-model.component';
+import {ExperimentInfoHyperParametersFormContainerComponent} from '../../webapp-common/experiments/containers/experiment-info-hyper-parameters-form-container/experiment-info-hyper-parameters-form-container.component';
 
 export const routes: Routes = [
   {
@@ -35,11 +37,17 @@ export const routes: Routes = [
               {path: '', redirectTo: 'input-model', pathMatch: 'full'},
               {path: 'input-model', component: ExperimentInfoInputModelComponent},
               {path: 'output-model', component: ExperimentInfoOutputModelComponent},
-              {path: 'artifact/:artifactId', children:[{ path:':mode', component: ExperimentInfoArtifactItemComponent}]},
-              {path: 'other/:artifactId', children:[{ path:':mode', component: ExperimentInfoArtifactItemComponent}]}
+              {path: 'artifact/:artifactId', children: [{path: ':mode', component: ExperimentInfoArtifactItemComponent}]},
+              {path: 'other/:artifactId', children: [{path: ':mode', component: ExperimentInfoArtifactItemComponent}]}
             ]
           },
-          {path: 'hyper-params', component: ExperimentInfoHyperParametersComponent, canDeactivate: [LeavingBeforeSaveAlertGuard]},
+          {
+            path    : 'hyper-params', component: ExperimentInfoHyperParametersComponent, canDeactivate: [LeavingBeforeSaveAlertGuard],
+            children: [
+              {path: 'configuration/:configObject', component: ExperimentInfoTaskModelComponent},
+              {path: 'hyper-param/:hyperParamId', component: ExperimentInfoHyperParametersFormContainerComponent}
+            ]
+          },
           {path: 'general', component: ExperimentInfoGeneralComponent},
           {
             path     : 'info-output',

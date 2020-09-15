@@ -4,7 +4,7 @@ import {experimentSections, experimentSectionsEnum} from '../shared/experiments.
 import {get, set} from 'lodash/fp';
 import {commonExperimentInfoReducer, ICommonExperimentInfoState, initialCommonExperimentInfoState} from '../../../webapp-common/experiments/reducers/common-experiment-info.reducer';
 import * as actions from '../../../webapp-common/experiments/actions/common-experiments-info.actions';
-import {SET_EXPERIMENT} from '../../../webapp-common/experiments/actions/common-experiments-info.actions';
+import {deleteHyperParamsSection, hyperParamsSectionUpdated, saveExperimentConfigObj, saveHyperParamsSection, SET_EXPERIMENT, setExperimentSaving, updateExperimentAtPath} from '../../../webapp-common/experiments/actions/common-experiments-info.actions';
 
 export interface IExperimentInfoState extends ICommonExperimentInfoState {
   activeSectionEdit: string;
@@ -16,13 +16,13 @@ export interface IExperimentInfoState extends ICommonExperimentInfoState {
 
 export const initialState: IExperimentInfoState = {
   ...initialCommonExperimentInfoState,
-  activeSectionEdit       : null,
-  saving                  : false,
-  infoDataFreeze          : null,
-  userKnowledge           : {
+  activeSectionEdit: null,
+  saving           : false,
+  infoDataFreeze   : null,
+  userKnowledge    : {
     [experimentSections.MODEL_INPUT]: false
   } as any,
-  errors                  : {
+  errors           : {
     model    : null,
     execution: null,
   },
@@ -40,7 +40,16 @@ export function experimentInfoReducer(state: IExperimentInfoState = initialState
       return {...state, infoData: {...state.infoData, model: {...state.infoData.model, ...action.payload}}};
     case EXPERIMENT_DATA_UPDATED:
       return {...state, infoData: {...state.infoData, ...action.payload.changes}};
+    case hyperParamsSectionUpdated.type:
+      return {...state, infoData: {...state.infoData, hyperparams: {...state.infoData.hyperparams, [action.section]: action.hyperparams}}};
+
     case EXPERIMENT_SAVE:
+      return {...state, saving: true};
+    case saveHyperParamsSection.type:
+      return {...state, saving: true};
+    case saveExperimentConfigObj.type:
+      return {...state, saving: true};
+    case deleteHyperParamsSection.type:
       return {...state, saving: true};
     case ACTIVATE_EDIT:
       return {...state, activeSectionEdit: action.payload, infoDataFreeze: state.infoData};
@@ -52,6 +61,11 @@ export function experimentInfoReducer(state: IExperimentInfoState = initialState
       return {...state, infoData: state.infoDataFreeze ? state.infoDataFreeze : state.infoData};
     case EXPERIMENT_DETAILS_UPDATED:
       return {...state, infoData: {...state.infoData, ...action.payload.changes}};
+    case setExperimentSaving.type:
+      return {...state, saving: action.saving};
+    case updateExperimentAtPath.type:
+      const newInfoData = set(action.path, action.value, state.infoData);
+      return {...state, infoData: newInfoData as any};
     case actions.EXPERIMENT_UPDATED_SUCCESSFULLY:
       return {...state, saving: false};
     case ADD_CUSTOM_OUTPUT_LABEL: {

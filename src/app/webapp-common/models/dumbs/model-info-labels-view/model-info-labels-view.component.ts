@@ -3,35 +3,41 @@ import {Model} from '../../../../business-logic/model/models/model';
 import {NgForm} from '@angular/forms';
 import {debounceTime} from 'rxjs/operators';
 import {Subscription} from 'rxjs';
+import {ISelectedModel} from '../../shared/models.model';
 
 @Component({
-  selector   : 'sm-model-info-labels-view',
+  selector: 'sm-model-info-labels-view',
   templateUrl: './model-info-labels-view.component.html',
-  styleUrls  : ['./model-info-labels-view.component.scss']
+  styleUrls: ['./model-info-labels-view.component.scss']
 })
 export class ModelInfoLabelsViewComponent implements OnInit, OnDestroy {
   public formData: Array<{ label: string; id: number }> = [];
   public editable: boolean = false;
-
   public cols = [{header: 'Label', class: 'col-10'},
     {header: 'Id', class: 'col-4'}];
+
   private unsavedValue: any;
-  @ViewChild('labels', {static: true}) labels: NgForm;
   private formChangesSubscription: Subscription;
-  private _model: Model;
-  @Input() set model(model: Model) {
+  private _model: ISelectedModel;
+
+  @ViewChild('labels', {static: true}) labels: NgForm;
+
+  @Input() set model(model: ISelectedModel) {
     if (model) {
       this.formData = this.revertParameters(model.labels);
     }
     this._model = model;
   }
+
   get model() {
     return this._model;
   }
+
   @Input() saving = false;
   @Output() saveFormData = new EventEmitter();
   @Output() cancelClicked = new EventEmitter();
   @Output() activateEditClicked = new EventEmitter();
+
   constructor() {
   }
 
@@ -54,10 +60,11 @@ export class ModelInfoLabelsViewComponent implements OnInit, OnDestroy {
 
   addRow() {
     this.formData.push({
-      id   : this.formData.length + 1,
+      id: this.formData.length + 1,
       label: null,
     });
   }
+
   removeRow(index) {
     this.formData.splice(index, 1);
   }
@@ -71,14 +78,16 @@ export class ModelInfoLabelsViewComponent implements OnInit, OnDestroy {
     this.editable = false;
     this.cancelClicked.emit();
   }
+
   // TODO: move to utils.
   revertParameters(labels: Model['labels']): Array<{ id: number, label: string }> {
     return labels ? Object.entries(labels).map(([key, val]) => ({id: val, label: key})).sort((labelA, labelB) => labelA.id - labelB.id) : [];
   }
-  convertParameters(labels: Array<{ id: number, label: string }> ): Model['labels']{
+
+  convertParameters(labels: Array<{ id: number, label: string }>): Model['labels'] {
     const obj = {};
     labels.forEach(l => {
-      obj[l.label] = l.id
+      obj[l.label] = l.id;
     });
     return obj;
   }

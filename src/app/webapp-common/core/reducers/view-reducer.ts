@@ -1,6 +1,7 @@
 import {HTTP, HTTP_ACTIONS, VIEW_ACTIONS} from '../../../app.constants';
 import {createSelector} from '@ngrx/store';
 import {get} from 'lodash/fp';
+import {setScaleFactor} from '../actions/layout.actions';
 
 export interface ViewState {
   loading: {[endpoint: string]: boolean};
@@ -12,6 +13,7 @@ export interface ViewState {
   autoRefresh: boolean;
   compareAutoRefresh: boolean;
   applicationVisible: boolean;
+  scaleFactor: number;
 }
 
 export const initViewState: ViewState = {
@@ -25,6 +27,7 @@ export const initViewState: ViewState = {
   autoRefresh: true,
   compareAutoRefresh: false,
   applicationVisible: true,
+  scaleFactor: 100
 };
 
 export const views = state => state.views as ViewState;
@@ -38,6 +41,7 @@ export const selectResultMessage = createSelector(views, state => state.resultMe
 export const selectAutoRefresh = createSelector(views, state => state && state.autoRefresh);
 export const selectCompareAutoRefresh = createSelector(views, state => state.compareAutoRefresh);
 export const selectAppVisible = createSelector(views, state => state.applicationVisible);
+export const selectScaleFactor = createSelector(views, state => state.scaleFactor);
 
 
 export function viewReducer(viewState: ViewState = initViewState, action) {
@@ -58,6 +62,8 @@ export function viewReducer(viewState: ViewState = initViewState, action) {
       };
     case VIEW_ACTIONS.VISIBILITY_CHANGED:
       return {...viewState, applicationVisible: action.visible};
+    case setScaleFactor.type:
+      return {...viewState, scaleFactor: action.scale};
     case VIEW_ACTIONS.RESET_LOADER:
       return {...viewState, loading: {}};
     case HTTP.API_REQUEST_SUCCESS:

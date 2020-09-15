@@ -26,7 +26,8 @@ export class TagsMenuComponent {
 
   @ViewChild('nameInput') nameInput: ElementRef<HTMLInputElement>;
 
-  constructor(private store: Store, private cdr: ChangeDetectorRef) {
+
+  constructor(private store: Store, private cdr: ChangeDetectorRef, private elRef: ElementRef) {
   }
 
   openTagColors() {
@@ -38,6 +39,7 @@ export class TagsMenuComponent {
       this.tagSelected.emit(tag);
       this.filterText = '';
     }
+    this.elRef.nativeElement.click();
   }
 
   focus() {

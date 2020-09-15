@@ -20,13 +20,7 @@ export class UserEffects {
   logoutFlow = this.actions.pipe(
     ofType(USERS_ACTIONS.LOGOUT),
     map(() => {
-      let domainParts = window.location.host.split(':')[0].split('.');
-      if (domainParts.length > 2) {
-        domainParts = domainParts.slice(1);
-      }
-      const domain = domainParts.join('.');
       this.authService.authLogout({}).subscribe();
-      this.cookiesService.delete('trains_token_basic', '/', domain);
       return {type: USERS_ACTIONS.LOGOUT_SUCCESS};
     })
   );

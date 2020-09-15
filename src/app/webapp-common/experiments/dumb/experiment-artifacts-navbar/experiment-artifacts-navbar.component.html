@@ -1,10 +1,10 @@
-<mat-expansion-panel expanded="true">
+<mat-expansion-panel expanded="true" *ngIf="inputModel?.id || outputModel?.id || editable">
   <mat-expansion-panel-header collapsedHeight="40px" expandedHeight="40px" [ngClass]="{'active': activeSection === ACTIVE_SECTIONS.model}">
     MODELS
   </mat-expansion-panel-header>
   <div
     queryParamsHandling="preserve"
-    [ngClass]="{'selected': routerConfig.includes('input-model')}"
+    [ngClass]="{'selected': routerConfig.includes('input-model'), 'hide-output-model' :((!inputModel?.id) && !editable)}"
     class="artifact-container pointer"
     routerLink="input-model"
   >
@@ -21,7 +21,7 @@
 </mat-expansion-panel>
 
 <mat-expansion-panel [expanded]="true" *ngIf="dataAuditArtifacts?.length > 0">
-  <mat-expansion-panel-header collapsedHeight="40px" expandedHeight="40px" [ngClass]="{'active': activeSection === ACTIVE_SECTIONS.artifact}">
+  <mat-expansion-panel-header collapsedHeight="40px" expandedHeight="40px" class="active">
     DATA AUDIT
   </mat-expansion-panel-header>
   <div *ngFor="let artifact of dataAuditArtifacts; trackBy: trackByFn"
@@ -30,11 +30,11 @@
        [routerLink]="'artifact/' + artifact.key+ '/' + artifact.mode"
        [ngClass]="{'selected': selectedArtifactKey === artifact.key}"
   >
-    <i class="icon sm i-data-audit"></i> {{artifact.key}}
+    <i class="sm al-icon al-ico-data-audit al-color" [class]="(selectedArtifactKey === artifact.key ? 'white' : 'blue-400')"></i>{{artifact.key}}
   </div>
 </mat-expansion-panel>
 <mat-expansion-panel [expanded]="true" *ngIf="otherArtifacts?.length > 0">
-  <mat-expansion-panel-header collapsedHeight="40px" expandedHeight="40px" [ngClass]="{'active': activeSection === ACTIVE_SECTIONS.other}">
+  <mat-expansion-panel-header collapsedHeight="40px" expandedHeight="40px" class="active">
     OTHER
   </mat-expansion-panel-header>
   <div *ngFor="let artifact of otherArtifacts; trackBy: trackByFn"
@@ -43,6 +43,6 @@
        [routerLink]="'other/' + artifact.key+'/' +artifact.mode"
        [ngClass]="{'selected': selectedArtifactKey===artifact.key}"
   >
-    <i class="icon sm i-data-audit"></i> {{artifact.key}}
+    <i class="sm al-icon al-ico-data-audit al-color" [class]="(selectedArtifactKey === artifact.key ? 'white' : 'blue-400')"></i>{{artifact.key}}
   </div>
 </mat-expansion-panel>

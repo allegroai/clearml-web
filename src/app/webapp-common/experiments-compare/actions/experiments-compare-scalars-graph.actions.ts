@@ -1,5 +1,5 @@
 import {createAction, props} from '@ngrx/store';
-import {HyperParams, MetricOption, MetricValueType} from '../reducers/experiments-compare-charts.reducer';
+import {GroupedHyperParams, HyperParams, MetricOption, MetricValueType} from '../reducers/experiments-compare-charts.reducer';
 
 export const EXPERIMENTS_COMPARE_SCALARS_GRAPH = 'EXPERIMENTS_COMPARE_SCALARS_GRAPH_';
 
@@ -14,5 +14,5 @@ export const getExperimentsHyperParams = createAction(GET_EXPERIMENTS_PARAMS, pr
 export const setMetricsList = createAction(SET_METRICS_LIST, props<{ metricsList: MetricOption[] }>());
 export const setTasks = createAction(SET_TASKS, props<{ tasks: any }>());
 export const setvalueType = createAction(SET_VALUE_TYPE, props<{ valueType: MetricValueType }>());
-export const setHyperParamsList = createAction(SET_PARAMS_LIST, props<{ hyperParams: HyperParams }>());
+export const setHyperParamsList = createAction(SET_PARAMS_LIST, props<{ hyperParams: GroupedHyperParams }>());
 export const setShowIdenticalHyperParams = createAction(SET_HIDE_IDENTICAL_HYPER_PARAMS);

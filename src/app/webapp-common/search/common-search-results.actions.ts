@@ -9,14 +9,14 @@ import {Model} from '../../business-logic/model/models/model';
 export class SearchSetTerm implements ISmAction {
   readonly type = SEARCH_ACTIONS.SET_TERM;
 
-  constructor(public payload: string) {
+  constructor(public payload: string, private force?: boolean) {
   }
 }
 
 export class SearchStart implements ISmAction {
   readonly type = SEARCH_ACTIONS.SEARCH_START;
 
-  constructor(public payload: string) {
+  constructor(public payload: string, public force?: boolean) {
   }
 }
 
