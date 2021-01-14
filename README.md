@@ -1,4 +1,4 @@
-# Trains Webapp
+# ClearML Webapp
 
 ## Building the UI from source
 ### Prerequisite
@@ -18,7 +18,7 @@
 ## Application Structure
 
 #### Business Logic module
-Contains Trains logic. api calls and trains objects (e.g tasks, models) and trains logic function (e.g isTaskHidden)
+Contains ClearML logic. api calls and ClearML objects (e.g tasks, models) as well as ClearML logic function (e.g isTaskHidden)
 
 #### Core module
 Contains only logic. no declarations. no dependency with any other module beside ngrx.
