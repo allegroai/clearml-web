@@ -1,50 +1,92 @@
 <sm-dialog-template iconClass="al-icon al-ico-clone" [header]="header">
   <div class="reference">
-    A draft copy of <b *ngIf="reference" [smTooltip]="reference.length > 80 ? reference : undefined">{{reference.length > 80 ? (reference | slice:0:77) + '...' : reference }}</b> will be created.
+    A draft copy of <b *ngIf="reference"
+                       [smTooltip]="reference.length > 80 ? reference : undefined">{{reference.length > 80 ? (reference | slice:0:77) + '...' : reference }}</b>
+    will be created.
   </div>
-<div class="form-container">
-  <h5>Project</h5>
-  <sm-select-group
-    *ngIf="projects"
-    fieldName="project"
-    inputClassName="highlight"
-    [options]="projects"
-    [placeHolder]=""
-    [formData]="formData.project"
-    (formDataChanged)="formDataChanged($event)">
-  </sm-select-group>
+  <form #cloneForm="ngForm">
+    <div class="form-container">
+      <h5>Project</h5>
+      <mat-form-field class="w-100" appearance="outline"
+                      hideRequiredMarker="true"
+                      floatLabel="never">
+        <input matInput type="text"
+               autocomplete="off"
+               (focusin)="clearOnFirstFocus($event);"
+               [matAutocomplete]="auto"
+               [(ngModel)]="formData.project"
+               name="projectName"
+               #projectInput="ngModel"
+               #projectInputRef
+               required
+               minlength="3"
+               (keydown.enter)="projectInput.control.markAsTouched()"
+               smUniqueNameValidator
+               [existingNames]="readOnlyProjects$ | async"
+               [pattern]="'^[^/]+$'"
+        >
+        <span matSuffix *ngIf="(!isAutoCompleteOpen) && (!formData.project?.value) && formData.project"
+              class="creat-new-suffix">(Create New)</span>
+        <i matSuffix [class]="'fa mr2 ' + (filterText? 'fa-times pointer':'fa-search')"
+           (click)="filterText && clear(); projectInputRef.focus()"
+           smClickStopPropagation></i>
+        <mat-error *ngIf="projectInput?.errors?.required">Please provide a Project</mat-error>
+        <mat-error *ngIf="projectInput?.errors?.minlength">Please provide a name longer than 3 characters</mat-error>
+        <mat-error *ngIf="projectInput?.errors?.pattern">Project name shouldn't contain slash (/)</mat-error>
+        <mat-error *ngIf="projectInput?.errors?.uniqueName">Please provide a different name as this project name is
+          taken as an Example project
+        </mat-error>
 
-  <h5>Name</h5>
-  <sm-input-group
-    fieldName="name"
-    inputClassName="highlight"
-    placeHolder="Name"
-    [validators]="validators.name"
-    [formData]="formData.name"
-    [errorMessages]="errorMessages.name"
-    [errors]="errors.name"
-    (formDataChanged)="formDataChanged($event)"
-    (errorsChanged)="formErrorChanged($event)"
-  >
-  </sm-input-group>
+        <mat-autocomplete #auto="matAutocomplete"
+                          name="ExperimentProject"
+                          [displayWith]="displayFn"
+                          (opened)="setIsAutoCompleteOpen(true)"
+                          (closed)="setIsAutoCompleteOpen(false)"
+                          autoActiveFirstOption
+        >
+          <mat-option
+            class="item"
+            *ngIf="filterText && isNewName"
+            [value]="filterText"
+          >"{{filterText}}" <span class="new">(Create New)</span></mat-option>
+          <mat-option *ngFor="let project of filteredProjects | async" [value]="project">{{project.label}}</mat-option>
+        </mat-autocomplete>
+      </mat-form-field>
+      <h5>Name</h5>
+      <mat-form-field class="w-100" appearance="outline"
+                      hideRequiredMarker="true"
+                      floatLabel="never">
+        <input
+          required
+          matInput
+          #experimentName="ngModel"
+          name="ExperimentName"
+          placeHolder="Name"
+          [(ngModel)]="formData.name"
+        />
+        <mat-error class="text-danger" *ngIf="experimentName?.errors?.required">Please provide a name</mat-error>
+      </mat-form-field>
+      <h5>Description</h5>
+      <mat-form-field class="w-100" appearance="outline"
+                      hideRequiredMarker="true"
+                      floatLabel="never">
+      <textarea
+        name="ExperimentComment"
+        matInput
+        [rows]="7"
+        [(ngModel)]="formData.comment"></textarea>
+      </mat-form-field>
 
-  <h5>Description</h5>
-  <sm-textarea-control
-    fieldName="comment"
-    inputClassName="highlight description"
-    [rows]="3"
-    [formData]="formData.comment"
-    (formDataChanged)="formDataChanged($event)">
-    >
-  </sm-textarea-control>
+      <div class="buttons">
+        <button cdkFocusInitial (click)="closeDialog(true)" [disabled]="!cloneForm.valid"
+                class="btn btn-neon yes-button" #cloneButton>
+          CLONE
+        </button>
+        <button (click)="closeDialog(false)" class="btn btn-outline-neon">
+          CANCEL
+        </button>
 
-  <div class="buttons">
-    <button (click)="closeDialog(false)" class="btn btn-outline-neon">
-      CANCEL
-    </button>
-    <button (click)="closeDialog(true)" [disabled]="!isFormValid()" class="btn btn-neon yes-button">
-      CLONE
-    </button>
-  </div>
-</div>
+      </div>
+    </div>
+  </form>
 </sm-dialog-template>

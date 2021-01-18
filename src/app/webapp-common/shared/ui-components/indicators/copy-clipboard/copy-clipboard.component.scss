@@ -1,12 +1,31 @@
 @import "../../styles/variables";
 
-button.hideBackground {
-  background: none !important;
-  border: none !important;
-  transition: color 0.3s;
-  &:hover {
-    color: $blue-200 !important;
+button {
+  &.hideBackground {
+    background: none !important;
+    border: none !important;
     transition: color 0.3s;
+    &:hover {
+      color: $blue-200 !important;
+      transition: color 0.3s;
+    }
+  }
+
+  &.text-area {
+    background-color: $blue-600;
+    color: #a7b2d8 !important;
+    border: none;
+    line-height: 22px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: bold;
+    text-align: center;
+    transition: background-color ease-in-out 0.3s;
+
+    &:hover {
+        background-color: $purple;
+        color: white !important;
+    }
   }
 }
 

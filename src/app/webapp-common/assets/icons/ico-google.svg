@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18">
+    <defs>
+        <clipPath id="clip-path">
+            <path id="Path_628" d="M17.64-8.8a10.341 10.341 0 0 0-.164-1.841H9v3.481h4.844a4.14 4.14 0 0 1-1.8 2.716v2.264h2.909A8.777 8.777 0 0 0 17.64-8.8z" class="cls-1"/>
+        </clipPath>
+        <clipPath id="clip-path-2">
+            <path id="Path_627" d="M-15 15h193v-48H-15z" class="cls-2"/>
+        </clipPath>
+        <clipPath id="clip-path-3">
+            <path id="Path_631" d="M9 0a8.592 8.592 0 0 0 5.956-2.18l-2.908-2.259A5.409 5.409 0 0 1 9-3.58a5.364 5.364 0 0 1-5.036-3.71H.957v2.332A9 9 0 0 0 9 0z" class="cls-1"/>
+        </clipPath>
+        <clipPath id="clip-path-5">
+            <path id="Path_634" d="M3.964-7.29A5.41 5.41 0 0 1 3.682-9a5.41 5.41 0 0 1 .282-1.71v-2.332H.957A9 9 0 0 0 0-9a9 9 0 0 0 .957 4.042L3.964-7.29z" class="cls-1"/>
+        </clipPath>
+        <clipPath id="clip-path-7">
+            <path id="Path_637" d="M9-14.42a4.862 4.862 0 0 1 3.44 1.346l2.581-2.581A8.649 8.649 0 0 0 9-18a9 9 0 0 0-8.043 4.958l3.007 2.332A5.364 5.364 0 0 1 9-14.42z" class="cls-1"/>
+        </clipPath>
+        <style>
+            .cls-1,.cls-2{fill:none}.cls-1{clip-rule:evenodd}.cls-4{clip-path:url(#clip-path-2)}
+        </style>
+    </defs>
+    <g id="ico-google" transform="translate(0 18)">
+        <path id="rec" d="M0 0H18V18H0z" class="cls-2" transform="translate(0 -18)"/>
+        <g id="Group_564" clip-path="url(#clip-path)">
+            <g id="Group_563" class="cls-4">
+                <path id="Path_626" fill="#4184f3" d="M4-15.636h18.64V2.82H4z"/>
+            </g>
+        </g>
+        <g id="Group_566" clip-path="url(#clip-path-3)">
+            <g id="Group_565" class="cls-4">
+                <path id="Path_629" fill="#34a753" d="M-4.043-12.29h24V5h-24z"/>
+            </g>
+        </g>
+        <g id="Group_568" clip-path="url(#clip-path-5)">
+            <g id="Group_567" class="cls-4">
+                <path id="Path_632" fill="#fabb04" d="M-5-18.042H8.964V.042H-5z"/>
+            </g>
+        </g>
+        <g id="Group_570" clip-path="url(#clip-path-7)">
+            <g id="Group_569" class="cls-4">
+                <path id="Path_635" fill="#ea4334" d="M-4.043-23h24.065v17.29H-4.043z"/>
+            </g>
+        </g>
+    </g>
+</svg>

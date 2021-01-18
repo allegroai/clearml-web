@@ -1,9 +1,10 @@
-import {environment} from '../environments/environment';
 import {Action} from '@ngrx/store';
+import {ConfigurationService} from './webapp-common/shared/services/configuration.service';
+const environment = ConfigurationService.globalEnvironment;
 
 export const NA                      = 'N/A';
 export const ALLEGRO_TUTORIAL_BUCKET = 'allegro-tutorials';
-export const UPDATE_SERVER_PATH      = 'https://updates.trains.allegro.ai';
+export const UPDATE_SERVER_PATH      = 'https://updates.clear.ml/updates';
 
 export const BASE_REGEX = {
   DOMAIN           : '([A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?\\.)+([A-Za-z]{2,6}\\.?|[A-Za-z0-9-]{1,}[A-Za-z0-9]\\.?)',
@@ -255,18 +256,23 @@ export const NAVIGATION_ACTIONS = {
 };
 
 
+export function guessAPIServerURL() {
+  const url = window.location.origin;
+  if (/https?:\/\/(demo|)app\./.test(url)) {
+    return url.replace(/(https?):\/\/(demo|)app/, '$1://$2api');
+  } else if (window.location.port === '30080') {
+    return url.replace(/:\d+/, '') + ':30008';
+  }
+  return url.replace(/:\d+/, '') + ':8008';
+}
 
-export const ENVIRONMENT = {API_VERSION: '/v2.9'};
+export const ENVIRONMENT = {API_VERSION: '/v2.12'};
 const url                = window.location.origin;
 let apiBaseUrl: string;
 if (environment.apiBaseUrl) {
   apiBaseUrl = environment.apiBaseUrl;
-} else if (/https?:\/\/(demo|)app\./.test(url)) {
-  apiBaseUrl = url.replace(/(https?):\/\/(demo|)app/, '$1://$2api');
-} else if (window.location.port === '30080') {
-  apiBaseUrl = url.replace(/:\d+/, '') + ':30008';
 } else {
-  apiBaseUrl = url.replace(/:\d+/, '') + ':8008';
+  apiBaseUrl = guessAPIServerURL();
 }
 const apiBaseUrlNoVersion = apiBaseUrl;
 

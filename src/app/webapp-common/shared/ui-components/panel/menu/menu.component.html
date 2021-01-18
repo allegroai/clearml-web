@@ -1,4 +1,4 @@
-<div class="d-flex justify-content-start align-items-center">
+<div class="d-flex justify-content-start align-items-center" [smTooltip]="buttonTooltip">
   <div mat-button [matMenuTriggerFor]="menu" [class]="'p-0 cell menu-button btn ' + buttonClass" [ngClass]="{'hidden-button': ! showButton}" (menuOpened)="menuOpened.emit()"
        smClickStopPropagation>
     {{header}}

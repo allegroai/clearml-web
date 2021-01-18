@@ -12,7 +12,7 @@
   justify-content: center;
   font-weight: bold;
   background: #f9fafb;
-  color: #5a658e;
+  color: $blue-400;
 }
 
 .custom-column-buttons {
@@ -24,7 +24,7 @@
   cursor: pointer;
 
   div:not(.disabled):hover {
-    color: #5a658e;
+    color: $blue-400;
     transition: color 0.3s;
   }
 }

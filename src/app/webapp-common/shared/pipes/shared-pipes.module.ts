@@ -34,11 +34,12 @@ import {safeAngularUrlParameterPipe} from './safeAngularUrlParameter.pipe';
 import {ReplaceViaMapPipe} from './replaceViaMap';
 import {FilterByIdPipe} from './filterById.pipe';
 import {FilterOutPipe} from './filterOut.pipe';
+import {DurationPipe} from "./duration.pipe";
 
 
 const pipes = [
   CamelToTitlePipe, FilenameFromPath, FilterPipe, FloorPipe, KeyValuePipe, NAPipe, SortPipe, IsVideoPipe, IsAudioPipe,
-  JoinPipe, KeyvalPipe, LabelValuePipe, NoUnderscorePipe, NumberToKPipe, UniqueByPipe, MsToHoursPipe, MsToSecPipe,
+  JoinPipe, KeyvalPipe, LabelValuePipe, NoUnderscorePipe, NumberToKPipe, UniqueByPipe, MsToHoursPipe, MsToSecPipe, DurationPipe,
   ToExponentialPipe, HighlightSearchTextPipe, HideHashPipe, HideHashTitlePipe, TimeAgoPipe, TimeTillNowPipe, HasExampleItemPipe,safeAngularUrlParameterPipe,
   AdvancedFilterPipe, SafePipe, SelectOptionValueToLabelPipe, ToPercentagePipe, ReplaceViaMapPipe, FilterByIdPipe, FilterOutPipe
 ];

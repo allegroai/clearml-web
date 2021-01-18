@@ -5,12 +5,18 @@
 }
 
 .list-container {
-  width: 343px;
-  padding: 20px 32px 0 32px;
-  overflow-y: hidden;
+  display: flex;
+  flex-direction: column;
+  width: 340px;
+  //padding: 20px 24px 0 24px;
   border-right: 1px solid #efefef;
 }
 .graphs-container {
   flex: 1;
   padding: 0 !important;
+}
+
+sm-graph-settings-bar {
+  padding: 24px;
+  border-bottom: 1px solid #efefef;
 }

@@ -86,6 +86,9 @@ export function getContrast(rgb1, rgb2) {
  * @returns {String} 6 digits hex starting with #
  */
 export function RGB2HEX(RGBArray) {
+  if (!RGBArray) {
+    return '#888888';
+  }
   return '#' + RGBArray.map(function (x) {             //For each array element
     x = parseInt(x).toString(16);      //Convert to a base16 string
     return (x.length == 1) ? '0' + x : x;  //Add zero if we get only one character

@@ -7,6 +7,7 @@ import {TableFilter} from '../../shared/utils/tableParamEncode';
 import {PROJECTS_PREFIX} from '../../core/actions/projects.actions';
 import {User} from '../../../business-logic/model/users/user';
 import {ParamsItem} from '../../../business-logic/model/tasks/paramsItem';
+import {ProjectsGetTaskParentsResponseParents} from '../../../business-logic/model/projects/projectsGetTaskParentsResponseParents';
 
 export const EXPERIMENTS_PREFIX = 'EXPERIMENTS_';
 
@@ -145,21 +146,24 @@ export const setUsers = createAction(
   props<{ users: User[] }>()
 );
 
+export const setParents = createAction(
+  EXPERIMENTS_PREFIX + '[set project experiment parents]',
+  props<{ parents: ProjectsGetTaskParentsResponseParents[]}>()
+);
 
+export const setActiveParentsFilter = createAction(
+  EXPERIMENTS_PREFIX + '[set active parents filter]',
+  props<{ parents: ProjectsGetTaskParentsResponseParents[]}>()
+);
 
 export const getUsers = createAction(
   EXPERIMENTS_PREFIX + 'GET_USERS');
 
+export const getParents = createAction(
+  EXPERIMENTS_PREFIX + '[get project experiments parents]');
+
 export const getFilteredUsers = createAction(
   EXPERIMENTS_PREFIX + 'GET_FILTERED_USERS');
-
-export const getTags = createAction(
-  EXPERIMENTS_PREFIX + 'GET_TAGS');
-
-export const setTags = createAction(
-  EXPERIMENTS_PREFIX + 'SET_TAGS',
-  props<{ tags: string[] }>()
-);
 
 export class TableSortChanged implements Action {
   public type = TABLE_SORT_CHANGED;
@@ -222,7 +226,7 @@ export class ArchivedModeChanged implements Action {
   }
 }
 
-export class ArchivedSelectedExperiments implements Action {
+export class ArchiveSelectedExperiments implements Action {
   public type = ARCHIVE_SELECTED_EXPERIMENTS;
 
   constructor(public payload: { skipUndo?: boolean }) {
@@ -343,5 +347,4 @@ export const setArchive = createAction(
 
 export const afterSetArchive = createAction(EXPERIMENTS_PREFIX + 'AFTER_SET_ARCHIVE');
 
-export const setSplitSize = createAction(EXPERIMENTS_PREFIX + 'SET_SPLIT_SIZE', props<{ splitSize: number }>()
-);
+export const setSplitSize = createAction(EXPERIMENTS_PREFIX + 'SET_SPLIT_SIZE', props<{ splitSize: number }>());

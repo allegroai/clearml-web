@@ -11,6 +11,7 @@ import {selectRefreshing, selectScalarsGraphHyperParams, selectScalarsGraphMetri
 import {getExperimentsHyperParams, setShowIdenticalHyperParams, setvalueType} from '../../actions/experiments-compare-scalars-graph.actions';
 import {GroupedHyperParams, HyperParams, MetricOption, MetricValueType, SelectedMetric, VariantOption} from '../../reducers/experiments-compare-charts.reducer';
 import {MatRadioChange} from '@angular/material/radio';
+import {selectPlotlyReady} from '../../../core/reducers/view-reducer';
 
 
 export const _filter = (opt: VariantOption[], value: string): VariantOption[] => {
@@ -42,8 +43,9 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
   public graphs: { [key: string]: ExperimentGraph };
   public selectedHyperParams: string[];
   public selectedMetric: SelectedMetric;
-  public hyperParams: { [section: string]: string[] };
+  public hyperParams: { [section: string]:  any};
   public showIdenticalParamsActive: boolean;
+  public plotlyReady$ = this.store.select(selectPlotlyReady);
 
   public metrics: MetricOption[];
   public metricsOptions: MetricOption[];
@@ -93,18 +95,21 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
       )
       .subscribe(([selectedParams, allParams, showIdentical]) => {
         this.showIdenticalParamsActive = showIdentical;
-        this.hyperParams = Object.entries(allParams).reduce((acc, [sectionKey, params]) => {
-          const section = Object.keys(params).sort((a, b) => a.toLowerCase() > b.toLowerCase() ? 1 : -1).reduce((acc2, paramKey) => {
-            if (showIdentical || params[paramKey]) {
-              acc2[paramKey] = true;
+        this.hyperParams = Object.entries(allParams)
+          .reduce((acc, [sectionKey, params]) => {
+            const section = Object.keys(params)
+              .sort((a, b) => a.toLowerCase() > b.toLowerCase() ? 1 : -1)
+              .reduce((acc2, paramKey) => {
+                if (showIdentical || params[paramKey]) {
+                  acc2[paramKey] = true;
+                }
+                return acc2;
+              }, {});
+            if (Object.keys(section).length > 0) {
+              acc[sectionKey] = section;
             }
-            return acc2;
+            return acc;
           }, {});
-          if (Object.keys(section).length > 0) {
-            acc[sectionKey] = section;
-          }
-          return acc;
-        }, {});
         this.selectedHyperParams = selectedParams.filter(selectedParam => has(selectedParam, this.hyperParams));
       });
 
@@ -172,7 +177,7 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
 
   }
 
-  updateMetricsList(event: KeyboardEvent) {
+  updateMetricsList(event: Event) {
     this.metricsOptions = this._filterGroup((event.target as HTMLInputElement).value);
   }
 
@@ -194,8 +199,9 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
     return item.metricName;
   }
 
-  trackVariantByFn(index: number, item: VariantOption['value']): string {
-    return item.path;
+  trackVariantByFn(index: number, item: VariantOption): string {
+    // TODO: validate with @nirla
+    return item.value.path;
   }
 
   valueTypeChange($event: MatRadioChange) {

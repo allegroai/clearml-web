@@ -1,11 +1,12 @@
 import {TableSelectionState} from '../../../../constants';
 import {allItemsAreSelected} from '../../../utils/shared-utils';
 import {differenceBy, get, unionBy} from 'lodash/fp';
-import {AfterViewInit, EventEmitter, Input, Output, QueryList, ViewChildren} from '@angular/core';
+import { AfterViewInit, EventEmitter, Input, Output, QueryList, ViewChildren, Directive } from '@angular/core';
 import {TableSortOrderEnum} from './table.consts';
 import {filter, take} from 'rxjs/operators';
 import {TableComponent} from './table.component';
 
+@Directive()
 export abstract class BaseTableView  implements AfterViewInit {
   public selectionState: TableSelectionState;
   protected entitiesKey: string;
@@ -18,6 +19,11 @@ export abstract class BaseTableView  implements AfterViewInit {
   @Input() tableSortField: string;
   @Input() tableSortOrder: TableSortOrderEnum;
   @Input() minimizedView: boolean;
+  protected prevSelected: any;
+  @Input() set split(size: number) {
+    this.table?.resize();
+  }
+
 
   @Output() onColumnsReordered = new EventEmitter<string[]>();
   @ViewChildren('table') tables: QueryList<TableComponent>;
@@ -61,6 +67,20 @@ export abstract class BaseTableView  implements AfterViewInit {
   }
   setContextMenuStatus(menuStatus: boolean) {
     this.contextMenuActive = menuStatus;
+  }
+
+  getSelectionRange<T>(change: { field: string; value: boolean; event: Event }, entity: T): T[] {
+    let addList = [entity];
+    if ((change.event as MouseEvent).shiftKey && this.prevSelected) {
+      let index1 = this[this.entitiesKey].indexOf(this.prevSelected);
+      let index2 = this[this.entitiesKey].indexOf(entity);
+      if (index1 > index2) {
+        [index1, index2] = [index2, index1];
+      }
+      addList = this[this.entitiesKey].slice(index1, index2 + 1);
+    }
+    this.prevSelected = entity;
+    return addList;
   }
 
   abstract emitSelection(selection: any[]);

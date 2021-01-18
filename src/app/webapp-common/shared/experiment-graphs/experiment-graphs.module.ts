@@ -6,6 +6,7 @@ import {SingleGraphComponent} from './single-graph/single-graph.component';
 import {GraphSettingsBarComponent} from './graph-settings-bar/graph-settings-bar.component';
 import { MatSliderModule } from '@angular/material/slider';
 import {PlotlyGraphBase} from './single-graph/plotly-graph-base';
+import {FormsModule} from '@angular/forms';
 
 const declarations= [ExperimentGraphsComponent, PlotlyGraphBase, SingleGraphComponent, GraphSettingsBarComponent];
 @NgModule({
@@ -15,6 +16,7 @@ const declarations= [ExperimentGraphsComponent, PlotlyGraphBase, SingleGraphComp
     CommonModule,
     UiComponentsModule,
     MatSliderModule,
+    FormsModule,
   ]
 })
 export class ExperimentGraphsModule { }

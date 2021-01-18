@@ -1,19 +1,20 @@
-<sm-experiment-output-model-form
-  *ngIf="modelInfo$ | async"
-  fieldName="model"
-  [editable]="editable$ | async"
-  [formData]="modelInfo$ | async"
-  [modelLabels]="modelLabels$ | async"
-  [saving]="saving$ |async"
-  [userKnowledge]="(userKnowledge$ | async)"
-  (activateEdit)="activateEditChanged($event)"
-  (cancelFormDataChange)="cancelModelChange()"
-  (errorsChanged)="onFormErrorsChanged($event)"
-  (formDataChanged)="onFormValuesChanged($event)"
-  (modelSelected)="onModelSelected($event)"
-  (saveFormData)="saveModelData()"
-  (showModelClicked)="showModel()"
-  (updateSectionKnowledge)="updateSectionKnowledge($event)"
->
-</sm-experiment-output-model-form>
+<sm-editable-section [editable]="false">
+  <sm-experiment-output-model-view
+    [editable]="false"
+    [modelLabels]="modelLabels$ | async"
+    [model]="formData?.input"
+    [output]="formData.output"
+    [projectId]="modelProjectId"
+    [source]="formData?.source">
+    >
+  </sm-experiment-output-model-view>
 
+</sm-editable-section>
+<sm-editable-section class="editable-design" [editable]="false" containerClass="h-100">
+  <sm-section-header label="MODEL CONFIGURATION"></sm-section-header>
+  <sm-experiment-network-design-form
+    [editable]="false"
+    [formData]="outputDesign"
+  >
+  </sm-experiment-network-design-form>
+</sm-editable-section>

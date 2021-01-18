@@ -1,3 +1,4 @@
+<sm-overlay [backdropActive]="backdropActive$|async"></sm-overlay>
 <div class="experiment-output-container light-theme">
   <sm-experiment-info-header
     *ngIf="!minimized"
@@ -5,14 +6,31 @@
     (minimizeClicked)="minimizeView()"
     [experiment]="selectedExperiment"
     [infoData]="infoData$ | async"
-    [editable]="false"
-    [showMenu]="false"
+    [editable]="!isExample"
+    [showMenu]="true"
     [showMinimize]="true"
+    [isSharedAndNotOwner]="isSharedAndNotOwner$ | async"
+    (experimentNameChanged)="updateExperimentName($event)"
+
   >
   </sm-experiment-info-header>
   <nav [class.minimized]="minimized">
+    <ng-container *ngIf="!minimized">
+      <span [routerLink]="['execution']"  queryParamsHandling="preserve">
+        <sm-navbar-item header="execution" [active]="routerConfig.includes('execution')"></sm-navbar-item>
+      </span>
+        <span [routerLink]="['hyper-params']"  queryParamsHandling="preserve">
+        <sm-navbar-item header="Configuration" [active]="routerConfig.includes('hyper-params')"></sm-navbar-item>
+      </span>
+        <span [routerLink]="['artifacts']"  queryParamsHandling="preserve">
+        <sm-navbar-item header="artifacts" [active]="routerConfig.includes('artifacts')"></sm-navbar-item>
+      </span>
+        <span [routerLink]="['general']"  queryParamsHandling="preserve">
+        <sm-navbar-item header="info" [active]="routerConfig.includes('general')"></sm-navbar-item>
+      </span>
+    </ng-container>
     <span [routerLink]="['log']"  queryParamsHandling="preserve">
-      <sm-navbar-item header="log" [active]="routerConfig.includes('log')"></sm-navbar-item>
+      <sm-navbar-item header="console" [active]="routerConfig.includes('log')"></sm-navbar-item>
     </span>
     <span [routerLink]="['metrics','scalar']" queryParamsHandling="preserve">
       <sm-navbar-item header="Scalars" [active]="routerConfig.includes('metrics') && routerConfig.includes('scalar')"></sm-navbar-item>
@@ -26,15 +44,9 @@
     <span class="refresh-position">
       <sm-experiment-settings
         [class.maximized]="!minimized"
-        [showSettings]="routerConfig.includes('scalar')"
+        [showSettings]="routerConfig.includes('scalar') && minimized"
         (toggleSettings)="toggleSettingsBar()">
       </sm-experiment-settings>
-      <span *ngIf="routerConfig.includes('log')">
-          <button class="btn btn-primary mb-2 mr-2" (click)="downloadLog()" [disabled]="!experimentId">
-            <i class="fa fa-download"></i>
-            Download full log
-          </button>
-      </span>
       <sm-refresh-button
         *ngIf=" ! minimized"
         class="light-theme"
@@ -46,6 +58,6 @@
     </span>
   </nav>
   <div class="output-body" [class.minimized]="minimized">
-    <router-outlet></router-outlet>
+    <router-outlet class="output-outlet"></router-outlet>
   </div>
 </div>

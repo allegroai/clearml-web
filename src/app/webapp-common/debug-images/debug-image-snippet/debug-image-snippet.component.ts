@@ -5,6 +5,7 @@ import {IsVideoPipe} from '../../shared/pipes/is-video.pipe';
 import {AddMessage} from '../../core/actions/layout.actions';
 import {MESSAGES_SEVERITY} from '../../../app.constants';
 import {Store} from '@ngrx/store';
+import {ThemeEnum} from '../../experiments/shared/common-experiments.const';
 
 @Component({
   selector: 'sm-debug-image-snippet',
@@ -16,6 +17,7 @@ export class DebugImageSnippetComponent implements OnInit {
   public isAudio: boolean;
   public isHtml: boolean;
   private _frame: any;
+  public ThemeEnum = ThemeEnum;
 
   @Input() set frame(frame) {
     if (frame.url) {

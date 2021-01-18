@@ -15,6 +15,13 @@
 @include mat-core();
 //@import "../webapp-common/shared/ui-components/styles/material-theme.scss";
 
+$custom-typography: mat-typography-config(
+  $font-family: $font-family-base
+);
+
+@include angular-material-typography($custom-typography);
+
+$allegro-theme-primary: mat-palette($mat-allegro);
 $custom-theme-primary: mat-palette($mat-green);
 $custom-theme-accent: mat-palette($mat-lime, A400, A100, A400);
 $custom-theme-warn: mat-palette($mat-purple);
@@ -24,17 +31,39 @@ $sm-theme-accent: mat-palette($sm-purple, A400, A100, A400);
 $sm-theme-warn: mat-palette($mat-purple);
 
 $green-theme: mat-light-theme($custom-theme-primary, $custom-theme-accent, $custom-theme-warn);
+$dark-theme: mat-dark-theme($mat-allegro, $mat-allegro, $mat-allegro);
+$light-theme: mat-light-theme($mat-allegro, $mat-allegro, $mat-allegro);
 $sm-theme: mat-light-theme($sm-theme-primary, $sm-theme-accent, $sm-theme-warn);
 
 .dark-theme {
   @include mat-slide-toggle-theme($green-theme);
   @include mat-radio-theme($green-theme);
+  @include mat-select-theme($dark-theme);
+
+  .mat-checkbox-frame,
+  .mat-radio-outer-circle {
+    border-color: $blue-400;
+  }
+
+  .mat-expansion-panel-header-description, .mat-expansion-indicator:after {
+    color: $white;
+  }
+
+  .light-theme .mat-radio-button.mat-radio-disabled .mat-radio-outer-circle,
+  .light-theme .mat-radio-button.mat-radio-disabled .mat-radio-label-content {
+    border-color: $blue-200 !important;
+    color: $blue-200 !important;
+  }
+
+  .light-theme .mat-radio-button.mat-radio-disabled .mat-radio-inner-circle {
+    background-color: transparent !important;
+  }
 }
 
 .light-theme {
   @include mat-slide-toggle-theme($sm-theme);
   @include mat-radio-theme($sm-theme);
-
+  @include mat-select-theme($light-theme);
   .mat-checkbox-frame,
   .mat-radio-outer-circle {
     border-color: $purple;
@@ -49,6 +78,15 @@ $sm-theme: mat-light-theme($sm-theme-primary, $sm-theme-accent, $sm-theme-warn);
   .light-theme .mat-radio-button.mat-radio-disabled .mat-radio-inner-circle {
     background-color: transparent !important;
   }
+
+  .mat-drawer-side {
+    border-right: solid 1px $blue-100;
+  }
+
+  .mat-expansion-panel-header-description, .mat-expansion-indicator:after {
+    color: $blue-300;
+  }
+
 }
 
 * {
@@ -59,7 +97,7 @@ html, body {
   height: 100%;
   margin: 0;
   padding: 0;
-  font-family: 'Heebo', sans-serif;
+  font-family: $font-family-base, sans-serif;
   font-size: 13px;
   overflow: hidden;
 }
@@ -105,21 +143,21 @@ h5.al-header {
 mat-expansion-panel {
   box-shadow: unset;
 
-  &:hover {
+  &:hover:not(.dark) {
     background: transparent !important;
   }
 
   .mat-expansion-panel-header {
     margin-bottom: 0;
 
-    &:hover {
-      background: transparent !important;
+    &:hover:not(.dark) {
+      background: $blue-50 !important;
     }
   }
 }
 
 .mat-expansion-panel-header {
-  font-family: 'Heebo', sans-serif;
+  font-family: $font-family-base, sans-serif;
 }
 
 .al-empty-collapse .mat-expansion-panel-header-title .al-header.sub-header {
@@ -309,7 +347,7 @@ body .clean-list {
 
 .mat-tooltip {
   &.sm-tooltip {
-    background-color: #4d66ff;
+    background-color: $purple;
     box-shadow: 0 -2px 8px 0 rgba(0, 0, 0, 0.2);
     font-family: Heebo;
     font-size: 11px;
@@ -402,8 +440,8 @@ as-split {
 
       .as-split-gutter-icon {
         background-color: $blue-900;
-        border-left: #2c3246 solid 1px;
-        border-right: #2c3246 solid 1px;
+        border-left: $blue-600 solid 1px;
+        border-right: $blue-600 solid 1px;
       }
     }
   }
@@ -424,7 +462,7 @@ $type-colors: (
 
 .dark-theme {
   .ngx-json-viewer {
-    background-color: $blue-600;
+    background-color: $blue-800;
     overflow: unset !important;
     height: 99% !important;
     font-size: 11px !important;
@@ -455,7 +493,7 @@ $type-colors: (
 
 .mat-expansion-panel.allegro-style {
   width: 100%;
-  background-color: #384161;
+  background-color: $blue-500;
   box-shadow: unset !important;
 
   .mat-expansion-panel-header {
@@ -488,24 +526,13 @@ $type-colors: (
 
 .mat-checkbox label {
   margin: 0;
+  display: inline-flex;
 }
 
 .image-displayer-dialog {
   .mat-dialog-container {
     padding: 0;
     border-radius: 0;
-  }
-}
-
-.dark-theme {
-  .labeled-row {
-    border-bottom: 1px solid $blue-500;
-  }
-}
-
-.light-theme {
-  .labeled-row {
-    border-bottom: 1px solid $blue-100;
   }
 }
 
@@ -534,8 +561,11 @@ body .mat-menu-panel .mat-form-field {
 
     .mat-form-field-flex {
       padding: 0 14px;
+      align-items: center;
 
       .mat-form-field-infix, .mat-form-field-suffix {
+        display: flex;
+        align-items: center;
         padding: 10px 0;
         border: 0;
 
@@ -553,4 +583,25 @@ body .mat-menu-panel .mat-form-field {
   white-space: pre-line;
   text-align: left !important;
   font-size: 14px !important;
+}
+
+button.btn.button-outline-dark {
+  height: 28px;
+  padding: 6px 12px 5px;
+  border: solid 1px $blue-500;
+  border-radius: 4px;
+  background-color: transparent;
+  color: $blue-280;
+  font-weight: 500;
+  font-size: 11px;
+
+  &:disabled {
+    color: $blue-280;
+  }
+
+  &:hover:not(:disabled) {
+    color: $blue-280;
+    background-color: $blue-600;
+    border-color: $blue-600;
+  }
 }

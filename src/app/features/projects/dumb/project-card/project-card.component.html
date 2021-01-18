@@ -8,6 +8,7 @@
                       [editable]="true"
                       [minWidth]="250"
                       [inlineDisabled]="true"
+                      [pattern]="'^[^/]+$'"
                       (textChanged)="projectNameChanged.emit($event)"
                       (inlineActiveStateChanged)="projectNameEditActiveChanged($event)"
 

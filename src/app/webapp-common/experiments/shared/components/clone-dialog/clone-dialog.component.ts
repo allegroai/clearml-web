@@ -1,19 +1,21 @@
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {Project} from '../../../../../business-logic/model/projects/project';
-import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
+import {Component, ElementRef, Inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {Validators} from '@angular/forms';
+import {NgForm} from '@angular/forms';
 import {Observable, Subscription} from 'rxjs';
 import {selectProjects} from '../../../../core/reducers/projects.reducer';
 import {GetAllProjects} from '../../../../core/actions/projects.actions';
 import {map} from 'rxjs/operators';
-import {isExample} from '../../../../shared/utils/shared-utils';
+import {isReadOnly} from '../../../../shared/utils/shared-utils';
 import {CloneForm} from '../../common-experiment-model.model';
+import {isEqual} from 'lodash/fp';
+import {MatAutocompleteSelectedEvent} from "@angular/material/autocomplete";
 
 @Component({
-  selector   : 'sm-clone-dialog',
+  selector: 'sm-clone-dialog',
   templateUrl: './clone-dialog.component.html',
-  styleUrls  : ['./clone-dialog.component.scss']
+  styleUrls: ['./clone-dialog.component.scss']
 })
 export class CloneDialogComponent implements OnInit, OnDestroy {
 
@@ -22,44 +24,52 @@ export class CloneDialogComponent implements OnInit, OnDestroy {
   public header: string;
   public type: string;
   public projects$: Observable<Project[]>;
-  public formData = <CloneForm>{
+  public formData = {
     project: null,
-    name   : null,
-    comment: null
-  };
-
-  public errors = {
     name: null,
-  };
+    comment: null
+  } as CloneForm;
 
-  public errorMessages = {
-    name: {
-      required: 'Please provide a name'
-    }
-  };
-
-  validators = {
-    name: [Validators.required]
-  };
   private readonly defaultProjectId: string;
   private projectsSub: Subscription;
   public projects: { label: string; value: string }[];
 
-  constructor(private store: Store<any>, @Inject(MAT_DIALOG_DATA) data: {
-                type: string;
-                defaultProject: Project['id'];
-                defaultName: string;
-                defaultComment: string;
-              }, public dialogRef: MatDialogRef<CloneDialogComponent>
+  @ViewChild('cloneForm', {static: true}) cloneForm: NgForm;
+  @ViewChild('cloneButton', {static: true}) cloneButton: ElementRef;
+  public filteredProjects: Observable<{ label: string; value: string }[]>;
+  filterText: string = '';
+  isNewName: boolean = false;
+  isAutoCompleteOpen: boolean;
+  public readOnlyProjects$: Observable<string[]>;
+
+  constructor(
+    private store: Store<any>,
+    @Inject(MAT_DIALOG_DATA) data: {
+      type: string;
+      defaultProject: string;
+      defaultName: string;
+      defaultComment: string;
+    },
+    public dialogRef: MatDialogRef<CloneDialogComponent>
   ) {
-    this.projects$ = this.store.select(selectProjects).pipe(map(projects => projects.filter( project => !isExample(project))));
+    this.readOnlyProjects$ = this.store.select(selectProjects)
+      .pipe(map(projects => projects.filter(project => isReadOnly(project)).map(project => project.name)));
+    this.projects$ = this.store.select(selectProjects)
+      .pipe(map(projects => projects.filter(project => !isReadOnly(project))));
     this.defaultProjectId = data.defaultProject;
     this.header = `Clone ${data.type}`;
     this.type = data.type.toLowerCase();
     this.reference = data.defaultName;
-    this.formData.name = this.CLONE_NAME_PREFIX + data.defaultName;
-    this.formData.comment = data.defaultComment || '';
+    this.formData.name = this.CLONE_NAME_PREFIX;
+    setTimeout(() => {
+      this.formData = {
+        ...this.formData,
+        name: this.CLONE_NAME_PREFIX + data.defaultName,
+        comment: data.defaultComment || '',
+      };
+    });
   }
+
 
   ngOnDestroy(): void {
     this.projectsSub.unsubscribe();
@@ -68,32 +78,64 @@ export class CloneDialogComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.store.dispatch(new GetAllProjects());
     this.projectsSub = this.projects$.subscribe(projects => {
-      this.projects = projects.map(project => ({value: project.id, label: project.name}));
-      const defaultProject = this.projects.find(project => project.value === this.defaultProjectId);
-      this.formData.project = defaultProject ? defaultProject.value : projects[0] ? this.projects[0].value : null;
+      const projectList = projects.map(project => ({value: project.id, label: project.name}));
+      if (!isEqual(projectList, this.projects)) {
+        this.projects = projectList;
+        const defaultProject = this.projects.find(project => project.value === this.defaultProjectId);
+        setTimeout(() => {
+          this.formData.project = defaultProject ? defaultProject : projects[0] ? this.projects[0] : null;
+          this.filterText = this.formData.project?.label;
+        }, 0);
+      }
     });
+    setTimeout(() => {
+      if (!this.cloneForm?.controls['projectName']) {
+        return;
+      }
+      this.filteredProjects = this.cloneForm.controls['projectName'].valueChanges
+        .pipe(
+          map(value => typeof value === 'string' ? value : value.label),
+          map(value => this._filter(value))
+        );
+    }, 1000);
+
   }
 
-  formDataChanged(event: { field: string, value: any }) {
-    this.formData = {...this.formData, [event.field]: event.value};
+  displayFn(project: any ): string {
+    return project && project.label ? project.label : project ;
   }
 
-  formErrorChanged(event: { field: string, errors: any }) {
-    this.errors = {...this.errors, [event.field]: event.errors};
-  }
-
-  isFormValid() {
-    return Object.values(this.errors).filter(err => {
-      return !!err;
-    }).length === 0;
+  private _filter(value: string) {
+    this.filterText = value;
+    const projectsNames = this.projects.map(project => project.label);
+    this.isNewName = !projectsNames.includes(value);
+    const filterValue = value.toLowerCase();
+    return this.projects.filter((project: any) => project.label.toLowerCase().includes(filterValue.toLowerCase()));
   }
 
   closeDialog(isConfirmed) {
     if (isConfirmed) {
+      if (typeof this.formData.project === 'string') {
+        this.formData.project = {label: this.formData.project, value: ''};
+      }
       this.dialogRef.close(this.formData);
     } else {
       this.dialogRef.close(null);
     }
   }
 
+  clear() {
+    this.filterText = '';
+    this.formData.project = '';
+  }
+
+  clearOnFirstFocus($event: FocusEvent) {
+    if (this.cloneForm.controls['projectName'].untouched) {
+      this.clear();
+    }
+  }
+
+  setIsAutoCompleteOpen(focus: boolean) {
+    this.isAutoCompleteOpen = focus;
+  }
 }

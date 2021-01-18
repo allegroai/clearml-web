@@ -17,7 +17,7 @@
 
 .model-tag {
   @include card-header-tag();
-  color: #8492c2;
+  color: $blue-300;
 }
 
 .model-footer {

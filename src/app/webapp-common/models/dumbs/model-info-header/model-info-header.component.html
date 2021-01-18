@@ -29,7 +29,6 @@
       <ng-template #readOnlyTags>
         <sm-tag-list
           class="w-100"
-          [class.menu-open]="tagMenu?.trigger.menuOpen"
           [sysTags]="sysTags"
           [tags]="model?.tags"></sm-tag-list>
       </ng-template>
@@ -45,7 +44,9 @@
           class="light-theme"
           #tagsMenuContent
           [tags]="model?.tags"
-          [allTags]="tags$ | async"
+          [tagsFilterByProject]="tagsFilterByProject$ | async"
+          [projectTags]="projectTags$ | async"
+          [companyTags]="companyTags$ | async"
           (tagSelected)="addTag($event)"
         ></sm-tags-menu>
       </sm-menu>
@@ -55,7 +56,9 @@
     <sm-model-menu
       [model]="model"
       [selectedModel]="model"
-      [allTags]="tags$ | async"
+      [tagsFilterByProject]="tagsFilterByProject$ | async"
+      [projectTags]="projectTags$ | async"
+      [companyTags]="companyTags$ | async"
       (tagSelected)="addTag($event)">
     </sm-model-menu>
   </div>

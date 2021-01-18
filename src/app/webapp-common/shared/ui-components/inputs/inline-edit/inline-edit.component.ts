@@ -2,42 +2,41 @@ import {Component, ElementRef, EventEmitter, Input, OnDestroy, Output, Renderer2
 import {ICONS} from '../../../../../app.constants';
 
 @Component({
-  selector   : 'sm-inline-edit',
+  selector: 'sm-inline-edit',
   templateUrl: './inline-edit.component.html',
-  styleUrls  : ['./inline-edit.component.scss']
+  styleUrls: ['./inline-edit.component.scss']
 })
 export class InlineEditComponent implements OnDestroy {
   public readonly CANCEL_BUTTON = 'CANCEL_BUTTON';
-  public readonly SAVE_BUTTON   = 'SAVE_BUTTON';
-  public ICONS                  = ICONS;
-  public active                 = false;
+  public readonly SAVE_BUTTON = 'SAVE_BUTTON';
+  public ICONS = ICONS;
+  public active = false;
   public inlineValue: string;
-  private shouldSave: boolean   = true;
+  private shouldSave: boolean = true;
+
   @Input() pattern;
   @Input() originalText;
-  @Input() fieldValue; // TODO: remove me
 
   // *DEFAULTS*
-  @Input() editable           = true;
-  @Input() minWidth: number   = 100;
+  @Input() editable = true;
+  @Input() minWidth: number = 100;
   @Input() multiline: boolean = false;
-  @Input() rows: number       = 3; // Only relevant to multiline
-  @Input() inlineDisabled     = false;
+  @Input() rows: number = 3; // Only relevant to multiline
+  @Input() inlineDisabled = false;
 
   @Output() inlineActiveStateChanged = new EventEmitter<boolean>();
-  @Output() textChanged              = new EventEmitter<string>();
-  @Output() inlineFocusOutEvent      = new EventEmitter<boolean>();
+  @Output() textChanged = new EventEmitter<string>();
+  @Output() inlineFocusOutEvent = new EventEmitter<boolean>();
   @Output() cancel = new EventEmitter();
   @ViewChild('inlineInput') inlineInput: ElementRef;
-  @ViewChild('inlineInputContainer') inlineInputContainer: ElementRef;
-  @ViewChild('template', { static: true }) template;
+  @ViewChild('template', {static: true}) template: ElementRef;
 
   constructor(private renderer: Renderer2) {
   }
 
   public inlineCanceled() {
     this.inlineValue = this.originalText;
-    this.active      = false;
+    this.active = false;
     this.inlineActiveStateChanged.emit(false);
     this.cancel.emit();
   }
@@ -55,12 +54,13 @@ export class InlineEditComponent implements OnDestroy {
     if (!this.editable) {
       return;
     }
+
+    const templateWidth = Math.max(this.template.nativeElement.getBoundingClientRect().width, 250);
+    this.renderer.setStyle(this.inlineInput.nativeElement, 'width', `${templateWidth}px`);
     this.inlineValue = this.originalText;
-    this.active      = true;
+    this.active = true;
     this.inlineActiveStateChanged.emit(true);
-    const inputWidth = (Math.max(this.template.nativeElement.offsetWidth, this.minWidth)) + 'px';
-    this.renderer.setStyle(this.inlineInputContainer.nativeElement, 'width', inputWidth);
-    setTimeout(() => this.inlineInput.nativeElement.focus());
+    setTimeout(() => this.inlineInput.nativeElement.focus(), 50);
   }
 
   cancelClicked() {

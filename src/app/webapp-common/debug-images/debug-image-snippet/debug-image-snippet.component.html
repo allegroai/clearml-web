@@ -44,8 +44,8 @@
 
   <div *ngIf="!frame.url || isFailed" class="item">
     <sm-snippet-error
-      theme="light"
-      [copyContent]="frame.url || frame.oldSrc"
+      [theme]="ThemeEnum.Light"
+      [copyContent]="(frame.url || frame.oldSrc)?.split('?X-Amz-Date')[0]"
       (openImageClicked)="openInNewTab()"
     ></sm-snippet-error>
   </div>

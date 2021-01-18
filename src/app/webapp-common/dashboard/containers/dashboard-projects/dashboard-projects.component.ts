@@ -9,6 +9,8 @@ import {GetRecentProjects} from '../../common-dashboard.actions';
 import {CARDS_IN_ROW} from '../../common-dashboard.const';
 import {ProjectCreateDialogComponent} from '../../../shared/project-create-dialog/project-create-dialog.component';
 import {ResetSelectedProject} from '../../../core/actions/projects.actions';
+import {selectCurrentUser} from '../../../core/reducers/users-reducer';
+import {filter, take} from 'rxjs/operators';
 
 @Component({
   selector   : 'sm-dashboard-projects',
@@ -27,7 +29,9 @@ export class DashboardProjectsComponent implements OnInit {
 
   ngOnInit() {
     this.store.dispatch(new ResetSelectedProject());
-    this.store.dispatch(new GetRecentProjects());
+    this.store.select(selectCurrentUser)
+      .pipe(filter(user => !!user), take(1))
+      .subscribe(() => this.store.dispatch(new GetRecentProjects()));
   }
 
   public projectCardClicked(projectId) {

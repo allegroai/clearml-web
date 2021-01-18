@@ -10,13 +10,26 @@
     height: $project-header-height;
     transition: background-color 0.5s;
 
+    .hide-item {
+      visibility: hidden;
+    }
+
     &.archive-mode {
       transition: background-color 0.5s;
       background-color: #333746;
+
       /deep/ button {
         border-color: #636e97;
         box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
       }
+    }
+  }
+
+  .right-buttons {
+    margin-right: 16px;
+
+    sm-experiment-menu {
+      padding: 6px 0;
     }
   }
 
@@ -27,7 +40,7 @@
   sm-experiment-custom-cols-menu {
     width: 30px;
     height: 20px;
-    margin-right: 10px;
+    margin-right: 16px;
   }
 }
 

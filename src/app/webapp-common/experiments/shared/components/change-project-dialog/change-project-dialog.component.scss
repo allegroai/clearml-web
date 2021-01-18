@@ -4,6 +4,9 @@
       width: 640px;
     }
   }
+  .creat-new-suffix{
+    margin-right: 18px;
+  }
   .message {
     padding: 6px;
     margin-bottom: 12px;
@@ -15,7 +18,10 @@
   }
   .buttons {
     margin-top: 48px;
-    display: inline-block;
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    justify-content: center;
     left: 50%;
     position: relative;
     transform: translateX(-50%);

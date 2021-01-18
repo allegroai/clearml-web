@@ -1,0 +1,32 @@
+<sm-dialog-template header="INVITE A USER" iconClass="al-icon al-ico-users"
+                    (xClicked)="matDialogRef.close()"
+>
+  <div class="share-menu-container" smClickStopPropagation>
+    <div class="copy-title">
+      Invite additional users to collaborate and share your work.<br>
+      Send your colleagues the below invitation link to have them join your team.<br>
+      The link will remain valid for 24 hours.
+    </div>
+    <ng-container *ngIf="(inviteLink$ | async) as inviteLink; else hidden">
+      <div class="share-link-container" *ngIf="inviteLink?.allocated_users < inviteLink?.allowed_users; else workspaceFull">
+        <div class="ellipsis share-link">
+          {{window.location.origin + '?invite=' + inviteLink?.id}}</div>
+        <div ngxClipboard
+             smClickStopPropagation
+             [cbContent]="window.location.origin + '?invite=' + inviteLink?.id"
+             class="copy pointer"
+             (cbOnSuccess)="copyToClipboardSuccess()">
+          <i class="fas fa-copy "></i>
+        </div>
+      </div>
+      <ng-template #workspaceFull>
+        <div class="share-link-container d-flex justify-content-center">
+          <span class="text-danger">This workspace is already full. No more members can join</span>
+        </div>
+      </ng-template>
+    </ng-container>
+    <ng-template #hidden>
+      <div class="share-link-container hidden"></div>
+    </ng-template>
+  </div>
+</sm-dialog-template>

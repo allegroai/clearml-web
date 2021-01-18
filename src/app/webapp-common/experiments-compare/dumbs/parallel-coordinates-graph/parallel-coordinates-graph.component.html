@@ -8,8 +8,8 @@
         <span #dot class="dot pallete-cursor"
               [style.background-color]="experimentsColors[experiment.id]"
               smChooseColor [colorButtonRef]="dot"
-              [defaultColor]="experimentsColors[experiment.id]"
-              [stringToColor]="experiment.id">
+              [defaultColor]="experimentsColors[getExperimentNameForColor(experiment)]"
+              [stringToColor]="getExperimentNameForColor(experiment)">
         </span>
       </span>
       <span

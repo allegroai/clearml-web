@@ -1,4 +1,4 @@
-import {Action} from '@ngrx/store';
+import {Action, createAction, props} from '@ngrx/store';
 import {ISmAction} from '../../core/models/actions';
 import {IExperimentSettings} from '../../experiments/reducers/common-experiment-output.reducer';
 import {ScalarKeyEnum} from '../../../business-logic/model/events/scalarKeyEnum';
@@ -51,6 +51,11 @@ export class SetExperimentHistogram implements Action {
   constructor(public payload: any,  public axisType: ScalarKeyEnum) {
   }
 }
+
+export const setAxisCache = createAction(
+  EXPERIMENTS_COMPARE_METRICS_CHARTS_ + '[set scalar axis type cache]',
+  props<{axis: ScalarKeyEnum}>()
+);
 
 export class SetExperimentPlots implements Action {
   readonly type = SET_EXPERIMENT_PLOTS;

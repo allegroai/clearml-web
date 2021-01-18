@@ -8,6 +8,7 @@ import {EXPERIMENTS_VIEW_MODES, ExperimentsViewModesEnum} from '../shared/common
 import {MetricVariantResult} from '../../../business-logic/model/projects/metricVariantResult';
 import {TableFilter} from '../../shared/utils/tableParamEncode';
 import {User} from '../../../business-logic/model/users/user';
+import {ProjectsGetTaskParentsResponseParents} from '../../../business-logic/model/projects/projectsGetTaskParentsResponseParents';
 
 
 export interface ICommonExperimentsViewState {
@@ -32,35 +33,37 @@ export interface ICommonExperimentsViewState {
   hyperParams: Array<any>;
   metricsLoading: boolean;
   users: User[];
+  parents: ProjectsGetTaskParentsResponseParents[];
+  activeParentsFilter: ProjectsGetTaskParentsResponseParents[];
   types: string[];
   splitSize: number;
-  projectTags: string[];
 }
 
 export const commonExperimentsInitialState: ICommonExperimentsViewState = {
-  tableCols               : INITIAL_EXPERIMENT_TABLE_COLS,
-  colsOrder               : {},
-  hiddenTableCols         : {'comment': true},
-  experiments             : [],
-  noMoreExperiment        : false,
-  selectedExperiment      : null,
-  selectedExperiments     : [],
+  tableCols: INITIAL_EXPERIMENT_TABLE_COLS,
+  colsOrder: {},
+  hiddenTableCols: {'comment': true, 'active_duration': true},
+  experiments: [],
+  noMoreExperiment: false,
+  selectedExperiment: null,
+  selectedExperiments: [],
   selectedExperimentSource: null,
-  experimentToken         : null,
-  viewMode                : EXPERIMENTS_VIEW_MODES.TABLE,
-  tableFilters            : null,
-  tableSortField          : EXPERIMENTS_TABLE_COL_FIELDS.LAST_UPDATE,
-  tableSortOrder          : TABLE_SORT_ORDER.ASC,
-  page                    : -1, // -1 so the "getNextExperiments" will send 0.
-  globalFilter            : null,
-  showAllSelectedIsActive : false,
-  metricsCols             : [],
-  metricVariants          : [],
-  hyperParams             : [],
-  metricsLoading          : false,
-  users                   : [],
-  projectTags             : [],
-  types                   : [],
+  experimentToken: null,
+  viewMode: EXPERIMENTS_VIEW_MODES.TABLE,
+  tableFilters: null,
+  tableSortField: EXPERIMENTS_TABLE_COL_FIELDS.LAST_UPDATE,
+  tableSortOrder: TABLE_SORT_ORDER.ASC,
+  page: -1, // -1 so the "getNextExperiments" will send 0.
+  globalFilter: null,
+  showAllSelectedIsActive: false,
+  metricsCols: [],
+  metricVariants: [],
+  hyperParams: [],
+  metricsLoading: false,
+  users: [],
+  parents: [],
+  activeParentsFilter: [],
+  types: [],
   splitSize: 75
 };
 
@@ -69,7 +72,12 @@ export function commonExperimentsViewReducer(state: ICommonExperimentsViewState 
     case actions.RESET_EXPERIMENTS:
       return {...state, experiments: [], selectedExperiment: null, showAllSelectedIsActive: false};
     case  actions.SET_SHOW_ALL_SELECTED_IS_ACTIVE:
-      return {...state, showAllSelectedIsActive: action.payload, globalFilter: commonExperimentsInitialState.globalFilter, tableFilters: commonExperimentsInitialState.tableFilters};
+      return {
+        ...state,
+        showAllSelectedIsActive: action.payload,
+        globalFilter: commonExperimentsInitialState.globalFilter,
+        tableFilters: commonExperimentsInitialState.tableFilters
+      };
     case actions.ADD_MANY_EXPERIMENTS:
       return {...state, experiments: state.experiments.concat(action.payload)};
     case actions.REMOVE_MANY_EXPERIMENTS:
@@ -91,7 +99,11 @@ export function commonExperimentsViewReducer(state: ICommonExperimentsViewState 
     case actions.SET_EXPERIMENTS:
       return {...state, experiments: action.payload};
     case setExperimentInPlace.type:
-      return {...state, experiments: state.experiments.map(currExp => action.experiments.find(newExp => newExp.id === currExp.id))};
+      return {
+        ...state, experiments: state.experiments
+          .map(currExp => action.experiments.find(newExp => newExp.id === currExp.id))
+          .filter(e => e)
+      };
     case actions.SET_NO_MORE_EXPERIMENTS:
       return {...state, noMoreExperiment: action.payload};
     case actions.SET_NEXT_PAGE:
@@ -111,14 +123,18 @@ export function commonExperimentsViewReducer(state: ICommonExperimentsViewState 
     case actions.RESET_SORT_ORDER:
       return {
         ...state, tableSortOrder: commonExperimentsInitialState.tableSortOrder,
-        tableSortField          : commonExperimentsInitialState.tableSortField
+        tableSortField: commonExperimentsInitialState.tableSortField
       };
     case  actions.TOGGLE_COL_HIDDEN:
-      return {...state, hiddenTableCols: {...state.hiddenTableCols, [action.payload]: !state.hiddenTableCols[action.payload]}};
+      return {
+        ...state,
+        hiddenTableCols: {...state.hiddenTableCols, [action.payload]: !state.hiddenTableCols[action.payload]}
+      };
     case  actions.setHiddenColumns.type: {
       const visibleColumns = ['selected'].concat(action['visibleColumns']) as string[];
       return {
         ...state, hiddenTableCols: {
+          ...state.hiddenTableCols,
           ...state.tableCols
             .filter(col => !visibleColumns.includes(col.id))
             .reduce((obj: object, col) => ({...obj, [col.id]: true}), {})
@@ -129,6 +145,7 @@ export function commonExperimentsViewReducer(state: ICommonExperimentsViewState 
       const payload = (action as actions.TableFilterChanged).payload;
       return {
         ...state,
+        activeParentsFilter: payload.col === EXPERIMENTS_TABLE_COL_FIELDS.PARENT ? payload.value.map(parentId => state.parents.find(parent => parent.id === parentId)).filter(p => !!p) : [],
         tableFilters: {
           ...state.tableFilters,
           [payload.col]: {value: payload.value, matchMode: payload.filterMatchMode}
@@ -151,20 +168,22 @@ export function commonExperimentsViewReducer(state: ICommonExperimentsViewState 
     case actions.REMOVE_COL:
       return {
         ...state,
-        metricsCols   : [...state.metricsCols.filter(tableCol => !(tableCol.id === action.payload.col.id && tableCol.projectId === action.payload.col.projectId))],
+        metricsCols: [...state.metricsCols.filter(tableCol => !(tableCol.id === action.payload.col.id && tableCol.projectId === action.payload.col.projectId))],
         tableSortField: action.payload.col.id === state.tableSortField ? null : state.tableSortField
       };
 
     case actions.setUsers.type:
       return {...state, users: action.users};
-    case actions.setTags.type:
-      return {...state, projectTags: action.tags};
+    case actions.setParents.type:
+      return {...state,parents: action.parents};
+    case actions.setActiveParentsFilter.type:
+      return {...state, activeParentsFilter: action.parents};
     case actions.setProjectsTypes.type:
       return {...state, types: action.types};
     case actions.CLEAR_HYPER_PARAMS_COLS:
       return {
         ...state,
-        metricsCols   : [...state.metricsCols.filter(tableCol => !(tableCol.id.startsWith('hyperparams') && tableCol.projectId === action.payload.projectId))],
+        metricsCols: [...state.metricsCols.filter(tableCol => !(tableCol.id.startsWith('hyperparams') && tableCol.projectId === action.payload.projectId))],
         tableSortField: state.tableSortField.startsWith('hyperparams') ? null : state.tableSortField
       };
     case actions.SET_CUSTOM_METRICS:

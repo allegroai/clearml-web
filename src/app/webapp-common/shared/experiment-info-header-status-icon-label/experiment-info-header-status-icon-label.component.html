@@ -9,11 +9,11 @@
       <span class="view-only d-inline" *ngIf="viewOnly === true">  (view only) </span>
     </div>
     <div class="right-buttons d-flex align-items-center">
-      <div *ngIf="showMaximize"  (click)="maximizedClicked.emit()"
-        smTooltip="View full screen" position="left" class="ico-container">
+      <div *ngIf="showMaximize" (click)="maximizedClicked.emit()"
+        smTooltip="View full screen" matTooltipPosition="left" class="d-flex fullscreen">
         <i class="al-icon al-ico-info-max pointer"></i>
       </div>
-      <div (click)="closeInfoClicked.emit()" class="d-flex align-items-center ico-container">
+      <div (click)="closeInfoClicked.emit()" class="d-flex align-items-center mr-1">
         <i class="al-icon al-ico-dialog-x pointer"></i>
       </div>
     </div>

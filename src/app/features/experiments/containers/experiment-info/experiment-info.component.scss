@@ -13,13 +13,13 @@
 
   .experiment-info-container {
     height: calc(100% - #{$project-info-progress-height});
-    padding: 15px 5px 0;
+    padding: 15px 0 0 5px;
     display: flex;
     flex-direction: column;
 
     nav {
       height: $experiment-info-tabs-height;
-      border-bottom: 2px solid rgba(2, 2, 2, 0.07);
+      border-bottom: 1px solid rgba(2, 2, 2, 0.07);
     }
   }
 

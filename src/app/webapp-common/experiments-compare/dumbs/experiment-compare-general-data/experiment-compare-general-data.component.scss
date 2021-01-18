@@ -15,11 +15,13 @@
     }
 
     .experiment-name {
+      font-size: 1.5rem;
       height: 22px;
       max-width: 93%;
       display: inline-block;
       white-space: nowrap;
       a {
+        text-decoration: unset;
         display: block;
         width: 100%;
         color: inherit;

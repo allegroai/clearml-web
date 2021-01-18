@@ -1,3 +1,5 @@
+@import "../../../shared/ui-components/styles/variables";
+
 :host {
   .dot {
     position: absolute;
@@ -51,7 +53,7 @@
     text-align: center;
     font-size: 16px;
     font-weight: 500;
-    color: #5a658e;
+    color: $blue-400;
   }
   /deep/ .parcoords-control-view .y-axis.metric-column {
     text.axis-title {
@@ -60,7 +62,7 @@
 
     path.domain {
       stroke-width: 2px;
-      stroke: #141722;
+      stroke: $blue-900;
       stroke-opacity: 1;
     }
   }

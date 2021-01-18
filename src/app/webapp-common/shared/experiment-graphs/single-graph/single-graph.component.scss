@@ -14,9 +14,10 @@
 
     &.whitebg-table {
       height: unset;
-      padding-bottom:12px;
+      padding-bottom: 12px;
       margin-left: 24px;
       margin-right: 24px;
+
       &::-webkit-scrollbar {
         height: 8px !important;
       }
@@ -42,18 +43,28 @@
   }
 
   /deep/ #header.column-block .column-cells {
-     .column-cell .cell-rect {
+    .column-cell .cell-rect {
       stroke-width: 2px;
       stroke: rgb(238, 239, 241) !important;
-       fill: white !important;
+      fill: white !important;
     }
   }
 
   /deep/ .infolayer > .g-gtitle > .gtitle {
     transform: translateY(12px);
   }
+
   /deep/ .modebar-container svg.icon {
-    height: unset;
-    width: unset;
+    height: 1em;
+    width: 1em;
+    font-size: 16px;
+  }
+
+  // moving legend next to title without text
+  /deep/ .legend.hide-text {
+    .legendtext,
+    .legendtoggle {
+      display: none;
+    }
   }
 }

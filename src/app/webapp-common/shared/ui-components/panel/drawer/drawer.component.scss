@@ -3,7 +3,18 @@
 :host {
 
   display: block;
-  width: fit-content;
+
+  &.collapsed {
+    width: 24px !important;
+
+    .drawer-toggle {
+      border-radius: 6px;
+    }
+
+    /deep/ .card-container.bordered {
+      border-color: transparent !important;
+    }
+  }
 
   * {
     overflow-anchor: none;
@@ -11,6 +22,7 @@
 
   .content-container {
     display: block;
+    width: calc(100% - 24px);
   }
 
   .drawer-container {
@@ -18,15 +30,12 @@
     flex-flow: row-reverse;
     width: 100%;
     overflow: hidden;
-    transition: width 0.3s ease-in-out;
   }
 
-  .drawer-closed {
-    transition: width 0.3s ease-in-out;
-
-    width: 24px !important;
+  .c-drawer-toggle {
+    position: relative;
+    z-index: 1;
   }
-
   button {
     display: flex;
     justify-content: center;
@@ -44,7 +53,7 @@
     transition: background-color 0.3s ease, color 0.3s ease;
 
     &:hover {
-      background-color: #7480aa;
+      background-color: $grey-purple;
       color: #ffffff;
     }
 

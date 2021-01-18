@@ -2,7 +2,6 @@ import {HttpClientModule} from '@angular/common/http';
 import {NgModule} from '@angular/core';
 import {ActionReducer, StoreModule, USER_PROVIDED_META_REDUCERS} from '@ngrx/store';
 import {StoreDevtoolsModule} from '@ngrx/store-devtools';
-import {environment} from '../../environments/environment';
 import {messagesReducer} from '../webapp-common/core/reducers/messages-reducer';
 import {recentTasksReducer} from './reducers/recent-tasks-reducer';
 import {sourcesReducer} from './reducers/sources-reducer';
@@ -25,7 +24,8 @@ import {UsageStatsService} from './Services/usage-stats.service';
 import {usageStatsReducer} from './reducers/usage-stats.reducer';
 import {commonAuthReducer} from '../webapp-common/core/reducers/common-auth-reducer';
 import {PROJECTS_PREFIX} from '../webapp-common/core/actions/projects.actions';
-
+import {loginReducer} from '../webapp-common/login/login-reducer';
+import {ConfigurationService} from '../webapp-common/shared/services/configuration.service';
 
 export const reducers = {
   auth: commonAuthReducer,
@@ -35,6 +35,7 @@ export const reducers = {
   views: viewReducer,
   sources: sourcesReducer,
   users: usersReducer,
+  login: loginReducer,
   rootProjects: projectsReducer,
   userStats: usageStatsReducer
 };
@@ -46,7 +47,8 @@ const syncedKeys = [
   'projects.selectedProjectId',
   'projects.selectedProject',
   'views.availableUpdates',
-  'views.showSurvey'
+  'views.showSurvey',
+  'views.neverShowPopupAgain'
 ];
 const key = '_saved_state_';
 
@@ -81,16 +83,20 @@ export function localStorageReducer(reducer: ActionReducer<any>): ActionReducer<
   };
 }
 
+export function setUsersPreferencesReducer(reducer: ActionReducer<any>): ActionReducer<any> {
+  return createLocalStorageReducer('users', ['users.activeWorkspace'] , ['[users]'])(reducer);
+}
+
 export function setViewPreferencesReducer(reducer: ActionReducer<any>): ActionReducer<any> {
-  return createLocalStorageReducer('view', ['views.autoRefresh'] , [VIEW_PREFIX])(reducer);
+  return createLocalStorageReducer('view', ['views.autoRefresh', 'views.neverShowPopupAgain'] , [VIEW_PREFIX])(reducer);
 }
 
 export function setRootProjectPreferencesReducer(reducer: ActionReducer<any>): ActionReducer<any> {
-  return createLocalStorageReducer('rootProjects', ['rootProjects.tagsColors'] , [PROJECTS_PREFIX])(reducer);
+  return createLocalStorageReducer('rootProjects', ['rootProjects.tagsColors', 'rootProjects.tagsFilterByProject'] , [PROJECTS_PREFIX])(reducer);
 }
 
 export function getMetaReducers() {
-  return [localStorageReducer, setRootProjectPreferencesReducer, setViewPreferencesReducer];
+  return [localStorageReducer, setRootProjectPreferencesReducer, setViewPreferencesReducer, setUsersPreferencesReducer];
 }
 
 @NgModule({
@@ -105,7 +111,7 @@ export function getMetaReducers() {
     }),
     EffectsModule.forRoot([LayoutEffects, CommonUserEffects, UserEffects,
       RouterEffects, ProjectsEffects, CommonAuthEffectsService]),
-    !environment.production ? StoreDevtoolsModule.instrument({
+    !ConfigurationService.globalEnvironment.production ? StoreDevtoolsModule.instrument({
       maxAge: 25 //  Retains last 25 states
     }) : [],
     HttpClientModule,

@@ -28,6 +28,7 @@ export class QueueTaskTableComponent {
         style      : {width: '680px'},
         headerType : ColHeaderTypeEnum.title,
         disableDrag: true,
+        disablePointerEvents: true
       },
       {
         id         : QUEUES_TABLE_COL_FIELDS.ID,
@@ -35,6 +36,7 @@ export class QueueTaskTableComponent {
         style      : {width: '300px'},
         headerType : ColHeaderTypeEnum.title,
         disableDrag: true,
+        disablePointerEvents: true
       },
       {
         id         : QUEUES_TABLE_COL_FIELDS.QUEUED,
@@ -42,6 +44,7 @@ export class QueueTaskTableComponent {
         style      : {width: '150px'},
         headerType : ColHeaderTypeEnum.title,
         disableDrag: true,
+        disablePointerEvents: true
       },
     ];
   }

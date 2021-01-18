@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, ElementRef, HostListener, Input, OnInit, Renderer2, ViewChild} from '@angular/core';
+import {Component, ElementRef, HostListener, Input, OnInit, ViewChild} from '@angular/core';
 import {PlotlyGraphBase} from '../../../shared/experiment-graphs/single-graph/plotly-graph-base';
 import {debounceTime, filter} from 'rxjs/operators';
 import {ColorHashService} from '../../../shared/services/color-hash/color-hash.service';
@@ -9,6 +9,7 @@ import {select} from 'd3-selection';
 import {sortCol} from '../../../shared/utils/tableParamEncode';
 import {Store} from '@ngrx/store';
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 declare let Plotly;
 
 interface ExtraTask extends Task {
@@ -135,12 +136,10 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBase implement
   }
 
   constructor(
-    protected store: Store,
-    protected renderer: Renderer2,
-    protected elementRef: ElementRef,
     private colorHash: ColorHashService,
-    private changeDetector: ChangeDetectorRef) {
-    super(store, renderer, elementRef);
+    protected store: Store
+  ) {
+    super(store);
   }
 
   ngOnInit(): void {
@@ -158,8 +157,12 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBase implement
   }
 
   getStringColor(experiment: ExtraTask): string {
-    const colorArr = this.colorHash.initColor(experiment.id);
+    const colorArr = this.colorHash.initColor(this.getExperimentNameForColor(experiment));
     return `rgb(${colorArr[0]},${colorArr[1]},${colorArr[2]})`;
+  }
+
+  getExperimentNameForColor(experiment): string {
+    return `${experiment.name}-${experiment.id}`;
   }
 
   getColorsArray(experiments): number[] {
@@ -183,12 +186,20 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBase implement
             textVal[text] = index;
             return index;
           });
+          let constraintrange;
+          if (this.parallelGraph.nativeElement?.data?.[0]?.dimensions) {
+            const currDimention = this.parallelGraph.nativeElement.data[0].dimensions.find(d => d.label === parameter);
+            if (currDimention?.constraintrange) {
+              constraintrange = currDimention.constraintrange;
+            }
+          }
           return {
             label: parameter,
             ticktext,
             tickvals,
             values: filteredExperiments.map((experiment) => (textVal[['', undefined].includes(get(parameter, experiment.hyperparams)) ? 'N/A' : get(parameter, experiment.hyperparams)])),
-            range: [0, max(tickvals)]
+            range: [0, max(tickvals)],
+            constraintrange
           };
         })
       } as ParaPlotData ;
@@ -211,17 +222,25 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBase implement
       if (this.metric) {
         const allValuesIncludingNull = this.experiments.map(experiment => get(`${this.metric.path}.${this.metricValueType}`, experiment.last_metrics));
         const allValues = allValuesIncludingNull.filter(value => value !== undefined);
-        const NAVal = this.getNAValue(allValues);
+        const naVal = this.getNAValue(allValues);
         const ticktext = uniq(allValuesIncludingNull.map(value => value !== undefined ? value : 'N/A'));
-        const tickvals = ticktext.map(text => text === 'N/A' ? NAVal : text);
+        const tickvals = ticktext.map(text => text === 'N/A' ? naVal : text);
+        let constraintrange;
+        if (this.parallelGraph.nativeElement?.data?.[0]?.dimensions) {
+          const currDimention = this.parallelGraph.nativeElement.data[0].dimensions.find(d => d.label === this.metric.name);
+          if (currDimention?.constraintrange) {
+            constraintrange = currDimention.constraintrange;
+          }
+        }
         trace.dimensions.push({
           label: this.metric.name,
           ticktext,
           tickvals,
           values: filteredExperiments.map((experiment) =>
-            parseFloat(getOr(NAVal, `${this.metric.path}.${this.metricValueType}`, experiment.last_metrics))
+            parseFloat(getOr(naVal, `${this.metric.path}.${this.metricValueType}`, experiment.last_metrics))
           ),
-          range: [min(tickvals), max(tickvals)]
+          range: [min(tickvals), max(tickvals)],
+          constraintrange
         });
       }
       this.data = [trace];
@@ -285,7 +304,17 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBase implement
 
   private naturalCompare(myArray) {
     const collator = new Intl.Collator(undefined, {numeric: true, sensitivity: 'base'});
-    return (myArray.sort(collator.compare));
+    const compare = (a: string, b: string) => {
+      const aFloat = parseFloat(a);
+      const bFloat = parseFloat(b);
+      if (!Number.isNaN(a) && !Number.isNaN(b)) {
+        return aFloat - bFloat;
+      }
+      return collator.compare(a, b);
+    };
+
+    return (myArray.sort(compare));
+
   }
 
   highlightExperiment(experiment: ExtraTask) {

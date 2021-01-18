@@ -24,6 +24,6 @@
   [class.no-tags]="!tagsList?.length"
   *ngIf="add.observers.length > 0"
   caption="ADD TAG"
-  [colors]="{foreground: '#a7b2d8'}"
+  [colors]="{foreground: '#a7b2d8', background: null}"
   (add)="add.emit($event)"
 ></sm-user-tag>

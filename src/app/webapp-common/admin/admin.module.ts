@@ -10,9 +10,10 @@ import { S3AccessComponent } from './s3-access/s3-access.component';
 import {CreateCredentialDialogComponent} from './create-credential-dialog/create-credential-dialog.component';
 import {SharedModule} from '../../shared/shared.module';
 import { UsageStatsComponent } from '../../features/admin/usage-stats/usage-stats.component';
+import {MatExpansionModule} from '@angular/material/expansion';
 
 @NgModule({
-  imports        : [CommonModule, SMSharedModule, ReactiveFormsModule, SharedModule],
+  imports: [CommonModule, SMSharedModule, ReactiveFormsModule, SharedModule, MatExpansionModule],
   declarations   : [
     AdminComponent, AdminCredentialTableComponent, AdminDialogTemplateComponent,
     S3AccessComponent, CreateCredentialDialogComponent, UsageStatsComponent

@@ -8,6 +8,8 @@
   vertical-align: middle;
 
   .label {
+    display: flex;
+    align-items: center;
     position: relative;
     padding: 0 0.5rem;
     border-radius: 16px;
@@ -25,7 +27,6 @@
 
   .dot-container {
     position: relative;
-    display: inline-block;
     width: 9px;
     height: 0.5rem;
   }
@@ -38,17 +39,11 @@
     height: 8px;
     width: 8px;
     border-radius: 50%;
-    display: inline-block;
-    vertical-align: middle;
     transition: width 0.2s ease-in-out, height 0.2s ease-in-out;
   }
 
   .label-text {
-    margin-left: 4px;
-    display: inline-block;
+    margin: 0 7px;
     max-width: 180px;
-    vertical-align: middle;
-    overflow-x: hidden;
-    text-overflow: ellipsis;
   }
 }

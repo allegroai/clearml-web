@@ -9,15 +9,14 @@
       <h5>Usage</h5>
     </div>
     <div class="p-1">
-      <sm-copy-clipboard [clipboardText]="codeSnippet.innerText"></sm-copy-clipboard>
+      <sm-copy-clipboard [clipboardText]="clipboardText"></sm-copy-clipboard>
     </div>
   </div>
+  <div class="instructions">Copy the below for input to clearml-init' configuration request, or modify your existing clearml.conf</div>
   <div class="usage-content">
-    <div>
-      <span>~/trains.conf</span>
-    </div>
     <div class="code-snippet" #codeSnippet>
       <pre class="greyout">{{'api {'}}</pre>
+      <pre *ngIf="workspace" class="greyout">{{'    # ' + workspace}}</pre>
       <pre class="greyout">{{'    web_server: ' + WEB_SERVER_URL}}</pre>
       <pre class="greyout">{{'    api_server: ' + API_BASE_URL}}</pre>
       <pre class="greyout" *ngIf="fileBaseUrl">{{'    files_server: ' + fileBaseUrl}}</pre>

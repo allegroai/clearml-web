@@ -12,9 +12,9 @@
 .buttons-container {
   height: 300px;
   overflow: auto;
-  &.searching {
-    height: unset;
-  }
+  //&.searching {
+  //  height: unset;
+  //}
 }
 
 .item {
@@ -44,6 +44,7 @@
 
   .new {
     font-weight: normal;
+    color: $purple;
   }
 }
 
@@ -60,3 +61,8 @@ hr {
   }
 }
 
+.project-tags-filter {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}

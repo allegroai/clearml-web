@@ -11,6 +11,7 @@ export const routes: Routes = [
     data        : {search: true},
   },
   {path: 'login', loadChildren: () => import('./webapp-common/login/login.module').then(m => m.LoginModule)},
+  {path: 'signup', loadChildren: () => import('./webapp-common/login/login.module').then(m => m.LoginModule)},
   {
     path        : 'projects',
     loadChildren: () => import('./features/projects/projects.module').then(m => m.ProjectsModule),

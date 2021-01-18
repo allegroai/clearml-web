@@ -18,9 +18,12 @@
     padding: $card-spacer-y $card-spacer-x;
     padding-top: $card-spacer-y / 2;
     padding-bottom: $card-spacer-y / 2;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.5;
   }
 
-  header:empty {
+  header.empty {
     padding: 0;
     padding-top: 0;
     padding-bottom: 0;
@@ -48,7 +51,7 @@
     transform: rotate(-45deg);
     border: 25px solid transparent;
     border-top: 25px solid;
-    border-top-color: $yellow-example;
+    border-top-color: $neon-yellow;
     position: absolute;
     bottom: -4px;
     right: -34px;

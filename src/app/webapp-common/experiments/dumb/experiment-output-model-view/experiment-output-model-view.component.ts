@@ -1,13 +1,8 @@
-import {Component, EventEmitter, Input, OnDestroy, Output} from '@angular/core';
-import {
-  IModelInfoInput, IModelInfoOutput, IModelInfoSource
-} from '../../shared/common-experiment-model.model';
-import {skip} from 'rxjs/operators';
+import {Component, Input, OnDestroy} from '@angular/core';
+import {IModelInfoInput, IModelInfoOutput, IModelInfoSource} from '../../shared/common-experiment-model.model';
 import {Model} from '../../../../business-logic/model/models/model';
 import {AdminService} from '../../../../features/admin/admin.service';
 import {Store} from '@ngrx/store';
-import {selectS3BucketCredentials} from '../../../core/reducers/common-auth-reducer';
-import {Observable, Subscription} from 'rxjs';
 import {BaseClickableArtifact} from '../base-clickable-artifact';
 
 
@@ -19,28 +14,23 @@ import {BaseClickableArtifact} from '../base-clickable-artifact';
 export class ExperimentOutputModelViewComponent extends BaseClickableArtifact implements OnDestroy {
 
   public isLocalFile: boolean;
-  private _model: IModelInfoInput;
+  private _output: IModelInfoOutput;
 
   @Input() projectId: string;
   @Input() editable: boolean;
   @Input() networkDesign: string;
   @Input() modelLabels: Model['labels'];
   @Input() source: IModelInfoSource;
-  @Input() output: IModelInfoOutput;
+  @Input() model: IModelInfoInput;
 
-  @Input() set model(model: IModelInfoInput) {
-    this._model = model;
-    this.isLocalFile = model && model.url && this.adminService.isLocalFile(model.url);
+  @Input() set output(output: IModelInfoOutput) {
+    this._output = output;
+    this.isLocalFile = output && output.url && this.adminService.isLocalFile(output.url);
   }
 
-  get model(): IModelInfoInput {
-    return this._model;
+  get output(): IModelInfoOutput {
+    return this._output;
   }
-
-  @Output() modelSelected = new EventEmitter<{
-    model: Model;
-    fieldsToPopulate: { labelEnum: boolean; networkDesign: boolean };
-  }>();
 
   constructor(protected adminService: AdminService, protected store: Store<any>) {
     super(adminService, store);

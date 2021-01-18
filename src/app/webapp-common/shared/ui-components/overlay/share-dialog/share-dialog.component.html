@@ -1,0 +1,21 @@
+<sm-dialog-template [displayX]="displayX && !dialogRef.disableClose" [header]="title"
+                    (xClicked)="closeDialog(undefined)" [closeOnX]="false"
+                    iconClass="al-icon al-ico-get-link-dialog">
+  <div class="d-flex">
+    <div class="sub-title" [innerHTML]="shared? sharedSubtitle: privateSubtitle"></div>
+  </div>
+
+  <div class="share-link-container"  *ngIf="shared">
+    <div class="ellipsis share-link">{{link}}</div>
+    <div ngxClipboard
+         smClickStopPropagation
+         [cbContent]="link"
+         class="copy pointer"
+         (cbOnSuccess)="copyToClipboardSuccess()">
+      <i class="fas fa-copy"></i>
+    </div>
+  </div>
+  <div class="d-flex justify-content-end">
+    <a href="javascript:void(0)" (click)="createLink()">{{shared ? 'Remove' : 'Create'}} link</a>
+  </div>
+</sm-dialog-template>

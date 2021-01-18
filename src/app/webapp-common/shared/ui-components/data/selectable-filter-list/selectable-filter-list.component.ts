@@ -11,6 +11,7 @@ export class SelectableFilterListComponent {
   private _searchTerm: string;
   private _list: Array<SelectableListItem>;
   public filteredList: SelectableListItem[];
+  public searchText: string;
 
   @Input() set searchTerm(searchTerm: string) {
     this.filteredList = this.list ? this.filterList(this.list, searchTerm) : [];
@@ -23,9 +24,10 @@ export class SelectableFilterListComponent {
 
   @Input() checkedList: Array<any> = [];
   @Input() selected: string;
+  @Input() placeholder: string = 'Search';
   @Input() titleLabel: string;
   @Input() checkAllIcon: string;
-  @Output() itemSelect             = new EventEmitter<SelectableListItem>();
+  @Output() itemSelect             = new EventEmitter<string>();
   @Output() hiddenChanged          = new EventEmitter<Array<SelectableListItem['value']>>();
   @Output() searchTermChanged      = new EventEmitter<string>();
 
@@ -46,8 +48,9 @@ export class SelectableFilterListComponent {
     }
   }
 
-  onSearchTermChanged(searchTerm) {
-    this.searchTermChanged.emit(searchTerm);
+  onSearchTermChanged(value: string) {
+    this.searchText = value;
+    this.searchTermChanged.emit(value);
   }
 
   public toggleHide(id) {

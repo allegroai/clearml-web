@@ -16,7 +16,7 @@ declare type FilterMatchModeEnum = 'startsWith' | 'contains' | 'endsWidth' | 'eq
 
 export interface ISmCol {
   id: string; // unique id, by default, will be use as the table data param (e.g name and data[name]).
-  getter?: string;
+  getter?: string | string[];
   header?: string; // the title header.
   label?: string; // Labels to show in cards mode..
   hidden?: boolean; // the column visibility.
@@ -33,6 +33,7 @@ export interface ISmCol {
   bodyTemplateRef?: string; // redundant.
   bodyStyleClass?: string;
   disableDrag?: boolean; // Disable drag on this col
+  disablePointerEvents?: boolean; // Disable pointer events for this col header (for selection col)
   metric_hash?: string;
   variant_hash?: string;
   valueType?: string;

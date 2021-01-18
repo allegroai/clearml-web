@@ -1,8 +1,10 @@
-import {Action} from '@ngrx/store';
+import {Action, createAction, props} from '@ngrx/store';
 import {IDebugImagesState} from './debug-images-reducer';
 import {Task} from '../../business-logic/model/tasks/task';
 import {TaskMetric} from '../../business-logic/model/events/taskMetric';
 import {EventsDebugImagesResponse} from '../../business-logic/model/events/eventsDebugImagesResponse';
+import {EXPERIMENTS_PREFIX} from "../experiments/actions/common-experiments-view.actions";
+import {EventsGetDebugImageIterationsResponse} from "../../business-logic/model/events/eventsGetDebugImageIterationsResponse";
 
 export const DEBUG_IMAGES_PREFIX = 'DEBUG_IMAGES_';
 
@@ -138,5 +140,14 @@ export class SetDebugImagesSettings implements Action {
   constructor(public payload: { id: string; changes: Partial<IDebugImagesState> }) {
   }
 }
+
+export const getDebugImageSample = createAction(DEBUG_IMAGES_PREFIX + 'GET_DEBUG_IMAGES_FOR_ITERATION', props<{ task: string; metric: string; variant: string; iteration: number }>());
+export const getNextDebugImageSample = createAction(DEBUG_IMAGES_PREFIX + 'GET_NEXT_DEBUG_IMAGE', props<{ task: string; navigateEarlier: boolean }>());
+export const setCurrentDebugImage = createAction(DEBUG_IMAGES_PREFIX + 'SET_DEBUG_IMAGES_FOR_ITERATION', props<{ event: any }>());
+export const setDebugImageViewerScrollId = createAction(DEBUG_IMAGES_PREFIX + 'SET_DEBUG_IMAGE_VIEWER_SCROLL_ID', props<{ scrollId: string }>());
+export const setDebugImageIterations = createAction(DEBUG_IMAGES_PREFIX + 'SET_DEBUG_IMAGE_ITERATIONS', props<EventsGetDebugImageIterationsResponse>());
+export const setDisplayerEndOfTime = createAction(DEBUG_IMAGES_PREFIX + 'SET_DISPLAYER_END_OF_TIME', props<{ endOfTime: boolean }>());
+export const setDisplayerBeginningOfTime = createAction(DEBUG_IMAGES_PREFIX + 'SET_DISPLAYER_BEGINNING_OF_TIME', props<{ beginningOfTime: boolean }>());
+export const resetDisplayer = createAction(DEBUG_IMAGES_PREFIX + 'RESET_DISPLAYER');
 
 

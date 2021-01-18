@@ -7,7 +7,7 @@
   </sm-checkbox-control>
   <i *ngIf="enableIcon" [class]="'item-icon ' + iconClass" [style.font-size.px]='iconFontSize'></i>
   <div class="item-label" [class.placeForIcon]="enableIcon">
-    <div class="ellipsis">{{itemLabel}}</div>
+    <div class="ellipsis" [smTooltip]="enableTooltip? (itemTooltip || itemLabel): ''">{{itemLabel}}</div>
     <i *ngIf="sortOrder" class="pt-1 ml-2" [class]="sortOrder === TABLE_SORT_ORDER.DESC ? 'fa fa-arrow-down' : 'fa fa-arrow-up' "></i>
   </div>
   <div *ngIf="removable" (click)="removeItem($event)" class="remove-button"><i class="al-icon al-ico-trash al-color blue-300 pointer"></i></div>

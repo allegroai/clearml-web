@@ -1,0 +1,645 @@
+@import "variables";
+
+@font-face {
+  font-family: '#{$icomoon-font-family}';
+  src: url('./#{$icomoon-font-family}.ttf?391id9') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
+[class^="al-ico-"], [class*=" al-ico-"] {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: '#{$icomoon-font-family}' !important;
+  speak: none;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.al-ico-t-logo-b {
+  &:before {
+    content: $al-ico-t-logo-b;
+  }
+}
+.al-ico-bars-menu {
+  &:before {
+    content: $al-ico-bars-menu;
+  }
+}
+.al-ico-home {
+  &:before {
+    content: $al-ico-home;
+  }
+}
+.al-ico-projects {
+  &:before {
+    content: $al-ico-projects;
+  }
+}
+.al-ico-datasets1 {
+  &:before {
+    content: $al-ico-datasets1;
+  }
+}
+.al-ico-queues {
+  &:before {
+    content: $al-ico-queues;
+  }
+}
+.al-ico-annotator {
+  &:before {
+    content: $al-ico-annotator;
+  }
+}
+.al-ico-account {
+  &:before {
+    content: $al-ico-account;
+  }
+}
+.al-ico-compare {
+  &:before {
+    content: $al-ico-compare;
+  }
+}
+.al-ico-archive {
+  &:before {
+    content: $al-ico-archive;
+  }
+}
+.al-ico-logout {
+  &:before {
+    content: $al-ico-logout;
+  }
+}
+.al-ico-how-to {
+  &:before {
+    content: $al-ico-how-to;
+  }
+}
+.al-ico-compare-c {
+  &:before {
+    content: $al-ico-compare-c;
+  }
+}
+.al-ico-datasets {
+  &:before {
+    content: $al-ico-datasets;
+  }
+}
+.al-ico-published-title {
+  &:before {
+    content: $al-ico-published-title;
+  }
+}
+.al-ico-publish {
+  &:before {
+    content: $al-ico-publish;
+  }
+}
+.al-ico-unpublish {
+  &:before {
+    content: $al-ico-unpublish;
+  }
+}
+.al-ico-published {
+  &:before {
+    content: $al-ico-published;
+  }
+}
+.al-ico-info {
+  &:before {
+    content: $al-ico-info;
+  }
+}
+.al-ico-warn {
+  &:before {
+    content: $al-ico-warn;
+  }
+}
+.al-ico-settings {
+  &:before {
+    content: $al-ico-settings;
+  }
+}
+.al-ico-trash {
+  &:before {
+    content: $al-ico-trash;
+  }
+}
+.al-ico-arrow-from-right {
+  &:before {
+    content: $al-ico-arrow-from-right;
+  }
+}
+.al-ico-arrow-from-left {
+  &:before {
+    content: $al-ico-arrow-from-left;
+  }
+}
+.al-ico-arrow-to-bottom {
+  &:before {
+    content: $al-ico-arrow-to-bottom;
+  }
+}
+.al-ico-arrow-to-top {
+  &:before {
+    content: $al-ico-arrow-to-top;
+  }
+}
+.al-ico-training {
+  &:before {
+    content: $al-ico-training;
+  }
+}
+.al-ico-test {
+  &:before {
+    content: $al-ico-test;
+  }
+}
+.al-ico-testing {
+  &:before {
+    content: $al-ico-testing;
+  }
+}
+.al-ico-type-training {
+  &:before {
+    content: $al-ico-type-training;
+  }
+}
+.al-ico-type-testing {
+  &:before {
+    content: $al-ico-type-testing;
+  }
+}
+.al-ico-type-data-processing {
+  &:before {
+    content: $al-ico-type-data-processing;
+  }
+}
+.al-ico-type-qc {
+  &:before {
+    content: $al-ico-type-qc;
+  }
+}
+.al-ico-type-service {
+  &:before {
+    content: $al-ico-type-service;
+  }
+}
+.al-ico-type-optimizer {
+  &:before {
+    content: $al-ico-type-optimizer;
+  }
+}
+.al-ico-type-monitor {
+  &:before {
+    content: $al-ico-type-monitor;
+  }
+}
+.al-ico-type-inference {
+  &:before {
+    content: $al-ico-type-inference;
+  }
+}
+.al-ico-type-application {
+  &:before {
+    content: $al-ico-type-application;
+  }
+}
+.al-ico-type-controller {
+  &:before {
+    content: $al-ico-type-controller;
+  }
+}
+.al-ico-type-custom {
+  &:before {
+    content: $al-ico-type-custom;
+  }
+}
+.al-ico-how-to1 {
+  &:before {
+    content: $al-ico-how-to1;
+  }
+}
+.al-ico-model {
+  &:before {
+    content: $al-ico-model;
+  }
+}
+.al-ico-temp-edit {
+  &:before {
+    content: $al-ico-temp-edit;
+  }
+}
+.al-ico-dialog-x {
+  &:before {
+    content: $al-ico-dialog-x;
+  }
+}
+.al-ico-temp-image {
+  &:before {
+    content: $al-ico-temp-image;
+  }
+}
+.al-ico-temp-list-alt {
+  &:before {
+    content: $al-ico-temp-list-alt;
+  }
+}
+.al-ico-dog {
+  &:before {
+    content: $al-ico-dog;
+  }
+}
+.al-ico-alert-purple {
+  &:before {
+    content: $al-ico-alert-purple;
+  }
+}
+.al-ico-back {
+  &:before {
+    content: $al-ico-back;
+  }
+}
+.al-ico-cat {
+  &:before {
+    content: $al-ico-cat;
+  }
+}
+.al-ico-clone {
+  &:before {
+    content: $al-ico-clone;
+  }
+}
+.al-ico-completed {
+  &:before {
+    content: $al-ico-completed;
+  }
+}
+.al-ico-data-audit {
+  &:before {
+    content: $al-ico-data-audit;
+  }
+}
+.al-ico-download-frames {
+  &:before {
+    content: $al-ico-download-frames;
+  }
+}
+.al-ico-dropdown-arrow {
+  &:before {
+    content: $al-ico-dropdown-arrow;
+  }
+}
+.al-ico-ellipse-icon {
+  &:before {
+    content: $al-ico-ellipse-icon;
+  }
+}
+.al-ico-filter {
+  &:before {
+    content: $al-ico-filter;
+  }
+}
+.al-ico-fit {
+  &:before {
+    content: $al-ico-fit;
+  }
+}
+.al-ico-id {
+  &:before {
+    content: $al-ico-id;
+  }
+}
+.al-ico-info-max {
+  &:before {
+    content: $al-ico-info-max;
+  }
+}
+.al-ico-info-min {
+  &:before {
+    content: $al-ico-info-min;
+  }
+}
+.al-ico-keypoint {
+  &:before {
+    content: $al-ico-keypoint;
+  }
+}
+.al-ico-list-view {
+  &:before {
+    content: $al-ico-list-view;
+  }
+}
+.al-ico-minus {
+  &:before {
+    content: $al-ico-minus;
+  }
+}
+.al-ico-previous {
+  &:before {
+    content: $al-ico-previous;
+  }
+}
+.al-ico-next {
+  &:before {
+    content: $al-ico-next;
+  }
+}
+.al-ico-plus {
+  &:before {
+    content: $al-ico-plus;
+  }
+}
+.al-ico-polygon {
+  &:before {
+    content: $al-ico-polygon;
+  }
+}
+.al-ico-pytorch-icon {
+  &:before {
+    content: $al-ico-pytorch-icon;
+  }
+}
+.al-ico-question-mark {
+  &:before {
+    content: $al-ico-question-mark;
+  }
+}
+.al-ico-rectangle {
+  &:before {
+    content: $al-ico-rectangle;
+  }
+}
+.al-ico-running {
+  &:before {
+    content: $al-ico-running;
+  }
+}
+.al-ico-tree-view {
+  &:before {
+    content: $al-ico-tree-view;
+  }
+}
+.al-ico-undo {
+  &:before {
+    content: $al-ico-undo;
+  }
+}
+.al-ico-zoom-1-to-1 {
+  &:before {
+    content: $al-ico-zoom-1-to-1;
+  }
+}
+.al-ico-zoom-in {
+  &:before {
+    content: $al-ico-zoom-in;
+  }
+}
+.al-ico-zoom-out {
+  &:before {
+    content: $al-ico-zoom-out;
+  }
+}
+.al-ico-search {
+  &:before {
+    content: $al-ico-search;
+  }
+}
+.al-ico-zoom-to-fit {
+  &:before {
+    content: $al-ico-zoom-to-fit;
+  }
+}
+.al-ico-kibana-code {
+  &:before {
+    content: $al-ico-kibana-code;
+  }
+}
+.al-ico-reset {
+  &:before {
+    content: $al-ico-reset;
+  }
+}
+.al-ico-import {
+  &:before {
+    content: $al-ico-import;
+  }
+}
+.al-ico-export {
+  &:before {
+    content: $al-ico-export;
+  }
+}
+.al-ico-between {
+  &:before {
+    content: $al-ico-between;
+  }
+}
+.al-ico-next-batch {
+  &:before {
+    content: $al-ico-next-batch;
+  }
+}
+.al-ico-prev-batch {
+  &:before {
+    content: $al-ico-prev-batch;
+  }
+}
+.al-ico-back-to-top {
+  &:before {
+    content: $al-ico-back-to-top;
+  }
+}
+.al-ico-redo {
+  &:before {
+    content: $al-ico-redo;
+  }
+}
+.al-ico-download {
+  &:before {
+    content: $al-ico-download;
+  }
+}
+.al-ico-edit {
+  &:before {
+    content: $al-ico-edit;
+  }
+}
+.al-ico-pending {
+  &:before {
+    content: $al-ico-pending;
+  }
+}
+.al-ico-aborted {
+  &:before {
+    content: $al-ico-aborted;
+  }
+}
+.al-ico-success {
+  &:before {
+    content: $al-ico-success;
+  }
+}
+.al-ico-alert-outline {
+  &:before {
+    content: $al-ico-alert-outline;
+  }
+}
+.al-ico-github {
+  &:before {
+    content: $al-ico-github;
+  }
+}
+.al-ico-description {
+  &:before {
+    content: $al-ico-description;
+  }
+}
+.al-ico-line-expand {
+  &:before {
+    content: $al-ico-line-expand;
+  }
+}
+.al-ico-user-logout {
+  &:before {
+    content: $al-ico-user-logout;
+  }
+}
+.al-ico-documentation {
+  &:before {
+    content: $al-ico-documentation;
+  }
+}
+.al-ico-frame-rule {
+  &:before {
+    content: $al-ico-frame-rule;
+  }
+}
+.al-ico-source-rule {
+  &:before {
+    content: $al-ico-source-rule;
+  }
+}
+.al-ico-get-link-dialog {
+  &:before {
+    content: $al-ico-get-link-dialog;
+  }
+}
+.al-ico-iteration {
+  &:before {
+    content: $al-ico-iteration;
+  }
+}
+.al-ico-mapping {
+  &:before {
+    content: $al-ico-mapping;
+  }
+}
+.al-ico-labels {
+  &:before {
+    content: $al-ico-labels;
+  }
+}
+.al-ico-augmentation {
+  &:before {
+    content: $al-ico-augmentation;
+  }
+}
+.al-ico-filter-outlined {
+  &:before {
+    content: $al-ico-filter-outlined;
+  }
+}
+.al-ico-input-data {
+  &:before {
+    content: $al-ico-input-data;
+  }
+}
+.al-ico-help-outlined {
+  &:before {
+    content: $al-ico-help-outlined;
+  }
+}
+.al-ico-email {
+  &:before {
+    content: $al-ico-email;
+  }
+}
+.al-ico-tips {
+  &:before {
+    content: $al-ico-tips;
+  }
+}
+.al-ico-caret-right {
+  &:before {
+    content: $al-ico-caret-right;
+  }
+}
+.al-ico-currently-active {
+  &:before {
+    content: $al-ico-currently-active;
+  }
+}
+.al-ico-access-key {
+  &:before {
+    content: $al-ico-access-key;
+  }
+}
+.al-ico-alert {
+  &:before {
+    content: $al-ico-alert;
+  }
+}
+.al-ico-users {
+  &:before {
+    content: $al-ico-users;
+  }
+}
+.al-ico-status-draft {
+  &:before {
+    content: $al-ico-status-draft;
+  }
+}
+.al-ico-status-pending {
+  &:before {
+    content: $al-ico-status-pending;
+  }
+}
+.al-ico-status-running {
+  &:before {
+    content: $al-ico-status-running;
+  }
+}
+.al-ico-status-completed {
+  &:before {
+    content: $al-ico-status-completed;
+  }
+}
+.al-ico-status-published {
+  &:before {
+    content: $al-ico-status-published;
+  }
+}
+.al-ico-status-failed {
+  &:before {
+    content: $al-ico-status-failed;
+  }
+}
+.al-ico-status-aborted {
+  &:before {
+    content: $al-ico-status-aborted;
+  }
+}
+.al-ico-status-aborted-sec {
+  &:before {
+    content: $al-ico-status-aborted-sec;
+  }
+}

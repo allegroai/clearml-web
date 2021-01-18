@@ -1,11 +1,19 @@
-<mat-expansion-panel *ngFor="let item of list | keyvalue | sort:'key'" [expanded]="expanded[item.key]">
-  <mat-expansion-panel-header expandedHeight="40px" collapsedHeight="40px">
-    <div class="d-flex align-items-center justify-content-between w-100"
-         [ngClass]="{'unchecked' : isHideAllMode(item)}">
+<mat-expansion-panel *ngFor="let item of showList | keyvalue | sort:'key'; trackBy: trackByFn"
+                     [expanded]="expanded[item.key]"
+                     [hideToggle]="!item.value.hasChildren"
+                     [class.no-children]="!item.value.hasChildren">
+  <mat-expansion-panel-header
+    #panelH
+    expandedHeight="40px"
+    collapsedHeight="40px"
+    [class.has-children]="item.value.hasChildren"
+    (click)="selectedItem(item, panelH)"
+  >
+    <div class="header-container" [ngClass]="{'unchecked' : isHideAllMode(item.value) || item.value.visible}">
       <div class="ellipsis item-key" [smTooltip]="item.key" [showDelay]="500">{{item.key}}</div>
       <div>
-        <i (click)="onGroupCheck.emit( {key: item.key, hide: !isHideAllMode(item)}); $event.stopPropagation()"
-           [class]="checkIcon + ' fa icon'"
+        <i (click)="groupCheck(item); $event.stopPropagation()"
+           [class]="(isHideAllMode(item.value) || item.value.visible? checkIcon[1] : checkIcon[0]) + ' fa icon'"
            ></i>
       </div>
     </div>
@@ -13,13 +21,13 @@
   </mat-expansion-panel-header>
   <ul class="list">
     <li
-      *ngFor="let listItem of item.value | keyvalue; let odd=odd; let even=even;"
+      *ngFor="let listItem of item.value.data | keyvalue; trackBy: trackByFn"
       class="list-item"
       (click)="onItemSelect.emit(item.key + listItem.key)"
-      [ngClass]="{odd: odd, even: even, unchecked: checkedList?.includes(item.key + listItem.key)}"
+      [ngClass]="{unchecked: listItem.value.visible}"
     >
       <span class="pointer ellipsis w-100 pl-2 list-item-key" [smTooltip]="listItem.key" [showDelay]="500">{{listItem.key}}</span>
-      <i (click)="onItemCheck.emit( item.key+ listItem.key); $event.stopPropagation()" [class]="checkIcon + ' fa icon'"></i>
+      <i (click)="onItemCheck.emit( {pathString: item.key+ listItem.key, parent: item.key}); $event.stopPropagation()" [class]="(listItem.value.visible? checkIcon[1] : checkIcon[0]) + ' fa icon'"></i>
     </li>
   </ul>
 </mat-expansion-panel>

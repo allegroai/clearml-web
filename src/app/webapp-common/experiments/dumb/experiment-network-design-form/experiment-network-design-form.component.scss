@@ -1,6 +1,12 @@
 @import "../../../shared/ui-components/styles/variables";
 
 :host {
+  .copy-textarea{
+    position: absolute;
+    right: 12px;
+    top: 7px;
+    z-index: 1;
+  }
   .design-container {
     background-color: $blue-600;
     padding: 12px 0 12px 12px;

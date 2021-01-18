@@ -22,7 +22,7 @@ $generic-font-size: 11px;
   /* Handle */
   ::-webkit-scrollbar-thumb {
     border-radius: 4px;
-    background: #565b6b;
+    background: $dark-grey-blue-nine;
   }
 
   .code-footer {

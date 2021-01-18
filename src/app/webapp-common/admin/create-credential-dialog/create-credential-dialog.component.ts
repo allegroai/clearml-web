@@ -8,7 +8,7 @@ import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 })
   export class CreateCredentialDialogComponent implements OnInit {
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: {credential: any}) {}
+  constructor(@Inject(MAT_DIALOG_DATA) public data: {credential: any; workspace?: string}) {}
 
   ngOnInit() {
   }

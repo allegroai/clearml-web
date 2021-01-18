@@ -1,0 +1,19 @@
+<div *ngIf="!showSpinner && !editable && lines?.length" class="diff-container h-100">
+  <div class="floating-buttons">
+    <ng-content select="[extra-buttons]"></ng-content>
+    <sm-copy-clipboard *ngIf="formData" [clipboardText]="formData" label="" class="copy-textarea" tooltipText='Copy to clipboard' theme="text-area"></sm-copy-clipboard>
+    <sm-search
+      class="dark-theme text-area"
+      [value]="search"
+      [expandOnHover]="true"
+      (valueChanged)="onSearchValueChanged($event)"
+    ></sm-search>
+  </div>
+  <cdk-virtual-scroll-viewport #scroll itemSize="19" minBufferPx = 400, maxBufferPx = 600
+                               class="viewport"
+                               [class.isReadonly]="!editable">
+    <div *cdkVirtualFor="let line of lines" class="line"><span *ngFor="let part of line.split(search); let last=last">{{part}}<span class="found" *ngIf="!last">{{search}}</span></span></div>
+  </cdk-virtual-scroll-viewport>
+</div>
+<span *ngIf="!showSpinner && !lines?.length && !editable">No changes logged</span>
+<mat-spinner [diameter]="50" *ngIf="showSpinner"></mat-spinner>

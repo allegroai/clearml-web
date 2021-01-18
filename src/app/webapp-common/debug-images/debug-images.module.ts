@@ -12,21 +12,23 @@ import { DebugImagesEffects } from './debug-images-effects';
 import { debugImagesReducer } from './debug-images-reducer';
 import { DebugImagesViewComponent } from './debug-images-view/debug-images-view.component';
 import { DebugImagesComponent } from './debug-images.component';
+import {MatSliderModule} from "@angular/material/slider";
 
 const declerations = [DebugImagesComponent, DebugImagesViewComponent, ImageDisplayerComponent, DebugImageSnippetComponent];
 
 @NgModule({
   declarations   : declerations,
   exports        : declerations,
-  imports        : [
-    UiComponentsModule,
-    SMSharedModule,
-    CommonModule,
-    ExperimentCompareSharedModule,
-    ScrollingModule,
-    StoreModule.forFeature('debugImages', debugImagesReducer),
-    EffectsModule.forFeature([DebugImagesEffects])
-  ]
+    imports: [
+        UiComponentsModule,
+        SMSharedModule,
+        CommonModule,
+        ExperimentCompareSharedModule,
+        ScrollingModule,
+        StoreModule.forFeature('debugImages', debugImagesReducer),
+        EffectsModule.forFeature([DebugImagesEffects]),
+        MatSliderModule
+    ]
 })
 export class DebugImagesModule {
 }

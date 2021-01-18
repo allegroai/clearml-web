@@ -4,13 +4,72 @@
   .modal-container {
     background-color: $white;
     height: 100%;
+    mat-slider.mat-slider-horizontal{
+      min-width: 280px;
+    }
+
+   /deep/ .mat-slider:not(.mat-slider-disabled).cdk-mouse-focused .mat-slider-thumb,
+   /deep/ .mat-slider:not(.mat-slider-disabled).cdk-touch-focused .mat-slider-thumb,
+   /deep/ .mat-slider:not(.mat-slider-disabled).cdk-program-focused .mat-slider-thumb{
+     transform: scale(0.7);
+     background-color: $light-grey-blue !important;
+   }
+    /deep/ .mat-slider-thumb{
+      cursor: grabbing;
+      background-color: white !important;
+      border: 2px solid $light-grey-blue;
+    }
+    /deep/ .mat-slider-horizontal.cdk-focused .mat-slider-thumb-label{
+      transform: none;
+    }
+
+    /deep/ .mat-slider-thumb-label {
+      border-radius: 4px!important;
+      background: #4d66ff; /* our tooltip bg. color */
+      width: auto;
+      height: 22px;
+      transition: none;
+      padding: 0 12px;
+    }
+    /deep/ .mat-slider-horizontal .mat-slider-thumb-label {
+      right: -28px;
+      top: auto;
+      bottom: -36px;
+      transform: scale(0.01);
+      outline: none;
+    }
+    /deep/ .mat-slider-horizontal .mat-slider-thumb-label-text {
+      transform: none !important;
+    }
+
 
     .viewer-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
       width: 100%;
       height: 58px;
       background-color: white;
       padding: 0 24px;
       border-bottom: solid 1px #f1f1f1;
+
+      .third {
+        width: 33.3%;
+      }
+
+      .iteration {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: $blue-400;
+        font-size: 18px;
+        line-height: 1.5;
+
+        .number {
+          color: $blue-500;
+        }
+
+      }
 
       .image-title {
         font-size: 18px;
@@ -51,7 +110,7 @@
         }
 
         label {
-          color: #8693be;
+          color: $blue-grey;
           padding-right: 4px;
           margin-bottom: 0;
 
@@ -129,12 +188,6 @@
 
         &.zoom {
           height: 120px;
-
-          // todo: Amir to fix
-          .al-ico-plus {
-            font-size: 15px;
-            padding-top: 8px;
-          }
         }
 
         &:hover {

@@ -3,17 +3,35 @@
 :host {
 
   display: block;
-  height: calc(100% - 66px);
+  padding: 0 10px 0 24px;
+  margin: 0 12px 0 0;
   overflow: scroll;
+
   /deep/ .mat-expansion-panel-header {
-    padding: 0 12px;
+    padding: 0 1px 0 0;
+
+    &.has-children {
+      .mat-content {
+        padding-right: 15px;
+      }
+    }
+
+    .mat-content {
+      height: 100%;
+
+      .header-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+      }
+    }
 
     .mat-expansion-indicator {
       height: 25px;
     }
 
     &.mat-expanded, mat-expanded:focus {
-      background: #f4f7ff !important;
 
       .mat-expansion-indicator {
         height: 22px;
@@ -23,8 +41,14 @@
 
   }
 
+  /deep/ mat-expansion-panel.no-children {
+    .mat-expansion-panel-body {
+      display: none;
+    }
+  }
+
   /deep/ .mat-expansion-panel-body {
-    padding: 0 0 0 17px;
+    padding: 0;
 
     .list {
       padding-left: 0;
@@ -34,14 +58,12 @@
           display: flex;
           justify-content: space-between;
           align-items: center;
+          border-radius: 4px;
           cursor: pointer;
-          padding: 0 30px 0 24px;
-          line-height: 40px;
+          padding: 0 24px 0 16px;
+          line-height: 32px;
           list-style: none;
 
-          &.even {
-            background-color: #f9fafb;
-          }
 
           &:hover {
             background-color: $blue-50;
@@ -57,21 +79,27 @@
 
   /deep/ .mat-expansion-panel-header-description {
     flex-grow: 0;
-    color: #5a658e;
+    color: $blue-400;
   }
 
-  /deep/ .mat-expansion-panel {
+  .mat-expansion-panel {
     box-shadow: none;
     //border-bottom: 1px solid rgba(2, 2, 2, 0.07);
-    color: #5a658e;
+    color: $blue-400;
+
+    &.mat-expanded {
+      .item-key {
+        color: $purple;
+      }
+    }
   }
 
   /deep/ .mat-content {
-    padding-right: 10px;
+    padding-right: 2px;
 
     .mat-expansion-panel-header-title {
       margin: unset;
-      color: #5a658e;
+      color: $blue-400;
     }
 
   }
@@ -83,6 +111,7 @@
 }
 
 i.icon {
+  display: block;
   font-size: 15px;
   width: 15px;
   height: 15px;

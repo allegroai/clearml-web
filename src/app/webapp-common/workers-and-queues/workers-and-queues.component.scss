@@ -18,7 +18,7 @@
       transition: background-color 0.5s;
 
       /deep/ button {
-        border-color: #2c3246;
+        border-color: $blue-600;
         box-shadow: none;
       }
     }

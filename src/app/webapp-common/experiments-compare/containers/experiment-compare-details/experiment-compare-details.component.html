@@ -3,6 +3,7 @@
   [baseExperiment]="baseExperiment"
   [ngClass]="calculatingTree ? 'pending' : ''"
   (experimentListChanged)="experimentListChanged($event)"
+  (toggled)="afterResize()"
 >
   <div *compareCardHeader="let experiment; let i = index">
     <sm-experiment-compare-general-data
@@ -11,7 +12,7 @@
       (copyIdClicked)="copyIdToClipboard()">
     </sm-experiment-compare-general-data>
   </div>
-  <div class="tree-card-body" *compareCardBody="let experiment; let i = index">
+  <div #treeCardBody class="tree-card-body" *compareCardBody="let experiment; let i = index">
     <div class="section h-100" *ngIf="experimentsDataControl[experiment.id]">
       <!--      TODO: move is-not-origin class outside nodes tree-->
       <ng-template let-dataSource="dataSource"
@@ -29,7 +30,11 @@
                      [class.selected-diff]="checkIfSelectedPath(node.data)"
                      [class.identical-row]="!allPaths[node.data.path]">
                   <i class="fas" [style.margin-left.px]="2 + node.level * 20" [ngClass]="treeControl.isExpanded(node) ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
-                  <span class="title-key" [class.ellipsis]="showEllipsis">{{(RENAME_MAP[node.data.key] || node.data.key) | hideHashTitle}}</span>
+                  <span
+                    class="title-key"
+                    [class.ellipsis]="showEllipsis"
+                    [style.width.px]="showEllipsis ? nativeWidth - 45 - node.level * 20 : null"
+                  >{{(RENAME_MAP[node.data.key] || node.data.key) | hideHashTitle}}</span>
                   <i *ngIf="node.metaData.tooltip" class="al-icon sm al-ico-description node-icon" customClass="hyper-parameters-tooltip" [smTooltip]="node.metaData.tooltip"></i>
                 </div>
               </div>
@@ -48,7 +53,7 @@
                     <pre *ngIf="(node.data.value !== undefined) || (node.data.existOnOrigin && node.data.existOnCompared)"
                          [class.no-ellipsis]="((node.data.key | hideHash) + node.data.value).length < 51"
                          [class.with-ellipsis]="showEllipsis"
-                         [style.width.px]="showEllipsis? 410 - node.level * 20 : null"
+                         [style.width.px]="showEllipsis ? nativeWidth - 45 - node.level * 20 : null"
                     >{{node.data.key | hideHash}}{{node.data.value}}<i class="al-icon sm al-ico-line-expand extend-toggle" [class.fa-rotate-180]="!showEllipsis" (click)="toggleEllipsis(); $event.stopPropagation()"></i>
                     </pre>
                   </div>

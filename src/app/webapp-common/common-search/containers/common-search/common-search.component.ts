@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router, NavigationEnd} from '@angular/router';
 import {Store} from '@ngrx/store';
 import {SetIsSearching, SetSearchQuery} from '../../common-search.actions';
@@ -21,14 +21,7 @@ export class CommonSearchComponent implements OnInit {
 
   @ViewChild('search', { static: true }) searchElem;
 
-  constructor(private store: Store<any>,
-              private router: Router,
-              private route: ActivatedRoute) {
-
-    this.searchQuery$       = this.store.select(selectSearchQuery);
-    this.isSearching$       = this.store.select(selectIsSearching);
-    this.searchPlaceholder$ = this.store.select(selectPlaceholder);
-  }
+  constructor(private store: Store<any>, private router: Router, private route: ActivatedRoute) {}
 
   onSearchValueChanged(query) {
     this.store.dispatch(new SetSearchQuery(query));
@@ -46,6 +39,9 @@ export class CommonSearchComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.searchQuery$       = this.store.select(selectSearchQuery);
+    this.isSearching$       = this.store.select(selectIsSearching);
+    this.searchPlaceholder$ = this.store.select(selectPlaceholder);
     this.router.events.pipe(filter(event => event instanceof NavigationEnd))
       .subscribe(() => {
         this.setSearchActive();

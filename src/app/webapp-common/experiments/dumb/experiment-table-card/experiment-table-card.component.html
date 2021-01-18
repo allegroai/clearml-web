@@ -7,6 +7,7 @@
       <div class="ellipsis name">
         {{experiment.name}}
       </div>
+      <i *ngIf="experiment?.system_tags.includes('shared')" class="fas fa-link p-1 ml-1"></i>
       <sm-experiment-status-icon-label [status]="experiment?.status"></sm-experiment-status-icon-label>
     </div>
     <div class="row content-row justify-content-between">

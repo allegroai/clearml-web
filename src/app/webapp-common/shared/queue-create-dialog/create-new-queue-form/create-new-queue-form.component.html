@@ -1,7 +1,7 @@
 <ng-form class="create-queue-form" #queueForm='ngForm'>
   <div class="row position-relative">
 
-    <mat-form-field appearance="outline" class="w-100">
+    <mat-form-field appearance="outline" class="w-100 pt-3">
       <mat-error *ngIf="name?.errors?.required">Required</mat-error>
       <mat-error *ngIf="name?.errors?.minlength">Name should contain at least 3 characters</mat-error>
       <mat-error *ngIf="name?.errors?.uniqueName">Name should be unique</mat-error>

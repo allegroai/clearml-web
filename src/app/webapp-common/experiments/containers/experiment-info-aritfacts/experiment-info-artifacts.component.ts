@@ -8,7 +8,7 @@ import {selectExperimentInfoData, selectIsExperimentEditable} from '../../../../
 import {IExperimentInfo} from '../../../../features/experiments/shared/experiment-info.model';
 import {selectRouterConfig, selectRouterParams} from '../../../core/reducers/router-reducer';
 import {map} from 'rxjs/operators';
-import {get} from 'lodash/fp';
+import {get, getOr} from 'lodash/fp';
 import {ActivatedRoute, Router} from '@angular/router';
 import {IExperimentModelInfo} from '../../shared/common-experiment-model.model';
 
@@ -30,9 +30,11 @@ export class ExperimentInfoArtifactsComponent implements OnDestroy {
   private experimentKey$: Observable<string>;
   public routerConfig$: Observable<string[]>;
   public editable$: Observable<boolean>;
+  public minimized: boolean;
 
   constructor(private store: Store<IExperimentInfoState>, public router: Router, private route: ActivatedRoute
   ) {
+    this.minimized = getOr(false, 'data.minimized', this.route.snapshot.routeConfig);
     this.backdropActive$ = this.store.select(selectBackdropActive);
     this.editable$       = this.store.select(selectIsExperimentEditable);
     this.modelInfo$ = this.store.select(selectExperimentModelInfoData);
@@ -59,25 +61,23 @@ export class ExperimentInfoArtifactsComponent implements OnDestroy {
     this.artifactSubscription = combineLatest([this.onOutputModel$, this.artifactKey$, this.modelInfo$, this.experimentKey$, this.ExperimentInfo$])
       .pipe()
       .subscribe(([onOutputModel, artifactKey, modelInfo, experimentKey, experimentInfo]) => {
-          if (experimentInfo && experimentKey && experimentInfo.id === experimentKey) {
-            if (artifactKey) {
-              this.selectedArtifact = modelInfo.artifacts.find(artifact => artifact.key === artifactKey);
-              if (!this.selectedArtifact) {
+        if (experimentInfo && experimentKey && experimentInfo.id === experimentKey) {
+          if (artifactKey) {
+            this.selectedArtifact = modelInfo.artifacts.find(artifact => artifact.key === artifactKey);
+            if (!this.selectedArtifact) {
+              this.router.navigate(['../artifacts/input-model'], {relativeTo: this.route});
+            }
+          }
+          if (onOutputModel) {
+            if (modelInfo && modelInfo.output) {
+              const isOutputModel = modelInfo.output.id;
+              if (!isOutputModel) {
                 this.router.navigate(['../artifacts/input-model'], {relativeTo: this.route});
               }
             }
-            if (onOutputModel) {
-              if (modelInfo && modelInfo.output) {
-                const isOutputModel = modelInfo.output.id;
-                if (!isOutputModel) {
-                  this.router.navigate(['../artifacts/input-model'], {relativeTo: this.route});
-                }
-              }
-            }
-
           }
         }
-      );
+      });
   }
 
   ngOnDestroy():

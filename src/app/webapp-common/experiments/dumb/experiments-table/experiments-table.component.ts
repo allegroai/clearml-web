@@ -5,10 +5,8 @@ import {
   EventEmitter,
   HostListener,
   Input,
-  AfterViewInit,
   Output,
   ViewChild,
-  ViewChildren, QueryList
 } from '@angular/core';
 import {ICONS} from '../../../../app.constants';
 import {ColHeaderTypeEnum, ISmCol, TableSortOrderEnum} from '../../../shared/ui-components/data/table/table.consts';
@@ -26,15 +24,16 @@ import {User} from '../../../../business-logic/model/users/user';
 import {sortByArr} from '../../../shared/pipes/show-selected-first.pipe';
 import {Observable} from 'rxjs';
 import {Store} from '@ngrx/store';
-import {selectProjectTags} from '../../../core/reducers/projects.reducer';
+import {selectCompanyTags, selectProjectTags, selectTagsFilterByProject} from '../../../core/reducers/projects.reducer';
 import {addTag} from '../../actions/common-experiments-menu.actions';
 import {ExperimentMenuComponent} from '../../../../features/experiments/shared/components/experiment-menu/experiment-menu.component';
 import {TIME_FORMAT_STRING} from '../../../constants';
 import {NoUnderscorePipe} from '../../../shared/pipes/no-underscore.pipe';
 import {TitleCasePipe} from '@angular/common';
-import {TableComponent} from '../../../shared/ui-components/data/table/table.component';
 import {INITIAL_EXPERIMENT_TABLE_COLS} from '../../../../features/experiments/experiments.consts';
-import {filter, take} from 'rxjs/operators';
+import {ProjectsGetTaskParentsResponseParents} from '../../../../business-logic/model/projects/projectsGetTaskParentsResponseParents';
+import {Router} from '@angular/router';
+import {MatMenuTrigger} from '@angular/material/menu';
 
 @Component({
   selector: 'sm-experiments-table',
@@ -50,6 +49,7 @@ export class ExperimentsTableComponent extends BaseTableView {
     type: [],
     users: [],
     tags: [],
+    [EXPERIMENTS_TABLE_COL_FIELDS.PARENT]: []
   };
   readonly ICONS = ICONS;
   readonly getSystemTags = getSystemTags;
@@ -57,9 +57,10 @@ export class ExperimentsTableComponent extends BaseTableView {
   public sortOrder = 1;
   public statusFiltersValue: any;
   public typeFiltersValue: any;
-  public allFiltersValue: { type: any; status: any; users: any; tags: any };
+  public allFiltersValue: { type: any; status: any; users: any; tags: any; 'parent.name': any };
   public tagsFiltersValue: any;
   public systemTagsFiltersValue: any;
+  public parentFiltersValue: any;
   public isDevelopment = isDevelopment;
   public menuOpen: boolean = false;
   private _selectedExperiments: ITableExperiment[] = [];
@@ -69,6 +70,7 @@ export class ExperimentsTableComponent extends BaseTableView {
   @Input() tableCols: Array<ISmCol>;
   private _experiments: Array<ITableExperiment> = [];
   private _selectedExperiment: ITableExperiment;
+  private lastOpenPopover: MatMenuTrigger;
 
   @Input() set experiments(value: Array<ITableExperiment>) {
     this._experiments = value;
@@ -83,8 +85,11 @@ export class ExperimentsTableComponent extends BaseTableView {
 
   public userFiltersValue: any;
   public userSearchValue: string;
+  public parentSearchValue: string;
   public contextExperiment: ITableExperiment;
-  public tags$: Observable<string[]>;
+  public tagsFilterByProject$: Observable<boolean>;
+  public projectTags$: Observable<string[]>;
+  public companyTags$: Observable<string[]>;
 
   @Input() set users(users: User[]) {
     this.EXPERIMENTS_ALL_FILTER_OPTIONS.users = users.map(user => ({
@@ -92,6 +97,18 @@ export class ExperimentsTableComponent extends BaseTableView {
       value: user.id
     }));
     this.sortOptionalUsersList();
+  }
+
+  @Input() activeParentsFilter: ProjectsGetTaskParentsResponseParents[];
+
+  @Input() set parents(parents: ProjectsGetTaskParentsResponseParents[]) {
+    const parentsAndActiveFilter = Array.from(new Set(parents.concat(this.activeParentsFilter || [])));
+    this.EXPERIMENTS_ALL_FILTER_OPTIONS[EXPERIMENTS_TABLE_COL_FIELDS.PARENT] = parentsAndActiveFilter.map(parent => ({
+      label: parent.name ? parent.name : 'Unknown Experiment',
+      value: parent.id,
+      tooltip: `${parent.project.name} / ${parent.name}`
+    }));
+    this.sortOptionalParentsList();
   }
 
   @Input() set selectedExperiments(experiments: ITableExperiment[]) {
@@ -104,14 +121,16 @@ export class ExperimentsTableComponent extends BaseTableView {
   }
 
   @Input() set selectedExperiment(experiment: ITableExperiment) {
-    if (this._selectedExperiment !== experiment) {
-      window.setTimeout(() => this.table?.focusSelected());
+    if (this._selectedExperiment?.id !== experiment?.id) {
+      window.setTimeout(() => !this.contextMenuActive && this.table?.focusSelected());
     }
     this._selectedExperiment = experiment;
   }
+
   get selectedExperiment() {
     return this._selectedExperiment;
   }
+
   @Input() noMoreExperiments: boolean;
 
   @Input() set tags(tags) {
@@ -146,16 +165,14 @@ export class ExperimentsTableComponent extends BaseTableView {
     this.userFiltersValue = get([EXPERIMENTS_TABLE_COL_FIELDS.USER, 'value'], filters) || [];
     this.tagsFiltersValue = get([EXPERIMENTS_TABLE_COL_FIELDS.TAGS, 'value'], filters) || [];
     this.systemTagsFiltersValue = (get(['system_tags', 'value'], filters) || []);
+    this.parentFiltersValue = get([EXPERIMENTS_TABLE_COL_FIELDS.PARENT, 'value'], filters) || [];
     this.allFiltersValue = {
       status: this.statusFiltersValue,
       type: this.typeFiltersValue,
       users: this.userFiltersValue,
-      tags: this.tagsFiltersValue
+      tags: this.tagsFiltersValue,
+      'parent.name': this.parentFiltersValue
     };
-  }
-
-  @Input() set split(size: number) {
-    this.table?.resize();
   }
 
   @Output() experimentSelectionChanged = new EventEmitter<ITableExperiment>();
@@ -175,9 +192,17 @@ export class ExperimentsTableComponent extends BaseTableView {
     }
   }
 
-  constructor(private changeDetector: ChangeDetectorRef, private store: Store<any>, private noUnderscorePipe: NoUnderscorePipe, private titleCasePipe: TitleCasePipe) {
+  constructor(
+    private changeDetector: ChangeDetectorRef,
+    private store: Store<any>,
+    private noUnderscorePipe: NoUnderscorePipe,
+    private titleCasePipe: TitleCasePipe,
+    private router: Router
+  ) {
     super();
-    this.tags$ = this.store.select(selectProjectTags);
+    this.tagsFilterByProject$ = this.store.select(selectTagsFilterByProject);
+    this.projectTags$ = this.store.select(selectProjectTags);
+    this.companyTags$ = this.store.select(selectCompanyTags);
     this.entitiesKey = 'experiments';
     this.selectedEntitiesKey = 'selectedExperiments';
   }
@@ -194,6 +219,10 @@ export class ExperimentsTableComponent extends BaseTableView {
 
   sortOptionalUsersList() {
     this.EXPERIMENTS_ALL_FILTER_OPTIONS.users.sort((a, b) => sortByArr(a.value, b.value, this.userFiltersValue));
+  }
+
+  sortOptionalParentsList() {
+    this.EXPERIMENTS_ALL_FILTER_OPTIONS[EXPERIMENTS_TABLE_COL_FIELDS.PARENT].sort((a, b) => sortByArr(a.value, b.value, this.parentFiltersValue));
   }
 
   sortOptionalTagsList() {
@@ -228,18 +257,10 @@ export class ExperimentsTableComponent extends BaseTableView {
     this.scrollTableToTop();
   }
 
-  get sortableCols() {
-    return this.tableCols.filter(col => col.sortable);
-  }
-
-  getColName(colId: ISmCol['id']) {
-    const col = this.tableCols.find(col => colId === col.id);
-    return col ? col.header : 'Sort by';
-  }
-
-  rowSelectedChanged(checked, experiment) {
-    if (checked.value) {
-      this.experimentsSelectionChanged.emit([...this.selectedExperiments, experiment]);
+  rowSelectedChanged(change: { field: string; value: boolean; event: Event }, experiment: ITableExperiment) {
+    if (change.value) {
+      const addList = this.getSelectionRange<ITableExperiment>(change, experiment);
+      this.experimentsSelectionChanged.emit([...this.selectedExperiments, ...addList]);
     } else {
       this.experimentsSelectionChanged.emit(this.selectedExperiments.filter((selectedExperiment) => selectedExperiment.id !== experiment.id));
     }
@@ -269,6 +290,9 @@ export class ExperimentsTableComponent extends BaseTableView {
     this.userSearchValue = searchTerm;
   }
 
+  parentSearchValueChanged(searchTerm) {
+    this.parentSearchValue = searchTerm;
+  }
 
   searchValueChanged($event: any) {
     switch ($event.key) {
@@ -286,6 +310,12 @@ export class ExperimentsTableComponent extends BaseTableView {
     this.sortOptionalUsersList();
   }
 
+  filterParentMenuClosed() {
+    // Not working anyway
+    // this.parentSearchValue = undefined;
+    // this.sortOptionalParentsList();
+  }
+
   addTag(tag: string) {
     this.store.dispatch(addTag({
       tag,
@@ -296,6 +326,7 @@ export class ExperimentsTableComponent extends BaseTableView {
   onContextMenu(data) {
     this.contextExperiment = this._experiments.find(experiment => experiment.id === data.rowData.id);
     if (!this.selectedExperiments.map(exp => exp.id).includes(this.contextExperiment.id)) {
+      this.prevSelected = this.contextExperiment;
       this.emitSelection([this.contextExperiment]);
     }
     const event = data.e as MouseEvent;
@@ -304,4 +335,16 @@ export class ExperimentsTableComponent extends BaseTableView {
   }
 
 
+  // navigateToParent(event: MouseEvent, experiment: ITableExperiment) {
+  //   return this.router.navigate([`projects/${experiment.parent.project?.id || '*'}/experiments/${experiment.parent.id}`],
+  //     {queryParams: {filter: []}});
+  //   event.stopPropagation();
+  // }
+
+  closeLast(currTrigger: MatMenuTrigger) {
+    if (this.lastOpenPopover !== currTrigger) {
+      this.lastOpenPopover?.closeMenu();
+      this.lastOpenPopover = currTrigger;
+    }
+  }
 }

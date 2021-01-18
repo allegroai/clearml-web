@@ -1,0 +1,84 @@
+@import "../../../shared/ui-components/styles/variables";
+
+:host {
+  display: block;
+  height: 100%;
+
+  mat-sidenav-container {
+    height: 100%;
+    position: static;
+  }
+
+  mat-sidenav-content  {
+    position: static;
+  }
+
+  mat-nav-list {
+    min-width: 300px;
+    padding-top: 0;
+  }
+
+  .side-link {
+    text-decoration: none;
+    color: $blue-400;
+    font-size: 13px;
+    font-family: Heebo;
+    font-weight: 500;
+
+    &.selected {
+      color: $white;
+      background-color: $purple;
+    }
+  }
+
+  .sidenav-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background-color: white;
+
+
+    &.maximized {
+      overflow: auto;
+
+      sm-scroll-textarea {
+        flex: 1;
+      }
+
+      sm-editable-section.limit-width {
+          max-width: 1200px;
+      }
+    }
+
+    sm-editable-section {
+      &.grow {
+        flex: 1;
+      }
+
+      &:hover {
+        .copy-textarea {
+          visibility: visible;
+        }
+      }
+    }
+  }
+
+  /deep/ sm-experiment-requirements-code textarea, /deep/ sm-scroll-textarea textarea {
+    padding: 5px 15px;
+  }
+
+  .btn-dark-fill {
+    background-color: $blue-600;
+    color: #a7b2d8;
+    margin: 0 6px !important;
+  }
+
+  .copy-textarea {
+    position: absolute;
+    right: 32px;
+    top: 72px;
+    z-index: 2;
+    visibility: hidden;
+  }
+
+}

@@ -8,10 +8,10 @@ import {MESSAGES_SEVERITY} from '../../../../app.constants';
 import {IExperimentInfoState} from '../../reducers/experiment-info.reducer';
 import {selectExperimentInfoData, selectIsExperimentEditable, selectSelectedExperiment} from '../../reducers';
 import {selectBackdropActive} from '../../../../webapp-common/core/reducers/view-reducer';
-import {isExample} from '../../../../webapp-common/shared/utils/shared-utils';
+import {isReadOnly} from '../../../../webapp-common/shared/utils/shared-utils';
 import {selectRouterConfig, selectRouterParams, selectRouterQueryParams} from '../../../../webapp-common/core/reducers/router-reducer';
 import * as commonInfoActions from '../../../../webapp-common/experiments/actions/common-experiments-info.actions';
-import * as infoActions from '../../actions/experiments-info.actions';
+import {ExperimentDetailsUpdated} from '../../../../webapp-common/experiments/actions/common-experiments-info.actions';
 import {AddMessage} from '../../../../webapp-common/core/actions/layout.actions';
 import {IExperimentInfo, ISelectedExperiment} from '../../shared/experiment-info.model';
 import {selectSelectedTableExperiment} from '../../../../webapp-common/experiments/reducers';
@@ -39,6 +39,7 @@ export class ExperimentInfoComponent implements OnInit, OnDestroy {
   public routerConfig: string[];
   private routerConfigSubscription: Subscription;
   public tableSelectedExperiment$: Observable<ITableExperiment>;
+  private toMaximize = false;
 
   constructor(
     private router: Router,
@@ -49,15 +50,14 @@ export class ExperimentInfoComponent implements OnInit, OnDestroy {
     this.infoData$ = this.store.select(selectExperimentInfoData);
     this.backdropActive$ = this.store.select(selectBackdropActive);
     this.queryParams$ = this.store.select(selectRouterQueryParams);
-    this.tableSelectedExperiment$ = this.store.select(selectSelectedTableExperiment)
-
+    this.tableSelectedExperiment$ = this.store.select(selectSelectedTableExperiment);
   }
 
   ngOnInit() {
     this.selectedExperimentSubscription = this.store.select(selectSelectedExperiment)
       .subscribe(experiment => {
         this.selectedExperiment = experiment;
-        this.isExample = isExample(experiment);
+        this.isExample = isReadOnly(experiment);
       });
     this.routerConfigSubscription = this.store.select(selectRouterConfig).subscribe(routerConfig => {
       this.routerConfig = routerConfig;
@@ -89,13 +89,15 @@ export class ExperimentInfoComponent implements OnInit, OnDestroy {
     this.paramsSubscription.unsubscribe();
     this.selectedExperimentSubscription.unsubscribe();
     this.routerConfigSubscription.unsubscribe();
-    // this.store.dispatch(new commonInfoActions.SetExperiment(null));
-    this.store.dispatch(new commonInfoActions.ResetExperimentInfo());
+    if (!this.toMaximize) {
+      this.store.dispatch(new commonInfoActions.SetExperiment(null));
+      this.store.dispatch(new commonInfoActions.ResetExperimentInfo());
+    }
   }
 
   updateExperimentName(name) {
     if (name.trim().length > 2) {
-      this.store.dispatch(new infoActions.ExperimentDetailsUpdated({id: this.selectedExperiment.id, changes: {name: name}}));
+      this.store.dispatch(new ExperimentDetailsUpdated({id: this.selectedExperiment.id, changes: {name: name}}));
     } else {
       this.store.dispatch(new AddMessage(MESSAGES_SEVERITY.ERROR, 'Name must be more than three letters long'));
     }
@@ -114,7 +116,14 @@ export class ExperimentInfoComponent implements OnInit, OnDestroy {
   }
 
   maximize() {
-    const resultsPath = this.route.firstChild.firstChild.routeConfig.path;
-    this.router.navigateByUrl(`projects/${this.projectId}/experiments/${this.experimentId}/output/${resultsPath}`);
+    if (window.location.pathname.includes('info-output')) {
+      const resultsPath = this.route.firstChild?.firstChild?.routeConfig?.path || this.route.firstChild.routeConfig.path;
+      this.router.navigateByUrl(`projects/${this.projectId}/experiments/${this.experimentId}/output/${resultsPath}`);
+    } else {
+      const parts = window.location.pathname.split('/');
+      parts.splice(5, 0, 'output');
+      this.router.navigateByUrl(parts.join('/'));
+    }
+    this.toMaximize = true;
   }
 }

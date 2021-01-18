@@ -2,6 +2,13 @@
   <sm-labeled-row label="{{kpi.label}}:">
     <div *ngIf="!kpi.href">
       {{kpi.value}}
+      <span *ngIf="kpi.downloadable">
+        <sm-copy-clipboard *ngIf="isLocalFile" [clipboardText]="kpi.value" [hideBackground]="true" label=""></sm-copy-clipboard>
+        <i *ngIf="model?.uri && !isLocalFile"
+           class="pointer fa fa-download ml-2"
+           (click)="downloadModelClicked()"
+        ></i>
+      </span>
     </div>
     <div *ngIf="kpi.href && kpi.value">
       <a [routerLink]="kpi.href">
@@ -15,7 +22,6 @@
 
 <sm-labeled-row label="DESCRIPTION:">
   <sm-inline-edit
-    [fieldValue]="model?.comment"
     [originalText]="model?.comment"
     [editable]="model?.company?.id"
     [multiline]="true"

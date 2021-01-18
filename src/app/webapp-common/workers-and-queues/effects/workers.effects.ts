@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {Store} from '@ngrx/store';
 import {castArray, cloneDeep} from 'lodash/fp';
-import {catchError, flatMap, switchMap, withLatestFrom} from 'rxjs/operators';
+import {catchError, mergeMap, switchMap, withLatestFrom} from 'rxjs/operators';
 import {MESSAGES_SEVERITY} from '../../../app.constants';
 import {ApiWorkersService} from '../../../business-logic/api-services/workers.service';
 import {Worker} from '../../../business-logic/model/workers/worker';
@@ -46,7 +46,7 @@ export class WorkersEffects {
       this.store.select(selectWorkersTableSortField),
     ),
     switchMap(([action, selectedWorker, sortOrder, sortField]) => this.workersApi.workersGetAll({}).pipe(
-      flatMap(res => {
+      mergeMap(res => {
         const actionsToFire = [
           new workersActions.SetWorkers(this.sortWorkers(sortOrder, sortField, res.workers)),
           new DeactiveLoader(action.type)];
@@ -71,7 +71,7 @@ export class WorkersEffects {
       this.store.select(selectWorkersTableSortField),
       this.store.select(selectWorkers)
     ),
-    flatMap(([action, sortOrder, sortField, workers]) => [new workersActions.SetWorkers(this.sortWorkers(sortOrder, sortField, workers))]),
+    mergeMap(([action, sortOrder, sortField, workers]) => [new workersActions.SetWorkers(this.sortWorkers(sortOrder, sortField, workers))]),
   );
 
   @Effect()
@@ -100,7 +100,7 @@ export class WorkersEffects {
       if (worker) {
         const req = prepareStatsQuery(worker.id, keys, timeFrame, granularity);
         return this.workersApi.workersGetStats(req).pipe(
-          flatMap(res => {
+          mergeMap(res => {
             if (res) {
               res = addStats(currentStats, res.workers, payload.maxPoints, keys, 'worker', WORKER_STATS_PARAM_INFO);
               if (Array.isArray(res) && res.some(topic => topic.dates.length > 0)) {
@@ -121,7 +121,7 @@ export class WorkersEffects {
         };
 
         return this.workersApi.workersGetActivityReport(req).pipe(
-          flatMap((res: WorkersGetActivityReportResponse) => {
+          mergeMap((res: WorkersGetActivityReportResponse) => {
             let result = null;
             if (res) {
               const statsData = [{

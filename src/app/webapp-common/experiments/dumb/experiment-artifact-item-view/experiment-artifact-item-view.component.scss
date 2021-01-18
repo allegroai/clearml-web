@@ -2,8 +2,13 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+
   .editable-design {
     flex: 1;
     min-height: 300px;
+  }
+
+  .uri {
+    word-break: break-all;
   }
 }

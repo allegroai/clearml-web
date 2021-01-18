@@ -1,9 +1,0 @@
-<div *ngIf="!showSpinner && !editable && lines?.length" class="diff-container">
-  <cdk-virtual-scroll-viewport itemSize="19" minBufferPx = 400, maxBufferPx = 600
-                               class="viewport"
-                               [class.isReadonly]="!editable">
-    <div *cdkVirtualFor="let line of lines" class="line">{{line}}</div>
-  </cdk-virtual-scroll-viewport>
-</div>
-<span *ngIf="!showSpinner && !lines?.length && !editable">No changes logged</span>
-<mat-spinner [diameter]="50" *ngIf="showSpinner"></mat-spinner>

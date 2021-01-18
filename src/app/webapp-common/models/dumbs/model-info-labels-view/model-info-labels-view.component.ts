@@ -3,7 +3,7 @@ import {Model} from '../../../../business-logic/model/models/model';
 import {NgForm} from '@angular/forms';
 import {debounceTime} from 'rxjs/operators';
 import {Subscription} from 'rxjs';
-import {ISelectedModel} from '../../shared/models.model';
+import {SelectedModel} from '../../shared/models.model';
 
 @Component({
   selector: 'sm-model-info-labels-view',
@@ -18,11 +18,11 @@ export class ModelInfoLabelsViewComponent implements OnInit, OnDestroy {
 
   private unsavedValue: any;
   private formChangesSubscription: Subscription;
-  private _model: ISelectedModel;
+  private _model: SelectedModel;
 
   @ViewChild('labels', {static: true}) labels: NgForm;
 
-  @Input() set model(model: ISelectedModel) {
+  @Input() set model(model: SelectedModel) {
     if (model) {
       this.formData = this.revertParameters(model.labels);
     }
@@ -34,6 +34,7 @@ export class ModelInfoLabelsViewComponent implements OnInit, OnDestroy {
   }
 
   @Input() saving = false;
+  @Input() isSharedAndNotOwner: boolean = false;
   @Output() saveFormData = new EventEmitter();
   @Output() cancelClicked = new EventEmitter();
   @Output() activateEditClicked = new EventEmitter();

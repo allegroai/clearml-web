@@ -1,8 +1,18 @@
 import {createSelector} from '@ngrx/store';
 import {
-  addCredential, AUTH_ACTIONS, cancelS3Credentials, resetDontShowAgainForBucketEndpoint, resetShowS3Popup, saveS3Credentials, showLocalFilePopUp, showS3PopUp,
-  updateAllCredentials, updateS3Credential
+  addCredential,
+  AUTH_ACTIONS,
+  cancelS3Credentials,
+  removeCredential,
+  resetDontShowAgainForBucketEndpoint,
+  resetShowS3Popup,
+  saveS3Credentials,
+  showLocalFilePopUp,
+  showS3PopUp,
+  updateAllCredentials,
+  updateS3Credential
 } from '../actions/common-auth.actions';
+import {CredentialKey} from '../../../business-logic/model/auth/credentialKey';
 
 export interface IS3PopupDetails {
   isAzure?: boolean;
@@ -20,12 +30,10 @@ export interface IAuthState {
   localFilesPopupURLs: Array<string>;
   S3PopUpDetails?: IS3PopupDetails;
   revokeSucceed: boolean;
-  credentials: Array<any>;
+  credentials: {[workSpaceId: string]: CredentialKey[]};
   newCredential: any;
   dontShowAgainForBucketEndpoint: string;
-  S3BucketCredentials: {
-    BucketCredentials: Array<any>
-  };
+  S3BucketCredentials: { BucketCredentials: any[] };
   showS3PopUp: false;
 }
 
@@ -34,7 +42,7 @@ export const initAuth: IAuthState = {
   localFilesPopupURLs: [],
   S3PopUpDetails: {},
   revokeSucceed: false,
-  credentials: [],
+  credentials: {},
   newCredential: {},
   dontShowAgainForBucketEndpoint: '',
   S3BucketCredentials: {
@@ -84,21 +92,17 @@ export function commonAuthReducer(auth = initAuth, action) {
 
     case resetDontShowAgainForBucketEndpoint.type:
       return {...auth, dontShowAgainForBucketEndpoint: ''};
-    case saveS3Credentials.type:
-      const indexsss = auth.S3BucketCredentials.BucketCredentials.findIndex((Cr) => {
-        return (Cr.Bucket === action.newCredential.Bucket && Cr.Endpoint === action.newCredential.Endpoint);
-      });
+    case saveS3Credentials.type: {
+      const index = auth.S3BucketCredentials.BucketCredentials.findIndex((Cr) =>
+        (Cr.Bucket === action.newCredential.Bucket && Cr.Endpoint === action.newCredential.Endpoint));
       const bucketCre = [...auth.S3BucketCredentials.BucketCredentials];
-      if (indexsss > -1) {
-        bucketCre[indexsss] = action.newCredential;
+      if (index > -1) {
+        bucketCre[index] = action.newCredential;
       } else {
         bucketCre.push(action.newCredential);
       }
       return {...auth, S3BucketCredentials: {BucketCredentials: bucketCre}, showS3PopUp: false, S3PopUpDetails: {}};
-
-    case AUTH_ACTIONS.CREATE_SUCCESS:
-      auth.credentials.push(action.payload.credentials);
-      return {...auth, newCredential: action.payload.credentials};
+    }
     case AUTH_ACTIONS.GET_SUCCESS:
       return {...auth, credentials: action.payload.credentials, revokeSucceed: false};
     case AUTH_ACTIONS.REVOKE_SUCCESS:
@@ -106,11 +110,26 @@ export function commonAuthReducer(auth = initAuth, action) {
     case AUTH_ACTIONS.RESET_NEW_CREDENTIAL:
       return {...auth, newCredential: initAuth.newCredential};
     case addCredential.type:
-      const newCredentials = [].concat(auth.credentials);
-      newCredentials.push(action.newCredential);
-      return {...auth, newCredential: action.newCredential, credentials: newCredentials};
+      return {
+        ...auth,
+        newCredential: {...action.newCredential, company: action.workspaceId},
+        credentials: {
+          ...auth.credentials,
+          [action.workspaceId]: [
+            ...(auth.credentials[action.workspaceId] || []),
+            ...(Object.keys(action.newCredential).length > 0 ? [{...action.newCredential, company: action.workspaceId}] : [])
+          ]}};
+    case removeCredential.type: {
+      const act = action as ReturnType<typeof removeCredential>;
+      return {
+        ...auth, credentials: {
+          ...auth.credentials,
+          [act.workspaceId]: auth.credentials[act.workspaceId].filter((cred => cred.access_key !== act.accessKey))
+        }
+      };
+    }
     case updateAllCredentials.type:
-      return {...auth, credentials: action.credentials, revokeSucceed: false};
+      return {...auth, credentials: {[action.credentials[0]?.company || action.workspace]: action.credentials, ...action.extra}, revokeSucceed: false};
     default:
       return auth;
   }

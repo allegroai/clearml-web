@@ -28,18 +28,22 @@ export const EXPERIMENTS_TABLE_COL_FIELDS = {
   LAST_UPDATE   : 'last_update' as ExperimentTableColFieldsEnum,
   LAST_ITERATION: 'last_iteration' as ExperimentTableColFieldsEnum,
   COMMENT       : 'comment' as ExperimentTableColFieldsEnum,
+  ACTIVE_DURATION: 'active_duration' as ExperimentTableColFieldsEnum,
   PROJECT       : 'project.name' as ExperimentTableColFieldsEnum,
   METRIC        : 'project.name' as ExperimentTableColFieldsEnum,
-  HYPER_PARAM   : 'project.name' as ExperimentTableColFieldsEnum
+  HYPER_PARAM   : 'project.name' as ExperimentTableColFieldsEnum,
+  PARENT        : 'parent.name' as ExperimentTableColFieldsEnum
 };
 
 export enum ExperimentTagsEnum {
   Development = 'development',
-  Hidden = 'archived'
+  Hidden = 'archived',
+  Shared = 'shared'
 }
 
-export const EXPERIMENTS_TAGS = {};
-export const EXPERIMENTS_TAGS_TOOLTIP = {};
+export const EXPERIMENTS_TAGS = {
+  ['shared' as ExperimentTagsEnum]: 'SHARED'
+};export const EXPERIMENTS_TAGS_TOOLTIP = {};
 export const EXPERIMENTS_STATUS_LABELS = {
   [TaskStatusEnum.Created]   : 'Draft',
   [TaskStatusEnum.Queued]    : 'Pending',
@@ -49,5 +53,6 @@ export const EXPERIMENTS_STATUS_LABELS = {
   [TaskStatusEnum.Failed]    : 'Failed',
   [TaskStatusEnum.Stopped]   : 'Aborted',
   [TaskStatusEnum.Closed]    : 'Completed'
+
 };
 export const DevWarningEnabled = false;

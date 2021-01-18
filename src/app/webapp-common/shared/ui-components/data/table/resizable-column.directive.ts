@@ -6,19 +6,19 @@ import {ResizableColumn} from 'primeng/table';
 })
 export class ResizableColumnDirective extends ResizableColumn {
   private resizerDoubleClickListener: (event: MouseEvent) => void;
+  private clickCount = 0;
 
-  ngAfterViewInit(): void {
-    super.ngAfterViewInit();
-    if (this.isEnabled()) {
-      this.resizerDoubleClickListener = (event) => {
+  onDocumentMouseUp(event) {
+    super.onDocumentMouseUp(event);
+    this.clickCount += 1;
+    window.setTimeout(() => this.clickCount = 0, 250);
+    if (this.clickCount > 1) {
+      window.setTimeout(() => {
         const width = this.calcWidth(this.el.nativeElement);
         const delta = width - this.el.nativeElement.offsetWidth;
         this.dt.onColumnResizeBegin(event);
         this.dt.onColumnResize({pageX: event.pageX + delta});
         this.dt.onColumnResizeEnd(event, this.el.nativeElement);
-      };
-      this.zone.runOutsideAngular(() => {
-        this.resizer.addEventListener('dblclick', this.resizerDoubleClickListener);
       });
     }
   }
@@ -26,7 +26,7 @@ export class ResizableColumnDirective extends ResizableColumn {
   ngOnDestroy(): void {
     super.ngOnDestroy();
     if(this.resizerDoubleClickListener) {
-      this.resizer.removeEventListener('dblclick', this.resizerDoubleClickListener);
+      this.resizer.removeEventListener('mouseup', this.resizerDoubleClickListener);
     }
   }
 

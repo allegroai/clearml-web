@@ -29,9 +29,7 @@ $header-height: 60px;
 
     .experiment-compare-body {
       padding: 0;
-      //height: calc(100vh - #{$top-bar-height + $nav-height + $header-height});
       height: calc(100% - #{$nav-height + $header-height});
-      //overflow-x: scroll;
     }
 
   }

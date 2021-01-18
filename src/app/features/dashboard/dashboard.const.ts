@@ -9,30 +9,39 @@ export const RECENT_EXPERIMENTS_TABLE_COLS: ISmCol[] = [
     header        : 'TYPE',
     bodyStyleClass: 'type-col',
     disableDrag   : true,
+    disablePointerEvents: true
   },
   {
     id         : RECENT_TASKS_TABLE_COL_FIELDS.NAME,
     headerType : ColHeaderTypeEnum.title,
     header     : 'TITLE',
     disableDrag: true,
+    disablePointerEvents: true
+
   },
   {
     id         : RECENT_TASKS_TABLE_COL_FIELDS.PROJECT,
     headerType : ColHeaderTypeEnum.title,
     header     : 'PROJECT',
     disableDrag: true,
+    disablePointerEvents: true
+
   },
   {
     id         : RECENT_TASKS_TABLE_COL_FIELDS.STARTED,
     headerType : ColHeaderTypeEnum.title,
     header     : 'STARTED',
     disableDrag: true,
+    disablePointerEvents: true
+
   },
   {
     id         : RECENT_TASKS_TABLE_COL_FIELDS.LAST_UPDATE,
     headerType : ColHeaderTypeEnum.title,
     header     : 'UPDATED',
     disableDrag: true,
+    disablePointerEvents: true
+
   },
   {
     id            : RECENT_TASKS_TABLE_COL_FIELDS.STATUS,
@@ -40,5 +49,7 @@ export const RECENT_EXPERIMENTS_TABLE_COLS: ISmCol[] = [
     header        : 'STATUS',
     bodyStyleClass: 'status-col',
     disableDrag   : true,
+    disablePointerEvents: true
+
   }
 ];

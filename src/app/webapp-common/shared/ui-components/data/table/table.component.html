@@ -7,11 +7,9 @@
   [selectionMode]="selectionMode"
   [rows]="rowsNumber"
   [value]="tableData"
-  [sortField]="sortField"
-  [sortOrder]="sortOrder"
   [selection]="selection"
   [reorderableColumns]="reorderableColumns"
-  [resizableColumns]="resizableColumns"
+  [resizableColumns]="resizableColumns && !minView"
   columnResizeMode="expand"
   [scrollable]="resizableColumns"
   [virtualScroll]="virtualScroll"
@@ -25,6 +23,8 @@
   (onRowSelect)="onRowSelected($event)"
   (onRowUnselect)="onRowDeselected($event)"
   (onContextMenuSelect)="openContext($event)"
+  (onColResize)="colResize($event)"
+  [rowTrackBy]="trackByFunction"
   #dataTable>
   <ng-template pTemplate="colgroup" let-columns>
     <colgroup *ngIf="!minView; else: cardColGroup">
@@ -47,6 +47,7 @@
   <ng-template pTemplate="header" let-columns let-rowData *ngIf="!noHeader">
     <tr class="header ui-state-default" *ngIf="!minView; else cardHeader">
       <th *ngFor="let col of columns"
+          [attr.data-col-id]="col.id"
           pReorderableColumn
           resizableColumn
           [pResizableColumnDisabled]="col?.disableDrag"
@@ -54,7 +55,7 @@
           [class.grab]="reorderableColumns"
           [class.resize-enabled]="resizableColumns"
           [class.resize-disabled]="!resizableColumns"
-          [class.selected-col-header]="col?.disableDrag">
+          [class.selected-col-header]="col?.disablePointerEvents">
         <ng-container [ngSwitch]="col?.headerType">
           <ng-container *ngSwitchCase="ColHeaderTypeEnum.sort">
             <ng-container *ngTemplateOutlet="sortTemplate; context: {$implicit: col}"></ng-container>
@@ -71,7 +72,23 @@
         </ng-container>
       </th>
     </tr>
-    <ng-template #cardHeader></ng-template>
+    <ng-template #cardHeader>
+      <div class="table-header">
+        <div class="table-header-title">{{minimizedTableHeader}}</div>
+        <div class="table-actions">
+          <div class="recent-title">
+            <sm-menu [header]="getColName(sortField)" class="menu" smMenuClass="bigger-width">
+              <div *ngFor="let col of sortableCols">
+                <sm-menu-item [itemLabel]="col.header"
+                              [sortOrder]="(sortField === col.id) && sortOrder"
+                              (itemClicked)="sortChanged.emit({field: col.id, sortOrder: $any(sortField === col.id ? sortOrder * -1 : 1)})"></sm-menu-item>
+              </div>
+            </sm-menu>
+          </div>
+          <ng-container *ngTemplateOutlet="cardHeaderTemplate"></ng-container>
+        </div>
+      </div>
+    </ng-template>
   </ng-template>
   <ng-template pTemplate="body" let-rowData let-columns="columns" let-index="rowIndex">
     <tr
@@ -99,7 +116,7 @@
           </ng-container>
         </td>
       </ng-container>
-      <ng-template #cardBody class=*ngIf="minView">
+      <ng-template #cardBody>
         <td class="pointer p-0" role="button">
           <ng-container
             *ngTemplateOutlet="cardTemplate;  context: {rowData: rowData, rowNumber: index, selected:  (selectionMode==='single'? selection?.id === rowData.id :  selection?.includes(rowData))}">

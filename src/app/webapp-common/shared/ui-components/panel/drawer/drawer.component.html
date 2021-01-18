@@ -1,15 +1,15 @@
 <div
   #drawerContainer
   class='drawer-container'
-  [ngClass]="{'drawer-closed': closed}"
-  [ngStyle]="{'padding': paddingAroundDrawer + 'px'}">
-  <div [ngClass]="{'display-on-hover': displayOnHover && !closed}">
+  [class.drawer-closed]="closed">
+  <div class="c-drawer-toggle" [class.display-on-hover]="displayOnHover && !closed">
     <button
       class="pointer drawer-toggle"
-      [ngClass]="{'display-on-hover': displayOnHover && !closed}"
-      (click)="toggleDrawer()">
+      [class.display-on-hover]="displayOnHover && !closed"
+      (click)="toggleDrawer()"
+    >
       <i *ngIf="!closed" class="arrows-icon fas fa-angle-double-left"></i>
-      <div #closedLabel [ngClass]="{hidden: !closed}" class="label">{{label}}</div>
+      <div #closedLabel [class.hidden]="!closed" class="label">{{label}}</div>
     </button>
   </div>
   <div class='content-container'>

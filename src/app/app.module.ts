@@ -22,6 +22,8 @@ import {ColorHashService} from './webapp-common/shared/services/color-hash/color
 import {LoginService} from './webapp-common/shared/services/login.service';
 import {Store} from '@ngrx/store';
 import {SharedModule} from './shared/shared.module';
+import {ErrorService} from './webapp-common/shared/services/error.service';
+import {ConfigurationService} from './webapp-common/shared/services/configuration.service';
 
 @NgModule({
   declarations   : [AppComponent],
@@ -58,14 +60,19 @@ import {SharedModule} from './shared/shared.module';
       provide   : APP_INITIALIZER,
       useFactory: loadUserAndPreferences,
       multi     : true,
-      deps      : [ApiUsersService, LoginService, Store]
+      deps      : [ApiUsersService, LoginService, Store, ErrorService, ConfigurationService]
     },
     ColorHashService,
     {provide: HTTP_INTERCEPTORS, useClass: WebappIntercptor, multi: true},
     {provide: RouteReuseStrategy, useClass: CustomReuseStrategy},
+    {
+      provide: 'googleTagManagerId',
+      deps: [ConfigurationService],
+      useFactory: (confService: ConfigurationService) =>
+        confService.getStaticEnvironment().GTM_ID
+    }
   ],
   bootstrap      : [AppComponent],
   exports        : []
 })
-
 export class AppModule {}

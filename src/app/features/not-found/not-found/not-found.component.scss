@@ -1,3 +1,5 @@
+@import "../../../webapp-common/shared/ui-components/styles/variables";
+
 :host{
   #not-found-container {
     margin-top: 5%;
@@ -28,7 +30,7 @@
       margin-right: 15px;
     }
     li:hover {
-      background: #2C3246;
+      background: $blue-600;
     }
     .icon {
       margin: 10px auto;

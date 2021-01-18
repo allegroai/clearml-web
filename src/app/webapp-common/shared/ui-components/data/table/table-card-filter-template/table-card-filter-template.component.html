@@ -10,15 +10,17 @@
       </button>
       <mat-menu #subMenu="matMenu" class="table-card-filter-menu">
         <form class="filter-form">
-          <mat-form-field *ngIf="['users', 'tags'].includes(option.key)" smClickStopPropagation [style.width]="'222px'">
+          <mat-form-field *ngIf="searchable(option.key)" smClickStopPropagation [style.width]="'222px'">
             <input matInput (input)="setSearchTerm($event, option.key)" name="filter" [(ngModel)]="searchTerms[option.key]" autocomplete="off">
             <i matSuffix [class]="'fa mr2 ' + (searchTerms[option.key]? 'fa-times pointer':'fa-search')" (click)="searchTerms[option.key] && clearSearch(option.key)"></i>
           </mat-form-field>
         </form>
-        <div class="results" [class.search-results]="option.key==='users' || option.key==='tags'">
+        <div class="results" [class.search-results]="searchable(option.key)">
           <sm-menu-item *ngFor="let subOption of option.value |filter:searchTerms[option.key]:'label'" [itemLabel]="subOption.label"
                         [checked]="value[option.key]?.includes(subOption.value)" [selectable]="true"
                         [itemValue]="subOption.value"
+                        [itemTooltip]="subOption.tooltip"
+                        [enableTooltip]="!!subOption.tooltip"
                         (itemClicked)="onFilterChanged(option.key, $event)">
           </sm-menu-item>
           <div *ngIf="(option.value |filter:searchTerms[option.key]:'label').length===0" class="flex-middle">No item found</div>

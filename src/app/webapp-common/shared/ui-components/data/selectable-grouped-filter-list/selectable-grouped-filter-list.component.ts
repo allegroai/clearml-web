@@ -1,20 +1,25 @@
 import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
-import {SelectableListItem} from '../selectable-list/selectable-list.model';
+import {PlotData} from 'plotly.js';
 
+export interface GroupedList {
+  [metric: string]: { [variant: string]: { [experimentId: string]: PlotData } };
+}
 
 @Component({
-  selector       : 'sm-selectable-grouped-filter-list',
-  templateUrl    : './selectable-grouped-filter-list.component.html',
-  styleUrls      : ['./selectable-grouped-filter-list.component.scss'],
+  selector: 'sm-selectable-grouped-filter-list',
+  templateUrl: './selectable-grouped-filter-list.component.html',
+  styleUrls: ['./selectable-grouped-filter-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SelectableGroupedFilterListComponent {
   private _searchTerm: string;
-  private _list: Array<SelectableListItem>;
-  public filteredList: SelectableListItem[];
+  private _list: GroupedList;
+  public filteredList: GroupedList;
+  public searchText: string;
 
-  @Input() set list(list: Array<any>) {
-    this._list        = list;
+  @Input() set list(list: GroupedList) {
+    this._list = list;
+    this.hideChildrenForHiddenParent(list);
     this.filteredList = this.filterList(list, this.searchTerm);
   }
 
@@ -24,7 +29,7 @@ export class SelectableGroupedFilterListComponent {
 
   @Input() set searchTerm(searchTerm: string) {
     this.filteredList = this.list ? this.filterList(this.list, searchTerm) : [];
-    this._searchTerm  = searchTerm;
+    this._searchTerm = searchTerm;
   }
 
   get searchTerm() {
@@ -35,9 +40,9 @@ export class SelectableGroupedFilterListComponent {
   @Input() selected: string;
   @Input() titleLabel: string;
   @Input() checkAllIcon: string;
-  @Output() itemSelect             = new EventEmitter<SelectableListItem>();
-  @Output() hiddenChanged          = new EventEmitter<any>();
-  @Output() searchTermChanged      = new EventEmitter<string>();
+  @Output() itemSelect = new EventEmitter<string>();
+  @Output() hiddenChanged = new EventEmitter<any>();
+  @Output() searchTermChanged = new EventEmitter<string>();
 
 
   filterList(list, searchTerm) {
@@ -64,13 +69,33 @@ export class SelectableGroupedFilterListComponent {
     }
   }
 
-  onSearchTermChanged(searchTerm) {
-    this.searchTermChanged.emit(searchTerm);
+  private hideChildrenForHiddenParent(list: GroupedList) {
+    const newHiddenList = [...this.checkedList];
+    let hiddenListChanged = false;
+    Object.entries(list).forEach(([parent, children]) => {
+      if (this.checkedList.includes(parent)) {
+        hiddenListChanged = true;
+        Array.prototype.push.apply(newHiddenList, (Object.keys(children).map(child => parent + child)));
+      }
+    });
+    if (hiddenListChanged) {
+      this.hiddenChanged.emit(Array.from(new Set(newHiddenList)));
+    }
   }
 
-  public toggleHide(pathString) {
-    const newHiddenList = this.checkedList.includes(pathString) ? this.checkedList.filter(i => i !== pathString) : [...this.checkedList, pathString];
+  onSearchTermChanged(value: string) {
+    this.searchText = value;
+    this.searchTermChanged.emit(value);
+  }
+
+  public toggleHide({pathString, parent}) {
+    let newHiddenList = this.checkedList.includes(pathString) ? this.checkedList.filter(i => i !== pathString) : [...this.checkedList, pathString];
+    newHiddenList = this.AreAllChildrenHidden(parent, newHiddenList) ? [...newHiddenList, parent] : newHiddenList.filter(i => i !== parent);
     this.hiddenChanged.emit(newHiddenList);
+  }
+
+  private AreAllChildrenHidden(parent, newHiddenList: any[]) {
+    return Object.keys(this.list[parent]).every(item => newHiddenList.includes(parent + item));
   }
 
   toggleHideAll() {
@@ -79,6 +104,7 @@ export class SelectableGroupedFilterListComponent {
     } else {
       const allValues = [];
       Object.keys(this.list).forEach(key => {
+        allValues.push(key);
         Object.keys(this.list[key]).forEach(itemKey => {
           allValues.push(key + itemKey);
         });
@@ -88,9 +114,10 @@ export class SelectableGroupedFilterListComponent {
   }
 
   toggleHideGroup(event) {
-    const key     = event.key;
+    const key = event.key;
     let allValues = [...this.checkedList];
     if (event.hide) {
+      allValues = !allValues.includes(key) ? [...allValues, key] : allValues;
       Object.keys(this.list[key]).forEach(itemKey => {
         const keyItemKey = key + itemKey;
         if (!allValues.includes(keyItemKey)) {
@@ -98,6 +125,7 @@ export class SelectableGroupedFilterListComponent {
         }
       });
     } else {
+      allValues = allValues.filter(i => i !== key);
       Object.keys(this.list[key]).forEach(itemKey => {
         const keyItemKey = key + itemKey;
         if (allValues.includes(keyItemKey)) {

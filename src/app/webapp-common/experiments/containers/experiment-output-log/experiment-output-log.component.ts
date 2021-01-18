@@ -8,7 +8,13 @@ import {HTTP} from '../../../../app.constants';
 import {ISelectedExperiment} from '../../../../features/experiments/shared/experiment-info.model';
 import {IExperimentInfoState} from '../../../../features/experiments/reducers/experiment-info.reducer';
 import {selectSelectedExperiment} from '../../../../features/experiments/reducers';
-import {ResetLogFilter, ResetOutput, SetLogFilter, getExperimentLog} from '../../actions/common-experiment-output.actions';
+import {
+  ResetLogFilter,
+  ResetOutput,
+  SetLogFilter,
+  getExperimentLog,
+  downloadFullLog
+} from '../../actions/common-experiment-output.actions';
 import {ExperimentLogInfoComponent} from '../../dumb/experiment-log-info/experiment-log-info.component';
 import {selectRefreshing} from '../../../experiments-compare/reducers';
 
@@ -96,5 +102,9 @@ export class ExperimentOutputLogComponent implements OnInit, OnDestroy {
 
   getLogs({direction, from}: {direction: string; from?: number}) {
     this.store.dispatch(getExperimentLog({id: this.experiment.id, direction, from, refresh: !from}));
+  }
+
+  downloadLog() {
+    this.store.dispatch(downloadFullLog({experimentId: this.experiment.id}));
   }
 }

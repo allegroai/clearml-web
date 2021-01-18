@@ -1,5 +1,5 @@
 <div class="header d-flex justify-content-between">
-  <div class="d-flex">
+  <div class="d-flex align-items-center">
     <div *ngIf="!activeWorker" class="title">Workers Utilization</div>
     <div *ngIf="activeWorker" class="param-selector">
       <sm-select-autocomplete
@@ -18,6 +18,7 @@
       class="dark"
       [multiple]="false"
       [items]="timeFrameOptions"
+      [searchable]="false"
       [formControl]="timeFormControl"></sm-select-autocomplete>
   </div>
 </div>

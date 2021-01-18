@@ -35,7 +35,7 @@
 
 
 .metrics-container {
-  padding: 20px 32px 0;
+  padding: 20px 12px 0 32px;
   // search icon
   i.fa {
     position: absolute;
@@ -63,12 +63,13 @@
 
 .metrics-search {
   position: relative;
+  margin-bottom: 6px;
 
   input {
     width: 100%;
     font-size: 14px;
     border: none;
-    border-bottom: 2px solid $light-periwinkle;
+    border-bottom: 2px solid $blue-200;
     border-radius: 0;
     padding-right: 32px;
 
@@ -86,7 +87,6 @@
   overflow: scroll;
   overflow-x: hidden;
   max-height: 0;
-  width: calc(100% + 20px);
   padding-right: 14px;
   transition: max-height 0.2s;
 
@@ -120,7 +120,7 @@
   &__item {
     display: flex;
     align-items: center;
-    font-family: 'Heebo', sans-serif;
+    font-family: $font-family-base, sans-serif;
     font-size: 12px;
     height: 32px;
     color: $blue-400;
@@ -157,7 +157,7 @@
 }
 
 .no-data {
-  color: #707ba3;
+  color: $blue-480;
   font-weight: 400;
 
   .no-data-title {

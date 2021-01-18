@@ -6,6 +6,7 @@ describe('ModelMenuComponent', () => {
   let component: ModelMenuComponent;
   let fixture: ComponentFixture<ModelMenuComponent>;
 
+
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [ ModelMenuComponent ]

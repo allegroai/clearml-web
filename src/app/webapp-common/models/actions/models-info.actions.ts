@@ -1,6 +1,6 @@
 import {Action, createAction, props} from '@ngrx/store';
 import {Model} from '../../../business-logic/model/models/model';
-import {ISelectedModel} from '../shared/models.model';
+import {SelectedModel, TableModel} from '../shared/models.model';
 import {ModelsUpdateRequest} from '../../../business-logic/model/models/modelsUpdateRequest';
 
 
@@ -49,13 +49,13 @@ export class RefreshModelInfo implements Action {
 export class SetModel implements Action {
   readonly type = SET_MODEL;
 
-  constructor(public payload: Model | ISelectedModel) {
+  constructor(public payload: SelectedModel) {
   }
 }
 export class EditModel implements Action {
   readonly type = EDIT_MODEL;
 
-  constructor(public payload: ISelectedModel) {
+  constructor(public payload: SelectedModel) {
   }
 }
 export class SetIsModelSaving implements Action {
@@ -67,7 +67,7 @@ export class SetIsModelSaving implements Action {
 export class ModelDetailsUpdated implements Action {
   readonly type = MODEL_DETAILS_UPDATED;
 
-  constructor(public payload: { id: Model['id'], changes: Partial<ModelsUpdateRequest> }) {
+  constructor(public payload: { id: Model['id']; changes: Partial<ModelsUpdateRequest> }) {
   }
 }
 

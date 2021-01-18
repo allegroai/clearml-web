@@ -16,7 +16,7 @@ import {get} from 'lodash/fp';
   styleUrls  : ['./select-experiments-for-compare.component.scss']
 })
 export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy, AfterViewInit {
-  public experimentsResults$: Observable<Array<Task>>;
+  public experimentsResults$: Observable<Task[]>;
   public selectedExperiments: string[] = [];
   private paramsSubscription: Subscription;
   public searchTerm$: Observable<string>;

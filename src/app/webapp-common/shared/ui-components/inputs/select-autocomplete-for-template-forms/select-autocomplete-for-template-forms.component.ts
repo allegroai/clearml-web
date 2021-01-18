@@ -29,7 +29,7 @@ export class SelectAutocompleteForTemplateFormsComponent extends TemplateFormSec
   @ViewChild('select') select: ElementRef;
   @Input() errorMsg: string;
   @Input() multiple: boolean = true;
-  @Input() enableChips: false;
+  @Input() enableChips = false;
   @Input() name: string;
 
   @Output() customOptionAdded = new EventEmitter();

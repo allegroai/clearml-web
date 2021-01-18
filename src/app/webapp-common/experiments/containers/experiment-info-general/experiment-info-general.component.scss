@@ -1,4 +1,9 @@
 :host {
   display: block;
   height: 100%;
+
+  sm-experiment-general-info {
+    display: block;
+    max-width: 1200px;
+  }
 }

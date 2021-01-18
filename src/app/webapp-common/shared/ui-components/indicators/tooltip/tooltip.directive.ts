@@ -1,20 +1,24 @@
-import {Directive, Input, OnInit} from '@angular/core';
-import { MatTooltip } from '@angular/material/tooltip';
-import {TooltipPosition} from '@angular/material/tooltip';
+import {Directive, Input} from '@angular/core';
+import {MAT_TOOLTIP_DEFAULT_OPTIONS, MatTooltip, MatTooltipDefaultOptions} from '@angular/material/tooltip';
+import {TooltipPosition} from "@angular/material/tooltip/tooltip";
 
 export type TooltipTypeEnum = 'help' | 'validation' | 'error';
 
 @Directive({
-  selector: '[smTooltip]'
+  selector: '[smTooltip]',
+  providers: [
+    {
+      provide: MAT_TOOLTIP_DEFAULT_OPTIONS,
+      useValue: {position: 'after'} as MatTooltipDefaultOptions
+    }
+  ]
 })
-
-
 export class TooltipDirective extends MatTooltip {
 
   public readonly TOOLTIP_TYPE = {
-    HELP      : 'help' as TooltipTypeEnum,
+    HELP: 'help' as TooltipTypeEnum,
     VALIDATION: 'validation' as TooltipTypeEnum,
-    ERROR     : 'error' as TooltipTypeEnum,
+    ERROR: 'error' as TooltipTypeEnum,
   };
 
   @Input() set smTooltip(message) {
@@ -23,7 +27,6 @@ export class TooltipDirective extends MatTooltip {
   }
 
   @Input() tooltipType: TooltipTypeEnum = 'help';
-  @Input() position: TooltipPosition    = 'above';
   @Input() customClass: string;
 
   @Input() set showTooltip(show) {
@@ -31,4 +34,5 @@ export class TooltipDirective extends MatTooltip {
   }
 
   @Input() showDelay = 0;
+
 }

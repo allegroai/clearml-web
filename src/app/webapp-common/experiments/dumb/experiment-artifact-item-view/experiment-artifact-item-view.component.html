@@ -2,7 +2,7 @@
     <div>
       <sm-labeled-row label="FILE PATH">
         <a *ngIf="artifact?.uri && !isLocalFile && isLinkable" [href]="artifact?.uri" target="_blank">{{artifact?.uri}}</a>
-        <span *ngIf="!isLinkable">{{artifact?.uri}}</span>
+        <span class="uri" *ngIf="!isLinkable">{{artifact?.uri}}</span>
         <i *ngIf="artifact?.uri && !isLocalFile && !isLinkable"
            class="pointer fa fa-download ml-2"
            (click)="artifactFilePathClicked(artifact.uri)"
@@ -24,8 +24,6 @@
                        containerClass="h-100">
     <sm-section-header label="PREVIEW"></sm-section-header>
     <sm-experiment-network-design-form
-      fieldName="prototext"
-      inputClassName="preview-text resize-none"
       [editable]="false"
       [formData]="artifact?.type_data?.preview">
     </sm-experiment-network-design-form>

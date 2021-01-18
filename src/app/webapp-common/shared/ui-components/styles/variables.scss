@@ -4,6 +4,7 @@ $blue-50: #f2f4fc; //242,244,252
 $blue-100: #dce0ee; //220,224,238
 $blue-200: #c3cdf0; //195,205,240
 $blue-250: #A4ADCD;
+$blue-280: #a7b2d8;
 $blue-300: #8492c2; //132,146,19
 $blue-400: #5a658e; //90,101,142
 $blue-450: #657099;
@@ -21,12 +22,11 @@ $dark-grey-blue-three: #bdc5e1;
 $dark-grey-blue-nine: #565b6b;
 $light-dusk: rgba(90, 101, 142, 0.5);
 $dusk-two: #515c85;
-$neon-yellow-original-notgoodinchrome: #d3ff00;
+$neon-yellow: #d3ff00;
 $neon-yellow-betterinchrome: #caff00;
 $neon-yellow-hover: #c6ef06;
 $purple: #4d66ff;
 $eggplant-purple: #222838;
-$yellow-example: #D3FF00;
 
 $completed-blue: #009aff;
 $blue-sky: #4a90e2;
@@ -60,16 +60,54 @@ $dark: #191e2c;
 $black: #000000;
 $dark-three: #212431;
 $white-10: rgba(255, 255, 255, 0.1);
-$light-periwinkle: #c3cdf0;
 $dark-grey-blue: #39405f;
 $light-periwinkle-two: #c1cdf3;
-$neon-yellow: #d3ff00;
 $light-grey-blue: #8f9dc9;
 $white: #ffffff;
 $blue-grey: #8693be;
-$lightish-blue: #4d66ff;
 $lightish-blue-dark: #4551AF;
 $dark-four: #0f131c;
+
+$dark-primary-text: rgba(black, 0.87);
+$light-primary-text: white;
+$mat-allegro: (
+        50: $blue-50,
+        100: $blue-100,
+        200: $blue-200,
+        300: $blue-300,
+        400: $blue-400,
+        500: $blue-500,
+        600: $blue-600,
+        700: $blue-700,
+        800: $blue-800,
+        900: $blue-900,
+        A100: $blue-250,
+        A200: $blue-450,
+        A400: $blue-480,
+        A700: $blue-550,
+        contrast: (
+                50: $dark-primary-text,
+                100: $dark-primary-text,
+                200: $dark-primary-text,
+                300: $dark-primary-text,
+                400: $dark-primary-text,
+                500: $dark-primary-text,
+                600: $light-primary-text,
+                700: $light-primary-text,
+                800: $light-primary-text,
+                900: $light-primary-text,
+                A100: $dark-primary-text,
+                A200: $dark-primary-text,
+                A400: $dark-primary-text,
+                A700: $dark-primary-text,
+        )
+);
+
+
+
+
+
+
 
 // charts
 $chart-background: $black;
@@ -121,14 +159,6 @@ $font-weight-normal: 400; // TODO:
 $font-weight-base: $font-weight-normal; // TODO:
 $font-weight-light: 300; // TODO:
 $font-weight-bold: 700; // TODO:
-
-$h1-font-size: $font-size-base * 2.5; // TODO:
-$h2-font-size: $font-size-base * 2; // TODO:
-$h3-font-size: $font-size-base * 1.55; // TODO:
-$h4-font-size: $font-size-base * 1.25; // TODO:
-$h5-font-size: $font-size-base * 1.15; // TODO:
-$h6-font-size: $font-size-base; // TODO:
-$h7-font-size: $font-size-base * 0.75; // TODO:
 
 // grid
 $grid-gutter: 30px;
@@ -192,7 +222,7 @@ $chip-height: 15px;
 // circle counter
 
 // table
-$table-cell-padding: .75rem;
+$table-cell-padding: 0 0.75rem;
 $table-cell-padding-sm: .3rem;
 
 $table-bg: $blue-700;
@@ -213,10 +243,3 @@ $assets-icons-path: '/app/webapp-common/assets/icons';
 // dialog
 $leaf-height: 55vh;
 $generic-base-z-index: 99999;
-
-
-// code
-$code-height: 160px;
-$leaf-code-height: 55vh;
-
-

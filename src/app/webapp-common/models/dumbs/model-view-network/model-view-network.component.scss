@@ -2,7 +2,19 @@
 
 :host {
   .dark {
-    background-color: #2c3246;
+    background-color: $blue-600;
     color: #ffffff;
+  }
+
+  .textarea-container {
+    position: relative;
+    height: 100%;
+
+    .copy-textarea {
+      position: absolute;
+      right: 12px;
+      top: 7px;
+      z-index: 1;
+    }
   }
 }

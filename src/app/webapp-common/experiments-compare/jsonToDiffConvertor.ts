@@ -75,7 +75,7 @@ function convertUncommittedChanges(diff: string[]): { [files: string]: string[] 
     return {};
   }
   let currKey = null;
-  return Array.isArray(diff) ? diff.reduce((acc, curr) => {
+  return Array.isArray(diff) ? diff.reduce((acc, curr, i) => {
     const newFileDiff = curr.startsWith('diff --git');
     if (newFileDiff) {
       currKey = curr;
@@ -85,7 +85,8 @@ function convertUncommittedChanges(diff: string[]): { [files: string]: string[] 
         if (curr.startsWith('** Content is too large to display.')) {
           acc['a_hash_'] = curr;
         } else {
-          acc[`hash_${curr}`] = curr;
+          // Hope there won't be a million rows diff
+          acc[`hash_${i.toString().padStart(6, '0')}`] = curr;
         }
       } else {
         acc[currKey].push(curr);
@@ -128,7 +129,7 @@ function convertConfiguration(confParams: { [name: string]: ConfigurationItem },
 
 export function convertExperimentsArrays(experiment, origin, experiments, path = ''): IExperimentDetail {
   const convertedExperiment: IExperimentDetail = {};
-  let counter = 1;
+  let counter = 9999;
   Object.keys(experiment).forEach(key => {
       const newPath = `${path}.${key}`;
       switch (key) {
@@ -145,7 +146,7 @@ export function convertExperimentsArrays(experiment, origin, experiments, path =
           convertedExperiment[key] = experiment[key];
           break;
         case 'configuration':
-          convertedExperiment[key] = convertConfiguration(experiment[key], origin);
+          convertedExperiment[key] = convertConfiguration(experiment[key], origin) as { [key: string]: ConfigurationItem };
           break;
         default:
           const alternativeConvertedExperiment = getAlternativeConvertedExperiment(newPath, experiment[key]);
@@ -161,11 +162,12 @@ export function convertExperimentsArrays(experiment, origin, experiments, path =
             convertedExperiment[newKey] = convertExperimentsArrays(experiment[key], origin ? origin[key] : null, experiments.map(exp => exp ? exp[key] : null), newPath);
           } else if (isArrayOrderNotImportant(experiment[key], key, experiments)) {
             const hashedObj = {};
+            const currentIndex = path.split(/\.([0-9]+)$/)[1];
             experiment[key].forEach(item => {
-              let convertedItemHash = convertToHashItem(item, origin && (Array.isArray(origin) ? (origin.map(item => item[key]) as any).flat() : origin[key]), newPath);
+              let convertedItemHash = convertToHashItem(item, origin && (Array.isArray(origin) ? (origin.map(item => item[key]) as any).flat() : origin[key][currentIndex]), newPath);
               if (hashedObj[convertedItemHash]) {
                 convertedItemHash = `${counter}${convertedItemHash}`;
-                counter++;
+                counter--;
               }
               if (isObject(item)) {
                 hashedObj[convertedItemHash] =

@@ -2,6 +2,7 @@ import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import {ColHeaderTypeEnum, ISmCol, TableSortOrderEnum} from '../../../../webapp-common/shared/ui-components/data/table/table.consts';
 import {get} from 'lodash/fp';
 import {WORKERS_TABLE_COL_FIELDS} from '../../workers-and-queues.consts';
+import {Worker} from '../../../../business-logic/model/workers/worker';
 
 @Component({
   selector   : 'sm-workers-table',
@@ -15,7 +16,7 @@ export class WorkersTableComponent {
   @Input() workers: Array<Worker>;
   @Input() selectedWorker: Worker;
   @Input() tableSortField: string;
-  @Input() tableSortOrder: number;
+  @Input() tableSortOrder: TableSortOrderEnum;
   @Output() workerSelected                 = new EventEmitter();
   @Output() sortedChanged                  = new EventEmitter<{ sortOrder: TableSortOrderEnum, colId: ISmCol['id'] }>();
 
@@ -30,7 +31,6 @@ export class WorkersTableComponent {
         header    : 'AVAILABLE WORKERS',
         style     : {width: '30%', minWidth: '500px'},
         sortable  : true,
-        disableDrag   : true,
       },
       {
         id      : WORKERS_TABLE_COL_FIELDS.TASK,
@@ -38,21 +38,18 @@ export class WorkersTableComponent {
         header  : 'CURRENTLY RUNNING EXPERIMENT',
         style   : {width: '30%', minWidth: '500px'},
         sortable: true,
-        disableDrag   : true,
       },
       {
         id      : WORKERS_TABLE_COL_FIELDS.TASK_RUNNING_TIME,
         headerType: ColHeaderTypeEnum.sort,
         header  : 'EXPERIMENT RUNNING TIME',
         sortable: true,
-        disableDrag   : true,
       },
       {
         id      : WORKERS_TABLE_COL_FIELDS.TASK_ITERATIONS,
         headerType: ColHeaderTypeEnum.sort,
         header  : 'ITERATION',
         sortable: true,
-        disableDrag   : true,
       },
     ];
   }

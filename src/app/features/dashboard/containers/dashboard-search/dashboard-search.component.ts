@@ -21,11 +21,11 @@ export class DashboardSearchComponent extends DashboardSearchComponentBase imple
 
   constructor(public store: Store<any>, public router: Router) {
     super(store);
-    this.allResultsJoin$     = combineLatest(this.projectsResults$, this.experimentsResults$, this.modelsResults$, this.resultsCounter$);
+    this.allResultsJoin$ = combineLatest([this.projectsResults$, this.experimentsResults$, this.modelsResults$, this.resultsCounter$]);
+    this.syncAppSearch();
   }
 
   public ngOnInit(): void {
-    this.syncAppSearch();
     this.allResultsSubscription = this.allResultsJoin$.pipe(
       skip(1),
       filter(allResults => allResults[this.tabsIndexes.length] === this.tabsIndexes.length)

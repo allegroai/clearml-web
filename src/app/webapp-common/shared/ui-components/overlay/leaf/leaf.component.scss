@@ -1,10 +1,9 @@
 @import "../../styles/mixins";
 
 .gradiented-background {
-  @include gradiented-background;
-  &.no-code{
-    height: 68vh;
-  }
+  height: 100%;
+  background-image: linear-gradient(to bottom, #ffffff, rgba(0, 0, 0, 0));
+  position: relative;
 }
 .choose-container {
   @include choose-leaf;
@@ -13,4 +12,8 @@
 .code-select{
   position: absolute;
   bottom: 5px;
+}
+
+:host {
+  height: 100%;
 }

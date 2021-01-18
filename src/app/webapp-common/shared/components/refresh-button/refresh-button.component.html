@@ -3,6 +3,7 @@
 <i
   class="fa fa-sync refresh-icon pointer"
   style="padding-left: 3px; position:relative"
+  smTooltip="Refresh now" showDelay="0" matTooltipPosition="above"
   (click)="refreshList.emit( ! autoRefreshState )">
   <i *ngIf="allowAutoRefresh && autoRefreshState === false" class="fa fa-pause pause-icon" ></i>
   <i *ngIf="allowAutoRefresh && autoRefreshState === true" class="fa fa-play pause-icon"></i>

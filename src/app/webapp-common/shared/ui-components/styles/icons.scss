@@ -97,10 +97,8 @@
 }
 
 .al-icon {
-  width: 100%;
   text-align: center;
   display: inline-block;
-
 }
 
 // no font icon
@@ -426,4 +424,32 @@
 //No font icon
 .i-no-debug-samples-with-text {
   @include icon('#{$assets-icons-path}/no-debug-samples-with-text.svg');
+}
+
+.i-move-to-project {
+  @include icon('#{$assets-icons-path}/move-to-project.svg');
+}
+
+.i-google {
+  @include icon('#{$assets-icons-path}/ico-google.svg');
+}
+
+.i-github {
+  @include icon('#{$assets-icons-path}/ico-github.svg');
+}
+
+.i-bitbucket {
+  @include icon('#{$assets-icons-path}/ico-bitbucket.svg');
+}
+
+.i-microsoft {
+  @include icon('#{$assets-icons-path}/ico-microsoft.svg');
+}
+
+.i-project-tags-filter-active {
+  @include icon('#{$assets-icons-path}/project-tags-filter-active.svg');
+}
+
+.i-project-tags-filter {
+  @include icon('#{$assets-icons-path}/project-tags-filter.svg');
 }

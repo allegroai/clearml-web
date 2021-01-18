@@ -2,7 +2,7 @@ import {MODELS_VIEW_MODES, ModelsViewModesEnum} from '../models.consts';
 import {TABLE_SORT_ORDER, TableSortOrderEnum} from '../../shared/ui-components/data/table/table.consts';
 import {ISmAction} from '../../core/models/actions';
 import * as actions from '../actions/models-view.actions';
-import {ITableModel, ModelTableColFieldsEnum} from '../shared/models.model';
+import {TableModel, ModelTableColFieldsEnum, SelectedModel} from '../shared/models.model';
 import {MODELS_TABLE_COL_FIELDS} from '../shared/models.const';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {TableFilter} from '../../shared/utils/tableParamEncode';
@@ -10,16 +10,17 @@ import {User} from '../../../business-logic/model/users/user';
 import {setModelsInPlace} from '../actions/models-view.actions';
 
 export interface IModelsViewState {
+  splitSize: number;
   models: Array<any>;
   colsOrder: { [Project: string]: string[] };
   hiddenTableCols: { [key: string]: boolean };
-  selectedModels: Array<ITableModel>; // TODO: declare type.
-  selectedModel: ITableModel;
+  selectedModels: Array<TableModel>; // TODO: declare type.
+  selectedModel: SelectedModel;
   noMoreModels: boolean;
   selectedModelSource: string;
   modelToken: string;
   viewMode: ModelsViewModesEnum;
-  tableFilters: Map<ModelTableColFieldsEnum, FilterMetadata>;
+  tableFilters: {[section: string]: FilterMetadata};
   tableSortField: string;
   tableSortOrder: TableSortOrderEnum;
   page: number;
@@ -31,6 +32,7 @@ export interface IModelsViewState {
 }
 
 const initialState: IModelsViewState = {
+  splitSize: 65,
   models: [],
   frameworks: [],
   colsOrder: {},
@@ -62,7 +64,7 @@ export function modelsViewReducer(state: IModelsViewState = initialState, action
       return {...state, models: state.models.filter(exp => !action.payload.includes(exp.id))};
     case  actions.SET_SHOW_ALL_SELECTED_IS_ACTIVE:
       return {...state, showAllSelectedIsActive: action.payload, globalFilter: initialState.globalFilter, tableFilters: initialState.tableFilters};
-    case actions.UPDATE_ONE_MODELS:
+    case actions.UPDATE_ONE_MODELS: {
       const payload = (action as actions.UpdateModel).payload;
       const newState = {
         ...state, models:
@@ -75,6 +77,7 @@ export function modelsViewReducer(state: IModelsViewState = initialState, action
         newState.selectedModels = state.selectedModels.map(ex => ex.id === payload.id ? {...ex, ...payload.changes} : ex);
       }
       return newState;
+    }
     case actions.SET_MODELS:
       return {...state, models: action.payload};
     case setModelsInPlace.type:
@@ -126,6 +129,8 @@ export function modelsViewReducer(state: IModelsViewState = initialState, action
           }, {})
         }
       };
+    case actions.setSplitSize.type:
+      return {...state, splitSize: action.splitSize};
     default:
       return state;
   }

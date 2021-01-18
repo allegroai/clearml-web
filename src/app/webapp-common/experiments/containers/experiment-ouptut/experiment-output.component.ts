@@ -2,26 +2,30 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {selectRouterConfig, selectRouterParams} from '../../../core/reducers/router-reducer';
 import {get, getOr} from 'lodash/fp';
 import {select, Store} from '@ngrx/store';
-import {Observable, Subscription} from 'rxjs';
+import {interval, Observable, Subscription} from 'rxjs';
 import {ActivatedRoute, Router} from '@angular/router';
 import {distinctUntilChanged, filter, map, tap, withLatestFrom} from 'rxjs/operators';
 import {Project} from '../../../../business-logic/model/projects/project';
 import {ISelectedExperiment} from '../../../../features/experiments/shared/experiment-info.model';
 import {ExperimentOutputState} from '../../../../features/experiments/reducers/experiment-output.reducer';
-import {selectExperimentInfoData, selectSelectedExperiment} from '../../../../features/experiments/reducers';
-import {downloadFullLog, ResetExperimentMetrics, toggleSettings} from '../../actions/common-experiment-output.actions';
+import {
+  selectExperimentInfoData,
+  selectIsSharedAndNotOwner,
+  selectSelectedExperiment
+} from '../../../../features/experiments/reducers';
+import {ResetExperimentMetrics, toggleSettings} from '../../actions/common-experiment-output.actions';
 import * as infoActions from '../../actions/common-experiments-info.actions';
-import {selectAppVisible, selectAutoRefresh} from '../../../core/reducers/view-reducer';
-import {SetAutoRefresh} from '../../../core/actions/layout.actions';
-import {SmSyncStateSelectorService} from '../../../core/services/sync-state-selector.service';
-import {interval} from 'rxjs/internal/observable/interval';
-import {AUTO_REFRESH_INTERVAL} from '../../../../app.constants';
+import {selectAppVisible, selectAutoRefresh, selectBackdropActive} from '../../../core/reducers/view-reducer';
+import {AddMessage, SetAutoRefresh} from '../../../core/actions/layout.actions';
+import {AUTO_REFRESH_INTERVAL, MESSAGES_SEVERITY} from '../../../../app.constants';
 import {selectSelectedExperiments} from '../../reducers';
+import {isReadOnly} from '../../../shared/utils/shared-utils';
+import {ExperimentDetailsUpdated} from '../../actions/common-experiments-info.actions';
 
 @Component({
-  selector   : 'sm-experiment-output',
+  selector: 'sm-experiment-output',
   templateUrl: './experiment-output.component.html',
-  styleUrls  : ['./experiment-output.component.scss']
+  styleUrls: ['./experiment-output.component.scss']
 })
 export class ExperimentOutputComponent implements OnInit, OnDestroy {
 
@@ -29,6 +33,7 @@ export class ExperimentOutputComponent implements OnInit, OnDestroy {
   private paramsSubscription: Subscription;
   private selectedExperimentSubscription: Subscription;
   public infoData$: Observable<any>;
+  public backdropActive$: Observable<any>;
   public currentComponent: string;
   public currentMetric: string;
   public minimized: boolean;
@@ -40,11 +45,15 @@ export class ExperimentOutputComponent implements OnInit, OnDestroy {
   public routerConfig: string[];
   private isAppVisible$: Observable<boolean>;
   private selectedExperiments$: Observable<Array<any>>;
+  isSharedAndNotOwner$: Observable<boolean>;
+  public isExample: boolean;
 
-  constructor(private store: Store<ExperimentOutputState>, private router: Router, private route: ActivatedRoute, private syncSelector: SmSyncStateSelectorService) {
+  constructor(private store: Store<ExperimentOutputState>, private router: Router, private route: ActivatedRoute) {
     this.infoData$ = this.store.select(selectExperimentInfoData);
+    this.isSharedAndNotOwner$ = this.store.select((selectIsSharedAndNotOwner));
     this.autoRefreshState$ = this.store.select(selectAutoRefresh);
     this.isAppVisible$ = this.store.select(selectAppVisible);
+    this.backdropActive$ = this.store.select(selectBackdropActive);
 
   }
 
@@ -64,6 +73,7 @@ export class ExperimentOutputComponent implements OnInit, OnDestroy {
     )
       .subscribe(([experimentId, selectedExperiments]) => {
         this.selectedExperiment = selectedExperiments.find(experiment => experiment.id === experimentId);
+        this.isExample = isReadOnly( this.selectedExperiment);
         this.store.dispatch(new ResetExperimentMetrics());
         this.store.dispatch(new infoActions.ResetExperimentInfo());
         this.store.dispatch(new infoActions.GetExperimentInfo(experimentId));
@@ -76,7 +86,10 @@ export class ExperimentOutputComponent implements OnInit, OnDestroy {
     });
     this.selectedExperimentSubscription = this.store.pipe(select(selectSelectedExperiment),
       filter(experiment => experiment?.id === this.experimentId))
-      .subscribe(experiment => this.selectedExperiment = experiment);
+      .subscribe(experiment => {
+        this.selectedExperiment = experiment;
+        this.isExample = isReadOnly( this.selectedExperiment);
+      });
   }
 
 
@@ -104,14 +117,22 @@ export class ExperimentOutputComponent implements OnInit, OnDestroy {
   }
 
   minimizeView() {
-    this.router.navigateByUrl(`projects/${this.projectId}/experiments/${this.experimentId}/info-output/${this.route.firstChild.routeConfig.path}`);
-  }
-
-  downloadLog() {
-    this.store.dispatch(downloadFullLog({experimentId: this.experimentId}));
+    const part = this.route.firstChild.routeConfig.path;
+    if (['log', 'metrics/scalar', 'metrics/plots', 'debugImages'].includes(part)) {
+      this.router.navigateByUrl(`projects/${this.projectId}/experiments/${this.experimentId}/info-output/${part}`);
+    } else {
+      this.router.navigateByUrl(`projects/${this.projectId}/experiments/${this.experimentId}/${part}`);
+    }
   }
 
   toggleSettingsBar() {
     this.store.dispatch(toggleSettings());
+  }
+  updateExperimentName(name) {
+    if (name.trim().length > 2) {
+      this.store.dispatch(new ExperimentDetailsUpdated({id: this.selectedExperiment.id, changes: {name: name}}));
+    } else {
+      this.store.dispatch(new AddMessage(MESSAGES_SEVERITY.ERROR, 'Name must be more than three letters long'));
+    }
   }
 }

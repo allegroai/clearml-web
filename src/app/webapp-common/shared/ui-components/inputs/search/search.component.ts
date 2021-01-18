@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
 import {Subject, timer} from 'rxjs';
-import {debounce, filter} from 'rxjs/operators';
+import {debounce, filter, tap} from 'rxjs/operators';
 
 
 @Component({
@@ -17,6 +17,8 @@ export class SearchComponent implements OnInit {
   @Input() debounceTime = 300;
   @Input() placeholder: string = 'Type to search';
   @Input() hideIcons: boolean = false;
+  @Input() expandOnHover = false;
+  public empty = true;
 
   @Input() set value(value: string) {
     this.searchBarInput.nativeElement.value = value || '';
@@ -27,6 +29,7 @@ export class SearchComponent implements OnInit {
 
   ngOnInit(): void {
     this.value$.pipe(
+      tap((val: string) => this.empty = val?.length === 0),
       debounce((val: string) => val.length > 0 ? timer(this.debounceTime) : timer(0)),
       filter(val => val.length >= this.minimumChars || val.length === 0)
     )

@@ -1,8 +1,8 @@
-<div [class]="'editable-container '+ containerClass " [ngClass]="{'edit-mode': inEditMode && !disableInEditMode}"
+<div class="editable-container" [class]="containerClass" [class.edit-mode]="inEditMode && !disableInEditMode" [class.disable-edit]="disableEditable"
      (dblclick)="editable && !disableEditable && (!inEditMode) && editModeChanged(true)">
   <div class="edit-wrapper" *ngIf="editable && !disableEditable && !inEditMode">
     <ng-content select="[extra-buttons]"></ng-content>
-    <button id="editSection" class="edit-pen btn-dark-fill pointer"
+    <button *ngIf="!hideEditButton" id="editSection" class="edit-pen btn-dark-fill pointer"
             (click)="editModeChanged(true)">
       <i class="fa fa-pencil"></i> EDIT
     </button>
@@ -14,7 +14,7 @@
       *ngIf="!hideSaveButton"
       [disabled]="disableSave" label="SAVE"
       [loading]="saving"
-      (click)="(!disableSave) && saveSection()"
+      (click)="!disableSave && !saving && saveSection()"
       class="action-button"></sm-loading-button>
   </div>
 </div>

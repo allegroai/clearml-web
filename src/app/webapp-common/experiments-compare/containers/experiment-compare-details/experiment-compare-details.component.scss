@@ -1,6 +1,10 @@
 @import "../experiment-compare-base.component";
 
 :host {
+  display: block;
+  height: 100%;
+  padding-top: 12px;
+
   .section {
     pre {
       display: inline-block;
@@ -10,7 +14,6 @@
       &.with-ellipsis {
         overflow: hidden;
         text-overflow: ellipsis;
-        width: 370px;
       }
 
       &:hover {

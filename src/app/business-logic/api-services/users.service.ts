@@ -39,6 +39,8 @@ import { UsersUpdateResponse } from '../model/users/usersUpdateResponse';
 
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
 import { Configuration }                                     from '../configuration';
+import {UsersGetTermsOfUseResponse} from '../model/users/usersGetTermsOfUseResponse';
+import {UsersGetTermsOfUseRequest} from '../model/users/usersGetTermsOfUseRequest';
 
 
 @Injectable()
@@ -74,7 +76,7 @@ export class ApiUsersService {
 
 
     /**
-     * 
+     *
      * Internal. Create a new user object. Reserved for internal use.
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -119,7 +121,7 @@ export class ApiUsersService {
     }
 
     /**
-     * 
+     *
      * Internal. Delete a user
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -164,7 +166,7 @@ export class ApiUsersService {
     }
 
     /**
-     * 
+     *
      * Internal. Get all user objects
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -209,7 +211,7 @@ export class ApiUsersService {
     }
 
     /**
-     * 
+     *
      * Internal. Get all user objects
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -254,7 +256,7 @@ export class ApiUsersService {
     }
 
     /**
-     * 
+     *
      * Internal. Gets user information
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -299,7 +301,7 @@ export class ApiUsersService {
     }
 
     /**
-     * 
+     *
      * Internal. Gets current user information, based on the authenticated user making   the call.
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -344,7 +346,7 @@ export class ApiUsersService {
     }
 
     /**
-     * 
+     *
      * Internal. Get user preferences
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -389,7 +391,7 @@ export class ApiUsersService {
     }
 
     /**
-     * 
+     *
      * Internal. Set user preferences
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -434,7 +436,7 @@ export class ApiUsersService {
     }
 
     /**
-     * 
+     *
      * Internal. Update a user object
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -478,4 +480,48 @@ export class ApiUsersService {
         );
     }
 
+    /**
+     *
+     * Internal. Get terms of use information
+     * @param request request body
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public usersGetTermsOfUse(request: UsersGetTermsOfUseRequest, options?: any, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+        if (request === null || request === undefined) {
+            throw new Error('Required parameter request was null or undefined when calling usersGetTermsOfUse.');
+        }
+
+        let headers = this.defaultHeaders;
+        if (options && options.async_enable) {
+            headers = headers.set(this.configuration.asyncHeader, '1');
+        }
+
+        // to determine the Accept header
+        const httpHeaderAccepts: string[] = [
+            'application/json'
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers = headers.set("Accept", httpHeaderAcceptSelected);
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+        ];
+        const httpContentTypeSelected:string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected != undefined) {
+            headers = headers.set("Content-Type", httpContentTypeSelected);
+        }
+
+        return this.apiRequest.post<UsersGetTermsOfUseResponse>(`${this.basePath}/users.get_terms_of_use`,
+          request,
+          {
+              withCredentials: this.configuration.withCredentials,
+              headers: headers,
+              observe: observe,
+              reportProgress: reportProgress
+          }
+        );
+    }
 }

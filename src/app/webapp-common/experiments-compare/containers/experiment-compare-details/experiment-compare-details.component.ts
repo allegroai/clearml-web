@@ -1,8 +1,17 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  ElementRef, HostListener,
+  OnInit, QueryList,
+  ViewChild,
+  ViewChildren
+} from '@angular/core';
 import {select, Store} from '@ngrx/store';
 import {experimentListUpdated, setExperiments} from '../../actions/experiments-compare-details.actions';
 import {selectExperimentsDetails} from '../../reducers';
-import {filter, tap} from 'rxjs/operators';
+import {filter, take, tap} from 'rxjs/operators';
 import {ExperimentCompareTree, IExperimentDetail} from '../../../../features/experiments-compare/experiments-compare-models';
 import {convertExperimentsArrays, getAllKeysEmptyObject, isDetailsConverted} from '../../jsonToDiffConvertor';
 import {ExperimentCompareBase} from '../experiment-compare-base';
@@ -16,13 +25,28 @@ import {ConfigurationItem} from '../../../../business-logic/model/tasks/configur
   styleUrls: ['./experiment-compare-details.component.scss', '../../cdk-drag.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ExperimentCompareDetailsComponent extends ExperimentCompareBase implements OnInit {
+export class ExperimentCompareDetailsComponent extends ExperimentCompareBase implements OnInit, AfterViewInit {
   public showEllipsis: boolean = true;
+  public nativeWidth = 410;
 
-  constructor(public router: Router,
-              public store: Store<IExperimentInfoState>,
-              public changeDetection: ChangeDetectorRef,
-              public activeRoute: ActivatedRoute) {
+  private treeCardBody: HTMLDivElement;
+  @ViewChildren('treeCardBody') treeCardBodies: QueryList<ElementRef<HTMLDivElement>>;
+
+  @HostListener('window:resize')
+  afterResize() {
+    window.setTimeout(() => {
+      this.nativeWidth = Math.max(this.treeCardBody.getBoundingClientRect().width, 410);
+      this.cdr.detectChanges();
+    });
+  }
+
+  constructor(
+    public router: Router,
+    public store: Store<IExperimentInfoState>,
+    public changeDetection: ChangeDetectorRef,
+    public activeRoute: ActivatedRoute,
+    private cdr: ChangeDetectorRef
+  ) {
     super(router, store, changeDetection, activeRoute);
   }
 
@@ -48,6 +72,15 @@ export class ExperimentCompareDetailsComponent extends ExperimentCompareBase imp
       this.resetComponentState(experiments);
       this.calculateTree(experiments);
     });
+  }
+
+  ngAfterViewInit() {
+    this.treeCardBodies.changes
+      .pipe(filter(list => list.first), take(1))
+      .subscribe((list: QueryList<ElementRef<HTMLDivElement>>) => {
+        this.treeCardBody = list.first.nativeElement;
+        this.nativeWidth = Math.max(this.treeCardBody.getBoundingClientRect().width, 410);
+      });
   }
 
   buildCompareTree(experiments: Array<IExperimentDetail>): ExperimentCompareTree {

@@ -15,10 +15,13 @@ import {last, findIndex} from 'lodash/fp';
 import * as Convert from 'ansi-to-html';
 import {Log} from '../../reducers/common-experiment-output.reducer';
 
+import hasAnsi from 'has-ansi';
+
 interface LogRow {
   timestamp?: string;
   entry: string;
   separator?: boolean;
+  hasAnsi?: boolean;
 }
 
 @Component({
@@ -47,8 +50,9 @@ export class ExperimentLogInfoComponent implements OnInit, OnDestroy {
   private prevLineOffset: number;
 
   @ViewChild('LogContainer', {static: true}) private logContainer: CdkVirtualScrollViewport;
-
   @Input() beginningOfLog: boolean;
+  private hasAnsi: any;
+
   @Input() set filterString(filter: string) {
     this.shouldFocusLog = false;
     setTimeout(() => this.shouldFocusLog = true, 1000);
@@ -87,22 +91,26 @@ export class ExperimentLogInfoComponent implements OnInit, OnDestroy {
         window.setTimeout(() => {
           this.logContainer.scrollToIndex(this.lines.length);
           this.canRefresh = true;
-          window.setTimeout(() => this.scrolling = false, 50);
+          window.setTimeout(() => this.scrolling = false, 80);
         }, 10);
       }
     }
-    this.fetching = false;
+    window.setTimeout(() => {
+      this.fetching = false;
+      this.cdr.detectChanges();
+    }, 50);
   }
 
-  @Output() fetchMore = new EventEmitter<{direction: string; from?: number}>();
+  @Output() fetchMore = new EventEmitter<{ direction: string; from?: number }>();
 
   constructor(private cdr: ChangeDetectorRef) {
     this.convert = new Convert();
+    this.hasAnsi = hasAnsi;
   }
 
   ngOnInit() {
     this.scrollSubscription = this.logContainer.elementScrolled().subscribe((event: Event) => {
-      if(this.shouldFocusLog) {
+      if (this.shouldFocusLog) {
         setTimeout(() => (event.target as HTMLElement).focus(), 50);
       }
     });
@@ -115,8 +123,7 @@ export class ExperimentLogInfoComponent implements OnInit, OnDestroy {
             this.cdr.detectChanges();
             this.fetchPrev = true;
             this.fetchMore.emit({direction: 'prev', from: this.orgLogs?.[0]?.timestamp});
-          }
-          else if (location >= this.lines.length - itemsInView && location > this.prevLocation) {
+          } else if (location >= this.lines.length - itemsInView && location > this.prevLocation) {
             this.fetching = true;
             this.cdr.detectChanges();
             this.fetchMore.emit({direction: 'next', from: last(this.orgLogs)?.timestamp});
@@ -160,12 +167,14 @@ export class ExperimentLogInfoComponent implements OnInit, OnDestroy {
       .forEach(logItem => {
         let first = true;
         logItem.msg.split('\n').filter(msg => !!msg).forEach((msg: string) => {
-          const converted = msg ? this.convert.toHtml(msg) : '';
+          const hasAnsi = this.hasAnsi(msg);
+          const converted = msg ? (hasAnsi ? this.convert.toHtml(msg) :
+            msg) : '';
           if (first) {
-            this.lines.push({timestamp: logItem['timestamp'] || logItem['@timestamp'], entry: converted});
+            this.lines.push({timestamp: logItem['timestamp'] || logItem['@timestamp'], entry: converted, hasAnsi: hasAnsi});
             first = false;
           } else {
-            this.lines.push({entry: converted});
+            this.lines.push({entry: converted, hasAnsi: hasAnsi});
           }
         });
         this.lines[this.lines.length - 1].separator = true;

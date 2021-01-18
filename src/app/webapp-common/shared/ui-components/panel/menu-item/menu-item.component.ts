@@ -12,11 +12,13 @@ export class MenuItemComponent {
   @Input() disabled: boolean    = false;
   @Input() itemLabel: string;
   @Input() itemValue: string;
+  @Input() itemTooltip: string;
   @Input() iconClass: string;
   @Input() enableIcon: boolean  = true;
   @Input() selectable: boolean  = false;
   @Input() checked: boolean     = false;
   @Input() sortOrder: number;
+  @Input() enableTooltip: boolean;
   @Output() itemClicked         = new EventEmitter();
   @Output() removeItemClicked   = new EventEmitter();
   @Output() closeMenu           = new EventEmitter();

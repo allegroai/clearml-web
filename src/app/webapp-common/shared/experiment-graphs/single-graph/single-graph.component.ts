@@ -39,6 +39,7 @@ export class SingleGraphComponent extends PlotlyGraphBase {
     return this._chart;
   }
 
+  @Input() moveLegendToTitle = false;
   @Input() legendStringLength: number;
   @Input() xAxisType: ScalarKeyEnum;
 
@@ -73,9 +74,9 @@ export class SingleGraphComponent extends PlotlyGraphBase {
     private colorHash: ColorHashService,
     private changeDetector: ChangeDetectorRef,
     protected elementRef: ElementRef,
-    protected store: Store<any>
+    protected store: Store
   ) {
-    super(store, renderer, elementRef);
+    super(store);
   }
 
   drawGraph(forceRedraw = false) {
@@ -133,7 +134,7 @@ export class SingleGraphComponent extends PlotlyGraphBase {
         'traceorder': 'normal',
         'xanchor': 'left',
         'yanchor': 'top',
-        'x': 1,
+        'x': this.moveLegendToTitle? 0 : 1,
         'y': 1,
         'borderwidth': 2,
         'bordercolor': '#FFFFFF',
@@ -259,7 +260,7 @@ export class SingleGraphComponent extends PlotlyGraphBase {
         }
       });
     }
-    if (!['table'].includes(get('data[0].type', graph)) && graph.layout?.showlegend !== false) {
+    if (!['table'].includes(get('data[0].type', graph)) && graph.layout?.showlegend !== false && !this.moveLegendToTitle) {
       modBarButtonsToAdd.push({
         name: 'Hide legend',
         title: this.getHideButtonTitle(),
@@ -301,7 +302,9 @@ export class SingleGraphComponent extends PlotlyGraphBase {
     }
 
     const graph = this.chart;
-    graph.data = this.addIdToDuplicateExperiments(this.chart.data, this.chart.task);
+    if (this.isCompare) {
+      graph.data = this.addIdToDuplicateExperiments(this.chart.data, this.chart.task);
+    }
     const smoothLines = [];
     const timeUnit = chooseTimeUnit(graph.data) as { time: number; str: string };
 
@@ -324,6 +327,7 @@ export class SingleGraphComponent extends PlotlyGraphBase {
         const finalText = wrappedText + `<span style="display: none;" class="color-key" data-color-key="${colorKey}"></span>`;
         graph.data[i].name = finalText;
       }
+
       const color = this.colorHash.initColor(this.extractColorKey(graph.data[i].name));
       this._reColorTrace(graph.data[i], color);
 
@@ -340,9 +344,9 @@ export class SingleGraphComponent extends PlotlyGraphBase {
   }
 
   public generateColorKey(graph: any, i) {
-    const variant = graph.data[i].name;
+    const variant = graph.data[i].name.replace(/\.[^.]+$/, '');
     if (!this.isCompare) {
-      return `${variant}-${graph.metric}`;
+      return `${variant}?`;  // "?" to adjust desired colors (legend title is removing this ?)
     } else {
       const task = graph.data[i].task;
       return `${variant}-${task}`;
@@ -415,10 +419,26 @@ export class SingleGraphComponent extends PlotlyGraphBase {
   }
 
   private subscribeColorButtons(container) {
+    if (this.scaleExists) {
+      const legend = container.querySelector('.groups') as SVGGElement;
+      legend.style.transform = 'translate(-10px, 0)';
+    }
+    if (this.moveLegendToTitle) {
+      const graphTitle = container.querySelector('.gtitle') as SVGTextElement;
+      const endOfTitlePosition = (this.singleGraphContainer.nativeElement.offsetWidth / 2) + (graphTitle.getClientRects()[0].width / 2);
+      const legend = container.querySelector('.legend') as SVGGElement;
+      legend.style.transform = `translate(${endOfTitlePosition}px, 30px)`;
+      legend.classList.add('hide-text');
+    }
     const traces = container.querySelectorAll('.traces');
     for (let i = 0; i < traces.length; i++) {
-      const textEl = traces[i].querySelector('.legendtext');
+      const textEl = traces[i].querySelector('.legendtext') as SVGTextElement;
       const text = textEl ? this.extractColorKey(textEl.getAttribute('data-unformatted')) : '';
+
+      const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+      title.textContent = text.replace('?','');
+      textEl.parentElement.appendChild(title);
+
       const layers = traces[i].querySelector('.layers');
       const parentEl = layers.parentElement;
       parentEl.removeChild(layers); // Needed because z-index in svg is by element order

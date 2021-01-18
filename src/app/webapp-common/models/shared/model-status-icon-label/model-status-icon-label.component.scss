@@ -7,7 +7,7 @@ span{
 }
 
 .created {
-  color: #7480aa;
+  color: $grey-purple;
 }
 
 .completed {
@@ -22,20 +22,20 @@ span{
 }
 
 .queued {
-  color: $neon-yellow-original-notgoodinchrome;
+  color: $neon-yellow;
   opacity: 0.5;
 }
 
 .in_progress{
-  color: $neon-yellow-original-notgoodinchrome;
+  color: $neon-yellow;
 }
 
 .published {
-  color: #4a90e2;
+  color: $blue-sky;
 }
 
 .stopped {
-  color: #7480aa;
+  color: $grey-purple;
 }
 
 .middle {

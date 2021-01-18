@@ -2,12 +2,14 @@ import {Component, HostListener, Inject} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {JsonPipe} from '@angular/common';
 import {validateJson} from '../../../utils/validation-utils';
+import {Store} from '@ngrx/store';
+import {AddMessage} from '../../../../core/actions/layout.actions';
 
 @Component({
-  selector   : 'sm-edit-json',
+  selector: 'sm-edit-json',
   templateUrl: './edit-json.component.html',
-  styleUrls  : ['./edit-json.component.scss'],
-  providers  : [{provide: JsonPipe, useClass: JsonPipe}]
+  styleUrls: ['./edit-json.component.scss'],
+  providers: [{provide: JsonPipe, useClass: JsonPipe}]
 })
 export class EditJsonComponent {
   public errors: Map<string, boolean>;
@@ -38,7 +40,8 @@ export class EditJsonComponent {
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: { textData: string; readOnly: boolean; title: string; typeJson: boolean; placeHolder: string },
     private dialogRef: MatDialogRef<EditJsonComponent, any>,
-    private jsonPipe: JsonPipe
+    private jsonPipe: JsonPipe,
+    private store: Store<any>
   ) {
     this.typeJson = data.typeJson;
     this.placeHolder = data.placeHolder;
@@ -49,23 +52,19 @@ export class EditJsonComponent {
 
   closeDialog(isConfirmed) {
     if (isConfirmed) {
-      if (!this.errors || !this.textData) {
-        this.dialogRef.close(this.textData ? (this.typeJson ? this.jsonPipe.transform(this.textData) : this.textData) : '');
-      } else {
-        this.showErrors = true;
+      try {
+        this.dialogRef.close(this.textData ? (this.typeJson ? JSON.parse(this.textData) : this.textData) : '');
+      } catch (e) {
+        this.store.dispatch(new AddMessage('warn', 'Not a valid JSON'))
+        // this.showErrors = true; // shows warning message bellow texterea
       }
     } else {
       this.dialogRef.close();
     }
   }
 
-  metadataChanged($event: string) {
+  textChanged() {
     this.showErrors = false;
-    this.textData = $event;
-  }
-
-  errorChanged(errors: Map<string, boolean>) {
-    this.errors = errors;
   }
 
   textAreaKeydown(e: KeyboardEvent) {

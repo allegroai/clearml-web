@@ -4,14 +4,13 @@ import {
   selectIsExperimentInProgress, selectSelectedExperimentSettings,
   selectSelectedSettingsHiddenPlot, selectSplitSize
 } from '../../reducers';
-import {Observable, Subscription} from 'rxjs';
+import {Observable, of, Subscription} from 'rxjs';
 import {select, Store} from '@ngrx/store';
 import {SelectableListItem} from '../../../shared/ui-components/data/selectable-list/selectable-list.model';
 import {distinctUntilChanged, filter, map} from 'rxjs/operators';
 import {selectRouterParams} from '../../../core/reducers/router-reducer';
 import {scrollToElement} from '../../../shared/utils/shared-utils';
 import {ActivatedRoute, Router} from '@angular/router';
-import {of} from 'rxjs/internal/observable/of';
 import {IExperimentInfoState} from '../../../../features/experiments/reducers/experiment-info.reducer';
 import {ExperimentPlotsRequested, ResetExperimentMetrics, SetExperimentMetricsSearchTerm,
   SetExperimentSettings} from '../../actions/common-experiment-output.actions';
@@ -83,13 +82,13 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.minimized         = this.activeRoute.snapshot.routeConfig.data.minimized;
-    this.listOfHidden      = this.minimized ? of([]) : this.store.pipe(select(selectSelectedSettingsHiddenPlot));
+    this.listOfHidden      = this.minimized ? of([]) : this.store.select(selectSelectedSettingsHiddenPlot);
     this.plotsSubscription = this.plots$
       .subscribe((metricsPlots) => {
         this.refreshDisabled = false;
         const groupedPlots   = groupIterations(metricsPlots);
         this.plotsList       = this.preparePlotsList(groupedPlots);
-        this.graphs          = convertPlots(groupedPlots);
+        this.graphs          = convertPlots(groupedPlots, this.experimentId);
         this.changeDetection.detectChanges();
       });
 

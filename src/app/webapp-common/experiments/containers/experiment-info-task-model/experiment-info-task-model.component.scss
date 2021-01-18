@@ -1,0 +1,26 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  .label-rows-container{
+    display: block;
+    position: relative;
+    padding: 24px;
+  }
+  /deep/ sm-labeled-row .label-container {
+    width: 175px !important;
+  }
+  .col-6{
+    padding: 0px;
+  }
+
+  .editable-design {
+    flex: 1;
+    min-height: 250px;
+  }
+
+  sm-experiment-task-model-form {
+    height: 100%;
+  }
+}

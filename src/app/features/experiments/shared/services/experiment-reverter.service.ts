@@ -5,7 +5,7 @@ import {CommonExperimentReverterService} from '../../../../webapp-common/experim
 @Injectable({providedIn: 'root'})
 export class ExperimentReverterService {
 
-  constructor(private commonExperimentReverterService: CommonExperimentReverterService) {
+  constructor(public commonExperimentReverterService: CommonExperimentReverterService) {
   }
 
   revertExperiment(experiment: ISelectedExperiment): IExperimentInfo {

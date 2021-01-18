@@ -1,3 +1,5 @@
+@import "../../styles/variables";
+
 .loader-container {
   position: fixed;
   display: flex;
@@ -15,7 +17,7 @@
   height: 80px;
   border-radius: 100%;
   border: 10px solid rgba(90, 101, 142, 0.8);
-  border-top-color: #4D66FF;
+  border-top-color: $purple;
   animation: spin 1s infinite linear;
   @keyframes spin {
     100% {
@@ -30,7 +32,7 @@
   left: 60px;
   width: calc(100% - 60px);
   height: calc(100% - 60px);
-  background: #1A1E2C;
+  background: $blue-800;
   opacity: 0;
   z-index: 999998;
   animation: showup 0.2s both normal;

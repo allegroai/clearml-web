@@ -26,7 +26,7 @@ export class TableCardFilterTemplateComponent {
   @Input() fixedOptionsSubheader;
   @Input() subValue: string[] = [];
   @Input() subOptions: {label: string; value: string}[];
-  @Input() options: { [col: string]: { label: string; value: string }[] };
+  @Input() options: { [col: string]: { label: string; value: string; tooltip?: string }[] };
   @Input() columns: ISmCol[];
   @Output() subFilterChanged = new EventEmitter();
   @Output() filterChanged = new EventEmitter();
@@ -71,10 +71,14 @@ export class TableCardFilterTemplateComponent {
 
   clearSearch(key: string) {
     this.searchTerms[key]='';
-    this.setSearchTerm({target:{value:''}}, key)
+    this.setSearchTerm({target:{value:''}}, key);
   }
 
   getColName(id: string) {
     return this.columns.find(col => col.id === id)?.header || id;
+  }
+
+  searchable(key: string) {
+    return this.columns.find(col => col.id === key)?.searchableFilter;
   }
 }

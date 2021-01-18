@@ -1,4 +1,4 @@
-import {MessageSeverityEnum, VIEW_ACTIONS} from '../../../app.constants';
+import {MessageSeverityEnum, VIEW_ACTIONS, VIEW_PREFIX} from '../../../app.constants';
 import {Action, createAction, props} from '@ngrx/store';
 import {omit} from 'lodash/fp';
 
@@ -93,18 +93,16 @@ export class AddMessage implements Action {
   }
 }
 
-export class SetServerUpdatesAvailable implements Action {
-  public type = VIEW_ACTIONS.SET_SERVER_UPDATES_AVAILABLE;
-  public payload: { availableUpdates: any };
-
-  constructor(availableUpdates: any) {
-    this.payload = {availableUpdates};
-  }
-}
+export const setServerUpdatesAvailable = createAction(
+  VIEW_ACTIONS.SET_SERVER_UPDATES_AVAILABLE,
+  props<{availableUpdates}>()
+);
 
 export const setScaleFactor = createAction(
   VIEW_ACTIONS + '[set scale]',
   props<{scale: number}>()
-  );
+);
 
+export const neverShowPopupAgain = createAction(VIEW_PREFIX + 'NEVER_SHOW_POPUP_AGAIN', props<{ popupId: string; reset?: boolean }>());
 
+export const plotlyReady = createAction(VIEW_ACTIONS + '[plotly ready]');

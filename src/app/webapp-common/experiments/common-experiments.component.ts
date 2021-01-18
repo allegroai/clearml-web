@@ -1,5 +1,30 @@
-import {ChangeDetectionStrategy, Component, OnDestroy, OnInit} from '@angular/core';
-import {selectExperimentsHiddenTableCols, selectExperimentsList, selectExperimentsMetricsCols, selectExperimentsTableCols, selectExperimentsTableColsOrder, selectGlobalFilter, selectHyperParamsVariants, selectIsExperimentInEditMode, selectNoMoreExperiments, selectSelectedExperiments, selectSelectedTableExperiment, selectShowAllSelectedIsActive, selectTableFilters, selectTableSortField, selectTableSortOrder, selectExperimentsUsers, selectExperimentsTypes, selectExperimentsTags} from './reducers/index';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
+import {
+  selectExperimentsHiddenTableCols,
+  selectExperimentsList,
+  selectExperimentsMetricsCols,
+  selectExperimentsTableCols,
+  selectExperimentsTableColsOrder,
+  selectGlobalFilter,
+  selectHyperParamsVariants,
+  selectIsExperimentInEditMode,
+  selectNoMoreExperiments,
+  selectSelectedExperiments,
+  selectSelectedTableExperiment,
+  selectShowAllSelectedIsActive,
+  selectTableFilters,
+  selectTableSortField,
+  selectTableSortOrder,
+  selectExperimentsUsers,
+  selectExperimentsTypes,
+  selectSplitSize,
+  selectExperimentsParents, selectActiveParentsFilter
+} from './reducers/index';
 import {selectIsArchivedMode, selectProjectSystemTags, selectProjectTags} from '../core/reducers/projects.reducer';
 import {select, Store} from '@ngrx/store';
 import {ColHeaderTypeEnum, ISmCol, TableSortOrderEnum} from '../shared/ui-components/data/table/table.consts';
@@ -8,33 +33,58 @@ import {get, isEqual} from 'lodash/fp';
 import {selectRouterParams} from '../core/reducers/router-reducer';
 import {filter, map, skip, tap, withLatestFrom, distinctUntilChanged} from 'rxjs/operators';
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
-import {combineLatest, Observable, Subscription} from 'rxjs';
+import {combineLatest, Observable, Subscription, interval} from 'rxjs';
 import {ConfirmDialogComponent} from '../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
-import {SmSyncStateSelectorService} from '../core/services/sync-state-selector.service';
-import {selectAutoRefresh, selectBackdropActive} from '../core/reducers/view-reducer';
+import {selectAutoRefresh, selectBackdropActive, selectNeverShowPopups} from '../core/reducers/view-reducer';
 import {InitSearch, ResetSearch} from '../common-search/common-search.actions';
 import {selectSearchQuery} from '../common-search/common-search.reducer';
 import {ITableExperiment} from './shared/common-experiment-model.model';
 import {IExperimentsViewState} from '../../features/experiments/reducers/experiments-view.reducer';
-import {selectMetricsLoading, selectMetricVariants} from '../../features/experiments/reducers';
+import {
+  selectIsSharedAndNotOwner,
+  selectMetricsLoading,
+  selectMetricVariants,
+  selectSelectedExperiment
+} from '../../features/experiments/reducers';
 import {EXPERIMENTS_TABLE_COL_FIELDS} from '../../features/experiments/shared/experiments.const';
 import * as experimentsActions from './actions/common-experiments-view.actions';
-import {AddCol, ClearHyperParamsCols, GetCustomHyperParams, GetCustomMetrics, getProjectTypes, getUsers, RemoveCol, ResetSortOrder, SetShowAllSelectedIsActive} from './actions/common-experiments-view.actions';
+import {
+  AddCol,
+  ClearHyperParamsCols,
+  GetCustomHyperParams,
+  GetCustomMetrics,
+  getProjectTypes,
+  RemoveCol,
+  ResetSortOrder,
+  SetShowAllSelectedIsActive,
+  setSplitSize
+} from './actions/common-experiments-view.actions';
 import {ExperimentsViewModesEnum} from './shared/common-experiments.const';
 import {MetricVariantResult} from '../../business-logic/model/projects/metricVariantResult';
-import {interval} from 'rxjs/internal/observable/interval';
 import {AUTO_REFRESH_INTERVAL} from '../../app.constants';
 import {SetAutoRefresh} from '../core/actions/layout.actions';
-import {getTags, ResetProjectSelection} from '../core/actions/projects.actions';
-import {decodeColumns, decodeFilter, decodeOrder, MetricColumn} from '../shared/utils/tableParamEncode';
+import {getCompanyTags, getTags, ResetProjectSelection} from '../core/actions/projects.actions';
+import {
+  decodeColumns,
+  decodeFilter,
+  decodeOrder,
+  getValueTypeName,
+  MetricColumn
+} from '../shared/utils/tableParamEncode';
 import {BaseEntityPage} from '../shared/entity-page/base-entity-page';
 import {User} from '../../business-logic/model/users/user';
-import {groupHyperParams} from '../shared/utils/shared-utils';
+import {groupHyperParams, isReadOnly} from '../shared/utils/shared-utils';
+import {selectCurrentUser} from '../core/reducers/users-reducer';
+import {GetCurrentUserResponseUserObject} from '../../business-logic/model/users/getCurrentUserResponseUserObject';
+import {ISelectedExperiment} from '../../features/experiments/shared/experiment-info.model';
+import {showConfirmArchiveExperiments} from './shared/common-experiments.utils';
+import {SmSyncStateSelectorService} from '../core/services/sync-state-selector.service';
+import {ProjectsGetTaskParentsResponseParents} from '../../business-logic/model/projects/projectsGetTaskParentsResponseParents';
 
 @Component({
-  selector       : 'sm-common-experiments',
-  templateUrl    : './common-experiments.component.html',
-  styleUrls      : ['./common-experiments.component.scss'],
+  selector: 'sm-common-experiments',
+  templateUrl: './common-experiments.component.html',
+  styleUrls: ['./common-experiments.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CommonExperimentsComponent extends BaseEntityPage implements OnInit, OnDestroy {
@@ -54,14 +104,12 @@ export class CommonExperimentsComponent extends BaseEntityPage implements OnInit
   public filteredTableCols$: Observable<ISmCol[]>;
   public tableCols$: Observable<ISmCol[]>;
   public metricVariants$: Observable<any>;
-  public hyperParams$: Observable<any[] >;
+  public hyperParams$: Observable<{ [section: string]: any[] }>;
   private hiddenTableCols$: Observable<any>;
   private metricTableCols$: Observable<any>;
   private searchSubs: Subscription;
-  // private searchQuerySubs: Subscription;
-  public selectedExperiment$: Observable<ITableExperiment>;
+  public selectedTableExperiment$: Observable<ITableExperiment>;
   private ExperimentFromUrlSub: Subscription;
-  public showInfo$: Observable<boolean>;
   private refreshing: boolean;
   public backdropActive$: Observable<any>;
   private searchQuery$: Observable<string>;
@@ -72,19 +120,29 @@ export class CommonExperimentsComponent extends BaseEntityPage implements OnInit
   private sortField: string;
   public tableColsOrder$: Observable<string[]>;
   public users$: Observable<Array<User>>;
+  public parent$: Observable<ProjectsGetTaskParentsResponseParents[]>;
+  public activeParentsFilter$: Observable<ProjectsGetTaskParentsResponseParents[]>;
   public tags$: Observable<string[]>;
   public systemTags$: Observable<string[]>;
   public types$: Observable<Array<any>>;
+  protected setSplitSizeAction = setSplitSize;
+  public currentUser$: Observable<GetCurrentUserResponseUserObject>;
+  public selectedExperiment$: Observable<ISelectedExperiment>;
+  public isSharedAndNotOwner$: Observable<boolean>;
+  public readOnlySelection: boolean;
 
   get selectedProject() {
     return this.route.parent.snapshot.params.projectId;
   }
 
   constructor(
-    protected store: Store<IExperimentsViewState>, private route: ActivatedRoute,
+    protected store: Store<IExperimentsViewState>,
+    protected syncSelector: SmSyncStateSelectorService,
+    private route: ActivatedRoute,
     private router: Router, private dialog: MatDialog
   ) {
     super(store);
+    this.selectSplitSize$ = this.store.select(selectSplitSize);
     this.tableSortField$ = this.store.select(selectTableSortField).pipe(tap(field => this.sortField = field));
     this.backdropActive$ = this.store.select(selectBackdropActive);
     this.noMoreExperiments$ = this.store.select(selectNoMoreExperiments);
@@ -93,16 +151,25 @@ export class CommonExperimentsComponent extends BaseEntityPage implements OnInit
     this.searchValue$ = this.store.select(selectGlobalFilter);
     this.isArchived$ = this.store.select(selectIsArchivedMode);
     this.showAllSelectedIsActive$ = this.store.select(selectShowAllSelectedIsActive);
-    this.selectedExperiment$ = this.store.select(selectSelectedTableExperiment);
-    this.selectedExperiments$ = this.store.pipe(select(selectSelectedExperiments), tap(selectedExperiments => this.selectedExperiments = selectedExperiments));
+    this.selectedTableExperiment$ = this.store.select(selectSelectedTableExperiment);
+    this.selectedExperiment$ = this.store.select(selectSelectedExperiment);
+    this.selectedExperiments$ = this.store.select(selectSelectedExperiments)
+      .pipe(tap(selectedExperiments => {
+        this.selectedExperiments = selectedExperiments;
+        this.readOnlySelection = this.selectedExperiments.some(exp => isReadOnly(exp));
+      }));
     this.hiddenTableCols$ = this.store.select(selectExperimentsHiddenTableCols);
     this.searchQuery$ = this.store.select(selectSearchQuery);
     this.autoRefreshState$ = this.store.select(selectAutoRefresh);
     this.isExperimentInEditMode$ = this.store.select(selectIsExperimentInEditMode);
+    this.isSharedAndNotOwner$ = this.store.select(selectIsSharedAndNotOwner);
     this.users$ = this.store.select(selectExperimentsUsers);
+    this.parent$ = this.store.select(selectExperimentsParents);
+    this.activeParentsFilter$ = this.store.select(selectActiveParentsFilter);
     this.types$ = this.store.select(selectExperimentsTypes);
-    this.tags$ = this.store.select(selectExperimentsTags);
+    this.tags$ = this.store.select(selectProjectTags);
     this.systemTags$ = this.store.select(selectProjectSystemTags);
+    this.currentUser$ = this.store.select(selectCurrentUser);
 
 
     this.metricTableCols$ = this.store.pipe(
@@ -122,13 +189,11 @@ export class CommonExperimentsComponent extends BaseEntityPage implements OnInit
       map(([experiments, showArchived]) => this.filterArchivedExperiments(experiments, showArchived)),
       tap(() => this.refreshing = false)
     );
-    this.showInfo$ = this.store.pipe(
-      select(selectRouterParams),
-      map(params => !!get('experimentId', params))
-    );
+    this.syncAppSearch();
   }
 
   ngOnInit() {
+    super.ngOnInit();
     this.autoRefreshSub = interval(AUTO_REFRESH_INTERVAL).pipe(
       withLatestFrom(this.autoRefreshState$, this.isExperimentInEditMode$),
       filter(([iteration, autoRefreshState, isExperimentInEditMode]) => autoRefreshState && !isExperimentInEditMode)
@@ -181,26 +246,27 @@ export class CommonExperimentsComponent extends BaseEntityPage implements OnInit
         this.store.dispatch(experimentsActions.setArchive({archive: true}));
       }
       if (queryParams.columns) {
-        const [cols, metrics, hyperParams] = decodeColumns(queryParams.columns);
+        const [cols, metrics, hyperParams, allIds] = decodeColumns(queryParams.columns);
         this.store.dispatch(experimentsActions.setHiddenColumns({visibleColumns: cols}));
         this.store.dispatch(experimentsActions.setExtraColumns({
           columns: metrics.map(metricCol => this.createMetricColumn(metricCol))
             .concat(hyperParams.map(param => this.createParamColumn(param)) as any[])
         }));
-        this.columnsReordered(queryParams.columns);
+        this.columnsReordered(allIds);
       }
       this.dispatchAndLock(new experimentsActions.GetExperiments());
       this.store.dispatch(experimentsActions.getUsers());
-      this.store.dispatch(experimentsActions.getTags());
+      this.store.dispatch(experimentsActions.getParents());
       this.store.dispatch(getTags());
+      // this.store.dispatch(getCompanyTags());
       this.store.dispatch(getProjectTypes());
     });
 
     this.selectExperimentFromUrl();
-    this.syncAppSearch();
   }
 
   ngOnDestroy(): void {
+    super.ngOnDestroy();
     this.selectedProjectSubs.unsubscribe();
     this.ExperimentFromUrlSub.unsubscribe();
     this.store.dispatch(new experimentsActions.ResetExperiments());
@@ -253,7 +319,10 @@ export class CommonExperimentsComponent extends BaseEntityPage implements OnInit
   }
 
   experimentSelectionChanged(experiment: ITableExperiment) {
-    this.store.dispatch(new experimentsActions.ExperimentSelectionChanged({experiment: experiment, project: this.selectedProject}));
+    this.store.dispatch(new experimentsActions.ExperimentSelectionChanged({
+      experiment: experiment,
+      project: this.selectedProject
+    }));
   }
 
   sortedChanged(sort: { sortOrder: TableSortOrderEnum; colId: ISmCol['id'] }) {
@@ -261,7 +330,11 @@ export class CommonExperimentsComponent extends BaseEntityPage implements OnInit
   }
 
   filterChanged({col, value}: { col: ISmCol; value: any }) {
-    this.dispatchAndLock(new experimentsActions.TableFilterChanged({col: col.id, value: value, filterMatchMode: col.filterMatchMode}));
+    this.dispatchAndLock(new experimentsActions.TableFilterChanged({
+      col: col.id,
+      value: value,
+      filterMatchMode: col.filterMatchMode
+    }));
   }
 
   compareExperiments() {
@@ -274,7 +347,13 @@ export class CommonExperimentsComponent extends BaseEntityPage implements OnInit
   }
 
   archiveExperiments() {
-    this.store.dispatch(new experimentsActions.ArchivedSelectedExperiments({}));
+    const showShareWarningDialog = this.selectedExperiments?.find(item => item?.system_tags.includes('shared')) &&
+      !this.syncSelector.selectSync(selectNeverShowPopups)?.includes('archive-shared-task');
+    if (showShareWarningDialog) {
+      showConfirmArchiveExperiments(this.store, this.dialog);
+    } else {
+      this.store.dispatch(new experimentsActions.ArchiveSelectedExperiments({}));
+    }
   }
 
   restoreExperiments() {
@@ -289,10 +368,10 @@ export class CommonExperimentsComponent extends BaseEntityPage implements OnInit
     if (this.selectedExperiments.length > 0) {
       const archiveDialog: MatDialogRef<any> = this.dialog.open(ConfirmDialogComponent, {
         data: {
-          title    : 'Are you sure?',
-          body     : 'Navigating between "Live" and "Archive" will deselect your selected experiments.',
-          yes      : 'Proceed',
-          no       : 'Back',
+          title: 'Are you sure?',
+          body: 'Navigating between "Live" and "Archive" will deselect your selected experiments.',
+          yes: 'Proceed',
+          no: 'Back',
           iconClass: ''
         }
       });
@@ -333,17 +412,17 @@ export class CommonExperimentsComponent extends BaseEntityPage implements OnInit
 
   createMetricColumn(column: MetricColumn): ISmCol {
     return {
-      id          : `last_metrics.${column.metricHash}.${column.variantHash}.${column.valueType}`,
-      headerType  : ColHeaderTypeEnum.sort,
-      sortable    : true,
-      filterable  : false,
-      header      : `${column.metric} > ${column.variant} ${column.valueType.replace('_', '').replace('value', '').toUpperCase()}`,
-      hidden      : false,
-      metric_hash : column.metricHash,
+      id: `last_metrics.${column.metricHash}.${column.variantHash}.${column.valueType}`,
+      headerType: ColHeaderTypeEnum.sort,
+      sortable: true,
+      filterable: false,
+      header: `${column.metric} > ${column.variant} ${getValueTypeName(column.valueType)}`,
+      hidden: false,
+      metric_hash: column.metricHash,
       variant_hash: column.variantHash,
-      valueType   : column.valueType,
-      projectId   : this.projectId,
-      style       : {width: '115px'},
+      valueType: column.valueType,
+      projectId: this.projectId,
+      style: {width: '115px'},
     };
   }
 
@@ -353,11 +432,11 @@ export class CommonExperimentsComponent extends BaseEntityPage implements OnInit
     valueType: string;
   }) {
     const variantCol = this.createMetricColumn({
-      metricHash : event.variant.metric_hash,
+      metricHash: event.variant.metric_hash,
       variantHash: event.variant.variant_hash,
-      valueType  : event.valueType,
-      metric     : event.variant.metric,
-      variant    : event.variant.variant
+      valueType: event.valueType,
+      metric: event.variant.metric,
+      variant: event.variant.variant
     });
     if (event.addCol) {
       this.store.dispatch(new AddCol(variantCol));
@@ -368,15 +447,15 @@ export class CommonExperimentsComponent extends BaseEntityPage implements OnInit
 
   createParamColumn(param: string) {
     return {
-      id        : `hyperparams.${param}`,
-      headerType  : ColHeaderTypeEnum.sort,
-      sortable  : true,
+      id: `hyperparams.${param}`,
+      headerType: ColHeaderTypeEnum.sort,
+      sortable: true,
       filterable: false,
-      header    : param,
-      hidden    : false,
-      projectId : this.projectId,
-      isParam   : true,
-      style     : {width: '115px'},
+      header: param,
+      hidden: false,
+      projectId: this.projectId,
+      isParam: true,
+      style: {width: '115px'},
     };
   }
 
@@ -407,16 +486,15 @@ export class CommonExperimentsComponent extends BaseEntityPage implements OnInit
       this.refreshing = true;
     }
 
-    this.dispatchAndLock(new experimentsActions.RefreshExperiments({hideLoader: isAutorefresh, autoRefresh: isAutorefresh}));
+    this.dispatchAndLock(new experimentsActions.RefreshExperiments({
+      hideLoader: isAutorefresh,
+      autoRefresh: isAutorefresh
+    }));
   }
 
   closeExperimentPanel() {
     this.router.navigate([`projects/${this.projectId}/experiments`], {queryParamsHandling: 'merge'});
     window.setTimeout(() => this.infoDisabled = false);
-  }
-
-  clickOnSplit() {
-    this.infoDisabled = false;
   }
 
   setAutoRefresh($event: boolean) {
@@ -432,14 +510,14 @@ export class CommonExperimentsComponent extends BaseEntityPage implements OnInit
   }
 
   refreshTagsList() {
-    this.store.dispatch(experimentsActions.getTags());
+    this.store.dispatch(getTags());
   }
 
   refreshTypesList() {
-    this.store.dispatch(getProjectTypes())
+    this.store.dispatch(getProjectTypes());
   }
 
-  disableInfoPanel() {
-    this.infoDisabled = true;
+  protected getParamId(params) {
+    return params?.experimentId;
   }
 }

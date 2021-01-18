@@ -1,10 +1,10 @@
 import {createAction, props} from '@ngrx/store';
+import {CredentialKey} from '../../../business-logic/model/auth/credentialKey';
 
 export const AUTH_PREFIX = 'AUTH_';
 export const AUTH_ACTIONS = {
   ADD_CREDENTIAL: AUTH_PREFIX + 'ADD_CREDENTIAL',
   CREATE_CREDENTIAL: AUTH_PREFIX + 'CREATE_CREDENTIAL (API)',
-  CREATE_SUCCESS: AUTH_PREFIX + 'CREATE_SUCCESS',
   GET_SUCCESS: AUTH_PREFIX + 'GET_SUCCESS',
   REVOKE_SUCCESS: AUTH_PREFIX + 'REVOKE_SUCCESS',
   RESET_NEW_CREDENTIAL: AUTH_PREFIX + 'RESET_NEW_CREDENTIAL',
@@ -28,8 +28,9 @@ export const S3_ACTIONS = {
 };
 
 export const updateS3Credential = createAction(S3_ACTIONS.SET_BUCKETS_CREDENTIALS, props<{ S3BucketCredentials: any }>());
-export const createCredential = createAction(AUTH_ACTIONS.CREATE_CREDENTIAL);
-export const addCredential = createAction(AUTH_ACTIONS.ADD_CREDENTIAL, props<{ newCredential: any }>());
+export const createCredential = createAction(AUTH_ACTIONS.CREATE_CREDENTIAL, props<{workspaceId: string}>());
+export const addCredential = createAction(AUTH_ACTIONS.ADD_CREDENTIAL, props<{ newCredential: CredentialKey; workspaceId: string }>());
+export const removeCredential = createAction(AUTH_PREFIX + '[remove credentials]', props<{ accessKey: string; workspaceId: string }>());
 export const saveS3Credentials = createAction(S3_ACTIONS.SET_BUCKET_CREDENTIALS, props<{ newCredential: any }>());
 export const cancelS3Credentials = createAction(S3_ACTIONS.CANCEL_BUCKET_CREDENTIALS, props<{ dontAskAgainForBucketName: string }>());
 export const resetDontShowAgainForBucketEndpoint = createAction(S3_ACTIONS.RESET_DONT_SHOW_AGAIN_FOR_BUCKET_ENDPOINT);
@@ -38,5 +39,5 @@ export const showS3PopUp = createAction(S3_ACTIONS.SHOW_S3_POPUP, props<{ payloa
 export const getTutorialBucketCredentials = createAction(S3_ACTIONS.GET_TUTORIAL_BUCKET_CREDENTIALS);
 export const showLocalFilePopUp = createAction(S3_ACTIONS.SHOW_LOCAL_FILE_POPUP, props<{ url: string }>());
 export const getAllCredentials = createAction(AUTH_ACTIONS.GET_ALL_CREDENTIALS);
-export const credentialRevoked = createAction(AUTH_ACTIONS.REVOKE_CREDENTIAL, props<{ accessKey: string }>());
-export const updateAllCredentials = createAction(AUTH_ACTIONS.UPDATE_ALL_CREDENTIALS, props<{ credentials: any[] }>());
+export const credentialRevoked = createAction(AUTH_ACTIONS.REVOKE_CREDENTIAL, props<{ accessKey: string; workspaceId: string }>());
+export const updateAllCredentials = createAction(AUTH_ACTIONS.UPDATE_ALL_CREDENTIALS, props<{ credentials: CredentialKey[]; extra: CredentialKey[]; workspace: string }>());

@@ -1,11 +1,18 @@
+@import "variables";
+
 body .mat-form-field-outline-gap {
   display: none;
 }
 
 body .mat-form-field-appearance-outline:not(.data-text) .mat-form-field-outline {
-  top: 10px;
+  top: 12px;
   background-color: white;
+  bottom: 2px;
 }
+body .mat-form-field-appearance-outline:not(.data-text) .mat-form-field-prefix, .mat-form-field-appearance-outline:not(.data-text) .mat-form-field-suffix{
+  top:0;
+}
+
 
 body .data-text.mat-form-field-appearance-outline .mat-form-field-outline {
   .mat-form-field-outline-end, .mat-form-field-outline-start {
@@ -20,14 +27,19 @@ body .mat-form-field-infix {
 
 body .mat-form-field-label-wrapper {
 
-  &.mat-form-field-empty {
-    top: 22px;
+  .mat-form-field-empty {
+    top: 27px;
   }
 }
 
 body .mat-form-field.mat-form-field-should-float .mat-form-field-label-wrapper {
+  margin-left: -10px;
+  overflow: visible;
+
   .mat-form-field-label {
-    top: 22px;
+    top: 24px;
+    height: 14px;
+    margin-bottom: unset;
   }
 }
 
@@ -59,3 +71,156 @@ body .mat-form-field-appearance-outline.mat-focused .mat-form-field-outline-thic
 body .mat-checkbox:not(.mat-checkbox-disabled).mat-accent .mat-checkbox-ripple .mat-ripple-element {
   background-color: initial;
 }
+
+mat-option.mat-option.dark {
+  color: white;
+}
+
+
+/// THIN MAT_FORM_FIELD
+
+body mat-form-field.mat-form-field-appearance-outline.dark {
+  .mat-form-field-outline {
+    background-color: $blue-800 !important;
+    border-radius: 4px;
+  }
+
+  .mat-form-field-wrapper {
+    padding-bottom: 0;
+  }
+
+  .mat-form-field-infix {
+    top: 6px;
+    padding: 1.2em 0;
+  }
+
+  .mat-form-field-outline-end, .mat-form-field-outline-start {
+    border: none;
+  }
+
+  mat-select.mat-select-empty .mat-select-value {
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  .mat-form-field-label-wrapper .mat-form-field-label {
+    color: #b9bdd4;
+  }
+
+  .mat-form-field-subscript-wrapper {
+
+    .mat-error.dark {
+      color: #ff6f81;
+    }
+  }
+}
+
+body mat-form-field.mat-form-field-appearance-outline.thin {
+  .mat-form-field-outline {
+    top: 24px;
+    border-radius: 4px;
+  }
+
+  .mat-form-field-wrapper {
+    padding-bottom: 0;
+
+    .mat-form-field-flex {
+      margin-top: -28px;
+    }
+  }
+
+  &.mat-form-field-has-label .mat-form-field-flex {
+    margin-top: -0.25em;
+  }
+
+  .mat-form-field-infix {
+    top: 6px;
+    padding: 1.2em 0;
+  }
+
+  .mat-form-field-label-wrapper .mat-form-field-label {
+    top: 30px;
+  }
+
+  .mat-form-field-subscript-wrapper {
+    margin-top: 22px;
+    padding: 0;
+
+  }
+}
+
+body mat-form-field.mat-form-field-appearance-outline.no-padding {
+  .mat-form-field-flex {
+    padding: 0;
+  }
+}
+// select menu light
+body.dark-theme .light-theme.mat-select-panel {
+  background: #fff;
+
+  .mat-option:hover:not(.mat-option-disabled), .mat-option:focus:not(.mat-option-disabled) {
+    background: rgba(0, 0, 0, .04);
+  }
+
+  .mat-option {
+    color: rgba(0, 0, 0, .87);
+
+    &.mat-selected:not(.mat-option-multiple) {
+      background: rgba(0, 0, 0, .12);
+      color: $purple
+    }
+  }
+}
+
+
+// select menu dark
+.dark-theme .mat-select-panel {
+  background: $blue-800;
+
+  .mat-option:hover:not(.mat-option-disabled), .mat-option:focus:not(.mat-option-disabled) {
+    background: lighten($blue-800, 5);
+  }
+
+  .mat-option {
+    color: rgba($white, .87);
+
+    &.mat-selected:not(.mat-option-multiple) {
+      background: lighten($blue-800, 8);
+    }
+  }
+  .mat-pseudo-checkbox {
+    color: rgba($white, .87);
+  }
+
+  &.mat-primary .mat-option.mat-selected:not(.mat-option-disabled) {
+    color: rgba($white, .87);
+  }
+
+  &.mat-primary .mat-pseudo-checkbox-checked, .mat-primary .mat-pseudo-checkbox-indeterminate {
+    background: $purple;
+  }
+}
+
+.mat-select-value-text {
+  line-height: 16px;
+}
+
+.dark-theme .mat-slide-toggle-thumb {
+  background-color: $blue-400;
+}
+
+.mat-slider-track-background {
+  background-color: $cloudy-blue-two;
+}
+
+.mat-slider-track-fill {
+  background-color: $blue-500 !important;
+}
+
+.mat-slider-thumb {
+  background-color: $blue-250 !important;
+
+  &:hover {
+    background-color: $blue-250 !important;
+  }
+}
+

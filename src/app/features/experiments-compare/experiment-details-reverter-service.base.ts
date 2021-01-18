@@ -1,6 +1,5 @@
 import {ISelectedExperiment} from '../experiments/shared/experiment-info.model';
-import {get} from 'lodash/fp';
-import {Execution} from '../../business-logic/model/tasks/execution';
+import {ConfigurationItem} from '../../business-logic/model/tasks/configurationItem';
 
 export abstract class ExperimentDetailsReverterServiceBase {
   public experimentReverter;
@@ -25,7 +24,7 @@ export abstract class ExperimentDetailsReverterServiceBase {
         tags: exp.tags,
         execution: this.revertExecution(exp),
         artifacts: this.revertArtifacts(exp),
-        configuration: exp.configuration
+        configuration: this.revertconfiguration(exp.configuration)
       };
     });
   }
@@ -37,6 +36,20 @@ export abstract class ExperimentDetailsReverterServiceBase {
     });
 
     return orderedLabels;
+  }
+
+  private revertconfiguration(configuration: {[p: string]: ConfigurationItem}) {
+    if (!configuration) {
+      return {};
+    }
+    return Object.entries(configuration).reduce((acc, [key, value]) => {
+      if (key === 'design' && value.type === 'legacy') {
+        acc['General'] = value;
+      } else {
+        acc[key] = value;
+      }
+      return acc;
+    }, {});
   }
 
   abstract revertArtifacts(exp: ISelectedExperiment);

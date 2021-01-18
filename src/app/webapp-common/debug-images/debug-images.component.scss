@@ -24,23 +24,23 @@ sm-debug-images-view {
 }
 
 .metric-bar {
+  margin: 0 auto 24px;
   grid-gap: 12px;
   display: inline-grid;
   grid-template-columns: auto 200px auto auto auto auto auto auto auto;
   align-items: center;
-  margin-bottom: 24px;
+
+  &.minimized {
+    margin: 0 0 24px;
+  }
 
   .al-ico-next-batch, .al-ico-prev-batch, .al-ico-back-to-top {
     cursor: pointer;
   }
 
   label {
-    color: #5a658e;
+    color: $blue-400;
     margin: 0;
-  }
-
-  select {
-    font-weight: bold;
   }
 
   .disabled {
@@ -78,17 +78,7 @@ sm-debug-images-view {
 
 .experiment-name {
   display: block;
-}
-
-.experiment-name {
-  margin-bottom: 24px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-right: auto;
-}
-
-.experiment-name {
+  font-size: 1.5rem;
   margin-bottom: 24px;
   white-space: nowrap;
   overflow: hidden;

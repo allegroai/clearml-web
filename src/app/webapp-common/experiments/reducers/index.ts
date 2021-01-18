@@ -4,7 +4,7 @@ import {TableSortOrderEnum} from '../../shared/ui-components/data/table/table.co
 import {experimentInfo, experimentOutput, experimentsView, selectExperimentInfoData, selectSelectedExperiment} from '../../../features/experiments/reducers';
 import {IExperimentInfo, ISelectedExperiment} from '../../../features/experiments/shared/experiment-info.model';
 import {experimentSectionsEnum} from '../../../features/experiments/shared/experiments.const';
-import {IExperimentSettings} from './common-experiment-output.reducer';
+import {GroupByCharts, IExperimentSettings} from './common-experiment-output.reducer';
 import {get, getOr} from 'lodash/fp';
 import {TaskStatusEnum} from '../../../business-logic/model/tasks/taskStatusEnum';
 import {IExecutionForm} from '../../../features/experiments/shared/experiment-execution.model';
@@ -23,7 +23,8 @@ export const selectSelectedTableExperiment = createSelector(experimentsView, (st
 
 export const selectExperimentsTableCols = createSelector(experimentsView, (state): Array<any> => state.tableCols);
 export const selectExperimentsUsers = createSelector(experimentsView, (state): Array<any> => state.users);
-export const selectExperimentsTags = createSelector(experimentsView, (state): Array<string> => state.projectTags);
+export const selectExperimentsParents = createSelector(experimentsView, (state): Array<any> => state.parents);
+export const selectActiveParentsFilter = createSelector(experimentsView, (state): Array<any> => state.activeParentsFilter);
 export const selectExperimentsTypes = createSelector(experimentsView, (state): Array<any> => state.types);
 
 export const selectExperimentsTableColsOrder = createSelector([experimentsView, selectSelectedProjectId], (state, projectId): string[] => (state.colsOrder && projectId) ? state.colsOrder[projectId] : undefined);
@@ -45,7 +46,7 @@ export const selectExperimentInfoDataFreeze = createSelector(experimentInfo, (st
 export const selectExperimentInfoErrors = createSelector(experimentInfo, (state): ICommonExperimentInfoState['errors'] => state.errors);
 export const selectIsSelectedExperimentInDev = createSelector(experimentInfo, (state): boolean => false);
 export const selectIsExperimentSaving = createSelector(experimentInfo, (state): boolean => state.saving);
-export const selectIsExperimentInEditMode = createSelector(experimentInfo, (state): boolean => !!state.activeSectionEdit);
+export const selectIsExperimentInEditMode = createSelector(experimentInfo, (state): boolean => state.activeSectionEdit);
 
 export const selectExperimentLog = createSelector(experimentOutput, (state) => state.experimentLog);
 export const selectExperimentBeginningOfLog = createSelector(experimentOutput, (state) => state.beginningOfLog);
@@ -72,6 +73,8 @@ export const selectSelectedSettingsSmoothWeight = createSelector(selectSelectedE
 
 export const selectSelectedSettingsxAxisType = createSelector(selectSelectedExperimentSettings,
   (settings): ScalarKeyEnum => get('xAxisType', settings) || ScalarKeyEnum.Iter as ScalarKeyEnum);
+export const selectSelectedSettingsGroupBy = createSelector(selectSelectedExperimentSettings,
+  (settings): GroupByCharts => settings?.groupBy || 'metric');
 export const selectIsExperimentInProgress = createSelector(selectSelectedExperiment,
   (experiment: ISelectedExperiment): boolean => experiment && (experiment.status === TaskStatusEnum.InProgress));
 
@@ -112,7 +115,7 @@ export const selectExperimentInfoHistograms = createSelector(
   selectSelectedSettingsxAxisType,
   experimentOutput,
   (axisType, state) => {
-    if (axisType === ScalarKeyEnum.IsoTime) {
+    if (axisType === ScalarKeyEnum.IsoTime && state.metricsHistogramCharts) {
       return Object.keys(state.metricsHistogramCharts).reduce((groupAcc, groupName) => {
         const group = state.metricsHistogramCharts[groupName];
         groupAcc[groupName] = Object.keys(group).reduce((graphAcc, graphName) => {

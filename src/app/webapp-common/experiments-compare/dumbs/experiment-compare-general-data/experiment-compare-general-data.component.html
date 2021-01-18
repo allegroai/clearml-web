@@ -1,7 +1,7 @@
 <header>
   <div class="project ellipsis">{{experiment.project?.name}}</div>
-  <h3 [smTooltip]="experiment.name" class="experiment-name al-header"><a smEllipsisMiddleDirective [href]="buildUrl()">{{experiment.name}}</a>
-  </h3>
+  <div [smTooltip]="experiment.name" class="experiment-name al-header"><a smEllipsisMiddleDirective [routerLink]="buildUrl()">{{experiment.name}}</a>
+  </div>
   <i class="icon i-id-fix id-icon pointer"
      [smTooltip]="experiment.id"
      ngxClipboard

@@ -9,20 +9,24 @@ import {
   UpdateProject,
   ResetProjectSelection,
   RESET_PROJECT_SELECTION,
-  setTags, openTagColorsMenu, getTags
+  setTags, openTagColorsMenu, getTags, setCompanyTags, getCompanyTags
 } from '../actions/projects.actions';
 import {GetAllProjects} from '../actions/projects.actions';
 
-import {catchError, filter, flatMap, map, switchMap, withLatestFrom} from 'rxjs/operators';
+import {catchError, filter, flatMap, map, mergeMap, switchMap, withLatestFrom} from 'rxjs/operators';
 import {RequestFailed} from '../actions/http.actions';
-import {SetServerError} from '../actions/layout.actions';
+import {DeactiveLoader, SetServerError} from '../actions/layout.actions';
 import {SetSelectedExperiments} from '../../experiments/actions/common-experiments-view.actions';
 import { SetSelectedModels } from '../../models/actions/models-view.actions';
-import {selectProjects} from '../../core/reducers/projects.reducer';
+import {selectProjects} from '../reducers/projects.reducer';
 import {TagColorMenuComponent} from '../../shared/ui-components/tags/tag-color-menu/tag-color-menu.component';
 import {MatDialog} from '@angular/material/dialog';
 import {ApiOrganizationService} from '../../../business-logic/api-services/organization.service';
 import {OrganizationGetTagsResponse} from '../../../business-logic/model/organization/organizationGetTagsResponse';
+import {selectRouterParams} from '../reducers/router-reducer';
+import {forkJoin} from 'rxjs';
+import {ProjectsGetTaskTagsResponse} from '../../../business-logic/model/projects/projectsGetTaskTagsResponse';
+import {ProjectsGetModelTagsResponse} from '../../../business-logic/model/projects/projectsGetModelTagsResponse';
 
 const ALL_PROJECTS_OBJECT = {id: '*', name: 'All Projects'};
 
@@ -101,12 +105,35 @@ export class ProjectsEffects {
 
   @Effect()
   getAllTags = this.actions$.pipe(
-    ofType(getTags),
+    ofType(getCompanyTags),
     switchMap(() => this.orgApi.organizationGetTags({include_system: true})
       .pipe(
-        map((res: OrganizationGetTagsResponse) => setTags({tags: res.tags, systemTags: res.system_tags})),
+        map((res: OrganizationGetTagsResponse) => setCompanyTags({tags: res.tags, systemTags: res.system_tags})),
         catchError(error => [new RequestFailed(error)])
       )
     )
   );
+
+  @Effect()
+  getTagsEffect = this.actions$.pipe(
+    ofType(getTags),
+    withLatestFrom(this.store.select(selectRouterParams).pipe(
+      map(params => (params === null || params?.projectId === '*') ? [] : [params.projectId]))),
+    switchMap(([action, projects]) => forkJoin([
+      this.projectsApi.projectsGetTaskTags({projects}),
+      this.projectsApi.projectsGetModelTags({projects})]
+    ).pipe(
+      map((res: [ProjectsGetTaskTagsResponse, ProjectsGetModelTagsResponse]) => Array.from(new Set(res[0].tags.concat(res[1].tags))).sort().concat(null)),
+      mergeMap((tags: string[]) => [
+        setTags({tags}),
+        new DeactiveLoader(action.type)
+      ]),
+      catchError(error => [
+        new RequestFailed(error),
+        new DeactiveLoader(action.type),
+        new SetServerError(error, null, 'Fetch tags failed')]
+      )
+    ))
+  );
+
 }

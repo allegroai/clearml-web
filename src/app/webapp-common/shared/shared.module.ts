@@ -27,7 +27,8 @@ import {LeavingBeforeSaveAlertGuard} from './guards/leaving-before-save-alert.gu
 import {CustomColumnsListComponent} from './components/custom-columns-list/custom-columns-list.component';
 import { BaseContextMenuComponent } from './components/base-context-menu/base-context-menu.component';
 import {EntityFooterComponent} from './entity-page/entity-footer/entity-footer.component';
-import {SharedModule} from '../../shared/shared.module';
+import {CheckPermissionDirective} from '../../shared/directives/check-permission.directive';
+import {ScrollTextareaComponent} from './components/scroll-textarea/scroll-textarea.component';
 
 const _declarations = [
   ExperimentInfoHeaderStatusProgressBarComponent,
@@ -43,29 +44,31 @@ const _declarations = [
   NgxJsonViewerComponent,
   ExperimentRefreshComponent,
   CustomColumnsListComponent,
-  EntityFooterComponent
+  EntityFooterComponent,
+  CheckPermissionDirective,
+  ScrollTextareaComponent
 ];
 
+
 @NgModule({
-    imports: [
-        CommonModule,
-        RouterModule,
-        FormsModule,
-        ReactiveFormsModule,
-        TableModule,
-        ClipboardModule,
-        UiComponentsModule,
-        SharedPipesModule,
-        MatProgressSpinnerModule,
-        MatButtonToggleModule,
-        MatSnackBarModule,
-        NgxFilesizeModule,
-        ChipsModule,
-        SharedModule
-    ],
+  imports: [
+    CommonModule,
+    RouterModule,
+    FormsModule,
+    ReactiveFormsModule,
+    TableModule,
+    ClipboardModule,
+    UiComponentsModule,
+    SharedPipesModule,
+    MatProgressSpinnerModule,
+    MatButtonToggleModule,
+    MatSnackBarModule,
+    NgxFilesizeModule,
+    ChipsModule
+  ],
   declarations: [
     _declarations,
-    BaseContextMenuComponent,
+    BaseContextMenuComponent
   ],
   exports     : [..._declarations, UiComponentsModule, TableModule, ClipboardModule, SharedPipesModule, MatSnackBarModule,
     NgxFilesizeModule
@@ -74,5 +77,3 @@ const _declarations = [
 })
 export class SMSharedModule {
 }
-
-

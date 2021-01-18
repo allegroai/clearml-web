@@ -18,3 +18,15 @@
     flex: 1;
   }
 }
+
+:host-context(.dark-theme) {
+  .labeled-row {
+    border-bottom: 1px solid $blue-500;
+  }
+}
+
+:host-context(.light-theme) {
+  .labeled-row {
+    border-bottom: 1px solid $blue-100;
+  }
+}

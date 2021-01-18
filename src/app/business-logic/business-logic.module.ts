@@ -14,6 +14,7 @@ import {ApiQueuesService} from './api-services/queues.service';
 import {ApiWorkersService} from './api-services/workers.service';
 import {ApiServerService} from './api-services/server.service';
 import {ApiOrganizationService} from './api-services/organization.service';
+import {ApiLoginService} from './api-services/login.service';
 
 @NgModule({
   imports     : [CommonModule, HttpClientModule],
@@ -32,7 +33,8 @@ import {ApiOrganizationService} from './api-services/organization.service';
     ApiProjectsService,
     ApiUsersService,
     ApiServerService,
-    ApiOrganizationService
+    ApiOrganizationService,
+    ApiLoginService
   ]
 })
 export class BusinessLogicModule {

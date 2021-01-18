@@ -1,24 +1,11 @@
-<sm-textarea-control
+<textarea
+  #networkDesign
   *ngIf="editable"
-  #textarearef
-  cols='60'
-  [formData]="(formData || formData === 0) ? formData : ''"
-  [inputClassName]="inputClassName + (hasErrors() && showErrors? ' danger' : '')  + (!editable? ' cursor-default':'')"
-  [isReadonly]="!editable"
-  tooltipType='validation'
-  [smTooltip]="getCurrentError()"
-  [showTooltip]="showErrors"
-  [showDelay]="0"
-  [placeHolder]="placeHolder"
-  class="dark"
-  (input)="fieldValueChanged($event.target.value)"
-  >
-</sm-textarea-control>
-<div *ngIf="!editable" class="design-container">
-  <cdk-virtual-scroll-viewport itemSize="19" minBufferPx = 400, maxBufferPx = 600
-                               class="viewport"
-                               [class.isReadonly]="!editable">
-    <div *cdkVirtualFor="let line of lines" class="line">{{line}}</div>
-  </cdk-virtual-scroll-viewport>
-</div>
-
+  class="preview-text resize-none"
+  [value]="(formData || formData === 0) ? formData : ''"
+></textarea>
+<sm-scroll-textarea
+  *ngIf="!editable"
+  [formData]="formData"
+  [editable]="editable"
+></sm-scroll-textarea>

@@ -1,12 +1,11 @@
 import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
-import {Model} from '../../../../business-logic/model/models/model';
 import {getTags} from '../../../core/actions/projects.actions';
 import {TagsMenuComponent} from '../../../shared/ui-components/tags/tags-menu/tags-menu.component';
 import {Store} from '@ngrx/store';
-import {selectProjectTags} from '../../../core/reducers/projects.reducer';
+import {selectCompanyTags, selectProjectTags, selectTagsFilterByProject} from '../../../core/reducers/projects.reducer';
 import {Observable} from 'rxjs';
 import { removeTag, addTag } from '../../actions/models-menu.actions';
-import {ISelectedModel, ITableModel} from '../../shared/models.model';
+import {SelectedModel, TableModel} from '../../shared/models.model';
 import {MenuComponent} from '../../../shared/ui-components/panel/menu/menu.component';
 import {getSysTags} from '../../model.utils';
 import {ActivateModelEdit, CancelModelEdit} from '../../actions/models-info.actions';
@@ -19,7 +18,9 @@ import {ActivateModelEdit, CancelModelEdit} from '../../actions/models-info.acti
 export class ModelInfoHeaderComponent {
 
   public viewId: boolean;
-  public tags$: Observable<string[]>;
+  public tagsFilterByProject$: Observable<boolean>;
+  public projectTags$: Observable<string[]>;
+  public companyTags$: Observable<string[]>;
   public sysTags: string[];
 
   @Input() editable: boolean;
@@ -30,19 +31,21 @@ export class ModelInfoHeaderComponent {
   @ViewChild('tagsMenuContent') tagMenuContent: TagsMenuComponent;
 
   constructor(private store: Store<any>) {
-    this.tags$ = this.store.select(selectProjectTags);
+    this.tagsFilterByProject$ = this.store.select(selectTagsFilterByProject);
+    this.projectTags$ = this.store.select(selectProjectTags);
+    this.companyTags$ = this.store.select(selectCompanyTags);
   }
 
-  private _model: Model | ITableModel | ISelectedModel;
+  private _model: TableModel | SelectedModel;
 
   get model() {
     return this._model;
   }
 
-  @Input() set model(model: Model | ITableModel | ISelectedModel) {
+  @Input() set model(model: TableModel | SelectedModel) {
     this._model = model;
     this.viewId = false;
-    this.sysTags = getSysTags(model as ITableModel);
+    this.sysTags = getSysTags(model as TableModel);
   }
 
   public onNameChanged(name) {
@@ -53,6 +56,7 @@ export class ModelInfoHeaderComponent {
     if (!this.tagMenu) {
       return;
     }
+    window.setTimeout(() => this.store.dispatch(new ActivateModelEdit('tags')), 200);
     this.store.dispatch(getTags());
     this.tagMenu.position = {x: event.clientX, y: event.clientY};
     window.setTimeout(() => {
@@ -62,14 +66,15 @@ export class ModelInfoHeaderComponent {
   }
 
   addTag(tag: string) {
-    this.store.dispatch(addTag({tag, models: [this.model as ISelectedModel]}));
+    this.store.dispatch(addTag({tag, models: [this.model as SelectedModel]}));
   }
 
   removeTag(tag: string) {
-    this.store.dispatch(removeTag({tag, models: [this.model as ISelectedModel]}));
+    this.store.dispatch(removeTag({tag, models: [this.model as SelectedModel]}));
   }
 
   tagsMenuClosed() {
+    this.store.dispatch(new CancelModelEdit());
     this.tagMenuContent.clear();
   }
 

@@ -5,7 +5,7 @@ import {ApiTasksService} from '../../../business-logic/api-services/tasks.servic
 import {ApiAuthService} from '../../../business-logic/api-services/auth.service';
 import {BlTasksService} from '../../../business-logic/services/tasks.service';
 import {ApiEventsService} from '../../../business-logic/api-services/events.service';
-import {catchError, debounceTime, filter, flatMap, map, switchMap, withLatestFrom} from 'rxjs/operators';
+import {catchError, debounceTime, filter, mergeMap, map, switchMap, withLatestFrom} from 'rxjs/operators';
 import {ActiveLoader, DeactiveLoader, SetServerError} from '../../core/actions/layout.actions';
 import {RequestFailed} from '../../core/actions/http.actions';
 import * as outputActions from '../actions/common-experiment-output.actions';
@@ -17,7 +17,6 @@ import {EventsGetTaskLogResponse} from '../../../business-logic/model/events/eve
 import {HTTP} from '../../../app.constants';
 import {ScalarKeyEnum} from '../../../business-logic/model/events/scalarKeyEnum';
 import {selectCompareHistogramCacheAxisType} from '../../experiments-compare/reducers';
-import {EXPERIMENT_PLOTS_REQUESTED} from '../actions/common-experiment-output.actions';
 
 
 @Injectable()
@@ -39,7 +38,7 @@ export class CommonExperimentOutputEffects {
         navigate_earlier: action.direction !== 'next',
         from_timestamp: action.refresh ? null : action.from,
       }).pipe(
-        flatMap((res: EventsGetTaskLogResponse) => [
+        mergeMap((res: EventsGetTaskLogResponse) => [
           outputActions.setExperimentLog({
             events: res.events,
             total: res.total,
@@ -75,7 +74,7 @@ export class CommonExperimentOutputEffects {
 
       return this.eventsApi.eventsScalarMetricsIterHistogram({task: action.payload, key: axisType === ScalarKeyEnum.IsoTime ? ScalarKeyEnum.Timestamp : axisType})
         .pipe(
-          flatMap(res => [
+          mergeMap(res => [
             new outputActions.SetExperimentHistogram(res, axisType),
             new DeactiveLoader(REFRESH_EXPERIMENTS),
             new DeactiveLoader(action.type)
@@ -97,7 +96,7 @@ export class CommonExperimentOutputEffects {
     switchMap(action =>
       this.eventsApi.eventsGetTaskPlots({task: action.payload, iters: 5})
         .pipe(
-          flatMap(res => [
+          mergeMap(res => [
             new outputActions.SetExperimentPlots(res.plots),
             new DeactiveLoader(REFRESH_EXPERIMENTS),
             new DeactiveLoader(action.type),

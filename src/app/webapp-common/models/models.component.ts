@@ -3,15 +3,14 @@ import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {select, Store} from '@ngrx/store';
 import {get, isEqual} from 'lodash/fp';
-import {combineLatest, Observable, Subscription} from 'rxjs';
-import {interval} from 'rxjs/internal/observable/interval';
-import {filter, map, skip, tap, withLatestFrom} from 'rxjs/operators';
+import {combineLatest, interval, Observable, Subscription} from 'rxjs';
+import {filter, map, skip, take, tap, withLatestFrom} from 'rxjs/operators';
 import {AUTO_REFRESH_INTERVAL} from '../../app.constants';
-import {getTags, ResetProjectSelection} from '../../webapp-common/core/actions/projects.actions';
+import {getTags, ResetProjectSelection} from '../core/actions/projects.actions';
 import {InitSearch, ResetSearch} from '../common-search/common-search.actions';
 import {selectSearchQuery} from '../common-search/common-search.reducer';
 import {SetAutoRefresh} from '../core/actions/layout.actions';
-import {selectIsArchivedMode, selectProjectSystemTags, selectProjectTags} from '../core/reducers/projects.reducer';
+import {selectIsArchivedMode, selectProjectSystemTags} from '../core/reducers/projects.reducer';
 import {selectRouterParams} from '../core/reducers/router-reducer';
 import {selectAutoRefresh} from '../core/reducers/view-reducer';
 import {BaseEntityPage} from '../shared/entity-page/base-entity-page';
@@ -22,11 +21,17 @@ import {decodeFilter, decodeOrder} from '../shared/utils/tableParamEncode';
 import * as modelsActions from './actions/models-view.actions';
 import {MODELS_TABLE_COLS, ModelsViewModesEnum} from './models.consts';
 import * as modelsSelectors from './reducers';
-import {selectModelsFrameworks, selectModelsHiddenTableCols, selectModelsTags, selectModelsUsers} from './reducers';
+import {
+  selectModelsFrameworks,
+  selectModelsHiddenTableCols,
+  selectModelsTags,
+  selectModelsUsers,
+  selectSplitSize
+} from './reducers';
 import {IModelsViewState} from './reducers/models-view.reducer';
-import {ITableModel, ModelTableColFieldsEnum} from './shared/models.model';
+import {TableModel, SelectedModel} from './shared/models.model';
 import {User} from '../../business-logic/model/users/user';
-import * as experimentsActions from '../experiments/actions/common-experiments-view.actions';
+import {selectIsSharedAndNotOwner} from "../../features/experiments/reducers";
 
 
 @Component({
@@ -36,21 +41,20 @@ import * as experimentsActions from '../experiments/actions/common-experiments-v
 })
 export class ModelsComponent extends BaseEntityPage implements OnInit, OnDestroy {
 
-  public models$: Observable<Array<ITableModel>>;
+  public models$: Observable<Array<TableModel>>;
   public tableSortField$: Observable<string>;
   public tableSortOrder$: Observable<TableSortOrderEnum>;
   public selectedModels$: Observable<Array<any>>;
-  public selectedModel$: Observable<ITableModel>;
+  public selectedModel$: Observable<SelectedModel>;
   public searchValue$: Observable<string>;
   public isArchived$: Observable<boolean>;
   public viewMode$: Observable<ModelsViewModesEnum>;
-  public tableFilters$: Observable<Map<ModelTableColFieldsEnum, FilterMetadata>>;
+  public tableFilters$: Observable<{[s: string]: FilterMetadata}>;
   public noMoreModels$: Observable<boolean>;
   public showAllSelectedIsActive$: Observable<boolean>;
   public showInfo$: Observable<boolean>;
-
-
-  private selectedModels: ITableModel[];
+  protected setSplitSizeAction = modelsActions.setSplitSize;
+  private selectedModels: TableModel[];
   private selectedModelSubs: Subscription;
   private searchSubs: Subscription;
   private selectedModelsSub: Subscription;
@@ -70,13 +74,14 @@ export class ModelsComponent extends BaseEntityPage implements OnInit, OnDestroy
   public filteredTableCols= MODELS_TABLE_COLS;
   private hiddenTableColsSub: Subscription;
   public frameworks$: Observable<Array<string>>;
-
+  public isSharedAndNotOwner$: Observable<boolean>;
 
   constructor(
     protected store: Store<IModelsViewState>, private route: ActivatedRoute, private router: Router,
     private dialog: MatDialog
   ) {
     super(store);
+    this.selectSplitSize$ = this.store.select(modelsSelectors.selectSplitSize);
     this.tableSortField$ = this.store.select(modelsSelectors.selectTableSortField);
     this.selectedModel$ = this.store.select(modelsSelectors.selectSelectedTableModel);
     this.selectedModels$ = this.store.select(modelsSelectors.selectSelectedModels);
@@ -86,6 +91,8 @@ export class ModelsComponent extends BaseEntityPage implements OnInit, OnDestroy
     this.isArchived$ = this.store.select(selectIsArchivedMode);
     this.noMoreModels$ = this.store.select(modelsSelectors.selectNoMoreModels);
     this.viewMode$ = this.store.select(modelsSelectors.selectViewMode);
+    this.isSharedAndNotOwner$ = this.store.select(selectIsSharedAndNotOwner);
+
     this.showAllSelectedIsActive$ = this.store.select(modelsSelectors.selectShowAllSelectedIsActive);
     this.searchQuery$ = this.store.select(selectSearchQuery);
     this.autoRefreshState$ = this.store.select(selectAutoRefresh);
@@ -108,9 +115,11 @@ export class ModelsComponent extends BaseEntityPage implements OnInit, OnDestroy
       select(selectRouterParams),
       map(params => !!get('modelId', params))
     );
+    this.syncAppSearch();
   }
 
   ngOnInit() {
+    super.ngOnInit();
     let prevQueryParams: Params;
 
     this.hiddenTableColsSub = this.hiddenTableCols$.subscribe(hiddenCols => {
@@ -158,9 +167,9 @@ export class ModelsComponent extends BaseEntityPage implements OnInit, OnDestroy
         const hiddenCols = {};
         this.tableCols.forEach((tableCol)=>{
           if(tableCol.id!=='selected'){
-            hiddenCols[tableCol.id] = !params.columns.includes(tableCol.id)
+            hiddenCols[tableCol.id] = !params.columns.includes(tableCol.id);
           }
-        })
+        });
         this.store.dispatch(modelsActions.setHiddenCols({hiddenCols}));
       }
       this.dispatchAndLock(new modelsActions.FetchModelsRequested());
@@ -177,7 +186,6 @@ export class ModelsComponent extends BaseEntityPage implements OnInit, OnDestroy
     });
 
     this.selectModelFromUrl();
-    this.syncAppSearch();
     this.store.dispatch(modelsActions.getUsers());
     this.store.dispatch(modelsActions.getFrameworks());
     this.store.dispatch(modelsActions.getTags());
@@ -221,7 +229,7 @@ export class ModelsComponent extends BaseEntityPage implements OnInit, OnDestroy
       });
   }
 
-  filterArchivedModels(models: ITableModel[], showArchived: boolean) {
+  filterArchivedModels(models: TableModel[], showArchived: boolean) {
     if (showArchived) {
       return models.filter(model => model.system_tags && model.system_tags.includes('archived'));
     } else {
@@ -229,11 +237,11 @@ export class ModelsComponent extends BaseEntityPage implements OnInit, OnDestroy
     }
   }
 
-  modelSelectionChanged(model: ITableModel) {
+  modelSelectionChanged(model: SelectedModel) {
     this.store.dispatch(new modelsActions.ModelSelectionChanged({model: model, project: this.projectId}));
   }
 
-  modelsSelectionChanged(models: Array<ITableModel>) {
+  modelsSelectionChanged(models: SelectedModel[]) {
     this.store.dispatch(new modelsActions.SetSelectedModels(models));
   }
 
@@ -328,5 +336,14 @@ export class ModelsComponent extends BaseEntityPage implements OnInit, OnDestroy
 
   refreshTagsList() {
     this.store.dispatch(modelsActions.getTags());
+  }
+
+  closeModelPanel() {
+    this.router.navigate([`projects/${this.projectId}/models`], {queryParamsHandling: 'merge'});
+    window.setTimeout(() => this.infoDisabled = false);
+  }
+
+  protected getParamId(params) {
+    return params?.modelId;
   }
 }

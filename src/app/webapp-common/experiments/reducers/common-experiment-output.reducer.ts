@@ -4,9 +4,16 @@ import {ScalarKeyEnum} from '../../../business-logic/model/events/scalarKeyEnum'
 import {sortBy, reverse} from 'lodash/fp';
 import {LOG_BATCH_SIZE} from '../shared/common-experiments.const';
 
+export type GroupByCharts = 'metric' | 'none';
+
+export const GroupByCharts = {
+  Metric: 'metric' as GroupByCharts,
+  None: 'none' as GroupByCharts
+};
+
 export interface Log {
   timestamp: number;
-  type:	'log';
+  type: 'log';
   task: Task['id'];
   level: 'debug' | 'info' | 'warning' | 'error' | 'critical';
   worker: string;
@@ -39,6 +46,7 @@ export interface IExperimentSettings {
   selectedPlot: string;
   smoothWeight: number;
   xAxisType: ScalarKeyEnum;
+  groupBy: GroupByCharts;
 }
 
 export const initialCommonExperimentOutputState: CommonExperimentOutputState = {
@@ -72,7 +80,7 @@ export function commonExperimentOutputReducer(state = initialCommonExperimentOut
       if (action.direction) {
         if (action.refresh) {
           currLog = events;
-        } else if(action.direction === 'prev') {
+        } else if (action.direction === 'prev') {
           if (action.events < LOG_BATCH_SIZE) {
             atStart = true;
           }
@@ -116,9 +124,9 @@ export function commonExperimentOutputReducer(state = initialCommonExperimentOut
     case actions.RESET_EXPERIMENT_METRICS:
       return {
         ...state,
-        metricsMultiScalarsCharts: initialCommonExperimentOutputState.metricsHistogramCharts,
+        metricsMultiScalarsCharts: initialCommonExperimentOutputState.metricsMultiScalarsCharts,
         metricsHistogramCharts: initialCommonExperimentOutputState.metricsHistogramCharts,
-        metricsPlotsCharts: initialCommonExperimentOutputState.metricsHistogramCharts,
+        metricsPlotsCharts: initialCommonExperimentOutputState.metricsPlotsCharts,
         cachedAxisType: initialCommonExperimentOutputState.cachedAxisType
       };
     case actions.SET_LOG_FILTER:

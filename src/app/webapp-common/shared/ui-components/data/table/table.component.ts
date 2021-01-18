@@ -13,6 +13,8 @@ import {filter, take, throttleTime} from 'rxjs/operators';
 import {custumFilterFunc, custumSortSingle} from './overrideFilterFunc';
 import {ISmCol, TableSortOrderEnum, ColHeaderTypeEnum} from './table.consts';
 import {sortCol} from '../../../utils/tableParamEncode';
+import {Store} from '@ngrx/store';
+import {selectScaleFactor} from '../../../../core/reducers/view-reducer';
 
 @Component({
   selector: 'sm-table',
@@ -26,12 +28,13 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
   public bodyTemplate: TemplateRef<any>;
   public sortTemplate: TemplateRef<any>;
   public cardTemplate: TemplateRef<any>;
+  public cardHeaderTemplate: TemplateRef<any>;
   public checkboxTemplate: any;
   public sortFilterTemplate: any;
   public headerTemplate: TemplateRef<any>;
   private loadMoreSubscription: Subscription;
   private loadMoreDebouncer: Subject<any>;
-  public menuItems = [] as MenuItem;
+  public menuItems = [] as MenuItem[];
   minView: boolean;
   private _filters: { [s: string]: FilterMetadata };
 
@@ -48,6 +51,10 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
   public loading: boolean;
   private scrollLeft = 0;
   public buttonLeft: number;
+  private minimizedHeaderEl: HTMLDivElement;
+  private resizeTimer: number;
+  private scaleFactor: number;
+  private waiting: boolean;
 
   @Input() set tableData(tableData) {
     this.loading = false;
@@ -95,8 +102,8 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
   @Input() keyboardControl: boolean = false;
   @Input() noMoreData: boolean;
   @Input() rowHover: boolean;
-  @Input() noHeader:boolean= false;
-  @Input() simple: boolean =false;
+  @Input() noHeader: boolean = false;
+  @Input() simple: boolean = false;
 
 
   @Input() set minimizedView(minView: boolean) {
@@ -104,10 +111,10 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
     if (!minView) {
       window.setTimeout(() => this.table && this.updateFilter());
     }
+    this.resize(3000);
   }
 
-  @Input()
-  set filters(filters: { [s: string]: FilterMetadata }) {
+  @Input() set filters(filters: { [s: string]: FilterMetadata }) {
     this._filters = filters;
     if (!this.minView) {
       this.table.filters = filters;
@@ -121,6 +128,7 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
   @Input() noDataMessage = 'No data to show';
   @Input() checkedItems = [];
   @Input() virtualScroll: boolean;
+  @Input() minimizedTableHeader: string;
 
   @Output() sortChanged = new EventEmitter<{ field: ISmCol['id']; sortOrder: TableSortOrderEnum }>();
   @Output() rowClicked = new EventEmitter();
@@ -131,8 +139,21 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
   @Output() colReordered = new EventEmitter();
 
   @HostListener('window:resize')
-  resize() {
-    this.updateLoadButton(null);
+  resize(delay = 50) {
+    window.clearTimeout(this.resizeTimer);
+    this.resizeTimer = window.setTimeout(() => {
+      this.updateLoadButton(null);
+      if (this.table) {
+        const element = (this.table.el.nativeElement as HTMLDivElement);
+        const scrollableBody = element.getElementsByClassName('p-datatable-scrollable-body')[0];
+        const scroll = scrollableBody && scrollableBody.scrollHeight > scrollableBody.clientHeight ? 7 : 0;
+        let width = element.getBoundingClientRect().width - scroll;
+        if (this.scaleFactor) {
+          width *= this.scaleFactor / 100;
+        }
+        this.table.setScrollableItemsWidthOnExpandResize(null, width, 0);
+      }
+    }, delay);
   }
 
   @HostListener('keydown', ['$event'])
@@ -158,13 +179,22 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
 
   }
 
-  constructor(private element: ElementRef, private renderer: Renderer2, private cdr: ChangeDetectorRef) {
+  constructor(
+    private element: ElementRef,
+    private renderer: Renderer2,
+    private cdr: ChangeDetectorRef,
+    private store: Store
+  ) {
     this.loadMoreDebouncer = new Subject();
     this.loadMoreSubscription = this.loadMoreDebouncer
       .pipe(throttleTime(1500))
       .subscribe(
         () => this.loadMoreClicked.emit()
       );
+
+    store.select(selectScaleFactor)
+      .pipe(filter(s => !!s), take(1))
+      .subscribe(scale => this.scaleFactor = scale);
   }
 
   ngOnInit(): void {
@@ -177,9 +207,17 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
       .pipe(filter((comps: QueryList<Table>) => !!comps.first), take(1))
       .subscribe((comps: QueryList<Table>) => {
         this.table = comps.first;
-        const scrollContainer = this.table.el.nativeElement.getElementsByClassName('ui-table-scrollable-body')[0] as HTMLDivElement;
+        const scrollContainer = this.table.el.nativeElement.getElementsByClassName('p-datatable-scrollable-body')[0] as HTMLDivElement;
         if (scrollContainer) {
-          scrollContainer.onscroll = (e: Event) => this.updateLoadButton(e);
+          scrollContainer.onscroll = (e: Event) => {
+            if (!this.waiting) {
+              this.waiting = true;
+              window.setTimeout(() => {
+                this.waiting = false;
+                this.updateLoadButton(e);
+              }, 60);
+            }
+          };
         }
         this.updateLoadButton(null);
         this.updateFilter();
@@ -212,6 +250,9 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
           break;
         case 'checkbox':
           this.checkboxTemplate = item.template;
+          break;
+        case 'cardFilter':
+          this.cardHeaderTemplate = item.template;
           break;
         default:
           this.bodyTemplate = item.template;
@@ -268,12 +309,18 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
   openContext(e: { originalEvent: MouseEvent; data: any }) {
     if (this.onRowRightClick.observers.length > 0) {
       this.onRowRightClick.emit({e: e.originalEvent, rowData: e.data});
-      this.table.contextMenuSelection = null;
+      if (this.table) {
+        this.table.contextMenuSelection = null;
+      }
       window.setTimeout(() => this.menu.hide());
     }
   }
 
   trackByFn(index, item) {
+    return item.id;
+  }
+
+  trackByFunction(index, item) {
     return item.id;
   }
 
@@ -360,5 +407,25 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
 
   focusSelected() {
     this.table.el.nativeElement.getElementsByClassName('selected')[0]?.focus();
+  }
+
+  colResize({delta, element}: { delta: number; element: HTMLTableHeaderCellElement }) {
+    if (delta) {
+      const width = element.getClientRects()[0].width;
+      const colId = element.attributes['data-col-id']?.value;
+      if (colId) {
+        const col = this.columns.find(col => col.id === colId);
+        col.style = {...col.style, width: `${width}px`};
+      }
+    }
+  }
+
+  getColName(colId: ISmCol['id']) {
+    const col = this.columns.find(col => colId === col.id);
+    return col ? col.header : 'Sort by';
+  }
+
+  get sortableCols() {
+    return this.columns.filter(col => col.sortable);
   }
 }

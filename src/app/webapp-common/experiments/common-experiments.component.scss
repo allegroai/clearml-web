@@ -18,11 +18,6 @@
     pointer-events: none;
   }
 
-  .experiment-table-container {
-    transition: all 0.3s;
-
-  }
-
   .experiment-info-container {
     transition: 0.3s;
     &.hide-experiment-info {

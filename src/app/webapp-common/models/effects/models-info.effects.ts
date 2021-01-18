@@ -9,16 +9,20 @@ import {ActiveLoader, DeactiveLoader, SetBackdrop, SetServerError} from '../../c
 import {selectAppVisible} from '../../core/reducers/view-reducer';
 import * as infoActions from '../actions/models-info.actions';
 import * as viewActions from '../actions/models-view.actions';
-import {IModelInfoState} from '../reducers/model-info.reducer';
+import {ModelInfoState} from '../reducers/model-info.reducer';
 import {MODELS_INFO_ONLY_FIELDS} from '../shared/models.const';
 import {selectSelectedModel} from '../reducers';
 import {EmptyAction} from '../../../app.constants';
+import {SelectedModel} from '../shared/models.model';
+import {selectActiveWorkspace} from "../../core/reducers/users-reducer";
+import {isExample, isSharedAndNotOwner} from "../../shared/utils/shared-utils";
 
 @Injectable()
 export class ModelsInfoEffects {
 
-  constructor(private actions$: Actions, private store: Store<IModelInfoState>,
-    private apiModels: ApiModelsService) {}
+  constructor(private actions$: Actions, private store: Store<ModelInfoState>,
+              private apiModels: ApiModelsService) {
+  }
 
   @Effect()
   activeLoader = this.actions$.pipe(
@@ -29,15 +33,19 @@ export class ModelsInfoEffects {
   @Effect()
   getModelInfo$ = this.actions$.pipe(
     ofType<infoActions.GetModelInfo>(infoActions.GET_MODEL_INFO, infoActions.REFRESH_MODEL_INFO),
-    withLatestFrom(this.store.select(selectAppVisible)),
-    filter(([action, visible]) => visible),
-    switchMap(([action])=>
-      this.apiModels.modelsGetAllEx({id: [action.payload], only_fields: MODELS_INFO_ONLY_FIELDS})
+    withLatestFrom(this.store.select(selectActiveWorkspace), this.store.select(selectAppVisible)),
+    filter(([action, currentUser, visible]) => visible),
+    switchMap(([action, activeWorkspace]) =>
+      this.apiModels.modelsGetByIdEx({id: [action.payload], only_fields: MODELS_INFO_ONLY_FIELDS})
         .pipe(
-          mergeMap((res: ModelsGetAllResponse) => [
-            new infoActions.SetModel(res.models[0]),
-            new DeactiveLoader(action.type)
-          ]),
+          mergeMap((res: ModelsGetAllResponse) => {
+            const model = res.models[0] as SelectedModel;
+            model.readOnly = isExample(model) || isSharedAndNotOwner(model, activeWorkspace);
+            return [
+              new infoActions.SetModel(model as SelectedModel),
+              new DeactiveLoader(action.type)
+            ];
+          }),
           catchError(error => [
             new RequestFailed(error),
             new DeactiveLoader(action.type),
@@ -52,7 +60,12 @@ export class ModelsInfoEffects {
     debounceTime(1000),
     switchMap((action) => {
       const parent = action.payload.parent ? (action.payload.parent as any).id : undefined;
-      return this.apiModels.modelsEdit({model: action.payload.id, ...action.payload, project: action.payload.project.id, task: action.payload.task?.id, parent: parent})
+      return this.apiModels.modelsEdit({
+        model: action.payload.id, ...action.payload,
+        project: action.payload.project.id,
+        task: action.payload.task?.id,
+        parent: parent
+      })
         .pipe(
           mergeMap(() => [
             new infoActions.GetModelInfo(action.payload.id),
@@ -81,7 +94,10 @@ export class ModelsInfoEffects {
             const changes = res?.fields || action.changes;
             return [
               new viewActions.UpdateModel({id: action.id, changes}),
-              selectedModel?.id === action.id ? new infoActions.ModelDetailsUpdated({id: action.id, changes}): new EmptyAction()
+              selectedModel?.id === action.id ? new infoActions.ModelDetailsUpdated({
+                id: action.id,
+                changes
+              }) : new EmptyAction()
             ];
           }),
           catchError(err => [

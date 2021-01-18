@@ -11,6 +11,7 @@ import {Artifact} from '../../../business-logic/model/tasks/artifact';
 import {IExperimentModelInfo} from '../../../webapp-common/experiments/shared/common-experiment-model.model';
 import {ParamsItem} from '../../../business-logic/model/tasks/paramsItem';
 import {ConfigurationItem} from '../../../business-logic/model/tasks/configurationItem';
+import {GetCurrentUserResponseUserObjectCompany} from "../../../business-logic/model/users/getCurrentUserResponseUserObjectCompany";
 
 /**
  * an extended object of task that includes projection, will come from the server as an api response.
@@ -19,7 +20,7 @@ export interface ISelectedExperiment {
   id?: string;
   name?: string;
   user?: User;
-  company?: string;
+  company?: GetCurrentUserResponseUserObjectCompany;
   type?: TaskTypeEnum;
   status?: TaskStatusEnum;
   comment?: string;
@@ -27,7 +28,8 @@ export interface ISelectedExperiment {
   completed?: Date;
   started?: Date;
   last_update?: Date;
-  parent?: string;
+  parent?: {id: string; name: string; project?: {id: string}};
+  active_duration?: Date;
   project?: Project;
   output?: ISelectedExperimentOutput;
   execution?: ISelectedExperimentExecution;
@@ -41,6 +43,7 @@ export interface ISelectedExperiment {
   last_iteration?: number;
   hyperparams?: { [section: string]: { [key: string]: ParamsItem } };
   configuration?: { [key: string]: ConfigurationItem };
+  currentUser?: any;
 }
 
 /**
@@ -55,6 +58,7 @@ export interface IExperimentInfo {
   hyperparams?: { [key: string]: { [key: string]: ParamsItem }; };
   configuration?: any;
   artifacts?: Artifact[];
+  readonly?: boolean;
 }
 
 export interface ISelectedExperimentOutput {

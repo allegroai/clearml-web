@@ -1,7 +1,7 @@
 // table
 import {Task} from '../../../business-logic/model/tasks/task';
 
-export type ExperimentTableColFieldsEnum = 'output.result' | 'comment' | 'id' | 'project.name' | 'name' | 'type' | 'status' | 'created' | 'completed' | 'user.name' | 'queue.name' | 'last_worker' | 'selected' |'last_iteration' | 'last_update' | 'tags';
+export type ExperimentTableColFieldsEnum = 'output.result' | 'comment' | 'id' | 'project.name' | 'name' | 'type' | 'status' | 'created' | 'completed' | 'user.name' | 'queue.name' | 'last_worker' | 'selected' |'last_iteration' | 'last_update' | 'tags' | 'active_duration'| 'parent';
 
 export interface ITableExperiment {
   id: Task['id'];
@@ -13,6 +13,7 @@ export interface ITableExperiment {
   tags: Task['tags'];
   system_tags: Task['system_tags'];
   last_update?: Date;
+  active_duration?: Date;
 }
 
 export interface CloneForm {

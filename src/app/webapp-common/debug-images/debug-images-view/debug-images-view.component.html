@@ -8,7 +8,7 @@
       <sm-debug-image-snippet [frame]="frame"
                               *ngFor="let frame of iteration.events; let i = index; trackBy:trackFrame"
                               (imageError)="imageUrlError({frame: frame, experimentId: experimentId})"
-                              (imageClicked)="imageClicked.emit({frame: frame, snippetKey: frame.key, frames: iteration.events})">
+                              (imageClicked)="imageClicked.emit({frame: frame, snippetKey: frame.key, frames: allIterationsEvents})">
       </sm-debug-image-snippet>
     </div>
   </ng-template>

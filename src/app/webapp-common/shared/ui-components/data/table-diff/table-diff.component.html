@@ -15,7 +15,7 @@
   </div>
 </div>
 <div *ngFor="let data of keyValueArray" class="table-diff-row">
-  <div *ngIf="data.value !== ''">{{data.key}}</div>
+  <div *ngIf="data.value || data.value === 0">{{data.key}}</div>
   <div [title]="data.value">
     <ng-template
       [ngTemplateOutlet]="templateRef"

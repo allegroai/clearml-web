@@ -9,19 +9,28 @@ import {
   ViewChild
 } from '@angular/core';
 import {Store} from '@ngrx/store';
-import {openTagColorsMenu} from '../../../../core/actions/projects.actions';
+import {getCompanyTags, openTagColorsMenu, setTagsFilterByProject} from '../../../../core/actions/projects.actions';
+import {ActivateEdit} from 'app/webapp-common/experiments/actions/common-experiments-info.actions';
+import {ActivateModelEdit} from '../../../../models/actions/models-info.actions';
 
 @Component({
-  selector       : 'sm-tags-menu',
-  templateUrl    : './tags-menu.component.html',
-  styleUrls      : ['./tags-menu.component.scss'],
+  selector: 'sm-tags-menu',
+  templateUrl: './tags-menu.component.html',
+  styleUrls: ['./tags-menu.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TagsMenuComponent {
-  filterText: string;
+  public filterText: string;
+  private firstTime = true;
+
+  get allTags(): string[] {
+    return this.tagsFilterByProject ? this.projectTags : this.companyTags;
+  }
 
   @Input() tags: string[];
-  @Input() allTags: string[];
+  @Input() projectTags: string[];
+  @Input() companyTags: string[] = [];
+  @Input() tagsFilterByProject: boolean;
   @Output() tagSelected = new EventEmitter<string>();
 
   @ViewChild('nameInput') nameInput: ElementRef<HTMLInputElement>;
@@ -31,6 +40,10 @@ export class TagsMenuComponent {
   }
 
   openTagColors() {
+    window.setTimeout(() => {
+      this.store.dispatch(new ActivateEdit('tags'));
+      this.store.dispatch(new ActivateModelEdit('tags'));
+    }, 500);
     this.store.dispatch(openTagColorsMenu());
   }
 
@@ -43,6 +56,11 @@ export class TagsMenuComponent {
   }
 
   focus() {
+    if (this.tagsFilterByProject) {
+      this.firstTime = true;
+    } else {
+      this.store.dispatch(getCompanyTags());
+    }
     this.nameInput.nativeElement.focus();
     this.cdr.detectChanges();
   }
@@ -51,7 +69,15 @@ export class TagsMenuComponent {
     this.filterText = '';
   }
 
-  clearSearch() {
-    this.filterText = '';
+  projectTagsFilterToggle(): void {
+    if (this.firstTime) {
+      this.firstTime = false;
+      this.store.dispatch(getCompanyTags());
+    }
+    this.store.dispatch(setTagsFilterByProject({tagsFilterByProject: !this.tagsFilterByProject}));
+  }
+
+  trackByFn(index, item) {
+    return item;
   }
 }

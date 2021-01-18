@@ -1,0 +1,37 @@
+<ng-template
+  let-saving="saving" let-editable="editable"
+  let-configurationObjectName="configurationObjectName"
+  [ngTemplateOutletContext]="{ saving: saving$ | async,
+                               editable: editable$ | async,
+                               configurationObjectName: selectedConfigObj$ | async}"
+  [ngTemplateOutlet]="template" #template>
+  <sm-editable-section [editable]="false">
+    <sm-section-header [label]="configurationObjectName | replaceViaMapPipe:sectionReplaceMap | uppercase"></sm-section-header>
+    <sm-labeled-row label="TYPE">{{formData?.type === 'legacy' ? '' : formData?.type}}</sm-labeled-row>
+    <sm-labeled-row label="DESCRIPTION">{{formData?.description}}</sm-labeled-row>
+  </sm-editable-section>
+
+  <!-- **************** CONFIGURATION OBJECT **************** -->
+  <sm-editable-section class="editable-design"
+                       #prototext
+                       [saving]="saving"
+                       [editable]="editable"
+                       [disableInEditMode]="true"
+                       (cancelClicked)="cancelModelChange()"
+                       (activateEditClicked)="activateEditChanged('prototext'); editPrototext()">
+    <sm-section-header label="CONFIGURATION OBJECT"></sm-section-header>
+    <sm-experiment-network-design-form
+      [editable]="false"
+      [formData]="formData?.value"
+    >
+    </sm-experiment-network-design-form>
+    <button extra-buttons
+            *ngIf="formData?.value"
+            class="btn-dark-fill mr-3 flex-1"
+            (click)="clearPrototext()">
+      <i class="p-1 fa fa-trash"></i>
+      CLEAR
+    </button>
+
+  </sm-editable-section>
+</ng-template>

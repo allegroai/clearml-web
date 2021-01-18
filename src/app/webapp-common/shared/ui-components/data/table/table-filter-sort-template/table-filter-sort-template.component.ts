@@ -1,6 +1,6 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {FormControl} from '@angular/forms';
-import {TABLE_SORT_ORDER, TableSortOrderEnum} from '../table.consts';
+import {ISmCol, TABLE_SORT_ORDER, TableSortOrderEnum} from '../table.consts';
 import {addOrRemoveFromArray} from '../../../../utils/shared-utils';
 
 @Component({
@@ -14,13 +14,19 @@ export class TableFilterSortTemplateComponent {
 
   private _value: Array<string>;
   public formControl = new FormControl();
+  header;
+  enableSort = true;
+  enableSearch = false;
 
-  @Input() sortOrder: TableSortOrderEnum;
-  @Input() header;
-  @Input() enableSort = true;
-  @Input() enableSearch = false;
+  @Input() sortOrder: TableSortOrderEnum | boolean;
+  @Input() set column(col: ISmCol) {
+    this.header = col.header;
+    this.enableSort = col.sortable;
+    this.enableSearch= col.searchableFilter;
+  }
   @Input() searchValue;
   @Input() fixedOptionsSubheader;
+  @Input() enableTooltip: boolean;
 
   @Input() set value(value: Array<string>) {
     this.formControl.setValue(value);
@@ -33,8 +39,8 @@ export class TableFilterSortTemplateComponent {
 
   @Input() subValue: string[] = [];
 
-  @Input() options: Array<{ label: string, value: string }>;
-  @Input() subOptions: Array<{ label: string, value: string }>;
+  @Input() options: Array<{ label: string; value: string; tooltip?: string }>;
+  @Input() subOptions: Array<{ label: string; value: string }>;
   @Output() filterChanged = new EventEmitter();
   @Output() subFilterChanged = new EventEmitter();
   @Output() menuClosed = new EventEmitter();
@@ -47,7 +53,7 @@ export class TableFilterSortTemplateComponent {
     this.sortOrderChanged.emit(newSortOrder);
   }
 
-  private toggleSortOrder(sortOrder: TableSortOrderEnum) {
+  private toggleSortOrder(sortOrder: TableSortOrderEnum | boolean) {
     if (sortOrder === this.TABLE_SORT_ORDER.ASC) {
       return this.TABLE_SORT_ORDER.DESC;
     }

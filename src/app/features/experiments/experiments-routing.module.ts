@@ -4,7 +4,6 @@ import {ExperimentsComponent} from './experiments.component';
 import {SMSharedModule} from '../../webapp-common/shared/shared.module';
 import {SelectableListComponent} from '../../webapp-common/shared/ui-components/data/selectable-list/selectable-list.component';
 import {SelectableFilterListComponent} from '../../webapp-common/shared/ui-components/data/selectable-filter-list/selectable-filter-list.component';
-import {ExperimentInfoExecutionComponent} from './containers/experiment-info-execution/experiment-info-execution.component';
 import {ExperimentInfoGeneralComponent} from '../../webapp-common/experiments/containers/experiment-info-general/experiment-info-general.component';
 import {ExperimentOutputComponent} from '../../webapp-common/experiments/containers/experiment-ouptut/experiment-output.component';
 import {ExperimentOutputScalarsComponent} from '../../webapp-common/experiments/containers/experiment-output-scalars/experiment-output-scalars.component';
@@ -20,6 +19,7 @@ import {ExperimentInfoArtifactItemComponent} from '../../webapp-common/experimen
 import {LeavingBeforeSaveAlertGuard} from '../../webapp-common/shared/guards/leaving-before-save-alert.guard';
 import {ExperimentInfoTaskModelComponent} from '../../webapp-common/experiments/containers/experiment-info-task-model/experiment-info-task-model.component';
 import {ExperimentInfoHyperParametersFormContainerComponent} from '../../webapp-common/experiments/containers/experiment-info-hyper-parameters-form-container/experiment-info-hyper-parameters-form-container.component';
+import {ExperimentInfoExecutionComponent} from '../../webapp-common/experiments/containers/experiment-info-execution/experiment-info-execution.component';
 
 export const routes: Routes = [
   {
@@ -30,9 +30,10 @@ export const routes: Routes = [
         path    : ':experimentId', component: ExperimentInfoComponent,
         children: [
           {path: '', redirectTo: 'execution', pathMatch: 'full'},
-          {path: 'execution', component: ExperimentInfoExecutionComponent, canDeactivate: [LeavingBeforeSaveAlertGuard]},
+          {path: 'execution', component: ExperimentInfoExecutionComponent, canDeactivate: [LeavingBeforeSaveAlertGuard], data: {minimized: true}},
           {
             path    : 'artifacts', component: ExperimentInfoArtifactsComponent, canDeactivate: [LeavingBeforeSaveAlertGuard],
+            data     : {minimized: true},
             children: [
               {path: '', redirectTo: 'input-model', pathMatch: 'full'},
               {path: 'input-model', component: ExperimentInfoInputModelComponent},
@@ -43,12 +44,13 @@ export const routes: Routes = [
           },
           {
             path    : 'hyper-params', component: ExperimentInfoHyperParametersComponent, canDeactivate: [LeavingBeforeSaveAlertGuard],
+            data     : {minimized: true},
             children: [
               {path: 'configuration/:configObject', component: ExperimentInfoTaskModelComponent},
               {path: 'hyper-param/:hyperParamId', component: ExperimentInfoHyperParametersFormContainerComponent}
             ]
           },
-          {path: 'general', component: ExperimentInfoGeneralComponent},
+          {path: 'general', component: ExperimentInfoGeneralComponent, data: {minimized: true}},
           {
             path     : 'info-output',
             component: ExperimentOutputComponent,
@@ -57,7 +59,7 @@ export const routes: Routes = [
               {path: '', redirectTo: 'log'},
               {path: 'metrics/scalar', component: ExperimentOutputScalarsComponent, data: {minimized: true}},
               {path: 'metrics/plots', component: ExperimentOutputPlotsComponent, data: {minimized: true}},
-              {path: 'debugImages', component: DebugImagesComponent},
+              {path: 'debugImages', component: DebugImagesComponent, data: {minimized: true}},
               {path: 'log', component: ExperimentOutputLogComponent},
             ]
           }
@@ -69,8 +71,26 @@ export const routes: Routes = [
   {
     path     : ':experimentId/output',
     component: ExperimentOutputComponent,
+    data: {search: false},
     children : [
-      {path: '', redirectTo: 'log'},
+      {path: '', redirectTo: 'execution'},
+      {path: 'execution', component: ExperimentInfoExecutionComponent, data: {}, canDeactivate: [LeavingBeforeSaveAlertGuard]},
+      {path: 'hyper-params', component: ExperimentInfoHyperParametersComponent, data: {}, canDeactivate: [LeavingBeforeSaveAlertGuard],
+        children: [
+          {path: 'configuration/:configObject', component: ExperimentInfoTaskModelComponent},
+          {path: 'hyper-param/:hyperParamId', component: ExperimentInfoHyperParametersFormContainerComponent}
+        ]
+      },
+      {path: 'artifacts', component: ExperimentInfoArtifactsComponent, data: {}, canDeactivate: [LeavingBeforeSaveAlertGuard],
+        children: [
+          {path: '', redirectTo: 'input-model', pathMatch: 'full'},
+          {path: 'input-model', component: ExperimentInfoInputModelComponent},
+          {path: 'output-model', component: ExperimentInfoOutputModelComponent},
+          {path: 'artifact/:artifactId', children: [{path: ':mode', component: ExperimentInfoArtifactItemComponent}]},
+          {path: 'other/:artifactId', children: [{path: ':mode', component: ExperimentInfoArtifactItemComponent}]}
+        ]
+      },
+      {path: 'general', component: ExperimentInfoGeneralComponent, data: {}},
       {path: 'metrics/scalar', component: ExperimentOutputScalarsComponent, data: {}},
       {path: 'metrics/plots', component: ExperimentOutputPlotsComponent, data: {}},
       {path: 'debugImages', component: DebugImagesComponent},

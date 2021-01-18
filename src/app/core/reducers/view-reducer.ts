@@ -6,12 +6,13 @@ import {
   ViewState as CommonViewState
 } from '../../webapp-common/core/reducers/view-reducer';
 import {dismissSurvey} from '../Actions/layout.actions';
+import {setServerUpdatesAvailable} from '../../webapp-common/core/actions/layout.actions';
 
 interface ViewState extends CommonViewState {
   availableUpdates: string;
   showSurvey: boolean;
 }
-const initViewState = {
+const initViewState: ViewState = {
   ...commonInitState,
   availableUpdates  : null,
   showSurvey: true
@@ -24,8 +25,8 @@ export const selectShowSurvey   = createSelector(views, state => state.showSurve
 export function viewReducer(viewState: ViewState = initViewState, action) {
 
   switch (action.type) {
-    case VIEW_ACTIONS.SET_SERVER_UPDATES_AVAILABLE:
-      return {...viewState, availableUpdates: action.payload.availableUpdates};
+    case setServerUpdatesAvailable.type:
+      return {...viewState, availableUpdates: (action as ReturnType<typeof setServerUpdatesAvailable>).availableUpdates};
     case dismissSurvey.type:
       return {...viewState, showSurvey: false};
     default:

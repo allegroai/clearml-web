@@ -1,6 +1,5 @@
 import {EXPERIMENTS_TABLE_COL_FIELDS} from './shared/experiments.const';
 import {ColHeaderTypeEnum, ISmCol} from '../../webapp-common/shared/ui-components/data/table/table.consts';
-import {MODELS_TABLE_COL_FIELDS} from '../../webapp-common/models/shared/models.const';
 
 export const EXPERIMENT_INFO_ONLY_FIELDS = [
   'id',
@@ -15,9 +14,11 @@ export const EXPERIMENT_INFO_ONLY_FIELDS = [
   'comment',
   'created',
   'last_update',
+  'last_change',
   'completed',
   'started',
-  'parent',
+  'parent.name',
+  'parent.project.name',
   'project.name',
   'output',
   'output.model.name',
@@ -46,6 +47,7 @@ export const EXPERIMENT_INFO_ONLY_FIELDS = [
   'published',
   'last_iteration',
   'tags',
+  'active_duration'
 ];
 
 export const INITIAL_EXPERIMENT_TABLE_COLS: ISmCol[] = [
@@ -60,7 +62,8 @@ export const INITIAL_EXPERIMENT_TABLE_COLS: ISmCol[] = [
     bodyStyleClass  : 'selected-col-body type-col',
     headerStyleClass: 'selected-col-header',
     style           : {width: '50px'},
-    disableDrag     : true
+    disableDrag     : true,
+    disablePointerEvents: true
   },
   {
     id            : EXPERIMENTS_TABLE_COL_FIELDS.TYPE,
@@ -146,10 +149,26 @@ export const INITIAL_EXPERIMENT_TABLE_COLS: ISmCol[] = [
     id        : EXPERIMENTS_TABLE_COL_FIELDS.COMMENT,
     headerType: ColHeaderTypeEnum.sort,
     sortable  : true,
-    hidden    : true,
     header    : 'DESCRIPTION',
     style     : {width: '300px'}
   },
+  {
+    id        : EXPERIMENTS_TABLE_COL_FIELDS.ACTIVE_DURATION,
+    headerType: ColHeaderTypeEnum.sort,
+    sortable  : true,
+    header    : 'RUN TIME',
+    style     : {width: '150px'}
+  },
+  {
+    id        : EXPERIMENTS_TABLE_COL_FIELDS.PARENT,
+    getter    : [EXPERIMENTS_TABLE_COL_FIELDS.PARENT, 'parent.project.id', 'parent.project.name'],
+    headerType: ColHeaderTypeEnum.sortFilter,
+    searchableFilter: true,
+    filterable      : true,
+    sortable        : false,
+    header    : 'PARENT TASK',
+    style     : {width: '200px'}
+  }
 ];
 
 export const GET_ALL_QUERY_ANY_FIELDS = ['id', 'name', 'comment', 'system_tags', 'output.model', 'execution.model'];
