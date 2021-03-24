@@ -1,9 +1,11 @@
-<div class="card" role="button">
+<div class="card">
   <div class="card-container">
-    <header>
-      {{header}}
-      <ng-content select="[header-content]"></ng-content>
-      <ng-content select="[headerButtons]"></ng-content>
+    <header [class.empty]="(!header) && headerWarp?.children.length===0 ">
+      <div #headerWarp>
+        {{header}}
+        <ng-content  select="[header-content]"></ng-content>
+        <ng-content  select="[headerButtons]"></ng-content>
+      </div>
     </header>
     <div *ngIf="showSeperator" class="line"></div>
     <div class="card-body">

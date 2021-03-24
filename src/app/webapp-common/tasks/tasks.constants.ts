@@ -45,6 +45,7 @@ export const TASKS_TABLE_COL_FIELDS = {
   CREATED  : 'created',
   COMPLETED: 'completed',
   USER     : 'user.name',
+  PARENT   : 'parent.name'
 };
 
 export const ASC  = 1;

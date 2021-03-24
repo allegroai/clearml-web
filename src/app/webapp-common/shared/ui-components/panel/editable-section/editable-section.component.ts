@@ -9,13 +9,17 @@ import {MatDialog} from '@angular/material/dialog';
   styleUrls  : ['./editable-section.component.scss']
 })
 export class EditableSectionComponent implements OnInit, OnDestroy {
+  public inEditMode = false;
+
   @Input() editable;
   @Input() disableEditable = false;
   @Input() disableSave = false;
   @Input() disableInEditMode = false;
   @Input() hideSaveButton = false;
   @Input() containerClass = '';
+  @Input() hideEditButton = false;
 
+  private _saving = false;
   @Input() set saving(saving) {
     if (this._saving && !saving) {
       this.inEditMode = false;
@@ -23,16 +27,12 @@ export class EditableSectionComponent implements OnInit, OnDestroy {
     this._saving = saving;
   }
 
-  public inEditMode = false;
-
-  get saving() {
+  get saving(): boolean {
     return this._saving;
   }
 
-  private _saving = false;
   @Output() saveClicked = new EventEmitter();
   @Output() cancelClicked = new EventEmitter();
-
   @Output() activateEditClicked = new EventEmitter();
 
   @HostListener('document:keydown', ['$event'])

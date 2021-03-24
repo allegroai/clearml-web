@@ -1,5 +1,5 @@
 <sm-editable-section
-  [editable]=" ! model?.ready && model.company?.id"
+  [editable]=" ! model?.ready && model.company?.id && !isSharedAndNotOwner"
   [saving]="saving"
   (activateEditClicked)="activateEdit()"
   (saveClicked)="saveClicked()"
@@ -49,7 +49,7 @@
         </div>
       </div>
     </form>
-    <button *ngIf="editable" class="btn btn-primary" (click)="addRow()"><i class="al-icon al-color blue-400 msm al-ico-plus"></i>
+    <button *ngIf="editable" class="btn btn-primary plus" (click)="addRow()"><i class="al-icon al-color blue-400 msm al-ico-plus"></i>
     </button>
     <div *ngIf="!editable">
 

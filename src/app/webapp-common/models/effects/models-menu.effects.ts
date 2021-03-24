@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {Store} from '@ngrx/store';
-import {IModelInfoState} from '../reducers/model-info.reducer';
+import {ModelInfoState} from '../reducers/model-info.reducer';
 import {ApiModelsService} from '../../../business-logic/api-services/models.service';
 import {catchError, flatMap, map, switchMap, tap, withLatestFrom} from 'rxjs/operators';
 import * as infoActions from '../actions/models-info.actions';
@@ -18,12 +18,12 @@ import {of} from 'rxjs';
 import {addTag, removeTag} from '../actions/models-menu.actions';
 import {updateModelDetails} from '../actions/models-info.actions';
 import {selectSelectedModel, selectSelectedModels, selectSelectedTableModel} from '../reducers';
-import {ISelectedModel} from '../shared/models.model';
+import {SelectedModel} from '../shared/models.model';
 
 @Injectable()
 export class ModelsMenuEffects {
 
-  constructor(private actions$: Actions, private store: Store<IModelInfoState>, private apiModels: ApiModelsService, private apiTasks: ApiTasksService,
+  constructor(private actions$: Actions, private store: Store<ModelInfoState>, private apiModels: ApiModelsService, private apiTasks: ApiTasksService,
               private authApi: ApiAuthService, private modelBl: BlModelsService, private router: Router) {
   }
 
@@ -58,18 +58,19 @@ export class ModelsMenuEffects {
     )
   );
 
+
   @Effect()
   changeProject$ = this.actions$.pipe(
     ofType<menuActions.ChangeProjectRequested>(menuActions.CHANGE_PROJECT_REQUESTED),
     switchMap(
-      action => this.apiModels.modelsUpdate({model: action.payload.model.id, project: action.payload.project.id})
+      action => this.apiModels.modelsMove({ids: [action.payload.model.id], project: action.payload.project.id, project_name: action.payload.project.name})
         .pipe(
+          tap((res) => this.router.navigate([`projects/${action.payload.project.id? action.payload.project.id : res.project_id}/models/${action.payload.model.id}`], {queryParamsHandling: 'merge'})),
           flatMap(() => [
             new viewActions.ResetState(),
-            new infoActions.SetModel({...action.payload.model, project: action.payload.project}),
+            new infoActions.SetModel(action.payload.model),
             new DeactiveLoader(action.type)
           ]),
-          tap(() => this.router.navigate([`projects/${action.payload.project.id}/models/${action.payload.model.id}`], {queryParamsHandling: 'merge'})),
           catchError(error => [new RequestFailed(error), new DeactiveLoader(action.type)])
         )
     )
@@ -96,7 +97,7 @@ export class ModelsMenuEffects {
     ofType(addTag),
     withLatestFrom(this.store.select(selectSelectedModels), this.store.select(selectSelectedTableModel)),
     switchMap(([action, selectedModels, selectedModelInfo]) => {
-        const modelsFromState = selectedModelInfo ? selectedModels.concat(selectedModelInfo) as ISelectedModel[] : selectedModels;
+        const modelsFromState = selectedModelInfo ? selectedModels.concat(selectedModelInfo) as SelectedModel[] : selectedModels;
         return action.models.map(model => {
           const modelFromState = modelsFromState.find(mod => mod.id === model.id);
           return updateModelDetails({

@@ -5,6 +5,8 @@ import {Project} from '../../business-logic/model/projects/project';
 import {ProjectsCreateRequest} from '../../business-logic/model/projects/projectsCreateRequest';
 import {IRecentTask} from './common-dashboard.reducer';
 import {ProjectsGetAllExRequest} from '../../business-logic/model/projects/projectsGetAllExRequest';
+import {createAction, props} from '@ngrx/store';
+import {LoginGetInviteInfoResponse} from '../../business-logic/model/login/loginGetInviteInfoResponse';
 
 
 export class GetRecentProjects implements ISmAction {
@@ -47,5 +49,11 @@ export class CreateProjectFromDashboard implements ISmAction {
   }
 }
 
-
-
+export const getInviteInfo = createAction(
+  '[dashboard] get invite info',
+  props<{inviteId: string}>()
+);
+export const setInviteInfo = createAction(
+  '[dashboard] set invite info',
+  props<{inviteInfo: LoginGetInviteInfoResponse}>()
+);

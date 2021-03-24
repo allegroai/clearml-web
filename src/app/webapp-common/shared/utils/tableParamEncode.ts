@@ -15,6 +15,10 @@ export interface MetricColumn {
   variant: string;
 }
 
+export function getValueTypeName(valueType: string) {
+  return valueType.replace('_', '').replace('value', '').toUpperCase();
+}
+
 export function encodeOrder(direction: 'asc' | 'desc', field: string): string {
   return `${direction === 'desc' ? '-' : ''}${field}`;
 }
@@ -22,7 +26,7 @@ export function encodeOrder(direction: 'asc' | 'desc', field: string): string {
 export function encodeFilters(filters: { [key: string]: FilterMetadata }) {
   if (filters) {
     return Object.keys(filters)
-      .filter((key: string) => filters[key].value.length)
+      .filter((key: string) => filters[key].value?.length)
       .map((key: string) => {
         const val = filters[key] as FilterMetadata;
         return `${key}:${val.matchMode ? val.matchMode + ':' : ''}${val.value.join('+')}`;
@@ -47,7 +51,7 @@ export function decodeFilter(filters: string): TableFilter[] {
     //   mode = parts[1];
     //   parts[1] = parts[2];
     // }
-    return {col, filterMatchMode: mode, value: values.split('+')};
+    return {col, filterMatchMode: mode, value: values?.split('+')};
   });
 }
 
@@ -65,8 +69,9 @@ export function encodeColumns(mainCols: ISmCol[] | any, hiddenCols = {}, metrics
     .sort((a, b) => sortCol(a.id, b.id, colsOrder))
     .map((col) => {
       if (col.metric_hash) {
-        const headerParts = col.header.split(' ');
-        return `m.${col.metric_hash}.${col.variant_hash}.${col.valueType}.${headerParts[0]}.${headerParts[2]}`;
+        const headerParts = col.header.trim().split(' > ');
+        const variant = headerParts[1]?.replace(` ${getValueTypeName(col.valueType)}`, '');
+        return `m.${col.metric_hash}.${col.variant_hash}.${col.valueType}.${headerParts[0]}.${variant}`;
       }
       if (col.isParam) {
         return `p.${col.header}`;
@@ -76,10 +81,11 @@ export function encodeColumns(mainCols: ISmCol[] | any, hiddenCols = {}, metrics
     });
 }
 
-export function decodeColumns(columns: string[]): [string[], MetricColumn[], string[]] {
+export function decodeColumns(columns: string[]): [string[], MetricColumn[], string[], string[]] {
   const cols = [] as string[];
   const metrics = [] as MetricColumn[];
   const params = [] as string[];
+  const allIds = [] as string[];
 
   columns.forEach(col => {
     if (col.startsWith('m.')) {
@@ -91,12 +97,16 @@ export function decodeColumns(columns: string[]): [string[], MetricColumn[], str
         metric: colParts[4],
         variant: colParts[5]
       });
+      allIds.push(`last_metrics.${colParts[1]}.${colParts[2]}.${colParts[3]}`);
     } else if (col.startsWith('p.')) {
       const colParts = col.split('.');
-      params.push(colParts[1] + (colParts[2] ? `.${colParts[2]}` : ''));
+      const param = colParts[1] + (colParts[2] ? `.${colParts[2]}` : '');
+      params.push(param);
+      allIds.push(param);
     } else {
       cols.push(col);
+      allIds.push(col);
     }
   });
-  return [cols, metrics, params];
+  return [cols, metrics, params, allIds];
 }

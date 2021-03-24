@@ -14,10 +14,11 @@ export class ExperimentHeaderComponent {
 
   @Input() isArchived: boolean;
   @Input() metricVariants: Array<MetricVariantResult>;
-  @Input() hyperParams: Array<any>;
+  @Input() hyperParams: { [section: string]: any[] };
   @Input() minimizedView: boolean;
   @Input() isMetricsLoading: boolean;
   @Input() autoRefreshState: boolean;
+  @Input() sharedView: boolean;
 
   @Input() set tableCols(tableCols) {
     this._tableCols = tableCols.filter(col => col.header !== '');

@@ -22,4 +22,9 @@ export class DebugImagesViewComponent {
   public imageUrlError(data: { frame: string; experimentId: string }) {
     this.urlError.emit(data);
   }
+  get allIterationsEvents (){
+    const iterationEvents = [];
+    this.iterations.forEach(iteration=> iterationEvents.push(iteration.events));
+    return iterationEvents;
+  }
 }

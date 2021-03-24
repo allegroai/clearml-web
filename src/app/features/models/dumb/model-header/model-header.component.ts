@@ -21,6 +21,8 @@ export class ModelHeaderComponent {
   @Input() hideCreateNewButton: boolean;
   @Input() disableCreateNewButton: boolean;
   @Input() autoRefreshState: boolean;
+  @Input() sharedView: boolean;
+
   @Output() isArchivedChanged    = new EventEmitter<boolean>();
   @Output() addModelClicked = new EventEmitter();
   @Output() refreshListClicked       = new EventEmitter();

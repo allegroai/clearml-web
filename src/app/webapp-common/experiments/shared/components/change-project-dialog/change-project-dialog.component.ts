@@ -1,13 +1,14 @@
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {Project} from '../../../../../business-logic/model/projects/project';
-import {Component, Inject, OnInit} from '@angular/core';
-import {select, Store} from '@ngrx/store';
-import {Observable} from 'rxjs';
-import {selectProjects} from '../../../../../webapp-common/core/reducers/projects.reducer';
-import {GetAllProjects} from '../../../../../webapp-common/core/actions/projects.actions';
-import {map, tap} from 'rxjs/operators';
-import {IOption} from '../../../../../webapp-common/shared/ui-components/inputs/select-autocomplete/select-autocomplete.component';
-import {isExample} from '../../../../../webapp-common/shared/utils/shared-utils';
+import {Component, Inject, OnInit, ViewChild} from '@angular/core';
+import {Store} from '@ngrx/store';
+import {asyncScheduler, Observable, Subscription} from 'rxjs';
+import {selectProjects} from '../../../../core/reducers/projects.reducer';
+import {GetAllProjects} from '../../../../core/actions/projects.actions';
+import {map, startWith} from 'rxjs/operators';
+import {isReadOnly} from '../../../../shared/utils/shared-utils';
+import {isEqual} from 'lodash/fp';
+import {NgForm} from '@angular/forms';
 
 @Component({
   selector: 'sm-change-project-dialog',
@@ -16,13 +17,23 @@ import {isExample} from '../../../../../webapp-common/shared/utils/shared-utils'
 })
 export class ChangeProjectDialogComponent implements OnInit {
 
-  public type: string;
-  public projects$: Observable<Array<IOption>>;
+  public projects$: Observable<Project[]>;
   public selectedProjectId: Project['id'];
   public currentProject: string;
-  public project: Project;
-  private projects: Array<Project>;
+  public projects: { label: string; value: string }[];
+  public filteredProjects: Observable<{ label: string; value: string }[]>;
+  public formData: { project: any } = {
+    project: null
+  };
   public reference: string;
+  private projectsSub: Subscription;
+  filterText: string = '';
+  isNewName: boolean = false;
+
+  @ViewChild('moveToForm', {static: true}) moveToForm: NgForm;
+  public readOnlyProjects$: Observable<string[]>;
+  public isAutoCompleteOpen: boolean;
+  public currentProjectInstance: Project;
 
   constructor(
     private store: Store<any>, public dialogRef: MatDialogRef<ChangeProjectDialogComponent>,
@@ -30,40 +41,72 @@ export class ChangeProjectDialogComponent implements OnInit {
       currentProject: Project['id'];
       defaultProject: Project['id'];
       reference?: string;
-      type?: string;
     }
   ) {
     this.selectedProjectId = data.defaultProject;
     this.currentProject = data.currentProject;
     this.reference = data.reference;
-    this.type = data.type;
-    this.projects$ = this.store.pipe(
-      select(selectProjects),
-      map(projects => projects.filter((project) => !isExample(project))),
-      tap((projects) => {
-        this.projects = projects;
-        if (projects) {
-          const project = this.projects.find(proj => proj.id === this.currentProject);
-          window.setTimeout(() => this.project = project);
-        }
-      }),
-      map(projects => projects.map(proj => ({value: proj.id, label: proj.name})))
+    this.readOnlyProjects$ = this.store.select(selectProjects)
+      .pipe(map(projects => projects.filter(project => isReadOnly(project)).map(project=> project.name).concat(this.currentProjectInstance.name)));
+    this.projects$ = this.store.select(selectProjects).pipe(
+      map(projects => projects.filter((project) => !isReadOnly(project)))
     );
   }
 
   ngOnInit(): void {
     this.store.dispatch(new GetAllProjects());
+    this.projectsSub = this.projects$.subscribe(projects => {
+      this.currentProjectInstance = projects.find(proj => proj.id === this.currentProject);
+      const projectList = projects.map(project => ({value: project.id, label: project.name}));
+      if (!isEqual(projectList, this.projects)) {
+        this.projects = projectList;
+      }
+    });
+    setTimeout(() => {
+      if (!this.moveToForm?.controls['projectName']) {
+        return;
+      }
+      this.filteredProjects = this.moveToForm.controls['projectName'].valueChanges
+        .pipe(
+          map(value => typeof value === 'string' ? value : value.label),
+          map(value => this._filter(value)),
+          startWith(this.projects, asyncScheduler)
+        );
+    }, 1000);
   }
 
-  projectChanged(event) {
-    this.selectedProjectId = event.value;
+  ngOnDestroy(): void {
+    this.projectsSub.unsubscribe();
   }
 
   closeDialog(isConfirmed) {
     if (isConfirmed) {
-      this.dialogRef.close(this.projects.find(proj => proj.id === this.selectedProjectId));
+      if (typeof this.formData.project === 'string') {
+        this.formData.project = {label: this.formData.project, value: ''};
+      }
+      this.dialogRef.close({id: this.formData.project.value, name: this.formData.project.label});
     } else {
       this.dialogRef.close(null);
     }
+  }
+
+  private _filter(value: string) {
+    this.filterText = value;
+    const projectsNames = this.projects.map(project => project.label);
+    this.isNewName = !projectsNames.includes(value);
+    const filterValue = value.toLowerCase();
+    return this.projects.filter((project: any) => project.label.toLowerCase().includes(filterValue.toLowerCase()));
+  }
+
+  displayFn(project: any ): string {
+    return project && project.label ? project.label : project ;
+  }
+
+  clear() {
+    this.filterText = '';
+    this.formData.project = '';
+  }
+  setIsAutoCompleteOpen(focus: boolean) {
+    this.isAutoCompleteOpen = focus;
   }
 }

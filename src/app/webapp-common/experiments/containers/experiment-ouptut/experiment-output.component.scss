@@ -27,8 +27,8 @@ $output-tabs-height: 64px;
 
   sm-experiment-info-header {
     display: block;
-    padding: 7px 10px 0 10px;
-    border-bottom: 1px solid #efefef;
+    padding: 7px 0 0 10px;
+    border-bottom: 1px solid $blue-100;
   }
   sm-experiment-settings.maximized {
     display: block;
@@ -40,11 +40,11 @@ $output-tabs-height: 64px;
     height: $output-tabs-height;
     position: relative;
     text-align: center;
-    border-bottom: 2px solid #efefef;
+    border-bottom: 1px solid #efefef;
 
     .refresh-position {
       position: absolute;
-      right: 10px;
+      right: 16px;
       top: 6px;
       display: flex;
       align-items: center;
@@ -71,3 +71,4 @@ $output-tabs-height: 64px;
     }
   }
 }
+

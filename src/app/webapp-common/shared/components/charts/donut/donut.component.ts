@@ -1,10 +1,11 @@
-import {Component, OnInit, Input, ViewContainerRef, ViewChild, ChangeDetectionStrategy} from '@angular/core';
+import {Component, OnInit, Input, ChangeDetectionStrategy} from '@angular/core';
 import {select, selectAll, Selection} from 'd3-selection';
 import {ColorHashService} from '../../../services/color-hash/color-hash.service';
-import donut from 'britecharts/src/charts/donut';
-import legend from 'britecharts/src/charts/legend';
+import donut from 'britecharts/dist/umd/donut.min';
+import legend from 'britecharts/dist/umd/legend.min';
 import {attachColorChooser} from '../../../ui-components/directives/choose-color/choose-color.directive';
 import {Store} from '@ngrx/store';
+
 export interface DonutChartData {
   name: string;
   quantity: number;
@@ -33,10 +34,9 @@ export class DonutComponent implements OnInit {
   private legendWidth: number;
 
   @Input() set data(data: DonutChartData[]) {
+    this.donutData = data;
     if (this.donutContainer !== undefined) {
-      this.donutData = data;
       this.donutContainer.datum(data).call(this.donutChart);
-      this.legendChart.height(20 + data.length * 20);
       this.updateLegend();
     }
   }
@@ -77,6 +77,7 @@ export class DonutComponent implements OnInit {
   }
 
   updateLegend() {
+    this.legendChart.height(30 + this.donutData?.length * 20);
     this.legendContainer.datum(this.donutData).call(this.legendChart);
     selectAll('.legend-entry').nodes().forEach((node: HTMLElement) => {
       const text   = node.querySelector('.legend-entry-name').textContent;

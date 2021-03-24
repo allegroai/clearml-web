@@ -17,7 +17,7 @@ export class SelectModelHeaderComponent {
   public readonly allProjectsdModeOptions = [
     {value: true, label: 'ALL PROJECTS'},
     {value: false, label: 'CURRENT PROJECT'}
-  ];
+  ] as {value: any; label: string}[];
 
 
   @Input() searchValue: string;

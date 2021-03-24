@@ -30,7 +30,7 @@
       [cpOKButton]="true"
       [cpCancelButton]="true"
       [cpSaveClickOutside]="false"
-      [cpWidth]="340"
+      cpWidth="340"
       [cpOKButtonClass]="'btn btn-neon'"
       [cpCancelButtonClass]="'btn btn-outline-neon'"
       [cpAlphaChannel]="'disabled'"
@@ -46,8 +46,8 @@
       <div
         *ngIf="(tag.colorObservable | async) as colors"
         class="tag pointer"
-        [style.backgroundColor]="colors?.background"
-        [style.color]="colors?.foreground"
+        [style.backgroundColor]="$any(colors)?.background"
+        [style.color]="$any(colors)?.foreground"
         mat-icon-button
         [matMenuTriggerFor]="colorMenu"
         [matMenuTriggerData]="{tag: tag.caption, colors: colors}"

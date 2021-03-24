@@ -16,7 +16,7 @@ export class SimpleTableComponent2 extends FormsTrackBy {
   }
   @Input() rowsConfig: Array<{ collapsible: boolean }> = [];
   @Input() rowsData: Array<any>;
-  @Input() cols: Array<{ class: string, header: string, subHeader: string }>;
+  @Input() cols: { class: string; header: string; subHeader?: string }[];
   @Input() hideHeaders = false;
   @Input() enableDragAndDrop = false;
   @Input() noDataMessage: string;

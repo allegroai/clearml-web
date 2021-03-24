@@ -83,6 +83,7 @@ export interface ITask {
    * Tags list
    */
   tags?: Array<string>;
+  system_tags?: string[];
   /**
    * Last status change time
    */

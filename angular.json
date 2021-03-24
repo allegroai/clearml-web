@@ -29,6 +29,17 @@
               "node_modules/primeng/resources/components/table/table.css",
               "src/styles.scss",
               "src/fonts.scss"
+            ],
+            "allowedCommonJsDependencies": [
+              "lodash/fp",
+              "ansi-to-html",
+              "has-ansi",
+              "amazon-s3-uri",
+              "aws-sdk/clients/s3",
+              "fabric/dist/fabric.min",
+              "url",
+              "entities",
+              "string-to-color"
             ]
           },
           "configurations": {
@@ -75,6 +86,52 @@
                 {
                   "replace": "src/environments/environment.ts",
                   "with": "src/environments/environment.demo.ts"
+                }
+              ]
+            },
+            "guest": {
+              "budgets": [
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kb"
+                }
+              ],
+              "optimization": true,
+              "outputHashing": "all",
+              "sourceMap": false,
+              "extractCss": true,
+              "namedChunks": false,
+              "aot": true,
+              "extractLicenses": true,
+              "vendorChunk": false,
+              "buildOptimizer": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.ignite.ts"
+                }
+              ]
+            },
+            "community": {
+              "budgets": [
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kb"
+                }
+              ],
+              "optimization": true,
+              "outputHashing": "all",
+              "sourceMap": false,
+              "extractCss": true,
+              "namedChunks": false,
+              "aot": true,
+              "extractLicenses": true,
+              "vendorChunk": false,
+              "buildOptimizer": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.community.ts"
                 }
               ]
             },

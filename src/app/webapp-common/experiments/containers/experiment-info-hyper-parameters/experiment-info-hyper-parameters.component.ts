@@ -2,19 +2,16 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {selectExperimentConfiguration, selectExperimentHyperParamsInfoData, selectExperimentHyperParamsSelectedSectionFromRoute, selectExperimentSelectedConfigObjectFromRoute, selectIsExperimentSaving, selectIsSelectedExperimentInDev} from '../../reducers';
 import {ICommonExperimentInfoState} from '../../reducers/common-experiment-info.reducer';
-import * as infoActions from '../../../../features/experiments/actions/experiments-info.actions';
-import {ExperimentDataUpdated, SetExperimentFormErrors} from '../../../../features/experiments/actions/experiments-info.actions';
 import {ISelectedExperiment} from '../../../../features/experiments/shared/experiment-info.model';
 import {selectBackdropActive} from '../../../core/reducers/view-reducer';
-import {combineLatest, merge, Observable, Subscription} from 'rxjs';
-import {IHyperParamsForm} from '../../shared/experiment-hyper-params.model';
+import {combineLatest, Observable, Subscription} from 'rxjs';
 import {selectIsExperimentEditable, selectSelectedExperiment} from '../../../../features/experiments/reducers';
-import {cloneDeep} from 'lodash/fp';
 import {selectRouterConfig, selectRouterParams} from '../../../core/reducers/router-reducer';
-import {Params, Router} from '@angular/router';
+import {ActivatedRoute, Params, Router} from '@angular/router';
 import {ParamsItem} from '../../../../business-logic/model/tasks/paramsItem';
 import {filter, tap, withLatestFrom} from 'rxjs/operators';
-import {getExperimentConfigurationNames, getExperimentConfigurationObj} from '../../actions/common-experiments-info.actions';
+import {ActivateEdit, getExperimentConfigurationNames, getExperimentConfigurationObj, SetExperimentFormErrors} from '../../actions/common-experiments-info.actions';
+import {getOr} from 'lodash/fp';
 
 @Component({
   selector: 'sm-experiment-info-hyper-parameters',
@@ -34,8 +31,14 @@ export class ExperimentInfoHyperParametersComponent implements OnInit, OnDestroy
   public hyperParamsInfo$: Observable<{ [p: string]: { [p: string]: ParamsItem } }>;
   public configuration$: Observable<any>;
   private hyperParamsConfigSubscription: Subscription;
+  public minimized: boolean;
 
-  constructor(private store: Store<ICommonExperimentInfoState>, protected router: Router) {
+  constructor(
+    private store: Store<ICommonExperimentInfoState>,
+    protected router: Router,
+    private route: ActivatedRoute
+  ) {
+    this.minimized = getOr(false, 'data.minimized', this.route.snapshot.routeConfig);
     this.hyperParamsInfo$ = this.store.select(selectExperimentHyperParamsInfoData);
     this.configuration$ = this.store.select(selectExperimentConfiguration);
     this.editable$ = this.store.select(selectIsExperimentEditable);
@@ -78,7 +81,7 @@ export class ExperimentInfoHyperParametersComponent implements OnInit, OnDestroy
   }
 
   activateEditChanged(e) {
-    this.store.dispatch(new infoActions.ActivateEdit(e.sectionName));
+    this.store.dispatch(new ActivateEdit(e.sectionName));
   }
 
 }

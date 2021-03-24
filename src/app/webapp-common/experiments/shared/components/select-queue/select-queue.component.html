@@ -7,7 +7,7 @@
     <b>Note: This experiment seems to not contain any executable code.
       <br>If enqueued to run, it might produce no results.</b>
   </p>
-  <select class="form-control highlight" (change)="selectQueue($event.target.value)">
+  <select class="form-control highlight" (change)="selectQueue($any($event.target).value)">
     <option *ngFor="let queue of queues" [value]="queue.id" [selected]="queue?.id===selectedQueue?.id">
       {{queue.name}}
     </option>
@@ -17,7 +17,7 @@
     <button (click)="closeDialog(false)" class="btn btn-outline-neon">
       CANCEL
     </button>
-    <button (click)="closeDialog(true)" class="btn btn-neon yes-button">
+    <button (click)="closeDialog(true)" class="btn btn-neon yes-button" [disabled]="!selectedQueue">
       ENQUEUE
     </button>
   </div>

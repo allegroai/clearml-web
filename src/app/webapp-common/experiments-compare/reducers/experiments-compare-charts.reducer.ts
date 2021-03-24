@@ -1,6 +1,15 @@
 import {Task} from '../../../business-logic/model/tasks/task';
-import {RESET_EXPERIMENT_METRICS, SET_EXPERIMENT_HISTOGRAM, SET_EXPERIMENT_METRICS_SEARCH_TERM, SET_EXPERIMENT_PLOTS, SET_SELECTED_EXPERIMENTS, UPDATE_EXPERIMENT_SETTINGS} from '../actions/experiments-compare-charts.actions';
+import {
+  RESET_EXPERIMENT_METRICS,
+  SET_EXPERIMENT_HISTOGRAM,
+  SET_EXPERIMENT_METRICS_SEARCH_TERM,
+  SET_EXPERIMENT_PLOTS,
+  SET_SELECTED_EXPERIMENTS,
+  setAxisCache,
+  UPDATE_EXPERIMENT_SETTINGS
+} from '../actions/experiments-compare-charts.actions';
 import {ScalarKeyEnum} from '../../../business-logic/model/events/scalarKeyEnum';
+import {GroupByCharts} from '../../experiments/reducers/common-experiment-output.reducer';
 
 export type MetricValueType = 'min_value' | 'max_value' | 'value';
 
@@ -48,6 +57,7 @@ export interface IExperimentCompareSettings {
   selectedPlot: string;
   smoothWeight: number;
   xAxisType: ScalarKeyEnum;
+  groupBy: GroupByCharts;
 }
 
 export const initialState: IExperimentCompareChartsState = {
@@ -69,6 +79,8 @@ export function experimentsCompareChartsReducer(state: IExperimentCompareChartsS
       return {...state, searchTerm: action.payload.searchTerm};
     case SET_EXPERIMENT_HISTOGRAM:
       return {...state, metricsHistogramCharts: action.payload, cachedAxisType: action.axisType};
+    case setAxisCache.type:
+      return {...state, cachedAxisType: (action as ReturnType<typeof setAxisCache>).axis};
     case SET_EXPERIMENT_PLOTS:
       return {...state, metricsPlotsCharts: action.payload};
     case UPDATE_EXPERIMENT_SETTINGS: {

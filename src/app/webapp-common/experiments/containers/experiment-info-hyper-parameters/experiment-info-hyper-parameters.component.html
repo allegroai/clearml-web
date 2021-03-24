@@ -1,14 +1,14 @@
 <sm-overlay [backdropActive]="backdropActive$|async"></sm-overlay>
-<div class="h-100 row">
+<div class="h-100 d-flex">
   <sm-experiment-hyper-params-navbar
-    class="col-6"
+    [class.minimized]="minimized"
     [hyperParams]="(hyperParamsInfo$| async)"
     [configuration]="configuration$ | async"
     [routerConfig]="routerConfig$ | async"
     [routerParams]="routerParams$ | async"
     [disableAdd]="!(selectedExperiment?.status === 'created')"
   ></sm-experiment-hyper-params-navbar>
-  <div class="col-18 hyper-col">
+  <div class="hyper-col">
     <router-outlet></router-outlet>
   </div>
 </div>

@@ -21,7 +21,7 @@
     </div>
     <br>
     <div *ngIf=" ! isAzure" class="row position-relative">
-      <input class="col-24 highlight" type="text" formControlName="Region" placeholder="Region">
+      <input class="col-24 highlight" type="text" formControlName="Region" placeholder="AWS Region (e.g. us-east-2)">
     </div>
     <br>
     <div *ngIf=" ! isAzure" class="row position-relative">
@@ -34,9 +34,7 @@
                            [formData]="useSSL"
                            (formDataChanged)="toggleSSL()"
       ></sm-checkbox-control>
-
-      <span> Connect using https (SSL)</span>
-
+      <span class="ml-2">Connect using https (SSL)</span>
     </div>
     <br/>
     <!--</div>-->

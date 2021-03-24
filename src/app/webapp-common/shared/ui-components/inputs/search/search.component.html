@@ -1,10 +1,13 @@
-<div class="search-input-container">
+<div class="search-input-container" [class.expand]="expandOnHover" [class.empty]="empty" (mouseenter)="searchBar.focus()" (dblclick)="$event.stopPropagation()">
   <input class="search-input"
          #searchBar
          [placeholder]="placeholder"
          (input)="onChange($event)"
          (keydown.enter)="valueChanged.emit(searchBar.value)"
   >
-  <i *ngIf="!hideIcons && searchBar.value.length === 0" class="fa fa-search pr-2"></i>
-  <i *ngIf="!hideIcons && searchBar.value.length > 0" class="fa fa-times pointer pr-2" (click)="clear()"></i>
+  <i *ngIf="!hideIcons && searchBar.value.length === 0; else hideIcons ? noIcon : showX" class="fa fa-search pr-2"></i>
+  <ng-template #showX>
+    <i class="fa fa-times pointer pr-2" (click)="clear()"></i>
+  </ng-template>
+  <ng-template #noIcon></ng-template>
 </div>

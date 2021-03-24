@@ -1,3 +1,5 @@
+@import "../../../styles/variables";
+
 :host {
   display: block;
   position: relative;
@@ -11,7 +13,7 @@
     color: #a7b2d8;
 
     &.active {
-      color: #5a658e;
+      color: $blue-400;
     }
     .sort-icon {
       transform: translateY(25%);

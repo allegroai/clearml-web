@@ -1,3 +1,5 @@
+@import "../../../shared/ui-components/styles/variables";
+
 :host{
   .model-icon {
     margin-right: 9px;
@@ -18,7 +20,7 @@
 
   .experiment-type {
     font-size: 11px;
-    color: #8492c2;
+    color: $blue-300;
   }
 
   .model-id {
@@ -27,6 +29,8 @@
     font-weight: bold;
   }
   .id-icon{
+    font-size: 12px;
+    font-weight: 500;
     width: 41px;
     height: 31px;
   }

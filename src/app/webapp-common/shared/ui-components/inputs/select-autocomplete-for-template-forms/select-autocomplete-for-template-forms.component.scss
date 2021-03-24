@@ -41,9 +41,15 @@
     padding-top: 0;
   }
 
-  /deep/ .ng-select.ng-select-single .ng-select-container .ng-value-container input {
-    height: 100%;
-    padding: 0;
+  /deep/ .ng-select.ng-select-single .ng-select-container .ng-value-container {
+    .ng-value {
+      z-index: 1;
+    }
+
+    input {
+      height: 100%;
+      padding: 0;
+    }
   }
 
   /deep/ .ng-select .ng-select-container {
@@ -70,6 +76,7 @@
       color: $light-periwinkle-two;
       border-radius: 0px !important;
     }
+
     /deep/ .ng-option.ng-option-selected, /deep/ .ng-option.ng-option-marked, /deep/ .ng-option.ng-option-selected.ng-option-marked {
       background-color: $dark-grey-blue;
       color: $light-periwinkle-two;

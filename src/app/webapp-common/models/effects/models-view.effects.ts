@@ -21,7 +21,7 @@ import {MODELS_PAGE_SIZE, MODELS_TABLE_COLS} from '../models.consts';
 import * as modelsSelectors from '../reducers';
 import {IModelsViewState} from '../reducers/models-view.reducer';
 import {MODEL_TAGS, MODELS_ONLY_FIELDS, MODELS_TABLE_COL_FIELDS} from '../shared/models.const';
-import {ITableModel} from '../shared/models.model';
+import {SelectedModel} from '../shared/models.model';
 import {ApiUsersService} from '../../../business-logic/api-services/users.service';
 import {EXPERIMENTS_TABLE_COL_FIELDS} from '../../../features/experiments/shared/experiments.const';
 import {ModelsGetAllExRequest} from '../../../business-logic/model/models/modelsGetAllExRequest';
@@ -421,7 +421,7 @@ export class ModelsViewEffects {
     }
   }
 
-  navigateAfterModelSelectionChanged(selectedModel: ITableModel, modelProject: string) {
+  navigateAfterModelSelectionChanged(selectedModel: SelectedModel, modelProject: string) {
     // wow angular really suck...
     const activeChild = get('firstChild.firstChild.firstChild.firstChild.firstChild.firstChild', this.route);
     const activeChildUrl = activeChild ? getRouteFullUrl(activeChild) : 'general';

@@ -1,5 +1,5 @@
 import {Task} from '../../business-logic/model/tasks/task';
-import {get, sortBy} from 'lodash/fp';
+import {cloneDeep, sortBy} from 'lodash/fp';
 import {ExperimentGraph} from './tasks.model';
 import {EventsGetMultiTaskPlotsResponse} from '../../business-logic/model/events/eventsGetMultiTaskPlotsResponse';
 
@@ -44,9 +44,9 @@ export function mergeTasks(tableTask, task) {
 }
 
 
-export function getModelDesign(modelDesc: Task['execution']['model_desc']): { key: string, value: any } {
+export function getModelDesign(modelDesc: Task['execution']['model_desc']): { key: string; value: any } {
   const key = getModelDesignKey(modelDesc);
-  return{key: key, value: key ? modelDesc[key] : modelDesc};
+  return {key: key, value: key ? modelDesc[key] : modelDesc};
 }
 
 function getModelDesignKey(modelDes): string {
@@ -60,12 +60,18 @@ function getModelDesignKey(modelDes): string {
   }
 }
 
-export function convertPlots(plots): { [key: string]: ExperimentGraph } {
+export function convertPlots(plots, experimentId: string): { [key: string]: ExperimentGraph } {
   return Object.entries(plots).reduce((acc, graphGroup) => {
     const key = graphGroup[0];
     const graphs = graphGroup[1] as Array<any>;
     acc[key] = graphs.map(graph => {
-      const json = JSON.parse(graph.plot_str);
+      let json;
+      try {
+        json = JSON.parse(graph.plot_str);
+        json.data.task = json.data.task || experimentId;
+      } catch (e) {
+        json = {data: [], layout: {title: 'Unknown data'}};
+      }
       return prepareGraph(json.data, json.layout, json.config, graph);
     });
     return acc;
@@ -74,26 +80,27 @@ export function convertPlots(plots): { [key: string]: ExperimentGraph } {
 
 export function prepareGraph(data: object, layout: object, config: object, graph): ExperimentGraph {
   return {
-    data     : data,
-    layout   : layout,
-    config   : config,
-    iter     : graph.iter,
-    metric   : graph.metric,
-    task     : graph.task,
+    data: data,
+    layout: layout,
+    config: config,
+    iter: graph.iter,
+    metric: graph.metric,
+    task: graph.task,
     timestamp: graph.timestamp,
-    type     : graph.type,
-    variant  : graph.variant,
-    worker   : graph.worker,
+    type: graph.type,
+    variant: graph.variant,
+    worker: graph.worker,
   };
 }
 
-export function convertScalars(scalars): { [key: string]: ExperimentGraph } {
+export function convertScalars(scalars, experimentId: string): { [key: string]: ExperimentGraph } {
   return Object.entries(scalars).reduce((acc, graphGroup) => {
     const key = graphGroup[0];
     const graph = graphGroup[1];
 
     const chart_data = Object.entries(graph).sort((a, b) => a[0] > b[0] ? 1 : -1)
       .map(([variant, data]: [string, any]) => ({
+        task: experimentId,
         ...data,
         type: 'scatter'
       }));
@@ -111,7 +118,7 @@ export function groupIterations(plots: any[]): Map<string, any[]> {
   return sortedPlots
     .reduce((groupedPlots, plot) => {
       const metric = plot.metric;
-      groupedPlots[metric] = groupedPlots[metric] || [];
+      groupedPlots[metric] = cloneDeep(groupedPlots[metric]) || [];
       const index = groupedPlots[metric].findIndex((existingGraph) => plot.iter === existingGraph.iter);
       const plotParsed = index > -1 && JSON.parse(plot.plot_str);
       if (index > -1 && plotParsed.data && plotParsed.data[0] && ['scatter', 'bar'].includes(plotParsed.data[0].type)) {
@@ -136,10 +143,24 @@ export function mergeMultiMetrics(metrics): { [key: string]: ExperimentGraph } {
   const graphsMap = {};
   Object.keys(metrics).forEach(key => {
     Object.keys(metrics[key]).forEach(itemKey => {
-      const chart_data = Object.entries(metrics[key][itemKey])
+      const chartData = Object.entries(metrics[key][itemKey])
         .map(([variant, data]: [string, any]) => ({...data, type: 'scatter', task: variant}));
-      graphsMap[key + itemKey] = [prepareGraph(chart_data, {type: 'multiScalar', title: key + ' / ' + itemKey}, {}, {})];
+      graphsMap[key + itemKey] = [prepareGraph(chartData, {type: 'multiScalar', title: key + ' / ' + itemKey}, {}, {})];
     });
+  });
+  return graphsMap;
+}
+
+export function mergeMultiMetricsGroupedVariant(metrics): { [key: string]: ExperimentGraph } {
+  const graphsMap = {};
+  Object.keys(metrics).forEach(metric => {
+    const chartData = [];
+    Object.keys(metrics[metric]).forEach(variant => {
+      chartData.push(Object.entries(metrics[metric][variant])
+        .map(([taskId, data]: [string, any]) => ({...data, type: 'scatter', task: taskId, name: `${variant} - ${data.name}`}))
+      );
+    });
+    graphsMap[metric] = [prepareGraph((chartData as any).flat(), {type: 'multiScalar', title: metric}, {}, {})];
   });
   return graphsMap;
 }
@@ -256,9 +277,9 @@ export function wordWrap(str, maxWidth) {
     found = false;
     // Inserts new line at first whitespace of the line
     for (let i = maxWidth - 1; i >= 0; i--) {
-      if (_testWhite(str.charAt(i))) {
+      if (i > 0 && _testWhite(str.charAt(i))) {
         res = res + [str.slice(0, i), newLineStr].join('');
-        str = str.slice(i || 1);
+        str = str.slice(i + 1 || 1);
         found = true;
         break;
       }
@@ -269,8 +290,9 @@ export function wordWrap(str, maxWidth) {
       str = str.slice(maxWidth);
     }
 
-    if (str.length < maxWidth)
+    if (str.length < maxWidth) {
       done = true;
+    }
   } while (!done);
 
   return res + str;

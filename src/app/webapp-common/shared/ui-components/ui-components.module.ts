@@ -21,22 +21,12 @@ import {DialogTemplateComponent} from './overlay/dialog-template/dialog-template
 import {SMMaterialModule} from '../material/material.module';
 import {AlertDialogComponent} from './overlay/alert-dialog/alert-dialog.component';
 import {TooltipDirective} from './indicators/tooltip/tooltip.directive';
-import {InputErrorComponent} from './forms/input-error/input-error.component';
-import {InputGroupComponent} from './forms/input-group/input-group.component';
-import {SelectGroupComponent} from './forms/select-group/select-group.component';
 import {CheckboxControlComponent} from './forms/checkbox-control/checkbox-control.component';
-import {NumberControlComponent} from './forms/number-control/number-control.component';
-import {MultiSelectControlComponent} from './forms/multi-select-control/multi-select-control.component';
-import {CheckboxGroupControlComponent} from './forms/checkbox-group-control/checkbox-group-control.component';
-import {DynamicInputComponent} from './forms/dynamic-input/dynamic-input.component';
-import {TextareaControlComponent} from './forms/textarea-control/textarea-control.component';
 import {SimpleTableComponent2} from './data/simple-table/simple-table.component';
 import {ChipsModule} from './buttons/chips/chips.module';
 import {TermsOfUseDialogComponent} from './overlay/terms-of-use-dialog/terms-of-use-dialog.component';
 import {LeafComponent} from './overlay/leaf/leaf.component';
 import {WizardDialogStepComponent} from './overlay/wizard-dialog-step/wizard-dialog-step.component';
-import {SwitchComponent} from './forms/switch/switch.component';
-import {ReadonlyLabelComponent} from './forms/readonlyLabel/readonly-label.component';
 import {LabeledRowComponent} from './data/labeled-row/labeled-row.component';
 import {CircleStatusComponent} from './indicators/circle-status/circle-status.component';
 import {MenuItemComponent} from './panel/menu-item/menu-item.component';
@@ -99,9 +89,10 @@ import {ResizableColumnDirective} from './data/table/resizable-column.directive'
 import {JsonValidatorDirective} from './template-forms-ui/json-validator.directive';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {GroupedCheckedFilterListComponent} from './data/grouped-checked-filter-list/grouped-checked-filter-list.component';
+import {ShareDialogComponent} from './overlay/share-dialog/share-dialog.component';
+import { HesitateDirective } from './directives/hesitate.directive';
 
-
-const _declarations = [
+const declarations = [
   DurationInputComponent,
   UpdateNotifierComponent,
   SnippetErrorComponent,
@@ -117,7 +108,6 @@ const _declarations = [
   CircleStatusComponent,
   WizardDialogStepComponent,
   LeafComponent,
-  NumberControlComponent,
   ButtonToggleComponent,
   SearchComponent,
   CircleCounterComponent,
@@ -132,6 +122,7 @@ const _declarations = [
   DialogTemplateComponent,
   ConfirmDialogComponent,
   EditJsonComponent,
+  ShareDialogComponent,
   ClickStopPropagationDirective,
   EllipsisMiddleDirective,
   KeydownStopPropagationDirective,
@@ -140,17 +131,7 @@ const _declarations = [
   JsonValidatorDirective,
   AlertDialogComponent,
   TooltipDirective,
-  InputGroupComponent,
-  ReadonlyLabelComponent,
-  SelectGroupComponent,
   CheckboxControlComponent,
-  NumberControlComponent,
-  TextareaControlComponent,
-  InputErrorComponent,
-  MultiSelectControlComponent,
-  SwitchComponent,
-  CheckboxGroupControlComponent,
-  DynamicInputComponent,
   SimpleTableComponent2,
   SelectableListComponent,
   CheckedFilterListComponent,
@@ -177,34 +158,35 @@ const _declarations = [
   NotAllowedStringsValidatorValidatorDirective,
   RefreshButtonComponent,
   UserTagComponent,
-  TagListComponent
+  TagListComponent,
+  HesitateDirective,
 ];
 
 @NgModule({
-    imports: [
-        MatExpansionModule,
-        DragDropModule,
-        NgSelectModule,
-        CommonModule,
-        ChipsModule,
-        FormsModule,
-        ReactiveFormsModule,
-        ClipboardModule,
-        TableModule,
-        ContextMenuModule,
-        SMMaterialModule,
-        MatButtonToggleModule,
-        SharedPipesModule,
-        ChooseColorModule,
-        PortalModule,
-        SMPortalModule,
-        ScrollingModule,
-        ColorPickerModule,
-        MatProgressSpinnerModule,
-    ],
+  imports: [
+    MatExpansionModule,
+    DragDropModule,
+    NgSelectModule,
+    CommonModule,
+    ChipsModule,
+    FormsModule,
+    ReactiveFormsModule,
+    ClipboardModule,
+    TableModule,
+    ContextMenuModule,
+    SMMaterialModule,
+    MatButtonToggleModule,
+    SharedPipesModule,
+    ChooseColorModule,
+    PortalModule,
+    SMPortalModule,
+    ScrollingModule,
+    ColorPickerModule,
+    MatProgressSpinnerModule,
+  ],
   providers: [],
-  declarations: [..._declarations, TagsMenuComponent, TagColorMenuComponent, ResizableColumnDirective],
-  exports: [..._declarations, NgSelectModule, ChipsModule, SMMaterialModule, ChooseColorModule, SMPortalModule, TagsMenuComponent]
+  declarations: [...declarations, TagsMenuComponent, TagColorMenuComponent, ResizableColumnDirective, HesitateDirective],
+  exports: [...declarations, NgSelectModule, ChipsModule, SMMaterialModule, ChooseColorModule, SMPortalModule, TagsMenuComponent]
 })
 export class UiComponentsModule {
 }

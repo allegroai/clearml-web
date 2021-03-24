@@ -5,6 +5,10 @@
 }
 
 :host {
+  display: block;
+  height: 100%;
+  padding-top: 12px;
+
   .tree-card-body {
     padding: 20px 15px 0 15px;
     height: 100%;

@@ -1,50 +1,105 @@
+@import "../../ui-components/styles/variables";
+
 :host {
   display: block;
-  height: 64px;
   z-index: 1000;
   width: 100%;
-  top: -64px;
-  background-color: #f2f3f6;
-  padding: 0 10px;
+  font-size: 14px;
+
+  .vertical-layout {
+    font-size: 13px;
+
+    &.x-axis-options {
+      flex-direction: column;
+      flex-wrap: wrap;
+      width: 100%;
+    }
+
+    .group-by-field,
+    .axis-type-field {
+      width: unset;
+     flex: 1 1 150px;
+      max-width: 150px;
+    }
+
+    .label-text {
+      display: inline-block;
+      white-space: nowrap;
+      width: 95px;
+      min-width: 95px;
+      padding-right: 12px;
+    }
+
+    .axis-text-margin-left {
+      margin-left: 0;
+    }
+
+    .close-settings {
+      display: none;
+    }
+
+    .smooth-options {
+      width: 100%;
+
+      mat-slider {
+        flex: 1 1 80px;
+        min-width: unset;
+      }
+
+      .smooth-input {
+        margin-right: 6px;
+      }
+    }
+  }
+
+  /deep/ .mat-form-field-appearance-outline:not(.data-text) .mat-form-field-outline {
+    top: 16px;
+    bottom: 4px;
+    background-color: transparent;
+    color: $grey-purple
+  }
+
+  /deep/ .mat-form-field-appearance-outline .mat-form-field-flex {
+    margin-top: -6px !important;
+
+    .mat-select-value {
+      color: $blue-400;
+    }
+  }
 }
 
-button.btn-primary.axis-option {
-  margin: auto 5px;
-
-  border: solid 1px #7480aa !important;
-  color: #7480aa !important;
-  border-radius: 4px;
-  background: transparent !important;
-  width: 100px !important;
-  height: 37px;
+.x-axis-options {
+  display: flex;
+  justify-content: space-between;
 }
 
-button.btn-primary.axis-option.active {
-  background: #7480aa !important;
-  color: white !important;
-}
-
-sm-number-control {
-  width: 60px;
-  text-align: center;
+.smooth-input {
+  width: 55px;
   margin: auto 0;
   margin-left: 6px;
+  border-color: $blue-400;
 }
 
 .smooth-options {
-  padding: 10px;
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  margin-top: 13px;
 }
 
-.axis-text {
-  margin: auto 0;
+.label-text {
+  margin-top: 20px;
   padding-right: 6px;
-  font-size: 15px;
+
+  &.axis-text-margin-left {
+    margin-left: 24px;
+  }
 }
+
 .smoothing-text {
   margin: auto 0;
   margin-left: auto;
   padding-right: 6px;
-  font-size: 15px;
 }
 
 .smooth-options i {
@@ -52,6 +107,23 @@ sm-number-control {
   margin-left: 25px;
 }
 
-.x-axis-options {
-  margin: auto;
+mat-form-field {
+  height: 50px;
+  flex-grow: 1;
+  width: 150px;
 }
+
+.axis-type-field {
+  width: 130px;
+}
+
+.group-by-field {
+  width: 140px;
+}
+
+mat-slider {
+  min-width: 121px;
+  top: -15px;
+  height: unset;
+}
+

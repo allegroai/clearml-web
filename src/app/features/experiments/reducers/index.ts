@@ -5,13 +5,15 @@ import {experimentOutputReducer} from './experiment-output.reducer';
 import {IExperimentInfo, ISelectedExperiment} from '../shared/experiment-info.model';
 import {TaskStatusEnum} from '../../../business-logic/model/tasks/taskStatusEnum';
 import {MetricVariantResult} from '../../../business-logic/model/projects/metricVariantResult';
-import {isExample} from '../../../webapp-common/shared/utils/shared-utils';
+import {isReadOnly, isSharedAndNotOwner} from '../../../webapp-common/shared/utils/shared-utils';
 import {EXPERIMENTS_STORE_KEY} from '../../../webapp-common/experiments/shared/common-experiments.const';
 import {CommonExperimentOutputState} from '../../../webapp-common/experiments/reducers/common-experiment-output.reducer';
+import {selectActiveWorkspace} from '../../../webapp-common/core/reducers/users-reducer';
+import {selectSelectedModel} from "../../../webapp-common/models/reducers";
 
 export const experimentsReducers: ActionReducerMap<any, any> = {
-  view  : experimentsViewReducer,
-  info  : experimentInfoReducer,
+  view: experimentsViewReducer,
+  info: experimentInfoReducer,
   output: experimentOutputReducer,
 };
 
@@ -24,29 +26,33 @@ export function experiments(state) {
 }
 
 // view selectors.
-export const experimentsView              = createSelector(experiments, (state): IExperimentsViewState => state ? state.view : {});
+export const experimentsView = createSelector(experiments, (state): IExperimentsViewState => state ? state.view : {});
 export const selectExperimentsMetricsCols = createSelector(experimentsView, (state): Array<any> => state.metricsCols);
-export const selectMetricVariants         = createSelector(experimentsView, (state): Array<MetricVariantResult> => state.metricVariants);
-export const selectMetricsLoading         = createSelector(experimentsView, (state): boolean => state.metricsLoading);
+export const selectMetricVariants = createSelector(experimentsView, (state): Array<MetricVariantResult> => state.metricVariants);
+export const selectMetricsLoading = createSelector(experimentsView, (state): boolean => state.metricsLoading);
 
 
 // info selectors
-export const experimentInfo           = createSelector(experiments, (state): IExperimentInfoState => state ? state.info : {});
+export const experimentInfo = createSelector(experiments, (state): IExperimentInfoState => state ? state.info : {});
 export const selectSelectedExperiment = createSelector(experimentInfo, (state): ISelectedExperiment => state.selectedExperiment);
 export const selectExperimentInfoData = createSelector(experimentInfo, (state): IExperimentInfo => state.infoData);
 export const selectShowExtraDataSpinner = createSelector(experimentInfo, state => state.showExtraDataSpinner);
 
 
-
 // output selectors
 export const experimentOutput = createSelector(experiments, (state): CommonExperimentOutputState => state ? state.output : {});
 
-export const selectIsExperimentEditable = createSelector(selectSelectedExperiment,
-  (experiment: ISelectedExperiment): boolean => experiment && experiment.status === TaskStatusEnum.Created && !isExample(experiment));
-
+export const selectIsExperimentEditable = createSelector(selectSelectedExperiment, selectActiveWorkspace,
+  (experiment: ISelectedExperiment, user): boolean => experiment && experiment.status === TaskStatusEnum.Created && !isReadOnly(experiment) && !isSharedAndNotOwner(experiment, user));
+export const selectIsSharedAndNotOwner = createSelector(selectSelectedExperiment, selectSelectedModel, selectActiveWorkspace,
+  (experiment: ISelectedExperiment, model, user): boolean => {
+  const item = experiment || model;
+    return item && isSharedAndNotOwner(item, user);
+  }
+);
 export const selectExperimentInfoDataFreeze = createSelector(experimentInfo, (state): IExperimentInfo => state.infoDataFreeze);
 
-export const selectExperimentInfoErrors   = createSelector(experimentInfo, (state): IExperimentInfoState['errors'] => state.errors);
+export const selectExperimentInfoErrors = createSelector(experimentInfo, (state): IExperimentInfoState['errors'] => state.errors);
 export const selectExperimentFormValidity = createSelector(selectExperimentInfoData, selectExperimentInfoErrors,
   (infoData, errors): boolean => {
     if (!infoData || !errors) {

@@ -11,8 +11,12 @@
       <span>Add Experiment</span>
     </button>
 
-    <mat-select *ngIf="viewMode" class="view-mode" [value]="queryParamsViewMode || viewMode" (selectionChange)="changeView($event)"
-                [disableOptionCentering]="true">
+    <mat-select *ngIf="viewMode"
+                class="view-mode"
+                panelClass="light-theme"
+                [value]="queryParamsViewMode || viewMode"
+                [disableOptionCentering]="true"
+                (selectionChange)="changeView($event)">
       <mat-select-trigger>
         <i class="fas mr-2"
            [ngClass]="{'fa-align-left': viewMode === 'values', 'fa-chart-area': viewMode === 'graph'}"></i>
@@ -56,16 +60,7 @@
   <div id="searchDiff"></div>
 
   <div class="settings">
-    <button *ngIf="currentPage === 'scalars' && viewMode === 'graph'"
-            class="btn"
-            smTooltip="Settings"
-            (click)="toggleSettings()">
-      <i class="fas fa-cog fa-lg"></i>
-    </button>
-<!--    <sm-experiment-refresh-->
-<!--      [disabled]="(selectRefreshing$ | async)?.refreshing"-->
-<!--      (onRefreshLogClicked)="refresh($event)"-->
-<!--    ></sm-experiment-refresh>-->
+
     <sm-refresh-button
       [autoRefreshState]="autoRefreshState$ | async"
       [allowAutoRefresh]="true"

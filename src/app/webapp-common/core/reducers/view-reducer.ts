@@ -1,7 +1,7 @@
 import {HTTP, HTTP_ACTIONS, VIEW_ACTIONS} from '../../../app.constants';
 import {createSelector} from '@ngrx/store';
 import {get} from 'lodash/fp';
-import {setScaleFactor} from '../actions/layout.actions';
+import {neverShowPopupAgain, plotlyReady, setScaleFactor} from '../actions/layout.actions';
 
 export interface ViewState {
   loading: {[endpoint: string]: boolean};
@@ -14,6 +14,8 @@ export interface ViewState {
   compareAutoRefresh: boolean;
   applicationVisible: boolean;
   scaleFactor: number;
+  neverShowPopupAgain: string[];
+  plotlyReady: boolean;
 }
 
 export const initViewState: ViewState = {
@@ -27,7 +29,9 @@ export const initViewState: ViewState = {
   autoRefresh: true,
   compareAutoRefresh: false,
   applicationVisible: true,
-  scaleFactor: 100
+  scaleFactor: 100,
+  neverShowPopupAgain: [],
+  plotlyReady: false
 };
 
 export const views = state => state.views as ViewState;
@@ -42,14 +46,17 @@ export const selectAutoRefresh = createSelector(views, state => state && state.a
 export const selectCompareAutoRefresh = createSelector(views, state => state.compareAutoRefresh);
 export const selectAppVisible = createSelector(views, state => state.applicationVisible);
 export const selectScaleFactor = createSelector(views, state => state.scaleFactor);
+export const selectPlotlyReady = createSelector(views, state => state.plotlyReady);
+export const selectNeverShowPopups = createSelector(views, (state): string[] => state.neverShowPopupAgain);
 
 
 export function viewReducer(viewState: ViewState = initViewState, action) {
 
   switch (action.type) {
-    case HTTP_ACTIONS.REQUEST_FAILED:
+    case HTTP_ACTIONS.REQUEST_FAILED: {
       const isLoggedOut = action.payload.err && action.payload.err.status === 401;
       return {...viewState, loggedOut: isLoggedOut};
+    }
     case VIEW_ACTIONS.DEACTIVE_LOADER:
       return {
         ...viewState,
@@ -64,6 +71,8 @@ export function viewReducer(viewState: ViewState = initViewState, action) {
       return {...viewState, applicationVisible: action.visible};
     case setScaleFactor.type:
       return {...viewState, scaleFactor: action.scale};
+    case plotlyReady.type:
+      return {...viewState, plotlyReady: true};
     case VIEW_ACTIONS.RESET_LOADER:
       return {...viewState, loading: {}};
     case HTTP.API_REQUEST_SUCCESS:
@@ -86,6 +95,8 @@ export function viewReducer(viewState: ViewState = initViewState, action) {
       return {...viewState, autoRefresh: action.payload.autoRefresh};
     case VIEW_ACTIONS.SET_COMPARE_AUTO_REFRESH:
       return {...viewState, compareAutoRefresh: action.payload.autoRefresh};
+    case neverShowPopupAgain.type:
+      return {...viewState, neverShowPopupAgain: action.reset? viewState.neverShowPopupAgain.filter( popups => popups !== action.popupId) : [...viewState.neverShowPopupAgain, action.popupId]};
     default:
       return viewState;
   }

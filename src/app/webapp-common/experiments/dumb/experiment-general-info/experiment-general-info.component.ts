@@ -2,8 +2,8 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {ISelectedExperiment} from '../../../../features/experiments/shared/experiment-info.model';
 import {TIME_FORMAT_STRING} from '../../../constants';
-import {ActivateEdit, DeactivateEdit} from '../../../../features/experiments/actions/experiments-info.actions';
 import {Store} from '@ngrx/store';
+import {ActivateEdit, DeactivateEdit} from '../../actions/common-experiments-info.actions';
 
 @Component({
   selector   : 'sm-experiment-general-info',

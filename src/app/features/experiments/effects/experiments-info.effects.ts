@@ -3,9 +3,9 @@ import {Actions, Effect, ofType} from '@ngrx/effects';
 import {Store} from '@ngrx/store';
 import {IExperimentInfoState} from '../reducers/experiment-info.reducer';
 import {map, withLatestFrom} from 'rxjs/operators';
-import * as infoActions from '../actions/experiments-info.actions';
-import {selectExperimentInfoData,  selectSelectedExperiment} from '../reducers';
+import {selectExperimentInfoData, selectSelectedExperiment} from '../reducers';
 import * as commonInfoActions from '../../../webapp-common/experiments/actions/common-experiments-info.actions';
+import {ExperimentDataUpdated} from '../../../webapp-common/experiments/actions/common-experiments-info.actions';
 import {CommonExperimentReverterService} from '../../../webapp-common/experiments/shared/services/common-experiment-reverter.service';
 
 
@@ -22,7 +22,7 @@ export class ExperimentsInfoEffects {
     ofType<commonInfoActions.ModelSelected>(commonInfoActions.MODEL_SELECTED),
     withLatestFrom(this.store.select(selectSelectedExperiment), this.store.select(selectExperimentInfoData)),
     map(([action, experiment, infoData]) => {
-      return new infoActions.ExperimentDataUpdated({
+      return new ExperimentDataUpdated({
         id     : experiment.id,
         changes: {
           model: {

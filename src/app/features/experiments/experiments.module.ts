@@ -12,7 +12,6 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ExperimentsInfoEffects} from './effects/experiments-info.effects';
 import {SelectModelModule} from '../../webapp-common/select-model/select-model.module';
 import {SmSyncStateSelectorService} from '../../webapp-common/core/services/sync-state-selector.service';
-import {SmFormBuilderService} from '../../webapp-common/shared/ui-components/forms/services/sm-form-builder.service';
 import {ExperimentOutputEffects} from './effects/experiment-output.effects';
 import {ExperimentsMenuEffects} from './effects/experiments-menu.effects';
 import {LayoutModule} from '../../layout/layout.module';
@@ -28,11 +27,13 @@ import {EXPERIMENTS_INFO_PREFIX} from '../../webapp-common/experiments/actions/c
 import {EXPERIMENTS_OUTPUT_PREFIX} from '../../webapp-common/experiments/actions/common-experiment-output.actions';
 import {EXPERIMENTS_STORE_KEY} from '../../webapp-common/experiments/shared/common-experiments.const';
 import {ExperimentInfoComponent} from './containers/experiment-info/experiment-info.component';
-import {ExperimentInfoExecutionComponent} from './containers/experiment-info-execution/experiment-info-execution.component';
 import {DebugImagesModule} from '../../webapp-common/debug-images/debug-images.module';
+import {ExperimentInfoExecutionComponent} from '../../webapp-common/experiments/containers/experiment-info-execution/experiment-info-execution.component';
+import {MatSidenavModule} from '@angular/material/sidenav';
+import {MatListModule} from '@angular/material/list';
 
 
-const syncedKeys    = [
+const syncedKeys = [
   'view.tableSortField',
   'view.tableSortOrder',
   'view.tableFilters',
@@ -41,7 +42,7 @@ const syncedKeys    = [
   'info.userKnowledge',
   'output.settingsList',
 ];
-const key           = EXPERIMENTS_STORE_KEY;
+const key = EXPERIMENTS_STORE_KEY;
 const actionsPrefix = [EXPERIMENTS_PREFIX, EXPERIMENTS_INFO_PREFIX, EXPERIMENTS_OUTPUT_PREFIX];
 
 export function localStorageReducer(reducer: ActionReducer<any>): ActionReducer<any> {
@@ -49,7 +50,7 @@ export function localStorageReducer(reducer: ActionReducer<any>): ActionReducer<
 }
 
 @NgModule({
-  imports        : [
+  imports: [
     SMMaterialModule,
     FormsModule,
     LayoutModule,
@@ -64,21 +65,21 @@ export function localStorageReducer(reducer: ActionReducer<any>): ActionReducer<
     DebugImagesModule,
     ExperimentCompareSharedModule,
     CommonLayoutModule,
+    MatSidenavModule,
+    MatListModule,
     AngularSplitModule.forRoot(),
     StoreModule.forFeature(EXPERIMENTS_STORE_KEY, experimentsReducers, {metaReducers: [localStorageReducer]}),
     EffectsModule.forFeature([ExperimentsInfoEffects, ExperimentOutputEffects, ExperimentsMenuEffects]),
   ],
-  declarations   : [
+  declarations: [
     ExperimentsComponent,
     ExperimentInfoComponent,
     ExperimentInfoExecutionComponent,
   ],
-  providers      : [
+  providers: [
     AdminService,
-    SmSyncStateSelectorService,
-    SmFormBuilderService,
-
-]
+    SmSyncStateSelectorService
+  ]
 })
 export class ExperimentsModule {
 }

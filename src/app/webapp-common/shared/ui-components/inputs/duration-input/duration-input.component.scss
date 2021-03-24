@@ -1,3 +1,5 @@
+@import "../../styles/variables";
+
 :host {
   //padding-right: 10px;
   //padding-left: 4px;
@@ -23,7 +25,7 @@
       display: inline-block;
 
       span {
-        color: rgba(#8693be, 1);
+        color: rgba($blue-grey, 1);
 
         &:last-child {
           padding-right: 0;
@@ -31,7 +33,7 @@
       }
 
       .submit {
-        background: #384161;
+        background: $blue-500;
         color: #fff;
         border-radius: 30px;
         border: none;

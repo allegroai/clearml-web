@@ -19,6 +19,8 @@ import {MatMenuTrigger} from '@angular/material/menu';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MenuComponent implements AfterViewInit {
+  private isMenuOpen: boolean = false;
+
   @Input() header: string;
   @Input() buttonClass: string;
   @Input() smMenuClass: string;
@@ -30,6 +32,7 @@ export class MenuComponent implements AfterViewInit {
   @Input() enableSearch: boolean = false;
   @Input() searchValue: string;
   @Input() fixedOptionsSubheader: string;
+  @Input() buttonTooltip: string;
 
   @Input() set position(position: { x: number; y: number }) {
     this.movePosition(position);
@@ -50,7 +53,8 @@ export class MenuComponent implements AfterViewInit {
 
   @HostListener('document:click', ['$event'])
   clickOut(event) {
-    if (!this.showOverlay && !this.eRef.nativeElement.contains(event.target)) {
+    if (this.isMenuOpen && !this.showOverlay && !this.eRef.nativeElement.contains(event.target)) {
+      this.isMenuOpen = false;
       this.trigger.closeMenu();
     }
   }
@@ -68,6 +72,7 @@ export class MenuComponent implements AfterViewInit {
   }
 
   openMenu() {
+    this.isMenuOpen = true;
     this.trigger.openMenu();
   }
 

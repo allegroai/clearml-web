@@ -1,0 +1,14 @@
+:host {
+  display: block;
+  position: relative;
+  height: 100%;
+
+  sm-section-header {
+    height: 35px;
+  }
+
+  sm-experiment-execution-parameters {
+    display: block;
+    height: calc(100% - 42px);
+  }
+}

@@ -13,7 +13,7 @@ export class ButtonToggleComponent implements OnInit {
   public formControl = new FormControl();
   private valueChangesSubs: any;
 
-  @Input() options: Array<{ value: any, label: string, icon: string }>;
+  @Input() options: Array<{ value: any; label: string; icon?: string }>;
 
   @Input() set value(value: any) {
     this.formControl.setValue(value);

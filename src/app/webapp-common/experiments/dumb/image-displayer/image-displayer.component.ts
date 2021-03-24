@@ -1,7 +1,36 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, HostListener, Inject, ViewChild} from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import {ConfirmDialogComponent} from '../../../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  HostListener,
+  Inject,
+  OnDestroy,
+  OnInit,
+  ViewChild
+} from '@angular/core';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {last} from 'lodash/fp';
+import {select, Store} from '@ngrx/store';
+import {
+  getDebugImageSample,
+  getNextDebugImageSample,
+  resetDisplayer,
+  setDebugImageViewerScrollId,
+  setDisplayerEndOfTime
+} from '../../../debug-images/debug-images-actions';
+import {
+  selectCurrentImageViewerDebugImage,
+  selectDisplayerBeginningOfTime,
+  selectDisplayerEndOfTime,
+  selectMinMaxIterations
+} from '../../../debug-images/debug-images-reducer';
+import {combineLatest, interval, Observable, Subscription} from 'rxjs';
+import {EventsGetDebugImageIterationsResponse} from '../../../../business-logic/model/events/eventsGetDebugImageIterationsResponse';
+import {selectS3BucketCredentials} from '../../../core/reducers/common-auth-reducer';
+import {filter, map, withLatestFrom} from 'rxjs/operators';
+import {AdminService} from '../../../../features/admin/admin.service';
+import {selectAppVisible, selectAutoRefresh} from "../../../core/reducers/view-reducer";
 
 @Component({
   selector: 'sm-image-displayer',
@@ -9,14 +38,11 @@ import {last} from 'lodash/fp';
   styleUrls: ['./image-displayer.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ImageDisplayerComponent {
+export class ImageDisplayerComponent implements OnInit, OnDestroy {
 
   public imageSources: Array<any>;
-  public currentIndex;
-  public title: string;
   public xCord: number;
   public yCord: number;
-  readonly snippetsMetaData: any;
   public scale = 1;
   readonly scaleStep = 0.1;
   public autoFitScale: number;
@@ -30,7 +56,23 @@ export class ImageDisplayerComponent {
   public imageTranslateY = 0;
   public imageTranslateX = 0;
   public dragging: boolean;
-  public hidden = false;
+  public minMaxIterations$: Observable<EventsGetDebugImageIterationsResponse>;
+  public currentDebugImage$: Observable<any>;
+  public currentDebugImage: any;
+  public iteration: number;
+  public beginningOfTime$: Observable<boolean>;
+  public endOfTime$: Observable<boolean>;
+  private currentDebugImageSubscription: Subscription;
+  private autoRefreshState$: Observable<boolean>;
+  private isAppVisible$: Observable<boolean>;
+  private autoRefreshSub: Subscription;
+  readonly DISPLAYER_AUTO_REFRESH_INTERVAL = 60 * 1000;
+  public imageLoaded: boolean = false;
+  private beginningOfTime: boolean = false;
+  private endOfTime: boolean = false;
+  private begOfTimeSub: Subscription;
+  private endOfTimeSub: Subscription;
+
 
   @HostListener('document:keydown', ['$event'])
   onKeyDown(e: KeyboardEvent) {
@@ -50,25 +92,59 @@ export class ImageDisplayerComponent {
     }
   }
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: { imageSources: Array<any>, index: number, snippetsMetaData: any },
-              public dialogRef: MatDialogRef<ConfirmDialogComponent>, public changeDetector: ChangeDetectorRef) {
-    this.imageSources = data.imageSources;
-    this.currentIndex = data.index || 0;
-    this.snippetsMetaData = data.snippetsMetaData;
-    this.title = this.getFrameTitle(this.currentIndex);
+  constructor(@Inject(MAT_DIALOG_DATA) public data: { imageSources: Array<any>; index: number; snippetsMetaData: any },
+              public dialogRef: MatDialogRef<ImageDisplayerComponent>, public changeDetector: ChangeDetectorRef, private store: Store<any>, private adminService: AdminService) {
+    const reqData = {
+      task: data.snippetsMetaData[data.index].task,
+      metric: data.snippetsMetaData[data.index].metric,
+      variant: data.snippetsMetaData[data.index].variant,
+      iteration: data.snippetsMetaData[data.index].iter
+    };
+    this.store.dispatch(getDebugImageSample(reqData));
+    this.minMaxIterations$ = this.store.select(selectMinMaxIterations);
+    this.beginningOfTime$ = this.store.select(selectDisplayerBeginningOfTime);
+    this.endOfTime$ = this.store.select(selectDisplayerEndOfTime);
+    this.autoRefreshState$ = this.store.select(selectAutoRefresh);
+    this.isAppVisible$ = this.store.select(selectAppVisible);
+    this.currentDebugImage$ = combineLatest([
+      store.pipe(select(selectS3BucketCredentials)),
+      store.pipe(select(selectCurrentImageViewerDebugImage))])
+      .pipe(
+        filter(([bucketCredentials, event]) => !!event),
+        map(([bucketCredentials, event]) => {
+          const signedUrl = this.adminService.signUrlIfNeeded(event.url);
+          const parsed = new URL(signedUrl);
+          parsed.searchParams.append('X-Amz-Date', event.timestamp);
+          return {...event, oldSrc: event.url, url: parsed.toString()};
+          return event;
+        })
+      );
+
+
+    this.autoRefreshSub = interval(this.DISPLAYER_AUTO_REFRESH_INTERVAL).pipe(
+      withLatestFrom(this.autoRefreshState$, this.isAppVisible$),
+      filter(([iteration, autoRefreshState, isVisible]) => isVisible && autoRefreshState)
+    ).subscribe(() => {
+        if (this.currentDebugImage) {
+          this.store.dispatch(setDisplayerEndOfTime({endOfTime: false}));
+          this.store.dispatch(setDebugImageViewerScrollId({scrollId: null}));
+          this.store.dispatch(getDebugImageSample({
+            task: this.currentDebugImage.task,
+            metric: this.currentDebugImage.metric,
+            variant: this.currentDebugImage.variant,
+            iteration: this.currentDebugImage.iter
+          }));
+        }
+      }
+    );
   }
 
   canGoNext() {
-    return this.currentIndex < (this.imageSources.length - 1);
+    return !this.endOfTime;
   }
 
   canGoBack() {
-    return this.currentIndex > 0;
-  }
-
-  private getFrameTitle(currentIndex: number) {
-    const snippetMeta = this.snippetsMetaData[currentIndex];
-    return snippetMeta.metric + ' - Iteration ' + snippetMeta.iter + ': ' + snippetMeta.variant;
+    return !this.beginningOfTime;
   }
 
   calculateNewScale(scaleUp: boolean) {
@@ -94,20 +170,21 @@ export class ImageDisplayerComponent {
   }
 
   next() {
-    if (this.canGoNext()) {
-      this.currentIndex++;
-      this.title = this.getFrameTitle(this.currentIndex);
+    if (this.canGoNext() && this.currentDebugImage) {
+      this.imageLoaded = false;
+      this.store.dispatch(getNextDebugImageSample({task: this.currentDebugImage.task, navigateEarlier: false}));
     }
   }
 
   previous() {
-    if (this.canGoBack()) {
-      this.currentIndex--;
-      this.title = this.getFrameTitle(this.currentIndex);
+    if (this.canGoBack() && this.currentDebugImage) {
+      this.imageLoaded = false;
+      this.store.dispatch(getNextDebugImageSample({task: this.currentDebugImage.task, navigateEarlier: true}));
     }
   }
 
   closeImageDisplayer() {
+    this.store.dispatch(resetDisplayer());
     this.dialogRef.close();
   }
 
@@ -153,11 +230,58 @@ export class ImageDisplayerComponent {
   }
 
   downloadImage() {
-    const src = new URL(this.imageSources[this.currentIndex]);
-    const a = document.createElement('a') as HTMLAnchorElement;
-    a.href = this.imageSources[this.currentIndex];
-    a.download = last(src.pathname.split('/'));
-    a.target = '_blank';
-    a.click();
+    if (this.currentDebugImage) {
+      const src = new URL(this.currentDebugImage.url);
+      const a = document.createElement('a') as HTMLAnchorElement;
+      a.href = this.currentDebugImage.url;
+      a.download = last(src.pathname.split('/'));
+      a.target = '_blank';
+      a.click();
+    }
+  }
+
+  changeIteration(value: number) {
+    this.iteration = value;
+    if (this.currentDebugImage) {
+      const reqData = {
+        task: this.currentDebugImage.task,
+        metric: this.currentDebugImage.metric,
+        variant: this.currentDebugImage.variant,
+        iteration: value
+      };
+      this.store.dispatch(getDebugImageSample(reqData));
+    }
+  }
+
+  ngOnInit(): void {
+    this.currentDebugImageSubscription = this.currentDebugImage$.subscribe(currentDebugImage => {
+      this.currentDebugImage = currentDebugImage;
+      this.iteration = currentDebugImage.iter;
+      this.changeDetector.detectChanges();
+    });
+    this.begOfTimeSub = this.beginningOfTime$.subscribe(beg => {
+      this.beginningOfTime = beg;
+      if (beg) {
+        this.imageLoaded = true;
+      }
+    });
+    this.endOfTimeSub = this.endOfTime$.subscribe(end => {
+      this.endOfTime = end;
+      if (end) {
+        this.imageLoaded = true;
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.store.dispatch(setDebugImageViewerScrollId({scrollId: null}));
+    this.currentDebugImageSubscription.unsubscribe();
+    this.begOfTimeSub.unsubscribe();
+    this.endOfTimeSub.unsubscribe();
+    this.autoRefreshSub.unsubscribe();
+  }
+
+  showImage() {
+    this.imageLoaded = true;
   }
 }

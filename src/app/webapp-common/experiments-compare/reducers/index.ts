@@ -9,9 +9,9 @@ import {compareHeader, CompareHeaderState} from './compare-header.reducer';
 import {IExperimentDetail} from '../../../features/experiments-compare/experiments-compare-models';
 import {ScalarKeyEnum} from '../../../business-logic/model/events/scalarKeyEnum';
 import {scalarsGraphReducer, ScalarsGraphState} from './experiments-compare-scalars-graph.reducer';
-import {experimentOutput} from '../../../features/experiments/reducers';
 import {ExperimentParams} from '../shared/experiments-compare-details.model';
 import {ExperimentCompareParamsState, experimentsCompareParamsReducer} from './experiments-compare-params.reducer';
+import {GroupByCharts} from '../../experiments/reducers/common-experiment-output.reducer';
 
 export const experimentsCompareReducers: ActionReducerMap<any, any> = {
   details      : experimentsCompareDetailsReducer,
@@ -23,7 +23,9 @@ export const experimentsCompareReducers: ActionReducerMap<any, any> = {
   scalarsGraph : scalarsGraphReducer
 };
 
-export const experimentsCompare = createFeatureSelector<any>('experimentsCompare');
+export function experimentsCompare(state) {
+  return state.experimentsCompare;
+}
 
 // Details
 export const experimentsDetails = createSelector(experimentsCompare, (state): ExperimentCompareDetailsState => state ? state.details : {});
@@ -81,6 +83,10 @@ export const selectCompareSelectedSettingsSmoothWeight = createSelector(selectSe
 
 export const selectCompareSelectedSettingsxAxisType = createSelector(selectSelectedExperimentSettings,
   (settings): ScalarKeyEnum => get('xAxisType', settings) || ScalarKeyEnum.Iter);
+
+export const selectCompareSelectedSettingsGroupBy = createSelector(selectSelectedExperimentSettings,
+  (settings): GroupByCharts => settings?.groupBy || GroupByCharts.None);
+
 
 export const selectScalarsGraph = createSelector(experimentsCompare, (state): ScalarsGraphState => state ? state.scalarsGraph : {});
 export const selectScalarsGraphShowIdenticalHyperParams = createSelector(selectScalarsGraph, (state): boolean => state ? state.showIdenticalHyperParams : true);

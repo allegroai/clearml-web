@@ -1,33 +1,33 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
-import {select, Store} from '@ngrx/store';
+import {Store} from '@ngrx/store';
 import {ApiTasksService} from '../../../business-logic/api-services/tasks.service';
 import {ApiAuthService} from '../../../business-logic/api-services/auth.service';
 import {BlTasksService} from '../../../business-logic/services/tasks.service';
 import {ApiEventsService} from '../../../business-logic/api-services/events.service';
 import {Router} from '@angular/router';
-import {catchError, flatMap, map, switchMap, tap, withLatestFrom} from 'rxjs/operators';
+import {catchError, flatMap, map, mergeAll, mergeMap, switchMap, tap, withLatestFrom} from 'rxjs/operators';
 import {ActiveLoader, AddMessage, DeactiveLoader, SetServerError} from '../../core/actions/layout.actions';
 import * as menuActions from '../actions/common-experiments-menu.actions';
+import {addTag, removeTag, shareSelectedExperiments} from '../actions/common-experiments-menu.actions';
 import * as viewActions from '../../../webapp-common/experiments/actions/common-experiments-view.actions';
 import {of} from 'rxjs';
-import {ITableExperiment} from '../shared/common-experiment-model.model';
 import {RequestFailed} from '../../core/actions/http.actions';
 import {IExperimentInfoState} from '../../../features/experiments/reducers/experiment-info.reducer';
 import {ExperimentConverterService} from '../../../features/experiments/shared/services/experiment-converter.service';
+import * as exSelectors from '../reducers';
 import {selectSelectedExperiments} from '../reducers';
 import {Task} from '../../../business-logic/model/tasks/task';
 import {selectSelectedExperiment} from '../../../features/experiments/reducers';
 import * as infoActions from '../actions/common-experiments-info.actions';
-import {EmptyAction} from '../../../app.constants';
+import {AutoRefreshExperimentInfo, ExperimentDetailsUpdated} from '../actions/common-experiments-info.actions';
+import {EmptyAction, MESSAGES_SEVERITY} from '../../../app.constants';
 import * as commonViewActions from '../actions/common-experiments-view.actions';
+import {GetExperiments, ResetExperiments, SetSelectedExperiments} from '../actions/common-experiments-view.actions';
 import {SmSyncStateSelectorService} from '../../core/services/sync-state-selector.service';
-import {RefreshExperiments, ResetExperiments, SetSelectedExperiments} from '../actions/common-experiments-view.actions';
-import {AutoRefreshExperimentInfo} from '../actions/common-experiments-info.actions';
-import {addTag, removeTag} from '../actions/common-experiments-menu.actions';
-import {ExperimentDetailsUpdated} from '../../../features/experiments/actions/experiments-info.actions';
 import {ISelectedExperiment} from '../../../features/experiments/shared/experiment-info.model';
 import {ResetOutput} from '../actions/common-experiment-output.actions';
+import exp from 'constants';
 
 
 @Injectable()
@@ -57,7 +57,7 @@ export class CommonExperimentsMenuEffects {
     ofType<menuActions.EnqueueClicked>(menuActions.ENQUEUE_CLICKED),
     switchMap(action => this.apiTasks.tasksGetAll({id: [action.payload.experiment.id]})
       .pipe(
-        flatMap((infoData) =>
+        mergeMap((infoData) =>
           this.apiTasks.tasksValidate(infoData['tasks'][0]).pipe(
             map(res => ([action, {pass: true, err: null}])),
           )
@@ -68,7 +68,7 @@ export class CommonExperimentsMenuEffects {
       validation.pass ?
         this.apiTasks.tasksEnqueue({task: action.payload.experiment.id, queue: action.payload.queue.id})
           .pipe(
-            flatMap(res => this.updateExperimentSuccess(action.payload.experiment.id, action.type, res.fields)),
+            mergeMap(res => this.updateExperimentSuccess(action.payload.experiment.id, action.type, res.fields)),
             catchError(error => this.updateExperimentFailed(action.type, error))
           ) :
         [new SetServerError(validation.err), new DeactiveLoader(action.type)]
@@ -82,7 +82,7 @@ export class CommonExperimentsMenuEffects {
     switchMap(
       action => this.apiTasks.tasksDequeue({task: action.payload.id})
         .pipe(
-          flatMap(res => this.updateExperimentSuccess(action.payload.id, action.type, res.fields)),
+          mergeMap(res => this.updateExperimentSuccess(action.payload.id, action.type, res.fields)),
           catchError(error => this.updateExperimentFailed(action.type, error))
         )
     )
@@ -96,14 +96,18 @@ export class CommonExperimentsMenuEffects {
         task: action.payload.originExperiment.id,
         new_task_project: action.payload.cloneData.project,
         new_task_comment: action.payload.cloneData.comment,
-        new_task_name: action.payload.cloneData.name
+        new_task_name: action.payload.cloneData.name,
+        new_project_name: action.payload.cloneData.newProjectName
       })
         .pipe(
-          flatMap(res => [
+          mergeMap(res => [
             new viewActions.GetExperiments(),
             new viewActions.SetSelectedExperiments([]),
             new DeactiveLoader(action.type),
-            new viewActions.ExperimentSelectionChanged({experiment: {id: res.id}, project: action.payload.cloneData.project}),
+            new viewActions.ExperimentSelectionChanged({
+              experiment: {id: res.id},
+              project: action.payload.cloneData.project? action.payload.cloneData.project: res?.new_project?.id
+            }),
           ]),
           catchError(error => [
             new DeactiveLoader(action.type),
@@ -119,7 +123,7 @@ export class CommonExperimentsMenuEffects {
     switchMap(
       action => this.apiTasks.tasksReset({task: action.payload.id})
         .pipe(
-          flatMap((res) => [new ResetOutput()]
+          mergeMap((res) => [new ResetOutput()]
             .concat(this.updateExperimentSuccess(action.payload.id, action.type, res.fields))),
           catchError(error => this.updateExperimentFailed(action.type, error))
         )
@@ -132,11 +136,42 @@ export class CommonExperimentsMenuEffects {
     switchMap(
       action => this.apiTasks.tasksPublish({task: action.payload.id})
         .pipe(
-          flatMap(res => this.updateExperimentSuccess(action.payload.id, action.type, res.fields)),
+          mergeMap(res => this.updateExperimentSuccess(action.payload.id, action.type, res.fields)),
           catchError(error => this.updateExperimentFailed(action.type, error))
         )
     )
   );
+
+  @Effect()
+  shareExperiments = this.actions$.pipe(
+    ofType(shareSelectedExperiments),
+    withLatestFrom(
+      this.store.select(exSelectors.selectExperimentsList),
+    ),
+    switchMap(([action, experiments]) => this.apiTasks.tasksShare({
+      tasks: [action.task],
+      share: action.share
+    })
+      .pipe(
+        mergeMap(res => {
+          const experiment = experiments.filter(experiment => experiment.id === action.task)[0];
+          if (experiment) {
+            return this.updateExperimentSuccess(action.task, action.type,
+              {
+                system_tags: (
+                  action.share ?
+                    [...experiment.system_tags, 'shared'] :
+                    experiment.system_tags.filter((tag) => tag !== 'shared')
+                )
+              }).concat([new AddMessage(MESSAGES_SEVERITY.SUCCESS, action.share ? 'A shareable link created successfully' : 'A shareable link removed successfully')]);
+          } else {
+            return [new AutoRefreshExperimentInfo(action.task)];
+          }
+        }
+        ),
+        catchError(error => this.updateExperimentFailed(action.type, error))
+      )));
+
 
   @Effect()
   stopExperiment$ = this.actions$.pipe(
@@ -144,7 +179,7 @@ export class CommonExperimentsMenuEffects {
     switchMap(
       action => this.apiTasks.tasksStop({task: action.payload.id})
         .pipe(
-          flatMap(res => this.updateExperimentSuccess(action.payload.id, action.type, res.fields)),
+          mergeMap(res => this.updateExperimentSuccess(action.payload.id, action.type, res.fields)),
           catchError(error => this.updateExperimentFailed(action.type, error))
         )
     )
@@ -154,15 +189,20 @@ export class CommonExperimentsMenuEffects {
   changeProject$ = this.actions$.pipe(
     ofType<menuActions.ChangeProjectRequested>(menuActions.CHANGE_PROJECT_REQUESTED),
     switchMap(
-      action => this.apiTasks.tasksUpdate({task: action.payload.experiment.id, project: action.payload.project.id})
+      action => this.apiTasks.tasksMove({
+        ids: [action.payload.experiment.id],
+        project: action.payload.project.id,
+        project_name: action.payload.project.name
+      })
         .pipe(
-          flatMap(() => [
+          tap((res) => this.router.navigate([`projects/${action.payload.project.id? action.payload.project.id: res.project_id }/experiments/${action.payload.experiment.id}`], {queryParamsHandling: 'merge'})),
+          mergeMap(() => [
             new ResetExperiments(),
             new SetSelectedExperiments([]),
             this.setExperimentIfSelected(action.payload.experiment.id, {project: action.payload.project}),
-            new DeactiveLoader(action.type)
+            new DeactiveLoader(action.type),
+            new GetExperiments()
           ]),
-          tap(() => this.router.navigate([`projects/${action.payload.project.id}/experiments/${action.payload.experiment.id}`], {queryParamsHandling: 'merge'})),
           catchError(error => [new RequestFailed(error), new DeactiveLoader(action.type)])
         )
     )

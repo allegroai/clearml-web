@@ -1,7 +1,7 @@
 @import "../../styles/variables";
 
 :host {
-  /deep/ th.resize-enabled span.ui-column-resizer.ui-clickable {
+  /deep/ th.resize-enabled span.p-column-resizer {
     width: 8px;
     border: none;
     padding-left: 6px;
@@ -12,22 +12,37 @@
     }
   }
 
-  /deep/ th.resize-disabled span.ui-column-resizer.ui-clickable {
+  /deep/ th.resize-disabled span.p-column-resizer {
     cursor: auto;
   }
 
-  /deep/ .ui-table-scrollable-header.ui-widget-header {
-    position: sticky;
-    top: -1px;
-    z-index: 20;
+  /deep/ .p-column-resizer-helper {
+    background-color: $blue-300;
+    z-index: 1000;
   }
 
-  /deep/ .ui-column-resizer-helper {
-    background-color: #8492c2;
-  }
-
-  /deep/ .ui-table-scrollable-view .ui-table-scrollable-body {
+  /deep/ .p-datatable-scrollable-view .p-datatable-scrollable-body {
     flex: 1 1 0 !important;
+  }
+
+  .table-header {
+    height: 45px;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid $blue-500;
+  }
+
+  .table-header-title {
+    font-weight: bold;
+  }
+
+  .table-actions {
+    padding-top: 1px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: 24px;
   }
 
   .selected-col-header {

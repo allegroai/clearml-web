@@ -1,10 +1,10 @@
 import {Action, createAction, props} from '@ngrx/store';
 import {TableSortOrderEnum} from '../../shared/ui-components/data/table/table.consts';
 import {ModelsViewModesEnum} from '../models.consts';
-import {ITableModel} from '../shared/models.model';
+import {SelectedModel} from '../shared/models.model';
 import {TableFilter} from '../../shared/utils/tableParamEncode';
 import {User} from '../../../business-logic/model/users/user';
-import {EXPERIMENTS_PREFIX, TOGGLE_COL_HIDDEN} from '../../experiments/actions/common-experiments-view.actions';
+import {EXPERIMENTS_PREFIX} from '../../experiments/actions/common-experiments-view.actions';
 
 const MODELS_PREFIX = 'MODELS_';
 
@@ -27,7 +27,7 @@ export const SET_SHOW_ALL_SELECTED_IS_ACTIVE = MODELS_PREFIX + 'SET_SHOW_ALL_SEL
 export const REFRESH_MODELS = MODELS_PREFIX + 'REFRESH_MODELS';
 
 
-//EVENTS:
+// EVENTS:
 export const ARCHIVE_MODE_CHANGED = MODELS_PREFIX + 'ARCHIVE_MODE_CHANGED';
 export const GLOBAL_FILTER_CHANGED = MODELS_PREFIX + 'GLOBAL_FILTER_CHANGED';
 export const TABLE_SORT_CHANGED = MODELS_PREFIX + 'TABLE_SORT_CHANGED';
@@ -47,7 +47,7 @@ export class FetchModelsRequested implements Action {
 export class RefreshModels implements Action {
   readonly type = REFRESH_MODELS;
 
-  constructor(public payload: { hideLoader: boolean; autoRefresh: boolean; }) {
+  constructor(public payload: { hideLoader: boolean; autoRefresh: boolean }) {
   }
 }
 
@@ -58,13 +58,12 @@ export class GetNextModels implements Action {
 export class SetModels implements Action {
   readonly type = SET_MODELS;
 
-  constructor(public payload: Array<ITableModel>) {
-  }
+  constructor(public payload: SelectedModel[]) {}
 }
 
 export const setModelsInPlace = createAction(
   MODELS_PREFIX + '[set models in place]',
-  props<{ models: ITableModel[] }>()
+  props<{ models: SelectedModel[] }>()
 );
 
 export class SetNoMoreModels implements Action {
@@ -123,35 +122,35 @@ export const getFilteredUsers = createAction(
 export class AddModels implements Action {
   readonly type = ADD_MANY_MODELS;
 
-  constructor(public payload: Array<ITableModel>) {
+  constructor(public payload: SelectedModel[]) {
   }
 }
 
 export class RemoveModels implements Action {
   readonly type = REMOVE_MANY_MODELS;
 
-  constructor(public payload: Array<ITableModel['id']>) {
+  constructor(public payload: SelectedModel['id'][]) {
   }
 }
 
 export class UpdateModel implements Action {
   readonly type = UPDATE_ONE_MODELS;
 
-  constructor(public payload: { id: ITableModel['id'], changes: Partial<ITableModel> }) {
+  constructor(public payload: { id: SelectedModel['id']; changes: Partial<SelectedModel> }) {
   }
 }
 
 export class SetSelectedModels implements Action {
   public type = SET_SELECTED_MODELS;
 
-  constructor(public payload: Array<ITableModel>) {
+  constructor(public payload: SelectedModel[]) {
   }
 }
 
 export class SetSelectedModel implements Action {
   public type = SET_SELECTED_MODEL;
 
-  constructor(public payload: ITableModel) {
+  constructor(public payload: SelectedModel) {
   }
 }
 
@@ -177,7 +176,7 @@ export const setTableFilters = createAction(
 export class ModelSelectionChanged implements Action {
   readonly type = MODEL_SELECTION_CHANGED;
 
-  constructor(public payload: { model: ITableModel; project?: string; }) {
+  constructor(public payload: { model: SelectedModel; project?: string }) {
     this.payload.project = this.payload.project || '*';
   }
 }
@@ -260,3 +259,4 @@ export const setArchive = createAction(
 
 export const afterSetArchive = createAction(MODELS_PREFIX + 'AFTER_SET_ARCHIVE');
 
+export const setSplitSize = createAction(MODELS_PREFIX + 'SET_SPLIT_SIZE', props<{ splitSize: number }>());

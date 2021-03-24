@@ -2,9 +2,10 @@ import {Component, OnInit} from '@angular/core';
 import {Observable} from 'rxjs';
 import {ISelectedModelInput} from '../../shared/models.model';
 import {Store} from '@ngrx/store';
-import {IModelInfoState} from '../../reducers/model-info.reducer';
+import {ModelInfoState} from '../../reducers/model-info.reducer';
 import {selectIsModelSaving, selectSelectedModel} from '../../reducers';
 import {ActivateModelEdit, CancelModelEdit, EditModel, SetIsModelSaving} from '../../actions/models-info.actions';
+import {selectIsSharedAndNotOwner} from '../../../../features/experiments/reducers';
 
 @Component({
   selector   : 'sm-model-info-network',
@@ -14,9 +15,11 @@ import {ActivateModelEdit, CancelModelEdit, EditModel, SetIsModelSaving} from '.
 export class ModelInfoNetworkComponent implements OnInit {
   public selectedModel$: Observable<ISelectedModelInput>;
   public saving$: Observable<boolean>;
+  public isSharedAndNotOwner$: Observable<boolean>;
 
-  constructor(private store: Store<IModelInfoState>) {
+  constructor(private store: Store<ModelInfoState>) {
     this.selectedModel$ = this.store.select(selectSelectedModel);
+    this.isSharedAndNotOwner$ = this.store.select(selectIsSharedAndNotOwner);
     this.saving$         = this.store.select(selectIsModelSaving);
   }
   ngOnInit() {

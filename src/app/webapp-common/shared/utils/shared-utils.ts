@@ -2,13 +2,16 @@ import {MEDIA_VIDEO_EXTENSIONS, MediaContentTypeEnum} from '../../../app.constan
 import {ActivatedRoute} from '@angular/router';
 import {EXPERIMENT_GRAPH_ID_PREFIX} from '../../experiments/shared/common-experiments.const';
 import {get, last} from 'lodash/fp';
+import {User} from '../../../business-logic/model/users/user';
+import {GetCurrentUserResponseUserObjectCompany} from "../../../business-logic/model/users/getCurrentUserResponseUserObjectCompany";
 
 export function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
-const CRC_TABLE      = function () {
+
+const CRC_TABLE = function () {
   const polynomial = 0x04C11DB7;
-  const table      = new Array(256);
+  const table = new Array(256);
 
   const reverse = function (x, n) {  // TODO
     let b = 0;
@@ -44,7 +47,7 @@ export const isVideo = (contentType: MediaContentTypeEnum, uri: string) => {
 export const isSourceVideo = (source) => {
 
   const contentType = (source.preview && source.preview.content_type) ? source.preview.content_type : source.content_type;
-  const uri         = (source.preview && source.preview.uri) ? source.preview.uri : source.uri;
+  const uri = (source.preview && source.preview.uri) ? source.preview.uri : source.uri;
   if (source.dprs) {
     return false;
   }
@@ -66,7 +69,7 @@ export function isTextFileURL(url: string) {
 export function createModelLink(uri, modelId, modelSignedUri) {
   const uriArray = uri.split('/');
   const filename = uriArray[uriArray.length - 1];
-  const url      = '/static/network?obj={"path":"' + modelSignedUri + '","fileName":"' + filename + '","id":"' + modelId + '"}';
+  const url = '/static/network?obj={"path":"' + modelSignedUri + '","fileName":"' + filename + '","id":"' + modelId + '"}';
   return encodeURI(url);
 }
 
@@ -99,8 +102,8 @@ export function scrollToElement(id) {
 }
 
 export function isScrolledIntoView(el) {
-  const rect       = el.getBoundingClientRect();
-  const elemTop    = rect.top;
+  const rect = el.getBoundingClientRect();
+  const elemTop = rect.top;
   const elemBottom = rect.bottom;
 
   // Only completely visible elements return true:
@@ -127,8 +130,18 @@ export function removeAlphaColor(rgbaColor: string) {
   return `rgb(${rgbaColorArr[0]},${rgbaColorArr[1]},${rgbaColorArr[2]})`;
 }
 
+export function isReadOnly(item) {
+  return (!get('company.id', item)) || (!!get('readOnly', item));
+}
+
 export function isExample(item) {
-  return item && item.company && !item.company.id;
+  const isEx = !get('company.id', item);
+  return isEx;
+}
+
+export function isSharedAndNotOwner(item, activeWorkSpace: GetCurrentUserResponseUserObjectCompany): boolean {
+  const isSharedandNot = item?.system_tags.includes('shared') && item?.company?.id !== activeWorkSpace?.id;
+  return isSharedandNot;
 }
 
 export function isAnnotationTask(entity) {
@@ -148,21 +161,21 @@ export function getCssTheme(el: HTMLElement): string {
   return null;
 }
 
-export function crc32(str/*, polynomial = 0x04C11DB7, initialValue = 0xFFFFFFFF, finalXORValue = 0xFFFFFFFF*/) {
-  const s             = String(str);
-  const table         = CRC_TABLE;
-  const initialValue  = arguments.length < 3 ? 0xFFFFFFFF : (arguments[2] >>> 0);
+export function crc32(str /* , polynomial = 0x04C11DB7, initialValue = 0xFFFFFFFF, finalXORValue = 0xFFFFFFFF*/) {
+  const s = String(str);
+  const table = CRC_TABLE;
+  const initialValue = arguments.length < 3 ? 0xFFFFFFFF : (arguments[2] >>> 0);
   const finalXORValue = arguments.length < 4 ? 0xFFFFFFFF : (arguments[3] >>> 0);
-  let crc             = initialValue;
-  const length        = s.length;
-  let k               = -1;
+  let crc = initialValue;
+  const length = s.length;
+  let k = -1;
   while (++k < length) {
     const c = s.charCodeAt(k) % 255; // Modulus 255 not part of crc32, used to support non-english text. YK
     if (c > 255) {
       throw new RangeError();
     }
     const index = (crc & 255) ^ c;
-    crc         = ((crc >>> 8) ^ table[index]) >>> 0;
+    crc = ((crc >>> 8) ^ table[index]) >>> 0;
   }
   return (crc ^ finalXORValue) >>> 0;
 }
@@ -179,8 +192,8 @@ export function findRegexRecursively(object, field: string, regex: RegExp) {
   if (currentValue) {
     return regex.test(currentValue);
   }
-  const nodes     = field.split('.');
-  const node      = nodes.shift();
+  const nodes = field.split('.');
+  const node = nodes.shift();
   const nodeValue = object[node];
   if (!nodeValue) {
     return false;
@@ -205,6 +218,7 @@ export function groupHyperParams(hyperParams: any[]) {
     return acc;
   }, {});
 }
+
 export function getScaleFactor() {
   const is_mac = (navigator.platform.indexOf('Mac') !== -1 || navigator.platform.indexOf('iPad') !== -1);
   const is_win = navigator.platform.indexOf('Win') !== -1;
@@ -232,3 +246,11 @@ export function getScaleFactor() {
   return dimensionRatio;
 }
 
+export function cleanUserData(user: User): User {
+  return user && Object.entries(user).reduce((curr, [key, value]) => {
+    if (!(value === 'Unknown' || value === '')) {
+      curr[key] = value;
+    }
+    return curr;
+  }, {});
+}

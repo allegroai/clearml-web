@@ -2,14 +2,14 @@ import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Hos
 import {ICONS} from '../../../../app.constants';
 import {ColHeaderTypeEnum, ISmCol, TableSortOrderEnum} from '../../../shared/ui-components/data/table/table.consts';
 import {get} from 'lodash/fp';
-import {ITableModel} from '../models.model';
+import {SelectedModel, TableModel} from '../models.model';
 import {MODELS_FRAMEWORK_LABELS, MODELS_READY_LABELS, MODELS_TABLE_COL_FIELDS} from '../models.const';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {BaseTableView} from '../../../shared/ui-components/data/table/base-table-view';
 import {User} from '../../../../business-logic/model/users/user';
 import {sortByArr} from '../../../shared/pipes/show-selected-first.pipe';
 import {Observable} from 'rxjs';
-import {selectProjectTags} from '../../../core/reducers/projects.reducer';
+import {selectCompanyTags, selectProjectTags, selectTagsFilterByProject} from '../../../core/reducers/projects.reducer';
 import {Store} from '@ngrx/store';
 import {addTag} from '../../actions/models-menu.actions';
 import {ModelMenuComponent} from '../../../../features/models/containers/model-menu/model-menu.component';
@@ -17,6 +17,7 @@ import {TIME_FORMAT_STRING} from '../../../constants';
 import {getSysTags} from '../../model.utils';
 import {TableComponent} from '../../../shared/ui-components/data/table/table.component';
 import { MODELS_TABLE_COLS } from '../../models.consts';
+import {ITableExperiment} from '../../../experiments/shared/common-experiment-model.model';
 
 @Component({
   selector       : 'sm-models-table',
@@ -44,18 +45,20 @@ export class ModelsTableComponent extends BaseTableView {
   public tagsFiltersValue: any;
   public systemTagsFiltersValue: any;
   public menuOpen: boolean;
-  public allFiltersValue: { framework: any; ready: any; users: any, tags: any };
+  public allFiltersValue: { framework: any; ready: any; users: any; tags: any };
   public sortOrder = 1;
 
-  public contextModel: ITableModel;
-  public tags$: Observable<string[]>;
-  private _selectedModels: ITableModel[];
-  private _models: ITableModel[];
+  public contextModel: SelectedModel;
+  public tagsFilterByProject$: Observable<boolean>;
+  public projectTags$: Observable<string[]>;
+  public companyTags$: Observable<string[]>;
+  private _selectedModels: TableModel[];
+  private _models: SelectedModel[];
   private _enableMultiSelect: boolean;
   private _tablesCols: ISmCol[];
   public getSysTags = getSysTags;
 
-  @Input() set models(models: ITableModel[]) {
+  @Input() set models(models: SelectedModel[]) {
     this._models = models;
     if (this.contextModel) {
       this.contextModel = this.models.find(model => model.id === this.contextModel.id);
@@ -159,12 +162,8 @@ export class ModelsTableComponent extends BaseTableView {
     return this.systemTags.filter(tag => tag !== 'archived');
   }
 
-  @Input() set split(size: number) {
-    this.table?.resize();
-  }
-
-  @Output() modelsSelectionChanged = new EventEmitter<Array<ITableModel>>();
-  @Output() modelSelectionChanged = new EventEmitter<ITableModel>();
+  @Output() modelsSelectionChanged = new EventEmitter<SelectedModel[]>();
+  @Output() modelSelectionChanged = new EventEmitter<SelectedModel>();
   @Output() loadMoreModels = new EventEmitter();
   @Output() tagsMenuOpened = new EventEmitter();
   @Output() sortedChanged = new EventEmitter<{ sortOrder: TableSortOrderEnum; colId: ISmCol['id'] }>();
@@ -184,7 +183,9 @@ export class ModelsTableComponent extends BaseTableView {
 
   constructor(private changeDetector: ChangeDetectorRef, private store: Store<any>) {
     super();
-    this.tags$ = this.store.select(selectProjectTags);
+    this.tagsFilterByProject$ = this.store.select(selectTagsFilterByProject);
+    this.projectTags$ = this.store.select(selectProjectTags);
+    this.companyTags$ = this.store.select(selectCompanyTags);
     this.entitiesKey = 'models';
     this.selectedEntitiesKey = 'selectedModels';
   }
@@ -245,9 +246,10 @@ export class ModelsTableComponent extends BaseTableView {
     return this.tableCols.find(col => colId === col.id)?.header;
   }
 
-  rowSelectedChanged(checked, model) {
-    if (checked.value) {
-      this.modelsSelectionChanged.emit([...this.selectedModels, model]);
+  rowSelectedChanged(change: { field: string; value: boolean; event: Event }, model: TableModel) {
+    if (change.value) {
+      const addList = this.getSelectionRange<TableModel>(change, model);
+      this.modelsSelectionChanged.emit([...this.selectedModels, ...addList]);
     } else {
       this.modelsSelectionChanged.emit(this.selectedModels.filter((selectedModel) => selectedModel.id !== model.id));
     }
@@ -294,6 +296,7 @@ export class ModelsTableComponent extends BaseTableView {
   openContextMenu(data) {
     this.contextModel = this.models.find(model => model.id === data.rowData.id);
     if (!this.selectedModels.map(model => model.id).includes(this.contextModel.id)) {
+      this.prevSelected = this.contextModel;
       this.emitSelection([this.contextModel]);
     }
     const event = data.e as MouseEvent;

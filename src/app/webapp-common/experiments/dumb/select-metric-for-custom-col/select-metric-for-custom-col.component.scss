@@ -97,20 +97,20 @@
 
   /deep/ .mat-expansion-panel-header-description {
     flex-grow: 0;
-    color: #5a658e;
+    color: $blue-400;
   }
 
   /deep/ .mat-expansion-panel {
     box-shadow: none;
     //border-bottom: 1px solid rgba(2, 2, 2, 0.07);
-    color: #5a658e;
+    color: $blue-400;
   }
 
   /deep/ .mat-content {
     padding-left: 5px;
 
     .mat-expansion-panel-header-title {
-      color: #5a658e;
+      color: $blue-400;
     }
   }
 

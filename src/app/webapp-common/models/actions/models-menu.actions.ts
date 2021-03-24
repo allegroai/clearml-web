@@ -1,6 +1,7 @@
 import {Action, createAction, props} from '@ngrx/store';
-import {ISelectedModel} from '../shared/models.model';
+import {SelectedModel} from '../shared/models.model';
 import {Project} from '../../../business-logic/model/projects/project';
+import {EXPERIMENTS_INFO_PREFIX} from "../../experiments/actions/common-experiments-menu.actions";
 
 const MODELS_PREFIX = 'MODELS_MENU_';
 
@@ -16,7 +17,7 @@ export const CHANGE_PROJECT_REQUESTED = MODELS_PREFIX + 'CHANGE_PROJECT_REQUESTE
 export class PublishModelClicked implements Action {
   readonly type = PUBLISH_MODEL_CLICKED;
 
-  constructor(public payload: ISelectedModel) {
+  constructor(public payload: SelectedModel) {
   }
 
 }
@@ -24,16 +25,17 @@ export class PublishModelClicked implements Action {
 export class ChangeProjectRequested implements Action {
   readonly type = CHANGE_PROJECT_REQUESTED;
 
-  constructor(public payload: { model: ISelectedModel, project: Project }) {
+  constructor(public payload: { model: SelectedModel; project: Project }) {
   }
 }
 
 export const addTag = createAction(
   MODELS_PREFIX + '[add tag to model]',
-  props<{models: ISelectedModel[]; tag: string}>()
+  props<{models: SelectedModel[]; tag: string}>()
 );
 
 export const removeTag = createAction(
   MODELS_PREFIX + '[remove tag from model]',
-  props<{models: ISelectedModel[]; tag: string}>()
+  props<{models: SelectedModel[]; tag: string}>()
 );
+

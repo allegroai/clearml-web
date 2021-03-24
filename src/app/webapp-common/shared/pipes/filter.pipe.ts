@@ -6,13 +6,13 @@ import {get} from 'lodash/fp';
 })
 export class FilterPipe implements PipeTransform {
 
-  transform(arr: any[], query: string | string[], key?: string): any[] {
+  transform<T>(arr: T[], query: string | string[], key?: string): T[] {
     if (!arr || !query) {
       return arr;
     }
     if (Array.isArray(query)) {
       return arr.filter(item => !(query as string[]).includes((key ? get(key, item) : item)));
     }
-    return arr.filter(item => (key ? get(key, item) : item).toLowerCase().includes(query.toLowerCase()));
+    return arr.filter(item => (key ? get(key, item) : item)?.toLowerCase().includes(query?.toLowerCase()));
   }
 }

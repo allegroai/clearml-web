@@ -9,7 +9,13 @@ import {RequestFailed} from '../core/actions/http.actions';
 import {REFRESH_EXPERIMENTS} from '../experiments/actions/common-experiments-view.actions';
 import {setRefreshing} from '../experiments-compare/actions/compare-header.actions';
 import {Store} from '@ngrx/store';
-import {selectDebugImages} from './debug-images-reducer';
+import {selectDebugImages, selectImageViewerScrollId} from './debug-images-reducer';
+import {
+  setCurrentDebugImage,
+  setDebugImageIterations,
+  setDebugImageViewerScrollId,
+  setDisplayerBeginningOfTime, setDisplayerEndOfTime
+} from "./debug-images-actions";
 
 interface Image {
   timestamp: number;
@@ -32,6 +38,7 @@ export class DebugImagesEffects {
     ofType(debugActions.FETCH_EXPERIMENTS),
     map(action => new ActiveLoader(action.type))
   );
+
 
   @Effect()
   fetchDebugImages$ = this.actions$.pipe(
@@ -59,13 +66,19 @@ export class DebugImagesEffects {
                   actionsToShoot.push(new debugActions.SetTimeIsNow({task: action.payload.task, timeIsNow: true}));
                   break;
                 case debugActions.GET_PREVIOUS_DEBUG_IMAGES_BATCH:
-                  actionsToShoot.push(new debugActions.SetBeginningOfTime({task: action.payload.task, beginningOfTime: false}));
+                  actionsToShoot.push(new debugActions.SetBeginningOfTime({
+                    task: action.payload.task,
+                    beginningOfTime: false
+                  }));
                   break;
               }
             } else {
               switch (action.type) {
                 case debugActions.GET_NEXT_DEBUG_IMAGES_BATCH:
-                  actionsToShoot.push(new debugActions.SetBeginningOfTime({task: action.payload.task, beginningOfTime: true}));
+                  actionsToShoot.push(new debugActions.SetBeginningOfTime({
+                    task: action.payload.task,
+                    beginningOfTime: true
+                  }));
                   break;
                 case debugActions.GET_PREVIOUS_DEBUG_IMAGES_BATCH:
                   actionsToShoot.push(new debugActions.SetTimeIsNow({task: action.payload.task, timeIsNow: true}));
@@ -99,13 +112,68 @@ export class DebugImagesEffects {
   @Effect()
   fetchMetrics$ = this.actions$.pipe(
     ofType<debugActions.GetDebugImagesMetrics | debugActions.RefreshDebugImagesMetrics>(debugActions.GET_DEBUG_IMAGES_METRICS, debugActions.REFRESH_DEBUG_IMAGES_METRICS),
-    switchMap((action) => this.eventsApi.eventsGetTaskMetrics({tasks: action.payload.tasks, event_type: 'training_debug_image'})
-      .pipe(
-        flatMap(res => [new debugActions.SetMetrics(res), new DeactiveLoader(action.type)]),
-        catchError(error => [new RequestFailed(error), new DeactiveLoader(action.type)])
-      )
+    switchMap((action) => this.eventsApi.eventsGetTaskMetrics({
+        tasks: action.payload.tasks,
+        event_type: 'training_debug_image'
+      })
+        .pipe(
+          flatMap(res => [new debugActions.SetMetrics(res), new DeactiveLoader(action.type)]),
+          catchError(error => [new RequestFailed(error), new DeactiveLoader(action.type)])
+        )
     )
   );
+
+  @Effect()
+  fetchDebugImagesForIter$ = this.actions$.pipe(
+    ofType(debugActions.getDebugImageSample),
+    withLatestFrom(this.store.select(selectImageViewerScrollId)),
+    switchMap(([action, scrollId]) =>
+      this.eventsApi.eventsGetDebugImageSample({
+        task: action.task,
+        iteration: action.iteration,
+        metric: action.metric,
+        variant: action.variant,
+        scroll_id: scrollId
+      })
+        .pipe(
+          flatMap(res => [
+            setDebugImageIterations({min_iteration: res.min_iteration, max_iteration: res.max_iteration}),
+            setCurrentDebugImage({event: res.event}), new DeactiveLoader(action.type),
+            setDebugImageViewerScrollId({scrollId: res.scroll_id}),
+          ]),
+          catchError(error => [new RequestFailed(error), new DeactiveLoader(action.type)])
+        )
+    )
+  );
+
+  @Effect()
+  getNextDebugImagesForIter$ = this.actions$.pipe(
+    ofType(debugActions.getNextDebugImageSample),
+    withLatestFrom(this.store.select(selectImageViewerScrollId)),
+    switchMap(([action, scrollId]) =>
+      this.eventsApi.eventsNextDebugImageSample({
+        task: action.task,
+        scroll_id: scrollId,
+        navigate_earlier: action.navigateEarlier
+      })
+        .pipe(
+          flatMap(res => {
+            if (!res.event) {
+              return [action.navigateEarlier ? setDisplayerBeginningOfTime({beginningOfTime: true}) : setDisplayerEndOfTime({endOfTime: true})];
+            } else {
+              return [
+                setDebugImageIterations({min_iteration: res.min_iteration, max_iteration: res.max_iteration}),
+                setCurrentDebugImage({event: res.event}), new DeactiveLoader(action.type),
+                setDebugImageViewerScrollId({scrollId: res.scroll_id}),
+                action.navigateEarlier ? setDisplayerBeginningOfTime({beginningOfTime: false}) : setDisplayerEndOfTime({endOfTime: false})
+              ];
+            }
+          }),
+          catchError(error => [new RequestFailed(error), new DeactiveLoader(action.type)])
+        )
+    )
+  );
+
 
   constructor(
     private actions$: Actions, private apiTasks: ApiTasksService,

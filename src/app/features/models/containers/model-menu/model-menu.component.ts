@@ -3,7 +3,7 @@ import {BaseModelMenuComponent} from '../../../../webapp-common/models/container
 import { MatDialog } from '@angular/material/dialog';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Store} from '@ngrx/store';
-import {IModelInfoState} from '../../../../webapp-common/models/reducers/model-info.reducer';
+import {ModelInfoState} from '../../../../webapp-common/models/reducers/model-info.reducer';
 import {AdminService} from '../../../admin/admin.service';
 
 @Component({
@@ -15,7 +15,7 @@ export class ModelMenuComponent extends BaseModelMenuComponent {
 
   constructor(
     protected dialog: MatDialog,
-    protected store: Store<IModelInfoState>,
+    protected store: Store<ModelInfoState>,
     protected adminService: AdminService,
     protected eRef: ElementRef
   ) {

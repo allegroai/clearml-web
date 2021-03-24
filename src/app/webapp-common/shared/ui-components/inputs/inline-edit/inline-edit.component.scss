@@ -10,6 +10,10 @@ $inline-edit-base-width: 93%;
     background-color: $blue-600;
     color: $blue-100;
     border: none;
+
+    &.ng-invalid {
+      color: $error-color;
+    }
   }
 
   // textarea
@@ -22,22 +26,13 @@ $inline-edit-base-width: 93%;
   }
 
 
-  .inline-edit-close {
+  .inline-edit-close, .inline-edit-approve {
     color: $blue-200;
 
     &:hover {
       color: white;
     }
   }
-
-  .inline-edit-approve {
-    color: $blue-200;
-
-    &:hover {
-      color: white;
-    }
-  }
-
 }
 
 
@@ -47,12 +42,11 @@ $inline-edit-base-width: 93%;
     padding: 0px;
   }
 
-  .inline-edit-close {
-    position: absolute;
-    font-size: 12px;
-    top: 10px;
-    left: calc(#{$inline-edit-base-width} - 15px);
+  .inline-edit-close, .inline-edit-approve {
+    line-height: 16px;
+    font-size: 16px;
     transition: color 300ms;
+    margin-left: 18px;
 
     &:hover {
       color: $purple;
@@ -60,63 +54,41 @@ $inline-edit-base-width: 93%;
   }
 
   .inline-edit-approve {
-    position: absolute;
     font-size: 12px;
-    top: 10px;
-    left: calc(#{$inline-edit-base-width} + 5px);
-    transition: color 300ms;
 
-    &:hover {
-      color: $purple;
+    &.disabled {
+      opacity: 0.25;
+      cursor: not-allowed !important;
     }
+
   }
 
   .inline-edit-form {
-    position: relative;
-  }
+    display: flex;
+    flex-direction: row;
+    align-items: center;
 
-  .inline-edit-input,
-  .inline-edit-textarea {
-    padding-right: 10%;
-    width: $inline-edit-base-width;
-  }
+    &.multiline {
+      flex-direction: column;
+      align-items: flex-end;
 
+      .buttons {
+        width: 65px;
+        min-width: 65px;
+        margin: 12px 12px 0 0;
+      }
+    }
+
+    .buttons {
+      display: flex;
+    }
+  }
 
   .editable-pen {
     position: relative;
     top: 3px;
     left: 2px;
   }
-}
-
-
-body .ui-inplace .ui-inplace-display.ui-state-disabled {
-  opacity: 1;
-}
-
-body .ui-inplace .ui-inplace-display {
-  display: block;
-}
-
-body .ui-inplace .ui-inplace-content input:not(:focus) {
-  border-color: indianred;
-}
-
-body .inline-select select:not(:focus).active {
-  border-color: indianred;
-}
-
-body .text-edit .ui-inplace .ui-inplace-display {
-  padding: 0;
-  display: block;
-}
-
-body .text-edit .ui-inplace .ui-inplace-display.ui-state-disabled {
-  opacity: 1;
-}
-
-body .text-edit .ui-inplace .ui-inplace-content textarea:not(:focus) {
-  border-color: indianred;
 }
 
 .editable-div {

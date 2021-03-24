@@ -1,3 +1,5 @@
+@import "../../../shared/ui-components/styles/variables";
+
 .fas.fa-arrows {
   cursor: move;
 }
@@ -71,7 +73,7 @@
                 margin-top: 1px;
                 font-family: "Heebo", sans-serif;
                 font-weight: 500;
-                color: #384161;
+                color: $blue-500;
                 white-space: nowrap;
               }
             }
@@ -129,13 +131,11 @@
   al-drawer {
     height: calc(100% - 16px);
     align-self: flex-start;
-    flex-direction: row;
-    justify-content: space-between;
-    box-sizing: border-box;
     background: white;
     font-size: 14px;
-    flex-basis: 0;
     margin-right: 4px;
+    width: 100%;
+    transition: width 0.4s ease;
   }
 
   /deep/ .fixed-width {
@@ -144,7 +144,7 @@
 
   sm-card2 {
     display: block;
-    width: 455px;
+    min-width: 455px;
     height: 100%;
   }
 

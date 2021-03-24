@@ -1,14 +1,21 @@
-.toggle-all {
-  margin-top: 2px;
+@import "../../styles/variables";
+
+:host {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+.toggle-all-text {
+  display: block;
+  margin-top: 13px;
+  font-size: 11px;
+  line-height: 1.55;
+  text-align: right;
+  color: $blue-480;
   cursor: pointer;
-
-  .toggle-all-text {
-    font-size: 10px;
-  }
-
-  .uncheckedAll {
-    opacity: 0.4;
-  }
+  padding: 0 24px;
 }
 
 i.toggle-icon {
@@ -19,4 +26,8 @@ i.toggle-icon {
   &.unchecked {
     opacity: 0.4;
   }
+}
+
+sm-search {
+  padding: 12px 24px 0 24px;
 }

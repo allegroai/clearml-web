@@ -1,0 +1,30 @@
+:host {
+  .selected-number {
+    padding-left: 12px;
+  }
+
+  .show-all{
+    text-decoration: underline;
+  }
+
+  i.icon {
+    margin-right: 6px;
+  }
+
+  .compare-button-container {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    margin-left: 24px;
+    i{
+      margin-right: 6px;
+    }
+
+    &.disabled {
+      cursor: no-drop;
+      pointer-events: none;
+      opacity: 0.3;
+    }
+  }
+}
+

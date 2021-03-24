@@ -1,4 +1,5 @@
-<sm-dialog-template [displayX]="displayX && !dialogRef.disableClose" [header]="title" (xClicked)="closeDialog(undefined)" [closeOnX]="false"
+<sm-dialog-template [displayX]="displayX && !dialogRef.disableClose" [header]="title"
+                    (xClicked)="closeDialog(undefined)" [closeOnX]="false"
                     [iconClass]="iconClass">
   <div *ngIf="reference" class="reference">{{reference}}</div>
   <div class="body" [innerHTML]='body'>
@@ -6,6 +7,11 @@
   <ng-content></ng-content>
 
 
+  <div *ngIf="showNeverShowAgain" class="body mt-4" >
+    <mat-checkbox [(ngModel)]="neverShowAgain">
+      <span class="chkbx-label">Don't show again</span>
+    </mat-checkbox>
+  </div>
   <div class="buttons">
 
     <button *ngIf="no" (click)="closeDialog(false)" class="btn btn-outline-neon yes-button">

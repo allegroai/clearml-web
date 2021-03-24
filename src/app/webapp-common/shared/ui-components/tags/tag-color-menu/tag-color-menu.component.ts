@@ -1,4 +1,4 @@
-import {Component, ElementRef, ViewChild} from '@angular/core';
+import {Component, ElementRef, OnDestroy, ViewChild} from '@angular/core';
 import {Observable} from 'rxjs';
 import {Store} from '@ngrx/store';
 import {selectProjectTags} from '../../../../core/reducers/projects.reducer';
@@ -6,13 +6,15 @@ import {map} from 'rxjs/operators';
 import {TagColorService} from '../../../services/tag-color.service';
 import {Tag} from '../tag-list/tag-list.component';
 import {MatDialogRef} from '@angular/material/dialog';
+import {DeactivateEdit} from '../../../../experiments/actions/common-experiments-info.actions';
+import {CancelModelEdit} from '../../../../models/actions/models-info.actions';
 
 @Component({
-  selector   : 'sm-tag-color-menu',
+  selector: 'sm-tag-color-menu',
   templateUrl: './tag-color-menu.component.html',
-  styleUrls  : ['./tag-color-menu.component.scss']
+  styleUrls: ['./tag-color-menu.component.scss']
 })
-export class TagColorMenuComponent {
+export class TagColorMenuComponent implements OnDestroy {
   filterText: string;
   public tags$: Observable<Tag[]>;
   defaultColor: string;
@@ -51,5 +53,10 @@ export class TagColorMenuComponent {
 
   clearSearch() {
     this.filterText = '';
+  }
+
+  ngOnDestroy(): void {
+    this.store.dispatch(new DeactivateEdit());
+    this.store.dispatch(new CancelModelEdit());
   }
 }

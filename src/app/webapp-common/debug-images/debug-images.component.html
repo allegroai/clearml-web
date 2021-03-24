@@ -1,38 +1,47 @@
 <div class="debug-images">
   <div class="p-3 images-container">
     <div class="single-debug-images-container" *ngFor="let experimentId of experimentIds; trackBy: trackExperiment">
-      <h3 *ngIf="experimentIds?.length > 1"
-          [smTooltip]="taskNames[experimentId]"
-          class="experiment-name"
-      >{{taskNames[experimentId]}}</h3>
-      <div class="metric-bar" *ngIf="!thereAreNoMetrics(experimentId)">
-        <label>Metric:</label>
-        <select #metricSelect class="form-control" (change)="selectMetric($event, experimentId)">
-          <option *ngFor="let metric of optionalMetrics[experimentId]" [value]="metric" [selected]="metric===selectedMetrics[experimentId]">
-            {{metric}}
-          </option>
-        </select>
-        <label>Iterations:</label>
-
-        <div [ngClass]="{'disabled': (beginningOfTime$| async)[experimentId]}" (click)="nextBatch({task: experimentId, metric: metricSelect.value})"
-             class="al-icon al-ico-next-batch al-color light-grey-blue"
-             smTooltip="Older images"></div>
-
-        <b class="text-right">{{debugImages && debugImages[experimentId] && debugImages[experimentId][debugImages[experimentId].length - 1].iter}}</b>
-
-        <div class="al-icon al-ico-between al-color light-blue-grey"></div>
-
-        <b>{{debugImages && debugImages[experimentId] && debugImages[experimentId][0].iter}}</b>
-
-        <div [ngClass]="{'disabled': (timeIsNow$| async)[experimentId]}" (click)="(!timeIsNow[experimentId]) && previousBatch({task: experimentId, metric: metricSelect.value})" class="al-icon al-ico-prev-batch al-color light-grey-blue"
-             smTooltip="Newer images"></div>
-
-        <div [ngClass]="{'disabled': (timeIsNow$| async)[experimentId] && !allowAutorefresh }"
-             (click)="(!(timeIsNow[experimentId] && !allowAutorefresh)) && backToNow({task: experimentId, metric: metricSelect.value})" class="al-icon al-ico-back-to-top al-color light-grey-blue"
-             smTooltip="Newest images"></div>
+      <div
+        *ngIf="experimentIds?.length > 1"
+        class="experiment-name">
+        <span [smTooltip]="taskNames[experimentId]" matTooltipPosition="above">{{taskNames[experimentId]}}</span>
       </div>
-      <div class="no-images icon i-no-debug-samples-with-text" *ngIf="shouldShowNoImagesForExperiment(experimentId)">
+      <div class="d-flex">
+        <div class="metric-bar" [class.minimized]="minimized" *ngIf="!thereAreNoMetrics(experimentId)">
+          <label>Metric:</label>
+          <select #metricSelect class="form-control" (change)="selectMetric($event, experimentId)">
+            <option *ngFor="let metric of optionalMetrics[experimentId]" [value]="metric"
+                    [selected]="metric===selectedMetrics[experimentId]">
+              {{metric}}
+            </option>
+          </select>
+          <label>Iterations:</label>
+
+          <div [ngClass]="{'disabled': (beginningOfTime$| async)[experimentId]}"
+               (click)="nextBatch({task: experimentId, metric: metricSelect.value})"
+               class="al-icon al-ico-next-batch al-color light-grey-blue"
+               smTooltip="Older images"></div>
+
+          <b
+            class="text-right">{{debugImages && debugImages[experimentId] && debugImages[experimentId][debugImages[experimentId].length - 1].iter}}</b>
+
+          <div class="al-icon al-ico-between al-color light-blue-grey"></div>
+
+          <b>{{debugImages && debugImages[experimentId] && debugImages[experimentId][0].iter}}</b>
+
+          <div [ngClass]="{'disabled': (timeIsNow$| async)[experimentId]}"
+               (click)="(!timeIsNow[experimentId]) && previousBatch({task: experimentId, metric: metricSelect.value})"
+               class="al-icon al-ico-prev-batch al-color light-grey-blue"
+               smTooltip="Newer images"></div>
+
+          <div [ngClass]="{'disabled': (timeIsNow$| async)[experimentId] && !allowAutorefresh }"
+               (click)="(!(timeIsNow[experimentId] && !allowAutorefresh)) && backToNow({task: experimentId, metric: metricSelect.value})"
+               class="al-icon al-ico-back-to-top al-color light-grey-blue"
+               smTooltip="Newest images"></div>
+        </div>
       </div>
+      <div class="no-images icon i-no-debug-samples-with-text"
+           *ngIf="shouldShowNoImagesForExperiment(experimentId)"></div>
       <sm-debug-images-view [iterations]="(debugImages$| async)[experimentId]"
                             [experimentId]="experimentId"
                             [title]="taskNames && taskNames[experimentId]"

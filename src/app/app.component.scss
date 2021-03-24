@@ -5,7 +5,9 @@ $notifier-height: 30px;
 
 .app-container {
   height: 100%;
-  margin-left: $side-bar-close-width;
+  &:not(.login-page) {
+    margin-left: $side-bar-close-width;
+  }
 
   &.notifier-open {
     height: calc(100% - #{$notifier-height});
@@ -13,12 +15,20 @@ $notifier-height: 30px;
       height: calc(100% - #{$top-bar-height});
     }
   }
+
+  .main-router + * {
+    display: block;
+    height: calc(100% - #{$top-bar-height});
+  }
+
+  &.login-page {
+    .main-router + * {
+      height: 100%;
+    }
+  }
 }
 
-.main-router + * {
-  display: block;
-  height: calc(100% - #{$top-bar-height});
-}
+
 
 
 sm-side-nav {

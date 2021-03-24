@@ -1,8 +1,8 @@
 import {Injectable} from '@angular/core';
-import {environment} from '../../../../environments/environment';
 import {Observable, of} from 'rxjs';
 import {SmApiRequestsService} from '../../../business-logic/api-services/api-requests.service';
 import {catchError, map} from 'rxjs/operators';
+import {ConfigurationService} from '../../shared/services/configuration.service';
 
 
 @Injectable()
@@ -13,6 +13,7 @@ export class AuthService {
 
   public isAuthenticated(): Observable<boolean> {
     // for localhost...
+    const environment = ConfigurationService.globalEnvironment;
     if (!environment.production) {
       return of(true);
     }

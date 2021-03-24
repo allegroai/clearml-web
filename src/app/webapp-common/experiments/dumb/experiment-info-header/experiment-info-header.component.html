@@ -5,7 +5,7 @@
   <sm-experiment-type-icon-label class="experiment-icon" [showLabel]="false" [type]="experiment?.type" iconClass="xl" >
   </sm-experiment-type-icon-label>
   <div class="middle-col">
-    <div class="d-flex p2">
+    <div class="d-flex align-items-center p2">
       <sm-inline-edit
         #editName
         class="edit-name pr-3"
@@ -17,11 +17,18 @@
       >
         <span class="experiment-name">{{experiment?.name}}</span>
       </sm-inline-edit>
-      <i class="icon i-id id-icon pointer" (click)="showID()" *ngIf="!viewId"></i>
+      <div class="shared"
+           *ngIf="showMinimize && shared"
+      ><i class="fas fa-link p-1"></i></div>
+      <span class="id-icon" (click)="showID()" *ngIf="!viewId">ID</span>
       <span class="experiment-id" *ngIf="viewId">{{experiment.id}}</span>
+      <div class="status"
+           [class]="experiment?.status"
+           *ngIf="showMinimize && getStatusLabel()"
+      >{{getStatusLabel()}}</div>
     </div>
     <div class="d-flex align-items-center">
-      <span class="experiment-type">{{ experiment?.type |noUnderscore| titlecase }}</span>
+      <span class="experiment-type">{{ experiment?.type | noUnderscore | titlecase }}</span>
       <sm-tag-list
         *smCheckPermission="editable; else readOnlyTags"
         class="w-100"
@@ -33,7 +40,6 @@
       <ng-template #readOnlyTags>
         <sm-tag-list
           class="w-100"
-          [class.menu-open]="!!tagMenu && tagMenu.trigger.menuOpen"
           [sysTags]="systemTags"
           [tags]="experiment?.tags"></sm-tag-list>
       </ng-template>
@@ -49,22 +55,28 @@
           class="light-theme"
           #tagsMenuContent
           [tags]="experiment?.tags"
-          [allTags]="tags$ | async"
+          [tagsFilterByProject]="tagsFilterByProject$ | async"
+          [projectTags]="projectTags$ | async"
+          [companyTags]="companyTags$ | async"
           (tagSelected)="addTag($event)"
         ></sm-tags-menu>
       </sm-menu>
     </div>
   </div>
-  <div *smCheckPermission="true" class="p-2 light-theme menu-container">
-    <button class="btn btn-icon" (click)="minimizeClicked.emit()" *ngIf="showMinimize"
-            smTooltip="View in experiment table" position="left">
+  <div *smCheckPermission="true" class="light-theme right-buttons">
+    <button class="btn btn-icon" (click)="minimizeClicked.emit()" *ngIf="showMinimize && !isSharedAndNotOwner"
+            smTooltip="View in experiment table" matTooltipPosition="left">
       <i class="al-icon al-ico-info-min al-color light-grey-blue"></i>
     </button>
     <sm-experiment-menu
       *ngIf="showMenu && experiment"
       [experiment]="experiment"
       [selectedExperiment]="experiment"
-      [allTags]="tags$ | async"
+      [tagsFilterByProject]="tagsFilterByProject$ | async"
+      [projectTags]="projectTags$ | async"
+      [companyTags]="companyTags$ | async"
+      [minimizedView]="!showMinimize"
+      [isSharedAndNotOwner]="isSharedAndNotOwner"
       (tagSelected)="addTag($event)"
     ></sm-experiment-menu>
   </div>

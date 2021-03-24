@@ -1,6 +1,6 @@
 :host {
   h5 {
-    padding-top: 10px;
+    padding-top: 15px;
   }
 
   .reference {
@@ -10,16 +10,26 @@
     max-width: 500px;
   }
 
-  /deep/ sm-textarea-control {
-    max-height: 100px;
+  textarea {
+    resize: none;
+    min-height: 100px;
+    padding: 12px;
+  }
+  .creat-new-suffix{
+    margin-right: 18px;
+  }
 
-    textarea {
-      min-height: unset !important;
-    }
+  textarea,
+  input,
+  select {
+    width: 100%;
   }
 
   .buttons {
-    display: inline-block;
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    justify-content: center;
     left: 50%;
     position: relative;
     transform: translateX(-50%);
@@ -32,5 +42,10 @@
     .yes-button {
       margin-left: 16px;
     }
+  }
+
+  .text-danger {
+    display: block;
+    position: absolute;
   }
 }

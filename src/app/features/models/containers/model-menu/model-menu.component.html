@@ -18,13 +18,13 @@
           [matMenuTriggerFor]="tagMenu"
           [disabled]="isExample"
           (menuOpened)="tagMenuOpened()"
-          (menuClosed)="tagMenuContent.clear()"
+          (menuClosed)="tagMenuClosed()"
   >
     <i class="fas fa-tag rotate-135"></i>
     <span>{{'Add Tag' + (numSelected > 1 ? ' (' + numSelected + ' items)' : '')}}</span>
   </button>
   <hr>
-  <button mat-menu-item (click)="downloadModelFileClicked()">
+  <button mat-menu-item (click)="downloadModelFileClicked()" [disabled]="isLocalFile">
     <i [class]="'fa ' + ICONS.DOWNLOAD"></i>Download
   </button>
   <button mat-menu-item (click)="moveToProjectPopup()" [disabled]="isExample">
@@ -37,7 +37,9 @@
     #tagMenuContent
     class="light-theme"
     [tags]="model?.tags"
-    [allTags]="allTags"
+    [tagsFilterByProject]="tagsFilterByProject"
+    [projectTags]="projectTags"
+    [companyTags]="companyTags"
     (tagSelected)="tagSelected.emit($event)">
   </sm-tags-menu>
 </mat-menu>

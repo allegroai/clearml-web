@@ -3,3 +3,28 @@
 sm-tasks-table .card, sm-models-view .card, sm-task-info .card, sm-models .card {
   border: none;
 }
+
+.welcome-dialog .generic-container {
+  background-image: url(assets/dialog-confetti-top-left.png), url(assets/dialog-confetti-bottom-right.png);
+  background-position: left top, right bottom;
+  background-repeat: no-repeat, no-repeat;
+  background-size: 216px, 245px;
+
+  .body {
+    font-size: 13px !important;
+    line-height: 20px !important;
+  }
+}
+
+.text-center .generic-container .buttons {
+  display: block !important;
+}
+
+.i-welcome-researcher {
+  background-image: url('assets/welcome-researcher.svg');
+  background-repeat: no-repeat;
+  background-position-x: center;
+  background-position-y: center;
+  background-size: contain;
+  display: inline-block;
+}

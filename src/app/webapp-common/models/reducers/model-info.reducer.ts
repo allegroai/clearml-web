@@ -1,22 +1,22 @@
 import {ACTIVATE_MODEL_EDIT, EDIT_MODEL, GET_MODEL_INFO, MODEL_CANCEL_EDIT, MODEL_DETAILS_UPDATED, SET_IS_MODEL_SAVING, SET_MODEL} from '../actions/models-info.actions';
-import {ISelectedModel} from '../shared/models.model';
+import {SelectedModel, TableModel} from '../shared/models.model';
 import {cloneDeep} from 'lodash/fp';
 
-export interface IModelInfoState {
-  selectedModel: ISelectedModel;
+export interface ModelInfoState {
+  selectedModel: TableModel;
   activeSectionEdit: string;
   infoDataFreeze: any;
   saving: boolean;
 }
 
-const initialState: IModelInfoState = {
+const initialState: ModelInfoState = {
   selectedModel: null,
   activeSectionEdit: null,
   infoDataFreeze: null,
   saving: false,
 };
 
-export function modelsInfoReducer(state: IModelInfoState = initialState, action): IModelInfoState {
+export function modelsInfoReducer(state: ModelInfoState = initialState, action): ModelInfoState {
 
   switch (action.type) {
     case GET_MODEL_INFO:

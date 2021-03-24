@@ -1,0 +1,29 @@
+<sm-dialog-template [header]="tips[tipIndex].title" iconClass="al-icon al-ico-tips"
+                    (xClicked)="matDialogRef.close(neverShowAgain)"
+>
+  <div class="tip-container" smClickStopPropagation>
+    <div *ngIf="tips[tipIndex].image"
+         class="tip-image"
+         [class.full-width]="!tips[tipIndex].content"
+         [style.background-image]="'url(' + tips[tipIndex].image + ')'"></div>
+    <div *ngIf="tips[tipIndex].content"
+         class="tip-content"
+         [class.full-width]="!tips[tipIndex].image"
+         [innerHTML]="tips[tipIndex].content | safe:'html'"></div>
+  </div>
+  <div class="footer">
+    <div class="tip-dont-show" [class.invisible]="hideDontShow"
+         smTooltip="Can also be set from the User Preferences section in the Profile page"
+         matTooltipPosition="above"
+         matTooltipShowDelay="300">
+      <mat-checkbox [(ngModel)]="neverShowAgain">
+        <span class="tip-cbx">Don't show again</span>
+      </mat-checkbox>
+    </div>
+    <div class="navigate">
+      <div class="btn-rec al-icon al-ico-previous" (click)="prev()"></div>
+      <div class="btn-rec al-icon al-ico-next" (click)="next()"></div>
+    </div>
+    <div class="tip-page"> {{tipIndex + 1}} / {{tips.length}}</div>
+  </div>
+</sm-dialog-template>

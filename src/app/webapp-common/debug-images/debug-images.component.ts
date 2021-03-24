@@ -7,7 +7,14 @@ import {selectS3BucketCredentials} from '../core/reducers/common-auth-reducer';
 import {MatDialog} from '@angular/material/dialog';
 import * as  debugActions from './debug-images-actions';
 import {FetchExperiments, GetDebugImagesMetrics, ResetDebugImages} from './debug-images-actions';
-import {selectBeginningOfTime, selectDebugImages, selectNoMore, selectOptionalMetrics, selectTaskNames, selectTimeIsNow} from './debug-images-reducer';
+import {
+  selectBeginningOfTime,
+  selectDebugImages,
+  selectNoMore,
+  selectOptionalMetrics,
+  selectTaskNames,
+  selectTimeIsNow
+} from './debug-images-reducer';
 import {selectRouterParams} from '../core/reducers/router-reducer';
 import {distinctUntilChanged, filter, map, publish, withLatestFrom} from 'rxjs/operators';
 import {Task} from '../../business-logic/model/tasks/task';
@@ -16,9 +23,8 @@ import {TaskStatusEnum} from '../../business-logic/model/tasks/taskStatusEnum';
 import {ImageDisplayerComponent} from '../experiments/dumb/image-displayer/image-displayer.component';
 import {selectSelectedExperiment} from '../../features/experiments/reducers';
 import {selectRefreshing} from '../experiments-compare/reducers';
-import {ISelectedExperiment} from '../../features/experiments/shared/experiment-info.model';
 import {TaskMetric} from '../../business-logic/model/events/taskMetric';
-import {get, isEqual} from 'lodash/fp';
+import {get, getOr, isEqual} from 'lodash/fp';
 
 @Component({
   selector   : 'sm-debug-images',
@@ -44,7 +50,7 @@ export class DebugImagesComponent implements OnInit, OnDestroy {
   public mergeIterations: boolean;
   public debugImages: Array<any>;
   public taskNames: { [id: string]: string } = {};
-  public experimentIds: Array<Task['id']>;
+  public experimentIds: string[];
   public allowAutorefresh: boolean = false;
 
   // ConnectableObservable<any[ISelectedExperiment | any ]>;
@@ -57,11 +63,14 @@ export class DebugImagesComponent implements OnInit, OnDestroy {
   private beginningOfTimeSubscription: Subscription;
   public timeIsNow: any;
   private timeIsNowSubscription: Subscription;
+  minimized: boolean;
 
 
   constructor(
-    private store: Store<IExperimentInfoState>, private adminService: AdminService,
-    private dialog: MatDialog, private changeDetection: ChangeDetectorRef,
+    private store: Store<IExperimentInfoState>,
+    private adminService: AdminService,
+    private dialog: MatDialog,
+    private changeDetection: ChangeDetectorRef,
     private activeRoute: ActivatedRoute
   ) {
     this.tasks$ = this.store.select(selectTaskNames);
@@ -70,7 +79,6 @@ export class DebugImagesComponent implements OnInit, OnDestroy {
     this.noMoreData$ = this.store.select(selectNoMore);
     this.timeIsNow$ = this.store.select(selectTimeIsNow);
     this.beginningOfTime$ = this.store.select(selectBeginningOfTime);
-
 
     this.debugImages$ = combineLatest([
       store.pipe(select(selectS3BucketCredentials)),
@@ -111,9 +119,8 @@ export class DebugImagesComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.mergeIterations = this.activeRoute.snapshot.routeConfig.data &&
-      this.activeRoute.snapshot.routeConfig.data.mergeIterations;
-
+    this.mergeIterations = this.activeRoute.snapshot.routeConfig?.data?.mergeIterations;
+    this.minimized = this.activeRoute.snapshot.routeConfig?.data?.minimized;
 
     this.delayedExperimentSelect$ = this.store.select(selectSelectedExperiment)
       .pipe(
@@ -229,8 +236,8 @@ export class DebugImagesComponent implements OnInit, OnDestroy {
     return tasks.length > 1 || [TaskStatusEnum.InProgress, 'Queued'].includes(tasks[0].status);
   }
 
-  trackExperiment(index: number, experiment: ISelectedExperiment) {
-    return experiment.id;
+  trackExperiment(index: number, experimentID: string) {
+    return experimentID;
   }
 
   selectMetric($event, task) {

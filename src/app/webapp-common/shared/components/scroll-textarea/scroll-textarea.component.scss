@@ -1,0 +1,53 @@
+@import "../../ui-components/styles/variables";
+
+:host {
+  .diff-container {
+    position: relative;
+    background-color: #141822;
+    padding: 24px 0 24px 24px;
+    border-radius: 4px;
+
+  .floating-buttons {
+    flex-direction: row-reverse;
+    position: absolute;
+    z-index: 100;
+    top: 8px;
+    right: 11px;
+    display: none;
+
+    * {
+      margin: 0 6px;
+    }
+
+    sm-search {
+      max-width: 200px;
+      border-radius: 4px;
+      color: #a7b2d8 !important;
+      background-color: $blue-600 !important;
+    }
+  }
+
+    &:hover {
+      .floating-buttons {
+        display: flex;
+      }
+    }
+
+    .viewport {
+      height: 100%;
+      min-height: 250px;
+      color: $white;
+      overflow-x: scroll;
+      font-family: monospace, serif;
+
+      .line {
+        height: 19px;
+        white-space: pre;
+        .found {
+          color: $blue-600;
+          background: $neon-yellow-betterinchrome;
+        }
+      }
+    }
+  }
+}

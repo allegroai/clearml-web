@@ -26,7 +26,7 @@ export class SelectQueueComponent implements OnInit, OnDestroy {
     private store: Store<any>, private blTaskService: BlTasksService,
     @Inject(MAT_DIALOG_DATA) public data: {
       taskId?: string;
-      reference?: string
+      reference?: string;
     }
   ) {
 

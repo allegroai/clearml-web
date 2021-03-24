@@ -1,6 +1,7 @@
 import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {ISmCol} from '../../../shared/ui-components/data/table/table.consts';
 import {ExperimentTableColFieldsEnum, ITableExperiment} from '../../../../webapp-common/experiments/shared/common-experiment-model.model';
+import {Task} from '../../../../business-logic/model/tasks/task';
 
 export const EXPERIMENTS_TABLE_COL_FIELDS = {
   SELECTED: 'selected' as ExperimentTableColFieldsEnum,
@@ -24,6 +25,7 @@ export const INITIAL_EXPERIMENT_TABLE_COLS = [
     headerStyleClass: 'selected-col-header',
     style           : {width: '20px'},
     disableDrag     : true,
+    disablePointerEvents: true
   },
   {
     id         : EXPERIMENTS_TABLE_COL_FIELDS.TYPE,
@@ -117,7 +119,7 @@ export class SelectExperimentsForCompareTableComponent implements OnInit {
   public menuOpen: boolean = false;
   @Input() searchTerm;
   @Input() tableCols;
-  @Input() experiments: Array<ITableExperiment> = [];
+  @Input() experiments: Task[] = [];
   @Input() selectedExperiments: Array<any> = [];
   @Output() experimentsSelectionChanged = new EventEmitter<AddExperimentEvent>();
 

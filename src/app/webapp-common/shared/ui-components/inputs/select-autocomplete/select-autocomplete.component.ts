@@ -27,32 +27,33 @@ export class SelectAutocompleteComponent implements OnInit, ControlValueAccessor
   private _items: any;
   private _focusIt: any;
   private valueChangesSub: Subscription;
-  public loading: boolean     = true;
+  public loading: boolean = true;
   public boundAddTag: any;
   public selectData: Array<string> | string;
   public isDarkBackground: boolean;
   @Output() customOptionAdded = new EventEmitter();
-  @Output() formDataChanged   = new EventEmitter();
-  @Input() multiple: boolean  = true;
+  @Output() formDataChanged = new EventEmitter();
+  @Input() multiple: boolean = true;
   @Input() showChips: boolean = false;
-  @Input() appendTo: string   = undefined;
+  @Input() appendTo: string = undefined;
 
   @Input() set items(items) {
     this.loading = false;
-    this._items  = items;
+    this._items = items;
   }
 
   get items() {
     return this._items || [];
   }
 
-  @Input() disable: boolean      = false;
-  @Input() clearable: boolean     = true;
-  @Input() placeholder: string    = '';
+  @Input() disable: boolean = false;
+  @Input() searchable = true;
+  @Input() clearable: boolean = true;
+  @Input() placeholder: string = '';
   @Input() optionAddable: boolean = false;
   @Input() formControl: FormControl;
   @Input() formData: any;
-  @Input() autofocus: boolean     = false;
+  @Input() autofocus: boolean = false;
 
   @Input() set focusIt(isFocus) {
     if (isFocus && this.autofocus === true) {
@@ -67,10 +68,10 @@ export class SelectAutocompleteComponent implements OnInit, ControlValueAccessor
     return this._focusIt;
   }
 
-  @ViewChild('ngSelectRef', { static: true }) ngSelectRef: NgSelectComponent;
+  @ViewChild('ngSelectRef', {static: true}) ngSelectRef: NgSelectComponent;
 
   private value: any;
-  private onChange  = (e) => {
+  private onChange = (e) => {
   };
   private onTouched = () => {
   };
@@ -80,14 +81,14 @@ export class SelectAutocompleteComponent implements OnInit, ControlValueAccessor
 
   ngOnInit() {
 
-    this.isDarkBackground    = (getCssTheme(this.elRef.nativeElement) == 'dark-theme') ? true : false;
+    this.isDarkBackground = getCssTheme(this.elRef.nativeElement) === 'dark-theme';
     this.ngSelectRef.classes = this.isDarkBackground ? 'dark-theme' : 'light-theme';
 
     if (!this.formControl) {
       this.formControl = new FormControl(this.formData);
     }
-    this.boundAddTag     = this.addTag.bind(this);
-    this.selectData      = this.getLabels(this.formControl.value);
+    this.boundAddTag = this.addTag.bind(this);
+    this.selectData = this.getLabels(this.formControl.value);
     this.valueChangesSub = this.formControl.valueChanges.subscribe((values) => {
       this.selectData = this.getLabels(values);
       this.formDataChanged.emit(this.selectData);
@@ -142,7 +143,7 @@ export class SelectAutocompleteComponent implements OnInit, ControlValueAccessor
   }
 
   overrideNgSelectKeydown() {
-    const handleKeyDownCopy        = this.ngSelectRef.handleKeyDown.bind(this.ngSelectRef);
+    const handleKeyDownCopy = this.ngSelectRef.handleKeyDown.bind(this.ngSelectRef);
     this.ngSelectRef.handleKeyDown = function (e) {
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key) && !this.isOpen) {
         return;

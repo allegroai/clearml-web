@@ -4,9 +4,10 @@
   [isArchived]="isArchived$ | async"
   [metricVariants]="metricVariants$ | async"
   [hyperParams]="hyperParams$ | async"
-  [minimizedView]="(showInfo$ | async)"
+  [minimizedView]="minimizedView"
   [isMetricsLoading]="metricLoading$ | async"
   [autoRefreshState]="autoRefreshState$ | async"
+  [sharedView]="isSharedAndNotOwner$ | async"
   (isArchivedChanged)="onIsArchivedChanged($event)"
   (selectedTableColsChanged)="selectedTableColsChanged($event)"
   (refreshListClicked)="refreshList(false)"
@@ -17,25 +18,38 @@
   (setAutoRefresh)="setAutoRefresh($event)"
   (clearSelection)="clearSelection()"
 ></sm-experiment-header>
-<div class="experiment-body" [class.footer-visible]="((selectedExperiments$ | async) && (selectedExperiments$ | async)?.length > 1) || (showAllSelectedIsActive$ |async)">
-  <as-split gutterDblClickDuration="400" (gutterClick)="clickOnSplit()" (gutterDblClick)="closeExperimentPanel()" (dragEnd)="splitSizeChange($event)" (dragStart)="disableInfoPanel()">
-    <as-split-area [size]="100 - (selectSplitSize$ | async)">
+<div class="experiment-body"
+     [class.footer-visible]="((selectedExperiments$ | async) && (selectedExperiments$ | async)?.length > 1) || (showAllSelectedIsActive$ |async)">
+  <as-split #split
+            [useTransition]="true"
+            [gutterDblClickDuration]="400"
+            (gutterClick)="clickOnSplit()"
+            (gutterDblClick)="closeExperimentPanel()"
+            (dragEnd)="splitSizeChange($event)"
+            (dragStart)="disableInfoPanel()"
+            (transitionEnd)="experimentsTable.table.resize()"
+  >
+    <as-split-area [size]="100 - (splitInitialSize)"
+                   [visible]="!(isSharedAndNotOwner$ | async)" [order]="1">
       <sm-experiments-table
+        #experimentsTable
         class="align-self-stretch"
         selectionMode="multiple"
         [colsOrder]="(tableColsOrder$ | async)"
         [tableCols]="tableCols$| async"
         [experiments]="experiments$ | async"
         [users]="users$ | async"
-        [experimentTypes]=" types$ | async"
+        [activeParentsFilter]="activeParentsFilter$ | async"
+        [parents]="parent$ | async"
+        [experimentTypes]="types$ | async"
         [tags]="tags$ | async"
         [systemTags]="systemTags$ | async"
         [tableSortField]="(tableSortField$ | async)"
         [tableSortOrder]="(tableSortOrder$ | async)"
         [tableFilters]="(tableFilters$ | async)"
         [selectedExperiments]="selectedExperiments$ | async"
-        [selectedExperiment]="selectedExperiment$ |async"
-        [minimizedView]="(showInfo$ | async)"
+        [selectedExperiment]="selectedTableExperiment$ |async"
+        [minimizedView]="minimizedView"
         [noMoreExperiments]="noMoreExperiments$ | async"
         [split]="selectSplitSize$ | async"
         (experimentSelectionChanged)="experimentSelectionChanged($event)"
@@ -49,7 +63,8 @@
       >
       </sm-experiments-table>
     </as-split-area>
-    <as-split-area [size]="selectSplitSize$ | async" class="light-theme" [class.info-disabled]="infoDisabled" [visible]="(showInfo$ | async)">
+    <as-split-area [size]="splitInitialSize" class="light-theme" [class.info-disabled]="infoDisabled"
+                   [visible]="minimizedView" [order]="2">
       <router-outlet></router-outlet>
     </as-split-area>
   </as-split>
@@ -59,6 +74,7 @@
   [visible]="(selectedExperiments$ | async)?.length > 1 || (showAllSelectedIsActive$ |async)"
   [numberOfSelectedEntities]="(selectedExperiments$ | async)?.length"
   [showAllSelectedIsActive]="showAllSelectedIsActive$ |async"
+  [disableArchive]="readOnlySelection"
   [isArchivedMode]="isArchived$ | async"
   (compareEntitiesClicked)="compareExperiments()"
   (showAllSelectedClicked)="showAllSelected($event)"

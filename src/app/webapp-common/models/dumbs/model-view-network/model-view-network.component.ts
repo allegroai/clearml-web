@@ -1,11 +1,11 @@
 import {Component, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
 import {getModelDesign} from '../../../tasks/tasks.utils';
-import {TextareaControlComponent} from '../../../shared/ui-components/forms/textarea-control/textarea-control.component';
 import {EditJsonComponent} from '../../../shared/ui-components/overlay/edit-json/edit-json.component';
 import {take} from 'rxjs/operators';
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {ConfirmDialogComponent} from '../../../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {EditableSectionComponent} from '../../../shared/ui-components/panel/editable-section/editable-section.component';
+import {selectIsSharedAndNotOwner} from "../../../../features/experiments/reducers";
 
 @Component({
   selector   : 'sm-model-view-network',
@@ -14,7 +14,6 @@ import {EditableSectionComponent} from '../../../shared/ui-components/panel/edit
 })
 export class ModelViewNetworkComponent implements OnInit {
   private _model: any;
-  @ViewChild('diff', {static: true}) diff: TextareaControlComponent;
   public design: string;
   private designKey: string;
 
@@ -28,7 +27,7 @@ export class ModelViewNetworkComponent implements OnInit {
   get model() {
     return this._model;
   }
-
+  @Input() isSharedAndNotOwner: boolean = false;
   @Input() saving: boolean;
   @Output() openNetworkDesignClicked: EventEmitter<any> = new EventEmitter();
   @Output() saveFormData = new EventEmitter();

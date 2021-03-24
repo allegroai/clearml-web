@@ -36,7 +36,7 @@ $font-family-base: $font-family-base;
     color: $blue-500;
     height: 32px;
     border-radius: 4px;
-    background-color: $neon-yellow-original-notgoodinchrome;
+    background-color: $neon-yellow;
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.13);
     padding: 0px 32px;
 
@@ -80,7 +80,7 @@ $font-family-base: $font-family-base;
     border-radius: 4px;
     font-weight: bold;
     background-color: $white;
-    border: solid 1px $neon-yellow-original-notgoodinchrome;
+    border: solid 1px $neon-yellow;
     padding: 0 40px;
     color: $blue-500;
     box-shadow: none !important;
@@ -137,7 +137,7 @@ $font-family-base: $font-family-base;
 
     &:hover {
       border: solid 1px $blue-300;
-      color: #8492c2;
+      color: $blue-300;
       background-color: $white;
     }
 
@@ -192,7 +192,7 @@ $font-family-base: $font-family-base;
     color: $blue-500;
     height: 32px;
     border-radius: 4px;
-    background-color: $neon-yellow-original-notgoodinchrome;
+    background-color: $neon-yellow;
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.13);
     padding: 0px 32px;
     transition: background-color ease-in-out 0.3s;
@@ -215,7 +215,7 @@ $font-family-base: $font-family-base;
     border-radius: 4px;
     font-weight: bold;
     background-color: $white;
-    border: solid 1px $neon-yellow-original-notgoodinchrome;
+    border: solid 1px $neon-yellow;
     padding: 0 40px;
     color: $blue-500;
     box-shadow: none !important;

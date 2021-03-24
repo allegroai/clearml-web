@@ -1,30 +1,22 @@
-<div class="row justify-content-between">
-  <div class="col-12 d-flex x-axis-options">
-    <span class="axis-text">Horizontal Axis</span>
-    <button
-      class="btn btn-primary axis-option"
-      [ngClass]="{'active': xAxisType === ScalarKeyEnum.Iter}"
-      (click)="changeXAxisType.emit(ScalarKeyEnum.Iter)"
-    >
-      ITERATIONS
-    </button>
-    <button
-      class="btn btn-primary axis-option"
-      [ngClass]="{'active': xAxisType === ScalarKeyEnum.Timestamp}"
-      (click)="changeXAxisType.emit(ScalarKeyEnum.Timestamp)"
-    >
-      RELATIVE
-    </button>
-    <button
-      class="btn btn-primary axis-option"
-      [ngClass]="{'active': xAxisType === ScalarKeyEnum.IsoTime}"
-      (click)="changeXAxisType.emit(ScalarKeyEnum.IsoTime)"
-    >
-      WALL
-    </button>
+<div class="x-axis-options" [class.vertical-layout]="verticalLayout">
+  <div class="d-flex justify-content-between" [class.w-100]="verticalLayout">
+    <span class="label-text">Group by</span>
+    <mat-form-field appearance="outline" class="group-by-field">
+      <mat-select [value]="groupBy" (selectionChange)="groupByChanged($event)" panelClass="light-theme" name="scriptType">
+        <mat-option *ngFor="let type of groupByOptions" [value]="type.value">{{type.name}}</mat-option>
+      </mat-select>
+    </mat-form-field>
   </div>
-  <div class="d-flex col-12 smooth-options">
-    <span class="smoothing-text">Smoothing</span>
+  <div class="d-flex justify-content-between" [class.w-100]="verticalLayout">
+    <span class="label-text axis-text-margin-left">Horizontal Axis</span>
+    <mat-form-field appearance="outline" class="axis-type-field">
+      <mat-select [value]="xAxisType" (selectionChange)="xAxisTypeChanged($event)" panelClass="light-theme" name="scriptType">
+        <mat-option *ngFor="let type of xAxisTypeOption" [value]="type.value">{{type.name}}</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <div class="smooth-options">
+    <span class="label-text smoothing-text">Smoothing</span>
 
     <mat-slider
       [value]="smoothWeight"
@@ -34,13 +26,14 @@
       (input)="changeWeight.emit($event.value)"
     >
     </mat-slider>
-    <sm-number-control
-      fieldName="minCount"
-      min="0"
-      [formData]="smoothWeight"
-      (formDataChanged)="changeWeight.emit($event.value)"
-    >
-    </sm-number-control>
-    <i (click)="toggleSettings.emit()" class="fas fa-times pointer"></i>
+    <input
+      name="minCount"
+      type="number"
+      class="form-control smooth-input"
+      [min]="0"
+      [value]="smoothWeight"
+      (input)="changeWeight.emit($any($event).target.value)"
+    />
+    <i (click)="toggleSettings.emit()" class="fas fa-times pointer close-settings"></i>
   </div>
 </div>

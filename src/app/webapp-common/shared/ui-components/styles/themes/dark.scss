@@ -74,13 +74,13 @@ $dark-theme: (
   input: (
     height: 32px,
     color: $blue-grey,
-    place-holder-color: #5a658e,
+    place-holder-color: $blue-400,
     background-color: #000,
     background-color-disabled: #000,
     border-radius: 4px,
     border-color: #364164,
     border-width: 1px,
-    focus-color: #8693be,
+    focus-color: $blue-grey,
     hover-border-color: rgba(206, 209, 220, 0.5),
     focus-border-color: $blue-300,
     focus-box-shadow: none,
@@ -103,8 +103,8 @@ $dark-theme: (
     background-color: black,
     border-radius: 4px,
     border: 0px,
-    color: #8693be,
-    placeholder-color: #5a658e
+    color: $blue-grey,
+    placeholder-color: $blue-400
   ),
   table: (
     cell-padding: .75rem,
@@ -126,7 +126,7 @@ $dark-theme: (
   ng-select: (
     option-color: $blue-400,
     option-bg: $white,
-    option-hover-color: #5a658e,
+    option-hover-color: $blue-400,
     option-hover-bg: #f5f7ff,
     border-color: $blue-500,
     focus-border-color: $blue-300,

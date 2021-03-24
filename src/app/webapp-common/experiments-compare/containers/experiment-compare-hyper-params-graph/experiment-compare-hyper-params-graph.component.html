@@ -38,9 +38,9 @@
         <ng-template matExpansionPanelContent>
           <div *ngFor="let variant of metricGroup.variants; trackBy: trackVariantByFn"
                class="metric-list__item"
-               [class.selected]="variant.value.name === selectedMetric?.name"
-               (click)="metricSelected(variant)">
-            <span class="ellipsis">{{variant.name}}</span>
+               [class.selected]="$any(variant).value.name === selectedMetric?.name"
+               (click)="metricSelected($any(variant))">
+            <span class="ellipsis">{{$any(variant).name}}</span>
           </div>
         </ng-template>
       </mat-expansion-panel>
@@ -67,7 +67,7 @@
 
 </div>
 <div class="graphs-container h-100">
-  <div class="graph-container">
+  <div *ngIf="plotlyReady$ | async" class="graph-container">
     <sm-parallel-coordinates-graph *ngIf="(experiments$ | async).length > 1 && selectedHyperParams.length > 0 && !!selectedMetric; else no_data"
                                    [experiments]="experiments$ | async"
                                    [parameters]="selectedHyperParams"

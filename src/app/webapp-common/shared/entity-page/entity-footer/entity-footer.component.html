@@ -1,0 +1,29 @@
+<sm-compare-footer [visible]="visible">
+  <div class="selected-number">
+    <span class="show-all pointer" (click)="showAllSelectedClicked.emit(!showAllSelectedIsActive)">
+      {{'SHOW ' + (showAllSelectedIsActive? 'ALL ' + entitiesType?.toUpperCase() : (numberOfSelectedEntities + ' ' + entitiesType?.toUpperCase() + ' SELECTED'))}} </span>
+  </div>
+  <div *ngIf="compareEntitiesClicked.observers.length > 0"  class="compare-button-container" (click)="compareEntitiesClicked.emit()">
+    <i class="sm al-icon al-ico-compare al-color blue-100"></i>
+    <div>COMPARE</div>
+  </div>
+  <div *smCheckPermission="true" class="d-flex align-items-center">
+    <div *ngIf="archiveEntitiesClicked.observers.length > 0 && !isArchivedMode"
+         class="compare-button-container"
+         [class.disabled]="disableArchive"
+         [smTooltip]="archiveToolTipMessage"
+         (click)="archiveEntitiesClicked.emit()">
+      <i class="sm al-icon al-ico-archive al-color blue-100"></i>
+      <div>ARCHIVE</div>
+    </div>
+    <div *ngIf="restoreEntitiesClicked.observers.length > 0 && isArchivedMode"
+         class="compare-button-container"
+         [class.disabled]="disableArchive"
+         [smTooltip]="archiveToolTipMessage"
+         (click)="restoreEntitiesClicked.emit()">
+      <i class="sm al-icon al-ico-archive al-color blue-100"></i>
+      <div>RESTORE</div>
+    </div>
+  </div>
+</sm-compare-footer>
+

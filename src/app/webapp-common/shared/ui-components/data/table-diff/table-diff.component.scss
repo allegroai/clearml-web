@@ -1,8 +1,10 @@
+@import "../../styles/variables";
+
 .table-diff-row {
   padding-left: 20px;
   padding-right: 20px;
   height: 30px;
-  color: #384161;
+  color: $blue-500;
   border-bottom: #ededed solid 1px;
   display: flex;
   justify-content: space-between;
@@ -13,10 +15,10 @@
   &.header {
     font-size: 11px;
     font-weight: bold;
-    color: #5a658e;
+    color: $blue-400;
     border-top: #ededed solid 1px;
     background-color: #f4f7ff;
-    font-family: 'Heebo', sans-serif;
+    font-family: $font-family-base, sans-serif;
   }
 
   div {

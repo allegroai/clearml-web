@@ -1,8 +1,6 @@
 @import "../../../shared/ui-components/styles/variables";
 @import "../../../layout/layout.scss";
 
-$header-height: 45px;
-
 /deep/ sm-models footer.d-flex.justify-content-center {
   align-items: center;
   height: 100px;
@@ -24,30 +22,6 @@ $header-height: 45px;
 
   .table-container {
     height: 100%;
-
-    &.card-view {
-      height: calc(100% - #{$header-height});
-    }
-  }
-
-
-  .table-header {
-    background-color: #202332;
-    height: $header-height;
-    padding: 0 24px;
-    display: flex;
-    align-items: center;
-    border-bottom: 1px solid $blue-500;
-  }
-  .table-header-title {
-    font-weight: bold;
-  }
-  .table-actions {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-left: 24px;
-    padding-top: 1px;
   }
 
   .checkbox-col {
@@ -61,6 +35,10 @@ $header-height: 45px;
   }
   .compact-columns-data {
     color: $blue-250;
+  }
+
+  sm-table-card-filter-template {
+    margin-left: 1em;
   }
 
 }

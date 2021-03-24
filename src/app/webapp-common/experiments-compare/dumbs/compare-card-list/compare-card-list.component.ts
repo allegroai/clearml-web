@@ -4,6 +4,7 @@ import {Task} from '../../../../business-logic/model/tasks/task';
 import {CompareCardBodyDirective} from '../compare-card-body.directive';
 import {CompareCardExtraHeaderDirective} from '../compare-card-extra-header.directive';
 import {CompareCardHeaderDirective} from '../compare-card-header.directive';
+import {IExperimentDetail} from '../../../../features/experiments-compare/experiments-compare-models';
 
 @Component({
   selector   : 'sm-compare-card-list',
@@ -12,9 +13,10 @@ import {CompareCardHeaderDirective} from '../compare-card-header.directive';
 })
 export class CompareCardListComponent {
 
-  @Input() experiments: Array<Task>;
-  @Input() baseExperiment: Task;
-  @Output() experimentListChanged = new EventEmitter<Array<Task>>();
+  @Input() experiments: IExperimentDetail[];
+  @Input() baseExperiment: IExperimentDetail;
+  @Output() experimentListChanged = new EventEmitter<IExperimentDetail[]>();
+  @Output() toggled = new EventEmitter<boolean>();
 
   @ContentChild(CompareCardBodyDirective, { read: TemplateRef }) bodyTemplate;
   @ContentChild(CompareCardExtraHeaderDirective, { read: TemplateRef }) extraHeaderTemplate;
@@ -27,11 +29,11 @@ export class CompareCardListComponent {
   constructor() {
   }
 
-  experimentRemoved(experiment: Task) {
+  experimentRemoved(experiment: IExperimentDetail) {
     this.experimentListChanged.emit(this.experiments.filter(exp => exp !== experiment));
   }
 
-  setAsBase(experiment: Task) {
+  setAsBase(experiment: IExperimentDetail) {
     this.detailsContainer.nativeElement.scrollLeft = 0;
     this.reorderExperiments(this.experiments.indexOf(experiment), 0);
   }

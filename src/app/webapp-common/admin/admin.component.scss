@@ -1,14 +1,176 @@
 @import "../../webapp-common/shared/ui-components/styles/variables.scss";
 @import "../../webapp-common/shared/ui-components/styles/mixins/lines.scss";
 
+$tab-width: 15vw;
+
 :host {
-  margin: 0 auto;
-  width: 97%;
+  display: flex !important;
+  flex-direction: column;
+  width: 100%;
   overflow: auto;
   padding-top: 20px;
+  background-color: $blue-700;
 
-  /deep/ .empty-card .line {
-    display: none;
+  .header {
+    padding-left: 24px;
+    font-size: 16px;
+    margin-bottom: 33px;
+    .user-icon {
+      width: 48px;
+      height: 48px;
+      border: $blue-300 solid 2px;
+      border-radius: 50%;
+      font-size: 24px;
+      line-height: 42px;
+      text-align: center;
+      margin-right: 12px;
+    }
+  }
+
+  .body {
+    flex: 1;
+    padding: 0 24px;
+  }
+
+  footer {
+    padding: 18px 24px;
+    height: 64px;
+    border-top: $blue-500 solid 1px;
+    line-height: 26px;
+
+    .notice {
+      margin-left: 12px;
+      color: $blue-250;
+
+      a {
+        text-decoration: underline;
+      }
+    }
+
+    .version {
+      color: $blue-400;
+    }
+  }
+  .title {
+    color: $white;
+    font-size: 16px;
+    text-transform: uppercase;
+    margin: 55px 0 12px 0;
+
+    &.first {
+      margin-top: 0;
+    }
+
+  }
+
+  .section {
+    margin: 6px 0 0 24px;
+  }
+
+  .toggles > * {
+    display: block;
+    margin-top: 12px;
+  }
+
+  mat-expansion-panel, mat-expansion-panel-header {
+    background-color: transparent;
+  }
+
+  .info {
+    margin-left: 12px;
+    color: $light-grey-blue;
+    &:hover {
+      color: $purple;
+    }
+  }
+
+  .mat-expansion-panel {
+    margin-bottom: 12px;
+
+    &.expanded {
+      border: $blue-500 solid 1px;
+      border-radius: 4px;
+
+      .mat-expansion-panel-header {
+        align-items: center;
+        padding-top: 0;
+      }
+    }
+
+    .mat-expansion-panel-header {
+      align-items: flex-start;
+      padding-top: 12px;
+
+      &:hover {
+        background-color: rgba($blue-600, 0.3);
+      }
+    }
+
+    .space-header {
+      display: flex;
+      align-items: center;
+      font-size: 15px;
+      color: $white;
+
+      .active {
+        display: flex;
+        align-items: center;
+        padding-left: 66px;
+        font-size: 13px;
+        color: $neon-yellow;
+      }
+
+      button {
+        margin-left: 50px;
+        width: 160px;
+      }
+
+      .space-header-name {
+        width: 300px;
+      }
+    }
+
+    .space-content {
+      display: flex;
+      padding-left: 24px;
+
+      .space-title {
+        display: flex;
+        align-items: center;
+        color: $blue-200;
+        font-weight: 500;
+        margin-bottom: 18px;
+
+        .shield {
+          margin-right: 12px;
+          color: $light-grey-blue;
+        }
+      }
+
+      .credentials {
+        flex: 1;
+        padding-right: 48px;
+        line-height: 28px;
+      }
+
+      .members {
+        flex: 1;
+        padding-left: 48px;
+        border-left: $blue-500 solid 1px;
+
+        .util-text {
+          flex: 0 0 250px;
+        }
+
+        .workspace-full {
+          margin-top: 12px;
+
+          i {
+            color: $warn-color;
+          }
+        }
+      }
+    }
   }
 
   .new-credentials {
@@ -17,13 +179,57 @@
     margin-top: 20px;
   }
 
-  .separator {
-    margin: $card-spacer-y / 2 $card-spacer-x;
-    @include line($line-height-sm + px)
+  .add-button {
+    margin-top: 18px;
+    color: $blue-280;
+
+    &:hover {
+      color: $white;
+    }
+
+    &.disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
   }
 
-  mat-slide-toggle {
-    display: block;
+  .circles {
+    flex: 1;
+    max-width: 290px;
+    display: flex;
+    margin: 6px 0 0 24px;
+
+    .circle {
+      width: 34px;
+      min-width: 34px;
+      height: 34px;
+      line-height: 32px;
+      text-align: center;
+      background-color: $light-grey-blue;
+      color: $blue-800;
+      border-radius: 50%;
+      font-size: 12px;
+      border: $blue-800 solid 2px;
+      position: relative;
+      box-sizing: border-box;
+      cursor: pointer;
+
+      &.empty {
+        background-color: $blue-700;
+        border-color: $light-grey-blue;
+        height: 32px;
+        width: 32px;
+        margin-top: 1px;
+      }
+
+      &.long {
+        width: unset;
+        min-width: unset;
+        border-radius: 18px;
+        padding: 0 4px;
+      }
+    }
   }
 
   .reload {

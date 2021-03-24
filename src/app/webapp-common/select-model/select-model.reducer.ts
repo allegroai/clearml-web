@@ -3,20 +3,20 @@ import {createFeatureSelector, createSelector} from '@ngrx/store';
 import {Model} from '../../business-logic/model/models/model';
 import {MODELS_VIEW_MODES, ModelsViewModesEnum} from '../../webapp-common/models/models.consts';
 import {TABLE_SORT_ORDER, TableSortOrderEnum} from '../../webapp-common/shared/ui-components/data/table/table.consts';
-import {ModelTableColFieldsEnum} from '../../webapp-common/models/shared/models.model';
+import {ModelTableColFieldsEnum, SelectedModel} from '../../webapp-common/models/shared/models.model';
 import {MODELS_TABLE_COL_FIELDS} from '../../webapp-common/models/shared/models.const';
 import * as actions from './select-model.actions';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 
 export interface SelectModelState {
-  models: Array<Model>;
-  selectedModels: Array<any>; // TODO: declare type.
+  models: SelectedModel[];
+  selectedModels: SelectedModel[];
   noMoreModels: boolean;
   selectedModelSource: string;
   modelToken: string;
   viewMode: ModelsViewModesEnum;
   allProjectsMode: boolean;
-  tableFilters: Map<ModelTableColFieldsEnum, FilterMetadata>;
+  tableFilters: {[s: string]: FilterMetadata} ;
   tableSortField: string;
   tableSortOrder: TableSortOrderEnum;
   page: number;
@@ -88,7 +88,7 @@ export const selectCurrentPage       = createSelector(models, (state): number =>
 export const selectGlobalFilter      = createSelector(models, (state): string => state.globalFilter);
 export const selectTableSortField    = createSelector(models, (state): string => state.tableSortField);
 export const selectTableSortOrder    = createSelector(models, (state): TableSortOrderEnum => state.tableSortOrder);
-export const selectTableFilters      = createSelector(models, (state): Map<ModelTableColFieldsEnum, FilterMetadata> => state.tableFilters);
+export const selectTableFilters      = createSelector(models, state => state.tableFilters);
 export const selectIsAllProjectsMode = createSelector(models, (state): boolean => state.allProjectsMode);
 export const selectViewMode          = createSelector(models, (state): ModelsViewModesEnum => state.viewMode);
 export const selectSelectedModels    = createSelector(models, (state): Array<any> => state.selectedModels);

@@ -12,9 +12,9 @@ import {BaseClickableArtifact} from '../base-clickable-artifact';
 
 
 @Component({
-  selector   : 'sm-experiment-models-form-view',
+  selector: 'sm-experiment-models-form-view',
   templateUrl: './experiment-models-form-view.component.html',
-  styleUrls  : ['./experiment-models-form-view.component.scss']
+  styleUrls: ['./experiment-models-form-view.component.scss']
 })
 export class ExperimentModelsFormViewComponent extends BaseClickableArtifact {
 
@@ -37,10 +37,7 @@ export class ExperimentModelsFormViewComponent extends BaseClickableArtifact {
     return this._model;
   }
 
-  @Output() modelSelected = new EventEmitter<{
-    model: Model;
-    fieldsToPopulate: { labelEnum: boolean; networkDesign: boolean };
-  }>();
+  @Output() modelSelected = new EventEmitter<Model>();
 
   constructor(private dialog: MatDialog, protected adminService: AdminService, protected store: Store<any>) {
     super(adminService, store);
@@ -48,48 +45,12 @@ export class ExperimentModelsFormViewComponent extends BaseClickableArtifact {
 
   public chooseModel() {
     const chooseModelDialog = this.dialog.open(SelectModelComponent);
-    chooseModelDialog.afterClosed().pipe(filter(model => !!model))
-      .subscribe((selectedModel: Model) => {
-        const areLabelsEquals = areLabelsEqualss(selectedModel.labels, this.modelLabels);
-        const isDesignEqual = this.isDesignEqual(selectedModel.design, this.networkDesign);
-        if (isDesignEqual && areLabelsEquals) {
-          return this.emitModelSelected(selectedModel, {labelEnum: false, networkDesign: false});
-        }
-        this.confirmModelSelection(selectedModel, isDesignEqual, areLabelsEquals);
-      });
-  }
-
-  confirmModelSelection(selectedModel: Model, isDesignEqual: boolean, areLabelsEquals: boolean) {
-    this.emitModelSelected(selectedModel, {
-      labelEnum    : false,
-      networkDesign: false,
-    });
-    // const autoPopulateModelDialog = this.dialog.open(
-    //   ModelAutoPopulateDialogComponent,
-    //   {data:
-    //       {
-    //         populateLabels: !areLabelsEquals,
-    //         populateDesign: !isDesignEqual,
-    //         experimentName: this.experimentName,
-    //         modelName: selectedModel.name,
-    //       }
-    //   }
-    // );
-    // autoPopulateModelDialog.afterClosed().pipe(filter(confirmed => !!confirmed))
-    //   .subscribe((populateFields) => {
-    //     this.emitModelSelected(selectedModel, populateFields);
-    //   });
-  }
-
-  private emitModelSelected(model: Model, fieldsToPopulate: { labelEnum: boolean; networkDesign: boolean }) {
-    this.modelSelected.emit({model: model, fieldsToPopulate: fieldsToPopulate});
-  }
-
-  private isDesignEqual(modelDesign: object, design: string) {
-    return JSON.stringify(modelDesign) === design;
+    chooseModelDialog.afterClosed()
+      .pipe(filter(model => !!model))
+      .subscribe((selectedModel: Model) => this.modelSelected.emit(selectedModel));
   }
 
   removeModel() {
-    this.emitModelSelected({}, {labelEnum: false, networkDesign: false});
+    this.modelSelected.emit({id: null});
   }
 }

@@ -1,4 +1,13 @@
-import {AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, Input, Renderer2, ViewChild} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  Output,
+  Renderer2,
+  ViewChild
+} from '@angular/core';
 
 @Component({
   selector       : 'al-drawer',
@@ -6,35 +15,31 @@ import {AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, Input, Re
   styleUrls      : ['./drawer.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DrawerComponent implements AfterViewInit {
+export class DrawerComponent {
 
   public closed              = false;
-  public paddingAroundDrawer = 0;
 
   @Input() label          = '';
   @Input() displayOnHover = false;
+  @Output() toggled = new EventEmitter<boolean>();
 
   @ViewChild('drawerContainer', { static: true }) drawerContainer: ElementRef;
   @ViewChild('fixedWidth', { static: true }) fixedWidth: ElementRef;
   @ViewChild('closedLabel', { static: true }) closedLabel: ElementRef;
 
-  constructor(private renderer: Renderer2) {
-  }
-
-  ngAfterViewInit(): void {
-    // Enables animation on width
-    this.renderer.setStyle(this.drawerContainer.nativeElement, 'width', this.drawerContainer.nativeElement.clientWidth + 'px');
-    // Setting content's width fixed (content should not get squashed)
-    // this.renderer.setStyle(this.fixedWidth.nativeElement, 'width', this.drawerContainer.nativeElement.clientWidth - (8 * this.paddingAroundDrawer) + 'px');
+  constructor(private renderer: Renderer2, private ref: ElementRef) {
   }
 
   toggleDrawer() {
     if (!this.closed) {
       // 30px padding for 15px padding for label text
       this.renderer.setStyle(this.closedLabel.nativeElement, 'max-height', this.drawerContainer.nativeElement.clientHeight - 30 + 'px');
+      this.renderer.addClass(this.ref.nativeElement, 'collapsed');
     } else {
       this.renderer.removeStyle(this.closedLabel.nativeElement, 'max-height');
+      this.renderer.removeClass(this.ref.nativeElement, 'collapsed');
     }
     this.closed = !this.closed;
+    window.setTimeout(() => this.toggled.emit(!this.closed), 330);
   }
 }

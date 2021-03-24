@@ -10,6 +10,8 @@
       <div class="d-flex content-row flex-shrink-1">
         <div class="name-container">
           <div class="ellipsis name">{{cardName}}</div>
+          <ng-content select="[sm-name-icon]"></ng-content>
+
         </div>
         <div class="d-flex ml-auto">
           <ng-content select="sm-experiment-system-tags"></ng-content>

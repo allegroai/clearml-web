@@ -24,5 +24,5 @@ export const TaskStatusEnum = {
     Closed: 'closed' as TaskStatusEnum,
     Failed: 'failed' as TaskStatusEnum,
     Completed: 'completed' as TaskStatusEnum,
-    Unknown: 'unknown' as TaskStatusEnum
+    Unknown: 'unknown' as TaskStatusEnum,
 }

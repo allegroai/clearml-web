@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {catchError, filter, flatMap, map, switchMap, tap, withLatestFrom} from 'rxjs/operators';
+import {catchError, filter, map, mergeMap, switchMap, tap, withLatestFrom} from 'rxjs/operators';
 import {Store} from '@ngrx/store';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {ApiQueuesService} from '../../../business-logic/api-services/queues.service';
@@ -20,9 +20,10 @@ import {hideNoStatsNotice, showStatsErrorNotice} from '../actions/stats.actions'
 
 @Injectable()
 export class QueuesEffect {
-  constructor(private actions: Actions, private queuesApi: ApiQueuesService, private tasksApi: ApiTasksService,
-              private store: Store<any>) {
-  }
+  constructor(
+    private actions: Actions, private queuesApi: ApiQueuesService, private tasksApi: ApiTasksService,
+    private store: Store<any>
+  ) {}
 
   @Effect()
   activeLoader = this.actions.pipe(
@@ -37,12 +38,12 @@ export class QueuesEffect {
       this.store.select(selectQueuesTableSortOrder),
       this.store.select(selectQueuesTableSortField)),
     switchMap(([action, orderSort, orderField]) => this.queuesApi.queuesGetAllEx({
-        only_fields: ['*', 'entries.task.name'],
-        order_by: [(orderSort === 1 ? '-' : '') + orderField],
-      }).pipe(
-      flatMap(res => [new SetQueues(this.sortQueues(orderField, orderSort, res.queues)), new DeactiveLoader(action.type)]),
+      only_fields: ['*', 'entries.task.name'],
+      order_by: [(orderSort === 1 ? '-' : '') + orderField],
+    }).pipe(
+      mergeMap(res => [new SetQueues(this.sortQueues(orderField, orderSort, res.queues)), new DeactiveLoader(action.type)]),
       catchError(err => [new DeactiveLoader(action.type), new RequestFailed(err)])
-      )
+    )
     )
   );
 
@@ -52,12 +53,12 @@ export class QueuesEffect {
     filter(action => !!action.payload.queue),
     tap(action => this.store.dispatch(new ActiveLoader(action.type))),
     switchMap(action => this.queuesApi.queuesGetAllEx({id: [action.payload.queue.id], only_fields: ['*', 'entries.task.name']}).pipe(
-      flatMap(res => [
+      mergeMap(res => [
         new SetSelectedQueueFromServer(res.queues[0]),
         new SyncSpecificQueueInTable(res.queues[0]),
         new DeactiveLoader(action.type)]),
       catchError(err => [new DeactiveLoader(action.type), new RequestFailed(err)])
-      )
+    )
     )
   );
 
@@ -66,23 +67,21 @@ export class QueuesEffect {
     ofType<RefreshSelectedQueue>(REFRESH_SELECTED_QUEUE),
     withLatestFrom(this.store.select(selectSelectedQueue)),
     switchMap(([action, queue]) => this.queuesApi.queuesGetAllEx({id: [queue.id], only_fields: ['*', 'entries.task.name']}).pipe(
-      flatMap(res => [
+      mergeMap(res => [
         new SetSelectedQueueFromServer(res.queues[0]),
         new SyncSpecificQueueInTable(res.queues[0]),
         new DeactiveLoader(action.type)]),
       catchError(err => [new DeactiveLoader(action.type), new RequestFailed(err)])
-      )
-    )
+    ))
   );
 
   @Effect()
   deleteQueues = this.actions.pipe(
     ofType<DeleteQueue>(DELETE_QUEUE),
     switchMap(action => this.queuesApi.queuesDelete({queue: action.payload.queue.id}).pipe(
-      flatMap(res => [new GetQueues()]),
+      mergeMap(res => [new GetQueues()]),
       catchError(err => [new DeactiveLoader(action.type), new RequestFailed(err), new AddMessage(MESSAGES_SEVERITY.ERROR, 'Delete Queue failed')])
-      )
-    )
+    ))
   );
 
   @Effect()
@@ -90,10 +89,9 @@ export class QueuesEffect {
     ofType<MoveExperimentToTopOfQueue>(MOVE_EXPERIMENT_TO_TOP_OF_QUEUE),
     withLatestFrom(this.store.select(selectSelectedQueue)),
     switchMap(([action, queue]) => this.queuesApi.queuesMoveTaskToFront({queue: queue.id, task: action.payload.task}).pipe(
-      flatMap(res => [new RefreshSelectedQueue()]),
+      mergeMap(res => [new RefreshSelectedQueue()]),
       catchError(err => [new DeactiveLoader(action.type), new RequestFailed(err), new AddMessage(MESSAGES_SEVERITY.ERROR, 'Move Experiment failed')])
-      )
-    )
+    ))
   );
 
   @Effect()
@@ -101,10 +99,9 @@ export class QueuesEffect {
     ofType<MoveExperimentToBottomOfQueue>(MOVE_EXPERIMENT_TO_BOTTOM_OF_QUEUE),
     withLatestFrom(this.store.select(selectSelectedQueue)),
     switchMap(([action, queue]) => this.queuesApi.queuesMoveTaskToBack({queue: queue.id, task: action.payload.task}).pipe(
-      flatMap(res => [new RefreshSelectedQueue()]),
+      mergeMap(res => [new RefreshSelectedQueue()]),
       catchError(err => [new DeactiveLoader(action.type), new RequestFailed(err), new AddMessage(MESSAGES_SEVERITY.ERROR, 'Move Experiment failed')])
-      )
-    )
+    ))
   );
 
   @Effect()
@@ -113,7 +110,7 @@ export class QueuesEffect {
     withLatestFrom(this.store.select(selectSelectedQueue)),
     switchMap(([action, queue]) =>
       this.queuesApi.queuesMoveTaskBackward({queue: queue.id, task: action.payload.task, count: (action.payload.count)}).pipe(
-        flatMap(res => [new RefreshSelectedQueue()]),
+        mergeMap(res => [new RefreshSelectedQueue()]),
         catchError(err => [new DeactiveLoader(action.type), new RequestFailed(err), new AddMessage(MESSAGES_SEVERITY.ERROR, 'Move Queue failed')])
       )
     )
@@ -124,11 +121,10 @@ export class QueuesEffect {
     ofType<RemoveExperimentFromQueue>(REMOVE_EXPERIMENT_FROM_QUEUE),
     withLatestFrom(this.store.select(selectSelectedQueue)),
     switchMap(([action, queue]) => this.tasksApi.tasksDequeue({task: action.payload.task}).pipe(
-      flatMap(res => [new RefreshSelectedQueue()]),
+      mergeMap(res => [new RefreshSelectedQueue()]),
       catchError(err => [new DeactiveLoader(action.type), new RequestFailed(err),
         new AddMessage(MESSAGES_SEVERITY.ERROR, 'Remove Queue failed')])
-      )
-    )
+    ))
   );
 
   @Effect()
@@ -136,7 +132,7 @@ export class QueuesEffect {
     ofType<MoveExperimentToOtherQueue>(MOVE_EXPERIMENT_TO_OTHER_QUEUE),
     withLatestFrom(this.store.select(selectSelectedQueue)),
     switchMap(([action, queue]) => this.queuesApi.queuesRemoveTask({queue: queue.id, task: action.payload.task}).pipe(
-      flatMap(res => [new AddExperimentToQueue(action.payload)]),
+      mergeMap(res => [new AddExperimentToQueue(action.payload)]),
       catchError(err => [new DeactiveLoader(action.type), new RequestFailed(err),
         new AddMessage(MESSAGES_SEVERITY.ERROR, 'Move Queue to other queue failed')])
       )
@@ -147,7 +143,7 @@ export class QueuesEffect {
   addExperimentToQueue = this.actions.pipe(
     ofType<AddExperimentToQueue>(ADD_EXPERIMENT_TO_QUEUE),
     switchMap((action) => this.queuesApi.queuesAddTask({queue: action.payload.queue, task: action.payload.task}).pipe(
-      flatMap(res => [new RefreshSelectedQueue(), new GetQueues()]),
+      mergeMap(res => [new RefreshSelectedQueue(), new GetQueues()]),
       catchError(err => [new DeactiveLoader(action.type), new RequestFailed(err), new AddMessage(MESSAGES_SEVERITY.ERROR, 'Add experiment to queue failed')])
       )
     )
@@ -174,7 +170,7 @@ export class QueuesEffect {
       };
 
       return this.queuesApi.queuesGetQueueMetrics(req).pipe(
-        flatMap((res: QueuesGetQueueMetricsResponse) => {
+        mergeMap((res: QueuesGetQueueMetricsResponse) => {
           let newStats = {wait: null, length: null};
           currentStats = cloneDeep(currentStats);
           if (res && res.queues) {

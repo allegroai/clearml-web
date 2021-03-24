@@ -2,12 +2,12 @@ import {Component} from '@angular/core';
 import {Observable} from 'rxjs';
 import {Store} from '@ngrx/store';
 import {filter, map} from 'rxjs/operators';
-import {tap} from 'rxjs/internal/operators/tap';
-import {isExample} from '../../../shared/utils/shared-utils';
+import {tap} from 'rxjs/operators';
+import {isReadOnly} from '../../../shared/utils/shared-utils';
 import {IExperimentInfo, ISelectedExperiment} from '../../../../features/experiments/shared/experiment-info.model';
 import {IExperimentInfoState} from '../../../../features/experiments/reducers/experiment-info.reducer';
 import {selectExperimentInfoData, selectIsExperimentEditable, selectSelectedExperiment} from '../../../../features/experiments/reducers';
-import {ExperimentDetailsUpdated} from '../../../../features/experiments/actions/experiments-info.actions';
+import {ExperimentDetailsUpdated} from '../../actions/common-experiments-info.actions';
 
 @Component({
   selector   : 'sm-experiment-info-general',
@@ -27,7 +27,7 @@ export class ExperimentInfoGeneralComponent {
       .pipe(
         filter(experiment => !!experiment),
         map(experiment => this.selectedExperiment = experiment),
-        tap((experiment) => this.isExample = isExample(experiment))
+        tap((experiment) => this.isExample = isReadOnly(experiment))
       );
     this.experimentInfoData$ = this.store.select(selectExperimentInfoData);
     this.editable$           = this.store.select(selectIsExperimentEditable);

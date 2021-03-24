@@ -5,6 +5,8 @@
     [columns]="cols"
     [rowsNumber]="5"
     (rowClicked)="onRowClicked($event)"
+    [reorderableColumns]="false"
+    [resizableColumns]="false"
 >
   <ng-template let-col
                let-task="rowData"

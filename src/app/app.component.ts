@@ -1,7 +1,7 @@
 import {ApiUsersService} from './business-logic/api-services/users.service';
-import {selectCurrentUser} from './webapp-common/core/reducers/users-reducer';
-import {Component, OnDestroy, OnInit, ViewEncapsulation, HostListener, Renderer2} from '@angular/core';
-import {ActivatedRoute, NavigationEnd, Router, Params} from '@angular/router';
+import {selectCurrentUser, selectActiveWorkspace} from './webapp-common/core/reducers/users-reducer';
+import {Component, OnDestroy, OnInit, ViewEncapsulation, HostListener, Renderer2, Injector} from '@angular/core';
+import {ActivatedRoute, NavigationEnd, Router, Params, RouterEvent} from '@angular/router';
 import {Title} from '@angular/platform-browser';
 import {selectLoggedOut} from './webapp-common/core/reducers/view-reducer';
 import {select, Store} from '@ngrx/store';
@@ -21,7 +21,7 @@ import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {S3AccessResolverComponent} from './webapp-common/layout/s3-access-resolver/s3-access-resolver.component';
 import {cancelS3Credentials, getTutorialBucketCredentials} from './webapp-common/core/actions/common-auth.actions';
 import {FetchCurrentUser} from './webapp-common/core/actions/users.actions';
-import {distinct, distinctUntilChanged, filter, map, take, withLatestFrom} from 'rxjs/operators';
+import {distinctUntilChanged, filter, map, tap, withLatestFrom} from 'rxjs/operators';
 import * as routerActions from './webapp-common/core/actions/router.actions';
 import {combineLatest, Observable, Subscription} from 'rxjs';
 import {selectBreadcrumbsStrings} from './webapp-common/layout/layout.reducer';
@@ -30,14 +30,16 @@ import {formatStaticCrumb} from './webapp-common/layout/breadcrumbs/breadcrumbs-
 import {ServerUpdatesService} from './webapp-common/shared/services/server-updates.service';
 import {selectAvailableUpdates, selectShowSurvey} from './core/reducers/view-reducer';
 import {UPDATE_SERVER_PATH} from './app.constants';
-import {setScaleFactor, VisibilityChanged} from './webapp-common/core/actions/layout.actions';
+import {plotlyReady, setScaleFactor, VisibilityChanged} from './webapp-common/core/actions/layout.actions';
 import {UiUpdatesService} from './webapp-common/shared/services/ui-updates.service';
 import {UsageStatsService} from './core/Services/usage-stats.service';
-import {UiUpdateDialogComponent} from './webapp-common/layout/ui-update-dialog/ui-update-dialog.component';
 import {dismissSurvey} from './core/Actions/layout.actions';
-import {environment} from '../environments/environment';
 import {getScaleFactor} from './webapp-common/shared/utils/shared-utils';
 import {User} from './business-logic/model/users/user';
+import {ConfigurationService} from './webapp-common/shared/services/configuration.service';
+import {GoogleTagManagerService} from 'angular-google-tag-manager';
+import {selectIsSharedAndNotOwner} from './features/experiments/reducers';
+import {TipsService} from './webapp-common/shared/services/tips.service';
 
 @Component({
   selector: 'sm-root',
@@ -63,12 +65,23 @@ export class AppComponent implements OnInit, OnDestroy {
   private selectedCurrentUser$: Observable<any>;
   public showNotification: boolean = true;
   public showSurvey$: Observable<boolean>;
-  public demo = environment.demo;
+  public demo = ConfigurationService.globalEnvironment.demo;
   public isLoginContext: boolean;
   public currentUser: User;
+  private gtmService;
+  public isSharedAndNotOwner$: Observable<boolean>;
+  private activeWorkspace: string;
+  public hideUpdate: boolean;
+  public showSurvey: boolean;
+  private plotlyURL: string;
 
   @HostListener('document:visibilitychange') onVisibilityChange() {
     this.store.dispatch(new VisibilityChanged(!document.hidden));
+  }
+
+  @HostListener('window:beforeunload', ['$event'])
+  beforeunloadHandler(event) {
+    window.localStorage.setItem('lastWorkspace', this.activeWorkspace);
   }
 
   constructor(
@@ -80,41 +93,74 @@ export class AppComponent implements OnInit, OnDestroy {
     private userService: ApiUsersService,
     public serverUpdatesService: ServerUpdatesService,
     private uiUpdatesService: UiUpdatesService,
+    private tipsService: TipsService,
     private matDialog: MatDialog,
     private userStats: UsageStatsService,
-    private renderer: Renderer2
+    private renderer: Renderer2,
+    private injector: Injector,
+    private configService: ConfigurationService
   ) {
     this.showS3Popup$ = this.store.select(selectShowS3PopUp);
     this.showLocalFilePopup$ = this.store.pipe(select(selectShowLocalFilesPopUp));
     this.loggedOut$ = store.select(selectLoggedOut);
+    this.isSharedAndNotOwner$ = this.store.select(selectIsSharedAndNotOwner);
     this.selectedProject$ = this.store.select(selectSelectedProject);
     this.updatesAvailable$ = this.store.select(selectAvailableUpdates);
-    this.showSurvey$ = this.store.select(selectShowSurvey);
+    this.showSurvey$ = this.store.select(selectShowSurvey).pipe(map(show => {
+      if (show) {
+        let loginTime = parseInt(localStorage.getItem('firstLogin'), 10);
+        if(!loginTime) {
+          loginTime = Date.now();
+          localStorage.setItem('firstLogin', `${loginTime}`);
+          return false;
+        }
+        return Date.now() - loginTime > (14 * 24 * 60 * 60 * 1000); // 2 weeks in milliseconds
+      }
+      return false;
+    }));
     this.selectedCurrentUser$ = this.store.select(selectCurrentUser);
     this.selectedProjectFromUrl$ = this.store.select(selectRouterParams)
       .pipe(
         filter((params: Params) => !!params),
         map(params => get('projectId', params) || null)
       );
+
+    if (ConfigurationService.globalEnvironment.GTM_ID) {
+      this.gtmService = injector.get(GoogleTagManagerService);
+    }
   }
 
   ngOnInit(): void {
+    this.configService.globalEnvironmentObservable.subscribe(env => {
+      this.hideUpdate = env.hideUpdateNotice;
+      this.showSurvey = env.showSurvey;
+      this.plotlyURL = env.plotlyURL;
+    });
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe(
-        () => {
+        (item: RouterEvent) => {
+          const gtmTag = {
+            event: 'page',
+            pageName: item.url
+          };
+          this.gtmService?.pushTag(gtmTag);
           this.store.dispatch(new routerActions.NavigationEnd());
           this.updateTitle();
         });
 
     this.store.dispatch(new FetchCurrentUser());
     this.selectedCurrentUser$.pipe(
-      filter( user => !!user),
-      distinctUntilChanged())
+      tap(user => this.currentUser = user), // should not be filtered
+      filter(user => !!user?.id),
+      distinctUntilChanged((prev, next) => prev?.id === next?.id))
       .subscribe((user) => {
-        this.currentUser = user;
+        this.store.dispatch(new GetAllProjects());
+        this.store.dispatch(getTutorialBucketCredentials());
+        this.uiUpdatesService.checkForUiUpdate();
+        this.tipsService.initTipsService();
         this.serverUpdatesService.checkForUpdates(UPDATE_SERVER_PATH);
-      } );
+      });
 
     this.selectedProjectFromUrl$.subscribe((projectId: string) => {
       this.store.dispatch(new SetSelectedProjectId(projectId));
@@ -136,6 +182,9 @@ export class AppComponent implements OnInit, OnDestroy {
           });
       }
     });
+
+    this.store.select(selectActiveWorkspace).pipe(filter(ws => !!ws))
+      .subscribe(workspace => this.activeWorkspace = workspace?.id);
 
     this.urlSubscription = combineLatest([this.store.select(selectRouterUrl), this.store.select(selectRouterParams)])
       .subscribe(([url, params]) => {
@@ -165,10 +214,7 @@ export class AppComponent implements OnInit, OnDestroy {
       this.setScale();
     }
 
-    // TODO: move to somewhere else...
-    this.store.dispatch(new GetAllProjects());
-    this.store.dispatch(getTutorialBucketCredentials());
-    this.uiUpdatesService.checkForUiUpdate();
+    this.loadPlotly();
   }
 
   private setScale() {
@@ -213,7 +259,7 @@ export class AppComponent implements OnInit, OnDestroy {
         return acc.concat(dynamicCrumb ? dynamicCrumb.name : formatStaticCrumb(config).name);
       }, [''])
       .filter(name => !!name);
-    this.titleService.setTitle(`trains - ${crumbs.join(' / ')}`);
+    this.titleService.setTitle(`ClearML - ${crumbs.join(' / ')}`);
   }
 
   versionDismissed(version: string) {
@@ -231,6 +277,37 @@ export class AppComponent implements OnInit, OnDestroy {
 
   get guestUser(): boolean {
     return !this.currentUser || this.currentUser?.role === 'guest';
+  }
+
+  public loadPlotly(): void {
+    const init = () => {
+      const script: HTMLScriptElement = document.createElement('script');
+      script.type = 'text/javascript';
+      script.src = this.plotlyURL;
+      script.onerror = () => console.error(`Error loading plotly.js library from ${this.plotlyURL}`);
+      script.crossOrigin = 'use-credentials';
+
+      const head: HTMLHeadElement = document.getElementsByTagName('head')[0];
+      head.appendChild(script);
+
+      let counter = 200;
+
+      const fn = () => {
+        const plotly = (window as any).Plotly;
+        if (plotly) {
+          this.store.dispatch(plotlyReady());
+        } else if (counter > 0) {
+          counter --;
+          setTimeout(fn, 100);
+        } else {
+          throw new Error(`Error loading plotly.js library from ${this.plotlyURL}. Timeout.`);
+        }
+      };
+
+      fn();
+    };
+
+    setTimeout(init);
   }
 }
 

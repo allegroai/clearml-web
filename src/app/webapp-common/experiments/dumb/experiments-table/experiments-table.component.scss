@@ -1,7 +1,5 @@
 @import "../../../../webapp-common/shared/ui-components/styles/variables";
 
-$header-height: 45px;
-
 /deep/ .bigger-width {
   width: 236px;
 }
@@ -19,34 +17,16 @@ $header-height: 45px;
 
   .table-container {
     height: 100%;
-
-    &.card-view {
-      height: calc(100% - #{$header-height});
-    }
-  }
-
-  .table-header {
-    height: $header-height;
-    padding: 0 24px;
-    display: flex;
-    align-items: center;
-    border-bottom: 1px solid $blue-500;
-  }
-
-  .table-header-title {
-    font-weight: bold;
-  }
-
-  .table-actions {
-    padding-top: 1px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-left: 24px;
   }
 
   .experiment-name {
     font-weight: 500;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .parent-name {
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
@@ -79,4 +59,15 @@ $header-height: 45px;
 /deep/ sm-models footer.d-flex.justify-content-center {
   align-items: center;
   height: 100px;
+}
+
+sm-table-card-filter-template {
+  margin-left: 1em;
+}
+
+.btn-outline-light {
+  font-weight: 500;
+  &:hover {
+    color: $purple;
+  }
 }

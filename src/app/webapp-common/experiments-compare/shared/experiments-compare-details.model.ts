@@ -8,16 +8,10 @@ import {ExperimentCompareTree} from '../../../features/experiments-compare/exper
 export type ExperimentCompareTrees = Array<ExperimentCompareTree>;
 
 
-export interface ExperimentDetailBase {
-  id?: Task['id'];
-  name?: string;
-  status?: Task['status'];
-  last_iteration?: Task['last_iteration'];
-  last_update?: Task['last_update'];
+export interface ExperimentDetailBase extends Omit<Task, 'project' | 'model' | 'execution'>{
   project?: Project;
   model?: ModelDetails;
   execution?: ExecutionDetails;
-  tags?: string[];
 }
 
 export interface ExperimentParams {

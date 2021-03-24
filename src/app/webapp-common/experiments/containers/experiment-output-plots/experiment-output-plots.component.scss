@@ -1,17 +1,22 @@
-.row {
+@import "../../../shared/ui-components/styles/variables";
+
+:host {
+  display: flex;
   height: 100%;
 
   .list-container {
     display: block;
     height: 100%;
+    width: 300px;
     overflow-y: auto;
     overflow-x: hidden;
 
     padding-top: 20px;
-    border-right: 1px solid #efefef;
+    border-right: 1px solid $blue-100;
   }
 
   .graphs-container {
+    flex: 1;
     height: 100%;
     padding: 0 !important;
   }

@@ -19,7 +19,7 @@
     }
     span{
       font-size: 20px;
-      font-weight: bold;
+      font-weight: 500;
       line-height: 1.45;
       color: $cloudy-blue-two;
     }
@@ -30,6 +30,7 @@
   }
 
   .artifacts-col {
+    flex: 1;
     overflow: auto;
     height: 100%;
     padding: 0;
@@ -43,12 +44,11 @@
     margin: 0 26px;
   }
 
-  /deep/ sm-textarea-control textarea{
-    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  }
-
   sm-experiment-artifacts-navbar {
     border-right: 1px solid #dee1e9;
+    flex: 0 0 300px;
+    &.minimized {
+      flex: 0 0 250px;
+    }
   }
-
 }

@@ -1,6 +1,7 @@
 <sm-menu
   [iconClass]="'sm-md al-icon al-ico-settings al-color blue-400 pointer create-new-icon '"
   smMenuClass="light-theme custom-columns"
+  buttonTooltip="Customize table"
   [showButton]="false"
   (click)="getMetricsToDisplay.emit()"
   (onMenuClosed)="selectMetricActiveChanged.emit(null)"

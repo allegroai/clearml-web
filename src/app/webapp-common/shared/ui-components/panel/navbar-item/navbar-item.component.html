@@ -1,6 +1,6 @@
 <div [class]="'navbar-item ' + direction" [ngClass]="{'active': active}">
-  <b>{{header?.toUpperCase()}}</b><br>
-  <b>{{subHeader? subHeader: ''}}</b>
+  <div>{{header?.toUpperCase()}}</div>
+  <div>{{subHeader? subHeader: ''}}</div>
 
   <!--<span class="triangle" mat-button [matMenuTriggerFor]="menu" *ngIf="multi"></span>-->
   <sm-menu *ngIf="multi">

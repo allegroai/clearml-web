@@ -7,11 +7,11 @@
 
   /deep/ .mat-expansion-panel {
     box-shadow: none;
-    color: #5a658e;
+    color: $blue-400;
     border-radius: 0;
 
     .mat-expansion-panel-header {
-      font-family: 'Heebo', sans-serif !important;
+      font-family: $font-family-base, sans-serif !important;
       font-size: 13px;
       font-weight: bold;
       padding: 0 12px;
@@ -38,14 +38,14 @@
 
         .mat-expansion-panel-header-title {
           margin: unset;
-          color: #5a658e;
+          color: $blue-400;
         }
 
       }
     }
 
     .mat-expansion-panel-content {
-      font-family: 'Heebo', sans-serif !important;
+      font-family: $font-family-base, sans-serif !important;
 
       .mat-expansion-panel-body {
         padding: 0;
@@ -72,7 +72,7 @@
 
   /deep/ .mat-expansion-panel-header-description {
     flex-grow: 0;
-    color: #5a658e;
+    color: $blue-400;
   }
 
 
@@ -86,7 +86,7 @@
   }
 
   .artifact-container {
-    padding: 12px;
+    padding: 10px 12px;
     font-size: 13px;
     font-weight: 500;
     display: flex;

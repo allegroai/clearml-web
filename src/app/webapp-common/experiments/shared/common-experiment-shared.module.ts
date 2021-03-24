@@ -7,15 +7,17 @@ import {CommonExperimentConverterService} from './services/common-experiment-con
 import {ExperimentSystemTagsComponent} from './components/experiments-system-tags/experiment-system-tags.component';
 import {CloneDialogComponent} from './components/clone-dialog/clone-dialog.component';
 import {SelectQueueModule} from './components/select-queue/select-queue.module';
+import {FormsModule} from '@angular/forms';
 
 const DECLARATIONS = [ExperimentStatusIconLabelComponent, ExperimentSystemTagsComponent, ChangeProjectDialogComponent, CloneDialogComponent];
 
 @NgModule({
-  imports        : [
-    SMSharedModule,
-    CommonModule,
-    SelectQueueModule
-  ],
+    imports: [
+        SMSharedModule,
+        CommonModule,
+        SelectQueueModule,
+        FormsModule,
+    ],
   declarations   : [...DECLARATIONS],
   providers      : [CommonExperimentConverterService],
   exports        : [...DECLARATIONS]

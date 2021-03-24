@@ -1,7 +1,7 @@
 <div class="d-flex">
   <div class="chart-contatiner overflow-hidden">
     <div class="header">
-      <div class="d-flex">
+      <div class="d-flex align-items-center">
         <div class="title">{{selectedQueue ? selectedQueue.name : 'Overall'}} Experiment Wait Time</div>
         <i *ngIf="statsError$ | async"
           class="warnning fas fa-exclamation-triangle"
@@ -15,8 +15,8 @@
   </div>
   <div class="chart-contatiner right overflow-hidden">
     <div class="header d-flex justify-content-between">
-      <div class="d-flex">
-        <div class="title">{{selectedQueue ? selectedQueue.name : 'Overall'}} Queued Experiment</div>
+      <div class="d-flex align-items-center">
+        <div class="title">{{selectedQueue ? selectedQueue.name : 'Overall'}} Queued Experiments</div>
         <i *ngIf="statsError$ | async"
           class="warnning fas fa-exclamation-triangle"
           smTooltip="Data temporarily not available">
@@ -27,6 +27,7 @@
           class="dark"
           [multiple]="false"
           [items]="timeFrameOptions"
+          [searchable]="false"
           [formControl]="timeFormControl"></sm-select-autocomplete>
       </div>
     </div>

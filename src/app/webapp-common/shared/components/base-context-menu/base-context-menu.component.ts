@@ -3,6 +3,8 @@ import {MatMenuTrigger} from '@angular/material/menu';
 import {TagsMenuComponent} from '../../ui-components/tags/tags-menu/tags-menu.component';
 import {getTags} from '../../../core/actions/projects.actions';
 import {Store} from '@ngrx/store';
+import {DeactivateEdit, ActivateEdit} from 'app/webapp-common/experiments/actions/common-experiments-info.actions';
+import {ActivateModelEdit, CancelModelEdit} from 'app/webapp-common/models/actions/models-info.actions';
 
 @Component({
   selector: 'sm-base-context-menu',
@@ -18,7 +20,7 @@ export class BaseContextMenuComponent {
 
   @HostListener('document:click', ['$event'])
   clickOut(event) {
-    if(!this.eRef.nativeElement.contains(event.target)) {
+    if (!this.eRef.nativeElement.contains(event.target)) {
       this.trigger?.closeMenu();
       this.menuClosed.emit();
     }
@@ -27,9 +29,10 @@ export class BaseContextMenuComponent {
   constructor(
     protected store: Store<any>,
     protected eRef: ElementRef
-  ) {}
+  ) {
+  }
 
-  openMenu(position: {x: number; y: number}) {
+  openMenu(position: { x: number; y: number }) {
     if (this.trigger?.menuOpen) {
       this.trigger.closeMenu();
       this.menuClosed.emit();
@@ -42,7 +45,19 @@ export class BaseContextMenuComponent {
   }
 
   tagMenuOpened() {
+    window.setTimeout(() => {
+      this.store.dispatch(new ActivateEdit('tags'));
+      this.store.dispatch(new ActivateModelEdit('tags'));
+    }, 200);
     this.store.dispatch(getTags());
     this.tagMenu.focus();
+  }
+
+  tagMenuClosed() {
+    window.setTimeout(() => {
+    this.store.dispatch(new DeactivateEdit());
+    this.store.dispatch(new CancelModelEdit());
+    }, 200);
+    this.tagMenu.clear();
   }
 }

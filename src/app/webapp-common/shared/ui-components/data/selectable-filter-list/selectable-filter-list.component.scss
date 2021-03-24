@@ -1,7 +1,10 @@
+@import "../../styles/variables";
+
 :host {
   display: flex;
   flex-direction: column;
   height: 100%;
+  padding: 16px;
 }
 
 sm-selectable-list {
@@ -9,16 +12,14 @@ sm-selectable-list {
   overflow: hidden;
   margin: 0 -16px 0 0;
 }
-.toggle-all {
-  margin-top: 2px;
-  cursor: pointer;
 
-  .toggle-all-text {
-    font-size: 10px;
-  }
-  .uncheckedAll {
-    opacity: 0.4;
-  }
+.toggle-all-text {
+  margin-top: 13px;
+  font-size: 11px;
+  line-height: 1.55;
+  text-align: right;
+  color: $blue-480;
+  cursor: pointer;
 }
 
 i.toggle-icon {

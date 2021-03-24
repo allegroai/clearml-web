@@ -1,3 +1,5 @@
+@import "../../shared/ui-components/styles/variables";
+
 /deep/ body sm-s3-access .editable {
   padding: 0;
   background-color: #ffffff;
@@ -5,4 +7,36 @@
 
 .s3-row {
   margin-bottom: 10px !important;
+  input {
+    color: $blue-100;
+  }
+
+  &:last-child {
+    padding-bottom: 8px;
+    border-bottom: $blue-500 solid 1px;
+  }
+}
+
+.header {
+  color: $blue-400;
+  border-bottom: solid 1px;
+  padding-bottom: 6px;
+  text-transform: uppercase;
+  font-weight: 500;
+  font-size: 12px;
+}
+
+.delete-button {
+  width: 32px;
+  height: 32px;
+  text-align: center;
+  line-height: 32px;
+}
+
+.add-button {
+  color: $blue-280;
+
+  &:hover {
+    color: $white;
+  }
 }

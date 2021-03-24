@@ -21,7 +21,7 @@ export class QueuesTableComponent implements OnInit {
   @Output() renameQueue = new EventEmitter();
   @Output() sortedChanged = new EventEmitter<{ sortOrder: TableSortOrderEnum, colId: ISmCol['id'] }>();
   @Input() tableSortField: string;
-  @Input() tableSortOrder: number;
+  @Input() tableSortOrder: TableSortOrderEnum;
   @ViewChild('tableContainer', {static: true}) tableContainer;
 
   public menuPosition: { x: number; y: number };
@@ -41,7 +41,6 @@ export class QueuesTableComponent implements OnInit {
         header     : 'QUEUE',
         style      : {width: '25%', minWidth: '500px'},
         sortable   : true,
-        disableDrag: true,
       },
       {
         id         : QUEUES_TABLE_COL_FIELDS.TASK,
@@ -49,7 +48,6 @@ export class QueuesTableComponent implements OnInit {
         header     : 'NEXT EXPERIMENT',
         style      : {width: '35%', minWidth: '800px'},
         sortable   : true,
-        disableDrag: true,
       },
       {
         id         : QUEUES_TABLE_COL_FIELDS.LAST_UPDATED,
@@ -57,14 +55,12 @@ export class QueuesTableComponent implements OnInit {
         header     : 'LAST UPDATED',
         style      : {width: '25%', minWidth: '400px'},
         sortable   : true,
-        disableDrag: true,
       },
       {
         id         : QUEUES_TABLE_COL_FIELDS.IN_QUEUE,
         headerType : ColHeaderTypeEnum.sort,
         header     : 'IN QUEUE',
         sortable   : true,
-        disableDrag: true,
       }
     ];
   }

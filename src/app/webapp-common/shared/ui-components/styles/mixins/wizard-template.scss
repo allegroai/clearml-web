@@ -24,9 +24,3 @@
   }
 }
 
-
-@mixin gradiented-background() {
-  height: $leaf-height;
-  background-image: linear-gradient(to bottom, #ffffff, rgba(0, 0, 0, 0));
-  position: relative;
-}

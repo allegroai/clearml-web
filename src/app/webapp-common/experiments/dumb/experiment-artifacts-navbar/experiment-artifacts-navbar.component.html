@@ -1,5 +1,5 @@
 <mat-expansion-panel expanded="true" *ngIf="inputModel?.id || outputModel?.id || editable">
-  <mat-expansion-panel-header collapsedHeight="40px" expandedHeight="40px" [ngClass]="{'active': activeSection === ACTIVE_SECTIONS.model}">
+  <mat-expansion-panel-header collapsedHeight="40px" expandedHeight="40px" class="active">
     MODELS
   </mat-expansion-panel-header>
   <div
@@ -8,7 +8,7 @@
     class="artifact-container pointer"
     routerLink="input-model"
   >
-    <i class="icon sm i-input-model"></i> Input Model
+    <i class="icon sm al-ico-import"></i> Input Model
   </div>
   <div
     queryParamsHandling="preserve"
@@ -16,7 +16,7 @@
     class="artifact-container pointer"
     routerLink="output-model"
   >
-    <i class="icon sm i-output-model"></i> Output Model
+    <i class="icon sm al-ico-export"></i> Output Model
   </div>
 </mat-expansion-panel>
 

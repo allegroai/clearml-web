@@ -8,6 +8,11 @@ button {
 
   i {
     margin-right: 12px;
+    width:24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 
     &.fa-eye-slash {
       margin-right: 8px;

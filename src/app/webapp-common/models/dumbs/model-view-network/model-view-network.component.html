@@ -1,23 +1,20 @@
 <sm-editable-section
   #prototext
-  [editable]="!model?.ready && model?.company?.id"
+  [editable]="!model?.ready && model?.company?.id && !isSharedAndNotOwner"
   [saving]="saving"
   [disableInEditMode]="true"
   (activateEditClicked)="activateEdit(); editPrototext()"
   (saveClicked)="saveClicked()"
   (cancelClicked)="cancelEdit()"
-  >
+>
   <sm-section-header label="MODEL CONFIGURATION"></sm-section-header>
-  <div class="light-theme h-100">
-    <sm-textarea-control
+  <div class="light-theme textarea-container">
+    <sm-scroll-textarea
+      class="form-section"
+      [editable]="inEditMode && prototext.inEditMode"
+      [isInDev]="false"
       [formData]="design ? design : ''"
-      [inputClassName]="!inEditMode? ' cursor-default':''"
-      [isReadonly]="!inEditMode"
-      placeHolder="Empty Model Configuration"
-      class="dark"
-      (input)="fieldValueChanged($event.target.value)"
-      >
-    </sm-textarea-control>
+      [showSpinner]="false"></sm-scroll-textarea>
   </div>
   <button extra-buttons
           *ngIf="design"

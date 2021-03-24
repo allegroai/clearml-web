@@ -8,12 +8,12 @@
     editable: editable$ | async
   }" [ngTemplateOutlet]="selfie" #selfie>
   <sm-overlay [backdropActive]="backdropActive$|async"></sm-overlay>
-  <div class="h-100 row" *ngIf="(experimentInfo?.model?.output?.id) ||
+  <div class="h-100 d-flex" *ngIf="(experimentInfo?.model?.output?.id) ||
                                 (experimentInfo?.model?.input?.id) ||
                                 (modelInfo?.artifacts?.length>0) ||
                                 editable; else noData">
     <sm-experiment-artifacts-navbar
-      class="col-6"
+      [class.minimized]="minimized"
       [artifacts]="modelInfo?.artifacts"
       [outputModel]="experimentInfo?.model?.output"
       [inputModel]="experimentInfo?.model?.input"
@@ -22,7 +22,7 @@
       [routerConfig]="routerConfig$ | async"
       [selectedArtifactKey]="artifactKey$ | async"
     ></sm-experiment-artifacts-navbar>
-    <div class="col-18 artifacts-col">
+    <div class="artifacts-col">
       <router-outlet></router-outlet>
     </div>
   </div>

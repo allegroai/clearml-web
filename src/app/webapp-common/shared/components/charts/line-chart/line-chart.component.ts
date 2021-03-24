@@ -1,7 +1,7 @@
 import {Component, OnInit, Input, ChangeDetectionStrategy, ViewChild, ViewContainerRef, ChangeDetectorRef} from '@angular/core';
-import line from 'britecharts/src/charts/line';
-import tooltip from 'britecharts/src/charts/tooltip';
-import legend from 'britecharts/src/charts/legend';
+import line from 'britecharts/dist/umd/line.min';
+import tooltip from 'britecharts/dist/umd/tooltip.min';
+import legend from 'britecharts/dist/umd/legend.min';
 import {select, Selection} from 'd3-selection';
 
 interface Topic {

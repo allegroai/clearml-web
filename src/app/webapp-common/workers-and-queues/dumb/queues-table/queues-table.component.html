@@ -20,6 +20,8 @@
             [columns]="cols"
             [rowsNumber]="100"
             [rowHeight]="40"
+            [reorderableColumns]="false"
+            [resizableColumns]="false"
             [selection]="selectedQueue"
             (rowSelectionChanged)="onRowClicked($event)"
             (onRowRightClick)="openContextMenu($event)"

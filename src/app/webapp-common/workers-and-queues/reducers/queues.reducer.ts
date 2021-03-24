@@ -8,9 +8,9 @@ import {QUEUES_TABLE_COL_FIELDS, TIME_INTERVALS} from '../workers-and-queues.con
 import {TABLE_SORT_ORDER} from '../../shared/ui-components/data/table/table.consts';
 
 const initQueues = {
-  data                  : <Array<Queue>>null,
-  selectedQueue         : <Queue>null,
-  tasks                 : <Array<any>>null,
+  data                  : null as Queue[],
+  selectedQueue         : null as Queue,
+  tasks                 : null as any[],
   stats                 : {wait: null, length: null},
   selectedStatsTimeFrame: (3 * TIME_INTERVALS.HOUR).toString(),
   tableSortField        : QUEUES_TABLE_COL_FIELDS.NAME,
@@ -35,7 +35,7 @@ export function queuesReducer(state = initQueues, action) {
     case ADD_QUEUES_TASKS:
       return {...state, tasks: {...state.tasks, [action.payload.queueId]: action.payload.tasks}};
     case SET_STATS:
-      return {...state, stats: (<SetStats>action).payload.data};
+      return {...state, stats: (action as SetStats).payload.data};
     case QUEUES_TABLE_SORT_CHANGED:
       return {...state, tableSortOrder: action.payload.sortOrder, tableSortField: action.payload.colId};
     case SET_STATS_PARAMS:

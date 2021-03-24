@@ -5,10 +5,13 @@ import {last} from 'lodash/fp';
   name: 'isAudio'
 })
 export class IsAudioPipe implements PipeTransform {
-  static videoExtensions = ['wav', 'mp3', 'flac', 'mid', 'au', 'ra', 'snd'];
+  static audioExtensions = ['wav', 'mp3', 'flac', 'mid', 'au', 'ra', 'snd'];
 
   transform(value: string, args?: any): any {
+    if(!value){
+      return false;
+    }
     const path = value.split('?')[0];
-    return IsAudioPipe.videoExtensions.includes(last(path.split('.')));
+    return IsAudioPipe.audioExtensions.includes(last(path.split('.')));
   }
 }

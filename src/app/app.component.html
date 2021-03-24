@@ -1,6 +1,7 @@
-<sm-survey *ngIf="!demo && !guestUser && (showSurvey$ | async) && !update?.active" (dismiss)="dismissSurvey()"></sm-survey>
+<sm-survey *ngIf="!guestUser && showSurvey && (showSurvey$ | async) && !update?.active"
+           (dismiss)="dismissSurvey()"></sm-survey>
 <sm-update-notifier #update
-                    [availableUpdates]="(updatesAvailable$ | async)"
+                    [availableUpdates]="!hideUpdate && (updatesAvailable$ | async)"
                     [currentUser]="currentUser"
                     [dismissedVersion]="serverUpdatesService.lastDismissedVersion"
                     (versionDismissed)="versionDismissed($event)"
@@ -9,9 +10,11 @@
 <sm-color-picker-wrapper id="color-picker-outlet"></sm-color-picker-wrapper>
 <sm-server-notification-dialog-container></sm-server-notification-dialog-container>
 <sm-spinner></sm-spinner>
-<sm-side-nav></sm-side-nav>
-<div class="app-container" [class.notifier-open]="update?.active || ((showSurvey$ | async) && !demo && !guestUser)">
-  <sm-header [isDashboard]="isDashboardContext" [isLogin]="isLoginContext"></sm-header>
+<sm-side-nav *ngIf="currentUser"></sm-side-nav>
+<div class="app-container" [class.login-page]="!currentUser"
+     [class.notifier-open]="update?.active || ((showSurvey$ | async) && showSurvey && !demo && !guestUser)">
+  <sm-header *ngIf="currentUser" [isDashboard]="isDashboardContext" [isLogin]="isLoginContext"
+             [isShareMode]="isSharedAndNotOwner$ | async"></sm-header>
   <router-outlet class="main-router"></router-outlet>
 </div>
 <notifier-container></notifier-container>

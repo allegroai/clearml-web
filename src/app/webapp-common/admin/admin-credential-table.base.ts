@@ -2,11 +2,12 @@ import { EventEmitter, Input, Output, Directive } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import {ConfirmDialogComponent} from '../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {ICONS} from '../../app.constants';
+import {CredentialKey} from '../../business-logic/model/auth/credentialKey';
 
 
 @Directive()
 export class AdminCredentialTableBaseDirective {
-  @Input() credentials: Array<any>;
+  @Input() credentials: CredentialKey[];
   @Output() credentialRevoked = new EventEmitter();
   public ICONS                = ICONS;
   public dialog: MatDialog;

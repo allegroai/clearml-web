@@ -32,7 +32,7 @@ export class CheckboxControlComponent extends ImmutableFormField implements Afte
     event.stopPropagation();
 
     if (!this.isReadonly) {
-      super.fieldValueChanged(!this.formData);
+      super.fieldValueChanged(!this.formData, event);
     }
     // this.formDataChanged.emit({field: this.fieldName, value: !this.formData});
   }

@@ -3,7 +3,6 @@
 }
 
 .box {
-  border: 1px solid #ced1dc;
   padding: 10px;
   max-height: calc(100% - 400px);
   min-height: 100px;
@@ -51,6 +50,7 @@
 
 :host {
   sm-confirm-dialog {
-    width: 60vw;
+    width: 100%;
+    max-width: 960px;
   }
 }

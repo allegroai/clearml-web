@@ -47,7 +47,24 @@ export interface IExperimentModelInfo {
   artifacts: Artifact[];
 }
 
-export type ExperimentTableColFieldsEnum = 'output.result' | 'comment' | 'id' | 'project.name' | 'name' | 'type' | 'status' | 'created' | 'completed' | 'user.name' | 'queue.name' | 'last_worker' | 'selected' |'last_iteration' | 'last_update' | 'tags';
+export type ExperimentTableColFieldsEnum =
+  'output.result'
+  | 'comment'
+  | 'id'
+  | 'project.name'
+  | 'name'
+  | 'type'
+  | 'status'
+  | 'created'
+  | 'completed'
+  | 'user.name'
+  | 'queue.name'
+  | 'last_worker'
+  | 'selected'
+  | 'last_iteration'
+  | 'last_update'
+  | 'parent'
+  | 'tags';
 
 export interface ITableExperiment {
   id: Task['id'];
@@ -59,13 +76,23 @@ export interface ITableExperiment {
   system_tags: Task['system_tags'];
   tags: Task['tags'];
   last_update: Task['last_update'];
+  parent: {id: string; name: string; project?: {id: string}};
 }
 
 export interface CloneForm {
-  project: string;
+  project?: any;
   name: string;
   comment: string;
+  newProjectName?: string;
 }
+
+export interface CloneExperimentPayload {
+  project?: string ;
+  name: string;
+  comment: string;
+  newProjectName?: string;
+}
+
 
 export interface ExtendForm {
   project: string;

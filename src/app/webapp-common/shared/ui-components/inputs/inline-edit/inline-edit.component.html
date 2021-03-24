@@ -6,31 +6,34 @@
     </div>
   </div>
     <div *ngIf="editable" [style.display]=" ! active ? 'none': 'block'" tabindex="12">
-      <div class="inline-edit-form" #inlineInputContainer>
-
+      <form #form class="inline-edit-form" [class.multiline]="multiline">
         <input type="text" class="form-control inline-edit-input"
                *ngIf="!multiline"
                (blur)="inlineCanceled()"
                [(ngModel)]="inlineValue"
+               name="inline"
                [pattern]="pattern"
-               (keydown.tab)="inlineSaved()"
+               (keydown.tab)="form.checkValidity() && inlineSaved()"
                (keydown.escape)="inlineCanceled()"
-               (keydown.enter)="inlineSaved()"
+               (keydown.enter)="form.checkValidity() && inlineSaved()"
                #inlineInput />
 
         <textarea class="form-control inline-edit-textarea"
                   *ngIf="multiline"
                   (blur)="inlineCanceled()"
                   [(ngModel)]="inlineValue"
+                  name="inline"
                   [pattern]="pattern"
                   (keydown.tab)="inlineSaved()"
                   (keydown.escape)="inlineCanceled()"
                   [rows]="multiline?rows:1"
                   #inlineInput>{{inlineValue}}
         </textarea>
-        <i class="fa fa-times inline-edit-close pointer" [id]="CANCEL_BUTTON" (click)="stopProp($event)"
-           (mousedown)="cancelClicked()"></i>
-        <i class="fas fa-check inline-edit-approve pointer" (click)="stopProp($event)" (mousedown)="inlineSaved()"></i>
-      </div>
+        <div class="buttons">
+          <i [class.disabled]="!form.checkValidity()" class="sm al-ico-success inline-edit-approve pointer" (click)="stopProp($event)" (mousedown)="form.checkValidity() && inlineSaved()"></i>
+          <i class="sm al-ico-dialog-x inline-edit-close pointer" [id]="CANCEL_BUTTON" (click)="stopProp($event)"
+             (mousedown)="cancelClicked()"></i>
+        </div>
+      </form>
     </div>
 </div>

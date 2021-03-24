@@ -29,7 +29,7 @@ $font-size: 18px;
     border-radius: 50%;
     margin-bottom: 8px;
     &.published {
-      background-color: $neon-yellow-original-notgoodinchrome;
+      background-color: $neon-yellow;
     }
     &.in_progress {
       background-color: #50e3c2;
@@ -38,7 +38,7 @@ $font-size: 18px;
       background-color: #c4f0e4;
     }
     &.created {
-      background-color: #8492c2;
+      background-color: $blue-300;
     }
     &.failed {
       background-color: $strong-red;

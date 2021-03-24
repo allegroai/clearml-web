@@ -41,11 +41,27 @@
   {{(experiment?.completed | date : TIME_FORMAT_STRING) | NA}}
 </sm-labeled-row>
 
+<sm-labeled-row label="RUN TIME:">
+  {{(experiment?.active_duration | duration) | NA}}
+</sm-labeled-row>
+
 
 <sm-labeled-row label="CREATED BY:">
   {{experiment?.user?.name | NA}}
 </sm-labeled-row>
 
+
+<sm-labeled-row label="PARENT TASK:">
+  <div *ngIf="experiment?.parent; else nA">
+    <a [href]="'projects/*/experiments/'+ experiment?.parent?.id"
+       target="_blank">{{experiment?.parent?.name}}</a>
+    <sm-copy-clipboard [clipboardText]="experiment?.parent?.id"
+                       [hideBackground]="true"
+                       [label]="''"
+                       [tooltipText]="'Copy parent task ID to clipboard'" class="copy-btn"></sm-copy-clipboard>
+  </div>
+  <ng-template #nA>{{null| NA}}</ng-template>
+</sm-labeled-row>
 
 <sm-labeled-row label="PROJECT:">
   {{experiment?.project?.name | NA}}
@@ -54,7 +70,6 @@
 
 <sm-labeled-row label="DESCRIPTION:" labelClass="pt-2">
   <sm-inline-edit
-    [fieldValue]="experimentComment"
     [originalText]="experimentComment"
     [editable]="!isExample"
     [multiline]="true"

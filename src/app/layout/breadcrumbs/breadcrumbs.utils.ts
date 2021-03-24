@@ -1,4 +1,4 @@
-import {ITableModel} from '../../webapp-common/models/shared/models.model';
+import {TableModel} from '../../webapp-common/models/shared/models.model';
 import {ISelectedExperiment} from '../../features/experiments/shared/experiment-info.model';
 import {Project} from '../../business-logic/model/projects/project';
 import {Task} from '../../business-logic/model/tasks/task';
@@ -11,7 +11,7 @@ import {formatStaticCrumb, prepareLinkData} from '../../webapp-common/layout/bre
 export interface IBreadcrumbs {
   project: Project;
   experiment: ISelectedExperiment;
-  model: ITableModel;
+  model: TableModel;
   task: Task;
 }
 
@@ -30,7 +30,7 @@ export function prepareNames(data: IBreadcrumbs) {
   const experiment = (data.experiment) ? prepareLinkData(data.experiment, true) : {};
   const model      = prepareLinkData(data.model, true);
 
-  const output      = formatStaticCrumb('output');
+  const output      = formatStaticCrumb('');
   const experiments = formatStaticCrumb('experiments');
   const models      = formatStaticCrumb('models');
   const compare     = formatStaticCrumb('compare-experiments');
@@ -44,5 +44,13 @@ export function prepareNames(data: IBreadcrumbs) {
     output,
     experiments,
     models,
+    execution: formatStaticCrumb('execution'),
+    'hyper-params' : formatStaticCrumb('hyper-params'),
+    artifacts: formatStaticCrumb('artifacts'),
+    general: formatStaticCrumb('general'),
+    log: formatStaticCrumb('logs'),
+    'scalar': formatStaticCrumb('scalars'),
+    'plots': formatStaticCrumb('plots'),
+    debugImages: formatStaticCrumb('Debug Samples'),
   };
 }

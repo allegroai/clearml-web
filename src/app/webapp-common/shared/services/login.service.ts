@@ -4,21 +4,29 @@ import {catchError, filter, map, switchMap, tap} from 'rxjs/operators';
 import {HTTP} from '../../../app.constants';
 import {UsersGetAllResponse} from '../../../business-logic/model/users/usersGetAllResponse';
 import {AuthCreateUserResponse} from '../../../business-logic/model/auth/authCreateUserResponse';
-import {environment} from '../../../../environments/environment';
 import {v1 as uuidV1} from 'uuid';
-import {ApiAuthService} from '../../../business-logic/api-services/auth.service';
 import {Observable, of} from 'rxjs';
 import {MatDialog} from '@angular/material/dialog';
 import {ConfirmDialogComponent} from '../ui-components/overlay/confirm-dialog/confirm-dialog.component';
-import {AuthFixedUsersModeExResponse} from '../../../business-logic/model/FixedUserModeExResponse';
+import {LoginModeResponse} from '../../../business-logic/model/LoginModeResponse';
 import {clone} from 'lodash/fp';
+import {ApiLoginService} from '../../../business-logic/api-services/login.service';
+import {LoginService as LoginServiceExt} from '../../../shared/services/login.service';
+import {LoginSsoCallbackResponse} from '../../../business-logic/model/login/loginSsoCallbackResponse';
+import {LoginGetInviteInfoResponse} from '../../../business-logic/model/login/loginGetInviteInfoResponse';
+import {LoginModel} from '../../login/signup/signup.component';
+import {ConfigurationService} from './configuration.service';
+const environment = ConfigurationService.globalEnvironment;
 
-export type LoginMode = 'simple' | 'password';
+export type LoginMode = 'simple' | 'password' | 'ssoOnly';
 
 export const LoginModeEnum = {
   simple: 'simple' as LoginMode,
   password: 'password' as LoginMode,
+  ssoOnly: 'ssoOnly' as LoginMode
 };
+
+export type userState = Observable<{ userState: LoginSsoCallbackResponse; state: string }>;
 
 @Injectable({
   providedIn: 'root'
@@ -28,14 +36,22 @@ export class LoginService {
   private userKey: string;
   private userSecret: string;
   private companyID: string;
-  private _loginMode;
+  private _loginMode: LoginMode;
   private _guestUser: { enabled: boolean; username: string; password: string };
   get guestUser () {
     return clone(this._guestUser);
   }
-
-  constructor(private httpClient: HttpClient, private authApi: ApiAuthService, private dialog: MatDialog) {
+  private _sso: {name: string; url: string}[];
+  get sso() {
+    return this._sso;
   }
+
+  constructor(
+    private httpClient: HttpClient,
+    private loginApi: ApiLoginService,
+    private dialog: MatDialog,
+    private loginServiceExt: LoginServiceExt
+  ) {}
 
   initCredentials() {
     const fromEnv = () => {
@@ -67,18 +83,37 @@ export class LoginService {
     if (this._loginMode !== undefined) {
       return of(this._loginMode);
     } else {
-      return (this.authApi.authFixedUsersMode({}) as Observable<AuthFixedUsersModeExResponse>)
+      return this.getLoginSupportedModes('signup')
         .pipe(
           // for testing: map(res => ({...res, server_errors: {missed_es_upgrade: true}}) ),
-          tap(res => (this.shouldOpenServerError(res.server_errors)) && this.openEs7MessageDialog(res.server_errors)),
-          filter(res => !this.shouldOpenServerError(res.server_errors)),
-          tap((res: AuthFixedUsersModeExResponse) => {
-            this._loginMode = res.enabled ? LoginModeEnum.password : LoginModeEnum.simple;
-            this._guestUser = res.guest;
+          tap(res => (res?.server_errors && this.shouldOpenServerError(res.server_errors)) && this.openEs7MessageDialog(res.server_errors)),
+          filter(res => !this.shouldOpenServerError(res?.server_errors)),
+          tap((res: LoginModeResponse) => {
+
+            this._loginMode = res.basic.enabled ? LoginModeEnum.password : res.sso_providers?.length > 0 ? LoginModeEnum.ssoOnly : LoginModeEnum.simple;
+            this._guestUser = res.basic.guest;
+            this._sso = res.sso_providers;
           }),
           map(() => this._loginMode)
         );
     }
+  }
+
+  public getLoginSupportedModes(additionalState = ''): Observable<LoginModeResponse> {
+    const url = new URL(window.location.href);
+    let state = url.searchParams.get('redirect') ?? url.searchParams.get('state') ?? url.pathname + url.search;
+    if (additionalState && state) {
+      const stateUrl = new URL(`http://aaa${state}`);
+      stateUrl.searchParams.append(additionalState, '');
+      state = stateUrl.pathname + stateUrl.search;
+    }
+    return this.loginApi.loginSupportedModes({
+      callback_url_prefix: url.origin + '/callback_',
+      state: (state === '/' || state.startsWith('callback_') || state.startsWith('/callback_'))? undefined : state
+    }).pipe(map((res: LoginModeResponse) => ({
+      ...res,
+      ...(!res.sso_providers && res.sso && {sso_providers: Object.keys(res.sso).map((key: string) => ({name: key, url: res.sso[key]}))})
+    })));
   }
 
   getUsers() {
@@ -136,11 +171,11 @@ export class LoginService {
     imgElement.setAttribute('style', 'width: 100%; height: 64px; background-color: #141822; padding: 15px;');
     document.body.appendChild(imgElement);
 
-    const body = `The Trains Server database seems to be unavailable.<BR>Possible reasons for this state are:<BR><BR>
+    const body = `The ClearML Server database seems to be unavailable.<BR>Possible reasons for this state are:<BR><BR>
 <ul>
-  ${serverErrors?.missed_es_upgrade ? '<li>Upgrading the Trains Server from a version earlier than v0.16 without performing the required data migration (see <a target="_blank" href="https://allegro.ai/docs/deploying_trains/trains_server_es7_migration/">instructions</a>).</li>' : ''}
+  ${serverErrors?.missed_es_upgrade ? '<li>Upgrading the Trains Server from a version earlier than v0.16 without performing the required data migration (see <a target="_blank" href="https://allegro.ai/clearml/docs/deploying_trains/trains_server_es7_migration/">instructions</a>).</li>' : ''}
   <li>Misconfiguration of the Elasticsearch container storage: Check the directory mappings in the docker-compose YAML configuration file
-     are correct and the target directories have the right permissions (see <a target="_blank" href="https://allegro.ai/docs/deploying_trains/trains_deploy_overview/#option-3-a-self-hosted-trains-server">documentation</a>).</li>
+     are correct and the target directories have the right permissions (see <a target="_blank" href="https://allegro.ai/clearml/docs/deploying_trains/trains_deploy_overview/#option-3-a-self-hosted-trains-server">documentation</a>).</li>
   <li>Other errors in the database startup sequence: Check the elasticsearch logs in the elasticsearch container for problem description.</li>
 </ul>
 <BR>
@@ -159,5 +194,21 @@ After the issue is resolved and Trains Server is up and running, reload this pag
     confirmDialogRef.afterClosed().subscribe(() => {
       window.location.reload();
     });
+  }
+
+  ssoLogin(params): userState {
+    return this.loginServiceExt.ssoLogin(params);
+  }
+
+  signup(signupInfo: LoginModel) {
+    return this.loginApi.loginSignupUser({signup_data: signupInfo});
+  }
+
+  getInviteInfo(invite_id: string): Observable<LoginGetInviteInfoResponse> {
+    return this.loginApi.loginGetInviteInfo({invite_id});
+  }
+
+  clearLoginCache() {
+    this._loginMode = undefined;
   }
 }

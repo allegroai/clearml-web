@@ -2,11 +2,11 @@ import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {selectRouterParams} from '../../../core/reducers/router-reducer';
 import {Store} from '@ngrx/store';
-import {IModelInfoState} from '../../reducers/model-info.reducer';
+import {ModelInfoState} from '../../reducers/model-info.reducer';
 import {get} from 'lodash/fp';
 import * as infoActions from '../../actions/models-info.actions';
 import {selectSelectedModel, selectSelectedTableModel} from '../../reducers';
-import {ISelectedModel, ITableModel} from '../../shared/models.model';
+import {SelectedModel, TableModel} from '../../shared/models.model';
 import {AdminService} from '../../../../features/admin/admin.service';
 import {selectS3BucketCredentials} from '../../../core/reducers/common-auth-reducer';
 import {SmSyncStateSelectorService} from '../../../core/services/sync-state-selector.service';
@@ -14,8 +14,9 @@ import {Observable, Subscription} from 'rxjs';
 import {debounceTime, distinctUntilChanged, filter, map, tap} from 'rxjs/operators';
 import {AddMessage} from '../../../core/actions/layout.actions';
 import {MESSAGES_SEVERITY} from '../../../../app.constants';
-import {isExample} from '../../../shared/utils/shared-utils';
+import {isReadOnly} from '../../../shared/utils/shared-utils';
 import {selectBackdropActive} from '../../../core/reducers/view-reducer';
+import * as commonInfoActions from "../../../experiments/actions/common-experiments-info.actions";
 
 
 @Component({
@@ -26,17 +27,17 @@ import {selectBackdropActive} from '../../../core/reducers/view-reducer';
 export class ModelInfoComponent implements OnInit, OnDestroy {
 
   private paramsSubscription: Subscription;
-  public selectedModel: ISelectedModel;
+  public selectedModel: SelectedModel;
   private selectedModelSubscription: Subscription;
   private S3BucketCredentials: Observable<any>;
   @ViewChild('modelInfoHeader', { static: true }) modelInfoHeader;
-  public selectedModel$: Observable<ISelectedModel | null>;
+  public selectedModel$: Observable<SelectedModel | null>;
   public isExample: boolean;
   public backdropActive$: Observable<any>;
   private projectId: string;
-  public selectedTableModel$: Observable<ITableModel>;
+  public selectedTableModel$: Observable<SelectedModel>;
 
-  constructor(private router: Router, private store: Store<IModelInfoState>, private route: ActivatedRoute, private adminService: AdminService, private syncSelector: SmSyncStateSelectorService) {
+  constructor(private router: Router, private store: Store<ModelInfoState>, private route: ActivatedRoute, private adminService: AdminService, private syncSelector: SmSyncStateSelectorService) {
     this.S3BucketCredentials = store.select(selectS3BucketCredentials);
     this.backdropActive$ = this.store.select(selectBackdropActive);
     this.selectedTableModel$ = this.store.select(selectSelectedTableModel);
@@ -46,7 +47,7 @@ export class ModelInfoComponent implements OnInit, OnDestroy {
     this.selectedModelSubscription = this.store.select(selectSelectedModel)
       .subscribe(model => {
         this.selectedModel = model;
-        this.isExample     = isExample(model);
+        this.isExample     = isReadOnly(model);
       });
     this.paramsSubscription = this.store.select(selectRouterParams)
       .pipe(
@@ -65,6 +66,7 @@ export class ModelInfoComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.paramsSubscription.unsubscribe();
     this.selectedModelSubscription.unsubscribe();
+    this.store.dispatch(new infoActions.SetModel(null));
   }
 
   public updateModelName(name) {

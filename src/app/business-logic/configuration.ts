@@ -24,7 +24,7 @@ export class Configuration {
         this.accessToken = configurationParameters.accessToken;
         this.basePath = configurationParameters.basePath;
         this.withCredentials = true; //configurationParameters.withCredentials;
-        this.asyncHeader = 'X-Trains-Async'; //configurationParameters.asyncHeader;
+        this.asyncHeader = 'X-Clearml-Async'; //configurationParameters.asyncHeader;
     }
 
     /**

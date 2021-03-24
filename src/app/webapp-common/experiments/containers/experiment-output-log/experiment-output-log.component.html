@@ -4,6 +4,10 @@
       <b>Hostname:</b> {{creator}}
     </span>
   </div>
+  <button class="btn btn-primary mr-5" (click)="downloadLog()">
+    <i class="fa fa-download"></i>
+    Download full log
+  </button>
   <span style="width: 45px;">Filter: </span>
   <input
     placeholder="Filter By Regex"

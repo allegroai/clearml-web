@@ -1,0 +1,65 @@
+@import "../../shared/ui-components/styles/variables";
+
+:host {
+  .tip-container {
+    display: flex;
+    justify-content: space-between;
+    width: calc(640px - 64px);
+  }
+
+  .tip-image {
+    width: 376px;
+    flex: 0 0 376px;
+    height: 235px;
+    background-repeat: no-repeat;
+    box-shadow: 0 0 0 1px white, 0 0 0 2px $blue-400;
+    background-size: cover;
+
+    &.full-width {
+      flex: 1 1 376px;
+    }
+  }
+
+  .tip-content {
+    width: 184px;
+    flex: 0 0 184px;
+
+    &.full-width {
+      flex: 1 1 184px;
+    }
+  }
+
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 32px;
+  }
+
+  .btn-rec {
+    width: 32px;
+    height: 32px;
+    margin: 0 6px;
+    padding-top: 4px;
+    vertical-align: middle;
+    border-radius: 32px;
+    background-color: $neon-yellow;
+    cursor: pointer;
+  }
+
+  .tip-page {
+    flex: 3px;
+    text-align: right;
+  }
+
+  .navigate,
+  .tip-dont-show {
+    flex: 3;
+  }
+
+  .tip-cbx {
+    position: relative;
+    top: 1px;
+    left: -2px;
+  }
+}

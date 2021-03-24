@@ -1,7 +1,7 @@
 <sm-experiment-info-header-status-progress-bar
   [status]="(tableSelectedExperiment$| async)?.status || selectedExperiment?.status"
   [editable]="editable$ | async"
-  [showMaximize]="resultsTab"
+  [showMaximize]="true"
   (closeInfoClicked)="deselectExperiment()"
   (maximizedClicked)="maximize()">
 </sm-experiment-info-header-status-progress-bar>
@@ -10,7 +10,7 @@
   <sm-experiment-info-header
     [experiment]="(tableSelectedExperiment$| async) || selectedExperiment"
     [infoData]="infoData$ | async"
-    [editable]=" !isExample"
+    [editable]="!isExample"
     [showMenu]="true"
     [backdropActive]="backdropActive$|async"
     (experimentNameChanged)="updateExperimentName($event)"

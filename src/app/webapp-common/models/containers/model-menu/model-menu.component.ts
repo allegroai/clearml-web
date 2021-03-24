@@ -1,13 +1,12 @@
-import {Input, Output, EventEmitter, ElementRef, Component} from '@angular/core';
-import * as menuActions from '../../actions/models-menu.actions';
+import {Component, ElementRef, EventEmitter, Input, Output} from '@angular/core';
 import {ChangeProjectRequested, PublishModelClicked} from '../../actions/models-menu.actions';
-import {isExample, htmlTextShorte} from '../../../shared/utils/shared-utils';
+import {htmlTextShorte, isReadOnly} from '../../../shared/utils/shared-utils';
 import {ICONS} from '../../../../app.constants';
 import {MatDialog} from '@angular/material/dialog';
 import {Store} from '@ngrx/store';
 import {AdminService} from '../../../../features/admin/admin.service';
 import {selectS3BucketCredentials} from '../../../core/reducers/common-auth-reducer';
-import {IModelInfoState} from '../../reducers/model-info.reducer';
+import {ModelInfoState} from '../../reducers/model-info.reducer';
 import {get} from 'lodash/fp';
 import {ConfirmDialogComponent} from '../../../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {Observable, Subscription} from 'rxjs';
@@ -16,6 +15,7 @@ import {ChangeProjectDialogComponent} from '../../../experiments/shared/componen
 import {resetDontShowAgainForBucketEndpoint} from '../../../core/actions/common-auth.actions';
 import {BaseContextMenuComponent} from '../../../shared/components/base-context-menu/base-context-menu.component';
 import {ArchivedSelectedModels, RestoreSelectedModels, SetSelectedModels} from '../../actions/models-view.actions';
+import {SelectedModel} from '../../shared/models.model';
 
 
 @Component({
@@ -30,10 +30,12 @@ export class BaseModelMenuComponent extends BaseContextMenuComponent {
   public modelSignedUri: string;
   public _model: any;
   public isExample: boolean;
+  public isLocalFile: boolean;
 
-  @Input() set model(model) {
+  @Input() set model(model: SelectedModel) {
     this._model = model;
-    this.isExample = isExample(model);
+    this.isExample = isReadOnly(model);
+    this.isLocalFile = this.adminService.isLocalFile(model?.uri);
   }
 
   get model() {
@@ -42,13 +44,15 @@ export class BaseModelMenuComponent extends BaseContextMenuComponent {
 
   @Input() selectedModel;
   @Input() numSelected = 0;
-  @Input() allTags: string[];
+  @Input() projectTags: string[];
+  @Input() companyTags: string[];
+  @Input() tagsFilterByProject: boolean;
   @Input() showButton = true;
   @Output() tagSelected = new EventEmitter<string>();
 
   constructor(
     protected dialog: MatDialog,
-    protected store: Store<IModelInfoState>,
+    protected store: Store<ModelInfoState>,
     protected adminService: AdminService,
     protected eRef: ElementRef
   ) {

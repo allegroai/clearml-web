@@ -3,11 +3,20 @@
   position: relative;
   height: 100%;
 
-  /deep/ .single-graph sm-single-graph{
+  /deep/ .single-graph sm-single-graph {
     margin-left: auto;
     margin-right: auto;
+
     .whitebg {
       border: none;
+    }
+  }
+
+  sm-single-graph {
+    width: 100%;
+
+    &.two-in-a-row {
+      width: 50%;
     }
   }
 
@@ -30,6 +39,10 @@
     padding-bottom: 20px;
     width: 100%;
 
+    &.two-in-a-row {
+      width: 50%;
+    }
+
     .less-padding {
       padding: 0;
     }
@@ -45,7 +58,8 @@
     &:last-of-type {
       margin-bottom: 20px;
     }
-    &:not(:first-of-type) .metric-group-header{
+
+    &:not(:first-of-type) .metric-group-header {
       margin-top: 20px;
       border-top: 1px solid #efefef;
     }
@@ -55,6 +69,7 @@
     flex-basis: 100%;
     text-align: center;
     padding: 20px 0;
+    font-size: 1.5rem;
   }
 
   .hidden {
@@ -62,12 +77,16 @@
   }
 
   sm-graph-settings-bar {
-    height: 0;
     overflow: hidden;
-    transition: height 0.3s;
+    height: auto;
+    max-height: 0;
+    padding: 0 25px 0 22px;
+    background-color: #f2f3f6;
+    transition: max-height 0.3s;
 
     &.showSettings {
-      height: 64px;
+      min-height: 64px;
+      max-height: 128px;
     }
   }
 }

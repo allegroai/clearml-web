@@ -5,6 +5,9 @@ import {EXPERIMENT_GRAPH_ID_PREFIX, SINGLE_GRAPH_ID_PREFIX} from '../../experime
 import {ScalarKeyEnum} from '../../../business-logic/model/events/scalarKeyEnum';
 import {getOr} from 'lodash/fp';
 import {AdminService} from '../../../features/admin/admin.service';
+import {GroupByCharts} from '../../experiments/reducers/common-experiment-output.reducer';
+import {Store} from '@ngrx/store';
+import {selectPlotlyReady} from '../../core/reducers/view-reducer';
 
 @Component({
   selector: 'sm-experiment-graphs',
@@ -15,6 +18,17 @@ import {AdminService} from '../../../features/admin/admin.service';
 
 export class ExperimentGraphsComponent {
 
+  groupByOptions = [
+    {
+      name: 'Metric',
+      value: GroupByCharts.Metric
+    },
+    {
+      name: 'None',
+      value: GroupByCharts.None
+    }
+  ];
+  public groupByCharts = GroupByCharts;
   readonly EXPERIMENT_GRAPH_ID_PREFIX = EXPERIMENT_GRAPH_ID_PREFIX;
   readonly SINGLE_GRAPH_ID_PREFIX = SINGLE_GRAPH_ID_PREFIX;
   public graphList: Array<any> = [];
@@ -22,10 +36,11 @@ export class ExperimentGraphsComponent {
   public graphsData: any;
   private observer: IntersectionObserver;
   private _smoothWeight: any;
-  private _xAxisType: number;
+  private _xAxisType: ScalarKeyEnum;
   @ViewChild('allMetrics', {static: true}) allMetrics: ElementRef;
   private visibleEntries: IntersectionObserverEntry[] = [];
   private timer: number;
+  public plotlyReady$ = this.store.select(selectPlotlyReady);
 
   @HostListener('window:resize')
   onResize() {
@@ -52,7 +67,9 @@ export class ExperimentGraphsComponent {
     return this._smoothWeight;
   }
 
-  @Input() set xAxisType(axisType: number) {
+  @Input() groupBy: GroupByCharts;
+
+  @Input() set xAxisType(axisType: ScalarKeyEnum) {
     this._xAxisType = axisType;
     this.prepareRedraw();
   }
@@ -63,12 +80,17 @@ export class ExperimentGraphsComponent {
 
   @ViewChildren(SingleGraphComponent) allGraphs !: QueryList<SingleGraphComponent>;
 
-  constructor(private el: ElementRef, private changeDetection: ChangeDetectorRef, private adminService: AdminService) {
-  }
+  constructor(
+    private el: ElementRef,
+    private changeDetection: ChangeDetectorRef,
+    private adminService: AdminService,
+    private store: Store<any>
+  ) {}
 
   @Output() resetGraphs = new EventEmitter();
   @Output() changeWeight = new EventEmitter<number>();
   @Output() changeXAxisType = new EventEmitter<ScalarKeyEnum>();
+  @Output() changeGroupBy = new EventEmitter<GroupByCharts>();
   @Output() toggleSettings = new EventEmitter();
 
   @Input() set splitSize(splitSize: number) {
@@ -79,6 +101,7 @@ export class ExperimentGraphsComponent {
   @Input() showSettings: boolean = false;
 
   @Input() set metrics(graphs) {
+    this.noGraphs = (graphs !== undefined) && (graphs !== null) && Object.keys(graphs).length === 0;
     if (!graphs) {
       this.graphList = [];
       return;
@@ -91,7 +114,6 @@ export class ExperimentGraphsComponent {
         }
       });
     });
-    this.noGraphs = graphs !== undefined && Object.keys(graphs).length === 0;
     this.graphList = sortMetricsList(Object.keys(graphs));
     this.changeDetection.detectChanges(); // forcing detectChanges for the intersection observer
     const options = {
@@ -135,7 +157,7 @@ export class ExperimentGraphsComponent {
       }
       const el = entries[i].target;
       const graphComponent = this.allGraphs.find(graphComp => graphComp.identifier === el.id);
-      if (!graphComponent.alreadyDrawn || graphComponent.shouldRefresh) {
+      if (!graphComponent?.alreadyDrawn || graphComponent?.shouldRefresh) {
         graphComponent.drawGraph(true);
       }
     }

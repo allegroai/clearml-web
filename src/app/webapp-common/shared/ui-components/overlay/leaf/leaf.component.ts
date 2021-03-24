@@ -7,7 +7,7 @@ import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 })
 export class LeafComponent implements OnInit {
 @Input() codeOpen: boolean = false;
-@Input() codeEnabled: boolean = true;
+@Input() codeEnabled: boolean = false;
 @Output() chooseClicked = new EventEmitter();
 
 

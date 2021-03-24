@@ -1,5 +1,5 @@
 import {Action} from '@ngrx/store';
-import {ITableModel} from '../../webapp-common/models/shared/models.model';
+import {TableModel} from '../../webapp-common/models/shared/models.model';
 import {ISmCol, TableSortOrderEnum} from '../../webapp-common/shared/ui-components/data/table/table.consts';
 import {ModelsViewModesEnum} from '../../webapp-common/models/models.consts';
 
@@ -32,7 +32,7 @@ export class GetNextModels implements Action {
 export class SetModels implements Action {
   readonly type = SET_MODELS;
 
-  constructor(public payload: Array<ITableModel>) {
+  constructor(public payload: Array<TableModel>) {
   }
 }
 
@@ -46,28 +46,28 @@ export class SetNoMoreModels implements Action {
 export class AddModels implements Action {
   readonly type = ADD_MANY_MODELS;
 
-  constructor(public payload: Array<ITableModel>) {
+  constructor(public payload: Array<TableModel>) {
   }
 }
 
 export class RemoveModels implements Action {
   readonly type = REMOVE_MANY_MODELS;
 
-  constructor(public payload: Array<ITableModel['id']>) {
+  constructor(public payload: Array<TableModel['id']>) {
   }
 }
 
 export class UpdateModel implements Action {
   readonly type = UPDATE_ONE_MODELS;
 
-  constructor(public payload: { id: ITableModel['id'], changes: Partial<ITableModel> }) {
+  constructor(public payload: { id: TableModel['id'], changes: Partial<TableModel> }) {
   }
 }
 
 export class SetSelectedModels implements Action {
   public type = SET_SELECTED_MODELS;
 
-  constructor(public payload: Array<ITableModel>) {
+  constructor(public payload: Array<TableModel>) {
   }
 }
 

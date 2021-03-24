@@ -2,15 +2,13 @@ import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit
 import {MatSelectChange} from '@angular/material/select';
 import {Action, Store} from '@ngrx/store';
 import {selectHideIdenticalFields, selectRefreshing, selectShowAddExperimentsForCompare} from '../../reducers';
-import {Observable, Subscription} from 'rxjs';
+import {interval, Observable, Subscription} from 'rxjs';
 import {refreshIfNeeded, setHideIdenticalFields, setNavigationPreferences, setRefreshing, setShowSearchExperimentsForCompare, toggleShowScalarOptions} from '../../actions/compare-header.actions';
 import {ActivatedRoute, Router} from '@angular/router';
 import {selectRouterQueryParams, selectRouterUrl} from '../../../core/reducers/router-reducer';
 import {get} from 'lodash/fp';
 import {selectAutoRefresh} from '../../../core/reducers/view-reducer';
-import * as experimentsActions from '../../../experiments/actions/common-experiments-view.actions';
 import {SetAutoRefresh} from '../../../core/actions/layout.actions';
-import {interval} from 'rxjs/internal/observable/interval';
 import {AUTO_REFRESH_INTERVAL} from '../../../../app.constants';
 import {filter, withLatestFrom} from 'rxjs/operators';
 

@@ -11,7 +11,11 @@ import {showLocalFilePopUp, showS3PopUp} from '../core/actions/common-auth.actio
 import {skip} from 'rxjs/operators';
 
 import AmazonS3URI from 'amazon-s3-uri';
-import {converToReverseProxy, isFileserverUrl} from '../../shared/utils/url';
+import {convertToReverseProxy, isFileserverUrl} from '../../shared/utils/url';
+import {ConfigurationService} from '../shared/services/configuration.service';
+import {selectActiveWorkspace} from '../core/reducers/users-reducer';
+import {GetCurrentUserResponseUserObjectCompany} from '../../business-logic/model/users/getCurrentUserResponseUserObjectCompany';
+import {Environment} from '../../../environments/base';
 
 const LOCAL_SERVER_PORT = 27878;
 
@@ -24,8 +28,10 @@ export class BaseAdminService {
   private S3BucketCredentials: Observable<any>;
   private previouslySignedUrls = {};
   private localServerWorking = false;
+  private workspace: GetCurrentUserResponseUserObjectCompany;
+  private environment: Environment;
 
-  constructor(store: Store<any>, protected syncSelector: SmSyncStateSelectorService) {
+  constructor(store: Store<any>, protected syncSelector: SmSyncStateSelectorService, protected confService: ConfigurationService) {
     this.store = store;
     this.revokeSucceed = store.pipe(select(selectRevokeSucceed));
     this.revokeSucceed.subscribe(this.onRevokeSucceed);
@@ -34,7 +40,8 @@ export class BaseAdminService {
       this.previouslySignedUrls = {};
     });
     this.bucketCredentials = store.pipe(select(selectS3BucketCredentialsBucketCredentials));
-
+    this.store.select(selectActiveWorkspace).subscribe(workspace => this.workspace = workspace);
+    confService.getEnvironment().subscribe(conf => this.environment = conf);
   }
 
   showS3PopUp(bucketKeyEndpoint, error = null, isAzure = false) {
@@ -50,8 +57,14 @@ export class BaseAdminService {
   }
 
   signUrlIfNeeded(url, skipLocalFile = true, skipFileServer = true) {
-    if (isFileserverUrl(url, window.location.hostname) && !skipFileServer) {
-      return converToReverseProxy(url);
+    if (isFileserverUrl(url, window.location.hostname)){
+      if (this.environment.communityServer) {
+        url = this.addTenant(url);
+      }
+      if (!skipFileServer && this.environment.communityServer) {
+        return convertToReverseProxy(url);
+      }
+      return url;
     }
 
     if (this.isLocalFile(url) && !skipLocalFile) {
@@ -280,4 +293,9 @@ export class BaseAdminService {
   }
 
 
+  private addTenant(url: string) {
+    const u = new URL(url);
+    u.searchParams.append('tenant', this.workspace?.id);
+    return u.toString();
+  }
 }

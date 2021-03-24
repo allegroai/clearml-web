@@ -1,0 +1,124 @@
+@import '../../styles/variables';
+
+:host {
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+
+  /deep/ .mat-expansion-panel-body {
+    padding: 0 0 16px;
+  }
+
+  /deep/ .mat-expansion-panel-header {
+
+    .mat-expansion-indicator {
+      height: 25px;
+      width: 12px;
+      text-align: center;
+    }
+
+    &.mat-expanded, .mat-expanded:focus {
+      color: $purple;
+
+      .mat-expansion-indicator {
+        height: 22px;
+      }
+      .item-key {
+        color: $purple;
+      }
+    }
+
+    .mat-content {
+      padding-left: 5px;
+    }
+
+  }
+
+  .mat-expansion-panel {
+    box-shadow: none;
+    color: $blue-400;
+  }
+
+}
+
+.title {
+  color: $blue-400;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30px 20px 5px 0;
+  font-size: 12px;
+  color: $blue-480;
+}
+
+.list {
+  overflow: scroll;
+  flex: 1;
+  padding-right: 12px;
+
+  mat-expansion-panel {
+    box-shadow: none;
+    border-radius: 0;
+
+    mat-expansion-panel-header {
+      padding: 0 2px 0 0;
+
+    }
+  }
+
+  .item-key {
+    font-size: 14px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    display: inline-block;
+
+    &:hover {
+      color: $purple;
+    }
+  }
+
+  mat-expansion-panel-header {
+    color: $blue-400;
+
+    &:hover .item-key {
+      color: $purple;
+    }
+  }
+
+  .item {
+    display: flex;
+    align-items: center;
+    height: 32px;
+    padding: 0 16px;
+    border-radius: 4px;
+    font-family: $font-family-base, sans-serif;
+    font-size: 12px;
+    color: $blue-400;
+    cursor: pointer;
+
+    &.disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+
+    &:hover {
+      background-color: $blue-50;
+    }
+  }
+
+  label {
+    font-weight: normal;
+    padding-left: 5px;
+    margin: 0 !important;
+    line-height: normal;
+    font-size: 12px;
+    cursor: inherit;
+  }
+
+}

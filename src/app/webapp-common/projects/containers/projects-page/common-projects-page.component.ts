@@ -54,12 +54,12 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
       distinctUntilChanged(),
       filter(readyForDeletion => readyForDeletionFilter(readyForDeletion)));
     this.projectsList$            = this.store.select(selectProjectsData).pipe(map((projectsList) => [this.ALL_PROJECTS_CARD].concat(projectsList)));
+    this.syncAppSearch();
   }
 
   ngOnInit() {
     this.store.dispatch(new ResetSelectedProject());
     this.store.dispatch(new GetAllProjects());
-    this.syncAppSearch();
 
     this.projectReadyForDeletionSub = this.projectReadyForDeletion$.subscribe(readyForDeletion => {
       let dialogData = {};

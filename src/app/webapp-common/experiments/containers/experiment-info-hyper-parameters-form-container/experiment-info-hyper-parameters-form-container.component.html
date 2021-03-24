@@ -1,0 +1,20 @@
+<sm-overlay [backdropActive]="backdropActive$|async"></sm-overlay>
+<sm-editable-section #parameterSection
+                     *ngIf="(selectedSectionHyperParams$| async).length>0 || (selectedSection$| async)==='properties'"
+                     [saving]="saving$ | async"
+                     [editable]="(!isExample) && ((editable$ | async) || (selectedSection$| async)==='properties')"
+                     [disableSave]="!executionParamsForm?.hyperParameters?.form?.valid"
+                     (cancelClicked)="cancelHyperParametersChange()"
+                     (saveClicked)="sectionSaved()"
+                     (activateEditClicked)="activateEditChanged('hyperparams')">
+  <sm-section-header [label]="((selectedSection$ | async)| replaceViaMapPipe:sectionReplaceMap) | uppercase " ></sm-section-header>
+  <sm-experiment-execution-parameters
+    #executionParamsForm
+    class="form-section"
+    [editable]="(!isExample) && ((editable$ | async) ||  (selectedSection$| async)==='properties') && parameterSection.inEditMode"
+    [section]="selectedSection$ | async"
+    [formData]="(selectedSectionHyperParams$ | async) | sort:'name'"
+    (formDataChanged)="onFormValuesChanged($event)"
+  ></sm-experiment-execution-parameters>
+</sm-editable-section>
+

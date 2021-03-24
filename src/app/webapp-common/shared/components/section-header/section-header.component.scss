@@ -1,3 +1,5 @@
+@import "../../ui-components/styles/variables";
+
 :host {
   display: flex;
   justify-content: space-between;
@@ -6,6 +8,7 @@
     margin: 0;
     display: block;
     position: relative;
+    color: $blue-400;
     span.error.ng-star-inserted {
       border: solid red 4px;
       border-radius: 35px;

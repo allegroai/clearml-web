@@ -6,4 +6,5 @@ export interface IConfirmDialogConfig {
   no?: string;
   iconClass?: string; // the icon class (see icons.scss).
   codeSnippet?: string;
+  showNeverShowAgain?: boolean;
 }

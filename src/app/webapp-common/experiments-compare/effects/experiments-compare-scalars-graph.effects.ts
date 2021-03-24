@@ -2,8 +2,8 @@ import {Injectable} from '@angular/core';
 import {Actions, createEffect, Effect, ofType} from '@ngrx/effects';
 import {Store} from '@ngrx/store';
 import {IExperimentCompareMetricsValuesState} from '../reducers/experiments-compare-metrics-values.reducer';
-import {ActiveLoader, DeactiveLoader, SetServerError} from '../../../webapp-common/core/actions/layout.actions';
-import {catchError, flatMap, map} from 'rxjs/operators';
+import {ActiveLoader, DeactiveLoader, SetServerError} from '../../core/actions/layout.actions';
+import {catchError, mergeMap, map} from 'rxjs/operators';
 import {RequestFailed} from '../../core/actions/http.actions';
 import {ApiTasksService} from '../../../business-logic/api-services/tasks.service';
 import {getExperimentsHyperParams, setHyperParamsList, setMetricsList, setTasks} from '../actions/experiments-compare-scalars-graph.actions';
@@ -25,27 +25,27 @@ export class ExperimentsCompareScalarsGraphEffects {
 
   loadMovies$ = createEffect(() => this.actions$.pipe(
     ofType(getExperimentsHyperParams),
-    flatMap((action) => this.tasksApiService.tasksGetAllEx({
-        id: action.experimentsIds,
-        only_fields: ['last_metrics', 'name', 'last_iteration', 'hyperparams']
-      })
-        .pipe(
-          // map(res => res.tasks)),
-          flatMap(res => {
-            const metricsList = this.getMetricOptions(res.tasks);
-            const paramsHasDiffs = this.getParametersHasDiffs(res.tasks);
-            return [
-              setTasks({tasks: res.tasks}),
-              setMetricsList({metricsList: metricsList}),
-              setHyperParamsList({hyperParams: paramsHasDiffs}),
-              setRefreshing({payload: false}),
-              new DeactiveLoader(action.type)];
-          }),
-          catchError(error => [
-            new RequestFailed(error), new DeactiveLoader(action.type), setRefreshing({payload: false}),
-            new SetServerError(error, null, 'Failed to get Compared Experiments')
-          ])
-        )
+    mergeMap((action) => this.tasksApiService.tasksGetAllEx({
+      id: action.experimentsIds,
+      only_fields: ['last_metrics', 'name', 'last_iteration', 'hyperparams']
+    })
+      .pipe(
+        // map(res => res.tasks)),
+        mergeMap(res => {
+          const metricsList = this.getMetricOptions(res.tasks);
+          const paramsHasDiffs = this.getParametersHasDiffs(res.tasks);
+          return [
+            setTasks({tasks: res.tasks}),
+            setMetricsList({metricsList: metricsList}),
+            setHyperParamsList({hyperParams: paramsHasDiffs}),
+            setRefreshing({payload: false}),
+            new DeactiveLoader(action.type)];
+        }),
+        catchError(error => [
+          new RequestFailed(error), new DeactiveLoader(action.type), setRefreshing({payload: false}),
+          new SetServerError(error, null, 'Failed to get Compared Experiments')
+        ])
+      )
     ))
   );
 

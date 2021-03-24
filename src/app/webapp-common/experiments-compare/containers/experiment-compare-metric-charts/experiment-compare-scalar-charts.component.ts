@@ -6,12 +6,14 @@ import {IExperimentInfoState} from '../../../../features/experiments/reducers/ex
 import {distinctUntilChanged, filter, map, tap} from 'rxjs/operators';
 import {selectRouterParams} from '../../../core/reducers/router-reducer';
 import {isEqual} from 'lodash/fp';
-import {mergeMultiMetrics} from '../../../tasks/tasks.utils';
+import {mergeMultiMetrics, mergeMultiMetricsGroupedVariant} from '../../../tasks/tasks.utils';
 import {scrollToElement} from '../../../shared/utils/shared-utils';
 import {GetMultiScalarCharts, ResetExperimentMetrics, SetExperimentMetricsSearchTerm, SetExperimentSettings, SetSelectedExperiments} from '../../actions/experiments-compare-charts.actions';
-import {selectCompareSelectedSettingsSmoothWeight, selectCompareSelectedSettingsxAxisType, selectCompareTasksScalarCharts, selectExperimentMetricsSearchTerm, selectRefreshing, selectSelectedExperimentSettings, selectSelectedSettingsHiddenScalar, selectShowScalarsOptions} from '../../reducers';
+import {selectCompareSelectedSettingsGroupBy, selectCompareSelectedSettingsSmoothWeight, selectCompareSelectedSettingsxAxisType, selectCompareTasksScalarCharts, selectExperimentMetricsSearchTerm, selectRefreshing, selectSelectedExperimentSettings, selectSelectedSettingsHiddenScalar, selectShowScalarsOptions} from '../../reducers';
 import {ScalarKeyEnum} from '../../../../business-logic/model/events/scalarKeyEnum';
 import {toggleShowScalarOptions} from '../../actions/compare-header.actions';
+import {GroupByCharts} from '../../../experiments/reducers/common-experiment-output.reducer';
+import {GroupedList} from '../../../shared/ui-components/data/selectable-grouped-filter-list/selectable-grouped-filter-list.component';
 
 
 @Component({
@@ -22,7 +24,8 @@ import {toggleShowScalarOptions} from '../../actions/compare-header.actions';
 export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy {
 
   public smoothWeight$: Observable<number>;
-  public xAxisType$: Observable<string>;
+  public xAxisType$: Observable<ScalarKeyEnum>;
+  public groupBy$: Observable<GroupByCharts>;
   public showSettingsBar$: Observable<boolean>;
   private selectRefreshing$: Observable<{ refreshing: boolean, autoRefresh: boolean }>;
   private routerParams$: Observable<any>;
@@ -36,13 +39,27 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
   private routerParamsSubscription: Subscription;
   private refreshingSubscription: Subscription;
   private xAxisSub: Subscription;
+  private groupBySub: Subscription;
 
-  public graphList: any = {};
+  public graphList: GroupedList = {};
   public selectedGraph: string = null;
   private taskIds: Array<string>;
   public graphs: { [key: string]: ExperimentGraph };
   public refreshDisabled = false;
   public showSettingsBar: boolean = false;
+  public groupBy: GroupByCharts;
+  private metrics: GroupedList;
+
+  groupByOptions = [
+    {
+      name: 'Metric',
+      value: GroupByCharts.Metric
+    },
+    {
+      name: 'Metric + Variant',
+      value: GroupByCharts.None
+    }
+  ];
 
   constructor(private store: Store<IExperimentInfoState>, private changeDetection: ChangeDetectorRef) {
     this.listOfHidden = this.store.pipe(select(selectSelectedSettingsHiddenScalar));
@@ -50,6 +67,7 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
     this.showSettingsBar$ = this.store.pipe(select(selectShowScalarsOptions));
     this.smoothWeight$ = this.store.select(selectCompareSelectedSettingsSmoothWeight);
     this.xAxisType$ = this.store.select(selectCompareSelectedSettingsxAxisType);
+    this.groupBy$ = this.store.select(selectCompareSelectedSettingsGroupBy);
     this.selectRefreshing$ = this.store.select(selectRefreshing);
     this.metrics$ = this.store.pipe(
       select(selectCompareTasksScalarCharts),
@@ -69,9 +87,16 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
       distinctUntilChanged(),
       tap(() => this.refreshDisabled = true)
     );
+
     this.xAxisSub = this.xAxisType$
       .pipe(filter((axis) => !!axis))
       .subscribe((axis) => this.store.dispatch(new GetMultiScalarCharts({taskIds: this.taskIds, cached: true})));
+
+    this.groupBySub = this.groupBy$
+      .subscribe(groupBy => {
+        this.groupBy = groupBy;
+        this.prepareGraphsAndUpdate(this.metrics);
+      });
   }
 
   ngOnInit() {
@@ -79,12 +104,8 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
       .subscribe((metricsWrapped) => {
         this.refreshDisabled = false;
         const metrics = metricsWrapped.metrics || {};
-        this.graphList = metrics;
-        const merged = mergeMultiMetrics(metrics);
-        if (!this.graphs || !isEqual(merged, this.graphs)) {
-          this.graphs = merged;
-        }
-        this.changeDetection.detectChanges();
+        this.metrics = metrics;
+        this.prepareGraphsAndUpdate(metrics);
       });
 
     this.settingsSubscription = this.experimentSettings$
@@ -104,6 +125,24 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
 
     this.refreshingSubscription = this.selectRefreshing$.pipe(filter(({refreshing}) => refreshing))
       .subscribe(({autoRefresh}) => this.store.dispatch(new GetMultiScalarCharts({taskIds: this.taskIds, autoRefresh})));
+  }
+
+  private prepareGraphsAndUpdate(metrics) {
+    if (metrics) {
+      const merged = this.groupBy === 'metric' ? mergeMultiMetricsGroupedVariant(metrics) : mergeMultiMetrics(metrics);
+      this.graphList = this.groupBy === 'metric' ? this.buildNestedListWithoutChildren(merged) : metrics;
+      if (!this.graphs || !isEqual(merged, this.graphs)) {
+        this.graphs = merged;
+      }
+      this.changeDetection.detectChanges();
+    }
+  }
+
+  private buildNestedListWithoutChildren(merged: { [p: string]: ExperimentGraph }) {
+    return Object.keys(merged).reduce((acc, metric) => {
+      acc[metric] = {};
+      return acc;
+    }, {});
   }
 
   ngOnDestroy() {
@@ -137,6 +176,10 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
 
   changeXAxisType($event: ScalarKeyEnum) {
     this.store.dispatch(new SetExperimentSettings({id: this.taskIds, changes: {xAxisType: $event}}));
+  }
+
+  changeGroupBy($event: GroupByCharts) {
+    this.store.dispatch(new SetExperimentSettings({id: this.taskIds, changes: {groupBy: $event}}));
   }
 
   toggleSettingsBar() {

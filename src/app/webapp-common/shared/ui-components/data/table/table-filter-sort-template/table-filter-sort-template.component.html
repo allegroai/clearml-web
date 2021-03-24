@@ -13,8 +13,13 @@
            (menuClosed)="menuClosed.emit()"
            (menuOpened)="menuOpened.emit()"
   >
-    <sm-menu-item *ngFor="let option of options" [itemLabel]="option.label"
-                  [checked]="value?.includes(option.value)" [selectable]="true" [itemValue]="option.value"
+    <sm-menu-item *ngFor="let option of options"
+                  [itemLabel]="option.label"
+                  [checked]="value?.includes(option.value)"
+                  [selectable]="true"
+                  [itemValue]="option.value"
+                  [itemTooltip]="option.tooltip"
+                  [enableTooltip]="enableTooltip"
                   (itemClicked)="onFilterChanged($event)">
     </sm-menu-item>
     <div *ngIf="options?.length===0" class="empty-menu flex-middle">No item found</div>

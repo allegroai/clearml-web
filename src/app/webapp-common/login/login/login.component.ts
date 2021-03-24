@@ -3,13 +3,18 @@ import {NgForm} from '@angular/forms';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {Store} from '@ngrx/store';
 import {Observable, Subscription} from 'rxjs';
-import {finalize, map, startWith} from 'rxjs/operators';
-import {environment} from '../../../../environments/environment';
+import {finalize, map, startWith, take, filter, mergeMap} from 'rxjs/operators';
 import {selectCurrentUser} from '../../core/reducers/users-reducer';
 import {mobilecheck} from '../../shared/utils/mobile';
 import {userPreferences} from '../../user-preferences';
 import {FetchCurrentUser, SetPreferences} from '../../core/actions/users.actions';
 import {LoginMode, LoginModeEnum, LoginService} from '../../shared/services/login.service';
+import {selectInviteId, selectLoginError} from '../login-reducer';
+import {ConfigurationService} from '../../shared/services/configuration.service';
+import {setLoginError} from '../login.actions';
+import {CommunityContext} from '../../../../environments/base';
+const environment = ConfigurationService.globalEnvironment;
+
 
 @Component({
   selector: 'sm-login',
@@ -36,18 +41,27 @@ export class LoginComponent implements OnInit, OnDestroy {
   public demo: boolean;
   public mobile: boolean;
   public newUser: boolean;
-  public environment = environment;
   public loginFailed = false;
   public showGitHub: boolean;
   private redirectUrl: string;
   stars: number = 0;
   showSpinner: boolean;
   public guestUser: { enabled: boolean; username: string; password: string };
+  public ssoEnabled = false;
+  public communityContext: CommunityContext;
+  public loginTitle: string;
+  public error: string;
+  public signupMode: boolean = true;
+  public signupForm: boolean;
+  public isInvite: boolean;
+  public environment: any;
+  public isCommunity: boolean;
+  public sso: { name: string; url: string }[];
+  public touLink: string;
 
   constructor(
     private router: Router, private loginService: LoginService,
-    private store: Store<any>, private route: ActivatedRoute)
-  {
+    private store: Store<any>, private route: ActivatedRoute) {
     this.mobile = mobilecheck();
   }
 
@@ -56,17 +70,35 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.store.select(selectCurrentUser).subscribe((res) => {
-      if (res) {
-        this.router.navigateByUrl(this.getNavigateUrl());
-      }
+    this.environment = environment;
+    this.store.select(selectCurrentUser).pipe(filter(user => !!user), take(1)).subscribe(() => this.router.navigateByUrl(this.getNavigateUrl()));
+    this.store.select(selectLoginError).subscribe((error) => this.error = error);
+    this.store.select(selectInviteId).pipe(
+      filter(invite => !!invite),
+      take(1),
+      mergeMap(inviteId => this.loginService.getInviteInfo(inviteId))
+    ).subscribe((inviteInfo) => {
+      const shorterName = inviteInfo.user_given_name || inviteInfo.user_name?.split(' ')[0];
+      this.loginTitle = !shorterName? '' : `Accept ${shorterName ? shorterName + '\'s' : ''} invitation and
+      join their team`;
     });
-
+    this.removeSignupFromUrl();
+    this.isInvite = this.router.url.includes('invite');
     this.banner = environment.loginBanner;
     this.notice = environment.loginNotice;
+    this.loginTitle = this.isInvite ? '' : (this.signupMode && this.isCommunity) ? 'Sign up' : 'Login';
+    this.communityContext = environment.communityContext;
+    this.isCommunity = environment.communityServer;
     this.demo = environment.demo;
-    this.showGitHub = environment.productName === 'trains';
-    this.route.queryParams.subscribe((params: Params) => this.redirectUrl = params['redirect']);
+    this.showGitHub = environment.productName === 'clearml';
+    this.touLink = environment.touLink;
+    this.route.queryParams
+      .pipe(filter(params => !!params), take(1))
+      .subscribe((params: Params) => {
+        this.signupForm = this.route.snapshot.routeConfig.path === 'signup';
+        this.redirectUrl = params['redirect'] || '';
+        this.redirectUrl = this.redirectUrl.replace('/login', '/dashboard');
+      });
 
     if (this.showGitHub) {
       fetch('https://api.github.com/repos/allegroai/trains', {method: 'GET'})
@@ -78,6 +110,8 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.loginService.getLoginMode().pipe(
       finalize(() => {
         this.guestUser = this.loginService.guestUser;
+        this.sso = this.loginService.sso;
+        this.ssoEnabled = this.sso.length > 0;
         if (this.loginMode === LoginModeEnum.simple) {
           this.loginService.getUsers().subscribe(users => {
             this.options = users;
@@ -89,7 +123,7 @@ export class LoginComponent implements OnInit, OnDestroy {
           }
         }
         setTimeout(() => {
-          this.nameInput.nativeElement.focus();
+          this.nameInput?.nativeElement.focus();
         }, 500);
       }))
       .subscribe((loginMode: LoginMode) => {
@@ -99,7 +133,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       });
 
     setTimeout(() => {
-      if (!this.loginForm.controls['name']) {
+      if (!this.loginForm?.controls['name']) {
         return;
       }
 
@@ -122,6 +156,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     if (this.userChanged) {
       this.userChanged.unsubscribe();
     }
+    this.removeSignupFromUrl();
   }
 
   login() {
@@ -190,11 +225,42 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.showSpinner = true;
     this.loginService.passwordLogin(this.guestUser.username, this.guestUser.password)
       .subscribe((res: any) => {
-        this.afterLogin();
-      },
-      () => {
-        this.showSpinner = false;
-        this.loginFailed = true;
-      });
+          this.afterLogin();
+        },
+        () => {
+          this.showSpinner = false;
+          this.loginFailed = true;
+        });
+  }
+
+  ssoLogin(providerUrl: string) {
+    window.location.href = providerUrl;
+  }
+
+  toggleSignup() {
+    this.showSpinner = true;
+    this.signupMode = !this.signupMode;
+    this.removeSignupFromUrl();
+    if (!this.isInvite) {
+      this.loginTitle = this.signupMode ? 'Signup' : 'Login';
+    }
+    this.store.dispatch(setLoginError({error: null}));
+    this.loginService.getLoginSupportedModes(this.signupMode ? 'signup' : '').subscribe(res => {
+      this.showSpinner = false;
+      this.sso = res.sso_providers;
+    });
+
+  }
+
+  private removeSignupFromUrl() {
+    if (this.router.url.includes('redirect') && this.route.snapshot.queryParams.redirect.includes('signup')) {
+      this.router.navigate(
+        [],
+        {
+          relativeTo: this.route,
+          queryParams: {redirect: this.route.snapshot.queryParams.redirect?.replace(/[&]?signup/, '')},
+          queryParamsHandling: 'merge'
+        });
+    }
   }
 }

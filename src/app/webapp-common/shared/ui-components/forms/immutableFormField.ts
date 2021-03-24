@@ -1,4 +1,4 @@
-import { EventEmitter, Input, OnDestroy, OnInit, Output, Directive } from '@angular/core';
+import {EventEmitter, Input, OnDestroy, OnInit, Output, Directive} from '@angular/core';
 import {ImmutableForm} from './immutableForm.model';
 import {ValidatorFn} from '@angular/forms';
 import {isEmpty, isEqual} from 'lodash/fp';
@@ -19,9 +19,9 @@ export class ImmutableFormField implements OnInit, OnDestroy, ImmutableForm {
   @Input() fieldName: string;
   @Input() errors: Map<string, boolean> = <Map<string, boolean>>{};
   @Input() header: string; // the input title.
-  @Input() placeHolder: string    = ''; // the input title.
+  @Input() placeHolder: string = ''; // the input title.
   @Input() validators: Array<ValidatorFn>;
-  @Input() showErrors: boolean    = true; // boolean to determine when the errors should be displayed.
+  @Input() showErrors: boolean = true; // boolean to determine when the errors should be displayed.
   @Input() isReadonly: boolean;
   @Input() inputClassName: string = 'form-control';
   @Input() readonlyClassName: string;
@@ -30,8 +30,8 @@ export class ImmutableFormField implements OnInit, OnDestroy, ImmutableForm {
   // a map of the error messages for each error when the key is the error key and the value is the error message.
   @Input() errorMessages;
 
-  @Output() formDataChanged = new EventEmitter<{ field: string, value: any }>();
-  @Output() errorsChanged   = new EventEmitter<{ field: string, errors: Map<string, boolean> }>();
+  @Output() formDataChanged = new EventEmitter<{ field: string; value: any; event: Event }>();
+  @Output() errorsChanged = new EventEmitter<{ field: string; errors: Map<string, boolean> }>();
 
   ngOnInit() {
     // if (!this.fieldName) {
@@ -44,9 +44,9 @@ export class ImmutableFormField implements OnInit, OnDestroy, ImmutableForm {
     this.errorsChanged.emit({field: this.fieldName, errors: null});
   }
 
-  fieldValueChanged(value) {
+  fieldValueChanged(value, event) {
     this.checkValidity(value);
-    this.formDataChanged.emit({field: this.fieldName, value: value});
+    this.formDataChanged.emit({field: this.fieldName, value: value, event});
   }
 
   hasErrors() {
@@ -66,7 +66,7 @@ export class ImmutableFormField implements OnInit, OnDestroy, ImmutableForm {
       let errors = <Map<string, boolean>>{};
       this.validators.forEach(validatorFn => {
         const err = validatorFn(<any>{value: newValue});
-        errors    = err ? {...errors, ...err} : errors;
+        errors = err ? {...errors, ...err} : errors;
       });
 
       errors = isEmpty(errors) ? null : errors;

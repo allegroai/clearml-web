@@ -2,7 +2,8 @@ import {enableProdMode} from '@angular/core';
 import {platformBrowserDynamic} from '@angular/platform-browser-dynamic';
 
 import {AppModule} from './app/app.module';
-import {environment} from './environments/environment';
+import {ConfigurationService} from './app/webapp-common/shared/services/configuration.service';
+const environment = ConfigurationService.globalEnvironment;
 
 if (environment.production) {
   enableProdMode();

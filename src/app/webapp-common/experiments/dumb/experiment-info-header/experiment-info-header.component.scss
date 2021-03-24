@@ -13,9 +13,7 @@
   .experiment-icon {
     margin: 0px 20px 0 5px;
   }
-  .menu-container{
-    margin-right: 4px;
-  }
+
   .middle-col {
     width: calc(100% - 100px);
 
@@ -38,16 +36,11 @@
   }
 
   .experiment-id {
-    top: 4px;
-    position: relative;
     font-weight: bold;
+    margin-right: 6px;
   }
-  .id-icon {
-    width: 41px;
-    height: 31px;
-  }
+
   .edit-name {
-    margin-top: 5px;
     max-width: 100%;
   }
   .menu-button, .menu-button &:hover, .menu-button &:focus {
@@ -65,6 +58,79 @@
       .al-icon.al-ico-info-min {
         color: #212529;
       }
+    }
+  }
+
+  .id-icon {
+    font-size: 12px;
+    font-weight: 500;
+    height: 18px;
+    line-height: 18px;
+    padding: 0 6px;
+    border-radius: 4px;
+    margin: 0 6px;
+    color: white;
+    background-color: $blue-400;
+    cursor: pointer;
+  }
+
+  .shared {
+    margin: 0 6px;
+  }
+  .status {
+    font-size: 12px;
+    font-weight: 500;
+    height: 18px;
+    line-height: 18px;
+    padding: 0 6px;
+    border-radius: 4px;
+    margin: 6px;
+    color: white;
+    background-color: #FFFFFF;
+
+    &.published {
+      color: $blue-600;
+      background-color: $neon-yellow;
+    }
+
+    &.in_progress {
+      background-color: #50e3c2;
+      color: $blue-600;
+    }
+
+    &.queued {
+      color: $blue-600;
+      background-color: #c4f0e4;
+    }
+
+    &.created {
+      color: $blue-600;
+      background-color: #dbdee6;
+    }
+
+    &.failed {
+      background-color: $strong-red;
+    }
+
+    &.completed, &.stopped {
+      background-color: $completed-blue;
+    }
+  }
+
+  .right-buttons {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    margin-right: 24px;
+
+    .btn-icon {
+      margin-right: 16px;
+    }
+
+    sm-experiment-menu {
+      line-height: 24px;
+      width: 24px;
+      height: 28px;
     }
   }
 }

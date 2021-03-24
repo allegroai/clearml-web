@@ -2,8 +2,14 @@
   <mat-form-field appearance="standard"
                   hideRequiredMarker="true"
                   floatLabel="never">
-    <input #nameInput cdkFocusInitial smClickStopPropagation  matInput placeholder="Add Tag" name="filter" [(ngModel)]="filterText" class="filter" autocomplete="off">
-    <i matSuffix [class]="'fa mr2 ' + (filterText? 'fa-times pointer':'fa-search')" (click)="filterText && clear()" smClickStopPropagation></i>
+    <input #nameInput cdkFocusInitial smClickStopPropagation matInput placeholder="Add Tag" name="filter" [(ngModel)]="filterText" class="filter" autocomplete="off">
+      <i matSuffix
+         [class]="'icon sm-md mr-3 ml-4 pointer ' + (tagsFilterByProject ? 'i-project-tags-filter-active' : 'i-project-tags-filter')"
+         matTooltipPosition="above"
+         smTooltip="Toggle all/project-only tags"
+         (click)="projectTagsFilterToggle()"
+         smClickStopPropagation></i>
+      <i matSuffix [class]="'fa mr2 ' + (filterText? 'fa-times pointer':'fa-search')" (click)="filterText && clear()" smClickStopPropagation></i>
   </mat-form-field>
 </form>
 <div class="buttons-container" [class.searching]="filterText">
@@ -13,7 +19,7 @@
     (click)="addTag(filterText)"
   >"{{filterText}}" <span class="new">(Create New)</span></button>
   <button
-    *ngFor="let tag of allTags | filter:tags | filter:filterText"
+    *ngFor="let tag of allTags | filter:tags | filter:filterText; trackBy: trackByFn"
     class="item"
     (click)="addTag(tag)"
   >{{tag}}</button>

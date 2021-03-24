@@ -5,8 +5,7 @@ import {selectSelectedProjectId} from '../../webapp-common/core/reducers/project
 import {Observable} from 'rxjs';
 import {Router} from '@angular/router';
 import {SearchDeactivate} from '../../webapp-common/search/common-search-results.actions';
-import {environment} from '../../../environments/environment';
-
+import {ConfigurationService} from '../../webapp-common/shared/services/configuration.service';
 
 @Component({
   selector   : 'sm-side-nav',
@@ -16,7 +15,7 @@ import {environment} from '../../../environments/environment';
 export class SideNavComponent {
   public selectedProjectId$: Observable<any>;
   currentUser: any;
-  environment = environment;
+  environment = ConfigurationService.globalEnvironment;
 
 
   constructor(public store: Store<any>, private router: Router) {

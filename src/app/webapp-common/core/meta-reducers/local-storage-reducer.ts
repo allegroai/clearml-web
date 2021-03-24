@@ -4,17 +4,21 @@ import {userPreferences} from '../../user-preferences';
 import {USERS_ACTIONS} from '../../../app.constants';
 import {SetPreferences} from '../actions/users.actions';
 
+const firstRun = {};
+
 export function createLocalStorageReducer(key: string, syncedKeys: string[], actionsPrefix?: string[]): (reducer: ActionReducer<any, Action>) => ActionReducer<any, Action> {
 
-  let firstRun = true;
+  if (firstRun[key] === undefined) {
+    firstRun[key] = true;
+  }
   let timeout: number;
 
   return function (reducer: ActionReducer<any>): ActionReducer<any> {
     return function (state, action): any {
       let nextState = reducer(state, action);
 
-      if (firstRun && userPreferences.isReady()) {
-        firstRun         = false;
+      if (firstRun[key] && userPreferences.isReady()) {
+        firstRun[key]         = false;
         const savedState = userPreferences.getPreferences(key);
         nextState        = merge(nextState, savedState);
       }

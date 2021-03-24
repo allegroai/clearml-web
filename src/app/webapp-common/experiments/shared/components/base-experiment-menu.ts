@@ -1,5 +1,5 @@
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
-import {Router} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {Store} from '@ngrx/store';
 import {get} from 'lodash/fp';
 import {filter, take} from 'rxjs/operators';
@@ -13,7 +13,7 @@ import {CloneForm} from '../common-experiment-model.model';
 import {selectRouterParams} from '../../../core/reducers/router-reducer';
 import {SmSyncStateSelectorService} from '../../../core/services/sync-state-selector.service';
 import {ConfirmDialogComponent} from '../../../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
-import {htmlTextShorte} from '../../../shared/utils/shared-utils';
+import {htmlTextShorte, isReadOnly} from '../../../shared/utils/shared-utils';
 import * as commonMenuActions from '../../actions/common-experiments-menu.actions';
 import {ChangeProjectDialogComponent} from './change-project-dialog/change-project-dialog.component';
 import {CloneDialogComponent} from './clone-dialog/clone-dialog.component';
@@ -22,35 +22,47 @@ import {ISelectedExperiment} from '../../../../features/experiments/shared/exper
 import {GetQueuesForEnqueue} from './select-queue/select-queue.actions';
 import {selectQueuesList} from './select-queue/select-queue.reducer';
 import {isDevelopment} from '../../../../features/experiments/shared/experiments.utils';
-import {
-  ChangeDetectorRef,
-  Component,
-  ElementRef,
-  EventEmitter,
-  HostListener,
-  Input,
-  Output,
-  ViewChild
-} from '@angular/core';
+import {Component, ElementRef, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {BaseContextMenuComponent} from '../../../shared/components/base-context-menu/base-context-menu.component';
 import * as experimentsActions from '../../actions/common-experiments-view.actions';
+import {ShareDialogComponent} from '../../../shared/ui-components/overlay/share-dialog/share-dialog.component';
+import {ConfigurationService} from '../../../shared/services/configuration.service';
+import {selectNeverShowPopups} from '../../../core/reducers/view-reducer';
+import {showConfirmArchiveExperiments} from '../common-experiments.utils';
+
+const environment = ConfigurationService.globalEnvironment;
 
 @Component({
   selector: 'sm-base-experiment-menu',
   template: ''
 })
-export class BaseExperimentMenuComponent extends BaseContextMenuComponent {
+export class BaseExperimentMenuComponent extends BaseContextMenuComponent implements OnInit {
   readonly ICONS = ICONS;
   readonly TaskStatusEnum = TaskStatusEnum;
   readonly TaskTypeEnum = TaskTypeEnum;
 
   public isExample: boolean;
-  protected _experiment: ISelectedExperiment;
+  public selectionHasExamples: boolean;
+  protected _experiment: ISelectedExperiment = null;
   public selectedExperiment: ISelectedExperiment;
-  @Input() allTags;
+  private _selectedExperiments: ISelectedExperiment[];
+
+  @Input() projectTags: string[];
+  @Input() companyTags: string[];
   @Input() numSelected = 0;
   @Input() showButton = true;
   @Output() tagSelected = new EventEmitter<string>();
+  @Input() set selectedExperiments(experiments: ISelectedExperiment[]) {
+    this._selectedExperiments = experiments;
+    this.selectionHasExamples = experiments.some((exp => isReadOnly(exp)));
+  }
+  get selectedExperiments(): ISelectedExperiment[] {
+    return this._selectedExperiments;
+  }
+  @Input() neverShowPopups;
+  @Input() minimizedView: boolean;
+
+  public isCommunity: boolean;
 
   constructor(
     protected blTaskService: BlTasksService,
@@ -58,9 +70,15 @@ export class BaseExperimentMenuComponent extends BaseContextMenuComponent {
     protected router: Router,
     protected store: Store<IExperimentInfoState>,
     protected syncSelector: SmSyncStateSelectorService,
-    protected eRef: ElementRef
+    protected eRef: ElementRef,
+    protected route?: ActivatedRoute
   ) {
     super(store, eRef);
+  }
+
+
+  ngOnInit(): void {
+    this.isCommunity = environment.communityServer;
   }
 
   public getProjectId() {
@@ -69,19 +87,45 @@ export class BaseExperimentMenuComponent extends BaseContextMenuComponent {
   }
 
   public restoreArchive() {
-    //info header case
+    // info header case
     if (this.showButton) {
       this.store.dispatch(new experimentsActions.SetSelectedExperiments([this._experiment as any]));
     }
-    if (this._experiment.system_tags && this._experiment.system_tags.includes('archived')) {
+    if (this._experiment.system_tags?.includes('archived')) {
       this.store.dispatch(new experimentsActions.RestoreSelectedExperiments({}));
     } else {
-      this.store.dispatch(new experimentsActions.ArchivedSelectedExperiments({}));
+      const showShareWarningDialog = (this.selectedExperiments?.find(item => item?.system_tags.includes('shared')) || this._experiment.system_tags.includes('shared')) &&
+        !this.syncSelector.selectSync(selectNeverShowPopups)?.includes('archive-shared-task');
+      if (showShareWarningDialog) {
+        showConfirmArchiveExperiments(this.store, this.dialog);
+      } else {
+        this.store.dispatch(new experimentsActions.ArchiveSelectedExperiments({}));
+      }
     }
   }
 
-  showExperimentMetrics() {
-    this.router.navigateByUrl(`projects/${this.getProjectId()}/experiments/${this._experiment.id}/output/metrics/scalar`);
+  toggleFullScreen(showFullScreen: boolean) {
+    if (showFullScreen) {
+      if (!this.selectedExperiment) {
+        this.router.navigateByUrl(`projects/${this.getProjectId()}/experiments/${this._experiment.id}/output/execution`);
+      } else {
+        if (window.location.pathname.includes('info-output')) {
+          const resultsPath = this.route.firstChild?.firstChild?.routeConfig?.path || this.route.firstChild.routeConfig.path;
+          this.router.navigateByUrl(`projects/${this.getProjectId()}/experiments/${this._experiment.id}/output/${resultsPath}`);
+        } else {
+          const parts = window.location.pathname.split('/');
+          parts.splice(5, 0, 'output');
+          this.router.navigateByUrl(parts.join('/'));
+        }
+      }
+    } else {
+      const part = this.route.firstChild.routeConfig.path;
+      if (['log', 'metrics/scalar', 'metrics/plots', 'debugImages'].includes(part)) {
+        this.router.navigateByUrl(`projects/${this.getProjectId()}/experiments/${this._experiment.id}/info-output/${part}`);
+      } else {
+        this.router.navigateByUrl(`projects/${this.getProjectId()}/experiments/${this._experiment.id}/${part}`);
+      }
+    }
   }
 
   public enqueueDequeueLabel() {
@@ -224,6 +268,18 @@ To avoid this, <b>clone the experiment</b> and work with the cloned experiment.`
     });
   }
 
+  shareExperimentPopup() {
+
+    const confirmDialogRef = this.dialog.open(ShareDialogComponent, {
+      data: {
+        title: 'SHARE EXPERIMENT PUBLICLY',
+        link: `${window.location.origin}/projects/${this._experiment.project.id}/experiments/${this._experiment.id}/output/execution`,
+        alreadyShared: this._experiment?.system_tags.includes('shared'),
+        task: this._experiment?.id
+      }
+    });
+  }
+
   publishExperiment() {
     this.store.dispatch(new commonMenuActions.PublishClicked(this._experiment));
   }
@@ -258,7 +314,7 @@ To avoid this, <b>clone the experiment</b> and work with the cloned experiment.`
     const confirmDialogRef = this.dialog.open(CloneDialogComponent, {
       data: {
         type: 'Experiment',
-        defaultProject: get('project.id', this._experiment),
+        defaultProject: this._experiment?.project?.id,
         defaultName: this._experiment.name
       }
     });
@@ -271,7 +327,14 @@ To avoid this, <b>clone the experiment</b> and work with the cloned experiment.`
     });
   }
 
-  cloneExperiment(cloneData: CloneForm) {
-    this.store.dispatch(new commonMenuActions.CloneExperimentClicked({originExperiment: this._experiment, cloneData}));
+  cloneExperiment(cloneData) {
+    this.store.dispatch(new commonMenuActions.CloneExperimentClicked({
+      originExperiment: this._experiment,
+      cloneData: {
+        ...cloneData,
+        project: cloneData.project.value,
+        newProjectName: cloneData.project.value ? undefined : cloneData.project.label
+      }
+    }));
   }
 }
