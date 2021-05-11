@@ -1,5 +1,6 @@
 <form class="filter-form" (ngSubmit)="addTag(filterText)">
   <mat-form-field appearance="standard"
+                  class="tags-menu-input"
                   hideRequiredMarker="true"
                   floatLabel="never">
     <input #nameInput cdkFocusInitial smClickStopPropagation matInput placeholder="Add Tag" name="filter" [(ngModel)]="filterText" class="filter" autocomplete="off">

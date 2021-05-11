@@ -1,5 +1,5 @@
 import {Pipe, PipeTransform} from '@angular/core';
-import {IOption} from '../ui-components/inputs/select-autocomplete/select-autocomplete.component';
+import {IOption} from '@common/shared/ui-components/inputs/select-autocomplete-with-chips/select-autocomplete-with-chips.component';
 
 @Pipe({
   name: 'selectOptionValueToLabel',

@@ -7,10 +7,11 @@ import {Project} from '../../../../business-logic/model/projects/project';
 import {selectRecentProjects} from '../../common-dashboard.reducer';
 import {GetRecentProjects} from '../../common-dashboard.actions';
 import {CARDS_IN_ROW} from '../../common-dashboard.const';
-import {ProjectCreateDialogComponent} from '../../../shared/project-create-dialog/project-create-dialog.component';
-import {ResetSelectedProject} from '../../../core/actions/projects.actions';
+import {ProjectDialogComponent} from '../../../shared/project-dialog/project-dialog.component';
+import {ResetSelectedProject, SetSelectedProjectId} from '../../../core/actions/projects.actions';
 import {selectCurrentUser} from '../../../core/reducers/users-reducer';
 import {filter, take} from 'rxjs/operators';
+import {isExample} from '../../../shared/utils/shared-utils';
 
 @Component({
   selector   : 'sm-dashboard-projects',
@@ -20,7 +21,7 @@ import {filter, take} from 'rxjs/operators';
 export class DashboardProjectsComponent implements OnInit {
   public recentProjectsList$: Observable<Array<Project>>;
   public CARDS_IN_ROW = CARDS_IN_ROW;
-  private dialog: MatDialogRef<ProjectCreateDialogComponent>;
+  private dialog: MatDialogRef<ProjectDialogComponent>;
 
   constructor(private store: Store<any>, public router: Router,
               private matDialog: MatDialog) {
@@ -34,12 +35,17 @@ export class DashboardProjectsComponent implements OnInit {
       .subscribe(() => this.store.dispatch(new GetRecentProjects()));
   }
 
-  public projectCardClicked(projectId) {
-    this.router.navigateByUrl('projects/' + projectId + '/experiments');
+  public projectCardClicked(project: Project) {
+    this.router.navigateByUrl(`projects/${project.id}`);
+    this.store.dispatch(new SetSelectedProjectId(project.id, isExample(project)));
   }
 
   public openCreateProjectDialog() {
-    this.dialog = this.matDialog.open(ProjectCreateDialogComponent);
+    this.dialog = this.matDialog.open(ProjectDialogComponent, {
+      data: {
+        mode: 'create',
+      }
+    });
     this.dialog.afterClosed().subscribe(projectHasBeenCreated => {
       if (projectHasBeenCreated) {
         this.store.dispatch(new GetRecentProjects());

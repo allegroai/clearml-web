@@ -1,6 +1,7 @@
 import {MessageSeverityEnum, VIEW_ACTIONS, VIEW_PREFIX} from '../../../app.constants';
 import {Action, createAction, props} from '@ngrx/store';
 import {omit} from 'lodash/fp';
+import {HttpErrorResponse} from '@angular/common/http';
 
 export class SetAutoRefresh {
   public type = VIEW_ACTIONS.SET_AUTO_REFRESH;
@@ -19,17 +20,22 @@ export class SetCompareAutoRefresh {
     this.payload = {autoRefresh};
   }
 }
+
 export class SetServerError {
   public type = VIEW_ACTIONS.SET_SERVER_ERROR;
   public payload: {
-    serverError: any;
+    serverError: Omit<HttpErrorResponse, 'headers'>;
     contextSubCode?: number;
     customMessage?: string;
     aggregateSimilar: boolean;
   };
 
-  constructor(serverError: any, contextSubCode?: number, customMessage?: string, aggregateSimilar = false) {
-    this.payload = {serverError: omit(['headers'], serverError), contextSubCode, customMessage, aggregateSimilar};
+  constructor(serverError: HttpErrorResponse, contextSubCode?: number, customMessage?: string, aggregateSimilar = false) {
+    this.payload = {
+      serverError: omit(['headers'], serverError) as Omit<HttpErrorResponse, 'headers'>,
+      contextSubCode,
+      customMessage,
+      aggregateSimilar};
   }
 }
 
@@ -101,6 +107,11 @@ export const setServerUpdatesAvailable = createAction(
 export const setScaleFactor = createAction(
   VIEW_ACTIONS + '[set scale]',
   props<{scale: number}>()
+);
+
+export const firstLogin = createAction(
+  VIEW_ACTIONS + '[set first Login]',
+  props<{first: boolean}>()
 );
 
 export const neverShowPopupAgain = createAction(VIEW_PREFIX + 'NEVER_SHOW_POPUP_AGAIN', props<{ popupId: string; reset?: boolean }>());

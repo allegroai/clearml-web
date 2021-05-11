@@ -2,7 +2,7 @@ import {Component, Input, OnDestroy} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {selectActiveWorkspace, selectCurrentUser, selectWorkspaces} from '../../core/reducers/users-reducer';
 import {Observable, Subscription} from 'rxjs';
-import {Logout, setActiveWorkspace} from '../../core/actions/users.actions';
+import {logout, setActiveWorkspace, setAccountAdministrationPage} from '../../core/actions/users.actions';
 import {AddMessage} from '../../core/actions/layout.actions';
 import {MESSAGES_SEVERITY} from '../../../app.constants';
 import {MatDialog} from '@angular/material/dialog';
@@ -14,6 +14,7 @@ import {filter} from 'rxjs/operators';
 import {selectRouterUrl} from '../../core/reducers/router-reducer';
 import {TipsService} from '../../shared/services/tips.service';
 import {LoginService} from '../../shared/services/login.service';
+import {WelcomeMessageComponent} from '../../dashboard/dumb/welcome-message/welcome-message.component';
 
 @Component({
   selector: 'sm-header',
@@ -31,6 +32,7 @@ export class HeaderComponent implements OnDestroy {
   public workspaces: Observable<GetCurrentUserResponseUserObjectCompany[]>;
   public url: Observable<string>;
   private workspaceSub: Subscription;
+  userFiltered: boolean;
 
   constructor(private store: Store<any>, private dialog: MatDialog, private tipsService: TipsService, private loginService: LoginService) {
     this.url = this.store.select(selectRouterUrl);
@@ -49,7 +51,11 @@ export class HeaderComponent implements OnDestroy {
 
   logout() {
     this.loginService.clearLoginCache();
-    this.store.dispatch(new Logout());
+    this.store.dispatch(logout({}));
+  }
+
+  userManagement() {
+    this.store.dispatch(setAccountAdministrationPage());
   }
 
   copyToClipboardSuccess() {
@@ -66,5 +72,10 @@ export class HeaderComponent implements OnDestroy {
 
   openTip() {
     this.tipsService.showTipsModal(null, true);
+  }
+
+  openWelcome(event: MouseEvent) {
+    event.preventDefault();
+    this.dialog.open(WelcomeMessageComponent, {data: {step: 2}});
   }
 }

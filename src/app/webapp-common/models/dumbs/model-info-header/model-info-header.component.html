@@ -1,23 +1,27 @@
 <sm-overlay [backdropActive]="backdropActive"></sm-overlay>
 
-<div class="d-flex w-100">
+<div class="d-flex">
   <div class="p-2 icon i-model model-icon xl"></div>
   <div class="middle-col">
-    <div class="d-flex p2">
-        <sm-inline-edit
-          class="edit-name pr-3"
-          [originalText]="model?.name"
-          [editable]="editable"
-          [minWidth]="250"
-          (textChanged)="onNameChanged($event)"
-          (inlineActiveStateChanged)="editExperimentName($event)"
-        >
-          <span class="model-name">{{model?.name}}</span>
-        </sm-inline-edit>
-        <i class="icon i-id id-icon pointer" (click)="viewId = true" *ngIf="!viewId"></i>
-        <span class="model-id" *ngIf="viewId">{{model.id}}</span>
-      </div>
     <div class="d-flex align-items-center">
+      <sm-inline-edit
+        class="edit-name"
+        [originalText]="model?.name"
+        [editable]="editable"
+        [minWidth]="250"
+        (textChanged)="onNameChanged($event)"
+        (inlineActiveStateChanged)="editExperimentName($event)"
+      >
+        <div class="model-name">
+          <span>{{model?.name}}</span>
+        </div>
+      </sm-inline-edit>
+      <i class="al-icon al-ico-id pointer" (click)="viewId = true" *ngIf="!viewId; else showId"></i>
+      <ng-template #showId>
+        <span class="model-id">{{model.id}}</span>
+      </ng-template>
+    </div>
+    <div class="tags-list">
       <sm-tag-list
         *smCheckPermission="editable; else readOnlyTags"
         class="w-100"
@@ -52,13 +56,16 @@
       </sm-menu>
     </div>
   </div>
-  <div *smCheckPermission="true" class="p-2 light-theme">
+  <div *smCheckPermission="true" class="light-theme right-buttons">
     <sm-model-menu
       [model]="model"
       [selectedModel]="model"
       [tagsFilterByProject]="tagsFilterByProject$ | async"
+      [selectedDisableAvailableIsMultiple]="false"
+      [selectedDisableAvailable]="selectedDisableAvailable"
       [projectTags]="projectTags$ | async"
       [companyTags]="companyTags$ | async"
+      [numSelected]="1"
       (tagSelected)="addTag($event)">
     </sm-model-menu>
   </div>

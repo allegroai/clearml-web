@@ -5,8 +5,7 @@
                       [workers]="workers$ | async"
                       [selectedWorker]="selectedWorker$ | async"
                       (sortedChanged)="sortedChanged($event)"
-                      [tableSortField]="tableSortField$ | async"
-                      [tableSortOrder]="tableSortOrder$ | async"
+                      [tableSortFields]="tableSortFields$ | async"
                       (workerSelected)="selectWorker($event)">
     </sm-workers-table>
   </as-split-area>

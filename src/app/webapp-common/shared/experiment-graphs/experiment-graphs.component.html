@@ -3,7 +3,7 @@
   <h3>NO CHART DATA</h3>
 </div>
 <sm-graph-settings-bar
-  [ngClass]="{showSettings: showSettings && minimized}"
+  [class.showSettings]="showSettings && minimized"
   [smoothWeight]="smoothWeight"
   [xAxisType]="xAxisType"
   [groupBy]="groupBy"
@@ -14,8 +14,12 @@
   (changeGroupBy)="changeGroupBy.emit($event)"
 ></sm-graph-settings-bar>
 <div class="metrics-section" [class.with-settings]="showSettings">
-  <div class="all-metrics" [ngClass]="{'row': !isGroupGraphs}" #allMetrics>
+  <div #allMetrics
+       class="all-metrics"
+       [class.row]="!isGroupGraphs"
+  >
     <div *ngFor="let metric of graphList;trackBy: trackByFn" class="metric-group-container less-padding"
+         #metricGroup
          [class.hidden]="hiddenList.includes(metric)"
          [class.two-in-a-row]="!isGroupGraphs && graphList.length > 1 && isWidthBigEnough()"
          [style.height.percent]=""
@@ -23,19 +27,28 @@
       <div [id]="EXPERIMENT_GRAPH_ID_PREFIX + metric" class="graph-id">
         <div>
           <div class="metric-group-header" *ngIf="isGroupGraphs">{{metric}}</div>
-          <div *ngIf="plotlyReady$ | async" [ngClass]="{'row': isGroupGraphs, 'single-graph': graphsData[metric].length === 1}">
-            <sm-single-graph *ngFor="let chartItem of graphsData[metric];trackBy: trackByIdFn.bind(this, metric)"
-                             [class.less-padding]="isGroupGraphs"
-                             [class.two-in-a-row]="isGroupGraphs && chartItem?.data[0]?.type !== 'table' && graphsData[metric].length > 1 && isWidthBigEnough()"
-                             [legendStringLength]="legendStringLength"
-                             [chart]="chartItem"
-                             [id]="SINGLE_GRAPH_ID_PREFIX + EXPERIMENT_GRAPH_ID_PREFIX + metric + chartItem.layout.title + chartItem.iter + chartItem.variant + (chartItem.layout.images && chartItem.layout.images[0]?.source)"
-                             [isCompare]="isCompare"
-                             [smoothWeight]="smoothWeight"
-                             [xAxisType]="xAxisType"
-                             [moveLegendToTitle]="groupBy === groupByCharts.None"
-                             [identifier]="SINGLE_GRAPH_ID_PREFIX + EXPERIMENT_GRAPH_ID_PREFIX + metric + chartItem.layout.title + chartItem.iter + chartItem.variant + (chartItem.layout.images && chartItem.layout.images[0]?.source)">
-            </sm-single-graph>
+          <div [class.row]="isGroupGraphs"
+               [class.single-graph]="graphsData[metric].length === 1">
+            <ng-container *ngFor="let chartItem of graphsData[metric];trackBy: trackByIdFn.bind(this, metric)">
+              <sm-single-graph
+                #singleGraph
+                [class.less-padding]="isGroupGraphs"
+                [class.two-in-a-row]="isGroupGraphs && chartItem?.data[0]?.type !== 'table' && graphsData[metric].length > 1 && isWidthBigEnough()"
+                [legendStringLength]="legendStringLength"
+                [chart]="chartItem"
+                [id]="SINGLE_GRAPH_ID_PREFIX + EXPERIMENT_GRAPH_ID_PREFIX + metric + chartItem.layout.title + chartItem.iter + chartItem.variant + (chartItem.layout.images && chartItem.layout.images[0]?.source)"
+                [isCompare]="isCompare"
+                [smoothWeight]="smoothWeight"
+                [xAxisType]="xAxisType"
+                [height]="height"
+                [moveLegendToTitle]="groupBy === groupByCharts.None"
+                [identifier]="SINGLE_GRAPH_ID_PREFIX + EXPERIMENT_GRAPH_ID_PREFIX + metric + chartItem.layout.title + chartItem.iter + chartItem.variant + (chartItem.layout.images && chartItem.layout.images[0]?.source)"
+                (resizeStarted)="resizeStarted(metricGroup, singleGraph)"
+                (resizing)="onResizing($event)"
+                (sizeChanged)="sizeChanged($event)">
+              </sm-single-graph>
+              <div class="resize-overlay" [class.active]="activeResizeElement && activeResizeElement !== singleGraph"></div>
+            </ng-container>
           </div>
         </div>
       </div>

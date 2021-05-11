@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {select, Store} from '@ngrx/store';
 import {ActiveLoader, DeactiveLoader, SetServerError} from '../../core/actions/layout.actions';
-import {catchError, flatMap, map, switchMap, withLatestFrom} from 'rxjs/operators';
+import {catchError, mergeMap, map, switchMap, withLatestFrom} from 'rxjs/operators';
 import {ApiTasksService} from '../../../business-logic/api-services/tasks.service';
 import {ExperimentDetailsReverterService} from '../services/experiment-details-reverter.service';
 import {RequestFailed} from '../../core/actions/http.actions';
@@ -33,25 +33,23 @@ export class ExperimentsCompareDetailsEffects {
     ofType(experimentListUpdated),
     withLatestFrom(this.store.pipe(select(selectExperimentIdsDetails))),
     switchMap(([action, oldExperimentIds]) => {
-        const newExperimentIds = action.ids.filter(id => !oldExperimentIds.includes(id));
-        return this.fetchExperimentDetails$(newExperimentIds)
-          .pipe(
-            withLatestFrom(this.store.pipe(select(selectExperimentsDetails))),
-            // get only the relevant experiments
-            map(([experiments, oldExperiments]) => oldExperiments.filter(exp => action.ids.includes(exp.id)).concat(experiments)),
-            flatMap(experiments => [
-              new DeactiveLoader(action.type),
-              setExperiments({experiments})
-            ]),
-            catchError(error => [
-                new RequestFailed(error),
-                new DeactiveLoader(action.type),
-                new SetServerError(error, null, 'The attempt to retrieve your experiment data failed. Refresh your browser and try again.')
-              ]
-            )
-          );
-      }
-    )
+      const newExperimentIds = action.ids.filter(id => !oldExperimentIds.includes(id));
+      return this.fetchExperimentDetails$(newExperimentIds)
+        .pipe(
+          withLatestFrom(this.store.pipe(select(selectExperimentsDetails))),
+          // get only the relevant experiments
+          map(([experiments, oldExperiments]) => oldExperiments.filter(exp => action.ids.includes(exp.id)).concat(experiments)),
+          mergeMap(experiments => [
+            new DeactiveLoader(action.type),
+            setExperiments({experiments})
+          ]),
+          catchError(error => [
+            new RequestFailed(error),
+            new DeactiveLoader(action.type),
+            new SetServerError(error, null, 'The attempt to retrieve your experiment data failed. Refresh your browser and try again.')
+          ])
+        );
+    })
   );
 
   @Effect()
@@ -60,7 +58,7 @@ export class ExperimentsCompareDetailsEffects {
     withLatestFrom(this.store.select(selectExperimentIdsDetails)),
     switchMap(([action, newExperimentIds]) =>
       this.fetchExperimentDetails$(newExperimentIds).pipe(
-        flatMap(experiments => [
+        mergeMap(experiments => [
           new DeactiveLoader(action.type),
           setRefreshing({payload: false}),
           setExperiments({experiments})

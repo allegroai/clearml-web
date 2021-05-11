@@ -8,7 +8,6 @@ import {NotifierAnimationService} from './services/notifier-animation.service';
 import {NotifierQueueService} from './services/notifier-queue.service';
 import {NotifierConfigToken, NotifierService} from './services/notifier.service';
 
-// tslint:disable variable-name
 
 /**
  * Injection Token for notifier options
@@ -17,7 +16,6 @@ export const NotifierOptionsToken: InjectionToken<NotifierOptions>
   = new InjectionToken<NotifierOptions>('[angular-notifier] Notifier Options');
 
 
-// tslint:enable variable-name
 
 /**
  * Factory for a notifier configuration with custom options

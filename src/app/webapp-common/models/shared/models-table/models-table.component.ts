@@ -1,6 +1,5 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, HostListener, Input, Output, ViewChild} from '@angular/core';
-import {ICONS} from '../../../../app.constants';
-import {ColHeaderTypeEnum, ISmCol, TableSortOrderEnum} from '../../../shared/ui-components/data/table/table.consts';
+import {ColHeaderTypeEnum, ISmCol} from '../../../shared/ui-components/data/table/table.consts';
 import {get} from 'lodash/fp';
 import {SelectedModel, TableModel} from '../models.model';
 import {MODELS_FRAMEWORK_LABELS, MODELS_READY_LABELS, MODELS_TABLE_COL_FIELDS} from '../models.const';
@@ -12,12 +11,15 @@ import {Observable} from 'rxjs';
 import {selectCompanyTags, selectProjectTags, selectTagsFilterByProject} from '../../../core/reducers/projects.reducer';
 import {Store} from '@ngrx/store';
 import {addTag} from '../../actions/models-menu.actions';
-import {ModelMenuComponent} from '../../../../features/models/containers/model-menu/model-menu.component';
-import {TIME_FORMAT_STRING} from '../../../constants';
+import { ModelMenuComponent } from '../../containers/model-menu/model-menu.component';
+import {ICONS, TIME_FORMAT_STRING} from '../../../constants';
 import {getSysTags} from '../../model.utils';
 import {TableComponent} from '../../../shared/ui-components/data/table/table.component';
 import { MODELS_TABLE_COLS } from '../../models.consts';
-import {ITableExperiment} from '../../../experiments/shared/common-experiment-model.model';
+import {IOption} from '../../../shared/ui-components/inputs/select-autocomplete-for-template-forms/select-autocomplete-for-template-forms.component';
+import {
+  CountAvailableAndIsDisableSelectedFiltered
+} from '../../../shared/entity-page/items.utils';
 
 @Component({
   selector       : 'sm-models-table',
@@ -29,23 +31,15 @@ export class ModelsTableComponent extends BaseTableView {
   readonly MODELS_TABLE_COL_FIELDS = MODELS_TABLE_COL_FIELDS;
   readonly MODELS_FRAMEWORK_OPTIONS = Object.entries(MODELS_FRAMEWORK_LABELS).map(([key, val]) => ({label: val, value: key}));
   readonly MODELS_READY_OPTIONS = Object.entries(MODELS_READY_LABELS).map(([key, val]) => ({label: val, value: key}));
-  readonly MODELS_ALL_FILTER_OPTIONS = {
-    framework: [],
-    ready    : this.MODELS_READY_OPTIONS,
-    users    : [],
-    tags     : [],
+  readonly MODELS_ALL_FILTER_OPTIONS: {[colId: string]: IOption[]} = {
+    [MODELS_TABLE_COL_FIELDS.FRAMEWORK]: [],
+    [MODELS_TABLE_COL_FIELDS.READY]    : this.MODELS_READY_OPTIONS,
+    [MODELS_TABLE_COL_FIELDS.USER]    : [],
+    [MODELS_TABLE_COL_FIELDS.TAGS]     : [],
   };
-  readonly ICONS = ICONS;
-  public userSearchValue: string;
-  public tagSearchValue: string;
-  public frameworkFiltersValue: any;
-  public readyFiltersValue: any;
-  public userFiltersValue: any;
 
-  public tagsFiltersValue: any;
-  public systemTagsFiltersValue: any;
+  readonly ICONS = ICONS;
   public menuOpen: boolean;
-  public allFiltersValue: { framework: any; ready: any; users: any; tags: any };
   public sortOrder = 1;
 
   public contextModel: SelectedModel;
@@ -57,6 +51,9 @@ export class ModelsTableComponent extends BaseTableView {
   private _enableMultiSelect: boolean;
   private _tablesCols: ISmCol[];
   public getSysTags = getSysTags;
+  public filtersValues: {[colId: string]: any} = {};
+  public filtersSubValues: {[colId: string]: any} = {};
+  public searchValues: {[colId: string]: string} = {};
 
   @Input() set models(models: SelectedModel[]) {
     this._models = models;
@@ -104,7 +101,7 @@ export class ModelsTableComponent extends BaseTableView {
   get selectedModels() {
     return this._selectedModels;
   }
-
+  @Input() selectedModelsDisableAvailable: Record<string, CountAvailableAndIsDisableSelectedFiltered> = {};
   @Input() set colRatio(ratio: number) {
     if (ratio) {
       this.tableCols.forEach(col => {
@@ -129,22 +126,21 @@ export class ModelsTableComponent extends BaseTableView {
   }
 
   @Input() set tableFilters(filters: { [s: string]: FilterMetadata }) {
-    this.frameworkFiltersValue = get([MODELS_TABLE_COL_FIELDS.FRAMEWORK, 'value'], filters) || [];
-    this.readyFiltersValue = get([MODELS_TABLE_COL_FIELDS.READY, 'value'], filters) || [];
-    this.userFiltersValue = get([MODELS_TABLE_COL_FIELDS.USER, 'value'], filters) || [];
-    this.tagsFiltersValue = get([MODELS_TABLE_COL_FIELDS.TAGS, 'value'], filters) || [];
-    this.systemTagsFiltersValue = get(['system_tags', 'value'], filters) || [];
-    this.allFiltersValue = {framework: this.frameworkFiltersValue, ready: this.readyFiltersValue, users: this.userFiltersValue, tags: this.tagsFiltersValue};
+    this.filtersValues[MODELS_TABLE_COL_FIELDS.FRAMEWORK] = get([MODELS_TABLE_COL_FIELDS.FRAMEWORK, 'value'], filters) || [];
+    this.filtersValues[MODELS_TABLE_COL_FIELDS.READY] = get([MODELS_TABLE_COL_FIELDS.READY, 'value'], filters) || [];
+    this.filtersValues[MODELS_TABLE_COL_FIELDS.USER] = get([MODELS_TABLE_COL_FIELDS.USER, 'value'], filters) || [];
+    this.filtersValues[MODELS_TABLE_COL_FIELDS.TAGS] = get([MODELS_TABLE_COL_FIELDS.TAGS, 'value'], filters) || [];
+    this.filtersSubValues[MODELS_TABLE_COL_FIELDS.TAGS] = get(['system_tags', 'value'], filters) || [];
   }
 
   @Input() set users(users: User[]) {
-    this.MODELS_ALL_FILTER_OPTIONS.users = users.map(user => ({label: user.name ? user.name : 'Unknown User', value: user.id}));
+    this.MODELS_ALL_FILTER_OPTIONS[MODELS_TABLE_COL_FIELDS.USER] = users.map(user => ({label: user.name ? user.name : 'Unknown User', value: user.id}));
     this.sortOptionalUsersList();
   }
 
   @Input() set frameworks(frameworks: string[]) {
-    const frameworksAndActiveFilter = Array.from(new Set(frameworks.concat(this.frameworkFiltersValue)));
-    this.MODELS_ALL_FILTER_OPTIONS.framework = frameworksAndActiveFilter.map(framework => ({
+    const frameworksAndActiveFilter = Array.from(new Set(frameworks.concat(this.filtersValues[MODELS_TABLE_COL_FIELDS.FRAMEWORK])));
+    this.MODELS_ALL_FILTER_OPTIONS[MODELS_TABLE_COL_FIELDS.FRAMEWORK] = frameworksAndActiveFilter.map(framework => ({
       label: framework ? framework :
         (framework === null ? '(No framework)' : 'Unknown'), value: framework
     }));
@@ -152,8 +148,9 @@ export class ModelsTableComponent extends BaseTableView {
   }
 
   @Input() set tags(tags) {
-    const tagsAndActiveFilter = Array.from(new Set(tags.concat(this.tagsFiltersValue)));
-    this.MODELS_ALL_FILTER_OPTIONS.tags = tagsAndActiveFilter.map(tag => ({label: tag===null? 'No tag':tag , value: tag}));
+    const tagsAndActiveFilter = Array.from(new Set(tags.concat(this.filtersValues[MODELS_TABLE_COL_FIELDS.TAGS])));
+    this.MODELS_ALL_FILTER_OPTIONS[MODELS_TABLE_COL_FIELDS.TAGS] = tagsAndActiveFilter.
+    map(tag => ({label: tag===null? 'No tag':tag , value: tag}) as IOption);
     this.sortOptionalTagsList();
   }
 
@@ -166,9 +163,8 @@ export class ModelsTableComponent extends BaseTableView {
   @Output() modelSelectionChanged = new EventEmitter<SelectedModel>();
   @Output() loadMoreModels = new EventEmitter();
   @Output() tagsMenuOpened = new EventEmitter();
-  @Output() sortedChanged = new EventEmitter<{ sortOrder: TableSortOrderEnum; colId: ISmCol['id'] }>();
-  @Output() filterChanged = new EventEmitter() as EventEmitter<{ col: ISmCol; value: any }>;
-  @ViewChild('table', {static: true}) table: TableComponent;
+  @Output() sortedChanged = new EventEmitter<{ isShift: boolean; colId: ISmCol['id'] }>();
+  @ViewChild(TableComponent, {static: true}) table: TableComponent;
   @ViewChild('contextMenu') contextMenu: ModelMenuComponent;
   SYSTEM_TAGS_OPTIONS = [{label: 'DEV', value: 'development'}];
   TIME_FORMAT_STRING = TIME_FORMAT_STRING;
@@ -197,23 +193,19 @@ export class ModelsTableComponent extends BaseTableView {
   }
 
   sortOptionalUsersList() {
-    this.MODELS_ALL_FILTER_OPTIONS.users.sort((a, b) => sortByArr(a.value, b.value, this.userFiltersValue));
+    this.MODELS_ALL_FILTER_OPTIONS.users.sort((a, b) => sortByArr(a.value, b.value, this.filtersValues[MODELS_TABLE_COL_FIELDS.USER]));
   }
 
   sortOptionalTagsList() {
-    this.MODELS_ALL_FILTER_OPTIONS.tags.sort((a, b) => sortByArr(a.value, b.value, this.tagsFiltersValue));
+    this.MODELS_ALL_FILTER_OPTIONS.tags.sort((a, b) => sortByArr(a.value, b.value, this.filtersValues[MODELS_TABLE_COL_FIELDS.TAGS]));
   }
 
   sortOptionalFrameworksList() {
-    this.MODELS_ALL_FILTER_OPTIONS.framework.sort((a, b) => sortByArr(a.value, b.value, [null].concat(this.frameworkFiltersValue)));
+    this.MODELS_ALL_FILTER_OPTIONS.framework.sort((a, b) => sortByArr(a.value, b.value, [null].concat(this.filtersValues[MODELS_TABLE_COL_FIELDS.FRAMEWORK])));
   }
 
   onRowSelectionChanged(event) {
     this.modelSelectionChanged.emit(event.data);
-  }
-
-  scrollTableToTop() {
-    this.table.table.scrollTo({top: 0});
   }
 
   tableFilterChanged(col: ISmCol, event) {
@@ -224,17 +216,12 @@ export class ModelsTableComponent extends BaseTableView {
     this.scrollTableToTop();
   }
 
-  tableAllFiltersChanged(event) {
-    this.filterChanged.emit({col: {id: event.col}, value: event.value});
-    this.scrollTableToTop();
-  }
-
   onLoadMoreClicked() {
     this.loadMoreModels.emit();
   }
 
-  onSortChanged(sortOrder, colId: ISmCol['id']) {
-    this.sortedChanged.emit({sortOrder, colId});
+  onSortChanged(isShift: boolean, colId: ISmCol['id']) {
+    this.sortedChanged.emit({isShift, colId});
     this.scrollTableToTop();
   }
 
@@ -268,22 +255,11 @@ export class ModelsTableComponent extends BaseTableView {
     this.modelsSelectionChanged.emit(selection);
   }
 
-  userSearchValueChanged(searchTerm) {
-    this.userSearchValue = searchTerm;
+  filterMenuClosed(colId) {
   }
 
-  tagSearchValueChanged(searchTerm) {
-    this.tagSearchValue = searchTerm;
-  }
-
-
-  searchValueChanged($event: any) {
-    if ($event.key === 'users') {
-      this.userSearchValueChanged($event.value);
-    }
-    if ($event.key === 'tags') {
-      this.tagSearchValueChanged($event.value);
-    }
+  searchValueChanged($event: string, colId) {
+    this.searchValues[colId] = $event;
   }
 
   addTag(tag: string) {

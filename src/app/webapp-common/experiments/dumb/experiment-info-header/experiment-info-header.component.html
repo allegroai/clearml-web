@@ -1,26 +1,50 @@
 <small class="alert-warning" *ngIf="editName.active && isDev">Renaming a DEV experiment without changing the
   code to reflect the rename, will create a new experiment the next time the code is executed.
 </small>
-<div class="d-flex w-100">
+<div class="d-flex">
   <sm-experiment-type-icon-label class="experiment-icon" [showLabel]="false" [type]="experiment?.type" iconClass="xl" >
   </sm-experiment-type-icon-label>
   <div class="middle-col">
-    <div class="d-flex align-items-center p2">
+    <div class="d-flex align-items-center">
       <sm-inline-edit
         #editName
-        class="edit-name pr-3"
+        class="edit-name"
         [originalText]="infoData?.name || experiment?.name"
         [editable]="editable"
         [minWidth]="250"
         (textChanged)="onNameChanged($event)"
         (inlineActiveStateChanged)="editExperimentName($event)"
       >
-        <span class="experiment-name">{{experiment?.name}}</span>
+        <div class="experiment-name">
+          <span>{{experiment?.name}}</span>
+        </div>
       </sm-inline-edit>
       <div class="shared"
            *ngIf="showMinimize && shared"
       ><i class="fas fa-link p-1"></i></div>
-      <span class="id-icon" (click)="showID()" *ngIf="!viewId">ID</span>
+
+      <i class="al-icon  comment pointer"
+         #commentElement
+         [ngClass]="infoData?.comment ? 'al-ico-task-desc' : 'al-ico-task-desc-outline'"
+         [matMenuTriggerFor]="menu"
+         smHesitate
+         [delay]="100"
+         [action]="'enter'"
+         (smHesitate)="commentElement.click()"
+         (click)="false"
+      ></i>
+
+      <mat-menu #menu="matMenu">
+        <sm-experiment-info-edit-description
+          smHesitate
+          [delay]="500"
+          [action]="'leave'"
+          (smHesitate)="menu.closed.emit()"
+          [selectedExperiment]="infoData"
+          (onDescription)="onDescriptionHandler()"
+        ></sm-experiment-info-edit-description>
+      </mat-menu>
+      <i class="al-icon al-ico-id pointer" (click)="showID()" *ngIf="!viewId"></i>
       <span class="experiment-id" *ngIf="viewId">{{experiment.id}}</span>
       <div class="status"
            [class]="experiment?.status"
@@ -73,10 +97,13 @@
       [experiment]="experiment"
       [selectedExperiment]="experiment"
       [tagsFilterByProject]="tagsFilterByProject$ | async"
+      [selectedDisableAvailable]="selectedDisableAvailable"
+      [selectedDisableAvailableIsMultiple]="false"
       [projectTags]="projectTags$ | async"
       [companyTags]="companyTags$ | async"
       [minimizedView]="!showMinimize"
       [isSharedAndNotOwner]="isSharedAndNotOwner"
+      [numSelected]="1"
       (tagSelected)="addTag($event)"
     ></sm-experiment-menu>
   </div>

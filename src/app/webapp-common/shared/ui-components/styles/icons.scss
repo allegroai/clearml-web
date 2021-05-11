@@ -116,7 +116,43 @@
   @include icon('#{$assets-icons-path}/dataview-icon.svg');
 }
 
-//Two colors icon
+.i-clone {
+  @include icon('#{$assets-icons-path}/clone.svg');
+}
+
+.i-clone-black {
+  @include icon('#{$assets-icons-path}/clone-black.svg');
+}
+
+.i-extand-copy-1 {
+  @include icon('#{$assets-icons-path}/extand-copy-1.svg');
+}
+
+.i-home-off {
+  @include icon('#{$assets-icons-path}/home-off.svg');
+}
+
+.i-list-view {
+  @include icon('#{$assets-icons-path}/bars-menu.svg');
+}
+
+.i-plus-blue {
+  @include icon('#{$assets-icons-path}/plus-blue.svg');
+}
+
+.i-projects-off {
+  @include icon('#{$assets-icons-path}/projects-off.svg');
+}
+
+.i-trash {
+  @include icon('#{$assets-icons-path}/trash.svg');
+
+  &.menu {
+    @include icon('#{$assets-icons-path}/trash-menu.svg');
+
+  }
+}
+
 .i-compare-copy {
   @include icon('#{$assets-icons-path}/compare-copy.svg');
 }
@@ -156,9 +192,41 @@
   @include icon('#{$assets-icons-path}/sort-on-down.svg');
 }
 
-//two colors icons
+.i-draft-light-blue {
+  @include icon('#{$assets-icons-path}/draft-light-blue.svg');
+}
+
+.i-edit {
+  @include icon('#{$assets-icons-path}/edit.svg');
+
+  &.menu {
+    @include icon('#{$assets-icons-path}/edit-menu.svg');
+  }
+}
+
 .i-filter-off {
   @include icon('#{$assets-icons-path}/filter-off.svg');
+}
+
+.i-how-to-white {
+  @include icon('#{$assets-icons-path}/how-to-white.svg');
+}
+
+.i-move-to {
+  @include icon('#{$assets-icons-path}/move-to.svg');
+}
+
+.i-merge-into {
+  @include icon('#{$assets-icons-path}/merge-into.svg');
+
+  &.menu {
+    @include icon('#{$assets-icons-path}/merge-into-menu.svg');
+  }
+}
+
+
+.i-move-to-project {
+  @include icon('#{$assets-icons-path}/move-to-project.svg');
 }
 
 .i-queues {
@@ -452,4 +520,8 @@
 
 .i-project-tags-filter {
   @include icon('#{$assets-icons-path}/project-tags-filter.svg');
+}
+
+.i-markdown {
+  @include icon('#{$assets-icons-path}/ico-markdown.svg');
 }

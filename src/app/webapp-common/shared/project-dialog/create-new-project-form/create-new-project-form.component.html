@@ -1,0 +1,91 @@
+<form #projectForm='ngForm' class="d-flex flex-column">
+  <mat-form-field appearance="outline" hideRequiredMarker class="mat-light">
+    <mat-label>Project name</mat-label>
+    <mat-error *ngIf="name.touched && name.errors?.required">*Please add name.</mat-error>
+    <mat-error *ngIf="name.touched && name.errors?.uniqueName">*Project name in this path already exists.</mat-error>
+    <mat-error *ngIf="name.touched && name.errors?.minlength">*Project name should contain more than 3 characters.</mat-error>
+    <mat-error *ngIf="name.touched && name.errors?.pattern">Project name shouldn't contain slash (/)</mat-error>
+    <input name="projectName"
+           [(ngModel)]="project.name"
+           #name="ngModel"
+           matInput
+           autocomplete="off"
+           smUniqueNameValidator
+           [forbiddenPrefix]="location.value + '/'"
+           [existingNames]="projectsNames"
+           [pattern]="'^[^/]+$'"
+           required minlength="3">
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" hideRequiredMarker>
+    <mat-error *ngIf="location.touched && location.errors?.required">*Please add location.</mat-error>
+    <mat-error *ngIf="location?.errors?.minlength">Please provide a name longer than 3 characters</mat-error>
+
+    <mat-label>Create in</mat-label>
+    <input type="text"
+           matInput
+           #location="ngModel"
+           #locationRef
+           name="location"
+           [ngModel]="project.parent"
+           [matAutocomplete]="auto"
+           placeholder="Search for project path"
+           required
+           minlength="3"
+           (blur)="detectChanges()">
+    <span matSuffix *ngIf="location.value && (!isAutoCompleteOpen) && !(project.parent | stringIncludedInArray:projectsNames)" class="creat-new-suffix">(Create New)</span>
+    <i matSuffix [class]="'fa mr2 ' + (location.value? 'fa-times pointer':'fa-search')"
+       (click)="location.value && clearLocation(); locationRef.focus()"
+       smClickStopPropagation></i>
+    <mat-autocomplete (opened)="setIsAutoCompleteOpen(true)"
+                      (closed)="setIsAutoCompleteOpen(false)"
+                      (optionSelected)="locationSelected($event)"
+                      #auto="matAutocomplete" autoActiveFirstOption
+                      class="light-theme" classList="light-theme">
+      <mat-option
+        class="item"
+        *ngIf="(location.value && !(location.value | stringIncludedInArray:projectsNames))"
+        [value]="location.value"
+      >"{{location.value}}" <span class="new">(Create New)</span></mat-option>
+      <mat-option
+        *ngFor="let projectName of projectsNames | simpleFilter:location.value"
+        [value]="projectName" [smTooltip]="projectName" matTooltipPosition="above"
+      >
+        <div [innerHTML]="projectName | highlightSearchText:location.value"></div>
+      </mat-option>
+    </mat-autocomplete>
+  </mat-form-field>
+  <mat-form-field appearance="outline" hideRequiredMarker>
+    <mat-error *ngIf="description?.touched && description?.invalid">*Please add description.
+    </mat-error>
+    <mat-label>Description</mat-label>
+    <textarea class="project-description"
+              name="description"
+              matInput
+              [(ngModel)]="project.description"
+              #description="ngModel"
+    ></textarea>
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-error *ngIf="default_output_destination?.touched && default_output_destination?.errors?.required">*Please add
+      default destination.
+    </mat-error>
+    <mat-error *ngIf="default_output_destination?.touched && default_output_destination?.errors?.pattern">*Illegal
+      output destination (e.g. s3://bucket. gs://bucket)
+    </mat-error>
+    <mat-label>Default output destination</mat-label>
+    <input class="project-output-dest"
+           matInput
+           name="default_output_destination"
+           [(ngModel)]="project.default_output_destination"
+           #default_output_destination="ngModel"
+           [pattern]="outputDestPattern"
+           placeholder="e.g. s3://bucket. gs://bucket">
+  </mat-form-field>
+  <div class="row">
+    <div class="col-24 create-project-button">
+      <button class="btn btn-dark-fill center" [disabled]="projectForm.invalid" (click)="send()">CREATE PROJECT
+      </button>
+    </div>
+  </div>
+</form>

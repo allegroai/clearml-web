@@ -10,6 +10,6 @@
         [disabled]="disabled"
         (cbOnSuccess)="copyToClipboard()"
 >
-  <i class="fa" [class]="copied ? 'fa-check' : 'fa-clipboard'" [class.mr-2]="label"></i>
+  <i class="fa" [class]="copied ? 'fa-check' : copyIcon || 'fa-clipboard'" [class.mr-2]="label"></i>
   <span>{{label}}</span>
 </button>

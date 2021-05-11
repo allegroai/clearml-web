@@ -1,4 +1,5 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {Worker} from '../../../../business-logic/model/workers/worker';
 
 @Component({
   selector   : 'sm-worker-info',

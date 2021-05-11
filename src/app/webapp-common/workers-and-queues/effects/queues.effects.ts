@@ -6,45 +6,76 @@ import {ApiQueuesService} from '../../../business-logic/api-services/queues.serv
 import {QueuesGetQueueMetricsRequest} from '../../../business-logic/model/queues/queuesGetQueueMetricsRequest';
 import {QueuesGetQueueMetricsResponse} from '../../../business-logic/model/queues/queuesGetQueueMetricsResponse';
 import {Queue} from '../../../business-logic/model/queues/queue';
-import {selectQueuesStatsTimeFrame, selectQueuesTableSortField, selectQueuesTableSortOrder, selectQueueStats, selectSelectedQueue} from '../reducers/index.reducer';
+import {
+  selectQueuesStatsTimeFrame,
+  selectQueuesTableSortFields,
+  selectQueueStats, selectSelectedQueue
+} from '../reducers/index.reducer';
 import {ActiveLoader, AddMessage, DeactiveLoader} from '../../core/actions/layout.actions';
 import {RequestFailed} from '../../core/actions/http.actions';
-import {ADD_EXPERIMENT_TO_QUEUE, AddExperimentToQueue, DELETE_QUEUE, DeleteQueue, GET_QUEUES, GET_STATS, GetQueues, GetStats, MOVE_EXPERIMENT_IN_QUEUE, MOVE_EXPERIMENT_TO_BOTTOM_OF_QUEUE, MOVE_EXPERIMENT_TO_OTHER_QUEUE, MOVE_EXPERIMENT_TO_TOP_OF_QUEUE, MoveExperimentInQueue, MoveExperimentToBottomOfQueue, MoveExperimentToOtherQueue, MoveExperimentToTopOfQueue, QUEUES_TABLE_SORT_CHANGED, QueuesTableSortChanged, REFRESH_SELECTED_QUEUE, RefreshSelectedQueue, REMOVE_EXPERIMENT_FROM_QUEUE, RemoveExperimentFromQueue, SET_SELECTED_QUEUE, SetQueues, SetSelectedQueue, SetSelectedQueueFromServer, SetStats, SyncSpecificQueueInTable} from '../actions/queues.actions';
+import {
+  ADD_EXPERIMENT_TO_QUEUE,
+  AddExperimentToQueue,
+  DELETE_QUEUE,
+  DeleteQueue,
+  GET_STATS,
+  getQueues,
+  GetStats,
+  MOVE_EXPERIMENT_IN_QUEUE,
+  MOVE_EXPERIMENT_TO_BOTTOM_OF_QUEUE,
+  MOVE_EXPERIMENT_TO_OTHER_QUEUE,
+  MOVE_EXPERIMENT_TO_TOP_OF_QUEUE,
+  MoveExperimentInQueue,
+  MoveExperimentToBottomOfQueue,
+  MoveExperimentToOtherQueue,
+  MoveExperimentToTopOfQueue,
+  REFRESH_SELECTED_QUEUE,
+  RefreshSelectedQueue,
+  REMOVE_EXPERIMENT_FROM_QUEUE,
+  RemoveExperimentFromQueue,
+  SET_SELECTED_QUEUE,
+  SetQueues,
+  SetSelectedQueue,
+  SetSelectedQueueFromServer,
+  SetStats,
+  SyncSpecificQueueInTable,
+  queuesTableSortChanged, queuesTableSetSort
+} from '../actions/queues.actions';
 import {MESSAGES_SEVERITY} from '../../../app.constants';
 import {QueueMetrics} from '../../../business-logic/model/queues/queueMetrics';
 import {ApiTasksService} from '../../../business-logic/api-services/tasks.service';
-import {cloneDeep, get} from 'lodash/fp';
-import {QUEUES_TABLE_COL_FIELDS} from '../workers-and-queues.consts';
+import {cloneDeep, orderBy} from 'lodash/fp';
 import {addFullRangeMarkers, addStats, removeFullRangeMarkers} from '../../shared/utils/statistics';
 import {hideNoStatsNotice, showStatsErrorNotice} from '../actions/stats.actions';
+import {encodeOrder} from '../../shared/utils/tableParamEncode';
+import {addMultipleSortColumns} from '../../shared/utils/shared-utils';
 
 @Injectable()
 export class QueuesEffect {
   constructor(
     private actions: Actions, private queuesApi: ApiQueuesService, private tasksApi: ApiTasksService,
     private store: Store<any>
-  ) {}
+  ) {
+  }
 
   @Effect()
   activeLoader = this.actions.pipe(
-    ofType(GET_QUEUES, REFRESH_SELECTED_QUEUE),
+    ofType(getQueues, REFRESH_SELECTED_QUEUE),
     map(action => new ActiveLoader(action.type))
   );
 
   @Effect()
   getQueues = this.actions.pipe(
-    ofType<GetQueues | QueuesTableSortChanged>(GET_QUEUES, QUEUES_TABLE_SORT_CHANGED),
+    ofType(getQueues, queuesTableSetSort),
     withLatestFrom(
-      this.store.select(selectQueuesTableSortOrder),
-      this.store.select(selectQueuesTableSortField)),
-    switchMap(([action, orderSort, orderField]) => this.queuesApi.queuesGetAllEx({
+      this.store.select(selectQueuesTableSortFields)),
+    switchMap(([action, orderFields]) => this.queuesApi.queuesGetAllEx({
       only_fields: ['*', 'entries.task.name'],
-      order_by: [(orderSort === 1 ? '-' : '') + orderField],
+      order_by: encodeOrder(orderFields)
     }).pipe(
-      mergeMap(res => [new SetQueues(this.sortQueues(orderField, orderSort, res.queues)), new DeactiveLoader(action.type)]),
+      mergeMap(res => [new SetQueues(this.sortQueues(orderFields, res.queues)), new DeactiveLoader(action.type)]),
       catchError(err => [new DeactiveLoader(action.type), new RequestFailed(err)])
-    )
-    )
+    ))
   );
 
   @Effect()
@@ -52,13 +83,16 @@ export class QueuesEffect {
     ofType<SetSelectedQueue>(SET_SELECTED_QUEUE),
     filter(action => !!action.payload.queue),
     tap(action => this.store.dispatch(new ActiveLoader(action.type))),
-    switchMap(action => this.queuesApi.queuesGetAllEx({id: [action.payload.queue.id], only_fields: ['*', 'entries.task.name']}).pipe(
+    switchMap(action => this.queuesApi.queuesGetAllEx({
+        id: [action.payload.queue.id],
+        only_fields: ['*', 'entries.task.name']
+      }).pipe(
       mergeMap(res => [
         new SetSelectedQueueFromServer(res.queues[0]),
         new SyncSpecificQueueInTable(res.queues[0]),
         new DeactiveLoader(action.type)]),
       catchError(err => [new DeactiveLoader(action.type), new RequestFailed(err)])
-    )
+      )
     )
   );
 
@@ -66,7 +100,10 @@ export class QueuesEffect {
   RefreshSelectedQueue = this.actions.pipe(
     ofType<RefreshSelectedQueue>(REFRESH_SELECTED_QUEUE),
     withLatestFrom(this.store.select(selectSelectedQueue)),
-    switchMap(([action, queue]) => this.queuesApi.queuesGetAllEx({id: [queue.id], only_fields: ['*', 'entries.task.name']}).pipe(
+    switchMap(([action, queue]) => this.queuesApi.queuesGetAllEx({
+      id: [queue.id],
+      only_fields: ['*', 'entries.task.name']
+    }).pipe(
       mergeMap(res => [
         new SetSelectedQueueFromServer(res.queues[0]),
         new SyncSpecificQueueInTable(res.queues[0]),
@@ -79,7 +116,9 @@ export class QueuesEffect {
   deleteQueues = this.actions.pipe(
     ofType<DeleteQueue>(DELETE_QUEUE),
     switchMap(action => this.queuesApi.queuesDelete({queue: action.payload.queue.id}).pipe(
-      mergeMap(res => [new GetQueues()]),
+      mergeMap(res => [getQueues(),
+        new SetSelectedQueue(),
+      ]),
       catchError(err => [new DeactiveLoader(action.type), new RequestFailed(err), new AddMessage(MESSAGES_SEVERITY.ERROR, 'Delete Queue failed')])
     ))
   );
@@ -88,7 +127,10 @@ export class QueuesEffect {
   moveExperimentToTopOfQueue = this.actions.pipe(
     ofType<MoveExperimentToTopOfQueue>(MOVE_EXPERIMENT_TO_TOP_OF_QUEUE),
     withLatestFrom(this.store.select(selectSelectedQueue)),
-    switchMap(([action, queue]) => this.queuesApi.queuesMoveTaskToFront({queue: queue.id, task: action.payload.task}).pipe(
+    switchMap(([action, queue]) => this.queuesApi.queuesMoveTaskToFront({
+      queue: queue.id,
+      task: action.payload.task
+    }).pipe(
       mergeMap(res => [new RefreshSelectedQueue()]),
       catchError(err => [new DeactiveLoader(action.type), new RequestFailed(err), new AddMessage(MESSAGES_SEVERITY.ERROR, 'Move Experiment failed')])
     ))
@@ -98,7 +140,10 @@ export class QueuesEffect {
   moveExperimentToBottomOfQueue = this.actions.pipe(
     ofType<MoveExperimentToBottomOfQueue>(MOVE_EXPERIMENT_TO_BOTTOM_OF_QUEUE),
     withLatestFrom(this.store.select(selectSelectedQueue)),
-    switchMap(([action, queue]) => this.queuesApi.queuesMoveTaskToBack({queue: queue.id, task: action.payload.task}).pipe(
+    switchMap(([action, queue]) => this.queuesApi.queuesMoveTaskToBack({
+      queue: queue.id,
+      task: action.payload.task
+    }).pipe(
       mergeMap(res => [new RefreshSelectedQueue()]),
       catchError(err => [new DeactiveLoader(action.type), new RequestFailed(err), new AddMessage(MESSAGES_SEVERITY.ERROR, 'Move Experiment failed')])
     ))
@@ -109,7 +154,11 @@ export class QueuesEffect {
     ofType<MoveExperimentInQueue>(MOVE_EXPERIMENT_IN_QUEUE),
     withLatestFrom(this.store.select(selectSelectedQueue)),
     switchMap(([action, queue]) =>
-      this.queuesApi.queuesMoveTaskBackward({queue: queue.id, task: action.payload.task, count: (action.payload.count)}).pipe(
+      this.queuesApi.queuesMoveTaskBackward({
+        queue: queue.id,
+        task: action.payload.task,
+        count: (action.payload.count)
+      }).pipe(
         mergeMap(res => [new RefreshSelectedQueue()]),
         catchError(err => [new DeactiveLoader(action.type), new RequestFailed(err), new AddMessage(MESSAGES_SEVERITY.ERROR, 'Move Queue failed')])
       )
@@ -143,7 +192,7 @@ export class QueuesEffect {
   addExperimentToQueue = this.actions.pipe(
     ofType<AddExperimentToQueue>(ADD_EXPERIMENT_TO_QUEUE),
     switchMap((action) => this.queuesApi.queuesAddTask({queue: action.payload.queue, task: action.payload.task}).pipe(
-      mergeMap(res => [new RefreshSelectedQueue(), new GetQueues()]),
+      mergeMap(res => [new RefreshSelectedQueue(), getQueues()]),
       catchError(err => [new DeactiveLoader(action.type), new RequestFailed(err), new AddMessage(MESSAGES_SEVERITY.ERROR, 'Add experiment to queue failed')])
       )
     )
@@ -233,16 +282,19 @@ export class QueuesEffect {
     })
   );
 
-  private sortQueues(sortField, sortOrder, queues: any) {
-    if ([QUEUES_TABLE_COL_FIELDS.IN_QUEUE, QUEUES_TABLE_COL_FIELDS.TASK].includes(sortField)) {
-      const sortedQueues = [...queues];
-      return sortedQueues.sort((queueA, queueB) => {
-        const fieldValA = get(sortField, queueA);
-        const fieldValB = get(sortField, queueB);
-        return sortOrder * (((!fieldValA && fieldValA !== 0) || (fieldValA > fieldValB)) ? 1 : -1);
-      });
-    } else {
-      return queues;
-    }
+  @Effect()
+  tableSortChange = this.actions.pipe(
+    ofType(queuesTableSortChanged),
+    withLatestFrom(this.store.select(selectQueuesTableSortFields)),
+    switchMap(([action, oldOrders]) => {
+      let orders = addMultipleSortColumns(oldOrders, action.colId, action.isShift);
+      return [queuesTableSetSort({orders})];
+    })
+  );
+
+  private sortQueues(sortFields, queues): Queue[] {
+    const srtByFields = sortFields.map(f => f.field);
+    const srtByOrders = sortFields.map(f => f.order > 0? 'asc' : 'desc');
+    return orderBy<Queue>(srtByFields, srtByOrders, queues) as any;
   }
 }

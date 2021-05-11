@@ -1,5 +1,6 @@
-import {TableSortOrderEnum, ISmCol} from '../ui-components/data/table/table.consts';
+import {TableSortOrderEnum, ISmCol, TABLE_SORT_ORDER} from '../ui-components/data/table/table.consts';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
+import {SortMeta} from 'primeng/api';
 
 export interface TableFilter {
   col?: string;
@@ -19,8 +20,8 @@ export function getValueTypeName(valueType: string) {
   return valueType.replace('_', '').replace('value', '').toUpperCase();
 }
 
-export function encodeOrder(direction: 'asc' | 'desc', field: string): string {
-  return `${direction === 'desc' ? '-' : ''}${field}`;
+export function encodeOrder(orders: SortMeta[]): string[] {
+  return orders.map(order => `${order.order === TABLE_SORT_ORDER.DESC ? '-' : ''}${order.field}`);
 }
 
 export function encodeFilters(filters: { [key: string]: FilterMetadata }) {
@@ -34,12 +35,17 @@ export function encodeFilters(filters: { [key: string]: FilterMetadata }) {
   }
 }
 
-export function decodeOrder(order: string): [string, TableSortOrderEnum] {
-  if (order[0] === '-') {
-    return [order.slice(1), -1];
-  } else {
-    return [order, 1];
+export function decodeOrder(orders: string[]): SortMeta[] {
+  if (typeof orders === 'string') {
+    orders = [orders];
   }
+  return orders.map(order => {
+    if (order[0] === '-') {
+      return {field: order.slice(1), order: -1} as SortMeta;
+    } else {
+      return {field: order, order: 1} as SortMeta;
+    }
+  });
 }
 
 export function decodeFilter(filters: string): TableFilter[] {
@@ -51,7 +57,7 @@ export function decodeFilter(filters: string): TableFilter[] {
     //   mode = parts[1];
     //   parts[1] = parts[2];
     // }
-    return {col, filterMatchMode: mode, value: values?.split('+')};
+    return {col, filterMatchMode: mode, value: values?.split('+').map( x => x === '' ? null : x )};
   });
 }
 
@@ -62,7 +68,7 @@ export function sortCol(a, b, colsOrder) {
 }
 
 export function encodeColumns(mainCols: ISmCol[] | any, hiddenCols = {}, metricsCols = [], colsOrder = []): string[] {
-  colsOrder.filter(col => !hiddenCols[col]);
+  colsOrder = colsOrder.filter(col => !hiddenCols[col]);
   return mainCols
     .filter(col => !hiddenCols[col.id])
     .concat(metricsCols ? metricsCols.filter(col => !hiddenCols[col.id]) : [])
@@ -73,9 +79,7 @@ export function encodeColumns(mainCols: ISmCol[] | any, hiddenCols = {}, metrics
         const variant = headerParts[1]?.replace(` ${getValueTypeName(col.valueType)}`, '');
         return `m.${col.metric_hash}.${col.variant_hash}.${col.valueType}.${headerParts[0]}.${variant}`;
       }
-      if (col.isParam) {
-        return `p.${col.header}`;
-      } else {
+      else {
         return col.id;
       }
     });
@@ -90,23 +94,35 @@ export function decodeColumns(columns: string[]): [string[], MetricColumn[], str
   columns.forEach(col => {
     if (col.startsWith('m.')) {
       const colParts = col.split('.');
+      const  [_, metricHash, variantHash, valueType, metric, ...variant] = colParts;
       metrics.push({
-        metricHash: colParts[1],
-        variantHash: colParts[2],
-        valueType: colParts[3],
-        metric: colParts[4],
-        variant: colParts[5]
+        metricHash,
+        variantHash,
+        valueType,
+        metric,
+        variant: variant.join('.')
       });
       allIds.push(`last_metrics.${colParts[1]}.${colParts[2]}.${colParts[3]}`);
-    } else if (col.startsWith('p.')) {
-      const colParts = col.split('.');
-      const param = colParts[1] + (colParts[2] ? `.${colParts[2]}` : '');
-      params.push(param);
-      allIds.push(param);
-    } else {
+    }
+      else if (col.startsWith('hyperparams.')) {
+        // const colParts = col.split('.');
+        // const param = colParts[1] + (colParts[2] ? `.${colParts[2]}` : '');
+        params.push(col);
+        allIds.push(col);
+    }
+    else {
       cols.push(col);
       allIds.push(col);
     }
   });
   return [cols, metrics, params, allIds];
+}
+
+
+export function decodeHyperParam(param: string): {name: string; section: string}  {
+  const split = param.replace('hyperparams.', '').split('.');
+  return {
+    name: split[1],
+    section: split[0]
+  };
 }

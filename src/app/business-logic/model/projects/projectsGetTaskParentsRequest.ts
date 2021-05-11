@@ -17,15 +17,14 @@ export interface ProjectsGetTaskParentsRequest {
      * The list of projects which task parents are retieved. If not passed or empty   then all the projects are searched
      */
     projects?: Array<string>;
-    /**
-     * Return parents for tasks in the specified state. If Null is provided, parents   for all task states will be returned.
-     */
-    tasks_state?: ProjectsGetTaskParentsRequest.TasksStateEnum;
+
+  tasks_state?: ProjectsGetTaskParentsRequest.TasksStateEnum;
 }
+
 export namespace ProjectsGetTaskParentsRequest {
-    export type TasksStateEnum = 'active' | 'archived';
-    export const TasksStateEnum = {
-        Active: 'active' as TasksStateEnum,
-        Archived: 'archived' as TasksStateEnum
-    }
+  export type TasksStateEnum = 'active' | 'archived';
+  export const TasksStateEnum = {
+    Active: 'active' as TasksStateEnum,
+    Archived: 'archived' as TasksStateEnum
+  };
 }

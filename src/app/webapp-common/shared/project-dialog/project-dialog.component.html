@@ -1,0 +1,7 @@
+<sm-dialog-template [iconClass]="modeParameters[mode]?.icon" [header]="modeParameters[mode]?.header">
+  <sm-create-new-project-form *ngIf="mode==='create'" [projects]="projects$| async" [baseProjectId]="baseProjectId"  (projectCreated)="createProject($event)">
+  </sm-create-new-project-form>
+  <sm-project-move-to-form *ngIf="mode==='move'" [projects]="projects$| async" [baseProjectId]="baseProjectId"  (moveProject)="moveProject($event)" (dismissDialog)="closeDialog()">
+  </sm-project-move-to-form>
+
+</sm-dialog-template>

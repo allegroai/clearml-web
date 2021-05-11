@@ -1,39 +1,60 @@
 import {TableModel} from '../../webapp-common/models/shared/models.model';
-import {ISelectedExperiment} from '../../features/experiments/shared/experiment-info.model';
+import {IExperimentInfo} from '../../features/experiments/shared/experiment-info.model';
 import {Project} from '../../business-logic/model/projects/project';
 import {Task} from '../../business-logic/model/tasks/task';
 import {selectSelectedTableModel} from '../../webapp-common/models/reducers';
 import {createSelector} from '@ngrx/store';
 import {selectSelectedExperiment} from '../../features/experiments/reducers';
-import {selectSelectedProject} from '../../webapp-common/core/reducers/projects.reducer';
+import {selectProjects, selectSelectedProject} from '../../webapp-common/core/reducers/projects.reducer';
 import {formatStaticCrumb, prepareLinkData} from '../../webapp-common/layout/breadcrumbs/breadcrumbs-common.utils';
 
 export interface IBreadcrumbs {
   project: Project;
-  experiment: ISelectedExperiment;
+  projects: Project[];
+  experiment: IExperimentInfo;
   model: TableModel;
   task: Task;
 }
 
 export const selectBreadcrumbsStringsBase = createSelector(
-  selectSelectedProject, selectSelectedExperiment, selectSelectedTableModel,
-  (project, experiment, model) =>
-    ({project, experiment, model}) as IBreadcrumbs);
+  selectSelectedProject, selectSelectedExperiment, selectSelectedTableModel,selectProjects,
+  (project, experiment, model,projects) =>
+    ({project, experiment, model, projects}) as IBreadcrumbs);
 
 
 
 export function prepareNames(data: IBreadcrumbs) {
-
   const project    = prepareLinkData(data.project, true);
-
+  if (data.project) {
+    const subProjects = [];
+    const subProjectsNames = data.project?.name?.split('/');
+    let currentName = '';
+    subProjectsNames.forEach(name => {
+      currentName += currentName ? ('/' + name) : name;
+      const foundProject = [
+        ...data.projects,
+        {id: '*', name: 'All Experiments'},
+        {...data.project}
+      ].find(project => currentName === project.name);
+      subProjects.push(foundProject);
+    });
+    const subProjectsLinks = subProjects.map(project => ({
+      name: project?.name.substring(project?.name.lastIndexOf('/') + 1),
+      url: `projects/${project?.id}/projects`
+    })) as { name: string; url: string }[];
+    project.name = project.name.substring(project.name.lastIndexOf('/') + 1);
+    project.subCrumbs = subProjectsLinks;
+  }
   const task       = prepareLinkData(data.task);
   const experiment = (data.experiment) ? prepareLinkData(data.experiment, true) : {};
   const model      = prepareLinkData(data.model, true);
-
+  const overview = formatStaticCrumb('overview');
   const output      = formatStaticCrumb('');
+  const accountAdministration      = formatStaticCrumb('account-administration');
   const experiments = formatStaticCrumb('experiments');
   const models      = formatStaticCrumb('models');
   const compare     = formatStaticCrumb('compare-experiments');
+
 
   return {
     ':projectId'         : project,
@@ -43,6 +64,7 @@ export function prepareNames(data: IBreadcrumbs) {
     'compare-experiments': compare,
     output,
     experiments,
+    overview,
     models,
     execution: formatStaticCrumb('execution'),
     'hyper-params' : formatStaticCrumb('hyper-params'),
@@ -51,6 +73,7 @@ export function prepareNames(data: IBreadcrumbs) {
     log: formatStaticCrumb('logs'),
     'scalar': formatStaticCrumb('scalars'),
     'plots': formatStaticCrumb('plots'),
+    accountAdministration,
     debugImages: formatStaticCrumb('Debug Samples'),
   };
 }

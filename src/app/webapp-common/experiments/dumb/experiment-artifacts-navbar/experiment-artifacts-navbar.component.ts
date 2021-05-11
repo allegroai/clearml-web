@@ -1,23 +1,24 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {Component, Input, OnChanges, SimpleChanges} from '@angular/core';
 import {Artifact} from '../../../../business-logic/model/tasks/artifact';
+import {IModelInfo} from '../../shared/common-experiment-model.model';
 
-type ActiveSection = 'model' | 'artifact' | 'other';
-export const ACTIVE_SECTIONS = {
-  'model'   : 'model' as ActiveSection,
-  'artifact': 'artifact' as ActiveSection,
-  'other'   : 'other' as ActiveSection,
-};
-
+ enum ActiveSectionEnum {
+   'input-model' = 'input-model',
+   'output-model' = 'output-model',
+   'artifact' = 'artifact',
+   'other' = 'other',
+ }
 @Component({
   selector   : 'sm-experiment-artifacts-navbar',
   templateUrl: './experiment-artifacts-navbar.component.html',
   styleUrls  : ['./experiment-artifacts-navbar.component.scss']
 })
-export class ExperimentArtifactsNavbarComponent {
+export class ExperimentArtifactsNavbarComponent implements OnChanges{
   readonly DATA_AUDIT_TABLE = 'data-audit-table';
   public dataAuditArtifacts: Artifact[];
   public otherArtifacts: Artifact[];
-  public ACTIVE_SECTIONS    = ACTIVE_SECTIONS;
+  public ACTIVE_SECTIONS    = ActiveSectionEnum;
+  public noItemsMode: boolean;
 
   @Input() set artifacts(artifacts: Array<Artifact>) {
     if (artifacts) {
@@ -27,17 +28,20 @@ export class ExperimentArtifactsNavbarComponent {
   }
 
   @Input() selectedArtifactKey;
-  @Input() outputModel;
-  @Input() inputModel;
+  @Input() outputModels: IModelInfo[];
+  @Input() inputModels: IModelInfo[];
   @Input() editable;
-  @Input() activeSection;
+  @Input() activeSection: ActiveSectionEnum;
   @Input() routerConfig: string[];
-  @Output() artifactSelected = new EventEmitter();
 
   constructor() {
   }
 
   trackByFn(index, artifact) {
     return (artifact.key + artifact.mode);
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    this.noItemsMode = this.outputModels?.length === 0 && this.inputModels?.length === 0 && this.dataAuditArtifacts?.length === 0 && this.otherArtifacts?.length === 0;
   }
 }

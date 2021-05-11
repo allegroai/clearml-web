@@ -1,5 +1,4 @@
 import { Component, OnInit, Input } from '@angular/core';
-import {ICONS} from "../../../../../app.constants";
 
 @Component({
   selector: 'sm-neon-button',

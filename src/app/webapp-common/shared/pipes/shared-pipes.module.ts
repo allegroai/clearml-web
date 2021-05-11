@@ -24,8 +24,9 @@ import {AdvancedFilterPipe} from './advanced-filter.pipe';
 import {SafePipe} from './safe.pipe';
 import {SelectOptionValueToLabelPipe} from './selectOptionValueToLabel.pipe';
 import {IsVideoPipe} from './is-video.pipe';
-import {IsAudioPipe} from './is-audio.pipe';
 import {ToPercentagePipe} from './to-precentage.pipe';
+import {SimpleFilterPipe} from './simple-filter.pipe';
+import {IsAudioPipe} from './is-audio.pipe';
 import {ShowSelectedFirstPipe} from './show-selected-first.pipe';
 import {CountPipe} from './count.pipe';
 import {LabelValuePipe} from './label-value.pipe';
@@ -35,13 +36,20 @@ import {ReplaceViaMapPipe} from './replaceViaMap';
 import {FilterByIdPipe} from './filterById.pipe';
 import {FilterOutPipe} from './filterOut.pipe';
 import {DurationPipe} from "./duration.pipe";
+import {BreadcrumbsEllipsisPipe} from './breadcrumbs-ellipsis.pipe';
+import { ShortProjectNamePipe } from './short-project-name.pipe';
+import {ProjectLocationPipe} from "./project-location.pipe";
+import { StringIncludedInArrayPipe } from './string-included-in-array.pipe';
+import {FilterLast} from "./filterLast.pipe";
+import {ToPropertyArrayPipe} from "@common/shared/pipes/toPropertyArray.pipe";
+import {MenuItemTextPipe} from "@common/shared/pipes/menu-item-text.pipe";
 
 
 const pipes = [
   CamelToTitlePipe, FilenameFromPath, FilterPipe, FloorPipe, KeyValuePipe, NAPipe, SortPipe, IsVideoPipe, IsAudioPipe,
   JoinPipe, KeyvalPipe, LabelValuePipe, NoUnderscorePipe, NumberToKPipe, UniqueByPipe, MsToHoursPipe, MsToSecPipe, DurationPipe,
-  ToExponentialPipe, HighlightSearchTextPipe, HideHashPipe, HideHashTitlePipe, TimeAgoPipe, TimeTillNowPipe, HasExampleItemPipe,safeAngularUrlParameterPipe,
-  AdvancedFilterPipe, SafePipe, SelectOptionValueToLabelPipe, ToPercentagePipe, ReplaceViaMapPipe, FilterByIdPipe, FilterOutPipe
+  ToExponentialPipe, HighlightSearchTextPipe, HideHashPipe, HideHashTitlePipe, TimeAgoPipe, TimeTillNowPipe, HasExampleItemPipe, safeAngularUrlParameterPipe,
+  AdvancedFilterPipe, SafePipe, SelectOptionValueToLabelPipe, ToPercentagePipe, ReplaceViaMapPipe, FilterByIdPipe, FilterLast, FilterOutPipe, SimpleFilterPipe, BreadcrumbsEllipsisPipe, ShortProjectNamePipe, ProjectLocationPipe,StringIncludedInArrayPipe, ToPropertyArrayPipe, MenuItemTextPipe
 ];
 
 @NgModule({

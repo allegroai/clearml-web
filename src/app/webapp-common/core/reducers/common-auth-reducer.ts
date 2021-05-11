@@ -31,7 +31,7 @@ export interface IAuthState {
   S3PopUpDetails?: IS3PopupDetails;
   revokeSucceed: boolean;
   credentials: {[workSpaceId: string]: CredentialKey[]};
-  newCredential: any;
+  newCredential: {access_key: string; secrete_key: string; company: string};
   dontShowAgainForBucketEndpoint: string;
   S3BucketCredentials: { BucketCredentials: any[] };
   showS3PopUp: false;
@@ -43,7 +43,7 @@ export const initAuth: IAuthState = {
   S3PopUpDetails: {},
   revokeSucceed: false,
   credentials: {},
-  newCredential: {},
+  newCredential: null,
   dontShowAgainForBucketEndpoint: '',
   S3BucketCredentials: {
     BucketCredentials: []

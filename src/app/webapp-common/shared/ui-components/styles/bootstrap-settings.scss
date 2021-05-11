@@ -7,7 +7,7 @@ $light-bootstrap-theme: map-get($light-theme, bootstrap);
 $dark-theme-input: map-get($dark-theme, input);
 $light-theme-input: map-get($light-theme, input);
 
-$btn-font-weight: bold;
+$btn-font-weight: 500;
 $font-family-base: $font-family-base;
 //override bootstrap
 .dark-theme {
@@ -30,14 +30,21 @@ $font-family-base: $font-family-base;
 
   @import '~bootstrap/scss/bootstrap.scss';
 
+  .btn {
+    font-size: 12px;
+    line-height: 1;
+    letter-spacing: 0.03em;
+    padding: 6px 12px;
+    border-radius: 4px;
+  }
+
   .btn-neon {
     font-size: 12px;
-    font-weight: bold;
+    font-weight: 500;
     color: $blue-500;
     height: 32px;
     border-radius: 4px;
     background-color: $neon-yellow;
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.13);
     padding: 0px 32px;
 
     &:hover:not([disabled]) {
@@ -81,7 +88,8 @@ $font-family-base: $font-family-base;
     font-weight: bold;
     background-color: $white;
     border: solid 1px $neon-yellow;
-    padding: 0 40px;
+    padding: 0 32px;
+    font-size: 12px;
     color: $blue-500;
     box-shadow: none !important;
 
@@ -124,6 +132,12 @@ $font-family-base: $font-family-base;
 
 
   @import '~bootstrap/scss/bootstrap.scss';
+
+  .btn {
+    font-size: 11px;
+    line-height: normal;
+    letter-spacing: 0.03em;
+  }
 
   .btn-primary {
     color: map-get($light-bootstrap-theme, primary-font-color) !important;
@@ -188,12 +202,11 @@ $font-family-base: $font-family-base;
 
   .btn-neon {
     font-size: 12px;
-    font-weight: bold;
+    font-weight: 500;
     color: $blue-500;
     height: 32px;
     border-radius: 4px;
     background-color: $neon-yellow;
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.13);
     padding: 0px 32px;
     transition: background-color ease-in-out 0.3s;
 
@@ -213,13 +226,12 @@ $font-family-base: $font-family-base;
   .btn-outline-neon {
     height: 32px;
     border-radius: 4px;
-    font-weight: bold;
+    font-weight: 500;
     background-color: $white;
     border: solid 1px $neon-yellow;
-    padding: 0 40px;
+    padding: 0 32px;
     color: $blue-500;
-    box-shadow: none !important;
-
+    font-size: 12px;
     &:hover {
       background-color: #f8f9fa; // TODO: ask brio.
       border: solid 1px $neon-yellow-hover;
@@ -256,6 +268,12 @@ $font-family-base: $font-family-base;
 label.mat-slide-toggle-label {
   display: flex;
   margin-bottom: 0;
+}
+
+.btn {
+  font-size: 11px;
+  line-height: normal;
+  letter-spacing: 0.03em;
 }
 
 .btn.btn-icon {

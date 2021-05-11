@@ -1,48 +1,69 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {Observable} from 'rxjs';
 import {Queue} from '../../../../business-logic/model/queues/queue';
 import {Task} from '../../../../business-logic/model/tasks/task';
-import {select, Store} from '@ngrx/store';
-import {Router} from '@angular/router';
-import {DeleteQueue, GetQueues, MoveExperimentInQueue, MoveExperimentToBottomOfQueue, MoveExperimentToOtherQueue, MoveExperimentToTopOfQueue, QueuesTableSortChanged, RemoveExperimentFromQueue, SetSelectedQueue} from '../../actions/queues.actions';
-import {selectQueues, selectQueuesTableSortField, selectQueuesTableSortOrder, selectQueuesTasks, selectSelectedQueue} from '../../reducers/index.reducer';
-import {filter, take} from 'rxjs/operators';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import {ISmCol, TableSortOrderEnum} from '../../../shared/ui-components/data/table/table.consts';
+import {Store} from '@ngrx/store';
+import {ActivatedRoute, Router} from '@angular/router';
+import {DeleteQueue, getQueues, MoveExperimentInQueue, MoveExperimentToBottomOfQueue, MoveExperimentToOtherQueue, MoveExperimentToTopOfQueue, queuesTableSortChanged, RemoveExperimentFromQueue, SetSelectedQueue} from '../../actions/queues.actions';
+import {selectQueues, selectQueuesTableSortFields, selectQueuesTasks, selectSelectedQueue} from '../../reducers/index.reducer';
+import {filter, take, withLatestFrom} from 'rxjs/operators';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {ISmCol} from '../../../shared/ui-components/data/table/table.consts';
 import {QueueCreateDialogComponent} from '../../../shared/queue-create-dialog/queue-create-dialog.component';
+import {SortMeta} from 'primeng/api';
 
 @Component({
-  selector   : 'sm-queues',
+  selector: 'sm-queues',
   templateUrl: './queues.component.html',
-  styleUrls  : ['./queues.component.scss']
+  styleUrls: ['./queues.component.scss']
 })
-export class QueuesComponent implements OnInit, OnDestroy {
+export class QueuesComponent implements OnInit {
 
-  public queues$: Observable<Array<Queue>>;
-  public queuesTasks$: Observable<Map<string, Array<Task>>>;
+  public queues$: Observable<Queue[]>;
+  public queuesTasks$: Observable<Map<string, Task[]>>;
   public selectedQueue$: Observable<Queue>;
   private createQueueDialog: MatDialogRef<QueueCreateDialogComponent, any>;
   public tableSortOrder$: Observable<1 | -1>;
-  public tableSortField$: Observable<string>;
+  public tableSortFields$: Observable<SortMeta[]>;
 
-  constructor(private store: Store<any>, private router: Router, private dialog: MatDialog) {
-    this.queues$         = this.store.select(selectQueues);
-    this.queuesTasks$    = this.store.select(selectQueuesTasks);
-    this.selectedQueue$  = this.store.pipe(select(selectSelectedQueue));
-    this.tableSortOrder$ = this.store.select(selectQueuesTableSortOrder);
-    this.tableSortField$ = this.store.select(selectQueuesTableSortField);
+  get routerQueueId() {
+    const url = new URL(window.location.href);
+    return url.searchParams.get('id');
+  }
+
+  constructor(private store: Store<any>, private router: Router, private route: ActivatedRoute, private dialog: MatDialog) {
+    this.queues$ = this.store.select(selectQueues);
+    this.queuesTasks$ = this.store.select(selectQueuesTasks);
+    this.selectedQueue$ = this.store.select(selectSelectedQueue);
+    this.tableSortFields$ = this.store.select(selectQueuesTableSortFields);
   }
 
   ngOnInit(): void {
-    this.store.dispatch(new GetQueues());
+    this.store.dispatch(getQueues());
+
+    this.queues$.pipe(
+      withLatestFrom(this.selectedQueue$),
+      filter(([queues, selectedQueue]) => queues && selectedQueue?.id !== this.routerQueueId),
+      take(1))
+      .subscribe(([queues]) => {
+        const selectedQueue = queues.find(queue => queue.id === this.routerQueueId);
+        this.selectQueue(selectedQueue);
+      });
   }
 
-  sortedChanged(sort: { sortOrder: TableSortOrderEnum, colId: ISmCol['id'] }) {
-    this.store.dispatch(new QueuesTableSortChanged(sort.colId, sort.sortOrder));
+  sortedChanged(sort: { isShift: boolean; colId: ISmCol['id'] }) {
+    this.store.dispatch(queuesTableSortChanged({colId: sort.colId, isShift: sort.isShift}));
   }
 
 
   public selectQueue(queue) {
+    this.router.navigate(
+      [],
+      {
+        relativeTo: this.route,
+        queryParams: {id: queue?.id},
+        queryParamsHandling: 'merge'
+      });
     this.store.dispatch(new SetSelectedQueue(queue));
   }
 
@@ -57,8 +78,8 @@ export class QueuesComponent implements OnInit, OnDestroy {
         filter(queue => !!queue),
         take(1)
       )
-      .subscribe((queue) => {
-        this.store.dispatch(new GetQueues());
+      .subscribe(() => {
+        this.store.dispatch(getQueues());
       });
   }
 
@@ -80,9 +101,5 @@ export class QueuesComponent implements OnInit, OnDestroy {
 
   moveExperimentInQueue($event: any) {
     this.store.dispatch(new MoveExperimentInQueue($event));
-  }
-
-  ngOnDestroy(): void {
-    this.selectQueue(null);
   }
 }

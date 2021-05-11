@@ -8,7 +8,7 @@
   height: 100%;
   overflow: auto;
 
-  /deep/ .mat-spinner circle {
+  ::ng-deep .mat-spinner circle {
     stroke: #FFFFFF !important;
   }
 }
@@ -134,6 +134,10 @@
         background-color: #ffffff;
         color: $blue-400;
         height: 40px;
+
+        i {
+          color: $blue-700;
+        }
       }
 
       .spinner {
@@ -156,6 +160,7 @@
 
     .separator {
       display: flex;
+      justify-content: center;
       color: $blue-250;
       font-size: 11px;
 
@@ -205,13 +210,14 @@
       .sso-body {
         padding: 24px;
       }
+    }
 
-      .terms-of-use {
-        display: flex;
-        text-align: left;
-        margin-top: 24px;
-        font-size: 14px;
-      }
+    .terms-of-use {
+      display: flex;
+      text-align: left;
+      margin-top: 24px;
+      font-size: 14px;
+      color: #b9bdd4;
 
       a[href] {
         text-decoration: underline;
@@ -434,3 +440,9 @@
   color: #ff6f81;
   text-align: left;
 }
+
+.other-email {
+  margin-top: 16px;
+  text-align: left;
+}
+

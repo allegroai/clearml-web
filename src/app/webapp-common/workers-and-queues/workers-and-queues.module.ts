@@ -23,21 +23,23 @@ import {SharedModule} from '../../shared/shared.module';
 import {ExperimentSharedModule} from '../../features/experiments/shared/experiment-shared.module';
 import {QueueCreateDialogModule} from '../shared/queue-create-dialog/queue-create-dialog.module';
 import {SelectQueueModule} from '../experiments/shared/components/select-queue/select-queue.module';
+import {FormsModule} from "@angular/forms";
 
 @NgModule({
-  imports     : [
-    ExperimentSharedModule,
-    SharedPipesModule,
-    CommonModule,
-    WorkersAndQueuesRoutingModule,
-    SharedModule,
-    SMSharedModule,
-    QueueCreateDialogModule,
-    SelectQueueModule,
-    StoreModule.forFeature('workersAndQueues', reducers),
-    EffectsModule.forFeature([WorkersEffects, QueuesEffect]),
-    AngularSplitModule.forRoot()
-  ],
+    imports: [
+        ExperimentSharedModule,
+        SharedPipesModule,
+        CommonModule,
+        WorkersAndQueuesRoutingModule,
+        SharedModule,
+        SMSharedModule,
+        QueueCreateDialogModule,
+        SelectQueueModule,
+        StoreModule.forFeature('workersAndQueues', reducers),
+        EffectsModule.forFeature([WorkersEffects, QueuesEffect]),
+        AngularSplitModule,
+        FormsModule
+    ],
   declarations: [
     WorkersAndQueuesComponent,
     WorkersComponent,

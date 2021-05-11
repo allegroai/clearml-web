@@ -5,7 +5,7 @@
   height: 100%;
   overflow: auto;
 
-  /deep/ .mat-expansion-panel {
+  ::ng-deep .mat-expansion-panel {
     box-shadow: none;
     color: $blue-400;
     border-radius: 0;
@@ -70,7 +70,7 @@
     }
   }
 
-  /deep/ .mat-expansion-panel-header-description {
+  ::ng-deep .mat-expansion-panel-header-description {
     flex-grow: 0;
     color: $blue-400;
   }

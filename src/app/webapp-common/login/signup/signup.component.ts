@@ -111,7 +111,7 @@ export class SignupComponent implements OnInit, AfterViewInit, OnDestroy {
     this.showGitHub = true;
 
     if (this.showGitHub) {
-      fetch('https://api.github.com/repos/allegroai/trains', {method: 'GET'})
+      fetch('https://api.github.com/repos/allegroai/clearml', {method: 'GET'})
         .then(response => response.json()
           .then(json => this.stars = json['stargazers_count'])
         );

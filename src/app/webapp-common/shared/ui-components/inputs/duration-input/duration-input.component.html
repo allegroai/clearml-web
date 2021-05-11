@@ -12,7 +12,7 @@
            maxlength="2"
            smKeyDownStopPropagation
            (focus)="$any($event.target).select()"
-           smTooltip="Hours"><span>:</span>
+           smTooltip="Hours"><span class="separator">:</span>
     <input #mins
            matInput
            name="min"
@@ -26,7 +26,7 @@
            maxlength="2"
            smKeyDownStopPropagation
            (focus)="$any($event.target).select()"
-           smTooltip="Minuets"><span>:</span>
+           smTooltip="Minuets"><span class="separator">:</span>
     <input #secs
            matInput
            name="sec"
@@ -40,7 +40,7 @@
            maxlength="2"
            smKeyDownStopPropagation
            (focus)="$any($event.target).select()"
-           smTooltip="Seconds"><span>.</span>
+           smTooltip="Seconds"><span class="separator">.</span>
     <input #mill
            [(ngModel)]="ms"
            matInput

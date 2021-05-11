@@ -4,7 +4,7 @@
     [class.minimized]="minimized"
     [hyperParams]="(hyperParamsInfo$| async)"
     [configuration]="configuration$ | async"
-    [routerConfig]="routerConfig$ | async"
+    [routerConfig]="(routerConfig$ | async)[minimized ? 5 : 6]"
     [routerParams]="routerParams$ | async"
     [disableAdd]="!(selectedExperiment?.status === 'created')"
   ></sm-experiment-hyper-params-navbar>

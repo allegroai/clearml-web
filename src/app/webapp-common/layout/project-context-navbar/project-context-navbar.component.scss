@@ -4,11 +4,9 @@ $lg-breakpoint: map-get($grid-breakpoints, lg);
 :host {
   .navbar-header-container {
     min-height: $nav-bar-height;
-    background-color: $blue-900;
     margin-left: $side-bar-close-width;
     .nav-bar-items-container {
       display: flex;
-      align-items: flex-end;
       position: absolute;
       left: 50%;
       transform: translateX(-50%);

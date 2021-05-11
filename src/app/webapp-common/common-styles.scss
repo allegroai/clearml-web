@@ -9,8 +9,10 @@
 @import "~britecharts/src/styles/common/tooltip";
 @import "~britecharts/src/styles/common/axes";
 @import "~britecharts/src/styles/common/grid";
+@import "~ngx-markdown-editor/assets/highlight.js/agate.min.css";
 @import "shared/ui-components/styles/material-palette";
 @import "assets/fonts/trains-icons.scss";
+@import "layout/layout";
 
 @include mat-core();
 //@import "../webapp-common/shared/ui-components/styles/material-theme.scss";
@@ -98,13 +100,13 @@ html, body {
   margin: 0;
   padding: 0;
   font-family: $font-family-base, sans-serif;
-  font-size: 13px;
+  font-size: 14px;
   overflow: hidden;
 }
 
 
 .al-header {
-  font-weight: bold;
+  font-weight: 500;
   margin: 0;
 }
 
@@ -139,22 +141,23 @@ h5.al-header {
     background: #ff7272 !important;
   }
 }
-
-mat-expansion-panel {
+mat-expansion-panel{
   box-shadow: unset;
-
-  &:hover:not(.dark) {
-    background: transparent !important;
-  }
-
   .mat-expansion-panel-header {
     margin-bottom: 0;
-
-    &:hover:not(.dark) {
-      background: $blue-50 !important;
-    }
   }
 }
+
+//mat-expansion-panel :not(.dark) {
+//  &:hover {
+//    background: transparent !important;
+//  }
+//  .mat-expansion-panel-header {
+//    &:hover {
+//      background: $blue-50 !important;
+//    }
+//  }
+//}
 
 .mat-expansion-panel-header {
   font-family: $font-family-base, sans-serif;
@@ -282,10 +285,6 @@ body .ui-state-highlight .card {
   color: chartreuse;
 }
 
-.ui-menu.ui-menu-dynamic {
-  width: 200px;
-}
-
 body .ui-multiselect {
   background: #ffffff;
   padding: 0;
@@ -349,7 +348,7 @@ body .clean-list {
   &.sm-tooltip {
     background-color: $purple;
     box-shadow: 0 -2px 8px 0 rgba(0, 0, 0, 0.2);
-    font-family: Heebo;
+    font-family: 'Heebo', sans-serif;
     font-size: 11px;
     line-height: 1.45;
     letter-spacing: 0.3px;
@@ -369,7 +368,8 @@ body .clean-list {
 }
 
 .mat-button-toggle-appearance-standard .mat-button-toggle-label-content {
-  line-height: 34px !important;
+  line-height: 30px !important;
+  font-size: 11px !important;
 }
 
 // --------------------------------old------------------------------------------
@@ -400,11 +400,16 @@ html {
   .mat-menu-panel {
     max-width: none;
     min-width: 114px;
-
+    min-height: 32px;
     &.custom-columns {
       width: 370px;
     }
   }
+}
+
+.mat-menu-item {
+  font-size: 14px;
+  font-weight: 500;
 }
 
 // hide arrows for number inputs
@@ -420,7 +425,7 @@ input[type=number] {
 }
 
 .js-plotly-plot .plotly .modebar {
-  z-index: 800 !important;
+  z-index: 11 !important;
 }
 
 as-split {
@@ -555,10 +560,9 @@ body .mat-menu-content:not(:empty) {
   }
 }
 
-body .mat-menu-panel .mat-form-field {
+body .mat-menu-panel .mat-form-field.tags-menu-input {
   .mat-form-field-wrapper {
     padding: 0;
-
     .mat-form-field-flex {
       padding: 0 14px;
       align-items: center;
@@ -568,7 +572,6 @@ body .mat-menu-panel .mat-form-field {
         align-items: center;
         padding: 10px 0;
         border: 0;
-
         font-size: 14px;
       }
     }
@@ -604,4 +607,56 @@ button.btn.button-outline-dark {
     background-color: $blue-600;
     border-color: $blue-600;
   }
+}
+
+.i-welcome-researcher {
+  background-image: url('./assets/icons/welcome-researcher.svg');
+  background-repeat: no-repeat;
+  background-position-x: center;
+  background-position-y: center;
+  background-size: contain;
+  display: inline-block;
+}
+
+.sm-card-list-layout {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, 352px);
+  grid-gap: 24px;
+  padding: 0 24px 24px;
+  justify-content: center;
+
+  .load-more {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    padding: 15px;
+    grid-column: 1 / -1;
+
+    .load-more-btn {
+      padding: 8px 40px;
+    }
+  }
+}
+
+.sm-card-list-header {
+  display: flex;
+  justify-content: space-between;
+  padding: $projects-header-padding 6px $projects-header-padding / 2 0;
+
+  .recent-title {
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+
+    &>.menu {
+      color: $blue-300;
+      font-weight: 500;
+      cursor: pointer;
+      margin-right: 16px;
+    }
+  }
+}
+
+.cdk-overlay-backdrop.darker {
+  background-color: rgba(0, 0, 0, 0.8);
 }

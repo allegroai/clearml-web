@@ -17,6 +17,6 @@
   color: #ced1db !important;
 }
 
-/deep/ sm-experiments .load-more {
+::ng-deep sm-experiments .load-more {
   margin-bottom: 80px;
 }

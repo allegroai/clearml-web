@@ -1,7 +1,7 @@
 import {ApiUsersService} from '../business-logic/api-services/users.service';
 import {EMPTY, Observable, of, throwError} from 'rxjs';
 import {catchError, map, tap} from 'rxjs/operators';
-import {cloneDeep, isEqual} from 'lodash/fp';
+import {cloneDeep, isEqual, isNil, isEmpty} from 'lodash/fp';
 import {UsersSetPreferencesRequest} from '../business-logic/model/users/usersSetPreferencesRequest';
 import {LoginService} from './shared/services/login.service';
 import {FetchCurrentUser} from './core/actions/users.actions';
@@ -11,16 +11,19 @@ import {ErrorService} from './shared/services/error.service';
 import {setLoginError, setUserLoginState} from './login/login.actions';
 import {cleanUserData} from './shared/utils/shared-utils';
 import {ConfigurationService} from './shared/services/configuration.service';
+import {LoginSsoCallbackResponse} from '../business-logic/model/login/loginSsoCallbackResponse';
 
 const USER_PREFERENCES_STORAGE_KEY = '_USER_PREFERENCES_';
+export const enum USER_PREFERENCES_KEY {
+  firstLogin = 'firstLogin',
+};
 
 class UserPreferences {
 
   private preferences: {[key: string]: any};
   private userService: ApiUsersService;
 
-  constructor() {
-  }
+  constructor() {}
 
   setUserService(userService: ApiUsersService) {
     this.userService = userService;
@@ -31,6 +34,7 @@ class UserPreferences {
       .pipe(
         map(res => res.preferences),
         map(pref => {
+          this.checkIfFirstTimeLoginAndSaveData(pref);
           if (pref.version !== 1 && pref.experiments) {
             this.preferences = {};
             this.setPreferences('experiments', {});
@@ -89,6 +93,17 @@ class UserPreferences {
     return !!this.preferences;
   }
 
+  private checkIfFirstTimeLoginAndSaveData(pref) {
+    if (isEmpty(pref.preferences)) {
+      this.preferences = pref;
+      const preferences = {...pref, [USER_PREFERENCES_KEY.firstLogin]: true};
+      this.setPreferences('preferences', preferences);
+      window.localStorage.setItem(USER_PREFERENCES_KEY.firstLogin, '0');
+    } else {
+      const firstLoginTime = window.localStorage.getItem(USER_PREFERENCES_KEY.firstLogin) || new Date().getTime().toString();
+      window.localStorage.setItem(USER_PREFERENCES_KEY.firstLogin, firstLoginTime);
+    }
+  }
   private loadFromLocalStorage(): {[key: string]: any} {
     try {
       return JSON.parse(localStorage.getItem(USER_PREFERENCES_STORAGE_KEY));
@@ -112,7 +127,7 @@ function afterLogin(resolve, store) {
   userPreferences.loadPreferences()
     .subscribe(() => {
       store.dispatch(new FetchCurrentUser());
-      resolve();
+      resolve(null);
     });
 }
 
@@ -124,7 +139,6 @@ export function loadUserAndPreferences(
   confService: ConfigurationService
 ): () => Promise<any> {
   return (): Promise<any> => new Promise((resolve) => {
-    confService.initConfigurationService();
 
     const loginFlow = (skipInvite = false) => {
       if (location.search.includes('invite') && !skipInvite) {
@@ -133,11 +147,13 @@ export function loadUserAndPreferences(
         store.dispatch(setUserLoginState({user: null, inviteId: inviteId, crmForm: null}));
       }
       userPreferences.setUserService(userService);
-      userPreferences.loadPreferences().pipe(
-        tap(_ => resolve()),   // resolve in case user is logged-in and preferences are loaded
-        catchError((err) => {
+      const redirectToLogin = (status) => {
+        if (status === 401) {
           const redirectUrl: string = window.location.pathname;
-          if (err.status === 401 && !['/login/signup', '/login', '/dashboard', '/'].includes(redirectUrl)) {
+          if (
+            !['/login/signup', '/login', '/dashboard', '/'].includes(redirectUrl) &&
+            (loginService.guestUser?.enabled || ConfigurationService.globalEnvironment.autoLogin)
+          ) {
             if (loginService.guestUser?.enabled) {
               loginService.passwordLogin(loginService.guestUser.username, loginService.guestUser.password)
                 .subscribe(() => afterLogin.bind(this)(resolve, store));
@@ -145,18 +161,31 @@ export function loadUserAndPreferences(
               const name = `${(new Date()).getTime().toString()}`;
               loginService.autoLogin(name, afterLogin.bind(this, resolve, store));
             } else {
-              resolve();
+              resolve(null);
             }
-          } else {
-            resolve();
+          } else if (!['/login/signup', '/login'].includes(redirectUrl)) {
+            const targetUrl = (redirectUrl && redirectUrl != '/') ? `/login?redirect=${encodeURIComponent(redirectUrl)}` : '/login';
+            window.history.replaceState(window.history.state, '', targetUrl);
           }
-          return EMPTY;
-        })
-      ).subscribe(() => {
-        // Do nothing
-      }, (error) => {
-        // Do nothing
-      });
+        }
+        resolve(null);
+        return EMPTY;
+      };
+
+      if (loginService.authenticated === false) {
+        redirectToLogin(401);
+      } else {
+        userPreferences.loadPreferences().pipe(
+          catchError((err) => redirectToLogin(err.status))
+        ).subscribe(
+          () => {
+            store.dispatch(new FetchCurrentUser());
+            resolve(null);
+          },
+          () => {
+            // Do nothing
+          });
+      }
     };
 
     const ssoFlow = () => {
@@ -173,19 +202,30 @@ export function loadUserAndPreferences(
       loginService.ssoLogin({signup_flow: signup})
         .pipe(catchError((err: HttpErrorResponse) => {
           const message = errorSvc.getErrorMsg(err?.error) || 'failed SSO login';
-          store.dispatch(setLoginError({error: message}));
+          store.dispatch(setLoginError({
+            error: message,
+            ...([62, 67].includes(err?.error?.meta?.result_subcode) && {verifyEmail: {email: err.error.meta?.error_data?.email,  resendUrl: err.error.meta?.error_data?.resend_url}})
+          }));
           loginService.clearLoginCache();
           const targetUrl = redirect ? `/login?redirect=${encodeURIComponent(redirect)}${invite? '&invite='+ invite : ''}` : `/login${invite? '?invite='+ invite : ''}`;
           window.history.replaceState(window.history.state, '', targetUrl);
           return throwError('failed SSO login');
         }))
         .subscribe((data) => {
+          if (data.userState?.signup_info?.email_verify_state) {
+            redirect = data.userState.signup_info.email_verify_state;
+            if (redirect.includes('invite')) {
+              const redirectURL = new URL('https://aaa/' + redirect);
+              invite = redirectURL.searchParams.get('invite');
+              store.dispatch(setUserLoginState({user: null, inviteId: invite, crmForm: null}));
+            }
+          }
           if (data.userState.user_id && data.state?.includes('signup=')) {
             store.dispatch(setLoginError({error: 'User already exists. Please sign in.'}));
             loginService.clearLoginCache();
             const targetUrl = redirect ? `/login?redirect=${encodeURIComponent(redirect)}${invite? '&invite='+ invite : ''}` : `/login${invite? '?invite='+ invite : ''}`;
             window.history.replaceState(window.history.state, '', targetUrl);
-          } else if (signup) {
+          } else if (data.userState.login_status === LoginSsoCallbackResponse.LoginStatusEnum.SignupRequired) {
             let crmForm;
             try {
               crmForm = JSON.parse(data.userState.signup_info.crm_form);
@@ -202,12 +242,19 @@ export function loadUserAndPreferences(
         }, (err) => loginFlow());
     };
 
-    loginService.initCredentials().subscribe(() => {
-      if (window.location.pathname.startsWith('/callback')) {
-        ssoFlow();
-      } else {
-        loginFlow();
-      }
-    });
+    confService.initConfigurationService().subscribe(() =>
+      loginService.initCredentials().subscribe(() => {
+        if (window.location.pathname.startsWith('/callback')) {
+          if (window.location.pathname.endsWith('verify')) {
+            const providerName = window.location.pathname.slice(10, -7);
+            const provider = loginService.sso.find(provider => provider.name === providerName);
+            window.location.href = provider.url;
+          } else {
+            ssoFlow();
+          }
+        } else {
+          loginFlow();
+        }
+      }));
   });
 }

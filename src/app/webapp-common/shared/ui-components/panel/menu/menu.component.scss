@@ -1,7 +1,16 @@
+@import "../../styles/variables";
+
 :host {
+  .menu-button.btn.icon {
+    font-weight: initial;
+    min-width: 16px;
+    min-height: 16px;
+    font-size: 16px;
+    color: $blue-400;
+  }
+
   .menu-button, .menu-button &:hover, .menu-button &:focus {
     cursor: pointer;
-    font-weight: bold;
     text-decoration: none;
   }
 
@@ -13,10 +22,6 @@
     display: flex;
     align-items: center;
 
-    .fa-caret-down {
-      transition: transform 0.3s;
-
-    }
   }
 
   .hidden-button {
@@ -24,7 +29,4 @@
     padding: 0;
   }
 
-  &:hover .cell .fa-caret-down {
-    transform: scale(1.6);
-  }
 }

@@ -1,6 +1,6 @@
-import {ActionReducerMap, createFeatureSelector, createSelector} from '@ngrx/store';
+import {ActionReducerMap, createSelector} from '@ngrx/store';
 import {ExperimentCompareDetailsState, experimentsCompareDetailsReducer} from './experiments-compare-details.reducer';
-import {experimentsCompareChartsReducer, GroupedHyperParams, HyperParams, IExperimentCompareChartsState, IExperimentCompareSettings, MetricOption, MetricValueType} from './experiments-compare-charts.reducer';
+import {experimentsCompareChartsReducer, GroupedHyperParams, IExperimentCompareChartsState, IExperimentCompareSettings, MetricOption, MetricValueType} from './experiments-compare-charts.reducer';
 import {experimentsCompareMetricsValuesReducer, IExperimentCompareMetricsValuesState, MetricSortBy} from './experiments-compare-metrics-values.reducer';
 import {experimentsCompareDebugImagesReducer} from './experiments-compare-debug-images.reducer';
 import {get} from 'lodash/fp';
@@ -19,7 +19,7 @@ export const experimentsCompareReducers: ActionReducerMap<any, any> = {
   metricsValues: experimentsCompareMetricsValuesReducer,
   charts       : experimentsCompareChartsReducer,
   debugImages  : experimentsCompareDebugImagesReducer,
-  compareHeader: compareHeader,
+  compareHeader,
   scalarsGraph : scalarsGraphReducer
 };
 
@@ -43,10 +43,10 @@ export const selectExperimentIdsParams = createSelector(selectExperimentsParams,
 // select experiments for compare and header
 export const selectCompareHeader = createSelector(experimentsCompare, (state): CompareHeaderState => state ? state.compareHeader : {});
 export const selectExperimentsForCompareSearchResults = createSelector(selectCompareHeader, (state): Array<Task> => state ? state.searchResultsExperiments : []);
-export const selectExperimentsForCompareSearchTerm = createSelector(selectCompareHeader, (state): string => state ? state.searchTerm : '');
-export const selectShowAddExperimentsForCompare = createSelector(selectCompareHeader, (state): boolean => state ? state.showSearch : false);
-export const selectHideIdenticalFields = createSelector(selectCompareHeader, (state): boolean => state ? state.hideIdenticalRows : false);
-export const selectShowScalarsOptions = createSelector(selectCompareHeader, (state): boolean => state ? state.showScalarOptions : false);
+export const selectExperimentsForCompareSearchTerm = createSelector(selectCompareHeader, (state) => state?.searchTerm);
+export const selectShowAddExperimentsForCompare = createSelector(selectCompareHeader, (state) => state?.showSearch);
+export const selectHideIdenticalFields = createSelector(selectCompareHeader, (state) => state?.hideIdenticalRows);
+export const selectShowScalarsOptions = createSelector(selectCompareHeader, (state) => state?.showScalarOptions);
 export const selectRefreshing = createSelector(selectCompareHeader, (state) => state ? {refreshing: state.refreshing, autoRefresh: state.autoRefresh} : {refreshing: false, autoRefresh: false});
 export const selectExperimentsUpdateTime = createSelector(selectCompareHeader, (state) => state ? state.experimentsUpdateTime : {});
 export const selectNavigationPreferences = createSelector(selectCompareHeader, (state) => state ? state.navigationPreferences : {});

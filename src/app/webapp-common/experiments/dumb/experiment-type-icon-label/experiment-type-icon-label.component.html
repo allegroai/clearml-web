@@ -1,6 +1,5 @@
 <i class="al-icon" [class]="iconClass + ' al-ico-type-' + (type ? type.replace('_', '-') : 'training')"></i>
-
-<span style="margin-left: 6px" [ngClass]="type" *ngIf="showLabel">
+<span class="ml-2 ellipsis" [ngClass]="type" *ngIf="showLabel">
   {{type?.length < 4 ? type.toUpperCase() : (type | noUnderscore | titlecase)}}
 </span>
 

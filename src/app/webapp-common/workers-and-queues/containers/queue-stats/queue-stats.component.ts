@@ -1,14 +1,13 @@
 import {Component, Input, OnDestroy, OnInit, ViewChild, ViewContainerRef} from '@angular/core';
-import {FormControl} from '@angular/forms';
 import {Store} from '@ngrx/store';
 import {Subscription} from 'rxjs';
 import {Queue} from '../../../../business-logic/model/queues/queue';
-import {IOption} from '../../../shared/ui-components/inputs/select-autocomplete/select-autocomplete.component';
 import {GetStats, SetStats, SetStatsParams} from '../../actions/queues.actions';
-import {selectQueueStats, selectQueuesStatsTimeFrame, selectStatsErrorNotice} from '../../reducers/index.reducer';
+import {selectQueuesStatsTimeFrame, selectQueueStats, selectStatsErrorNotice} from '../../reducers/index.reducer';
 import {filter} from 'rxjs/operators';
 import {Topic} from '../../../shared/utils/statistics';
-import {hideNoStatsNotice} from '../../actions/stats.actions';
+import {TIME_INTERVALS} from '../../workers-and-queues.consts';
+import {IOption} from '../../../shared/ui-components/inputs/select-autocomplete-with-chips/select-autocomplete-with-chips.component';
 
 @Component({
   selector: 'sm-queue-stats',
@@ -17,26 +16,25 @@ import {hideNoStatsNotice} from '../../actions/stats.actions';
 })
 export class QueueStatsComponent implements OnInit, OnDestroy {
   private chartDataSubscription: Subscription;
-  private timeSelectionSubscription: Subscription;
   private chartParamSubscription: Subscription;
   public statsError$ = this.store.select(selectStatsErrorNotice);
   public selectedQueue: Queue;
-  public timeFormControl = new FormControl();
   public refreshChart = true;
   public waitChartData: { dataByTopic: Topic[] };
   public lenChartData: { dataByTopic: Topic[] };
 
   public timeFrameOptions: IOption[] = [
-    {label: '3 Hours', value: (3 * 60 * 60).toString()},
-    {label: '6 Hours', value: (6 * 60 * 60).toString()},
-    {label: '12 Hours', value: (12 * 60 * 60).toString()},
-    {label: '1 Day', value: (24 * 60 * 60).toString()},
-    {label: '1 Week', value: (7 * 24 * 60 * 60).toString()},
-    {label: '1 Month', value: (30 * 24 * 60 * 60).toString()}];
+    {label: '3 Hours', value: (3 * TIME_INTERVALS.HOUR).toString()},
+    {label: '6 Hours', value: (6 * TIME_INTERVALS.HOUR).toString()},
+    {label: '12 Hours', value: (12 * TIME_INTERVALS.HOUR).toString()},
+    {label: '1 Day', value: (TIME_INTERVALS.DAY).toString()},
+    {label: '1 Week', value: (TIME_INTERVALS.WEEK).toString()},
+    {label: '1 Month', value: (TIME_INTERVALS.MONTH).toString()}];
 
   @ViewChild('waitchart', {read: ViewContainerRef, static: true}) waitChartRef: ViewContainerRef;
   @ViewChild('lenchart', {read: ViewContainerRef, static: true}) lenChartRef: ViewContainerRef;
   private intervaleHandle: number;
+  public currentTimeFrame: string;
 
   @Input() set queue(queue: Queue) {
     if (this.selectedQueue !== queue) {
@@ -49,16 +47,10 @@ export class QueueStatsComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.timeFormControl.setValue(this.timeFrameOptions[0].value);
-    this.timeSelectionSubscription = this.timeFormControl.valueChanges
-      .subscribe(timeFrame => {
-        this.store.dispatch(new SetStatsParams({timeFrame}));
-      });
-
     this.chartParamSubscription = this.store.select(selectQueuesStatsTimeFrame)
       .pipe(filter((timeFrame: string) => !!timeFrame))
       .subscribe((timeFrame) => {
-        this.timeFormControl.setValue(timeFrame);
+        this.currentTimeFrame = timeFrame;
         this.updateChart();
       });
     this.chartDataSubscription = this.store.select(selectQueueStats).subscribe(
@@ -75,7 +67,6 @@ export class QueueStatsComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.timeSelectionSubscription.unsubscribe();
     this.chartDataSubscription.unsubscribe();
     this.chartParamSubscription.unsubscribe();
     clearInterval(this.intervaleHandle);
@@ -85,7 +76,7 @@ export class QueueStatsComponent implements OnInit, OnDestroy {
     clearInterval(this.intervaleHandle);
     this.refreshChart = true;
     this.store.dispatch(new SetStats({data: {wait: null, length: null}}));
-    const range = this.timeFormControl.value;
+    const range = parseInt(this.currentTimeFrame, 10);
     let width = this.waitChartRef.element.nativeElement.clientWidth | 1000;
     width = Math.min(0.8 * width, 1000);
     const granularity = Math.max(Math.floor(range / width), 5);
@@ -105,5 +96,9 @@ export class QueueStatsComponent implements OnInit, OnDestroy {
     // 4- Keep only seconds not extracted to minutes:
     const ts = `${seconds % 60}`.padStart(2, '0');
     return `${th}:${tm}:${ts}`;
+  }
+
+  timeFrameChanged($event: any) {
+    this.store.dispatch(new SetStatsParams({timeFrame: $event}));
   }
 }

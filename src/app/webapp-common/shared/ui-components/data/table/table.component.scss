@@ -1,7 +1,7 @@
 @import "../../styles/variables";
 
 :host {
-  /deep/ th.resize-enabled span.p-column-resizer {
+  ::ng-deep th.resize-enabled span.p-column-resizer {
     width: 8px;
     border: none;
     padding-left: 6px;
@@ -12,16 +12,16 @@
     }
   }
 
-  /deep/ th.resize-disabled span.p-column-resizer {
+  ::ng-deep th.resize-disabled span.p-column-resizer {
     cursor: auto;
   }
 
-  /deep/ .p-column-resizer-helper {
+  ::ng-deep .p-column-resizer-helper {
     background-color: $blue-300;
     z-index: 1000;
   }
 
-  /deep/ .p-datatable-scrollable-view .p-datatable-scrollable-body {
+  ::ng-deep .p-datatable-scrollable-view .p-datatable-scrollable-body {
     flex: 1 1 0 !important;
   }
 
@@ -56,7 +56,7 @@
   }
 
   .load-more-wrapper {
-    padding: 32px 0 12px 0;
+    padding: 32px 0;
 
     button {
       padding: 8px 40px;
@@ -123,9 +123,14 @@
       color: $blue-300;
       border-bottom: 1px solid $blue-600;
 
+      &.disable-drag {
+        cursor: initial !important;
+      }
+
       .col-header {
         text-align: left !important;
         font-size: 12px !important;
+        font-weight: 500;
       }
 
       &:hover {

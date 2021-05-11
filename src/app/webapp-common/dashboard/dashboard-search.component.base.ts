@@ -1,18 +1,20 @@
 import {InitSearch, ResetSearch} from '../common-search/common-search.actions';
-import {skip} from 'rxjs/operators';
+import {filter, skip} from 'rxjs/operators';
 import {Model} from '../../business-logic/model/models/model';
-import {SearchDeactivate, SearchStart} from '../search/common-search-results.actions';
+import {SearchDeactivate, searchStart} from '../dashboard-search/dashboard-search.actions';
 import {IRecentTask} from './common-dashboard.reducer';
 import {ITask} from '../../business-logic/model/al-task';
 import {Observable} from 'rxjs';
-import {selectSearchQuery} from '../common-search/common-search.reducer';
+import {ICommonSearchState, selectSearchQuery} from '../common-search/common-search.reducer';
 import {Store} from '@ngrx/store';
 import {
   selectActiveSearch, selectExperimentsResults, selectModelsResults, selectProjectsResults,
   selectResultsCounter,
   selectSearchTerm
-} from '../search/common-search-results.reducer';
+} from '../dashboard-search/dashboard-search.reducer';
 import {Project} from '../../business-logic/model/projects/project';
+import {SetSelectedProjectId} from '../core/actions/projects.actions';
+import {isExample} from '../shared/utils/shared-utils';
 
 export abstract class DashboardSearchComponentBase {
 
@@ -20,13 +22,13 @@ export abstract class DashboardSearchComponentBase {
   abstract router;
   public activeLink: string = 'projects';
   private searchSubs;
-  public searchQuery$: Observable<string>;
+  public searchQuery$: Observable<ICommonSearchState['searchQuery']>;
   public activeSearch$: Observable<boolean>;
   protected readonly resultsCounter$: Observable<number>;
   public modelsResults$: Observable<Array<Model>>;
   public projectsResults$: Observable<Array<Project>>;
   public experimentsResults$: Observable<any>;
-  public searchTerm$: Observable<string>;
+  public searchTerm$: Observable<ICommonSearchState['searchQuery']>;
 
   constructor(store: Store<any>){
     this.searchQuery$        = store.select(selectSearchQuery);
@@ -47,9 +49,11 @@ export abstract class DashboardSearchComponentBase {
   syncAppSearch() {
     this.store.dispatch(new InitSearch('Search for all'));
 
-    this.searchSubs = this.searchQuery$.pipe(skip(1)).subscribe(query => {
-      this.searchTermChanged(query);
-    });
+    this.searchSubs = this.searchQuery$
+      .pipe(skip(1), filter(query => !!query?.query))
+      .subscribe(query => {
+        this.searchTermChanged(query.query, query.regExp);
+      });
   }
 
   public modelSelected(model: Model) {
@@ -58,17 +62,18 @@ export abstract class DashboardSearchComponentBase {
     this.router.navigateByUrl('projects/' + projectId + '/models/' + model.id);
   }
 
-  public searchTermChanged(term: string) {
+  public searchTermChanged(term: string, regExp?: boolean) {
     if (term && term.length > 0) {
-      this.store.dispatch(new SearchStart(term, term.length < 3));
+      this.store.dispatch(searchStart({query:term, regExp, force: term.length < 3}));
     } else {
       this.activeLink = 'projects';
       this.store.dispatch(new SearchDeactivate());
     }
   }
 
-  public projectCardClicked(projectId) {
-    return this.router.navigateByUrl('projects/' + projectId + '/experiments');
+  public projectCardClicked(project: Project) {
+    this.router.navigateByUrl(`projects/${project.id}`);
+    this.store.dispatch(new SetSelectedProjectId(project.id, isExample(project)));
   }
 
   public taskSelected(task: IRecentTask | ITask) {

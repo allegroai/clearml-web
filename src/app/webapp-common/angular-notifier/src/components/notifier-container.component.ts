@@ -60,7 +60,7 @@ export class NotifierContainerComponent implements OnDestroy, OnInit {
   /**
    * Promise resolve function reference, temporarily used while the notification child component gets created
    */
-  private tempPromiseResolver: () => void;
+  private tempPromiseResolver: (value: PromiseLike<undefined>) => void;
 
   /**
    * Constructor
@@ -125,7 +125,7 @@ export class NotifierContainerComponent implements OnDestroy, OnInit {
    * @param notificationComponent Notification component reference
    */
   public onNotificationReady(notificationComponent: NotifierNotificationComponent): void {
-    let currentNotification: NotifierNotification = this.notifications[this.notifications.length - 1]; // Get the latest notification
+    const currentNotification: NotifierNotification = this.notifications[this.notifications.length - 1]; // Get the latest notification
     currentNotification.component = notificationComponent; // Save the new omponent reference
     this.continueHandleShowAction(currentNotification); // Continue with handling the show action
   }
@@ -147,10 +147,10 @@ export class NotifierContainerComponent implements OnDestroy, OnInit {
       case 'HIDE_NEWEST':
         return this.handleHideNewestAction(action);
       case 'HIDE_ALL':
-        return this.handleHideAllAction(action);
+        return this.handleHideAllAction();
       default:
-        return new Promise<undefined>((resolve: () => void, reject: () => void) => {
-          resolve(); // Ignore unknown action types
+        return new Promise<undefined>((resolve: (value: PromiseLike<undefined>) => void) => {
+          resolve(null); // Ignore unknown action types
         });
     }
   }
@@ -164,7 +164,7 @@ export class NotifierContainerComponent implements OnDestroy, OnInit {
    * @returns Promise, resolved when done
    */
   private handleShowAction(action: NotifierAction): Promise<undefined> {
-    return new Promise<undefined>((resolve: () => void, reject: () => void) => {
+    return new Promise<undefined>((resolve: (value: PromiseLike<undefined>) => void) => {
       this.tempPromiseResolver = resolve; // Save the promise resolve function so that it can be called later on by another method
       this.addNotificationToList(new NotifierNotification(action.payload));
     });
@@ -218,7 +218,7 @@ export class NotifierContainerComponent implements OnDestroy, OnInit {
                 stepPromises.push(notification.component.show());
               }, this.config.animations.hide.speed + this.config.animations.shift.speed - this.config.animations.overlap);
             } else {
-              stepPromises.push(new Promise<undefined>((resolve: () => void, reject: () => void) => {
+              stepPromises.push(new Promise<undefined>((resolve: (value: PromiseLike<undefined>) => void) => {
                 this.notifications[0].component.hide().then(() => {
                   this.shiftNotifications(oldNotifications, notification.component.getHeight(), true).then(() => {
                     notification.component.show().then(resolve);
@@ -247,7 +247,7 @@ export class NotifierContainerComponent implements OnDestroy, OnInit {
                 stepPromises.push(notification.component.show());
               }, this.config.animations.shift.speed - this.config.animations.overlap);
             } else {
-              stepPromises.push(new Promise<undefined>((resolve: () => void, reject: () => void) => {
+              stepPromises.push(new Promise<undefined>((resolve: (value: PromiseLike<undefined>) => void) => {
                 this.shiftNotifications(oldNotifications, notification.component.getHeight(), true).then(() => {
                   notification.component.show().then(resolve);
                 });
@@ -265,7 +265,7 @@ export class NotifierContainerComponent implements OnDestroy, OnInit {
           if (numberOfNotifications > this.config.behaviour.stacking) {
             this.removeNotificationFromList(this.notifications[0]);
           }
-          this.tempPromiseResolver();
+          this.tempPromiseResolver(null);
         }); // Done
 
       }
@@ -285,21 +285,21 @@ export class NotifierContainerComponent implements OnDestroy, OnInit {
    * @returns Promise, resolved when done
    */
   private handleHideAction(action: NotifierAction): Promise<undefined> {
-    return new Promise<undefined>((resolve: () => void, reject: () => void) => {
+    return new Promise<undefined>((resolve: (value: PromiseLike<undefined>) => void) => {
 
       const stepPromises: Array<Promise<undefined>> = [];
 
       // Does the notification exist / are there even any notifications? (let's prevent accidential errors)
       const notification: NotifierNotification | undefined = this.findNotificationById(action.payload);
       if (notification === undefined) {
-        resolve();
+        resolve(null);
         return;
       }
 
       // Get older notifications
       const notificationIndex: number | undefined = this.findNotificationIndexById(action.payload);
       if (notificationIndex === undefined) {
-        resolve();
+        resolve(null);
         return;
       }
       const oldNotifications: Array<NotifierNotification> = this.notifications.slice(0, notificationIndex);
@@ -335,7 +335,7 @@ export class NotifierContainerComponent implements OnDestroy, OnInit {
       // Wait until both hiding and shifting is done, then remove the notification from the list
       Promise.all(stepPromises).then(() => {
         this.removeNotificationFromList(notification);
-        resolve(); // Done
+        resolve(null); // Done
       });
 
     });
@@ -352,8 +352,8 @@ export class NotifierContainerComponent implements OnDestroy, OnInit {
 
     // Are there any notifications? (prevent accidential errors)
     if (this.notifications.length === 0) {
-      return new Promise<undefined>((resolve: () => void, reject: () => void) => {
-        resolve();
+      return new Promise<undefined>((resolve: (value: PromiseLike<undefined>) => void) => {
+        resolve(null);
       }); // Done
     } else {
       action.payload = this.notifications[0].id;
@@ -372,8 +372,8 @@ export class NotifierContainerComponent implements OnDestroy, OnInit {
 
     // Are there any notifications? (prevent accidential errors)
     if (this.notifications.length === 0) {
-      return new Promise<undefined>((resolve: () => void, reject: () => void) => {
-        resolve();
+      return new Promise<undefined>((resolve: (value: PromiseLike<undefined>) => void) => {
+        resolve(null);
       }); // Done
     } else {
       action.payload = this.notifications[this.notifications.length - 1].id;
@@ -388,13 +388,13 @@ export class NotifierContainerComponent implements OnDestroy, OnInit {
    * @param   action Action object
    * @returns Promise, resolved when done
    */
-  private handleHideAllAction(action: NotifierAction): Promise<undefined> {
-    return new Promise<undefined>((resolve: () => void, reject: () => void) => {
+  private handleHideAllAction(): Promise<undefined> {
+    return new Promise<undefined>((resolve: (value: PromiseLike<undefined>) => void) => {
 
       // Are there any notifications? (prevent accidential errors)
       const numberOfNotifications: number = this.notifications.length;
       if (numberOfNotifications === 0) {
-        resolve(); // Done
+        resolve(null); // Done
         return;
       }
 
@@ -411,7 +411,7 @@ export class NotifierContainerComponent implements OnDestroy, OnInit {
               if ((this.config.position.vertical.position === 'top' && i === 0) ||
                 (this.config.position.vertical.position === 'bottom' && i === numberOfNotifications - 1)) {
                 this.removeAllNotificationsFromList();
-                resolve(); // Done
+                resolve(null); // Done
               }
 
             });
@@ -420,13 +420,13 @@ export class NotifierContainerComponent implements OnDestroy, OnInit {
 
       } else {
 
-        let stepPromises: Array<Promise<undefined>> = [];
+        const stepPromises: Array<Promise<undefined>> = [];
         for (let i: number = numberOfNotifications - 1; i >= 0; i--) {
           stepPromises.push(this.notifications[i].component.hide());
         }
         Promise.all(stepPromises).then(() => {
           this.removeAllNotificationsFromList();
-          resolve(); // Done
+          resolve(null); // Done
         });
 
       }
@@ -443,20 +443,19 @@ export class NotifierContainerComponent implements OnDestroy, OnInit {
    * @returns Promise, resolved when done
    */
   private shiftNotifications(notifications: Array<NotifierNotification>, distance: number, toMakePlace: boolean): Promise<undefined> {
-    return new Promise<undefined>((resolve: () => void, reject: () => void) => {
+    return new Promise<undefined>((resolve: (value: PromiseLike<undefined>) => void) => {
 
       // Are there any notifications to shift?
       if (notifications.length === 0) {
-        resolve();
+        resolve(null);
         return;
       }
 
-      let notificationPromises: Array<Promise<undefined>> = [];
+      const notificationPromises: Array<Promise<undefined>> = [];
       for (let i: number = notifications.length - 1; i >= 0; i--) {
         notificationPromises.push(notifications[i].component.shift(distance, toMakePlace));
       }
-      Promise.all(notificationPromises).then(resolve); // Done
-
+      Promise.all(notificationPromises).then(resolve as any); // Done
     });
   }
 
@@ -510,5 +509,4 @@ export class NotifierContainerComponent implements OnDestroy, OnInit {
       this.notifications.findIndex((currentNotification: NotifierNotification) => currentNotification.id === notificationId);
     return (notificationIndex !== -1 ? notificationIndex : undefined);
   }
-
 }

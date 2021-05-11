@@ -1,4 +1,4 @@
-<div class="row pb-3 pt-4">
+<div class="row recent-header">
   <div class="col-24 d-flex justify-content-between">
     <div class="recent-title">RECENT PROJECTS
       <button class="btn btn-link view-all" (click)="router.navigateByUrl('/projects')">VIEW ALL</button>
@@ -7,18 +7,20 @@
       <button *ngIf="(recentProjectsList$ | async).length >= CARDS_IN_ROW"
               class="btn btn-primary d-flex align-items-center"
               (click)="openCreateProjectDialog()">
-        <i class="al-icon al-color blue-400 al-ico-plus mr-2"></i>NEW PROJECT
+        <i class="al-icon al-color sm blue-400 al-ico-add mr-2"></i>NEW PROJECT
       </button>
     </div>
   </div>
 </div>
-<div class="projects row">
-  <div class="col-lg-6 col-md-12" *ngFor="let project of recentProjectsList$ | async | slice:0:CARDS_IN_ROW">
-    <sm-project-card [project]="project" (projectCardClicked)="projectCardClicked($event)"
-                     [hideMenu]="true"></sm-project-card>
-  </div>
-  <div *ngIf="(recentProjectsList$ | async).length < CARDS_IN_ROW"
-       class="col-lg-6 col-md-12">
-    <sm-plus-card *smCheckPermission="true" (plusCardClick)="openCreateProjectDialog()"></sm-plus-card>
-  </div>
+<div class="projects">
+  <sm-project-card
+    *ngFor="let project of recentProjectsList$ | async | slice:0:CARDS_IN_ROW"
+    [project]="project" (projectCardClicked)="projectCardClicked($event)"
+    [hideMenu]="true"
+  ></sm-project-card>
+  <sm-plus-card
+    *smCheckPermission="(recentProjectsList$ | async).length < CARDS_IN_ROW"
+    [folder]="true"
+    (plusCardClick)="openCreateProjectDialog()"
+  ></sm-plus-card>
 </div>

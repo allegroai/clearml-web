@@ -10,7 +10,7 @@
     }
   }
 
-  /deep/ sm-overlay .overlay {
+  ::ng-deep sm-overlay .overlay {
     background-color: rgba(0, 0, 0, 0.2);
   }
 

@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {Actions, Effect, ofType} from '@ngrx/effects';
+import {act, Actions, createEffect, Effect, ofType} from '@ngrx/effects';
 import {ApiProjectsService} from '../../../business-logic/api-services/projects.service';
 import * as actions from '../actions/projects.actions';
 import {
@@ -9,16 +9,15 @@ import {
   UpdateProject,
   ResetProjectSelection,
   RESET_PROJECT_SELECTION,
-  setTags, openTagColorsMenu, getTags, setCompanyTags, getCompanyTags
+  setTags, openTagColorsMenu, getTags, setCompanyTags, getCompanyTags, openMoreInfoPopup
 } from '../actions/projects.actions';
 import {GetAllProjects} from '../actions/projects.actions';
 
-import {catchError, filter, flatMap, map, mergeMap, switchMap, withLatestFrom} from 'rxjs/operators';
+import {catchError, filter, finalize, map, mergeMap, switchMap, withLatestFrom} from 'rxjs/operators';
 import {RequestFailed} from '../actions/http.actions';
-import {DeactiveLoader, SetServerError} from '../actions/layout.actions';
+import {ActiveLoader, DeactiveLoader, SetServerError} from '../actions/layout.actions';
 import {SetSelectedExperiments} from '../../experiments/actions/common-experiments-view.actions';
-import { SetSelectedModels } from '../../models/actions/models-view.actions';
-import {selectProjects} from '../reducers/projects.reducer';
+import {SetSelectedModels} from '../../models/actions/models-view.actions';
 import {TagColorMenuComponent} from '../../shared/ui-components/tags/tag-color-menu/tag-color-menu.component';
 import {MatDialog} from '@angular/material/dialog';
 import {ApiOrganizationService} from '../../../business-logic/api-services/organization.service';
@@ -27,22 +26,34 @@ import {selectRouterParams} from '../reducers/router-reducer';
 import {forkJoin} from 'rxjs';
 import {ProjectsGetTaskTagsResponse} from '../../../business-logic/model/projects/projectsGetTaskTagsResponse';
 import {ProjectsGetModelTagsResponse} from '../../../business-logic/model/projects/projectsGetModelTagsResponse';
+import {selectSelectedProjectId} from '../reducers/projects.reducer';
+import {OperationErrorDialogComponent} from '@common/shared/ui-components/overlay/operation-error-dialog/operation-error-dialog.component';
+import {EmptyAction} from '../../../app.constants';
 
-const ALL_PROJECTS_OBJECT = {id: '*', name: 'All Projects'};
+const ALL_PROJECTS_OBJECT = {id: '*', name: 'All Experiments'};
 
 @Injectable()
 export class ProjectsEffects {
+  private fetchingExampleExperiment: string = null;
 
   constructor(
     private actions$: Actions, private projectsApi: ApiProjectsService, private orgApi: ApiOrganizationService,
     private store: Store<any>, private dialog: MatDialog
-  ) {}
+  ) {
+  }
+
+  @Effect()
+  activeLoader = this.actions$.pipe(
+    ofType(actions.SET_SELECTED_PROJECT_ID),
+    filter((action: any) => !!action.payload?.projectId),
+    map(action => new ActiveLoader(action.type))
+  );
 
   @Effect()
   getProjects$ = this.actions$.pipe(
     ofType<GetAllProjects>(actions.GET_PROJECTS),
     switchMap(() =>
-      this.projectsApi.projectsGetAllEx({only_fields:['name', 'company']})
+      this.projectsApi.projectsGetAllEx({only_fields: ['name', 'company', 'parent']})
         .pipe(map(res => new actions.SetAllProjects(res.projects)))
     )
   );
@@ -50,22 +61,22 @@ export class ProjectsEffects {
   @Effect()
   ResetProjects$ = this.actions$.pipe(
     ofType<ResetSelectedProject>(actions.RESET_SELECTED_PROJECT),
-    flatMap(() => [new ResetProjectSelection()])
+    mergeMap(() => [new ResetProjectSelection()])
   );
 
   @Effect()
   ResetProjectSelections$ = this.actions$.pipe(
     ofType<ResetProjectSelection>(RESET_PROJECT_SELECTION),
-    flatMap(() => [new SetSelectedExperiments([]), new SetSelectedModels([])])
+    mergeMap(() => [new SetSelectedExperiments([]), new SetSelectedModels([])])
   );
 
   @Effect()
-  updateProject$     = this.actions$.pipe(
+  updateProject$ = this.actions$.pipe(
     ofType<UpdateProject>(actions.UPDATE_PROJECT),
     switchMap((action) =>
       this.projectsApi.projectsUpdate({project: action.payload.id, ...action.payload.changes})
         .pipe(
-          flatMap((res) => [
+          mergeMap((res) => [
             new actions.UpdateProjectCompleted()
           ]),
           catchError(err => [
@@ -79,21 +90,40 @@ export class ProjectsEffects {
   @Effect()
   getSelectedProject = this.actions$.pipe(
     ofType<SetSelectedProjectId>(actions.SET_SELECTED_PROJECT_ID),
-    withLatestFrom(this.store.select(selectProjects)),
-    filter(([action, projects]) => !!action.payload.projectId),
-    switchMap(([action, projects]) => {
+    withLatestFrom(this.store.select(selectSelectedProjectId)),
+    switchMap(([action, selectedProjectId]) => {
+      if(!action.payload.projectId){
+        return [new actions.SetSelectedProject(null)];
+      }
+      if (action.payload.projectId === selectedProjectId) {
+        return [new DeactiveLoader(action.type)];
+      }
       if (action.payload.projectId === '*') {
-        return [new actions.SetSelectedProject(ALL_PROJECTS_OBJECT)];
+        return [
+          new actions.SetSelectedProject(ALL_PROJECTS_OBJECT),
+          new DeactiveLoader(action.type)];
       } else {
-        const proj = projects.find(proj => proj.id === action.payload.projectId);
-        if (proj) {
-          return [new actions.SetSelectedProject(proj)];
-        } else {
-          return this.projectsApi.projectsGetAllEx({id: [action.payload.projectId]})
-            .pipe(map(res => new actions.SetSelectedProject(res.projects[0])));
-        }
+        this.fetchingExampleExperiment = action.payload.example && action.payload.projectId;
+        return this.projectsApi.projectsGetAllEx({
+          id: [action.payload.projectId],
+          include_stats: true,
+          ...((action.payload.example !== false || this.fetchingExampleExperiment === action.payload.projectId) && {check_own_contents: true})
+        })
+          .pipe(
+            finalize(() => this.fetchingExampleExperiment = null),
+            mergeMap(res => [
+              new actions.SetSelectedProject(res.projects[0]),
+              new DeactiveLoader(action.type),
+            ]
+            ),
+            catchError(error => [
+              new RequestFailed(error),
+              new DeactiveLoader(action.type)
+            ])
+          );
       }
     }));
+
 
   @Effect({dispatch: false})
   openTagColor = this.actions$.pipe(
@@ -123,7 +153,8 @@ export class ProjectsEffects {
       this.projectsApi.projectsGetTaskTags({projects}),
       this.projectsApi.projectsGetModelTags({projects})]
     ).pipe(
-      map((res: [ProjectsGetTaskTagsResponse, ProjectsGetModelTagsResponse]) => Array.from(new Set(res[0].tags.concat(res[1].tags))).sort().concat(null)),
+      map((res: [ProjectsGetTaskTagsResponse, ProjectsGetModelTagsResponse]) =>
+        Array.from(new Set(res[0].tags.concat(res[1].tags))).sort()),
       mergeMap((tags: string[]) => [
         setTags({tags}),
         new DeactiveLoader(action.type)
@@ -136,4 +167,18 @@ export class ProjectsEffects {
     ))
   );
 
+  openMoreInfoPopupEffect = createEffect(() => this.actions$.pipe(
+    ofType(openMoreInfoPopup),
+    switchMap(action => this.dialog.open(OperationErrorDialogComponent, {
+          data: {
+            title: `${action.operationName} ${action.entityType}`,
+            action,
+            iconClass: `d-block al-ico-${action.operationName} al-icon w-auto`,
+          }
+        }).afterClosed()
+    )
+  ), {dispatch: false});
+
 }
+
+

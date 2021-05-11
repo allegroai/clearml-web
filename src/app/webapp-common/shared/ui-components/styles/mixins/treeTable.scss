@@ -11,13 +11,13 @@
         padding-bottom: 13px;
       }
 
-      /deep/ .ui-paginator-bottom.ui-paginator.ui-widget.ui-widget-header {
+      ::ng-deep .ui-paginator-bottom.ui-paginator.ui-widget.ui-widget-header {
         border: none;
         margin-top: 15px;
         margin-bottom: 15px;
       }
 
-      /deep/ table {
+      ::ng-deep table {
 
         // override ng-prime
         .ui-treetable .ui-treetable-thead > tr > th.ui-state-default.ui-unselectable-text {

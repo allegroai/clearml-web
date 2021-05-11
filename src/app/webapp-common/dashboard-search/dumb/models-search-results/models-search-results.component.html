@@ -1,0 +1,7 @@
+<div class="sm-card-list-layout">
+  <sm-model-card
+    *ngFor="let model of modelsList"
+    [model]="model"
+    (modelCardClicked)="modelCardClicked($event)"
+  ></sm-model-card>
+</div>

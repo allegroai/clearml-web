@@ -7,6 +7,21 @@ span {
 :host {
   display: flex;
   align-items: center;
+  .menu-trigger {
+    width: 34px;
+    .menu-trigger-icon {
+      height: 100%;
+      color: $blue-100;
+    }
+  }
+}
+
+
+
+.sub-project-menu-item {
+  font-size: 14px;
+  font-weight: 500;
+  color: $blue-900;
 }
 
 .breadcrumbLink a, .breadcrumbLink span, .workspace {
@@ -39,7 +54,7 @@ span {
   text-transform: uppercase;
 }
 
-.breadcrumbLink:last-of-type a {
+.breadcrumbLink:last-of-type a:not(.sub-project) {
   pointer-events: none;
   cursor: default;
   font-weight: bold;

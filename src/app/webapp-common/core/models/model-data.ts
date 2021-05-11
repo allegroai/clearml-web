@@ -1,20 +1,16 @@
 import {Model} from '../../../business-logic/model/models/model';
+import {Execution} from '../../../business-logic/model/tasks/execution';
+import {Queue} from '../../../business-logic/model/queues/queue';
 
-export interface IExecution {
-  queue: string;
-  // script { "$ref": "#/definitions/script" }
-  test_split: number;
-  parameters: any;
-  model: Model ;// TODO should be IModel
-  model_desc: any;
-  model_labels: any;
-  framework: string;
+export interface IBaseExecution extends  Omit<Execution, 'model' | 'queue'> {
+  model: Model;
+  queue: Queue;
 }
 
 export interface ItaskOutput {
   view: ITaskView;
   destination: string;
-  model: string;
+  model: Model;
   result: string;
   error: string;
 }

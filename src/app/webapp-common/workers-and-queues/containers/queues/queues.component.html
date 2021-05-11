@@ -5,7 +5,7 @@
                      [queues]="queues$ | async"
                      [selectedQueue]="selectedQueue$ | async"
                      (sortedChanged)="sortedChanged($event)"
-                     [tableSortField]="tableSortField$ | async"
+                     [tableSortFields]="tableSortFields$ | async"
                      [tableSortOrder]="tableSortOrder$ | async"
                      (deleteQueue)="deleteQueue($event)"
                      (renameQueue)="renameQueue($event)"

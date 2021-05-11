@@ -1,0 +1,36 @@
+<ng-form #templateForm="ngForm">
+  <div class="inputs-container d-flex align-items-center"
+       [class.active]="!hasNoValues">
+      <ng-container *ngFor="let input of data; trackBy: trackBy; let index = index; let last = last;">
+        <input #inputRef
+               [class]="'text-center max-length-' + input.maxLength"
+               matInput
+               [attr.name]="input.type"
+               (input)="setValue(inputRef.value, input.type)"
+               [value]="hasNoValues && input.placeholder ? input.placeholder : this[input.type]"
+               (keypress)="checkChars($event)"
+               (keyup)="(inputRef.selectionStart === input.maxLength ) && setNextInputFocus(index)"
+               (keyup.enter)="onChangePartial($event)"
+               (keyup.arrowRight)="(inputRef.selectionStart === input.maxLength || inputRef.value.length <= 1)  && setNextInputFocus(index)"
+               (keyup.arrowLeft)="inputRef.selectionEnd === 0 && setPreviousInputFocus(index)"
+               (blur)="focusOutInput()"
+               [attr.maxlength]="input.maxLength"
+               smKeyDownStopPropagation
+               (focus)="inputRef.select()"
+               [smTooltip]="input.type.charAt(0).toUpperCase() + input.type.slice(1)"
+               matTooltipPosition="above"
+               [readonly]="readonly"
+        >
+        <i class="al-icon al-ico-time-colon" *ngIf="!last"></i>
+      </ng-container>
+    <ng-container *ngIf="hasResetIcon">
+      <div class="reset">
+        <i *ngIf="val > 0"
+           [class]="'al-icon al-ico-dialog-x sm'"
+           (click)="onResetIcon.emit()"
+        ></i>
+      </div>
+    </ng-container>
+    <ng-content select="[after-inputs]"></ng-content>
+  </div>
+</ng-form>

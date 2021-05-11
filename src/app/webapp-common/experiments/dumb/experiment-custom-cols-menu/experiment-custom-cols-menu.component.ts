@@ -1,5 +1,7 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {CustomColumnMode} from '../../shared/common-experiments.const';
+import {ISmCol} from '../../../shared/ui-components/data/table/table.consts';
+import {MetricVariantResult} from '../../../../business-logic/model/projects/metricVariantResult';
 
 @Component({
   selector: 'sm-experiment-custom-cols-menu',
@@ -28,11 +30,10 @@ export class ExperimentCustomColsMenuComponent {
 
   @Output() selectMetricActiveChanged = new EventEmitter<CustomColumnMode>();
   @Output() getMetricsToDisplay = new EventEmitter();
-  @Output() removeColFromList = new EventEmitter();
-  @Output() selectedTableColsChanged = new EventEmitter();
-  @Output() selectedMetricToShow = new EventEmitter();
-  @Output() selectedHyperParamToShow = new EventEmitter();
-  @Output() addCustomColClicked = new EventEmitter();
+  @Output() removeColFromList = new EventEmitter<ISmCol['id']>();
+  @Output() selectedTableColsChanged = new EventEmitter<ISmCol>();
+  @Output() selectedMetricToShow = new EventEmitter<{variant: MetricVariantResult; addCol: boolean, valueType: string}>();
+  @Output() selectedHyperParamToShow = new EventEmitter<{param: string; addCol: boolean}>();
   @Output() clearSelection = new EventEmitter();
 
   public CustomColumnMode = CustomColumnMode;

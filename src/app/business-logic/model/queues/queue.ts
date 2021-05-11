@@ -11,6 +11,7 @@
  */
 
 import { Entry } from './entry';
+import {Worker} from '../workers/worker';
 
 
 export interface Queue {
@@ -46,4 +47,5 @@ export interface Queue {
      * List of ordered queue entries
      */
     entries?: Array<Entry>;
+    workers?: Worker[];
 }

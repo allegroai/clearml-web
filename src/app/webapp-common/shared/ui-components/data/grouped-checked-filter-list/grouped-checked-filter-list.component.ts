@@ -25,7 +25,7 @@ export class GroupedCheckedFilterListComponent {
   private _itemsList: HyperParams<any>;
   private _selectedItemsList: string[];
 
-  @Input() set selectedItemsList(selectedItemsList: string[]) {
+  @Input() set selectedItemsList(selectedItemsList: any[]) {
     this._selectedItemsList = selectedItemsList;
     if (selectedItemsList && this.itemsList) {
       this.itemsObjectList = this.getItemsObjectList(this.itemsList);
@@ -49,7 +49,7 @@ export class GroupedCheckedFilterListComponent {
 
   private getItemsObjectList(itemsList: { [section: string]: { [key: string]: string } }) {
     return Object.entries(itemsList).reduce((acc, [section, params]) => {
-      acc[section] = Object.entries(params).map(([paramKey, paramVal]) => ({value: paramKey, checked: this.selectedItemsList.includes(`${section}.${paramKey}`) || false}));
+      acc[section] = Object.entries(params).map(([paramKey, paramVal]) => ({value: paramKey, checked: this.selectedItemsList.map(item=> item.id).includes(`hyperparams.${section}.${paramKey}`) || false}));
       return acc;
     }, {});
   }

@@ -1,22 +1,22 @@
 import * as actions from '../actions/common-experiments-info.actions';
-import {IExperimentInfo, ISelectedExperiment} from '../../../features/experiments/shared/experiment-info.model';
+import {IExperimentInfo} from '../../../features/experiments/shared/experiment-info.model';
 import {experimentSections, experimentSectionsEnum} from '../../../features/experiments/shared/experiments.const';
 import {
   ACTIVATE_EDIT, DEACTIVATE_EDIT, deleteHyperParamsSection, EXPERIMENT_CANCEL_EDIT, EXPERIMENT_DATA_UPDATED, EXPERIMENT_DETAILS_UPDATED, EXPERIMENT_SAVE, hyperParamsSectionUpdated,
-  saveExperimentConfigObj, saveExperimentSection, saveHyperParamsSection, SET_EXPERIMENT, SET_EXPERIMENT_ERRORS, SET_EXPERIMENT_FORM_ERRORS, SET_EXPERIMENT_INFO_MODEL_DATA, setExperimentSaving,
-  UPDATE_SECTION_KNOWLEDGE, updateExperimentAtPath
+  saveExperimentConfigObj, saveExperimentSection, saveHyperParamsSection, SET_EXPERIMENT, SET_EXPERIMENT_ERRORS, SET_EXPERIMENT_FORM_ERRORS, setExperimentSaving, updateExperimentAtPath
 } from '../actions/common-experiments-info.actions';
 import {set} from 'lodash/fp';
 
 
 export interface ICommonExperimentInfoState {
-  selectedExperiment: ISelectedExperiment;
+  selectedExperiment: IExperimentInfo;
   experimentLog: Array<any>;
   infoData: IExperimentInfo;
   errors: { [key: string]: any } | null;
   showExtraDataSpinner: boolean;
   activeSectionEdit: boolean;
   saving: boolean;
+  currentActiveSectionEdit: string;
   infoDataFreeze: IExperimentInfo;
   userKnowledge: Map<experimentSectionsEnum, boolean>;
 }
@@ -32,6 +32,7 @@ export const initialCommonExperimentInfoState: ICommonExperimentInfoState = {
   showExtraDataSpinner: false,
   activeSectionEdit: false,
   saving           : false,
+  currentActiveSectionEdit: null,
   infoDataFreeze   : null,
   userKnowledge    : {
     [experimentSections.MODEL_INPUT]: false
@@ -45,10 +46,6 @@ export function commonExperimentInfoReducer(state: ICommonExperimentInfoState = 
       return {...state, selectedExperiment: action.payload};
     case SET_EXPERIMENT_FORM_ERRORS:
       return {...state, errors: action.payload};
-    case UPDATE_SECTION_KNOWLEDGE:
-      return {...state, userKnowledge: {...state.userKnowledge, [action.payload]: true}};
-    case SET_EXPERIMENT_INFO_MODEL_DATA:
-      return {...state, infoData: {...state.infoData, model: {...state.infoData.model, ...action.payload}}};
     case EXPERIMENT_DATA_UPDATED:
       return {...state, infoData: {...state.infoData, ...action.payload.changes}};
     case hyperParamsSectionUpdated.type:
@@ -61,11 +58,11 @@ export function commonExperimentInfoReducer(state: ICommonExperimentInfoState = 
     case saveExperimentSection.type:
       return {...state, saving: true};
     case ACTIVATE_EDIT:
-      return {...state, activeSectionEdit: true, infoDataFreeze: state.infoData};
+      return {...state, activeSectionEdit: true, infoDataFreeze: state.infoData, currentActiveSectionEdit: action.payload};
     case DEACTIVATE_EDIT:
-      return {...state, activeSectionEdit: false};
+      return {...state, activeSectionEdit: false, currentActiveSectionEdit: null};
     case EXPERIMENT_CANCEL_EDIT:
-      return {...state, infoData: state.infoDataFreeze ? state.infoDataFreeze : state.infoData};
+      return {...state, infoData: state.infoDataFreeze ? state.infoDataFreeze : state.infoData, currentActiveSectionEdit: null};
     case EXPERIMENT_DETAILS_UPDATED:
       return {...state, infoData: {...state.infoData, ...action.payload.changes}};
     case setExperimentSaving.type:

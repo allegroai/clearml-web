@@ -1,6 +1,8 @@
 <sm-model-menu #contextMenu *smCheckPermission="true"
-               [model]="this.contextModel"
+               [model]="contextModel"
                [selectedModel]="selectedModel"
+               [selectedModels]="selectedModels"
+               [selectedDisableAvailable]="selectedModelsDisableAvailable"
                [numSelected]="selectedModels.length"
                [tagsFilterByProject]="tagsFilterByProject$ | async"
                [projectTags]="projectTags$ | async"
@@ -11,7 +13,7 @@
                [showButton]="false"
 ></sm-model-menu>
 <div class="table-container" [class.card-view]="minimizedView">
-  <sm-table #table
+  <sm-table
     [selectionMode]="selectionMode"
     [tableData]="models"
     [noMoreData]="noMoreModels"
@@ -26,24 +28,22 @@
     [contextMenuOpen]="contextMenuActive"
     [minimizedView]="minimizedView"
     [minimizedTableHeader]="'MODEL LIST'"
-    [sortField]="tableSortField"
-    [sortOrder]="tableSortOrder"
+    [sortFields]="tableSortFields"
     (colReordered)="columnsReordered($event)"
     [keyboardControl]="true"
     (rowSelectionChanged)="onRowSelectionChanged($event)"
     (loadMoreClicked)="onLoadMoreClicked()"
     (onRowRightClick)="openContextMenu($event)"
-    (sortChanged)="onSortChanged($event.sortOrder, $event.field)"
+    (sortChanged)="onSortChanged($event.isShift, $event.field)"
   >
     <ng-template let-col pTemplate="cardFilter">
       <sm-table-card-filter-template [options]="MODELS_ALL_FILTER_OPTIONS"
-                                     [value]="allFiltersValue"
-                                     [subValue]="systemTagsFiltersValue"
+                                     [value]="filtersValues"
+                                     [subValue]="filtersSubValues[MODELS_TABLE_COL_FIELDS.TAGS]"
                                      [columns]="initialColumns"
                                      fixedOptionsSubheader="System tags"
                                      (subFilterChanged)="tableFilterChanged({id:'system_tags'}, $event)"
                                      (filterChanged)="tableAllFiltersChanged($event)"
-                                     (searchValueChanged)="searchValueChanged($event)"
                                      (menuClosed)="sortOptionalUsersList()"
                                      (menuOpened)="tagsMenuOpened.emit()"
       ></sm-table-card-filter-template>
@@ -63,61 +63,19 @@
 
     <ng-template let-col pTemplate="sort-filter">
       <sm-table-filter-sort-template
-        *ngIf="col.id === MODELS_TABLE_COL_FIELDS.FRAMEWORK"
         [column]="col"
-        [value]="frameworkFiltersValue"
-        [options]="MODELS_ALL_FILTER_OPTIONS.framework"
-        [sortOrder]="col.id === tableSortField ? tableSortOrder : false"
+        [value]="filtersValues[col.id]"
+        [searchValue]="searchValues[col.id]"
+        [options]="MODELS_ALL_FILTER_OPTIONS[col.id] | filter:searchValues[col.id]:'label'"
+        [sortOrder]="tableSortFieldsObject[col.id]"
         (sortOrderChanged)="onSortChanged($event, col.id)"
-        (filterChanged)="tableFilterChanged(col, $event)"
-        (menuClosed)="sortOptionalFrameworksList()"
+        (filterChanged)="tableFilterChanged(col, $event);"
+        (searchValueChanged)="searchValueChanged($event, col.id)"
+        (menuClosed)="filterMenuClosed(col.id)"
+        [fixedOptionsSubheader]="col.id === MODELS_ALL_FILTER_OPTIONS.TAGS ? 'System tags' : ''"
+        (menuOpened)="col.id === MODELS_ALL_FILTER_OPTIONS.TAGS && tagsMenuOpened.emit()"
       >
       </sm-table-filter-sort-template>
-      <sm-table-filter-sort-template
-        *ngIf="col.id === MODELS_TABLE_COL_FIELDS.READY"
-        [column]="col"
-        [value]="readyFiltersValue"
-        [options]="MODELS_READY_OPTIONS"
-        [sortOrder]="col.id === tableSortField ? tableSortOrder : false"
-        (sortOrderChanged)="onSortChanged($event, col.id)"
-        (filterChanged)="tableFilterChanged(col, $event)"
-      ></sm-table-filter-sort-template>
-      <sm-table-filter-sort-template
-        *ngIf="col.id === MODELS_TABLE_COL_FIELDS.USER"
-        [column]="col"
-        [searchValue]="userSearchValue"
-        [options]="MODELS_ALL_FILTER_OPTIONS.users |filter:userSearchValue:'label'"
-        [value]="userFiltersValue"
-        (filterChanged)="tableFilterChanged(col, $event)"
-        (searchValueChanged)="userSearchValueChanged($event)"
-        (menuClosed)="sortOptionalUsersList()"
-      >
-      </sm-table-filter-sort-template>
-      <sm-table-filter-sort-template
-        *ngIf="col.id === MODELS_TABLE_COL_FIELDS.TAGS"
-        [column]="col"
-        [searchValue]="tagSearchValue"
-        [options]="MODELS_ALL_FILTER_OPTIONS.tags |filter:tagSearchValue:'label'"
-        fixedOptionsSubheader="System tags"
-        [value]="tagsFiltersValue"
-        [subValue]="systemTagsFiltersValue"
-        [enableTooltip]="true"
-        (filterChanged)="tableFilterChanged(col, $event)"
-        (subFilterChanged)="tableFilterChanged({id:'system_tags'}, $event)"
-        (searchValueChanged)="tagSearchValueChanged($event)"
-        (menuClosed)="sortOptionalTagsList()"
-        (menuOpened)="tagsMenuOpened.emit()"
-      >
-      </sm-table-filter-sort-template>
-    </ng-template>
-
-    <!--SORT TEMPLATE-->
-    <ng-template let-col pTemplate="sort">
-      <sm-table-sort-template
-        [header]="col.header"
-        [sortOrder]="col.id === tableSortField ? tableSortOrder : false"
-        (sortOrderChanged)="onSortChanged($event, col.id)">
-      </sm-table-sort-template>
     </ng-template>
 
     <!--BODY TEMPLATE-->
@@ -128,7 +86,7 @@
       <ng-container [ngSwitch]="col.id">
         <ng-container *ngSwitchCase="MODELS_TABLE_COL_FIELDS.NAME">
           <div class="d-flex flex-row flex-nowrap">
-            <div class="font-weight-bold flex-grow-1 ellipsis" [smTooltip]="model.name">{{model.name}}</div>
+            <div class="model-name" matTooltipPosition="above" [smTooltip]="model.name">{{model.name}}</div>
             <i *ngIf="model?.system_tags.includes('shared')" class="fas fa-link p-1 ml-1"></i>
           </div>
         </ng-container>
@@ -138,20 +96,17 @@
         <ng-container *ngSwitchCase="MODELS_TABLE_COL_FIELDS.USER">
           {{model.user?.name ? model.user?.name : 'Unknown User'}}
         </ng-container>
-        <ng-container *ngSwitchCase="MODELS_TABLE_COL_FIELDS.PROJECT">
+        <span matTooltipPosition="above" [smTooltip]="model?.project?.name" *ngSwitchCase="MODELS_TABLE_COL_FIELDS.PROJECT">
           {{model?.project?.name}}
-        </ng-container>
-        <div *ngSwitchCase="MODELS_TABLE_COL_FIELDS.TASK" [smTooltip]="model.task?.name" class="ellipsis">
+        </span>
+        <span *ngSwitchCase="MODELS_TABLE_COL_FIELDS.TASK" matTooltipPosition="above" [smTooltip]="model.task?.name">
           {{model.task?.name}}
-        </div>
+        </span>
         <ng-container *ngSwitchCase="MODELS_TABLE_COL_FIELDS.READY">
-          <div class="d-flex justify-content-start">
-            <sm-experiment-status-icon-label
-              [status]="model?.ready? 'published': 'created'"></sm-experiment-status-icon-label>
-          </div>
+          <sm-experiment-status-icon-label [status]="model?.ready? 'published': 'created'"></sm-experiment-status-icon-label>
         </ng-container>
         <ng-container *ngSwitchCase="MODELS_TABLE_COL_FIELDS.CREATED">
-          <span [smTooltip]="model.created | date : TIME_FORMAT_STRING">{{model.created | timeAgo}}</span>
+          <span matTooltipPosition="above" [smTooltip]="model.created | date : TIME_FORMAT_STRING">{{model.created | timeAgo}}</span>
         </ng-container>
         <sm-checkbox-control
           *ngSwitchCase="MODELS_TABLE_COL_FIELDS.SELECTED"
@@ -163,11 +118,11 @@
           inputClassName="table-check-box table-body">
         </sm-checkbox-control>
         <ng-container *ngSwitchCase="MODELS_TABLE_COL_FIELDS.COMMENT">
-          <span class="ellipsis" [smTooltip]="model.comment">{{model.comment}}</span>
+          <span matTooltipPosition="above" [smTooltip]="model.comment">{{model.comment}}</span>
         </ng-container>
-        <div *ngSwitchDefault class="ellipsis">
+        <ng-container *ngSwitchDefault>
           {{model[col.id]}}
-        </div>
+        </ng-container>
       </ng-container>
     </ng-template>
 

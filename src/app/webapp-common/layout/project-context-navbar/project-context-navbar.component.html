@@ -1,17 +1,13 @@
 <div class="navbar-header-container">
-  <div class="d-flex justify-content-between">
     <div class="nav-bar-items-container">
       <sm-navbar-item
         *ngFor="let route of routes"
         direction="top"
-        [header]="route"
-        [active]="activeFeature === route"
-        (click)="tabClicked(route)"
-        [subHeader]="archivedMode  && '(ARCHIVED)'"
+        [header]="route.header"
+        [active]="activeFeature === route.header"
+        (click)="tabClicked(route.header)"
+        [subHeader]="archivedMode && route.subHeader"
       >
       </sm-navbar-item>
     </div>
-
-  </div>
-
 </div>

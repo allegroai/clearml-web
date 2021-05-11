@@ -1,38 +1,48 @@
 import {ITableExperiment} from '../shared/common-experiment-model.model';
-import {INITIAL_EXPERIMENT_TABLE_COLS} from '../../../features/experiments/experiments.consts';
-import {TABLE_SORT_ORDER, TableSortOrderEnum} from '../../shared/ui-components/data/table/table.consts';
+import {INITIAL_EXPERIMENT_TABLE_COLS} from '../experiment.consts';
+import {ISmCol, TABLE_SORT_ORDER} from '../../shared/ui-components/data/table/table.consts';
 import {EXPERIMENTS_TABLE_COL_FIELDS} from '../../../features/experiments/shared/experiments.const';
 import * as actions from '../actions/common-experiments-view.actions';
-import {setExperimentInPlace} from '../actions/common-experiments-view.actions';
+import {
+  hyperParamSelectedInfoExperiments,
+  setExperimentInPlace,
+  setTableSort
+} from '../actions/common-experiments-view.actions';
 import {EXPERIMENTS_VIEW_MODES, ExperimentsViewModesEnum} from '../shared/common-experiments.const';
 import {MetricVariantResult} from '../../../business-logic/model/projects/metricVariantResult';
 import {TableFilter} from '../../shared/utils/tableParamEncode';
 import {User} from '../../../business-logic/model/users/user';
 import {ProjectsGetTaskParentsResponseParents} from '../../../business-logic/model/projects/projectsGetTaskParentsResponseParents';
+import {ICommonSearchState} from '../../common-search/common-search.reducer';
+import {SortMeta} from 'primeng/api';
+import {CountAvailableAndIsDisableSelectedFiltered} from '../../shared/entity-page/items.utils';
+import {SET_SELECTED_PROJECT} from '@common/core/actions/projects.actions';
 
 
 export interface ICommonExperimentsViewState {
-  tableCols: Array<any>;
+  tableCols: ISmCol[];
   colsOrder: { [Project: string]: string[] };
   hiddenTableCols: any;
   experiments: Array<ITableExperiment>;
   noMoreExperiment: boolean;
   selectedExperiment: ITableExperiment;
-  selectedExperiments: Array<ITableExperiment>; // TODO: declare type.
+  selectedExperiments: Array<ITableExperiment>;
+  selectedExperimentsDisableAvailable: Record<string, CountAvailableAndIsDisableSelectedFiltered>;
   selectedExperimentSource: string;
   experimentToken: string;
   viewMode: ExperimentsViewModesEnum;
   tableFilters: any;
-  tableSortField: string;
-  tableSortOrder: TableSortOrderEnum;
+  tableOrders: SortMeta[];
   page: number;
-  globalFilter: string;
+  globalFilter: ICommonSearchState['searchQuery'];
   showAllSelectedIsActive: boolean;
-  metricsCols: Array<any>;
+  metricsCols: ISmCol[];
   metricVariants: Array<MetricVariantResult>;
   hyperParams: Array<any>;
+  hyperParamsOptions: Record<ISmCol['id'], string[]>;
   metricsLoading: boolean;
   users: User[];
+  projectTags: string[];
   parents: ProjectsGetTaskParentsResponseParents[];
   activeParentsFilter: ProjectsGetTaskParentsResponseParents[];
   types: string[];
@@ -47,19 +57,21 @@ export const commonExperimentsInitialState: ICommonExperimentsViewState = {
   noMoreExperiment: false,
   selectedExperiment: null,
   selectedExperiments: [],
+  selectedExperimentsDisableAvailable: {},
   selectedExperimentSource: null,
   experimentToken: null,
   viewMode: EXPERIMENTS_VIEW_MODES.TABLE,
   tableFilters: null,
-  tableSortField: EXPERIMENTS_TABLE_COL_FIELDS.LAST_UPDATE,
-  tableSortOrder: TABLE_SORT_ORDER.ASC,
+  tableOrders: [{field: EXPERIMENTS_TABLE_COL_FIELDS.LAST_UPDATE, order: TABLE_SORT_ORDER.DESC}],
   page: -1, // -1 so the "getNextExperiments" will send 0.
   globalFilter: null,
   showAllSelectedIsActive: false,
   metricsCols: [],
   metricVariants: [],
   hyperParams: [],
+  hyperParamsOptions: {},
   metricsLoading: false,
+  projectTags: [],
   users: [],
   parents: [],
   activeParentsFilter: [],
@@ -69,8 +81,16 @@ export const commonExperimentsInitialState: ICommonExperimentsViewState = {
 
 export function commonExperimentsViewReducer(state: ICommonExperimentsViewState = commonExperimentsInitialState, action: any): ICommonExperimentsViewState {
   switch (action.type) {
-    case actions.RESET_EXPERIMENTS:
-      return {...state, experiments: [], selectedExperiment: null, showAllSelectedIsActive: false};
+    case actions.resetExperiments.type:
+      return {
+        ...state,
+        experiments: commonExperimentsInitialState.experiments,
+        selectedExperiment: commonExperimentsInitialState.selectedExperiment,
+        metricVariants: commonExperimentsInitialState.metricVariants,
+        showAllSelectedIsActive: commonExperimentsInitialState.showAllSelectedIsActive
+      };
+    case SET_SELECTED_PROJECT:
+      return {...state, selectedExperiments: commonExperimentsInitialState.selectedExperiments};
     case  actions.SET_SHOW_ALL_SELECTED_IS_ACTIVE:
       return {
         ...state,
@@ -84,17 +104,14 @@ export function commonExperimentsViewReducer(state: ICommonExperimentsViewState 
       return {...state, experiments: state.experiments.filter(exp => !action.payload.includes(exp.id))};
     case actions.UPDATE_ONE_EXPERIMENTS: {
       const payload = (action as actions.UpdateExperiment).payload;
-      const newState = {
-        ...state, experiments:
-          state.experiments.map(ex => ex.id === payload.id ? {...ex, ...payload.changes} : ex)
-      };
-      if (state.selectedExperiment?.id === payload.id) {
-        newState.selectedExperiment = {...state.selectedExperiment, ...payload.changes};
-      }
-      if (state.selectedExperiments.find(ex => ex.id === payload.id)) {
-        newState.selectedExperiments = state.selectedExperiments.map(ex => ex.id === payload.id ? {...ex, ...payload.changes} : ex);
-      }
-      return newState;
+      return setExperimentsAndUpdateSelectedExperiments(state, payload);
+    }
+    case actions.updateManyExperiment.type: {
+      const changeList = (action as ReturnType<typeof actions.updateManyExperiment>).changeList;
+      return changeList.reduce((acc, change) => {
+        acc = setExperimentsAndUpdateSelectedExperiments(acc, {id: change.id, changes: change.fields});
+        return acc;
+      }, state as ICommonExperimentsViewState);
     }
     case actions.SET_EXPERIMENTS:
       return {...state, experiments: action.payload};
@@ -112,18 +129,22 @@ export function commonExperimentsViewReducer(state: ICommonExperimentsViewState 
       return {...state, selectedExperiment: action.payload};
     case actions.SET_SELECTED_EXPERIMENTS:
       return {...state, selectedExperiments: action.payload};
+    case actions.setSelectedExperimentsDisableAvailable.type:
+      return {...state, selectedExperimentsDisableAvailable: action.selectedExperimentsDisableAvailable};
     case actions.SET_VIEW_MODE:
       return {...state, viewMode: action.payload};
-    case actions.GLOBAL_FILTER_CHANGED:
-      return {...state, globalFilter: action.payload, showAllSelectedIsActive: false};
+    case actions.globalFilterChanged.type:
+      return {...state, globalFilter: action as ReturnType<typeof actions.globalFilterChanged>, showAllSelectedIsActive: false};
     case actions.resetGlobalFilter.type:
-      return {...state, globalFilter: ''};
-    case actions.TABLE_SORT_CHANGED:
-      return {...state, tableSortOrder: action.payload.sortOrder, tableSortField: action.payload.colId};
+      return {...state, globalFilter: commonExperimentsInitialState.globalFilter};
+    case setTableSort.type: {
+      const colIds = state.tableCols.map(col => col.id).concat(state.metricsCols.map(col => col.id));
+      const orders = (action as ReturnType<typeof setTableSort>).orders.filter(order => colIds.includes(order.field));
+      return {...state, tableOrders: orders.length > 0 ? orders : commonExperimentsInitialState.tableOrders};
+    }
     case actions.RESET_SORT_ORDER:
       return {
-        ...state, tableSortOrder: commonExperimentsInitialState.tableSortOrder,
-        tableSortField: commonExperimentsInitialState.tableSortField
+        ...state, tableOrders: commonExperimentsInitialState.tableOrders
       };
     case  actions.TOGGLE_COL_HIDDEN:
       return {
@@ -137,7 +158,7 @@ export function commonExperimentsViewReducer(state: ICommonExperimentsViewState 
           ...state.hiddenTableCols,
           ...state.tableCols
             .filter(col => !visibleColumns.includes(col.id))
-            .reduce((obj: object, col) => ({...obj, [col.id]: true}), {})
+            .reduce((obj, col) => ({...obj, [col.id]: true}), {})
         }
       };
     }
@@ -155,27 +176,30 @@ export function commonExperimentsViewReducer(state: ICommonExperimentsViewState 
     case actions.setTableFilters.type:
       return {
         ...state, tableFilters: {
-          ...action['filters'].reduce((obj: object, filter: TableFilter) => {
+          ...action['filters'].reduce((obj, filter: TableFilter) => {
             obj[filter.col] = {value: filter.value, machMode: filter.filterMatchMode};
             return obj;
           }, {})
         }
       };
     case actions.setExtraColumns.type:
-      return {...state, metricsCols: action['columns']};
+      return {...state, metricsCols: [...state.metricsCols.filter(tableCol => !(tableCol.projectId === action['projectId'])), ...action['columns']]};
     case actions.ADD_COL:
       return {...state, metricsCols: [...state.metricsCols, action.payload.col]};
     case actions.REMOVE_COL:
       return {
         ...state,
         metricsCols: [...state.metricsCols.filter(tableCol => !(tableCol.id === action.payload.col.id && tableCol.projectId === action.payload.col.projectId))],
-        tableSortField: action.payload.col.id === state.tableSortField ? null : state.tableSortField
+        tableOrders: state.tableOrders.filter(order => order.field !== action.payload.col.id),
+        colsOrder: {...state.colsOrder, [action.payload.col.projectId]: state.colsOrder[action.payload.col.projectId] ? state.colsOrder[action.payload.col.projectId].filter(colId => colId !== action.payload.col.id) : null}
       };
 
+    case actions.setTags.type:
+      return {...state, projectTags: action.tags};
     case actions.setUsers.type:
       return {...state, users: action.users};
     case actions.setParents.type:
-      return {...state,parents: action.parents};
+      return {...state, parents: action.parents};
     case actions.setActiveParentsFilter.type:
       return {...state, activeParentsFilter: action.parents};
     case actions.setProjectsTypes.type:
@@ -184,7 +208,7 @@ export function commonExperimentsViewReducer(state: ICommonExperimentsViewState 
       return {
         ...state,
         metricsCols: [...state.metricsCols.filter(tableCol => !(tableCol.id.startsWith('hyperparams') && tableCol.projectId === action.payload.projectId))],
-        tableSortField: state.tableSortField.startsWith('hyperparams') ? null : state.tableSortField
+        tableOrders: state.tableOrders.filter(order => order.field.startsWith('hyperparams'))
       };
     case actions.SET_CUSTOM_METRICS:
       return {...state, metricVariants: action.payload.metrics, metricsLoading: false};
@@ -192,6 +216,8 @@ export function commonExperimentsViewReducer(state: ICommonExperimentsViewState 
       return {...state, colsOrder: {...state.colsOrder, [action.project]: action.cols}};
     case actions.SET_CUSTOM_HYPER_PARAMS:
       return {...state, hyperParams: action.payload.params, metricsLoading: false};
+    case hyperParamSelectedInfoExperiments.type:
+      return {...state, hyperParamsOptions: {...state.hyperParamsOptions, [action.col.id]: action.values}};
     case actions.GET_CUSTOM_METRICS:
       return {...state, metricsLoading: true};
     case actions.GET_CUSTOM_HYPER_PARAMS:
@@ -201,4 +227,13 @@ export function commonExperimentsViewReducer(state: ICommonExperimentsViewState 
     default:
       return state;
   }
+}
+
+function setExperimentsAndUpdateSelectedExperiments(state: ICommonExperimentsViewState, payload): ICommonExperimentsViewState {
+  return {
+    ...state,
+    experiments: state.experiments.map(ex => ex.id === payload.id ? {...ex, ...payload.changes} : ex),
+    ...(state.selectedExperiment?.id === payload.id && {selectedExperiment: {...state.selectedExperiment, ...payload.changes}}),
+    ...(state.selectedExperiments.find(ex => ex.id === payload.id) && {selectedExperiments: state.selectedExperiments.map(ex => ex.id === payload.id ? {...ex, ...payload.changes} : ex)})
+  };
 }

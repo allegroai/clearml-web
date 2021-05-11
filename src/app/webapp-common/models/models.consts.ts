@@ -44,7 +44,7 @@ export const MODELS_TABLE_COLS: ISmCol[] = [
     hidden          : false,
     header          : '',
     headerStyleClass: 'selected-col-header',
-    style           : {width: '70px'},
+    style           : {width: '70px', maxWidth: '70px'},
     disableDrag     : true,
     disablePointerEvents: true
   },
@@ -58,7 +58,7 @@ export const MODELS_TABLE_COLS: ISmCol[] = [
   },
   {
     id          : MODELS_TABLE_COL_FIELDS.NAME,
-    headerType  : ColHeaderTypeEnum.sort,
+    headerType  : ColHeaderTypeEnum.sortFilter,
     sortable    : true,
     header      : 'NAME',
     style       : {width: '160px'},
@@ -105,7 +105,7 @@ export const MODELS_TABLE_COLS: ISmCol[] = [
   },
   {
     id        : MODELS_TABLE_COL_FIELDS.CREATED,
-    headerType: ColHeaderTypeEnum.sort,
+    headerType: ColHeaderTypeEnum.sortFilter,
     sortable  : true,
     header    : 'CREATED',
     label     : 'Created',
@@ -113,7 +113,7 @@ export const MODELS_TABLE_COLS: ISmCol[] = [
   },
   {
     id        : MODELS_TABLE_COL_FIELDS.COMMENT,
-    headerType: ColHeaderTypeEnum.sort,
+    headerType: ColHeaderTypeEnum.sortFilter,
     sortable  : true,
     hidden    : true,
     header    : 'DESCRIPTION',

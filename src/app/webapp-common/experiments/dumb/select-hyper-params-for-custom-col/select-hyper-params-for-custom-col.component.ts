@@ -12,17 +12,18 @@ export class SelectHyperParamsForCustomColComponent {
 
   @Input() hyperParams: {[section: string]: any[]};
   @Output() getMetricsToDisplay      = new EventEmitter();
-  @Output() selectedHyperParamToShow = new EventEmitter();
+  @Output() selectedHyperParamToShow = new EventEmitter<{param: string; addCol: boolean}>();
   @Output() goBack                   = new EventEmitter();
   @Output() clearSelection           = new EventEmitter();
 
   @Input() set tableCols(tableCols) {
-    this.metricsCols = tableCols.map(tableCol => tableCol.id.replace('hyperparams.',''));
+    this.metricsCols = tableCols;
   }
 
 
   public toggleParamToDisplay({param, value}) {
-    this.selectedHyperParamToShow.emit({param, addCol: !value});
+
+    this.selectedHyperParamToShow.emit({param: `hyperparams.${param}`, addCol: !value});
   }
 
 }

@@ -1,13 +1,47 @@
-<span *ngIf="isCommunity && activeWorkspace" class="breadcrumbLink">
+<span *ngIf="isCommunity && activeWorkspace && !workspaceNeutral" class="breadcrumbLink">
   <span class="workspace">{{activeWorkspace.name}}</span>
-  <i class="al-icon  al-ico-caret-right"></i>
+  <i class="al-icon  al-ico-slash"></i>
 </span>
 <span *ngFor="let crumb of breadcrumbs; let i=index; let last=last" class="breadcrumbLink" [class.ellipsis]="last">
-  <a [routerLink]="crumb.url">{{crumb.name}}</a>
-  <i *ngIf="!last" class="al-icon  al-ico-caret-right"></i>
+  <div *ngIf="crumb.isProject;else crumbDiv;" class="d-flex align-items-center">
+    <div *ngIf="subProjects.length>2; else shortTree" class="d-flex align-items-center">
+      <div [matMenuTriggerFor]="subProjectsMenu" class="d-flex align-items-center menu-trigger" (menuOpened)="subProjectsMenuOpened(true)" (menuClosed)="subProjectsMenuOpened(false)">
+        <i class="menu-trigger-icon al-icon msm" [class.al-ico-d-menu-down]="!subProjectsMenuIsOpen" [class.al-ico-d-menu-up]="subProjectsMenuIsOpen"></i>
+      </div>
+      <div class="d-flex">
+        <i class="al-icon al-ico-slash"></i>
+      </div>
+     <div class="d-flex align-items-center">
+      <a class="sub-project"
+         [routerLink]="subProjects[subProjects.length-1].url!=='projects/*/projects'? subProjects[subProjects.length-1].url: null">{{subProjects[subProjects.length-1].name}}</a>
+      </div>
+      <mat-menu #subProjectsMenu="matMenu">
+        <div mat-menu-item
+             class="sub-project-menu-item"
+             *ngFor="let subProject of subProjects | filterLast"
+             [routerLink]="subProject.url!=='projects/*/projects'? subProject.url: 'projects/*'">
+          {{subProject.name}}
+        </div>
+      </mat-menu>
+    </div>
+    <ng-template #shortTree>
+    <div *ngFor="let subProject of subProjects; let lastP=last" class="d-flex align-items-center">
+      <a class="sub-project"
+         [routerLink]="subProject.url!=='projects/*/projects'? subProject.url: 'projects/*/experiments'">{{subProject.name}}</a>
+      <div *ngIf="!lastP">
+        <i class="al-icon al-ico-slash"></i>
+      </div>
+    </div>
+      </ng-template>
+  </div>
+
+  <ng-template #crumbDiv>
+    <a
+      [routerLink]="crumb.url">{{(['Experiments', 'Models', 'Dataviews'].includes(crumb.name) && isDeep) ? 'All ' : ''}}{{crumb.name}}</a>
+  </ng-template>
+  <i *ngIf="!last" class="al-icon  al-ico-slash"></i>
 </span>
 <div *ngIf="checkIfBreadcrumbsInitiated()">
-
   <div
     #menuTrigger="matMenuTrigger"
     [matMenuTriggerFor]="shareModal"

@@ -1,33 +1,31 @@
 <ng-template
-  let-experimentInfo="experimentInfo"
   let-modelInfo="modelInfo"
   let-editable="editable"
   [ngTemplateOutletContext]="{
-    experimentInfo: ExperimentInfo$ | async,
     modelInfo: modelInfo$ | async,
     editable: editable$ | async
   }" [ngTemplateOutlet]="selfie" #selfie>
   <sm-overlay [backdropActive]="backdropActive$|async"></sm-overlay>
-  <div class="h-100 d-flex" *ngIf="(experimentInfo?.model?.output?.id) ||
-                                (experimentInfo?.model?.input?.id) ||
-                                (modelInfo?.artifacts?.length>0) ||
+  <div class="h-100 d-flex" *ngIf="(modelInfo?.output?.length) ||
+                                (modelInfo?.input?.length) ||
+                                (modelInfo?.artifacts?.length) ||
                                 editable; else noData">
     <sm-experiment-artifacts-navbar
       [class.minimized]="minimized"
       [artifacts]="modelInfo?.artifacts"
-      [outputModel]="experimentInfo?.model?.output"
-      [inputModel]="experimentInfo?.model?.input"
+      [outputModels]="modelInfo?.output"
+      [inputModels]="modelInfo?.input"
       [editable]="editable"
       [activeSection]="activeSection"
       [routerConfig]="routerConfig$ | async"
-      [selectedArtifactKey]="artifactKey$ | async"
+      [selectedArtifactKey]="selectedId$ | async"
     ></sm-experiment-artifacts-navbar>
     <div class="artifacts-col">
       <router-outlet></router-outlet>
     </div>
   </div>
   <ng-template #noData>
-    <div class="d-flex h-100" *ngIf="experimentInfo?.model">
+    <div class="d-flex h-100" *ngIf="modelInfo">
       <div class="no-data">
         <i class="icon i-no-data-artifacts"></i>
         <span>NO ARTIFACTS RECORDED</span>

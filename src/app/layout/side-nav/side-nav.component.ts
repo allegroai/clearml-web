@@ -4,8 +4,8 @@ import {Store} from '@ngrx/store';
 import {selectSelectedProjectId} from '../../webapp-common/core/reducers/projects.reducer';
 import {Observable} from 'rxjs';
 import {Router} from '@angular/router';
-import {SearchDeactivate} from '../../webapp-common/search/common-search-results.actions';
 import {ConfigurationService} from '../../webapp-common/shared/services/configuration.service';
+import {SearchDeactivate} from '../../webapp-common/dashboard-search/dashboard-search.actions';
 
 @Component({
   selector   : 'sm-side-nav',

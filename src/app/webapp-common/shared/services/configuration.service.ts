@@ -1,8 +1,8 @@
 import {Injectable} from '@angular/core';
 import {environment} from '../../../../environments/environment';
 import {HttpClient} from '@angular/common/http';
-import {BehaviorSubject} from 'rxjs';
-import {delay, retryWhen, take} from 'rxjs/operators';
+import {BehaviorSubject, of, timer, throwError} from 'rxjs';
+import {catchError, map, retryWhen, mergeMap} from 'rxjs/operators';
 import {Environment} from '../../../../environments/base';
 
 
@@ -18,12 +18,17 @@ export class ConfigurationService {
   }
 
   initConfigurationService() {
-    this.httpClient.get('/configuration.json')
-      .pipe(retryWhen(errors => errors.pipe(delay(500), take(5))))
-      .subscribe(env => {
-        ConfigurationService.globalEnvironment = {...ConfigurationService.globalEnvironment, ...env};
-        this.globalEnvironmentObservable.next(ConfigurationService.globalEnvironment);
-      });
+    return this.httpClient.get('/configuration.json')
+      .pipe(
+        retryWhen(errors => errors.pipe(
+            mergeMap((err, i) => i > 2 ? throwError('Error from retry!') : timer(500))
+        )),
+        catchError(() => of({})),
+        map(env => {
+          ConfigurationService.globalEnvironment = {...ConfigurationService.globalEnvironment, ...env};
+          this.globalEnvironmentObservable.next(ConfigurationService.globalEnvironment);
+        })
+      );
   }
 
   // If someone must have it the rxjs way

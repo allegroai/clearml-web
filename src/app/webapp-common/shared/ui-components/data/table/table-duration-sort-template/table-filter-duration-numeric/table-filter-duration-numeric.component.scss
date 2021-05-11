@@ -1,0 +1,24 @@
+@import "../../../../styles/variables";
+
+:host {
+  .label {
+    font-size: 12px;
+  }
+  .disabled {
+      color: $blue-250 !important;
+  }
+  .input-border-duration-container {
+    position: relative;
+    input {
+      width: calc(100% - 15px);
+    }
+    .reset {
+      border: none;
+      position: absolute;
+      top: 0;
+      right: 0px;
+      display: flex;
+      align-items: center;
+    }
+  }
+}

@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {EmptyAction, VIEW_ACTIONS} from '../../../app.constants';
 import * as layoutActions from '../actions/layout.actions';
-import {filter, map, switchMap, take, flatMap} from 'rxjs/operators';
+import {filter, map, switchMap, take, mergeMap} from 'rxjs/operators';
 import {get} from 'lodash/fp';
 import {ApiTasksService} from '../../../business-logic/api-services/tasks.service';
 import {Observable, of} from 'rxjs';
@@ -48,6 +48,10 @@ export class LayoutEffects {
     ofType<layoutActions.SetServerError>(VIEW_ACTIONS.SET_SERVER_ERROR),
     filter(action => action.payload.serverError?.status !== 401),
     map((action) => {
+      if (action.payload?.serverError?.status === 502) {
+        console.log('Gateway Error', action.payload.serverError);
+        return;
+      }
       const customMessage: string = action.payload.customMessage;
       if (action.payload.aggregateSimilar) {
         const lastTS = this.errors[customMessage];
@@ -75,8 +79,8 @@ export class LayoutEffects {
   addMessage: Observable<any> = this.actions.pipe(
     ofType<layoutActions.AddMessage>(VIEW_ACTIONS.ADD_MESSAGE),
     map((action: layoutActions.AddMessage) => action.payload),
-    flatMap(payload => this.notifierService.show({type: payload.severity, message: payload.msg, actions: payload.userActions})),
-    flatMap(actions => actions.length > 0? actions : [new EmptyAction()])
+    mergeMap(payload => this.notifierService.show({type: payload.severity, message: payload.msg, actions: payload.userActions})),
+    mergeMap(actions => actions.length > 0? actions : [new EmptyAction()])
   );
 
   private parseError(errorMessage) {

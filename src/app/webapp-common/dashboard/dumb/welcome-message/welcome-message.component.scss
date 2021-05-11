@@ -1,0 +1,144 @@
+@import "../../../shared/ui-components/styles/variables";
+
+.welcome-content {
+  padding: 10px 32px;
+
+  .body {
+    display: flex;
+    justify-content: space-between;
+
+    .info {
+      width: 152px;
+      margin-right: 42px;
+      text-align: center;
+      color: $blue-400;
+      font-size: 12px;
+
+      &:last-child {
+        margin-right: 0;
+      }
+
+      .foreground:before {
+        position: relative;
+        z-index: 5;
+      }
+
+      .background:before {
+        content: '';
+        display: inline-block;
+        position: absolute;
+        width: 48px;
+        height: 32px;
+        left: 0;
+        bottom: 9px;
+        border-radius: 4px;
+        background-color: $neon-yellow;
+        z-index: 1;
+      }
+
+      i {
+        font-size: 48px;
+      }
+    }
+  }
+
+  .separator {
+    width: 100%;
+    margin: 46px 0 24px;
+    border-bottom: $separator-line solid 2px;
+  }
+
+  .link {
+    .title {
+      color: $blue-500;
+      font-size: 14px;
+      font-weight: 500;
+    }
+  }
+}
+
+.steps-content {
+  padding: 10px 32px;
+  .step-container{
+    margin: 20px 0;
+  }
+
+
+  .text {
+    color: $blue-400;
+    margin-bottom: 12px;
+    width: 530px;
+  }
+  .step-header {
+    color: $blue-500;
+    margin-bottom: 1px;
+    width: 530px;
+  }
+
+  .step {
+    margin-bottom: 2px;
+    color: $blue-500;
+    font-size: 14px;
+  }
+  .sub-note{
+    margin: 2px 0 0;
+    font-size: 12px;
+    line-height: 1.5;
+    color:$blue-400;
+  }
+
+  .code {
+    position: relative;
+    padding: 16px;
+    margin: 1px 0 2px;
+    width: 530px;
+    color: $blue-100;
+    background-color: $blue-900;
+    border-radius: 4px;
+    overflow: auto;
+
+    &:hover {
+      sm-copy-clipboard {
+        visibility: visible;
+      }
+    }
+
+    .content {
+      white-space: pre;
+      font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 12px;
+      line-height: 18px;
+    }
+
+    .operation {
+      color: #b087e5;
+    }
+
+    .string {
+      color: #e6db74;
+    }
+
+    .variable {
+      color: #9ed66b;
+    }
+
+    .comment {
+      color: $blue-500;
+    }
+
+    sm-copy-clipboard {
+      visibility: hidden;
+      position: absolute;
+      right: 10px;
+      top: 10px;
+    }
+  }
+
+  .empty-config {
+    height: 190px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+}

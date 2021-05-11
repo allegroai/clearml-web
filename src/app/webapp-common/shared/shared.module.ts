@@ -29,6 +29,9 @@ import { BaseContextMenuComponent } from './components/base-context-menu/base-co
 import {EntityFooterComponent} from './entity-page/entity-footer/entity-footer.component';
 import {CheckPermissionDirective} from '../../shared/directives/check-permission.directive';
 import {ScrollTextareaComponent} from './components/scroll-textarea/scroll-textarea.component';
+import { ShowOnlyUserWorkComponent } from './components/show-only-user-work/show-only-user-work.component';
+import {GeneralLeavingBeforeSaveAlertGuard} from './guards/general-leaving-before-save-alert.guard';
+import {SortHumanizePipe} from './pipes/sort.pipe';
 
 const _declarations = [
   ExperimentInfoHeaderStatusProgressBarComponent,
@@ -46,7 +49,9 @@ const _declarations = [
   CustomColumnsListComponent,
   EntityFooterComponent,
   CheckPermissionDirective,
-  ScrollTextareaComponent
+  ScrollTextareaComponent,
+  SortHumanizePipe,
+  ShowOnlyUserWorkComponent
 ];
 
 
@@ -68,12 +73,12 @@ const _declarations = [
   ],
   declarations: [
     _declarations,
-    BaseContextMenuComponent
+    BaseContextMenuComponent,
   ],
-  exports     : [..._declarations, UiComponentsModule, TableModule, ClipboardModule, SharedPipesModule, MatSnackBarModule,
+  exports: [..._declarations, UiComponentsModule, TableModule, ClipboardModule, SharedPipesModule, MatSnackBarModule,
     NgxFilesizeModule
   ],
-  providers   : [LeavingBeforeSaveAlertGuard]
+  providers   : [LeavingBeforeSaveAlertGuard, GeneralLeavingBeforeSaveAlertGuard]
 })
 export class SMSharedModule {
 }

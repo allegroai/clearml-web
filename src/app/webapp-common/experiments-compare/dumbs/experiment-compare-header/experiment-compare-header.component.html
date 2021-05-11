@@ -1,8 +1,6 @@
 <div class="header-container">
-  <sm-select-experiments-for-compare *ngIf="showAddExperimentsForCompare$ | async">
-  </sm-select-experiments-for-compare>
   <div class="actions-container">
-
+    <span [matMenuTriggerFor]="selectExperiment" (onMenuClose)="menuClosed()"></span>
     <button class="btn btn-secondary btn-add-experiment"
             smClickStopPropagation
             smTooltip="Add/Remove experiments to comparison"
@@ -72,5 +70,7 @@
   </div>
 </div>
 
-
-
+<mat-menu #selectExperiment="matMenu">
+  <sm-select-experiments-for-compare>
+  </sm-select-experiments-for-compare>
+</mat-menu>

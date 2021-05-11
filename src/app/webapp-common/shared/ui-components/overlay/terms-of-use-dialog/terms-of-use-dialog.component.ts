@@ -12,6 +12,7 @@ export class TermsOfUseDialogComponent implements AfterViewChecked {
   text;
   disabled = true;
   @ViewChild('box', { static: true }) box: ElementRef;
+  private version: number;
 
   @HostListener('scroll', ['$event'])
   onScroll(event) {
@@ -20,9 +21,10 @@ export class TermsOfUseDialogComponent implements AfterViewChecked {
     }
   }
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: any, private dialogRef: MatDialogRef<any>, private sanitizer: DomSanitizer) {
+  constructor(@Inject(MAT_DIALOG_DATA) public data: any, private dialogRef: MatDialogRef<any>) {
+    this.version = data.version;
     // TODO: (nir) hack to prevent auto scrolling to first <a>
-    this.text = sanitizer.bypassSecurityTrustHtml('<a href="#"></a>' + data.externalData);
+    this.text = '<a href="#"></a>' + data.externalData;
   }
 
   ngAfterViewChecked(): void {
@@ -33,8 +35,8 @@ export class TermsOfUseDialogComponent implements AfterViewChecked {
     window.open('/', '_blank');
   }
 
-  closeDialog(isConfirmed) {
-    this.dialogRef.close(isConfirmed);
+  closeDialog() {
+    this.dialogRef.close(this.version);
   }
 
 }

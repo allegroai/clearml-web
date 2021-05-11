@@ -3,6 +3,7 @@
 $generic-font-size: 11px;
 :host {
   .dialog-template-container {
+    height: 100%;
     min-height: 150px;
     overflow-y: auto;
     background-color: transparent;
@@ -38,12 +39,12 @@ $generic-font-size: 11px;
     border-radius: 4px;
     padding: 32px 32px;
     overflow-y: auto;
-    min-height: 200px;
-    max-height: 90vh;
     min-width: 430px;
+    height: 100%;
+    max-height: 94vh;
   }
 
-  /deep/ .background-transparent {
+  ::ng-deep .background-transparent {
     .mat-dialog-container {
       max-height: none !important;
       height: 97vh !important;

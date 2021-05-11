@@ -9,7 +9,7 @@ import {
   ViewChild
 } from '@angular/core';
 import {Store} from '@ngrx/store';
-import {getCompanyTags, openTagColorsMenu, setTagsFilterByProject} from '../../../../core/actions/projects.actions';
+import {getCompanyTags, getTags, openTagColorsMenu, setTagsFilterByProject} from '../../../../core/actions/projects.actions';
 import {ActivateEdit} from 'app/webapp-common/experiments/actions/common-experiments-info.actions';
 import {ActivateModelEdit} from '../../../../models/actions/models-info.actions';
 
@@ -58,7 +58,9 @@ export class TagsMenuComponent {
   focus() {
     if (this.tagsFilterByProject) {
       this.firstTime = true;
+      this.store.dispatch(getTags());
     } else {
+      this.firstTime = false;
       this.store.dispatch(getCompanyTags());
     }
     this.nameInput.nativeElement.focus();
@@ -70,9 +72,13 @@ export class TagsMenuComponent {
   }
 
   projectTagsFilterToggle(): void {
-    if (this.firstTime) {
-      this.firstTime = false;
-      this.store.dispatch(getCompanyTags());
+    if (this.tagsFilterByProject) {
+      if (this.firstTime) {
+        this.firstTime = false;
+        this.store.dispatch(getCompanyTags());
+      }
+    } else {
+      this.store.dispatch(getTags());
     }
     this.store.dispatch(setTagsFilterByProject({tagsFilterByProject: !this.tagsFilterByProject}));
   }

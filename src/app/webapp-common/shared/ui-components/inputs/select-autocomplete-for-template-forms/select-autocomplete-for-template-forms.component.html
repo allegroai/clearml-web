@@ -1,27 +1,29 @@
-<ng-select #ngSelectRef
-           [ngClass]="{'disabled':disabled}"
-           notFoundMsg=""
-           dropdownPosition="bottom"
-           [placeholder]="placeholder"
-           [multiple]="multiple"
-           [addTag]=" !optionAddable ? false : boundAddTag"
-           [clearable]=" multiple && clearable"
-           [loading]="false"
-           [items]="items"
-           [isOpen]="disabled === true ? false : undefined"
-           [(ngModel)]="ngModelValue"
-           (change)="onChange($event)"
-           [name]="name"
->
-
-  <ng-template *ngIf="multiple || enableChips" ng-label-tmp let-item="item">
-    <sm-chips
-      *ngIf="items.length"
-      [isDarkBackground]="false"
-      [allowRemove]="(!disabled) && (multiple || clearable)"
-      (remove)="removeTag(item)"
-      [label]="item.label">
-    </sm-chips>
-  </ng-template>
-</ng-select>
-<ng-content></ng-content>
+<ng-form #autoSelectForm='ngForm'>
+  <mat-form-field [appearance]="appearance" hideRequiredMarker floatLabel="never"  [class]="formFieldClass">
+      <input
+        #autocompleteInput
+        matInput
+        [matAutocomplete]="auto"
+        [name]="name"
+        [ngModel]="val"
+        [placeholder]="placeholder"
+        (ngModelChange)="optionSelected($event)"
+      >
+    <mat-autocomplete #auto="matAutocomplete"
+                      [displayWith]="displayFn"
+                      [class]="formFieldClass"
+                      [classList]="formFieldClass"
+                      autoActiveFirstOption
+    >
+      <mat-option
+        class="item"
+        *ngIf="filterText && isNewName && optionAddable"
+        [value]="{label:filterText, value:filterText}"
+        (onSelectionChange)= "customOptionSelected($event)"
+      >"{{filterText}}" <span class="new">(Add item)</span></mat-option>
+      <mat-option *ngFor="let option of (filteredItems | async)" [value]="option" >
+        {{option.label}}
+      </mat-option>
+    </mat-autocomplete>
+  </mat-form-field>
+</ng-form>

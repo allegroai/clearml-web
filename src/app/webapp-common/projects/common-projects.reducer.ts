@@ -2,38 +2,43 @@ import {createFeatureSelector, createSelector} from '@ngrx/store';
 import {Project} from '../../business-logic/model/projects/project';
 import {TABLE_SORT_ORDER, TableSortOrderEnum} from '../shared/ui-components/data/table/table.consts';
 import {PROJECTS_ACTIONS} from './common-projects.consts';
+import {setProjectsSearchQuery} from './common-projects.actions';
+import {ICommonSearchState} from '../common-search/common-search.reducer';
 
-export interface IProjectReadyForDeletion {
-  experiments: number;
-  models: number;
+export interface CommonProjectReadyForDeletion {
+  project: Project;
+  experiments: {archived: number; unarchived: number};
+  models: {archived: number; unarchived: number};
 }
 
 export interface ICommonProjectsState {
   orderBy: string;
   sortOrder: TableSortOrderEnum;
-  searchQuery: string;
+  searchQuery: ICommonSearchState['searchQuery'];
   data: Project[];
   projectsNonFilteredList: Project[];
   selectedProjectId: string;
   selectedProject: Project;
-  projectReadyForDeletion: IProjectReadyForDeletion;
+  projectReadyForDeletion: CommonProjectReadyForDeletion;
   noMoreProjects: boolean;
   page: number;
 }
 
 export const commonProjectsInitState: ICommonProjectsState = {
-  data                   : [],
-  selectedProjectId      : '',
-  selectedProject        : {},
-  orderBy                : 'last_update',
-  sortOrder              : TABLE_SORT_ORDER.DESC,
-  searchQuery            : '',
+  data: [],
+  selectedProjectId: '',
+  selectedProject: {},
+  orderBy: 'last_update',
+  sortOrder: TABLE_SORT_ORDER.DESC,
+  searchQuery: null,
   projectsNonFilteredList: [],
   projectReadyForDeletion: {
-    experiments: null, models: null
+    project: null,
+    experiments: null,
+    models: null
   },
-  noMoreProjects         : true,
-  page                   : 0,
+  noMoreProjects: true,
+  page: 0,
 };
 
 // todo: where to put it?
@@ -45,7 +50,7 @@ const getCorrectSortingOrder = (currentSortOrder: TableSortOrderEnum, currentOrd
   }
 };
 
-export function commonProjectsReducer<ActionReducer>(state: ICommonProjectsState = commonProjectsInitState, action): ICommonProjectsState {
+export const commonProjectsReducer = (state: ICommonProjectsState = commonProjectsInitState, action): ICommonProjectsState => {
 
   switch (action.type) {
 
@@ -64,34 +69,34 @@ export function commonProjectsReducer<ActionReducer>(state: ICommonProjectsState
         ...state, data:
           state.data.map(ex => ex.id === action.payload.id ? {...ex, ...action.payload.changes} : ex)
       };
-
     case PROJECTS_ACTIONS.SET_PROJECT_BY_ID: {
-      const selectedProjectIndex3 = state.data.findIndex(project => project.id === action.payload.res.project.id);
+      const selectedProjectIndex = state.data.findIndex(project => project.id === action.payload.res.project.id);
       const projectListInst = [...state.data];
-      projectListInst[selectedProjectIndex3] = Object.assign({}, state.data[selectedProjectIndex3], action.payload.res.project);
+      projectListInst[selectedProjectIndex] = Object.assign({}, state.data[selectedProjectIndex], action.payload.res.project);
       return {...state, selectedProject: action.payload.res.project, data: projectListInst};
     }
     case PROJECTS_ACTIONS.SELECT_PROJECT: {
-      const selectedProjectIndex2 = state.data.findIndex(project =>
+      const selectedProjectIndex = state.data.findIndex(project =>
         project.id === action.payload.projectId
       );
-      const selectedProject2 = state.data[selectedProjectIndex2];
-      return {...state, selectedProjectId: action.payload.projectId, selectedProject: selectedProject2};
+      const selectedProject = state.data[selectedProjectIndex];
+      return {...state, selectedProjectId: action.payload.projectId, selectedProject};
     }
     case PROJECTS_ACTIONS.CREATE_PROJECT_SUCCESS:
       return {...state, selectedProjectId: action.payload.projectId};
-
     case PROJECTS_ACTIONS.SELECT_ALL_PROJECTS:
       return {...state, selectedProjectId: null, selectedProject: {}};
-    case PROJECTS_ACTIONS.DELETE_PROJECT:
+      // TODO: do we need to reset this in new delete?
+    case PROJECTS_ACTIONS.RESET_PROJECTS:
       return {...state, page: 0, noMoreProjects: false, data: []};
     case PROJECTS_ACTIONS.SET_ORDER_BY:
       return {...state, orderBy: action.payload.orderBy, sortOrder: getCorrectSortingOrder(state.sortOrder, state.orderBy, action.payload.orderBy), page: 0, noMoreProjects: false, data: []};
-    case PROJECTS_ACTIONS.SET_SEARCH_QUERY:
-      return {...state, searchQuery: action.payload.searchQuery, page: 0, noMoreProjects: false, data: []};
+    case setProjectsSearchQuery.type:
+      return {...state, searchQuery: (action as ReturnType<typeof setProjectsSearchQuery>), page: 0, noMoreProjects: false, data: []};
     case PROJECTS_ACTIONS.RESET_SEARCH_QUERY:
-      return {...state, searchQuery: '', page: 0, noMoreProjects: false, data: []};
+      return {...state, searchQuery: commonProjectsInitState.searchQuery, page: 0, noMoreProjects: false, data: []};
     case PROJECTS_ACTIONS.CHECK_PROJECT_FOR_DELETION:
+      return {...state, projectReadyForDeletion: {...commonProjectsInitState.projectReadyForDeletion, project: action.payload.project}};
     case PROJECTS_ACTIONS.RESET_READY_TO_DELETE:
       return {...state, projectReadyForDeletion: commonProjectsInitState.projectReadyForDeletion};
     case PROJECTS_ACTIONS.SET_PROJECT_READY_FOR_DELETION:
@@ -99,19 +104,16 @@ export function commonProjectsReducer<ActionReducer>(state: ICommonProjectsState
     default:
       return state;
   }
-}
+};
 
-export const selectProjects                = createFeatureSelector<ICommonProjectsState>('projects');
+export const selectProjects = createFeatureSelector<ICommonProjectsState>('projects');
 // TODO what to do?
-export const selectProjectsData            = createSelector(selectProjects, (state: ICommonProjectsState): Array<Project> => state ? state.data : []);
+export const selectProjectsData = createSelector(selectProjects, (state: ICommonProjectsState): Array<Project> => state ? state.data : []);
 export const selectNonFilteredProjectsList = createSelector(selectProjects, (state: ICommonProjectsState): Array<Project> => state ? state.projectsNonFilteredList : []);
 // export const selectSelectedProjectId = createSelector(selectRouterParams, (params: any) => params ? params.projectId : '');
-export const selectProjectsOrderBy         = createSelector(selectProjects, (state: ICommonProjectsState): string => state ? state.orderBy : '');
-export const selectProjectsSortOrder       = createSelector(selectProjects, (state: ICommonProjectsState): TableSortOrderEnum => state ? state.sortOrder : TABLE_SORT_ORDER.DESC);
-export const selectProjectsSearchQuery     = createSelector(selectProjects, (state: ICommonProjectsState): string => state ? state.searchQuery : '');
-export const selectPojectReadyForDeletion  = createSelector(selectProjects, (state: ICommonProjectsState): IProjectReadyForDeletion => state.projectReadyForDeletion);
-export const selectNoMoreProjects          = createSelector(selectProjects, (state: ICommonProjectsState): boolean => state.noMoreProjects);
-export const selectProjectsPage            = createSelector(selectProjects, (state: ICommonProjectsState): number => state.page);
-
-// export const selectSelectedProjectId = createSelector(selectProjects, (state: ICommonProjectsState): string => state ? state.selectedProjectId : '');
-// export const selectSelectedProject = createSelector(selectProjects, (state: ICommonProjectsState): Project => state ? state.selectedProject : {});
+export const selectProjectsOrderBy = createSelector(selectProjects, (state: ICommonProjectsState): string => state ? state.orderBy : '');
+export const selectProjectsSortOrder = createSelector(selectProjects, (state: ICommonProjectsState): TableSortOrderEnum => state ? state.sortOrder : TABLE_SORT_ORDER.DESC);
+export const selectProjectsSearchQuery = createSelector(selectProjects, (state: ICommonProjectsState) => state?.searchQuery);
+export const selectProjectReadyForDeletion = createSelector(selectProjects, (state: ICommonProjectsState): CommonProjectReadyForDeletion => state.projectReadyForDeletion);
+export const selectNoMoreProjects = createSelector(selectProjects, (state: ICommonProjectsState): boolean => state.noMoreProjects);
+export const selectProjectsPage = createSelector(selectProjects, (state: ICommonProjectsState): number => state ? state.page : null);

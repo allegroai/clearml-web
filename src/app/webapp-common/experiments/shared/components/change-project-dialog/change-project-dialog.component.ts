@@ -9,6 +9,7 @@ import {map, startWith} from 'rxjs/operators';
 import {isReadOnly} from '../../../../shared/utils/shared-utils';
 import {isEqual} from 'lodash/fp';
 import {NgForm} from '@angular/forms';
+import {EntityTypeEnum} from '../../../../../shared/constants/non-common-consts';
 
 @Component({
   selector: 'sm-change-project-dialog',
@@ -19,7 +20,7 @@ export class ChangeProjectDialogComponent implements OnInit {
 
   public projects$: Observable<Project[]>;
   public selectedProjectId: Project['id'];
-  public currentProject: string;
+  public currentProjects: string[];
   public projects: { label: string; value: string }[];
   public filteredProjects: Observable<{ label: string; value: string }[]>;
   public formData: { project: any } = {
@@ -38,16 +39,17 @@ export class ChangeProjectDialogComponent implements OnInit {
   constructor(
     private store: Store<any>, public dialogRef: MatDialogRef<ChangeProjectDialogComponent>,
     @Inject(MAT_DIALOG_DATA) data: {
-      currentProject: Project['id'];
+      currentProjects: Project['id'] | Project['id'][];
       defaultProject: Project['id'];
-      reference?: string;
+      reference?: string | any[];
+      type: EntityTypeEnum;
     }
   ) {
     this.selectedProjectId = data.defaultProject;
-    this.currentProject = data.currentProject;
-    this.reference = data.reference;
+    this.currentProjects = Array.isArray(data.currentProjects) ? data.currentProjects : [data.currentProjects];
+    this.reference = Array.isArray(data.reference) ? `${data.reference.length} ${data.type}s` : data.reference;
     this.readOnlyProjects$ = this.store.select(selectProjects)
-      .pipe(map(projects => projects.filter(project => isReadOnly(project)).map(project=> project.name).concat(this.currentProjectInstance.name)));
+      .pipe(map(projects => projects.filter(project => isReadOnly(project)).map(project=> project.name).concat(this.currentProjectInstance?.name)));
     this.projects$ = this.store.select(selectProjects).pipe(
       map(projects => projects.filter((project) => !isReadOnly(project)))
     );
@@ -56,7 +58,9 @@ export class ChangeProjectDialogComponent implements OnInit {
   ngOnInit(): void {
     this.store.dispatch(new GetAllProjects());
     this.projectsSub = this.projects$.subscribe(projects => {
-      this.currentProjectInstance = projects.find(proj => proj.id === this.currentProject);
+      if (this.currentProjects.length === 1) {
+        this.currentProjectInstance = projects.find(proj => proj.id === this.currentProjects[0]);
+      }
       const projectList = projects.map(project => ({value: project.id, label: project.name}));
       if (!isEqual(projectList, this.projects)) {
         this.projects = projectList;

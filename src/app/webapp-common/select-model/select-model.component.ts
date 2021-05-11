@@ -7,7 +7,7 @@ import {MatDialogRef} from '@angular/material/dialog';
 import {ConfirmDialogComponent} from '../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {ISmCol, TableSortOrderEnum} from '../shared/ui-components/data/table/table.consts';
 import {SelectedModel} from '../models/shared/models.model';
-import {selectGlobalFilter, selectIsAllProjectsMode, selectNoMoreModels, selectTableFilters, selectTableSortField, selectTableSortOrder} from './select-model.reducer';
+import {selectGlobalFilter, selectIsAllProjectsMode, selectNoMoreModels, selectTableFilters, selectTableSortFields} from './select-model.reducer';
 import {MODELS_TABLE_COLS, ModelsViewModesEnum} from '../models/models.consts';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {selectProjectSystemTags, selectProjectTags} from '../core/reducers/projects.reducer';
@@ -15,6 +15,7 @@ import {getTags} from '../core/actions/projects.actions';
 import {selectModelsUsers} from '../models/reducers';
 import {User} from '../../business-logic/model/users/user';
 import * as modelsActions from '../models/actions/models-view.actions';
+import {SortMeta} from 'primeng/api';
 
 @Component({
   selector   : 'sm-select-model',
@@ -24,7 +25,7 @@ import * as modelsActions from '../models/actions/models-view.actions';
 export class SelectModelComponent implements OnInit, OnDestroy {
 
   public models$: Observable<SelectedModel[]>;
-  public tableSortField$: Observable<string>;
+  public tableSortFields$: Observable<SortMeta[]>;
   public tableSortOrder$: Observable<TableSortOrderEnum>;
   public noMoreModels$: Observable<boolean>;
   public isAllProjects$: Observable<boolean>;
@@ -39,8 +40,7 @@ export class SelectModelComponent implements OnInit, OnDestroy {
 
   constructor(private store: Store<any>, public dialogRef: MatDialogRef<ConfirmDialogComponent>) {
     this.models$         = this.store.select(selectModelsList);
-    this.tableSortField$ = this.store.select(selectTableSortField);
-    this.tableSortOrder$ = this.store.select(selectTableSortOrder);
+    this.tableSortFields$ = this.store.select(selectTableSortFields);
     this.tableFilters$   = this.store.select(selectTableFilters);
     this.selectedModels$ = this.store.select(selectSelectedModels);
     this.viewMode$       = this.store.select(selectViewMode);
@@ -73,8 +73,8 @@ export class SelectModelComponent implements OnInit, OnDestroy {
     this.store.dispatch(new actions.GetNextModels());
   }
 
-  sortedChanged(sort: { sortOrder: TableSortOrderEnum; colId: ISmCol['id'] }) {
-    this.store.dispatch(new actions.TableSortChanged(sort.colId, sort.sortOrder));
+  sortedChanged(sort: { isShift: boolean; colId: ISmCol['id'] }) {
+    this.store.dispatch(actions.tableSortChanged({colId: sort.colId, isShift: sort.isShift}));
   }
 
   filterChanged(filter: {col: ISmCol; value: any}) {

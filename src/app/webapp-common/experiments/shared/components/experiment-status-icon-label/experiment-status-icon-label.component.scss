@@ -1,5 +1,9 @@
 @import "../../../../../webapp-common/shared/ui-components/styles/variables";
 
+.icon {
+  min-width: 10px;
+}
+
 .label {
   align-items: center;
   justify-content: center;
@@ -42,7 +46,7 @@
   color: $blue-sky;
 }
 
-/deep/ .ui-state-highlight{
+::ng-deep .ui-state-highlight{
   sm-experiment-status-icon-label, sm-experiment-type-icon-label {
     .published, .created, .in_progress, .queued, .failed, .stopped, .training, .testing, .completed, .aborted{
       color: $almost-white;
@@ -51,7 +55,7 @@
   }
 }
 
-/deep/ .selected {
+::ng-deep .selected {
   sm-experiment-status-icon-label, sm-experiment-type-icon-label {
     .published, .created, .in_progress, .queued, .failed, .stopped, .training, .testing, .completed, .aborted{
       color: $almost-white;

@@ -37,7 +37,7 @@
     text-align: center;
     position: relative;
 
-    /deep/ sm-search {
+    ::ng-deep sm-search {
       input {
         font-size: 16px;
 

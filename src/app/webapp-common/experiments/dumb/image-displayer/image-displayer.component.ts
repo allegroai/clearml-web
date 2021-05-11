@@ -30,7 +30,8 @@ import {EventsGetDebugImageIterationsResponse} from '../../../../business-logic/
 import {selectS3BucketCredentials} from '../../../core/reducers/common-auth-reducer';
 import {filter, map, withLatestFrom} from 'rxjs/operators';
 import {AdminService} from '../../../../features/admin/admin.service';
-import {selectAppVisible, selectAutoRefresh} from "../../../core/reducers/view-reducer";
+import {selectAppVisible, selectAutoRefresh} from '../../../core/reducers/view-reducer';
+import {isFileserverUrl} from '../../../../shared/utils/url';
 
 @Component({
   selector: 'sm-image-displayer',
@@ -92,8 +93,13 @@ export class ImageDisplayerComponent implements OnInit, OnDestroy {
     }
   }
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: { imageSources: Array<any>; index: number; snippetsMetaData: any },
-              public dialogRef: MatDialogRef<ImageDisplayerComponent>, public changeDetector: ChangeDetectorRef, private store: Store<any>, private adminService: AdminService) {
+  constructor(
+    @Inject(MAT_DIALOG_DATA) public data: { imageSources: Array<any>; index: number; snippetsMetaData: any },
+    public dialogRef: MatDialogRef<ImageDisplayerComponent>,
+    public changeDetector: ChangeDetectorRef,
+    private store: Store<any>,
+    private adminService: AdminService
+  ) {
     const reqData = {
       task: data.snippetsMetaData[data.index].task,
       metric: data.snippetsMetaData[data.index].metric,
@@ -116,7 +122,6 @@ export class ImageDisplayerComponent implements OnInit, OnDestroy {
           const parsed = new URL(signedUrl);
           parsed.searchParams.append('X-Amz-Date', event.timestamp);
           return {...event, oldSrc: event.url, url: parsed.toString()};
-          return event;
         })
       );
 
@@ -125,16 +130,16 @@ export class ImageDisplayerComponent implements OnInit, OnDestroy {
       withLatestFrom(this.autoRefreshState$, this.isAppVisible$),
       filter(([iteration, autoRefreshState, isVisible]) => isVisible && autoRefreshState)
     ).subscribe(() => {
-        if (this.currentDebugImage) {
-          this.store.dispatch(setDisplayerEndOfTime({endOfTime: false}));
-          this.store.dispatch(setDebugImageViewerScrollId({scrollId: null}));
-          this.store.dispatch(getDebugImageSample({
-            task: this.currentDebugImage.task,
-            metric: this.currentDebugImage.metric,
-            variant: this.currentDebugImage.variant,
-            iteration: this.currentDebugImage.iter
-          }));
-        }
+      if (this.currentDebugImage) {
+        this.store.dispatch(setDisplayerEndOfTime({endOfTime: false}));
+        this.store.dispatch(setDebugImageViewerScrollId({scrollId: null}));
+        this.store.dispatch(getDebugImageSample({
+          task: this.currentDebugImage.task,
+          metric: this.currentDebugImage.metric,
+          variant: this.currentDebugImage.variant,
+          iteration: this.currentDebugImage.iter
+        }));
+      }
       }
     );
   }
@@ -232,8 +237,11 @@ export class ImageDisplayerComponent implements OnInit, OnDestroy {
   downloadImage() {
     if (this.currentDebugImage) {
       const src = new URL(this.currentDebugImage.url);
+      if (isFileserverUrl(this.currentDebugImage.url, window.location.hostname)) {
+        src.searchParams.set('download', '');
+      }
       const a = document.createElement('a') as HTMLAnchorElement;
-      a.href = this.currentDebugImage.url;
+      a.href = src.toString();
       a.download = last(src.pathname.split('/'));
       a.target = '_blank';
       a.click();

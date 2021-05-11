@@ -1,0 +1,61 @@
+<form class="filter-form p-4" #templateForm="ngForm" smClickStopPropagation smKeyDownStopPropagation [formGroup]="iterationsForm">
+
+  <div>
+    <div class="mb-1 label">Equals or greater than</div>
+    <div class="d-flex ">
+     <!-- <sm-checkbox-control
+        (formDataChanged)="setCheckBox($event.value, 'greaterThan')"
+        [formData]="greaterThan.checked"
+        class="align-self-center pr-2"
+      >
+      </sm-checkbox-control>-->
+      <div class="input-border-duration-container">
+        <div>
+          <input
+                 matInput
+                 formControlName="greaterThan"
+                 type="number"
+                 name="greaterThan"
+          >
+        </div>
+        <div class="reset">
+          <i *ngIf="greaterThan.value !== null"
+             [class]="'al-icon al-ico-dialog-x sm'"
+             (click)="iterationsForm.get('greaterThan').setValue(null)"
+          ></i>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <sm-divider [label]="'and'"></sm-divider>
+  <div>
+    <div class="mb-1 label">Equals or less than</div>
+    <div class="d-flex " >
+    <!--  <sm-checkbox-control
+        [formData]="lessThan.checked"
+        (formDataChanged)="setCheckBox($event.value, 'lessThan')"
+        class="align-self-center pr-2"
+      >
+      </sm-checkbox-control>-->
+      <div class="input-border-duration-container">
+        <div>
+          <input
+                   type="number"
+                   formControlName="lessThan"
+                   name="greaterThan"
+          >
+        </div>
+        <div class="reset">
+          <i *ngIf="lessThan.value !== null"
+             [class]="'al-icon al-ico-dialog-x sm'"
+             (click)="iterationsForm.get('lessThan').setValue(null)"
+          ></i>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</form>
+
+<sm-table-filter-duration-error *ngIf="hasTimeError"  [isFullWidth]="true"></sm-table-filter-duration-error>

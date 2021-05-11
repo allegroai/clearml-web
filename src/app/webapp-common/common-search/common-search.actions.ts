@@ -1,4 +1,4 @@
-import {Action} from '@ngrx/store';
+import {Action, createAction, props} from '@ngrx/store';
 
 const COMMON_SEARCH_PREFIX = 'CommonSearch_';
 
@@ -26,12 +26,10 @@ export class SetSearchActive implements Action {
   }
 }
 
-export class SetSearchQuery implements Action {
-  readonly type = COMMON_SEARCH_ACTIONS.SET_SEARCH_QUERY;
-
-  constructor(public payload: string) {
-  }
-}
+export const setSearchQuery = createAction(
+  COMMON_SEARCH_ACTIONS.SET_SEARCH_QUERY,
+  props<{query: string; regExp?: boolean}>()
+);
 
 export class SetSearchPlaceholder implements Action {
   readonly type = COMMON_SEARCH_ACTIONS.SET_SEARCH_PLACEHOLDER;

@@ -1,0 +1,27 @@
+:host {
+  ng-form, mat-form-field {
+    display: block;
+  }
+
+  input[disabled] {
+    width: 0;
+    max-width: 0;
+    margin: 0;
+    padding: 0;
+  }
+
+  .mat-form-field-appearance-fill {
+    ::ng-deep .mat-chip-list-wrapper {
+      line-height: 24px;
+    }
+
+    ::ng-deep &.mat-form-field-disabled .mat-form-field-flex {
+      background-color: #000;
+    }
+    ::ng-deep .mat-form-field-flex {
+      background-color: #000;
+      padding-top: 0;
+    }
+  }
+}
+

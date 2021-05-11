@@ -1,13 +1,11 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {IModelInfoInput, IModelInfoOutput, IModelInfoSource} from '../../shared/common-experiment-model.model';
+import {IModelInfo, IModelInfoSource} from '../../shared/common-experiment-model.model';
 import {MatDialog} from '@angular/material/dialog';
 import {filter} from 'rxjs/operators';
-import {ModelAutoPopulateDialogComponent} from '../model-auto-populate-dialog/model-auto-populate-dialog.component';
 import {Model} from '../../../../business-logic/model/models/model';
 import {SelectModelComponent} from '../../../select-model/select-model.component';
 import {AdminService} from '../../../../features/admin/admin.service';
 import {Store} from '@ngrx/store';
-import {areLabelsEqualss} from '../../../../features/experiments/shared/experiments.utils';
 import {BaseClickableArtifact} from '../base-clickable-artifact';
 
 
@@ -19,21 +17,21 @@ import {BaseClickableArtifact} from '../base-clickable-artifact';
 export class ExperimentModelsFormViewComponent extends BaseClickableArtifact {
 
   public isLocalFile: boolean;
-  private _model: IModelInfoInput;
+  private _model: IModelInfo;
   @Input() projectId: string;
   @Input() editable: boolean;
   @Input() networkDesign: string;
   @Input() modelLabels: Model['labels'];
   @Input() source: IModelInfoSource;
-  @Input() output: IModelInfoOutput;
   @Input() experimentName: string;
+  @Input() showCreatedExperiment: boolean = true;
 
-  @Input() set model(model: IModelInfoInput) {
+  @Input() set model(model: IModelInfo) {
     this._model = model;
-    this.isLocalFile = model && model.url && this.adminService.isLocalFile(model.url);
+    this.isLocalFile = model && model.uri && this.adminService.isLocalFile(model.uri);
   }
 
-  get model(): IModelInfoInput {
+  get model(): IModelInfo {
     return this._model;
   }
 

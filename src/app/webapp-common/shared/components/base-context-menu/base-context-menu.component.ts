@@ -1,10 +1,15 @@
-import {Component, ElementRef, EventEmitter, HostListener, OnInit, Output, ViewChild} from '@angular/core';
+import {Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, ViewChild} from '@angular/core';
 import {MatMenuTrigger} from '@angular/material/menu';
 import {TagsMenuComponent} from '../../ui-components/tags/tags-menu/tags-menu.component';
-import {getTags} from '../../../core/actions/projects.actions';
+import {getTags} from '@common/core/actions/projects.actions';
 import {Store} from '@ngrx/store';
 import {DeactivateEdit, ActivateEdit} from 'app/webapp-common/experiments/actions/common-experiments-info.actions';
 import {ActivateModelEdit, CancelModelEdit} from 'app/webapp-common/models/actions/models-info.actions';
+import {
+  CountAvailableAndIsDisable,
+  CountAvailableAndIsDisableSelectedFiltered
+} from '@common/shared/entity-page/items.utils';
+import { MENU_ITEM_ID } from '../../entity-page/items.utils';
 
 @Component({
   selector: 'sm-base-context-menu',
@@ -12,9 +17,13 @@ import {ActivateModelEdit, CancelModelEdit} from 'app/webapp-common/models/actio
 })
 export class BaseContextMenuComponent {
   public position = {x: 0, y: 0};
+  public MENU_ITEM_ID =  MENU_ITEM_ID;
 
   @ViewChild('tagMenuContent') tagMenu: TagsMenuComponent;
   @ViewChild(MatMenuTrigger) trigger: MatMenuTrigger;
+
+  @Input() selectedDisableAvailable: Record<string, CountAvailableAndIsDisableSelectedFiltered> = {};
+  @Input() selectedDisableAvailableIsMultiple = true;
   @Output() menuOpened = new EventEmitter();
   @Output() menuClosed = new EventEmitter();
 
@@ -49,8 +58,7 @@ export class BaseContextMenuComponent {
       this.store.dispatch(new ActivateEdit('tags'));
       this.store.dispatch(new ActivateModelEdit('tags'));
     }, 200);
-    this.store.dispatch(getTags());
-    this.tagMenu.focus();
+    this.tagMenu?.focus();
   }
 
   tagMenuClosed() {
@@ -58,6 +66,6 @@ export class BaseContextMenuComponent {
     this.store.dispatch(new DeactivateEdit());
     this.store.dispatch(new CancelModelEdit());
     }, 200);
-    this.tagMenu.clear();
+    this.tagMenu?.clear();
   }
 }

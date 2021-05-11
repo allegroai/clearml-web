@@ -1,4 +1,4 @@
-<div class="search-input-container" [class.expand]="expandOnHover" [class.empty]="empty" (mouseenter)="searchBar.focus()" (dblclick)="$event.stopPropagation()">
+<span class="search-input-container" [class.expand]="expandOnHover" [class.empty]="empty" (mouseenter)="searchBar.focus()" (dblclick)="$event.stopPropagation()">
   <input class="search-input"
          #searchBar
          [placeholder]="placeholder"
@@ -9,5 +9,7 @@
   <ng-template #showX>
     <i class="fa fa-times pointer pr-2" (click)="clear()"></i>
   </ng-template>
-  <ng-template #noIcon></ng-template>
-</div>
+  <ng-template #noIcon>
+    <ng-content></ng-content>
+  </ng-template>
+</span>

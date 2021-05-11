@@ -1,11 +1,14 @@
 import {ActionReducerMap, createSelector} from '@ngrx/store';
 import {IModelsViewState, modelsViewReducer} from './models-view.reducer';
 import {ModelInfoState, modelsInfoReducer} from './model-info.reducer';
-import {SelectedModel, TableModel, ModelTableColFieldsEnum} from '../shared/models.model';
+import {SelectedModel} from '../shared/models.model';
 import {ModelsViewModesEnum} from '../models.consts';
-import {TableSortOrderEnum} from '../../shared/ui-components/data/table/table.consts';
-import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {selectSelectedProjectId} from '../../core/reducers/projects.reducer';
+import {SortMeta} from 'primeng/api';
+import {
+  CountAvailableAndIsDisable,
+  CountAvailableAndIsDisableSelectedFiltered
+} from '@common/shared/entity-page/items.utils';
 
 export const reducers: ActionReducerMap<any, any> = {
   view: modelsViewReducer,
@@ -20,12 +23,12 @@ function models(state) {
 export const modelsView = createSelector(models, (state): IModelsViewState => state ? state.view : {});
 export const selectModelsList = createSelector(modelsView, (state) => state.models);
 export const selectCurrentPage = createSelector(modelsView, (state): number => state.page);
-export const selectGlobalFilter = createSelector(modelsView, (state): string => state.globalFilter);
-export const selectTableSortField = createSelector(modelsView, (state): string => state.tableSortField);
-export const selectTableSortOrder = createSelector(modelsView, (state): TableSortOrderEnum => state.tableSortOrder);
+export const selectGlobalFilter = createSelector(modelsView, (state) => state.globalFilter);
+export const selectTableSortFields = createSelector(modelsView, (state): SortMeta[] => state.tableSortFields);
 export const selectTableFilters = createSelector(modelsView, state => state.tableFilters);
 export const selectViewMode = createSelector(modelsView, (state): ModelsViewModesEnum => state.viewMode);
 export const selectSelectedModels = createSelector(modelsView, (state): Array<any> => state.selectedModels);
+export const selectedModelsDisableAvailable = createSelector(modelsView, (state): Record<string, CountAvailableAndIsDisableSelectedFiltered> => state.selectedModelsDisableAvailable);
 export const selectSelectedTableModel = createSelector(modelsView, (state): SelectedModel => state.selectedModel);
 export const selectNoMoreModels = createSelector(modelsView, (state): boolean => state.noMoreModels);
 export const selectShowAllSelectedIsActive = createSelector(modelsView, (state): boolean => state.showAllSelectedIsActive);

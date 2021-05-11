@@ -1,5 +1,6 @@
 import {ISelectedExperiment} from '../experiments/shared/experiment-info.model';
 import {ConfigurationItem} from '../../business-logic/model/tasks/configurationItem';
+import {ITask} from '../../business-logic/model/al-task';
 
 export abstract class ExperimentDetailsReverterServiceBase {
   public experimentReverter;
@@ -9,7 +10,7 @@ export abstract class ExperimentDetailsReverterServiceBase {
   }
 
 
-  revertExperiments(experimentIds: Array<string>, experiments: Array<ISelectedExperiment>) {
+  revertExperiments(experimentIds: Array<string>, experiments: ITask[]) {
     // map the experiment ids to keep the user order.
     return experimentIds.map(id => {
       const exp = experiments.find(ex => ex.id === id);
@@ -52,7 +53,7 @@ export abstract class ExperimentDetailsReverterServiceBase {
     }, {});
   }
 
-  abstract revertArtifacts(exp: ISelectedExperiment);
+  abstract revertArtifacts(exp: ITask);
 
-  abstract revertExecution(exp: ISelectedExperiment);
+  abstract revertExecution(exp: ITask);
 }

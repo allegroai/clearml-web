@@ -1,0 +1,105 @@
+<div *ngIf="activateFromMenuButton" mat-button [matMenuTriggerFor]="experimentMenu"
+     class="p-0 cell menu-button al-icon sm-md al-color light-grey-blue al-ico-bars-menu"
+></div>
+<div *ngIf="!activateFromMenuButton" #contextTrigger
+     style="visibility: hidden; position: fixed"
+     [style.left.px]="position.x"
+     [style.top.px]="position.y"
+     [matMenuTriggerFor]="experimentMenu">
+</div>
+<mat-menu #experimentMenu="matMenu" [hasBackdrop]="false">
+  <ng-container *ngIf="selectedDisableAvailable[MENU_ITEM_ID.QUEUE]">
+    <button mat-menu-item (click)="toggleFullScreen(minimizedView)" [disabled]="isSharedAndNotOwner">
+      <i [class]="'al-icon '+ ICONS.CHART + ' sm-md'"></i>
+      {{minimizedView ? 'View Full Screen' : 'View in Experiment Table'}}
+    </button>
+
+    <button mat-menu-item (click)="manageQueueClicked()"
+            [disabled]="selectedDisableAvailable[MENU_ITEM_ID.QUEUE].disable">
+      <i [class]="'al-icon '+ ICONS.QUEUED + ' sm-md'"></i>
+      {{selectedDisableAvailable[MENU_ITEM_ID.QUEUE]?.available | menuItemText : 'Manage Queue' : selectedDisableAvailableIsMultiple}}
+    </button>
+
+    <button mat-menu-item (click)="viewWorkerClicked()"
+            [disabled]="selectedDisableAvailable[MENU_ITEM_ID.VIEW_WORKER].disable">
+      <i [class]="'al-icon '+ ICONS.WORKER + ' sm-md'"></i>
+      {{selectedDisableAvailable[MENU_ITEM_ID.VIEW_WORKER]?.available | menuItemText : 'View Worker' : selectedDisableAvailableIsMultiple}}
+    </button>
+
+    <hr>
+
+    <button mat-menu-item (click)="deleteExperimentPopup()"
+            [disabled]="selectedDisableAvailable[MENU_ITEM_ID.DELETE].disable" *ngIf="isArchive">
+      <i [class]="'al-icon ' + ICONS.REMOVE + ' sm-md'"></i>
+      {{selectedDisableAvailable[MENU_ITEM_ID.DELETE].available | menuItemText : 'Delete' : selectedDisableAvailableIsMultiple}}
+    </button>
+
+    <button mat-menu-item (click)="restoreArchive()"
+            [disabled]="selectedDisableAvailable[MENU_ITEM_ID.ARCHIVE].disable">
+      <i class="al-icon sm-md" [class]="isArchive ? ICONS.RESTORE : ICONS.ARCHIVE"></i>
+      {{selectedDisableAvailable[MENU_ITEM_ID.ARCHIVE].available | menuItemText : isArchive ? 'Restore from Archive' : 'Archive' : selectedDisableAvailableIsMultiple}}
+    </button>
+
+    <button mat-menu-item (click)="enqueuePopup()"
+            *ngIf="!selectedDisableAvailable[MENU_ITEM_ID.ENQUEUE].disable && !isArchive"
+            [disabled]="selectedDisableAvailable[MENU_ITEM_ID.ENQUEUE].disable">
+      <i [class]="'al-icon ' + ICONS.ENQUEUE + ' sm-md'"></i>
+      {{selectedDisableAvailable[MENU_ITEM_ID.ENQUEUE]?.available | menuItemText : 'Enqueue' : selectedDisableAvailableIsMultiple}}
+    </button>
+
+    <button mat-menu-item (click)="dequeuePopup()"
+            *ngIf="!selectedDisableAvailable[MENU_ITEM_ID.DEQUEUE].disable"
+            [disabled]="selectedDisableAvailable[MENU_ITEM_ID.DEQUEUE]?.disable">
+      <i [class]="'al-icon ' + ICONS.DEQUEUE + ' sm-md'"></i>
+      {{selectedDisableAvailable[MENU_ITEM_ID.DEQUEUE]?.available | menuItemText : 'Dequeue' : selectedDisableAvailableIsMultiple}}
+    </button>
+
+    <button mat-menu-item (click)="resetPopup()" [disabled]="selectedDisableAvailable[MENU_ITEM_ID.RESET].disable">
+      <i [class]="'al-icon ' + ICONS.RESET + ' sm-md'"></i>
+      {{selectedDisableAvailable[MENU_ITEM_ID.RESET].available | menuItemText : 'Reset' : selectedDisableAvailableIsMultiple}}
+    </button>
+
+    <button mat-menu-item (click)="stopPopup()" [disabled]="selectedDisableAvailable[MENU_ITEM_ID.ABORT].disable">
+      <i [class]="'al-icon ' + ICONS.STOPPED + ' sm-md'"></i>
+      {{selectedDisableAvailable[MENU_ITEM_ID.ABORT].available | menuItemText : 'Abort' : selectedDisableAvailableIsMultiple }}
+    </button>
+
+    <button
+      mat-menu-item
+      (click)="publishPopup()"
+      [disabled]="selectedDisableAvailable[MENU_ITEM_ID.PUBLISH].disable">
+      <i [class]="'al-icon ' + ICONS.PUBLISHED + ' sm-md'"></i>
+      {{selectedDisableAvailable[MENU_ITEM_ID.PUBLISH].available | menuItemText : 'Publish' : selectedDisableAvailableIsMultiple }}
+    </button>
+    <hr>
+    <button mat-menu-item
+            [matMenuTriggerFor]="tagMenu"
+            [disabled]="isExample"
+            (menuOpened)="tagMenuOpened()"
+            (menuClosed)="tagMenuClosed()">
+      <i [class]="'al-icon ' + ICONS.TAG + ' sm-md'">
+      </i><span>{{numSelected | menuItemText : 'Add Tag' : selectedDisableAvailableIsMultiple }}</span>
+    </button>
+    <hr>
+    <button mat-menu-item (click)="clonePopup()">
+      <i [class]="'al-icon ' + ICONS.CLONE + ' sm-md'"></i>Clone
+    </button>
+    <button mat-menu-item (click)="moveToProjectPopup()"
+            [disabled]="selectedDisableAvailable[MENU_ITEM_ID.MOVE_TO].disable">
+      <i [class]="'al-icon ' + ICONS.MOVE_TO + ' sm-md'"></i>
+      {{selectedDisableAvailable[MENU_ITEM_ID.MOVE_TO].available | menuItemText : 'Move to Project' : selectedDisableAvailableIsMultiple}}
+    </button>
+    </ng-container>
+</mat-menu>
+
+<mat-menu #tagMenu="matMenu">
+  <sm-tags-menu
+    #tagMenuContent
+    class="light-theme"
+    [tags]="experiment?.tags"
+    [tagsFilterByProject]="tagsFilterByProject"
+    [projectTags]="projectTags"
+    [companyTags]="companyTags"
+    (tagSelected)="tagSelected.emit($event)">
+  </sm-tags-menu>
+</mat-menu>

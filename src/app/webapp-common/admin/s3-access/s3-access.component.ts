@@ -2,9 +2,10 @@ import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angula
 import {Store} from '@ngrx/store';
 import {FormArray, FormBuilder, FormGroup} from '@angular/forms';
 import {get} from 'lodash/fp';
-import {ICONS, ALLEGRO_TUTORIAL_BUCKET} from '../../../app.constants';
+import {ALLEGRO_TUTORIAL_BUCKET} from '../../../app.constants';
 import {debounceTime} from 'rxjs/operators';
 import {Subscription} from 'rxjs';
+import { ICONS } from '../../constants';
 
 @Component({
   selector   : 'sm-s3-access',

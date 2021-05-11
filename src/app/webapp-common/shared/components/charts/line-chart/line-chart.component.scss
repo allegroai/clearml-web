@@ -1,7 +1,12 @@
 @import "../../../ui-components/styles/variables";
 
 :host {
-  /deep/ svg.britechart.line-chart {
+  .chart {
+    height: calc(100% - 40px);
+    margin-bottom: 6px;
+  }
+
+  ::ng-deep svg.britechart.line-chart {
     overflow: visible;
   }
 
@@ -28,45 +33,45 @@
     }
   }
 
-  /deep/ .masking-rectangle {
+  ::ng-deep .masking-rectangle {
     fill: $black;
   }
 
-  /deep/ .horizontal-grid-line {
+  ::ng-deep .horizontal-grid-line {
     stroke: $dark-grey-blue;
     stroke-dasharray: unset;
   }
 
-  /deep/ .extended-x-line {
+  ::ng-deep .extended-x-line {
     stroke: $dark-grey-blue;
   }
 
-  /deep/ .tick {
+  ::ng-deep .tick {
     text {
       fill: $light-periwinkle-two;
     }
   }
 
-  /deep/ .legend-entry-name {
+  ::ng-deep .legend-entry-name {
     fill: $light-periwinkle-two;
   }
 
-  /deep/ rect.tooltip-text-container {
+  ::ng-deep rect.tooltip-text-container {
     fill: black !important;
     stroke: $blue-300 !important;
   }
 
-  /deep/ .tooltip-title {
+  ::ng-deep .tooltip-title {
     fill: $blue-200 !important;
   }
 
-  /deep/ .tooltip-divider {
+  ::ng-deep .tooltip-divider {
     stroke: $blue-300 !important;
     stroke-width: 0.5px;
 
   }
 
-  /deep/ .tooltip-left-text, /deep/ .tooltip-right-text {
+  ::ng-deep .tooltip-left-text, ::ng-deep .tooltip-right-text {
     fill: $blue-200 !important;
   }
 }

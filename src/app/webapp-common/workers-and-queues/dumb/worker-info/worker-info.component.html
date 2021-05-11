@@ -16,7 +16,7 @@
       let-row="row">
       <!--QUEUE-->
       <div class="col-8 id-cell d-flex">
-        <div class="value">{{row?.name}}</div>
+        <a class="value link" [routerLink]="['../queues']" [queryParams]="{id: row.id}">{{row?.name}}</a>
         <sm-copy-clipboard
           class="copy-btn"
           [hideBackground]="true"

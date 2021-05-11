@@ -1,38 +1,39 @@
 <div #tableContainer class="worker-container">
-  <sm-table [tableData]="workers"
+  <sm-table #table
+            [tableData]="workers"
             [selection]="selectedWorker"
             [reorderableColumns]="false"
             [resizableColumns]="false"
             [columns]="cols"
             [rowsNumber]="100"
-            [rowHeight]="20"
+            [rowHeight]="40"
             (rowSelectionChanged)="onRowClicked($event)"
   >
-    <ng-template let-col
-                 let-worker="rowData"
-                 pTemplate="body">
-      <div [ngSwitch]="col.id">
-        <div *ngSwitchCase="WORKERS_TABLE_COL_FIELDS.TASK_RUNNING_TIME">
+    <ng-template let-col let-worker="rowData" pTemplate="body">
+      <ng-container [ngSwitch]="col.id">
+        <ng-container *ngSwitchCase="WORKERS_TABLE_COL_FIELDS.TASK_RUNNING_TIME">
           <span>{{worker?.task?.running_time | msToSec}}</span>
           <span *ngIf="!worker?.task?.running_time">&mdash;</span>
-        </div>
-        <div *ngSwitchCase="WORKERS_TABLE_COL_FIELDS.ID" class="first-content">
-          {{getBodyData(worker, col)}}
-        </div>
-        <div *ngSwitchDefault>
+        </ng-container>
+        <ng-container *ngSwitchCase="WORKERS_TABLE_COL_FIELDS.ID">
+          <span class="first-content" matTooltipPosition="above" [smTooltip]="getBodyData(worker, col)">
+            {{getBodyData(worker, col)}}
+          </span>
+        </ng-container>
+        <ng-container *ngSwitchDefault>
           {{getBodyData(worker, col)}}
           <span *ngIf="(getBodyData(worker, col)!==0) && !getBodyData(worker, col)">&mdash;</span>
-        </div>
-      </div>
+        </ng-container>
+      </ng-container>
     </ng-template>
 
-    <ng-template let-col pTemplate="sort">
-      <sm-table-sort-template
+    <ng-template let-col pTemplate="sort-filter">
+      <sm-table-filter-sort-template
         [class.first]="col.id === WORKERS_TABLE_COL_FIELDS.ID"
-        (sortOrderChanged)="onSortChanged($event, col.id)"
-        [header]="col.header"
-        [sortOrder]="col.id === tableSortField ? tableSortOrder : false">
-      </sm-table-sort-template>
+        [column]="col"
+        [sortOrder]="tableSortFieldsObject[col.id]"
+        (sortOrderChanged)="onSortChanged($event, col.id)">
+      </sm-table-filter-sort-template>
     </ng-template>
   </sm-table>
 </div>

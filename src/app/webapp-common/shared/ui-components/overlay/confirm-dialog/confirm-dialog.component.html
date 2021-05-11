@@ -2,8 +2,7 @@
                     (xClicked)="closeDialog(undefined)" [closeOnX]="false"
                     [iconClass]="iconClass">
   <div *ngIf="reference" class="reference">{{reference}}</div>
-  <div class="body" [innerHTML]='body'>
-  </div>
+  <div class="body" [innerHTML]="body | safe: 'html'"></div>
   <ng-content></ng-content>
 
 

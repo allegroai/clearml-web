@@ -3,6 +3,7 @@
                     [experiment]="contextExperiment"
                     [selectedExperiment]="selectedExperiment"
                     [selectedExperiments]="selectedExperiments"
+                    [selectedDisableAvailable]="selectedExperimentsDisableAvailable"
                     [numSelected]="selectedExperiments.length"
                     [tagsFilterByProject]="tagsFilterByProject$ | async"
                     [projectTags]="projectTags$ | async"
@@ -10,7 +11,7 @@
                     (tagSelected)="addTag($event)"
                     (menuOpened)="setContextMenuStatus(true)"
                     (menuClosed)="setContextMenuStatus(false)"
-                    [showButton]="false"
+                    [activateFromMenuButton]="false"
                     [minimizedView]="true"
 ></sm-experiment-menu>
 <div class="table-container" [class.card-view]="minimizedView" #tableContainer>
@@ -30,24 +31,22 @@
     [contextMenuOpen]="contextMenuActive"
     [checkedItems]="selectedExperiments"
     [keyboardControl]="true"
-    [sortField]="tableSortField"
-    [sortOrder]="tableSortOrder"
+    [sortFields]="tableSortFields"
     (rowSelectionChanged)="onRowSelectionChanged($event)"
     (loadMoreClicked)="onLoadMoreClicked()"
     (onRowRightClick)="onContextMenu($event)"
     (colReordered)="columnsReordered($event)"
-    (sortChanged)="onSortChanged($event.sortOrder, $event.field)"
+    (sortChanged)="onSortChanged($event.isShift, $event.field)"
   >
     <!--HEADER TEMPLATE-->
     <ng-template let-col pTemplate="cardFilter">
       <sm-table-card-filter-template [options]="EXPERIMENTS_ALL_FILTER_OPTIONS"
-                                     [value]="allFiltersValue"
-                                     [subValue]="systemTagsFiltersValue"
+                                     [value]="filtersValues"
+                                     [subValue]="filtersSubValues[EXPERIMENTS_TABLE_COL_FIELDS.TAGS]"
                                      [columns]="initialColumns"
                                      fixedOptionsSubheader="System tags"
                                      (subFilterChanged)="tableFilterChanged({id:'system_tags'}, $event)"
                                      (filterChanged)="tableAllFiltersChanged($event)"
-                                     (searchValueChanged)="searchValueChanged($event)"
                                      (menuClosed)="sortOptionalUsersList(); sortOptionalParentsList()"
                                      (menuOpened)="tagsMenuOpened.emit(); typesMenuOpened.emit()"
       ></sm-table-card-filter-template>
@@ -55,7 +54,7 @@
 
     <ng-template let-col pTemplate="checkbox">
       <sm-checkbox-control
-        *ngIf="col.headerType === ColHeaderTypeEnum.checkBox" class="checkbox-col header"
+        *ngIf="col.headerType === ColHeaderTypeEnum.checkBox"
         class="checkbox-col header"
         fieldName="selected"
         [formData]="selectionState"
@@ -67,71 +66,20 @@
 
     <ng-template let-col pTemplate="sort-filter">
       <sm-table-filter-sort-template
-        *ngIf="col.id === EXPERIMENTS_TABLE_COL_FIELDS.STATUS "
         [column]="col"
-        [value]="statusFiltersValue"
-        [options]="FILTERED_EXPERIMENTS_STATUS_OPTIONS"
+        [value]="filtersValues[col.id]"
+        [searchValue]="searchValues[col.id]"
+        [options]="EXPERIMENTS_ALL_FILTER_OPTIONS[col.id] | filter:searchValues[col.id]:'label'"
+        [sortOrder]="tableSortFieldsObject[col.id]"
+        [tooltip]="col.metric_hash || col.isParam"
         (sortOrderChanged)="onSortChanged($event, col.id)"
         (filterChanged)="tableFilterChanged(col, $event);"
+        (searchValueChanged)="searchValueChanged($event, col.id)"
+        (menuClosed)="filterMenuClosed(col.id)"
+        [fixedOptionsSubheader]="col.id === EXPERIMENTS_TABLE_COL_FIELDS.TAGS ? 'System tags' : ''"
+        (menuOpened)="onSortFilterMenuOpened(col)"
       >
       </sm-table-filter-sort-template>
-      <sm-table-filter-sort-template
-        *ngIf="col.id === EXPERIMENTS_TABLE_COL_FIELDS.TYPE"
-        [column]="col"
-        [value]="typeFiltersValue"
-        [options]="EXPERIMENTS_ALL_FILTER_OPTIONS.type"
-        [sortOrder]="col.id === tableSortField ? tableSortOrder : false"
-        (sortOrderChanged)="onSortChanged($event, col.id)"
-        (filterChanged)="tableFilterChanged(col, $event)"
-        (menuOpened)="typesMenuOpened.emit()"
-      >
-      </sm-table-filter-sort-template>
-      <sm-table-filter-sort-template
-        *ngIf="col.id === EXPERIMENTS_TABLE_COL_FIELDS.USER"
-        [column]="col"
-        [searchValue]="userSearchValue"
-        [options]="EXPERIMENTS_ALL_FILTER_OPTIONS.users |filter:userSearchValue:'label'"
-        [value]="userFiltersValue"
-        (filterChanged)="tableFilterChanged(col, $event)"
-        (searchValueChanged)="userSearchValueChanged($event)"
-        (menuClosed)="usersMenuClosed()"
-      >
-      </sm-table-filter-sort-template>
-      <sm-table-filter-sort-template
-        *ngIf="col.id === EXPERIMENTS_TABLE_COL_FIELDS.TAGS"
-        [column]="col"
-        [options]="EXPERIMENTS_ALL_FILTER_OPTIONS.tags |filter:tagSearchValue:'label'"
-        fixedOptionsSubheader="System tags"
-        [value]="tagsFiltersValue"
-        [subValue]="systemTagsFiltersValue"
-        [enableTooltip]="true"
-        (filterChanged)="tableFilterChanged(col, $event)"
-        (subFilterChanged)="tableFilterChanged({id:'system_tags'}, $event)"
-        (searchValueChanged)="tagSearchValueChanged($event)"
-        (menuClosed)="sortOptionalTagsList()"
-        (menuOpened)="tagsMenuOpened.emit()"
-      >
-      </sm-table-filter-sort-template>
-      <sm-table-filter-sort-template
-        *ngIf="col.id === EXPERIMENTS_TABLE_COL_FIELDS.PARENT "
-        [column]="col"
-        [value]="parentFiltersValue"
-        [options]="EXPERIMENTS_ALL_FILTER_OPTIONS[EXPERIMENTS_TABLE_COL_FIELDS.PARENT] |filter:parentSearchValue:'label'"
-        [sortOrder]="col.id === tableSortField ? tableSortOrder : false"
-        [enableTooltip]="true"
-        (sortOrderChanged)="onSortChanged($event, col.id)"
-        (filterChanged)="tableFilterChanged(col, $event);"
-        (searchValueChanged)="parentSearchValueChanged($event)"
-        (menuClosed)="filterParentMenuClosed()"
-      >
-      </sm-table-filter-sort-template>
-    </ng-template>
-    <ng-template let-col pTemplate="sort">
-      <sm-table-sort-template
-        [header]="col.header"
-        [sortOrder]="col.id === tableSortField ? tableSortOrder : false"
-        (sortOrderChanged)="onSortChanged($event, col.id)">
-      </sm-table-sort-template>
     </ng-template>
 
     <!--BODY TEMPLATE-->
@@ -139,15 +87,16 @@
     <ng-template let-col
                  let-experiment="rowData"
                  pTemplate="body">
-      <div [ngSwitch]="col.id">
-        <div *ngSwitchCase="EXPERIMENTS_TABLE_COL_FIELDS.TYPE" class="table-cell-outline">
-          <sm-experiment-type-icon-label [type]="experiment?.type"></sm-experiment-type-icon-label>
-        </div>
+      <ng-container [ngSwitch]="col.id">
+        <ng-container *ngSwitchCase="EXPERIMENTS_TABLE_COL_FIELDS.TYPE">
+          <sm-experiment-type-icon-label class="w-100" [type]="experiment?.type"></sm-experiment-type-icon-label>
+        </ng-container>
         <ng-container *ngSwitchCase="EXPERIMENTS_TABLE_COL_FIELDS.NAME">
           <div class="d-flex align-items-center pr-3">
             <div
               class="experiment-name"
               [class.italic]="isDevelopment(experiment)"
+              matTooltipPosition="above"
               [smTooltip]="experiment.name">
               {{experiment.name}}
             </div>
@@ -160,24 +109,24 @@
         <ng-container *ngSwitchCase="EXPERIMENTS_TABLE_COL_FIELDS.USER">
           {{experiment.user?.name ? experiment.user?.name : 'Unknown User'}}
         </ng-container>
-        <div *ngSwitchCase="EXPERIMENTS_TABLE_COL_FIELDS.PROJECT"
-             class="ellipsis"
+        <span *ngSwitchCase="EXPERIMENTS_TABLE_COL_FIELDS.PROJECT"
+             matTooltipPosition="above"
              [smTooltip]="experiment.project?.name">
           {{experiment.project?.name}}
-        </div>
+        </span>
         <ng-container *ngSwitchCase="EXPERIMENTS_TABLE_COL_FIELDS.STARTED">
-          <span [smTooltip]="experiment.started | date : TIME_FORMAT_STRING">{{experiment.started | timeAgo}}</span>
+          <span matTooltipPosition="above" [smTooltip]="experiment.started | date : TIME_FORMAT_STRING">{{experiment.started | timeAgo}}</span>
         </ng-container>
         <ng-container *ngSwitchCase="EXPERIMENTS_TABLE_COL_FIELDS.LAST_UPDATE">
-          <span [smTooltip]="experiment.last_update | date : TIME_FORMAT_STRING">{{experiment.last_update | timeAgo}}</span>
+          <span matTooltipPosition="above" [smTooltip]="experiment.last_update | date : TIME_FORMAT_STRING">{{experiment.last_update | timeAgo}}</span>
         </ng-container>
         <ng-container *ngSwitchCase="EXPERIMENTS_TABLE_COL_FIELDS.ACTIVE_DURATION">
           {{experiment.active_duration | duration}}
         </ng-container>
         <ng-container *ngSwitchCase="EXPERIMENTS_TABLE_COL_FIELDS.COMMENT">
-          <span class="ellipsis" [smTooltip]="experiment.comment">{{experiment.comment}}</span>
+          <span matTooltipPosition="above" [smTooltip]="experiment.comment">{{experiment.comment}}</span>
         </ng-container>
-        <div *ngSwitchCase="EXPERIMENTS_TABLE_COL_FIELDS.SELECTED">
+        <ng-container *ngSwitchCase="EXPERIMENTS_TABLE_COL_FIELDS.SELECTED">
           <sm-checkbox-control
             class="checkbox-col"
             fieldName="selected"
@@ -185,25 +134,23 @@
             (formDataChanged)="rowSelectedChanged($event, experiment)"
             inputClassName="table-check-box table-body">
           </sm-checkbox-control>
-        </div>
+        </ng-container>
         <ng-container *ngSwitchCase="EXPERIMENTS_TABLE_COL_FIELDS.STATUS">
-          <div class="d-flex">
-            <sm-experiment-status-icon-label [status]="experiment?.status">
-            </sm-experiment-status-icon-label>
-          </div>
+            <sm-experiment-status-icon-label [status]="experiment?.status"></sm-experiment-status-icon-label>
         </ng-container>
         <ng-container *ngSwitchCase="EXPERIMENTS_TABLE_COL_FIELDS.PARENT">
           <span
             class="parent-name"
             *ngIf="experiment?.parent?.id"
+            matTooltipPosition="above"
             [smTooltip]="experiment.parent.project?.name? experiment.parent.project.name + ' / ' + experiment.parent.name : experiment.parent.name"
           >{{experiment.parent.name}}</span>
         </ng-container>
         <!--  Case for hyper params and custom metrics/variants  -->
-        <div *ngSwitchDefault [class.ellipsis]="col.ellipsis" [smTooltip]="col.showTooltip && experiment[col.id]" >
+        <div *ngSwitchDefault [class.ellipsis]="col.ellipsis" matTooltipPosition="above" [smTooltip]="col.showTooltip && experiment[col.id]" >
           {{col.isParam ? getHyperParam(experiment?.hyperparams, col) : (col.metric_hash ? getVarient(experiment?.last_metrics, col) : experiment[col.id])}}
         </div>
-      </div>
+      </ng-container>
     </ng-template>
 
     <ng-template let-experiment="rowData" let-selected="selected" let-rowNumber="rowNumber" pTemplate="card">

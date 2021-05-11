@@ -1,6 +1,6 @@
 @import "../../../../shared/ui-components/styles/variables";
 
-/deep/ .dark-theme {
+::ng-deep .dark-theme {
   .legend-entry-name, .legend-entry-value {
     fill: $blue-250;
   }
@@ -15,7 +15,7 @@
   }
 }
 
-/deep/ .legend-circle {
+::ng-deep .legend-circle {
   &:hover {
     cursor: url(../../../../assets/icons/pallete-cursor.png) 6 0, pointer;
   }
@@ -26,6 +26,6 @@
   overflow: auto;
 }
 
-/deep/ .britechart-legend .legend-entry.is-faded .legend-entry-name {
+::ng-deep .britechart-legend .legend-entry.is-faded .legend-entry-name {
   transition: unset !important;
 }

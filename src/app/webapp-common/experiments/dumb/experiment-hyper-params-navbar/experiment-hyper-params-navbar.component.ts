@@ -5,7 +5,7 @@ import {get} from 'lodash/fp';
 type ActiveSection = 'hyper-param' | 'configuration';
 export const ACTIVE_SECTIONS = {
   'hyper-param'  : 'hyper-param' as ActiveSection,
-  'configuration': 'configuration' as ActiveSection,
+  configuration: 'configuration' as ActiveSection,
 };
 
 @Component({
@@ -22,22 +22,22 @@ export class ExperimentHyperParamsNavbarComponent {
     design: 'General'
   };
   encodeURI = encodeURI;
-  @Input() hyperParams: { [key: string]: any; };
-  @Input() configuration: { [key: string]: any; };
+  @Input() hyperParams: { [key: string]: any};
+  @Input() configuration: { [key: string]: any};
   @Input() selectedObject;
   public activeSection: string;
 
-  @Input() set routerConfig(routerConfig: string[]) {
-    this.activeSection = routerConfig[5];
+  @Input() set routerConfig(routerConfig: string) {
+    this.activeSection = routerConfig;
     this.changeDetection.detectChanges();
-  };
+  }
   @Input() disableAdd = true;
 
   public selectedHyperParam: string;
 
   @Input() set routerParams(routerParams: Params) {
     this.selectedHyperParam = get('hyperParamId', routerParams);
-    this.selectedObject = get('configObject', routerParams);
+    this.selectedObject = decodeURIComponent(routerParams?.configObject);
     this.changeDetection.detectChanges();
   };
 

@@ -1,33 +1,21 @@
 import {Action, createAction, props} from '@ngrx/store';
 import {SelectedModel} from '../shared/models.model';
 import {Project} from '../../../business-logic/model/projects/project';
-import {EXPERIMENTS_INFO_PREFIX} from "../../experiments/actions/common-experiments-menu.actions";
+import {ModelsPublishManyResponse} from '../../../business-logic/model/models/modelsPublishManyResponse';
+import {ModelsArchiveManyResponse} from '../../../business-logic/model/models/modelsArchiveManyResponse';
+import {ModelsDeleteManyResponse} from '../../../business-logic/model/models/modelsDeleteManyResponse';
 
 const MODELS_PREFIX = 'MODELS_MENU_';
 
-//COMMANDS:
+export const publishModelClicked = createAction(
+  MODELS_PREFIX + '[publish model]',
+  props<{selectedModels: SelectedModel[]}>()
+);
 
-//EVENTS:
-export const ARCHIVE_CLICKED       = MODELS_PREFIX + 'ARCHIVE_CLICKED';
-export const RESTORE_CLICKED       = MODELS_PREFIX + 'RESTORE_CLICKED';
-export const PUBLISH_MODEL_CLICKED = MODELS_PREFIX + 'PUBLISH_MODEL_CLICKED';
-export const CHANGE_PROJECT_REQUESTED = MODELS_PREFIX + 'CHANGE_PROJECT_REQUESTED';
-
-
-export class PublishModelClicked implements Action {
-  readonly type = PUBLISH_MODEL_CLICKED;
-
-  constructor(public payload: SelectedModel) {
-  }
-
-}
-
-export class ChangeProjectRequested implements Action {
-  readonly type = CHANGE_PROJECT_REQUESTED;
-
-  constructor(public payload: { model: SelectedModel; project: Project }) {
-  }
-}
+export const changeProjectRequested = createAction(
+  MODELS_PREFIX + '[change project requested]',
+  props<{ selectedModels: SelectedModel[]; project: Project }>()
+);
 
 export const addTag = createAction(
   MODELS_PREFIX + '[add tag to model]',
@@ -37,5 +25,15 @@ export const addTag = createAction(
 export const removeTag = createAction(
   MODELS_PREFIX + '[remove tag from model]',
   props<{models: SelectedModel[]; tag: string}>()
+);
+
+export const archivedSelectedModels = createAction(
+  MODELS_PREFIX + '[archive selected models]',
+  props<{selectedEntities: SelectedModel[],  skipUndo: boolean }>()
+);
+
+export const restoreSelectedModels = createAction(
+  MODELS_PREFIX + '[restore selected models]',
+  props<{selectedEntities: SelectedModel[],  skipUndo: boolean }>()
 );
 

@@ -3,11 +3,11 @@ import {Store} from '@ngrx/store';
 import {selectExperimentConfigObj, selectExperimentInfoErrors, selectExperimentSelectedConfigObjectFromRoute, selectExperimentUserKnowledge, selectIsExperimentSaving} from '../../reducers';
 import {Model} from '../../../../business-logic/model/models/model';
 import {Observable, Subscription} from 'rxjs';
-import {ISelectedExperiment} from '../../../../features/experiments/shared/experiment-info.model';
+import {IExperimentInfo, ISelectedExperiment} from '../../../../features/experiments/shared/experiment-info.model';
 import {IExperimentInfoState} from '../../../../features/experiments/reducers/experiment-info.reducer';
 import {experimentSectionsEnum} from '../../../../features/experiments/shared/experiments.const';
 import {selectIsExperimentEditable, selectSelectedExperiment} from '../../../../features/experiments/reducers';
-import {ActivateEdit, CancelExperimentEdit, DeactivateEdit, getExperimentConfigurationObj, ModelSelected, saveExperimentConfigObj, saveExperimentSection, SetExperimentErrors, SetExperimentFormErrors, UpdateSectionKnowledge} from '../../actions/common-experiments-info.actions';
+import {ActivateEdit, CancelExperimentEdit, DeactivateEdit, getExperimentConfigurationObj, saveExperimentConfigObj, SetExperimentErrors, SetExperimentFormErrors} from '../../actions/common-experiments-info.actions';
 import {ConfigurationItem} from '../../../../business-logic/model/tasks/configurationItem';
 import {EditJsonComponent} from '../../../shared/ui-components/overlay/edit-json/edit-json.component';
 import {take} from 'rxjs/operators';
@@ -22,7 +22,7 @@ import {EditableSectionComponent} from '../../../shared/ui-components/panel/edit
 })
 export class ExperimentInfoTaskModelComponent implements OnInit, OnDestroy {
   public selectedExperimentSubscription: Subscription;
-  private selectedExperiment: ISelectedExperiment;
+  private selectedExperiment: IExperimentInfo;
   public editable$: Observable<boolean>;
   public errors$: Observable<IExperimentInfoState['errors']>;
   public userKnowledge$: Observable<Map<experimentSectionsEnum, boolean>>;
@@ -80,14 +80,6 @@ export class ExperimentInfoTaskModelComponent implements OnInit, OnDestroy {
     this.store.dispatch(new SetExperimentErrors({[event.field]: event.errors}));
   }
 
-  onModelSelected(event) {
-    this.store.dispatch(new ModelSelected(event));
-  }
-
-  updateSectionKnowledge(section: experimentSectionsEnum) {
-    this.store.dispatch(new UpdateSectionKnowledge(section));
-  }
-
   saveModelData(configuration: ConfigurationItem[]) {
     this.store.dispatch(saveExperimentConfigObj({configuration}));
     this.store.dispatch(new DeactivateEdit());
@@ -131,7 +123,7 @@ export class ExperimentInfoTaskModelComponent implements OnInit, OnDestroy {
     confirmDialogRef.afterClosed().pipe(take(1)).subscribe((confirmed) => {
       if (confirmed) {
         this.activateEditChanged('prototext');
-        this.saveModelData([{name: 'design', type: 'legacy', value: '', description: this.formData.description}]);
+        this.saveModelData([{name: this.formData.name, type: this.formData.type, value: '', description: this.formData.description}]);
         this.store.dispatch(new DeactivateEdit());
       }
     });

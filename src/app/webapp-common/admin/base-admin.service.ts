@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {select, Store} from '@ngrx/store';
-import {from, Observable} from 'rxjs';
+import {from, Observable, Subject} from 'rxjs';
 import {HTTP} from '../../app.constants';
 import {
   selectDontShowAgainForBucketEndpoint, selectRevokeSucceed, selectS3BucketCredentials, selectS3BucketCredentialsBucketCredentials
@@ -8,7 +8,7 @@ import {
 import {SmSyncStateSelectorService} from '../core/services/sync-state-selector.service';
 import * as S3 from 'aws-sdk/clients/s3';
 import {showLocalFilePopUp, showS3PopUp} from '../core/actions/common-auth.actions';
-import {skip} from 'rxjs/operators';
+import {skip, take} from 'rxjs/operators';
 
 import AmazonS3URI from 'amazon-s3-uri';
 import {convertToReverseProxy, isFileserverUrl} from '../../shared/utils/url';
@@ -30,6 +30,7 @@ export class BaseAdminService {
   private localServerWorking = false;
   private workspace: GetCurrentUserResponseUserObjectCompany;
   private environment: Environment;
+  private deleteS3FilesSubject: Subject<{ success: boolean; files: string[] }>;
 
   constructor(store: Store<any>, protected syncSelector: SmSyncStateSelectorService, protected confService: ConfigurationService) {
     this.store = store;
@@ -42,6 +43,7 @@ export class BaseAdminService {
     this.bucketCredentials = store.pipe(select(selectS3BucketCredentialsBucketCredentials));
     this.store.select(selectActiveWorkspace).subscribe(workspace => this.workspace = workspace);
     confService.getEnvironment().subscribe(conf => this.environment = conf);
+    this.deleteS3FilesSubject = new Subject();
   }
 
   showS3PopUp(bucketKeyEndpoint, error = null, isAzure = false) {
@@ -50,6 +52,7 @@ export class BaseAdminService {
     if (selectDontShowAgainBucketEndpoint !== (bucketKeyEndpoint.Bucket + bucketKeyEndpoint.Endpoint)) {
       this.store.dispatch(showS3PopUp({payload: {credentials: bucketKeyEndpoint, credentialsError: error, isAzure}}));
     }
+    return this.S3BucketCredentials;
   }
 
   showLocalFilePopUp(url) {
@@ -57,11 +60,11 @@ export class BaseAdminService {
   }
 
   signUrlIfNeeded(url, skipLocalFile = true, skipFileServer = true) {
-    if (isFileserverUrl(url, window.location.hostname)){
+    if (isFileserverUrl(url, window.location.hostname)) {
       if (this.environment.communityServer) {
         url = this.addTenant(url);
       }
-      if (!skipFileServer && this.environment.communityServer) {
+      if (!skipFileServer && this.environment.useFilesProxy) {
         return convertToReverseProxy(url);
       }
       return url;
@@ -125,7 +128,7 @@ export class BaseAdminService {
 
   findS3CredentialsInStore(bucketKeyEndpoint) {
     return this.syncSelector.selectSync(selectS3BucketCredentialsBucketCredentials)
-      .filter(bucket => bucket && bucket.Bucket === bucketKeyEndpoint.Bucket && bucket.Endpoint === bucketKeyEndpoint.Endpoint)[0];
+      .find(bucket => bucket?.Bucket === bucketKeyEndpoint.Bucket && bucket?.Endpoint === bucketKeyEndpoint.Endpoint);
   }
 
   findOrInitBucketS3(bucketKeyEndpoint) {
@@ -143,7 +146,7 @@ export class BaseAdminService {
     }
   }
 
-  createS3Service(set) {
+  createS3Service(set): S3 {
     const config = {
       accessKeyId: set.Key,
       secretAccessKey: set.Secret,
@@ -278,17 +281,17 @@ export class BaseAdminService {
     return url.startsWith('azure://');
   }
 
-  public replaceAll(baseString: string, toReplace: string, replaceWith: string, ignore= false): string{
-    return baseString.replace(new RegExp(toReplace.replace(/([\/\,\!\\\^\$\{\}\[\]\(\)\.\*\+\?\|\<\>\-\&])/g,"\\$&"),(ignore?"gi":"g")),(typeof(replaceWith)=="string")?replaceWith.replace(/\$/g,"$$$$"):replaceWith);
+  public replaceAll(baseString: string, toReplace: string, replaceWith: string, ignore = false): string {
+    return baseString.replace(new RegExp(toReplace.replace(/([\/\,\!\\\^\$\{\}\[\]\(\)\.\*\+\?\|\<\>\-\&])/g, '\\$&'), (ignore ? 'gi' : 'g')), (typeof (replaceWith) == 'string') ? replaceWith.replace(/\$/g, '$$$$') : replaceWith);
 
   }
 
 
   private encodeSpecialCharacters(src: string) {
-    src = this.replaceAll(src, '%','%25');
-    src = this.replaceAll(src, '#','%23');
-    src = this.replaceAll(src, '\\','%5C');
-    src = this.replaceAll(src, '^','%5E');
+    src = this.replaceAll(src, '%', '%25');
+    src = this.replaceAll(src, '#', '%23');
+    src = this.replaceAll(src, '\\', '%5C');
+    src = this.replaceAll(src, '^', '%5E');
     return src;
   }
 
@@ -297,5 +300,34 @@ export class BaseAdminService {
     const u = new URL(url);
     u.searchParams.append('tenant', this.workspace?.id);
     return u.toString();
+  }
+
+  public deleteS3Files(files: string[], skipSubjectReturn): Observable<{ success: boolean; files: string[] }> {
+    const url = files[0];
+    const bucketKeyEndpoint = url && this.getBucketAndKeyFromSrc(url);
+    const s3 = this.findOrInitBucketS3(bucketKeyEndpoint) as S3;
+
+    const req = {
+      Bucket: bucketKeyEndpoint.Bucket,
+      Delete: {
+        Quiet: true,
+        Objects: files.map(file => ({Key: file} as S3.ObjectIdentifier))
+      }
+    } as S3.Types.DeleteObjectsRequest;
+
+    if (s3) {
+      s3.deleteObjects(req, (err, data) => {
+        if (err) {
+          this.deleteS3FilesSubject.next({success: false, files: files});
+        } else {
+          this.deleteS3FilesSubject.next({success: true, files: files});
+        }
+      });
+    } else {
+      delete bucketKeyEndpoint.Key;
+      this.showS3PopUp(bucketKeyEndpoint).pipe(skip(1), take(1))
+        .subscribe(() => this.deleteS3Files(files, true));
+    }
+    return !skipSubjectReturn && this.deleteS3FilesSubject.asObservable();
   }
 }

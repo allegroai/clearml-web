@@ -1,0 +1,94 @@
+<form class="filter-form p-4" #templateForm="ngForm" smClickStopPropagation smKeyDownStopPropagation>
+  <div>
+    <div class="mb-1 label">From</div>
+    <div class="d-flex ">
+      <!--<sm-checkbox-control
+        [formData]="greaterThan.checked"
+        (formDataChanged)="setCheckBox(hasGreaterThanValue ? $event.value : false, 'greaterThan')"
+        class="align-self-center pr-2"
+      >
+      </sm-checkbox-control>-->
+
+      <div class="input-duration d-flex align-items-center">
+        <div class="input-border-duration-container pr-3 ">
+          <div class="d-flex align-items-center mat-datepicker-container">
+            <input matInput
+                   [value]="_greaterThan.date"
+                   [matDatepicker]="fromPicker"
+                   placeholder="Date"
+                   (dateChange)="$event.value ? setCheckBox(true, 'greaterThan') : null;
+                                  onDateHandler($any($event.value), '_greaterThan')"
+            >
+            <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+            <mat-datepicker #fromPicker [startAt]="$any(_greaterThan.date)"></mat-datepicker>
+          </div>
+        </div>
+        <div class="input-border-duration-container">
+          <sm-duration-input-list name="lessThan"
+                                  [durationValue]="_greaterThan.date ? _greaterThan.time || MINIMUM_TIME_DISPLAY : null"
+                                  [inputs]="[{type: 'hours', placeholder: '--'}, {type: 'minutes', placeholder: '--'}]"
+                                  [returnFactor]="1000"
+                                  [readonly]="!_greaterThan.date"
+                                  (onDurationChanged)="onTimeHandler($event, '_greaterThan')"></sm-duration-input-list>
+        </div>
+      </div>
+      <div class="d-flex align-items-center pl-2">
+        <i [class]="'al-icon ' + (hasGreaterThanValue ? 'al-ico-dialog-x' : 'al-ico-time') + ' sm'"
+           (click)="hasGreaterThanValue ? onResetHandler('greaterThan') : onAutoFillCurrentTimeHandler('greaterThan')"
+           [smTooltip]="hasGreaterThanValue ? 'Clear' : 'Autofill current time'"
+
+           matTooltipPosition="above"
+        ></i>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="pt-2">
+    <div class="mb-1 label">To</div>
+    <div class="d-flex ">
+    <!--  <sm-checkbox-control
+        (formDataChanged)="setNowCheckBox(hasLessThanValue ? $event.value : false, 'lessThan')"
+        [formData]="isNowChecked"
+        class="align-self-center pr-2"
+      >
+      </sm-checkbox-control>-->
+
+      <div class="input-duration d-flex align-items-center" >
+          <div class="input-border-duration-container pr-3 ">
+          <div class="d-flex align-items-center mat-datepicker-container">
+            <input matInput
+                   class="input-to"
+                   [value]="_lessThan.date"
+                   [matDatepicker]="toPicker"
+                   placeholder="Now"
+                   (dateChange)="$event.value ? setCheckBox(true, 'lessThan') : null;
+                                  onDateHandler($any($event.value), '_lessThan')"
+            >
+            <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+            <mat-datepicker #toPicker [startAt]="_lessThan.date"></mat-datepicker>
+          </div>
+        </div>
+        <div class="input-border-duration-container">
+          <sm-duration-input-list
+            [durationValue]="_lessThan.date ? _lessThan.time || MINIMUM_TIME_DISPLAY : null"
+            name="greaterThan"
+            [inputs]="[{type: 'hours', placeholder: '--'}, {type: 'minutes', placeholder: '--'}]"
+            (onDurationChanged)="onTimeHandler($event, '_lessThan')"
+            [readonly]="!_lessThan.date"
+            [returnFactor]="1000"></sm-duration-input-list>
+        </div>
+      </div>
+      <div class="d-flex align-items-center pl-2">
+        <i *ngIf="hasLessThanValue"
+          [class]="'al-icon ' + (hasLessThanValue ? 'al-ico-dialog-x' : 'al-ico-time') + ' sm'"
+           (click)="hasLessThanValue ? onResetToDateInput() : onFakeNowCheckbox()"
+           [smTooltip]="hasLessThanValue ? 'Clear' : 'Autofill current time'"
+           matTooltipPosition="above"
+        ></i>
+      </div>
+    </div>
+  </div>
+</form>
+
+<sm-table-filter-duration-error *ngIf="hasTimeError" [isFullWidth]="true"></sm-table-filter-duration-error>

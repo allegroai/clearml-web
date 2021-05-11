@@ -1,8 +1,9 @@
-import {GET_SELECTED_WORKER, GET_STATS_AND_WORKERS, GetStatsAndWorkers, SET_SELECTED_WORKER_FROM_SERVER, SET_STATS, SET_STATS_PARAMS, SET_WORKERS, SET_WORKERS_TASKS, SetStats, SetWorkers, SYNC_SPECIFIC_WORKER_IN_TABLE, WORKERS_TABLE_SORT_CHANGED} from '../actions/workers.actions';
+import {GET_SELECTED_WORKER, GET_STATS_AND_WORKERS, GetStatsAndWorkers, SET_SELECTED_WORKER_FROM_SERVER, SET_STATS, SET_STATS_PARAMS, SET_WORKERS, SET_WORKERS_TASKS, SetStats, SetWorkers, SYNC_SPECIFIC_WORKER_IN_TABLE, WORKERS_TABLE_SORT_CHANGED, workersTableSetSort} from '../actions/workers.actions';
 import {Worker} from '../../../business-logic/model/workers/worker';
-import {TABLE_SORT_ORDER, TableSortOrderEnum} from '../../shared/ui-components/data/table/table.consts';
+import {TABLE_SORT_ORDER} from '../../shared/ui-components/data/table/table.consts';
 import {TIME_INTERVALS} from '../workers-and-queues.consts';
 import {Topic} from '../../shared/utils/statistics';
+import {SortMeta} from 'primeng/api';
 
 interface WorkerStoreType {
   data: Worker[];
@@ -10,8 +11,7 @@ interface WorkerStoreType {
   stats: Topic[];
   selectedStatsTimeFrame: string;
   selectedStatsParam: string;
-  tableSortField: string;
-  tableSortOrder: TableSortOrderEnum;
+  tableSortFields: SortMeta[];
 }
 
 const initWorkersStore: WorkerStoreType = {
@@ -20,8 +20,7 @@ const initWorkersStore: WorkerStoreType = {
   stats: null,
   selectedStatsTimeFrame: (3 * TIME_INTERVALS.HOUR).toString(),
   selectedStatsParam: 'cpu_usage;gpu_usage',
-  tableSortField: 'id',
-  tableSortOrder: TABLE_SORT_ORDER.ASC,
+  tableSortFields: [{field: 'id', order: TABLE_SORT_ORDER.ASC}],
 };
 
 
@@ -39,8 +38,8 @@ export function workersReducer(state = initWorkersStore, action) {
         ...state, data:
           state.data.map(worker => worker.id === action.payload.worker.id ? action.payload.worker : worker)
       };
-    case WORKERS_TABLE_SORT_CHANGED:
-      return {...state, tableSortOrder: action.payload.sortOrder, tableSortField: action.payload.colId};
+    case workersTableSetSort.type:
+      return {...state, tableSortFields: action.orders};
     case GET_STATS_AND_WORKERS:
       return {...state, statsRequest: (<GetStatsAndWorkers>action).payload};
     case SET_STATS:

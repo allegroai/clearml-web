@@ -27,9 +27,10 @@ import {SmFormBuilderService} from '../core/services/sm-form-builder.service';
 import {MODELS_PREFIX_INFO, MODELS_PREFIX_MENU, MODELS_PREFIX_VIEW, MODELS_STORE_KEY} from './models.consts';
 import {createLocalStorageReducer} from '../core/meta-reducers/local-storage-reducer';
 import {ModelCustomColsMenuComponent} from './dumbs/model-custom-cols-menu/model-custom-cols-menu.component';
-import {BaseModelMenuComponent} from './containers/model-menu/model-menu.component';
 import {ModelHeaderComponent} from '../../features/models/dumb/model-header/model-header.component';
 import {SharedModule} from '../../shared/shared.module';
+import {CommonDeleteDialogModule} from '../shared/entity-page/entity-delete/common-delete-dialog.module';
+import {ModelMenuComponent} from './containers/model-menu/model-menu.component';
 
 const syncedKeys    = [
   'view.colsOrder'
@@ -41,27 +42,28 @@ export function localStorageReducer(reducer: ActionReducer<any>): ActionReducer<
   return createLocalStorageReducer(key, syncedKeys, actionsPrefix)(reducer);
 }
 @NgModule({
-    imports: [
-        ExperimentSharedModule,
-        FormsModule,
-        ReactiveFormsModule,
-        CommonModule,
-        CommonLayoutModule,
-        ModelRouterModule,
-        ModelSharedModule,
-        SMSharedModule,
-        FeatureModelsModule,
-        AngularSplitModule.forRoot(),
-        StoreModule.forFeature(MODELS_STORE_KEY, reducers, {metaReducers: [localStorageReducer]}),
-        EffectsModule.forFeature([ModelsViewEffects, ModelsInfoEffects, ModelsMenuEffects]),
-        FeatureModelsModule,
-        SharedModule,
-    ],
+  imports: [
+    ExperimentSharedModule,
+    FormsModule,
+    ReactiveFormsModule,
+    CommonModule,
+    CommonLayoutModule,
+    ModelRouterModule,
+    ModelSharedModule,
+    CommonDeleteDialogModule,
+    SMSharedModule,
+    FeatureModelsModule,
+    AngularSplitModule,
+    StoreModule.forFeature(MODELS_STORE_KEY, reducers, {metaReducers: [localStorageReducer]}),
+    EffectsModule.forFeature([ModelsViewEffects, ModelsInfoEffects, ModelsMenuEffects]),
+    FeatureModelsModule,
+    SharedModule,
+  ],
   providers      : [SmFormBuilderService, DatePipe],
   declarations   : [ModelInfoComponent, ModelsComponent, ModelInfoHeaderComponent,
     ModelViewNetworkComponent, ModelInfoNetworkComponent,
     ModelInfoLabelsComponent, ModelInfoLabelsViewComponent, ModelInfoGeneralComponent,
-    ModelGeneralInfoComponent, ModelHeaderComponent, BaseModelMenuComponent,
+    ModelGeneralInfoComponent, ModelHeaderComponent,
     ModelCustomColsMenuComponent]
 })
 export class ModelsModule {

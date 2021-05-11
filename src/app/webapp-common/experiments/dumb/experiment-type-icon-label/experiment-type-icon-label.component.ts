@@ -8,7 +8,6 @@ import {TaskTypeEnum} from '../../../../business-logic/model/tasks/taskTypeEnum'
   styleUrls: ['./experiment-type-icon-label.component.scss']
 })
 export class ExperimentTypeIconLabelComponent implements OnInit {
-  private displayType: string;
   @Input() type: TaskTypeEnum;
   @Input() iconClass = 'md';
   @Input() showLabel = true;

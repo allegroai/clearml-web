@@ -1,8 +1,30 @@
 import {TaskStatusEnum} from '../../business-logic/model/tasks/taskStatusEnum';
 import {TaskTypeEnum} from '../../business-logic/model/tasks/taskTypeEnum';
 
-export const PROJECT_ROUTES = ['experiments', 'models'];
-export type PROJECT_ROUTES_TYPE = 'models' | 'experiments';
+export interface ProjectRoute {
+  header: 'overview' | 'models' | 'experiments';
+  subHeader: string;
+}
+
+export const PROJECT_ROUTES = [
+  {header: 'overview', subHeader: ''},
+  {header: 'experiments', subHeader: '(ARCHIVED)'},
+  {header: 'models', subHeader: '(ARCHIVED)'},
+] as ProjectRoute[];
+
+export enum EntityTypeEnum {
+  experiment = 'experiment',
+  model = 'model',
+  project = 'project',
+}
+
+export enum CircleTypeEnum {
+  completed = 'completed',
+  running = 'running',
+  pending = 'pending',
+  empty = 'empty',
+  'model-labels' = 'model-labels'
+}
 
 export const EXPERIMENTS_STATUS_LABELS = {
   [TaskStatusEnum.Created]     : 'Draft',

@@ -3,10 +3,17 @@ import {ActivatedRoute} from '@angular/router';
 import {EXPERIMENT_GRAPH_ID_PREFIX} from '../../experiments/shared/common-experiments.const';
 import {get, last} from 'lodash/fp';
 import {User} from '../../../business-logic/model/users/user';
-import {GetCurrentUserResponseUserObjectCompany} from "../../../business-logic/model/users/getCurrentUserResponseUserObjectCompany";
+import {GetCurrentUserResponseUserObjectCompany} from '../../../business-logic/model/users/getCurrentUserResponseUserObjectCompany';
+import {TABLE_SORT_ORDER} from '../ui-components/data/table/table.consts';
+import {CloseScrollStrategy, Overlay} from '@angular/cdk/overlay';
+import {ModelsArchiveManyResponse} from '../../../business-logic/model/models/modelsArchiveManyResponse';
+import {AddMessage} from '@common/core/actions/layout.actions';
+import {openMoreInfoPopup} from '@common/core/actions/projects.actions';
+import {EntityTypeEnum} from '../../../shared/constants/non-common-consts';
+import {TasksArchiveManyResponse} from '../../../business-logic/model/tasks/tasksArchiveManyResponse';
 
-export function capitalizeFirstLetter(string) {
-  return string.charAt(0).toUpperCase() + string.slice(1);
+export function capitalizeFirstLetter(str: string) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
 const CRC_TABLE = function () {
@@ -74,15 +81,15 @@ export function createModelLink(uri, modelId, modelSignedUri) {
 }
 
 export function allItemsAreSelected(itemsInView: { id: any }[], selectedItems: { id: any }[]) {
-  if (itemsInView.length === 0 || selectedItems.length === 0) {
+  if (itemsInView?.length === 0 || selectedItems.length === 0) {
     return false;
   } else {
     const selectedItemsIds = selectedItems.map(item => item.id);
-    return (itemsInView.every(item => selectedItemsIds.includes(item.id)));
+    return (itemsInView?.every(item => selectedItemsIds.includes(item.id)));
   }
 }
 
-export function addOrRemoveFromArray(arr: Array<any>, item) {
+export function addOrRemoveFromArray(arr: Array<any> = [], item) {
   if (arr.includes(item)) {
     return arr.filter(arrItem => item !== arrItem);
   } else {
@@ -131,16 +138,18 @@ export function removeAlphaColor(rgbaColor: string) {
 }
 
 export function isReadOnly(item) {
+  if (get('id', item) === '*') {
+    return false;
+  }
   return (!get('company.id', item)) || (!!get('readOnly', item));
 }
 
 export function isExample(item) {
-  const isEx = !get('company.id', item);
-  return isEx;
+  return item?.company && !item.company?.id;
 }
 
 export function isSharedAndNotOwner(item, activeWorkSpace: GetCurrentUserResponseUserObjectCompany): boolean {
-  const isSharedandNot = item?.system_tags.includes('shared') && item?.company?.id !== activeWorkSpace?.id;
+  const isSharedandNot = item?.system_tags.includes('shared') && item?.company?.id !== activeWorkSpace?.id && (!!item?.company.id);
   return isSharedandNot;
 }
 
@@ -220,23 +229,14 @@ export function groupHyperParams(hyperParams: any[]) {
 }
 
 export function getScaleFactor() {
-  const is_mac = (navigator.platform.indexOf('Mac') !== -1 || navigator.platform.indexOf('iPad') !== -1);
-  const is_win = navigator.platform.indexOf('Win') !== -1;
+  const isMac = (navigator.platform.indexOf('Mac') !== -1 || navigator.platform.indexOf('iPad') !== -1);
+  const isWin = navigator.platform.indexOf('Win') !== -1;
   let dimensionRatio = 100;
   let screenHeight: number;
 
   try {
-    if (is_win) {
-      if (window['chrome']) {
-        screenHeight = window.screen.height < window.screen.width ? window.screen.height : window.screen.width;
-        dimensionRatio = Math.max(60, Math.min(100, Math.round((100 * (screenHeight / 1080) / 10)) * 10));
-
-      }
-    } else if (is_mac) {
-      screenHeight = (window.screen.height < window.screen.width ? window.screen.height : window.screen.width);
-      if (!window['chrome']) {
-        screenHeight *= devicePixelRatio / 2;
-      }
+    if ((isWin || isMac) && (window['chrome'] || window['safari'])) {
+      screenHeight = window.screen.height < window.screen.width ? window.screen.height : window.screen.width;
       dimensionRatio = Math.max(60, Math.min(100, Math.round((100 * (screenHeight / 1080) / 10)) * 10));
     }
   } catch (err) {
@@ -253,4 +253,41 @@ export function cleanUserData(user: User): User {
     }
     return curr;
   }, {});
+}
+
+export function addMultipleSortColumns(oldOrders, colId, isShift) {
+  let orders;
+  const currentSortField = oldOrders.find(field => field.field === colId);
+  const newField = {
+    field: colId,
+    order: currentSortField?.order ? (currentSortField.order * -1) : TABLE_SORT_ORDER.DESC
+  };
+
+  if (isShift) {
+    if (currentSortField) {
+      orders = oldOrders.map(field => field.field === colId ? newField : field);
+    } else {
+      orders = [...oldOrders, newField];
+    }
+  } else {
+    orders = [newField];
+  }
+  return orders;
+}
+
+export function scrollFactory(overlay: Overlay): () => CloseScrollStrategy {
+  return () => overlay.scrollStrategies.close();
+}
+
+export function getNotificationAction(res: ModelsArchiveManyResponse | TasksArchiveManyResponse, action, operationName: string, entityType: EntityTypeEnum, notificationActions = []): AddMessage {
+  const totalNum = res.failed.length + res.succeeded.length;
+  const allFailed = res.succeeded.length === 0;
+
+  const message = allFailed ? `${totalNum === 1 ? '' : totalNum} ${entityType}${totalNum > 1 ? 's' : ''} failed to ${operationName}` :
+    `${totalNum === 1 ? '' : res.succeeded.length} ${totalNum > res.succeeded.length ? 'of ' + totalNum : ''} ${entityType}${res.succeeded.length > 1 ? 's' : ''} ${operationName} successfully`;
+
+  return new AddMessage(res.failed.length > 0 ? 'error' : 'success', message, [
+    res.failed.length > 0 ? {actions: [openMoreInfoPopup({parentAction: action, operationName, res, entityType: EntityTypeEnum[entityType]})], name: 'More info'} : null,
+    ...notificationActions
+  ].filter(a => a));
 }

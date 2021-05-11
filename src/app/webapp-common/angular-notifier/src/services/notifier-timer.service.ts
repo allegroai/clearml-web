@@ -27,7 +27,7 @@ export class NotifierTimerService {
   /**
    * Promise resolve function, eventually getting called once the timer finishes
    */
-  private finishPromiseResolver: () => void;
+  private finishPromiseResolver: (value: PromiseLike<undefined>) => void;
 
   /**
    * Constructor
@@ -44,7 +44,7 @@ export class NotifierTimerService {
    * @returns          Promise, resolved once the timer finishes
    */
   public start(duration: number): Promise<undefined> {
-    return new Promise<undefined>((resolve: () => void, reject: () => void) => {
+    return new Promise<undefined>((resolve: (value: PromiseLike<undefined>) => void) => {
 
       // For the first run ...
       this.remaining = duration;
@@ -86,7 +86,7 @@ export class NotifierTimerService {
    * Finish up the timeout by resolving the timer promise
    */
   private finish(): void {
-    this.finishPromiseResolver();
+    this.finishPromiseResolver(null);
   }
 
 }

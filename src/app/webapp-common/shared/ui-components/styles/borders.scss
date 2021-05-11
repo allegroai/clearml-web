@@ -1,0 +1,8 @@
+@import "variables";
+
+.dark-theme {
+  .border-top, .border-bottom, .border .border-right, .border-left {
+    border-color: $border-line-color-dark !important;
+
+  }
+}

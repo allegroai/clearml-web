@@ -4,7 +4,9 @@ import {ControlValueAccessor, NgForm} from '@angular/forms';
 @Directive()
 export class TemplateFormSectionBase implements ControlValueAccessor {
   public disabled: boolean;
+  public val = null;
   public ngModelValue = null;
+  protected valueFromInherit = true;
   @Input() inEditMode: boolean;
   @ViewChild('templateForm', {static: true}) templateForm: NgForm;
   onChange: any = () => {
@@ -13,8 +15,10 @@ export class TemplateFormSectionBase implements ControlValueAccessor {
   };
 
   set value(val) {  // this value is updated by programmatic changes if( ngModelValue !== undefined && this.ngModelValue !== ngModelValue){
-    if (val !== this.ngModelValue) {
-      this.ngModelValue = val;
+    if (this.valueFromInherit && val !== undefined && val !== this.val) {
+      this.val = val;
+      this.onChange(val);
+      this.onTouch(val);
     }
   }
 

@@ -9,6 +9,7 @@ import {commonSearchResultsReducer} from './common-search-results.reducer';
 import {ExperimentsSearchResultsComponent} from './dumb/experiments-search-results/experiments-search-results.component';
 import {ModelsSearchResultsComponent} from './dumb/models-search-results/models-search-results.component';
 import {ProjectsSharedModule} from '../../features/projects/shared/projects-shared.module';
+import {CommonProjectsModule} from '../projects/common-projects.module';
 
 const _declarations = [
   ModelsSearchResultsComponent,
@@ -22,6 +23,7 @@ const _declarations = [
     CommonModule,
     SMSharedModule,
     StoreModule.forFeature('search', commonSearchResultsReducer),
+    CommonProjectsModule,
     EffectsModule.forFeature([CommonSearchResultsEffects])
   ],
   declarations: [_declarations],

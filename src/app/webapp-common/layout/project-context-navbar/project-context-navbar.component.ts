@@ -1,6 +1,6 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {PROJECT_ROUTES, PROJECT_ROUTES_TYPE} from '../../../shared/constants/non-common-consts';
+import {PROJECT_ROUTES} from '../../../shared/constants/non-common-consts';
 
 @Component({
   selector   : 'sm-project-context-navbar',
@@ -12,16 +12,16 @@ export class ProjectContextNavbarComponent {
   @Output() backToProjectClicked = new EventEmitter();
   @Output() onNameChanged        = new EventEmitter();
 
-  @Input() activeFeature: PROJECT_ROUTES_TYPE;
+  @Input() activeFeature: string;
   @Input() archivedMode: boolean;
 
-  public readonly routes = PROJECT_ROUTES;
+  public readonly routes = this.projectId === '*'? PROJECT_ROUTES.slice(1) : PROJECT_ROUTES;
   get projectId() {
-    return this.route.parent.snapshot.params.projectId;
+    return this.activatedRoute.parent.snapshot.params.projectId;
   }
 
   constructor(private router: Router,
-              private route: ActivatedRoute) {
+              public activatedRoute: ActivatedRoute) {
   }
 
   public tabClicked(feature) {

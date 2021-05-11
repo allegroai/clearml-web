@@ -1,9 +1,15 @@
-<sm-dialog-template iconClass="al-icon al-ico-clone" [header]="header">
-  <div class="reference">
+<sm-dialog-template [iconClass]="'al-icon ' + (extend ? 'al-ico-extend' : 'al-ico-clone')" [header]="header">
+  <div *ngIf="!extend; else extendMessage" class="reference">
     A draft copy of <b *ngIf="reference"
                        [smTooltip]="reference.length > 80 ? reference : undefined">{{reference.length > 80 ? (reference | slice:0:77) + '...' : reference }}</b>
     will be created.
   </div>
+  <ng-template #extendMessage>
+    <div class="reference">
+      A draft copy of <b *ngIf="reference" [smTooltip]="reference.length > 80 ? reference : undefined">{{reference.length > 80 ? (reference | slice:0:77) + '...' : reference }}</b> will be created,
+      with it's input model set to the output model of <b *ngIf="reference">{{reference}}</b>.
+    </div>
+  </ng-template>
   <form #cloneForm="ngForm">
     <div class="form-container">
       <h5>Project</h5>
@@ -39,6 +45,7 @@
 
         <mat-autocomplete #auto="matAutocomplete"
                           name="ExperimentProject"
+                          class="light-theme"
                           [displayWith]="displayFn"
                           (opened)="setIsAutoCompleteOpen(true)"
                           (closed)="setIsAutoCompleteOpen(false)"
@@ -53,18 +60,17 @@
         </mat-autocomplete>
       </mat-form-field>
       <h5>Name</h5>
-      <mat-form-field class="w-100" appearance="outline"
-                      hideRequiredMarker="true"
-                      floatLabel="never">
+      <mat-form-field class="w-100" appearance="outline">
         <input
           required
           matInput
+          autocomplete="off"
           #experimentName="ngModel"
           name="ExperimentName"
-          placeHolder="Name"
+          placeholder="Name"
           [(ngModel)]="formData.name"
         />
-        <mat-error class="text-danger" *ngIf="experimentName?.errors?.required">Please provide a name</mat-error>
+        <mat-error *ngIf="experimentName?.errors?.required">Please provide a name</mat-error>
       </mat-form-field>
       <h5>Description</h5>
       <mat-form-field class="w-100" appearance="outline"
@@ -80,7 +86,7 @@
       <div class="buttons">
         <button cdkFocusInitial (click)="closeDialog(true)" [disabled]="!cloneForm.valid"
                 class="btn btn-neon yes-button" #cloneButton>
-          CLONE
+          {{extend ? 'EXTEND' : 'CLONE'}}
         </button>
         <button (click)="closeDialog(false)" class="btn btn-outline-neon">
           CANCEL

@@ -1,11 +1,15 @@
 import {createFeatureSelector, createSelector} from '@ngrx/store';
 import {TABLE_SORT_ORDER, TableSortOrderEnum} from '../../webapp-common/shared/ui-components/data/table/table.consts';
-import {commonProjectsInitState, commonProjectsReducer, ICommonProjectsState} from '../../webapp-common/projects/common-projects.reducer';
+import {
+  CommonProjectReadyForDeletion,
+  commonProjectsInitState,
+  commonProjectsReducer,
+  ICommonProjectsState
+} from '../../webapp-common/projects/common-projects.reducer';
 import {PROJECTS_ACTIONS} from '../../webapp-common/projects/common-projects.consts';
+import {Project} from '../../business-logic/model/projects/project';
 
-export interface IProjectReadyForDeletion {
-  experiments: number;
-  models: number;
+export interface IProjectReadyForDeletion extends CommonProjectReadyForDeletion{
 }
 
 export interface IProjectsState extends ICommonProjectsState {
@@ -16,10 +20,9 @@ export interface IProjectsState extends ICommonProjectsState {
 const projectsInitState: IProjectsState = {
         ...commonProjectsInitState,
         projectReadyForDeletion: {
-          experiments: null, models: null
+          project: null, experiments: null, models: null
         }
-      }
-;
+      };
 
 // todo: where to put it?
 const getCorrectSortingOrder = (currentSortOrder: TableSortOrderEnum, currentOrderField: string, nextOrderField: string) => {
@@ -34,6 +37,7 @@ export function projectsReducer<ActionReducer>(state: IProjectsState = projectsI
 
   switch (action.type) {
     case PROJECTS_ACTIONS.CHECK_PROJECT_FOR_DELETION:
+      return {...state, projectReadyForDeletion: {...projectsInitState.projectReadyForDeletion, project: action.payload.project}};
     case PROJECTS_ACTIONS.RESET_READY_TO_DELETE:
       return {...state, projectReadyForDeletion: projectsInitState.projectReadyForDeletion};
     case PROJECTS_ACTIONS.SET_PROJECT_READY_FOR_DELETION:

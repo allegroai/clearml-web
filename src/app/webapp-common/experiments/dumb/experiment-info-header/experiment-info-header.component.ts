@@ -1,7 +1,6 @@
 import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import {TaskStatusEnum} from '../../../../business-logic/model/tasks/taskStatusEnum';
 import {TaskTypeEnum} from '../../../../business-logic/model/tasks/taskTypeEnum';
-import {ISelectedExperiment} from '../../../../features/experiments/shared/experiment-info.model';
 import {getSystemTags, isDevelopment} from '../../../../features/experiments/shared/experiments.utils';
 import {Observable} from 'rxjs';
 import {Store} from '@ngrx/store';
@@ -12,6 +11,17 @@ import {TagsMenuComponent} from '../../../shared/ui-components/tags/tags-menu/ta
 import {MenuComponent} from '../../../shared/ui-components/panel/menu/menu.component';
 import {ActivateEdit, DeactivateEdit} from '../../actions/common-experiments-info.actions';
 import {EXPERIMENTS_STATUS_LABELS} from '../../../../features/experiments/shared/experiments.const';
+import {EXPERIMENT_COMMENT} from '../experiment-general-info/experiment-general-info.component';
+import {ActivatedRoute, Router} from '@angular/router';
+import {
+  CountAvailableAndIsDisable,
+  MENU_ITEM_ID,
+  selectionDisabledAbort, selectionDisabledArchive,
+  selectionDisabledDelete, selectionDisabledDequeue, selectionDisabledEnqueue,
+  selectionDisabledMoveTo,
+  selectionDisabledPublishExperiments, selectionDisabledQueue,
+  selectionDisabledReset, selectionDisabledViewWorker
+} from '../../../shared/entity-page/items.utils';
 
 @Component({
   selector: 'sm-experiment-info-header',
@@ -30,6 +40,7 @@ export class ExperimentInfoHeaderComponent {
   public isDev = false;
   public systemTags = [] as string[];
   public shared: boolean;
+  selectedDisableAvailable = {};
 
   @Input() editable: boolean = true;
   @Input() infoData;
@@ -42,28 +53,37 @@ export class ExperimentInfoHeaderComponent {
   @ViewChild('tagMenu') tagMenu: MenuComponent;
   @ViewChild('tagsMenuContent') tagMenuContent: TagsMenuComponent;
 
-  constructor(private store: Store<any>) {
+  constructor(private store: Store<any>, private router: Router, private activatedRoute: ActivatedRoute) {
     this.tagsFilterByProject$ = this.store.select(selectTagsFilterByProject);
     this.projectTags$ = this.store.select(selectProjectTags);
     this.companyTags$ = this.store.select(selectCompanyTags);
   }
 
-  private _experiment: ISelectedExperiment;
-  private previousId: string;
-
+  private _experiment: any;
   get experiment() {
     return this._experiment;
   }
 
-  @Input() set experiment(experiment: ISelectedExperiment) {
+  @Input() set experiment(experiment) {
+    if (experiment?.id !== this._experiment?.id) {
+      this.viewId = false;
+    }
     this._experiment = experiment;
     this.isDev = isDevelopment(experiment);
     this.systemTags = getSystemTags(experiment);
-    if (experiment?.id !== this.previousId) {
-      this.viewId = false;
-    }
-    this.previousId = experiment?.id;
     this.shared = experiment?.system_tags?.includes('shared');
+    this.selectedDisableAvailable = {
+      [MENU_ITEM_ID.ABORT]: selectionDisabledAbort([experiment]),
+      [MENU_ITEM_ID.PUBLISH]: selectionDisabledPublishExperiments([experiment]),
+      [MENU_ITEM_ID.RESET]: selectionDisabledReset([experiment]),
+      [MENU_ITEM_ID.DELETE]: selectionDisabledDelete([experiment]),
+      [MENU_ITEM_ID.MOVE_TO]: selectionDisabledMoveTo([experiment]),
+      [MENU_ITEM_ID.ENQUEUE]: selectionDisabledEnqueue([experiment]),
+      [MENU_ITEM_ID.DEQUEUE]: selectionDisabledDequeue([experiment]),
+      [MENU_ITEM_ID.QUEUE]: selectionDisabledQueue([experiment]),
+      [MENU_ITEM_ID.VIEW_WORKER]: selectionDisabledViewWorker([experiment]),
+      [MENU_ITEM_ID.ARCHIVE]: selectionDisabledArchive([experiment])
+    };
   }
 
 
@@ -76,7 +96,6 @@ export class ExperimentInfoHeaderComponent {
       return;
     }
     window.setTimeout(() => this.store.dispatch(new ActivateEdit('tags')), 200);
-    this.store.dispatch(getTags());
     this.tagMenu.position = {x: event.clientX, y: event.clientY};
     window.setTimeout(() => {
       this.tagMenu.openMenu();
@@ -111,5 +130,10 @@ export class ExperimentInfoHeaderComponent {
 
   getStatusLabel() {
     return EXPERIMENTS_STATUS_LABELS[this.experiment?.status] || '';
+  }
+
+  onDescriptionHandler() {
+    this.router.navigate(['general'], {relativeTo: this.activatedRoute});
+    this.store.dispatch(new ActivateEdit(EXPERIMENT_COMMENT));
   }
 }

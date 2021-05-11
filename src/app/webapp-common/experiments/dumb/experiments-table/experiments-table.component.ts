@@ -8,15 +8,15 @@ import {
   Output,
   ViewChild,
 } from '@angular/core';
-import {ICONS} from '../../../../app.constants';
-import {ColHeaderTypeEnum, ISmCol, TableSortOrderEnum} from '../../../shared/ui-components/data/table/table.consts';
+import {ICONS} from '../../../constants';
+import {ColHeaderTypeEnum, ISmCol} from '../../../shared/ui-components/data/table/table.consts';
 import {FILTERED_EXPERIMENTS_STATUS_OPTIONS} from '../../shared/common-experiments.const';
-import {get, uniq} from 'lodash/fp';
+import {get, isEqual, uniq} from 'lodash/fp';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {ITableExperiment} from '../../shared/common-experiment-model.model';
 import {
   DIGITS_AFTER_DECIMAL,
-  EXPERIMENTS_TABLE_COL_FIELDS
+  EXPERIMENTS_TABLE_COL_FIELDS,
 } from '../../../../features/experiments/shared/experiments.const';
 import {BaseTableView} from '../../../shared/ui-components/data/table/base-table-view';
 import {getSystemTags, isDevelopment} from '../../../../features/experiments/shared/experiments.utils';
@@ -25,15 +25,22 @@ import {sortByArr} from '../../../shared/pipes/show-selected-first.pipe';
 import {Observable} from 'rxjs';
 import {Store} from '@ngrx/store';
 import {selectCompanyTags, selectProjectTags, selectTagsFilterByProject} from '../../../core/reducers/projects.reducer';
-import {addTag} from '../../actions/common-experiments-menu.actions';
-import {ExperimentMenuComponent} from '../../../../features/experiments/shared/components/experiment-menu/experiment-menu.component';
+import {addTag, hyperParamSelectedExperiments} from '../../actions/common-experiments-menu.actions';
+
 import {TIME_FORMAT_STRING} from '../../../constants';
 import {NoUnderscorePipe} from '../../../shared/pipes/no-underscore.pipe';
 import {TitleCasePipe} from '@angular/common';
-import {INITIAL_EXPERIMENT_TABLE_COLS} from '../../../../features/experiments/experiments.consts';
+import {INITIAL_EXPERIMENT_TABLE_COLS} from '../../experiment.consts';
 import {ProjectsGetTaskParentsResponseParents} from '../../../../business-logic/model/projects/projectsGetTaskParentsResponseParents';
 import {Router} from '@angular/router';
 import {MatMenuTrigger} from '@angular/material/menu';
+import {IOption} from '../../../shared/ui-components/inputs/select-autocomplete-for-template-forms/select-autocomplete-for-template-forms.component';
+import {createFiltersFromStore} from '../../effects/common-experiments-view.effects';
+import {
+  CountAvailableAndIsDisable,
+  CountAvailableAndIsDisableSelectedFiltered
+} from '../../../shared/entity-page/items.utils';
+import { ExperimentMenuComponent } from '../../shared/components/experiment-menu/experiment-menu.component';
 
 @Component({
   selector: 'sm-experiments-table',
@@ -44,23 +51,15 @@ import {MatMenuTrigger} from '@angular/material/menu';
 export class ExperimentsTableComponent extends BaseTableView {
   readonly EXPERIMENTS_TABLE_COL_FIELDS = EXPERIMENTS_TABLE_COL_FIELDS;
   readonly FILTERED_EXPERIMENTS_STATUS_OPTIONS = FILTERED_EXPERIMENTS_STATUS_OPTIONS;
-  public EXPERIMENTS_ALL_FILTER_OPTIONS = {
-    status: this.FILTERED_EXPERIMENTS_STATUS_OPTIONS,
-    type: [],
-    users: [],
-    tags: [],
+  public EXPERIMENTS_ALL_FILTER_OPTIONS: {[colId: string]: IOption[]} = {
+    [EXPERIMENTS_TABLE_COL_FIELDS.STATUS]: this.FILTERED_EXPERIMENTS_STATUS_OPTIONS,
+    [EXPERIMENTS_TABLE_COL_FIELDS.TYPE]: [],
+    [EXPERIMENTS_TABLE_COL_FIELDS.USER]: [],
+    [EXPERIMENTS_TABLE_COL_FIELDS.TAGS]: [],
     [EXPERIMENTS_TABLE_COL_FIELDS.PARENT]: []
   };
   readonly ICONS = ICONS;
   readonly getSystemTags = getSystemTags;
-  public tagSearchValue: string;
-  public sortOrder = 1;
-  public statusFiltersValue: any;
-  public typeFiltersValue: any;
-  public allFiltersValue: { type: any; status: any; users: any; tags: any; 'parent.name': any };
-  public tagsFiltersValue: any;
-  public systemTagsFiltersValue: any;
-  public parentFiltersValue: any;
   public isDevelopment = isDevelopment;
   public menuOpen: boolean = false;
   private _selectedExperiments: ITableExperiment[] = [];
@@ -71,6 +70,7 @@ export class ExperimentsTableComponent extends BaseTableView {
   private _experiments: Array<ITableExperiment> = [];
   private _selectedExperiment: ITableExperiment;
   private lastOpenPopover: MatMenuTrigger;
+  public searchValues: {[colId: string]: string} = {};
 
   @Input() set experiments(value: Array<ITableExperiment>) {
     this._experiments = value;
@@ -83,21 +83,29 @@ export class ExperimentsTableComponent extends BaseTableView {
     return this._experiments;
   }
 
-  public userFiltersValue: any;
-  public userSearchValue: string;
-  public parentSearchValue: string;
   public contextExperiment: ITableExperiment;
   public tagsFilterByProject$: Observable<boolean>;
   public projectTags$: Observable<string[]>;
   public companyTags$: Observable<string[]>;
-
+  public filtersValues: {[colId: string]: any} = {};
+  public filtersSubValues: {[colId: string]: any} = {};
+  @Input() selectedExperimentsDisableAvailable: Record<string, CountAvailableAndIsDisableSelectedFiltered>;
   @Input() set users(users: User[]) {
-    this.EXPERIMENTS_ALL_FILTER_OPTIONS.users = users.map(user => ({
+    this.EXPERIMENTS_ALL_FILTER_OPTIONS[EXPERIMENTS_TABLE_COL_FIELDS.USER] = users.map(user => ({
       label: user.name ? user.name : 'Unknown User',
       value: user.id
     }));
     this.sortOptionalUsersList();
   }
+
+  @Input() set hyperParamsOptions(hyperParamsOptions: Record<ISmCol['id'], string[]>) {
+    Object.entries(hyperParamsOptions).forEach(([id, values]) => {
+      this.EXPERIMENTS_ALL_FILTER_OPTIONS[id] = values.map( value => ({
+          label: value,
+          value: value
+        }));
+      });
+    }
 
   @Input() activeParentsFilter: ProjectsGetTaskParentsResponseParents[];
 
@@ -106,7 +114,7 @@ export class ExperimentsTableComponent extends BaseTableView {
     this.EXPERIMENTS_ALL_FILTER_OPTIONS[EXPERIMENTS_TABLE_COL_FIELDS.PARENT] = parentsAndActiveFilter.map(parent => ({
       label: parent.name ? parent.name : 'Unknown Experiment',
       value: parent.id,
-      tooltip: `${parent.project.name} / ${parent.name}`
+      tooltip: `${parent.project?.name} / ${parent.name}`
     }));
     this.sortOptionalParentsList();
   }
@@ -134,18 +142,18 @@ export class ExperimentsTableComponent extends BaseTableView {
   @Input() noMoreExperiments: boolean;
 
   @Input() set tags(tags) {
-    const tagsAndActiveFilter = Array.from(new Set(tags.concat(this.tagsFiltersValue)));
-    this.EXPERIMENTS_ALL_FILTER_OPTIONS.tags = tagsAndActiveFilter.map(tag => ({
+    const tagsAndActiveFilter = Array.from(new Set(tags.concat(this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.TAGS])));
+    this.EXPERIMENTS_ALL_FILTER_OPTIONS[EXPERIMENTS_TABLE_COL_FIELDS.TAGS] = tagsAndActiveFilter.map(tag => ({
       label: tag === null ? '(No tags)' : tag,
       value: tag
-    }));
+    }) as IOption);
     this.sortOptionalTagsList();
   }
 
   @Input() set experimentTypes(types: string[]) {
-    const typesAndActiveFilter = uniq(types.concat(this.typeFiltersValue));
+    const typesAndActiveFilter = uniq(types.concat(this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.TYPE]));
     // under 4 letters assume an acronym and capitalize.
-    this.EXPERIMENTS_ALL_FILTER_OPTIONS.type = typesAndActiveFilter.map((type: string) =>
+    this.EXPERIMENTS_ALL_FILTER_OPTIONS[EXPERIMENTS_TABLE_COL_FIELDS.TYPE] = typesAndActiveFilter.map((type: string) =>
       ({
         label: (type?.length < 4 ? type.toUpperCase() : this.titleCasePipe.transform(this.noUnderscorePipe.transform(type))),
         value: type
@@ -160,26 +168,22 @@ export class ExperimentsTableComponent extends BaseTableView {
   }
 
   @Input() set tableFilters(filters: { [s: string]: FilterMetadata }) {
-    this.statusFiltersValue = get([EXPERIMENTS_TABLE_COL_FIELDS.STATUS, 'value'], filters) || [];
-    this.typeFiltersValue = get([EXPERIMENTS_TABLE_COL_FIELDS.TYPE, 'value'], filters) || [];
-    this.userFiltersValue = get([EXPERIMENTS_TABLE_COL_FIELDS.USER, 'value'], filters) || [];
-    this.tagsFiltersValue = get([EXPERIMENTS_TABLE_COL_FIELDS.TAGS, 'value'], filters) || [];
-    this.systemTagsFiltersValue = (get(['system_tags', 'value'], filters) || []);
-    this.parentFiltersValue = get([EXPERIMENTS_TABLE_COL_FIELDS.PARENT, 'value'], filters) || [];
-    this.allFiltersValue = {
-      status: this.statusFiltersValue,
-      type: this.typeFiltersValue,
-      users: this.userFiltersValue,
-      tags: this.tagsFiltersValue,
-      'parent.name': this.parentFiltersValue
-    };
+    this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.STATUS] = get([EXPERIMENTS_TABLE_COL_FIELDS.STATUS, 'value'], filters) || [];
+    this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.TYPE] = get([EXPERIMENTS_TABLE_COL_FIELDS.TYPE, 'value'], filters) || [];
+    this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.USER] = get([EXPERIMENTS_TABLE_COL_FIELDS.USER, 'value'], filters) || [];
+    this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.TAGS] = get([EXPERIMENTS_TABLE_COL_FIELDS.TAGS, 'value'], filters) || [];
+    this.filtersSubValues[EXPERIMENTS_TABLE_COL_FIELDS.TAGS] = (get(['system_tags', 'value'], filters) || []);
+    this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.PARENT] = get([EXPERIMENTS_TABLE_COL_FIELDS.PARENT, 'value'], filters) || [];
+
+    // handle dynamic filters;
+    const filtersValues = createFiltersFromStore(filters || {}, false);
+    this.filtersValues = Object.assign({}, {...this.filtersValues}, {...filtersValues});
   }
 
   @Output() experimentSelectionChanged = new EventEmitter<ITableExperiment>();
   @Output() experimentsSelectionChanged = new EventEmitter<Array<ITableExperiment>>();
   @Output() loadMoreExperiments = new EventEmitter();
-  @Output() sortedChanged = new EventEmitter<{ sortOrder: TableSortOrderEnum; colId: ISmCol['id'] }>();
-  @Output() filterChanged = new EventEmitter();
+  @Output() sortedChanged = new EventEmitter<{ isShift: boolean; colId: ISmCol['id'] }>();
   @Output() tagsMenuOpened = new EventEmitter();
   @Output() typesMenuOpened = new EventEmitter();
   @ViewChild('contextMenu') contextMenu: ExperimentMenuComponent;
@@ -191,7 +195,6 @@ export class ExperimentsTableComponent extends BaseTableView {
       this.menuOpen = false;
     }
   }
-
   constructor(
     private changeDetector: ChangeDetectorRef,
     private store: Store<any>,
@@ -213,47 +216,48 @@ export class ExperimentsTableComponent extends BaseTableView {
     }
   }
 
+  onSortFilterMenuOpened(col: ISmCol) {
+    switch (col.id) {
+      case EXPERIMENTS_TABLE_COL_FIELDS.TAGS:
+        this.tagsMenuOpened.emit();
+        break;
+    }
+
+    if (col.id.includes('hyperparams')) {
+      this.store.dispatch(hyperParamSelectedExperiments({col}));
+      return;
+    }
+  }
+
   onRowSelectionChanged(event) {
     this.experimentSelectionChanged.emit(event.data);
   }
 
   sortOptionalUsersList() {
-    this.EXPERIMENTS_ALL_FILTER_OPTIONS.users.sort((a, b) => sortByArr(a.value, b.value, this.userFiltersValue));
+    this.EXPERIMENTS_ALL_FILTER_OPTIONS[EXPERIMENTS_TABLE_COL_FIELDS.USER]
+      .sort((a, b) => sortByArr(a.value, b.value, this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.USER]));
   }
 
   sortOptionalParentsList() {
-    this.EXPERIMENTS_ALL_FILTER_OPTIONS[EXPERIMENTS_TABLE_COL_FIELDS.PARENT].sort((a, b) => sortByArr(a.value, b.value, this.parentFiltersValue));
+    this.EXPERIMENTS_ALL_FILTER_OPTIONS[EXPERIMENTS_TABLE_COL_FIELDS.PARENT]
+      .sort((a, b) => sortByArr(a.value, b.value, this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.PARENT]));
   }
 
   sortOptionalTagsList() {
-    this.EXPERIMENTS_ALL_FILTER_OPTIONS.tags.sort((a, b) => sortByArr(a.value, b.value, [null].concat(this.tagsFiltersValue)));
-  }
-
-  tagSearchValueChanged(searchTerm) {
-    this.tagSearchValue = searchTerm;
-  }
-
-
-  tableFilterChanged(col: ISmCol, event) {
-    this.filterChanged.emit({col, value: event.value});
-    this.scrollTableToTop();
+    this.EXPERIMENTS_ALL_FILTER_OPTIONS[EXPERIMENTS_TABLE_COL_FIELDS.TAGS]
+      .sort((a, b) => sortByArr(a.value, b.value, [null].concat(this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.TAGS])));
   }
 
   scrollTableToTop() {
     this.table?.table?.scrollTo({top: 0});
   }
 
-  tableAllFiltersChanged(event) {
-    this.filterChanged.emit({col: {id: event.col}, value: event.value});
-    this.scrollTableToTop();
-  }
-
   onLoadMoreClicked() {
     this.loadMoreExperiments.emit();
   }
 
-  onSortChanged(sortOrder, colId: ISmCol['id']) {
-    this.sortedChanged.emit({sortOrder, colId});
+  onSortChanged(isShift: boolean, colId: ISmCol['id']) {
+    this.sortedChanged.emit({isShift, colId});
     this.scrollTableToTop();
   }
 
@@ -286,31 +290,22 @@ export class ExperimentsTableComponent extends BaseTableView {
     this.experimentsSelectionChanged.emit(selection);
   }
 
-  userSearchValueChanged(searchTerm) {
-    this.userSearchValue = searchTerm;
-  }
-
-  parentSearchValueChanged(searchTerm) {
-    this.parentSearchValue = searchTerm;
-  }
-
-  searchValueChanged($event: any) {
-    switch ($event.key) {
-      case 'users':
-        this.userSearchValueChanged($event.value);
-        return;
-      case 'tags':
-        this.tagSearchValueChanged($event.value);
-        return;
-    }
+  searchValueChanged($event: string, colId) {
+    this.searchValues[colId] = $event;
   }
 
   usersMenuClosed() {
-    this.userSearchValue = undefined;
+    // this.searchValues[EXPERIMENTS_TABLE_COL_FIELDS.PARENT] = undefined;
     this.sortOptionalUsersList();
   }
 
   filterParentMenuClosed() {
+    // Not working anyway
+    // this.parentSearchValue = undefined;
+    // this.sortOptionalParentsList();
+  }
+
+  filterMenuClosed(colId) {
     // Not working anyway
     // this.parentSearchValue = undefined;
     // this.sortOptionalParentsList();
@@ -335,11 +330,11 @@ export class ExperimentsTableComponent extends BaseTableView {
   }
 
 
-  // navigateToParent(event: MouseEvent, experiment: ITableExperiment) {
-  //   return this.router.navigate([`projects/${experiment.parent.project?.id || '*'}/experiments/${experiment.parent.id}`],
-  //     {queryParams: {filter: []}});
-  //   event.stopPropagation();
-  // }
+  navigateToParent(event: MouseEvent, experiment: ITableExperiment) {
+    event.stopPropagation();
+    return this.router.navigate([`projects/${experiment.parent.project?.id || '*'}/experiments/${experiment.parent.id}`],
+      {queryParams: {filter: []}});
+  }
 
   closeLast(currTrigger: MatMenuTrigger) {
     if (this.lastOpenPopover !== currTrigger) {

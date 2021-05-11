@@ -1,23 +1,15 @@
 <sm-confirm-dialog [displayX]="false">
-
   <div class="content">
-    <div #box class="box" (scroll)="onScroll($event)" [innerHTML]="text">
-
+    <div #box class="box" (scroll)="onScroll($event)" [innerHTML]="text | safe: 'html'">
     </div>
   </div>
 
-  <div class="read-through-notice">
-    <p *ngIf="disabled">Read through this document to accept the terms</p>
-  </div>
   <div class="buttons">
-
-    <button (click)="closeDialog(true)" class="btn btn-neon"
+    <button (click)="closeDialog()" class="btn btn-neon"
             [style.background-color]="disabled ? '#E7E7E8' : ''"
             [disabled]="disabled">
       ACCEPT
     </button>
-
+    <p class="ml-3" *ngIf="disabled">Read through this document to accept the terms</p>
   </div>
-
-
 </sm-confirm-dialog>

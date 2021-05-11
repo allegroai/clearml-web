@@ -11,11 +11,14 @@ $blue-450: #657099;
 $blue-480: #707ba3;
 $blue-500: #384161; //56,65,97
 $blue-550: #47527A;
+$blue-570: #323a56;
 $blue-600: #2c3246; //44,50,70
 $blue-650: #24293c;
 $blue-700: #202432; //32,36,50
 $blue-800: #1a1e2c; //26,30,44
 $blue-900: #141722; //20,23,34
+
+
 
 $cloudy-blue-two: #ced1dc;
 $dark-grey-blue-three: #bdc5e1;
@@ -28,6 +31,7 @@ $neon-yellow-hover: #c6ef06;
 $purple: #4d66ff;
 $eggplant-purple: #222838;
 
+$border-line-color-dark: rgba(0, 0, 0, 0.1);
 $completed-blue: #009aff;
 $blue-sky: #4a90e2;
 $running-green: #50e3c3;
@@ -35,16 +39,17 @@ $pending-gray: $blue-300;
 
 $orangada: #fd8934;
 
-
+$separator-line: #ededed;
 $dataset_import: #f57e23;
 $testing: #f8e71c;
 $training: #f57e23;
 $grey-purple: #7480aa;
 $strong-red: #ff001f;
 $almost-white: #fdfdff;
+$header-backgroud: $blue-900;
 
 $info-color: #0080ff;
-$success-color: #00e309;
+$success-color: #326C34;
 $error-color: #de3232;
 $warn-color: #ffa301;
 
@@ -148,7 +153,7 @@ $border-radius-lg: .3rem; // TODO:
 $border-radius-sm: .2rem; // TODO:
 
 // fonts
-$font-family-base: 'Heebo'; // Assumes the browser default, typically `16px`
+$font-family-base: 'Heebo', sans-serif; // Assumes the browser default, typically `16px`
 $font-default-color: $blue-100; // Assumes the browser default, typically `16px`
 
 $font-size-base: 1rem; // Assumes the browser default, typically `16px`
@@ -243,3 +248,7 @@ $assets-icons-path: '/app/webapp-common/assets/icons';
 // dialog
 $leaf-height: 55vh;
 $generic-base-z-index: 99999;
+
+// font sizes
+$font-size-small: 12px;
+$font-size-regular: 14px;

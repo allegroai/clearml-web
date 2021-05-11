@@ -17,22 +17,22 @@ export class SelectQueueComponent implements OnInit, OnDestroy {
   public queues: Array<Queue>;
   public selectedQueue: Queue;
   public queues$ = this.store.select(selectQueuesList);
-  public task$ = this.store.select(selectTaskForEnqueue);
-  public enqueueWarning$ = this.task$.pipe(filter(task => !(task && task.script && (task.script.diff || (task.script.repository && task.script.entry_point)))));
+  public tasks$ = this.store.select(selectTaskForEnqueue);
+  public enqueueWarning$ = this.tasks$.pipe(filter(tasks => tasks?.some(task => !(task && task.script && (task.script.diff || (task.script.repository && task.script.entry_point))))));
   public reference: string;
 
   constructor(
     public dialogRef: MatDialogRef<ConfirmDialogComponent>,
     private store: Store<any>, private blTaskService: BlTasksService,
     @Inject(MAT_DIALOG_DATA) public data: {
-      taskId?: string;
+      taskIds?: string[];
       reference?: string;
     }
   ) {
 
-    if (data && data.taskId) {
-      this.store.dispatch(new GetTaskForEnqueue(data.taskId));
-      this.reference = data.reference;
+    if (data && data.taskIds.length > 0) {
+      this.store.dispatch(new GetTaskForEnqueue(data.taskIds));
+      this.reference = data.taskIds.length < 2 ?  data.reference : `${data.taskIds.length} experiments `;
     }
     this.queues$.subscribe(queues => {
       if (queues) {
@@ -48,12 +48,6 @@ export class SelectQueueComponent implements OnInit, OnDestroy {
 
   closeDialog(confirmed) {
     this.dialogRef.close({confirmed, queue: this.selectedQueue});
-  }
-
-  selectQueue(queueId: string) {
-    if (this.queues) {
-      this.selectedQueue = this.queues.find(queue => queue.id === queueId);
-    }
   }
 
   ngOnDestroy(): void {

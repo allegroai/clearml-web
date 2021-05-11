@@ -2,7 +2,7 @@
 
 mat-form-field {
   width: 100%;
-  /deep/ .mat-form-field-flex {
+  ::ng-deep .mat-form-field-flex {
     background-color: unset;
   }
 }
@@ -11,7 +11,7 @@ mat-form-field {
   top: calc(50% - 200px);
   left: calc(50% + 260px);
 
-  /deep/ .arrow {
+  ::ng-deep .arrow {
     display: none;
   }
 }

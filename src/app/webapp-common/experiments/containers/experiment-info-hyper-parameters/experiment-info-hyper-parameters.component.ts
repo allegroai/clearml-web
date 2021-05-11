@@ -2,7 +2,7 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {selectExperimentConfiguration, selectExperimentHyperParamsInfoData, selectExperimentHyperParamsSelectedSectionFromRoute, selectExperimentSelectedConfigObjectFromRoute, selectIsExperimentSaving, selectIsSelectedExperimentInDev} from '../../reducers';
 import {ICommonExperimentInfoState} from '../../reducers/common-experiment-info.reducer';
-import {ISelectedExperiment} from '../../../../features/experiments/shared/experiment-info.model';
+import {IExperimentInfo, ISelectedExperiment} from '../../../../features/experiments/shared/experiment-info.model';
 import {selectBackdropActive} from '../../../core/reducers/view-reducer';
 import {combineLatest, Observable, Subscription} from 'rxjs';
 import {selectIsExperimentEditable, selectSelectedExperiment} from '../../../../features/experiments/reducers';
@@ -20,7 +20,7 @@ import {getOr} from 'lodash/fp';
 })
 export class ExperimentInfoHyperParametersComponent implements OnInit, OnDestroy {
 
-  public selectedExperiment: ISelectedExperiment;
+  public selectedExperiment: IExperimentInfo;
   public editable$: Observable<boolean>;
   public isInDev$: Observable<boolean>;
   public saving$: Observable<boolean>;

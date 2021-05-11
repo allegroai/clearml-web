@@ -1,28 +1,27 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {Component, ElementRef, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {EntityTypeEnum} from '../../../../shared/constants/non-common-consts';
+import {ItemFooterModel} from '../footer-items/footer-items.models';
+import {BaseContextMenuComponent} from '@common/shared/components/base-context-menu/base-context-menu.component';
+import {Store} from '@ngrx/store';
+import { ICONS } from '@common/constants';
 
 @Component({
   selector   : 'sm-entity-footer',
   templateUrl: './entity-footer.component.html',
   styleUrls  : ['./entity-footer.component.scss']
 })
-export class EntityFooterComponent implements OnInit {
+export class EntityFooterComponent extends BaseContextMenuComponent {
 
-  @Input() entitiesType: 'experiments' | 'models' | 'dataviews';
-  @Input() visible;
-  @Input() numberOfSelectedEntities;
-  @Input() showAllSelectedIsActive;
-  @Input() isArchivedMode;
-  @Input() disableArchive: boolean = false;
-  @Input() archiveToolTipMessage: string;
+  @Input() entitiesType: EntityTypeEnum;
+  @Input() footerItems: ItemFooterModel[] = [];
+  @Output() onFooterItemClick = new EventEmitter<{item: ItemFooterModel; emitValue: any}>();
+  @Output() tagSelected = new EventEmitter();
 
-  @Output() restoreEntitiesClicked   = new EventEmitter();
-  @Output() compareEntitiesClicked   = new EventEmitter();
-  @Output() archiveEntitiesClicked   = new EventEmitter();
-  @Output() showAllSelectedClicked = new EventEmitter();
+  ICONS = ICONS;
 
-  constructor() {
+  constructor( store: Store<any>,
+               eRef: ElementRef) {
+    super(store, eRef);
   }
 
-  ngOnInit() {
-  }
 }

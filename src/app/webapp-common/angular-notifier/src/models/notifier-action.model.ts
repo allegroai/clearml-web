@@ -9,12 +9,11 @@
  */
 export interface NotifierAction {
 
-  // tslint:disable no-any
+  // eslint-disable  @typescript-eslint/no-explicit-any
   /**
    * Action payload containing all information necessary to process the action (optional)
    */
   payload?: any;
-  // tslint:enable no-any
 
   /**
    * Action type

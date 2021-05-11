@@ -9,7 +9,7 @@ export class safeAngularUrlParameterPipe implements PipeTransform {
     if (!value) {
       return;
     }
-    return value.replace('/', '%2F');
+    return encodeURIComponent(value);
   }
 
 }

@@ -20,14 +20,18 @@
     nav {
       height: $experiment-info-tabs-height;
       border-bottom: 1px solid rgba(2, 2, 2, 0.07);
+
+      span.disabled {
+        pointer-events: none;
+      }
     }
   }
 
-  /deep/ nav {
+  ::ng-deep nav {
     border-bottom: 1px solid rgba(2, 2, 2, 0.07);
   }
 
-  /deep/ sm-simple-table-2 .headers {
+  ::ng-deep sm-simple-table-2 .headers {
     font-size: 12px;
   }
 

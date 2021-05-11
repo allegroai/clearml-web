@@ -1,6 +1,7 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {MetricVariantResult} from '../../../../business-logic/model/projects/metricVariantResult';
 import {CustomColumnMode} from '../../shared/common-experiments.const';
+import {ISmCol} from '../../../shared/ui-components/data/table/table.consts';
 
 @Component({
   selector   : 'sm-experiment-header',
@@ -29,27 +30,18 @@ export class ExperimentHeaderComponent {
   }
 
   @Output() isArchivedChanged        = new EventEmitter<boolean>();
-  @Output() addExperimentClicked     = new EventEmitter();
-  @Output() selectedTableColsChanged = new EventEmitter();
-  @Output() removeColFromList        = new EventEmitter();
+  @Output() selectedTableColsChanged = new EventEmitter<ISmCol>();
+  @Output() removeColFromList        = new EventEmitter<ISmCol['id']>();
   @Output() getMetricsToDisplay      = new EventEmitter();
-  @Output() selectedMetricToShow     = new EventEmitter();
-  @Output() selectedHyperParamToShow = new EventEmitter();
+  @Output() selectedMetricToShow     = new EventEmitter<{variant: MetricVariantResult; addCol: boolean, valueType: string}>();
+  @Output() selectedHyperParamToShow = new EventEmitter<{param: string; addCol: boolean}>();
   @Output() refreshListClicked       = new EventEmitter();
-  @Output() setAutoRefresh           = new EventEmitter();
+  @Output() setAutoRefresh           = new EventEmitter<boolean>();
   @Output() clearSelection           = new EventEmitter();
 
 
   onIsArchivedChanged(value: boolean) {
     this.isArchivedChanged.emit(value);
-  }
-
-  onAddExperimentClicked() {
-    this.addExperimentClicked.emit();
-  }
-
-  addCustomColClicked(mode: CustomColumnMode) {
-    this.selectMetricActive = mode;
   }
 
   onRefreshListClicked() {

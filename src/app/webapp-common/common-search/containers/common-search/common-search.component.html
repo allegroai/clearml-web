@@ -1,16 +1,24 @@
-  <div class="search-container" [ngClass]="{'open': isSearching$ | async}">
-    <sm-search
-      #search
-      class="search-header"
-      [value]="searchQuery$ | async"
-      [placeholder]="searchPlaceholder$ | async"
-      [hideIcons]="true"
-      (valueChanged)="onSearchValueChanged($event)"
-      (focusout)="onSearchFocusOut()"
-    >
-    </sm-search>
-  </div>
-  <div class="search-icon-container" *ngIf="searchActive">
-    <i *ngIf="!(isSearching$ | async)" class="fa fa-search pointer" (click)="openSearch()"></i>
-    <i *ngIf="(isSearching$ | async)" class="fa fa-times pointer" (click)="clearSearch()" smClickStopPropagation></i>
-  </div>
+<span class="search-container" [ngClass]="{'open': isSearching$ | async}">
+  <sm-search
+    class="search-header"
+    [value]="(searchQuery$ | async)?.query"
+    [placeholder]="searchPlaceholder$ | async"
+    [hideIcons]="true"
+    [minimumChars]="minChars"
+    (valueChanged)="onSearchValueChanged($event)"
+    (focusout)="onSearchFocusOut()"
+  >
+    <i
+      class="regexp al-ico-regex pointer"
+      smClickStopPropagation
+      [smTooltip]="'Regex'" [matTooltipPosition]="'below'"
+      [class.active]="regExp"
+      (click)="toggleRegExp()"></i>
+  </sm-search>
+</span>
+<ng-container *ngIf="searchActive">
+  <i *ngIf="(isSearching$ | async); else searchIcon" class="fa fa-times pointer" (click)="clearSearch()" smClickStopPropagation></i>
+  <ng-template #searchIcon>
+    <i class="fa fa-search pointer" (click)="openSearch()"></i>
+  </ng-template>
+</ng-container>

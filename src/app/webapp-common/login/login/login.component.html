@@ -7,7 +7,7 @@
   <div class="login-form">
     <div class="login-section">
       <section>
-        <img src="../../../../assets/logo-white.svg?v=1" class="logo">
+        <img [src]="environment.branding?.logo " class="logo">
         <sm-signup *ngIf="signupForm; else signupElse"></sm-signup>
         <ng-template #signupElse>
           <div *ngIf="isInvite || loginMode !== LoginModeEnum.ssoOnly" class="login-title">{{loginTitle}}</div>
@@ -38,14 +38,17 @@
             <div *ngIf="loginFailed" class="errors">
               Invalid User/Password combination
             </div>
-            <button *ngIf="loginMode !== LoginModeEnum.ssoOnly || !ssoEnabled" class="btn" (click)="login()"
-                    [disabled]="loginForm.touched && (!loginForm.valid || showSpinner)">
-              <mat-spinner class="spinner" *ngIf="showSpinner" diameter="16"></mat-spinner>
-              {{buttonCaption}}
-            </button>
+            <ng-container *ngIf="loginMode !== LoginModeEnum.ssoOnly || !ssoEnabled">
+              <button class="btn" (click)="login()"
+                      [disabled]="loginForm.touched && (!loginForm.valid || showSpinner)">
+                <mat-spinner class="spinner" *ngIf="showSpinner" diameter="16"></mat-spinner>
+                {{buttonCaption}}
+              </button>
+              <ng-content *ngTemplateOutlet="tou"></ng-content>
+            </ng-container>
 
             <div class="d-flex flex-column" *ngIf="guestUser?.enabled || ssoEnabled">
-              <div *ngIf="loginMode !== LoginModeEnum.ssoOnly" class="separator d-flex mt-4">
+              <div *ngIf="loginMode !== LoginModeEnum.ssoOnly" class="separator mt-4">
                 <div class="line"></div>
                 <div class="px-3">OR</div>
                 <div class="line"></div>
@@ -53,28 +56,43 @@
               <button *ngIf="guestUser?.enabled" [disabled]="showSpinner" class="btn mt-3" (click)="loginGuest()">LOGIN
                 AS A GUEST
               </button>
-              <div class="sso-wrapper">
-                <div *ngIf="isCommunity" class="signup-header">
-                  <div [class.inactive]="signupMode" (click)="toggleSignup()">Log in</div>
-                  <div [class.inactive]="!signupMode" (click)="toggleSignup()">Sign up</div>
-                </div>
-                <div class="sso-body">
-                  <div class="sso-message">{{signupMode ? 'Create a free account' : 'Welcome back!'}}</div>
-                  <button
-                    *ngFor="let provider of sso"
-                    [disabled]="showSpinner"
-                    [id]="'app_oauth_' + provider.name"
-                    class="btn sso-btn"
-                    (click)="ssoLogin(provider.url)"
-                  ><i class="mr-4 sm-md al-icon" [class]="'i-' + provider.name.replace('_', ' ')"></i>
-                    <span class="btn-text">Continue with {{provider.name?.replace('_', ' ') | titlecase}}</span>
-                  </button>
-                  <div class="terms-of-use">
-                    <span>By signing up you agree to Allegro AI’s <a class="link" [href]="touLink" target="_blank">Privacy Policy and Terms of Use</a>.</span>
+              <ng-template let-validateEmail="validateEmail"
+                [ngTemplateOutletContext]="{ validateEmail: validateEmail$ | async}"
+                [ngTemplateOutlet]="template" #template>
+                <div *ngIf="validateEmail?.resendUrl; else ssoLoginSection" class="sso-wrapper">
+                  <div class="sso-body">
+                    <div class="sso-message mb-5">A verification E-mail was sent to {{validateEmail.email}}, please open it to continue the signup process</div>
+                    Can't find the email?
+                    <button class="btn mt-2 mb-5" (click)="reSendVerificationEmail(validateEmail.resendUrl)">Re-send the verification email</button>
+                    use a different email? <a href="" (click)="$event.preventDefault(); resetPasswordSignup()">click here</a>
+                    <div class="issue"></div>
                   </div>
-                  <div *ngIf="error" class="errors">{{error}}</div>
                 </div>
-              </div>
+                <ng-template #ssoLoginSection>
+                  <div class="sso-wrapper">
+                    <div *ngIf="isCommunity" class="signup-header">
+                      <div [class.inactive]="signupMode" (click)="toggleSignup()">Log in</div>
+                      <div [class.inactive]="!signupMode" (click)="toggleSignup()">Sign up</div>
+                    </div>
+                    <div class="sso-body">
+                      <div class="sso-message">{{signupMode ? 'Create a free account' : 'Welcome back!'}}</div>
+                      <button
+                        *ngFor="let provider of sso"
+                        [disabled]="showSpinner"
+                        [id]="'app_oauth_' + provider.name"
+                        class="btn sso-btn"
+                        (click)="ssoLogin(provider.url)"
+                      ><i class="mr-4 sm-md al-icon" [class]="getProviderIcon(provider)"></i>
+                        <span class="btn-text">Continue with {{getProviderName(provider)}}</span>
+                      </button>
+                      <ng-content *ngTemplateOutlet="tou"></ng-content>
+                      <div *ngIf="error" class="errors">{{error}}</div>
+                      <div class="other-email" *ngIf="validateEmail?.email">
+                        use a different email? <a href="" (click)="$event.preventDefault(); resetPasswordSignup()">click here</a>                                    </div>
+                    </div>
+                  </div>
+                </ng-template>
+              </ng-template>
             </div>
             <mat-autocomplete #auto="matAutocomplete">
               <mat-option *ngFor="let option of filteredOptions | async" [value]="option.name">
@@ -87,16 +105,10 @@
     </div>
     <div *ngIf="banner" class="banner">{{banner}}</div>
     <div *ngIf="showGitHub" class="community-links">
-      <a class="link" target="_blank" href="https://github.com/allegroai/trains/stargazers">
-        <i class="fas fa-star"></i>Star<span class="gazer" *ngIf="stars"> ({{(stars | filesize:{
-        base: 10,
-        round: 1,
-        symbols: {kB: 'k', B: '', mB: 'm'}
-      })}})</span></a>
-      <a class="link" *ngIf="!isCommunity" target="_blank" href="https://github.com/allegroai/trains"><i
-        class="fab fa-github"></i>Fork on Github</a>
-      <a class="link" [class.link-community]="isCommunity" target="_blank"
-         href="https://join.slack.com/t/allegroai-trains/shared_invite/enQtOTQyMTI1MzQxMzE4LTY5NTUxOTY1NmQ1MzQ5MjRhMGRhZmM4ODE5NTNjMTg2NTBlZGQzZGVkMWU3ZDg1MGE1MjQxNDEzMWU2NmVjZmY">
+      <a class="link" target="_blank" href="https://github.com/allegroai/clearml/stargazers">
+        <i class="fas fa-star"></i>Star<span class="gazer" *ngIf="stars"> ({{(stars | filesize:{base: 10, round: 1, symbols: {kB: 'k', B: '', mB: 'm'} })}})</span></a>
+      <a class="link" *ngIf="!isCommunity" target="_blank" href="https://github.com/allegroai/clearml"><i class="fab fa-github"></i>Fork on Github</a>
+      <a class="link" [class.link-community]="isCommunity" target="_blank" href="https://join.slack.com/t/allegroai-trains/shared_invite/enQtOTQyMTI1MzQxMzE4LTY5NTUxOTY1NmQ1MzQ5MjRhMGRhZmM4ODE5NTNjMTg2NTBlZGQzZGVkMWU3ZDg1MGE1MjQxNDEzMWU2NmVjZmY">
         <i class="fab fa-slack"></i>Community on Slack</a>
       <a class="link" *ngIf="true" href="https://www.clear.ml/contact-us" target="_blank"><i class="fa fa-envelope"></i>Contact
         Us</a>
@@ -122,3 +134,9 @@
   </div>
 
 </div>
+
+<ng-template #tou>
+  <div class="terms-of-use" *ngIf="touLink">
+    <span>By signing up you agree to Allegro AI’s <a class="link" [href]="touLink" target="_blank">Privacy Policy and Terms of Use</a>.</span>
+  </div>
+</ng-template>

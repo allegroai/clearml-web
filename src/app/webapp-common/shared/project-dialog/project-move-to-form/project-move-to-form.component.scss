@@ -1,0 +1,70 @@
+@import "../../../shared/ui-components/styles/variables";
+
+:host {
+  .creat-new-suffix{
+    margin-right: 18px;
+  }
+  .buttons {
+    margin-top: 48px;
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    justify-content: center;
+    left: 50%;
+    position: relative;
+    transform: translateX(-50%);
+
+    button {
+      width: 130px;
+      text-transform: uppercase;
+    }
+    .yes-button {
+      margin-left: 16px;
+    }
+  }
+  .line {
+    line-height: 2;
+  }
+
+  .create-project-button {
+    padding-top: 32px;
+  }
+
+  .dynamic-subtitle {
+    padding: 9px;
+    margin-bottom: 9px;
+    background-color: $blue-50;
+
+    .p-name {
+      font-weight: bold;
+    }
+
+    .p-holder {
+      opacity: 0.3;
+      font-weight: bold;
+      font-stretch: normal;
+      font-style: normal;
+      line-height: 1.5;
+      color: $blue-500;
+    }
+  }
+
+  small.text-danger {
+    //position: absolute !important;
+    //top: -15px;
+  }
+
+  #project-description {
+    max-height: 250px;
+    padding-top: 12px;
+    height: 65px;
+  }
+
+  mat-form-field {
+    width: 100%;
+
+    .project-description {
+      min-height: 68px;
+    }
+  }
+}

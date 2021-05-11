@@ -1,12 +1,14 @@
 @import "../../../shared/ui-components/styles/mixins/common";
 
-.header {
+.recent-header {
   display: flex;
   justify-content: space-between;
-  padding-bottom: 10px;
+  align-items: center;
+  padding-top: 24px;
+  padding-bottom: 12px;
 }
 
-.table-container{
+.table-container {
   height: calc(100% - 38px);
   min-height: 180px;
   overflow-y: auto;

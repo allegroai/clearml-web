@@ -8,7 +8,7 @@
 sm-grouped-checked-filter-list {
   padding: 15px 15px 0 15px;
   max-height: 419px;
-  /deep/ .actions {
+  ::ng-deep .actions {
     padding-top: 10px;
   }
 }

@@ -5,8 +5,8 @@ import {filter, skip} from 'rxjs/operators';
 import {Store} from '@ngrx/store';
 import {Project} from '../../../../business-logic/model/projects/project';
 import {Model} from '../../../../business-logic/model/models/model';
-import {SearchClear} from '../../../../webapp-common/search/common-search-results.actions';
 import {DashboardSearchComponentBase} from '../../../../webapp-common/dashboard/dashboard-search.component.base';
+import {SearchClear} from '../../../../webapp-common/dashboard-search/dashboard-search.actions';
 
 @Component({
   selector   : '  sm-dashboard-search',

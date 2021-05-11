@@ -3,11 +3,18 @@ import {Project} from '../../../business-logic/model/projects/project';
 import {User} from '../../../business-logic/model/users/user';
 import {Task} from '../../../business-logic/model/tasks/task';
 import {Artifact} from '../../../business-logic/model/tasks/artifact';
+import {ITask} from '../../../business-logic/model/al-task';
+
+export interface IModelInfo extends  Omit<Model, 'project' | 'task'> {
+  project?: Project;
+  task?: ITask;
+  taskName?: string;
+}
 
 export interface IModelInfoInput {
-  id: Model['id'];
+  id?: Model['id'];
   framework: Model['framework'];
-  url: Model['uri'];
+  uri: Model['uri'];
   name: Model['name'];
   labels: Model['labels'];
   project?: Project;
@@ -19,20 +26,20 @@ export interface IModelFormOutput {
 }
 
 export interface IModelInfoOutput {
-  id: Model['id'];
+  id?: Model['id'];
   name: Model['name'];
-  url: Model['uri'];
+  uri: Model['uri'];
   project?: Project;
   design?: any;
 }
 
 export interface IModelInfoSource {
-  experimentName: Task['name'];
-  experimentId: Task['id'];
-  projectName: Project['name'];
-  projectId: Project['id'];
-  userName: User['name'];
-  timeCreated: Model['created'];
+  experimentName?: Task['name'];
+  experimentId?: Task['id'];
+  projectName?: Project['name'];
+  projectId?: Project['id'];
+  userName?: User['name'];
+  timeCreated?: Model['created'];
 }
 
 export interface IExperimentModelForm {
@@ -41,9 +48,8 @@ export interface IExperimentModelForm {
 }
 
 export interface IExperimentModelInfo {
-  input: IModelInfoInput;
-  output: IModelInfoOutput;
-  source: IModelInfoSource;
+  input: IModelInfo[];
+  output: IModelInfo[];
   artifacts: Artifact[];
 }
 
@@ -67,16 +73,16 @@ export type ExperimentTableColFieldsEnum =
   | 'tags';
 
 export interface ITableExperiment {
-  id: Task['id'];
-  type: Task['type'];
-  name: Task['name'];
-  created: Task['created'];
-  completed: Task['completed'];
-  status: Task['status'];
-  system_tags: Task['system_tags'];
-  tags: Task['tags'];
-  last_update: Task['last_update'];
-  parent: {id: string; name: string; project?: {id: string}};
+  id?: Task['id'];
+  type?: Task['type'];
+  name?: Task['name'];
+  created?: Task['created'];
+  completed?: Task['completed'];
+  status?: Task['status'];
+  system_tags?: Task['system_tags'];
+  tags?: Task['tags'];
+  last_update?: Task['last_update'];
+  parent?: {id: string; name: string; project?: {id: string}};
 }
 
 export interface CloneForm {

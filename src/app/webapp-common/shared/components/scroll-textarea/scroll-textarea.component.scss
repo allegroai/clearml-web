@@ -3,7 +3,7 @@
 :host {
   .diff-container {
     position: relative;
-    background-color: #141822;
+    background-color: $blue-900;
     padding: 24px 0 24px 24px;
     border-radius: 4px;
 
@@ -38,7 +38,7 @@
       min-height: 250px;
       color: $white;
       overflow-x: scroll;
-      font-family: monospace, serif;
+      font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
 
       .line {
         height: 19px;

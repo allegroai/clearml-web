@@ -1,13 +1,14 @@
-import {Action} from '@ngrx/store';
+import {Action, createAction, props} from '@ngrx/store';
 import {Worker} from '../../../business-logic/model/workers/worker';
-import {TableSortOrderEnum} from '../../shared/ui-components/data/table/table.consts';
 import {Topic} from '../../shared/utils/statistics';
+import {SortMeta} from 'primeng/api';
 
 const workersPrefix = 'WORKERS_';
 export const SET_WORKERS = workersPrefix + 'SET_WORKERS';
 export const SET_WORKERS_TASKS = workersPrefix + 'SET_WORKERS_TASKS';
 export const GET_SELECTED_WORKER = workersPrefix + 'GET_SELECTED_WORKER';
 export const WORKERS_TABLE_SORT_CHANGED = workersPrefix + 'WORKERS_TABLE_SORT_CHANGED';
+export const WORKERS_TABLE_SET_SORT = workersPrefix + 'WORKERS_TABLE_SET_SORT';
 export const SET_SELECTED_WORKER_FROM_SERVER = workersPrefix + 'SET_SELECTED_WORKER_FROM_SERVER';
 export const SYNC_SPECIFIC_WORKER_IN_TABLE = workersPrefix + 'SYNC_SPECIFIC_WORKER_IN_TABLE';
 export const GET_STATS_AND_WORKERS = workersPrefix + 'GET_STATS_AND_WORKERS';
@@ -33,14 +34,16 @@ export class GetSelectedWorker implements Action {
   }
 }
 
-export class WorkersTableSortChanged implements Action {
-  public type = WORKERS_TABLE_SORT_CHANGED;
-  public payload: { colId: string; sortOrder: (TableSortOrderEnum) };
+export const workersTableSortChanged = createAction(
+  WORKERS_TABLE_SORT_CHANGED,
+  props<{  colId: string; isShift: boolean }>()
+);
 
-  constructor(colId: string, sortOrder: TableSortOrderEnum) {
-    this.payload = {colId, sortOrder};
-  }
-}
+
+export const workersTableSetSort = createAction(
+  WORKERS_TABLE_SET_SORT,
+  props<{ orders: SortMeta[] }>()
+);
 
 export class SetSelectedWorkerFromServer implements Action {
   type = SET_SELECTED_WORKER_FROM_SERVER;

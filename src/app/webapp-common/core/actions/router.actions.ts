@@ -3,6 +3,7 @@ import {NAVIGATION_PREFIX, NAVIGATION_ACTIONS} from '../../../app.constants';
 import {Action, createAction, props} from '@ngrx/store';
 import {Params} from '@angular/router';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
+import {SortMeta} from 'primeng/api';
 
 
 // TODO: remove this action...
@@ -35,9 +36,9 @@ export const setURLParams = createAction(
   NAVIGATION_PREFIX + 'SET_URL_PARAMS',
   props<{
     columns?: string[];
-    orderField: string;
-    orderDirection: 'asc' | 'desc';
+    orders: SortMeta[];
     filters?: { [key: string]: FilterMetadata };
     isArchived: boolean;
+    isDeep?: boolean;
   }>()
 );

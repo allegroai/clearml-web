@@ -14,19 +14,27 @@
     margin: 0px 20px 0 5px;
   }
 
+  .comment {
+    margin-right: 12px;
+  }
   .middle-col {
-    width: calc(100% - 100px);
-
+    flex-grow: 1;
+    overflow: hidden;
   }
 
   .experiment-name {
+    display: flex;
+    align-items: center;
     font-size: 15px;
-    min-height: 24px;
-    font-weight: bold;
-    max-width: 80ch;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
+    min-height: 32px;
+    width: 100%;
+    font-weight: 500;
+
+    span {
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
   }
 
   .experiment-type {
@@ -36,47 +44,37 @@
   }
 
   .experiment-id {
-    font-weight: bold;
     margin-right: 6px;
   }
 
   .edit-name {
-    max-width: 100%;
+    max-width: 80%;
+    padding-right: 24px;
   }
+
   .menu-button, .menu-button &:hover, .menu-button &:focus {
     cursor: pointer;
     font-weight: bold;
     font-size: 12px;
     text-decoration: none;
   }
+
   .btn.btn-icon:not([disabled]):hover {
     filter: none;
   }
 
   .btn {
-    &:hover{
+    &:hover {
       .al-icon.al-ico-info-min {
         color: #212529;
       }
     }
   }
 
-  .id-icon {
-    font-size: 12px;
-    font-weight: 500;
-    height: 18px;
-    line-height: 18px;
-    padding: 0 6px;
-    border-radius: 4px;
-    margin: 0 6px;
-    color: white;
-    background-color: $blue-400;
-    cursor: pointer;
-  }
-
   .shared {
     margin: 0 6px;
   }
+
   .status {
     font-size: 12px;
     font-weight: 500;
@@ -120,17 +118,19 @@
   .right-buttons {
     display: flex;
     align-items: center;
-    padding: 0.5rem;
     margin-right: 24px;
+    margin-left: auto;
 
     .btn-icon {
-      margin-right: 16px;
+      margin-right: 30px;
     }
 
     sm-experiment-menu {
-      line-height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       width: 24px;
-      height: 28px;
+      height: 24px;
     }
   }
 }

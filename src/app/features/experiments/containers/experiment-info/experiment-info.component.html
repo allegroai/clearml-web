@@ -17,20 +17,20 @@
   >
   </sm-experiment-info-header>
   <nav>
-    <span routerLink="execution" queryParamsHandling="merge">
+    <span routerLink="execution" [routerLinkActive]="'disabled'" queryParamsHandling="merge">
       <sm-navbar-item header="execution" [active]="routerConfig.includes('execution')"></sm-navbar-item>
     </span>
 
-    <span [routerLink]="['hyper-params/hyper-param/_empty_']" queryParamsHandling="merge">
+    <span [routerLink]="['hyper-params/hyper-param/_empty_']" [class.disabled]="routerConfig.includes('hyper-params')" queryParamsHandling="merge">
       <sm-navbar-item header="configuration" [active]="routerConfig.includes('hyper-params')"></sm-navbar-item>
     </span>
-    <span [routerLink]="['artifacts']"  queryParamsHandling="preserve">
+    <span [routerLink]="['artifacts']" [routerLinkActive]="'disabled'" queryParamsHandling="preserve">
       <sm-navbar-item header="artifacts" [active]="routerConfig.includes('artifacts')"></sm-navbar-item>
     </span>
-    <span [routerLink]="['general']" queryParamsHandling="preserve">
+    <span [routerLink]="['general']" [routerLinkActive]="'disabled'" queryParamsHandling="preserve">
       <sm-navbar-item header="info" [active]="routerConfig.includes('general')"></sm-navbar-item>
     </span>
-    <span [routerLink]="['info-output']" queryParamsHandling="preserve">
+    <span [routerLink]="['info-output']" [routerLinkActive]="'disabled'" queryParamsHandling="preserve">
       <sm-navbar-item header="results" [active]="routerConfig.includes('info-output')"></sm-navbar-item>
     </span>
   </nav>

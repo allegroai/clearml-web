@@ -7,6 +7,8 @@ import {ParamsItem} from '../../../business-logic/model/tasks/paramsItem';
 import {ConfigurationItem} from '../../../business-logic/model/tasks/configurationItem';
 import {IExperimentInfoState} from '../../../features/experiments/reducers/experiment-info.reducer';
 import {experimentSectionsEnum} from '../../../features/experiments/shared/experiments.const';
+import {ActivatedRoute} from '@angular/router';
+import {ITask} from '../../../business-logic/model/al-task';
 
 export const EXPERIMENTS_INFO_PREFIX = 'EXPERIMENTS_INFO_';
 export const GET_EXPERIMENT_INFO = EXPERIMENTS_INFO_PREFIX + 'GET_EXPERIMENT_INFO';
@@ -19,11 +21,9 @@ export const UPDATE_EXPERIMENT_INFO_DATA = EXPERIMENTS_INFO_PREFIX + 'UPDATE_EXP
 export const MODEL_SELECTED = EXPERIMENTS_INFO_PREFIX + 'MODEL_SELECTED';
 
 export const SET_EXPERIMENT_FORM_ERRORS = EXPERIMENTS_INFO_PREFIX + 'SET_EXPERIMENT_FORM_ERRORS';
-export const SET_EXPERIMENT_INFO_MODEL_DATA = EXPERIMENTS_INFO_PREFIX + 'SET_EXPERIMENT_INFO_INPUT_MODEL_DATA';
 export const SET_EXPERIMENT_ERRORS = EXPERIMENTS_INFO_PREFIX + 'SET_EXPERIMENT_ERRORS';
 export const ACTIVATE_EDIT = EXPERIMENTS_INFO_PREFIX + 'ACTIVATE_EDIT';
 export const DEACTIVATE_EDIT = EXPERIMENTS_INFO_PREFIX + 'DEACTIVATE_EDIT';
-export const UPDATE_SECTION_KNOWLEDGE = EXPERIMENTS_INFO_PREFIX + 'UPDATE_SECTION_KNOWLEDGE';
 export const RESET_STATE = EXPERIMENTS_INFO_PREFIX + 'RESET_STATE';
 // EVENTS:
 export const EXPERIMENT_DATA_UPDATED = EXPERIMENTS_INFO_PREFIX + 'EXPERIMENT_DATA_UPDATED';
@@ -85,27 +85,14 @@ export const setExperimentUncommittedChanges = createAction(
   props<{ diff: string }>()
 );
 
-export class ModelSelected implements Action {
-  readonly type = MODEL_SELECTED;
-  public payload: {
-    model: Model;
-    fieldsToPopulate: { labelEnum: boolean; networkDesign: boolean };
-  };
-
-  constructor(payload: {
-    model: Model;
-    fieldsToPopulate: { labelEnum: boolean; networkDesign: boolean };
-  }) {
-    this.payload = payload;
-  }
-}
-
 export class UpdateExperimentInfoData implements Action {
   readonly type = UPDATE_EXPERIMENT_INFO_DATA;
 
   constructor(public payload: { id: ITableExperiment['id']; changes: Partial<IExperimentInfo> }) {
   }
 }
+export const saveExperimentInputModel = createAction(
+  EXPERIMENTS_INFO_PREFIX + '[save input model]', props<{ modelId: string; modelName: string; route: ActivatedRoute}>());
 
 export const saveHyperParamsSection = createAction(
   EXPERIMENTS_INFO_PREFIX + 'SAVE_HYPERPARAMS', props<{ hyperparams: ParamsItem[] }>());
@@ -134,14 +121,6 @@ export const updateExperimentAtPath = createAction(
 );
 
 // COMMANDS:
-
-
-export class UpdateSectionKnowledge implements Action {
-  readonly type = UPDATE_SECTION_KNOWLEDGE;
-
-  constructor(public payload: experimentSectionsEnum) {
-  }
-}
 
 export class ExperimentDataUpdated implements Action {
   readonly type = EXPERIMENT_DATA_UPDATED;

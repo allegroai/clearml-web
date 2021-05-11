@@ -1,0 +1,53 @@
+<div class="w-100 model-header">
+  <div class="d-flex justify-content-between header-container align-items-center">
+    <div class="archive"></div>
+    <sm-project-context-navbar [activeFeature]="'overview'"></sm-project-context-navbar>
+    <div class="d-flex justify-content-end align-items-center right-buttons"></div>
+  </div>
+</div>
+
+<ng-container *ngIf="!loading">
+  <div *ngIf="info || editMode; else noData" class="md-editor-preview" [class.editor]="editMode">
+
+    <div class="md-content" [class.edit-mode]="editMode" [class.dirty]="isDirty">
+      <button *ngIf="!editMode" class="btn btn-primary md-btn-edit" (click)="editClicked()">EDIT</button>
+      <button *ngIf="editMode" class="btn btn-primary btn-preview-toggle" (click)="togglePreview()">
+        {{ editorVisible? 'EDIT' : 'PREVIEW' }}
+      </button>
+      <span *ngIf="editMode && !editorVisible" class="preview-header">PREVIEW</span>
+      <md-editor #editorComponent
+                 name="Content"
+                 [(ngModel)]="info"
+                 height="100%"
+                 [mode]="editMode? 'editor' : 'preview'"
+                 [options]="options"
+                 (onEditorLoaded)="editorReady()"
+                 (ngModelChange)="checkDirty()">
+      </md-editor>
+    </div>
+
+    <div class="md-footer">
+      <div *ngIf="editMode && isDirty" class="md-warning">* You have unsaved changes</div>
+      <div *ngIf="editMode" class="right-buttons">
+        <button class="btn btn-primary btn-outline"
+                (click)="cancelClicked()">CANCEL
+        </button>
+        <button class="btn btn-primary"
+                [disabled]="!isDirty"
+                (click)="saveInfo()">SAVE
+        </button>
+      </div>
+    </div>
+
+  </div>
+</ng-container>
+
+<ng-template #noData>
+  <div class="flex-middle">
+    <i class="icon i-markdown xxl"></i>
+    <div class="no-data-title">THERE’S NOTHING HERE YET…</div>
+    <button (click)="editClicked()" class="no-data-button btn btn-neon">
+      <span>ADD PROJECT OVERVIEW</span>
+    </button>
+  </div>
+</ng-template>

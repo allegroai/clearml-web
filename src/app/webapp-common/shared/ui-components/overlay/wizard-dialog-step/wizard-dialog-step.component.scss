@@ -112,6 +112,10 @@
 
 .choose-box {
   visibility: hidden;
+  height: calc(100% - 200px);
+  overflow-y: auto;
+  padding-top: 2px;
+
   &.hide-step {
     visibility: visible;
     transition-delay: $transition-slow;

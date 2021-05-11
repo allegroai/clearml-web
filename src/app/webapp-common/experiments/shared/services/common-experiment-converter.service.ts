@@ -13,7 +13,7 @@ export class CommonExperimentConverterService {
   constructor() {
   }
 
-  convertCommonExperiment(experimentInfo: IExperimentInfo, selectedExperiment: ISelectedExperiment, experimentInfoBeforeChange: IExperimentInfo): TasksEditRequest {
+  convertCommonExperiment(experimentInfo: IExperimentInfo, selectedExperiment: IExperimentInfo, experimentInfoBeforeChange: IExperimentInfo): TasksEditRequest {
     const convertedExperiment: TasksEditRequest = {
       task: selectedExperiment.id,
       type: selectedExperiment.type,
@@ -29,7 +29,6 @@ export class CommonExperimentConverterService {
 
   commonConvertExecution(execution: IExecutionForm, model: IExperimentModelInfo): Execution {
     return {
-      model     : getOr(null as string, 'input.id', model),
       framework : get('input.framework', model),
       docker_cmd: get('docker_cmd', execution)
     };

@@ -15,7 +15,7 @@
       </span>
     </span>
     <span smTooltip="label.length > 12 ? label : ''" class="label-text ellipsis">{{label}}</span>
-    <span class="pointer" *ngIf="allowRemove" (click)="remove.emit($event)">
+    <span class="pointer" *ngIf="allowRemove" (click)="remove.emit($event); $event.stopPropagation()">
       <i class="fas fa-sm fa-times pointer"></i>
     </span>
   </span>

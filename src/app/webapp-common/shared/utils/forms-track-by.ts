@@ -21,3 +21,6 @@ export abstract class FormsTrackBy {
     return index;
   };
 }
+
+export const trackByIndex = (index: number): number => index;
+export const trackById = <T extends {id: number | string}>(index: number, val: T): number | string => val.id;

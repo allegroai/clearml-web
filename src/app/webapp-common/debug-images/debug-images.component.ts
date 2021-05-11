@@ -24,7 +24,9 @@ import {ImageDisplayerComponent} from '../experiments/dumb/image-displayer/image
 import {selectSelectedExperiment} from '../../features/experiments/reducers';
 import {selectRefreshing} from '../experiments-compare/reducers';
 import {TaskMetric} from '../../business-logic/model/events/taskMetric';
-import {get, getOr, isEqual} from 'lodash/fp';
+import {get, isEqual} from 'lodash/fp';
+import {ALL_IMAGES} from './debug-images-effects';
+import {MatSelectChange} from '@angular/material/select';
 
 @Component({
   selector   : 'sm-debug-images',
@@ -64,7 +66,8 @@ export class DebugImagesComponent implements OnInit, OnDestroy {
   public timeIsNow: any;
   private timeIsNowSubscription: Subscription;
   minimized: boolean;
-
+  readonly ALL_IMAGES = ALL_IMAGES;
+  private selectedMetric: string;
 
   constructor(
     private store: Store<IExperimentInfoState>,
@@ -84,18 +87,19 @@ export class DebugImagesComponent implements OnInit, OnDestroy {
       store.pipe(select(selectS3BucketCredentials)),
       store.pipe(select(selectDebugImages))])
       .pipe(
-        map(([bucketCredentials, debugImages]) => {
+        map(([, debugImages]) => {
           const debugImagesP = Object.entries(debugImages).reduce(((previousValue, currentValue: any) => {
-            previousValue[currentValue[0]] = currentValue[1].metrics[0].iterations.map(iteration => {
+            previousValue[currentValue[0]] = currentValue[1].metrics.map(metric => metric.iterations.map(iteration => {
               const events = iteration.events.map(event => {
                 const signedUrl = this.adminService.signUrlIfNeeded(event.url);
                 const parsed = new URL(signedUrl);
                 parsed.searchParams.append('X-Amz-Date', event.timestamp);
-                return {...event, oldSrc: event.url, url: parsed.toString()};
+                return {...event, oldSrc: event.url, url: parsed.toString(), variantAndMetric: this.selectedMetric === ALL_IMAGES ? `${event.metric}/${event.variant}` : ''};
               });
               return {...iteration, events};
-            });
-            previousValue[currentValue[0]].metric = currentValue[1].metrics[0].metric;
+            }));
+            previousValue[currentValue[0]].metrics = currentValue[1].metrics.map( metric => metric.metric || metric.iterations[0].events[0].metric);
+            previousValue[currentValue[0]].metric = previousValue[currentValue[0]].metrics[0];
             previousValue[currentValue[0]].scrollId = currentValue[1].scroll_id;
             return previousValue;
           }), {});
@@ -106,7 +110,7 @@ export class DebugImagesComponent implements OnInit, OnDestroy {
       this.debugImages = debugImages;
       Object.keys(debugImages).forEach(key => {
         if (!this.selectedMetrics[key]) {
-          this.selectedMetrics[key] = get('[0].events[0].metric', debugImages[key]);
+          this.selectedMetrics[key] = get('metric', debugImages[key]);
         }
       });
     });
@@ -165,7 +169,7 @@ export class DebugImagesComponent implements OnInit, OnDestroy {
     this.refreshingSubscription = this.selectRefreshing$.pipe(
       filter(({refreshing}) => refreshing),
       withLatestFrom(this.store.select(selectTimeIsNow), this.store.select(selectDebugImages)),
-    ).subscribe(([autoRefresh, timeIsNow, debugImages]) => {
+    ).subscribe(([, timeIsNow, debugImages]) => {
         this.store.dispatch(new debugActions.RefreshDebugImagesMetrics({tasks: this.experimentIds}));
         this.experimentIds.forEach(experiment => {
           this.refresh(experiment, timeIsNow, debugImages);
@@ -200,12 +204,12 @@ export class DebugImagesComponent implements OnInit, OnDestroy {
   }
 
   public urlError(data) {
-    const {frame, experimentId} = data;
+    const {frame} = data;
     this.adminService.checkImgUrl(frame.oldSrc || frame.src);
   }
 
   imageClicked(data) {
-    const {frame, frames, snippetKey} = data;
+    const {frame, frames} = data;
     let iterationSnippets = [];
     Object.entries(frames).map(iteration => {
       iterationSnippets = iterationSnippets.concat(iteration[1]);
@@ -213,7 +217,7 @@ export class DebugImagesComponent implements OnInit, OnDestroy {
     const sources = iterationSnippets.map(img => img.url);
     const index = iterationSnippets.findIndex(img => img.url === frame.url);
     this.dialog.open(ImageDisplayerComponent, {
-      data      : {imageSources: sources, index: index, snippetsMetaData: iterationSnippets},
+      data      : {imageSources: sources, index, snippetsMetaData: iterationSnippets},
       panelClass: ['image-displayer-dialog'],
       height    : '100%',
       maxHeight : 'auto',
@@ -226,7 +230,6 @@ export class DebugImagesComponent implements OnInit, OnDestroy {
     if (experimentId && timeIsNow && timeIsNow[experimentId] && debugImages[experimentId]) {
       this.store.dispatch(new debugActions.RefreshMetric({task: experimentId, metric: debugImages[experimentId].metrics[0].metric}));
     }
-
   }
 
   private isTaskPendingRunning(tasks: any) {
@@ -240,13 +243,15 @@ export class DebugImagesComponent implements OnInit, OnDestroy {
     return experimentID;
   }
 
-  selectMetric($event, task) {
-    this.store.dispatch(new debugActions.SelectMetric({task, metric: $event.target.value}));
+  selectMetric(change: MatSelectChange, task) {
+    this.selectedMetric = change.value;
+    this.store.dispatch(new debugActions.SelectMetric({task, metric: change.value}));
   }
 
   nextBatch(taskMetric: TaskMetric) {
-    if (!this.beginningOfTime[taskMetric.task])
+    if (!this.beginningOfTime[taskMetric.task]) {
       this.store.dispatch(new debugActions.GetNextBatch(taskMetric));
+    }
   }
 
   previousBatch(taskMetric: TaskMetric) {

@@ -1,11 +1,11 @@
-<sm-card class="model-card" (click)="modelClicked()" [isExample]=" ! model?.company?.id">
+<sm-card class="model-card" (click)="modelClicked()" [isExample]="!model?.company?.id" [height]="264">
   <div header-content>
     <div class="d-flex justify-content-between">
-      <div class="title mr-auto">{{model?.name }}</div>
+      <div class="title mr-auto">{{model?.name}}</div>
     </div>
     <div style="padding-top: 5px">
       <div class="d-flex align-items-center justify-content-start">
-        <span class="sub-title">ID:  {{ model?.id}} </span>
+        <span class="sub-title">ID:  {{model?.id}} </span>
         <sm-copy-clipboard [clipboardText]="model?.id" [label]="''" [hideBackground]="true"></sm-copy-clipboard>
       </div>
     </div>
@@ -13,7 +13,7 @@
 
   <div class="d-flex justify-content-around">
     <sm-circle-status [status]="model.framework"></sm-circle-status>
-    <sm-circle-counter [counter]="numberOfLabels(model?.labels)" label="LABELS" type="model-labels"></sm-circle-counter>
+    <sm-circle-counter [counter]="numberOfLabels(model?.labels)" label="LABELS" [type]="CircleTypeEnum['model-labels']"></sm-circle-counter>
     <sm-circle-status [status]="model.ready? 'published' : 'created'"></sm-circle-status>
   </div>
 

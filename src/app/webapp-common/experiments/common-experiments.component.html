@@ -7,7 +7,6 @@
   [minimizedView]="minimizedView"
   [isMetricsLoading]="metricLoading$ | async"
   [autoRefreshState]="autoRefreshState$ | async"
-  [sharedView]="isSharedAndNotOwner$ | async"
   (isArchivedChanged)="onIsArchivedChanged($event)"
   (selectedTableColsChanged)="selectedTableColsChanged($event)"
   (refreshListClicked)="refreshList(false)"
@@ -30,7 +29,7 @@
             (transitionEnd)="experimentsTable.table.resize()"
   >
     <as-split-area [size]="100 - (splitInitialSize)"
-                   [visible]="!(isSharedAndNotOwner$ | async)" [order]="1">
+                   [order]="1">
       <sm-experiments-table
         #experimentsTable
         class="align-self-stretch"
@@ -39,15 +38,17 @@
         [tableCols]="tableCols$| async"
         [experiments]="experiments$ | async"
         [users]="users$ | async"
+        [hyperParamsOptions]="hyperParamsOptions$ | async"
         [activeParentsFilter]="activeParentsFilter$ | async"
         [parents]="parent$ | async"
         [experimentTypes]="types$ | async"
         [tags]="tags$ | async"
         [systemTags]="systemTags$ | async"
-        [tableSortField]="(tableSortField$ | async)"
+        [tableSortFields]="(tableSortFields$ | async)"
         [tableSortOrder]="(tableSortOrder$ | async)"
         [tableFilters]="(tableFilters$ | async)"
         [selectedExperiments]="selectedExperiments$ | async"
+        [selectedExperimentsDisableAvailable]="selectedExperimentsDisableAvailable$ | async"
         [selectedExperiment]="selectedTableExperiment$ |async"
         [minimizedView]="minimizedView"
         [noMoreExperiments]="noMoreExperiments$ | async"
@@ -69,15 +70,9 @@
     </as-split-area>
   </as-split>
 </div>
+
 <sm-entity-footer
-  entitiesType="experiments"
-  [visible]="(selectedExperiments$ | async)?.length > 1 || (showAllSelectedIsActive$ |async)"
-  [numberOfSelectedEntities]="(selectedExperiments$ | async)?.length"
-  [showAllSelectedIsActive]="showAllSelectedIsActive$ |async"
-  [disableArchive]="readOnlySelection"
-  [isArchivedMode]="isArchived$ | async"
-  (compareEntitiesClicked)="compareExperiments()"
-  (showAllSelectedClicked)="showAllSelected($event)"
-  (archiveEntitiesClicked)="archiveExperiments()"
-  (restoreEntitiesClicked)="restoreExperiments()"
+  [footerItems]="footerItems"
+  (onFooterItemClick)="onFooterHandler($event)"
+  (tagSelected)="tagSelected($event, 'experiments')"
 ></sm-entity-footer>

@@ -2,8 +2,7 @@ import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {selectExperimentInfoHistograms, selectExperimentMetricsSearchTerm, selectIsExperimentInProgress, selectSelectedExperimentSettings, selectSelectedSettingsGroupBy, selectSelectedSettingsHiddenScalar, selectSelectedSettingsSmoothWeight, selectSelectedSettingsxAxisType, selectShowSettings, selectSplitSize} from '../../reducers';
 import {Observable, Subscription} from 'rxjs';
 import {select, Store} from '@ngrx/store';
-import {SelectableListItem} from '../../../shared/ui-components/data/selectable-list/selectable-list.model';
-import {distinctUntilChanged, filter, map} from 'rxjs/operators';
+import {distinctUntilChanged, filter, map, tap} from 'rxjs/operators';
 import {selectRouterParams} from '../../../core/reducers/router-reducer';
 import {scrollToElement} from '../../../shared/utils/shared-utils';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -87,6 +86,7 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
     this.routerParams$ = this.store.pipe(
       select(selectRouterParams),
       filter(params => !!params.experimentId),
+      tap(params => this.experimentId = params.experimentId),
       distinctUntilChanged()
     );
 
@@ -101,7 +101,7 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
     );
 
     this.xAxisSub = this.xAxisType$
-      .pipe(filter((axis) => !!axis))
+      .pipe(filter((axis) => !!axis && !!this.experimentId))
       .subscribe(() => this.store.dispatch(new ExperimentScalarRequested(this.experimentId)));
 
     this.groupBySub = this.groupBy$
@@ -124,6 +124,7 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
         distinctUntilChanged()
       )
       .subscribe(experiment => {
+        this.experimentId = experiment.id;
         this.refresh();
       });
     this.scalarSubscription = this.scalars$
@@ -141,14 +142,12 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
 
     this.paramsSubscription = this.routerParams$
       .subscribe(params => {
-        if (!this.experimentId || this.experimentId != params.experimentId) {
+        if (!this.experimentId || this.experimentId !== params.experimentId) {
           this.graphs = undefined;
           this.resetMetrics();
-
-          this.store.dispatch(new ExperimentScalarRequested(params.experimentId));
+          // this.store.dispatch(new ExperimentScalarRequested(params.experimentId));
           this.store.dispatch(new SetExperimentMetricsSearchTerm({searchTerm: ''}));
         }
-        this.experimentId = params.experimentId;
       });
   }
 

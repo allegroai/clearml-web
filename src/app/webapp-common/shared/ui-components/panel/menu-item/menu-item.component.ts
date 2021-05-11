@@ -19,20 +19,20 @@ export class MenuItemComponent {
   @Input() checked: boolean     = false;
   @Input() sortOrder: number;
   @Input() enableTooltip: boolean;
-  @Output() itemClicked         = new EventEmitter();
+  @Output() itemClicked         = new EventEmitter<{event?: MouseEvent; itemValue: string}>();
   @Output() removeItemClicked   = new EventEmitter();
   @Output() closeMenu           = new EventEmitter();
 
   public TABLE_SORT_ORDER = TABLE_SORT_ORDER;
 
-  itemClickedEvent() {
+  itemClickedEvent(event?: MouseEvent) {
     if (!this.disabled) {
-      this.itemClicked.emit({itemValue: this.itemValue});
+      this.itemClicked.emit({event, itemValue: this.itemValue});
     }
   }
 
   buttonClickedEvent(event) {
-    this.itemClickedEvent();
+    this.itemClickedEvent(event);
     if (this.selectable) {
       event.stopPropagation();
     }

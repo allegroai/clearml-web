@@ -3,12 +3,12 @@
     <div class="d-flex justify-content-between">
       <span>
         <a [href]="'projects/' + projectId + '/models/' + model?.id" target="_blank"><span>{{model?.name}}</span></a>
-        <i *ngIf="model?.url && !isLocalFile"
+        <i *ngIf="model?.uri && !isLocalFile"
            class="pointer fa fa-download ml-2"
-           (click)="artifactFilePathClicked(model.url)"
+           (click)="artifactFilePathClicked(model.uri)"
         ></i>
-        <sm-copy-clipboard *ngIf="model?.url && isLocalFile"
-                           label="" [clipboardText]="model.url"
+        <sm-copy-clipboard *ngIf="model?.uri && isLocalFile"
+                           label="" [clipboardText]="model.uri"
                            class="pl-2 light"
                            [hideBackground]="true"
         ></sm-copy-clipboard>
@@ -19,7 +19,7 @@
       </div>
     </div>
   </sm-labeled-row>
-  <sm-labeled-row label="CREATING EXPERIMENT">
+  <sm-labeled-row *ngIf="showCreatedExperiment" label="CREATING EXPERIMENT">
     <a [href]="'/projects/'+ ((source?.projectId) ? source?.projectId : '*') + '/experiments/' + (source? source?.experimentId: '')"
        target="_blank">
       {{source?.experimentName}}

@@ -1,16 +1,16 @@
 export function isDeletableProject(readyForDeletion) {
-  return (readyForDeletion.experiments + readyForDeletion.models) === 0;
+  return (readyForDeletion.experiments.unarchived + readyForDeletion.models.unarchived) === 0;
 }
 
+export function getDeletePopupEntitiesList(): string {
+  return 'experiments or models';
+}
 
-export function getDeleteProjectPopupBody(readyForDeletion) {
-  return `You cannot delete a project with un-archived experiments, or models. <br/>
-          You have:
-          ${readyForDeletion.experiments > 0 ? readyForDeletion.experiments + ' experiments ' : ''}
-          ${readyForDeletion.models > 0 ? readyForDeletion.models + ' models ' : ''} in this project. <br/>
-          If you wish to delete this project, you must archive, delete, or move these items to another project.`
+export function getDeleteProjectPopupStatsBreakdown(readyForDeletion, statsSubset: 'archived' | 'unarchived' | 'total'): string {
+  return `${readyForDeletion.experiments[statsSubset] > 0 ? readyForDeletion.experiments[statsSubset] + ' experiments ' : ''}
+          ${readyForDeletion.models[statsSubset] > 0 ? readyForDeletion.models[statsSubset] + ' models ' : ''}`;
 }
 
 export function readyForDeletionFilter(readyForDeletion) {
- return !(readyForDeletion.experiments === null || readyForDeletion.models === null);
+  return !(readyForDeletion.experiments === null || readyForDeletion.models === null);
 }

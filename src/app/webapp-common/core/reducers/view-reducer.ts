@@ -1,7 +1,7 @@
 import {HTTP, HTTP_ACTIONS, VIEW_ACTIONS} from '../../../app.constants';
 import {createSelector} from '@ngrx/store';
 import {get} from 'lodash/fp';
-import {neverShowPopupAgain, plotlyReady, setScaleFactor} from '../actions/layout.actions';
+import {firstLogin, neverShowPopupAgain, plotlyReady, setScaleFactor} from '../actions/layout.actions';
 
 export interface ViewState {
   loading: {[endpoint: string]: boolean};
@@ -14,6 +14,8 @@ export interface ViewState {
   compareAutoRefresh: boolean;
   applicationVisible: boolean;
   scaleFactor: number;
+  firstLogin: boolean;
+  firstLoginAt: number;
   neverShowPopupAgain: string[];
   plotlyReady: boolean;
 }
@@ -30,6 +32,8 @@ export const initViewState: ViewState = {
   compareAutoRefresh: false,
   applicationVisible: true,
   scaleFactor: 100,
+  firstLogin: false,
+  firstLoginAt: +(window?.localStorage?.getItem('firstLogin') || 0),
   neverShowPopupAgain: [],
   plotlyReady: false
 };
@@ -46,6 +50,8 @@ export const selectAutoRefresh = createSelector(views, state => state && state.a
 export const selectCompareAutoRefresh = createSelector(views, state => state.compareAutoRefresh);
 export const selectAppVisible = createSelector(views, state => state.applicationVisible);
 export const selectScaleFactor = createSelector(views, state => state.scaleFactor);
+export const selectFirstLogin = createSelector(views, state => state.firstLogin);
+export const selectFirstLoginAt = createSelector(views, state => state.firstLoginAt);
 export const selectPlotlyReady = createSelector(views, state => state.plotlyReady);
 export const selectNeverShowPopups = createSelector(views, (state): string[] => state.neverShowPopupAgain);
 
@@ -71,6 +77,8 @@ export function viewReducer(viewState: ViewState = initViewState, action) {
       return {...viewState, applicationVisible: action.visible};
     case setScaleFactor.type:
       return {...viewState, scaleFactor: action.scale};
+    case firstLogin.type:
+      return {...viewState, firstLogin: (action as ReturnType<typeof firstLogin>).first, firstLoginAt: new Date().getTime()};
     case plotlyReady.type:
       return {...viewState, plotlyReady: true};
     case VIEW_ACTIONS.RESET_LOADER:

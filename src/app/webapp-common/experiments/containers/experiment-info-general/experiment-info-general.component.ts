@@ -4,7 +4,7 @@ import {Store} from '@ngrx/store';
 import {filter, map} from 'rxjs/operators';
 import {tap} from 'rxjs/operators';
 import {isReadOnly} from '../../../shared/utils/shared-utils';
-import {IExperimentInfo, ISelectedExperiment} from '../../../../features/experiments/shared/experiment-info.model';
+import {IExperimentInfo} from '../../../../features/experiments/shared/experiment-info.model';
 import {IExperimentInfoState} from '../../../../features/experiments/reducers/experiment-info.reducer';
 import {selectExperimentInfoData, selectIsExperimentEditable, selectSelectedExperiment} from '../../../../features/experiments/reducers';
 import {ExperimentDetailsUpdated} from '../../actions/common-experiments-info.actions';
@@ -16,11 +16,11 @@ import {ExperimentDetailsUpdated} from '../../actions/common-experiments-info.ac
 })
 export class ExperimentInfoGeneralComponent {
 
-  public selectedExperiment$: Observable<ISelectedExperiment>;
+  public selectedExperiment$: Observable<IExperimentInfo>;
   public editable$: Observable<boolean>;
   public experimentInfoData$: Observable<IExperimentInfo>;
   public isExample: boolean;
-  private selectedExperiment: ISelectedExperiment;
+  private selectedExperiment: IExperimentInfo;
 
   constructor(private store: Store<IExperimentInfoState>) {
     this.selectedExperiment$ = this.store.select(selectSelectedExperiment)

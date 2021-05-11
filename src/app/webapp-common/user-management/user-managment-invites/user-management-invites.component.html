@@ -1,0 +1,42 @@
+<table class="user-management-invites-table">
+  <thead>
+  <tr>
+    <th>EMAIL</th>
+    <th>NAME</th>
+    <th>STATUS</th>
+    <th class="action"></th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngFor="let whitelistEntry of whitelistEntries; trackBy: trackByFn; let i = index">
+    <td>{{whitelistEntry.email}}</td>
+    <td>
+      <div class="name-container">
+        {{whitelistEntry?.user?.name}}
+        <sm-tag-list *ngIf="whitelistEntry?.user?.role === 'admin'"
+                     [sysTags]="['admin']"
+        > </sm-tag-list>
+      </div>
+    </td>
+    <td>
+      <span class="status status-pending" *ngIf="whitelistEntry.status === STATUS.Pending">
+          <i class="al-icons al-ico-status-pending sm"></i>
+            Pending
+      </span>
+      <span class="status status-accepted" *ngIf="whitelistEntry.status === STATUS.Accepted">
+          <i class="al-icons al-ico-status-completed sm"></i>
+            Active
+      </span>
+      <span class="status status-aborted" *ngIf="whitelistEntry.status === STATUS.TimedOut">
+          <i class="al-icons al-ico-status-aborted sm"></i>
+            Aborted
+      </span>
+    </td>
+    <td>
+          <span class="delete-button" (click)="onRemoveWhitelistEntry.emit(whitelistEntry)" smTooltip="Delete" *ngIf="whitelistEntry.user?.id !== currentUser?.id">
+            <i class="fa" [ngClass]="ICONS.REMOVE"></i>
+          </span>
+    </td>
+  </tr>
+  </tbody>
+</table>

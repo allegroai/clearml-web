@@ -50,6 +50,7 @@ export interface ModelsGetAllExRequest {
      * List of associated project IDs
      */
     project?: Array<string>;
+    include_subprojects?: boolean;
     /**
      * List of field names to order by. When search_text is used, \'@text_score\' can be   used as a field representing the text score of returned documents. Use \'-\'   prefix to specify descending order. Optional, recommended when using page
      */

@@ -15,13 +15,13 @@ export class SearchResultsPageComponent {
   @Input() modelsList: Array<Model>     = [];
   @Input() activeLink                   = 'projects';
 
-  @Output() projectSelected    = new EventEmitter<string>();
+  @Output() projectSelected    = new EventEmitter<Project>();
   @Output() activeLinkChanged  = new EventEmitter<string>();
   @Output() experimentSelected = new EventEmitter<ITask>();
   @Output() modelSelected      = new EventEmitter<Model>();
 
-  public projectClicked(projectId: string) {
-    this.projectSelected.emit(projectId);
+  public projectClicked(project: Project) {
+    this.projectSelected.emit(project);
   }
 
   public experimentClicked(experiment: ITask) {

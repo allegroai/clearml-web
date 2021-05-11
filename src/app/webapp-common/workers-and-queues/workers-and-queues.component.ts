@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
 import {filter, take} from 'rxjs/operators';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import {GetQueues} from './actions/queues.actions';
+import {getQueues} from './actions/queues.actions';
 import {Store} from '@ngrx/store';
 import {QueueCreateDialogComponent} from '../shared/queue-create-dialog/queue-create-dialog.component';
 
@@ -26,7 +26,7 @@ export class WorkersAndQueuesComponent {
         take(1)
       )
       .subscribe((queue) => {
-        this.store.dispatch(new GetQueues());
+        this.store.dispatch(getQueues());
       });
   }
 

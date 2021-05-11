@@ -19,14 +19,14 @@ import {convertPlots, groupIterations, sortMetricsList} from '../../../tasks/tas
 import {selectSelectedExperiment} from '../../../../features/experiments/reducers';
 
 @Component({
-  selector   : 'sm-experiment-output-plots',
+  selector: 'sm-experiment-output-plots',
   templateUrl: './experiment-output-plots.component.html',
-  styleUrls  : ['./experiment-output-plots.component.scss']
+  styleUrls: ['./experiment-output-plots.component.scss']
 })
 export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy {
 
   public plotsList: Array<SelectableListItem> = [];
-  public selectedGraph: string                = null;
+  public selectedGraph: string = null;
 
   private plotsSubscription: Subscription;
   private settingsSubscription: Subscription;
@@ -46,10 +46,10 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy {
 
 
   constructor(private store: Store<IExperimentInfoState>, private router: Router, private activeRoute: ActivatedRoute, private changeDetection: ChangeDetectorRef) {
-    this.searchTerm$  = this.store.pipe(select(selectExperimentMetricsSearchTerm));
+    this.searchTerm$ = this.store.pipe(select(selectExperimentMetricsSearchTerm));
     this.splitSize$ = this.store.pipe(select(selectSplitSize));
 
-    this.plots$       = this.store.pipe(
+    this.plots$ = this.store.pipe(
       select(selectExperimentInfoPlots),
       distinctUntilChanged(),
       filter(metrics => !!metrics)
@@ -62,33 +62,26 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy {
       distinctUntilChanged()
     );
 
-    this.routerParams$                    = this.store.pipe(
+    this.routerParams$ = this.store.pipe(
       select(selectRouterParams),
       filter(params => !!params.experimentId),
       distinctUntilChanged()
     );
-    this.selectedExperimentSubscription   = this.store.select(selectSelectedExperiment)
-      .pipe(
-        filter(experiment => !!experiment),
-        distinctUntilChanged()
-      )
-      .subscribe(experiment => {
-        this.refresh();
-      });
+
     this.selectIsExperimentPendingRunning = this.store.pipe(
       select(selectIsExperimentInProgress)
     );
   }
 
   ngOnInit() {
-    this.minimized         = this.activeRoute.snapshot.routeConfig.data.minimized;
-    this.listOfHidden      = this.minimized ? of([]) : this.store.select(selectSelectedSettingsHiddenPlot);
+    this.minimized = this.activeRoute.snapshot.routeConfig.data.minimized;
+    this.listOfHidden = this.minimized ? of([]) : this.store.select(selectSelectedSettingsHiddenPlot);
     this.plotsSubscription = this.plots$
       .subscribe((metricsPlots) => {
         this.refreshDisabled = false;
-        const groupedPlots   = groupIterations(metricsPlots);
-        this.plotsList       = this.preparePlotsList(groupedPlots);
-        this.graphs          = convertPlots(groupedPlots, this.experimentId);
+        const groupedPlots = groupIterations(metricsPlots);
+        this.plotsList = this.preparePlotsList(groupedPlots);
+        this.graphs = convertPlots(groupedPlots, this.experimentId);
         this.changeDetection.detectChanges();
       });
 
@@ -103,12 +96,21 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy {
         if (!this.experimentId || this.experimentId !== params.experimentId) {
           this.graphs = undefined;
           this.resetMetrics();
-          this.store.dispatch(new ExperimentPlotsRequested(params.experimentId));
+          // this.store.dispatch(new ExperimentPlotsRequested(params.experimentId));
           this.store.dispatch(new SetExperimentMetricsSearchTerm({searchTerm: ''}));
         }
         this.experimentId = params.experimentId;
       });
 
+    this.selectedExperimentSubscription = this.store.select(selectSelectedExperiment)
+      .pipe(
+        filter(experiment => !!experiment),
+        distinctUntilChanged()
+      )
+      .subscribe(experiment => {
+        this.experimentId = experiment.id;
+        this.refresh();
+      });
 
   }
 
@@ -122,7 +124,7 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy {
   }
 
   private preparePlotsList(groupedPlots: Map<string, any[]>): Array<SelectableListItem> {
-    const list       = groupedPlots ? Object.keys(groupedPlots) : [];
+    const list = groupedPlots ? Object.keys(groupedPlots) : [];
     const sortedList = sortMetricsList(list);
     return sortedList.map((item) => ({name: item, value: item}));
   }

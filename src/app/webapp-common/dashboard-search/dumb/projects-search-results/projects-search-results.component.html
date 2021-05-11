@@ -1,0 +1,8 @@
+<div class="sm-card-list-layout">
+  <sm-project-card
+    *ngFor="let project of projectsList"
+    [project]="project"
+    (projectCardClicked)="projectCardClicked($event)"
+    [hideMenu]="true"
+  ></sm-project-card>
+</div>

@@ -14,7 +14,6 @@
             matInput
             smUniqueNameValidator
             [existingNames]="formNames(parameter.id)"
-            [smNotAllowedStringsValidator]="['.', '$']"
             required/>
           <mat-error *ngIf="parameterKey.invalid && parameterKey?.errors?.required">
             Required

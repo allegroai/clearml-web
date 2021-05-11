@@ -1,14 +1,12 @@
-/*@import "";*/
-//@import url('https://fonts.googleapis.com/css?family=Heebo:100,300,400,500,600,700,900');
 @import "variables";
 @import "mixins";
 @import "themes";
 @import './bootstrap-settings.scss';
-/*@import 'material-theme';*/
 @import './icons';
 @import '../styles/variables';
 @import 'material-overide';
-@import "~@ng-select/ng-select/themes/default.theme.css";
+@import "duration-input";
+@import "borders";
 /* You can add global styles to this file, and also import other style files */
 $dark-theme-input: map-get($dark-theme, input);
 $light-theme-input: map-get($light-theme, input);
@@ -91,64 +89,6 @@ body {
       color: $cloudy-blue-two;
     }
 
-    &.ng-dropdown-panel {
-      margin-top: 5px;
-      border: 1px solid $blue-400;
-    }
-
-    &.ng-dropdown-panel .ng-dropdown-panel-items .ng-option {
-      background: black;
-      color: $blue-grey;
-
-    }
-
-    &.ng-dropdown-panel .ng-option.ng-option-selected, &.ng-dropdown-panel .ng-option.ng-option-selected.ng-option-marked {
-      background-color: #1f2333;
-      color: #a4b2db;
-    }
-
-    &.ng-dropdown-panel .ng-option.ng-option-marked {
-      background-color: $blue-900;
-      color: #a4b2db;
-    }
-
-    ng-select, ng-select.ng-select-opened {
-      .ng-option {
-        color: map-get($dark-theme-input-highlight, color) !important;
-      }
-
-      .ng-select-container, .ng-option, .ng-dropdown-panel {
-        background-color: black;
-        color: map-get($dark-theme-input-highlight, color);
-      }
-
-      .ng-option.ng-option-selected, .ng-option.ng-option-marked, .ng-option.ng-option-selected.ng-option-marked {
-        background-color: #1f2333;
-        color: #a4b2db;
-      }
-
-      &.ng-select-focused > .ng-select-container {
-        border-color: $blue-300 !important;
-        box-shadow: none !important;
-      }
-
-      .ng-dropdown-panel, .ng-dropdown-panel.ng-select-bottom {
-        border: 1.3px solid $blue-400;
-      }
-
-      .ng-select-container {
-        border: 1.3px solid $blue-500;
-
-        &:hover {
-          border: 1.3px solid $blue-400;
-
-        }
-      }
-
-      .ng-placeholder {
-        color: map-get($dark-theme-input-highlight, placeholder-color);
-      }
-    }
   }
 
   .light-theme {
@@ -241,47 +181,6 @@ body {
         }
       }
     }
-
-    ng-select, ng-select.ng-select-opened {
-      .ng-option {
-        color: black !important;
-      }
-
-      .ng-select-container, .ng-option, .ng-dropdown-panel {
-        background-color: white;
-
-      }
-
-      .ng-option.ng-option-selected, .ng-option.ng-option-marked, .ng-option.ng-option-selected.ng-option-marked {
-        background-color: map-get($light-theme-input-highlight, background-color);
-        color: black;
-      }
-
-      &.ng-select-focused > .ng-select-container{
-        border-color: $blue-400 !important;
-        box-shadow: none !important;
-      }
-
-      .ng-dropdown-panel, .ng-dropdown-panel.ng-select-bottom {
-        border: 1.3px solid $cloudy-blue-two;
-      }
-
-      .ng-select-container {
-        border: 1.3px solid $cloudy-blue-two;
-
-        &:hover {
-          border: 1.3px solid $blue-300;
-        }
-        &:focus {
-          border: 1.3px solid $blue-400;
-        }
-      }
-
-
-      .ng-placeholder {
-        color: map-get($light-theme-input-highlight, placeholder-color);
-      }
-    }
   }
 }
 
@@ -318,6 +217,11 @@ body {
 
 .pallete-cursor {
   cursor: url(/app/webapp-common/assets/icons/pallete-cursor.png) 6 0, pointer;
+}
+.cursor {
+  &.pointer{
+    cursor: pointer;
+  }
 }
 
 .resize-none {

@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {get} from 'lodash/fp';
-import {groupHyperParams} from '../../shared/utils/shared-utils';
+import {ITask} from '../../../business-logic/model/al-task';
 
 
 @Injectable({
@@ -11,7 +11,7 @@ export class ExperimentParamsReverterService {
   constructor() {
   }
 
-  revertExperiments(experimentIds: Array<string>, experiments: any[]) {
+  revertExperiments(experimentIds: string[], experiments: ITask[]) {
     // map the experiment ids to keep the user order.
     return experimentIds.map(id => {
       const exp = experiments.find(ex => ex.id === id);

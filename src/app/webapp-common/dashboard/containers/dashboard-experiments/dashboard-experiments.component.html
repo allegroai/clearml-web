@@ -1,6 +1,6 @@
 <div class="row h-100">
   <div *ngIf="(recentTasks$ | async).length >= 0" class="col-24 h-100">
-    <div class="header pt-4">
+    <div class="recent-header">
       <div class="recent-title">RECENT EXPERIMENTS</div>
       <ng-content select="[header-buttons]"></ng-content>
     </div>

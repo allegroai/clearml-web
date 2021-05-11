@@ -8,22 +8,22 @@
       min-width: 280px;
     }
 
-   /deep/ .mat-slider:not(.mat-slider-disabled).cdk-mouse-focused .mat-slider-thumb,
-   /deep/ .mat-slider:not(.mat-slider-disabled).cdk-touch-focused .mat-slider-thumb,
-   /deep/ .mat-slider:not(.mat-slider-disabled).cdk-program-focused .mat-slider-thumb{
+   ::ng-deep .mat-slider:not(.mat-slider-disabled).cdk-mouse-focused .mat-slider-thumb,
+   ::ng-deep .mat-slider:not(.mat-slider-disabled).cdk-touch-focused .mat-slider-thumb,
+   ::ng-deep .mat-slider:not(.mat-slider-disabled).cdk-program-focused .mat-slider-thumb{
      transform: scale(0.7);
      background-color: $light-grey-blue !important;
    }
-    /deep/ .mat-slider-thumb{
+    ::ng-deep .mat-slider-thumb{
       cursor: grabbing;
       background-color: white !important;
       border: 2px solid $light-grey-blue;
     }
-    /deep/ .mat-slider-horizontal.cdk-focused .mat-slider-thumb-label{
+    ::ng-deep .mat-slider-horizontal.cdk-focused .mat-slider-thumb-label{
       transform: none;
     }
 
-    /deep/ .mat-slider-thumb-label {
+    ::ng-deep .mat-slider-thumb-label {
       border-radius: 4px!important;
       background: #4d66ff; /* our tooltip bg. color */
       width: auto;
@@ -31,14 +31,14 @@
       transition: none;
       padding: 0 12px;
     }
-    /deep/ .mat-slider-horizontal .mat-slider-thumb-label {
+    ::ng-deep .mat-slider-horizontal .mat-slider-thumb-label {
       right: -28px;
       top: auto;
       bottom: -36px;
       transform: scale(0.01);
       outline: none;
     }
-    /deep/ .mat-slider-horizontal .mat-slider-thumb-label-text {
+    ::ng-deep .mat-slider-horizontal .mat-slider-thumb-label-text {
       transform: none !important;
     }
 

@@ -1,0 +1,14 @@
+:host {
+  .header {
+    padding: 24px 24px 12px 24px;
+    display: flex;
+    align-items: center;
+    &-title {
+      flex-grow: 1;
+    }
+    .seat-consumption {
+      margin-left: 24px;
+      display: inline;
+    }
+  }
+}

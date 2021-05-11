@@ -13,7 +13,7 @@ export interface CompareHeaderState {
   refreshing: boolean;
   autoRefresh: boolean;
   navigationPreferences: Params;
-  experimentsUpdateTime: { [key: string]: Date }
+  experimentsUpdateTime: { [key: string]: Date};
 };
 
 

@@ -55,7 +55,7 @@
     font-weight: 500;
     color: $blue-400;
   }
-  /deep/ .parcoords-control-view .y-axis.metric-column {
+  ::ng-deep .parcoords-control-view .y-axis.metric-column {
     text.axis-title {
       font-weight: bold;
     }

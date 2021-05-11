@@ -3,6 +3,7 @@ import {USERS_ACTIONS, USERS_PREFIX} from '../../../app.constants';
 import {User} from '../../../business-logic/model/users/user';
 import {OrganizationCreateInviteResponse} from "../../../business-logic/model/organization/organizationCreateInviteResponse";
 import {GetCurrentUserResponseUserObjectCompany} from '../../../business-logic/model/users/getCurrentUserResponseUserObjectCompany';
+import {LoginGetSettingsResponse} from "../../../business-logic/model/login/loginGetSettingsResponse";
 
 
 export class FetchCurrentUser implements Action {
@@ -15,9 +16,11 @@ export const setCurrentUser = createAction(
   props<{user: User; terms_of_use?: any}>()
 );
 
-export class Logout implements Action {
-  type = USERS_ACTIONS.LOGOUT;
-}
+export const termsOfUseAccepted = createAction(USERS_PREFIX + '[TOS accepted]');
+
+export const logout = createAction(USERS_ACTIONS.LOGOUT, props<{provider?: string}>());
+export const logoutSuccess = createAction(USERS_ACTIONS.LOGOUT_SUCCESS);
+
 
 export class SetPreferences implements Action {
   type = USERS_ACTIONS.SET_PREF;
@@ -34,7 +37,7 @@ export const addWorkspace = createAction(
   '[login] add workspace',
   props<{inviteId: string}>()
 );
-
+export const setFilterByUser =  createAction(USERS_PREFIX +'SET_FILTERED_BY_USER', props<{showOnlyUserWork: boolean}>());
 export const leaveWorkspace = createAction(
   '[login] leave workspace',
   props<{workspace: GetCurrentUserResponseUserObjectCompany}>()
@@ -68,3 +71,18 @@ export const setUserWorkspaces = createAction(
 );
 
 export const setUserWorkspacesFromUser = createAction('[users] set user workspaces from current user');
+
+export const setAccountAdministrationPage = createAction(`${USERS_PREFIX} route to account-administration`  );
+export const getWhitelistEntries = createAction(`${USERS_PREFIX} get invited users`);
+export const setWhitelistEntries = createAction(`${USERS_PREFIX} set invited users`,
+  props<{whitelistEntries: LoginGetSettingsResponse }>());
+export const removeWhitelistEntry = createAction(`${USERS_PREFIX} remove invited user`,
+  props<{remove: string[]}>());
+export const deleteWhitelistEntry = createAction(`${USERS_PREFIX} delete invited user`,
+  props<{user: User}>());
+export const addWhitelistEntries = createAction(`${USERS_PREFIX} add invited user`,
+  props<{whitelistEntries: string[]}>());
+export const setAddWhitelistEntries = createAction(`${USERS_PREFIX} set add invited user`,
+  props<{whitelistEntries: string[]}>());
+export const setRemoveWhitelistEntry = createAction(`${USERS_PREFIX} set remove invited user`,
+  props<{removed: string[]}>());

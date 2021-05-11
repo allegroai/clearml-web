@@ -3,7 +3,7 @@ import {CREATE_QUEUE_ACTIONS} from './queue-create-dialog.actions';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {Injectable} from '@angular/core';
 import {CREATION_STATUS} from './queue-create-dialog.reducer';
-import {catchError, flatMap, map, switchMap} from 'rxjs/operators';
+import {catchError, mergeMap, map, switchMap} from 'rxjs/operators';
 import {Router} from '@angular/router';
 import {MESSAGES_SEVERITY} from '../../../app.constants';
 import {ActiveLoader, AddMessage, DeactiveLoader} from '../../core/actions/layout.actions';
@@ -24,9 +24,9 @@ export class QueueCreateDialogEffects {
   @Effect()
   createQueue = this.actions.pipe(
     ofType<createNewQueueActions.CreateNewQueue>(CREATE_QUEUE_ACTIONS.CREATE_NEW_QUEUE),
-    flatMap((action) => this.queuesApiService.queuesCreate(action.payload)
+    mergeMap((action) => this.queuesApiService.queuesCreate(action.payload)
       .pipe(
-        flatMap(res => [
+        mergeMap(res => [
           new DeactiveLoader(action.type),
           new createNewQueueActions.SetNewQueueCreationStatus(CREATION_STATUS.SUCCESS),
           new AddMessage(MESSAGES_SEVERITY.SUCCESS, 'Queue Created Successfully'),
@@ -39,9 +39,9 @@ export class QueueCreateDialogEffects {
   @Effect()
   updateQueue = this.actions.pipe(
     ofType<createNewQueueActions.UpdateQueue>(CREATE_QUEUE_ACTIONS.UPDATE_QUEUE),
-    flatMap((action) => this.queuesApiService.queuesUpdate(action.payload)
+    mergeMap((action) => this.queuesApiService.queuesUpdate(action.payload)
       .pipe(
-        flatMap(res => [
+        mergeMap(res => [
           new DeactiveLoader(action.type),
           new createNewQueueActions.SetNewQueueCreationStatus(CREATION_STATUS.SUCCESS),
           new AddMessage(MESSAGES_SEVERITY.SUCCESS, 'Queue Updated Successfully'),
@@ -56,7 +56,7 @@ export class QueueCreateDialogEffects {
     ofType<createNewQueueActions.GetQueues>(CREATE_QUEUE_ACTIONS.GET_QUEUES),
     switchMap(action => this.queuesApiService.queuesGetAllEx({})
       .pipe(
-        flatMap(res => [new createNewQueueActions.SetQueues(res.queues)]),
+        mergeMap(res => [new createNewQueueActions.SetQueues(res.queues)]),
         catchError(error => [new RequestFailed(error)])
       )
     )

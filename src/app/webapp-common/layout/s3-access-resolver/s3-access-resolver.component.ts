@@ -4,7 +4,7 @@ import {selectS3PopUpDetails} from '../../core/reducers/common-auth-reducer';
 import {saveS3Credentials} from '../../core/actions/common-auth.actions';
 import {Observable, Subscription} from 'rxjs';
 import { MatDialogRef } from '@angular/material/dialog';
-import {ProjectCreateDialogComponent} from '../../shared/project-create-dialog/project-create-dialog.component';
+import {ProjectDialogComponent} from '../../shared/project-dialog/project-dialog.component';
 
 @Component({
   selector   : 'sm-s3-access-resolver',
@@ -27,7 +27,7 @@ export class S3AccessResolverComponent implements OnDestroy, OnInit {
   public isAzure: boolean;
 
 
-  constructor(private store: Store<any>, private matDialogRef: MatDialogRef<ProjectCreateDialogComponent>) {
+  constructor(private store: Store<any>, private matDialogRef: MatDialogRef<ProjectDialogComponent>) {
     this.popupDetails = this.store.select(selectS3PopUpDetails);
   }
 
