@@ -83,7 +83,7 @@
 }
 
 :host {
-  /deep/ .action-button button {
+  ::ng-deep .action-button button {
     min-width: 70px;
   }
 }

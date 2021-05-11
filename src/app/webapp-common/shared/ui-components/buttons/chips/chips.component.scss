@@ -2,7 +2,7 @@
 
 .chips {
   cursor: auto;
-  padding-right: 8px;
+  margin: 1px 6px 1px 0;
   display: inline-block;
   line-height: normal;
   vertical-align: middle;
@@ -14,7 +14,7 @@
     padding: 0 0.5rem;
     border-radius: 16px;
     opacity: 1;
-    font-size: 1rem;
+    font-size: 12px;
 
     &:hover {
       .dot {

@@ -1,0 +1,83 @@
+<sm-card class="project-card"
+         (click)="projectClicked()"
+         [isExample]="!['All Experiments'].includes(project.name) && !isRootProject && (!project.company || ! project.company.id)"
+         [isFolder]="true"
+         [oneTabMode]="!(project?.sub_projects?.length>0)"
+         [subFolderTitle]="project?.sub_projects?.length + ' sub projects'"
+>
+  <div secondTab class="h-100">
+    <div class="card-sp-list" smClickStopPropagation>
+      <ul>
+        <li *ngFor="let subProject of project?.sub_projects"><a class="d-flex align-items-center"
+                                                                (click)="subProjectClicked(subProject.id)"
+                                                                [smTooltip]="subProject?.name"
+                                                                matTooltipPosition="above"
+                                                                [innerHTML]="subProject?.name | breadcrumbsEllipsis"></a>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div header-content>
+    <div class="d-flex justify-content-between align-items-center">
+      <sm-inline-edit #projectName
+                      class="title edit-name dark"
+                      [originalText]="project.name | shortProjectName"
+                      [editable]="true"
+                      pattern="^[^/]+$"
+                      [minWidth]="250"
+                      [inlineDisabled]="true"
+                      (textChanged)="prepareProjectNameForChange($event)"
+                      (inlineActiveStateChanged)="projectNameEditActiveChanged($event)"
+
+      >
+        <span class="project-name"
+              matTooltipPosition="above"
+              [smTooltip]="project.name"
+        >{{project.name | shortProjectName}}</span>
+      </sm-inline-edit>
+      <div *ngIf="project.system_tags?.includes('default')" class="justify-content-end project-tag">Sample</div>
+      <div class="menu-wrapper" *ngIf="!hideMenu">
+        <sm-menu buttonClass="al-ico-bars-menu al-icon sm" [showCart]="false">
+          <sm-menu-item itemLabel="Rename"
+                        iconClass="al-icon al-color blue-800 al-ico-edit"
+                        [disabled]="!project.company?.id"
+                        [iconFontSize]="20"
+                        (itemClicked)="projectName.inlineActivated()"></sm-menu-item>
+          <sm-menu-item itemLabel="New Project"
+                        [iconFontSize]="20"
+                        iconClass="al-icon al-color blue-800 al-ico-add"
+                        (itemClicked)="newProjectClicked.emit(project.id)"></sm-menu-item>
+          <sm-menu-item itemLabel="Move to"
+                        [iconFontSize]="20"
+                        iconClass="al-icon al-color blue-800 al-ico-move-to"
+                        (itemClicked)="moveToClicked.emit(project.id)"></sm-menu-item>
+          <sm-menu-item itemLabel="Delete"
+                        [iconFontSize]="20"
+                        iconClass="al-icon al-color blue-800 al-ico-trash"
+                        (itemClicked)="deleteProjectClicked.emit(project)"></sm-menu-item>
+        </sm-menu>
+      </div>
+    </div>
+
+  </div>
+  <div class="d-flex justify-content-around">
+    <ng-template></ng-template>
+    <sm-circle-counter
+      [counter]="project.id === '*'? '∞' : countAllTasks(project.stats?.active?.status_count)"
+      label="TOTAL"
+      [type]="countAllTasks(project.stats?.active?.status_count)===0 ? CircleTypeEnum.empty:CircleTypeEnum.pending"></sm-circle-counter>
+    <sm-circle-counter
+      [counter]="project.id === '*'? '∞' : project.stats?.active?.status_count?.in_progress"
+      label="RUNNING"
+      [type]="project.stats?.active?.status_count?.in_progress===0?CircleTypeEnum.empty:CircleTypeEnum.running"></sm-circle-counter>
+    <sm-circle-counter [counter]="project.id === '*'? '∞' : project.stats?.active?.status_count?.closed"
+                       label="COMPLETED"
+                       [type]="project.stats?.active?.status_count?.closed===0? CircleTypeEnum.empty:CircleTypeEnum.completed"
+                       underLabel="(24 hrs)"></sm-circle-counter>
+  </div>
+  <div footer>
+    <div class="footer-title">
+      {{'COMPUTE TIME: ' + convertSecToDaysHrsMinsSec(project.stats?.active?.total_runtime)}}
+    </div>
+  </div>
+</sm-card>

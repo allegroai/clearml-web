@@ -13,10 +13,11 @@ import {WorkersGetStatsRequest} from '../../../business-logic/model/workers/work
 import {RequestFailed} from '../../core/actions/http.actions';
 import {AddMessage, DeactiveLoader} from '../../core/actions/layout.actions';
 import * as workersActions from '../actions/workers.actions';
-import {selectSelectedWorker, selectStats, selectStatsParams, selectStatsTimeFrame, selectWorkers, selectWorkersTableSortField, selectWorkersTableSortOrder} from '../reducers/index.reducer';
-import {get} from 'lodash/fp';
+import {selectSelectedWorker, selectStats, selectStatsParams, selectStatsTimeFrame, selectWorkers, selectWorkersTableSortFields} from '../reducers/index.reducer';
+import {orderBy} from 'lodash/fp';
 import {addFullRangeMarkers, addStats, getLastTimestamp, Topic, removeFullRangeMarkers} from '../../shared/utils/statistics';
 import {showStatsErrorNotice, hideNoStatsNotice} from '../actions/stats.actions';
+import {addMultipleSortColumns} from '../../shared/utils/shared-utils';
 
 function prepareStatsQuery(entitie: string, keys: { key: string }[], range: number, granularity: number): WorkersGetStatsRequest {
   const now = Math.floor((new Date).getTime() / 1000);
@@ -42,13 +43,12 @@ export class WorkersEffects {
     ofType(workersActions.GET_STATS_AND_WORKERS),
     withLatestFrom(
       this.store.select(selectSelectedWorker),
-      this.store.select(selectWorkersTableSortOrder),
-      this.store.select(selectWorkersTableSortField),
+      this.store.select(selectWorkersTableSortFields),
     ),
-    switchMap(([action, selectedWorker, sortOrder, sortField]) => this.workersApi.workersGetAll({}).pipe(
+    switchMap(([action, selectedWorker, sortFields]) => this.workersApi.workersGetAll({}).pipe(
       mergeMap(res => {
         const actionsToFire = [
-          new workersActions.SetWorkers(this.sortWorkers(sortOrder, sortField, res.workers)),
+          new workersActions.SetWorkers(this.sortWorkers(sortFields, res.workers)),
           new DeactiveLoader(action.type)];
         if (selectedWorker) {
           actionsToFire.push(
@@ -65,13 +65,12 @@ export class WorkersEffects {
 
   @Effect()
   sortWorkers$ = this.actions.pipe(
-    ofType(workersActions.WORKERS_TABLE_SORT_CHANGED),
+    ofType(workersActions.workersTableSetSort),
     withLatestFrom(
-      this.store.select(selectWorkersTableSortOrder),
-      this.store.select(selectWorkersTableSortField),
+      this.store.select(selectWorkersTableSortFields),
       this.store.select(selectWorkers)
     ),
-    mergeMap(([action, sortOrder, sortField, workers]) => [new workersActions.SetWorkers(this.sortWorkers(sortOrder, sortField, workers))]),
+    mergeMap(([action, sortFields, workers]) => [new workersActions.SetWorkers(this.sortWorkers(sortFields, workers))]),
   );
 
   @Effect()
@@ -162,12 +161,19 @@ export class WorkersEffects {
     })
   );
 
-  private sortWorkers(sortOrder, sortField, workers) {
-    const sortedWorkers = [...workers];
-    return sortedWorkers.sort((workerA, workerB) => {
-      const fieldValA = get(sortField, workerA);
-      const fieldValB = get(sortField, workerB);
-      return sortOrder * ((!fieldValA || (fieldValA > fieldValB)) ? 1 : -1);
-    });
+  @Effect()
+  tableSortChange = this.actions.pipe(
+    ofType(workersActions.workersTableSortChanged),
+    withLatestFrom(this.store.select(selectWorkersTableSortFields)),
+    switchMap(([action, oldOrders]) => {
+      let orders = addMultipleSortColumns(oldOrders, action.colId, action.isShift);
+      return [workersActions.workersTableSetSort({orders})];
+    })
+  );
+
+  private sortWorkers(sortFields, workers): Worker[] {
+    const srtByFields = sortFields.map(f => f.field);
+    const srtByOrders = sortFields.map(f => f.order > 0? 'asc' : 'desc');
+    return orderBy<Worker>(srtByFields, srtByOrders, workers) as any;
   }
 }

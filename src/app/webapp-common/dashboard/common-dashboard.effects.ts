@@ -9,13 +9,14 @@ import {MESSAGES_SEVERITY} from '../../app.constants';
 import {ApiTasksService} from '../../business-logic/api-services/tasks.service';
 import {IRecentTask} from './common-dashboard.reducer';
 import {ProjectsGetAllExRequest} from '../../business-logic/model/projects/projectsGetAllExRequest';
-import {catchError, mergeMap, map, switchMap} from 'rxjs/operators';
+import {catchError, mergeMap, map, switchMap, withLatestFrom} from 'rxjs/operators';
 import {ApiLoginService} from '../../business-logic/api-services/login.service';
 import {addWorkspace, setWorkspace} from '../core/actions/users.actions';
 import {MatDialog} from '@angular/material/dialog';
 import {ConfirmDialogComponent} from '../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {Store} from '@ngrx/store';
 import {ErrorService} from '../shared/services/error.service';
+import {selectCurrentUser, selectShowOnlyUserWork} from "../core/reducers/users-reducer";
 
 @Injectable()
 export class CommonDashboardEffects {
@@ -34,25 +35,32 @@ export class CommonDashboardEffects {
   @Effect()
   getRecentProjects = this.actions.pipe(
     ofType<GetRecentProjects>(DASHBOARD_ACTIONS.GET_RECENT_PROJECTS),
-    mergeMap((action) => this.projectsApi.projectsGetAllEx(action.payload.getAllFilter)
-      .pipe(
-        mergeMap(res => [new SetRecentProjects(res.projects), new DeactiveLoader(action.type)]),
-        catchError(error => [new DeactiveLoader(action.type), new RequestFailed(error)])
-      )
+    withLatestFrom(this.store.select(selectCurrentUser), this.store.select(selectShowOnlyUserWork)),
+    mergeMap(([action, user, showOnlyUserWork]) =>
+      this.projectsApi.projectsGetAllEx({
+        ...action.payload.getAllFilter,
+        active_users: (showOnlyUserWork ? [user.id] : null),
+        only_fields: ['name', 'company', 'user', 'created', 'default_output_destination']
+      }).pipe(
+          mergeMap(res => [new SetRecentProjects(res.projects), new DeactiveLoader(action.type)]),
+          catchError(error => [new DeactiveLoader(action.type), new RequestFailed(error)])
+        )
     )
   );
 
   @Effect()
   getRecentTasks = this.actions.pipe(
-    ofType(DASHBOARD_ACTIONS.GET_RECENT_TASKS),
-    switchMap(action => this.tasksApi.tasksGetAllEx({
+    ofType(DASHBOARD_ACTIONS.GET_RECENT_TASKS ),
+    withLatestFrom(this.store.select(selectCurrentUser), this.store.select(selectShowOnlyUserWork)),
+    switchMap(([action, user, showOnlyUserWork]) => this.tasksApi.tasksGetAllEx({
         page: 0,
         page_size: 5,
         order_by: ['-last_update'],
         status: ['published', 'closed', 'failed', 'stopped', 'in_progress', 'completed'],
         type: ['__$not', 'annotation_manual', '__$not', 'annotation', '__$not', 'dataset_import'],
         only_fields: ['type', 'status', 'created', 'name', 'id', 'last_update', 'started', 'project.name'],
-        system_tags: ['-archived']
+        system_tags: ['-archived'],
+        user: showOnlyUserWork ? [user.id] : null,
       })
         .pipe(
           mergeMap(res => [new SetRecentTasks(res.tasks as Array<IRecentTask>), new DeactiveLoader(action.type)]),
@@ -71,7 +79,7 @@ export class CommonDashboardEffects {
           new DeactiveLoader(action.type),
           new AddMessage(MESSAGES_SEVERITY.SUCCESS, 'Project Created Successfully')]),
         catchError(error => [new DeactiveLoader(action.type), new RequestFailed(error),
-          new AddMessage(MESSAGES_SEVERITY.ERROR, 'Project Created Failed')])
+          new AddMessage(MESSAGES_SEVERITY.ERROR, 'Project Creation Failed')])
       )
     )
   );
@@ -147,7 +155,7 @@ To run experiments in this workspace, use workspace-specific app credentials you
         no: false,
         iconClass: icon,
       },
-      panelClass: textCenter? 'text-center' : ''
+      panelClass: textCenter ? 'text-center' : ''
     });
   }
 }

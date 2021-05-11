@@ -10,7 +10,7 @@
  * Do not edit the class manually.
  */
 
-/* tslint:disable:no-unused-variable member-ordering */
+/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/member-ordering */
 
 import {HTTP} from '../../app.constants';
 import {SmApiRequestsService} from "./api-requests.service";

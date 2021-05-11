@@ -32,7 +32,6 @@ export class TableCardFilterTemplateComponent {
   @Output() filterChanged = new EventEmitter();
   @Output() menuClosed = new EventEmitter();
   @Output() menuOpened = new EventEmitter();
-  @Output() searchValueChanged = new EventEmitter();
 
   @ViewChild(MatMenuTrigger, {static: true}) trigger: MatMenuTrigger;
 

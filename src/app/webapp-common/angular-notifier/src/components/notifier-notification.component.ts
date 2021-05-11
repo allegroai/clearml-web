@@ -165,7 +165,7 @@ export class NotifierNotificationComponent implements AfterViewInit {
    * @returns Promise, resolved when done
    */
   public show(): Promise<undefined> {
-    return new Promise<undefined>((resolve: () => void, reject: () => void) => {
+    return new Promise<undefined>((resolve: (value: PromiseLike<undefined>) => void) => {
 
       // Are animations enabled?
       if (this.config.animations.enabled && this.config.animations.show.speed > 0) {
@@ -185,7 +185,7 @@ export class NotifierNotificationComponent implements AfterViewInit {
         const animation: Animation = this.element.animate(animationData.keyframes, animationData.options);
         animation.onfinish = () => {
           this.startAutoHideTimer();
-          resolve(); // Done
+          resolve(null); // Done
         };
 
       } else {
@@ -193,7 +193,7 @@ export class NotifierNotificationComponent implements AfterViewInit {
         // Show notification
         this.renderer.setStyle(this.element, 'visibility', 'visible');
         this.startAutoHideTimer();
-        resolve(); // Done
+        resolve(null); // Done
 
       }
 
@@ -207,7 +207,7 @@ export class NotifierNotificationComponent implements AfterViewInit {
    * @returns Promise, resolved when done
    */
   public hide(): Promise<undefined> {
-    return new Promise<undefined>((resolve: () => void, reject: () => void) => {
+    return new Promise<undefined>((resolve: (value: PromiseLike<undefined>) => void) => {
 
       this.stopAutoHideTimer();
 
@@ -218,10 +218,10 @@ export class NotifierNotificationComponent implements AfterViewInit {
         const animationData: NotifierAnimationData = this.animationService.getAnimationData('hide', this.notification);
         const animation: Animation = this.element.animate(animationData.keyframes, animationData.options);
         animation.onfinish = () => {
-          resolve(); // Done
+          resolve(null); // Done
         };
       } else {
-        resolve(); // Done
+        resolve(null); // Done
       }
 
     });
@@ -235,7 +235,7 @@ export class NotifierNotificationComponent implements AfterViewInit {
    * @returns Promise, resolved when done
    */
   public shift(distance: number, shiftToMakePlace: boolean): Promise<undefined> {
-    return new Promise<undefined>((resolve: () => void, reject: () => void) => {
+    return new Promise<undefined>((resolve: (value: PromiseLike<undefined>) => void) => {
 
       // Calculate new position (position after the shift)
       let newElementShift: number;
@@ -267,13 +267,13 @@ export class NotifierNotificationComponent implements AfterViewInit {
         this.elementShift = newElementShift;
         const animation: Animation = this.element.animate(animationData.keyframes, animationData.options);
         animation.onfinish = () => {
-          resolve(); // Done
+          resolve(null); // Done
         };
 
       } else {
         this.renderer.setStyle(this.element, 'transform', `translate3d( ${horizontalPosition}, ${newElementShift}px, 0 )`);
         this.elementShift = newElementShift;
-        resolve(); // Done
+        resolve(null); // Done
       }
 
     });

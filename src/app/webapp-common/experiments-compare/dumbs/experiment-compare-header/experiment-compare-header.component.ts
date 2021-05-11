@@ -1,16 +1,21 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {MatSelectChange} from '@angular/material/select';
-import {Action, Store} from '@ngrx/store';
+import {Store} from '@ngrx/store';
 import {selectHideIdenticalFields, selectRefreshing, selectShowAddExperimentsForCompare} from '../../reducers';
 import {interval, Observable, Subscription} from 'rxjs';
-import {refreshIfNeeded, setHideIdenticalFields, setNavigationPreferences, setRefreshing, setShowSearchExperimentsForCompare, toggleShowScalarOptions} from '../../actions/compare-header.actions';
+import {
+  refreshIfNeeded, setHideIdenticalFields, setNavigationPreferences,
+  setShowSearchExperimentsForCompare, toggleShowScalarOptions
+} from '../../actions/compare-header.actions';
 import {ActivatedRoute, Router} from '@angular/router';
 import {selectRouterQueryParams, selectRouterUrl} from '../../../core/reducers/router-reducer';
 import {get} from 'lodash/fp';
-import {selectAutoRefresh} from '../../../core/reducers/view-reducer';
+import {selectAppVisible, selectAutoRefresh} from '../../../core/reducers/view-reducer';
 import {SetAutoRefresh} from '../../../core/actions/layout.actions';
 import {AUTO_REFRESH_INTERVAL} from '../../../../app.constants';
 import {filter, withLatestFrom} from 'rxjs/operators';
+import {MatMenuTrigger} from '@angular/material/menu';
+import {MatSlideToggleChange} from '@angular/material/slide-toggle';
 
 @Component({
   selector       : 'sm-experiment-compare-header',
@@ -22,7 +27,6 @@ export class ExperimentCompareHeaderComponent implements OnInit, OnDestroy {
   private routerSubscription: Subscription;
   private queryParamsSubscription: Subscription;
   public selectHideIdenticalFields$: Observable<boolean>;
-  public showAddExperimentsForCompare$: Observable<boolean>;
 
   public selectRefreshing$: Observable<{ refreshing: boolean; autoRefresh: boolean }>;
   public viewMode: string;
@@ -30,18 +34,23 @@ export class ExperimentCompareHeaderComponent implements OnInit, OnDestroy {
   public queryParamsViewMode: string;
   public autoRefreshState$: Observable<boolean>;
   private autorRefreshSub: Subscription;
+  private showMenuSub: Subscription;
+
+  @ViewChild(MatMenuTrigger) trigger: MatMenuTrigger;
+  private isAppVisible$: Observable<boolean>;
 
   constructor(private store: Store<any>, private route: ActivatedRoute, private router: Router, private cdr: ChangeDetectorRef) {
     this.selectHideIdenticalFields$ = this.store.select(selectHideIdenticalFields);
-    this.showAddExperimentsForCompare$ = this.store.select(selectShowAddExperimentsForCompare);
     this.selectRefreshing$ = this.store.select(selectRefreshing);
     this.autoRefreshState$ = this.store.select(selectAutoRefresh);
+    this.isAppVisible$ = this.store.select(selectAppVisible);
+    this.showMenuSub = this.store.select(selectShowAddExperimentsForCompare).subscribe(open => open ? this.trigger?.openMenu() : this.trigger?.closeMenu());
   }
 
   ngOnInit() {
     this.autorRefreshSub = interval(AUTO_REFRESH_INTERVAL).pipe(
-      withLatestFrom(this.autoRefreshState$),
-      filter(([iteration, autoRefreshState]) => autoRefreshState)
+      withLatestFrom(this.autoRefreshState$, this.isAppVisible$),
+      filter(([, autoRefreshState, isAppVisible]) => autoRefreshState && isAppVisible)
     ).subscribe(() => {
       this.refreshList(true);
     });
@@ -58,6 +67,7 @@ export class ExperimentCompareHeaderComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.routerSubscription.unsubscribe();
     this.autorRefreshSub.unsubscribe();
+    this.showMenuSub?.unsubscribe();
   }
 
   refresh({isAutoRefresh}: { isAutoRefresh: boolean }) {
@@ -79,8 +89,8 @@ export class ExperimentCompareHeaderComponent implements OnInit, OnDestroy {
     this.store.dispatch(setShowSearchExperimentsForCompare({payload: true}));
   }
 
-  hideIdenticalFieldsToggled(val) {
-    this.store.dispatch(setHideIdenticalFields({payload: val.checked}));
+  hideIdenticalFieldsToggled(event: MatSlideToggleChange) {
+    this.store.dispatch(setHideIdenticalFields({payload: event.checked}));
   }
 
   toggleSettings() {
@@ -95,4 +105,7 @@ export class ExperimentCompareHeaderComponent implements OnInit, OnDestroy {
     this.store.dispatch(new SetAutoRefresh($event));
   }
 
+  menuClosed() {
+    this.store.dispatch(setShowSearchExperimentsForCompare({payload: false}));
+  }
 }

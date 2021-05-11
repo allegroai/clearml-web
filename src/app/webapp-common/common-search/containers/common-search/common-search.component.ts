@@ -1,10 +1,11 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router, NavigationEnd} from '@angular/router';
 import {Store} from '@ngrx/store';
-import {SetIsSearching, SetSearchQuery} from '../../common-search.actions';
-import {selectIsSearching, selectPlaceholder, selectSearchQuery} from '../../common-search.reducer';
+import {SetIsSearching, setSearchQuery} from '../../common-search.actions';
+import {ICommonSearchState, selectIsSearching, selectPlaceholder, selectSearchQuery} from '../../common-search.reducer';
 import {Observable} from 'rxjs';
-import {filter} from 'rxjs/operators';
+import {debounceTime, filter, tap} from 'rxjs/operators';
+import {SearchComponent} from '../../../shared/ui-components/inputs/search/search.component';
 
 @Component({
   selector   : 'sm-common-search',
@@ -12,41 +13,47 @@ import {filter} from 'rxjs/operators';
   styleUrls  : ['./common-search.component.scss']
 })
 export class CommonSearchComponent implements OnInit {
-  public searchQuery$: Observable<string>;
+  public searchQuery$: Observable<ICommonSearchState['searchQuery']>;
   public isSearching$: Observable<boolean>;
   public searchPlaceholder$: Observable<string>;
   public searchActive: boolean;
 
 
 
-  @ViewChild('search', { static: true }) searchElem;
+  @ViewChild(SearchComponent) searchElem: SearchComponent;
+  public regExp: boolean = false;
+  private closeTimer: number;
+  private queryString: string;
+  minChars = 3;
 
   constructor(private store: Store<any>, private router: Router, private route: ActivatedRoute) {}
 
+  ngOnInit() {
+    this.searchQuery$       = this.store.select(selectSearchQuery).pipe(tap(searchQuery => this.regExp = searchQuery?.regExp));
+    this.isSearching$       = this.store.select(selectIsSearching);
+    this.searchPlaceholder$ = this.store.select(selectPlaceholder).pipe(debounceTime(0));
+    this.router.events.pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe(() => {
+        this.setSearchActive();
+      });
+    setTimeout(this.setSearchActive.bind(this));
+  }
+
   onSearchValueChanged(query) {
-    this.store.dispatch(new SetSearchQuery(query));
+    this.queryString = query;
+    this.store.dispatch(setSearchQuery({query, regExp: this.regExp}));
   }
 
   openSearch() {
+    window.clearTimeout(this.closeTimer);
     this.searchElem.searchBarInput.nativeElement.focus();
     this.store.dispatch(new SetIsSearching(true));
   }
 
   onSearchFocusOut() {
     if (!this.searchElem.searchBarInput.nativeElement.value) {
-      this.store.dispatch(new SetIsSearching(false));
+      this.closeTimer = window.setTimeout(() => this.store.dispatch(new SetIsSearching(false)), 200);
     }
-  }
-
-  ngOnInit() {
-    this.searchQuery$       = this.store.select(selectSearchQuery);
-    this.isSearching$       = this.store.select(selectIsSearching);
-    this.searchPlaceholder$ = this.store.select(selectPlaceholder);
-    this.router.events.pipe(filter(event => event instanceof NavigationEnd))
-      .subscribe(() => {
-        this.setSearchActive();
-      });
-    setTimeout(this.setSearchActive.bind(this));
   }
 
   private setSearchActive() {
@@ -62,7 +69,16 @@ export class CommonSearchComponent implements OnInit {
   }
 
   clearSearch() {
-    this.store.dispatch(new SetSearchQuery(''));
-    this.searchElem.searchBarInput.nativeElement.focus();
+    this.searchElem.clear();
+    this.store.dispatch(new SetIsSearching(false));
+    document.body.focus();
+  }
+
+  toggleRegExp() {
+    this.regExp = !this.regExp;
+    window.clearTimeout(this.closeTimer);
+    if (this.queryString?.length >= this.minChars) {
+      this.store.dispatch(setSearchQuery({query: this.queryString, regExp: this.regExp}));
+    }
   }
 }

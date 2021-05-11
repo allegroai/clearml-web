@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { CustomColumnsListComponent } from './custom-columns-list.component';
 
@@ -6,7 +6,7 @@ describe('CustomColumnsListComponent', () => {
   let component: CustomColumnsListComponent;
   let fixture: ComponentFixture<CustomColumnsListComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ CustomColumnsListComponent ]
     })

@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
-import {catchError, flatMap, map, switchMap, withLatestFrom} from 'rxjs/operators';
+import {catchError, mergeMap, map, switchMap, withLatestFrom} from 'rxjs/operators';
 import * as  debugActions from './debug-images-actions';
 import {ActiveLoader, DeactiveLoader} from '../core/actions/layout.actions';
 import {ApiTasksService} from '../../business-logic/api-services/tasks.service';
@@ -15,7 +15,13 @@ import {
   setDebugImageIterations,
   setDebugImageViewerScrollId,
   setDisplayerBeginningOfTime, setDisplayerEndOfTime
-} from "./debug-images-actions";
+} from './debug-images-actions';
+
+export const ALL_IMAGES = '-- All --';
+
+export const removeAllImagesFromPayload = (payload) => {
+  return {...payload, metric: payload.metric === ALL_IMAGES ? null : payload.metric};
+};
 
 interface Image {
   timestamp: number;
@@ -45,16 +51,16 @@ export class DebugImagesEffects {
     ofType<debugActions.SelectMetric | debugActions.GetNextBatch | debugActions.GetPreviousBatch | debugActions.RefreshMetric>
     (debugActions.SET_DEBUG_IMAGES_SELECTED_METRIC, debugActions.GET_NEXT_DEBUG_IMAGES_BATCH, debugActions.GET_PREVIOUS_DEBUG_IMAGES_BATCH, debugActions.REFRESH_IMAGES_SELECTED_METRIC),
     withLatestFrom(this.store.select(selectDebugImages)),
-    flatMap(([action, debugImages]) =>
+    mergeMap(([action, debugImages]) =>
       this.eventsApi.eventsDebugImages({
-        metrics: [action.payload],
+        metrics: [removeAllImagesFromPayload(action.payload)],
         iters: 3,
         scroll_id: debugImages[action.payload.task] ? debugImages[action.payload.task].scroll_id : null,
         navigate_earlier: action.type !== debugActions.GET_PREVIOUS_DEBUG_IMAGES_BATCH,
         refresh: [debugActions.SET_DEBUG_IMAGES_SELECTED_METRIC, debugActions.REFRESH_IMAGES_SELECTED_METRIC].includes(action.type)
       })
         .pipe(
-          flatMap((res: any) => {
+          mergeMap((res: any) => {
             const actionsToShoot = [new DeactiveLoader(action.type), setRefreshing({payload: false})];
             if (res.metrics[0].iterations && res.metrics[0].iterations.length > 0) {
               actionsToShoot.push(new debugActions.SetDebugImages({res, task: action.payload.task}));
@@ -102,7 +108,7 @@ export class DebugImagesEffects {
     ofType<debugActions.FetchExperiments>(debugActions.FETCH_EXPERIMENTS),
     switchMap((action) => this.apiTasks.tasksGetAllEx({id: action.payload, only_fields: ['id', 'name', 'status']})
       .pipe(
-        flatMap(res => [new debugActions.SetExperimentsNames(res), new DeactiveLoader(action.type)]),
+        mergeMap(res => [new debugActions.SetExperimentsNames(res), new DeactiveLoader(action.type)]),
         catchError(error => [new RequestFailed(error), new DeactiveLoader(action.type)])
       )
     )
@@ -113,13 +119,13 @@ export class DebugImagesEffects {
   fetchMetrics$ = this.actions$.pipe(
     ofType<debugActions.GetDebugImagesMetrics | debugActions.RefreshDebugImagesMetrics>(debugActions.GET_DEBUG_IMAGES_METRICS, debugActions.REFRESH_DEBUG_IMAGES_METRICS),
     switchMap((action) => this.eventsApi.eventsGetTaskMetrics({
-        tasks: action.payload.tasks,
-        event_type: 'training_debug_image'
-      })
-        .pipe(
-          flatMap(res => [new debugActions.SetMetrics(res), new DeactiveLoader(action.type)]),
-          catchError(error => [new RequestFailed(error), new DeactiveLoader(action.type)])
-        )
+      tasks: action.payload.tasks,
+      event_type: 'training_debug_image'
+    })
+      .pipe(
+        mergeMap(res => [new debugActions.SetMetrics(res), new DeactiveLoader(action.type)]),
+        catchError(error => [new RequestFailed(error), new DeactiveLoader(action.type)])
+      )
     )
   );
 
@@ -136,7 +142,7 @@ export class DebugImagesEffects {
         scroll_id: scrollId
       })
         .pipe(
-          flatMap(res => [
+          mergeMap(res => [
             setDebugImageIterations({min_iteration: res.min_iteration, max_iteration: res.max_iteration}),
             setCurrentDebugImage({event: res.event}), new DeactiveLoader(action.type),
             setDebugImageViewerScrollId({scrollId: res.scroll_id}),
@@ -157,7 +163,7 @@ export class DebugImagesEffects {
         navigate_earlier: action.navigateEarlier
       })
         .pipe(
-          flatMap(res => {
+          mergeMap(res => {
             if (!res.event) {
               return [action.navigateEarlier ? setDisplayerBeginningOfTime({beginningOfTime: true}) : setDisplayerEndOfTime({endOfTime: true})];
             } else {

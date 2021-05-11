@@ -3,50 +3,26 @@
 }
 
 .box {
-  padding: 10px;
-  max-height: calc(100% - 400px);
+  height: calc(90vh - 360px);
   min-height: 100px;
   overflow-y: scroll;
   position: relative;
   margin-top: 10px;
 }
 
-.new-tab {
-    position: absolute;
-    top: -22px;
-    right:0;
-    cursor: pointer;
-  img {
-    width: 11px;
-    height: 11px;
-  }
-}
-
-.read-through-notice {
-  margin: 40px auto 0 30%;
-  font-size: 11px;
-  color: lightslategray;
-
-  p {
-    margin-bottom: 0;
-  }
-}
-
 .buttons {
-  margin-top: 10px;
-  margin: 10px auto 0 40%;
+  display: flex;
+  align-items: baseline;
+  margin: 24px 0 0 40%;
 
-    button {
-      text-transform: uppercase;
-    }
-    .yes-button {
-      margin-right: 16px;
-    }
-
-    .btn-accept{
-        background-color: #E7E7E8;
-    }
+  button {
+    text-transform: uppercase;
   }
+  p {
+    font-size: 11px;
+    color: lightslategray;
+  }
+}
 
 :host {
   sm-confirm-dialog {

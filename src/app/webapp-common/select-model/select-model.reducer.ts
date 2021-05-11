@@ -1,12 +1,12 @@
 import {createFeatureSelector, createSelector} from '@ngrx/store';
 
-import {Model} from '../../business-logic/model/models/model';
 import {MODELS_VIEW_MODES, ModelsViewModesEnum} from '../../webapp-common/models/models.consts';
-import {TABLE_SORT_ORDER, TableSortOrderEnum} from '../../webapp-common/shared/ui-components/data/table/table.consts';
-import {ModelTableColFieldsEnum, SelectedModel} from '../../webapp-common/models/shared/models.model';
+import {TABLE_SORT_ORDER} from '../../webapp-common/shared/ui-components/data/table/table.consts';
+import {SelectedModel} from '../../webapp-common/models/shared/models.model';
 import {MODELS_TABLE_COL_FIELDS} from '../../webapp-common/models/shared/models.const';
 import * as actions from './select-model.actions';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
+import {SortMeta} from 'primeng/api';
 
 export interface SelectModelState {
   models: SelectedModel[];
@@ -16,26 +16,24 @@ export interface SelectModelState {
   modelToken: string;
   viewMode: ModelsViewModesEnum;
   allProjectsMode: boolean;
-  tableFilters: {[s: string]: FilterMetadata} ;
-  tableSortField: string;
-  tableSortOrder: TableSortOrderEnum;
+  tableFilters: { [s: string]: FilterMetadata };
+  tableSortFields: SortMeta[];
   page: number;
   globalFilter: string;
 }
 
 const selectModelInitState: SelectModelState = {
-  models             : [],
-  selectedModels     : [],
-  noMoreModels       : false,
+  models: [],
+  selectedModels: [],
+  noMoreModels: false,
   selectedModelSource: null,
-  modelToken         : null,
-  viewMode           : MODELS_VIEW_MODES.TABLE,
-  allProjectsMode    : true,
-  tableFilters       : null,
-  tableSortField     : MODELS_TABLE_COL_FIELDS.CREATED,
-  tableSortOrder     : TABLE_SORT_ORDER.ASC,
-  page               : -1, // -1 so the "getNextModels" will send 0.
-  globalFilter       : null,
+  modelToken: null,
+  viewMode: MODELS_VIEW_MODES.TABLE,
+  allProjectsMode: true,
+  tableFilters: null,
+  tableSortFields: [{field: MODELS_TABLE_COL_FIELDS.CREATED, order: TABLE_SORT_ORDER.DESC}],
+  page: -1, // -1 so the "getNextModels" will send 0.
+  globalFilter: null,
 };
 
 
@@ -66,8 +64,8 @@ export function selectModelReducer<ActionReducer>(state: SelectModelState = sele
       return {...state, viewMode: action.payload};
     case actions.GLOBAL_FILTER_CHANGED:
       return {...state, globalFilter: action.payload};
-    case actions.TABLE_SORT_CHANGED:
-      return {...state, tableSortOrder: action.payload.sortOrder, tableSortField: action.payload.colId};
+    case actions.setTableSort.type:
+      return {...state, tableSortFields: action.orders};
     case actions.TABLE_FILTER_CHANGED:
       return {
         ...state,
@@ -82,14 +80,13 @@ export function selectModelReducer<ActionReducer>(state: SelectModelState = sele
 }
 
 
-export const models                  = createFeatureSelector<SelectModelState>('selectModel');
-export const selectModelsList        = createSelector(models, (state) => state ? state.models : []);
-export const selectCurrentPage       = createSelector(models, (state): number => state.page);
-export const selectGlobalFilter      = createSelector(models, (state): string => state.globalFilter);
-export const selectTableSortField    = createSelector(models, (state): string => state.tableSortField);
-export const selectTableSortOrder    = createSelector(models, (state): TableSortOrderEnum => state.tableSortOrder);
-export const selectTableFilters      = createSelector(models, state => state.tableFilters);
+export const models = createFeatureSelector<SelectModelState>('selectModel');
+export const selectModelsList = createSelector(models, (state) => state ? state.models : []);
+export const selectCurrentPage = createSelector(models, (state): number => state.page);
+export const selectGlobalFilter = createSelector(models, (state): string => state.globalFilter);
+export const selectTableSortFields = createSelector(models, (state): SortMeta[] => state.tableSortFields);
+export const selectTableFilters = createSelector(models, state => state.tableFilters);
 export const selectIsAllProjectsMode = createSelector(models, (state): boolean => state.allProjectsMode);
-export const selectViewMode          = createSelector(models, (state): ModelsViewModesEnum => state.viewMode);
-export const selectSelectedModels    = createSelector(models, (state): Array<any> => state.selectedModels);
-export const selectNoMoreModels      = createSelector(models, (state): boolean => state.noMoreModels);
+export const selectViewMode = createSelector(models, (state): ModelsViewModesEnum => state.viewMode);
+export const selectSelectedModels = createSelector(models, (state): Array<any> => state.selectedModels);
+export const selectNoMoreModels = createSelector(models, (state): boolean => state.noMoreModels);

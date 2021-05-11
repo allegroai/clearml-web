@@ -1,8 +1,5 @@
 import {Injectable} from '@angular/core';
 import {ExperimentReverterService} from '../../../features/experiments/shared/services/experiment-reverter.service';
-import {
-  ISelectedExperiment, ISelectedExperimentOutput
-} from '../../../features/experiments/shared/experiment-info.model';
 import {get} from 'lodash/fp';
 import {ExecutionDetails, ModelDetails} from '../shared/experiments-compare-details.model';
 import {Task} from '../../../business-logic/model/tasks/task';
@@ -10,6 +7,9 @@ import {ExperimentDetailsReverterServiceBase} from '../../../features/experiment
 import {ARTIFACTS_TYPES} from '../../tasks/tasks.constants';
 import {Artifact} from '../../../business-logic/model/tasks/artifact';
 import {crc32} from '../../shared/utils/shared-utils';
+import {TaskModelItem} from '../../../business-logic/model/tasks/taskModelItem';
+import {IModelInfo} from '../../experiments/shared/common-experiment-model.model';
+import {ITask} from '../../../business-logic/model/al-task';
 
 @Injectable({
   providedIn: 'root'
@@ -20,10 +20,10 @@ export class ExperimentDetailsReverterService extends ExperimentDetailsReverterS
     super(experimentReverter);
   }
 
-  revertArtifacts(experiment: ISelectedExperiment): any {
+  revertArtifacts(experiment: ITask): any {
     const result = {
-      ' input model': this.revertModel(experiment),
-      ' output model': this.revertOutputModel(experiment.output.model)
+      ' input models': this.revertModels(experiment.models.input),
+      ' output models': this.revertModels(experiment.models.output)
     };
     experiment.execution.artifacts.forEach(artifact => result[artifact.key] = this.revertArtifact(artifact));
     return result;
@@ -57,27 +57,27 @@ export class ExperimentDetailsReverterService extends ExperimentDetailsReverterS
     return result;
   }
 
-  revertOutputModel(model: ISelectedExperimentOutput['model']): ModelDetails {
-    return {
-      model: this.revertModelInput({model}),
-      network_design: this.revertNetworkDesign(model),
-    };
+  revertModels(models: TaskModelItem[]) {
+    return models.reduce((acc, model) => {
+      acc[model.name] = this.revertModel(model);
+      return acc;
+    }, {});
   }
 
-  revertModel(experiment: ISelectedExperiment): ModelDetails {
+  revertModel(model: TaskModelItem): ModelDetails {
     return {
-      model: this.revertModelInput(experiment.execution),
-      network_design: this.revertNetworkDesign(experiment.execution.model),
+      model: this.revertModelInput(model),
+      network_design: this.revertNetworkDesign(model.model),
     };
   }
 
   revertNetworkDesign(model): string {
-    let networkDesign = get('design.design', model) || get('design', model);
+    let networkDesign = model?.design?.design || model?.design;
     networkDesign = typeof networkDesign === 'string' ? networkDesign.split('\n') : {};
     return networkDesign;
   }
 
-  revertExecution(experiment: ISelectedExperiment): ExecutionDetails {
+  revertExecution(experiment: ITask): ExecutionDetails {
     let pip = get('script.requirements.pip', experiment);
     pip = (pip === undefined || Array.isArray(pip)) ? pip : pip.split('\n');
     pip = pip?.filter(row => !row.startsWith('#') && row.length > 0); // Should we remove comments????
@@ -87,23 +87,27 @@ export class ExperimentDetailsReverterService extends ExperimentDetailsReverterS
       diff = (Array.isArray(diff)) ? diff : diff.split('\n');
       diff = (diff.length < 3000 && diff[0]?.length < 3000) ? diff : [`** Content is too large to display. Hash: ${crc32(get('script.diff', experiment))}`];
     }
-    const base_docker_image = get('execution.docker_cmd', experiment) || '';
 
     return {
       source: experiment.script ? this.revertExecutionSource(experiment.script) : undefined,
       uncommitted_changes: diff,
       installed_packages: pip,
-      base_docker_image
+      container: {
+        image: experiment.container?.image || '',
+        arguments: experiment.container?.arguments || '',
+        setup_shell_script: experiment.container?.setup_shell_script?.split('\n') || []
+      }
     };
   }
 
 
-  public revertModelInput(execution: any) {
+  public revertModelInput(model: TaskModelItem): IModelInfo {
     return {
-      id: get('model.id', execution),
-      name: get('model.name', execution),
-      url: get('model.uri', execution),
-      framework: execution?.framework || get('model.framework', execution)
+      id: get('model.id', model),
+      name: get('model.name', model),
+      // taskName: get('name', model),
+      uri: get('model.uri', model),
+      framework: get('framework', model) || get('model.framework', model)
     };
   }
 

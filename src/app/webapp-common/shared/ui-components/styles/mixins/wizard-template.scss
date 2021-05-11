@@ -14,7 +14,7 @@
   border-bottom: 8px solid #FFFFFF;
   &:hover {
     border-bottom: 8px solid $neon-yellow-betterinchrome;
-    /deep/ .step-number {
+    ::ng-deep .step-number {
       color: $dark-grey-blue-three;
     }
   }

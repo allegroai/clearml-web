@@ -1,7 +1,7 @@
 import {hslToRgb, rgbToHsl} from '../../services/color-hash/color-hash.utils';
 import {Subscription} from 'rxjs';
 import {Input, OnDestroy, Directive} from '@angular/core';
-import {Data, Frame, Layout, LayoutAxis, Legend, PlotData} from 'plotly.js';
+import {Frame, Layout, LayoutAxis, Legend, PlotData} from 'plotly.js';
 import {selectScaleFactor} from '../../../core/reducers/view-reducer';
 import {Store} from '@ngrx/store';
 
@@ -30,12 +30,15 @@ export interface ExtLayout extends Omit<Layout, 'xaxis' | 'yaxis' | 'legend'> {
   yaxis: Partial<ExtLayoutAxis>;
   legend: Partial<ExtLegend>;
   uirevision: number | string;
+  name: string;
 }
 
-interface ExtData extends Data {
+export interface ExtData extends PlotData {
   task: string;
   cells: any;
   header: any;
+  name: string;
+  isSmoothed: boolean;
 }
 
 @Directive({
@@ -54,7 +57,7 @@ export class PlotlyGraphBase implements OnDestroy {
     this.scaleSub = store.select(selectScaleFactor).subscribe(scaleFactor => this.scaleExists = scaleFactor !== 100);
   }
 
-  public _reColorTrace(trace, newColor: string[]) {
+  public _reColorTrace(trace: ExtData, newColor: string[]): void {
     let colorString = `rgb(${newColor[0]},${newColor[1]},${newColor[2]})`;
     if (this.isSmooth && !trace.isSmoothed) {
       const colorHSL = rgbToHsl(newColor);
@@ -73,17 +76,17 @@ export class PlotlyGraphBase implements OnDestroy {
     }
   }
 
-  public _getTraceColor(trace: any) {
+  public _getTraceColor(trace: ExtData): string {
     if (trace.line) {
-      return trace.line.color;
+      return trace.line.color as string;
     }
     if (trace.marker) {
-      return trace.marker.color;
+      return trace.marker.color as string;
     }
     return '';
   }
 
-  public addIdToDuplicateExperiments(data: ExtData[], taskId: string) {
+  public addIdToDuplicateExperiments(data: ExtData[], taskId: string): ExtData[]{
     const namesHash = {};
     for (let i = 0; i < data.length; i++) {
       if (!data[i].name) {
@@ -98,7 +101,7 @@ export class PlotlyGraphBase implements OnDestroy {
     }
     const filtered = Object.entries(namesHash).filter((entry: any) => entry[1].length > 1);
     const duplicateIndexes = filtered.reduce((acc, entry: any) => acc.concat(entry[1]), []);
-    const merged = [].concat.apply([], duplicateIndexes);
+    const merged = [...duplicateIndexes];
 
     for (let i = 0; i < merged.length; i++) {
       const key = merged[i];
@@ -111,7 +114,7 @@ export class PlotlyGraphBase implements OnDestroy {
     return data;
   }
 
-  public extractColorKey(html: string) {
+  public extractColorKey(html: string): string {
     const div = document.createElement('div');
     div.innerHTML = html;
     const el = div.querySelector('.color-key');

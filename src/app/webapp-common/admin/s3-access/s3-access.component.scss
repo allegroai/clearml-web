@@ -1,6 +1,6 @@
 @import "../../shared/ui-components/styles/variables";
 
-/deep/ body sm-s3-access .editable {
+::ng-deep body sm-s3-access .editable {
   padding: 0;
   background-color: #ffffff;
 }

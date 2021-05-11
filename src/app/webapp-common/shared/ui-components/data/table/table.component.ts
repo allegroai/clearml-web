@@ -4,7 +4,7 @@ import {
   OnInit, Output, QueryList, Renderer2, TemplateRef, ViewChild, ViewChildren
 } from '@angular/core';
 import {get} from 'lodash/fp';
-import {MenuItem, PrimeTemplate} from 'primeng/api';
+import {MenuItem, PrimeTemplate, SortMeta} from 'primeng/api';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {ContextMenu} from 'primeng/contextmenu';
 import {Table} from 'primeng/table';
@@ -41,7 +41,7 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
 
   readonly ColHeaderTypeEnum = ColHeaderTypeEnum;
   table: Table;
-  @ViewChildren('dataTable') public tableComp: QueryList<Table>;
+  @ViewChildren(Table) public tableComp: QueryList<Table>;
   loadButton: ElementRef<HTMLDivElement>;
   @ViewChildren('loadButton') loadButtons: QueryList<ElementRef<HTMLDivElement>>;
   @ViewChild('cm', {static: true}) menu: ContextMenu;
@@ -89,7 +89,7 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
   @Input() reorderableColumns = false;
   @Input() resizableColumns = false;
   @Input() sortOrder: TableSortOrderEnum;
-  @Input() sortField: string;
+  @Input() sortFields: SortMeta[];
   @Input() selection: any;
   @Input() activeContextRow;
   @Input() contextMenuOpen = false;
@@ -130,7 +130,7 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
   @Input() virtualScroll: boolean;
   @Input() minimizedTableHeader: string;
 
-  @Output() sortChanged = new EventEmitter<{ field: ISmCol['id']; sortOrder: TableSortOrderEnum }>();
+  @Output() sortChanged = new EventEmitter<{ field: ISmCol['id']; isShift: boolean }>();
   @Output() rowClicked = new EventEmitter();
   @Output() rowSelectionChanged = new EventEmitter<{ data: Array<any>; originalEvent?: Event }>();
   @Output() firstChanged = new EventEmitter();
@@ -143,16 +143,16 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
     window.clearTimeout(this.resizeTimer);
     this.resizeTimer = window.setTimeout(() => {
       this.updateLoadButton(null);
-      if (this.table) {
-        const element = (this.table.el.nativeElement as HTMLDivElement);
-        const scrollableBody = element.getElementsByClassName('p-datatable-scrollable-body')[0];
-        const scroll = scrollableBody && scrollableBody.scrollHeight > scrollableBody.clientHeight ? 7 : 0;
-        let width = element.getBoundingClientRect().width - scroll;
-        if (this.scaleFactor) {
-          width *= this.scaleFactor / 100;
-        }
-        this.table.setScrollableItemsWidthOnExpandResize(null, width, 0);
-      }
+      // if (this.table) {
+      //   const element = (this.table.el.nativeElement as HTMLDivElement);
+      //   const scrollableBody = element.getElementsByClassName('p-datatable-scrollable-body')[0];
+      //   const scroll = scrollableBody && scrollableBody.scrollHeight > scrollableBody.clientHeight ? 7 : 0;
+      //   let width = element.getBoundingClientRect().width - scroll;
+      //   if (this.scaleFactor) {
+      //     width *= this.scaleFactor / 100;
+      //   }
+      //   this.table.setScrollableItemsWidthOnExpandResize(null, width, 0);
+      // }
     }, delay);
   }
 
@@ -203,10 +203,9 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
   }
 
   ngAfterViewInit(): void {
-    this.tableComp.changes
-      .pipe(filter((comps: QueryList<Table>) => !!comps.first), take(1))
-      .subscribe((comps: QueryList<Table>) => {
-        this.table = comps.first;
+    const gotTable = (item: Table) => {
+      if (!this.table) {
+        this.table = item;
         const scrollContainer = this.table.el.nativeElement.getElementsByClassName('p-datatable-scrollable-body')[0] as HTMLDivElement;
         if (scrollContainer) {
           scrollContainer.onscroll = (e: Event) => {
@@ -221,7 +220,13 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
         }
         this.updateLoadButton(null);
         this.updateFilter();
-      });
+      }
+    };
+
+    this.tableComp.changes
+      .pipe(filter((comps: QueryList<Table>) => !!comps.first), take(1))
+      .subscribe((comps: QueryList<Table>) => gotTable(comps.first));
+    this.tableComp.forEach(gotTable);
     this.loadButtons.changes
       .pipe(filter((comps: QueryList<ElementRef<HTMLDivElement>>) => !!comps.first), take(1))
       .subscribe((comps: QueryList<ElementRef<HTMLDivElement>>) => {
@@ -420,12 +425,15 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
     }
   }
 
-  getColName(colId: ISmCol['id']) {
-    const col = this.columns.find(col => colId === col.id);
-    return col ? col.header : 'Sort by';
-  }
-
   get sortableCols() {
     return this.columns.filter(col => col.sortable);
+  }
+
+  sortItemClick($event: { event?: MouseEvent; itemValue: string }, colId: string) {
+    this.sortChanged.emit({isShift: $event.event.shiftKey, field: colId});
+  }
+
+  getOrder(colId: string) {
+    return this.sortFields.find(field => field.field === colId)?.order;
   }
 }

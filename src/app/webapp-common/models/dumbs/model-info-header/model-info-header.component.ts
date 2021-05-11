@@ -9,6 +9,14 @@ import {SelectedModel, TableModel} from '../../shared/models.model';
 import {MenuComponent} from '../../../shared/ui-components/panel/menu/menu.component';
 import {getSysTags} from '../../model.utils';
 import {ActivateModelEdit, CancelModelEdit} from '../../actions/models-info.actions';
+import {
+  CountAvailableAndIsDisable, CountAvailableAndIsDisableSelectedFiltered,
+  MENU_ITEM_ID,
+  selectionDisabledArchive,
+  selectionDisabledDelete,
+  selectionDisabledMoveTo,
+  selectionDisabledPublishModels
+} from '../../../shared/entity-page/items.utils';
 
 @Component({
   selector   : 'sm-model-info-header',
@@ -22,6 +30,7 @@ export class ModelInfoHeaderComponent {
   public projectTags$: Observable<string[]>;
   public companyTags$: Observable<string[]>;
   public sysTags: string[];
+  selectedDisableAvailable: Record<string, CountAvailableAndIsDisableSelectedFiltered>;
 
   @Input() editable: boolean;
   @Input() backdropActive: boolean;
@@ -43,9 +52,18 @@ export class ModelInfoHeaderComponent {
   }
 
   @Input() set model(model: TableModel | SelectedModel) {
+    if (this._model?.id != model?.id) {
+      this.viewId = false;
+    }
     this._model = model;
-    this.viewId = false;
     this.sysTags = getSysTags(model as TableModel);
+    const selectedModelsDisableAvailable: Record<string, CountAvailableAndIsDisableSelectedFiltered> = {
+      [MENU_ITEM_ID.PUBLISH]: selectionDisabledPublishModels([model]),
+      [MENU_ITEM_ID.MOVE_TO]: selectionDisabledMoveTo([model]),
+      [MENU_ITEM_ID.DELETE]: selectionDisabledDelete([model]),
+      [MENU_ITEM_ID.ARCHIVE]: selectionDisabledArchive([model])
+    };
+    this.selectedDisableAvailable = selectedModelsDisableAvailable;
   }
 
   public onNameChanged(name) {
@@ -57,7 +75,6 @@ export class ModelInfoHeaderComponent {
       return;
     }
     window.setTimeout(() => this.store.dispatch(new ActivateModelEdit('tags')), 200);
-    this.store.dispatch(getTags());
     this.tagMenu.position = {x: event.clientX, y: event.clientY};
     window.setTimeout(() => {
       this.tagMenu.openMenu();

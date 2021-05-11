@@ -10,7 +10,7 @@ export class RefreshButtonComponent implements OnInit {
   @Input() allowAutoRefresh: boolean = true;
   @Input() disabled: boolean = true;
   @Output() refreshList = new EventEmitter();
-  @Output() setAutoRefresh = new EventEmitter();
+  @Output() setAutoRefresh = new EventEmitter<boolean>();
 
   constructor() {
   }

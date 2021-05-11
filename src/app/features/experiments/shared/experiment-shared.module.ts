@@ -2,7 +2,7 @@ import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {SMSharedModule} from '../../../webapp-common/shared/shared.module';
 import {ExperimentConverterService} from './services/experiment-converter.service';
-import {ExperimentMenuComponent} from './components/experiment-menu/experiment-menu.component';
+import { ExperimentMenuComponent } from '../../../webapp-common/experiments/shared/components/experiment-menu/experiment-menu.component';
 
 const DECLARATIONS = [
   ExperimentMenuComponent,

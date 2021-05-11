@@ -5,12 +5,13 @@
   .filter-sort-container {
     position: relative;
     z-index: 20;
-    height: 45px;
+    //height: 45px;
 
 
-    /deep/ .menu-button {
+    ::ng-deep .menu-button {
       color: $blue-400;
-      font-weight: bold;
+      font-weight: 500;
+      font-size: 12px;
 
       &.active {
         color: $blue-250;

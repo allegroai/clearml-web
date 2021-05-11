@@ -7,8 +7,6 @@ import {EffectsModule} from '@ngrx/effects';
 import {projectsReducer} from '../projects/projects.reducer';
 import {ProjectsEffects} from './projects.effects';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {ProjectCreateDialogModule} from '../../webapp-common/shared/project-create-dialog/project-create-dialog.module';
-import {ProjectCreateDialogComponent} from '../../webapp-common/shared/project-create-dialog/project-create-dialog.component';
 import {CommonProjectsModule} from '../../webapp-common/projects/common-projects.module';
 
 @NgModule({
@@ -18,7 +16,6 @@ import {CommonProjectsModule} from '../../webapp-common/projects/common-projects
     ProjectRouterModule,
     FormsModule,
     ReactiveFormsModule,
-    ProjectCreateDialogModule,
     CommonProjectsModule,
     StoreModule.forFeature('projects', projectsReducer),
     EffectsModule.forFeature([ProjectsEffects]),

@@ -8,6 +8,9 @@ import {AdminService} from '../../../features/admin/admin.service';
 import {GroupByCharts} from '../../experiments/reducers/common-experiment-output.reducer';
 import {Store} from '@ngrx/store';
 import {selectPlotlyReady} from '../../core/reducers/view-reducer';
+import {ResizeEvent} from 'angular-resizable-element';
+import {filter, skip, tap} from 'rxjs/operators';
+import {Subscription} from 'rxjs';
 
 @Component({
   selector: 'sm-experiment-graphs',
@@ -41,13 +44,22 @@ export class ExperimentGraphsComponent {
   private visibleEntries: IntersectionObserverEntry[] = [];
   private timer: number;
   public plotlyReady$ = this.store.select(selectPlotlyReady);
+  public plotlyReady: boolean;
+  private plotlyReadySub: Subscription;
+  public height: number = 450;
+  private width: number;
+  private graphsPerRow: number = 2;
+  private minWidth: number = 400;
+  private resizeTextElement: HTMLDivElement;
+  private graphsNumberLimit: number;
+  public activeResizeElement: SingleGraphComponent;
 
   @HostListener('window:resize')
   onResize() {
     clearTimeout(this.timer);
     this.prepareRedraw();
     this.timer = window.setTimeout(() => {
-      this.graphInView(this.visibleEntries);
+      this.calculateGraphsLayout();
     }, 200);
   }
 
@@ -78,14 +90,24 @@ export class ExperimentGraphsComponent {
     return this._xAxisType;
   }
 
+  @ViewChildren('metricGroup') allMetricGroups !: QueryList<ElementRef>;
   @ViewChildren(SingleGraphComponent) allGraphs !: QueryList<SingleGraphComponent>;
 
   constructor(
     private el: ElementRef,
     private changeDetection: ChangeDetectorRef,
     private adminService: AdminService,
-    private store: Store<any>
-  ) {}
+    private store: Store<any>,
+    private renderer: Renderer2
+  ) {
+    this.plotlyReadySub = this.plotlyReady$.pipe(
+      tap(ready => this.plotlyReady = ready),
+      skip(1), // Only work on page load 1: false 2: true
+      filter(ready => !!ready)).subscribe(() => {
+      this.prepareRedraw();
+      this.graphInView(this.visibleEntries);
+    });
+  }
 
   @Output() resetGraphs = new EventEmitter();
   @Output() changeWeight = new EventEmitter<number>();
@@ -94,8 +116,7 @@ export class ExperimentGraphsComponent {
   @Output() toggleSettings = new EventEmitter();
 
   @Input() set splitSize(splitSize: number) {
-    this.prepareRedraw();
-    setTimeout(() => this.graphInView(this.visibleEntries));
+    this.calculateGraphsLayout();
   }
 
   @Input() showSettings: boolean = false;
@@ -157,7 +178,7 @@ export class ExperimentGraphsComponent {
       }
       const el = entries[i].target;
       const graphComponent = this.allGraphs.find(graphComp => graphComp.identifier === el.id);
-      if (!graphComponent?.alreadyDrawn || graphComponent?.shouldRefresh) {
+      if (this.plotlyReady && (!graphComponent?.alreadyDrawn || graphComponent?.shouldRefresh)) {
         graphComponent.drawGraph(true);
       }
     }
@@ -166,7 +187,9 @@ export class ExperimentGraphsComponent {
   private maintainVisibleEntries(entries: IntersectionObserverEntry[]) {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
-        this.visibleEntries.push(entry);
+        if (!this.visibleEntries.includes(entry)) {
+          this.visibleEntries.push(entry);
+        }
       } else {
         this.visibleEntries = this.visibleEntries.filter(visEntry => visEntry.target !== entry.target);
       }
@@ -195,5 +218,69 @@ export class ExperimentGraphsComponent {
 
   isWidthBigEnough() {
     return this.el.nativeElement.clientWidth > this.breakPoint;
+  }
+
+  private calculateGraphsLayout() {
+    if (this.allGraphs) {
+      const containerWidth = this.el.nativeElement.clientWidth;
+      while (containerWidth / this.graphsPerRow < this.minWidth && this.graphsPerRow > 1) {
+        this.graphsPerRow -= 1;
+      }
+      const width = Math.floor(containerWidth / this.graphsPerRow);
+      this.width = width - 4;
+      if (!this.isGroupGraphs) {
+        this.allMetricGroups.forEach(metricGroup => this.renderer.setStyle(metricGroup.nativeElement, 'width', `${this.width}px`));
+      } else {
+        this.allGraphs.forEach(singleGraph => this.renderer.setStyle(singleGraph.elementRef.nativeElement, 'width', `${this.width}px`));
+      }
+    }
+    this.prepareRedraw();
+    this.graphInView(this.visibleEntries);
+  }
+
+  sizeChanged($event: ResizeEvent) {
+    this.activeResizeElement = null;
+    if ($event.edges.right) {
+      const containerWidth = this.el.nativeElement.clientWidth;
+      const userWidth = $event.rectangle.width;
+      this.graphsPerRow = Math.min(Math.floor(containerWidth / userWidth), this.graphsNumberLimit);
+
+      if (!this.isGroupGraphs) {
+        this.allMetricGroups.forEach(metricGroup => {
+          this.width = containerWidth / this.graphsPerRow - 4;
+          this.renderer.setStyle(metricGroup.nativeElement, 'width', `${this.width}px`);
+        });
+      } else {
+        this.allGraphs.forEach(singleGraph => {
+          this.width = containerWidth / this.graphsPerRow - 4;
+          this.renderer.setStyle(singleGraph.elementRef.nativeElement, 'width', `${this.width}px`);
+        });
+      }
+    }
+    if ($event.edges.bottom) {
+      this.height = $event.rectangle.height;
+      if (!this.isGroupGraphs) {
+        this.allMetricGroups.forEach(metricGroup => this.renderer.setStyle(metricGroup.nativeElement, 'height', `${this.height}px`));
+      } else {
+        this.allGraphs.forEach(singleGraph => this.renderer.setStyle(singleGraph.elementRef.nativeElement, 'height', `${this.height}px`));
+      }
+    }
+    this.prepareRedraw();
+    setTimeout(() => this.graphInView(this.visibleEntries));
+  }
+
+  resizeStarted(metricGroup: HTMLDivElement, singleGraph: SingleGraphComponent) {
+    this.activeResizeElement = singleGraph;
+    this.changeDetection.detectChanges();
+    this.graphsNumberLimit = this.isGroupGraphs ? metricGroup.querySelectorAll('sm-single-graph').length : this.graphList.length;
+    this.resizeTextElement = singleGraph.elementRef.nativeElement.querySelector('.whitebg.resize-active.resize-ghost-element .resize-overlay-text');
+  }
+
+  onResizing($event: ResizeEvent) {
+    if ($event.edges.right) {
+      const graphsPerRow = Math.min(Math.floor(this.el.nativeElement.clientWidth / $event.rectangle.width), this.graphsNumberLimit);
+      const text = `${graphsPerRow > 1 ? graphsPerRow + ' graphs' : '1 graph'} per row`;
+      this.renderer.setProperty(this.resizeTextElement, 'textContent', text);
+    }
   }
 }

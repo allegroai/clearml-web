@@ -4,7 +4,7 @@ import {Component, OnDestroy, OnInit, ViewEncapsulation, HostListener, Renderer2
 import {ActivatedRoute, NavigationEnd, Router, Params, RouterEvent} from '@angular/router';
 import {Title} from '@angular/platform-browser';
 import {selectLoggedOut} from './webapp-common/core/reducers/view-reducer';
-import {select, Store} from '@ngrx/store';
+import {Store} from '@ngrx/store';
 import {get} from 'lodash/fp';
 import {selectRouterParams, selectRouterUrl} from './webapp-common/core/reducers/router-reducer';
 import {ApiProjectsService} from './business-logic/api-services/projects.service';
@@ -20,8 +20,8 @@ import {
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {S3AccessResolverComponent} from './webapp-common/layout/s3-access-resolver/s3-access-resolver.component';
 import {cancelS3Credentials, getTutorialBucketCredentials} from './webapp-common/core/actions/common-auth.actions';
-import {FetchCurrentUser} from './webapp-common/core/actions/users.actions';
-import {distinctUntilChanged, filter, map, tap, withLatestFrom} from 'rxjs/operators';
+import {termsOfUseAccepted} from './webapp-common/core/actions/users.actions';
+import {debounceTime, distinctUntilChanged, filter, map, tap, withLatestFrom} from 'rxjs/operators';
 import * as routerActions from './webapp-common/core/actions/router.actions';
 import {combineLatest, Observable, Subscription} from 'rxjs';
 import {selectBreadcrumbsStrings} from './webapp-common/layout/layout.reducer';
@@ -30,7 +30,7 @@ import {formatStaticCrumb} from './webapp-common/layout/breadcrumbs/breadcrumbs-
 import {ServerUpdatesService} from './webapp-common/shared/services/server-updates.service';
 import {selectAvailableUpdates, selectShowSurvey} from './core/reducers/view-reducer';
 import {UPDATE_SERVER_PATH} from './app.constants';
-import {plotlyReady, setScaleFactor, VisibilityChanged} from './webapp-common/core/actions/layout.actions';
+import {firstLogin, plotlyReady, setScaleFactor, VisibilityChanged} from './webapp-common/core/actions/layout.actions';
 import {UiUpdatesService} from './webapp-common/shared/services/ui-updates.service';
 import {UsageStatsService} from './core/Services/usage-stats.service';
 import {dismissSurvey} from './core/Actions/layout.actions';
@@ -40,6 +40,7 @@ import {ConfigurationService} from './webapp-common/shared/services/configuratio
 import {GoogleTagManagerService} from 'angular-google-tag-manager';
 import {selectIsSharedAndNotOwner} from './features/experiments/reducers';
 import {TipsService} from './webapp-common/shared/services/tips.service';
+import {USER_PREFERENCES_KEY} from '@common/user-preferences';
 
 @Component({
   selector: 'sm-root',
@@ -61,6 +62,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private s3Dialog: MatDialogRef<S3AccessResolverComponent, any>;
   private showLocalFilePopup$: Observable<any>;
   private breadcrumbsSubscription: Subscription;
+  private selectedCurrentUserSubscription: Subscription;
   private breadcrumbsStrings;
   private selectedCurrentUser$: Observable<any>;
   public showNotification: boolean = true;
@@ -80,7 +82,7 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   @HostListener('window:beforeunload', ['$event'])
-  beforeunloadHandler(event) {
+  beforeunloadHandler() {
     window.localStorage.setItem('lastWorkspace', this.activeWorkspace);
   }
 
@@ -101,23 +103,29 @@ export class AppComponent implements OnInit, OnDestroy {
     private configService: ConfigurationService
   ) {
     this.showS3Popup$ = this.store.select(selectShowS3PopUp);
-    this.showLocalFilePopup$ = this.store.pipe(select(selectShowLocalFilesPopUp));
+    this.showLocalFilePopup$ = this.store.select(selectShowLocalFilesPopUp);
     this.loggedOut$ = store.select(selectLoggedOut);
     this.isSharedAndNotOwner$ = this.store.select(selectIsSharedAndNotOwner);
     this.selectedProject$ = this.store.select(selectSelectedProject);
     this.updatesAvailable$ = this.store.select(selectAvailableUpdates);
-    this.showSurvey$ = this.store.select(selectShowSurvey).pipe(map(show => {
-      if (show) {
-        let loginTime = parseInt(localStorage.getItem('firstLogin'), 10);
-        if(!loginTime) {
-          loginTime = Date.now();
-          localStorage.setItem('firstLogin', `${loginTime}`);
+    this.showSurvey$ = combineLatest([this.store.select(selectShowSurvey), this.store.select(selectCurrentUser)])
+      .pipe(
+        debounceTime(0),
+        filter(([, user]) => !!user),
+        map(([show]) => {
+          if (show) {
+            let loginTime = parseInt(localStorage.getItem(USER_PREFERENCES_KEY.firstLogin), 10);
+            if(!loginTime) {
+              this.store.dispatch(firstLogin({first: true}));
+              loginTime = Date.now();
+              localStorage.setItem(USER_PREFERENCES_KEY.firstLogin, `${loginTime}`);
+              return false;
+            }
+            return Date.now() - loginTime > (14 * 24 * 60 * 60 * 1000); // 2 weeks in milliseconds
+          }
           return false;
-        }
-        return Date.now() - loginTime > (14 * 24 * 60 * 60 * 1000); // 2 weeks in milliseconds
-      }
-      return false;
-    }));
+        })
+      );
     this.selectedCurrentUser$ = this.store.select(selectCurrentUser);
     this.selectedProjectFromUrl$ = this.store.select(selectRouterParams)
       .pipe(
@@ -149,14 +157,15 @@ export class AppComponent implements OnInit, OnDestroy {
           this.updateTitle();
         });
 
-    this.store.dispatch(new FetchCurrentUser());
-    this.selectedCurrentUser$.pipe(
+    this.selectedCurrentUserSubscription = this.selectedCurrentUser$.pipe(
       tap(user => this.currentUser = user), // should not be filtered
       filter(user => !!user?.id),
-      distinctUntilChanged((prev, next) => prev?.id === next?.id))
-      .subscribe((user) => {
+      distinctUntilChanged((prev, next) => prev?.id === next?.id)
+    )
+    .subscribe(() => {
         this.store.dispatch(new GetAllProjects());
         this.store.dispatch(getTutorialBucketCredentials());
+        this.store.dispatch(termsOfUseAccepted());
         this.uiUpdatesService.checkForUiUpdate();
         this.tipsService.initTipsService();
         this.serverUpdatesService.checkForUpdates(UPDATE_SERVER_PATH);
@@ -171,7 +180,7 @@ export class AppComponent implements OnInit, OnDestroy {
         this.s3Dialog = this.matDialog.open(S3AccessResolverComponent);
         this.s3Dialog.afterClosed().pipe(
           withLatestFrom(
-            this.store.pipe(select(selectS3BucketCredentialsBucketCredentials)), this.store.pipe(select(selectS3PopUpDetails)))
+            this.store.select(selectS3BucketCredentialsBucketCredentials), this.store.select(selectS3PopUpDetails))
         )
           .subscribe(([data, bucketCredentials, popupDetails]) => {
             if (!(data && data.success)) {
@@ -201,15 +210,14 @@ export class AppComponent implements OnInit, OnDestroy {
         }
       });
 
-    this.breadcrumbsSubscription = this.store.pipe(
-      select(selectBreadcrumbsStrings),
-      filter(names => !!names)
-    ).subscribe(
-      (names) => {
-        this.breadcrumbsStrings = prepareNames(names);
-        this.updateTitle();
-      }
-    );
+    this.breadcrumbsSubscription = this.store.select(selectBreadcrumbsStrings)
+      .pipe(filter(names => !!names))
+      .subscribe(
+        (names) => {
+          this.breadcrumbsStrings = prepareNames(names);
+          this.updateTitle();
+        }
+      );
     if (window.localStorage.getItem('disableHidpi') !== 'true') {
       this.setScale();
     }
@@ -228,20 +236,21 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   nameChanged(name) {
-    this.store.dispatch(new UpdateProject({id: this.projectId, changes: {name: name}}));
+    this.store.dispatch(new UpdateProject({id: this.projectId, changes: {name}}));
   }
 
   ngOnDestroy(): void {
     this.urlSubscription.unsubscribe();
     this.breadcrumbsSubscription.unsubscribe();
+    this.selectedCurrentUserSubscription.unsubscribe();
   }
 
   changeRoute(feature) {
-    this.router.navigateByUrl('projects/' + this.projectId + '/' + feature);
+    return this.router.navigateByUrl('projects/' + this.projectId + '/' + feature);
   }
 
   backToProjects() {
-    this.router.navigateByUrl('projects');
+    return this.router.navigateByUrl('projects');
   }
 
   updateTitle() {
@@ -290,7 +299,7 @@ export class AppComponent implements OnInit, OnDestroy {
       const head: HTMLHeadElement = document.getElementsByTagName('head')[0];
       head.appendChild(script);
 
-      let counter = 200;
+      let counter = 600;
 
       const fn = () => {
         const plotly = (window as any).Plotly;

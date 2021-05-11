@@ -1,5 +1,6 @@
 import {ChangeDetectorRef, Component, EventEmitter, Input, Output} from '@angular/core';
 import {MetricVariantResult} from '../../../../business-logic/model/projects/metricVariantResult';
+import {ISmCol} from '../../../shared/ui-components/data/table/table.consts';
 
 @Component({
   selector   : 'sm-select-metric-for-custom-col',
@@ -41,7 +42,7 @@ export class SelectMetricForCustomColComponent {
   // }
 
   @Output() getMetricsToDisplay  = new EventEmitter();
-  @Output() selectedMetricToShow = new EventEmitter();
+  @Output() selectedMetricToShow = new EventEmitter<{variant: MetricVariantResult; addCol: boolean, valueType: string}>();
   @Output() goBack               = new EventEmitter();
 
   constructor(private changeDetectorRef: ChangeDetectorRef) {
@@ -57,7 +58,7 @@ export class SelectMetricForCustomColComponent {
     }
   }
 
-  public toggleMetricToDisplay(variant, value, valueType) {
+  public toggleMetricToDisplay(variant: ISmCol, value: boolean, valueType: string) {
     this.selectedMetricToShow.emit({variant, addCol: !value, valueType});
   }
 

@@ -12,7 +12,7 @@ export class RouterHelperGuard implements CanActivate {
     const viewMode = (route.url[0] && route.queryParams[route.url[0].path] || 'values').replace(/.*_/, '') || 'values'; // i.e: graph, min_values
     const defaultViewMode = route.url[1].path; // usually 'values'
     if (viewMode !== defaultViewMode) {
-      this.router.navigateByUrl(state.url.replace(defaultViewMode, viewMode), {queryParamsHandling: 'merge'});
+      this.router.navigateByUrl(state.url.replace(defaultViewMode, viewMode), /* Removed unsupported properties by Angular migration: queryParamsHandling. */ {});
       return false;
     }
     return true;

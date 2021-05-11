@@ -43,6 +43,7 @@ import {ScrollingModule} from '@angular/cdk/scrolling';
 import {MatRadioModule} from '@angular/material/radio';
 import {ExperimentCompareParamsComponent} from './containers/experiment-compare-params/experiment-compare-params.component';
 import {ExperimentsCompareParamsEffects} from './effects/experiments-compare-params.effects';
+import {FormsModule} from "@angular/forms";
 
 const syncedKeys = [
   'charts.settingsList',
@@ -77,31 +78,32 @@ export function localStorageReducer(reducer: ActionReducer<any>): ActionReducer<
   exports: [
     GetKeyValueArrayPipePipe
   ],
-  imports: [
-    CommonModule,
-    DragDropModule,
-    DebugImagesModule,
-    SMSharedModule,
-    TableDiffModule,
-    ScrollingModule,
-    CardModule,
-    DrawerModule,
-    ExperimentSharedModule,
-    ExperimentsCompareRoutingModule,
-    ExperimentGraphsModule,
-    ExperimentCompareSharedModule,
-    CommonExperimentSharedModule,
-    StoreModule.forFeature('experimentsCompare', experimentsCompareReducers, {metaReducers: [localStorageReducer]}),
-    EffectsModule.forFeature([
-      ExperimentsCompareDetailsEffects,
-      ExperimentsCompareParamsEffects,
-      ExperimentsCompareDebugImagesEffects,
-      ExperimentsCompareChartsEffects,
-      ExperimentsCompareMetricsValuesEffects,
-      SelectCompareHeaderEffects,
-      ExperimentsCompareScalarsGraphEffects]),
-      MatRadioModule,
-  ]
+    imports: [
+        CommonModule,
+        DragDropModule,
+        DebugImagesModule,
+        SMSharedModule,
+        TableDiffModule,
+        ScrollingModule,
+        CardModule,
+        DrawerModule,
+        ExperimentSharedModule,
+        ExperimentsCompareRoutingModule,
+        ExperimentGraphsModule,
+        ExperimentCompareSharedModule,
+        CommonExperimentSharedModule,
+        StoreModule.forFeature('experimentsCompare', experimentsCompareReducers, {metaReducers: [localStorageReducer]}),
+        EffectsModule.forFeature([
+            ExperimentsCompareDetailsEffects,
+            ExperimentsCompareParamsEffects,
+            ExperimentsCompareDebugImagesEffects,
+            ExperimentsCompareChartsEffects,
+            ExperimentsCompareMetricsValuesEffects,
+            SelectCompareHeaderEffects,
+            ExperimentsCompareScalarsGraphEffects]),
+        MatRadioModule,
+        FormsModule,
+    ]
 })
 export class ExperimentsCompareModule {
 }

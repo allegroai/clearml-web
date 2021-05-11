@@ -2,7 +2,7 @@
 
 @font-face {
   font-family: '#{$icomoon-font-family}';
-  src: url('./#{$icomoon-font-family}.ttf?391id9') format('truetype');
+  src: url('./#{$icomoon-font-family}.ttf?23s406') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -11,7 +11,7 @@
 [class^="al-ico-"], [class*=" al-ico-"] {
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: '#{$icomoon-font-family}' !important;
-  speak: none;
+  speak: never;
   font-style: normal;
   font-weight: normal;
   font-variant: normal;
@@ -383,9 +383,9 @@
     content: $al-ico-running;
   }
 }
-.al-ico-tree-view {
+.al-ico-setup {
   &:before {
-    content: $al-ico-tree-view;
+    content: $al-ico-setup;
   }
 }
 .al-ico-undo {
@@ -588,6 +588,11 @@
     content: $al-ico-currently-active;
   }
 }
+.al-ico-complete {
+  &:before {
+    content: $al-ico-complete;
+  }
+}
 .al-ico-access-key {
   &:before {
     content: $al-ico-access-key;
@@ -601,6 +606,282 @@
 .al-ico-users {
   &:before {
     content: $al-ico-users;
+  }
+}
+.al-ico-exit-archive {
+  &:before {
+    content: $al-ico-exit-archive;
+  }
+}
+.al-ico-calendar {
+  &:before {
+    content: $al-ico-calendar;
+  }
+}
+.al-ico-time {
+  &:before {
+    content: $al-ico-time;
+  }
+}
+.al-ico-add {
+  &:before {
+    content: $al-ico-add;
+  }
+}
+.al-ico-time-colon {
+  &:before {
+    content: $al-ico-time-colon;
+  }
+}
+.al-ico-regex {
+  &:before {
+    content: $al-ico-regex;
+  }
+}
+.al-ico-filter-on .path1 {
+  &:before {
+    content: $al-ico-filter-on-path1;
+    color: rgb(211, 255, 0);
+  }
+}
+.al-ico-filter-on .path2 {
+  &:before {
+    content: $al-ico-filter-on-path2;
+    margin-left: -1em;
+    color: rgb(132, 146, 194);
+  }
+}
+.al-ico-filter-off {
+  &:before {
+    content: $al-ico-filter-off;
+    color: #8492c2;
+  }
+}
+.al-ico-sort-off {
+  &:before {
+    content: $al-ico-sort-off;
+    color: #5a658e;
+  }
+}
+.al-ico-sort-on-down .path1 {
+  &:before {
+    content: $al-ico-sort-on-down-path1;
+    color: rgb(90, 101, 142);
+  }
+}
+.al-ico-sort-on-down .path2 {
+  &:before {
+    content: $al-ico-sort-on-down-path2;
+    margin-left: -1em;
+    color: rgb(195, 205, 240);
+  }
+}
+.al-ico-sort-on-up .path1 {
+  &:before {
+    content: $al-ico-sort-on-up-path1;
+    color: rgb(90, 101, 142);
+  }
+}
+.al-ico-sort-on-up .path2 {
+  &:before {
+    content: $al-ico-sort-on-up-path2;
+    margin-left: -1em;
+    color: rgb(195, 205, 240);
+  }
+}
+.al-ico-arrow-left {
+  &:before {
+    content: $al-ico-arrow-left;
+  }
+}
+.al-ico-arrow-right {
+  &:before {
+    content: $al-ico-arrow-right;
+  }
+}
+.al-ico-step-backward {
+  &:before {
+    content: $al-ico-step-backward;
+  }
+}
+.al-ico-step-forward {
+  &:before {
+    content: $al-ico-step-forward;
+  }
+}
+.al-ico-backward {
+  &:before {
+    content: $al-ico-backward;
+  }
+}
+.al-ico-forward {
+  &:before {
+    content: $al-ico-forward;
+  }
+}
+.al-ico-copy-to-clipboard {
+  &:before {
+    content: $al-ico-copy-to-clipboard;
+  }
+}
+.al-ico-card-example {
+  &:before {
+    content: $al-ico-card-example;
+  }
+}
+.al-ico-bold {
+  &:before {
+    content: $al-ico-bold;
+  }
+}
+.al-ico-italic {
+  &:before {
+    content: $al-ico-italic;
+  }
+}
+.al-ico-heading {
+  &:before {
+    content: $al-ico-heading;
+  }
+}
+.al-ico-quote {
+  &:before {
+    content: $al-ico-quote;
+  }
+}
+.al-ico-link {
+  &:before {
+    content: $al-ico-link;
+  }
+}
+.al-ico-image {
+  &:before {
+    content: $al-ico-image;
+  }
+}
+.al-ico-code {
+  &:before {
+    content: $al-ico-code;
+  }
+}
+.al-ico-list-bulleted {
+  &:before {
+    content: $al-ico-list-bulleted;
+  }
+}
+.al-ico-list-numbered {
+  &:before {
+    content: $al-ico-list-numbered;
+  }
+}
+.al-ico-me {
+  &:before {
+    content: $al-ico-me;
+  }
+}
+.al-ico-team {
+  &:before {
+    content: $al-ico-team;
+  }
+}
+.al-ico-task-desc {
+  &:before {
+    content: $al-ico-task-desc;
+  }
+}
+.al-ico-dots {
+  &:before {
+    content: $al-ico-dots;
+  }
+}
+.al-ico-move-to {
+  &:before {
+    content: $al-ico-move-to;
+  }
+}
+.al-ico-abort {
+  &:before {
+    content: $al-ico-abort;
+  }
+}
+.al-ico-extend {
+  &:before {
+    content: $al-ico-extend;
+  }
+}
+.al-ico-reset-exp {
+  &:before {
+    content: $al-ico-reset-exp;
+  }
+}
+.al-ico-tag {
+  &:before {
+    content: $al-ico-tag;
+  }
+}
+.al-ico-shared-item {
+  &:before {
+    content: $al-ico-shared-item;
+  }
+}
+.al-ico-restore {
+  &:before {
+    content: $al-ico-restore;
+  }
+}
+.al-ico-workers {
+  &:before {
+    content: $al-ico-workers;
+  }
+}
+.al-ico-dots-v-menu {
+  &:before {
+    content: $al-ico-dots-v-menu;
+  }
+}
+.al-ico-d-menu-down {
+  &:before {
+    content: $al-ico-d-menu-down;
+  }
+}
+.al-ico-d-menu-up {
+  &:before {
+    content: $al-ico-d-menu-up;
+  }
+}
+.al-ico-slash {
+  &:before {
+    content: $al-ico-slash;
+  }
+}
+.al-ico-info-circle {
+  &:before {
+    content: $al-ico-info-circle;
+  }
+}
+.al-ico-annotate {
+  &:before {
+    content: $al-ico-annotate;
+  }
+}
+.al-ico-task-desc-outline {
+  &:before {
+    content: $al-ico-task-desc-outline;
+  }
+}
+.al-ico-manage-queue {
+  &:before {
+    content: $al-ico-manage-queue;
+  }
+}
+.al-ico-enqueue {
+  &:before {
+    content: $al-ico-enqueue;
+  }
+}
+.al-ico-dequeue {
+  &:before {
+    content: $al-ico-dequeue;
   }
 }
 .al-ico-status-draft {
@@ -643,3 +924,4 @@
     content: $al-ico-status-aborted-sec;
   }
 }
+

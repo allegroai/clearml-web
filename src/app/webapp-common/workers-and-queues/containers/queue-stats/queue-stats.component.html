@@ -1,5 +1,5 @@
 <div class="d-flex">
-  <div class="chart-contatiner overflow-hidden">
+  <div class="chart-container overflow-hidden">
     <div class="header">
       <div class="d-flex align-items-center">
         <div class="title">{{selectedQueue ? selectedQueue.name : 'Overall'}} Experiment Wait Time</div>
@@ -13,7 +13,7 @@
       <sm-line-chart [data]="waitChartData" [showLoadingOverlay]="refreshChart" [tooltipVerticalOffset]="-60"></sm-line-chart>
     </div>
   </div>
-  <div class="chart-contatiner right overflow-hidden">
+  <div class="chart-container right overflow-hidden">
     <div class="header d-flex justify-content-between">
       <div class="d-flex align-items-center">
         <div class="title">{{selectedQueue ? selectedQueue.name : 'Overall'}} Queued Experiments</div>
@@ -23,12 +23,13 @@
         </i>
       </div>
       <div class="time-selector">
-        <sm-select-autocomplete
-          class="dark"
-          [multiple]="false"
-          [items]="timeFrameOptions"
-          [searchable]="false"
-          [formControl]="timeFormControl"></sm-select-autocomplete>
+        <mat-form-field appearance="outline" class="dark-outline thin time-selector">
+          <mat-select [ngModel]="currentTimeFrame" (ngModelChange)="timeFrameChanged($event)" name="time-frame" panelClass="dark-outline">
+            <mat-option *ngFor="let timeFrame of timeFrameOptions" [value]="timeFrame.value">
+              {{timeFrame.label}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
       </div>
     </div>
     <div #lenchart class="line-chart-container" >

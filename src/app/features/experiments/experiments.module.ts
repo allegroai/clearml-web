@@ -9,7 +9,6 @@ import {ActionReducer, StoreModule} from '@ngrx/store';
 import {experimentsReducers} from './reducers';
 import {AdminService} from '../admin/admin.service';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {ExperimentsInfoEffects} from './effects/experiments-info.effects';
 import {SelectModelModule} from '../../webapp-common/select-model/select-model.module';
 import {SmSyncStateSelectorService} from '../../webapp-common/core/services/sync-state-selector.service';
 import {ExperimentOutputEffects} from './effects/experiment-output.effects';
@@ -31,6 +30,7 @@ import {DebugImagesModule} from '../../webapp-common/debug-images/debug-images.m
 import {ExperimentInfoExecutionComponent} from '../../webapp-common/experiments/containers/experiment-info-execution/experiment-info-execution.component';
 import {MatSidenavModule} from '@angular/material/sidenav';
 import {MatListModule} from '@angular/material/list';
+import {ExperimentOutputComponent} from './containers/experiment-ouptut/experiment-output.component';
 
 
 const syncedKeys = [
@@ -39,6 +39,7 @@ const syncedKeys = [
   'view.tableFilters',
   'view.hiddenTableCols',
   'view.metricsCols',
+  'view.colsOrder',
   'info.userKnowledge',
   'output.settingsList',
 ];
@@ -67,14 +68,15 @@ export function localStorageReducer(reducer: ActionReducer<any>): ActionReducer<
     CommonLayoutModule,
     MatSidenavModule,
     MatListModule,
-    AngularSplitModule.forRoot(),
+    AngularSplitModule,
     StoreModule.forFeature(EXPERIMENTS_STORE_KEY, experimentsReducers, {metaReducers: [localStorageReducer]}),
-    EffectsModule.forFeature([ExperimentsInfoEffects, ExperimentOutputEffects, ExperimentsMenuEffects]),
+    EffectsModule.forFeature([ExperimentOutputEffects, ExperimentsMenuEffects]),
   ],
   declarations: [
     ExperimentsComponent,
     ExperimentInfoComponent,
     ExperimentInfoExecutionComponent,
+    ExperimentOutputComponent
   ],
   providers: [
     AdminService,

@@ -36,10 +36,14 @@ export class ExperimentArtifactItemViewComponent extends BaseClickableArtifact{
 
   linkClicked(event: Event) {
     const signed = this.adminService.signUrlIfNeeded(this.artifact.uri, true);
-    const a = document.createElement('a');
-    a.href = signed || this.artifact.uri;
-    a.target = '_blank';
-    a.click();
+    if (signed) {
+      const a = document.createElement('a');
+      a.href = signed;
+      a.target = '_blank';
+      a.click();
+    } else {
+      this.uri = this.artifact.uri;
+    }
     event.preventDefault();
   }
 }

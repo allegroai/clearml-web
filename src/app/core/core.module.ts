@@ -6,7 +6,7 @@ import {messagesReducer} from '../webapp-common/core/reducers/messages-reducer';
 import {recentTasksReducer} from './reducers/recent-tasks-reducer';
 import {sourcesReducer} from './reducers/sources-reducer';
 import {viewReducer} from './reducers/view-reducer';
-import {AUTH_PREFIX, USERS_PREFIX, VIEW_PREFIX} from '../app.constants';
+import {USERS_PREFIX, VIEW_PREFIX} from '../app.constants';
 import {merge, pick} from 'lodash/fp';
 import {usersReducer} from '../webapp-common/core/reducers/users-reducer';
 import {projectsReducer} from '../webapp-common/core/reducers/projects.reducer';
@@ -26,6 +26,7 @@ import {commonAuthReducer} from '../webapp-common/core/reducers/common-auth-redu
 import {PROJECTS_PREFIX} from '../webapp-common/core/actions/projects.actions';
 import {loginReducer} from '../webapp-common/login/login-reducer';
 import {ConfigurationService} from '../webapp-common/shared/services/configuration.service';
+import {AUTH_PREFIX} from '../webapp-common/core/actions/common-auth.actions';
 
 export const reducers = {
   auth: commonAuthReducer,

@@ -1,28 +1,40 @@
-import {ChangeDetectorRef, Component, EventEmitter, HostListener, Input, OnInit, Output, ViewChild} from '@angular/core';
-import {ColHeaderTypeEnum, ISmCol, TableSortOrderEnum} from '../../../../webapp-common/shared/ui-components/data/table/table.consts';
+import {ChangeDetectorRef, Component, EventEmitter, HostListener, Input, Output, ViewChild} from '@angular/core';
+import {ColHeaderTypeEnum, ISmCol, TableSortOrderEnum} from '../../../shared/ui-components/data/table/table.consts';
 import {find, get} from 'lodash/fp';
 import {Queue} from '../../../../business-logic/model/queues/queue';
 import {QUEUES_TABLE_COL_FIELDS} from '../../workers-and-queues.consts';
+import {TableComponent} from '../../../shared/ui-components/data/table/table.component';
+import {BaseTableView} from '../../../shared/ui-components/data/table/base-table-view';
 
 @Component({
-  selector   : 'sm-queues-table',
+  selector: 'sm-queues-table',
   templateUrl: './queues-table.component.html',
-  styleUrls  : ['./queues-table.component.scss']
+  styleUrls: ['./queues-table.component.scss']
 })
-export class QueuesTableComponent implements OnInit {
+export class QueuesTableComponent extends BaseTableView {
   public cols: Array<ISmCol>;
 
   public readonly QUEUES_TABLE_COL_FIELDS = QUEUES_TABLE_COL_FIELDS;
   public menuOpen: boolean;
-  @Input() queues: Array<Queue>;
+  private _queues: Array<Queue>;
+
+  @Input() set queues(queues: Array<Queue>) {
+    this._queues = queues;
+    this.table && this.table.focusSelected();
+  }
+
+  get queues() {
+    return this._queues;
+  }
+
   @Input() selectedQueue: Queue;
   @Output() queueSelected = new EventEmitter();
   @Output() deleteQueue = new EventEmitter();
   @Output() renameQueue = new EventEmitter();
-  @Output() sortedChanged = new EventEmitter<{ sortOrder: TableSortOrderEnum, colId: ISmCol['id'] }>();
-  @Input() tableSortField: string;
+  @Output() sortedChanged = new EventEmitter<{ isShift: boolean; colId: ISmCol['id'] }>();
   @Input() tableSortOrder: TableSortOrderEnum;
-  @ViewChild('tableContainer', {static: true}) tableContainer;
+  @ViewChild('tableContainer', {static: false}) tableContainer;
+  @ViewChild('table', {static: false}) table: TableComponent;
 
   public menuPosition: { x: number; y: number };
 
@@ -34,33 +46,34 @@ export class QueuesTableComponent implements OnInit {
   }
 
   constructor(private changeDetector: ChangeDetectorRef) {
+    super();
     this.cols = [
       {
-        id         : QUEUES_TABLE_COL_FIELDS.NAME,
-        headerType : ColHeaderTypeEnum.sort,
-        header     : 'QUEUE',
-        style      : {width: '25%', minWidth: '500px'},
-        sortable   : true,
+        id: QUEUES_TABLE_COL_FIELDS.NAME,
+        headerType: ColHeaderTypeEnum.sortFilter,
+        header: 'QUEUE',
+        style: {width: '25%', minWidth: '500px'},
+        sortable: true,
       },
       {
-        id         : QUEUES_TABLE_COL_FIELDS.TASK,
-        headerType : ColHeaderTypeEnum.sort,
-        header     : 'NEXT EXPERIMENT',
-        style      : {width: '35%', minWidth: '800px'},
-        sortable   : true,
+        id: QUEUES_TABLE_COL_FIELDS.TASK,
+        headerType: ColHeaderTypeEnum.sortFilter,
+        header: 'NEXT EXPERIMENT',
+        style: {width: '35%', minWidth: '800px'},
+        sortable: true,
       },
       {
-        id         : QUEUES_TABLE_COL_FIELDS.LAST_UPDATED,
-        headerType : ColHeaderTypeEnum.sort,
-        header     : 'LAST UPDATED',
-        style      : {width: '25%', minWidth: '400px'},
-        sortable   : true,
+        id: QUEUES_TABLE_COL_FIELDS.LAST_UPDATED,
+        headerType: ColHeaderTypeEnum.sortFilter,
+        header: 'LAST UPDATED',
+        style: {width: '25%', minWidth: '400px'},
+        sortable: true,
       },
       {
-        id         : QUEUES_TABLE_COL_FIELDS.IN_QUEUE,
-        headerType : ColHeaderTypeEnum.sort,
-        header     : 'IN QUEUE',
-        sortable   : true,
+        id: QUEUES_TABLE_COL_FIELDS.IN_QUEUE,
+        headerType: ColHeaderTypeEnum.sortFilter,
+        header: 'IN QUEUE',
+        sortable: true,
       }
     ];
   }
@@ -82,9 +95,6 @@ export class QueuesTableComponent implements OnInit {
     this.queueSelected.emit(event.data);
   }
 
-  ngOnInit(): void {
-  }
-
   openContextMenu(data) {
     data.e.preventDefault();
     this.queueSelected.emit(data.rowData);
@@ -101,8 +111,14 @@ export class QueuesTableComponent implements OnInit {
     this.tableContainer.nativeElement.scroll({top: 0});
   }
 
-  onSortChanged(sortOrder, colId: ISmCol['id']) {
-    this.sortedChanged.emit({sortOrder, colId});
+  onSortChanged(isShift: boolean, colId: ISmCol['id']) {
+    this.sortedChanged.emit({isShift, colId});
     this.scrollTableToTop();
+  }
+
+  afterTableInit(): void {
+  }
+
+  emitSelection(selection: any[]) {
   }
 }

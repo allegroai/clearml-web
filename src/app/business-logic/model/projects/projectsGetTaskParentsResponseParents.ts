@@ -21,5 +21,6 @@ export interface ProjectsGetTaskParentsResponseParents {
      * The name of the parent task
      */
     name?: string;
+
     project?: {id: string; name: string};
 }

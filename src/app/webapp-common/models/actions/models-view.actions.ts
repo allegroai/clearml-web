@@ -1,10 +1,14 @@
 import {Action, createAction, props} from '@ngrx/store';
-import {TableSortOrderEnum} from '../../shared/ui-components/data/table/table.consts';
+import {ISmCol} from '../../shared/ui-components/data/table/table.consts';
 import {ModelsViewModesEnum} from '../models.consts';
 import {SelectedModel} from '../shared/models.model';
 import {TableFilter} from '../../shared/utils/tableParamEncode';
 import {User} from '../../../business-logic/model/users/user';
-import {EXPERIMENTS_PREFIX} from '../../experiments/actions/common-experiments-view.actions';
+import {SortMeta} from 'primeng/api';
+import {
+  CountAvailableAndIsDisable,
+  CountAvailableAndIsDisableSelectedFiltered
+} from "@common/shared/entity-page/items.utils";
 
 const MODELS_PREFIX = 'MODELS_';
 
@@ -31,6 +35,7 @@ export const REFRESH_MODELS = MODELS_PREFIX + 'REFRESH_MODELS';
 export const ARCHIVE_MODE_CHANGED = MODELS_PREFIX + 'ARCHIVE_MODE_CHANGED';
 export const GLOBAL_FILTER_CHANGED = MODELS_PREFIX + 'GLOBAL_FILTER_CHANGED';
 export const TABLE_SORT_CHANGED = MODELS_PREFIX + 'TABLE_SORT_CHANGED';
+export const SET_TABLE_SORT = MODELS_PREFIX + 'SET_TABLE_SORT';
 export const TABLE_FILTER_CHANGED = MODELS_PREFIX + 'TABLE_FILTER_CHANGED';
 export const SET_TABLE_FILTERS = MODELS_PREFIX + 'SET_TABLE_FILTERS';
 export const MODEL_SELECTION_CHANGED = MODELS_PREFIX + 'MODEL_SELECTION_CHANGED';
@@ -154,12 +159,15 @@ export class SetSelectedModel implements Action {
   }
 }
 
-export class TableSortChanged implements Action {
-  public type = TABLE_SORT_CHANGED;
+export const tableSortChanged = createAction(
+  TABLE_SORT_CHANGED,
+  props<{ isShift: boolean; colId: ISmCol['id'] }>()
+);
 
-  constructor(public payload: { colId: string; sortOrder: (TableSortOrderEnum) }) {
-  }
-}
+export const setTableSort = createAction(
+  SET_TABLE_SORT,
+  props<{ orders: SortMeta[] }>()
+);
 
 export class TableFilterChanged implements Action {
   public type = TABLE_FILTER_CHANGED;
@@ -195,12 +203,10 @@ export class ShowAllSelected implements Action {
   }
 }
 
-export class GlobalFilterChanged implements Action {
-  public type = GLOBAL_FILTER_CHANGED;
-
-  constructor(public payload: string) {
-  }
-}
+export const globalFilterChanged = createAction(
+  GLOBAL_FILTER_CHANGED,
+  props<{query: string; regExp?: boolean}>()
+);
 
 export const resetGlobalFilter = createAction(MODELS_PREFIX + 'RESET_GLOBAL_FILTER');
 
@@ -215,24 +221,6 @@ export class ArchivedModeChanged implements Action {
   public type = ARCHIVE_MODE_CHANGED;
 
   constructor(public payload: boolean) {
-  }
-}
-
-export class ArchivedSelectedModels implements Action {
-  public type = ARCHIVE_SELECTED_MODELS;
-  public payload: { skipUndo: boolean };
-
-  constructor(skipUndo?: boolean) {
-    this.payload = {skipUndo};
-  }
-}
-
-export class RestoreSelectedModels implements Action {
-  public type = RESTORE_SELECTED_MODELS;
-  public payload: { skipUndo: boolean };
-
-  constructor(skipUndo?: boolean) {
-    this.payload = {skipUndo};
   }
 }
 
@@ -260,3 +248,7 @@ export const setArchive = createAction(
 export const afterSetArchive = createAction(MODELS_PREFIX + 'AFTER_SET_ARCHIVE');
 
 export const setSplitSize = createAction(MODELS_PREFIX + 'SET_SPLIT_SIZE', props<{ splitSize: number }>());
+export const setSelectedModelsDisableAvailable = createAction(
+  MODELS_PREFIX + 'setSelectedModelsDisableAvailable',
+  props<{ selectedModelsDisableAvailable: Record<string, CountAvailableAndIsDisableSelectedFiltered> }>()
+);

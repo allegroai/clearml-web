@@ -1,12 +1,16 @@
 <div class="select-experiments-container light-theme" (click)="closeSearch()">
   <div class="search-experiment-for-compare d-flex justify-content-between">
-    <input
-      #searchExperiments
-      smClickStopPropagation
-      class="form-control search-input"
-      placeholder="Start typing experiment name or ID to add to your comparison"
-      (input)="searchTermChanged(searchExperiments.value)"
-    >
+      <mat-form-field appearance="outline" class="w-50" smClickStopPropagation>
+        <input
+          #searchExperiments
+          matInput
+          name="search-experiments"
+          autocomplete="off"
+          smClickStopPropagation
+          placeholder="Start typing experiment name or ID to add to your comparison"
+          (input)="searchTermChanged(searchExperiments.value)"
+        >
+      </mat-form-field>
     <i class="fas fa-times pointer" (click)="closeSearch()" style="font-size: 16px"></i>
   </div>
   <div class="hide-table"

@@ -3,9 +3,27 @@
 
 .view-all {
   font-size: 12px;
-  font-weight: bold;
+  font-weight: 500;
 }
 
 .recent-title {
   @include recent-title();
+}
+
+.recent-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 24px;
+  padding-bottom: 12px;
+}
+.projects {
+  display: flex;
+  flex-wrap: wrap;
+  overflow: hidden;
+  height: 250px;
+
+  sm-project-card {
+    margin: 0 15px;
+  }
 }

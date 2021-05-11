@@ -14,6 +14,7 @@ export class CopyClipboardComponent {
   @Input() tooltipText = 'Copy to clipboard';
   @Input() hideBackground = false;
   @Input() theme: string;
+  @Input() copyIcon: string;
 
   public copied = false;
 

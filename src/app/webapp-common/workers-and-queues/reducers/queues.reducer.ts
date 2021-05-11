@@ -1,20 +1,29 @@
 import {
   ADD_QUEUES_TASKS, SET_QUEUES, SET_QUEUES_TASKS, SET_SELECTED_QUEUE,
-  SET_SELECTED_QUEUE_FROM_SERVER, SYNC_SPECIFIC_QUEUE_IN_TABLE, GET_STATS,
-  GetStats, SET_STATS, SetStats, SET_STATS_PARAMS, QUEUES_TABLE_SORT_CHANGED
+  SET_SELECTED_QUEUE_FROM_SERVER, SYNC_SPECIFIC_QUEUE_IN_TABLE, SET_STATS, SetStats, SET_STATS_PARAMS, queuesTableSetSort
 } from '../actions/queues.actions';
 import {Queue} from '../../../business-logic/model/queues/queue';
 import {QUEUES_TABLE_COL_FIELDS, TIME_INTERVALS} from '../workers-and-queues.consts';
 import {TABLE_SORT_ORDER} from '../../shared/ui-components/data/table/table.consts';
+import {SortMeta} from 'primeng/api';
+import {ITask} from '../../../business-logic/model/al-task';
 
-const initQueues = {
+interface QueueStoreType {
+  data: Queue[];
+  selectedQueue: Queue;
+  tasks: ITask[];
+  stats: {wait: any; length: number};
+  selectedStatsTimeFrame: string;
+  tableSortFields: SortMeta[];
+}
+
+const initQueues: QueueStoreType = {
   data                  : null as Queue[],
   selectedQueue         : null as Queue,
   tasks                 : null as any[],
   stats                 : {wait: null, length: null},
   selectedStatsTimeFrame: (3 * TIME_INTERVALS.HOUR).toString(),
-  tableSortField        : QUEUES_TABLE_COL_FIELDS.NAME,
-  tableSortOrder        : TABLE_SORT_ORDER.ASC,
+  tableSortFields       : [{field: QUEUES_TABLE_COL_FIELDS.NAME, order: TABLE_SORT_ORDER.ASC}],
 };
 
 
@@ -36,8 +45,8 @@ export function queuesReducer(state = initQueues, action) {
       return {...state, tasks: {...state.tasks, [action.payload.queueId]: action.payload.tasks}};
     case SET_STATS:
       return {...state, stats: (action as SetStats).payload.data};
-    case QUEUES_TABLE_SORT_CHANGED:
-      return {...state, tableSortOrder: action.payload.sortOrder, tableSortField: action.payload.colId};
+    case queuesTableSetSort.type:
+      return {...state, tableSortFields: action.orders};
     case SET_STATS_PARAMS:
       return {
         ...state,

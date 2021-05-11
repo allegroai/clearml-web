@@ -1,12 +1,12 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {FormControl} from '@angular/forms';
-import {ISmCol, TABLE_SORT_ORDER, TableSortOrderEnum} from '../table.consts';
+import {ColHeaderFilterTypeEnum, ISmCol, TABLE_SORT_ORDER, TableSortOrderEnum} from '../table.consts';
 import {addOrRemoveFromArray} from '../../../../utils/shared-utils';
 
 @Component({
-  selector   : 'sm-table-filter-sort-template',
+  selector: 'sm-table-filter-sort-template',
   templateUrl: './table-filter-sort-template.component.html',
-  styleUrls  : ['./table-filter-sort-template.component.scss']
+  styleUrls: ['./table-filter-sort-template.component.scss']
 })
 export class TableFilterSortTemplateComponent {
 
@@ -16,17 +16,24 @@ export class TableFilterSortTemplateComponent {
   public formControl = new FormControl();
   header;
   enableSort = true;
+  enableFilter: boolean;
   enableSearch = false;
+  isSorted: boolean;
+  filterType: ColHeaderFilterTypeEnum;
 
-  @Input() sortOrder: TableSortOrderEnum | boolean;
+  FILTER_TYPE = ColHeaderFilterTypeEnum;
+  @Input() sortOrder: { index: number; field: string; order: TableSortOrderEnum };
+
   @Input() set column(col: ISmCol) {
     this.header = col.header;
     this.enableSort = col.sortable;
-    this.enableSearch= col.searchableFilter;
+    this.enableFilter = col.filterable;
+    this.enableSearch = col.searchableFilter;
+    this.filterType = col.filterType;
   }
+
   @Input() searchValue;
   @Input() fixedOptionsSubheader;
-  @Input() enableTooltip: boolean;
 
   @Input() set value(value: Array<string>) {
     this.formControl.setValue(value);
@@ -41,24 +48,16 @@ export class TableFilterSortTemplateComponent {
 
   @Input() options: Array<{ label: string; value: string; tooltip?: string }>;
   @Input() subOptions: Array<{ label: string; value: string }>;
+  @Input() tooltip: boolean = false;
   @Output() filterChanged = new EventEmitter();
   @Output() subFilterChanged = new EventEmitter();
   @Output() menuClosed = new EventEmitter();
   @Output() menuOpened = new EventEmitter();
-  @Output() sortOrderChanged = new EventEmitter<TableSortOrderEnum>();
+  @Output() sortOrderChanged = new EventEmitter<boolean>();
   @Output() searchValueChanged = new EventEmitter<string>();
 
-  switchSortOrder() {
-    const newSortOrder = this.toggleSortOrder(this.sortOrder);
-    this.sortOrderChanged.emit(newSortOrder);
-  }
-
-  private toggleSortOrder(sortOrder: TableSortOrderEnum | boolean) {
-    if (sortOrder === this.TABLE_SORT_ORDER.ASC) {
-      return this.TABLE_SORT_ORDER.DESC;
-    }
-
-    return this.TABLE_SORT_ORDER.ASC;
+  switchSortOrder($event: MouseEvent) {
+    this.sortOrderChanged.emit($event.shiftKey);
   }
 
   onFilterChanged(val) {
@@ -81,19 +80,16 @@ export class TableFilterSortTemplateComponent {
   }
 
   sortedClass() {
-    switch (this.sortOrder) {
+    switch (this.sortOrder?.order) {
       case TABLE_SORT_ORDER.DESC:
-        return 'i-sort-on-up';
-      case  TABLE_SORT_ORDER.ASC:
+        this.isSorted = true;
         return 'i-sort-on-down';
+      case  TABLE_SORT_ORDER.ASC:
+        this.isSorted = true;
+        return 'i-sort-on-up';
       default:
+        this.isSorted = false;
         return 'i-sort-off';
     }
-  }
-
-
-  mainMenuClosed() {
-    this.menuClosed.emit();
-
   }
 }

@@ -3,7 +3,7 @@ import {Store} from '@ngrx/store';
 import {AlertDialogComponent} from '../../shared/ui-components/overlay/alert-dialog/alert-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import {take} from 'rxjs/operators';
-import {Logout} from '../../../webapp-common/core/actions/users.actions';
+import {logout} from '../../../webapp-common/core/actions/users.actions';
 
 @Component({
   selector   : 'sm-logged-out-alert',
@@ -26,7 +26,7 @@ export class LoggedOutAlertComponent {
       .pipe(
         take(1)
       ).subscribe(() => {
-        this.store.dispatch(new Logout());
+        this.store.dispatch(logout({}));
     });
   }
 

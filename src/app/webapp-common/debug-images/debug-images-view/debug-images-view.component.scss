@@ -50,7 +50,7 @@
       background:transparent;
     }
 
-    /deep/ .mat-expansion-panel-content {
+    ::ng-deep .mat-expansion-panel-content {
       .mat-expansion-panel-body {
         padding: 0 12px 48px 12px;
       }
@@ -82,7 +82,7 @@
         }
       }
 
-      &-title, /deep/ .mat-expansion-indicator::after {
+      &-title, ::ng-deep .mat-expansion-indicator::after {
         flex: unset;
       }
     }

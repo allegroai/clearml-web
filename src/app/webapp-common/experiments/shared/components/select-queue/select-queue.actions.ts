@@ -15,19 +15,19 @@ export class GetQueuesForEnqueue implements Action {
 
 export class GetTaskForEnqueue implements Action {
   readonly type = GET_TASK_FOR_ENQUEUE;
-  public payload: { taskId: string };
+  public payload: { taskIds: string[] };
 
-  constructor(taskId: string) {
-    this.payload = {taskId};
+  constructor(taskIds: string[]) {
+    this.payload = {taskIds};
   }
 }
 
 export class SetTaskForEnqueue implements Action {
   readonly type = SET_TASK_FOR_ENQUEUE;
-  public payload: { task: Task };
+  public payload: { tasks: Task[] };
 
-  constructor(task: Task) {
-    this.payload = {task};
+  constructor(tasks: Task[]) {
+    this.payload = {tasks};
   }
 }
 

@@ -11,27 +11,28 @@ import {CommonSearchModule} from '../common-search/common-search.module';
 import {CommonLayoutModule} from '../layout/layout.module';
 import {EffectsModule} from '@ngrx/effects';
 import {ProjectsSharedModule} from '../../features/projects/shared/projects-shared.module';
-import {CommonSearchResultsModule} from '../search/common-search-results.module';
 import {CommonExperimentSharedModule} from '../experiments/shared/common-experiment-shared.module';
+import {CommonProjectsModule} from '../projects/common-projects.module';
 import {SharedModule} from '../../shared/shared.module';
+import { WelcomeMessageComponent } from './dumb/welcome-message/welcome-message.component';
 
 @NgModule({
-  declarations: [DashboardProjectsComponent, DashboardExperimentsComponent, RecentExperimentTableComponent],
+  declarations: [DashboardProjectsComponent, DashboardExperimentsComponent, RecentExperimentTableComponent, WelcomeMessageComponent],
   exports     : [DashboardProjectsComponent, DashboardExperimentsComponent],
-    imports: [
-        SMSharedModule,
-        ExperimentsCommonModule,
-        CommonModule,
-        ExperimentSharedModule,
-        CommonSearchModule,
-        CommonSearchResultsModule,
-        ProjectsSharedModule,
-        CommonExperimentSharedModule,
-        EffectsModule.forFeature([CommonDashboardEffects]),
-        CommonLayoutModule,
-        ExperimentSharedModule,
-        SharedModule
-    ]
+  imports: [
+    CommonModule,
+    SMSharedModule,
+    ExperimentsCommonModule,
+    ExperimentSharedModule,
+    CommonSearchModule,
+    ProjectsSharedModule,
+    CommonExperimentSharedModule,
+    EffectsModule.forFeature([CommonDashboardEffects]),
+    CommonLayoutModule,
+    ExperimentSharedModule,
+    CommonProjectsModule,
+    SharedModule
+  ]
 })
 export class CommonDashboardModule {
 }

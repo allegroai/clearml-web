@@ -2,7 +2,7 @@
 
 :host {
   .filter-sort-container {
-    /deep/ .menu-button {
+    ::ng-deep .menu-button {
       color: $blue-400;
       font-weight: bold;
 

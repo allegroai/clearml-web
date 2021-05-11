@@ -9,12 +9,15 @@
       <div class="d-flex">
         <div class="metric-bar" [class.minimized]="minimized" *ngIf="!thereAreNoMetrics(experimentId)">
           <label>Metric:</label>
-          <select #metricSelect class="form-control" (change)="selectMetric($event, experimentId)">
-            <option *ngFor="let metric of optionalMetrics[experimentId]" [value]="metric"
-                    [selected]="metric===selectedMetrics[experimentId]">
-              {{metric}}
-            </option>
-          </select>
+          <mat-form-field appearance="outline">
+            <mat-select #metricSelect (selectionChange)="selectMetric($event, experimentId)" panelClass="light-theme"
+                        [value]="selectedMetrics[experimentId]" name="selectedMetric">
+              <mat-option *ngIf="selectedMetrics[experimentId]" [value]="ALL_IMAGES">{{ALL_IMAGES}}</mat-option>
+              <mat-option *ngFor="let metric of optionalMetrics[experimentId]" [value]="metric">
+                {{metric}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
           <label>Iterations:</label>
 
           <div [ngClass]="{'disabled': (beginningOfTime$| async)[experimentId]}"
@@ -23,11 +26,11 @@
                smTooltip="Older images"></div>
 
           <b
-            class="text-right">{{debugImages && debugImages[experimentId] && debugImages[experimentId][debugImages[experimentId].length - 1].iter}}</b>
+            class="text-right">{{debugImages && debugImages[experimentId] && debugImages[experimentId][0][debugImages[experimentId].length - 1].iter}}</b>
 
           <div class="al-icon al-ico-between al-color light-blue-grey"></div>
 
-          <b>{{debugImages && debugImages[experimentId] && debugImages[experimentId][0].iter}}</b>
+          <b>{{debugImages && debugImages[experimentId] && debugImages[experimentId][0][0].iter}}</b>
 
           <div [ngClass]="{'disabled': (timeIsNow$| async)[experimentId]}"
                (click)="(!timeIsNow[experimentId]) && previousBatch({task: experimentId, metric: metricSelect.value})"
@@ -42,12 +45,14 @@
       </div>
       <div class="no-images icon i-no-debug-samples-with-text"
            *ngIf="shouldShowNoImagesForExperiment(experimentId)"></div>
-      <sm-debug-images-view [iterations]="(debugImages$| async)[experimentId]"
-                            [experimentId]="experimentId"
-                            [title]="taskNames && taskNames[experimentId]"
-                            [isMergeIterations]="mergeIterations"
-                            (imageClicked)="imageClicked($event)"
-                            (urlError)="urlError($event)"
+      <sm-debug-images-view
+        *ngFor="let debugImages of debugImages[experimentId]"
+        [iterations]="debugImages"
+        [experimentId]="experimentId"
+        [title]="taskNames && taskNames[experimentId]"
+        [isMergeIterations]="mergeIterations"
+        (imageClicked)="imageClicked($event)"
+        (urlError)="urlError($event)"
       >
       </sm-debug-images-view>
     </div>

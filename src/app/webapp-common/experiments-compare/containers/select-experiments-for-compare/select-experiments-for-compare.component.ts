@@ -1,14 +1,15 @@
-import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, HostListener, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {select, Store} from '@ngrx/store';
-import {resetSelectCompareHeader, searchExperimentsForCompare, setSearchExperimentsForCompareResults, setShowSearchExperimentsForCompare} from '../../actions/compare-header.actions';
+import {
+  searchExperimentsForCompare, setSearchExperimentsForCompareResults, setShowSearchExperimentsForCompare
+} from '../../actions/compare-header.actions';
 import {selectExperimentsForCompareSearchResults, selectExperimentsForCompareSearchTerm} from '../../reducers';
 import {Observable, Subscription} from 'rxjs';
-import {Task} from 'app/business-logic/model/tasks/task';
+import {Task} from '../../../../business-logic/model/tasks/task';
 import {AddExperimentEvent} from '../../dumbs/select-experiments-for-compare-table/select-experiments-for-compare-table.component';
 import {ActivatedRoute, Router} from '@angular/router';
 import {selectRouterParams} from '../../../core/reducers/router-reducer';
 import {filter, map} from 'rxjs/operators';
-import {get} from 'lodash/fp';
 
 @Component({
   selector   : 'sm-select-experiments-for-compare',
@@ -21,13 +22,6 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy, 
   private paramsSubscription: Subscription;
   public searchTerm$: Observable<string>;
   @ViewChild('searchExperiments', {static: true}) searchExperiments;
-
-  @HostListener('document:click', ['$event'])
-  clickOut(event) {
-    if (!this.eRef.nativeElement.contains(event.target)) {
-      this.store.dispatch(setShowSearchExperimentsForCompare({payload: false}));
-    }
-  }
 
 
   constructor(private store: Store<any>, private route: ActivatedRoute, private router: Router, private eRef: ElementRef, private changedDetectRef: ChangeDetectorRef) {
@@ -69,19 +63,17 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy, 
   ngOnInit() {
     this.paramsSubscription = this.store.pipe(
       select(selectRouterParams),
-      map(params => get('ids', params)),
-      filter(params => !!params)
-    )
-      .subscribe((experimentIds: string) => {
-        this.selectedExperiments = experimentIds.split(',');
-        this.changedDetectRef.detectChanges();
+      map(params => params && params['ids']),
+      filter( experimentIds => !!experimentIds)
+    ).subscribe((experimentIds: string) => {
+      this.selectedExperiments = experimentIds.split(',');
+      this.changedDetectRef.detectChanges();
 
-      });
+    });
   }
 
   ngOnDestroy(): void {
     this.paramsSubscription.unsubscribe();
-    this.store.dispatch(resetSelectCompareHeader());
   }
 
   ngAfterViewInit(): void {

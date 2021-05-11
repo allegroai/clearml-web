@@ -7,6 +7,7 @@ import {GraphSettingsBarComponent} from './graph-settings-bar/graph-settings-bar
 import { MatSliderModule } from '@angular/material/slider';
 import {PlotlyGraphBase} from './single-graph/plotly-graph-base';
 import {FormsModule} from '@angular/forms';
+import {ResizableModule} from 'angular-resizable-element';
 
 const declarations= [ExperimentGraphsComponent, PlotlyGraphBase, SingleGraphComponent, GraphSettingsBarComponent];
 @NgModule({
@@ -17,6 +18,7 @@ const declarations= [ExperimentGraphsComponent, PlotlyGraphBase, SingleGraphComp
     UiComponentsModule,
     MatSliderModule,
     FormsModule,
+    ResizableModule,
   ]
 })
 export class ExperimentGraphsModule { }

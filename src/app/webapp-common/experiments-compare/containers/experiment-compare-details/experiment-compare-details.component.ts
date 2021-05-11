@@ -13,7 +13,12 @@ import {experimentListUpdated, setExperiments} from '../../actions/experiments-c
 import {selectExperimentsDetails} from '../../reducers';
 import {filter, take, tap} from 'rxjs/operators';
 import {ExperimentCompareTree, IExperimentDetail} from '../../../../features/experiments-compare/experiments-compare-models';
-import {convertExperimentsArrays, getAllKeysEmptyObject, isDetailsConverted} from '../../jsonToDiffConvertor';
+import {
+  convertConfigurationFromExperiments, convertContainerScriptFromExperiments,
+  convertExperimentsArrays, convertNetworkDesignFromExperiments,
+  getAllKeysEmptyObject,
+  isDetailsConverted
+} from '../../jsonToDiffConvertor';
 import {ExperimentCompareBase} from '../experiment-compare-base';
 import {ActivatedRoute, Router} from '@angular/router';
 import {IExperimentInfoState} from '../../../../features/experiments/reducers/experiment-info.reducer';
@@ -69,10 +74,16 @@ export class ExperimentCompareDetailsComponent extends ExperimentCompareBase imp
         return acc;
       }, {} as { [id: string]: ConfigurationItem });
       experiments = Object.values(this.originalExperiments).map(experiment => convertExperimentsArrays(experiment, this.originalExperiments[experiments[0].id], experiments));
+      experiments = convertConfigurationFromExperiments(experiments, this.originalExperiments);
+      experiments = convertNetworkDesignFromExperiments(experiments, this.originalExperiments);
+      experiments = convertContainerScriptFromExperiments(experiments, this.originalExperiments);
+
       this.resetComponentState(experiments);
       this.calculateTree(experiments);
     });
   }
+
+
 
   ngAfterViewInit() {
     this.treeCardBodies.changes

@@ -4,6 +4,11 @@ export enum ColHeaderTypeEnum {
   checkBox   = 'checkbox',
   title      = 'none'
 }
+export enum ColHeaderFilterTypeEnum {
+  duration        = 'duration',         // days-hours-minutes
+  durationNumeric = 'duration-numeric', // number
+  durationDate    = 'duration-date',    // DD-MM-YYYY hours:minutes
+}
 
 export type TableSortOrderEnum = 1 | -1;
 export const TABLE_SORT_ORDER = {
@@ -22,13 +27,14 @@ export interface ISmCol {
   hidden?: boolean; // the column visibility.
   static?: boolean;
   headerType?: ColHeaderTypeEnum;
+  filterType?: ColHeaderFilterTypeEnum;
   sortable?: boolean; // determine if the column shell be sortable
   searchableFilter?: boolean;
   filterable?: boolean; // determine if the column shell be filterable
   isFiltered?: boolean; // deprecated.
   isSorted?: boolean; // deprecated.
   filterMatchMode?: FilterMatchModeEnum; // the filter method.
-  style?: {width?: string, minWidth?: string}; // the column style.
+  style?: {width?: string; minWidth?: string; maxWidth?: string}; // the column style.
   headerStyleClass?: string; // the header css class name.
   bodyTemplateRef?: string; // redundant.
   bodyStyleClass?: string;
@@ -36,6 +42,7 @@ export interface ISmCol {
   disablePointerEvents?: boolean; // Disable pointer events for this col header (for selection col)
   metric_hash?: string;
   variant_hash?: string;
+  isParam?: boolean;
   valueType?: string;
   projectId?: string;
 

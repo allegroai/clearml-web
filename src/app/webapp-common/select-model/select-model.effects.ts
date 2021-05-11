@@ -3,22 +3,22 @@ import {Store} from '@ngrx/store';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import * as actions from './select-model.actions';
 import * as exSelectors from './select-model.reducer';
-import {MODELS_PAGE_SIZE} from '../../webapp-common/models/models.consts';
-import {catchError, flatMap, map, switchMap, withLatestFrom} from 'rxjs/operators';
+import {MODELS_PAGE_SIZE} from '../models/models.consts';
+import {catchError, mergeMap, map, switchMap, withLatestFrom} from 'rxjs/operators';
 import {get} from 'lodash/fp';
-import {MODEL_TAGS, MODELS_TABLE_COL_FIELDS} from '../../webapp-common/models/shared/models.const';
-import {IModelsViewState} from '../../webapp-common/models/reducers/models-view.reducer';
+import {MODEL_TAGS, MODELS_TABLE_COL_FIELDS} from '../models/shared/models.const';
+import {IModelsViewState} from '../models/reducers/models-view.reducer';
 import {ApiModelsService} from '../../business-logic/api-services/models.service';
-import {RequestFailed} from '../../webapp-common/core/actions/http.actions';
-import {ActiveLoader, DeactiveLoader, SetServerError} from '../../webapp-common/core/actions/layout.actions';
-import {selectRouterParams} from '../../webapp-common/core/reducers/router-reducer';
-import {ModelsGetAllRequest} from '../../business-logic/model/models/modelsGetAllRequest';
-import {escapeRegex} from '../../webapp-common/shared/utils/shared-utils';
+import {RequestFailed} from '../core/actions/http.actions';
+import {ActiveLoader, DeactiveLoader, SetServerError} from '../core/actions/layout.actions';
+import {selectRouterParams} from '../core/reducers/router-reducer';
+import {addMultipleSortColumns, escapeRegex} from '../shared/utils/shared-utils';
 import {of} from 'rxjs';
-import {TableSortOrderEnum} from '../shared/ui-components/data/table/table.consts';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
-import {EXPERIMENTS_TABLE_COL_FIELDS} from '../../features/experiments/shared/experiments.const';
 import {ModelsGetAllExRequest} from '../../business-logic/model/models/modelsGetAllExRequest';
+import {SortMeta} from 'primeng/api';
+import {encodeOrder} from '../shared/utils/tableParamEncode';
+import {selectTableSortFields} from './select-model.reducer';
 
 @Injectable()
 export class SelectModelEffects {
@@ -34,11 +34,21 @@ export class SelectModelEffects {
   );
 
   @Effect()
+  tableSortChange = this.actions$.pipe(
+    ofType(actions.tableSortChanged),
+    withLatestFrom(this.store.select(selectTableSortFields)),
+    switchMap(([action, oldOrders]) => {
+      let orders = addMultipleSortColumns(oldOrders, action.colId, action.isShift);
+      return [actions.setTableSort({orders})];
+    })
+  );
+
+  @Effect()
   modelsFilterChanged = this.actions$.pipe(
     ofType(actions.GLOBAL_FILTER_CHANGED, actions.ALL_PROJECTS_MODE_CHANGED, actions.TABLE_SORT_CHANGED, actions.TABLE_FILTER_CHANGED),
     switchMap((action) => this.fetchModels$(0)
       .pipe(
-        flatMap(res => [
+        mergeMap(res => [
           new actions.SetNoMoreModels((res.models.length < MODELS_PAGE_SIZE)),
           new actions.SetModels(res.models),
           new actions.SetCurrentPage(0),
@@ -56,7 +66,7 @@ export class SelectModelEffects {
     switchMap(([action, page]) =>
       this.fetchModels$(page + 1)
         .pipe(
-          flatMap(res => [
+          mergeMap(res => [
             new actions.SetNoMoreModels((res.models.length < MODELS_PAGE_SIZE)),
             new actions.AddModels(res.models),
             new actions.SetCurrentPage(page + 1),
@@ -69,7 +79,7 @@ export class SelectModelEffects {
 
   getGetAllQuery(
     page: number, projectId: string, searchQuery: string, isAllProjects: boolean,
-    orderField: string, orderSort: TableSortOrderEnum, tableFilters: Map<string, FilterMetadata>
+    orderFields: SortMeta[], tableFilters: { [s: string]: FilterMetadata }
   ): ModelsGetAllExRequest {
     const userFilter = get([MODELS_TABLE_COL_FIELDS.USER, 'value'], tableFilters);
     const tagsFilter = get([MODELS_TABLE_COL_FIELDS.TAGS, 'value'], tableFilters);
@@ -83,7 +93,7 @@ export class SelectModelEffects {
       project: (isAllProjects || !projectId || projectId === '*') ? undefined : [projectId],
       page: page,
       page_size: MODELS_PAGE_SIZE,
-      order_by: [(orderSort === 1 ? '-' : '') + orderField],
+      order_by: encodeOrder(orderFields),
       tags: (tagsFilter && tagsFilter.length > 0) ? tagsFilter : [],
       system_tags: (systemTagsFilter && systemTagsFilter.length > 0) ? systemTagsFilter : [],
       only_fields: ['created', 'framework', 'id', 'labels', 'name', 'ready', 'tags', 'system_tags', 'task.name', 'uri', 'user.name', 'parent', 'design', 'company'],
@@ -101,12 +111,11 @@ export class SelectModelEffects {
           this.store.select(selectRouterParams).pipe(map(params => get('projectId', params))),
           this.store.select(exSelectors.selectIsAllProjectsMode),
           this.store.select(exSelectors.selectGlobalFilter),
-          this.store.select(exSelectors.selectTableSortField),
-          this.store.select(exSelectors.selectTableSortOrder),
+          this.store.select(exSelectors.selectTableSortFields),
           this.store.select(exSelectors.selectTableFilters),
         ),
-        switchMap(([pageNumber, projectId, isAllProjects, gb, sortField, sortOrder, filters]) =>
-          this.apiModels.modelsGetAllEx(this.getGetAllQuery(pageNumber, projectId, gb, isAllProjects, sortField, sortOrder, filters))
+        switchMap(([pageNumber, projectId, isAllProjects, gb, sortFields, filters]) =>
+          this.apiModels.modelsGetAllEx(this.getGetAllQuery(pageNumber, projectId, gb, isAllProjects, sortFields, filters))
         )
       );
   }

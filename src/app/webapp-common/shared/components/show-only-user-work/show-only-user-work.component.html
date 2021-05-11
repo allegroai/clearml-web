@@ -1,0 +1,11 @@
+<sm-menu
+  (menuOpened)="userFilterMenuOpened(true)"
+  (menuClosed)="userFilterMenuOpened(false)"
+  [header]="(showOnlyUserWork$ | async) ? 'My Work': 'Team\`s work'"
+  [prefixIconClass]="'mr-1 al-icon ' + ((showOnlyUserWork$ | async)? 'al-ico-me': 'al-ico-team')"
+  [iconClass]="isUserMenuOpened?'fa fa-caret-up': 'fa fa-caret-down'" class="menu">
+  <sm-menu-item itemLabel="My Work" (itemClicked)="userFilterChanged(true)" iconClass="mr-2 al-icon al-ico-me"
+                [iconFontSize]="24"></sm-menu-item>
+  <sm-menu-item itemLabel="Team`s work" (itemClicked)="userFilterChanged(false)"
+                iconClass="mr-2 al-icon al-ico-team" [iconFontSize]="24"></sm-menu-item>
+</sm-menu>

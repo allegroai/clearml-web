@@ -24,10 +24,10 @@
       *ngFor="let listItem of item.value.data | keyvalue; trackBy: trackByFn"
       class="list-item"
       (click)="onItemSelect.emit(item.key + listItem.key)"
-      [ngClass]="{unchecked: listItem.value.visible}"
+      [ngClass]="{unchecked: $any(listItem.value).visible}"
     >
       <span class="pointer ellipsis w-100 pl-2 list-item-key" [smTooltip]="listItem.key" [showDelay]="500">{{listItem.key}}</span>
-      <i (click)="onItemCheck.emit( {pathString: item.key+ listItem.key, parent: item.key}); $event.stopPropagation()" [class]="(listItem.value.visible? checkIcon[1] : checkIcon[0]) + ' fa icon'"></i>
+      <i (click)="onItemCheck.emit( {pathString: item.key+ listItem.key, parent: item.key}); $event.stopPropagation()" [class]="($any(listItem.value).visible ? checkIcon[1] : checkIcon[0]) + ' fa icon'"></i>
     </li>
   </ul>
 </mat-expansion-panel>

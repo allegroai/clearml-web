@@ -1,25 +1,29 @@
-<sm-dialog-template [closeOnX]="false" (xClicked)="closeDialog(false)" header="Enqueue Experiment">
-  <p>
-    <b *ngIf="reference" [smTooltip]="reference.length > 80 ? reference : undefined">{{reference.length > 80 ? (reference | slice:0:77) + '...' : reference }}</b> will be scheduled for execution through the selected queue.
-  </p>
+<sm-dialog-template [closeOnX]="false" (xClicked)="closeDialog(false)" header="Enqueue Experiment" iconClass="al-color blue-300 al-ico-enqueue">
+  <ng-form #enqueueForm="ngForm" class="d-flex flex-column light-theme">
+    <p *ngIf="reference">
+      <b [smTooltip]="reference.length > 80 ? reference : undefined">{{reference.length > 80 ? (reference | slice:0:77) + '...' : reference }}</b>
+      will be scheduled for execution through the selected queue.
+    </p>
 
-  <p class="mt-4 mb-4 text-danger enqueu-warning" [ngClass]="{'show':enqueueWarning$|async}">
-    <b>Note: This experiment seems to not contain any executable code.
-      <br>If enqueued to run, it might produce no results.</b>
-  </p>
-  <select class="form-control highlight" (change)="selectQueue($any($event.target).value)">
-    <option *ngFor="let queue of queues" [value]="queue.id" [selected]="queue?.id===selectedQueue?.id">
-      {{queue.name}}
-    </option>
-  </select>
-
+    <p class="mt-4 mb-4 text-danger enqueue-warning" *ngIf="enqueueWarning$ | async">
+      <b>Note: Some experiments seems to not contain any executable code.
+        <br>If enqueued to run, they might produce no results.</b>
+    </p>
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>Queue</mat-label>
+      <mat-select [(ngModel)]="selectedQueue" name="queue" panelClass="light-theme">
+        <mat-option *ngFor="let queue of queues" [value]="queue">
+          {{queue.name}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </ng-form>
   <div class="buttons">
     <button (click)="closeDialog(false)" class="btn btn-outline-neon">
       CANCEL
     </button>
-    <button (click)="closeDialog(true)" class="btn btn-neon yes-button" [disabled]="!selectedQueue">
+    <button (click)="closeDialog(true)" class="btn btn-neon yes-button" [disabled]="enqueueForm.invalid">
       ENQUEUE
     </button>
   </div>
-
 </sm-dialog-template>

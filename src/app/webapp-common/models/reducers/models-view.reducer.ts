@@ -1,13 +1,16 @@
 import {MODELS_VIEW_MODES, ModelsViewModesEnum} from '../models.consts';
-import {TABLE_SORT_ORDER, TableSortOrderEnum} from '../../shared/ui-components/data/table/table.consts';
-import {ISmAction} from '../../core/models/actions';
+import {TABLE_SORT_ORDER} from '../../shared/ui-components/data/table/table.consts';
 import * as actions from '../actions/models-view.actions';
-import {TableModel, ModelTableColFieldsEnum, SelectedModel} from '../shared/models.model';
+import {TableModel, SelectedModel} from '../shared/models.model';
 import {MODELS_TABLE_COL_FIELDS} from '../shared/models.const';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {TableFilter} from '../../shared/utils/tableParamEncode';
 import {User} from '../../../business-logic/model/users/user';
 import {setModelsInPlace} from '../actions/models-view.actions';
+import {ICommonSearchState} from '../../common-search/common-search.reducer';
+import {SortMeta} from 'primeng/api';
+import {CountAvailableAndIsDisableSelectedFiltered} from '@common/shared/entity-page/items.utils';
+import {SET_SELECTED_PROJECT} from '@common/core/actions/projects.actions';
 
 export interface IModelsViewState {
   splitSize: number;
@@ -21,14 +24,14 @@ export interface IModelsViewState {
   modelToken: string;
   viewMode: ModelsViewModesEnum;
   tableFilters: {[section: string]: FilterMetadata};
-  tableSortField: string;
-  tableSortOrder: TableSortOrderEnum;
+  tableSortFields: SortMeta[];
   page: number;
-  globalFilter: string;
+  globalFilter: ICommonSearchState['searchQuery'];
   showAllSelectedIsActive: boolean;
   users: User[];
   frameworks: string[];
   projectTags: string[];
+  selectedModelsDisableAvailable: Record<string, CountAvailableAndIsDisableSelectedFiltered>;
 }
 
 const initialState: IModelsViewState = {
@@ -38,14 +41,14 @@ const initialState: IModelsViewState = {
   colsOrder: {},
   hiddenTableCols: {'comment': true},
   selectedModels: [],
+  selectedModelsDisableAvailable: {},
   selectedModel: null,
   noMoreModels: false,
   selectedModelSource: null,
   modelToken: null,
   viewMode: MODELS_VIEW_MODES.TABLE,
   tableFilters: null,
-  tableSortField: MODELS_TABLE_COL_FIELDS.CREATED,
-  tableSortOrder: TABLE_SORT_ORDER.ASC,
+  tableSortFields: [{field: MODELS_TABLE_COL_FIELDS.CREATED, order: TABLE_SORT_ORDER.DESC}],
   page: -1, // -1 so the "getNextModels" will send 0.
   globalFilter: null,
   showAllSelectedIsActive: false,
@@ -57,7 +60,13 @@ export function modelsViewReducer(state: IModelsViewState = initialState, action
 
   switch (action.type) {
     case actions.RESET_STATE:
-      return {...state, models: [], selectedModel: null};
+      return {
+        ...state,
+        models: initialState.models,
+        selectedModel: initialState.selectedModel,
+      };
+    case SET_SELECTED_PROJECT:
+      return {...state, selectedModels: initialState.selectedModels};
     case actions.ADD_MANY_MODELS:
       return {...state, models: state.models.concat(action.payload)};
     case actions.REMOVE_MANY_MODELS:
@@ -88,14 +97,16 @@ export function modelsViewReducer(state: IModelsViewState = initialState, action
       return {...state, page: action.payload};
     case actions.SET_SELECTED_MODELS:
       return {...state, selectedModels: action.payload};
+    case actions.setSelectedModelsDisableAvailable.type:
+      return {...state, selectedModelsDisableAvailable: action.selectedModelsDisableAvailable};
     case actions.SET_SELECTED_MODEL:
       return {...state, selectedModel: action.payload};
     case actions.SET_VIEW_MODE:
       return {...state, viewMode: action.payload};
-    case actions.GLOBAL_FILTER_CHANGED:
-      return {...state, globalFilter: action.payload};
+    case actions.globalFilterChanged.type:
+      return {...state, globalFilter: action as ReturnType<typeof actions.globalFilterChanged>};
     case actions.resetGlobalFilter.type:
-      return {...state, globalFilter: ''};
+      return {...state, globalFilter: initialState.globalFilter};
     case actions.toggleColHidden.type:
       return {...state, hiddenTableCols: {...state.hiddenTableCols, [action.colName]: !state.hiddenTableCols[action.colName]}};
     case actions.setHiddenCols.type:
@@ -106,8 +117,8 @@ export function modelsViewReducer(state: IModelsViewState = initialState, action
       return {...state, frameworks: action.frameworks};
     case actions.setTags.type:
       return {...state, projectTags: action.tags};
-    case actions.TABLE_SORT_CHANGED:
-      return {...state, tableSortOrder: action.payload.sortOrder, tableSortField: action.payload.colId};
+    case actions.setTableSort.type:
+      return {...state, tableSortFields: action.orders};
     case actions.TABLE_FILTER_CHANGED: {
       const payload = (action as actions.TableFilterChanged).payload;
       return {

@@ -33,6 +33,6 @@ sm-graph-settings-bar {
   border-bottom: 1px solid $blue-100;
 }
 
-/deep/ sm-experiment-output-scalars .cursor-crosshair {
+::ng-deep sm-experiment-output-scalars .cursor-crosshair {
   cursor: default !important;
 }

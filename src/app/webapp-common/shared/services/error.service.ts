@@ -31,10 +31,13 @@ export class ErrorService {
       52: this.template`Could not complete identity verification. The provider may be down - Please try again later`,
       53: this.template`Could not complete identity verification. The provider may be down - Please try again later`,
       54: this.template`Could not resolve link destination. Contact the person who provided you with the link to join their team.`,
-      55: this.template`Could not complete identity verification. The provider may be down - Please try again later`,
+      55: this.template`Could not complete identity verification. Your sign-up session has probably timed out, please try again.
+** If this issue persists, the identity provider may be down - please try again later.`,
       56: this.template`The invitation to ${'user_name'}'s team has expired. Contact ${'user_name'} to join their team, or sign up for a free standalone account.`,
       57: this.template`Account already exists for this ${'provider'}  identity. Use 'Log In' Instead.`,
-      58: this.template`No account exists. Use the provider you signed up with or sign up to create a new account`
+      58: this.template`No account exists. Use the provider you signed up with or sign up to create a new account`,
+      62: this.template`Please check your email to continue the signup process`,
+      67: this.template`${'email'} is not registered - please contact your admin`
     }
   };
 

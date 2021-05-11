@@ -1,0 +1,45 @@
+<ng-template
+  let-saving="saving" let-editable="editable"
+  let-experimentName="experimentName" let-modelLabels="modelLabels"
+  [ngTemplateOutletContext]="{ saving: saving$ | async,
+                               editable: editable$ | async,
+                               experimentName: selectedExperiment$ | async,
+                               modelLabels: modelLabels$ | async}"
+  [ngTemplateOutlet]="template" #template>
+<sm-editable-section #modelSection
+                     *ngIf="(model?.id || editable)"
+                     [saving]="saving"
+                     [editable]="editable && !outputMode"
+                     [hideSaveButton]="true"
+                     (cancelClicked)="cancelModelChange()"
+                     (activateEditClicked)="activateEditChanged()">
+  <sm-experiment-models-form-view
+    #experimentModelForm
+    [editable]="editable && modelSection.inEditMode"
+    [model]="model"
+    [experimentName]="experimentName"
+    [projectId]="modelProjectId"
+    [modelLabels]="modelLabels"
+    [source]="source"
+    [showCreatedExperiment]="!outputMode"
+    (modelSelected)="onModelSelected($event)">
+  </sm-experiment-models-form-view>
+</sm-editable-section>
+<sm-editable-section class="editable-design"
+                     #prototext
+                     [saving]="saving"
+                     [editable]="false"
+                     [disableInEditMode]="true"
+                     containerClass="h-100"
+                     (cancelClicked)="cancelModelChange()">
+  <sm-section-header *ngIf="model?.id" label="MODEL CONFIGURATION"></sm-section-header>
+  <sm-experiment-network-design-form
+    #networkDesignForm
+    *ngIf="model?.id"
+    [editable]="false"
+    [formData]="inputDesign"
+  >
+  </sm-experiment-network-design-form>
+</sm-editable-section>
+
+</ng-template>

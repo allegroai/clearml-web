@@ -1,20 +1,23 @@
-<sm-dialog-template header="MOVE TO PROJECT" [iconClass]="'i-move-to-project'">
+<sm-dialog-template header="MOVE TO PROJECT" [iconClass]="'al-ico-move-to'">
   <div class="message">
     <b *ngIf="reference" [smTooltip]="reference.length > 80 ? reference : undefined">
       {{reference.length > 80 ? (reference | slice:0:77) + '...' : reference }}
     </b> will be moved
     <span *ngIf="currentProjectInstance"> from
       <b
-        [smTooltip]="currentProjectInstance.name.length > 80 ? currentProject : undefined">
+        [smTooltip]="currentProjectInstance.name.length > 80 ? currentProjects[0] : undefined">
         {{currentProjectInstance.name.length > 80 ? (currentProjectInstance.name | slice:0:77) + '...' : currentProjectInstance.name}}
       </b>
     </span> to the selected project.
   </div>
-  <form #moveToForm="ngForm" (submit)="closeDialog(true)">
-    <mat-form-field class="w-100" appearance="outline"
-                    hideRequiredMarker="true"
-                    floatLabel="never">
-      <input matInput type="text" [matAutocomplete]="auto" [(ngModel)]="formData.project" name="projectName"
+  <ng-form #moveToForm="ngForm" (submit)="closeDialog(true)" class="light-theme">
+    <mat-form-field class="w-100" appearance="outline">
+      <mat-label>Project</mat-label>
+      <input matInput
+             type="text"
+             [matAutocomplete]="auto"
+             [(ngModel)]="formData.project"
+             name="projectName"
              #projectInputRef
              #projectInput="ngModel"
              required
@@ -22,18 +25,19 @@
              (keydown.enter)="projectInput.control.markAsTouched() "
              smUniqueNameValidator
              [existingNames]="readOnlyProjects$ | async"
-             [pattern]="'^[^/]+$'"
       >
       <span matSuffix *ngIf="(!isAutoCompleteOpen) && (!formData.project?.value) && formData.project" class="creat-new-suffix">(Create New)</span>
-      <i matSuffix [class]="'fa mr2 ' + (filterText? 'fa-times pointer':'fa-search')" (click)="filterText && clear(); projectInputRef.focus()"
+      <i matSuffix [class]="'fa mr2 ' + (filterText ? 'fa-times pointer' :  'fa-search')" (click)="filterText && clear(); projectInputRef.focus();"
          smClickStopPropagation></i>
       <mat-error *ngIf="projectInput?.errors?.required">Please provide a Project</mat-error>
       <mat-error *ngIf="projectInput?.errors?.minlength">Please provide a name longer than 3 characters</mat-error>
-      <mat-error *ngIf="projectInput?.errors?.pattern">Project name shouldn't contain slash (/)</mat-error>
-      <mat-error *ngIf="projectInput?.errors?.uniqueName && currentProject !== formData.project?.value">Please provide a different name as this project name is taken as an Example project</mat-error>
-      <mat-error *ngIf="currentProject === formData.project?.value">Please select a project different than the current one</mat-error>
+      <mat-error *ngIf="projectInput?.errors?.uniqueName && !currentProjects.includes(formData.project?.value)">Please provide a different name as this project name is taken as an Example project</mat-error>
+<!--      TODO: Need another validator for this val error-->
+      <mat-error *ngIf="formData.project && currentProjects.includes(formData.project.value)">Some {{reference}}s are already in the selected project</mat-error>
       <mat-autocomplete #auto="matAutocomplete"
                         name="ExperimentProject"
+                        class="light-theme"
+                        classList="light-theme"
                         (opened)="setIsAutoCompleteOpen(true)"
                         (closed)="setIsAutoCompleteOpen(false)"
                         [displayWith]="displayFn"
@@ -44,12 +48,12 @@
           *ngIf="filterText && isNewName"
           [value]="filterText"
         >"{{filterText}}" <span class="new">(Create New)</span></mat-option>
-        <mat-option *ngFor="let project of filteredProjects | async" [value]="project">{{project.label}}</mat-option>
+        <mat-option *ngFor="let project of filteredProjects | async" [value]="project" > <div [innerHTML]="project.label | highlightSearchText:projectInput.value"></div></mat-option>
       </mat-autocomplete>
     </mat-form-field>
-  </form>
+  </ng-form>
   <div class="buttons">
-    <button [disabled]="currentProject === formData.project?.value || moveToForm.invalid" (click)="closeDialog(true)" cdkFocusInitial
+    <button [disabled]="moveToForm.invalid" (click)="closeDialog(true)" cdkFocusInitial
             class="btn btn-neon yes-button" #moveButton>
       MOVE
     </button>

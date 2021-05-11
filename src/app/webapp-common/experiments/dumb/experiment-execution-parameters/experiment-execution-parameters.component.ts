@@ -43,8 +43,8 @@ export class ExperimentExecutionParametersComponent implements IExperimentInfoFo
   HELP_TEXTS = HELP_TEXTS;
   public cols = [
     { id: 'name', style: {width: '48%'}},
-    { id: 'value', style: {width: '48%'}},
-    { id: 'description', style: {width: '4%'}}
+    { id: 'value', style: {width: 'auto'}},
+    { id: 'description', style: {width: '48px'}}
   ] as ISmCol[];
   private clickedRow: number;
 

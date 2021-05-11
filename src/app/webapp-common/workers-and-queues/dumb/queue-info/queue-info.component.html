@@ -8,10 +8,10 @@
   </div>
 </div>
 
-<div *ngIf="activeTab === 'experiments' &&  selectedQueue?.entries.length===0"
+<div *ngIf="activeTab === 'experiments' && selectedQueue?.entries?.length===0"
      class="d-flex align-items-center justify-content-center p-4">No experiments currently enqueued
 </div>
-<div *ngIf="activeTab === 'workers' &&  selectedQueue?.workers.length===0"
+<div *ngIf="activeTab === 'workers' && selectedQueue?.workers?.length===0"
      class="d-flex align-items-center justify-content-center p-4">No workers currently assigned to this queue
 </div>
 <sm-simple-table-2
@@ -24,9 +24,7 @@
     let-col
     let-i="rowIndex"
     let-row="row">
-    <div class="col-9">
-      {{row.name}}
-    </div>
+    <a class="col-9 link" [routerLink]="['../workers']" [queryParams]="{id: row.name}">{{row?.name}}</a>
     <div class="col-6">
       {{row.ip}}
     </div>
@@ -52,22 +50,22 @@
 >
   <sm-menu-item itemLabel="Move to top"
                 [disabled]="selectedQueue.entries.length <= 0"
-                (itemClicked)="moveToTop($event)"
+                (itemClicked)="moveToTop()"
                 iconClass="al-icon al-ico-arrow-to-top al-color light-periwinkle-two sm mr-2">
   </sm-menu-item>
   <sm-menu-item itemLabel="Move to bottom"
                 [disabled]="selectedQueue.entries.length <= 0"
-                (itemClicked)="moveToBottom($event)"
+                (itemClicked)="moveToBottom()"
                 iconClass="sm mr-2 al-icon al-ico-arrow-to-bottom al-color light-periwinkle-two">
   </sm-menu-item>
   <sm-menu-item itemLabel="Move to queue..."
                 [disabled]="selectedQueue.entries.length <= 0"
-                (itemClicked)="moveToQueue($event)"
+                (itemClicked)="moveToQueue()"
                 iconClass="icon sm mr-2 al-icon al-ico-arrow-from-left al-color light-periwinkle-two">
   </sm-menu-item>
   <sm-menu-item itemLabel="Remove from queue"
                 [disabled]="selectedQueue.entries.length <= 0"
-                (itemClicked)="removeFromQueue($event)"
+                (itemClicked)="removeFromQueue()"
                 [iconFontSize]="12"
                 iconClass="fas fa-trash">
   </sm-menu-item>

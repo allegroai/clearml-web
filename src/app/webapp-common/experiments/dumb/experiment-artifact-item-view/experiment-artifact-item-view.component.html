@@ -1,7 +1,7 @@
   <sm-editable-section [disableInEditMode]="true" [editable]="false" *ngIf="artifact">
     <div>
       <sm-labeled-row label="FILE PATH">
-        <a *ngIf="artifact?.uri && !isLocalFile && isLinkable" [href]="artifact?.uri" target="_blank">{{artifact?.uri}}</a>
+        <a *ngIf="artifact?.uri && !isLocalFile && isLinkable" (click)="linkClicked($event)" href="">{{artifact?.uri}}</a>
         <span class="uri" *ngIf="!isLinkable">{{artifact?.uri}}</span>
         <i *ngIf="artifact?.uri && !isLocalFile && !isLinkable"
            class="pointer fa fa-download ml-2"

@@ -5,7 +5,7 @@ import {ApiTasksService} from '../../../business-logic/api-services/tasks.servic
 import {ApiAuthService} from '../../../business-logic/api-services/auth.service';
 import {BlTasksService} from '../../../business-logic/services/tasks.service';
 import {ApiEventsService} from '../../../business-logic/api-services/events.service';
-import {catchError, debounceTime, filter, mergeMap, map, switchMap, withLatestFrom} from 'rxjs/operators';
+import {catchError, filter, mergeMap, map, switchMap, withLatestFrom} from 'rxjs/operators';
 import {ActiveLoader, DeactiveLoader, SetServerError} from '../../core/actions/layout.actions';
 import {RequestFailed} from '../../core/actions/http.actions';
 import * as outputActions from '../actions/common-experiment-output.actions';
@@ -61,7 +61,6 @@ export class CommonExperimentOutputEffects {
   @Effect()
   fetchExperimentScalar$ = this.actions$.pipe(
     ofType<outputActions.ExperimentScalarRequested>(outputActions.EXPERIMENT_SCALAR_REQUESTED),
-    debounceTime(200),
     withLatestFrom(this.store.select(selectSelectedSettingsxAxisType), this.store.select(selectCompareHistogramCacheAxisType)),
     switchMap(([action, axisType, prevAxisType]) => {
       if ([ScalarKeyEnum.IsoTime, ScalarKeyEnum.Timestamp].includes(prevAxisType) &&
@@ -92,7 +91,6 @@ export class CommonExperimentOutputEffects {
   @Effect()
   fetchExperimentPlots$ = this.actions$.pipe(
     ofType<outputActions.ExperimentPlotsRequested>(outputActions.EXPERIMENT_PLOTS_REQUESTED),
-    debounceTime(200),
     switchMap(action =>
       this.eventsApi.eventsGetTaskPlots({task: action.payload, iters: 5})
         .pipe(

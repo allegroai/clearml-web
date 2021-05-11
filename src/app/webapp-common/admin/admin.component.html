@@ -7,7 +7,7 @@
   <div class="section toggles">
     <sm-usage-stats></sm-usage-stats>
     <mat-slide-toggle
-      *ngIf="isChrome"
+      *ngIf="supportReScaling"
       (change)="HidpiChange($event)"
       [checked]="disableHidpi">
       Disable HiDPI browser scale override
@@ -49,7 +49,7 @@
         class="dark-theme mat-elevation-z0"
         [class.expanded]="panelState[workspace?.id]"
       >
-        <mat-expansion-panel-header class="dark">
+        <mat-expansion-panel-header class="dark" expandedHeight="48px" collapsedHeight="48px">
           <mat-panel-title>
             <div class="space-header">
               <span class="space-header-name ellipsis">{{workspace?.name}}</span>
@@ -127,10 +127,12 @@
     </ng-template>
   </ng-container>
 </div>
-<footer *ngIf="communityServer">
-  <button *ngIf="!showDeleteAccount; else notice" (click)="deleteAccount()" class="btn button-outline-dark">DELETE ACCOUNT</button>
-  <ng-template #notice>
-    <span class="notice">Please <a href="https://www.clear.ml/contact-us" target="_blank">contact us</a> to remove your account from the service.</span>
-  </ng-template>
-  <span class="version float-right">Version:{{version}}</span>
+<footer>
+  <ng-container *ngIf="communityServer">
+    <button *ngIf="!showDeleteAccount; else notice" (click)="deleteAccount()" class="btn button-outline-dark">DELETE ACCOUNT</button>
+    <ng-template #notice>
+      <span class="notice">Please <a href="https://www.clear.ml/contact-us" target="_blank">contact us</a> to remove your account from the service.</span>
+    </ng-template>
+  </ng-container>
+  <span class="version float-right">Version: {{version}}</span>
 </footer>

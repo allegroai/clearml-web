@@ -1,13 +1,12 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
-import {catchError, debounceTime, filter, flatMap, map, switchMap, withLatestFrom} from 'rxjs/operators';
-import {TaskTypeEnum} from '../../../business-logic/model/tasks/taskTypeEnum';
+import {catchError, debounceTime, filter, mergeMap, map, switchMap, withLatestFrom} from 'rxjs/operators';
 import {ActiveLoader, DeactiveLoader} from '../../core/actions/layout.actions';
 import {RequestFailed} from '../../core/actions/http.actions';
 import {ApiTasksService} from '../../../business-logic/api-services/tasks.service';
 import {
-  resetSelectCompareHeader, SEARCH_EXPERIMENTS_FOR_COMPARE, searchExperimentsForCompare,
-  setSearchExperimentsForCompareResults, setShowSearchExperimentsForCompare, refreshIfNeeded, setRefreshing, setExperimentsUpdateTime
+  SEARCH_EXPERIMENTS_FOR_COMPARE, searchExperimentsForCompare,
+  setSearchExperimentsForCompareResults, refreshIfNeeded, setRefreshing, setExperimentsUpdateTime
 } from '../actions/compare-header.actions';
 import {select, Store} from '@ngrx/store';
 import {get, isEmpty} from 'lodash/fp';
@@ -41,27 +40,21 @@ export class SelectCompareHeaderEffects {
     filter(([action, isAppVisible, experimentsIds, experimentsUpdateTime]) => isAppVisible),
     switchMap(([action, isAppVisible, experimentsIds, experimentsUpdateTime]) =>
       this.experimentsApi.tasksGetAllEx({id: experimentsIds, only_fields: ['last_update']}).pipe(
-        flatMap((res) => {
+        mergeMap((res) => {
           const updatedExperimentsUpdateTime: { [key: string]: Date } = {};
           res.tasks.forEach(task => {
             updatedExperimentsUpdateTime[task.id] = task.last_update;
           });
-          const experimentsWhereUpdated = !!(experimentsIds.find((id) => {
-            return (new Date(experimentsUpdateTime[id]).getTime()) < new Date(updatedExperimentsUpdateTime[id]).getTime();
-          }));
+          const experimentsWhereUpdated = !!(experimentsIds.find((id) =>
+            (new Date(experimentsUpdateTime[id]).getTime()) < new Date(updatedExperimentsUpdateTime[id]).getTime()
+          ));
           const shouldUpdate = ((!action.payload) || (!action.autoRefresh) || experimentsWhereUpdated) && !(isEmpty(experimentsUpdateTime));
           return [
             setExperimentsUpdateTime({payload: updatedExperimentsUpdateTime}),
-            (shouldUpdate) ? setRefreshing({payload: action.payload, autoRefresh: action.autoRefresh}) : new EmptyAction];
+            (shouldUpdate) ? setRefreshing({payload: action.payload, autoRefresh: action.autoRefresh}) : new EmptyAction()];
         }))
     )
   );
-
-  @Effect()
-  resetState = this.actions.pipe(
-    ofType(setShowSearchExperimentsForCompare),
-    filter(action => !action.payload),
-    flatMap(() => [resetSelectCompareHeader()]));
 
   @Effect()
   searchExperimentsForCompare = this.actions.pipe(
@@ -79,7 +72,7 @@ export class SelectCompareHeaderEffects {
       system_tags: ['-archived'],
     })
       .pipe(
-        flatMap(res => [action.payload ? setSearchExperimentsForCompareResults({payload: res.tasks}) : setSearchExperimentsForCompareResults({payload: []}), new DeactiveLoader(action.type)]),
+        mergeMap(res => [action.payload ? setSearchExperimentsForCompareResults({payload: res.tasks}) : setSearchExperimentsForCompareResults({payload: []}), new DeactiveLoader(action.type)]),
         catchError(error => [new DeactiveLoader(action.type), new RequestFailed(error)])
       )
     )

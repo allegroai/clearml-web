@@ -1,6 +1,6 @@
-import {Component, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output} from '@angular/core';
+import {Component, ElementRef, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {SetBackdrop} from '../../../../core/actions/layout.actions';
+import {SetBackdrop} from '@common/core/actions/layout.actions';
 import {MatDialog} from '@angular/material/dialog';
 
 @Component({
@@ -47,7 +47,7 @@ export class EditableSectionComponent implements OnInit, OnDestroy {
     }
   }
 
-  constructor(private store: Store<any>, private matDialog: MatDialog) {
+  constructor(private store: Store<any>, private matDialog: MatDialog, public elementRef: ElementRef) {
   }
 
   editModeChanged(editMode) {

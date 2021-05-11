@@ -26,7 +26,7 @@ import {ITableExperiment} from '../../../../webapp-common/experiments/shared/com
 export class ExperimentInfoComponent implements OnInit, OnDestroy {
 
   private paramsSubscription: Subscription;
-  public selectedExperiment: ISelectedExperiment;
+  public selectedExperiment: IExperimentInfo;
   private selectedExperimentSubscription: Subscription;
   public editable$: Observable<boolean>;
   public infoData$: Observable<IExperimentInfo>;

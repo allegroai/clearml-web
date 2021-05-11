@@ -25,7 +25,7 @@ $search-font-size: 14px;
     position: relative;
     display: flex;
     align-items: center;
-    flex-direction: row-reverse;
+//    flex-direction: row-reverse;
     min-width: 32px;
 
     i.fa {
@@ -41,7 +41,7 @@ $search-font-size: 14px;
       border: 0;
       border-bottom: 2px solid;
       outline: none;
-      border-radius: 0 !important;
+      border-radius: 4px 4px 0 0 !important;
       box-shadow: none !important;
       padding-right: 24px;
       padding-left: 6px !important;
@@ -87,5 +87,11 @@ $search-font-size: 14px;
     .search-input {
       border-bottom: unset;
     }
+  }
+}
+
+:host-context(.search-header) {
+  .search-input {
+    background-color: $blue-700;
   }
 }

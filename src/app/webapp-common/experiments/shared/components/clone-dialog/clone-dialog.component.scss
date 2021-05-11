@@ -1,21 +1,27 @@
 :host {
   h5 {
     padding-top: 15px;
+    font-size: 12px;
+    margin: 0;
+    font-weight: unset;
   }
 
   .reference {
     padding: 6px;
     margin-bottom: 12px;
-    overflow-wrap: break-word;
     max-width: 500px;
+  }
+
+  mat-form-field {
+    margin-top: -8px;
   }
 
   textarea {
     resize: none;
-    min-height: 100px;
-    padding: 12px;
+    min-height: 60px;
   }
-  .creat-new-suffix{
+
+  .creat-new-suffix {
     margin-right: 18px;
   }
 

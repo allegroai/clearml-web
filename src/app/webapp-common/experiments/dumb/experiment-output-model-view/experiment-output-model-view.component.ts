@@ -1,5 +1,5 @@
 import {Component, Input, OnDestroy} from '@angular/core';
-import {IModelInfoInput, IModelInfoOutput, IModelInfoSource} from '../../shared/common-experiment-model.model';
+import {IModelInfo} from '../../shared/common-experiment-model.model';
 import {Model} from '../../../../business-logic/model/models/model';
 import {AdminService} from '../../../../features/admin/admin.service';
 import {Store} from '@ngrx/store';
@@ -14,22 +14,20 @@ import {BaseClickableArtifact} from '../base-clickable-artifact';
 export class ExperimentOutputModelViewComponent extends BaseClickableArtifact implements OnDestroy {
 
   public isLocalFile: boolean;
-  private _output: IModelInfoOutput;
+  private _model: IModelInfo;
 
   @Input() projectId: string;
   @Input() editable: boolean;
   @Input() networkDesign: string;
   @Input() modelLabels: Model['labels'];
-  @Input() source: IModelInfoSource;
-  @Input() model: IModelInfoInput;
 
-  @Input() set output(output: IModelInfoOutput) {
-    this._output = output;
-    this.isLocalFile = output && output.url && this.adminService.isLocalFile(output.url);
+  @Input() set model(model: IModelInfo) {
+    this._model = model;
+    this.isLocalFile = model && model.uri && this.adminService.isLocalFile(model.uri);
   }
 
-  get output(): IModelInfoOutput {
-    return this._output;
+  get model(): IModelInfo {
+    return this._model;
   }
 
   constructor(protected adminService: AdminService, protected store: Store<any>) {

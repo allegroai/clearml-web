@@ -81,7 +81,7 @@ $light-theme: (
     ph-color: $blue-250
   ),
   input: (
-    color: $blue-400,
+    color: $blue-500,
     place-holder-color: $blue-250,
     background-color: $white,
     //background-color-disabled: $blue-600,
@@ -120,22 +120,6 @@ $light-theme: (
     row-color: $blue-400,
     row-bg-color: $white,
     box-shadow: inset 0 -1px 0 0 $blue-300
-  ),
-  ng-select: (
-    option-color: $blue-400,
-    option-bg: $white,
-    option-hover-color: $blue-400,
-    option-hover-bg: #f5f7ff,
-    border-color: $cloudy-blue-two,
-    focus-border-color: $blue-400,
-    hover-border-color: $blue-300,
-    //backgound-color: rgba(216, 216, 216, 0),
-    //backgound-hover-color: $blue-400,
-    //border-color: $blue-400,
-    //options-backgound-color: $blue-50,
-    //option-backgound-color: $blue-100,
-    //option-selected-backgound-color: $blue-100,
-    //option-highlighted-bg: $blue-200
   ),
   button-toggle-group: (
     background-color-active: #e0e0e0,

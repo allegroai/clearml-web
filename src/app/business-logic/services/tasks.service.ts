@@ -26,7 +26,7 @@ export class BlTasksService {
   }
 
   canEnqueue(task: Task): boolean {
-    return !!(task && TASKS_STATUS.CREATED === task.status && task.type !== TASK_TYPES.MANUAL_ANNOTATION);
+    return !!(task && (TASKS_STATUS.CREATED === task.status || TASKS_STATUS.STOPPED === task.status) && task.type !== TASK_TYPES.MANUAL_ANNOTATION);
   }
 
   canDequeue(task: Task): boolean {

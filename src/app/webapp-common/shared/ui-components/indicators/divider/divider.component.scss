@@ -1,0 +1,26 @@
+@import "../../styles/variables";
+
+:host {
+  --width: 1px;
+  --margin: 5px;
+
+  display: flex;
+  width: 100%;
+  align-items: center;
+  margin: var(--margin) 0;
+
+  &:before,
+  &:after {
+    flex: 1;
+    content: '';
+    border-top: var(--width) solid var(--divider-line, #ededed);
+  }
+  span {
+    color: $light-grey-blue;
+    padding: 4px 12px;
+    border-radius: 5px;
+    &:empty {
+      display: none;
+    }
+  }
+}

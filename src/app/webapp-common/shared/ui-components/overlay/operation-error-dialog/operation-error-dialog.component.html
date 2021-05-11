@@ -1,0 +1,20 @@
+<sm-dialog-template [displayX]="true"
+                    [header]="title"
+                    [closeOnX]="true"
+                    [iconClass]="iconClass">
+
+  <div *ngIf="failed > 0" class="errors-title">The following {{failed == 1 ? '' : failed}} {{action.entityType}}{{failed > 1 ? 's' : ''}} failed to {{action.operationName}}:</div>
+  <ul class="list-container">
+    <li *ngFor="let fail of failedList">
+      <div>{{getName(fail)}}</div>
+      <div class="error-reason">{{fail.error.msg}} </div>
+    </li>
+  </ul>
+
+  <div class="buttons">
+    <button (click)="dialogRef.close()" class="btn btn-neon yes-button">
+      Close
+    </button>
+  </div>
+
+</sm-dialog-template>

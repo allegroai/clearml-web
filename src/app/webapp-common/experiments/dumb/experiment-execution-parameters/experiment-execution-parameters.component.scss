@@ -19,7 +19,7 @@
     width: 42%;
     padding-right: 12px;
   }
-  /deep/ tr:hover {
+  ::ng-deep tr:hover {
     cursor: auto !important;
     transition: background-color 0.3s;
   }

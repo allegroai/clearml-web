@@ -1,8 +1,6 @@
 @import "../../layout/layout";
 @import "../../shared/ui-components/styles/variables";
 
-$header-backgroud: #141822;
-
 :host {
   display: block;
   position: relative;
@@ -19,9 +17,18 @@ $header-backgroud: #141822;
     padding: 0 24px;
     align-items: center;
     justify-content: space-between;
+    .header-title{
+      font-size: 15px;
+      font-weight: 500;
+    }
     .spacer{
       min-width: 50px;
     }
+    .left-menu{
+      display: flex;
+      align-items: center;
+
+    };
 
     sm-breadcrumbs :not(.login){
       width: 95%;
@@ -124,8 +131,6 @@ hr {
 }
 
 .mat-menu-item {
-  font-size: 14px;
-  font-weight: 500;
   line-height: 48px;
 
   i {

@@ -46,15 +46,15 @@ $table-row-padding: 10px;
   .table-row {
     line-height: $table-row-height;
 
-    /deep/ .flashing-icon {
+    ::ng-deep .flashing-icon {
       opacity: 0;
     }
 
-    &:hover /deep/ .flashing-icon {
+    &:hover ::ng-deep .flashing-icon {
       opacity: 0.5;
     }
 
-    &:not(:hover) /deep/ .flashing-icon {
+    &:not(:hover) ::ng-deep .flashing-icon {
       opacity: 0 !important;
     }
 

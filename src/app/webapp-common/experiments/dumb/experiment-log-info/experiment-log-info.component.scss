@@ -9,7 +9,7 @@
     background-color: #000;
     overflow-x: scroll;
 
-    /deep/ .cdk-virtual-scroll-content-wrapper {
+    ::ng-deep .cdk-virtual-scroll-content-wrapper {
       min-width: 103%;
     }
   }

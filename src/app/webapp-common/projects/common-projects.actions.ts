@@ -4,8 +4,9 @@ import {ProjectsGetAllRequest} from '../../business-logic/model/projects/project
 import {ProjectsGetByIdRequest} from '../../business-logic/model/projects/projectsGetByIdRequest';
 import {ProjectsGetByIdResponse} from '../../business-logic/model/projects/projectsGetByIdResponse';
 import {Project} from '../../business-logic/model/projects/project';
-import {Action} from '@ngrx/store';
+import {Action, createAction, props} from '@ngrx/store';
 import {PROJECTS_ACTIONS} from './common-projects.consts';
+import {GLOBAL_FILTER_CHANGED} from '../models/actions/models-view.actions';
 
 export class ProjectUpdated implements ISmAction {
   public type = PROJECTS_ACTIONS.PROJECT_UPDATED;
@@ -60,14 +61,10 @@ export class SetProjectsOrderBy implements ISmAction {
   }
 }
 
-export class SetProjectsSearchQuery implements ISmAction {
-  public type = PROJECTS_ACTIONS.SET_SEARCH_QUERY;
-  public payload: { searchQuery: string };
-
-  constructor(searchQuery: string = null) {
-    this.payload = {searchQuery};
-  }
-}
+export const setProjectsSearchQuery = createAction(
+  PROJECTS_ACTIONS.SET_SEARCH_QUERY,
+  props<{query: string; regExp?: boolean}>()
+);
 
 export class ResetProjectsSearchQuery implements ISmAction {
   public type = PROJECTS_ACTIONS.RESET_SEARCH_QUERY;
@@ -91,21 +88,16 @@ export class AddToProjectsList implements ISmAction {
   }
 }
 
-export class DeleteProject implements ISmAction {
-  public type = PROJECTS_ACTIONS.DELETE_PROJECT;
-  public payload: { projectId: string };
-
-  constructor(projectId: string) {
-    this.payload = {projectId};
-  }
+export class ResetProjects implements ISmAction {
+  public type = PROJECTS_ACTIONS.RESET_PROJECTS;
 }
 
 export class CheckProjectForDeletion implements ISmAction {
   public type = PROJECTS_ACTIONS.CHECK_PROJECT_FOR_DELETION;
-  public payload: { projectId: string };
+  public payload: { project: Project };
 
-  constructor(projectId: string) {
-    this.payload = {projectId};
+  constructor(project: Project) {
+    this.payload = {project};
   }
 }
 
@@ -137,10 +129,6 @@ export class SetCurrentProjectsPage implements Action {
 
   constructor(public payload: number) {
   }
-}
-
-export class GetNextProjects implements Action {
-  readonly type = PROJECTS_ACTIONS.GET_NEXT_PROJECTS;
 }
 
 

@@ -36,11 +36,11 @@
     padding: 0;
   }
 
-  /deep/ sm-labeled-row {
+  ::ng-deep sm-labeled-row {
     border-bottom: none !important;
   }
 
-  /deep/ hr {
+  ::ng-deep hr {
     margin: 0 26px;
   }
 

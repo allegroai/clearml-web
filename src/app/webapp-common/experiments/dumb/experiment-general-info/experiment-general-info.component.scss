@@ -1,9 +1,19 @@
+@import "variables";
 :host {
   display: block;
   position: relative;
-  padding: 24px;
+
+  .general-info {
+    padding: 24px 24px 64px 24px;
+  }
 }
 
+textarea {
+  border-radius: 4px;
+  border: solid 1px $blue-100;
+  padding: 12px;
+  color: $blue-500;
+}
 .general-description {
   white-space: pre-wrap;
 }

@@ -17,4 +17,5 @@ export interface ModelsDeleteResponse {
      * Indicates whether the model was deleted
      */
     deleted?: boolean;
+    url?: string;
 }

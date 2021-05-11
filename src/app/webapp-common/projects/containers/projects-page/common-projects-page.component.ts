@@ -1,101 +1,178 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {IProjectReadyForDeletion, selectNoMoreProjects, selectPojectReadyForDeletion, selectProjectsData, selectProjectsOrderBy, selectProjectsSearchQuery, selectProjectsSortOrder} from '../../common-projects.reducer';
-import {CheckProjectForDeletion, DeleteProject, GetAllProjects, GetNextProjects, ProjectUpdated, ResetProjectsSearchQuery, ResetReadyToDelete, SetProjectsOrderBy, SetProjectsSearchQuery} from '../../common-projects.actions';
+import {CommonProjectReadyForDeletion, selectNoMoreProjects, selectProjectReadyForDeletion, selectProjectsData, selectProjectsOrderBy, selectProjectsSortOrder} from '../../common-projects.reducer';
+import {CheckProjectForDeletion, GetAllProjects, ProjectUpdated, ResetProjects, ResetProjectsSearchQuery, ResetReadyToDelete, SetProjectsOrderBy, setProjectsSearchQuery} from '../../common-projects.actions';
 import {Router} from '@angular/router';
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {ProjectsGetAllResponseSingle} from '../../../../business-logic/model/projects/projectsGetAllResponseSingle';
-import {ProjectCreateDialogComponent} from '../../../shared/project-create-dialog/project-create-dialog.component';
-import {Observable, Subscription} from 'rxjs';
-import {distinctUntilChanged, filter, map, skip} from 'rxjs/operators';
+import {ProjectDialogComponent} from '../../../shared/project-dialog/project-dialog.component';
+import {combineLatest, Observable, Subscription} from 'rxjs';
+import {debounceTime, distinctUntilChanged, filter, map, skip, withLatestFrom} from 'rxjs/operators';
 import {ConfirmDialogComponent} from '../../../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
-import {ResetSelectedProject} from '../../../core/actions/projects.actions';
+import * as coreProjectsActions from '../../../core/actions/projects.actions';
+import {setDeep, SetSelectedProjectId} from '../../../core/actions/projects.actions';
 import {InitSearch, ResetSearch} from '../../../common-search/common-search.actions';
-import {selectSearchQuery} from '../../../common-search/common-search.reducer';
-import {getDeleteProjectPopupBody, isDeletableProject, readyForDeletionFilter} from '../../../../features/projects/projects-page.utils';
+import {ICommonSearchState, selectSearchQuery} from '../../../common-search/common-search.reducer';
+import {getDeletePopupEntitiesList, getDeleteProjectPopupStatsBreakdown, isDeletableProject, readyForDeletionFilter} from '../../../../features/projects/projects-page.utils';
+import {selectRouterParams} from '../../../core/reducers/router-reducer';
+import {get} from 'lodash/fp';
+import {selectShowOnlyUserWork} from '../../../core/reducers/users-reducer';
+import {Project} from '../../../../business-logic/model/projects/project';
+import {CommonDeleteDialogComponent} from '../../../shared/entity-page/entity-delete/common-delete-dialog.component';
+import {resetDeleteState} from '../../../shared/entity-page/entity-delete/common-delete-dialog.actions';
+import {EntityTypeEnum} from '../../../../shared/constants/non-common-consts';
+import {StatsStatusCountStatusCount} from '../../../../business-logic/model/projects/statsStatusCountStatusCount';
+import {StatsStatusCount} from '../../../../business-logic/model/projects/statsStatusCount';
+import {isExample} from '../../../shared/utils/shared-utils';
+import {selectSelectedProject} from '../../../core/reducers/projects.reducer';
 
 @Component({
-  selector   : 'sm-common-projects-page',
+  selector: 'sm-common-projects-page',
   templateUrl: './common-projects-page.component.html',
-  styleUrls  : ['./common-projects-page.component.scss']
+  styleUrls: ['./common-projects-page.component.scss']
 })
 export class CommonProjectsPageComponent implements OnInit, OnDestroy {
   public projectsList$: Observable<Array<ProjectsGetAllResponseSingle>>;
   public projectsOrderBy$: Observable<string>;
-  public projectsSearchQuery$: Observable<string>;
 
-  public ALL_PROJECTS_CARD: ProjectsGetAllResponseSingle =
-           {
-             id   : '*',
-             name : 'All projects',
-             stats: {
-               active: {
-                 status_count : {queued: '∞' as any, in_progress: '∞' as any, published: '∞' as any},
-                 total_runtime: 0
-               }
-             }
-           };
-  private createProjectDialog: MatDialogRef<ProjectCreateDialogComponent, any>;
+  public ALL_EXPERIMENTS_CARD: ProjectsGetAllResponseSingle = {
+    id: '*',
+    name: 'All Experiments',
+    stats: {
+      active: {
+        status_count: {queued: '∞' as any, in_progress: '∞' as any, published: '∞' as any},
+        total_runtime: 0
+      }
+    }
+  };
+
+  public ROOT_EXPERIMENTS_CARD: ProjectsGetAllResponseSingle = {
+    name: '[.]',
+    stats: {
+      active: {
+        status_count: {queued: 0, in_progress: 0, closed: 0},
+        total_runtime: 0
+      }
+    }
+  };
   private searchSubs: Subscription;
-  private projectReadyForDeletion$: Observable<IProjectReadyForDeletion>;
-  private deleteProjectId: string;
+  private projectReadyForDeletion$: Observable<CommonProjectReadyForDeletion>;
   private projectReadyForDeletionSub: Subscription;
-  private searchQuery$: Observable<string>;
+  private searchQuery$: Observable<ICommonSearchState['searchQuery']>;
   public noMoreProjects$: Observable<boolean>;
   public projectsSortOrder$: Observable<1 | -1>;
+  private projectDialog: MatDialogRef<ProjectDialogComponent, any>;
+  public selectedProjectId$: Observable<string>;
+  private showOnlyUserWorkSub$: Subscription;
+  private selectedProjectIdSub: Subscription;
 
   constructor(public store: Store<any>, private router: Router, private dialog: MatDialog) {
-    this.searchQuery$             = this.store.select(selectSearchQuery);
-    this.projectsOrderBy$         = this.store.select(selectProjectsOrderBy);
-    this.projectsSortOrder$       = this.store.select(selectProjectsSortOrder);
-    this.projectsSearchQuery$     = this.store.select(selectProjectsSearchQuery);
-    this.noMoreProjects$          = this.store.select(selectNoMoreProjects);
-    this.projectReadyForDeletion$ = this.store.select(selectPojectReadyForDeletion).pipe(
+    this.searchQuery$ = this.store.select(selectSearchQuery);
+    this.projectsOrderBy$ = this.store.select(selectProjectsOrderBy);
+    this.projectsSortOrder$ = this.store.select(selectProjectsSortOrder);
+    this.noMoreProjects$ = this.store.select(selectNoMoreProjects);
+    this.selectedProjectId$ = this.store.select(selectRouterParams).pipe(map(params => get('projectId', params)));
+    this.projectReadyForDeletion$ = this.store.select(selectProjectReadyForDeletion).pipe(
       distinctUntilChanged(),
       filter(readyForDeletion => readyForDeletionFilter(readyForDeletion)));
-    this.projectsList$            = this.store.select(selectProjectsData).pipe(map((projectsList) => [this.ALL_PROJECTS_CARD].concat(projectsList)));
+    this.projectsList$ = combineLatest([
+      this.store.select(selectProjectsData),
+      this.store.select(selectSelectedProject)
+    ]).pipe(
+      debounceTime(0),
+      withLatestFrom(this.selectedProjectId$, this.searchQuery$),
+      map(([[projectsList, selectedProject], selectedProjectId, searchQuery]) => {
+        if ((searchQuery?.query || searchQuery?.regExp)) {
+          return projectsList;
+        } else {
+          if (selectedProject?.sub_projects?.length === 0 && selectedProjectId === selectedProject?.id) {
+            this.router.navigateByUrl(`projects/${selectedProject.id}/experiments`);
+            return [];
+          }
+          const pageProjectsList = ([{
+            ...((selectedProjectId && selectedProject) ? selectedProject : this.ALL_EXPERIMENTS_CARD),
+            id: selectedProjectId ? selectedProjectId : '*', name: 'All Experiments', sub_projects: null
+          } as ProjectsGetAllResponseSingle]);
+          if (selectedProject && selectedProjectId && !(isExample(selectedProject) && selectedProject.own_models === 0 && selectedProject.own_models === 0)) {
+            pageProjectsList.push({
+              ...selectedProject,
+              isRoot: true,
+              name: `[${selectedProject.name}]`,
+              sub_projects: null,
+              stats: {active: this.calculateShallowRootProjectStats(selectedProject, projectsList)}
+            });
+          }
+          return pageProjectsList.concat(projectsList);
+        }
+      })
+    );
+
     this.syncAppSearch();
   }
 
   ngOnInit() {
-    this.store.dispatch(new ResetSelectedProject());
+    // this.store.dispatch(new ResetSelectedProject());
+    this.store.dispatch(setDeep({deep: false}));
     this.store.dispatch(new GetAllProjects());
+    this.selectedProjectIdSub = this.selectedProjectId$.pipe().subscribe((projectId) => {
+      this.store.dispatch(new ResetProjectsSearchQuery());
+      this.store.dispatch(new GetAllProjects());
+    });
+    this.showOnlyUserWorkSub$ = this.store.select(selectShowOnlyUserWork).pipe(skip(1)).subscribe(() => {
+      this.store.dispatch(new ResetProjectsSearchQuery());
+      this.store.dispatch(new GetAllProjects());
+    });
 
     this.projectReadyForDeletionSub = this.projectReadyForDeletion$.subscribe(readyForDeletion => {
-      let dialogData = {};
       if (isDeletableProject(readyForDeletion)) {
-        dialogData = {
-          title    : 'Delete this project?',
-          body     : 'Are you sure you want to delete this project?',
-          yes      : 'Delete',
-          no       : 'Cancel',
-          iconClass: 'i-alert',
-        };
+        this.showDeleteDialog(readyForDeletion);
       } else {
-        dialogData = {
-          title    : 'Unable to Delete Project',
-          body     : getDeleteProjectPopupBody(readyForDeletion),
-          no       : 'OK',
-          iconClass: 'i-alert',
-        };
+        this.showConfirmDialog(readyForDeletion);
       }
-      const confirmDialogRef: MatDialogRef<any, boolean> = this.dialog.open(ConfirmDialogComponent, {
-              data: dialogData
-            })
-      ;
-      confirmDialogRef.afterClosed().subscribe(approvedDeletion => {
-        if (approvedDeletion) {
-          this.store.dispatch(new DeleteProject(this.deleteProjectId));
-        } else {
-          this.store.dispatch(new ResetReadyToDelete());
-        }
-      });
+    });
+  }
+
+  private showConfirmDialog(readyForDeletion: CommonProjectReadyForDeletion) {
+    const confirmDialogRef: MatDialogRef<any, boolean> = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: `Unable to Delete Project`,
+        body: `You cannot delete project "<b>${readyForDeletion.project.name}</b>" with un-archived ${getDeletePopupEntitiesList()}. <br/>
+                   You have: ${getDeleteProjectPopupStatsBreakdown(readyForDeletion, 'unarchived')} in this project. <br/>
+                   If you wish to delete this project, you must archive, delete, or move these items to another project.`,
+        no: 'OK',
+        iconClass: 'i-alert',
+      }
+    });
+    confirmDialogRef.afterClosed().subscribe(approvedDeletion => {
+      this.store.dispatch(new ResetReadyToDelete());
+    });
+  }
+
+  private showDeleteDialog(readyForDeletion: CommonProjectReadyForDeletion) {
+    const confirmDialogRef = this.dialog.open(CommonDeleteDialogComponent, {
+      data: {
+        entity: readyForDeletion.project,
+        numSelected: 1,
+        entityType: EntityTypeEnum.project,
+        projectStats: readyForDeletion
+      },
+      width: '600px',
+      disableClose: true
+    });
+    confirmDialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        this.store.dispatch(resetDeleteState());
+        this.store.dispatch(new ResetProjects());
+        this.store.dispatch(new GetAllProjects());
+      }
     });
   }
 
   ngOnDestroy() {
     this.stopSyncSearch();
     this.projectReadyForDeletionSub.unsubscribe();
+    this.showOnlyUserWorkSub$.unsubscribe();
+    this.selectedProjectIdSub.unsubscribe();
     this.store.dispatch(new ResetReadyToDelete());
     this.store.dispatch(new ResetProjectsSearchQuery());
   }
@@ -110,21 +187,17 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
     this.searchSubs = this.searchQuery$.pipe(skip(1)).subscribe(query => this.search(query));
   }
 
-  openCreateProjectDialog() {
-    this.createProjectDialog = this.dialog.open(ProjectCreateDialogComponent);
-    this.createProjectDialog.afterClosed().subscribe(projectHasBeenCreated => {
-      if (projectHasBeenCreated) {
-        this.store.dispatch(new GetAllProjects());
-      }
-    });
+  public projectCardClicked(project: ProjectsGetAllResponseSingle) {
+    if (project.name === 'All Experiments') {
+      this.store.dispatch(setDeep({deep: true}));
+    }
+    this.router.navigateByUrl((project?.sub_projects?.length > 0) ? `projects/${project.id}/projects` :
+      (project.id !== '*' ? `projects/${project.id}` : `projects/${project.id}/experiments`));
+    this.store.dispatch(new SetSelectedProjectId(project.id, isExample(project)));
   }
 
-  public projectCardClicked(projectId) {
-    this.router.navigateByUrl('projects/' + projectId + '/experiments');
-  }
-
-  search(term: string) {
-    this.store.dispatch(new SetProjectsSearchQuery(term));
+  search(query: ICommonSearchState['searchQuery']) {
+    this.store.dispatch(setProjectsSearchQuery(query));
   }
 
   orderByChanged(sortByFieldName: string) {
@@ -135,12 +208,38 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
     this.store.dispatch(new ProjectUpdated(updatedProject));
   }
 
-  deleteProject(projectId) {
-    this.deleteProjectId = projectId;
-    this.store.dispatch(new CheckProjectForDeletion(projectId));
+  deleteProject(project: Project) {
+    this.store.dispatch(new CheckProjectForDeletion(project));
   }
 
   loadMore() {
     this.store.dispatch(new GetAllProjects());
   }
+
+
+  openProjectDialog(projectId?: string, mode?: string) {
+    this.projectDialog = this.dialog.open(ProjectDialogComponent, {
+      data: {
+        mode: mode,
+        projectId
+      }
+    });
+    this.projectDialog.afterClosed().subscribe(projectHasBeenUpdated => {
+      if (projectHasBeenUpdated) {
+        this.store.dispatch(new ResetProjectsSearchQuery());
+        this.store.dispatch(new GetAllProjects());
+        this.store.dispatch(new coreProjectsActions.GetAllProjects());
+      }
+    });
+  }
+
+  private calculateShallowRootProjectStats(selectedProject: ProjectsGetAllResponseSingle, projectsList: ProjectsGetAllResponseSingle[]): StatsStatusCount {
+    const stats: StatsStatusCountStatusCount = {};
+    for (const [key, value] of Object.entries(selectedProject.stats.active.status_count)) {
+      stats[key] = value - projectsList.map(project => (project.stats.active.status_count[key] || 0)).reduce((a, b) => a + b, 0);
+    }
+    const totalRunTime: number = selectedProject.stats.active.total_runtime - projectsList.map(project => project.stats.active.total_runtime || 0).reduce((a, b) => a + b, 0);
+    return {status_count: stats, total_runtime: totalRunTime};
+  }
+
 }

@@ -26,7 +26,7 @@
   padding: 5px 10px;
 }
 
-/deep/ .experiment-card {
+::ng-deep .experiment-card {
   cursor: pointer;
   height: 228px;
   overflow: hidden;
@@ -37,7 +37,7 @@
   }
 }
 
-/deep/ .experiment-card {
+::ng-deep .experiment-card {
   .card-container:hover {
     background-color: $blue-400 !important;
   }

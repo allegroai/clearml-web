@@ -11,7 +11,7 @@
       border-radius: 6px;
     }
 
-    /deep/ .card-container.bordered {
+    ::ng-deep .card-container.bordered {
       border-color: transparent !important;
     }
   }

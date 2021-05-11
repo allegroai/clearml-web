@@ -11,7 +11,7 @@ import {debounceTime, filter, take, tap} from 'rxjs/operators';
 import {
   getUserWorkspaces,
   leaveWorkspace,
-  Logout,
+  logout,
   setActiveWorkspace,
   setSelectedWorkspaceTab
 } from '../core/actions/users.actions';
@@ -52,7 +52,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   public version = versions['version'];
   public disableHidpi: boolean = false;
   public disableHidpiChanged: boolean = false;
-  public isChrome: boolean;
+  public supportReScaling: boolean;
   workspaces = [] as Workspace[];
   activeWorkspace: OrganizationGetUserCompaniesResponseCompanies;
   selectionIndex = 0;
@@ -71,7 +71,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     private dialog: MatDialog,
     private configService: ConfigurationService
 ) {
-    this.isChrome = window['chrome'];
+    this.supportReScaling = window['chrome'] || window['safari'];
     store.select(selectCurrentUser)
       .pipe(filter(user => !!user), take(1))
       .subscribe(user => {
@@ -110,21 +110,23 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.newCredentialSub = this.store.select(selectNewCredential)
       .pipe(
         tap(() => this.creatingCredentials = false),
-        filter(credential => Object.keys(credential).length > 0)
-      ).subscribe(credential => {
-        const workspace = this.workspaces.find(ws => ws.id === credential.company);
-        const dialog = this.dialog.open(
-          CreateCredentialDialogComponent,
-          {data: {credential, ...(this.communityServer && {workspace: workspace.name})}}
-        );
-        dialog.afterClosed().subscribe(() => {
-          this.adminService.resetNewCredential();
-        });
+        filter(credential => credential && Object.keys(credential).length > 0)
+      ).subscribe((credential) => {
+        if (credential.access_key) {
+          const workspace = this.workspaces.find(ws => ws.id === credential.company);
+          const dialog = this.dialog.open(
+            CreateCredentialDialogComponent,
+            {data: {credential, ...(this.communityServer && {workspace: workspace.name})}}
+          );
+          dialog.afterClosed().subscribe(() => {
+            this.adminService.resetNewCredential();
+          });
+        }
       });
   }
 
   logoutClicked() {
-    this.store.dispatch(new Logout());
+    this.store.dispatch(logout({}));
   }
 
   createCredential(workspace: OrganizationGetUserCompaniesResponseCompanies) {

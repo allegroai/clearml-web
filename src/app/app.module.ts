@@ -7,7 +7,7 @@ import {AppComponent} from './app.component';
 import {routes} from './app.routes';
 import {SMCoreModule} from './core/core.module';
 import {SMSharedModule} from './webapp-common/shared/shared.module';
-import {FormsModule} from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {CommonLayoutModule} from './webapp-common/layout/layout.module';
 import {HTTP_INTERCEPTORS} from '@angular/common/http';
 import {WebappIntercptor} from './webapp-common/core/interceptors/webapp-interceptor';
@@ -24,22 +24,30 @@ import {Store} from '@ngrx/store';
 import {SharedModule} from './shared/shared.module';
 import {ErrorService} from './webapp-common/shared/services/error.service';
 import {ConfigurationService} from './webapp-common/shared/services/configuration.service';
+import {ProjectsSharedModule} from "./features/projects/shared/projects-shared.module";
+import { UserManagementComponent } from './webapp-common/user-management/user-management.component';
+import { UserManagementDialogComponent } from './webapp-common/user-management/user-management-dialog/user-management-dialog.component';
+import { UserManagementInvitesComponent } from './webapp-common/user-management/user-managment-invites/user-management-invites.component';
+import {MAT_FORM_FIELD_DEFAULT_OPTIONS} from "@angular/material/form-field";
 
 @NgModule({
-  declarations   : [AppComponent],
+  declarations   : [AppComponent, UserManagementComponent, UserManagementDialogComponent, UserManagementInvitesComponent],
   imports: [
     FormsModule,
+    ReactiveFormsModule,
     BrowserAnimationsModule,
+    ProjectsSharedModule,
     BrowserModule,
     SMCoreModule,
     BusinessLogicModule,
     SMSharedModule,
-    AngularSplitModule.forRoot(),
+    AngularSplitModule,
     RouterModule.forRoot(routes, {
       preloadingStrategy: PreloadAllModules,
       scrollPositionRestoration: 'top',
-      onSameUrlNavigation: 'reload'
-    }),
+      onSameUrlNavigation: 'reload',
+      relativeLinkResolution: 'legacy'
+}),
     AdminModule,
     NotifierModule.withConfig({
       theme: 'material',
@@ -56,6 +64,7 @@ import {ConfigurationService} from './webapp-common/shared/services/configuratio
     SharedModule,
   ],
   providers      : [
+    {provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: {floatLabel: 'always'}},
     {
       provide   : APP_INITIALIZER,
       useFactory: loadUserAndPreferences,

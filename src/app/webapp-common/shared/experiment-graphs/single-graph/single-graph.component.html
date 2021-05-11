@@ -1,2 +1,29 @@
-<div #drawHere class="whitebg" [class.whitebg-table]="type === 'table'">
+<div #drawHere
+     [style.height.px]="height"
+     class="whitebg"
+     [class.loading]="loading"
+     mwlResizable
+     [validateResize]="validateResize"
+     [enableGhostResize]="true"
+     [ghostElementPositioning]="'absolute'"
+     (resizing)="resizing.emit($event);"
+     (resizeEnd)="sizeChanged.emit($event)"
+     (resizeStart)="resizeStarted.emit()"
+     [class.whitebg-table]="type === 'table'">
+  <div
+    class="resize-handle-right"
+    mwlResizeHandle
+    [resizeEdges]="{ right: true }">
+    <div class="right-line"></div>
+    <div class="right-handle"></div>
+  </div>
+  <div
+    class="resize-handle-bottom"
+    mwlResizeHandle
+    [resizeEdges]="{ bottom: true }">
+    <div class="bottom-line"></div>
+    <div class="bottom-handle"></div>
+  </div>
+  <div class="resize-overlay-text"></div>
+  <div *ngIf="loading" class="plot-loader">Loading...</div>
 </div>

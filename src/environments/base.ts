@@ -21,20 +21,25 @@ export interface Environment {
   companyID: string;
   loginNotice?: string;
   loginBanner?: string;
-  spaLogin?: boolean;
   autoLogin?: boolean;
+  loginPopup?: string;
   whiteLabelLogo?: boolean;
   whiteLabelLink?: any;
   whiteLabelLoginTitle?: string;
   whiteLabelLoginSubtitle?: string;
   whiteLabelSlogan?: string;
   communityServer: boolean;
+  accountAdministration: boolean;
   communityContext?: CommunityContext;
   GTM_ID?: string;
   hideUpdateNotice: boolean;
   showSurvey: boolean;
   touLink: string;
   plotlyURL: string;
+  slackLink: string;
+  docsLink: string;
+  useFilesProxy: boolean;
+  branding?: {faviconUrl?: string; logo?: string; logoSmall?: string};
 }
 
 export const BASE_ENV = {
@@ -50,7 +55,6 @@ export const BASE_ENV = {
   companyID: 'd1bd92a3b039400cbafc60a7a5b1e52b',
   loginNotice: '',
   loginBanner: '',
-  spaLogin: true,
   autoLogin: false,
   whiteLabelLogo: null,
   whiteLabelLink: null,
@@ -63,7 +67,12 @@ export const BASE_ENV = {
   GTM_ID: null,
   hideUpdateNotice: false,
   showSurvey: false,
+  accountAdministration: false,
+  useFilesProxy: false,
   touLink: 'https://allegro.ai/legal-platform-tou/',
-  plotlyURL: 'app/webapp-common/assets/plotly-1.58.4.min.js'
+  plotlyURL: 'app/webapp-common/assets/plotly-1.58.4.min.js',
+  slackLink: 'https://join.slack.com/t/allegroai-trains/shared_invite/enQtOTQyMTI1MzQxMzE4LTY5NTUxOTY1NmQ1MzQ5MjRhMGRhZmM4ODE5NTNjMTg2NTBlZGQzZGVkMWU3ZDg1MGE1MjQxNDEzMWU2NmVjZmY',
+  docsLink: 'https://allegro.ai/clearml/docs',
+  branding: {logo: '/assets/logo-white.svg?v=7', logoSmall: '/assets/c-logo.svg?=2'}
 } as Environment;
 

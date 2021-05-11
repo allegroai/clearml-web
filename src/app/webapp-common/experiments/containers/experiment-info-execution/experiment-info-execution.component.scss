@@ -3,6 +3,7 @@
 :host {
   display: block;
   height: 100%;
+  overflow: auto;
 
   mat-sidenav-container {
     height: 100%;
@@ -46,7 +47,7 @@
       }
 
       sm-editable-section.limit-width {
-          max-width: 1200px;
+        max-width: 1200px;
       }
     }
 
@@ -63,7 +64,7 @@
     }
   }
 
-  /deep/ sm-experiment-requirements-code textarea, /deep/ sm-scroll-textarea textarea {
+  ::ng-deep sm-experiment-requirements-code textarea, ::ng-deep sm-scroll-textarea textarea {
     padding: 5px 15px;
   }
 
@@ -81,4 +82,46 @@
     visibility: hidden;
   }
 
+  .edit-in-section {
+    ::ng-deep #editSection {
+      position: relative;
+      top: 36px;
+    }
+  }
+
+  .setup-shell-script {
+    margin-top: -30px;
+
+    &.maximised {
+      max-width: 1200px;
+    }
+
+    ::ng-deep .editable-container {
+      padding-top: 0;
+      display: flex;
+      position: relative;
+
+      .edit-wrapper {
+        position: absolute;
+        right: 24px;
+        top: 0;
+        bottom: 0;
+      }
+      ::ng-deep sm-section-header  {
+        width: 155px;
+        h4 {
+          font-weight: 500;
+          color: #71758A;
+          font-size: 11px;
+        }
+      }
+      sm-scroll-textarea {
+        position: relative;
+        flex: 1;
+        span.no-changes {
+          font-size: 11px;
+        }
+      }
+    }
+  }
 }

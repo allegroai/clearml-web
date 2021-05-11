@@ -15,6 +15,7 @@ $tab-width: 15vw;
     padding-left: 24px;
     font-size: 16px;
     margin-bottom: 33px;
+
     .user-icon {
       width: 48px;
       height: 48px;
@@ -51,6 +52,7 @@ $tab-width: 15vw;
       color: $blue-400;
     }
   }
+
   .title {
     color: $white;
     font-size: 16px;
@@ -79,6 +81,7 @@ $tab-width: 15vw;
   .info {
     margin-left: 12px;
     color: $light-grey-blue;
+
     &:hover {
       color: $purple;
     }
@@ -86,20 +89,15 @@ $tab-width: 15vw;
 
   .mat-expansion-panel {
     margin-bottom: 12px;
+    border: transparent solid 1px;
 
     &.expanded {
       border: $blue-500 solid 1px;
       border-radius: 4px;
 
-      .mat-expansion-panel-header {
-        align-items: center;
-        padding-top: 0;
-      }
     }
 
     .mat-expansion-panel-header {
-      align-items: flex-start;
-      padding-top: 12px;
 
       &:hover {
         background-color: rgba($blue-600, 0.3);
@@ -115,24 +113,23 @@ $tab-width: 15vw;
       .active {
         display: flex;
         align-items: center;
-        padding-left: 66px;
         font-size: 13px;
         color: $neon-yellow;
       }
 
       button {
-        margin-left: 50px;
         width: 160px;
       }
 
       .space-header-name {
         width: 300px;
+        padding-right: 24px;
       }
     }
 
     .space-content {
       display: flex;
-      padding-left: 24px;
+      padding: 16px 0 24px 24px;
 
       .space-title {
         display: flex;
@@ -220,6 +217,7 @@ $tab-width: 15vw;
         border-color: $light-grey-blue;
         height: 32px;
         width: 32px;
+        min-width: 32px;
         margin-top: 1px;
       }
 

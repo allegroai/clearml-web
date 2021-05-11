@@ -16,7 +16,7 @@ export class ExperimentConverterService {
   }
 
 
-  convertExperiment(experimentInfo: IExperimentInfo, selectedExperiment: ISelectedExperiment, experimentInfoBeforeChange: IExperimentInfo): TasksEditRequest {
+  convertExperiment(experimentInfo: IExperimentInfo, selectedExperiment: IExperimentInfo, experimentInfoBeforeChange: IExperimentInfo): TasksEditRequest {
     const convertedExperiment                   = this.commonExperimentConverterService.convertCommonExperiment(experimentInfo, selectedExperiment, experimentInfoBeforeChange);
 
     const executionInfoNoOutputDest             = {...experimentInfo.execution, output: {...experimentInfo.execution.output, destination: null}};

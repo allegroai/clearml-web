@@ -1,18 +1,24 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {select, Store} from '@ngrx/store';
 import {get, isEqual} from 'lodash/fp';
 import {combineLatest, interval, Observable, Subscription} from 'rxjs';
-import {filter, map, skip, take, tap, withLatestFrom} from 'rxjs/operators';
+import {filter, map, skip, tap, withLatestFrom} from 'rxjs/operators';
 import {AUTO_REFRESH_INTERVAL} from '../../app.constants';
-import {getTags, ResetProjectSelection} from '../core/actions/projects.actions';
+import {getTags, ResetProjectSelection, setDeep} from '../core/actions/projects.actions';
 import {InitSearch, ResetSearch} from '../common-search/common-search.actions';
-import {selectSearchQuery} from '../common-search/common-search.reducer';
+import {ICommonSearchState, selectSearchQuery} from '../common-search/common-search.reducer';
 import {SetAutoRefresh} from '../core/actions/layout.actions';
-import {selectIsArchivedMode, selectProjectSystemTags} from '../core/reducers/projects.reducer';
+import {
+  selectCompanyTags,
+  selectIsArchivedMode,
+  selectProjectSystemTags,
+  selectProjectTags,
+  selectTagsFilterByProject
+} from '../core/reducers/projects.reducer';
 import {selectRouterParams} from '../core/reducers/router-reducer';
-import {selectAutoRefresh} from '../core/reducers/view-reducer';
+import {selectAppVisible, selectAutoRefresh} from '../core/reducers/view-reducer';
 import {BaseEntityPage} from '../shared/entity-page/base-entity-page';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {ISmCol, TableSortOrderEnum} from '../shared/ui-components/data/table/table.consts';
@@ -21,17 +27,28 @@ import {decodeFilter, decodeOrder} from '../shared/utils/tableParamEncode';
 import * as modelsActions from './actions/models-view.actions';
 import {MODELS_TABLE_COLS, ModelsViewModesEnum} from './models.consts';
 import * as modelsSelectors from './reducers';
-import {
-  selectModelsFrameworks,
-  selectModelsHiddenTableCols,
-  selectModelsTags,
-  selectModelsUsers,
-  selectSplitSize
-} from './reducers';
+import {selectModelsFrameworks, selectModelsHiddenTableCols, selectModelsTags, selectModelsUsers} from './reducers';
 import {IModelsViewState} from './reducers/models-view.reducer';
-import {TableModel, SelectedModel} from './shared/models.model';
+import {SelectedModel, TableModel} from './shared/models.model';
 import {User} from '../../business-logic/model/users/user';
-import {selectIsSharedAndNotOwner} from "../../features/experiments/reducers";
+import {SortMeta} from 'primeng/api';
+import {selectIsSharedAndNotOwner} from '../../features/experiments/reducers';
+import {EntityTypeEnum} from '../../shared/constants/non-common-consts';
+import {ShowItemsFooterSelected} from '../shared/entity-page/footer-items/show-items-footer-selected';
+import {DividerFooterItem} from '../shared/entity-page/footer-items/divider-footer-item';
+import {ArchiveFooterItem} from '../shared/entity-page/footer-items/archive-footer-item';
+import {DeleteFooterItem} from '../shared/entity-page/footer-items/delete-footer-item';
+import {MoveToFooterItem} from '../shared/entity-page/footer-items/move-to-footer-item';
+import {addTag} from './actions/models-menu.actions';
+import {ModelsTableComponent} from './shared/models-table/models-table.component';
+import {
+  CountAvailableAndIsDisable,
+  CountAvailableAndIsDisableSelectedFiltered,
+  MENU_ITEM_ID
+} from '../shared/entity-page/items.utils';
+import {PublishFooterItem} from '../shared/entity-page/footer-items/publish-footer-item';
+import { HasReadOnlyFooterItem } from '../shared/entity-page/footer-items/has-read-only-footer-item';
+import { SelectedTagsFooterItem } from '../shared/entity-page/footer-items/selected-tags-footer-item';
 
 
 @Component({
@@ -41,12 +58,13 @@ import {selectIsSharedAndNotOwner} from "../../features/experiments/reducers";
 })
 export class ModelsComponent extends BaseEntityPage implements OnInit, OnDestroy {
 
+  public EntityTypeEnum = EntityTypeEnum;
   public models$: Observable<Array<TableModel>>;
-  public tableSortField$: Observable<string>;
+  public tableSortFields$: Observable<SortMeta[]>;
   public tableSortOrder$: Observable<TableSortOrderEnum>;
   public selectedModels$: Observable<Array<any>>;
   public selectedModel$: Observable<SelectedModel>;
-  public searchValue$: Observable<string>;
+  public searchValue$: Observable<ICommonSearchState['searchQuery']>;
   public isArchived$: Observable<boolean>;
   public viewMode$: Observable<ModelsViewModesEnum>;
   public tableFilters$: Observable<{[s: string]: FilterMetadata}>;
@@ -59,15 +77,18 @@ export class ModelsComponent extends BaseEntityPage implements OnInit, OnDestroy
   private searchSubs: Subscription;
   private selectedModelsSub: Subscription;
   private ModelFromUrlSub: Subscription;
-  private searchQuery$: Observable<string>;
+  private searchQuery$: Observable<ICommonSearchState['searchQuery']>;
   public autoRefreshState$: Observable<boolean>;
   private refreshing: boolean;
-  private autorRefreshSub: Subscription;
+  private autoRefreshSub: Subscription;
   public activeSectionEdit$: Observable<string>;
   public selectedProjectId$: Observable<string>;
   public tableColsOrder$: Observable<string[]>;
   public users$: Observable<Array<User>>;
   public tags$: Observable<string[]>;
+  private tagsFilterByProject$: Observable<boolean>;
+  private projectTags$: Observable<string[]>;
+  private companyTags$: Observable<string[]>;
   public systemTags$: Observable<string[]>;
   public hiddenTableCols$: Observable<{ [p: string]: boolean }>;
   public tableCols = MODELS_TABLE_COLS;
@@ -75,6 +96,11 @@ export class ModelsComponent extends BaseEntityPage implements OnInit, OnDestroy
   private hiddenTableColsSub: Subscription;
   public frameworks$: Observable<Array<string>>;
   public isSharedAndNotOwner$: Observable<boolean>;
+  private isAppVisible$: Observable<boolean>;
+  protected addTag = addTag;
+  @ViewChild('modelsTable') private table: ModelsTableComponent;
+  public selectedModelsDisableAvailable$: Observable<Record<string, CountAvailableAndIsDisableSelectedFiltered>>;
+
 
   constructor(
     protected store: Store<IModelsViewState>, private route: ActivatedRoute, private router: Router,
@@ -82,10 +108,10 @@ export class ModelsComponent extends BaseEntityPage implements OnInit, OnDestroy
   ) {
     super(store);
     this.selectSplitSize$ = this.store.select(modelsSelectors.selectSplitSize);
-    this.tableSortField$ = this.store.select(modelsSelectors.selectTableSortField);
+    this.tableSortFields$ = this.store.select(modelsSelectors.selectTableSortFields);
     this.selectedModel$ = this.store.select(modelsSelectors.selectSelectedTableModel);
     this.selectedModels$ = this.store.select(modelsSelectors.selectSelectedModels);
-    this.tableSortOrder$ = this.store.select(modelsSelectors.selectTableSortOrder);
+    this.selectedModelsDisableAvailable$ = this.store.select(modelsSelectors.selectedModelsDisableAvailable);
     this.tableFilters$ = this.store.select(modelsSelectors.selectTableFilters);
     this.searchValue$ = this.store.select(modelsSelectors.selectGlobalFilter);
     this.isArchived$ = this.store.select(selectIsArchivedMode);
@@ -96,10 +122,14 @@ export class ModelsComponent extends BaseEntityPage implements OnInit, OnDestroy
     this.showAllSelectedIsActive$ = this.store.select(modelsSelectors.selectShowAllSelectedIsActive);
     this.searchQuery$ = this.store.select(selectSearchQuery);
     this.autoRefreshState$ = this.store.select(selectAutoRefresh);
+    this.isAppVisible$ = this.store.select(selectAppVisible);
     this.activeSectionEdit$ = this.store.select(modelsSelectors.selectActiveSectionEdit);
     this.tableColsOrder$ = this.store.select(modelsSelectors.selectModelsTableColsOrder);
     this.selectedProjectId$ = this.store.select(selectRouterParams).pipe(map(params => get('projectId', params)));
     this.tags$ = this.store.select(selectModelsTags);
+    this.tagsFilterByProject$ = this.store.select(selectTagsFilterByProject);
+    this.projectTags$ = this.store.select(selectProjectTags);
+    this.companyTags$ = this.store.select(selectCompanyTags);
     this.systemTags$ = this.store.select(selectProjectSystemTags);
     this.users$ = this.store.select(selectModelsUsers);
     this.frameworks$ = this.store.select(selectModelsFrameworks);
@@ -120,6 +150,16 @@ export class ModelsComponent extends BaseEntityPage implements OnInit, OnDestroy
 
   ngOnInit() {
     super.ngOnInit();
+    this.createFooterItems({
+      entitiesType: EntityTypeEnum.model,
+      selected$: this.selectedModels$,
+      showAllSelectedIsActive$: this.showAllSelectedIsActive$,
+      tags$: this.tags$,
+      data$: this.selectedModelsDisableAvailable$,
+      tagsFilterByProject$: this.tagsFilterByProject$,
+      companyTags$: this.companyTags$,
+      projectTags$: this.projectTags$
+    });
     let prevQueryParams: Params;
 
     this.hiddenTableColsSub = this.hiddenTableCols$.subscribe(hiddenCols => {
@@ -127,7 +167,7 @@ export class ModelsComponent extends BaseEntityPage implements OnInit, OnDestroy
         tableCol.hidden = hiddenCols[tableCol.id];
         return tableCol;
       });
-      this.filteredTableCols = MODELS_TABLE_COLS.filter(tableCol=> !hiddenCols[tableCol.id]);
+      this.filteredTableCols = MODELS_TABLE_COLS.filter(tableCol => !hiddenCols[tableCol.id]);
     });
 
     this.selectedModelSubs = combineLatest([
@@ -148,8 +188,8 @@ export class ModelsComponent extends BaseEntityPage implements OnInit, OnDestroy
       })
     ).subscribe(([projectId, params]: [string, Params]) => {
       if (params.order) {
-        const [colId, sortOrder] = decodeOrder(params.order);
-        this.store.dispatch(new modelsActions.TableSortChanged({colId, sortOrder}));
+        const orders = decodeOrder(params.order);
+        this.store.dispatch(modelsActions.setTableSort({orders}));
       }
       if (params.filter) {
         const filters = decodeFilter(params.filter);
@@ -162,6 +202,10 @@ export class ModelsComponent extends BaseEntityPage implements OnInit, OnDestroy
       if (params.archive) {
         this.store.dispatch(modelsActions.setArchive({archive: true}));
       }
+      if (params.deep) {
+        this.store.dispatch(setDeep({deep: true}));
+      }
+
       if (params.columns) {
         this.columnsReordered(params.columns);
         const hiddenCols = {};
@@ -178,9 +222,9 @@ export class ModelsComponent extends BaseEntityPage implements OnInit, OnDestroy
     this.selectedModelsSub = this.selectedModels$.subscribe(selectedModels => {
       this.selectedModels = selectedModels;
     });
-    this.autorRefreshSub = interval(AUTO_REFRESH_INTERVAL).pipe(
-      withLatestFrom(this.autoRefreshState$, this.activeSectionEdit$),
-      filter(([iteration, autoRefreshState, activeSectionEdit]) => autoRefreshState && activeSectionEdit === null)
+    this.autoRefreshSub = interval(AUTO_REFRESH_INTERVAL).pipe(
+      withLatestFrom(this.autoRefreshState$, this.activeSectionEdit$, this.isAppVisible$),
+      filter(([iteration, autoRefreshState, activeSectionEdit, isAppVisible]) => autoRefreshState && activeSectionEdit === null && isAppVisible)
     ).subscribe(() => {
       this.refreshList(true);
     });
@@ -193,9 +237,10 @@ export class ModelsComponent extends BaseEntityPage implements OnInit, OnDestroy
   }
 
   ngOnDestroy(): void {
+    super.ngOnDestroy();
     this.selectedModelSubs.unsubscribe();
     this.ModelFromUrlSub.unsubscribe();
-    this.autorRefreshSub.unsubscribe();
+    this.autoRefreshSub.unsubscribe();
     this.selectedModelsSub.unsubscribe();
     this.hiddenTableColsSub.unsubscribe();
     this.store.dispatch(new modelsActions.ResetState());
@@ -211,7 +256,7 @@ export class ModelsComponent extends BaseEntityPage implements OnInit, OnDestroy
   syncAppSearch() {
     this.store.dispatch(new InitSearch('Search for models'));
     this.searchSubs = this.searchQuery$.pipe(skip(1)).subscribe(query => {
-      this.onSearchValueChanged(query);
+      this.store.dispatch(modelsActions.globalFilterChanged(query));
     });
   }
 
@@ -238,15 +283,15 @@ export class ModelsComponent extends BaseEntityPage implements OnInit, OnDestroy
   }
 
   modelSelectionChanged(model: SelectedModel) {
-    this.store.dispatch(new modelsActions.ModelSelectionChanged({model: model, project: this.projectId}));
+    this.store.dispatch(new modelsActions.ModelSelectionChanged({model, project: this.projectId}));
   }
 
   modelsSelectionChanged(models: SelectedModel[]) {
     this.store.dispatch(new modelsActions.SetSelectedModels(models));
   }
 
-  sortedChanged({colId, sortOrder}: { sortOrder: TableSortOrderEnum; colId: string }) {
-    this.dispatchAndLock(new modelsActions.TableSortChanged({colId, sortOrder}));
+  sortedChanged({colId, isShift}: { isShift: boolean; colId: string }) {
+    this.dispatchAndLock(modelsActions.tableSortChanged({colId, isShift}));
   }
 
   filterChanged({col, value}: { col: ISmCol; value: any }) {
@@ -263,22 +308,11 @@ export class ModelsComponent extends BaseEntityPage implements OnInit, OnDestroy
     );
   }
 
-  archiveModels() {
-    this.store.dispatch(new modelsActions.ArchivedSelectedModels());
-  }
-
-  restoreModels() {
-    this.store.dispatch(new modelsActions.RestoreSelectedModels());
-  }
-
-  onSearchValueChanged(value: string) {
-    this.store.dispatch(new modelsActions.GlobalFilterChanged(value));
-  }
-
   archivedChanged(isArchived: boolean) {
     const navigate = () => {
       this.dispatchAndLock(modelsActions.setArchive({archive: isArchived}));
       this.store.dispatch(new ResetProjectSelection());
+      this.closeModelPanel();
     };
 
     if (this.selectedModels.length > 0) {
@@ -327,11 +361,11 @@ export class ModelsComponent extends BaseEntityPage implements OnInit, OnDestroy
   }
 
   columnsReordered(cols: string[]) {
-    this.store.dispatch(modelsActions.changeColsOrder({cols: cols}));
+    this.store.dispatch(modelsActions.changeColsOrder({cols}));
   }
 
   selectedTableColsChanged(col) {
-    this.dispatchAndLock(modelsActions.toggleColHidden({colName: col.itemValue}));
+    this.dispatchAndLock(modelsActions.toggleColHidden({colName: col.id}));
   }
 
   refreshTagsList() {
@@ -345,5 +379,51 @@ export class ModelsComponent extends BaseEntityPage implements OnInit, OnDestroy
 
   protected getParamId(params) {
     return params?.modelId;
+  }
+
+  createFooterItems(config: {
+    entitiesType: EntityTypeEnum;
+    selected$: Observable<Array<any>>;
+    showAllSelectedIsActive$: Observable<boolean>;
+    tags$: Observable<string[]>;
+    data$?: Observable<Record<string, CountAvailableAndIsDisableSelectedFiltered>>;
+    companyTags$:   Observable<string[]>;
+    projectTags$: Observable<string[]>;
+    tagsFilterByProject$: Observable<boolean>;
+  }) {
+    const state$ = this.createFooterState(config.selected$, config.data$);
+
+    this.footerItems = [
+      new ShowItemsFooterSelected(config.entitiesType, config.showAllSelectedIsActive$, config.selected$),
+      new DividerFooterItem(),
+
+      new ArchiveFooterItem(config.entitiesType, state$),
+      new DeleteFooterItem(state$),
+      new SelectedTagsFooterItem(config.entitiesType, state$, config.companyTags$, config.projectTags$, config.tagsFilterByProject$),
+      new DividerFooterItem(),
+
+      new MoveToFooterItem(state$),
+      new PublishFooterItem(state$, EntityTypeEnum.model),
+      new HasReadOnlyFooterItem(state$)
+    ];
+  }
+  onFooterHandler({emitValue, item}) {
+    switch (item.id) {
+      case MENU_ITEM_ID.SHOW_ALL_ITEMS:
+        this.showAllSelected(!emitValue);
+        break;
+      case MENU_ITEM_ID.ARCHIVE:
+        this.table.contextMenu.archiveClicked();
+        break;
+      case MENU_ITEM_ID.DELETE:
+        this.table.contextMenu.deleteModelPopup();
+        break;
+      case MENU_ITEM_ID.MOVE_TO:
+        this.table.contextMenu.moveToProjectPopup();
+        break;
+      case MENU_ITEM_ID.PUBLISH:
+        this.table.contextMenu.publishPopup();
+        break;
+    }
   }
 }

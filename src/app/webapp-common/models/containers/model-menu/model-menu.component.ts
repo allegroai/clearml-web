@@ -1,28 +1,32 @@
 import {Component, ElementRef, EventEmitter, Input, Output} from '@angular/core';
-import {ChangeProjectRequested, PublishModelClicked} from '../../actions/models-menu.actions';
-import {htmlTextShorte, isReadOnly} from '../../../shared/utils/shared-utils';
-import {ICONS} from '../../../../app.constants';
+import {archivedSelectedModels, changeProjectRequested, publishModelClicked, restoreSelectedModels} from '../../actions/models-menu.actions';
+import {htmlTextShorte, isReadOnly} from '@common/shared/utils/shared-utils';
+import {ICONS} from '@common/constants';
 import {MatDialog} from '@angular/material/dialog';
 import {Store} from '@ngrx/store';
 import {AdminService} from '../../../../features/admin/admin.service';
-import {selectS3BucketCredentials} from '../../../core/reducers/common-auth-reducer';
+import {selectS3BucketCredentials} from '@common/core/reducers/common-auth-reducer';
 import {ModelInfoState} from '../../reducers/model-info.reducer';
-import {get} from 'lodash/fp';
-import {ConfirmDialogComponent} from '../../../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
+import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {Observable, Subscription} from 'rxjs';
 import {filter, first, skip} from 'rxjs/operators';
-import {ChangeProjectDialogComponent} from '../../../experiments/shared/components/change-project-dialog/change-project-dialog.component';
-import {resetDontShowAgainForBucketEndpoint} from '../../../core/actions/common-auth.actions';
-import {BaseContextMenuComponent} from '../../../shared/components/base-context-menu/base-context-menu.component';
-import {ArchivedSelectedModels, RestoreSelectedModels, SetSelectedModels} from '../../actions/models-view.actions';
+import {ChangeProjectDialogComponent} from '@common/experiments/shared/components/change-project-dialog/change-project-dialog.component';
+import {resetDontShowAgainForBucketEndpoint} from '@common/core/actions/common-auth.actions';
+import {FetchModelsRequested, ModelSelectionChanged, SetSelectedModels} from '../../actions/models-view.actions';
 import {SelectedModel} from '../../shared/models.model';
+import {CommonDeleteDialogComponent} from '@common/shared/entity-page/entity-delete/common-delete-dialog.component';
+import {EntityTypeEnum} from '../../../../shared/constants/non-common-consts';
+import {CancelModelEdit} from '../../actions/models-info.actions';
+import {BaseContextMenuComponent} from '../../../shared/components/base-context-menu/base-context-menu.component';
+import {selectionDisabledArchive, selectionDisabledMoveTo, selectionDisabledPublishModels} from '../../../shared/entity-page/items.utils';
 
 
 @Component({
-  selector: 'sm-base-model-menu',
-  template: ''
+  selector: 'sm-model-menu',
+  templateUrl: './model-menu.component.html',
+  styleUrls: ['./model-menu.component.scss']
 })
-export class BaseModelMenuComponent extends BaseContextMenuComponent {
+export class ModelMenuComponent extends BaseContextMenuComponent {
 
   readonly ICONS = ICONS;
   private S3BucketCredentialsSubscription: Subscription;
@@ -31,18 +35,21 @@ export class BaseModelMenuComponent extends BaseContextMenuComponent {
   public _model: any;
   public isExample: boolean;
   public isLocalFile: boolean;
+  public isArchive: boolean;
 
   @Input() set model(model: SelectedModel) {
     this._model = model;
     this.isExample = isReadOnly(model);
     this.isLocalFile = this.adminService.isLocalFile(model?.uri);
+    this.isArchive = model?.system_tags?.includes('archived');
   }
 
   get model() {
     return this._model;
   }
 
-  @Input() selectedModel;
+  @Input() selectedModel: SelectedModel;
+  @Input() selectedModels: SelectedModel[];
   @Input() numSelected = 0;
   @Input() projectTags: string[];
   @Input() companyTags: string[];
@@ -61,14 +68,13 @@ export class BaseModelMenuComponent extends BaseContextMenuComponent {
   }
 
   archiveClicked() {
-    //info header case
-    if (this.showButton) {
-      this.store.dispatch(new SetSelectedModels([this.model]));
-    }
-    if (this.model.system_tags && this.model.system_tags.includes('archived')) {
-      this.store.dispatch(new RestoreSelectedModels());
+    // info header case
+    const selectedModels = this.selectedModels ? selectionDisabledArchive(this.selectedModels).selectedFiltered : [this.selectedModel];
+
+    if (this.isArchive) {
+      this.store.dispatch(restoreSelectedModels({selectedEntities: selectedModels, skipUndo: false}));
     } else {
-      this.store.dispatch(new ArchivedSelectedModels());
+      this.store.dispatch(archivedSelectedModels({selectedEntities: selectedModels, skipUndo: false}));
     }
   }
 
@@ -85,10 +91,12 @@ export class BaseModelMenuComponent extends BaseContextMenuComponent {
   }
 
   public publishPopup() {
+    const selectedModels = this.selectedModels ? selectionDisabledPublishModels(this.selectedModels).selectedFiltered : [this.model];
+
     const confirmDialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
         title: 'PUBLISH',
-        body: `<b>${htmlTextShorte(this.model.name)}</b> status will be set to Published.
+        body: `<b>${selectedModels.length === 1 ? htmlTextShorte(selectedModels[0].name) : selectedModels.length + ' models'}</b> status will be set to Published.
 <br><br>Published models are read-only and cannot be reset.`,
         yes: 'Publish',
         no: 'Cancel',
@@ -98,31 +106,34 @@ export class BaseModelMenuComponent extends BaseContextMenuComponent {
 
     confirmDialogRef.afterClosed().subscribe((confirmed) => {
       if (confirmed) {
-        this.publishModel();
+        this.publishModel(selectedModels);
       }
     });
   }
 
-  publishModel() {
-    this.store.dispatch(new PublishModelClicked(this.model));
+  publishModel(selectedModels: SelectedModel[]) {
+    this.store.dispatch(publishModelClicked({selectedModels}));
   }
 
   public moveToProjectPopup() {
+    const selectedModels = this.selectedModels ? selectionDisabledMoveTo(this.selectedModels).selectedFiltered : [this.model];
+    const currentProjects = Array.from(new Set(selectedModels.map(exp => exp.project?.id).filter(p => p)));
     const dialog = this.dialog.open(ChangeProjectDialogComponent, {
       data: {
-        currentProject: get('project.id', this.model),
-        defaultProject: get('project.id', this.model),
-        reference: this.model.name,
+        currentProjects: currentProjects.length > 0 ? currentProjects : [selectedModels[0].project?.id],
+        defaultProject: selectedModels[0].project?.id,
+        reference: selectedModels.length > 1 ? selectedModels : selectedModels[0]?.name,
         type: 'model'
       }
     });
     dialog.afterClosed().pipe(filter(project => !!project)).subscribe(project => {
-      this.moveToProjectClicked(project);
+      this.moveToProjectClicked(project, selectedModels);
     });
+
   }
 
-  moveToProjectClicked(project) {
-    this.store.dispatch(new ChangeProjectRequested({model: this.model, project}));
+  moveToProjectClicked(project, selectedModels) {
+    this.store.dispatch(changeProjectRequested({selectedModels, project}));
   }
 
   public downloadModelFileClicked = () => {
@@ -142,7 +153,24 @@ export class BaseModelMenuComponent extends BaseContextMenuComponent {
     a.click();
   };
 
-  public canShowModel() {
-    return !!this.model && !'Custom'.includes(this.model.framework);
+  deleteModelPopup() {
+    const confirmDialogRef = this.dialog.open(CommonDeleteDialogComponent, {
+      data: {
+        entity: this._model,
+        numSelected: this.numSelected,
+        entityType: EntityTypeEnum.model,
+        useCurrentEntity: this.showButton
+      },
+      width: '600px',
+      disableClose: true
+    });
+    confirmDialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        this.store.dispatch(new SetSelectedModels([]));
+        this.store.dispatch(new ModelSelectionChanged({model: null, project: this.model?.project?.id || '*'}));
+        this.store.dispatch(new FetchModelsRequested());
+        this.store.dispatch(new CancelModelEdit());
+      }
+    });
   }
 }

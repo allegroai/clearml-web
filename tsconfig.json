@@ -3,7 +3,7 @@
   "compilerOptions": {
     "downlevelIteration": true,
     "importHelpers": true,
-    "module": "esnext",
+    "module": "es2020",
     "outDir": "./dist/out-tsc",
     "sourceMap": true,
     "declaration": false,
@@ -17,13 +17,17 @@
       "node_modules/@types"
     ],
     "lib": [
+      "es2019.array",
       "es2017",
       "dom"
     ],
-    "baseUrl": "./"
+    "baseUrl": "./",
+    "paths": {
+      "@common/*": ["app/webapp-common/*"]
+    }
   },
   "angularCompilerOptions": {
-    "fullTemplateTypeCheck": true,
+    "strictTemplates": true,
     "preserveWhitespaces": true
   }
 }

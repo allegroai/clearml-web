@@ -2,9 +2,10 @@
 
 :host {
   .first {
+    display: block;
     padding-left: 44px;
   }
-  /deep/ .copy-btn .selected {
+  ::ng-deep .copy-btn .selected {
     background-color: $purple;
     .light-color {
       color: $blue-100;
@@ -34,6 +35,13 @@
     &.first {
       padding-left: 42px;
     }
+  }
+
+  .queue-name {
+    font-weight: 500;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
   }
 
   .copy-btn {

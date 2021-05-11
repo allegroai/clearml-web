@@ -3,7 +3,11 @@
   position: relative;
   height: 100%;
 
-  /deep/ .single-graph sm-single-graph {
+  .single-graph {
+    position: relative;
+  }
+
+  ::ng-deep .single-graph sm-single-graph {
     margin-left: auto;
     margin-right: auto;
 
@@ -26,6 +30,10 @@
 
     &.with-settings {
       height: calc(100% - 64px);
+    }
+
+    .disable-graphs-interactive {
+      pointer-events: none;
     }
   }
 
@@ -70,6 +78,7 @@
     text-align: center;
     padding: 20px 0;
     font-size: 1.5rem;
+    border-bottom: 1px solid #efefef;
   }
 
   .hidden {
@@ -87,6 +96,17 @@
     &.showSettings {
       min-height: 64px;
       max-height: 128px;
+    }
+  }
+  .resize-overlay{
+    position: absolute;
+    z-index: 13;
+    top: 0;
+    left: 0;
+
+    &.active {
+      bottom: 0;
+      right: 0;
     }
   }
 }

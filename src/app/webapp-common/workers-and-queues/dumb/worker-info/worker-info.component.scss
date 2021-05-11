@@ -5,12 +5,12 @@
     padding: 0px 5px;
   }
 
-  /deep/ .table-row {
+  ::ng-deep .table-row {
     background-color: $blue-800 !important;
     border-bottom: 1px solid #323950 !important;
   }
 
-  /deep/ .row.headers {
+  ::ng-deep .row.headers {
     //border-bottom: none !important;
     font-weight: bold;
     border-bottom: 1px solid #323950 !important;
@@ -27,7 +27,7 @@
     margin: 0 20px 10px 20px;
     height: 42px;
 
-    /deep/ .navbar-item {
+    ::ng-deep .navbar-item {
       height: 42px;
       padding: 0 15px;
       margin: 0 20px;

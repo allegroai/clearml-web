@@ -32,7 +32,6 @@ import {CircleStatusComponent} from './indicators/circle-status/circle-status.co
 import {MenuItemComponent} from './panel/menu-item/menu-item.component';
 import {ClickStopPropagationDirective} from './directives/click-stop-propagation.directive';
 import {TableComponent} from './data/table/table.component';
-import {TableSortTemplateComponent} from './data/table/table-sort-template/table-sort-template.component';
 import {TableFilterSortTemplateComponent} from './data/table/table-filter-sort-template/table-filter-sort-template.component';
 import {CompareFooterComponent} from './panel/compare-footer/compare-footer.component';
 import {IconLabelComponent} from './data/icon-label/icon-label.component';
@@ -45,12 +44,12 @@ import {TableCardComponent} from './data/table-card/table-card.component';
 import {ToggleArchiveComponent} from './buttons/toggle-archive/toggle-archive.component';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
 import {MatExpansionModule} from '@angular/material/expansion';
+import {MatDatepickerModule} from '@angular/material/datepicker';
+
 import {TableCardFilterTemplateComponent} from './data/table/table-card-filter-template/table-card-filter-template.component';
 import {EditableSectionComponent} from './panel/editable-section/editable-section.component';
 import {LoadingButtonComponent} from './buttons/loading-button/loading-button.component';
 import {OverlayComponent} from './overlay/overlay/overlay.component';
-import {NgSelectModule} from '@ng-select/ng-select';
-import {SelectAutocompleteComponent} from './inputs/select-autocomplete/select-autocomplete.component';
 import {ChooseColorModule} from './directives/choose-color/choose-color.module';
 import {PortalModule} from '@angular/cdk/portal';
 import {SMPortalModule} from '../portal/portal.module';
@@ -91,6 +90,18 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {GroupedCheckedFilterListComponent} from './data/grouped-checked-filter-list/grouped-checked-filter-list.component';
 import {ShareDialogComponent} from './overlay/share-dialog/share-dialog.component';
 import { HesitateDirective } from './directives/hesitate.directive';
+import { DividerComponent } from './indicators/divider/divider.component';
+import { DurationInputListComponent } from './inputs/duraion-input-list/duration-input-list.component';
+import { TableFilterDurationComponent } from './data/table/table-duration-sort-template/table-filter-duration/table-filter-duration.component';
+import { TableFilterDurationNumericComponent } from './data/table/table-duration-sort-template/table-filter-duration-numeric/table-filter-duration-numeric.component';
+import { TableFilterDurationDateTimeComponent } from './data/table/table-duration-sort-template/table-filter-duration-date-time/table-filter-duration-date-time.component';
+import {MatInputModule} from '@angular/material/input';
+import {MAT_DATE_LOCALE, MatNativeDateModule} from '@angular/material/core';
+import {SelectAutocompleteWithChipsComponent} from './inputs/select-autocomplete-with-chips/select-autocomplete-with-chips.component';
+import { TableFilterDurationErrorComponent } from './data/table/table-duration-sort-template/table-filter-duration-error/table-filter-duration-error.component';
+import {InvalidPrefixValidatorDirective} from './template-forms-ui/invalid-prefix-validator.directive';
+import {UniquePathValidatorDirective} from './template-forms-ui/unique-path-validator.directive';
+import {OperationErrorDialogComponent} from '@common/shared/ui-components/overlay/operation-error-dialog/operation-error-dialog.component';
 
 const declarations = [
   DurationInputComponent,
@@ -101,8 +112,8 @@ const declarations = [
   UniqueInListSync2ValidatorDirective,
   MaxNumberValidatorDirective,
   SelectAutocompleteForTemplateFormsComponent,
+  SelectAutocompleteWithChipsComponent,
   TableComponent,
-  TableSortTemplateComponent,
   TableFilterSortTemplateComponent,
   TableCardFilterTemplateComponent,
   CircleStatusComponent,
@@ -121,6 +132,7 @@ const declarations = [
   CodeComponent,
   DialogTemplateComponent,
   ConfirmDialogComponent,
+  OperationErrorDialogComponent,
   EditJsonComponent,
   ShareDialogComponent,
   ClickStopPropagationDirective,
@@ -149,24 +161,27 @@ const declarations = [
   EditableSectionComponent,
   OverlayComponent,
   ToggleArchiveComponent,
-  SelectAutocompleteComponent,
   TermsOfUseDialogComponent,
   LoadingButtonComponent,
   TagComponent,
   UniqueNameValidatorDirective,
+  UniquePathValidatorDirective,
+  InvalidPrefixValidatorDirective,
   ForceInvalidValidatorDirective,
   NotAllowedStringsValidatorValidatorDirective,
   RefreshButtonComponent,
   UserTagComponent,
   TagListComponent,
   HesitateDirective,
+  DividerComponent,
+  TableFilterDurationDateTimeComponent,
+  TableFilterDurationNumericComponent
 ];
 
 @NgModule({
-  imports: [
+  imports     : [
     MatExpansionModule,
     DragDropModule,
-    NgSelectModule,
     CommonModule,
     ChipsModule,
     FormsModule,
@@ -183,10 +198,13 @@ const declarations = [
     ScrollingModule,
     ColorPickerModule,
     MatProgressSpinnerModule,
+    MatInputModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
   ],
-  providers: [],
-  declarations: [...declarations, TagsMenuComponent, TagColorMenuComponent, ResizableColumnDirective, HesitateDirective],
-  exports: [...declarations, NgSelectModule, ChipsModule, SMMaterialModule, ChooseColorModule, SMPortalModule, TagsMenuComponent]
+  providers   : [],
+  declarations: [...declarations, TagsMenuComponent, TagColorMenuComponent, ResizableColumnDirective, HesitateDirective, DurationInputListComponent, TableFilterDurationComponent, TableFilterDurationErrorComponent],
+    exports     : [...declarations, ChipsModule, SMMaterialModule, ChooseColorModule, SMPortalModule, TagsMenuComponent, TableFilterDurationComponent, MatDatepickerModule]
 })
 export class UiComponentsModule {
 }

@@ -39,7 +39,7 @@
         </div>
       </div>
     </div>
-    <div *ngIf="!isLoading" class="image-var ellipsis" [smTooltip]="frame?.variant">{{frame?.variant}}</div>
+    <div *ngIf="!isLoading" class="image-var ellipsis" [smTooltip]="frame?.variant">{{frame?.variantAndMetric || frame?.variant}}</div>
   </div>
 
   <div *ngIf="!frame.url || isFailed" class="item">

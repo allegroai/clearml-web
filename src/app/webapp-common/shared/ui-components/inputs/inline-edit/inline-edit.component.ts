@@ -1,5 +1,5 @@
 import {Component, ElementRef, EventEmitter, Input, OnDestroy, Output, Renderer2, ViewChild} from '@angular/core';
-import {ICONS} from '../../../../../app.constants';
+import { ICONS } from '../../../../constants';
 
 @Component({
   selector: 'sm-inline-edit',

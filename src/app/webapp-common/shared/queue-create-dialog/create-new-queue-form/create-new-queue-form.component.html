@@ -1,6 +1,5 @@
 <ng-form class="create-queue-form" #queueForm='ngForm'>
   <div class="row position-relative">
-
     <mat-form-field appearance="outline" class="w-100 pt-3">
       <mat-error *ngIf="name?.errors?.required">Required</mat-error>
       <mat-error *ngIf="name?.errors?.minlength">Name should contain at least 3 characters</mat-error>
@@ -13,14 +12,13 @@
              required
              minlength="3"
              smUniqueNameValidator
-             [existingNames]="queuesNames"
-             placeholder="Queue name">
+             [existingNames]="queuesNames">
     </mat-form-field>
   </div>
   <br/>
   <div class="row">
     <div class="col-24 create-queue-button">
-      <button class="btn btn-dark-fill center" [disabled]="queueForm.submitted && queueForm.invalid"
+      <button class="btn btn-dark-fill center" [disabled]="queueForm.invalid"
               (click)="send()">{{isEdit ? 'RENAME' : 'CREATE'}}
       </button>
     </div>

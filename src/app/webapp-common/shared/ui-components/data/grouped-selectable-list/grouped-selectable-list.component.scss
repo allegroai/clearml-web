@@ -7,7 +7,7 @@
   margin: 0 12px 0 0;
   overflow: scroll;
 
-  /deep/ .mat-expansion-panel-header {
+  ::ng-deep .mat-expansion-panel-header {
     padding: 0 1px 0 0;
 
     &.has-children {
@@ -41,13 +41,13 @@
 
   }
 
-  /deep/ mat-expansion-panel.no-children {
+  ::ng-deep mat-expansion-panel.no-children {
     .mat-expansion-panel-body {
       display: none;
     }
   }
 
-  /deep/ .mat-expansion-panel-body {
+  ::ng-deep .mat-expansion-panel-body {
     padding: 0;
 
     .list {
@@ -77,7 +77,7 @@
 
   }
 
-  /deep/ .mat-expansion-panel-header-description {
+  ::ng-deep .mat-expansion-panel-header-description {
     flex-grow: 0;
     color: $blue-400;
   }
@@ -94,7 +94,7 @@
     }
   }
 
-  /deep/ .mat-content {
+  ::ng-deep .mat-content {
     padding-right: 2px;
 
     .mat-expansion-panel-header-title {

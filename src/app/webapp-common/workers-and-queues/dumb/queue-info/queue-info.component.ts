@@ -12,8 +12,8 @@ import {SelectQueueComponent} from '../../../experiments/shared/components/selec
 })
 export class QueueInfoComponent implements OnInit {
 
-  @Input() selectedQueue;
-  @Input() queues;
+  @Input() selectedQueue: Queue;
+  @Input() queues: Queue[];
   @Output() deselectQueue                 = new EventEmitter();
   @Output() moveExperimentToTopOfQueue    = new EventEmitter();
   @Output() moveExperimentToBottomOfQueue = new EventEmitter();
@@ -63,7 +63,7 @@ export class QueueInfoComponent implements OnInit {
 
 
   experimentDropped($event: CdkDragDrop<any>) {
-    this.moveExperimentInQueue.emit({task: this.selectedQueue.entries[$event.previousIndex].task.id, count: ($event.currentIndex - $event.previousIndex)});
+    this.moveExperimentInQueue.emit({task: (this.selectedQueue.entries[$event.previousIndex].task as any).id, count: ($event.currentIndex - $event.previousIndex)});
     moveItemInArray(this.selectedQueue.entries, $event.previousIndex, $event.currentIndex);
   }
 
@@ -80,26 +80,25 @@ export class QueueInfoComponent implements OnInit {
 
   }
 
-  moveToTop($event: any) {
+  moveToTop() {
     this.moveExperimentToTopOfQueue.emit(this.menuSelectedExperiment);
   }
 
-  moveToBottom($event: any) {
+  moveToBottom() {
     this.moveExperimentToBottomOfQueue.emit(this.menuSelectedExperiment);
 
   }
 
-  moveToQueue($event: any) {
-    this.EnqueuePopup();
-    // this.moveExperimentToOtherQueue.emit(this.menuSelectedExperiment);
+  moveToQueue() {
+    this.enqueuePopup();
   }
 
-  removeFromQueue($event: any) {
+  removeFromQueue() {
     this.removeExperimentFromQueue.emit(this.menuSelectedExperiment);
   }
 
-  EnqueuePopup() {
-    const selectQueueDialog: MatDialogRef<SelectQueueComponent, { confirmed: boolean, queue: Queue }> =
+  enqueuePopup() {
+    const selectQueueDialog: MatDialogRef<SelectQueueComponent, { confirmed: boolean; queue: Queue }> =
             this.dialog.open(SelectQueueComponent, {data: {}});
 
     selectQueueDialog.afterClosed().subscribe((res) => {

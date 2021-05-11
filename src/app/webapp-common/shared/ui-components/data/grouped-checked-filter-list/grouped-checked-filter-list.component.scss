@@ -5,11 +5,11 @@
   flex-direction: column;
   overflow: auto;
 
-  /deep/ .mat-expansion-panel-body {
+  ::ng-deep .mat-expansion-panel-body {
     padding: 0 0 16px;
   }
 
-  /deep/ .mat-expansion-panel-header {
+  ::ng-deep .mat-expansion-panel-header {
 
     .mat-expansion-indicator {
       height: 25px;

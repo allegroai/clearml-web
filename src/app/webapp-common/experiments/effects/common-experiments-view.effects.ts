@@ -3,30 +3,35 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {Actions, createEffect, Effect, ofType} from '@ngrx/effects';
 import {Action, Store} from '@ngrx/store';
 import {cloneDeep, flatten, get, getOr, isEqual, uniq} from 'lodash/fp';
-import {forkJoin, Observable, of} from 'rxjs';
+import {Observable, of} from 'rxjs';
 import {auditTime, catchError, filter, map, mergeMap, switchMap, tap, withLatestFrom} from 'rxjs/operators';
 import {ApiProjectsService} from '../../../business-logic/api-services/projects.service';
 import {ApiTasksService} from '../../../business-logic/api-services/tasks.service';
 import {TasksGetAllExResponse} from '../../../business-logic/model/tasks/tasksGetAllExResponse';
-import {TasksGetAllRequest} from '../../../business-logic/model/tasks/tasksGetAllRequest';
 import {BlTasksService} from '../../../business-logic/services/tasks.service';
 import {GET_ALL_QUERY_ANY_FIELDS} from '../../../features/experiments/experiments.consts';
 import {selectSelectedExperiment} from '../../../features/experiments/reducers';
 import {IExperimentsViewState} from '../../../features/experiments/reducers/experiments-view.reducer';
 import {EXPERIMENTS_TABLE_COL_FIELDS} from '../../../features/experiments/shared/experiments.const';
 import {RequestFailed} from '../../core/actions/http.actions';
-import {ActiveLoader, AddMessage, DeactiveLoader, SetServerError} from '../../core/actions/layout.actions';
+import {ActiveLoader, DeactiveLoader, SetServerError} from '../../core/actions/layout.actions';
 import {setArchive as setProjectArchive} from '../../core/actions/projects.actions';
 import {setURLParams} from '../../core/actions/router.actions';
-import {selectIsArchivedMode} from '../../core/reducers/projects.reducer';
-import {selectRouterConfig, selectRouterParams} from '../../core/reducers/router-reducer';
+import {selectIsArchivedMode, selectIsDeepMode} from '../../core/reducers/projects.reducer';
+import {selectRouterParams} from '../../core/reducers/router-reducer';
 import {selectAppVisible} from '../../core/reducers/view-reducer';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {ISmCol} from '../../shared/ui-components/data/table/table.consts';
-import {escapeRegex, getRouteFullUrl} from '../../shared/utils/shared-utils';
-import {encodeColumns} from '../../shared/utils/tableParamEncode';
-import {AutoRefreshExperimentInfo, ExperimentDetailsUpdated, GetExperimentInfo} from '../actions/common-experiments-info.actions';
+import {addMultipleSortColumns, escapeRegex, getRouteFullUrl} from '../../shared/utils/shared-utils';
+import {encodeColumns, encodeOrder} from '../../shared/utils/tableParamEncode';
+import {AutoRefreshExperimentInfo, GetExperimentInfo} from '../actions/common-experiments-info.actions';
 import * as exActions from '../actions/common-experiments-view.actions';
+import {
+  SET_SELECTED_EXPERIMENTS,
+  setActiveParentsFilter,
+  setParents,
+  UPDATE_ONE_EXPERIMENTS, updateManyExperiment
+} from '../actions/common-experiments-view.actions';
 import * as exSelectors from '../reducers/index';
 import {ITableExperiment} from '../shared/common-experiment-model.model';
 import {EXPERIMENTS_PAGE_SIZE} from '../shared/common-experiments.const';
@@ -35,12 +40,39 @@ import {ApiUsersService} from '../../../business-logic/api-services/users.servic
 import {sortByField} from '../../tasks/tasks.utils';
 import {MODEL_TAGS, MODELS_TABLE_COL_FIELDS} from '../../models/shared/models.const';
 import {EmptyAction} from '../../../app.constants';
-import {selectExperimentsList, selectExperimentsUsers, selectTableFilters} from '../reducers';
-import {TasksUpdateResponse} from '../../../business-logic/model/tasks/tasksUpdateResponse';
+import {selectExperimentsList, selectExperimentsUsers, selectTableFilters, selectTableSortFields} from '../reducers';
 import {ProjectsGetTaskParentsResponse} from '../../../business-logic/model/projects/projectsGetTaskParentsResponse';
-import {setActiveParentsFilter, setParents} from '../actions/common-experiments-view.actions';
 import {ProjectsGetTaskParentsRequest} from '../../../business-logic/model/projects/projectsGetTaskParentsRequest';
-import TasksStateEnum = ProjectsGetTaskParentsRequest.TasksStateEnum;
+import {ICommonSearchState} from '../../common-search/common-search.reducer';
+import {SortMeta} from 'primeng/api';
+import {hasValue} from '../../shared/utils/helpers.util';
+import {TasksGetAllExRequest} from '../../../business-logic/model/tasks/tasksGetAllExRequest';
+import {ProjectsGetHyperParametersResponse} from '../../../business-logic/model/projects/projectsGetHyperParametersResponse';
+import {
+  CountAvailableAndIsDisable, CountAvailableAndIsDisableSelectedFiltered, MENU_ITEM_ID,
+  selectionDisabledAbort, selectionDisabledArchive,
+  selectionDisabledDelete, selectionDisabledDequeue,
+  selectionDisabledEnqueue,
+  selectionDisabledMoveTo,
+  selectionDisabledPublishExperiments, selectionDisabledQueue,
+  selectionDisabledReset, selectionDisabledTags, selectionDisabledViewWorker
+} from '../../shared/entity-page/items.utils';
+import { MINIMUM_ONLY_FIELDS } from '../experiment.consts';
+
+
+export function createFiltersFromStore(_tableFilters: { [key: string]: FilterMetadata }, removeEmptyValues = true) {
+  if (!_tableFilters) {
+    return [];
+  }
+  return  Object.keys(_tableFilters).reduce( (returnTableFilters, currentFilterName) => {
+    const value = get([currentFilterName, 'value'], _tableFilters);
+    if (removeEmptyValues && (!hasValue(value) || value?.length === 0)) {
+      return returnTableFilters;
+    }
+    returnTableFilters[currentFilterName] = value;
+    return returnTableFilters;
+  }, {});
+}
 
 @Injectable()
 export class CommonExperimentsViewEffects {
@@ -54,11 +86,21 @@ export class CommonExperimentsViewEffects {
 
   @Effect()
   activeLoader = this.actions$.pipe(
-    ofType(exActions.GET_NEXT_EXPERIMENTS, exActions.GET_EXPERIMENTS, exActions.ARCHIVE_SELECTED_EXPERIMENTS,
-      exActions.GLOBAL_FILTER_CHANGED, exActions.TABLE_SORT_CHANGED, exActions.TABLE_FILTER_CHANGED,
+    ofType(exActions.GET_NEXT_EXPERIMENTS, exActions.GET_EXPERIMENTS,
+      exActions.globalFilterChanged.type, exActions.TABLE_SORT_CHANGED, exActions.TABLE_FILTER_CHANGED,
       exActions.REFRESH_EXPERIMENTS, exActions.afterSetArchive.type),
     filter((action) => !get('payload.hideLoader', action)),
     map(() => new ActiveLoader('EXPERIMENTS_LIST'))
+  );
+
+  @Effect()
+  tableSortChange = this.actions$.pipe(
+    ofType(exActions.tableSortChanged),
+    withLatestFrom(this.store.select(selectTableSortFields)),
+    switchMap(([action, oldOrders]) => {
+      const orders = addMultipleSortColumns(oldOrders, action.colId, action.isShift);
+      return [exActions.setTableSort({orders})];
+    })
   );
 
   @Effect()
@@ -70,7 +112,7 @@ export class CommonExperimentsViewEffects {
   @Effect()
   reFetchExperiment = this.actions$.pipe(
     ofType(
-      exActions.GET_EXPERIMENTS, exActions.GLOBAL_FILTER_CHANGED, exActions.TABLE_SORT_CHANGED,
+      exActions.GET_EXPERIMENTS, exActions.globalFilterChanged.type, exActions.setTableSort.type,
       exActions.TABLE_FILTER_CHANGED, exActions.setTableFilters.type, exActions.afterSetArchive.type
     ),
     auditTime(50),
@@ -96,13 +138,17 @@ export class CommonExperimentsViewEffects {
 
   @Effect()
   refreshExperiments = this.actions$.pipe(
-    ofType<exActions.RefreshExperiments>(exActions.REFRESH_EXPERIMENTS, exActions.ADD_COL),
+    ofType<exActions.RefreshExperiments>(exActions.REFRESH_EXPERIMENTS, exActions.ADD_COL, exActions.TOGGLE_COL_HIDDEN),
     withLatestFrom(
       this.store.select(exSelectors.selectCurrentPage),
       this.store.select(selectSelectedExperiment),
       this.store.select(selectExperimentsList),
-      this.store.select(selectAppVisible)),
-    filter(([action, currentPage, selectedExperiment, experiments, visible]) => visible),
+      this.store.select(selectAppVisible),
+      this.store.select(exSelectors.selectExperimentsHiddenTableCols)),
+    filter(([action, currentPage, selectedExperiment, experiments, visible, hiddenCols]) => {
+      const isToggleToHiddenCol = action.type !== exActions.TOGGLE_COL_HIDDEN || !hiddenCols[(action as any).payload];
+      return visible && isToggleToHiddenCol;
+    }),
     switchMap(([action, currentPage, selectedExperiment, experiments]) => this.fetchExperiments$(currentPage, true)
       .pipe(
         mergeMap(res => {
@@ -169,115 +215,7 @@ export class CommonExperimentsViewEffects {
     // map(action => new exActions.SetSelectedExperiment(action.payload.experiment))
   );
 
-  @Effect()
-  archiveExperiments = this.actions$.pipe(
-    ofType<exActions.ArchiveSelectedExperiments>(exActions.ARCHIVE_SELECTED_EXPERIMENTS),
-    withLatestFrom(
-      this.store.select(exSelectors.selectSelectedExperiments),
-      this.store.select(exSelectors.selectSelectedTableExperiment),
-      this.store.select(selectRouterParams)
-    ),
-    tap(([action, checkedExperiments, selectedExperiment, routerParams]) => {
-      if (this.isSelectedExpInCheckedExps(checkedExperiments, selectedExperiment)) {
-        this.router.navigate([`projects/${routerParams.projectId}/experiments/`]);
-      }
-    }),
-    switchMap(([action, experiments, selected, routerParams]) => this.apiTasks.tasksArchive({tasks: experiments.map((experiment) => experiment.id)})
-      .pipe(
-        withLatestFrom(this.store.select(selectRouterConfig)),
-        mergeMap(([res, routerConfig]) => {
-          let actions: Action[] = [
-            new DeactiveLoader('EXPERIMENTS_LIST'),
-            new exActions.SetSelectedExperiments([]),
-            new AddMessage('success', `${experiments.length} experiment${experiments.length > 1 ? 's have' : ' has'} been archived.
-            Any queued experiments had been reset`, action.payload.skipUndo ? [] : [
-              {
-                name: 'Undo', actions: [
-                  new exActions.SetSelectedExperiments(experiments),
-                  new exActions.RestoreSelectedExperiments({skipUndo: true})
-                ]
-              }
-            ])
-          ];
-          if (routerConfig.includes('experiments')) {
-            actions = actions.concat([
-              new exActions.RemoveExperiments(experiments.map(exp => exp.task)),
-              new exActions.GetExperiments()
-            ]);
-          }
 
-          if (routerConfig.includes('output') && routerParams?.experimentId === experiments[0].id) {
-            actions.push(new ExperimentDetailsUpdated({
-              id: experiments[0].id,
-              changes: {system_tags: [...experiments[0]?.system_tags.filter(t => t !== 'shared'), 'archived'].sort()}
-            }));
-          }
-          return actions;
-        }),
-        catchError(error => [
-          new RequestFailed(error),
-          new DeactiveLoader('EXPERIMENTS_LIST'),
-          new SetServerError(error, null, 'Failed To Archive Experiments')
-        ])
-      )
-    )
-  );
-
-  @Effect()
-  restoreExperiments = this.actions$.pipe(
-    ofType<exActions.RestoreSelectedExperiments>(exActions.RESTORE_SELECTED_EXPERIMENTS),
-    withLatestFrom(
-      this.store.select(exSelectors.selectSelectedExperiments),
-      this.store.select(exSelectors.selectSelectedTableExperiment),
-      this.store.select(selectRouterParams)),
-    tap(([action, checkedExperiments, selectedExperiment, routerParams]) => {
-      if (this.isSelectedExpInCheckedExps(checkedExperiments, selectedExperiment)) {
-        this.router.navigate([`projects/${routerParams.projectId}/experiments/`]);
-      }
-    }),
-    switchMap(([action, experiments, selected, routerParams]) => forkJoin(experiments.map(experiment => (
-      {
-        task: experiment.id,
-        system_tags: this.taskBl.removeHiddenTag(experiment.system_tags)
-      })).map(req => this.apiTasks.tasksUpdate(req)) as TasksUpdateResponse[])
-      .pipe(
-        withLatestFrom(this.store.select(selectRouterConfig)),
-        mergeMap(([res, routerConfig]) => {
-            let actions: Action[] = [
-              new DeactiveLoader('EXPERIMENTS_LIST'),
-              new exActions.SetSelectedExperiments([]),
-              new AddMessage('success', `${experiments.length} experiment${experiments.length > 1 ? 's have' : ' has'} been restored`, action.payload.skipUndo ? [] : [
-                {
-                  name: 'Undo', actions: [
-                    new exActions.SetSelectedExperiments(experiments),
-                    new exActions.ArchiveSelectedExperiments({skipUndo: true})
-                  ]
-                }
-              ]),
-            ];
-            if (routerConfig.includes('experiments')) {
-              actions = actions.concat([
-                new exActions.RemoveExperiments(experiments.map(exp => exp.task)),
-                new exActions.GetExperiments(),
-              ]);
-            }
-            if (routerConfig.includes('output') && routerParams?.experimentId === experiments[0].id) {
-              actions.push(new ExperimentDetailsUpdated({
-                id: experiments[0].id,
-                changes: {system_tags: experiments[0]?.system_tags.filter(tag => tag !== 'archived')}
-              }));
-            }
-            return actions;
-          }
-        ),
-        catchError(error => [
-          new RequestFailed(error),
-          new DeactiveLoader('EXPERIMENTS_LIST'),
-          new SetServerError(error, null, 'Failed To Restore Experiments')
-        ])
-      )
-    )
-  );
   @Effect()
   getTypesEffect = this.actions$.pipe(
     ofType(exActions.getProjectTypes),
@@ -285,22 +223,21 @@ export class CommonExperimentsViewEffects {
     switchMap(([action, projectId]) => this.apiTasks.tasksGetTypes({projects: (projectId !== '*' ? [projectId] : [])}).pipe(
       withLatestFrom(this.store.select(exSelectors.selectTableFilters)),
       mergeMap(([res, tableFilters]) => {
-          let shouldFilterFilters: boolean;
-          let filteredTableFilters: any = {};
-          if (tableFilters?.type?.value) {
-            filteredTableFilters = {
-              col: 'type',
-              value: tableFilters.type.value.filter(filterType => res.types.includes(filterType))
-            };
-            shouldFilterFilters = filteredTableFilters.value.length !== tableFilters.type.value.length;
-          }
-          return [
-            shouldFilterFilters ? new exActions.TableFilterChanged(filteredTableFilters) : new EmptyAction(),
-            exActions.setProjectsTypes(res),
-            new DeactiveLoader(action.type)
-          ];
+        let shouldFilterFilters: boolean;
+        let filteredTableFilters: any = {};
+        if (tableFilters?.type?.value) {
+          filteredTableFilters = {
+            col: 'type',
+            value: tableFilters.type.value.filter(filterType => res.types.includes(filterType))
+          };
+          shouldFilterFilters = filteredTableFilters.value.length !== tableFilters.type.value.length;
         }
-      ),
+        return [
+          shouldFilterFilters ? new exActions.TableFilterChanged(filteredTableFilters) : new EmptyAction(),
+          exActions.setProjectsTypes(res),
+          new DeactiveLoader(action.type)
+        ];
+      }),
       catchError(error => [
         new RequestFailed(error),
         new DeactiveLoader(action.type),
@@ -364,7 +301,9 @@ export class CommonExperimentsViewEffects {
     ),
     switchMap(([action, projectId, isArchive]) => this.projectsApi.projectsGetTaskParents({
       projects: projectId !== '*' ? [projectId] : [],
-      tasks_state: isArchive? TasksStateEnum.Archived: TasksStateEnum.Active
+      tasks_state: isArchive ?
+        ProjectsGetTaskParentsRequest.TasksStateEnum.Archived :
+        ProjectsGetTaskParentsRequest.TasksStateEnum.Active
     }).pipe(
       withLatestFrom(this.store.select(selectTableFilters).pipe(map(filters => filters?.['parent.name']?.value || []))),
       mergeMap(([res, filteredParentIds]: [ProjectsGetTaskParentsResponse, string[]]) => {
@@ -388,8 +327,8 @@ export class CommonExperimentsViewEffects {
   @Effect()
   getCustomMetrics = this.actions$.pipe(
     ofType<exActions.GetCustomMetrics>(exActions.GET_CUSTOM_METRICS),
-    withLatestFrom(this.store.select(selectRouterParams).pipe(map(params => get('projectId', params)))),
-    switchMap(([action, projectId]) => this.projectsApi.projectsGetUniqueMetricVariants({project: projectId === '*' ? null : projectId})
+    withLatestFrom(this.store.select(selectRouterParams).pipe(map(params => get('projectId', params))), this.store.select(selectIsDeepMode)),
+    switchMap(([action, projectId, isDeep]) => this.projectsApi.projectsGetUniqueMetricVariants({project: projectId === '*' ? null : projectId, include_subprojects: isDeep})
       .pipe(
         mergeMap(res => [
           new exActions.SetCustomMetrics(sortByField(res.metrics, 'metric')),
@@ -407,13 +346,14 @@ export class CommonExperimentsViewEffects {
   @Effect()
   GetCustomHyperParams = this.actions$.pipe(
     ofType<exActions.GetCustomHyperParams>(exActions.GET_CUSTOM_HYPER_PARAMS),
-    withLatestFrom(this.store.select(selectRouterParams).pipe(map(params => get('projectId', params)))),
-    switchMap(([action, projectId]) => this.projectsApi.projectsGetHyperParameters({
+    withLatestFrom(this.store.select(selectRouterParams).pipe(map(params => get('projectId', params))),this.store.select(selectIsDeepMode)),
+    switchMap(([action, projectId, isDeep]) => this.projectsApi.projectsGetHyperParameters({
         project: projectId === '*' ? null : projectId,
-        page_size: 1000
+        page_size: 1000,
+      include_subprojects: isDeep
       })
         .pipe(
-          mergeMap(res => [
+          mergeMap((res: ProjectsGetHyperParametersResponse)  => [
             new exActions.SetCustomHyperParams(res.parameters),
             new DeactiveLoader(action.type)
           ]),
@@ -446,25 +386,25 @@ export class CommonExperimentsViewEffects {
       this.store.select(selectRouterParams).pipe(map(params => get('projectId', params))),
       this.store.select(selectIsArchivedMode),
       this.store.select(exSelectors.selectGlobalFilter),
-      this.store.select(exSelectors.selectTableSortField),
-      this.store.select(exSelectors.selectTableSortOrder),
+      this.store.select(exSelectors.selectTableSortFields),
       this.store.select(exSelectors.selectTableFilters),
       this.store.select(exSelectors.selectExperimentsTableCols),
       this.store.select(exSelectors.selectExperimentsHiddenTableCols),
       this.store.select(exSelectors.selectExperimentsMetricsCols),
       this.store.select(exSelectors.selectExperimentsTableColsOrder),
+      this.store.select(selectIsDeepMode),
+      this.route.queryParams
     ),
-    map(([
-           action, projectId, isArchived, gb, sortField, sortOrder, filters,
-           cols, hiddenCols, metricsCols, colsOrder
+    map(([action, projectId, isArchived, gb, sortFields, filters,
+           cols, hiddenCols, metricsCols, colsOrder,isDeep, queryParams
          ]) => {
-      const columns = encodeColumns(cols, hiddenCols, this.filterColumns(projectId, metricsCols), colsOrder);
+      const columns = encodeColumns(cols, hiddenCols, this.filterColumns(projectId, metricsCols), colsOrder ? colsOrder : queryParams.columns);
       return setURLParams({
         columns,
         filters,
-        orderField: sortField,
-        orderDirection: sortOrder > 0 ? 'asc' : 'desc',
-        isArchived
+        orders: sortFields,
+        isArchived,
+        isDeep
       });
     })
   );
@@ -478,16 +418,12 @@ export class CommonExperimentsViewEffects {
       this.router.navigate([baseUrl + '/' + selectedExperiment.id + '/' + activeChildUrl], {queryParamsHandling: 'preserve'}) : this.router.navigate([baseUrl], {queryParamsHandling: 'preserve'});
   }
 
-  isSelectedExpInCheckedExps(checked, selected) {
-    return selected && checked.map(model => model.id).includes(selected.id);
-  }
-
   getGetAllQuery(
-    getAllPages: boolean, page: number, projectId: string, searchQuery: string,
-    isArchivedMode: boolean, orderField: string, orderSort: number,
+    getAllPages: boolean, page: number, projectId: string, searchQuery: ICommonSearchState['searchQuery'],
+    isArchivedMode: boolean, orderFields: SortMeta[],
     tableFilters: { [key: string]: FilterMetadata }, ids: string[] = [], cols?: ISmCol[],
-    metricCols?: any[]
-  ): TasksGetAllRequest {
+    metricCols?: ISmCol[], isDeepMode: boolean = false
+  ): TasksGetAllExRequest {
     const typeFilter = get([EXPERIMENTS_TABLE_COL_FIELDS.TYPE, 'value'], tableFilters);
     const statusFilter = get([EXPERIMENTS_TABLE_COL_FIELDS.STATUS, 'value'], tableFilters);
     const userFilter = get([EXPERIMENTS_TABLE_COL_FIELDS.USER, 'value'], tableFilters);
@@ -498,25 +434,49 @@ export class CommonExperimentsViewEffects {
       .concat(systemTags ? systemTags : []);
     const pageToGet = getAllPages ? 0 : page;
     const pageSizeToGet = getAllPages ? (page + 1) * EXPERIMENTS_PAGE_SIZE : EXPERIMENTS_PAGE_SIZE;
+
+    let filters = createFiltersFromStore(tableFilters, true);
+    filters = Object.keys(filters).reduce((reduce, colId) => {
+      const col = metricCols.find(col => col.id === colId);
+      let key = col?.getter || colId;
+      if (Array.isArray(key)) {
+        key = key[0];
+      }
+      reduce[key] = filters[colId];
+      return reduce;
+    }, {});
+
+    orderFields = orderFields.map(field => {
+      const col = metricCols.find(col => col.id === field.field);
+      const getter = Array.isArray(col?.getter) ? col.getter[0] : col?.getter;
+      return getter ? {...field, field: getter} : field;
+    });
+
+    const colsFilters = flatten(cols.filter(col => col.id !== 'selected' && !col.hidden).map(col => col.getter || col.id));
+    const metricColsFilters = metricCols ? flatten(metricCols.map(col => col.getter || col.id)) : [];
+    const only_fields = [...new Set([...MINIMUM_ONLY_FIELDS, ...colsFilters, ...metricColsFilters])];
+
     return {
+      ...filters,
       id: ids,
-      _any_: searchQuery ? {
-        pattern: escapeRegex(searchQuery),
-        fields: GET_ALL_QUERY_ANY_FIELDS
-      } : undefined,
+      ...(searchQuery?.query && {
+        _any_: {
+          pattern: searchQuery.regExp ? searchQuery.query : escapeRegex(searchQuery.query),
+          fields: GET_ALL_QUERY_ANY_FIELDS
+        }
+      }),
       project: (!projectId || projectId === '*') ? undefined : [projectId],
       page: pageToGet,
       page_size: pageSizeToGet,
-      order_by: [(orderSort === 1 ? '-' : '') + orderField],
+      order_by: encodeOrder(orderFields),
       status: (statusFilter && statusFilter.length > 0) ? statusFilter : undefined,
       type: (typeFilter && typeFilter.length > 0) ? typeFilter : ['__$not', 'annotation_manual', '__$not', 'annotation', '__$not', 'dataset_import'],
       user: (userFilter && userFilter.length > 0) ? userFilter : [],
       ...(parentFilter?.length > 0 && {parent: parentFilter}),
       system_tags: (systemTagsFilter && systemTagsFilter.length > 0) ? systemTagsFilter : [],
       tags: (tagsFilter && tagsFilter.length > 0) ? tagsFilter : [],
-      only_fields: ['system_tags', 'company', 'last_change'].concat(
-        flatten(cols.filter(col => col.id !== 'selected' && !col.hidden).map(col => col.getter || col.id))
-      ).concat(metricCols ? metricCols.map(col => col.id) : [])
+      include_subprojects: isDeepMode,
+      only_fields
     };
   }
 
@@ -527,44 +487,90 @@ export class CommonExperimentsViewEffects {
           this.store.select(selectRouterParams).pipe(map(params => get('projectId', params))),
           this.store.select(selectIsArchivedMode),
           this.store.select(exSelectors.selectGlobalFilter),
-          this.store.select(exSelectors.selectTableSortField),
-          this.store.select(exSelectors.selectTableSortOrder),
+          this.store.select(exSelectors.selectTableSortFields),
           this.store.select(exSelectors.selectTableFilters),
           this.store.select(exSelectors.selectSelectedExperiments),
           this.store.select(exSelectors.selectShowAllSelectedIsActive),
           this.store.select(exSelectors.selectExperimentsTableCols),
           this.store.select(exSelectors.selectExperimentsHiddenTableCols),
-          this.store.select(exSelectors.selectExperimentsMetricsCols),
+          this.store.select(exSelectors.selectExperimentsMetricsColsForProject),
           this.store.select(exSelectors.selectExperimentsTableColsOrder),
+          this.store.select(selectIsDeepMode),
+          this.route.queryParams
         ),
         switchMap(([
-                     pageNumber, projectId, isArchived, gb, sortField, sortOrder, filters,
-                     selectedExperiments, showAllSelectedIsActive, cols, hiddenCols, metricsCols, colsOrder
+                     pageNumber, projectId, isArchived, gb, sortField, filters, selectedExperiments,
+                     showAllSelectedIsActive, cols, hiddenCols, metricsCols, colsOrder, deep, queryParams
+
                    ]) => {
-          const myFilters = cloneDeep(filters) as { [key: string]: FilterMetadata };
+          const myFilters = cloneDeep(filters) || {} as { [key: string]: FilterMetadata };
           if (myFilters && myFilters.status && myFilters.status.value.includes('completed')) {
             myFilters.status.value.push('closed');
           }
           const selectedExperimentsIds = showAllSelectedIsActive ? selectedExperiments.map(exp => exp.id) : [];
-          const columns = encodeColumns(cols, hiddenCols, this.filterColumns(projectId, metricsCols), colsOrder);
+          const columns = encodeColumns(cols, hiddenCols, this.filterColumns(projectId, metricsCols), colsOrder ? colsOrder : queryParams.columns);
           this.store.dispatch(setURLParams({
             columns,
             filters,
-            orderField: sortField,
-            orderDirection: sortOrder > 0 ? 'asc' : 'desc',
-            isArchived
+            orders: sortField,
+            isArchived,
+            isDeep: deep
           }));
           return this.apiTasks.tasksGetAllEx(this.getGetAllQuery(getAllPages, pageNumber,
-            projectId, gb, isArchived, sortField, sortOrder, myFilters, selectedExperimentsIds,
-            cols, metricsCols));
+            projectId, gb, isArchived, sortField, myFilters, selectedExperimentsIds,
+            cols, metricsCols, deep));
         })
       );
   }
 
   private filterColumns(projectId: string, metricsCols: any) {
-    if (projectId !== '*') {
-      return metricsCols.filter(col => col.projectId === projectId);
-    }
-    return metricsCols;
+    return metricsCols.filter(col => col.projectId === projectId);
   }
+
+  getTagsEffect = createEffect(() => this.actions$.pipe(
+    ofType(exActions.getTags),
+    withLatestFrom(this.store.select(selectRouterParams).pipe(map(params => get('projectId', params)))),
+    switchMap(([action, projectId]) => this.projectsApi.projectsGetTaskTags({
+      projects: projectId === '*' ? [] : [projectId]
+    }).pipe(
+      mergeMap(res => [
+        exActions.setTags({tags: res.tags.concat(null)}),
+        new DeactiveLoader(action.type)
+      ]),
+      catchError(error => [
+        new RequestFailed(error),
+        new DeactiveLoader(action.type),
+        new SetServerError(error, null, 'Fetch tags failed')]
+      )
+    ))
+  ));
+
+  setSelectedExperiments = createEffect(() => {
+      return this.actions$.pipe(
+        ofType<exActions.SetSelectedExperiments>(SET_SELECTED_EXPERIMENTS, UPDATE_ONE_EXPERIMENTS, updateManyExperiment.type),
+        withLatestFrom(
+          this.store.select(exSelectors.selectSelectedExperiments),
+        ),
+        switchMap(([action, selectSelectedExperiments]) => {
+          const payload = action.type === SET_SELECTED_EXPERIMENTS ? action.payload : selectSelectedExperiments;
+          const selectedExperimentsDisableAvailable: Record<string, CountAvailableAndIsDisableSelectedFiltered> = {
+            [MENU_ITEM_ID.ABORT]: selectionDisabledAbort(payload),
+            [MENU_ITEM_ID.PUBLISH]: selectionDisabledPublishExperiments(payload),
+            [MENU_ITEM_ID.RESET]: selectionDisabledReset(payload),
+            [MENU_ITEM_ID.DELETE]: selectionDisabledDelete(payload),
+            [MENU_ITEM_ID.MOVE_TO]: selectionDisabledMoveTo(payload),
+            [MENU_ITEM_ID.ENQUEUE]: selectionDisabledEnqueue(payload),
+            [MENU_ITEM_ID.DEQUEUE]: selectionDisabledDequeue(payload),
+            [MENU_ITEM_ID.QUEUE]: selectionDisabledQueue(payload),
+            [MENU_ITEM_ID.VIEW_WORKER]: selectionDisabledViewWorker(payload),
+            [MENU_ITEM_ID.ARCHIVE]: selectionDisabledArchive(payload),
+            [MENU_ITEM_ID.TAGS]: selectionDisabledTags(payload),
+          };
+          //allHasExamples: selectionAllExamples(action.payload),
+           // allArchive: selectionAllIsArchive(action.payload),
+          return [exActions.setSelectedExperimentsDisableAvailable({selectedExperimentsDisableAvailable})];
+        })
+      );
+    }
+  );
 }

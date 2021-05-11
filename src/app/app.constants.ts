@@ -68,88 +68,6 @@ export const RECENT_TASKS_ACTIONS = {
   SET_RECENT_TASKS: recentTasksPrefix + 'SET_RECENT_TASKS'
 };
 
-
-export const AUTH_PREFIX  = 'AUTH_';
-export const AUTH_ACTIONS = {
-  ADD_CREDENTIAL              : AUTH_PREFIX + 'ADD_CREDENTIAL',
-  CREATE_CREDENTIAL           : AUTH_PREFIX + 'CREATE_CREDENTIAL (API)',
-  CREATE_SUCCESS              : AUTH_PREFIX + 'CREATE_SUCCESS',
-  GET_SUCCESS                 : AUTH_PREFIX + 'GET_SUCCESS',
-  REVOKE_SUCCESS              : AUTH_PREFIX + 'REVOKE_SUCCESS',
-  RESET_NEW_CREDENTIAL        : AUTH_PREFIX + 'RESET_NEW_CREDENTIAL',
-  GET_TASK_TOKEN_SUCCESS      : AUTH_PREFIX + 'GET_TASK_TOKEN_SUCCESS',
-  SET_TASK_TOKEN              : AUTH_PREFIX + 'SET_TASK_TOKEN',
-  GET_ALL_CREDENTIALS         : AUTH_PREFIX + 'GET_ALL_CREDENTIALS (API)',
-  UPDATE_ALL_CREDENTIALS      : AUTH_PREFIX + 'UPDATE_ALL_CREDENTIALS',
-  UPDATE_S3_BUCKET_CREDENTIALS: AUTH_PREFIX + 'UPDATE_S3_BUCKET_CREDENTIALS',
-  REVOKE_CREDENTIAL           : AUTH_PREFIX + 'REVOKE_CREDENTIAL (API)'
-};
-
-export const S3_ACTIONS = {
-  RESET_DONT_SHOW_AGAIN_FOR_BUCKET_ENDPOINT: AUTH_PREFIX + 'RESET_DONT_SHOW_AGAIN_FOR_BUCKET_ENDPOINT',
-  CANCEL_BUCKET_CREDENTIALS                : AUTH_PREFIX + 'CANCEL_BUCKET_CREDENTIALS',
-  SHOW_S3_POPUP                            : AUTH_PREFIX + 'SHOW_S3_POPUP',
-  RESET_SHOW_S3_POPUP                      : AUTH_PREFIX + 'RESET_SHOW_S3_POPUP',
-  SHOW_LOCAL_FILE_POPUP                    : AUTH_PREFIX + 'SHOW_LOCAL_FILE_POPUP',
-  SET_BUCKETS_CREDENTIALS                  : AUTH_PREFIX + 'SET_BUCKETS_CREDENTIALS',
-  SET_BUCKET_CREDENTIALS                   : AUTH_PREFIX + 'SET_BUCKET_CREDENTIALS',
-  GET_TUTORIAL_BUCKET_CREDENTIALS          : AUTH_PREFIX + 'GET_TUTORIAL_BUCKET_CREDENTIALS'
-};
-
-export const ICONS = {
-  CREATED          : 'fa-plus',
-  MINUS            : 'fa-minus',
-  CHART            : 'fa-chart-area',
-  QUEUED           : 'fa-hourglass',
-  ENQUEUE          : 'fa-hourglass',
-  DEQUEUE          : 'fa-undo',
-  IN_PROGRESS      : 'fa-hourglass-half',
-  STOPPED          : 'fa-square',
-  RESUME           : 'fa-hourglass-half',
-  CLOSED           : 'fa-circle-o',
-  FAILED           : 'fa-times',
-  FALSE            : 'fa-times',
-  PUBLISHED        : 'fa-check',
-  PUBLISHING       : 'fa-spinner',
-  TRUE             : 'fa-check',
-  ANNOTATION       : 'fa-puzzle-piece',
-  TASK             : 'fa-briefcase',
-  MODEL            : 'fa-cube',
-  SHOW             : 'fa-eye',
-  HIDE             : 'fa-eye-slash',
-  COMPLETED        : 'fa-circle',
-  ABORTED          : 'fa-circle',
-  UNKNOWN          : 'fa-question-circle',
-  TESTING          : 'fa-balance-scale',
-  IMPORT           : 'fa-download',
-  TRAINING         : 'fa-cube',
-  ANNOTATION_MANUAL: 'fa-edit',
-  ADMIN            : 'fa-cogs',
-  WARNING          : 'fa-exclamation-triangle',
-  OUTPUT           : 'fa-folder-open',
-  EXECUTION        : 'fa-terminal',
-  LIST             : 'fa-list',
-  REMOVE           : 'fa-trash',
-  ADD              : 'fa-plus',
-  TREE             : 'fa-code-branch',
-  TABLE            : 'fa-table',
-  SELECTED         : 'fa-check-square-o',
-  PROJECT          : 'fa-list-alt',
-  FOCUS            : 'fa-crosshairs',
-  LOG              : 'fa-file-text-o',
-  METRICS          : 'fa-chart-area',
-  TOKEN            : 'fa-key',
-  EDIT             : 'fa-pencil-square-o',
-  EDITABLE         : 'fa-pencil-alt',
-  RESET            : 'fa-sync',
-  CLONE            : 'fa-clone',
-  EXTEND           : 'fa-code-branch',
-  DOWNLOAD         : 'fa-download',
-  WORKER           : 'fa-microchip',
-
-};
-
-
 export const VIEW_PREFIX  = 'VIEW_';
 export const VIEW_ACTIONS = {
   SET_SERVER_UPDATES_AVAILABLE: VIEW_PREFIX + 'SET_SERVER_UPDATES_AVAILABLE',
@@ -266,7 +184,7 @@ export function guessAPIServerURL() {
   return url.replace(/:\d+/, '') + ':8008';
 }
 
-export const ENVIRONMENT = {API_VERSION: '/v2.12'};
+export const ENVIRONMENT = {API_VERSION: '/v2.13'};
 const url                = window.location.origin;
 let apiBaseUrl: string;
 if (environment.apiBaseUrl) {

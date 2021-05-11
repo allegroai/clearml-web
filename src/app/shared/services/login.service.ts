@@ -13,7 +13,7 @@ export class LoginService {
 
   constructor(private loginApi: ApiLoginService) { }
 
-  ssoLogin(params: LoginSsoCallbackRequest): userState {
+  ssoLogin(params: Partial<LoginSsoCallbackRequest>): userState {
     const url = new URL(window.location.href);
     const provider = url.pathname.slice(10);
     const args = {};

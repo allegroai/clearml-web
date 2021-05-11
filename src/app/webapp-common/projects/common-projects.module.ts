@@ -7,23 +7,25 @@ import {CommonProjectsEffects} from './common-projects.effects';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ProjectsListComponent} from './dumb/projects-list/projects-list.component';
 import {ProjectsHeaderComponent} from './dumb/projects-header/projects-header.component';
-import {ProjectCreateDialogModule} from '../shared/project-create-dialog/project-create-dialog.module';
+import {ProjectDialogModule} from '../shared/project-dialog/project-dialog.module';
 import {ProjectsSharedModule} from '../../features/projects/shared/projects-shared.module';
+import {CommonLayoutModule} from '../layout/layout.module';
 import {SharedModule} from '../../shared/shared.module';
 
 @NgModule({
-    imports: [
-        CommonModule,
-        SMSharedModule,
-        FormsModule,
-        ReactiveFormsModule,
-        ProjectCreateDialogModule,
-        ProjectsSharedModule,
-        EffectsModule.forFeature([CommonProjectsEffects]),
-        SharedModule,
-    ],
-  declarations   : [CommonProjectsPageComponent, ProjectsListComponent, ProjectsHeaderComponent],
-  exports        : [CommonProjectsPageComponent, ProjectsListComponent, ProjectsHeaderComponent]
+  imports: [
+    CommonModule,
+    SMSharedModule,
+    FormsModule,
+    ReactiveFormsModule,
+    ProjectDialogModule,
+    ProjectsSharedModule,
+    EffectsModule.forFeature([CommonProjectsEffects]),
+    SharedModule,
+    CommonLayoutModule
+  ],
+  declarations: [CommonProjectsPageComponent, ProjectsListComponent, ProjectsHeaderComponent],
+  exports: [CommonProjectsPageComponent, ProjectsListComponent, ProjectsHeaderComponent]
 })
 export class CommonProjectsModule {
 }

@@ -8,7 +8,7 @@
       <div *ngIf="minMaxIterations$| async as minMaxIterations">
         Iteration <span class="number">{{iteration}}</span>
         <mat-slider
-          *ngIf="minMaxIterations.max_iteration > minMaxIterations.min_iteration"
+          [invert]="!(minMaxIterations.max_iteration > minMaxIterations.min_iteration)"
           thumbLabel
           [value]="iteration"
           [max]="minMaxIterations.max_iteration"
@@ -21,10 +21,9 @@
       </div>
     </div>
     <div class="d-flex third">
-      <div (click)="downloadImage(); imageARef.click()" smTooltip="Download" class="download icon-container"
+      <div (click)="downloadImage()" smTooltip="Download" class="download icon-container"
            [style.visibility]="(currentDebugImage?.url | isVideo)?'hidden':'visible'">
         <i class="al-icon al-ico-download al-color light-grey-blue"></i>
-        <a #imageARef [href]="currentDebugImage?.url" download target="_blank"></a>
       </div>
       <div (click)="closeImageDisplayer()" smTooltip="Close" class="icon-container">
         <i class="al-icon al-ico-dialog-x al-color blue-400 light-grey-blue"></i>

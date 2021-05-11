@@ -12,8 +12,10 @@ import {ActiveLoader, DeactiveLoader, SetBackdrop, SetServerError} from '../../c
 import {selectAppVisible} from '../../core/reducers/view-reducer';
 import * as commonInfoActions from '../actions/common-experiments-info.actions';
 import {
-  CancelExperimentEdit, deleteHyperParamsSection, EXPERIMENT_DETAILS_UPDATED, EXPERIMENT_SAVE, EXPERIMENT_SAVE_SECTION, ExperimentDetailsUpdated, getExperimentConfigurationNames,
-  getExperimentConfigurationObj, SaveExperiment, saveExperimentConfigObj, saveHyperParamsSection, saveExperimentSection, DeactivateEdit, setExperimentSaving
+  CancelExperimentEdit, deleteHyperParamsSection, EXPERIMENT_DETAILS_UPDATED, EXPERIMENT_SAVE,
+  ExperimentDetailsUpdated, getExperimentConfigurationNames, getExperimentConfigurationObj,
+  SaveExperiment, saveExperimentConfigObj, saveHyperParamsSection, saveExperimentSection,
+  DeactivateEdit, setExperimentSaving, saveExperimentInputModel
 } from '../actions/common-experiments-info.actions';
 import {UpdateExperiment} from '../actions/common-experiments-view.actions';
 import {
@@ -25,11 +27,12 @@ import {ExperimentConverterService} from '../../../features/experiments/shared/s
 import {of} from 'rxjs';
 import {EmptyAction} from '../../../app.constants';
 import {ReplaceHyperparamsEnum} from '../../../business-logic/model/tasks/replaceHyperparamsEnum';
-import {Router} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {selectRouterParams} from '../../core/reducers/router-reducer';
 import {cloneDeep, get} from 'lodash/fp';
 import {CommonExperimentReverterService} from '../shared/services/common-experiment-reverter.service';
 import {setExperimentLog} from '../actions/common-experiment-output.actions';
+import {TasksGetByIdExResponse} from '../../../business-logic/model/tasks/tasksGetByIdExResponse';
 
 
 @Injectable()
@@ -163,7 +166,7 @@ export class CommonExperimentsInfoEffects {
       const listed = experiments.find(e => e.id === currentSelected?.id);
       return (listed ? of(listed) :
         this.apiTasks.tasksGetByIdEx({id: [selected.id], only_fields: ['last_change']}).pipe(map(res => res.tasks[0])))
-        .pipe(map(task => [action, task?.last_change, task, selected]));
+        .pipe(map(task => [action, task?.last_change ?? task?.last_update, task, selected]));
     }),
     filter(([action, updateTime, tableSelected, selected]) => (action.type !== commonInfoActions.AUTO_REFRESH_EXPERIMENT_INFO || (!tableSelected) ||  (tableSelected?.id === selected?.id))),
     // Can't have filter here because we need to deactivate loader
@@ -178,13 +181,12 @@ export class CommonExperimentsInfoEffects {
             autoRefresh: action.type === commonInfoActions.AUTO_REFRESH_EXPERIMENT_INFO
           }),
           // clear log data if experiment was restarted
-          ...(selected?.started && selected.started != tableSelected?.started ? [setExperimentLog({direction: null, events: [], total: 0})] : [])
+          ...(selected?.started && tableSelected?.started && selected.started != tableSelected?.started ? [setExperimentLog({direction: null, events: [], total: 0})] : [])
         ];
       } else {
         return [new DeactiveLoader(action.type)];
       }
-    }
-    )
+    })
   );
 
   @Effect()
@@ -211,15 +213,10 @@ export class CommonExperimentsInfoEffects {
               ];
             } else {
               this.router.navigate(['dashboard']);
-              return [
-                new DeactiveLoader(action.type),
-                new SetServerError('Experiment not Found', null, 'Fetch experiment failed',
-                  action.type === commonInfoActions.AUTO_REFRESH_EXPERIMENT_INFO)
-              ];
+              return [new DeactiveLoader(action.type)];
             }
           }),
           catchError(error => {
-            console.log(error);
             return [
               new RequestFailed(error),
               new DeactiveLoader(action.type),
@@ -412,6 +409,5 @@ export class CommonExperimentsInfoEffects {
         )
     ),
   );
-
 
 }

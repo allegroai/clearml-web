@@ -1,17 +1,17 @@
 import {Injectable} from '@angular/core';
-import {IExperimentInfo, ISelectedExperiment} from '../../../../features/experiments/shared/experiment-info.model';
+import {IExperimentInfo} from '../../../../features/experiments/shared/experiment-info.model';
 import {IExecutionForm, sourceTypesEnum} from '../../../../features/experiments/shared/experiment-execution.model';
 import {get, getOr} from 'lodash/fp';
 import {Execution} from '../../../../business-logic/model/tasks/execution';
 import {Task} from '../../../../business-logic/model/tasks/task';
-import {Model} from '../../../../business-logic/model/models/model';
 import {Script} from '../../../../business-logic/model/tasks/script';
 import {IExperimentModelInfo} from '../common-experiment-model.model';
-import {Store} from "@ngrx/store";
-import {IExperimentsViewState} from "../../../../features/experiments/reducers/experiments-view.reducer";
-import {selectActiveWorkspace} from "../../../core/reducers/users-reducer";
-import {Observable, Subscription} from "rxjs";
-import {isExample, isSharedAndNotOwner} from "../../../shared/utils/shared-utils";
+import {Store} from '@ngrx/store';
+import {IExperimentsViewState} from '../../../../features/experiments/reducers/experiments-view.reducer';
+import {selectActiveWorkspace} from '../../../core/reducers/users-reducer';
+import {Observable, Subscription} from 'rxjs';
+import {isExample, isSharedAndNotOwner} from '../../../shared/utils/shared-utils';
+import {ITask} from '../../../../business-logic/model/al-task';
 
 @Injectable({providedIn: 'root'})
 export class CommonExperimentReverterService {
@@ -26,12 +26,12 @@ export class CommonExperimentReverterService {
     });
   }
 
-  public revertReadOnly(experiment) {
+  public revertReadOnly(experiment): Task {
     experiment.readOnly = isExample(experiment) || isSharedAndNotOwner(experiment, this.activeWorkSpace);
     return experiment;
   }
 
-  commonRevertExperiment(experiment: ISelectedExperiment): IExperimentInfo {
+  commonRevertExperiment(experiment: ITask): IExperimentInfo {
     return {
       id: experiment.id,
       name: experiment.name,
@@ -40,6 +40,8 @@ export class CommonExperimentReverterService {
       execution: this.revertExecution(experiment),
       model: this.revertModel(experiment),
       hyperparams: this.revertHyperParams(experiment.hyperparams),
+      status: experiment.status,
+      container: experiment.container || {image: '', setup_shell_script: '', arguments: ''}
     };
   }
 
@@ -54,7 +56,7 @@ export class CommonExperimentReverterService {
   }
 
 
-  revertExecution(experiment: ISelectedExperiment): IExecutionForm {
+  revertExecution(experiment: ITask): IExecutionForm {
     return {
       source: this.revertExecutionSource(experiment.script),
       output: {
@@ -63,13 +65,15 @@ export class CommonExperimentReverterService {
       },
       requirements: experiment.script ? this.revertRequirements(experiment.script) : {pip: ''},
       diff: get('diff', experiment.script) || '',
-      docker_cmd: get('docker_cmd', experiment.execution)
+      docker_cmd: get('docker_cmd', experiment.execution),
+      queue: experiment.execution?.queue,
+      container: experiment.container || {setup_shell_script: '', arguments: '', image: ''}
     };
   }
 
   revertExecutionParameters(parameters: Execution['parameters']): Array<{ label: any, key: string }> {
     return parameters ?
-      Object.entries(parameters).map(([key, val]) => ({label: val, key: key}))
+      Object.entries(parameters).map(([key, val]) => ({label: val, key}))
         .sort((p, c) => p.key < c.key ? -1 : 1) :
       [];
   }
@@ -97,56 +101,12 @@ export class CommonExperimentReverterService {
     }
   }
 
-  revertModel(experiment: ISelectedExperiment): IExperimentModelInfo {
+  revertModel(experiment: ITask): IExperimentModelInfo {
     return {
-      input: {
-        id: get('model.id', experiment.execution),
-        name: get('model.name', experiment.execution),
-        url: get('model.uri', experiment.execution),
-        framework: get('framework', experiment.execution),
-        labels: get('model.labels', experiment.execution),
-        project: get('model.project', experiment.execution),
-        design: get('model.design', experiment.execution) || '',
-      },
-      output: {
-        id: get('model.id', experiment.output) || '',
-        name: get('model.name', experiment.output) || '',
-        url: get('model.uri', experiment.output) || '',
-        project: get('model.project', experiment.output) || '',
-        design: get('model.design', experiment.output) || '',
-      },
-      artifacts: get('artifacts', experiment.execution) || [],
-      source: {
-        experimentName: get('model.task.name', experiment.execution),
-        experimentId: get('model.task.id', experiment.execution),
-        projectName: get('model.task.project.name', experiment.execution),
-        projectId: get('model.task.project.id', experiment.execution),
-        userName: get('model.user.name', experiment.execution),
-        timeCreated: get('model.created', experiment.execution),
-      },
+      input: experiment.models?.input?.map(modelEx => ({...modelEx.model, taskName: modelEx.name})) || [],
+      output: experiment.models?.output?.map(modelEx => ({...modelEx.model, taskName: modelEx.name})) || [],
+      artifacts: get('artifacts', experiment.execution) || []
     };
-  }
-
-
-  revertModelFromModel(model: Model, populatePrototext: boolean): Partial<IExperimentModelInfo> {
-    const modelData: Partial<IExperimentModelInfo> = {
-      input: model.id ? {
-        id: model.id,
-        name: model.name,
-        url: model.uri,
-        framework: model.framework,
-        labels: model.labels,
-      } : undefined,
-      source: {
-        experimentId: get('task.id', model),
-        projectId: get('project.id', model),
-        experimentName: get('task.name', model),
-        projectName: get('project.name', model),
-        userName: get('user.name', model),
-        timeCreated: model.created,
-      },
-    };
-    return modelData;
   }
 
   private revertRequirements(script: Script) {

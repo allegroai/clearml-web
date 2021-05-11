@@ -1,0 +1,24 @@
+@import "variables";
+
+:host {
+  .description-tooltip {
+    max-width: 300px;
+    background: $purple;
+    padding: 8px;
+    border-radius: 4px;
+    box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
+    font-size: 11px;
+    div, p {
+      color: $white;
+    }
+    div.edit-description {
+      color: $light-periwinkle-two;
+    }
+    .add-description, .edit-description {
+      &:hover {
+        color: $white;
+        text-decoration: underline;
+      }
+    }
+  }
+}

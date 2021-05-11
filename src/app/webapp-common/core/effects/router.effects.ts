@@ -2,6 +2,7 @@ import {Injectable} from '@angular/core';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {Store} from '@ngrx/store';
+import {uniq} from 'lodash/fp';
 import {map, tap} from 'rxjs/operators';
 import {NAVIGATION_ACTIONS} from '../../../app.constants';
 import {encodeFilters, encodeOrder} from '../../shared/utils/tableParamEncode';
@@ -14,7 +15,8 @@ export class RouterEffects {
   constructor(
     private actions$: Actions, private router: Router,
     private route: ActivatedRoute, private store: Store<any>
-  ) {}
+  ) {
+  }
 
   // TODO: (itay) remove after delete old pages.
   @Effect({dispatch: false})
@@ -22,7 +24,7 @@ export class RouterEffects {
     ofType<NavigateTo>(NAVIGATION_ACTIONS.NAVIGATE_TO),
     tap(action => {
       (!action.payload.params || !action.payload.url) ?
-        this.router.navigateByUrl(action.payload.url, {queryParams: <any>{unGuard: action.payload.unGuard}}) :
+        this.router.navigateByUrl(action.payload.url, /* Removed unsupported properties by Angular migration: queryParams. */ {}) :
         this.router.navigate([action.payload.url, action.payload.params], {queryParams: <any>{unGuard: action.payload.unGuard}});
     })
   );
@@ -45,34 +47,35 @@ export class RouterEffects {
           relativeTo: this.route,
           replaceUrl: firstUpdate,
           queryParams: {
-            columns: action.columns,
-            order: encodeOrder(action.orderDirection, action.orderField),
+            columns: uniq(action.columns),
+            order: encodeOrder(action.orders),
             filter: filterStr ? filterStr : undefined,
-            archive: action.isArchived ? true : undefined
+            archive: action.isArchived ? true : undefined,
+            deep: action.isDeep ? true : undefined
           }
         });
     })
   );
 
   getRouterParams(): Params {
-    let route  = this.route.snapshot.firstChild;
+    let route = this.route.snapshot.firstChild;
     let params: Params = {};
 
     while (route) {
       params = {...params, ...route.params};
-      route  = route.firstChild;
+      route = route.firstChild;
     }
     return params;
   }
 
   getRouterConfig(): string[] {
-    let route  = this.route.snapshot.firstChild;
+    let route = this.route.snapshot.firstChild;
     let config = [];
 
     while (route) {
       const path = route.routeConfig.path.split('/').filter((item) => !!item);
-      config     = config.concat(path);
-      route      = route.firstChild;
+      config = config.concat(path);
+      route = route.firstChild;
     }
     return config;
   }

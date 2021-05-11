@@ -1,6 +1,12 @@
 import {ChangeDetectionStrategy, Component, ElementRef, EventEmitter, forwardRef, Input, OnInit, Output, ViewChild} from '@angular/core';
 import {TemplateFormSectionBase} from '../../template-forms-ui/templateFormSectionBase';
-import {NG_VALUE_ACCESSOR} from '@angular/forms';
+import {NG_VALUE_ACCESSOR, NgForm} from '@angular/forms';
+import {COMMA, ENTER} from "@angular/cdk/keycodes";
+import {MatAutocompleteSelectedEvent} from "@angular/material/autocomplete";
+import {filter, map, startWith} from "rxjs/operators";
+import {asyncScheduler} from "rxjs";
+import {Observable} from "rxjs/internal/Observable";
+import {MatOptionSelectionChange} from "@angular/material/core";
 
 
 export interface IOption {
@@ -22,19 +28,26 @@ export interface IOption {
 })
 
 export class SelectAutocompleteForTemplateFormsComponent extends TemplateFormSectionBase implements OnInit {
-  private _items: any;
+  private _items: { label: string; value: string }[];
   private _focusIt: any;
   public loading: boolean = true;
-  public boundAddTag: any;
-  @ViewChild('select') select: ElementRef;
+  separatorKeysCodes: number[] = [ENTER, COMMA];
+  filterText: string = '';
+  isNewName: boolean = false;
   @Input() errorMsg: string;
   @Input() multiple: boolean = true;
-  @Input() enableChips = false;
   @Input() name: string;
-
   @Output() customOptionAdded = new EventEmitter();
+  @Input() formFieldClass: string;
+  @Input() appearance: 'outline' | 'fill' = 'outline';
 
-  @Input() set items(items) {
+  public filteredItems: Observable<{ label: string; value: string }[]>;
+
+  @Input() set isDisabled(disabled: boolean) {
+    this.disabled = disabled;
+  }
+
+  @Input() set items(items: { label: string; value: string }[]) {
     this.loading = false;
     this._items = items;
   }
@@ -44,6 +57,7 @@ export class SelectAutocompleteForTemplateFormsComponent extends TemplateFormSec
   }
 
   @Input() disabled: boolean = false;
+  // @Input() required: boolean = false;
   @Input() clearable: boolean = true;
   @Input() placeholder: string = '';
   @Input() optionAddable: boolean = false;
@@ -52,7 +66,6 @@ export class SelectAutocompleteForTemplateFormsComponent extends TemplateFormSec
   @Input() set focusIt(isFocus) {
     if (isFocus && this.autofocus === true) {
       this._focusIt = isFocus;
-      this.ngSelectRef.focus();
     } else {
       this._focusIt = false;
     }
@@ -62,40 +75,42 @@ export class SelectAutocompleteForTemplateFormsComponent extends TemplateFormSec
     return this._focusIt;
   }
 
-  @ViewChild('ngSelectRef', {static: true}) ngSelectRef;
+  @ViewChild('autoSelectForm', {static: true}) autoSelectForm: NgForm;
+  @ViewChild('autocompleteInput') autocompleteInput: ElementRef<HTMLInputElement>;
 
   ngOnInit() {
-    this.boundAddTag = this.addTag.bind(this);
-    // const control                   = this.controlDir.control;
-    // const validators: ValidatorFn[] = control.validator ? [control.validator] : [];
-    // control.setValidators(validators);
-    // control.updateValueAndValidity();
-    this.overrideNgSelectKeydown();
+    setTimeout(() => {
+      this.filteredItems = this.autoSelectForm.controls[this.name].valueChanges
+        .pipe(
+          filter(value => value !== undefined),
+          map(value => typeof value === 'string' ? value : value.label),
+          map(value => this._filter(value)),
+          startWith(this.items, asyncScheduler)
+        );
+    }, 0);
   }
 
-  addTag(e: any) {
-    // We are adding an item to the select, but we don't want to change the form data.
-    const addItem = this.ngSelectRef.itemsList.addItem({label: e, value: e});
-    this.ngSelectRef.select(addItem);
-    this.customOptionAdded.emit(e);
+  private _filter(value: string) {
+    this.filterText = value;
+    const itemsLabels = this.items.map(item => item.label);
+    this.isNewName = !itemsLabels.includes(value);
+    const filterValue = value?.toLowerCase();
+    return this.items.filter((item: any) => item.label?.toLowerCase().includes(filterValue));
+  }
+
+  displayFn(item: any): string {
+    return item && item.label ? item.label : item;
   }
 
 
-  removeTag(toRemove) {
-    this.ngSelectRef.clearItem(toRemove);
+  optionSelected($event: MatAutocompleteSelectedEvent) {
+    if (typeof $event === 'string') {
+      return;
+    }
+    this.writeValue($event);
   }
 
-  overrideNgSelectKeydown() {
-    const handleKeyDownCopy = this.ngSelectRef.handleKeyDown.bind(this.ngSelectRef);
-    this.ngSelectRef.handleKeyDown = function (e) {
-      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key) && !this.isOpen) {
-        return;
-      } else {
-        if (this.isOpen) {
-          e.stopPropagation();
-        }
-        handleKeyDownCopy(e);
-      }
-    };
+  customOptionSelected($event: MatOptionSelectionChange) {
+    this.customOptionAdded.emit($event.source.value.label);
   }
 }

@@ -6,9 +6,10 @@ import {selectRouterConfig} from '../../core/reducers/router-reducer';
 import {combineLatest, Subscription} from 'rxjs';
 import {debounceTime, distinctUntilChanged, filter, map} from 'rxjs/operators';
 import {TipOfTheDayModalComponent} from '../../layout/tip-of-the-day-modal/tip-of-the-day-modal.component';
-import {selectNeverShowPopups} from '../../core/reducers/view-reducer';
-import {selectCurrentUser} from '../../core/reducers/users-reducer';
+import {selectFirstLogin, selectNeverShowPopups} from '../../core/reducers/view-reducer';
+import {selectCurrentUser, selectTermsOfUse} from '../../core/reducers/users-reducer';
 import {neverShowPopupAgain} from '../../core/actions/layout.actions';
+import {GetCurrentUserResponseUserObject} from '../../../business-logic/model/users/getCurrentUserResponseUserObject';
 
 interface Tips {
   [url: string]: Tip[];
@@ -72,10 +73,15 @@ export class TipsService {
       this.firstTime = false;
     });
 
-    this.routerConfigSubscription = combineLatest([this.store.select(selectRouterConfig), this.store.select(selectCurrentUser)])
+    this.routerConfigSubscription = combineLatest([
+      this.store.select(selectRouterConfig),
+      this.store.select(selectCurrentUser),
+      this.store.select(selectFirstLogin),
+      this.store.select(selectTermsOfUse)
+    ])
       .pipe(
         debounceTime(1000),
-        filter(([routerConfig, user]) => !!user && !this.neverShowAgain && this.matDialog.openDialogs.length === 0),
+        filter(([routerConfig, user, firstLogin, tos]) => !firstLogin && !!user && !tos.accept_required && !this.neverShowAgain && this.matDialog.openDialogs.length === 0),
         distinctUntilChanged(([prev], [curr]) => prev?.[prev.length - 1] === curr[curr.length - 1]))
       .subscribe(([routerConfig]) => {
         const urlConfig = routerConfig?.join('/');
@@ -98,7 +104,7 @@ export class TipsService {
     this.modalRef = this.matDialog.open(TipOfTheDayModalComponent, {
       data: {
         tips: allTips,
-        visitedIndex: visitedIndex,
+        visitedIndex,
         hideDontShow: this.neverShowAgain || hideDontShow
       }
     });

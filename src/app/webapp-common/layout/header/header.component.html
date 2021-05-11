@@ -1,33 +1,38 @@
 <div class="header-container" [class.login]="isLogin">
-  <sm-breadcrumbs
-    *ngIf="!isDashboard || environment.communityServer; else spacer"
-    class="spacer"
-    [class.share-view]="isShareMode"
-    [activeWorkspace]="activeWorkspace">
-  </sm-breadcrumbs>
-  <ng-template #spacer><div></div></ng-template>
-  <div *ngIf="isDashboard && !isLogin" class="logo-full middle" [class.make-room-for-slogan]="environment.whiteLabelSlogan">
-    <img [src]="environment.whiteLabelLogo || '../../../../assets/logo-white.svg?v=1'">
+  <div class="d-flex align-items-center">
+    <sm-breadcrumbs
+      class="spacer"
+      [class.share-view]="isShareMode"
+      [activeWorkspace]="activeWorkspace">
+    </sm-breadcrumbs>
+    <div class="ml-3 d-flex align-items-center" *ngIf="isDashboard">
+      <sm-show-only-user-work></sm-show-only-user-work>
+    </div>
+  </div>
+
+  <div *ngIf="isDashboard && !isLogin" class="logo-full middle"
+       [class.make-room-for-slogan]="environment.whiteLabelSlogan">
+    <img [src]="environment?.branding?.logo">
     <div *ngIf="environment.whiteLabelSlogan" class="slogan">{{environment.whiteLabelSlogan}}</div>
   </div>
-  <div *ngIf="isLogin && environment.whiteLabelLogo"  class="logo-full">
-    <img [src]="environment.whiteLabelLogo">
+  <div *ngIf="isLogin && environment.whiteLabelLogo" class="logo-full">
+    <img [src]="environment?.branding?.logo">
   </div>
   <div *ngIf="isLogin" class="spacer"></div>
 
-  <div  *ngIf="workspaces | async as workspaces" class="right-buttons">
+  <div *ngIf="workspaces | async as workspaces" class="right-buttons">
     <sm-common-search [class.share-view]="isShareMode"></sm-common-search>
 
     <a *smCheckPermission="true" class="pointer resources-trigger"
        menuTrigger="matMenuTrigger"
        [matMenuTriggerFor]="resourcesMenu"
        showDelay="0" matTooltipPosition="below">
-        <i class="far al-ico-help-outlined"></i>
+      <i class="far al-ico-help-outlined"></i>
     </a>
     <a *smCheckPermission="true; else guestLogOut" class="pointer menu-trigger"
-            menuTrigger="matMenuTrigger"
-            [matMenuTriggerFor]="profileMenu"
-            showDelay="0" matTooltipPosition="below">
+       menuTrigger="matMenuTrigger"
+       [matMenuTriggerFor]="profileMenu"
+       showDelay="0" matTooltipPosition="below">
       <img class="avatar" *ngIf="(user | async).avatar; else iconAvatar" [src]="(user | async).avatar">
       <ng-template #iconAvatar>
         <div class="user-icon" [class.neon]="(url | async)?.endsWith('profile')">
@@ -35,7 +40,7 @@
         </div>
       </ng-template>
     </a>
-    <ng-template #guestLogOut >
+    <ng-template #guestLogOut>
       <a class="logout pointer" (click)="logout()" smTooltip="Logout" showDelay="0" matTooltipPosition="below">
         <i class="al-icon al-ico-user-logout al-color blue-300"></i>
       </a>
@@ -58,20 +63,25 @@
           <hr>
         </ng-container>
       </ng-container>
+
+      <ng-container *ngIf="environment.accountAdministration && (user | async)?.role === 'admin'">
+        <button mat-menu-item (click)="userManagement()">Account Administration</button>
+      </ng-container>
+
       <button mat-menu-item (click)="logout()">Logout</button>
     </mat-menu>
     <mat-menu #resourcesMenu="matMenu" class="user-menu">
-      <button mat-menu-item>
+      <button mat-menu-item *ngIf="environment.slackLink">
         <a class="item d-block" target="_blank"
-           href="https://join.slack.com/t/allegroai-trains/shared_invite/enQtOTQyMTI1MzQxMzE4LTY5NTUxOTY1NmQ1MzQ5MjRhMGRhZmM4ODE5NTNjMTg2NTBlZGQzZGVkMWU3ZDg1MGE1MjQxNDEzMWU2NmVjZmY">
+           [href]="environment.slackLink">
           <i class="fab fa-slack"></i>Community on Slack
         </a>
       </button>
       <button mat-menu-item>
-        <a class="item d-block" href="https://allegro.ai/clearml/docs" target="_blank">
-            <i class="far al-ico-documentation"></i>ClearML Documentation
+        <a class="item d-block" [href]="environment.docsLink" target="_blank">
+          <i class="far al-ico-documentation"></i>ClearML Documentation
         </a>
-        </button>
+      </button>
       <button mat-menu-item>
         <a class="item d-block" href="https://www.youtube.com/c/ClearML/featured" target="_blank">
           <i class="fab fa-youtube"></i>ClearML on Youtube
@@ -81,8 +91,13 @@
         <i class="far al-ico-tips"></i>Pro Tips
       </button>
       <button mat-menu-item>
+        <a class="item d-block" href="" (click)="openWelcome($event)">
+          <i class="fa al-ico-setup"></i>ClearML Python Package setup
+        </a>
+      </button>
+      <button mat-menu-item>
         <a class="item d-block" href="https://www.clear.ml/contact-us/" target="_blank">
-            <i class="fas al-ico-email"></i>Contact Us
+          <i class="fas al-ico-email"></i>Contact Us
         </a>
       </button>
     </mat-menu>

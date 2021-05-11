@@ -9,7 +9,7 @@
     height: $graph-height;
   }
 
-  .chart-contatiner {
+  .chart-container {
     padding: 20px 20px 0;
     background-color: $black;
     border: 1px solid $dark-grey-blue;
@@ -20,18 +20,25 @@
     }
 
     .line-chart-container {
+      height: calc(100% - 48px);
       position: relative;
       z-index: 500;
+
+      sm-line-chart {
+        height: 100%;
+      }
     }
 
     .header {
+      height: 48px;
+      line-height: 47px;
 
       .title {
         font-size: 15px;
         text-transform: uppercase;
       }
 
-      .time-selector, .param-selector {
+      .time-selector {
         width: 150px;
       }
     }

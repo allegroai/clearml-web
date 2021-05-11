@@ -4,8 +4,8 @@ import {queuesReducer} from './queues.reducer';
 import {workersReducer} from './workers.reducer';
 import {Queue} from '../../../business-logic/model/queues/queue';
 import {Task} from '../../../business-logic/model/tasks/task';
-import {TableSortOrderEnum} from '../../shared/ui-components/data/table/table.consts';
 import {statsReducer, StatsState} from './stats.reducer';
+import {SortMeta} from 'primeng/api';
 
 export const reducers: ActionReducerMap<any, any> = {
   workers: workersReducer,
@@ -25,19 +25,17 @@ export const selectSelectedQueue         = createSelector(queues, (state): Queue
 export const selectQueuesTasks           = createSelector(queues, (state): Map<string, Array<Task>> => state.tasks);
 export const selectQueueStats            = createSelector(queues, state => state.stats);
 export const selectQueuesStatsTimeFrame  = createSelector(queues, state => state.selectedStatsTimeFrame);
-export const selectQueuesTableSortOrder = createSelector(queues, (state): TableSortOrderEnum => state.tableSortOrder);
-export const selectQueuesTableSortField = createSelector(queues, (state): string => state.tableSortField);
+export const selectQueuesTableSortFields = createSelector(queues, (state): SortMeta[] => state.tableSortFields);
 
 export const workers                     = createSelector(workersAndQueues, state => state.workers);
 export const selectWorkers               = createSelector(workers, (state): Array<Worker> => state.data);
 export const selectStats                 = createSelector(workers, state => state.stats);
 export const selectStatsRequest          = createSelector(workers, state => state.statsRequest);
 export const selectSelectedWorker        = createSelector(workers, (state): Worker => state.selectedWorker);
-export const selectWorkersTableSortOrder = createSelector(workers, (state): TableSortOrderEnum => state.tableSortOrder);
-export const selectWorkersTableSortField = createSelector(workers, (state): string => state.tableSortField);
+export const selectWorkersTableSortFields = createSelector(workers, (state): SortMeta[] => state.tableSortFields);
 
 export const selectStatsParams    = createSelector(workers, state => state.selectedStatsParam);
 export const selectStatsTimeFrame = createSelector(workers, state => state.selectedStatsTimeFrame);
 
 export const stats = createSelector(workersAndQueues, state => state.stats);
-export const selectStatsErrorNotice = createSelector(stats, (state: StatsState) => state.showNoStatsNotice)
+export const selectStatsErrorNotice = createSelector(stats, (state: StatsState) => state.showNoStatsNotice);

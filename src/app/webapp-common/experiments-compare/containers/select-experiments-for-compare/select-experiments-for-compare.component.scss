@@ -1,19 +1,16 @@
 @import "../../../shared/ui-components/styles/variables";
 
 .select-experiments-container {
-  position: absolute;
-  top: 0;
-  left: 0;
   background-color: rgba(242, 243, 246, 0.9);
   width: 100%;
-  padding: 10px 32px;
-  z-index: 900;
+  height: 100%;
+  padding: 16px 32px;
   box-shadow: 0 3px 3px rgba(0, 0, 0, .15);
 }
 
-.search-input {
-  width: 550px;
-}
+//.search-input {
+//  width: 550px;
+//}
 
 .hide-table {
   height: 0px;
@@ -21,9 +18,8 @@
   transition: $transition-fast;
 
   &.show-table {
-    height: auto;
-    overflow: initial;
-    max-height: 400px;
+    height: calc(100% - 36px);
+    overflow-y: auto;
   }
 }
 
@@ -35,13 +31,3 @@
   padding: 0;
 }
 
-:host {
-  sm-select-experiments-for-compare-table {
-    overflow: auto;
-    max-height: 500px;
-  }
-
-  /deep/ .form-control.table-container footer.d-flex.justify-content-center {
-    padding: 0;
-  }
-}

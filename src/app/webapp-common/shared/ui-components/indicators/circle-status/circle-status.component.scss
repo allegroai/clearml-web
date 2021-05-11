@@ -24,6 +24,7 @@ $font-size: 18px;
   padding: 8px;
   .circle {
     display: inline-block;
+    margin: auto;
     width: $reqWidth;
     height: $reqWidth;
     border-radius: 50%;

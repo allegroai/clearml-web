@@ -30,7 +30,7 @@
                          [editable]="editable"
                          (cancelClicked)="cancelFormChange()"
                          (saveClicked)="sourceCode.sourceCodeForm.valid? saveSourceData(): sourceCode.sourceCodeForm.onSubmit(null)"
-                         (activateEditClicked)="activateEditChanged('source')">
+                         (activateEditClicked)="activateEditChanged('source', sourceSection)">
       <sm-section-header label="SOURCE CODE"></sm-section-header>
       <sm-experiment-execution-source-code
         #sourceCode
@@ -100,22 +100,61 @@
         </button>
       </sm-scroll-textarea>
     </sm-editable-section>
-    <sm-editable-section #orchestrationSection
-                         class="limit-width"
-                         *ngIf="minimized || currentLink === 'details'"
+    <sm-editable-section #containerSection
+                         class="limit-width edit-in-section"
+                         [style.margin-bottom.px]="containerSection.inEditMode ? 30 : null"
+                         *ngIf="minimized || currentLink === 'container'"
                          [saving]="saving"
                          [editable]="editable"
                          (cancelClicked)="cancelFormChange()"
-                         (saveClicked)="saveOrchestrationData()"
-                         (activateEditClicked)="activateEditChanged('orchestration')">
-      <sm-section-header label="AGENT CONFIGURATION"></sm-section-header>
-      <sm-labeled-row label="BASE DOCKER IMAGE" [class.mb-3]="editable">
-        <div *ngIf="!((editable && !isInDev) && orchestrationSection.inEditMode)">{{formData.docker_cmd}}</div>
-        <mat-form-field appearance="outline" *ngIf="(editable && !isInDev) && orchestrationSection.inEditMode" class="col-24">
-          <input #orchestration matInput [ngModel]="formData.docker_cmd" name="docker_cmd">
+                         (saveClicked)="saveContainerData({image: containerImage.nativeElement.value, arguments: containerArguments.nativeElement.value})"
+                         (activateEditClicked)="activateEditChanged('orchestration', containerSection)">
+      <sm-section-header label="CONTAINER"></sm-section-header>
+      <sm-labeled-row label="IMAGE" [class.mb-3]="editable">
+        <div *ngIf="!((editable && !isInDev) && containerSection.inEditMode)">{{formData.container?.image}}</div>
+        <mat-form-field appearance="outline" *ngIf="(editable && !isInDev) && containerSection.inEditMode" class="col-24">
+          <input #containerImage matInput [ngModel]="formData.container?.image" name="image">
         </mat-form-field>
       </sm-labeled-row>
+      <sm-labeled-row label="ARGUMENTS" [class.mb-3]="editable" [labelClass]="'this-is-myclass'">
+        <div *ngIf="!((editable && !isInDev) && containerSection.inEditMode)">{{formData.container?.arguments}}</div>
+        <mat-form-field appearance="outline" *ngIf="(editable && !isInDev) && containerSection.inEditMode" class="col-24">
+          <input #containerArguments matInput [ngModel]="formData.container?.arguments" name="image">
+        </mat-form-field>
+      </sm-labeled-row>
+
     </sm-editable-section>
+        <sm-editable-section #containerSetupShellSection
+                             class="grow setup-shell-script"
+                             [class.maximised]="!minimized"
+                             [class.mb-3]="editable"
+                             *ngIf="minimized || currentLink === 'container'"
+                             [saving]="saving"
+                             [editable]="editable && (!(formData?.container?.setup_shell_script) || containerSetupShellSection.inEditMode)"
+                             [disableInEditMode]="true"
+                             [disableSave]="false"
+                             (cancelClicked)="cancelFormChange()"
+                             (activateEditClicked)="activateEditChanged('container'); editContainerSetupShellScript(containerSetupShellSection)">
+          <sm-section-header  label="SETUP SHELL SCRIPT"></sm-section-header>
+          <sm-scroll-textarea
+            class="form-section"
+            [editable]="editable && containerSetupShellSection.inEditMode"
+            [isInDev]="isInDev"
+            [formData]="formData?.container?.setup_shell_script">
+            <button extra-buttons
+                    *ngIf="formData?.container?.setup_shell_script && editable && !showExtraDataSpinner"
+                    class="btn-dark-fill mr-3 flex-1"
+                    (click)="containerSetupShellSection.editModeChanged(true)">EDIT</button>
+            <button extra-buttons
+                    *ngIf="formData.container?.setup_shell_script && editable && !showExtraDataSpinner"
+                    class="btn-dark-fill mr-3 flex-1"
+                    (click)="clearSetupShellScript()">
+              <i class="p-1 fa fa-trash"></i>
+              CLEAR
+            </button>
+          </sm-scroll-textarea>
+        </sm-editable-section>
+
     <sm-editable-section #outputSection
                          class="limit-width"
                          *ngIf="minimized || currentLink === 'details'"
@@ -123,7 +162,7 @@
                          [editable]="editable"
                          (cancelClicked)="cancelFormChange()"
                          (saveClicked)="saveOutputData()"
-                         (activateEditClicked)="activateEditChanged('output')">
+                         (activateEditClicked)="activateEditChanged('output', outputSection)">
       <sm-section-header label="OUTPUT"></sm-section-header>
       <sm-labeled-row label="DESTINATION">
         <div *ngIf="!((editable && !isInDev) && outputSection.inEditMode)">{{formData.output?.destination}}</div>

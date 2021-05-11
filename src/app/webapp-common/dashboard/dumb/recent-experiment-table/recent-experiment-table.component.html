@@ -7,31 +7,31 @@
   <ng-template let-col
                let-experiment="rowData"
                pTemplate="body">
-    <div [ngSwitch]="col.id">
-      <div *ngSwitchCase="RECENT_TASKS_TABLE_COL_FIELDS.TYPE" class="table-cell-outline">
+    <ng-container [ngSwitch]="col.id">
+      <ng-container *ngSwitchCase="RECENT_TASKS_TABLE_COL_FIELDS.TYPE">
         <sm-experiment-type-icon-label [type]="experiment?.type"></sm-experiment-type-icon-label>
-      </div>
-      <div *ngSwitchCase="RECENT_TASKS_TABLE_COL_FIELDS.NAME" class="ellipsis">
+      </ng-container>
+      <ng-container *ngSwitchCase="RECENT_TASKS_TABLE_COL_FIELDS.NAME">
         {{experiment.name}}
-      </div>
-      <div *ngSwitchCase="RECENT_TASKS_TABLE_COL_FIELDS.PROJECT" class="ellipsis">
+      </ng-container>
+      <ng-container *ngSwitchCase="RECENT_TASKS_TABLE_COL_FIELDS.PROJECT">
         {{experiment.project?.name}}
-      </div>
-      <div *ngSwitchCase="RECENT_TASKS_TABLE_COL_FIELDS.STARTED">
+      </ng-container>
+      <ng-container *ngSwitchCase="RECENT_TASKS_TABLE_COL_FIELDS.STARTED">
         {{experiment.started | date : TIME_FORMAT_STRING}}
-      </div>
-      <div *ngSwitchCase="RECENT_TASKS_TABLE_COL_FIELDS.LAST_UPDATE">
+      </ng-container>
+      <ng-container *ngSwitchCase="RECENT_TASKS_TABLE_COL_FIELDS.LAST_UPDATE">
         {{experiment.last_update | date : TIME_FORMAT_STRING}}
-      </div>
-      <div *ngSwitchCase="RECENT_TASKS_TABLE_COL_FIELDS.USER" class="ellipsis">
+      </ng-container>
+      <ng-container *ngSwitchCase="RECENT_TASKS_TABLE_COL_FIELDS.USER">
         {{experiment.user?.name}}
-      </div>
-      <div *ngSwitchCase="RECENT_TASKS_TABLE_COL_FIELDS.STATUS">
+      </ng-container>
+      <ng-container *ngSwitchCase="RECENT_TASKS_TABLE_COL_FIELDS.STATUS">
         <sm-experiment-status-icon-label [status]="experiment?.status"></sm-experiment-status-icon-label>
-      </div>
-      <div *ngSwitchDefault class="ellipsis">
+      </ng-container>
+      <ng-container *ngSwitchDefault>
         {{experiment[col.id]}}
-      </div>
-    </div>
+      </ng-container>
+    </ng-container>
   </ng-template>
 </sm-table>

@@ -40,11 +40,12 @@ export class ModelsInfoEffects {
         .pipe(
           mergeMap((res: ModelsGetAllResponse) => {
             const model = res.models[0] as SelectedModel;
-            model.readOnly = isExample(model) || isSharedAndNotOwner(model, activeWorkspace);
-            return [
-              new infoActions.SetModel(model as SelectedModel),
-              new DeactiveLoader(action.type)
-            ];
+            const actions = [new DeactiveLoader(action.type)];
+            if( model) {
+              model.readOnly = isExample(model) || isSharedAndNotOwner(model, activeWorkspace);
+              actions.push(new infoActions.SetModel(model as SelectedModel));
+            }
+            return actions;
           }),
           catchError(error => [
             new RequestFailed(error),
@@ -62,7 +63,7 @@ export class ModelsInfoEffects {
       const parent = action.payload.parent ? (action.payload.parent as any).id : undefined;
       return this.apiModels.modelsEdit({
         model: action.payload.id, ...action.payload,
-        project: action.payload.project.id,
+        project: action.payload.project?.id,
         task: action.payload.task?.id,
         parent: parent
       })

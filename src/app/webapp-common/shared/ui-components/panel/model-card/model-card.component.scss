@@ -25,7 +25,7 @@
   padding: 5px 10px;
 }
 
-/deep/ .model-card {
+::ng-deep .model-card {
   cursor: pointer;
 
   height: 228px;
@@ -37,7 +37,7 @@
   }
 }
 
-/deep/ .model-card {
+::ng-deep .model-card {
   .card-container:hover {
     background-color: $blue-400 !important;
   }

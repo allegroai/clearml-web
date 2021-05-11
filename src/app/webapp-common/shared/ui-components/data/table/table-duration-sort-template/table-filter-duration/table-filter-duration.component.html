@@ -1,0 +1,53 @@
+<form class="filter-form p-4" #templateForm="ngForm" smClickStopPropagation smKeyDownStopPropagation>
+  <div>
+    <div class="mb-1 label">Equals or greater than</div>
+    <div class="d-flex " >
+    <!--  <sm-checkbox-control
+        (formDataChanged)="setCheckBox($event.value, 'greaterThan')"
+        [formData]="greaterThan.checked"
+        class="align-self-center pr-2"
+      >
+      </sm-checkbox-control>-->
+      <div class="input-duration">
+        <div class="input-border-duration-container ">
+          <sm-duration-input-list
+            [durationValue]="greaterThan.value"
+            name="greaterThan"
+            [inputs]="['days', 'hours', 'minutes', 'seconds']"
+            [hasResetIcon]="true"
+            (onDurationChanged)="timeStampChanged($event > 0 ? $event : null, 'greaterThan')"
+            (onResetIcon)="timeStampChanged(null, 'greaterThan')"
+            [returnFactor]="1000">
+          </sm-duration-input-list>
+        </div>
+      </div>
+    </div>
+  </div>
+  <sm-divider [label]="'and'"></sm-divider>
+  <div>
+    <div class="mb-1 label">Equals or less than</div>
+    <div class="d-flex " >
+     <!-- <sm-checkbox-control
+        [formData]="lessThan.checked"
+        (formDataChanged)="setCheckBox($event.value, 'lessThan')"
+        class="align-self-center pr-2"
+      >
+      </sm-checkbox-control>-->
+      <div class="input-duration">
+        <div class="input-border-duration-container ">
+          <sm-duration-input-list name="lessThan"
+                                  [ngModel]="lessThan.value"
+                                  [durationValue]="{standalone: true}"
+                                  [inputs]="['days', 'hours', 'minutes', 'seconds']"
+                                  [returnFactor]="1000"
+                                  [hasResetIcon]="true"
+                                  (onResetIcon)="timeStampChanged(null, 'lessThan')"
+                                  (onDurationChanged)="timeStampChanged($event > 0 ? $event : null, 'lessThan')">
+          </sm-duration-input-list>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+<sm-table-filter-duration-error *ngIf="hasTimeError"></sm-table-filter-duration-error>

@@ -10,7 +10,7 @@
   [selection]="selection"
   [reorderableColumns]="reorderableColumns"
   [resizableColumns]="resizableColumns && !minView"
-  columnResizeMode="expand"
+  columnResizeMode="fit"
   [scrollable]="resizableColumns"
   [virtualScroll]="virtualScroll"
   [virtualRowHeight]="rowHeight"
@@ -25,7 +25,7 @@
   (onContextMenuSelect)="openContext($event)"
   (onColResize)="colResize($event)"
   [rowTrackBy]="trackByFunction"
-  #dataTable>
+>
   <ng-template pTemplate="colgroup" let-columns>
     <colgroup *ngIf="!minView; else: cardColGroup">
       <col *ngFor="let col of columns" [style.width]="col.style?.width">
@@ -44,22 +44,22 @@
     </tr>
   </ng-template>
 
-  <ng-template pTemplate="header" let-columns let-rowData *ngIf="!noHeader">
+  <ng-template pTemplate="header" let-columns *ngIf="!noHeader">
     <tr class="header ui-state-default" *ngIf="!minView; else cardHeader">
       <th *ngFor="let col of columns"
           [attr.data-col-id]="col.id"
           pReorderableColumn
           resizableColumn
           [pResizableColumnDisabled]="col?.disableDrag"
-          [pReorderableColumnDisabled]="col?.disableDrag"
-          [class.grab]="reorderableColumns"
+          [pReorderableColumnDisabled]="!reorderableColumns || col?.disableDrag"
+          [class.disable-drag]="!reorderableColumns || col?.disableDrag"
           [class.resize-enabled]="resizableColumns"
           [class.resize-disabled]="!resizableColumns"
-          [class.selected-col-header]="col?.disablePointerEvents">
+          [class.selected-col-header]="col?.disablePointerEvents"
+          [style.min-width]="col.style?.minWidth"
+          [style.max-width]="col.style?.maxWidth"
+      >
         <ng-container [ngSwitch]="col?.headerType">
-          <ng-container *ngSwitchCase="ColHeaderTypeEnum.sort">
-            <ng-container *ngTemplateOutlet="sortTemplate; context: {$implicit: col}"></ng-container>
-          </ng-container>
           <ng-container *ngSwitchCase="ColHeaderTypeEnum.sortFilter">
             <ng-container *ngTemplateOutlet="sortFilterTemplate; context: {$implicit: col}"></ng-container>
           </ng-container>
@@ -77,11 +77,11 @@
         <div class="table-header-title">{{minimizedTableHeader}}</div>
         <div class="table-actions">
           <div class="recent-title">
-            <sm-menu [header]="getColName(sortField)" class="menu" smMenuClass="bigger-width">
+            <sm-menu header="SORTED BY " class="menu" smMenuClass="bigger-width">
               <div *ngFor="let col of sortableCols">
                 <sm-menu-item [itemLabel]="col.header"
-                              [sortOrder]="(sortField === col.id) && sortOrder"
-                              (itemClicked)="sortChanged.emit({field: col.id, sortOrder: $any(sortField === col.id ? sortOrder * -1 : 1)})"></sm-menu-item>
+                              [sortOrder]="getOrder(col.id)"
+                              (itemClicked)="sortItemClick($event, col.id)"></sm-menu-item>
               </div>
             </sm-menu>
           </div>
@@ -105,7 +105,12 @@
       (click)="!minView && rowClicked.emit({e: $event, data: rowData})"
     >
       <ng-container *ngIf="!minView; else cardBody">
-        <td *ngFor="let col of columns; index as i" [class.ui-resizable-column]="resizableColumns" [class.simple]="simple"
+        <td
+          *ngFor="let col of columns; index as i"
+          [class.ui-resizable-column]="resizableColumns"
+          [class.simple]="simple"
+          [style.min-width]="col.style?.minWidth"
+          [style.max-width]="col.style?.maxWidth"
         >
           <ng-container *ngIf="bodyTemplate">
             <ng-container *ngTemplateOutlet="bodyTemplate; context: {$implicit: col, rowData: rowData, rowIndex: index}">
@@ -116,7 +121,7 @@
           </ng-container>
         </td>
       </ng-container>
-      <ng-template #cardBody>
+     <ng-template #cardBody>
         <td class="pointer p-0" role="button">
           <ng-container
             *ngTemplateOutlet="cardTemplate;  context: {rowData: rowData, rowNumber: index, selected:  (selectionMode==='single'? selection?.id === rowData.id :  selection?.includes(rowData))}">

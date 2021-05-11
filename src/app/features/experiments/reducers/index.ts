@@ -27,15 +27,15 @@ export function experiments(state) {
 
 // view selectors.
 export const experimentsView = createSelector(experiments, (state): IExperimentsViewState => state ? state.view : {});
-export const selectExperimentsMetricsCols = createSelector(experimentsView, (state): Array<any> => state.metricsCols);
-export const selectMetricVariants = createSelector(experimentsView, (state): Array<MetricVariantResult> => state.metricVariants);
-export const selectMetricsLoading = createSelector(experimentsView, (state): boolean => state.metricsLoading);
+export const selectExperimentsMetricsCols = createSelector(experimentsView, state => state.metricsCols);
+export const selectMetricVariants = createSelector(experimentsView, state => state.metricVariants);
+export const selectMetricsLoading = createSelector(experimentsView, state => state.metricsLoading);
 
 
 // info selectors
 export const experimentInfo = createSelector(experiments, (state): IExperimentInfoState => state ? state.info : {});
-export const selectSelectedExperiment = createSelector(experimentInfo, (state): ISelectedExperiment => state.selectedExperiment);
-export const selectExperimentInfoData = createSelector(experimentInfo, (state): IExperimentInfo => state.infoData);
+export const selectSelectedExperiment = createSelector(experimentInfo, state => state.selectedExperiment);
+export const selectExperimentInfoData = createSelector(experimentInfo, state => state.infoData);
 export const selectShowExtraDataSpinner = createSelector(experimentInfo, state => state.showExtraDataSpinner);
 
 
@@ -43,9 +43,9 @@ export const selectShowExtraDataSpinner = createSelector(experimentInfo, state =
 export const experimentOutput = createSelector(experiments, (state): CommonExperimentOutputState => state ? state.output : {});
 
 export const selectIsExperimentEditable = createSelector(selectSelectedExperiment, selectActiveWorkspace,
-  (experiment: ISelectedExperiment, user): boolean => experiment && experiment.status === TaskStatusEnum.Created && !isReadOnly(experiment) && !isSharedAndNotOwner(experiment, user));
+  (experiment, user): boolean => experiment && experiment.status === TaskStatusEnum.Created && !isReadOnly(experiment) && !isSharedAndNotOwner(experiment, user));
 export const selectIsSharedAndNotOwner = createSelector(selectSelectedExperiment, selectSelectedModel, selectActiveWorkspace,
-  (experiment: ISelectedExperiment, model, user): boolean => {
+  (experiment, model, user): boolean => {
   const item = experiment || model;
     return item && isSharedAndNotOwner(item, user);
   }

@@ -1,6 +1,4 @@
 import {Component, OnInit, Input, OnDestroy, ViewChild, ViewContainerRef} from '@angular/core';
-import {FormControl} from '@angular/forms';
-import {IOption} from '../../../shared/ui-components/inputs/select-autocomplete/select-autocomplete.component';
 import {Worker} from '../../../../business-logic/model/workers/worker';
 import {Subscription, combineLatest} from 'rxjs';
 import {Store} from '@ngrx/store';
@@ -10,6 +8,7 @@ import {filter} from 'rxjs/operators';
 import {get} from 'lodash/fp';
 import {TIME_INTERVALS} from '../../workers-and-queues.consts';
 import {Topic} from '../../../shared/utils/statistics';
+import {IOption} from '../../../shared/ui-components/inputs/select-autocomplete-with-chips/select-autocomplete-with-chips.component';
 
 @Component({
   selector: 'sm-workers-graph',
@@ -17,16 +16,13 @@ import {Topic} from '../../../shared/utils/statistics';
   styleUrls: ['./workers-stats.component.scss']
 })
 export class WorkersStatsComponent implements OnInit, OnDestroy {
-  private selectionSubscription: Subscription;
   private chartDataSubscription: Subscription;
   private chartParamSubscription: Subscription;
   public statsError$ = this.store.select(selectStatsErrorNotice);
   private intervaleHandle: number;
-  private currentParam: string;
-  private currentTimeFrame: number;
+  public currentParam: string;
+  public currentTimeFrame: string;
   public refreshChart = true;
-  public timeFormControl = new FormControl();
-  public paramFormControl = new FormControl();
   public activeWorker: Worker;
   public yAxisLabel: string;
 
@@ -71,20 +67,13 @@ export class WorkersStatsComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.selectionSubscription = combineLatest([this.timeFormControl.valueChanges, this.paramFormControl.valueChanges])
-      .pipe(filter(([timeFrame, param]) => !!timeFrame && !!param &&
-        (param !== this.currentParam || timeFrame !== this.currentTimeFrame)))
-      .subscribe(([timeFrame, param]) => {
-        this.store.dispatch(new SetStatsParams({timeFrame, param}));
-      });
+
 
     this.chartParamSubscription = combineLatest([this.store.select(selectStatsTimeFrame), this.store.select(selectStatsParams)])
       .pipe(filter(([timeFrame, param]) => !!timeFrame && !!param))
       .subscribe(([timeFrame, param]) => {
         this.currentParam = param;
         this.currentTimeFrame = timeFrame;
-        this.timeFormControl.setValue(timeFrame);
-        this.paramFormControl.setValue(param);
         this.yAxisLabel = this.activeWorker ? this.yAxisLabels[param] : 'Count';
         this.chartChanged();
       });
@@ -102,14 +91,13 @@ export class WorkersStatsComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.selectionSubscription.unsubscribe();
     this.chartDataSubscription.unsubscribe();
     this.chartParamSubscription.unsubscribe();
     clearInterval(this.intervaleHandle);
   }
 
   chartChanged() {
-    const range = parseInt(this.timeFormControl.value, 10);
+    const range = parseInt(this.currentTimeFrame, 10);
     clearInterval(this.intervaleHandle);
     this.refreshChart = true;
     let width = this.chartRef.element.nativeElement.clientWidth || 1000;
@@ -122,5 +110,15 @@ export class WorkersStatsComponent implements OnInit, OnDestroy {
     this.intervaleHandle = window.setInterval(() => {
       this.store.dispatch(new GetStatsAndWorkers({maxPoints: width}));
     }, granularity * 1000);
+  }
+
+  chartParamChange(event) {
+    this.currentParam = event;
+    this.store.dispatch(new SetStatsParams({timeFrame: this.currentTimeFrame, param: this.currentParam}));
+  }
+
+  timeFrameChange(event) {
+    this.currentTimeFrame = event;
+    this.store.dispatch(new SetStatsParams({timeFrame: this.currentTimeFrame, param: this.currentParam}));
   }
 }

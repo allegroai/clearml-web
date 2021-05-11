@@ -1,0 +1,44 @@
+@import "../../styles/variables";
+
+:host {
+  input {
+    font-size: 14px;
+    color: $blue-250;
+    height: auto;
+    padding: 0;
+  }
+  .active {
+    input {
+      color: $blue-400;
+    }
+  }
+  input[name="days"], input[name="ms"], .max-length-3{
+    width: 24px
+  }
+  input[name="hours"], input[name="minutes"], .max-length-2 {
+    width: 16px
+  }
+  i.al-ico-time-colon {
+    font-size: 8px;
+    line-height: 8px;
+    width: 8px;
+    height: 8px;
+  }
+
+  .reset {
+    position: relative;
+    width: 14px;
+    height: 16px;
+    margin-left: 8px;
+    i {
+      position: absolute;
+      right: 0;
+    }
+  }
+}
+
+:host-context(sm-duration-input-list.input-disabled) {
+  ::ng-deep input {
+    color: $blue-250 !important;
+  }
+}

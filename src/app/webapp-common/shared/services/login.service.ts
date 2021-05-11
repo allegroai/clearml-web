@@ -16,7 +16,9 @@ import {LoginSsoCallbackResponse} from '../../../business-logic/model/login/logi
 import {LoginGetInviteInfoResponse} from '../../../business-logic/model/login/loginGetInviteInfoResponse';
 import {LoginModel} from '../../login/signup/signup.component';
 import {ConfigurationService} from './configuration.service';
-const environment = ConfigurationService.globalEnvironment;
+import {LoginSsoCallbackRequest} from '../../../business-logic/model/login/loginSsoCallbackRequest';
+import {Environment} from '../../../../environments/base';
+import {USER_PREFERENCES_KEY} from '@common/user-preferences';
 
 export type LoginMode = 'simple' | 'password' | 'ssoOnly';
 
@@ -32,32 +34,45 @@ export type userState = Observable<{ userState: LoginSsoCallbackResponse; state:
   providedIn: 'root'
 })
 export class LoginService {
+  signupMode: boolean;
   protected basePath = HTTP.API_BASE_URL;
   private userKey: string;
   private userSecret: string;
   private companyID: string;
   private _loginMode: LoginMode;
   private _guestUser: { enabled: boolean; username: string; password: string };
-  get guestUser () {
+  private environment: Environment;
+  get guestUser() {
     return clone(this._guestUser);
   }
-  private _sso: {name: string; url: string}[];
+  private _sso: {name: string; url: string; displayName?: string}[];
   get sso() {
     return this._sso;
+  }
+  private _authenticated: boolean;
+  get authenticated(): boolean {
+    return this._authenticated;
   }
 
   constructor(
     private httpClient: HttpClient,
     private loginApi: ApiLoginService,
     private dialog: MatDialog,
-    private loginServiceExt: LoginServiceExt
-  ) {}
+    private loginServiceExt: LoginServiceExt,
+    private configService: ConfigurationService
+  ) {
+    configService.globalEnvironmentObservable.subscribe(env => {
+      const firstLogin = !window.localStorage.getItem(USER_PREFERENCES_KEY.firstLogin);
+      this.environment = env;
+      this.signupMode = !!this.environment.communityServer && firstLogin;
+    });
+  }
 
   initCredentials() {
     const fromEnv = () => {
-      this.userKey = environment.userKey;
-      this.userSecret = environment.userSecret;
-      this.companyID = environment.companyID;
+      this.userKey = this.environment.userKey;
+      this.userSecret = this.environment.userSecret;
+      this.companyID = this.environment.companyID;
     };
 
     return this.getLoginMode().pipe(
@@ -83,13 +98,13 @@ export class LoginService {
     if (this._loginMode !== undefined) {
       return of(this._loginMode);
     } else {
-      return this.getLoginSupportedModes('signup')
+      return this.getLoginSupportedModes(this.signupMode && 'signup')
         .pipe(
           // for testing: map(res => ({...res, server_errors: {missed_es_upgrade: true}}) ),
           tap(res => (res?.server_errors && this.shouldOpenServerError(res.server_errors)) && this.openEs7MessageDialog(res.server_errors)),
           filter(res => !this.shouldOpenServerError(res?.server_errors)),
           tap((res: LoginModeResponse) => {
-
+            this._authenticated = res.authenticated;
             this._loginMode = res.basic.enabled ? LoginModeEnum.password : res.sso_providers?.length > 0 ? LoginModeEnum.ssoOnly : LoginModeEnum.simple;
             this._guestUser = res.basic.guest;
             this._sso = res.sso_providers;
@@ -101,7 +116,9 @@ export class LoginService {
 
   public getLoginSupportedModes(additionalState = ''): Observable<LoginModeResponse> {
     const url = new URL(window.location.href);
-    let state = url.searchParams.get('redirect') ?? url.searchParams.get('state') ?? url.pathname + url.search;
+    let state = url.searchParams.get('redirect') ??
+      url.searchParams.get('state') ??
+      (url.pathname === '/login' ? '/' : url.pathname + url.search);
     if (additionalState && state) {
       const stateUrl = new URL(`http://aaa${state}`);
       stateUrl.searchParams.append(additionalState, '');
@@ -110,10 +127,20 @@ export class LoginService {
     return this.loginApi.loginSupportedModes({
       callback_url_prefix: url.origin + '/callback_',
       state: (state === '/' || state.startsWith('callback_') || state.startsWith('/callback_'))? undefined : state
-    }).pipe(map((res: LoginModeResponse) => ({
-      ...res,
-      ...(!res.sso_providers && res.sso && {sso_providers: Object.keys(res.sso).map((key: string) => ({name: key, url: res.sso[key]}))})
-    })));
+    }).pipe(map((res: LoginModeResponse) => {
+      const auth0 = res.sso_providers.find(provider => provider.name == 'auth0');
+      if (auth0 && this.signupMode) {
+        const url = new URL(auth0.url);
+        url.searchParams.set('screen_hint', 'signup');
+        auth0.url = url.toString();
+      }
+      return {
+        ...res,
+        ...(res.sso_providers ?
+          {sso_providers: res.sso_providers.map(provider => ({...provider, displayName: provider.display_name}))} :
+          res.sso && {sso_providers: Object.keys(res.sso).map((key: string) => ({name: key, url: res.sso[key]}))})
+      };
+    }));
   }
 
   getUsers() {
@@ -133,7 +160,7 @@ export class LoginService {
 
   login(userId: string) {
     let headers = this.getHeaders();
-    headers = headers.append(`${environment.headerPrefix}-Impersonate-As`, userId);
+    headers = headers.append(`${this.environment.headerPrefix}-Impersonate-As`, userId);
     return this.httpClient.post(`${this.basePath}/auth.login`, null, {headers, withCredentials: true});
   }
 
@@ -167,7 +194,7 @@ export class LoginService {
 
     // Mocking application header
     const imgElement = new Image();
-    imgElement.setAttribute('src', '../../../../assets/logo-white.svg');
+    imgElement.setAttribute('src', this.environment.branding.logo);
     imgElement.setAttribute('style', 'width: 100%; height: 64px; background-color: #141822; padding: 15px;');
     document.body.appendChild(imgElement);
 
@@ -196,8 +223,9 @@ After the issue is resolved and Trains Server is up and running, reload this pag
     });
   }
 
-  ssoLogin(params): userState {
-    return this.loginServiceExt.ssoLogin(params);
+  ssoLogin(params: Partial<LoginSsoCallbackRequest>): userState {
+    return this.loginServiceExt.ssoLogin(params).pipe(tap(({userState}) =>
+      this._authenticated = userState.login_status === 'logged_in'));
   }
 
   signup(signupInfo: LoginModel) {

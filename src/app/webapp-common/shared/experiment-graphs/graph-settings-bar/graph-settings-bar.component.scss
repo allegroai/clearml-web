@@ -18,16 +18,18 @@
     .group-by-field,
     .axis-type-field {
       width: unset;
-     flex: 1 1 150px;
+      flex: 1 1 150px;
       max-width: 150px;
     }
 
     .label-text {
-      display: inline-block;
+      display: flex;
+      align-items: center;
       white-space: nowrap;
       width: 95px;
       min-width: 95px;
       padding-right: 12px;
+      padding-bottom: 4px;
     }
 
     .axis-text-margin-left {
@@ -46,26 +48,23 @@
         min-width: unset;
       }
 
-      .smooth-input {
-        margin-right: 6px;
-      }
     }
   }
 
-  /deep/ .mat-form-field-appearance-outline:not(.data-text) .mat-form-field-outline {
-    top: 16px;
-    bottom: 4px;
-    background-color: transparent;
-    color: $grey-purple
-  }
-
-  /deep/ .mat-form-field-appearance-outline .mat-form-field-flex {
-    margin-top: -6px !important;
-
-    .mat-select-value {
-      color: $blue-400;
-    }
-  }
+  //::ng-deep .mat-form-field-appearance-outline:not(.data-text) .mat-form-field-outline {
+  //  top: 16px;
+  //  bottom: 4px;
+  //  background-color: transparent;
+  //  color: $grey-purple
+  //}
+  //
+  //::ng-deep .mat-form-field-appearance-outline .mat-form-field-flex {
+  //  margin-top: -6px !important;
+  //
+  //  .mat-select-value {
+  //    color: $blue-400;
+  //  }
+  //}
 }
 
 .x-axis-options {
@@ -75,22 +74,18 @@
 
 .smooth-input {
   width: 55px;
-  margin: auto 0;
   margin-left: 6px;
-  border-color: $blue-400;
 }
 
 .smooth-options {
   display: flex;
   align-items: center;
   margin-left: auto;
-  margin-top: 13px;
 }
 
 .label-text {
-  margin-top: 20px;
   padding-right: 6px;
-
+  margin: auto;
   &.axis-text-margin-left {
     margin-left: 24px;
   }
@@ -108,8 +103,6 @@
 }
 
 mat-form-field {
-  height: 50px;
-  flex-grow: 1;
   width: 150px;
 }
 

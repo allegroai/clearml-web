@@ -10,7 +10,7 @@
       </button>
       <mat-menu #subMenu="matMenu" class="table-card-filter-menu">
         <form class="filter-form">
-          <mat-form-field *ngIf="searchable(option.key)" smClickStopPropagation [style.width]="'222px'">
+          <mat-form-field *ngIf="searchable(option.key)" smClickStopPropagation [style.width]="'222px'" class="tags-menu-input">
             <input matInput (input)="setSearchTerm($event, option.key)" name="filter" [(ngModel)]="searchTerms[option.key]" autocomplete="off">
             <i matSuffix [class]="'fa mr2 ' + (searchTerms[option.key]? 'fa-times pointer':'fa-search')" (click)="searchTerms[option.key] && clearSearch(option.key)"></i>
           </mat-form-field>

@@ -1,0 +1,28 @@
+hr {
+  margin: 0 !important;
+}
+
+button {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  i {
+    margin-right: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    &.fa-eye-slash {
+      margin-right: 8px;
+    }
+
+    &.rotate-135 {
+      transform: rotate(135deg);
+      margin-right: 10px;
+    }
+  }
+}
+
+.al-ico-bars-menu {
+  line-height: 20px;
+}

@@ -22,7 +22,7 @@ export class WebappIntercptor implements HttpInterceptor {
     this.store.select(selectCurrentUser).subscribe(user => this.user = user);
     this.store.select(selectActiveWorkspace).subscribe(workspace => this.workspace = workspace);
     this.store.select(selectSelectedWorkspaceTab).subscribe(workspace => this.selectedWorkspaceTab = workspace);
-    this.communityServer = confService.getStaticEnvironment().communityServer;
+    confService.getEnvironment().subscribe(env => this.communityServer = env.communityServer);
   }
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {

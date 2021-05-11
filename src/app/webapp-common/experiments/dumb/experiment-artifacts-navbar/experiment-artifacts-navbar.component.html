@@ -1,26 +1,46 @@
-<mat-expansion-panel expanded="true" *ngIf="inputModel?.id || outputModel?.id || editable">
+<mat-expansion-panel expanded="true" *ngIf="inputModels?.length || editable">
   <mat-expansion-panel-header collapsedHeight="40px" expandedHeight="40px" class="active">
-    MODELS
+    INPUT MODELS
   </mat-expansion-panel-header>
-  <div
-    queryParamsHandling="preserve"
-    [ngClass]="{'selected': routerConfig.includes('input-model'), 'hide-output-model' :((!inputModel?.id) && !editable)}"
-    class="artifact-container pointer"
-    routerLink="input-model"
+  <div *ngIf="noItemsMode; else hasItems"
+       queryParamsHandling="preserve"
+       class="artifact-container pointer"
+       [routerLink]="'input-model/input-model'"
+       [class.selected]="true"
   >
     <i class="icon sm al-ico-import"></i> Input Model
   </div>
+  <ng-template #hasItems>
+    <div
+      *ngFor="let model of inputModels"
+      queryParamsHandling="preserve"
+      class="artifact-container pointer"
+      [routerLink]="'input-model/' + model.id"
+      [class.selected]="model.id === selectedArtifactKey && activeSection === ACTIVE_SECTIONS['input-model']"
+    >
+      <i class="icon sm al-ico-import"></i>
+      <span class="ellipsis">{{model.taskName}}</span>
+    </div>
+  </ng-template>
+</mat-expansion-panel>
+
+<mat-expansion-panel expanded="true" *ngIf="outputModels?.length">
+  <mat-expansion-panel-header collapsedHeight="40px" expandedHeight="40px" class="active">
+    OUTPUT MODELS
+  </mat-expansion-panel-header>
   <div
+    *ngFor="let model of outputModels"
     queryParamsHandling="preserve"
-    [ngClass]="{'selected': routerConfig.includes('output-model'), 'hide-output-model':!outputModel?.id}"
     class="artifact-container pointer"
-    routerLink="output-model"
+    [routerLink]="'output-model/' + model.id"
+    [class.selected]="model.id === selectedArtifactKey && activeSection === ACTIVE_SECTIONS['output-model']"
   >
-    <i class="icon sm al-ico-export"></i> Output Model
+    <i class="icon sm al-ico-export"></i>
+    <span class="ellipsis">{{model.taskName}}</span>
   </div>
 </mat-expansion-panel>
 
-<mat-expansion-panel [expanded]="true" *ngIf="dataAuditArtifacts?.length > 0">
+<mat-expansion-panel expanded="true" *ngIf="dataAuditArtifacts?.length > 0">
   <mat-expansion-panel-header collapsedHeight="40px" expandedHeight="40px" class="active">
     DATA AUDIT
   </mat-expansion-panel-header>
@@ -28,7 +48,7 @@
        class="artifact-container pointer"
        queryParamsHandling="preserve"
        [routerLink]="'artifact/' + artifact.key+ '/' + artifact.mode"
-       [ngClass]="{'selected': selectedArtifactKey === artifact.key}"
+       [class.selected]="selectedArtifactKey === artifact.key && activeSection === ACTIVE_SECTIONS['artifact']"
   >
     <i class="sm al-icon al-ico-data-audit al-color" [class]="(selectedArtifactKey === artifact.key ? 'white' : 'blue-400')"></i>{{artifact.key}}
   </div>
@@ -41,8 +61,9 @@
        class="artifact-container pointer"
        queryParamsHandling="preserve"
        [routerLink]="'other/' + artifact.key+'/' +artifact.mode"
-       [ngClass]="{'selected': selectedArtifactKey===artifact.key}"
+       [class.selected]="selectedArtifactKey === artifact.key && activeSection === ACTIVE_SECTIONS['other']"
   >
-    <i class="sm al-icon al-ico-data-audit al-color" [class]="(selectedArtifactKey === artifact.key ? 'white' : 'blue-400')"></i>{{artifact.key}}
+    <i class="sm al-icon al-ico-data-audit al-color" [class]="(selectedArtifactKey === artifact.key ? 'white' : 'blue-400')"></i>
+    <span class="ellipsis">{{artifact.key}}</span>
   </div>
 </mat-expansion-panel>

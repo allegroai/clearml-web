@@ -23,7 +23,7 @@ $header-height: 60px;
       height: $nav-height
     }
 
-    /deep/ nav {
+    ::ng-deep nav {
       border-top: 1px solid rgba(2, 2, 2, 0.07);
     }
 
@@ -34,12 +34,12 @@ $header-height: 60px;
 
   }
 
-  /deep/ sm-experiment-graphs, /deep/ sm-debug-images, /deep/ sm-experiment-output-log {
+  ::ng-deep sm-experiment-graphs, ::ng-deep sm-debug-images, ::ng-deep sm-experiment-output-log {
     display: block;
     height: 100%;
   }
 
-  /deep/ .no-output {
+  ::ng-deep .no-output {
     text-align: center;
     color: $cloudy-blue-two;
     position: absolute;
@@ -49,7 +49,7 @@ $header-height: 60px;
     display: block;
   }
 
-  /deep/ .no-output-icon {
+  ::ng-deep .no-output-icon {
     height: 200px;
     width: 200px;
     left: 50%;
@@ -73,7 +73,7 @@ $header-height: 60px;
     background: $blue-100;
   }
 
-  /deep/ al-drawer sm-card2 .card-container {
+  ::ng-deep al-drawer sm-card2 .card-container {
     border-radius: 6px 0 0 6px !important;
     border-right: none !important;
 
@@ -82,7 +82,7 @@ $header-height: 60px;
     }
   }
 
-  /deep/ al-drawer button.drawer-toggle {
+  ::ng-deep al-drawer button.drawer-toggle {
     border-radius: 0 6px 6px 0;
   }
 }

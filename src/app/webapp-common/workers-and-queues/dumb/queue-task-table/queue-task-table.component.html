@@ -11,17 +11,17 @@
   <ng-template let-col
                let-task="rowData"
                pTemplate="body">
-    <div [ngSwitch]="col.id">
-      <div *ngSwitchCase="QUEUES_TABLE_COL_FIELDS.USER">
+    <ng-container [ngSwitch]="col.id">
+      <ng-container *ngSwitchCase="QUEUES_TABLE_COL_FIELDS.USER">
         {{task.user.name}}
-      </div>
-      <div *ngSwitchCase="QUEUES_TABLE_COL_FIELDS.QUEUED">
+      </ng-container>
+      <ng-container *ngSwitchCase="QUEUES_TABLE_COL_FIELDS.QUEUED">
         <span [smTooltip]="task[col.id] | date : TIME_FORMAT_STRING">{{task[col.id] | timeAgo}}</span>
-      </div>
-      <div *ngSwitchDefault>
+      </ng-container>
+      <ng-container *ngSwitchDefault>
         {{task[col.id]}}
-      </div>
-    </div>
+      </ng-container>
+    </ng-container>
   </ng-template>
 
 </sm-table>

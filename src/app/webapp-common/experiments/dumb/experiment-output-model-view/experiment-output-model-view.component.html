@@ -1,14 +1,14 @@
 <div class="input-model-container">
   <sm-labeled-row *ngIf="!editable" label="MODEL NAME">
-    <a [href]="'/projects/'+ ((output?.project?.id) ? output?.project?.id : '*')  + '/models/' + output.id" target="_blank">
-      {{output.name}}
+    <a [href]="'/projects/'+ ((model?.project?.id) ? model?.project?.id : '*')  + '/models/' + model?.id" target="_blank">
+      {{model?.name}}
     </a>
-    <i *ngIf="output?.url && !isLocalFile"
+    <i *ngIf="model?.uri && !isLocalFile"
        class="pointer fa fa-download ml-2"
-       (click)="artifactFilePathClicked(output.url)"
+       (click)="artifactFilePathClicked(model.uri)"
     ></i>
-    <sm-copy-clipboard *ngIf="output?.url && isLocalFile"
-                       label="" [clipboardText]="output.url"
+    <sm-copy-clipboard *ngIf="model?.uri && isLocalFile"
+                       label="" [clipboardText]="model.uri"
                        class="pl-2 light"
                        [hideBackground]="true"
     ></sm-copy-clipboard>

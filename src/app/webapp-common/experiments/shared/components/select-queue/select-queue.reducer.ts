@@ -5,12 +5,12 @@ import {Task} from '../../../../../business-logic/model/tasks/task';
 
 export interface ISelectQueueState {
   queues: Array<Queue>;
-  task: Task;
+  tasks: Task[];
 }
 
 const selectQueueInitState: ISelectQueueState = {
   queues: null,
-  task: null
+  tasks: null
 };
 
 
@@ -19,7 +19,7 @@ export function selectQueueReducer<ActionReducer>(state: ISelectQueueState = sel
     case SET_QUEUES_FOR_ENQUEUE:
       return {...state, queues: action.payload.queues};
     case SET_TASK_FOR_ENQUEUE:
-      return {...state, task: action.payload.task};
+      return {...state, tasks: action.payload.task};
     default:
       return state;
   }
@@ -28,5 +28,5 @@ export function selectQueueReducer<ActionReducer>(state: ISelectQueueState = sel
 
 export const queues = createFeatureSelector<ISelectQueueState>('selectQueue');
 export const selectQueuesList = createSelector(queues, (state) => state ? state.queues : []);
-export const selectTaskForEnqueue = createSelector(queues, (state) => state ? state.task : {});
+export const selectTaskForEnqueue = createSelector(queues, (state) => state ? state.tasks : []);
 

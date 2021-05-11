@@ -10,7 +10,7 @@
                 [removable]="col.metric_hash || col.isParam"
                 [itemValue]="col.id"
                 (removeItemClicked)="removeColFromList.emit($event)"
-                (itemClicked)="selectedTableColsChanged.emit($event)">
+                (itemClicked)="selectedTableColsChanged.emit(col)">
   </sm-menu-item>
 </div>
 <hr style="margin: 0">

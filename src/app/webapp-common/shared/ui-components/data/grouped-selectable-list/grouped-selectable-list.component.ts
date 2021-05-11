@@ -3,8 +3,15 @@ import {SelectableListItem} from './grouped-selectable-list.model';
 import {GroupedList} from '../selectable-grouped-filter-list/selectable-grouped-filter-list.component';
 import {MatExpansionPanelHeader} from '@angular/material/expansion';
 
+
+interface GroupItem {
+  data: GroupedVisibleList;
+  visible: boolean;
+  hasChildren: boolean;
+}
+
 export interface GroupedVisibleList {
-  [metric: string]: { data: GroupedVisibleList; visible: boolean; hasChildren: boolean };
+  [metric: string]: GroupItem;
 }
 
 @Component({
@@ -62,7 +69,7 @@ export class GroupedSelectableListComponent implements OnChanges {
         hasChildren: Object.keys(children).length > 0
       };
       return acc;
-    }, {});
+    }, {}) as GroupedVisibleList;
   }
 
   public toggleExpandedAll(open) {
@@ -71,20 +78,20 @@ export class GroupedSelectableListComponent implements OnChanges {
     });
   }
 
-  isHideAllMode(parent: GroupedVisibleList['metric']) {
+  isHideAllMode(parent: GroupItem) {
     const children = Object.values(parent.data);
     return parent.hasChildren ? children.every(itemKey => itemKey.visible) : parent.visible;
   }
 
-  trackByFn(index, item: GroupedVisibleList) {
+  trackByFn(index, item: {key: string; value: GroupItem}) {
     return index + item.key + item.value.hasChildren;
   }
 
-  groupCheck(item: { key: string; value: GroupedVisibleList['metric'] }) {
+  groupCheck(item: { key: string; value: GroupItem}) {
     this.onGroupCheck.emit({key: item.key, hide: !this.isHideAllMode(item.value)});
   }
 
-  selectedItem(item: { key: string; value: GroupedVisibleList['metric'] }, panelH: MatExpansionPanelHeader) {
+  selectedItem(item: { key: string; value: GroupItem}, panelH: MatExpansionPanelHeader) {
     if (!item.value.hasChildren) {
       this.onItemSelect.emit(item.key);
       panelH._toggle();

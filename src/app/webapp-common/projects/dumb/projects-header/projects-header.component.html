@@ -1,13 +1,15 @@
-<div class="col-24 d-flex justify-content-between">
+<div class="sm-card-list-header">
   <div class="recent-title">
-    <sm-menu [header]="sortByTitle" [iconClass]="sortOrder===1?'fa fa-caret-down':'fa fa-caret-up' " class="menu">
+    <sm-menu [header]="sortByTitle" [iconClass]="sortOrder===1?'fa fa-caret-up':'fa fa-caret-down' " class="menu">
       <sm-menu-item itemLabel="RECENT" (itemClicked)="orderByChanged.emit('last_update')"></sm-menu-item>
       <sm-menu-item itemLabel="NAME" (itemClicked)="orderByChanged.emit('name')"></sm-menu-item>
     </sm-menu>
+    <sm-show-only-user-work></sm-show-only-user-work>
   </div>
   <div *smCheckPermission="true">
-    <button *ngIf="!hideCreateButton" class="btn btn-primary d-flex align-items-center" (click)="createProjectClicked.emit()">
-      <i class="al-icon al-color blue-400 al-ico-plus mr-2"></i>NEW PROJECT
+    <button *ngIf="!hideCreateButton" class="btn btn-primary d-flex align-items-center"
+            (click)="createProjectClicked.emit(selectedProject)">
+      <i class="al-icon al-color blue-400 al-ico-add sm mr-2"></i>NEW PROJECT
     </button>
   </div>
 </div>

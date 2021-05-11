@@ -3,7 +3,7 @@
 :host {
   position: relative;
 
-  /deep/ #searchDiff {
+  ::ng-deep #searchDiff {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
@@ -40,11 +40,11 @@
     }
   }
 
-  /deep/ .btn-arrow {
+  ::ng-deep .btn-arrow {
     width: 42px;
   }
 
-  /deep/ #refreshIcon .btn {
+  ::ng-deep #refreshIcon .btn {
     width: 40px;
     height: 40px;
     border-radius: 4px;
@@ -55,7 +55,7 @@
 
   }
 
-  /deep/ mat-select.view-mode {
+  ::ng-deep mat-select.view-mode {
     width: 142px;
 
     .mat-select-trigger {
@@ -63,7 +63,7 @@
       border: 1px solid $blue-250;
       border-radius: 4px;
       height: 32px;
-      padding: 7px 14px;
+      padding: 5px 14px;
 
       mat-select-trigger {
         color: $blue-400;
@@ -120,7 +120,7 @@
 
 }
 
-/deep/ mat-option.compare-mat-option {
+::ng-deep mat-option.compare-mat-option {
   color: $blue-400 !important;
 
   &.mat-selected {
@@ -133,4 +133,6 @@
   }
 }
 
-
+::ng-deep .mat-menu-content {
+  height: 100%;
+}

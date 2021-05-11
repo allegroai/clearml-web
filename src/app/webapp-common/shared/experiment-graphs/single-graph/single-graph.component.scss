@@ -1,3 +1,19 @@
+@import "../../ui-components/styles/variables";
+
+.overlay-text {
+  display: block;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translateY(-50%) translateX(-50%);
+  font-size: 14px;
+  color: #fff;
+  padding: 0 6px;
+  background-color: $blue-400;
+  border-radius: 4px;
+  z-index: 2;
+}
+
 :host {
   display: block;
   position: relative;
@@ -5,12 +21,13 @@
   .whitebg {
     display: block;
     background: white;
-    height: 452px;
-    border: 1px solid #efefef;
     margin-left: -1px;
-    margin-top: -1px;
     overflow-y: hidden;
     overflow-x: auto;
+
+    &.loading .chart {
+      opacity: 0.3;
+    }
 
     &.whitebg-table {
       height: unset;
@@ -22,27 +39,57 @@
         height: 8px !important;
       }
     }
+
+    .resize-overlay-text {
+      display: none;
+    }
+
+    &.resize-active {
+      z-index: 12;
+    }
+
+    &.resize-active.resize-ghost-element {
+      filter: brightness(0.95);
+      overflow: hidden;
+
+      .chart {
+        opacity: 0.5;
+      }
+
+      .resize-overlay-text {
+        @extend .overlay-text;
+      }
+    }
+
+    .plot-loader {
+      @extend .overlay-text;
+    }
   }
 
-  /deep/ sm-color-picker-wrapper {
+  ::ng-deep sm-color-picker-wrapper {
     display: block;
     top: 0px;
 
   }
 
-  /deep/ .legendlines path, /deep/ .legendpoints path {
-    cursor: url(/app/webapp-common/assets/icons/pallete-cursor.png) 6 0, pointer;
+  ::ng-deep .legendlines path, ::ng-deep .legendpoints path {
+    cursor: url('../../../assets/icons/pallete-cursor.png') 6 0, pointer;
   }
 
-  /deep/ .legendpoints path:not(.scatterpts) {
+  ::ng-deep .legendpoints path:not(.scatterpts) {
     d: path('M8,8H-8V-8H8Z') !important;
   }
 
-  /deep/ .legendlines path {
-    stroke-width: 10px !important;
+  ::ng-deep .legendlines path {
+    stroke-width: 12px !important;
   }
 
-  /deep/ #header.column-block .column-cells {
+  ::ng-deep .legendpoints path.scatterpts {
+    // chrome only
+    d: path('M5.5,0A5.5,5.5 0 1,1 0,-5.5A5.5,5.5 0 0,1 5.5,0Z') !important;
+  }
+
+  ::ng-deep #header.column-block .column-cells {
     .column-cell .cell-rect {
       stroke-width: 2px;
       stroke: rgb(238, 239, 241) !important;
@@ -50,21 +97,101 @@
     }
   }
 
-  /deep/ .infolayer > .g-gtitle > .gtitle {
+  ::ng-deep .infolayer > .g-gtitle > .gtitle {
     transform: translateY(12px);
   }
 
-  /deep/ .modebar-container svg.icon {
+  ::ng-deep .modebar-container svg.icon {
     height: 1em;
     width: 1em;
     font-size: 16px;
   }
 
   // moving legend next to title without text
-  /deep/ .legend.hide-text {
+  ::ng-deep .legend.hide-text {
     .legendtext,
     .legendtoggle {
       display: none;
+    }
+  }
+
+  mwlResizable {
+    box-sizing: border-box; // required for the enableGhostResize option to work
+  }
+
+  [mwlResizable] {
+    box-sizing: border-box; // required for the enableGhostResize option to work
+  }
+
+  .resize-handle-bottom, {
+    position: absolute;
+    height: 1px;
+    cursor: row-resize;
+    width: 100%;
+    bottom: 0;
+    padding: 6px 0;
+    z-index: 12;
+
+    .bottom-line {
+      position: absolute;
+      width: 100%;
+      height: 1px;
+      background-color: #efefef;
+    }
+
+    .bottom-handle {
+      position: absolute;
+      height: 12px;
+      width: 40px;
+      left: 0;
+      right: 0;
+      margin: auto;
+      transform: translateY(-50%);
+      transition: background-color 0.3s;
+      background-color: transparent;
+      border-radius: 12px;
+    }
+
+    &:hover {
+      .bottom-handle {
+        background-color: darken(#efefef, 5);
+      }
+    }
+  }
+
+  .resize-handle-right {
+    position: absolute;
+    height: 100%;
+    cursor: col-resize;
+    width: 1px;
+    right: 0;
+    padding: 0 6px;
+    z-index: 12;
+
+    .right-line {
+      position: absolute;
+      height: 100%;
+      width: 1px;
+      background-color: #efefef;
+    }
+
+    .right-handle {
+      position: absolute;
+      height: 40px;
+      width: 12px;
+      top: 0;
+      bottom: 0;
+      margin: auto;
+      transform: translateX(-50%);
+      transition: background-color 0.3s;
+      background-color: transparent;
+      border-radius: 12px;
+    }
+
+    &:hover {
+      .right-handle {
+        background-color: darken(#efefef, 5);
+      }
     }
   }
 }

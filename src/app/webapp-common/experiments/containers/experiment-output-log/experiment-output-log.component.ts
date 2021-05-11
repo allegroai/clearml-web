@@ -1,11 +1,20 @@
-import {Component, OnDestroy, OnInit, ChangeDetectorRef, ViewChild} from '@angular/core';
+import {
+  Component,
+  OnDestroy,
+  OnInit,
+  ChangeDetectorRef,
+  ViewChild,
+  ViewChildren,
+  QueryList,
+  AfterViewInit
+} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {selectExperimentBeginningOfLog, selectExperimentLog, selectLogFilter} from '../../reducers';
 import {Observable, Subscription} from 'rxjs';
 import {distinctUntilChanged, filter} from 'rxjs/operators';
 import {last} from 'lodash/fp';
 import {HTTP} from '../../../../app.constants';
-import {ISelectedExperiment} from '../../../../features/experiments/shared/experiment-info.model';
+import {IExperimentInfo} from '../../../../features/experiments/shared/experiment-info.model';
 import {IExperimentInfoState} from '../../../../features/experiments/reducers/experiment-info.reducer';
 import {selectSelectedExperiment} from '../../../../features/experiments/reducers';
 import {
@@ -23,14 +32,14 @@ import {selectRefreshing} from '../../../experiments-compare/reducers';
   templateUrl: './experiment-output-log.component.html',
   styleUrls: ['./experiment-output-log.component.scss']
 })
-export class ExperimentOutputLogComponent implements OnInit, OnDestroy {
+export class ExperimentOutputLogComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private selectedExperimentSubscription: Subscription;
-  private experiment: ISelectedExperiment;
+  private experiment: IExperimentInfo;
 
   public API_BASE_URL = HTTP.API_BASE_URL;
   public log$: Observable<any[]>;
-  public experiment$: Observable<ISelectedExperiment>;
+  public experiment$: Observable<IExperimentInfo>;
   public filter$: Observable<string>;
   public logBeginning$: Observable<boolean>;
   public creator: string | Worker;
@@ -38,14 +47,19 @@ export class ExperimentOutputLogComponent implements OnInit, OnDestroy {
   public hasLog: boolean;
   public logSubscription: Subscription;
   private refreshingSubscription: Subscription;
-
-  @ViewChild('log', {static: false}) private logRef: ExperimentLogInfoComponent;
+  private logRef: ExperimentLogInfoComponent;
+  @ViewChildren(ExperimentLogInfoComponent) private logRefs: QueryList<ExperimentLogInfoComponent>;
+  private logSub: Subscription;
 
   constructor(private store: Store<IExperimentInfoState>, private cdr: ChangeDetectorRef) {
     this.log$ = this.store.select(selectExperimentLog);
     this.logBeginning$ = this.store.select(selectExperimentBeginningOfLog);
     this.filter$ = this.store.select(selectLogFilter);
     this.experiment$ = this.store.select(selectSelectedExperiment);
+  }
+
+  ngAfterViewInit(): void {
+    this.logSub = this.logRefs.changes.subscribe(refs => this.logRef = refs.first);
   }
 
   ngOnInit() {
@@ -92,6 +106,7 @@ export class ExperimentOutputLogComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.selectedExperimentSubscription.unsubscribe();
     this.logSubscription.unsubscribe();
+    this.logSub?.unsubscribe();
     this.store.dispatch(new ResetLogFilter());
     this.store.dispatch(new ResetOutput());
   }

@@ -4,7 +4,7 @@
   display: flex;
   height: 100%;
 
-  /deep/ .list-container {
+  ::ng-deep .list-container {
     display: flex;
     flex-direction: column;
     width: 360px;
@@ -16,7 +16,7 @@
     }
   }
 
-  /deep/ .mat-expansion-panel-body {
+  ::ng-deep .mat-expansion-panel-body {
     padding: 0;
   }
 }
@@ -36,7 +36,7 @@
 
 .metrics-container {
   padding: 20px 12px 0 32px;
-  // search icon
+  // dashboard-search icon
   i.fa {
     position: absolute;
     right: 0;

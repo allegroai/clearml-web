@@ -4,66 +4,164 @@
 .card {
   margin-bottom: 20px;
   border: solid 0;
+  width: 352px;
+  background: unset;
+
+  .card-container .first-tab-container {
+    background-color: #5a658e;
+
+    &:hover {
+      background-color: #5a658e;
+    }
+
+    &.first-tab-hovered {
+      background-color: #5a658e;
+    }
+  }
+
+  .folder-tab {
+    height: 20px;
+    line-height: 20px;
+    display: flex;
+
+    .first-tab {
+      flex: 0 0 64px;
+      width: 60px;
+      height: 20px;
+    }
+
+    .middle-tab {
+      font: normal normal 500 12px/20px 'Heebo', sans-serif;
+
+      white-space: nowrap;
+      color: $blue-grey;
+
+      &.second-tab-active {
+        color: $blue-200
+      }
+
+      background-color: $blue-600;
+
+      &.tab-hovered:not(.show-second-tab) {
+        background-color: $blue-400;
+        color: $blue-200;
+      }
+
+      padding-right: 6px;
+    }
+
+    .second-tab {
+      flex: 0 0 28px;
+      width: 28px;
+    }
+
+  }
+
   overflow: hidden;
 
+
   .card-container {
-    height: 100%;
-    transition: $transition-fast;
-    border-radius: $card-border-radius $card-border-radius;
-    padding-top: 10px;
-    box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.1);
-    background-color: $card-bg;
-  }
-  header {
-    padding: $card-spacer-y $card-spacer-x;
-    padding-top: $card-spacer-y / 2;
-    padding-bottom: $card-spacer-y / 2;
-    font-size: 16px;
-    font-weight: 500;
-    line-height: 1.5;
-  }
-
-  header.empty {
-    padding: 0;
-    padding-top: 0;
-    padding-bottom: 0;
-  }
-
-  .line {
-    margin: $card-spacer-y / 2 $card-spacer-x;
-    @include line($line-height-sm + px)
-  }
-
-  .card-body {
-    padding: $card-spacer-y $card-spacer-x;
-    padding-top: $card-spacer-y / 2;
-    padding-bottom: $card-spacer-y / 2;
-  }
-
-  footer {
     position: relative;
-    background-color: $card-footer-bg;
-    border-bottom-left-radius: $card-border-radius;
-    border-bottom-right-radius: $card-border-radius;
+    transition: $transition-fast;
+    height: 226px;
+    width: 100%;
+    background-color: #384161;
+    border-radius: 6px;
+
+    &.is-folder {
+      border-top-left-radius: 0;
+    }
+
+
+    .tab-container {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      border-radius: 6px;
+
+      &.is-folder {
+        border-top-left-radius: 0;
+      }
+    }
+
+    .first-tab-container {
+      padding-top: 10px;
+      background-color: $card-bg;
+      visibility: visible;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+
+      &.hide {
+        visibility: hidden;
+      }
+
+      footer {
+        position: relative;
+        background-color: $card-footer-bg;
+        border-bottom-left-radius: $card-border-radius;
+        border-bottom-right-radius: $card-border-radius;
+      }
+
+      header {
+        padding: $card-spacer-y $card-spacer-x;
+        padding-top: $card-spacer-y / 2;
+        padding-bottom: $card-spacer-y / 2;
+        font-size: 16px;
+        font-weight: 500;
+        line-height: 1.5;
+      }
+
+      header.empty {
+        padding: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+      }
+
+      .line {
+        border-top: solid 1px $blue-600;
+        margin: 8px 15px;
+        width: auto;
+      }
+
+      .card-body {
+        padding: $card-spacer-y $card-spacer-x;
+        padding-top: $card-spacer-y / 2;
+        padding-bottom: $card-spacer-y / 2;
+      }
+
+
+      .ribbon {
+        transform: rotate(-45deg);
+        border: 25px solid transparent;
+        border-top: 25px solid;
+        border-top-color: $neon-yellow;
+        position: absolute;
+        bottom: -4px;
+        right: -34px;
+        padding: 0 10px;
+        width: 110px;
+        color: #68777C;
+        font-size: 10px;
+      }
+
+      .ribbon .txt {
+        position: absolute;
+        top: -20px;
+        left: -3px;
+      }
+    }
+
+    .second-tab-container {
+      background: $blue-600;
+      visibility: hidden;
+
+      &.show {
+        visibility: visible;
+      }
+    }
   }
 
-  .ribbon {
-    transform: rotate(-45deg);
-    border: 25px solid transparent;
-    border-top: 25px solid;
-    border-top-color: $neon-yellow;
-    position: absolute;
-    bottom: -4px;
-    right: -34px;
-    padding: 0 10px;
-    width: 110px;
-    color: #68777C;
-    font-size: 10px;
-  }
 
-  .ribbon .txt {
-    position: absolute;
-    top: -20px;
-    left: -3px;
-  }
 }
+

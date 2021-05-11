@@ -18,7 +18,7 @@
       transition: background-color 0.5s;
       background-color: #333746;
 
-      /deep/ button {
+      ::ng-deep button {
         border-color: #636e97;
         box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
       }
@@ -40,7 +40,7 @@
   sm-experiment-custom-cols-menu {
     width: 30px;
     height: 20px;
-    margin-right: 16px;
+    margin-right: 22px;
   }
 }
 

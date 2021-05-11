@@ -9,7 +9,7 @@ export const setUserLoginState = createAction(
 
 export const setLoginError = createAction(
   '[login] set login error',
-  props<{error: string}>()
+  props<{error: string; verifyEmail?: {email: string; resendUrl: string}}>()
 );
 
 export const getTOU = createAction('[login] get TOU');

@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {Store} from '@ngrx/store';
-import {flatMap, map, switchMap} from 'rxjs/operators';
+import {mergeMap, map, switchMap} from 'rxjs/operators';
 import {GetQueuesForEnqueue, GET_QUEUES_FOR_ENQUEUE, SetQueuesForEnqueue, GET_TASK_FOR_ENQUEUE, GetTaskForEnqueue, SetTaskForEnqueue} from './select-queue.actions';
 import {ApiQueuesService} from '../../../../../business-logic/api-services/queues.service';
 import {ActiveLoader} from '../../../../core/actions/layout.actions';
@@ -23,15 +23,15 @@ export class SelectQueueEffects {
   getQueuesForEnqueue$ = this.actions$.pipe(
     ofType<GetQueuesForEnqueue>(GET_QUEUES_FOR_ENQUEUE),
     switchMap(action => this.apiQueues.queuesGetAllEx({}).pipe(
-      flatMap((res) => [new SetQueuesForEnqueue(res.queues)])
+      mergeMap((res) => [new SetQueuesForEnqueue(res.queues)])
       )
     ));
 
   @Effect()
   getTaskForEnqueue$ = this.actions$.pipe(
     ofType<GetTaskForEnqueue>(GET_TASK_FOR_ENQUEUE),
-    switchMap(action => this.tasksApi.tasksGetAllEx({id: [action.payload.taskId], only_fields: ['status', 'script.repository', 'script.entry_point', 'script.diff']}).pipe(
-      flatMap((res) => [new SetTaskForEnqueue(res.tasks[0])])
+    switchMap(action => this.tasksApi.tasksGetAllEx({id: action.payload.taskIds, only_fields: ['status', 'script.repository', 'script.entry_point', 'script.diff']}).pipe(
+      mergeMap((res) => [new SetTaskForEnqueue(res.tasks)])
       )
     ));
 }

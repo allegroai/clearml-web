@@ -1,4 +1,5 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {ISmCol} from '../../ui-components/data/table/table.consts';
 
 @Component({
   selector   : 'sm-custom-columns-list',
@@ -8,8 +9,8 @@ import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 export class CustomColumnsListComponent implements OnInit {
   @Input() tableCols;
   @Input() isLoading;
-  @Output() removeColFromList = new EventEmitter();
-  @Output() selectedTableColsChanged = new EventEmitter();
+  @Output() removeColFromList = new EventEmitter<ISmCol['id']>();
+  @Output() selectedTableColsChanged = new EventEmitter<ISmCol>();
 
   constructor() {
   }

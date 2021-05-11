@@ -7,12 +7,16 @@ import {finalize, map, startWith, take, filter, mergeMap} from 'rxjs/operators';
 import {selectCurrentUser} from '../../core/reducers/users-reducer';
 import {mobilecheck} from '../../shared/utils/mobile';
 import {userPreferences} from '../../user-preferences';
-import {FetchCurrentUser, SetPreferences} from '../../core/actions/users.actions';
+import {FetchCurrentUser, logout, SetPreferences} from '../../core/actions/users.actions';
 import {LoginMode, LoginModeEnum, LoginService} from '../../shared/services/login.service';
-import {selectInviteId, selectLoginError} from '../login-reducer';
+import {selectInviteId, selectLoginError, selectValidateEmail} from '../login-reducer';
 import {ConfigurationService} from '../../shared/services/configuration.service';
 import {setLoginError} from '../login.actions';
 import {CommunityContext} from '../../../../environments/base';
+import {TitleCasePipe} from '@angular/common';
+import {selectFirstLoginAt} from '../../core/reducers/view-reducer';
+import {ConfirmDialogComponent} from '../../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
+import {MatDialog} from '@angular/material/dialog';
 const environment = ConfigurationService.globalEnvironment;
 
 
@@ -51,17 +55,23 @@ export class LoginComponent implements OnInit, OnDestroy {
   public communityContext: CommunityContext;
   public loginTitle: string;
   public error: string;
-  public signupMode: boolean = true;
+  public signupMode: boolean;
   public signupForm: boolean;
   public isInvite: boolean;
   public environment: any;
   public isCommunity: boolean;
-  public sso: { name: string; url: string }[];
+  public sso: { name: string; url: string; displayName?: string }[];
   public touLink: string;
+  private errorSub: Subscription;
+  public validateEmail$: Observable<{ email?: string; resendUrl?: string }>;
 
   constructor(
-    private router: Router, private loginService: LoginService,
-    private store: Store<any>, private route: ActivatedRoute) {
+    private router: Router,
+    private loginService: LoginService,
+    private dialog: MatDialog,
+    private store: Store<any>,
+    private route: ActivatedRoute
+  ) {
     this.mobile = mobilecheck();
   }
 
@@ -71,8 +81,14 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.environment = environment;
+    this.signupMode = !!environment.communityServer;
+    this.store.select(selectFirstLoginAt).pipe(take(1)).subscribe(firstLoginAt => {
+      this.signupMode = !!environment.communityServer && !firstLoginAt;
+      this.loginService.signupMode = this.signupMode;
+    });
     this.store.select(selectCurrentUser).pipe(filter(user => !!user), take(1)).subscribe(() => this.router.navigateByUrl(this.getNavigateUrl()));
-    this.store.select(selectLoginError).subscribe((error) => this.error = error);
+    this.errorSub = this.store.select(selectLoginError).subscribe((error) => this.error = error);
+    this.validateEmail$ = this.store.select(selectValidateEmail);
     this.store.select(selectInviteId).pipe(
       filter(invite => !!invite),
       take(1),
@@ -101,7 +117,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       });
 
     if (this.showGitHub) {
-      fetch('https://api.github.com/repos/allegroai/trains', {method: 'GET'})
+      fetch('https://api.github.com/repos/allegroai/clearml', {method: 'GET'})
         .then(response => response.json()
           .then(json => this.stars = json['stargazers_count'])
         );
@@ -153,9 +169,8 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    if (this.userChanged) {
-      this.userChanged.unsubscribe();
-    }
+    this.userChanged?.unsubscribe();
+    this.errorSub?.unsubscribe();
     this.removeSignupFromUrl();
   }
 
@@ -196,15 +211,15 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   private afterLogin() {
-    let domainParts = window.location.host.split(':')[0].split('.');
-    if (domainParts.length > 2) {
-      domainParts = domainParts.slice(1);
-    }
-    this.store.dispatch(new FetchCurrentUser());
-    userPreferences.loadPreferences().subscribe(res => {
-      this.store.dispatch(new SetPreferences(res));
-      this.router.navigateByUrl(this.getNavigateUrl());
-    }, () => this.router.navigateByUrl(this.getNavigateUrl()));
+    userPreferences.loadPreferences()
+      .pipe(
+        finalize( () => this.store.dispatch(new FetchCurrentUser()))
+      )
+      .subscribe(res => {
+        this.store.dispatch(new SetPreferences(res));
+        this.router.navigateByUrl(this.getNavigateUrl());
+        this.openLoginNotice();
+      }, () => this.router.navigateByUrl(this.getNavigateUrl()));
   }
 
   private _filter(value: string): string[] {
@@ -240,6 +255,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   toggleSignup() {
     this.showSpinner = true;
     this.signupMode = !this.signupMode;
+    this.loginService.signupMode = this.signupMode;
     this.removeSignupFromUrl();
     if (!this.isInvite) {
       this.loginTitle = this.signupMode ? 'Signup' : 'Login';
@@ -247,7 +263,10 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.store.dispatch(setLoginError({error: null}));
     this.loginService.getLoginSupportedModes(this.signupMode ? 'signup' : '').subscribe(res => {
       this.showSpinner = false;
-      this.sso = res.sso_providers;
+      this.sso = res.sso_providers.map(provider => {
+        const {display_name, ...rest} = provider;
+        return rest;
+      });
     });
 
   }
@@ -261,6 +280,43 @@ export class LoginComponent implements OnInit, OnDestroy {
           queryParams: {redirect: this.route.snapshot.queryParams.redirect?.replace(/[&]?signup/, '')},
           queryParamsHandling: 'merge'
         });
+    }
+  }
+
+  getProviderName(provider: { name: string; url: string; displayName?: string }) {
+    if (provider.displayName) {
+      return provider.displayName;
+    }
+    return (new TitleCasePipe()).transform(provider.name?.replace('_', ' '));
+  }
+
+  getProviderIcon(provider: { name: string; url: string }) {
+    switch (provider.name) {
+      case 'auth0':
+        return 'al-ico-email';
+      default:
+        return `i-${provider.name.replace('_', ' ')}`;
+    }
+  }
+
+  resetPasswordSignup() {
+    this.store.dispatch(logout({provider: 'auth0'}));
+  }
+
+  reSendVerificationEmail(url: string) {
+    window.location.href = url;
+  }
+
+  private openLoginNotice() {
+    if (this.environment.loginPopup) {
+      this.dialog.open(ConfirmDialogComponent, {
+        disableClose: true,
+        data: {
+          body: this.environment.loginPopup,
+          yes: 'OK',
+          iconClass: 'i-alert'
+        }
+      });
     }
   }
 }

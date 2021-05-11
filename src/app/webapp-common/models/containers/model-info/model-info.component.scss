@@ -24,7 +24,7 @@
     padding-right: 24px;
   }
 
-  /deep/ nav {
+  ::ng-deep nav {
     border-bottom: 1px solid rgba(2, 2, 2, 0.07);
   }
 }

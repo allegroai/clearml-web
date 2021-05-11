@@ -10,7 +10,6 @@ import {map} from 'rxjs/operators';
 import {isReadOnly} from '../../../../shared/utils/shared-utils';
 import {CloneForm} from '../../common-experiment-model.model';
 import {isEqual} from 'lodash/fp';
-import {MatAutocompleteSelectedEvent} from "@angular/material/autocomplete";
 
 @Component({
   selector: 'sm-clone-dialog',
@@ -19,7 +18,7 @@ import {MatAutocompleteSelectedEvent} from "@angular/material/autocomplete";
 })
 export class CloneDialogComponent implements OnInit, OnDestroy {
 
-  CLONE_NAME_PREFIX = 'Clone Of ';
+  CLONE_NAME_PREFIX;
   public reference: string;
   public header: string;
   public type: string;
@@ -41,6 +40,7 @@ export class CloneDialogComponent implements OnInit, OnDestroy {
   isNewName: boolean = false;
   isAutoCompleteOpen: boolean;
   public readOnlyProjects$: Observable<string[]>;
+  public extend: boolean;
 
   constructor(
     private store: Store<any>,
@@ -49,6 +49,7 @@ export class CloneDialogComponent implements OnInit, OnDestroy {
       defaultProject: string;
       defaultName: string;
       defaultComment: string;
+      extend: boolean;
     },
     public dialogRef: MatDialogRef<CloneDialogComponent>
   ) {
@@ -57,14 +58,16 @@ export class CloneDialogComponent implements OnInit, OnDestroy {
     this.projects$ = this.store.select(selectProjects)
       .pipe(map(projects => projects.filter(project => !isReadOnly(project))));
     this.defaultProjectId = data.defaultProject;
-    this.header = `Clone ${data.type}`;
+    this.header = `${data.extend ? 'Extend' : 'Clone'} ${data.type}`;
+    this.CLONE_NAME_PREFIX = data.extend ? '' : 'Clone Of ';
     this.type = data.type.toLowerCase();
     this.reference = data.defaultName;
+    this.extend = data.extend;
     this.formData.name = this.CLONE_NAME_PREFIX;
     setTimeout(() => {
       this.formData = {
         ...this.formData,
-        name: this.CLONE_NAME_PREFIX + data.defaultName,
+        name: this.extend ? '' : this.CLONE_NAME_PREFIX + data.defaultName,
         comment: data.defaultComment || '',
       };
     });

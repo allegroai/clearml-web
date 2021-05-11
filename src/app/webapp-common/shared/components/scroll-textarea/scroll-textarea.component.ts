@@ -4,8 +4,7 @@ import {CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
 @Component({
   selector: 'sm-scroll-textarea',
   templateUrl: './scroll-textarea.component.html',
-  styleUrls: ['./scroll-textarea.component.scss'],
-})
+  styleUrls: ['./scroll-textarea.component.scss']})
 export class ScrollTextareaComponent {
 
   lines: string[];
@@ -17,7 +16,7 @@ export class ScrollTextareaComponent {
 
   @Input() set formData(data: string) {
     this._formData = data;
-    this.lines = data ? data.split('\n') : [];
+    this.lines = data ? data.split('\n').map( line => line.length > 800 ? line.substring(0, 800) + '...' : line) : [];
   }
 
   get formData() {

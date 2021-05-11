@@ -1,18 +1,19 @@
-<div class="container">
-  <sm-projects-header
-    (createProjectClicked)="openCreateProjectDialog()"
-    (orderByChanged)="orderByChanged($event)"
-    [hideCreateButton]="false"
-    [sortByField]="projectsOrderBy$ | async"
-    [sortOrder]="projectsSortOrder$ | async"
-  ></sm-projects-header>
-</div>
 <sm-projects-list
   (deleteProjectClicked)="deleteProject($event)"
   (loadMore)="loadMore()"
   (projectCardClicked)="projectCardClicked($event)"
   (projectNameChanged)="projectNameChanged($event)"
+  (createNewProjectClicked)="openProjectDialog($event, 'create')"
+  (moveToClicked)="openProjectDialog($event, 'move')"
   [noMoreProjects]="noMoreProjects$ | async"
   [projects]="projectsList$ | async"
 >
+  <sm-projects-header
+    (createProjectClicked)="openProjectDialog($event, 'create')"
+    (orderByChanged)="orderByChanged($event)"
+    [hideCreateButton]="false"
+    [sortByField]="projectsOrderBy$ | async"
+    [sortOrder]="projectsSortOrder$ | async"
+    [selectedProject]="selectedProjectId$ | async"
+  ></sm-projects-header>
 </sm-projects-list>

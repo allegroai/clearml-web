@@ -34,11 +34,12 @@
         [frameworks]="frameworks$ |async"
         [tags]="tags$ | async"
         [systemTags]="systemTags$ | async"
-        [tableSortField]="(tableSortField$ | async)"
+        [tableSortFields]="(tableSortFields$ | async)"
         [tableSortOrder]="(tableSortOrder$ | async)"
         [tableFilters]="(tableFilters$ | async)"
         [colsOrder]="(tableColsOrder$ | async)"
         [selectedModels]="selectedModels$ | async"
+        [selectedModelsDisableAvailable]="selectedModelsDisableAvailable$ | async"
         [selectedModel]="selectedModel$ | async"
         [split]="selectSplitSize$ | async"
         (onColumnsReordered)="columnsReordered($event)"
@@ -57,15 +58,8 @@
   </as-split>
 </div>
 <sm-entity-footer
-  entitiesType="models"
-  [visible]="(selectedModels$ | async)?.length > 1|| (showAllSelectedIsActive$ |async)"
-  [numberOfSelectedEntities]="(selectedModels$ | async)?.length"
-  [isArchivedMode]="isArchived$ | async"
-  [disableArchive]="(selectedModels$ | async) | hasExampleItem"
-  [archiveToolTipMessage]="((selectedModels$ | async) | hasExampleItem)?'Archiving is disabled as one or more of the models you chose are example models':null"
-  [showAllSelectedIsActive]="showAllSelectedIsActive$ |async"
-  (archiveEntitiesClicked)="archiveModels()"
-  (restoreEntitiesClicked)="restoreModels()"
-  (showAllSelectedClicked)="showAllSelected($event)"
+ [footerItems]="footerItems"
+ (onFooterItemClick)="onFooterHandler($event)"
+ (tagSelected)="tagSelected($event, 'models')"
 >
 </sm-entity-footer>

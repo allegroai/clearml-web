@@ -26,12 +26,12 @@ export class TreeBuilderService {
   }
 
   private buildTreeFromJsonRec<V>(obj: { [key: string]: any },
-                                  transformer: TreeNodeTransformerFn<V>,
-                                  metaTransformer: TreeNodeMetaTransformerFn,
-                                  transformerExtraParams?: any,
-                                  level            = 0,
-                                  parent: TreeNode<V> = null,
-                                  path             = [],
+    transformer: TreeNodeTransformerFn<V>,
+    metaTransformer: TreeNodeMetaTransformerFn,
+    transformerExtraParams?: any,
+    level            = 0,
+    parent: TreeNode<V> = null,
+    path             = [],
   ): Array<TreeNode<V>> {
     return Object.keys(obj).reduce<Array<TreeNode<V>>>((accumulator, key) => {
       const _path          = path.concat([key]);
@@ -52,28 +52,6 @@ export class TreeBuilderService {
       return accumulator.concat(node);
     }, []);
   }
-
-
-  // updateNode(node, newNode) {
-  //   const parents = [];
-  //   while (node.parent) {
-  //     const parent = this._updateNode(node, newNode);
-  //     [parent].concat(parents)
-  //     node = node.parent;
-  //   }
-  //   // const tree = parents.map(parent => )
-  //   console.log(parents);
-  // }
-  //
-  // _updateNode(node, newNode) {
-  //   const index = node.parent.children.indexOf(node);
-  //   const parent = {...node.parent, children: node.parent.children[index] = newNode};
-  //   return {
-  //     parent: parent,
-  //     index: index
-  //   };
-  // }
-
 }
 
 // TODO: move to utils.

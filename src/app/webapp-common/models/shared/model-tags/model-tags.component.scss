@@ -18,14 +18,14 @@
   }
 }
 
-/deep/ .selectedModel .hideOnOpen {
+::ng-deep .selectedModel .hideOnOpen {
   display: none;
 }
 
-/deep/ .hideOnClose{
+::ng-deep .hideOnClose{
   display: none;
 }
 
-/deep/.selectedModel .hideOnClose{
+::ng-deep.selectedModel .hideOnClose{
   display: initial;
 }

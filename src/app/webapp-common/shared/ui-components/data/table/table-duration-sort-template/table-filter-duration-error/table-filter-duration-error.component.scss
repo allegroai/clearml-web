@@ -1,0 +1,11 @@
+@import "../../../../styles/variables";
+
+.error {
+  color: $error-color;
+  font-size: 12px;
+  line-height: 1.2;
+  &.is-full-width {
+    max-width: 215px;
+  }
+  max-width: 124px;
+}

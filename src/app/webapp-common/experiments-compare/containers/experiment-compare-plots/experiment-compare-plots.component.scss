@@ -5,7 +5,7 @@
     cursor: pointer;
   }
 
-  /deep/.list-container {
+  ::ng-deep.list-container {
     display: block;
     height: 100%;
     width: 343px;

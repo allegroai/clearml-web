@@ -34,7 +34,7 @@
       opacity: 0.5;
       cursor: default;
 
-     /deep/ .purple-v {
+     ::ng-deep .purple-v {
         background: white !important;
       }
     ;

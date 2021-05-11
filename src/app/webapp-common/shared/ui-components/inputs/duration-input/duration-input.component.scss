@@ -24,8 +24,9 @@
       position: relative;
       display: inline-block;
 
-      span {
-        color: rgba($blue-grey, 1);
+      .separator {
+        line-height: 32px;
+        color: $blue-grey;
 
         &:last-child {
           padding-right: 0;

@@ -10,19 +10,19 @@
        formArrayName="BucketCredentials">
     <div class="row s3-row" [formGroupName]="i">
       <div class="col-6">
-        <input class="form-control" formControlName="Bucket">
+        <input matInput class="form-control" formControlName="Bucket">
       </div>
       <div class="col-4">
-        <input class="form-control" formControlName="Key">
+        <input matInput class="form-control" formControlName="Key">
       </div>
       <div class="col-6">
-        <input class="form-control" formControlName="Secret">
+        <input matInput class="form-control" formControlName="Secret">
       </div>
       <div class="col-2">
-        <input class="form-control" formControlName="Region" placeholder="us-east-2">
+        <input matInput class="form-control" formControlName="Region" placeholder="us-east-2">
       </div>
       <div class="col-4">
-        <input class="form-control" formControlName="Endpoint" placeholder="Leave empty for AWS S3">
+        <input matInput class="form-control" formControlName="Endpoint" placeholder="Leave empty for AWS S3">
       </div>
       <div class="col-2 d-flex justify-content-end">
         <span class="delete-button" (click)="removeBucket(i)" type="button" smTooltip="Remove">

@@ -4,7 +4,7 @@
   @each $theme, $map in $themes {
     $button: map-get($map, button-toggle-group);
     :host-context(.#{$theme}-theme) mat-button-toggle-group {
-      /deep/ .mat-button-toggle-label-content {
+      ::ng-deep .mat-button-toggle-label-content {
         font-family: heebo;
         font-size: 1rem;
       }
