@@ -8,7 +8,6 @@ import {sourcesReducer} from './reducers/sources-reducer';
 import {viewReducer} from './reducers/view-reducer';
 import {USERS_PREFIX, VIEW_PREFIX} from '../app.constants';
 import {merge, pick} from 'lodash/fp';
-import {usersReducer} from '../webapp-common/core/reducers/users-reducer';
 import {projectsReducer} from '../webapp-common/core/reducers/projects.reducer';
 import {EffectsModule} from '@ngrx/effects';
 import {SmSyncStateSelectorService} from '../webapp-common/core/services/sync-state-selector.service';
@@ -27,6 +26,7 @@ import {PROJECTS_PREFIX} from '../webapp-common/core/actions/projects.actions';
 import {loginReducer} from '../webapp-common/login/login-reducer';
 import {ConfigurationService} from '../webapp-common/shared/services/configuration.service';
 import {AUTH_PREFIX} from '../webapp-common/core/actions/common-auth.actions';
+import {usersReducer} from './reducers/users.reducer';
 
 export const reducers = {
   auth: commonAuthReducer,
@@ -93,7 +93,7 @@ export function setViewPreferencesReducer(reducer: ActionReducer<any>): ActionRe
 }
 
 export function setRootProjectPreferencesReducer(reducer: ActionReducer<any>): ActionReducer<any> {
-  return createLocalStorageReducer('rootProjects', ['rootProjects.tagsColors', 'rootProjects.tagsFilterByProject'] , [PROJECTS_PREFIX])(reducer);
+  return createLocalStorageReducer('rootProjects', ['rootProjects.tagsColors', 'rootProjects.tagsFilterByProject', 'rootProjects.graphVariant'] , [PROJECTS_PREFIX])(reducer);
 }
 
 export function getMetaReducers() {

@@ -53,9 +53,9 @@
                 <div class="px-3">OR</div>
                 <div class="line"></div>
               </div>
-              <button *ngIf="guestUser?.enabled" [disabled]="showSpinner" class="btn mt-3" (click)="loginGuest()">LOGIN
-                AS A GUEST
-              </button>
+<!--              <button *ngIf="guestUser?.enabled" [disabled]="showSpinner" class="btn mt-3" (click)="loginGuest()">LOGIN-->
+<!--                AS A GUEST-->
+<!--              </button>-->
               <ng-template let-validateEmail="validateEmail"
                 [ngTemplateOutletContext]="{ validateEmail: validateEmail$ | async}"
                 [ngTemplateOutlet]="template" #template>
@@ -75,7 +75,10 @@
                       <div [class.inactive]="!signupMode" (click)="toggleSignup()">Sign up</div>
                     </div>
                     <div class="sso-body">
-                      <div class="sso-message">{{signupMode ? 'Create a free account' : 'Welcome back!'}}</div>
+                      <div *ngIf="!isCommunity; else communityWelcome" class="sso-message">{{firstLogin ? 'Welcome' : 'Welcome back!'}}</div>
+                      <ng-template #communityWelcome>
+                        <div class="sso-message">{{signupMode ? 'Create a free account' : 'Welcome back!'}}</div>
+                      </ng-template>
                       <button
                         *ngFor="let provider of sso"
                         [disabled]="showSpinner"

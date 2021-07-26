@@ -1,8 +1,8 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {catchError, debounceTime, filter, mergeMap, map, switchMap, withLatestFrom} from 'rxjs/operators';
-import {ActiveLoader, DeactiveLoader} from '../../core/actions/layout.actions';
-import {RequestFailed} from '../../core/actions/http.actions';
+import {activeLoader, deactivateLoader} from '../../core/actions/layout.actions';
+import {requestFailed} from '../../core/actions/http.actions';
 import {ApiTasksService} from '../../../business-logic/api-services/tasks.service';
 import {
   SEARCH_EXPERIMENTS_FOR_COMPARE, searchExperimentsForCompare,
@@ -26,7 +26,7 @@ export class SelectCompareHeaderEffects {
   @Effect()
   activeLoader = this.actions.pipe(
     ofType(SEARCH_EXPERIMENTS_FOR_COMPARE),
-    map(action => new ActiveLoader(action.type))
+    map(action => activeLoader(action.type))
   );
 
   @Effect()
@@ -72,8 +72,8 @@ export class SelectCompareHeaderEffects {
       system_tags: ['-archived'],
     })
       .pipe(
-        mergeMap(res => [action.payload ? setSearchExperimentsForCompareResults({payload: res.tasks}) : setSearchExperimentsForCompareResults({payload: []}), new DeactiveLoader(action.type)]),
-        catchError(error => [new DeactiveLoader(action.type), new RequestFailed(error)])
+        mergeMap(res => [action.payload ? setSearchExperimentsForCompareResults({payload: res.tasks}) : setSearchExperimentsForCompareResults({payload: []}), deactivateLoader(action.type)]),
+        catchError(error => [deactivateLoader(action.type), requestFailed(error)])
       )
     )
   );

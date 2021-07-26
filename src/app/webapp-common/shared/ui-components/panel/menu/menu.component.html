@@ -1,18 +1,30 @@
 <div class="d-flex justify-content-start align-items-center" [smTooltip]="buttonTooltip">
   <i [class]="prefixIconClass" *ngIf="prefixIconClass" (click)="trigger.openMenu()"></i>
-  <div mat-button [matMenuTriggerFor]="menu" class="btn p-0 cell menu-button" [class]="buttonClass" [class.hidden-button]="!showButton" (menuOpened)="menuOpened.emit()"
-       smClickStopPropagation>
+  <div mat-button
+       smClickStopPropagation
+       [matMenuTriggerFor]="menu"
+       class=" p-0 cell menu-button"
+       [class]="buttonClass"
+       [class.btn]="hasButtonClass"
+       [class.hidden-button]="!showButton"
+       (menuOpened)="menuOpened.emit()"
+  >
     {{header}}
   </div>
   <div class='cell pointer'>
     <i [class]="iconClass" *ngIf="showCart" (click)="trigger.openMenu()"></i>
   </div>
 </div>
-<mat-menu (closed)="menuClosed.emit()" #menu="matMenu" [overlapTrigger]="false" [hasBackdrop]="showOverlay"
-          [class]="smMenuClass + ' sm-menu'"
+<mat-menu
+  #menu="matMenu"
+  class="sm-menu"
+  [class]="smMenuClass + ' ' + panelClasses"
+  [overlapTrigger]="false"
+  [hasBackdrop]="showOverlay"
+  (closed)="menuClosed.emit()"
 >
-  <mat-form-field *ngIf="enableSearch" smClickStopPropagation class="tags-menu-input">
-    <input #searchInput matInput (input)="searchValueChanged.emit($event)" [(ngModel)]="searchValue" autocomplete="off">
+  <mat-form-field appearance="fill" *ngIf="enableSearch" smClickStopPropagation class="tags-menu-input w-100">
+    <input matInput (input)="searchValueChanged.emit($event)" [(ngModel)]="searchValue" autocomplete="off">
     <i matSuffix [class]="'fa mr2 ' + (searchValue? 'fa-times pointer':'fa-search')" (click)="searchValue && clearSearch()"></i>
   </mat-form-field>
   <div class="results" [class.search-results]="enableSearch">

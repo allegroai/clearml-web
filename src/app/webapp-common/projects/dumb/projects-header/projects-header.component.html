@@ -6,7 +6,7 @@
     </sm-menu>
     <sm-show-only-user-work></sm-show-only-user-work>
   </div>
-  <div *smCheckPermission="true">
+  <div>
     <button *ngIf="!hideCreateButton" class="btn btn-primary d-flex align-items-center"
             (click)="createProjectClicked.emit(selectedProject)">
       <i class="al-icon al-color blue-400 al-ico-add sm mr-2"></i>NEW PROJECT

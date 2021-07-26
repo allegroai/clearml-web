@@ -5,6 +5,7 @@ import {TreeNode} from './shared/experiments-compare-details.model';
 import {getAlternativeConvertedExperiment, getDisplayTextForTitles} from '../../features/experiments-compare/experiment-compare-utils';
 import {ConfigurationItem} from '../../business-logic/model/tasks/configurationItem';
 import * as Diff from 'diff';
+import {MAX_ROWS_FOR_SMART_COMPARE_ARRAYS} from './experiments-compare.constants';
 
 export interface TreeNodeJsonData {
   key: string;
@@ -329,6 +330,9 @@ export function compareArrayOfStrings<T extends Array<string[]>>(values: T): T {
 
 export function convertConfigurationFromExperiments<T extends Array<IExperimentDetail>>(experiments: T, originalExperiments: Record<string, IExperimentDetail>): T {
   const data = experiments.map(experiment => originalExperiments[experiment.id]?.configuration?.General?.value.split('\n') || []) || [];
+  if (data.some(experimentData => experimentData.length > MAX_ROWS_FOR_SMART_COMPARE_ARRAYS)) {
+    return experiments;
+  }
   const values = compareArrayOfStrings(data);
   experiments.forEach((experiment, index) => {
     if (' General' in experiment.configuration) {
@@ -342,6 +346,9 @@ export function convertConfigurationFromExperiments<T extends Array<IExperimentD
 
 export function convertContainerScriptFromExperiments<T extends Array<IExperimentDetail>>(experiments: T, originalExperiments: Record<string, IExperimentDetail>): T {
   const data = experiments.map(experiment => originalExperiments[experiment.id]?.execution.container?.setup_shell_script);
+  if (data.some(experimentData => experimentData.length > MAX_ROWS_FOR_SMART_COMPARE_ARRAYS)) {
+    return experiments;
+  }
   const values = compareArrayOfStrings(data);
   experiments.forEach((experiment, index) => experiment.execution.container.setup_shell_script = values[index]);
   return experiments;
@@ -355,6 +362,9 @@ export function convertNetworkDesignFromExperiments<T extends IExperimentDetail>
       return Array.isArray(values) ? values : [];
     }) as Array<string[]>;
 
+    if (modelNetworkDesignData.some(experimentData => experimentData.length > MAX_ROWS_FOR_SMART_COMPARE_ARRAYS)) {
+      return experiments;
+    }
     const inputModelNetworkDesignValues = compareArrayOfStrings(modelNetworkDesignData);
 
     experiments.forEach((experiment, index) => {

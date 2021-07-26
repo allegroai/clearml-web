@@ -1,3 +1,5 @@
+@import "variables";
+
 :host {
   display: block;
   position: relative;
@@ -43,6 +45,13 @@
     }
   }
 
+  .dark-theme {
+    .log-line {
+      .timestamp {
+        background-color: $blue-950;
+      }
+    }
+  }
   .get-last {
     position: absolute;
     right: -100px;

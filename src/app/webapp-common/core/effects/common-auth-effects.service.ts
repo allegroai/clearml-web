@@ -2,8 +2,8 @@ import {Injectable} from '@angular/core';
 import {act, Actions, Effect, ofType} from '@ngrx/effects';
 import {ApiAuthService} from '../../../business-logic/api-services/auth.service';
 import * as authActions from '../actions/common-auth.actions';
-import {RequestFailed} from '../actions/http.actions';
-import {ActiveLoader, DeactiveLoader, SetServerError} from '../actions/layout.actions';
+import {requestFailed} from '../actions/http.actions';
+import {activeLoader, deactivateLoader, setServerError} from '../actions/layout.actions';
 import {catchError, map, mergeMap, switchMap, withLatestFrom} from 'rxjs/operators';
 import {AuthGetCredentialsResponse} from '../../../business-logic/model/auth/authGetCredentialsResponse';
 import {Store} from '@ngrx/store';
@@ -19,7 +19,7 @@ export class CommonAuthEffectsService {
   @Effect()
   activeLoader = this.actions.pipe(
     ofType(authActions.getAllCredentials, authActions.createCredential),
-    map(action => new ActiveLoader(action.type))
+    map(action => activeLoader(action.type))
   );
 
   @Effect()
@@ -29,9 +29,9 @@ export class CommonAuthEffectsService {
       withLatestFrom(this.store.select(selectCurrentUser)),
       mergeMap(([res, user]: [AuthGetCredentialsResponse, GetCurrentUserResponseUserObject]) => [
         authActions.updateAllCredentials({credentials: res.credentials, extra: res.additional_credentials, workspace: user.company.id}),
-        new DeactiveLoader(action.type)
+        deactivateLoader(action.type)
       ]),
-      catchError(error => [new RequestFailed(error), new DeactiveLoader(action.type)])
+      catchError(error => [requestFailed(error), deactivateLoader(action.type)])
     ))
   );
 
@@ -39,11 +39,11 @@ export class CommonAuthEffectsService {
   revokeCredential = this.actions.pipe(
     ofType(authActions.credentialRevoked),
     mergeMap(action => this.credentialsApi.authRevokeCredentials({access_key: action.accessKey}).pipe(
-      mergeMap(() => [authActions.removeCredential(action), new DeactiveLoader(action.type)]),
+      mergeMap(() => [authActions.removeCredential(action), deactivateLoader(action.type)]),
       catchError(error => [
-        new RequestFailed(error),
-        new DeactiveLoader(action.type),
-        new SetServerError(error, null, 'Can\'t delete this credentials.')
+        requestFailed(error),
+        deactivateLoader(action.type),
+        setServerError(error, null, 'Can\'t delete this credentials.')
       ])
     ))
   );
@@ -54,12 +54,12 @@ export class CommonAuthEffectsService {
     mergeMap(action => this.credentialsApi.authCreateCredentials({}).pipe(
       mergeMap(res => [
         authActions.addCredential({newCredential: res.credentials, workspaceId: action.workspaceId}),
-        new DeactiveLoader(action.type)]),
+        deactivateLoader(action.type)]),
       catchError(error => [
-        new RequestFailed(error),
-        new SetServerError(error, null, 'Unable to create credentials'),
+        requestFailed(error),
+        setServerError(error, null, 'Unable to create credentials'),
         authActions.addCredential({newCredential: {}, workspaceId: action.workspaceId}),
-        new DeactiveLoader(action.type)])
+        deactivateLoader(action.type)])
     ))
   );
 }

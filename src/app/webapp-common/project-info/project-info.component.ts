@@ -1,13 +1,17 @@
-import {Component, HostListener, OnDestroy, OnInit, Renderer2, ViewChild} from '@angular/core';
+import {ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit, Renderer2, ViewChild} from '@angular/core';
 import {Store} from '@ngrx/store';
 import 'ace-builds/src-noconflict/ace';
 import 'ace-builds/webpack-resolver';
 import {Observable} from 'rxjs/internal/Observable';
 import {Subscription} from 'rxjs';
-import {filter} from 'rxjs/operators';
+import {filter, take} from 'rxjs/operators';
 import {MarkdownEditorComponent} from 'ngx-markdown-editor';
 import 'ngx-markdown-editor';
-import {RootProjects, selectSelectedProject} from '../core/reducers/projects.reducer';
+import {
+  RootProjects,
+  selectSelectedMetricVariantForCurrProject,
+  selectSelectedProject
+} from '../core/reducers/projects.reducer';
 import {UpdateProject} from '../core/actions/projects.actions';
 import {Project} from '../../business-logic/model/projects/project';
 
@@ -28,6 +32,7 @@ export class ProjectInfoComponent implements OnInit, OnDestroy {
     markedjsOpt: {
       sanitize: true
     },
+    enablePreviewContentClick: true,
     usingFontAwesome5: true,
     showPreviewPanel: true,
     resizable: false,
@@ -35,15 +40,23 @@ export class ProjectInfoComponent implements OnInit, OnDestroy {
   };
   public loading: boolean;
   public editorVisible: boolean;
+  public project: Project;
+  public panelOpen: boolean = false;
   private preview: Element;
   private editor: Element;
   public isDirty: boolean;
   private projectId: string;
 
   @ViewChild('editorComponent', {static: false}) editorComponent: MarkdownEditorComponent;
+  private ready: boolean = false;
+  private selectedVariantSub: Subscription;
 
   @HostListener('window:resize', ['$event'])
   updateEditorVisibility() {
+    if (!this.ready) {
+      return;
+    }
+
     if (window.innerWidth > BREAK_POINT) {
       if (this.editMode) {
         this.renderer.setStyle(this.preview, 'display', 'block');
@@ -67,15 +80,25 @@ export class ProjectInfoComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loading = true;
-    this.infoSubs = this.selecteProject$.pipe(filter(project => project?.description !== undefined)).subscribe(project => {
-      this.info = project.description;
-      this.projectId = project.id;
-      this.loading = false;
-    });
+    this.infoSubs = this.selecteProject$
+      .pipe(
+        filter(project => !!project?.id)
+      ).subscribe(project => {
+        this.project = project;
+        this.info = project.description;
+        this.projectId = project.id;
+        this.loading = false;
+      });
+    this.selectedVariantSub = this.store.select(selectSelectedMetricVariantForCurrProject).pipe(filter(data => !!data), take(1))
+      .subscribe(data => {
+        this.setMetricsPanel(true);
+      });
+
   }
 
   ngOnDestroy() {
     this.infoSubs.unsubscribe();
+    this.selectedVariantSub.unsubscribe();
   }
 
   saveInfo() {
@@ -89,7 +112,7 @@ export class ProjectInfoComponent implements OnInit, OnDestroy {
     this.originalInfo = this.info;
     this.editMode = true;
     this.editorVisible = false;
-    setTimeout( () => this.updateEditorVisibility());
+    setTimeout(() => this.updateEditorVisibility());
   }
 
   cancelClicked() {
@@ -100,6 +123,7 @@ export class ProjectInfoComponent implements OnInit, OnDestroy {
   }
 
   editorReady() {
+    this.ready = true;
     this.preview = document.querySelector('.preview-container');
     this.editor = document.querySelector('.editor-container > div:first-child');
   }
@@ -112,5 +136,9 @@ export class ProjectInfoComponent implements OnInit, OnDestroy {
 
   checkDirty() {
     this.isDirty = this.originalInfo !== this.info;
+  }
+
+  setMetricsPanel(open: boolean) {
+    this.panelOpen = open;
   }
 }

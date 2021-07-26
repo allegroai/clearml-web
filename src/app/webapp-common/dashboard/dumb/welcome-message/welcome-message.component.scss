@@ -89,13 +89,13 @@
 
   .code {
     position: relative;
-    padding: 16px;
+
     margin: 1px 0 2px;
     width: 530px;
     color: $blue-100;
     background-color: $blue-900;
     border-radius: 4px;
-    overflow: auto;
+
 
     &:hover {
       sm-copy-clipboard {
@@ -104,6 +104,9 @@
     }
 
     .content {
+      padding: 16px;
+      overflow: auto;
+      margin-right: 16px;
       white-space: pre;
       font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       font-size: 12px;
@@ -131,6 +134,7 @@
       position: absolute;
       right: 10px;
       top: 10px;
+      background-color: rgba(0, 0, 0, 0.2);
     }
   }
 

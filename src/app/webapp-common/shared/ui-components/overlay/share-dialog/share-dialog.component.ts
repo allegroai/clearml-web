@@ -1,7 +1,7 @@
 import {Component, Inject} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {IShareDialogConfig} from './share-dialog.model';
-import {AddMessage} from '../../../../core/actions/layout.actions';
+import {addMessage} from '../../../../core/actions/layout.actions';
 import {MESSAGES_SEVERITY} from '../../../../../app.constants';
 import {Store} from '@ngrx/store';
 import {shareSelectedExperiments} from '../../../../experiments/actions/common-experiments-menu.actions';
@@ -41,7 +41,7 @@ export class ShareDialogComponent {
   }
 
   copyToClipboardSuccess() {
-    this.store.dispatch(new AddMessage(MESSAGES_SEVERITY.SUCCESS, 'URL copied successfully'));
+    this.store.dispatch(addMessage(MESSAGES_SEVERITY.SUCCESS, 'URL copied successfully'));
   }
 
   createLink() {

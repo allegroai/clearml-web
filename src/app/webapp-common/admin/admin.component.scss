@@ -69,9 +69,20 @@ $tab-width: 15vw;
     margin: 6px 0 0 24px;
   }
 
-  .toggles > * {
-    display: block;
-    margin-top: 12px;
+  .toggles {
+    display: inline-flex;
+    position: relative;
+    flex-direction: column;
+    margin-top: 0;
+
+    & > *:not(:first-child){
+      display: block;
+      margin-top: 12px;
+
+      &.first {
+        margin-top: 0;
+      }
+    }
   }
 
   mat-expansion-panel, mat-expansion-panel-header {
@@ -191,53 +202,23 @@ $tab-width: 15vw;
     }
   }
 
-  .circles {
+  sm-circles-in-row {
     flex: 1;
     max-width: 290px;
     display: flex;
     margin: 6px 0 0 24px;
-
-    .circle {
-      width: 34px;
-      min-width: 34px;
-      height: 34px;
-      line-height: 32px;
-      text-align: center;
-      background-color: $light-grey-blue;
-      color: $blue-800;
-      border-radius: 50%;
-      font-size: 12px;
-      border: $blue-800 solid 2px;
-      position: relative;
-      box-sizing: border-box;
-      cursor: pointer;
-
-      &.empty {
-        background-color: $blue-700;
-        border-color: $light-grey-blue;
-        height: 32px;
-        width: 32px;
-        min-width: 32px;
-        margin-top: 1px;
-      }
-
-      &.long {
-        width: unset;
-        min-width: unset;
-        border-radius: 18px;
-        padding: 0 4px;
-      }
-    }
   }
 
   .reload {
     color: transparent;
     text-decoration: underline;
-    transition: color 0.5s;
+    position: absolute;
+    right: 50px;
+    transition: color 0.5s ease-in-out, right 0.5s ease-in-out;
 
     &.highlight {
       color: $neon-yellow;
-      transition: color 0.5s;
+      right: -100px;
     }
   }
 }

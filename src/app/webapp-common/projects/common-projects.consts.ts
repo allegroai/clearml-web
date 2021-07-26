@@ -1,3 +1,15 @@
+export interface ProjectRoute {
+  header: 'overview' | 'models' | 'experiments';
+  subHeader: string;
+  permissionCheck?: string;
+}
+
+export const PROJECT_ROUTES = [
+  {header: 'overview', subHeader: ''},
+  {header: 'experiments', subHeader: '(ARCHIVED)'},
+  {header: 'models', subHeader: '(ARCHIVED)'},
+] as ProjectRoute[];
+
 export const PROJECTS_PREFIX         = 'PROJECTS_';
 export const PROJECTS_ACTIONS = {
   SET_SEARCH_QUERY                 : PROJECTS_PREFIX + 'SET_SEARCH_QUERY',
@@ -27,3 +39,5 @@ export const PROJECTS_ACTIONS = {
   SET_NEXT_PAGE                    : PROJECTS_PREFIX + 'SET_NEXT_PAGE',
   ADD_TO_PROJECTS_LIST             : PROJECTS_PREFIX + 'ADD_TO_PROJECTS_LIST'
 };
+
+export const pageSize = 12;

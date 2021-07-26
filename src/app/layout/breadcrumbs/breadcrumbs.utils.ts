@@ -5,7 +5,7 @@ import {Task} from '../../business-logic/model/tasks/task';
 import {selectSelectedTableModel} from '../../webapp-common/models/reducers';
 import {createSelector} from '@ngrx/store';
 import {selectSelectedExperiment} from '../../features/experiments/reducers';
-import {selectProjects, selectSelectedProject} from '../../webapp-common/core/reducers/projects.reducer';
+import {selectRootProjects, selectSelectedProject} from '../../webapp-common/core/reducers/projects.reducer';
 import {formatStaticCrumb, prepareLinkData} from '../../webapp-common/layout/breadcrumbs/breadcrumbs-common.utils';
 
 export interface IBreadcrumbs {
@@ -17,13 +17,12 @@ export interface IBreadcrumbs {
 }
 
 export const selectBreadcrumbsStringsBase = createSelector(
-  selectSelectedProject, selectSelectedExperiment, selectSelectedTableModel,selectProjects,
+  selectSelectedProject, selectSelectedExperiment, selectSelectedTableModel, selectRootProjects,
   (project, experiment, model,projects) =>
     ({project, experiment, model, projects}) as IBreadcrumbs);
 
 
-
-export function prepareNames(data: IBreadcrumbs) {
+export const prepareNames = (data: IBreadcrumbs) => {
   const project    = prepareLinkData(data.project, true);
   if (data.project) {
     const subProjects = [];
@@ -35,12 +34,12 @@ export function prepareNames(data: IBreadcrumbs) {
         ...data.projects,
         {id: '*', name: 'All Experiments'},
         {...data.project}
-      ].find(project => currentName === project.name);
+      ].find(proj => currentName === proj.name);
       subProjects.push(foundProject);
     });
-    const subProjectsLinks = subProjects.map(project => ({
-      name: project?.name.substring(project?.name.lastIndexOf('/') + 1),
-      url: `projects/${project?.id}/projects`
+    const subProjectsLinks = subProjects.map(subProject => ({
+      name: subProject?.name.substring(subProject?.name.lastIndexOf('/') + 1),
+      url: `projects/${subProject?.id}/projects`
     })) as { name: string; url: string }[];
     project.name = project.name.substring(project.name.lastIndexOf('/') + 1);
     project.subCrumbs = subProjectsLinks;
@@ -71,9 +70,9 @@ export function prepareNames(data: IBreadcrumbs) {
     artifacts: formatStaticCrumb('artifacts'),
     general: formatStaticCrumb('general'),
     log: formatStaticCrumb('logs'),
-    'scalar': formatStaticCrumb('scalars'),
-    'plots': formatStaticCrumb('plots'),
+    scalar: formatStaticCrumb('scalars'),
+    plots: formatStaticCrumb('plots'),
     accountAdministration,
     debugImages: formatStaticCrumb('Debug Samples'),
   };
-}
+};

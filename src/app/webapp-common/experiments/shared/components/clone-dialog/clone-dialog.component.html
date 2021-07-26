@@ -12,10 +12,9 @@
   </ng-template>
   <form #cloneForm="ngForm">
     <div class="form-container">
-      <h5>Project</h5>
       <mat-form-field class="w-100" appearance="outline"
-                      hideRequiredMarker="true"
-                      floatLabel="never">
+                      hideRequiredMarker="true">
+        <mat-label>Project</mat-label>
         <input matInput type="text"
                autocomplete="off"
                (focusin)="clearOnFirstFocus($event);"
@@ -30,6 +29,7 @@
                smUniqueNameValidator
                [existingNames]="readOnlyProjects$ | async"
                [pattern]="'^[^/]+$'"
+               (click)="filterText && clear(); projectInputRef.blur(); projectInputRef.focus()"
         >
         <span matSuffix *ngIf="(!isAutoCompleteOpen) && (!formData.project?.value) && formData.project"
               class="creat-new-suffix">(Create New)</span>
@@ -59,28 +59,26 @@
           <mat-option *ngFor="let project of filteredProjects | async" [value]="project">{{project.label}}</mat-option>
         </mat-autocomplete>
       </mat-form-field>
-      <h5>Name</h5>
       <mat-form-field class="w-100" appearance="outline">
+        <mat-label>Name</mat-label>
         <input
           required
           matInput
           autocomplete="off"
           #experimentName="ngModel"
           name="ExperimentName"
-          placeholder="Name"
           [(ngModel)]="formData.name"
         />
         <mat-error *ngIf="experimentName?.errors?.required">Please provide a name</mat-error>
       </mat-form-field>
-      <h5>Description</h5>
       <mat-form-field class="w-100" appearance="outline"
-                      hideRequiredMarker="true"
-                      floatLabel="never">
-      <textarea
-        name="ExperimentComment"
-        matInput
-        [rows]="7"
-        [(ngModel)]="formData.comment"></textarea>
+                      hideRequiredMarker="true">
+        <mat-label>Description</mat-label>
+        <textarea
+          name="ExperimentComment"
+          matInput
+          [rows]="7"
+          [(ngModel)]="formData.comment"></textarea>
       </mat-form-field>
 
       <div class="buttons">

@@ -2,13 +2,13 @@ import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {catchError, mergeMap, map, switchMap, withLatestFrom} from 'rxjs/operators';
 import * as  debugActions from './debug-images-actions';
-import {ActiveLoader, DeactiveLoader} from '../core/actions/layout.actions';
+import {activeLoader, deactivateLoader} from '../core/actions/layout.actions';
 import {ApiTasksService} from '../../business-logic/api-services/tasks.service';
 import {ApiEventsService} from '../../business-logic/api-services/events.service';
-import {RequestFailed} from '../core/actions/http.actions';
-import {REFRESH_EXPERIMENTS} from '../experiments/actions/common-experiments-view.actions';
+import {requestFailed} from '../core/actions/http.actions';
+import {refreshExperiments} from '../experiments/actions/common-experiments-view.actions';
 import {setRefreshing} from '../experiments-compare/actions/compare-header.actions';
-import {Store} from '@ngrx/store';
+import {Action, Store} from '@ngrx/store';
 import {selectDebugImages, selectImageViewerScrollId} from './debug-images-reducer';
 import {
   setCurrentDebugImage,
@@ -42,7 +42,7 @@ export class DebugImagesEffects {
   @Effect()
   activeLoader = this.actions$.pipe(
     ofType(debugActions.FETCH_EXPERIMENTS),
-    map(action => new ActiveLoader(action.type))
+    map(action => activeLoader(action.type))
   );
 
 
@@ -61,7 +61,7 @@ export class DebugImagesEffects {
       })
         .pipe(
           mergeMap((res: any) => {
-            const actionsToShoot = [new DeactiveLoader(action.type), setRefreshing({payload: false})];
+            const actionsToShoot = [deactivateLoader(action.type), setRefreshing({payload: false})] as Action[];
             if (res.metrics[0].iterations && res.metrics[0].iterations.length > 0) {
               actionsToShoot.push(new debugActions.SetDebugImages({res, task: action.payload.task}));
               switch (action.type) {
@@ -94,10 +94,10 @@ export class DebugImagesEffects {
             return actionsToShoot;
           }),
           catchError(error => [
-            new RequestFailed(error),
+            requestFailed(error),
             setRefreshing({payload: false}),
-            new DeactiveLoader(action.type),
-            new DeactiveLoader(REFRESH_EXPERIMENTS)
+            deactivateLoader(action.type),
+            deactivateLoader(refreshExperiments.type)
           ])
         )
     )
@@ -108,8 +108,8 @@ export class DebugImagesEffects {
     ofType<debugActions.FetchExperiments>(debugActions.FETCH_EXPERIMENTS),
     switchMap((action) => this.apiTasks.tasksGetAllEx({id: action.payload, only_fields: ['id', 'name', 'status']})
       .pipe(
-        mergeMap(res => [new debugActions.SetExperimentsNames(res), new DeactiveLoader(action.type)]),
-        catchError(error => [new RequestFailed(error), new DeactiveLoader(action.type)])
+        mergeMap(res => [new debugActions.SetExperimentsNames(res), deactivateLoader(action.type)]),
+        catchError(error => [requestFailed(error), deactivateLoader(action.type)])
       )
     )
   );
@@ -123,8 +123,8 @@ export class DebugImagesEffects {
       event_type: 'training_debug_image'
     })
       .pipe(
-        mergeMap(res => [new debugActions.SetMetrics(res), new DeactiveLoader(action.type)]),
-        catchError(error => [new RequestFailed(error), new DeactiveLoader(action.type)])
+        mergeMap(res => [new debugActions.SetMetrics(res), deactivateLoader(action.type)]),
+        catchError(error => [requestFailed(error), deactivateLoader(action.type)])
       )
     )
   );
@@ -144,10 +144,10 @@ export class DebugImagesEffects {
         .pipe(
           mergeMap(res => [
             setDebugImageIterations({min_iteration: res.min_iteration, max_iteration: res.max_iteration}),
-            setCurrentDebugImage({event: res.event}), new DeactiveLoader(action.type),
+            setCurrentDebugImage({event: res.event}), deactivateLoader(action.type),
             setDebugImageViewerScrollId({scrollId: res.scroll_id}),
           ]),
-          catchError(error => [new RequestFailed(error), new DeactiveLoader(action.type)])
+          catchError(error => [requestFailed(error), deactivateLoader(action.type)])
         )
     )
   );
@@ -169,13 +169,13 @@ export class DebugImagesEffects {
             } else {
               return [
                 setDebugImageIterations({min_iteration: res.min_iteration, max_iteration: res.max_iteration}),
-                setCurrentDebugImage({event: res.event}), new DeactiveLoader(action.type),
+                setCurrentDebugImage({event: res.event}), deactivateLoader(action.type),
                 setDebugImageViewerScrollId({scrollId: res.scroll_id}),
                 action.navigateEarlier ? setDisplayerBeginningOfTime({beginningOfTime: false}) : setDisplayerEndOfTime({endOfTime: false})
               ];
             }
           }),
-          catchError(error => [new RequestFailed(error), new DeactiveLoader(action.type)])
+          catchError(error => [requestFailed(error), deactivateLoader(action.type)])
         )
     )
   );

@@ -45,5 +45,6 @@ export interface ISmCol {
   isParam?: boolean;
   valueType?: string;
   projectId?: string;
-
+  textCenter?: boolean;
+  andFilter?: boolean;
 }

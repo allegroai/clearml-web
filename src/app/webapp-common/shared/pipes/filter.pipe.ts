@@ -10,9 +10,12 @@ export class FilterPipe implements PipeTransform {
     if (!arr || !query) {
       return arr;
     }
+
     if (Array.isArray(query)) {
       return arr.filter(item => !(query as string[]).includes((key ? get(key, item) : item)));
+    } else if (typeof query === 'string') {
+      return arr.filter(item => (key ? get(key, item) : item)?.toLowerCase().includes(query?.toLowerCase()));
     }
-    return arr.filter(item => (key ? get(key, item) : item)?.toLowerCase().includes(query?.toLowerCase()));
+    return arr;
   }
 }

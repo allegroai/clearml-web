@@ -7,12 +7,13 @@ import {ActivatedRoute} from '@angular/router';
 import {combineLatest, Subscription} from 'rxjs';
 import {prepareNames} from '../../../layout/breadcrumbs/breadcrumbs.utils';
 import {formatStaticCrumb} from './breadcrumbs-common.utils';
-import {AddMessage} from '../../core/actions/layout.actions';
+import {addMessage} from '../../core/actions/layout.actions';
 import {MESSAGES_SEVERITY} from '../../../app.constants';
 import {ConfigurationService} from '../../shared/services/configuration.service';
 import {GetCurrentUserResponseUserObjectCompany} from '../../../business-logic/model/users/getCurrentUserResponseUserObjectCompany';
 import {selectIsDeepMode} from "../../core/reducers/projects.reducer";
 import {Observable} from "rxjs/internal/Observable";
+import {GetAllSystemProjects} from "@common/core/actions/projects.actions";
 
 
 export interface IBreadcrumbsLink {
@@ -66,6 +67,9 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
     ).subscribe(([config, names]) => {
       this.routeConfig = config;
       this.breadcrumbsStrings = prepareNames(names);
+      if(this.breadcrumbsStrings[':projectId'].subCrumbs?.map(project=>project.name).includes(undefined)){
+        this.store.dispatch(new GetAllSystemProjects());
+      };
       this.refreshBreadcrumbs();
       let route = this.route.snapshot;
       let hide = false;
@@ -118,7 +122,7 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
   }
 
   copyToClipboardSuccess() {
-    this.store.dispatch(new AddMessage(MESSAGES_SEVERITY.SUCCESS, 'URL copied successfully'));
+    this.store.dispatch(addMessage(MESSAGES_SEVERITY.SUCCESS, 'URL copied successfully'));
   }
 
   checkIfBreadcrumbsInitiated() {

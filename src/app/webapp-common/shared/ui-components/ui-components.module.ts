@@ -102,6 +102,9 @@ import { TableFilterDurationErrorComponent } from './data/table/table-duration-s
 import {InvalidPrefixValidatorDirective} from './template-forms-ui/invalid-prefix-validator.directive';
 import {UniquePathValidatorDirective} from './template-forms-ui/unique-path-validator.directive';
 import {OperationErrorDialogComponent} from '@common/shared/ui-components/overlay/operation-error-dialog/operation-error-dialog.component';
+import { CirclesInRowComponent } from './indicators/circles-in-row/circles-in-row.component';
+import {RequiredAutocompleteSelectionValidatorDirective} from "@common/shared/ui-components/template-forms-ui/required-autocomplete-selection-validator.directive";
+import {OverflowsDirective} from '@common/shared/ui-components/directives/overflows.directive';
 
 const declarations = [
   DurationInputComponent,
@@ -166,6 +169,7 @@ const declarations = [
   TagComponent,
   UniqueNameValidatorDirective,
   UniquePathValidatorDirective,
+  RequiredAutocompleteSelectionValidatorDirective,
   InvalidPrefixValidatorDirective,
   ForceInvalidValidatorDirective,
   NotAllowedStringsValidatorValidatorDirective,
@@ -175,7 +179,9 @@ const declarations = [
   HesitateDirective,
   DividerComponent,
   TableFilterDurationDateTimeComponent,
-  TableFilterDurationNumericComponent
+  TableFilterDurationNumericComponent,
+  CirclesInRowComponent,
+  OverflowsDirective
 ];
 
 @NgModule({

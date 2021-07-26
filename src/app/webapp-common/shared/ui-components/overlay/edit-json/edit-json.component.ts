@@ -3,7 +3,7 @@ import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {JsonPipe} from '@angular/common';
 import {validateJson} from '../../../utils/validation-utils';
 import {Store} from '@ngrx/store';
-import {AddMessage} from '../../../../core/actions/layout.actions';
+import {addMessage} from '../../../../core/actions/layout.actions';
 
 @Component({
   selector: 'sm-edit-json',
@@ -55,7 +55,7 @@ export class EditJsonComponent {
       try {
         this.dialogRef.close(this.textData ? (this.typeJson ? JSON.parse(this.textData) : this.textData) : '');
       } catch (e) {
-        this.store.dispatch(new AddMessage('warn', 'Not a valid JSON'))
+        this.store.dispatch(addMessage('warn', 'Not a valid JSON'))
         // this.showErrors = true; // shows warning message bellow texterea
       }
     } else {

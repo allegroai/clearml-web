@@ -3,7 +3,8 @@ import {AbstractControl, NG_VALIDATORS, ValidationErrors, Validator, ValidatorFn
 
 export function uniqueNameValidator(names, forbiddenPrefix?): ValidatorFn {
   return (control: AbstractControl): { [key: string]: any } | null => {
-    const forbidden = names.includes(forbiddenPrefix ? forbiddenPrefix + control.value : control.value);
+    const value = control.value?.label || control.value?.name || control.value;
+    const forbidden = names.includes(forbiddenPrefix ? forbiddenPrefix + value : value);
     return forbidden ? {'uniqueName': {value: control.value}} : null;
   };
 }

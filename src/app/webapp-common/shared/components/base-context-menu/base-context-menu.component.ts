@@ -1,15 +1,11 @@
 import {Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, ViewChild} from '@angular/core';
 import {MatMenuTrigger} from '@angular/material/menu';
 import {TagsMenuComponent} from '../../ui-components/tags/tags-menu/tags-menu.component';
-import {getTags} from '@common/core/actions/projects.actions';
 import {Store} from '@ngrx/store';
 import {DeactivateEdit, ActivateEdit} from 'app/webapp-common/experiments/actions/common-experiments-info.actions';
 import {ActivateModelEdit, CancelModelEdit} from 'app/webapp-common/models/actions/models-info.actions';
-import {
-  CountAvailableAndIsDisable,
-  CountAvailableAndIsDisableSelectedFiltered
-} from '@common/shared/entity-page/items.utils';
-import { MENU_ITEM_ID } from '../../entity-page/items.utils';
+import {CountAvailableAndIsDisableSelectedFiltered} from '@common/shared/entity-page/items.utils';
+import { MenuItems } from '../../entity-page/items.utils';
 
 @Component({
   selector: 'sm-base-context-menu',
@@ -17,7 +13,7 @@ import { MENU_ITEM_ID } from '../../entity-page/items.utils';
 })
 export class BaseContextMenuComponent {
   public position = {x: 0, y: 0};
-  public MENU_ITEM_ID =  MENU_ITEM_ID;
+  public menuItems =  MenuItems;
 
   @ViewChild('tagMenuContent') tagMenu: TagsMenuComponent;
   @ViewChild(MatMenuTrigger) trigger: MatMenuTrigger;

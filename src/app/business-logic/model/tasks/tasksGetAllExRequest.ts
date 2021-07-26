@@ -89,4 +89,6 @@ export interface TasksGetAllExRequest {
      * If set to 'true' and project field is set then tasks from the subprojects are   searched too
      */
     include_subprojects?: boolean;
+
+    search_hidden?: boolean;
 }

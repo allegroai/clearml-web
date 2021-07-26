@@ -13,6 +13,7 @@ import { debugImagesReducer } from './debug-images-reducer';
 import { DebugImagesViewComponent } from './debug-images-view/debug-images-view.component';
 import { DebugImagesComponent } from './debug-images.component';
 import {MatSliderModule} from "@angular/material/slider";
+import {ExperimentGraphsModule} from "../shared/experiment-graphs/experiment-graphs.module";
 
 const declerations = [DebugImagesComponent, DebugImagesViewComponent, ImageDisplayerComponent, DebugImageSnippetComponent];
 
@@ -27,7 +28,8 @@ const declerations = [DebugImagesComponent, DebugImagesViewComponent, ImageDispl
         ScrollingModule,
         StoreModule.forFeature('debugImages', debugImagesReducer),
         EffectsModule.forFeature([DebugImagesEffects]),
-        MatSliderModule
+        MatSliderModule,
+        ExperimentGraphsModule
     ]
 })
 export class DebugImagesModule {

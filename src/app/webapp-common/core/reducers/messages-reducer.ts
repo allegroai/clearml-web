@@ -1,4 +1,4 @@
-import {VIEW_ACTIONS} from '../../../app.constants';
+import * as actions from '../actions/layout.actions';
 
 const initialState = {
   visible: false,
@@ -10,13 +10,13 @@ const initialState = {
 export function messagesReducer(state = initialState, action) {
 
   switch (action.type) {
-    case VIEW_ACTIONS.ADD_MESSAGE:
+    case actions.addMessage:
       return {
         visible: true,
         severity: action.payload.severity,
         message : action.payload.msg
       };
-    case VIEW_ACTIONS.REMOVE_MESSAGE:
+    case actions.removeMessage:
       return {
         visible: false
       };

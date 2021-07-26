@@ -43,6 +43,7 @@ export const INITIAL_EXPERIMENT_TABLE_COLS: ISmCol[] = [
     static: true,
     header: 'TAGS',
     style: {width: '300px'},
+    andFilter: true
   },
   {
     id          : EXPERIMENTS_TABLE_COL_FIELDS.STATUS,
@@ -136,7 +137,7 @@ export const INITIAL_EXPERIMENT_TABLE_COLS: ISmCol[] = [
   }
 ];
 
-export const EXPERIMENT_INFO_ONLY_FIELDS = [
+export const EXPERIMENT_INFO_ONLY_FIELDS_BASE = [
   'id',
   'name',
   'user.name',
@@ -197,7 +198,8 @@ export const EXPERIMENT_INFO_ONLY_FIELDS = [
   'last_worker',
   'tags',
   'active_duration',
-  'container'
+  'container',
+  'runtime'
 ];
 
 export const MINIMUM_ONLY_FIELDS = ['system_tags', 'project', 'company', 'last_change', 'started', 'last_iteration', 'tags', 'user.name'];

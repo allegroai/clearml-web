@@ -1,0 +1,25 @@
+@import "./../shared/ui-components/styles/variables";
+@import "./../layout/layout.scss";
+
+:host {
+  .experiment-body {
+    width: 100%;
+    height: calc(100% - #{$project-header-height});
+    transition: height 0.3s;
+    &.footer-visible {
+      height: calc(100% - #{$project-header-height + $project-footer-height});
+    }
+  }
+
+  .info-disabled {
+    pointer-events: none;
+  }
+
+  .experiment-info-container {
+    transition: 0.3s;
+    &.hide-experiment-info {
+      width: 0 !important;
+      max-width: 0 !important;
+    }
+  }
+}

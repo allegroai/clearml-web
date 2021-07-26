@@ -5,6 +5,9 @@
   z-index: 1000;
   width: 100%;
   font-size: 14px;
+  .mat-form-field{
+    padding-top: 3px;
+  }
 
   .vertical-layout {
     font-size: 13px;
@@ -50,21 +53,6 @@
 
     }
   }
-
-  //::ng-deep .mat-form-field-appearance-outline:not(.data-text) .mat-form-field-outline {
-  //  top: 16px;
-  //  bottom: 4px;
-  //  background-color: transparent;
-  //  color: $grey-purple
-  //}
-  //
-  //::ng-deep .mat-form-field-appearance-outline .mat-form-field-flex {
-  //  margin-top: -6px !important;
-  //
-  //  .mat-select-value {
-  //    color: $blue-400;
-  //  }
-  //}
 }
 
 .x-axis-options {

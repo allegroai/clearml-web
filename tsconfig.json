@@ -23,7 +23,8 @@
     ],
     "baseUrl": "./",
     "paths": {
-      "@common/*": ["app/webapp-common/*"]
+      "@common/*": ["app/webapp-common/*"],
+      "~/*": ["app/*"]
     }
   },
   "angularCompilerOptions": {

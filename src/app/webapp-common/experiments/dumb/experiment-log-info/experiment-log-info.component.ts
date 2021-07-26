@@ -51,6 +51,7 @@ export class ExperimentLogInfoComponent implements OnInit, OnDestroy {
 
   @ViewChild('LogContainer', {static: true}) private logContainer: CdkVirtualScrollViewport;
   @Input() beginningOfLog: boolean;
+  @Input() isDarkTheme: boolean;
   private hasAnsi: any;
 
   @Input() set filterString(filter: string) {

@@ -2,10 +2,10 @@ import {ItemFooterModel, IFooterState} from './footer-items.models';
 import {IconNames, ICONS} from '../../../constants';
 import {map} from 'rxjs/operators';
 import {Observable} from 'rxjs/internal/Observable';
-import {MENU_ITEM_ID} from '../items.utils';
+import {MenuItems} from '../items.utils';
 
 export class DequeueFooterItem<T = any> extends ItemFooterModel {
-  id = MENU_ITEM_ID.DEQUEUE;
+  id = MenuItems.dequeue;
   emit = true;
   icon = ICONS.DEQUEUE as Partial<IconNames>;
 

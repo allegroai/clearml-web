@@ -1,17 +1,17 @@
 import {Injectable} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {Actions, createEffect, Effect, ofType} from '@ngrx/effects';
+import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {Action, Store} from '@ngrx/store';
 import {get, isEqual, uniq} from 'lodash/fp';
 import {of} from 'rxjs';
 import {auditTime, catchError, filter, map, mergeMap, switchMap, tap, withLatestFrom} from 'rxjs/operators';
 import {ApiModelsService} from '../../../business-logic/api-services/models.service';
 import {BlModelsService} from '../../../business-logic/services/models.service';
-import {RequestFailed} from '../../core/actions/http.actions';
-import {ActiveLoader, DeactiveLoader, SetServerError} from '../../core/actions/layout.actions';
+import {requestFailed} from '../../core/actions/http.actions';
+import {activeLoader, deactivateLoader, setServerError} from '../../core/actions/layout.actions';
 import {setArchive as setProjectArchive} from '../../core/actions/projects.actions';
 import {setURLParams} from '../../core/actions/router.actions';
-import {selectIsArchivedMode, selectIsDeepMode} from '../../core/reducers/projects.reducer';
+import {selectIsArchivedMode, selectIsDeepMode, selectSelectedProjectId} from '../../core/reducers/projects.reducer';
 import {selectRouterParams} from '../../core/reducers/router-reducer';
 import {selectAppVisible} from '../../core/reducers/view-reducer';
 import {addMultipleSortColumns, escapeRegex, getRouteFullUrl} from '../../shared/utils/shared-utils';
@@ -25,23 +25,22 @@ import {IModelsViewState} from '../reducers/models-view.reducer';
 import {MODEL_TAGS, MODELS_ONLY_FIELDS, MODELS_TABLE_COL_FIELDS} from '../shared/models.const';
 import {SelectedModel} from '../shared/models.model';
 import {ApiUsersService} from '../../../business-logic/api-services/users.service';
-import {EXPERIMENTS_TABLE_COL_FIELDS} from '../../../features/experiments/shared/experiments.const';
 import {ModelsGetAllExRequest} from '../../../business-logic/model/models/modelsGetAllExRequest';
 import {encodeColumns, encodeOrder} from '../../shared/utils/tableParamEncode';
 import {EmptyAction} from '../../../app.constants';
 import {ApiProjectsService} from '../../../business-logic/api-services/projects.service';
 import {ICommonSearchState} from '../../common-search/common-search.reducer';
-import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {SortMeta} from 'primeng/api';
 import {
   CountAvailableAndIsDisableSelectedFiltered,
-  MENU_ITEM_ID,
+  MenuItems,
   selectionDisabledArchive,
   selectionDisabledDelete,
   selectionDisabledMoveTo,
   selectionDisabledPublishModels,
   selectionDisabledTags
 } from '../../shared/entity-page/items.utils';
+import {FilterMetadata} from 'primeng/api/filtermetadata';
 
 @Injectable()
 export class ModelsViewEffects {
@@ -52,67 +51,68 @@ export class ModelsViewEffects {
   ) {
   }
 
-  @Effect()
-  activeLoader = this.actions$.pipe(
-    ofType(actions.GET_NEXT_MODELS, actions.globalFilterChanged.type,
-      actions.TABLE_SORT_CHANGED, actions.TABLE_FILTER_CHANGED, actions.REFRESH_MODELS,
-      actions.afterSetArchive.type),
-    filter((action) => !get('payload.hideLoader', action)),
-    map(() => new ActiveLoader('Fetch Models'))
-  );
+  activeLoader = createEffect( () => this.actions$.pipe(
+    ofType(actions.getNextModels, actions.globalFilterChanged, actions.fetchModelsRequested,
+      actions.tableSortChanged, actions.tableFilterChanged, actions.refreshModels,
+      actions.afterSetArchive, actions.getUsers, actions.setTableFilters),
+    filter((action) => !(action as ReturnType<typeof actions.refreshModels>).hideLoader),
+    map(() => activeLoader('Fetch Models'))
+  ));
 
-  @Effect()
-  tableSortChange = this.actions$.pipe(
+  tableSortChange = createEffect( () => this.actions$.pipe(
     ofType(actions.tableSortChanged),
-    withLatestFrom(this.store.select(selectTableSortFields)),
-    switchMap(([action, oldOrders]) => {
-      let orders = addMultipleSortColumns(oldOrders, action.colId, action.isShift);
-      return [actions.setTableSort({orders})];
+    withLatestFrom(
+      this.store.select(selectTableSortFields),
+      this.store.select(selectSelectedProjectId),
+    ),
+    switchMap(([action, oldOrders, projectId]) => {
+      const orders = addMultipleSortColumns(oldOrders, action.colId, action.isShift);
+      return [actions.setTableSort({orders, projectId})];
     })
-  );
+  ));
 
-  @Effect()
-  reFetchModels = this.actions$.pipe(
-    ofType(actions.FETCH_MODELS_REQUESTED, actions.globalFilterChanged.type,
-      actions.TABLE_SORT_CHANGED, actions.TABLE_FILTER_CHANGED, actions.afterSetArchive.type),
+  reFetchModels = createEffect( () => this.actions$.pipe(
+    ofType(
+      actions.fetchModelsRequested, actions.globalFilterChanged, actions.showSelectedOnly,
+      actions.tableSortChanged, actions.tableFilterChanged, actions.afterSetArchive.type,
+      actions.setTableFilters
+    ),
     auditTime(50),
     switchMap(() => this.fetchModels$(0)
       .pipe(
         mergeMap(res => [
-          new actions.SetNoMoreModels((res.models.length < MODELS_PAGE_SIZE)),
-          new actions.SetModels(res.models),
-          new actions.SetCurrentPage(0),
-          new DeactiveLoader('Fetch Models')
+          actions.setNoMoreModels({payload: (res.models.length < MODELS_PAGE_SIZE)}),
+          actions.setModels({models: res.models}),
+          actions.setCurrentPage({page: 0}),
+          deactivateLoader('Fetch Models')
         ]),
-        catchError(error => [new RequestFailed(error), new DeactiveLoader('Fetch Models'), new SetServerError(error, null, 'Fetch Models failed')])
+        catchError(error => [requestFailed(error), deactivateLoader('Fetch Models'), setServerError(error, null, 'Fetch Models failed')])
       )
     )
-  );
-  @Effect()
-  getFrameworksEffect = this.actions$.pipe(
+  ));
+
+  getFrameworksEffect = createEffect( () => this.actions$.pipe(
     ofType(actions.getFrameworks),
     withLatestFrom(
       this.store.select(selectRouterParams).pipe(map(params => get('projectId', params))),
     ),
-    switchMap(([action, projectId]) => this.apiModels.modelsGetFrameworks({projects: projectId !== '*' ? [projectId] : []})
+    switchMap(([, projectId]) => this.apiModels.modelsGetFrameworks({projects: projectId !== '*' ? [projectId] : []})
       .pipe(
         mergeMap(res => [
           actions.setFrameworks({frameworks: res.frameworks.concat(null)}),
         ]),
         catchError(error => [
-          new RequestFailed(error),
-          new SetServerError(error, null, 'Fetch frameworks failed')]
+          requestFailed(error),
+          setServerError(error, null, 'Fetch frameworks failed')]
         )
       )
     )
-  );
+  ));
 
-
-  @Effect()
-  getFilteredUsersEffect = this.actions$.pipe(
+  getFilteredUsersEffect = createEffect( () => this.actions$.pipe(
     ofType(actions.getFilteredUsers),
     withLatestFrom(this.store.select(modelsSelectors.selectModelsUsers), this.store.select(modelsSelectors.selectTableFilters)),
-    switchMap(([action, users, filters]) => this.usersApi.usersGetAllEx({
+    switchMap(([, users, filters]) => this.usersApi.usersGetAllEx({
       order_by: ['name'],
       only_fields: ['name'],
       id: get(['user.name', 'value'], filters) || []
@@ -121,42 +121,42 @@ export class ModelsViewEffects {
         actions.setUsers({users: uniq(res.users.concat(users))}),
       ]),
       catchError(error => [
-        new RequestFailed(error),
-        new SetServerError(error, null, 'Fetch users failed')]
+        requestFailed(error),
+        setServerError(error, null, 'Fetch users failed')]
       )
     ))
-  );
+  ));
 
-  @Effect()
-  getUsersEffect = this.actions$.pipe(
+  getUsersEffect = createEffect( () => this.actions$.pipe(
     ofType(actions.getUsers),
     withLatestFrom(
       this.store.select(selectRouterParams).pipe(map(params => get('projectId', params))),
       this.store.select(modelsSelectors.selectTableFilters)
     ),
-    switchMap(([action, projectId, filters]) => this.usersApi.usersGetAllEx({order_by: ['name'], only_fields: ['name'], active_in_projects: projectId !== '*' ? [projectId] : []})
-      .pipe(
-        mergeMap(res => {
-          const userFiltersValue = get([MODELS_TABLE_COL_FIELDS.USER, 'value'], filters) || [];
-          const resIds = res.users.map(user => user.id);
-          const shouldGetFilteredUsersNames = !(userFiltersValue.every(id => resIds.includes(id)));
-          return [
-            actions.setUsers(res),
-            shouldGetFilteredUsersNames ? actions.getFilteredUsers() : new EmptyAction(),
-            new DeactiveLoader(action.type)
-          ];
-        }),
-        catchError(error => [
-          new RequestFailed(error),
-          new DeactiveLoader(action.type),
-          new SetServerError(error, null, 'Fetch users failed')]
-        )
-      )
-    )
-  );
+    switchMap(([action, projectId, filters]) => this.usersApi.usersGetAllEx({
+      order_by: ['name'],
+      only_fields: ['name'],
+      active_in_projects: projectId !== '*' ? [projectId] : []
+    }).pipe(
+      mergeMap(res => {
+        const userFiltersValue = get([MODELS_TABLE_COL_FIELDS.USER, 'value'], filters) || [];
+        const resIds = res.users.map(user => user.id);
+        const shouldGetFilteredUsersNames = !(userFiltersValue.every(id => resIds.includes(id)));
+        return [
+          actions.setUsers(res),
+          shouldGetFilteredUsersNames ? actions.getFilteredUsers() : new EmptyAction(),
+          deactivateLoader('Fetch Models')
+        ];
+      }),
+      catchError(error => [
+        requestFailed(error),
+        deactivateLoader('Fetch Models'),
+        setServerError(error, null, 'Fetch users failed')
+      ])
+    ))
+  ));
 
-  @Effect()
-  getTagsEffect = this.actions$.pipe(
+  getTagsEffect = createEffect( () => this.actions$.pipe(
     ofType(actions.getTags),
     withLatestFrom(this.store.select(selectRouterParams).pipe(map(params => get('projectId', params)))),
     switchMap(([action, projectId]) => this.projectsApi.projectsGetModelTags({
@@ -164,20 +164,18 @@ export class ModelsViewEffects {
     }).pipe(
       mergeMap(res => [
         actions.setTags({tags: res.tags.concat(null)}),
-        new DeactiveLoader(action.type)
+        deactivateLoader('Fetch Models')
       ]),
       catchError(error => [
-        new RequestFailed(error),
-        new DeactiveLoader(action.type),
-        new SetServerError(error, null, 'Fetch tags failed')]
+        requestFailed(error),
+        deactivateLoader('Fetch Models'),
+        setServerError(error, null, 'Fetch tags failed')]
       )
     ))
-  );
+  ));
 
-
-  @Effect()
-  refreshModels = this.actions$.pipe(
-    ofType<actions.RefreshModels>(actions.REFRESH_MODELS),
+  refreshModels = createEffect( () => this.actions$.pipe(
+    ofType(actions.refreshModels),
     withLatestFrom(
       this.store.select(modelsSelectors.selectCurrentPage),
       this.store.select(modelsSelectors.selectSelectedModel),
@@ -187,7 +185,7 @@ export class ModelsViewEffects {
     switchMap(([action, page, selectedModel, models]) => this.fetchModels$(page, true)
       .pipe(
         mergeMap(res => {
-          const resActions: Action[] = [new DeactiveLoader('Fetch Models')];
+          const resActions: Action[] = [deactivateLoader('Fetch Models')];
           if (selectedModel) {
             if (get('payload.hideLoader', action)) {
               resActions.push(new RefreshModelInfo(selectedModel.id));
@@ -195,56 +193,42 @@ export class ModelsViewEffects {
               resActions.push(new GetModelInfo(selectedModel.id));
             }
           }
-          if (selectedModel && action.payload.autoRefresh && isEqual(models.map(model => model.id).sort(), res.models.map(model => model.id).sort())) {
+          if (selectedModel && action.autoRefresh && isEqual(models.map(model => model.id).sort(), res.models.map(model => model.id).sort())) {
             resActions.push(actions.setModelsInPlace({models: res.models}));
           } else {
-            resActions.push(new actions.SetModels(res.models));
+            resActions.push(actions.setModels({models: res.models}));
           }
           return resActions;
         }),
         catchError(error => [
-          new RequestFailed(error),
-          new DeactiveLoader('Fetch Models'),
-          new SetServerError(error, null, 'Fetch Models failed', action.payload.autoRefresh)
+          requestFailed(error),
+          deactivateLoader('Fetch Models'),
+          setServerError(error, null, 'Fetch Models failed', action.autoRefresh)
         ])
       )
     )
-  );
-  @Effect()
-  getModels = this.actions$.pipe(
-    ofType<actions.GetNextModels>(actions.GET_NEXT_MODELS),
+  ));
+
+  getModels = createEffect( () => this.actions$.pipe(
+    ofType(actions.getNextModels),
     withLatestFrom(this.store.select(modelsSelectors.selectCurrentPage)),
-    switchMap(([action, page]) =>
+    switchMap(([, page]) =>
       this.fetchModels$(page + 1)
         .pipe(
           mergeMap(res => [
-            new actions.SetNoMoreModels((res.models.length < MODELS_PAGE_SIZE)),
-            new actions.AddModels(res.models),
-            new actions.SetCurrentPage(page + 1),
-            new DeactiveLoader('Fetch Models')
+            actions.setNoMoreModels({payload: (res.models.length < MODELS_PAGE_SIZE)}),
+            actions.addModels({models: res.models}),
+            actions.setCurrentPage({page: page + 1}),
+            deactivateLoader('Fetch Models')
           ]),
-          catchError(error => [new RequestFailed(error), new DeactiveLoader('Fetch Models'), new SetServerError(error, null, 'Fetch Models failed')])
+          catchError(error => [requestFailed(error), deactivateLoader('Fetch Models'), setServerError(error, null, 'Fetch Models failed')])
         )
     )
-  );
+  ));
 
-  @Effect()
-  showAllSelected = this.actions$.pipe(
-    ofType<actions.ShowAllSelected>(actions.SHOW_ALL_SELECTED),
-    mergeMap(action => [new actions.SetShowAllSelectedIsActive(action.payload), new actions.FetchModelsRequested()]),
-  );
-
-  @Effect()
-  changeColumnsOrder = this.actions$.pipe(
-    ofType(actions.changeColsOrder),
-    withLatestFrom(this.store.select(selectRouterParams).pipe(map(params => get('projectId', params)))),
-    mergeMap(([action, projectId]) => [actions.setColsOrderForProject({cols: action.cols, project: projectId})])
-  );
-
-
-  @Effect()
-  updateModelsUrlParams = this.actions$.pipe(
+  updateModelsUrlParams = createEffect( () => this.actions$.pipe(
     ofType(actions.setColsOrderForProject, actions.toggleColHidden),
+    filter(action => !(action as ReturnType<typeof actions.setColsOrderForProject>)?.fromUrl),
     withLatestFrom(
       this.store.select(modelsSelectors.selectTableFilters),
       this.store.select(modelsSelectors.selectTableSortFields),
@@ -253,7 +237,7 @@ export class ModelsViewEffects {
       this.store.select(modelsSelectors.selectModelsHiddenTableCols),
       this.store.select(selectIsDeepMode)
     ),
-    mergeMap(([action, filters, sortFields, isArchived, colsOrder, hiddenCols, isDeep]) =>
+    mergeMap(([, filters, sortFields, isArchived, colsOrder, hiddenCols, isDeep]) =>
       [setURLParams({
         filters: filters as any,
         orders: sortFields,
@@ -262,29 +246,29 @@ export class ModelsViewEffects {
         columns: encodeColumns(MODELS_TABLE_COLS, hiddenCols, [], colsOrder)
       })]
     )
-  );
+  ));
 
-  @Effect()
-  modelSelectionChanged = this.actions$.pipe(
-    ofType<actions.ModelSelectionChanged>(actions.MODEL_SELECTION_CHANGED),
-    tap(action => this.navigateAfterModelSelectionChanged(action.payload.model, action.payload.project)),
-    map(action => new actions.SetSelectedModel(action.payload.model))
-  );
+  modelSelectionChanged = createEffect( () => this.actions$.pipe(
+    ofType(actions.modelSelectionChanged),
+    tap(action => this.navigateAfterModelSelectionChanged(action.model, action.project)),
+    mergeMap(() => [])
+    // map(action => actions.setSelectedModel({model: action.model}))
+  ));
 
-
-  @Effect()
-  setArchiveMode = this.actions$.pipe(
+  setArchiveMode = createEffect( () => this.actions$.pipe(
     ofType(actions.setArchive),
     switchMap(action => [setProjectArchive(action), actions.afterSetArchive()])
-  );
+  ));
 
   getGetAllQuery(
     page: number, pageSize: number, projectId: string, searchQuery: ICommonSearchState['searchQuery'],
     isArchivedMode: boolean, orderFields: SortMeta[], tableFilters: { [key: string]: FilterMetadata }, ids: string[] = [], isDeepMode: boolean
   ): ModelsGetAllExRequest {
-    const userFilter = get([EXPERIMENTS_TABLE_COL_FIELDS.USER, 'value'], tableFilters);
-    const tagsFilter = get([MODELS_TABLE_COL_FIELDS.TAGS, 'value'], tableFilters);
+    const userFilter = get([MODELS_TABLE_COL_FIELDS.USER, 'value'], tableFilters);
+    const tagsFilter = tableFilters?.[MODELS_TABLE_COL_FIELDS.TAGS]?.value;
+    const tagsFilterAnd = tableFilters?.[MODELS_TABLE_COL_FIELDS.TAGS]?.matchMode === 'AND';
     const systemTags = get(['system_tags', 'value'], tableFilters);
+    const frameworkFilter = get([MODELS_TABLE_COL_FIELDS.FRAMEWORK, 'value'], tableFilters);
     const systemTagsFilter = (isArchivedMode ? [MODEL_TAGS.HIDDEN] : ['-' + MODEL_TAGS.HIDDEN])
       .concat(systemTags ? systemTags : []);
     return {
@@ -299,11 +283,11 @@ export class ModelsViewEffects {
       include_subprojects: isDeepMode,
       order_by: encodeOrder(orderFields),
       system_tags: (systemTagsFilter && systemTagsFilter.length > 0) ? systemTagsFilter : [],
-      tags: (tagsFilter && tagsFilter.length > 0) ? tagsFilter : [],
       only_fields: MODELS_ONLY_FIELDS,
+      ...(tagsFilter?.length > 0 && {tags: tagsFilterAnd ? ['__$and', ...tagsFilter] : tagsFilter}),
+      ...(frameworkFilter?.length > 0 && {framework: frameworkFilter}),
+      ...(userFilter?.length > 0 && {user: userFilter}),
       ready: this.getReadyFilter(tableFilters),
-      framework: get([MODELS_TABLE_COL_FIELDS.FRAMEWORK, 'value'], tableFilters) || [],
-      user: (userFilter && userFilter.length > 0) ? userFilter : []
     };
   }
 
@@ -323,7 +307,7 @@ export class ModelsViewEffects {
           this.store.select(modelsSelectors.selectModelsHiddenTableCols),
           this.store.select(selectIsDeepMode),
         ),
-        switchMap(([pageNumber, projectId, isArchived, gb, sortFields, filters, selectedModels, showAllSelectedIsActive, colsOrder, hiddenCols, isDeep]) => {
+        switchMap(([, projectId, isArchived, gb, sortFields, filters, selectedModels, showAllSelectedIsActive, colsOrder, hiddenCols, isDeep]) => {
           const selectedModelsIds = showAllSelectedIsActive ? selectedModels.map(exp => exp.id) : [];
           const pageToGet = getAllPages ? 0 : page;
           const pageSize = getAllPages ? (page + 1) * MODELS_PAGE_SIZE : MODELS_PAGE_SIZE;
@@ -336,18 +320,19 @@ export class ModelsViewEffects {
 
   setSelectedModels = createEffect(() => {
       return this.actions$.pipe(
-        ofType<actions.SetSelectedModels>(actions.SET_SELECTED_MODELS, actions.UPDATE_ONE_MODELS),
+        ofType(actions.setSelectedModels, actions.updateModel),
         withLatestFrom(
           this.store.select(selectSelectedModels),
         ),
         switchMap(([action, selectedModels]) => {
-          const payload = action.type === actions.SET_SELECTED_MODELS ? action.payload : selectedModels;
+          const payload = action.type === actions.setSelectedModels.type ?
+            (action as ReturnType<typeof actions.setSelectedModels>).models : selectedModels;
           const selectedModelsDisableAvailable: Record<string, CountAvailableAndIsDisableSelectedFiltered> = {
-            [MENU_ITEM_ID.PUBLISH]: selectionDisabledPublishModels(payload),
-            [MENU_ITEM_ID.ARCHIVE]: selectionDisabledArchive(payload),
-            [MENU_ITEM_ID.MOVE_TO]: selectionDisabledMoveTo(payload),
-            [MENU_ITEM_ID.DELETE]: selectionDisabledDelete(payload),
-            [MENU_ITEM_ID.TAGS]: selectionDisabledTags(payload),
+            [MenuItems.publish]: selectionDisabledPublishModels(payload),
+            [MenuItems.archive]: selectionDisabledArchive(payload),
+            [MenuItems.moveTo]: selectionDisabledMoveTo(payload),
+            [MenuItems.delete]: selectionDisabledDelete(payload),
+            [MenuItems.tags]: selectionDisabledTags(payload),
           };
           return [setSelectedModelsDisableAvailable({selectedModelsDisableAvailable})];
         })
@@ -356,7 +341,7 @@ export class ModelsViewEffects {
   );
 
   setModelsUrlParams(filters, sortFields, isArchived, columns, isDeep) {
-    this.store.dispatch(setURLParams({filters, orders: sortFields, isArchived, columns: columns, isDeep}));
+    this.store.dispatch(setURLParams({filters, orders: sortFields, isArchived, columns, isDeep}));
   }
 
   getReadyFilter(tableFilters) {

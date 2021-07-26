@@ -2,42 +2,44 @@
 
 :host {
   .worker-info-container {
-    padding: 0px 5px;
+    padding: 12px 0;
   }
 
   ::ng-deep .table-row {
+    line-height: unset !important;
+    height: 40px;
     background-color: $blue-800 !important;
-    border-bottom: 1px solid #323950 !important;
+    border-bottom: 1px solid #303443 !important;
   }
 
   ::ng-deep .row.headers {
-    //border-bottom: none !important;
-    font-weight: bold;
-    border-bottom: 1px solid #323950 !important;
+    line-height: 48px !important;
+    border-bottom: 1px solid #303443 !important;
+    color: $blue-400;
   }
 
-  .queues-table-container {
-    padding: 0 20px;
-  }
+  //.queues-table-container {
+  //  padding: 0 20px;
+  //}
 
   .tabs-container {
     position: relative;
     background-color: $blue-800;
-    border-bottom: 1px solid #383F60;
-    margin: 0 20px 10px 20px;
-    height: 42px;
+    border-bottom: 1px solid #303443;
+    margin: 12px 0 0 0;
+    height: 38px;
 
     ::ng-deep .navbar-item {
-      height: 42px;
+      height: 100%;
       padding: 0 15px;
-      margin: 0 20px;
+      margin: 0 1px;
     }
   }
 
   .pull-right {
     position: absolute;
-    right: 5px;
-    top: 5px;
+    right: 24px;
+    top: 0;
   }
 
   .id-cell {
@@ -48,12 +50,16 @@
     .copy-btn {
       min-width: 30px;
       margin-left: 5px;
-      display: none;
+      visibility: hidden;
+
+      ::ng-deep .btn {
+        padding: 0;
+      }
     }
 
     &:hover {
       .copy-btn {
-        display: inline-block;
+        visibility: visible;
       }
     }
   }

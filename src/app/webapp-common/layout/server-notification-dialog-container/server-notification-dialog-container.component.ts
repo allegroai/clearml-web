@@ -3,7 +3,7 @@ import {select, Store} from '@ngrx/store';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import {selectNotification} from '../../core/reducers/view-reducer';
 import {filter, take} from 'rxjs/operators';
-import {SetNotificationDialog, SetServerError} from '../../core/actions/layout.actions';
+import {setNotificationDialog} from '../../core/actions/layout.actions';
 import {Subscription} from 'rxjs';
 import {ConfirmDialogComponent} from '../../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 
@@ -35,7 +35,7 @@ export class ServerNotificationDialogContainerComponent implements OnInit, OnDes
         });
 
         this.dialogRef.afterClosed().pipe(take(1)).subscribe(() => {
-          this.store.dispatch(new SetNotificationDialog(null));
+          this.store.dispatch(setNotificationDialog(null));
         });
       });
   }

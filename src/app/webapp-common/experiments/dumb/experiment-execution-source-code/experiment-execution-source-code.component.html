@@ -6,7 +6,7 @@
         <input matInput [ngModel]="formData?.repository" name="repository">
       </mat-form-field>
     </sm-labeled-row>
-    <sm-labeled-row [label]="editable ? '' : 'COMMIT ID'">
+    <sm-labeled-row [label]="editable ? 'COMMIT' : (formData?.scriptType| replaceViaMapPipe:flagNameMap)">
       <div *ngIf="!editable">
         <div [ngSwitch]="formData?.scriptType">
           <div *ngSwitchCase="sourceTypesEnum.VersionNum">
@@ -22,7 +22,7 @@
       </div>
       <div class="d-flex" *ngIf="editable">
         <mat-form-field appearance="outline" class="col-12">
-          <mat-label>Flag</mat-label>
+          <mat-label>Type</mat-label>
           <mat-select #scriptType [ngModel]="formData?.scriptType" panelClass="light-theme" name="scriptType">
             <mat-option *ngFor="let type of scriptTypeOptions" [value]="type.value">{{type.label}}</mat-option>
           </mat-select>

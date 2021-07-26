@@ -12,8 +12,11 @@
   <cdk-virtual-scroll-viewport #scroll itemSize="19" minBufferPx = 400, maxBufferPx = 600
                                class="viewport"
                                [class.isReadonly]="!editable">
-    <div *cdkVirtualFor="let line of lines" class="line"><span *ngFor="let part of line.split(search); let last=last">{{part}}<span class="found" *ngIf="!last">{{search}}</span></span></div>
+    <div *cdkVirtualFor="let line of lines" class="line"><span
+      *ngFor="let part of (search ? line.split(search) : [line]); let last=last"
+      >{{part}}<span class="found" *ngIf="!last"
+        >{{search}}</span></span></div>
   </cdk-virtual-scroll-viewport>
 </div>
-<span *ngIf="!showSpinner && !lines?.length && !editable" class="no-changes">No changes logged</span>
+<span *ngIf="!showSpinner && !lines?.length && !editable" class="no-changes">{{emptyMessage}}</span>
 <mat-spinner [diameter]="50" *ngIf="showSpinner"></mat-spinner>

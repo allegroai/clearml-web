@@ -2,31 +2,15 @@
 @import "../../webapp-common/shared/ui-components/styles/variables";
 
 :host {
-  .projects.row {
-    min-height: 228px;
-  }
-
-  .datasets.row {
-    min-height: 228px;
+  .dashboard-body {
+    height: 100%;
+    padding: 0 24px;
+    overflow: auto;
   }
 
   .recent {
     height: 100%;
     overflow: auto;
-    @include recent-title();
-
-    .recent-title {
-      color: #5d6787;
-      margin-top: 20px;
-    }
-
-    .right {
-      text-align: right;
-    }
-
-    .recent-row {
-      margin-top: 30px;
-    }
   }
 
   .search-bar {
@@ -66,7 +50,8 @@
 
   sm-dashboard-experiments {
     display: block;
-    height: calc(100% - 344px);
+    margin: 0 auto;
+    height: calc(100% - 356px);
   }
 
   .dashboard-search {

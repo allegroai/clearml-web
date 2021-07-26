@@ -1,27 +1,28 @@
-@import "../../../shared/ui-components/styles/variables";
+@import "variables";
 
 :host {
+  .title {
+    color: $blue-400;
+    flex-basis: 84%;
+  }
+
   .variant-label {
-    display: flex;
-    height: 26px;
+    padding: 4px 6px;
 
     sm-checkbox-control {
       width: 100%;
-    }
-
-    ::ng-deep .checkbox-label {
-      margin-left: 5px;
     }
   }
 
   .value-type {
     display: flex;
     align-items: center;
-    height: 30px;
+    height: 42px;
     margin-left: 24px;
+    padding-left: 18px;
     font-size: 11px;
     font-weight: bold;
-    background-color: #f9fafb;
+    background-color: $blue-25;
 
     sm-checkbox-control {
       width: 100%;
@@ -33,47 +34,45 @@
     }
   }
 
-  ::ng-deep .mat-expansion-panel-header {
+  mat-expansion-panel {
+    box-shadow: none;
+    font-weight: bold;
+    color: $blue-400;
 
-    .mat-expansion-indicator {
-      height: 25px;
-      width: 45px;
-      text-align: center;
-    }
+    mat-expansion-panel-header {
+      padding: 7px 24px 7px 4px;
+      border-radius: 0;
+      border-bottom: 1px solid $blue-100;
 
-    .mat-expansion-indicator::after {
-      color: $light-grey-blue;
-    }
-
-    &.mat-expanded, .mat-expanded:focus {
-      background: #f4f7ff !important;
-      font-weight: bold;
-
-      .mat-expansion-indicator {
-        height: 22px;
+      &.mat-expanded {
+        background-color: $blue-50;
+        border-radius: 0;
+        border-bottom: none;
+        font-weight: bold;
       }
-    }
 
-
-  }
-
-  ::ng-deep .mat-expansion-panel {
-    font-size: 13px !important;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-
-    .mat-expansion-panel-header {
-      font-size: 13px !important;
-    }
-
-    .mat-expansion-panel-content {
-      margin-left: 5px;
-      font-size: 13px !important;
+      .panel-title {
+        font-size: 13px;
+        color: $blue-400;
+      }
     }
   }
 
   ::ng-deep .mat-expansion-panel-body {
-    padding: 0;
+    padding: 4px 4px 0;
+  }
 
+  .metrics {
+    height: calc(100% - 32px);
+    width: 100%;
+    overflow-y: scroll;
+
+    &.has-title {
+      height: calc(100% - #{32px + 49px});
+    }
+  }
+
+  .metric-expansion-content {
     li {
       &.list-item {
         padding: 0 47px 0 24px;
@@ -88,30 +87,7 @@
           background-color: $blue-50;
           transition: background-color 0.2s;
         }
-
       }
-
-    }
-
-  }
-
-  ::ng-deep .mat-expansion-panel-header-description {
-    flex-grow: 0;
-    color: $blue-400;
-  }
-
-  ::ng-deep .mat-expansion-panel {
-    box-shadow: none;
-    //border-bottom: 1px solid rgba(2, 2, 2, 0.07);
-    color: $blue-400;
-  }
-
-  ::ng-deep .mat-content {
-    padding-left: 5px;
-
-    .mat-expansion-panel-header-title {
-      color: $blue-400;
     }
   }
-
 }

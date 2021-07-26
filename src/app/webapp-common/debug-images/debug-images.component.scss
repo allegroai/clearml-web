@@ -15,12 +15,25 @@ sm-debug-images-view {
 }
 
 .no-images {
-  height: 100%;
+  text-align: center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translateY(-50%) translateX(-50%);
+  display: block;
   color: $cloudy-blue-two;
-  width: 100%;
-  background-repeat: repeat-y;
-  background-position: center calc(50vh - 300px);
-  background-size: unset;
+  font-size: 1.75rem;
+  font-weight: 500;
+  line-height: 1.2;
+
+  &.dark {
+    color: $blue-250;
+    font-size: 12px;
+    path {
+      opacity: 1;
+      fill: $dark-grey-blue;
+    }
+  }
 }
 
 .metric-bar {
@@ -56,6 +69,7 @@ sm-debug-images-view {
 .single-debug-images-container {
   display: block;
   overflow: hidden;
+  position: relative;
   flex: 1;
   min-width: 640px;
   min-height: 100%;

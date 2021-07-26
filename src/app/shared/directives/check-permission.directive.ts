@@ -14,7 +14,7 @@ export class CheckPermissionDirective implements OnDestroy{
   private blocked = true;
 
   @Input() set smCheckPermission(permission: boolean | string) {
-    this.blocked = !permission;
+    this.blocked = permission === false;
     this.setUpView();
   }
 

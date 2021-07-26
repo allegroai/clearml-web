@@ -3,8 +3,8 @@ import {Project} from '../../../../../business-logic/model/projects/project';
 import {Component, Inject, OnInit, ViewChild} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {asyncScheduler, Observable, Subscription} from 'rxjs';
-import {selectProjects} from '../../../../core/reducers/projects.reducer';
-import {GetAllProjects} from '../../../../core/actions/projects.actions';
+import {selectRootProjects} from '../../../../core/reducers/projects.reducer';
+import {GetAllSystemProjects} from '../../../../core/actions/projects.actions';
 import {map, startWith} from 'rxjs/operators';
 import {isReadOnly} from '../../../../shared/utils/shared-utils';
 import {isEqual} from 'lodash/fp';
@@ -48,15 +48,15 @@ export class ChangeProjectDialogComponent implements OnInit {
     this.selectedProjectId = data.defaultProject;
     this.currentProjects = Array.isArray(data.currentProjects) ? data.currentProjects : [data.currentProjects];
     this.reference = Array.isArray(data.reference) ? `${data.reference.length} ${data.type}s` : data.reference;
-    this.readOnlyProjects$ = this.store.select(selectProjects)
+    this.readOnlyProjects$ = this.store.select(selectRootProjects)
       .pipe(map(projects => projects.filter(project => isReadOnly(project)).map(project=> project.name).concat(this.currentProjectInstance?.name)));
-    this.projects$ = this.store.select(selectProjects).pipe(
+    this.projects$ = this.store.select(selectRootProjects).pipe(
       map(projects => projects.filter((project) => !isReadOnly(project)))
     );
   }
 
   ngOnInit(): void {
-    this.store.dispatch(new GetAllProjects());
+    this.store.dispatch(new GetAllSystemProjects());
     this.projectsSub = this.projects$.subscribe(projects => {
       if (this.currentProjects.length === 1) {
         this.currentProjectInstance = projects.find(proj => proj.id === this.currentProjects[0]);

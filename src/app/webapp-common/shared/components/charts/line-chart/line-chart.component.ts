@@ -1,4 +1,4 @@
-import {Component, OnInit, Input, ChangeDetectionStrategy, ViewChild, ViewContainerRef, ChangeDetectorRef} from '@angular/core';
+import {Component, Input, ChangeDetectionStrategy, ViewChild, ViewContainerRef, ChangeDetectorRef, AfterViewInit} from '@angular/core';
 import line from 'britecharts/dist/umd/line.min';
 import tooltip from 'britecharts/dist/umd/tooltip.min';
 import legend from 'britecharts/dist/umd/legend.min';
@@ -22,7 +22,7 @@ const COLOR_SCHEME = ['#a4a1fb', '#ff8a15'];
   styleUrls      : ['./line-chart.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class LineChartComponent implements OnInit {
+export class LineChartComponent implements AfterViewInit {
 
   private lineMargin = {top: 30, bottom: 50, left: 80, right: 10};
   private lineChartContainer: Selection<SVGElement, {}, HTMLElement, any>;
@@ -82,7 +82,7 @@ export class LineChartComponent implements OnInit {
   constructor(private cdr: ChangeDetectorRef) {
   }
 
-  ngOnInit() {
+  ngAfterViewInit() {
     this.legendChart        = legend();
     this.legendContainer    = select(this.legendRef.element.nativeElement);
     this.lineChart          = line();

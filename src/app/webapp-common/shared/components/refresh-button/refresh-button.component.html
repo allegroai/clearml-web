@@ -1,16 +1,17 @@
 <div class="refresh-wrapper d-flex flex-row-reverse align-items-center" [ngClass]="{'allow-autorefresh': allowAutoRefresh}">
-
-<i
-  class="fa fa-sync refresh-icon pointer"
-  style="padding-left: 3px; position:relative"
-  smTooltip="Refresh now" showDelay="0" matTooltipPosition="above"
-  (click)="refreshList.emit( ! autoRefreshState )">
-  <i *ngIf="allowAutoRefresh && autoRefreshState === false" class="fa fa-pause pause-icon" ></i>
-  <i *ngIf="allowAutoRefresh && autoRefreshState === true" class="fa fa-play pause-icon"></i>
-
-</i>
+  <span
+    *ngIf="allowAutoRefresh && autoRefreshState; else pause"
+    class="pl-1 al-icon al-ico-auto-refresh-play"
+    (click)="refreshList.emit(false)"
+  ><span class="path1"></span><span class="path2"></span></span>
+  <ng-template #pause>
+    <span
+      class="pl-1 al-icon al-ico-auto-refresh-pause"
+      (click)="refreshList.emit(false)"
+    ><span class="path1"></span><span class="path2"></span>
+    </span>
+  </ng-template>
   <mat-checkbox [ngModel]="autoRefreshState" name="autoRefresh" (ngModelChange)="setAutoRefresh.emit($event)" class="autorefresh-checkbox">
     Auto Refresh
   </mat-checkbox>
-
 </div>

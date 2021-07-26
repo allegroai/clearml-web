@@ -7,10 +7,10 @@ import {selectEntitiesFailedToDelete, selectFilesFailedToDelete, selectNumberOfS
 import {Observable} from 'rxjs/internal/Observable';
 import {Subject} from 'rxjs';
 import {deleteEntities, resetDeleteState} from './common-delete-dialog.actions';
-import {IProjectReadyForDeletion} from '../../../../features/projects/projects.reducer';
 import {getDeleteProjectPopupStatsBreakdown} from '../../../../features/projects/projects-page.utils';
 import {EntityTypeEnum} from '../../../../shared/constants/non-common-consts';
 import {takeUntil, tap} from 'rxjs/operators';
+import {CommonProjectReadyForDeletion} from '../../../projects/common-projects.reducer';
 
 
 @Component({
@@ -46,7 +46,7 @@ export class CommonDeleteDialogComponent implements OnInit, OnDestroy {
       numSelected: number;
       entity: Task;
       entityType: EntityTypeEnum;
-      projectStats: IProjectReadyForDeletion;
+      projectStats: CommonProjectReadyForDeletion;
       useCurrentEntity: boolean;
     },
     public dialogRef: MatDialogRef<CommonDeleteDialogComponent>
@@ -110,7 +110,7 @@ export class CommonDeleteDialogComponent implements OnInit, OnDestroy {
     this.isOpenEntities = !this.isOpenEntities;
   }
 
-  getMessageByEntity(entityType: EntityTypeEnum, stats?: IProjectReadyForDeletion): string {
+  getMessageByEntity(entityType: EntityTypeEnum, stats?: CommonProjectReadyForDeletion): string {
     switch (entityType) {
       case EntityTypeEnum.experiment:
         return 'This will also remove all captured logs, results, artifacts and debug samples.';

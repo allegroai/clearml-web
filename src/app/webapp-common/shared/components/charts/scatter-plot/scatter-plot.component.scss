@@ -1,0 +1,35 @@
+@import "variables";
+
+:host{
+  .chart {
+    ::ng-deep text {
+      fill: $blue-100;
+    }
+
+    ::ng-deep .extended-x-line {
+      stroke-width: 0;
+    }
+  }
+
+  color: $blue-600;
+  ::ng-deep .mini-tooltip-title {
+    fill: $blue-200 !important;
+  }
+
+  ::ng-deep .tooltip-background {
+    fill: black !important;
+    stroke: $blue-300 !important;
+  }
+  ::ng-deep .mini-tooltip-value {
+    fill: $blue-200 !important;
+  }
+
+  ::ng-deep .mini-tooltip-name {
+    font-size: 11px !important;
+    fill: $blue-200 !important;
+  }
+
+  ::ng-deep .vertical-grid-line, ::ng-deep .horizontal-grid-line {
+    opacity: 0.2;
+  }
+}

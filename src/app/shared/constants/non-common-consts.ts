@@ -1,17 +1,6 @@
 import {TaskStatusEnum} from '../../business-logic/model/tasks/taskStatusEnum';
 import {TaskTypeEnum} from '../../business-logic/model/tasks/taskTypeEnum';
 
-export interface ProjectRoute {
-  header: 'overview' | 'models' | 'experiments';
-  subHeader: string;
-}
-
-export const PROJECT_ROUTES = [
-  {header: 'overview', subHeader: ''},
-  {header: 'experiments', subHeader: '(ARCHIVED)'},
-  {header: 'models', subHeader: '(ARCHIVED)'},
-] as ProjectRoute[];
-
 export enum EntityTypeEnum {
   experiment = 'experiment',
   model = 'model',

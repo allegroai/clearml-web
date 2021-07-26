@@ -5,7 +5,6 @@ import {
   Component,
   ElementRef, HostListener,
   OnInit, QueryList,
-  ViewChild,
   ViewChildren
 } from '@angular/core';
 import {select, Store} from '@ngrx/store';
@@ -59,7 +58,6 @@ export class ExperimentCompareDetailsComponent extends ExperimentCompareBase imp
 
   ngOnInit() {
     this.onInit();
-
     this.routerParamsSubscription = this.taskIds$.subscribe((experimentIds: string) => this.store.dispatch(experimentListUpdated({ids: experimentIds.split(',')})));
 
     this.experimentsSubscription = this.experiments$.pipe(
@@ -94,11 +92,11 @@ export class ExperimentCompareDetailsComponent extends ExperimentCompareBase imp
       });
   }
 
-  buildCompareTree(experiments: Array<IExperimentDetail>): ExperimentCompareTree {
+  buildCompareTree(experiments: Array<IExperimentDetail>, hasDataFeature?: boolean): ExperimentCompareTree {
     const mergedExperiment = getAllKeysEmptyObject(experiments);
     return experiments
       .reduce((acc, cur) => {
-        acc[cur.id] = this.buildExperimentTree(cur, this.baseExperiment, mergedExperiment);
+        acc[cur.id] = this.buildExperimentTree(cur, this.baseExperiment, mergedExperiment, hasDataFeature);
 
         return acc;
       }, {} as ExperimentCompareTree);

@@ -11,7 +11,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {selectRouterQueryParams, selectRouterUrl} from '../../../core/reducers/router-reducer';
 import {get} from 'lodash/fp';
 import {selectAppVisible, selectAutoRefresh} from '../../../core/reducers/view-reducer';
-import {SetAutoRefresh} from '../../../core/actions/layout.actions';
+import {setAutoRefresh} from '../../../core/actions/layout.actions';
 import {AUTO_REFRESH_INTERVAL} from '../../../../app.constants';
 import {filter, withLatestFrom} from 'rxjs/operators';
 import {MatMenuTrigger} from '@angular/material/menu';
@@ -102,7 +102,7 @@ export class ExperimentCompareHeaderComponent implements OnInit, OnDestroy {
   }
 
   setAutoRefresh($event: boolean) {
-    this.store.dispatch(new SetAutoRefresh($event));
+    this.store.dispatch(setAutoRefresh({autoRefresh: $event}));
   }
 
   menuClosed() {

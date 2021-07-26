@@ -1,9 +1,9 @@
 import {Store} from '@ngrx/store';
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {selectLoading} from '../../../../core/reducers/view-reducer';
+import {selectLoading} from '@common/core/reducers/view-reducer';
 import {NavigationStart, Router} from '@angular/router';
-import {debounceTime, filter} from 'rxjs/operators';
-import {ResetLoader} from '../../../../core/actions/layout.actions';
+import {debounceTime, distinctUntilChanged, filter, map} from 'rxjs/operators';
+import {resetLoader} from '@common/core/actions/layout.actions';
 import {Subscription} from 'rxjs';
 
 @Component({
@@ -28,13 +28,16 @@ export class SpinnerComponent implements OnInit, OnDestroy {
     this.spinnerSubscribe = store.select(selectLoading)
       .pipe(
         debounceTime(300)
-      ).subscribe(loaders => this.showSpinner = Object.entries(loaders).some(([loader, value]) => !!value));
+      ).subscribe(loaders => this.showSpinner = Object.entries(loaders).some(([, value]) => !!value));
   }
 
   ngOnInit() {
     this.navEndSubscription = this.router.events
-      .pipe(filter(event => event instanceof NavigationStart))
-      .subscribe(event => this.store.dispatch(new ResetLoader()));
+      .pipe(
+        filter(event => event instanceof NavigationStart),
+        map((event: NavigationStart) => event.url.split('?')[0]),
+        distinctUntilChanged()
+      ).subscribe(() => this.store.dispatch(resetLoader()));
   }
 
   ngOnDestroy(): void {

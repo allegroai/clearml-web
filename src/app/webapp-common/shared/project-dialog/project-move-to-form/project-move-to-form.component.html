@@ -13,6 +13,7 @@
            [matAutocomplete]="auto"
            [ngModel]="project.parent"
            name="projectName"
+           placeholder="Search for project path"
            #projectInputRef
            #projectInput="ngModel"
            smUniquePathValidator
@@ -24,7 +25,8 @@
            [existingNames]="[projectName | projectLocation]"
            required
            minlength="3"
-           (keydown.enter)="projectInput.control.markAsTouched() "
+           (keydown.enter)="projectInput.control.markAsTouched()"
+           (click)="project.parent && clear(); projectInputRef.blur(); projectInputRef.focus()"
     >
     <span matSuffix *ngIf="projectInput.value && (!isAutoCompleteOpen) && !(project.parent | stringIncludedInArray:projectsNames)" class="creat-new-suffix">(Create New)</span>
     <i matSuffix [class]="'fa mr2 ' + (project.parent? 'fa-times pointer':'fa-search')"

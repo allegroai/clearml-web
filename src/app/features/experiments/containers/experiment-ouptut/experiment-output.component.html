@@ -13,7 +13,7 @@
 
   >
   </sm-experiment-info-header>
-  <nav [class.minimized]="minimized">
+  <nav [class.minimized]="minimized" [smOverflows]="'nav'" (onOverflows)="overflow = $event">
     <ng-container *ngIf="!minimized">
       <span [routerLink]="['execution']"  queryParamsHandling="preserve">
         <sm-navbar-item header="execution" [active]="routerConfig.includes('execution')"></sm-navbar-item>
@@ -28,18 +28,32 @@
         <sm-navbar-item header="info" [active]="routerConfig.includes('general')"></sm-navbar-item>
       </span>
     </ng-container>
-    <span [routerLink]="['log']"  queryParamsHandling="preserve">
-      <sm-navbar-item header="console" [active]="routerConfig.includes('log')"></sm-navbar-item>
+
+    <span [matMenuTriggerFor]="results" *ngIf="!minimized && overflow">
+      <sm-navbar-item header="results" [multi]="true" [active]="console.active || scalar.active || plots.active || samples.active"></sm-navbar-item>
     </span>
-    <span [routerLink]="['metrics','scalar']" queryParamsHandling="preserve">
-      <sm-navbar-item header="Scalars" [active]="routerConfig.includes('metrics') && routerConfig.includes('scalar')"></sm-navbar-item>
-    </span>
-    <span [routerLink]="['metrics','plots']" queryParamsHandling="preserve">
-      <sm-navbar-item header="PLOTS" [active]="routerConfig.includes('metrics') && routerConfig.includes('plots')"></sm-navbar-item>
-    </span>
-    <span [routerLink]="['debugImages']" queryParamsHandling="preserve">
-      <sm-navbar-item header="DEBUG SAMPLES" [active]="routerConfig.includes('debugImages')"></sm-navbar-item>
-    </span>
+
+    <mat-menu #results="matMenu">
+      <button mat-menu-item [routerLink]="['log']" [class.active]="routerConfig.includes('log')">CONSOLE</button>
+      <button mat-menu-item [routerLink]="['metrics','scalar']" [class.active]="routerConfig.includes('metrics') && routerConfig.includes('scalar')">SCALARS</button>
+      <button mat-menu-item [routerLink]="['metrics','plots']" [class.active]="routerConfig.includes('metrics') && routerConfig.includes('plots')">PLOTS</button>
+      <button mat-menu-item [routerLink]="['debugImages']" [class.active]="routerConfig.includes('debugImages')">DEBUG SAMPLES</button>
+    </mat-menu>
+
+    <div class="d-inline-block" [style.visibility]="overflow && !minimized ? 'hidden' : 'visible'">
+      <span [routerLink]="['log']" queryParamsHandling="preserve">
+        <sm-navbar-item #console header="console" [active]="routerConfig.includes('log')"></sm-navbar-item>
+      </span>
+      <span [routerLink]="['metrics','scalar']" queryParamsHandling="preserve">
+        <sm-navbar-item #scalar header="Scalars" [active]="routerConfig.includes('metrics') && routerConfig.includes('scalar')"></sm-navbar-item>
+      </span>
+      <span [routerLink]="['metrics','plots']" queryParamsHandling="preserve">
+        <sm-navbar-item #plots header="PLOTS" [active]="routerConfig.includes('metrics') && routerConfig.includes('plots')"></sm-navbar-item>
+      </span>
+      <span [routerLink]="['debugImages']" queryParamsHandling="preserve">
+        <sm-navbar-item #samples header="DEBUG SAMPLES" [active]="routerConfig.includes('debugImages')"></sm-navbar-item>
+      </span>
+    </div>
     <span class="refresh-position">
       <sm-experiment-settings
         [class.maximized]="!minimized"

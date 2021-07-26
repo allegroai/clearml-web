@@ -21,7 +21,7 @@ export class QueueInfoComponent implements OnInit {
   @Output() removeExperimentFromQueue     = new EventEmitter();
   @Output() moveExperimentInQueue         = new EventEmitter();
 
-  public activeTab: string        = 'experiments';
+  public activeTab: string;
   public menuSelectedExperiment: any;
   public menuOpen: boolean;
   public menuPosition: { x: number; y: number };
@@ -49,7 +49,13 @@ export class QueueInfoComponent implements OnInit {
   }
 
 
+  get routerTab() {
+    const url = new URL(window.location.href);
+    return url.searchParams.get('tab');
+  }
+
   ngOnInit() {
+    this.activeTab = this.routerTab === 'workers' ? 'workers' : 'experiments';
   }
 
 

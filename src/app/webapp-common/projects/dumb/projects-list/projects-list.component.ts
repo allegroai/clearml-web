@@ -2,6 +2,7 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {ProjectsGetAllResponseSingle} from '../../../../business-logic/model/projects/projectsGetAllResponseSingle';
 import {Project} from '../../../../business-logic/model/projects/project';
 import {isExample} from '../../../shared/utils/shared-utils';
+import {pageSize} from '../../common-projects.consts';
 
 @Component({
   selector: 'sm-projects-list',
@@ -10,6 +11,7 @@ import {isExample} from '../../../shared/utils/shared-utils';
 })
 export class ProjectsListComponent {
   isExample = isExample;
+  pageSize = pageSize;
 
   @Input() projects: Array<ProjectsGetAllResponseSingle>;
   @Input() noMoreProjects: boolean;

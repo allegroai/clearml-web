@@ -37,28 +37,31 @@ import {FilterByIdPipe} from './filterById.pipe';
 import {FilterOutPipe} from './filterOut.pipe';
 import {DurationPipe} from "./duration.pipe";
 import {BreadcrumbsEllipsisPipe} from './breadcrumbs-ellipsis.pipe';
-import { ShortProjectNamePipe } from './short-project-name.pipe';
+import {ShortProjectNamePipe} from './short-project-name.pipe';
 import {ProjectLocationPipe} from "./project-location.pipe";
-import { StringIncludedInArrayPipe } from './string-included-in-array.pipe';
+import {StringIncludedInArrayPipe} from './string-included-in-array.pipe';
 import {FilterLast} from "./filterLast.pipe";
 import {ToPropertyArrayPipe} from "@common/shared/pipes/toPropertyArray.pipe";
 import {MenuItemTextPipe} from "@common/shared/pipes/menu-item-text.pipe";
+import {InitialsPipe} from './initials.pipe';
+import {UuidPipe} from './uuid.pipe';
+import {FilterInternalPipe} from './filter-internal.pipe';
 
 
 const pipes = [
-  CamelToTitlePipe, FilenameFromPath, FilterPipe, FloorPipe, KeyValuePipe, NAPipe, SortPipe, IsVideoPipe, IsAudioPipe,
+  CamelToTitlePipe, FilenameFromPath, FilterPipe, FloorPipe, KeyValuePipe, NAPipe, SortPipe, IsVideoPipe, IsAudioPipe,FilterInternalPipe,UuidPipe,
   JoinPipe, KeyvalPipe, LabelValuePipe, NoUnderscorePipe, NumberToKPipe, UniqueByPipe, MsToHoursPipe, MsToSecPipe, DurationPipe,
   ToExponentialPipe, HighlightSearchTextPipe, HideHashPipe, HideHashTitlePipe, TimeAgoPipe, TimeTillNowPipe, HasExampleItemPipe, safeAngularUrlParameterPipe,
-  AdvancedFilterPipe, SafePipe, SelectOptionValueToLabelPipe, ToPercentagePipe, ReplaceViaMapPipe, FilterByIdPipe, FilterLast, FilterOutPipe, SimpleFilterPipe, BreadcrumbsEllipsisPipe, ShortProjectNamePipe, ProjectLocationPipe,StringIncludedInArrayPipe, ToPropertyArrayPipe, MenuItemTextPipe
+  AdvancedFilterPipe, SafePipe, SelectOptionValueToLabelPipe, ToPercentagePipe, ReplaceViaMapPipe, FilterByIdPipe, FilterLast, FilterOutPipe, SimpleFilterPipe, BreadcrumbsEllipsisPipe, ShortProjectNamePipe, ProjectLocationPipe,StringIncludedInArrayPipe, ToPropertyArrayPipe, MenuItemTextPipe, InitialsPipe
 ];
 
 @NgModule({
   imports: [
     CommonModule,
   ],
-  declarations: [pipes, ShowSelectedFirstPipe, CountPipe],
+  declarations: [pipes, ShowSelectedFirstPipe, CountPipe ],
   providers: [pipes],
-  exports: [pipes, ShowSelectedFirstPipe, CountPipe]
+    exports: [pipes, ShowSelectedFirstPipe, CountPipe]
 })
 export class SharedPipesModule {
 }

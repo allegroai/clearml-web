@@ -1,6 +1,6 @@
-import {Component, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
+import {Component, Input, OnChanges, Output, SimpleChanges, ViewChild} from '@angular/core';
 import {AdminService} from '../../../features/admin/admin.service';
-import {FormBuilder, FormControl, FormGroup} from '@angular/forms';
+import {FormBuilder, FormControl, FormGroup, NgForm} from '@angular/forms';
 import {EventEmitter} from '@angular/core';
 
 @Component({
@@ -9,7 +9,9 @@ import {EventEmitter} from '@angular/core';
   styleUrls  : ['./s3-access-dialog.component.scss']
 })
 export class S3AccessDialogComponent implements OnChanges {
-  public S3Form: FormGroup;
+  @ViewChild('S3NGForm', {static: true}) S3NGForm: NgForm;
+
+  public S3Form;
   @Input() isAzure;
   @Input() key;
   @Input() secret                          = '';
@@ -19,60 +21,42 @@ export class S3AccessDialogComponent implements OnChanges {
   @Input() useSSL: boolean;
   @Input() editMode                        = false;
   @Input() header;
+
   @Output() closeCancel: EventEmitter<any> = new EventEmitter();
   @Output() closeSave: EventEmitter<any>   = new EventEmitter<any>();
   @Input() saveEnabled = true;
+  public formIsSubmitted: boolean;
+
 
   constructor(public adminService: AdminService, private formBuilder: FormBuilder) {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes) {
-      this.buildS3Form();
+      this.S3Form= {
+        Key     : changes.isAzure.currentValue ? 'azure' : changes.key.currentValue,
+        Secret  : changes.secret.currentValue,
+        Region  : changes.region.currentValue,
+        Bucket  : changes.bucket.currentValue,
+        Endpoint: changes.endpoint.currentValue,
+        useSSL  : changes.useSSL.currentValue,
+      };
     }
   }
 
-  private buildS3Form() {
-    this.S3Form = this.formBuilder.group({
-      Key     : this.isAzure ? 'azure' : this.key,
-      Secret  : this.secret,
-      Region  : this.region,
-      Bucket  : this.bucket,
-      Endpoint: this.endpoint,
-      useSSL  : this.useSSL,
-    });
-  }
-  get S3Key() {
-    return this.S3Form.get('Key') as FormControl;
-  }
-  get S3Secret() {
-    return this.S3Form.get('Secret') as FormControl;
-  }
 
   public saveNewCredentials() {
-    this.markControlsAsTouched();
-    this.S3Form.updateValueAndValidity();
-    if (this.S3Form.invalid) {
+    this.formIsSubmitted = true;
+    if (this.S3NGForm.invalid) {
       return false;
     } else {
-      this.closeSave.emit(this.S3Form.value);
+      this.closeSave.emit(this.S3Form);
     }
-    this.buildS3Form();
+
   }
 
   public cancel() {
-    this.closeCancel.emit(this.S3Form.value);
+    this.closeCancel.emit(this.S3Form);
   }
 
-  markControlsAsTouched() {
-    const controls = this.S3Form.controls;
-    for (const i of Object.keys(controls)) {
-      controls[i].markAsTouched();
-    }
-  }
-
-  toggleSSL() {
-    this.useSSL = !this.useSSL;
-    this.buildS3Form();
-  }
 }

@@ -7,4 +7,5 @@ import {BaseExperimentOutputComponent} from '../../../../webapp-common/experimen
   styleUrls: ['../../../../webapp-common/experiments/containers/experiment-ouptut/base-experiment-output.component.scss']
 })
 export class ExperimentOutputComponent extends BaseExperimentOutputComponent {
+  public overflow: boolean;
 }

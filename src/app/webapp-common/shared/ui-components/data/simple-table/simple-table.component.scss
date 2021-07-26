@@ -9,6 +9,12 @@ $table-row-padding: 10px;
   //  padding-left: 8px !important;
   //  padding-right: 8px !important;
   //}
+
+  &.dark-theme {
+    .headers {
+      background-color: $blue-700;
+    }
+  }
   .cdk-drag-preview {
     box-sizing: border-box;
     border-radius: 4px;
@@ -41,10 +47,13 @@ $table-row-padding: 10px;
     line-height: 40px;
     border-bottom: 1px solid;
     font-weight: 500;
+    font-size: 12px;
   }
 
   .table-row {
     line-height: $table-row-height;
+    padding-top: 10px;
+    padding-bottom: 10px;
 
     ::ng-deep .flashing-icon {
       opacity: 0;
@@ -57,9 +66,6 @@ $table-row-padding: 10px;
     &:not(:hover) ::ng-deep .flashing-icon {
       opacity: 0 !important;
     }
-
-    padding-top: 10px;
-    padding-bottom: 10px;
 
     &:nth-child(even) {
       background-color: #f9fafb;

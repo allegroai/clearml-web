@@ -1,14 +1,14 @@
-import {DeactiveLoader} from '../../../core/actions/layout.actions';
+import {deactivateLoader} from '../../../core/actions/layout.actions';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {ApiProjectsService} from '../../../../business-logic/api-services/projects.service';
-import {RequestFailed} from '../../../core/actions/http.actions';
+import {requestFailed} from '../../../core/actions/http.actions';
 import {Injectable} from '@angular/core';
 import {catchError, filter, map, mergeMap, switchMap, withLatestFrom} from 'rxjs/operators';
 import {EmptyAction, HTTP} from '../../../../app.constants';
 import {Action, select, Store} from '@ngrx/store';
 import {Task} from '../../../../business-logic/model/tasks/task';
 import {forkJoin, of} from 'rxjs';
-import {SetServerError} from '../../../core/actions/layout.actions';
+import {setServerError} from '../../../core/actions/layout.actions';
 import {fromFetch} from 'rxjs/fetch';
 import {AdminService} from '../../../../features/admin/admin.service';
 import {ApiTasksService} from '../../../../business-logic/api-services/tasks.service';
@@ -37,7 +37,7 @@ export class DeleteDialogEffectsBase {
     public modelsApi: ApiModelsService,
     public projectsApi: ApiProjectsService,
     public adminService: AdminService,
-    private configService: ConfigurationService
+    public configService: ConfigurationService
   ) {}
 
   deleteEntityApi(entityType: EntityTypeEnum, entities: any[]): Observable<{ failed: any[]; succeeded: string[] }> {
@@ -115,9 +115,9 @@ export class DeleteDialogEffectsBase {
           ]
         ),
         catchError(error => [
-          new RequestFailed(error),
-          new DeactiveLoader(action.type),
-          new SetServerError(error, null, `Can't delete ${action.entityType} ${error?.meta?.error_data?.id || ''}`)]
+          requestFailed(error),
+          deactivateLoader(action.type),
+          setServerError(error, null, `Can't delete ${action.entityType} ${error?.meta?.error_data?.id || ''}`)]
         )
       )
     )
@@ -127,7 +127,7 @@ export class DeleteDialogEffectsBase {
     ofType(deleteFileServerSources),
     mergeMap(action => action.files.map(url =>
       fromFetch(
-        this.adminService.signUrlIfNeeded(url,true, false),
+        this.adminService.signUrlIfNeeded(url, {skipFileServer: false}),
         {method: 'DELETE', credentials: this.configService.getStaticEnvironment().useFilesProxy ? 'include' : 'omit'}
       ).pipe(catchError(() => [{status: 'error', url}]))), 10
     ),

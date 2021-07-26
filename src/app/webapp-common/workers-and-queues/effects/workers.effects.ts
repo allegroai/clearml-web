@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
-import {Store} from '@ngrx/store';
+import {Action, Store} from '@ngrx/store';
 import {castArray, cloneDeep} from 'lodash/fp';
 import {catchError, mergeMap, switchMap, withLatestFrom} from 'rxjs/operators';
 import {MESSAGES_SEVERITY} from '../../../app.constants';
@@ -10,8 +10,8 @@ import {WORKER_STATS_PARAM_INFO} from '../workers-and-queues.consts';
 import {WorkersGetActivityReportRequest} from '../../../business-logic/model/workers/workersGetActivityReportRequest';
 import {WorkersGetActivityReportResponse} from '../../../business-logic/model/workers/workersGetActivityReportResponse';
 import {WorkersGetStatsRequest} from '../../../business-logic/model/workers/workersGetStatsRequest';
-import {RequestFailed} from '../../core/actions/http.actions';
-import {AddMessage, DeactiveLoader} from '../../core/actions/layout.actions';
+import {requestFailed} from '../../core/actions/http.actions';
+import {addMessage, deactivateLoader} from '../../core/actions/layout.actions';
 import * as workersActions from '../actions/workers.actions';
 import {selectSelectedWorker, selectStats, selectStatsParams, selectStatsTimeFrame, selectWorkers, selectWorkersTableSortFields} from '../reducers/index.reducer';
 import {orderBy} from 'lodash/fp';
@@ -49,7 +49,7 @@ export class WorkersEffects {
       mergeMap(res => {
         const actionsToFire = [
           new workersActions.SetWorkers(this.sortWorkers(sortFields, res.workers)),
-          new DeactiveLoader(action.type)];
+          deactivateLoader(action.type)] as Action[];
         if (selectedWorker) {
           actionsToFire.push(
             new workersActions.SetSelectedWorkerFromServer(
@@ -58,7 +58,7 @@ export class WorkersEffects {
         }
         return actionsToFire;
       }),
-      catchError(err => [new RequestFailed(err), new DeactiveLoader(action.type)])
+      catchError(err => [requestFailed(err), deactivateLoader(action.type)])
       )
     )
   );
@@ -108,9 +108,9 @@ export class WorkersEffects {
             }
             return [new workersActions.SetStats({data: res})];
           }),
-          catchError(err => [new RequestFailed(err),
+          catchError(err => [requestFailed(err),
             new workersActions.SetStats({data: []}),
-            new AddMessage(MESSAGES_SEVERITY.WARN, 'Failed to fetching activity worker statistics')])
+            addMessage(MESSAGES_SEVERITY.WARN, 'Failed to fetching activity worker statistics')])
         );
       } else {
         const req: WorkersGetActivityReportRequest = {
@@ -153,7 +153,7 @@ export class WorkersEffects {
             }
             return [new workersActions.SetStats({data: result}), hideNoStatsNotice()];
           }),
-          catchError(err => [new RequestFailed(err),
+          catchError(err => [requestFailed(err),
             new workersActions.SetStats({data: []}),
             showStatsErrorNotice()])
         );

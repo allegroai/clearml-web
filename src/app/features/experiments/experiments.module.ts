@@ -34,10 +34,10 @@ import {ExperimentOutputComponent} from './containers/experiment-ouptut/experime
 
 
 const syncedKeys = [
-  'view.tableSortField',
-  'view.tableSortOrder',
-  'view.tableFilters',
-  'view.hiddenTableCols',
+  'view.projectColumnsSortOrder',
+  'view.projectColumnFilter',
+  'view.projectColumnsWidth',
+  'view.hiddenProjectTableCols',
   'view.metricsCols',
   'view.colsOrder',
   'info.userKnowledge',

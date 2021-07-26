@@ -75,7 +75,7 @@ export class ModelGeneralInfoComponent {
   }
 
   downloadModelClicked() {
-    const signed = this.adminService.signUrlIfNeeded(this.model.uri, true);
+    const signed = this.adminService.signUrlIfNeeded(this.model.uri);
     const a = document.createElement('a') as HTMLAnchorElement;
       a.target = '_blank';
       a.href = signed || this.model.uri;

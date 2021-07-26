@@ -1,13 +1,12 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType, createEffect} from '@ngrx/effects';
-import {USERS_ACTIONS} from '../../app.constants';
 import {filter, take, mergeMap, switchMap} from 'rxjs/operators';
 import {CookiesService} from '../../shared/cookies.service';
 import {ApiAuthService} from '../../business-logic/api-services/auth.service';
 import {ApiServerService} from '../../business-logic/api-services/server.service';
 import {ServerReportStatsOptionResponse} from '../../business-logic/model/server/serverReportStatsOptionResponse';
-import {setUsageStats, updateUsageStats} from '../Actions/usage-stats.actions';
-import {FetchCurrentUser} from '../../webapp-common/core/actions/users.actions';
+import {setUsageStats, updateUsageStats} from '../actions/usage-stats.actions';
+import {fetchCurrentUser} from '@common/core/actions/users.actions';
 
 
 @Injectable()
@@ -18,7 +17,7 @@ export class UserEffects {
 
   @Effect()
   setUser$ = this.actions.pipe(
-    ofType<FetchCurrentUser>(USERS_ACTIONS.SET_CURRENT_USER),
+    ofType(fetchCurrentUser),
     filter(user => !!user),
     take(1),
     mergeMap(() => this.serverService.serverReportStatsOption({})

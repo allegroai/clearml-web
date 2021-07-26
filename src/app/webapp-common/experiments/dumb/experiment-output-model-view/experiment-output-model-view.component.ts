@@ -3,7 +3,7 @@ import {IModelInfo} from '../../shared/common-experiment-model.model';
 import {Model} from '../../../../business-logic/model/models/model';
 import {AdminService} from '../../../../features/admin/admin.service';
 import {Store} from '@ngrx/store';
-import {BaseClickableArtifact} from '../base-clickable-artifact';
+import {BaseClickableArtifactComponent} from '../base-clickable-artifact.component';
 
 
 @Component({
@@ -11,7 +11,7 @@ import {BaseClickableArtifact} from '../base-clickable-artifact';
   templateUrl: './experiment-output-model-view.component.html',
   styleUrls  : ['./experiment-output-model-view.component.scss']
 })
-export class ExperimentOutputModelViewComponent extends BaseClickableArtifact implements OnDestroy {
+export class ExperimentOutputModelViewComponent extends BaseClickableArtifactComponent implements OnDestroy {
 
   public isLocalFile: boolean;
   private _model: IModelInfo;

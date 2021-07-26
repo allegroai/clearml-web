@@ -1,45 +1,45 @@
 import {ApiUsersService} from './business-logic/api-services/users.service';
-import {selectCurrentUser, selectActiveWorkspace} from './webapp-common/core/reducers/users-reducer';
+import {selectCurrentUser} from '@common/core/reducers/users-reducer';
 import {Component, OnDestroy, OnInit, ViewEncapsulation, HostListener, Renderer2, Injector} from '@angular/core';
 import {ActivatedRoute, NavigationEnd, Router, Params, RouterEvent} from '@angular/router';
 import {Title} from '@angular/platform-browser';
-import {selectLoggedOut} from './webapp-common/core/reducers/view-reducer';
+import {selectLoggedOut} from '@common/core/reducers/view-reducer';
 import {Store} from '@ngrx/store';
 import {get} from 'lodash/fp';
-import {selectRouterParams, selectRouterUrl} from './webapp-common/core/reducers/router-reducer';
+import {selectRouterParams, selectRouterUrl} from '@common/core/reducers/router-reducer';
 import {ApiProjectsService} from './business-logic/api-services/projects.service';
 import {Project} from './business-logic/model/projects/project';
-import {GetAllProjects, SetSelectedProjectId, UpdateProject} from './webapp-common/core/actions/projects.actions';
-import {selectSelectedProject} from './webapp-common/core/reducers/projects.reducer';
+import {GetAllSystemProjects, SetSelectedProjectId, UpdateProject} from '@common/core/actions/projects.actions';
+import {selectSelectedProject} from '@common/core/reducers/projects.reducer';
 import {
   selectS3BucketCredentialsBucketCredentials,
   selectS3PopUpDetails,
   selectShowLocalFilesPopUp,
   selectShowS3PopUp
-} from './webapp-common/core/reducers/common-auth-reducer';
+} from '@common/core/reducers/common-auth-reducer';
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
-import {S3AccessResolverComponent} from './webapp-common/layout/s3-access-resolver/s3-access-resolver.component';
-import {cancelS3Credentials, getTutorialBucketCredentials} from './webapp-common/core/actions/common-auth.actions';
-import {termsOfUseAccepted} from './webapp-common/core/actions/users.actions';
+import {S3AccessResolverComponent} from '@common/layout/s3-access-resolver/s3-access-resolver.component';
+import {cancelS3Credentials, getTutorialBucketCredentials} from '@common/core/actions/common-auth.actions';
+import {termsOfUseAccepted} from '@common/core/actions/users.actions';
 import {debounceTime, distinctUntilChanged, filter, map, tap, withLatestFrom} from 'rxjs/operators';
 import * as routerActions from './webapp-common/core/actions/router.actions';
 import {combineLatest, Observable, Subscription} from 'rxjs';
-import {selectBreadcrumbsStrings} from './webapp-common/layout/layout.reducer';
+import {selectBreadcrumbsStrings} from '@common/layout/layout.reducer';
 import {prepareNames} from './layout/breadcrumbs/breadcrumbs.utils';
-import {formatStaticCrumb} from './webapp-common/layout/breadcrumbs/breadcrumbs-common.utils';
-import {ServerUpdatesService} from './webapp-common/shared/services/server-updates.service';
+import {formatStaticCrumb} from '@common/layout/breadcrumbs/breadcrumbs-common.utils';
+import {ServerUpdatesService} from '@common/shared/services/server-updates.service';
 import {selectAvailableUpdates, selectShowSurvey} from './core/reducers/view-reducer';
 import {UPDATE_SERVER_PATH} from './app.constants';
-import {firstLogin, plotlyReady, setScaleFactor, VisibilityChanged} from './webapp-common/core/actions/layout.actions';
-import {UiUpdatesService} from './webapp-common/shared/services/ui-updates.service';
+import {firstLogin, plotlyReady, setScaleFactor, visibilityChanged} from '@common/core/actions/layout.actions';
+import {UiUpdatesService} from '@common/shared/services/ui-updates.service';
 import {UsageStatsService} from './core/Services/usage-stats.service';
-import {dismissSurvey} from './core/Actions/layout.actions';
-import {getScaleFactor} from './webapp-common/shared/utils/shared-utils';
+import {dismissSurvey} from './core/actions/layout.actions';
+import {getScaleFactor} from '@common/shared/utils/shared-utils';
 import {User} from './business-logic/model/users/user';
-import {ConfigurationService} from './webapp-common/shared/services/configuration.service';
+import {ConfigurationService} from '@common/shared/services/configuration.service';
 import {GoogleTagManagerService} from 'angular-google-tag-manager';
 import {selectIsSharedAndNotOwner} from './features/experiments/reducers';
-import {TipsService} from './webapp-common/shared/services/tips.service';
+import {TipsService} from '@common/shared/services/tips.service';
 import {USER_PREFERENCES_KEY} from '@common/user-preferences';
 
 @Component({
@@ -50,7 +50,6 @@ import {USER_PREFERENCES_KEY} from '@common/user-preferences';
 })
 export class AppComponent implements OnInit, OnDestroy {
   public loggedOut$: Observable<any>;
-  public isDashboardContext: boolean;
   public activeFeature: string;
   private urlSubscription: Subscription;
   public selectedProject$: Observable<Project>;
@@ -78,7 +77,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private plotlyURL: string;
 
   @HostListener('document:visibilitychange') onVisibilityChange() {
-    this.store.dispatch(new VisibilityChanged(!document.hidden));
+    this.store.dispatch(visibilityChanged({visible: !document.hidden}));
   }
 
   @HostListener('window:beforeunload', ['$event'])
@@ -163,7 +162,7 @@ export class AppComponent implements OnInit, OnDestroy {
       distinctUntilChanged((prev, next) => prev?.id === next?.id)
     )
     .subscribe(() => {
-        this.store.dispatch(new GetAllProjects());
+        this.store.dispatch(new GetAllSystemProjects());
         this.store.dispatch(getTutorialBucketCredentials());
         this.store.dispatch(termsOfUseAccepted());
         this.uiUpdatesService.checkForUiUpdate();
@@ -192,13 +191,9 @@ export class AppComponent implements OnInit, OnDestroy {
       }
     });
 
-    this.store.select(selectActiveWorkspace).pipe(filter(ws => !!ws))
-      .subscribe(workspace => this.activeWorkspace = workspace?.id);
-
     this.urlSubscription = combineLatest([this.store.select(selectRouterUrl), this.store.select(selectRouterParams)])
       .subscribe(([url, params]) => {
         this.projectId = get('projectId', params);
-        this.isDashboardContext = url && url.includes('dashboard');
         this.isLoginContext = url && url.includes('login');
         this.isWorkersContext = url && url.includes('workers-and-queues');
         if (this.projectId) {
@@ -319,4 +314,3 @@ export class AppComponent implements OnInit, OnDestroy {
     setTimeout(init);
   }
 }
-

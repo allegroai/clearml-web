@@ -4,11 +4,11 @@
                      [disableEditable]="isExample"
                      (saveClicked)="commentValueChanged(experimentCommentText); experimentDescriptionSection.editModeChanged(false);"
                      (cancelClicked)="onCancelComment() "
-                     >
+>
   <sm-section-header label="DESCRIPTION:"></sm-section-header>
-    <textarea rows="4"
-              class="mb-2"
-               [(ngModel)]="experimentCommentText" [readOnly]="!experimentDescriptionSection.inEditMode"></textarea>
+  <textarea rows="4"
+            class="mb-2"
+            [(ngModel)]="experimentCommentText" [readOnly]="!experimentDescriptionSection.inEditMode"></textarea>
 </sm-editable-section>
 
 <div class="general-info">
@@ -91,5 +91,10 @@
   <sm-labeled-row label="PROJECT:">
     {{experiment?.project?.name | NA}}
   </sm-labeled-row>
+  <ng-container *ngFor="let runtimeItem of $any(experiment?.runtime) | keyvalue | filterInternal ">
+    <sm-labeled-row [label]="runtimeItem.key">
+      {{runtimeItem.value}}
+    </sm-labeled-row>
+  </ng-container>
 
 </div>

@@ -1,0 +1,48 @@
+<div class="header d-flex justify-content-center"><span class="trigger" #trigger="matMenuTrigger"
+                                                        [matMenuTriggerFor]="metricMenu"></span>
+  <button
+    class="btn btn-primary"
+    [hidden]="!selectedVariant"
+    (click)="getOptions(); trigger.openMenu()"
+    [smTooltip]="variantDisplay?.length > 30 ? variantDisplay : null"
+    matTooltipPosition="above"
+  >{{variantDisplay}}</button>
+  <mat-menu #metricMenu=matMenu>
+    <div class="close-button" (click)="trigger.closeMenu()"><i class="al-icon al-ico-dialog-x"></i></div>
+    <div class="light-theme metric-menu" smClickStopPropagation>
+      <i class="al-icon al-ico-no-scatter-graph xxl"></i>
+      <div class="title">METRIC SNAPSHOT</div>
+      <sm-select-metric-for-custom-col
+        *ngIf="(metricVariants$| async) as variants"
+        class="w-100 mb-3"
+        width="100%"
+        [multiSelect]="false"
+        [metricVariants]="variants"
+        [tableCols]="metricVariantSelection"
+        (selectedMetricToShow)="selectedMetricToShow($event, trigger)">
+      </sm-select-metric-for-custom-col>
+      <div class="d-flex align-items-center justify-content-center w-100 mt-2">
+        <button (click)="clear(trigger)" class="btn-outline-neon">
+          CLEAR
+        </button>
+      </div>
+    </div>
+  </mat-menu>
+</div>
+<div class="line-chart-container" *ngIf="selectedVariant; else noData">
+  <sm-scatter-plot
+    [colors]="colors"
+    [data]="graphData"
+    [showLoadingOverlay]="loading"
+    (clicked)="experimentClicked($event)"
+  ></sm-scatter-plot>
+  <div class="legend">
+    <span *ngFor="let state of states" [style.--color]="statusToColor(state.type)" class="entry">{{state.label}}</span>
+  </div>
+</div>
+<ng-template #noData>
+  <div class="flex-middle overview-placeholder">
+    <i class="al-icon al-ico-no-scatter-graph xxl"></i>
+    <div class=" pointer no-data-title" (click)="getOptions(); trigger.openMenu()">Select Metric & Variant</div>
+  </div>
+</ng-template>

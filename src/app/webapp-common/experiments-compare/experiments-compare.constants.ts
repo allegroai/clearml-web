@@ -17,3 +17,32 @@ export const RENAME_MAP = {
   '_legacy': 'General',
   'container': 'Container'
 };
+
+export const MAX_ROWS_FOR_SMART_COMPARE_ARRAYS = 20000;
+export const COMPARE_DETAILS_ONLY_FIELDS_BASE = [
+  'id',
+  'name',
+  'type',
+  'status',
+  'last_update',
+  'project.name',
+  'models.input.name',
+  'models.output.name',
+  'models.output.model.name',
+  'models.output.model.uri',
+  'models.output.model.framework',
+  'models.output.model.design',
+  'models.input.name',
+  'models.input.model.name',
+  'models.input.model.uri',
+  'models.input.model.framework',
+  'models.input.model.labels',
+  'models.input.model.design',
+  'execution.artifacts',
+  'container',
+  'script',
+  'tags',
+  'published',
+  'last_iteration',
+  'configuration'
+];

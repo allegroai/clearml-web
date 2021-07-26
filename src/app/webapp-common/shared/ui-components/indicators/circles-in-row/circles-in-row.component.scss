@@ -1,0 +1,45 @@
+@import "variables";
+
+:host {
+  .circles {
+    display: flex;
+
+    .circle {
+      width: 32px;
+      min-width: 32px;
+      height: 32px;
+      line-height: 30px;
+      text-align: center;
+      background-color: $light-grey-blue;
+      color: $blue-800;
+      border-radius: 50%;
+      font-size: 12px;
+      border: $blue-800 solid 2px;
+      position: relative;
+      box-sizing: border-box;
+      cursor: default;
+
+      &.empty {
+        background-color: $blue-700;
+        border-color: $light-grey-blue;
+        height: 32px;
+        width: 32px;
+        min-width: 32px;
+        margin-top: 1px;
+      }
+
+      &.long {
+        width: unset;
+        min-width: unset;
+        border-radius: 18px;
+        padding: 0 4px;
+      }
+
+      &.rest {
+        border: solid 2px $blue-800;
+        background-color: $blue-800;
+        color: $light-periwinkle-two;
+      }
+    }
+  }
+}

@@ -1,26 +1,11 @@
 @import "../../../../webapp-common/shared/ui-components/styles/variables";
 
-::ng-deep .mat-menu-panel.experiments-in-queue-list {
-  border-radius: 3px;
-  box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
-  border: solid 1px $blue-400;
-  background-color: #000000;
-
-  .mat-menu-item {
-    color: $light-periwinkle-two;
-
-    &:hover {
-      background-color: $dark-grey-blue;
-    }
-  }
-}
-
 :host {
 
 
   ::ng-deep .table-row {
     background-color: $blue-800 !important;
-    border-bottom: 1px solid $grey-purple !important;
+    border-bottom: 1px solid #303443 !important;
   }
 
   ::ng-deep .row.headers {
@@ -31,18 +16,22 @@
   .tabs-container {
     position: relative;
     background-color: $blue-800;
-    height: 42px;
+    border-bottom: 1px solid #303443;
+    margin: 12px 0 0 0;
+    height: 38px;
+
 
     ::ng-deep .navbar-item {
-      height: 42px;
-      padding: 11px;
+      height: 100%;
+      padding: 0 15px;
+      margin: 0 1px;
     }
   }
 
   .pull-right {
     position: absolute;
-    right: 5px;
-    top: 5px;
+    right: 24px;
+    top: 0;
   }
 
   sm-navbar-item[disabled] {

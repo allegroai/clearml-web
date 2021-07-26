@@ -9,12 +9,12 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {of} from 'rxjs';
 import {IExperimentInfoState} from '../../../../features/experiments/reducers/experiment-info.reducer';
 import {ExperimentScalarRequested, ResetExperimentMetrics, SetExperimentMetricsSearchTerm, SetExperimentSettings} from '../../actions/common-experiment-output.actions';
-import {ExperimentGraph} from '../../../tasks/tasks.model';
 import {convertScalars} from '../../../tasks/tasks.utils';
 import {ScalarKeyEnum} from '../../../../business-logic/model/events/scalarKeyEnum';
 import {selectSelectedExperiment} from '../../../../features/experiments/reducers';
 import {GroupByCharts} from '../../reducers/common-experiment-output.reducer';
 import {GroupedList} from '../../../shared/ui-components/data/selectable-grouped-filter-list/selectable-grouped-filter-list.component';
+import {ExtFrame} from '../../../shared/experiment-graphs/single-graph/plotly-graph-base';
 
 
 @Component({
@@ -38,7 +38,7 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
   public experimentSettings$: Observable<any>;
   public searchTerm$: Observable<string>;
   public minimized: boolean = false;
-  public graphs: { [key: string]: ExperimentGraph };
+  public graphs: { [key: string]: ExtFrame[] };
   public selectIsExperimentPendingRunning: Observable<boolean>;
   public smoothWeight$: Observable<number>;
   public showSettingsBar: boolean = false;
@@ -151,7 +151,7 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
       });
   }
 
-  private prepareGraphsAndUpdate(scalars) {
+  private prepareGraphsAndUpdate(scalars: GroupedList) {
     if (scalars) {
       const splittedScalars = this.groupBy === 'metric' ? scalars : this.splitScalars(scalars);
       this.scalarList = this.prepareScalarList(splittedScalars);
@@ -171,7 +171,7 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
     this.resetMetrics();
   }
 
-  private prepareScalarList(metricsScalar): GroupedList {
+  private prepareScalarList(metricsScalar: GroupedList): GroupedList {
     return Object.keys(metricsScalar || []).reduce((acc, curr) => {
       acc[curr] = {};
       return acc;
@@ -218,7 +218,7 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
     this.showSettingsBar = !this.showSettingsBar;
   }
 
-  private splitScalars(scalars: any) {
+  private splitScalars(scalars: GroupedList): GroupedList {
     return Object.entries(scalars).reduce((acc, [metric, variantGraph]) => {
       Object.entries(variantGraph).forEach(([variant, graph]) => {
         acc[metric + ' / ' + variant] = {[metric + ' / ' + variant]: graph};

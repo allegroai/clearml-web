@@ -3,12 +3,6 @@ import {INITIAL_EXPERIMENT_TABLE_COLS} from '../experiment.consts';
 import {ISmCol, TABLE_SORT_ORDER} from '../../shared/ui-components/data/table/table.consts';
 import {EXPERIMENTS_TABLE_COL_FIELDS} from '../../../features/experiments/shared/experiments.const';
 import * as actions from '../actions/common-experiments-view.actions';
-import {
-  hyperParamSelectedInfoExperiments,
-  setExperimentInPlace,
-  setTableSort
-} from '../actions/common-experiments-view.actions';
-import {EXPERIMENTS_VIEW_MODES, ExperimentsViewModesEnum} from '../shared/common-experiments.const';
 import {MetricVariantResult} from '../../../business-logic/model/projects/metricVariantResult';
 import {TableFilter} from '../../shared/utils/tableParamEncode';
 import {User} from '../../../business-logic/model/users/user';
@@ -16,13 +10,23 @@ import {ProjectsGetTaskParentsResponseParents} from '../../../business-logic/mod
 import {ICommonSearchState} from '../../common-search/common-search.reducer';
 import {SortMeta} from 'primeng/api';
 import {CountAvailableAndIsDisableSelectedFiltered} from '../../shared/entity-page/items.utils';
-import {SET_SELECTED_PROJECT} from '@common/core/actions/projects.actions';
+import {setSelectedProject} from '@common/core/actions/projects.actions';
+import {createReducer, on} from '@ngrx/store';
+import {modelsInitialState} from '@common/models/reducers/models-view.reducer';
 
 
 export interface ICommonExperimentsViewState {
   tableCols: ISmCol[];
   colsOrder: { [Project: string]: string[] };
-  hiddenTableCols: any;
+  tableFilters: any;
+  tempFilters: {[columnId: string]: {value: any; matchMode: string}};
+  projectColumnFilters: {[projectId: string]: {[columnId: string]: {value: any; matchMode: string}}};
+  tableOrders: SortMeta[];
+  projectColumnsSortOrder: {[projectId: string]: SortMeta[]};
+  projectColumnsWidth: {[projectId: string]: {[colId: string]: number}};
+  metricsCols: ISmCol[];
+  hiddenTableCols: {[colName: string]: boolean};
+  hiddenProjectTableCols: {[projectId: string]: {[colName: string]: boolean | undefined}};
   experiments: Array<ITableExperiment>;
   noMoreExperiment: boolean;
   selectedExperiment: ITableExperiment;
@@ -30,13 +34,9 @@ export interface ICommonExperimentsViewState {
   selectedExperimentsDisableAvailable: Record<string, CountAvailableAndIsDisableSelectedFiltered>;
   selectedExperimentSource: string;
   experimentToken: string;
-  viewMode: ExperimentsViewModesEnum;
-  tableFilters: any;
-  tableOrders: SortMeta[];
   page: number;
   globalFilter: ICommonSearchState['searchQuery'];
   showAllSelectedIsActive: boolean;
-  metricsCols: ISmCol[];
   metricVariants: Array<MetricVariantResult>;
   hyperParams: Array<any>;
   hyperParamsOptions: Record<ISmCol['id'], string[]>;
@@ -52,17 +52,21 @@ export interface ICommonExperimentsViewState {
 export const commonExperimentsInitialState: ICommonExperimentsViewState = {
   tableCols: INITIAL_EXPERIMENT_TABLE_COLS,
   colsOrder: {},
-  hiddenTableCols: {'comment': true, 'active_duration': true},
+  hiddenTableCols: {comment: true, active_duration: true},
+  hiddenProjectTableCols: {},
   experiments: [],
+  tableFilters: {},
+  tempFilters: {},
+  projectColumnFilters: {},
+  tableOrders: [{field: EXPERIMENTS_TABLE_COL_FIELDS.LAST_UPDATE, order: TABLE_SORT_ORDER.DESC}],
+  projectColumnsSortOrder: {},
+  projectColumnsWidth: {},
   noMoreExperiment: false,
   selectedExperiment: null,
   selectedExperiments: [],
   selectedExperimentsDisableAvailable: {},
   selectedExperimentSource: null,
   experimentToken: null,
-  viewMode: EXPERIMENTS_VIEW_MODES.TABLE,
-  tableFilters: null,
-  tableOrders: [{field: EXPERIMENTS_TABLE_COL_FIELDS.LAST_UPDATE, order: TABLE_SORT_ORDER.DESC}],
   page: -1, // -1 so the "getNextExperiments" will send 0.
   globalFilter: null,
   showAllSelectedIsActive: false,
@@ -79,161 +83,169 @@ export const commonExperimentsInitialState: ICommonExperimentsViewState = {
   splitSize: 75
 };
 
-export function commonExperimentsViewReducer(state: ICommonExperimentsViewState = commonExperimentsInitialState, action: any): ICommonExperimentsViewState {
-  switch (action.type) {
-    case actions.resetExperiments.type:
-      return {
-        ...state,
-        experiments: commonExperimentsInitialState.experiments,
-        selectedExperiment: commonExperimentsInitialState.selectedExperiment,
-        metricVariants: commonExperimentsInitialState.metricVariants,
-        showAllSelectedIsActive: commonExperimentsInitialState.showAllSelectedIsActive
-      };
-    case SET_SELECTED_PROJECT:
-      return {...state, selectedExperiments: commonExperimentsInitialState.selectedExperiments};
-    case  actions.SET_SHOW_ALL_SELECTED_IS_ACTIVE:
-      return {
-        ...state,
-        showAllSelectedIsActive: action.payload,
-        globalFilter: commonExperimentsInitialState.globalFilter,
-        tableFilters: commonExperimentsInitialState.tableFilters
-      };
-    case actions.ADD_MANY_EXPERIMENTS:
-      return {...state, experiments: state.experiments.concat(action.payload)};
-    case actions.REMOVE_MANY_EXPERIMENTS:
-      return {...state, experiments: state.experiments.filter(exp => !action.payload.includes(exp.id))};
-    case actions.UPDATE_ONE_EXPERIMENTS: {
-      const payload = (action as actions.UpdateExperiment).payload;
-      return setExperimentsAndUpdateSelectedExperiments(state, payload);
+const setExperimentsAndUpdateSelectedExperiments = (state: ICommonExperimentsViewState, payload): ICommonExperimentsViewState => ({
+  ...state,
+  experiments: state.experiments.map(ex => ex.id === payload.id ? {...ex, ...payload.changes} : ex),
+  ...(state.selectedExperiment?.id === payload.id && {selectedExperiment: {...state.selectedExperiment, ...payload.changes}}),
+  ...(state.selectedExperiments.find(ex => ex.id === payload.id) && {selectedExperiments: state.selectedExperiments.map(ex => ex.id === payload.id ? {...ex, ...payload.changes} : ex)})
+});
+
+export const commonExperimentsViewReducer = createReducer(
+  commonExperimentsInitialState,
+  on(actions.resetExperiments, state => ({
+    ...state,
+    experiments: commonExperimentsInitialState.experiments,
+    selectedExperiment: commonExperimentsInitialState.selectedExperiment,
+    metricVariants: commonExperimentsInitialState.metricVariants,
+    showAllSelectedIsActive: commonExperimentsInitialState.showAllSelectedIsActive
+  })),
+  on(setSelectedProject, state => ({
+    ...state,
+    selectedExperiments: commonExperimentsInitialState.selectedExperiments,
+    metricVariants: commonExperimentsInitialState.metricVariants,
+    hyperParamsOptions: commonExperimentsInitialState.hyperParamsOptions
+  })),
+  on(actions.showOnlySelected, (state, action) => ({
+    ...state,
+    showAllSelectedIsActive: action.active,
+    globalFilter: commonExperimentsInitialState.globalFilter,
+    tempFilters: state.projectColumnFilters[action.projectId] || {},
+    projectColumnFilters: {
+      ...state.projectColumnFilters,
+      [action.projectId]: action.active ? modelsInitialState.tableFilters : state.tempFilters
     }
-    case actions.updateManyExperiment.type: {
-      const changeList = (action as ReturnType<typeof actions.updateManyExperiment>).changeList;
-      return changeList.reduce((acc, change) => {
-        acc = setExperimentsAndUpdateSelectedExperiments(acc, {id: change.id, changes: change.fields});
-        return acc;
-      }, state as ICommonExperimentsViewState);
+  })),
+  on(actions.addExperiments, (state, action) => ({...state, experiments: state.experiments.concat(action.experiments)})),
+  on(actions.removeExperiments, (state, action) => ({...state, experiments: state.experiments.filter(exp => !action.experiments.includes(exp.id))})),
+  on(actions.updateExperiment, (state, action) => setExperimentsAndUpdateSelectedExperiments(state, action)),
+  on(actions.updateManyExperiment, (state, action) =>
+    action.changeList.reduce((acc, change) => {
+      acc = setExperimentsAndUpdateSelectedExperiments(acc, {id: change.id, changes: change.fields});
+      return acc;
+    }, state as ICommonExperimentsViewState)
+  ),
+  on(actions.setExperiments, (state, action) => ({...state, experiments: action.experiments})),
+  on(actions.setExperimentInPlace, (state, action) => ({
+    ...state, experiments: state.experiments
+      .map(currExp => action.experiments.find(newExp => newExp.id === currExp.id))
+      .filter(e => e)
+  })),
+  on(actions.setNoMoreExperiments, (state, action) => ({...state, noMoreExperiment: action.payload})),
+  on(actions.setCurrentPage, (state, action) => ({...state, page: action.page})),
+  on(actions.setSelectedExperiment, (state, action) => ({...state, selectedExperiment: action.experiment})),
+  on(actions.setSelectedExperiments, (state, action) => ({...state, selectedExperiments: action.experiments})),
+  on(actions.setSelectedExperimentsDisableAvailable, (state, action) =>
+    ({...state, selectedExperimentsDisableAvailable: action.selectedExperimentsDisableAvailable})),
+  on(actions.globalFilterChanged, (state, action) =>
+    ({...state, globalFilter: action as ReturnType<typeof actions.globalFilterChanged>, showAllSelectedIsActive: false})),
+  on(actions.resetGlobalFilter, state => ({...state, globalFilter: commonExperimentsInitialState.globalFilter})),
+  on(actions.setTableSort, (state, action) => {
+    const colIds = state.tableCols.map(col => col.id).concat(state.metricsCols.map(col => col.id));
+    let orders = action.orders.filter(order => colIds.includes(order.field));
+    orders = orders.length > 0 ? orders : commonExperimentsInitialState.tableOrders;
+    return { ...state, projectColumnsSortOrder: {...state.projectColumnsSortOrder, [action.projectId]: orders} };
+  }),
+  on(actions.resetSortOrder, (state, action) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const {[action.projectId]: remove, ...order} = state.projectColumnsSortOrder;
+    return {...state, projectColumnsSortOrder: order};
+  }),
+  on(actions.setColumnWidth, (state, action) => ({
+    ...state,
+    projectColumnsWidth: {
+      ...state.projectColumnsWidth,
+      [action.projectId]: {
+        ...state.projectColumnsWidth[action.projectId],
+        [action.columnId]: action.widthPx
+      }
     }
-    case actions.SET_EXPERIMENTS:
-      return {...state, experiments: action.payload};
-    case setExperimentInPlace.type:
-      return {
-        ...state, experiments: state.experiments
-          .map(currExp => action.experiments.find(newExp => newExp.id === currExp.id))
-          .filter(e => e)
-      };
-    case actions.SET_NO_MORE_EXPERIMENTS:
-      return {...state, noMoreExperiment: action.payload};
-    case actions.SET_NEXT_PAGE:
-      return {...state, page: action.payload};
-    case actions.SET_SELECTED_EXPERIMENT:
-      return {...state, selectedExperiment: action.payload};
-    case actions.SET_SELECTED_EXPERIMENTS:
-      return {...state, selectedExperiments: action.payload};
-    case actions.setSelectedExperimentsDisableAvailable.type:
-      return {...state, selectedExperimentsDisableAvailable: action.selectedExperimentsDisableAvailable};
-    case actions.SET_VIEW_MODE:
-      return {...state, viewMode: action.payload};
-    case actions.globalFilterChanged.type:
-      return {...state, globalFilter: action as ReturnType<typeof actions.globalFilterChanged>, showAllSelectedIsActive: false};
-    case actions.resetGlobalFilter.type:
-      return {...state, globalFilter: commonExperimentsInitialState.globalFilter};
-    case setTableSort.type: {
-      const colIds = state.tableCols.map(col => col.id).concat(state.metricsCols.map(col => col.id));
-      const orders = (action as ReturnType<typeof setTableSort>).orders.filter(order => colIds.includes(order.field));
-      return {...state, tableOrders: orders.length > 0 ? orders : commonExperimentsInitialState.tableOrders};
+  })),
+  on(actions.toggleColHidden, (state, action) => ({
+    ...state,
+    hiddenProjectTableCols: {
+      ...state.hiddenProjectTableCols,
+      [action.projectId]: {
+        ...(state.hiddenProjectTableCols[action.projectId] || commonExperimentsInitialState.hiddenTableCols),
+        [action.columnId]: state.hiddenProjectTableCols?.[action.projectId]?.[action.columnId] ? undefined : true
+      }
     }
-    case actions.RESET_SORT_ORDER:
-      return {
-        ...state, tableOrders: commonExperimentsInitialState.tableOrders
-      };
-    case  actions.TOGGLE_COL_HIDDEN:
-      return {
-        ...state,
-        hiddenTableCols: {...state.hiddenTableCols, [action.payload]: !state.hiddenTableCols[action.payload]}
-      };
-    case  actions.setHiddenColumns.type: {
-      const visibleColumns = ['selected'].concat(action['visibleColumns']) as string[];
-      return {
-        ...state, hiddenTableCols: {
-          ...state.hiddenTableCols,
+  })),
+  on(actions.setHiddenColumns, (state, action) => {
+    const visibleColumns = ['selected'].concat(action['visibleColumns']) as string[];
+    return {
+      ...state,
+      hiddenProjectTableCols: {
+        ...state.hiddenProjectTableCols,
+        [action.projectId]: {
           ...state.tableCols
             .filter(col => !visibleColumns.includes(col.id))
             .reduce((obj, col) => ({...obj, [col.id]: true}), {})
         }
-      };
-    }
-    case actions.TABLE_FILTER_CHANGED: {
-      const payload = (action as actions.TableFilterChanged).payload;
-      return {
-        ...state,
-        activeParentsFilter: payload.col === EXPERIMENTS_TABLE_COL_FIELDS.PARENT ? payload.value.map(parentId => state.parents.find(parent => parent.id === parentId)).filter(p => !!p) : [],
-        tableFilters: {
-          ...state.tableFilters,
-          [payload.col]: {value: payload.value, matchMode: payload.filterMatchMode}
-        }
-      };
-    }
-    case actions.setTableFilters.type:
-      return {
-        ...state, tableFilters: {
-          ...action['filters'].reduce((obj, filter: TableFilter) => {
-            obj[filter.col] = {value: filter.value, machMode: filter.filterMatchMode};
-            return obj;
-          }, {})
-        }
-      };
-    case actions.setExtraColumns.type:
-      return {...state, metricsCols: [...state.metricsCols.filter(tableCol => !(tableCol.projectId === action['projectId'])), ...action['columns']]};
-    case actions.ADD_COL:
-      return {...state, metricsCols: [...state.metricsCols, action.payload.col]};
-    case actions.REMOVE_COL:
-      return {
-        ...state,
-        metricsCols: [...state.metricsCols.filter(tableCol => !(tableCol.id === action.payload.col.id && tableCol.projectId === action.payload.col.projectId))],
-        tableOrders: state.tableOrders.filter(order => order.field !== action.payload.col.id),
-        colsOrder: {...state.colsOrder, [action.payload.col.projectId]: state.colsOrder[action.payload.col.projectId] ? state.colsOrder[action.payload.col.projectId].filter(colId => colId !== action.payload.col.id) : null}
-      };
-
-    case actions.setTags.type:
-      return {...state, projectTags: action.tags};
-    case actions.setUsers.type:
-      return {...state, users: action.users};
-    case actions.setParents.type:
-      return {...state, parents: action.parents};
-    case actions.setActiveParentsFilter.type:
-      return {...state, activeParentsFilter: action.parents};
-    case actions.setProjectsTypes.type:
-      return {...state, types: action.types};
-    case actions.CLEAR_HYPER_PARAMS_COLS:
-      return {
-        ...state,
-        metricsCols: [...state.metricsCols.filter(tableCol => !(tableCol.id.startsWith('hyperparams') && tableCol.projectId === action.payload.projectId))],
-        tableOrders: state.tableOrders.filter(order => order.field.startsWith('hyperparams'))
-      };
-    case actions.SET_CUSTOM_METRICS:
-      return {...state, metricVariants: action.payload.metrics, metricsLoading: false};
-    case actions.setColsOrderForProject.type:
-      return {...state, colsOrder: {...state.colsOrder, [action.project]: action.cols}};
-    case actions.SET_CUSTOM_HYPER_PARAMS:
-      return {...state, hyperParams: action.payload.params, metricsLoading: false};
-    case hyperParamSelectedInfoExperiments.type:
-      return {...state, hyperParamsOptions: {...state.hyperParamsOptions, [action.col.id]: action.values}};
-    case actions.GET_CUSTOM_METRICS:
-      return {...state, metricsLoading: true};
-    case actions.GET_CUSTOM_HYPER_PARAMS:
-      return {...state, metricsLoading: true};
-    case actions.setSplitSize.type:
-      return {...state, splitSize: action.splitSize};
-    default:
-      return state;
-  }
-}
-
-function setExperimentsAndUpdateSelectedExperiments(state: ICommonExperimentsViewState, payload): ICommonExperimentsViewState {
-  return {
+      }
+    };
+  }),
+  on(actions.tableFilterChanged, (state, action) => ({
     ...state,
-    experiments: state.experiments.map(ex => ex.id === payload.id ? {...ex, ...payload.changes} : ex),
-    ...(state.selectedExperiment?.id === payload.id && {selectedExperiment: {...state.selectedExperiment, ...payload.changes}}),
-    ...(state.selectedExperiments.find(ex => ex.id === payload.id) && {selectedExperiments: state.selectedExperiments.map(ex => ex.id === payload.id ? {...ex, ...payload.changes} : ex)})
-  };
-}
+    activeParentsFilter: action.filter.col === EXPERIMENTS_TABLE_COL_FIELDS.PARENT ?
+      action.filter.value.map(parentId => state.parents.find(parent => parent.id === parentId)).filter(p => !!p) : [],
+    projectColumnFilters: {
+      ...state.projectColumnFilters,
+      [action.projectId]: {
+        ...state.projectColumnFilters[action.projectId],
+        [action.filter.col]: {value: action.filter.value, matchMode: action.filter.filterMatchMode}
+      }
+    }
+  })),
+  on(actions.setTableFilters, (state, action) => ({
+    ...state,
+    projectColumnFilters: {
+      ...state.projectColumnFilters,
+      [action.projectId]: {
+        ...action.filters.reduce((obj, filter: TableFilter) => {
+          obj[filter.col] = {value: filter.value, matchMode: filter.filterMatchMode};
+          return obj;
+        }, {} as {[columnId: string]: {value: any; matchMode: string}})
+      }
+    }
+  })),
+  on(actions.setExtraColumns, (state, action) =>
+    ({...state, metricsCols: [...state.metricsCols.filter(tableCol => !(tableCol.projectId === action['projectId'])), ...action['columns']]})),
+  on(actions.addColumn, (state, action) => ({...state, metricsCols: [...state.metricsCols, action.col]})),
+  on(actions.removeCol, (state, action) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const {[action.id]: removedCol, ...remainingColsWidth} = state.projectColumnsWidth[action.projectId] || {};
+      return {
+        ...state,
+        metricsCols: [...state.metricsCols.filter(tableCol => !(tableCol.id === action.id && tableCol.projectId === action.projectId))],
+        projectColumnsSortOrder: {
+          ...state.projectColumnsSortOrder,
+          [action.projectId]: state.projectColumnsSortOrder[action.projectId].filter(order => order.field !== action.id)
+        },
+        projectColumnsWidth: {...state.projectColumnsWidth, [action.projectId]: remainingColsWidth},
+        colsOrder: {...state.colsOrder, [action.projectId]: state.colsOrder[action.projectId] ? state.colsOrder[action.projectId].filter(colId => colId !== action.id) : null}
+      };
+    }),
+  on(actions.setTags, (state, action) => ({...state, projectTags: action.tags})),
+  on(actions.setUsers, (state, action) => ({...state, users: action.users})),
+  on(actions.setParents, (state, action) => ({...state, parents: action.parents})),
+  on(actions.setActiveParentsFilter, (state, action) => ({...state, activeParentsFilter: action.parents})),
+  on(actions.setProjectsTypes, (state, action) => ({...state, types: action.types})),
+  on(actions.clearHyperParamsCols, (state, action) => ({
+    ...state,
+    metricsCols: [...state.metricsCols.filter(tableCol => !(tableCol.id.startsWith('hyperparams') && tableCol.projectId === action.projectId))],
+    projectColumnsSortOrder: {
+      ...state.projectColumnsSortOrder,
+      [action.projectId]: state.projectColumnsSortOrder[action.projectId].filter(order => order.field.startsWith('hyperparams'))
+    }
+  })),
+  on(actions.setCustomMetrics, (state, action) =>
+    ({...state, metricVariants: action.metrics, metricsLoading: false})),
+  on(actions.setColsOrderForProject, (state, action) =>
+    ({...state, colsOrder: {...state.colsOrder, [action.project]: action.cols}})),
+  on(actions.setCustomHyperParams, (state, action) => ({...state, hyperParams: action.params, metricsLoading: false})),
+  on(actions.hyperParamSelectedInfoExperiments, (state, action) =>
+    ({...state, hyperParamsOptions: {...state.hyperParamsOptions, [action.col.id]: action.values}})),
+  on(actions.getCustomMetrics, state => ({...state, metricsLoading: true})),
+  on(actions.getCustomHyperParams, state => ({...state, metricsLoading: true})),
+  on(actions.setSplitSize, (state, action) => ({...state, splitSize: action.splitSize})),
+);

@@ -1,6 +1,7 @@
 import {ChangeDetectorRef, Component, EventEmitter, Input, Output} from '@angular/core';
 import {MetricVariantResult} from '../../../../business-logic/model/projects/metricVariantResult';
 import {ISmCol} from '../../../shared/ui-components/data/table/table.consts';
+import {MetricValueType} from '../../../experiments-compare/reducers/experiments-compare-charts.reducer';
 
 @Component({
   selector   : 'sm-select-metric-for-custom-col',
@@ -10,7 +11,7 @@ import {ISmCol} from '../../../shared/ui-components/data/table/table.consts';
 export class SelectMetricForCustomColComponent {
   public metricTree;
   public metrics: string[];
-  public metricsCols: any;
+  public metricsCols: {[metVar: string]: string[]};
   public searchText: any;
 
   // private _searchTerm: string;
@@ -31,6 +32,7 @@ export class SelectMetricForCustomColComponent {
         this.metricsCols[tableCol.metric_hash + tableCol.variant_hash] = [tableCol.valueType];
     });
   }
+  @Input() multiSelect: boolean = true;
 
   // @Input() set searchTerm(searchTerm: string) {
   //   this.filteredList = this.list ? this.filterList(this.list, searchTerm) : [];
@@ -42,7 +44,11 @@ export class SelectMetricForCustomColComponent {
   // }
 
   @Output() getMetricsToDisplay  = new EventEmitter();
-  @Output() selectedMetricToShow = new EventEmitter<{variant: MetricVariantResult; addCol: boolean, valueType: string}>();
+  @Output() selectedMetricToShow = new EventEmitter<{
+    variant: MetricVariantResult;
+    addCol: boolean;
+    valueType: MetricValueType;
+  }>();
   @Output() goBack               = new EventEmitter();
 
   constructor(private changeDetectorRef: ChangeDetectorRef) {
@@ -50,7 +56,10 @@ export class SelectMetricForCustomColComponent {
 
   toggleAllMetricsToDisplay(variant: any, on: boolean) {
     if (!on) {
-      this.toggleMetricToDisplay(variant, on, 'value');
+      this.toggleMetricToDisplay(variant, on, null);
+      this.multiSelect ?
+        this.metricsCols[variant.metric_hash + variant.variant_hash] = [] :
+        this.metricsCols = {[variant.metric_hash + variant.variant_hash]: []};
     } else {
       this.toggleMetricToDisplay(variant, on, 'value');
       this.toggleMetricToDisplay(variant, on, 'min_value');
@@ -58,7 +67,7 @@ export class SelectMetricForCustomColComponent {
     }
   }
 
-  public toggleMetricToDisplay(variant: ISmCol, value: boolean, valueType: string) {
+  public toggleMetricToDisplay(variant: ISmCol, value: boolean, valueType: MetricValueType) {
     this.selectedMetricToShow.emit({variant, addCol: !value, valueType});
   }
 
@@ -66,4 +75,11 @@ export class SelectMetricForCustomColComponent {
     this.searchText = value;
     this.changeDetectorRef.detectChanges();
   }
+
+  public isArray(obj: unknown) {
+    return Array.isArray(obj);
+  }
+
+  hasSelectedVariant = (metric: string) =>
+    this.metricTree[metric].some(variant => this.metricsCols[variant.metric_hash + variant.variant_hash] !== undefined);
 }

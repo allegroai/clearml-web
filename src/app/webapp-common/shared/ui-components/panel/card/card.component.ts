@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 
 @Component({
   selector: 'sm-card',
@@ -23,6 +23,8 @@ export class CardComponent implements OnInit {
   @Input() isFolder = false;
   @Input() subFolderTitle = '';
   @Input() oneTabMode: boolean;
+  @Input() ribbonText: string;
+
 
   public showSecondTab = false;
   public secondTabIsHovered: boolean;

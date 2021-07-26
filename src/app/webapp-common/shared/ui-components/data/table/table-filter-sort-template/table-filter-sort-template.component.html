@@ -27,7 +27,7 @@
              [buttonClass]="'table-filter-button ' + (isFiltered() ? 'active' : 'deactive')"
              [iconClass]="'icon ' + (isFiltered()? 'i-filter-on':'i-filter-off')"
              (menuClosed)="menuClosed.emit()"
-             (menuOpened)="menuOpened.emit()"
+         (menuOpened)="menuOpened.emit()"
     >
       <ng-container [ngSwitch]="filterType">
         <sm-table-filter-duration
@@ -45,27 +45,32 @@
           (filterChanged)="filterChanged.emit($event)"
         ></sm-table-filter-duration-date-time>
         <ng-container *ngSwitchDefault>
-          <sm-menu-item *ngFor="let option of options"
-                        [itemLabel]="option.label"
-                        [checked]="value?.includes(option.value)"
-                        [selectable]="true"
-                        [itemValue]="option.value"
-                        [itemTooltip]="option.tooltip"
-                        [enableTooltip]="true"
-                        (itemClicked)="onFilterChanged($event)">
-          </sm-menu-item>
-          <div *ngIf="options?.length===0" class="empty-menu flex-middle">No item found</div>
-          <div fixedOptions>
-            <sm-menu-item *ngFor="let option of subOptions" [itemLabel]="option.label"
-                          [checked]="subValue?.includes(option.value)" [selectable]="true" [itemValue]="option.value"
-                          (itemClicked)="onSubFilterChanged($event)">
+          <div *ngIf="supportAndFilter" class="filter-type" smClickStopPropagation>
+            <span class="link mr-3" [class.selected]="!andFilter" (click)="toggleCombination()">Any</span>
+            <span class="link" [class.selected]="andFilter" (click)="toggleCombination()">All</span>
+          </div>
+          <div [class.options-section]="enableSearch">
+            <sm-menu-item *ngFor="let option of options; trackBy: trackByValFn"
+                          [itemLabel]="option.label"
+                          [checked]="value?.includes(option.value)"
+                          [selectable]="true"
+                          [itemValue]="option.value"
+                          [itemTooltip]="option.tooltip"
+                          [enableTooltip]="true"
+                          (itemClicked)="onFilterChanged($event)">
             </sm-menu-item>
+            <div *ngIf="options?.length===0" class="empty-menu flex-middle">No item found</div>
+            <div fixedOptions>
+              <sm-menu-item
+                *ngFor="let option of subOptions; trackBy: trackByLabel"
+                [itemLabel]="option.label"
+                [checked]="subValue?.includes(option.value)" [selectable]="true" [itemValue]="option.value"
+                (itemClicked)="onSubFilterChanged($event)"
+              ></sm-menu-item>
+            </div>
           </div>
         </ng-container>
       </ng-container>
-
     </sm-menu>
   </ng-container>
-
 </div>
-

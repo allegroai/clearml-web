@@ -41,7 +41,7 @@ export function formatStaticCrumb(crumb: string): IBreadcrumbsLink {
       name = 'Info';
       break;
     case 'account-administration':
-      name = 'Account Administration';
+      name = 'Access Controls';
       break;
     default:
       name = crumb.charAt(0).toUpperCase() + crumb.slice(1);

@@ -1,10 +1,10 @@
 import {Injectable} from '@angular/core';
 import {act, Actions, Effect, ofType} from '@ngrx/effects';
-import {ActiveLoader, DeactiveLoader} from '../core/actions/layout.actions';
+import {activeLoader, deactivateLoader} from '../core/actions/layout.actions';
 import {SearchActivate, SearchClear, searchExperiments, searchModels, searchProjects, searchSetTerm, searchStart, SetExperimentsResults, SetModelsResults, SetProjectsResults} from './dashboard-search.actions';
 import {EXPERIMENT_SEARCH_ONLY_FIELDS, SEARCH_ACTIONS, SEARCH_PAGE_SIZE} from './dashboard-search.consts';
 import {ApiProjectsService} from '../../business-logic/api-services/projects.service';
-import {RequestFailed} from '../core/actions/http.actions';
+import {requestFailed} from '../core/actions/http.actions';
 import {Store} from '@ngrx/store';
 import {selectActiveSearch} from './dashboard-search.reducer';
 import {ProjectsGetAllExRequest} from '../../business-logic/model/projects/projectsGetAllExRequest';
@@ -29,7 +29,7 @@ export class DashboardSearchEffects {
   @Effect()
   activeLoader = this.actions.pipe(
     ofType(SEARCH_ACTIONS.SEARCH_PROJECTS, SEARCH_ACTIONS.SEARCH_MODELS, SEARCH_ACTIONS.SEARCH_EXPERIMENTS),
-    map(action => new ActiveLoader(action.type))
+    map(action => activeLoader(action.type))
   );
   // add actions for each search
   @Effect()
@@ -64,8 +64,8 @@ export class DashboardSearchEffects {
       include_stats  : true,
       only_fields: ['name', 'company', 'user', 'created', 'default_output_destination']
     }).pipe(
-      mergeMap(res => [new SetProjectsResults(res.projects), new DeactiveLoader(action.type)]),
-      catchError(error => [new DeactiveLoader(action.type), new RequestFailed(error)])))
+      mergeMap(res => [new SetProjectsResults(res.projects), deactivateLoader(action.type)]),
+      catchError(error => [deactivateLoader(action.type), requestFailed(error)])))
   );
 
   @Effect()
@@ -81,8 +81,8 @@ export class DashboardSearchEffects {
       system_tags: ['-archived'],
       only_fields: ['labels', 'ready', 'created', 'framework', 'user.name', 'name', 'parent.name', 'task.name', 'id', 'company']
     }).pipe(
-      mergeMap(res => [new SetModelsResults(res.models), new DeactiveLoader(action.type)]),
-      catchError(error => [new DeactiveLoader(action.type), new RequestFailed(error)])))
+      mergeMap(res => [new SetModelsResults(res.models), deactivateLoader(action.type)]),
+      catchError(error => [deactivateLoader(action.type), requestFailed(error)])))
   );
 
   @Effect()
@@ -99,7 +99,7 @@ export class DashboardSearchEffects {
       type       : ['__$not', 'annotation_manual', '__$not', 'annotation', '__$not', 'dataset_import'],
       system_tags: ['-archived']
     }).pipe(
-      mergeMap(res => [new SetExperimentsResults(res.tasks), new DeactiveLoader(action.type)]),
-      catchError(error => [new DeactiveLoader(action.type), new RequestFailed(error)])))
+      mergeMap(res => [new SetExperimentsResults(res.tasks), deactivateLoader(action.type)]),
+      catchError(error => [deactivateLoader(action.type), requestFailed(error)])))
   );
 }

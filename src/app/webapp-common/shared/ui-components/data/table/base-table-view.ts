@@ -45,7 +45,7 @@ export abstract class BaseTableView implements AfterViewInit {
   }
 
 
-  @Output() filterChanged = new EventEmitter() as EventEmitter<{ col: ISmCol; value: any }>;
+  @Output() filterChanged = new EventEmitter() as EventEmitter<{ col: ISmCol; value: any; andFilter?: boolean }>;
   @Output() onColumnsReordered = new EventEmitter<string[]>();
   @ViewChildren('table') tables: QueryList<TableComponent>;
 
@@ -106,12 +106,12 @@ export abstract class BaseTableView implements AfterViewInit {
   }
 
   tableFilterChanged(col: ISmCol, event) {
-    this.filterChanged.emit({col, value: event.value});
+    this.filterChanged.emit({col, value: event.value, andFilter: event.andFilter});
     this.scrollTableToTop();
   }
 
-  tableAllFiltersChanged(event) {
-    this.filterChanged.emit({col: {id: event.col}, value: event.value});
+  tableAllFiltersChanged(event: {col: string; value: unknown; matchMode?: string}) {
+    this.filterChanged.emit({col: {id: event.col}, value: event.value, andFilter: event.matchMode === 'AND'});
     this.scrollTableToTop();
   }
 

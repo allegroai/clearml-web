@@ -4,7 +4,7 @@ import {Store} from '@ngrx/store';
 import {mergeMap, map, switchMap} from 'rxjs/operators';
 import {GetQueuesForEnqueue, GET_QUEUES_FOR_ENQUEUE, SetQueuesForEnqueue, GET_TASK_FOR_ENQUEUE, GetTaskForEnqueue, SetTaskForEnqueue} from './select-queue.actions';
 import {ApiQueuesService} from '../../../../../business-logic/api-services/queues.service';
-import {ActiveLoader} from '../../../../core/actions/layout.actions';
+import {activeLoader} from '../../../../core/actions/layout.actions';
 import {ApiTasksService} from '../../../../../business-logic/api-services/tasks.service';
 
 @Injectable()
@@ -16,7 +16,7 @@ export class SelectQueueEffects {
   @Effect()
   activeLoader = this.actions$.pipe(
     ofType(),
-    map((action: any) => new ActiveLoader(action.type))
+    map((action: any) => activeLoader(action.type))
   );
 
   @Effect()

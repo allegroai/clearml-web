@@ -27,11 +27,17 @@
             "assets": [
               "src/assets",
               "src/favicon.ico",
-              "src/app/webapp-common/assets"
+              "src/app/webapp-common/assets",
+              {
+                "glob": "**/*",
+                "input": "node_modules/ace-builds/src-min",
+                "output": "./assets/ace-builds/"
+              }
             ],
             "styles": [
               "node_modules/primeicons/primeicons.css",
               "node_modules/primeng/resources/components/table/table.css",
+              "node_modules/ngx-markdown-editor/assets/highlight.js/agate.min.css",
               "src/styles.scss",
               "src/fonts.scss"
             ],

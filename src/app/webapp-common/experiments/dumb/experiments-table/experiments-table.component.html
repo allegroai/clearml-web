@@ -1,5 +1,5 @@
 <script src="../../../models/shared/models-table/models-table.component.ts"></script>
-<sm-experiment-menu #contextMenu *smCheckPermission="true"
+<sm-experiment-menu #contextMenu
                     [experiment]="contextExperiment"
                     [selectedExperiment]="selectedExperiment"
                     [selectedExperiments]="selectedExperiments"
@@ -37,10 +37,12 @@
     (onRowRightClick)="onContextMenu($event)"
     (colReordered)="columnsReordered($event)"
     (sortChanged)="onSortChanged($event.isShift, $event.field)"
+    (columnResized)="columnResized.emit($event)"
   >
     <!--HEADER TEMPLATE-->
     <ng-template let-col pTemplate="cardFilter">
-      <sm-table-card-filter-template [options]="EXPERIMENTS_ALL_FILTER_OPTIONS"
+      <sm-table-card-filter-template [options]="allFiltersOptions"
+                                     [filterMatch]="filtersMatch"
                                      [value]="filtersValues"
                                      [subValue]="filtersSubValues[EXPERIMENTS_TABLE_COL_FIELDS.TAGS]"
                                      [columns]="initialColumns"
@@ -54,7 +56,7 @@
 
     <ng-template let-col pTemplate="checkbox">
       <sm-checkbox-control
-        *ngIf="col.headerType === ColHeaderTypeEnum.checkBox"
+        *ngIf="col.headerType === colHeaderTypeEnum.checkBox"
         class="checkbox-col header"
         fieldName="selected"
         [formData]="selectionState"
@@ -69,14 +71,14 @@
         [column]="col"
         [value]="filtersValues[col.id]"
         [searchValue]="searchValues[col.id]"
-        [options]="EXPERIMENTS_ALL_FILTER_OPTIONS[col.id] | filter:searchValues[col.id]:'label'"
+        [options]="allFiltersOptions[col.id] | filter:searchValues[col.id]:'label'"
         [sortOrder]="tableSortFieldsObject[col.id]"
         [tooltip]="col.metric_hash || col.isParam"
+        [fixedOptionsSubheader]="col.id === EXPERIMENTS_TABLE_COL_FIELDS.TAGS ? 'System tags' : ''"
+        [andFilter]="col.andFilter ? filtersMatch[col.id] === 'AND' : null"
         (sortOrderChanged)="onSortChanged($event, col.id)"
         (filterChanged)="tableFilterChanged(col, $event);"
         (searchValueChanged)="searchValueChanged($event, col.id)"
-        (menuClosed)="filterMenuClosed(col.id)"
-        [fixedOptionsSubheader]="col.id === EXPERIMENTS_TABLE_COL_FIELDS.TAGS ? 'System tags' : ''"
         (menuOpened)="onSortFilterMenuOpened(col)"
       >
       </sm-table-filter-sort-template>

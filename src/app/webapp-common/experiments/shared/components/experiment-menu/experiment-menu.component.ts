@@ -132,7 +132,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
         this.router.navigateByUrl(`projects/${this.getProjectId()}/experiments/${this._experiment.id}/output/execution`);
       } else {
         if (window.location.pathname.includes('info-output')) {
-          const resultsPath = this.route.firstChild?.firstChild?.routeConfig?.path || this.route.firstChild.routeConfig.path;
+          const resultsPath = window.location.pathname.split('info-output/')[1];
           this.router.navigateByUrl(`projects/${this.getProjectId()}/experiments/${this._experiment.id}/output/${resultsPath}`);
         } else {
           const parts = window.location.pathname.split('/');
@@ -303,7 +303,7 @@ To avoid this, <b>clone the experiment</b> and work with the cloned experiment.`
   }
 
   shareExperimentPopup() {
-    const confirmDialogRef = this.dialog.open(ShareDialogComponent, {
+    this.dialog.open(ShareDialogComponent, {
       data: {
         title: 'SHARE EXPERIMENT PUBLICLY',
         link: `${window.location.origin}/projects/${this._experiment.project.id}/experiments/${this._experiment.id}/output/execution`,
@@ -382,9 +382,9 @@ To avoid this, <b>clone the experiment</b> and work with the cloned experiment.`
     });
     confirmDialogRef.afterClosed().subscribe((confirmed) => {
       if (confirmed) {
-        this.store.dispatch(new experimentsActions.SetSelectedExperiments([]));
+        this.store.dispatch(experimentsActions.setSelectedExperiments({experiments: []}));
         this.store.dispatch(new SetExperiment(null));
-        this.store.dispatch(new experimentsActions.GetExperiments());
+        this.store.dispatch(experimentsActions.getExperiments());
         this.store.dispatch(new DeactivateEdit());
         if (this.activateFromMenuButton || this.selectedExperiments.map(e => e.id).includes(this.selectedExperiment?.id)) {
           window.setTimeout(() => this.router.navigate([`projects/${this.getProjectId()}/experiments`], {queryParamsHandling: 'preserve'}));

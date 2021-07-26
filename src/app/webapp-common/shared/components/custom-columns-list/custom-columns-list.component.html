@@ -1,19 +1,17 @@
-<div class="d-flex justify-content-around" style="padding: 15px 15px; color: #5a658e; width: 370px">
-  CUSTOMIZE COLUMNS
-</div>
-<hr style="margin: 0">
+<div class="sm-menu-header">CUSTOMIZE COLUMNS</div>
+<mat-divider></mat-divider>
 <div class="list-container">
-  <sm-menu-item *ngFor="let col of tableCols"
+  <sm-menu-item *ngFor="let col of tableCols; trackBy: trackById"
                 [itemLabel]="col.header"
                 [checked]="!(col?.hidden)"
                 [selectable]="true"
-                [removable]="col.metric_hash || col.isParam"
+                [removable]="!!col.metric_hash || col.isParam"
                 [itemValue]="col.id"
                 (removeItemClicked)="removeColFromList.emit($event)"
                 (itemClicked)="selectedTableColsChanged.emit(col)">
   </sm-menu-item>
 </div>
-<hr style="margin: 0">
+<mat-divider></mat-divider>
 <div class="loader" [ngClass]="{'d-none': !isLoading}">
   <mat-spinner diameter="50"></mat-spinner>
 </div>

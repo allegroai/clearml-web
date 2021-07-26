@@ -33,7 +33,7 @@
     <sm-refresh-button
       [autoRefreshState]="autoRefreshState"
       [allowAutoRefresh]="true"
-      (refreshList)="refreshListClicked.emit()"
+      (refreshList)="refreshListClicked.emit($event)"
       (setAutoRefresh)="setAutoRefresh.emit($event)"
     >
     </sm-refresh-button>

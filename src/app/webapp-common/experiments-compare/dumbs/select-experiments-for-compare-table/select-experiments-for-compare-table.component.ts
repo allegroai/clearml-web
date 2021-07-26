@@ -90,7 +90,8 @@ export const INITIAL_EXPERIMENT_TABLE_COLS = [
 
 export enum ExperimentTagsEnum {
   Development = 'development',
-  Hidden = 'archived'
+  Archived = 'archived',
+  Example = 'example'
 }
 
 export interface AddExperimentEvent {

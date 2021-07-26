@@ -25,3 +25,27 @@
     }
   }
 }
+
+.filter-type {
+  padding: 4px 14px;
+  text-align: right;
+
+  .link {
+    font-size: 12px;
+    font-weight: 500;
+    color: $blue-200;
+    cursor: pointer;
+
+    &.selected {
+      color: $blue-400;
+      pointer-events: none;
+      cursor: initial;
+    }
+  }
+}
+
+.options-section {
+  height: 60vh;
+  max-height: 400px;
+  overflow: auto;
+}

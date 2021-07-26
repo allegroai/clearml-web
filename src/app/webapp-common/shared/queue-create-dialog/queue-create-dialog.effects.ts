@@ -6,8 +6,8 @@ import {CREATION_STATUS} from './queue-create-dialog.reducer';
 import {catchError, mergeMap, map, switchMap} from 'rxjs/operators';
 import {Router} from '@angular/router';
 import {MESSAGES_SEVERITY} from '../../../app.constants';
-import {ActiveLoader, AddMessage, DeactiveLoader} from '../../core/actions/layout.actions';
-import {RequestFailed} from '../../core/actions/http.actions';
+import {activeLoader, addMessage, deactivateLoader} from '../../core/actions/layout.actions';
+import {requestFailed} from '../../core/actions/http.actions';
 import {ApiQueuesService} from '../../../business-logic/api-services/queues.service';
 
 @Injectable()
@@ -18,7 +18,7 @@ export class QueueCreateDialogEffects {
   @Effect()
   activeLoader = this.actions.pipe(
     ofType(CREATE_QUEUE_ACTIONS.CREATE_NEW_QUEUE),
-    map(action => new ActiveLoader(action.type))
+    map(action => activeLoader(action.type))
   );
 
   @Effect()
@@ -27,11 +27,11 @@ export class QueueCreateDialogEffects {
     mergeMap((action) => this.queuesApiService.queuesCreate(action.payload)
       .pipe(
         mergeMap(res => [
-          new DeactiveLoader(action.type),
+          deactivateLoader(action.type),
           new createNewQueueActions.SetNewQueueCreationStatus(CREATION_STATUS.SUCCESS),
-          new AddMessage(MESSAGES_SEVERITY.SUCCESS, 'Queue Created Successfully'),
+          addMessage(MESSAGES_SEVERITY.SUCCESS, 'Queue Created Successfully'),
         ]),
-        catchError(error => [new DeactiveLoader(action.type), new RequestFailed(error), new AddMessage(MESSAGES_SEVERITY.ERROR, 'Queue Created Failed'), new createNewQueueActions.SetNewQueueCreationStatus(CREATION_STATUS.FAILED)])
+        catchError(error => [deactivateLoader(action.type), requestFailed(error), addMessage(MESSAGES_SEVERITY.ERROR, 'Queue Created Failed'), new createNewQueueActions.SetNewQueueCreationStatus(CREATION_STATUS.FAILED)])
       )
     )
   );
@@ -42,11 +42,11 @@ export class QueueCreateDialogEffects {
     mergeMap((action) => this.queuesApiService.queuesUpdate(action.payload)
       .pipe(
         mergeMap(res => [
-          new DeactiveLoader(action.type),
+          deactivateLoader(action.type),
           new createNewQueueActions.SetNewQueueCreationStatus(CREATION_STATUS.SUCCESS),
-          new AddMessage(MESSAGES_SEVERITY.SUCCESS, 'Queue Updated Successfully'),
+          addMessage(MESSAGES_SEVERITY.SUCCESS, 'Queue Updated Successfully'),
         ]),
-        catchError(error => [new DeactiveLoader(action.type), new RequestFailed(error), new AddMessage(MESSAGES_SEVERITY.ERROR, 'Queue Created Failed'), new createNewQueueActions.SetNewQueueCreationStatus(CREATION_STATUS.FAILED)])
+        catchError(error => [deactivateLoader(action.type), requestFailed(error), addMessage(MESSAGES_SEVERITY.ERROR, 'Queue Created Failed'), new createNewQueueActions.SetNewQueueCreationStatus(CREATION_STATUS.FAILED)])
       )
     )
   );
@@ -57,7 +57,7 @@ export class QueueCreateDialogEffects {
     switchMap(action => this.queuesApiService.queuesGetAllEx({})
       .pipe(
         mergeMap(res => [new createNewQueueActions.SetQueues(res.queues)]),
-        catchError(error => [new RequestFailed(error)])
+        catchError(error => [requestFailed(error)])
       )
     )
   );

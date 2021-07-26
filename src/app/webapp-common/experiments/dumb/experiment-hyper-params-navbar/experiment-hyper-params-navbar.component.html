@@ -20,14 +20,17 @@
     HYPER PARAMETERS
   </mat-expansion-panel-header>
   <div
-    *ngFor="let hyperParameter of (hyperParams | keyvalue)|filterOut:'key':'properties' | sort:'key'"
+    *ngFor="let hyperParameter of (hyperParams | keyvalue)|filterOut:'key':'properties' | sort:'key'; trackBy: trackByFn"
     queryParamsHandling="preserve"
     [routerLink]="'hyper-param/' + (hyperParameter.key | safeUrlParameter)"
-    [class.selected]="selectedHyperParam === hyperParameter.key"
+    [class.selected]="selectedHyperParam === (hyperParameter.key | safeUrlParameter)"
     class="hyper-container pointer ellipsis"
     routerLink="hyper-param"
   >
-    <i class="sm al-icon al-ico-data-audit al-color" [class]="(selectedHyperParam === hyperParameter.key ? 'white' : 'blue-400')"></i>{{hyperParameter.key | replaceViaMapPipe:sectionReplaceMap}}
+    <i
+      class="sm al-icon al-ico-data-audit al-color"
+      [class]="(selectedHyperParam === hyperParameter.key ? 'white' : 'blue-400')"
+    ></i>{{hyperParameter.key | replaceViaMapPipe:sectionReplaceMap}}
   </div>
 </mat-expansion-panel>
 
@@ -36,7 +39,7 @@
     CONFIGURATION OBJECTS
   </mat-expansion-panel-header>
   <div
-    *ngFor="let confObj of configuration | keyvalue"
+    *ngFor="let confObj of configuration | keyvalue; trackBy: trackByFn"
     queryParamsHandling="preserve"
     [routerLink]="'configuration/' + (confObj.key | safeUrlParameter)"
     [class.selected]="selectedObject === confObj.key"

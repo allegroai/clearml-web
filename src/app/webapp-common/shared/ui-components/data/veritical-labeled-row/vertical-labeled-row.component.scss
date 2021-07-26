@@ -1,15 +1,17 @@
 @import '../../styles/variables';
 
 :host {
+
   .labeled-row {
-    border-bottom: 1px solid $blue-500;
+    padding: 8px 0;
+    border-bottom: 1px solid #303443;
   }
 
   .label {
-    font-size: 13px;
+    font-size: 12px;
   }
 
   .value {
-    font-size: 15px;
+    font-weight: 500;
   }
 }

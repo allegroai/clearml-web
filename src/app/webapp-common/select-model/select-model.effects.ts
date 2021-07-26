@@ -9,8 +9,8 @@ import {get} from 'lodash/fp';
 import {MODEL_TAGS, MODELS_TABLE_COL_FIELDS} from '../models/shared/models.const';
 import {IModelsViewState} from '../models/reducers/models-view.reducer';
 import {ApiModelsService} from '../../business-logic/api-services/models.service';
-import {RequestFailed} from '../core/actions/http.actions';
-import {ActiveLoader, DeactiveLoader, SetServerError} from '../core/actions/layout.actions';
+import {requestFailed} from '../core/actions/http.actions';
+import {activeLoader, deactivateLoader, setServerError} from '../core/actions/layout.actions';
 import {selectRouterParams} from '../core/reducers/router-reducer';
 import {addMultipleSortColumns, escapeRegex} from '../shared/utils/shared-utils';
 import {of} from 'rxjs';
@@ -30,7 +30,7 @@ export class SelectModelEffects {
   activeLoader = this.actions$.pipe(
     ofType(actions.GET_NEXT_MODELS, actions.GLOBAL_FILTER_CHANGED,
       actions.ALL_PROJECTS_MODE_CHANGED, actions.TABLE_SORT_CHANGED, actions.TABLE_FILTER_CHANGED),
-    map(action => new ActiveLoader(action.type))
+    map(action => activeLoader(action.type))
   );
 
   @Effect()
@@ -52,9 +52,9 @@ export class SelectModelEffects {
           new actions.SetNoMoreModels((res.models.length < MODELS_PAGE_SIZE)),
           new actions.SetModels(res.models),
           new actions.SetCurrentPage(0),
-          new DeactiveLoader(action.type)
+          deactivateLoader(action.type)
         ]),
-        catchError(error => [new RequestFailed(error), new DeactiveLoader(action.type), new SetServerError(error, null, 'Fetch Models failed')])
+        catchError(error => [requestFailed(error), deactivateLoader(action.type), setServerError(error, null, 'Fetch Models failed')])
       )
     )
   );
@@ -70,9 +70,9 @@ export class SelectModelEffects {
             new actions.SetNoMoreModels((res.models.length < MODELS_PAGE_SIZE)),
             new actions.AddModels(res.models),
             new actions.SetCurrentPage(page + 1),
-            new DeactiveLoader(action.type)
+            deactivateLoader(action.type)
           ]),
-          catchError(error => [new RequestFailed(error), new DeactiveLoader(action.type), new SetServerError(error, null, 'Fetch Models failed')])
+          catchError(error => [requestFailed(error), deactivateLoader(action.type), setServerError(error, null, 'Fetch Models failed')])
         )
     )
   );

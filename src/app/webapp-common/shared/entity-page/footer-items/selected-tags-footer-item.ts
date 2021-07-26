@@ -2,10 +2,10 @@ import {EntityTypeEnum} from '../../../../shared/constants/non-common-consts';
 import {IFooterState, ItemFooterModel} from './footer-items.models';
 import {Observable} from 'rxjs';
 import {distinctUntilChanged, map, shareReplay, tap} from 'rxjs/operators';
-import {MENU_ITEM_ID, selectionTags} from '../items.utils';
+import {MenuItems, selectionTags} from '../items.utils';
 
 export class SelectedTagsFooterItem extends ItemFooterModel {
-  id = MENU_ITEM_ID.TAGS;
+  id = MenuItems.tags;
   isTag = true;
   disableDescription = 'Tags'
 

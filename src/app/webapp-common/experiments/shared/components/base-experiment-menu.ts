@@ -3,7 +3,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {Store} from '@ngrx/store';
 import {get} from 'lodash/fp';
 import {filter, take} from 'rxjs/operators';
-import {ICONS} from '../../../../app.constants';
+import { ICONS } from '../../../constants';
 import {Queue} from '../../../../business-logic/model/queues/queue';
 import {TaskStatusEnum} from '../../../../business-logic/model/tasks/taskStatusEnum';
 import {TaskTypeEnum} from '../../../../business-logic/model/tasks/taskTypeEnum';
@@ -29,6 +29,10 @@ import {ShareDialogComponent} from '../../../shared/ui-components/overlay/share-
 import {ConfigurationService} from '../../../shared/services/configuration.service';
 import {selectNeverShowPopups} from '../../../core/reducers/view-reducer';
 import {showConfirmArchiveExperiments} from '../common-experiments.utils';
+import {resetDeleteState} from '../../../shared/entity-page/entity-delete/common-delete-dialog.actions';
+import {CommonDeleteDialogComponent} from '../../../shared/entity-page/entity-delete/common-delete-dialog.component';
+import {EntityTypeEnum} from '../../../../shared/constants/non-common-consts';
+import {DeactivateEdit, SetExperiment} from '../../actions/common-experiments-info.actions';
 
 const environment = ConfigurationService.globalEnvironment;
 
@@ -42,6 +46,7 @@ export class BaseExperimentMenuComponent extends BaseContextMenuComponent implem
   readonly TaskTypeEnum = TaskTypeEnum;
 
   public isExample: boolean;
+  public isArchive: boolean;
   public selectionHasExamples: boolean;
   protected _experiment: ISelectedExperiment = null;
   public selectedExperiment: ISelectedExperiment;
@@ -89,7 +94,7 @@ export class BaseExperimentMenuComponent extends BaseContextMenuComponent implem
   public restoreArchive() {
     // info header case
     if (this.showButton) {
-      this.store.dispatch(new experimentsActions.SetSelectedExperiments([this._experiment as any]));
+      this.store.dispatch(experimentsActions.setSelectedExperiments({experiments: [this._experiment as any]}));
     }
     if (this._experiment.system_tags?.includes('archived')) {
       this.store.dispatch(new experimentsActions.RestoreSelectedExperiments({}));
@@ -307,7 +312,7 @@ To avoid this, <b>clone the experiment</b> and work with the cloned experiment.`
   }
 
   manageQueueClicked() {
-    this.router.navigateByUrl('/workers-and-queues/queues');
+    this.store.dispatch(commonMenuActions.navigateToQueue({experimentId: (this.showButton? this._experiment : this.selectedExperiments[0])?.id}));
   }
 
   clonePopup() {
@@ -336,5 +341,30 @@ To avoid this, <b>clone the experiment</b> and work with the cloned experiment.`
         newProjectName: cloneData.project.value ? undefined : cloneData.project.label
       }
     }));
+  }
+
+  deleteExperimentPopup() {
+    const confirmDialogRef = this.dialog.open(CommonDeleteDialogComponent, {
+      data: {
+        entity: this._experiment,
+        numSelected: this.numSelected,
+        entityType: EntityTypeEnum.experiment,
+        useCurrentEntity: this.showButton
+      },
+      width: '600px',
+      disableClose: true
+    });
+    confirmDialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        this.store.dispatch(resetDeleteState());
+        this.store.dispatch(experimentsActions.setSelectedExperiments({experiments: []}));
+        this.store.dispatch(new SetExperiment(null));
+        this.store.dispatch(experimentsActions.getExperiments());
+        this.store.dispatch(new DeactivateEdit());
+        if(this.showButton || this.selectedExperiments.map(e => e.id).includes(this.selectedExperiment?.id)) {
+          window.setTimeout( () => this.router.navigate([`projects/${this.getProjectId()}/experiments`], {queryParamsHandling: 'preserve'}));
+        }
+      }
+    });
   }
 }

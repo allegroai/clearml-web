@@ -15,7 +15,7 @@ import {EXPERIMENT_COMMENT} from '../experiment-general-info/experiment-general-
 import {ActivatedRoute, Router} from '@angular/router';
 import {
   CountAvailableAndIsDisable,
-  MENU_ITEM_ID,
+  MenuItems,
   selectionDisabledAbort, selectionDisabledArchive,
   selectionDisabledDelete, selectionDisabledDequeue, selectionDisabledEnqueue,
   selectionDisabledMoveTo,
@@ -73,16 +73,16 @@ export class ExperimentInfoHeaderComponent {
     this.systemTags = getSystemTags(experiment);
     this.shared = experiment?.system_tags?.includes('shared');
     this.selectedDisableAvailable = {
-      [MENU_ITEM_ID.ABORT]: selectionDisabledAbort([experiment]),
-      [MENU_ITEM_ID.PUBLISH]: selectionDisabledPublishExperiments([experiment]),
-      [MENU_ITEM_ID.RESET]: selectionDisabledReset([experiment]),
-      [MENU_ITEM_ID.DELETE]: selectionDisabledDelete([experiment]),
-      [MENU_ITEM_ID.MOVE_TO]: selectionDisabledMoveTo([experiment]),
-      [MENU_ITEM_ID.ENQUEUE]: selectionDisabledEnqueue([experiment]),
-      [MENU_ITEM_ID.DEQUEUE]: selectionDisabledDequeue([experiment]),
-      [MENU_ITEM_ID.QUEUE]: selectionDisabledQueue([experiment]),
-      [MENU_ITEM_ID.VIEW_WORKER]: selectionDisabledViewWorker([experiment]),
-      [MENU_ITEM_ID.ARCHIVE]: selectionDisabledArchive([experiment])
+      [MenuItems.abort]: selectionDisabledAbort([experiment]),
+      [MenuItems.publish]: selectionDisabledPublishExperiments([experiment]),
+      [MenuItems.reset]: selectionDisabledReset([experiment]),
+      [MenuItems.delete]: selectionDisabledDelete([experiment]),
+      [MenuItems.moveTo]: selectionDisabledMoveTo([experiment]),
+      [MenuItems.enqueue]: selectionDisabledEnqueue([experiment]),
+      [MenuItems.dequeue]: selectionDisabledDequeue([experiment]),
+      [MenuItems.queue]: selectionDisabledQueue([experiment]),
+      [MenuItems.viewWorker]: selectionDisabledViewWorker([experiment]),
+      [MenuItems.archive]: selectionDisabledArchive([experiment])
     };
   }
 

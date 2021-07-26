@@ -16,7 +16,7 @@ import {
 import {ResetExperimentMetrics, toggleSettings} from '../../actions/common-experiment-output.actions';
 import * as infoActions from '../../actions/common-experiments-info.actions';
 import {selectAppVisible, selectAutoRefresh, selectBackdropActive} from '../../../core/reducers/view-reducer';
-import {AddMessage, SetAutoRefresh} from '../../../core/actions/layout.actions';
+import {addMessage, setAutoRefresh} from '../../../core/actions/layout.actions';
 import {AUTO_REFRESH_INTERVAL, MESSAGES_SEVERITY} from '../../../../app.constants';
 import {selectIsExperimentInEditMode, selectSelectedExperiments} from '../../reducers';
 import {isReadOnly} from '../../../shared/utils/shared-utils';
@@ -105,7 +105,7 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
   }
 
   setAutoRefresh($event: boolean) {
-    this.store.dispatch(new SetAutoRefresh($event));
+    this.store.dispatch(setAutoRefresh({autoRefresh: $event}));
   }
 
   refresh(isAutorefresh) {
@@ -134,7 +134,7 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
     if (name.trim().length > 2) {
       this.store.dispatch(new ExperimentDetailsUpdated({id: this.selectedExperiment.id, changes: {name: name}}));
     } else {
-      this.store.dispatch(new AddMessage(MESSAGES_SEVERITY.ERROR, 'Name must be more than three letters long'));
+      this.store.dispatch(addMessage(MESSAGES_SEVERITY.ERROR, 'Name must be more than three letters long'));
     }
   }
 }

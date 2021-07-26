@@ -23,7 +23,9 @@ export class MenuComponent implements AfterViewInit {
 
   @Input() header: string;
   @Input() buttonClass: string;
+  @Input() hasButtonClass = true;
   @Input() smMenuClass: string;
+  @Input() panelClasses: string;
   @Input() iconClass: string = 'fa fa-caret-down';
   @Input() showCart: boolean = true;
   @Input() openOnInit: boolean = false;

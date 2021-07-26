@@ -60,9 +60,33 @@ export const ICONS = {
   DOWNLOAD: 'al-ico-download',
   WORKER: 'al-ico-workers',
   TAG: 'al-ico-tag',
-  SHARE: 'al-ico-shared-item'
+  SHARE: 'al-ico-shared-item',
+  ARROW_DOWN: 'al-ico-ico-chevron-down',
+  ARROW_UP: 'al-ico-ico-chevron-up',
 };
 
 export type IconNames = keyof typeof ICONS;
 export type ObjectKeysRecord<T extends object> = { [P in keyof T]: P };
-export type IconsList = ObjectKeysRecord<typeof ICONS>;
+export type IconsValues = typeof ICONS[keyof typeof ICONS];
+
+export const PALLET = {
+  blue25: '#f9fafb',
+  blue50: '#f2f4fc', //242,244,252
+  blue100: '#dce0ee', //220,224,238
+  blue200: '#c3cdf0', //195,205,240
+  blue250: '#A4ADCD',
+  blue280: '#a7b2d8',
+  blue300: '#8492c2', //132,146,19
+  blue400: '#5a658e', //90,101,142
+  blue450: '#657099',
+  blue480: '#707ba3',
+  blue500: '#384161', //56,65,97
+  blue550: '#47527A',
+  blue570: '#323a56',
+  blue600: '#2c3246', //44,50,70
+  blue650: '#24293c',
+  blue700: '#202432', //32,36,50
+  blue800: '#1a1e2c', //26,30,44
+  blue900: '#141722', //20,23,34
+  blue950: '#0d0e15', //20,23,34
+};

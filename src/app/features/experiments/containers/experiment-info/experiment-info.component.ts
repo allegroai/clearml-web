@@ -12,8 +12,8 @@ import {isReadOnly} from '../../../../webapp-common/shared/utils/shared-utils';
 import {selectRouterConfig, selectRouterParams, selectRouterQueryParams} from '../../../../webapp-common/core/reducers/router-reducer';
 import * as commonInfoActions from '../../../../webapp-common/experiments/actions/common-experiments-info.actions';
 import {ExperimentDetailsUpdated} from '../../../../webapp-common/experiments/actions/common-experiments-info.actions';
-import {AddMessage} from '../../../../webapp-common/core/actions/layout.actions';
-import {IExperimentInfo, ISelectedExperiment} from '../../shared/experiment-info.model';
+import {addMessage} from '../../../../webapp-common/core/actions/layout.actions';
+import {IExperimentInfo} from '../../shared/experiment-info.model';
 import {selectSelectedTableExperiment} from '../../../../webapp-common/experiments/reducers';
 import {ITableExperiment} from '../../../../webapp-common/experiments/shared/common-experiment-model.model';
 
@@ -99,7 +99,7 @@ export class ExperimentInfoComponent implements OnInit, OnDestroy {
     if (name.trim().length > 2) {
       this.store.dispatch(new ExperimentDetailsUpdated({id: this.selectedExperiment.id, changes: {name: name}}));
     } else {
-      this.store.dispatch(new AddMessage(MESSAGES_SEVERITY.ERROR, 'Name must be more than three letters long'));
+      this.store.dispatch(addMessage(MESSAGES_SEVERITY.ERROR, 'Name must be more than three letters long'));
     }
   }
 

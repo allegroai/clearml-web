@@ -107,8 +107,8 @@ export abstract class BaseEntityPage implements OnInit, AfterViewInit, OnDestroy
   clickOnSplit() {
     this.infoDisabled = false;
   }
-ß
-  tagSelected({tags, emitValue}, entitiesType: 'models' | 'experiments') {
+
+  tagSelected({tags, emitValue}, entitiesType: 'models' | 'experiments' | 'dataviews') {
     this.store.dispatch(this.addTag({
       tag: tags,
       [entitiesType]: emitValue

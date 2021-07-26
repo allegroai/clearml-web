@@ -12,6 +12,7 @@ import {AdminService} from '../../../../features/admin/admin.service';
 import {ConfigurationService} from '../../../shared/services/configuration.service';
 import {GetCurrentUserResponseUserObjectCompany} from '../../../../business-logic/model/users/getCurrentUserResponseUserObjectCompany';
 import {Queue} from "../../../../business-logic/model/queues/queue";
+import {GettingStartedContext} from '../../../../../environments/base';
 
 type StepObject = { header?: string; title?: string; code?: string; subNote?: string };
 
@@ -25,6 +26,7 @@ export class WelcomeMessageComponent implements OnInit, OnDestroy {
   accessKey: string;
   secretKey: string;
   creatingCredentials = false;
+
   private workspacesSub: Subscription;
   public workspace: GetCurrentUserResponseUserObjectCompany;
   private newCredentialSub: Subscription;
@@ -50,7 +52,7 @@ export class WelcomeMessageComponent implements OnInit, OnDestroy {
       code: 'pip install clearml-agent',
     }, {
       title: '2. Configure',
-      code: 'clear-agent init'
+      code: 'clearml-agent init'
     }
     ];
   host: string;
@@ -58,6 +60,8 @@ export class WelcomeMessageComponent implements OnInit, OnDestroy {
   public queue: Queue;
   steps: StepObject[];
   doNotShowAgain: boolean;
+  private agentName: string;
+  public gettingStartedContext: GettingStartedContext;
 
   constructor(
     private store: Store<any>,
@@ -69,10 +73,15 @@ export class WelcomeMessageComponent implements OnInit, OnDestroy {
     this.dialogRef.beforeClosed().subscribe(() => this.dialogRef.close(this.doNotShowAgain));
     this.step = data?.step || this.step;
     this.queue = data?.queue;
+    this.gettingStartedContext = this.configService.getStaticEnvironment().gettingStartedContext;
+
     this.steps = this.queue ? this.ORPHANED_QUEUE_STEPS : this.GETTING_STARTED_STEPS;
     if (this.queue) {
-      this.steps[0].code = `clearml-agent daemon —-queue ${this.queue.name}`;
+      this.steps[0].code = `clearml-agent daemon --queue ${this.queue.name}`;
       this.steps[0].header = `To assign a worker to the ${this.queue.name} queue, run:`;
+    } else if (this.gettingStartedContext) {
+      this.steps[0].code = this.gettingStartedContext.install;
+      this.steps[1].code = this.gettingStartedContext.configure;
     }
     this.host = `${window.location.protocol}//${window.location.hostname}`;
     if (this.API_BASE_URL === '/api') {

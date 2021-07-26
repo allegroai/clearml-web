@@ -54,7 +54,7 @@
     <div class="d-flex align-items-center">
       <span class="experiment-type">{{ experiment?.type | noUnderscore | titlecase }}</span>
       <sm-tag-list
-        *smCheckPermission="editable; else readOnlyTags"
+        *ngIf="editable; else readOnlyTags"
         class="w-100"
         [class.menu-open]="!!tagMenu && tagMenu.trigger.menuOpen"
         [sysTags]="systemTags"
@@ -68,7 +68,6 @@
           [tags]="experiment?.tags"></sm-tag-list>
       </ng-template>
       <sm-menu
-        *smCheckPermission="true"
         #tagMenu
         [showCart]="false"
         [showButton]="false"
@@ -87,7 +86,7 @@
       </sm-menu>
     </div>
   </div>
-  <div *smCheckPermission="true" class="light-theme right-buttons">
+  <div class="light-theme right-buttons">
     <button class="btn btn-icon" (click)="minimizeClicked.emit()" *ngIf="showMinimize && !isSharedAndNotOwner"
             smTooltip="View in experiment table" matTooltipPosition="left">
       <i class="al-icon al-ico-info-min al-color light-grey-blue"></i>

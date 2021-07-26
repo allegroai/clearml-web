@@ -10,6 +10,7 @@ import {
 } from '../actions/experiments-compare-charts.actions';
 import {ScalarKeyEnum} from '../../../business-logic/model/events/scalarKeyEnum';
 import {GroupByCharts} from '../../experiments/reducers/common-experiment-output.reducer';
+import {IMultiplot} from '@common/tasks/tasks.utils';
 
 export type MetricValueType = 'min_value' | 'max_value' | 'value';
 
@@ -40,7 +41,7 @@ export interface IExperimentCompareChartsState {
   metricsMultiScalarsCharts: any;
   metricsHistogramCharts: any;
   cachedAxisType: ScalarKeyEnum;
-  metricsPlotsCharts: any;
+  metricsPlotsCharts: IMultiplot;
   settingsList: Array<IExperimentCompareSettings>;
   searchTerm: string;
   showSettingsBar: boolean;

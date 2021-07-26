@@ -1,11 +1,11 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
-import {catchError, filter, map, switchMap, tap} from 'rxjs/operators';
+import {catchError, filter, map, mergeMap, retryWhen, switchMap, tap} from 'rxjs/operators';
 import {HTTP} from '../../../app.constants';
 import {UsersGetAllResponse} from '../../../business-logic/model/users/usersGetAllResponse';
 import {AuthCreateUserResponse} from '../../../business-logic/model/auth/authCreateUserResponse';
 import {v1 as uuidV1} from 'uuid';
-import {Observable, of} from 'rxjs';
+import {Observable, of, throwError, timer} from 'rxjs';
 import {MatDialog} from '@angular/material/dialog';
 import {ConfirmDialogComponent} from '../ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {LoginModeResponse} from '../../../business-logic/model/LoginModeResponse';
@@ -76,6 +76,13 @@ export class LoginService {
     };
 
     return this.getLoginMode().pipe(
+      retryWhen(errors => errors.pipe(
+        mergeMap((err, i) => i > 2 ? throwError('Error from retry!') : timer(500))
+      )),
+      catchError(() => {
+        this.openServerError();
+        return of({});
+      }),
       switchMap(mode => mode === LoginModeEnum.password ? of(fromEnv()) : this.httpClient.get('credentials.json')),
       tap((credentials: any) => {
         this.userKey = credentials.userKey;
@@ -212,6 +219,30 @@ After the issue is resolved and Trains Server is up and running, reload this pag
       disableClose: true,
       data: {
         title: 'Database Error',
+        body,
+
+        yes: 'Reload',
+        iconClass: 'i-alert'
+      }
+    });
+    confirmDialogRef.afterClosed().subscribe(() => {
+      window.location.reload();
+    });
+  }
+
+  private openServerError() {
+    // Mocking application header
+    const imgElement = new Image();
+    imgElement.setAttribute('src', this.environment.branding.logo);
+    imgElement.setAttribute('style', 'width: 100%; height: 64px; background-color: #141822; padding: 15px;');
+    document.body.appendChild(imgElement);
+
+    const body = this.environment.serverDownMessage;
+
+    const confirmDialogRef = this.dialog.open(ConfirmDialogComponent, {
+      disableClose: true,
+      data: {
+        title: 'Server Unavailable',
         body,
 
         yes: 'Reload',

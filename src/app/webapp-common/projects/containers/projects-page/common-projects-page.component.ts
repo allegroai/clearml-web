@@ -1,19 +1,48 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {CommonProjectReadyForDeletion, selectNoMoreProjects, selectProjectReadyForDeletion, selectProjectsData, selectProjectsOrderBy, selectProjectsSortOrder} from '../../common-projects.reducer';
-import {CheckProjectForDeletion, GetAllProjects, ProjectUpdated, ResetProjects, ResetProjectsSearchQuery, ResetReadyToDelete, SetProjectsOrderBy, setProjectsSearchQuery} from '../../common-projects.actions';
+import {
+  CommonProjectReadyForDeletion,
+  selectNoMoreProjects,
+  selectProjectReadyForDeletion,
+  selectProjectsData,
+  selectProjectsOrderBy,
+  selectProjectsSortOrder
+} from '../../common-projects.reducer';
+import {
+  CheckProjectForDeletion,
+  GetAllProjectsPageProjects,
+  ProjectUpdated,
+  ResetProjects,
+  ResetProjectsSearchQuery,
+  ResetReadyToDelete,
+  SetProjectsOrderBy,
+  setProjectsSearchQuery
+} from '../../common-projects.actions';
 import {Router} from '@angular/router';
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {ProjectsGetAllResponseSingle} from '../../../../business-logic/model/projects/projectsGetAllResponseSingle';
 import {ProjectDialogComponent} from '../../../shared/project-dialog/project-dialog.component';
 import {combineLatest, Observable, Subscription} from 'rxjs';
-import {debounceTime, distinctUntilChanged, filter, map, skip, withLatestFrom} from 'rxjs/operators';
+import {
+  debounceTime,
+  distinctUntilChanged,
+  distinctUntilKeyChanged,
+  filter,
+  map,
+  skip,
+  withLatestFrom
+} from 'rxjs/operators';
 import {ConfirmDialogComponent} from '../../../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import * as coreProjectsActions from '../../../core/actions/projects.actions';
 import {setDeep, SetSelectedProjectId} from '../../../core/actions/projects.actions';
 import {InitSearch, ResetSearch} from '../../../common-search/common-search.actions';
 import {ICommonSearchState, selectSearchQuery} from '../../../common-search/common-search.reducer';
-import {getDeletePopupEntitiesList, getDeleteProjectPopupStatsBreakdown, isDeletableProject, readyForDeletionFilter} from '../../../../features/projects/projects-page.utils';
+import {
+  getDeletePopupEntitiesList,
+  getDeleteProjectPopupStatsBreakdown,
+  isDeletableProject,
+  readyForDeletionFilter
+} from '../../../../features/projects/projects-page.utils';
 import {selectRouterParams} from '../../../core/reducers/router-reducer';
 import {get} from 'lodash/fp';
 import {selectShowOnlyUserWork} from '../../../core/reducers/users-reducer';
@@ -64,7 +93,10 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
   private projectDialog: MatDialogRef<ProjectDialogComponent, any>;
   public selectedProjectId$: Observable<string>;
   private showOnlyUserWorkSub$: Subscription;
+  private selectedProjectSub: Subscription;
+  private selectedProject$: Observable<Project>;
   private selectedProjectIdSub: Subscription;
+  private projectId: string;
 
   constructor(public store: Store<any>, private router: Router, private dialog: MatDialog) {
     this.searchQuery$ = this.store.select(selectSearchQuery);
@@ -72,6 +104,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
     this.projectsSortOrder$ = this.store.select(selectProjectsSortOrder);
     this.noMoreProjects$ = this.store.select(selectNoMoreProjects);
     this.selectedProjectId$ = this.store.select(selectRouterParams).pipe(map(params => get('projectId', params)));
+    this.selectedProject$ = this.store.select(selectSelectedProject);
     this.projectReadyForDeletion$ = this.store.select(selectProjectReadyForDeletion).pipe(
       distinctUntilChanged(),
       filter(readyForDeletion => readyForDeletionFilter(readyForDeletion)));
@@ -113,14 +146,25 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
   ngOnInit() {
     // this.store.dispatch(new ResetSelectedProject());
     this.store.dispatch(setDeep({deep: false}));
-    this.store.dispatch(new GetAllProjects());
-    this.selectedProjectIdSub = this.selectedProjectId$.pipe().subscribe((projectId) => {
+    this.store.dispatch(new GetAllProjectsPageProjects());
+
+
+    this.selectedProjectIdSub = this.selectedProjectId$.pipe(filter(projectId => !projectId)).subscribe((projectId) => {
+        this.store.dispatch(new ResetProjectsSearchQuery());
+        this.store.dispatch(new GetAllProjectsPageProjects());
+      }
+    );
+    this.selectedProjectSub = this.selectedProject$.pipe(
+      skip(1),
+      filter(project => (!!project)),
+      distinctUntilKeyChanged('id'),
+    ).subscribe((project) => {
       this.store.dispatch(new ResetProjectsSearchQuery());
-      this.store.dispatch(new GetAllProjects());
+      this.store.dispatch(new GetAllProjectsPageProjects());
     });
     this.showOnlyUserWorkSub$ = this.store.select(selectShowOnlyUserWork).pipe(skip(1)).subscribe(() => {
       this.store.dispatch(new ResetProjectsSearchQuery());
-      this.store.dispatch(new GetAllProjects());
+      this.store.dispatch(new GetAllProjectsPageProjects());
     });
 
     this.projectReadyForDeletionSub = this.projectReadyForDeletion$.subscribe(readyForDeletion => {
@@ -163,7 +207,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
       if (confirmed) {
         this.store.dispatch(resetDeleteState());
         this.store.dispatch(new ResetProjects());
-        this.store.dispatch(new GetAllProjects());
+        this.store.dispatch(new GetAllProjectsPageProjects());
       }
     });
   }
@@ -172,7 +216,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
     this.stopSyncSearch();
     this.projectReadyForDeletionSub.unsubscribe();
     this.showOnlyUserWorkSub$.unsubscribe();
-    this.selectedProjectIdSub.unsubscribe();
+    this.selectedProjectSub.unsubscribe();
     this.store.dispatch(new ResetReadyToDelete());
     this.store.dispatch(new ResetProjectsSearchQuery());
   }
@@ -213,7 +257,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
   }
 
   loadMore() {
-    this.store.dispatch(new GetAllProjects());
+    this.store.dispatch(new GetAllProjectsPageProjects());
   }
 
 
@@ -227,8 +271,8 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
     this.projectDialog.afterClosed().subscribe(projectHasBeenUpdated => {
       if (projectHasBeenUpdated) {
         this.store.dispatch(new ResetProjectsSearchQuery());
-        this.store.dispatch(new GetAllProjects());
-        this.store.dispatch(new coreProjectsActions.GetAllProjects());
+        this.store.dispatch(new GetAllProjectsPageProjects());
+        this.store.dispatch(new coreProjectsActions.GetAllSystemProjects());
       }
     });
   }

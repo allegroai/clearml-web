@@ -1,12 +1,12 @@
 import {
+  AfterViewInit,
+  ChangeDetectorRef,
   Component,
+  Input,
   OnDestroy,
   OnInit,
-  ChangeDetectorRef,
-  ViewChild,
-  ViewChildren,
   QueryList,
-  AfterViewInit
+  ViewChildren
 } from '@angular/core';
 import {Store} from '@ngrx/store';
 import {selectExperimentBeginningOfLog, selectExperimentLog, selectLogFilter} from '../../reducers';
@@ -18,11 +18,11 @@ import {IExperimentInfo} from '../../../../features/experiments/shared/experimen
 import {IExperimentInfoState} from '../../../../features/experiments/reducers/experiment-info.reducer';
 import {selectSelectedExperiment} from '../../../../features/experiments/reducers';
 import {
+  downloadFullLog,
+  getExperimentLog,
   ResetLogFilter,
   ResetOutput,
-  SetLogFilter,
-  getExperimentLog,
-  downloadFullLog
+  SetLogFilter
 } from '../../actions/common-experiment-output.actions';
 import {ExperimentLogInfoComponent} from '../../dumb/experiment-log-info/experiment-log-info.component';
 import {selectRefreshing} from '../../../experiments-compare/reducers';
@@ -34,6 +34,8 @@ import {selectRefreshing} from '../../../experiments-compare/reducers';
 })
 export class ExperimentOutputLogComponent implements OnInit, AfterViewInit, OnDestroy {
 
+  @Input() showHeader = true;
+  @Input() isDarkTheme = false;
   private selectedExperimentSubscription: Subscription;
   private experiment: IExperimentInfo;
 
@@ -65,7 +67,7 @@ export class ExperimentOutputLogComponent implements OnInit, AfterViewInit, OnDe
   ngOnInit() {
     this.logSubscription = this.log$.subscribe(log => {
       if (log) {
-        this.creator = (log && log[0]) ? log[0].worker : '';
+        this.creator = last(log)?.worker ?? '';
         this.disabled = false;
         this.hasLog = log.length > 0;
         this.cdr.detectChanges();

@@ -71,6 +71,7 @@ export const MODELS_TABLE_COLS: ISmCol[] = [
     searchableFilter: true,
     header      : 'TAGS',
     style       : {width: '240px'},
+    andFilter: true
   },
   {
     id          : MODELS_TABLE_COL_FIELDS.READY,

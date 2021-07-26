@@ -1,0 +1,25 @@
+@import "../../../../webapp-common/shared/ui-components/styles/variables";
+
+:host {
+  .modal-container {
+    background-color: $white;
+    height: 100%;
+    .graph-container {
+      padding: 0 64px;
+      background-color: $white;
+    }
+
+    &.dark-theme {
+      background-color: $blue-950;
+      .graph-container {
+        background-color: $blue-950;
+      }
+    }
+  }
+  .graph-displayer-header {
+    height: 56px;
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+  }
+}

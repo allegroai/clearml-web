@@ -4,8 +4,8 @@ import {Component, ElementRef, Inject, OnDestroy, OnInit, ViewChild} from '@angu
 import {Store} from '@ngrx/store';
 import {NgForm} from '@angular/forms';
 import {Observable, Subscription} from 'rxjs';
-import {selectProjects} from '../../../../core/reducers/projects.reducer';
-import {GetAllProjects} from '../../../../core/actions/projects.actions';
+import {selectRootProjects} from '../../../../core/reducers/projects.reducer';
+import {GetAllSystemProjects} from '../../../../core/actions/projects.actions';
 import {map} from 'rxjs/operators';
 import {isReadOnly} from '../../../../shared/utils/shared-utils';
 import {CloneForm} from '../../common-experiment-model.model';
@@ -53,9 +53,9 @@ export class CloneDialogComponent implements OnInit, OnDestroy {
     },
     public dialogRef: MatDialogRef<CloneDialogComponent>
   ) {
-    this.readOnlyProjects$ = this.store.select(selectProjects)
+    this.readOnlyProjects$ = this.store.select(selectRootProjects)
       .pipe(map(projects => projects.filter(project => isReadOnly(project)).map(project => project.name)));
-    this.projects$ = this.store.select(selectProjects)
+    this.projects$ = this.store.select(selectRootProjects)
       .pipe(map(projects => projects.filter(project => !isReadOnly(project))));
     this.defaultProjectId = data.defaultProject;
     this.header = `${data.extend ? 'Extend' : 'Clone'} ${data.type}`;
@@ -79,7 +79,7 @@ export class CloneDialogComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.store.dispatch(new GetAllProjects());
+    this.store.dispatch(new GetAllSystemProjects());
     this.projectsSub = this.projects$.subscribe(projects => {
       const projectList = projects.map(project => ({value: project.id, label: project.name}));
       if (!isEqual(projectList, this.projects)) {

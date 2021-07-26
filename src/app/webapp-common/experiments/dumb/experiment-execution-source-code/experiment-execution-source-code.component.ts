@@ -42,6 +42,11 @@ export class ExperimentExecutionSourceCodeComponent implements OnInit, IExperime
     [sourceTypesEnum.Tag]       : 'Insert tag name',
     [sourceTypesEnum.Branch]    : 'Insert branch name',
   };
+  flagNameMap = {
+    [sourceTypesEnum.VersionNum]: 'COMMIT ID',
+    [sourceTypesEnum.Tag]       : 'TAG NAME',
+    [sourceTypesEnum.Branch]    : 'BRANCH NAME'
+  };
 
 
   ngOnInit(): void {

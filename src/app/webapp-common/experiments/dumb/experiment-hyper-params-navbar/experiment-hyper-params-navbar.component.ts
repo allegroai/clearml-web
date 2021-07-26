@@ -1,12 +1,5 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output} from '@angular/core';
 import {Params} from '@angular/router';
-import {get} from 'lodash/fp';
-
-type ActiveSection = 'hyper-param' | 'configuration';
-export const ACTIVE_SECTIONS = {
-  'hyper-param'  : 'hyper-param' as ActiveSection,
-  configuration: 'configuration' as ActiveSection,
-};
 
 @Component({
   selector   : 'sm-experiment-hyper-params-navbar',
@@ -15,7 +8,6 @@ export const ACTIVE_SECTIONS = {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ExperimentHyperParamsNavbarComponent {
-  public ACTIVE_SECTIONS = ACTIVE_SECTIONS;
   sectionReplaceMap= {
     _legacy:'General',
     properties: 'User Properties',
@@ -36,7 +28,7 @@ export class ExperimentHyperParamsNavbarComponent {
   public selectedHyperParam: string;
 
   @Input() set routerParams(routerParams: Params) {
-    this.selectedHyperParam = get('hyperParamId', routerParams);
+    this.selectedHyperParam = routerParams?.hyperParamId || null;
     this.selectedObject = decodeURIComponent(routerParams?.configObject);
     this.changeDetection.detectChanges();
   };
@@ -46,5 +38,5 @@ export class ExperimentHyperParamsNavbarComponent {
   constructor(private changeDetection: ChangeDetectorRef,) {
   }
 
-
+  trackByFn = (index: number, item: {key: string; value: any}) => item['key'];
 }

@@ -1,5 +1,5 @@
 import {Routes} from '@angular/router';
-import {ExperimentsComponent} from '../../features/experiments/experiments.component';
+import {ExperimentsComponent} from '@common/experiments/experiments.component';
 import {ExperimentInfoComponent} from '../../features/experiments/containers/experiment-info/experiment-info.component';
 import {ExperimentInfoExecutionComponent} from './containers/experiment-info-execution/experiment-info-execution.component';
 import {LeavingBeforeSaveAlertGuard} from '../shared/guards/leaving-before-save-alert.guard';

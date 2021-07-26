@@ -6,48 +6,62 @@
   </div>
 </div>
 
-<ng-container *ngIf="!loading">
-  <div *ngIf="info || editMode; else noData" class="md-editor-preview" [class.editor]="editMode">
+<div class="info-content">
+  <div class="metric-panel" [class.open]="panelOpen">
+    <mat-expansion-panel (opened)="setMetricsPanel(true)" (closed)="setMetricsPanel(false)" [expanded]="panelOpen">
+      <mat-expansion-panel-header expandedHeight="48px" collapsedHeight="48px">
+        <mat-panel-title>
+          Metric Snapshot
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      <ng-template matExpansionPanelContent>
+        <sm-project-stats [project]="project"></sm-project-stats>
+      </ng-template>
+    </mat-expansion-panel>
+  </div>
 
-    <div class="md-content" [class.edit-mode]="editMode" [class.dirty]="isDirty">
-      <button *ngIf="!editMode" class="btn btn-primary md-btn-edit" (click)="editClicked()">EDIT</button>
-      <button *ngIf="editMode" class="btn btn-primary btn-preview-toggle" (click)="togglePreview()">
-        {{ editorVisible? 'EDIT' : 'PREVIEW' }}
-      </button>
-      <span *ngIf="editMode && !editorVisible" class="preview-header">PREVIEW</span>
-      <md-editor #editorComponent
-                 name="Content"
-                 [(ngModel)]="info"
-                 height="100%"
-                 [mode]="editMode? 'editor' : 'preview'"
-                 [options]="options"
-                 (onEditorLoaded)="editorReady()"
-                 (ngModelChange)="checkDirty()">
-      </md-editor>
-    </div>
+  <ng-container *ngIf="!loading">
+    <div *ngIf="info || editMode; else noData" class="md-editor-preview" [class.editor]="editMode">
 
-    <div class="md-footer">
-      <div *ngIf="editMode && isDirty" class="md-warning">* You have unsaved changes</div>
-      <div *ngIf="editMode" class="right-buttons">
-        <button class="btn btn-primary btn-outline"
-                (click)="cancelClicked()">CANCEL
+      <div class="md-content" [class.edit-mode]="editMode" [class.dirty]="isDirty">
+        <button *ngIf="!editMode" class="btn btn-primary md-btn-edit" (click)="editClicked()">EDIT</button>
+        <button *ngIf="editMode" class="btn btn-primary btn-preview-toggle" (click)="togglePreview()">
+          {{ editorVisible? 'EDIT' : 'PREVIEW' }}
         </button>
-        <button class="btn btn-primary"
-                [disabled]="!isDirty"
-                (click)="saveInfo()">SAVE
+        <span *ngIf="editMode && !editorVisible" class="preview-header">PREVIEW</span>
+        <md-editor #editorComponent
+                   name="Content"
+                   [(ngModel)]="info"
+                   height="100%"
+                   [mode]="editMode? 'editor' : 'preview'"
+                   [options]="options"
+                   (onEditorLoaded)="editorReady()"
+                   (ngModelChange)="checkDirty()">
+        </md-editor>
+      </div>
+
+      <div class="md-footer">
+        <div *ngIf="editMode && isDirty" class="md-warning">* You have unsaved changes</div>
+        <div *ngIf="editMode" class="right-buttons">
+          <button class="btn btn-primary btn-outline"
+                  (click)="cancelClicked()">CANCEL
+          </button>
+          <button class="btn btn-primary"
+                  [disabled]="!isDirty"
+                  (click)="saveInfo()">SAVE
+          </button>
+        </div>
+      </div>
+
+    </div>
+    <ng-template #noData>
+      <div class="flex-middle overview-placeholder">
+        <i class="icon i-markdown xxl"></i>
+        <div class="no-data-title">THERE’S NOTHING HERE YET…</div>
+        <button (click)="editClicked()" class="no-data-button btn btn-neon">
+          <span>ADD PROJECT OVERVIEW</span>
         </button>
       </div>
-    </div>
-
-  </div>
-</ng-container>
-
-<ng-template #noData>
-  <div class="flex-middle">
-    <i class="icon i-markdown xxl"></i>
-    <div class="no-data-title">THERE’S NOTHING HERE YET…</div>
-    <button (click)="editClicked()" class="no-data-button btn btn-neon">
-      <span>ADD PROJECT OVERVIEW</span>
-    </button>
-  </div>
-</ng-template>
+    </ng-template>
+  </ng-container>
+</div>

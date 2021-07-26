@@ -114,7 +114,8 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
     if (element) {
       window.setTimeout(() => {
         const bounding = element.getBoundingClientRect();
-        if (bounding.bottom > window.innerHeight) {
+        const containerRect = this.element.nativeElement.getBoundingClientRect();
+        if (bounding.bottom > window.innerHeight && bounding.top > containerRect.top) {
           this.element.nativeElement.scroll({top: element.offsetTop, behavior: 'smooth'} as ScrollToOptions);
         }
       });
