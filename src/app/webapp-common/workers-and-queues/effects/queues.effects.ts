@@ -11,8 +11,8 @@ import {
   selectQueuesTableSortFields,
   selectQueueStats, selectSelectedQueue
 } from '../reducers/index.reducer';
-import {ActiveLoader, AddMessage, DeactiveLoader} from '../../core/actions/layout.actions';
-import {RequestFailed} from '../../core/actions/http.actions';
+import {activeLoader, addMessage, deactivateLoader} from '../../core/actions/layout.actions';
+import {requestFailed} from '../../core/actions/http.actions';
 import {
   ADD_EXPERIMENT_TO_QUEUE,
   AddExperimentToQueue,
@@ -61,7 +61,7 @@ export class QueuesEffect {
   @Effect()
   activeLoader = this.actions.pipe(
     ofType(getQueues, REFRESH_SELECTED_QUEUE),
-    map(action => new ActiveLoader(action.type))
+    map(action => activeLoader(action.type))
   );
 
   @Effect()
@@ -73,8 +73,8 @@ export class QueuesEffect {
       only_fields: ['*', 'entries.task.name'],
       order_by: encodeOrder(orderFields)
     }).pipe(
-      mergeMap(res => [new SetQueues(this.sortQueues(orderFields, res.queues)), new DeactiveLoader(action.type)]),
-      catchError(err => [new DeactiveLoader(action.type), new RequestFailed(err)])
+      mergeMap(res => [new SetQueues(this.sortQueues(orderFields, res.queues)), deactivateLoader(action.type)]),
+      catchError(err => [deactivateLoader(action.type), requestFailed(err)])
     ))
   );
 
@@ -82,7 +82,7 @@ export class QueuesEffect {
   getSelectedQueue = this.actions.pipe(
     ofType<SetSelectedQueue>(SET_SELECTED_QUEUE),
     filter(action => !!action.payload.queue),
-    tap(action => this.store.dispatch(new ActiveLoader(action.type))),
+    tap(action => this.store.dispatch(activeLoader(action.type))),
     switchMap(action => this.queuesApi.queuesGetAllEx({
         id: [action.payload.queue.id],
         only_fields: ['*', 'entries.task.name']
@@ -90,8 +90,8 @@ export class QueuesEffect {
       mergeMap(res => [
         new SetSelectedQueueFromServer(res.queues[0]),
         new SyncSpecificQueueInTable(res.queues[0]),
-        new DeactiveLoader(action.type)]),
-      catchError(err => [new DeactiveLoader(action.type), new RequestFailed(err)])
+        deactivateLoader(action.type)]),
+      catchError(err => [deactivateLoader(action.type), requestFailed(err)])
       )
     )
   );
@@ -107,8 +107,8 @@ export class QueuesEffect {
       mergeMap(res => [
         new SetSelectedQueueFromServer(res.queues[0]),
         new SyncSpecificQueueInTable(res.queues[0]),
-        new DeactiveLoader(action.type)]),
-      catchError(err => [new DeactiveLoader(action.type), new RequestFailed(err)])
+        deactivateLoader(action.type)]),
+      catchError(err => [deactivateLoader(action.type), requestFailed(err)])
     ))
   );
 
@@ -119,7 +119,7 @@ export class QueuesEffect {
       mergeMap(res => [getQueues(),
         new SetSelectedQueue(),
       ]),
-      catchError(err => [new DeactiveLoader(action.type), new RequestFailed(err), new AddMessage(MESSAGES_SEVERITY.ERROR, 'Delete Queue failed')])
+      catchError(err => [deactivateLoader(action.type), requestFailed(err), addMessage(MESSAGES_SEVERITY.ERROR, 'Delete Queue failed')])
     ))
   );
 
@@ -132,7 +132,7 @@ export class QueuesEffect {
       task: action.payload.task
     }).pipe(
       mergeMap(res => [new RefreshSelectedQueue()]),
-      catchError(err => [new DeactiveLoader(action.type), new RequestFailed(err), new AddMessage(MESSAGES_SEVERITY.ERROR, 'Move Experiment failed')])
+      catchError(err => [deactivateLoader(action.type), requestFailed(err), addMessage(MESSAGES_SEVERITY.ERROR, 'Move Experiment failed')])
     ))
   );
 
@@ -145,7 +145,7 @@ export class QueuesEffect {
       task: action.payload.task
     }).pipe(
       mergeMap(res => [new RefreshSelectedQueue()]),
-      catchError(err => [new DeactiveLoader(action.type), new RequestFailed(err), new AddMessage(MESSAGES_SEVERITY.ERROR, 'Move Experiment failed')])
+      catchError(err => [deactivateLoader(action.type), requestFailed(err), addMessage(MESSAGES_SEVERITY.ERROR, 'Move Experiment failed')])
     ))
   );
 
@@ -160,7 +160,7 @@ export class QueuesEffect {
         count: (action.payload.count)
       }).pipe(
         mergeMap(res => [new RefreshSelectedQueue()]),
-        catchError(err => [new DeactiveLoader(action.type), new RequestFailed(err), new AddMessage(MESSAGES_SEVERITY.ERROR, 'Move Queue failed')])
+        catchError(err => [deactivateLoader(action.type), requestFailed(err), addMessage(MESSAGES_SEVERITY.ERROR, 'Move Queue failed')])
       )
     )
   );
@@ -171,8 +171,8 @@ export class QueuesEffect {
     withLatestFrom(this.store.select(selectSelectedQueue)),
     switchMap(([action, queue]) => this.tasksApi.tasksDequeue({task: action.payload.task}).pipe(
       mergeMap(res => [new RefreshSelectedQueue()]),
-      catchError(err => [new DeactiveLoader(action.type), new RequestFailed(err),
-        new AddMessage(MESSAGES_SEVERITY.ERROR, 'Remove Queue failed')])
+      catchError(err => [deactivateLoader(action.type), requestFailed(err),
+        addMessage(MESSAGES_SEVERITY.ERROR, 'Remove Queue failed')])
     ))
   );
 
@@ -182,8 +182,8 @@ export class QueuesEffect {
     withLatestFrom(this.store.select(selectSelectedQueue)),
     switchMap(([action, queue]) => this.queuesApi.queuesRemoveTask({queue: queue.id, task: action.payload.task}).pipe(
       mergeMap(res => [new AddExperimentToQueue(action.payload)]),
-      catchError(err => [new DeactiveLoader(action.type), new RequestFailed(err),
-        new AddMessage(MESSAGES_SEVERITY.ERROR, 'Move Queue to other queue failed')])
+      catchError(err => [deactivateLoader(action.type), requestFailed(err),
+        addMessage(MESSAGES_SEVERITY.ERROR, 'Move Queue to other queue failed')])
       )
     )
   );
@@ -193,7 +193,7 @@ export class QueuesEffect {
     ofType<AddExperimentToQueue>(ADD_EXPERIMENT_TO_QUEUE),
     switchMap((action) => this.queuesApi.queuesAddTask({queue: action.payload.queue, task: action.payload.task}).pipe(
       mergeMap(res => [new RefreshSelectedQueue(), getQueues()]),
-      catchError(err => [new DeactiveLoader(action.type), new RequestFailed(err), new AddMessage(MESSAGES_SEVERITY.ERROR, 'Add experiment to queue failed')])
+      catchError(err => [deactivateLoader(action.type), requestFailed(err), addMessage(MESSAGES_SEVERITY.ERROR, 'Add experiment to queue failed')])
       )
     )
   );
@@ -270,11 +270,11 @@ export class QueuesEffect {
               addFullRangeMarkers(newStats.length, now - range, now);
             }
           }
-          return [new DeactiveLoader(action.type), new SetStats({data: newStats}), hideNoStatsNotice()];
+          return [deactivateLoader(action.type), new SetStats({data: newStats}), hideNoStatsNotice()];
         }),
-        catchError(err => [new DeactiveLoader(action.type),
+        catchError(err => [deactivateLoader(action.type),
           new SetStats({data: {wait: [], length: []}}),
-          new RequestFailed(err),
+          requestFailed(err),
           showStatsErrorNotice()
         ])
       );

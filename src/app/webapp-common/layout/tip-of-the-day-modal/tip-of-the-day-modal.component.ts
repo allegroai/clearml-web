@@ -1,7 +1,7 @@
 import {Component, Inject} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {Store} from '@ngrx/store';
-import {AddMessage} from '../../core/actions/layout.actions';
+import {addMessage} from '../../core/actions/layout.actions';
 import {MESSAGES_SEVERITY} from '../../../app.constants';
 import {Tip} from '../../shared/services/tips.service';
 
@@ -28,7 +28,7 @@ export class TipOfTheDayModalComponent {
   }
 
   copyToClipboardSuccess() {
-    this.store.dispatch(new AddMessage(MESSAGES_SEVERITY.SUCCESS, 'URL copied successfully'));
+    this.store.dispatch(addMessage(MESSAGES_SEVERITY.SUCCESS, 'URL copied successfully'));
   }
 
   prev() {

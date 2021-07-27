@@ -2,7 +2,7 @@
 
 @font-face {
   font-family: '#{$icomoon-font-family}';
-  src: url('./#{$icomoon-font-family}.ttf?23s406') format('truetype');
+  src: url('./#{$icomoon-font-family}.ttf?ck7fvi') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -43,9 +43,9 @@
     content: $al-ico-projects;
   }
 }
-.al-ico-datasets1 {
+.al-ico-datasets {
   &:before {
-    content: $al-ico-datasets1;
+    content: $al-ico-datasets;
   }
 }
 .al-ico-queues {
@@ -86,11 +86,6 @@
 .al-ico-compare-c {
   &:before {
     content: $al-ico-compare-c;
-  }
-}
-.al-ico-datasets {
-  &:before {
-    content: $al-ico-datasets;
   }
 }
 .al-ico-published-title {
@@ -882,6 +877,82 @@
 .al-ico-dequeue {
   &:before {
     content: $al-ico-dequeue;
+  }
+}
+.al-ico-applications {
+  &:before {
+    content: $al-ico-applications;
+  }
+}
+.al-ico-ico-chevron-up {
+  &:before {
+    content: $al-ico-ico-chevron-up;
+  }
+}
+.al-ico-ico-chevron-down {
+  &:before {
+    content: $al-ico-ico-chevron-down;
+  }
+}
+.al-ico-no-data-graph {
+  &:before {
+    content: $al-ico-no-data-graph;
+  }
+}
+.al-ico-no-scatter-graph {
+  &:before {
+    content: $al-ico-no-scatter-graph;
+  }
+}
+.al-ico-applications-exp {
+  &:before {
+    content: $al-ico-applications-exp;
+  }
+}
+.al-ico-auto-refresh-play .path1 {
+  &:before {
+    content: $al-ico-auto-refresh-play-path1;
+    color: rgb(90, 101, 142);
+  }
+}
+.al-ico-auto-refresh-play .path2 {
+  &:before {
+    content: $al-ico-auto-refresh-play-path2;
+    margin-left: -1em;
+    color: rgb(211, 253, 0);
+  }
+}
+.al-ico-auto-refresh-pause .path1 {
+  &:before {
+    content: $al-ico-auto-refresh-pause-path1;
+    color: rgb(90, 101, 142);
+  }
+}
+.al-ico-auto-refresh-pause .path2 {
+  &:before {
+    content: $al-ico-auto-refresh-pause-path2;
+    margin-left: -1em;
+    color: rgb(211, 253, 0);
+  }
+}
+.al-ico-sqr-ok {
+  &:before {
+    content: $al-ico-sqr-ok;
+  }
+}
+.al-ico-sqr-cancel {
+  &:before {
+    content: $al-ico-sqr-cancel;
+  }
+}
+.al-ico-queue-lg {
+  &:before {
+    content: $al-ico-queue-lg;
+  }
+}
+.al-ico-started-lg {
+  &:before {
+    content: $al-ico-started-lg;
   }
 }
 .al-ico-status-draft {

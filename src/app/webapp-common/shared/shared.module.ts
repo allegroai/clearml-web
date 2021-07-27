@@ -32,6 +32,7 @@ import {ScrollTextareaComponent} from './components/scroll-textarea/scroll-texta
 import { ShowOnlyUserWorkComponent } from './components/show-only-user-work/show-only-user-work.component';
 import {GeneralLeavingBeforeSaveAlertGuard} from './guards/general-leaving-before-save-alert.guard';
 import {SortHumanizePipe} from './pipes/sort.pipe';
+import { ScatterPlotComponent } from './components/charts/scatter-plot/scatter-plot.component';
 
 const _declarations = [
   ExperimentInfoHeaderStatusProgressBarComponent,
@@ -74,9 +75,10 @@ const _declarations = [
   declarations: [
     _declarations,
     BaseContextMenuComponent,
+    ScatterPlotComponent,
   ],
   exports: [..._declarations, UiComponentsModule, TableModule, ClipboardModule, SharedPipesModule, MatSnackBarModule,
-    NgxFilesizeModule
+    NgxFilesizeModule, ScatterPlotComponent
   ],
   providers   : [LeavingBeforeSaveAlertGuard, GeneralLeavingBeforeSaveAlertGuard]
 })

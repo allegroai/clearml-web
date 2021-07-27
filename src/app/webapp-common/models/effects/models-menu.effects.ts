@@ -3,20 +3,20 @@ import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {Action, Store} from '@ngrx/store';
 import {ModelInfoState} from '../reducers/model-info.reducer';
 import {ApiModelsService} from '../../../business-logic/api-services/models.service';
-import {catchError, mergeMap, map, switchMap, tap, withLatestFrom} from 'rxjs/operators';
+import {catchError, map, mergeMap, switchMap, tap, withLatestFrom} from 'rxjs/operators';
 import * as infoActions from '../actions/models-info.actions';
+import {updateModelDetails} from '../actions/models-info.actions';
 import * as viewActions from '../actions/models-view.actions';
 import * as menuActions from '../actions/models-menu.actions';
-import {ActiveLoader, AddMessage, DeactiveLoader, SetServerError} from '../../core/actions/layout.actions';
-import {RequestFailed} from '../../core/actions/http.actions';
+import {addTag, removeTag} from '../actions/models-menu.actions';
+import {activeLoader, addMessage, deactivateLoader, setServerError} from '../../core/actions/layout.actions';
+import {requestFailed} from '../../core/actions/http.actions';
 import {ApiAuthService} from '../../../business-logic/api-services/auth.service';
 import {BlModelsService} from '../../../business-logic/services/models.service';
 import {get} from 'lodash/fp';
 import {Router} from '@angular/router';
 import {ApiTasksService} from '../../../business-logic/api-services/tasks.service';
 import {of} from 'rxjs';
-import {addTag, removeTag} from '../actions/models-menu.actions';
-import {updateModelDetails} from '../actions/models-info.actions';
 import {selectSelectedModel, selectSelectedModels, selectSelectedTableModel} from '../reducers';
 import {SelectedModel} from '../shared/models.model';
 import {RouterState, selectRouterConfig, selectRouterParams} from '../../core/reducers/router-reducer';
@@ -24,8 +24,8 @@ import {ModelsArchiveManyResponse} from '../../../business-logic/model/models/mo
 import {MatDialog} from '@angular/material/dialog';
 import {EmptyAction} from '../../../app.constants';
 import {EntityTypeEnum} from '../../../shared/constants/non-common-consts';
-import {getNotificationAction} from '../../shared/utils/shared-utils';
 import {ModelsUnarchiveManyResponse} from '../../../business-logic/model/models/modelsUnarchiveManyResponse';
+import {getNotificationAction, MenuItems, MoreMenuItems} from '../../shared/entity-page/items.utils';
 
 @Injectable()
 export class ModelsMenuEffects {
@@ -37,7 +37,7 @@ export class ModelsMenuEffects {
   activeLoader = createEffect( () => this.actions$.pipe(
     ofType(menuActions.archivedSelectedModels, menuActions.publishModelClicked,
       menuActions.restoreSelectedModels, menuActions.changeProjectRequested),
-    map(action => new ActiveLoader(action.type))));
+    map(action => activeLoader(action.type))));
 
 
   publishModel$ = createEffect( () => this.actions$.pipe(
@@ -47,12 +47,12 @@ export class ModelsMenuEffects {
       const ids = action.selectedModels.map(model => model.id);
       return this.apiModels.modelsPublishMany({ids})
           .pipe(
-            mergeMap(res => this.updateModelsSuccess(action, 'publish', ids, selectedModel, res, {ready: true})),
+            mergeMap(res => this.updateModelsSuccess(action, MenuItems.publish, ids, selectedModel, res, {ready: true})),
             catchError(error => this.publishModelFailedText(error, action.selectedModels).pipe(
               mergeMap(errorMessage => [
-                new RequestFailed(error),
-                new DeactiveLoader(action.type),
-                new SetServerError(error, null, errorMessage)
+                requestFailed(error),
+                deactivateLoader(action.type),
+                setServerError(error, null, errorMessage)
               ])
               )
             )
@@ -75,11 +75,11 @@ export class ModelsMenuEffects {
           .pipe(
             tap((res) => this.router.navigate([`projects/${action.project.id? action.project.id : res.project_id}/models/${action.selectedModels.length === 1 ? action.selectedModels[0].id : ''}`], {queryParamsHandling: 'merge'})),
             mergeMap(() => [
-              new viewActions.ResetState(),
+              viewActions.resetState(),
               selectedModel ? new infoActions.SetModel(selectedModel) : new EmptyAction(),
-              new DeactiveLoader(action.type)
+              deactivateLoader(action.type)
             ]),
-            catchError(error => [new RequestFailed(error), new DeactiveLoader(action.type)])
+            catchError(error => [requestFailed(error), deactivateLoader(action.type)])
           )
       }
     )
@@ -130,11 +130,11 @@ export class ModelsMenuEffects {
           return null;
         }
       }).filter(update => update !== null)
-        .concat(new AddMessage('success', `“${action.tag}” tag has been removed from “${action.models[0]?.name}” model`, [
+        .concat(addMessage('success', `“${action.tag}” tag has been removed from “${action.models[0]?.name}” model`, [
             {
               name: 'Undo',
               actions: [
-                new AddMessage('success', `“${action.tag}” tag has been restored`),
+                addMessage('success', `“${action.tag}” tag has been restored`),
                 ...action.models.map(() => addTag({
                     models: action.models,
                     tag: action.tag
@@ -167,30 +167,30 @@ export class ModelsMenuEffects {
           const undoAction = [
             {
               name: 'Undo', actions: [
-                new viewActions.SetSelectedModels(models),
+                viewActions.setSelectedModels({models}),
                 menuActions.restoreSelectedModels({selectedEntities: models, skipUndo: true})
               ]
             }
           ];
           let actions: Action[] = [
-            new DeactiveLoader(action.type),
-            new viewActions.SetSelectedModels([]),
-            getNotificationAction(res, action, 'archive', EntityTypeEnum.model, (action.skipUndo || allFailed) ? [] : undoAction)
+            deactivateLoader(action.type),
+            viewActions.setSelectedModels({models: []}),
+            getNotificationAction(res, action, MenuItems.archive, EntityTypeEnum.model, (action.skipUndo || allFailed) ? [] : undoAction)
           ];
           if (routerConfig.includes('models')) {
             const failedIds = res.failed.map(fail => fail.id);
             const successModels = models.map(model => model.id).filter(id => !failedIds.includes(id));
             actions = actions.concat([
-              new viewActions.RemoveModels(successModels),
-              new viewActions.FetchModelsRequested()
+              viewActions.removeModels({modelIds: successModels}),
+              viewActions.fetchModelsRequested()
             ]);
           }
           return actions;
         }),
         catchError(error => [
-          new RequestFailed(error),
-          new DeactiveLoader(action.type),
-          new SetServerError(error, null, 'Failed To Archive models')
+          requestFailed(error),
+          deactivateLoader(action.type),
+          setServerError(error, null, 'Failed To Archive models')
         ])
       )
     )
@@ -217,41 +217,41 @@ export class ModelsMenuEffects {
           const undoAction = [
             {
               name: 'Undo', actions: [
-                new viewActions.SetSelectedModels(models),
+                viewActions.setSelectedModels({models}),
                 menuActions.archivedSelectedModels({selectedEntities: models, skipUndo: true})
               ]
             }
           ];
           let actions: Action[] = [
-            new DeactiveLoader(action.type),
-            new viewActions.SetSelectedModels([]),
-            getNotificationAction(res, action, 'restore', EntityTypeEnum.model, (action.skipUndo || allFailed) ? [] : undoAction)
+            deactivateLoader(action.type),
+            viewActions.setSelectedModels({models: []}),
+            getNotificationAction(res, action, MoreMenuItems.restore, EntityTypeEnum.model, (action.skipUndo || allFailed) ? [] : undoAction)
           ];
           if (routerConfig.includes('models')) {
             const failedIds = res.failed.map(fail => fail.id);
             const successModels = models.map(model => model.id).filter(id => !failedIds.includes(id));
             actions = actions.concat([
-              new viewActions.RemoveModels(successModels),
-              new viewActions.FetchModelsRequested()
+              viewActions.removeModels({modelIds: successModels}),
+              viewActions.fetchModelsRequested()
             ]);
           }
           return actions;
         }),
         catchError(error => [
-          new RequestFailed(error),
-          new DeactiveLoader(action.type),
-          new SetServerError(error, null, 'Failed To Restore models')
+          requestFailed(error),
+          deactivateLoader(action.type),
+          setServerError(error, null, 'Failed To Restore models')
         ])
       )
     )
   ));
 
 
-  private updateModelsSuccess(action, operationName: string, ids: string[], selectedEntity, res: ModelsArchiveManyResponse, changes): Action[] {
+  private updateModelsSuccess(action, operationName: MenuItems, ids: string[], selectedEntity, res: ModelsArchiveManyResponse, changes): Action[] {
     const actions = [
-        ...ids.map(id => new viewActions.UpdateModel({id, changes})),
-      new DeactiveLoader(action.type)
-      ]
+        ...ids.map(id => viewActions.updateModel({id, changes})),
+      deactivateLoader(action.type)
+      ] as Action[];
     if (ids.includes(selectedEntity?.id)) {
       actions.push(new infoActions.SetModel({...selectedEntity, ...changes}));
     }

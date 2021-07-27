@@ -12,7 +12,7 @@ import {selectS3BucketCredentials} from '../../../core/reducers/common-auth-redu
 import {SmSyncStateSelectorService} from '../../../core/services/sync-state-selector.service';
 import {Observable, Subscription} from 'rxjs';
 import {debounceTime, distinctUntilChanged, filter, map, tap} from 'rxjs/operators';
-import {AddMessage} from '../../../core/actions/layout.actions';
+import {addMessage} from '../../../core/actions/layout.actions';
 import {MESSAGES_SEVERITY} from '../../../../app.constants';
 import {isReadOnly} from '../../../shared/utils/shared-utils';
 import {selectBackdropActive} from '../../../core/reducers/view-reducer';
@@ -73,7 +73,7 @@ export class ModelInfoComponent implements OnInit, OnDestroy {
     if (name.trim().length > 2) {
       this.store.dispatch(infoActions.updateModelDetails({id: this.selectedModel.id, changes: {name: name}}));
     } else {
-      this.store.dispatch(new AddMessage(MESSAGES_SEVERITY.ERROR, 'Name must be more than three letters long'));
+      this.store.dispatch(addMessage(MESSAGES_SEVERITY.ERROR, 'Name must be more than three letters long'));
     }
   }
 

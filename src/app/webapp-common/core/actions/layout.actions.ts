@@ -1,119 +1,79 @@
-import {MessageSeverityEnum, VIEW_ACTIONS, VIEW_PREFIX} from '../../../app.constants';
-import {Action, createAction, props} from '@ngrx/store';
+import {MessageSeverityEnum, VIEW_PREFIX} from '../../../app.constants';
+import {createAction, props} from '@ngrx/store';
 import {omit} from 'lodash/fp';
 import {HttpErrorResponse} from '@angular/common/http';
 
-export class SetAutoRefresh {
-  public type = VIEW_ACTIONS.SET_AUTO_REFRESH;
-  public payload: { autoRefresh: boolean };
+export const setAutoRefresh = createAction(
+  VIEW_PREFIX + '[set auto refresh]',
+  props<{autoRefresh: boolean}>()
+);
 
-  constructor(autoRefresh: boolean) {
-    this.payload = {autoRefresh};
-  }
-}
+export const setCompareAutoRefresh = createAction(
+  VIEW_PREFIX + '[set compare auto refresh]',
+  props<{autoRefresh: boolean}>()
+);
 
-export class SetCompareAutoRefresh {
-  public type = VIEW_ACTIONS.SET_COMPARE_AUTO_REFRESH;
-  public payload: { autoRefresh: boolean };
+export const setServerError = createAction(
+  VIEW_PREFIX + '[set server error]',
+  (serverError: HttpErrorResponse, contextSubCode?: number, customMessage?: string, aggregateSimilar = false) => ({
+    serverError: omit(['headers'], serverError) as Omit<HttpErrorResponse, 'headers'>,
+    contextSubCode,
+    customMessage,
+    aggregateSimilar
+  })
+);
 
-  constructor(autoRefresh: boolean) {
-    this.payload = {autoRefresh};
-  }
-}
+export const setNotificationDialog = createAction(
+  VIEW_PREFIX + '[set notification dialog]',
+  props<{message: string; title: string}>()
+);
 
-export class SetServerError {
-  public type = VIEW_ACTIONS.SET_SERVER_ERROR;
-  public payload: {
-    serverError: Omit<HttpErrorResponse, 'headers'>;
-    contextSubCode?: number;
-    customMessage?: string;
-    aggregateSimilar: boolean;
-  };
+export const resetLoader = createAction(VIEW_PREFIX + '[reset loader]');
 
-  constructor(serverError: HttpErrorResponse, contextSubCode?: number, customMessage?: string, aggregateSimilar = false) {
-    this.payload = {
-      serverError: omit(['headers'], serverError) as Omit<HttpErrorResponse, 'headers'>,
-      contextSubCode,
-      customMessage,
-      aggregateSimilar};
-  }
-}
+export const setBackdrop = createAction(
+  VIEW_PREFIX + '[set backdrop]',
+  props<{payload: boolean}>()
+);
 
-export class SetNotificationDialog {
-  public type = VIEW_ACTIONS.SET_NOTIFICATION_DIALOG;
-  public payload: { message: string; title: string };
+export const activeLoader = createAction(
+  VIEW_PREFIX + '[activate loader]',
+  (endpoint: string) => ({endpoint})
+);
 
-  constructor(payload: { message: string; title: string }) {
-    this.payload = payload;
-  }
-}
+export const deactivateLoader = createAction(
+  VIEW_PREFIX + '[deactivate loader]',
+  (endpoint: string) => ({endpoint})
+);
 
-export class ResetLoader implements Action {
-  readonly type = VIEW_ACTIONS.RESET_LOADER;
 
-  constructor() {
-  }
-}
+export const visibilityChanged = createAction(
+  VIEW_PREFIX + '[visibility changed]',
+  props<{visible: boolean}>()
+);
 
-export class SetBackdrop implements Action {
-  readonly type = VIEW_ACTIONS.SET_BACKDROP;
+export const addMessage = createAction(
+  VIEW_PREFIX + '[add message]',
+  (severity: MessageSeverityEnum, msg: string, userActions?: {actions: any[]; name: string}[]) =>
+    ({severity, msg, userActions})
+);
 
-  constructor(public payload: boolean) {
-  }
-}
-
-export class ActiveLoader {
-  type = VIEW_ACTIONS.ACTIVE_LOADER;
-  public payload: any;
-
-  constructor(endpoint = 'default') {
-    this.payload = {endpoint};
-  }
-}
-
-export class DeactiveLoader {
-  type = VIEW_ACTIONS.DEACTIVE_LOADER;
-  public payload: any;
-
-  constructor(endpoint = 'default') {
-    this.payload = {endpoint};
-  }
-}
-
-export class VisibilityChanged {
-  type = VIEW_ACTIONS.VISIBILITY_CHANGED;
-
-  constructor(public visible: boolean) {}
-}
-
-export class AddMessage implements Action {
-  readonly type = VIEW_ACTIONS.ADD_MESSAGE;
-  public payload: {
-    severity: string;
-    msg: string;
-    userActions?: {actions: any[]; name: string}[];
-  };
-
-  constructor(severity: MessageSeverityEnum, msg: string, userActions?: {actions: any[]; name: string}[]) {
-    this.payload = {severity, msg, userActions};
-  }
-}
+export const removeMessage = createAction(VIEW_PREFIX + '[remove message]');
 
 export const setServerUpdatesAvailable = createAction(
-  VIEW_ACTIONS.SET_SERVER_UPDATES_AVAILABLE,
+  VIEW_PREFIX + '[set server updates available]',
   props<{availableUpdates}>()
 );
 
 export const setScaleFactor = createAction(
-  VIEW_ACTIONS + '[set scale]',
+  VIEW_PREFIX + '[set scale]',
   props<{scale: number}>()
 );
 
 export const firstLogin = createAction(
-  VIEW_ACTIONS + '[set first Login]',
+  VIEW_PREFIX + '[set first Login]',
   props<{first: boolean}>()
 );
 
 export const neverShowPopupAgain = createAction(VIEW_PREFIX + 'NEVER_SHOW_POPUP_AGAIN', props<{ popupId: string; reset?: boolean }>());
 
-export const plotlyReady = createAction(VIEW_ACTIONS + '[plotly ready]');
+export const plotlyReady = createAction(VIEW_PREFIX + '[plotly ready]');

@@ -1,4 +1,4 @@
-<div class="editable-container" [class]="containerClass" [class.edit-mode]="inEditMode && !disableInEditMode" [class.disable-edit]="disableEditable"
+<div class="editable-container h-100" [class.dark-theme]="isDarkTheme" [class]="containerClass" [class.edit-mode]="inEditMode && !disableInEditMode" [class.disable-edit]="disableEditable"
      (dblclick)="editable && !disableEditable && (!inEditMode) && editModeChanged(true)">
   <div class="edit-wrapper" *ngIf="editable && !disableEditable && !inEditMode">
     <ng-content select="[extra-buttons]"></ng-content>

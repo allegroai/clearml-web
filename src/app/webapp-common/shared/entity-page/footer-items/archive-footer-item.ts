@@ -3,10 +3,10 @@ import {Observable} from 'rxjs/internal/Observable';
 import {EntityTypeEnum} from '../../../../shared/constants/non-common-consts';
 import {IconNames, ICONS} from '../../../constants';
 import {ItemFooterModel, IFooterState} from './footer-items.models';
-import {MENU_ITEM_ID} from '../items.utils';
+import {MenuItems} from '../items.utils';
 
 export class ArchiveFooterItem<T = any> extends ItemFooterModel {
-  id = MENU_ITEM_ID.ARCHIVE;
+  id = MenuItems.archive;
 
   constructor(public entitiesType: EntityTypeEnum, state$: Observable<IFooterState<T>>) {
     super();

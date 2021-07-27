@@ -11,7 +11,7 @@ import {getSysTags} from '../../model.utils';
 import {ActivateModelEdit, CancelModelEdit} from '../../actions/models-info.actions';
 import {
   CountAvailableAndIsDisable, CountAvailableAndIsDisableSelectedFiltered,
-  MENU_ITEM_ID,
+  MenuItems,
   selectionDisabledArchive,
   selectionDisabledDelete,
   selectionDisabledMoveTo,
@@ -58,10 +58,10 @@ export class ModelInfoHeaderComponent {
     this._model = model;
     this.sysTags = getSysTags(model as TableModel);
     const selectedModelsDisableAvailable: Record<string, CountAvailableAndIsDisableSelectedFiltered> = {
-      [MENU_ITEM_ID.PUBLISH]: selectionDisabledPublishModels([model]),
-      [MENU_ITEM_ID.MOVE_TO]: selectionDisabledMoveTo([model]),
-      [MENU_ITEM_ID.DELETE]: selectionDisabledDelete([model]),
-      [MENU_ITEM_ID.ARCHIVE]: selectionDisabledArchive([model])
+      [MenuItems.publish]: selectionDisabledPublishModels([model]),
+      [MenuItems.moveTo]: selectionDisabledMoveTo([model]),
+      [MenuItems.delete]: selectionDisabledDelete([model]),
+      [MenuItems.archive]: selectionDisabledArchive([model])
     };
     this.selectedDisableAvailable = selectedModelsDisableAvailable;
   }

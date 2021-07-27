@@ -18,6 +18,7 @@
              [matAutocomplete]="auto"
              [(ngModel)]="formData.project"
              name="projectName"
+             placeholder="Search for project path"
              #projectInputRef
              #projectInput="ngModel"
              required
@@ -25,6 +26,7 @@
              (keydown.enter)="projectInput.control.markAsTouched() "
              smUniqueNameValidator
              [existingNames]="readOnlyProjects$ | async"
+             (click)="filterText && clear(); projectInputRef.blur(); projectInputRef.focus()"
       >
       <span matSuffix *ngIf="(!isAutoCompleteOpen) && (!formData.project?.value) && formData.project" class="creat-new-suffix">(Create New)</span>
       <i matSuffix [class]="'fa mr2 ' + (filterText ? 'fa-times pointer' :  'fa-search')" (click)="filterText && clear(); projectInputRef.focus();"

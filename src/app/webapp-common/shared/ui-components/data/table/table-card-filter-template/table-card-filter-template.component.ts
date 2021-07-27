@@ -10,8 +10,6 @@ import {MatMenuTrigger} from '@angular/material/menu';
 })
 export class TableCardFilterTemplateComponent {
 
-  public readonly TABLE_SORT_ORDER = TABLE_SORT_ORDER;
-
   private _value: Array<string>;
   public searchTerms = {};
 
@@ -28,24 +26,28 @@ export class TableCardFilterTemplateComponent {
   @Input() subOptions: {label: string; value: string}[];
   @Input() options: { [col: string]: { label: string; value: string; tooltip?: string }[] };
   @Input() columns: ISmCol[];
+  @Input() filterMatch: {[colId: string]: string};
   @Output() subFilterChanged = new EventEmitter();
-  @Output() filterChanged = new EventEmitter();
+  @Output() filterChanged = new EventEmitter<{col: string; value: unknown; matchMode?: string}>();
   @Output() menuClosed = new EventEmitter();
   @Output() menuOpened = new EventEmitter();
 
   @ViewChild(MatMenuTrigger, {static: true}) trigger: MatMenuTrigger;
 
-  onFilterChanged(col, val) {
+  trackByKey = (index: number, item: {key: string; value: { label: string; value: string; tooltip?: string }[]}) => item['key'];
+  trackByLabel = (index: number, item) => item.label;
+
+  onFilterChanged(colId: string, val) {
     if (val) {
-      const newValues = addOrRemoveFromArray(this.value[col], val.itemValue);
-      this.filterChanged.emit({col: col, value: newValues});
+      const newValues = addOrRemoveFromArray(this.value[colId], val.itemValue);
+      this.filterChanged.emit({col: colId, value: newValues, matchMode: this.filterMatch[colId]});
     }
   }
 
   onSubFilterChanged(col, val) {
     if (val) {
       const newValues = addOrRemoveFromArray(this.subValue, val.itemValue);
-      this.subFilterChanged.emit({col: col, value: newValues});
+      this.subFilterChanged.emit({col, value: newValues});
     }
   }
 
@@ -79,5 +81,16 @@ export class TableCardFilterTemplateComponent {
 
   searchable(key: string) {
     return this.columns.find(col => col.id === key)?.searchableFilter;
+  }
+
+  andFilter(id: string) {
+    return this.columns.find(col => col.id === id)?.andFilter;
+  }
+
+  toggleCombination(colId: string, $event: MouseEvent) {
+    this.filterMatch[colId] = this.filterMatch[colId] === 'AND' ? '' : 'AND';
+    if (this.value?.[colId]?.length > 1) {
+      this.filterChanged.emit({col: colId, value: this.value[colId], matchMode: this.filterMatch[colId]});
+    }
   }
 }

@@ -1,7 +1,6 @@
 import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {SelectableListItem} from '../../../shared/ui-components/data/selectable-list/selectable-list.model';
 import {Observable, Subscription} from 'rxjs';
-import {ExperimentGraph} from '../../../tasks/tasks.model';
 import {select, Store} from '@ngrx/store';
 import {IExperimentInfoState} from '../../../../features/experiments/reducers/experiment-info.reducer';
 import {distinctUntilChanged, filter, map, tap} from 'rxjs/operators';
@@ -11,6 +10,7 @@ import {isEqual} from 'lodash/fp';
 import {scrollToElement} from '../../../shared/utils/shared-utils';
 import {GetMultiPlotCharts, ResetExperimentMetrics, SetExperimentMetricsSearchTerm, SetExperimentSettings, SetSelectedExperiments} from '../../actions/experiments-compare-charts.actions';
 import {selectCompareTasksPlotCharts, selectExperimentMetricsSearchTerm, selectRefreshing, selectSelectedExperimentSettings, selectSelectedSettingsHiddenPlot} from '../../reducers';
+import {ExtFrame} from '../../../shared/experiment-graphs/single-graph/plotly-graph-base';
 
 @Component({
   selector: 'sm-experiment-compare-plots',
@@ -31,11 +31,11 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
   private routerParamsSubscription: Subscription;
   private refreshingSubscription: Subscription;
 
-  public graphList: Array<SelectableListItem> = [];
+  public graphList: SelectableListItem[] = [];
   public selectedGraph: string = null;
   private experimentId: string;
   private taskIds: Array<string>;
-  public graphs: { [key: string]: ExperimentGraph };
+  public graphs: { [key: string]: ExtFrame[] };
   public refreshDisabled: boolean;
 
 

@@ -2,8 +2,8 @@ import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angula
 import {filter} from 'rxjs/operators';
 import {Subscription, interval} from 'rxjs';
 import {Store} from '@ngrx/store';
-import {SetCompareAutoRefresh} from '../../../core/actions/layout.actions';
-import {selectCompareAutoRefresh} from '../../../core/reducers/view-reducer';
+import {setCompareAutoRefresh} from '@common/core/actions/layout.actions';
+import {selectCompareAutoRefresh} from '@common/core/reducers/view-reducer';
 
 @Component({
   selector   : 'sm-experiment-refresh',
@@ -37,7 +37,7 @@ export class ExperimentRefreshComponent implements OnInit, OnDestroy {
   }
 
   onAutoRefreshChange(event) {
-    this.store.dispatch(new SetCompareAutoRefresh(event.checked));
+    this.store.dispatch(setCompareAutoRefresh({autoRefresh: event.checked}));
   }
 
   ngOnDestroy(): void {

@@ -1,14 +1,14 @@
-import {HTTP_ACTIONS} from '../../../app.constants';
-import {ISmAction} from '../models/actions';
+import {HTTP_PREFIX} from '../../../app.constants';
 import {omit} from 'lodash/fp';
 import {HttpErrorResponse} from '@angular/common/http';
+import {createAction, props} from '@ngrx/store';
 
-export class RequestFailed implements ISmAction {
-  public type = HTTP_ACTIONS.REQUEST_FAILED;
-  public payload: { err: any };
+export const requestFailed = createAction(
+  HTTP_PREFIX + 'REQUEST_FAILED',
+  (err: HttpErrorResponse) => ({err: omit(['headers'], err)})
+);
 
-  constructor(err: HttpErrorResponse) {
-    this.payload = { err: omit(['headers'], err) };
-  }
-}
-
+export const apiRequest = createAction(
+  HTTP_PREFIX + 'API Request',
+  props<{method: string; endpoint: string; success: string}>()
+);

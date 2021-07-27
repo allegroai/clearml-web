@@ -30,7 +30,7 @@
   <ng-template #configStep>
     <div class="steps-content">
       <div class="text" *ngIf="queue">
-        Tasks have been enqueued on the {{queue?.name}} queue, which is currently not serviced by any worker. They will remain in the 'pending' state until a ClearML worker services this queue.
+        Tasks have been enqueued on the <b>{{queue?.name}}</b> queue, which is currently not serviced by any worker. They will remain in the 'pending' state until a ClearML worker services this queue.
       </div>
       <div *ngFor="let step of steps" class="step-container">
         <div class="step-header">{{step.header}}</div>
@@ -79,7 +79,7 @@
         <div class="step">3. Integrate</div>
         <div class="step sub-note">Add the following lines to your code</div>
         <div class="code">
-          <div #content class="content"><span class="variable">from</span> clearml <span class="variable">import</span> Task
+          <div #content class="content"><span class="variable">from</span> {{gettingStartedContext?.agentName || 'clearml'}} <span class="variable">import</span> Task
 task <span class="operation">=</span> Task.<span class="variable">init</span>(project_name<span class="operation">=</span>"my project", task_name<span class="operation">=</span>"my task")</div>
           <sm-copy-clipboard
             [hideBackground]="true"

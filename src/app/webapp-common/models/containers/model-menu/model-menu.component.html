@@ -6,20 +6,20 @@
      [matMenuTriggerFor]="modelMenu">
 </div>
 <mat-menu #modelMenu="matMenu" [hasBackdrop]="false">
-  <ng-container *ngIf="selectedDisableAvailable[MENU_ITEM_ID.PUBLISH]">
-  <button mat-menu-item (click)="publishPopup()" [disabled]="selectedDisableAvailable[MENU_ITEM_ID.PUBLISH].disable">
+  <ng-container *ngIf="selectedDisableAvailable[menuItems.publish]">
+  <button mat-menu-item (click)="publishPopup()" [disabled]="selectedDisableAvailable[menuItems.publish].disable">
     <i [class]="'al-icon ' + ICONS.PUBLISHED + ' sm-md'"></i>
-      {{selectedDisableAvailable[MENU_ITEM_ID.PUBLISH].available | menuItemText : 'Publish' : selectedDisableAvailableIsMultiple}}
+      {{selectedDisableAvailable[menuItems.publish].available | menuItemText : 'Publish' : selectedDisableAvailableIsMultiple}}
   </button>
-  <button mat-menu-item (click)="deleteModelPopup()" [disabled]="selectedDisableAvailable[MENU_ITEM_ID.DELETE].disable" *ngIf="isArchive">
+  <button mat-menu-item (click)="deleteModelPopup()" [disabled]="selectedDisableAvailable[menuItems.delete].disable" *ngIf="isArchive">
     <i [class]="'al-icon ' + ICONS.REMOVE + ' sm-md'"></i>
-    {{selectedDisableAvailable[MENU_ITEM_ID.DELETE].available | menuItemText : 'Delete' : selectedDisableAvailableIsMultiple}}
+    {{selectedDisableAvailable[menuItems.delete].available | menuItemText : 'Delete' : selectedDisableAvailableIsMultiple}}
   </button>
 
     <button mat-menu-item (click)="archiveClicked()"
-            [disabled]="selectedDisableAvailable[MENU_ITEM_ID.ARCHIVE].disable">
+            [disabled]="selectedDisableAvailable[menuItems.archive].disable">
       <i class="al-icon sm-md" [class]="isArchive ? ICONS.RESTORE : ICONS.ARCHIVE"></i>
-      {{selectedDisableAvailable[MENU_ITEM_ID.ARCHIVE].available | menuItemText : isArchive ? 'Restore from Archive' : 'Archive' : selectedDisableAvailableIsMultiple}}
+      {{selectedDisableAvailable[menuItems.archive].available | menuItemText : isArchive ? 'Restore from Archive' : 'Archive' : selectedDisableAvailableIsMultiple}}
     </button>
 
   <hr>
@@ -37,7 +37,7 @@
     <i [class]="'al-icon  ' + ICONS.DOWNLOAD + ' sm-md'"></i>Download
   </button>
   <button mat-menu-item (click)="moveToProjectPopup()" [disabled]="isExample">
-    <i [class]="'al-icon ' + ICONS.MOVE_TO + '  sm-md'"></i>{{selectedDisableAvailable[MENU_ITEM_ID.MOVE_TO].available | menuItemText : 'Move to Project' : selectedDisableAvailableIsMultiple}}
+    <i [class]="'al-icon ' + ICONS.MOVE_TO + '  sm-md'"></i>{{selectedDisableAvailable[menuItems.moveTo].available | menuItemText : 'Move to Project' : selectedDisableAvailableIsMultiple}}
   </button>
   </ng-container>
 </mat-menu>

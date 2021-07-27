@@ -132,4 +132,5 @@ export interface Task {
      * Task configuration params
      */
     configuration?: { [key: string]: ConfigurationItem; };
+    runtime?: { [key: string]: string};
 }

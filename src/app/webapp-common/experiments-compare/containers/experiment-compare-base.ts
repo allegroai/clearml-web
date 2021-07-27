@@ -6,7 +6,7 @@ import {treeBuilderService} from '../services/tree-builder.service';
 import {createDiffObjectDetails} from '../jsonToDiffConvertor';
 import {ExperimentParams, TreeNode, TreeNodeMetadata} from '../shared/experiments-compare-details.model';
 import {MatTreeFlatDataSource, MatTreeFlattener} from '@angular/material/tree';
-import {ActiveLoader, AddMessage, DeactiveLoader} from '../../core/actions/layout.actions';
+import {activeLoader, addMessage, deactivateLoader} from '../../core/actions/layout.actions';
 import { ChangeDetectorRef, OnDestroy, QueryList, ViewChildren, Directive } from '@angular/core';
 import {ExperimentCompareDetailsBase} from '../../../features/experiments-compare/experiments-compare-details.base';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -20,8 +20,9 @@ import {distinctUntilChanged, filter, map, tap} from 'rxjs/operators';
 import {selectHideIdenticalFields, selectRefreshing} from '../reducers';
 import {refetchExperimentRequested} from '../actions/compare-header.actions';
 import {RENAME_MAP} from '../experiments-compare.constants';
+import {selectHasDataFeature} from '../../../core/reducers/users.reducer';
 
-export type nextDiffDirectionEnum = 'down' | 'up';
+export type NextDiffDirectionEnum = 'down' | 'up';
 
 export interface FlatNode {
   data: any;
@@ -33,10 +34,10 @@ export interface FlatNode {
 
 @Directive()
 export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase implements OnDestroy {
+  public hasDataFeature$: Observable<boolean>;
+  private hasDataFeature: boolean;
 
-  abstract buildCompareTree(experiments);
-
-  public RENAME_MAP = RENAME_MAP;
+  public renameMap = RENAME_MAP;
   public experiments$: Observable<any[]>;
   public taskIds$: Observable<string>;
 
@@ -81,6 +82,7 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
               public changeDetection: ChangeDetectorRef,
               public activeRoute: ActivatedRoute) {
     super();
+    this.hasDataFeature$ = this.store.pipe(select(selectHasDataFeature));
 
     this.taskIds$ = this.store.pipe(
       select(selectRouterParams),
@@ -111,6 +113,9 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
     this.refreshingSubscription = this.store.pipe(select(selectRefreshing))
       .pipe(filter(({refreshing}) => refreshing))
       .subscribe(({autoRefresh}) => this.store.dispatch(refetchExperimentRequested({autoRefresh})));
+
+    this.hideIdenticalFieldsSub.add(this.hasDataFeature$.subscribe( hasData => this.hasDataFeature = hasData));
+
   }
 
   ngOnDestroy(): void {
@@ -124,13 +129,13 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
 
   calculateTree(experiments) {
     this.calculatingTree = true;
-    this.store.dispatch(new ActiveLoader('CALCULATING_DIFF_TREE'));
+    this.store.dispatch(activeLoader('CALCULATING_DIFF_TREE'));
     this.changeDetection.detectChanges();
 
     setTimeout(() => {
-      const experimentTrees = this.buildCompareTree(experiments);
+      const experimentTrees = this.buildCompareTree(experiments, this.hasDataFeature);
       this.tree = experimentTrees;
-      this.ClearRemovedExperiment(experiments);
+      this.clearRemovedExperiment(experiments);
 
       const treeFlattener = new MatTreeFlattener<TreeNode<any>, FlatNode>(
         this.nodeTransformer,
@@ -157,7 +162,7 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
         this.selectedPath && window.setTimeout(() => this.exapndAndScrollToPath());
       });
       this.calculatingTree = false;
-      this.store.dispatch(new DeactiveLoader('CALCULATING_DIFF_TREE'));
+      this.store.dispatch(deactivateLoader('CALCULATING_DIFF_TREE'));
       if (!this.changeDetection['destroyed']) {
         this.changeDetection.detectChanges();
       }
@@ -186,13 +191,13 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
 
   toggleNode(node) {
     Object.keys(this.experimentsDataControl).forEach(id => {
-      const [dataSource, treeControl] = this.experimentsDataControl[id];
-      const n = treeControl.dataNodes.filter(n => n.hasChildren).find(n => n.data.path === node.data.path);
+      const [, treeControl] = this.experimentsDataControl[id];
+      const n = treeControl.dataNodes.filter(n1 => n1.hasChildren).find(n2 => n2.data.path === node.data.path);
       treeControl.toggle(n);
     });
   }
 
-  ClearRemovedExperiment(experiments) {
+  clearRemovedExperiment(experiments) {
     const expIds = experiments.map(exp => exp.id);
     Object.keys(this.experimentsDataControl).forEach(expId => {
       if (!expIds.includes(expId)) {
@@ -235,7 +240,7 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
     );
   }
 
-  goToNextDiff(direction: nextDiffDirectionEnum) {
+  goToNextDiff(direction: NextDiffDirectionEnum) {
     if (direction === 'down') {
       this.selectedPathIndex = this.onlyDiffsPaths.length - 1 > this.selectedPathIndex ? this.selectedPathIndex + 1 : 0;
     } else if (this.selectedPathIndex > 0) {
@@ -262,7 +267,7 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
     let nodeGotExpanded = false;
     if (!isEqual(openPaths.slice(0, openPaths.length - 1), this.previousOpenPaths)) {
       Object.keys(this.experimentsDataControl).forEach(id => {
-        const [dataSource, treeControl] = this.experimentsDataControl[id];
+        const [, treeControl] = this.experimentsDataControl[id];
         const nodesToOpen = treeControl.dataNodes.filter(node => node.hasChildren).filter(n => {
           const currentPath = n.data.path;
           return !treeControl.isExpanded(n) && openPaths.includes(currentPath);
@@ -274,7 +279,7 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
       });
     }
     this.previousOpenPaths = openPaths.slice(0, openPaths.length - 1);
-    const [dataSource, treeControl] = Object.values(this.experimentsDataControl)[0];
+    const [dataSource,] = Object.values(this.experimentsDataControl)[0];
     const selectedNodeIndex = this.findRealIndex(dataSource);
     const scrollToInPixels = (selectedNodeIndex + 1) * 28 - this.virtualScrollRef.first.getViewportSize() / 2;
     if (nodeGotExpanded) {
@@ -346,7 +351,7 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
       {[section]: mergedExperiment[section]},
       this.dataTransformer,
       this.metaDataTransformer,
-      {experiment: experiment}
+      {experiment}
     );
   }
 
@@ -428,7 +433,7 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
     }
   }
 
-  keyClicked(data, event: MouseEvent) {
+  keyClicked(data) {
     const path = data.path;
     this.selectedPathClicked(path);
   }
@@ -467,7 +472,7 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
   }
 
   copyIdToClipboard() {
-    this.store.dispatch(new AddMessage('success', 'Copied to clipboard'));
+    this.store.dispatch(addMessage('success', 'Copied to clipboard'));
   }
 
   public resetComponentState(experiments) {

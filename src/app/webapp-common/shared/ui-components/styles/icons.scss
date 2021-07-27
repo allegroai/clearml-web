@@ -439,9 +439,19 @@
   @include icon('#{$assets-icons-path}/no-plots.svg');
 }
 
+//No font icon dark-them
+.i-no-plots-dark {
+  @include icon('#{$assets-icons-path}/no-plots-dk.svg');
+}
+
 //No font icon
 .i-no-log {
   @include icon('#{$assets-icons-path}/no-log.svg');
+}
+
+//No font icon dark-theme
+.i-no-log-dark {
+  @include icon('#{$assets-icons-path}/no-log-dk.svg');
 }
 
 //No font icon
@@ -457,19 +467,6 @@
 .i-no-data-artifacts {
   @include icon('#{$assets-icons-path}/no-artifacts.svg');
 }
-
-//No font icon
-.i-no-data-graph {
-  @include icon('#{$assets-icons-path}/no-data-graph.svg');
-}
-
-//.i-info-maximize {
-//  @include icon('#{$assets-icons-path}/info-max.svg');
-//}
-
-//.i-info-minimize {
-//  @include icon('#{$assets-icons-path}/info-min.svg');
-//}
 
 .i-kibana {
   @include icon('#{$assets-icons-path}/kibana.svg');

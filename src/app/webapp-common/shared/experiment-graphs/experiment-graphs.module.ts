@@ -8,8 +8,19 @@ import { MatSliderModule } from '@angular/material/slider';
 import {PlotlyGraphBase} from './single-graph/plotly-graph-base';
 import {FormsModule} from '@angular/forms';
 import {ResizableModule} from 'angular-resizable-element';
+import {GraphDisplayerComponent} from './graph-displayer/graph-displayer.component';
+import {GraphScalarDataToMetric} from './graph-scalar-data-to-metric.pipe';
+import {GraphPlotDataToMetric} from './graph-plot-data-to-metric.pipe';
 
-const declarations= [ExperimentGraphsComponent, PlotlyGraphBase, SingleGraphComponent, GraphSettingsBarComponent];
+const declarations= [
+  ExperimentGraphsComponent,
+  PlotlyGraphBase,
+  SingleGraphComponent,
+  GraphSettingsBarComponent,
+  GraphDisplayerComponent,
+  GraphScalarDataToMetric,
+  GraphPlotDataToMetric,
+];
 @NgModule({
   declarations: declarations,
   exports: declarations,

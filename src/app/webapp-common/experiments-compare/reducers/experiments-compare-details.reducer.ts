@@ -11,12 +11,10 @@ export const initialState: ExperimentCompareDetailsState = {
 };
 
 const _experimentsCompareDetailsReducer = createReducer(initialState,
-  on(setExperiments, (state: ExperimentCompareDetailsState, {experiments}) => ({...state, experiments: experiments})),
-  on(resetState, (state: ExperimentCompareDetailsState) => ({...initialState}))
+  on(setExperiments, (state: ExperimentCompareDetailsState, {experiments}) => ({...state, experiments})),
+  on(resetState, () => ({...initialState}))
 );
 
-export function experimentsCompareDetailsReducer(state, action) {
-  return _experimentsCompareDetailsReducer(state, action);
-}
+export const experimentsCompareDetailsReducer = (state, action) => _experimentsCompareDetailsReducer(state, action);
 
 

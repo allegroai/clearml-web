@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
-import {EmptyAction, VIEW_ACTIONS} from '../../../app.constants';
+import {EmptyAction} from '../../../app.constants';
 import * as layoutActions from '../actions/layout.actions';
 import {filter, map, switchMap, take, mergeMap} from 'rxjs/operators';
 import {get} from 'lodash/fp';
@@ -28,9 +28,9 @@ export class LayoutEffects {
   ) {}
 
   @Effect({dispatch: false})
-  serverErrorMoreInfo = this.actions.pipe(ofType<layoutActions.SetServerError>(VIEW_ACTIONS.SET_SERVER_ERROR),
-    filter(action => !!action.payload.serverError),
-    map(action => this.parseError(get('error.meta.result_msg', action.payload.serverError))),
+  serverErrorMoreInfo = this.actions.pipe(ofType(layoutActions.setServerError),
+    filter(action => !!action.serverError),
+    map(action => this.parseError(get('error.meta.result_msg', action.serverError))),
     filter(([ids]) => !!ids),
     switchMap(([ids, entity]) => this.getAllEntity(ids, entity).pipe(
       filter(res => !!res),
@@ -45,15 +45,15 @@ export class LayoutEffects {
 
   @Effect({dispatch: false})
   popupError = this.actions.pipe(
-    ofType<layoutActions.SetServerError>(VIEW_ACTIONS.SET_SERVER_ERROR),
-    filter(action => action.payload.serverError?.status !== 401),
+    ofType(layoutActions.setServerError),
+    filter(action => action.serverError?.status !== 401),
     map((action) => {
-      if (action.payload?.serverError?.status === 502) {
-        console.log('Gateway Error', action.payload.serverError);
+      if (action.serverError?.status === 502) {
+        console.log('Gateway Error', action.serverError);
         return;
       }
-      const customMessage: string = action.payload.customMessage;
-      if (action.payload.aggregateSimilar) {
+      const customMessage: string = action.customMessage;
+      if (action.aggregateSimilar) {
         const lastTS = this.errors[customMessage];
         const now = (new Date()).getTime();
         if (lastTS && lastTS + ERROR_AGGREGATION > now) {
@@ -62,9 +62,9 @@ export class LayoutEffects {
         this.errors[customMessage] = now;
       }
       let resultMessage: string;
-      const subcode = get('error.meta.result_subcode', action.payload.serverError);
+      const subcode = get('error.meta.result_subcode', action.serverError);
       if (subcode) {
-        resultMessage = `Error ${subcode} : ${get('error.meta.result_msg', action.payload.serverError)}`;
+        resultMessage = `Error ${subcode} : ${get('error.meta.result_msg', action.serverError)}`;
       }
       this.alertDialogRef = this.dialog.open(AlertDialogComponent, {
         data: {alertMessage: 'Error', alertSubMessage: customMessage, resultMessage}
@@ -77,8 +77,7 @@ export class LayoutEffects {
 
   @Effect()
   addMessage: Observable<any> = this.actions.pipe(
-    ofType<layoutActions.AddMessage>(VIEW_ACTIONS.ADD_MESSAGE),
-    map((action: layoutActions.AddMessage) => action.payload),
+    ofType(layoutActions.addMessage),
     mergeMap(payload => this.notifierService.show({type: payload.severity, message: payload.msg, actions: payload.userActions})),
     mergeMap(actions => actions.length > 0? actions : [new EmptyAction()])
   );

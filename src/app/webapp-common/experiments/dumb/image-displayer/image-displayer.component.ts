@@ -118,10 +118,8 @@ export class ImageDisplayerComponent implements OnInit, OnDestroy {
       .pipe(
         filter(([bucketCredentials, event]) => !!event),
         map(([bucketCredentials, event]) => {
-          const signedUrl = this.adminService.signUrlIfNeeded(event.url);
-          const parsed = new URL(signedUrl);
-          parsed.searchParams.append('X-Amz-Date', event.timestamp);
-          return {...event, oldSrc: event.url, url: parsed.toString()};
+          const signedUrl = this.adminService.signUrlIfNeeded(event.url, {disableCache: event.timestamp});
+          return {...event, oldSrc: event.url, url: signedUrl};
         })
       );
 

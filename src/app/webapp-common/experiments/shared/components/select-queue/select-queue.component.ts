@@ -30,7 +30,7 @@ export class SelectQueueComponent implements OnInit, OnDestroy {
     }
   ) {
 
-    if (data && data.taskIds.length > 0) {
+    if (data && data.taskIds?.length > 0) {
       this.store.dispatch(new GetTaskForEnqueue(data.taskIds));
       this.reference = data.taskIds.length < 2 ?  data.reference : `${data.taskIds.length} experiments `;
     }

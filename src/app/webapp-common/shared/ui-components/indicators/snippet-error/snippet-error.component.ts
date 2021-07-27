@@ -1,5 +1,5 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {AddMessage} from '../../../../core/actions/layout.actions';
+import {addMessage} from '../../../../core/actions/layout.actions';
 import {MESSAGES_SEVERITY} from '../../../../../app.constants';
 import {Store} from '@ngrx/store';
 import {ThemeEnum} from '../../../../experiments/shared/common-experiments.const';
@@ -23,7 +23,7 @@ export class SnippetErrorComponent implements OnInit {
   public baseFile: string;
   @Input() set copyContent(content: string) {
     this._copyContent = content;
-    this.baseFile = last(content.split('/'));
+    this.baseFile = last(content?.split('/') || '');
   }
   get copyContent() {
     return this._copyContent;
@@ -36,7 +36,7 @@ export class SnippetErrorComponent implements OnInit {
   }
 
   copyToClipboardSuccess(success: boolean) {
-    this.store.dispatch(new AddMessage(success ? MESSAGES_SEVERITY.SUCCESS : MESSAGES_SEVERITY.ERROR, success ? 'Path copied to clipboard' : 'No path to copy'));
+    this.store.dispatch(addMessage(success ? MESSAGES_SEVERITY.SUCCESS : MESSAGES_SEVERITY.ERROR, success ? 'Path copied to clipboard' : 'No path to copy'));
   }
 
 }

@@ -1,18 +1,18 @@
 import {Injectable} from '@angular/core';
-import {Actions, Effect, ofType} from '@ngrx/effects';
+import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {Store} from '@ngrx/store';
 import {ApiTasksService} from '../../../business-logic/api-services/tasks.service';
 import {ApiAuthService} from '../../../business-logic/api-services/auth.service';
 import {BlTasksService} from '../../../business-logic/services/tasks.service';
 import {ApiEventsService} from '../../../business-logic/api-services/events.service';
 import {catchError, filter, mergeMap, map, switchMap, withLatestFrom} from 'rxjs/operators';
-import {ActiveLoader, DeactiveLoader, SetServerError} from '../../core/actions/layout.actions';
-import {RequestFailed} from '../../core/actions/http.actions';
+import {activeLoader, deactivateLoader, setServerError} from '../../core/actions/layout.actions';
+import {requestFailed} from '../../core/actions/http.actions';
 import * as outputActions from '../actions/common-experiment-output.actions';
 import {ExperimentOutputState} from '../../../features/experiments/reducers/experiment-output.reducer';
 import {LOG_BATCH_SIZE} from '../shared/common-experiments.const';
 import {selectSelectedSettingsxAxisType} from '../reducers';
-import {REFRESH_EXPERIMENTS} from '../actions/common-experiments-view.actions';
+import {refreshExperiments} from '../actions/common-experiments-view.actions';
 import {EventsGetTaskLogResponse} from '../../../business-logic/model/events/eventsGetTaskLogResponse';
 import {HTTP} from '../../../app.constants';
 import {ScalarKeyEnum} from '../../../business-logic/model/events/scalarKeyEnum';
@@ -21,15 +21,13 @@ import {selectCompareHistogramCacheAxisType} from '../../experiments-compare/red
 
 @Injectable()
 export class CommonExperimentOutputEffects {
-  @Effect()
-  activeLoader = this.actions$.pipe(
+  activeLoader = createEffect(() => this.actions$.pipe(
     ofType(outputActions.CHANGE_PROJECT_REQUESTED, outputActions.getExperimentLog, outputActions.EXPERIMENT_SCALAR_REQUESTED, outputActions.EXPERIMENT_PLOTS_REQUESTED),
     filter(action => !action?.['from']),
-    map(action => new ActiveLoader(action.type))
-  );
+    map(action => activeLoader(action.type))
+  ));
 
-  @Effect()
-  getLog$ = this.actions$.pipe(
+  getLog$ = createEffect(() => this.actions$.pipe(
     ofType(outputActions.getExperimentLog),
     switchMap((action) =>
       this.eventsApi.eventsGetTaskLog({
@@ -45,29 +43,28 @@ export class CommonExperimentOutputEffects {
             direction: action.direction,
             refresh: action.refresh
           }),
-          new DeactiveLoader(action.type),
-          new DeactiveLoader(REFRESH_EXPERIMENTS)
+          deactivateLoader(action.type),
+          deactivateLoader(refreshExperiments.type)
         ]),
         catchError(error => [
-          new RequestFailed(error),
-          new DeactiveLoader(action.type),
-          new DeactiveLoader(REFRESH_EXPERIMENTS),
-          new SetServerError(error, null, 'Failed to fetch log')
+          requestFailed(error),
+          deactivateLoader(action.type),
+          deactivateLoader(refreshExperiments.type),
+          setServerError(error, null, 'Failed to fetch log')
         ])
       )
     )
-  );
+  ));
 
-  @Effect()
-  fetchExperimentScalar$ = this.actions$.pipe(
+  fetchExperimentScalar$ = createEffect(() => this.actions$.pipe(
     ofType<outputActions.ExperimentScalarRequested>(outputActions.EXPERIMENT_SCALAR_REQUESTED),
     withLatestFrom(this.store.select(selectSelectedSettingsxAxisType), this.store.select(selectCompareHistogramCacheAxisType)),
     switchMap(([action, axisType, prevAxisType]) => {
       if ([ScalarKeyEnum.IsoTime, ScalarKeyEnum.Timestamp].includes(prevAxisType) &&
         [ScalarKeyEnum.IsoTime, ScalarKeyEnum.Timestamp].includes(axisType)) {
         return [
-          new DeactiveLoader(REFRESH_EXPERIMENTS),
-          new DeactiveLoader(action.type)
+          deactivateLoader(refreshExperiments.type),
+          deactivateLoader(action.type)
         ];
       }
 
@@ -75,42 +72,40 @@ export class CommonExperimentOutputEffects {
         .pipe(
           mergeMap(res => [
             new outputActions.SetExperimentHistogram(res, axisType),
-            new DeactiveLoader(REFRESH_EXPERIMENTS),
-            new DeactiveLoader(action.type)
+            deactivateLoader(refreshExperiments.type),
+            deactivateLoader(action.type)
           ]),
           catchError(error => [
-            new RequestFailed(error),
-            new DeactiveLoader(action.type),
-            new DeactiveLoader(REFRESH_EXPERIMENTS),
-            new SetServerError(error, null, 'Failed to get Scalar Charts')
+            requestFailed(error),
+            deactivateLoader(action.type),
+            deactivateLoader(refreshExperiments.type),
+            setServerError(error, null, 'Failed to get Scalar Charts')
           ])
         );}
     )
-  );
+  ));
 
-  @Effect()
-  fetchExperimentPlots$ = this.actions$.pipe(
+  fetchExperimentPlots$ = createEffect(() => this.actions$.pipe(
     ofType<outputActions.ExperimentPlotsRequested>(outputActions.EXPERIMENT_PLOTS_REQUESTED),
     switchMap(action =>
       this.eventsApi.eventsGetTaskPlots({task: action.payload, iters: 5})
         .pipe(
           mergeMap(res => [
             new outputActions.SetExperimentPlots(res.plots),
-            new DeactiveLoader(REFRESH_EXPERIMENTS),
-            new DeactiveLoader(action.type),
+            deactivateLoader(refreshExperiments.type),
+            deactivateLoader(action.type),
           ]),
           catchError(error => [
-            new RequestFailed(error),
-            new DeactiveLoader(action.type),
-            new DeactiveLoader(REFRESH_EXPERIMENTS),
-            new SetServerError(error, null, 'Failed to get Plot Charts')
+            requestFailed(error),
+            deactivateLoader(action.type),
+            deactivateLoader(refreshExperiments.type),
+            setServerError(error, null, 'Failed to get Plot Charts')
           ])
         )
     )
-  );
+  ));
 
-  @Effect({dispatch: false})
-  downloadFullLog$ = this.actions$.pipe(
+  downloadFullLog$ = createEffect(() => this.actions$.pipe(
     ofType(outputActions.downloadFullLog),
     filter(action => !!action.experimentId),
     map(action => {
@@ -120,7 +115,7 @@ export class CommonExperimentOutputEffects {
       a.download= 'Log';
       a.click();
     })
-  );
+  ), {dispatch: false});
 
   constructor(
     private actions$: Actions, private store: Store<ExperimentOutputState>, private apiTasks: ApiTasksService,

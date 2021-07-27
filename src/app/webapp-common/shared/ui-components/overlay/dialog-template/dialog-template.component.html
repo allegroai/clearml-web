@@ -5,19 +5,20 @@
     </i>
   </div>
 
-  <div class="generic-container {{theme || 'light-theme'}}">
-    <div>
-      <div class="d-flex flex-column" *ngIf="iconClass">
-        <div [class]="'al-icon icon xxl mx-auto '+ [iconClass]"></div>
+  <div #container class="generic-container {{theme || 'light-theme'}}" cdkScrollable>
+    <div class="d-flex flex-column" *ngIf="iconClass">
+      <div [class]="'al-icon icon xxl mx-auto '+ [iconClass]"></div>
+    </div>
+    <div class="d-flex justify-content-center" *ngIf="iconData">
+        <div class="app-icon-image" [style.background-image]="'url(' + iconData + ')'"></div>
       </div>
       <div class="d-flex flex-column" *ngIf="header">
-        <div class="create-title mx-auto ellipsis">{{header}}</div>
-      </div>
-      <div class="d-flex flex-column" *ngIf="subHeader">
-        <p class="sub-header mx-auto" [innerHTML]="subHeader"></p>
-      </div>
-      <ng-content></ng-content>
+      <div class="create-title mx-auto ellipsis">{{header}}</div>
     </div>
+    <div class="d-flex flex-column" *ngIf="subHeader">
+      <p class="sub-header mx-auto" [innerHTML]="subHeader"></p>
+    </div>
+    <ng-content></ng-content>
   </div>
   <sm-code *ngIf="codeTemplateFileName"
            [closedCodeLabel]="closedCodeLabel"

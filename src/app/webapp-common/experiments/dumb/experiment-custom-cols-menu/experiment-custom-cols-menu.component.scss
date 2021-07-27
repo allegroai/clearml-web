@@ -1,4 +1,4 @@
-@import '../../../../webapp-common/shared/ui-components/styles/variables';
+@import 'variables';
 
 .add-button {
   display: flex;
@@ -7,18 +7,10 @@
   padding: 15px 15px;
 }
 
-.custom-column-header {
-  display: flex;
-  justify-content: center;
-  font-weight: bold;
-  background: #f9fafb;
-  color: $blue-400;
-}
-
 .custom-column-buttons {
   display: flex;
   border-top: 1px solid #C3CDEF;
-  font-weight: bold;
+  font-weight: 500;
   color: $light-grey-blue;
   background: #f4f7ff;
   cursor: pointer;
@@ -28,8 +20,6 @@
     transition: color 0.3s;
   }
 }
-
-
 
 .metrics-button {
   width: 50%;
@@ -59,4 +49,11 @@
 .disabled {
   opacity: 0.5;
   cursor: default;
+}
+
+sm-select-metric-for-custom-col {
+  display: block;
+  height: 640px;
+  max-height: calc(100vh - 120px);
+  padding: 12px;
 }

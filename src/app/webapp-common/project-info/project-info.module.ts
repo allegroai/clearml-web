@@ -6,9 +6,11 @@ import {ProjectInfoRoutingModule} from './project-info-routing.module';
 import {LMarkdownEditorModule} from 'ngx-markdown-editor';
 import {FormsModule} from '@angular/forms';
 import {CommonLayoutModule} from '../layout/layout.module';
+import { ProjectStatsComponent } from './conteiners/project-stats/project-stats.component';
+import {ExperimentsCommonModule} from '../experiments/common-experiments.module';
 
 @NgModule({
-  declarations: [ProjectInfoComponent],
+  declarations: [ProjectInfoComponent, ProjectStatsComponent],
   imports: [
     CommonModule,
     SMSharedModule,
@@ -16,6 +18,7 @@ import {CommonLayoutModule} from '../layout/layout.module';
     ProjectInfoRoutingModule,
     LMarkdownEditorModule,
     CommonLayoutModule,
+    ExperimentsCommonModule,
   ]
 })
 export class ProjectInfoModule {

@@ -48,8 +48,8 @@ export class TreeBuilderService {
           );
         }
       }
-
-      return accumulator.concat(node);
+      accumulator.push(node);
+      return accumulator;
     }, []);
   }
 }

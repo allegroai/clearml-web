@@ -15,6 +15,7 @@ export class DebugImagesViewComponent {
   @Input() isMergeIterations;
   @Input() title;
   @Input() iterations;
+  @Input() isDarkTheme = false;
   @Output() imageClicked = new EventEmitter();
   @Output() refreshClicked = new EventEmitter();
   @Output() urlError = new EventEmitter();
@@ -22,7 +23,7 @@ export class DebugImagesViewComponent {
   public imageUrlError(data: { frame: string; experimentId: string }) {
     this.urlError.emit(data);
   }
-  get allIterationsEvents (){
+  get allIterationsEvents(){
     const iterationEvents = [];
     this.iterations.forEach(iteration=> iterationEvents.push(iteration.events));
     return iterationEvents;

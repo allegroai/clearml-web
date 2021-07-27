@@ -12,11 +12,12 @@ import {TasksArchiveManyResponse} from '../../../business-logic/model/tasks/task
 import {TasksPublishManyResponse} from '../../../business-logic/model/tasks/tasksPublishManyResponse';
 import {TasksStopManyResponse} from '../../../business-logic/model/tasks/tasksStopManyResponse';
 import {EntityTypeEnum} from '../../../shared/constants/non-common-consts';
+import {MetricColumn} from '@common/shared/utils/tableParamEncode';
+import {ProjectStatsGraphData} from '@common/core/reducers/projects.reducer';
 
 export const PROJECTS_PREFIX = '[ROOT_PROJECTS] ';
 export const GET_PROJECTS = PROJECTS_PREFIX + 'GET_PROJECTS';
 export const SET_PROJECTS = PROJECTS_PREFIX + 'SET_PROJECTS';
-export const SET_SELECTED_PROJECT = PROJECTS_PREFIX + 'SET_SELECTED_PROJECT';
 export const SET_SELECTED_PROJECT_ID = PROJECTS_PREFIX + 'SET_SELECTED_PROJECT_ID';
 export const RESET_SELECTED_PROJECT = PROJECTS_PREFIX + 'RESET_SELECTED_PROJECT';
 export const RESET_PROJECT_SELECTION = PROJECTS_PREFIX + 'RESET_PROJECT_SELECTION';
@@ -28,7 +29,7 @@ export interface TagColor {
   background: string;
 }
 
-export class GetAllProjects implements ISmAction {
+export class GetAllSystemProjects implements ISmAction {
   readonly type = GET_PROJECTS;
 }
 
@@ -59,14 +60,10 @@ export class SetSelectedProjectId implements ISmAction {
   }
 }
 
-export class SetSelectedProject implements ISmAction {
-  readonly type = SET_SELECTED_PROJECT;
-  public payload: { project: Project };
-
-  constructor(project: Project) {
-    this.payload = {project};
-  }
-}
+export const setSelectedProject = createAction(
+  PROJECTS_PREFIX + 'SET_SELECTED_PROJECT',
+  props<{project: Project}>()
+);
 
 export class ResetSelectedProject implements ISmAction {
   readonly type = RESET_SELECTED_PROJECT;
@@ -102,4 +99,16 @@ export const setTagColors = createAction(
 export const openMoreInfoPopup = createAction(
   PROJECTS_PREFIX + '[open more info popup]',
   props<{ parentAction: ReturnType<typeof archivedSelectedModels>; operationName: string; entityType: EntityTypeEnum; res: ModelsPublishManyResponse | ModelsArchiveManyResponse | ModelsDeleteManyResponse | TasksResetManyResponse | TasksEnqueueManyResponse | TasksArchiveManyResponse | TasksPublishManyResponse | TasksStopManyResponse }>()
+);
+
+export const setMetricVariant = createAction(
+  PROJECTS_PREFIX + '[set selected metric variant for graph]',
+  props<{projectId: string; col: MetricColumn}>()
+
+);
+export const fetchGraphData = createAction(PROJECTS_PREFIX + '[fetch stats for project graph]');
+
+export const setGraphData = createAction(
+  PROJECTS_PREFIX + '[set project stats]',
+  props<{stats: ProjectStatsGraphData[]}>()
 );

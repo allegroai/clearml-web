@@ -4,6 +4,7 @@ import {ItemFooterModel} from '../footer-items/footer-items.models';
 import {BaseContextMenuComponent} from '@common/shared/components/base-context-menu/base-context-menu.component';
 import {Store} from '@ngrx/store';
 import { ICONS } from '@common/constants';
+import {trackByIndex} from '@common/shared/utils/forms-track-by';
 
 @Component({
   selector   : 'sm-entity-footer',
@@ -18,7 +19,7 @@ export class EntityFooterComponent extends BaseContextMenuComponent {
   @Output() tagSelected = new EventEmitter();
 
   ICONS = ICONS;
-
+  trackBy = trackByIndex;
   constructor( store: Store<any>,
                eRef: ElementRef) {
     super(store, eRef);

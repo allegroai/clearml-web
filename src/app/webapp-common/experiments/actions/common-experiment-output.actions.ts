@@ -2,6 +2,7 @@ import {Action, createAction, props} from '@ngrx/store';
 import {ISelectedExperiment} from '../../../features/experiments/shared/experiment-info.model';
 import {IExperimentSettings} from '../reducers/common-experiment-output.reducer';
 import {ScalarKeyEnum} from '../../../business-logic/model/events/scalarKeyEnum';
+import {MetricsPlotEvent} from '../../../business-logic/model/events/metricsPlotEvent';
 
 export const EXPERIMENTS_OUTPUT_PREFIX = 'EXPERIMENTS_OUTPUT_';
 
@@ -57,14 +58,14 @@ export class ExperimentScalarRequested implements Action {
 export class SetExperimentHistogram implements Action {
   readonly type = SET_EXPERIMENT_HISTOGRAM;
 
-  constructor(public payload: any, public axisType: ScalarKeyEnum) {
+  constructor(public payload: {[metric: string]: {[variant: string]: unknown}}, public axisType: ScalarKeyEnum) {
   }
 }
 
 export class SetExperimentPlots implements Action {
   readonly type = SET_EXPERIMENT_PLOTS;
 
-  constructor(public payload: any) {
+  constructor(public payload: MetricsPlotEvent[]) {
   }
 }
 

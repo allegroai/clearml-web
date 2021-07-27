@@ -7,7 +7,7 @@ import {finalize, map, startWith, take, filter, mergeMap} from 'rxjs/operators';
 import {selectCurrentUser} from '../../core/reducers/users-reducer';
 import {mobilecheck} from '../../shared/utils/mobile';
 import {userPreferences} from '../../user-preferences';
-import {FetchCurrentUser, logout, SetPreferences} from '../../core/actions/users.actions';
+import {fetchCurrentUser, logout, setPreferences} from '../../core/actions/users.actions';
 import {LoginMode, LoginModeEnum, LoginService} from '../../shared/services/login.service';
 import {selectInviteId, selectLoginError, selectValidateEmail} from '../login-reducer';
 import {ConfigurationService} from '../../shared/services/configuration.service';
@@ -47,9 +47,8 @@ export class LoginComponent implements OnInit, OnDestroy {
   public newUser: boolean;
   public loginFailed = false;
   public showGitHub: boolean;
-  private redirectUrl: string;
-  stars: number = 0;
-  showSpinner: boolean;
+  public stars: number = 0;
+  public showSpinner: boolean;
   public guestUser: { enabled: boolean; username: string; password: string };
   public ssoEnabled = false;
   public communityContext: CommunityContext;
@@ -62,8 +61,10 @@ export class LoginComponent implements OnInit, OnDestroy {
   public isCommunity: boolean;
   public sso: { name: string; url: string; displayName?: string }[];
   public touLink: string;
-  private errorSub: Subscription;
   public validateEmail$: Observable<{ email?: string; resendUrl?: string }>;
+  public firstLogin: boolean;
+  private errorSub: Subscription;
+  private redirectUrl: string;
 
   constructor(
     private router: Router,
@@ -84,6 +85,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.signupMode = !!environment.communityServer;
     this.store.select(selectFirstLoginAt).pipe(take(1)).subscribe(firstLoginAt => {
       this.signupMode = !!environment.communityServer && !firstLoginAt;
+      this.firstLogin = !firstLoginAt;
       this.loginService.signupMode = this.signupMode;
     });
     this.store.select(selectCurrentUser).pipe(filter(user => !!user), take(1)).subscribe(() => this.router.navigateByUrl(this.getNavigateUrl()));
@@ -200,7 +202,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 
     if (user) {
       const loginObserver = this.loginService.login(user.id);
-      loginObserver.subscribe((res: any) => {
+      loginObserver.subscribe(() => {
         this.afterLogin();
       });
       return loginObserver;
@@ -213,10 +215,10 @@ export class LoginComponent implements OnInit, OnDestroy {
   private afterLogin() {
     userPreferences.loadPreferences()
       .pipe(
-        finalize( () => this.store.dispatch(new FetchCurrentUser()))
+        finalize( () => this.store.dispatch(fetchCurrentUser()))
       )
       .subscribe(res => {
-        this.store.dispatch(new SetPreferences(res));
+        this.store.dispatch(setPreferences({payload: res}));
         this.router.navigateByUrl(this.getNavigateUrl());
         this.openLoginNotice();
       }, () => this.router.navigateByUrl(this.getNavigateUrl()));
@@ -239,7 +241,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   loginGuest() {
     this.showSpinner = true;
     this.loginService.passwordLogin(this.guestUser.username, this.guestUser.password)
-      .subscribe((res: any) => {
+      .subscribe(() => {
           this.afterLogin();
         },
         () => {

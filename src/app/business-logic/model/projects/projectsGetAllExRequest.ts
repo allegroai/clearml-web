@@ -69,6 +69,8 @@ export interface ProjectsGetAllExRequest {
   stats_for_state?: ProjectsGetAllExRequest.StatsForStateEnum;
 
   check_own_contents?: boolean;
+
+  search_hidden?: boolean;
 }
 
 export namespace ProjectsGetAllExRequest {

@@ -2,13 +2,14 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {combineLatest, Observable, Subscription} from 'rxjs';
 import {Store} from '@ngrx/store';
 import {AdminService} from '../../features/admin/admin.service';
-import {selectActiveWorkspace, selectCurrentUser, selectUserWorkspaces} from '../core/reducers/users-reducer';
+import {selectActiveWorkspace, selectCurrentUser, selectServerVersions, selectUserWorkspaces} from '../core/reducers/users-reducer';
 import {createCredential, credentialRevoked, getAllCredentials, updateS3Credential} from '../core/actions/common-auth.actions';
 import {selectCredentials, selectNewCredential, selectS3BucketCredentials} from '../core/reducers/common-auth-reducer';
 import { MatDialog } from '@angular/material/dialog';
 import {CreateCredentialDialogComponent} from './create-credential-dialog/create-credential-dialog.component';
 import {debounceTime, filter, take, tap} from 'rxjs/operators';
 import {
+  getApiVersion,
   getUserWorkspaces,
   leaveWorkspace,
   logout,
@@ -64,6 +65,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   creatingCredentials = false;
   public panelState = {} as { [workspaceId: string]: boolean };
   private confSub: Subscription;
+  public serverVersions$: Observable<{ server: string; api: string }>;
 
   constructor(
     public adminService: AdminService,
@@ -95,9 +97,11 @@ export class AdminComponent implements OnInit, OnDestroy {
 
     this.neverShowTipsAgain$ = store.select(selectNeverShowPopups);
     this.credentials$ = this.store.select(selectCredentials);
+    this.serverVersions$ = this.store.select(selectServerVersions);
   }
 
   ngOnInit() {
+    this.store.dispatch(getApiVersion());
     this.store.select(selectCurrentUser)
       .pipe(filter(user => !!user), take(1))
       .subscribe(() => {

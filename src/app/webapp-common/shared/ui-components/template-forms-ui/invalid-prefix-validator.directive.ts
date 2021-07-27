@@ -3,8 +3,8 @@ import {AbstractControl, NG_VALIDATORS, ValidationErrors, Validator, ValidatorFn
 
 export function validatePrefix(invalidPrefix?: string): ValidatorFn {
   return (control: AbstractControl): { [key: string]: any } | null => {
-    const forbidden = control.value.startsWith(invalidPrefix);
-    return forbidden ? {'invalidPrefix': {value: control.value}} : null;
+    const forbidden = control.value?.startsWith(invalidPrefix);
+    return forbidden ? {invalidPrefix: {value: control.value}} : null;
   };
 }
 

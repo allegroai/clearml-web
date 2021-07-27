@@ -1,17 +1,17 @@
 import {Component, HostListener, OnDestroy, OnInit, ElementRef, ViewChild} from '@angular/core';
 import {combineLatest, Observable, Subscription} from 'rxjs';
-import {ExperimentGraph} from '../../../tasks/tasks.model';
 import {select, Store} from '@ngrx/store';
 import {IExperimentInfoState} from '../../../../features/experiments/reducers/experiment-info.reducer';
-import {distinctUntilChanged, distinctUntilKeyChanged, filter, map} from 'rxjs/operators';
+import {distinctUntilChanged, filter, map} from 'rxjs/operators';
 import {selectRouterParams} from '../../../core/reducers/router-reducer';
 import {get, has} from 'lodash/fp';
 import {SetExperimentSettings, SetSelectedExperiments} from '../../actions/experiments-compare-charts.actions';
 import {selectRefreshing, selectScalarsGraphHyperParams, selectScalarsGraphMetrics, selectScalarsGraphShowIdenticalHyperParams, selectScalarsGraphTasks, selectMetricValueType, selectSelectedSettigsHyperParams, selectSelectedSettigsMetric} from '../../reducers';
 import {getExperimentsHyperParams, setShowIdenticalHyperParams, setvalueType} from '../../actions/experiments-compare-scalars-graph.actions';
-import {GroupedHyperParams, HyperParams, MetricOption, MetricValueType, SelectedMetric, VariantOption} from '../../reducers/experiments-compare-charts.reducer';
+import {GroupedHyperParams, MetricOption, MetricValueType, SelectedMetric, VariantOption} from '../../reducers/experiments-compare-charts.reducer';
 import {MatRadioChange} from '@angular/material/radio';
 import {selectPlotlyReady} from '../../../core/reducers/view-reducer';
+import {ExtFrame} from '../../../shared/experiment-graphs/single-graph/plotly-graph-base';
 
 
 export const _filter = (opt: VariantOption[], value: string): VariantOption[] => {
@@ -40,7 +40,7 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
   private selectRefreshing$: Observable<{ refreshing: boolean, autoRefresh: boolean }>;
   public experiments$: Observable<any[]>;
 
-  public graphs: { [key: string]: ExperimentGraph };
+  public graphs: { [key: string]: ExtFrame };
   public selectedHyperParams: string[];
   public selectedMetric: SelectedMetric;
   public hyperParams: { [section: string]:  any};

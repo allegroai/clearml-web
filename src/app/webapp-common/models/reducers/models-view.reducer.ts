@@ -1,30 +1,32 @@
-import {MODELS_VIEW_MODES, ModelsViewModesEnum} from '../models.consts';
+import {createReducer, on} from '@ngrx/store';
 import {TABLE_SORT_ORDER} from '../../shared/ui-components/data/table/table.consts';
 import * as actions from '../actions/models-view.actions';
 import {TableModel, SelectedModel} from '../shared/models.model';
 import {MODELS_TABLE_COL_FIELDS} from '../shared/models.const';
-import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {TableFilter} from '../../shared/utils/tableParamEncode';
 import {User} from '../../../business-logic/model/users/user';
-import {setModelsInPlace} from '../actions/models-view.actions';
 import {ICommonSearchState} from '../../common-search/common-search.reducer';
 import {SortMeta} from 'primeng/api';
 import {CountAvailableAndIsDisableSelectedFiltered} from '@common/shared/entity-page/items.utils';
-import {SET_SELECTED_PROJECT} from '@common/core/actions/projects.actions';
+import {setSelectedProject} from '@common/core/actions/projects.actions';
 
 export interface IModelsViewState {
   splitSize: number;
   models: Array<any>;
+  tableFilters: any;
+  tempFilters: {[columnId: string]: {value: any; matchMode: string}};
+  projectColumnFilters: {[projectId: string]: {[columnId: string]: {value: any; matchMode: string}}};
   colsOrder: { [Project: string]: string[] };
-  hiddenTableCols: { [key: string]: boolean };
-  selectedModels: Array<TableModel>; // TODO: declare type.
+  tableSortFields: SortMeta[];
+  projectColumnsSortOrder: {[projectId: string]: SortMeta[]};
+  projectColumnsWidth: {[projectId: string]: {[colId: string]: number}};
+  hiddenTableCols: {[colName: string]: boolean};
+  hiddenProjectTableCols: {[projectId: string]: {[colName: string]: boolean | undefined}};
+  selectedModels: TableModel[]; // TODO: declare type.
   selectedModel: SelectedModel;
   noMoreModels: boolean;
   selectedModelSource: string;
   modelToken: string;
-  viewMode: ModelsViewModesEnum;
-  tableFilters: {[section: string]: FilterMetadata};
-  tableSortFields: SortMeta[];
   page: number;
   globalFilter: ICommonSearchState['searchQuery'];
   showAllSelectedIsActive: boolean;
@@ -34,21 +36,25 @@ export interface IModelsViewState {
   selectedModelsDisableAvailable: Record<string, CountAvailableAndIsDisableSelectedFiltered>;
 }
 
-const initialState: IModelsViewState = {
+export const modelsInitialState: IModelsViewState = {
   splitSize: 65,
   models: [],
   frameworks: [],
+  hiddenTableCols: {comment: true},
+  hiddenProjectTableCols: {},
+  tableFilters: {},
+  tempFilters: {},
+  projectColumnFilters: {},
+  tableSortFields: [{field: MODELS_TABLE_COL_FIELDS.CREATED, order: TABLE_SORT_ORDER.DESC}],
+  projectColumnsSortOrder: {},
+  projectColumnsWidth: {},
   colsOrder: {},
-  hiddenTableCols: {'comment': true},
   selectedModels: [],
   selectedModelsDisableAvailable: {},
   selectedModel: null,
   noMoreModels: false,
   selectedModelSource: null,
   modelToken: null,
-  viewMode: MODELS_VIEW_MODES.TABLE,
-  tableFilters: null,
-  tableSortFields: [{field: MODELS_TABLE_COL_FIELDS.CREATED, order: TABLE_SORT_ORDER.DESC}],
   page: -1, // -1 so the "getNextModels" will send 0.
   globalFilter: null,
   showAllSelectedIsActive: false,
@@ -56,93 +62,105 @@ const initialState: IModelsViewState = {
   projectTags: [],
 };
 
-export function modelsViewReducer(state: IModelsViewState = initialState, action: any): IModelsViewState {
-
-  switch (action.type) {
-    case actions.RESET_STATE:
-      return {
-        ...state,
-        models: initialState.models,
-        selectedModel: initialState.selectedModel,
-      };
-    case SET_SELECTED_PROJECT:
-      return {...state, selectedModels: initialState.selectedModels};
-    case actions.ADD_MANY_MODELS:
-      return {...state, models: state.models.concat(action.payload)};
-    case actions.REMOVE_MANY_MODELS:
-      return {...state, models: state.models.filter(exp => !action.payload.includes(exp.id))};
-    case  actions.SET_SHOW_ALL_SELECTED_IS_ACTIVE:
-      return {...state, showAllSelectedIsActive: action.payload, globalFilter: initialState.globalFilter, tableFilters: initialState.tableFilters};
-    case actions.UPDATE_ONE_MODELS: {
-      const payload = (action as actions.UpdateModel).payload;
+export const modelsViewReducer = createReducer(
+  modelsInitialState,
+  on(actions.resetState, (state)=> ({
+    ...state,
+    models: modelsInitialState.models,
+    selectedModel: modelsInitialState.selectedModel,
+  })),
+  on(setSelectedProject, (state) => ({...state, selectedModels: modelsInitialState.selectedModels})),
+  on(actions.addModels, (state, action) => ({...state, models: state.models.concat(action.models)})),
+  on(actions.removeModels, (state, action) => ({...state, models: state.models.filter(exp => !action.modelIds.includes(exp.id))})),
+  on(actions.showSelectedOnly, (state, action) => ({
+    ...state,
+    showAllSelectedIsActive: action.active,
+    globalFilter: modelsInitialState.globalFilter,
+    tempFilters: state.projectColumnFilters[action.projectId] || {},
+    projectColumnFilters: {
+      ...state.projectColumnFilters,
+      [action.projectId]: action.active ? modelsInitialState.tableFilters : state.tempFilters
+    }
+  })),
+  on(actions.updateModel, (state, action) => {
       const newState = {
         ...state, models:
-          state.models.map(ex => ex.id === payload.id ? {...ex, ...payload.changes} : ex)
+          state.models.map(ex => ex.id === action.id ? {...ex, ...action.changes} : ex)
       };
-      if (state.selectedModel?.id === payload.id) {
-        newState.selectedModel = {...state.selectedModel, ...payload.changes};
+      if (state.selectedModel?.id === action.id) {
+        newState.selectedModel = {...state.selectedModel, ...action.changes};
       }
-      if (state.selectedModels.find(ex => ex.id === payload.id)) {
-        newState.selectedModels = state.selectedModels.map(ex => ex.id === payload.id ? {...ex, ...payload.changes} : ex);
+      if (state.selectedModels.find(ex => ex.id === action.id)) {
+        newState.selectedModels = state.selectedModels.map(ex => ex.id === action.id ? {...ex, ...action.changes} : ex);
       }
       return newState;
+    }),
+  on(actions.setModels, (state, action) => ({...state, models: action.models})),
+  on(actions.setModelsInPlace, (state, action) =>
+    ({...state, models: state.models.map(currModel => action.models.find(newModel => newModel.id === currModel.id))})),
+  on(actions.setNoMoreModels, (state, action) => ({...state, noMoreModels: action.payload})),
+  on(actions.setCurrentPage, (state, action) => ({...state, page: action.page})),
+  on(actions.setSelectedModels, (state, action) => ({...state, selectedModels: action.models as unknown as TableModel[]})),
+  on(actions.setSelectedModelsDisableAvailable, (state, action) =>
+    ({...state, selectedModelsDisableAvailable: action.selectedModelsDisableAvailable})),
+  on(actions.setSelectedModel, (state, action) => ({...state, selectedModel: action.model})),
+  on(actions.globalFilterChanged, (state, action) =>
+    ({...state, globalFilter: action as ReturnType<typeof actions.globalFilterChanged>})),
+  on(actions.resetGlobalFilter, (state ) => ({...state, globalFilter: modelsInitialState.globalFilter})),
+  on(actions.toggleColHidden, (state, action) => ({
+    ...state,
+    hiddenProjectTableCols: {
+      ...state.hiddenProjectTableCols,
+      [action.projectId]: {
+        ...(state.hiddenProjectTableCols[action.projectId] || modelsInitialState.hiddenTableCols),
+        [action.columnId]: state.hiddenProjectTableCols?.[action.projectId]?.[action.columnId] ? undefined : true
+      }
     }
-    case actions.SET_MODELS:
-      return {...state, models: action.payload};
-    case setModelsInPlace.type:
-      return {...state, models: state.models.map(currModel => action.models.find(newModel => newModel.id === currModel.id))};
-    case actions.SET_NO_MORE_MODELS:
-      return {...state, noMoreModels: action.payload};
-    case actions.SET_NEXT_PAGE:
-      return {...state, page: action.payload};
-    case actions.SET_SELECTED_MODELS:
-      return {...state, selectedModels: action.payload};
-    case actions.setSelectedModelsDisableAvailable.type:
-      return {...state, selectedModelsDisableAvailable: action.selectedModelsDisableAvailable};
-    case actions.SET_SELECTED_MODEL:
-      return {...state, selectedModel: action.payload};
-    case actions.SET_VIEW_MODE:
-      return {...state, viewMode: action.payload};
-    case actions.globalFilterChanged.type:
-      return {...state, globalFilter: action as ReturnType<typeof actions.globalFilterChanged>};
-    case actions.resetGlobalFilter.type:
-      return {...state, globalFilter: initialState.globalFilter};
-    case actions.toggleColHidden.type:
-      return {...state, hiddenTableCols: {...state.hiddenTableCols, [action.colName]: !state.hiddenTableCols[action.colName]}};
-    case actions.setHiddenCols.type:
-      return {...state, hiddenTableCols: action.hiddenCols};
-    case actions.setUsers.type:
-      return {...state, users: action.users};
-    case actions.setFrameworks.type:
-      return {...state, frameworks: action.frameworks};
-    case actions.setTags.type:
-      return {...state, projectTags: action.tags};
-    case actions.setTableSort.type:
-      return {...state, tableSortFields: action.orders};
-    case actions.TABLE_FILTER_CHANGED: {
-      const payload = (action as actions.TableFilterChanged).payload;
-      return {
-        ...state,
-        tableFilters: {
-          ...state.tableFilters,
-          [payload.col]: {value: payload.value, matchMode: payload.filterMatchMode}
-        }
-      };
+  })),
+  on(actions.setHiddenCols, (state, action) => ({...state, hiddenTableCols: action.hiddenCols})),
+  on(actions.setUsers, (state, action) => ({...state, users: action.users})),
+  on(actions.setFrameworks, (state, action) => ({...state, frameworks: action.frameworks})),
+  on(actions.setTags, (state, action) => ({...state, projectTags: action.tags})),
+  on(actions.setTableSort, (state, action) => ({
+    ...state,
+    projectColumnsSortOrder: {
+      ...state.projectColumnsSortOrder,
+      [action.projectId]: action.orders
     }
-    case actions.setColsOrderForProject.type:
-      return {...state, colsOrder: {...state.colsOrder, [action.project]: action.cols}};
-    case actions.setTableFilters.type:
-      return {
-        ...state, tableFilters: {
-          ...action['filters'].reduce((obj: object, filter: TableFilter) => {
-            obj[filter.col] = {value: filter.value, machMode: filter.filterMatchMode};
-            return obj;
-          }, {})
-        }
-      };
-    case actions.setSplitSize.type:
-      return {...state, splitSize: action.splitSize};
-    default:
-      return state;
-  }
-}
+  })),
+  on(actions.tableFilterChanged, (state, action) => ({
+    ...state,
+    projectColumnFilters: {
+      ...state.projectColumnFilters,
+      [action.projectId]: {
+        ...state.projectColumnFilters[action.projectId],
+        [action.filter.col]: {value: action.filter.value, matchMode: action.filter.filterMatchMode}
+      }
+    }
+  })),
+  on(actions.setColumnWidth, (state, action) => ({
+    ...state,
+    projectColumnsWidth: {
+      ...state.projectColumnsWidth,
+      [action.projectId]: {
+        ...state.projectColumnsWidth[action.projectId],
+        [action.columnId]: action.widthPx
+      }
+    }
+  })),
+  on(actions.setColsOrderForProject, (state, action) =>
+    ({...state, colsOrder: {...state.colsOrder, [action.project]: action.cols}})),
+  on(actions.setTableFilters, (state, action) => ({
+    ...state,
+    projectColumnFilters: {
+      ...state.projectColumnFilters,
+      [action.projectId]: {
+        ...action.filters.reduce((obj, filter: TableFilter) => {
+          obj[filter.col] = {value: filter.value, matchMode: filter.filterMatchMode};
+          return obj;
+        }, {} as {[columnId: string]: {value: any; matchMode: string}})
+      }
+    }
+  })),
+  on(actions.setSplitSize, (state, action) => ({...state, splitSize: action.splitSize}))
+);

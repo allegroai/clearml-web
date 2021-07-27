@@ -84,6 +84,7 @@
       <sm-section-header *ngIf="minimized" label="INSTALLED PACKAGES"></sm-section-header>
       <sm-scroll-textarea
         class="form-section"
+        emptyMessage="Packages will be installed from projects requirements file"
         [editable]="editable && requirementsSection.inEditMode"
         [isInDev]="isInDev"
         [formData]="formData.requirements?.pip">

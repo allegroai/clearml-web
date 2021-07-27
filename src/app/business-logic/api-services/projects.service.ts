@@ -51,6 +51,8 @@ import {ProjectsGetHyperparamValuesRequest} from '../model/projects/projectsGetH
 import {ProjectsGetHyperparamValuesResponse} from '../model/projects/projectsGetHyperparamValuesResponse';
 import {ProjectsMoveRequest} from "../model/projects/projectsMoveRequest";
 import {ProjectsMoveResponse} from "../model/projects/projectsMoveResponse";
+import { ProjectsValidateDeleteRequest } from '../model/projects/projectsValidateDeleteRequest';
+import { ProjectsValidateDeleteResponse } from '../model/projects/projectsValidateDeleteResponse';
 
 
 @Injectable()
@@ -633,7 +635,7 @@ export class ApiProjectsService {
    * @param request request body
 
    */
-  public projectsGetHyperparamValuesWithHttpInfo(request: ProjectsGetHyperparamValuesRequest, options?: any, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+  public projectsGetHyperparamValues(request: ProjectsGetHyperparamValuesRequest, options?: any, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
     if (request === null || request === undefined) {
       throw new Error('Required parameter request was null or undefined when calling projectsUpdate.');
     }
@@ -670,4 +672,50 @@ export class ApiProjectsService {
       }
     );
   }
+
+  /**
+   *
+   * Validates that the project existis and can be deleted
+   * @param request request body
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   */
+  public projectsValidateDelete(request: ProjectsValidateDeleteRequest, options?: any, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    if (request === null || request === undefined) {
+      throw new Error('Required parameter request was null or undefined when calling projectsValidateDelete.');
+    }
+
+    let headers = this.defaultHeaders;
+    if (options && options.async_enable) {
+      headers = headers.set(this.configuration.asyncHeader, '1');
+    }
+
+    // to determine the Accept header
+    const httpHeaderAccepts: string[] = [
+      'application/json'
+    ];
+    const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+    if (httpHeaderAcceptSelected != undefined) {
+      headers = headers.set("Accept", httpHeaderAcceptSelected);
+    }
+
+    // to determine the Content-Type header
+    const consumes: string[] = [
+    ];
+    const httpContentTypeSelected:string | undefined = this.configuration.selectHeaderContentType(consumes);
+    if (httpContentTypeSelected != undefined) {
+      headers = headers.set("Content-Type", httpContentTypeSelected);
+    }
+
+    return this.apiRequest.post<ProjectsValidateDeleteResponse>(`${this.basePath}/projects.validate_delete`,
+      request,
+      {
+        withCredentials: this.configuration.withCredentials,
+        headers: headers,
+        observe: observe,
+        reportProgress: reportProgress
+      }
+    );
+  }
+
 }

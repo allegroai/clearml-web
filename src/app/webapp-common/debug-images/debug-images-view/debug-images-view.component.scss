@@ -50,6 +50,7 @@
       background:transparent;
     }
 
+
     ::ng-deep .mat-expansion-panel-content {
       .mat-expansion-panel-body {
         padding: 0 12px 48px 12px;
@@ -78,7 +79,7 @@
       &:hover {
 
         .mat-expansion-panel-header-title {
-          color: rgba(56, 65, 97, 1)
+          color: rgba(56, 65, 97, 1);
         }
       }
 
@@ -94,4 +95,9 @@
     }
   }
 
+  .mat-expansion-panel {
+    &.dark-theme {
+      background: transparent;
+    }
+  }
 }

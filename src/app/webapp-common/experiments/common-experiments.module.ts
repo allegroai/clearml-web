@@ -30,7 +30,7 @@ import {RouterModule} from '@angular/router';
 import {SMMaterialModule} from '../shared/material/material.module';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ExperimentGraphsModule} from '../shared/experiment-graphs/experiment-graphs.module';
-import {CommonExperimentsComponent} from './common-experiments.component';
+import {ExperimentsComponent} from './experiments.component';
 import {AngularSplitModule} from 'angular-split';
 import {ExperimentCompareSharedModule} from '../experiments-compare/shared/experiment-compare-shared.module';
 import {ExperimentCustomColsMenuComponent} from './dumb/experiment-custom-cols-menu/experiment-custom-cols-menu.component';
@@ -45,7 +45,7 @@ import {ExperimentInfoArtifactItemComponent} from './containers/experiment-info-
 import {ExperimentArtifactItemViewComponent} from './dumb/experiment-artifact-item-view/experiment-artifact-item-view.component';
 import {ExperimentInfoModelComponent} from './containers/experiment-info-model/experiment-info-model.component';
 import {ScrollingModule} from '@angular/cdk/scrolling';
-import {BaseClickableArtifact} from './dumb/base-clickable-artifact';
+import {BaseClickableArtifactComponent} from './dumb/base-clickable-artifact.component';
 import {NoUnderscorePipe} from '../shared/pipes/no-underscore.pipe';
 import {ExperimentHyperParamsNavbarComponent} from './dumb/experiment-hyper-params-navbar/experiment-hyper-params-navbar.component';
 import {ExperimentInfoTaskModelComponent} from './containers/experiment-info-task-model/experiment-info-task-model.component';
@@ -53,21 +53,21 @@ import {ExperimentInfoHyperParametersFormContainerComponent} from './containers/
 import {SharedModule} from '../../shared/shared.module';
 import {CommonDeleteDialogModule} from '../shared/entity-page/entity-delete/common-delete-dialog.module';
 import { ExperimentInfoEditDescriptionComponent } from './dumb/experiment-info-edit-description/experiment-info-edit-description.component';
+import {ExperimentOutputLogModule} from './shared/experiment-output-log/experiment-output-log.module';
+import {MatRadioModule} from '@angular/material/radio';
 
 @NgModule({
   declarations: [
     SelectMetricForCustomColComponent,
     SelectHyperParamsForCustomColComponent,
-    CommonExperimentsComponent,
-    BaseClickableArtifact,
+    BaseClickableArtifactComponent,
+    ExperimentsComponent,
     ExperimentTypeIconLabelComponent,
     ExperimentHeaderComponent,
     ExperimentInfoHeaderComponent,
     ExperimentsTableComponent,
     ExperimentInfoModelComponent,
     ExperimentInfoTaskModelComponent,
-    ExperimentOutputLogComponent,
-    ExperimentLogInfoComponent,
     ExperimentInfoGeneralComponent,
     ExperimentGeneralInfoComponent,
     ExperimentNetworkDesignFormComponent,
@@ -90,9 +90,11 @@ import { ExperimentInfoEditDescriptionComponent } from './dumb/experiment-info-e
     ExperimentInfoEditDescriptionComponent
   ],
   exports: [ExperimentTypeIconLabelComponent,
-    CommonExperimentsComponent,
+    ExperimentsComponent,
     ExperimentInfoHeaderComponent,
-    ExperimentExecutionSourceCodeComponent],
+    ExperimentExecutionSourceCodeComponent,
+    SelectMetricForCustomColComponent,
+    ExperimentExecutionParametersComponent],
   imports: [
     AngularSplitModule,
     ScrollingModule,
@@ -112,6 +114,8 @@ import { ExperimentInfoEditDescriptionComponent } from './dumb/experiment-info-e
     EffectsModule.forFeature([CommonExperimentsViewEffects, CommonExperimentsInfoEffects, CommonExperimentOutputEffects, CommonExperimentsMenuEffects]),
     MatProgressSpinnerModule,
     SharedModule,
+    ExperimentOutputLogModule,
+    MatRadioModule
   ],
   providers: [ExperimentTableCardComponent, NoUnderscorePipe, TitleCasePipe]
 })

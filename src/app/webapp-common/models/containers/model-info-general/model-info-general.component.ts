@@ -31,7 +31,7 @@ export class ModelInfoGeneralComponent implements OnDestroy {
 
   showModel(model) {
     this.store.dispatch(resetDontShowAgainForBucketEndpoint());
-    const modelSignedUri = this.adminService.signUrlIfNeeded(model.uri, true);
+    const modelSignedUri = this.adminService.signUrlIfNeeded(model.uri);
     if (modelSignedUri) {
       window.open(createModelLink(model.uri, model.id, modelSignedUri));
     }

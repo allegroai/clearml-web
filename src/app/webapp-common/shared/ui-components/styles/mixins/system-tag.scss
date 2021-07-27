@@ -1,0 +1,33 @@
+@import "../variables";
+
+@mixin system-tag() {
+  display: inline-block;
+  position: relative;
+  min-width: 50px;
+  max-width: 180px;
+  height: 18px;
+  line-height: 18px;
+  font-size: 11px;
+  border-radius: 4px;
+  border: $blue-300 1px solid;
+  padding: 0 8px 0 14px;
+  margin-right: 5px;
+  background-color: $blue-400;
+  color: #fff;
+  text-transform: uppercase;
+  background-repeat: no-repeat;
+  background-size: 9px;
+  background-position: 0 -1px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@mixin shrinkable-tags() {
+  margin-right: 5px;
+  flex: 0 2 content;
+  transition: flex-shrink 0.3s;
+
+  &:hover {
+    flex-shrink: 0;
+  }
+}

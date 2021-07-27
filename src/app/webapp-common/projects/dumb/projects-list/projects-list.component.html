@@ -12,7 +12,8 @@
       [project]="project">
     </sm-project-card>
   </ng-container>
-  <div class="load-more">
-    <button (click)="loadMore.emit()" *ngIf="!noMoreProjects" class="btn btn-primary load-more-btn">LOAD MORE</button>
+
+  <div class="load-more" *ngIf="!noMoreProjects && projects?.length > pageSize">
+    <button (click)="loadMore.emit()" class="btn btn-primary load-more-btn">LOAD MORE</button>
   </div>
 </div>

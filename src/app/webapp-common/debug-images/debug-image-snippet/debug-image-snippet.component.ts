@@ -2,7 +2,7 @@ import {Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild} f
 import {isHtmlPage, isTextFileURL} from '../../shared/utils/shared-utils';
 import {IsAudioPipe} from '../../shared/pipes/is-audio.pipe';
 import {IsVideoPipe} from '../../shared/pipes/is-video.pipe';
-import {AddMessage} from '../../core/actions/layout.actions';
+import {addMessage} from '../../core/actions/layout.actions';
 import {MESSAGES_SEVERITY} from '../../../app.constants';
 import {Store} from '@ngrx/store';
 import {ThemeEnum} from '../../experiments/shared/common-experiments.const';
@@ -55,7 +55,7 @@ export class DebugImageSnippetComponent implements OnInit {
   }
 
   copyToClipboardSuccess(success: boolean) {
-    this.store.dispatch(new AddMessage(
+    this.store.dispatch(addMessage(
       success ? MESSAGES_SEVERITY.SUCCESS : MESSAGES_SEVERITY.ERROR,
       success ? 'Path copied to clipboard' : 'No path to copy'
     ));

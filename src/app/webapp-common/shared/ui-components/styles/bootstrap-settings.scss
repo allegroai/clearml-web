@@ -27,8 +27,13 @@ $font-family-base: $font-family-base;
   $input-height: map-get($light-theme-input, height);
   $link-hover-color: $blue-200;
   $link-color: $blue-300;
+  $label-margin-bottom: 0;
 
   @import '~bootstrap/scss/bootstrap.scss';
+
+  label {
+    display: inline-flex;
+  }
 
   .btn {
     font-size: 12px;
@@ -129,9 +134,13 @@ $font-family-base: $font-family-base;
   $input-focus-box-shadow: map-get($light-theme-input, focus-box-shadow);
   $input-focus-bg: map-get($light-theme-input, focus-bg);
   $input-height: map-get($light-theme-input, height);
-
+  $label-margin-bottom: 0;
 
   @import '~bootstrap/scss/bootstrap.scss';
+
+  label {
+    display: inline-flex;
+  }
 
   .btn {
     font-size: 11px;

@@ -16,6 +16,6 @@ export class MaxNumberValidatorDirective implements Validator {
 export function maxNumberValidator(maxNumber): ValidatorFn {
   return (control: AbstractControl): { [key: string]: any } | null => {
     const forbidden = control.value > maxNumber;
-    return forbidden ? {'maxNumber': {value: control.value}} : null;
+    return forbidden ? {maxNumber: {value: control.value}} : null;
   };
 }

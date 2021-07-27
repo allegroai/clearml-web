@@ -1,5 +1,5 @@
 export type TaskTableColFieldsEnum = 'output.result' | 'comment' | 'id' | 'project.name' | 'name' | 'type' | 'status' | 'started' | 'last_update' | 'user.name' | 'queue.name' | 'worker.name';
-export const CARDS_IN_ROW                  = 4;
+export const CARDS_IN_ROW                  = 6;
 export const RECENT_TASKS_TABLE_COL_FIELDS = {
   RESULT     : 'output.result' as TaskTableColFieldsEnum,
   COMMENT    : 'comment' as TaskTableColFieldsEnum,

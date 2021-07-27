@@ -1,7 +1,7 @@
 import {hslToRgb, rgbToHsl} from '../../services/color-hash/color-hash.utils';
 import {Subscription} from 'rxjs';
 import {Input, OnDestroy, Directive} from '@angular/core';
-import {Frame, Layout, LayoutAxis, Legend, PlotData} from 'plotly.js';
+import {Config, Frame, Layout, LayoutAxis, Legend, PlotData} from 'plotly.js';
 import {selectScaleFactor} from '../../../core/reducers/view-reducer';
 import {Store} from '@ngrx/store';
 
@@ -11,9 +11,11 @@ export interface ExtFrame extends Omit<Frame, 'data' | 'layout'> {
   task: string;
   timestamp: number;
   type: string;
+  variant: string;
   worker: string;
   data: ExtData[];
-  layout: ExtLayout;
+  layout: Partial<ExtLayout>;
+  config: Partial<Config>;
 }
 
 export interface ExtLegend extends Legend {
@@ -25,7 +27,7 @@ export interface ExtLayoutAxis extends Omit<LayoutAxis, 'spikesnap'> {
 }
 
 export interface ExtLayout extends Omit<Layout, 'xaxis' | 'yaxis' | 'legend'> {
-  type: PlotData['type'];
+  type: string;
   xaxis: Partial<ExtLayoutAxis>;
   yaxis: Partial<ExtLayoutAxis>;
   legend: Partial<ExtLegend>;
@@ -39,6 +41,7 @@ export interface ExtData extends PlotData {
   header: any;
   name: string;
   isSmoothed: boolean;
+  colorHash: string;
 }
 
 @Directive({
@@ -65,9 +68,9 @@ export class PlotlyGraphBase implements OnDestroy {
       const lighterColor = hslToRgb(colorHSL);
       colorString = `rgb(${lighterColor[0]},${lighterColor[1]},${lighterColor[2]})`;
     }
-    if (trace.line) {
+    if (trace.line && !Array.isArray(trace.line.color)) {
       trace.line.color = colorString;
-    } else if (trace.marker) {
+    } else if (trace.marker && !Array.isArray(trace.marker.color)) {
       trace.marker.color = colorString;
     } else {
       // Guess that a graph without a lne or a marker should have a line, may cause havoc
@@ -105,6 +108,7 @@ export class PlotlyGraphBase implements OnDestroy {
 
     for (let i = 0; i < merged.length; i++) {
       const key = merged[i];
+      data[key].colorHash = data[key].name;
 
       // Warning: "data[key].task" in compare case. taskId in subplots (multiple plots with same name)
       if (data[key].task || taskId) {

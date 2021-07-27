@@ -3,9 +3,9 @@ import {Actions, Effect, ofType} from '@ngrx/effects';
 import {Store} from '@ngrx/store';
 import {IExperimentCompareMetricsValuesState} from '../reducers/experiments-compare-metrics-values.reducer';
 import * as metricsValuesActions from '../actions/experiments-compare-metrics-values.actions';
-import {ActiveLoader, DeactiveLoader, SetServerError} from '../../../webapp-common/core/actions/layout.actions';
+import {activeLoader, deactivateLoader, setServerError} from '../../../webapp-common/core/actions/layout.actions';
 import {catchError, mergeMap, map} from 'rxjs/operators';
-import {RequestFailed} from '../../core/actions/http.actions';
+import {requestFailed} from '../../core/actions/http.actions';
 import {ApiTasksService} from '../../../business-logic/api-services/tasks.service';
 import {setRefreshing} from '../actions/compare-header.actions';
 
@@ -19,7 +19,7 @@ export class ExperimentsCompareMetricsValuesEffects {
   @Effect()
   activeLoader = this.actions$.pipe(
     ofType(metricsValuesActions.GET_COMPARED_EXPERIMENTS_METRICS_VALUES),
-    map(action => new ActiveLoader(action.type))
+    map(action => activeLoader(action.type))
   );
 
   @Effect()
@@ -31,10 +31,10 @@ export class ExperimentsCompareMetricsValuesEffects {
         mergeMap(experiments => [
           new metricsValuesActions.SetComparedExperiments(experiments),
           setRefreshing({payload: false}),
-          new DeactiveLoader(action.type)]),
+          deactivateLoader(action.type)]),
         catchError(error => [
-          new RequestFailed(error), new DeactiveLoader(action.type), setRefreshing({payload: false}),
-          new SetServerError(error, null, 'Failed to get Compared Experiments', action.payload.autoRefresh)
+          requestFailed(error), deactivateLoader(action.type), setRefreshing({payload: false}),
+          setServerError(error, null, 'Failed to get Compared Experiments', action.payload.autoRefresh)
         ])
       )
     )

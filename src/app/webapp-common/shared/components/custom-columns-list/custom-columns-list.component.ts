@@ -7,7 +7,7 @@ import {ISmCol} from '../../ui-components/data/table/table.consts';
   styleUrls  : ['./custom-columns-list.component.scss']
 })
 export class CustomColumnsListComponent implements OnInit {
-  @Input() tableCols;
+  @Input() tableCols: ISmCol[];
   @Input() isLoading;
   @Output() removeColFromList = new EventEmitter<ISmCol['id']>();
   @Output() selectedTableColsChanged = new EventEmitter<ISmCol>();
@@ -18,4 +18,5 @@ export class CustomColumnsListComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  trackById = (index: number, col: ISmCol) => col.id;
 }

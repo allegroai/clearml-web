@@ -1,55 +1,72 @@
-<div smClickStopPropagation style="width: 370px;">
-  <div class="d-flex justify-content-between" style="padding: 15px">
+<div smClickStopPropagation class="w-100 h-100">
+  <div *ngIf="goBack?.observers.length > 0" class="d-flex justify-content-between p-3">
     <i (click)="goBack.emit()" class="al-icon sm-md al-ico-back pointer" smClickStopPropagation></i>
-    <div style="color: #5a658e; flex-basis: 84%">SELECT METRIC TO DISPLAY
+    <div class="title">SELECT METRIC TO DISPLAY
     </div>
+    <hr class="m-0" style="margin: 0">
   </div>
-  <hr style="margin: 0">
-  <div style="padding: 15px 15px">
-<!--    <input (input)="searchQ($event)" type="search" placeholder="dashboard-search" class="form-control">-->
-    <sm-search
-            [value]="searchText"
-            [minimumChars]="0"
-            [debounceTime]="0"
-            placeholder="Search metric"
-            (valueChanged)="searchQ($event)"
-    ></sm-search>
-    <div style="max-height: 360px; width: 101.5%; overflow-y: scroll">
-      <mat-expansion-panel *ngFor="let metric of metrics" style="color: #5a658e; font-weight: bold"
-                           [expanded]="searchText?.length>0"
-                           [hidden]="(metricTree[metric] | advancedFilter:searchText).length===0">
-        <mat-expansion-panel-header style="padding: 10px 0;" expandedHeight="42px" collapsedHeight="42px">
-          <mat-panel-title>
-            {{metric}}
-          </mat-panel-title>
-        </mat-expansion-panel-header>
-        <ng-template matExpansionPanelContent
-                     class="d-flex justify-content-start flex-column" style="padding: 10px 0">
-          <div class="metric-expansion-content" *ngFor="let variant of metricTree[metric] | advancedFilter:searchText">
+  <sm-search
+          [value]="searchText"
+          [minimumChars]="0"
+          [debounceTime]="0"
+          placeholder="Search metric"
+          (valueChanged)="searchQ($event)"
+  ></sm-search>
+  <div class="metrics" [class.has-title]="goBack?.observers.length > 0">
+    <mat-expansion-panel *ngFor="let metric of metrics"
+                         [expanded]="searchText?.length>0 || hasSelectedVariant(metric)"
+                         [hidden]="(metricTree[metric] | advancedFilter:searchText).length===0">
+      <mat-expansion-panel-header class="py-2" expandedHeight="42px" collapsedHeight="42px">
+        <mat-panel-title>
+          <span class="panel-title">{{metric}}</span>
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      <ng-template matExpansionPanelContent>
+        <div class="metric-expansion-content" *ngFor="let variant of metricTree[metric] | advancedFilter:searchText">
+          <ng-container *ngIf="multiSelect; else single">
             <div class="variant-label">
               <sm-checkbox-control #metricVariant
                                    (formDataChanged)="toggleAllMetricsToDisplay(variant, metricVariant.formData)"
-                                   [formData]="!!metricsCols[variant.metric_hash + variant.variant_hash]"
+                                   [formData]="metricsCols[variant.metric_hash + variant.variant_hash] !== undefined"
                                    [label]="variant.variant"
               ></sm-checkbox-control>
             </div>
-            <div *ngIf="metricsCols[variant.metric_hash + variant.variant_hash]" class="value-type">
+            <div *ngIf="metricVariant.formData" class="value-type">
               <sm-checkbox-control #last label="LAST"
-                                   [formData]="metricsCols[variant.metric_hash + variant.variant_hash].includes('value')"
+                                   [formData]="metricsCols[variant.metric_hash + variant.variant_hash]?.includes('value')"
                                    (formDataChanged)="toggleMetricToDisplay(variant, last.formData, 'value')"
               ></sm-checkbox-control>
               <sm-checkbox-control #min label="MIN"
-                                   [formData]="metricsCols[variant.metric_hash + variant.variant_hash].includes('min_value')"
+                                   [formData]="metricsCols[variant.metric_hash + variant.variant_hash]?.includes('min_value')"
                                    (formDataChanged)="toggleMetricToDisplay(variant, min.formData, 'min_value')"
               ></sm-checkbox-control>
               <sm-checkbox-control #max label="MAX"
-                                   [formData]="metricsCols[variant.metric_hash + variant.variant_hash].includes('max_value')"
+                                   [formData]="metricsCols[variant.metric_hash + variant.variant_hash]?.includes('max_value')"
                                    (formDataChanged)="toggleMetricToDisplay(variant, max.formData, 'max_value')"
               ></sm-checkbox-control>
             </div>
-          </div>
-        </ng-template>
-      </mat-expansion-panel>
-    </div>
+          </ng-container>
+          <ng-template #single>
+            <div class="variant-label">
+              <mat-radio-button
+                #metricVariant
+                (change)="toggleAllMetricsToDisplay(variant, false)"
+                [checked]="metricsCols[variant.metric_hash + variant.variant_hash] !== undefined"
+              >{{variant.variant}}</mat-radio-button>
+            </div>
+            <div *ngIf="metricVariant.checked" class="value-type">
+              <mat-radio-group
+                [ngModel]="metricsCols[variant.metric_hash + variant.variant_hash][0]"
+                (change)="toggleMetricToDisplay(variant, true, $event.value)"
+              >
+                <mat-radio-button class="pr-4" value="value">LAST</mat-radio-button>
+                <mat-radio-button class="pr-4" value="min_value">MIN</mat-radio-button>
+                <mat-radio-button value="max_value">MAX</mat-radio-button>
+              </mat-radio-group>
+            </div>
+          </ng-template>
+        </div>
+      </ng-template>
+    </mat-expansion-panel>
   </div>
 </div>

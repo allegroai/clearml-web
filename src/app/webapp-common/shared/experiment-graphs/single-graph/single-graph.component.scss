@@ -61,11 +61,11 @@
       }
     }
 
-    .plot-loader {
-      @extend .overlay-text;
-    }
   }
 
+  .plot-loader {
+    @extend .overlay-text;
+  }
   ::ng-deep sm-color-picker-wrapper {
     display: block;
     top: 0px;
@@ -87,14 +87,6 @@
   ::ng-deep .legendpoints path.scatterpts {
     // chrome only
     d: path('M5.5,0A5.5,5.5 0 1,1 0,-5.5A5.5,5.5 0 0,1 5.5,0Z') !important;
-  }
-
-  ::ng-deep #header.column-block .column-cells {
-    .column-cell .cell-rect {
-      stroke-width: 2px;
-      stroke: rgb(238, 239, 241) !important;
-      fill: white !important;
-    }
   }
 
   ::ng-deep .infolayer > .g-gtitle > .gtitle {
@@ -191,6 +183,75 @@
     &:hover {
       .right-handle {
         background-color: darken(#efefef, 5);
+      }
+    }
+  }
+
+  .dark-theme {
+    background: transparent !important;
+
+    ::ng-deep .js-plotly-plot .plotly {
+      .modebar-group {
+        border-left: 1px solid $blue-500;
+
+        &:last-child {
+          .modebar-btn:last-child {
+            border-left: 1px solid $blue-500;
+
+            &:only-child {
+              border-left: none;
+            }
+          }
+        }
+      }
+      .svg-container {
+        svg.main-svg {
+          background: transparent !important;
+        }
+      }
+      svg a {
+        fill: $blue-300;
+
+        &:hover {
+          fill: $blue-50;
+        }
+      }
+    }
+  }
+
+  ::ng-deep .js-plotly-plot .plotly {
+    .modebar-group {
+      padding-left: 8px; /* instead of padding-right */
+      padding-right: 0;
+      margin-left: 8px;
+      border-left: 1px solid #efefef;
+    }
+
+    .modebar-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modebar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      top: 6px;
+      padding-right: 12px;
+
+    }
+
+    .modebar .modebar-group:last-child {
+      .modebar-btn:last-child {
+        margin-left: 12px;
+        padding-left: 12px;
+        border-left: 1px solid #efefef;
+        &:only-child{
+          border-left:none;
+          margin-left: 0px;
+          padding-left: 0px;
+        }
       }
     }
   }

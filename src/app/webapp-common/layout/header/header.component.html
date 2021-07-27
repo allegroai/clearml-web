@@ -5,7 +5,7 @@
       [class.share-view]="isShareMode"
       [activeWorkspace]="activeWorkspace">
     </sm-breadcrumbs>
-    <div class="ml-3 d-flex align-items-center" *ngIf="isDashboard">
+    <div class="ml-3 d-flex align-items-center" *ngIf="userFocus">
       <sm-show-only-user-work></sm-show-only-user-work>
     </div>
   </div>
@@ -23,13 +23,13 @@
   <div *ngIf="workspaces | async as workspaces" class="right-buttons">
     <sm-common-search [class.share-view]="isShareMode"></sm-common-search>
 
-    <a *smCheckPermission="true" class="pointer resources-trigger"
+    <a class="pointer resources-trigger"
        menuTrigger="matMenuTrigger"
        [matMenuTriggerFor]="resourcesMenu"
        showDelay="0" matTooltipPosition="below">
       <i class="far al-ico-help-outlined"></i>
     </a>
-    <a *smCheckPermission="true; else guestLogOut" class="pointer menu-trigger"
+    <a class="pointer menu-trigger"
        menuTrigger="matMenuTrigger"
        [matMenuTriggerFor]="profileMenu"
        showDelay="0" matTooltipPosition="below">
@@ -40,11 +40,6 @@
         </div>
       </ng-template>
     </a>
-    <ng-template #guestLogOut>
-      <a class="logout pointer" (click)="logout()" smTooltip="Logout" showDelay="0" matTooltipPosition="below">
-        <i class="al-icon al-ico-user-logout al-color blue-300"></i>
-      </a>
-    </ng-template>
 
     <mat-menu #profileMenu="matMenu" class="user-menu">
       <button mat-menu-item routerLink="/profile">Profile</button>
@@ -63,11 +58,7 @@
           <hr>
         </ng-container>
       </ng-container>
-
-      <ng-container *ngIf="environment.accountAdministration && (user | async)?.role === 'admin'">
-        <button mat-menu-item (click)="userManagement()">Account Administration</button>
-      </ng-container>
-
+      <button *ngIf="userManagement$ | async" mat-menu-item (click)="userManagement()">Access Controls</button>
       <button mat-menu-item (click)="logout()">Logout</button>
     </mat-menu>
     <mat-menu #resourcesMenu="matMenu" class="user-menu">

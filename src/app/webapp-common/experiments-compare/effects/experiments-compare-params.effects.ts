@@ -2,11 +2,11 @@ import {Injectable} from '@angular/core';
 import {Actions, Effect, ofType} from '@ngrx/effects';
 import {select, Store} from '@ngrx/store';
 import * as paramsActions from '../actions/experiments-compare-params.actions';
-import {ActiveLoader, DeactiveLoader, SetServerError} from '../../core/actions/layout.actions';
+import {activeLoader, deactivateLoader, setServerError} from '../../core/actions/layout.actions';
 import {catchError, map, mergeMap, switchMap, withLatestFrom} from 'rxjs/operators';
 import {ApiTasksService} from '../../../business-logic/api-services/tasks.service';
 import {ExperimentParamsReverterService} from '../services/experiment-params-reverter.service';
-import {RequestFailed} from '../../core/actions/http.actions';
+import {requestFailed} from '../../core/actions/http.actions';
 import {selectExperimentIdsParams, selectExperimentsParams} from '../reducers';
 import {Observable, of} from 'rxjs';
 import {COMPARE_PARAMS_ONLY_FIELDS} from '../../../features/experiments-compare/experiments-compare-consts';
@@ -27,7 +27,7 @@ export class ExperimentsCompareParamsEffects {
   @Effect()
   activeLoader$ = this.actions$.pipe(
     ofType(paramsActions.experimentListUpdated, REFETCH_EXPERIMENT_REQUESTED),
-    map(action => new ActiveLoader(action.type))
+    map(action => activeLoader(action.type))
   );
 
   @Effect()
@@ -43,13 +43,13 @@ export class ExperimentsCompareParamsEffects {
           map(([experiments, oldExperiments]: [ExperimentDetailBase[], ExperimentParams[]]) =>
             oldExperiments.filter(exp => action.ids.includes(exp.id)).concat(experiments as ExperimentParams[])),
           mergeMap(experiments => [
-            new DeactiveLoader(action.type),
+            deactivateLoader(action.type),
             setExperiments({experiments})
           ]),
           catchError(error => [
-            new RequestFailed(error),
-            new DeactiveLoader(action.type),
-            new SetServerError(error, null, 'The attempt to retrieve your experiment data failed. Refresh your browser and try again.')
+            requestFailed(error),
+            deactivateLoader(action.type),
+            setServerError(error, null, 'The attempt to retrieve your experiment data failed. Refresh your browser and try again.')
           ]
           )
         );
@@ -64,15 +64,15 @@ export class ExperimentsCompareParamsEffects {
     switchMap(([action, newExperimentIds]) =>
       this.fetchExperimentParams$(newExperimentIds).pipe(
         mergeMap(experiments => [
-          new DeactiveLoader(action.type),
+          deactivateLoader(action.type),
           setRefreshing({payload: false}),
           setExperiments({experiments : experiments as ExperimentParams[]})
         ]),
         catchError(error => [
-          new RequestFailed(error),
-          new DeactiveLoader(action.type),
+          requestFailed(error),
+          deactivateLoader(action.type),
           setRefreshing({payload: false}),
-          new SetServerError(
+          setServerError(
             error, null,
             'The attempt to retrieve your experiment data failed. Refresh your browser and try again.',
             action.autoRefresh

@@ -17,7 +17,8 @@
            required minlength="3">
   </mat-form-field>
 
-  <mat-form-field appearance="outline" hideRequiredMarker>
+  <mat-form-field appearance="outline" hideRequiredMarker
+                  (click)="location.value && clearLocation(); location.reset(); locationRef.blur(); locationRef.focus()">
     <mat-error *ngIf="location.touched && location.errors?.required">*Please add location.</mat-error>
     <mat-error *ngIf="location?.errors?.minlength">Please provide a name longer than 3 characters</mat-error>
 
@@ -35,7 +36,7 @@
            (blur)="detectChanges()">
     <span matSuffix *ngIf="location.value && (!isAutoCompleteOpen) && !(project.parent | stringIncludedInArray:projectsNames)" class="creat-new-suffix">(Create New)</span>
     <i matSuffix [class]="'fa mr2 ' + (location.value? 'fa-times pointer':'fa-search')"
-       (click)="location.value && clearLocation(); locationRef.focus()"
+       (click)="location.value && clearLocation(); location.reset(); locationRef.focus()"
        smClickStopPropagation></i>
     <mat-autocomplete (opened)="setIsAutoCompleteOpen(true)"
                       (closed)="setIsAutoCompleteOpen(false)"

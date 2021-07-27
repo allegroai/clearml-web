@@ -1,4 +1,4 @@
-<div class="px-4 py-2 row align-items-center" *ngIf="hasLog">
+<div class="px-4 py-2 row align-items-center" *ngIf="hasLog && showHeader">
   <div class="p-2 mr-auto">
     <span>
       <b>Hostname:</b> {{creator}}
@@ -18,11 +18,13 @@
   />
 </div>
 <div *ngIf="hasLog !== undefined && !hasLog" class="no-output">
-  <i class="icon i-no-log no-output-icon"></i>
+  <i class="icon no-output-icon" [ngClass]="isDarkTheme ? 'i-no-log-dark' : 'i-no-log'"></i>
   <h3>NO LOG DATA</h3>
 </div>
 
 <sm-experiment-log-info *ngIf="hasLog"
+  [class.no-header]="!showHeader"
+  [isDarkTheme]="isDarkTheme"
   [logs]="log$ | async"
   [beginningOfLog]="logBeginning$ | async"
   [filterString]="filter$ | async"

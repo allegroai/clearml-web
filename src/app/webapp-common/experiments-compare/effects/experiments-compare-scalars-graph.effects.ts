@@ -2,9 +2,9 @@ import {Injectable} from '@angular/core';
 import {Actions, createEffect, Effect, ofType} from '@ngrx/effects';
 import {Store} from '@ngrx/store';
 import {IExperimentCompareMetricsValuesState} from '../reducers/experiments-compare-metrics-values.reducer';
-import {ActiveLoader, DeactiveLoader, SetServerError} from '../../core/actions/layout.actions';
+import {activeLoader, deactivateLoader, setServerError} from '../../core/actions/layout.actions';
 import {catchError, mergeMap, map} from 'rxjs/operators';
-import {RequestFailed} from '../../core/actions/http.actions';
+import {requestFailed} from '../../core/actions/http.actions';
 import {ApiTasksService} from '../../../business-logic/api-services/tasks.service';
 import {getExperimentsHyperParams, setHyperParamsList, setMetricsList, setTasks} from '../actions/experiments-compare-scalars-graph.actions';
 import {setRefreshing} from '../actions/compare-header.actions';
@@ -19,7 +19,7 @@ export class ExperimentsCompareScalarsGraphEffects {
   @Effect()
   activeLoader = createEffect(() => this.actions$.pipe(
     ofType(getExperimentsHyperParams),
-    map(action => new ActiveLoader(action.type))
+    map(action => activeLoader(action.type))
     )
   );
 
@@ -39,11 +39,11 @@ export class ExperimentsCompareScalarsGraphEffects {
             setMetricsList({metricsList: metricsList}),
             setHyperParamsList({hyperParams: paramsHasDiffs}),
             setRefreshing({payload: false}),
-            new DeactiveLoader(action.type)];
+            deactivateLoader(action.type)];
         }),
         catchError(error => [
-          new RequestFailed(error), new DeactiveLoader(action.type), setRefreshing({payload: false}),
-          new SetServerError(error, null, 'Failed to get Compared Experiments')
+          requestFailed(error), deactivateLoader(action.type), setRefreshing({payload: false}),
+          setServerError(error, null, 'Failed to get Compared Experiments')
         ])
       )
     ))

@@ -52,11 +52,6 @@ export const shareSelectedExperiments = createAction(
   props<{ share: boolean; task: string }>()
 );
 
-export const hyperParamSelectedExperiments = createAction(
-  EXPERIMENTS_INFO_PREFIX + '[hyper param selected in the menu filter experiments]',
-  props<{ col: ISmCol }>()
-);
-
 export const navigateToQueue = createAction(
   EXPERIMENTS_INFO_PREFIX + '[navigate to queue]',
   props<{ experimentId: string }>()

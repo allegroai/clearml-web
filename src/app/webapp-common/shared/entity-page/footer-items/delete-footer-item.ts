@@ -2,10 +2,10 @@ import {ItemFooterModel, IFooterState} from './footer-items.models';
 import {IconNames, ICONS} from '../../../constants';
 import {map} from 'rxjs/operators';
 import {Observable} from 'rxjs/internal/Observable';
-import {MENU_ITEM_ID, selectionDisabledDelete} from '../items.utils';
+import {MenuItems, selectionDisabledDelete} from '../items.utils';
 
 export class DeleteFooterItem<T = any> extends ItemFooterModel {
-  id = MENU_ITEM_ID.DELETE;
+  id = MenuItems.delete;
   emit = true;
   icon = ICONS.REMOVE as Partial<IconNames>;
   disableDescription = 'Delete';
@@ -16,7 +16,7 @@ export class DeleteFooterItem<T = any> extends ItemFooterModel {
       map( ({data, selectionAllIsArchive}) => ({
           preventCurrentItem: !selectionAllIsArchive,
           disable: data[this.id].disable,
-          description: this.menuItemText.transform(data[MENU_ITEM_ID.DELETE].available , 'Delete'),
+          description: this.menuItemText.transform(data[MenuItems.delete].available , 'Delete'),
         }))
     );
   }

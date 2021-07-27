@@ -2,6 +2,7 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {MetricVariantResult} from '../../../../business-logic/model/projects/metricVariantResult';
 import {CustomColumnMode} from '../../shared/common-experiments.const';
 import {ISmCol} from '../../../shared/ui-components/data/table/table.consts';
+import {MetricValueType} from '../../../experiments-compare/reducers/experiments-compare-charts.reducer';
 
 @Component({
   selector   : 'sm-experiment-header',
@@ -33,9 +34,13 @@ export class ExperimentHeaderComponent {
   @Output() selectedTableColsChanged = new EventEmitter<ISmCol>();
   @Output() removeColFromList        = new EventEmitter<ISmCol['id']>();
   @Output() getMetricsToDisplay      = new EventEmitter();
-  @Output() selectedMetricToShow     = new EventEmitter<{variant: MetricVariantResult; addCol: boolean, valueType: string}>();
+  @Output() selectedMetricToShow     = new EventEmitter<{
+    variant: MetricVariantResult;
+    addCol: boolean;
+    valueType: MetricValueType;
+  }>();
   @Output() selectedHyperParamToShow = new EventEmitter<{param: string; addCol: boolean}>();
-  @Output() refreshListClicked       = new EventEmitter();
+  @Output() refreshListClicked       = new EventEmitter<boolean>();
   @Output() setAutoRefresh           = new EventEmitter<boolean>();
   @Output() clearSelection           = new EventEmitter();
 
@@ -45,7 +50,7 @@ export class ExperimentHeaderComponent {
   }
 
   onRefreshListClicked() {
-    this.refreshListClicked.emit();
+    this.refreshListClicked.emit(false);
   }
 
   setCustomColumnMode(mode: CustomColumnMode) {

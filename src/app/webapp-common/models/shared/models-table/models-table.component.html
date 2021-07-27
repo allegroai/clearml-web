@@ -1,4 +1,4 @@
-<sm-model-menu #contextMenu *smCheckPermission="true"
+<sm-model-menu #contextMenu
                [model]="contextModel"
                [selectedModel]="selectedModel"
                [selectedModels]="selectedModels"
@@ -35,12 +35,14 @@
     (loadMoreClicked)="onLoadMoreClicked()"
     (onRowRightClick)="openContextMenu($event)"
     (sortChanged)="onSortChanged($event.isShift, $event.field)"
+    (columnResized)="columnResized.emit($event)"
   >
     <ng-template let-col pTemplate="cardFilter">
-      <sm-table-card-filter-template [options]="MODELS_ALL_FILTER_OPTIONS"
+      <sm-table-card-filter-template [options]="filtersOptions"
                                      [value]="filtersValues"
                                      [subValue]="filtersSubValues[MODELS_TABLE_COL_FIELDS.TAGS]"
                                      [columns]="initialColumns"
+                                     [filterMatch]="filtersMatch"
                                      fixedOptionsSubheader="System tags"
                                      (subFilterChanged)="tableFilterChanged({id:'system_tags'}, $event)"
                                      (filterChanged)="tableAllFiltersChanged($event)"
@@ -66,14 +68,14 @@
         [column]="col"
         [value]="filtersValues[col.id]"
         [searchValue]="searchValues[col.id]"
-        [options]="MODELS_ALL_FILTER_OPTIONS[col.id] | filter:searchValues[col.id]:'label'"
+        [options]="filtersOptions[col.id] | filter:searchValues[col.id]:'label'"
         [sortOrder]="tableSortFieldsObject[col.id]"
+        [fixedOptionsSubheader]="col.id === filtersOptions.TAGS ? 'System tags' : ''"
+        [andFilter]="col.andFilter ? filtersMatch[col.id] === 'AND' : null"
         (sortOrderChanged)="onSortChanged($event, col.id)"
         (filterChanged)="tableFilterChanged(col, $event);"
         (searchValueChanged)="searchValueChanged($event, col.id)"
-        (menuClosed)="filterMenuClosed(col.id)"
-        [fixedOptionsSubheader]="col.id === MODELS_ALL_FILTER_OPTIONS.TAGS ? 'System tags' : ''"
-        (menuOpened)="col.id === MODELS_ALL_FILTER_OPTIONS.TAGS && tagsMenuOpened.emit()"
+        (menuOpened)="col.id === filtersOptions.TAGS && tagsMenuOpened.emit()"
       >
       </sm-table-filter-sort-template>
     </ng-template>
@@ -106,7 +108,7 @@
           <sm-experiment-status-icon-label [status]="model?.ready? 'published': 'created'"></sm-experiment-status-icon-label>
         </ng-container>
         <ng-container *ngSwitchCase="MODELS_TABLE_COL_FIELDS.CREATED">
-          <span matTooltipPosition="above" [smTooltip]="model.created | date : TIME_FORMAT_STRING">{{model.created | timeAgo}}</span>
+          <span matTooltipPosition="above" [smTooltip]="model.created | date : timeFormatString">{{model.created | timeAgo}}</span>
         </ng-container>
         <sm-checkbox-control
           *ngSwitchCase="MODELS_TABLE_COL_FIELDS.SELECTED"

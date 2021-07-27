@@ -36,11 +36,13 @@ $output-tabs-height: 64px;
     padding-top: 6px;
   }
 
-  nav{
+  nav {
     height: $output-tabs-height;
     position: relative;
     text-align: center;
     border-bottom: 1px solid #efefef;
+    overflow: hidden;
+    padding: 0 24px;
 
     .refresh-position {
       position: absolute;
@@ -72,6 +74,14 @@ $output-tabs-height: 64px;
     &.minimized {
       height: calc(100% - #{$output-tabs-height});
     }
+  }
+}
+
+.mat-menu-item {
+  padding-left: 22px;
+  &.active {
+    border-left: 6px solid $purple;
+    padding-left: 16px;
   }
 }
 

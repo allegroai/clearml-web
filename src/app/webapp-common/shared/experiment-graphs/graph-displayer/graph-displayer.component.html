@@ -1,0 +1,25 @@
+<div class="modal-container" [class.dark-theme]="darkTheme">
+  <div class="graph-displayer-header">
+    <div (click)="closeGraphDisplayer()" smTooltip="Close" class="icon-container ml-auto pointer">
+      <i class="al-icon al-ico-dialog-x al-color blue-400 light-grey-blue"></i>
+    </div>
+  </div>
+  <div class="graph-container">
+    <sm-single-graph
+      #singleGraph
+      [class.less-padding]="true"
+      [class.two-in-a-row]="false"
+      [chart]="chart"
+      [disableResize]="true"
+      [isMaximized]="true"
+      [height]="800"
+      [id]="id"
+      [identifier]="id"
+      [isCompare]="false"
+      [xAxisType]="xAxisType"
+      [moveLegendToTitle]="false"
+      [isDarkTheme]="darkTheme"
+    >
+    </sm-single-graph>
+  </div>
+</div>

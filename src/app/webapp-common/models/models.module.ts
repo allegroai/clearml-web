@@ -30,17 +30,20 @@ import {ModelCustomColsMenuComponent} from './dumbs/model-custom-cols-menu/model
 import {ModelHeaderComponent} from '../../features/models/dumb/model-header/model-header.component';
 import {SharedModule} from '../../shared/shared.module';
 import {CommonDeleteDialogModule} from '../shared/entity-page/entity-delete/common-delete-dialog.module';
-import {ModelMenuComponent} from './containers/model-menu/model-menu.component';
 
 const syncedKeys    = [
+  'view.projectColumnsSortOrder',
+  'view.projectColumnFilter',
+  'view.projectColumnsWidth',
+  'view.hiddenProjectTableCols',
   'view.colsOrder'
 ];
 const key           = MODELS_STORE_KEY;
 const actionsPrefix = [MODELS_PREFIX_INFO, MODELS_PREFIX_MENU, MODELS_PREFIX_VIEW];
 
-export function localStorageReducer(reducer: ActionReducer<any>): ActionReducer<any> {
-  return createLocalStorageReducer(key, syncedKeys, actionsPrefix)(reducer);
-}
+export const localStorageReducer = (reducer: ActionReducer<any>) =>
+  createLocalStorageReducer(key, syncedKeys, actionsPrefix)(reducer);
+
 @NgModule({
   imports: [
     ExperimentSharedModule,

@@ -1,15 +1,15 @@
 import * as createNewProjectActions from './project-dialog.actions';
 import {CREATE_PROJECT_ACTIONS} from './project-dialog.actions';
 import {MESSAGES_SEVERITY} from '../../../app.constants';
-import {ActiveLoader, AddMessage, DeactiveLoader} from '../../core/actions/layout.actions';
+import {activeLoader, addMessage, deactivateLoader} from '../../core/actions/layout.actions';
 import {Actions, createEffect, Effect, ofType} from '@ngrx/effects';
 import {ApiProjectsService} from '../../../business-logic/api-services/projects.service';
-import {RequestFailed} from '../../core/actions/http.actions';
+import {requestFailed} from '../../core/actions/http.actions';
 import {Injectable} from '@angular/core';
 import {CREATION_STATUS} from './project-dialog.reducer';
 import {catchError, filter, map, mergeMap, switchMap, withLatestFrom} from 'rxjs/operators';
 import {Router} from '@angular/router';
-import {GetAllProjects, SetSelectedProject} from '../../core/actions/projects.actions';
+import {GetAllSystemProjects} from '../../core/actions/projects.actions';
 import {Store} from '@ngrx/store';
 import {selectActiveWorkspace} from '../../core/reducers/users-reducer';
 import {ShortProjectNamePipe} from "../pipes/short-project-name.pipe";
@@ -30,7 +30,7 @@ export class ProjectDialogEffects {
   @Effect()
   activeLoader = this.actions.pipe(
     ofType(CREATE_PROJECT_ACTIONS.CREATE_NEW_PROJECT, CREATE_PROJECT_ACTIONS.GET_PROJECTS),
-    map(action => new ActiveLoader(action.type))
+    map(action => activeLoader(action.type))
   );
 
   @Effect({dispatch: false})
@@ -47,13 +47,13 @@ export class ProjectDialogEffects {
     switchMap(([action, workspace]) => this.projectsApiService.projectsCreate(action.payload)
       .pipe(
         mergeMap(res => [
-            new DeactiveLoader(action.type),
+            deactivateLoader(action.type),
             new createNewProjectActions.SetNewProjectCreationStatus(CREATION_STATUS.SUCCESS),
-            new GetAllProjects(),
-            new AddMessage(MESSAGES_SEVERITY.SUCCESS, `${this.shortProjectName.transform(action.payload.name)} has been created successfully in ${this.projectLocation.transform(action.payload.name)}`),
+            new GetAllSystemProjects(),
+            addMessage(MESSAGES_SEVERITY.SUCCESS, `${this.shortProjectName.transform(action.payload.name)} has been created successfully in ${this.projectLocation.transform(action.payload.name)}`),
           ]
         ),
-        catchError(error => [new DeactiveLoader(action.type), new RequestFailed(error), new AddMessage(MESSAGES_SEVERITY.ERROR, 'Project Created Failed'), new createNewProjectActions.SetNewProjectCreationStatus(CREATION_STATUS.FAILED)])
+        catchError(error => [deactivateLoader(action.type), requestFailed(error), addMessage(MESSAGES_SEVERITY.ERROR, 'Project Created Failed'), new createNewProjectActions.SetNewProjectCreationStatus(CREATION_STATUS.FAILED)])
       )
     )
   );
@@ -64,13 +64,13 @@ export class ProjectDialogEffects {
     switchMap(([action, workspace]) => this.projectsApiService.projectsMove({project: action.project, new_location: action.new_location})
       .pipe(
         mergeMap(res => [
-            new DeactiveLoader(action.type),
+            deactivateLoader(action.type),
             new createNewProjectActions.SetNewProjectCreationStatus(CREATION_STATUS.SUCCESS),
-            new GetAllProjects(),
-            new AddMessage(MESSAGES_SEVERITY.SUCCESS, `${this.shortProjectName.transform(action.name)} has been moved from ${this.projectLocation.transform(action.name)} to ${action.new_location}`),
+            new GetAllSystemProjects(),
+            addMessage(MESSAGES_SEVERITY.SUCCESS, `${this.shortProjectName.transform(action.name)} has been moved from ${this.projectLocation.transform(action.name)} to ${action.new_location}`),
           ]
         ),
-        catchError(error => [new DeactiveLoader(action.type), new RequestFailed(error), new AddMessage(MESSAGES_SEVERITY.ERROR, 'Project Move Failed'), new createNewProjectActions.SetNewProjectCreationStatus(CREATION_STATUS.FAILED)])
+        catchError(error => [deactivateLoader(action.type), requestFailed(error), addMessage(MESSAGES_SEVERITY.ERROR, 'Project Move Failed'), new createNewProjectActions.SetNewProjectCreationStatus(CREATION_STATUS.FAILED)])
       )
     )
   ));
@@ -80,8 +80,8 @@ export class ProjectDialogEffects {
     ofType<createNewProjectActions.GetProjects>(CREATE_PROJECT_ACTIONS.GET_PROJECTS),
     switchMap(action => this.projectsApiService.projectsGetAllEx({only_fields: ['name']})
       .pipe(
-        mergeMap(res => [new DeactiveLoader(action.type), new createNewProjectActions.SetProjects(res.projects)]),
-        catchError(error => [new RequestFailed(error)])
+        mergeMap(res => [deactivateLoader(action.type), new createNewProjectActions.SetProjects(res.projects)]),
+        catchError(error => [requestFailed(error)])
       )
     )
   );

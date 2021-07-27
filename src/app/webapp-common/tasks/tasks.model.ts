@@ -1,8 +1,8 @@
 import {Task} from '../../business-logic/model/tasks/task';
 
 export interface ExperimentGraph {
-  data?: {};
-  layout?: Object;
+  data?: unknown;
+  layout?: {[key: string]: unknown};
   iter?: number;
   metric?: string;
   task?: Task['id'];
@@ -10,5 +10,5 @@ export interface ExperimentGraph {
   type?: string;  // TODO: write options in constant
   variant?: string;
   worker?: string;
-  config?: Object;
+  config?: {[key: string]: unknown};
 }

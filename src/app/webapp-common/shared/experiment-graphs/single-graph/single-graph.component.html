@@ -1,16 +1,18 @@
 <div #drawHere
      [style.height.px]="height"
-     class="whitebg"
+     [class.whitebg]="!isDarkTheme"
+     [class.dark-theme]="isDarkTheme"
      [class.loading]="loading"
      mwlResizable
      [validateResize]="validateResize"
-     [enableGhostResize]="true"
+     [enableGhostResize]="!disableResize"
      [ghostElementPositioning]="'absolute'"
      (resizing)="resizing.emit($event);"
      (resizeEnd)="sizeChanged.emit($event)"
      (resizeStart)="resizeStarted.emit()"
      [class.whitebg-table]="type === 'table'">
   <div
+    *ngIf="!disableResize"
     class="resize-handle-right"
     mwlResizeHandle
     [resizeEdges]="{ right: true }">
@@ -18,6 +20,7 @@
     <div class="right-handle"></div>
   </div>
   <div
+    *ngIf="!disableResize"
     class="resize-handle-bottom"
     mwlResizeHandle
     [resizeEdges]="{ bottom: true }">

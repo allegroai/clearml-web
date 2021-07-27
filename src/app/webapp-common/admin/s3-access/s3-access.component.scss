@@ -27,10 +27,8 @@
 }
 
 .delete-button {
-  width: 32px;
-  height: 32px;
-  text-align: center;
-  line-height: 32px;
+  display: flex;
+  align-items: center;
 }
 
 .add-button {

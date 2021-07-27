@@ -5,9 +5,10 @@
 <div class="body">
   <div class="title first">User Preferences</div>
   <div class="section toggles">
-    <sm-usage-stats></sm-usage-stats>
+    <sm-usage-stats #usage></sm-usage-stats>
     <mat-slide-toggle
       *ngIf="supportReScaling"
+      [class.first]="!usage.shown"
       (change)="HidpiChange($event)"
       [checked]="disableHidpi">
       Disable HiDPI browser scale override
@@ -33,13 +34,15 @@
     <sm-s3-access [S3BucketCredentials]="S3BucketCredentials | async"
                   (S3BucketCredentialsChanged)="onS3BucketCredentialsChanged($event)"></sm-s3-access>
   </div>
-  <ng-container *smCheckPermission="'manageAppCredentials'">
+  <ng-container *smCheckPermission="'engineer'">
     <div *ngIf="communityServer; else credsTitle" class="title">WORKSPACES</div>
-    <ng-template #credsTitle><div class="title">APP CREDENTIALS<i
-      class="fas fa-info-circle info"
-      smTooltip="Credentials providing API access to this workspace"
-      matTooltipPosition="above"
-    ></i></div></ng-template>
+    <ng-template #credsTitle>
+      <div class="title">APP CREDENTIALS<i
+        class="fas fa-info-circle info"
+        smTooltip="Credentials providing API access to this workspace"
+        matTooltipPosition="above"
+      ></i></div>
+    </ng-template>
     <div *ngIf="communityServer; else credsSection" class="section mb-4">
       <mat-expansion-panel
         *ngFor="let workspace of workspaces; trackBy: trackByWorkspace"
@@ -72,9 +75,9 @@
                                          (credentialRevoked)="onCredentialRevoked($event, workspace)">
               </sm-admin-credential-table>
               <span
-		class="add-button d-flex align-items-center pointer"
+                class="add-button d-flex align-items-center pointer"
                 [class.disabled]="creatingCredentials"
-		(click)="createCredential(workspace)"
+                (click)="createCredential(workspace)"
               >
                 <i class="al-icon sm al-ico-plus mr-1"></i> Create new credentials
               </span>
@@ -83,15 +86,7 @@
               <div class="space-title"><i class="al-icon al-ico-users mr-2"></i>Members</div>
               <div class="d-flex align-items-center flex-wrap">
                 <div class="util-text">Workspace has {{workspace?.allocated}} of {{workspace?.allowed}} users</div>
-                <div class="circles">
-                  <div *ngFor="let user of workspace?.users; let index=index; trackBy: trackByUser"
-                       class="circle"
-                       [class.empty]="!user.name"
-                       [class.long]="user.initials?.length > 4"
-                       [style.left.px]="-6 * index"
-                       [smTooltip]="user.name" matTooltipPosition="above"
-                  >{{user.name ? user.initials : ''}}</div>
-                </div>
+                <sm-circles-in-row [data]="workspace?.users"></sm-circles-in-row>
               </div>
               <ng-container *ngIf="workspace?.id === currentUser.company.id; else leave">
                 <button class="btn button-outline-dark mt-4"
@@ -134,5 +129,12 @@
       <span class="notice">Please <a href="https://www.clear.ml/contact-us" target="_blank">contact us</a> to remove your account from the service.</span>
     </ng-template>
   </ng-container>
-  <span class="version float-right">Version: {{version}}</span>
+  <div class="version float-right">
+    <span>Version: </span>
+    <span>{{version}}</span>
+    <ng-container *ngIf="(serverVersions$ | async) as serverVersions">
+      <span> • {{serverVersions?.server}}</span>
+      <span> • {{serverVersions?.api}}</span>
+    </ng-container>
+  </div>
 </footer>

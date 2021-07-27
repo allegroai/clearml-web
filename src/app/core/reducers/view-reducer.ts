@@ -1,12 +1,11 @@
-import {VIEW_ACTIONS} from '../../app.constants';
 import {createSelector} from '@ngrx/store';
 import {
   initViewState as commonInitState,
   viewReducer as commonViewReducer,
   ViewState as CommonViewState
 } from '../../webapp-common/core/reducers/view-reducer';
-import {dismissSurvey} from '../Actions/layout.actions';
-import {setServerUpdatesAvailable} from '../../webapp-common/core/actions/layout.actions';
+import {dismissSurvey} from '../actions/layout.actions';
+import {setServerUpdatesAvailable} from '@common/core/actions/layout.actions';
 
 interface ViewState extends CommonViewState {
   availableUpdates: string;

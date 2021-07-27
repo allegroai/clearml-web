@@ -50,7 +50,7 @@ export abstract class DashboardSearchComponentBase {
     this.store.dispatch(new InitSearch('Search for all'));
 
     this.searchSubs = this.searchQuery$
-      .pipe(skip(1), filter(query => !!query?.query))
+      .pipe(skip(1))
       .subscribe(query => {
         this.searchTermChanged(query.query, query.regExp);
       });
@@ -87,7 +87,7 @@ export abstract class DashboardSearchComponentBase {
     this.activeLink = activeLink;
   }
 
-  setFirstActiveLink(allResults, tabsIndexes) {
+  setFirstActiveLink(allResults, tabsIndexes: string[]) {
     if (!(allResults[tabsIndexes.indexOf(this.activeLink)].length > 0)) {
       const firstTabIndex = allResults.findIndex(list => list.length > 0);
       if (firstTabIndex > -1) {

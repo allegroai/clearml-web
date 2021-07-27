@@ -2,7 +2,7 @@ import {ItemFooterModel, IFooterState} from './footer-items.models';
 import {IconNames, ICONS} from '../../../constants';
 import {map} from 'rxjs/operators';
 import {Observable} from 'rxjs/internal/Observable';
-import {MENU_ITEM_ID} from '../items.utils';
+import {MenuItems} from '../items.utils';
 
 export class HasReadOnlyFooterItem<T = any> extends ItemFooterModel {
   emit = true;

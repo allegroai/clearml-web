@@ -1,9 +1,9 @@
-import {Component, Input, OnDestroy} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {selectActiveWorkspace, selectCurrentUser, selectWorkspaces} from '../../core/reducers/users-reducer';
 import {Observable, Subscription} from 'rxjs';
 import {logout, setActiveWorkspace, setAccountAdministrationPage} from '../../core/actions/users.actions';
-import {AddMessage} from '../../core/actions/layout.actions';
+import {addMessage} from '../../core/actions/layout.actions';
 import {MESSAGES_SEVERITY} from '../../../app.constants';
 import {MatDialog} from '@angular/material/dialog';
 import {InviteUserModalComponent} from '../invite-user-modal/invite-user-modal.component';
@@ -15,38 +15,65 @@ import {selectRouterUrl} from '../../core/reducers/router-reducer';
 import {TipsService} from '../../shared/services/tips.service';
 import {LoginService} from '../../shared/services/login.service';
 import {WelcomeMessageComponent} from '../../dashboard/dumb/welcome-message/welcome-message.component';
+import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
+import {selectHasUserManagement} from '../../../core/reducers/users.reducer';
 
 @Component({
   selector: 'sm-header',
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss']
 })
-export class HeaderComponent implements OnDestroy {
-  @Input() isDashboard: boolean;
+export class HeaderComponent implements OnInit, OnDestroy {
   @Input() isShareMode: boolean;
   @Input() isLogin: boolean;
+  isDashboard: boolean;
   profile: boolean;
+  userFiltered: boolean;
+  userFocus: boolean;
   environment = ConfigurationService.globalEnvironment;
   public user: Observable<GetCurrentUserResponseUserObject>;
   public activeWorkspace: GetCurrentUserResponseUserObjectCompany;
   public workspaces: Observable<GetCurrentUserResponseUserObjectCompany[]>;
   public url: Observable<string>;
-  private workspaceSub: Subscription;
-  userFiltered: boolean;
+  private sub = new Subscription();
+  public userManagement$: Observable<boolean>;
 
-  constructor(private store: Store<any>, private dialog: MatDialog, private tipsService: TipsService, private loginService: LoginService) {
+  constructor(
+    private store: Store<any>,
+    private dialog: MatDialog,
+    private tipsService: TipsService,
+    private loginService: LoginService,
+    private router: Router,
+    private activeRoute: ActivatedRoute
+
+  ) {
     this.url = this.store.select(selectRouterUrl);
     this.user = this.store.select(selectCurrentUser);
     this.workspaces = this.store.select(selectWorkspaces);
-    this.workspaceSub = this.store.select(selectActiveWorkspace)
+    this.userManagement$ = this.store.select(selectHasUserManagement);
+    this.sub.add(this.store.select(selectActiveWorkspace)
       .pipe(filter(workspace => !!workspace))
       .subscribe(workspace => {
         this.activeWorkspace = workspace;
-      });
+      }));
+
+    this.sub.add(this.router.events
+    .pipe(filter((event) => event instanceof NavigationEnd))
+    .subscribe(() => this.getRotueData()));
+
+  }
+
+  ngOnInit(): void {
+    this.getRotueData();
+  }
+
+  getRotueData() {
+    this.userFocus = !!this.activeRoute?.firstChild?.snapshot.data?.userFocus;
+    this.isDashboard = this.activeRoute?.firstChild?.snapshot.url?.[0].path === 'dashboard';
   }
 
   ngOnDestroy(): void {
-    this.workspaceSub?.unsubscribe();
+    this.sub.unsubscribe();
   }
 
   logout() {
@@ -59,7 +86,7 @@ export class HeaderComponent implements OnDestroy {
   }
 
   copyToClipboardSuccess() {
-    this.store.dispatch(new AddMessage(MESSAGES_SEVERITY.SUCCESS, 'URL copied successfully'));
+    this.store.dispatch(addMessage(MESSAGES_SEVERITY.SUCCESS, 'URL copied successfully'));
   }
 
   openInviteModal() {

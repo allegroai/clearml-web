@@ -6,11 +6,6 @@ import {User} from '../../../business-logic/model/users/user';
 import {GetCurrentUserResponseUserObjectCompany} from '../../../business-logic/model/users/getCurrentUserResponseUserObjectCompany';
 import {TABLE_SORT_ORDER} from '../ui-components/data/table/table.consts';
 import {CloseScrollStrategy, Overlay} from '@angular/cdk/overlay';
-import {ModelsArchiveManyResponse} from '../../../business-logic/model/models/modelsArchiveManyResponse';
-import {AddMessage} from '@common/core/actions/layout.actions';
-import {openMoreInfoPopup} from '@common/core/actions/projects.actions';
-import {EntityTypeEnum} from '../../../shared/constants/non-common-consts';
-import {TasksArchiveManyResponse} from '../../../business-logic/model/tasks/tasksArchiveManyResponse';
 
 export function capitalizeFirstLetter(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
@@ -279,15 +274,3 @@ export function scrollFactory(overlay: Overlay): () => CloseScrollStrategy {
   return () => overlay.scrollStrategies.close();
 }
 
-export function getNotificationAction(res: ModelsArchiveManyResponse | TasksArchiveManyResponse, action, operationName: string, entityType: EntityTypeEnum, notificationActions = []): AddMessage {
-  const totalNum = res.failed.length + res.succeeded.length;
-  const allFailed = res.succeeded.length === 0;
-
-  const message = allFailed ? `${totalNum === 1 ? '' : totalNum} ${entityType}${totalNum > 1 ? 's' : ''} failed to ${operationName}` :
-    `${totalNum === 1 ? '' : res.succeeded.length} ${totalNum > res.succeeded.length ? 'of ' + totalNum : ''} ${entityType}${res.succeeded.length > 1 ? 's' : ''} ${operationName} successfully`;
-
-  return new AddMessage(res.failed.length > 0 ? 'error' : 'success', message, [
-    res.failed.length > 0 ? {actions: [openMoreInfoPopup({parentAction: action, operationName, res, entityType: EntityTypeEnum[entityType]})], name: 'More info'} : null,
-    ...notificationActions
-  ].filter(a => a));
-}

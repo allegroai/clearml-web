@@ -34,11 +34,11 @@
                     class="title-key"
                     [class.ellipsis]="showEllipsis"
                     [style.width.px]="showEllipsis ? nativeWidth - 45 - node.level * 20 : null"
-                  >{{(RENAME_MAP[node.data.key] || node.data.key) | hideHashTitle}}</span>
+                  >{{(renameMap[node.data.key] || node.data.key) | hideHashTitle}}</span>
                   <i *ngIf="node.metaData.tooltip" class="al-icon sm al-ico-description node-icon" customClass="hyper-parameters-tooltip" [smTooltip]="node.metaData.tooltip"></i>
                 </div>
               </div>
-              <div *ngIf="!node.hasChildren" class="section" (click)="keyClicked(node.data, $event)">
+              <div *ngIf="!node.hasChildren" class="section" (click)="keyClicked(node.data)">
                 <div [style.padding-left.px]="2 + node.level * 20" [ngClass]="{
                   'node-item-container': true,
                   'identical-row': checkIfIdenticalRow(node.data),

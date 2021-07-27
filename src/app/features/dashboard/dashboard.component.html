@@ -1,19 +1,18 @@
-<sm-dashboard-search [ngClass]="{'dashboard-search': (activeSearch$ | async)}"></sm-dashboard-search>
-<div *ngIf="!(activeSearch$ | async)" class="recent">
-  <div class="container h-100">
-    <div *ngIf="!(activeSearch$ | async)" class="container h-100">
-      <div class="recent">
-        <sm-dashboard-projects></sm-dashboard-projects>
-        <sm-dashboard-experiments>
-          <div header-buttons>
-            <button
-              *smCheckPermission="true"
-              class="btn btn-primary d-flex align-items-center"
-              (click)="redirectToWorkers()"
-            ><i class="al-icon al-ico-queues al-color light-grey-blue sm mr-2"></i>MANAGE WORKERS AND QUEUES</button>
-          </div>
-        </sm-dashboard-experiments>
+<sm-dashboard-search [class.dashboard-search]="activeSearch$ | async"></sm-dashboard-search>
+<div *ngIf="(activeSearch$ | async) !== true" class="dashboard-body">
+  <div class="recent">
+    <sm-dashboard-projects (width)="width = $event"></sm-dashboard-projects>
+    <sm-dashboard-experiments
+      [style.width]="width && width > 900 ? width + 'px' : '100%'"
+      [recentTasks]="recentTasks$| async"
+    >
+      <div header-buttons>
+        <button
+          *smCheckPermission="true"
+          class="btn btn-primary d-flex align-items-center"
+          (click)="redirectToWorkers()"
+        ><i class="al-icon al-ico-queues al-color light-grey-blue sm mr-2"></i>MANAGE WORKERS AND QUEUES</button>
       </div>
-    </div>
+    </sm-dashboard-experiments>
   </div>
 </div>

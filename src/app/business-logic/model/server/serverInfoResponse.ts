@@ -29,4 +29,5 @@ export interface ServerInfoResponse {
      * Server UID
      */
     uid?: string;
+    api_version?: string;
 }

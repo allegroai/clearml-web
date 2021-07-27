@@ -1,5 +1,5 @@
 <sm-compare-footer >
-  <ng-container *ngFor="let footerItem of footerItems"   >
+  <ng-container *ngFor="let footerItem of footerItems; trackBy: trackBy"   >
     <ng-container></ng-container>
     <ng-container *ngIf="!footerItem.isTag; else tags">
       <ng-container *ngIf="footerItem.state$ | async as footerState">

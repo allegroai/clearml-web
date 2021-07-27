@@ -14,7 +14,7 @@ import {getModelDesign} from '../../../tasks/tasks.utils';
 import {distinctUntilKeyChanged, filter, map, takeUntil} from 'rxjs/operators';
 import {ActivatedRoute, Router} from '@angular/router';
 import {IExperimentInfo} from '../../../../features/experiments/shared/experiment-info.model';
-import {AddMessage} from '../../../core/actions/layout.actions';
+import {addMessage} from '../../../core/actions/layout.actions';
 
 
 @Component({
@@ -82,7 +82,7 @@ export class ExperimentInfoModelComponent implements OnInit, OnDestroy {
   onModelSelected(selectedModel: Model) {
     const modelFoundIndex = this.models.findIndex(model => model.id === this.modelId);
     if (this.models.map(m => m.id).includes(selectedModel.id)) {
-      this.store.dispatch(new AddMessage('warn', 'Selected model is already an input-model'))
+      this.store.dispatch(addMessage('warn', 'Selected model is already an input-model'))
     } else {
       let newModels: { model: string; name: string }[];
       if (modelFoundIndex >= 0) {

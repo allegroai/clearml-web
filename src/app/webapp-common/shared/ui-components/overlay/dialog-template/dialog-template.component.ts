@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 
 @Component({
@@ -15,12 +15,14 @@ export class DialogTemplateComponent {
   @Input() theme: string = 'light-theme';
   @Input() closedCodeLabel: string = 'VIEW COMMAND LINE';
   @Input() iconClass: string; // the icon class (see icons.scss).
+  @Input() iconData: string;
   @Input() header: string;
   @Input() subHeader: string;
   @Input() codeParams;
   @Input() codeTemplateFileName;
   @Output() xClicked = new EventEmitter();
 
+  @ViewChild('container') container: ElementRef<HTMLDivElement>;
   constructor(private dialog: MatDialogRef<DialogTemplateComponent, any>) {
   }
 

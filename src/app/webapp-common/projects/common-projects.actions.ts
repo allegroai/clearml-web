@@ -5,8 +5,7 @@ import {ProjectsGetByIdRequest} from '../../business-logic/model/projects/projec
 import {ProjectsGetByIdResponse} from '../../business-logic/model/projects/projectsGetByIdResponse';
 import {Project} from '../../business-logic/model/projects/project';
 import {Action, createAction, props} from '@ngrx/store';
-import {PROJECTS_ACTIONS} from './common-projects.consts';
-import {GLOBAL_FILTER_CHANGED} from '../models/actions/models-view.actions';
+import {PROJECTS_ACTIONS, PROJECTS_PREFIX} from './common-projects.consts';
 
 export class ProjectUpdated implements ISmAction {
   public type = PROJECTS_ACTIONS.PROJECT_UPDATED;
@@ -43,7 +42,7 @@ export class SetProjectInSelectedAndInList implements ISmAction {
   }
 }
 
-export class GetAllProjects implements ISmAction {
+export class GetAllProjectsPageProjects implements ISmAction {
   public type = PROJECTS_ACTIONS.GET_PROJECTS;
   public payload: { getAllFilter: ProjectsGetAllRequest };
 
@@ -130,13 +129,3 @@ export class SetCurrentProjectsPage implements Action {
   constructor(public payload: number) {
   }
 }
-
-
-// export class SelectProject implements ISmAction {
-//   public type = PROJECTS_ACTIONS.SELECT_PROJECT;
-//   public payload: { projectId: string | null };
-//
-//   constructor(projectId = null) {
-//     this.payload = {projectId};
-//   }
-// }

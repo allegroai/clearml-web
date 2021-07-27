@@ -39,7 +39,7 @@ export function queuesReducer(state = initQueues, action) {
     case SYNC_SPECIFIC_QUEUE_IN_TABLE:
       return {
         ...state, data:
-          state.data.map(queue => queue.id === action.payload.queue.id ? action.payload.queue : queue)
+          state.data.map(queue => queue.id === action.payload.queue?.id ? action.payload.queue : queue)
       };
     case ADD_QUEUES_TASKS:
       return {...state, tasks: {...state.tasks, [action.payload.queueId]: action.payload.tasks}};

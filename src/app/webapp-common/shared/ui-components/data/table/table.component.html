@@ -39,14 +39,14 @@
   <ng-template pTemplate="emptymessage">
     <tr class="no-data-row">
       <td [attr.colspan]="columns.length" class="no-data" [class.simple]="simple">
-        {{noDataMessage}}
+        <span class="d-flex" [style.margin-left.px]="buttonLeft">{{noDataMessage}}</span>
       </td>
     </tr>
   </ng-template>
 
   <ng-template pTemplate="header" let-columns *ngIf="!noHeader">
     <tr class="header ui-state-default" *ngIf="!minView; else cardHeader">
-      <th *ngFor="let col of columns"
+      <th *ngFor="let col of columns; trackBy: trackByColFn"
           [attr.data-col-id]="col.id"
           pReorderableColumn
           resizableColumn
@@ -67,7 +67,7 @@
             <ng-container *ngTemplateOutlet="checkboxTemplate; context: {$implicit: col}"></ng-container>
           </ng-container>
           <ng-container *ngSwitchDefault>
-            <div class="col-header">{{col.header}}</div>
+            <div class="col-header" [class.text-center]="col.textCenter">{{col.header}}</div>
           </ng-container>
         </ng-container>
       </th>

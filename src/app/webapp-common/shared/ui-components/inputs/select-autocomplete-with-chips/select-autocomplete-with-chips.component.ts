@@ -1,6 +1,6 @@
 import {
   AfterViewInit,
-  ChangeDetectionStrategy,
+  ChangeDetectionStrategy, ChangeDetectorRef,
   Component,
   ElementRef,
   EventEmitter,
@@ -58,6 +58,8 @@ export class SelectAutocompleteWithChipsComponent extends TemplateFormSectionBas
   @Input() set items(items: { label: string; value: string }[]) {
     this.loading = false;
     this._items = items;
+    this.autoSelectForm?.controls[this.name]?.setValue('');
+    this.cdr.detectChanges();
   }
 
   get items() {
@@ -87,6 +89,9 @@ export class SelectAutocompleteWithChipsComponent extends TemplateFormSectionBas
   @ViewChild('autocompleteInput') autocompleteInput: ElementRef<HTMLInputElement>;
   @ViewChild(MatAutocompleteTrigger) autocomplete: MatAutocompleteTrigger;
 
+  constructor(private cdr: ChangeDetectorRef) {
+    super();
+  }
   ngOnDestroy() {
     this.keyDownSub?.unsubscribe();
   }

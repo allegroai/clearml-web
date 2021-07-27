@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, Output} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {ColHeaderFilterTypeEnum, ISmCol, TABLE_SORT_ORDER, TableSortOrderEnum} from '../table.consts';
 import {addOrRemoveFromArray} from '../../../../utils/shared-utils';
@@ -6,13 +6,13 @@ import {addOrRemoveFromArray} from '../../../../utils/shared-utils';
 @Component({
   selector: 'sm-table-filter-sort-template',
   templateUrl: './table-filter-sort-template.component.html',
-  styleUrls: ['./table-filter-sort-template.component.scss']
+  styleUrls: ['./table-filter-sort-template.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TableFilterSortTemplateComponent {
 
   public readonly TABLE_SORT_ORDER = TABLE_SORT_ORDER;
 
-  private _value: Array<string>;
   public formControl = new FormControl();
   header;
   enableSort = true;
@@ -20,6 +20,8 @@ export class TableFilterSortTemplateComponent {
   enableSearch = false;
   isSorted: boolean;
   filterType: ColHeaderFilterTypeEnum;
+  supportAndFilter: boolean;
+  private _value: string[];
 
   FILTER_TYPE = ColHeaderFilterTypeEnum;
   @Input() sortOrder: { index: number; field: string; order: TableSortOrderEnum };
@@ -30,14 +32,17 @@ export class TableFilterSortTemplateComponent {
     this.enableFilter = col.filterable;
     this.enableSearch = col.searchableFilter;
     this.filterType = col.filterType;
+    this.supportAndFilter = col.andFilter;
   }
 
   @Input() searchValue;
   @Input() fixedOptionsSubheader;
 
   @Input() set value(value: Array<string>) {
-    this.formControl.setValue(value);
-    this._value = value;
+    if (Array.isArray(value)) {
+      this.formControl.setValue(value);
+      this._value = value;
+    }
   }
 
   get value() {
@@ -45,6 +50,7 @@ export class TableFilterSortTemplateComponent {
   }
 
   @Input() subValue: string[] = [];
+  @Input() andFilter: boolean = null;
 
   @Input() options: Array<{ label: string; value: string; tooltip?: string }>;
   @Input() subOptions: Array<{ label: string; value: string }>;
@@ -56,6 +62,9 @@ export class TableFilterSortTemplateComponent {
   @Output() sortOrderChanged = new EventEmitter<boolean>();
   @Output() searchValueChanged = new EventEmitter<string>();
 
+  trackByLabel = (index: number, item) => item.label;
+  trackByValFn = (index, item) => item.value;
+
   switchSortOrder($event: MouseEvent) {
     this.sortOrderChanged.emit($event.shiftKey);
   }
@@ -63,7 +72,7 @@ export class TableFilterSortTemplateComponent {
   onFilterChanged(val) {
     if (val) {
       const newValues = addOrRemoveFromArray(this.value, val.itemValue);
-      this.filterChanged.emit({value: newValues});
+      this.filterChanged.emit({value: newValues, andFilter: this.andFilter});
     }
   }
 
@@ -90,6 +99,13 @@ export class TableFilterSortTemplateComponent {
       default:
         this.isSorted = false;
         return 'i-sort-off';
+    }
+  }
+
+  toggleCombination() {
+    this.andFilter = !this.andFilter;
+    if (this.value?.length > 1) {
+      this.filterChanged.emit({value: this.value, andFilter: this.andFilter});
     }
   }
 }

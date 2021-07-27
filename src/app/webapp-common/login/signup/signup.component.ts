@@ -4,7 +4,7 @@ import {Store} from '@ngrx/store';
 import {Observable, Subscription} from 'rxjs';
 import {take, filter, withLatestFrom} from 'rxjs/operators';
 import {userPreferences} from '../../user-preferences';
-import {FetchCurrentUser, SetPreferences} from '../../core/actions/users.actions';
+import {fetchCurrentUser, setPreferences} from '../../core/actions/users.actions';
 import {LoginService} from '../../shared/services/login.service';
 import {selectCrmForm, selectLoginError, selectTerms, selectUserInfo} from '../login-reducer';
 import {MatDialog} from '@angular/material/dialog';
@@ -154,9 +154,9 @@ export class SignupComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private afterLogin() {
-    this.store.dispatch(new FetchCurrentUser());
+    this.store.dispatch(fetchCurrentUser());
     userPreferences.loadPreferences().subscribe(res => {
-      this.store.dispatch(new SetPreferences(res));
+      this.store.dispatch(setPreferences({payload: res}));
     });
   }
 

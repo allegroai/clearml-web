@@ -3,6 +3,7 @@ import * as actions from '../actions/common-experiment-output.actions';
 import {ScalarKeyEnum} from '../../../business-logic/model/events/scalarKeyEnum';
 import {sortBy, reverse} from 'lodash/fp';
 import {LOG_BATCH_SIZE} from '../shared/common-experiments.const';
+import {MetricsPlotEvent} from '../../../business-logic/model/events/metricsPlotEvent';
 
 export type GroupByCharts = 'metric' | 'none';
 
@@ -22,11 +23,21 @@ export interface Log {
   variant: string;
 }
 
+export interface SeriesData {
+  name: string;
+  x: number[];
+  y: number[];
+}
+
+export interface HistogramCharts {
+  [metric: string]: { [variant: string]: SeriesData };
+}
+
 export interface CommonExperimentOutputState {
   metricsMultiScalarsCharts: any;
-  metricsHistogramCharts: any;
+  metricsHistogramCharts: HistogramCharts;
   cachedAxisType: ScalarKeyEnum;
-  metricsPlotsCharts: any;
+  metricsPlotsCharts: MetricsPlotEvent[];
   experimentLog: Log[];
   totalLogLines: number;
   beginningOfLog: boolean;

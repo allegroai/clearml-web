@@ -1,29 +1,44 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Input, Output, Renderer2, ViewChild, EventEmitter} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  Output,
+  Renderer2,
+  ViewChild
+} from '@angular/core';
 import {ColorHashService} from '../../services/color-hash/color-hash.service';
 import {chooseTimeUnit, wordWrap} from '../../../tasks/tasks.utils';
 import {attachColorChooser} from '../../ui-components/directives/choose-color/choose-color.directive';
 import {debounceTime, filter} from 'rxjs/operators';
-import {cloneDeep, escape, getOr, get} from 'lodash/fp';
+import {cloneDeep, escape, get, getOr} from 'lodash/fp';
 import {
   AxisType,
   Config,
   Data,
-  ModeBarDefaultButtons,
-  Root,
-  Margin,
   Datum,
-  PlotData,
+  Margin,
   ModeBarButton,
-  PlotlyHTMLElement
+  ModeBarDefaultButtons,
+  PlotData,
+  PlotlyHTMLElement,
+  Root
 } from 'plotly.js';
 import {ScalarKeyEnum} from '../../../../business-logic/model/events/scalarKeyEnum';
-import {ExtData, ExtFrame, ExtLayout, PlotlyGraphBase} from './plotly-graph-base';
+import {ExtData, ExtFrame, ExtLayout, ExtLegend, PlotlyGraphBase} from './plotly-graph-base';
 import {Store} from '@ngrx/store';
 import {ResizeEvent} from 'angular-resizable-element';
 import {select} from 'd3-selection';
+import {MatDialog} from '@angular/material/dialog';
+import {GraphDisplayerComponent} from '../graph-displayer/graph-displayer.component';
+import {PALLET} from '../../../constants';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 declare const Plotly;
+const DARK_THEME_GRAPH_LINES_COLOR = '#39405f';
+const DARK_THEME_GRAPH_TICK_COLOR = '#c1cdf3';
 
 @Component({
   selector: 'sm-single-graph',
@@ -43,6 +58,11 @@ export class SingleGraphComponent extends PlotlyGraphBase {
   private previousOffsetWidth: number;
 
   @Input() identifier: string;
+  @Input() disableResize: boolean = false;
+  @Input() isDarkTheme: boolean;
+  @Input() showLoaderOnDraw = true;
+  @Input() isMaximized: boolean = false;
+  @Input() legendConfiguration: Partial<ExtLegend & { noTextWrap: boolean }> = {};
   @Input() height: number = 450;
   public loading: boolean;
 
@@ -89,14 +109,17 @@ export class SingleGraphComponent extends PlotlyGraphBase {
     private colorHash: ColorHashService,
     private changeDetector: ChangeDetectorRef,
     public elementRef: ElementRef,
-    protected store: Store
+    protected store: Store,
+    private dialog: MatDialog,
   ) {
     super(store);
   }
 
   drawGraph(forceRedraw = false) {
-    this.loading = true;
-    this.changeDetector.detectChanges();
+    if (this.showLoaderOnDraw) {
+      this.loading = true;
+      this.changeDetector.detectChanges();
+    }
     const container = this.singleGraphContainer.nativeElement;
     if (this.alreadyDrawn && !forceRedraw && !this.shouldRefresh) {
       return;
@@ -152,32 +175,71 @@ export class SingleGraphComponent extends PlotlyGraphBase {
     const iterText = graph.iter ? ` - Iteration ${graph.iter}` : '';
     let layout = {
       ...graph.layout,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      ...this.addParametersIfDarkTheme({plot_bgcolor: 'transparent'}),
       height: this.height,
-      // height    : 400, // TODO: fix legend position to bottom and add height e.g: `height: 400 + plot_json.data.length * 20` - YK
-      // width     : (this.customPlots.nativeElement.offsetWidth - 10) / 2,
       modebar: {
-        'color': '#8F9DC9',
-        'activecolor': '#4D66FF'
+        color: '#8F9DC9',
+        activecolor: '#4D66FF',
+        ...this.addParametersIfDarkTheme({
+          activecolor: PALLET.blue500,
+          bgcolor: 'transparent',
+        }),
       },
       title: {
-        text: graph.layout.title + iterText
+        text: graph.layout.title + iterText,
+        ...this.addParametersIfDarkTheme({
+          font: {
+            color: this.isDarkTheme? PALLET.blue100 : 'dce0ee'
+          },
+        }),
       },
-
+      ...this.addParametersIfDarkTheme({
+        xaxis: {
+          color: DARK_THEME_GRAPH_LINES_COLOR,
+          gridcolor: DARK_THEME_GRAPH_LINES_COLOR,
+          zerolinecolor: DARK_THEME_GRAPH_LINES_COLOR,
+          tickfont: {
+            color: DARK_THEME_GRAPH_TICK_COLOR
+          }
+        },
+        yaxis: {
+          color: DARK_THEME_GRAPH_LINES_COLOR,
+          gridcolor: DARK_THEME_GRAPH_LINES_COLOR,
+          zerolinecolor: DARK_THEME_GRAPH_LINES_COLOR,
+          tickfont: {
+            color: DARK_THEME_GRAPH_TICK_COLOR
+          }
+        }
+      }),
       uirevision: 'static', // Saves the UI state between redraws https://plot.ly/javascript/uirevision/
       legend: {
-        'traceorder': 'normal',
-        'xanchor': 'left',
-        'yanchor': 'top',
-        'x': this.moveLegendToTitle ? 0 : 1,
-        'y': 1,
-        'borderwidth': 2,
-        'bordercolor': '#FFFFFF',
-        'orientation': 'v',
-        'valign': 'top',
-        'font': {'color': '#000', 'size': 12, 'family': 'sans-serif'}
+        traceorder: 'normal',
+        xanchor: 'left',
+        yanchor: 'top',
+        x: this.moveLegendToTitle ? 0 : 1,
+        y: 1,
+        borderwidth: 2,
+        bordercolor: '#FFFFFF',
+        orientation: 'v',
+        valign: 'top',
+        font: {color: '#000', size: 12, family: 'sans-serif'},
+        ...this.addParametersIfDarkTheme({
+          bgcolor: 'transparent',
+          bordercolor: 'transparent',
+          font: {color: '#dce0ee', size: 12, family: 'sans-serif'},
+        }),
+        ...this.legendConfiguration
       },
       showlegend: this.chartElm.layout && Object.prototype.hasOwnProperty.call(this.chartElm.layout, 'showlegend') ? this.chartElm.layout.showlegend : graph.layout?.showlegend !== false,
-      margin: graph.layout.margin ? graph.layout.margin : {'l': 70, 'r': 50, 't': 80, 'b': 90, 'pad': 0, 'autoexpand': true} as Partial<Margin>,
+      margin: graph.layout.margin ? graph.layout.margin : {
+        l: 70,
+        r: 50,
+        t: 80,
+        b: 90,
+        pad: 0,
+        autoexpand: true
+      } as Partial<Margin>,
     } as Partial<ExtLayout>;
 
     if (this.type === 'table') {
@@ -185,13 +247,13 @@ export class SingleGraphComponent extends PlotlyGraphBase {
       // override header design
       graph.data[0].header = {
         ...graph.data[0].header,
-        line: {width: 1, color: '#d4d6e0'},
+        line: {width: 1, color: this.isDarkTheme? '#39405F' : '#d4d6e0'},
         align: 'left',
         font: {
-          color: ['#5a658e'],
+          color: [this.isDarkTheme? PALLET.blue200 : PALLET.blue400],
           size: 12
         },
-        fill: {color: 'white'}
+        fill: {...graph.data[0].header?.fill, color: this.isDarkTheme? PALLET.blue800 : PALLET.blue50}
       };
 
       // override cells design
@@ -200,10 +262,11 @@ export class SingleGraphComponent extends PlotlyGraphBase {
         align: 'left',
         height: 30,
         font: {
-          color: ['#5a658e'],
+          color: [this.isDarkTheme? PALLET.blue200 : PALLET.blue400],
           size: 12
         },
-        line: {width: 0, color: 'transparent'}
+        fill: {...graph.data[0].cells, color: this.isDarkTheme? PALLET.blue950 : '#ffffff'},
+        line: {width: 1, color: this.isDarkTheme? DARK_THEME_GRAPH_LINES_COLOR : PALLET.blue100}
       };
       layout.width = Math.max(getOr(0, 'data[0].cells.values.length', graph) * 100, this.singleGraphContainer.nativeElement.offsetWidth - 3);
       layout.title = {
@@ -213,18 +276,13 @@ export class SingleGraphComponent extends PlotlyGraphBase {
         xref: 'paper',
         x: 0
       };
-      const numberOfRows = getOr(0, 'data[0].cells.values[0].length', graph);
-      if (numberOfRows && graph.data[0].cells) {
-        graph.data[0].cells.fill = {...graph.data[0].cells.fill, color: [(Array(numberOfRows).fill(['#f5f7ff', 'white']) as any).flat()]};
-
-      }
       layout.margin = {
-        'l': 24,
-        't': this.isCompare ? 52 : 32,
-        'r': 24,
-        'b': 0
+        l: 24,
+        t: 52,
+        r: 24,
+        b: 0
       };
-      layout.height = Math.min(getOr(15, 'data[0].cells.values[0].length', graph) * 30 + 70, 500);
+      layout.height = Math.min(getOr(15, 'data[0].cells.values[0].length', graph) * 30 + 150, 500);
     }
     const barLayoutConfig = {
       hovermode: 'closest',
@@ -244,6 +302,15 @@ export class SingleGraphComponent extends PlotlyGraphBase {
         spikedash: 'solid',
         rangeslider: {visible: false},
         fixedrange: false,
+        ...this.addParametersIfDarkTheme({
+          color: DARK_THEME_GRAPH_LINES_COLOR,
+          gridcolor: DARK_THEME_GRAPH_LINES_COLOR,
+          zerolinecolor: DARK_THEME_GRAPH_LINES_COLOR,
+          tickfont: {
+            color: DARK_THEME_GRAPH_TICK_COLOR
+          }
+
+        })
       },
       yaxis: {
         ...graph.layout.yaxis,
@@ -256,6 +323,14 @@ export class SingleGraphComponent extends PlotlyGraphBase {
         rangeslider: {visible: false},
         fixedrange: false,
         type: this.yaxisType,
+        ...this.addParametersIfDarkTheme({
+          color: DARK_THEME_GRAPH_LINES_COLOR,
+          gridcolor: DARK_THEME_GRAPH_LINES_COLOR,
+          zerolinecolor: DARK_THEME_GRAPH_LINES_COLOR,
+          tickfont: {
+            color: DARK_THEME_GRAPH_TICK_COLOR
+          }
+        })
       },
     };
 
@@ -267,7 +342,9 @@ export class SingleGraphComponent extends PlotlyGraphBase {
     if (['bar'].includes(this.type)) {
       layout = {...layout, ...barLayoutConfig} as Partial<ExtLayout>;
     }
+
     const modBarButtonsToAdd: ModeBarButton[] = [];
+
     if (['multiScalar', 'scalar'].includes(graph.layout.type)) {
       modBarButtonsToAdd.push({
         name: 'Log view',
@@ -323,11 +400,21 @@ export class SingleGraphComponent extends PlotlyGraphBase {
         this.downloadGraphAsJson(cloneDeep(this.originalChart));
       }
     });
+    if (!this.isMaximized) {
+      const maximizeButton: ModeBarButton = {
+        name: 'Maximize',
+        title: 'Maximize Graph',
+        icon: this.getMaximizeIcon(),
+        click: () => {
+          this.maximizeGraph();
+        }
+      };
+      modBarButtonsToAdd.push(maximizeButton);
+    }
     const config = {
-      'modeBarButtonsToRemove': ['sendDataToCloud'] as ModeBarDefaultButtons[],
-      'displaylogo': false,
-      'modeBarButtonsToAdd': modBarButtonsToAdd
-
+      modeBarButtonsToRemove: ['sendDataToCloud'] as ModeBarDefaultButtons[],
+      displaylogo: false,
+      modeBarButtonsToAdd: modBarButtonsToAdd
     };
 
     return [this.chartElm, graph.data, layout, config, this.chartData];
@@ -370,7 +457,7 @@ export class SingleGraphComponent extends PlotlyGraphBase {
         }
 
         const colorKey = this.generateColorKey(graph, i);
-        const wrappedText = wordWrap(graph.data[i].name, this.legendStringLength || 19);
+        const wrappedText = !this.legendConfiguration.noTextWrap ? wordWrap(graph.data[i].name, this.legendStringLength || 19) : graph.data[i].name;
         graph.data[i].name = wrappedText + `<span style="display: none;" class="color-key" data-color-key="${colorKey}"></span>`;
       }
 
@@ -390,7 +477,7 @@ export class SingleGraphComponent extends PlotlyGraphBase {
   }
 
   public generateColorKey(graph: ExtFrame, i: number) {
-    const variant = graph.data[i].name.replace(/\.[^.]+$/, '');
+    const variant = graph.data[i].colorHash || graph.data[i].name;
     if (!this.isCompare) {
       return `${variant}?`;  // "?" to adjust desired colors (legend title is removing this ?)
     } else {
@@ -443,20 +530,20 @@ export class SingleGraphComponent extends PlotlyGraphBase {
       .subscribe(colorObj => {
         const graph = this.chart;
         let changed: boolean = false;
-        for (let i = 0; i < graph.data.length; i++) {
-          const name = graph.data[i].name;
+        graph.data.forEach(trace => {
+          const name = trace.name;
           if (!name) {
-            continue;
+            return;
           }
           const colorKey = this.extractColorKey(name);
-          const oldColor = this._getTraceColor(graph.data[i]);
+          const oldColor = this._getTraceColor(trace);
           const newColorArr = colorObj[colorKey];
           const newColor = newColorArr ? `rgb(${newColorArr[0]},${newColorArr[1]},${newColorArr[2]})` : false;
           if (oldColor !== newColor && newColor) {
             changed = true;
-            this._reColorTrace(graph.data[i], newColorArr);
+            this._reColorTrace(trace, newColorArr);
           }
-        }
+        });
         if (changed) {
           Plotly.redraw(this.chartElm);
           this.updateLegend();
@@ -480,15 +567,15 @@ export class SingleGraphComponent extends PlotlyGraphBase {
       }
     }
     const traces = container.querySelectorAll('.traces');
-    for (let i = 0; i < traces.length; i++) {
-      const textEl = traces[i].querySelector('.legendtext') as SVGTextElement;
+    for (const trace of traces) {
+      const textEl = trace.querySelector('.legendtext') as SVGTextElement;
       const text = textEl ? this.extractColorKey(textEl.getAttribute('data-unformatted')) : '';
 
       const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
       title.textContent = text.replace('?', '');
       textEl.parentElement.appendChild(title);
 
-      const layers = traces[i].querySelector('.layers');
+      const layers = trace.querySelector('.layers');
       const parentEl = layers.parentElement;
       parentEl.removeChild(layers); // Needed because z-index in svg is by element order
       parentEl.appendChild(layers);
@@ -511,16 +598,16 @@ export class SingleGraphComponent extends PlotlyGraphBase {
   downloadGraphAsJson(chart: ExtFrame) {
     let timeUnit;
     if (this.xAxisType === ScalarKeyEnum.Timestamp) {
-      for (let i = 0; i < chart.data.length; i++) {
-        if (!chart.data[i].name) {
-          continue;
+      chart.data.forEach(graphData => {
+        if (!graphData.name) {
+          return;
         }
 
         timeUnit = typeof timeUnit === 'undefined' ? chooseTimeUnit(chart.data) : timeUnit;
-        const zeroTime = chart.data[i].x[0] as number;
-        chart.data[i].x = (chart.data[i].x as number[]).map(timestamp => (timestamp - zeroTime) / timeUnit.time);
+        const zeroTime = graphData.x[0] as number;
+        graphData.x = (graphData.x as number[]).map(timestamp => (timestamp - zeroTime) / timeUnit.time);
         // graph.data[i].hovertext = graph.data[i].x.map(timestamp => timeInWords((timestamp - zeroTime)));
-      }
+      });
     }
     const exportName = `${chart.layout.title} -  ${this.getAxisText(timeUnit)}`;
     const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(chart.data));
@@ -534,41 +621,53 @@ export class SingleGraphComponent extends PlotlyGraphBase {
 
   getIcon() {
     return {
-      'width': 1792,
-      'path': 'M1344 1344q0-26-19-45t-45-19-45 19-19 45 19 45 45 19 45-19 19-45zm256 0q0-26-19-45t-45-19-45 19-19 45 19 45 45 19 45-19 19-45zm128-224v320q0 40-28 68t-68 28h-1472q-40 0-68-28t-28-68v-320q0-40 28-68t68-28h465l135 136q58 56 136 56t136-56l136-136h464q40 0 68 28t28 68zm-325-569q17 41-14 70l-448 448q-18 19-45 19t-45-19l-448-448q-31-29-14-70 17-39 59-39h256v-448q0-26 19-45t45-19h256q26 0 45 19t19 45v448h256q42 0 59 89z',
-      'ascent': 1792,
-      'descent': 0,
-      'transform': 'translate(0, -100)'
+      width: 1792,
+      path: 'M1344 1344q0-26-19-45t-45-19-45 19-19 45 19 45 45 19 45-19 19-45zm256 0q0-26-19-45t-45-19-45 19-19 45 19 45 45 19 45-19 19-45zm128-224v320q0 40-28 68t-68 28h-1472q-40 0-68-28t-28-68v-320q0-40 28-68t68-28h465l135 136q58 56 136 56t136-56l136-136h464q40 0 68 28t28 68zm-325-569q17 41-14 70l-448 448q-18 19-45 19t-45-19l-448-448q-31-29-14-70 17-39 59-39h256v-448q0-26 19-45t45-19h256q26 0 45 19t19 45v448h256q42 0 59 89z',
+      ascent: 1792,
+      descent: 0,
+      transform: 'translate(0, -100)'
     };
   }
 
   getToggleLegendIcon() {
     return {
-      'width': 1000,
-      'fill': 'rgb(77, 102, 255)',
-      'path': 'M200,250H50a50,50,0,0,1,0-100H200a50,50,0,0,1,0,100Zm800-50a50,50,0,0,0-50-50H400a50,50,0,0,0,0,100H950A50,50,0,0,0,1000,200ZM250,400a50,50,0,0,0-50-50H50a50,50,0,0,0,0,100H200A50,50,0,0,0,250,400Zm750,0a50,50,0,0,0-50-50H400a50,50,0,0,0,0,100H950A50,50,0,0,0,1000,400ZM250,600a50,50,0,0,0-50-50H50a50,50,0,0,0,0,100H200A50,50,0,0,0,250,600Zm750,0a50,50,0,0,0-50-50H400a50,50,0,0,0,0,100H950A50,50,0,0,0,1000,600ZM250,800a50,50,0,0,0-50-50H50a50,50,0,0,0,0,100H200A50,50,0,0,0,250,800Zm750,0a50,50,0,0,0-50-50H400a50,50,0,0,0,0,100H950A50,50,0,0,0,1000,800Z',
-      'ascent': 1000,
-      'descent': 0,
-      'transform': 'translate(0, -100)'
+      width: 1000,
+      fill: 'rgb(77, 102, 255)',
+      path: 'M200,250H50a50,50,0,0,1,0-100H200a50,50,0,0,1,0,100Zm800-50a50,50,0,0,0-50-50H400a50,50,0,0,0,0,100H950A50,50,0,0,0,1000,200ZM250,400a50,50,0,0,0-50-50H50a50,50,0,0,0,0,100H200A50,50,0,0,0,250,400Zm750,0a50,50,0,0,0-50-50H400a50,50,0,0,0,0,100H950A50,50,0,0,0,1000,400ZM250,600a50,50,0,0,0-50-50H50a50,50,0,0,0,0,100H200A50,50,0,0,0,250,600Zm750,0a50,50,0,0,0-50-50H400a50,50,0,0,0,0,100H950A50,50,0,0,0,1000,600ZM250,800a50,50,0,0,0-50-50H50a50,50,0,0,0,0,100H200A50,50,0,0,0,250,800Zm750,0a50,50,0,0,0-50-50H400a50,50,0,0,0,0,100H950A50,50,0,0,0,1000,800Z',
+      ascent: 1000,
+      descent: 0,
+      transform: 'translate(0, -100)'
+    };
+  }
+
+  getMaximizeIcon() {
+    return {
+      width: 1000,
+      height: 1000,
+      fill: 'rgb(77, 102, 255)',
+      path: 'M920,80V436.38L771.51,287.89,559.4,500,500,440.6,712.11,228.49,563.62,80ZM500,559.4,440.6,500,228.49,712.11,80,563.62V920H436.38L287.89,771.51Z',
+      ascent: 1000,
+      descent: 0,
+      transform: 'translate(0, -100)'
     };
   }
 
   getLogIcon(onOrOff: boolean) {
     if (!onOrOff) {
       return {
-        'width': 1000,
-        'path': 'M797,772a29.4,29.4,0,0,1-3.1-.16c-130-13.31-240.09-51.57-327.17-113.74-70.33-50.2-125.62-115.78-164.34-194.91C236.94,329.34,241.79,203.92,242,198.64A30,30,0,0,1,302,201.31h0c-.05,1.16-4.17,117.36,55.41,237.65,34.47,69.59,83.42,127.19,145.5,171.2,78.3,55.51,178.29,89.82,297.18,102A30,30,0,0,1,797,772Zm111,80.5H147.5V92H38v28H92.5v29H37v28H92.5v41H38v28H92.5v64H38v28H92.5V446H38v28H92.5V639H38v28H92.5V852.5H0v55H92.5V1000h55V907.5H908Z',
-        'ascent': 1000,
-        'descent': 0,
-        'transform': 'translate(0, -100)'
+        width: 1000,
+        path: 'M797,772a29.4,29.4,0,0,1-3.1-.16c-130-13.31-240.09-51.57-327.17-113.74-70.33-50.2-125.62-115.78-164.34-194.91C236.94,329.34,241.79,203.92,242,198.64A30,30,0,0,1,302,201.31h0c-.05,1.16-4.17,117.36,55.41,237.65,34.47,69.59,83.42,127.19,145.5,171.2,78.3,55.51,178.29,89.82,297.18,102A30,30,0,0,1,797,772Zm111,80.5H147.5V92H38v28H92.5v29H37v28H92.5v41H38v28H92.5v64H38v28H92.5V446H38v28H92.5V639H38v28H92.5V852.5H0v55H92.5V1000h55V907.5H908Z',
+        ascent: 1000,
+        descent: 0,
+        transform: 'translate(0, -100)'
       };
     }
     return {
-      'width': 1000,
-      'path': 'M908,907.5H147.5V1000h-55V907.5H0v-55H92.5V120H37V92H147.5V852.5H908ZM883.79,239.14a30,30,0,0,0-41.65,8.07L672,499.21,471.48,411.78a59.49,59.49,0,0,0-117.89-.59l-154.22,71.6a30,30,0,1,0,25.26,54.42l151.74-70.45a59.48,59.48,0,0,0,71.85.33L667,562.5A29.91,29.91,0,0,0,679,565c.85,0,1.68,0,2.52-.12s1.65.11,2.47.11a30,30,0,0,0,24.89-13.21l183-271A30,30,0,0,0,883.79,239.14ZM894,627a30,30,0,0,0-41-11l-129.1,74.28a59.5,59.5,0,0,0-87.83,25.11L219.32,711H219a30,30,0,0,0-.31,60l424.43,4.47a59.48,59.48,0,0,0,106.65-30.82L883,668A30,30,0,0,0,894,627Z',
-      'ascent': 1000,
-      'descent': 0,
-      'transform': 'translate(0, -100)'
+      width: 1000,
+      path: 'M908,907.5H147.5V1000h-55V907.5H0v-55H92.5V120H37V92H147.5V852.5H908ZM883.79,239.14a30,30,0,0,0-41.65,8.07L672,499.21,471.48,411.78a59.49,59.49,0,0,0-117.89-.59l-154.22,71.6a30,30,0,1,0,25.26,54.42l151.74-70.45a59.48,59.48,0,0,0,71.85.33L667,562.5A29.91,29.91,0,0,0,679,565c.85,0,1.68,0,2.52-.12s1.65.11,2.47.11a30,30,0,0,0,24.89-13.21l183-271A30,30,0,0,0,883.79,239.14ZM894,627a30,30,0,0,0-41-11l-129.1,74.28a59.5,59.5,0,0,0-87.83,25.11L219.32,711H219a30,30,0,0,0-.31,60l424.43,4.47a59.48,59.48,0,0,0,106.65-30.82L883,668A30,30,0,0,0,894,627Z',
+      ascent: 1000,
+      descent: 0,
+      transform: 'translate(0, -100)'
     };
   }
 
@@ -595,5 +694,25 @@ export class SingleGraphComponent extends PlotlyGraphBase {
 
   validateResize($event: ResizeEvent): boolean {
     return $event.rectangle.width > 300 && $event.rectangle.height > 250;
+  }
+
+  private maximizeGraph() {
+    this.dialog.open(GraphDisplayerComponent, {
+      data: {
+        chart: cloneDeep(this.originalChart),
+        id: this.identifier,
+        xAxisType: this.xAxisType,
+        darkTheme: this.isDarkTheme
+      },
+      panelClass: ['image-displayer-dialog', this.isDarkTheme ? 'dark-theme' : ''],
+      height: '100%',
+      maxHeight: 'auto',
+      width: '100%',
+      maxWidth: 'auto'
+    });
+  }
+
+  private addParametersIfDarkTheme(object: Record<string, unknown>) {
+    return this.isDarkTheme ? object : {};
   }
 }

@@ -1,9 +1,10 @@
-import {createFeatureSelector, createSelector} from '@ngrx/store';
+import {createSelector} from '@ngrx/store';
 import {Project} from '../../business-logic/model/projects/project';
 import {TABLE_SORT_ORDER, TableSortOrderEnum} from '../shared/ui-components/data/table/table.consts';
 import {PROJECTS_ACTIONS} from './common-projects.consts';
 import {setProjectsSearchQuery} from './common-projects.actions';
 import {ICommonSearchState} from '../common-search/common-search.reducer';
+import {selectSelectedProject} from "@common/core/reducers/projects.reducer";
 
 export interface CommonProjectReadyForDeletion {
   project: Project;
@@ -41,7 +42,6 @@ export const commonProjectsInitState: ICommonProjectsState = {
   page: 0,
 };
 
-// todo: where to put it?
 const getCorrectSortingOrder = (currentSortOrder: TableSortOrderEnum, currentOrderField: string, nextOrderField: string) => {
   if (currentOrderField === nextOrderField) {
     return currentSortOrder === TABLE_SORT_ORDER.DESC ? TABLE_SORT_ORDER.ASC : TABLE_SORT_ORDER.DESC;
@@ -106,8 +106,9 @@ export const commonProjectsReducer = (state: ICommonProjectsState = commonProjec
   }
 };
 
-export const selectProjects = createFeatureSelector<ICommonProjectsState>('projects');
-// TODO what to do?
+export const selectProjects = state => state.projects;
+
+
 export const selectProjectsData = createSelector(selectProjects, (state: ICommonProjectsState): Array<Project> => state ? state.data : []);
 export const selectNonFilteredProjectsList = createSelector(selectProjects, (state: ICommonProjectsState): Array<Project> => state ? state.projectsNonFilteredList : []);
 // export const selectSelectedProjectId = createSelector(selectRouterParams, (params: any) => params ? params.projectId : '');
@@ -116,4 +117,5 @@ export const selectProjectsSortOrder = createSelector(selectProjects, (state: IC
 export const selectProjectsSearchQuery = createSelector(selectProjects, (state: ICommonProjectsState) => state?.searchQuery);
 export const selectProjectReadyForDeletion = createSelector(selectProjects, (state: ICommonProjectsState): CommonProjectReadyForDeletion => state.projectReadyForDeletion);
 export const selectNoMoreProjects = createSelector(selectProjects, (state: ICommonProjectsState): boolean => state.noMoreProjects);
-export const selectProjectsPage = createSelector(selectProjects, (state: ICommonProjectsState): number => state ? state.page : null);
+export const selectProjectsPage = createSelector(selectProjects, (state: ICommonProjectsState): number => state?.page || null);
+export const selectShowHidden = createSelector([selectProjects,selectSelectedProject ], (state, selectedProject) => (state?.showHidden || selectedProject?.system_tags?.includes('hidden')));

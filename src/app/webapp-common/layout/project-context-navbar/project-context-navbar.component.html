@@ -1,7 +1,8 @@
 <div class="navbar-header-container">
-    <div class="nav-bar-items-container">
+  <div class="nav-bar-items-container">
+    <ng-container *ngFor="let route of routes; trackBy:trackByFn">
       <sm-navbar-item
-        *ngFor="let route of routes"
+        *smCheckPermission="route.permissionCheck"
         direction="top"
         [header]="route.header"
         [active]="activeFeature === route.header"
@@ -9,5 +10,6 @@
         [subHeader]="archivedMode && route.subHeader"
       >
       </sm-navbar-item>
-    </div>
+    </ng-container>
+  </div>
 </div>

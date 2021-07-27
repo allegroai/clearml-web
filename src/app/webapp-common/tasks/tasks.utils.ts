@@ -1,32 +1,23 @@
 import {Task} from '../../business-logic/model/tasks/task';
 import {cloneDeep, sortBy} from 'lodash/fp';
-import {ExperimentGraph} from './tasks.model';
-import {EventsGetMultiTaskPlotsResponse} from '../../business-logic/model/events/eventsGetMultiTaskPlotsResponse';
+import {SelectableListItem} from '@common/shared/ui-components/data/selectable-list/selectable-list.model';
+import {GroupedList} from '@common/shared/ui-components/data/selectable-grouped-filter-list/selectable-grouped-filter-list.component';
+import {Config} from 'plotly.js';
+import {ExtData, ExtFrame, ExtLayout} from '../shared/experiment-graphs/single-graph/plotly-graph-base';
+import {MetricsPlotEvent} from '../../business-logic/model/events/models';
 
 export interface IMultiplot {
   [key: string]: { // i.e ROC
     [key: number]: { // Iteration number
       [key: string]: { // experimentId
         name: string;
-        plots: Array<IPlot>;
+        plots: ExtFrame[];
       };
     };
   };
 }
 
-export interface IPlot {
-  iter: number;
-  metric: string;
-  plot_str: string;
-  task: Task['id'];
-  timestamp: number;
-  type: string;
-  variant: string;
-  worker: string;
-}
-
-
-export function compare(a, b) {
+export const compare = (a, b) => {
   if (a.id < b.id) {
     return -1;
   }
@@ -34,22 +25,21 @@ export function compare(a, b) {
     return 1;
   }
   return 0;
-}
+};
 
-export function mergeTasks(tableTask, task) {
+export const mergeTasks = (tableTask, task) => {
   task.project = tableTask.project;
   task.user = tableTask.user;
   task.task = tableTask.task;
   return task;
-}
+};
 
+export const _mergeVariants = (base: Array<any>, variant) =>  base.slice().concat(variant);
 
-export function getModelDesign(modelDesc: Task['execution']['model_desc']): { key: string; value: any } {
-  const key = getModelDesignKey(modelDesc);
-  return {key: key, value: key ? modelDesc[key] : modelDesc};
-}
+export const _mergePlotsData = (base: any, toMerge: any) =>
+  JSON.stringify({...base, data: _mergeVariants(base.data, toMerge.data)});
 
-function getModelDesignKey(modelDes): string {
+export const getModelDesignKey = (modelDes): string => {
   const modelStr = typeof modelDes == 'string';
   if (!modelDes || modelStr) {
     return undefined;
@@ -58,61 +48,61 @@ function getModelDesignKey(modelDes): string {
     const firstNonEmptyKey = desKeys.find(key => !!modelDes[key]);
     return firstNonEmptyKey ? firstNonEmptyKey : desKeys[0];
   }
-}
+};
 
-export function convertPlots(plots, experimentId: string): { [key: string]: ExperimentGraph } {
-  return Object.entries(plots).reduce((acc, graphGroup) => {
-    const key = graphGroup[0];
-    const graphs = graphGroup[1] as Array<any>;
-    acc[key] = graphs.map(graph => {
-      let json;
-      try {
-        json = JSON.parse(graph.plot_str);
-        json.data.task = json.data.task || experimentId;
-      } catch (e) {
-        json = {data: [], layout: {title: 'Unknown data'}};
-      }
-      return prepareGraph(json.data, json.layout, json.config, graph);
-    });
-    return acc;
-  }, {});
-}
+export const getModelDesign = (modelDesc: Task['execution']['model_desc']): { key: string; value: any } => {
+  const key = getModelDesignKey(modelDesc);
+  return {key, value: key ? modelDesc[key] : modelDesc};
+};
 
-export function prepareGraph(data: object, layout: object, config: object, graph): ExperimentGraph {
-  return {
-    data: data,
-    layout: layout,
-    config: config,
+export const prepareGraph = (data: ExtData[], layout: Partial<ExtLayout>, config: Partial<Config>, graph: Partial<MetricsPlotEvent>): Partial<ExtFrame> =>
+  ({
+    data,
+    layout,
+    config,
     iter: graph.iter,
     metric: graph.metric,
     task: graph.task,
     timestamp: graph.timestamp,
-    type: graph.type,
+    type: graph.type as unknown as string,
     variant: graph.variant,
-    worker: graph.worker,
-  };
-}
+    worker: graph['worker'],
+});
 
-export function convertScalars(scalars, experimentId: string): { [key: string]: ExperimentGraph } {
-  return Object.entries(scalars).reduce((acc, graphGroup) => {
+export const convertPlots = ({plots, experimentId}: {plots: {[title: string]: MetricsPlotEvent[]}; experimentId: string}): { [title: string]: ExtFrame[] } =>
+  Object.entries(plots).reduce((acc, [key, graphs]) => {
+  acc[key] = graphs?.map(graph => {
+    let json: {data: any; layout: any; config?: any};
+    try {
+      json = JSON.parse(graph.plot_str) as ExtFrame;
+      json.data.task = json.data.task || experimentId;
+    } catch (e) {
+      json = {data: [], layout: {title: 'Unknown data'}};
+    }
+    return prepareGraph(json.data, json.layout, json.config, graph);
+  });
+  return acc;
+}, {});
+
+export const convertScalars = (scalars: GroupedList, experimentId: string): { [key: string]: ExtFrame[] } =>
+  Object.entries(scalars).reduce((acc, graphGroup) => {
     const key = graphGroup[0];
     const graph = graphGroup[1];
 
-    const chart_data = Object.entries(graph).sort((a, b) => a[0] > b[0] ? 1 : -1)
-      .map(([variant, data]: [string, any]) => ({
-        task: experimentId,
-        ...data,
-        type: 'scatter'
-      }));
+    const chartData = Object.entries(graph).sort((a, b) => a[0] > b[0] ? 1 : -1)
+    .map(([, data]: [string, any]) => ({
+      task: experimentId,
+      ...data,
+      type: 'scatter'
+    }));
 
-    acc[key] = [prepareGraph(chart_data, {type: 'scalar', title: key, xaxis: {title: 'Iterations'}}, {}, {metric: key})];
+    acc[key] = [prepareGraph(chartData, {type: 'scalar', title: key, xaxis: {title: 'Iterations'}}, {}, {metric: key})];
     return acc;
   }, {});
-}
 
-export function groupIterations(plots: any[]): Map<string, any[]> {
+export const groupIterations = (plots: MetricsPlotEvent[]): {[title: string]: MetricsPlotEvent[]} => {
   if (!plots.length) {
-    return {} as Map<string, any[]>;
+    return {};
   }
   const sortedPlots = sortBy('iter', plots);
   return sortedPlots
@@ -129,70 +119,72 @@ export function groupIterations(plots: any[]): Map<string, any[]> {
       }
       return groupedPlots;
     }, {});
-}
+};
 
-export function sortMetricsList(list: string[]) {
-  return list ? sortBy(item => item.replace(':', '~').toLowerCase(), list) : list;
-}
+export const prepareScalarList = (metricsScalar): GroupedList =>
+  Object.keys(metricsScalar || []).reduce((acc, curr) => {
+    acc[curr] = {};
+    return acc;
+}, {});
 
-export function sortByField(arr: any[], field: string) {
-  return sortBy(item => item[field].replace(':', '~').toLowerCase(), arr);
-}
+export const sortMetricsList = (list: string[]) =>
+  list ? sortBy(item => item.replace(':', '~').toLowerCase(), list) : list;
 
-export function mergeMultiMetrics(metrics): { [key: string]: ExperimentGraph } {
+export const preparePlotsList = (groupedPlots: Map<string, any[]>): Array<SelectableListItem> => {
+  const list = groupedPlots ? Object.keys(groupedPlots) : [];
+  const sortedList = sortMetricsList(list);
+  return sortedList.map((item) => ({name: item, value: item}));
+};
+
+
+export const sortByField = (arr: any[], field: string) =>
+  sortBy(item => item[field].replace(':', '~').toLowerCase(), arr);
+
+export const mergeMultiMetrics = (metrics): { [key: string]: ExtFrame[] } => {
   const graphsMap = {};
   Object.keys(metrics).forEach(key => {
     Object.keys(metrics[key]).forEach(itemKey => {
       const chartData = Object.entries(metrics[key][itemKey])
         .map(([variant, data]: [string, any]) => ({...data, type: 'scatter', task: variant}));
-      graphsMap[key + itemKey] = [prepareGraph(chartData, {type: 'multiScalar', title: key + ' / ' + itemKey}, {}, {})];
+      graphsMap[key + itemKey] = [prepareGraph(chartData, {
+        type: 'multiScalar',
+        title: key + ' / ' + itemKey
+      }, {}, {})];
     });
   });
   return graphsMap;
-}
+};
 
-export function mergeMultiMetricsGroupedVariant(metrics): { [key: string]: ExperimentGraph } {
+export const mergeMultiMetricsGroupedVariant = (metrics): { [key: string]: ExtFrame[] } => {
   const graphsMap = {};
   Object.keys(metrics).forEach(metric => {
     const chartData = [];
     Object.keys(metrics[metric]).forEach(variant => {
       chartData.push(Object.entries(metrics[metric][variant])
-        .map(([taskId, data]: [string, any]) => ({...data, type: 'scatter', task: taskId, name: `${variant} - ${data.name}`}))
+        .map(([taskId, data]: [string, any]) => ({
+          ...data,
+          type: 'scatter',
+          task: taskId,
+          name: `${variant} - ${data.name}`
+        }))
       );
     });
     graphsMap[metric] = [prepareGraph((chartData as any).flat(), {type: 'multiScalar', title: metric}, {}, {})];
   });
   return graphsMap;
-}
+};
 
-export function convertMultiPlots(plots): { [key: string]: ExperimentGraph } {
-
-  return Object.entries(plots).reduce((acc, graphGroup) => {
+export const convertMultiPlots = (plots): { [key: string]: ExtFrame[] } =>
+  Object.entries(plots).reduce((acc, graphGroup) => {
     const key = graphGroup[0];
     const graphs = graphGroup[1] as Array<any>;
-
-    acc[key] = Object.values(graphs).map(graph => {
-      return prepareGraph(graph.data, graph.layout, graph.config, {...graph, task: graph.task});
-    });
+    acc[key] = Object.values(graphs).map(
+      graph => prepareGraph(graph.data, graph.layout, graph.config, {...graph, task: graph.task})
+    );
     return acc;
   }, {});
-}
 
-export function prepareMultiPlots(multiPlots: EventsGetMultiTaskPlotsResponse['plots']) {
-  if (!multiPlots) {
-    return multiPlots;
-  }
-  return Object.entries(multiPlots).reduce((acc, graph) => {
-    if (!graph[1]) {
-      return acc;
-    }
-    const isMultipleVarients = Object.keys(graph[1]).length > 1;
-    const graphsPerVariant = seperateMultiplotsVariants(graph[1] as IMultiplot, isMultipleVarients);
-    return {...acc, ...graphsPerVariant};
-  }, {});
-}
-
-export function seperateMultiplotsVariants(mixedPlot: IMultiplot, isMultipleVarients) {
+export const seperateMultiplotsVariants = (mixedPlot: IMultiplot, isMultipleVarients) => {
   let charts = {};
   const values = Object.values(mixedPlot);
   if (!values || values.length === 0) {
@@ -221,9 +213,23 @@ export function seperateMultiplotsVariants(mixedPlot: IMultiplot, isMultipleVari
   }
 
   return charts;
-}
+};
 
-export function multiplotsAddChartToGroup(charts, parsed, metric, experiment, experimentId) {
+export const prepareMultiPlots = (multiPlots: MetricsPlotEvent) => {
+  if (!multiPlots) {
+    return multiPlots;
+  }
+  return Object.entries(multiPlots).reduce((acc, graph) => {
+    if (!graph[1]) {
+      return acc;
+    }
+    const isMultipleVarients = Object.keys(graph[1]).length > 1;
+    const graphsPerVariant = seperateMultiplotsVariants(graph[1] as IMultiplot, isMultipleVarients);
+    return {...acc, ...graphsPerVariant};
+  }, {});
+};
+
+export const multiplotsAddChartToGroup = (charts, parsed, metric, experiment, experimentId) => {
   const allowedTypes = ['scatter', 'bar'];
   let fullName: string;
   if (parsed.layout && parsed.layout.images) {
@@ -262,9 +268,9 @@ export function multiplotsAddChartToGroup(charts, parsed, metric, experiment, ex
     charts[metricName][fullName].layout.barmode = isMultipleTasks ? 'group' : 'stack';
   }
   return charts;
-}
+};
 
-export function wordWrap(str, maxWidth) {
+export const wordWrap = (str, maxWidth) => {
 
   if (str.length <= maxWidth) {
     return str;
@@ -296,27 +302,16 @@ export function wordWrap(str, maxWidth) {
   } while (!done);
 
   return res + str;
-}
+};
 
-function _testWhite(x) {
+export const _testWhite = (x) => {
   const white = new RegExp(/^[\s\-_]$/);
   return white.test(x.charAt(0));
-}
+};
 
-function _mergePlotsData(base: any, toMerge: any) {
-  return JSON.stringify({...base, data: _mergeVariants(base.data, toMerge.data)});
-}
+export const stripHtml = (s) => s.replace(/<[^>]*>?/gm, '');
 
-export function _mergeVariants(base: Array<any>, variant) {
-  const data_array = base.slice();
-  return data_array.concat(variant);
-}
-
-export function stripHtml(s) {
-  return s.replace(/<[^>]*>?/gm, '');
-}
-
-export function timeInWords(milliseconds, granularityLevel = 3) {
+export const timeInWords = (milliseconds: number, granularityLevel = 3) => {
   let remaining = Math.floor(milliseconds / 1000);
   if (remaining <= 0) {
     return '0';
@@ -338,9 +333,9 @@ export function timeInWords(milliseconds, granularityLevel = 3) {
     }
   }
   return output.join(' ');
-}
+};
 
-export function chooseTimeUnit(data) {
+export const chooseTimeUnit = (data) => {
   if (!data[0]?.x || !data[0]?.x[0] || !data[0]?.x[1]) {
     return {time: 1000, str: 'Seconds'};
   }
@@ -356,4 +351,4 @@ export function chooseTimeUnit(data) {
   }
   const lastIndex = timesConst.length - 1;
   return {time: timesConst[lastIndex] * 1000, str: timeStringPlural[lastIndex]};
-}
+};

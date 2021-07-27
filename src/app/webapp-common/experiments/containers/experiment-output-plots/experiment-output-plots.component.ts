@@ -14,9 +14,10 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {IExperimentInfoState} from '../../../../features/experiments/reducers/experiment-info.reducer';
 import {ExperimentPlotsRequested, ResetExperimentMetrics, SetExperimentMetricsSearchTerm,
   SetExperimentSettings} from '../../actions/common-experiment-output.actions';
-import {ExperimentGraph} from '../../../tasks/tasks.model';
 import {convertPlots, groupIterations, sortMetricsList} from '../../../tasks/tasks.utils';
 import {selectSelectedExperiment} from '../../../../features/experiments/reducers';
+import {ExtFrame} from '@common/shared/experiment-graphs/single-graph/plotly-graph-base';
+import {MetricsPlotEvent} from '../../../../business-logic/model/events/metricsPlotEvent';
 
 @Component({
   selector: 'sm-experiment-output-plots',
@@ -34,11 +35,11 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy {
   private experimentId: string;
   private routerParams$: Observable<any>;
   public listOfHidden: Observable<Array<any>>;
-  public plots$: Observable<any>;
+  public plots$: Observable<MetricsPlotEvent[]>;
   public experimentSettings$: Observable<any>;
   public searchTerm$: Observable<string>;
   public minimized: boolean = false;
-  public graphs: { [key: string]: ExperimentGraph };
+  public graphs: { [key: string]: ExtFrame[] };
   public refreshDisabled: boolean;
   public selectIsExperimentPendingRunning: Observable<boolean>;
   private selectedExperimentSubscription: Subscription;
@@ -81,7 +82,7 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy {
         this.refreshDisabled = false;
         const groupedPlots = groupIterations(metricsPlots);
         this.plotsList = this.preparePlotsList(groupedPlots);
-        this.graphs = convertPlots(groupedPlots, this.experimentId);
+        this.graphs = convertPlots({plots: groupedPlots, experimentId: this.experimentId});
         this.changeDetection.detectChanges();
       });
 
@@ -123,7 +124,7 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy {
     this.resetMetrics();
   }
 
-  private preparePlotsList(groupedPlots: Map<string, any[]>): Array<SelectableListItem> {
+  private preparePlotsList(groupedPlots: {[title: string]: MetricsPlotEvent[]}): Array<SelectableListItem> {
     const list = groupedPlots ? Object.keys(groupedPlots) : [];
     const sortedList = sortMetricsList(list);
     return sortedList.map((item) => ({name: item, value: item}));
@@ -145,7 +146,7 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy {
   }
 
   searchTermChanged(searchTerm: string) {
-    this.store.dispatch(new SetExperimentMetricsSearchTerm({searchTerm: searchTerm}));
+    this.store.dispatch(new SetExperimentMetricsSearchTerm({searchTerm}));
   }
 
   resetMetrics() {

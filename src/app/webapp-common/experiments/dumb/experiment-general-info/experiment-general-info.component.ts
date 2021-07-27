@@ -4,20 +4,21 @@ import {IExperimentInfo} from '../../../../features/experiments/shared/experimen
 import {TIME_FORMAT_STRING} from '../../../constants';
 import {Store} from '@ngrx/store';
 import {ActivateEdit, DeactivateEdit} from '../../actions/common-experiments-info.actions';
-import { selectCurrentActiveSectionEdit } from '../../reducers';
-import {filter, take} from 'rxjs/operators';
+import {selectCurrentActiveSectionEdit} from '../../reducers';
+import {filter} from 'rxjs/operators';
 import {Subscription} from 'rxjs';
 import {EditableSectionComponent} from '../../../shared/ui-components/panel/editable-section/editable-section.component';
 
 export const EXPERIMENT_COMMENT = 'ExperimentComment';
 
 @Component({
-  selector   : 'sm-experiment-general-info',
+  selector: 'sm-experiment-general-info',
   templateUrl: './experiment-general-info.component.html',
-  styleUrls  : ['./experiment-general-info.component.scss']
+  styleUrls: ['./experiment-general-info.component.scss']
 })
 export class ExperimentGeneralInfoComponent implements AfterViewInit, OnDestroy {
-  constructor(private store: Store<any>) {}
+  constructor(private store: Store<any>) {
+  }
 
   commentControl = new FormControl();
   experimentCommentText: string;
@@ -40,9 +41,9 @@ export class ExperimentGeneralInfoComponent implements AfterViewInit, OnDestroy 
 
   ngAfterViewInit() {
     this.selectCurrentActiveSectionEditSub = this.store.select(selectCurrentActiveSectionEdit)
-      .pipe(filter( currentActiveSectionEdit => currentActiveSectionEdit === EXPERIMENT_COMMENT))
+      .pipe(filter(currentActiveSectionEdit => currentActiveSectionEdit === EXPERIMENT_COMMENT))
       .subscribe(() => {
-          this.experimentDescriptionSection.editModeChanged(true);
+        this.experimentDescriptionSection.editModeChanged(true);
       });
   }
 
@@ -71,4 +72,5 @@ export class ExperimentGeneralInfoComponent implements AfterViewInit, OnDestroy 
   ngOnDestroy() {
     this.selectCurrentActiveSectionEditSub?.unsubscribe();
   }
+
 }

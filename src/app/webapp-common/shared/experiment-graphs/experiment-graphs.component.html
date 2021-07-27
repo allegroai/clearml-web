@@ -1,5 +1,5 @@
-<div *ngIf="noGraphs" class="no-output">
-  <i class="icon i-no-plots no-output-icon"></i>
+<div *ngIf="noGraphs" class="no-output" >
+  <i class="icon no-output-icon" [ngClass]="isDarkTheme ? 'i-no-plots-dark' : 'i-no-plots'"></i>
   <h3>NO CHART DATA</h3>
 </div>
 <sm-graph-settings-bar
@@ -38,6 +38,10 @@
                 [chart]="chartItem"
                 [id]="SINGLE_GRAPH_ID_PREFIX + EXPERIMENT_GRAPH_ID_PREFIX + metric + chartItem.layout.title + chartItem.iter + chartItem.variant + (chartItem.layout.images && chartItem.layout.images[0]?.source)"
                 [isCompare]="isCompare"
+                [disableResize]="disableResize"
+                [isDarkTheme]="isDarkTheme"
+                [showLoaderOnDraw]="showLoaderOnDraw"
+                [legendConfiguration]="legendConfiguration"
                 [smoothWeight]="smoothWeight"
                 [xAxisType]="xAxisType"
                 [height]="height"

@@ -3,12 +3,12 @@
     [isArchived]="isArchived$ | async"
     [disableCreateNewButton]="isExampleProject"
     [autoRefreshState]="autoRefreshState$ | async"
+    [tableCols]="tableCols$ | async"
     [sharedView]="isSharedAndNotOwner$|async"
     (isArchivedChanged)="archivedChanged($event)"
     (setAutoRefresh)="setAutoRefresh($event)"
     (refreshListClicked)="refreshList(false)"
     (selectedTableColsChanged)="selectedTableColsChanged($event)"
-    [tableCols]="tableCols"
   ></sm-model-header>
 </div>
 <div class="models-body" [class.footer-visible]="(selectedModels$ | async)?.length > 1|| (showAllSelectedIsActive$ |async)">
@@ -27,7 +27,7 @@
         class="w-100 align-self-stretch"
         selectionMode="single"
         [models]="models$ | async"
-        [tableCols]="filteredTableCols"
+        [tableCols]="tableCols$ | async"
         [minimizedView]="minimizedView"
         [noMoreModels]="noMoreModels$ | async"
         [users]="users$ |async"
@@ -47,6 +47,7 @@
         (modelsSelectionChanged)="modelsSelectionChanged($event)"
         (tagsMenuOpened)="refreshTagsList()"
         (sortedChanged)="sortedChanged($event)"
+        (columnResized)="columnResized($event)"
         (filterChanged)="filterChanged($event)"
         (loadMoreModels)="getNextModels()"
       >

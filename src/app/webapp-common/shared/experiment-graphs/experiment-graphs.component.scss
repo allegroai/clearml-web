@@ -94,6 +94,7 @@
     transition: max-height 0.3s;
 
     &.showSettings {
+      padding-top: 7px ;
       min-height: 64px;
       max-height: 128px;
     }

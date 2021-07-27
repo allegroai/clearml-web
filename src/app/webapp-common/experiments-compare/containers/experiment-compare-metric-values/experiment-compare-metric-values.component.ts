@@ -7,7 +7,7 @@ import {Observable, Subscription} from 'rxjs';
 import * as metricsValuesActions from '../../actions/experiments-compare-metrics-values.actions';
 import {selectCompareMetricsValuesExperiments, selectCompareMetricsValuesSortConfig, selectRefreshing} from '../../reducers';
 import {Router} from '@angular/router';
-import {AddMessage} from '../../../core/actions/layout.actions';
+import {addMessage} from '../../../core/actions/layout.actions';
 import {TreeNode} from '../../shared/experiments-compare-details.model';
 import {createDiffObjectScalars, getAllKeysEmptyObject} from '../../jsonToDiffConvertor';
 
@@ -187,6 +187,6 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
   }
 
   copyIdToClipboard() {
-    this.store.dispatch(new AddMessage('success', 'Copied to clipboard'));
+    this.store.dispatch(addMessage('success', 'Copied to clipboard'));
   }
 }

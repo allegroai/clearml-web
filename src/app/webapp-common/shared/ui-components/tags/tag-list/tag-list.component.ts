@@ -20,7 +20,7 @@ export class TagListComponent implements OnInit {
   public disableRemove: boolean;
   tagsList = [] as Tag[];
 
-  @Input() set tags (tags: string[]) {
+  @Input() set tags(tags: string[]) {
     this.tagsList = tags?.map((tag: string) => ({caption: tag, colorObservable: this.colorService.getColor(tag)}));
     this.disableRemove = false;
   }
@@ -34,8 +34,7 @@ export class TagListComponent implements OnInit {
   ngOnInit(): void {
   }
 
-  // Why the first arg is index??
-  public trackFn (index: number, tag: Tag) {
+  public trackFn(index: number, tag: Tag) {
     return tag.caption;
   }
 

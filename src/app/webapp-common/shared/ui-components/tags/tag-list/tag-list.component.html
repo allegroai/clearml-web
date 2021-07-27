@@ -1,4 +1,4 @@
-<span class="sys-tag" *ngFor="let tag of sysTags">{{tag}}</span>
+<span class="sys-tag tag-item" *ngFor="let tag of sysTags">{{tag}}</span>
 <ng-container *ngIf="remove.observers.length > 0; else:noRemove">
   <sm-user-tag class="tag-item"
                *ngFor="let tag of tagsList; trackBy: trackFn"

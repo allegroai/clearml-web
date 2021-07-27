@@ -3,8 +3,8 @@
                   (click)="activeTab = 'experiments'"></sm-navbar-item>
   <sm-navbar-item header="Workers" [active]="activeTab==='workers'" (click)="activeTab = 'workers'">
   </sm-navbar-item>
-  <div class="pull-right pointer" (click)="deselectQueueClicked()">
-    <i class="fa fa-times"></i>
+  <div class="pull-right pointer tabs-x" (click)="deselectQueueClicked()">
+    <i class="al-icon al-ico-dialog-x sm-md"></i>
   </div>
 </div>
 
@@ -40,6 +40,7 @@
   *ngIf="menuOpen"
   buttonClass="al-icon sm-md al-ico-bars-menu al-color light-grey-blue"
   smMenuClass="bigger-width experiments-in-queue-list"
+  panelClasses="dark"
   [position]="menuPosition"
   [header]=""
   [showCart]="false"
@@ -61,7 +62,7 @@
   <sm-menu-item itemLabel="Move to queue..."
                 [disabled]="selectedQueue.entries.length <= 0"
                 (itemClicked)="moveToQueue()"
-                iconClass="icon sm mr-2 al-icon al-ico-arrow-from-left al-color light-periwinkle-two">
+                iconClass="sm mr-2 al-icon al-ico-arrow-from-left al-color light-periwinkle-two">
   </sm-menu-item>
   <sm-menu-item itemLabel="Remove from queue"
                 [disabled]="selectedQueue.entries.length <= 0"
@@ -90,12 +91,12 @@
     <div class="col-1">
       {{i + 1}}
     </div>
-    <div class="col-21">
+    <div class="col-20">
       <a
         [href]="'/projects/'+ ((row?.task?.project?.id) ? row?.task?.project?.id : '*') + '/experiments/' +row?.task?.id">{{row?.task?.name}}</a>
     </div>
-    <div class="col-1">
-      <i class="fas fa-ellipsis-v pointer p-2" (click)="openContextMenu($event, row?.task)"></i>
+    <div class="col-2">
+      <i class="al-icon al-ico-dots-v-menu sm-md pointer p-2" (click)="openContextMenu($event, row?.task)"></i>
     </div>
   </ng-template>
 </sm-simple-table-2>

@@ -15,6 +15,7 @@ import {ISmCol, TableSortOrderEnum, ColHeaderTypeEnum} from './table.consts';
 import {sortCol} from '../../../utils/tableParamEncode';
 import {Store} from '@ngrx/store';
 import {selectScaleFactor} from '../../../../core/reducers/view-reducer';
+import {trackById} from '@common/shared/utils/forms-track-by';
 
 @Component({
   selector: 'sm-table',
@@ -32,6 +33,7 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
   public checkboxTemplate: any;
   public sortFilterTemplate: any;
   public headerTemplate: TemplateRef<any>;
+  public trackByColFn = trackById;
   private loadMoreSubscription: Subscription;
   private loadMoreDebouncer: Subject<any>;
   public menuItems = [] as MenuItem[];
@@ -137,6 +139,7 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
   @Output() loadMoreClicked = new EventEmitter();
   @Output() onRowRightClick = new EventEmitter();
   @Output() colReordered = new EventEmitter();
+  @Output() columnResized = new EventEmitter<{ columnId: string; widthPx: number }>();
 
   @HostListener('window:resize')
   resize(delay = 50) {
@@ -394,10 +397,8 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
     if (e) {
       this.scrollLeft = (e.target as HTMLDivElement).scrollLeft;
     }
-    if (this.loadButton) {
-      this.buttonLeft = (this.table.el.nativeElement.getBoundingClientRect().width / 2) - 90 + this.scrollLeft;
-      this.cdr.detectChanges();
-    }
+    this.buttonLeft = (this.table.el.nativeElement.getBoundingClientRect().width / 2) - 70 + this.scrollLeft;
+    this.cdr.detectChanges();
   }
 
   private updateFilter() {
@@ -417,9 +418,10 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
   colResize({delta, element}: { delta: number; element: HTMLTableHeaderCellElement }) {
     if (delta) {
       const width = element.getClientRects()[0].width;
-      const colId = element.attributes['data-col-id']?.value;
-      if (colId) {
-        const col = this.columns.find(col => col.id === colId);
+      const columnId = element.attributes['data-col-id']?.value;
+      this.columnResized.emit({columnId, widthPx: width});
+      if (columnId) {
+        const col = this.columns.find(col => col.id === columnId);
         col.style = {...col.style, width: `${width}px`};
       }
     }
@@ -436,4 +438,5 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
   getOrder(colId: string) {
     return this.sortFields.find(field => field.field === colId)?.order;
   }
+
 }

@@ -12,7 +12,7 @@ import {Observable, Subscription} from 'rxjs';
 import {filter, first, skip} from 'rxjs/operators';
 import {ChangeProjectDialogComponent} from '@common/experiments/shared/components/change-project-dialog/change-project-dialog.component';
 import {resetDontShowAgainForBucketEndpoint} from '@common/core/actions/common-auth.actions';
-import {FetchModelsRequested, ModelSelectionChanged, SetSelectedModels} from '../../actions/models-view.actions';
+import {fetchModelsRequested, modelSelectionChanged, setSelectedModels} from '../../actions/models-view.actions';
 import {SelectedModel} from '../../shared/models.model';
 import {CommonDeleteDialogComponent} from '@common/shared/entity-page/entity-delete/common-delete-dialog.component';
 import {EntityTypeEnum} from '../../../../shared/constants/non-common-consts';
@@ -138,7 +138,7 @@ export class ModelMenuComponent extends BaseContextMenuComponent {
 
   public downloadModelFileClicked = () => {
     this.store.dispatch(resetDontShowAgainForBucketEndpoint());
-    this.modelSignedUri = this.adminService.signUrlIfNeeded(this.model.uri, true);
+    this.modelSignedUri = this.adminService.signUrlIfNeeded(this.model.uri);
     if (this.modelSignedUri) {
       this.downloadModelFile();
     } else {
@@ -166,9 +166,9 @@ export class ModelMenuComponent extends BaseContextMenuComponent {
     });
     confirmDialogRef.afterClosed().subscribe((confirmed) => {
       if (confirmed) {
-        this.store.dispatch(new SetSelectedModels([]));
-        this.store.dispatch(new ModelSelectionChanged({model: null, project: this.model?.project?.id || '*'}));
-        this.store.dispatch(new FetchModelsRequested());
+        this.store.dispatch(setSelectedModels({models: []}));
+        this.store.dispatch(modelSelectionChanged({model: null, project: this.model?.project?.id || '*'}));
+        this.store.dispatch(fetchModelsRequested());
         this.store.dispatch(new CancelModelEdit());
       }
     });

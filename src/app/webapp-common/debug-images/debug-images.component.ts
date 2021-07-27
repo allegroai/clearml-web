@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {combineLatest, Observable, Subscription} from 'rxjs';
 import {select, Store} from '@ngrx/store';
 import {IExperimentInfoState} from '../../features/experiments/reducers/experiment-info.reducer';
@@ -35,6 +35,7 @@ import {MatSelectChange} from '@angular/material/select';
 })
 export class DebugImagesComponent implements OnInit, OnDestroy {
 
+  @Input() isDarkTheme = false;
   private debugImagesSubscription: Subscription;
   private taskNamesSubscription: Subscription;
   private selectedExperimentSubscription: Subscription;
@@ -91,10 +92,8 @@ export class DebugImagesComponent implements OnInit, OnDestroy {
           const debugImagesP = Object.entries(debugImages).reduce(((previousValue, currentValue: any) => {
             previousValue[currentValue[0]] = currentValue[1].metrics.map(metric => metric.iterations.map(iteration => {
               const events = iteration.events.map(event => {
-                const signedUrl = this.adminService.signUrlIfNeeded(event.url);
-                const parsed = new URL(signedUrl);
-                parsed.searchParams.append('X-Amz-Date', event.timestamp);
-                return {...event, oldSrc: event.url, url: parsed.toString(), variantAndMetric: this.selectedMetric === ALL_IMAGES ? `${event.metric}/${event.variant}` : ''};
+                const url = this.adminService.signUrlIfNeeded(event.url, {disableCache: event.timestamp});
+                return {...event, oldSrc: event.url, url, variantAndMetric: this.selectedMetric === ALL_IMAGES ? `${event.metric}/${event.variant}` : ''};
               });
               return {...iteration, events};
             }));

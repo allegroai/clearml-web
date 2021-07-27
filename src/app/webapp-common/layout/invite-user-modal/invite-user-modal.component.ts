@@ -4,7 +4,7 @@ import {Store} from '@ngrx/store';
 import {getInviteUserLink, setInviteUserLink} from '../../core/actions/users.actions';
 import {selectInviteLink} from '../../core/reducers/users-reducer';
 import {Observable} from 'rxjs';
-import {AddMessage} from "../../core/actions/layout.actions";
+import {addMessage} from "../../core/actions/layout.actions";
 import {MESSAGES_SEVERITY} from "../../../app.constants";
 import {OrganizationCreateInviteResponse} from "../../../business-logic/model/organization/organizationCreateInviteResponse";
 
@@ -26,7 +26,7 @@ export class InviteUserModalComponent implements OnInit, OnDestroy {
   }
 
   copyToClipboardSuccess() {
-    this.store.dispatch(new AddMessage(MESSAGES_SEVERITY.SUCCESS, 'URL copied successfully'));
+    this.store.dispatch(addMessage(MESSAGES_SEVERITY.SUCCESS, 'URL copied successfully'));
   }
 
   ngOnDestroy(): void {

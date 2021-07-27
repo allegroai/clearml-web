@@ -9,9 +9,9 @@ import {
   ViewChild
 } from '@angular/core';
 import {Store} from '@ngrx/store';
-import {getCompanyTags, getTags, openTagColorsMenu, setTagsFilterByProject} from '../../../../core/actions/projects.actions';
+import {getCompanyTags, getTags, openTagColorsMenu, setTagsFilterByProject} from '@common/core/actions/projects.actions';
 import {ActivateEdit} from 'app/webapp-common/experiments/actions/common-experiments-info.actions';
-import {ActivateModelEdit} from '../../../../models/actions/models-info.actions';
+import {ActivateModelEdit} from '@common/models/actions/models-info.actions';
 
 @Component({
   selector: 'sm-tags-menu',

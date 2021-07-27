@@ -26,6 +26,7 @@ export class ScrollTextareaComponent {
   @Input() isInDev: boolean = false;
   @Input() editable: boolean;
   @Input() showSpinner: boolean;
+  @Input() emptyMessage: string = 'No changes logged';
   @Output() freezeForm = new EventEmitter();
 
   onSearchValueChanged(value: string) {

@@ -7,15 +7,26 @@ span {
 :host {
   display: flex;
   align-items: center;
+
   .menu-trigger {
     width: 34px;
+
     .menu-trigger-icon {
       height: 100%;
       color: $blue-100;
     }
   }
-}
 
+  .feature-tag {
+    color: #d3fd00;
+    font-size: 12px;
+    height: 18px;
+    margin: 4px 0 4px 6px;
+    padding: 0 6px;
+    border-radius: 9px;
+    background-color: #364164;
+  }
+}
 
 
 .sub-project-menu-item {

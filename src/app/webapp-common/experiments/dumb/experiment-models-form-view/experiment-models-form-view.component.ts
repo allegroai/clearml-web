@@ -6,7 +6,7 @@ import {Model} from '../../../../business-logic/model/models/model';
 import {SelectModelComponent} from '../../../select-model/select-model.component';
 import {AdminService} from '../../../../features/admin/admin.service';
 import {Store} from '@ngrx/store';
-import {BaseClickableArtifact} from '../base-clickable-artifact';
+import {BaseClickableArtifactComponent} from '../base-clickable-artifact.component';
 
 
 @Component({
@@ -14,7 +14,7 @@ import {BaseClickableArtifact} from '../base-clickable-artifact';
   templateUrl: './experiment-models-form-view.component.html',
   styleUrls: ['./experiment-models-form-view.component.scss']
 })
-export class ExperimentModelsFormViewComponent extends BaseClickableArtifact {
+export class ExperimentModelsFormViewComponent extends BaseClickableArtifactComponent {
 
   public isLocalFile: boolean;
   private _model: IModelInfo;

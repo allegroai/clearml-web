@@ -1,11 +1,11 @@
 import {Injectable} from '@angular/core';
-import {Actions, Effect, ofType} from '@ngrx/effects';
-import {Store} from '@ngrx/store';
+import {Actions, createEffect, ofType} from '@ngrx/effects';
+import {Action, Store} from '@ngrx/store';
 import {catchError, debounceTime, filter, map, mergeMap, shareReplay, switchMap, withLatestFrom} from 'rxjs/operators';
 import {ApiModelsService} from '../../../business-logic/api-services/models.service';
 import {ModelsGetAllResponse} from '../../../business-logic/model/models/modelsGetAllResponse';
-import {RequestFailed} from '../../core/actions/http.actions';
-import {ActiveLoader, DeactiveLoader, SetBackdrop, SetServerError} from '../../core/actions/layout.actions';
+import {requestFailed} from '../../core/actions/http.actions';
+import {activeLoader, deactivateLoader, setBackdrop, setServerError} from '../../core/actions/layout.actions';
 import {selectAppVisible} from '../../core/reducers/view-reducer';
 import * as infoActions from '../actions/models-info.actions';
 import * as viewActions from '../actions/models-view.actions';
@@ -14,8 +14,8 @@ import {MODELS_INFO_ONLY_FIELDS} from '../shared/models.const';
 import {selectSelectedModel} from '../reducers';
 import {EmptyAction} from '../../../app.constants';
 import {SelectedModel} from '../shared/models.model';
-import {selectActiveWorkspace} from "../../core/reducers/users-reducer";
-import {isExample, isSharedAndNotOwner} from "../../shared/utils/shared-utils";
+import {selectActiveWorkspace} from '../../core/reducers/users-reducer';
+import {isExample, isSharedAndNotOwner} from '../../shared/utils/shared-utils';
 
 @Injectable()
 export class ModelsInfoEffects {
@@ -24,14 +24,12 @@ export class ModelsInfoEffects {
               private apiModels: ApiModelsService) {
   }
 
-  @Effect()
-  activeLoader = this.actions$.pipe(
+  activeLoader = createEffect(() => this.actions$.pipe(
     ofType(infoActions.GET_MODEL_INFO),
-    map(action => new ActiveLoader(action.type)));
+    map(action => activeLoader(action.type))));
 
 
-  @Effect()
-  getModelInfo$ = this.actions$.pipe(
+  getModelInfo$ = createEffect(() => this.actions$.pipe(
     ofType<infoActions.GetModelInfo>(infoActions.GET_MODEL_INFO, infoActions.REFRESH_MODEL_INFO),
     withLatestFrom(this.store.select(selectActiveWorkspace), this.store.select(selectAppVisible)),
     filter(([action, currentUser, visible]) => visible),
@@ -40,7 +38,7 @@ export class ModelsInfoEffects {
         .pipe(
           mergeMap((res: ModelsGetAllResponse) => {
             const model = res.models[0] as SelectedModel;
-            const actions = [new DeactiveLoader(action.type)];
+            const actions = [deactivateLoader(action.type)] as Action[];
             if( model) {
               model.readOnly = isExample(model) || isSharedAndNotOwner(model, activeWorkspace);
               actions.push(new infoActions.SetModel(model as SelectedModel));
@@ -48,15 +46,15 @@ export class ModelsInfoEffects {
             return actions;
           }),
           catchError(error => [
-            new RequestFailed(error),
-            new DeactiveLoader(action.type),
-            new SetServerError(error, null, 'Fetch Model failed')
+            requestFailed(error),
+            deactivateLoader(action.type),
+            setServerError(error, null, 'Fetch Model failed')
           ])
         )
     )
-  );
-  @Effect()
-  editModel$ = this.actions$.pipe(
+  ));
+
+  editModel$ = createEffect(() => this.actions$.pipe(
     ofType<infoActions.EditModel>(infoActions.EDIT_MODEL),
     debounceTime(1000),
     switchMap((action) => {
@@ -71,21 +69,20 @@ export class ModelsInfoEffects {
           mergeMap(() => [
             new infoActions.GetModelInfo(action.payload.id),
             new infoActions.SetIsModelSaving(false),
-            new SetBackdrop(false)
+            setBackdrop({payload: false})
           ]),
           catchError(err => [
-            new RequestFailed(err),
-            new SetServerError(err, null, 'edit models failed'),
-            new SetBackdrop(false),
+            requestFailed(err),
+            setServerError(err, null, 'edit models failed'),
+            setBackdrop({payload: false}),
             new infoActions.GetModelInfo(action.payload.id)
           ])
         );
     }),
     shareReplay(1)
-  );
+  ));
 
-  @Effect()
-  updateModelDetails$ = this.actions$.pipe(
+  updateModelDetails$ = createEffect(() => this.actions$.pipe(
     ofType(infoActions.updateModelDetails),
     withLatestFrom(this.store.select(selectSelectedModel)),
     mergeMap(([action, selectedModel]) =>
@@ -94,7 +91,7 @@ export class ModelsInfoEffects {
           mergeMap((res) => {
             const changes = res?.fields || action.changes;
             return [
-              new viewActions.UpdateModel({id: action.id, changes}),
+              viewActions.updateModel({id: action.id, changes}),
               selectedModel?.id === action.id ? new infoActions.ModelDetailsUpdated({
                 id: action.id,
                 changes
@@ -102,13 +99,13 @@ export class ModelsInfoEffects {
             ];
           }),
           catchError(err => [
-            new RequestFailed(err),
-            new SetServerError(err, null, 'Update models failed'),
+            requestFailed(err),
+            setServerError(err, null, 'Update models failed'),
             new infoActions.GetModelInfo(action.id)
           ])
         )
     ),
     shareReplay(1)
-  );
+  ));
 
 }

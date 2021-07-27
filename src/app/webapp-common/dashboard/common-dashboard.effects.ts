@@ -1,8 +1,8 @@
 import {Injectable} from '@angular/core';
 import {ApiProjectsService} from '../../business-logic/api-services/projects.service';
-import {Actions, createEffect, Effect, ofType} from '@ngrx/effects';
-import {RequestFailed} from '../core/actions/http.actions';
-import {ActiveLoader, AddMessage, DeactiveLoader} from '../core/actions/layout.actions';
+import {Actions, createEffect, ofType} from '@ngrx/effects';
+import {requestFailed} from '../core/actions/http.actions';
+import {activeLoader, addMessage, deactivateLoader} from '../core/actions/layout.actions';
 import {CreateProjectFromDashboard, getInviteInfo, GetRecentProjects, setInviteInfo, SetRecentProjects, SetRecentTasks} from './common-dashboard.actions';
 import {CARDS_IN_ROW, DASHBOARD_ACTIONS} from './common-dashboard.const';
 import {MESSAGES_SEVERITY} from '../../app.constants';
@@ -16,7 +16,7 @@ import {MatDialog} from '@angular/material/dialog';
 import {ConfirmDialogComponent} from '../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {Store} from '@ngrx/store';
 import {ErrorService} from '../shared/services/error.service';
-import {selectCurrentUser, selectShowOnlyUserWork} from "../core/reducers/users-reducer";
+import {selectCurrentUser, selectShowOnlyUserWork} from '../core/reducers/users-reducer';
 
 @Injectable()
 export class CommonDashboardEffects {
@@ -26,14 +26,12 @@ export class CommonDashboardEffects {
               private dialog: MatDialog) {
   }
 
-  @Effect()
-  activeLoader = this.actions.pipe(
+  activeLoader = createEffect(() => this.actions.pipe(
     ofType(DASHBOARD_ACTIONS.GET_RECENT_PROJECTS, DASHBOARD_ACTIONS.GET_RECENT_PROJECTS, DASHBOARD_ACTIONS.GET_RECENT_TASKS, DASHBOARD_ACTIONS.CREATE_PROJECT),
-    map(action => new ActiveLoader(action.type))
-  );
+    map(action => activeLoader(action.type))
+  ));
 
-  @Effect()
-  getRecentProjects = this.actions.pipe(
+  getRecentProjects = createEffect(() => this.actions.pipe(
     ofType<GetRecentProjects>(DASHBOARD_ACTIONS.GET_RECENT_PROJECTS),
     withLatestFrom(this.store.select(selectCurrentUser), this.store.select(selectShowOnlyUserWork)),
     mergeMap(([action, user, showOnlyUserWork]) =>
@@ -42,14 +40,13 @@ export class CommonDashboardEffects {
         active_users: (showOnlyUserWork ? [user.id] : null),
         only_fields: ['name', 'company', 'user', 'created', 'default_output_destination']
       }).pipe(
-          mergeMap(res => [new SetRecentProjects(res.projects), new DeactiveLoader(action.type)]),
-          catchError(error => [new DeactiveLoader(action.type), new RequestFailed(error)])
+          mergeMap(res => [new SetRecentProjects(res.projects), deactivateLoader(action.type)]),
+          catchError(error => [deactivateLoader(action.type), requestFailed(error)])
         )
     )
-  );
+  ));
 
-  @Effect()
-  getRecentTasks = this.actions.pipe(
+  getRecentTasks = createEffect(() => this.actions.pipe(
     ofType(DASHBOARD_ACTIONS.GET_RECENT_TASKS ),
     withLatestFrom(this.store.select(selectCurrentUser), this.store.select(selectShowOnlyUserWork)),
     switchMap(([action, user, showOnlyUserWork]) => this.tasksApi.tasksGetAllEx({
@@ -63,26 +60,25 @@ export class CommonDashboardEffects {
         user: showOnlyUserWork ? [user.id] : null,
       })
         .pipe(
-          mergeMap(res => [new SetRecentTasks(res.tasks as Array<IRecentTask>), new DeactiveLoader(action.type)]),
-          catchError(err => [new RequestFailed(err), new DeactiveLoader(action.type)])
+          mergeMap(res => [new SetRecentTasks(res.tasks as Array<IRecentTask>), deactivateLoader(action.type)]),
+          catchError(err => [requestFailed(err), deactivateLoader(action.type)])
         )
     )
-  );
+  ));
 
-  @Effect()
-  createProject = this.actions.pipe(
+  createProject = createEffect(() => this.actions.pipe(
     ofType<CreateProjectFromDashboard>(DASHBOARD_ACTIONS.CREATE_PROJECT),
     mergeMap((action) => this.projectsApi.projectsCreate(action.payload.project)
       .pipe(
         mergeMap(res => [
           new GetRecentProjects({stats_for_state: ProjectsGetAllExRequest.StatsForStateEnum.Active, order_by: ['-last_update'], page: 0, page_size: CARDS_IN_ROW}),
-          new DeactiveLoader(action.type),
-          new AddMessage(MESSAGES_SEVERITY.SUCCESS, 'Project Created Successfully')]),
-        catchError(error => [new DeactiveLoader(action.type), new RequestFailed(error),
-          new AddMessage(MESSAGES_SEVERITY.ERROR, 'Project Creation Failed')])
+          deactivateLoader(action.type),
+          addMessage(MESSAGES_SEVERITY.SUCCESS, 'Project Created Successfully')]),
+        catchError(error => [deactivateLoader(action.type), requestFailed(error),
+          addMessage(MESSAGES_SEVERITY.ERROR, 'Project Creation Failed')])
       )
     )
-  );
+  ));
 
   addWorkspace = createEffect(() => this.actions.pipe(
     ofType(addWorkspace),

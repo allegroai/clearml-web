@@ -1,6 +1,5 @@
 import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {Observable, Subscription} from 'rxjs';
-import {ExperimentGraph} from '../../../tasks/tasks.model';
 import {select, Store} from '@ngrx/store';
 import {IExperimentInfoState} from '../../../../features/experiments/reducers/experiment-info.reducer';
 import {distinctUntilChanged, filter, map, tap} from 'rxjs/operators';
@@ -14,6 +13,7 @@ import {ScalarKeyEnum} from '../../../../business-logic/model/events/scalarKeyEn
 import {toggleShowScalarOptions} from '../../actions/compare-header.actions';
 import {GroupByCharts} from '../../../experiments/reducers/common-experiment-output.reducer';
 import {GroupedList} from '../../../shared/ui-components/data/selectable-grouped-filter-list/selectable-grouped-filter-list.component';
+import {ExtFrame} from '../../../shared/experiment-graphs/single-graph/plotly-graph-base';
 
 
 @Component({
@@ -44,7 +44,7 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
   public graphList: GroupedList = {};
   public selectedGraph: string = null;
   private taskIds: Array<string>;
-  public graphs: { [key: string]: ExperimentGraph };
+  public graphs: { [key: string]: ExtFrame[] };
   public refreshDisabled = false;
   public showSettingsBar: boolean = false;
   public groupBy: GroupByCharts;
@@ -138,7 +138,7 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
     }
   }
 
-  private buildNestedListWithoutChildren(merged: { [p: string]: ExperimentGraph }) {
+  private buildNestedListWithoutChildren(merged: { [p: string]: ExtFrame[] }) {
     return Object.keys(merged).reduce((acc, metric) => {
       acc[metric] = {};
       return acc;

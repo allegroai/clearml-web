@@ -50,9 +50,7 @@
   }
 
   .table-load-more {
-    &:hover {
-      background-color: transparent !important;
-    }
+    background-color: transparent !important;
   }
 
   .load-more-wrapper {
@@ -128,7 +126,7 @@
       }
 
       .col-header {
-        text-align: left !important;
+        text-align: left;
         font-size: 12px !important;
         font-weight: 500;
       }
@@ -193,6 +191,15 @@
           color: $blue-300;
         }
       }
+    }
+  }
+}
+:host-context(.dark-theme-table.table-first-column-color) {
+  tr td:not(.no-data):not(.load-more-wrapper).simple {
+    border-bottom-color: $dark-grey-blue;
+    color: $blue-280;
+    &:first-child {
+      color: $blue-400;
     }
   }
 }

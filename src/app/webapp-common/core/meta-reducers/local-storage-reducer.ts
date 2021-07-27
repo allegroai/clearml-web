@@ -1,8 +1,7 @@
 import {ActionReducer, Action} from '@ngrx/store';
 import {merge, pick} from 'lodash/fp';
 import {userPreferences} from '../../user-preferences';
-import {USERS_ACTIONS} from '../../../app.constants';
-import {SetPreferences} from '../actions/users.actions';
+import {setPreferences} from '../actions/users.actions';
 
 const firstRun = {};
 
@@ -22,8 +21,8 @@ export function createLocalStorageReducer(key: string, syncedKeys: string[], act
         const savedState = userPreferences.getPreferences(key);
         nextState        = merge(nextState, savedState);
       }
-      if (action.type === USERS_ACTIONS.SET_PREF) {
-        const savedState = (action as SetPreferences).payload[key];
+      if (action.type === setPreferences.type) {
+        const savedState = (action as ReturnType<typeof setPreferences>).payload[key];
         nextState        = merge(nextState, savedState);
       }
 

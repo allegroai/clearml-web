@@ -1,7 +1,6 @@
 import {Injectable} from '@angular/core';
 import {select, Store} from '@ngrx/store';
 import {from, Observable, Subject} from 'rxjs';
-import {HTTP} from '../../app.constants';
 import {
   selectDontShowAgainForBucketEndpoint, selectRevokeSucceed, selectS3BucketCredentials, selectS3BucketCredentialsBucketCredentials
 } from '../core/reducers/common-auth-reducer';
@@ -16,16 +15,17 @@ import {ConfigurationService} from '../shared/services/configuration.service';
 import {selectActiveWorkspace} from '../core/reducers/users-reducer';
 import {GetCurrentUserResponseUserObjectCompany} from '../../business-logic/model/users/getCurrentUserResponseUserObjectCompany';
 import {Environment} from '../../../environments/base';
+import {apiRequest} from '@common/core/actions/http.actions';
 
 const LOCAL_SERVER_PORT = 27878;
 
 @Injectable()
 export class BaseAdminService {
   bucketCredentials: Observable<any>;
-  public S3Services = {};
+  public s3Services = {};
   revokeSucceed: Observable<any>;
   protected store: Store<any>;
-  private S3BucketCredentials: Observable<any>;
+  private readonly s3BucketCredentials: Observable<any>;
   private previouslySignedUrls = {};
   private localServerWorking = false;
   private workspace: GetCurrentUserResponseUserObjectCompany;
@@ -36,8 +36,8 @@ export class BaseAdminService {
     this.store = store;
     this.revokeSucceed = store.pipe(select(selectRevokeSucceed));
     this.revokeSucceed.subscribe(this.onRevokeSucceed);
-    this.S3BucketCredentials = store.pipe(select(selectS3BucketCredentials));
-    this.S3BucketCredentials.pipe(skip(1)).subscribe(bucketEndpoint => {
+    this.s3BucketCredentials = store.pipe(select(selectS3BucketCredentials));
+    this.s3BucketCredentials.pipe(skip(1)).subscribe(() => {
       this.previouslySignedUrls = {};
     });
     this.bucketCredentials = store.pipe(select(selectS3BucketCredentialsBucketCredentials));
@@ -47,30 +47,35 @@ export class BaseAdminService {
   }
 
   showS3PopUp(bucketKeyEndpoint, error = null, isAzure = false) {
-    delete this.S3Services[bucketKeyEndpoint.Bucket + bucketKeyEndpoint.Endpoint];
+    delete this.s3Services[bucketKeyEndpoint.Bucket + bucketKeyEndpoint.Endpoint];
     const selectDontShowAgainBucketEndpoint = this.syncSelector.selectSync(selectDontShowAgainForBucketEndpoint);
     if (selectDontShowAgainBucketEndpoint !== (bucketKeyEndpoint.Bucket + bucketKeyEndpoint.Endpoint)) {
       this.store.dispatch(showS3PopUp({payload: {credentials: bucketKeyEndpoint, credentialsError: error, isAzure}}));
     }
-    return this.S3BucketCredentials;
+    return this.s3BucketCredentials;
   }
 
   showLocalFilePopUp(url) {
     this.store.dispatch(showLocalFilePopUp({url}));
   }
 
-  signUrlIfNeeded(url, skipLocalFile = true, skipFileServer = true) {
+  signUrlIfNeeded(url: string, config?: {skipLocalFile?: boolean; skipFileServer?: boolean; disableCache?: number}) {
+    config = {...{skipLocalFile: true, skipFileServer: true, disableCache: null}, ...config};
+
     if (isFileserverUrl(url, window.location.hostname)) {
       if (this.environment.communityServer) {
         url = this.addTenant(url);
       }
-      if (!skipFileServer && this.environment.useFilesProxy) {
+      if (!config.skipFileServer && this.environment.useFilesProxy) {
         return convertToReverseProxy(url);
+      }
+      if (config.disableCache) {
+        url = this.addS3TimeStamp(url, config.disableCache);
       }
       return url;
     }
 
-    if (this.isLocalFile(url) && !skipLocalFile) {
+    if (this.isLocalFile(url) && !config.skipLocalFile) {
       this.checkLocalServerRunning(url);
       return this.redirectToLocalServer(url);
     }
@@ -97,11 +102,13 @@ export class BaseAdminService {
       }
       const s3 = this.findOrInitBucketS3(bucketKeyEndpoint);
       if (s3) {
+        /* eslint-disable @typescript-eslint/naming-convention */
         const bucketKey = {
           Bucket: bucketKeyEndpoint.Bucket,
           Key: bucketKeyEndpoint.Key,
           Expires: 60 * 60 * 24 * 4
         };
+        /* eslint-enable @typescript-eslint/naming-convention */
         let signedURL = '';
         try {
           signedURL = s3.getSignedUrl('getObject', bucketKey);
@@ -110,10 +117,13 @@ export class BaseAdminService {
         }
         const timeToExperation = (new Date()).setDate(now.getDate() + 3);
         this.previouslySignedUrls[url] = {
-          signedURL: signedURL,
+          signedURL,
           expires: timeToExperation,
-          bucketKeyEndpoint: bucketKeyEndpoint
+          bucketKeyEndpoint
         };
+        if(config.disableCache){
+          return this.addS3TimeStamp(signedURL, config.disableCache);
+        }
         return signedURL;
       } else {
         delete bucketKeyEndpoint.Key;
@@ -133,13 +143,13 @@ export class BaseAdminService {
 
   findOrInitBucketS3(bucketKeyEndpoint) {
     const set = this.findS3CredentialsInStore(bucketKeyEndpoint);
-    const S3Service = this.S3Services[bucketKeyEndpoint.Bucket + bucketKeyEndpoint.Endpoint];
-    if (set && S3Service) {
-      return S3Service;
+    const s3Service = this.s3Services[bucketKeyEndpoint.Bucket + bucketKeyEndpoint.Endpoint];
+    if (set && s3Service) {
+      return s3Service;
     } else {
       if (set) {
-        this.S3Services[bucketKeyEndpoint.Bucket + bucketKeyEndpoint.Endpoint] = this.createS3Service(set);
-        return this.S3Services[bucketKeyEndpoint.Bucket + bucketKeyEndpoint.Endpoint];
+        this.s3Services[bucketKeyEndpoint.Bucket + bucketKeyEndpoint.Endpoint] = this.createS3Service(set);
+        return this.s3Services[bucketKeyEndpoint.Bucket + bucketKeyEndpoint.Endpoint];
       } else {
         return false;
       }
@@ -160,31 +170,29 @@ export class BaseAdminService {
   }
 
   resetS3Services() {
-    this.S3Services = {};
+    this.s3Services = {};
   }
 
   public checkImgUrl(src) {
     const bucketKeyEndpoint = src && this.getBucketAndKeyFromSrc(src);
     if (bucketKeyEndpoint) {
-      delete this.S3Services[bucketKeyEndpoint.Bucket + bucketKeyEndpoint.Endpoint];
-      const S3OldCredentials = this.syncSelector.selectSync(selectS3BucketCredentialsBucketCredentials)
+      delete this.s3Services[bucketKeyEndpoint.Bucket + bucketKeyEndpoint.Endpoint];
+      const s3OldCredentials = this.syncSelector.selectSync(selectS3BucketCredentialsBucketCredentials)
         .filter(bucket => bucket.Bucket === bucketKeyEndpoint.Bucket && bucket.Endpoint === bucketKeyEndpoint.Endpoint);
-      if (S3OldCredentials[0]) {
-        this.showS3PopUp(S3OldCredentials[0], 'Error', this.isAzureUrl(src));
+      if (s3OldCredentials[0]) {
+        this.showS3PopUp(s3OldCredentials[0], 'Error', this.isAzureUrl(src));
       }
     }
   }
 
 
   public getAllCredentials() {
-    this.store.dispatch({
-      type: HTTP.API_REQUEST,
-      meta: {
+    this.store.dispatch(apiRequest({
         method: 'GET',
         endpoint: 'auth.get_credentials',
         success: 'AUTH_GET_SUCCESS'
-      }
-    });
+      })
+    );
   }
 
 
@@ -205,39 +213,45 @@ export class BaseAdminService {
   }
 
   public getBucketAndKeyFromSrc = (src) => {
-    let Key = '';
+    let key = '';
     if (src && src.includes('azure://')) {
+      /* eslint-disable @typescript-eslint/naming-convention */
       return {
         Bucket: 'azure',
         Endpoint: 'azure',
         Key: 'azure',
-        Secret: Key
+        Secret: key
       };
+      /* eslint-enable @typescript-eslint/naming-convention */
     }
-    const src_arr = src.split('/');
+    const srcArr = src.split('/');
     if (!this.isS3Url(src)) {
       return null;
-    } else if (src_arr[2].includes(':')) {
-      src_arr.forEach((part, index) => {
+    } else if (srcArr[2].includes(':')) {
+      srcArr.forEach((part, index) => {
         if (index > 3) {
-          Key += part + '/';
+          key += part + '/';
         }
       });
-      Key = Key.slice(0, -1);
+      key = key.slice(0, -1);
+      /* eslint-disable @typescript-eslint/naming-convention */
       return {
-        Bucket: src_arr[3],
-        Endpoint: src_arr[2],
-        Key: Key,
+        Bucket: srcArr[3],
+        Endpoint: srcArr[2],
+        Key: key,
       };
+      /* eslint-enable @typescript-eslint/naming-convention */
     } else {
       try {
         src = this.encodeSpecialCharacters(src);
         const amazon = AmazonS3URI(src);
+        /* eslint-disable @typescript-eslint/naming-convention */
         return {
           Bucket: amazon.bucket,
           Key: amazon.key,
           Endpoint: null
         };
+        /* eslint-enable @typescript-eslint/naming-convention */
       } catch (err) {
         console.log(err);
         return null;
@@ -268,7 +282,6 @@ export class BaseAdminService {
 
   signGoogleCloudUrl(url: string): string {
     return 'https://storage.cloud.google.com' + (url.slice(4));
-
   }
 
   signAzureUrl(url: string, azureBucket) {
@@ -307,6 +320,7 @@ export class BaseAdminService {
     const bucketKeyEndpoint = url && this.getBucketAndKeyFromSrc(url);
     const s3 = this.findOrInitBucketS3(bucketKeyEndpoint) as S3;
 
+    /* eslint-disable @typescript-eslint/naming-convention */
     const req = {
       Bucket: bucketKeyEndpoint.Bucket,
       Delete: {
@@ -314,13 +328,14 @@ export class BaseAdminService {
         Objects: files.map(file => ({Key: file} as S3.ObjectIdentifier))
       }
     } as S3.Types.DeleteObjectsRequest;
+    /* eslint-enable @typescript-eslint/naming-convention */
 
     if (s3) {
-      s3.deleteObjects(req, (err, data) => {
+      s3.deleteObjects(req, (err) => {
         if (err) {
-          this.deleteS3FilesSubject.next({success: false, files: files});
+          this.deleteS3FilesSubject.next({success: false, files});
         } else {
-          this.deleteS3FilesSubject.next({success: true, files: files});
+          this.deleteS3FilesSubject.next({success: true, files});
         }
       });
     } else {
@@ -330,4 +345,16 @@ export class BaseAdminService {
     }
     return !skipSubjectReturn && this.deleteS3FilesSubject.asObservable();
   }
+
+  addS3TimeStamp(url: string, timestamp: number) {
+    timestamp = timestamp || new Date().getTime();
+    try {
+      const parsed = new URL(url);
+      parsed.searchParams.append('X-Amz-Date', `${timestamp}`);
+      return  parsed.toString();
+    } catch {
+      return url;
+    }
+  }
+
 }

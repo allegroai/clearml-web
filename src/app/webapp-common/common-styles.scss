@@ -36,7 +36,12 @@ $green-theme: mat-light-theme($custom-theme-primary, $custom-theme-accent, $cust
 $dark-theme: mat-dark-theme($mat-allegro, $mat-allegro, $mat-allegro);
 $light-theme: mat-light-theme($mat-allegro, $mat-allegro, $mat-allegro);
 $sm-theme: mat-light-theme($sm-theme-primary, $sm-theme-accent, $sm-theme-warn);
-
+.cdk-drag-preview.form-group-drag {
+  padding: 8px 16px 32px 16px;
+  border-radius: 4px;
+  border: solid 1px #d4d6e0;
+  background-color: white;
+}
 .dark-theme {
   @include mat-slide-toggle-theme($green-theme);
   @include mat-radio-theme($green-theme);
@@ -66,9 +71,19 @@ $sm-theme: mat-light-theme($sm-theme-primary, $sm-theme-accent, $sm-theme-warn);
   @include mat-slide-toggle-theme($sm-theme);
   @include mat-radio-theme($sm-theme);
   @include mat-select-theme($light-theme);
+
   .mat-checkbox-frame,
   .mat-radio-outer-circle {
     border-color: $purple;
+  }
+
+  .mat-radio-button.mat-accent.disabled, .mat-radio-button.mat-accent.disabled.mat-radio-checked {
+    .mat-radio-outer-circle, .mat-radio-inner-circle {
+      border-color:  $blue-300;
+    }
+    .mat-radio-inner-circle{
+    background-color:  $blue-300;
+    }
   }
 
   .light-theme .mat-radio-button.mat-radio-disabled .mat-radio-outer-circle,
@@ -126,6 +141,11 @@ h5.al-header {
   cursor: pointer;
 }
 
+.pointer-events-none {
+  pointer-events: none;
+}
+
+
 .grab {
   cursor: grab;
 }
@@ -141,8 +161,10 @@ h5.al-header {
     background: #ff7272 !important;
   }
 }
-mat-expansion-panel{
+
+mat-expansion-panel {
   box-shadow: unset;
+
   .mat-expansion-panel-header {
     margin-bottom: 0;
   }
@@ -213,6 +235,12 @@ button {
 // utility to display a pointer
 .pointer {
   cursor: pointer;
+}
+.grabbing{
+  cursor: grab;
+  &:active {
+    cursor: grabbing;
+  }
 }
 
 .flex-middle {
@@ -401,10 +429,19 @@ html {
     max-width: none;
     min-width: 114px;
     min-height: 32px;
+
     &.custom-columns {
       width: 370px;
     }
   }
+}
+
+.sm-menu-header {
+  text-align: center;
+  padding: 15px 15px;
+  background: $blue-25;
+  color: $blue-400;
+  font-weight: 500;
 }
 
 .mat-menu-item {
@@ -459,10 +496,10 @@ as-split {
 }
 
 $type-colors: (
-        string: #ff8400,
-        number: $neon-yellow-betterinchrome,
-        boolean: #b938a4,
-        date: #05668D,
+  string: #ff8400,
+  number: $neon-yellow-betterinchrome,
+  boolean: #b938a4,
+  date: #05668D,
 );
 
 .dark-theme {
@@ -547,7 +584,6 @@ body .mat-menu-content:not(:empty) {
   padding-bottom: 0px;
 
   .search-results {
-    height: 200px;
     overflow: auto;
     max-width: 222px;
   }
@@ -563,6 +599,7 @@ body .mat-menu-content:not(:empty) {
 body .mat-menu-panel .mat-form-field.tags-menu-input {
   .mat-form-field-wrapper {
     padding: 0;
+
     .mat-form-field-flex {
       padding: 0 14px;
       align-items: center;
@@ -621,7 +658,7 @@ button.btn.button-outline-dark {
 .sm-card-list-layout {
   display: grid;
   grid-template-columns: repeat(auto-fit, 352px);
-  grid-gap: 24px;
+  grid-gap: 32px 24px;
   padding: 0 24px 24px;
   justify-content: center;
 
@@ -648,7 +685,7 @@ button.btn.button-outline-dark {
     align-items: center;
     font-size: 12px;
 
-    &>.menu {
+    & > .menu {
       color: $blue-300;
       font-weight: 500;
       cursor: pointer;

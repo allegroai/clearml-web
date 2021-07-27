@@ -1,6 +1,6 @@
 import {Component, ElementRef, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {SetBackdrop} from '@common/core/actions/layout.actions';
+import {setBackdrop} from '@common/core/actions/layout.actions';
 import {MatDialog} from '@angular/material/dialog';
 
 @Component({
@@ -18,6 +18,7 @@ export class EditableSectionComponent implements OnInit, OnDestroy {
   @Input() hideSaveButton = false;
   @Input() containerClass = '';
   @Input() hideEditButton = false;
+  @Input() isDarkTheme = false;
 
   private _saving = false;
   @Input() set saving(saving) {
@@ -53,12 +54,12 @@ export class EditableSectionComponent implements OnInit, OnDestroy {
   editModeChanged(editMode) {
     this.inEditMode = editMode;
     this.activateEditClicked.emit(editMode);
-    this.store.dispatch(new SetBackdrop(editMode));
+    this.store.dispatch(setBackdrop({payload: editMode}));
   }
 
   cancelClickedEvent() {
     this.inEditMode = false;
-    this.store.dispatch(new SetBackdrop(false));
+    this.store.dispatch(setBackdrop({payload: false}));
     this.cancelClicked.emit();
   }
 

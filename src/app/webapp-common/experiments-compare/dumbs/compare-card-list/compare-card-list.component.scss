@@ -40,7 +40,6 @@
       sm-card2 {
         height: 100%;
         display: block;
-        width: 455px;
 
         .al-card {
           height: 100%;
@@ -76,6 +75,20 @@
                 color: $blue-500;
                 white-space: nowrap;
               }
+              .parent .content {
+                display: flex;
+                align-items: center;
+                text-transform: uppercase;
+                .fas {
+                  font-size: 11px;
+                  width: 16px;
+                  height: 28px;
+                  display: inline-flex;
+                  line-height: 28px;
+                  align-items: center;
+                  justify-content: center;
+                }
+              }
             }
 
             cdk-virtual-scroll-viewport {
@@ -103,7 +116,7 @@
 
     i {
       margin-right: 16px;
-      opacity: 0.2;
+      opacity: 0.8;
 
       &:hover {
         opacity: 1;

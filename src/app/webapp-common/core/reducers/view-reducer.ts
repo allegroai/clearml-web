@@ -1,7 +1,6 @@
-import {HTTP, HTTP_ACTIONS, VIEW_ACTIONS} from '../../../app.constants';
-import {createSelector} from '@ngrx/store';
-import {get} from 'lodash/fp';
-import {firstLogin, neverShowPopupAgain, plotlyReady, setScaleFactor} from '../actions/layout.actions';
+import {createReducer, createSelector, on} from '@ngrx/store';
+import * as layoutActions from '../actions/layout.actions';
+import {apiRequest, requestFailed} from '@common/core/actions/http.actions';
 
 export interface ViewState {
   loading: {[endpoint: string]: boolean};
@@ -56,56 +55,33 @@ export const selectPlotlyReady = createSelector(views, state => state.plotlyRead
 export const selectNeverShowPopups = createSelector(views, (state): string[] => state.neverShowPopupAgain);
 
 
-export function viewReducer(viewState: ViewState = initViewState, action) {
-
-  switch (action.type) {
-    case HTTP_ACTIONS.REQUEST_FAILED: {
-      const isLoggedOut = action.payload.err && action.payload.err.status === 401;
-      return {...viewState, loggedOut: isLoggedOut};
-    }
-    case VIEW_ACTIONS.DEACTIVE_LOADER:
-      return {
-        ...viewState,
-        loading: {...viewState.loading, [action.payload.endpoint]: false}
-      };
-    case VIEW_ACTIONS.ACTIVE_LOADER:
-      return {
-        ...viewState,
-        loading: {...viewState.loading, [action.payload.endpoint]: true}
-      };
-    case VIEW_ACTIONS.VISIBILITY_CHANGED:
-      return {...viewState, applicationVisible: action.visible};
-    case setScaleFactor.type:
-      return {...viewState, scaleFactor: action.scale};
-    case firstLogin.type:
-      return {...viewState, firstLogin: (action as ReturnType<typeof firstLogin>).first, firstLoginAt: new Date().getTime()};
-    case plotlyReady.type:
-      return {...viewState, plotlyReady: true};
-    case VIEW_ACTIONS.RESET_LOADER:
-      return {...viewState, loading: {}};
-    case HTTP.API_REQUEST_SUCCESS:
-      return {
-        ...viewState,
-        loading: {...viewState.loading, [get('payload.endpoint', action) ? action.payload.endpoint : 'default']: false}
-      };
-
-    case HTTP.API_REQUEST:
-      return {
-        ...viewState,
-        loading: {...viewState.loading, [get('payload.endpoint', action) ? action.payload.endpoint : 'default']: true}
-      };
-
-    case VIEW_ACTIONS.SET_NOTIFICATION_DIALOG:
-      return {...viewState, notification: action.payload};
-    case VIEW_ACTIONS.SET_BACKDROP:
-      return {...viewState, backdropActive: action.payload};
-    case VIEW_ACTIONS.SET_AUTO_REFRESH:
-      return {...viewState, autoRefresh: action.payload.autoRefresh};
-    case VIEW_ACTIONS.SET_COMPARE_AUTO_REFRESH:
-      return {...viewState, compareAutoRefresh: action.payload.autoRefresh};
-    case neverShowPopupAgain.type:
-      return {...viewState, neverShowPopupAgain: action.reset? viewState.neverShowPopupAgain.filter( popups => popups !== action.popupId) : [...viewState.neverShowPopupAgain, action.popupId]};
-    default:
-      return viewState;
-  }
-}
+export const viewReducer = createReducer(
+  initViewState,
+  on(requestFailed, (state, action) => {
+    const isLoggedOut = action.err && action.err.status === 401;
+    return {...state, loggedOut: isLoggedOut};
+  }),
+  on(layoutActions.deactivateLoader, (state, action) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const {[action.endpoint]: removed, ...loading} = state.loading;
+    return {...state, loading};
+  }),
+  on(layoutActions.activeLoader, (state, action) => ({
+    ...state,
+    loading: {...state.loading, [action.endpoint]: true}
+  })),
+  on(layoutActions.visibilityChanged, (state, action) => ({...state, applicationVisible: action.visible})),
+  on(layoutActions.setScaleFactor, (state, action) => ({...state, scaleFactor: action.scale})),
+  on(layoutActions.firstLogin, (state, action) => ({...state, firstLogin: action.first, firstLoginAt: new Date().getTime()})),
+  on(layoutActions.plotlyReady, (state) => ({...state, plotlyReady: true})),
+  on(layoutActions.resetLoader, (state) => ({...state, loading: {}})),
+  on(apiRequest, (state, action) => ({
+    ...state,
+    loading: {...state.loading, [action?.endpoint || 'default']: true}
+  })),
+  on(layoutActions.setNotificationDialog, (state, action) => ({...state, notification: action})),
+  on(layoutActions.setBackdrop, (state, action) => ({...state, backdropActive: action.payload})),
+  on(layoutActions.setAutoRefresh, (state, action) => ({...state, autoRefresh: action.autoRefresh})),
+  on(layoutActions.setCompareAutoRefresh, (state, action) => ({...state, compareAutoRefresh: action.autoRefresh})),
+  on(layoutActions.neverShowPopupAgain, (state, action) => ({...state, neverShowPopupAgain: action.reset? state.neverShowPopupAgain.filter( popups => popups !== action.popupId) : Array.from(new Set([...state.neverShowPopupAgain, action.popupId]))}))
+);

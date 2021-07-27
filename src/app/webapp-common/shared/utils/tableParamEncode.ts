@@ -1,6 +1,11 @@
-import {TableSortOrderEnum, ISmCol, TABLE_SORT_ORDER} from '../ui-components/data/table/table.consts';
+import {
+  ISmCol,
+  TABLE_SORT_ORDER,
+  ColHeaderTypeEnum, ColHeaderFilterTypeEnum
+} from '../ui-components/data/table/table.consts';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {SortMeta} from 'primeng/api';
+import {MetricValueType} from '@common/experiments-compare/reducers/experiments-compare-charts.reducer';
 
 export interface TableFilter {
   col?: string;
@@ -11,20 +16,16 @@ export interface TableFilter {
 export interface MetricColumn {
   metricHash: string;
   variantHash: string;
-  valueType: string;
+  valueType: MetricValueType;
   metric: string;
   variant: string;
 }
 
-export function getValueTypeName(valueType: string) {
-  return valueType.replace('_', '').replace('value', '').toUpperCase();
-}
+export const getValueTypeName = (valueType: string) => valueType.replace('_', '').replace('value', '').toUpperCase();
 
-export function encodeOrder(orders: SortMeta[]): string[] {
-  return orders.map(order => `${order.order === TABLE_SORT_ORDER.DESC ? '-' : ''}${order.field}`);
-}
+export const encodeOrder = (orders: SortMeta[]): string[] => orders.map(order => `${order.order === TABLE_SORT_ORDER.DESC ? '-' : ''}${order.field}`);
 
-export function encodeFilters(filters: { [key: string]: FilterMetadata }) {
+export const encodeFilters = (filters: { [key: string]: FilterMetadata }) => {
   if (filters) {
     return Object.keys(filters)
       .filter((key: string) => filters[key].value?.length)
@@ -33,9 +34,9 @@ export function encodeFilters(filters: { [key: string]: FilterMetadata }) {
         return `${key}:${val.matchMode ? val.matchMode + ':' : ''}${val.value.join('+')}`;
       }).join(',');
   }
-}
+};
 
-export function decodeOrder(orders: string[]): SortMeta[] {
+export const decodeOrder = (orders: string[]): SortMeta[] => {
   if (typeof orders === 'string') {
     orders = [orders];
   }
@@ -46,28 +47,30 @@ export function decodeOrder(orders: string[]): SortMeta[] {
       return {field: order, order: 1} as SortMeta;
     }
   });
-}
+};
 
-export function decodeFilter(filters: string): TableFilter[] {
-  return filters.split(',').map((filter: string) => {
-    const parts = filter.split(':');
-    const [col, values] = filter.split(/:(.+)/);
-    let mode: string;
-    // if (parts.length === 3) {
-    //   mode = parts[1];
-    //   parts[1] = parts[2];
-    // }
-    return {col, filterMatchMode: mode, value: values?.split('+').map( x => x === '' ? null : x )};
-  });
-}
+export const decodeFilter = (filters: string): TableFilter[] => filters.split(',').map((filter: string) => {
+  let mode: string;
+  const index = filter.indexOf(':AND');
+  if (index > -1) {
+    mode = 'AND';
+    filter = filter.replace(':AND', '');
+  }
+  const [col, values] = filter.split(/:(.+)/);
+  // if (parts.length === 3) {
+  //   mode = parts[1];
+  //   parts[1] = parts[2];
+  // }
+  return {col, filterMatchMode: mode, value: values?.split('+').map(x => x === '' ? null : x)};
+});
 
-export function sortCol(a, b, colsOrder) {
+export const sortCol = (a, b, colsOrder) => {
   const indexOfA = colsOrder.indexOf(a);
   const indexOfB = colsOrder.indexOf(b);
   return ((indexOfA >= 0) ? indexOfA : 99) - ((indexOfB >= 0) ? indexOfB : 99);
-}
+};
 
-export function encodeColumns(mainCols: ISmCol[] | any, hiddenCols = {}, metricsCols = [], colsOrder = []): string[] {
+export const encodeColumns = (mainCols: ISmCol[] | any, hiddenCols = {}, metricsCols = [], colsOrder = []): string[] => {
   colsOrder = colsOrder.filter(col => !hiddenCols[col]);
   return mainCols
     .filter(col => !hiddenCols[col.id])
@@ -83,9 +86,9 @@ export function encodeColumns(mainCols: ISmCol[] | any, hiddenCols = {}, metrics
         return col.id;
       }
     });
-}
+};
 
-export function decodeColumns(columns: string[]): [string[], MetricColumn[], string[], string[]] {
+export const decodeColumns = (columns: string[]): [string[], MetricColumn[], string[], string[]] => {
   const cols = [] as string[];
   const metrics = [] as MetricColumn[];
   const params = [] as string[];
@@ -94,11 +97,11 @@ export function decodeColumns(columns: string[]): [string[], MetricColumn[], str
   columns.forEach(col => {
     if (col.startsWith('m.')) {
       const colParts = col.split('.');
-      const  [_, metricHash, variantHash, valueType, metric, ...variant] = colParts;
+      const  [, metricHash, variantHash, valueType, metric, ...variant] = colParts;
       metrics.push({
         metricHash,
         variantHash,
-        valueType,
+        valueType: valueType as MetricValueType,
         metric,
         variant: variant.join('.')
       });
@@ -116,13 +119,28 @@ export function decodeColumns(columns: string[]): [string[], MetricColumn[], str
     }
   });
   return [cols, metrics, params, allIds];
-}
+};
 
 
-export function decodeHyperParam(param: string): {name: string; section: string}  {
+export const decodeHyperParam = (param: string): { name: string; section: string } => {
   const split = param.replace('hyperparams.', '').split('.');
   return {
     name: split[1],
     section: split[0]
   };
-}
+};
+export const createMetricColumn = (column: MetricColumn, projectId: string): ISmCol => ({
+    id: `last_metrics.${column.metricHash}.${column.variantHash}.${column.valueType}`,
+    headerType: ColHeaderTypeEnum.sortFilter,
+    sortable: true,
+    filterable: true,
+    filterType: ColHeaderFilterTypeEnum.durationNumeric,
+    header: `${column.metric} > ${column.variant} ${getValueTypeName(column.valueType)}`,
+    hidden: false,
+    metric_hash: column.metricHash,
+    variant_hash: column.variantHash,
+    valueType: column.valueType,
+    projectId: projectId,
+    style: {width: '115px'},
+});
+

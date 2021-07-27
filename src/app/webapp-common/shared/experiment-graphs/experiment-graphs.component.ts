@@ -11,6 +11,7 @@ import {selectPlotlyReady} from '../../core/reducers/view-reducer';
 import {ResizeEvent} from 'angular-resizable-element';
 import {filter, skip, tap} from 'rxjs/operators';
 import {Subscription} from 'rxjs';
+import {ExtFrame, ExtLegend} from './single-graph/plotly-graph-base';
 
 @Component({
   selector: 'sm-experiment-graphs',
@@ -59,6 +60,7 @@ export class ExperimentGraphsComponent {
     clearTimeout(this.timer);
     this.prepareRedraw();
     this.timer = window.setTimeout(() => {
+      this.graphsPerRow = this.allGraphs.length === this.allMetricGroups.length ? 1: this.graphsPerRow;
       this.calculateGraphsLayout();
     }, 200);
   }
@@ -67,8 +69,12 @@ export class ExperimentGraphsComponent {
   @Input() isGroupGraphs: boolean;
   @Input() legendStringLength;
   @Input() minimized: boolean;
+  @Input() isDarkTheme: boolean;
+  @Input() showLoaderOnDraw = true;
+  @Input() legendConfiguration: Partial<ExtLegend & {noTextWrap: boolean}> = {};
   @Input() breakPoint: number = 700;
   @Input() isCompare: boolean = false;
+  @Input() disableResize: boolean = false;
 
 
   @Input() set smoothWeight(smooth: number) {
@@ -121,21 +127,22 @@ export class ExperimentGraphsComponent {
 
   @Input() showSettings: boolean = false;
 
-  @Input() set metrics(graphs) {
-    this.noGraphs = (graphs !== undefined) && (graphs !== null) && Object.keys(graphs).length === 0;
-    if (!graphs) {
+  @Input() set metrics(graphGroups: {[label: string]: ExtFrame[]}) {
+    this.noGraphs = (graphGroups !== undefined) && (graphGroups !== null) && Object.keys(graphGroups).length === 0;
+    if (!graphGroups) {
       this.graphList = [];
       return;
     }
-    this.graphsData = this.sortGraphsData(graphs);
-    Object.values(this.graphsData).forEach((graphs: any[]) => {
-      graphs.forEach((graph: Plotly.Frame) => {
+    this.graphsData = this.sortGraphsData(graphGroups);
+    Object.values(this.graphsData).forEach((graphs: ExtFrame[]) => {
+      graphs.forEach((graph: ExtFrame) => {
         if (getOr(0, 'layout.images.length', graph) > 0) {
-          graph.layout.images.forEach((image: Plotly.Image) => image.source = this.adminService.signUrlIfNeeded(image.source, false, false));
+          graph.layout.images.forEach((image: Plotly.Image) =>
+            image.source = this.adminService.signUrlIfNeeded(image.source, {skipFileServer: false, skipLocalFile: false, disableCache: graph.timestamp}));
         }
       });
     });
-    this.graphList = sortMetricsList(Object.keys(graphs));
+    this.graphList = sortMetricsList(Object.keys(graphGroups));
     this.changeDetection.detectChanges(); // forcing detectChanges for the intersection observer
     const options = {
       root: this.allMetrics.nativeElement,
@@ -172,11 +179,11 @@ export class ExperimentGraphsComponent {
 
   graphInView(entries: IntersectionObserverEntry[]) {
     this.maintainVisibleEntries(entries);
-    for (let i = 0; i < entries.length; i++) {
-      if (entries[i].intersectionRatio === 0) {
+    for (const entity of entries) {
+      if (entity.intersectionRatio === 0) {
         continue;
       }
-      const el = entries[i].target;
+      const el = entity.target;
       const graphComponent = this.allGraphs.find(graphComp => graphComp.identifier === el.id);
       if (this.plotlyReady && (!graphComponent?.alreadyDrawn || graphComponent?.shouldRefresh)) {
         graphComponent.drawGraph(true);
@@ -196,25 +203,22 @@ export class ExperimentGraphsComponent {
     });
   }
 
-  sortGraphsData(data) {
-    const dataCopy = {};
-    for (const key in data) {
-      dataCopy[key] = data[key].sort((a, b) => {
-        a.layout.title = a.layout.title || '';
-        b.layout.title = b.layout.title || '';
-        return a.layout.title === b.layout.title ? b.iter - a.iter : a.layout.title.localeCompare(b.layout.title, undefined, {numeric: true, sensitivity: 'base'});
-      });
-    }
-    return dataCopy;
-  }
+  sortGraphsData = (data: {[label: string]: ExtFrame[]}) =>
+    Object.entries(data).reduce((acc, [label, graphs]) =>
+      ({...acc,
+       [label]: graphs.sort((a, b) => {
+         a.layout.title = a.layout.title || '';
+         b.layout.title = b.layout.title || '';
+         return a.layout.title === b.layout.title ?
+           b.iter - a.iter :
+           (a.layout.title as string).localeCompare((b.layout.title as string), undefined, {numeric: true, sensitivity: 'base'});
+      })
+    }), {} as {[label: string]: ExtFrame[]});
 
-  trackByFn(index, item) {
-    return item;
-  }
+  trackByFn = (index: number, item) => item;
 
-  trackByIdFn(metric, index, item) {
-    return metric + item.layout.title + item.iter;
-  }
+  trackByIdFn = (metric: string, index: number, item: ExtFrame) =>
+    metric + item.layout.title + item.iter;
 
   isWidthBigEnough() {
     return this.el.nativeElement.clientWidth > this.breakPoint;
@@ -277,7 +281,7 @@ export class ExperimentGraphsComponent {
   }
 
   onResizing($event: ResizeEvent) {
-    if ($event.edges.right) {
+    if ($event.edges.right && this.resizeTextElement) {
       const graphsPerRow = Math.min(Math.floor(this.el.nativeElement.clientWidth / $event.rectangle.width), this.graphsNumberLimit);
       const text = `${graphsPerRow > 1 ? graphsPerRow + ' graphs' : '1 graph'} per row`;
       this.renderer.setProperty(this.resizeTextElement, 'textContent', text);

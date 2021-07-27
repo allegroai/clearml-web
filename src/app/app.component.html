@@ -13,7 +13,7 @@
 <sm-side-nav *ngIf="currentUser"></sm-side-nav>
 <div class="app-container" [class.login-page]="!currentUser"
      [class.notifier-open]="update?.active || ((showSurvey$ | async) && showSurvey && !demo && !guestUser)">
-  <sm-header *ngIf="currentUser" [isDashboard]="isDashboardContext" [isLogin]="isLoginContext"
+  <sm-header *ngIf="currentUser" [isLogin]="isLoginContext"
              [isShareMode]="isSharedAndNotOwner$ | async"></sm-header>
   <router-outlet class="main-router"></router-outlet>
 </div>

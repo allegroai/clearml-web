@@ -7,145 +7,79 @@ import {TableFilter} from '../../shared/utils/tableParamEncode';
 import {User} from '../../../business-logic/model/users/user';
 import {ProjectsGetTaskParentsResponseParents} from '../../../business-logic/model/projects/projectsGetTaskParentsResponseParents';
 import {SortMeta} from 'primeng/api';
-import {
-  CountAvailableAndIsDisable,
-  CountAvailableAndIsDisableSelectedFiltered
-} from "@common/shared/entity-page/items.utils";
+import {CountAvailableAndIsDisableSelectedFiltered} from '@common/shared/entity-page/items.utils';
 import {TasksEnqueueManyResponseSucceeded} from '../../../business-logic/model/tasks/tasksEnqueueManyResponseSucceeded';
+import {EXPERIMENTS_INFO_PREFIX} from '@common/experiments/actions/common-experiments-menu.actions';
 
 export const EXPERIMENTS_PREFIX = 'EXPERIMENTS_';
 
 // COMMANDS:
-export const ADD_MANY_EXPERIMENTS = EXPERIMENTS_PREFIX + 'ADD_MANY_EXPERIMENTS';
-export const GET_EXPERIMENTS = EXPERIMENTS_PREFIX + 'GET_EXPERIMENTS';
-export const REFRESH_EXPERIMENTS = EXPERIMENTS_PREFIX + 'REFRESH_EXPERIMENTS';
-export const GET_NEXT_EXPERIMENTS = EXPERIMENTS_PREFIX + 'GET_NEXT_EXPERIMENTS';
-export const SET_EXPERIMENTS = EXPERIMENTS_PREFIX + 'SET_EXPERIMENTS';
-export const SET_NEXT_PAGE = EXPERIMENTS_PREFIX + 'SET_NEXT_PAGE';
-export const SET_SELECTED_EXPERIMENTS = EXPERIMENTS_PREFIX + 'SET_SELECTED_EXPERIMENTS';
-export const SET_SELECTED_EXPERIMENT = EXPERIMENTS_PREFIX + 'SET_SELECTED_EXPERIMENT';
-export const SET_VIEW_MODE = EXPERIMENTS_PREFIX + 'SET_VIEW_MODE';
-export const SET_NO_MORE_EXPERIMENTS = EXPERIMENTS_PREFIX + 'SET_NO_MORE_EXPERIMENTS';
-export const REMOVE_MANY_EXPERIMENTS = EXPERIMENTS_PREFIX + 'REMOVE_MANY_EXPERIMENTS';
-export const UPDATE_ONE_EXPERIMENTS = EXPERIMENTS_PREFIX + 'UPDATE_ONE_EXPERIMENTS';
+export const getExperiments = createAction(EXPERIMENTS_PREFIX + ' [get experiments]');
+export const getNextExperiments = createAction(EXPERIMENTS_PREFIX + '[get next experiments]');
 
-export const SHOW_ALL_SELECTED = EXPERIMENTS_PREFIX + 'SHOW_ALL_SELECTED';
-export const SET_SHOW_ALL_SELECTED_IS_ACTIVE = EXPERIMENTS_PREFIX + 'SET_SHOW_ALL_SELECTED_IS_ACTIVE';
-// EVENTS:
-export const ARCHIVE_MODE_CHANGED = EXPERIMENTS_PREFIX + 'ARCHIVE_MODE_CHANGED';
+export const refreshExperiments = createAction(
+  EXPERIMENTS_PREFIX + ' [refresh experiment]',
+  props<{ hideLoader: boolean; autoRefresh?: boolean}>()
+);
 
-export const GLOBAL_FILTER_CHANGED = EXPERIMENTS_PREFIX + 'GLOBAL_FILTER_CHANGED';
-export const TABLE_SORT_CHANGED = EXPERIMENTS_PREFIX + 'TABLE_SORT_CHANGED';
-export const SET_TABLE_SORT = EXPERIMENTS_PREFIX + 'SET_TABLE_SORT';
-export const TABLE_FILTER_CHANGED = EXPERIMENTS_PREFIX + 'TABLE_FILTER_CHANGED';
-export const SET_TABLE_FILTERS = EXPERIMENTS_PREFIX + 'SET_TABLE_FILTERS';
-export const GET_PROJECT_TYPES = EXPERIMENTS_PREFIX + 'GET_PROJECT_TYPES';
-export const SET_PROJECT_TYPES = EXPERIMENTS_PREFIX + 'SET_PROJECT_TYPES';
-export const EXPERIMENT_SELECTION_CHANGED = EXPERIMENTS_PREFIX + 'EXPERIMENT_SELECTION_CHANGED';
-// export const EXPERIMENTS_SELECTION_CHANGED = EXPERIMENTS_PREFIX + 'EXPERIMENTS_SELECTION_CHANGED';
-export const TOGGLE_COL_HIDDEN = EXPERIMENTS_PREFIX + 'TOGGLE_COL_HIDDEN';
-
-export class GetExperiments implements Action {
-  readonly type = GET_EXPERIMENTS;
-}
-
-export class RefreshExperiments implements Action {
-  readonly type = REFRESH_EXPERIMENTS;
-
-  constructor(public payload: { hideLoader: boolean; autoRefresh?: boolean; }) {
-  }
-}
-
-export class SetShowAllSelectedIsActive implements Action {
-  readonly type = SET_SHOW_ALL_SELECTED_IS_ACTIVE;
-
-  constructor(public payload: boolean) {
-  }
-}
-
-
-export class GetNextExperiments implements Action {
-  readonly type = GET_NEXT_EXPERIMENTS;
-}
-
-export class SetExperiments implements Action {
-  readonly type = SET_EXPERIMENTS;
-
-  constructor(public payload: Array<ITableExperiment>) {
-  }
-}
+export const setExperiments = createAction(
+  EXPERIMENTS_PREFIX + ' [set experiments]',
+  props<{experiments: ITableExperiment[]}>()
+);
 
 export const setExperimentInPlace = createAction(
   EXPERIMENTS_PREFIX + '[set experiment in place]',
   props<{ experiments: ITableExperiment[] }>()
 );
 
-export class SetNoMoreExperiments implements Action {
-  readonly type = SET_NO_MORE_EXPERIMENTS;
+export const setNoMoreExperiments =createAction(
+  EXPERIMENTS_PREFIX + ' [set no more experiments]',
+  props<{payload: boolean}>()
+);
 
-  constructor(public payload: boolean) {
-  }
-}
+export const addExperiments = createAction(
+  EXPERIMENTS_PREFIX + ' [add many experiments]',
+  props<{experiments: ITableExperiment[]}>()
+);
 
-export class AddExperiments implements Action {
-  readonly type = ADD_MANY_EXPERIMENTS;
+export const removeExperiments = createAction(
+  EXPERIMENTS_PREFIX + ' [remove many experiments]',
+  props<{experiments: string[]}>()
+);
 
-  constructor(public payload: Array<ITableExperiment>) {
-  }
-}
-
-export class RemoveExperiments implements Action {
-  readonly type = REMOVE_MANY_EXPERIMENTS;
-
-  constructor(public payload: Array<ITableExperiment['id']>) {
-  }
-}
-
-export class UpdateExperiment implements Action {
-  readonly type = UPDATE_ONE_EXPERIMENTS;
-
-  constructor(public payload: { id: ITableExperiment['id']; changes: Partial<ITableExperiment> }) {
-  }
-}
+export const updateExperiment = createAction(
+  EXPERIMENTS_PREFIX + ' [update experiment]',
+  props<{id: string; changes: Partial<ITableExperiment>}>()
+);
 
 export const updateManyExperiment = createAction(
   EXPERIMENTS_PREFIX + 'update many experiments',
   props<{changeList: TasksEnqueueManyResponseSucceeded[] }>()
 );
 
-export class SetSelectedExperiments implements Action {
-  public type = SET_SELECTED_EXPERIMENTS;
+export const setSelectedExperiments = createAction(
+  EXPERIMENTS_PREFIX + ' [set selected experiments]',
+  props<{experiments: ITableExperiment[]}>()
+);
 
-  constructor(public payload: Array<ITableExperiment>) {
-  }
-}
+export const setSelectedExperiment = createAction(
+  EXPERIMENTS_PREFIX + ' [set selected experiment]',
+  props<{experiment: ITableExperiment}>()
+);
 
-export class SetSelectedExperiment implements Action {
-  public type = SET_SELECTED_EXPERIMENT;
+export const experimentSelectionChanged = createAction(
+  EXPERIMENTS_PREFIX + ' [experiment selection changed]',
+  props<{experiment: {id?: string}; project?: string}>()
+);
 
-  constructor(public payload: ITableExperiment) {
-  }
-}
-
-export class ExperimentSelectionChanged implements Action {
-  readonly type = EXPERIMENT_SELECTION_CHANGED;
-
-  constructor(public payload: { experiment: { id?: string }; project?: string }) {
-    this.payload.project = this.payload.project || '*';
-  }
-}
-
-
-export class ToggleColHidden implements Action {
-  readonly type = TOGGLE_COL_HIDDEN;
-
-  constructor(public payload: string) {
-  }
-}
+export const toggleColHidden = createAction(
+  EXPERIMENTS_PREFIX + ' [toggle column hidden state]',
+  props<{columnId: string; projectId: string}>()
+);
 
 export const setHiddenColumns = createAction(
   EXPERIMENTS_PREFIX + 'SET_HIDDEN_COLS',
-  props<{ visibleColumns: string[] }>()
+  props<{ visibleColumns: string[]; projectId: string }>()
 );
 
 export const setUsers = createAction(
@@ -163,167 +97,100 @@ export const setActiveParentsFilter = createAction(
   props<{ parents: ProjectsGetTaskParentsResponseParents[]}>()
 );
 
-export const getUsers = createAction(
-  EXPERIMENTS_PREFIX + 'GET_USERS');
+export const getUsers = createAction(EXPERIMENTS_PREFIX + 'GET_USERS');
+export const getParents = createAction(EXPERIMENTS_PREFIX + '[get project experiments parents]');
+export const getFilteredUsers = createAction(EXPERIMENTS_PREFIX + 'GET_FILTERED_USERS');
 
-export const getParents = createAction(
-  EXPERIMENTS_PREFIX + '[get project experiments parents]');
-
-export const getFilteredUsers = createAction(
-  EXPERIMENTS_PREFIX + 'GET_FILTERED_USERS');
-
-export class TableFilterChanged implements Action {
-  public type = TABLE_FILTER_CHANGED;
-
-  constructor(public payload: TableFilter) {
-  }
-}
+export const tableFilterChanged = createAction(
+  EXPERIMENTS_PREFIX + '[table filter changed]',
+  props<{filter: TableFilter; projectId: string}>()
+);
 
 export const tableSortChanged = createAction(
-  TABLE_SORT_CHANGED,
+  EXPERIMENTS_PREFIX + ' [table sort changed]',
   props<{ isShift: boolean; colId: ISmCol['id'] }>()
 );
 
 export const setTableSort = createAction(
-  SET_TABLE_SORT,
-  props<{ orders: SortMeta[] }>()
+  EXPERIMENTS_PREFIX + ' [set table sort]',
+  props<{ orders: SortMeta[]; projectId: string }>()
 );
 
 export const setTableFilters = createAction(
-  SET_TABLE_FILTERS,
-  props<{ filters: TableFilter[] }>()
+  EXPERIMENTS_PREFIX + ' [set table filters]',
+  props<{ filters: TableFilter[]; projectId: string }>()
 );
 
 export const setProjectsTypes = createAction(
-  SET_PROJECT_TYPES,
+  EXPERIMENTS_PREFIX + 'SET_PROJECT_TYPES',
   props<{ types?: Array<string> }>()
 );
 
-export const getProjectTypes = createAction(
-  GET_PROJECT_TYPES
+export const getProjectTypes = createAction(EXPERIMENTS_PREFIX + 'GET_PROJECT_TYPES');
+
+export const showOnlySelected = createAction(
+  EXPERIMENTS_PREFIX + ' [show only selected]',
+  props<{active: boolean; projectId: string}>()
 );
 
-export class ShowAllSelected implements Action {
-  public type = SHOW_ALL_SELECTED;
-
-  constructor(public payload: boolean) {
-  }
-}
-
 export const globalFilterChanged = createAction(
-  GLOBAL_FILTER_CHANGED,
+  EXPERIMENTS_PREFIX + 'GLOBAL_FILTER_CHANGED',
   props<{query: string; regExp?: boolean}>()
 );
 
 export const resetGlobalFilter = createAction(EXPERIMENTS_PREFIX + 'RESET_GLOBAL_FILTER');
 
-export class SetCurrentPage implements Action {
-  public type = SET_NEXT_PAGE;
+export const setCurrentPage= createAction(
+  EXPERIMENTS_PREFIX + ' [set current page]',
+  props<{page: number}>()
+);
 
-  constructor(public payload: number) {
-  }
-}
+export const resetExperiments = createAction(EXPERIMENTS_PREFIX + ' [reset experiments]');
+export const getCustomMetrics = createAction(EXPERIMENTS_PREFIX + ' [get custom metrics]');
+export const getCustomHyperParams = createAction(EXPERIMENTS_PREFIX + ' [get custom hyper parameter]');
 
-export class ArchivedModeChanged implements Action {
-  public type = ARCHIVE_MODE_CHANGED;
-
-  constructor(public payload: boolean) {
-  }
-}
-
-export class SetViewMode implements Action {
-  public type = SET_VIEW_MODE;
-  public payload: { viewMode: ExperimentsViewModesEnum };
-
-  constructor(viewMode: ExperimentsViewModesEnum) {
-    this.payload = {viewMode};
-  }
-}
-
-export const resetExperiments = createAction(EXPERIMENTS_PREFIX + 'RESET_EXPERIMENTS');
-export const GET_CUSTOM_METRICS = EXPERIMENTS_PREFIX + 'GET_CUSTOM_METRICS';
-export const GET_CUSTOM_HYPER_PARAMS = EXPERIMENTS_PREFIX + 'GET_CUSTOM_HYPER_PARAMS';
-export const SET_CUSTOM_METRICS = EXPERIMENTS_PREFIX + 'SET_CUSTOM_METRICS';
-export const SET_CUSTOM_HYPER_PARAMS = EXPERIMENTS_PREFIX + 'SET_CUSTOM_HYPER_PARAMS';
-export const ADD_COL = EXPERIMENTS_PREFIX + 'ADD_COL';
-export const REMOVE_COL = EXPERIMENTS_PREFIX + 'REMOVE_COL';
-export const SET_COLS_ORDER = EXPERIMENTS_PREFIX + 'SET_COLS_ORDER';
-export const CHANGE_COLS_ORDER = EXPERIMENTS_PREFIX + 'CHANGE_COLS_ORDER';
-export const CLEAR_HYPER_PARAMS_COLS = EXPERIMENTS_PREFIX + 'CLEAR_COLS';
-export const RESET_SORT_ORDER = EXPERIMENTS_PREFIX + 'RESET_SORT_ORDER';
-
-export class GetCustomMetrics implements Action {
-  readonly type = GET_CUSTOM_METRICS;
-}
-
-export class GetCustomHyperParams implements Action {
-  readonly type = GET_CUSTOM_HYPER_PARAMS;
-}
-
-export class SetCustomMetrics implements Action {
-  public type = SET_CUSTOM_METRICS;
-  public payload: { metrics: Array<MetricVariantResult> };
-
-  constructor(metrics: Array<MetricVariantResult>) {
-    this.payload = {metrics};
-  }
-}
-
-export class SetCustomHyperParams implements Action {
-  public type = SET_CUSTOM_HYPER_PARAMS;
-  public payload: { params: Array<any> };
-
-  constructor(params: Array<any>) {
-    this.payload = {params};
-  }
-}
+export const setCustomMetrics = createAction(
+  EXPERIMENTS_PREFIX + ' [set custom metrics]',
+  props<{metrics: MetricVariantResult[]}>()
+);
+export const setCustomHyperParams = createAction(
+  EXPERIMENTS_PREFIX + ' [set custom hyper params]',
+  props<{params: any[]}>()
+);
 
 export const setExtraColumns = createAction(
   EXPERIMENTS_PREFIX + 'SET_EXTRA_COLUMNS',
   props<{ columns: any[] ; projectId: string }>()
 );
 
-export class AddCol implements Action {
-  public type = ADD_COL;
-  public payload: { col: any };
-
-  constructor(col: any) {
-    this.payload = {col};
-  }
-}
-
-export class RemoveCol implements Action {
-  public type = REMOVE_COL;
-  public payload: { col: { id: string; projectId: string } };
-
-  constructor(col: { id: string; projectId: string }) {
-    this.payload = {col};
-  }
-}
-
-export const changeColsOrder = createAction(
-  EXPERIMENTS_PREFIX + 'CHANGE_COLS_ORDER',
-  props<{ cols: string[] }>()
+export const addColumn = createAction(
+  EXPERIMENTS_PREFIX + ' [ add column]',
+  props<{col: ISmCol}>()
 );
 
+export const removeCol = createAction(
+  EXPERIMENTS_PREFIX + ' [remove column]',
+  props<{ id: string; projectId: string }>()
+);
+
+export const setColumnWidth = createAction(
+  EXPERIMENTS_PREFIX + ' [set column width]',
+  props<{projectId: string; columnId: string; widthPx: number}>()
+);
 
 export const setColsOrderForProject = createAction(
-  EXPERIMENTS_PREFIX + 'SET_COLS_ORDER',
-  props<{ cols: string[]; project: string }>()
+  EXPERIMENTS_PREFIX + ' [set cols order]',
+  props<{ cols: string[]; project: string; fromUrl?: boolean }>()
 );
 
-export class ClearHyperParamsCols implements Action {
-  public type = CLEAR_HYPER_PARAMS_COLS;
-  public payload: { projectId };
-
-  constructor(projectId: string) {
-    this.payload = {projectId};
-  }
-}
+export const clearHyperParamsCols = createAction(
+  EXPERIMENTS_PREFIX + ' [Clear HyperParam Cols]',
+  props<{projectId: string}>()
+);
 
 export const resetSortOrder = createAction(
   EXPERIMENTS_PREFIX + 'RESET_SORT_ORDER',
-  props<{sortIndex: number}>()
+  props<{sortIndex: number; projectId: string}>()
 );
 
 export const setArchive = createAction(
@@ -338,6 +205,11 @@ export const setSplitSize = createAction(EXPERIMENTS_PREFIX + 'SET_SPLIT_SIZE', 
 export const hyperParamSelectedInfoExperiments = createAction(
   EXPERIMENTS_PREFIX + '[hyper param option add filter experiments]',
   props<{ col: ISmCol; values: string[] }>()
+);
+
+export const hyperParamSelectedExperiments = createAction(
+  EXPERIMENTS_INFO_PREFIX + '[hyper param selected in the menu filter experiments]',
+  props<{ col: ISmCol }>()
 );
 
 export const getTags = createAction(EXPERIMENTS_PREFIX + ' [get experiments tags]');

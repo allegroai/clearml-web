@@ -3,10 +3,10 @@ import {IconNames, ICONS} from '../../../constants';
 import {map} from 'rxjs/operators';
 import {Observable} from 'rxjs/internal/Observable';
 import {TaskStatusEnum} from '../../../../business-logic/model/tasks/taskStatusEnum';
-import {MENU_ITEM_ID, selectionDisabledAbort} from '../items.utils';
+import {MenuItems, selectionDisabledAbort} from '../items.utils';
 
 export class AbortFooterItem<T extends {status: TaskStatusEnum}> extends ItemFooterModel {
-  id = MENU_ITEM_ID.ABORT;
+  id = MenuItems.abort;
   emit = true;
   icon = ICONS.STOPPED as Partial<IconNames>;
 

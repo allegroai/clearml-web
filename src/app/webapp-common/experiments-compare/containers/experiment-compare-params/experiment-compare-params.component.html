@@ -29,10 +29,10 @@
                      [class.selected-diff]="checkIfSelectedPath(node.data)"
                      [class.identical-row]="!allPaths[node.data.path]">
                   <i class="fas" [style.margin-left.px]="2 + node.level * 20" [ngClass]="treeControl.isExpanded(node) ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
-                  <span class="title-key" [class.ellipsis]="showEllipsis">{{(RENAME_MAP[node.data.key] || node.data.key)}}</span>
+                  <span class="title-key" [class.ellipsis]="showEllipsis">{{(renameMap[node.data.key] || node.data.key)}}</span>
                 </div>
               </div>
-              <div *ngIf="!node.hasChildren" class="section" (click)="keyClicked(node.data, $event)">
+              <div *ngIf="!node.hasChildren" class="section" (click)="keyClicked(node.data)">
                 <div [style.padding-left.px]="2 + node.level * 20" [ngClass]="{
                   'node-item-container': true,
                   'identical-row': checkIfIdenticalRow(node.data),

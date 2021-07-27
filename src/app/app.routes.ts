@@ -1,7 +1,6 @@
 import {Routes} from '@angular/router';
 import {AdminComponent} from './webapp-common/admin/admin.component';
 import {AccountAdministrationGuard} from "./webapp-common/shared/guards/account-administration.guard";
-import {UserManagementComponent} from "./webapp-common/user-management/user-management.component";
 import {ProjectRedirectGuardGuard} from './webapp-common/shared/guards/project-redirect.guard';
 
 
@@ -22,7 +21,6 @@ export const routes: Routes = [
   {path: 'signup', loadChildren: () => import('./webapp-common/login/login.module').then(m => m.LoginModule)},
 
   {path: 'profile', component: AdminComponent, data: {workspaceNeutral: true}},
-  {path: 'account-administration', component: UserManagementComponent, data: {workspaceNeutral: false, }, canActivate: [AccountAdministrationGuard]},
 
   {
     path: 'projects',
