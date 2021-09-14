@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import {Store} from '@ngrx/store';
 import {filter} from 'rxjs/operators';
-import {updateUsageStats} from '../actions/usage-stats.actions';
+import {updateUsageStats} from '../Actions/usage-stats.actions';
 import {selectPromptUser} from '../reducers/usage-stats.reducer';
 import {MatDialog} from '@angular/material/dialog';
 import {ConfirmDialogComponent} from '../../webapp-common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';

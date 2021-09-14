@@ -5,7 +5,7 @@ import {CookiesService} from '../../shared/cookies.service';
 import {ApiAuthService} from '../../business-logic/api-services/auth.service';
 import {ApiServerService} from '../../business-logic/api-services/server.service';
 import {ServerReportStatsOptionResponse} from '../../business-logic/model/server/serverReportStatsOptionResponse';
-import {setUsageStats, updateUsageStats} from '../actions/usage-stats.actions';
+import {setUsageStats, updateUsageStats} from '../Actions/usage-stats.actions';
 import {fetchCurrentUser} from '@common/core/actions/users.actions';
 
 

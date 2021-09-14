@@ -1,6 +1,6 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {PROJECT_ROUTES, ProjectRoute} from '~/features/projects/projects.consts';
+import {PROJECT_ROUTES, ProjectRoute} from 'app/features/projects/projects.consts';
 
 @Component({
   selector   : 'sm-project-context-navbar',
