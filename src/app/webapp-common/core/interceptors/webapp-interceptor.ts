@@ -9,7 +9,7 @@ import {Store} from '@ngrx/store';
 import {GetCurrentUserResponseUserObject} from 'app/business-logic/model/users/getCurrentUserResponseUserObject';
 import {GetCurrentUserResponseUserObjectCompany} from 'app/business-logic/model/users/getCurrentUserResponseUserObjectCompany';
 import {ConfigurationService} from '../../shared/services/configuration.service';
-import {setCurrentUser} from 'app/core/Actions/users.action';
+import {setCurrentUser} from 'app/core/actions/users.action';
 
 @Injectable()
 export class WebappInterceptor implements HttpInterceptor {

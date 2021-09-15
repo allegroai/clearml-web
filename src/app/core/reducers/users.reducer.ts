@@ -1,7 +1,7 @@
 import {createReducer, createSelector, on} from '@ngrx/store';
 
 import {initUsers, users, usersReducerFunctions, UsersState} from '../../webapp-common/core/reducers/users-reducer';
-import {setCurrentUser} from '../Actions/users.action';
+import {setCurrentUser} from '../actions/users.action';
 
 export const selectHasDataFeature = createSelector(users, () => false);
 export const selectHasUserManagement = createSelector(users, () => false);

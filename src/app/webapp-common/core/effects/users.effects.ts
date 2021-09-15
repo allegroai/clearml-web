@@ -21,7 +21,7 @@ import {LoginLogoutResponse} from 'app/business-logic/model/login/loginLogoutRes
 import {ErrorService} from '../../shared/services/error.service';
 import {ApiServerService} from 'app/business-logic/api-services/server.service';
 import {ServerInfoResponse} from 'app/business-logic/model/server/serverInfoResponse';
-import {setCurrentUser} from 'app/core/Actions/users.action';
+import {setCurrentUser} from 'app/core/actions/users.action';
 
 
 @Injectable()

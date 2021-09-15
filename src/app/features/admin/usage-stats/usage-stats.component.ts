@@ -3,7 +3,7 @@ import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import {Store} from '@ngrx/store';
 import {selectAllowed} from '../../../core/reducers/usage-stats.reducer';
 import {Observable} from 'rxjs';
-import { updateUsageStats } from 'app/core/Actions/usage-stats.actions';
+import { updateUsageStats } from 'app/core/actions/usage-stats.actions';
 import {ConfigurationService} from '../../../webapp-common/shared/services/configuration.service';
 
 

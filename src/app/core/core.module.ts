@@ -19,7 +19,7 @@ import {CommonUserEffects} from '../webapp-common/core/effects/users.effects';
 import {UserEffects} from './effects/users.effects';
 import {CommonAuthEffectsService} from '../webapp-common/core/effects/common-auth-effects.service';
 import {createLocalStorageReducer} from '../webapp-common/core/meta-reducers/local-storage-reducer';
-import {UsageStatsService} from './Services/usage-stats.service';
+import {UsageStatsService} from './services/usage-stats.service';
 import {usageStatsReducer} from './reducers/usage-stats.reducer';
 import {commonAuthReducer} from '../webapp-common/core/reducers/common-auth-reducer';
 import {PROJECTS_PREFIX} from '../webapp-common/core/actions/projects.actions';

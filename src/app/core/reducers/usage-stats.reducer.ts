@@ -1,5 +1,5 @@
 import {Action, createReducer, on, createSelector} from '@ngrx/store';
-import {setUsageStats} from '../Actions/usage-stats.actions';
+import {setUsageStats} from '../actions/usage-stats.actions';
 
 
 export const userStatsFeatureKey = 'userStats';
