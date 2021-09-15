@@ -6,10 +6,10 @@ import {catchError} from 'rxjs/operators';
 import { Router } from '@angular/router';
 import {selectCurrentUser, selectActiveWorkspace, selectSelectedWorkspaceTab} from '../reducers/users-reducer';
 import {Store} from '@ngrx/store';
-import {GetCurrentUserResponseUserObject} from '~/business-logic/model/users/getCurrentUserResponseUserObject';
-import {GetCurrentUserResponseUserObjectCompany} from '~/business-logic/model/users/getCurrentUserResponseUserObjectCompany';
+import {GetCurrentUserResponseUserObject} from 'app/business-logic/model/users/getCurrentUserResponseUserObject';
+import {GetCurrentUserResponseUserObjectCompany} from 'app/business-logic/model/users/getCurrentUserResponseUserObjectCompany';
 import {ConfigurationService} from '../../shared/services/configuration.service';
-import {setCurrentUser} from '~/core/actions/users.action';
+import {setCurrentUser} from 'app/core/actions/users.action';
 
 @Injectable()
 export class WebappInterceptor implements HttpInterceptor {

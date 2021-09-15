@@ -2,26 +2,26 @@ import {Injectable} from '@angular/core';
 import {Router} from '@angular/router';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {Store} from '@ngrx/store';
-import {MESSAGES_SEVERITY} from '~/app.constants';
-import {ApiUsersService} from '~/business-logic/api-services/users.service';
+import {MESSAGES_SEVERITY} from 'app/app.constants';
+import {ApiUsersService} from 'app/business-logic/api-services/users.service';
 import {
   fetchCurrentUser, getApiVersion, getInviteUserLink, getUserWorkspaces, leaveWorkspace, logout, logoutSuccess, removeWorkspace, setAccountAdministrationPage, setActiveWorkspace, setApiVersion,
   setInviteUserLink, setUserWorkspaces, setUserWorkspacesFromUser
 } from '../actions/users.actions';
 import {catchError, map, mergeMap, switchMap, withLatestFrom} from 'rxjs/operators';
 import {requestFailed} from '../actions/http.actions';
-import {ApiAuthService} from '~/business-logic/api-services/auth.service';
-import {ApiOrganizationService} from '~/business-logic/api-services/organization.service';
+import {ApiAuthService} from 'app/business-logic/api-services/auth.service';
+import {ApiOrganizationService} from 'app/business-logic/api-services/organization.service';
 import {addMessage, deactivateLoader, setServerError} from '../actions/layout.actions';
-import {OrganizationCreateInviteResponse} from '~/business-logic/model/organization/organizationCreateInviteResponse';
-import {ApiLoginService} from '~/business-logic/api-services/login.service';
-import {OrganizationGetUserCompaniesResponse} from '~/business-logic/model/organization/organizationGetUserCompaniesResponse';
+import {OrganizationCreateInviteResponse} from 'app/business-logic/model/organization/organizationCreateInviteResponse';
+import {ApiLoginService} from 'app/business-logic/api-services/login.service';
+import {OrganizationGetUserCompaniesResponse} from 'app/business-logic/model/organization/organizationGetUserCompaniesResponse';
 import {selectRouterUrl} from '../reducers/router-reducer';
-import {LoginLogoutResponse} from '~/business-logic/model/login/loginLogoutResponse';
+import {LoginLogoutResponse} from 'app/business-logic/model/login/loginLogoutResponse';
 import {ErrorService} from '../../shared/services/error.service';
-import {ApiServerService} from '~/business-logic/api-services/server.service';
-import {ServerInfoResponse} from '~/business-logic/model/server/serverInfoResponse';
-import {setCurrentUser} from '~/core/actions/users.action';
+import {ApiServerService} from 'app/business-logic/api-services/server.service';
+import {ServerInfoResponse} from 'app/business-logic/model/server/serverInfoResponse';
+import {setCurrentUser} from 'app/core/actions/users.action';
 
 
 @Injectable()

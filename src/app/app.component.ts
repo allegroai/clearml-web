@@ -32,7 +32,7 @@ import {selectAvailableUpdates, selectShowSurvey} from './core/reducers/view-red
 import {UPDATE_SERVER_PATH} from './app.constants';
 import {firstLogin, plotlyReady, setScaleFactor, visibilityChanged} from '@common/core/actions/layout.actions';
 import {UiUpdatesService} from '@common/shared/services/ui-updates.service';
-import {UsageStatsService} from './core/Services/usage-stats.service';
+import {UsageStatsService} from './core/services/usage-stats.service';
 import {dismissSurvey} from './core/actions/layout.actions';
 import {getScaleFactor} from '@common/shared/utils/shared-utils';
 import {User} from './business-logic/model/users/user';
