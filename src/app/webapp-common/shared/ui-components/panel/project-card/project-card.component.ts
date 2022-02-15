@@ -1,34 +1,40 @@
-import {Component, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
-import {ProjectsGetAllResponseSingle} from '../../../../../business-logic/model/projects/projectsGetAllResponseSingle';
-import {StatsStatusCountStatusCount} from '../../../../../business-logic/model/projects/statsStatusCountStatusCount';
-import {CircleTypeEnum} from '../../../../../shared/constants/non-common-consts';
-import {Project} from '../../../../../business-logic/model/projects/project';
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
+import {ProjectsGetAllResponseSingle} from '~/business-logic/model/projects/projectsGetAllResponseSingle';
+import {CircleTypeEnum} from '~/shared/constants/non-common-consts';
+import {Project} from '~/business-logic/model/projects/project';
+import {ICONS} from '@common/constants';
 
 
 @Component({
   selector: 'sm-project-card',
   templateUrl: './project-card.component.html',
-  styleUrls: ['./project-card.component.scss']
+  styleUrls: ['./project-card.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ProjectCardComponent implements OnInit {
-  @Input() project;
+export class ProjectCardComponent {
+  private _project: ProjectsGetAllResponseSingle ;
+  public computeTime: string;
+
+  @Input() set project(data: ProjectsGetAllResponseSingle ) {
+    this._project = data;
+    this.computeTime = this.convertSecToDaysHrsMinsSec(data.stats?.active?.total_runtime)
+  };
+
+  get project() {
+    return this._project;
+  }
   @Input() isRootProject;
   @Input() hideMenu = false;
-  @Output() projectCardClicked = new EventEmitter<ProjectsGetAllResponseSingle>();
+  @Output() projectCardClicked = new EventEmitter<Project>();
   @Output() projectNameChanged = new EventEmitter();
   @Output() deleteProjectClicked = new EventEmitter<Project>();
   @Output() moveToClicked = new EventEmitter<string>();
   @Output() newProjectClicked = new EventEmitter<string>();
   @ViewChild('projectName', {static: true}) projectName;
-  readonly CircleTypeEnum = CircleTypeEnum;
+  readonly circleTypeEnum = CircleTypeEnum;
+  readonly ICONS = ICONS;
 
   private projectNameActive = false;
-
-  constructor() {
-  }
-
-  ngOnInit() {
-  }
 
   public convertSecToDaysHrsMinsSec(secs) {
     const dayInSec = 60 * 60 * 24;
@@ -52,23 +58,6 @@ export class ProjectCardComponent implements OnInit {
 
   public projectNameEditActiveChanged(active) {
     setTimeout(() => this.projectNameActive = active, 100);
-  }
-
-  public isProjectDeletable(project: ProjectsGetAllResponseSingle) {
-    return !Object.values(project.stats.active.status_count).some(count => count > 0);
-  }
-
-  countAllTasks(status_count: StatsStatusCountStatusCount) {
-    return this.sumValues(status_count);
-  }
-
-  public sumValues(obj) {
-    if (!obj) {
-      return 0
-    };
-    return Object.values(obj).reduce((a, b) => {
-      return (a as number) + (b as number);
-    });
   }
 
   subProjectClicked(id: string) {

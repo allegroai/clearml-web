@@ -1,8 +1,14 @@
 @import "../../styles/variables";
 
 .table-card {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
   padding: 15px 15px 15px 0;
   min-height: 90px;
+
+  &.two-columns {
+    grid-template-columns: auto 1fr;
+  }
 
   &:hover {
     background-color: $blue-650;
@@ -21,10 +27,6 @@
     &:hover {
       background-color: $blue-480;
     }
-  }
-
-  ::ng-deep sm-experiment-status-icon-label {
-    width: 80px;
   }
 }
 
@@ -46,6 +48,7 @@
   .name-container {
     min-width: 0;
     display: flex;
+    margin-right: 12px;
   }
 }
 

@@ -1,4 +1,4 @@
-<div class="filter-sort-container d-flex align-items-center" [class.active]="value?.length>0 || subValue?.length>0">
+<div class="filter-sort-container d-flex align-items-center" [class.active]="value?.length > 0 || subValue?.length > 0">
   <div class='d-flex pointer'>
     <i class="sort-icon" [class]="enableSort?  'icon sm ' + sortedClass():''" (click)="switchSortOrder($event)"></i>
   </div>
@@ -49,17 +49,13 @@
             <span class="link mr-3" [class.selected]="!andFilter" (click)="toggleCombination()">Any</span>
             <span class="link" [class.selected]="andFilter" (click)="toggleCombination()">All</span>
           </div>
-          <div [class.options-section]="enableSearch">
-            <sm-menu-item *ngFor="let option of options; trackBy: trackByValFn"
-                          [itemLabel]="option.label"
-                          [checked]="value?.includes(option.value)"
-                          [selectable]="true"
-                          [itemValue]="option.value"
-                          [itemTooltip]="option.tooltip"
-                          [enableTooltip]="true"
-                          (itemClicked)="onFilterChanged($event)">
-            </sm-menu-item>
-            <div *ngIf="options?.length===0" class="empty-menu flex-middle">No item found</div>
+          <div [class.options-section]="enableSearch" smClickStopPropagation class="d-flex align-items-start flex-column table-filter-sort-template checkbox-list">
+            <sm-checkbox-three-state-list
+              [supportExcludeFilter]="supportExcludeFilter"
+              [options]="options"
+              [checkedList]="value"
+              (filterChanged)="emitFilterChanged($event)"
+            ></sm-checkbox-three-state-list>
             <div fixedOptions>
               <sm-menu-item
                 *ngFor="let option of subOptions; trackBy: trackByLabel"
@@ -71,6 +67,8 @@
           </div>
         </ng-container>
       </ng-container>
+      <div *ngIf="columnExplain && options.length" class="column-explanation">{{columnExplain}}</div>
+
     </sm-menu>
   </ng-container>
 </div>

@@ -1,4 +1,10 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, Output} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Input,
+  Output
+} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {ColHeaderFilterTypeEnum, ISmCol, TABLE_SORT_ORDER, TableSortOrderEnum} from '../table.consts';
 import {addOrRemoveFromArray} from '../../../../utils/shared-utils';
@@ -21,6 +27,8 @@ export class TableFilterSortTemplateComponent {
   isSorted: boolean;
   filterType: ColHeaderFilterTypeEnum;
   supportAndFilter: boolean;
+  supportExcludeFilter: boolean;
+  columnExplain: string;
   private _value: string[];
 
   FILTER_TYPE = ColHeaderFilterTypeEnum;
@@ -33,15 +41,17 @@ export class TableFilterSortTemplateComponent {
     this.enableSearch = col.searchableFilter;
     this.filterType = col.filterType;
     this.supportAndFilter = col.andFilter;
+    this.supportExcludeFilter = col.excludeFilter;
+    this.columnExplain = col.columnExplain;
   }
 
   @Input() searchValue;
   @Input() fixedOptionsSubheader;
 
-  @Input() set value(value: Array<string>) {
-    if (Array.isArray(value)) {
-      this.formControl.setValue(value);
-      this._value = value;
+  @Input() set value(filters: Array<string>) {
+    if (Array.isArray(filters)) {
+      this.formControl.setValue(filters);
+      this._value = filters;
     }
   }
 
@@ -62,18 +72,11 @@ export class TableFilterSortTemplateComponent {
   @Output() sortOrderChanged = new EventEmitter<boolean>();
   @Output() searchValueChanged = new EventEmitter<string>();
 
+  constructor() {}
   trackByLabel = (index: number, item) => item.label;
-  trackByValFn = (index, item) => item.value;
 
   switchSortOrder($event: MouseEvent) {
     this.sortOrderChanged.emit($event.shiftKey);
-  }
-
-  onFilterChanged(val) {
-    if (val) {
-      const newValues = addOrRemoveFromArray(this.value, val.itemValue);
-      this.filterChanged.emit({value: newValues, andFilter: this.andFilter});
-    }
   }
 
   onSubFilterChanged(val) {
@@ -104,8 +107,13 @@ export class TableFilterSortTemplateComponent {
 
   toggleCombination() {
     this.andFilter = !this.andFilter;
-    if (this.value?.length > 1) {
-      this.filterChanged.emit({value: this.value, andFilter: this.andFilter});
-    }
+    this.emitFilterChanged();
+  }
+
+  emitFilterChanged(value?: string[]) {
+    this.filterChanged.emit({
+      value: value || this.value,
+      andFilter: this.andFilter
+    });
   }
 }

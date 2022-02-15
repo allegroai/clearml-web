@@ -5,7 +5,7 @@ import {Store} from '@ngrx/store';
 import {NgForm} from '@angular/forms';
 import {Observable, Subscription} from 'rxjs';
 import {selectRootProjects} from '../../../../core/reducers/projects.reducer';
-import {GetAllSystemProjects} from '../../../../core/actions/projects.actions';
+import {getAllSystemProjects} from '../../../../core/actions/projects.actions';
 import {map} from 'rxjs/operators';
 import {isReadOnly} from '../../../../shared/utils/shared-utils';
 import {CloneForm} from '../../common-experiment-model.model';
@@ -79,7 +79,7 @@ export class CloneDialogComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.store.dispatch(new GetAllSystemProjects());
+    this.store.dispatch(getAllSystemProjects());
     this.projectsSub = this.projects$.subscribe(projects => {
       const projectList = projects.map(project => ({value: project.id, label: project.name}));
       if (!isEqual(projectList, this.projects)) {
@@ -97,7 +97,7 @@ export class CloneDialogComponent implements OnInit, OnDestroy {
       }
       this.filteredProjects = this.cloneForm.controls['projectName'].valueChanges
         .pipe(
-          map(value => typeof value === 'string' ? value : value.label),
+          map(value => typeof value === 'string' ? value : value?.label || ''),
           map(value => this._filter(value))
         );
     }, 1000);

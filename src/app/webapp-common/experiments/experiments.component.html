@@ -7,6 +7,7 @@
   [minimizedView]="minimizedView"
   [isMetricsLoading]="metricLoading$ | async"
   [autoRefreshState]="autoRefreshState$ | async"
+  [tableFilters]="tableFilters$ | async"
   (isArchivedChanged)="onIsArchivedChanged($event)"
   (selectedTableColsChanged)="selectedTableColsChanged($event)"
   (refreshListClicked)="refreshList($event)"
@@ -16,6 +17,7 @@
   (removeColFromList)="removeColFromList($event)"
   (setAutoRefresh)="setAutoRefresh($event)"
   (clearSelection)="clearSelection()"
+  (clearTableFilters)="clearTableFiltersHandler($event)"
 ></sm-experiment-header>
 <div class="experiment-body"
      [class.footer-visible]="((selectedExperiments$ | async) && (selectedExperiments$ | async)?.length > 1) || (showAllSelectedIsActive$ |async)">
@@ -26,14 +28,14 @@
             (gutterDblClick)="closeExperimentPanel()"
             (dragEnd)="splitSizeChange($event)"
             (dragStart)="disableInfoPanel()"
-            (transitionEnd)="experimentsTable.table.resize()"
+            (transitionEnd)="experimentsTable.table?.resize(); experimentsTable.afterTableInit()"
   >
     <as-split-area [size]="100 - (splitInitialSize)"
                    [order]="1">
       <sm-experiments-table
         #experimentsTable
         class="align-self-stretch"
-        selectionMode="multiple"
+        selectionMode="single"
         [colsOrder]="(tableColsOrder$ | async)"
         [tableCols]="tableCols$| async"
         [experiments]="experiments$ | async"
@@ -60,7 +62,7 @@
         (tagsMenuOpened)="refreshTagsList()"
         (typesMenuOpened)="refreshTypesList()"
         (loadMoreExperiments)="getNextExperiments()"
-        (onColumnsReordered)="columnsReordered($event)"
+        (columnsReordered)="columnsReordered($event)"
         (columnResized)="columnResized($event)"
       >
       </sm-experiments-table>
@@ -73,7 +75,8 @@
 </div>
 
 <sm-entity-footer
+  [footerState]="footerState$ | async"
   [footerItems]="footerItems"
-  (onFooterItemClick)="onFooterHandler($event)"
+  (footerItemClick)="onFooterHandler($event)"
   (tagSelected)="tagSelected($event, 'experiments')"
 ></sm-entity-footer>

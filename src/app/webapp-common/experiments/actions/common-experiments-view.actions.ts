@@ -1,7 +1,6 @@
-import {Action, createAction, props} from '@ngrx/store';
+import {createAction, props} from '@ngrx/store';
 import {ITableExperiment} from '../shared/common-experiment-model.model';
 import {ISmCol} from '../../shared/ui-components/data/table/table.consts';
-import {ExperimentsViewModesEnum} from '../shared/common-experiments.const';
 import {MetricVariantResult} from '../../../business-logic/model/projects/metricVariantResult';
 import {TableFilter} from '../../shared/utils/tableParamEncode';
 import {User} from '../../../business-logic/model/users/user';
@@ -15,6 +14,8 @@ export const EXPERIMENTS_PREFIX = 'EXPERIMENTS_';
 
 // COMMANDS:
 export const getExperiments = createAction(EXPERIMENTS_PREFIX + ' [get experiments]');
+export const getExperimentsWithPageSize = createAction(EXPERIMENTS_PREFIX + ' [get experiments with size]',
+  props<{pageSize: number}>());
 export const getNextExperiments = createAction(EXPERIMENTS_PREFIX + '[get next experiments]');
 
 export const refreshExperiments = createAction(
@@ -70,6 +71,11 @@ export const setSelectedExperiment = createAction(
 export const experimentSelectionChanged = createAction(
   EXPERIMENTS_PREFIX + ' [experiment selection changed]',
   props<{experiment: {id?: string}; project?: string}>()
+);
+
+export const selectAllExperiments = createAction(
+  EXPERIMENTS_PREFIX + ' [select all experiments]',
+  props<{filtered: boolean}>()
 );
 
 export const toggleColHidden = createAction(
@@ -140,9 +146,9 @@ export const globalFilterChanged = createAction(
 
 export const resetGlobalFilter = createAction(EXPERIMENTS_PREFIX + 'RESET_GLOBAL_FILTER');
 
-export const setCurrentPage= createAction(
-  EXPERIMENTS_PREFIX + ' [set current page]',
-  props<{page: number}>()
+export const setCurrentScrollId = createAction(
+  EXPERIMENTS_PREFIX + ' [set current scrollId]',
+  props<{scrollId: string}>()
 );
 
 export const resetExperiments = createAction(EXPERIMENTS_PREFIX + ' [reset experiments]');

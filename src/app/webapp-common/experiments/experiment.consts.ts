@@ -12,7 +12,7 @@ export const INITIAL_EXPERIMENT_TABLE_COLS: ISmCol[] = [
     static          : true,
     bodyStyleClass  : 'selected-col-body type-col',
     headerStyleClass: 'selected-col-header',
-    style           : {width: '50px'},
+    style           : {width: '65px'},
     disableDrag     : true,
     disablePointerEvents: true
   },
@@ -43,7 +43,9 @@ export const INITIAL_EXPERIMENT_TABLE_COLS: ISmCol[] = [
     static: true,
     header: 'TAGS',
     style: {width: '300px'},
-    andFilter: true
+    excludeFilter: true,
+    andFilter: true,
+    columnExplain: 'Click to include tag. Click again to exclude.'
   },
   {
     id          : EXPERIMENTS_TABLE_COL_FIELDS.STATUS,

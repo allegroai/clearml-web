@@ -22,7 +22,7 @@
     <sm-section-header label="CONFIGURATION OBJECT"></sm-section-header>
     <sm-experiment-network-design-form
       [editable]="false"
-      [formData]="formData?.value"
+      [formData]="formData === null ? null : formData?.value"
     >
     </sm-experiment-network-design-form>
     <button extra-buttons

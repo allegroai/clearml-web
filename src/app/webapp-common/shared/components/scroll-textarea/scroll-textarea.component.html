@@ -1,3 +1,4 @@
+<ng-content select="[empty-state]"></ng-content>
 <div *ngIf="!showSpinner && !editable && lines?.length" class="diff-container h-100">
   <div class="floating-buttons">
     <ng-content select="[extra-buttons]"></ng-content>
@@ -11,6 +12,8 @@
   </div>
   <cdk-virtual-scroll-viewport #scroll itemSize="19" minBufferPx = 400, maxBufferPx = 600
                                class="viewport"
+                               [style.min-height]="minHeight"
+                               [class.disabled]="disabled"
                                [class.isReadonly]="!editable">
     <div *cdkVirtualFor="let line of lines" class="line"><span
       *ngFor="let part of (search ? line.split(search) : [line]); let last=last"
@@ -19,4 +22,4 @@
   </cdk-virtual-scroll-viewport>
 </div>
 <span *ngIf="!showSpinner && !lines?.length && !editable" class="no-changes">{{emptyMessage}}</span>
-<mat-spinner [diameter]="50" *ngIf="showSpinner"></mat-spinner>
+<mat-spinner class="mx-auto mt-3" [diameter]="50" *ngIf="showSpinner"></mat-spinner>

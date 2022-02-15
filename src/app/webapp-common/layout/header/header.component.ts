@@ -1,22 +1,22 @@
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {selectActiveWorkspace, selectCurrentUser, selectWorkspaces} from '../../core/reducers/users-reducer';
+import {selectActiveWorkspace, selectCurrentUser} from '../../core/reducers/users-reducer';
 import {Observable, Subscription} from 'rxjs';
-import {logout, setActiveWorkspace, setAccountAdministrationPage} from '../../core/actions/users.actions';
-import {addMessage} from '../../core/actions/layout.actions';
-import {MESSAGES_SEVERITY} from '../../../app.constants';
+import {logout} from '../../core/actions/users.actions';
+import {addMessage, openAppsAwarenessDialog} from '../../core/actions/layout.actions';
+import {MESSAGES_SEVERITY} from '~/app.constants';
 import {MatDialog} from '@angular/material/dialog';
-import {InviteUserModalComponent} from '../invite-user-modal/invite-user-modal.component';
-import {GetCurrentUserResponseUserObject} from '../../../business-logic/model/users/getCurrentUserResponseUserObject';
+import {GetCurrentUserResponseUserObject} from '~/business-logic/model/users/getCurrentUserResponseUserObject';
 import {ConfigurationService} from '../../shared/services/configuration.service';
-import {GetCurrentUserResponseUserObjectCompany} from '../../../business-logic/model/users/getCurrentUserResponseUserObjectCompany';
+import {GetCurrentUserResponseUserObjectCompany} from '~/business-logic/model/users/getCurrentUserResponseUserObjectCompany';
 import {filter} from 'rxjs/operators';
 import {selectRouterUrl} from '../../core/reducers/router-reducer';
 import {TipsService} from '../../shared/services/tips.service';
-import {LoginService} from '../../shared/services/login.service';
 import {WelcomeMessageComponent} from '../../dashboard/dumb/welcome-message/welcome-message.component';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
-import {selectHasUserManagement} from '../../../core/reducers/users.reducer';
+import {LoginService} from '~/shared/services/login.service';
+import {selectUserSettingsNotificationPath} from '~/core/reducers/view.reducer';
+import {selectInvitesPending} from '~/core/reducers/users.reducer';
 
 @Component({
   selector: 'sm-header',
@@ -33,10 +33,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
   environment = ConfigurationService.globalEnvironment;
   public user: Observable<GetCurrentUserResponseUserObject>;
   public activeWorkspace: GetCurrentUserResponseUserObjectCompany;
-  public workspaces: Observable<GetCurrentUserResponseUserObjectCompany[]>;
   public url: Observable<string>;
+  public userNotificationPath$: Observable<string>;
+  public invitesPending$: Observable<any[]>;
   private sub = new Subscription();
-  public userManagement$: Observable<boolean>;
+  public userNotificationPath: string;
 
   constructor(
     private store: Store<any>,
@@ -49,8 +50,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
   ) {
     this.url = this.store.select(selectRouterUrl);
     this.user = this.store.select(selectCurrentUser);
-    this.workspaces = this.store.select(selectWorkspaces);
-    this.userManagement$ = this.store.select(selectHasUserManagement);
+    this.sub.add(this.store.select(selectUserSettingsNotificationPath).subscribe(path => this.userNotificationPath = path));
+    this.invitesPending$ = this.store.select(selectInvitesPending);
     this.sub.add(this.store.select(selectActiveWorkspace)
       .pipe(filter(workspace => !!workspace))
       .subscribe(workspace => {
@@ -81,20 +82,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.store.dispatch(logout({}));
   }
 
-  userManagement() {
-    this.store.dispatch(setAccountAdministrationPage());
-  }
-
   copyToClipboardSuccess() {
     this.store.dispatch(addMessage(MESSAGES_SEVERITY.SUCCESS, 'URL copied successfully'));
-  }
-
-  openInviteModal() {
-    this.dialog.open(InviteUserModalComponent);
-  }
-
-  switchWorkspace(workspace: GetCurrentUserResponseUserObjectCompany) {
-    this.store.dispatch(setActiveWorkspace({workspace}));
   }
 
   openTip() {
@@ -104,5 +93,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
   openWelcome(event: MouseEvent) {
     event.preventDefault();
     this.dialog.open(WelcomeMessageComponent, {data: {step: 2}});
+  }
+
+  openAppsAwareness($event: MouseEvent, appsYouTubeIntroLink: string) {
+    $event.preventDefault();
+    this.store.dispatch(openAppsAwarenessDialog({appsYouTubeIntroLink}));
   }
 }

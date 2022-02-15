@@ -69,6 +69,10 @@
       {{selectedDisableAvailable[menuItems.abort].available | menuItemText : 'Abort' : selectedDisableAvailableIsMultiple }}
     </button>
 
+    <button mat-menu-item (click)="stopAllChildrenPopup()" *ngIf="!selectedDisableAvailable[menuItems.abortAllChildren]?.disable">
+      <i [class]="'al-icon ' + ICONS.STOPPED_ALL + ' sm-md'"></i>
+      {{selectedDisableAvailable[menuItems.abortAllChildren]?.available | menuItemText : 'Abort All Children' : selectedDisableAvailableIsMultiple }}
+    </button>
     <button
       mat-menu-item
       (click)="publishPopup()"
@@ -79,11 +83,11 @@
     <hr>
     <button mat-menu-item
             [matMenuTriggerFor]="tagMenu"
-            [disabled]="isExample"
+            [disabled]="selectedDisableAvailable[menuItems.tags]?.disable"
             (menuOpened)="tagMenuOpened()"
             (menuClosed)="tagMenuClosed()">
       <i [class]="'al-icon ' + ICONS.TAG + ' sm-md'">
-      </i><span>{{numSelected | menuItemText : 'Add Tag' : selectedDisableAvailableIsMultiple }}</span>
+      </i><span>{{selectedDisableAvailable[menuItems.tags]?.available | menuItemText : 'Add Tag' : selectedDisableAvailableIsMultiple }}</span>
     </button>
     <hr>
     <button mat-menu-item (click)="clonePopup()">
@@ -94,6 +98,10 @@
       <i [class]="'al-icon ' + ICONS.MOVE_TO + ' sm-md'"></i>
       {{selectedDisableAvailable[menuItems.moveTo].available | menuItemText : 'Move to Project' : selectedDisableAvailableIsMultiple}}
     </button>
+    <ng-content select="[extended]"></ng-content>
+
+
+
     </ng-container>
 </mat-menu>
 

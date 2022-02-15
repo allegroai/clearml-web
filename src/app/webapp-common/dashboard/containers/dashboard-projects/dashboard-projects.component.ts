@@ -5,9 +5,9 @@ import {fromEvent, Observable, Subscription} from 'rxjs';
 import {Store} from '@ngrx/store';
 import {Project} from '../../../../business-logic/model/projects/project';
 import {selectRecentProjects} from '../../common-dashboard.reducer';
-import {GetRecentProjects} from '../../common-dashboard.actions';
+import {getRecentProjects} from '../../common-dashboard.actions';
 import {ProjectDialogComponent} from '../../../shared/project-dialog/project-dialog.component';
-import {ResetSelectedProject, SetSelectedProjectId} from '../../../core/actions/projects.actions';
+import {resetSelectedProject, setSelectedProjectId} from '../../../core/actions/projects.actions';
 import {selectCurrentUser} from '../../../core/reducers/users-reducer';
 import {filter, take, throttleTime} from 'rxjs/operators';
 import {isExample} from '../../../shared/utils/shared-utils';
@@ -21,25 +21,30 @@ import { CARDS_IN_ROW } from '../../common-dashboard.const';
 export class DashboardProjectsComponent implements OnInit, AfterViewInit, OnDestroy {
   public recentProjectsList$: Observable<Array<Project>>;
   private dialog: MatDialogRef<ProjectDialogComponent>;
+  private sub: Subscription;
   readonly cardsInRow = CARDS_IN_ROW;
 
   @Output() width = new EventEmitter<number>();
-  private sub: Subscription;
-  constructor(private store: Store<any>, public router: Router,
-              private matDialog: MatDialog) {
+
+  constructor(
+    private store: Store<any>,
+    public router: Router,
+    private matDialog: MatDialog
+  ) {
     this.recentProjectsList$ = this.store.select(selectRecentProjects);
   }
 
   @ViewChild('header') header: ElementRef<HTMLDivElement>;
 
   ngOnInit() {
-    this.store.dispatch(new ResetSelectedProject());
+    this.store.dispatch(resetSelectedProject());
     this.store.select(selectCurrentUser)
       .pipe(filter(user => !!user), take(1))
-      .subscribe(() => this.store.dispatch(new GetRecentProjects()));
+      .subscribe(() => this.store.dispatch(getRecentProjects()));
   }
 
   ngAfterViewInit() {
+    this.width.emit(this.header.nativeElement.getBoundingClientRect().width);
     window.setTimeout(() => this.width.emit(this.header.nativeElement.getBoundingClientRect().width));
     this.sub = fromEvent(window, 'resize')
       .pipe(throttleTime(50))
@@ -47,7 +52,7 @@ export class DashboardProjectsComponent implements OnInit, AfterViewInit, OnDest
   }
   public projectCardClicked(project: Project) {
     this.router.navigateByUrl(`projects/${project.id}`);
-    this.store.dispatch(new SetSelectedProjectId(project.id, isExample(project)));
+    this.store.dispatch(setSelectedProjectId({projectId: project.id, example: isExample(project)}));
   }
 
   public openCreateProjectDialog() {
@@ -58,12 +63,13 @@ export class DashboardProjectsComponent implements OnInit, AfterViewInit, OnDest
     });
     this.dialog.afterClosed().subscribe(projectHasBeenCreated => {
       if (projectHasBeenCreated) {
-        this.store.dispatch(new GetRecentProjects());
+        this.store.dispatch(getRecentProjects());
       }
     });
   }
 
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
+    this.header = null;
   }
 }

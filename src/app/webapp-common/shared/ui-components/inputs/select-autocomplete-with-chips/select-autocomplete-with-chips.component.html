@@ -3,7 +3,7 @@
     <div class="d-flex">
       <mat-chip-list #chipList aria-label="Fruit selection" [disabled]="disabled">
         <ng-container *ngIf="multiple">
-          <sm-chips *ngFor="let item of val"
+          <sm-chips *ngFor="let item of val; trackBy: trackByFn"
                     [label]="item.label"
                     [allowRemove]="multiple && clearable && !disabled"
                     (remove)="remove(item)"
@@ -33,7 +33,7 @@
 
 
       </mat-chip-list>
-      <i
+      <i *ngIf="!disabled"
         [class]="'fa pl-2 mr-1 ml-auto ' + (val ? (multiple && clearable? 'fa-caret-down' : 'fa-times pointer') : 'fa-caret-down')"
         (click)="val && !(multiple && clearable) && removeLastChip(); autocompleteInput.focus();"
         smClickStopPropagation></i>
@@ -50,7 +50,7 @@
                   (onSelectionChange)="customOptionAdded.emit($event)">
         "{{filterText}}"<span class="new">(Add item)</span>
       </mat-option>
-      <mat-option *ngFor="let option of (filteredItems | async)" [value]="option">
+      <mat-option *ngFor="let option of (filteredItems | async); trackBy: trackByFn" [value]="option">
         {{option.label}}
       </mat-option>
     </mat-autocomplete>

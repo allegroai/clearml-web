@@ -31,11 +31,21 @@ export const encodeFilters = (filters: { [key: string]: FilterMetadata }) => {
       .filter((key: string) => filters[key].value?.length)
       .map((key: string) => {
         const val = filters[key] as FilterMetadata;
-        return `${key}:${val.matchMode ? val.matchMode + ':' : ''}${val.value.join('+')}`;
+        return `${key}:${val.matchMode ? val.matchMode + ':' : ''}${val.value.join('+$+')}`;
       }).join(',');
   }
 };
+export const excludedKey = '__$not';
+export const uniqueFilterValueAndExcluded = (arr1 = [], arr2 = []) => Array.from(new Set(arr1.concat((arr2).map(key => key ? key.replace(/^__\$not/,'') : key))));
+export const addExcludeFilters = (arr1: string[]) => {
+  return arr1.reduce((returnArray, currentFilter) => {
+    if (currentFilter?.startsWith(excludedKey)) {
+      return  [...returnArray, excludedKey, currentFilter.substring(excludedKey.length)]
+    }
+    return [...returnArray, currentFilter];
 
+  }, []);
+}
 export const decodeOrder = (orders: string[]): SortMeta[] => {
   if (typeof orders === 'string') {
     orders = [orders];
@@ -61,7 +71,7 @@ export const decodeFilter = (filters: string): TableFilter[] => filters.split(',
   //   mode = parts[1];
   //   parts[1] = parts[2];
   // }
-  return {col, filterMatchMode: mode, value: values?.split('+').map(x => x === '' ? null : x)};
+  return {col, filterMatchMode: mode, value: values?.split('+$+').map(x => x === '' ? null : x)};
 });
 
 export const sortCol = (a, b, colsOrder) => {

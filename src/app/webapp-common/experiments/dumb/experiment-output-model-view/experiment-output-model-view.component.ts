@@ -1,7 +1,7 @@
 import {Component, Input, OnDestroy} from '@angular/core';
 import {IModelInfo} from '../../shared/common-experiment-model.model';
 import {Model} from '../../../../business-logic/model/models/model';
-import {AdminService} from '../../../../features/admin/admin.service';
+import {AdminService} from '~/shared/services/admin.service';
 import {Store} from '@ngrx/store';
 import {BaseClickableArtifactComponent} from '../base-clickable-artifact.component';
 
@@ -11,7 +11,7 @@ import {BaseClickableArtifactComponent} from '../base-clickable-artifact.compone
   templateUrl: './experiment-output-model-view.component.html',
   styleUrls  : ['./experiment-output-model-view.component.scss']
 })
-export class ExperimentOutputModelViewComponent extends BaseClickableArtifactComponent implements OnDestroy {
+export class ExperimentOutputModelViewComponent extends BaseClickableArtifactComponent {
 
   public isLocalFile: boolean;
   private _model: IModelInfo;

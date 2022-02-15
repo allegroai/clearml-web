@@ -9,6 +9,47 @@
     pre {
       overflow: hidden;
     }
+
+    .node-row {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+
+      .node-key {
+        position: relative;
+        cursor: pointer;
+        white-space: nowrap;
+        min-width: 150px;
+        //width: 220px;
+        &.ellipsis {
+          width: 200px;
+        }
+
+        &:hover {
+          i.extend-toggle {
+            visibility: visible;
+          }
+        }
+      }
+
+      .node-val {
+        position: relative;
+        cursor: pointer;
+        white-space: nowrap;
+        min-width: 150px;
+
+        &.ellipsis {
+          //width: 150px;
+        }
+
+        &:hover {
+          .extend-toggle {
+            visibility: visible;
+          }
+        }
+      }
+    }
+
   }
 
   .title-key {
@@ -20,40 +61,14 @@
       white-space: nowrap;
       width: 390px;
     }
+  }
 
-    .no-ellipsis {
-      cursor: default;
+  .no-ellipsis {
+    cursor: default !important;
 
-      .extend-toggle {
-        visibility: hidden !important;
-      }
+    .extend-toggle {
+      visibility: hidden !important;
     }
   }
 
-  .node-key {
-    width: 220px;
-  }
-
-  .node-val {
-    position: relative;
-    cursor: pointer;
-    white-space: nowrap;
-    min-width: 150px;
-
-    &.ellipsis {
-      width: 150px;
-    }
-
-    &:hover {
-      .extend-toggle {
-        visibility: visible !important;
-      }
-    }
-  }
-
-  .node-row {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-  }
 }

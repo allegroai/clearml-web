@@ -4,12 +4,13 @@ import {Store} from '@ngrx/store';
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {selectRouterConfig} from '../../core/reducers/router-reducer';
 import {combineLatest, Subscription} from 'rxjs';
-import {debounceTime, distinctUntilChanged, filter, map} from 'rxjs/operators';
+import {debounceTime, distinctUntilChanged, filter, map, withLatestFrom} from 'rxjs/operators';
 import {TipOfTheDayModalComponent} from '../../layout/tip-of-the-day-modal/tip-of-the-day-modal.component';
-import {selectFirstLogin, selectNeverShowPopups} from '../../core/reducers/view-reducer';
-import {selectCurrentUser, selectTermsOfUse} from '../../core/reducers/users-reducer';
+import {selectFirstLogin, selectNeverShowPopups} from '../../core/reducers/view.reducer';
+import {selectCurrentUser} from '../../core/reducers/users-reducer';
 import {neverShowPopupAgain} from '../../core/actions/layout.actions';
-import {GetCurrentUserResponseUserObject} from '../../../business-logic/model/users/getCurrentUserResponseUserObject';
+import {FeaturesEnum} from '~/business-logic/model/users/featuresEnum';
+import {selectFeatures, selectTermsOfUse} from '~/core/reducers/users.reducer';
 
 interface Tips {
   [url: string]: Tip[];
@@ -20,6 +21,7 @@ export interface Tip {
   image: string;
   content: string;
   context: string;
+  feature: FeaturesEnum;
 }
 
 const tipsCooldownTime = 1000 * 60 * 60 * 24 * 3;
@@ -41,13 +43,14 @@ export class TipsService {
   ) {
   }
 
-  initTipsService() {
+  initTipsService(showAllTips = true) {
     this.nextTimeToShowTips = new Date(window.localStorage.getItem('nextTimeToShowTips') || new Date().getTime());
 
-    this.httpClient.get('/onboarding.json')
-      .subscribe((tipsConfig: { onboarding: Tip[] }) => {
+    this.httpClient.get('/onboarding.json').pipe(withLatestFrom(this.store.select(selectFeatures)))
+      .subscribe(([tipsConfig, features]: [{ onboarding: Tip[] }, FeaturesEnum[]]) => {
+        const tipsFiltered = tipsConfig.onboarding.filter(tip => !tip.feature || features.includes(tip.feature) || showAllTips);
         this.tipsConfig = {
-          global: [], ...tipsConfig.onboarding.reduce((acc, curr) => {
+          global: [], ...tipsFiltered.reduce((acc, curr) => {
             const context = curr.context || 'global';
             if (acc[context]) {
               acc[context].push(curr);
@@ -81,7 +84,7 @@ export class TipsService {
     ])
       .pipe(
         debounceTime(1000),
-        filter(([routerConfig, user, firstLogin, tos]) => !firstLogin && !!user && !tos.accept_required && !this.neverShowAgain && this.matDialog.openDialogs.length === 0),
+        filter(([, user, firstLogin, tos]) => !firstLogin && !!user && !tos.accept_required && !this.neverShowAgain && this.matDialog.openDialogs.length === 0),
         distinctUntilChanged(([prev], [curr]) => prev?.[prev.length - 1] === curr[curr.length - 1]))
       .subscribe(([routerConfig]) => {
         const urlConfig = routerConfig?.join('/');

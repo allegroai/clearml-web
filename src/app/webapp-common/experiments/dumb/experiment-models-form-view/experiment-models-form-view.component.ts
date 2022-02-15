@@ -2,9 +2,9 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {IModelInfo, IModelInfoSource} from '../../shared/common-experiment-model.model';
 import {MatDialog} from '@angular/material/dialog';
 import {filter} from 'rxjs/operators';
-import {Model} from '../../../../business-logic/model/models/model';
-import {SelectModelComponent} from '../../../select-model/select-model.component';
-import {AdminService} from '../../../../features/admin/admin.service';
+import {Model} from '~/business-logic/model/models/model';
+import {SelectModelComponent} from '@common/select-model/select-model.component';
+import {AdminService} from '~/shared/services/admin.service';
 import {Store} from '@ngrx/store';
 import {BaseClickableArtifactComponent} from '../base-clickable-artifact.component';
 
@@ -42,7 +42,7 @@ export class ExperimentModelsFormViewComponent extends BaseClickableArtifactComp
   }
 
   public chooseModel() {
-    const chooseModelDialog = this.dialog.open(SelectModelComponent);
+    const chooseModelDialog = this.dialog.open(SelectModelComponent, {maxWidth: '95vw'});
     chooseModelDialog.afterClosed()
       .pipe(filter(model => !!model))
       .subscribe((selectedModel: Model) => this.modelSelected.emit(selectedModel));

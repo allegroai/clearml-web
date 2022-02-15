@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import {IHue} from './color-hash.model';
-import {BehaviorSubject, Observable} from 'rxjs';
-import {select, Store} from '@ngrx/store';
+import {BehaviorSubject} from 'rxjs';
+import {Store} from '@ngrx/store';
 import {UsersState} from '../../../core/reducers/users-reducer';
 import {filter, take} from 'rxjs/operators';
 import {selectColorPreferences} from '../../ui-components/directives/choose-color/choose-color.reducer';
@@ -10,20 +10,22 @@ import {getHslContrast, hexToRgb, hslToRgb, RGB2HEX, rgbToHsl} from './color-has
 import stc from 'string-to-color';
 import hexRgb from 'hex-rgb';
 
+export interface ColorCache {[label: string]: number[]};
+export const DOT_PLACEHOLDER = '--DOT--';
+
+
 @Injectable()
 export class ColorHashService {
   hueRanges: Array<IHue>;
 
   hash;
-  Saturation;
-  Lightness;
-  private _colorCache: BehaviorSubject<any> = new BehaviorSubject({});
-  readonly DOT_PLACEHOLDER: string          = '--DOT--';
-  getColorCache(): Observable<any> {
+  lightness;
+  private _colorCache: BehaviorSubject<ColorCache> = new BehaviorSubject({});
+  getColorCache() {
     return this._colorCache.asObservable();
   }
 
-  setColorCache(obj: any) {
+  setColorCache(obj: ColorCache) {
     this._colorCache.next(obj);
   }
 
@@ -36,22 +38,14 @@ export class ColorHashService {
       .subscribe(preferenceColors => this.batchUpdateColorCache(preferenceColors));
   }
 
-  /**
-   * Returns the hash in [r, g, b].
-   * Note that R, G, B ∈ [0, 255]
-   *
-   * @param {String} str string to hash
-   * @param colorSchemeName
-   * @returns {Array} [r, g, b]
-   */
-  public initColor(str: string) {
+  public initColor(label: string) {
     const colorCache = this._colorCache.getValue();
-    if (colorCache && colorCache[str]) {
-      return colorCache[str];
+    if (colorCache && colorCache[label]) {
+      return colorCache[label];
     }
-    const {red, green, blue} = hexRgb(stc(str));
+    const {red, green, blue} = hexRgb(stc(label));
     const color = [red, green, blue];
-    this.setColorForString(str, color, false);
+    this.setColorForString(label, color, false);
     return color;
   }
 
@@ -63,38 +57,29 @@ export class ColorHashService {
     const newColorCache = {...this._colorCache.getValue(), ...colors};
     const filteredCache = {};
     Object.keys(newColorCache).forEach(color => {
-      const regex             = new RegExp(this.DOT_PLACEHOLDER, 'g');
+      const regex             = new RegExp(DOT_PLACEHOLDER, 'g');
       const cleanKey          = color.replace(regex, '.');
       filteredCache[cleanKey] = newColorCache[color];
     });
     this.setColorCache(filteredCache);
   }
 
-  private updateColorCache(str: string, color: Array<number>) {
+  private updateColorCache(str: string, color: number[]) {
     const newColorCache = this._colorCache.getValue();
     newColorCache[str]  = color;
     this.setColorCache(newColorCache);
   }
 
-  setColorForString(str: string, color: Array<number>, savePreference: boolean = true) {
+  setColorForString(str: string, color: number[], savePreference: boolean = true) {
     this.updateColorCache(str, color);
     if (savePreference) {
-      const cleanString     = str.replace(/\./, this.DOT_PLACEHOLDER);
-      const colorObj        = {};
-      colorObj[cleanString] = color;
-      this.store.dispatch(addUpdateColorPreferences(colorObj));
+      const cleanString     = str.replace(/\./, DOT_PLACEHOLDER);
+      this.store.dispatch(addUpdateColorPreferences({[cleanString]: color}));
     }
   }
 
-  /**
-   * Returns the hash in hex
-   *
-   * @param {String} str string to hash
-   * @returns {String} hex with #
-   */
-  public hex(str) {
-    // May be used later.
-    const rgb = this.initColor(str);
+  public hex(hash: string) {
+    const rgb = this.initColor(hash);
     return RGB2HEX(rgb);
   }
 

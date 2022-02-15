@@ -2,7 +2,7 @@ import {Component, Input, OnDestroy, OnInit, ViewChild, ViewContainerRef} from '
 import {Store} from '@ngrx/store';
 import {Subscription} from 'rxjs';
 import {Queue} from '../../../../business-logic/model/queues/queue';
-import {GetStats, SetStats, SetStatsParams} from '../../actions/queues.actions';
+import {getStats, setStats, setStatsParams} from '../../actions/queues.actions';
 import {selectQueuesStatsTimeFrame, selectQueueStats, selectStatsErrorNotice} from '../../reducers/index.reducer';
 import {filter} from 'rxjs/operators';
 import {Topic} from '../../../shared/utils/statistics';
@@ -35,6 +35,7 @@ export class QueueStatsComponent implements OnInit, OnDestroy {
   @ViewChild('lenchart', {read: ViewContainerRef, static: true}) lenChartRef: ViewContainerRef;
   private intervaleHandle: number;
   public currentTimeFrame: string;
+  public trackByFn = (index: number, option: IOption) => option.value;
 
   @Input() set queue(queue: Queue) {
     if (this.selectedQueue !== queue) {
@@ -75,15 +76,15 @@ export class QueueStatsComponent implements OnInit, OnDestroy {
   updateChart() {
     clearInterval(this.intervaleHandle);
     this.refreshChart = true;
-    this.store.dispatch(new SetStats({data: {wait: null, length: null}}));
+    this.store.dispatch(setStats({data: {wait: null, length: null}}));
     const range = parseInt(this.currentTimeFrame, 10);
     let width = this.waitChartRef.element.nativeElement.clientWidth | 1000;
     width = Math.min(0.8 * width, 1000);
     const granularity = Math.max(Math.floor(range / width), 5);
 
-    this.store.dispatch(new GetStats({maxPoints: width}));
+    this.store.dispatch(getStats({maxPoints: width}));
     this.intervaleHandle = window.setInterval(() => {
-      this.store.dispatch(new GetStats({maxPoints: width}));
+      this.store.dispatch(getStats({maxPoints: width}));
     }, granularity * 1000);
   }
 
@@ -99,6 +100,6 @@ export class QueueStatsComponent implements OnInit, OnDestroy {
   }
 
   timeFrameChanged($event: any) {
-    this.store.dispatch(new SetStatsParams({timeFrame: $event}));
+    this.store.dispatch(setStatsParams({timeFrame: $event}));
   }
 }

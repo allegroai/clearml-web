@@ -7,7 +7,7 @@ import {debounceTime, distinctUntilChanged, filter, map, tap} from 'rxjs/operato
 import {MESSAGES_SEVERITY} from '../../../../app.constants';
 import {IExperimentInfoState} from '../../reducers/experiment-info.reducer';
 import {selectExperimentInfoData, selectIsExperimentEditable, selectSelectedExperiment} from '../../reducers';
-import {selectBackdropActive} from '../../../../webapp-common/core/reducers/view-reducer';
+import {selectBackdropActive} from '../../../../webapp-common/core/reducers/view.reducer';
 import {isReadOnly} from '../../../../webapp-common/shared/utils/shared-utils';
 import {selectRouterConfig, selectRouterParams, selectRouterQueryParams} from '../../../../webapp-common/core/reducers/router-reducer';
 import * as commonInfoActions from '../../../../webapp-common/experiments/actions/common-experiments-info.actions';

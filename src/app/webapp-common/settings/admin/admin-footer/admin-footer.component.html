@@ -1,0 +1,11 @@
+<footer>
+  <sm-admin-footer-actions></sm-admin-footer-actions>
+  <div class="version float-right">
+    <span>WebApp: </span>
+    <span>{{version["docker-image"] || version.version}}</span>
+    <ng-container *ngIf="(serverVersions$ | async) as serverVersions">
+      <span> • Server: {{serverVersions?.server}}</span>
+      <span> • API: {{serverVersions?.api}}</span>
+    </ng-container>
+  </div>
+</footer>

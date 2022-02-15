@@ -1,0 +1,10 @@
+<mat-checkbox *ngFor="let option of options; let i = index trackBy: trackByValFn"
+              class="w-100 d-flex"
+              [value]="option.value"
+              [checked]="checkedList?.includes(option.value) || indeterminateState[option.value] === checkboxState.exclude"
+              [indeterminate]="indeterminateState[option.value] === checkboxState.exclude"
+              (change)="onFilterChanged($event)"
+>
+  <span [smTooltip]="option.tooltip || option.value" class="ellipsis label"> {{option.label}}</span>
+</mat-checkbox>
+<div *ngIf="options?.length===0" class="empty-menu flex-middle">No item found</div>

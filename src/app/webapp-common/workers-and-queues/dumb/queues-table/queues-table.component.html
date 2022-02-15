@@ -1,21 +1,11 @@
-<div #tableContainer class="queue-container">
-  <sm-menu
-    *ngIf="menuOpen"
-    [position]="menuPosition"
-    [header]=""
-    buttonClass="al-icon sm-md al-ico-bars-menu al-color light-grey-blue"
-    [showCart]="false"
-    [showOverlay]="false"
-    [showButton]="false"
-    [openOnInit]="true"
-  >
-    <sm-menu-item itemLabel="Delete"
-                  [disabled]="selectedQueue?.entries?.length>0"
-                  (itemClicked)="deleteQueue.emit(selectedQueue)"></sm-menu-item>
-    <sm-menu-item itemLabel="Rename"
-                  (itemClicked)="renameQueue.emit(selectedQueue)"></sm-menu-item>
-  </sm-menu>
-
+<div #tableContainer class="queues-container">
+  <sm-queues-menu-extended
+    [menuOpen]="menuOpen"
+    [menuPosition]="menuPosition"
+    [selectedQueue]="selectedQueue"
+    (deleteQueue)="deleteQueue.emit($event)"
+    (renameQueue)="renameQueue.emit(selectedQueue)"
+  ></sm-queues-menu-extended>
   <sm-table #table
             [tableData]="queues"
             [columns]="cols"
@@ -23,6 +13,7 @@
             [rowHeight]="40"
             [reorderableColumns]="false"
             [resizableColumns]="false"
+            [scrollable]="true"
             [selection]="selectedQueue"
             (rowSelectionChanged)="onRowClicked($event)"
             (onRowRightClick)="openContextMenu($event)"
@@ -37,7 +28,7 @@
     </ng-template>
     <ng-template let-col let-queue="rowData" pTemplate="body">
       <ng-container [ngSwitch]="col.id" class="table-cell">
-        <div class="d-flex align-items-center pr-3 first" *ngSwitchCase="QUEUES_TABLE_COL_FIELDS.NAME">
+        <div class="w-100 d-flex align-items-center pr-3 first id-cell" *ngSwitchCase="QUEUES_TABLE_COL_FIELDS.NAME">
           <div class="queue-name" matTooltipPosition="above" [smTooltip]="queue?.name">{{queue?.name}}</div>
           <sm-copy-clipboard [clipboardText]="queue?.id"
                              [hideBackground]="true"

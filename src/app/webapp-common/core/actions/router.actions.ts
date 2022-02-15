@@ -1,5 +1,5 @@
 import {ISmAction} from '../models/actions';
-import {NAVIGATION_PREFIX, NAVIGATION_ACTIONS} from '../../../app.constants';
+import {NAVIGATION_PREFIX, NAVIGATION_ACTIONS} from '~/app.constants';
 import {Action, createAction, props} from '@ngrx/store';
 import {Params} from '@angular/router';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
@@ -36,9 +36,10 @@ export const setURLParams = createAction(
   NAVIGATION_PREFIX + 'SET_URL_PARAMS',
   props<{
     columns?: string[];
-    orders: SortMeta[];
+    orders?: SortMeta[];
     filters?: { [key: string]: FilterMetadata };
-    isArchived: boolean;
+    isArchived?: boolean;
     isDeep?: boolean;
+    update?: boolean;
   }>()
 );

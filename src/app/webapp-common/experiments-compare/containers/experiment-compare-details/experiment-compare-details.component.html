@@ -26,7 +26,7 @@
               <div *ngIf="node.hasChildren" class="section" [ngClass]="'depth-' + node.level">
                 <div class="content"
                      (click)="toggleNode(node)"
-                     [ngClass]="node?.metaData?.classStyle"
+                     [ngClass]="node?.data?.classStyle"
                      [class.selected-diff]="checkIfSelectedPath(node.data)"
                      [class.identical-row]="!allPaths[node.data.path]">
                   <i class="fas" [style.margin-left.px]="2 + node.level * 20" [ngClass]="treeControl.isExpanded(node) ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
@@ -35,7 +35,7 @@
                     [class.ellipsis]="showEllipsis"
                     [style.width.px]="showEllipsis ? nativeWidth - 45 - node.level * 20 : null"
                   >{{(renameMap[node.data.key] || node.data.key) | hideHashTitle}}</span>
-                  <i *ngIf="node.metaData.tooltip" class="al-icon sm al-ico-description node-icon" customClass="hyper-parameters-tooltip" [smTooltip]="node.metaData.tooltip"></i>
+                  <i *ngIf="node.data.tooltip" class="al-icon sm al-ico-description node-icon" customClass="hyper-parameters-tooltip" [smTooltip]="node.data.tooltip"></i>
                 </div>
               </div>
               <div *ngIf="!node.hasChildren" class="section" (click)="keyClicked(node.data)">

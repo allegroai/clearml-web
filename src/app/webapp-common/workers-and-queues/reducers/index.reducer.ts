@@ -31,7 +31,7 @@ export const workers                     = createSelector(workersAndQueues, stat
 export const selectWorkers               = createSelector(workers, (state): Array<Worker> => state.data);
 export const selectStats                 = createSelector(workers, state => state.stats);
 export const selectStatsRequest          = createSelector(workers, state => state.statsRequest);
-export const selectSelectedWorker        = createSelector(workers, (state): Worker => state.selectedWorker);
+export const selectSelectedWorker        = createSelector(workers, state => state.selectedWorker);
 export const selectWorkersTableSortFields = createSelector(workers, (state): SortMeta[] => state.tableSortFields);
 
 export const selectStatsParams    = createSelector(workers, state => state.selectedStatsParam);

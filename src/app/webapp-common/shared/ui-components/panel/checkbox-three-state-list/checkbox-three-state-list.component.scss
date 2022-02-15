@@ -1,0 +1,33 @@
+@import "variables";
+
+:host {
+  width: 100%;
+  mat-checkbox {
+    width: 100%;
+    padding-left: 16px;
+    height: 40px;
+    align-items: center;
+    &:hover {
+      background: rgba(0, 0, 0, 0.04);
+    }
+    ::ng-deep .mat-checkbox-layout {
+      width: calc(100% - 32px);
+    }
+    ::ng-deep .mat-checkbox-label {
+      height: 40px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      font-size: 14px;
+      font-weight: 500;
+      line-height: normal;
+      color: rgba(0, 0, 0, 0.87)
+    }
+     &.mat-checkbox-indeterminate  {
+       ::ng-deep  .mat-checkbox-background {
+        color: red;
+        background-image: url('#{$assets-icons-path}/cbx-exlude.svg');
+      }
+    }
+  }
+}

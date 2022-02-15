@@ -1,5 +1,5 @@
-import {Container} from "../../../business-logic/model/tasks/container";
-import {Queue} from '../../../business-logic/model/queues/queue';
+import {Container} from '~/business-logic/model/tasks/container';
+import {Queue} from '~/business-logic/model/queues/queue';
 
 export enum sourceTypesEnum {
   Tag = 'tag',

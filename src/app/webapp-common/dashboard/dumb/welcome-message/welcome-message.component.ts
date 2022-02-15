@@ -1,20 +1,20 @@
 import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {setSelectedWorkspaceTab} from '../../../core/actions/users.actions';
+import {setSelectedWorkspaceTab} from '@common/core/actions/users.actions';
 import {Subscription} from 'rxjs';
-import {selectActiveWorkspace} from '../../../core/reducers/users-reducer';
+import {selectActiveWorkspace} from '@common/core/reducers/users-reducer';
 import {filter, tap} from 'rxjs/operators';
 import {Store} from '@ngrx/store';
-import {createCredential} from '../../../core/actions/common-auth.actions';
-import {selectNewCredential} from '../../../core/reducers/common-auth-reducer';
-import {guessAPIServerURL, HTTP} from '../../../../app.constants';
-import {AdminService} from '../../../../features/admin/admin.service';
-import {ConfigurationService} from '../../../shared/services/configuration.service';
-import {GetCurrentUserResponseUserObjectCompany} from '../../../../business-logic/model/users/getCurrentUserResponseUserObjectCompany';
-import {Queue} from "../../../../business-logic/model/queues/queue";
+import {createCredential, resetCredential} from '@common/core/actions/common-auth.actions';
+import {selectNewCredential} from '@common/core/reducers/common-auth-reducer';
+import {guessAPIServerURL, HTTP} from '~/app.constants';
+import {AdminService} from '~/shared/services/admin.service';
+import {ConfigurationService} from '@common/shared/services/configuration.service';
+import {GetCurrentUserResponseUserObjectCompany} from '~/business-logic/model/users/getCurrentUserResponseUserObjectCompany';
+import {Queue} from '~/business-logic/model/queues/queue';
 import {GettingStartedContext} from '../../../../../environments/base';
 
-type StepObject = { header?: string; title?: string; code?: string; subNote?: string };
+interface StepObject { header?: string; title?: string; code?: string; subNote?: string }
 
 @Component({
   selector: 'sm-welcome-message',
@@ -60,8 +60,8 @@ export class WelcomeMessageComponent implements OnInit, OnDestroy {
   public queue: Queue;
   steps: StepObject[];
   doNotShowAgain: boolean;
-  private agentName: string;
   public gettingStartedContext: GettingStartedContext;
+  docsLink: string;
 
   constructor(
     private store: Store<any>,
@@ -74,6 +74,7 @@ export class WelcomeMessageComponent implements OnInit, OnDestroy {
     this.step = data?.step || this.step;
     this.queue = data?.queue;
     this.gettingStartedContext = this.configService.getStaticEnvironment().gettingStartedContext;
+    this.docsLink = this.configService.getStaticEnvironment().docsLink;
 
     this.steps = this.queue ? this.ORPHANED_QUEUE_STEPS : this.GETTING_STARTED_STEPS;
     if (this.queue) {
@@ -103,7 +104,7 @@ export class WelcomeMessageComponent implements OnInit, OnDestroy {
       ).subscribe(credential => {
         this.accessKey = credential.access_key;
         this.secretKey = credential.secret_key;
-        this.adminService.resetNewCredential();
+        this.store.dispatch(resetCredential());
       });
   }
 
@@ -119,7 +120,7 @@ export class WelcomeMessageComponent implements OnInit, OnDestroy {
   createCredentials() {
     this.creatingCredentials = true;
     this.store.dispatch(setSelectedWorkspaceTab({workspace: {id: this.workspace.id}}));
-    this.store.dispatch(createCredential({workspaceId: this.workspace.id}));
+    this.store.dispatch(createCredential({workspace: this.workspace}));
   }
 
   ngOnDestroy(): void {

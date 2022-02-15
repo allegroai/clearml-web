@@ -1,5 +1,3 @@
-<sm-survey *ngIf="!guestUser && showSurvey && (showSurvey$ | async) && !update?.active"
-           (dismiss)="dismissSurvey()"></sm-survey>
 <sm-update-notifier #update
                     [availableUpdates]="!hideUpdate && (updatesAvailable$ | async)"
                     [currentUser]="currentUser"
@@ -12,7 +10,7 @@
 <sm-spinner></sm-spinner>
 <sm-side-nav *ngIf="currentUser"></sm-side-nav>
 <div class="app-container" [class.login-page]="!currentUser"
-     [class.notifier-open]="update?.active || ((showSurvey$ | async) && showSurvey && !demo && !guestUser)">
+     [class.notifier-open]="update?.active">
   <sm-header *ngIf="currentUser" [isLogin]="isLoginContext"
              [isShareMode]="isSharedAndNotOwner$ | async"></sm-header>
   <router-outlet class="main-router"></router-outlet>

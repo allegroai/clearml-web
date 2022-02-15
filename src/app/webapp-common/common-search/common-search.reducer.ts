@@ -51,7 +51,7 @@ export function commonSearchReducer<ActionReducer>(state: ICommonSearchState = c
 
 export const selectCommonSearch = createFeatureSelector<ICommonSearchState>('commonSearch');
 export const selectIsSearching  = createSelector(selectCommonSearch, (state: ICommonSearchState): boolean => state ? state.isSearching : false);
-export const selectSearchQuery  = createSelector(selectCommonSearch, (state: ICommonSearchState) => state ? state.searchQuery : commonSearchInitState.searchQuery);
+export const selectSearchQuery  = createSelector(selectCommonSearch, (state: ICommonSearchState) => state?.searchQuery || commonSearchInitState.searchQuery);
 export const selectPlaceholder  = createSelector(selectCommonSearch, (state: ICommonSearchState): string => state ? state.placeholder : '');
 export const selectActiveSearch = createSelector(selectCommonSearch, (state: ICommonSearchState): boolean => state ? state.active : false);
 

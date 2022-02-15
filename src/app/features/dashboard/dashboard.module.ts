@@ -12,8 +12,8 @@ import {DashboardSearchComponent} from './containers/dashboard-search/dashboard-
 import {SearchResultsPageComponent} from './dumb/search-results-page/search-results-page.component';
 import {SharedModule} from '../../shared/shared.module';
 import {DashboardSearchModule} from './dashboard-search/dashboard-search.module';
-import {ProjectDialogModule} from "../../webapp-common/shared/project-dialog/project-dialog.module";
-import {ProjectsSharedModule} from "../projects/shared/projects-shared.module";
+import {ProjectDialogModule} from '../../webapp-common/shared/project-dialog/project-dialog.module';
+import {ProjectsSharedModule} from '../projects/shared/projects-shared.module';
 
 @NgModule({
   imports: [

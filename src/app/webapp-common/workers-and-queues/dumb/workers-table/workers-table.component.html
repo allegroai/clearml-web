@@ -4,6 +4,7 @@
             [selection]="selectedWorker"
             [reorderableColumns]="false"
             [resizableColumns]="false"
+            [scrollable]="true"
             [columns]="cols"
             [rowsNumber]="100"
             [rowHeight]="40"
@@ -16,8 +17,8 @@
           <span *ngIf="!worker?.task?.running_time">&mdash;</span>
         </ng-container>
         <ng-container *ngSwitchCase="WORKERS_TABLE_COL_FIELDS.ID">
-          <span class="first-content" matTooltipPosition="above" [smTooltip]="getBodyData(worker, col)">
-            {{getBodyData(worker, col)}}
+          <span class="first-content" matTooltipPosition="above" [smTooltip]="worker.name">
+            {{worker.name}}
           </span>
         </ng-container>
         <ng-container *ngSwitchDefault>

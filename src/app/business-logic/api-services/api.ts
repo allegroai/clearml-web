@@ -1,3 +1,3 @@
-export * from './events.service';
-import { ApiEventsService } from './events.service';
-export const APIS = [ApiEventsService];
+export * from './tasks.service';
+import { TasksService } from './tasks.service';
+export const APIS = [TasksService];

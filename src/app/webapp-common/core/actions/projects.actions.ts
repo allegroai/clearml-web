@@ -1,6 +1,5 @@
-import {Action, createAction, props} from '@ngrx/store';
+import {createAction, props} from '@ngrx/store';
 import {Project} from '../../../business-logic/model/projects/project';
-import {ISmAction} from '../models/actions';
 import {ProjectsUpdateRequest} from '../../../business-logic/model/projects/projectsUpdateRequest';
 import {ModelsPublishManyResponse} from '../../../business-logic/model/models/modelsPublishManyResponse';
 import {ModelsArchiveManyResponse} from '../../../business-logic/model/models/modelsArchiveManyResponse';
@@ -16,63 +15,59 @@ import {MetricColumn} from '@common/shared/utils/tableParamEncode';
 import {ProjectStatsGraphData} from '@common/core/reducers/projects.reducer';
 
 export const PROJECTS_PREFIX = '[ROOT_PROJECTS] ';
-export const GET_PROJECTS = PROJECTS_PREFIX + 'GET_PROJECTS';
 export const SET_PROJECTS = PROJECTS_PREFIX + 'SET_PROJECTS';
-export const SET_SELECTED_PROJECT_ID = PROJECTS_PREFIX + 'SET_SELECTED_PROJECT_ID';
+export const RESET_PROJECTS = PROJECTS_PREFIX + 'RESET_PROJECTS';
+export const SET_LAST_UPDATE = PROJECTS_PREFIX + 'SET_LAST_UPDATE';
 export const RESET_SELECTED_PROJECT = PROJECTS_PREFIX + 'RESET_SELECTED_PROJECT';
 export const RESET_PROJECT_SELECTION = PROJECTS_PREFIX + 'RESET_PROJECT_SELECTION';
 export const UPDATE_PROJECT = PROJECTS_PREFIX + 'UPDATE_PROJECT';
-export const UPDATE_PROJECT_COMPLETED = PROJECTS_PREFIX + 'UPDATE_PROJECT_COMPLETED';
 
 export interface TagColor {
   foreground: string;
   background: string;
 }
 
-export class GetAllSystemProjects implements ISmAction {
-  readonly type = GET_PROJECTS;
-}
+export const getAllSystemProjects = createAction(
+  PROJECTS_PREFIX + 'GET_PROJECTS'
+);
 
-export class UpdateProject implements Action {
-  readonly type = UPDATE_PROJECT;
+export const updateProject = createAction(
+  UPDATE_PROJECT,
+  props<{ id: string; changes: Partial<ProjectsUpdateRequest> }>()
+);
 
-  constructor(public payload: { id: Project['id']; changes: Partial<ProjectsUpdateRequest> }) {
-  }
-}
+export const setAllProjects = createAction(
+  SET_PROJECTS,
+  props<{ projects: Project[]; updating?: boolean }>()
+);
 
-export class SetAllProjects implements ISmAction {
-  readonly type = SET_PROJECTS;
+export const resetProjects = createAction(RESET_PROJECTS);
 
-  constructor(public payload: Array<Project>) {
-  }
-}
+export const setLastUpdate = createAction(
+  SET_LAST_UPDATE,
+  props<{ lastUpdate: string }>());
 
-export class UpdateProjectCompleted implements ISmAction {
-  readonly type = UPDATE_PROJECT_COMPLETED;
-}
+export const updateProjectCompleted = createAction(
+  PROJECTS_PREFIX + 'UPDATE_PROJECT_COMPLETED'
+);
 
-export class SetSelectedProjectId implements ISmAction {
-  readonly type = SET_SELECTED_PROJECT_ID;
-  public payload: { projectId: string; deep?: boolean; example?: boolean};
-
-  constructor(projectId: string, private example?: boolean) {
-    this.payload = {projectId, example};
-  }
-}
+export const setSelectedProjectId = createAction(
+  PROJECTS_PREFIX + 'SET_SELECTED_PROJECT_ID',
+  props<{ projectId: string; example?: boolean }>()
+);
 
 export const setSelectedProject = createAction(
   PROJECTS_PREFIX + 'SET_SELECTED_PROJECT',
-  props<{project: Project}>()
+  props<{ project: Project }>()
 );
 
-export class ResetSelectedProject implements ISmAction {
-  readonly type = RESET_SELECTED_PROJECT;
-}
+export const resetSelectedProject = createAction(
+  PROJECTS_PREFIX + 'RESET_SELECTED_PROJECT'
+);
 
-
-export class ResetProjectSelection implements ISmAction {
-  readonly type = RESET_PROJECT_SELECTION;
-}
+export const resetProjectSelection = createAction(
+  PROJECTS_PREFIX + 'RESET_PROJECT_SELECTION'
+);
 
 export const setArchive = createAction(
   PROJECTS_PREFIX + 'SET_ARCHIVE',
@@ -84,12 +79,32 @@ export const setDeep = createAction(
   props<{ deep: boolean }>()
 );
 
-export const getTags = createAction(PROJECTS_PREFIX + '[get tags]');
-export const getCompanyTags = createAction(PROJECTS_PREFIX + '[get company tags]');
-export const setTagsFilterByProject = createAction(PROJECTS_PREFIX + '[set tags filter by project]', props<{ tagsFilterByProject: boolean }>());
-export const setTags = createAction(PROJECTS_PREFIX + '[set tags]', props<{ tags: string[] }>());
-export const setCompanyTags = createAction(PROJECTS_PREFIX + '[set company tags]', props<{ tags: string[]; systemTags: string[] }>());
-export const openTagColorsMenu = createAction(PROJECTS_PREFIX + '[open tag colors]');
+export const getTags = createAction(
+  PROJECTS_PREFIX + '[get tags]'
+);
+
+export const getCompanyTags = createAction(
+  PROJECTS_PREFIX + '[get company tags]'
+);
+
+export const setTagsFilterByProject = createAction(
+  PROJECTS_PREFIX + '[set tags filter by project]',
+  props<{ tagsFilterByProject: boolean }>()
+);
+
+export const setTags = createAction(
+  PROJECTS_PREFIX + '[set tags]',
+  props<{ tags: string[] }>()
+);
+
+export const setCompanyTags = createAction(
+  PROJECTS_PREFIX + '[set company tags]',
+  props<{ tags: string[]; systemTags: string[] }>()
+);
+
+export const openTagColorsMenu = createAction(
+  PROJECTS_PREFIX + '[open tag colors]'
+);
 
 export const setTagColors = createAction(
   PROJECTS_PREFIX + '[set tag colors]',
@@ -103,12 +118,11 @@ export const openMoreInfoPopup = createAction(
 
 export const setMetricVariant = createAction(
   PROJECTS_PREFIX + '[set selected metric variant for graph]',
-  props<{projectId: string; col: MetricColumn}>()
-
+  props<{ projectId: string; col: MetricColumn }>()
 );
 export const fetchGraphData = createAction(PROJECTS_PREFIX + '[fetch stats for project graph]');
 
 export const setGraphData = createAction(
   PROJECTS_PREFIX + '[set project stats]',
-  props<{stats: ProjectStatsGraphData[]}>()
+  props<{ stats: ProjectStatsGraphData[] }>()
 );

@@ -12,7 +12,6 @@ export const ADD_MANY_MODELS = SELECT_MODEL_PREFIX + 'ADD_MANY_MODELS';
 export const GET_NEXT_MODELS = SELECT_MODEL_PREFIX + 'GET_NEXT_MODELS';
 export const SET_MODELS = SELECT_MODEL_PREFIX + 'SET_MODELS';
 export const SET_NO_MORE_MODELS = SELECT_MODEL_PREFIX + 'SET_NO_MORE_MODELS';
-export const SET_NEXT_PAGE = SELECT_MODEL_PREFIX + 'SET_NEXT_PAGE';
 export const SET_SELECTED_MODELS = SELECT_MODEL_PREFIX + 'SET_SELECTED_MODELS';
 export const SET_VIEW_MODE = SELECT_MODEL_PREFIX + 'SET_VIEW_MODE';
 export const REMOVE_MANY_MODELS = SELECT_MODEL_PREFIX + 'REMOVE_MANY_MODELS';
@@ -97,12 +96,10 @@ export class GlobalFilterChanged implements Action {
   }
 }
 
-export class SetCurrentPage implements Action {
-  public type = SET_NEXT_PAGE;
-
-  constructor(public payload: number) {
-  }
-}
+export const setCurrentScrollId = createAction(
+  SELECT_MODEL_PREFIX + ' [set current scrollId]',
+  props<{scrollId: string}>()
+);
 
 export class ArchivAllProjectsdModeChanged implements Action {
   public type = ALL_PROJECTS_MODE_CHANGED;

@@ -1,13 +1,26 @@
-import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {selectExperimentHyperParamsSelectedSectionFromRoute, selectExperimentHyperParamsSelectedSectionParams, selectIsExperimentSaving, selectIsSelectedExperimentInDev} from '../../reducers';
+import {
+  selectExperimentHyperParamsSelectedSectionFromRoute,
+  selectExperimentHyperParamsSelectedSectionParams,
+  selectIsExperimentSaving,
+  selectIsSelectedExperimentInDev
+} from '../../reducers';
 import {ICommonExperimentInfoState} from '../../reducers/common-experiment-info.reducer';
-import {IExperimentInfo, ISelectedExperiment} from '../../../../features/experiments/shared/experiment-info.model';
-import {selectBackdropActive} from '../../../core/reducers/view-reducer';
+import {IExperimentInfo} from '../../../../features/experiments/shared/experiment-info.model';
+import {selectBackdropActive} from '../../../core/reducers/view.reducer';
 import {Observable, Subscription} from 'rxjs';
 import {selectIsExperimentEditable, selectSelectedExperiment} from '../../../../features/experiments/reducers';
 import {selectRouterConfig} from '../../../core/reducers/router-reducer';
-import {ActivateEdit, CancelExperimentEdit, DeactivateEdit, deleteHyperParamsSection, saveHyperParamsSection, SetExperimentFormErrors, updateExperimentAtPath} from '../../actions/common-experiments-info.actions';
+import {
+  ActivateEdit,
+  CancelExperimentEdit,
+  DeactivateEdit,
+  deleteHyperParamsSection,
+  saveHyperParamsSection,
+  SetExperimentFormErrors,
+  updateExperimentAtPath
+} from '../../actions/common-experiments-info.actions';
 import {ParamsItem} from '../../../../business-logic/model/tasks/paramsItem';
 import {HELP_TEXTS} from '../../shared/common-experiments.const';
 import {Router} from '@angular/router';
@@ -41,8 +54,11 @@ export class ExperimentInfoHyperParametersFormContainerComponent implements OnIn
   public isExample: boolean;
   public selectedExperiment$: Observable<IExperimentInfo>;
   public propSection: boolean;
+  public searchedText: string;
+  public searchResultsCount: number;
+  public scrollIndexCounter: number;
 
-  constructor(private store: Store<ICommonExperimentInfoState>, protected router: Router) {
+  constructor(private store: Store<ICommonExperimentInfoState>, protected router: Router, private cdr: ChangeDetectorRef) {
 
     this.selectedSectionHyperParams$ = this.store.select(selectExperimentHyperParamsSelectedSectionParams);
     this.editable$ = this.store.select(selectIsExperimentEditable);
@@ -92,8 +108,22 @@ export class ExperimentInfoHyperParametersFormContainerComponent implements OnIn
       this.store.dispatch(saveHyperParamsSection({hyperparams: this.executionParamsForm.formData}));
     } else {
       this.store.dispatch(deleteHyperParamsSection({section: this.selectedSection}));
-
     }
     this.store.dispatch(new DeactivateEdit());
+  }
+
+  searchTable($event: string) {
+    this.searchedText = $event;
+    this.cdr.detectChanges();
+  }
+
+  searchCounterChanged(count: number) {
+    this.searchResultsCount = count;
+    this.cdr.detectChanges();
+  }
+
+  scrollIndexCounterChanged(counterIndex: number) {
+    this.scrollIndexCounter = counterIndex;
+    this.cdr.detectChanges();
   }
 }

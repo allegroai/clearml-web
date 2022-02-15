@@ -5,6 +5,7 @@ import {GroupedList} from '@common/shared/ui-components/data/selectable-grouped-
 import {Config} from 'plotly.js';
 import {ExtData, ExtFrame, ExtLayout} from '../shared/experiment-graphs/single-graph/plotly-graph-base';
 import {MetricsPlotEvent} from '../../business-logic/model/events/models';
+import {KeyValue} from '@angular/common';
 
 export interface IMultiplot {
   [key: string]: { // i.e ROC
@@ -16,16 +17,6 @@ export interface IMultiplot {
     };
   };
 }
-
-export const compare = (a, b) => {
-  if (a.id < b.id) {
-    return -1;
-  }
-  if (a.id > b.id) {
-    return 1;
-  }
-  return 0;
-};
 
 export const mergeTasks = (tableTask, task) => {
   task.project = tableTask.project;
@@ -139,6 +130,11 @@ export const preparePlotsList = (groupedPlots: Map<string, any[]>): Array<Select
 
 export const sortByField = (arr: any[], field: string) =>
   sortBy(item => item[field].replace(':', '~').toLowerCase(), arr);
+
+export const compareByFieldFunc = (field) =>
+  (a: KeyValue<string, any>, b: KeyValue<string, any>) =>
+    a[field].replace(':', '~').toLowerCase() >
+    b[field].replace(':', '~').toLowerCase() ? 1 : -1;
 
 export const mergeMultiMetrics = (metrics): { [key: string]: ExtFrame[] } => {
   const graphsMap = {};
@@ -265,6 +261,7 @@ export const multiplotsAddChartToGroup = (charts, parsed, metric, experiment, ex
     }
     charts[metricName][fullName].layout = Object.assign({}, {...charts[metricName][fullName].layout});
     charts[metricName][fullName].layout.title = fullName;
+    charts[metricName][fullName].layout.name = charts[metricName][fullName].layout.name ? `${charts[metricName][fullName].layout.name} - ${experiment}`: fullName;
     charts[metricName][fullName].layout.barmode = isMultipleTasks ? 'group' : 'stack';
   }
   return charts;

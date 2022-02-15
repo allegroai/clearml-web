@@ -15,6 +15,7 @@ import {SmSyncStateSelectorService} from '../../../../core/services/sync-state-s
 import {ConfirmDialogComponent} from '../../../../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {htmlTextShorte, isReadOnly} from '../../../../shared/utils/shared-utils';
 import * as commonMenuActions from '../../../actions/common-experiments-menu.actions';
+import {archiveSelectedExperiments, getAllTasksChildren} from '../../../actions/common-experiments-menu.actions';
 import {ChangeProjectDialogComponent} from '../change-project-dialog/change-project-dialog.component';
 import {CloneDialogComponent} from '../clone-dialog/clone-dialog.component';
 import {SelectQueueComponent} from '../select-queue/select-queue.component';
@@ -27,16 +28,25 @@ import {BaseContextMenuComponent} from '../../../../shared/components/base-conte
 import * as experimentsActions from '../../../actions/common-experiments-view.actions';
 import {ShareDialogComponent} from '../../../../shared/ui-components/overlay/share-dialog/share-dialog.component';
 import {ConfigurationService} from '../../../../shared/services/configuration.service';
-import {selectNeverShowPopups} from '../../../../core/reducers/view-reducer';
+import {selectNeverShowPopups} from '../../../../core/reducers/view.reducer';
 import {CommonDeleteDialogComponent} from '../../../../shared/entity-page/entity-delete/common-delete-dialog.component';
 import {EntityTypeEnum} from '../../../../../shared/constants/non-common-consts';
 import {DeactivateEdit, SetExperiment} from '../../../actions/common-experiments-info.actions';
-import {archiveSelectedExperiments} from '../../../actions/common-experiments-menu.actions';
 import {neverShowPopupAgain} from '../../../../core/actions/layout.actions';
-import {selectionDisabledAbort, selectionDisabledArchive, selectionDisabledDequeue, selectionDisabledEnqueue, selectionDisabledMoveTo, selectionDisabledPublishExperiments, selectionDisabledReset} from '../../../../shared/entity-page/items.utils';
+import {
+  selectionDisabledAbort,
+  selectionDisabledAbortAllChildren,
+  selectionDisabledArchive,
+  selectionDisabledDequeue,
+  selectionDisabledEnqueue,
+  selectionDisabledMoveTo,
+  selectionDisabledPublishExperiments,
+  selectionDisabledReset
+} from '../../../../shared/entity-page/items.utils';
 import {WelcomeMessageComponent} from '../../../../dashboard/dumb/welcome-message/welcome-message.component';
+import {AbortAllChildrenDialogComponent} from '../abort-all-children-dialog/abort-all-children-dialog.component';
+import {selectAllRunningTasksChildrenForAbort} from '../../../reducers';
 
-const environment = ConfigurationService.globalEnvironment;
 
 @Component({
   selector: 'sm-experiment-menu',
@@ -62,6 +72,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
   @Input() companyTags: string[];
   @Input() numSelected = 0;
   @Input() activateFromMenuButton = true;
+
   @Input() set experiment(experiment: ISelectedExperiment) {
     this._experiment = experiment;
     this.isExample = isReadOnly(experiment);
@@ -72,9 +83,10 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
   @Output() tagSelected = new EventEmitter<string>();
   @Input() neverShowPopups;
   @Input() minimizedView: boolean;
+
   @Input() set selectedExperiments(experiments: ISelectedExperiment[]) {
     this._selectedExperiments = experiments;
-    this.selectionHasExamples = experiments.some((exp => isReadOnly(exp)));
+    this.selectionHasExamples = experiments && experiments.some((exp => isReadOnly(exp)));
   }
 
   get selectedExperiments(): ISelectedExperiment[] {
@@ -94,6 +106,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
     protected store: Store<IExperimentInfoState>,
     protected syncSelector: SmSyncStateSelectorService,
     protected eRef: ElementRef,
+    protected configService: ConfigurationService,
     protected route?: ActivatedRoute
   ) {
     super(store, eRef);
@@ -101,7 +114,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
 
 
   ngOnInit(): void {
-    this.isCommunity = environment.communityServer;
+    this.isCommunity = this.configService.getStaticEnvironment().communityServer;
   }
 
   public getProjectId() {
@@ -135,7 +148,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
           const resultsPath = window.location.pathname.split('info-output/')[1];
           this.router.navigateByUrl(`projects/${this.getProjectId()}/experiments/${this._experiment.id}/output/${resultsPath}`);
         } else {
-          const parts = window.location.pathname.split('/');
+          const parts = this.router.url.split('/');
           parts.splice(5, 0, 'output');
           this.router.navigateByUrl(parts.join('/'));
         }
@@ -330,7 +343,10 @@ To avoid this, <b>clone the experiment</b> and work with the cloned experiment.`
   }
 
   moveToProjectClicked(project, selectedExperiments) {
-    this.store.dispatch(commonMenuActions.changeProjectRequested({selectedEntities: selectedExperiments, project: project}));
+    this.store.dispatch(commonMenuActions.changeProjectRequested({
+      selectedEntities: selectedExperiments,
+      project: project
+    }));
   }
 
   viewWorkerClicked() {
@@ -418,5 +434,26 @@ To avoid this, <b>clone the experiment</b> and work with the cloned experiment.`
 
   setMenuOpenStatus(status: boolean) {
     this.open = status;
+  }
+
+
+  stopAllChildrenPopup() {
+    let stopAllChildrenPopup;
+    const selectedExperiments = this.selectedExperiments ? selectionDisabledAbortAllChildren(this.selectedExperiments).selectedFiltered : [this._experiment];
+    const shouldBeAbortedTasksSub = this.store.select(selectAllRunningTasksChildrenForAbort).subscribe((shouldBeAbortedTasks) => {
+      if (!!shouldBeAbortedTasks) {
+        stopAllChildrenPopup = this.dialog.open(AbortAllChildrenDialogComponent, {
+          data: {tasks: selectedExperiments, shouldBeAbortedTasks}
+        });
+        stopAllChildrenPopup.afterClosed().subscribe((confirmed) => {
+          if (confirmed) {
+            this.store.dispatch(commonMenuActions.stopClicked({selectedEntities: confirmed.shouldBeAbortedTasks}));
+          }
+          shouldBeAbortedTasksSub.unsubscribe();
+          this.store.dispatch(commonMenuActions.setAllTasksChildren({experiments: null}));
+        });
+      }
+    });
+    this.store.dispatch(getAllTasksChildren({experiments: selectedExperiments.map(exp => exp.id)}));
   }
 }

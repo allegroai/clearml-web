@@ -15,8 +15,7 @@ export class UserEffects {
   constructor(private actions: Actions, private cookiesService: CookiesService,
     private authService: ApiAuthService, private serverService: ApiServerService) { }
 
-  @Effect()
-  setUser$ = this.actions.pipe(
+  setUser$ = createEffect(() => this.actions.pipe(
     ofType(fetchCurrentUser),
     filter(user => !!user),
     take(1),
@@ -29,7 +28,7 @@ export class UserEffects {
         })])
       )
     )
-  );
+  ));
 
   setStatsPref$ = createEffect(
     () => this.actions.pipe(

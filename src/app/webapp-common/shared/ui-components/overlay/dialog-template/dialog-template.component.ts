@@ -1,5 +1,5 @@
-import {Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
-import { MatDialogRef } from '@angular/material/dialog';
+import {Component, ElementRef, EventEmitter, Input, Output, ViewChild} from '@angular/core';
+import {MatDialogRef} from '@angular/material/dialog';
 
 @Component({
   selector   : 'sm-dialog-template',
@@ -13,6 +13,7 @@ export class DialogTemplateComponent {
   @Input() closeOnX: boolean = true;
 
   @Input() theme: string = 'light-theme';
+  @Input() containerClass: string;
   @Input() closedCodeLabel: string = 'VIEW COMMAND LINE';
   @Input() iconClass: string; // the icon class (see icons.scss).
   @Input() iconData: string;

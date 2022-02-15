@@ -46,13 +46,21 @@ import {MenuItemTextPipe} from "@common/shared/pipes/menu-item-text.pipe";
 import {InitialsPipe} from './initials.pipe';
 import {UuidPipe} from './uuid.pipe';
 import {FilterInternalPipe} from './filter-internal.pipe';
-
+import {IdToObjectsArrayPipe} from "./idToObjectsArray.pipe";
+import {IsEmptyPipe} from './is-empty.pipe';
+import {HighlightSearchPipe} from './highlight-search.pipe';
+import { TemplateInjectorPipe } from './template-injector.pipe';
+import { TestConditionalPipe } from './test-conditional.pipe';
+import { GroupHasErrorsPipe } from './group-has-errors.pipe';
+import { FormgroupHasRequiredFieldPipe } from './formgroup-has-required-field.pipe';
 
 const pipes = [
   CamelToTitlePipe, FilenameFromPath, FilterPipe, FloorPipe, KeyValuePipe, NAPipe, SortPipe, IsVideoPipe, IsAudioPipe,FilterInternalPipe,UuidPipe,
   JoinPipe, KeyvalPipe, LabelValuePipe, NoUnderscorePipe, NumberToKPipe, UniqueByPipe, MsToHoursPipe, MsToSecPipe, DurationPipe,
-  ToExponentialPipe, HighlightSearchTextPipe, HideHashPipe, HideHashTitlePipe, TimeAgoPipe, TimeTillNowPipe, HasExampleItemPipe, safeAngularUrlParameterPipe,
-  AdvancedFilterPipe, SafePipe, SelectOptionValueToLabelPipe, ToPercentagePipe, ReplaceViaMapPipe, FilterByIdPipe, FilterLast, FilterOutPipe, SimpleFilterPipe, BreadcrumbsEllipsisPipe, ShortProjectNamePipe, ProjectLocationPipe,StringIncludedInArrayPipe, ToPropertyArrayPipe, MenuItemTextPipe, InitialsPipe
+  ToExponentialPipe, HighlightSearchTextPipe, HighlightSearchPipe, HideHashPipe, HideHashTitlePipe, TimeAgoPipe, TimeTillNowPipe, HasExampleItemPipe, safeAngularUrlParameterPipe,
+  AdvancedFilterPipe, SafePipe, SelectOptionValueToLabelPipe, ToPercentagePipe, ReplaceViaMapPipe, FilterByIdPipe, FilterLast, FilterOutPipe, SimpleFilterPipe,
+  BreadcrumbsEllipsisPipe, ShortProjectNamePipe, ProjectLocationPipe,StringIncludedInArrayPipe, ToPropertyArrayPipe, MenuItemTextPipe, InitialsPipe, IdToObjectsArrayPipe, IsEmptyPipe,
+  TemplateInjectorPipe, TestConditionalPipe, GroupHasErrorsPipe, FormgroupHasRequiredFieldPipe
 ];
 
 @NgModule({

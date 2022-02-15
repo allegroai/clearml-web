@@ -15,6 +15,7 @@ export class InlineEditComponent implements OnDestroy {
   private shouldSave: boolean = true;
 
   @Input() pattern;
+  @Input() minLength = 0;
   @Input() originalText;
 
   // *DEFAULTS*
@@ -28,6 +29,7 @@ export class InlineEditComponent implements OnDestroy {
   @Output() textChanged = new EventEmitter<string>();
   @Output() inlineFocusOutEvent = new EventEmitter<boolean>();
   @Output() cancel = new EventEmitter();
+  @Output() cancelClick = new EventEmitter<Event>();
   @ViewChild('inlineInput') inlineInput: ElementRef;
   @ViewChild('template', {static: true}) template: ElementRef;
 
@@ -50,7 +52,7 @@ export class InlineEditComponent implements OnDestroy {
     this.inlineActiveStateChanged.emit(false);
   }
 
-  public inlineActivated() {
+  public inlineActivated(event?: Event) {
     if (!this.editable) {
       return;
     }
@@ -60,10 +62,12 @@ export class InlineEditComponent implements OnDestroy {
     this.inlineValue = this.originalText;
     this.active = true;
     this.inlineActiveStateChanged.emit(true);
+    event?.stopPropagation();
     setTimeout(() => this.inlineInput.nativeElement.focus(), 50);
   }
 
-  cancelClicked() {
+  cancelClicked(event: Event) {
+    this.cancelClick.emit(event);
     this.shouldSave = false;
     this.inlineCanceled();
   }
@@ -74,5 +78,7 @@ export class InlineEditComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this.inlineCanceled();
+    this.inlineInput = null;
+    this.template = null;
   }
 }

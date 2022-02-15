@@ -6,7 +6,7 @@ import {Pipe, PipeTransform} from '@angular/core';
 })
 export class DurationPipe implements PipeTransform {
 
-  transform(value: any, args?: any): any {
+  transform(value: any): any {
 
     if (!value && value !== 0) {
       return '';
@@ -15,29 +15,53 @@ export class DurationPipe implements PipeTransform {
       return '>1 s';
     } else {
       const result = [];
-      const originalVal = value;
-      let seconds = value;
+      let units = 's';
+      let calcSeconds = value;
       // 2- Extract hours:
-      const days = Math.floor(seconds / 86400) % 100;
+      const days = Math.floor(calcSeconds / 86400);
       if (days) {
-        result.push(days.toString().padStart(2, '0'));
+        units = 'd';
+        result.push(days.toString().padStart(days.toString().length, '0'));
       }
-      seconds = seconds % 86400;
-      const hours = Math.floor(seconds / 3600) % 100;
-      if (hours) {
-        result.push(hours.toString().padStart(2, '0'));
+      calcSeconds = calcSeconds % 86400;
+      const hours = Math.floor(calcSeconds / 3600) % 100;
+      if (days && !hours) {
+        return `${result}${units}`;
+      } else if (hours) {
+        if(units === 'd') {
+          result.push(hours.toString().padStart(2, '0'));
+        } else {
+          result.push(hours.toString());
+        }
+        if (result.length === 2) {
+          return `${result.join(':')}${units}`;
+        }
+        units = 'h';
       }
-      seconds = seconds % 3600; // seconds remaining after extracting hours
+      calcSeconds = calcSeconds % 3600; // seconds remaining after extracting hours
       // 3- Extract minutes:
-      const minutes = Math.floor(seconds / 60) % 100;
-      if (minutes) {
+      const minutes = Math.floor(calcSeconds / 60) % 100;
+      if (hours && !minutes) {
+        return `${result}${units}`;
+      } else if (minutes) {
         result.push(minutes.toString().padStart(2, '0'));
+        if (result.length === 2) {
+          return `${result.join(':')}${units}`;
+        }
+        units = 'm';
       }
       // 4- Keep only seconds not extracted to minutes:
-      if (originalVal < 86400) {
-        result.push(Math.floor(seconds % 60).toString().padStart(2, '0'));
+      calcSeconds = calcSeconds % 60; // seconds remaining after extracting hours
+      // 3- Extract minutes:
+      const seconds = Math.floor(calcSeconds) % 100;
+      if (seconds) {
+        result.push(seconds.toString().padStart(2, '0'));
+        if (result.length === 2) {
+          return `${result.join(':')}${units}`;
+        }
+        units = 's';
       }
-      return result.join(':') + (originalVal < 86400 ? 's' : 'm');
+      return `${result.join(':')}${units}`;
     }
   }
 

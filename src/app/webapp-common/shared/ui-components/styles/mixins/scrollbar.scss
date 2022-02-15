@@ -7,8 +7,8 @@
 
       /* width */
       ::-webkit-scrollbar {
-        width: 6px;
-        height: 6px;
+        width: 14px;
+        height: 14px;
       }
 
       /* Track */
@@ -18,19 +18,27 @@
 
       /* Handle */
       ::-webkit-scrollbar-thumb {
-        border-radius: 4px;
-        background: map-get($scrollbar, tumb-background);
+        min-height: 32px;
+        min-width: 32px;
+        border-style: solid;
+        border-color: transparent;
+        border-width: 4px;
+        border-radius: 14px;
+        background-clip: padding-box;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background-color: map-get($scrollbar, tumb-background);
       }
 
       &::-webkit-scrollbar-thumb {
-        border-radius: 4px;
-        background: map-get($scrollbar, tumb-background);
+        background-color: map-get($scrollbar, tumb-background);
       }
 
       scrollbar-color: map-get($scrollbar, tumb-background) transparent;
 
       ::-webkit-scrollbar-corner {
-        background: transparent
+        background-color: transparent
       }
 
     }

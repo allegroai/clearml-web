@@ -15,9 +15,9 @@ interface Error {
 export class ErrorService {
 
   template(strings, ...keys) {
-    return (function(values) {
+    return (values => {
       const result = [strings[0]];
-      keys.forEach(function(key, i) {
+      keys.forEach((key, i) => {
         const value = values[key];
         result.push(value, strings[i + 1]);
       });

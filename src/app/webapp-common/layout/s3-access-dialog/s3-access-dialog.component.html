@@ -23,13 +23,9 @@
     </mat-form-field>
     <mat-form-field *ngIf="(!isAzure) && endpoint" class="w-100">
       <mat-label>Endpoint</mat-label>
-      <input matInput [(ngModel)]="S3Form.Endpoint" type="text" name="Endpoint" readonly autocomplete="off"
+      <input matInput [(ngModel)]="S3Form.Endpoint" type="text" name="Endpoint" autocomplete="off"
              placeholder="Host (Endpoint)">
     </mat-form-field>
-    <div *ngIf=" !isAzure" class="row position-relative">
-      <mat-checkbox [(ngModel)]="useSSL" name="useSSL"></mat-checkbox>
-      <span class="ml-2">Connect using https (SSL)</span>
-    </div>
     <div class="w-100 d-flex justify-content-center">
       <button class="btn btn-neon" (click)="S3NGForm.form.markAllAsTouched(); saveNewCredentials()"
               [disabled]="(!saveEnabled) || (formIsSubmitted && S3NGForm.invalid)">Save Credentials

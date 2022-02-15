@@ -1,18 +1,17 @@
-import {Component, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
-import {getModelDesign} from '../../../tasks/tasks.utils';
-import {EditJsonComponent} from '../../../shared/ui-components/overlay/edit-json/edit-json.component';
+import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
+import {getModelDesign} from '@common/tasks/tasks.utils';
+import {EditJsonComponent} from '@common/shared/ui-components/overlay/edit-json/edit-json.component';
 import {take} from 'rxjs/operators';
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
-import {ConfirmDialogComponent} from '../../../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
-import {EditableSectionComponent} from '../../../shared/ui-components/panel/editable-section/editable-section.component';
-import {selectIsSharedAndNotOwner} from "../../../../features/experiments/reducers";
+import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
+import {EditableSectionComponent} from '@common/shared/ui-components/panel/editable-section/editable-section.component';
 
 @Component({
   selector   : 'sm-model-view-network',
   templateUrl: './model-view-network.component.html',
   styleUrls  : ['./model-view-network.component.scss']
 })
-export class ModelViewNetworkComponent implements OnInit {
+export class ModelViewNetworkComponent {
   private _model: any;
   public design: string;
   private designKey: string;
@@ -21,7 +20,7 @@ export class ModelViewNetworkComponent implements OnInit {
     this._model = model;
     const design = getModelDesign(model?.design)
     this.designKey = design.key;
-    this.design = design.value;
+    this.design = typeof design.value === 'string' ? design.value : '';
   }
 
   get model() {
@@ -38,9 +37,6 @@ export class ModelViewNetworkComponent implements OnInit {
   private unsavedValue: string;
 
   constructor(private dialog: MatDialog) {
-  }
-
-  ngOnInit() {
   }
 
   fieldValueChanged(value: any) {

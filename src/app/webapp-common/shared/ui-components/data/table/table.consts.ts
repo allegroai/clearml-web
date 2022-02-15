@@ -47,4 +47,6 @@ export interface ISmCol {
   projectId?: string;
   textCenter?: boolean;
   andFilter?: boolean;
+  excludeFilter?: boolean;
+  columnExplain?: string;
 }

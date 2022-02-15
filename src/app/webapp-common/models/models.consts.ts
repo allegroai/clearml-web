@@ -71,7 +71,9 @@ export const MODELS_TABLE_COLS: ISmCol[] = [
     searchableFilter: true,
     header      : 'TAGS',
     style       : {width: '240px'},
-    andFilter: true
+    excludeFilter: true,
+    andFilter: true,
+    columnExplain: 'Click to include tag. Click again to exclude.'
   },
   {
     id          : MODELS_TABLE_COL_FIELDS.READY,
@@ -105,11 +107,11 @@ export const MODELS_TABLE_COLS: ISmCol[] = [
     style     : {width: '240px'}
   },
   {
-    id        : MODELS_TABLE_COL_FIELDS.CREATED,
+    id        : MODELS_TABLE_COL_FIELDS.LAST_UPDATE,
     headerType: ColHeaderTypeEnum.sortFilter,
     sortable  : true,
-    header    : 'CREATED',
-    label     : 'Created',
+    header    : 'UPDATED',
+    label     : 'Updated',
     style     : {width: '120px'}
   },
   {

@@ -16,10 +16,11 @@ export class ChipsComponent implements OnInit, OnDestroy {
 
   public color: string;
   public backgroundColor: string;
+  public colorIsForced: boolean = false;
+  public colorTuple: number[];
   private _label: any;
   private colorSub: Subscription;
   private _forceColor: [number, number, number];
-  public colorIsForced: boolean = false;
 
   @Input() set label(label) {
     const initColor = this.colorHash.initColor(label);
@@ -56,16 +57,16 @@ export class ChipsComponent implements OnInit, OnDestroy {
     this.isDarkBackground = (getCssTheme(this.elRef.nativeElement) == 'dark-theme') ? true : false;
     const colorObservable = this.colorHash.getColorsObservable();
     this.colorSub         = colorObservable.pipe(
-      filter((colorObj) => colorObj[this.label] !== this.color)
-    ).subscribe((colorObj) => {
+      filter((colorObj) => colorObj[this.label] !== this.colorTuple)
+    ).subscribe(colorObj => {
       const color = this.forceColor ? this.forceColor : colorObj[this.label];
+      this.colorTuple = color;
       this.chooseColor(color);
       this.changeDetection.detectChanges();
-
     });
   }
 
-  chooseColor(color) {
+  chooseColor(color: number[]) {
     if (FORCED_COLORS_FOR_STRING[this.label]) {
       this.colorIsForced = true;
       const forcedColor  = FORCED_COLORS_FOR_STRING[this.label];

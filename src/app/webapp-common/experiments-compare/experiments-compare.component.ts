@@ -42,4 +42,12 @@ export class ExperimentsCompareComponent implements OnInit, OnDestroy {
     // Update store with url query params on load
     this.store.dispatch(setNavigationPreferences({navigationPreferences: this.queryParams}));
   }
+
+  updateUrl(ids: string[]) {
+    this.router.navigate(
+      [{ids}],
+      {
+        relativeTo: this.activatedRoute
+      });
+  }
 }

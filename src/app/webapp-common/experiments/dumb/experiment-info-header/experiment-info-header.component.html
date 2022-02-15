@@ -22,24 +22,29 @@
       <div class="shared"
            *ngIf="showMinimize && shared"
       ><i class="fas fa-link p-1"></i></div>
+      <span class="comment"
+            smHesitate [delay]="1000" [action]="'leave'"
+            (smHesitate)="menuHesitate.hesitateStatus && menu.closed.emit()">
+        <i class="al-icon  pointer"
+           #commentElement
+           [ngClass]="infoData?.comment ? 'al-ico-task-desc' : 'al-ico-task-desc-outline'"
+           [matMenuTriggerFor]="menu"
+           smHesitate
+           [delay]="500"
+           [action]="'enter'"
+           (smHesitate)="commentElement.click(); menuHesitate.hesitateStatus = true"
+           (click)="false"
+        ></i>
+      </span>
 
-      <i class="al-icon  comment pointer"
-         #commentElement
-         [ngClass]="infoData?.comment ? 'al-ico-task-desc' : 'al-ico-task-desc-outline'"
-         [matMenuTriggerFor]="menu"
-         smHesitate
-         [delay]="100"
-         [action]="'enter'"
-         (smHesitate)="commentElement.click()"
-         (click)="false"
-      ></i>
 
-      <mat-menu #menu="matMenu">
+      <mat-menu #menu="matMenu" backdropClass="hello" [hasBackdrop]="false">
         <sm-experiment-info-edit-description
           smHesitate
-          [delay]="500"
+          #menuHesitate="hesitate"
+          [delay]="1000"
           [action]="'leave'"
-          (smHesitate)="menu.closed.emit()"
+          (smHesitate)="menu.closed.emit();"
           [selectedExperiment]="infoData"
           (onDescription)="onDescriptionHandler()"
         ></sm-experiment-info-edit-description>
@@ -91,7 +96,7 @@
             smTooltip="View in experiment table" matTooltipPosition="left">
       <i class="al-icon al-ico-info-min al-color light-grey-blue"></i>
     </button>
-    <sm-experiment-menu
+    <sm-experiment-menu-extended
       *ngIf="showMenu && experiment"
       [experiment]="experiment"
       [selectedExperiment]="experiment"
@@ -104,6 +109,6 @@
       [isSharedAndNotOwner]="isSharedAndNotOwner"
       [numSelected]="1"
       (tagSelected)="addTag($event)"
-    ></sm-experiment-menu>
+    ></sm-experiment-menu-extended>
   </div>
 </div>

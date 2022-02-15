@@ -1,7 +1,7 @@
-import {Action, createAction, props} from '@ngrx/store';
+import {createAction, props} from '@ngrx/store';
 
 export interface ColorPreference {
-  [key: string]: Array<[string, string, string]>;
+  [key: string]: number[];
 }
 
 export interface ColorPickerProps {
@@ -10,6 +10,7 @@ export interface ColorPickerProps {
   theme: string;
   defaultColor: string;
   cacheKey: string;
+  alpha?: boolean;
 }
 
 export const CHOOSE_COLOR_PREFIX          = 'CHOOSE_COLOR_';

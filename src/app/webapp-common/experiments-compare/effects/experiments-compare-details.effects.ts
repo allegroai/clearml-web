@@ -23,12 +23,13 @@ export class ExperimentsCompareDetailsEffects {
   ) {
   }
 
-  activeLoader$ = createEffect( () => this.actions$.pipe(
+
+  activeLoader$ = createEffect(() => this.actions$.pipe(
     ofType(experimentListUpdated, REFETCH_EXPERIMENT_REQUESTED),
     map(action => activeLoader(action.type))
   ));
 
-  updateExperimentsDetail$ = createEffect( () => this.actions$.pipe(
+  updateExperimentsDetail$ = createEffect(() => this.actions$.pipe(
     ofType(experimentListUpdated),
     withLatestFrom(
       this.store.pipe(select(selectExperimentIdsDetails)),
@@ -54,11 +55,10 @@ export class ExperimentsCompareDetailsEffects {
     })
   ));
 
-  refetchExperimentEffect$ = createEffect( () => this.actions$.pipe(
+  refetchExperimentEffect$ = createEffect(() => this.actions$.pipe(
     ofType(refetchExperimentRequested),
     withLatestFrom(this.store.select(selectExperimentIdsDetails), this.store.select(selectHasDataFeature)),
-    switchMap(([action, newExperimentIds, hasDataFeature]) =>
-      this.fetchExperimentDetails$(newExperimentIds, hasDataFeature).pipe(
+    switchMap(([action, newExperimentIds, hasDataFeature]) => this.fetchExperimentDetails$(newExperimentIds, hasDataFeature).pipe(
         mergeMap(experiments => [
           deactivateLoader(action.type),
           setRefreshing({payload: false}),

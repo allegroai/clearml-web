@@ -1,0 +1,32 @@
+@import "src/app/webapp-common/shared/ui-components/styles/variables";
+
+:host {
+  .reload {
+    color: transparent;
+    text-decoration: underline;
+    position: absolute;
+    right: 50px;
+    transition: color 0.5s ease-in-out, right 0.5s ease-in-out;
+
+    &.highlight {
+      color: $neon-yellow;
+      right: -100px;
+    }
+  }
+
+  .toggles {
+    display: inline-flex;
+    position: relative;
+    flex-direction: column;
+    margin-top: 0;
+
+    & > *:not(:first-child){
+      display: block;
+      margin-top: 12px;
+
+      &.first {
+        margin-top: 0;
+      }
+    }
+  }
+}

@@ -4,25 +4,15 @@ $generic-font-size: 11px;
 
 :host {
 
-  ///* Handle on hover */
-  //::-webkit-scrollbar-thumb:hover {
-  //  //background: #555;
-  //}
-
-  ::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
-  }
 
   /* Track */
   ::-webkit-scrollbar-track {
-    background: $blue-600;
+    background-color: $blue-600;
   }
 
   /* Handle */
   ::-webkit-scrollbar-thumb {
-    border-radius: 4px;
-    background: $dark-grey-blue-nine;
+    background-color: $dark-grey-blue-nine;
   }
 
   .code-footer {

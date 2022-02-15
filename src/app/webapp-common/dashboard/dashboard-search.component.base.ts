@@ -1,5 +1,5 @@
 import {InitSearch, ResetSearch} from '../common-search/common-search.actions';
-import {filter, skip} from 'rxjs/operators';
+import {skip} from 'rxjs/operators';
 import {Model} from '../../business-logic/model/models/model';
 import {SearchDeactivate, searchStart} from '../dashboard-search/dashboard-search.actions';
 import {IRecentTask} from './common-dashboard.reducer';
@@ -13,7 +13,7 @@ import {
   selectSearchTerm
 } from '../dashboard-search/dashboard-search.reducer';
 import {Project} from '../../business-logic/model/projects/project';
-import {SetSelectedProjectId} from '../core/actions/projects.actions';
+import {setSelectedProjectId} from '../core/actions/projects.actions';
 import {isExample} from '../shared/utils/shared-utils';
 
 export abstract class DashboardSearchComponentBase {
@@ -51,9 +51,7 @@ export abstract class DashboardSearchComponentBase {
 
     this.searchSubs = this.searchQuery$
       .pipe(skip(1))
-      .subscribe(query => {
-        this.searchTermChanged(query.query, query.regExp);
-      });
+      .subscribe(query => this.searchTermChanged(query?.query, query?.regExp));
   }
 
   public modelSelected(model: Model) {
@@ -73,7 +71,7 @@ export abstract class DashboardSearchComponentBase {
 
   public projectCardClicked(project: Project) {
     this.router.navigateByUrl(`projects/${project.id}`);
-    this.store.dispatch(new SetSelectedProjectId(project.id, isExample(project)));
+    this.store.dispatch(setSelectedProjectId({projectId: project.id, example: isExample(project)}));
   }
 
   public taskSelected(task: IRecentTask | ITask) {

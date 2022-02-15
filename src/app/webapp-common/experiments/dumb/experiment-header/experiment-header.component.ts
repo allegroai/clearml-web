@@ -1,8 +1,9 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {MetricVariantResult} from '../../../../business-logic/model/projects/metricVariantResult';
+import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 import {CustomColumnMode} from '../../shared/common-experiments.const';
-import {ISmCol} from '../../../shared/ui-components/data/table/table.consts';
-import {MetricValueType} from '../../../experiments-compare/reducers/experiments-compare-charts.reducer';
+import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
+import {MetricValueType} from '@common/experiments-compare/reducers/experiments-compare-charts.reducer';
+import {FilterMetadata} from 'primeng/api/filtermetadata';
 
 @Component({
   selector   : 'sm-experiment-header',
@@ -20,6 +21,7 @@ export class ExperimentHeaderComponent {
   @Input() minimizedView: boolean;
   @Input() isMetricsLoading: boolean;
   @Input() autoRefreshState: boolean;
+  @Input() tableFilters: { [s: string]: FilterMetadata };
   @Input() sharedView: boolean;
 
   @Input() set tableCols(tableCols) {
@@ -43,6 +45,7 @@ export class ExperimentHeaderComponent {
   @Output() refreshListClicked       = new EventEmitter<boolean>();
   @Output() setAutoRefresh           = new EventEmitter<boolean>();
   @Output() clearSelection           = new EventEmitter();
+  @Output() clearTableFilters        = new EventEmitter<{ [s: string]: FilterMetadata }>();
 
 
   onIsArchivedChanged(value: boolean) {

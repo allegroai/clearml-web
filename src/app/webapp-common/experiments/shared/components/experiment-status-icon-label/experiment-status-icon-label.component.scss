@@ -32,7 +32,14 @@
 .in_progress {
   color: $running-green;
 }
-
+:host-context(.light-theme) {
+  .published {
+    color: darken($neon-yellow, 10%);
+    .icon.i-published{
+      filter: brightness(0.8)
+    }
+  }
+}
 .published {
   color: $neon-yellow;
   line-height: 23px;

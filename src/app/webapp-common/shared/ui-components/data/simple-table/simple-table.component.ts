@@ -1,6 +1,6 @@
 import { Component, ContentChild, EventEmitter, Input, Output, TemplateRef } from '@angular/core';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
-import { FormsTrackBy } from '../../../utils/forms-track-by';
+import {FormsTrackBy, trackById} from '../../../utils/forms-track-by';
 
 @Component({
   selector: 'sm-simple-table-2',
@@ -10,6 +10,7 @@ import { FormsTrackBy } from '../../../utils/forms-track-by';
 export class SimpleTableComponent2 extends FormsTrackBy {
 
   public open = [];
+  public trackById = trackById;
 
   get formData() {
     return this.rowsData;

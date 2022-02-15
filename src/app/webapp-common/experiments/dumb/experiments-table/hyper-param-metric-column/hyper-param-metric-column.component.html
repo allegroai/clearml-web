@@ -1,0 +1,8 @@
+<span matTooltipPosition="above" class="metric-cell ellipsis"
+      [smTooltip]="roundedMetricValue?.[experiment.id] && !roundedMetricValue?.noRound ? (col | getVariantWithoutRound:experiment?.last_metrics) : ''">
+            {{col | getParamMetricValue:experiment:roundedMetricValue}}
+</span>
+<i *ngIf="roundedMetricValue && roundedMetricValue[experiment.id]"
+   class="al-icon sm ml-2 al-ico-line-expand"
+   [class.fa-rotate-180]="roundedMetricValue.noRound"
+   (click)="expandColToggle($event, col)"></i>

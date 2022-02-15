@@ -1,4 +1,5 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {FilterMetadata} from "primeng/api/filtermetadata";
 
 @Component({
   selector   : 'sm-model-header',
@@ -22,12 +23,14 @@ export class ModelHeaderComponent {
   @Input() disableCreateNewButton: boolean;
   @Input() autoRefreshState: boolean;
   @Input() sharedView: boolean;
+  @Input() tableFilters: { [s: string]: FilterMetadata };
 
   @Output() isArchivedChanged    = new EventEmitter<boolean>();
   @Output() addModelClicked = new EventEmitter();
   @Output() refreshListClicked       = new EventEmitter();
   @Output() setAutoRefresh           = new EventEmitter();
   @Output() selectedTableColsChanged = new EventEmitter();
+  @Output() clearTableFilters        = new EventEmitter<{ [s: string]: FilterMetadata }>();
 
 
 

@@ -13,7 +13,7 @@
       class="form-section"
       [editable]="inEditMode && prototext.inEditMode"
       [isInDev]="false"
-      [formData]="design ? design : ''"
+      [formData]="design ?? ''"
       [showSpinner]="false"></sm-scroll-textarea>
   </div>
   <button extra-buttons

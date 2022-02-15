@@ -1,5 +1,6 @@
-<div class="table-card" [ngClass]="{'selected':selected, 'odd': odd, 'checked':checked, 'contexted': activeContextRow?.id ===rowData?.id && contextMenuOpen}">
-  <div class="d-flex">
+<div class="table-card"
+     [class.two-columns]="tableType === 'model'"
+     [ngClass]="{'selected':selected, 'odd': odd, 'checked':checked, 'contexted': activeContextRow?.id ===rowData?.id && contextMenuOpen}">
     <div class="d-flex align-items-start justify-content-around content-row mx-2">
       <ng-content select="sm-checkbox-control"></ng-content>
     </div>
@@ -21,5 +22,4 @@
       </div>
       <ng-content select="sm-tag-list"></ng-content>
       <ng-content select="[compact-columns-data]"></ng-content>
-    </div>
   </div>

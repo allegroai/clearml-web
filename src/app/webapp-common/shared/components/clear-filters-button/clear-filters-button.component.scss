@@ -1,0 +1,16 @@
+@import "variables";
+i {
+  display: inline;
+  line-height: 36px;
+
+  &.disabled {
+    .path2:before, .path1:before {
+      color: $blue-570;
+    }
+  }
+}
+:not(.dark-theme) {
+  &.disabled {
+    opacity: 0.3;
+  }
+}

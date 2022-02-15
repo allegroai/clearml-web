@@ -1,5 +1,40 @@
 @import "../variables";
 
+
+@mixin sm-system-tag() {
+  .sys-tag {
+    @include system-tag();
+
+    &:before {
+      font-family: '#{$icomoon-font-family}';
+      content: $al-ico-users;
+      width: 12px;
+      font-size: 24px;
+      text-align: left;
+      position: absolute;
+      left: -12px;
+    }
+  }
+
+  .tag-item {
+    @include shrinkable-tags();
+    padding-left: 16px;
+  }
+
+  .group-rest {
+    background: transparent;
+    border-color: transparent;
+    min-width: 0;
+    text-overflow: unset;
+    padding: 0 6px;
+    overflow: visible;
+
+    &:before {
+      content: '';
+    }
+  }
+}
+
 @mixin system-tag() {
   display: inline-block;
   position: relative;

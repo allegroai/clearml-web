@@ -18,6 +18,7 @@ export class ExperimentCustomColsMenuComponent {
   @Input() metricVariants;
   @Input() customColumnMode: CustomColumnMode;
   @Input() tableCols;
+  @Input() disabled: boolean;
 
   @Input() set hyperParams(hyperParams: { [section: string]: any[] }) {
     this._hyperParams = hyperParams;

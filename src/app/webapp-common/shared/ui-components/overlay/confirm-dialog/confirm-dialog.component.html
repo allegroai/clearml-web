@@ -1,8 +1,8 @@
 <sm-dialog-template [displayX]="displayX && !dialogRef.disableClose" [header]="title"
                     (xClicked)="closeDialog(undefined)" [closeOnX]="false"
-                    [iconClass]="iconClass">
+                    [iconClass]="iconClass" [iconData]="iconData">
   <div *ngIf="reference" class="reference">{{reference}}</div>
-  <div class="body" [innerHTML]="body | safe: 'html'"></div>
+  <div class="body" [class.text-center]="this.centerText" [innerHTML]="body | safe: 'html'"></div>
   <ng-content></ng-content>
 
 

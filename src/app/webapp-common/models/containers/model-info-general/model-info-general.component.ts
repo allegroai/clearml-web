@@ -7,7 +7,7 @@ import {selectSelectedModel} from '../../reducers';
 import {filter} from 'rxjs/operators';
 import {resetDontShowAgainForBucketEndpoint} from '../../../core/actions/common-auth.actions';
 import {createModelLink, isReadOnly} from '../../../shared/utils/shared-utils';
-import {AdminService} from '../../../../features/admin/admin.service';
+import {AdminService} from '~/shared/services/admin.service';
 import {ModelDetailsUpdated, updateModelDetails} from '../../actions/models-info.actions';
 
 @Component({

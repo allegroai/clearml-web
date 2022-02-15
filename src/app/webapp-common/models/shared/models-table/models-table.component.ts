@@ -1,4 +1,13 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, HostListener, Input, Output, ViewChild} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  HostListener,
+  Input,
+  Output,
+  ViewChild
+} from '@angular/core';
 import {ColHeaderTypeEnum, ISmCol} from '../../../shared/ui-components/data/table/table.consts';
 import {get} from 'lodash/fp';
 import {SelectedModel, TableModel} from '../models.model';
@@ -11,13 +20,14 @@ import {Observable} from 'rxjs';
 import {selectCompanyTags, selectProjectTags, selectTagsFilterByProject} from '../../../core/reducers/projects.reducer';
 import {Store} from '@ngrx/store';
 import {addTag} from '../../actions/models-menu.actions';
-import { ModelMenuComponent } from '../../containers/model-menu/model-menu.component';
 import {ICONS, TIME_FORMAT_STRING} from '../../../constants';
 import {getSysTags} from '../../model.utils';
 import {TableComponent} from '../../../shared/ui-components/data/table/table.component';
-import { MODELS_TABLE_COLS } from '../../models.consts';
+import {MODELS_TABLE_COLS} from '../../models.consts';
 import {IOption} from '../../../shared/ui-components/inputs/select-autocomplete-for-template-forms/select-autocomplete-for-template-forms.component';
 import {CountAvailableAndIsDisableSelectedFiltered} from '../../../shared/entity-page/items.utils';
+import {selectAllModels} from '../../actions/models-view.actions';
+import {ModelMenuExtendedComponent} from '../../../../features/models/containers/model-menu-extended/model-menu-extended.component';
 
 @Component({
   selector       : 'sm-models-table',
@@ -29,7 +39,7 @@ export class ModelsTableComponent extends BaseTableView {
   readonly MODELS_TABLE_COL_FIELDS = MODELS_TABLE_COL_FIELDS;
   readonly MODELS_FRAMEWORK_OPTIONS = Object.entries(MODELS_FRAMEWORK_LABELS).map(([key, val]) => ({label: val, value: key}));
   readonly MODELS_READY_OPTIONS = Object.entries(MODELS_READY_LABELS).map(([key, val]) => ({label: val, value: key}));
-  readonly filtersOptions: {[colId: string]: IOption[]} = {
+  public filtersOptions: {[colId: string]: IOption[]} = {
     [MODELS_TABLE_COL_FIELDS.FRAMEWORK]: [],
     [MODELS_TABLE_COL_FIELDS.READY]    : this.MODELS_READY_OPTIONS,
     [MODELS_TABLE_COL_FIELDS.USER]    : [],
@@ -137,7 +147,7 @@ export class ModelsTableComponent extends BaseTableView {
 
   @Input() set users(users: User[]) {
     this.filtersOptions[MODELS_TABLE_COL_FIELDS.USER] = users.map(user => ({label: user.name ? user.name : 'Unknown User', value: user.id}));
-    this.sortOptionalUsersList();
+    this.sortOptionsList(MODELS_TABLE_COL_FIELDS.USER);
   }
 
   @Input() set frameworks(frameworks: string[]) {
@@ -146,14 +156,14 @@ export class ModelsTableComponent extends BaseTableView {
       label: framework ? framework :
         (framework === null ? '(No framework)' : 'Unknown'), value: framework
     }));
-    this.sortOptionalFrameworksList();
+    this.sortOptionsList(MODELS_TABLE_COL_FIELDS.FRAMEWORK);
   }
 
   @Input() set tags(tags) {
     const tagsAndActiveFilter = Array.from(new Set(tags.concat(this.filtersValues[MODELS_TABLE_COL_FIELDS.TAGS])));
     this.filtersOptions[MODELS_TABLE_COL_FIELDS.TAGS] = tagsAndActiveFilter.
     map(tag => ({label: tag===null? 'No tag':tag , value: tag}) as IOption);
-    this.sortOptionalTagsList();
+    this.sortOptionsList(MODELS_TABLE_COL_FIELDS.TAGS);
   }
 
   @Input() systemTags = [] as string[];
@@ -168,7 +178,7 @@ export class ModelsTableComponent extends BaseTableView {
   @Output() sortedChanged = new EventEmitter<{ isShift: boolean; colId: ISmCol['id'] }>();
   @Output() columnResized = new EventEmitter<{columnId: string; widthPx: number}>();
   @ViewChild(TableComponent, {static: true}) table: TableComponent;
-  @ViewChild('contextMenu') contextMenu: ModelMenuComponent;
+  @ViewChild('contextMenuExtended') contextMenuExtended: ModelMenuExtendedComponent;
   timeFormatString = TIME_FORMAT_STRING;
   public readonly initialColumns = MODELS_TABLE_COLS;
 
@@ -186,24 +196,13 @@ export class ModelsTableComponent extends BaseTableView {
     this.companyTags$ = this.store.select(selectCompanyTags);
     this.entitiesKey = 'models';
     this.selectedEntitiesKey = 'selectedModels';
+
   }
 
-  afterTableInit() {
-    if (this._selectedModel) {
-      this.table.scrollToElement(this._selectedModel);
-    }
-  }
-
-  sortOptionalUsersList() {
-    this.filtersOptions.users.sort((a, b) => sortByArr(a.value, b.value, this.filtersValues[MODELS_TABLE_COL_FIELDS.USER]));
-  }
-
-  sortOptionalTagsList() {
-    this.filtersOptions.tags.sort((a, b) => sortByArr(a.value, b.value, this.filtersValues[MODELS_TABLE_COL_FIELDS.TAGS]));
-  }
-
-  sortOptionalFrameworksList() {
-    this.filtersOptions.framework.sort((a, b) => sortByArr(a.value, b.value, [null].concat(this.filtersValues[MODELS_TABLE_COL_FIELDS.FRAMEWORK])));
+  sortOptionsList(columnId: string) {
+    this.filtersOptions[columnId]
+      .sort((a, b) => sortByArr(a.value, b.value, [null, ...(this.filtersValues[columnId] || [])]));
+    this.filtersOptions = {...this.filtersOptions, [columnId]: [...this.filtersOptions[columnId]]};
   }
 
   onRowSelectionChanged(event) {
@@ -244,21 +243,17 @@ export class ModelsTableComponent extends BaseTableView {
     }
   }
 
-  selectAll(checked) {
-    const notAllAreSelected = this.models.length !== this.selectedModels.length && this.selectedModels.length > 1;
-    if (!checked.value || notAllAreSelected) {
-      this.modelsSelectionChanged.emit([]);
-    } else {
-      this.modelsSelectionChanged.emit(this.models);
-    }
+  selectAll(filtered = false) {
+    this.store.dispatch(selectAllModels({filtered}));
   }
 
   emitSelection(selection: any[]) {
     this.modelsSelectionChanged.emit(selection);
   }
 
-  searchValueChanged($event: string, colId) {
+  searchValueChanged($event: string, colId: string) {
     this.searchValues[colId] = $event;
+    this.sortOptionsList(colId);
   }
 
   addTag(tag: string) {
@@ -266,6 +261,7 @@ export class ModelsTableComponent extends BaseTableView {
       tag,
       models: this.selectedModels.length > 1 ? this.selectedModels : [this.contextModel]
     }));
+    this.filtersOptions[MODELS_TABLE_COL_FIELDS.TAGS] = [];
   }
 
   openContextMenu(data) {
@@ -279,6 +275,16 @@ export class ModelsTableComponent extends BaseTableView {
     }
     const event = data.e as MouseEvent;
     event.preventDefault();
-    this.contextMenu?.openMenu({x: event.clientX, y: event.clientY});
+    this.contextMenuExtended?.contextMenu.openMenu({x: event.clientX, y: event.clientY});
+  }
+
+  columnFilterOpened(col: ISmCol) {
+    if (col.id === MODELS_TABLE_COL_FIELDS.TAGS && !this.filtersOptions[MODELS_TABLE_COL_FIELDS.TAGS]?.length) {
+      this.tagsMenuOpened.emit();
+    }
+  }
+
+  columnFilterClosed(col: ISmCol) {
+    window.setTimeout(() => this.sortOptionsList(col.id));
   }
 }

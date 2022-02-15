@@ -23,12 +23,13 @@
   <ng-template
     let-col
     let-i="rowIndex"
-    let-row="row">
-    <a class="col-9 link" [routerLink]="['../workers']" [queryParams]="{id: row.name}">{{row?.name}}</a>
-    <div class="col-6">
+    let-row="row"
+  >
+    <a class="ml-2 flex-column link" [routerLink]="['../workers']" [queryParams]="{id: row.name}">{{row?.name}}</a>
+    <div class="flex-column">
       {{row.ip}}
     </div>
-    <div class="col-9">
+    <div class="flex-column">
       <a
         [href]="'/projects/'+ ((row?.task?.project?.id) ? row?.task?.project?.id : '*') + '/experiments/' +row?.task?.id"> {{row?.task?.name}}</a>
     </div>
@@ -39,7 +40,7 @@
 <sm-menu
   *ngIf="menuOpen"
   buttonClass="al-icon sm-md al-ico-bars-menu al-color light-grey-blue"
-  smMenuClass="bigger-width experiments-in-queue-list"
+  smMenuClass="experiments-in-queue-list"
   panelClasses="dark"
   [position]="menuPosition"
   [header]=""
@@ -85,17 +86,18 @@
     let-col
     let-i="rowIndex"
     let-row="row">
-    <div class="col-1">
+    <div class="column ml-3">
       <i class="fas fa-th drag-grid"></i>
     </div>
-    <div class="col-1">
+    <div class="column">
       {{i + 1}}
     </div>
-    <div class="col-20">
+    <div class="flex-column">
       <a
-        [href]="'/projects/'+ ((row?.task?.project?.id) ? row?.task?.project?.id : '*') + '/experiments/' +row?.task?.id">{{row?.task?.name}}</a>
+        [href]="'/projects/'+ ((row?.task?.project?.id) ? row?.task?.project?.id : '*') + '/experiments/' +row?.task?.id">{{row?.task?.name}}
+      </a>
     </div>
-    <div class="col-2">
+    <div class="column">
       <i class="al-icon al-ico-dots-v-menu sm-md pointer p-2" (click)="openContextMenu($event, row?.task)"></i>
     </div>
   </ng-template>

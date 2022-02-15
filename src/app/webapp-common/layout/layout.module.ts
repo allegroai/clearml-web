@@ -14,9 +14,9 @@ import {BreadcrumbsComponent} from './breadcrumbs/breadcrumbs.component';
 import {CommonSearchModule} from '../common-search/common-search.module';
 import {HeaderComponent} from './header/header.component';
 import { UiUpdateDialogComponent } from './ui-update-dialog/ui-update-dialog.component';
-import {SharedModule} from '../../shared/shared.module';
-import { InviteUserModalComponent } from './invite-user-modal/invite-user-modal.component';
+import {SharedModule} from '~/shared/shared.module';
 import {TipOfTheDayModalComponent} from './tip-of-the-day-modal/tip-of-the-day-modal.component';
+import {HeaderUserMenuActionsComponent} from '~/layout/header/header-user-menu-actions/header-user-menu-actions.component';
 
 
 @NgModule({
@@ -30,8 +30,12 @@ import {TipOfTheDayModalComponent} from './tip-of-the-day-modal/tip-of-the-day-m
         StoreModule.forFeature('layout', LayoutReducer),
         SharedModule,
     ],
-  declarations: [HeaderComponent, BreadcrumbsComponent, ProjectContextNavbarComponent, LoggedOutAlertComponent, S3AccessResolverComponent, S3AccessDialogComponent, ServerNotificationDialogContainerComponent, UiUpdateDialogComponent, InviteUserModalComponent, TipOfTheDayModalComponent],
-  exports     : [HeaderComponent, BreadcrumbsComponent, ProjectContextNavbarComponent, LoggedOutAlertComponent, S3AccessResolverComponent, S3AccessDialogComponent, ServerNotificationDialogContainerComponent, UiUpdateDialogComponent]
+  declarations: [
+    HeaderComponent, BreadcrumbsComponent, ProjectContextNavbarComponent, LoggedOutAlertComponent,
+    S3AccessResolverComponent, S3AccessDialogComponent, ServerNotificationDialogContainerComponent,
+    UiUpdateDialogComponent, TipOfTheDayModalComponent, HeaderUserMenuActionsComponent
+  ],
+  exports: [HeaderComponent, BreadcrumbsComponent, ProjectContextNavbarComponent, LoggedOutAlertComponent, S3AccessResolverComponent, S3AccessDialogComponent, ServerNotificationDialogContainerComponent, UiUpdateDialogComponent]
 })
 export class CommonLayoutModule {
 }

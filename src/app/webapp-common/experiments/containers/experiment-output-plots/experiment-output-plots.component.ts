@@ -12,8 +12,10 @@ import {selectRouterParams} from '../../../core/reducers/router-reducer';
 import {scrollToElement} from '../../../shared/utils/shared-utils';
 import {ActivatedRoute, Router} from '@angular/router';
 import {IExperimentInfoState} from '../../../../features/experiments/reducers/experiment-info.reducer';
-import {ExperimentPlotsRequested, ResetExperimentMetrics, SetExperimentMetricsSearchTerm,
-  SetExperimentSettings} from '../../actions/common-experiment-output.actions';
+import {
+  experimentPlotsRequested, ResetExperimentMetrics, SetExperimentMetricsSearchTerm,
+  SetExperimentSettings
+} from '../../actions/common-experiment-output.actions';
 import {convertPlots, groupIterations, sortMetricsList} from '../../../tasks/tasks.utils';
 import {selectSelectedExperiment} from '../../../../features/experiments/reducers';
 import {ExtFrame} from '@common/shared/experiment-graphs/single-graph/plotly-graph-base';
@@ -141,7 +143,7 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy {
   refresh() {
     if (!this.refreshDisabled) {
       this.refreshDisabled = true;
-      this.store.dispatch(new ExperimentPlotsRequested(this.experimentId));
+      this.store.dispatch(experimentPlotsRequested({task: this.experimentId}));
     }
   }
 

@@ -125,6 +125,7 @@ export class ScatterPlotComponent implements AfterViewInit, OnDestroy {
     }
     if (this.chartData) {
       this.chartContainer.datum(this.chartData).call(this.chart);
+      window.setTimeout(() => this.chartContainer.selectAll('circle.data-point').attr('r', 3), 1000);
     }
     this.chartContainer.selectAll('#scatter-clip-path').remove();
   }

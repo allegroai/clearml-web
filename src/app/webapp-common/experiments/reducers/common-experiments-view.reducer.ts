@@ -13,6 +13,7 @@ import {CountAvailableAndIsDisableSelectedFiltered} from '../../shared/entity-pa
 import {setSelectedProject} from '@common/core/actions/projects.actions';
 import {createReducer, on} from '@ngrx/store';
 import {modelsInitialState} from '@common/models/reducers/models-view.reducer';
+import {setAllTasksChildren} from '../actions/common-experiments-menu.actions';
 
 
 export interface ICommonExperimentsViewState {
@@ -34,7 +35,7 @@ export interface ICommonExperimentsViewState {
   selectedExperimentsDisableAvailable: Record<string, CountAvailableAndIsDisableSelectedFiltered>;
   selectedExperimentSource: string;
   experimentToken: string;
-  page: number;
+  scrollId: string;
   globalFilter: ICommonSearchState['searchQuery'];
   showAllSelectedIsActive: boolean;
   metricVariants: Array<MetricVariantResult>;
@@ -47,11 +48,13 @@ export interface ICommonExperimentsViewState {
   activeParentsFilter: ProjectsGetTaskParentsResponseParents[];
   types: string[];
   splitSize: number;
+  allRunningChildrenForAbortChildrenDialog: ITableExperiment[];
 }
 
 export const commonExperimentsInitialState: ICommonExperimentsViewState = {
   tableCols: INITIAL_EXPERIMENT_TABLE_COLS,
   colsOrder: {},
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   hiddenTableCols: {comment: true, active_duration: true},
   hiddenProjectTableCols: {},
   experiments: [],
@@ -67,7 +70,7 @@ export const commonExperimentsInitialState: ICommonExperimentsViewState = {
   selectedExperimentsDisableAvailable: {},
   selectedExperimentSource: null,
   experimentToken: null,
-  page: -1, // -1 so the "getNextExperiments" will send 0.
+  scrollId: null, // -1 so the "getNextExperiments" will send 0.
   globalFilter: null,
   showAllSelectedIsActive: false,
   metricsCols: [],
@@ -80,7 +83,8 @@ export const commonExperimentsInitialState: ICommonExperimentsViewState = {
   parents: [],
   activeParentsFilter: [],
   types: [],
-  splitSize: 75
+  splitSize: 75,
+  allRunningChildrenForAbortChildrenDialog: null,
 };
 
 const setExperimentsAndUpdateSelectedExperiments = (state: ICommonExperimentsViewState, payload): ICommonExperimentsViewState => ({
@@ -116,6 +120,8 @@ export const commonExperimentsViewReducer = createReducer(
     }
   })),
   on(actions.addExperiments, (state, action) => ({...state, experiments: state.experiments.concat(action.experiments)})),
+  // on(actions.freezeTableState, (state) => ({...state, freeze: cloneDeep(state)})),
+  // on(actions.defrostTableState, (state) => ({...cloneDeep(state.freeze), freeze: null})),
   on(actions.removeExperiments, (state, action) => ({...state, experiments: state.experiments.filter(exp => !action.experiments.includes(exp.id))})),
   on(actions.updateExperiment, (state, action) => setExperimentsAndUpdateSelectedExperiments(state, action)),
   on(actions.updateManyExperiment, (state, action) =>
@@ -131,7 +137,7 @@ export const commonExperimentsViewReducer = createReducer(
       .filter(e => e)
   })),
   on(actions.setNoMoreExperiments, (state, action) => ({...state, noMoreExperiment: action.payload})),
-  on(actions.setCurrentPage, (state, action) => ({...state, page: action.page})),
+  on(actions.setCurrentScrollId, (state, action) => ({...state, scrollId: action.scrollId})),
   on(actions.setSelectedExperiment, (state, action) => ({...state, selectedExperiment: action.experiment})),
   on(actions.setSelectedExperiments, (state, action) => ({...state, selectedExperiments: action.experiments})),
   on(actions.setSelectedExperimentsDisableAvailable, (state, action) =>
@@ -219,13 +225,14 @@ export const commonExperimentsViewReducer = createReducer(
         metricsCols: [...state.metricsCols.filter(tableCol => !(tableCol.id === action.id && tableCol.projectId === action.projectId))],
         projectColumnsSortOrder: {
           ...state.projectColumnsSortOrder,
-          [action.projectId]: state.projectColumnsSortOrder[action.projectId].filter(order => order.field !== action.id)
+          [action.projectId]: state.projectColumnsSortOrder[action.projectId]?.filter(order => order.field !== action.id) || commonExperimentsInitialState.tableOrders
         },
         projectColumnsWidth: {...state.projectColumnsWidth, [action.projectId]: remainingColsWidth},
         colsOrder: {...state.colsOrder, [action.projectId]: state.colsOrder[action.projectId] ? state.colsOrder[action.projectId].filter(colId => colId !== action.id) : null}
       };
     }),
   on(actions.setTags, (state, action) => ({...state, projectTags: action.tags})),
+  on(setAllTasksChildren, (state, action) => ({...state, allRunningChildrenForAbortChildrenDialog: action.experiments})),
   on(actions.setUsers, (state, action) => ({...state, users: action.users})),
   on(actions.setParents, (state, action) => ({...state, parents: action.parents})),
   on(actions.setActiveParentsFilter, (state, action) => ({...state, activeParentsFilter: action.parents})),

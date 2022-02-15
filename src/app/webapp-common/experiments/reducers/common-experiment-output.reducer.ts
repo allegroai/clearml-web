@@ -1,9 +1,11 @@
 import {Task} from '../../../business-logic/model/tasks/task';
 import * as actions from '../actions/common-experiment-output.actions';
 import {ScalarKeyEnum} from '../../../business-logic/model/events/scalarKeyEnum';
-import {sortBy, reverse} from 'lodash/fp';
+import {sortBy, reverse, set} from 'lodash/fp';
 import {LOG_BATCH_SIZE} from '../shared/common-experiments.const';
 import {MetricsPlotEvent} from '../../../business-logic/model/events/metricsPlotEvent';
+import {EventsScalarMetricsIterRawResponse} from '../../../business-logic/model/events/eventsScalarMetricsIterRawResponse';
+import {ExtFrame} from '@common/shared/experiment-graphs/single-graph/plotly-graph-base';
 
 export type GroupByCharts = 'metric' | 'none';
 
@@ -33,9 +35,14 @@ export interface HistogramCharts {
   [metric: string]: { [variant: string]: SeriesData };
 }
 
+
 export interface CommonExperimentOutputState {
   metricsMultiScalarsCharts: any;
   metricsHistogramCharts: HistogramCharts;
+  fullScreenDetailedChart: ExtFrame;
+  fetchingFullScreenData: boolean;
+  fullScreenXtype: ScalarKeyEnum;
+  isFullScreenOpen: boolean;
   cachedAxisType: ScalarKeyEnum;
   metricsPlotsCharts: MetricsPlotEvent[];
   experimentLog: Log[];
@@ -63,8 +70,12 @@ export interface IExperimentSettings {
 export const initialCommonExperimentOutputState: CommonExperimentOutputState = {
   metricsMultiScalarsCharts: null,
   metricsHistogramCharts: null,
+  fullScreenDetailedChart: null,
+  fullScreenXtype: null,
+  fetchingFullScreenData: false,
   cachedAxisType: null,
   metricsPlotsCharts: null,
+  isFullScreenOpen: false,
   experimentLog: [],
   totalLogLines: null,
   beginningOfLog: false,
@@ -83,6 +94,20 @@ export function commonExperimentOutputReducer(state = initialCommonExperimentOut
         metricsMultiScalarsCharts: initialCommonExperimentOutputState.metricsMultiScalarsCharts,
         metricsHistogramCharts: initialCommonExperimentOutputState.metricsHistogramCharts,
         metricsPlotsCharts: initialCommonExperimentOutputState.metricsPlotsCharts
+      };
+    case actions.setGraphDisplayFullDetailsScalars.type:
+      return {...state, fullScreenDetailedChart: action.data};
+    case actions.setGraphDisplayFullDetailsScalarsIsOpen.type:
+      return {...state, isFullScreenOpen: action.isOpen};
+    case actions.getGraphDisplayFullDetailsScalars.type:
+      return {...state, fetchingFullScreenData: true};
+    case actions.setXtypeGraphDisplayFullDetailsScalars.type:
+      return {...state, fullScreenXtype: action.xAxisType};
+    case actions.mergeGraphDisplayFullDetailsScalars.type:
+      return {
+        ...state,
+        fullScreenDetailedChart: {...state.fullScreenDetailedChart, data: action.data},
+        fetchingFullScreenData: false
       };
     case actions.setExperimentLog.type: {
       const events = reverse(action.events);
@@ -123,7 +148,7 @@ export function commonExperimentOutputReducer(state = initialCommonExperimentOut
       return {...state, metricsPlotsCharts: action.payload};
     case actions.UPDATE_EXPERIMENT_SETTINGS: {
       let newSettings;
-      const experimentExists = state.settingsList.find((setting) => setting.id === action.payload.id);
+      const experimentExists = state.settingsList.find(setting => setting.id === action.payload.id);
       if (experimentExists) {
         newSettings = state.settingsList.map(setting => setting.id === action.payload.id ? {...setting, ...action.payload.changes} : setting);
       } else {
@@ -138,7 +163,8 @@ export function commonExperimentOutputReducer(state = initialCommonExperimentOut
         metricsMultiScalarsCharts: initialCommonExperimentOutputState.metricsMultiScalarsCharts,
         metricsHistogramCharts: initialCommonExperimentOutputState.metricsHistogramCharts,
         metricsPlotsCharts: initialCommonExperimentOutputState.metricsPlotsCharts,
-        cachedAxisType: initialCommonExperimentOutputState.cachedAxisType
+        cachedAxisType: initialCommonExperimentOutputState.cachedAxisType,
+        searchTerm: ''
       };
     case actions.SET_LOG_FILTER:
       return {...state, logFilter: (action as actions.SetLogFilter).filterString};

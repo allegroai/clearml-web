@@ -1,7 +1,7 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {select, Store} from '@ngrx/store';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import {selectNotification} from '../../core/reducers/view-reducer';
+import {selectNotification} from '../../core/reducers/view.reducer';
 import {filter, take} from 'rxjs/operators';
 import {setNotificationDialog} from '../../core/actions/layout.actions';
 import {Subscription} from 'rxjs';
@@ -35,7 +35,7 @@ export class ServerNotificationDialogContainerComponent implements OnInit, OnDes
         });
 
         this.dialogRef.afterClosed().pipe(take(1)).subscribe(() => {
-          this.store.dispatch(setNotificationDialog(null));
+          this.store.dispatch(setNotificationDialog({notification: null}));
         });
       });
   }

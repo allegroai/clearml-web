@@ -4,6 +4,7 @@
   [minimumChars]="0"
   [debounceTime]="0"
   placeholder="Search parameters"
+  class="underline-search"
   (valueChanged)="searchQ($event)"
 ></sm-search>
 <div class="actions">
@@ -11,11 +12,11 @@
   <ng-content></ng-content>
 </div>
 <div class="list">
-  <mat-expansion-panel *ngFor="let bigItem of itemsObjectList | keyvalue | sort:'key'; trackBy: trackByKeyFn"
+  <mat-expansion-panel *ngFor="let bigItem of (itemsObjectList | keyvalue: compareByKey); trackBy: trackByKeyFn"
                        [expanded]="searchText?.length > 0"
                        [hidden]="(bigItem.value | advancedFilter:searchText).length === 0">
     <mat-expansion-panel-header expandedHeight="40px" collapsedHeight="40px" (click)="toggleExpand(bigItem.key)">
-      <div class="ellipsis item-key" [smTooltip]="RENAME_MAP[bigItem.key]" [showDelay]="500">{{RENAME_MAP[bigItem.key] || bigItem.key}}</div>
+      <div class="ellipsis item-key" [smTooltip]="renameMap[bigItem.key]" [showDelay]="500">{{renameMap[bigItem.key] || bigItem.key}}</div>
     </mat-expansion-panel-header>
     <div *ngFor="let item of bigItem.value | filter:searchText:'value'; trackBy: trackByValFn"
          class="item pointer"

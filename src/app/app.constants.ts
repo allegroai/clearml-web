@@ -104,7 +104,7 @@ export function guessAPIServerURL() {
   return url.replace(/:\d+/, '') + ':8008';
 }
 
-export const ENVIRONMENT = {API_VERSION: '/v2.13'};
+export const ENVIRONMENT = {API_VERSION: '/v999.0'};
 const url                = window.location.origin;
 let apiBaseUrl: string;
 if (environment.apiBaseUrl) {

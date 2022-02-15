@@ -1,7 +1,5 @@
-import {ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit, Renderer2, ViewChild} from '@angular/core';
+import {Component, HostListener, OnDestroy, OnInit, Renderer2, ViewChild} from '@angular/core';
 import {Store} from '@ngrx/store';
-import 'ace-builds/src-noconflict/ace';
-import 'ace-builds/webpack-resolver';
 import {Observable} from 'rxjs/internal/Observable';
 import {Subscription} from 'rxjs';
 import {filter, take} from 'rxjs/operators';
@@ -12,8 +10,9 @@ import {
   selectSelectedMetricVariantForCurrProject,
   selectSelectedProject
 } from '../core/reducers/projects.reducer';
-import {UpdateProject} from '../core/actions/projects.actions';
+import {updateProject} from '../core/actions/projects.actions';
 import {Project} from '../../business-logic/model/projects/project';
+import {isExample} from '../shared/utils/shared-utils';
 
 const BREAK_POINT = 990;
 
@@ -42,9 +41,10 @@ export class ProjectInfoComponent implements OnInit, OnDestroy {
   public editorVisible: boolean;
   public project: Project;
   public panelOpen: boolean = false;
+  public example: boolean;
+  public isDirty: boolean;
   private preview: Element;
   private editor: Element;
-  public isDirty: boolean;
   private projectId: string;
 
   @ViewChild('editorComponent', {static: false}) editorComponent: MarkdownEditorComponent;
@@ -85,12 +85,13 @@ export class ProjectInfoComponent implements OnInit, OnDestroy {
         filter(project => !!project?.id)
       ).subscribe(project => {
         this.project = project;
+        this.example = isExample(project);
         this.info = project.description;
         this.projectId = project.id;
         this.loading = false;
       });
     this.selectedVariantSub = this.store.select(selectSelectedMetricVariantForCurrProject).pipe(filter(data => !!data), take(1))
-      .subscribe(data => {
+      .subscribe(() => {
         this.setMetricsPanel(true);
       });
 
@@ -102,7 +103,7 @@ export class ProjectInfoComponent implements OnInit, OnDestroy {
   }
 
   saveInfo() {
-    this.store.dispatch(new UpdateProject({id: this.projectId, changes: {description: this.info}}));
+    this.store.dispatch(updateProject({id: this.projectId, changes: {description: this.info}}));
     this.editMode = false;
     this.isDirty = false;
     this.updateEditorVisibility();

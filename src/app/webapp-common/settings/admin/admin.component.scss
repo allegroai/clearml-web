@@ -1,0 +1,76 @@
+@import "../../shared/ui-components/styles/variables";
+@import "../../shared/ui-components/styles/mixins/lines";
+
+$tab-width: 15vw;
+
+:host {
+  display: flex !important;
+  flex-direction: column;
+  //width: 100%;
+  overflow: auto;
+  // padding-top: 20px;
+ // background-color: $blue-700;
+  .vault {
+    height: calc(100% - 36px);
+    min-height: 110px;
+    display: block;
+    font-size: 12px;
+  }
+  .empty-vault{
+    width: 100%;
+    height: 111px;
+    margin: 6px 0 0;
+    padding: 16px;
+    border-radius: 4px;
+    border: solid 1px $blue-500;
+    display: flex;
+    justify-content: space-between;
+    .edit-button{
+      height: 32px
+    }
+
+  }
+
+
+
+  .body {
+    flex: 1;
+    padding: 0 24px;
+  }
+
+  .title {
+    display: flex;
+    align-items: center;
+    color: $white;
+    font-size: 16px;
+    text-transform: uppercase;
+    margin: 0 0 6px 0;
+    i {
+      color: $blue-250;
+    }
+    &.first {
+      margin-top: 0;
+    }
+
+  }
+
+  .section {
+    margin: 6px 0 0 24px;
+    padding-bottom: 48px;
+  }
+
+
+
+  .info {
+    display: flex;
+    align-items: center;
+    margin-left: 12px;
+    color: $light-grey-blue;
+
+    &:hover {
+      color: $purple;
+    }
+  }
+
+
+}

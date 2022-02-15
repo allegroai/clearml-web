@@ -4,8 +4,23 @@ import {Queue} from '../../../../business-logic/model/queues/queue';
 import {Task} from '../../../../business-logic/model/tasks/task';
 import {Store} from '@ngrx/store';
 import {ActivatedRoute, Router} from '@angular/router';
-import {DeleteQueue, getQueues, MoveExperimentInQueue, MoveExperimentToBottomOfQueue, MoveExperimentToOtherQueue, MoveExperimentToTopOfQueue, queuesTableSortChanged, RemoveExperimentFromQueue, SetSelectedQueue} from '../../actions/queues.actions';
-import {selectQueues, selectQueuesTableSortFields, selectQueuesTasks, selectSelectedQueue} from '../../reducers/index.reducer';
+import {
+  deleteQueue,
+  getQueues,
+  moveExperimentInQueue,
+  moveExperimentToBottomOfQueue,
+  moveExperimentToOtherQueue,
+  moveExperimentToTopOfQueue,
+  queuesTableSortChanged,
+  removeExperimentFromQueue,
+  setSelectedQueue
+} from '../../actions/queues.actions';
+import {
+  selectQueues,
+  selectQueuesTableSortFields,
+  selectQueuesTasks,
+  selectSelectedQueue
+} from '../../reducers/index.reducer';
 import {filter, take, withLatestFrom} from 'rxjs/operators';
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {ISmCol} from '../../../shared/ui-components/data/table/table.consts';
@@ -36,6 +51,7 @@ export class QueuesComponent implements OnInit {
     this.queuesTasks$ = this.store.select(selectQueuesTasks);
     this.selectedQueue$ = this.store.select(selectSelectedQueue);
     this.tableSortFields$ = this.store.select(selectQueuesTableSortFields);
+
   }
 
   ngOnInit(): void {
@@ -64,18 +80,18 @@ export class QueuesComponent implements OnInit {
         queryParams: {id: queue?.id},
         queryParamsHandling: 'merge'
       });
-    this.store.dispatch(new SetSelectedQueue(queue));
+    this.store.dispatch(setSelectedQueue({queue}));
   }
 
   deleteQueue(queue) {
-    this.store.dispatch(new DeleteQueue(queue));
+    this.store.dispatch(deleteQueue({queue}));
   }
 
   renameQueue(queue) {
     this.createQueueDialog = this.dialog.open(QueueCreateDialogComponent, {data: queue});
     this.createQueueDialog.afterClosed()
       .pipe(
-        filter(queue => !!queue),
+        filter(q => !!q),
         take(1)
       )
       .subscribe(() => {
@@ -84,22 +100,23 @@ export class QueuesComponent implements OnInit {
   }
 
   moveExperimentToBottomOfQueue(task: Task) {
-    this.store.dispatch(new MoveExperimentToBottomOfQueue({task: task.id}));
+    this.store.dispatch(moveExperimentToBottomOfQueue({task: task.id}));
   }
 
   moveExperimentToTopOfQueue(task: Task) {
-    this.store.dispatch(new MoveExperimentToTopOfQueue({task: task.id}));
+    this.store.dispatch(moveExperimentToTopOfQueue({task: task.id}));
   }
 
   removeExperimentFromQueue(task: Task) {
-    this.store.dispatch(new RemoveExperimentFromQueue({task: task.id}));
+    this.store.dispatch(removeExperimentFromQueue({task: task.id}));
   }
 
   moveExperimentToOtherQueue($event) {
-    this.store.dispatch(new MoveExperimentToOtherQueue({task: $event.task.id, queue: $event.queue.id}));
+    this.store.dispatch(moveExperimentToOtherQueue({task: $event.task.id, queue: $event.queue.id}));
   }
 
-  moveExperimentInQueue($event: any) {
-    this.store.dispatch(new MoveExperimentInQueue($event));
+  moveExperimentInQueue({task, count}) {
+    this.store.dispatch(moveExperimentInQueue({task, count}));
   }
+
 }

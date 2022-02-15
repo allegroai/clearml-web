@@ -1,5 +1,4 @@
-@import "~@angular/material/prebuilt-themes/indigo-pink.css";
-@import '~@angular/material/theming';
+@use '~@angular/material' as mat;
 @import "angular-notifier/styles.scss";
 @import "angular-notifier/styles/themes/theme-material.scss";
 @import "shared/ui-components/styles/notifications";
@@ -9,43 +8,50 @@
 @import "~britecharts/src/styles/common/tooltip";
 @import "~britecharts/src/styles/common/axes";
 @import "~britecharts/src/styles/common/grid";
-@import "~ngx-markdown-editor/assets/highlight.js/agate.min.css";
+// @import "~ngx-markdown-editor/assets/highlight.js/agate.min.css";
 @import "shared/ui-components/styles/material-palette";
 @import "assets/fonts/trains-icons.scss";
 @import "layout/layout";
 
-@include mat-core();
+@include mat.core();
 //@import "../webapp-common/shared/ui-components/styles/material-theme.scss";
 
-$custom-typography: mat-typography-config(
+$custom-typography: mat.define-typography-config(
   $font-family: $font-family-base
 );
 
-@include angular-material-typography($custom-typography);
+@include mat.all-component-typographies($custom-typography);
 
-$allegro-theme-primary: mat-palette($mat-allegro);
-$custom-theme-primary: mat-palette($mat-green);
-$custom-theme-accent: mat-palette($mat-lime, A400, A100, A400);
-$custom-theme-warn: mat-palette($mat-purple);
+$allegro-theme-primary: mat.define-palette($mat-allegro);
+$allegro-theme-accent: mat.define-palette($mat-allegro, A400, A100, A400);
+$custom-theme-primary: mat.define-palette(mat.$green-palette);
+$custom-theme-accent: mat.define-palette(mat.$lime-palette, A400, A100, A400);
+$custom-theme-warn: mat.define-palette(mat.$purple-palette);
 
-$sm-theme-primary: mat-palette($sm-purple);
-$sm-theme-accent: mat-palette($sm-purple, A400, A100, A400);
-$sm-theme-warn: mat-palette($mat-purple);
+$sm-theme-primary: mat.define-palette($sm-purple);
+$sm-theme-accent: mat.define-palette($sm-purple, A400, A100, A400);
+$sm-theme-warn: mat.define-palette(mat.$purple-palette);
 
-$green-theme: mat-light-theme($custom-theme-primary, $custom-theme-accent, $custom-theme-warn);
-$dark-theme: mat-dark-theme($mat-allegro, $mat-allegro, $mat-allegro);
-$light-theme: mat-light-theme($mat-allegro, $mat-allegro, $mat-allegro);
-$sm-theme: mat-light-theme($sm-theme-primary, $sm-theme-accent, $sm-theme-warn);
-.cdk-drag-preview.form-group-drag {
-  padding: 8px 16px 32px 16px;
-  border-radius: 4px;
-  border: solid 1px #d4d6e0;
-  background-color: white;
-}
+$green-theme: mat.define-light-theme($custom-theme-primary, $custom-theme-accent, $custom-theme-warn);
+$dark-theme: mat.define-dark-theme($allegro-theme-primary, $allegro-theme-accent);
+$light-theme: mat.define-light-theme($allegro-theme-primary, $allegro-theme-accent);
+$sm-theme: mat.define-light-theme($sm-theme-primary, $sm-theme-accent, $sm-theme-warn);
+
+@include mat.form-field-color($light-theme);
+@include mat.progress-spinner-theme($light-theme);
+
 .dark-theme {
-  @include mat-slide-toggle-theme($green-theme);
-  @include mat-radio-theme($green-theme);
-  @include mat-select-theme($dark-theme);
+  @include mat.core-theme($dark-theme);
+  @include mat.button-theme($dark-theme);
+  @include mat.slide-toggle-color($green-theme);
+  @include mat.radio-color($green-theme);
+  @include mat.select-color($dark-theme);
+  @include mat.menu-color($light-theme);
+  @include mat.autocomplete-color($light-theme);
+  @include mat.datepicker-color($light-theme);
+  @include mat.pseudo-checkbox-color($light-theme);
+  @include mat.divider-color($light-theme);
+  @include mat.progress-bar-theme($light-theme);
 
   .mat-checkbox-frame,
   .mat-radio-outer-circle {
@@ -65,12 +71,28 @@ $sm-theme: mat-light-theme($sm-theme-primary, $sm-theme-accent, $sm-theme-warn);
   .light-theme .mat-radio-button.mat-radio-disabled .mat-radio-inner-circle {
     background-color: transparent !important;
   }
+  .link {
+    &:hover {
+      text-decoration: underline;
+      cursor: pointer;
+    }
+  }
 }
 
 .light-theme {
-  @include mat-slide-toggle-theme($sm-theme);
-  @include mat-radio-theme($sm-theme);
-  @include mat-select-theme($light-theme);
+  @include mat.core-color($light-theme);
+  @include mat.button-color($light-theme);
+  @include mat.slide-toggle-color($sm-theme);
+  //  @include mat.radio-color($sm-theme);
+  @include mat.radio-theme($sm-theme);
+  //  @include mat.select-color($light-theme);
+  @include mat.select-theme($light-theme);
+  @include mat.menu-color($light-theme);
+  @include mat.autocomplete-color($light-theme);
+  @include mat.datepicker-color($light-theme);
+  @include mat.pseudo-checkbox-color($light-theme);
+  @include mat.divider-color($light-theme);
+  @include mat.progress-bar-theme($light-theme);
 
   .mat-checkbox-frame,
   .mat-radio-outer-circle {
@@ -79,10 +101,11 @@ $sm-theme: mat-light-theme($sm-theme-primary, $sm-theme-accent, $sm-theme-warn);
 
   .mat-radio-button.mat-accent.disabled, .mat-radio-button.mat-accent.disabled.mat-radio-checked {
     .mat-radio-outer-circle, .mat-radio-inner-circle {
-      border-color:  $blue-300;
+      border-color: $blue-300;
     }
-    .mat-radio-inner-circle{
-    background-color:  $blue-300;
+
+    .mat-radio-inner-circle {
+      background-color: $blue-300;
     }
   }
 
@@ -136,6 +159,12 @@ h4.al-header {
 h5.al-header {
   font-weight: normal;
 }
+span.highlight-text{
+  background: $neon-yellow-betterinchrome;
+  &.current-match{
+    background: #f5d655;
+  }
+}
 
 .pointer {
   cursor: pointer;
@@ -145,6 +174,9 @@ h5.al-header {
   pointer-events: none;
 }
 
+.noselect {
+  user-select: none;
+}
 
 .grab {
   cursor: grab;
@@ -202,7 +234,7 @@ mat-expansion-panel {
 }
 
 .al-primary {
-  background: #f4f7ff !important;
+  background: $faint-gray !important;
 }
 
 .mat-slide-toggle-label {
@@ -236,8 +268,28 @@ button {
 .pointer {
   cursor: pointer;
 }
-.grabbing{
+
+.color-neon-yellow {
+  color: $neon-yellow;
+}
+.background-neon-green {
+  background-color: $neon-green !important;
+  background: $neon-green !important;
+}
+.background-neon-yellow {
+  background-color: $neon-yellow !important;
+  background: $neon-yellow !important;
+}
+.color-neon-green {
+  color: $neon-green;
+}
+
+.border-radius {
+  border-radius: 4px;
+}
+.grabbing {
   cursor: grab;
+
   &:active {
     cursor: grabbing;
   }
@@ -380,7 +432,6 @@ body .clean-list {
     font-size: 11px;
     line-height: 1.45;
     letter-spacing: 0.3px;
-    text-align: center;
     color: #ffffff;
     word-break: break-word;
     max-width: 400px;
@@ -444,9 +495,10 @@ html {
   font-weight: 500;
 }
 
-.mat-menu-item {
+.mat-menu-content .mat-menu-item {
   font-size: 14px;
   font-weight: 500;
+  padding: 0 32px 0 16px;
 }
 
 // hide arrows for number inputs
@@ -580,8 +632,8 @@ $type-colors: (
 
 //material menu
 body .mat-menu-content:not(:empty) {
-  padding-top: 0px;
-  padding-bottom: 0px;
+  padding-top: 0;
+  padding-bottom: 0;
 
   .search-results {
     overflow: auto;
@@ -678,7 +730,7 @@ button.btn.button-outline-dark {
 .sm-card-list-header {
   display: flex;
   justify-content: space-between;
-  padding: $projects-header-padding 6px $projects-header-padding / 2 0;
+  padding: $projects-header-padding 6px $projects-header-padding * 0.5 0;
 
   .recent-title {
     display: flex;
@@ -696,4 +748,16 @@ button.btn.button-outline-dark {
 
 .cdk-overlay-backdrop.darker {
   background-color: rgba(0, 0, 0, 0.8);
+}
+
+.cdk-drag-preview.form-group-drag {
+  padding: 8px 16px 32px 16px;
+  border-radius: 4px;
+  border: solid 1px #d4d6e0;
+  background-color: white;
+}
+
+.ace_placeholder {
+  font-family: SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;
+  color: $blue-grey !important;
 }

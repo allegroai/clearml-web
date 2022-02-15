@@ -56,21 +56,9 @@ $header-height: 60px;
     margin-bottom: 10px;
   }
 
-  /* width */
-  ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
-
-  /* Track */
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
   /* Handle */
   ::-webkit-scrollbar-thumb {
-    border-radius: 4px;
-    background: $blue-100;
+    background-color: $blue-100;
   }
 
   ::ng-deep al-drawer sm-card2 .card-container {

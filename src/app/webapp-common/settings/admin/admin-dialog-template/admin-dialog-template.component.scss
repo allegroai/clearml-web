@@ -1,0 +1,48 @@
+@import "../../../shared/ui-components/styles/variables";
+
+:host {
+  .code {
+    position: relative;
+    padding: 18px 16px;
+    margin-bottom: 12px;
+    width: 530px;
+    color: $blue-100;
+    background-color: $blue-900;
+    border-radius: 4px;
+
+    &:hover {
+      sm-copy-clipboard {
+        visibility: visible;
+      }
+    }
+
+    .content {
+      white-space: pre;
+      font-family: monospace;
+      font-size: 12px;
+    }
+
+    .operation {
+      color: #b087e5;
+    }
+
+    .string {
+      color: #e6db74;
+    }
+
+    .variable {
+      color: #9ed66b;
+    }
+
+    .comment {
+      color: $blue-500;
+    }
+
+    sm-copy-clipboard {
+      visibility: hidden;
+      position: absolute;
+      right: 10px;
+      top: 10px;
+    }
+  }
+}

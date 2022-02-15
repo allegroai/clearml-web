@@ -1,0 +1,40 @@
+:host {
+  .ripple {
+    position: absolute;
+    z-index: 999;
+    height: 48px;
+    width: 48px;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  .ripple:before,
+  .ripple:after {
+    content: '';
+    height: 100%;
+    width: 100%;
+    top: 0%;
+    left: 0%;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #50e3c3;
+    animation: glow-grow 2s ease-out infinite;
+    position: absolute;
+  }
+  .ripple:after {
+    animation-delay: 0.8s;
+  }
+
+  @keyframes glow-grow {
+    0% {
+      opacity: 0;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 1;
+    }
+    100% {
+      transform: scale(2);
+      opacity: 0;
+    }
+  }
+}

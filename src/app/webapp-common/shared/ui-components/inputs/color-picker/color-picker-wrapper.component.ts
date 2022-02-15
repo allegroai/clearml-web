@@ -3,7 +3,7 @@ import {Store} from '@ngrx/store';
 import {selectColorPickerProps} from '../../directives/choose-color/choose-color.reducer';
 import {Subscription} from 'rxjs';
 import {ColorPickerProps} from '../../directives/choose-color/choose-color.actions';
-import {hexToRgb} from '../../../services/color-hash/color-hash.utils';
+import {hexToRgb, rgbaToValues} from '../../../services/color-hash/color-hash.utils';
 import {ColorHashService} from '../../../services/color-hash/color-hash.service';
 
 @Component({
@@ -45,8 +45,13 @@ export class ColorPickerWrapperComponent implements OnInit, OnDestroy  {
       });
   }
 
-  selectColor(event) {
-    const color = hexToRgb(event);
+  selectColor(event: string) {
+    let color;
+    if (event.startsWith('rgba')) {
+      color = rgbaToValues(event);
+    } else {
+      color = hexToRgb(event.length === 9 ? event.slice(0,7) : event);
+    }
     this.colorHashService.setColorForString(this.props.cacheKey, color);
   }
 

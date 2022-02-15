@@ -1,4 +1,13 @@
-import {Component, Input, ChangeDetectionStrategy, ViewChild, ViewContainerRef, ChangeDetectorRef, AfterViewInit} from '@angular/core';
+import {
+  Component,
+  Input,
+  ChangeDetectionStrategy,
+  ViewChild,
+  ViewContainerRef,
+  ChangeDetectorRef,
+  AfterViewInit,
+  NgZone,
+} from '@angular/core';
 import line from 'britecharts/dist/umd/line.min';
 import tooltip from 'britecharts/dist/umd/tooltip.min';
 import legend from 'britecharts/dist/umd/legend.min';
@@ -25,11 +34,11 @@ const COLOR_SCHEME = ['#a4a1fb', '#ff8a15'];
 export class LineChartComponent implements AfterViewInit {
 
   private lineMargin = {top: 30, bottom: 50, left: 80, right: 10};
-  private lineChartContainer: Selection<SVGElement, {}, HTMLElement, any>;
+  private lineChartContainer: Selection<SVGElement, LineChartData, HTMLElement, any>;
   private lineChart;
   private lineTooltipContainer;
   private lineTooltip;
-  private legendContainer: Selection<SVGElement, {}, HTMLElement, any>;
+  private legendContainer: Selection<SVGElement, LineChartData, HTMLElement, any>;
   private legendChart;
   private legendWidth: number;
   public loading     = false;
@@ -79,7 +88,7 @@ export class LineChartComponent implements AfterViewInit {
   @ViewChild('chart', {read: ViewContainerRef, static: true}) chartRef: ViewContainerRef;
   @ViewChild('legend', {read: ViewContainerRef, static: true}) legendRef: ViewContainerRef;
 
-  constructor(private cdr: ChangeDetectorRef) {
+  constructor(private cdr: ChangeDetectorRef, private readonly zone: NgZone) {
   }
 
   ngAfterViewInit() {
@@ -112,83 +121,90 @@ export class LineChartComponent implements AfterViewInit {
     if (!this.chartData) {
       return;
     }
-    const data = this.chartData.dataByTopic.map(topic => ({id: topic.topic, name: topic.topicName}));
-    this.legendContainer.datum(data).call(this.legendChart);
 
-    this.legendContainer.select('defs').remove();
-    this.legendContainer.select('svg').append('defs').append('svg:clipPath')
-      .attr('id', 'legend-label-clip')
-      .append('svg:rect')
-      .attr('id', 'clip-rect')
-      .attr('x', '0')
-      .attr('y', '-10')
-      .attr('width', this.legendWidth - 100)
-      .attr('height', 20);
-    this.legendContainer.selectAll('.legend-entry-name')
-      .attr('clip-path', 'url(#legend-label-clip)')
-      .append('title')
-      .text((d: any[]) => d['name']);
+    this.zone.runOutsideAngular(() => {
+      const data = this.chartData.dataByTopic.map(topic => ({id: topic.topic, name: topic.topicName}));
+      this.legendContainer.datum(data).call(this.legendChart);
+
+      this.legendContainer.select('defs').remove();
+      this.legendContainer.select('svg').append('defs').append('svg:clipPath')
+        .attr('id', 'legend-label-clip')
+        .append('svg:rect')
+        .attr('id', 'clip-rect')
+        .attr('x', '0')
+        .attr('y', '-10')
+        .attr('width', this.legendWidth - 100)
+        .attr('height', 20);
+      this.legendContainer.selectAll('.legend-entry-name')
+        .attr('clip-path', 'url(#legend-label-clip)')
+        .append('title')
+        .text((d: any[]) => d['name']);
+    });
   }
 
   initLineChart() {
-    const containerWidth: number = this.lineChartContainer.node() ?
-      this.lineChartContainer.node().getBoundingClientRect().width : 10;
+    this.zone.runOutsideAngular(() => {
+      const containerWidth: number = this.lineChartContainer.node() ?
+        this.lineChartContainer.node().getBoundingClientRect().width : 10;
 
-    this.lineChart
-      .tooltipThreshold(600)
-      .height(270)
-      .margin(this.lineMargin)
-      .lineCurve('monotoneX')
-      .isAnimated(true)
-      .grid('horizontal')
-      .width(containerWidth)
-      .colorSchema(COLOR_SCHEME)
-      .lineGradient(['#a4a1fb', '#a4a1fb'])
-      .xAxisLabel('')
-      .xTicks(8)
-      .yAxisLabelPadding(50)
-      .yAxisLabel(this._yLabel)
-      .xAxisFormat(this.lineChart.axisTimeCombinations.CUSTOM)
-      .on('customMouseOver', this.lineTooltip.show)
-      .on('customMouseMove', this.lineTooltip.update)
-      .on('customMouseOut', this.lineTooltip.hide);
+      this.lineChart
+        .tooltipThreshold(600)
+        .height(270)
+        .margin(this.lineMargin)
+        .lineCurve('monotoneX')
+        .isAnimated(true)
+        .grid('horizontal')
+        .width(containerWidth)
+        .colorSchema(COLOR_SCHEME)
+        .lineGradient(['#a4a1fb', '#a4a1fb'])
+        .xAxisLabel('')
+        .xTicks(8)
+        .yAxisLabelPadding(50)
+        .yAxisLabel(this._yLabel)
+        .xAxisFormat(this.lineChart.axisTimeCombinations.CUSTOM)
+        .on('customMouseOver', this.lineTooltip.show)
+        .on('customMouseMove', this.lineTooltip.update)
+        .on('customMouseOut', this.lineTooltip.hide);
 
-    this.initLegend();
+      this.initLegend();
 
-    if (this.chartData) {
-      this.lineChart.xAxisCustomFormat(this.getXAxisFormatter(this.chartData));
-      this.updateChart();
-      this.updateLegend();
-    }
+      if (this.chartData) {
+        this.lineChart.xAxisCustomFormat(this.getXAxisFormatter(this.chartData));
+        this.updateChart();
+        this.updateLegend();
+      }
 
-    // Tooltip Setup and start
-    const tooltipElm          = this.chartRef.element.nativeElement;
-    this.lineTooltipContainer = select(tooltipElm).select('.metadata-group .vertical-marker-container');
-    this.lineTooltip
-      .title('')
-      .valueLabel('value')
-      .dateFormat(this.lineTooltip.axisTimeCombinations.CUSTOM)
-      .dateCustomFormat('%c')
-      .tooltipOffset({
-        y: this.tooltipVerticalOffset,
-        x: 500
-      });
+      // Tooltip Setup and start
+      const tooltipElm          = this.chartRef.element.nativeElement;
+      this.lineTooltipContainer = select(tooltipElm).select('.metadata-group .vertical-marker-container');
+      this.lineTooltip
+        .title('')
+        .valueLabel('value')
+        .dateFormat(this.lineTooltip.axisTimeCombinations.CUSTOM)
+        .dateCustomFormat('%c')
+        .tooltipOffset({
+          y: this.tooltipVerticalOffset,
+          x: 500
+        });
 
-    if (this.yTickFormatter) {
-      this.lineTooltip.valueFormatter(this.yTickFormatter);
-    }
-    // Note that if the viewport width is less than the tooltipThreshold value,
-    // this container won't exist, and the tooltip won't show up
-    this.lineTooltipContainer.datum([]).call(this.lineTooltip);
-    this.initDone = true;
+      if (this.yTickFormatter) {
+        this.lineTooltip.valueFormatter(this.yTickFormatter);
+      }
+      // Note that if the viewport width is less than the tooltipThreshold value,
+      // this container won't exist, and the tooltip won't show up
+      this.lineTooltipContainer.datum([]).call(this.lineTooltip);
+      this.initDone = true;
+    });
   }
 
   updateChart() {
     if (this.chartData) {
-      this.lineChartContainer.datum(this.chartData).call(this.lineChart);
-      if (this.yTickFormatter) {
-        this.lineChartContainer.selectAll('.y.axis .tick text').text(this.yTickFormatter);
-      }
+      this.zone.runOutsideAngular(() => {
+        this.lineChartContainer.datum(this.chartData).call(this.lineChart);
+        if (this.yTickFormatter) {
+          this.lineChartContainer.selectAll('.y.axis .tick text').text(this.yTickFormatter);
+        }
+      });
     }
   }
 

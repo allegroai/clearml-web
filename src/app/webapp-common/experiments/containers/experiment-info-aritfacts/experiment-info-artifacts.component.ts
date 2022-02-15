@@ -1,6 +1,6 @@
 import {Component, OnDestroy} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {selectBackdropActive} from '../../../core/reducers/view-reducer';
+import {selectBackdropActive} from '../../../core/reducers/view.reducer';
 import {combineLatest, Observable, Subscription} from 'rxjs';
 import {IExperimentInfoState} from '../../../../features/experiments/reducers/experiment-info.reducer';
 import {selectExperimentModelInfoData} from '../../reducers';

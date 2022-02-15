@@ -27,14 +27,17 @@
 
       .search-input-container {
 
-        input.search-input {
-          border: 1px solid #a7b2d8 !important;
+        .search-input input{
+          border: 1px solid $blue-280;
+          border-right: none;
           border-radius: 4px 0 0 4px !important;
           padding-left: 6px !important;
         }
 
         i.fa {
-          right: 4px !important;
+          border-top: 1px solid $blue-280;
+          border-bottom: 1px solid $blue-280;
+          border-right: 1px solid $blue-280;
         }
       }
     }

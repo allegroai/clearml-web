@@ -11,9 +11,10 @@ import {addMessage} from '../../core/actions/layout.actions';
 import {MESSAGES_SEVERITY} from '../../../app.constants';
 import {ConfigurationService} from '../../shared/services/configuration.service';
 import {GetCurrentUserResponseUserObjectCompany} from '../../../business-logic/model/users/getCurrentUserResponseUserObjectCompany';
-import {selectIsDeepMode} from "../../core/reducers/projects.reducer";
-import {Observable} from "rxjs/internal/Observable";
-import {GetAllSystemProjects} from "@common/core/actions/projects.actions";
+import {selectIsDeepMode} from '../../core/reducers/projects.reducer';
+import {Observable} from 'rxjs/internal/Observable';
+import {getAllSystemProjects} from '@common/core/actions/projects.actions';
+import {isEqual} from 'lodash/fp';
 
 
 export interface IBreadcrumbsLink {
@@ -44,6 +45,7 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
   private isDeep$: Observable<boolean>;
   public isDeep: boolean;
   public subProjectsMenuIsOpen: boolean;
+  private previousProjectNames: any;
 
   constructor(private store: Store<any>, public route: ActivatedRoute, private configService: ConfigurationService, private cd: ChangeDetectorRef) {
     this.isDeep$ = this.store.select(selectIsDeepMode);
@@ -67,9 +69,11 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
     ).subscribe(([config, names]) => {
       this.routeConfig = config;
       this.breadcrumbsStrings = prepareNames(names);
-      if(this.breadcrumbsStrings[':projectId'].subCrumbs?.map(project=>project.name).includes(undefined)){
-        this.store.dispatch(new GetAllSystemProjects());
-      };
+      if (!isEqual(this.previousProjectNames, this.breadcrumbsStrings[':projectId'].subCrumbs) &&
+          this.breadcrumbsStrings[':projectId'].subCrumbs?.map(project => project.name).includes(undefined)) {
+        this.previousProjectNames = this.breadcrumbsStrings[':projectId'].subCrumbs;
+        this.store.dispatch(getAllSystemProjects());
+      }
       this.refreshBreadcrumbs();
       let route = this.route.snapshot;
       let hide = false;

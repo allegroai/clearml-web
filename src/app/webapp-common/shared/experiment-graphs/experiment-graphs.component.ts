@@ -1,17 +1,33 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Input, Output, QueryList, Renderer2, ViewChild, ViewChildren} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  EventEmitter,
+  HostListener,
+  Input,
+  OnDestroy,
+  Output,
+  QueryList,
+  Renderer2,
+  ViewChild,
+  ViewChildren
+} from '@angular/core';
 import {sortMetricsList} from '../../tasks/tasks.utils';
 import {SingleGraphComponent} from './single-graph/single-graph.component';
 import {EXPERIMENT_GRAPH_ID_PREFIX, SINGLE_GRAPH_ID_PREFIX} from '../../experiments/shared/common-experiments.const';
 import {ScalarKeyEnum} from '../../../business-logic/model/events/scalarKeyEnum';
 import {getOr} from 'lodash/fp';
-import {AdminService} from '../../../features/admin/admin.service';
+import {AdminService} from '~/shared/services/admin.service';
 import {GroupByCharts} from '../../experiments/reducers/common-experiment-output.reducer';
 import {Store} from '@ngrx/store';
-import {selectPlotlyReady} from '../../core/reducers/view-reducer';
+import {selectPlotlyReady} from '../../core/reducers/view.reducer';
 import {ResizeEvent} from 'angular-resizable-element';
-import {filter, skip, tap} from 'rxjs/operators';
+import {filter, map, skip, take, tap} from 'rxjs/operators';
 import {Subscription} from 'rxjs';
 import {ExtFrame, ExtLegend} from './single-graph/plotly-graph-base';
+import {getSignedUrl} from '../../core/actions/common-auth.actions';
+import {selectSignedUrl} from '../../core/reducers/common-auth-reducer';
 
 @Component({
   selector: 'sm-experiment-graphs',
@@ -20,7 +36,7 @@ import {ExtFrame, ExtLegend} from './single-graph/plotly-graph-base';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 
-export class ExperimentGraphsComponent {
+export class ExperimentGraphsComponent implements OnDestroy {
 
   groupByOptions = [
     {
@@ -46,7 +62,7 @@ export class ExperimentGraphsComponent {
   private timer: number;
   public plotlyReady$ = this.store.select(selectPlotlyReady);
   public plotlyReady: boolean;
-  private plotlyReadySub: Subscription;
+  private subs = new Subscription();
   public height: number = 450;
   private width: number;
   private graphsPerRow: number = 2;
@@ -54,6 +70,7 @@ export class ExperimentGraphsComponent {
   private resizeTextElement: HTMLDivElement;
   private graphsNumberLimit: number;
   public activeResizeElement: SingleGraphComponent;
+  private _hiddenList: string[];
 
   @HostListener('window:resize')
   onResize() {
@@ -65,7 +82,13 @@ export class ExperimentGraphsComponent {
     }, 200);
   }
 
-  @Input() hiddenList: Array<string> = [];
+  @Input() set hiddenList(list: string[]) {
+    this._hiddenList = list || [];
+    window.setTimeout(() => this.prepareRedraw());
+  }
+  get hiddenList() {
+    return this._hiddenList;
+  }
   @Input() isGroupGraphs: boolean;
   @Input() legendStringLength;
   @Input() minimized: boolean;
@@ -106,13 +129,21 @@ export class ExperimentGraphsComponent {
     private store: Store<any>,
     private renderer: Renderer2
   ) {
-    this.plotlyReadySub = this.plotlyReady$.pipe(
-      tap(ready => this.plotlyReady = ready),
-      skip(1), // Only work on page load 1: false 2: true
-      filter(ready => !!ready)).subscribe(() => {
-      this.prepareRedraw();
-      this.graphInView(this.visibleEntries);
-    });
+    this.subs.add(this.plotlyReady$.pipe(
+        tap(ready => this.plotlyReady = ready),
+        skip(1), // Only work on page load 1: false 2: true
+        filter(ready => !!ready)
+      ).subscribe(() => {
+        this.prepareRedraw();
+        this.graphInView(this.visibleEntries);
+      })
+    );
+  }
+
+  ngOnDestroy() {
+    this.subs.unsubscribe();
+    this.allMetricGroups = null;
+    this.graphsPerRow = null;
   }
 
   @Output() resetGraphs = new EventEmitter();
@@ -137,8 +168,17 @@ export class ExperimentGraphsComponent {
     Object.values(this.graphsData).forEach((graphs: ExtFrame[]) => {
       graphs.forEach((graph: ExtFrame) => {
         if (getOr(0, 'layout.images.length', graph) > 0) {
-          graph.layout.images.forEach((image: Plotly.Image) =>
-            image.source = this.adminService.signUrlIfNeeded(image.source, {skipFileServer: false, skipLocalFile: false, disableCache: graph.timestamp}));
+          graph.layout.images.forEach((image: Plotly.Image) => {
+              this.store.dispatch(getSignedUrl({url: image.source, config: {skipFileServer: false, skipLocalFile: false, disableCache: graph.timestamp}}));
+              this.subs.add(this.store.select(selectSignedUrl(image.source))
+                .pipe(
+                  filter(signed => !!signed?.signed),
+                  map(({signed: signedUrl}) => signedUrl),
+                  take(1)
+                ).subscribe(url => image.source = url)
+              );
+            }
+        );
         }
       });
     });
@@ -151,8 +191,7 @@ export class ExperimentGraphsComponent {
     };
 
     this.observer = new IntersectionObserver(this.graphInView.bind(this), options);
-    this.prepareRedraw();                                     // to apply on updated graphs
-
+    window.setTimeout(() => this.prepareRedraw());
   }
 
   observeGraphs() {
@@ -251,12 +290,12 @@ export class ExperimentGraphsComponent {
 
       if (!this.isGroupGraphs) {
         this.allMetricGroups.forEach(metricGroup => {
-          this.width = containerWidth / this.graphsPerRow - 4;
+          this.width = containerWidth / this.graphsPerRow - (this.graphsPerRow < 4 ? 10 : 4);
           this.renderer.setStyle(metricGroup.nativeElement, 'width', `${this.width}px`);
         });
       } else {
         this.allGraphs.forEach(singleGraph => {
-          this.width = containerWidth / this.graphsPerRow - 4;
+          this.width = containerWidth / this.graphsPerRow - (this.graphsPerRow < 4 ? 10 : 4);
           this.renderer.setStyle(singleGraph.elementRef.nativeElement, 'width', `${this.width}px`);
         });
       }

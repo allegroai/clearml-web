@@ -12,20 +12,17 @@ import {CommonLayoutModule} from '@common/layout/layout.module';
 import {HTTP_INTERCEPTORS} from '@angular/common/http';
 import {WebappInterceptor} from '@common/core/interceptors/webapp-interceptor';
 import {CustomReuseStrategy} from '@common/core/router-reuse-strategy';
-import {ApiUsersService} from './business-logic/api-services/users.service';
-import {loadUserAndPreferences} from '@common/user-preferences';
-import {AdminModule} from '@common/admin/admin.module';
+import {loadUserAndPreferences, UserPreferences} from '@common/user-preferences';
 import {AngularSplitModule} from 'angular-split';
 import {NotifierModule} from '@common/angular-notifier';
 import {LayoutModule} from './layout/layout.module';
 import {ColorHashService} from '@common/shared/services/color-hash/color-hash.service';
-import {LoginService} from '@common/shared/services/login.service';
-import {Store} from '@ngrx/store';
 import {SharedModule} from './shared/shared.module';
-import {ErrorService} from '@common/shared/services/error.service';
 import {ConfigurationService} from '@common/shared/services/configuration.service';
 import {ProjectsSharedModule} from './features/projects/shared/projects-shared.module';
 import {MAT_FORM_FIELD_DEFAULT_OPTIONS} from '@angular/material/form-field';
+import {LoginService} from '~/shared/services/login.service';
+import {SettingsModule} from '~/features/settings/settings.module';
 
 @NgModule({
   declarations   : [AppComponent],
@@ -45,7 +42,7 @@ import {MAT_FORM_FIELD_DEFAULT_OPTIONS} from '@angular/material/form-field';
       onSameUrlNavigation: 'reload',
       relativeLinkResolution: 'legacy'
 }),
-    AdminModule,
+    SettingsModule,
     NotifierModule.withConfig({
       theme: 'material',
       behaviour: {
@@ -61,12 +58,13 @@ import {MAT_FORM_FIELD_DEFAULT_OPTIONS} from '@angular/material/form-field';
     SharedModule,
   ],
   providers      : [
+    UserPreferences,
     {provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: {floatLabel: 'always'}},
     {
       provide   : APP_INITIALIZER,
+      deps: [LoginService, ConfigurationService],
       useFactory: loadUserAndPreferences,
       multi     : true,
-      deps      : [ApiUsersService, LoginService, Store, ErrorService, ConfigurationService]
     },
     ColorHashService,
     {provide: HTTP_INTERCEPTORS, useClass: WebappInterceptor, multi: true},

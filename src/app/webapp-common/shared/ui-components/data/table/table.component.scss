@@ -3,8 +3,6 @@
 :host {
   ::ng-deep th.resize-enabled span.p-column-resizer {
     width: 8px;
-    border: none;
-    padding-left: 6px;
 
     &:hover {
       background: $blue-300;
@@ -21,16 +19,16 @@
     z-index: 1000;
   }
 
-  ::ng-deep .p-datatable-scrollable-view .p-datatable-scrollable-body {
-    flex: 1 1 0 !important;
+  ::ng-deep .p-datatable-table .p-datatable-thead {
+    top: -1px;
+    z-index: 20;
   }
 
   .table-header {
-    height: 45px;
     padding: 0 24px;
     display: flex;
     align-items: center;
-    border-bottom: 1px solid $blue-500;
+    justify-content: space-between;
   }
 
   .table-header-title {
@@ -42,7 +40,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-left: 24px;
+    margin-right: 24px;
   }
 
   .selected-col-header {
@@ -58,6 +56,7 @@
 
     button {
       padding: 8px 40px;
+      width: 175px;
     }
 
     .load-spinner {
@@ -78,6 +77,7 @@
     text-align: center;
     padding: 15px 0 10px 0;
     font-size: 14px;
+    width: 120px;
   }
 
   tr {
@@ -114,8 +114,6 @@
     }
 
     th {
-      position: sticky;
-      top: -1px;
       background-color: $blue-700;
       vertical-align: middle;
       color: $blue-300;
@@ -163,11 +161,18 @@
 
   :host-context(.light-theme) {
     tr {
-      &:hover:not(.header):not(.no-data-row):not(.simple) {
+      &.checked:not(.header):not(.no-data-row):not(.simple) {
         background-color: $blue-100;
+        .td{
+          border-bottom-color: $blue-100;
+        }
+
+        &:hover, &.contexted {
+          background-color: $blue-50;
+        }
       }
 
-      &:not(.even):not(.selected):not(.no-data-row):not(:hover):not(.simple) {
+      &:hover:not(.header):not(.no-data-row):not(.simple) {
         background-color: $blue-50;
       }
 
@@ -178,7 +183,7 @@
       }
 
       th {
-        background-color: white;
+        background-color: $blue-50;
         color: $blue-400;
         font-weight: 500;
         border-bottom: none;
@@ -187,6 +192,9 @@
       td {
         color: $blue-400;
         border-bottom: none;
+        &:not(.no-data):not(.load-more-wrapper){
+          border-bottom: 1px solid $blue-50;
+        }
         &.no-data {
           color: $blue-300;
         }

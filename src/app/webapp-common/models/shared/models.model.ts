@@ -4,7 +4,7 @@ import {User} from '../../../business-logic/model/users/user';
 import {Task} from '../../../business-logic/model/tasks/task';
 import {Project} from '../../../business-logic/model/projects/project';
 
-export type ModelTableColFieldsEnum = 'system_tags' | 'id' | 'project.name' | 'name' | 'created' | 'framework' | 'user.name' | 'ready' | 'task.name' | 'selected';
+export type ModelTableColFieldsEnum = 'system_tags' | 'id' | 'project.name' | 'name' | 'created' | 'framework' | 'user.name' | 'ready' | 'task.name' | 'selected' | 'last_update';
 
 export interface SelectedModel extends Omit<Model, 'user' | 'task' | 'project'> {
   user?: User;

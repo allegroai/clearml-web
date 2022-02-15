@@ -7,13 +7,28 @@
                      (cancelClicked)="cancelHyperParametersChange()"
                      (saveClicked)="sectionSaved()"
                      (activateEditClicked)="activateEditChanged('hyperparams')">
-  <sm-section-header [label]="(selectedSection | replaceViaMapPipe:sectionReplaceMap) | uppercase " ></sm-section-header>
+  <sm-section-header [label]="(selectedSection | replaceViaMapPipe:sectionReplaceMap) | uppercase "></sm-section-header>
+  <sm-search search-button
+             #search
+             class="table-search dark-theme"
+             [enableJumpToNextResult]="true"
+             [minimumChars]="0"
+             [debounceTime]="0"
+             [expandOnHover]="true"
+             [searchResultsCount]="searchResultsCount"
+             (valueChanged)="searchTable($event)"
+             (jumpToResult)="executionParamsForm.jumpToResult($event)"
+  ></sm-search>
   <sm-experiment-execution-parameters
     #executionParamsForm
     class="form-section"
+    [searchedText]="searchedText"
     [editable]="(!isExample) && ((editable$ | async) || propSection) && parameterSection.inEditMode"
     [section]="selectedSection"
     [formData]="(selectedSectionHyperParams$ | async) | sort:'name'"
     (formDataChanged)="onFormValuesChanged($event)"
+    (searchCounterChanged)="searchCounterChanged($event)"
+    (resetSearch)="search.clear(false)"
+    (scrollToResultCounterChanged)="scrollIndexCounterChanged($event)"
   ></sm-experiment-execution-parameters>
 </sm-editable-section>

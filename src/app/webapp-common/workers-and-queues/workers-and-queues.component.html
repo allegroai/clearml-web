@@ -10,7 +10,7 @@
       </span>
     </div>
     <div *ngIf="rlaQueues.isActive">
-      <button class="btn btn-primary d-flex align-items-center" (click)="addQueue()">
+      <button *ngIf="queuesManager" class="btn btn-primary d-flex align-items-center" (click)="addQueue()">
         <i class="al-icon al-ico-add sm"></i>
         <span> &nbsp; NEW QUEUE</span>
       </button>

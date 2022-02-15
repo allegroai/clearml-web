@@ -79,21 +79,38 @@ export function getContrast(rgb1, rgb2) {
 }
 
 
-/**
- * Convert RGB Array to HEX
- *
- * @param {Array} RGBArray - [R, G, B]
- * @returns {String} 6 digits hex starting with #
- */
-export function RGB2HEX(RGBArray) {
-  if (!RGBArray) {
+export const RGB2HEX = (rgbArray: number[]) => {
+  if (!rgbArray) {
     return '#888888';
   }
-  return '#' + RGBArray.map(function (x) {             //For each array element
-    x = parseInt(x).toString(16);      //Convert to a base16 string
-    return (x.length == 1) ? '0' + x : x;  //Add zero if we get only one character
+  return '#' + rgbArray.map(x => {
+    const base16 = x.toString(16);
+    return (base16.length == 1) ? '0' + base16 : base16;  //Add zero if we get only one character
   }).join('');
-}
+};
+
+export const rgba2String = (rgba: number[]) => `rgba(${rgba.join(',')})`;
+
+export const normalizeColorToString = (color) => {
+  if (typeof color === 'string') {
+    if (color.includes('#')) {
+      return color; // It's already hex
+    }
+    if (color.includes('rgb')) {
+      // rgb() or rgba()
+      const openParenthisis    = color.indexOf('(');
+      const closingParenthisis = color.indexOf(')');
+      color             = color.slice(openParenthisis + 1, closingParenthisis).split(',');
+    }
+  }
+  if (Array.isArray(color)) {
+    if (color.length === 3) {
+      return RGB2HEX(color);
+    } else if (color.length === 4) {
+      return rgba2String(color);
+    }
+  }
+};
 
 /**
  * Convert HSL to RGB
@@ -130,7 +147,7 @@ export function HSL2RGB(H, S, L) {
   });
 }
 
-export function hexToRgb(hex) {
+export const hexToRgb = hex => {
   hex          = hex.replace('#', '');
   const bigint = parseInt(hex, 16);
   const r      = (bigint >> 16) & 255;
@@ -138,8 +155,9 @@ export function hexToRgb(hex) {
   const b      = bigint & 255;
 
   return [r, g, b];
-}
+};
 
-export function invertRgb(rgb: [number, number, number]) {
-  return rgb.map(c => 255 - c);
-}
+export const rgbaToValues = (color: string) =>
+  color.slice(5, -1).split(',').map(c => parseFloat(c));
+
+export const invertRgb = (rgb: [number, number, number]) => rgb.map(c => 255 - c);

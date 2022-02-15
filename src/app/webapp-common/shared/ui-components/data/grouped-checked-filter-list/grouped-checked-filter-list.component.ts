@@ -1,8 +1,7 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output} from '@angular/core';
+import {compareByFieldFunc} from '@common/tasks/tasks.utils';
 
-export interface HyperParams<T> {
-  [section: string]: any;
-}
+export type HyperParams<T> = ReadonlyMap<string, T[]>;
 
 @Component({
   selector: 'sm-grouped-checked-filter-list',
@@ -12,7 +11,7 @@ export interface HyperParams<T> {
 })
 export class GroupedCheckedFilterListComponent {
 
-  RENAME_MAP = {'_legacy': 'General'};
+  renameMap = {_legacy: 'General'};
 
   public expanded = {};
   public searchText: string;
@@ -22,7 +21,9 @@ export class GroupedCheckedFilterListComponent {
   @Input() limitSelection = 9999;
   @Input() titleText: string;
   @Input() placeholderText: string;
-  private _itemsList: HyperParams<any>;
+  @Input() selectedItemsListMapper = (data) => data.id;
+  @Input() selectedItemsListPrefix = 'hyperparams.';
+  private _itemsList: { [section: string]: { [key: string]: any } };
   private _selectedItemsList: string[];
 
   @Input() set selectedItemsList(selectedItemsList: any[]) {
@@ -47,16 +48,19 @@ export class GroupedCheckedFilterListComponent {
     }
   }
 
-  private getItemsObjectList(itemsList: { [section: string]: { [key: string]: string } }) {
-    return Object.entries(itemsList).reduce((acc, [section, params]) => {
-      acc[section] = Object.entries(params).map(([paramKey, paramVal]) => ({value: paramKey, checked: this.selectedItemsList.map(item=> item.id).includes(`hyperparams.${section}.${paramKey}`) || false}));
-      return acc;
-    }, {});
-  }
-
   get itemsList() {
     return this._itemsList;
   }
+
+  private getItemsObjectList = (itemsList: { [section: string]: { [key: string]: string } }) =>
+    Object.entries(itemsList).reduce((acc, [section, params]) => ({
+          ...acc,
+          [section]: Object.entries(params).map(([paramKey,]) => ({
+              value: paramKey,
+              checked: this.selectedItemsList.map(this.selectedItemsListMapper).includes(`${this.selectedItemsListPrefix}${section}.${paramKey}`)
+            }))
+        })
+      , {}) as HyperParams<{ checked: boolean; value: string }>;
 
   @Output() selectedItems = new EventEmitter<{ param: string; value: any }>();
   @Output() clearSelection = new EventEmitter();
@@ -79,12 +83,11 @@ export class GroupedCheckedFilterListComponent {
     this.clearSelection.emit();
   }
 
-  trackByKeyFn(index, item) {
-    return item.key;
-  }
-  trackByValFn(index, item) {
-    return item.value;
-  }
+  trackByKeyFn = (index, item) => item.key;
+
+  trackByValFn = (index, item) => item.value;
+
+  compareByKey = compareByFieldFunc('key');
 
   toggleExpand(name) {
     this.expanded[name] = !this.expanded[name];

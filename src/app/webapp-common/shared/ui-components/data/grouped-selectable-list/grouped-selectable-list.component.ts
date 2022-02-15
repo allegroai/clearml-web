@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, TrackByFunction} from '@angular/core';
 import {SelectableListItem} from './grouped-selectable-list.model';
 import {GroupedList} from '../selectable-grouped-filter-list/selectable-grouped-filter-list.component';
 import {MatExpansionPanelHeader} from '@angular/material/expansion';
@@ -83,9 +83,7 @@ export class GroupedSelectableListComponent implements OnChanges {
     return parent.hasChildren ? children.every(itemKey => itemKey.visible) : parent.visible;
   }
 
-  trackByFn(index, item: {key: string; value: GroupItem}) {
-    return index + item.key + item.value.hasChildren;
-  }
+  trackByFn = (index, item) => index + item.key + item.value.hasChildren;
 
   groupCheck(item: { key: string; value: GroupItem}) {
     this.onGroupCheck.emit({key: item.key, hide: !this.isHideAllMode(item.value)});

@@ -38,7 +38,7 @@ export class SelectModelEffects {
     ofType(actions.tableSortChanged),
     withLatestFrom(this.store.select(selectTableSortFields)),
     switchMap(([action, oldOrders]) => {
-      let orders = addMultipleSortColumns(oldOrders, action.colId, action.isShift);
+      const orders = addMultipleSortColumns(oldOrders, action.colId, action.isShift);
       return [actions.setTableSort({orders})];
     })
   );
@@ -46,12 +46,12 @@ export class SelectModelEffects {
   @Effect()
   modelsFilterChanged = this.actions$.pipe(
     ofType(actions.GLOBAL_FILTER_CHANGED, actions.ALL_PROJECTS_MODE_CHANGED, actions.TABLE_SORT_CHANGED, actions.TABLE_FILTER_CHANGED),
-    switchMap((action) => this.fetchModels$(0)
+    switchMap((action) => this.fetchModels$(null)
       .pipe(
         mergeMap(res => [
           new actions.SetNoMoreModels((res.models.length < MODELS_PAGE_SIZE)),
           new actions.SetModels(res.models),
-          new actions.SetCurrentPage(0),
+          actions.setCurrentScrollId({scrollId: res.scroll_id}),
           deactivateLoader(action.type)
         ]),
         catchError(error => [requestFailed(error), deactivateLoader(action.type), setServerError(error, null, 'Fetch Models failed')])
@@ -62,14 +62,14 @@ export class SelectModelEffects {
   @Effect()
   getModels = this.actions$.pipe(
     ofType<actions.GetNextModels>(actions.GET_NEXT_MODELS),
-    withLatestFrom(this.store.select(exSelectors.selectCurrentPage)),
-    switchMap(([action, page]) =>
-      this.fetchModels$(page + 1)
+    withLatestFrom(this.store.select(exSelectors.selectCurrentScrollId)),
+    switchMap(([action, scrollId]) =>
+      this.fetchModels$(scrollId)
         .pipe(
           mergeMap(res => [
             new actions.SetNoMoreModels((res.models.length < MODELS_PAGE_SIZE)),
             new actions.AddModels(res.models),
-            new actions.SetCurrentPage(page + 1),
+            actions.setCurrentScrollId({scrollId: res.scroll_id}),
             deactivateLoader(action.type)
           ]),
           catchError(error => [requestFailed(error), deactivateLoader(action.type), setServerError(error, null, 'Fetch Models failed')])
@@ -78,7 +78,7 @@ export class SelectModelEffects {
   );
 
   getGetAllQuery(
-    page: number, projectId: string, searchQuery: string, isAllProjects: boolean,
+    scrollId: string, projectId: string, searchQuery: string, isAllProjects: boolean,
     orderFields: SortMeta[], tableFilters: { [s: string]: FilterMetadata }
   ): ModelsGetAllExRequest {
     const userFilter = get([MODELS_TABLE_COL_FIELDS.USER, 'value'], tableFilters);
@@ -90,9 +90,10 @@ export class SelectModelEffects {
         pattern: escapeRegex(searchQuery),
         fields: ['id', 'name', 'framework', 'system_tags', 'uri']
       } : undefined,
+      /* eslint-disable @typescript-eslint/naming-convention */
       project: (isAllProjects || !projectId || projectId === '*') ? undefined : [projectId],
-      page: page,
-      page_size: MODELS_PAGE_SIZE,
+      scroll_id: scrollId || null, // null to create new scroll (undefined doesn't generate scroll)
+      size: MODELS_PAGE_SIZE,
       order_by: encodeOrder(orderFields),
       tags: (tagsFilter && tagsFilter.length > 0) ? tagsFilter : [],
       system_tags: (systemTagsFilter && systemTagsFilter.length > 0) ? systemTagsFilter : [],
@@ -100,11 +101,12 @@ export class SelectModelEffects {
       ready: true,
       framework: get([MODELS_TABLE_COL_FIELDS.FRAMEWORK, 'value'], tableFilters) || undefined,
       user: (userFilter && userFilter.length > 0) ? userFilter : undefined
+      /* eslint-enable @typescript-eslint/naming-convention */
     };
   }
 
-  fetchModels$(page: number) {
-    return of(page)
+  fetchModels$(scrollId1: string) {
+    return of(scrollId1)
       .pipe(
         withLatestFrom(
           // TODO: refactor with ngrx router.
@@ -114,8 +116,8 @@ export class SelectModelEffects {
           this.store.select(exSelectors.selectTableSortFields),
           this.store.select(exSelectors.selectTableFilters),
         ),
-        switchMap(([pageNumber, projectId, isAllProjects, gb, sortFields, filters]) =>
-          this.apiModels.modelsGetAllEx(this.getGetAllQuery(pageNumber, projectId, gb, isAllProjects, sortFields, filters))
+        switchMap(([scrollId, projectId, isAllProjects, gb, sortFields, filters]) =>
+          this.apiModels.modelsGetAllEx(this.getGetAllQuery(scrollId, projectId, gb, isAllProjects, sortFields, filters))
         )
       );
   }

@@ -1,0 +1,41 @@
+@import "variables";
+
+:host {
+  .settings-container {
+    height: 100%;
+
+    mat-drawer {
+      border-right: 1px solid $blue-500;
+      width: 220px;
+    }
+    .mat-list-item {
+      color: $blue-200;
+      font-size: 14px;
+      padding-left: 8px; // mat-list-item has padding 0 16px
+      height: 40px;
+      &.active {
+        background-color: $blue-500;
+        color: white;
+      }
+      &:hover {
+        background-color: $blue-650;
+      }
+    }
+
+    mat-drawer-content {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+
+      .section {
+        padding: 20px 24px;
+        height: calc(100% - 64px);
+        overflow: auto;
+        .content {
+          height: 100%;
+          max-width: 1660px;
+        }
+      }
+    }
+  }
+}

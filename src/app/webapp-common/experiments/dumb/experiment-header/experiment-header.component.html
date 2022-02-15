@@ -14,9 +14,12 @@
 
 
   <div class="d-flex justify-content-end align-items-center right-buttons">
-
+    <sm-clear-filters-button
+      [tableFilters]="tableFilters"
+      (clearTableFilters)="clearTableFilters.emit(tableFilters)"
+    ></sm-clear-filters-button>
     <sm-experiment-custom-cols-menu
-      [hidden]="minimizedView"
+      [disabled]="minimizedView"
       [metricVariants]="metricVariants"
       [hyperParams]="hyperParams"
       [tableCols]="tableCols"

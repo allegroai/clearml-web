@@ -1,0 +1,8 @@
+<i class="al-icon al-ico-filter-reset"
+   [class.disabled]="!isTableFiltered"
+   [class.pointer]="isTableFiltered"
+   smTooltip="Clear all filters"
+   (click)="isTableFiltered && clearTableFilters.emit()"
+>
+  <span class="path1"></span><span class="path2"></span>
+</i>

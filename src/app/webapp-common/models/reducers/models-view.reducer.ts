@@ -27,7 +27,7 @@ export interface IModelsViewState {
   noMoreModels: boolean;
   selectedModelSource: string;
   modelToken: string;
-  page: number;
+  scrollId: string;
   globalFilter: ICommonSearchState['searchQuery'];
   showAllSelectedIsActive: boolean;
   users: User[];
@@ -55,7 +55,7 @@ export const modelsInitialState: IModelsViewState = {
   noMoreModels: false,
   selectedModelSource: null,
   modelToken: null,
-  page: -1, // -1 so the "getNextModels" will send 0.
+  scrollId: null,
   globalFilter: null,
   showAllSelectedIsActive: false,
   users: [],
@@ -99,7 +99,7 @@ export const modelsViewReducer = createReducer(
   on(actions.setModelsInPlace, (state, action) =>
     ({...state, models: state.models.map(currModel => action.models.find(newModel => newModel.id === currModel.id))})),
   on(actions.setNoMoreModels, (state, action) => ({...state, noMoreModels: action.payload})),
-  on(actions.setCurrentPage, (state, action) => ({...state, page: action.page})),
+  on(actions.setCurrentScrollId, (state, action) => ({...state, scrollId: action.scrollId})),
   on(actions.setSelectedModels, (state, action) => ({...state, selectedModels: action.models as unknown as TableModel[]})),
   on(actions.setSelectedModelsDisableAvailable, (state, action) =>
     ({...state, selectedModelsDisableAvailable: action.selectedModelsDisableAvailable})),

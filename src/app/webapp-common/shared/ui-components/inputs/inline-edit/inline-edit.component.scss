@@ -7,8 +7,8 @@ $inline-edit-base-width: 93%;
   .inline-edit-input,
   .inline-edit-input:active,
   .inline-edit-input:focus {
-    background-color: $blue-600;
-    color: $blue-100;
+    background-color: #000;
+    color: $light-periwinkle-two;
     border: none;
 
     &.ng-invalid {
@@ -46,21 +46,15 @@ $inline-edit-base-width: 93%;
     line-height: 16px;
     font-size: 16px;
     transition: color 300ms;
-    margin-left: 18px;
 
     &:hover {
       color: $purple;
     }
   }
 
-  .inline-edit-approve {
-    font-size: 12px;
-
-    &.disabled {
+  .inline-edit-approve.disabled {
       opacity: 0.25;
       cursor: not-allowed !important;
-    }
-
   }
 
   .inline-edit-form {
@@ -83,12 +77,20 @@ $inline-edit-base-width: 93%;
 
     .buttons {
       display: flex;
+      margin-left: 6px;
+      i {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
     }
   }
 
   .editable-pen {
     position: relative;
-    left: 6px;
+    margin-left: 6px;
   }
 }
 

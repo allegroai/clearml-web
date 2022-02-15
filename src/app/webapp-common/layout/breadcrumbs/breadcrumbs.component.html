@@ -28,11 +28,13 @@
     </div>
     <ng-template #shortTree>
     <div *ngFor="let subProject of subProjects; let lastP=last" class="d-flex align-items-center">
-      <a class="sub-project"
-         [routerLink]="subProject.url!=='projects/*/projects'? subProject.url: 'projects/*/experiments'">{{subProject.name}}</a>
-      <div *ngIf="!lastP">
-        <i class="al-icon al-ico-slash"></i>
-      </div>
+     <ng-container *ngIf="subProject.name">
+        <a class="sub-project"
+           [routerLink]="subProject.url!=='projects/*/projects'? subProject.url: 'projects/*/experiments'">{{subProject.name}}</a>
+        <div *ngIf="!lastP">
+          <i class="al-icon al-ico-slash"></i>
+        </div>
+       </ng-container>
     </div>
       </ng-template>
   </div>
@@ -40,7 +42,6 @@
   <ng-template #crumbDiv>
     <a
       [routerLink]="crumb.url">{{(['Experiments', 'Models', 'Dataviews'].includes(crumb.name) && isDeep) ? 'All ' : ''}}{{crumb.name}}</a>
-    <div *ngIf="crumb.name==='Applications'" class="feature-tag">Experimental</div>
   </ng-template>
   <i *ngIf="!last" class="al-icon  al-ico-slash"></i>
 </span>

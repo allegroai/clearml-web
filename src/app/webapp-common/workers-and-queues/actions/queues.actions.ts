@@ -1,6 +1,4 @@
-import {Action, createAction, props} from '@ngrx/store';
-import {ISmAction} from '../../core/models/actions';
-import {Task} from '../../../business-logic/model/tasks/task';
+import {createAction, props} from '@ngrx/store';
 import {Queue} from '../../../business-logic/model/queues/queue';
 import {Topic} from '../../shared/utils/statistics';
 import {SortMeta} from 'primeng/api';
@@ -8,9 +6,9 @@ import {SortMeta} from 'primeng/api';
 const queuesPrefix = 'QUEUES_';
 export const GET_QUEUES = queuesPrefix + 'GET_QUEUES';
 export const SET_QUEUES = queuesPrefix + 'SET_QUEUES';
-export const GET_QUEUES_TASKS = queuesPrefix + 'SET_QUEUES_TASKS';
-export const SET_QUEUES_TASKS = queuesPrefix + 'SET_QUEUES_TASKS';
-export const ADD_QUEUES_TASKS = queuesPrefix + 'ADD_QUEUES_TASKS';
+// export const GET_QUEUES_TASKS = queuesPrefix + 'SET_QUEUES_TASKS';
+// export const SET_QUEUES_TASKS = queuesPrefix + 'SET_QUEUES_TASKS';
+// export const ADD_QUEUES_TASKS = queuesPrefix + 'ADD_QUEUES_TASKS';
 export const MOVE_EXPERIMENT_TO_BOTTOM_OF_QUEUE = queuesPrefix + 'MOVE_EXPERIMENT_TO_BOTTOM_OF_QUEUE';
 export const MOVE_EXPERIMENT_TO_TOP_OF_QUEUE = queuesPrefix + 'MOVE_EXPERIMENT_TO_TOP_OF_QUEUE';
 export const MOVE_EXPERIMENT_IN_QUEUE = queuesPrefix + 'MOVE_EXPERIMENT_IN_QUEUE';
@@ -30,14 +28,10 @@ export const SET_STATS_PARAMS = queuesPrefix + 'SET_STATS_PARAMS';
 
 export const getQueues = createAction(GET_QUEUES);
 
-export class SetQueues implements Action {
-  type = SET_QUEUES;
-  public payload: { queues: Array<Queue> };
-
-  constructor(queues: Array<Queue>) {
-    this.payload = {queues};
-  }
-}
+export const setQueues = createAction(
+  SET_QUEUES,
+  props<{ queues: Array<Queue> }>()
+);
 
 export const queuesTableSortChanged = createAction(
   QUEUES_TABLE_SORT_CHANGED,
@@ -50,126 +44,87 @@ export const queuesTableSetSort = createAction(
   props<{ orders: SortMeta[] }>()
 );
 
-export class SetSelectedQueue implements Action {
-  type = SET_SELECTED_QUEUE;
-  public payload: { queue?: Queue };
+export const setSelectedQueue = createAction(
+  SET_SELECTED_QUEUE,
+  props<{ queue?: Queue }>()
+);
 
-  constructor(queue?: Queue) {
-    this.payload = {queue};
-  }
-}
+export const refreshSelectedQueue = createAction(
+  REFRESH_SELECTED_QUEUE
+);
 
-export class RefreshSelectedQueue implements Action {
-  type = REFRESH_SELECTED_QUEUE;
+export const setSelectedQueueFromServer = createAction(
+  SET_SELECTED_QUEUE_FROM_SERVER,
+  props<{ queue?: Queue }>()
+);
 
-}
+export const syncSpecificQueueInTable = createAction(
+  SYNC_SPECIFIC_QUEUE_IN_TABLE,
+  props<{ queue?: Queue }>()
+);
 
-export class SetSelectedQueueFromServer implements Action {
-  type = SET_SELECTED_QUEUE_FROM_SERVER;
-  public payload: { queue: Queue };
+export const deleteQueue = createAction(
+  DELETE_QUEUE,
+  props<{ queue: Queue }>()
+);
 
-  constructor(queue: Queue) {
-    this.payload = {queue};
-  }
-}
+// export class GetQueuesTasks implements ISmAction {
+//   type = GET_QUEUES_TASKS;
+//   public payload: { queues: Queue };
+//
+//   constructor(queues: Queue) {
+//     this.payload = {queues};
+//   }
+// }
 
-export class SyncSpecificQueueInTable implements Action {
-  type = SYNC_SPECIFIC_QUEUE_IN_TABLE;
-  public payload: { queue: Queue };
+// export class AddQueuesTasks implements ISmAction {
+//   type = ADD_QUEUES_TASKS;
+//
+//   constructor(public payload: { tasks: Task; queueId: string }) {
+//   }
+// }
 
-  constructor(queue: Queue) {
-    this.payload = {queue};
-  }
-}
+export const moveExperimentToBottomOfQueue = createAction(
+  MOVE_EXPERIMENT_TO_BOTTOM_OF_QUEUE,
+  props<{ task: string }>()
+);
 
-export class DeleteQueue implements Action {
-  type = DELETE_QUEUE;
-  public payload: { queue: Queue };
+export const moveExperimentToTopOfQueue = createAction(
+  MOVE_EXPERIMENT_TO_TOP_OF_QUEUE,
+  props<{ task: string }>()
+);
 
-  constructor(queue: Queue) {
-    this.payload = {queue};
-  }
-}
+export const moveExperimentInQueue = createAction(
+  MOVE_EXPERIMENT_IN_QUEUE,
+  props<{ task: string; count: number }>()
+);
 
-export class GetQueuesTasks implements ISmAction {
-  type = GET_QUEUES_TASKS;
-  public payload: { queues: Queue };
+export const removeExperimentFromQueue = createAction(
+  REMOVE_EXPERIMENT_FROM_QUEUE,
+  props<{ task: string }>()
+);
 
-  constructor(queues: Queue) {
-    this.payload = {queues};
-  }
-}
+export const moveExperimentToOtherQueue = createAction(
+  MOVE_EXPERIMENT_TO_OTHER_QUEUE,
+  props<{ task: string; queue: string }>()
+);
 
-export class AddQueuesTasks implements ISmAction {
-  type = ADD_QUEUES_TASKS;
+export const addExperimentToQueue = createAction(
+  ADD_EXPERIMENT_TO_QUEUE,
+  props<{ task: string; queue: string }>()
+);
 
-  constructor(public payload: { tasks: Task; queueId: string }) {
-  }
-}
+export const getStats = createAction(
+  GET_STATS,
+  props<{ maxPoints?: number }>()
+);
 
+export const setStats = createAction(
+  SET_STATS,
+  props<{ data: { wait?: Topic[]; length?: Topic[] } }>()
+);
 
-export class MoveExperimentToBottomOfQueue implements ISmAction {
-  type = MOVE_EXPERIMENT_TO_BOTTOM_OF_QUEUE;
-
-  constructor(public payload: { task: string }) {
-  }
-}
-
-export class MoveExperimentToTopOfQueue implements ISmAction {
-  type = MOVE_EXPERIMENT_TO_TOP_OF_QUEUE;
-
-  constructor(public payload: { task: string }) {
-  }
-}
-
-
-export class MoveExperimentInQueue implements ISmAction {
-  type = MOVE_EXPERIMENT_IN_QUEUE;
-
-  constructor(public payload: { task: string; count: number }) {
-  }
-}
-
-export class RemoveExperimentFromQueue implements ISmAction {
-  type = REMOVE_EXPERIMENT_FROM_QUEUE;
-
-  constructor(public payload: { task: string }) {
-  }
-}
-
-export class MoveExperimentToOtherQueue implements ISmAction {
-  type = MOVE_EXPERIMENT_TO_OTHER_QUEUE;
-
-  constructor(public payload: { task: string; queue: string }) {
-  }
-}
-
-
-export class AddExperimentToQueue implements ISmAction {
-  type = ADD_EXPERIMENT_TO_QUEUE;
-
-  constructor(public payload: { task: string; queue: string }) {
-  }
-}
-
-
-export class GetStats implements Action {
-  type = GET_STATS;
-
-  constructor(public payload: { maxPoints?: number }) {
-  }
-}
-
-export class SetStats implements Action {
-  type = SET_STATS;
-
-  constructor(public payload: { data: { wait?: Topic[]; length?: Topic[] } }) {
-  }
-}
-
-export class SetStatsParams implements Action {
-  type = SET_STATS_PARAMS;
-
-  constructor(public payload: { timeFrame: string }) {
-  }
-}
+export const setStatsParams = createAction(
+  SET_STATS_PARAMS,
+  props<{ timeFrame: string }>()
+);

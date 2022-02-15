@@ -1,10 +1,9 @@
 import {Injectable} from '@angular/core';
 import {ActivatedRoute, Params, Router} from '@angular/router';
-import {Actions, Effect, ofType} from '@ngrx/effects';
-import {Store} from '@ngrx/store';
+import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {uniq} from 'lodash/fp';
 import {map, tap} from 'rxjs/operators';
-import {NAVIGATION_ACTIONS} from '../../../app.constants';
+import {NAVIGATION_ACTIONS} from '~/app.constants';
 import {encodeFilters, encodeOrder} from '../../shared/utils/tableParamEncode';
 import {NavigateTo, NavigationEnd, SetRouterSegments, setURLParams} from '../actions/router.actions';
 
@@ -14,48 +13,45 @@ export class RouterEffects {
 
   constructor(
     private actions$: Actions, private router: Router,
-    private route: ActivatedRoute, private store: Store<any>
+    private route: ActivatedRoute
   ) {
   }
 
   // TODO: (itay) remove after delete old pages.
-  @Effect({dispatch: false})
-  activeLoader = this.actions$.pipe(
+  activeLoader = createEffect(() => this.actions$.pipe(
     ofType<NavigateTo>(NAVIGATION_ACTIONS.NAVIGATE_TO),
     tap(action => {
       (!action.payload.params || !action.payload.url) ?
         this.router.navigateByUrl(action.payload.url, /* Removed unsupported properties by Angular migration: queryParams. */ {}) :
-        this.router.navigate([action.payload.url, action.payload.params], {queryParams: <any>{unGuard: action.payload.unGuard}});
+        this.router.navigate([action.payload.url, action.payload.params], {queryParams: {unGuard: action.payload.unGuard}});
     })
-  );
+  ), {dispatch: false});
 
-  @Effect()
-  routerNavigationEnd = this.actions$.pipe(
+  routerNavigationEnd = createEffect(() => this.actions$.pipe(
     ofType<NavigationEnd>(NAVIGATION_ACTIONS.NAVIGATION_END),
     map(() => new SetRouterSegments({url: this.getRouterUrl(), params: this.getRouterParams(), config: this.getRouterConfig(), queryParams: this.route.snapshot.queryParams}))
-  );
+  ));
 
-  @Effect({dispatch: false})
-  setTableParams = this.actions$.pipe(
+  setTableParams = createEffect(() => this.actions$.pipe(
     ofType(setURLParams),
     map((action) => {
       const firstUpdate = !this.route.snapshot.queryParams.order;
-      const filterStr = encodeFilters(action.filters);
       this.router.navigate(
         [],
         {
           relativeTo: this.route,
           replaceUrl: firstUpdate,
+          queryParamsHandling: action.update ? 'merge' : '',
           queryParams: {
-            columns: uniq(action.columns),
-            order: encodeOrder(action.orders),
-            filter: filterStr ? filterStr : undefined,
-            archive: action.isArchived ? true : undefined,
-            deep: action.isDeep ? true : undefined
+            ...(action.columns && {columns: uniq(action.columns)}),
+            ...(action.orders && {order: encodeOrder(action.orders)}),
+            ...(action.filters && {filter: encodeFilters(action.filters)}),
+            ...(action.isArchived && {archive:  true}),
+            ...(action.isDeep && {deep:  true})
           }
         });
     })
-  );
+  ), {dispatch: false});
 
   getRouterParams(): Params {
     let route = this.route.snapshot.firstChild;

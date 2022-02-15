@@ -12,6 +12,6 @@ export class IsVideoPipe implements PipeTransform {
       return false;
     }
     const path = value.split('?')[0];
-    return IsVideoPipe.videoExtensions.includes(last(path.split('.')));
+    return IsVideoPipe.videoExtensions.includes(last(path.split('.')).toLowerCase());
   }
 }

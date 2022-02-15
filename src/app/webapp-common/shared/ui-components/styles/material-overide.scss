@@ -4,6 +4,35 @@ body .mat-form-field-outline-gap {
   display: none;
 }
 
+body .mat-slide-toggle-bar {
+  width: 30px;
+}
+
+body .mat-slide-toggle-thumb-container {
+  width: 14px;
+  height: 14px;
+  top: 0;
+  left: 0;
+}
+
+body .mat-slide-toggle .mat-slide-toggle-ripple {
+  top: calc(50% - 16px);
+  left: calc(50% - 16px);
+  height: 32px;
+  width: 32px;
+  border-radius: 32px;
+}
+
+body .mat-slide-toggle-thumb {
+  height: 14px;
+  width: 14px;
+}
+
+/* checked */
+body .dark-theme .mat-slide-toggle.mat-checked .mat-slide-toggle-bar {
+  background-color: rgba(198, 255, 0, 0.10);
+}
+
 
 body mat-form-field.mat-form-field-appearance-outline {
   &.readonly:not(.dark) {
@@ -12,18 +41,35 @@ body mat-form-field.mat-form-field-appearance-outline {
     }
   }
 
+  &.dark {
+    .mat-select-value-text, .mat-input-element, .mat-select-arrow {
+      color: $blue-grey;
+    }
+  }
+
   &.append-left.mat-form-field-should-float {
-    margin-left: 100px;
+    width: 340px;
+    margin-left: 160px;
 
     .mat-form-field-wrapper {
       margin: 0.25em;
+
+      .mat-form-field-subscript-wrapper {
+        z-index: 1;
+      }
     }
 
     .mat-form-field-label-wrapper {
       .mat-form-field-label {
-        top: 52px;
-        margin-left: -100px;
+        top: 42px;
+        margin-left: -160px;
+        width: 156px;
+        white-space: normal;
+        position: relative;
+        padding-right: 20px;
+
       }
+
     }
   }
 
@@ -33,6 +79,8 @@ body mat-form-field.mat-form-field-appearance-outline {
 
 
     .mat-form-field-label {
+      overflow: unset;
+      width: unset;
       top: 24px;
       margin-bottom: unset;
       transform: translateY(-1.59373em) scale(1);
@@ -67,6 +115,7 @@ body mat-form-field.mat-form-field-appearance-outline {
   .mat-form-field-subscript-wrapper {
     padding: 0;
   }
+
 
   .mat-form-field-outline {
     background: white;
@@ -103,6 +152,12 @@ body .dark.mat-form-field-appearance-outline:not(.data-text) .mat-form-field-out
   background-color: #1a1e2c;
 }
 
+body .dark-theme {
+  .mat-form-field-appearance-outline .mat-form-field-outline {
+    background-color: #1a1e2c;
+  }
+}
+
 
 body .data-text.mat-form-field-appearance-outline .mat-form-field-outline {
   .mat-form-field-outline-end, .mat-form-field-outline-start {
@@ -115,6 +170,12 @@ body .mat-form-field-infix {
 }
 
 body .mat-form-field-label-wrapper {
+  .mat-form-field-label{
+    pointer-events: auto;
+    .mat-form-field-required-marker{
+      color: #f44336;
+    }
+  }
 
   .mat-form-field-empty {
     top: 27px;
@@ -151,7 +212,8 @@ body .mat-checkbox-checked.mat-accent {
   .mat-checkbox-background, .mat-checkbox-indeterminate.mat-accent .mat-checkbox-background {
     background-color: $purple;
   }
-  &.readonly .mat-checkbox-background, .mat-checkbox-indeterminate.mat-accent .mat-checkbox-background{
+
+  &.readonly .mat-checkbox-background, .mat-checkbox-indeterminate.mat-accent .mat-checkbox-background {
     background-color: $blue-300;
   }
 }
@@ -207,6 +269,7 @@ body mat-form-field.mat-form-field-appearance-outline.dark {
 
   .mat-form-field-label-wrapper .mat-form-field-label {
     color: #b9bdd4;
+
   }
 
   .mat-form-field-subscript-wrapper {
@@ -266,7 +329,7 @@ body mat-form-field.mat-form-field-appearance-outline.dark-outline {
 
 body.dark-theme .mat-select-panel.dark-outline {
   background-color: #000;
-  border: 1px solid $grey-purple;
+  border: 1px solid $blue-500;
 
   .mat-option:hover:not(.mat-option-disabled), .mat-option:focus:not(.mat-option-disabled) {
     background: $blue-700;
@@ -357,7 +420,8 @@ body.dark-theme .mat-autocomplete-panel.light-theme,
 body.dark-theme .mat-select-panel.dark,
 body.dark-theme .mat-autocomplete-panel.dark,
 {
-  background: $blue-800;
+  background: $black;
+  border: 1px solid $blue-500;
 
   .mat-option:hover:not(.mat-option-disabled), .mat-option:focus:not(.mat-option-disabled) {
     background: lighten($blue-800, 5);
@@ -408,6 +472,20 @@ body .mat-autocomplete-panel.annotator-autocomplete {
   background-color: $cloudy-blue-two;
 }
 
+.dark-theme .mat-slider {
+  &.mat-slider-disabled {
+    opacity: 0.5;
+  }
+
+  .mat-slider-track-background {
+    background-color: rgba(167, 178, 216, 0.3);
+  }
+
+  .mat-slider-track-fill {
+    background-color: $blue-280 !important;
+  }
+}
+
 .mat-slider-track-fill {
   background-color: $blue-500 !important;
 }
@@ -436,7 +514,7 @@ body .mat-autocomplete-panel.annotator-autocomplete {
 .mat-menu-panel.dark {
   border-radius: 3px;
   box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
-  border: solid 1px $blue-400;
+  border: solid 1px $blue-500;
   background-color: #000000;
 
   .mat-menu-item {

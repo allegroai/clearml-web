@@ -6,6 +6,9 @@ import {addMessage} from '../../core/actions/layout.actions';
 import {MESSAGES_SEVERITY} from '../../../app.constants';
 import {Store} from '@ngrx/store';
 import {ThemeEnum} from '../../experiments/shared/common-experiments.const';
+import {getSignedUrlOrOrigin$} from '../../core/reducers/common-auth-reducer';
+import {tap} from 'rxjs/operators';
+import {Observable} from 'rxjs/internal/Observable';
 
 @Component({
   selector: 'sm-debug-image-snippet',
@@ -13,17 +16,25 @@ import {ThemeEnum} from '../../experiments/shared/common-experiments.const';
   styleUrls: ['./debug-image-snippet.component.scss']
 })
 export class DebugImageSnippetComponent implements OnInit {
-  public isVideo: boolean;
-  public isAudio: boolean;
-  public isHtml: boolean;
+  public type: 'image' | 'player' | 'html';
+  public themeEnum = ThemeEnum;
+  public source$: Observable<string>;
   private _frame: any;
-  public ThemeEnum = ThemeEnum;
 
   @Input() set frame(frame) {
     if (frame.url) {
-      this.isVideo = (new IsVideoPipe().transform(frame.url));
-      this.isAudio = (new IsAudioPipe()).transform(frame.url);
-      this.isHtml = isHtmlPage(frame.url) || isTextFileURL(frame.url);
+      this.source$ = getSignedUrlOrOrigin$(frame.url, this.store).pipe(
+        tap(signed => {
+          if (new IsVideoPipe().transform(signed) ||
+            new IsAudioPipe().transform(signed)) {
+            this.type = 'player';
+          } else if (isHtmlPage(signed) || isTextFileURL(signed)) {
+            this.type = 'html';
+          } else {
+            this.type = 'image';
+          }
+          this.isFailed = !signed?.startsWith('http');
+        }));
     }
     this._frame = frame;
   }
@@ -43,8 +54,8 @@ export class DebugImageSnippetComponent implements OnInit {
   ngOnInit() {
   }
 
-  openInNewTab() {
-    window.open(this.frame.url || this.frame.oldSrc, '_blank');
+  openInNewTab(source: string) {
+    window.open(source, '_blank');
   }
 
   loadedMedia() {
@@ -59,5 +70,9 @@ export class DebugImageSnippetComponent implements OnInit {
       success ? MESSAGES_SEVERITY.SUCCESS : MESSAGES_SEVERITY.ERROR,
       success ? 'Path copied to clipboard' : 'No path to copy'
     ));
+  }
+
+  log($event: ErrorEvent) {
+    console.log($event);
   }
 }

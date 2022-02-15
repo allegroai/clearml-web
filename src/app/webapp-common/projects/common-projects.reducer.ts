@@ -2,7 +2,7 @@ import {createSelector} from '@ngrx/store';
 import {Project} from '../../business-logic/model/projects/project';
 import {TABLE_SORT_ORDER, TableSortOrderEnum} from '../shared/ui-components/data/table/table.consts';
 import {PROJECTS_ACTIONS} from './common-projects.consts';
-import {setProjectsSearchQuery} from './common-projects.actions';
+import {setCurrentScrollId, setProjectsSearchQuery} from './common-projects.actions';
 import {ICommonSearchState} from '../common-search/common-search.reducer';
 import {selectSelectedProject} from "@common/core/reducers/projects.reducer";
 
@@ -22,7 +22,7 @@ export interface ICommonProjectsState {
   selectedProject: Project;
   projectReadyForDeletion: CommonProjectReadyForDeletion;
   noMoreProjects: boolean;
-  page: number;
+  scrollId: string;
 }
 
 export const commonProjectsInitState: ICommonProjectsState = {
@@ -39,7 +39,7 @@ export const commonProjectsInitState: ICommonProjectsState = {
     models: null
   },
   noMoreProjects: true,
-  page: 0,
+  scrollId: null,
 };
 
 const getCorrectSortingOrder = (currentSortOrder: TableSortOrderEnum, currentOrderField: string, nextOrderField: string) => {
@@ -58,8 +58,8 @@ export const commonProjectsReducer = (state: ICommonProjectsState = commonProjec
       return {...state, data: action.payload.projects};
     case PROJECTS_ACTIONS.ADD_TO_PROJECTS_LIST:
       return {...state, data: state.data.concat(action.payload.projects)};
-    case PROJECTS_ACTIONS.SET_NEXT_PAGE:
-      return {...state, page: action.payload};
+    case setCurrentScrollId.type:
+      return {...state, scrollId: action.scrollId};
     case PROJECTS_ACTIONS.SET_NO_MORE_PROJECTS:
       return {...state, noMoreProjects: action.payload};
     case PROJECTS_ACTIONS.SET_PROJECTS_NON_FILTERED_LIST:
@@ -88,13 +88,13 @@ export const commonProjectsReducer = (state: ICommonProjectsState = commonProjec
       return {...state, selectedProjectId: null, selectedProject: {}};
       // TODO: do we need to reset this in new delete?
     case PROJECTS_ACTIONS.RESET_PROJECTS:
-      return {...state, page: 0, noMoreProjects: false, data: []};
+      return {...state, scrollId: null, noMoreProjects: false, data: []};
     case PROJECTS_ACTIONS.SET_ORDER_BY:
-      return {...state, orderBy: action.payload.orderBy, sortOrder: getCorrectSortingOrder(state.sortOrder, state.orderBy, action.payload.orderBy), page: 0, noMoreProjects: false, data: []};
+      return {...state, orderBy: action.payload.orderBy, sortOrder: getCorrectSortingOrder(state.sortOrder, state.orderBy, action.payload.orderBy), scrollId: null, noMoreProjects: false, data: []};
     case setProjectsSearchQuery.type:
-      return {...state, searchQuery: (action as ReturnType<typeof setProjectsSearchQuery>), page: 0, noMoreProjects: false, data: []};
+      return {...state, searchQuery: (action as ReturnType<typeof setProjectsSearchQuery>), scrollId: null, noMoreProjects: false, data: []};
     case PROJECTS_ACTIONS.RESET_SEARCH_QUERY:
-      return {...state, searchQuery: commonProjectsInitState.searchQuery, page: 0, noMoreProjects: false, data: []};
+      return {...state, searchQuery: commonProjectsInitState.searchQuery, scrollId: null, noMoreProjects: false, data: []};
     case PROJECTS_ACTIONS.CHECK_PROJECT_FOR_DELETION:
       return {...state, projectReadyForDeletion: {...commonProjectsInitState.projectReadyForDeletion, project: action.payload.project}};
     case PROJECTS_ACTIONS.RESET_READY_TO_DELETE:
@@ -106,16 +106,16 @@ export const commonProjectsReducer = (state: ICommonProjectsState = commonProjec
   }
 };
 
-export const selectProjects = state => state.projects;
+export const projects = state => state.projects as ICommonProjectsState;
 
 
-export const selectProjectsData = createSelector(selectProjects, (state: ICommonProjectsState): Array<Project> => state ? state.data : []);
-export const selectNonFilteredProjectsList = createSelector(selectProjects, (state: ICommonProjectsState): Array<Project> => state ? state.projectsNonFilteredList : []);
+export const selectProjectsData = createSelector(projects, state => state?.data || []);
+export const selectNonFilteredProjectsList = createSelector(projects, state => state?.projectsNonFilteredList || []);
 // export const selectSelectedProjectId = createSelector(selectRouterParams, (params: any) => params ? params.projectId : '');
-export const selectProjectsOrderBy = createSelector(selectProjects, (state: ICommonProjectsState): string => state ? state.orderBy : '');
-export const selectProjectsSortOrder = createSelector(selectProjects, (state: ICommonProjectsState): TableSortOrderEnum => state ? state.sortOrder : TABLE_SORT_ORDER.DESC);
-export const selectProjectsSearchQuery = createSelector(selectProjects, (state: ICommonProjectsState) => state?.searchQuery);
-export const selectProjectReadyForDeletion = createSelector(selectProjects, (state: ICommonProjectsState): CommonProjectReadyForDeletion => state.projectReadyForDeletion);
-export const selectNoMoreProjects = createSelector(selectProjects, (state: ICommonProjectsState): boolean => state.noMoreProjects);
-export const selectProjectsPage = createSelector(selectProjects, (state: ICommonProjectsState): number => state?.page || null);
-export const selectShowHidden = createSelector([selectProjects,selectSelectedProject ], (state, selectedProject) => (state?.showHidden || selectedProject?.system_tags?.includes('hidden')));
+export const selectProjectsOrderBy = createSelector(projects, state => state?.orderBy || '');
+export const selectProjectsSortOrder = createSelector(projects, state => state?.sortOrder || TABLE_SORT_ORDER.DESC);
+export const selectProjectsSearchQuery = createSelector(projects, state => state?.searchQuery);
+export const selectProjectReadyForDeletion = createSelector(projects, state => state?.projectReadyForDeletion);
+export const selectProjectForDelete = createSelector(projects, state => [state?.projectReadyForDeletion.project]);
+export const selectNoMoreProjects = createSelector(projects, state => state.noMoreProjects);
+export const selectProjectsScrollId = createSelector(projects, (state): string => state?.scrollId || null);

@@ -1,7 +1,6 @@
-import {ChangeDetectorRef, ComponentFactoryResolver, ComponentRef, Directive, ElementRef, HostListener, Input, ViewContainerRef} from '@angular/core';
+import {Directive, ElementRef, HostListener, Input} from '@angular/core';
 import {ColorHashService} from '../../../services/color-hash/color-hash.service';
-import {ColorPickerWrapperComponent} from '../../inputs/color-picker/color-picker-wrapper.component';
-import {hexToRgb, RGB2HEX} from '../../../services/color-hash/color-hash.utils';
+import {normalizeColorToString} from '../../../services/color-hash/color-hash.utils';
 import {Store} from '@ngrx/store';
 import {showColorPicker} from './choose-color.actions';
 
@@ -15,16 +14,18 @@ export class ChooseColorDirective {
   @Input() colorButtonRef;
   @Input() colorButtonClass: string;
   @Input() stringToColor: string;
+  @Input() colorPickerWithAlpha: boolean = false;
+  private _defaultColor: number[];
+  private defaultColorString: string;
 
-  @Input() set defaultColor(defaultColor) {
-    this._defaultColor = this.normalizeColorToHex(defaultColor);
+  @Input() set defaultColor(defaultColor: number[]) {
+    this._defaultColor = defaultColor;
+    this.defaultColorString = normalizeColorToString(defaultColor);
   }
 
   get defaultColor() {
     return this._defaultColor;
   }
-
-  private _defaultColor: string;
 
   @HostListener('mousedown', ['$event'])
   public onMouseDown(event: MouseEvent): void {
@@ -60,38 +61,24 @@ export class ChooseColorDirective {
       top,
       left,
       theme: 'light',
-      defaultColor: this.defaultColor,
-      cacheKey: this.stringToColor
+      defaultColor: this.defaultColorString,
+      cacheKey: this.stringToColor,
+      alpha: this.colorPickerWithAlpha
     }));
     event.stopPropagation();
   }
 
-  private normalizeColorToHex(defaultColor) {
-    if (typeof defaultColor === 'string') {
-      if (defaultColor.includes('#')) {
-        return defaultColor; // It's already hex
-      }
-      if (defaultColor.includes('rgb')) {
-        // rgb() or rgba()
-        const openParenthisis    = defaultColor.indexOf('(');
-        const closingParenthisis = defaultColor.indexOf(')');
-        defaultColor             = defaultColor.slice(openParenthisis + 1, closingParenthisis).split(',');
-      }
-    }
-    if (Array.isArray(defaultColor)) {
-      return RGB2HEX(defaultColor);
-    }
-  }
 }
 
-export function attachColorChooser(text: string, buttonElement: Element, colorHash: ColorHashService, store: Store<any>) {
+export const attachColorChooser = (text: string, buttonElement: Element, colorHash: ColorHashService, store: Store<any>, withAlpha?: boolean) => {
   const directive = new ChooseColorDirective(new ElementRef(buttonElement), store);
   directive.colorButtonRef = new ElementRef(buttonElement);
   directive.stringToColor  = text;
+  directive.colorPickerWithAlpha = withAlpha;
   const listener = (e: MouseEvent) => {
     directive.defaultColor = colorHash.initColor(text);
     directive.openColorPicker(e);
   };
   buttonElement.removeEventListener('click', listener);
   buttonElement.addEventListener('click', listener);
-}
+};

@@ -1,7 +1,48 @@
-<div class="modal-container" [class.dark-theme]="darkTheme">
+<div class="modal-container" [class.dark-theme]="darkTheme" #modalContainer>
   <div class="graph-displayer-header">
-    <div (click)="closeGraphDisplayer()" smTooltip="Close" class="icon-container ml-auto pointer">
-      <i class="al-icon al-ico-dialog-x al-color blue-400 light-grey-blue"></i>
+    <div class="chart-title">{{chart?.layout?.title || chart?.metric}}</div>
+    <div class="ml-auto d-flex align-items-center">
+      <div [class.load-spinner]="isFetchingData$ | async" class="d-flex align-items-center mr-3"></div>
+      <div class="pointer d-flex align-items-center mr-3" *ngIf="(isFetchingData$ | async) === false && isFullDetailsMode" smTooltip="refresh" matTooltipPosition="below" (click)="refresh()"><i class="al-icon al-ico-refresh"></i></div>
+      <div (click)="closeGraphDisplayer()" matTooltipPosition="below" smTooltip="Close" class="icon-container pointer d-flex align-items-center">
+        <i class="al-icon al-ico-dialog-x al-color blue-400 light-grey-blue"></i>
+      </div>
+    </div>
+
+  </div>
+  <div class="graph-controls" *ngIf="isFullDetailsMode">
+    <div class="d-flex align-items-center"  *ngIf="!isCompare">
+      <span class="label-text axis-text-margin-left">Horizontal Axis</span>
+      <mat-form-field appearance="outline" class="axis-type-field">
+        <mat-select [value]="xAxisType$ | async" (selectionChange)="xAxisTypeChanged($event)" panelClass="light-theme"
+                    name="scriptType" [disabled]="isFetchingData$ | async">
+          <mat-option *ngFor="let type of xAxisTypeOption" [value]="type.value">{{type.name}}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <div class="smooth-options d-flex align-items-center ml-3">
+      <span class="label-text smoothing-text">Smoothing</span>
+      <mat-slider
+        [value]="smoothWeight"
+        [max]="0.999"
+        [min]="0"
+        [step]="0.001"
+        (input)="changeWeight($event.value)"
+      >
+      </mat-slider>
+      <mat-form-field
+        appearance="outline"
+        class="smooth-input">
+        <input
+          matInput
+          name="minCount"
+          type="number"
+          [min]="0"
+          [ngModel]="smoothWeight"
+          (ngModelChange)="changeWeight($any($event))"
+        />
+      </mat-form-field>
+
     </div>
   </div>
   <div class="graph-container">
@@ -11,11 +52,13 @@
       [class.two-in-a-row]="false"
       [chart]="chart"
       [disableResize]="true"
+      [smoothWeight]="smoothWeight"
+      [hideTitle]="true"
       [isMaximized]="true"
-      [height]="800"
+      [height]="height"
       [id]="id"
       [identifier]="id"
-      [isCompare]="false"
+      [isCompare]="isCompare"
       [xAxisType]="xAxisType"
       [moveLegendToTitle]="false"
       [isDarkTheme]="darkTheme"

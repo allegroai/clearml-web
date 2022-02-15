@@ -1,12 +1,11 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {Worker} from '../../../../business-logic/model/workers/worker';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 
 @Component({
   selector   : 'sm-worker-info',
   templateUrl: './worker-info.component.html',
   styleUrls  : ['./worker-info.component.scss']
 })
-export class WorkerInfoComponent implements OnInit {
+export class WorkerInfoComponent {
 
   @Input() selectedWorker;
   @Output() deselectWorker = new EventEmitter();
@@ -18,9 +17,6 @@ export class WorkerInfoComponent implements OnInit {
   ];
 
   constructor() {
-  }
-
-  ngOnInit() {
   }
 
   deselectWorkerClicked() {

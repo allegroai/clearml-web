@@ -1,5 +1,5 @@
 import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
-import {ISmCol, TABLE_SORT_ORDER} from '../table.consts';
+import {ISmCol} from '../table.consts';
 import {addOrRemoveFromArray} from '../../../../utils/shared-utils';
 import {MatMenuTrigger} from '@angular/material/menu';
 
@@ -29,8 +29,8 @@ export class TableCardFilterTemplateComponent {
   @Input() filterMatch: {[colId: string]: string};
   @Output() subFilterChanged = new EventEmitter();
   @Output() filterChanged = new EventEmitter<{col: string; value: unknown; matchMode?: string}>();
-  @Output() menuClosed = new EventEmitter();
-  @Output() menuOpened = new EventEmitter();
+  @Output() menuClosed = new EventEmitter<ISmCol>();
+  @Output() menuOpened = new EventEmitter<ISmCol>();
 
   @ViewChild(MatMenuTrigger, {static: true}) trigger: MatMenuTrigger;
 
@@ -40,10 +40,14 @@ export class TableCardFilterTemplateComponent {
   onFilterChanged(colId: string, val) {
     if (val) {
       const newValues = addOrRemoveFromArray(this.value[colId], val.itemValue);
-      this.filterChanged.emit({col: colId, value: newValues, matchMode: this.filterMatch[colId]});
+      this.filterChanged.emit({col: colId, value: newValues, matchMode: this.filterMatch?.[colId]});
     }
   }
 
+  emitFilterChangedCheckBox(colId: string, values: string[]) {
+    this.filterChanged.emit({col: colId, value: values, matchMode: this.filterMatch?.[colId]});
+
+  }
   onSubFilterChanged(col, val) {
     if (val) {
       const newValues = addOrRemoveFromArray(this.subValue, val.itemValue);
@@ -65,9 +69,9 @@ export class TableCardFilterTemplateComponent {
     this.searchTerms[key] = $event.target.value;
   }
 
-  closeMenu() {
+  closeMenu(col: ISmCol) {
     this.searchTerms = {};
-    this.menuClosed.emit();
+    this.menuClosed.emit(col);
   }
 
   clearSearch(key: string) {
@@ -75,22 +79,14 @@ export class TableCardFilterTemplateComponent {
     this.setSearchTerm({target:{value:''}}, key);
   }
 
-  getColName(id: string) {
-    return this.columns.find(col => col.id === id)?.header || id;
-  }
-
-  searchable(key: string) {
-    return this.columns.find(col => col.id === key)?.searchableFilter;
-  }
-
-  andFilter(id: string) {
-    return this.columns.find(col => col.id === id)?.andFilter;
-  }
-
-  toggleCombination(colId: string, $event: MouseEvent) {
+  toggleCombination(colId: string) {
     this.filterMatch[colId] = this.filterMatch[colId] === 'AND' ? '' : 'AND';
     if (this.value?.[colId]?.length > 1) {
       this.filterChanged.emit({col: colId, value: this.value[colId], matchMode: this.filterMatch[colId]});
     }
+  }
+
+  getColumnByOption(option: any) {
+    return this.columns.find(col => col.id === option.key);
   }
 }

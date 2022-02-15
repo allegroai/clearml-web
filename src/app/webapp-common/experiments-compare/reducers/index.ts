@@ -12,6 +12,11 @@ import {scalarsGraphReducer, ScalarsGraphState} from './experiments-compare-scal
 import {ExperimentParams} from '../shared/experiments-compare-details.model';
 import {ExperimentCompareParamsState, experimentsCompareParamsReducer} from './experiments-compare-params.reducer';
 import {GroupByCharts} from '../../experiments/reducers/common-experiment-output.reducer';
+import {ITableExperiment} from '../../experiments/shared/common-experiment-model.model';
+import {selectSelectedProjectId} from '../../core/reducers/projects.reducer';
+import {selectRouterConfig} from '../../core/reducers/router-reducer';
+import {TABLE_SORT_ORDER} from '../../shared/ui-components/data/table/table.consts';
+import { EXPERIMENTS_TABLE_COL_FIELDS } from '../../../features/experiments/shared/experiments.const';
 
 export const experimentsCompareReducers: ActionReducerMap<any, any> = {
   details      : experimentsCompareDetailsReducer,
@@ -23,9 +28,7 @@ export const experimentsCompareReducers: ActionReducerMap<any, any> = {
   scalarsGraph : scalarsGraphReducer
 };
 
-export function experimentsCompare(state) {
-  return state.experimentsCompare;
-}
+export const experimentsCompare = state => state.experimentsCompare;
 
 // Details
 export const experimentsDetails = createSelector(experimentsCompare, (state): ExperimentCompareDetailsState => state ? state.details : {});
@@ -42,7 +45,13 @@ export const selectExperimentIdsParams = createSelector(selectExperimentsParams,
 
 // select experiments for compare and header
 export const selectCompareHeader = createSelector(experimentsCompare, (state): CompareHeaderState => state ? state.compareHeader : {});
-export const selectExperimentsForCompareSearchResults = createSelector(selectCompareHeader, (state): Array<Task> => state ? state.searchResultsExperiments : []);
+export const selectIsCompare = createSelector(selectRouterConfig, (config): boolean => config?.includes('compare-experiments'));
+
+export const selectCompareAddTableSortFields = createSelector(selectCompareHeader, selectSelectedProjectId,
+  (state, projectId) => state.projectColumnsSortOrder?.[projectId] ||  [{field: EXPERIMENTS_TABLE_COL_FIELDS.LAST_UPDATE, order: TABLE_SORT_ORDER.DESC}]);
+export const selectCompareAddTableFilters = createSelector(selectCompareHeader, selectSelectedProjectId,
+  (state, projectId) => state.projectColumnFilters?.[projectId] || {});
+export const selectSelectedExperimentsForCompareAdd = createSelector(selectCompareHeader, (state): ITableExperiment[] => state ? state.searchResultsExperiments : []);
 export const selectExperimentsForCompareSearchTerm = createSelector(selectCompareHeader, (state) => state?.searchTerm);
 export const selectShowAddExperimentsForCompare = createSelector(selectCompareHeader, (state) => state?.showSearch);
 export const selectHideIdenticalFields = createSelector(selectCompareHeader, (state) => state?.hideIdenticalRows);
@@ -99,7 +108,7 @@ export const selectCompareTasksScalarCharts = createSelector(
   selectCompareSelectedSettingsxAxisType,
   compareCharts,
   (axisType, state) => {
-    if (!axisType || axisType === ScalarKeyEnum.IsoTime) {
+    if (state?.metricsHistogramCharts?.metrics && (!axisType || axisType === ScalarKeyEnum.IsoTime)) {
       return  {
         metrics: Object.keys(state.metricsHistogramCharts.metrics).reduce((metricAcc, metricName) => {
           const metric = state.metricsHistogramCharts.metrics[metricName];

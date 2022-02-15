@@ -1,28 +1,25 @@
 import {ItemFooterModel, IFooterState} from './footer-items.models';
 import {IconNames, ICONS} from '../../../constants';
-import {map} from 'rxjs/operators';
-import {Observable} from 'rxjs/internal/Observable';
 import {MenuItems} from '../items.utils';
 
-export class EnqueueFooterItem<T = any> extends ItemFooterModel {
+export class EnqueueFooterItem extends ItemFooterModel {
   id = MenuItems.enqueue;
   emit = true;
   icon = ICONS.ENQUEUE as Partial<IconNames>;
 
-  constructor(state$: Observable<IFooterState<T>>) {
+  constructor() {
     super();
-    this.state$ = state$.pipe(
-      map( ({data, selectionIsOnlyExamples, selectionAllIsArchive}) => {
-        const enqueue = data[this.id];
+  }
 
-        return {
-          disable: enqueue.disable,
-          preventCurrentItem: selectionAllIsArchive,
-          description: this.menuItemText.transform(enqueue.available, 'Enqueue'),
-          disableDescription: selectionIsOnlyExamples ? 'Enqueue' : `You can only enqueue experiments with ‘Draft’/'Aborted' status`
+  getItemState(state: IFooterState<any>): { icon?: IconNames; title?: string; description?: string; disable?: boolean; disableDescription?: string; emit?: boolean; emitValue?: boolean; preventCurrentItem?: boolean; class?: string; wrapperClass?: string } {
+    const enqueue = state.data[this.id];
 
-        };
-      })
-    );
+    return {
+      disable: enqueue.disable,
+      preventCurrentItem: state.selectionAllIsArchive,
+      description: this.menuItemText.transform(enqueue.available, 'Enqueue'),
+      disableDescription: state.selectionIsOnlyExamples ? 'Enqueue' : `You can only enqueue experiments with ‘Draft’/'Aborted' status`
+
+    };
   }
 }

@@ -10,6 +10,7 @@
     class="light-theme"
     cdkDrag
     cdkDragLockAxis="x"
+    cdkDragPreviewContainer="parent"
     [displayOnHover]="i > 0"
     [label]="experiments[i].name"
     (toggled)="toggled.emit($event)"

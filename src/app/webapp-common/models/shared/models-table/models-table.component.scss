@@ -6,12 +6,7 @@
   height: 100px;
 }
 
-::ng-deep .bigger-width {
-  width: 236px;
-}
-
 :host {
-
   sm-table {
     display: block;
     height: 100%;
@@ -22,6 +17,7 @@
 
   .table-container {
     height: 100%;
+    width: 100%;
   }
 
   .model-name {
@@ -40,6 +36,13 @@
       padding-left: 17px;
     }
   }
+
+  .drop-down {
+    padding-left: 4px;
+    pointer-events: initial;
+    cursor: pointer;
+  }
+
   .compact-columns-data {
     color: $blue-250;
   }
@@ -47,6 +50,19 @@
   sm-table-card-filter-template {
     margin-left: 1em;
   }
-
 }
 
+.menu-title {
+  background-color: white;
+  color: $blue-400;
+  font-size: 15px;
+  font-weight: 500;
+  padding: 6px 12px 0;
+  height: 32px;
+  line-height: 32px;
+}
+
+.dot {
+  color: $blue-400;
+  padding: 0 6px;
+}

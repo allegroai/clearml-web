@@ -1,7 +1,6 @@
 import {ISmAction} from '../core/models/actions';
 import {ProjectsUpdateRequest} from '../../business-logic/model/projects/projectsUpdateRequest';
 import {ProjectsGetAllRequest} from '../../business-logic/model/projects/projectsGetAllRequest';
-import {ProjectsGetByIdRequest} from '../../business-logic/model/projects/projectsGetByIdRequest';
 import {ProjectsGetByIdResponse} from '../../business-logic/model/projects/projectsGetByIdResponse';
 import {Project} from '../../business-logic/model/projects/project';
 import {Action, createAction, props} from '@ngrx/store';
@@ -23,15 +22,6 @@ export class UpdateProjectPartial implements Action {
   }
 }
 
-
-export class GetProjectByID implements ISmAction {
-  public type = PROJECTS_ACTIONS.GET_PROJECT_BY_ID;
-  public payload: { getByIdRequest: ProjectsGetByIdRequest };
-
-  constructor(getByIdRequest: ProjectsGetByIdRequest) {
-    this.payload = {getByIdRequest};
-  }
-}
 
 export class SetProjectInSelectedAndInList implements ISmAction {
   public type = PROJECTS_ACTIONS.SET_PROJECT_BY_ID;
@@ -123,9 +113,7 @@ export class SetNoMoreProjects implements Action {
   }
 }
 
-export class SetCurrentProjectsPage implements Action {
-  public type = PROJECTS_ACTIONS.SET_NEXT_PAGE;
-
-  constructor(public payload: number) {
-  }
-}
+export const setCurrentScrollId = createAction(
+  PROJECTS_PREFIX + ' [set current scrollId]',
+  props<{scrollId: string}>()
+);

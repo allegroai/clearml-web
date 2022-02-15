@@ -55,6 +55,8 @@
     [itemsList]="hyperParams"
     [selectedItemsList]="selectedHyperParams"
     [selectFilteredItems]="selectShowIdenticalHyperParams$ | async"
+    [selectedItemsListMapper]="selectedItemsListMapper"
+    selectedItemsListPrefix=""
     [limitSelection]="10"
     (selectedItems)="selectedParamsChanged($event)"
     (clearSelection)="clearSelection()"

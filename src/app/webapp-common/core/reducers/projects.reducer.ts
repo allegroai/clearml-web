@@ -1,20 +1,23 @@
 import {createSelector} from '@ngrx/store';
 import * as projectsActions from '../actions/projects.actions';
 import {
+  setAllProjects,
   setCompanyTags,
   setGraphData,
+  setLastUpdate,
   setMetricVariant,
   setTagColors,
   setTags,
   setTagsFilterByProject,
   TagColor
 } from '../actions/projects.actions';
-import {Project} from '../../../business-logic/model/projects/project';
-import {getSystemTags} from '../../../features/experiments/shared/experiments.utils';
+import {Project} from '~/business-logic/model/projects/project';
+import {getSystemTags} from '~/features/experiments/shared/experiments.utils';
 import {ITableExperiment} from '../../experiments/shared/common-experiment-model.model';
 import {MetricColumn} from '@common/shared/utils/tableParamEncode';
+import {sortByField} from '@common/tasks/tasks.utils';
+import {ProjectsGetAllResponseSingle} from '~/business-logic/model/projects/projectsGetAllResponseSingle';
 
-export const SYSTEM_TAGS_BLACK_LIST = ['archived'];
 
 export interface ProjectStatsGraphData {
   id: string;
@@ -36,27 +39,29 @@ export interface RootProjects {
   systemTags: string[];
   tagsColors: { [tag: string]: TagColor };
   tagsFilterByProject: boolean;
-  graphVariant: {[project: string]: MetricColumn};
+  graphVariant: { [project: string]: MetricColumn };
   graphData: ProjectStatsGraphData[];
+  lastUpdate: string;
 }
 
 const initRootProjects: RootProjects = {
   projects: [],
   selectedProject: null,
   archive: false,
-  deep:false,
+  deep: false,
   projectTags: [],
   companyTags: [],
   systemTags: [],
   tagsColors: {},
   tagsFilterByProject: true,
   graphVariant: {},
-  graphData: null
+  graphData: null,
+  lastUpdate: null
 };
 
 export const projects = state => state.rootProjects as RootProjects;
 export const selectRootProjects = createSelector(projects, (state): Project[] => state.projects);
-export const selectSelectedProject = createSelector(projects, state => state.selectedProject);
+export const selectSelectedProject = createSelector(projects, (state): ProjectsGetAllResponseSingle => state.selectedProject);
 export const selectSelectedProjectDescription = createSelector(projects, state => state.selectedProject?.description);
 export const selectSelectedProjectId = createSelector(selectSelectedProject, (selectedProject): string => selectedProject ? selectedProject.id : '');
 export const selectIsArchivedMode = createSelector(projects, state => state.archive);
@@ -64,8 +69,10 @@ export const selectIsDeepMode = createSelector(projects, state => state.deep);
 export const selectTagsFilterByProject = createSelector(projects, state => state.tagsFilterByProject);
 export const selectProjectTags = createSelector(projects, state => state.projectTags);
 export const selectCompanyTags = createSelector(projects, state => state.companyTags);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const selectProjectSystemTags = createSelector(projects, state => getSystemTags({system_tags: state.systemTags} as ITableExperiment));
 export const selectTagsColors = createSelector(projects, state => state.tagsColors);
+export const selectLastUpdate = createSelector(projects, (state): string => state.lastUpdate);
 export const selectTagColors = createSelector(selectTagsColors,
   (tagsColors, props: { tag: string }) => tagsColors[props.tag]);
 const selectSelectedProjectsMetricVariant = createSelector(projects, state => state.graphVariant);
@@ -82,10 +89,26 @@ export const selectGraphData = createSelector(projects, state => state.graphData
 
 export const projectsReducer = (state: RootProjects = initRootProjects, action) => {
   switch (action.type) {
-    case projectsActions.SET_PROJECTS:
-      return {...state, projects: action.payload};
-    case projectsActions.SET_SELECTED_PROJECT_ID: {
-      const projectId = (action as projectsActions.SetSelectedProjectId).payload.projectId;
+    case projectsActions.resetProjects.type:
+      return {...state, projects: [], lastUpdate: null};
+    case projectsActions.setAllProjects.type:
+      const payload = action as ReturnType<typeof setAllProjects>;
+      let newProjects = state.projects;
+      if (payload.updating) {
+        payload.projects.forEach(proj => {
+          const index = state.projects.findIndex(stateProject => stateProject.id === proj.id);
+          if (index > -1) {
+            newProjects = [...newProjects.slice(0, index), proj, ...newProjects.slice(index + 1)];
+          } else {
+            newProjects = [...newProjects, proj];
+          }
+        });
+      } else {
+        newProjects = [...newProjects, ...payload.projects];
+      }
+      return {...state, projects: sortByField(newProjects, 'name')};
+    case projectsActions.setSelectedProjectId.type: {
+      const projectId = (action as ReturnType<typeof projectsActions.setSelectedProjectId>).projectId;
       return {
         ...state,
         ...(state.selectedProject?.id !== projectId && {archive: initRootProjects.archive}),
@@ -94,10 +117,10 @@ export const projectsReducer = (state: RootProjects = initRootProjects, action) 
     }
     case projectsActions.setSelectedProject.type:
       return {...state, selectedProject: action.project};
-    case projectsActions.RESET_SELECTED_PROJECT:
+    case projectsActions.resetSelectedProject.type:
       return {...state, selectedProject: initRootProjects.selectedProject};
-    case projectsActions.UPDATE_PROJECT: {
-      return {...state, selectedProject: {...state.selectedProject, ...action.payload.changes}};
+    case projectsActions.updateProject.type: {
+      return {...state, selectedProject: {...state.selectedProject, ...(action as ReturnType<typeof projectsActions.updateProject>).changes}};
     }
     case projectsActions.setArchive.type:
       return {...state, archive: action.archive};
@@ -112,11 +135,13 @@ export const projectsReducer = (state: RootProjects = initRootProjects, action) 
     case setTagColors.type:
       return {...state, tagsColors: {...state.tagsColors, [action.tag]: action.colors}};
     case setMetricVariant.type: {
-      const payload = action as ReturnType<typeof setMetricVariant>;
-      return {...state, graphVariant: {...state.graphVariant, [payload.projectId]: payload.col}};
+      const payLoad = action as ReturnType<typeof setMetricVariant>;
+      return {...state, graphVariant: {...state.graphVariant, [payLoad.projectId]: payLoad.col}};
     }
     case setGraphData.type:
       return {...state, graphData: (action as ReturnType<typeof setGraphData>).stats};
+    case setLastUpdate.type:
+      return {...state, lastUpdate: (action as ReturnType<typeof setLastUpdate>).lastUpdate};
     default:
       return state;
   }

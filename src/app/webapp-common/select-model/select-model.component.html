@@ -1,7 +1,5 @@
-<sm-dialog-template header="SELECT MODEL">
-
-  <div
-    class="model-table-container col-24">
+<sm-dialog-template header="SELECT A PUBLIC MODEL">
+  <div class="model-table-container">
     <div class="w-100 model-header">
       <sm-select-model-header
         [searchActive]="true"
@@ -17,9 +15,10 @@
     </div>
     <div class="space-line"></div>
     <sm-models-table
-      class="model-info-container w-100 align-self-stretch"
+      class="model-info-container align-self-stretch"
       selectionMode="single"
       [enableMultiSelect]="false"
+      [minimizedView]="false"
       [models]="models$ | async"
       [tableCols]="tableCols"
       [noMoreModels]="noMoreModels$ | async"
@@ -39,5 +38,4 @@
     >
     </sm-models-table>
   </div>
-
 </sm-dialog-template>

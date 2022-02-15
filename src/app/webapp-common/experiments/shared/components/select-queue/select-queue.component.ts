@@ -7,6 +7,7 @@ import {Queue} from '../../../../../business-logic/model/queues/queue';
 import {ConfirmDialogComponent} from '../../../../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {BlTasksService} from '../../../../../business-logic/services/tasks.service';
 import {filter} from 'rxjs/operators';
+import {Subscription} from 'rxjs';
 
 @Component({
   selector: 'sm-select-queue',
@@ -20,6 +21,7 @@ export class SelectQueueComponent implements OnInit, OnDestroy {
   public tasks$ = this.store.select(selectTaskForEnqueue);
   public enqueueWarning$ = this.tasks$.pipe(filter(tasks => tasks?.some(task => !(task && task.script && (task.script.diff || (task.script.repository && task.script.entry_point))))));
   public reference: string;
+  private queuesSub: Subscription;
 
   constructor(
     public dialogRef: MatDialogRef<ConfirmDialogComponent>,
@@ -34,7 +36,7 @@ export class SelectQueueComponent implements OnInit, OnDestroy {
       this.store.dispatch(new GetTaskForEnqueue(data.taskIds));
       this.reference = data.taskIds.length < 2 ?  data.reference : `${data.taskIds.length} experiments `;
     }
-    this.queues$.subscribe(queues => {
+    this.queuesSub = this.queues$.subscribe(queues => {
       if (queues) {
         this.queues = queues;
         this.selectedQueue = this.blTaskService.getDefaultQueue(this.queues) || queues[0];
@@ -51,6 +53,7 @@ export class SelectQueueComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.queuesSub.unsubscribe();
     this.store.dispatch(new SetTaskForEnqueue(null));
   }
 }

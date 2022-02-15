@@ -1,23 +1,19 @@
-import {Component, OnDestroy, OnInit, ViewChild, ElementRef} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewChild, ElementRef, Input} from '@angular/core';
 import {NgForm} from '@angular/forms';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {Store} from '@ngrx/store';
 import {Observable, Subscription} from 'rxjs';
 import {finalize, map, startWith, take, filter, mergeMap} from 'rxjs/operators';
 import {selectCurrentUser} from '../../core/reducers/users-reducer';
-import {mobilecheck} from '../../shared/utils/mobile';
-import {userPreferences} from '../../user-preferences';
-import {fetchCurrentUser, logout, setPreferences} from '../../core/actions/users.actions';
-import {LoginMode, LoginModeEnum, LoginService} from '../../shared/services/login.service';
-import {selectInviteId, selectLoginError, selectValidateEmail} from '../login-reducer';
+import {fetchCurrentUser, setPreferences} from '../../core/actions/users.actions';
+import {LoginMode, LoginModeEnum} from '../../shared/services/login.service';
+import {selectInviteId} from '../login-reducer';
 import {ConfigurationService} from '../../shared/services/configuration.service';
-import {setLoginError} from '../login.actions';
-import {CommunityContext} from '../../../../environments/base';
-import {TitleCasePipe} from '@angular/common';
-import {selectFirstLoginAt} from '../../core/reducers/view-reducer';
 import {ConfirmDialogComponent} from '../../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {MatDialog} from '@angular/material/dialog';
-const environment = ConfigurationService.globalEnvironment;
+import {LoginService} from '~/shared/services/login.service';
+import {UserPreferences} from '../../user-preferences';
+import {Environment} from '../../../../environments/base';
 
 
 @Component({
@@ -38,42 +34,37 @@ export class LoginComponent implements OnInit, OnDestroy {
   loginMode: LoginMode;
   filteredOptions: Observable<any[]>;
   userChanged: Subscription;
-  public LoginModeEnum = LoginModeEnum;
+  public loginModeEnum = LoginModeEnum;
 
-  public banner: string;
   public notice: string;
   public demo: boolean;
-  public mobile: boolean;
   public newUser: boolean;
   public loginFailed = false;
-  public showGitHub: boolean;
-  public stars: number = 0;
   public showSpinner: boolean;
   public guestUser: { enabled: boolean; username: string; password: string };
-  public ssoEnabled = false;
-  public communityContext: CommunityContext;
   public loginTitle: string;
-  public error: string;
-  public signupMode: boolean;
-  public signupForm: boolean;
   public isInvite: boolean;
-  public environment: any;
-  public isCommunity: boolean;
-  public sso: { name: string; url: string; displayName?: string }[];
+  public environment: Environment;
   public touLink: string;
-  public validateEmail$: Observable<{ email?: string; resendUrl?: string }>;
-  public firstLogin: boolean;
-  private errorSub: Subscription;
   private redirectUrl: string;
+  public banner: string;
+  public showGitHub: boolean;
+  public stars: number = 0;
+
+  @Input() showSimpleLogin: boolean;
+  @Input() hideTou: boolean;
+  @Input() darkerTou = false;
 
   constructor(
     private router: Router,
     private loginService: LoginService,
     private dialog: MatDialog,
     private store: Store<any>,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private userPreferences: UserPreferences,
+    private config: ConfigurationService
   ) {
-    this.mobile = mobilecheck();
+    this.environment = config.getStaticEnvironment();
   }
 
   get buttonCaption() {
@@ -81,60 +72,36 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.environment = environment;
-    this.signupMode = !!environment.communityServer;
-    this.store.select(selectFirstLoginAt).pipe(take(1)).subscribe(firstLoginAt => {
-      this.signupMode = !!environment.communityServer && !firstLoginAt;
-      this.firstLogin = !firstLoginAt;
-      this.loginService.signupMode = this.signupMode;
-    });
     this.store.select(selectCurrentUser).pipe(filter(user => !!user), take(1)).subscribe(() => this.router.navigateByUrl(this.getNavigateUrl()));
-    this.errorSub = this.store.select(selectLoginError).subscribe((error) => this.error = error);
-    this.validateEmail$ = this.store.select(selectValidateEmail);
     this.store.select(selectInviteId).pipe(
       filter(invite => !!invite),
       take(1),
       mergeMap(inviteId => this.loginService.getInviteInfo(inviteId))
-    ).subscribe((inviteInfo) => {
+    ).subscribe((inviteInfo: any) => {
       const shorterName = inviteInfo.user_given_name || inviteInfo.user_name?.split(' ')[0];
-      this.loginTitle = !shorterName? '' : `Accept ${shorterName ? shorterName + '\'s' : ''} invitation and
+      this.loginTitle = !shorterName ? '' : `Accept ${shorterName ? shorterName + '\'s' : ''} invitation and
       join their team`;
     });
-    this.removeSignupFromUrl();
     this.isInvite = this.router.url.includes('invite');
-    this.banner = environment.loginBanner;
-    this.notice = environment.loginNotice;
-    this.loginTitle = this.isInvite ? '' : (this.signupMode && this.isCommunity) ? 'Sign up' : 'Login';
-    this.communityContext = environment.communityContext;
-    this.isCommunity = environment.communityServer;
-    this.demo = environment.demo;
-    this.showGitHub = environment.productName === 'clearml';
-    this.touLink = environment.touLink;
+    this.notice = this.environment.loginNotice;
+    this.loginTitle = this.isInvite ? '' : 'Login'; // NEED SIGNUPMODE
+    this.demo = this.environment.demo;
+    this.touLink = this.environment.legal.TOULink;
     this.route.queryParams
       .pipe(filter(params => !!params), take(1))
       .subscribe((params: Params) => {
-        this.signupForm = this.route.snapshot.routeConfig.path === 'signup';
         this.redirectUrl = params['redirect'] || '';
         this.redirectUrl = this.redirectUrl.replace('/login', '/dashboard');
       });
 
-    if (this.showGitHub) {
-      fetch('https://api.github.com/repos/allegroai/clearml', {method: 'GET'})
-        .then(response => response.json()
-          .then(json => this.stars = json['stargazers_count'])
-        );
-    }
-
     this.loginService.getLoginMode().pipe(
       finalize(() => {
         this.guestUser = this.loginService.guestUser;
-        this.sso = this.loginService.sso;
-        this.ssoEnabled = this.sso.length > 0;
         if (this.loginMode === LoginModeEnum.simple) {
           this.loginService.getUsers().subscribe(users => {
             this.options = users;
           });
-          if (environment.autoLogin && this.redirectUrl &&
+          if (this.environment.autoLogin && this.redirectUrl &&
             !['/dashboard'].includes(this.redirectUrl)) {
             this.loginForm.controls['name'].setValue((new Date()).getTime().toString());
             this.simpleLogin();
@@ -168,12 +135,20 @@ export class LoginComponent implements OnInit, OnDestroy {
           this.newUser = this.loginMode === LoginModeEnum.simple && !user;
         });
     });
+
+    this.banner = this.environment.loginBanner;
+    this.showGitHub = !this.environment.enterpriseServer;
+
+    if (this.showGitHub) {
+      fetch('https://api.github.com/repos/allegroai/clearml', {method: 'GET'})
+        .then(response => response.json()
+          .then(json => this.stars = json['stargazers_count'])
+        );
+    }
   }
 
   ngOnDestroy() {
     this.userChanged?.unsubscribe();
-    this.errorSub?.unsubscribe();
-    this.removeSignupFromUrl();
   }
 
   login() {
@@ -213,7 +188,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   private afterLogin() {
-    userPreferences.loadPreferences()
+    this.userPreferences.loadPreferences()
       .pipe(
         finalize( () => this.store.dispatch(fetchCurrentUser()))
       )
@@ -234,80 +209,6 @@ export class LoginComponent implements OnInit, OnDestroy {
     return this.redirectUrl ? this.redirectUrl : '/dashboard';
   }
 
-  acknowledge() {
-    this.mobile = false;
-  }
-
-  loginGuest() {
-    this.showSpinner = true;
-    this.loginService.passwordLogin(this.guestUser.username, this.guestUser.password)
-      .subscribe(() => {
-          this.afterLogin();
-        },
-        () => {
-          this.showSpinner = false;
-          this.loginFailed = true;
-        });
-  }
-
-  ssoLogin(providerUrl: string) {
-    window.location.href = providerUrl;
-  }
-
-  toggleSignup() {
-    this.showSpinner = true;
-    this.signupMode = !this.signupMode;
-    this.loginService.signupMode = this.signupMode;
-    this.removeSignupFromUrl();
-    if (!this.isInvite) {
-      this.loginTitle = this.signupMode ? 'Signup' : 'Login';
-    }
-    this.store.dispatch(setLoginError({error: null}));
-    this.loginService.getLoginSupportedModes(this.signupMode ? 'signup' : '').subscribe(res => {
-      this.showSpinner = false;
-      this.sso = res.sso_providers.map(provider => {
-        const {display_name, ...rest} = provider;
-        return rest;
-      });
-    });
-
-  }
-
-  private removeSignupFromUrl() {
-    if (this.router.url.includes('redirect') && this.route.snapshot.queryParams.redirect.includes('signup')) {
-      this.router.navigate(
-        [],
-        {
-          relativeTo: this.route,
-          queryParams: {redirect: this.route.snapshot.queryParams.redirect?.replace(/[&]?signup/, '')},
-          queryParamsHandling: 'merge'
-        });
-    }
-  }
-
-  getProviderName(provider: { name: string; url: string; displayName?: string }) {
-    if (provider.displayName) {
-      return provider.displayName;
-    }
-    return (new TitleCasePipe()).transform(provider.name?.replace('_', ' '));
-  }
-
-  getProviderIcon(provider: { name: string; url: string }) {
-    switch (provider.name) {
-      case 'auth0':
-        return 'al-ico-email';
-      default:
-        return `i-${provider.name.replace('_', ' ')}`;
-    }
-  }
-
-  resetPasswordSignup() {
-    this.store.dispatch(logout({provider: 'auth0'}));
-  }
-
-  reSendVerificationEmail(url: string) {
-    window.location.href = url;
-  }
 
   private openLoginNotice() {
     if (this.environment.loginPopup) {

@@ -15,7 +15,7 @@ import {
 } from '../../../../features/experiments/reducers';
 import {ResetExperimentMetrics, toggleSettings} from '../../actions/common-experiment-output.actions';
 import * as infoActions from '../../actions/common-experiments-info.actions';
-import {selectAppVisible, selectAutoRefresh, selectBackdropActive} from '../../../core/reducers/view-reducer';
+import {selectAppVisible, selectAutoRefresh, selectBackdropActive} from '../../../core/reducers/view.reducer';
 import {addMessage, setAutoRefresh} from '../../../core/actions/layout.actions';
 import {AUTO_REFRESH_INTERVAL, MESSAGES_SEVERITY} from '../../../../app.constants';
 import {selectIsExperimentInEditMode, selectSelectedExperiments} from '../../reducers';
@@ -29,8 +29,7 @@ import {ExperimentDetailsUpdated} from '../../actions/common-experiments-info.ac
 export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy {
 
   public selectedExperiment: IExperimentInfo;
-  private paramsSubscription: Subscription;
-  private selectedExperimentSubscription: Subscription;
+  private subs = new Subscription();
   public infoData$: Observable<any>;
   public backdropActive$: Observable<any>;
   public currentComponent: string;
@@ -40,8 +39,6 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
   private isExperimentInEditMode$: Observable<boolean>;
   private projectId: Project['id'];
   public experimentId: string;
-  private autoRefreshSub: Subscription;
-  private routerConfigSubscription: Subscription;
   public routerConfig: string[];
   private isAppVisible$: Observable<boolean>;
   isSharedAndNotOwner$: Observable<boolean>;
@@ -59,45 +56,45 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
 
   ngOnInit() {
     this.minimized = getOr(false, 'data.minimized', this.route.snapshot.routeConfig);
-    this.routerConfigSubscription = this.store.select(selectRouterConfig).subscribe(routerConfig => {
+    this.subs.add(this.store.select(selectRouterConfig).subscribe(routerConfig => {
       this.routerConfig = routerConfig;
-    });
-    this.paramsSubscription = this.store.pipe(
-      select(selectRouterParams),
-      tap((params) => this.projectId = params.projectId),
-      map(params => get('experimentId', params)),
-      filter(experimentId => !!experimentId),
-      tap((experimentId) => this.experimentId = experimentId),
-      distinctUntilChanged(),
-      withLatestFrom(this.store.select(selectSelectedExperiments))
-    )
-      .subscribe(([experimentId, selectedExperiments]) => {
+    }));
+
+    this.subs.add(this.store.pipe(
+        select(selectRouterParams),
+        tap((params) => this.projectId = params.projectId),
+        map(params => get('experimentId', params)),
+        filter(experimentId => !!experimentId),
+        tap((experimentId) => this.experimentId = experimentId),
+        distinctUntilChanged(),
+        withLatestFrom(this.store.select(selectSelectedExperiments))
+      ).subscribe(([experimentId, selectedExperiments]) => {
         this.selectedExperiment = selectedExperiments.find(experiment => experiment.id === experimentId);
         this.isExample = isReadOnly( this.selectedExperiment);
         this.store.dispatch(new ResetExperimentMetrics());
         this.store.dispatch(new infoActions.ResetExperimentInfo());
         this.store.dispatch(new infoActions.GetExperimentInfo(experimentId));
-      });
-    this.autoRefreshSub = interval(AUTO_REFRESH_INTERVAL).pipe(
-      withLatestFrom(this.autoRefreshState$, this.isAppVisible$, this.isExperimentInEditMode$),
-      filter(([iteration, autoRefreshState, isVisible, isExperimentInEditMode]) => isVisible && autoRefreshState && !isExperimentInEditMode &&!this.minimized)
-    ).subscribe(() => {
-      this.refresh(true);
-    });
-    this.selectedExperimentSubscription = this.store.pipe(select(selectSelectedExperiment),
+      })
+    );
+    this.subs.add(interval(AUTO_REFRESH_INTERVAL).pipe(
+        withLatestFrom(this.autoRefreshState$, this.isAppVisible$, this.isExperimentInEditMode$),
+        filter(([, autoRefreshState, isVisible, isExperimentInEditMode]) => isVisible && autoRefreshState && !isExperimentInEditMode &&!this.minimized)
+      ).subscribe(() => {
+        this.refresh(true);
+      })
+    );
+    this.subs.add(this.store.pipe(select(selectSelectedExperiment),
       filter(experiment => experiment?.id === this.experimentId))
       .subscribe(experiment => {
         this.selectedExperiment = experiment;
         this.isExample = isReadOnly( this.selectedExperiment);
-      });
+      })
+    );
   }
 
 
   ngOnDestroy() {
-    this.routerConfigSubscription.unsubscribe();
-    this.selectedExperimentSubscription.unsubscribe();
-    this.paramsSubscription.unsubscribe();
-    this.autoRefreshSub.unsubscribe();
+    this.subs.unsubscribe();
   }
 
   returnToInfo(experiment) {
@@ -121,7 +118,7 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
     if (['log', 'metrics/scalar', 'metrics/plots', 'debugImages'].includes(part)) {
       this.router.navigateByUrl(`projects/${this.projectId}/experiments/${this.experimentId}/info-output/${part}`);
     } else {
-      const parts = window.location.pathname.split('/');
+      const parts = this.router ? this.router.url.split('/') : window.location.pathname.split('/');;
       parts.splice(5, 1);
       this.router.navigateByUrl(parts.join('/'));
     }
@@ -132,7 +129,7 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
   }
   updateExperimentName(name) {
     if (name.trim().length > 2) {
-      this.store.dispatch(new ExperimentDetailsUpdated({id: this.selectedExperiment.id, changes: {name: name}}));
+      this.store.dispatch(new ExperimentDetailsUpdated({id: this.selectedExperiment.id, changes: {name}}));
     } else {
       this.store.dispatch(addMessage(MESSAGES_SEVERITY.ERROR, 'Name must be more than three letters long'));
     }

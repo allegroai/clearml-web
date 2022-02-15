@@ -10,7 +10,7 @@ import {selectRefreshing, selectScalarsGraphHyperParams, selectScalarsGraphMetri
 import {getExperimentsHyperParams, setShowIdenticalHyperParams, setvalueType} from '../../actions/experiments-compare-scalars-graph.actions';
 import {GroupedHyperParams, MetricOption, MetricValueType, SelectedMetric, VariantOption} from '../../reducers/experiments-compare-charts.reducer';
 import {MatRadioChange} from '@angular/material/radio';
-import {selectPlotlyReady} from '../../../core/reducers/view-reducer';
+import {selectPlotlyReady} from '../../../core/reducers/view.reducer';
 import {ExtFrame} from '../../../shared/experiment-graphs/single-graph/plotly-graph-base';
 
 
@@ -54,6 +54,9 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
   private taskIds: string[];
 
   public metricValueType$: Observable<MetricValueType>;
+  public selectedItemsListMapper(data) {
+    return data
+  }
   @ViewChild('searchMetric') searchMetricRef: ElementRef;
 
   @HostListener('document:click', [])
