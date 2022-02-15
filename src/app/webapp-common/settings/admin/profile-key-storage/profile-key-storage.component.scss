@@ -1,0 +1,18 @@
+@import "src/app/webapp-common/shared/ui-components/styles/variables";
+
+:host {
+  .title {
+    color: $white;
+    font-size: 16px;
+    text-transform: uppercase;
+    margin: 55px 0 12px 0;
+    i {
+      color: $blue-250;
+    }
+  }
+
+  .section {
+    margin: 6px 0 0 0;
+    padding-bottom: 48px;
+  }
+}

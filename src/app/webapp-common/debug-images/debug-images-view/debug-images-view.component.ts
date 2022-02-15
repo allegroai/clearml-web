@@ -10,11 +10,20 @@ export class DebugImagesViewComponent {
 
   public trackKey = (index: number, item: any) => item.iter;
   public trackFrame = (index: number, item: any) => item.key;
+  public iterationEvents;
 
   @Input() experimentId;
   @Input() isMergeIterations;
   @Input() title;
-  @Input() iterations;
+  private _iterations;
+  @Input() set iterations(iters) {
+    this._iterations = iters;
+    this.iterationEvents = [];
+    iters.forEach(iteration => this.iterationEvents.push(iteration.events));
+  }
+  get iterations() {
+    return this._iterations;
+  }
   @Input() isDarkTheme = false;
   @Output() imageClicked = new EventEmitter();
   @Output() refreshClicked = new EventEmitter();
@@ -22,10 +31,5 @@ export class DebugImagesViewComponent {
 
   public imageUrlError(data: { frame: string; experimentId: string }) {
     this.urlError.emit(data);
-  }
-  get allIterationsEvents(){
-    const iterationEvents = [];
-    this.iterations.forEach(iteration=> iterationEvents.push(iteration.events));
-    return iterationEvents;
   }
 }

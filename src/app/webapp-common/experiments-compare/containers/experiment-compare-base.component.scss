@@ -145,7 +145,7 @@ $extra-header-min-height: 50px;
       }
 
       &.selected-diff {
-        background-color: #f4f7ff;
+        background-color: $faint-gray;
         position: relative;
 
         &:before {
@@ -198,7 +198,7 @@ $extra-header-min-height: 50px;
       }
 
       &.selected-diff {
-        background-color: #f4f7ff;
+        background-color: $faint-gray;
         position: relative;
 
         &:before {

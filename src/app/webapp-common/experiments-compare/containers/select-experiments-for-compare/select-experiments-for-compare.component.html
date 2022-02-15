@@ -1,8 +1,10 @@
-<div class="select-experiments-container light-theme" (click)="closeSearch()">
-  <div class="search-experiment-for-compare d-flex justify-content-between">
+<sm-dialog-template [header]="'Choose compared experiments'">
+  <div class="select-experiments-container light-theme" (click)="closeSearch()">
+    <div class="search-experiment-for-compare d-flex justify-content-between">
       <mat-form-field appearance="outline" class="w-50" smClickStopPropagation>
         <input
           #searchExperiments
+          autofocus
           matInput
           name="search-experiments"
           autocomplete="off"
@@ -11,15 +13,55 @@
           (input)="searchTermChanged(searchExperiments.value)"
         >
       </mat-form-field>
-    <i class="fas fa-times pointer" (click)="closeSearch()" style="font-size: 16px"></i>
+      <sm-clear-filters-button
+        [tableFilters]="(tableFilters$ | async)"
+        (clearTableFilters)="clearTableFilters()"
+      ></sm-clear-filters-button>
+    </div>
+    <div class="hide-table show-table">
+      <sm-experiments-table
+        class="align-self-stretch"
+        [selectionReachedLimit]="reachedCompareLimit"
+        [selectionMode]="null"
+        [disableContextMenu]="true"
+        [reorderableColumns]="false"
+        [minimizedView]="false"
+        [colsOrder]="(tableColsOrder$ | async)"
+        [tableCols]="tableCols$| async"
+        [users]="users$ | async"
+        [projects]="projects$ | async"
+        [selectedExperiments]="selectedExperimentsIds | idToObjectsArray"
+        [experiments]="experiments$ | async"
+        [experimentTypes]="types$ | async"
+        [tableFilters]="(tableFilters$ | async)"
+        [tableSortFields]="(tableSortFields$ | async)"
+        [tableSortOrder]="(tableSortOrder$ | async)"
+        [tags]="tags$ | async"
+        [hyperParamsOptions]="hyperParamsOptions$ | async"
+        [activeParentsFilter]="activeParentsFilter$ | async"
+        [parents]="parent$ | async"
+        [noMoreExperiments]="noMoreExperiments$ | async"
+        [systemTags]="systemTags$ | async"
+        (tagsMenuOpened)="refreshTagsList()"
+        (typesMenuOpened)="refreshTypesList()"
+        (experimentsSelectionChanged)="experimentsSelectionChanged($event)"
+        (loadMoreExperiments)="getNextExperiments()"
+        (sortedChanged)="sortedChanged($event)"
+        (filterChanged)="filterChanged($event)"
+        (columnResized)="resizeCol($event)"
+      >
+      </sm-experiments-table>
+    </div>
   </div>
-  <div class="hide-table"
-       [ngClass]="{'show-table':(searchTerm$| async)?.length>2 && (experimentsResults$| async)?.length>0}">
-    <sm-select-experiments-for-compare-table [experiments]="experimentsResults$| async"
-                                             [searchTerm]="searchTerm$ | async"
-                                             (experimentsSelectionChanged)="addOrRemoveExperiment($event)"
-                                             [selectedExperiments]="selectedExperiments"
-                                             class="form-control table-container" smClickStopPropagation>
-    </sm-select-experiments-for-compare-table>
+  <div class="buttons">
+    <button type="submit"
+            (click)="applyChanges()"
+            class="btn btn-neon yes-button">
+      APPLY
+    </button>
+    <button (click)="closeDialog()" class="btn btn-outline-neon">
+      CANCEL
+    </button>
   </div>
-</div>
+
+</sm-dialog-template>

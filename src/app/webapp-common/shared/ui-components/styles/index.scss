@@ -139,6 +139,10 @@ body {
     }
 
     textarea {
+      &::placeholder {
+        color: $blue-250;
+      }
+
       &.highlight {
         &::placeholder {
           color: $light-dusk;

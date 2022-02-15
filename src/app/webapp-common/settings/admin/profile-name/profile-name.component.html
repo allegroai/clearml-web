@@ -1,0 +1,12 @@
+<div class="header d-flex align-items-center justify-content-center h-100 w-100 flex-column"   *ngIf="currentUser$ | async as currentUser">
+    <div class="user-icon"> </div>
+    <sm-inline-edit class="dark profile-name"
+                    [originalText]="currentUser.name"
+                    [editable]="true"
+                    (textChanged)="nameChange($event, currentUser)">
+      <div class="text-center">{{currentUser.name}}</div>
+    </sm-inline-edit>
+    <div *ngIf="currentUser.email" class="profile-email text">Email address:</div>
+    <div>{{currentUser.email}}</div>
+
+</div>

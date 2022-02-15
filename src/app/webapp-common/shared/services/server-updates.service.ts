@@ -4,10 +4,11 @@ import {selectCurrentUser} from '../../core/reducers/users-reducer';
 import versionConf from '../../../../version.json';
 import {Store} from '@ngrx/store';
 import {setServerUpdatesAvailable} from '../../core/actions/layout.actions';
-import {ApiServerService} from '../../../business-logic/api-services/server.service';
+import {ApiServerService} from '~/business-logic/api-services/server.service';
 import {filter, switchMap, take} from 'rxjs/operators';
 import {ConfigurationService} from './configuration.service';
-import {GetCurrentUserResponseUserObject} from '../../../business-logic/model/users/getCurrentUserResponseUserObject';
+import {GetCurrentUserResponseUserObject} from '~/business-logic/model/users/getCurrentUserResponseUserObject';
+import {ServerInfoResponse} from '~/business-logic/model/server/serverInfoResponse';
 
 @Injectable({
   providedIn: 'root'
@@ -32,14 +33,14 @@ export class ServerUpdatesService {
     if (this.httpClient && (!nextUpdateCheckTime || nextUpdateCheckTime < new Date())) {
       this.serverService.serverInfo({}).pipe(
         take(1),
-        switchMap(infoRes => this.httpClient.post<any>(`${serverPath}`, {
+        switchMap((infoRes: ServerInfoResponse) => this.httpClient.post<any>(`${serverPath}`, {
           url: window.location.origin,
           client: window.navigator.userAgent,
           uid: this.currentUser?.id,
-          server_uuid: infoRes.uid || '',
+          server_uuid: infoRes['uid'] || '',
           time: new Date().toISOString(),
           versions: {
-            ['trains-server']: versionConf.version
+            ['clearml-server']: infoRes.version
           }
         })
         )

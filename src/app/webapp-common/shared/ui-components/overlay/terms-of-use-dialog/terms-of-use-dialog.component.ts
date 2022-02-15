@@ -1,6 +1,5 @@
 import {Component, Inject, HostListener, ViewChild, ElementRef, AfterViewChecked} from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import {DomSanitizer} from '@angular/platform-browser';
 
 @Component({
   selector   : 'sm-terms-of-use-dialog',
@@ -16,7 +15,7 @@ export class TermsOfUseDialogComponent implements AfterViewChecked {
 
   @HostListener('scroll', ['$event'])
   onScroll(event) {
-    if (event.target.offsetHeight + event.target.scrollTop >= event.target.scrollHeight) {
+    if (event.target.offsetHeight + event.target.scrollTop + 5 >= event.target.scrollHeight) {
       this.disabled = false;
     }
   }

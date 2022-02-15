@@ -7,6 +7,7 @@ import {MODELS_TABLE_COL_FIELDS} from '../../webapp-common/models/shared/models.
 import * as actions from './select-model.actions';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {SortMeta} from 'primeng/api';
+import {setCurrentScrollId} from './select-model.actions';
 
 export interface SelectModelState {
   models: SelectedModel[];
@@ -18,7 +19,7 @@ export interface SelectModelState {
   allProjectsMode: boolean;
   tableFilters: { [s: string]: FilterMetadata };
   tableSortFields: SortMeta[];
-  page: number;
+  scrollId: string;
   globalFilter: string;
 }
 
@@ -32,7 +33,7 @@ const selectModelInitState: SelectModelState = {
   allProjectsMode: true,
   tableFilters: null,
   tableSortFields: [{field: MODELS_TABLE_COL_FIELDS.CREATED, order: TABLE_SORT_ORDER.DESC}],
-  page: -1, // -1 so the "getNextModels" will send 0.
+  scrollId: null,
   globalFilter: null,
 };
 
@@ -54,8 +55,8 @@ export function selectModelReducer<ActionReducer>(state: SelectModelState = sele
       return {...state, models: action.payload};
     case actions.SET_NO_MORE_MODELS:
       return {...state, noMoreModels: action.payload};
-    case actions.SET_NEXT_PAGE:
-      return {...state, page: action.payload};
+    case actions.setCurrentScrollId.type:
+      return {...state, scrollId: action.scrollId};
     case actions.SET_SELECTED_MODELS:
       return {...state, selectedModels: action.payload};
     case actions.ALL_PROJECTS_MODE_CHANGED:
@@ -82,7 +83,7 @@ export function selectModelReducer<ActionReducer>(state: SelectModelState = sele
 
 export const models = createFeatureSelector<SelectModelState>('selectModel');
 export const selectModelsList = createSelector(models, (state) => state ? state.models : []);
-export const selectCurrentPage = createSelector(models, (state): number => state.page);
+export const selectCurrentScrollId = createSelector(models, (state): string => state.scrollId);
 export const selectGlobalFilter = createSelector(models, (state): string => state.globalFilter);
 export const selectTableSortFields = createSelector(models, (state): SortMeta[] => state.tableSortFields);
 export const selectTableFilters = createSelector(models, state => state.tableFilters);

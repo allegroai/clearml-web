@@ -19,13 +19,13 @@
       box-sizing: border-box;
       cursor: default;
 
+
       &.empty {
         background-color: $blue-700;
-        border-color: $light-grey-blue;
+        border-color: $blue-700;
         height: 32px;
         width: 32px;
         min-width: 32px;
-        margin-top: 1px;
       }
 
       &.long {
@@ -39,6 +39,16 @@
         border: solid 2px $blue-800;
         background-color: $blue-800;
         color: $light-periwinkle-two;
+      }
+
+      .inner-circle {
+        width: 100%;
+        height: 100%;
+        border-radius: 100%;
+        border: 2px solid $light-grey-blue;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
     }
   }

@@ -1,0 +1,20 @@
+<sm-menu buttonClass="al-ico-bars-menu al-icon sm" [showCart]="false">
+  <sm-menu-item itemLabel="Rename"
+                iconClass="al-icon al-color blue-800 al-ico-edit"
+                [disabled]="!project.company?.id"
+                [iconFontSize]="20"
+                (itemClicked)="projectNameInlineActivated.emit()"></sm-menu-item>
+  <sm-menu-item itemLabel="New Project"
+                [iconFontSize]="20"
+                iconClass="al-icon al-color blue-800 al-ico-add"
+                (itemClicked)="newProjectClicked.emit(project.id)"></sm-menu-item>
+  <sm-menu-item itemLabel="Move to"
+                [iconFontSize]="20"
+                iconClass="al-icon al-color blue-800 al-ico-move-to"
+                (itemClicked)="moveToClicked.emit(project.id)"></sm-menu-item>
+  <sm-menu-item itemLabel="Delete"
+                [iconFontSize]="20"
+                iconClass="al-icon al-color blue-800 al-ico-trash"
+                (itemClicked)="deleteProjectClicked.emit(project)"></sm-menu-item>
+  <ng-content select="[extendedCardMenu]"></ng-content>
+</sm-menu>

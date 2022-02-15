@@ -1,0 +1,29 @@
+<span
+  smHesitate
+  [delay]="500"
+  [action]="'leave'"
+  (smHesitate)=" hesitateMenu.hesitateStatus && tooltipMenu.closed.emit()">
+<i class="al-icon pointer fas fa-info-circle"
+   #tooltipElement
+   [matMenuTriggerFor]="tooltipMenu"
+   smClickStopPropagation
+   smHesitate
+   [delay]="100"
+   [action]="'enter'"
+   (smHesitate)="tooltipElement.click(); hesitateMenu.hesitateStatus= true"
+   (click)="false"
+></i>
+</span>
+
+<mat-menu #tooltipMenu="matMenu" [xPosition]="'after'" [hasBackdrop]="false">
+  <div
+    class="tooltip-container"
+    [innerHTML]="infoData"
+    smHesitate
+    [delay]="500"
+    [action]="'leave'"
+    (smHesitate)="tooltipMenu.closed.emit()"
+    #hesitateMenu = "hesitate"
+  >
+  </div>
+</mat-menu>

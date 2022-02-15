@@ -47,12 +47,12 @@ export function durationInputFactory(values: Array<DURATION_INPUT_TYPE | Duratio
   }
 
   // strings = ['ms', 'minutes', 'days']
-  if (isUndefined((<DurationInputInterface>values[0]).type)) {
+  if (isUndefined((values[0] as DurationInputInterface).type)) {
     return (values as unknown as Array<DURATION_INPUT_TYPE>).map( (value) => new DurationInput(value) );
   }
 
   // an object {type: 'ms'}
-  if (!isUndefined((<DurationInputInterface>values[0]).type)) {
+  if (!isUndefined((values[0] as DurationInputInterface).type)) {
     return (values as unknown as Array<DurationInputInterface>).map( value => new DurationInput(value.type, value.placeholder, value.maxLength));
   }
 

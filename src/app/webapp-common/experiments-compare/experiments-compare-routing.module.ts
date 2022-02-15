@@ -28,7 +28,7 @@ export const routes: Routes = [
       {path: 'scalars/values', component: ExperimentCompareMetricValuesComponent, canActivate: [RouterHelperGuard]},
       {path: 'scalars/graph', component: ExperimentCompareScalarChartsComponent},
       {path: 'metrics-plots', component: ExperimentComparePlotsComponent},
-      {path: 'debug-images', component: DebugImagesComponent, data: {mergeIterations: true}},
+      {path: 'debug-images', component: DebugImagesComponent, data: {mergeIterations: true, multiple: true}},
     ]
   },
 ];

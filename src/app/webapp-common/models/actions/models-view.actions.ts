@@ -2,7 +2,7 @@ import {createAction, props} from '@ngrx/store';
 import {ISmCol} from '../../shared/ui-components/data/table/table.consts';
 import {SelectedModel} from '../shared/models.model';
 import {TableFilter} from '../../shared/utils/tableParamEncode';
-import {User} from '../../../business-logic/model/users/user';
+import {User} from '~/business-logic/model/users/user';
 import {SortMeta} from 'primeng/api';
 import {CountAvailableAndIsDisableSelectedFiltered} from '@common/shared/entity-page/items.utils';
 const MODELS_PREFIX = 'MODELS_';
@@ -15,6 +15,8 @@ export const refreshModels = createAction(
 );
 
 export const getNextModels = createAction(MODELS_PREFIX + '[get next model]');
+export const getNextModelsWithPageSize = createAction(MODELS_PREFIX + '[get next model with page size]',
+  props<{pageSize: number}>());
 export const setModels = createAction(
   MODELS_PREFIX + '[set models]',
   props<{models: SelectedModel[]}>()
@@ -96,6 +98,11 @@ export const setSelectedModel = createAction(
   props<{model: SelectedModel }>()
 );
 
+export const selectAllModels = createAction(
+  MODELS_PREFIX + ' [select all models]',
+  props<{filtered: boolean}>()
+);
+
 export const tableSortChanged = createAction(
   MODELS_PREFIX + 'TABLE_SORT_CHANGED',
   props<{ isShift: boolean; colId: ISmCol['id'] }>()
@@ -140,11 +147,10 @@ export const globalFilterChanged = createAction(
 export const resetGlobalFilter = createAction(MODELS_PREFIX + 'RESET_GLOBAL_FILTER');
 export const resetState = createAction(MODELS_PREFIX + '[reset state]');
 
-export const setCurrentPage = createAction(
-  MODELS_PREFIX + '[set current page]',
-  props<{page: number}>()
+export const setCurrentScrollId = createAction(
+  MODELS_PREFIX + ' [set current scrollId]',
+  props<{scrollId: string}>()
 );
-
 export const setArchive = createAction(
   MODELS_PREFIX + 'SET_ARCHIVE',
   props<{ archive: boolean }>()

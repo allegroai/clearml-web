@@ -58,7 +58,7 @@ export class ExperimentExecutionSourceCodeComponent implements OnInit, IExperime
   }
 
   ngOnDestroy(): void {
-    this.formChangesSubscription.unsubscribe();
+    this.formChangesSubscription?.unsubscribe();
   }
 
   resetOtherScriptParameters(sourceType: sourceTypesEnum) {

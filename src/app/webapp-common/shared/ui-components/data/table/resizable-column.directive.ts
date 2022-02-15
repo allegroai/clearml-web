@@ -1,33 +1,29 @@
-import { Directive } from '@angular/core';
+import {AfterViewInit, Directive} from '@angular/core';
 import {ResizableColumn} from 'primeng/table';
+import {fromEvent, Subscription} from 'rxjs';
 
 @Directive({
-  selector: '[resizableColumn]'
+  selector: '[smResizableColumn]'
 })
-export class ResizableColumnDirective extends ResizableColumn {
-  private resizerDoubleClickListener: (event: MouseEvent) => void;
-  private clickCount = 0;
+export class ResizableColumnDirective extends ResizableColumn implements AfterViewInit{
+  private sub: Subscription;
 
-  onDocumentMouseUp(event) {
-    super.onDocumentMouseUp(event);
-    this.clickCount += 1;
-    window.setTimeout(() => this.clickCount = 0, 250);
-    if (this.clickCount > 1) {
-      window.setTimeout(() => {
+  ngAfterViewInit() {
+    super.ngAfterViewInit();
+    if (this.resizer) {
+      this.sub = fromEvent(this.resizer, 'dblclick').subscribe((event: MouseEvent) => {
         const width = this.calcWidth(this.el.nativeElement);
         const delta = width - this.el.nativeElement.offsetWidth;
         this.dt.onColumnResizeBegin(event);
         this.dt.onColumnResize({pageX: event.pageX + delta});
-        this.dt.onColumnResizeEnd(event, this.el.nativeElement);
+        this.dt.onColumnResizeEnd();
       });
     }
   }
 
   ngOnDestroy(): void {
     super.ngOnDestroy();
-    if(this.resizerDoubleClickListener) {
-      this.resizer.removeEventListener('mouseup', this.resizerDoubleClickListener);
-    }
+    this.sub?.unsubscribe();
   }
 
   private calcWidth(column: HTMLTableHeaderCellElement) {

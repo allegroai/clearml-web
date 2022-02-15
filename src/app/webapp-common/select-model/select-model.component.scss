@@ -9,21 +9,12 @@
   }
 
   .model-table-container {
-    display: flex;
-    flex-direction: column;
     height: 53vh;
     width: 85vw;
   }
 
-  .buttons {
-    display: inline-block;
-    left: 50%;
-    position: relative;
-    transform: translateX(-50%);
-    margin-top: 41px;
+}
 
-    button {
-      text-transform: uppercase;
-    }
-  }
+::ng-deep p-table table {
+  width: 100% !important;
 }

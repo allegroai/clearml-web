@@ -1,7 +1,7 @@
 @import "../../styles/variables";
 
 .chips {
-  cursor: auto;
+  cursor: default;
   margin: 1px 6px 1px 0;
   display: inline-block;
   line-height: normal;
@@ -18,8 +18,7 @@
 
     &:hover {
       .dot {
-        height: 12px;
-        width: 12px;
+        transform: scale(1.6);
       }
     }
 
@@ -39,7 +38,9 @@
     height: 8px;
     width: 8px;
     border-radius: 50%;
-    transition: width 0.2s ease-in-out, height 0.2s ease-in-out;
+    transition: transform 0.2s ease-in-out;
+    transform: scale(1);
+    transform-origin: center;
   }
 
   .label-text {

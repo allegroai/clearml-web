@@ -6,8 +6,8 @@ import {ModelInfoState} from '../../reducers/model-info.reducer';
 import {get} from 'lodash/fp';
 import * as infoActions from '../../actions/models-info.actions';
 import {selectSelectedModel, selectSelectedTableModel} from '../../reducers';
-import {SelectedModel, TableModel} from '../../shared/models.model';
-import {AdminService} from '../../../../features/admin/admin.service';
+import {SelectedModel} from '../../shared/models.model';
+import {AdminService} from '~/shared/services/admin.service';
 import {selectS3BucketCredentials} from '../../../core/reducers/common-auth-reducer';
 import {SmSyncStateSelectorService} from '../../../core/services/sync-state-selector.service';
 import {Observable, Subscription} from 'rxjs';
@@ -15,8 +15,7 @@ import {debounceTime, distinctUntilChanged, filter, map, tap} from 'rxjs/operato
 import {addMessage} from '../../../core/actions/layout.actions';
 import {MESSAGES_SEVERITY} from '../../../../app.constants';
 import {isReadOnly} from '../../../shared/utils/shared-utils';
-import {selectBackdropActive} from '../../../core/reducers/view-reducer';
-import * as commonInfoActions from "../../../experiments/actions/common-experiments-info.actions";
+import {selectBackdropActive} from '../../../core/reducers/view.reducer';
 
 
 @Component({
@@ -71,7 +70,7 @@ export class ModelInfoComponent implements OnInit, OnDestroy {
 
   public updateModelName(name) {
     if (name.trim().length > 2) {
-      this.store.dispatch(infoActions.updateModelDetails({id: this.selectedModel.id, changes: {name: name}}));
+      this.store.dispatch(infoActions.updateModelDetails({id: this.selectedModel.id, changes: {name}}));
     } else {
       this.store.dispatch(addMessage(MESSAGES_SEVERITY.ERROR, 'Name must be more than three letters long'));
     }

@@ -1,14 +1,22 @@
+@import "../../../shared/ui-components/styles/variables";
+
 :host {
   display: block;
   position: relative;
   height: 100%;
 
   sm-section-header {
+
     height: 35px;
   }
 
   sm-experiment-execution-parameters {
     display: block;
     height: calc(100% - 42px);
+  }
+  sm-search.table-search {
+    border-radius: 4px;
+    color: #a7b2d8 !important;
+    background-color: $blue-600 !important;
   }
 }

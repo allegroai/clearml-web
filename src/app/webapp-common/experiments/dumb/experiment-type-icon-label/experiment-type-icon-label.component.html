@@ -1,4 +1,4 @@
-<i class="al-icon" [class]="iconClass + ' al-ico-type-' + (type ? type.replace('_', '-') : 'training')"></i>
+<i class="al-icon" [class]="iconClass + ' al-ico-type-' + (type ? (type.toString()).replace('_', '-') : 'training')"></i>
 <span class="ml-2 ellipsis" [ngClass]="type" *ngIf="showLabel">
   {{type?.length < 4 ? type.toUpperCase() : (type | noUnderscore | titlecase)}}
 </span>

@@ -1,5 +1,5 @@
 import {Component, Input, OnChanges, Output, SimpleChanges, ViewChild} from '@angular/core';
-import {AdminService} from '../../../features/admin/admin.service';
+import {AdminService} from '~/shared/services/admin.service';
 import {FormBuilder, FormControl, FormGroup, NgForm} from '@angular/forms';
 import {EventEmitter} from '@angular/core';
 
@@ -18,7 +18,6 @@ export class S3AccessDialogComponent implements OnChanges {
   @Input() region                          = '';
   @Input() bucket;
   @Input() endpoint;
-  @Input() useSSL: boolean;
   @Input() editMode                        = false;
   @Input() header;
 
@@ -38,8 +37,9 @@ export class S3AccessDialogComponent implements OnChanges {
         Secret  : changes.secret.currentValue,
         Region  : changes.region.currentValue,
         Bucket  : changes.bucket.currentValue,
-        Endpoint: changes.endpoint.currentValue,
-        useSSL  : changes.useSSL.currentValue,
+        Endpoint: (changes.endpoint.currentValue === null || changes.endpoint.currentValue?.startsWith('http')) ?
+          changes.endpoint.currentValue:
+           `http${(changes.endpoint.currentValue as string).endsWith('443') ? 's' : ''}://${changes.endpoint.currentValue}`,
       };
     }
   }

@@ -1,5 +1,6 @@
 import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
 import {PlotData} from 'plotly.js';
+import {isEqual} from 'lodash/fp';
 
 export interface GroupedList {
   [metric: string]: { [variant: string]: { [experimentId: string]: PlotData } };
@@ -18,8 +19,10 @@ export class SelectableGroupedFilterListComponent {
   public searchText: string;
 
   @Input() set list(list: GroupedList) {
+    if (!isEqual(this._list, list)) {
+      this.hideChildrenForHiddenParent(list);
+    }
     this._list = list;
-    this.hideChildrenForHiddenParent(list);
     this.filteredList = this.filterList(list, this.searchTerm);
   }
 
@@ -73,7 +76,7 @@ export class SelectableGroupedFilterListComponent {
     const newHiddenList = [...this.checkedList];
     let hiddenListChanged = false;
     Object.entries(list).forEach(([parent, children]) => {
-      if (this.checkedList.includes(parent)) {
+      if (this.checkedList.includes(parent) && Object.keys(children).length > 0) {
         hiddenListChanged = true;
         Array.prototype.push.apply(newHiddenList, (Object.keys(children).map(child => parent + child)));
       }

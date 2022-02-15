@@ -1,16 +1,14 @@
 import {createFeatureSelector, createSelector} from '@ngrx/store';
-import {TABLE_SORT_ORDER, TableSortOrderEnum} from '../../webapp-common/shared/ui-components/data/table/table.consts';
 import {
   CommonProjectReadyForDeletion,
   commonProjectsInitState,
   commonProjectsReducer,
   ICommonProjectsState
-} from '../../webapp-common/projects/common-projects.reducer';
-import {PROJECTS_ACTIONS} from '../../webapp-common/projects/common-projects.consts';
-import {Project} from '../../business-logic/model/projects/project';
+} from '@common/projects/common-projects.reducer';
+import {PROJECTS_ACTIONS} from '@common/projects/common-projects.consts';
+import {selectSelectedProject} from '@common/core/reducers/projects.reducer';
 
-export interface IProjectReadyForDeletion extends CommonProjectReadyForDeletion{
-}
+export type IProjectReadyForDeletion = CommonProjectReadyForDeletion;
 
 export interface IProjectsState extends ICommonProjectsState {
 
@@ -24,17 +22,7 @@ const projectsInitState: IProjectsState = {
         }
       };
 
-// todo: where to put it?
-const getCorrectSortingOrder = (currentSortOrder: TableSortOrderEnum, currentOrderField: string, nextOrderField: string) => {
-  if (currentOrderField === nextOrderField) {
-    return currentSortOrder === TABLE_SORT_ORDER.DESC ? TABLE_SORT_ORDER.ASC : TABLE_SORT_ORDER.DESC;
-  } else {
-    return TABLE_SORT_ORDER.ASC;
-  }
-};
-
-export function projectsReducer<ActionReducer>(state: IProjectsState = projectsInitState, action): IProjectsState {
-
+export const projectsReducer = (state: IProjectsState = projectsInitState, action): IProjectsState => {
   switch (action.type) {
     case PROJECTS_ACTIONS.CHECK_PROJECT_FOR_DELETION:
       return {...state, projectReadyForDeletion: {...projectsInitState.projectReadyForDeletion, project: action.payload.project}};
@@ -43,10 +31,10 @@ export function projectsReducer<ActionReducer>(state: IProjectsState = projectsI
     case PROJECTS_ACTIONS.SET_PROJECT_READY_FOR_DELETION:
       return {...state, projectReadyForDeletion: {...state.projectReadyForDeletion, ...action.payload.readyForDeletion}};
     default:
-      return <IProjectsState>commonProjectsReducer(state, action);
+      return commonProjectsReducer(state, action);
   }
-}
+};
 
-export const selectProjects               = createFeatureSelector<IProjectsState>('projects');
-// TODO what to do?
-export const selectPojectReadyForDeletion = createSelector(selectProjects, (state: IProjectsState): IProjectReadyForDeletion => state.projectReadyForDeletion);
+export const projects = state => state.projects as IProjectsState;
+
+export const selectShowHidden = createSelector(projects, () => false);

@@ -2,17 +2,17 @@ import {Injectable} from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {Action, Store} from '@ngrx/store';
 import {catchError, debounceTime, filter, map, mergeMap, shareReplay, switchMap, withLatestFrom} from 'rxjs/operators';
-import {ApiModelsService} from '../../../business-logic/api-services/models.service';
-import {ModelsGetAllResponse} from '../../../business-logic/model/models/modelsGetAllResponse';
+import {ApiModelsService} from '~/business-logic/api-services/models.service';
+import {ModelsGetAllResponse} from '~/business-logic/model/models/modelsGetAllResponse';
 import {requestFailed} from '../../core/actions/http.actions';
 import {activeLoader, deactivateLoader, setBackdrop, setServerError} from '../../core/actions/layout.actions';
-import {selectAppVisible} from '../../core/reducers/view-reducer';
+import {selectAppVisible} from '../../core/reducers/view.reducer';
 import * as infoActions from '../actions/models-info.actions';
 import * as viewActions from '../actions/models-view.actions';
 import {ModelInfoState} from '../reducers/model-info.reducer';
 import {MODELS_INFO_ONLY_FIELDS} from '../shared/models.const';
 import {selectSelectedModel} from '../reducers';
-import {EmptyAction} from '../../../app.constants';
+import {EmptyAction} from '~/app.constants';
 import {SelectedModel} from '../shared/models.model';
 import {selectActiveWorkspace} from '../../core/reducers/users-reducer';
 import {isExample, isSharedAndNotOwner} from '../../shared/utils/shared-utils';
@@ -32,7 +32,7 @@ export class ModelsInfoEffects {
   getModelInfo$ = createEffect(() => this.actions$.pipe(
     ofType<infoActions.GetModelInfo>(infoActions.GET_MODEL_INFO, infoActions.REFRESH_MODEL_INFO),
     withLatestFrom(this.store.select(selectActiveWorkspace), this.store.select(selectAppVisible)),
-    filter(([action, currentUser, visible]) => visible),
+    filter(([, , visible]) => visible),
     switchMap(([action, activeWorkspace]) =>
       this.apiModels.modelsGetByIdEx({id: [action.payload], only_fields: MODELS_INFO_ONLY_FIELDS})
         .pipe(

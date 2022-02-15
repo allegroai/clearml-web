@@ -1,24 +1,36 @@
-import {Component, ElementRef, EventEmitter, Input, Output} from '@angular/core';
-import {archivedSelectedModels, changeProjectRequested, publishModelClicked, restoreSelectedModels} from '../../actions/models-menu.actions';
+import {Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
+import {
+  archivedSelectedModels,
+  changeProjectRequested,
+  publishModelClicked,
+  restoreSelectedModels
+} from '../../actions/models-menu.actions';
 import {htmlTextShorte, isReadOnly} from '@common/shared/utils/shared-utils';
 import {ICONS} from '@common/constants';
 import {MatDialog} from '@angular/material/dialog';
 import {Store} from '@ngrx/store';
-import {AdminService} from '../../../../features/admin/admin.service';
+import {AdminService} from '~/shared/services/admin.service';
 import {selectS3BucketCredentials} from '@common/core/reducers/common-auth-reducer';
 import {ModelInfoState} from '../../reducers/model-info.reducer';
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {Observable, Subscription} from 'rxjs';
-import {filter, first, skip} from 'rxjs/operators';
+import {filter, map, take} from 'rxjs/operators';
 import {ChangeProjectDialogComponent} from '@common/experiments/shared/components/change-project-dialog/change-project-dialog.component';
-import {resetDontShowAgainForBucketEndpoint} from '@common/core/actions/common-auth.actions';
 import {fetchModelsRequested, modelSelectionChanged, setSelectedModels} from '../../actions/models-view.actions';
 import {SelectedModel} from '../../shared/models.model';
 import {CommonDeleteDialogComponent} from '@common/shared/entity-page/entity-delete/common-delete-dialog.component';
 import {EntityTypeEnum} from '../../../../shared/constants/non-common-consts';
 import {CancelModelEdit} from '../../actions/models-info.actions';
 import {BaseContextMenuComponent} from '../../../shared/components/base-context-menu/base-context-menu.component';
-import {selectionDisabledArchive, selectionDisabledMoveTo, selectionDisabledPublishModels} from '../../../shared/entity-page/items.utils';
+import {
+  selectionDisabledArchive,
+  selectionDisabledMoveTo,
+  selectionDisabledPublishModels
+} from '../../../shared/entity-page/items.utils';
+import {getSignedUrl} from '../../../core/actions/common-auth.actions';
+import {selectSignedUrl} from '../../../core/reducers/common-auth-reducer';
+import {selectRouterParams} from '../../../core/reducers/router-reducer';
+import {get} from 'lodash/fp';
 
 
 @Component({
@@ -26,16 +38,17 @@ import {selectionDisabledArchive, selectionDisabledMoveTo, selectionDisabledPubl
   templateUrl: './model-menu.component.html',
   styleUrls: ['./model-menu.component.scss']
 })
-export class ModelMenuComponent extends BaseContextMenuComponent {
+export class ModelMenuComponent extends BaseContextMenuComponent implements OnInit, OnDestroy{
 
   readonly ICONS = ICONS;
-  private S3BucketCredentialsSubscription: Subscription;
   private S3BucketCredentials: Observable<any>;
   public modelSignedUri: string;
   public _model: any;
   public isExample: boolean;
   public isLocalFile: boolean;
   public isArchive: boolean;
+  private projectId: string;
+  private subscription: Subscription;
 
   @Input() set model(model: SelectedModel) {
     this._model = model;
@@ -67,6 +80,12 @@ export class ModelMenuComponent extends BaseContextMenuComponent {
     this.S3BucketCredentials = store.select(selectS3BucketCredentials);
   }
 
+  ngOnInit(): void {
+    this.subscription = this.store.select(selectRouterParams)
+      .pipe(map(params => get('projectId', params)))
+      .subscribe((id => this.projectId = id));
+  }
+
   archiveClicked() {
     // info header case
     const selectedModels = this.selectedModels ? selectionDisabledArchive(this.selectedModels).selectedFiltered : [this.selectedModel];
@@ -76,18 +95,6 @@ export class ModelMenuComponent extends BaseContextMenuComponent {
     } else {
       this.store.dispatch(archivedSelectedModels({selectedEntities: selectedModels, skipUndo: false}));
     }
-  }
-
-  private refreshDownload() {
-    if (this.S3BucketCredentialsSubscription) {
-      this.S3BucketCredentialsSubscription.unsubscribe();
-    }
-    this.S3BucketCredentialsSubscription = this.S3BucketCredentials.pipe(
-      skip(1),
-      first()
-    ).subscribe(() => {
-      this.downloadModelFile();
-    });
   }
 
   public publishPopup() {
@@ -137,13 +144,19 @@ export class ModelMenuComponent extends BaseContextMenuComponent {
   }
 
   public downloadModelFileClicked = () => {
-    this.store.dispatch(resetDontShowAgainForBucketEndpoint());
-    this.modelSignedUri = this.adminService.signUrlIfNeeded(this.model.uri);
-    if (this.modelSignedUri) {
-      this.downloadModelFile();
-    } else {
-      this.refreshDownload();
-    }
+    const url = this.model.uri;
+    this.store.dispatch(getSignedUrl({url}));
+    this.store.select(selectSignedUrl(url))
+      .pipe(
+        filter(signed => !!signed?.signed),
+        map(({signed: signedUrl}) => signedUrl),
+        take(1)
+      ).subscribe(signed => {
+      const a = document.createElement('a') as HTMLAnchorElement;
+      a.target = '_blank';
+      a.href = signed;
+      a.click();
+    });
   };
 
   public downloadModelFile = () => {
@@ -167,10 +180,14 @@ export class ModelMenuComponent extends BaseContextMenuComponent {
     confirmDialogRef.afterClosed().subscribe((confirmed) => {
       if (confirmed) {
         this.store.dispatch(setSelectedModels({models: []}));
-        this.store.dispatch(modelSelectionChanged({model: null, project: this.model?.project?.id || '*'}));
+        this.store.dispatch(modelSelectionChanged({model: null, project: this.projectId || this.model?.project?.id || '*'}));
         this.store.dispatch(fetchModelsRequested());
         this.store.dispatch(new CancelModelEdit());
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 }

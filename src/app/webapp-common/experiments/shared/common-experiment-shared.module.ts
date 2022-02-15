@@ -8,8 +8,10 @@ import {ExperimentSystemTagsComponent} from './components/experiments-system-tag
 import {CloneDialogComponent} from './components/clone-dialog/clone-dialog.component';
 import {SelectQueueModule} from './components/select-queue/select-queue.module';
 import {FormsModule} from '@angular/forms';
+import {AbortAllChildrenDialogComponent} from './components/abort-all-children-dialog/abort-all-children-dialog.component';
 
-const DECLARATIONS = [ExperimentStatusIconLabelComponent, ExperimentSystemTagsComponent, ChangeProjectDialogComponent, CloneDialogComponent];
+const DECLARATIONS = [ExperimentStatusIconLabelComponent, ExperimentSystemTagsComponent, ChangeProjectDialogComponent, CloneDialogComponent,AbortAllChildrenDialogComponent
+];
 
 @NgModule({
     imports: [

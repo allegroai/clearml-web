@@ -1,11 +1,10 @@
-import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
+import {Component, EventEmitter, Input, OnDestroy, Output, ViewChild} from '@angular/core';
 import {TaskStatusEnum} from '../../../../business-logic/model/tasks/taskStatusEnum';
 import {TaskTypeEnum} from '../../../../business-logic/model/tasks/taskTypeEnum';
 import {getSystemTags, isDevelopment} from '../../../../features/experiments/shared/experiments.utils';
 import {Observable} from 'rxjs';
 import {Store} from '@ngrx/store';
 import {selectCompanyTags, selectProjectTags, selectTagsFilterByProject} from '../../../core/reducers/projects.reducer';
-import {getTags} from '../../../core/actions/projects.actions';
 import {addTag, removeTag} from '../../actions/common-experiments-menu.actions';
 import {TagsMenuComponent} from '../../../shared/ui-components/tags/tags-menu/tags-menu.component';
 import {MenuComponent} from '../../../shared/ui-components/panel/menu/menu.component';
@@ -14,13 +13,18 @@ import {EXPERIMENTS_STATUS_LABELS} from '../../../../features/experiments/shared
 import {EXPERIMENT_COMMENT} from '../experiment-general-info/experiment-general-info.component';
 import {ActivatedRoute, Router} from '@angular/router';
 import {
-  CountAvailableAndIsDisable,
   MenuItems,
-  selectionDisabledAbort, selectionDisabledArchive,
-  selectionDisabledDelete, selectionDisabledDequeue, selectionDisabledEnqueue,
+  selectionDisabledAbort,
+  selectionDisabledAbortAllChildren,
+  selectionDisabledArchive,
+  selectionDisabledDelete,
+  selectionDisabledDequeue,
+  selectionDisabledEnqueue,
   selectionDisabledMoveTo,
-  selectionDisabledPublishExperiments, selectionDisabledQueue,
-  selectionDisabledReset, selectionDisabledViewWorker
+  selectionDisabledPublishExperiments,
+  selectionDisabledQueue,
+  selectionDisabledReset,
+  selectionDisabledViewWorker
 } from '../../../shared/entity-page/items.utils';
 
 @Component({
@@ -28,7 +32,7 @@ import {
   templateUrl: './experiment-info-header.component.html',
   styleUrls: ['./experiment-info-header.component.scss']
 })
-export class ExperimentInfoHeaderComponent {
+export class ExperimentInfoHeaderComponent implements OnDestroy {
 
   readonly TaskStatusEnum = TaskStatusEnum;
   readonly TaskTypeEnum = TaskTypeEnum;
@@ -59,6 +63,11 @@ export class ExperimentInfoHeaderComponent {
     this.companyTags$ = this.store.select(selectCompanyTags);
   }
 
+  ngOnDestroy(): void {
+    this.tagMenu = null;
+    this.tagMenuContent = null;
+  }
+
   private _experiment: any;
   get experiment() {
     return this._experiment;
@@ -74,6 +83,7 @@ export class ExperimentInfoHeaderComponent {
     this.shared = experiment?.system_tags?.includes('shared');
     this.selectedDisableAvailable = {
       [MenuItems.abort]: selectionDisabledAbort([experiment]),
+      [MenuItems.abortAllChildren]: selectionDisabledAbortAllChildren([experiment]),
       [MenuItems.publish]: selectionDisabledPublishExperiments([experiment]),
       [MenuItems.reset]: selectionDisabledReset([experiment]),
       [MenuItems.delete]: selectionDisabledDelete([experiment]),
@@ -136,4 +146,5 @@ export class ExperimentInfoHeaderComponent {
     this.router.navigate(['general'], {relativeTo: this.activatedRoute});
     this.store.dispatch(new ActivateEdit(EXPERIMENT_COMMENT));
   }
+
 }

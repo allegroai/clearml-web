@@ -13,7 +13,7 @@
     display: inline-block;
 
     &.open {
-      width: 300px;
+      width: 284px;
     }
   }
 
@@ -39,6 +39,12 @@
     color: $blue-grey;
     font-size: 18px;
     margin-left: auto;
+    width: 32px;
+    height: 32px;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 32px;
+    display: flex;
     &:hover {
       color: $blue-200;
     }

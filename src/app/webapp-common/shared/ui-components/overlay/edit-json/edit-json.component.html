@@ -1,10 +1,7 @@
 <sm-dialog-template [header]="title">
-  <textarea [(ngModel)]="textData"
-            class="data-text"
-            [disabled]="readOnly"
-            [placeholder]="placeHolder? placeHolder:''"
-            (keydown)="textChanged()">
-  </textarea>
+  <div  class="data-text">
+    <div class="data-text-ace" #aceEditor></div>
+  </div>
   <div>
     <small *ngIf="this.showErrors"
            class="text-danger">*Not a valid json.

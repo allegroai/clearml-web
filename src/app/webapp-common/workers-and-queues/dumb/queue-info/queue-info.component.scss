@@ -51,9 +51,19 @@
     transition: color 0.5s;
     color: $dark-grey-blue;
   }
+
+  .column {
+    width: 36px;
+    padding: 0 8px;
+  }
+
+  .flex-column {
+    flex: 1;
+    padding: 0 8px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
-::ng-deep .bigger-width {
-  width: 236px;
-}
 

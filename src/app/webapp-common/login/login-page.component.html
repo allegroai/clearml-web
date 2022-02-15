@@ -1,0 +1,26 @@
+<div id="mobile-warn" class="alert alert-warning mobile-warn" [class.show]="mobile" role="alert">
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close" (click)="acknowledge()">
+    <span aria-hidden="true">×</span></button>
+  <strong>Notice!</strong> The Web-App is not yet optimized for mobile devices.
+</div>
+<div class="login-box-wrapper" [class.mobile]="mobile">
+  <router-outlet></router-outlet>
+  <div
+    *ngIf="commercialContext"
+    class="commercial-text"
+    [style.background-image]="commercialContext.background ? 'url(' + commercialContext.background + ')' : null"
+    [style.background-position]="commercialContext.backgroundPosition"
+  >
+    <img class="white-label" *ngIf="environment.whiteLabelLogo" [src]="environment.whiteLabelLogo">
+    <div *ngIf="commercialContext.title" class="main-title" [innerHTML]="commercialContext.title | safe:'html'"></div>
+    <div class="list" *ngIf="commercialContext.list">
+      <div *ngFor="let paragraph of commercialContext.list" class="paragraph">
+        <span class="text-left">
+          <div class="text d-flex align-items-center"><i
+            class="icon al-ico-next"></i><span>{{paragraph.text}}</span></div>
+            </span>
+      </div>
+    </div>
+  </div>
+</div>
+

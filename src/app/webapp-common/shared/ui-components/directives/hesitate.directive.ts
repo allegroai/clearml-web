@@ -11,6 +11,7 @@ import { Renderer2 } from '@angular/core';
   selector: '[smHesitate]',
   inputs: [ 'delay', 'action' ],
   outputs: [ 'hesitateEvents: smHesitate' ],
+  exportAs: 'hesitate'
 })
 export class HesitateDirective implements OnInit, OnDestroy {
   public delay: number;
@@ -22,6 +23,7 @@ export class HesitateDirective implements OnInit, OnDestroy {
   private listeners: (() => void)[] | null;
   private timer: number;
   private zone: NgZone;
+  public hesitateStatus = false;
 
   // I initialize the hesitate directive.
   constructor(
@@ -44,6 +46,7 @@ export class HesitateDirective implements OnInit, OnDestroy {
   // NOTE: This is method is PUBLIC so that it may be consumed as part of the EXPORTED
   // API in the View of the calling context.
   public cancel(): void {
+    this.hesitateStatus = false;
     clearTimeout( this.timer );
   }
 
@@ -106,6 +109,7 @@ export class HesitateDirective implements OnInit, OnDestroy {
     // When the user enters the host, start the hesitation timer. This timer will be
     // fulfilled if the user remains inside of the host without performing any other
     // meaningful actions.
+    this.hesitateStatus = true;
     this.timer = window.setTimeout( this.handleTimerThreshold, this.delay );
   };
 

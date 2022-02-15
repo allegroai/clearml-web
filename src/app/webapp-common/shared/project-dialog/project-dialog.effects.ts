@@ -9,11 +9,11 @@ import {Injectable} from '@angular/core';
 import {CREATION_STATUS} from './project-dialog.reducer';
 import {catchError, filter, map, mergeMap, switchMap, withLatestFrom} from 'rxjs/operators';
 import {Router} from '@angular/router';
-import {GetAllSystemProjects} from '../../core/actions/projects.actions';
+import {getAllSystemProjects} from '../../core/actions/projects.actions';
 import {Store} from '@ngrx/store';
 import {selectActiveWorkspace} from '../../core/reducers/users-reducer';
-import {ShortProjectNamePipe} from "../pipes/short-project-name.pipe";
-import {ProjectLocationPipe} from "../pipes/project-location.pipe";
+import {ShortProjectNamePipe} from '../pipes/short-project-name.pipe';
+import {ProjectLocationPipe} from '../pipes/project-location.pipe';
 
 @Injectable()
 export class ProjectDialogEffects {
@@ -34,7 +34,7 @@ export class ProjectDialogEffects {
   );
 
   @Effect({dispatch: false})
-  NavigateToNewProject = this.actions.pipe(
+  navigateToNewProject = this.actions.pipe(
     ofType<createNewProjectActions.NavigateToNewProject>(CREATE_PROJECT_ACTIONS.NAVIGATE_TO_NEW_PROJECT),
     filter(action => !!action.payload),
     map((action) => this.router.navigateByUrl(`projects/${action.payload}`))
@@ -44,12 +44,12 @@ export class ProjectDialogEffects {
   createProject = this.actions.pipe(
     ofType<createNewProjectActions.CreateNewProject>(CREATE_PROJECT_ACTIONS.CREATE_NEW_PROJECT),
     withLatestFrom(this.store.select(selectActiveWorkspace)),
-    switchMap(([action, workspace]) => this.projectsApiService.projectsCreate(action.payload)
+    switchMap(([action]) => this.projectsApiService.projectsCreate(action.payload)
       .pipe(
-        mergeMap(res => [
+        mergeMap(() => [
             deactivateLoader(action.type),
             new createNewProjectActions.SetNewProjectCreationStatus(CREATION_STATUS.SUCCESS),
-            new GetAllSystemProjects(),
+            getAllSystemProjects(),
             addMessage(MESSAGES_SEVERITY.SUCCESS, `${this.shortProjectName.transform(action.payload.name)} has been created successfully in ${this.projectLocation.transform(action.payload.name)}`),
           ]
         ),
@@ -61,12 +61,13 @@ export class ProjectDialogEffects {
   moveProject = createEffect(() => this.actions.pipe(
     ofType(createNewProjectActions.moveProject),
     withLatestFrom(this.store.select(selectActiveWorkspace)),
-    switchMap(([action, workspace]) => this.projectsApiService.projectsMove({project: action.project, new_location: action.new_location})
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    switchMap(([action]) => this.projectsApiService.projectsMove({project: action.project, new_location: action.new_location})
       .pipe(
-        mergeMap(res => [
+        mergeMap(() => [
             deactivateLoader(action.type),
             new createNewProjectActions.SetNewProjectCreationStatus(CREATION_STATUS.SUCCESS),
-            new GetAllSystemProjects(),
+            getAllSystemProjects(),
             addMessage(MESSAGES_SEVERITY.SUCCESS, `${this.shortProjectName.transform(action.name)} has been moved from ${this.projectLocation.transform(action.name)} to ${action.new_location}`),
           ]
         ),
@@ -78,6 +79,7 @@ export class ProjectDialogEffects {
   @Effect()
   getAllProjects = this.actions.pipe(
     ofType<createNewProjectActions.GetProjects>(CREATE_PROJECT_ACTIONS.GET_PROJECTS),
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     switchMap(action => this.projectsApiService.projectsGetAllEx({only_fields: ['name']})
       .pipe(
         mergeMap(res => [deactivateLoader(action.type), new createNewProjectActions.SetProjects(res.projects)]),

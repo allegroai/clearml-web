@@ -1,4 +1,5 @@
 <section class="ngx-json-viewer">
+  {{ '{' }}
   <section
     *ngFor="let segment of segments"
     [ngClass]="['segment', 'segment-type-' + segment.type]">
@@ -21,4 +22,5 @@
       <ngx-json-viewer [testLink]="testLink" (linkAction)="subsectionAction($event)" [json]="segment.value" [expanded]="expanded"></ngx-json-viewer>
     </section>
   </section>
+    {{ '}' }}
 </section>

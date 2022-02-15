@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {last} from 'lodash/fp';
-import {select, Store} from '@ngrx/store';
+import {Store} from '@ngrx/store';
 import {
   getDebugImageSample,
   getNextDebugImageSample,
@@ -25,13 +25,17 @@ import {
   selectDisplayerEndOfTime,
   selectMinMaxIterations
 } from '../../../debug-images/debug-images-reducer';
-import {combineLatest, interval, Observable, Subscription} from 'rxjs';
+import {interval, Observable, Subscription} from 'rxjs';
 import {EventsGetDebugImageIterationsResponse} from '../../../../business-logic/model/events/eventsGetDebugImageIterationsResponse';
-import {selectS3BucketCredentials} from '../../../core/reducers/common-auth-reducer';
-import {filter, map, withLatestFrom} from 'rxjs/operators';
-import {AdminService} from '../../../../features/admin/admin.service';
-import {selectAppVisible, selectAutoRefresh} from '../../../core/reducers/view-reducer';
+import {filter, map, switchMap, tap, withLatestFrom} from 'rxjs/operators';
+import {selectAppVisible, selectAutoRefresh} from '../../../core/reducers/view.reducer';
 import {isFileserverUrl} from '../../../../shared/utils/url';
+import {getSignedUrl} from '../../../core/actions/common-auth.actions';
+import {getSignedUrlOrOrigin$} from '../../../core/reducers/common-auth-reducer';
+import {IsVideoPipe} from '../../../shared/pipes/is-video.pipe';
+import {IsAudioPipe} from '../../../shared/pipes/is-audio.pipe';
+
+const DISPLAYER_AUTO_REFRESH_INTERVAL = 60 * 1000;
 
 @Component({
   selector: 'sm-image-displayer',
@@ -63,11 +67,12 @@ export class ImageDisplayerComponent implements OnInit, OnDestroy {
   public iteration: number;
   public beginningOfTime$: Observable<boolean>;
   public endOfTime$: Observable<boolean>;
+  public url: string;
+  public isPlayer: boolean;
   private currentDebugImageSubscription: Subscription;
   private autoRefreshState$: Observable<boolean>;
   private isAppVisible$: Observable<boolean>;
   private autoRefreshSub: Subscription;
-  readonly DISPLAYER_AUTO_REFRESH_INTERVAL = 60 * 1000;
   public imageLoaded: boolean = false;
   private beginningOfTime: boolean = false;
   private endOfTime: boolean = false;
@@ -97,8 +102,7 @@ export class ImageDisplayerComponent implements OnInit, OnDestroy {
     @Inject(MAT_DIALOG_DATA) public data: { imageSources: Array<any>; index: number; snippetsMetaData: any },
     public dialogRef: MatDialogRef<ImageDisplayerComponent>,
     public changeDetector: ChangeDetectorRef,
-    private store: Store<any>,
-    private adminService: AdminService
+    private store: Store<any>
   ) {
     const reqData = {
       task: data.snippetsMetaData[data.index].task,
@@ -112,21 +116,18 @@ export class ImageDisplayerComponent implements OnInit, OnDestroy {
     this.endOfTime$ = this.store.select(selectDisplayerEndOfTime);
     this.autoRefreshState$ = this.store.select(selectAutoRefresh);
     this.isAppVisible$ = this.store.select(selectAppVisible);
-    this.currentDebugImage$ = combineLatest([
-      store.pipe(select(selectS3BucketCredentials)),
-      store.pipe(select(selectCurrentImageViewerDebugImage))])
+    this.currentDebugImage$ = store.select(selectCurrentImageViewerDebugImage)
       .pipe(
-        filter(([bucketCredentials, event]) => !!event),
-        map(([bucketCredentials, event]) => {
-          const signedUrl = this.adminService.signUrlIfNeeded(event.url, {disableCache: event.timestamp});
-          return {...event, oldSrc: event.url, url: signedUrl};
+        filter(event => !!event),
+        map(event => {
+          this.store.dispatch(getSignedUrl({url: event.url, config: {disableCache: event.timestamp}}));
+          return event;
         })
       );
 
-
-    this.autoRefreshSub = interval(this.DISPLAYER_AUTO_REFRESH_INTERVAL).pipe(
+    this.autoRefreshSub = interval(DISPLAYER_AUTO_REFRESH_INTERVAL).pipe(
       withLatestFrom(this.autoRefreshState$, this.isAppVisible$),
-      filter(([iteration, autoRefreshState, isVisible]) => isVisible && autoRefreshState)
+      filter(([, autoRefreshState, isVisible]) => isVisible && autoRefreshState)
     ).subscribe(() => {
       if (this.currentDebugImage) {
         this.store.dispatch(setDisplayerEndOfTime({endOfTime: false}));
@@ -138,8 +139,7 @@ export class ImageDisplayerComponent implements OnInit, OnDestroy {
           iteration: this.currentDebugImage.iter
         }));
       }
-      }
-    );
+    });
   }
 
   canGoNext() {
@@ -235,7 +235,7 @@ export class ImageDisplayerComponent implements OnInit, OnDestroy {
   downloadImage() {
     if (this.currentDebugImage) {
       const src = new URL(this.currentDebugImage.url);
-      if (isFileserverUrl(this.currentDebugImage.url, window.location.hostname)) {
+      if (isFileserverUrl(this.currentDebugImage.url)) {
         src.searchParams.set('download', '');
       }
       const a = document.createElement('a') as HTMLAnchorElement;
@@ -260,11 +260,19 @@ export class ImageDisplayerComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.currentDebugImageSubscription = this.currentDebugImage$.subscribe(currentDebugImage => {
-      this.currentDebugImage = currentDebugImage;
-      this.iteration = currentDebugImage.iter;
-      this.changeDetector.detectChanges();
-    });
+    this.currentDebugImageSubscription = this.currentDebugImage$
+      .pipe(
+        tap(currentDebugImage => {
+          this.currentDebugImage = currentDebugImage;
+          this.iteration = currentDebugImage.iter;
+        }),
+        switchMap(currentDebugImage => getSignedUrlOrOrigin$(currentDebugImage.url, this.store))
+      )
+      .subscribe(signed => {
+        this.url = signed;
+        this.isPlayer = (new IsVideoPipe().transform(signed) || new IsAudioPipe().transform(signed));
+        this.changeDetector.detectChanges();
+      });
     this.begOfTimeSub = this.beginningOfTime$.subscribe(beg => {
       this.beginningOfTime = beg;
       if (beg) {

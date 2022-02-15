@@ -1,13 +1,14 @@
 import {isReadOnly} from '../utils/shared-utils';
 import {TaskStatusEnum} from '../../../business-logic/model/tasks/taskStatusEnum';
-import {BlTasksService} from '../../../business-logic/services/tasks.service';
 import {ModelsArchiveManyResponse} from '../../../business-logic/model/models/modelsArchiveManyResponse';
 import {TasksArchiveManyResponse} from '../../../business-logic/model/tasks/tasksArchiveManyResponse';
 import {EntityTypeEnum} from '../../../shared/constants/non-common-consts';
 import {addMessage} from '@common/core/actions/layout.actions';
 import {openMoreInfoPopup} from '@common/core/actions/projects.actions';
-
-const blTasksService = new BlTasksService();
+import { TaskTypeEnum } from '../../../business-logic/model/tasks/taskTypeEnum';
+import {Task} from "~/business-logic/model/tasks/task";
+import {TASKS_STATUS} from '@common/tasks/tasks.constants';
+import {TASK_TYPES} from '~/app.constants';
 
 export interface CountAvailableAndIsDisable {
   available: number;
@@ -27,6 +28,13 @@ export const selectionAllHasExample = (selectedElements: any[]) => selectedEleme
 export const selectionAllIsArchive = (selectedElements: any[]) => selectedElements.every( s => s?.system_tags?.includes('archived'));
 export const selectionIsArchive = (selectedElements: any) => selectedElements?.system_tags?.includes('archived');
 export const selectionExamplesCount = (selectedElements: any) => selectedElements.filter((exp => isReadOnly(exp)));
+export const  canEnqueue = (task: Task): boolean => {
+  return !!(task && (TASKS_STATUS.CREATED === task.status || TASKS_STATUS.STOPPED === task.status) && task.type !== TASK_TYPES.MANUAL_ANNOTATION);
+}
+
+export const canDequeue = (task: Task): boolean => {
+  return !!(task && TASKS_STATUS.QUEUED === task.status);
+}
 
 export const selectionDisabledAbort = (selectedElements: any[]) => {
   const selectedFiltered = selectedElements.filter( (_selected) => TaskStatusEnum.InProgress === _selected?.status  && !isReadOnly(_selected));
@@ -42,6 +50,11 @@ export const selectionDisabledPublishModels = (selectedElements: any[]) => {
 };
 export const selectionDisabledReset = (selectedElements: any[]) => {
   const selectedFiltered = selectedElements.filter(_selected => ![TaskStatusEnum.Created, TaskStatusEnum.Published, TaskStatusEnum.Publishing].includes(_selected?.status)  && !isReadOnly(_selected));
+  return {selectedFiltered, ...countAvailableAndIsDisable(selectedFiltered)};
+};
+
+export const selectionDisabledAbortAllChildren = (selectedElements: any[]) => {
+  const selectedFiltered = selectedElements.filter(_selected => [TaskTypeEnum.Controller, TaskTypeEnum.Optimizer].includes(_selected?.type)  && !isReadOnly(_selected));
   return {selectedFiltered, ...countAvailableAndIsDisable(selectedFiltered)};
 };
 export const selectionDisabledDelete = (selectedElements: any[]) => {
@@ -62,11 +75,11 @@ export const selectionDisabledViewWorker = (selectedElements: any[]) => {
 };
 
 export const selectionDisabledEnqueue = (selectedElements: any[]) => {
-  const selectedFiltered = selectedElements.filter(_selected => blTasksService.canEnqueue(_selected) && !isReadOnly(_selected));
+  const selectedFiltered = selectedElements.filter(_selected => canEnqueue(_selected) && !isReadOnly(_selected));
   return {selectedFiltered, ...countAvailableAndIsDisable(selectedFiltered)};
 };
 export const selectionDisabledDequeue = (selectedElements: any[]) => {
-  const selectedFiltered = selectedElements.filter(_selected => blTasksService.canDequeue(_selected) && !isReadOnly(_selected));
+  const selectedFiltered = selectedElements.filter(_selected => canDequeue(_selected) && !isReadOnly(_selected));
   return {selectedFiltered, ...countAvailableAndIsDisable(selectedFiltered)};
 };
 export const selectionDisabledArchive = (selectedElements: any[]) => {
@@ -96,6 +109,7 @@ export const selectionTags = <T extends {tags?: string[]}>(selectedElements: Arr
 
 export enum MenuItems {
   abort = 'abort',
+  abortAllChildren='abortAllChildren',
   archive = 'archive',
   compare = 'compare',
   delete = 'delete',

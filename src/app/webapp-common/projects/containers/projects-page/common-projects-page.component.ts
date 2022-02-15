@@ -34,7 +34,7 @@ import {
 } from 'rxjs/operators';
 import {ConfirmDialogComponent} from '../../../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import * as coreProjectsActions from '../../../core/actions/projects.actions';
-import {setDeep, SetSelectedProjectId} from '../../../core/actions/projects.actions';
+import {setDeep, setSelectedProjectId} from '../../../core/actions/projects.actions';
 import {InitSearch, ResetSearch} from '../../../common-search/common-search.actions';
 import {ICommonSearchState, selectSearchQuery} from '../../../common-search/common-search.reducer';
 import {
@@ -50,10 +50,10 @@ import {Project} from '../../../../business-logic/model/projects/project';
 import {CommonDeleteDialogComponent} from '../../../shared/entity-page/entity-delete/common-delete-dialog.component';
 import {resetDeleteState} from '../../../shared/entity-page/entity-delete/common-delete-dialog.actions';
 import {EntityTypeEnum} from '../../../../shared/constants/non-common-consts';
-import {StatsStatusCountStatusCount} from '../../../../business-logic/model/projects/statsStatusCountStatusCount';
 import {StatsStatusCount} from '../../../../business-logic/model/projects/statsStatusCount';
 import {isExample} from '../../../shared/utils/shared-utils';
 import {selectSelectedProject} from '../../../core/reducers/projects.reducer';
+import {Projects} from '@angular/cli/lib/config/workspace-schema';
 
 @Component({
   selector: 'sm-common-projects-page',
@@ -61,9 +61,10 @@ import {selectSelectedProject} from '../../../core/reducers/projects.reducer';
   styleUrls: ['./common-projects-page.component.scss']
 })
 export class CommonProjectsPageComponent implements OnInit, OnDestroy {
-  public projectsList$: Observable<Array<ProjectsGetAllResponseSingle>>;
+  public projectsList$: Observable<Projects[]>;
   public projectsOrderBy$: Observable<string>;
 
+  /* eslint-disable @typescript-eslint/naming-convention */
   public ALL_EXPERIMENTS_CARD: ProjectsGetAllResponseSingle = {
     id: '*',
     name: 'All Experiments',
@@ -84,6 +85,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
       }
     }
   };
+  /* eslint-enable @typescript-eslint/naming-convention */
   private searchSubs: Subscription;
   private projectReadyForDeletion$: Observable<CommonProjectReadyForDeletion>;
   private projectReadyForDeletionSub: Subscription;
@@ -96,7 +98,6 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
   private selectedProjectSub: Subscription;
   private selectedProject$: Observable<Project>;
   private selectedProjectIdSub: Subscription;
-  private projectId: string;
 
   constructor(public store: Store<any>, private router: Router, private dialog: MatDialog) {
     this.searchQuery$ = this.store.select(selectSearchQuery);
@@ -105,6 +106,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
     this.noMoreProjects$ = this.store.select(selectNoMoreProjects);
     this.selectedProjectId$ = this.store.select(selectRouterParams).pipe(map(params => get('projectId', params)));
     this.selectedProject$ = this.store.select(selectSelectedProject);
+
     this.projectReadyForDeletion$ = this.store.select(selectProjectReadyForDeletion).pipe(
       distinctUntilChanged(),
       filter(readyForDeletion => readyForDeletionFilter(readyForDeletion)));
@@ -124,17 +126,10 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
           }
           const pageProjectsList = ([{
             ...((selectedProjectId && selectedProject) ? selectedProject : this.ALL_EXPERIMENTS_CARD),
-            id: selectedProjectId ? selectedProjectId : '*', name: 'All Experiments', sub_projects: null
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            id: selectedProjectId ? selectedProjectId : '*', name: 'All Experiments', sub_projects: null,
+            ...(selectedProject && {stats: {active: this.calculateAllExperimentsProjectStats(selectedProject, projectsList)}})
           } as ProjectsGetAllResponseSingle]);
-          if (selectedProject && selectedProjectId && !(isExample(selectedProject) && selectedProject.own_models === 0 && selectedProject.own_models === 0)) {
-            pageProjectsList.push({
-              ...selectedProject,
-              isRoot: true,
-              name: `[${selectedProject.name}]`,
-              sub_projects: null,
-              stats: {active: this.calculateShallowRootProjectStats(selectedProject, projectsList)}
-            });
-          }
           return pageProjectsList.concat(projectsList);
         }
       })
@@ -148,17 +143,19 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
     this.store.dispatch(setDeep({deep: false}));
     this.store.dispatch(new GetAllProjectsPageProjects());
 
-
-    this.selectedProjectIdSub = this.selectedProjectId$.pipe(filter(projectId => !projectId)).subscribe((projectId) => {
+    this.selectedProjectIdSub = this.selectedProjectId$.pipe(
+      filter(projectId => !projectId),
+      distinctUntilChanged(),
+    ).subscribe(() => {
         this.store.dispatch(new ResetProjectsSearchQuery());
         this.store.dispatch(new GetAllProjectsPageProjects());
       }
     );
     this.selectedProjectSub = this.selectedProject$.pipe(
-      skip(1),
       filter(project => (!!project)),
       distinctUntilKeyChanged('id'),
-    ).subscribe((project) => {
+      skip(1),
+    ).subscribe(() => {
       this.store.dispatch(new ResetProjectsSearchQuery());
       this.store.dispatch(new GetAllProjectsPageProjects());
     });
@@ -187,7 +184,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
         iconClass: 'i-alert',
       }
     });
-    confirmDialogRef.afterClosed().subscribe(approvedDeletion => {
+    confirmDialogRef.afterClosed().subscribe(() => {
       this.store.dispatch(new ResetReadyToDelete());
     });
   }
@@ -217,6 +214,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
     this.projectReadyForDeletionSub.unsubscribe();
     this.showOnlyUserWorkSub$.unsubscribe();
     this.selectedProjectSub.unsubscribe();
+    this.selectedProjectIdSub.unsubscribe();
     this.store.dispatch(new ResetReadyToDelete());
     this.store.dispatch(new ResetProjectsSearchQuery());
   }
@@ -225,6 +223,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
     this.store.dispatch(new ResetSearch());
     this.searchSubs.unsubscribe();
   }
+
 
   syncAppSearch() {
     this.store.dispatch(new InitSearch('Search for projects'));
@@ -237,7 +236,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
     }
     this.router.navigateByUrl((project?.sub_projects?.length > 0) ? `projects/${project.id}/projects` :
       (project.id !== '*' ? `projects/${project.id}` : `projects/${project.id}/experiments`));
-    this.store.dispatch(new SetSelectedProjectId(project.id, isExample(project)));
+    this.store.dispatch(setSelectedProjectId({projectId: project.id, example: isExample(project)}));
   }
 
   search(query: ICommonSearchState['searchQuery']) {
@@ -264,7 +263,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
   openProjectDialog(projectId?: string, mode?: string) {
     this.projectDialog = this.dialog.open(ProjectDialogComponent, {
       data: {
-        mode: mode,
+        mode,
         projectId
       }
     });
@@ -272,18 +271,20 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
       if (projectHasBeenUpdated) {
         this.store.dispatch(new ResetProjectsSearchQuery());
         this.store.dispatch(new GetAllProjectsPageProjects());
-        this.store.dispatch(new coreProjectsActions.GetAllSystemProjects());
+        this.store.dispatch(coreProjectsActions.getAllSystemProjects());
       }
     });
   }
 
-  private calculateShallowRootProjectStats(selectedProject: ProjectsGetAllResponseSingle, projectsList: ProjectsGetAllResponseSingle[]): StatsStatusCount {
-    const stats: StatsStatusCountStatusCount = {};
-    for (const [key, value] of Object.entries(selectedProject.stats.active.status_count)) {
-      stats[key] = value - projectsList.map(project => (project.stats.active.status_count[key] || 0)).reduce((a, b) => a + b, 0);
+  private calculateAllExperimentsProjectStats(selectedProject: ProjectsGetAllResponseSingle, projectsList: ProjectsGetAllResponseSingle[]): StatsStatusCount {
+    const stats: StatsStatusCount = {};
+    for (const key of Object.keys(selectedProject.stats.active)) {
+      if(['completed_tasks', 'running_tasks', 'total_tasks', 'total_runtime'].includes(key)){
+        stats[key] = projectsList.map(project => (project.stats.active[key] || 0)).reduce((a, b) => a + b, 0);
+      }
     }
-    const totalRunTime: number = selectedProject.stats.active.total_runtime - projectsList.map(project => project.stats.active.total_runtime || 0).reduce((a, b) => a + b, 0);
-    return {status_count: stats, total_runtime: totalRunTime};
+    return stats;
   }
+
 
 }

@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
-import {AdminService} from '../../../../features/admin/admin.service';
+import {AdminService} from '~/shared/services/admin.service';
 import {Artifact} from '../../../../business-logic/model/tasks/artifact';
 import {Store} from '@ngrx/store';
 import {BaseClickableArtifactComponent} from '../base-clickable-artifact.component';
@@ -36,15 +36,12 @@ export class ExperimentArtifactItemViewComponent extends BaseClickableArtifactCo
   }
 
   linkClicked(event: Event) {
-    const signed = this.adminService.signUrlIfNeeded(this.artifact.uri, {disableCache: this.artifact.timestamp});
-    if (signed) {
+    this.signUrl(this.artifact.uri).subscribe(signed => {
       const a = document.createElement('a');
       a.href = signed;
       a.target = '_blank';
       a.click();
-    } else {
-      this.uri = this.artifact.uri;
-    }
+    });
     event.preventDefault();
   }
 }

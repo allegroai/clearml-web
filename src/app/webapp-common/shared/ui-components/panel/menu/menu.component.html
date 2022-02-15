@@ -30,13 +30,15 @@
   <div class="results" [class.search-results]="enableSearch">
     <ng-content></ng-content>
   </div>
-  <div class="fixed-options">
-    <mat-divider></mat-divider>
+  <div class="fixed-options" >
+    <mat-divider *ngIf="fixedOptionsSubheader || refFixedOptions.hasChildNodes()"></mat-divider>
     <div *ngIf="fixedOptionsSubheader" class="fixed-options-subheader">
       {{fixedOptionsSubheader}}
     </div>
-    <ng-content select="[fixedOptions]">
+    <div #refFixedOptions>
+      <ng-content select="[fixedOptions]">
 
-    </ng-content>
+      </ng-content>
+    </div>
   </div>
 </mat-menu>

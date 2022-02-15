@@ -1,13 +1,15 @@
 import {Directive, Input} from '@angular/core';
 import {AbstractControl, NG_VALIDATORS, ValidationErrors, Validator, ValidatorFn} from '@angular/forms';
 
-export function uniqueNameValidator(names, forbiddenPrefix?): ValidatorFn {
-  return (control: AbstractControl): { [key: string]: any } | null => {
-    const value = control.value?.label || control.value?.name || control.value;
+export const uniqueNameValidator = (names, forbiddenPrefix?, valuePrefix?): ValidatorFn =>
+  (control: AbstractControl): { [key: string]: any } | null => {
+    let value = control.value?.label || control.value?.name || control.value;
+    if (valuePrefix) {
+      value = valuePrefix + value;
+    }
     const forbidden = names.includes(forbiddenPrefix ? forbiddenPrefix + value : value);
-    return forbidden ? {'uniqueName': {value: control.value}} : null;
+    return forbidden ? {uniqueName: {value: control.value}} : null;
   };
-}
 
 @Directive({
   selector: '[smUniqueNameValidator]',
@@ -16,9 +18,10 @@ export function uniqueNameValidator(names, forbiddenPrefix?): ValidatorFn {
 export class UniqueNameValidatorDirective implements Validator {
   @Input() existingNames: Array<string>;
   @Input() forbiddenPrefix: string;
+  @Input() valuePrefix: string;
 
   validate(control: AbstractControl): ValidationErrors | null {
-    return this.existingNames ? uniqueNameValidator(this.existingNames, this.forbiddenPrefix)(control) : null;
+    return this.existingNames ? uniqueNameValidator(this.existingNames, this.forbiddenPrefix, this.valuePrefix)(control) : null;
   }
 }
 

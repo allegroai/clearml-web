@@ -33,6 +33,11 @@ import { ShowOnlyUserWorkComponent } from './components/show-only-user-work/show
 import {GeneralLeavingBeforeSaveAlertGuard} from './guards/general-leaving-before-save-alert.guard';
 import {SortHumanizePipe} from './pipes/sort.pipe';
 import { ScatterPlotComponent } from './components/charts/scatter-plot/scatter-plot.component';
+import {
+  ClearFiltersButtonComponent,
+} from './components/clear-filters-button/clear-filters-button.component';
+import { AppendComponentOnTopElementDirective } from './directive/append-component-on-top-element.directive';
+import {MultiLineTooltipComponent} from './components/multi-line-tooltip/multi-line-tooltip.component';
 
 const _declarations = [
   ExperimentInfoHeaderStatusProgressBarComponent,
@@ -52,7 +57,9 @@ const _declarations = [
   CheckPermissionDirective,
   ScrollTextareaComponent,
   SortHumanizePipe,
-  ShowOnlyUserWorkComponent
+  ShowOnlyUserWorkComponent,
+  AppendComponentOnTopElementDirective,
+  MultiLineTooltipComponent,
 ];
 
 
@@ -76,10 +83,11 @@ const _declarations = [
     _declarations,
     BaseContextMenuComponent,
     ScatterPlotComponent,
+    ClearFiltersButtonComponent,
   ],
-  exports: [..._declarations, UiComponentsModule, TableModule, ClipboardModule, SharedPipesModule, MatSnackBarModule,
-    NgxFilesizeModule, ScatterPlotComponent
-  ],
+    exports: [..._declarations, UiComponentsModule, TableModule, ClipboardModule, SharedPipesModule, MatSnackBarModule,
+        NgxFilesizeModule, ScatterPlotComponent, ClearFiltersButtonComponent
+    ],
   providers   : [LeavingBeforeSaveAlertGuard, GeneralLeavingBeforeSaveAlertGuard]
 })
 export class SMSharedModule {

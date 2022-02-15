@@ -33,7 +33,8 @@
            placeholder="Search for project path"
            required
            minlength="3"
-           (blur)="detectChanges()">
+           (blur)="detectChanges()"
+           (click)="location.value && clearLocation(); location.reset(); locationRef.blur(); locationRef.focus()">
     <span matSuffix *ngIf="location.value && (!isAutoCompleteOpen) && !(project.parent | stringIncludedInArray:projectsNames)" class="creat-new-suffix">(Create New)</span>
     <i matSuffix [class]="'fa mr2 ' + (location.value? 'fa-times pointer':'fa-search')"
        (click)="location.value && clearLocation(); location.reset(); locationRef.focus()"

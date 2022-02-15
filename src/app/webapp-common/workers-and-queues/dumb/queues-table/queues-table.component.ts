@@ -5,6 +5,8 @@ import {Queue} from '../../../../business-logic/model/queues/queue';
 import {QUEUES_TABLE_COL_FIELDS} from '../../workers-and-queues.consts';
 import {TableComponent} from '../../../shared/ui-components/data/table/table.component';
 import {BaseTableView} from '../../../shared/ui-components/data/table/base-table-view';
+import {ActivatedRoute} from '@angular/router';
+import {ICONS} from '../../../constants';
 
 @Component({
   selector: 'sm-queues-table',
@@ -13,10 +15,11 @@ import {BaseTableView} from '../../../shared/ui-components/data/table/base-table
 })
 export class QueuesTableComponent extends BaseTableView {
   public cols: Array<ISmCol>;
-
   public readonly QUEUES_TABLE_COL_FIELDS = QUEUES_TABLE_COL_FIELDS;
   public menuOpen: boolean;
   private _queues: Array<Queue>;
+  public queuesManager: boolean;
+  readonly ICONS = ICONS;
 
   @Input() set queues(queues: Array<Queue>) {
     this._queues = queues;
@@ -32,6 +35,7 @@ export class QueuesTableComponent extends BaseTableView {
   @Output() deleteQueue = new EventEmitter();
   @Output() renameQueue = new EventEmitter();
   @Output() sortedChanged = new EventEmitter<{ isShift: boolean; colId: ISmCol['id'] }>();
+
   @Input() tableSortOrder: TableSortOrderEnum;
   @ViewChild('tableContainer', {static: false}) tableContainer;
   @ViewChild('table', {static: false}) table: TableComponent;
@@ -45,34 +49,36 @@ export class QueuesTableComponent extends BaseTableView {
     }
   }
 
-  constructor(private changeDetector: ChangeDetectorRef) {
+  constructor(private changeDetector: ChangeDetectorRef, private route: ActivatedRoute) {
     super();
+    this.queuesManager = route.snapshot.data.queuesManager;
     this.cols = [
       {
         id: QUEUES_TABLE_COL_FIELDS.NAME,
         headerType: ColHeaderTypeEnum.sortFilter,
         header: 'QUEUE',
-        style: {width: '25%', minWidth: '500px'},
+        style: {width: '35%'},
         sortable: true,
       },
       {
         id: QUEUES_TABLE_COL_FIELDS.TASK,
         headerType: ColHeaderTypeEnum.sortFilter,
         header: 'NEXT EXPERIMENT',
-        style: {width: '35%', minWidth: '800px'},
+        style: {width: '30%'},
         sortable: true,
       },
       {
         id: QUEUES_TABLE_COL_FIELDS.LAST_UPDATED,
         headerType: ColHeaderTypeEnum.sortFilter,
         header: 'LAST UPDATED',
-        style: {width: '25%', minWidth: '400px'},
+        style: {width: '150px'},
         sortable: true,
       },
       {
         id: QUEUES_TABLE_COL_FIELDS.IN_QUEUE,
         headerType: ColHeaderTypeEnum.sortFilter,
         header: 'IN QUEUE',
+        style: {width: '100px'},
         sortable: true,
       }
     ];
@@ -119,6 +125,7 @@ export class QueuesTableComponent extends BaseTableView {
   afterTableInit(): void {
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   emitSelection(selection: any[]) {
   }
 }

@@ -1,3 +1,5 @@
+@use "sass:math";
+
 // colors
 $white: #fff;
 $blue-25: #f9fafb;
@@ -20,13 +22,14 @@ $blue-800: #1a1e2c; //26,30,44
 $blue-900: #141722; //20,23,34
 $blue-950: #0d0e15; //20,23,34
 
-
+$cloudy-blue: #d4d6e0;
 $cloudy-blue-two: #ced1dc;
-$dark-grey-blue-three: #bdc5e1;
+$dark-grey-blue-three: #bdc51a1e2ce1;
 $dark-grey-blue-nine: #565b6b;
 $light-dusk: rgba(90, 101, 142, 0.5);
 $dusk-two: #515c85;
 $neon-yellow: #d3ff00;
+$neon-green: #82dd22;
 $neon-yellow-betterinchrome: #caff00;
 $neon-yellow-hover: #c6ef06;
 $purple: #4d66ff;
@@ -49,6 +52,7 @@ $strong-red: #ff001f;
 $almost-white: #fdfdff;
 $header-backgroud: $blue-900;
 
+$error-dark: #ed8a83;
 
 $info-color: #0080ff;
 $success-color: #326C34;
@@ -71,43 +75,45 @@ $dark-grey-blue: #39405f;
 $light-periwinkle-two: #c1cdf3;
 $light-grey-blue: #8f9dc9;
 $white: #ffffff;
+$faint-gray: #f4f7ff;
 $blue-grey: #8693be;
 $lightish-blue-dark: #4551AF;
 $dark-four: #0f131c;
 
 $dark-primary-text: rgba(black, 0.87);
 $light-primary-text: white;
+
 $mat-allegro: (
-        50: $blue-50,
-        100: $blue-100,
-        200: $blue-200,
-        300: $blue-300,
-        400: $blue-400,
-        500: $blue-500,
-        600: $blue-600,
-        700: $blue-700,
-        800: $blue-800,
-        900: $blue-900,
-        A100: $blue-250,
-        A200: $blue-450,
-        A400: $blue-480,
-        A700: $blue-550,
-        contrast: (
-                50: $dark-primary-text,
-                100: $dark-primary-text,
-                200: $dark-primary-text,
-                300: $dark-primary-text,
-                400: $dark-primary-text,
-                500: $dark-primary-text,
-                600: $light-primary-text,
-                700: $light-primary-text,
-                800: $light-primary-text,
-                900: $light-primary-text,
-                A100: $dark-primary-text,
-                A200: $dark-primary-text,
-                A400: $dark-primary-text,
-                A700: $dark-primary-text,
-        )
+  50: $blue-50,
+  100: $blue-100,
+  200: $blue-200,
+  300: $blue-300,
+  400: $blue-400,
+  500: $blue-500,
+  600: $blue-600,
+  700: $blue-700,
+  800: $blue-800,
+  900: $blue-900,
+  A100: $blue-250,
+  A200: $blue-450,
+  A400: $blue-480,
+  A700: $blue-550,
+  contrast: (
+    50: $dark-primary-text,
+    100: $dark-primary-text,
+    200: $dark-primary-text,
+    300: $dark-primary-text,
+    400: $dark-primary-text,
+    500: $dark-primary-text,
+    600: $light-primary-text,
+    700: $light-primary-text,
+    800: $light-primary-text,
+    900: $light-primary-text,
+    A100: $dark-primary-text,
+    A200: $dark-primary-text,
+    A400: $dark-primary-text,
+    A700: $dark-primary-text,
+  )
 );
 
 
@@ -213,8 +219,8 @@ $zindex-popover: 1060;
 $zindex-tooltip: 1070;
 
 // card
-$card-spacer-y: $grid-gutter / 2;
-$card-spacer-x: $grid-gutter / 2;
+$card-spacer-y: math.div($grid-gutter, 2);
+$card-spacer-x: math.div($grid-gutter, 2);
 $card-border-radius: 6px;
 $card-bg: $blue-500;
 $card-footer-bg: $blue-600;

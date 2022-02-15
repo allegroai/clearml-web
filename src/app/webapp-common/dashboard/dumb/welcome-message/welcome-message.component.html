@@ -18,7 +18,7 @@
       </div>
       <div class="info">
         <i class="al-ico-documentation"></i>
-        <div class="mt-2">Check out the <a target="_blank" href="https://allegro.ai/clearml/docs/">ClearML docs</a> for advanced information and in depth how-to’s.
+        <div class="mt-2">Check out the <a target="_blank" [href]="docsLink">ClearML docs</a> for advanced information and in depth how-to’s.
         </div>
       </div>
     </div>
@@ -73,13 +73,13 @@
               [clipboardText]="content.textContent"></sm-copy-clipboard>
           </div>
         </ng-template>
-        <div class="sub-note"><i class="mr-1 fas fa-info-circle info"></i>Manage your app credentials in the <a target="_blank" href="/profile">Profile page</a></div>
+        <div class="sub-note"><i class="mr-1 fas fa-info-circle info"></i>Manage your app credentials in the <a target="_blank" href="settings/workspace-configuration">workspace settings page</a></div>
       </div>
       <div class="step-container" *ngIf="!queue">
         <div class="step">3. Integrate</div>
         <div class="step sub-note">Add the following lines to your code</div>
         <div class="code">
-          <div #content class="content"><span class="variable">from</span> {{gettingStartedContext?.agentName || 'clearml'}} <span class="variable">import</span> Task
+          <div #content class="content"><span class="variable">from</span> {{gettingStartedContext?.packageName || 'clearml'}} <span class="variable">import</span> Task
 task <span class="operation">=</span> Task.<span class="variable">init</span>(project_name<span class="operation">=</span>"my project", task_name<span class="operation">=</span>"my task")</div>
           <sm-copy-clipboard
             [hideBackground]="true"

@@ -15,6 +15,8 @@ export interface TreeNodeJsonData {
   existOnCompared: boolean;
   isValueEqualToOrigin: boolean;
   isArray: boolean;
+  classStyle: string;
+  tooltip: string
 }
 
 function arrayOrderIsNotImportant(key) {
@@ -22,7 +24,7 @@ function arrayOrderIsNotImportant(key) {
   return !['augmentation', 'mapping', 'network_design', 'file content', 'preview'].includes(key);
 }
 
-function isArrayOrderNotImportant(val, key, allExperiments = []) {
+export function isArrayOrderNotImportant(val, key, allExperiments = []) {
   const allIsOne = allExperiments.every(experiment => experiment && experiment[key] && experiment[key].length === 1);
   return Array.isArray(val) && !allIsOne && (arrayOrderIsNotImportant(key));
 }
@@ -85,8 +87,15 @@ interface DiffArraysReturnInterface {
 export function diffArrays<T extends string[]>(compare: T, baseCompare: T): DiffArraysReturnInterface {
   const base = [];
   const compared = [];
+  let diff;
 
-  const diff = Diff.diffArrays(compare, baseCompare);
+  if (baseCompare.length === 0) {
+    diff = [{added: undefined, count: compare.length, removed: true, value: compare}];
+  } else if (compare.length === 0) {
+    diff = [{removed: undefined, count: baseCompare.length, added: true, value: compare}];
+  } else {
+    diff = Diff.diffArrays(compare, baseCompare);
+  }
   const changes = {base: {}, compare: {}};
 
   const setLengthsAndChanges = () => {
@@ -345,7 +354,7 @@ export function convertConfigurationFromExperiments<T extends Array<IExperimentD
 }
 
 export function convertContainerScriptFromExperiments<T extends Array<IExperimentDetail>>(experiments: T, originalExperiments: Record<string, IExperimentDetail>): T {
-  const data = experiments.map(experiment => originalExperiments[experiment.id]?.execution.container?.setup_shell_script);
+  const data = experiments.map(experiment => originalExperiments[experiment.id]?.execution?.container?.setup_shell_script);
   if (data.some(experimentData => experimentData.length > MAX_ROWS_FOR_SMART_COMPARE_ARRAYS)) {
     return experiments;
   }
@@ -486,23 +495,6 @@ export function getAllKeysEmptyObject(jsons) {
   return sortedObject;
 }
 
-export function createDiffObjectDetails(originObject, comparedObject, path, key): TreeNodeJsonData {
-  const originData = path.length === 0 ? originObject : get(path, originObject);
-  const comparedData = path.length === 0 ? comparedObject : get(path, comparedObject);
-  const existOnOrigin = !!has(path, originObject);
-  const existOnCompared = !!has(path, comparedObject);
-
-  return {
-    key,
-    path: path.join(','),
-    existOnOrigin,
-    existOnCompared,
-    value: comparedData,
-    isValueEqualToOrigin: (originObject === comparedObject) || (isEqual(comparedData, originData) && (existOnOrigin === existOnCompared)),
-    isArray: isArrayOrderNotImportant(comparedObject, key),
-  };
-}
-
 export function createDiffObjectScalars(AllKeysObject, originObject?, comparedObject?, metaTransformerFunction?, originPath?): Array<TreeNode<TreeNodeJsonData>> {
   return treeBuilderService.buildTreeFromJson<TreeNodeJsonData>(AllKeysObject, (data, key, path) => {
 
@@ -519,7 +511,7 @@ export function createDiffObjectScalars(AllKeysObject, originObject?, comparedOb
       existOnOrigin,
       existOnCompared,
       value: comparedPartial,
-      isValueEqualToOrigin: isEqual(originPartial, comparedPartial) && (existOnOrigin === existOnCompared),
+      isValueEqualToOrigin: (existOnOrigin === existOnCompared) && isEqual(originPartial, comparedPartial),
       isArray: isArrayOrderNotImportant(comparedPartial, key),
       originPath,
       fullPath: originPath.concat(path).concat(key)

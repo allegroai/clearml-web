@@ -1,5 +1,5 @@
 import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
-import {ColHeaderTypeEnum, ISmCol, TableSortOrderEnum} from '../../../shared/ui-components/data/table/table.consts';
+import {ColHeaderTypeEnum, ISmCol} from '../../../shared/ui-components/data/table/table.consts';
 import {get} from 'lodash/fp';
 import {WORKERS_TABLE_COL_FIELDS} from '../../workers-and-queues.consts';
 import {Worker} from '../../../../business-logic/model/workers/worker';
@@ -40,26 +40,28 @@ export class WorkersTableComponent extends BaseTableView {
         id: WORKERS_TABLE_COL_FIELDS.ID,
         headerType: ColHeaderTypeEnum.sortFilter,
         header: 'AVAILABLE WORKERS',
-        style: {width: '30%', minWidth: '500px'},
+        style: {width: '30%'},
         sortable: true,
       },
       {
         id: WORKERS_TABLE_COL_FIELDS.TASK,
         headerType: ColHeaderTypeEnum.sortFilter,
         header: 'CURRENTLY RUNNING EXPERIMENT',
-        style: {width: '30%', minWidth: '500px'},
+        style: {width: '30%'},
         sortable: true,
       },
       {
         id: WORKERS_TABLE_COL_FIELDS.TASK_RUNNING_TIME,
         headerType: ColHeaderTypeEnum.sortFilter,
         header: 'EXPERIMENT RUNNING TIME',
+        style: {width: '100px'},
         sortable: true,
       },
       {
         id: WORKERS_TABLE_COL_FIELDS.TASK_ITERATIONS,
         headerType: ColHeaderTypeEnum.sortFilter,
         header: 'ITERATION',
+        style: {width: '100px'},
         sortable: true,
       },
     ];
@@ -85,6 +87,7 @@ export class WorkersTableComponent extends BaseTableView {
   afterTableInit(): void {
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   emitSelection(selection: any[]) {
   }
 }

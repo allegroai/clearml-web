@@ -1,14 +1,15 @@
 <div class="header-container">
   <div class="actions-container">
-    <span [matMenuTriggerFor]="selectExperiment" (onMenuClose)="menuClosed()"></span>
-    <button class="btn btn-secondary btn-add-experiment"
-            smClickStopPropagation
-            smTooltip="Add/Remove experiments to comparison"
-            (click)="openAddExperimentSearch()">
+    <span [smTooltip]="(allowAddExperiment$ | async) ?
+      'Add/Remove experiments to comparison' :
+      compareLimitations + ' or fewer experiments can be compared'"
+    >
+        <button class="btn btn-secondary btn-add-experiment"
+                (click)="openAddExperimentSearch()">
       <i class="fas fa-plus mr-2"></i>
       <span>Add Experiment</span>
     </button>
-
+    </span>
     <mat-select *ngIf="viewMode"
                 class="view-mode"
                 panelClass="light-theme"
@@ -69,8 +70,3 @@
     </sm-refresh-button>
   </div>
 </div>
-
-<mat-menu #selectExperiment="matMenu">
-  <sm-select-experiments-for-compare>
-  </sm-select-experiments-for-compare>
-</mat-menu>

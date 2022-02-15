@@ -2,7 +2,7 @@ import {Component, Input, OnInit} from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { IRecentTask} from '../../common-dashboard.reducer';
-import {GetRecentTasks} from '../../common-dashboard.actions';
+import {getRecentExperiments} from '../../common-dashboard.actions';
 import { ITask } from '../../../../business-logic/model/al-task';
 import {selectCurrentUser} from '../../../core/reducers/users-reducer';
 import {filter, take} from 'rxjs/operators';
@@ -21,7 +21,7 @@ export class DashboardExperimentsComponent implements OnInit {
   ngOnInit() {
     this.store.select(selectCurrentUser)
       .pipe(filter(user => !!user), take(1))
-      .subscribe(() => this.store.dispatch(new GetRecentTasks()));
+      .subscribe(() => this.store.dispatch((getRecentExperiments())));
   }
 
   public taskSelected(task: IRecentTask | ITask) {

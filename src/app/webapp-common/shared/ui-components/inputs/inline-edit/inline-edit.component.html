@@ -1,6 +1,6 @@
 <div class="editable-div">
   <div [style.display]="active ? 'none': 'block'" >
-    <div class="d-flex align-items-center" #template (click)="(!inlineDisabled) && inlineActivated()"
+    <div class="d-flex align-items-center" #template (click)="(!inlineDisabled) && inlineActivated($event)"
       ><ng-content></ng-content>
       <i *ngIf="editable && !inlineDisabled" class='p2 al-icon al-ico-edit sm-md pull-right editable-pen pointer'></i>
     </div>
@@ -13,6 +13,7 @@
                [(ngModel)]="inlineValue"
                name="inline"
                [pattern]="pattern"
+               [minLength]="minLength"
                (keydown.tab)="form.checkValidity() && inlineSaved()"
                (keydown.escape)="inlineCanceled()"
                (keydown.enter)="form.checkValidity() && inlineSaved()"
@@ -30,9 +31,8 @@
                   #inlineInput>{{inlineValue}}
         </textarea>
         <div class="buttons">
-          <i [class.disabled]="!form.checkValidity()" class="sm al-ico-success inline-edit-approve pointer" (click)="stopProp($event)" (mousedown)="form.checkValidity() && inlineSaved()"></i>
-          <i class="sm al-ico-dialog-x inline-edit-close pointer" [id]="CANCEL_BUTTON" (click)="stopProp($event)"
-             (mousedown)="cancelClicked()"></i>
+          <i [class.disabled]="!form.checkValidity() || inlineValue?.length < minLength" class="sm al-ico-success inline-edit-approve pointer" (click)="stopProp($event)" (mousedown)="form.checkValidity() && inlineSaved()"></i>
+          <i class="sm al-ico-dialog-x inline-edit-close pointer" [id]="CANCEL_BUTTON"  (click)="stopProp($event); cancelClicked($event);"></i>
         </div>
       </form>
     </div>

@@ -1,25 +1,25 @@
 import {
-  FETCH_EXPERIMENTS,
-  GET_DEBUG_IMAGES_METRICS,
-  GET_NEXT_DEBUG_IMAGES_BATCH,
-  RESET_DEBUG_IMAGES, resetDisplayer,
-  SET_BEGINNING_OF_TIME,
-  SET_DEBUG_IMAGES,
-  SET_DEBUG_IMAGES_METRICS,
-  SET_DEBUG_IMAGES_SELECTED_METRIC,
-  SET_DEBUG_IMAGES_SETTINGS,
-  SET_EXPERIMENTS_NAMES,
-  SET_TIME_IS_NOW, setCurrentDebugImage,
-  setDebugImageIterations, setDebugImageViewerScrollId, setDisplayerBeginningOfTime, setDisplayerEndOfTime
+  fetchExperiments,
+  getDebugImagesMetrics,
+  resetDebugImages,
+  resetDisplayer,
+  setBeginningOfTime,
+  setCurrentDebugImage,
+  setDebugImageIterations,
+  setDebugImages,
+  setDebugImageViewerScrollId,
+  setDisplayerBeginningOfTime,
+  setDisplayerEndOfTime, setExperimentsNames, setMetrics, setSelectedMetric, setTimeIsNow
 } from './debug-images-actions';
 import {Task} from '../../business-logic/model/tasks/task';
-import {createFeatureSelector, createSelector} from '@ngrx/store';
+import {createFeatureSelector, createReducer, createSelector, on} from '@ngrx/store';
 import {omit} from 'lodash/fp';
 import {EventsGetDebugImageIterationsResponse} from '../../business-logic/model/events/eventsGetDebugImageIterationsResponse';
+import {EventsDebugImagesResponse} from '../../business-logic/model/events/eventsDebugImagesResponse';
 
 
 export interface IDebugImagesState {
-  debugImages: any;
+  debugImages: {[taskId: string]: EventsDebugImagesResponse};
   settingsList: Array<IDebugImagesSettings>;
   tasks: Array<Partial<Task>>;
   optionalMetrics: Array<ITaskOptionalMetrics>;
@@ -78,73 +78,42 @@ export const selectImageViewerScrollId = createSelector(debugImages, (state) => 
 export const selectDisplayerEndOfTime = createSelector(debugImages, (state) => state.imageDisplayerEndOfTime);
 export const selectDisplayerBeginningOfTime = createSelector(debugImages, (state) => state.imageDisplayerBeginningOfTime);
 
-export function debugImagesReducer(state = initialState, action): IDebugImagesState {
-  switch (action.type) {
-    case RESET_DEBUG_IMAGES:
-      return {
-        ...state,
-        debugImages: initialState.debugImages,
-        scrollId: initialState.scrollId,
-        noMore: initialState.noMore
-      };
-    case SET_DEBUG_IMAGES_SETTINGS: {
-      let newSettings: IDebugImagesSettings[];
-      const isExperimentExists = state.settingsList.find((setting) => setting.id === action.payload.id);
-      if (isExperimentExists) {
-        newSettings = state.settingsList.map(setting => setting.id === action.payload.id ? {...setting, ...action.payload.changes} : setting);
-      } else {
-        newSettings = state.settingsList.slice();
-        newSettings.push({id: action.payload.id, ...action.payload.changes});
-      }
-      return {...state, settingsList: newSettings};
-    }
-    case SET_DEBUG_IMAGES: {
-      return {...state, debugImages: {...state.debugImages, [action.payload.task]: action.payload.res}};
-    }
-    case SET_EXPERIMENTS_NAMES:
-      return {...state, tasks: action.payload.tasks};
-    case SET_DEBUG_IMAGES_METRICS:
-      return {...state, optionalMetrics: action.payload.metrics};
-    case GET_DEBUG_IMAGES_METRICS:
-      return {...state, optionalMetrics: initialState.optionalMetrics, debugImages: initialState.debugImages};
-    case SET_DEBUG_IMAGES_SELECTED_METRIC:
-      return {
+export const debugSamplesReducer = createReducer(
+  initialState,
+  on(resetDebugImages, state => ({
+    ...state,
+    debugImages: initialState.debugImages,
+    scrollId: initialState.scrollId,
+    noMore: initialState.noMore
+  })),
+  on(setDebugImages, (state, action) => ({...state, debugImages: {...state.debugImages, [action.task]: action.res}})),
+  on(setExperimentsNames, (state, action) => ({...state, tasks: action.tasks})),
+  on(setMetrics, (state, action) => ({...state, optionalMetrics: action.metrics})),
+  on(getDebugImagesMetrics, state => ({...state, optionalMetrics: initialState.optionalMetrics, debugImages: initialState.debugImages})),
+  on(setSelectedMetric, (state, action) => ({
         ...state,
         debugImages: omit(action.payload.task, state.debugImages),
         timeIsNow: {...state.timeIsNow, [action.payload.task]: true},
         beginningOfTime: {...state.beginningOfTime, [action.payload.task]: false}
-      };
-    case SET_TIME_IS_NOW:
-      return {...state, timeIsNow: {...state.timeIsNow, [action.payload.task]: action.payload.timeIsNow}};
-    case FETCH_EXPERIMENTS:
-      return {...initialState};
-    case SET_BEGINNING_OF_TIME:
-      return {
+  })),
+  on(setTimeIsNow, (state, action) => ({...state, timeIsNow: {...state.timeIsNow, [action.task]: action.timeIsNow}})),
+  on(fetchExperiments, () => ({...initialState})),
+  on(setBeginningOfTime, (state, action) => ({
         ...state,
-        beginningOfTime: {...state.beginningOfTime, [action.payload.task]: action.payload.beginningOfTime}
-      };
-    case setDebugImageIterations.type:
-      return {...state, minMaxIterations: {min_iteration: action.min_iteration, max_iteration: action.max_iteration}};
-    case setCurrentDebugImage.type:
-      return {...state, currentImageViewerDebugImage: action.event};
-    case setDebugImageViewerScrollId.type:
-      return {...state, imageDisplayerScrollId: action.scrollId};
-    case setDisplayerEndOfTime.type:
-      return {...state, imageDisplayerEndOfTime: action.endOfTime};
-    case setDisplayerBeginningOfTime.type:
-      return {...state, imageDisplayerBeginningOfTime: action.beginningOfTime};
-
-    case resetDisplayer.type:
-      return {
-        ...state,
-        imageDisplayerEndOfTime: null,
-        imageDisplayerBeginningOfTime: null,
-        imageDisplayerScrollId: null,
-        minMaxIterations: null,
-        currentImageViewerDebugImage: null
-      };
-    default:
-      return state;
-  }
-}
-
+        beginningOfTime: {...state.beginningOfTime, [action.task]: action.beginningOfTime}
+  })),
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  on(setDebugImageIterations, (state, action) => ({...state, minMaxIterations: {min_iteration: action.min_iteration, max_iteration: action.max_iteration}})),
+  on(setCurrentDebugImage, (state, action) => ({...state, currentImageViewerDebugImage: action.event})),
+  on(setDebugImageViewerScrollId, (state, action) => ({...state, imageDisplayerScrollId: action.scrollId})),
+  on(setDisplayerEndOfTime, (state, action) => ({...state, imageDisplayerEndOfTime: action.endOfTime})),
+  on(setDisplayerBeginningOfTime, (state, action) => ({...state, imageDisplayerBeginningOfTime: action.beginningOfTime})),
+  on(resetDisplayer, state => ({
+    ...state,
+    imageDisplayerEndOfTime: null,
+    imageDisplayerBeginningOfTime: null,
+    imageDisplayerScrollId: null,
+    minMaxIterations: null,
+    currentImageViewerDebugImage: null
+  })),
+);

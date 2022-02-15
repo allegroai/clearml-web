@@ -9,11 +9,11 @@ import { SMSharedModule } from '../shared/shared.module';
 import { UiComponentsModule } from '../shared/ui-components/ui-components.module';
 import { DebugImageSnippetComponent } from './debug-image-snippet/debug-image-snippet.component';
 import { DebugImagesEffects } from './debug-images-effects';
-import { debugImagesReducer } from './debug-images-reducer';
+import {debugSamplesReducer} from './debug-images-reducer';
 import { DebugImagesViewComponent } from './debug-images-view/debug-images-view.component';
 import { DebugImagesComponent } from './debug-images.component';
-import {MatSliderModule} from "@angular/material/slider";
-import {ExperimentGraphsModule} from "../shared/experiment-graphs/experiment-graphs.module";
+import {MatSliderModule} from '@angular/material/slider';
+import {ExperimentGraphsModule} from '../shared/experiment-graphs/experiment-graphs.module';
 
 const declerations = [DebugImagesComponent, DebugImagesViewComponent, ImageDisplayerComponent, DebugImageSnippetComponent];
 
@@ -26,7 +26,7 @@ const declerations = [DebugImagesComponent, DebugImagesViewComponent, ImageDispl
         CommonModule,
         ExperimentCompareSharedModule,
         ScrollingModule,
-        StoreModule.forFeature('debugImages', debugImagesReducer),
+        StoreModule.forFeature('debugImages', debugSamplesReducer),
         EffectsModule.forFeature([DebugImagesEffects]),
         MatSliderModule,
         ExperimentGraphsModule

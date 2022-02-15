@@ -1,8 +1,7 @@
 import {Component, Input, EventEmitter, Output} from '@angular/core';
 import {IRecentTask} from '../../common-dashboard.reducer';
-import {RECENT_TASKS_TABLE_COL_FIELDS} from '../../common-dashboard.const';
+import {RECENT_EXPERIMENTS_TABLE_COLS, RECENT_TASKS_TABLE_COL_FIELDS} from '../../common-dashboard.const';
 import {ISmCol} from '../../../shared/ui-components/data/table/table.consts';
-import {RECENT_EXPERIMENTS_TABLE_COLS} from '../../../../features/dashboard/dashboard.const';
 import {TIME_FORMAT_STRING} from '../../../constants';
 
 @Component({

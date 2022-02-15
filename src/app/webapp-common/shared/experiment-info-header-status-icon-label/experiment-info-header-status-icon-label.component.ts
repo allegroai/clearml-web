@@ -10,6 +10,7 @@ export class ExperimentInfoHeaderStatusIconLabelComponent {
   @Input() showLabel               = true;
   @Input() status                  = '';
   @Input() viewOnly                = false;
+  @Input() development             = false;
   @Input() showMaximize: boolean;
   @Output() closeInfoClicked       = new EventEmitter();
   @Output() maximizedClicked       = new EventEmitter();

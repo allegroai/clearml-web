@@ -2,7 +2,7 @@
 
 @font-face {
   font-family: '#{$icomoon-font-family}';
-  src: url('./#{$icomoon-font-family}.ttf?ck7fvi') format('truetype');
+  src: url('./#{$icomoon-font-family}.ttf?mmpkhb') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -73,9 +73,9 @@
     content: $al-ico-archive;
   }
 }
-.al-ico-logout {
+.al-ico-cloud-head {
   &:before {
-    content: $al-ico-logout;
+    content: $al-ico-cloud-head;
   }
 }
 .al-ico-how-to {
@@ -953,6 +953,147 @@
 .al-ico-started-lg {
   &:before {
     content: $al-ico-started-lg;
+  }
+}
+.al-ico-admin {
+  &:before {
+    content: $al-ico-admin;
+  }
+}
+.al-ico-projects-outlined {
+  &:before {
+    content: $al-ico-projects-outlined;
+  }
+}
+.al-ico-datasets-outlined {
+  &:before {
+    content: $al-ico-datasets-outlined;
+  }
+}
+.al-ico-hide {
+  &:before {
+    content: $al-ico-hide;
+  }
+}
+.al-ico-show {
+  &:before {
+    content: $al-ico-show;
+  }
+}
+.al-ico-metadata {
+  &:before {
+    content: $al-ico-metadata;
+  }
+}
+.al-ico-filter-reset .path1 {
+  &:before {
+    content: $al-ico-filter-reset-path1;
+    color: rgb(90, 101, 142);
+  }
+}
+.al-ico-filter-reset .path2 {
+  &:before {
+    content: $al-ico-filter-reset-path2;
+    margin-left: -1em;
+    color: rgb(237, 138, 131);
+  }
+}
+.al-ico-version-label {
+  &:before {
+    content: $al-ico-version-label;
+  }
+}
+.al-ico-plugin {
+  &:before {
+    content: $al-ico-plugin;
+  }
+}
+.al-ico-abort-all {
+  &:before {
+    content: $al-ico-abort-all;
+  }
+}
+.al-ico-refresh {
+  &:before {
+    content: $al-ico-refresh;
+  }
+}
+.al-ico-rocket {
+  &:before {
+    content: $al-ico-rocket;
+  }
+}
+.al-ico-logout {
+  &:before {
+    content: $al-ico-logout;
+  }
+}
+.al-ico-settings-alert .path1 {
+  &:before {
+    content: $al-ico-settings-alert-path1;
+    color: rgb(0, 0, 0);
+  }
+}
+.al-ico-settings-alert .path2 {
+  &:before {
+    content: $al-ico-settings-alert-path2;
+    margin-left: -1em;
+    color: rgb(211, 255, 0);
+  }
+}
+.al-ico-platform {
+  &:before {
+    content: $al-ico-platform;
+  }
+}
+.al-ico-creditcard {
+  &:before {
+    content: $al-ico-creditcard;
+  }
+}
+.al-ico-star {
+  &:before {
+    content: $al-ico-star;
+  }
+}
+.al-ico-email-check {
+  &:before {
+    content: $al-ico-email-check;
+  }
+}
+.al-ico-slack {
+  &:before {
+    content: $al-ico-slack;
+  }
+}
+.al-ico-youtube {
+  &:before {
+    content: $al-ico-youtube;
+  }
+}
+.al-ico-lock {
+  &:before {
+    content: $al-ico-lock;
+  }
+}
+.al-ico-lock-open {
+  &:before {
+    content: $al-ico-lock-open;
+  }
+}
+.al-ico-no-code {
+  &:before {
+    content: $al-ico-no-code;
+  }
+}
+.al-ico-automation {
+  &:before {
+    content: $al-ico-automation;
+  }
+}
+.al-ico-calendar-checked {
+  &:before {
+    content: $al-ico-calendar-checked;
   }
 }
 .al-ico-status-draft {

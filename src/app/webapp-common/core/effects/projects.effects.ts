@@ -1,52 +1,52 @@
 import {Injectable} from '@angular/core';
-import {Store} from '@ngrx/store';
-import {Actions, createEffect, Effect, ofType} from '@ngrx/effects';
-import {ApiProjectsService} from '../../../business-logic/api-services/projects.service';
+import {Action, Store} from '@ngrx/store';
+import {Actions, createEffect, ofType} from '@ngrx/effects';
+import {ApiProjectsService} from '~/business-logic/api-services/projects.service';
 import * as actions from '../actions/projects.actions';
 import {
-  fetchGraphData,
-  GetAllSystemProjects,
+  fetchGraphData, getAllSystemProjects,
   getCompanyTags,
   getTags,
   openMoreInfoPopup,
   openTagColorsMenu,
-  RESET_PROJECT_SELECTION,
-  ResetProjectSelection,
-  ResetSelectedProject,
+  resetProjects, resetProjectSelection,
   setCompanyTags,
-  setGraphData,
-  SetSelectedProjectId,
-  setTags,
-  UpdateProject
+  setGraphData, setLastUpdate,
+  setTags
 } from '../actions/projects.actions';
 
-import {catchError, filter, finalize, map, mergeMap, switchMap, withLatestFrom} from 'rxjs/operators';
+import {catchError, filter, map, mergeMap, switchMap, withLatestFrom} from 'rxjs/operators';
 import {requestFailed} from '../actions/http.actions';
 import {activeLoader, deactivateLoader, setServerError} from '../actions/layout.actions';
 import {setSelectedModels} from '../../models/actions/models-view.actions';
 import {TagColorMenuComponent} from '../../shared/ui-components/tags/tag-color-menu/tag-color-menu.component';
 import {MatDialog} from '@angular/material/dialog';
-import {ApiOrganizationService} from '../../../business-logic/api-services/organization.service';
-import {OrganizationGetTagsResponse} from '../../../business-logic/model/organization/organizationGetTagsResponse';
+import {ApiOrganizationService} from '~/business-logic/api-services/organization.service';
+import {OrganizationGetTagsResponse} from '~/business-logic/model/organization/organizationGetTagsResponse';
 import {selectRouterParams} from '../reducers/router-reducer';
 import {forkJoin} from 'rxjs';
-import {ProjectsGetTaskTagsResponse} from '../../../business-logic/model/projects/projectsGetTaskTagsResponse';
-import {ProjectsGetModelTagsResponse} from '../../../business-logic/model/projects/projectsGetModelTagsResponse';
-import {selectSelectedMetricVariantForCurrProject, selectSelectedProjectId} from '../reducers/projects.reducer';
+import {ProjectsGetTaskTagsResponse} from '~/business-logic/model/projects/projectsGetTaskTagsResponse';
+import {ProjectsGetModelTagsResponse} from '~/business-logic/model/projects/projectsGetModelTagsResponse';
+import {selectLastUpdate, selectSelectedMetricVariantForCurrProject, selectSelectedProjectId} from '../reducers/projects.reducer';
 import {OperationErrorDialogComponent} from '@common/shared/ui-components/overlay/operation-error-dialog/operation-error-dialog.component';
-import {ApiTasksService} from '../../../business-logic/api-services/tasks.service';
+import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
 import {createMetricColumn} from '@common/shared/utils/tableParamEncode';
 import {get} from 'lodash/fp';
-import {ITask} from '../../../business-logic/model/al-task';
-import {TasksGetAllExRequest} from '../../../business-logic/model/tasks/tasksGetAllExRequest';
+import {ITask} from '~/business-logic/model/al-task';
+import {TasksGetAllExRequest} from '~/business-logic/model/tasks/tasksGetAllExRequest';
 import {setSelectedExperiments} from '../../experiments/actions/common-experiments-view.actions';
-import {selectShowHidden} from "@common/projects/common-projects.reducer";
+import {selectShowHidden} from '~/features/projects/projects.reducer';
+import {setActiveWorkspace} from '@common/core/actions/users.actions';
+import {ProjectsGetAllExResponse} from '~/business-logic/model/projects/projectsGetAllExResponse';
+import {Project} from '~/business-logic/model/projects/project';
 
-const ALL_PROJECTS_OBJECT = {id: '*', name: 'All Experiments'};
+export const ALL_PROJECTS_OBJECT = {id: '*', name: 'All Experiments'};
 
 @Injectable()
 export class ProjectsEffects {
-  private fetchingExampleExperiment: string = null;
+  private pageSize: number = 500;
+  private lastUpdateSoFar: string;
+  private scrollId: string = null;
 
   constructor(
     private actions$: Actions, private projectsApi: ApiProjectsService, private orgApi: ApiOrganizationService,
@@ -54,111 +54,87 @@ export class ProjectsEffects {
   ) {
   }
 
-  @Effect()
-  activeLoader = this.actions$.pipe(
-    ofType(actions.SET_SELECTED_PROJECT_ID),
-    filter((action: any) => !!action.payload?.projectId),
+  activeLoader = createEffect(() => this.actions$.pipe(
+    ofType(actions.setSelectedProjectId),
+    filter((action) => !!action.projectId),
     map(action => activeLoader(action.type))
-  );
+  ));
 
-  @Effect()
-  getProjects$ = this.actions$.pipe(
-    ofType<GetAllSystemProjects>(actions.GET_PROJECTS),
-    withLatestFrom(this.store.select(selectShowHidden)),
-    switchMap(([action, showHidden]) =>
-      this.projectsApi.projectsGetAllEx({only_fields: ['name', 'company', 'parent'], search_hidden: showHidden})
-        .pipe(map(res => new actions.SetAllProjects(res.projects)))
+  getProjects$ = createEffect(() => this.actions$.pipe(
+    ofType(actions.getAllSystemProjects),
+    withLatestFrom(this.store.select(selectShowHidden), this.store.select(selectLastUpdate)),
+    switchMap(([, showHidden, lastUpdate]) => this.projectsApi.projectsGetAllEx({
+        /* eslint-disable @typescript-eslint/naming-convention */
+        size: this.pageSize,
+        scroll_id: this.scrollId,
+        order_by: ['last_update'],
+        last_update: lastUpdate ? [lastUpdate, null] : undefined,
+        only_fields: ['name', 'company', 'parent', 'last_update'], search_hidden: showHidden
+        /* eslint-enable @typescript-eslint/naming-convention */
+      } as any)
+        .pipe(mergeMap((res: ProjectsGetAllExResponse) => {
+            const resultsActions: Action[] = [actions.setAllProjects({projects: res.projects as unknown as Project[], updating: !!lastUpdate})];
+            if (res.projects.length >= this.pageSize) {
+              this.scrollId = res.scroll_id;
+              this.lastUpdateSoFar = res.projects[res.projects.length - 1].last_update;
+              resultsActions.push(getAllSystemProjects());
+            } else {
+              resultsActions.push(setLastUpdate({lastUpdate: res.projects[res.projects.length - 1]?.last_update || this.lastUpdateSoFar || lastUpdate}));
+              this.scrollId = null;
+              this.lastUpdateSoFar = null;
+            }
+            return resultsActions;
+          })
+        )
     )
-  );
+  ));
 
-  @Effect()
-  resetProjects$ = this.actions$.pipe(
-    ofType<ResetSelectedProject>(actions.RESET_SELECTED_PROJECT),
-    mergeMap(() => [new ResetProjectSelection()])
-  );
+  resetProjects$ = createEffect(() => this.actions$.pipe(
+    ofType(actions.resetSelectedProject),
+    mergeMap(() => [resetProjectSelection()])
+  ));
 
-  @Effect()
-  resetProjectSelections$ = this.actions$.pipe(
-    ofType<ResetProjectSelection>(RESET_PROJECT_SELECTION),
+  resetProjectSelections$ = createEffect(() => this.actions$.pipe(
+    ofType(resetProjectSelection),
     mergeMap(() => [setSelectedExperiments({experiments: []}), setSelectedModels({models: []})])
-  );
+  ));
 
-  @Effect()
-  updateProject$ = this.actions$.pipe(
-    ofType<UpdateProject>(actions.UPDATE_PROJECT),
+  updateProject$ = createEffect(() => this.actions$.pipe(
+    ofType(actions.updateProject),
     switchMap((action) =>
-      this.projectsApi.projectsUpdate({project: action.payload.id, ...action.payload.changes})
+      this.projectsApi.projectsUpdate({project: action.id, ...action.changes})
         .pipe(
           mergeMap(() => [
-            new actions.UpdateProjectCompleted()
+            actions.updateProjectCompleted()
           ]),
           catchError(err => [
             requestFailed(err),
             setServerError(err, null, 'Update project failed'),
-            new actions.SetSelectedProjectId(action.payload.id)
+            actions.setSelectedProjectId({projectId: action.id})
           ])
         )
     )
-  );
-  @Effect()
-  getSelectedProject = this.actions$.pipe(
-    ofType<SetSelectedProjectId>(actions.SET_SELECTED_PROJECT_ID),
-    withLatestFrom(this.store.select(selectSelectedProjectId)),
-    switchMap(([action, selectedProjectId]) => {
-      if (!action.payload.projectId) {
-        return [actions.setSelectedProject({project: null})];
-      }
-      if (action.payload.projectId === selectedProjectId) {
-        return [deactivateLoader(action.type)];
-      }
-      if (action.payload.projectId === '*') {
-        return [
-          actions.setSelectedProject({project: ALL_PROJECTS_OBJECT}),
-          deactivateLoader(action.type)];
-      } else {
-        this.fetchingExampleExperiment = action.payload.example && action.payload.projectId;
-        return this.projectsApi.projectsGetAllEx({
-          id: [action.payload.projectId],
-          include_stats: true,
-          ...((action.payload.example !== false || this.fetchingExampleExperiment === action.payload.projectId) && {check_own_contents: true})
-        })
-          .pipe(
-            finalize(() => this.fetchingExampleExperiment = null),
-            mergeMap(res => [
-                actions.setSelectedProject({project: res.projects[0]}),
-                deactivateLoader(action.type),
-              ]
-            ),
-            catchError(error => [
-              requestFailed(error),
-              deactivateLoader(action.type)
-            ])
-          );
-      }
-    }));
+  ));
 
-
-  @Effect({dispatch: false})
-  openTagColor = this.actions$.pipe(
+  openTagColor = createEffect(() => this.actions$.pipe(
     ofType(openTagColorsMenu),
     map(() => {
       this.dialog.open(TagColorMenuComponent);
     })
-  );
+  ), {dispatch: false});
 
-  @Effect()
-  getAllTags = this.actions$.pipe(
+  getAllTags = createEffect(() => this.actions$.pipe(
     ofType(getCompanyTags),
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     switchMap(() => this.orgApi.organizationGetTags({include_system: true})
       .pipe(
         map((res: OrganizationGetTagsResponse) => setCompanyTags({tags: res.tags, systemTags: res.system_tags})),
         catchError(error => [requestFailed(error)])
       )
     )
-  );
+  ));
 
-  @Effect()
-  getTagsEffect = this.actions$.pipe(
+  getTagsEffect = createEffect(() => this.actions$.pipe(
     ofType(getTags),
     withLatestFrom(this.store.select(selectRouterParams).pipe(
       map(params => (params === null || params?.projectId === '*') ? [] : [params.projectId]))),
@@ -178,7 +154,7 @@ export class ProjectsEffects {
         setServerError(error, null, 'Fetch tags failed')]
       )
     ))
-  );
+  ));
 
   openMoreInfoPopupEffect = createEffect(() => this.actions$.pipe(
     ofType(openMoreInfoPopup),
@@ -202,6 +178,7 @@ export class ProjectsEffects {
     switchMap(([, projectId, variant]) => {
       const col = createMetricColumn(variant, projectId);
       return this.tasksApi.tasksGetAllEx({
+        /* eslint-disable @typescript-eslint/naming-convention */
         project: [projectId],
         only_fields: ['started', 'last_iteration', 'user.name', 'type', 'name', 'status', 'active_duration', col.id],
         [col.id]: [0, null],
@@ -210,7 +187,9 @@ export class ProjectsEffects {
         order_by: ['-started'],
         type: ['__$not', 'annotation_manual', '__$not', 'annotation', '__$not', 'dataset_import'],
         system_tags: ['-archived'],
-        page_size: 1000
+        scroll_id: null,
+        size: 1000
+        /* eslint-enable @typescript-eslint/naming-convention */
       } as unknown as TasksGetAllExRequest).pipe(
         map((res) =>
           setGraphData({
@@ -230,6 +209,14 @@ export class ProjectsEffects {
           }))
       );
     })
+  ));
+
+  resetRootProjects = createEffect(() => this.actions$.pipe(
+    ofType(setActiveWorkspace),
+    mergeMap(() => [
+      resetProjects(),
+      getAllSystemProjects()
+    ])
   ));
 }
 

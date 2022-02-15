@@ -1,25 +1,23 @@
 import {IFooterState, ItemFooterModel} from './footer-items.models';
 import {IconNames, ICONS} from '../../../constants';
-import {Observable} from 'rxjs/internal/Observable';
-import {map} from 'rxjs/operators';
 import {MenuItems} from '../items.utils';
-import {TaskStatusEnum} from '../../../../business-logic/model/tasks/taskStatusEnum';
 import {EntityTypeEnum} from '../../../../shared/constants/non-common-consts';
 
-export class PublishFooterItem<T extends { status: TaskStatusEnum }> extends ItemFooterModel {
+export class PublishFooterItem extends ItemFooterModel {
   id = MenuItems.publish;
   emit = true;
   icon = ICONS.PUBLISHED as Partial<IconNames>;
 
-  constructor(state$: Observable<IFooterState<T>>, entityType: EntityTypeEnum) {
+  constructor(private entityType: EntityTypeEnum) {
     super();
     this.disableDescription = entityType === EntityTypeEnum.experiment ? this.disableDescription : ``;
-    this.state$ = state$.pipe(
-      map(({data, selectionIsOnlyExamples}) => ({
-          disable: data[this.id].disable,
-          description: this.menuItemText.transform(data[MenuItems.publish].available, 'Publish'),
-          disableDescription: selectionIsOnlyExamples ? 'Publish' : `You can only publish ${entityType}s that have already been executed`
-        })
-      ));
+  }
+
+  getItemState(state: IFooterState<any>): { icon?: IconNames; title?: string; description?: string; disable?: boolean; disableDescription?: string; emit?: boolean; emitValue?: boolean; preventCurrentItem?: boolean; class?: string; wrapperClass?: string } {
+    return {
+      disable: state.data[this.id]?.disable,
+      description: this.menuItemText.transform(state.data[MenuItems.publish]?.available, 'Publish'),
+      disableDescription: state.selectionIsOnlyExamples ? 'Publish' : `You can only publish ${this.entityType}s that have already been executed`
+    };
   }
 }

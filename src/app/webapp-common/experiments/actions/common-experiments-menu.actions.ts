@@ -3,7 +3,6 @@ import {ISelectedExperiment} from '../../../features/experiments/shared/experime
 import {Project} from '../../../business-logic/model/projects/project';
 import {Queue} from '../../../business-logic/model/queues/queue';
 import {CloneExperimentPayload, ITableExperiment} from '../shared/common-experiment-model.model';
-import {ISmCol} from '../../shared/ui-components/data/table/table.consts';
 
 export const EXPERIMENTS_INFO_PREFIX = 'EXPERIMENTS_INFO_';
 
@@ -41,6 +40,16 @@ export class CloneExperimentClicked implements Action {
 export const addTag = createAction(
   EXPERIMENTS_INFO_PREFIX + '[add tag to experiment]',
   props<{ experiments: Partial<ITableExperiment>[]; tag: string }>()
+);
+
+export const getAllTasksChildren = createAction(
+  EXPERIMENTS_INFO_PREFIX + '[get all tasks children]',
+  props<{ experiments: string[]}>()
+);
+
+export const setAllTasksChildren = createAction(
+  EXPERIMENTS_INFO_PREFIX + '[set all tasks children]',
+  props<{ experiments: ITableExperiment[]}>()
 );
 
 export const removeTag = createAction(

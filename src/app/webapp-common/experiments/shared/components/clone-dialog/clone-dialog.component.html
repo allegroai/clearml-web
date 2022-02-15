@@ -12,8 +12,10 @@
   </ng-template>
   <form #cloneForm="ngForm">
     <div class="form-container">
-      <mat-form-field class="w-100" appearance="outline"
-                      hideRequiredMarker="true">
+      <mat-form-field class="w-100"
+                      appearance="outline"
+                      hideRequiredMarker="true"
+                      (click)="filterText && clear(); projectInputRef.blur(); projectInputRef.focus()">
         <mat-label>Project</mat-label>
         <input matInput type="text"
                autocomplete="off"
@@ -28,8 +30,6 @@
                (keydown.enter)="projectInput.control.markAsTouched()"
                smUniqueNameValidator
                [existingNames]="readOnlyProjects$ | async"
-               [pattern]="'^[^/]+$'"
-               (click)="filterText && clear(); projectInputRef.blur(); projectInputRef.focus()"
         >
         <span matSuffix *ngIf="(!isAutoCompleteOpen) && (!formData.project?.value) && formData.project"
               class="creat-new-suffix">(Create New)</span>
@@ -38,7 +38,6 @@
            smClickStopPropagation></i>
         <mat-error *ngIf="projectInput?.errors?.required">Please provide a Project</mat-error>
         <mat-error *ngIf="projectInput?.errors?.minlength">Please provide a name longer than 3 characters</mat-error>
-        <mat-error *ngIf="projectInput?.errors?.pattern">Project name shouldn't contain slash (/)</mat-error>
         <mat-error *ngIf="projectInput?.errors?.uniqueName">Please provide a different name as this project name is
           taken as an Example project
         </mat-error>

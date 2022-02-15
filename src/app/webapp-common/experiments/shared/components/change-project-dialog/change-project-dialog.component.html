@@ -35,7 +35,7 @@
       <mat-error *ngIf="projectInput?.errors?.minlength">Please provide a name longer than 3 characters</mat-error>
       <mat-error *ngIf="projectInput?.errors?.uniqueName && !currentProjects.includes(formData.project?.value)">Please provide a different name as this project name is taken as an Example project</mat-error>
 <!--      TODO: Need another validator for this val error-->
-      <mat-error *ngIf="formData.project && currentProjects.includes(formData.project.value)">Some {{reference}}s are already in the selected project</mat-error>
+      <mat-error *ngIf="formData.project && currentProjects.includes(formData.project.value)">{{isMulti? (type | titlecase)+'s are' : (type| titlecase) + ' is'}} already in the selected project</mat-error>
       <mat-autocomplete #auto="matAutocomplete"
                         name="ExperimentProject"
                         class="light-theme"

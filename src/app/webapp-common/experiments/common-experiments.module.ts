@@ -9,9 +9,6 @@ import {CommonExperimentOutputEffects} from './effects/common-experiment-output.
 import {CommonExperimentsMenuEffects} from './effects/common-experiments-menu.effects';
 import {ExperimentHeaderComponent} from './dumb/experiment-header/experiment-header.component';
 import {ExperimentInfoHeaderComponent} from './dumb/experiment-info-header/experiment-info-header.component';
-import {ExperimentsTableComponent} from './dumb/experiments-table/experiments-table.component';
-import {ExperimentOutputLogComponent} from './containers/experiment-output-log/experiment-output-log.component';
-import {ExperimentLogInfoComponent} from './dumb/experiment-log-info/experiment-log-info.component';
 import {ExperimentInfoGeneralComponent} from './containers/experiment-info-general/experiment-info-general.component';
 import {ExperimentGeneralInfoComponent} from './dumb/experiment-general-info/experiment-general-info.component';
 import {ExperimentNetworkDesignFormComponent} from './dumb/experiment-network-design-form/experiment-network-design-form.component';
@@ -52,9 +49,13 @@ import {ExperimentInfoTaskModelComponent} from './containers/experiment-info-tas
 import {ExperimentInfoHyperParametersFormContainerComponent} from './containers/experiment-info-hyper-parameters-form-container/experiment-info-hyper-parameters-form-container.component';
 import {SharedModule} from '../../shared/shared.module';
 import {CommonDeleteDialogModule} from '../shared/entity-page/entity-delete/common-delete-dialog.module';
-import { ExperimentInfoEditDescriptionComponent } from './dumb/experiment-info-edit-description/experiment-info-edit-description.component';
+import {ExperimentInfoEditDescriptionComponent} from './dumb/experiment-info-edit-description/experiment-info-edit-description.component';
 import {ExperimentOutputLogModule} from './shared/experiment-output-log/experiment-output-log.module';
 import {MatRadioModule} from '@angular/material/radio';
+import {ExperimentsTableComponent} from "./dumb/experiments-table/experiments-table.component";
+import { HyperParamMetricColumnComponent } from './dumb/experiments-table/hyper-param-metric-column/hyper-param-metric-column.component';
+import { GetParamMetricValuePipe } from './dumb/experiments-table/hyper-param-metric-column/get-param-metric-value.pipe';
+import { GetVariantWithoutRoundPipe } from './dumb/experiments-table/hyper-param-metric-column/get-variant-without-round.pipe';
 
 @NgModule({
   declarations: [
@@ -87,14 +88,17 @@ import {MatRadioModule} from '@angular/material/radio';
     ExperimentHyperParamsNavbarComponent,
     ExperimentInfoArtifactItemComponent,
     ExperimentArtifactItemViewComponent,
-    ExperimentInfoEditDescriptionComponent
+    ExperimentInfoEditDescriptionComponent,
+    HyperParamMetricColumnComponent,
+    GetParamMetricValuePipe,
+    GetVariantWithoutRoundPipe
   ],
   exports: [ExperimentTypeIconLabelComponent,
     ExperimentsComponent,
     ExperimentInfoHeaderComponent,
     ExperimentExecutionSourceCodeComponent,
     SelectMetricForCustomColComponent,
-    ExperimentExecutionParametersComponent],
+    ExperimentExecutionParametersComponent,ExperimentsTableComponent],
   imports: [
     AngularSplitModule,
     ScrollingModule,
@@ -115,7 +119,7 @@ import {MatRadioModule} from '@angular/material/radio';
     MatProgressSpinnerModule,
     SharedModule,
     ExperimentOutputLogModule,
-    MatRadioModule
+    MatRadioModule,
   ],
   providers: [ExperimentTableCardComponent, NoUnderscorePipe, TitleCasePipe]
 })

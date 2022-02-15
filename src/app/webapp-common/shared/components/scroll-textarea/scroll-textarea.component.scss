@@ -4,9 +4,8 @@
   .diff-container {
     position: relative;
     background-color: $blue-900;
-    padding: 24px 0 24px 24px;
+    padding: 16px 0 16px 16px;
     border-radius: 4px;
-
   .floating-buttons {
     flex-direction: row-reverse;
     position: absolute;
@@ -37,12 +36,19 @@
       height: 100%;
       min-height: 250px;
       color: $white;
+      &.disabled{
+        color: $blue-400;
+      }
       overflow-x: scroll;
       font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
 
       .line {
         height: 19px;
         white-space: pre;
+        ::selection {
+          background-color: $neon-yellow-hover;
+          color: $blue-600;
+        }
         .found {
           color: $blue-600;
           background: $neon-yellow-betterinchrome;

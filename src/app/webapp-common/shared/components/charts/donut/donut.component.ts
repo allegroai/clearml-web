@@ -25,11 +25,11 @@ export interface DonutChartData {
 })
 export class DonutComponent implements OnInit {
 
-  private donutContainer: Selection<SVGElement, {}, HTMLElement, any>;
+  private donutContainer: Selection<SVGElement, DonutChartData, HTMLElement, any>;
   private donutChart;
   private donutData: DonutChartData[];
 
-  private legendContainer: Selection<SVGElement, {}, HTMLElement, any>;
+  private legendContainer: Selection<SVGElement, DonutChartData, HTMLElement, any>;
   private legendChart;
   private legendWidth: number;
 

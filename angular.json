@@ -12,7 +12,6 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "aot": true,
             "preserveSymlinks": true,
             "outputPath": "build",
             "index": "src/index.html",
@@ -35,28 +34,35 @@
               }
             ],
             "styles": [
-              "node_modules/primeicons/primeicons.css",
               "node_modules/primeng/resources/components/table/table.css",
+              "node_modules/primeicons/primeicons.css",
               "node_modules/ngx-markdown-editor/assets/highlight.js/agate.min.css",
               "src/styles.scss",
               "src/fonts.scss"
+            ],
+            "scripts": [
+              "node_modules/ngx-markdown-editor/assets/highlight.js/highlight.min.js",
+              "node_modules/ngx-markdown-editor/assets/marked.min.js"
             ],
             "allowedCommonJsDependencies": [
               "lodash/fp",
               "ansi-to-html",
               "has-ansi",
-              "amazon-s3-uri",
-              "aws-sdk/clients/s3",
               "fabric/dist/fabric.min",
-              "url",
               "entities",
               "string-to-color",
-              "ace-builds/webpack-resolver"
+              "fast-xml-parser",
+              "url",
+              "@aws-crypto/sha256-browser",
+              "@aws-crypto/crc32"
+
             ],
-            "scripts": [
-              "node_modules/ngx-markdown-editor/assets/highlight.js/highlight.min.js",
-              "node_modules/ngx-markdown-editor/assets/marked.min.js"
-            ]
+            "vendorChunk": true,
+            "extractLicenses": false,
+            "buildOptimizer": false,
+            "sourceMap": true,
+            "optimization": false,
+            "namedChunks": true
           },
           "configurations": {
             "appdev": {
@@ -70,7 +76,6 @@
               "outputHashing": "all",
               "sourceMap": false,
               "namedChunks": false,
-              "aot": true,
               "extractLicenses": true,
               "vendorChunk": false,
               "buildOptimizer": true,
@@ -92,7 +97,6 @@
               "outputHashing": "all",
               "sourceMap": false,
               "namedChunks": false,
-              "aot": true,
               "extractLicenses": true,
               "vendorChunk": false,
               "buildOptimizer": true,
@@ -114,7 +118,6 @@
               "outputHashing": "all",
               "sourceMap": false,
               "namedChunks": false,
-              "aot": true,
               "extractLicenses": true,
               "vendorChunk": false,
               "buildOptimizer": true,
@@ -136,7 +139,6 @@
               "outputHashing": "all",
               "sourceMap": false,
               "namedChunks": false,
-              "aot": true,
               "extractLicenses": true,
               "vendorChunk": false,
               "buildOptimizer": true,
@@ -158,7 +160,6 @@
               "outputHashing": "all",
               "sourceMap": false,
               "namedChunks": false,
-              "aot": true,
               "extractLicenses": true,
               "vendorChunk": false,
               "buildOptimizer": true,
@@ -169,7 +170,8 @@
                 }
               ]
             }
-          }
+          },
+          "defaultConfiguration": ""
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",

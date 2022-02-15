@@ -3,7 +3,7 @@ import {filter} from 'rxjs/operators';
 import {Subscription, interval} from 'rxjs';
 import {Store} from '@ngrx/store';
 import {setCompareAutoRefresh} from '@common/core/actions/layout.actions';
-import {selectCompareAutoRefresh} from '@common/core/reducers/view-reducer';
+import {selectCompareAutoRefresh} from '@common/core/reducers/view.reducer';
 
 @Component({
   selector   : 'sm-experiment-refresh',

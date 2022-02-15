@@ -1,0 +1,27 @@
+@import "variables";
+
+.tooltip-container {
+  max-width: 300px;
+  background: $purple;
+  padding: 8px;
+  border-radius: 4px;
+  box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
+  font-size: 11px;
+  color: $blue-25;
+
+  ::ng-deep a {
+    color: $blue-25;
+    text-decoration: underline;
+
+    &:hover {
+      text-decoration: underline;
+      color: $white;
+      font-weight: 500;
+    }
+  }
+}
+
+.fas.fa-info-circle {
+  font-size: 12px;
+}
+

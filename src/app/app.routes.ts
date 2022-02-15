@@ -1,12 +1,13 @@
 import {Routes} from '@angular/router';
-import {AdminComponent} from './webapp-common/admin/admin.component';
-import {AccountAdministrationGuard} from "./webapp-common/shared/guards/account-administration.guard";
-import {ProjectRedirectGuardGuard} from './webapp-common/shared/guards/project-redirect.guard';
+/*
+import {AdminComponent} from '@common/settings/admin/admin.component';
+*/
+import {ProjectRedirectGuardGuard} from '@common/shared/guards/project-redirect.guard';
 
 
 export const routes: Routes = [
   {path: '', redirectTo: 'dashboard', pathMatch: 'full'},
-  {path: 'admin', redirectTo: 'profile', pathMatch: 'full'},
+  {path: 'admin', redirectTo: 'settings', pathMatch: 'full'},
   {
     path: 'dashboard',
     loadChildren: () => import('./features/dashboard/dashboard.module').then(m => m.DashboardModule),
@@ -17,10 +18,12 @@ export const routes: Routes = [
     loadChildren: () => import('./features/projects/projects.module').then(m => m.ProjectsModule),
     data: {search: true},
   },
-  {path: 'login', loadChildren: () => import('./webapp-common/login/login.module').then(m => m.LoginModule)},
-  {path: 'signup', loadChildren: () => import('./webapp-common/login/login.module').then(m => m.LoginModule)},
-
-  {path: 'profile', component: AdminComponent, data: {workspaceNeutral: true}},
+  {path: 'login', loadChildren: () => import('./features/login/login.module').then(m => m.LoginModule)},
+  {
+    path: 'settings',
+    loadChildren: () => import('./features/settings/settings.module').then(m => m.SettingsModule),
+    data: {search: false, workspaceNeutral: false, },
+  },
 
   {
     path: 'projects',
@@ -46,7 +49,7 @@ export const routes: Routes = [
       },
     ]
   },
-  {path: 'workers-and-queues', loadChildren: () => import('./webapp-common/workers-and-queues/workers-and-queues.module').then(m => m.WorkersAndQueuesModule)},
+  {path: 'workers-and-queues', loadChildren: () => import('./features/workers-and-queues/workers-and-queues.module').then(m => m.WorkersAndQueuesModule)},
   {path: '404', loadChildren: () => import('./features/not-found/not-found.module').then(m => m.NotFoundModule)},
   {path: '**', loadChildren: () => import('./features/not-found/not-found.module').then(m => m.NotFoundModule)},
 

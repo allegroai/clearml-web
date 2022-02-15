@@ -1,24 +1,24 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {catchError, filter, map, mergeMap, retryWhen, switchMap, tap} from 'rxjs/operators';
-import {HTTP} from '../../../app.constants';
-import {UsersGetAllResponse} from '../../../business-logic/model/users/usersGetAllResponse';
-import {AuthCreateUserResponse} from '../../../business-logic/model/auth/authCreateUserResponse';
+import {HTTP} from '~/app.constants';
+import {UsersGetAllResponse} from '~/business-logic/model/users/usersGetAllResponse';
+import {AuthCreateUserResponse} from '~/business-logic/model/auth/authCreateUserResponse';
 import {v1 as uuidV1} from 'uuid';
-import {Observable, of, throwError, timer} from 'rxjs';
+import {EMPTY, Observable, of, throwError, timer} from 'rxjs';
 import {MatDialog} from '@angular/material/dialog';
 import {ConfirmDialogComponent} from '../ui-components/overlay/confirm-dialog/confirm-dialog.component';
-import {LoginModeResponse} from '../../../business-logic/model/LoginModeResponse';
+import {LoginModeResponse} from '~/business-logic/model/LoginModeResponse';
 import {clone} from 'lodash/fp';
-import {ApiLoginService} from '../../../business-logic/api-services/login.service';
-import {LoginService as LoginServiceExt} from '../../../shared/services/login.service';
-import {LoginSsoCallbackResponse} from '../../../business-logic/model/login/loginSsoCallbackResponse';
-import {LoginGetInviteInfoResponse} from '../../../business-logic/model/login/loginGetInviteInfoResponse';
-import {LoginModel} from '../../login/signup/signup.component';
+import {ApiLoginService} from '~/business-logic/api-services/login.service';
 import {ConfigurationService} from './configuration.service';
-import {LoginSsoCallbackRequest} from '../../../business-logic/model/login/loginSsoCallbackRequest';
 import {Environment} from '../../../../environments/base';
-import {USER_PREFERENCES_KEY} from '@common/user-preferences';
+import {USER_PREFERENCES_KEY, UserPreferences} from '@common/user-preferences';
+import {setUserLoginState} from '@common/login/login.actions';
+import {fetchCurrentUser} from '@common/core/actions/users.actions';
+import {Store} from '@ngrx/store';
+import {ConfirmDialogConfig} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.model';
+import {Router} from '@angular/router';
 
 export type LoginMode = 'simple' | 'password' | 'ssoOnly';
 
@@ -28,12 +28,10 @@ export const LoginModeEnum = {
   ssoOnly: 'ssoOnly' as LoginMode
 };
 
-export type userState = Observable<{ userState: LoginSsoCallbackResponse; state: string }>;
-
 @Injectable({
   providedIn: 'root'
 })
-export class LoginService {
+export class BaseLoginService {
   signupMode: boolean;
   protected basePath = HTTP.API_BASE_URL;
   private userKey: string;
@@ -49,17 +47,19 @@ export class LoginService {
   get sso() {
     return this._sso;
   }
-  private _authenticated: boolean;
+  protected _authenticated: boolean;
   get authenticated(): boolean {
     return this._authenticated;
   }
 
   constructor(
-    private httpClient: HttpClient,
-    private loginApi: ApiLoginService,
-    private dialog: MatDialog,
-    private loginServiceExt: LoginServiceExt,
-    private configService: ConfigurationService
+    protected httpClient: HttpClient,
+    protected loginApi: ApiLoginService,
+    protected dialog: MatDialog,
+    protected configService: ConfigurationService,
+    protected store: Store,
+    protected router: Router,
+    protected userPreferences: UserPreferences
   ) {
     configService.globalEnvironmentObservable.subscribe(env => {
       const firstLogin = !window.localStorage.getItem(USER_PREFERENCES_KEY.firstLogin);
@@ -83,7 +83,7 @@ export class LoginService {
         this.openServerError();
         return of({});
       }),
-      switchMap(mode => mode === LoginModeEnum.password ? of(fromEnv()) : this.httpClient.get('credentials.json')),
+      switchMap(mode => mode === LoginModeEnum.simple ? this.httpClient.get('credentials.json') : of(fromEnv())),
       tap((credentials: any) => {
         this.userKey = credentials.userKey;
         this.userSecret = credentials.userSecret;
@@ -132,20 +132,23 @@ export class LoginService {
       state = stateUrl.pathname + stateUrl.search;
     }
     return this.loginApi.loginSupportedModes({
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       callback_url_prefix: url.origin + '/callback_',
-      state: (state === '/' || state.startsWith('callback_') || state.startsWith('/callback_'))? undefined : state
+      state: (state === '/' || state.startsWith('callback_') || state.startsWith('/callback_')) ? undefined : state
     }).pipe(map((res: LoginModeResponse) => {
       const auth0 = res.sso_providers.find(provider => provider.name == 'auth0');
       if (auth0 && this.signupMode) {
-        const url = new URL(auth0.url);
-        url.searchParams.set('screen_hint', 'signup');
-        auth0.url = url.toString();
+        const auth0Url = new URL(auth0.url);
+        auth0Url.searchParams.set('screen_hint', 'signup');
+        auth0.url = auth0Url.toString();
       }
       return {
+        /* eslint-disable @typescript-eslint/naming-convention */
         ...res,
         ...(res.sso_providers ?
           {sso_providers: res.sso_providers.map(provider => ({...provider, displayName: provider.display_name}))} :
           res.sso && {sso_providers: Object.keys(res.sso).map((key: string) => ({name: key, url: res.sso[key]}))})
+        /* eslint-enable @typescript-eslint/naming-convention */
       };
     }));
   }
@@ -175,11 +178,13 @@ export class LoginService {
     let headers = this.getHeaders();
     headers = headers.append('Content-Type', 'application/json');
     const data = {
+      /* eslint-disable @typescript-eslint/naming-convention */
       email: uuidV1() + '@test.ai',
       name,
       company: this.companyID,
       given_name: name.split(' ')[0],
       family_name: name.split(' ')[1] ? name.split(' ')[1] : name.split(' ')[0]
+      /* eslint-enable @typescript-eslint/naming-convention */
     };
     return this.httpClient.post<AuthCreateUserResponse>(`${this.basePath}/auth.create_user`, data, {headers})
       .pipe(map((x: any) => x.data.id));
@@ -193,10 +198,12 @@ export class LoginService {
         }));
   }
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   private shouldOpenServerError(serverErrors: {missed_es_upgrade: boolean; es_connection_error: boolean}) {
     return serverErrors?.missed_es_upgrade || serverErrors?.es_connection_error;
   }
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   private openEs7MessageDialog(serverErrors: {missed_es_upgrade: boolean; es_connection_error: boolean}) {
 
     // Mocking application header
@@ -242,32 +249,75 @@ After the issue is resolved and Trains Server is up and running, reload this pag
     const confirmDialogRef = this.dialog.open(ConfirmDialogComponent, {
       disableClose: true,
       data: {
+        width: 440,
         title: 'Server Unavailable',
         body,
-
         yes: 'Reload',
-        iconClass: 'i-alert'
-      }
+        iconClass: 'i-alert',
+        centerText: true
+      } as ConfirmDialogConfig
     });
     confirmDialogRef.afterClosed().subscribe(() => {
       window.location.reload();
     });
   }
 
-  ssoLogin(params: Partial<LoginSsoCallbackRequest>): userState {
-    return this.loginServiceExt.ssoLogin(params).pipe(tap(({userState}) =>
-      this._authenticated = userState.login_status === 'logged_in'));
-  }
-
-  signup(signupInfo: LoginModel) {
-    return this.loginApi.loginSignupUser({signup_data: signupInfo});
-  }
-
-  getInviteInfo(invite_id: string): Observable<LoginGetInviteInfoResponse> {
-    return this.loginApi.loginGetInviteInfo({invite_id});
-  }
-
   clearLoginCache() {
     this._loginMode = undefined;
+  }
+
+  afterLogin(resolve, store) {
+    this.userPreferences.loadPreferences()
+      .subscribe(() => {
+        store.dispatch(fetchCurrentUser());
+        resolve(null);
+      });
+  }
+
+  loginFlow(resolve, skipInvite = false) {
+    if (location.search.includes('invite') && !skipInvite) {
+      const currentURL = new URL(location.href);
+      const inviteId = currentURL.searchParams.get('invite');
+      this.store.dispatch(setUserLoginState({user: null, inviteId, crmForm: null}));
+    }
+    const redirectToLogin = (status) => {
+      if (status === 401) {
+        const redirectUrl: string = window.location.pathname + window.location.search;
+        if (
+          !['/login/signup', '/login', '/dashboard', '/'].includes(redirectUrl) &&
+          (this.guestUser?.enabled || ConfigurationService.globalEnvironment.autoLogin)
+        ) {
+          if (this.guestUser?.enabled) {
+            this.passwordLogin(this.guestUser.username, this.guestUser.password)
+              .subscribe(() => this.afterLogin.bind(this)(resolve, this.store));
+          } else if (ConfigurationService.globalEnvironment.autoLogin) {
+            const name = `${(new Date()).getTime().toString()}`;
+            this.autoLogin(name, this.afterLogin.bind(this, resolve, this.store));
+          } else {
+            resolve(null);
+          }
+        } else if (!['/login/signup', '/login'].includes(redirectUrl)) {
+          const targetUrl = (redirectUrl && redirectUrl != '/') ? `/login?redirect=${encodeURIComponent(redirectUrl)}` : '/login';
+          window.history.replaceState(window.history.state, '', targetUrl);
+        }
+      }
+      resolve(null);
+      return EMPTY;
+    };
+
+    if (this.authenticated === false) {
+      redirectToLogin(401);
+    } else {
+      this.store.dispatch(fetchCurrentUser());
+      this.userPreferences.loadPreferences().pipe(
+        catchError((err) => redirectToLogin(err.status))
+      ).subscribe(
+        () => {
+          resolve(null);
+        },
+        () => {
+          // Do nothing
+        });
+    }
   }
 }

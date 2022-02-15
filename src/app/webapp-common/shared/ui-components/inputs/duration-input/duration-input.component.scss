@@ -12,6 +12,9 @@
     padding-left: 0;
     text-align: center;
     width: 22px;
+    &:last-of-type {
+      width: 30px;
+    }
   }
 
   ng-form {

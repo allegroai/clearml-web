@@ -1,0 +1,16 @@
+:host {
+  display: flex;
+
+  .al-ico-line-expand {
+    height: 18px;
+    margin-left: 2px;
+    vertical-align: middle;
+    display: none;
+  }
+
+  &:hover {
+    .al-ico-line-expand {
+      display: inline;
+    }
+  }
+}

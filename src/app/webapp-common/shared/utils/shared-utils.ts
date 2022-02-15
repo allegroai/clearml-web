@@ -6,16 +6,16 @@ import {User} from '../../../business-logic/model/users/user';
 import {GetCurrentUserResponseUserObjectCompany} from '../../../business-logic/model/users/getCurrentUserResponseUserObjectCompany';
 import {TABLE_SORT_ORDER} from '../ui-components/data/table/table.consts';
 import {CloseScrollStrategy, Overlay} from '@angular/cdk/overlay';
+import {Store} from '@ngrx/store';
+import {mobilecheck} from '@common/shared/utils/mobile';
 
-export function capitalizeFirstLetter(str: string) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
+export const capitalizeFirstLetter = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
 
-const CRC_TABLE = function () {
+const CRC_TABLE = () => {
   const polynomial = 0x04C11DB7;
   const table = new Array(256);
 
-  const reverse = function (x, n) {  // TODO
+  const reverse = (x, n) => {  // TODO
     let b = 0;
     while (--n >= 0) {
       b <<= 1;
@@ -35,7 +35,8 @@ const CRC_TABLE = function () {
     table[i] = reverse(g, 32);
   }
   return table;
-}();
+};
+
 export const isVideo = (contentType: MediaContentTypeEnum, uri: string) => {
 
   if (contentType) {
@@ -56,43 +57,58 @@ export const isSourceVideo = (source) => {
   return isVideo(contentType, uri);
 };
 
-export function isHtmlPage(url: string) {
+export const isHtmlPage = (url: string) => {
+  if (!url) {
+    return false;
+  }
   const parsed = new URL(url);
   const ext = last(parsed.pathname.split('.'));
   return ['html', 'htm'].includes(ext);
-}
+};
 
-export function isTextFileURL(url: string) {
+export const isTextFileURL = (url: string) => {
+  if (!url) {
+    return false;
+  }
   const parsed = new URL(url);
   const ext = last(parsed.pathname.split('.'));
   return ['txt', 'text'].includes(ext);
-}
+};
 
-export function createModelLink(uri, modelId, modelSignedUri) {
+export const isHtmlOrText = (url: string) => {
+  if (!url) {
+    return false;
+  }
+  const parsed = new URL(url);
+  const ext = last(parsed.pathname.split('.'));
+  return ['txt', 'text', 'html', 'htm'].includes(ext);
+};
+
+export const createModelLink = (uri, modelId, modelSignedUri) => {
   const uriArray = uri.split('/');
   const filename = uriArray[uriArray.length - 1];
   const url = '/static/network?obj={"path":"' + modelSignedUri + '","fileName":"' + filename + '","id":"' + modelId + '"}';
   return encodeURI(url);
-}
+};
 
-export function allItemsAreSelected(itemsInView: { id: any }[], selectedItems: { id: any }[]) {
+export const allItemsAreSelected = (itemsInView: { id: any }[], selectedItems: { id: any }[]) => {
   if (itemsInView?.length === 0 || selectedItems.length === 0) {
     return false;
   } else {
     const selectedItemsIds = selectedItems.map(item => item.id);
     return (itemsInView?.every(item => selectedItemsIds.includes(item.id)));
   }
-}
+};
 
-export function addOrRemoveFromArray(arr: Array<any> = [], item) {
+export const addOrRemoveFromArray = (arr: Array<any> = [], item) => {
   if (arr.includes(item)) {
     return arr.filter(arrItem => item !== arrItem);
   } else {
     return arr.concat([item]);
   }
-}
+};
 
-export function scrollToElement(id) {
+export const scrollToElement = id => {
   const element = document.getElementById(EXPERIMENT_GRAPH_ID_PREFIX + id);
   if (!element) {
     if (id) {
@@ -101,9 +117,9 @@ export function scrollToElement(id) {
     return;
   }
   element.scrollIntoView({block: 'start', behavior: 'smooth'});
-}
+};
 
-export function isScrolledIntoView(el) {
+export const isScrolledIntoView = el => {
   const rect = el.getBoundingClientRect();
   const elemTop = rect.top;
   const elemBottom = rect.bottom;
@@ -113,46 +129,41 @@ export function isScrolledIntoView(el) {
   // Partially visible elements return true:
   const isVisible = elemTop < window.innerHeight && elemBottom >= 0;
   return isVisible;
-}
+};
 
-export function getRouteFullUrl(route: ActivatedRoute) {
+export const getRouteFullUrl = (route: ActivatedRoute) => {
   let path = route.routeConfig.path;
-  while (route = route.firstChild) {
+  while (route.firstChild) {
+    route = route.firstChild;
     path += '/' + route.snapshot.url.map(a => a.path).join('/');
   }
   return path;
-}
+};
 
-export function escapeRegex(input: string) {
-  return input.replace(/[.+?^*${}()|[\]\\]/g, '\\$&');
-}
+export const escapeRegex = (input: string) => input.replace(/[.+?^*${}()|[\]\\]/g, '\\$&');
 
-export function removeAlphaColor(rgbaColor: string) {
+export const removeAlphaColor = (rgbaColor: string) => {
   const rgbaColorArr = rgbaColor.substring(rgbaColor.indexOf('(') + 1, rgbaColor.indexOf(')')).split(',');
   return `rgb(${rgbaColorArr[0]},${rgbaColorArr[1]},${rgbaColorArr[2]})`;
-}
+};
 
-export function isReadOnly(item) {
+export const isReadOnly = item => {
   if (get('id', item) === '*') {
     return false;
   }
   return (!get('company.id', item)) || (!!get('readOnly', item));
-}
+};
 
-export function isExample(item) {
-  return item?.company && !item.company?.id;
-}
+export const isExample = item => item?.company && !item.company?.id;
 
-export function isSharedAndNotOwner(item, activeWorkSpace: GetCurrentUserResponseUserObjectCompany): boolean {
+export const isSharedAndNotOwner = (item, activeWorkSpace: GetCurrentUserResponseUserObjectCompany): boolean => {
   const isSharedandNot = item?.system_tags.includes('shared') && item?.company?.id !== activeWorkSpace?.id && (!!item?.company.id);
   return isSharedandNot;
-}
+};
 
-export function isAnnotationTask(entity) {
-  return entity.system_tags && entity.system_tags.includes('Annotation');
-}
+export const isAnnotationTask = entity => entity.system_tags && entity.system_tags.includes('Annotation');
 
-export function getCssTheme(el: HTMLElement): string {
+export const getCssTheme = (el: HTMLElement): string => {
   do {
     if (el.classList.contains('dark-theme')) {
       return 'dark-theme';
@@ -163,8 +174,9 @@ export function getCssTheme(el: HTMLElement): string {
     el = ((el.parentElement || el.parentNode) as HTMLElement);
   } while (el !== null && el.nodeType === 1);
   return null;
-}
+};
 
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function crc32(str /* , polynomial = 0x04C11DB7, initialValue = 0xFFFFFFFF, finalXORValue = 0xFFFFFFFF*/) {
   const s = String(str);
   const table = CRC_TABLE;
@@ -184,14 +196,14 @@ export function crc32(str /* , polynomial = 0x04C11DB7, initialValue = 0xFFFFFFF
   return (crc ^ finalXORValue) >>> 0;
 }
 
-export function htmlTextShorte(name: string, limit = 80) {
+export const htmlTextShorte = (name: string, limit = 80) => {
   if (name.length > limit) {
     return `<span title="${name}">${name.slice(0, limit - 3)}...</span>`;
   }
   return name;
-}
+};
 
-export function findRegexRecursively(object, field: string, regex: RegExp) {
+export const findRegexRecursively = (object, field: string, regex: RegExp) => {
   const currentValue = get(field, object);
   if (currentValue) {
     return regex.test(currentValue);
@@ -205,29 +217,31 @@ export function findRegexRecursively(object, field: string, regex: RegExp) {
   if (typeof nodeValue == 'string' || typeof nodeValue == 'number') {
     return (nodes.length == 0 && typeof nodeValue == 'string') ? nodeValue.match(regex) : false;
   }
-  for (const key in nodeValue) {
-    const result = findRegexRecursively(nodeValue[key], nodes.join('.'), regex);
+  for (const value of nodeValue) {
+    const result = findRegexRecursively(value, nodes.join('.'), regex);
     if (result || result === null) {
       return result;
     }
   }
   return false;
-}
+};
 
-export function groupHyperParams(hyperParams: any[]) {
-  return hyperParams.reduce((acc, {section, name, value}) => {
-    acc[section] = acc[section] || {};
-    acc[section][name] = acc[section][name] || {};
-    acc[section][name] = value;
-    return acc;
-  }, {});
-}
+export const groupHyperParams = (hyperParams: any[]) => hyperParams.reduce((acc, {section, name, value}) => {
+  acc[section] = acc[section] || {};
+  acc[section][name] = acc[section][name] || {};
+  acc[section][name] = value;
+  return acc;
+}, {});
 
-export function getScaleFactor() {
+export const getScaleFactor = () => {
   const isMac = (navigator.platform.indexOf('Mac') !== -1 || navigator.platform.indexOf('iPad') !== -1);
   const isWin = navigator.platform.indexOf('Win') !== -1;
   let dimensionRatio = 100;
   let screenHeight: number;
+
+  if(mobilecheck()) {
+    return dimensionRatio;
+  }
 
   try {
     if ((isWin || isMac) && (window['chrome'] || window['safari'])) {
@@ -239,18 +253,16 @@ export function getScaleFactor() {
   }
   dimensionRatio = 10000 / dimensionRatio;
   return dimensionRatio;
-}
+};
 
-export function cleanUserData(user: User): User {
-  return user && Object.entries(user).reduce((curr, [key, value]) => {
-    if (!(value === 'Unknown' || value === '')) {
-      curr[key] = value;
-    }
-    return curr;
-  }, {});
-}
+export const cleanUserData = (user: User): User => user && Object.entries(user).reduce((curr, [key, value]) => {
+  if (!(value === 'Unknown' || value === '')) {
+    curr[key] = value;
+  }
+  return curr;
+}, {});
 
-export function addMultipleSortColumns(oldOrders, colId, isShift) {
+export const addMultipleSortColumns = (oldOrders, colId, isShift) => {
   let orders;
   const currentSortField = oldOrders.find(field => field.field === colId);
   const newField = {
@@ -268,9 +280,25 @@ export function addMultipleSortColumns(oldOrders, colId, isShift) {
     orders = [newField];
   }
   return orders;
-}
+};
 
-export function scrollFactory(overlay: Overlay): () => CloseScrollStrategy {
-  return () => overlay.scrollStrategies.close();
-}
+export const scrollFactory = (overlay: Overlay): () => CloseScrollStrategy => () => overlay.scrollStrategies.close();
 
+export const loadExternalLibrary = (store: Store, url: string, action) => {
+  if (!url) {
+    return;
+  }
+  const init = () => {
+    const script: HTMLScriptElement = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = url;
+    script.onerror = () => console.error(`Error loading library from ${url}`);
+    script.crossOrigin = '' ;// 'use-credentials';
+    script.onload = () => store.dispatch(action());
+
+    const head: HTMLHeadElement = document.getElementsByTagName('head')[0];
+    head.appendChild(script);
+  };
+
+  setTimeout(init);
+};

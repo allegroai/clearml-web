@@ -12,6 +12,7 @@ import {MatOptionSelectionChange} from "@angular/material/core";
 export interface IOption {
   label: string;
   value: string;
+  tooltip?: string;
 }
 
 @Component({

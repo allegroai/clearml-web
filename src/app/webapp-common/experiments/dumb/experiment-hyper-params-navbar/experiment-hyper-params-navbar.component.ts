@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output, TrackByFunction} from '@angular/core';
 import {Params} from '@angular/router';
 
 @Component({
@@ -38,5 +38,5 @@ export class ExperimentHyperParamsNavbarComponent {
   constructor(private changeDetection: ChangeDetectorRef,) {
   }
 
-  trackByFn = (index: number, item: {key: string; value: any}) => item['key'];
+  trackByFn: TrackByFunction<{key: string; value: any}> = (index: number, item: {key: string; value: any}) => item['key'];
 }

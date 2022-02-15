@@ -4,6 +4,22 @@
   [style.top.px]="props?.top"
   [style.left.px]="props?.left">
   <div
+    *ngIf="props?.alpha; else noAlpha"
+    [(colorPicker)]="defaultColor"
+    [(cpToggle)]="toggle"
+    [cpOKButton]="true"
+    [cpCancelButton]="true"
+    [cpSaveClickOutside]="false"
+    [cpOKButtonClass]="'btn btn-primary btn-xs'"
+    [cpCancelButtonClass]="'btn btn-primary btn-xs m-3'"
+    [cpAlphaChannel]="'forced'"
+    [cpDisableInput]="true"
+    [cpPresetColors]="presetColors"
+    (colorPickerSelect)="selectColor($event)">
+  </div>
+<!--  cpAlphaChannel dynamic change doesn't work -> ngIf-->
+  <ng-template #noAlpha>
+  <div
     [(colorPicker)]="defaultColor"
     [(cpToggle)]="toggle"
     [cpOKButton]="true"
@@ -16,4 +32,5 @@
     [cpPresetColors]="presetColors"
     (colorPickerSelect)="selectColor($event)">
   </div>
+  </ng-template>
 </div>

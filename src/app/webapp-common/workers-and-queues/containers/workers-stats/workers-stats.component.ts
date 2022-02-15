@@ -2,7 +2,7 @@ import {Component, OnInit, Input, OnDestroy, ViewChild, ViewContainerRef} from '
 import {Worker} from '../../../../business-logic/model/workers/worker';
 import {Subscription, combineLatest} from 'rxjs';
 import {Store} from '@ngrx/store';
-import {GetStatsAndWorkers, SetStats, SetStatsParams} from '../../actions/workers.actions';
+import {getWorkers, setStats, setStatsParams} from '../../actions/workers.actions';
 import {selectStatsTimeFrame, selectStatsParams, selectStats, selectStatsErrorNotice} from '../../reducers/index.reducer';
 import {filter} from 'rxjs/operators';
 import {get} from 'lodash/fp';
@@ -55,10 +55,12 @@ export class WorkersStatsComponent implements OnInit, OnDestroy {
   ];
 
   public yAxisLabels = {
+    /* eslint-disable @typescript-eslint/naming-convention */
     'cpu_usage;gpu_usage': 'Usage %',
     memory_used: 'Bytes',
     gpu_memory_used: 'Bytes',
     'network_rx;network_tx': 'Bytes/sec'
+    /* eslint-enable @typescript-eslint/naming-convention */
   };
 
   public chartData: { dataByTopic: Topic[] };
@@ -104,21 +106,21 @@ export class WorkersStatsComponent implements OnInit, OnDestroy {
     width = Math.min(0.8 * width, 1000);
     const granularity = Math.max(Math.floor(range / width), this.activeWorker ? 10 : 40);
 
-    this.store.dispatch(new SetStats({data: null}));
-    this.store.dispatch(new GetStatsAndWorkers({maxPoints: width}));
+    this.store.dispatch(setStats({data: null}));
+    this.store.dispatch(getWorkers({maxPoints: width}));
 
     this.intervaleHandle = window.setInterval(() => {
-      this.store.dispatch(new GetStatsAndWorkers({maxPoints: width}));
+      this.store.dispatch(getWorkers({maxPoints: width}));
     }, granularity * 1000);
   }
 
   chartParamChange(event) {
     this.currentParam = event;
-    this.store.dispatch(new SetStatsParams({timeFrame: this.currentTimeFrame, param: this.currentParam}));
+    this.store.dispatch(setStatsParams({timeFrame: this.currentTimeFrame, param: this.currentParam}));
   }
 
   timeFrameChange(event) {
     this.currentTimeFrame = event;
-    this.store.dispatch(new SetStatsParams({timeFrame: this.currentTimeFrame, param: this.currentParam}));
+    this.store.dispatch(setStatsParams({timeFrame: this.currentTimeFrame, param: this.currentParam}));
   }
 }

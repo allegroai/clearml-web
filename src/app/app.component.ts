@@ -3,32 +3,25 @@ import {selectCurrentUser} from '@common/core/reducers/users-reducer';
 import {Component, OnDestroy, OnInit, ViewEncapsulation, HostListener, Renderer2, Injector} from '@angular/core';
 import {ActivatedRoute, NavigationEnd, Router, Params, RouterEvent} from '@angular/router';
 import {Title} from '@angular/platform-browser';
-import {selectLoggedOut} from '@common/core/reducers/view-reducer';
+import {selectLoggedOut} from '@common/core/reducers/view.reducer';
 import {Store} from '@ngrx/store';
 import {get} from 'lodash/fp';
 import {selectRouterParams, selectRouterUrl} from '@common/core/reducers/router-reducer';
 import {ApiProjectsService} from './business-logic/api-services/projects.service';
 import {Project} from './business-logic/model/projects/project';
-import {GetAllSystemProjects, SetSelectedProjectId, UpdateProject} from '@common/core/actions/projects.actions';
+import {getAllSystemProjects, setSelectedProjectId, updateProject} from '@common/core/actions/projects.actions';
 import {selectSelectedProject} from '@common/core/reducers/projects.reducer';
-import {
-  selectS3BucketCredentialsBucketCredentials,
-  selectS3PopUpDetails,
-  selectShowLocalFilesPopUp,
-  selectShowS3PopUp
-} from '@common/core/reducers/common-auth-reducer';
-import {MatDialog, MatDialogRef} from '@angular/material/dialog';
-import {S3AccessResolverComponent} from '@common/layout/s3-access-resolver/s3-access-resolver.component';
-import {cancelS3Credentials, getTutorialBucketCredentials} from '@common/core/actions/common-auth.actions';
+import {MatDialog} from '@angular/material/dialog';
+import {getTutorialBucketCredentials} from '@common/core/actions/common-auth.actions';
 import {termsOfUseAccepted} from '@common/core/actions/users.actions';
-import {debounceTime, distinctUntilChanged, filter, map, tap, withLatestFrom} from 'rxjs/operators';
+import {distinctUntilChanged, filter, map, tap} from 'rxjs/operators';
 import * as routerActions from './webapp-common/core/actions/router.actions';
 import {combineLatest, Observable, Subscription} from 'rxjs';
 import {selectBreadcrumbsStrings} from '@common/layout/layout.reducer';
 import {prepareNames} from './layout/breadcrumbs/breadcrumbs.utils';
 import {formatStaticCrumb} from '@common/layout/breadcrumbs/breadcrumbs-common.utils';
 import {ServerUpdatesService} from '@common/shared/services/server-updates.service';
-import {selectAvailableUpdates, selectShowSurvey} from './core/reducers/view-reducer';
+import {selectAvailableUpdates} from './core/reducers/view.reducer';
 import {UPDATE_SERVER_PATH} from './app.constants';
 import {firstLogin, plotlyReady, setScaleFactor, visibilityChanged} from '@common/core/actions/layout.actions';
 import {UiUpdatesService} from '@common/shared/services/ui-updates.service';
@@ -57,9 +50,6 @@ export class AppComponent implements OnInit, OnDestroy {
   public isWorkersContext: boolean;
   public updatesAvailable$: Observable<any>;
   private selectedProjectFromUrl$: Observable<string>;
-  private showS3Popup$: Observable<any>;
-  private s3Dialog: MatDialogRef<S3AccessResolverComponent, any>;
-  private showLocalFilePopup$: Observable<any>;
   private breadcrumbsSubscription: Subscription;
   private selectedCurrentUserSubscription: Subscription;
   private breadcrumbsStrings;
@@ -101,30 +91,10 @@ export class AppComponent implements OnInit, OnDestroy {
     private injector: Injector,
     private configService: ConfigurationService
   ) {
-    this.showS3Popup$ = this.store.select(selectShowS3PopUp);
-    this.showLocalFilePopup$ = this.store.select(selectShowLocalFilesPopUp);
     this.loggedOut$ = store.select(selectLoggedOut);
     this.isSharedAndNotOwner$ = this.store.select(selectIsSharedAndNotOwner);
     this.selectedProject$ = this.store.select(selectSelectedProject);
     this.updatesAvailable$ = this.store.select(selectAvailableUpdates);
-    this.showSurvey$ = combineLatest([this.store.select(selectShowSurvey), this.store.select(selectCurrentUser)])
-      .pipe(
-        debounceTime(0),
-        filter(([, user]) => !!user),
-        map(([show]) => {
-          if (show) {
-            let loginTime = parseInt(localStorage.getItem(USER_PREFERENCES_KEY.firstLogin), 10);
-            if(!loginTime) {
-              this.store.dispatch(firstLogin({first: true}));
-              loginTime = Date.now();
-              localStorage.setItem(USER_PREFERENCES_KEY.firstLogin, `${loginTime}`);
-              return false;
-            }
-            return Date.now() - loginTime > (14 * 24 * 60 * 60 * 1000); // 2 weeks in milliseconds
-          }
-          return false;
-        })
-      );
     this.selectedCurrentUser$ = this.store.select(selectCurrentUser);
     this.selectedProjectFromUrl$ = this.store.select(selectRouterParams)
       .pipe(
@@ -162,33 +132,22 @@ export class AppComponent implements OnInit, OnDestroy {
       distinctUntilChanged((prev, next) => prev?.id === next?.id)
     )
     .subscribe(() => {
-        this.store.dispatch(new GetAllSystemProjects());
+        this.store.dispatch(getAllSystemProjects());
         this.store.dispatch(getTutorialBucketCredentials());
         this.store.dispatch(termsOfUseAccepted());
         this.uiUpdatesService.checkForUiUpdate();
-        this.tipsService.initTipsService();
+        this.tipsService.initTipsService(false);
         this.serverUpdatesService.checkForUpdates(UPDATE_SERVER_PATH);
-      });
-
-    this.selectedProjectFromUrl$.subscribe((projectId: string) => {
-      this.store.dispatch(new SetSelectedProjectId(projectId));
+        let loginTime = parseInt(localStorage.getItem(USER_PREFERENCES_KEY.firstLogin) || '0', 10);
+        if (!loginTime) {
+          this.store.dispatch(firstLogin({first: true}));
+          loginTime = Date.now();
+          localStorage.setItem(USER_PREFERENCES_KEY.firstLogin, `${loginTime}`);
+        }
     });
 
-    this.showS3Popup$.subscribe(showS3 => {
-      if (showS3) {
-        this.s3Dialog = this.matDialog.open(S3AccessResolverComponent);
-        this.s3Dialog.afterClosed().pipe(
-          withLatestFrom(
-            this.store.select(selectS3BucketCredentialsBucketCredentials), this.store.select(selectS3PopUpDetails))
-        )
-          .subscribe(([data, bucketCredentials, popupDetails]) => {
-            if (!(data && data.success)) {
-              const emptyCredentials = bucketCredentials.find((cred => cred.Bucket === popupDetails.credentials.Bucket)) === undefined;
-              const dontAskAgainForBucketName = emptyCredentials ? '' : popupDetails.credentials.Bucket + popupDetails.credentials.Endpoint;
-              this.store.dispatch(cancelS3Credentials({dontAskAgainForBucketName}));
-            }
-          });
-      }
+    this.selectedProjectFromUrl$.subscribe((projectId: string) => {
+      this.store.dispatch(setSelectedProjectId({projectId}));
     });
 
     this.urlSubscription = combineLatest([this.store.select(selectRouterUrl), this.store.select(selectRouterParams)])
@@ -231,7 +190,7 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   nameChanged(name) {
-    this.store.dispatch(new UpdateProject({id: this.projectId, changes: {name}}));
+    this.store.dispatch(updateProject({id: this.projectId, changes: {name}}));
   }
 
   ngOnDestroy(): void {

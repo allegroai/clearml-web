@@ -1,0 +1,152 @@
+@import "../shared/ui-components/styles/variables";
+
+:host {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  text-align: center !important;
+  height: 100%;
+  overflow: auto;
+
+  ::ng-deep .mat-spinner circle {
+    stroke: #FFFFFF !important;
+  }
+}
+
+.login-box-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 310px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.mobile-warn {
+  font-size: 40px;
+  position: absolute;
+  z-index: 1;
+  display: none;
+
+  &.show {
+    display: block;
+  }
+
+  & > strong {
+    margin-right: 5px;
+  }
+
+  @media (max-width: 750px) {
+    font-size: 18px;
+  }
+}
+
+.commercial-text {
+  height: 100%;
+  flex: 1 1 350px;
+  background-repeat: no-repeat;
+  background-position: right calc(100% - 63px);
+  background-size: 100vw;
+  padding-left: 64px;
+  text-align: left;
+  overflow: auto;
+
+  @media(max-width: 655px) {
+    overflow: unset;
+    height: unset;
+    background-image: none !important;
+    padding: 24px;
+  }
+
+  @media(max-width: 420px) {
+    display: none;
+  }
+
+  .white-label {
+    margin-top: 64px;
+  }
+
+  .main-title {
+    margin-top: 174px;
+    max-width: 800px;
+    font-size: 48px;
+    font-weight: 500;
+    line-height: 64px;
+    color: $white;
+    white-space: pre;
+
+    @media only screen and (min-width: 1920px) {
+      font-size: 58px;
+      line-height: 68px;
+      max-width: 860px;
+      margin-bottom: 12px;
+    }
+
+    @media (max-width: 655px) {
+      white-space: normal;
+    }
+  }
+
+  .subtitle {
+    font-size: 18px;
+    color: $blue-200;
+    max-width: 800px;
+
+    @media only screen and (min-width: 1920px) {
+      font-size: 24px;
+      max-width: 860px;
+    }
+  }
+
+  .list {
+    max-width: 575px;
+    margin-top: 16px;
+    margin-left: 26px;
+
+    @media only screen and (min-width: 1920px) {
+      max-width: 860px;
+    }
+
+    .paragraph {
+      display: flex;
+      margin-bottom: 10px;
+
+      .context-icon {
+        display: inline-block;
+        flex-shrink: 0;
+        width: 56px;
+        height: 56px;
+        margin-right: 26px;
+        background-repeat: no-repeat;
+      }
+
+      .title {
+        font-weight: 300;
+        font-size: 22px;
+        color: $blue-100;
+
+        @media only screen and (min-width: 1920px) {
+          font-size: 24px;
+          letter-spacing: 0.02em;
+        }
+      }
+
+      .text {
+        font-size: 18px;
+        font-weight: 300;
+        color: #dbe0f7;
+
+        .icon {
+          margin-right: 12px;
+        }
+
+        @media only screen and (min-width: 1920px) {
+          font-size: 22px;
+          line-height: normal;
+        }
+      }
+    }
+  }
+}
+

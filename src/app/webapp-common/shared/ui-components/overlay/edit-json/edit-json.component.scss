@@ -6,12 +6,23 @@
     height: calc(90vh - 200px);
     overflow: auto;
     background-color: $blue-600;
-    color: #ffffff;
-    font-family: monospace;
-    padding: 12px;
     border-radius: 4px;
     resize: none;
+
+    .data-text-ace  {
+      width: 100%;
+      height: 100%;
+      background-color: $blue-600;
+      color: #ffffff;
+      font-family: monospace;
+      font-size: 14px;
+      line-height: 1.3;
+    }
   }
+
+::ng-deep .ace_marker-layer .ace_selection {
+  background-color: $neon-green;
+}
 
   .buttons {
     display: flex;

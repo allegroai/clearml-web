@@ -4,6 +4,7 @@
   .modal-container {
     background-color: $white;
     height: 100%;
+
     .graph-container {
       padding: 0 64px;
       background-color: $white;
@@ -11,15 +12,64 @@
 
     &.dark-theme {
       background-color: $blue-950;
+
       .graph-container {
         background-color: $blue-950;
       }
+
+      .graph-displayer-header {
+        border-bottom: solid 1px transparent;
+        .chart-title {
+          color: $blue-100;
+        }
+      }
     }
+
   }
+
   .graph-displayer-header {
+    border-bottom: solid 1px #f1f1f1;;
+    .load-spinner {
+      display: inline-block;
+      vertical-align: middle;
+      background-image: url("#{$assets-icons-path}/Spinner.svg");
+      background-repeat: no-repeat;
+      background-size: 18px;
+      width: 24px;
+      height: 24px;
+      background-position: center;
+    }
+
+    .chart-title {
+      font-size: 18px;
+      color: $blue-500;
+    }
+
     height: 56px;
     display: flex;
     align-items: center;
     padding: 0 24px;
+  }
+  .smooth-input {
+    width: 66px;
+    margin-left: 6px;
+  }
+  .graph-container{
+    margin-top: 8px;
+  }
+
+  .graph-controls {
+    position: absolute;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    padding: 8px 128px;
+    .label-text {
+      display: flex;
+      align-items: center;
+      white-space: nowrap;
+      padding-right: 12px;
+      padding-bottom: 4px;
+    }
   }
 }

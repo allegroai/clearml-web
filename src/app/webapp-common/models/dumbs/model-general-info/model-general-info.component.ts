@@ -7,7 +7,10 @@ import {DatePipe} from '@angular/common';
 import {TIME_FORMAT_STRING} from '../../../constants';
 import {Store} from '@ngrx/store';
 import {ActivateModelEdit, CancelModelEdit} from '../../actions/models-info.actions';
-import {AdminService} from '../../../../features/admin/admin.service';
+import {AdminService} from '~/shared/services/admin.service';
+import {getSignedUrl} from '../../../core/actions/common-auth.actions';
+import {selectSignedUrl} from '../../../core/reducers/common-auth-reducer';
+import {filter, map, take} from 'rxjs/operators';
 
 @Component({
   selector: 'sm-model-general-info',
@@ -32,6 +35,7 @@ export class ModelGeneralInfoComponent {
       this.isLocalFile = this.adminService.isLocalFile(model.uri);
       this.kpis = [
         {label: 'CREATED AT', value: model.created ? (this.datePipe.transform(model.created, TIME_FORMAT_STRING)) : 'NA'},
+        {label: 'UPDATED AT', value: model.last_update ? (this.datePipe.transform(model.last_update, TIME_FORMAT_STRING)) : 'NA'},
         {label: 'FRAMEWORK', value: model.framework || NA},
         {label: 'STATUS', value: (model.ready !== undefined) ? (model.ready ? 'Published' : 'Draft') : NA},
         {label: 'MODEL URL', value: model.uri || NA, downloadable: true},
@@ -75,10 +79,18 @@ export class ModelGeneralInfoComponent {
   }
 
   downloadModelClicked() {
-    const signed = this.adminService.signUrlIfNeeded(this.model.uri);
-    const a = document.createElement('a') as HTMLAnchorElement;
+    const url = this.model.uri;
+    this.store.dispatch(getSignedUrl({url}));
+    this.store.select(selectSignedUrl(url))
+      .pipe(
+        filter(signed => !!signed?.signed),
+        map(({signed: signedUrl}) => signedUrl),
+        take(1)
+      ).subscribe(signed => {
+      const a = document.createElement('a') as HTMLAnchorElement;
       a.target = '_blank';
-      a.href = signed || this.model.uri;
+      a.href = signed;
       a.click();
+    });
   }
 }

@@ -1,7 +1,7 @@
 import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {Store, Action, ActionCreator} from '@ngrx/store';
-import {combineLatest, Observable, of, Subscription} from 'rxjs';
-import {debounceTime, filter, map, shareReplay, take, throttleTime} from 'rxjs/operators';
+import {Action, ActionCreator, Store} from '@ngrx/store';
+import {combineLatest, Observable, of, Subject, Subscription} from 'rxjs';
+import {debounceTime, filter, finalize, map, shareReplay, take, takeUntil, throttleTime} from 'rxjs/operators';
 import {Project} from '../../../business-logic/model/projects/project';
 import {isReadOnly} from '../utils/shared-utils';
 import {selectSelectedProject} from '../../core/reducers/projects.reducer';
@@ -12,7 +12,6 @@ import {ITableExperiment} from '../../experiments/shared/common-experiment-model
 import {EntityTypeEnum} from '../../../shared/constants/non-common-consts';
 import {IFooterState} from './footer-items/footer-items.models';
 import {
-  CountAvailableAndIsDisable,
   CountAvailableAndIsDisableSelectedFiltered,
   selectionAllHasExample,
   selectionAllIsArchive,
@@ -25,21 +24,22 @@ import {
   template: ''
 })
 export abstract class BaseEntityPage implements OnInit, AfterViewInit, OnDestroy {
-  protected preventUrlUpdate = false;
-  public projectId: string;
+  private dragSub: Subscription;
   protected selectedProject$: Observable<Project>;
   protected showInfoSub: Subscription;
-
+  protected preventUrlUpdate = false;
+  protected setSplitSizeAction: any;
+  protected selectedExperiments: ITableExperiment[];
+  protected addTag: ActionCreator<string, any>;
+  public projectId: string;
   public isExampleProject: boolean;
   public selectSplitSize$?: Observable<number>;
   public infoDisabled: boolean;
-  private dragSub: Subscription;
-  protected setSplitSizeAction: any;
   public splitInitialSize: number;
   public minimizedView: boolean;
-  protected selectedExperiments: ITableExperiment[];
-  protected addTag: ActionCreator<string, any>;
-  footerItems = [];
+  public footerItems = [];
+  public footerState$: Observable<IFooterState<any>>;
+  private destroy$ = new Subject();
 
   @ViewChild('split') split: SplitComponent;
 
@@ -87,6 +87,9 @@ export abstract class BaseEntityPage implements OnInit, AfterViewInit, OnDestroy
   ngOnDestroy(): void {
     this.dragSub?.unsubscribe();
     this.showInfoSub?.unsubscribe();
+    this.footerItems = [];
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   dispatchAndLock(action: Action) {
@@ -117,17 +120,32 @@ export abstract class BaseEntityPage implements OnInit, AfterViewInit, OnDestroy
 
   protected abstract getParamId(params);
 
-  createFooterState<T = any>(selected$: Observable<Array<any>>, data$?: Observable<Record<string, CountAvailableAndIsDisableSelectedFiltered>>): Observable<IFooterState<T>> {
+  createFooterState<T = any>(
+    selected$: Observable<Array<any>>,
+    data$?: Observable<Record<string, CountAvailableAndIsDisableSelectedFiltered>>,
+    showAllSelectedIsActive$?: Observable<boolean>,
+    companyTags$?: Observable<string[]>,
+    projectTags$?: Observable<string[]>,
+    tagsFilterByProject$?: Observable<boolean>
+  ): Observable<IFooterState<T>> {
     data$ = data$ || of({});
+    projectTags$ = projectTags$ || of([]);
+    companyTags$ = companyTags$ || of([]);
+    tagsFilterByProject$ = tagsFilterByProject$ || of(true);
     return combineLatest(
       [
         selected$,
-        data$
+        data$,
+        showAllSelectedIsActive$,
+        companyTags$,
+        projectTags$,
+        tagsFilterByProject$
       ]
     ).pipe(
+      takeUntil(this.destroy$),
       debounceTime(100),
       filter(([selected]) => selected.length > 1),
-      map(([selected, data]) => {
+      map(([selected, data, showAllSelectedIsActive, companyTags, projectTags, tagsFilterByProject]) => {
         const _selectionAllHasExample = selectionAllHasExample(selected);
         const _selectionHasExample = selectionHasExample(selected);
         const _selectionExamplesCount = selectionExamplesCount(selected);
@@ -138,12 +156,16 @@ export abstract class BaseEntityPage implements OnInit, AfterViewInit, OnDestroy
           selectionIsOnlyExamples: _selectionExamplesCount.length === selected.length,
           selected,
           selectionAllIsArchive: isArchive,
-          data
+          data,
+          showAllSelectedIsActive,
+          companyTags,
+          projectTags,
+          tagsFilterByProject
         };
       }
       ),
       filter(({selected, data}) => !!selected && !!data),
-      shareReplay()
+      //shareReplay()
     );
   }
 }

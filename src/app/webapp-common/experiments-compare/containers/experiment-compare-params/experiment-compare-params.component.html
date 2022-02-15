@@ -12,7 +12,7 @@
     </sm-experiment-compare-general-data>
   </div>
   <div class="tree-card-body" *compareCardBody="let experiment; let i = index">
-    <div class="section h-100" *ngIf="experimentsDataControl[experiment.id]">
+    <div #section class="section h-100" *ngIf="experimentsDataControl[experiment.id]">
       <!--      TODO: move is-not-origin class outside nodes tree-->
       <ng-template let-dataSource="dataSource"
                    let-treeControl="treeControl"
@@ -25,7 +25,7 @@
               <div *ngIf="node.hasChildren" class="section" [ngClass]="'depth-' + node.level">
                 <div class="content"
                      (click)="toggleNode(node)"
-                     [ngClass]="node?.metaData?.classStyle"
+                     [ngClass]="node?.data?.classStyle"
                      [class.selected-diff]="checkIfSelectedPath(node.data)"
                      [class.identical-row]="!allPaths[node.data.path]">
                   <i class="fas" [style.margin-left.px]="2 + node.level * 20" [ngClass]="treeControl.isExpanded(node) ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
@@ -43,13 +43,18 @@
                   'equal-row': node.data.isValueEqualToOrigin,
                   'hide-identical-mode': hideIdenticalFields
                 }">
-                  <div *ngIf="(node.data.value !== undefined) || (node.data.existOnOrigin && node.data.existOnCompared)" class="node-row">
-                    <pre class="node-key ellipsis">{{node.data.key}}</pre>
+                  <div *ngIf="(node.data.value !== undefined) || (node.data.existOnOrigin && node.data.existOnCompared)" #row class="node-row">
+                    <pre class="node-key"
+                         [class.no-ellipsis]="node.data.key.length < 15"
+                         [class.ellipsis]="showEllipsis"
+                    >{{node.data.key}}<i  class="al-icon sm al-ico-line-expand extend-toggle" [class.fa-rotate-180]="!showEllipsis" (click)="toggleEllipsis(); $event.stopPropagation()"></i>
+                    </pre>
                     <pre class="node-val"
+                         [style.width]="showEllipsis ? (section.clientWidth - 250) + 'px' : null"
                          [class.no-ellipsis]="node.data.value.length < 15"
                          [class.ellipsis]="showEllipsis">{{node.data.value}}<i  class="al-icon sm al-ico-line-expand extend-toggle" [class.fa-rotate-180]="!showEllipsis" (click)="toggleEllipsis(); $event.stopPropagation()"></i>
                     </pre>
-                    <i *ngIf="node.metaData.tooltip" class="al-icon sm al-ico-description node-icon" customClass="hyper-parameters-tooltip" [smTooltip]="node.metaData.tooltip"></i>
+                    <i *ngIf="node.data.tooltip" class="al-icon sm al-ico-description node-icon" customClass="hyper-parameters-tooltip" [smTooltip]="node.data.tooltip"></i>
                   </div>
                 </div>
               </div>

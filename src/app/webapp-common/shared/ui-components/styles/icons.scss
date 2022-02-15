@@ -30,6 +30,10 @@
     color: $blue-400;
   }
 
+  &.blue-570 {
+    color: $blue-570;
+  }
+
 }
 .al-icon, .icon {
   width: 24px;
@@ -521,4 +525,7 @@
 
 .i-markdown {
   @include icon('#{$assets-icons-path}/ico-markdown.svg');
+}
+.i-c-logo {
+  @include icon('#{$assets-icons-path}/c-logomark.svg');
 }

@@ -1,52 +1,56 @@
-<div>
-  <div *ngIf="frame.url && !isFailed" class="item snippet" [ngClass]="{'loading' : isLoading}">
-    <img
-      *ngIf="!isVideo && !isAudio && !isHtml"
-      class="pointer"
-      [src]="frame.url"
-      (error)="imageError.emit(); isFailed = true"
-      (click)="imageClicked.emit()"
-      (load)="loadedMedia()"
-      [ngClass]="{'loading' : isLoading}"
-    >
-    <video
-      #video
-      *ngIf="isVideo || isAudio"
-      preload="metadata"
-      class="pointer w-100 h-100"
-      [src]="frame.url"
-      (error)="imageError.emit(); isFailed = true"
-      (loadedmetadata)="loadedMedia()"
-      (click)="imageClicked.emit()"
-    ></video>
-    <div class="html-snippet" *ngIf="isHtml">
-      <div class="html-wrap">
-        <iframe class="html-viewer" width="400" height="400" referrerpolicy="origin-when-cross-origin" [src]="frame.url | safe:'url'"></iframe>
-      </div>
-      <div class="toolbar">
-        <div class="clickable-icon d-flex align-items-center justify-content-center pointer mr-2"
-             ngxClipboard
-             smTooltip="Copy URL"
-             [cbContent]="frame.url || frame.oldSrc"
-             (cbOnSuccess)="copyToClipboardSuccess(true)">
-          <i class="fas fa-copy"></i>
+<ng-container *ngIf="(source$ | async) as source">
+  <div *ngIf="!isFailed" class="item snippet" [ngClass]="{'loading' : isLoading}">
+    <ng-container [ngSwitch]="type">
+      <img
+        *ngSwitchCase="'image'"
+        class="pointer"
+        [src]="source"
+        (error)="isFailed = true"
+        (click)="imageClicked.emit()"
+        (load)="loadedMedia()"
+        [ngClass]="{'loading' : isLoading}"
+      >
+      <video
+        #video
+        *ngSwitchCase="'player'"
+        preload="metadata"
+        class="pointer w-100 h-100"
+        [src]="source"
+        (error)="imageError.emit(); isFailed = true"
+        (loadedmetadata)="loadedMedia()"
+        (click)="imageClicked.emit()"
+      ></video>
+      <div class="html-snippet" *ngSwitchCase="'html'">
+        <div class="html-wrap">
+          <iframe class="html-viewer" width="400" height="400" referrerpolicy="origin-when-cross-origin" [src]="source | safe:'url'"></iframe>
         </div>
-        <div class="clickable-icon d-flex align-items-center justify-content-center pointer"
-             smTooltip="Open URL in a new Tab"
-             (click)="openInNewTab()"
-        >
-          <i class="fas fa-external-link-alt"></i>
+        <div class="toolbar">
+          <div class="clickable-icon d-flex align-items-center justify-content-center pointer mr-2"
+               ngxClipboard
+               smTooltip="Copy URL"
+               [cbContent]="source"
+               (cbOnSuccess)="copyToClipboardSuccess(true)">
+            <i class="fas fa-copy"></i>
+          </div>
+          <div class="clickable-icon d-flex align-items-center justify-content-center pointer"
+               smTooltip="Open URL in a new Tab"
+               (click)="openInNewTab(source)"
+          >
+            <i class="fas fa-external-link-alt"></i>
+          </div>
         </div>
       </div>
-    </div>
+    </ng-container>
     <div *ngIf="!isLoading" class="image-var ellipsis" [smTooltip]="frame?.variant">{{frame?.variantAndMetric || frame?.variant}}</div>
   </div>
+</ng-container>
 
-  <div *ngIf="!frame.url || isFailed" class="item">
+<ng-container *ngIf="(source$ | async) as source">
+  <div *ngIf="isFailed" class="item">
     <sm-snippet-error
-      [theme]="ThemeEnum.Light"
-      [copyContent]="(frame.url || frame.oldSrc)?.split('?X-Amz-Date')[0]"
-      (openImageClicked)="openInNewTab()"
+      [theme]="themeEnum.Light"
+      [copyContent]="source?.split('?X-Amz-Date')[0]"
+      (openImageClicked)="openInNewTab(source)"
     ></sm-snippet-error>
   </div>
-</div>
+</ng-container>

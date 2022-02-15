@@ -1,51 +1,52 @@
 <div class="filter-sort-container d-flex align-items-center"
      [ngClass]="isFiltered() ? 'active' : 'deactive'">
-  <div class='cell pointer'>
-    <i [class]="'icon ' + (isFiltered()? 'i-filter-on':'i-filter-off')" mat-button [matMenuTriggerFor]="menu" (menuOpened)="menuOpened.emit()"></i>
+  <div mat-button class='cell pointer'>
+    <i [class]="'icon ' + (isFiltered()? 'i-filter-on':'i-filter-off')" [matMenuTriggerFor]="menu"></i>
   </div>
-  <mat-menu #menu="matMenu" class="table-card-filter-menu" classList="light-theme" (closed)="closeMenu()">
+  <mat-menu #menu="matMenu" class="table-card-filter-menu" classList="light-theme">
     <ng-container *ngFor="let option of (options | keyvalue); trackBy: trackByKey">
-      <button mat-menu-item [matMenuTriggerFor]="subMenu">
-        <i [class.hidden]="!isOptionFiltered(option.key)" class="filter-point icon i-v-black xs"></i> {{getColName(option.key)}}
-      </button>
-      <mat-menu #subMenu="matMenu" class="table-card-filter-menu light-theme">
-        <form class="filter-form">
-          <mat-form-field appearance="fill" *ngIf="searchable(option.key)" smClickStopPropagation class="tags-menu-input w-100">
-            <input matInput (input)="setSearchTerm($event, option.key)" name="filter" [(ngModel)]="searchTerms[option.key]" autocomplete="off">
-            <i matSuffix [class]="'fa mr2 ' + (searchTerms[option.key]? 'fa-times pointer':'fa-search')" (click)="searchTerms[option.key] && clearSearch(option.key)"></i>
-          </mat-form-field>
-        </form>
-        <div *ngIf="andFilter(option.key)" class="filter-type" smClickStopPropagation>
+      <ng-template let-col
+                   [ngTemplateOutletContext]="{$implicit: getColumnByOption(option)}"
+                   [ngTemplateOutlet]="column" #column
+      >
+        <button mat-menu-item [matMenuTriggerFor]="subMenu" (menuOpened)="menuOpened.emit(col)">
+          <i [class.hidden]="!isOptionFiltered(option.key)" class="filter-point icon i-v-black xs"></i> {{col?.header}}
+        </button>
+        <mat-menu #subMenu="matMenu" class="table-card-filter-menu light-theme" (close)="closeMenu(col)">
+          <form class="filter-form">
+            <mat-form-field appearance="fill" *ngIf="col?.searchableFilter" smClickStopPropagation class="tags-menu-input w-100">
+              <input matInput (input)="setSearchTerm($event, option.key)" name="filter" [(ngModel)]="searchTerms[option.key]" autocomplete="off">
+              <i matSuffix [class]="'fa mr2 ' + (searchTerms[option.key]? 'fa-times pointer':'fa-search')" (click)="searchTerms[option.key] && clearSearch(option.key)"></i>
+            </mat-form-field>
+          </form>
+          <div *ngIf="col?.andFilter" class="filter-type" smClickStopPropagation>
           <span class="link mr-3" [class.selected]="filterMatch[option.key] !== 'AND'"
-                (click)="toggleCombination(option.key, $event)">Any</span>
-          <span class="link" [class.selected]="filterMatch[option.key] === 'AND'"
-                (click)="toggleCombination(option.key, $event)">All</span>
-        </div>
-        <div class="results" [class.scroll]="searchable(option.key)">
-          <sm-menu-item
-            *ngFor="let subOption of option.value |filter:searchTerms[option.key]:'label'; trackBy: trackByLabel"
-            [itemLabel]="subOption.label"
-            [checked]="value[option.key]?.includes(subOption.value)" [selectable]="true"
-            [itemValue]="subOption.value"
-            [itemTooltip]="subOption.tooltip"
-            [enableTooltip]="!!subOption.tooltip"
-            (itemClicked)="onFilterChanged(option.key, $event)">
-          </sm-menu-item>
-          <div *ngIf="(option.value |filter:searchTerms[option.key]:'label').length===0" class="flex-middle">No item found</div>
-        </div>
-        <div class="fixed-options" *ngIf="option.key==='tags'">
-          <mat-divider></mat-divider>
-          <div *ngIf="subOptions?.length" class="fixed-options-subheader">
-            {{fixedOptionsSubheader}}
+                (click)="toggleCombination(option.key)">Any</span>
+            <span class="link" [class.selected]="filterMatch[option.key] === 'AND'"
+                  (click)="toggleCombination(option.key)">All</span>
           </div>
-          <sm-menu-item
-            *ngFor="let option of subOptions; trackBy: trackByLabel"
-            [itemLabel]="option.label"
-            [checked]="subValue?.includes(option.value)" [selectable]="true" [itemValue]="option.value"
-            (itemClicked)="onSubFilterChanged({id:'system_tags'},$event)"
-          ></sm-menu-item>
-        </div>
-      </mat-menu>
+          <div class="results" [class.scroll]="col.searchableFilter" *ngIf="col" smClickStopPropagation>
+             <sm-checkbox-three-state-list
+               [supportExcludeFilter]="col.excludeFilter"
+               [checkedList]="value[col.id]"
+               [options]="option.value | filter : searchTerms[option.key]: 'label'"
+               (filterChanged)="emitFilterChangedCheckBox(option.key, $event)"
+             > </sm-checkbox-three-state-list>
+          </div>
+          <div class="fixed-options" *ngIf="option.key==='tags'">
+            <mat-divider></mat-divider>
+            <div *ngIf="subOptions?.length" class="fixed-options-subheader">
+              {{fixedOptionsSubheader}}
+            </div>
+            <sm-menu-item
+              *ngFor="let option of subOptions; trackBy: trackByLabel"
+              [itemLabel]="option.label"
+              [checked]="subValue?.includes(option.value)" [selectable]="true" [itemValue]="option.value"
+              (itemClicked)="onSubFilterChanged({id:'system_tags'},$event)"
+            ></sm-menu-item>
+          </div>
+        </mat-menu>
+      </ng-template>
     </ng-container>
   </mat-menu>
 </div>

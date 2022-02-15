@@ -65,6 +65,33 @@ $font-family-base: $font-family-base;
 
   }
 
+  .btn-dark-fill {
+    line-height: 22px;
+    border-width: 0;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    text-align: center;
+    transition: background-color ease-in-out 0.3s;
+    background-color: $blue-600;
+    color: #a7b2d8;
+    margin: 0 6px !important;
+
+    &:hover:enabled {
+      background-color: $purple;
+      color: white;
+    }
+
+    &:active:enabled {
+      background-color: $purple;
+    }
+
+    &:disabled {
+      cursor: auto;
+      pointer-events: none !important;
+    }
+  }
+
   .btn-primary {
     color: map-get($light-bootstrap-theme, primary-font-color) !important;
   }
@@ -90,7 +117,7 @@ $font-family-base: $font-family-base;
   .btn-outline-neon {
     height: 32px;
     border-radius: 4px;
-    font-weight: bold;
+    font-weight: 500;
     background-color: $white;
     border: solid 1px $neon-yellow;
     padding: 0 32px;
@@ -188,8 +215,8 @@ $font-family-base: $font-family-base;
     border-width: 0;
     border-radius: 4px;
     background-color: $grey-purple;
-    font-size: 11px;
-    font-weight: bold;
+    font-size: 12px;
+    font-weight: 500;
     text-align: center;
     color: #ffffff;
     transition: background-color ease-in-out 0.3s;
@@ -241,6 +268,7 @@ $font-family-base: $font-family-base;
     padding: 0 32px;
     color: $blue-500;
     font-size: 12px;
+
     &:hover {
       background-color: #f8f9fa; // TODO: ask brio.
       border: solid 1px $neon-yellow-hover;
@@ -280,7 +308,7 @@ label.mat-slide-toggle-label {
 }
 
 .btn {
-  font-size: 11px;
+  font-size: 12px;
   line-height: normal;
   letter-spacing: 0.03em;
 }

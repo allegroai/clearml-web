@@ -12,20 +12,14 @@
     }
   }
 
-  /* width */
-  ::-webkit-scrollbar {
-    width: 8px;
-  }
-
   /* Track */
   ::-webkit-scrollbar-track {
-    background: $blue-600;
+    background-color: $blue-600;
   }
 
   /* Handle */
   ::-webkit-scrollbar-thumb {
-    border-radius: 4px;
-    background: $dark-grey-blue-nine;
+    background-color: $dark-grey-blue-nine;
   }
   .model-table-container {
     transition: all 0.3s;

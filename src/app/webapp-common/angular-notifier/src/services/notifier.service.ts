@@ -61,12 +61,12 @@ export class NotifierService {
    * @param notificationOptions Notification options
    */
   public show(notificationOptions: NotifierNotificationOptions): Subject<any> {
-    const lala = new Subject();
+    const subject = new Subject();
     this.queueService.push({
-      payload: {...notificationOptions, observer: lala},
+      payload: {...notificationOptions, observer: subject},
       type: 'SHOW'
     });
-    return lala;
+    return subject;
   }
 
   /**

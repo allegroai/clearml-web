@@ -1,6 +1,5 @@
 import {Directive, Input} from '@angular/core';
 import {MAT_TOOLTIP_DEFAULT_OPTIONS, MatTooltip, MatTooltipDefaultOptions} from '@angular/material/tooltip';
-import {TooltipPosition} from "@angular/material/tooltip/tooltip";
 
 export type TooltipTypeEnum = 'help' | 'validation' | 'error';
 

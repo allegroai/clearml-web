@@ -4,6 +4,7 @@ import {trackByIndex} from "@common/shared/utils/forms-track-by";
 export interface CirclesInRowInterface {
   name?: string;
   initials?: string;
+  class?: string;
 }
 @Component({
   selector: 'sm-circles-in-row',

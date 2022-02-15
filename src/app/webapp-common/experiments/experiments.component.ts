@@ -1,5 +1,27 @@
 import {ChangeDetectionStrategy, Component, OnDestroy, OnInit, ViewChild,} from '@angular/core';
-import {selectActiveParentsFilter, selectedExperimentsDisableAvailable, selectExperimentsHiddenTableCols, selectExperimentsList, selectExperimentsMetricsColsForProject, selectExperimentsParents, selectExperimentsTableCols, selectExperimentsTableColsOrder, selectExperimentsTags, selectExperimentsTypes, selectExperimentsUsers, selectHyperParamsOptions, selectHyperParamsVariants, selectIsExperimentInEditMode, selectNoMoreExperiments, selectSelectedExperiments, selectSelectedTableExperiment, selectShowAllSelectedIsActive, selectSplitSize, selectTableFilters, selectTableSortFields} from './reducers/index';
+import {
+  selectActiveParentsFilter,
+  selectedExperimentsDisableAvailable,
+  selectExperimentsHiddenTableCols,
+  selectExperimentsList,
+  selectExperimentsMetricsColsForProject,
+  selectExperimentsParents,
+  selectExperimentsTableCols,
+  selectExperimentsTableColsOrder,
+  selectExperimentsTags,
+  selectExperimentsTypes,
+  selectExperimentsUsers,
+  selectHyperParamsOptions,
+  selectHyperParamsVariants,
+  selectIsExperimentInEditMode,
+  selectNoMoreExperiments,
+  selectSelectedExperiments,
+  selectSelectedTableExperiment,
+  selectShowAllSelectedIsActive,
+  selectSplitSize,
+  selectTableFilters,
+  selectTableSortFields
+} from './reducers';
 import {
   selectCompanyTags,
   selectIsArchivedMode,
@@ -13,28 +35,29 @@ import {ColHeaderTypeEnum, ISmCol, TableSortOrderEnum} from '../shared/ui-compon
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {get, isEqual} from 'lodash/fp';
 import {selectRouterParams} from '../core/reducers/router-reducer';
-import {distinctUntilChanged, filter, map, skip, tap, withLatestFrom} from 'rxjs/operators';
+import {debounceTime, distinctUntilChanged, filter, map, skip, tap, throttleTime, withLatestFrom} from 'rxjs/operators';
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {combineLatest, interval, Observable, Subscription} from 'rxjs';
 import {ConfirmDialogComponent} from '../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
-import {selectAppVisible, selectAutoRefresh, selectBackdropActive} from '../core/reducers/view-reducer';
+import {selectAppVisible, selectAutoRefresh, selectBackdropActive} from '../core/reducers/view.reducer';
 import {InitSearch, ResetSearch} from '../common-search/common-search.actions';
 import {ICommonSearchState, selectSearchQuery} from '../common-search/common-search.reducer';
 import {ITableExperiment} from './shared/common-experiment-model.model';
 import {IExperimentsViewState} from '../../features/experiments/reducers/experiments-view.reducer';
-import {selectIsSharedAndNotOwner, selectMetricsLoading, selectMetricVariants, selectSelectedExperiment} from '../../features/experiments/reducers';
+import {
+  selectIsSharedAndNotOwner,
+  selectMetricsLoading,
+  selectMetricVariants,
+  selectSelectedExperiment
+} from '../../features/experiments/reducers';
 import {EXPERIMENTS_TABLE_COL_FIELDS} from '../../features/experiments/shared/experiments.const';
 import * as experimentsActions from './actions/common-experiments-view.actions';
+import {setTableFilters} from './actions/common-experiments-view.actions';
 import {MetricVariantResult} from '../../business-logic/model/projects/metricVariantResult';
 import {AUTO_REFRESH_INTERVAL} from '../../app.constants';
 import {setAutoRefresh} from '../core/actions/layout.actions';
-import {ResetProjectSelection, setDeep} from '../core/actions/projects.actions';
-import {
-  createMetricColumn,
-  decodeColumns,
-  decodeFilter,
-  decodeOrder,
-} from '../shared/utils/tableParamEncode';
+import {resetProjectSelection, setDeep} from '../core/actions/projects.actions';
+import {createMetricColumn, decodeColumns, decodeFilter, decodeOrder,} from '../shared/utils/tableParamEncode';
 import {BaseEntityPage} from '../shared/entity-page/base-entity-page';
 import {User} from '../../business-logic/model/users/user';
 import {groupHyperParams, isReadOnly} from '../shared/utils/shared-utils';
@@ -57,15 +80,14 @@ import {MoveToFooterItem} from '../shared/entity-page/footer-items/move-to-foote
 import {EnqueueFooterItem} from '../shared/entity-page/footer-items/enqueue-footer-item';
 import {AbortFooterItem} from '../shared/entity-page/footer-items/abort-footer-item';
 import {addTag} from './actions/common-experiments-menu.actions';
-import {
-  CountAvailableAndIsDisableSelectedFiltered,
-  MenuItems
-} from '../shared/entity-page/items.utils';
+import {CountAvailableAndIsDisableSelectedFiltered, MenuItems} from '../shared/entity-page/items.utils';
 import {ExperimentsTableComponent} from './dumb/experiments-table/experiments-table.component';
 import {DequeueFooterItem} from '../shared/entity-page/footer-items/dequeue-footer-item';
-import { HasReadOnlyFooterItem } from '../shared/entity-page/footer-items/has-read-only-footer-item';
+import {HasReadOnlyFooterItem} from '../shared/entity-page/footer-items/has-read-only-footer-item';
 import {MetricValueType} from '../experiments-compare/reducers/experiments-compare-charts.reducer';
-import {GetAllProjectsPageProjects, ResetProjectsSearchQuery} from "../projects/common-projects.actions";
+import {FilterMetadata} from 'primeng/api/filtermetadata';
+import {filterArchivedExperiments} from './shared/common-experiments.utils';
+import {AbortAllChildrenFooterItem} from '../shared/entity-page/footer-items/abort-all-footer-item';
 
 @Component({
   selector: 'sm-common-experiments',
@@ -75,7 +97,7 @@ import {GetAllProjectsPageProjects, ResetProjectsSearchQuery} from "../projects/
 })
 export class ExperimentsComponent extends BaseEntityPage implements OnInit, OnDestroy {
 
-  public EntityTypeEnum = EntityTypeEnum;
+  public entityTypeEnum = EntityTypeEnum;
   public experiments$: Observable<Array<ITableExperiment>>;
   public noMoreExperiments$: Observable<boolean>;
   public tableSortFields$: Observable<SortMeta[]>;
@@ -96,7 +118,7 @@ export class ExperimentsComponent extends BaseEntityPage implements OnInit, OnDe
   private searchSubs: Subscription;
   public selectedTableExperiment$: Observable<ITableExperiment>;
   public selectedExperimentsDisableAvailable$: Observable<Record<string, CountAvailableAndIsDisableSelectedFiltered>>;
-  private ExperimentFromUrlSub: Subscription;
+  private experimentFromUrlSub: Subscription;
   private refreshing: boolean;
   public backdropActive$: Observable<any>;
   private searchQuery$: Observable<ICommonSearchState['searchQuery']>;
@@ -124,6 +146,7 @@ export class ExperimentsComponent extends BaseEntityPage implements OnInit, OnDe
   protected addTag = addTag;
   @ViewChild('experimentsTable') private table: ExperimentsTableComponent;
   private selectedProjectSubscription: Subscription;
+  private deep: boolean;
 
   get selectedProject() {
     return this.route.parent.snapshot.params.projectId;
@@ -181,7 +204,7 @@ export class ExperimentsComponent extends BaseEntityPage implements OnInit, OnDe
     this.experiments$ = this.store.select(selectExperimentsList).pipe(
       withLatestFrom(this.isArchived$),
       // lil hack for hiding archived task after they been archived from task info or footer...
-      map(([experiments, showArchived]) => this.filterArchivedExperiments(experiments, showArchived)),
+      map(([experiments, showArchived]) => filterArchivedExperiments(experiments, showArchived)),
       tap(() => this.refreshing = false)
     );
     this.syncAppSearch();
@@ -205,18 +228,25 @@ export class ExperimentsComponent extends BaseEntityPage implements OnInit, OnDe
     ).subscribe(() => {
       this.refreshList(true);
     });
-    this.selectedProjectSubscription = this.selectedProject$.pipe(filter(project=> !!project)).subscribe((project) => {
+    this.selectedProjectSubscription = this.selectedProject$.pipe(filter(project => !!project)).subscribe(() => {
       this.dispatchAndLock(experimentsActions.getExperiments());
     });
 
     this.filteredTableCols$ = combineLatest([this.columns$, this.metricTableCols$])
       .pipe(
+        filter(([tableCols, metricCols]) => !!tableCols && !!metricCols),
         map(([tableCols, metricCols]) =>
           tableCols.concat(metricCols.map(col => ({...col, metric: true})))
-            .filter(col => col.id !== EXPERIMENTS_TABLE_COL_FIELDS.PROJECT || this.selectedProject == '*'))
-      ); // Only show project col on "all projects"
+            // Only show project col on "all projects"
+            .filter(col => (col.id !== EXPERIMENTS_TABLE_COL_FIELDS.PROJECT || this.deep || this.selectedProject === '*'))
+        ),
+        tap(() => this.table?.table?.resize(100))
+        );
 
-    this.tableCols$ = this.filteredTableCols$.pipe(map(cols => cols.filter(col => !col.hidden)));
+    this.tableCols$ = this.filteredTableCols$.pipe(
+      distinctUntilChanged((a, b) => isEqual(a, b)),
+      map(cols => cols.filter(col => !col.hidden))
+    );
     let prevQueryParams: Params;
 
     this.selectedProjectSubs = combineLatest([
@@ -259,6 +289,7 @@ export class ExperimentsComponent extends BaseEntityPage implements OnInit, OnDe
         }
       }
       if (queryParams.deep) {
+        this.deep = true;
         this.store.dispatch(setDeep({deep: true}));
       }
 
@@ -280,33 +311,40 @@ export class ExperimentsComponent extends BaseEntityPage implements OnInit, OnDe
     showAllSelectedIsActive$: Observable<boolean>;
     data$?: Observable<Record<string, CountAvailableAndIsDisableSelectedFiltered>>;
     tags$: Observable<string[]>;
-    companyTags$:   Observable<string[]>;
+    companyTags$: Observable<string[]>;
     projectTags$: Observable<string[]>;
     tagsFilterByProject$: Observable<boolean>;
   }) {
-    const state$ = this.createFooterState(config.selected$, config.data$);
+    this.footerState$ = this.createFooterState(
+      config.selected$,
+      config.data$,
+      config.showAllSelectedIsActive$,
+      config.companyTags$,
+      config.projectTags$,
+      config.tagsFilterByProject$
+      )
 
     this.footerItems = [
-      new ShowItemsFooterSelected(config.entitiesType, config.showAllSelectedIsActive$, config.selected$),
-      new CompareFooterItem(),
+      new ShowItemsFooterSelected(config.entitiesType),
+      new CompareFooterItem(config.entitiesType),
+      new DividerFooterItem(),
+      new ArchiveFooterItem(config.entitiesType),
+      new DeleteFooterItem(),
       new DividerFooterItem(),
 
-      new ArchiveFooterItem(config.entitiesType, state$),
-      new DeleteFooterItem(state$),
+      new EnqueueFooterItem(),
+      new DequeueFooterItem(),
+      new ResetFooterItem(config.entitiesType),
+      new AbortFooterItem(),
+      new AbortAllChildrenFooterItem(),
+      new PublishFooterItem(EntityTypeEnum.experiment),
       new DividerFooterItem(),
 
-      new EnqueueFooterItem(state$),
-      new DequeueFooterItem(state$),
-      new ResetFooterItem(config.entitiesType, state$),
-      new AbortFooterItem(state$),
-      new PublishFooterItem(state$, EntityTypeEnum.model),
+      new SelectedTagsFooterItem(EntityTypeEnum.experiment),
       new DividerFooterItem(),
 
-      new SelectedTagsFooterItem(config.entitiesType, state$, config.companyTags$, config.projectTags$, config.tagsFilterByProject$),
-      new DividerFooterItem(),
-
-      new MoveToFooterItem(state$),
-      new HasReadOnlyFooterItem(state$)
+      new MoveToFooterItem(),
+      new HasReadOnlyFooterItem()
     ];
   }
 
@@ -319,39 +357,44 @@ export class ExperimentsComponent extends BaseEntityPage implements OnInit, OnDe
         this.compareExperiments();
         break;
       case MenuItems.archive:
-        this.table.contextMenu.restoreArchive();
+        this.table.contextMenuExtended.contextMenu.restoreArchive();
         break;
       case MenuItems.reset:
-        this.table.contextMenu.resetPopup();
+        this.table.contextMenuExtended.contextMenu.resetPopup();
         break;
       case MenuItems.publish:
-        this.table.contextMenu.publishPopup();
+        this.table.contextMenuExtended.contextMenu.publishPopup();
         break;
       case MenuItems.enqueue:
-        this.table.contextMenu.enqueuePopup();
+        this.table.contextMenuExtended.contextMenu.enqueuePopup();
         break;
       case MenuItems.dequeue:
-        this.table.contextMenu.dequeuePopup();
+        this.table.contextMenuExtended.contextMenu.dequeuePopup();
         break;
       case MenuItems.delete:
-        this.table.contextMenu.deleteExperimentPopup();
+        this.table.contextMenuExtended.contextMenu.deleteExperimentPopup();
         break;
       case MenuItems.abort:
-        this.table.contextMenu.stopPopup();
+        this.table.contextMenuExtended.contextMenu.stopPopup();
+        break;
+      case MenuItems.abortAllChildren:
+        this.table.contextMenuExtended.contextMenu.stopAllChildrenPopup();
         break;
       case MenuItems.moveTo:
-        this.table.contextMenu.moveToProjectPopup();
+        this.table.contextMenuExtended.contextMenu.moveToProjectPopup();
         break;
     }
   }
+
   ngOnDestroy(): void {
     super.ngOnDestroy();
     this.selectedProjectSubs.unsubscribe();
     this.selectedProjectSubscription.unsubscribe();
-    this.ExperimentFromUrlSub.unsubscribe();
+    this.experimentFromUrlSub.unsubscribe();
     this.store.dispatch(experimentsActions.resetExperiments());
     this.stopSyncSearch();
     this.autoRefreshSub.unsubscribe();
+    this.table = undefined;
   }
 
   stopSyncSearch() {
@@ -369,7 +412,7 @@ export class ExperimentsComponent extends BaseEntityPage implements OnInit, OnDe
   }
 
   selectExperimentFromUrl() {
-    this.ExperimentFromUrlSub = combineLatest([
+    this.experimentFromUrlSub = combineLatest([
       this.store.select(selectRouterParams)
         .pipe(map(params => get('experimentId', params))),
       this.experiments$
@@ -385,13 +428,7 @@ export class ExperimentsComponent extends BaseEntityPage implements OnInit, OnDe
     this.dispatchAndLock(experimentsActions.getNextExperiments());
   }
 
-  filterArchivedExperiments(experiments, showArchived) {
-    if (showArchived) {
-      return experiments.filter(ex => ex?.system_tags?.includes('archived'));
-    } else {
-      return experiments.filter(ex => !(ex?.system_tags?.includes('archived')));
-    }
-  }
+
 
   experimentsSelectionChanged(experiments: Array<ITableExperiment>) {
     this.store.dispatch(experimentsActions.setSelectedExperiments({experiments}));
@@ -409,11 +446,13 @@ export class ExperimentsComponent extends BaseEntityPage implements OnInit, OnDe
   }
 
   filterChanged({col, value, andFilter}: { col: ISmCol; value: any; andFilter?: boolean }) {
-    this.dispatchAndLock(experimentsActions.tableFilterChanged({filter: {
-      col: col.id,
-      value,
-      filterMatchMode: col.filterMatchMode || andFilter ? 'AND' : undefined
-    }, projectId: this.projectId}));
+    this.dispatchAndLock(experimentsActions.tableFilterChanged({
+      filter: {
+        col: col.id,
+        value,
+        filterMatchMode: col.filterMatchMode || andFilter ? 'AND' : undefined
+      }, projectId: this.projectId
+    }));
   }
 
   compareExperiments() {
@@ -448,7 +487,7 @@ export class ExperimentsComponent extends BaseEntityPage implements OnInit, OnDe
   }
 
   switchArchiveMode(isArchived) {
-    this.store.dispatch(new ResetProjectSelection());
+    this.store.dispatch(resetProjectSelection());
     this.store.dispatch(experimentsActions.showOnlySelected({active: false, projectId: this.projectId}));
     this.dispatchAndLock(experimentsActions.setArchive({archive: isArchived}));
     this.closeExperimentPanel();
@@ -566,6 +605,11 @@ export class ExperimentsComponent extends BaseEntityPage implements OnInit, OnDe
 
   protected getParamId(params) {
     return params?.experimentId;
+  }
+
+  clearTableFiltersHandler(tableFilters: { [s: string]: FilterMetadata }) {
+    const filters = Object.keys(tableFilters).map(col => ({col, value: []}));
+    this.store.dispatch(setTableFilters({filters, projectId: this.selectedProject}));
   }
 }
 

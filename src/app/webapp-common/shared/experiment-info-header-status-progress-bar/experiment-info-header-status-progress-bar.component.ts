@@ -9,6 +9,7 @@ import {EXPERIMENTS_STATUS_LABELS} from '../../../features/experiments/shared/ex
 export class ExperimentInfoHeaderStatusProgressBarComponent implements OnInit {
   @Input() status;
   @Input() editable          = true;
+  @Input() development        = false;
   @Input() showMaximize: boolean;
   @Output() closeInfoClicked = new EventEmitter();
   @Output() maximizedClicked = new EventEmitter();

@@ -1,12 +1,42 @@
 @import "../shared/ui-components/styles/variables";
 
+:host {
+  display: block;
+  height: 100%;
+  overflow-y: auto;
+
+  header {
+    margin-bottom: 24px;
+
+    .experiment-name {
+      font-size: 18px;
+      height: 22px;
+      max-width: 93%;
+      display: inline-block;
+      white-space: nowrap;
+
+      a {
+        text-decoration: unset;
+        display: block;
+        width: 100%;
+        color: inherit;
+      }
+    }
+
+    .id-icon {
+      width: 16px;
+      height: 13px;
+      margin-left: 6px;
+    }
+  }
+}
+
 sm-debug-images-view {
   display: block;
 }
 
 .debug-images {
-  height: 100%;
-  overflow-y: auto;
+
 }
 
 .images-container {
@@ -29,6 +59,7 @@ sm-debug-images-view {
   &.dark {
     color: $blue-250;
     font-size: 12px;
+
     path {
       opacity: 1;
       fill: $dark-grey-blue;
@@ -90,12 +121,3 @@ sm-debug-images-view {
   height: 250px;
 }
 
-.experiment-name {
-  display: block;
-  font-size: 18px;
-  margin-bottom: 24px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-right: auto;
-}

@@ -51,6 +51,12 @@ $generic-font-size: 11px;
     max-height: 94vh;
   }
 
+  .include-banner {
+    height: calc(100vh - 220px);
+    .generic-container {
+      border-radius: 4px 4px 0 0px;
+    }
+  }
   ::ng-deep .background-transparent {
     .mat-dialog-container {
       max-height: none !important;

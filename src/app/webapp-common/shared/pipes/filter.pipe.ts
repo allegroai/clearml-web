@@ -6,7 +6,7 @@ import {get} from 'lodash/fp';
 })
 export class FilterPipe implements PipeTransform {
 
-  transform<T>(arr: T[], query: string | string[], key?: string): T[] {
+  transform(arr, query: string | string[], key?: string) {
     if (!arr || !query) {
       return arr;
     }

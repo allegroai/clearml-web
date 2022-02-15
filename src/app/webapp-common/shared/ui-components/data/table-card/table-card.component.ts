@@ -13,6 +13,7 @@ export class TableCardComponent {
   @Input() rowData;
   @Input() activeContextRow;
   @Input() contextMenuOpen;
+  @Input() tableType;
 
 
   @Input() set rowNumber(rowNumber) {

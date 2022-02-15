@@ -11,6 +11,8 @@ import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {MatMenuModule} from '@angular/material/menu';
 import {MatChipsModule} from '@angular/material/chips';
+import {MatSidenavModule} from "@angular/material/sidenav";
+import {MatListModule} from "@angular/material/list";
 
 
 @NgModule({
@@ -40,7 +42,9 @@ import {MatChipsModule} from '@angular/material/chips';
     MatFormFieldModule,
     MatSlideToggleModule,
     MatAutocompleteModule,
-    MatChipsModule
+    MatChipsModule,
+    MatSidenavModule,
+    MatListModule,
   ],
   declarations: []
 })

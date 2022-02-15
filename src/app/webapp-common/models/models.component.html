@@ -1,14 +1,17 @@
 <div class="w-100 model-header">
   <sm-model-header
+    [minimizedView]="minimizedView"
     [isArchived]="isArchived$ | async"
     [disableCreateNewButton]="isExampleProject"
     [autoRefreshState]="autoRefreshState$ | async"
     [tableCols]="tableCols$ | async"
     [sharedView]="isSharedAndNotOwner$|async"
+    [tableFilters]="tableFilters$ | async"
     (isArchivedChanged)="archivedChanged($event)"
     (setAutoRefresh)="setAutoRefresh($event)"
     (refreshListClicked)="refreshList(false)"
     (selectedTableColsChanged)="selectedTableColsChanged($event)"
+    (clearTableFilters)="clearTableFiltersHandler($event)"
   ></sm-model-header>
 </div>
 <div class="models-body" [class.footer-visible]="(selectedModels$ | async)?.length > 1|| (showAllSelectedIsActive$ |async)">
@@ -19,9 +22,9 @@
             (gutterDblClick)="closeModelPanel()"
             (dragEnd)="splitSizeChange($event)"
             (dragStart)="disableInfoPanel()"
-            (transitionEnd)="modelsTable.table.resize()"
+            (transitionEnd)="modelsTable.table.resize(); modelsTable.afterTableInit()"
   >
-    <as-split-area [size]="100 - splitInitialSize" [visible]="!(isSharedAndNotOwner$ | async)">
+    <as-split-area [size]="100 - splitInitialSize" [visible]="(isSharedAndNotOwner$ | async) !== true">
       <sm-models-table
         #modelsTable
         class="w-100 align-self-stretch"
@@ -42,7 +45,8 @@
         [selectedModelsDisableAvailable]="selectedModelsDisableAvailable$ | async"
         [selectedModel]="selectedModel$ | async"
         [split]="selectSplitSize$ | async"
-        (onColumnsReordered)="columnsReordered($event)"
+        [enableMultiSelect]="true"
+        (columnsReordered)="columnsReordered($event)"
         (modelSelectionChanged)="modelSelectionChanged($event)"
         (modelsSelectionChanged)="modelsSelectionChanged($event)"
         (tagsMenuOpened)="refreshTagsList()"
@@ -59,8 +63,9 @@
   </as-split>
 </div>
 <sm-entity-footer
+ [footerState]="footerState$ | async"
  [footerItems]="footerItems"
- (onFooterItemClick)="onFooterHandler($event)"
+ (footerItemClick)="onFooterHandler($event)"
  (tagSelected)="tagSelected($event, 'models')"
 >
 </sm-entity-footer>

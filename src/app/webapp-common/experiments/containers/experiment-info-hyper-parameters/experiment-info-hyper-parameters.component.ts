@@ -2,16 +2,16 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {selectExperimentConfiguration, selectExperimentHyperParamsInfoData, selectExperimentHyperParamsSelectedSectionFromRoute, selectExperimentSelectedConfigObjectFromRoute, selectIsExperimentSaving, selectIsSelectedExperimentInDev} from '../../reducers';
 import {ICommonExperimentInfoState} from '../../reducers/common-experiment-info.reducer';
-import {IExperimentInfo, ISelectedExperiment} from '../../../../features/experiments/shared/experiment-info.model';
-import {selectBackdropActive} from '../../../core/reducers/view-reducer';
+import {IExperimentInfo} from '../../../../features/experiments/shared/experiment-info.model';
+import {selectBackdropActive} from '../../../core/reducers/view.reducer';
 import {combineLatest, Observable, Subscription} from 'rxjs';
 import {selectIsExperimentEditable, selectSelectedExperiment} from '../../../../features/experiments/reducers';
 import {selectRouterConfig, selectRouterParams} from '../../../core/reducers/router-reducer';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {ParamsItem} from '../../../../business-logic/model/tasks/paramsItem';
-import {filter, tap, withLatestFrom} from 'rxjs/operators';
+import {debounceTime, filter, tap, withLatestFrom} from 'rxjs/operators';
 import {ActivateEdit, getExperimentConfigurationNames, getExperimentConfigurationObj, SetExperimentFormErrors} from '../../actions/common-experiments-info.actions';
-import {getOr} from 'lodash/fp';
+import {getOr, min} from 'lodash/fp';
 
 @Component({
   selector: 'sm-experiment-info-hyper-parameters',
@@ -59,17 +59,17 @@ export class ExperimentInfoHyperParametersComponent implements OnInit, OnDestroy
         this.store.dispatch(getExperimentConfigurationNames({experimentId: selectedExperiment.id}));
         this.store.dispatch(getExperimentConfigurationObj());
       });
-    this.hyperParamsConfigSubscription = combineLatest([this.hyperParamsInfo$, this.configuration$]).pipe(
+    this.hyperParamsConfigSubscription = combineLatest([
+      this.hyperParamsInfo$,
+      this.configuration$
+    ]).pipe(
+      debounceTime(0),
       withLatestFrom(
         this.store.select(selectExperimentHyperParamsSelectedSectionFromRoute),
         this.store.select(selectExperimentSelectedConfigObjectFromRoute)
       )).subscribe(([[hyperparams, configuration], selectedHyperParam, selectedConfig]) => {
       if ((hyperparams && configuration && !(selectedHyperParam in hyperparams) && !(selectedConfig in configuration))) {
-        if (selectedHyperParam) {
-          this.router.navigateByUrl(this.router.url.replace(selectedHyperParam, Object.keys(hyperparams)[0]));
-        } else if (selectedConfig) {
-          this.router.navigateByUrl(this.router.url.replace(`configuration/${selectedConfig}`, `hyper-param/${Object.keys(hyperparams)[0]}`));
-        }
+        this.router.navigate(['hyper-param', min(Object.keys(hyperparams))], {relativeTo: this.route, replaceUrl: true});
       }
     });
     this.store.dispatch(new SetExperimentFormErrors(null));

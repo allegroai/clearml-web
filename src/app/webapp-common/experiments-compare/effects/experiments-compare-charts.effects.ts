@@ -64,7 +64,7 @@ export class ExperimentsCompareChartsEffects {
     ofType<GetMultiPlotCharts>(chartActions.GET_MULTI_PLOT_CHARTS),
     debounceTime(200),
     mergeMap((action) =>
-      this.eventsApi.eventsGetMultiTaskPlots({tasks: action.payload.taskIds, iters: 1})
+      this.eventsApi.eventsGetMultiTaskPlots({tasks: action.payload.taskIds, iters: 1, no_scroll: true})
         .pipe(
           map(res => res.plots),
           mergeMap(res => [

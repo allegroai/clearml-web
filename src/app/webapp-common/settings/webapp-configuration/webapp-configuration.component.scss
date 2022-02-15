@@ -1,0 +1,20 @@
+@import 'variables';
+
+:host {
+
+  .section {
+    margin: 6px 0 24px 0;
+    padding-bottom: 12px;
+  }
+  .title {
+    color: $white;
+    font-size: 16px;
+    text-transform: uppercase;
+    margin: 55px 0 12px 0;
+
+    &.first {
+      margin-top: 0;
+    }
+
+  }
+}

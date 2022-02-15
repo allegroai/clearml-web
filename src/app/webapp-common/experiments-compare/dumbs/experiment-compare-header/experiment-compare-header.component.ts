@@ -1,26 +1,42 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  OnDestroy,
+  OnInit,
+  Output
+} from '@angular/core';
 import {MatSelectChange} from '@angular/material/select';
 import {Store} from '@ngrx/store';
-import {selectHideIdenticalFields, selectRefreshing, selectShowAddExperimentsForCompare} from '../../reducers';
+import {selectHideIdenticalFields, selectRefreshing} from '../../reducers';
 import {interval, Observable, Subscription} from 'rxjs';
 import {
-  refreshIfNeeded, setHideIdenticalFields, setNavigationPreferences,
-  setShowSearchExperimentsForCompare, toggleShowScalarOptions
+  refreshIfNeeded,
+  setHideIdenticalFields,
+  setNavigationPreferences,
+  setShowSearchExperimentsForCompare,
+  toggleShowScalarOptions
 } from '../../actions/compare-header.actions';
 import {ActivatedRoute, Router} from '@angular/router';
-import {selectRouterQueryParams, selectRouterUrl} from '../../../core/reducers/router-reducer';
+import {selectRouterParams, selectRouterQueryParams, selectRouterUrl} from '../../../core/reducers/router-reducer';
 import {get} from 'lodash/fp';
-import {selectAppVisible, selectAutoRefresh} from '../../../core/reducers/view-reducer';
+import {selectAppVisible, selectAutoRefresh} from '../../../core/reducers/view.reducer';
 import {setAutoRefresh} from '../../../core/actions/layout.actions';
 import {AUTO_REFRESH_INTERVAL} from '../../../../app.constants';
 import {filter, withLatestFrom} from 'rxjs/operators';
-import {MatMenuTrigger} from '@angular/material/menu';
 import {MatSlideToggleChange} from '@angular/material/slide-toggle';
+import {compareLimitations} from '../../../shared/entity-page/footer-items/compare-footer-item';
+import {
+  allowAddExperiment$,
+  SelectExperimentsForCompareComponent
+} from '../../containers/select-experiments-for-compare/select-experiments-for-compare.component';
+import {MatDialog} from "@angular/material/dialog";
 
 @Component({
-  selector       : 'sm-experiment-compare-header',
-  templateUrl    : './experiment-compare-header.component.html',
-  styleUrls      : ['./experiment-compare-header.component.scss'],
+  selector: 'sm-experiment-compare-header',
+  templateUrl: './experiment-compare-header.component.html',
+  styleUrls: ['./experiment-compare-header.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ExperimentCompareHeaderComponent implements OnInit, OnDestroy {
@@ -32,19 +48,21 @@ export class ExperimentCompareHeaderComponent implements OnInit, OnDestroy {
   public viewMode: string;
   public currentPage: string;
   public queryParamsViewMode: string;
+  public compareLimitations = compareLimitations;
   public autoRefreshState$: Observable<boolean>;
+  public allowAddExperiment$: Observable<boolean>;
   private autorRefreshSub: Subscription;
   private showMenuSub: Subscription;
 
-  @ViewChild(MatMenuTrigger) trigger: MatMenuTrigger;
   private isAppVisible$: Observable<boolean>;
 
-  constructor(private store: Store<any>, private route: ActivatedRoute, private router: Router, private cdr: ChangeDetectorRef) {
+  @Output() selectionChanged = new EventEmitter<string[]>();
+
+  constructor(private store: Store<any>, private route: ActivatedRoute, private router: Router, private cdr: ChangeDetectorRef, private dialog: MatDialog) {
     this.selectHideIdenticalFields$ = this.store.select(selectHideIdenticalFields);
     this.selectRefreshing$ = this.store.select(selectRefreshing);
     this.autoRefreshState$ = this.store.select(selectAutoRefresh);
     this.isAppVisible$ = this.store.select(selectAppVisible);
-    this.showMenuSub = this.store.select(selectShowAddExperimentsForCompare).subscribe(open => open ? this.trigger?.openMenu() : this.trigger?.closeMenu());
   }
 
   ngOnInit() {
@@ -59,6 +77,8 @@ export class ExperimentCompareHeaderComponent implements OnInit, OnDestroy {
       this.viewMode = get('snapshot.firstChild.url[1].path', this.route);
       this.cdr.detectChanges();
     });
+
+    this.allowAddExperiment$ = allowAddExperiment$(this.store.select(selectRouterParams));
 
     this.queryParamsSubscription = this.store.select(selectRouterQueryParams)
       .subscribe((queryParams) => this.queryParamsViewMode = queryParams[this.currentPage]);
@@ -79,14 +99,18 @@ export class ExperimentCompareHeaderComponent implements OnInit, OnDestroy {
     const page = $event.value.replace(/.*_/, '');
     this.store.dispatch(setNavigationPreferences({navigationPreferences: queryParam}));
     this.router.navigate([`./${this.currentPage}/${page}`], {
-      queryParams        : queryParam,
-      relativeTo         : this.route,
+      queryParams: queryParam,
+      relativeTo: this.route,
       queryParamsHandling: 'merge'
     });
   }
 
   openAddExperimentSearch() {
-    this.store.dispatch(setShowSearchExperimentsForCompare({payload: true}));
+    this.dialog.open(SelectExperimentsForCompareComponent, {
+      height: '100vh',
+      width: '100%',
+      maxWidth: '100%'
+    }).afterClosed().pipe(filter(ids => !!ids)).subscribe(ids => this.selectionChanged.emit(ids));
   }
 
   hideIdenticalFieldsToggled(event: MatSlideToggleChange) {

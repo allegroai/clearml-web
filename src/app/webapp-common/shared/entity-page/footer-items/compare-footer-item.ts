@@ -1,15 +1,23 @@
-import {GenericFooterItem} from './generic-footer-item';
 import {IconNames, ICONS} from '../../../constants';
 import {EntityTypeEnum} from '../../../../shared/constants/non-common-consts';
 import {MenuItems} from '../items.utils';
-
-export class CompareFooterItem extends GenericFooterItem {
+import { ItemFooterModel} from './footer-items.models';
+export const compareLimitations = 10;
+export class CompareFooterItem extends ItemFooterModel  {
   id = MenuItems.compare;
   icon = ICONS.COMPARE as Partial<IconNames>;
   class = 'compare';
   title = 'COMPARE';
   emit = true;
-  constructor(public entitiesType?: EntityTypeEnum) {
+  disableDescription = `${compareLimitations} or fewer ${this.entitiesType}s can be compared`;
+
+  constructor(public entitiesType: EntityTypeEnum) {
     super();
+  }
+  getItemState(state): any {
+    return {
+      disable: state.selected.length > 10,
+    };
+
   }
 }

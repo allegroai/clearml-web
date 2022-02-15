@@ -1,0 +1,20 @@
+<div class="toggles">
+  <sm-usage-stats #usage></sm-usage-stats>
+  <mat-slide-toggle
+    *ngIf="supportReScaling"
+    [class.first]="!usage.shown"
+    (change)="hidpiChange($event)"
+    [checked]="disableHidpi">
+    Disable HiDPI browser scale override
+    <i class="al-icon al-ico-info-circle sm info align-middle ml-3 mr-3"
+       smTooltip="ClearML dynamically sets the browser scaling factor for an optimal page layout. Disable for default desktop scale."
+       matTooltipPosition="above"
+    ></i>
+    <span class="reload" [class.highlight]="disableHidpiChanged" (click)="reload($event)">Reload to apply</span>
+  </mat-slide-toggle>
+  <mat-slide-toggle
+    (change)="setNeverShowTipsAgain($event)"
+    [checked]="(neverShowTipsAgain$ | async)?.includes(popupId)">
+    Don’t show pro tips periodically
+  </mat-slide-toggle>
+</div>

@@ -15,37 +15,38 @@ import {IExperimentInfoState} from '../../../features/experiments/reducers/exper
 import {ExperimentConverterService} from '../../../features/experiments/shared/services/experiment-converter.service';
 import * as exSelectors from '../reducers';
 import {selectSelectedExperiments} from '../reducers';
-import {Task} from '../../../business-logic/model/tasks/task';
 import {selectSelectedExperiment} from '../../../features/experiments/reducers';
 import * as infoActions from '../actions/common-experiments-info.actions';
 import {AutoRefreshExperimentInfo, ExperimentDetailsUpdated} from '../actions/common-experiments-info.actions';
 import {EmptyAction, MESSAGES_SEVERITY} from '../../../app.constants';
 import * as viewActions from '../actions/common-experiments-view.actions';
-import {SmSyncStateSelectorService} from '../../core/services/sync-state-selector.service';
 import {IExperimentInfo, ISelectedExperiment} from '../../../features/experiments/shared/experiment-info.model';
 import {ResetOutput} from '../actions/common-experiment-output.actions';
 import {ApiProjectsService} from '../../../business-logic/api-services/projects.service';
 import {TasksGetAllExResponse} from '../../../business-logic/model/tasks/tasksGetAllExResponse';
 import {ITask} from '../../../business-logic/model/al-task';
 import {TasksResetManyResponse} from '../../../business-logic/model/tasks/tasksResetManyResponse';
-import {MatDialog} from '@angular/material/dialog';
 import {RouterState, selectRouterConfig, selectRouterParams} from '../../core/reducers/router-reducer';
 import {TasksArchiveManyResponse} from '../../../business-logic/model/tasks/tasksArchiveManyResponse';
 import {EntityTypeEnum} from '../../../shared/constants/non-common-consts';
 import {TasksEnqueueManyResponse} from '../../../business-logic/model/tasks/tasksEnqueueManyResponse';
 import {getNotificationAction, MenuItems, MoreMenuItems} from '../../shared/entity-page/items.utils';
+import {getAllSystemProjects} from '../../core/actions/projects.actions';
+import { TaskStatusEnum } from '../../../business-logic/model/tasks/taskStatusEnum';
+import {setAllTasksChildren} from '../actions/common-experiments-menu.actions';
 
 
 @Injectable()
 export class CommonExperimentsMenuEffects {
+  private selectedExperiment: IExperimentInfo;
 
   constructor(private actions$: Actions, private store: Store<IExperimentInfoState>, private apiTasks: ApiTasksService,
               private authApi: ApiAuthService, private taskBl: BlTasksService, private eventsApi: ApiEventsService,
               private projectApi: ApiProjectsService,
               private converter: ExperimentConverterService,
-              private router: Router, private syncSelector: SmSyncStateSelectorService,
-              private matDialog: MatDialog
+              private router: Router
   ) {
+    store.select(selectSelectedExperiment).subscribe(exp => this.selectedExperiment = exp);
   }
 
   activeLoader = createEffect(() => this.actions$.pipe(
@@ -55,7 +56,9 @@ export class CommonExperimentsMenuEffects {
       menuActions.resetClicked,
       menuActions.publishClicked,
       menuActions.stopClicked,
-      menuActions.changeProjectRequested),
+      menuActions.changeProjectRequested,
+      menuActions.getAllTasksChildren,
+      ),
     map(action => activeLoader(action.type))));
 
   enqueueExperiment$ = createEffect(() => this.actions$.pipe(
@@ -102,6 +105,7 @@ export class CommonExperimentsMenuEffects {
             viewActions.getExperiments(),
             viewActions.setSelectedExperiments({experiments: []}),
             deactivateLoader(action.type),
+            ...action.payload.cloneData.newProjectName ? [getAllSystemProjects()] : [],
             viewActions.experimentSelectionChanged({
               experiment: {id: res.id},
               project: action.payload.cloneData.project ? action.payload.cloneData.project : res?.new_project?.id
@@ -109,7 +113,8 @@ export class CommonExperimentsMenuEffects {
           ]),
           catchError(error => [
             deactivateLoader(action.type),
-            setServerError(error, null, 'Clone Experiment failed')
+            setServerError(error, null, 'Clone Experiment failed'),
+            requestFailed(error)
           ])
         )
     )
@@ -144,33 +149,16 @@ export class CommonExperimentsMenuEffects {
     })
   ));
 
-  shareExperiments = createEffect(() => this.actions$.pipe(
-    ofType(menuActions.shareSelectedExperiments),
-    withLatestFrom(this.store.select(exSelectors.selectExperimentsList)),
-    switchMap(([action, experiments]) => this.apiTasks.tasksShare({
-      tasks: [action.task],
-      share: action.share
-    })
+
+  getAllTasksChildren$ = createEffect(() => this.actions$.pipe(
+    ofType(menuActions.getAllTasksChildren),
+    switchMap((action) => this.apiTasks.tasksGetAllEx({only_fields: ['name', 'status'], parent: action.experiments, status:[TaskStatusEnum.InProgress, TaskStatusEnum.Queued]})
       .pipe(
-        mergeMap(() => {
-            const experiment = experiments.filter(exp => exp.id === action.task)[0];
-            if (experiment) {
-              return this.updateExperimentSuccess(action.task, action.type,
-                {
-                  system_tags: (
-                    action.share ?
-                      [...experiment.system_tags, 'shared'] :
-                      experiment.system_tags.filter((tag) => tag !== 'shared')
-                  )
-                }).concat([addMessage(MESSAGES_SEVERITY.SUCCESS, action.share ? 'A shareable link created successfully' : 'A shareable link removed successfully')]);
-            } else {
-              return [new AutoRefreshExperimentInfo(action.task)];
-            }
-          }
-        ),
-        catchError(error => this.updateExperimentFailed(action.type, error))
-      )
-    )
+        mergeMap((res) => [setAllTasksChildren({experiments: res.tasks}), deactivateLoader(action.type)]),
+        catchError(error => [deactivateLoader(action.type), requestFailed(error),
+          addMessage(MESSAGES_SEVERITY.ERROR, 'Failed to fetch tasks running children')])
+
+      ))
   ));
 
 
@@ -223,15 +211,6 @@ export class CommonExperimentsMenuEffects {
     return actions;
   }
 
-  updateExperimentSuccess(id: Task['id'], actionType, fields: Partial<Task>) {
-    return [
-      this.setExperimentIfSelected(id, fields),
-      viewActions.updateExperiment({id, changes: fields}),
-      new AutoRefreshExperimentInfo(id),
-      deactivateLoader(actionType)
-    ] as Action[];
-  }
-
   updateExperimentFailed(actionType, error) {
     return [
       requestFailed(error),
@@ -241,13 +220,11 @@ export class CommonExperimentsMenuEffects {
   }
 
   setExperimentIfSelected(experimentId, payload) {
-    const selected = this.syncSelector.selectSync(selectSelectedExperiment);
-    if (selected && selected.id === experimentId) {
-      return new infoActions.SetExperiment({...selected, ...payload});
+    if (this.selectedExperiment?.id === experimentId) {
+      return new infoActions.SetExperiment({...this.selectedExperiment, ...payload});
     }
     return new EmptyAction();
   }
-
 
   addTag$ = createEffect(() => this.actions$.pipe(
     ofType(menuActions.addTag),
@@ -278,7 +255,7 @@ export class CommonExperimentsMenuEffects {
           name: 'Undo',
           actions: [
             addMessage('success', `“${action.tag}” tag has been restored`),
-            ...action.experiments.map(experiment => menuActions.addTag({
+            ...action.experiments.map(() => menuActions.addTag({
               experiments: action.experiments,
               tag: action.tag
             }))

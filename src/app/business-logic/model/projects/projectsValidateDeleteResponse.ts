@@ -29,12 +29,4 @@ export interface ProjectsValidateDeleteResponse {
      * The total number of non-archived models under the project and all its children
      */
     non_archived_models?: number;
-    /**
-     * The total number of dataviews under the project and all its children
-     */
-    dataviews?: number;
-    /**
-     * The total number of non-archived dataviews under the project and all its   children
-     */
-    non_archived_dataviews?: number;
 }

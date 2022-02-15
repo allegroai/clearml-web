@@ -7,11 +7,6 @@ export const setUserLoginState = createAction(
   props<{ user: User; inviteId: string; crmForm: any }>()
 );
 
-export const setLoginError = createAction(
-  '[login] set login error',
-  props<{error: string; verifyEmail?: {email: string; resendUrl: string}}>()
-);
-
 export const getTOU = createAction('[login] get TOU');
 
 export const setTOU = createAction(

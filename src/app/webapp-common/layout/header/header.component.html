@@ -12,15 +12,15 @@
 
   <div *ngIf="isDashboard && !isLogin" class="logo-full middle"
        [class.make-room-for-slogan]="environment.whiteLabelSlogan">
-    <img [src]="environment?.branding?.logo">
+    <img [src]="environment?.branding?.logo" width="122" height="42">
     <div *ngIf="environment.whiteLabelSlogan" class="slogan">{{environment.whiteLabelSlogan}}</div>
   </div>
   <div *ngIf="isLogin && environment.whiteLabelLogo" class="logo-full">
-    <img [src]="environment?.branding?.logo">
+    <img [src]="environment?.branding?.logo" width="122" height="42">
   </div>
   <div *ngIf="isLogin" class="spacer"></div>
 
-  <div *ngIf="workspaces | async as workspaces" class="right-buttons">
+  <div class="right-buttons">
     <sm-common-search [class.share-view]="isShareMode"></sm-common-search>
 
     <a class="pointer resources-trigger"
@@ -29,66 +29,69 @@
        showDelay="0" matTooltipPosition="below">
       <i class="far al-ico-help-outlined"></i>
     </a>
-    <a class="pointer menu-trigger"
+    <a class="pointer menu-trigger position-relative"
        menuTrigger="matMenuTrigger"
        [matMenuTriggerFor]="profileMenu"
        showDelay="0" matTooltipPosition="below">
       <img class="avatar" *ngIf="(user | async).avatar; else iconAvatar" [src]="(user | async).avatar">
       <ng-template #iconAvatar>
-        <div class="user-icon" [class.neon]="(url | async)?.endsWith('profile')">
-          <i class="fa fa-user-alt fa-lg"></i>
+        <div class="user-icon">
+          <i class="al-icon al-ico-account sm-md"></i>
         </div>
       </ng-template>
+      <div *ngIf="userNotificationPath || (invitesPending$ | async)?.length" class="user-notification"></div>
     </a>
 
     <mat-menu #profileMenu="matMenu" class="user-menu">
-      <button mat-menu-item routerLink="/profile">Profile</button>
-      <ng-container *ngIf="environment.communityServer">
-        <button mat-menu-item (click)="openInviteModal()">Invite a User</button>
-        <ng-container *ngIf="workspaces">
-          <hr>
-          <div class="section-title">SWITCH TO WORKSPACE</div>
-          <button mat-menu-item
-                  *ngFor="let workspace of workspaces; let first = first"
-                  class="workspace-button"
-                  (click)="switchWorkspace(workspace)">
-            <i [class.fa-check-circle]="activeWorkspace.id === workspace.id" class="fas"></i>
-            {{first ? 'My Workspace' : workspace.name}}
-          </button>
-          <hr>
-        </ng-container>
-      </ng-container>
-      <button *ngIf="userManagement$ | async" mat-menu-item (click)="userManagement()">Access Controls</button>
-      <button mat-menu-item (click)="logout()">Logout</button>
+      <button mat-menu-item [routerLink]="'settings/' + userNotificationPath">
+        <span class="al-icon icon sm-md" [class]="userNotificationPath ? 'al-ico-settings-alert' : 'al-ico-settings'">
+          <span class="path1"></span><span class="path2"></span>
+        </span>
+        Settings
+      </button>
+      <sm-header-user-menu-actions></sm-header-user-menu-actions>
+      <button mat-menu-item (click)="logout()">
+        <span class="al-ico-logout al-icon icon sm-md"></span>
+        Logout
+      </button>
     </mat-menu>
+
     <mat-menu #resourcesMenu="matMenu" class="user-menu">
       <button mat-menu-item *ngIf="environment.slackLink">
-        <a class="item d-block" target="_blank"
+        <a class="item" target="_blank"
            [href]="environment.slackLink">
-          <i class="fab fa-slack"></i>Community on Slack
+          <i class="al-icon al-ico-slack sm-md"></i>Community on Slack
         </a>
       </button>
       <button mat-menu-item>
-        <a class="item d-block" [href]="environment.docsLink" target="_blank">
-          <i class="far al-ico-documentation"></i>ClearML Documentation
+        <a class="item" [href]="environment.docsLink" target="_blank">
+          <i class="al-icon sm-md al-ico-documentation"></i>ClearML Documentation
         </a>
       </button>
       <button mat-menu-item>
-        <a class="item d-block" href="https://www.youtube.com/c/ClearML/featured" target="_blank">
-          <i class="fab fa-youtube"></i>ClearML on Youtube
+        <a class="item" href="https://www.youtube.com/c/ClearML/featured" target="_blank">
+          <i class="al-icon al-ico-youtube sm-md"></i>ClearML on Youtube
         </a>
       </button>
       <button mat-menu-item (click)="openTip()">
-        <i class="far al-ico-tips"></i>Pro Tips
+        <i class="al-icon sm-md al-ico-tips"></i>Pro Tips
       </button>
       <button mat-menu-item>
-        <a class="item d-block" href="" (click)="openWelcome($event)">
-          <i class="fa al-ico-setup"></i>ClearML Python Package setup
+        <a class="item" href="" (click)="openWelcome($event)">
+          <i class="al-icon sm-md al-ico-setup"></i>ClearML Python Package setup
         </a>
       </button>
+      <ng-container *smCheckPermission="'applications'">
+        <button mat-menu-item *ngIf="$any(environment)?.appsYouTubeIntroLink && $any(environment).appAwarenessMenu !== false">
+          <a class="item" (click)="openAppsAwareness($event, $any(environment)?.appsYouTubeIntroLink)">
+            <i class="al-icon sm-md al-ico-applications"></i>ClearML Apps Introduction
+          </a>
+        </button>
+      </ng-container>
+
       <button mat-menu-item>
-        <a class="item d-block" href="https://www.clear.ml/contact-us/" target="_blank">
-          <i class="fas al-ico-email"></i>Contact Us
+        <a class="item" href="https://www.clear.ml/contact-us/" target="_blank">
+          <i class="al-icon sm-md al-ico-email"></i>Contact Us
         </a>
       </button>
     </mat-menu>

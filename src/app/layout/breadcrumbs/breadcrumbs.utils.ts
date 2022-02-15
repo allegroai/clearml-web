@@ -1,12 +1,12 @@
-import {TableModel} from '../../webapp-common/models/shared/models.model';
-import {IExperimentInfo} from '../../features/experiments/shared/experiment-info.model';
-import {Project} from '../../business-logic/model/projects/project';
-import {Task} from '../../business-logic/model/tasks/task';
-import {selectSelectedTableModel} from '../../webapp-common/models/reducers';
+import {TableModel} from '@common/models/shared/models.model';
+import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
+import {Project} from '~/business-logic/model/projects/project';
+import {Task} from '~/business-logic/model/tasks/task';
+import {selectSelectedTableModel} from '@common/models/reducers';
 import {createSelector} from '@ngrx/store';
-import {selectSelectedExperiment} from '../../features/experiments/reducers';
-import {selectRootProjects, selectSelectedProject} from '../../webapp-common/core/reducers/projects.reducer';
-import {formatStaticCrumb, prepareLinkData} from '../../webapp-common/layout/breadcrumbs/breadcrumbs-common.utils';
+import {selectSelectedExperiment} from '~/features/experiments/reducers';
+import {selectRootProjects, selectSelectedProject} from '@common/core/reducers/projects.reducer';
+import {formatStaticCrumb, prepareLinkData} from '@common/layout/breadcrumbs/breadcrumbs-common.utils';
 
 export interface IBreadcrumbs {
   project: Project;
@@ -18,7 +18,7 @@ export interface IBreadcrumbs {
 
 export const selectBreadcrumbsStringsBase = createSelector(
   selectSelectedProject, selectSelectedExperiment, selectSelectedTableModel, selectRootProjects,
-  (project, experiment, model,projects) =>
+  (project, experiment, model, projects) =>
     ({project, experiment, model, projects}) as IBreadcrumbs);
 
 

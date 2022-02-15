@@ -3,7 +3,7 @@ import {Store} from '@ngrx/store';
 import {selectExperimentConfigObj, selectExperimentInfoErrors, selectExperimentSelectedConfigObjectFromRoute, selectExperimentUserKnowledge, selectIsExperimentSaving} from '../../reducers';
 import {Model} from '../../../../business-logic/model/models/model';
 import {Observable, Subscription} from 'rxjs';
-import {IExperimentInfo, ISelectedExperiment} from '../../../../features/experiments/shared/experiment-info.model';
+import {IExperimentInfo} from '../../../../features/experiments/shared/experiment-info.model';
 import {IExperimentInfoState} from '../../../../features/experiments/reducers/experiment-info.reducer';
 import {experimentSectionsEnum} from '../../../../features/experiments/shared/experiments.const';
 import {selectIsExperimentEditable, selectSelectedExperiment} from '../../../../features/experiments/reducers';

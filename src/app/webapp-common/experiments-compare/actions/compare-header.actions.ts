@@ -1,10 +1,14 @@
 import {createAction, props} from '@ngrx/store';
 import {Task} from '../../../business-logic/model/tasks/task';
 import {Params} from '@angular/router';
+import {ISmCol} from '../../shared/ui-components/data/table/table.consts';
+import {SortMeta} from 'primeng/api';
+import {TableFilter} from '../../shared/utils/tableParamEncode';
+import {EXPERIMENTS_PREFIX} from '../../experiments/actions/common-experiments-view.actions';
 
 export const EXPERIMENTS_COMPARE_SELECT_EXPERIMENT_ = 'EXPERIMENTS_COMPARE_SELECT_EXPERIMENT_';
 
-export const SEARCH_EXPERIMENTS_FOR_COMPARE = EXPERIMENTS_COMPARE_SELECT_EXPERIMENT_ + 'SEARCH_EXPERIMENTS_FOR_COMPARE';
+export const GET_SELECTED_EXPERIMENTS_FOR_COMPARE = EXPERIMENTS_COMPARE_SELECT_EXPERIMENT_ + 'SEARCH_EXPERIMENTS_FOR_COMPARE';
 export const SET_SHOW_SEARCH_EXPERIMENTS_FOR_COMPARE = EXPERIMENTS_COMPARE_SELECT_EXPERIMENT_ + 'SET_SHOW_SEARCH_EXPERIMENTS_FOR_COMPARE';
 export const SET_SELECT_EXPERIMENTS_FOR_COMPARE = EXPERIMENTS_COMPARE_SELECT_EXPERIMENT_ + 'SET_SELECT_EXPERIMENTS_FOR_COMPARE';
 export const RESET_SELECT_EXPERIMENT_FOR_COMPARE = EXPERIMENTS_COMPARE_SELECT_EXPERIMENT_ + 'RESET_SELECT_EXPERIMENT_FOR_COMPARE';
@@ -25,6 +29,28 @@ export const toggleShowScalarOptions = createAction(TOGGLE_SHOW_SACLARS_OPTIONS)
 export const setSearchExperimentsForCompareResults = createAction(SET_SELECT_EXPERIMENTS_FOR_COMPARE, props<{ payload: Array<Task> }>());
 export const setShowSearchExperimentsForCompare = createAction(SET_SHOW_SEARCH_EXPERIMENTS_FOR_COMPARE, props<{ payload: boolean }>());
 export const resetSelectCompareHeader = createAction(RESET_SELECT_EXPERIMENT_FOR_COMPARE);
-export const searchExperimentsForCompare = createAction(SEARCH_EXPERIMENTS_FOR_COMPARE, props<{ payload: string }>());
+export const getSelectedExperimentsForCompareAddDialog = createAction(GET_SELECTED_EXPERIMENTS_FOR_COMPARE, props<{tasksIds?: string[]}>());
+export const compareAddDialogTableSortChanged = createAction(
+  EXPERIMENTS_COMPARE_SELECT_EXPERIMENT_ + ' [table sort changed]',
+  props<{ isShift: boolean; colId: ISmCol['id'] }>()
+);
+export const compareAddTableFilterChanged = createAction(
+  EXPERIMENTS_COMPARE_SELECT_EXPERIMENT_ + '[table filter changed]',
+  props<{filter: TableFilter; projectId: string}>()
+);
+
+export const compareAddTableFilterInit = createAction(
+  EXPERIMENTS_COMPARE_SELECT_EXPERIMENT_ + '[table filter init]',
+  props<{projectId: string}>()
+);
+
+export const compareAddTableClearAllFilters = createAction(
+  EXPERIMENTS_COMPARE_SELECT_EXPERIMENT_ + '[clear table filters]',
+  props<{projectId: string}>()
+);
+export const compareAddDialogSetTableSort = createAction(
+  EXPERIMENTS_COMPARE_SELECT_EXPERIMENT_ + ' [set table sort]',
+  props<{ orders: SortMeta[]; projectId: string; colIds: string[] }>()
+);
 export const refetchExperimentRequested = createAction(REFETCH_EXPERIMENT_REQUESTED, props<{ autoRefresh: boolean }>());
 export const setNavigationPreferences = createAction(SET_NAVIGATION_PREFERENCES, props<{ navigationPreferences: Params }>());

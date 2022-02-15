@@ -24,7 +24,7 @@
     <div *ngIf="info || editMode; else noData" class="md-editor-preview" [class.editor]="editMode">
 
       <div class="md-content" [class.edit-mode]="editMode" [class.dirty]="isDirty">
-        <button *ngIf="!editMode" class="btn btn-primary md-btn-edit" (click)="editClicked()">EDIT</button>
+        <button *ngIf="!example && !editMode" class="btn btn-primary md-btn-edit" (click)="editClicked()">EDIT</button>
         <button *ngIf="editMode" class="btn btn-primary btn-preview-toggle" (click)="togglePreview()">
           {{ editorVisible? 'EDIT' : 'PREVIEW' }}
         </button>
@@ -55,7 +55,7 @@
 
     </div>
     <ng-template #noData>
-      <div class="flex-middle overview-placeholder">
+      <div class="flex-middle overview-placeholder" *ngIf="!example">
         <i class="icon i-markdown xxl"></i>
         <div class="no-data-title">THERE’S NOTHING HERE YET…</div>
         <button (click)="editClicked()" class="no-data-button btn btn-neon">

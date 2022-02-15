@@ -2,7 +2,7 @@ import {Actions} from '@ngrx/effects';
 import {ApiProjectsService} from '../../business-logic/api-services/projects.service';
 import {Injectable} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {AdminService} from '../admin/admin.service';
+import {AdminService} from '~/shared/services/admin.service';
 import {ApiTasksService} from '../../business-logic/api-services/tasks.service';
 import {ApiModelsService} from '../../business-logic/api-services/models.service';
 import {DeleteDialogEffectsBase} from '../../webapp-common/shared/entity-page/entity-delete/base-delete-dialog.effects';

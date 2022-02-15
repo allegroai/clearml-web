@@ -11,7 +11,12 @@ export interface CommunityContext {
 export interface GettingStartedContext {
   install?: string;
   configure?: string;
-  agentName?: string;
+  packageName?: string;
+}
+
+export interface Legal {
+  TOULink?: string;
+  pricingLink?: string;
 }
 
 export interface Environment {
@@ -33,13 +38,13 @@ export interface Environment {
   whiteLabelLoginTitle?: string;
   whiteLabelLoginSubtitle?: string;
   whiteLabelSlogan?: string;
-  communityServer: boolean;
+  communityServer?: boolean;
+  enterpriseServer?: boolean;
   accountAdministration: boolean;
   communityContext?: CommunityContext;
   GTM_ID?: string;
   hideUpdateNotice: boolean;
   showSurvey: boolean;
-  touLink: string;
   plotlyURL: string;
   slackLink: string;
   docsLink: string;
@@ -47,6 +52,8 @@ export interface Environment {
   branding?: {faviconUrl?: string; logo?: string; logoSmall?: string};
   gettingStartedContext?: GettingStartedContext;
   serverDownMessage?: string;
+  legal: Legal;
+  loginPopup?: string;
 }
 
 export const BASE_ENV = {
@@ -76,10 +83,10 @@ export const BASE_ENV = {
   showSurvey: false,
   accountAdministration: false,
   useFilesProxy: false,
-  touLink: 'https://allegro.ai/legal-platform-tou/',
+  legal: {TOULink: 'https://allegro.ai/legal-platform-tou/'},
   plotlyURL: 'app/webapp-common/assets/plotly-1.58.4.min.js',
   slackLink: 'https://join.slack.com/t/allegroai-trains/shared_invite/enQtOTQyMTI1MzQxMzE4LTY5NTUxOTY1NmQ1MzQ5MjRhMGRhZmM4ODE5NTNjMTg2NTBlZGQzZGVkMWU3ZDg1MGE1MjQxNDEzMWU2NmVjZmY',
-  docsLink: 'https://clear.ml/docs/latest/docs/',
+  docsLink: 'https://clear.ml/docs',
   branding: {logo: '/assets/logo-white.svg?v=7', logoSmall: '/assets/c-logo.svg?=2'},
   serverDownMessage: 'The ClearML server is currently unavailable.<BR>' +
     'Please try to reload this page in a little while.<BR>' +

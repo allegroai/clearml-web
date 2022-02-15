@@ -6,7 +6,7 @@
   position: relative;
   height: $top-bar-height;
 
-  .share-view{
+  .share-view {
     visibility: hidden;
   }
 
@@ -17,20 +17,24 @@
     padding: 0 24px;
     align-items: center;
     justify-content: space-between;
-    .header-title{
+
+    .header-title {
       font-size: 15px;
       font-weight: 500;
     }
-    .spacer{
+
+    .spacer {
       min-width: 50px;
     }
-    .left-menu{
+
+    .left-menu {
       display: flex;
       align-items: center;
 
-    };
+    }
+  ;
 
-    sm-breadcrumbs :not(.login){
+    sm-breadcrumbs :not(.login) {
       width: 95%;
     }
 
@@ -63,18 +67,18 @@
       }
 
       .user-icon {
-        display: block;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 32px;
         width: 32px;
         height: 32px;
-        flex-shrink: 0;
         background-color: $light-grey-blue;
         color: $header-backgroud;
         border-radius: 50%;
-        text-align: center;
-        line-height: 32px;
 
-        &.neon {
-          background-color: $neon-yellow-betterinchrome;
+        .al-icon {
+          margin-top: -2px;
         }
       }
     }
@@ -97,7 +101,8 @@
 
     &.make-room-for-slogan {
       justify-content: start;
-      .slogan{
+
+      .slogan {
         padding: 12px;
       }
     }
@@ -114,39 +119,36 @@
     justify-content: flex-end;
   }
 
-}
-
-.section-title {
-  color: $blue-400;
-  font-size: 11px;
-  font-weight: 500;
-  padding: 0 12px;
-  height: 32px;
-  line-height: 32px;
-  margin-top: 6px;
-}
-
-hr {
-  margin: 0;
+  .user-notification {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 10px;
+    height: 10px;
+    border: solid 2px $blue-800;
+    border-radius: 50%;
+    background-color: $neon-yellow;
+  }
 }
 
 .mat-menu-item {
-  line-height: 48px;
+  display: flex;
+  align-items: center;
+  height: 48px;
+  background-color: white;
 
-  i {
-    font-size: 16px;
-    width: 32px;
-    height: 24px;
+  .al-icon,
+  .fab {
+    margin-right: 12px;
   }
 
   a {
     color: unset;
     text-decoration: unset;
-  }
-}
 
-.workspace-button {
-  overflow: hidden;
-  max-width: 400px;
-  text-overflow: ellipsis;
+    &.item {
+      display: flex;
+      align-items: center;
+    }
+  }
 }

@@ -13,7 +13,6 @@ import {selectExperimentBeginningOfLog, selectExperimentLog, selectLogFilter} fr
 import {Observable, Subscription} from 'rxjs';
 import {distinctUntilChanged, filter} from 'rxjs/operators';
 import {last} from 'lodash/fp';
-import {HTTP} from '../../../../app.constants';
 import {IExperimentInfo} from '../../../../features/experiments/shared/experiment-info.model';
 import {IExperimentInfoState} from '../../../../features/experiments/reducers/experiment-info.reducer';
 import {selectSelectedExperiment} from '../../../../features/experiments/reducers';
@@ -36,44 +35,39 @@ export class ExperimentOutputLogComponent implements OnInit, AfterViewInit, OnDe
 
   @Input() showHeader = true;
   @Input() isDarkTheme = false;
-  private selectedExperimentSubscription: Subscription;
+  private subs = new Subscription();
   private experiment: IExperimentInfo;
 
-  public API_BASE_URL = HTTP.API_BASE_URL;
   public log$: Observable<any[]>;
-  public experiment$: Observable<IExperimentInfo>;
   public filter$: Observable<string>;
   public logBeginning$: Observable<boolean>;
   public creator: string | Worker;
   public disabled: boolean;
   public hasLog: boolean;
-  public logSubscription: Subscription;
-  private refreshingSubscription: Subscription;
   private logRef: ExperimentLogInfoComponent;
   @ViewChildren(ExperimentLogInfoComponent) private logRefs: QueryList<ExperimentLogInfoComponent>;
-  private logSub: Subscription;
 
   constructor(private store: Store<IExperimentInfoState>, private cdr: ChangeDetectorRef) {
     this.log$ = this.store.select(selectExperimentLog);
     this.logBeginning$ = this.store.select(selectExperimentBeginningOfLog);
     this.filter$ = this.store.select(selectLogFilter);
-    this.experiment$ = this.store.select(selectSelectedExperiment);
   }
 
   ngAfterViewInit(): void {
-    this.logSub = this.logRefs.changes.subscribe(refs => this.logRef = refs.first);
+    this.subs.add(this.logRefs.changes.subscribe(refs => this.logRef = refs.first));
   }
 
   ngOnInit() {
-    this.logSubscription = this.log$.subscribe(log => {
+    this.subs.add(this.log$.subscribe(log => {
       if (log) {
         this.creator = last(log)?.worker ?? '';
         this.disabled = false;
         this.hasLog = log.length > 0;
         this.cdr.detectChanges();
       }
-    });
-    this.selectedExperimentSubscription = this.store.select(selectSelectedExperiment)
+    }));
+
+    this.subs.add(this.store.select(selectSelectedExperiment)
       .pipe(
         filter(experiment => !!experiment),
         distinctUntilChanged()
@@ -94,21 +88,23 @@ export class ExperimentOutputLogComponent implements OnInit, AfterViewInit, OnDe
             from: last(this.logRef?.orgLogs)?.timestamp
           }));
         }
-      });
+      })
+    );
 
-    this.refreshingSubscription = this.store.select(selectRefreshing)
+    this.subs.add(this.store.select(selectRefreshing)
       .pipe(filter(({refreshing}) => refreshing))
       .subscribe(({autoRefresh}) => this.store.dispatch(getExperimentLog({
         id: this.experiment.id,
         direction: autoRefresh ? 'prev' : 'next',
         from: last(this.logRef?.orgLogs)?.timestamp
-      })));
+      })))
+    );
   }
 
   ngOnDestroy(): void {
-    this.selectedExperimentSubscription.unsubscribe();
-    this.logSubscription.unsubscribe();
-    this.logSub?.unsubscribe();
+    this.subs.unsubscribe();
+    this.logRef = null;
+    this.logRefs = null;
     this.store.dispatch(new ResetLogFilter());
     this.store.dispatch(new ResetOutput());
   }

@@ -1,14 +1,14 @@
-import {TableSelectionState} from '../../../../constants';
+import {TableSelectionState} from '@common/constants';
 import {allItemsAreSelected} from '../../../utils/shared-utils';
-import {differenceBy, unionBy} from 'lodash/fp';
-import {AfterViewInit, EventEmitter, Input, Output, QueryList, ViewChildren, Directive} from '@angular/core';
+import {unionBy} from 'lodash/fp';
+import {AfterViewInit, EventEmitter, Input, Output, QueryList, ViewChildren, Directive, OnDestroy} from '@angular/core';
 import {ISmCol, TABLE_SORT_ORDER, TableSortOrderEnum} from './table.consts';
 import {filter, take} from 'rxjs/operators';
 import {TableComponent} from './table.component';
 import {SortMeta} from 'primeng/api';
 
 @Directive()
-export abstract class BaseTableView implements AfterViewInit {
+export abstract class BaseTableView implements AfterViewInit, OnDestroy{
   public selectionState: TableSelectionState;
   protected entitiesKey: string;
   public selectedEntitiesKey: string;
@@ -46,34 +46,30 @@ export abstract class BaseTableView implements AfterViewInit {
 
 
   @Output() filterChanged = new EventEmitter() as EventEmitter<{ col: ISmCol; value: any; andFilter?: boolean }>;
-  @Output() onColumnsReordered = new EventEmitter<string[]>();
-  @ViewChildren('table') tables: QueryList<TableComponent>;
+  @Output() columnsReordered = new EventEmitter<string[]>();
+  @ViewChildren(TableComponent) tables: QueryList<TableComponent>;
 
   ngAfterViewInit(): void {
     this.tables.changes
       .pipe(filter((comps: QueryList<TableComponent>) => !!comps.first), take(1))
       .subscribe((comps: QueryList<TableComponent>) => {
         this.table = comps.first;
-        window.setTimeout(() => this.table.focusSelected());
+        window.setTimeout(() => this.table?.focusSelected());
         this.afterTableInit();
       });
+    this.tables.forEach(item => this.table = item);
   }
 
   updateSelectionState() {
     this.selectionState = allItemsAreSelected(this[this.entitiesKey], this[this.selectedEntitiesKey]) ? 'All' : this[this.selectedEntitiesKey].length > 0 ? 'Partial' : 'None';
   }
 
-  columnsReordered($event: string[]) {
-    this.onColumnsReordered.emit($event);
-  }
-
-
   headerCheckboxClicked() {
     let selectionUnion;
     if (this.selectionState === 'None') {
       selectionUnion = unionBy('id', this[this.entitiesKey], this[this.selectedEntitiesKey]);
     } else {
-      selectionUnion = differenceBy('id', this[this.selectedEntitiesKey], this[this.entitiesKey]);
+      selectionUnion = [];
     }
     this.emitSelection(selectionUnion);
   }
@@ -116,10 +112,19 @@ export abstract class BaseTableView implements AfterViewInit {
   }
 
   scrollTableToTop() {
-    this.table.table.scrollTo({top: 0});
+    this.table?.table.scrollTo({top: 0});
+  }
+
+  afterTableInit() {
+    const key = this.selectedEntitiesKey.slice(0, -1);
+    if (this[key]) {
+      window.setTimeout(() => this.table.scrollToElement(this[key]), 100);
+    }
   }
 
   abstract emitSelection(selection: any[]);
 
-  abstract afterTableInit(): void;
+  ngOnDestroy(): void {
+    this.table = null;
+  }
 }

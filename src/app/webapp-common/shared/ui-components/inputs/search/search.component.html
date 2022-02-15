@@ -1,15 +1,28 @@
-<span class="search-input-container" [class.expand]="expandOnHover" [class.empty]="empty" (mouseenter)="searchBar.focus()" (dblclick)="$event.stopPropagation()">
-  <input class="search-input"
-         #searchBar
-         [placeholder]="placeholder"
-         (input)="onChange($event)"
-         (keydown.enter)="valueChanged.emit(searchBar.value)"
+<span class="search-input-container" [class.expand]="expandOnHover" [class.active]="active" [class.focused]="focused"
+      (dblclick)="$event.stopPropagation()"  (mouseover)="updateActive(true)" (mouseleave)="updateActive(false)">
+  <span class="search-input" [class.expand]="expandOnHover">
+  <input
+    [class.active]="active"
+    #searchBar
+    [placeholder]="placeholder"
+    (focusin)="focusInput(true)"
+    (focusout)="focusInput(false)"
+    (input)="onChange($event)"
+    (keydown.enter)="valueChanged.emit(searchBar.value)"
   >
-  <i *ngIf="!hideIcons && searchBar.value.length === 0; else hideIcons ? noIcon : showX" class="fa fa-search pr-2"></i>
-  <ng-template #showX>
-    <i class="fa fa-times pointer pr-2" (click)="clear()"></i>
+  <i *ngIf="!hideIcons && searchBar.value.length === 0; else hideIcons ? noIcon : showX"
+     class="icon-button fa fa-search"></i>
+    <ng-template #showX>
+    <i class="icon-button fa fa-times pointer" [class.active]="active" (click)="clear()"></i>
   </ng-template>
+    <div *ngIf="enableJumpToNextResult" class="separator" [class.active]="active"></div>
+    <i  *ngIf="enableJumpToNextResult" class="icon-button fas fa-chevron-up" [class.active]="active"
+       (click)="jump(false)" [class.disabled]="searchCounterIndex<1"></i>
+    <i *ngIf="enableJumpToNextResult" class="icon-button fas fa-chevron-down" [class.active]="active"
+       (click)="jump(true)" [class.disabled]="searchCounterIndex+1===searchResultsCount"></i>
   <ng-template #noIcon>
     <ng-content></ng-content>
   </ng-template>
+  </span>
 </span>
+<div *ngIf="enableJumpToNextResult && active && searchBar.value.length > 0" class="match">Match {{searchCounterIndex+1}}/{{searchResultsCount}}</div>

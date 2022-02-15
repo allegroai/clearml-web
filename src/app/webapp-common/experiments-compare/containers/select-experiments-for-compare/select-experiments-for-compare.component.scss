@@ -1,33 +1,55 @@
 @import "../../../shared/ui-components/styles/variables";
 
-.select-experiments-container {
-  background-color: rgba(242, 243, 246, 0.9);
-  width: 100%;
-  height: 100%;
-  padding: 16px 32px;
-  box-shadow: 0 3px 3px rgba(0, 0, 0, .15);
-}
+:host {
 
-//.search-input {
-//  width: 550px;
-//}
-
-.hide-table {
-  height: 0px;
-  overflow: hidden;
-  transition: $transition-fast;
-
-  &.show-table {
-    height: calc(100% - 36px);
-    overflow-y: auto;
+  .select-experiments-container {
+    padding: 16px 32px;
+    height: calc(100% - 100px);
+    width: 100%;
   }
-}
 
-.table-container {
-  width: 1160px;
-  margin-bottom: 10px;
-  margin-top: 10px;
-  height: auto;
-  padding: 0;
+  .hide-table {
+    height: 0px;
+    overflow: hidden;
+    transition: $transition-fast;
+
+    &.show-table {
+      height: calc(100% - 60px);
+      overflow-y: auto;
+    }
+  }
+
+  .table-container {
+    width: 1160px;
+    margin-bottom: 10px;
+    margin-top: 10px;
+    height: auto;
+    padding: 0;
+  }
+
+  .buttons {
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    justify-content: center;
+    left: 50%;
+    position: relative;
+    transform: translateX(-50%);
+
+    button {
+      width: 130px;
+      text-transform: uppercase;
+    }
+
+    .yes-button {
+      margin-left: 16px;
+    }
+  }
+  ::ng-deep sm-table p-table {
+
+    .p-datatable-hoverable-rows .p-selectable-row {
+      cursor: default;
+    }
+  }
 }
 

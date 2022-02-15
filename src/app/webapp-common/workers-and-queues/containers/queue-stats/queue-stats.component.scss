@@ -30,12 +30,22 @@
     }
 
     .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       height: 48px;
       line-height: 47px;
+      width: 100%;
+      white-space: nowrap;
 
       .title {
+        display: flex;
+        align-items: center;
+        margin-right: 16px;
         font-size: 15px;
         text-transform: uppercase;
+        white-space: nowrap;
+        overflow: hidden;
       }
 
       .time-selector {

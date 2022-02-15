@@ -156,6 +156,9 @@ export class SelectAutocompleteWithChipsComponent extends TemplateFormSectionBas
           map(value => this._filter(value)),
         );
     }, 0);
+  }
 
+  trackByFn(index, item) {
+    return item.label;
   }
 }

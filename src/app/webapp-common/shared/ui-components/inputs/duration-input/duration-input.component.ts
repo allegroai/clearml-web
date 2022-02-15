@@ -1,4 +1,4 @@
-import {Component, ElementRef, forwardRef, HostListener, Input, OnInit} from '@angular/core';
+import {Component, ElementRef, forwardRef, HostListener} from '@angular/core';
 import {TemplateFormSectionBase} from '../../template-forms-ui/templateFormSectionBase';
 import {NG_VALUE_ACCESSOR} from '@angular/forms';
 

@@ -6,7 +6,10 @@
       <div class="label" *ngIf="showLabel">
         {{'  ' + (EXPERIMENTS_STATUS_LABELS[status] ? EXPERIMENTS_STATUS_LABELS[status] : '') | uppercase}}
       </div>
-      <span class="view-only d-inline" *ngIf="viewOnly === true">  (view only) </span>
+      <span class="view-only d-inline" *ngIf="viewOnly === true; else developmentTemp">  (view only) </span>
+      <ng-template #developmentTemp>
+        <span class="view-only d-inline" *ngIf="development === true">  (note: changes will be overridden if re-run locally) </span>
+      </ng-template>
     </div>
     <div class="right-buttons d-flex align-items-center">
       <div *ngIf="showMaximize" (click)="maximizedClicked.emit()"

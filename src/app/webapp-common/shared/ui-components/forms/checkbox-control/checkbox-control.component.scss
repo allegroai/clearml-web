@@ -70,7 +70,13 @@
     padding: 1px 0 0 1px;
   }
 }
-
+::ng-deep .light-theme{
+  .purple-v{
+    &.table-check-box {
+      border-color: #5A658E;
+    }
+  }
+}
 .disabled {
   cursor: default;
   opacity: 0.5;

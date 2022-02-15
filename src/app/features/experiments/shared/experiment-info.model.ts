@@ -29,10 +29,10 @@ export interface ISelectedExperiment {
   type?: TaskTypeEnum;
   status?: TaskStatusEnum;
   comment?: string;
-  created?: Date;
-  completed?: Date;
-  started?: Date;
-  last_update?: Date;
+  created?: string;
+  completed?: string;
+  started?: string;
+  last_update?: string;
   parent?: {id: string; name: string; project?: {id: string}};
   active_duration?: number;
   project?: Project;
@@ -43,7 +43,7 @@ export interface ISelectedExperiment {
   tags?: Array<string>;
   system_tags?: Array<string>;
   published?: Task['published'];
-  status_changed?: Date;
+  status_changed?: string;
   status_message?: string;
   status_reason?: string;
   last_iteration?: number;
@@ -57,7 +57,7 @@ export interface ISelectedExperiment {
 /**
  * an object that will transfrom from the ISelectedExperiment response to more comfortable object to display.
  */
-export interface IExperimentInfo extends Omit<Task, 'id' | 'user' | 'project' | 'company' | 'execution'>{
+export interface IExperimentInfo extends Omit<Task, 'id' | 'user' | 'project' | 'company' | 'execution' | 'container'> {
   id?: string;
   model?: IExperimentModelInfo;
   execution?: IExecutionForm;

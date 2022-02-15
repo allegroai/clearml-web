@@ -7,7 +7,7 @@ import {IExperimentInfoState} from '../../../../features/experiments/reducers/ex
 import {selectIsExperimentEditable, selectSelectedExperiment, selectShowExtraDataSpinner} from '../../../../features/experiments/reducers';
 import * as commonInfoActions from '../../actions/common-experiments-info.actions';
 import {selectExperimentExecutionInfoData, selectIsExperimentSaving, selectIsSelectedExperimentInDev} from '../../reducers';
-import {selectBackdropActive} from '../../../core/reducers/view-reducer';
+import {selectBackdropActive} from '../../../core/reducers/view.reducer';
 import {EditJsonComponent} from '../../../shared/ui-components/overlay/edit-json/edit-json.component';
 import {filter, take} from 'rxjs/operators';
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';

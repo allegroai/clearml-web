@@ -42,11 +42,20 @@ export abstract class TableDurationSortBase {
   hasTimeError = false;
   private isFirstTimeUpdate = true;
   public updateValue(value: Array<string | number | null>): void {
+
+    if(value === undefined || value?.length === 0) {
+      this.greaterThan = emptyDuration;
+      this.lessThan = emptyDuration;
+      this.isFirstTimeUpdate = true;
+      this._updateValue();
+      return;
+    }
+
     if (this.isFirstTimeUpdate) {
       this.isFirstTimeUpdate = false;
       const data = dataInputOutputHelper.decodeFromServerData(value, {greaterThan: this.greaterThan, lessThan: this.lessThan}, this.parseServerDataFunction);
       this.greaterThan = data.greaterThan;
-      this.lessThan = data.lessThan;
+      this.lessThan    = data.lessThan;
       this._updateValue();
     }
 

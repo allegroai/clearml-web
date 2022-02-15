@@ -4,9 +4,9 @@ import {ActivatedRoute, Params, Router} from '@angular/router';
 import {select, Store} from '@ngrx/store';
 import {get, isEqual} from 'lodash/fp';
 import {combineLatest, interval, Observable, Subscription} from 'rxjs';
-import {distinctUntilChanged, filter, map, skip, tap, withLatestFrom} from 'rxjs/operators';
-import {AUTO_REFRESH_INTERVAL} from '../../app.constants';
-import {getTags, ResetProjectSelection, setDeep} from '../core/actions/projects.actions';
+import {debounceTime, distinctUntilChanged, filter, map, skip, tap, withLatestFrom} from 'rxjs/operators';
+import {AUTO_REFRESH_INTERVAL} from '~/app.constants';
+import {getTags, resetProjectSelection, setDeep} from '../core/actions/projects.actions';
 import {InitSearch, ResetSearch} from '../common-search/common-search.actions';
 import {ICommonSearchState, selectSearchQuery} from '../common-search/common-search.reducer';
 import {setAutoRefresh} from '../core/actions/layout.actions';
@@ -18,7 +18,7 @@ import {
   selectTagsFilterByProject
 } from '../core/reducers/projects.reducer';
 import {selectRouterParams} from '../core/reducers/router-reducer';
-import {selectAppVisible, selectAutoRefresh} from '../core/reducers/view-reducer';
+import {selectAppVisible, selectAutoRefresh} from '../core/reducers/view.reducer';
 import {BaseEntityPage} from '../shared/entity-page/base-entity-page';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {ISmCol, TableSortOrderEnum} from '../shared/ui-components/data/table/table.consts';
@@ -30,10 +30,10 @@ import * as modelsSelectors from './reducers';
 import {selectModelsFrameworks, selectModelsTags, selectModelsUsers, selectModelTableColumns} from './reducers';
 import {IModelsViewState} from './reducers/models-view.reducer';
 import {SelectedModel, TableModel} from './shared/models.model';
-import {User} from '../../business-logic/model/users/user';
+import {User} from '~/business-logic/model/users/user';
 import {SortMeta} from 'primeng/api';
-import {selectIsSharedAndNotOwner} from '../../features/experiments/reducers';
-import {EntityTypeEnum} from '../../shared/constants/non-common-consts';
+import {selectIsSharedAndNotOwner} from '~/features/experiments/reducers';
+import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {ShowItemsFooterSelected} from '../shared/entity-page/footer-items/show-items-footer-selected';
 import {DividerFooterItem} from '../shared/entity-page/footer-items/divider-footer-item';
 import {ArchiveFooterItem} from '../shared/entity-page/footer-items/archive-footer-item';
@@ -48,6 +48,7 @@ import {
 import {PublishFooterItem} from '../shared/entity-page/footer-items/publish-footer-item';
 import { HasReadOnlyFooterItem } from '../shared/entity-page/footer-items/has-read-only-footer-item';
 import { SelectedTagsFooterItem } from '../shared/entity-page/footer-items/selected-tags-footer-item';
+import {setTableFilters} from './actions/models-view.actions';
 
 
 @Component({
@@ -127,7 +128,11 @@ export class ModelsComponent extends BaseEntityPage implements OnInit, OnDestroy
     this.systemTags$ = this.store.select(selectProjectSystemTags);
     this.users$ = this.store.select(selectModelsUsers);
     this.frameworks$ = this.store.select(selectModelsFrameworks);
-    this.tableCols$ = this.store.select(selectModelTableColumns);
+    this.tableCols$ = this.store.select(selectModelTableColumns)
+      .pipe(
+        distinctUntilChanged((a, b) => isEqual(a, b)),
+        tap(() => this.table?.table?.resize(100))
+      );
 
     this.models$ = this.store.select(modelsSelectors.selectModelsList).pipe(
       withLatestFrom(this.isArchived$),
@@ -157,10 +162,9 @@ export class ModelsComponent extends BaseEntityPage implements OnInit, OnDestroy
     let prevQueryParams: Params;
 
     this.selectedModelSubs = combineLatest([
-      this.store.select(selectRouterParams),
+      this.store.select(selectRouterParams).pipe(map(params => params?.projectId)),
       this.route.queryParams,
     ]).pipe(
-      map(([params, queryParams]) => [get('projectId', params), queryParams]),
       filter(([projectId, queryParams]) => {
         const equal = projectId === this.projectId && isEqual(queryParams, prevQueryParams);
         if (!equal && !this.preventUrlUpdate) {
@@ -182,8 +186,8 @@ export class ModelsComponent extends BaseEntityPage implements OnInit, OnDestroy
         this.store.dispatch(modelsActions.setTableFilters({filters, projectId}));
       } else {
         if (params.order) {
-          this.store.dispatch(modelsActions.setTableFilters({filters: [], projectId}));
-        }
+        this.store.dispatch(modelsActions.setTableFilters({filters: [], projectId}));
+      }
       }
       if (params.archive) {
         this.store.dispatch(modelsActions.setArchive({archive: true}));
@@ -307,7 +311,7 @@ export class ModelsComponent extends BaseEntityPage implements OnInit, OnDestroy
   archivedChanged(isArchived: boolean) {
     const navigate = () => {
       this.dispatchAndLock(modelsActions.setArchive({archive: isArchived}));
-      this.store.dispatch(new ResetProjectSelection());
+      this.store.dispatch(resetProjectSelection());
       this.closeModelPanel();
     };
 
@@ -390,20 +394,20 @@ export class ModelsComponent extends BaseEntityPage implements OnInit, OnDestroy
     projectTags$: Observable<string[]>;
     tagsFilterByProject$: Observable<boolean>;
   }) {
-    const state$ = this.createFooterState(config.selected$, config.data$);
+    this.footerState$ = this.createFooterState(config.selected$, config.data$, config.showAllSelectedIsActive$, config.companyTags$, config.projectTags$, config.tagsFilterByProject$);
 
     this.footerItems = [
-      new ShowItemsFooterSelected(config.entitiesType, config.showAllSelectedIsActive$, config.selected$),
+      new ShowItemsFooterSelected(config.entitiesType),
       new DividerFooterItem(),
 
-      new ArchiveFooterItem(config.entitiesType, state$),
-      new DeleteFooterItem(state$),
-      new SelectedTagsFooterItem(config.entitiesType, state$, config.companyTags$, config.projectTags$, config.tagsFilterByProject$),
+      new ArchiveFooterItem(config.entitiesType),
+      new DeleteFooterItem(),
+      new SelectedTagsFooterItem(config.entitiesType),
       new DividerFooterItem(),
 
-      new MoveToFooterItem(state$),
-      new PublishFooterItem(state$, EntityTypeEnum.model),
-      new HasReadOnlyFooterItem(state$)
+      new MoveToFooterItem(),
+      new PublishFooterItem(EntityTypeEnum.model),
+      new HasReadOnlyFooterItem()
     ];
   }
   onFooterHandler({emitValue, item}) {
@@ -412,17 +416,22 @@ export class ModelsComponent extends BaseEntityPage implements OnInit, OnDestroy
         this.showAllSelected(!emitValue);
         break;
       case MenuItems.archive:
-        this.table.contextMenu.archiveClicked();
+        this.table.contextMenuExtended.contextMenu.archiveClicked();
         break;
       case MenuItems.delete:
-        this.table.contextMenu.deleteModelPopup();
+        this.table.contextMenuExtended.contextMenu.deleteModelPopup();
         break;
       case MenuItems.moveTo:
-        this.table.contextMenu.moveToProjectPopup();
+        this.table.contextMenuExtended.contextMenu.moveToProjectPopup();
         break;
       case MenuItems.publish:
-        this.table.contextMenu.publishPopup();
+        this.table.contextMenuExtended.contextMenu.publishPopup();
         break;
     }
+  }
+
+  clearTableFiltersHandler(tableFilters: any) {
+    const filters = Object.keys(tableFilters).map( col => ({col, value: []}));
+    this.store.dispatch(setTableFilters({filters, projectId: this.projectId}));
   }
 }

@@ -1,6 +1,5 @@
 import {
-  ADD_QUEUES_TASKS, SET_QUEUES, SET_QUEUES_TASKS, SET_SELECTED_QUEUE,
-  SET_SELECTED_QUEUE_FROM_SERVER, SYNC_SPECIFIC_QUEUE_IN_TABLE, SET_STATS, SetStats, SET_STATS_PARAMS, queuesTableSetSort
+  queuesTableSetSort, setQueues, setSelectedQueue, setSelectedQueueFromServer, syncSpecificQueueInTable, setStats, setStatsParams
 } from '../actions/queues.actions';
 import {Queue} from '../../../business-logic/model/queues/queue';
 import {QUEUES_TABLE_COL_FIELDS, TIME_INTERVALS} from '../workers-and-queues.consts';
@@ -29,28 +28,28 @@ const initQueues: QueueStoreType = {
 
 export function queuesReducer(state = initQueues, action) {
   switch (action.type) {
-    case SET_QUEUES:
-      return {...state, data: action.payload.queues};
-    case SET_QUEUES_TASKS:
-      return {...state, data: action.payload.queues};
-    case SET_SELECTED_QUEUE:
-    case SET_SELECTED_QUEUE_FROM_SERVER:
-      return {...state, selectedQueue: action.payload.queue};
-    case SYNC_SPECIFIC_QUEUE_IN_TABLE:
+    case setQueues.type:
+      return {...state, data: action.queues};
+    // case SET_QUEUES_TASKS:
+    //   return {...state, data: action.payload.queues};
+    case setSelectedQueue.type:
+    case setSelectedQueueFromServer.type:
+      return {...state, selectedQueue: action.queue};
+    case syncSpecificQueueInTable.type:
       return {
         ...state, data:
-          state.data.map(queue => queue.id === action.payload.queue?.id ? action.payload.queue : queue)
+          state.data.map(queue => queue.id === action.queue?.id ? action.queue : queue)
       };
-    case ADD_QUEUES_TASKS:
-      return {...state, tasks: {...state.tasks, [action.payload.queueId]: action.payload.tasks}};
-    case SET_STATS:
-      return {...state, stats: (action as SetStats).payload.data};
+    // case ADD_QUEUES_TASKS:
+    //   return {...state, tasks: {...state.tasks, [action.queueId]: action.tasks}};
+    case setStats.type:
+      return {...state, stats: (action as ReturnType<typeof setStats>).data};
     case queuesTableSetSort.type:
       return {...state, tableSortFields: action.orders};
-    case SET_STATS_PARAMS:
+    case setStatsParams.type:
       return {
         ...state,
-        selectedStatsTimeFrame: action.payload.timeFrame,
+        selectedStatsTimeFrame: action.timeFrame,
       };
     default:
       return state;

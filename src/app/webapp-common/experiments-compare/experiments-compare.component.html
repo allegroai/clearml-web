@@ -18,9 +18,9 @@
       <sm-navbar-item [active]="rlaGeneral.isActive" header="Debug Samples" direction="bottom"></sm-navbar-item>
     </span>
   </nav>
-  <sm-experiment-compare-header>
-
-  </sm-experiment-compare-header>
+  <sm-experiment-compare-header
+    (selectionChanged)="updateUrl($event)"
+  ></sm-experiment-compare-header>
   <div class="experiment-compare-body">
     <router-outlet></router-outlet>
   </div>

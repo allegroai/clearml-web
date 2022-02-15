@@ -11,6 +11,7 @@ import {ResizableModule} from 'angular-resizable-element';
 import {GraphDisplayerComponent} from './graph-displayer/graph-displayer.component';
 import {GraphScalarDataToMetric} from './graph-scalar-data-to-metric.pipe';
 import {GraphPlotDataToMetric} from './graph-plot-data-to-metric.pipe';
+import {SharedPipesModule} from '../pipes/shared-pipes.module';
 
 const declarations= [
   ExperimentGraphsComponent,
@@ -30,6 +31,7 @@ const declarations= [
     MatSliderModule,
     FormsModule,
     ResizableModule,
+    SharedPipesModule,
   ]
 })
 export class ExperimentGraphsModule { }

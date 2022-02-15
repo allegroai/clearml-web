@@ -1,11 +1,11 @@
-import {Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, ViewChild} from '@angular/core';
+import {Component, ElementRef, EventEmitter, HostListener, Input, Output, ViewChild} from '@angular/core';
 import {MatMenuTrigger} from '@angular/material/menu';
 import {TagsMenuComponent} from '../../ui-components/tags/tags-menu/tags-menu.component';
 import {Store} from '@ngrx/store';
 import {DeactivateEdit, ActivateEdit} from 'app/webapp-common/experiments/actions/common-experiments-info.actions';
 import {ActivateModelEdit, CancelModelEdit} from 'app/webapp-common/models/actions/models-info.actions';
 import {CountAvailableAndIsDisableSelectedFiltered} from '@common/shared/entity-page/items.utils';
-import { MenuItems } from '../../entity-page/items.utils';
+import {MenuItems} from '../../entity-page/items.utils';
 
 @Component({
   selector: 'sm-base-context-menu',
@@ -13,11 +13,10 @@ import { MenuItems } from '../../entity-page/items.utils';
 })
 export class BaseContextMenuComponent {
   public position = {x: 0, y: 0};
-  public menuItems =  MenuItems;
+  public menuItems = MenuItems;
 
   @ViewChild('tagMenuContent') tagMenu: TagsMenuComponent;
   @ViewChild(MatMenuTrigger) trigger: MatMenuTrigger;
-
   @Input() selectedDisableAvailable: Record<string, CountAvailableAndIsDisableSelectedFiltered> = {};
   @Input() selectedDisableAvailableIsMultiple = true;
   @Output() menuOpened = new EventEmitter();
@@ -34,8 +33,7 @@ export class BaseContextMenuComponent {
   constructor(
     protected store: Store<any>,
     protected eRef: ElementRef
-  ) {
-  }
+  ) {}
 
   openMenu(position: { x: number; y: number }) {
     if (this.trigger?.menuOpen) {
@@ -59,8 +57,8 @@ export class BaseContextMenuComponent {
 
   tagMenuClosed() {
     window.setTimeout(() => {
-    this.store.dispatch(new DeactivateEdit());
-    this.store.dispatch(new CancelModelEdit());
+      this.store.dispatch(new DeactivateEdit());
+      this.store.dispatch(new CancelModelEdit());
     }, 200);
     this.tagMenu?.clear();
   }

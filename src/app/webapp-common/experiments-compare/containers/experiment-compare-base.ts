@@ -3,11 +3,11 @@ import * as paramsActions from '../actions/experiments-compare-params.actions';
 import {ExperimentCompareTree, ExperimentCompareTreeSection, IExperimentDetail} from '../../../features/experiments-compare/experiments-compare-models';
 import {get, has, isEmpty, isEqual} from 'lodash/fp';
 import {treeBuilderService} from '../services/tree-builder.service';
-import {createDiffObjectDetails} from '../jsonToDiffConvertor';
+import {isArrayOrderNotImportant} from '../jsonToDiffConvertor';
 import {ExperimentParams, TreeNode, TreeNodeMetadata} from '../shared/experiments-compare-details.model';
 import {MatTreeFlatDataSource, MatTreeFlattener} from '@angular/material/tree';
 import {activeLoader, addMessage, deactivateLoader} from '../../core/actions/layout.actions';
-import { ChangeDetectorRef, OnDestroy, QueryList, ViewChildren, Directive } from '@angular/core';
+import {ChangeDetectorRef, OnDestroy, QueryList, ViewChildren, Directive} from '@angular/core';
 import {ExperimentCompareDetailsBase} from '../../../features/experiments-compare/experiments-compare-details.base';
 import {ActivatedRoute, Router} from '@angular/router';
 import {select, Store} from '@ngrx/store';
@@ -21,6 +21,7 @@ import {selectHideIdenticalFields, selectRefreshing} from '../reducers';
 import {refetchExperimentRequested} from '../actions/compare-header.actions';
 import {RENAME_MAP} from '../experiments-compare.constants';
 import {selectHasDataFeature} from '../../../core/reducers/users.reducer';
+import {ListRange} from '@angular/cdk/collections';
 
 export type NextDiffDirectionEnum = 'down' | 'up';
 
@@ -58,7 +59,7 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
   public allPaths: any = {};
   public calculatingTree: boolean;
   public hideIdenticalFields = false;
-  public experimentsDataControl: { [key: string]: [MatTreeFlatDataSource<TreeNode<any>, FlatNode>, FlatTreeControl<FlatNode>] } = {};
+  public experimentsDataControl: { [key: string]: [MatTreeFlatDataSource<TreeNode<any>, FlatNode>, FlatTreeControl<FlatNode>, FlatNode[]] } = {};
   public compareTabPage: string;
   public foundPaths: string[] = [];
   public foundIndex: number = 0;
@@ -114,7 +115,7 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
       .pipe(filter(({refreshing}) => refreshing))
       .subscribe(({autoRefresh}) => this.store.dispatch(refetchExperimentRequested({autoRefresh})));
 
-    this.hideIdenticalFieldsSub.add(this.hasDataFeature$.subscribe( hasData => this.hasDataFeature = hasData));
+    this.hideIdenticalFieldsSub.add(this.hasDataFeature$.subscribe(hasData => this.hasDataFeature = hasData));
 
   }
 
@@ -155,7 +156,11 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
         const treeControl: FlatTreeControl<FlatNode> = new FlatTreeControl<FlatNode>(this.getNodeLevel, this.getIsNodeExpandable);
         const dataSource: MatTreeFlatDataSource<TreeNode<any>, FlatNode> = new MatTreeFlatDataSource(treeControl, treeFlattener);
 
-        this.experimentsDataControl[experimentID] = [dataSource, treeControl];
+        dataSource.connect({viewChange: new Observable<ListRange>()}).subscribe((nodes: FlatNode[]) =>
+          this.experimentsDataControl[experimentID] = [dataSource, treeControl, nodes]
+        );
+
+        this.experimentsDataControl[experimentID] = [dataSource, treeControl, []];
         this.experimentsDataSources[experimentID] = {all: root, onlyDiffs: rootOnlyDiffs};
         dataSource.data = this.experimentsDataSources[experimentID][this.hideIdenticalFields ? 'onlyDiffs' : 'all'];
         this.setExpandedPaths(expandedsPaths, treeControl);
@@ -279,8 +284,8 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
       });
     }
     this.previousOpenPaths = openPaths.slice(0, openPaths.length - 1);
-    const [dataSource,] = Object.values(this.experimentsDataControl)[0];
-    const selectedNodeIndex = this.findRealIndex(dataSource);
+    const [, , flatNodes] = Object.values(this.experimentsDataControl)[0];
+    const selectedNodeIndex = this.findRealIndex(flatNodes);
     const scrollToInPixels = (selectedNodeIndex + 1) * 28 - this.virtualScrollRef.first.getViewportSize() / 2;
     if (nodeGotExpanded) {
       // Hack to make multiple scroll work with cdk. Don't change
@@ -356,42 +361,53 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
   }
 
   dataTransformer = (data, key, path, extraParams: { experiment; section: string }) => {
-    // TODO: get the origin experiment from the state (selectedExperiment).
     const originExperiment: any = this.baseExperiment;
-    const fullPath = path.concat([key]);
-    const diffObject = createDiffObjectDetails(originExperiment, extraParams.experiment, fullPath, key);
-    return {...diffObject, key, path: fullPath.join(',')};
+    const comparedExperiment: any = extraParams.experiment;
+    path.push(key);
+    const fullPath = path;
+    const fullPathJoined = fullPath.join(',');
+
+    const originData = fullPath.length === 0 ? originExperiment : get(fullPath, originExperiment);
+    const comparedData = fullPath.length === 0 ? comparedExperiment : get(fullPath, comparedExperiment);
+    const existOnOrigin = !!has(fullPath, originExperiment);
+    const existOnCompared = !!has(fullPath, comparedExperiment);
+    const isEquals = isEqual(comparedData, originData);
+    const isEmptyObject = isEmpty(comparedData) || (!Array.isArray(comparedData) && Object.values(comparedData).every(val => val === undefined));
+
+    const isPrimitive = this.isPrimitive(originData) || originData === undefined || originData === null;
+    this.allPaths[fullPathJoined] = this.allPaths[fullPathJoined] || !isEquals;
+    if (isPrimitive) {
+      this.setPathDif(fullPathJoined, isEquals, (originExperiment === undefined && comparedExperiment === undefined));
+    }
+    if (originExperiment === undefined && comparedExperiment && !this.isPrimitive(comparedExperiment)) {
+      delete this.allPathsDiffs[fullPathJoined];
+    }
+
+    let tooltip;
+    if (this.compareTabPage === 'hyper-params') {
+      path[path.length - 1] = path[path.length - 1].trim();
+      const hypeParamObject = get(path.join('.'), this.originalExperiments[comparedExperiment.id]);
+      if (hypeParamObject && has('name', hypeParamObject) && has('value', hypeParamObject) && hypeParamObject.type !== 'legacy') {
+        tooltip = (hypeParamObject.type ? `Type: ${hypeParamObject.type}\n` : '') + (hypeParamObject.description || '');
+      }
+    }
+    path.pop();
+
+    return {
+      key,
+      path: fullPathJoined,
+      existOnOrigin,
+      existOnCompared,
+      value: comparedData,
+      isValueEqualToOrigin: (originExperiment === comparedExperiment) || (isEquals && (existOnOrigin === existOnCompared)),
+      isArray: isArrayOrderNotImportant(comparedExperiment, key),
+      classStyle: `${(originExperiment === comparedExperiment || isEquals) ? '' : 'al-danger '}${isEmptyObject ? 'al-empty-collapse ' : ''}${existOnCompared ? '' : 'hide-field'}`,
+      tooltip: tooltip || undefined
+    };
   };
 
   metaDataTransformer = (data, key, path, extraParams): TreeNodeMetadata => {
-    // TODO: get the origin experiment from the state (selectedExperiment).
-    const fullPath = path.concat([key]);
-    const originExperiment: any = this.baseExperiment;
-    const originObject = get(fullPath, originExperiment);
-    const comparedObject = get(fullPath, extraParams.experiment);
-    const keyExists = has(fullPath, extraParams.experiment);
-    const isEquals = (originObject === comparedObject) || isEqual(originObject, comparedObject);
-    const isPrimitive = this.isPrimitive(originObject) || originObject === undefined || originObject === null;
-    const isEmptyObject = isEmpty(comparedObject) || Object.values(comparedObject).every(val => val === undefined);
-
-    this.allPaths[fullPath] = this.allPaths[fullPath] || !isEquals;
-    if (isPrimitive) {
-      this.setPathDif(fullPath, isEquals, (originObject === undefined && comparedObject === undefined));
-    }
-    if (originObject === undefined && comparedObject && !this.isPrimitive(comparedObject)) {
-      delete this.allPathsDiffs[fullPath];
-    }
-    const metadata = {
-      classStyle: (isEquals ? '' : 'al-danger ') + (isEmptyObject ? 'al-empty-collapse ' : '') + (keyExists ? '' : 'hide-field'),
-    };
-    const hypeParamObject = get(`${path.join('.')}.${key.trim()}`, this.originalExperiments[extraParams.experiment.id]);
-    if (hypeParamObject && has('name', hypeParamObject) && has('value', hypeParamObject) && hypeParamObject.type !== 'legacy') {
-      const tooltip = (hypeParamObject.type ? `Type: ${hypeParamObject.type}\n` : '') + (hypeParamObject.description || '');
-      if (tooltip) {
-        metadata['tooltip'] = tooltip;
-      }
-    }
-    return metadata;
+    return null;
   };
 
   isPrimitive(obj) {
@@ -467,8 +483,8 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
     return node;
   }
 
-  private findRealIndex(ds: MatTreeFlatDataSource<TreeNode<any>, FlatNode>) {
-    return ds._expandedData.value.findIndex(node => node.data?.path === this.selectedPath);
+  private findRealIndex(flatNodes: FlatNode[]) {
+    return flatNodes.findIndex(node => node.data?.path === this.selectedPath);
   }
 
   copyIdToClipboard() {

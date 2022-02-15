@@ -18,10 +18,11 @@
     ],
     "lib": [
       "es2019.array",
+      "es2019.object",
       "es2017",
       "dom"
     ],
-    "baseUrl": "./",
+    "baseUrl": "src",
     "paths": {
       "@common/*": ["app/webapp-common/*"],
       "~/*": ["app/*"]

@@ -9,5 +9,6 @@ import {ISmCol} from '../../../shared/ui-components/data/table/table.consts';
 export class ModelCustomColsMenuComponent {
   @Input() tableCols: ISmCol[];
   @Input() isLoading: boolean;
+  @Input() disabled: boolean;
   @Output() selectedTableColsChanged  = new EventEmitter();
 }

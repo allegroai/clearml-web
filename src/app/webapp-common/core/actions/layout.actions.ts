@@ -25,7 +25,7 @@ export const setServerError = createAction(
 
 export const setNotificationDialog = createAction(
   VIEW_PREFIX + '[set notification dialog]',
-  props<{message: string; title: string}>()
+  props<{notification: {message: string; title: string}}>()
 );
 
 export const resetLoader = createAction(VIEW_PREFIX + '[reset loader]');
@@ -53,8 +53,8 @@ export const visibilityChanged = createAction(
 
 export const addMessage = createAction(
   VIEW_PREFIX + '[add message]',
-  (severity: MessageSeverityEnum, msg: string, userActions?: {actions: any[]; name: string}[]) =>
-    ({severity, msg, userActions})
+  (severity: MessageSeverityEnum, msg: string, userActions?: {actions: any[]; name: string}[], suppressNextMessages?: boolean) =>
+    ({severity, msg, userActions, suppressNextMessages})
 );
 
 export const removeMessage = createAction(VIEW_PREFIX + '[remove message]');
@@ -77,3 +77,8 @@ export const firstLogin = createAction(
 export const neverShowPopupAgain = createAction(VIEW_PREFIX + 'NEVER_SHOW_POPUP_AGAIN', props<{ popupId: string; reset?: boolean }>());
 
 export const plotlyReady = createAction(VIEW_PREFIX + '[plotly ready]');
+export const aceReady = createAction(VIEW_PREFIX + '[ace ready]');
+export const openAppsAwarenessDialog = createAction(VIEW_PREFIX + '[apps awareness dialog]',
+  props<{appsYouTubeIntroLink}>()
+);
+

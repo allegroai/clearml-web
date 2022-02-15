@@ -1,0 +1,23 @@
+@import "src/app/webapp-common/shared/ui-components/styles/variables";
+
+:host {
+  .header {
+    padding-left: 24px;
+    font-size: 16px;
+    margin-bottom: 33px;
+
+    .user-icon {
+      width: 88px;
+      height: 88px;
+      overflow: hidden;
+      background-image: url(../../../../webapp-common/assets/icons/icon-profile-user.svg);
+    }
+    sm-inline-edit {
+      margin: 12px 0 12px 24px;
+      min-height: 32px;
+    }
+    .profile-email.text{
+      color: $blue-400;
+    }
+  }
+}

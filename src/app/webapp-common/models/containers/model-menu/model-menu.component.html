@@ -39,6 +39,7 @@
   <button mat-menu-item (click)="moveToProjectPopup()" [disabled]="isExample">
     <i [class]="'al-icon ' + ICONS.MOVE_TO + '  sm-md'"></i>{{selectedDisableAvailable[menuItems.moveTo].available | menuItemText : 'Move to Project' : selectedDisableAvailableIsMultiple}}
   </button>
+    <ng-content select="[extended]"></ng-content>
   </ng-container>
 </mat-menu>
 

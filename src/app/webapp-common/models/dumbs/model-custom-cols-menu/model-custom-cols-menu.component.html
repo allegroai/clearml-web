@@ -1,8 +1,9 @@
 <sm-menu
-  [iconClass]="'al-icon al-ico-settings al-color blue-400 sm-md pointer create-new-icon '"
+  [iconClass]="'al-icon al-ico-settings al-color pointer create-new-icon ' + (disabled ? 'blue-570' : 'blue-400')"
   buttonTooltip="Customize table"
   smMenuClass="light-theme custom-columns"
   [showButton]="false"
+  [style.pointer-events]="disabled ? 'none' : 'initial'"
 >
   <div (click)="$event.stopPropagation()">
     <sm-custom-columns-list

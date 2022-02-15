@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="88" height="88" viewBox="0 0 88 88">
+    <defs>
+        <style>
+            .cls-1{fill:none;stroke:#a4adcd;stroke-width:2px}
+        </style>
+    </defs>
+    <g id="ico-profile-user" transform="translate(-831 -206)">
+        <g id="p2" class="cls-1" transform="translate(831 206)">
+            <circle cx="44" cy="44" r="44" style="stroke:none"/>
+            <circle cx="44" cy="44" r="43" style="fill:none"/>
+        </g>
+        <path id="p1" class="cls-1" d="M123.2-604.267a11.733 11.733 0 0 1-11.733 11.733 11.733 11.733 0 0 1-11.733-11.733A11.733 11.733 0 0 1 111.467-616a11.733 11.733 0 0 1 11.733 11.733zm4.693 21.12a28.186 28.186 0 0 0-9.51-3.835 11.657 11.657 0 0 1-6.917 2.27 11.657 11.657 0 0 1-6.917-2.27 28.186 28.186 0 0 0-9.51 3.835c-2.761 1.84-7.04 4.693-7.04 7.04s.962 7.04 4.165 7.04h38.6c3.2 0 4.165-4.693 4.165-7.04s-4.274-5.2-7.036-7.04z" transform="translate(762.8 842.533)"/>
+    </g>
+</svg>

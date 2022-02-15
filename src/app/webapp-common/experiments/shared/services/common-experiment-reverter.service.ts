@@ -41,6 +41,7 @@ export class CommonExperimentReverterService {
       model: this.revertModel(experiment),
       hyperparams: this.revertHyperParams(experiment.hyperparams),
       status: experiment.status,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       container: experiment.container || {image: '', setup_shell_script: '', arguments: ''}
     };
   }
@@ -58,6 +59,7 @@ export class CommonExperimentReverterService {
 
   revertExecution(experiment: ITask): IExecutionForm {
     return {
+      /* eslint-disable @typescript-eslint/naming-convention */
       source: this.revertExecutionSource(experiment.script),
       output: {
         destination: get('destination', experiment.output) || '',
@@ -68,10 +70,11 @@ export class CommonExperimentReverterService {
       docker_cmd: get('docker_cmd', experiment.execution),
       queue: experiment.execution?.queue,
       container: experiment.container || {setup_shell_script: '', arguments: '', image: ''}
+      /* eslint-enable @typescript-eslint/naming-convention */
     };
   }
 
-  revertExecutionParameters(parameters: Execution['parameters']): Array<{ label: any, key: string }> {
+  revertExecutionParameters(parameters: Execution['parameters']): Array<{ label: any; key: string }> {
     return parameters ?
       Object.entries(parameters).map(([key, val]) => ({label: val, key}))
         .sort((p, c) => p.key < c.key ? -1 : 1) :
@@ -80,6 +83,7 @@ export class CommonExperimentReverterService {
 
   revertExecutionSource(script: Task['script']): IExecutionForm['source'] {
     return {
+      /* eslint-disable @typescript-eslint/naming-convention */
       repository: get('repository', script) || '',
       tag: get('tag', script) || '',
       version_num: get('version_num', script) || '',
@@ -87,6 +91,7 @@ export class CommonExperimentReverterService {
       entry_point: get('entry_point', script) || '',
       working_dir: get('working_dir', script) || '',
       scriptType: this.revertScriptType(script)
+      /* eslint-enable @typescript-eslint/naming-convention */
     };
   }
 
@@ -113,7 +118,7 @@ export class CommonExperimentReverterService {
     const pip = getOr([], 'requirements.pip', script);
     return {
       ...script.requirements,
-      'pip': (Array.isArray(pip) ? pip.join('\n') : pip) || ''
+      pip: (Array.isArray(pip) ? pip.join('\n') : pip) || ''
     };
   }
 

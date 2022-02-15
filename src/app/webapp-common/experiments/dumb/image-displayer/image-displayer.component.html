@@ -22,7 +22,7 @@
     </div>
     <div class="d-flex third">
       <div (click)="downloadImage()" smTooltip="Download" class="download icon-container"
-           [style.visibility]="(currentDebugImage?.url | isVideo)?'hidden':'visible'">
+           [style.visibility]="(url | isVideo) ? 'hidden' : 'visible'">
         <i class="al-icon al-ico-download al-color light-grey-blue"></i>
       </div>
       <div (click)="closeImageDisplayer()" smTooltip="Close" class="icon-container">
@@ -38,15 +38,15 @@
          [style.height.px]="imageHeight"
          [style.transform]="'translate(' +imageTranslateX +'px, '+ imageTranslateY + 'px)'"
          [style.width.px]="imageWidth" [style.top.px]="this.imageTop" [style.left.px]="this.imageLeft"
-         [style.visibility]="((currentDebugImage?.url | isVideo) || (currentDebugImage?.url | isAudio)) || !imageLoaded?'hidden':'visible'">
-      <img #debugImage [src]="currentDebugImage?.url" (mousemove)="changeCords($event)"
+         [style.visibility]="isPlayer || !imageLoaded ? 'hidden' : 'visible'">
+      <img #debugImage [src]="url" (mousemove)="changeCords($event)"
            (load)="fitToScreen(); resetDrag(); showImage()" (mousedown)="setDragging(true)"
            (mouseup)="setDragging(false)" (mouseout)="setDragging(false); resetCords()" [class.dragging]="dragging">
     </div>
-    <video #debugVideo [src]="currentDebugImage?.url" autoplay controls
-           [style.visibility]="(currentDebugImage?.url | isVideo) || (currentDebugImage?.url | isAudio)?'visible':'hidden'"></video>
+    <video #debugVideo [src]="url" autoplay controls
+           [style.visibility]="isPlayer ? 'visible' : 'hidden'"></video>
     <div class="d-flex flex-column controllers"
-         [style.visibility]="(currentDebugImage?.url | isVideo) || (currentDebugImage?.url | isAudio)?'hidden':'visible'">
+         [style.visibility]="isPlayer ? 'hidden' : 'visible'">
       <div (click)="fitToScreen()"
            class="fit-to-screen d-flex flex-column justify-content-around align-items-center controller icon-container"
            smTooltip="Fit to window" matTooltipPosition="left"
@@ -81,7 +81,7 @@
   </div>
 
   <div class="footer-info d-flex align-items-center justify-content-between"
-       [style.visibility]="(currentDebugImage?.url | isVideo) || (currentDebugImage?.url | isAudio)?'hidden':'visible'">
+       [style.visibility]="isPlayer ? 'hidden' : 'visible'">
     <div class="d-flex justify-content-center params" smTooltip="Image Width & Height in pixels">
       <div class="single-parameter"><label>w: </label>{{debugImage.naturalWidth}}</div>
       <div class="single-parameter"><label>h: </label>{{debugImage.naturalHeight}}</div>

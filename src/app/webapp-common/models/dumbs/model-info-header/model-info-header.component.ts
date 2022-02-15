@@ -1,16 +1,15 @@
 import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
-import {getTags} from '../../../core/actions/projects.actions';
 import {TagsMenuComponent} from '../../../shared/ui-components/tags/tags-menu/tags-menu.component';
 import {Store} from '@ngrx/store';
 import {selectCompanyTags, selectProjectTags, selectTagsFilterByProject} from '../../../core/reducers/projects.reducer';
 import {Observable} from 'rxjs';
-import { removeTag, addTag } from '../../actions/models-menu.actions';
+import {addTag, removeTag} from '../../actions/models-menu.actions';
 import {SelectedModel, TableModel} from '../../shared/models.model';
 import {MenuComponent} from '../../../shared/ui-components/panel/menu/menu.component';
 import {getSysTags} from '../../model.utils';
 import {ActivateModelEdit, CancelModelEdit} from '../../actions/models-info.actions';
 import {
-  CountAvailableAndIsDisable, CountAvailableAndIsDisableSelectedFiltered,
+  CountAvailableAndIsDisableSelectedFiltered,
   MenuItems,
   selectionDisabledArchive,
   selectionDisabledDelete,
@@ -43,6 +42,7 @@ export class ModelInfoHeaderComponent {
     this.tagsFilterByProject$ = this.store.select(selectTagsFilterByProject);
     this.projectTags$ = this.store.select(selectProjectTags);
     this.companyTags$ = this.store.select(selectCompanyTags);
+
   }
 
   private _model: TableModel | SelectedModel;

@@ -12,6 +12,6 @@ export class IsAudioPipe implements PipeTransform {
       return false;
     }
     const path = value.split('?')[0];
-    return IsAudioPipe.audioExtensions.includes(last(path.split('.')));
+    return IsAudioPipe.audioExtensions.includes(last(path.split('.')).toLowerCase());
   }
 }

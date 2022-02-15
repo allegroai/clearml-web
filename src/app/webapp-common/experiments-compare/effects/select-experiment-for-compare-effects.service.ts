@@ -1,21 +1,29 @@
 import {Injectable} from '@angular/core';
-import {Actions, Effect, ofType} from '@ngrx/effects';
-import {catchError, debounceTime, filter, mergeMap, map, switchMap, withLatestFrom} from 'rxjs/operators';
+import {Actions, createEffect, Effect, ofType} from '@ngrx/effects';
+import {debounceTime, filter, map, mergeMap, switchMap, withLatestFrom} from 'rxjs/operators';
 import {activeLoader, deactivateLoader} from '../../core/actions/layout.actions';
-import {requestFailed} from '../../core/actions/http.actions';
 import {ApiTasksService} from '../../../business-logic/api-services/tasks.service';
 import {
-  SEARCH_EXPERIMENTS_FOR_COMPARE, searchExperimentsForCompare,
-  setSearchExperimentsForCompareResults, refreshIfNeeded, setRefreshing, setExperimentsUpdateTime
+  compareAddDialogSetTableSort,
+  compareAddDialogTableSortChanged,
+  GET_SELECTED_EXPERIMENTS_FOR_COMPARE,
+  getSelectedExperimentsForCompareAddDialog,
+  refreshIfNeeded,
+  setExperimentsUpdateTime,
+  setRefreshing,
+  setSearchExperimentsForCompareResults
 } from '../actions/compare-header.actions';
 import {select, Store} from '@ngrx/store';
-import {get, isEmpty} from 'lodash/fp';
-import {escapeRegex} from '../../shared/utils/shared-utils';
-import {NONE_USER_TASK_TYPES} from '../../experiments/shared/common-experiments.const';
-import {selectExperimentsUpdateTime} from '../reducers';
+import {flatten, get, isEmpty} from 'lodash/fp';
+import {selectCompareAddTableSortFields, selectExperimentsUpdateTime} from '../reducers';
 import {EmptyAction} from '../../../app.constants';
 import {selectRouterParams} from '../../core/reducers/router-reducer';
-import {selectAppVisible} from '../../core/reducers/view-reducer';
+import {selectAppVisible} from '../../core/reducers/view.reducer';
+import {MINIMUM_ONLY_FIELDS} from '../../experiments/experiment.consts';
+import * as exSelectors from '../../experiments/reducers';
+import {selectExperimentsMetricsCols, selectExperimentsTableCols} from '../../experiments/reducers';
+import {selectSelectedProjectId} from '../../core/reducers/projects.reducer';
+import {addMultipleSortColumns} from '../../shared/utils/shared-utils';
 
 @Injectable()
 export class SelectCompareHeaderEffects {
@@ -25,7 +33,7 @@ export class SelectCompareHeaderEffects {
 
   @Effect()
   activeLoader = this.actions.pipe(
-    ofType(SEARCH_EXPERIMENTS_FOR_COMPARE),
+    ofType(GET_SELECTED_EXPERIMENTS_FOR_COMPARE),
     map(action => activeLoader(action.type))
   );
 
@@ -37,8 +45,9 @@ export class SelectCompareHeaderEffects {
       this.store.select(selectRouterParams).pipe(map(params => get('ids', params)?.split(','))),
       this.store.pipe(select(selectExperimentsUpdateTime)),
     ),
-    filter(([action, isAppVisible, experimentsIds, experimentsUpdateTime]) => isAppVisible),
-    switchMap(([action, isAppVisible, experimentsIds, experimentsUpdateTime]) =>
+    filter(([, isAppVisible, ,]) => isAppVisible),
+    switchMap(([action, , experimentsIds, experimentsUpdateTime]) =>
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       this.experimentsApi.tasksGetAllEx({id: experimentsIds, only_fields: ['last_update']}).pipe(
         mergeMap((res) => {
           const updatedExperimentsUpdateTime: { [key: string]: Date } = {};
@@ -51,30 +60,42 @@ export class SelectCompareHeaderEffects {
           const shouldUpdate = ((!action.payload) || (!action.autoRefresh) || experimentsWhereUpdated) && !(isEmpty(experimentsUpdateTime));
           return [
             setExperimentsUpdateTime({payload: updatedExperimentsUpdateTime}),
-            (shouldUpdate) ? setRefreshing({payload: action.payload, autoRefresh: action.autoRefresh}) : new EmptyAction()];
+            (shouldUpdate) ? setRefreshing({
+              payload: action.payload,
+              autoRefresh: action.autoRefresh
+            }) : new EmptyAction()];
         }))
     )
   );
+  tableSortChange = createEffect(() => this.actions.pipe(
+    ofType(compareAddDialogTableSortChanged),
+    withLatestFrom(
+      this.store.select(selectCompareAddTableSortFields),
+      this.store.select(selectSelectedProjectId),
+      this.store.select(selectExperimentsTableCols),
+      this.store.select(selectExperimentsMetricsCols),
+    ),
+    switchMap(([action, oldOrders, projectId, tableCols, metricsCols]) => {
+      const orders = addMultipleSortColumns(oldOrders, action.colId, action.isShift);
+      const colIds = tableCols.map(col => col.id).concat(metricsCols.map(col => col.id));
+      return [compareAddDialogSetTableSort({orders, projectId, colIds})];
+    })
+  ));
 
   @Effect()
   searchExperimentsForCompare = this.actions.pipe(
-    ofType(searchExperimentsForCompare),
+    ofType(getSelectedExperimentsForCompareAddDialog),
+    withLatestFrom(this.store.select(selectRouterParams).pipe(map(params => get('ids', params)?.split(','))),
+      this.store.select(exSelectors.selectExperimentsTableCols),
+      this.store.select(exSelectors.selectExperimentsMetricsColsForProject)),
     debounceTime(500),
-    switchMap((action) => this.experimentsApi.tasksGetAllEx({
-      _any_      : {
-        pattern: action.payload ? escapeRegex(action.payload) : '',
-        fields : ['id', 'name']
-      },
-      page       : 0,
-      page_size  : 300,
-      only_fields: ['type', 'id', 'name', 'user.name', 'status', 'tags', 'system_tags', 'project.name'],
-      type: NONE_USER_TASK_TYPES,
-      system_tags: ['-archived'],
-    })
-      .pipe(
-        mergeMap(res => [action.payload ? setSearchExperimentsForCompareResults({payload: res.tasks}) : setSearchExperimentsForCompareResults({payload: []}), deactivateLoader(action.type)]),
-        catchError(error => [deactivateLoader(action.type), requestFailed(error)])
+    switchMap(([action, tasksIds, cols, metricCols]) => this.experimentsApi.tasksGetAllEx({
+        id: action.tasksIds ? action.tasksIds : tasksIds,
+        only_fields: [...new Set([...MINIMUM_ONLY_FIELDS,
+          ...flatten(cols.filter(col => col.id !== 'selected' && !col.hidden).map(col => col.getter || col.id)),
+          ...(metricCols ? flatten(metricCols.map(col => col.getter || col.id)) : [])])]
+      }).pipe(
+      mergeMap((res) => [setSearchExperimentsForCompareResults({payload: [...res?.tasks]}), deactivateLoader(action.type)]),
       )
-    )
-  );
+    ));
 }

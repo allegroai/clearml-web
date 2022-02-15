@@ -1,0 +1,21 @@
+<sm-dialog-template header="ABORT CHILD TASKS" [iconClass]="'al-ico-abort-all'">
+  <div *ngIf="shouldBeAbortedTasks!==null; else lookingForRunningTasks">
+    <div class="message" [ngPlural]="shouldBeAbortedTasks?.length">
+      <ng-template ngPluralCase="=0">Couldn't find any child running tasks</ng-template>
+      <ng-template ngPluralCase="=1">this will abort one running child task</ng-template>
+      <ng-template ngPluralCase="other">This will abort all {{shouldBeAbortedTasks?.length}} running child tasks</ng-template>
+    </div>
+  </div>
+  <ng-template #lookingForRunningTasks>
+    Looking for child running tasks...
+  </ng-template>
+  <div class="buttons">
+    <button (click)="closeDialog(true)" [disabled]="!(shouldBeAbortedTasks?.length>0)"
+            class="btn btn-neon yes-button">
+      ABORT
+    </button>
+    <button (click)="closeDialog(false)" class="btn btn-outline-neon">
+      CANCEL
+    </button>
+  </div>
+</sm-dialog-template>

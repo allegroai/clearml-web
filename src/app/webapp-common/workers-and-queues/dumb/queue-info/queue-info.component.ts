@@ -4,6 +4,7 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import {Queue} from '../../../../business-logic/model/queues/queue';
 import {BlTasksService} from '../../../../business-logic/services/tasks.service';
 import {SelectQueueComponent} from '../../../experiments/shared/components/select-queue/select-queue.component';
+import {cloneDeep} from 'lodash/fp';
 
 @Component({
   selector   : 'sm-queue-info',
@@ -11,15 +12,23 @@ import {SelectQueueComponent} from '../../../experiments/shared/components/selec
   styleUrls  : ['./queue-info.component.scss']
 })
 export class QueueInfoComponent implements OnInit {
+  private _selectedQueue: Queue;
 
-  @Input() selectedQueue: Queue;
+  @Input() set selectedQueue(selectedQueue: Queue) {
+    this._selectedQueue = cloneDeep(selectedQueue);
+  }
+
+  get selectedQueue() {
+    return this._selectedQueue;
+  }
+
   @Input() queues: Queue[];
   @Output() deselectQueue                 = new EventEmitter();
   @Output() moveExperimentToTopOfQueue    = new EventEmitter();
   @Output() moveExperimentToBottomOfQueue = new EventEmitter();
   @Output() moveExperimentToOtherQueue    = new EventEmitter();
   @Output() removeExperimentFromQueue     = new EventEmitter();
-  @Output() moveExperimentInQueue         = new EventEmitter();
+  @Output() moveExperimentInQueue         = new EventEmitter<{task: string; count: number}>();
 
   public activeTab: string;
   public menuSelectedExperiment: any;

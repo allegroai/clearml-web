@@ -1,26 +1,48 @@
 import {Injectable} from '@angular/core';
-import {ApiLoginService} from '../../business-logic/api-services/login.service';
-import {LoginSsoCallbackResponse} from '../../business-logic/model/login/loginSsoCallbackResponse';
-import {LoginSsoCallbackRequest} from '../../business-logic/model/login/loginSsoCallbackRequest';
-import {Observable} from 'rxjs';
-import {map} from 'rxjs/operators';
-import {userState} from '../../webapp-common/shared/services/login.service';
+import {Router} from '@angular/router';
+import {HttpClient} from '@angular/common/http';
+import {MatDialog} from '@angular/material/dialog';
+import {Store} from '@ngrx/store';
+import {EMPTY} from 'rxjs';
+import {ApiLoginService} from '~/business-logic/api-services/login.service';
+import {BaseLoginService} from '@common/shared/services/login.service';
+import {ConfigurationService} from '@common/shared/services/configuration.service';
+import {UserPreferences} from '@common/user-preferences';
 
 @Injectable({
   providedIn: 'root'
 })
-export class LoginService {
+export class LoginService extends BaseLoginService {
 
-  constructor(private loginApi: ApiLoginService) { }
-
-  ssoLogin(params: Partial<LoginSsoCallbackRequest>): userState {
-    const url = new URL(window.location.href);
-    const provider = url.pathname.slice(10);
-    const args = {};
-    url.searchParams.forEach(((value, key) => args[key] = value));
-    const state = url.searchParams.get('state');
-    const callback = `${url.origin}/callback_${provider}`;
-    return (this.loginApi.loginSsoCallback({provider, args, callback_url: callback, ...params}) as Observable<LoginSsoCallbackResponse>)
-      .pipe(map((res) => ({userState: res, state})));
+  constructor(
+    protected httpClient: HttpClient,
+    protected loginApi: ApiLoginService,
+    protected dialog: MatDialog,
+    protected configService: ConfigurationService,
+    protected store: Store,
+    protected router: Router,
+    protected userPreferences: UserPreferences
+) {
+    super(httpClient, loginApi, dialog, configService, store, router, userPreferences);
   }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  signup(signupInfo) {
+    return EMPTY;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  getInviteInfo(inviteId: string) {
+    return EMPTY;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  ssoLogin(params) {
+    return EMPTY;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  ssoFlow(resolve) {
+  }
+
 }

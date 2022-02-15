@@ -6,8 +6,10 @@
   </div>
 </div>
 <form #moveToForm="ngForm" (submit)="send()">
-  <mat-form-field class="w-100" appearance="outline"
-                  hideRequiredMarker="true">
+  <mat-form-field class="w-100"
+                  appearance="outline"
+                  hideRequiredMarker="true"
+                  (click)="project.parent && clear(); projectInputRef.blur(); projectInputRef.focus()">
     <mat-label>Destination</mat-label>
     <input matInput type="text"
            [matAutocomplete]="auto"
@@ -26,7 +28,6 @@
            required
            minlength="3"
            (keydown.enter)="projectInput.control.markAsTouched()"
-           (click)="project.parent && clear(); projectInputRef.blur(); projectInputRef.focus()"
     >
     <span matSuffix *ngIf="projectInput.value && (!isAutoCompleteOpen) && !(project.parent | stringIncludedInArray:projectsNames)" class="creat-new-suffix">(Create New)</span>
     <i matSuffix [class]="'fa mr2 ' + (project.parent? 'fa-times pointer':'fa-search')"

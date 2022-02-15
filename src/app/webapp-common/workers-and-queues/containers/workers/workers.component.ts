@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {Worker} from '../../../../business-logic/model/workers/worker';
-import {GetSelectedWorker, workersTableSortChanged} from '../../actions/workers.actions';
+import {getSelectedWorker, workersTableSortChanged} from '../../actions/workers.actions';
 import {selectSelectedWorker, selectWorkers, selectWorkersTableSortFields} from '../../reducers/index.reducer';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Observable} from 'rxjs';
@@ -51,7 +51,7 @@ export class WorkersComponent implements OnInit {
         queryParams: {id: worker?.id},
         queryParamsHandling: 'merge'
       });
-    this.store.dispatch(new GetSelectedWorker(worker));
+    this.store.dispatch(getSelectedWorker({worker}));
   }
 
   sortedChanged(sort: { isShift: boolean; colId: ISmCol['id'] }) {

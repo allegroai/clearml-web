@@ -18,9 +18,8 @@
        class="all-metrics"
        [class.row]="!isGroupGraphs"
   >
-    <div *ngFor="let metric of graphList;trackBy: trackByFn" class="metric-group-container less-padding"
+    <div *ngFor="let metric of (graphList | filter: hiddenList); trackBy: trackByFn" class="metric-group-container less-padding"
          #metricGroup
-         [class.hidden]="hiddenList.includes(metric)"
          [class.two-in-a-row]="!isGroupGraphs && graphList.length > 1 && isWidthBigEnough()"
          [style.height.percent]=""
     >
@@ -34,6 +33,7 @@
                 #singleGraph
                 [class.less-padding]="isGroupGraphs"
                 [class.two-in-a-row]="isGroupGraphs && chartItem?.data[0]?.type !== 'table' && graphsData[metric].length > 1 && isWidthBigEnough()"
+                [graphsNumber]="graphsData[metric].length"
                 [legendStringLength]="legendStringLength"
                 [chart]="chartItem"
                 [id]="SINGLE_GRAPH_ID_PREFIX + EXPERIMENT_GRAPH_ID_PREFIX + metric + chartItem.layout.title + chartItem.iter + chartItem.variant + (chartItem.layout.images && chartItem.layout.images[0]?.source)"
