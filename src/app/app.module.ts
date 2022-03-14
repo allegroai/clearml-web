@@ -23,6 +23,7 @@ import {ProjectsSharedModule} from './features/projects/shared/projects-shared.m
 import {MAT_FORM_FIELD_DEFAULT_OPTIONS} from '@angular/material/form-field';
 import {LoginService} from '~/shared/services/login.service';
 import {SettingsModule} from '~/features/settings/settings.module';
+import {EnvServiceProvider} from './env.service.provider';
 
 @NgModule({
   declarations   : [AppComponent],
@@ -74,7 +75,8 @@ import {SettingsModule} from '~/features/settings/settings.module';
       deps: [ConfigurationService],
       useFactory: (confService: ConfigurationService) =>
         confService.getStaticEnvironment().GTM_ID
-    }
+    },
+    EnvServiceProvider
   ],
   bootstrap      : [AppComponent],
   exports        : []

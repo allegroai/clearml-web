@@ -11,6 +11,8 @@ import {selectCurrentUser} from '../../core/reducers/users-reducer';
 import {neverShowPopupAgain} from '../../core/actions/layout.actions';
 import {FeaturesEnum} from '~/business-logic/model/users/featuresEnum';
 import {selectFeatures, selectTermsOfUse} from '~/core/reducers/users.reducer';
+import {EnvService} from '../../../env.service';
+import {EnvServiceFactory} from '../../../env.service.provider';
 
 interface Tips {
   [url: string]: Tip[];
@@ -26,6 +28,10 @@ export interface Tip {
 
 const tipsCooldownTime = 1000 * 60 * 60 * 24 * 3;
 export const popupId = 'tip-of-the-day';
+
+var env : EnvService = EnvServiceFactory();
+export const NAMESPACE               = env.namespace;
+export const SUFFIX                  = NAMESPACE == null ? '/' : '/'+NAMESPACE+'-clearml/';
 
 @Injectable({
   providedIn: 'root'
@@ -46,7 +52,7 @@ export class TipsService {
   initTipsService(showAllTips = true) {
     this.nextTimeToShowTips = new Date(window.localStorage.getItem('nextTimeToShowTips') || new Date().getTime());
 
-    this.httpClient.get('/onboarding.json').pipe(withLatestFrom(this.store.select(selectFeatures)))
+    this.httpClient.get(SUFFIX +'/onboarding.json').pipe(withLatestFrom(this.store.select(selectFeatures)))
       .subscribe(([tipsConfig, features]: [{ onboarding: Tip[] }, FeaturesEnum[]]) => {
         const tipsFiltered = tipsConfig.onboarding.filter(tip => !tip.feature || features.includes(tip.feature) || showAllTips);
         this.tipsConfig = {

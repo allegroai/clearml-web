@@ -1,10 +1,16 @@
 import {Action} from '@ngrx/store';
 import {ConfigurationService} from './webapp-common/shared/services/configuration.service';
+import {EnvServiceFactory} from './env.service.provider';
+import {EnvService} from './env.service';
 const environment = ConfigurationService.globalEnvironment;
 
 export const NA                      = 'N/A';
 export const ALLEGRO_TUTORIAL_BUCKET = 'allegro-tutorials';
 export const UPDATE_SERVER_PATH      = 'https://updates.clear.ml/updates';
+
+var env : EnvService = EnvServiceFactory();
+export const NAMESPACE               = env.namespace;
+export const SUFFIX                  = NAMESPACE == null ? '/' : '/'+NAMESPACE+'-clearml/';
 
 export const BASE_REGEX = {
   DOMAIN           : '([A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?\\.)+([A-Za-z]{2,6}\\.?|[A-Za-z0-9-]{1,}[A-Za-z0-9]\\.?)',
@@ -101,7 +107,7 @@ export function guessAPIServerURL() {
   } else if (window.location.port === '30080') {
     return url.replace(/:\d+/, '') + ':30008';
   }
-  return url.replace(/:\d+/, '') + ':8008';
+  return url.replace(/:\d+/, '') + SUFFIX + 'api';
 }
 
 export const ENVIRONMENT = {API_VERSION: '/v999.0'};
@@ -122,7 +128,7 @@ if (environment.fileBaseUrl) {
 } else if (window.location.port === '30080') {
   fileBaseUrl = url.replace(/:\d+/, '') + ':30081';
 } else if (window.location.port === '8080') {
-  fileBaseUrl = url.replace(/:\d+/, '') + ':8081';
+  fileBaseUrl = url.replace(/:\d+/, '') + SUFFIX + 'files';
 }
 
 apiBaseUrl += ENVIRONMENT.API_VERSION;
