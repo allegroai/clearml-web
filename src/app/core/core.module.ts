@@ -57,7 +57,7 @@ export const reducers = {
 };
 
 const syncedKeys = [
-  'auth.S3BucketCredentials',
+  'auth.s3BucketCredentials',
   'datasets.selectedVersion',
   'datasets.selected',
   'projects.selectedProjectId',
