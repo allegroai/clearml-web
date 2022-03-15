@@ -55,6 +55,7 @@ export const MODELS_TABLE_COLS: ISmCol[] = [
     filterable  : true,
     header      : 'FRAMEWORK',
     style       : {width: '100px'},
+    showInCardFilters: true
   },
   {
     id          : MODELS_TABLE_COL_FIELDS.NAME,
@@ -73,7 +74,8 @@ export const MODELS_TABLE_COLS: ISmCol[] = [
     style       : {width: '240px'},
     excludeFilter: true,
     andFilter: true,
-    columnExplain: 'Click to include tag. Click again to exclude.'
+    columnExplain: 'Click to include tag. Click again to exclude.',
+    showInCardFilters: true
   },
   {
     id          : MODELS_TABLE_COL_FIELDS.READY,
@@ -83,6 +85,7 @@ export const MODELS_TABLE_COLS: ISmCol[] = [
     header      : 'STATUS',
     hidden      : false,
     style       : {width: '135px'},
+    showInCardFilters: true
   },
   {
     id          : MODELS_TABLE_COL_FIELDS.PROJECT,
@@ -97,7 +100,8 @@ export const MODELS_TABLE_COLS: ISmCol[] = [
     sortable        : false,
     static          : true,
     header          : 'USER',
-    style           : {width: '240px'}
+    style           : {width: '240px'},
+    showInCardFilters: true
   },
   {
     id        : MODELS_TABLE_COL_FIELDS.TASK,

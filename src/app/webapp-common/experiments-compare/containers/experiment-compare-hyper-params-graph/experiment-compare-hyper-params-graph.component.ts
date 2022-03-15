@@ -1,17 +1,17 @@
 import {Component, HostListener, OnDestroy, OnInit, ElementRef, ViewChild} from '@angular/core';
 import {combineLatest, Observable, Subscription} from 'rxjs';
 import {select, Store} from '@ngrx/store';
-import {IExperimentInfoState} from '../../../../features/experiments/reducers/experiment-info.reducer';
+import {IExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {distinctUntilChanged, filter, map} from 'rxjs/operators';
-import {selectRouterParams} from '../../../core/reducers/router-reducer';
+import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {get, has} from 'lodash/fp';
 import {SetExperimentSettings, SetSelectedExperiments} from '../../actions/experiments-compare-charts.actions';
-import {selectRefreshing, selectScalarsGraphHyperParams, selectScalarsGraphMetrics, selectScalarsGraphShowIdenticalHyperParams, selectScalarsGraphTasks, selectMetricValueType, selectSelectedSettigsHyperParams, selectSelectedSettigsMetric} from '../../reducers';
+import {selectRefreshing, selectScalarsGraphHyperParams, selectScalarsGraphMetrics, selectScalarsGraphShowIdenticalHyperParams, selectScalarsGraphTasks, selectMetricValueType, selectSelectedSettingsHyperParams, selectSelectedSettingsMetric} from '../../reducers';
 import {getExperimentsHyperParams, setShowIdenticalHyperParams, setvalueType} from '../../actions/experiments-compare-scalars-graph.actions';
 import {GroupedHyperParams, MetricOption, MetricValueType, SelectedMetric, VariantOption} from '../../reducers/experiments-compare-charts.reducer';
 import {MatRadioChange} from '@angular/material/radio';
-import {selectPlotlyReady} from '../../../core/reducers/view.reducer';
-import {ExtFrame} from '../../../shared/experiment-graphs/single-graph/plotly-graph-base';
+import {selectPlotlyReady} from '@common/core/reducers/view.reducer';
+import {ExtFrame} from '@common/shared/experiment-graphs/single-graph/plotly-graph-base';
 
 
 export const _filter = (opt: VariantOption[], value: string): VariantOption[] => {
@@ -69,8 +69,8 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
   constructor(private store: Store<IExperimentInfoState>) {
     this.metrics$ = this.store.pipe(select(selectScalarsGraphMetrics));
     this.hyperParams$ = this.store.pipe(select(selectScalarsGraphHyperParams));
-    this.selectedHyperParams$ = this.store.pipe(select(selectSelectedSettigsHyperParams));
-    this.selectedMetric$ = this.store.pipe(select(selectSelectedSettigsMetric));
+    this.selectedHyperParams$ = this.store.pipe(select(selectSelectedSettingsHyperParams));
+    this.selectedMetric$ = this.store.pipe(select(selectSelectedSettingsMetric));
     this.selectShowIdenticalHyperParams$ = this.store.pipe(select(selectScalarsGraphShowIdenticalHyperParams));
     this.selectRefreshing$ = this.store.select(selectRefreshing);
     this.experiments$ = this.store.pipe(select(selectScalarsGraphTasks));
@@ -94,7 +94,7 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
 
     this.hyperParamsSubscription = combineLatest([this.selectedHyperParams$, this.hyperParams$, this.selectShowIdenticalHyperParams$])
       .pipe(
-        filter(([selectedParams, allParams, filterActive]) => !!allParams),
+        filter(([, allParams]) => !!allParams),
       )
       .subscribe(([selectedParams, allParams, showIdentical]) => {
         this.showIdenticalParamsActive = showIdentical;
@@ -161,7 +161,7 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
     this.listOpen = false;
   }
 
-  selectedParamsChanged({param, value}) {
+  selectedParamsChanged({param}) {
     const newSelectedParamsList = this.selectedHyperParams.includes(param) ? this.selectedHyperParams.filter(i => i !== param) : [...this.selectedHyperParams, param];
     this.updateServer(this.selectedMetric, newSelectedParamsList);
   }

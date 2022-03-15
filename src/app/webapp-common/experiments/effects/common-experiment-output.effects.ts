@@ -1,10 +1,10 @@
 import {Injectable} from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {Store} from '@ngrx/store';
-import {ApiTasksService} from '../../../business-logic/api-services/tasks.service';
-import {ApiAuthService} from '../../../business-logic/api-services/auth.service';
-import {BlTasksService} from '../../../business-logic/services/tasks.service';
-import {ApiEventsService} from '../../../business-logic/api-services/events.service';
+import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
+import {ApiAuthService} from '~/business-logic/api-services/auth.service';
+import {BlTasksService} from '~/business-logic/services/tasks.service';
+import {ApiEventsService} from '~/business-logic/api-services/events.service';
 import {catchError, expand, filter, map, mergeMap, reduce, switchMap, withLatestFrom} from 'rxjs/operators';
 import {activeLoader, deactivateLoader, setServerError} from '../../core/actions/layout.actions';
 import {requestFailed} from '../../core/actions/http.actions';
@@ -13,21 +13,20 @@ import {
   mergeGraphDisplayFullDetailsScalars,
   setXtypeGraphDisplayFullDetailsScalars
 } from '../actions/common-experiment-output.actions';
-import {ExperimentOutputState} from '../../../features/experiments/reducers/experiment-output.reducer';
+import {ExperimentOutputState} from '~/features/experiments/reducers/experiment-output.reducer';
 import {LOG_BATCH_SIZE} from '../shared/common-experiments.const';
 import {
+  selectExperimentHistogramCacheAxisType,
   selectFullScreenChart,
   selectFullScreenChartIsOpen,
   selectFullScreenChartXtype,
   selectSelectedSettingsxAxisType
 } from '../reducers';
 import {refreshExperiments} from '../actions/common-experiments-view.actions';
-import {EventsGetTaskLogResponse} from '../../../business-logic/model/events/eventsGetTaskLogResponse';
-import {HTTP} from '../../../app.constants';
-import {ScalarKeyEnum} from '../../../business-logic/model/events/scalarKeyEnum';
+import {EventsGetTaskLogResponse} from '~/business-logic/model/events/eventsGetTaskLogResponse';
+import {HTTP} from '~/app.constants';
+import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {EMPTY} from 'rxjs';
-import {getOr} from 'lodash/fp';
-import {selectCompareHistogramCacheAxisType} from '../../experiments-compare/reducers';
 
 
 @Injectable()
@@ -78,7 +77,10 @@ export class CommonExperimentOutputEffects {
 
   fetchExperimentScalarFullDetails$ = createEffect(() => this.actions$.pipe(
     ofType(outputActions.getGraphDisplayFullDetailsScalars),
-    withLatestFrom(this.store.select(selectFullScreenChart), this.store.select(selectFullScreenChartXtype)),
+    withLatestFrom(
+      this.store.select(selectFullScreenChart),
+      this.store.select(selectFullScreenChartXtype)
+    ),
     switchMap(([action, fullScreenData, chartType]) => this.eventsApi.eventsScalarMetricsIterRaw({
       task: action.task,
       metric: action.metric,
@@ -103,25 +105,23 @@ export class CommonExperimentOutputEffects {
           : EMPTY
         ),
         reduce((acc, [, data]) => {
-            const graphData = acc ? acc : fullScreenData.data;
-            return graphData.map((item) => ({
-                ...item,
-                y: !acc ? getOr([], `variants[${item.name}].y`, data) : (item.y).concat(getOr([], `variants[${item.name}].y`, data)),
-                x: !acc ? getOr([], `variants[${item.name}][${action.key? action.key : chartType}]`, data) : (item.x).concat(getOr([], `variants[${item.name}][${action.key? action.key : chartType}]`, data))
-              }));
-          }
-          , null)
-      ,
-    mergeMap( (data: any) => [
-        ... action.key ? [setXtypeGraphDisplayFullDetailsScalars({xAxisType: action.key})]:[],
-      mergeGraphDisplayFullDetailsScalars({data}),
-      deactivateLoader(outputActions.getGraphDisplayFullDetailsScalars.type),
-    ]),
-    catchError(error => [
-      requestFailed(error),
-      deactivateLoader(outputActions.getGraphDisplayFullDetailsScalars.type),
-      setServerError(error, null, 'Failed to get full detailed Chart')
-    ])))
+          const graphData = acc ? acc : fullScreenData.data;
+          return graphData.map((item) => ({
+            ...item,
+            y: (acc ? item.y : []).concat(data?.variants?.[item.name]?.y || []),
+            x: (acc ? item.x : []).concat(data?.variants?.[item.name]?.[action.key || chartType] || [])
+          }));
+        }, null),
+        mergeMap( data => [
+          ... action.key ? [setXtypeGraphDisplayFullDetailsScalars({xAxisType: action.key})]:[],
+          mergeGraphDisplayFullDetailsScalars({data}),
+          deactivateLoader(outputActions.getGraphDisplayFullDetailsScalars.type),
+        ]),
+        catchError(error => [
+          requestFailed(error),
+          deactivateLoader(outputActions.getGraphDisplayFullDetailsScalars.type),
+          setServerError(error, null, 'Failed to get full detailed Chart')
+        ])))
   ));
 
   fetchExperimentPlots$ = createEffect(() => this.actions$.pipe(
@@ -152,7 +152,7 @@ export class CommonExperimentOutputEffects {
 
   fetchExperimentScalar$ = createEffect(() => this.actions$.pipe(
     ofType<outputActions.ExperimentScalarRequested>(outputActions.EXPERIMENT_SCALAR_REQUESTED),
-    withLatestFrom(this.store.select(selectSelectedSettingsxAxisType), this.store.select(selectCompareHistogramCacheAxisType)),
+    withLatestFrom(this.store.select(selectSelectedSettingsxAxisType), this.store.select(selectExperimentHistogramCacheAxisType)),
     switchMap(([action, axisType, prevAxisType]) => {
         if ([ScalarKeyEnum.IsoTime, ScalarKeyEnum.Timestamp].includes(prevAxisType) &&
           [ScalarKeyEnum.IsoTime, ScalarKeyEnum.Timestamp].includes(axisType)) {

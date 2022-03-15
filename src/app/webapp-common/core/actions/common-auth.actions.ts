@@ -10,7 +10,7 @@ export const updateS3Credential = createAction(
 );
 export const createCredential = createAction(
   AUTH_PREFIX + 'CREATE_CREDENTIAL (API)',
-  props<{workspace: GetCurrentUserResponseUserObjectCompany; openCredentialsPopup?: boolean}>()
+  props<{workspace: GetCurrentUserResponseUserObjectCompany; openCredentialsPopup?: boolean; label?: string}>()
 );
 export const addCredential = createAction(
   AUTH_PREFIX + 'ADD_CREDENTIAL',

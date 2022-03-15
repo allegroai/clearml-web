@@ -1,11 +1,12 @@
 import {createSelector} from '@ngrx/store';
 import * as projectsActions from '../actions/projects.actions';
 import {
+  addAllProjectTags,
   setAllProjects,
   setCompanyTags,
   setGraphData,
   setLastUpdate,
-  setMetricVariant,
+  setMetricVariant, setAllProjectTags,
   setTagColors,
   setTags,
   setTagsFilterByProject,
@@ -35,6 +36,7 @@ export interface RootProjects {
   archive: boolean;
   deep: boolean;
   projectTags: string[];
+  allProjectsTags: string[];
   companyTags: string[];
   systemTags: string[];
   tagsColors: { [tag: string]: TagColor };
@@ -50,6 +52,7 @@ const initRootProjects: RootProjects = {
   archive: false,
   deep: false,
   projectTags: [],
+  allProjectsTags: [],
   companyTags: [],
   systemTags: [],
   tagsColors: {},
@@ -69,6 +72,7 @@ export const selectIsDeepMode = createSelector(projects, state => state.deep);
 export const selectTagsFilterByProject = createSelector(projects, state => state.tagsFilterByProject);
 export const selectProjectTags = createSelector(projects, state => state.projectTags);
 export const selectCompanyTags = createSelector(projects, state => state.companyTags);
+export const selectAllProjectsTagsTags = createSelector(projects, state => state.allProjectsTags);
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const selectProjectSystemTags = createSelector(projects, state => getSystemTags({system_tags: state.systemTags} as ITableExperiment));
 export const selectTagsColors = createSelector(projects, state => state.tagsColors);
@@ -117,10 +121,18 @@ export const projectsReducer = (state: RootProjects = initRootProjects, action) 
     }
     case projectsActions.setSelectedProject.type:
       return {...state, selectedProject: action.project};
+    case projectsActions.deletedProjectFromRoot.type:
+      const projectIdsToDelete = [action.project.id].concat(action.project.sub_projects.map(project=> project.id))
+      return {...state, projects: state.projects.filter(project=> !projectIdsToDelete.includes(project.id))};
     case projectsActions.resetSelectedProject.type:
       return {...state, selectedProject: initRootProjects.selectedProject};
-    case projectsActions.updateProject.type: {
-      return {...state, selectedProject: {...state.selectedProject, ...(action as ReturnType<typeof projectsActions.updateProject>).changes}};
+    case projectsActions.updateProjectCompleted.type: {
+      const payload = action as ReturnType<typeof projectsActions.updateProjectCompleted>;
+      return {
+        ...state,
+        selectedProject: {...state.selectedProject, ...payload.changes},
+        projects: state.projects.map(project => project.id === payload.id ? project : {...project, ...payload.changes})
+      };
     }
     case projectsActions.setArchive.type:
       return {...state, archive: action.archive};
@@ -132,6 +144,10 @@ export const projectsReducer = (state: RootProjects = initRootProjects, action) 
       return {...state, tagsFilterByProject: action.tagsFilterByProject};
     case setCompanyTags.type:
       return {...state, companyTags: action.tags, systemTags: action.systemTags};
+    case setAllProjectTags.type:
+      return {...state, allProjectsTags: action.tags};
+    case addAllProjectTags.type:
+      return {...state, allProjectsTags: Array.from(new Set(state.allProjectsTags.concat(action.tags))).sort()};
     case setTagColors.type:
       return {...state, tagsColors: {...state.tagsColors, [action.tag]: action.colors}};
     case setMetricVariant.type: {

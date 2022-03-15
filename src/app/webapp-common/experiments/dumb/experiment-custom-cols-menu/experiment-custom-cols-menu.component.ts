@@ -1,13 +1,14 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
 import {CustomColumnMode} from '../../shared/common-experiments.const';
-import {ISmCol} from '../../../shared/ui-components/data/table/table.consts';
-import {MetricVariantResult} from '../../../../business-logic/model/projects/metricVariantResult';
-import {MetricValueType} from '../../../experiments-compare/reducers/experiments-compare-charts.reducer';
+import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
+import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
+import {MetricValueType} from '@common/experiments-compare/reducers/experiments-compare-charts.reducer';
 
 @Component({
   selector: 'sm-experiment-custom-cols-menu',
   templateUrl: './experiment-custom-cols-menu.component.html',
-  styleUrls: ['./experiment-custom-cols-menu.component.scss']
+  styleUrls: ['./experiment-custom-cols-menu.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ExperimentCustomColsMenuComponent {
 

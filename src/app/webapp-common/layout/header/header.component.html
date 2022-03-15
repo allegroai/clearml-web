@@ -1,5 +1,5 @@
 <div class="header-container" [class.login]="isLogin">
-  <div class="d-flex align-items-center">
+  <div class="d-flex align-items-center crumbs-contain">
     <sm-breadcrumbs
       class="spacer"
       [class.share-view]="isShareMode"
@@ -12,11 +12,11 @@
 
   <div *ngIf="isDashboard && !isLogin" class="logo-full middle"
        [class.make-room-for-slogan]="environment.whiteLabelSlogan">
-    <img [src]="environment?.branding?.logo" width="122" height="42">
+    <img alt="logo" [src]="environment?.branding?.logo" width="122" height="42">
     <div *ngIf="environment.whiteLabelSlogan" class="slogan">{{environment.whiteLabelSlogan}}</div>
   </div>
   <div *ngIf="isLogin && environment.whiteLabelLogo" class="logo-full">
-    <img [src]="environment?.branding?.logo" width="122" height="42">
+    <img alt="logo" [src]="environment?.branding?.logo" width="122" height="42">
   </div>
   <div *ngIf="isLogin" class="spacer"></div>
 
@@ -26,14 +26,14 @@
     <a class="pointer resources-trigger"
        menuTrigger="matMenuTrigger"
        [matMenuTriggerFor]="resourcesMenu"
-       showDelay="0" matTooltipPosition="below">
+    >
       <i class="far al-ico-help-outlined"></i>
     </a>
     <a class="pointer menu-trigger position-relative"
        menuTrigger="matMenuTrigger"
        [matMenuTriggerFor]="profileMenu"
-       showDelay="0" matTooltipPosition="below">
-      <img class="avatar" *ngIf="(user | async).avatar; else iconAvatar" [src]="(user | async).avatar">
+    >
+      <img alt="avatar" class="avatar" *ngIf="(user | async).avatar; else iconAvatar" [src]="(user | async).avatar">
       <ng-template #iconAvatar>
         <div class="user-icon">
           <i class="al-icon al-ico-account sm-md"></i>
@@ -57,42 +57,32 @@
     </mat-menu>
 
     <mat-menu #resourcesMenu="matMenu" class="user-menu">
-      <button mat-menu-item *ngIf="environment.slackLink">
-        <a class="item" target="_blank"
-           [href]="environment.slackLink">
-          <i class="al-icon al-ico-slack sm-md"></i>Community on Slack
-        </a>
+      <button mat-menu-item *ngIf="environment.slackLink" (click)="navigate(environment.slackLink)">
+        <i class="al-icon al-ico-slack sm-md"></i>Community on Slack
       </button>
-      <button mat-menu-item>
-        <a class="item" [href]="environment.docsLink" target="_blank">
-          <i class="al-icon sm-md al-ico-documentation"></i>ClearML Documentation
-        </a>
+      <button mat-menu-item (click)="navigate(environment.docsLink)">
+        <i class="al-icon sm-md al-ico-documentation"></i>ClearML Documentation
       </button>
-      <button mat-menu-item>
-        <a class="item" href="https://www.youtube.com/c/ClearML/featured" target="_blank">
-          <i class="al-icon al-ico-youtube sm-md"></i>ClearML on Youtube
-        </a>
+      <button mat-menu-item (click)="navigate('https://www.youtube.com/c/ClearML/featured')">
+        <i class="al-icon al-ico-youtube sm-md"></i>ClearML on Youtube
       </button>
       <button mat-menu-item (click)="openTip()">
         <i class="al-icon sm-md al-ico-tips"></i>Pro Tips
       </button>
-      <button mat-menu-item>
-        <a class="item" href="" (click)="openWelcome($event)">
-          <i class="al-icon sm-md al-ico-setup"></i>ClearML Python Package setup
-        </a>
+      <button mat-menu-item (click)="openWelcome($event)">
+        <i class="al-icon sm-md al-ico-setup"></i>ClearML Python Package setup
       </button>
       <ng-container *smCheckPermission="'applications'">
-        <button mat-menu-item *ngIf="$any(environment)?.appsYouTubeIntroLink && $any(environment).appAwarenessMenu !== false">
-          <a class="item" (click)="openAppsAwareness($event, $any(environment)?.appsYouTubeIntroLink)">
-            <i class="al-icon sm-md al-ico-applications"></i>ClearML Apps Introduction
-          </a>
+        <button mat-menu-item
+                *ngIf="$any(environment)?.appsYouTubeIntroLink && $any(environment).appAwarenessMenu !== false"
+                (click)="openAppsAwareness($event, $any(environment)?.appsYouTubeIntroLink)"
+        >
+          <i class="al-icon sm-md al-ico-applications"></i>ClearML Apps Introduction
         </button>
       </ng-container>
 
-      <button mat-menu-item>
-        <a class="item" href="https://www.clear.ml/contact-us/" target="_blank">
-          <i class="al-icon sm-md al-ico-email"></i>Contact Us
-        </a>
+      <button mat-menu-item (click)="navigate('https://www.clear.ml/contact-us/')">
+        <i class="al-icon sm-md al-ico-email"></i>Contact Us
       </button>
     </mat-menu>
   </div>

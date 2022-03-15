@@ -59,13 +59,12 @@
       >
         <button extra-buttons
                 *ngIf="formData.diff && editable && !showExtraDataSpinner"
-                class="btn-dark-fill mr-3 flex-1"
+                class="btn-dark-fill terminal mr-3 flex-1"
                 (click)="diffSection.editModeChanged(true)">EDIT</button>
         <button extra-buttons
                 *ngIf="formData.diff && editable && !showExtraDataSpinner"
-                class="btn-dark-fill mr-3 flex-1"
+                class="btn-dark-fill terminal mr-3 flex-1"
                 (click)="discardDiff()">
-          <i class="p-1 fa fa-trash"></i>
           DISCARD DIFFS
         </button>
       </sm-scroll-textarea>
@@ -90,13 +89,12 @@
         [formData]="formData.requirements?.pip">
         <button extra-buttons
                 *ngIf="formData?.requirements?.pip && editable && !showExtraDataSpinner"
-                class="btn-dark-fill mr-3 flex-1"
+                class="btn-dark-fill terminal mr-3 flex-1"
                 (click)="requirementsSection.editModeChanged(true)">EDIT</button>
         <button extra-buttons
                 *ngIf="formData.requirements?.pip && editable && !showExtraDataSpinner"
-                class="btn-dark-fill mr-3 flex-1"
+                class="btn-dark-fill terminal mr-3 flex-1"
                 (click)="clearInstalledPackages()">
-          <i class="p-1 fa fa-trash"></i>
           CLEAR
         </button>
       </sm-scroll-textarea>
@@ -144,13 +142,12 @@
             [formData]="formData?.container?.setup_shell_script">
             <button extra-buttons
                     *ngIf="formData?.container?.setup_shell_script && editable && !showExtraDataSpinner"
-                    class="btn-dark-fill mr-3 flex-1"
+                    class="btn-dark-fill terminal mr-3 flex-1"
                     (click)="containerSetupShellSection.editModeChanged(true)">EDIT</button>
             <button extra-buttons
                     *ngIf="formData.container?.setup_shell_script && editable && !showExtraDataSpinner"
-                    class="btn-dark-fill mr-3 flex-1"
+                    class="btn-dark-fill terminal mr-3 flex-1"
                     (click)="clearSetupShellScript()">
-              <i class="p-1 fa fa-trash"></i>
               CLEAR
             </button>
           </sm-scroll-textarea>

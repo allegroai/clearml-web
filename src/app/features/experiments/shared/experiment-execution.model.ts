@@ -8,6 +8,7 @@ export enum sourceTypesEnum {
 }
 
 export interface IExecutionForm {
+  artifacts?: any[];
   source: {
     repository: string;
     tag?: string;

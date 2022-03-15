@@ -9,4 +9,9 @@
     height: calc(100% - #{$graph-height});
     min-height: 180px;
   }
+
+  sm-queue-stats {
+    display: block;
+    margin: 0 48px 20px;
+  }
 }

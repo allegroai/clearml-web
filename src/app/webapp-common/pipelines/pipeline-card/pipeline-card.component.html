@@ -1,0 +1,77 @@
+<sm-card class="project-card"
+         (click)="projectClicked()"
+         [isExample]="!['All Experiments'].includes(project.name) && !isRootProject && (!project.company || ! project.company.id)"
+         [isFolder]="false"
+         [oneTabMode]="true"
+         [subFolderTitle]="project?.sub_projects?.length + ' sub projects'"
+>
+  <div secondTab class="h-100">
+    <div class="card-sp-list" smClickStopPropagation>
+      <ul>
+        <li *ngFor="let subProject of project?.sub_projects; trackBy: trackById"><a class="d-flex align-items-center"
+                                                                (click)="subProjectClicked(subProject.id)"
+                                                                [smTooltip]="subProject?.name"
+                                                                matTooltipPosition="above"
+                                                                [innerHTML]="subProject?.name | breadcrumbsEllipsis"></a>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div header-content>
+    <div class="d-flex justify-content-between align-items-center">
+      <sm-inline-edit #projectName
+                      class="title edit-name dark"
+                      [originalText]="project.name | shortProjectName"
+                      [editable]="true"
+                      pattern="^[^/]+$"
+                      [minWidth]="250"
+                      [inlineDisabled]="true"
+                      (textChanged)="prepareProjectNameForChange($event)"
+                      (inlineActiveStateChanged)="projectNameEditActiveChanged($event)"
+
+      >
+        <span class="project-name"
+              matTooltipPosition="above"
+              [smTooltip]="project.name"
+        >{{project.name | shortProjectName}}</span>
+      </sm-inline-edit>
+      <sm-pipeline-card-menu
+        class="menu-wrapper"
+        *ngIf="!hideMenu"
+        [project]="project"
+        [allTags]="allTags"
+        (run)="run.emit()"
+        (rename)="projectName.inlineActivated()"
+        (addTag)="addTag.emit($event)"
+      ></sm-pipeline-card-menu>
+    </div>
+    <div *ngIf="project.stats?.active?.last_task_run; else: noRun" class="last-run">Last run {{project.stats?.active?.last_task_run | timeAgo}}</div>
+    <ng-template #noRun><div class="last-run">No pipeline runs yet</div></ng-template>
+  </div>
+  <div class="d-flex justify-content-around">
+    <ng-template></ng-template>
+    <sm-circle-counter
+      [counter]="project.stats?.active?.status_count.in_progress"
+      label="RUNNING"
+      [type]="project.stats?.active?.status_count.in_progress? circleTypeEnum.running : circleTypeEnum.empty"
+    ></sm-circle-counter>
+    <sm-circle-counter
+      [counter]="project.stats?.active?.status_count.queued"
+      label="PENDING"
+      [type]="project.stats?.active?.status_count.queued ? circleTypeEnum.pending : circleTypeEnum.empty"
+    ></sm-circle-counter>
+    <sm-circle-counter
+      [counter]="project.stats?.active?.status_count?.completed"
+      label="COMPLETED"
+      [type]="project.stats?.active?.status_count?.completed? circleTypeEnum.completed : circleTypeEnum.empty"
+    ></sm-circle-counter>
+    <sm-circle-counter
+      [counter]="project.stats?.active?.status_count.failed"
+      label="FAILED"
+      [type]="project.stats?.active?.status_count.failed ? circleTypeEnum.failed : circleTypeEnum.empty"
+    ></sm-circle-counter>
+  </div>
+  <div footer class="footer-tags">
+    <sm-tag-list [tags]="project.tags" (remove)="removeTag.emit($event)" smClickStopPropagation></sm-tag-list>
+  </div>
+</sm-card>

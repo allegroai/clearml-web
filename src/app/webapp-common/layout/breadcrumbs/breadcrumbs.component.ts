@@ -1,20 +1,20 @@
-import {ChangeDetectorRef, Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {selectRouterConfig} from '../../core/reducers/router-reducer';
+import {selectRouterConfig, selectRouterQueryParams} from '../../core/reducers/router-reducer';
 import {debounceTime, filter} from 'rxjs/operators';
 import {selectBreadcrumbsStrings} from '../layout.reducer';
 import {ActivatedRoute} from '@angular/router';
 import {combineLatest, Subscription} from 'rxjs';
-import {prepareNames} from '../../../layout/breadcrumbs/breadcrumbs.utils';
+import {prepareNames} from '~/layout/breadcrumbs/breadcrumbs.utils';
 import {formatStaticCrumb} from './breadcrumbs-common.utils';
 import {addMessage} from '../../core/actions/layout.actions';
-import {MESSAGES_SEVERITY} from '../../../app.constants';
+import {MESSAGES_SEVERITY} from '~/app.constants';
 import {ConfigurationService} from '../../shared/services/configuration.service';
-import {GetCurrentUserResponseUserObjectCompany} from '../../../business-logic/model/users/getCurrentUserResponseUserObjectCompany';
+import {GetCurrentUserResponseUserObjectCompany} from '~/business-logic/model/users/getCurrentUserResponseUserObjectCompany';
 import {selectIsDeepMode} from '../../core/reducers/projects.reducer';
-import {Observable} from 'rxjs/internal/Observable';
 import {getAllSystemProjects} from '@common/core/actions/projects.actions';
 import {isEqual} from 'lodash/fp';
+import {selectIsPipelines} from '@common/experiments-compare/reducers';
 
 
 export interface IBreadcrumbsLink {
@@ -42,36 +42,42 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
   private confSub: Subscription;
   private isDeepSub: Subscription;
   public workspaceNeutral: boolean;
-  private isDeep$: Observable<boolean>;
   public isDeep: boolean;
   public subProjectsMenuIsOpen: boolean;
   private previousProjectNames: any;
+  public shouldCollapse: boolean;
+  @ViewChild('container') private breadCrumbsContainer: ElementRef;
+  private tempBread:  Array<IBreadcrumbsLink> = [];
+  archive: boolean;
 
-  constructor(private store: Store<any>, public route: ActivatedRoute, private configService: ConfigurationService, private cd: ChangeDetectorRef) {
-    this.isDeep$ = this.store.select(selectIsDeepMode);
+
+  constructor(private store: Store<any>, public route: ActivatedRoute, private configService: ConfigurationService, public cd: ChangeDetectorRef) {
   }
 
   ngOnInit() {
 
     this.confSub = this.configService.globalEnvironmentObservable.subscribe(env => this.isCommunity = env.communityServer);
 
-    this.isDeepSub = this.isDeep$.subscribe(isDeep => {
+    this.isDeepSub = this.store.select(selectIsDeepMode).subscribe(isDeep => {
       this.isDeep = isDeep;
       this.cd.detectChanges();
     });
 
     this.breadcrumbsSubscription = combineLatest([
       this.store.select(selectRouterConfig),
-      this.store.select(selectBreadcrumbsStrings)
+      this.store.select(selectBreadcrumbsStrings),
+      this.store.select(selectIsPipelines),
+      this.store.select(selectRouterQueryParams),
     ]).pipe(
-      debounceTime(10),
-      filter(([config, names]) => !!names)
-    ).subscribe(([config, names]) => {
-      this.routeConfig = config;
-      this.breadcrumbsStrings = prepareNames(names);
-      if (!isEqual(this.previousProjectNames, this.breadcrumbsStrings[':projectId'].subCrumbs) &&
-          this.breadcrumbsStrings[':projectId'].subCrumbs?.map(project => project.name).includes(undefined)) {
-        this.previousProjectNames = this.breadcrumbsStrings[':projectId'].subCrumbs;
+      debounceTime(200),
+      filter(([, names]) => !!names)
+    ).subscribe(([config, names, isPipelines, params]) => {
+      this.archive = !!params?.archive;
+      this.routeConfig = this.isDeep ? config : config?.filter( c => !['experiments', 'models', 'dataviews'].includes(c));
+      this.breadcrumbsStrings = prepareNames(names, isPipelines);
+      if (!isEqual(this.previousProjectNames, this.breadcrumbsStrings[':projectId']?.subCrumbs) &&
+        this.breadcrumbsStrings[':projectId'].subCrumbs?.map(project => project.name).includes(undefined)) {
+        this.previousProjectNames = this.breadcrumbsStrings[':projectId']?.subCrumbs;
         this.store.dispatch(getAllSystemProjects());
       }
       this.refreshBreadcrumbs();
@@ -97,8 +103,7 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
     if (!this.routeConfig) {
       return;
     }
-
-    this.breadcrumbs = this.routeConfig
+    this.tempBread = this.routeConfig
       .reduce((acc, config) => {
         const name = this.getRouteName(config);
         const id = this.getRouteId(config);
@@ -109,7 +114,16 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
       }, [{url: '', name: '', isProject: true}])
       .filter((i) => !!i.name);
     const rootCrumb = formatStaticCrumb(this.routeConfig[0]);
-    this.breadcrumbs = [rootCrumb, ...this.breadcrumbs];
+    this.tempBread = [rootCrumb, ...this.tempBread];
+    if(!isEqual(this.tempBread,this.breadcrumbs)){
+      this.shouldCollapse = false;
+      this.breadcrumbs = this.tempBread;
+      setTimeout(() => {
+        if (this.checkIfBreadcrumbsInitiated()) {
+          this.shouldCollapse =  this.breadCrumbsContainer.nativeElement.scrollWidth > this.breadCrumbsContainer.nativeElement.clientWidth;
+        }
+      }, 0)
+    }
     // this.showShareButton = !(this.routeConfig.includes('login') || this.routeConfig.includes('dashboard'));
   }
 

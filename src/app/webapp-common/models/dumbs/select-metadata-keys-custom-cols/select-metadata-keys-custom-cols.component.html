@@ -1,0 +1,30 @@
+<div smClickStopPropagation class="w-100 h-100">
+  <div class="d-flex justify-content-between p-3">
+    <i (click)="goBack.emit()" class="al-icon sm-md al-ico-back pointer" smClickStopPropagation></i>
+    <div class="title">SELECT METADATA KEY TO DISPLAY
+    </div>
+    <hr class="m-0" style="margin: 0">
+  </div>
+  <sm-search
+    class="underline-search"
+    [value]="searchText"
+    [minimumChars]="0"
+    [debounceTime]="0"
+    placeholder="Search metric"
+    (valueChanged)="searchQ($event)"
+  ></sm-search>
+  <div *ngIf="metadataKeys.length>0; else noData " class="list-container">
+    <sm-menu-item *ngFor="let key of metadataKeys | simpleFilter: searchText"
+                  #metaKey
+                  [itemLabel]="key"
+                  [checked]="metadataColsIds.includes(key)"
+                  [selectable]="true"
+                  [itemValue]="key"
+                  (itemClicked)="addOrRemoveMetadataKeyFromColumns.emit({key, show: !metaKey.checked})"
+    >
+    </sm-menu-item>
+  </div>
+  <ng-template #noData>
+    <div class="empty-state">No data to show</div>
+  </ng-template>
+</div>

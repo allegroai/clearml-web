@@ -6,20 +6,21 @@ import {QUEUES_TABLE_COL_FIELDS, TIME_INTERVALS} from '../workers-and-queues.con
 import {TABLE_SORT_ORDER} from '../../shared/ui-components/data/table/table.consts';
 import {SortMeta} from 'primeng/api';
 import {ITask} from '../../../business-logic/model/al-task';
+import {Topic} from '@common/shared/utils/statistics';
 
-interface QueueStoreType {
+export interface QueueStoreType {
   data: Queue[];
   selectedQueue: Queue;
   tasks: ITask[];
-  stats: {wait: any; length: number};
+  stats: {wait: Topic[]; length: Topic[]};
   selectedStatsTimeFrame: string;
   tableSortFields: SortMeta[];
 }
 
 const initQueues: QueueStoreType = {
-  data                  : null as Queue[],
-  selectedQueue         : null as Queue,
-  tasks                 : null as any[],
+  data                  : null,
+  selectedQueue         : null,
+  tasks                 : null,
   stats                 : {wait: null, length: null},
   selectedStatsTimeFrame: (3 * TIME_INTERVALS.HOUR).toString(),
   tableSortFields       : [{field: QUEUES_TABLE_COL_FIELDS.NAME, order: TABLE_SORT_ORDER.ASC}],

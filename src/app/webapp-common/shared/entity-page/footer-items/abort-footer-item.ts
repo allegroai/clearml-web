@@ -1,13 +1,14 @@
 import {ItemFooterModel, IFooterState} from './footer-items.models';
 import {IconNames, ICONS} from '../../../constants';
 import {MenuItems, selectionDisabledAbort} from '../items.utils';
+import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 
 export class AbortFooterItem extends ItemFooterModel {
   id = MenuItems.abort;
   emit = true;
   icon = ICONS.STOPPED as Partial<IconNames>;
 
-  constructor() {
+  constructor(public entitiesType: EntityTypeEnum) {
     super();
   }
   getItemState(state: IFooterState<any>) {
@@ -15,7 +16,7 @@ export class AbortFooterItem extends ItemFooterModel {
     return {
       disable,
       description: `Abort (${available} items)`,
-      disableDescription: state.selectionIsOnlyExamples ? 'Abort' : `You can only abort experiments with ‘Running’ status`
+      disableDescription: state.selectionIsOnlyExamples ? 'Abort' : `You can only abort ${this.entitiesType}s with ‘Running’ status`
     };
   }
 }

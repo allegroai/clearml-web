@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
+<path d="M206 141.49h-18a4 4 0 0 0-4 4v32a4 4 0 0 0 4 4h24a4 4 0 0 0 4-4v-26Zm0 5.63 4.37 4.37H206Zm6 30.37h-24v-32h14v6a4 4 0 0 0 4 4h6Zm-6.34-12.83-2.83 2.83 2.83 2.83a2 2 0 0 1-2.83 2.83l-2.83-2.83-2.83 2.83a2 2 0 0 1-2.83-2.83l2.83-2.83-2.83-2.83a2 2 0 1 1 2.78-2.88v.05l2.83 2.83 2.83-2.83a2 2 0 0 1 2.88 2.78s0 0-.05 0" fill="#5a658e"/>
+<text transform="translate(32 208)" font-size="16" fill="#5a658e" font-family="'Heebo', sans-serif" font-weight="500">This source is not specified in this Framegroup</text>
+<text transform="translate(127 240)" font-size="12" fill="#5a658e" font-family="'Heebo', sans-serif">Changes cannot be applied</text>
+<text transform="translate(36 258)" font-size="12" fill="#5a658e" font-family="'Heebo', sans-serif">Choose an available source or go back to the version browser</text>
+</svg>

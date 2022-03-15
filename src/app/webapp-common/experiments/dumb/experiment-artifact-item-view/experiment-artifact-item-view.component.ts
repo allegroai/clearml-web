@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
 import {AdminService} from '~/shared/services/admin.service';
-import {Artifact} from '../../../../business-logic/model/tasks/artifact';
+import {Artifact} from '~/business-logic/model/tasks/artifact';
 import {Store} from '@ngrx/store';
 import {BaseClickableArtifactComponent} from '../base-clickable-artifact.component';
 

@@ -21,7 +21,7 @@ import {selectRouterParams} from '../../core/reducers/router-reducer';
 import {selectAppVisible} from '../../core/reducers/view.reducer';
 import {MINIMUM_ONLY_FIELDS} from '../../experiments/experiment.consts';
 import * as exSelectors from '../../experiments/reducers';
-import {selectExperimentsMetricsCols, selectExperimentsTableCols} from '../../experiments/reducers';
+import {selectExperimentsMetricsCols, selectExperimentsTableCols, selectTableSortFields} from '../../experiments/reducers';
 import {selectSelectedProjectId} from '../../core/reducers/projects.reducer';
 import {addMultipleSortColumns} from '../../shared/utils/shared-utils';
 
@@ -70,7 +70,7 @@ export class SelectCompareHeaderEffects {
   tableSortChange = createEffect(() => this.actions.pipe(
     ofType(compareAddDialogTableSortChanged),
     withLatestFrom(
-      this.store.select(selectCompareAddTableSortFields),
+      this.store.select(selectTableSortFields),
       this.store.select(selectSelectedProjectId),
       this.store.select(selectExperimentsTableCols),
       this.store.select(selectExperimentsMetricsCols),
@@ -93,7 +93,7 @@ export class SelectCompareHeaderEffects {
         id: action.tasksIds ? action.tasksIds : tasksIds,
         only_fields: [...new Set([...MINIMUM_ONLY_FIELDS,
           ...flatten(cols.filter(col => col.id !== 'selected' && !col.hidden).map(col => col.getter || col.id)),
-          ...(metricCols ? flatten(metricCols.map(col => col.getter || col.id)) : [])])]
+          ...(metricCols ? flatten(metricCols.map(col => col.getter || col.id)) : [])])] as string[]
       }).pipe(
       mergeMap((res) => [setSearchExperimentsForCompareResults({payload: [...res?.tasks]}), deactivateLoader(action.type)]),
       )

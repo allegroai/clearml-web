@@ -1,16 +1,18 @@
-import {TaskStatusEnum} from '../../business-logic/model/tasks/taskStatusEnum';
-import {TaskTypeEnum} from '../../business-logic/model/tasks/taskTypeEnum';
+import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
+import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
 
 export enum EntityTypeEnum {
   experiment = 'experiment',
   model = 'model',
   project = 'project',
+  controller = 'pipeline run'
 }
 
 export enum CircleTypeEnum {
   completed = 'completed',
   running = 'running',
   pending = 'pending',
+  failed = 'failed',
   empty = 'empty',
   'model-labels' = 'model-labels'
 }

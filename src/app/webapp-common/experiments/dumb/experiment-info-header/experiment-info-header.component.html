@@ -1,6 +1,3 @@
-<small class="alert-warning" *ngIf="editName.active && isDev">Renaming a DEV experiment without changing the
-  code to reflect the rename, will create a new experiment the next time the code is executed.
-</small>
 <div class="d-flex">
   <sm-experiment-type-icon-label class="experiment-icon" [showLabel]="false" [type]="experiment?.type" iconClass="xl" >
   </sm-experiment-type-icon-label>
@@ -14,11 +11,13 @@
         [minWidth]="250"
         (textChanged)="onNameChanged($event)"
         (inlineActiveStateChanged)="editExperimentName($event)"
+        [warning]="isDev && 'Renaming a DEV experiment without changing the code to reflect the rename, will create a new experiment the next time the code is executed.'"
       >
         <div class="experiment-name">
           <span>{{experiment?.name}}</span>
         </div>
       </sm-inline-edit>
+      
       <div class="shared"
            *ngIf="showMinimize && shared"
       ><i class="fas fa-link p-1"></i></div>
@@ -92,7 +91,7 @@
     </div>
   </div>
   <div class="light-theme right-buttons">
-    <button class="btn btn-icon" (click)="minimizeClicked.emit()" *ngIf="showMinimize && !isSharedAndNotOwner"
+    <button class="btn btn-icon" (click)="minimizeClicked.emit()" *ngIf="experiment && showMinimize && !isSharedAndNotOwner && !isPipeline"
             smTooltip="View in experiment table" matTooltipPosition="left">
       <i class="al-icon al-ico-info-min al-color light-grey-blue"></i>
     </button>

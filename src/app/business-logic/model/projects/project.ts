@@ -1,4 +1,5 @@
 import {ProjectsGetAllResponseSingleSubProjects} from '~/business-logic/model/projects/projectsGetAllResponseSingleSubProjects';
+import {Stats} from '~/business-logic/model/projects/stats';
 
 /**
  * projects
@@ -51,6 +52,7 @@ export interface Project {
      * The default output destination URL for new tasks under this project
      */
     default_output_destination?: string;
+    stats?: Stats;
     /**
      * Last project update time. Reflects the last time the project metadata was changed or a task in this project has changed status
      */

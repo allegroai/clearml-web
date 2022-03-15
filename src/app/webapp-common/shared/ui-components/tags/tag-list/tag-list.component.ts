@@ -17,12 +17,12 @@ export interface Tag {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TagListComponent implements OnInit {
-  public disableRemove: boolean;
+  public disableRemove: string;
   tagsList = [] as Tag[];
 
   @Input() set tags(tags: string[]) {
     this.tagsList = tags?.map((tag: string) => ({caption: tag, colorObservable: this.colorService.getColor(tag)}));
-    this.disableRemove = false;
+    this.disableRemove = null;
   }
   @Input() sysTags = [] as string[];
   @Input() tooltip: boolean = false;
@@ -40,6 +40,6 @@ export class TagListComponent implements OnInit {
 
   removeTag(tag: string) {
     this.remove.emit(tag);
-    this.disableRemove = true;
+    this.disableRemove = tag;
   }
 }

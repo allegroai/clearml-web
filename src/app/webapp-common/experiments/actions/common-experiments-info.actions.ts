@@ -1,14 +1,11 @@
 import {Action, createAction, props} from '@ngrx/store';
-import {Task} from '../../../business-logic/model/tasks/task';
-import {IExperimentInfo, ISelectedExperiment} from '../../../features/experiments/shared/experiment-info.model';
-import {Model} from '../../../business-logic/model/models/model';
+import {Task} from '~/business-logic/model/tasks/task';
+import {IExperimentInfo, ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
 import {ITableExperiment} from '../shared/common-experiment-model.model';
-import {ParamsItem} from '../../../business-logic/model/tasks/paramsItem';
-import {ConfigurationItem} from '../../../business-logic/model/tasks/configurationItem';
-import {IExperimentInfoState} from '../../../features/experiments/reducers/experiment-info.reducer';
-import {experimentSectionsEnum} from '../../../features/experiments/shared/experiments.const';
+import {ParamsItem} from '~/business-logic/model/tasks/paramsItem';
+import {ConfigurationItem} from '~/business-logic/model/tasks/configurationItem';
+import {IExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {ActivatedRoute} from '@angular/router';
-import {ITask} from '../../../business-logic/model/al-task';
 
 export const EXPERIMENTS_INFO_PREFIX = 'EXPERIMENTS_INFO_';
 export const GET_EXPERIMENT_INFO = EXPERIMENTS_INFO_PREFIX + 'GET_EXPERIMENT_INFO';
@@ -113,7 +110,21 @@ export const setExperimentSaving = createAction(
   EXPERIMENTS_INFO_PREFIX + 'SET_SAVING', props<{ saving: boolean }>());
 
 export const getExperimentConfigurationObj = createAction(
-  EXPERIMENTS_INFO_PREFIX + 'GET_CONFIGURATION_OBJ');
+  EXPERIMENTS_INFO_PREFIX + 'GET_CONFIGURATION_OBJ',
+  );
+export const getPipelineConfigurationObj = createAction(
+  EXPERIMENTS_INFO_PREFIX + 'GET_PIPELINE_CONFIGURATION_OBJ',
+);
+
+export const getSelectedPipelineStep = createAction(
+  EXPERIMENTS_INFO_PREFIX + 'GET_PIPELINE_STEP',
+  props<{ id:string }>()
+);
+
+export const setSelectedPipelineStep = createAction(
+  EXPERIMENTS_INFO_PREFIX + 'SET_PIPELINE_STEP',
+  props<{ step:IExperimentInfo }>()
+);
 
 export const updateExperimentAtPath = createAction(
   EXPERIMENTS_INFO_PREFIX + 'UPDATE_EXPERIMENT_AT_PATH',
@@ -167,7 +178,6 @@ export class DeactivateEdit implements Action {
 
 export class SetExperimentFormErrors implements Action {
   readonly type = SET_EXPERIMENT_FORM_ERRORS;
-
   constructor(public payload: { [key: string]: any } | null) {
   }
 }

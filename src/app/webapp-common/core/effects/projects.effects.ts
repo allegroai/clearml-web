@@ -5,13 +5,13 @@ import {ApiProjectsService} from '~/business-logic/api-services/projects.service
 import * as actions from '../actions/projects.actions';
 import {
   fetchGraphData, getAllSystemProjects,
-  getCompanyTags,
+  getCompanyTags, getProjectsTags,
   getTags,
   openMoreInfoPopup,
-  openTagColorsMenu,
+  openTagColorsMenu, refetchProjects,
   resetProjects, resetProjectSelection,
   setCompanyTags,
-  setGraphData, setLastUpdate,
+  setGraphData, setLastUpdate, setAllProjectTags,
   setTags
 } from '../actions/projects.actions';
 
@@ -104,8 +104,8 @@ export class ProjectsEffects {
     switchMap((action) =>
       this.projectsApi.projectsUpdate({project: action.id, ...action.changes})
         .pipe(
-          mergeMap(() => [
-            actions.updateProjectCompleted()
+          mergeMap(res => [
+            actions.updateProjectCompleted({id: action.id, changes: res?.fields || action.changes})
           ]),
           catchError(err => [
             requestFailed(err),
@@ -123,12 +123,24 @@ export class ProjectsEffects {
     })
   ), {dispatch: false});
 
+  //getAll but not projects'
   getAllTags = createEffect(() => this.actions$.pipe(
     ofType(getCompanyTags),
     // eslint-disable-next-line @typescript-eslint/naming-convention
     switchMap(() => this.orgApi.organizationGetTags({include_system: true})
       .pipe(
         map((res: OrganizationGetTagsResponse) => setCompanyTags({tags: res.tags, systemTags: res.system_tags})),
+        catchError(error => [requestFailed(error)])
+      )
+    )
+  ));
+
+    getProjectsTags = createEffect(() => this.actions$.pipe(
+    ofType(getProjectsTags),
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    switchMap(() => this.projectsApi.projectsGetProjectTags({filter: {system_tags: ['pipeline']}})
+      .pipe(
+        map((res: OrganizationGetTagsResponse) => setAllProjectTags({tags: res.tags, systemTags: res.system_tags})),
         catchError(error => [requestFailed(error)])
       )
     )
@@ -212,7 +224,7 @@ export class ProjectsEffects {
   ));
 
   resetRootProjects = createEffect(() => this.actions$.pipe(
-    ofType(setActiveWorkspace),
+    ofType(setActiveWorkspace, refetchProjects),
     mergeMap(() => [
       resetProjects(),
       getAllSystemProjects()

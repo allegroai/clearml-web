@@ -13,16 +13,16 @@
     <ng-template let-col let-worker="rowData" pTemplate="body">
       <ng-container [ngSwitch]="col.id">
         <ng-container *ngSwitchCase="WORKERS_TABLE_COL_FIELDS.TASK_RUNNING_TIME">
-          <span>{{worker?.task?.running_time | msToSec}}</span>
+          <span class="ellipsis">{{worker?.task?.running_time | msToSec}}</span>
           <span *ngIf="!worker?.task?.running_time">&mdash;</span>
         </ng-container>
         <ng-container *ngSwitchCase="WORKERS_TABLE_COL_FIELDS.ID">
-          <span class="first-content" matTooltipPosition="above" [smTooltip]="worker.name">
+          <span class="first-content ellipsis" matTooltipPosition="above" [smTooltip]="worker.name">
             {{worker.name}}
           </span>
         </ng-container>
         <ng-container *ngSwitchDefault>
-          {{getBodyData(worker, col)}}
+          <span  class="ellipsis">{{getBodyData(worker, col)}}</span>
           <span *ngIf="(getBodyData(worker, col)!==0) && !getBodyData(worker, col)">&mdash;</span>
         </ng-container>
       </ng-container>

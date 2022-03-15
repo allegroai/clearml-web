@@ -5,7 +5,9 @@
 
   ::ng-deep .table-row {
     background-color: $blue-800 !important;
-    border-bottom: 1px solid #303443 !important;
+    border-bottom: 1px solid $dark-border;
+    padding: 0 !important;
+    &:last-of-type {border-bottom-color: $dark-border !important;}
   }
 
   ::ng-deep .row.headers {
@@ -16,7 +18,7 @@
   .tabs-container {
     position: relative;
     background-color: $blue-800;
-    border-bottom: 1px solid #303443;
+    border-bottom: 1px solid $dark-border;
     margin: 12px 0 0 0;
     height: 38px;
 
@@ -55,6 +57,9 @@
   .column {
     width: 36px;
     padding: 0 8px;
+    &:last-child {
+      width: 60px;
+    }
   }
 
   .flex-column {

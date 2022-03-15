@@ -52,6 +52,9 @@ export class TableFilterSortTemplateComponent {
     if (Array.isArray(filters)) {
       this.formControl.setValue(filters);
       this._value = filters;
+    } else {
+      this.formControl.setValue([]);
+      this._value = [];
     }
   }
 
@@ -87,8 +90,7 @@ export class TableFilterSortTemplateComponent {
   }
 
   isFiltered() {
-    const filtered = (this.value && this.value.length > 0) || (this.subValue && this.subValue.length > 0);
-    return filtered;
+    return (this.value && this.value.length > 0) || (this.subValue && this.subValue.length > 0);
   }
 
   sortedClass() {

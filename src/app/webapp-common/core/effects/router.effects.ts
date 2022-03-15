@@ -1,11 +1,12 @@
 import {Injectable} from '@angular/core';
-import {ActivatedRoute, Params, Router} from '@angular/router';
+import {ActivatedRoute, NavigationExtras, Params, Router} from '@angular/router';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {uniq} from 'lodash/fp';
 import {map, tap} from 'rxjs/operators';
 import {NAVIGATION_ACTIONS} from '~/app.constants';
 import {encodeFilters, encodeOrder} from '../../shared/utils/tableParamEncode';
 import {NavigateTo, NavigationEnd, SetRouterSegments, setURLParams} from '../actions/router.actions';
+import {from} from 'rxjs';
 
 
 @Injectable()
@@ -34,22 +35,21 @@ export class RouterEffects {
 
   setTableParams = createEffect(() => this.actions$.pipe(
     ofType(setURLParams),
-    map((action) => {
+    tap((action) => {
       const firstUpdate = !this.route.snapshot.queryParams.order;
-      this.router.navigate(
-        [],
-        {
-          relativeTo: this.route,
-          replaceUrl: firstUpdate,
-          queryParamsHandling: action.update ? 'merge' : '',
-          queryParams: {
-            ...(action.columns && {columns: uniq(action.columns)}),
-            ...(action.orders && {order: encodeOrder(action.orders)}),
-            ...(action.filters && {filter: encodeFilters(action.filters)}),
-            ...(action.isArchived && {archive:  true}),
-            ...(action.isDeep && {deep:  true})
-          }
-        });
+      const extra = {
+        // relativeTo: this.route,
+        ...(firstUpdate && {replaceUrl: true}),
+        ...(action.update && {queryParamsHandling: 'merge'}),
+        queryParams: {
+          ...(action.columns && {columns: uniq(action.columns)}),
+          ...(action.orders && {order: encodeOrder(action.orders)}),
+          ...(action.filters && {filter: encodeFilters(action.filters)}),
+          ...(action.isArchived !== undefined && {archive: action.isArchived ? 'true' : null}),
+          ...(action.isDeep && {deep:  true})
+        }
+      } as NavigationExtras;
+      this.router.navigate([], extra);
     })
   ), {dispatch: false});
 

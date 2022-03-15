@@ -1,5 +1,7 @@
 import {TaskStatusEnum} from '../../../business-logic/model/tasks/taskStatusEnum';
 import {ExperimentTableColFieldsEnum} from './experiments.model';
+import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
+import {Model} from '~/business-logic/model/models/model';
 
 export type experimentSectionsEnum =
   'MODEL_INPUT'
@@ -32,13 +34,15 @@ export const EXPERIMENTS_TABLE_COL_FIELDS = {
   PROJECT       : 'project.name' as ExperimentTableColFieldsEnum,
   METRIC        : 'project.name' as ExperimentTableColFieldsEnum,
   HYPER_PARAM   : 'project.name' as ExperimentTableColFieldsEnum,
-  PARENT        : 'parent.name' as ExperimentTableColFieldsEnum
+  PARENT        : 'parent.name' as ExperimentTableColFieldsEnum,
+  VERSION       : 'hyperparams.properties.version' as ExperimentTableColFieldsEnum
 };
 
 export enum ExperimentTagsEnum {
   Development = 'development',
   Hidden = 'archived',
-  Shared = 'shared'
+  Shared = 'shared',
+  Pipeline = 'pipeline'
 }
 
 export const EXPERIMENTS_TAGS = {
@@ -56,3 +60,5 @@ export const EXPERIMENTS_STATUS_LABELS = {
 
 };
 export const DevWarningEnabled = false;
+
+export const excludeTypes = [];

@@ -17,9 +17,19 @@ export interface StatsStatusCount {
     /**
      * Total run time of all tasks in project (in seconds)
      */
-    completed_tasks?: number;
-    running_tasks?: number;
-    total_tasks?: number;
     total_runtime?: number;
+    /**
+     * Number of tasks
+     */
+    total_tasks?: number;
+    /**
+     * Number of tasks completed in the last 24 hours
+     */
+    completed_tasks_24h?: number;
+    /**
+     * The most recent started time of a task
+     */
+    last_task_run?: number;
     status_count?: StatsStatusCountStatusCount;
 }
+

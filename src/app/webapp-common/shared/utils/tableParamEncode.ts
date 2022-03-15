@@ -36,11 +36,11 @@ export const encodeFilters = (filters: { [key: string]: FilterMetadata }) => {
   }
 };
 export const excludedKey = '__$not';
-export const uniqueFilterValueAndExcluded = (arr1 = [], arr2 = []) => Array.from(new Set(arr1.concat((arr2).map(key => key ? key.replace(/^__\$not/,'') : key))));
+export const uniqueFilterValueAndExcluded = (arr1 = [], arr2 = []) => Array.from(new Set(arr1.concat((arr2).map(key => key ? key.replace(/^__\$not/, '') : key))));
 export const addExcludeFilters = (arr1: string[]) => {
   return arr1.reduce((returnArray, currentFilter) => {
     if (currentFilter?.startsWith(excludedKey)) {
-      return  [...returnArray, excludedKey, currentFilter.substring(excludedKey.length)]
+      return [...returnArray, excludedKey, currentFilter.substring(excludedKey.length)]
     }
     return [...returnArray, currentFilter];
 
@@ -66,7 +66,7 @@ export const decodeFilter = (filters: string): TableFilter[] => filters.split(',
     mode = 'AND';
     filter = filter.replace(':AND', '');
   }
-  const [col, values] = filter.split(/:(.+)/);
+  const [col, values] = filter.split(/:(.*)/);
   // if (parts.length === 3) {
   //   mode = parts[1];
   //   parts[1] = parts[2];
@@ -84,7 +84,7 @@ export const encodeColumns = (mainCols: ISmCol[] | any, hiddenCols = {}, metrics
   colsOrder = colsOrder.filter(col => !hiddenCols[col]);
   return mainCols
     .filter(col => !hiddenCols[col.id])
-    .concat(metricsCols ? metricsCols.filter(col => !hiddenCols[col.id]) : [])
+    .concat(metricsCols ? metricsCols : [])
     .sort((a, b) => sortCol(a.id, b.id, colsOrder))
     .map((col) => {
       if (col.metric_hash) {
@@ -92,22 +92,25 @@ export const encodeColumns = (mainCols: ISmCol[] | any, hiddenCols = {}, metrics
         const variant = headerParts[1]?.replace(` ${getValueTypeName(col.valueType)}`, '');
         return `m.${col.metric_hash}.${col.variant_hash}.${col.valueType}.${headerParts[0]}.${variant}`;
       }
-      else {
+      if (col.type === 'metadata') {
+        return `meta.${col.key}`;
+      } else {
         return col.id;
       }
     });
 };
 
-export const decodeColumns = (columns: string[]): [string[], MetricColumn[], string[], string[]] => {
+export const decodeColumns = (columns: string[], tableCols: ISmCol[]): [string[], MetricColumn[], string[], string[], string[]] => {
   const cols = [] as string[];
   const metrics = [] as MetricColumn[];
   const params = [] as string[];
   const allIds = [] as string[];
+  const metadataCols = [] as string[]
 
   columns.forEach(col => {
     if (col.startsWith('m.')) {
       const colParts = col.split('.');
-      const  [, metricHash, variantHash, valueType, metric, ...variant] = colParts;
+      const [, metricHash, variantHash, valueType, metric, ...variant] = colParts;
       metrics.push({
         metricHash,
         variantHash,
@@ -116,19 +119,21 @@ export const decodeColumns = (columns: string[]): [string[], MetricColumn[], str
         variant: variant.join('.')
       });
       allIds.push(`last_metrics.${colParts[1]}.${colParts[2]}.${colParts[3]}`);
-    }
-      else if (col.startsWith('hyperparams.')) {
-        // const colParts = col.split('.');
-        // const param = colParts[1] + (colParts[2] ? `.${colParts[2]}` : '');
-        params.push(col);
-        allIds.push(col);
-    }
-    else {
+    } else if (col.startsWith('hyperparams.') && !tableCols.find(tableCol => tableCol.id === col)) {
+      // const colParts = col.split('.');
+      // const param = colParts[1] + (colParts[2] ? `.${colParts[2]}` : '');
+      params.push(col);
+      allIds.push(col);
+    } else if (col.startsWith('meta.') && !tableCols.find(tableCol => tableCol.id === col)) {
+      const colParts = col.split('.');
+      metadataCols.push(colParts[1]);
+      allIds.push(colParts[1]);
+    } else {
       cols.push(col);
       allIds.push(col);
     }
   });
-  return [cols, metrics, params, allIds];
+  return [cols, metrics, params, metadataCols, allIds];
 };
 
 
@@ -140,17 +145,30 @@ export const decodeHyperParam = (param: string): { name: string; section: string
   };
 };
 export const createMetricColumn = (column: MetricColumn, projectId: string): ISmCol => ({
-    id: `last_metrics.${column.metricHash}.${column.variantHash}.${column.valueType}`,
-    headerType: ColHeaderTypeEnum.sortFilter,
-    sortable: true,
-    filterable: true,
-    filterType: ColHeaderFilterTypeEnum.durationNumeric,
-    header: `${column.metric} > ${column.variant} ${getValueTypeName(column.valueType)}`,
-    hidden: false,
-    metric_hash: column.metricHash,
-    variant_hash: column.variantHash,
-    valueType: column.valueType,
-    projectId: projectId,
-    style: {width: '115px'},
+  id: `last_metrics.${column.metricHash}.${column.variantHash}.${column.valueType}`,
+  headerType: ColHeaderTypeEnum.sortFilter,
+  sortable: true,
+  filterable: true,
+  filterType: ColHeaderFilterTypeEnum.durationNumeric,
+  header: `${column.metric} > ${column.variant} ${getValueTypeName(column.valueType)}`,
+  hidden: false,
+  metric_hash: column.metricHash,
+  variant_hash: column.variantHash,
+  valueType: column.valueType,
+  projectId: projectId,
+  style: {width: '115px'},
 });
+export const createMetadataCol = (key, projectId): ISmCol => ({
+  id: `metadata.${key}.value`,
+  getter: `metadata.${key}.value`,
+  key: key,
+  headerType: ColHeaderTypeEnum.sortFilter,
+  sortable: true,
+  filterable: false,
+  header: key,
+  style: {width: '240px'},
+  projectId: projectId,
+  type: 'metadata'
+});
+
 

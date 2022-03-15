@@ -5,7 +5,7 @@
                 [itemLabel]="col.header"
                 [checked]="!(col?.hidden)"
                 [selectable]="true"
-                [removable]="!!col.metric_hash || col.isParam"
+                [removable]="!!col.metric_hash || col.isParam || col.type==='metadata'"
                 [itemValue]="col.id"
                 (removeItemClicked)="removeColFromList.emit($event)"
                 (itemClicked)="selectedTableColsChanged.emit(col)">

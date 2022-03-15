@@ -19,8 +19,8 @@ export class AdminCredentialTableBaseDirective {
     const confirmDialogRef: MatDialogRef<any, boolean> = this.dialog.open(ConfirmDialogComponent, {
       data: {
         title    : 'Are you sure?',
-        body     : `Are you sure you want to revoke access key ${credential.access_key}?<br>\n
-              When revoked, these credentials cannot be recovered.`,
+        body     : `Are you sure you want to revoke the ${credential.label || ''} credentials (${credential.access_key})?<br>\n
+              Once revoked, these credentials cannot be recovered.`,
         yes      : 'Revoke',
         no       : 'Cancel',
         iconClass: 'i-alert',

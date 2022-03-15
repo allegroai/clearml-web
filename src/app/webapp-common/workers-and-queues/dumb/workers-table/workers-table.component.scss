@@ -1,4 +1,4 @@
-:host{
+:host {
   .first {
     display: block;
     padding-left: 44px;
@@ -8,6 +8,12 @@
     padding-left: 42px;
   }
 }
-.worker-container{
-  margin-bottom: 40px;
+
+.worker-container {
+  width: 100%;
+  height: 100%;
+
+  .ellipsis {
+    max-width: 500px;
+  }
 }

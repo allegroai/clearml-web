@@ -58,8 +58,8 @@
 }
 
 .steps-content {
-  padding: 10px 32px;
-  .step-container{
+  padding: 0 32px 10px 32px;
+  .step-container:not(:first-child){
     margin: 20px 0;
   }
 
@@ -71,7 +71,7 @@
   }
   .step-header {
     color: $blue-500;
-    margin-bottom: 1px;
+    margin-bottom: 4px;
     width: 530px;
   }
 
@@ -104,12 +104,12 @@
     }
 
     .content {
-      padding: 16px;
+      padding: 14px 16px;
       overflow: auto;
       margin-right: 16px;
       white-space: pre;
       font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-size: 12px;
+      font-size: 11px;
       line-height: 18px;
     }
 
@@ -138,11 +138,38 @@
     }
   }
 
-  .empty-config {
-    height: 190px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+  .cred-step {
+    height: 238px;
+    transition: height 1s ease;
+
+    &.has-label {
+      height: 272px;
+    }
+
+    &.first-step {
+      height: 90px;
+    }
+  }
+
+  .cred-visible {
+    visibility: visible;
+    opacity: 1;
+    transition: opacity 1s ease;
+
+    &.invisible {
+      opacity: 0;
+      visibility: hidden;
+    }
+  }
+
+  .label-input {
+    flex: 1;
+    padding-right: 12px;
+  }
+
+  .create-cred-button {
+    margin-top: 18px;
+    height: 36px;
+    padding: 0px 28px;
   }
 }

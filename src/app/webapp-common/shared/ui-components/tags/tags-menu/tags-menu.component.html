@@ -5,6 +5,7 @@
                   floatLabel="never">
     <input #nameInput cdkFocusInitial smClickStopPropagation matInput placeholder="Add Tag" name="filter" [(ngModel)]="filterText" class="filter" autocomplete="off">
       <i matSuffix
+         *ngIf="companyTags !== null"
          [class]="'icon sm-md mr-3 ml-4 pointer ' + (tagsFilterByProject ? 'i-project-tags-filter-active' : 'i-project-tags-filter')"
          matTooltipPosition="above"
          smTooltip="Toggle all/project-only tags"

@@ -6,6 +6,7 @@ import {ModelInfoGeneralComponent} from './containers/model-info-general/model-i
 import {ModelInfoNetworkComponent} from './containers/model-info-network/model-info-network.component';
 import {ModelInfoLabelsComponent} from './containers/model-info-labels/model-info-labels.component';
 import {LeavingBeforeSaveAlertGuard} from '../shared/guards/leaving-before-save-alert.guard';
+import {ModelInfoMetadataComponent} from './containers/model-info-metadata/model-info-metadata.component';
 
 export const routes: Routes = [
   {
@@ -19,6 +20,7 @@ export const routes: Routes = [
           {path: 'general', component: ModelInfoGeneralComponent},
           {path: 'network', component: ModelInfoNetworkComponent, canDeactivate: [LeavingBeforeSaveAlertGuard]},
           {path: 'labels', component: ModelInfoLabelsComponent, canDeactivate: [LeavingBeforeSaveAlertGuard]},
+          {path: 'metadata', component: ModelInfoMetadataComponent, canDeactivate: [LeavingBeforeSaveAlertGuard]},
         ]
       },
     ]

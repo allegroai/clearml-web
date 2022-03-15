@@ -58,6 +58,7 @@ $inline-edit-base-width: 93%;
   }
 
   .inline-edit-form {
+    position: relative;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -73,6 +74,14 @@ $inline-edit-base-width: 93%;
         min-width: 65px;
         margin: 12px 12px 0 0;
       }
+    }
+    input.warn {
+      padding-right: 32px;
+    }
+    .al-ico-alert {
+      position: absolute;
+      right: 100px;
+      color: $warn-color;
     }
 
     .buttons {

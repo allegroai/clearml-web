@@ -14,6 +14,7 @@
 ></sm-model-menu-extended>
 <div class="table-container" [class.card-view]="minimizedView">
   <sm-table
+    [initialColumns]="initialColumns"
     [selectionMode]="selectionMode"
     [tableData]="models"
     [noMoreData]="noMoreModels"
@@ -52,15 +53,18 @@
     </ng-template>
     <!--CHECKBOX TEMPLATE-->
     <ng-template let-col pTemplate="checkbox">
-      <sm-checkbox-control
-        *ngIf="col.id === MODELS_TABLE_COL_FIELDS.SELECTED"
-        class="checkbox-col header"
-        fieldName="selected"
-        [formData]="selectionState"
-        (formDataChanged)="headerCheckboxClicked()"
-        inputClassName="table-check-box select-col-checkbox">
-      </sm-checkbox-control>
-      <div class="al-icon al-ico-dropdown-arrow sm drop-down" [matMenuTriggerFor]="selectionMenu"></div>
+      <div class="d-flex">
+        <sm-checkbox-control
+          *ngIf="col.id === MODELS_TABLE_COL_FIELDS.SELECTED"
+          class="checkbox-col header"
+          [class.minimised]="minimizedView"
+          fieldName="selected"
+          [formData]="selectionState"
+          (formDataChanged)="headerCheckboxClicked()"
+          inputClassName="table-check-box select-col-checkbox">
+        </sm-checkbox-control>
+        <div class="al-icon al-ico-dropdown-arrow sm drop-down" [matMenuTriggerFor]="selectionMenu"></div>
+      </div>
       <mat-menu class="light-theme" #selectionMenu="matMenu">
         <div class="menu-title">Select from project</div>
         <button mat-menu-item (click)="selectAll()">All</button>
@@ -96,29 +100,30 @@
                  pTemplate="body">
       <ng-container [ngSwitch]="col.id">
         <ng-container *ngSwitchCase="MODELS_TABLE_COL_FIELDS.NAME">
-          <div class="d-flex flex-row flex-nowrap">
+          <div class="d-flex flex-row flex-nowrap ellipsis">
             <div class="model-name" matTooltipPosition="above" [smTooltip]="model.name">{{model.name}}</div>
-            <i *ngIf="model?.system_tags.includes('shared')" class="fas fa-link p-1 ml-1"></i>
+            <i *ngIf="model?.system_tags.includes('shared')" class="al-icon al-ico-link sm-md ml-2"></i>
           </div>
         </ng-container>
         <ng-container *ngSwitchCase="MODELS_TABLE_COL_FIELDS.TAGS">
           <sm-tag-list [tags]="model.tags" [sysTags]="getSysTags(model)"></sm-tag-list>
         </ng-container>
         <ng-container *ngSwitchCase="MODELS_TABLE_COL_FIELDS.USER">
-          {{model.user?.name ? model.user?.name : 'Unknown User'}}
+          <span class="ellipsis">{{model.user?.name ? model.user?.name : 'Unknown User'}}</span>
         </ng-container>
-        <span matTooltipPosition="above" [smTooltip]="model?.project?.name" *ngSwitchCase="MODELS_TABLE_COL_FIELDS.PROJECT">
+        <span matTooltipPosition="above" class="ellipsis" [smTooltip]="model?.project?.name" *ngSwitchCase="MODELS_TABLE_COL_FIELDS.PROJECT">
           {{model?.project?.name}}
         </span>
-        <span *ngSwitchCase="MODELS_TABLE_COL_FIELDS.TASK" matTooltipPosition="above" [smTooltip]="model.task?.name">
+        <span *ngSwitchCase="MODELS_TABLE_COL_FIELDS.TASK" class="ellipsis" matTooltipPosition="above" [smTooltip]="model.task?.name">
           {{model.task?.name}}
         </span>
         <ng-container *ngSwitchCase="MODELS_TABLE_COL_FIELDS.READY">
           <sm-experiment-status-icon-label [status]="model?.ready? 'published': 'created'"></sm-experiment-status-icon-label>
         </ng-container>
         <ng-container *ngSwitchCase="MODELS_TABLE_COL_FIELDS.LAST_UPDATE">
-          <span matTooltipPosition="above" [smTooltip]="model.last_update | date : timeFormatString">{{model.last_update | timeAgo}}</span>
+          <span class="ellipsis" matTooltipPosition="above" [smTooltip]="model.last_update | date : timeFormatString">{{model.last_update | timeAgo}}</span>
         </ng-container>
+
         <sm-checkbox-control
           *ngSwitchCase="MODELS_TABLE_COL_FIELDS.SELECTED"
           smClickStopPropagation
@@ -129,10 +134,11 @@
           inputClassName="table-check-box table-body">
         </sm-checkbox-control>
         <ng-container *ngSwitchCase="MODELS_TABLE_COL_FIELDS.COMMENT">
-          <span matTooltipPosition="above" [smTooltip]="model.comment">{{model.comment}}</span>
+          <span class="ellipsis" matTooltipPosition="above" [smTooltip]="model.comment">{{model.comment}}</span>
         </ng-container>
         <ng-container *ngSwitchDefault>
-          {{model[col.id]}}
+          <span *ngIf="col.type==='metadata'; else regular " matTooltipPosition="above" [smTooltip]="model | colGetter: col">{{model | colGetter: col}}</span>
+          <ng-template #regular><span class="ellipsis">{{model[col.id]}}</span></ng-template>
         </ng-container>
       </ng-container>
     </ng-template>
@@ -140,17 +146,16 @@
     <ng-template let-model="rowData" let-selected="selected" let-rowNumber="rowNumber" pTemplate="card">
       <sm-table-card class="flex-grow-1"
                      [selected]="selected"
-                     [rowNumber]="rowNumber"
                      [cardName]="model.name"
                      [columns]="tableCols"
                      [rowData]="model"
                      [checked]="isRowSelected(model)"
                      [activeContextRow]="contextModel"
                      [contextMenuOpen]="contextMenuActive"
-                     [tableType]="'model'"
+                     [entityType]="entityType"
       >
-        <div sm-name-icon><i *ngIf="model?.system_tags.includes('shared')" class="fas fa-link p-1 ml-1"></i></div>
-        <sm-tag-list class="mb-1" [sysTags]="getSysTags(model)" [tags]="model?.tags"></sm-tag-list>
+        <div sm-name-icon><i *ngIf="model?.system_tags.includes('shared')" class="al-icon al-ico-link sm-md ml-2"></i></div>
+        <sm-tag-list [sysTags]="getSysTags(model)" [tags]="model?.tags"></sm-tag-list>
         <div  class="ellipsis compact-columns-data" compact-columns-data>
           Updated {{model.last_update | timeAgo}} by {{model.user?.name || 'Unknown User'}}<ng-container *ngIf="model.task"><span class="dot">●</span>{{model.task.name}}</ng-container>
         </div>

@@ -9,7 +9,7 @@ import {
   updateAllCredentials,
   updateS3Credential
 } from '../actions/common-auth.actions';
-import {CredentialKey} from '../../../business-logic/model/auth/credentialKey';
+import {CredentialKey} from '~/business-logic/model/auth/credentialKey';
 import {inBucket} from '@common/settings/admin/base-admin.service';
 import {filter, map, timeoutWith} from 'rxjs/operators';
 
@@ -66,8 +66,10 @@ export const selectSignedUrl = url => createSelector(selectAuth, state => state.
 export const getSignedUrlOrOrigin$ = (url: string, store: Store) => store.pipe(
   select(selectSignedUrl(url)),
   filter(signed => !!signed?.signed),
-  map(signed => signed?.signed || url),
-  timeoutWith(600, store.select(selectSignedUrl(url)).pipe(map(signed => signed?.signed || url))),
+  map(signed => signed?.signed),
+  timeoutWith(900, store.select(selectSignedUrl(url))
+    .pipe(map(signed => signed?.signed || url))
+  ),
 );
 
 

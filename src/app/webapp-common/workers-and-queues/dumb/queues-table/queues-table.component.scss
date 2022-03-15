@@ -8,16 +8,6 @@
   hr {
     margin: 0 !important;
   }
-  ::ng-deep .copy-btn .selected {
-    background-color: $purple;
-    .light-color {
-      color: $blue-100;
-    }
-    &:hover {
-      background-color: $lightish-blue-dark;
-    }
-    border: none;
-  }
 }
 
 .queues-container {
@@ -42,7 +32,6 @@
   }
 
   .queue-name {
-    flex: 1;
     font-weight: 500;
     text-overflow: ellipsis;
     overflow: hidden;
@@ -50,14 +39,14 @@
   }
 
   .copy-btn {
+    margin-left: auto;
     min-width: 30px;
-    margin-left: 5px;
-    display: none;
+    visibility: hidden;
   }
 
   &:hover {
     .copy-btn {
-      display: inline-block;
+      visibility: visible;
     }
   }
 }

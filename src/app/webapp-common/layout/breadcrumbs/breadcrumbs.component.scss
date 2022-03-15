@@ -1,5 +1,9 @@
 @import "../../shared/ui-components/styles/variables.scss";
-
+.breadcrumbs-container{
+  display: flex;
+  overflow: hidden;
+  white-space: nowrap;
+}
 span {
   font-size: 15px;
 }
@@ -24,19 +28,38 @@ span {
     margin: 4px 0 4px 6px;
     padding: 0 6px;
     border-radius: 9px;
-    background-color: #364164;
+    background-color: $blue-500;
+  }
+
+  .archive {
+    display: flex;
+    align-items: center;
+    margin-left: 12px;
+    padding: 0 6px;
+    line-height: 18px;
+    border-radius: 4px;
+    background-color: $blue-600;
+    color: $blue-100;
+    font-size: 12px;
   }
 }
 
 
 .sub-project-menu-item {
+  max-width: 400px;
   font-size: 14px;
   font-weight: 500;
   color: $blue-900;
 }
 
 .breadcrumbLink a, .breadcrumbLink span, .workspace {
-  max-width: 700px;
+  max-width: 400px;
+  &.after-collapse{
+    max-width: 960px;
+  }
+  &.last{
+    max-width: 100%;
+  }
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

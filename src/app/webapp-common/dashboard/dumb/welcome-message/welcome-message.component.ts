@@ -3,7 +3,7 @@ import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {setSelectedWorkspaceTab} from '@common/core/actions/users.actions';
 import {Subscription} from 'rxjs';
 import {selectActiveWorkspace} from '@common/core/reducers/users-reducer';
-import {filter, tap} from 'rxjs/operators';
+import {filter} from 'rxjs/operators';
 import {Store} from '@ngrx/store';
 import {createCredential, resetCredential} from '@common/core/actions/common-auth.actions';
 import {selectNewCredential} from '@common/core/reducers/common-auth-reducer';
@@ -25,7 +25,7 @@ export class WelcomeMessageComponent implements OnInit, OnDestroy {
   public step: number = 1;
   accessKey: string;
   secretKey: string;
-  creatingCredentials = false;
+  credentialsCreated = false;
 
   private workspacesSub: Subscription;
   public workspace: GetCurrentUserResponseUserObjectCompany;
@@ -62,6 +62,7 @@ export class WelcomeMessageComponent implements OnInit, OnDestroy {
   doNotShowAgain: boolean;
   public gettingStartedContext: GettingStartedContext;
   docsLink: string;
+  credentialsLabel: string;
 
   constructor(
     private store: Store<any>,
@@ -99,7 +100,6 @@ export class WelcomeMessageComponent implements OnInit, OnDestroy {
 
     this.newCredentialSub = this.store.select(selectNewCredential)
       .pipe(
-        tap(() => this.creatingCredentials = false),
         filter(credential => credential && Object.keys(credential).length > 0)
       ).subscribe(credential => {
         this.accessKey = credential.access_key;
@@ -118,9 +118,9 @@ export class WelcomeMessageComponent implements OnInit, OnDestroy {
   }
 
   createCredentials() {
-    this.creatingCredentials = true;
+    this.credentialsCreated = true;
     this.store.dispatch(setSelectedWorkspaceTab({workspace: {id: this.workspace.id}}));
-    this.store.dispatch(createCredential({workspace: this.workspace}));
+    this.store.dispatch(createCredential({workspace: this.workspace, label: this.credentialsLabel}));
   }
 
   ngOnDestroy(): void {

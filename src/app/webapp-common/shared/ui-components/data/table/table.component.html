@@ -68,11 +68,12 @@
     <ng-template #cardHeader>
       <tr class="header">
         <th class="table-header" style="flex-basis:100%">
-          <div class="table-header-title">{{minimizedTableHeader}}</div>
+          <ng-container *ngTemplateOutlet="checkboxTemplate; context: {$implicit: columns[0]}"></ng-container>
+          <div class="table-header-title ellipsis">{{minimizedTableHeader}}</div>
           <div class="table-actions">
             <div class="recent-title">
               <sm-menu header="SORTED BY " class="menu">
-                <div *ngFor="let col of sortableCols">
+                <div *ngFor="let col of sortableCols; trackBy: trackByColFn">
                   <sm-menu-item [itemLabel]="col.header"
                                 [sortOrder]="getOrder(col.id)"
                                 (itemClicked)="sortItemClick($event, col.id)"></sm-menu-item>
@@ -103,6 +104,7 @@
         <td
           *ngFor="let col of columns; trackBy: trackByColFn; index as i"
           [class.ui-resizable-column]="resizableColumns"
+          [class.cursor-default]="selectionMode===null"
           [class.simple]="simple"
           [style.min-width]="col.style?.minWidth"
           [style.max-width]="col.style?.maxWidth"
@@ -125,8 +127,8 @@
         </td>
       </ng-template>
     </tr>
-    <tr *ngIf="index === rowsNumber - 1 && lazyLoading && !noMoreData" class="table-load-more">
-      <div class="load-more-wrapper">
+    <tr *ngIf="index === rowsNumber - 1 && lazyLoading && !noMoreData" class="table-load-more load-more-wrapper">
+      <div>
         <button #loadButton
                 class="btn btn-primary"
                 (click)="loadMore()"

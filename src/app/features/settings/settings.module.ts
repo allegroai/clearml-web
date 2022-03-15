@@ -4,7 +4,7 @@ import { SettingsRoutingModule } from './settings-routing.module';
 import { SettingsComponent } from '../settings/settings.component';
 import {SMMaterialModule} from '../../webapp-common/shared/material/material.module';
 import {SMSharedModule} from '@common/shared/shared.module';
-import {ReactiveFormsModule} from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {SharedModule} from '~/shared/shared.module';
 import {MatExpansionModule} from '@angular/material/expansion';
 import {WebappConfigurationComponent} from '@common/settings/webapp-configuration/webapp-configuration.component';
@@ -47,7 +47,10 @@ import {CreateCredentialDialogComponent} from '~/features/settings/containers/ad
     SettingsRoutingModule,
     SMMaterialModule,
     SMSharedModule,
-    ReactiveFormsModule, SharedModule, MatExpansionModule,
+    ReactiveFormsModule,
+    SharedModule,
+    MatExpansionModule,
+    FormsModule,
   ],
   exports: [
     UserCredentialsComponent,

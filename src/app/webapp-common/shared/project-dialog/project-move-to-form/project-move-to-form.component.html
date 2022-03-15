@@ -35,8 +35,8 @@
        smClickStopPropagation></i>
     <mat-error *ngIf="projectInput?.errors?.required">Please provide a Project</mat-error>
     <mat-error *ngIf="projectInput?.errors?.minlength">Please provide a project name longer than 3 characters</mat-error>
-    <mat-error *ngIf="projectInput?.errors?.uniqueName">Can't move a project to it's current location</mat-error>
-    <mat-error *ngIf="projectInput?.errors?.invalidPrefix">Can't move a project to it's nested projects</mat-error>
+    <mat-error *ngIf="projectInput?.errors?.uniqueName">Can't move a project to its current location</mat-error>
+    <mat-error *ngIf="projectInput?.errors?.invalidPrefix">Can't move a project to its nested projects</mat-error>
     <mat-error *ngIf="projectInput?.errors?.uniquePath">{{projectInput.value}} already contains a project named {{projectName | shortProjectName}}</mat-error>
     <mat-autocomplete #auto="matAutocomplete"
                       name="ExperimentProject"

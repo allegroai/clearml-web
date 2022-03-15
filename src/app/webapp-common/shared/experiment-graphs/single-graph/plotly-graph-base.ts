@@ -2,7 +2,7 @@ import {hslToRgb, rgbToHsl} from '../../services/color-hash/color-hash.utils';
 import {Subscription} from 'rxjs';
 import {Input, OnDestroy, Directive} from '@angular/core';
 import {Config, Frame, Layout, LayoutAxis, Legend, PlotData} from 'plotly.js';
-import {selectScaleFactor} from '../../../core/reducers/view.reducer';
+import {selectScaleFactor} from '@common/core/reducers/view.reducer';
 import {Store} from '@ngrx/store';
 
 export interface ExtFrame extends Omit<Frame, 'data' | 'layout'> {
@@ -50,14 +50,14 @@ export interface ExtData extends PlotData {
 export class PlotlyGraphBase implements OnDestroy {
   public isSmooth = false;
   public colorSub: Subscription;
-  public scaleExists: boolean;
+  public scaleFactor: number;
 
   @Input() isCompare: boolean = false;
   private scaleSub: Subscription;
 
 
   constructor(protected store: Store) {
-    this.scaleSub = store.select(selectScaleFactor).subscribe(scaleFactor => this.scaleExists = scaleFactor !== 100);
+    this.scaleSub = store.select(selectScaleFactor).subscribe(scaleFactor => this.scaleFactor = scaleFactor);
   }
 
   public _reColorTrace(trace: ExtData, newColor: number[]): void {
@@ -92,7 +92,7 @@ export class PlotlyGraphBase implements OnDestroy {
     return '';
   }
 
-  public addIdToDuplicateExperiments(data: ExtData[], taskId: string): ExtData[]{
+  public addIdToDuplicateExperiments(data: ExtData[], taskId: string): ExtData[] {
     const namesHash = {};
     for (let i = 0; i < data.length; i++) {
       if (!data[i].name) {

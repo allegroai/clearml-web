@@ -13,7 +13,7 @@ export const routes: Routes = [
       queuesManager: WorkersAndQueuesResolver
     },
     children: [
-      {path: '', redirectTo: 'workers'},
+      {path: '', redirectTo: 'workers', pathMatch: 'full'},
       {path: 'workers', component: WorkersComponent},
       {path: 'queues',
         component: QueuesComponent,

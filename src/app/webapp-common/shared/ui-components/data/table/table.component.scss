@@ -3,6 +3,7 @@
 :host {
   ::ng-deep th.resize-enabled span.p-column-resizer {
     width: 8px;
+    z-index: 20;
 
     &:hover {
       background: $blue-300;
@@ -19,8 +20,7 @@
     z-index: 1000;
   }
 
-  ::ng-deep .p-datatable-table .p-datatable-thead {
-    top: -1px;
+  ::ng-deep .p-datatable-scrollable > .p-datatable-wrapper > .p-datatable-table > .p-datatable-thead {
     z-index: 20;
   }
 
@@ -32,7 +32,9 @@
   }
 
   .table-header-title {
-    font-weight: bold;
+    font-weight: 500;
+    text-transform: uppercase;
+    padding-left: 16px;
   }
 
   .table-actions {
@@ -82,14 +84,20 @@
 
   tr {
     transition: height 0.5s cubic-bezier(.55,.06,.68,.19);
-    &:hover:not(.header):not(.selected):not(.no-data-row):not(.simple) {
+
+    &:not(.no-data-row):not(.load-more-wrapper) {
+      border-bottom: 1px solid $blue-600;
+    }
+
+    &:hover:not(.header):not(.selected):not(.no-data-row):not(.simple):not(.load-more-wrapper) {
       background-color: $blue-650;
+      border-bottom: 1px solid $blue-600;
     }
 
     &.checked:not(.header):not(.selected):not(.no-data-row):not(.simple) {
       background-color: $blue-500;
       .td{
-        border-bottom-color: $blue-600;
+        border-bottom: none;
       }
 
       &:hover, &.contexted {
@@ -111,13 +119,14 @@
 
     &.header {
       height: 48px;
+      background-color: $blue-700;
     }
 
     th {
-      background-color: $blue-700;
       vertical-align: middle;
       color: $blue-300;
-      border-bottom: 1px solid $blue-600;
+      border-bottom: none;
+      padding:0 8px;
 
       &.disable-drag {
         cursor: initial !important;
@@ -141,8 +150,8 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      padding: 0 8px;
       &:not(.no-data):not(.load-more-wrapper){
-        border-bottom: 1px solid #303443;
         &.simple{
           border-bottom-color: $blue-100;
 
@@ -161,40 +170,43 @@
 
   :host-context(.light-theme) {
     tr {
-      &.checked:not(.header):not(.no-data-row):not(.simple) {
+      &:not(.no-data-row):not(.load-more-wrapper) {
+        border-bottom: 1px solid $blue-50;
+      }
+      &.checked:not(.header):not(.no-data-row):not(.simple):not(.load-more-wrapper) {
         background-color: $blue-100;
-        .td{
-          border-bottom-color: $blue-100;
-        }
+        border-bottom-color: $blue-50;
 
         &:hover, &.contexted {
           background-color: $blue-50;
         }
       }
 
-      &:hover:not(.header):not(.no-data-row):not(.simple) {
+      &:hover:not(.header):not(.no-data-row):not(.simple):not(.load-more-wrapper) {
         background-color: $blue-50;
+        border-bottom-color: $blue-50;
       }
 
       &.header {
+        background-color: $blue-50;
         @supports (-moz-appearance:meterbar) {
-          border-bottom: 3px solid #364164;
+          border-bottom: 3px solid $blue-500;
         }
       }
 
       th {
-        background-color: $blue-50;
         color: $blue-400;
         font-weight: 500;
         border-bottom: none;
+
+        &:hover {
+          background-color: $blue-100;
+        }
       }
 
       td {
         color: $blue-400;
         border-bottom: none;
-        &:not(.no-data):not(.load-more-wrapper){
-          border-bottom: 1px solid $blue-50;
-        }
         &.no-data {
           color: $blue-300;
         }

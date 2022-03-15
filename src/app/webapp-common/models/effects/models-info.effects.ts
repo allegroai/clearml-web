@@ -16,6 +16,7 @@ import {EmptyAction} from '~/app.constants';
 import {SelectedModel} from '../shared/models.model';
 import {selectActiveWorkspace} from '../../core/reducers/users-reducer';
 import {isExample, isSharedAndNotOwner} from '../../shared/utils/shared-utils';
+import {resetActiveSection} from '../actions/models-info.actions';
 
 @Injectable()
 export class ModelsInfoEffects {
@@ -81,6 +82,28 @@ export class ModelsInfoEffects {
     }),
     shareReplay(1)
   ));
+
+  saveModelMetadata$ = createEffect(() => this.actions$.pipe(
+    ofType(infoActions.saveMetaData),
+    withLatestFrom(this.store.select(selectSelectedModel)),
+    mergeMap(([action, selectedModel]) =>
+      this.apiModels.modelsEdit({model: selectedModel.id, metadata: action.metadata})
+        .pipe(
+          mergeMap(() => [
+              new infoActions.GetModelInfo(selectedModel.id),
+              new infoActions.SetIsModelSaving(false),
+              resetActiveSection(),
+              setBackdrop({payload: false})
+            ]),
+          catchError(err => [
+            requestFailed(err),
+            setServerError(err, null, 'Update metadata failed'),
+          ])
+        )
+    ),
+    shareReplay(1)
+  ));
+
 
   updateModelDetails$ = createEffect(() => this.actions$.pipe(
     ofType(infoActions.updateModelDetails),

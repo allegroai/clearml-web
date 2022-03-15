@@ -5,6 +5,7 @@ import {Task} from '../../../../business-logic/model/tasks/task';
 import {Store} from '@ngrx/store';
 import {ActivatedRoute, Router} from '@angular/router';
 import {
+  clearQueue,
   deleteQueue,
   getQueues,
   moveExperimentInQueue,
@@ -26,6 +27,7 @@ import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {ISmCol} from '../../../shared/ui-components/data/table/table.consts';
 import {QueueCreateDialogComponent} from '../../../shared/queue-create-dialog/queue-create-dialog.component';
 import {SortMeta} from 'primeng/api';
+import {ConfirmDialogComponent} from '../../../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'sm-queues',
@@ -35,7 +37,6 @@ import {SortMeta} from 'primeng/api';
 export class QueuesComponent implements OnInit {
 
   public queues$: Observable<Queue[]>;
-  public queuesTasks$: Observable<Map<string, Task[]>>;
   public selectedQueue$: Observable<Queue>;
   private createQueueDialog: MatDialogRef<QueueCreateDialogComponent, any>;
   public tableSortOrder$: Observable<1 | -1>;
@@ -48,7 +49,6 @@ export class QueuesComponent implements OnInit {
 
   constructor(private store: Store<any>, private router: Router, private route: ActivatedRoute, private dialog: MatDialog) {
     this.queues$ = this.store.select(selectQueues);
-    this.queuesTasks$ = this.store.select(selectQueuesTasks);
     this.selectedQueue$ = this.store.select(selectSelectedQueue);
     this.tableSortFields$ = this.store.select(selectQueuesTableSortFields);
 
@@ -86,6 +86,25 @@ export class QueuesComponent implements OnInit {
   deleteQueue(queue) {
     this.store.dispatch(deleteQueue({queue}));
   }
+  clearQueue(queue) {
+      const confirmDialogRef: MatDialogRef<any, boolean> = this.dialog.open(ConfirmDialogComponent, {
+        data: {
+          title    : 'Clear all pending tasks',
+          body     : `Are you sure you want to dequeue the ${queue.entries.length} task${queue.entries.length>1?'s':''} currently pending on the ${queue.name} queue?`,
+          yes      : 'Clear Queue',
+          no       : 'Cancel',
+          iconClass: 'i-alert',
+        }
+      });
+
+      confirmDialogRef.afterClosed().subscribe((confirmed) => {
+        if (confirmed) {
+          this.store.dispatch(clearQueue({queue}));
+        }
+      });
+    }
+
+
 
   renameQueue(queue) {
     this.createQueueDialog = this.dialog.open(QueueCreateDialogComponent, {data: queue});

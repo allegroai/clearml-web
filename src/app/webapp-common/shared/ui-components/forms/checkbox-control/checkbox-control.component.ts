@@ -11,7 +11,6 @@ import {TableSelectionState} from '../../../../constants';
 })
 export class CheckboxControlComponent extends ImmutableFormField implements AfterViewInit {
 
-  public special = false;
   public state: TableSelectionState = null;
 
   @Input() label: string;
@@ -22,7 +21,7 @@ export class CheckboxControlComponent extends ImmutableFormField implements Afte
   }
 
   ngAfterViewInit() {
-    this.formDataUpdated(null);
+    this.formDataUpdated();
   }
 
   fieldValueChanged(event) {
@@ -37,11 +36,8 @@ export class CheckboxControlComponent extends ImmutableFormField implements Afte
     // this.formDataChanged.emit({field: this.fieldName, value: !this.formData});
   }
 
-  formDataUpdated(formData) {
-    if (this.inputClassName === 'add-or-remove') {
-      this.special = true;
-      this.state = null;
-    } else if (!isString(this.formData)) {
+  formDataUpdated() {
+    if (!isString(this.formData)) {
       this.state = this.formData === true ? 'All' : 'None';
     } else {
       this.state = <TableSelectionState>this.formData;

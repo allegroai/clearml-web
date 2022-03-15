@@ -1,0 +1,49 @@
+<sm-dialog-template [closeOnX]="false" (xClicked)="closeDialog(false)" header="NEW RUN"
+                    [pageHeader]="title"
+                    iconClass="al-color blue-300 al-ico-pipelines">
+  <ng-form #enqueueForm="ngForm" class="d-flex flex-column light-theme form-container">
+    <div class="section-title" *ngIf="params?.length > 0">Parameters</div>
+    <div *ngFor="let param of params" class="param-line">
+      <div class="param-key">{{param.name}}</div>
+      <ng-container [ngSwitch]="param.type">
+        <mat-form-field appearance="outline" *ngSwitchCase="'float'">
+          <input #floatInput="ngModel"  type="text" matInput [(ngModel)]="param.value" [name]="param.name" pattern="[+-]?([0-9]*[.])?[0-9]+" >
+          <mat-error
+            *ngIf="floatInput?.errors && floatInput?.errors['pattern']">
+            Please provide an float
+          </mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline" *ngSwitchCase="'int'">
+          <input  type="text" step="1" matInput [(ngModel)]="param.value" #intInput="ngModel" [name]="param.name" pattern="^[-\d]\d*$">
+          <mat-error
+            *ngIf="intInput?.errors && intInput?.errors['pattern']">
+            Please provide an integer
+          </mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline" *ngSwitchDefault>
+          <input matInput [(ngModel)]="param.value" [name]="param.name">
+        </mat-form-field>
+      </ng-container>
+    </div>
+    <div class="param-line">
+      <div class="section-title">Advanced configuration</div>
+      <sm-checkbox-control class="mat-form-field" [formData]="chooseCustomQueue" (formDataChanged)="changeChooseCustomQueue()"></sm-checkbox-control>
+    </div>
+    <mat-form-field appearance="outline" class="queue-select" [style.display]="chooseCustomQueue?'' :'none'">
+      <mat-label>Pipeline controller queue</mat-label>
+      <mat-select [(ngModel)]="selectedQueue" name="queue" panelClass="light-theme">
+        <mat-option *ngFor="let queue of queues" [value]="queue">
+          {{queue.name}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </ng-form>
+  <div class="buttons">
+    <button (click)="closeDialog(false)" class="btn btn-outline-neon">
+      CANCEL
+    </button>
+    <button (click)="closeDialog(true)" class="btn btn-neon yes-button">
+      RUN
+    </button>
+  </div>
+</sm-dialog-template>

@@ -1,5 +1,6 @@
 <sm-overlay [backdropActive]="backdropActive$|async"></sm-overlay>
 <sm-editable-section #parameterSection
+                     class="light-theme"
                      *ngIf="(selectedSectionHyperParams$| async).length>0 || propSection"
                      [editable]="(!isExample) && ((editable$ | async) || propSection)"
                      [disableSave]="!executionParamsForm?.hyperParameters?.form?.valid"
@@ -10,14 +11,15 @@
   <sm-section-header [label]="(selectedSection | replaceViaMapPipe:sectionReplaceMap) | uppercase "></sm-section-header>
   <sm-search search-button
              #search
-             class="table-search dark-theme"
-             [enableJumpToNextResult]="true"
-             [minimumChars]="0"
+             class="table-search"
+             [value]="searchedText"
+             [enableNavigation]="true"
+             [minimumChars]="1"
              [debounceTime]="0"
              [expandOnHover]="true"
              [searchResultsCount]="searchResultsCount"
+             [searchCounterIndex]="executionParamsForm.matchIndex"
              (valueChanged)="searchTable($event)"
-             (jumpToResult)="executionParamsForm.jumpToResult($event)"
   ></sm-search>
   <sm-experiment-execution-parameters
     #executionParamsForm
@@ -29,6 +31,6 @@
     (formDataChanged)="onFormValuesChanged($event)"
     (searchCounterChanged)="searchCounterChanged($event)"
     (resetSearch)="search.clear(false)"
-    (scrollToResultCounterChanged)="scrollIndexCounterChanged($event)"
+    (scrollToResultCounterReset)="scrollIndexCounterReset()"
   ></sm-experiment-execution-parameters>
 </sm-editable-section>

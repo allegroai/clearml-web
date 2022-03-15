@@ -1,13 +1,15 @@
 <div class="frame text-center" [ngClass]="{
 'dark-theme':theme===ThemeEnum.Dark,
 'light-theme': theme===ThemeEnum.Light
-}" >
+}">
   <div class="labeled-icon">
-    <i class=" mb-3 al-icon xl al-ico-alert-outline al-color " [ngClass]="{
-    'light-grey-blue': theme=== ThemeEnum.Light,
-    'neon-yellow': theme===ThemeEnum.Dark
-   }"></i>
-    <div class="label">Unable to load image</div>
+    <i class="mb-3 al-icon xl al-color" [ngClass]="{
+        'light-grey-blue': theme === ThemeEnum.Light,
+        'neon-yellow': theme === ThemeEnum.Dark,
+        'al-ico-no-source': missingSource,
+        'al-ico-alert-outline': !missingSource
+        }"></i>
+    <div class="label">{{missingSource ? 'Source not available' : 'Unable to load image'}}</div>
     <div class="label">{{baseFile}}</div>
   </div>
   <div class="d-flex justify-content-between buttons-footer align-items-center">

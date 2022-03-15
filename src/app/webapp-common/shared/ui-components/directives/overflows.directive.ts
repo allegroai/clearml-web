@@ -44,6 +44,6 @@ export class OverflowsDirective implements AfterViewInit, OnDestroy {
     }
   }
   ngOnDestroy() {
-    this.onDestroySubscription$.next();
+    this.onDestroySubscription$.next(false);
   }
 }

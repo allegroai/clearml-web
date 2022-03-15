@@ -8,10 +8,19 @@
                              [class.hide-item]="sharedView"
                              activeFeature="models" [archivedMode]="isArchived"></sm-project-context-navbar>
   <div class="d-flex justify-content-end align-items-center right-buttons">
+    <sm-clear-filters-button
+      [tableFilters]="tableFilters"
+      (clearTableFilters)="clearTableFilters.emit(tableFilters)"
+    ></sm-clear-filters-button>
     <sm-model-custom-cols-menu
-      [hidden]="minimizedView || sharedView"
+      [disabled]="minimizedView || sharedView"
+      [isLoading]="isLoadingMetadataKeys"
+      [metadataKeys]="metadataKeys"
       [tableCols]="tableCols"
+      (removeColFromList)="removeColFromList.emit($event)"
       (selectedTableColsChanged)="selectedTableColsChanged.emit($event)"
+      (selectMetadataKeysActiveChanged)="selectMetadataKeysActiveChanged.emit($event)"
+      (addOrRemoveMetadataKeyFromColumns)="addOrRemoveMetadataKeyFromColumns.emit($event)"
     ></sm-model-custom-cols-menu>
         <sm-refresh-button
           [autoRefreshState]="autoRefreshState"

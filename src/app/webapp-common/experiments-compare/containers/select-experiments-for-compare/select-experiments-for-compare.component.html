@@ -42,6 +42,7 @@
         [parents]="parent$ | async"
         [noMoreExperiments]="noMoreExperiments$ | async"
         [systemTags]="systemTags$ | async"
+        [entityType]="entityTypes.experiment"
         (tagsMenuOpened)="refreshTagsList()"
         (typesMenuOpened)="refreshTypesList()"
         (experimentsSelectionChanged)="experimentsSelectionChanged($event)"

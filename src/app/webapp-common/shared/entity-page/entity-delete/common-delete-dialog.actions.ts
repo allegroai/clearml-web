@@ -6,7 +6,7 @@ import {TasksResetManyResponseFailed} from '../../../../business-logic/model/tas
 const DELETE_PREFIX = 'DELETE_ENTITY ';
 
 export const deleteEntities = createAction( DELETE_PREFIX + '[delete entities]',
-  props<{entityType: EntityTypeEnum; entity?: Task}>());
+  props<{entityType: EntityTypeEnum; entity?: Task, includeChildren?: boolean}>());
 
 export const deleteModels = createAction( DELETE_PREFIX + '[delete models]');
 

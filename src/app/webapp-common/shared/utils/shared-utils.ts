@@ -79,9 +79,13 @@ export const isHtmlOrText = (url: string) => {
   if (!url) {
     return false;
   }
-  const parsed = new URL(url);
-  const ext = last(parsed.pathname.split('.'));
-  return ['txt', 'text', 'html', 'htm'].includes(ext);
+  try {
+    const parsed = new URL(url);
+    const ext = last(parsed.pathname.split('.'));
+    return ['txt', 'text', 'html', 'htm'].includes(ext);
+  } catch (e) {
+    return false;
+  }
 };
 
 export const createModelLink = (uri, modelId, modelSignedUri) => {
@@ -239,7 +243,7 @@ export const getScaleFactor = () => {
   let dimensionRatio = 100;
   let screenHeight: number;
 
-  if(mobilecheck()) {
+  if (mobilecheck()) {
     return dimensionRatio;
   }
 
@@ -293,7 +297,7 @@ export const loadExternalLibrary = (store: Store, url: string, action) => {
     script.type = 'text/javascript';
     script.src = url;
     script.onerror = () => console.error(`Error loading library from ${url}`);
-    script.crossOrigin = '' ;// 'use-credentials';
+    script.crossOrigin = '';// 'use-credentials';
     script.onload = () => store.dispatch(action());
 
     const head: HTMLHeadElement = document.getElementsByTagName('head')[0];

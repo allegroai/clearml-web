@@ -1,12 +1,12 @@
 import {Component, ElementRef, HostListener, Input, OnInit, ViewChild} from '@angular/core';
-import {PlotlyGraphBase} from '../../../shared/experiment-graphs/single-graph/plotly-graph-base';
+import {PlotlyGraphBase} from '@common/shared/experiment-graphs/single-graph/plotly-graph-base';
 import {debounceTime, filter} from 'rxjs/operators';
-import {ColorHashService} from '../../../shared/services/color-hash/color-hash.service';
+import {ColorHashService} from '@common/shared/services/color-hash/color-hash.service';
 import {get, getOr, isEqual, max, min, uniq, cloneDeep} from 'lodash/fp';
 import {MetricValueType, SelectedMetric} from '../../reducers/experiments-compare-charts.reducer';
-import {Task} from '../../../../business-logic/model/tasks/task';
+import {Task} from '~/business-logic/model/tasks/task';
 import {select} from 'd3-selection';
-import {sortCol} from '../../../shared/utils/tableParamEncode';
+import {sortCol} from '@common/shared/utils/tableParamEncode';
 import {Store} from '@ngrx/store';
 import {Axis, Color, ColorScale} from 'plotly.js';
 
@@ -292,10 +292,10 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBase implement
       graph.selectAll('.axis-title').text((d: any) => this.wrap(d.key)).append('title').text(d => (d as any).key);
       graph.selectAll('.axis .tick text').text((d: string) => this.wrap(d)).append('title').text((d: string) => d);
       graph.selectAll('.axis .tick text').style('pointer-events', 'auto');
-      graph.selectAll('.tick').on('mouseover', (event, d) => {
-        const tick = d as unknown as SVGGElement;
+      graph.selectAll('.tick').on('mouseover', (d, i, e) => {
+        const tick = e[i] as unknown as SVGGElement;
         const axis = tick.parentNode as SVGGElement;
-        if (axis.lastChild !== tick) {
+        if (axis && axis.lastChild !== tick) {
           axis.removeChild(tick);
           axis.appendChild(tick);
         }

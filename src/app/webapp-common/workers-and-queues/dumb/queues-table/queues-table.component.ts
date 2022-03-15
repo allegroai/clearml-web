@@ -34,6 +34,7 @@ export class QueuesTableComponent extends BaseTableView {
   @Output() queueSelected = new EventEmitter();
   @Output() deleteQueue = new EventEmitter();
   @Output() renameQueue = new EventEmitter();
+  @Output() clearQueue = new EventEmitter();
   @Output() sortedChanged = new EventEmitter<{ isShift: boolean; colId: ISmCol['id'] }>();
 
   @Input() tableSortOrder: TableSortOrderEnum;

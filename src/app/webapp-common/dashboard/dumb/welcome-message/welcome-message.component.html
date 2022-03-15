@@ -45,22 +45,27 @@
         </div>
         <div *ngIf="step.subNote" class="sub-note"><i class="mr-1 fas fa-info-circle info"></i>{{step.subNote}}</div>
       </div>
-      <div class="step-container">
-        <div class="step-header sub-note">Complete the clearml configuration information as prompted.</div>
-        <div *ngIf="!accessKey ; else config" class="code empty-config">
-          <div>
-            <button class="mb-2 btn btn-neon" [disabled]="creatingCredentials" (click)="createCredentials()">CREATE NEW
-              CREDENTIALS
-            </button>
-          </div>
+      <div class="step-container cred-step" [class.first-step]="!credentialsCreated" [class.has-label]="credentialsLabel">
+        <div class="step-header">Complete the clearml configuration information as prompted.</div>
+        <div *ngIf="!credentialsCreated" class="d-flex align-items-end">
+          <mat-form-field appearance="outline"
+                          class="label-input"
+                          floatLabel="always">
+            <mat-label>Label (optional)</mat-label>
+            <input matInput [(ngModel)]="credentialsLabel" [disabled]="credentialsCreated" placeholder="Credentials label" name="credentials">
+          </mat-form-field>
+          <button class="mb-2 btn btn-neon create-cred-button" (click)="createCredentials()">CREATE NEW
+            CREDENTIALS
+          </button>
         </div>
-        <ng-template #config>
+        <div class="cred-visible" [class.invisible]="!accessKey">
           <div class="code">
 <div #content class="content"><span class="variable">api</span> {{ '{' }}<ng-container *ngIf="community && workspace.name">
-  <span class="comment">{{'# ' + workspace.name}}</span></ng-container>
+  <span class="">{{'# ' + workspace.name}}</span></ng-container>
   <span class="variable">web_server</span><span class="operation">:</span> <span class="string">{{WEB_SERVER_URL}}</span>
   <span class="variable">api_server</span><span class="operation">:</span> <span class="string">{{API_BASE_URL}}</span>
-<ng-container *ngIf="fileBaseUrl">  <span class="variable">files_server</span><span class="operation">:</span> <span class="string">{{fileBaseUrl}}</span>
+<ng-container *ngIf="fileBaseUrl">  <span class="variable">files_server</span><span class="operation">:</span> <span class="string">{{fileBaseUrl}}</span><ng-container *ngIf="credentialsLabel">
+  <span>{{'# ' + credentialsLabel}}</span></ng-container>
 </ng-container>  <span class="variable">credentials</span> {{ '{' }}
     <span class="string">"access_key"</span> <span class="operation">=</span> <span class="string">"{{accessKey}}"</span>
     <span class="string">"secret_key"</span> <span class="operation">=</span> <span class="string">"{{secretKey}}"</span>
@@ -72,8 +77,8 @@
               [copyIcon]="'far fa-lg fa-copy'"
               [clipboardText]="content.textContent"></sm-copy-clipboard>
           </div>
-        </ng-template>
         <div class="sub-note"><i class="mr-1 fas fa-info-circle info"></i>Manage your app credentials in the <a target="_blank" href="settings/workspace-configuration">workspace settings page</a></div>
+        </div>
       </div>
       <div class="step-container" *ngIf="!queue">
         <div class="step">3. Integrate</div>

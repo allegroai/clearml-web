@@ -1,12 +1,15 @@
 <div class="d-flex justify-content-between header-container align-items-center"
      [ngClass]="{'archive-mode': isArchived}">
-  <sm-toggle-archive
-    [class.hide-item]="sharedView"
-    [showArchived]="isArchived"
-    (toggleArchived)="onIsArchivedChanged($event)"
-  ></sm-toggle-archive>
-
+  <div class="d-flex-center">
+    <ng-content></ng-content>
+    <sm-toggle-archive
+      [class.hide-item]="sharedView"
+      [showArchived]="isArchived"
+      (toggleArchived)="onIsArchivedChanged($event)"
+    ></sm-toggle-archive>
+  </div>
   <sm-project-context-navbar
+    *ngIf="showNavbarLinks"
     [class.hide-item]="sharedView"
     [activeFeature]="'experiments'"
     [archivedMode]="isArchived"

@@ -14,7 +14,7 @@ import {selectSelectedProject} from '@common/core/reducers/projects.reducer';
 import {MatDialog} from '@angular/material/dialog';
 import {getTutorialBucketCredentials} from '@common/core/actions/common-auth.actions';
 import {termsOfUseAccepted} from '@common/core/actions/users.actions';
-import {distinctUntilChanged, filter, map, tap} from 'rxjs/operators';
+import {distinctUntilChanged, filter, map, tap, withLatestFrom} from 'rxjs/operators';
 import * as routerActions from './webapp-common/core/actions/router.actions';
 import {combineLatest, Observable, Subscription} from 'rxjs';
 import {selectBreadcrumbsStrings} from '@common/layout/layout.reducer';
@@ -23,17 +23,19 @@ import {formatStaticCrumb} from '@common/layout/breadcrumbs/breadcrumbs-common.u
 import {ServerUpdatesService} from '@common/shared/services/server-updates.service';
 import {selectAvailableUpdates} from './core/reducers/view.reducer';
 import {UPDATE_SERVER_PATH} from './app.constants';
-import {firstLogin, plotlyReady, setScaleFactor, visibilityChanged} from '@common/core/actions/layout.actions';
+import {aceReady, firstLogin, plotlyReady, setScaleFactor, visibilityChanged} from '@common/core/actions/layout.actions';
 import {UiUpdatesService} from '@common/shared/services/ui-updates.service';
 import {UsageStatsService} from './core/services/usage-stats.service';
 import {dismissSurvey} from './core/actions/layout.actions';
-import {getScaleFactor} from '@common/shared/utils/shared-utils';
+import {getScaleFactor, loadExternalLibrary} from '@common/shared/utils/shared-utils';
 import {User} from './business-logic/model/users/user';
 import {ConfigurationService} from '@common/shared/services/configuration.service';
 import {GoogleTagManagerService} from 'angular-google-tag-manager';
 import {selectIsSharedAndNotOwner} from './features/experiments/reducers';
 import {TipsService} from '@common/shared/services/tips.service';
 import {USER_PREFERENCES_KEY} from '@common/user-preferences';
+import {selectIsPipelines} from '@common/experiments-compare/reducers';
+import {Environment} from '../environments/base';
 
 @Component({
   selector: 'sm-root',
@@ -65,6 +67,7 @@ export class AppComponent implements OnInit, OnDestroy {
   public hideUpdate: boolean;
   public showSurvey: boolean;
   private plotlyURL: string;
+  private environment: Environment;
 
   @HostListener('document:visibilitychange') onVisibilityChange() {
     this.store.dispatch(visibilityChanged({visible: !document.hidden}));
@@ -99,7 +102,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.selectedProjectFromUrl$ = this.store.select(selectRouterParams)
       .pipe(
         filter((params: Params) => !!params),
-        map(params => get('projectId', params) || null)
+        map(params => params?.projectId || null)
       );
 
     if (ConfigurationService.globalEnvironment.GTM_ID) {
@@ -112,6 +115,7 @@ export class AppComponent implements OnInit, OnDestroy {
       this.hideUpdate = env.hideUpdateNotice;
       this.showSurvey = env.showSurvey;
       this.plotlyURL = env.plotlyURL;
+      this.environment = env;
     });
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
@@ -131,7 +135,7 @@ export class AppComponent implements OnInit, OnDestroy {
       filter(user => !!user?.id),
       distinctUntilChanged((prev, next) => prev?.id === next?.id)
     )
-    .subscribe(() => {
+      .subscribe(() => {
         this.store.dispatch(getAllSystemProjects());
         this.store.dispatch(getTutorialBucketCredentials());
         this.store.dispatch(termsOfUseAccepted());
@@ -144,7 +148,7 @@ export class AppComponent implements OnInit, OnDestroy {
           loginTime = Date.now();
           localStorage.setItem(USER_PREFERENCES_KEY.firstLogin, `${loginTime}`);
         }
-    });
+      });
 
     this.selectedProjectFromUrl$.subscribe((projectId: string) => {
       this.store.dispatch(setSelectedProjectId({projectId}));
@@ -164,19 +168,22 @@ export class AppComponent implements OnInit, OnDestroy {
         }
       });
 
-    this.breadcrumbsSubscription = this.store.select(selectBreadcrumbsStrings)
-      .pipe(filter(names => !!names))
-      .subscribe(
-        (names) => {
-          this.breadcrumbsStrings = prepareNames(names);
-          this.updateTitle();
-        }
-      );
+    this.breadcrumbsSubscription = this.store.select(selectBreadcrumbsStrings).pipe(
+      filter(names => !!names),
+      withLatestFrom(this.store.select(selectIsPipelines))
+    ).subscribe(
+      ([names, isPipeLines]) => {
+        this.breadcrumbsStrings = prepareNames(names, isPipeLines);
+        this.updateTitle();
+      }
+    );
+
     if (window.localStorage.getItem('disableHidpi') !== 'true') {
       this.setScale();
     }
 
-    this.loadPlotly();
+    loadExternalLibrary(this.store, this.environment.plotlyURL, plotlyReady);
+    loadExternalLibrary(this.store, '/assets/ace-builds/ace.js', aceReady);
   }
 
   private setScale() {
@@ -240,36 +247,5 @@ export class AppComponent implements OnInit, OnDestroy {
 
   get guestUser(): boolean {
     return !this.currentUser || this.currentUser?.role === 'guest';
-  }
-
-  public loadPlotly(): void {
-    const init = () => {
-      const script: HTMLScriptElement = document.createElement('script');
-      script.type = 'text/javascript';
-      script.src = this.plotlyURL;
-      script.onerror = () => console.error(`Error loading plotly.js library from ${this.plotlyURL}`);
-      script.crossOrigin = 'use-credentials';
-
-      const head: HTMLHeadElement = document.getElementsByTagName('head')[0];
-      head.appendChild(script);
-
-      let counter = 600;
-
-      const fn = () => {
-        const plotly = (window as any).Plotly;
-        if (plotly) {
-          this.store.dispatch(plotlyReady());
-        } else if (counter > 0) {
-          counter --;
-          setTimeout(fn, 100);
-        } else {
-          throw new Error(`Error loading plotly.js library from ${this.plotlyURL}. Timeout.`);
-        }
-      };
-
-      fn();
-    };
-
-    setTimeout(init);
   }
 }

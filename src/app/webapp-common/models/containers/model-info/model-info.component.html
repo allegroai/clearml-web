@@ -22,6 +22,9 @@
     <span [routerLink]="['labels']" routerLinkActive #rlaLabels="routerLinkActive" queryParamsHandling="merge">
       <sm-navbar-item header="labels" [active]="rlaLabels.isActive"></sm-navbar-item>
     </span>
+    <span [routerLink]="['metadata']" routerLinkActive #rlaMetadata="routerLinkActive" queryParamsHandling="merge">
+      <sm-navbar-item header="metadata" [active]="rlaMetadata.isActive"></sm-navbar-item>
+    </span>
   </nav>
   <div class="model-info-body">
     <router-outlet></router-outlet>

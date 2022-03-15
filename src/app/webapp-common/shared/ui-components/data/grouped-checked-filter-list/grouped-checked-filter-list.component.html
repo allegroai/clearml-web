@@ -16,7 +16,7 @@
                        [expanded]="searchText?.length > 0"
                        [hidden]="(bigItem.value | advancedFilter:searchText).length === 0">
     <mat-expansion-panel-header expandedHeight="40px" collapsedHeight="40px" (click)="toggleExpand(bigItem.key)">
-      <div class="ellipsis item-key" [smTooltip]="renameMap[bigItem.key]" [showDelay]="500">{{renameMap[bigItem.key] || bigItem.key}}</div>
+      <div class="ellipsis item-key" [smTooltip]="renameMap[bigItem.key]" [matTooltipShowDelay]="500">{{renameMap[bigItem.key] || bigItem.key}}</div>
     </mat-expansion-panel-header>
     <div *ngFor="let item of bigItem.value | filter:searchText:'value'; trackBy: trackByValFn"
          class="item pointer"

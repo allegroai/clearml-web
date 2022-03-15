@@ -1,33 +1,35 @@
 import {Injectable} from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
-import {ApiProjectsService} from '../../business-logic/api-services/projects.service';
+import {ApiProjectsService} from '~/business-logic/api-services/projects.service';
 import {requestFailed} from '../core/actions/http.actions';
 import {activeLoader, deactivateLoader, setServerError} from '../core/actions/layout.actions';
 import {
-  AddToProjectsList, GetAllProjectsPageProjects, ProjectUpdated,
+  AddToProjectsList, GetAllProjectsPageProjects, updateProject,
   setCurrentScrollId, SetNoMoreProjects, SetProjectsOrderBy,
-  setProjectsSearchQuery, UpdateProjectPartial
+  setProjectsSearchQuery, updateProjectSuccess
 } from './common-projects.actions';
 import {
   selectProjectsOrderBy, selectProjectsScrollId, selectProjectsSearchQuery, selectProjectsSortOrder
 } from './common-projects.reducer';
 import {Store} from '@ngrx/store';
 import {TABLE_SORT_ORDER} from '../shared/ui-components/data/table/table.consts';
-import {ProjectsGetAllExRequest} from '../../business-logic/model/projects/projectsGetAllExRequest';
+import {ProjectsGetAllExRequest} from '~/business-logic/model/projects/projectsGetAllExRequest';
 import {escapeRegex, isExample} from '../shared/utils/shared-utils';
 import {catchError, debounceTime, map, mergeMap, switchMap, withLatestFrom} from 'rxjs/operators';
 import {get} from 'lodash/fp';
-import {ApiTasksService} from '../../business-logic/api-services/tasks.service';
-import {ApiModelsService} from '../../business-logic/api-services/models.service';
+import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
+import {ApiModelsService} from '~/business-logic/api-services/models.service';
 import {pageSize, PROJECTS_ACTIONS} from './common-projects.consts';
 import {selectRouterParams} from '../core/reducers/router-reducer';
 import {selectCurrentUser, selectShowOnlyUserWork} from '../core/reducers/users-reducer';
-import {selectShowHidden} from '../../features/projects/projects.reducer';
-import {ProjectsGetAllExResponse} from '../../business-logic/model/projects/projectsGetAllExResponse';
+import {selectShowHidden} from '~/features/projects/projects.reducer';
+import {ProjectsGetAllExResponse} from '~/business-logic/model/projects/projectsGetAllExResponse';
 import {selectRootProjects, selectSelectedProjectId} from '../core/reducers/projects.reducer';
 import {forkJoin, of} from 'rxjs';
-import {Project} from '../../business-logic/model/projects/project';
+import {Project} from '~/business-logic/model/projects/project';
 import {setAllProjects} from '../core/actions/projects.actions';
+import {ActivatedRoute} from '@angular/router';
+import {ProjectsUpdateResponse} from '~/business-logic/model/projects/projectsUpdateResponse';
 
 @Injectable()
 export class CommonProjectsEffects {
@@ -35,34 +37,35 @@ export class CommonProjectsEffects {
   constructor(
     private actions: Actions, public projectsApi: ApiProjectsService,
     public experimentsApi: ApiTasksService, public modelsApi: ApiModelsService,
-    private store: Store<any>
+    private store: Store<any>, private route: ActivatedRoute
   ) {
   }
 
   activeLoader = createEffect(() => this.actions.pipe(
-    ofType(PROJECTS_ACTIONS.PROJECT_UPDATED, PROJECTS_ACTIONS.GET_PROJECTS, PROJECTS_ACTIONS.CREATE_PROJECT),
+    ofType(updateProject, PROJECTS_ACTIONS.GET_PROJECTS, PROJECTS_ACTIONS.CREATE_PROJECT),
     map(action => activeLoader(action.type))
   ));
 
   updateProject = createEffect(() => this.actions.pipe(
-    ofType<ProjectUpdated>(PROJECTS_ACTIONS.PROJECT_UPDATED),
+    ofType(updateProject),
     withLatestFrom(this.store.select(selectRootProjects)),
-    mergeMap(([action, rootProjects]) => this.projectsApi.projectsUpdate(action.payload.updatedData)
+    mergeMap(([action, rootProjects]) => this.projectsApi.projectsUpdate({project: action.id, ...action.changes})
       .pipe(
-        mergeMap(() => {
-          const parentProject = rootProjects.find(project => project.id === action.payload.updatedData.project);
-          const effectedRootProjects = [
-            rootProjects.find(project => project.name === parentProject.name),
-            ...rootProjects.filter(project => project.name.startsWith(`${parentProject.name}/`))]
-            .map(project => ({
-              ...project,
-              name: project.name.replace(parentProject?.name, action.payload.updatedData.name)
-            }));
-          return [
+        mergeMap((res: ProjectsUpdateResponse) => {
+          const actions = [
             deactivateLoader(action.type),
-            new UpdateProjectPartial({id: action.payload.updatedData.project, changes: action.payload.updatedData}),
-            setAllProjects({projects: effectedRootProjects, updating: true})
+            updateProjectSuccess({id: action.id, changes: res.fields})
           ];
+          if (action.changes.name) {
+            const parentProject = rootProjects.find(project => project.id === action.id);
+            if (parentProject) {
+              const affectedRootProjects = rootProjects
+                .filter(project => project.name.startsWith(`${parentProject.name}/`))
+                .map(project => ({...project, name: project.name.replace(parentProject?.name, action.changes.name)}));
+              actions.push(setAllProjects({projects: affectedRootProjects, updating: true}) as any);
+            }
+          }
+          return actions;
         }),
         catchError(error => [deactivateLoader(action.type), requestFailed(error),
           setServerError(error, undefined, get('error.meta.result_subcode', error) === 800 ?
@@ -85,25 +88,32 @@ export class CommonProjectsEffects {
       this.store.select(selectRouterParams).pipe(map(params => get('projectId', params))),
       this.store.select(selectSelectedProjectId),
     ),
-    switchMap(([action, orderBy, sortOrder, searchQuery, scrollId, user, showOnlyUserWork, showHidden, routerProjectId, projectId]) => {
+    switchMap(([
+                 action, orderBy, sortOrder, searchQuery, scrollId, user, showOnlyUserWork,
+                 showHidden, routerProjectId, projectId
+               ]) => {
         const selectedProjectId = routerProjectId || projectId; // In rare cases where router not updated yet with current project id
+        const pipelines = this.route.snapshot.firstChild.routeConfig.path === 'pipelines';
         /* eslint-disable @typescript-eslint/naming-convention */
         return forkJoin([
           this.projectsApi.projectsGetAllEx({
             stats_for_state: ProjectsGetAllExRequest.StatsForStateEnum.Active,
+            ...(pipelines && {include_stats_filter: {system_tags: ['pipeline', '-archive']}}),
             include_stats: true,
-            shallow_search: !searchQuery?.query,
+            shallow_search: !pipelines && !searchQuery?.query,
             ...(selectedProjectId && {parent: [selectedProjectId]}),
             scroll_id: scrollId || null, // null to create new scroll (undefined doesn't generate scroll)
             size: pageSize,
             active_users: (showOnlyUserWork ? [user.id] : null),
-            ...(showHidden && {search_hidden: true}),
+            ...((showHidden || pipelines) && {search_hidden: true}),
+            ...(pipelines && {system_tags: ['pipeline']}),
             order_by: ['featured', sortOrder === TABLE_SORT_ORDER.DESC ? '-' + orderBy : orderBy],
-            only_fields: ['name', 'company', 'user', 'created', 'default_output_destination'],
+            only_fields: ['name', 'company', 'user', 'created', 'default_output_destination']
+              .concat(pipelines ? ['tags', 'system_tags']: []),
             ...(searchQuery?.query && {
               _any_: {
                 pattern: searchQuery.regExp ? searchQuery.query : escapeRegex(searchQuery.query) + '[^/]*$',
-                fields: ['id', 'name', 'description', 'system_tags']
+                fields: ['id', 'name', 'description']
               }
             }),
             ...action.payload.getAllFilter
@@ -119,24 +129,23 @@ export class CommonProjectsEffects {
             only_fields: ['name', 'company', 'user', 'created', 'default_output_destination'],
             /* eslint-enable @typescript-eslint/naming-convention */
           }) : of(null),
-        ])
-          .pipe(
-            map(([projectsRes, currentProjectRes]: [ProjectsGetAllExResponse, ProjectsGetAllExResponse]) => ({
-                newScrollId: projectsRes.scroll_id,
-                projects: (currentProjectRes && this.isNotEmptyExampleProject(currentProjectRes.projects[0])) ? [
-                  // eslint-disable-next-line @typescript-eslint/naming-convention
-                  {...currentProjectRes.projects[0], isRoot: true, sub_projects: null, name: `[${currentProjectRes.projects[0]?.name}]`},
-                  ...projectsRes.projects
-                ] : projectsRes.projects
-              }
-            )),
-            mergeMap(({newScrollId, projects}) => [
-              new AddToProjectsList(projects),
-              deactivateLoader(action.type),
-              setCurrentScrollId({scrollId: newScrollId}),
-              new SetNoMoreProjects(projects.length < pageSize)]),
-            catchError(error => [deactivateLoader(action.type), requestFailed(error)])
-          );
+        ]).pipe(
+          map(([projectsRes, currentProjectRes]: [ProjectsGetAllExResponse, ProjectsGetAllExResponse]) => ({
+              newScrollId: projectsRes.scroll_id,
+              projects: (currentProjectRes && this.isNotEmptyExampleProject(currentProjectRes.projects[0])) ? [
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                {...currentProjectRes.projects[0], isRoot: true, sub_projects: null, name: `[${currentProjectRes.projects[0]?.name}]`},
+                ...projectsRes.projects
+              ] : projectsRes.projects
+            }
+          )),
+          mergeMap(({newScrollId, projects}) => [
+            new AddToProjectsList(projects),
+            deactivateLoader(action.type),
+            setCurrentScrollId({scrollId: newScrollId}),
+            new SetNoMoreProjects(projects.length < pageSize)]),
+          catchError(error => [deactivateLoader(action.type), requestFailed(error)])
+        );
       }
     )
   ));

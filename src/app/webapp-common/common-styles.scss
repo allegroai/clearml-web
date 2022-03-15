@@ -1,4 +1,4 @@
-@use '~@angular/material' as mat;
+@use '@angular/material' as mat;
 @import "angular-notifier/styles.scss";
 @import "angular-notifier/styles/themes/theme-material.scss";
 @import "shared/ui-components/styles/notifications";
@@ -39,6 +39,7 @@ $sm-theme: mat.define-light-theme($sm-theme-primary, $sm-theme-accent, $sm-theme
 
 @include mat.form-field-color($light-theme);
 @include mat.progress-spinner-theme($light-theme);
+@include mat.progress-bar-theme($light-theme);
 
 .dark-theme {
   @include mat.core-theme($dark-theme);
@@ -51,7 +52,6 @@ $sm-theme: mat.define-light-theme($sm-theme-primary, $sm-theme-accent, $sm-theme
   @include mat.datepicker-color($light-theme);
   @include mat.pseudo-checkbox-color($light-theme);
   @include mat.divider-color($light-theme);
-  @include mat.progress-bar-theme($light-theme);
 
   .mat-checkbox-frame,
   .mat-radio-outer-circle {
@@ -71,6 +71,7 @@ $sm-theme: mat.define-light-theme($sm-theme-primary, $sm-theme-accent, $sm-theme
   .light-theme .mat-radio-button.mat-radio-disabled .mat-radio-inner-circle {
     background-color: transparent !important;
   }
+
   .link {
     &:hover {
       text-decoration: underline;
@@ -92,7 +93,6 @@ $sm-theme: mat.define-light-theme($sm-theme-primary, $sm-theme-accent, $sm-theme
   @include mat.datepicker-color($light-theme);
   @include mat.pseudo-checkbox-color($light-theme);
   @include mat.divider-color($light-theme);
-  @include mat.progress-bar-theme($light-theme);
 
   .mat-checkbox-frame,
   .mat-radio-outer-circle {
@@ -159,15 +159,29 @@ h4.al-header {
 h5.al-header {
   font-weight: normal;
 }
-span.highlight-text{
+
+span.highlight-text {
   background: $neon-yellow-betterinchrome;
-  &.current-match{
+  border: 1px solid darken($neon-yellow-betterinchrome, 5%);
+  border-radius: 4px;
+  padding: 0 2px;
+
+  &.current-match {
     background: #f5d655;
+    border: 1px solid darken(#f5d655, 15%);
   }
+}
+
+hr {
+  border-top: 1px solid rgba(0, 0, 0, .1);
 }
 
 .pointer {
   cursor: pointer;
+}
+
+.cursor-default {
+  cursor: default;
 }
 
 .pointer-events-none {
@@ -272,14 +286,17 @@ button {
 .color-neon-yellow {
   color: $neon-yellow;
 }
+
 .background-neon-green {
   background-color: $neon-green !important;
   background: $neon-green !important;
 }
+
 .background-neon-yellow {
   background-color: $neon-yellow !important;
   background: $neon-yellow !important;
 }
+
 .color-neon-green {
   color: $neon-green;
 }
@@ -287,6 +304,7 @@ button {
 .border-radius {
   border-radius: 4px;
 }
+
 .grabbing {
   cursor: grab;
 
@@ -758,6 +776,6 @@ button.btn.button-outline-dark {
 }
 
 .ace_placeholder {
-  font-family: SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;
+  font-family: SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
   color: $blue-grey !important;
 }

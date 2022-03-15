@@ -160,7 +160,7 @@
 
     .tool-bar {
       background-color: #141822 !important;
-      border-bottom: 1px solid #1d2230 !important;
+      border-bottom: 1px solid $blue-600 !important;
 
       .btn:first-child:before {
         display: none;
@@ -373,7 +373,7 @@
       }
 
       hr {
-        border-bottom: 1px solid #1d2230;
+        border-bottom: 1px solid $blue-600;
       }
 
       a {
@@ -384,7 +384,7 @@
         background-color: transparent;
 
         td, th {
-          border-bottom: 1px solid #303443;
+          border-bottom: 1px solid $dark-border;
           font-weight: 400;
           line-height: 32px;
         }

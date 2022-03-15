@@ -49,6 +49,32 @@ export const routes: Routes = [
       },
     ]
   },
+  {
+    path: 'pipelines',
+    // canActivate: [RolePermissionsGuard],
+    data: {search: true},
+    loadChildren: () => import('@common/pipelines/pipelines.module').then(m => m.PipelinesModule),
+  },
+  {
+    path: 'pipelines',
+    // canActivate: [RolePermissionsGuard],
+    data: {search: true},
+    children: [
+      {
+        path: ':projectId',
+        children: [
+          {path: 'pipelines', loadChildren: () => import('./features/projects/projects.module').then(m => m.ProjectsModule)},
+          {
+            path: 'experiments', loadChildren: () => import('@common/pipelines-controller/pipelines-controller.module').then(m => m.PipelinesControllerModule)
+          },
+          {
+            path: 'compare-experiments',
+            loadChildren: () => import('./webapp-common/experiments-compare/experiments-compare.module').then(m => m.ExperimentsCompareModule)
+          },
+        ]
+      },
+    ]
+  },
   {path: 'workers-and-queues', loadChildren: () => import('./features/workers-and-queues/workers-and-queues.module').then(m => m.WorkersAndQueuesModule)},
   {path: '404', loadChildren: () => import('./features/not-found/not-found.module').then(m => m.NotFoundModule)},
   {path: '**', loadChildren: () => import('./features/not-found/not-found.module').then(m => m.NotFoundModule)},

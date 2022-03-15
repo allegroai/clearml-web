@@ -6,13 +6,13 @@
   (click)="add.emit($event)"
   [smTooltip]="tooltip ? caption : undefined"
 >
-  <i class="fas fa-plus" *ngIf="add.observers.length > 0"></i>
+  <i class="al-icon al-ico-add xs" *ngIf="add.observers.length > 0"></i>
   {{caption}}
 </span>
-<i class="fas fa-xs fa-times remove"
+<i class="al-icon al-ico-dialog-x sm remove"
    *ngIf="remove.observers.length > 0 && !disabledRemove"
    [style.color]="colors?.foreground"
-   (click)="onRemoveClicked(caption)">
+   (click)="$event.stopPropagation(); onRemoveClicked(caption)">
 </i>
-<mat-spinner *ngIf="disabledRemove" class="icon sm white remove" [diameter]="17" [strokeWidth]="3"></mat-spinner>
+<mat-spinner *ngIf="disabledRemove === caption" class="al-icon sm white" [diameter]="12" [strokeWidth]="1"></mat-spinner>
 <div class="arrow" [class.add-button]="add.observers.length > 0" [style.backgroundColor]="colors?.background"></div>

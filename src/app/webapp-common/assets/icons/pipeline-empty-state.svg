@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="487" height="434" viewBox="0 0 487 434">
+    <g style="opacity:.996">
+        <path data-name="connector" d="M-72.842-2.432h31.272c12.026 0 16.185 7.754 16.185 15.728V43.33" transform="translate(444.116 27.577)" style="fill:none;stroke:#5a658e;stroke-width:2px"/>
+        <path d="m936.044 346.708 3.429 3.429 3.429-3.429" transform="translate(-520.743 -279.229)" style="fill:none;stroke:#5a658e;stroke-width:2px"/>
+        <g data-name="connector">
+            <path data-name="connector" d="M-72.842-2.432h31.272c12.026 0 16.185 7.754 16.185 15.728V43.33" transform="translate(328.76 181.343)" style="fill:none;stroke:#5a658e;stroke-width:2px"/>
+            <path data-name="connector-head" d="m936.044 346.708 3.429 3.429 3.429-3.429" transform="translate(-636.099 -125.463)" style="fill:none;stroke:#5a658e;stroke-width:2px"/>
+        </g>
+        <g data-name="connector">
+            <path data-name="connector" d="M-25.386-2.432h-31.271c-12.026 0-16.184 7.754-16.184 15.728V43.33" transform="translate(259.337 27.577)" style="fill:none;stroke:#5a658e;stroke-width:2px"/>
+            <path data-name="connector-head" d="m942.9 346.708-3.429 3.429-3.429-3.429" transform="translate(-752.978 -279.229)" style="fill:none;stroke:#5a658e;stroke-width:2px"/>
+        </g>
+        <g data-name="connector">
+            <path data-name="connector" d="M-25.386-2.432h-31.271c-12.026 0-16.184 7.754-16.184 15.728V43.33" transform="translate(141.266 181.343)" style="fill:none;stroke:#5a658e;stroke-width:2px"/>
+            <path data-name="connector-head" d="m942.9 346.708-3.429 3.429-3.429-3.429" transform="translate(-871.049 -125.463)" style="fill:none;stroke:#5a658e;stroke-width:2px"/>
+        </g>
+        <g data-name="connector">
+            <path data-name="connector" transform="translate(185.899 127.427)" style="fill:none;stroke:#5a658e;stroke-width:2px" d="M0 0v21.527"/>
+            <path data-name="connector-head" d="m936.044 346.708 3.429 3.429 3.429-3.429" transform="translate(-753.574 -200.856)" style="fill:none;stroke:#5a658e;stroke-width:2px"/>
+        </g>
+        <g data-name="connector">
+            <path data-name="connector" transform="translate(303.596 279.194)" style="fill:none;stroke:#5a658e;stroke-width:2px" d="M0 0v24.386"/>
+            <path data-name="connector-head" d="m936.044 346.708 3.429 3.429 3.429-3.429" transform="translate(-635.877 -46.23)" style="fill:none;stroke:#5a658e;stroke-width:2px"/>
+        </g>
+        <g data-name="connector">
+            <path data-name="connector" transform="translate(303.596 356.194)" style="fill:none;stroke:#5a658e;stroke-width:2px" d="M0 0v24.386"/>
+            <path data-name="connector-head" d="m936.044 346.708 3.429 3.429 3.429-3.429" transform="translate(-635.877 30.77)" style="fill:none;stroke:#5a658e;stroke-width:2px"/>
+        </g>
+        <g transform="translate(231.301 -3)">
+            <path data-name="step" d="M4 0h129a4 4 0 0 1 4 4v29H0V4a4 4 0 0 1 4-4z" transform="translate(2.699 3)" style="fill:rgba(0,154,255,.2)"/>
+            <path d="M0 0h137v13a4 4 0 0 1-4 4H4a4 4 0 0 1-4-4V0z" transform="translate(2.699 36)" style="fill:#009aff"/>
+            <rect width="26" height="4" rx="2" transform="translate(105.699 43)" style="fill:#153856"/>
+            <path d="M7.72 12.3a4.576 4.576 0 1 1 4.58-4.58 4.581 4.581 0 0 1-4.58 4.58m0 1.144A5.72 5.72 0 1 0 2 7.72a5.72 5.72 0 0 0 5.72 5.72m2.344-7.96-3.48 3.48-1.2-1.2-.809.809 2 2 4.289-4.289z" transform="translate(9.843 36.144)" style="fill:#153856"/>
+            <rect width="55" height="4" rx="2" transform="translate(34.699 17)" style="fill:#009aff"/>
+            <circle cx="8" cy="8" r="8" transform="translate(10.699 11)" style="fill:#0099fe"/>
+        </g>
+        <g data-name="step" transform="translate(347.301 71)">
+            <path data-name="step" d="M4 0h129a4 4 0 0 1 4 4v29H0V4a4 4 0 0 1 4-4z" transform="translate(2.699 3)" style="fill:rgba(0,154,255,.2)"/>
+            <path data-name="step-status" d="M0 0h137v13a4 4 0 0 1-4 4H4a4 4 0 0 1-4-4V0z" transform="translate(2.699 36)" style="fill:#009aff"/>
+            <rect data-name="time" width="26" height="4" rx="2" transform="translate(105.699 43)" style="fill:#153856"/>
+            <path data-name="ico-status-completed" d="M7.72 12.3a4.576 4.576 0 1 1 4.58-4.58 4.581 4.581 0 0 1-4.58 4.58m0 1.144A5.72 5.72 0 1 0 2 7.72a5.72 5.72 0 0 0 5.72 5.72m2.344-7.96-3.48 3.48-1.2-1.2-.809.809 2 2 4.289-4.289z" transform="translate(9.843 36.144)" style="fill:#153856"/>
+            <rect data-name="title" width="55" height="4" rx="2" transform="translate(34.699 17)" style="fill:#009aff"/>
+            <circle data-name="ico-object-type" cx="8" cy="8" r="8" transform="translate(10.699 11)" style="fill:#0099fe"/>
+        </g>
+        <g data-name="step" transform="translate(115.301 71)">
+            <path data-name="step" d="M4 0h129a4 4 0 0 1 4 4v29H0V4a4 4 0 0 1 4-4z" transform="translate(2.699 3)" style="fill:rgba(0,154,255,.2)"/>
+            <path data-name="step-status" d="M0 0h137v13a4 4 0 0 1-4 4H4a4 4 0 0 1-4-4V0z" transform="translate(2.699 36)" style="fill:#009aff"/>
+            <rect data-name="time" width="26" height="4" rx="2" transform="translate(105.699 43)" style="fill:#153856"/>
+            <path data-name="ico-status-completed" d="M7.72 12.3a4.576 4.576 0 1 1 4.58-4.58 4.581 4.581 0 0 1-4.58 4.58m0 1.144A5.72 5.72 0 1 0 2 7.72a5.72 5.72 0 0 0 5.72 5.72m2.344-7.96-3.48 3.48-1.2-1.2-.809.809 2 2 4.289-4.289z" transform="translate(9.843 36.144)" style="fill:#153856"/>
+            <rect data-name="title" width="55" height="4" rx="2" transform="translate(34.699 17)" style="fill:#009aff"/>
+            <circle data-name="ico-object-type" cx="8" cy="8" r="8" transform="translate(10.699 11)" style="fill:#0099fe"/>
+        </g>
+        <g data-name="step" transform="translate(115.301 150)">
+            <path data-name="step" d="M4 0h129a4 4 0 0 1 4 4v29H0V4a4 4 0 0 1 4-4z" transform="translate(2.699 3)" style="fill:rgba(0,154,255,.2)"/>
+            <path data-name="step-status" d="M0 0h137v13a4 4 0 0 1-4 4H4a4 4 0 0 1-4-4V0z" transform="translate(2.699 36)" style="fill:#009aff"/>
+            <rect data-name="time" width="26" height="4" rx="2" transform="translate(105.699 43)" style="fill:#153856"/>
+            <path data-name="ico-status-completed" d="M7.72 12.3a4.576 4.576 0 1 1 4.58-4.58 4.581 4.581 0 0 1-4.58 4.58m0 1.144A5.72 5.72 0 1 0 2 7.72a5.72 5.72 0 0 0 5.72 5.72m2.344-7.96-3.48 3.48-1.2-1.2-.809.809 2 2 4.289-4.289z" transform="translate(9.843 36.144)" style="fill:#153856"/>
+            <rect data-name="title" width="55" height="4" rx="2" transform="translate(34.699 17)" style="fill:#009aff"/>
+            <circle data-name="ico-object-type" cx="8" cy="8" r="8" transform="translate(10.699 11)" style="fill:#0099fe"/>
+        </g>
+        <g data-name="step" transform="translate(231.301 225)">
+            <path data-name="step" d="M4 0h129a4 4 0 0 1 4 4v29H0V4a4 4 0 0 1 4-4z" transform="translate(2.699 3)" style="fill:rgba(0,154,255,.2)"/>
+            <path data-name="step-status" d="M0 0h137v13a4 4 0 0 1-4 4H4a4 4 0 0 1-4-4V0z" transform="translate(2.699 36)" style="fill:#009aff"/>
+            <rect data-name="time" width="26" height="4" rx="2" transform="translate(105.699 43)" style="fill:#153856"/>
+            <path data-name="ico-status-completed" d="M7.72 12.3a4.576 4.576 0 1 1 4.58-4.58 4.581 4.581 0 0 1-4.58 4.58m0 1.144A5.72 5.72 0 1 0 2 7.72a5.72 5.72 0 0 0 5.72 5.72m2.344-7.96-3.48 3.48-1.2-1.2-.809.809 2 2 4.289-4.289z" transform="translate(9.843 36.144)" style="fill:#153856"/>
+            <rect data-name="title" width="55" height="4" rx="2" transform="translate(34.699 17)" style="fill:#009aff"/>
+            <circle data-name="ico-object-type" cx="8" cy="8" r="8" transform="translate(10.699 11)" style="fill:#0099fe"/>
+        </g>
+        <g data-name="step" transform="translate(231.301 303)">
+            <path data-name="step" d="M4 0h129a4 4 0 0 1 4 4v29H0V4a4 4 0 0 1 4-4z" transform="translate(2.699 3)" style="fill:rgba(0,154,255,.2)"/>
+            <path data-name="step-status" d="M0 0h137v13a4 4 0 0 1-4 4H4a4 4 0 0 1-4-4V0z" transform="translate(2.699 36)" style="fill:#009aff"/>
+            <rect data-name="time" width="26" height="4" rx="2" transform="translate(105.699 43)" style="fill:#153856"/>
+            <path data-name="ico-status-completed" d="M7.72 12.3a4.576 4.576 0 1 1 4.58-4.58 4.581 4.581 0 0 1-4.58 4.58m0 1.144A5.72 5.72 0 1 0 2 7.72a5.72 5.72 0 0 0 5.72 5.72m2.344-7.96-3.48 3.48-1.2-1.2-.809.809 2 2 4.289-4.289z" transform="translate(9.843 36.144)" style="fill:#153856"/>
+            <rect data-name="title" width="55" height="4" rx="2" transform="translate(34.699 17)" style="fill:#009aff"/>
+            <circle data-name="ico-object-type" cx="8" cy="8" r="8" transform="translate(10.699 11)" style="fill:#0099fe"/>
+        </g>
+        <g data-name="step" transform="translate(231.301 381)">
+            <path data-name="step" d="M4 0h129a4 4 0 0 1 4 4v29H0V4a4 4 0 0 1 4-4z" transform="translate(2.699 3)" style="fill:rgba(20,170,140,.2)"/>
+            <path data-name="step-status" d="M0 0h137v13a4 4 0 0 1-4 4H4a4 4 0 0 1-4-4V0z" transform="translate(2.699 36)" style="fill:#14a98b"/>
+            <rect data-name="time" width="26" height="4" rx="2" transform="translate(105.699 43)" style="fill:#193a3e"/>
+            <path d="M7.72 12.3a4.576 4.576 0 1 1 4.58-4.58 4.582 4.582 0 0 1-4.58 4.58m0 1.144A5.72 5.72 0 1 0 2 7.72a5.72 5.72 0 0 0 5.72 5.72m-.153-8.384 2.26 2.26a.572.572 0 0 1 0 .809l-2.26 2.26a.572.572 0 0 1-.976-.4V5.461a.572.572 0 0 1 .976-.4" transform="translate(9.843 36.144)" style="fill:#193b3f"/>
+            <rect data-name="title" width="55" height="4" rx="2" transform="translate(34.699 17)" style="fill:#14a98b"/>
+            <circle data-name="ico-object-type" cx="8" cy="8" r="8" transform="translate(10.699 11)" style="fill:#14a88a"/>
+        </g>
+        <g data-name="step" transform="translate(-2.699 225)">
+            <path data-name="step" d="M4 0h129a4 4 0 0 1 4 4v29H0V4a4 4 0 0 1 4-4z" transform="translate(2.699 3)" style="fill:rgba(158,84,204,.2)"/>
+            <path data-name="step-status" d="M0 0h137v13a4 4 0 0 1-4 4H4a4 4 0 0 1-4-4V0z" transform="translate(2.699 36)" style="fill:#9e54cc"/>
+            <rect data-name="time" width="26" height="4" rx="2" transform="translate(105.699 43)" style="fill:#34294c"/>
+            <path d="M7.72 12.3a4.576 4.576 0 1 1 4.58-4.58 4.582 4.582 0 0 1-4.58 4.58m0 1.144A5.72 5.72 0 1 0 2 7.72a5.72 5.72 0 0 0 5.72 5.72m2.86-8.009H4.86v1.145h5.72zm0 1.716H4.86v1.146h5.72zm0 1.716H4.86v1.144h5.72z" transform="translate(9.843 36.144)" style="fill:#352a4c"/>
+            <rect data-name="title" width="55" height="4" rx="2" transform="translate(34.699 17)" style="fill:#9b51c9"/>
+            <circle data-name="ico-object-type" cx="8" cy="8" r="8" transform="translate(10.699 11)" style="fill:#9c52ca"/>
+        </g>
+    </g>
+</svg>

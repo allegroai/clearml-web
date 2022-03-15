@@ -15,8 +15,9 @@
     height: calc(100% - 42px);
   }
   sm-search.table-search {
+    padding-right: 2px;
     border-radius: 4px;
-    color: #a7b2d8 !important;
+    color: $blue-280 !important;
     background-color: $blue-600 !important;
   }
 }

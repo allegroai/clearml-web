@@ -1,13 +1,11 @@
 :host {
   display: block;
   height: 100%;
-  overflow-y: auto;
 
   sm-experiment-log-info {
     height: calc(100% - 50px);
     &.no-header {
       height: calc(100%);
     }
-    overflow-y: scroll;
   }
 }

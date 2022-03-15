@@ -25,7 +25,7 @@ export class GroupedSelectableListComponent implements OnChanges {
   public showList: GroupedVisibleList;
   expanded = {};
 
-  checkIcon: string[] = ['fa-eye', 'fa-eye-slash'];
+  checkIcon: string[] = ['al-ico-show', 'al-ico-hide'];
   @Input() searchTerm: string;
 
   @Input() set list(list) {
@@ -43,7 +43,6 @@ export class GroupedSelectableListComponent implements OnChanges {
 
   @Input() checkedList: Array<any>;
   @Input() selected: SelectableListItem['value'];
-  // @Input() checkIcon: string[] = ['fa-eye', 'fa-eye-slash'];
   @Output() onItemSelect = new EventEmitter<string>();
   @Output() onItemCheck = new EventEmitter<{ pathString: string; parent: string }>();
   @Output() onGroupCheck = new EventEmitter<any>();

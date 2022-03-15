@@ -1,0 +1,46 @@
+@import "variables";
+
+:host {
+  ::ng-deep sm-dialog-template {
+  }
+  display: block;
+  .form-container{
+    width: 512px;
+    margin: 0 32px;
+  }
+  .section-title{
+    color: $blue-500;
+    font-size: 14px;
+    margin-top: 14px;
+  }
+
+  .buttons {
+    margin-top: 41px;
+    display: inline-block;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+
+    button {
+      &:first-of-type {
+        margin-right: 16px;
+      }
+    }
+  }
+  .param-line{
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    .param-key{
+      width: 180px;
+      font-size: 12px;
+    }
+    .mat-form-field{
+      width: 340px;
+      &.hidden{
+        display: none;
+      }
+    }
+  }
+}

@@ -1,22 +1,18 @@
 import {ActionReducerMap, createSelector} from '@ngrx/store';
 import {ExperimentCompareDetailsState, experimentsCompareDetailsReducer} from './experiments-compare-details.reducer';
-import {experimentsCompareChartsReducer, GroupedHyperParams, IExperimentCompareChartsState, IExperimentCompareSettings, MetricOption, MetricValueType} from './experiments-compare-charts.reducer';
+import {experimentsCompareChartsReducer, GroupedHyperParams, IExperimentCompareChartsState, ExperimentCompareSettings, MetricOption, MetricValueType} from './experiments-compare-charts.reducer';
 import {experimentsCompareMetricsValuesReducer, IExperimentCompareMetricsValuesState, MetricSortBy} from './experiments-compare-metrics-values.reducer';
 import {experimentsCompareDebugImagesReducer} from './experiments-compare-debug-images.reducer';
-import {get} from 'lodash/fp';
-import {Task} from '../../../business-logic/model/tasks/task';
+import {Task} from '~/business-logic/model/tasks/task';
 import {compareHeader, CompareHeaderState} from './compare-header.reducer';
-import {IExperimentDetail} from '../../../features/experiments-compare/experiments-compare-models';
-import {ScalarKeyEnum} from '../../../business-logic/model/events/scalarKeyEnum';
+import {IExperimentDetail} from '~/features/experiments-compare/experiments-compare-models';
+import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {scalarsGraphReducer, ScalarsGraphState} from './experiments-compare-scalars-graph.reducer';
 import {ExperimentParams} from '../shared/experiments-compare-details.model';
 import {ExperimentCompareParamsState, experimentsCompareParamsReducer} from './experiments-compare-params.reducer';
 import {GroupByCharts} from '../../experiments/reducers/common-experiment-output.reducer';
-import {ITableExperiment} from '../../experiments/shared/common-experiment-model.model';
 import {selectSelectedProjectId} from '../../core/reducers/projects.reducer';
 import {selectRouterConfig} from '../../core/reducers/router-reducer';
-import {TABLE_SORT_ORDER} from '../../shared/ui-components/data/table/table.consts';
-import { EXPERIMENTS_TABLE_COL_FIELDS } from '../../../features/experiments/shared/experiments.const';
 
 export const experimentsCompareReducers: ActionReducerMap<any, any> = {
   details      : experimentsCompareDetailsReducer,
@@ -44,21 +40,22 @@ export const selectExperimentIdsParams = createSelector(selectExperimentsParams,
 
 
 // select experiments for compare and header
-export const selectCompareHeader = createSelector(experimentsCompare, (state): CompareHeaderState => state ? state.compareHeader : {});
+export const selectCompareHeader = createSelector(experimentsCompare, state => (state?.compareHeader ?? {}) as CompareHeaderState);
 export const selectIsCompare = createSelector(selectRouterConfig, (config): boolean => config?.includes('compare-experiments'));
+export const selectIsPipelines = createSelector(selectRouterConfig, (config): boolean => config?.[0] === 'pipelines');
 
 export const selectCompareAddTableSortFields = createSelector(selectCompareHeader, selectSelectedProjectId,
-  (state, projectId) => state.projectColumnsSortOrder?.[projectId] ||  [{field: EXPERIMENTS_TABLE_COL_FIELDS.LAST_UPDATE, order: TABLE_SORT_ORDER.DESC}]);
+  (state, projectId) => state.projectColumnsSortOrder?.[projectId] || null);
 export const selectCompareAddTableFilters = createSelector(selectCompareHeader, selectSelectedProjectId,
   (state, projectId) => state.projectColumnFilters?.[projectId] || {});
-export const selectSelectedExperimentsForCompareAdd = createSelector(selectCompareHeader, (state): ITableExperiment[] => state ? state.searchResultsExperiments : []);
-export const selectExperimentsForCompareSearchTerm = createSelector(selectCompareHeader, (state) => state?.searchTerm);
-export const selectShowAddExperimentsForCompare = createSelector(selectCompareHeader, (state) => state?.showSearch);
-export const selectHideIdenticalFields = createSelector(selectCompareHeader, (state) => state?.hideIdenticalRows);
-export const selectShowScalarsOptions = createSelector(selectCompareHeader, (state) => state?.showScalarOptions);
-export const selectRefreshing = createSelector(selectCompareHeader, (state) => state ? {refreshing: state.refreshing, autoRefresh: state.autoRefresh} : {refreshing: false, autoRefresh: false});
-export const selectExperimentsUpdateTime = createSelector(selectCompareHeader, (state) => state ? state.experimentsUpdateTime : {});
-export const selectNavigationPreferences = createSelector(selectCompareHeader, (state) => state ? state.navigationPreferences : {});
+export const selectSelectedExperimentsForCompareAdd = createSelector(selectCompareHeader, state => state?.searchResultsExperiments);
+export const selectExperimentsForCompareSearchTerm = createSelector(selectCompareHeader, state => state?.searchTerm);
+export const selectShowAddExperimentsForCompare = createSelector(selectCompareHeader, state => state?.showSearch);
+export const selectHideIdenticalFields = createSelector(selectCompareHeader, state => state?.hideIdenticalRows);
+export const selectShowScalarsOptions = createSelector(selectCompareHeader, state => state?.showScalarOptions);
+export const selectRefreshing = createSelector(selectCompareHeader, state => state ? {refreshing: state.refreshing, autoRefresh: state.autoRefresh} : {refreshing: false, autoRefresh: false});
+export const selectExperimentsUpdateTime = createSelector(selectCompareHeader, state => state ? state.experimentsUpdateTime : {});
+export const selectNavigationPreferences = createSelector(selectCompareHeader, state => state ? state.navigationPreferences : {});
 
 // Metric Values
 export const compareMetricsValues = createSelector(experimentsCompare, (state): IExperimentCompareMetricsValuesState => state ? state.metricsValues : {});
@@ -68,30 +65,30 @@ export const selectCompareMetricsValuesSortConfig = createSelector(compareMetric
 // Charts
 export const compareCharts = createSelector(experimentsCompare, (state): IExperimentCompareChartsState => state ? state.charts : {});
 export const selectSelectedExperiments = createSelector(compareCharts, (state): Array<string> => state ? state.selectedExperiments : []);
-export const selectCompareHistogramCacheAxisType = createSelector(compareCharts, (state) => state.cachedAxisType);
+export const selectCompareHistogramCacheAxisType = createSelector(compareCharts, state => state.cachedAxisType);
 export const selectCompareTasksPlotCharts = createSelector(compareCharts, state => state.metricsPlotsCharts);
 
 export const selectSelectedExperimentSettings = createSelector(compareCharts, selectSelectedExperiments,
-  (output, currentExperiments): IExperimentCompareSettings => output.settingsList && output.settingsList.find((setting) => currentExperiments && setting.id.join() === currentExperiments.join()));
+  (output, currentExperiments): ExperimentCompareSettings => output.settingsList && output.settingsList.find((setting) => currentExperiments && setting.id.join() === currentExperiments.join()));
 
 export const selectSelectedSettingsHiddenPlot = createSelector(selectSelectedExperimentSettings,
-  (settings): Array<string> => get('hiddenMetricsPlot', settings) || []);
+  (settings): Array<string> => settings?.hiddenMetricsPlot || []);
 
-export const selectSelectedSettigsHyperParams = createSelector(selectSelectedExperimentSettings,
-  (settings): Array<string> => get('selectedHyperParams', settings) || []);
+export const selectSelectedSettingsHyperParams = createSelector(selectSelectedExperimentSettings,
+  (settings): Array<string> => settings?.selectedHyperParams || []);
 
-export const selectSelectedSettigsMetric = createSelector(selectSelectedExperimentSettings,
-  (settings) => get('selectedMetric', settings) || null);
+export const selectSelectedSettingsMetric = createSelector(selectSelectedExperimentSettings,
+  (settings) => settings?.selectedMetric || null);
 
 export const selectSelectedSettingsHiddenScalar = createSelector(selectSelectedExperimentSettings,
-  (settings): Array<string> => get('hiddenMetricsScalar', settings) || []);
+  (settings): Array<string> => settings?.hiddenMetricsScalar || []);
 
 export const selectExperimentMetricsSearchTerm = createSelector(compareCharts, (state) => state.searchTerm);
 export const selectCompareSelectedSettingsSmoothWeight = createSelector(selectSelectedExperimentSettings,
-  (settings): number => get('smoothWeight', settings) || 0);
+  (settings): number => settings?.smoothWeight || 0);
 
 export const selectCompareSelectedSettingsxAxisType = createSelector(selectSelectedExperimentSettings,
-  (settings): ScalarKeyEnum => get('xAxisType', settings) || ScalarKeyEnum.Iter);
+  settings => settings?.xAxisType ?? ScalarKeyEnum.Iter as ScalarKeyEnum);
 
 export const selectCompareSelectedSettingsGroupBy = createSelector(selectSelectedExperimentSettings,
   (settings): GroupByCharts => settings?.groupBy || GroupByCharts.None);

@@ -41,6 +41,7 @@ export class CommonExperimentReverterService {
       model: this.revertModel(experiment),
       hyperparams: this.revertHyperParams(experiment.hyperparams),
       status: experiment.status,
+      configuration: experiment.configuration,
       // eslint-disable-next-line @typescript-eslint/naming-convention
       container: experiment.container || {image: '', setup_shell_script: '', arguments: ''}
     };

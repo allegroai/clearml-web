@@ -75,6 +75,7 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
   private waiting: boolean;
   private scrollContainer: HTMLDivElement;
 
+  @Input() initialColumns;
   @Input() set tableData(tableData) {
     this.loading = false;
     this.rowsNumber = tableData ? tableData.length : 0;
@@ -117,7 +118,7 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
   @Input() rowsNumber = 10;
   @Input() selectionMode: 'multiple' | 'single' | null = 'single';
   @Input() rowHeight = 48;
-  @Input() cardHeight = 90;
+  @Input() cardHeight = 100;
   @Input() lazyLoading = false;
   @Input() keyboardControl: boolean = false;
   @Input() noMoreData: boolean;
@@ -190,7 +191,7 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
               this.table.resizeColumnElement = element.getElementsByTagName('th')[index];
               this.table.resizeTableCells(colWidth, null);
             } else {
-              const width = element.getElementsByTagName('th')[index].getBoundingClientRect().width;
+              const width = element.getElementsByTagName('th')[index]?.getBoundingClientRect().width || 0;
               totalWidth += this.scaleFactor ? width * this.scaleFactor / 100 : width;
             }
           });
@@ -417,7 +418,7 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
 
   loadMore() {
     this.loading = true;
-    this.loadMoreDebouncer.next();
+    this.loadMoreDebouncer.next(null);
   }
 
   onColReorder($event: any) {
@@ -498,8 +499,8 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
     });
   }
 
-  get sortableCols() {
-    return this.columns.filter(col => col.sortable);
+  get sortableCols(): Array<ISmCol> {
+    return (this.initialColumns || this.columns).filter(col => col.sortable);
   }
 
   sortItemClick($event: { event?: MouseEvent; itemValue: string }, colId: string) {

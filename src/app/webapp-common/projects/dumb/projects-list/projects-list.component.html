@@ -1,14 +1,14 @@
 <div class="sm-card-list-layout projects">
   <ng-content></ng-content>
-  <ng-container *ngFor="let project of projects; let last=last">
+  <ng-container *ngFor="let project of projects; trackBy: trackById; let last=last">
     <sm-project-card
       (deleteProjectClicked)="deleteProjectClicked.emit($event)"
       (projectCardClicked)="projectCardClicked.emit($event)"
       (newProjectClicked)="createNewProjectClicked.emit($event)"
-      (projectNameChanged)="projectNameChanged.emit({project: project.id, name:$event})"
+      (projectNameChanged)="projectNameChanged.emit({id: project.id, name:$event})"
       (moveToClicked)="moveToClicked.emit($event)"
       *ngIf="!last || (last && noMoreProjects)"
-      [hideMenu]="['All Experiments'].includes(project.name) || project.isRoot || isExample(project)"
+      [hideMenu]="['All Experiments'].includes(project.name) || $any(project).isRoot || isExample(project)"
       [project]="project">
     </sm-project-card>
   </ng-container>

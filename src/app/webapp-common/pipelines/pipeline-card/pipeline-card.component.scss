@@ -1,0 +1,28 @@
+@import "variables";
+
+:host {
+  cursor: pointer;
+  .project-name {
+    max-width: 280px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .last-run {
+    margin-top: 6px;
+    font-size: 12px;
+    color: $blue-300;
+  }
+  .title {
+    font-weight: 500;
+  }
+
+  .footer-tags {
+    display: flex;
+    min-height: 38px;
+    background-color: $blue-600;
+    padding: 0 16px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+}

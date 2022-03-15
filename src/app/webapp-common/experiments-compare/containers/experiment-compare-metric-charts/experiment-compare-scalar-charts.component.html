@@ -1,41 +1,40 @@
-<div class="d-flex h-100">
-  <div class="list-container">
-    <sm-graph-settings-bar
-      [verticalLayout]="true"
-      [smoothWeight]="smoothWeight$ | async"
-      [xAxisType]="xAxisType$ | async"
-      [groupBy]="groupBy"
-      [groupByOptions]="groupByOptions"
-      (changeWeight)="changeSmoothness($event)"
-      (toggleSettings)="toggleSettingsBar()"
-      (changeXAxisType)="changeXAxisType($event)"
-      (changeGroupBy)="changeGroupBy($event)"
-    ></sm-graph-settings-bar>
-    <sm-selectable-grouped-filter-list
-      [list]="graphList"
-      [selected]="selectedGraph"
-      [checkedList]="listOfHidden | async"
-      [searchTerm]="searchTerm$ | async"
-      (itemSelect)="metricSelected($event)"
-      (hiddenChanged)="hiddenListChanged($event)"
-      (searchTermChanged)="searchTermChanged($event)"
-    >
-    </sm-selectable-grouped-filter-list>
-  </div>
-  <div class="graphs-container h-100">
+<mat-drawer-container autosize>
+  <mat-drawer opened="true" mode="side">
+    <div class="list-container">
+      <sm-graph-settings-bar
+        class="drawer-settings-bar"
+        [verticalLayout]="true"
+        [smoothWeight]="smoothWeight$ | async"
+        [xAxisType]="xAxisType$ | async"
+        [groupBy]="groupBy"
+        [groupByOptions]="groupByOptions"
+        (changeWeight)="changeSmoothness($event)"
+        (toggleSettings)="toggleSettingsBar()"
+        (changeXAxisType)="changeXAxisType($event)"
+        (changeGroupBy)="changeGroupBy($event)"
+      ></sm-graph-settings-bar>
+      <sm-selectable-grouped-filter-list
+        [list]="graphList"
+        [selected]="selectedGraph"
+        [checkedList]="listOfHidden | async"
+        [searchTerm]="searchTerm$ | async"
+        (itemSelect)="metricSelected($event)"
+        (hiddenChanged)="hiddenListChanged($event)"
+        (searchTermChanged)="searchTermChanged($event)"
+      >
+      </sm-selectable-grouped-filter-list>
+    </div>
+  </mat-drawer>
+  <mat-drawer-content>
     <sm-experiment-graphs
       [metrics]="graphs"
       [hiddenList]="listOfHidden | async"
       [isGroupGraphs]="false"
       [isCompare]="true"
-      [showSettings]="showSettingsBar$ | async"
       [smoothWeight]="(smoothWeight$ | async)"
       [xAxisType]="xAxisType$ | async"
       (resetGraphs)="resetMetrics()"
-      (changeWeight)="changeSmoothness($event)"
-      (changeXAxisType)="changeXAxisType($event)"
-      (toggleSettings)="toggleSettingsBar()"
     >
     </sm-experiment-graphs>
-  </div>
-</div>
+  </mat-drawer-content>
+</mat-drawer-container>

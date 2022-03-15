@@ -15,24 +15,26 @@ import {CommonExperimentSharedModule} from '../experiments/shared/common-experim
 import {CommonProjectsModule} from '../projects/common-projects.module';
 import {SharedModule} from '../../shared/shared.module';
 import { WelcomeMessageComponent } from './dumb/welcome-message/welcome-message.component';
+import {FormsModule} from '@angular/forms';
 
 @NgModule({
   declarations: [DashboardProjectsComponent, DashboardExperimentsComponent, RecentExperimentTableComponent, WelcomeMessageComponent],
   exports     : [DashboardProjectsComponent, DashboardExperimentsComponent],
-  imports: [
-    CommonModule,
-    SMSharedModule,
-    ExperimentsCommonModule,
-    ExperimentSharedModule,
-    CommonSearchModule,
-    ProjectsSharedModule,
-    CommonExperimentSharedModule,
-    EffectsModule.forFeature([CommonDashboardEffects]),
-    CommonLayoutModule,
-    ExperimentSharedModule,
-    CommonProjectsModule,
-    SharedModule
-  ]
+    imports: [
+        CommonModule,
+        SMSharedModule,
+        ExperimentsCommonModule,
+        ExperimentSharedModule,
+        CommonSearchModule,
+        ProjectsSharedModule,
+        CommonExperimentSharedModule,
+        EffectsModule.forFeature([CommonDashboardEffects]),
+        CommonLayoutModule,
+        ExperimentSharedModule,
+        CommonProjectsModule,
+        SharedModule,
+        FormsModule
+    ]
 })
 export class CommonDashboardModule {
 }

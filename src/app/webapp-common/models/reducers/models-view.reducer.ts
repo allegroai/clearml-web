@@ -1,14 +1,15 @@
 import {createReducer, on} from '@ngrx/store';
-import {TABLE_SORT_ORDER} from '../../shared/ui-components/data/table/table.consts';
+import {ISmCol, TABLE_SORT_ORDER} from '../../shared/ui-components/data/table/table.consts';
 import * as actions from '../actions/models-view.actions';
 import {TableModel, SelectedModel} from '../shared/models.model';
 import {MODELS_TABLE_COL_FIELDS} from '../shared/models.const';
 import {TableFilter} from '../../shared/utils/tableParamEncode';
-import {User} from '../../../business-logic/model/users/user';
+import {User} from '~/business-logic/model/users/user';
 import {ICommonSearchState} from '../../common-search/common-search.reducer';
 import {SortMeta} from 'primeng/api';
 import {CountAvailableAndIsDisableSelectedFiltered} from '@common/shared/entity-page/items.utils';
 import {setSelectedProject} from '@common/core/actions/projects.actions';
+import {commonExperimentsInitialState} from '../../experiments/reducers/common-experiments-view.reducer';
 
 export interface IModelsViewState {
   splitSize: number;
@@ -33,6 +34,8 @@ export interface IModelsViewState {
   users: User[];
   frameworks: string[];
   projectTags: string[];
+  projectMetadataKeys: string[];
+  metadataCols: ISmCol[];
   selectedModelsDisableAvailable: Record<string, CountAvailableAndIsDisableSelectedFiltered>;
 }
 
@@ -48,6 +51,8 @@ export const modelsInitialState: IModelsViewState = {
   tableSortFields: [{field: MODELS_TABLE_COL_FIELDS.CREATED, order: TABLE_SORT_ORDER.DESC}],
   projectColumnsSortOrder: {},
   projectColumnsWidth: {},
+  projectMetadataKeys:[],
+  metadataCols: [],
   colsOrder: {},
   selectedModels: [],
   selectedModelsDisableAvailable: {},
@@ -118,24 +123,26 @@ export const modelsViewReducer = createReducer(
     }
   })),
   on(actions.setHiddenCols, (state, action) => ({...state, hiddenTableCols: action.hiddenCols})),
+  on(actions.addColumn, (state, action) => ({...state, metadataCols: [...state.metadataCols, action.col]})),
+  on(actions.removeCol, (state, action) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    return {
+      ...state,
+      metadataCols: [...state.metadataCols.filter(tableCol => !(tableCol.key === action.id && tableCol.projectId === action.projectId))],
+      colsOrder: {...state.colsOrder, [action.projectId]: state.colsOrder[action.projectId] ? state.colsOrder[action.projectId].filter(colId => colId !== action.id) : null}
+    };
+  }),
+  on(actions.setExtraColumns, (state, action) =>
+    ({...state, metadataCols: [...state.metadataCols.filter(tableCol => !(tableCol.projectId === action['projectId'])), ...action['columns']]})),
   on(actions.setUsers, (state, action) => ({...state, users: action.users})),
   on(actions.setFrameworks, (state, action) => ({...state, frameworks: action.frameworks})),
   on(actions.setTags, (state, action) => ({...state, projectTags: action.tags})),
+  on(actions.setMetadataKeys, (state, action) => ({...state, projectMetadataKeys: action.keys})),
   on(actions.setTableSort, (state, action) => ({
     ...state,
     projectColumnsSortOrder: {
       ...state.projectColumnsSortOrder,
       [action.projectId]: action.orders
-    }
-  })),
-  on(actions.tableFilterChanged, (state, action) => ({
-    ...state,
-    projectColumnFilters: {
-      ...state.projectColumnFilters,
-      [action.projectId]: {
-        ...state.projectColumnFilters[action.projectId],
-        [action.filter.col]: {value: action.filter.value, matchMode: action.filter.filterMatchMode}
-      }
     }
   })),
   on(actions.setColumnWidth, (state, action) => ({

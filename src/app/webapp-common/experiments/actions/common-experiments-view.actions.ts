@@ -1,13 +1,13 @@
 import {createAction, props} from '@ngrx/store';
 import {ITableExperiment} from '../shared/common-experiment-model.model';
 import {ISmCol} from '../../shared/ui-components/data/table/table.consts';
-import {MetricVariantResult} from '../../../business-logic/model/projects/metricVariantResult';
+import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 import {TableFilter} from '../../shared/utils/tableParamEncode';
-import {User} from '../../../business-logic/model/users/user';
-import {ProjectsGetTaskParentsResponseParents} from '../../../business-logic/model/projects/projectsGetTaskParentsResponseParents';
+import {User} from '~/business-logic/model/users/user';
+import {ProjectsGetTaskParentsResponseParents} from '~/business-logic/model/projects/projectsGetTaskParentsResponseParents';
 import {SortMeta} from 'primeng/api';
 import {CountAvailableAndIsDisableSelectedFiltered} from '@common/shared/entity-page/items.utils';
-import {TasksEnqueueManyResponseSucceeded} from '../../../business-logic/model/tasks/tasksEnqueueManyResponseSucceeded';
+import {TasksEnqueueManyResponseSucceeded} from '~/business-logic/model/tasks/tasksEnqueueManyResponseSucceeded';
 import {EXPERIMENTS_INFO_PREFIX} from '@common/experiments/actions/common-experiments-menu.actions';
 
 export const EXPERIMENTS_PREFIX = 'EXPERIMENTS_';
@@ -18,6 +18,11 @@ export const getExperimentsWithPageSize = createAction(EXPERIMENTS_PREFIX + ' [g
   props<{pageSize: number}>());
 export const getNextExperiments = createAction(EXPERIMENTS_PREFIX + '[get next experiments]');
 
+export const setTableCols = createAction(
+  EXPERIMENTS_PREFIX + ' [set table cols]',
+  props<{ cols: ISmCol[]}>()
+);
+
 export const refreshExperiments = createAction(
   EXPERIMENTS_PREFIX + ' [refresh experiment]',
   props<{ hideLoader: boolean; autoRefresh?: boolean}>()
@@ -25,7 +30,7 @@ export const refreshExperiments = createAction(
 
 export const setExperiments = createAction(
   EXPERIMENTS_PREFIX + ' [set experiments]',
-  props<{experiments: ITableExperiment[]}>()
+  props<{experiments: ITableExperiment[], noPreferences?: boolean}>()
 );
 
 export const setExperimentInPlace = createAction(
@@ -63,6 +68,8 @@ export const setSelectedExperiments = createAction(
   props<{experiments: ITableExperiment[]}>()
 );
 
+export const updateUrlParams = createAction(EXPERIMENTS_PREFIX + '[update URL params from state]');
+
 export const setSelectedExperiment = createAction(
   EXPERIMENTS_PREFIX + ' [set selected experiment]',
   props<{experiment: ITableExperiment}>()
@@ -83,9 +90,13 @@ export const toggleColHidden = createAction(
   props<{columnId: string; projectId: string}>()
 );
 
-export const setHiddenColumns = createAction(
-  EXPERIMENTS_PREFIX + 'SET_HIDDEN_COLS',
+export const setVisibleColumnsForProject = createAction(
+  EXPERIMENTS_PREFIX + 'SET_HIDDEN_COLS_FOR_PROJECT',
   props<{ visibleColumns: string[]; projectId: string }>()
+);
+export const setHiddenCols = createAction(
+  EXPERIMENTS_PREFIX + 'SET_HIDDEN_COLS',
+  props<{ hiddenCols: { [key: string]: boolean } }>()
 );
 
 export const setUsers = createAction(
@@ -109,7 +120,7 @@ export const getFilteredUsers = createAction(EXPERIMENTS_PREFIX + 'GET_FILTERED_
 
 export const tableFilterChanged = createAction(
   EXPERIMENTS_PREFIX + '[table filter changed]',
-  props<{filter: TableFilter; projectId: string}>()
+  props<{filters: TableFilter[]; projectId: string}>()
 );
 
 export const tableSortChanged = createAction(
@@ -186,7 +197,7 @@ export const setColumnWidth = createAction(
 
 export const setColsOrderForProject = createAction(
   EXPERIMENTS_PREFIX + ' [set cols order]',
-  props<{ cols: string[]; project: string; fromUrl?: boolean }>()
+  props<{ cols: string[]; project: string;}>()
 );
 
 export const clearHyperParamsCols = createAction(
@@ -198,13 +209,6 @@ export const resetSortOrder = createAction(
   EXPERIMENTS_PREFIX + 'RESET_SORT_ORDER',
   props<{sortIndex: number; projectId: string}>()
 );
-
-export const setArchive = createAction(
-  EXPERIMENTS_PREFIX + 'SET_ARCHIVE',
-  props<{ archive: boolean }>()
-);
-
-export const afterSetArchive = createAction(EXPERIMENTS_PREFIX + 'AFTER_SET_ARCHIVE');
 
 export const setSplitSize = createAction(EXPERIMENTS_PREFIX + 'SET_SPLIT_SIZE', props<{ splitSize: number }>());
 

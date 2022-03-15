@@ -298,16 +298,25 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
     }
   }
 
-  public find(text: string) {
-    if (text) {
-      this.findAllOccurrences(text);
-      this.foundIndex = -1;
-      this.findNext();
-    } else if (this.searchText !== text) {
-      this.foundPaths = [];
-      this.selectedPath = null;
+  public find(value: string) {
+    const searchBackward = value === null;
+    if (this.searchText !== value && !searchBackward) {
+      this.resetSearch();
+      if (value.length > 0) {
+        this.findAllOccurrences(value);
+      }
+      this.searchText = value;
     }
-    this.searchText = text;
+
+    if (value?.length > 0 || value === null) {
+      searchBackward ? this.findPrev() : this.findNext();
+    }
+  }
+
+  public resetSearch() {
+    this.foundPaths = [];
+    this.selectedPath = null;
+    this.foundIndex = -1;
   }
 
   findAllOccurrences(text) {

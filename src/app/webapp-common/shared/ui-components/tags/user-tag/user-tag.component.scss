@@ -1,53 +1,48 @@
+@import "variables";
+
 :host {
   display: flex;
   position: relative;
   height: 18px;
+  line-height: 18px;
   overflow: hidden;
   padding-right: 20px;
-
-  &:hover {
-    .remove {
-      display: block;
-    }
-  }
 
   .content {
     border-radius: 3px 0 0 3px;
     display: inline-block;
     position: relative;
+    z-index: 2;
     height: 18px;
-    line-height: 18px;
     flex: 1;
     padding-left: 8px;
     overflow: hidden;
     text-overflow: ellipsis;
     font-size: 12px;
-    z-index: 10;
     white-space: nowrap;
 
     &.add-button {
-      border-left: solid 1px #a7b2d8;
-      border-top: solid 1px #a7b2d8;
-      border-bottom: solid 1px #a7b2d8;
+      border-left: solid 1px $blue-280;
+      border-top: solid 1px $blue-280;
+      border-bottom: solid 1px $blue-280;
       cursor: pointer;
-      line-height: 18px;
       font-size: 10px;
       font-weight: 500;
+      padding-left: 4px;
     }
   }
 
   .remove {
-    display: none;
+    visibility: hidden;
     position: absolute;
     right: 5px;
-    top: 0px;
+    top: 0;
     z-index: 100;
-    padding: 5px;
+    line-height: inherit;
     cursor: pointer;
-
-    @supports (-moz-appearance:meterbar) {
-      top: -1px;
-    }
+    transform: scale(0.4);
+    transform-origin: center;
+    transition: transform 0.25s;
   }
 
   .arrow {
@@ -61,9 +56,21 @@
     background-color: inherit;
 
     &.add-button {
-      border-right: solid 1px #a7b2d8;
-      border-top: solid 1px #a7b2d8;
+      border-right: solid 1px $blue-280;
+      border-top: solid 1px $blue-280;
       right: 17px;
+    }
+  }
+  .mat-spinner {
+    position: absolute;
+    z-index: 1;
+    top: 3px;
+    right: 2px;
+  }
+  &:hover {
+    .remove {
+      visibility: visible;
+      transform: scale(0.8);
     }
   }
 }

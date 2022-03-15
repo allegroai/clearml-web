@@ -5,6 +5,7 @@ import {TableFilter} from '../../shared/utils/tableParamEncode';
 import {User} from '~/business-logic/model/users/user';
 import {SortMeta} from 'primeng/api';
 import {CountAvailableAndIsDisableSelectedFiltered} from '@common/shared/entity-page/items.utils';
+
 const MODELS_PREFIX = 'MODELS_';
 
 export const fetchModelsRequested = createAction(MODELS_PREFIX + '[fetch models requested]');
@@ -16,10 +17,10 @@ export const refreshModels = createAction(
 
 export const getNextModels = createAction(MODELS_PREFIX + '[get next model]');
 export const getNextModelsWithPageSize = createAction(MODELS_PREFIX + '[get next model with page size]',
-  props<{pageSize: number}>());
+  props<{ pageSize: number }>());
 export const setModels = createAction(
   MODELS_PREFIX + '[set models]',
-  props<{models: SelectedModel[]}>()
+  props<{ models: SelectedModel[] }>()
 );
 
 export const setModelsInPlace = createAction(
@@ -34,7 +35,7 @@ export const setNoMoreModels = createAction(
 
 export const toggleColHidden = createAction(
   MODELS_PREFIX + 'TOGGLE_COL_HIDDEN',
-  props<{columnId: string; projectId: string}>()
+  props<{ columnId: string; projectId: string }>()
 );
 
 export const getTags = createAction(
@@ -45,6 +46,11 @@ export const setTags = createAction(
   props<{ tags: string[] }>()
 );
 
+export const setMetadataKeys = createAction(
+  MODELS_PREFIX + 'SET_METADATA_KEYS',
+  props<{ keys: string[] }>()
+);
+
 export const setHiddenCols = createAction(
   MODELS_PREFIX + 'SET_HIDDEN_COLS',
   props<{ hiddenCols: { [key: string]: boolean } }>()
@@ -53,6 +59,24 @@ export const setHiddenCols = createAction(
 export const setColsOrderForProject = createAction(
   MODELS_PREFIX + 'SET_COLS_ORDER',
   props<{ cols: string[]; project: string; fromUrl?: boolean }>()
+);
+
+export const setExtraColumns = createAction(
+  MODELS_PREFIX + 'SET_EXTRA_COLUMNS',
+  props<{ columns: any[] ; projectId: string }>()
+);
+
+export const getMetadataKeysForProject = createAction(
+  MODELS_PREFIX + 'GET_METADATA_FOR_PROJECT'
+);
+export const addColumn = createAction(
+  MODELS_PREFIX + ' [ add column]',
+  props<{col: ISmCol}>()
+);
+
+export const removeCol = createAction(
+  MODELS_PREFIX + ' [ remove column]',
+  props<{ id: string; projectId: string }>()
 );
 
 export const setUsers = createAction(
@@ -75,32 +99,32 @@ export const getFilteredUsers = createAction(
 
 export const addModels = createAction(
   MODELS_PREFIX + '[add models]',
-  props<{models: SelectedModel[] }>()
+  props<{ models: SelectedModel[] }>()
 );
 
 export const removeModels = createAction(
   MODELS_PREFIX + '[remove models]',
-  props<{modelIds: string[] }>()
+  props<{ modelIds: string[] }>()
 );
 
 export const updateModel = createAction(
   MODELS_PREFIX + '[update model]',
-  props<{id: SelectedModel['id']; changes: Partial<SelectedModel>}>()
+  props<{ id: SelectedModel['id']; changes: Partial<SelectedModel> }>()
 );
 
 export const setSelectedModels = createAction(
   MODELS_PREFIX + '[set selected models]',
-  props<{models: SelectedModel[] }>()
+  props<{ models: SelectedModel[] }>()
 );
 
 export const setSelectedModel = createAction(
   MODELS_PREFIX + '[set selected model]',
-  props<{model: SelectedModel }>()
+  props<{ model: SelectedModel }>()
 );
 
 export const selectAllModels = createAction(
   MODELS_PREFIX + ' [select all models]',
-  props<{filtered: boolean}>()
+  props<{ filtered: boolean }>()
 );
 
 export const tableSortChanged = createAction(
@@ -110,24 +134,25 @@ export const tableSortChanged = createAction(
 
 export const setTableSort = createAction(
   MODELS_PREFIX + 'SET_TABLE_SORT',
-  props<{orders: SortMeta[]; projectId: string}>()
+  props<{ orders: SortMeta[]; projectId: string }>()
 );
 
-export const tableFilterChanged= createAction(
+export const tableFilterChanged = createAction(
   MODELS_PREFIX + '[table filters changed]',
-  props<{filter: TableFilter; projectId: string}>()
+  props<{ filters: TableFilter[]; projectId: string }>()
 );
 
 export const setTableFilters = createAction(
   MODELS_PREFIX + 'SET_TABLE_FILTERS',
-  props<{filters: TableFilter[]; projectId: string}>()
+  props<{ filters: TableFilter[]; projectId: string }>()
 );
 
 export const setColumnWidth = createAction(
   MODELS_PREFIX + ' [set column width]',
-  props<{projectId: string; columnId: string; widthPx: number}>()
+  props<{ projectId: string; columnId: string; widthPx: number }>()
 );
 
+export const updateUrlParams = createAction(MODELS_PREFIX + '[update URL params from state]');
 
 export const modelSelectionChanged = createAction(
   MODELS_PREFIX + '[model selection changed]',
@@ -141,7 +166,7 @@ export const showSelectedOnly = createAction(
 
 export const globalFilterChanged = createAction(
   MODELS_PREFIX + 'GLOBAL_FILTER_CHANGED',
-  props<{query: string; regExp?: boolean}>()
+  props<{ query: string; regExp?: boolean }>()
 );
 
 export const resetGlobalFilter = createAction(MODELS_PREFIX + 'RESET_GLOBAL_FILTER');
@@ -149,7 +174,7 @@ export const resetState = createAction(MODELS_PREFIX + '[reset state]');
 
 export const setCurrentScrollId = createAction(
   MODELS_PREFIX + ' [set current scrollId]',
-  props<{scrollId: string}>()
+  props<{ scrollId: string }>()
 );
 export const setArchive = createAction(
   MODELS_PREFIX + 'SET_ARCHIVE',

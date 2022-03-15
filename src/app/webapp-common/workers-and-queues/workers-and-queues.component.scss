@@ -12,15 +12,12 @@
     }
 
     .header-container {
-      padding-left: 24px;
-      padding-right: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: end;
+      padding: 0 48px;
       height: 66px;
       transition: background-color 0.5s;
-
-      ::ng-deep button {
-        border-color: $blue-600;
-        box-shadow: none;
-      }
     }
   }
 }

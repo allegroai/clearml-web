@@ -1,0 +1,22 @@
+<div mat-button [matMenuTriggerFor]="pipelinesMenu" smClickStopPropagation
+     class="p-0 cell menu-button al-icon sm al-color light-grey-blue al-ico-bars-menu"
+></div>
+<mat-menu #pipelinesMenu="matMenu">
+  <button mat-menu-item (click)="rename.emit()">
+    <i class="al-icon sm-md" [class]="ICONS.EDIT"></i>Rename
+  </button>
+  <button mat-menu-item [matMenuTriggerFor]="tagMenu">
+    <i class="al-icon sm-md" [class]="ICONS.TAG"></i>Add Tag
+  </button>
+</mat-menu>
+<mat-menu #tagMenu="matMenu">
+  <sm-tags-menu
+    #tagMenuContent
+    class="light-theme"
+    [tags]="project?.tags"
+    [tagsFilterByProject]="true"
+    [projectTags]="allTags"
+    [companyTags]="null"
+    (tagSelected)="addTag.emit($event)">
+  </sm-tags-menu>
+</mat-menu>

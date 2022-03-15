@@ -1,4 +1,4 @@
-import {Task} from '../../../business-logic/model/tasks/task';
+import {Task} from '~/business-logic/model/tasks/task';
 import {
   RESET_EXPERIMENT_METRICS,
   SET_EXPERIMENT_HISTOGRAM,
@@ -8,8 +8,8 @@ import {
   setAxisCache,
   UPDATE_EXPERIMENT_SETTINGS
 } from '../actions/experiments-compare-charts.actions';
-import {ScalarKeyEnum} from '../../../business-logic/model/events/scalarKeyEnum';
-import {GroupByCharts} from '../../experiments/reducers/common-experiment-output.reducer';
+import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
+import {ExperimentSettings} from '../../experiments/reducers/common-experiment-output.reducer';
 import {IMultiplot} from '@common/tasks/tasks.utils';
 
 export type MetricValueType = 'min_value' | 'max_value' | 'value';
@@ -42,23 +42,15 @@ export interface IExperimentCompareChartsState {
   metricsHistogramCharts: any;
   cachedAxisType: ScalarKeyEnum;
   metricsPlotsCharts: IMultiplot;
-  settingsList: Array<IExperimentCompareSettings>;
+  settingsList: Array<ExperimentCompareSettings>;
   searchTerm: string;
   showSettingsBar: boolean;
   selectedExperiments: Array<string>;
 }
 
-export interface IExperimentCompareSettings {
+export interface ExperimentCompareSettings extends Omit<ExperimentSettings, 'id' | 'selectedMetric'> {
   id: Array<Task['id']>;
-  hiddenMetricsScalar: Array<string>;
-  hiddenMetricsPlot: Array<string>;
-  selectedHyperParams: Array<string>;
   selectedMetric: SelectedMetric;
-  selectedScalar: string;
-  selectedPlot: string;
-  smoothWeight: number;
-  xAxisType: ScalarKeyEnum;
-  groupBy: GroupByCharts;
 }
 
 export const initialState: IExperimentCompareChartsState = {
@@ -85,13 +77,21 @@ export function experimentsCompareChartsReducer(state: IExperimentCompareChartsS
     case SET_EXPERIMENT_PLOTS:
       return {...state, metricsPlotsCharts: action.payload};
     case UPDATE_EXPERIMENT_SETTINGS: {
-      let newSettings;
-      const isExperimentExists = state.settingsList.find((setting) => setting.id.join() === action.payload.id.join());
-      if (isExperimentExists) {
-        newSettings = state.settingsList.map(setting => setting.id.join() === action.payload.id.join() ? {...setting, ...action.payload.changes} : setting);
+      let newSettings: ExperimentCompareSettings[];
+      const changes = {...action.payload.changes, lastModified: (new Date()).getTime()} as ExperimentCompareSettings;
+      const ids = action.payload.id.join();
+      const experimentExists = state.settingsList.find((setting) => setting.id.join() === ids);
+      const discardBefore = new Date()
+      discardBefore.setMonth(discardBefore.getMonth() - 6);
+      if (experimentExists) {
+        newSettings = state.settingsList
+          .filter(setting => discardBefore < new Date(setting.lastModified || 1648771200000))
+          .map(setting => setting.id.join() === ids ? {...setting, ...changes} : setting);
       } else {
-        newSettings = state.settingsList.slice();
-        newSettings.push({id: action.payload.id, ...action.payload.changes});
+        newSettings = [
+          ...state.settingsList.filter(setting => discardBefore < new Date(setting.lastModified || 1648771200000)),
+          {id: action.payload.id, ...changes}
+        ];
       }
       return {...state, settingsList: newSettings};
     }

@@ -1,14 +1,15 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {addMessage} from '../../../../core/actions/layout.actions';
 import {MESSAGES_SEVERITY} from '../../../../../app.constants';
 import {Store} from '@ngrx/store';
 import {ThemeEnum} from '../../../../experiments/shared/common-experiments.const';
-import { last } from 'lodash/fp';
+import {last} from 'lodash/fp';
 
 @Component({
   selector   : 'sm-snippet-error',
   templateUrl: './snippet-error.component.html',
-  styleUrls  : ['./snippet-error.component.scss']
+  styleUrls  : ['./snippet-error.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 
 
@@ -30,6 +31,7 @@ export class SnippetErrorComponent implements OnInit {
   }
 
   @Input() theme: ThemeEnum = ThemeEnum.Dark;
+  @Input() missingSource: boolean = false;
   public ThemeEnum           = ThemeEnum;
 
   ngOnInit() {

@@ -9,7 +9,7 @@
              (keydown.escape)="clearMetricSearch(); searchMetric.value= ''"
              placeholder="Search metric"
              [smTooltip]="selectedMetric?.name"
-             [showDelay]="500"
+             [matTooltipShowDelay]="500"
              [value]="(!metrics || listOpen) ? '' : selectedMetric?.name"
              (input)="updateMetricsList($event)"
       >

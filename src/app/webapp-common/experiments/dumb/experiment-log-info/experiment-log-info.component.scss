@@ -10,10 +10,6 @@
     width: 100%;
     background-color: #000;
     overflow-x: scroll;
-
-    ::ng-deep .cdk-virtual-scroll-content-wrapper {
-      min-width: 103%;
-    }
   }
 
   .log-line {

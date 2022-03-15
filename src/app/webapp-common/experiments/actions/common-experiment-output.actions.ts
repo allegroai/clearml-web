@@ -1,10 +1,10 @@
 import {Action, createAction, props} from '@ngrx/store';
-import {ISelectedExperiment} from '../../../features/experiments/shared/experiment-info.model';
-import {IExperimentSettings} from '../reducers/common-experiment-output.reducer';
-import {ScalarKeyEnum} from '../../../business-logic/model/events/scalarKeyEnum';
-import {MetricsPlotEvent} from '../../../business-logic/model/events/metricsPlotEvent';
-import {EventsScalarMetricsIterRawRequest} from '../../../business-logic/model/events/eventsScalarMetricsIterRawRequest';
-import {EventsScalarMetricsIterRawResponse} from '../../../business-logic/model/events/eventsScalarMetricsIterRawResponse';
+import {ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
+import {ExperimentSettings} from '../reducers/common-experiment-output.reducer';
+import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
+import {MetricsPlotEvent} from '~/business-logic/model/events/metricsPlotEvent';
+import {EventsScalarMetricsIterRawRequest} from '~/business-logic/model/events/eventsScalarMetricsIterRawRequest';
+import {EventsScalarMetricsIterRawResponse} from '~/business-logic/model/events/eventsScalarMetricsIterRawResponse';
 
 export const EXPERIMENTS_OUTPUT_PREFIX = 'EXPERIMENTS_OUTPUT_';
 
@@ -114,7 +114,7 @@ export const setExperimentLog = createAction(
 export class SetExperimentSettings implements Action {
   readonly type = UPDATE_EXPERIMENT_SETTINGS;
 
-  constructor(public payload: { id: string; changes: Partial<IExperimentSettings> }) {
+  constructor(public payload: { id: string; changes: Partial<ExperimentSettings> }) {
   }
 }
 

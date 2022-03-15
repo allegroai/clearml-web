@@ -5,6 +5,7 @@
     [selectedQueue]="selectedQueue"
     (deleteQueue)="deleteQueue.emit($event)"
     (renameQueue)="renameQueue.emit(selectedQueue)"
+    (clearQueue)="clearQueue.emit(selectedQueue)"
   ></sm-queues-menu-extended>
   <sm-table #table
             [tableData]="queues"
@@ -28,7 +29,7 @@
     </ng-template>
     <ng-template let-col let-queue="rowData" pTemplate="body">
       <ng-container [ngSwitch]="col.id" class="table-cell">
-        <div class="w-100 d-flex align-items-center pr-3 first id-cell" *ngSwitchCase="QUEUES_TABLE_COL_FIELDS.NAME">
+        <div class="w-100 d-flex align-items-center first id-cell" *ngSwitchCase="QUEUES_TABLE_COL_FIELDS.NAME">
           <div class="queue-name" matTooltipPosition="above" [smTooltip]="queue?.name">{{queue?.name}}</div>
           <sm-copy-clipboard [clipboardText]="queue?.id"
                              [hideBackground]="true"
@@ -36,21 +37,19 @@
                              [tooltipText]="'Copy Queue ID'" class="copy-btn"></sm-copy-clipboard>
         </div>
         <ng-container *ngSwitchCase="QUEUES_TABLE_COL_FIELDS.TASK">
-          <span>{{queue?.entries[0]?.task?.name}}</span>
+          <span class="ellipsis">{{queue?.entries[0]?.task?.name}}</span>
           <span *ngIf="!queue?.entries[0]?.task?.name">&mdash;</span>
         </ng-container>
         <ng-container *ngSwitchCase="QUEUES_TABLE_COL_FIELDS.LAST_UPDATED">
-          <span>{{queue?.last_update | timeAgo}}</span>
+          <span class="ellipsis">{{queue?.last_update | timeAgo}}</span>
           <span *ngIf="!queue?.last_update">&mdash;</span>
         </ng-container>
         <ng-container *ngSwitchCase="QUEUES_TABLE_COL_FIELDS.IN_QUEUE">
-          <span>
-            {{queue?.entries?.length === 0 ? '' : queue?.entries?.length}}
-            <span *ngIf="queue?.entries?.length === 0">&mdash;</span>
-          </span>
+          <span class="ellipsis">{{queue?.entries?.length === 0 ? '' : queue?.entries?.length}}</span>
+          <span *ngIf="queue?.entries?.length === 0">&mdash;</span>
         </ng-container>
         <ng-container *ngSwitchDefault>
-          {{getBodyData(queue, col)}}
+          <span class="ellipsis">{{getBodyData(queue, col)}}</span>
         </ng-container>
       </ng-container>
     </ng-template>

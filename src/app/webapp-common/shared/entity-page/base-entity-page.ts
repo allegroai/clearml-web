@@ -1,15 +1,15 @@
 import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {Action, ActionCreator, Store} from '@ngrx/store';
+import {ActionCreator, Store} from '@ngrx/store';
 import {combineLatest, Observable, of, Subject, Subscription} from 'rxjs';
-import {debounceTime, filter, finalize, map, shareReplay, take, takeUntil, throttleTime} from 'rxjs/operators';
-import {Project} from '../../../business-logic/model/projects/project';
+import {debounceTime, filter, map, take, takeUntil, throttleTime} from 'rxjs/operators';
+import {Project} from '~/business-logic/model/projects/project';
 import {isReadOnly} from '../utils/shared-utils';
 import {selectSelectedProject} from '../../core/reducers/projects.reducer';
 import {IOutputData} from 'angular-split/lib/interface';
 import {SplitComponent} from 'angular-split';
 import {selectRouterParams} from '../../core/reducers/router-reducer';
 import {ITableExperiment} from '../../experiments/shared/common-experiment-model.model';
-import {EntityTypeEnum} from '../../../shared/constants/non-common-consts';
+import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {IFooterState} from './footer-items/footer-items.models';
 import {
   CountAvailableAndIsDisableSelectedFiltered,
@@ -18,18 +18,21 @@ import {
   selectionExamplesCount,
   selectionHasExample
 } from './items.utils';
+import {ActivatedRoute, Params, Router} from '@angular/router';
+import {resetProjectSelection} from '@common/core/actions/projects.actions';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'sm-base-entity-page',
   template: ''
 })
-export abstract class BaseEntityPage implements OnInit, AfterViewInit, OnDestroy {
+export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, OnDestroy {
   private dragSub: Subscription;
   protected selectedProject$: Observable<Project>;
   protected showInfoSub: Subscription;
-  protected preventUrlUpdate = false;
   protected setSplitSizeAction: any;
-  protected selectedExperiments: ITableExperiment[];
+  public selectedExperiments: ITableExperiment[];
   protected addTag: ActionCreator<string, any>;
   public projectId: string;
   public isExampleProject: boolean;
@@ -43,19 +46,17 @@ export abstract class BaseEntityPage implements OnInit, AfterViewInit, OnDestroy
 
   @ViewChild('split') split: SplitComponent;
 
-  abstract createFooterItems(config: {
-      entitiesType?: EntityTypeEnum;
-      selected$: Observable<Array<any>>;
-      showAllSelectedIsActive$?: Observable<boolean>;
-      tags$?: Observable<string[]>;
-      companyTags$?:   Observable<string[]>;
-      projectTags$?: Observable<string[]>;
-      tagsFilterByProject$?: Observable<boolean>;
-  }): void;
   abstract onFooterHandler({emitValue, item}): void;
+  abstract getSelectedEntities();
+  abstract afterArchiveChanged();
+  protected abstract getParamId(params);
 
-
-  protected constructor(protected store: Store<any>) {
+  protected constructor(
+    protected store: Store,
+    protected route: ActivatedRoute,
+    protected router: Router,
+    protected dialog: MatDialog
+  ) {
     this.selectedProject$ = this.store.select(selectSelectedProject);
     this.selectedProject$.pipe(filter(p => !!p), take(1)).subscribe((project: Project) => {
       this.isExampleProject = isReadOnly(project);
@@ -88,13 +89,13 @@ export abstract class BaseEntityPage implements OnInit, AfterViewInit, OnDestroy
     this.dragSub?.unsubscribe();
     this.showInfoSub?.unsubscribe();
     this.footerItems = [];
-    this.destroy$.next();
+    this.destroy$.next(null);
     this.destroy$.complete();
   }
 
-  dispatchAndLock(action: Action) {
-    this.preventUrlUpdate = true;
-    this.store.dispatch(action);
+  closePanel(queryParams?: Params) {
+    window.setTimeout(() => this.infoDisabled = false);
+    return this.router.navigate(this.minimizedView ? [{}]: [], {relativeTo: this.route, queryParamsHandling: 'merge', queryParams});
   }
 
   splitSizeChange(event: IOutputData) {
@@ -118,7 +119,25 @@ export abstract class BaseEntityPage implements OnInit, AfterViewInit, OnDestroy
     }));
   }
 
-  protected abstract getParamId(params);
+  createFooterItems(config: {
+    entitiesType: EntityTypeEnum;
+    selected$: Observable<Array<any>>;
+    showAllSelectedIsActive$: Observable<boolean>;
+    data$?: Observable<Record<string, CountAvailableAndIsDisableSelectedFiltered>>;
+    tags$?: Observable<string[]>;
+    companyTags$?: Observable<string[]>;
+    projectTags$?: Observable<string[]>;
+    tagsFilterByProject$?: Observable<boolean>;
+  }) {
+    this.footerState$ = this.createFooterState(
+      config.selected$,
+      config.data$,
+      config.showAllSelectedIsActive$,
+      config.companyTags$,
+      config.projectTags$,
+      config.tagsFilterByProject$
+    );
+  }
 
   createFooterState<T = any>(
     selected$: Observable<Array<any>>,
@@ -168,4 +187,42 @@ export abstract class BaseEntityPage implements OnInit, AfterViewInit, OnDestroy
       //shareReplay()
     );
   }
+
+  archivedChanged(isArchived: boolean) {
+    const navigate = () => {
+      return this.closePanel({archive: isArchived || null}).then(() => {
+        this.afterArchiveChanged();
+        this.store.dispatch(resetProjectSelection());
+      });
+    };
+
+    if (this.getSelectedEntities().length > 0) {
+      const archiveDialog: MatDialogRef<any> = this.dialog.open(ConfirmDialogComponent, {
+        data: {
+          title: 'Are you sure?',
+          body: 'Navigating between "Live" and "Archive" will deselect your selected data views.',
+          yes: 'Proceed',
+          no: 'Back',
+          iconClass: ''
+        }
+      });
+
+      archiveDialog.afterClosed().subscribe((confirmed) => {
+        if (confirmed) {
+          navigate();
+        }
+      });
+    } else {
+      navigate();
+    }
+  }
+
+  updateUrl (queryParams: Params) {
+    return this.router.navigate([], {
+      relativeTo: this.route,
+      queryParamsHandling: 'merge',
+      queryParams
+    })
+  }
+
 }

@@ -17,6 +17,7 @@ export class QueuesMenuComponent  {
   @Input() menuPosition;
   @Output() deleteQueue = new EventEmitter();
   @Output() renameQueue = new EventEmitter();
+  @Output() clearQueue = new EventEmitter();
   constructor(private route: ActivatedRoute) {
     this.queuesManager = route.snapshot.data.queuesManager;
 

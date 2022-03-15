@@ -1,10 +1,11 @@
+<div class="breadcrumbs-container" #container>
 <span *ngIf="isCommunity && activeWorkspace && !workspaceNeutral" class="breadcrumbLink">
   <span class="workspace">{{activeWorkspace.name}}</span>
   <i class="al-icon  al-ico-slash"></i>
 </span>
-<span *ngFor="let crumb of breadcrumbs; let i=index; let last=last" class="breadcrumbLink" [class.ellipsis]="last">
+  <span *ngFor="let crumb of breadcrumbs; let i=index; let last=last" class="breadcrumbLink">
   <div *ngIf="crumb.isProject;else crumbDiv;" class="d-flex align-items-center">
-    <div *ngIf="subProjects.length>2; else shortTree" class="d-flex align-items-center">
+    <div *ngIf="shouldCollapse; else shortTree" class="d-flex align-items-center">
       <div [matMenuTriggerFor]="subProjectsMenu" class="d-flex align-items-center menu-trigger"
            (menuOpened)="subProjectsMenuOpened(true)" (menuClosed)="subProjectsMenuOpened(false)">
         <i class="menu-trigger-icon al-icon msm" [class.al-ico-d-menu-down]="!subProjectsMenuIsOpen"
@@ -14,12 +15,23 @@
         <i class="al-icon al-ico-slash"></i>
       </div>
      <div class="d-flex align-items-center">
-      <a class="sub-project"
+      <a *ngIf="subProjects[subProjects.length-1].url else lastNonLink"
+        class="sub-project after-collapse"
+         [smTooltip]="subProjects[subProjects.length - 1].name"
+         smShowTooltipIfEllipsis
          [routerLink]="subProjects[subProjects.length-1].url!=='projects/*/projects'? subProjects[subProjects.length-1].url: null">{{subProjects[subProjects.length - 1].name}}</a>
+       <ng-template #lastNonLink>
+         <a class="sub-project after-collapse"
+            [smTooltip]="subProjects[subProjects.length - 1].name"
+            smShowTooltipIfEllipsis
+            >{{subProjects[subProjects.length - 1].name}}</a>
+       </ng-template>
       </div>
       <mat-menu #subProjectsMenu="matMenu">
         <div mat-menu-item
              class="sub-project-menu-item"
+             [smTooltip]="subProject.name"
+             smShowTooltipIfEllipsis
              *ngFor="let subProject of subProjects | filterLast"
              [routerLink]="subProject.url!=='projects/*/projects'? subProject.url: 'projects/*'">
           {{subProject.name}}
@@ -30,7 +42,15 @@
     <div *ngFor="let subProject of subProjects; let lastP=last" class="d-flex align-items-center">
      <ng-container *ngIf="subProject.name">
         <a class="sub-project"
+           [class.last]="lastP"
+           *ngIf="subProject.url; else nonLink"
+           [smTooltip]="subProject.name"
+           smShowTooltipIfEllipsis
            [routerLink]="subProject.url!=='projects/*/projects'? subProject.url: 'projects/*/experiments'">{{subProject.name}}</a>
+       <ng-template #nonLink><a class="sub-project"
+                                [class.last]="lastP"
+                                [smTooltip]="subProject.name"
+                                smShowTooltipIfEllipsis>{{subProject.name}}</a></ng-template>
         <div *ngIf="!lastP">
           <i class="al-icon al-ico-slash"></i>
         </div>
@@ -41,38 +61,40 @@
 
   <ng-template #crumbDiv>
     <a
-      [routerLink]="crumb.url">{{(['Experiments', 'Models', 'Dataviews'].includes(crumb.name) && isDeep) ? 'All ' : ''}}{{crumb.name}}</a>
+      [routerLink]="crumb.url">{{!(['Experiments', 'Models', 'Dataviews'].includes(crumb.name)) ? crumb.name : 'All ' + crumb.name}}</a>
   </ng-template>
-  <i *ngIf="!last" class="al-icon  al-ico-slash"></i>
+  <i *ngIf="!last && !['Experiments', 'Models', 'Dataviews'].includes(crumb.name)" class="al-icon  al-ico-slash"></i>
 </span>
-<div *ngIf="checkIfBreadcrumbsInitiated()">
-  <div
-    #menuTrigger="matMenuTrigger"
-    [matMenuTriggerFor]="shareModal"
-    (menuOpened)="openShareModal()"
-  >
-    <i *ngIf="showShareButton && !isCommunity" class="fa fa-share-alt share pointer" smTooltip="Share"></i>
-  </div>
-  <mat-menu #shareModal="matMenu">
-    <div class="share-menu-container" smClickStopPropagation>
-      <div class="d-flex align-items-center justify-content-between top">
-        <div class="share-title">SHARE VIEW</div>
-        <i class="pointer al-icon al-ico-dialog-x al-color blue-400 sm-md close-dialog"
-           (click)="menuTrigger.closeMenu()" smClickStopPropagation></i>
-      </div>
-      <div class="copy-title">Copy the following URL to share this view with others</div>
+  <div *ngIf="checkIfBreadcrumbsInitiated()">
+    <div
+      #menuTrigger="matMenuTrigger"
+      [matMenuTriggerFor]="shareModal"
+      (menuOpened)="openShareModal()"
+    >
+      <i *ngIf="showShareButton && !isCommunity" class="fa fa-share-alt share pointer" smTooltip="Share"></i>
+    </div>
+    <mat-menu #shareModal="matMenu">
+      <div class="share-menu-container" smClickStopPropagation>
+        <div class="d-flex align-items-center justify-content-between top">
+          <div class="share-title">SHARE VIEW</div>
+          <i class="pointer al-icon al-ico-dialog-x al-color blue-400 sm-md close-dialog"
+             (click)="menuTrigger.closeMenu()" smClickStopPropagation></i>
+        </div>
+        <div class="copy-title">Copy the following URL to share this view with others</div>
 
-      <div class="share-link-container" [class.hidden]="!(currentUrl)">
-        <div class="ellipsis share-link">
-          {{currentUrl}}</div>
-        <div ngxClipboard
-             smClickStopPropagation
-             [cbContent]="currentUrl"
-             class="copy pointer"
-             (cbOnSuccess)="copyToClipboardSuccess(); menuTrigger.closeMenu()">
-          <i class="fas fa-copy "></i>
+        <div class="share-link-container" [class.hidden]="!(currentUrl)">
+          <div class="ellipsis share-link">
+            {{currentUrl}}</div>
+          <div ngxClipboard
+               smClickStopPropagation
+               [cbContent]="currentUrl"
+               class="copy pointer"
+               (cbOnSuccess)="copyToClipboardSuccess(); menuTrigger.closeMenu()">
+            <i class="fas fa-copy "></i>
+          </div>
         </div>
       </div>
-    </div>
-  </mat-menu>
+    </mat-menu>
+  </div>
 </div>
+<div *ngIf="archive" class="archive"><i class="al-icon xs al-ico-archive mr-1"></i>Archive</div>

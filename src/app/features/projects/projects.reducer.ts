@@ -37,4 +37,4 @@ export const projectsReducer = (state: IProjectsState = projectsInitState, actio
 
 export const projects = state => state.projects as IProjectsState;
 
-export const selectShowHidden = createSelector(projects, () => false);
+export const selectShowHidden = createSelector(projects, (state) => false);

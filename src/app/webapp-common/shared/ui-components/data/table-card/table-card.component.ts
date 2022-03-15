@@ -1,5 +1,5 @@
 import {Component, Input} from '@angular/core';
-import {get} from 'lodash/fp';
+import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 
 @Component({
   selector   : 'sm-table-card',
@@ -7,17 +7,16 @@ import {get} from 'lodash/fp';
   styleUrls  : ['./table-card.component.scss']
 })
 export class TableCardComponent {
-  public odd: boolean;
+
+  public hasTypeIcon: boolean;
+
   @Input() columns;
   @Input() cardName;
   @Input() rowData;
   @Input() activeContextRow;
   @Input() contextMenuOpen;
-  @Input() tableType;
-
-
-  @Input() set rowNumber(rowNumber) {
-    this.odd = rowNumber % 2 === 1;
+  @Input() set entityType(entityType: EntityTypeEnum) {
+    this.hasTypeIcon = entityType === EntityTypeEnum.experiment;
   }
 
   @Input() selected;
@@ -26,11 +25,4 @@ export class TableCardComponent {
   constructor() {
   }
 
-  _get(selector, obj) {
-    return get(selector, obj);
-  }
-
-  getValueFromRow(row) {
-    return get(row.id, this.rowData);
-  }
 }

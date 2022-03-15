@@ -24,11 +24,11 @@ export const ICONS = {
   DATASET: 'fa-puzzle-piece',
   TASK: 'fa-briefcase',
   MODEL: 'fa-cube',
-  SHOW: 'fa-eye',
+  SHOW: 'al-ico-show',
   ARCHIVE: 'al-ico-archive',
   RESTORE: 'al-ico-restore',
   COMPARE: 'al-ico-compare',
-  HIDE: 'fa-eye-slash',
+  HIDE: 'al-ico-hide',
   COMPLETED: 'fa-circle',
   ABORTED: 'fa-circle',
   UNKNOWN: 'fa-question-circle',
@@ -54,7 +54,7 @@ export const ICONS = {
   LOG: 'fa-file-text-o',
   METRICS: 'fa-chart-area',
   TOKEN: 'fa-key',
-  EDIT: 'fa-pencil-square-o',
+  EDIT: 'al-ico-edit',
   EDITABLE: 'fa-pencil',
   RESET: 'al-ico-reset',
   CLONE: 'al-ico-clone',
@@ -65,6 +65,7 @@ export const ICONS = {
   SHARE: 'al-ico-shared-item',
   ARROW_DOWN: 'al-ico-ico-chevron-down',
   ARROW_UP: 'al-ico-ico-chevron-up',
+  RUN: 'al-ico-run',
 };
 
 export type IconNames = keyof typeof ICONS;

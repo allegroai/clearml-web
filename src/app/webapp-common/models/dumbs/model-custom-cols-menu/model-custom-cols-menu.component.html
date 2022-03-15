@@ -5,12 +5,30 @@
   [showButton]="false"
   [style.pointer-events]="disabled ? 'none' : 'initial'"
 >
-  <div (click)="$event.stopPropagation()">
+  <div *ngIf="!customColumnMode; else selectCol" (click)="$event.stopPropagation()" class="main">
     <sm-custom-columns-list
       [tableCols]="tableCols"
       [isLoading]="isLoading"
+      (removeColFromList)="removeColFromList.emit($event)"
       (selectedTableColsChanged)="selectedTableColsChanged.emit($event)"
     >
     </sm-custom-columns-list>
+    <div [ngClass]="{loading: isLoading, loaded: !isLoading}">
+      <div class="custom-column-buttons">
+        <div class="add-button meta-button"
+             smClickStopPropagation
+             [class.disabled]="!metadataKeys?.length"
+             (click)="selectMetadataKeys('metadata'); $event.stopPropagation()"
+        ><i class="fas fa-plus mr-1"></i><span class="caption">ADD CUSTOM METADATA COLUMN</span>
+        </div>
+      </div>
+    </div>
   </div>
+<ng-template #selectCol>
+  <sm-select-metadata-keys-custom-cols [tableCols]="tableCols"
+                                       [metadataKeys]="metadataKeys"
+                                       (goBack)="setCustomColumnMode(null)"
+                                       (addOrRemoveMetadataKeyFromColumns)="addOrRemoveMetadataKeyFromColumns.emit($event)">
+  </sm-select-metadata-keys-custom-cols>
+</ng-template>
 </sm-menu>

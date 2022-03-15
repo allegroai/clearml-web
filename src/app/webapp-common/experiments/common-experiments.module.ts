@@ -11,7 +11,6 @@ import {ExperimentHeaderComponent} from './dumb/experiment-header/experiment-hea
 import {ExperimentInfoHeaderComponent} from './dumb/experiment-info-header/experiment-info-header.component';
 import {ExperimentInfoGeneralComponent} from './containers/experiment-info-general/experiment-info-general.component';
 import {ExperimentGeneralInfoComponent} from './dumb/experiment-general-info/experiment-general-info.component';
-import {ExperimentNetworkDesignFormComponent} from './dumb/experiment-network-design-form/experiment-network-design-form.component';
 import {ExperimentModelsFormViewComponent} from './dumb/experiment-models-form-view/experiment-models-form-view.component';
 import {ExperimentExecutionSourceCodeComponent} from './dumb/experiment-execution-source-code/experiment-execution-source-code.component';
 import {ExperimentExecutionParametersComponent} from './dumb/experiment-execution-parameters/experiment-execution-parameters.component';
@@ -21,7 +20,7 @@ import {ModelAutoPopulateDialogComponent} from './dumb/model-auto-populate-dialo
 import {ExperimentTableCardComponent} from './dumb/experiment-table-card/experiment-table-card.component';
 import {SMSharedModule} from '../shared/shared.module';
 import {CommonLayoutModule} from '../layout/layout.module';
-import {ExperimentSharedModule} from '../../features/experiments/shared/experiment-shared.module';
+import {ExperimentSharedModule} from '~/features/experiments/shared/experiment-shared.module';
 import {CommonExperimentSharedModule} from './shared/common-experiment-shared.module';
 import {RouterModule} from '@angular/router';
 import {SMMaterialModule} from '../shared/material/material.module';
@@ -47,7 +46,7 @@ import {NoUnderscorePipe} from '../shared/pipes/no-underscore.pipe';
 import {ExperimentHyperParamsNavbarComponent} from './dumb/experiment-hyper-params-navbar/experiment-hyper-params-navbar.component';
 import {ExperimentInfoTaskModelComponent} from './containers/experiment-info-task-model/experiment-info-task-model.component';
 import {ExperimentInfoHyperParametersFormContainerComponent} from './containers/experiment-info-hyper-parameters-form-container/experiment-info-hyper-parameters-form-container.component';
-import {SharedModule} from '../../shared/shared.module';
+import {SharedModule} from '~/shared/shared.module';
 import {CommonDeleteDialogModule} from '../shared/entity-page/entity-delete/common-delete-dialog.module';
 import {ExperimentInfoEditDescriptionComponent} from './dumb/experiment-info-edit-description/experiment-info-edit-description.component';
 import {ExperimentOutputLogModule} from './shared/experiment-output-log/experiment-output-log.module';
@@ -71,7 +70,6 @@ import { GetVariantWithoutRoundPipe } from './dumb/experiments-table/hyper-param
     ExperimentInfoTaskModelComponent,
     ExperimentInfoGeneralComponent,
     ExperimentGeneralInfoComponent,
-    ExperimentNetworkDesignFormComponent,
     ExperimentModelsFormViewComponent,
     ExperimentOutputModelViewComponent,
     ExperimentExecutionSourceCodeComponent,
@@ -98,7 +96,7 @@ import { GetVariantWithoutRoundPipe } from './dumb/experiments-table/hyper-param
     ExperimentInfoHeaderComponent,
     ExperimentExecutionSourceCodeComponent,
     SelectMetricForCustomColComponent,
-    ExperimentExecutionParametersComponent,ExperimentsTableComponent],
+    ExperimentExecutionParametersComponent, ExperimentsTableComponent, ExperimentHeaderComponent],
   imports: [
     AngularSplitModule,
     ScrollingModule,

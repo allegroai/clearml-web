@@ -1,24 +1,53 @@
+<div class="label-row cred-visible" *ngIf="!credentialsCreated">
+  <mat-form-field appearance="outline"
+                  class="label-input d-block"
+                  floatLabel="always">
+    <mat-label>Label (optional)</mat-label>
+    <input matInput [(ngModel)]="label" [disabled]="credentialsCreated" placeholder="Credentials label" name="credentials">
+  </mat-form-field>
+</div>
+<div class="credentials-and-code cred-visible"
+     *ngIf="newCredential"
+     [class.invisible]="!newCredential.access_key"
+     [class.small-popup]="!credentialsCreated">
+<!--<div class="credentials-and-code" >-->
 <div class="credentials">
-  <sm-labeled-row label="Access key">{{newCredential.access_key || 'Loading...'}}</sm-labeled-row>
-  <sm-labeled-row label="Secret key">{{newCredential.secret_key || 'Loading...'}}</sm-labeled-row>
+  <div class="cred-row">
+    <span class="label">Label</span>
+    <span class="value">{{newCredential.label}}</span>
+  </div>
+  <div class="cred-row">
+    <span class="label">Access key</span>
+    <span class="value">{{newCredential.access_key}}</span>
+  </div>
+  <div class="cred-row">
+    <span class="label">Secret key</span>
+    <span class="value">{{newCredential.secret_key}}</span>
+  </div>
+
 </div>
 <div>
-  <h5 class="mt-4">Usage</h5>
   <div class="instructions">Copy the below info for input to 'clearml-init' configuration request, or modify your existing clearml.conf</div>
-  <div class="mt-3 w-100 code">
+  <div class="mt-2 w-100 code">
     <div #content class="content"><span class="variable">api</span> {{ '{' }} <ng-content></ng-content>
     <span class="variable">web_server</span><span class="operation">:</span> <span class="string">{{WEB_SERVER_URL}}</span>
     <span class="variable">api_server</span><span class="operation">:</span> <span class="string">{{API_BASE_URL}}</span><ng-container *ngIf="fileBaseUrl">
-    <span class="variable">files_server</span><span class="operation">:</span> <span class="string">{{fileBaseUrl}}</span></ng-container>
+    <span class="variable">files_server</span><span class="operation">:</span> <span class="string">{{fileBaseUrl}}</span></ng-container><ng-container *ngIf="label">
+    <span>{{'# ' + label}}</span></ng-container>
     <span class="variable">credentials</span> {{ '{' }}
         <span class="string">"access_key"</span> <span class="operation">=</span> <span class="string">"{{newCredential.access_key}}"</span>
         <span class="string">"secret_key"</span> <span class="operation">=</span> <span class="string">"{{newCredential.secret_key}}"</span>
     }
 }</div>
     <sm-copy-clipboard
+      *ngIf="newCredential.secret_key"
       [hideBackground]="true"
       [label]="''"
       [copyIcon]="'far fa-lg fa-copy'"
-      [clipboardText]="textContent$ | async"></sm-copy-clipboard>
+      [clipboardText]="content.textContent"></sm-copy-clipboard>
   </div>
+</div>
+</div>
+<div class="footer">
+  <button class="btn btn-neon" (click)="credentialsCreated? close() : createCredentials()">{{credentialsCreated? 'CLOSE' : 'CREATE'}}</button>
 </div>

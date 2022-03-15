@@ -1,9 +1,6 @@
-import {Action, createAction, props} from '@ngrx/store';
+import {createAction, props} from '@ngrx/store';
 import {SelectedModel} from '../shared/models.model';
-import {Project} from '../../../business-logic/model/projects/project';
-import {ModelsPublishManyResponse} from '../../../business-logic/model/models/modelsPublishManyResponse';
-import {ModelsArchiveManyResponse} from '../../../business-logic/model/models/modelsArchiveManyResponse';
-import {ModelsDeleteManyResponse} from '../../../business-logic/model/models/modelsDeleteManyResponse';
+import {Project} from '~/business-logic/model/projects/project';
 
 const MODELS_PREFIX = 'MODELS_MENU_';
 

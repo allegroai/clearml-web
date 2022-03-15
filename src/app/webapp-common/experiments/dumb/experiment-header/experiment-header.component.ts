@@ -23,6 +23,7 @@ export class ExperimentHeaderComponent {
   @Input() autoRefreshState: boolean;
   @Input() tableFilters: { [s: string]: FilterMetadata };
   @Input() sharedView: boolean;
+  @Input() showNavbarLinks: boolean;
 
   @Input() set tableCols(tableCols) {
     this._tableCols = tableCols.filter(col => col.header !== '');
@@ -60,4 +61,7 @@ export class ExperimentHeaderComponent {
     this.selectMetricActive = mode;
   }
 
+  newRun() {
+
+  }
 }

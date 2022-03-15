@@ -4,7 +4,7 @@ import {ApiAuthService} from '~/business-logic/api-services/auth.service';
 import * as authActions from '../actions/common-auth.actions';
 import {requestFailed} from '../actions/http.actions';
 import {activeLoader, deactivateLoader, setServerError} from '../actions/layout.actions';
-import {catchError, filter, finalize, map, mergeMap, switchMap, take, tap, throttleTime, withLatestFrom} from 'rxjs/operators';
+import {catchError, filter, finalize, map, mergeMap, switchMap, throttleTime, withLatestFrom} from 'rxjs/operators';
 import {AuthGetCredentialsResponse} from '~/business-logic/model/auth/authGetCredentialsResponse';
 import {select, Store} from '@ngrx/store';
 import {selectCurrentUser} from '../reducers/users-reducer';
@@ -15,8 +15,6 @@ import {EMPTY, of} from 'rxjs';
 import {SignResponse} from '@common/settings/admin/base-admin.service';
 import {S3AccessResolverComponent} from '@common/layout/s3-access-resolver/s3-access-resolver.component';
 import {MatDialog} from '@angular/material/dialog';
-import {CreateCredentialDialogComponent} from '~/features/settings/containers/admin/create-credential-dialog/create-credential-dialog.component';
-import {resetCredential} from '../actions/common-auth.actions';
 
 @Injectable()
 export class CommonAuthEffects {
@@ -29,8 +27,7 @@ export class CommonAuthEffects {
     private store: Store<any>,
     private adminService: AdminService,
     private matDialog: MatDialog
-  ) {
-  }
+  ) {}
 
   activeLoader = createEffect(() => this.actions.pipe(
     ofType(authActions.getAllCredentials, authActions.createCredential),
@@ -64,8 +61,7 @@ export class CommonAuthEffects {
 
   createCredential = createEffect(() => this.actions.pipe(
     ofType(authActions.createCredential),
-    mergeMap(action => this.credentialsApi.authCreateCredentials({}).pipe(
-      tap( ({credentials}) => action.openCredentialsPopup && this.openCredentialsPopup(credentials, action)),
+    mergeMap(action => this.credentialsApi.authCreateCredentials({label: action.label}).pipe(
       mergeMap(({credentials}) => [
         authActions.addCredential({newCredential: credentials, workspaceId: action.workspace?.id}),
         deactivateLoader(action.type)
@@ -141,11 +137,4 @@ export class CommonAuthEffects {
       );
     })
   ));
-
-  openCredentialsPopup(credentials, action): void {
-    this.matDialog.open(CreateCredentialDialogComponent,
-      {data: {credentials, ...(action.workspace && {workspace: action.workspace.name})}}
-    ).afterClosed().pipe(take(1)).subscribe(() => this.store.dispatch(resetCredential()));
-  }
-
 }

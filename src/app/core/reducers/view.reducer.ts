@@ -20,7 +20,7 @@ const initViewState: ViewState = {
 export const views = state => state.views as ViewState;
 export const selectAvailableUpdates   = createSelector(views, state => state.availableUpdates);
 export const selectShowSurvey   = createSelector(views, state => state.showSurvey);
-export const selectUserSettingsNotificationPath = createSelector(views, () => '');
+export const selectUserSettingsNotificationPath = createSelector(views, (state) => '');
 
 export function viewReducer(viewState: ViewState = initViewState, action) {
 

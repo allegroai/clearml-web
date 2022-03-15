@@ -82,17 +82,13 @@ export const localStorageReducer = (reducer: ActionReducer<any>): ActionReducer<
       const savedState = JSON.parse(localStorage.getItem(key));
       nextState = merge(nextState, savedState);
    }
-
     if (state === nextState) {
       return nextState;
    }
-
     if (actionsPrefix && !actionsPrefix.some(ap => action.type.startsWith(ap))) {
       return nextState;
    }
-
     localStorage.setItem(key, JSON.stringify(pick(syncedKeys, nextState)));
-
     return nextState;
  };
 

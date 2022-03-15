@@ -1,50 +1,40 @@
-import {ChangeDetectorRef, Component, Input, ViewChild} from '@angular/core';
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
 import {guessAPIServerURL, HTTP} from '../../../../app.constants';
-import {BehaviorSubject} from 'rxjs';
+import {CredentialKeyExt} from '../../../core/reducers/common-auth-reducer';
+import {MatDialogRef} from '@angular/material/dialog';
+import {CreateCredentialDialogComponent} from '../../../../features/settings/containers/admin/create-credential-dialog/create-credential-dialog.component';
 
 @Component({
-  selector   : 'sm-admin-dialog-template',
+  selector: 'sm-admin-dialog-template',
   templateUrl: './admin-dialog-template.component.html',
-  styleUrls  : ['./admin-dialog-template.component.scss']
+  styleUrls: ['./admin-dialog-template.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AdminDialogTemplateComponent {
-  private _newCredential: any;
-  public host: string;
-  clipboardText: string;
-  public exampleText: { credentials: { access_key: any | string; secret_key: any } } = {
-    credentials: {
-      access_key: '',
-      secret_key: ''
-    }
-  };
+  public clipboardText: string;
+  public label: string;
+  public credentialsCreated: boolean;
+
   API_BASE_URL = HTTP.API_BASE_URL_NO_VERSION;
   fileBaseUrl = HTTP.FILE_BASE_URL;
   WEB_SERVER_URL = window.location.origin;
 
-  @ViewChild('content') set contentElement(contetElement) {
-    setTimeout(() => {
-      this.textContent$.next(contetElement.nativeElement.textContent);
-    });
-  }
-  @Input() workspace: {id: string, name: string};
+  @Input() newCredential: CredentialKeyExt;
 
-  @Input() set newCredential(newCredential) {
-    this._newCredential = newCredential;
-    this.exampleText = {
-      credentials: {
-        access_key: newCredential.access_key,
-        secret_key: newCredential.secret_key
-      }
-    };
-  }
-  textContent$ = new BehaviorSubject(null);
-  get newCredential() {
-    return this._newCredential;
-  }
-  constructor(private cdr: ChangeDetectorRef) {
-    this.host = `${window.location.protocol}//${window.location.hostname}`;
+  @Output() onCreateCredentials = new EventEmitter<{label: string}>();
+
+  constructor(private dialog: MatDialogRef<CreateCredentialDialogComponent>) {
     if (this.API_BASE_URL === '/api') {
       this.API_BASE_URL = guessAPIServerURL();
     }
+  }
+
+  createCredentials() {
+    this.credentialsCreated = true;
+    this.onCreateCredentials.emit({label: this.label});
+  }
+
+  close() {
+    this.dialog.close();
   }
 }

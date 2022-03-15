@@ -30,10 +30,10 @@
   .checkbox-col {
     display: block;
     float: left;
-    padding-left: 10px;
+    padding-left: 18px;
 
-    &.header {
-      padding-left: 17px;
+    &.header.minimised {
+      padding-left: 16px;
     }
   }
 

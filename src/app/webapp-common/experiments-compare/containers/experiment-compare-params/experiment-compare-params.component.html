@@ -68,31 +68,23 @@
 
 
 <sm-portal outletId="searchDiff">
-  <div class="btn-group mr-2" role="group">
-    <sm-search [value]="searchText"
-               [minimumChars]="1"
-               [debounceTime]="300"
-               (keydown.enter)="findNext()"
-               (valueChanged)="find($event)"
-    ></sm-search>
-
-    <button class="btn btn-secondary prev" smTooltip="Previous occurrence" [disabled]="foundPaths.length === 0 " (click)="findPrev()">
-      <i class="fas fa-chevron-up"></i>
-    </button>
-
-    <button class="btn btn-secondary next" smTooltip="Next occurrence" [disabled]="foundPaths.length === 0 " (click)="findNext()">
-      <i class="fas fa-chevron-down"></i>
-    </button>
-  </div>
-  <span [class.hidden]="searchText.length === 0 "> Match {{foundPaths.length === 0 ? '0' : foundIndex + 1}} / {{foundPaths.length}}</span>
+  <sm-search class="light-theme"
+             [value]="searchText"
+             [minimumChars]="1"
+             [debounceTime]="300"
+             [enableNavigation]="true"
+             [searchCounterIndex]="foundIndex"
+             [searchResultsCount]="foundPaths.length"
+             (valueChanged)="find($event)"
+  ></sm-search>
 </sm-portal>
 
 <sm-portal outletId="nextDiff">
   <button class="btn btn-secondary btn-arrow mr-3" smTooltip="Previous diff" (click)="goToNextDiff('up')">
-    <i class="fas fa-arrow-up"></i>
+    <i class="al-icon al-ico-arrow-up sm"></i>
   </button>
 
   <button class="btn btn-secondary btn-arrow" smTooltip="Next diff" (click)="goToNextDiff('down')">
-    <i class="fas fa-arrow-down"></i>
+    <i class="al-icon al-ico-arrow-down sm"></i>
   </button>
 </sm-portal>
