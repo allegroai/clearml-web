@@ -3,7 +3,7 @@
 ## Building the UI from source
 ### Prerequisite
 * a linux machine
-* Node 12 with latest npm
+* Node 16 with latest npm
 * clone the project to your local machine
 
 ### build

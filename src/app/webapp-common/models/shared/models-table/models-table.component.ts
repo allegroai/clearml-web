@@ -137,6 +137,7 @@ export class ModelsTableComponent extends BaseTableView {
   }
 
   @Input() set tableFilters(filters: { [s: string]: FilterMetadata }) {
+    this.filtersValues = {};
     this.filtersValues[MODELS_TABLE_COL_FIELDS.FRAMEWORK] = get([MODELS_TABLE_COL_FIELDS.FRAMEWORK, 'value'], filters) || [];
     this.filtersValues[MODELS_TABLE_COL_FIELDS.READY] = get([MODELS_TABLE_COL_FIELDS.READY, 'value'], filters) || [];
     this.filtersValues[MODELS_TABLE_COL_FIELDS.USER] = get([MODELS_TABLE_COL_FIELDS.USER, 'value'], filters) || [];

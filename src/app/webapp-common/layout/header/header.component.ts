@@ -70,7 +70,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   getRotueData() {
     this.userFocus = !!this.activeRoute?.firstChild?.snapshot.data?.userFocus;
-    this.isDashboard = this.activeRoute?.firstChild?.snapshot.url?.[0].path === 'dashboard';
+    this.isDashboard = this.activeRoute?.firstChild?.snapshot.url?.[0]?.path === 'dashboard';
   }
 
   ngOnDestroy(): void {
@@ -98,5 +98,12 @@ export class HeaderComponent implements OnInit, OnDestroy {
   openAppsAwareness($event: MouseEvent, appsYouTubeIntroLink: string) {
     $event.preventDefault();
     this.store.dispatch(openAppsAwarenessDialog({appsYouTubeIntroLink}));
+  }
+
+  navigate(link: string) {
+   const a = document.createElement('a');
+   a.target = '_blank';
+   a.href = link;
+   a.click();
   }
 }

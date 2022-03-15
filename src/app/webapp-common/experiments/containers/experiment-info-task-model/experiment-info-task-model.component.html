@@ -17,21 +17,26 @@
                        [saving]="saving"
                        [editable]="editable"
                        [disableInEditMode]="true"
+                       [disableEditable]="true"
                        (cancelClicked)="cancelModelChange()"
                        (activateEditClicked)="activateEditChanged('prototext'); editPrototext()">
     <sm-section-header label="CONFIGURATION OBJECT"></sm-section-header>
-    <sm-experiment-network-design-form
-      [editable]="false"
+    <sm-scroll-textarea
+      class="flex-grow-1"
+      [editable]="editable && prototext.inEditMode"
       [formData]="formData === null ? null : formData?.value"
+      [showSpinner]="formData === null"
     >
-    </sm-experiment-network-design-form>
-    <button extra-buttons
-            *ngIf="formData?.value"
-            class="btn-dark-fill mr-3 flex-1"
-            (click)="clearPrototext()">
-      <i class="p-1 fa fa-trash"></i>
-      CLEAR
-    </button>
-
+      <button extra-buttons
+              *ngIf="formData?.value && editable"
+              class="btn-dark-fill terminal mr-3 flex-1"
+              (click)="prototext.editModeChanged(true)">EDIT</button>
+      <button extra-buttons
+              *ngIf="formData?.value && editable"
+              class="btn-dark-fill terminal mr-3 flex-1"
+              (click)="clearPrototext()">
+        CLEAR
+      </button>
+    </sm-scroll-textarea>
   </sm-editable-section>
 </ng-template>

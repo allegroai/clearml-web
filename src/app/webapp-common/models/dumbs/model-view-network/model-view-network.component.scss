@@ -6,15 +6,10 @@
     color: #ffffff;
   }
 
-  .textarea-container {
-    position: relative;
-    height: 100%;
-
-    .copy-textarea {
-      position: absolute;
-      right: 12px;
-      top: 7px;
-      z-index: 1;
-    }
+  .copy-textarea {
+    position: absolute;
+    right: 12px;
+    top: 7px;
+    z-index: 1;
   }
 }

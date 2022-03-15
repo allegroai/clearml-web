@@ -1,0 +1,15 @@
+<sm-dialog-template header="ABORT PIPELINE RUN{{experiments.length > 1 ? 's' : ''}}" [iconClass]="'al-ico-abort'">
+  <div *ngIf="shouldBeAbortedTasks !== null">
+    <div>This will abort the execution of {{experiments.length > 1 ? experiments.length : 'the '}}
+      <b *ngIf="experiments.length === 1">{{experiments[0]?.name ? '"' + experiments[0]?.name + '"' : ''}} </b> pipeline run{{experiments.length > 1 ? 's' : ''}}
+    </div>
+  </div>
+  <div class="buttons">
+    <button (click)="closeDialog(true)" class="btn btn-neon yes-button">
+      ABORT
+    </button>
+    <button (click)="closeDialog(false)" class="btn btn-outline-neon">
+      CANCEL
+    </button>
+  </div>
+</sm-dialog-template>

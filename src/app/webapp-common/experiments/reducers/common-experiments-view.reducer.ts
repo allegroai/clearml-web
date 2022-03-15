@@ -1,33 +1,30 @@
 import {ITableExperiment} from '../shared/common-experiment-model.model';
-import {INITIAL_EXPERIMENT_TABLE_COLS} from '../experiment.consts';
-import {ISmCol, TABLE_SORT_ORDER} from '../../shared/ui-components/data/table/table.consts';
-import {EXPERIMENTS_TABLE_COL_FIELDS} from '../../../features/experiments/shared/experiments.const';
+import {ISmCol} from '../../shared/ui-components/data/table/table.consts';
 import * as actions from '../actions/common-experiments-view.actions';
-import {MetricVariantResult} from '../../../business-logic/model/projects/metricVariantResult';
+import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 import {TableFilter} from '../../shared/utils/tableParamEncode';
-import {User} from '../../../business-logic/model/users/user';
-import {ProjectsGetTaskParentsResponseParents} from '../../../business-logic/model/projects/projectsGetTaskParentsResponseParents';
+import {User} from '~/business-logic/model/users/user';
+import {ProjectsGetTaskParentsResponseParents} from '~/business-logic/model/projects/projectsGetTaskParentsResponseParents';
 import {ICommonSearchState} from '../../common-search/common-search.reducer';
 import {SortMeta} from 'primeng/api';
 import {CountAvailableAndIsDisableSelectedFiltered} from '../../shared/entity-page/items.utils';
 import {setSelectedProject} from '@common/core/actions/projects.actions';
 import {createReducer, on} from '@ngrx/store';
 import {modelsInitialState} from '@common/models/reducers/models-view.reducer';
-import {setAllTasksChildren} from '../actions/common-experiments-menu.actions';
+import {FilterMetadata} from 'primeng/api/filtermetadata';
 
 
 export interface ICommonExperimentsViewState {
   tableCols: ISmCol[];
   colsOrder: { [Project: string]: string[] };
   tableFilters: any;
-  tempFilters: {[columnId: string]: {value: any; matchMode: string}};
-  projectColumnFilters: {[projectId: string]: {[columnId: string]: {value: any; matchMode: string}}};
-  tableOrders: SortMeta[];
-  projectColumnsSortOrder: {[projectId: string]: SortMeta[]};
-  projectColumnsWidth: {[projectId: string]: {[colId: string]: number}};
+  tempFilters: { [columnId: string]: FilterMetadata };
+  projectColumnFilters: { [projectId: string]: { [columnId: string]: FilterMetadata } };
+  projectColumnsSortOrder: { [projectId: string]: SortMeta[] };
+  projectColumnsWidth: { [projectId: string]: { [colId: string]: number } };
   metricsCols: ISmCol[];
-  hiddenTableCols: {[colName: string]: boolean};
-  hiddenProjectTableCols: {[projectId: string]: {[colName: string]: boolean | undefined}};
+  hiddenTableCols: { [colName: string]: boolean };
+  hiddenProjectTableCols: { [projectId: string]: { [colName: string]: boolean | undefined } };
   experiments: Array<ITableExperiment>;
   noMoreExperiment: boolean;
   selectedExperiment: ITableExperiment;
@@ -48,11 +45,10 @@ export interface ICommonExperimentsViewState {
   activeParentsFilter: ProjectsGetTaskParentsResponseParents[];
   types: string[];
   splitSize: number;
-  allRunningChildrenForAbortChildrenDialog: ITableExperiment[];
 }
 
 export const commonExperimentsInitialState: ICommonExperimentsViewState = {
-  tableCols: INITIAL_EXPERIMENT_TABLE_COLS,
+  tableCols: [],
   colsOrder: {},
   // eslint-disable-next-line @typescript-eslint/naming-convention
   hiddenTableCols: {comment: true, active_duration: true},
@@ -61,7 +57,6 @@ export const commonExperimentsInitialState: ICommonExperimentsViewState = {
   tableFilters: {},
   tempFilters: {},
   projectColumnFilters: {},
-  tableOrders: [{field: EXPERIMENTS_TABLE_COL_FIELDS.LAST_UPDATE, order: TABLE_SORT_ORDER.DESC}],
   projectColumnsSortOrder: {},
   projectColumnsWidth: {},
   noMoreExperiment: false,
@@ -84,7 +79,6 @@ export const commonExperimentsInitialState: ICommonExperimentsViewState = {
   activeParentsFilter: [],
   types: [],
   splitSize: 75,
-  allRunningChildrenForAbortChildrenDialog: null,
 };
 
 const setExperimentsAndUpdateSelectedExperiments = (state: ICommonExperimentsViewState, payload): ICommonExperimentsViewState => ({
@@ -96,6 +90,7 @@ const setExperimentsAndUpdateSelectedExperiments = (state: ICommonExperimentsVie
 
 export const commonExperimentsViewReducer = createReducer(
   commonExperimentsInitialState,
+  on(actions.setTableCols, (state, action) => ({...state, tableCols: action.cols})),
   on(actions.resetExperiments, state => ({
     ...state,
     experiments: commonExperimentsInitialState.experiments,
@@ -119,10 +114,16 @@ export const commonExperimentsViewReducer = createReducer(
       [action.projectId]: action.active ? modelsInitialState.tableFilters : state.tempFilters
     }
   })),
-  on(actions.addExperiments, (state, action) => ({...state, experiments: state.experiments.concat(action.experiments)})),
+  on(actions.addExperiments, (state, action) => ({
+    ...state,
+    experiments: state.experiments.concat(action.experiments)
+  })),
   // on(actions.freezeTableState, (state) => ({...state, freeze: cloneDeep(state)})),
   // on(actions.defrostTableState, (state) => ({...cloneDeep(state.freeze), freeze: null})),
-  on(actions.removeExperiments, (state, action) => ({...state, experiments: state.experiments.filter(exp => !action.experiments.includes(exp.id))})),
+  on(actions.removeExperiments, (state, action) => ({
+    ...state,
+    experiments: state.experiments.filter(exp => !action.experiments.includes(exp.id))
+  })),
   on(actions.updateExperiment, (state, action) => setExperimentsAndUpdateSelectedExperiments(state, action)),
   on(actions.updateManyExperiment, (state, action) =>
     action.changeList.reduce((acc, change) => {
@@ -143,13 +144,17 @@ export const commonExperimentsViewReducer = createReducer(
   on(actions.setSelectedExperimentsDisableAvailable, (state, action) =>
     ({...state, selectedExperimentsDisableAvailable: action.selectedExperimentsDisableAvailable})),
   on(actions.globalFilterChanged, (state, action) =>
-    ({...state, globalFilter: action as ReturnType<typeof actions.globalFilterChanged>, showAllSelectedIsActive: false})),
+    ({
+      ...state,
+      globalFilter: action as ReturnType<typeof actions.globalFilterChanged>,
+      showAllSelectedIsActive: false
+    })),
   on(actions.resetGlobalFilter, state => ({...state, globalFilter: commonExperimentsInitialState.globalFilter})),
   on(actions.setTableSort, (state, action) => {
     const colIds = state.tableCols.map(col => col.id).concat(state.metricsCols.map(col => col.id));
     let orders = action.orders.filter(order => colIds.includes(order.field));
-    orders = orders.length > 0 ? orders : commonExperimentsInitialState.tableOrders;
-    return { ...state, projectColumnsSortOrder: {...state.projectColumnsSortOrder, [action.projectId]: orders} };
+    orders = orders.length > 0 ? orders : null;
+    return {...state, projectColumnsSortOrder: {...state.projectColumnsSortOrder, [action.projectId]: orders}};
   }),
   on(actions.resetSortOrder, (state, action) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -176,32 +181,22 @@ export const commonExperimentsViewReducer = createReducer(
       }
     }
   })),
-  on(actions.setHiddenColumns, (state, action) => {
+  on(actions.setHiddenCols, (state, action) => ({...state, hiddenTableCols: action.hiddenCols})),
+  on(actions.setVisibleColumnsForProject, (state, action) => {
     const visibleColumns = ['selected'].concat(action['visibleColumns']) as string[];
     return {
       ...state,
       hiddenProjectTableCols: {
         ...state.hiddenProjectTableCols,
-        [action.projectId]: {
+        [action.projectId]: {...state.hiddenProjectTableCols[action.projectId],
           ...state.tableCols
             .filter(col => !visibleColumns.includes(col.id))
             .reduce((obj, col) => ({...obj, [col.id]: true}), {})
         }
       }
     };
+
   }),
-  on(actions.tableFilterChanged, (state, action) => ({
-    ...state,
-    activeParentsFilter: action.filter.col === EXPERIMENTS_TABLE_COL_FIELDS.PARENT ?
-      action.filter.value.map(parentId => state.parents.find(parent => parent.id === parentId)).filter(p => !!p) : [],
-    projectColumnFilters: {
-      ...state.projectColumnFilters,
-      [action.projectId]: {
-        ...state.projectColumnFilters[action.projectId],
-        [action.filter.col]: {value: action.filter.value, matchMode: action.filter.filterMatchMode}
-      }
-    }
-  })),
   on(actions.setTableFilters, (state, action) => ({
     ...state,
     projectColumnFilters: {
@@ -210,29 +205,34 @@ export const commonExperimentsViewReducer = createReducer(
         ...action.filters.reduce((obj, filter: TableFilter) => {
           obj[filter.col] = {value: filter.value, matchMode: filter.filterMatchMode};
           return obj;
-        }, {} as {[columnId: string]: {value: any; matchMode: string}})
+        }, {} as { [columnId: string]: { value: any; matchMode: string } })
       }
     }
   })),
   on(actions.setExtraColumns, (state, action) =>
-    ({...state, metricsCols: [...state.metricsCols.filter(tableCol => !(tableCol.projectId === action['projectId'])), ...action['columns']]})),
+    ({
+      ...state,
+      metricsCols: [...state.metricsCols.filter(tableCol => !(tableCol.projectId === action['projectId'])), ...action['columns']]
+    })),
   on(actions.addColumn, (state, action) => ({...state, metricsCols: [...state.metricsCols, action.col]})),
   on(actions.removeCol, (state, action) => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const {[action.id]: removedCol, ...remainingColsWidth} = state.projectColumnsWidth[action.projectId] || {};
-      return {
-        ...state,
-        metricsCols: [...state.metricsCols.filter(tableCol => !(tableCol.id === action.id && tableCol.projectId === action.projectId))],
-        projectColumnsSortOrder: {
-          ...state.projectColumnsSortOrder,
-          [action.projectId]: state.projectColumnsSortOrder[action.projectId]?.filter(order => order.field !== action.id) || commonExperimentsInitialState.tableOrders
-        },
-        projectColumnsWidth: {...state.projectColumnsWidth, [action.projectId]: remainingColsWidth},
-        colsOrder: {...state.colsOrder, [action.projectId]: state.colsOrder[action.projectId] ? state.colsOrder[action.projectId].filter(colId => colId !== action.id) : null}
-      };
-    }),
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const {[action.id]: removedCol, ...remainingColsWidth} = state.projectColumnsWidth[action.projectId] || {};
+    return {
+      ...state,
+      metricsCols: [...state.metricsCols.filter(tableCol => !(tableCol.id === action.id && tableCol.projectId === action.projectId))],
+      projectColumnsSortOrder: {
+        ...state.projectColumnsSortOrder,
+        [action.projectId]: state.projectColumnsSortOrder[action.projectId]?.filter(order => order.field !== action.id) || null
+      },
+      projectColumnsWidth: {...state.projectColumnsWidth, [action.projectId]: remainingColsWidth},
+      colsOrder: {
+        ...state.colsOrder,
+        [action.projectId]: state.colsOrder[action.projectId] ? state.colsOrder[action.projectId].filter(colId => colId !== action.id) : null
+      }
+    };
+  }),
   on(actions.setTags, (state, action) => ({...state, projectTags: action.tags})),
-  on(setAllTasksChildren, (state, action) => ({...state, allRunningChildrenForAbortChildrenDialog: action.experiments})),
   on(actions.setUsers, (state, action) => ({...state, users: action.users})),
   on(actions.setParents, (state, action) => ({...state, parents: action.parents})),
   on(actions.setActiveParentsFilter, (state, action) => ({...state, activeParentsFilter: action.parents})),

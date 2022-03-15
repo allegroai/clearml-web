@@ -24,6 +24,7 @@ export class InlineEditComponent implements OnDestroy {
   @Input() multiline: boolean = false;
   @Input() rows: number = 3; // Only relevant to multiline
   @Input() inlineDisabled = false;
+  @Input() warning: string;
 
   @Output() inlineActiveStateChanged = new EventEmitter<boolean>();
   @Output() textChanged = new EventEmitter<string>();
@@ -57,7 +58,7 @@ export class InlineEditComponent implements OnDestroy {
       return;
     }
 
-    const templateWidth = Math.max(this.template.nativeElement.getBoundingClientRect().width, 250);
+    const templateWidth = Math.max(this.template.nativeElement.getBoundingClientRect().width - 120, 200);
     this.renderer.setStyle(this.inlineInput.nativeElement, 'width', `${templateWidth}px`);
     this.inlineValue = this.originalText;
     this.active = true;

@@ -4,13 +4,18 @@
   display: flex;
   align-content: space-between;
   align-items: center;
+  position: relative;
 
   &.select-col-checkbox {
     pointer-events: none;
   }
 
-  &.table-body {
-    padding: 12px 7px;
+  &.table-body:after {
+    content: "";
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    left: -8px;
   }
 }
 

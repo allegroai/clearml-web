@@ -1,9 +1,9 @@
 <sm-menu
-  [iconClass]="'al-icon al-ico-settings al-color pointer create-new-icon ' + (disabled ? 'blue-570' : 'blue-400')"
+  [iconClass]="'al-icon al-ico-settings al-color pointer create-new-icon ' + (disabled ? 'pointer-events-none blue-570' : 'blue-400')"
   smMenuClass="light-theme custom-columns"
   buttonTooltip="Customize table"
   [showButton]="false"
-  (click)="getMetricsToDisplay.emit()"
+  (click)="!disabled && getMetricsToDisplay.emit()"
   (onMenuClosed)="selectMetricActiveChanged.emit(null)"
   [style.pointer-events]="disabled ? 'none' : 'initial'"
 >
@@ -23,13 +23,13 @@
              smClickStopPropagation
              [ngClass]="{disabled: !metricVariants.length}"
              (click)="metricVariants.length && selectMetricActiveChanged.emit(CustomColumnMode.Metrics); $event.stopPropagation()"
-        ><i class="fas fa-plus pr-1"></i> METRIC
+        ><i class="al-icon al-ico-add sm mr-1"></i><span class="caption">METRIC</span>
         </div>
-        <div class="add-button"
+        <div class="add-button metrics-button"
              smClickStopPropagation
              [ngClass]="{disabled: !hasHyperParams}"
              (click)="hasHyperParams && selectMetricActiveChanged.emit(CustomColumnMode.HyperParams); $event.stopPropagation()"
-        ><i class="fas fa-plus pr-1"></i> HYPER PARAMETERS
+        ><i class="al-icon al-ico-add sm mr-1"></i><span class="caption">HYPER PARAMETERS</span>
         </div>
       </div>
     </div>

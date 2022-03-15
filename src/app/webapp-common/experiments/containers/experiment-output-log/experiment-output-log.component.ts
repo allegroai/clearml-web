@@ -10,12 +10,12 @@ import {
 } from '@angular/core';
 import {Store} from '@ngrx/store';
 import {selectExperimentBeginningOfLog, selectExperimentLog, selectLogFilter} from '../../reducers';
-import {Observable, Subscription} from 'rxjs';
-import {distinctUntilChanged, filter} from 'rxjs/operators';
+import {BehaviorSubject, combineLatest, Observable, Subscription} from 'rxjs';
+import {debounceTime, filter, map} from 'rxjs/operators';
 import {last} from 'lodash/fp';
-import {IExperimentInfo} from '../../../../features/experiments/shared/experiment-info.model';
-import {IExperimentInfoState} from '../../../../features/experiments/reducers/experiment-info.reducer';
-import {selectSelectedExperiment} from '../../../../features/experiments/reducers';
+import {ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
+import {IExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
+import {selectSelectedExperiment} from '~/features/experiments/reducers';
 import {
   downloadFullLog,
   getExperimentLog,
@@ -24,7 +24,8 @@ import {
   SetLogFilter
 } from '../../actions/common-experiment-output.actions';
 import {ExperimentLogInfoComponent} from '../../dumb/experiment-log-info/experiment-log-info.component';
-import {selectRefreshing} from '../../../experiments-compare/reducers';
+import {selectRefreshing} from '@common/experiments-compare/reducers';
+import {ITableExperiment} from '@common/experiments/shared/common-experiment-model.model';
 
 @Component({
   selector: 'sm-experiment-output-log',
@@ -35,8 +36,11 @@ export class ExperimentOutputLogComponent implements OnInit, AfterViewInit, OnDe
 
   @Input() showHeader = true;
   @Input() isDarkTheme = false;
+  @Input() set experiment(experiment: ITableExperiment) {
+    this.experiment$.next(experiment);
+  }
   private subs = new Subscription();
-  private experiment: IExperimentInfo;
+  private currExperiment: ISelectedExperiment;
 
   public log$: Observable<any[]>;
   public filter$: Observable<string>;
@@ -45,12 +49,43 @@ export class ExperimentOutputLogComponent implements OnInit, AfterViewInit, OnDe
   public disabled: boolean;
   public hasLog: boolean;
   private logRef: ExperimentLogInfoComponent;
+  private experiment$ = new BehaviorSubject<ITableExperiment>(null);
   @ViewChildren(ExperimentLogInfoComponent) private logRefs: QueryList<ExperimentLogInfoComponent>;
 
   constructor(private store: Store<IExperimentInfoState>, private cdr: ChangeDetectorRef) {
     this.log$ = this.store.select(selectExperimentLog);
     this.logBeginning$ = this.store.select(selectExperimentBeginningOfLog);
     this.filter$ = this.store.select(selectLogFilter);
+
+    this.subs.add(
+      combineLatest([
+        this.store.select(selectSelectedExperiment),
+        this.experiment$
+      ]).pipe(
+        debounceTime(0),
+        map(([selected, input]) => (input || selected) as ISelectedExperiment),
+        filter(experiment => !!experiment?.id),
+      )
+        .subscribe(experiment => {
+          if (this.currExperiment?.id !== experiment.id || this.currExperiment?.started !== experiment.started) {
+            this.store.dispatch(new ResetOutput());
+            this.logRef?.reset();
+            this.currExperiment = experiment;
+            this.hasLog = undefined;
+            this.cdr.detectChanges();
+            this.store.dispatch(getExperimentLog({
+              id: this.currExperiment.id,
+              direction: null
+            }));
+          } else if (!this.logRef?.lines?.length || this.logRef?.canRefresh) {
+            this.store.dispatch(getExperimentLog({
+              id: this.currExperiment.id,
+              direction: !this.logRef?.orgLogs ? 'prev' : 'next',
+              from: last(this.logRef?.orgLogs)?.timestamp
+            }));
+          }
+        })
+    );
   }
 
   ngAfterViewInit(): void {
@@ -67,34 +102,10 @@ export class ExperimentOutputLogComponent implements OnInit, AfterViewInit, OnDe
       }
     }));
 
-    this.subs.add(this.store.select(selectSelectedExperiment)
-      .pipe(
-        filter(experiment => !!experiment),
-        distinctUntilChanged()
-      )
-      .subscribe(experiment => {
-        if (this.experiment?.id !== experiment.id || this.experiment?.started !== experiment.started) {
-          this.store.dispatch(new ResetOutput());
-          this.logRef?.reset();
-          this.experiment = experiment;
-          this.store.dispatch(getExperimentLog({
-            id: this.experiment.id,
-            direction: null
-          }));
-        } else if (!this.logRef?.lines?.length || this.logRef?.canRefresh) {
-          this.store.dispatch(getExperimentLog({
-            id: this.experiment.id,
-            direction: !this.logRef?.orgLogs ? 'prev' : 'next',
-            from: last(this.logRef?.orgLogs)?.timestamp
-          }));
-        }
-      })
-    );
-
     this.subs.add(this.store.select(selectRefreshing)
       .pipe(filter(({refreshing}) => refreshing))
       .subscribe(({autoRefresh}) => this.store.dispatch(getExperimentLog({
-        id: this.experiment.id,
+        id: this.currExperiment.id,
         direction: autoRefresh ? 'prev' : 'next',
         from: last(this.logRef?.orgLogs)?.timestamp
       })))
@@ -114,10 +125,10 @@ export class ExperimentOutputLogComponent implements OnInit, AfterViewInit, OnDe
   }
 
   getLogs({direction, from}: {direction: string; from?: number}) {
-    this.store.dispatch(getExperimentLog({id: this.experiment.id, direction, from, refresh: !from}));
+    this.store.dispatch(getExperimentLog({id: this.currExperiment.id, direction, from, refresh: !from}));
   }
 
   downloadLog() {
-    this.store.dispatch(downloadFullLog({experimentId: this.experiment.id}));
+    this.store.dispatch(downloadFullLog({experimentId: this.currExperiment.id}));
   }
 }

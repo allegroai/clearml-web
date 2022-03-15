@@ -1,15 +1,15 @@
 import {Component, EventEmitter, Input, OnDestroy, Output, ViewChild} from '@angular/core';
-import {TaskStatusEnum} from '../../../../business-logic/model/tasks/taskStatusEnum';
-import {TaskTypeEnum} from '../../../../business-logic/model/tasks/taskTypeEnum';
-import {getSystemTags, isDevelopment} from '../../../../features/experiments/shared/experiments.utils';
+import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
+import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
+import {getSystemTags, isDevelopment} from '~/features/experiments/shared/experiments.utils';
 import {Observable} from 'rxjs';
 import {Store} from '@ngrx/store';
-import {selectCompanyTags, selectProjectTags, selectTagsFilterByProject} from '../../../core/reducers/projects.reducer';
+import {selectCompanyTags, selectProjectTags, selectTagsFilterByProject} from '@common/core/reducers/projects.reducer';
 import {addTag, removeTag} from '../../actions/common-experiments-menu.actions';
-import {TagsMenuComponent} from '../../../shared/ui-components/tags/tags-menu/tags-menu.component';
-import {MenuComponent} from '../../../shared/ui-components/panel/menu/menu.component';
+import {TagsMenuComponent} from '@common/shared/ui-components/tags/tags-menu/tags-menu.component';
+import {MenuComponent} from '@common/shared/ui-components/panel/menu/menu.component';
 import {ActivateEdit, DeactivateEdit} from '../../actions/common-experiments-info.actions';
-import {EXPERIMENTS_STATUS_LABELS} from '../../../../features/experiments/shared/experiments.const';
+import {EXPERIMENTS_STATUS_LABELS, ExperimentTagsEnum} from '~/features/experiments/shared/experiments.const';
 import {EXPERIMENT_COMMENT} from '../experiment-general-info/experiment-general-info.component';
 import {ActivatedRoute, Router} from '@angular/router';
 import {
@@ -25,7 +25,7 @@ import {
   selectionDisabledQueue,
   selectionDisabledReset,
   selectionDisabledViewWorker
-} from '../../../shared/entity-page/items.utils';
+} from '@common/shared/entity-page/items.utils';
 
 @Component({
   selector: 'sm-experiment-info-header',
@@ -44,6 +44,7 @@ export class ExperimentInfoHeaderComponent implements OnDestroy {
   public isDev = false;
   public systemTags = [] as string[];
   public shared: boolean;
+  public isPipeline: boolean;
   selectedDisableAvailable = {};
 
   @Input() editable: boolean = true;
@@ -80,7 +81,9 @@ export class ExperimentInfoHeaderComponent implements OnDestroy {
     this._experiment = experiment;
     this.isDev = isDevelopment(experiment);
     this.systemTags = getSystemTags(experiment);
-    this.shared = experiment?.system_tags?.includes('shared');
+
+    this.isPipeline = !!experiment?.system_tags?.includes(ExperimentTagsEnum.Pipeline);
+    this.shared = experiment?.system_tags?.includes(ExperimentTagsEnum.Shared);
     this.selectedDisableAvailable = {
       [MenuItems.abort]: selectionDisabledAbort([experiment]),
       [MenuItems.abortAllChildren]: selectionDisabledAbortAllChildren([experiment]),

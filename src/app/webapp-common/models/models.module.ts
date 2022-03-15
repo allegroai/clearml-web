@@ -29,13 +29,16 @@ import {ModelCustomColsMenuComponent} from './dumbs/model-custom-cols-menu/model
 import {ModelHeaderComponent} from '~/features/models/dumb/model-header/model-header.component';
 import {SharedModule} from '~/shared/shared.module';
 import {CommonDeleteDialogModule} from '../shared/entity-page/entity-delete/common-delete-dialog.module';
+import { ModelInfoMetadataComponent } from './containers/model-info-metadata/model-info-metadata.component';
+import { SelectMetadataKeysCustomColsComponent } from './dumbs/select-metadata-keys-custom-cols/select-metadata-keys-custom-cols.component';
 
 export const modelSyncedKeys    = [
   'view.projectColumnsSortOrder',
   'view.projectColumnFilters',
   'view.projectColumnsWidth',
   'view.hiddenProjectTableCols',
-  'view.colsOrder'
+  'view.colsOrder',
+  'view.metadataCols'
 ];
 
 
@@ -64,7 +67,9 @@ export const modelSyncedKeys    = [
     ModelViewNetworkComponent, ModelInfoNetworkComponent,
     ModelInfoLabelsComponent, ModelInfoLabelsViewComponent, ModelInfoGeneralComponent,
     ModelGeneralInfoComponent, ModelHeaderComponent,
-    ModelCustomColsMenuComponent]
+    ModelCustomColsMenuComponent,
+    ModelInfoMetadataComponent,
+    SelectMetadataKeysCustomColsComponent]
 })
 export class ModelsModule {
 }

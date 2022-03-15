@@ -52,7 +52,7 @@ export class UserPreferences {
   public setPreferences(key: string, value: any) {
     if (this.preferences && !isEqual(this.preferences[key], value)) {
       const prefs = {[key]: cloneDeep(value)};
-      this.preferences = {...this.preferences, ...prefs};
+      this.preferences = {...this.preferences, ...{[key]: value}};
       this.replaceDots(prefs);
       this.saveToServer(prefs);
       return;

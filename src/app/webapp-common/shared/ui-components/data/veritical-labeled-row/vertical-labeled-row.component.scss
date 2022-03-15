@@ -4,11 +4,12 @@
 
   .labeled-row {
     padding: 8px 0;
-    border-bottom: 1px solid #303443;
+    border-bottom: 1px solid $dark-border;
   }
 
   .label {
     font-size: 12px;
+    color: $blue-480;
   }
 
   .value {

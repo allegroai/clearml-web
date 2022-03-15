@@ -59,6 +59,10 @@ import { ProjectsValidateDeleteResponse } from '../model/projects/projectsValida
 
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
 import { Configuration }                                     from '../configuration';
+import {ProjectsGetModelMetadataKeysResponse} from '~/business-logic/model/projects/projectsGetModelMetadataKeysResponse';
+import {ProjectsGetModelMetadataKeysRequest} from '~/business-logic/model/projects/projectsGetModelMetadataKeysRequest';
+import {ProjectsGetProjectTagsResponse} from '~/business-logic/model/projects/projectsGetProjectTagsResponse';
+import {ProjectsGetProjectTagsRequest} from '~/business-logic/model/projects/projectsGetProjectTagsRequest';
 
 
 @Injectable()
@@ -408,6 +412,53 @@ export class ApiProjectsService {
         );
     }
 
+
+    /**
+     *
+     * Get a list of all metadata keys used in models within the given project.
+     * @param request request body
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public projectsGetModelMetadataKeys(request: ProjectsGetModelMetadataKeysRequest, options?: any, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+        if (request === null || request === undefined) {
+            throw new Error('Required parameter request was null or undefined when calling projectsGetModelMetadataKeys.');
+        }
+
+        let headers = this.defaultHeaders;
+        if (options && options.async_enable) {
+            headers = headers.set(this.configuration.asyncHeader, '1');
+        }
+
+        // to determine the Accept header
+        const httpHeaderAccepts: string[] = [
+            'application/json'
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers = headers.set("Accept", httpHeaderAcceptSelected);
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+        ];
+        const httpContentTypeSelected:string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected != undefined) {
+            headers = headers.set("Content-Type", httpContentTypeSelected);
+        }
+
+        return this.apiRequest.post<ProjectsGetModelMetadataKeysResponse>(`${this.basePath}/projects.get_model_metadata_keys`,
+          request,
+          {
+              withCredentials: this.configuration.withCredentials,
+              headers: headers,
+              observe: observe,
+              reportProgress: reportProgress
+          }
+        );
+    }
+
+
     /**
      * 
      * Get user and system tags used for the models under the specified projects
@@ -450,6 +501,51 @@ export class ApiProjectsService {
                 observe: observe,
                 reportProgress: reportProgress
             }
+        );
+    }
+
+    /**
+     *
+     * Get user and system tags used for the specified projects and their children
+     * @param request request body
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public projectsGetProjectTags(request: ProjectsGetProjectTagsRequest, options?: any, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+        if (request === null || request === undefined) {
+            throw new Error('Required parameter request was null or undefined when calling projectsGetProjectTags.');
+        }
+
+        let headers = this.defaultHeaders;
+        if (options && options.async_enable) {
+            headers = headers.set(this.configuration.asyncHeader, '1');
+        }
+
+        // to determine the Accept header
+        const httpHeaderAccepts: string[] = [
+            'application/json'
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers = headers.set("Accept", httpHeaderAcceptSelected);
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+        ];
+        const httpContentTypeSelected:string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected != undefined) {
+            headers = headers.set("Content-Type", httpContentTypeSelected);
+        }
+
+        return this.apiRequest.post<ProjectsGetProjectTagsResponse>(`${this.basePath}/projects.get_project_tags`,
+          request,
+          {
+              withCredentials: this.configuration.withCredentials,
+              headers: headers,
+              observe: observe,
+              reportProgress: reportProgress
+          }
         );
     }
 

@@ -5,6 +5,9 @@
   display: block;
   position: relative;
   height: $top-bar-height;
+  .crumbs-contain{
+    width: calc(100% - 600px);
+  }
 
   .share-view {
     visibility: hidden;
@@ -140,15 +143,5 @@
   .al-icon,
   .fab {
     margin-right: 12px;
-  }
-
-  a {
-    color: unset;
-    text-decoration: unset;
-
-    &.item {
-      display: flex;
-      align-items: center;
-    }
   }
 }

@@ -1,0 +1,18 @@
+@import 'variables';
+
+:host {
+  display: block;
+  padding: 12px;
+}
+
+.list-container {
+  overflow: auto;
+  max-height: calc(60vh - 27px);
+  min-height: 360px;
+}
+
+.empty-state {
+  text-align: center;
+  padding-top: 12px;
+  color: $blue-300;
+}

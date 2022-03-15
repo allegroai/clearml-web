@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {ApiProjectsService} from '../../business-logic/api-services/projects.service';
+import {ApiProjectsService} from '~/business-logic/api-services/projects.service';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {requestFailed} from '../core/actions/http.actions';
 import {activeLoader, deactivateLoader} from '../core/actions/layout.actions';
@@ -10,23 +10,21 @@ import {
   setRecentProjects,
 } from './common-dashboard.actions';
 import {CARDS_IN_ROW} from './common-dashboard.const';
-import {ApiTasksService} from '../../business-logic/api-services/tasks.service';
-import {ProjectsGetAllExRequest} from '../../business-logic/model/projects/projectsGetAllExRequest';
+import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
+import {ProjectsGetAllExRequest} from '~/business-logic/model/projects/projectsGetAllExRequest';
 import {catchError, mergeMap, map, switchMap, withLatestFrom} from 'rxjs/operators';
-import {ApiLoginService} from '../../business-logic/api-services/login.service';
-import {MatDialog} from '@angular/material/dialog';
-import {ConfirmDialogComponent} from '../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
+import {ApiLoginService} from '~/business-logic/api-services/login.service';
 import {Store} from '@ngrx/store';
 import {ErrorService} from '../shared/services/error.service';
 import {selectCurrentUser, selectShowOnlyUserWork} from '../core/reducers/users-reducer';
 
 @Injectable()
 export class CommonDashboardEffects {
-  constructor(private actions: Actions, private projectsApi: ApiProjectsService,
-              private tasksApi: ApiTasksService, private loginApi: ApiLoginService,
-              private errorService: ErrorService, private store: Store<any>,
-              private dialog: MatDialog) {
-  }
+  constructor(
+    private actions: Actions, private projectsApi: ApiProjectsService,
+    private tasksApi: ApiTasksService, private loginApi: ApiLoginService,
+    private errorService: ErrorService, private store: Store<any>,
+  ) {}
   /* eslint-disable @typescript-eslint/naming-convention */
   activeLoader = createEffect(() => this.actions.pipe(
     ofType(getRecentProjects, getRecentExperiments),
@@ -62,7 +60,7 @@ export class CommonDashboardEffects {
         status: ['published', 'closed', 'failed', 'stopped', 'in_progress', 'completed'],
         type: ['__$not', 'annotation_manual', '__$not', 'annotation', '__$not', 'dataset_import'],
         only_fields: ['type', 'status', 'created', 'name', 'id', 'last_update', 'started', 'project.name'],
-        system_tags: ['-archived'],
+        system_tags: ['-archived', '-pipeline'],
         user: showOnlyUserWork ? [user.id] : null,
       })
         .pipe(

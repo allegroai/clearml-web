@@ -44,7 +44,6 @@ export class DashboardProjectsComponent implements OnInit, AfterViewInit, OnDest
   }
 
   ngAfterViewInit() {
-    this.width.emit(this.header.nativeElement.getBoundingClientRect().width);
     window.setTimeout(() => this.width.emit(this.header.nativeElement.getBoundingClientRect().width));
     this.sub = fromEvent(window, 'resize')
       .pipe(throttleTime(50))

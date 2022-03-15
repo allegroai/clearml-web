@@ -5,7 +5,7 @@
     [class.unchecked]="!item.visible"
     (click)="onItemSelect.emit(item.value)"
   >
-    <div class="pointer ellipsis pr-3" [smTooltip]="item.value" [showDelay]="500">{{item.value}}</div>
-    <i (click)="onItemCheck.emit(item.value); $event.stopPropagation()" class="fa" [class]="item.visible? checkIcon[0] : checkIcon[1]"></i>
+    <div class="pointer ellipsis pr-3" [smTooltip]="item.value">{{item.value}}</div>
+    <i (click)="onItemCheck.emit(item.value); $event.stopPropagation()" class="al-icon sm-md" [class]="item.visible? checkIcon[0] : checkIcon[1]"></i>
   </li>
 </ul>

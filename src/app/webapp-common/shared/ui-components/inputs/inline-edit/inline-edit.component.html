@@ -8,6 +8,7 @@
     <div *ngIf="editable" [style.display]=" ! active ? 'none': 'block'" tabindex="12">
       <form #form class="inline-edit-form" [class.multiline]="multiline">
         <input type="text" class="form-control inline-edit-input"
+               [class.warn]="!!warning"
                *ngIf="!multiline"
                (blur)="inlineCanceled()"
                [(ngModel)]="inlineValue"
@@ -18,6 +19,7 @@
                (keydown.escape)="inlineCanceled()"
                (keydown.enter)="form.checkValidity() && inlineSaved()"
                #inlineInput />
+               <i class="al-icon al-ico-alert sm-md" *ngIf="warning" [smTooltip]="warning"></i>
 
         <textarea class="form-control inline-edit-textarea"
                   *ngIf="multiline"

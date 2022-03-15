@@ -25,4 +25,5 @@ export interface CredentialKey {
    *
    */
   last_used_from?: string;
+  label?: string; // (nir) until BE will implement
 }

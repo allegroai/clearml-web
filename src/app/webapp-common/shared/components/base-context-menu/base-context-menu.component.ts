@@ -47,19 +47,19 @@ export class BaseContextMenuComponent {
     }, 100);
   }
 
-  tagMenuOpened() {
+  tagMenuOpened(tagMenuRef?: TagsMenuComponent) {
     window.setTimeout(() => {
       this.store.dispatch(new ActivateEdit('tags'));
       this.store.dispatch(new ActivateModelEdit('tags'));
     }, 200);
-    this.tagMenu?.focus();
+    tagMenuRef ? tagMenuRef.focus() : this.tagMenu?.focus();
   }
 
-  tagMenuClosed() {
+  tagMenuClosed(tagMenuRef?: TagsMenuComponent) {
     window.setTimeout(() => {
       this.store.dispatch(new DeactivateEdit());
       this.store.dispatch(new CancelModelEdit());
     }, 200);
-    this.tagMenu?.clear();
+    tagMenuRef ? tagMenuRef.clear() : this.tagMenu?.clear();
   }
 }

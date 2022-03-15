@@ -1,18 +1,19 @@
 export enum ColHeaderTypeEnum {
-  sort       = 'sort',
+  sort = 'sort',
   sortFilter = 'sort-filter',
-  checkBox   = 'checkbox',
-  title      = 'none'
+  checkBox = 'checkbox',
+  title = 'none'
 }
+
 export enum ColHeaderFilterTypeEnum {
-  duration        = 'duration',         // days-hours-minutes
+  duration = 'duration',         // days-hours-minutes
   durationNumeric = 'duration-numeric', // number
-  durationDate    = 'duration-date',    // DD-MM-YYYY hours:minutes
+  durationDate = 'duration-date',    // DD-MM-YYYY hours:minutes
 }
 
 export type TableSortOrderEnum = 1 | -1;
 export const TABLE_SORT_ORDER = {
-  ASC : 1 as TableSortOrderEnum,
+  ASC: 1 as TableSortOrderEnum,
   DESC: -1 as TableSortOrderEnum,
 };
 
@@ -34,7 +35,7 @@ export interface ISmCol {
   isFiltered?: boolean; // deprecated.
   isSorted?: boolean; // deprecated.
   filterMatchMode?: FilterMatchModeEnum; // the filter method.
-  style?: {width?: string; minWidth?: string; maxWidth?: string}; // the column style.
+  style?: { width?: string; minWidth?: string; maxWidth?: string }; // the column style.
   headerStyleClass?: string; // the header css class name.
   bodyTemplateRef?: string; // redundant.
   bodyStyleClass?: string;
@@ -49,4 +50,7 @@ export interface ISmCol {
   andFilter?: boolean;
   excludeFilter?: boolean;
   columnExplain?: string;
+  key?: string;
+  type?: string;
+  showInCardFilters?: boolean;
 }

@@ -19,17 +19,17 @@ import {ChangeProjectDialogComponent} from '@common/experiments/shared/component
 import {fetchModelsRequested, modelSelectionChanged, setSelectedModels} from '../../actions/models-view.actions';
 import {SelectedModel} from '../../shared/models.model';
 import {CommonDeleteDialogComponent} from '@common/shared/entity-page/entity-delete/common-delete-dialog.component';
-import {EntityTypeEnum} from '../../../../shared/constants/non-common-consts';
+import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {CancelModelEdit} from '../../actions/models-info.actions';
-import {BaseContextMenuComponent} from '../../../shared/components/base-context-menu/base-context-menu.component';
+import {BaseContextMenuComponent} from '@common/shared/components/base-context-menu/base-context-menu.component';
 import {
   selectionDisabledArchive,
   selectionDisabledMoveTo,
   selectionDisabledPublishModels
-} from '../../../shared/entity-page/items.utils';
-import {getSignedUrl} from '../../../core/actions/common-auth.actions';
-import {selectSignedUrl} from '../../../core/reducers/common-auth-reducer';
-import {selectRouterParams} from '../../../core/reducers/router-reducer';
+} from '@common/shared/entity-page/items.utils';
+import {getSignedUrl} from '@common/core/actions/common-auth.actions';
+import {selectSignedUrl} from '@common/core/reducers/common-auth-reducer';
+import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {get} from 'lodash/fp';
 
 

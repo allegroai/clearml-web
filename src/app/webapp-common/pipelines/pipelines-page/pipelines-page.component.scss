@@ -1,0 +1,67 @@
+@import "variables";
+
+:host {
+  display: block;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  sm-projects-header {
+    grid-column: 1 / -1;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: $blue-800;
+  }
+
+
+  .empty-pipelines {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+
+    .title-icon {
+      text-align: center;
+      margin: 48px 0 24px;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: 500;
+      width: 100%;
+      margin-bottom: 6px;
+      text-align: center;
+    }
+
+    .sub-title {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .code {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      a {
+        color: white;
+      }
+
+      sm-code-editor {
+        display: block;
+        width: 600px;
+        height: 490px;
+        margin-top: 6px;
+      }
+    }
+
+    .diagram {
+      display: flex;
+      justify-content: center;
+
+      i {
+        width: 490px;
+        height: 440px;
+      }
+    }
+  }
+}

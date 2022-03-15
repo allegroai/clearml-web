@@ -1,8 +1,10 @@
 import {Action, createAction, props} from '@ngrx/store';
-import {ISelectedExperiment} from '../../../features/experiments/shared/experiment-info.model';
-import {Project} from '../../../business-logic/model/projects/project';
-import {Queue} from '../../../business-logic/model/queues/queue';
+import {ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
+import {Project} from '~/business-logic/model/projects/project';
+import {Queue} from '~/business-logic/model/queues/queue';
 import {CloneExperimentPayload, ITableExperiment} from '../shared/common-experiment-model.model';
+import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
+import { PipelinesStartPipelineRequest } from '~/business-logic/model/pipelines/pipelinesStartPipelineRequest';
 
 export const EXPERIMENTS_INFO_PREFIX = 'EXPERIMENTS_INFO_';
 
@@ -19,6 +21,21 @@ export const stopClicked = createAction(
   EXPERIMENTS_INFO_PREFIX + '[stop experiments]',
   props<{ selectedEntities: ISelectedExperiment[] }>()
 );
+export const startPipeline = createAction(
+  EXPERIMENTS_INFO_PREFIX + '[start pipeline]',
+  props<PipelinesStartPipelineRequest>()
+);
+
+export const getControllerForStartPipelineDialog = createAction(
+  EXPERIMENTS_INFO_PREFIX + '[Get Controller For Start Pipeline]',
+  props<{task:string}>()
+);
+
+export const setControllerForStartPipelineDialog = createAction(
+  EXPERIMENTS_INFO_PREFIX + '[Set Controller For Start Pipeline]',
+  props<{task:Task}>()
+);
+
 
 export const changeProjectRequested = createAction(
   EXPERIMENTS_INFO_PREFIX + '[change project requested]',
@@ -42,14 +59,9 @@ export const addTag = createAction(
   props<{ experiments: Partial<ITableExperiment>[]; tag: string }>()
 );
 
-export const getAllTasksChildren = createAction(
+export const abortAllChildren = createAction(
   EXPERIMENTS_INFO_PREFIX + '[get all tasks children]',
-  props<{ experiments: string[]}>()
-);
-
-export const setAllTasksChildren = createAction(
-  EXPERIMENTS_INFO_PREFIX + '[set all tasks children]',
-  props<{ experiments: ITableExperiment[]}>()
+  props<{ experiments: ISelectedExperiment[]}>()
 );
 
 export const removeTag = createAction(
@@ -78,10 +90,10 @@ export const enqueueClicked = createAction(
 
 export const archiveSelectedExperiments = createAction(
   EXPERIMENTS_INFO_PREFIX + '[archive selected experiments]',
-  props<{ selectedEntities: ISelectedExperiment[]; skipUndo?: boolean }>()
+  props<{ selectedEntities: ISelectedExperiment[]; skipUndo?: boolean; entityType?: EntityTypeEnum }>()
 );
 
 export const restoreSelectedExperiments = createAction(
   EXPERIMENTS_INFO_PREFIX + '[restore selected experiments]',
-  props<{ selectedEntities: ISelectedExperiment[]; skipUndo?: boolean }>()
+  props<{ selectedEntities: ISelectedExperiment[]; skipUndo?: boolean; entityType?: EntityTypeEnum }>()
 );

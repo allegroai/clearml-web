@@ -1,10 +1,9 @@
-import {Task} from '../../../business-logic/model/tasks/task';
+import {Task} from '~/business-logic/model/tasks/task';
 import * as actions from '../actions/common-experiment-output.actions';
-import {ScalarKeyEnum} from '../../../business-logic/model/events/scalarKeyEnum';
-import {sortBy, reverse, set} from 'lodash/fp';
+import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
+import {sortBy, reverse} from 'lodash/fp';
 import {LOG_BATCH_SIZE} from '../shared/common-experiments.const';
-import {MetricsPlotEvent} from '../../../business-logic/model/events/metricsPlotEvent';
-import {EventsScalarMetricsIterRawResponse} from '../../../business-logic/model/events/eventsScalarMetricsIterRawResponse';
+import {MetricsPlotEvent} from '~/business-logic/model/events/metricsPlotEvent';
 import {ExtFrame} from '@common/shared/experiment-graphs/single-graph/plotly-graph-base';
 
 export type GroupByCharts = 'metric' | 'none';
@@ -48,13 +47,13 @@ export interface CommonExperimentOutputState {
   experimentLog: Log[];
   totalLogLines: number;
   beginningOfLog: boolean;
-  settingsList: Array<IExperimentSettings>;
+  settingsList: Array<ExperimentSettings>;
   searchTerm: string;
   logFilter: string;
   showSettings: boolean;
 }
 
-export interface IExperimentSettings {
+export interface ExperimentSettings {
   id: Task['id'];
   hiddenMetricsScalar: Array<string>;
   hiddenMetricsPlot: Array<string>;
@@ -65,6 +64,7 @@ export interface IExperimentSettings {
   smoothWeight: number;
   xAxisType: ScalarKeyEnum;
   groupBy: GroupByCharts;
+  lastModified?: number;
 }
 
 export const initialCommonExperimentOutputState: CommonExperimentOutputState = {
@@ -76,7 +76,7 @@ export const initialCommonExperimentOutputState: CommonExperimentOutputState = {
   cachedAxisType: null,
   metricsPlotsCharts: null,
   isFullScreenOpen: false,
-  experimentLog: [],
+  experimentLog: null,
   totalLogLines: null,
   beginningOfLog: false,
   settingsList: [],
@@ -147,13 +147,20 @@ export function commonExperimentOutputReducer(state = initialCommonExperimentOut
     case actions.SET_EXPERIMENT_PLOTS:
       return {...state, metricsPlotsCharts: action.payload};
     case actions.UPDATE_EXPERIMENT_SETTINGS: {
-      let newSettings;
+      let newSettings: ExperimentSettings[];
+      const changes = {...action.payload.changes, lastModified: (new Date()).getTime()} as ExperimentSettings;
       const experimentExists = state.settingsList.find(setting => setting.id === action.payload.id);
+      const discardBefore = new Date()
+      discardBefore.setMonth(discardBefore.getMonth() - 6);
       if (experimentExists) {
-        newSettings = state.settingsList.map(setting => setting.id === action.payload.id ? {...setting, ...action.payload.changes} : setting);
+        newSettings = state.settingsList
+          .filter(setting => discardBefore < new Date(setting.lastModified || 1648771200000))
+          .map(setting => setting.id === action.payload.id ? {...setting, ...changes} : setting);
       } else {
-        newSettings = state.settingsList.slice();
-        newSettings.push({id: action.payload.id, ...action.payload.changes});
+        newSettings = [
+          ...state.settingsList.filter(setting => discardBefore < new Date(setting.lastModified || 1648771200000)),
+          {id: action.payload.id, ...changes}
+        ];
       }
       return {...state, settingsList: newSettings};
     }

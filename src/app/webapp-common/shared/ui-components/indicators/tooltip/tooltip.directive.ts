@@ -31,7 +31,4 @@ export class TooltipDirective extends MatTooltip {
   @Input() set showTooltip(show) {
     show && this.show();
   }
-
-  @Input() showDelay = 0;
-
 }

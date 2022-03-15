@@ -1,27 +1,19 @@
 import {ISmAction} from '../core/models/actions';
-import {ProjectsUpdateRequest} from '../../business-logic/model/projects/projectsUpdateRequest';
-import {ProjectsGetAllRequest} from '../../business-logic/model/projects/projectsGetAllRequest';
-import {ProjectsGetByIdResponse} from '../../business-logic/model/projects/projectsGetByIdResponse';
-import {Project} from '../../business-logic/model/projects/project';
+import {ProjectsGetAllRequest} from '~/business-logic/model/projects/projectsGetAllRequest';
+import {ProjectsGetByIdResponse} from '~/business-logic/model/projects/projectsGetByIdResponse';
+import {Project} from '~/business-logic/model/projects/project';
 import {Action, createAction, props} from '@ngrx/store';
 import {PROJECTS_ACTIONS, PROJECTS_PREFIX} from './common-projects.consts';
 
-export class ProjectUpdated implements ISmAction {
-  public type = PROJECTS_ACTIONS.PROJECT_UPDATED;
-  public payload: { updatedData: ProjectsUpdateRequest };
+export const updateProject = createAction(
+  PROJECTS_PREFIX + '[update project]',
+  props<{id: string, changes: Partial<Project>}>()
+);
 
-  constructor(updatedData: ProjectsUpdateRequest) {
-    this.payload = {updatedData};
-  }
-}
-
-export class UpdateProjectPartial implements Action {
-  readonly type = PROJECTS_ACTIONS.UPDATE_ONE_PROJECT;
-
-  constructor(public payload: { id: Project['id']; changes: ProjectsUpdateRequest }) {
-  }
-}
-
+export const updateProjectSuccess = createAction(
+  PROJECTS_PREFIX + '[update project success]',
+  props<{id: string; changes: Partial<Project>}>()
+);
 
 export class SetProjectInSelectedAndInList implements ISmAction {
   public type = PROJECTS_ACTIONS.SET_PROJECT_BY_ID;

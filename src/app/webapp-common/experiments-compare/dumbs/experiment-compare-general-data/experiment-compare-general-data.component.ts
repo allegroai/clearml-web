@@ -1,7 +1,7 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {EXPERIMENTS_STATUS_LABELS} from '../../../../features/experiments/shared/experiments.const';
-import {IExperimentDetail} from '../../../../features/experiments-compare/experiments-compare-models';
-import {TIME_FORMAT_STRING} from '../../../constants';
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
+import {EXPERIMENTS_STATUS_LABELS} from '~/features/experiments/shared/experiments.const';
+import {IExperimentDetail} from '~/features/experiments-compare/experiments-compare-models';
+import {TIME_FORMAT_STRING} from '@common/constants';
 
 @Component({
   selector: 'sm-experiment-compare-general-data',
@@ -24,6 +24,6 @@ export class ExperimentCompareGeneralDataComponent {
   }
 
   buildUrl() {
-    return `/projects/${this.experiment.project ? this.experiment.project.id : '*'}/experiments/${this.experiment.id}`;
+    return ['../../', 'experiments', this.experiment.id];
   }
 }

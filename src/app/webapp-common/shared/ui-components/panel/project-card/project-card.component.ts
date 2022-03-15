@@ -12,17 +12,18 @@ import {ICONS} from '@common/constants';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProjectCardComponent {
-  private _project: ProjectsGetAllResponseSingle ;
+  private _project: ProjectsGetAllResponseSingle;
   public computeTime: string;
 
-  @Input() set project(data: ProjectsGetAllResponseSingle ) {
+  @Input() set project(data: Project) {
     this._project = data;
-    this.computeTime = this.convertSecToDaysHrsMinsSec(data.stats?.active?.total_runtime)
+    this.computeTime = this.convertSecToDaysHrsMinsSec(data.stats?.active?.total_runtime);
   };
 
   get project() {
     return this._project;
   }
+
   @Input() isRootProject;
   @Input() hideMenu = false;
   @Output() projectCardClicked = new EventEmitter<Project>();

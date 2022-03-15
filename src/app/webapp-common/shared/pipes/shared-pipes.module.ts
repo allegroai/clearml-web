@@ -49,10 +49,13 @@ import {FilterInternalPipe} from './filter-internal.pipe';
 import {IdToObjectsArrayPipe} from "./idToObjectsArray.pipe";
 import {IsEmptyPipe} from './is-empty.pipe';
 import {HighlightSearchPipe} from './highlight-search.pipe';
-import { TemplateInjectorPipe } from './template-injector.pipe';
-import { TestConditionalPipe } from './test-conditional.pipe';
-import { GroupHasErrorsPipe } from './group-has-errors.pipe';
-import { FormgroupHasRequiredFieldPipe } from './formgroup-has-required-field.pipe';
+import {TemplateInjectorPipe} from './template-injector.pipe';
+import {TestConditionalPipe} from './test-conditional.pipe';
+import {GroupHasErrorsPipe} from './group-has-errors.pipe';
+import {FormgroupHasRequiredFieldPipe} from './formgroup-has-required-field.pipe';
+import {FileSizePipe} from '@common/shared/pipes/filesize.pipe';
+import {RegexPipe} from '@common/shared/pipes/filter-regex.pipe';
+import {ColGetterPipe} from './col-getter.pipe';
 
 const pipes = [
   CamelToTitlePipe, FilenameFromPath, FilterPipe, FloorPipe, KeyValuePipe, NAPipe, SortPipe, IsVideoPipe, IsAudioPipe,FilterInternalPipe,UuidPipe,
@@ -60,16 +63,16 @@ const pipes = [
   ToExponentialPipe, HighlightSearchTextPipe, HighlightSearchPipe, HideHashPipe, HideHashTitlePipe, TimeAgoPipe, TimeTillNowPipe, HasExampleItemPipe, safeAngularUrlParameterPipe,
   AdvancedFilterPipe, SafePipe, SelectOptionValueToLabelPipe, ToPercentagePipe, ReplaceViaMapPipe, FilterByIdPipe, FilterLast, FilterOutPipe, SimpleFilterPipe,
   BreadcrumbsEllipsisPipe, ShortProjectNamePipe, ProjectLocationPipe,StringIncludedInArrayPipe, ToPropertyArrayPipe, MenuItemTextPipe, InitialsPipe, IdToObjectsArrayPipe, IsEmptyPipe,
-  TemplateInjectorPipe, TestConditionalPipe, GroupHasErrorsPipe, FormgroupHasRequiredFieldPipe
+  TemplateInjectorPipe, TestConditionalPipe, GroupHasErrorsPipe, FormgroupHasRequiredFieldPipe, FileSizePipe, RegexPipe
 ];
 
 @NgModule({
   imports: [
     CommonModule,
   ],
-  declarations: [pipes, ShowSelectedFirstPipe, CountPipe ],
+  declarations: [pipes, ShowSelectedFirstPipe, CountPipe, ColGetterPipe ],
   providers: [pipes],
-    exports: [pipes, ShowSelectedFirstPipe, CountPipe]
+    exports: [pipes, ShowSelectedFirstPipe, CountPipe, ColGetterPipe]
 })
 export class SharedPipesModule {
 }

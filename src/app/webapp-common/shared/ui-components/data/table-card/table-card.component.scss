@@ -1,56 +1,51 @@
 @import "../../styles/variables";
 
-.table-card {
+.table-card {  
   display: grid;
-  grid-template-columns: auto auto 1fr;
-  padding: 15px 15px 15px 0;
-  min-height: 90px;
-
+  grid-template-columns: 20px 32px 1fr;
+  align-items: center;
+  gap: 4px 12px;
+  margin: 0 24px;
+  grid-template-areas:
+    "cbx type-icon card-name"
+    ". . tags"
+    ". . data";
   &.two-columns {
-    grid-template-columns: auto 1fr;
+    grid-template-columns: 24px 1fr;
+    grid-template-areas:
+    "cbx card-name"
+    ". tags"
+    ". data";
   }
+}
 
-  &:hover {
-    background-color: $blue-650;
-  }
+.cbx { grid-area: cbx; margin-right: auto; }
+.type-icon { grid-area: type-icon; display: flex; justify-content: center; }
+.card-name { grid-area: card-name; display: flex; overflow: hidden;}
+.tags { grid-area: tags; overflow: hidden; }
+.data { grid-area: data; overflow: hidden; text-overflow: ellipsis; }
 
-  &.checked:not(.selected) {
-    background-color: $blue-500;
-    &:hover, &.contexted {
-      background-color: $blue-550;
-    }
-  }
 
-  &.selected {
-    background-color: $blue-400;
-
-    &:hover {
-      background-color: $blue-480;
-    }
-  }
+.name-container {
+  min-width: 0;
+  display: flex;
+  margin-right: 12px;
+}
+.name {
+  flex: 1;
+  font-weight: 500;
+  color: $blue-50;
+  min-width: 60px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .content-row {
   padding: 2px;
   color: $cloudy-blue-two;
-
-  .name {
-    flex: 1;
-    font-weight: bold;
-    color: $blue-50;
-    min-width: 0;
-  }
 }
 
-.columns-container {
-  min-width: 0;
 
-  .name-container {
-    min-width: 0;
-    display: flex;
-    margin-right: 12px;
-  }
-}
 
 ::ng-deep sm-model-tags .tag {
   margin-left: 0px !important;

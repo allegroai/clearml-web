@@ -1,0 +1,27 @@
+@import 'variables';
+
+.custom-column-buttons {
+  display: flex;
+  font-weight: 500;
+  color: $light-grey-blue;
+  background: $faint-gray;
+  cursor: pointer;
+  .add-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 15px 15px;
+
+    &.meta-button {
+      width: 100%;
+      .caption {
+        margin-top: 2px;
+      }
+    }
+  }
+
+  div:not(.disabled):hover {
+    color: $blue-400;
+    transition: color 0.3s;
+  }
+}

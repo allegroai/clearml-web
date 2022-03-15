@@ -36,9 +36,10 @@ export class CommonDeleteDialogComponent implements OnInit, OnDestroy {
   private numSelected: number;
   public bodyMessage: string;
   public showFinishMessage: boolean = false;
-  private useCurrentEntity: boolean;
-  private entity: Task;
+  private readonly useCurrentEntity: boolean;
+  private readonly entity: Task;
   public failedFiles: string[];
+  private readonly includeChildren: boolean;
 
   constructor(
     private store: Store<any>,
@@ -48,6 +49,7 @@ export class CommonDeleteDialogComponent implements OnInit, OnDestroy {
       entityType: EntityTypeEnum;
       projectStats: CommonProjectReadyForDeletion;
       useCurrentEntity: boolean;
+      includeChildren: boolean;
     },
     public dialogRef: MatDialogRef<CommonDeleteDialogComponent>
   ) {
@@ -61,6 +63,7 @@ export class CommonDeleteDialogComponent implements OnInit, OnDestroy {
     this.bodyMessage = this.getMessageByEntity(data.entityType, data.projectStats);
     this.useCurrentEntity = data.useCurrentEntity;
     this.entity = data.entity;
+    this.includeChildren = data.includeChildren;
   }
 
   ngOnDestroy(): void {
@@ -99,7 +102,7 @@ export class CommonDeleteDialogComponent implements OnInit, OnDestroy {
 
   delete() {
     this.inProgress = true;
-    this.store.dispatch(deleteEntities({entityType: this.entityType, entity: this.useCurrentEntity && this.entity}));
+    this.store.dispatch(deleteEntities({entityType: this.entityType, entity: this.useCurrentEntity && this.entity, includeChildren: this.includeChildren}));
   }
 
   openToggle() {
@@ -112,6 +115,7 @@ export class CommonDeleteDialogComponent implements OnInit, OnDestroy {
 
   getMessageByEntity(entityType: EntityTypeEnum, stats?: CommonProjectReadyForDeletion): string {
     switch (entityType) {
+      case EntityTypeEnum.controller:
       case EntityTypeEnum.experiment:
         return 'This will also remove all captured logs, results, artifacts and debug samples.';
       case EntityTypeEnum.model:

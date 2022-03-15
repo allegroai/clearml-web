@@ -17,7 +17,7 @@
     (keyup)="filterLog($event)"
   />
 </div>
-<div *ngIf="hasLog !== undefined && !hasLog" class="no-output">
+<div *ngIf="hasLog === false" class="no-output">
   <i class="icon no-output-icon" [ngClass]="isDarkTheme ? 'i-no-log-dark' : 'i-no-log'"></i>
   <h3>NO LOG DATA</h3>
 </div>

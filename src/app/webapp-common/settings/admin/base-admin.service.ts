@@ -16,7 +16,6 @@ import {selectActiveWorkspace} from '../../core/reducers/users-reducer';
 import {GetCurrentUserResponseUserObjectCompany} from '../../../business-logic/model/users/getCurrentUserResponseUserObjectCompany';
 import {Environment} from '../../../../environments/base';
 import {AmazonS3URI, DEFAULT_REGION} from '../../shared/utils/amazon-s3-uri';
-import {fromPromise} from 'rxjs/internal-compatibility';
 import {BuildMiddleware, MetadataBearer, RequestPresigningArguments} from '@aws-sdk/types';
 import {Client, Command} from '@aws-sdk/smithy-client';
 import {HttpRequest} from '@aws-sdk/protocol-http';
@@ -240,7 +239,7 @@ export class BaseAdminService {
       if (s3) {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         const command = new GetObjectCommand({Key: bucketKeyEndpoint.Key, Bucket: bucketKeyEndpoint.Bucket/*, ResponseContentType: 'image/jpeg'*/});
-        return fromPromise(getSignedUrl(s3, command, {
+        return from(getSignedUrl(s3, command, {
           expiresIn: FOUR_DAYS,
           unhoistableHeaders: new Set(['x-amz-content-sha256', 'x-id']),
           unsignableHeaders: new Set(['x-amz-content-sha256', 'x-id']),

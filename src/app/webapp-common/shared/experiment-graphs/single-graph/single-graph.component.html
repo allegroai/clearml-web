@@ -12,6 +12,7 @@
      (resizeStart)="resizeStarted.emit()"
      [class.whitebg-table]="type === 'table'"
      [class.move-title]="type !== 'parcoords'"
+     (scroll)="repositionModeBar($event.target)"
 >
   <div
     *ngIf="!disableResize"

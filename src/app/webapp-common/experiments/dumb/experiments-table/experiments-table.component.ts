@@ -5,37 +5,33 @@ import {
   EventEmitter,
   Input,
   OnDestroy,
-  Output,
-  ViewChild,
+  Output, TemplateRef,
 } from '@angular/core';
-import {ICONS, TIME_FORMAT_STRING} from '../../../constants';
-import {ColHeaderTypeEnum, ISmCol} from '../../../shared/ui-components/data/table/table.consts';
+import {ICONS, TIME_FORMAT_STRING} from '@common/constants';
+import {ColHeaderTypeEnum, ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {FILTERED_EXPERIMENTS_STATUS_OPTIONS} from '../../shared/common-experiments.const';
 import {get, uniq} from 'lodash/fp';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {ITableExperiment} from '../../shared/common-experiment-model.model';
-import {EXPERIMENTS_TABLE_COL_FIELDS,} from '../../../../features/experiments/shared/experiments.const';
-import {BaseTableView} from '../../../shared/ui-components/data/table/base-table-view';
-import {getSystemTags, isDevelopment} from '../../../../features/experiments/shared/experiments.utils';
-import {User} from '../../../../business-logic/model/users/user';
-import {sortByArr} from '../../../shared/pipes/show-selected-first.pipe';
-import {Observable} from 'rxjs';
+import {EXPERIMENTS_TABLE_COL_FIELDS,} from '~/features/experiments/shared/experiments.const';
+import {BaseTableView} from '@common/shared/ui-components/data/table/base-table-view';
+import {getSystemTags, isDevelopment} from '~/features/experiments/shared/experiments.utils';
+import {User} from '~/business-logic/model/users/user';
+import {sortByArr} from '@common/shared/pipes/show-selected-first.pipe';
 import {Store} from '@ngrx/store';
-import {selectCompanyTags, selectProjectTags, selectTagsFilterByProject} from '../../../core/reducers/projects.reducer';
-import {addTag} from '../../actions/common-experiments-menu.actions';
-import {NoUnderscorePipe} from '../../../shared/pipes/no-underscore.pipe';
+import {NoUnderscorePipe} from '@common/shared/pipes/no-underscore.pipe';
 import {TitleCasePipe} from '@angular/common';
 import {INITIAL_EXPERIMENT_TABLE_COLS} from '../../experiment.consts';
-import {ProjectsGetTaskParentsResponseParents} from '../../../../business-logic/model/projects/projectsGetTaskParentsResponseParents';
+import {
+  ProjectsGetTaskParentsResponseParents
+} from '~/business-logic/model/projects/projectsGetTaskParentsResponseParents';
 import {Router} from '@angular/router';
-import {IOption} from '../../../shared/ui-components/inputs/select-autocomplete-for-template-forms/select-autocomplete-for-template-forms.component';
+import {IOption} from '@common/shared/ui-components/inputs/select-autocomplete-for-template-forms/select-autocomplete-for-template-forms.component';
 import {createFiltersFromStore} from '../../effects/common-experiments-view.effects';
-import {CountAvailableAndIsDisableSelectedFiltered} from '../../../shared/entity-page/items.utils';
+import {CountAvailableAndIsDisableSelectedFiltered} from '@common/shared/entity-page/items.utils';
 import {hyperParamSelectedExperiments, selectAllExperiments} from '../../actions/common-experiments-view.actions';
-import {excludedKey, uniqueFilterValueAndExcluded} from '../../../shared/utils/tableParamEncode';
+import {excludedKey, uniqueFilterValueAndExcluded} from '@common/shared/utils/tableParamEncode';
 import {getRoundedNumber} from '../../shared/common-experiments.utils';
-import {isReadOnly} from '../../../shared/utils/shared-utils';
-import {ExperimentMenuExtendedComponent} from '../../../../features/experiments/containers/experiment-menu-extended/experiment-menu-extended.component';
 
 @Component({
   selector: 'sm-experiments-table',
@@ -59,8 +55,9 @@ export class ExperimentsTableComponent extends BaseTableView implements OnDestro
   public isDevelopment = isDevelopment;
   private _selectedExperiments: ITableExperiment[] = [];
   readonly colHeaderTypeEnum = ColHeaderTypeEnum;
-  public readonly initialColumns = INITIAL_EXPERIMENT_TABLE_COLS;
+  @Input() initialColumns = INITIAL_EXPERIMENT_TABLE_COLS;
   @Input() disableContextMenu = false;
+  @Input() contextMenuTemplate: TemplateRef<any> = null;
 
   @Input() tableCols: ISmCol[];
   private _experiments: Array<ITableExperiment> = [];
@@ -87,9 +84,6 @@ export class ExperimentsTableComponent extends BaseTableView implements OnDestro
   }
 
   public contextExperiment: ITableExperiment;
-  public tagsFilterByProject$: Observable<boolean>;
-  public projectTags$: Observable<string[]>;
-  public companyTags$: Observable<string[]>;
   public filtersValues: { [colId: string]: any } = {};
   public filtersMatch: { [colId: string]: string } = {};
   public filtersSubValues: { [colId: string]: any } = {};
@@ -177,6 +171,7 @@ export class ExperimentsTableComponent extends BaseTableView implements OnDestro
   }
 
   @Input() set tableFilters(filters: { [s: string]: FilterMetadata }) {
+    this.filtersValues = {};
     this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.STATUS] = get([EXPERIMENTS_TABLE_COL_FIELDS.STATUS, 'value'], filters) || [];
     this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.TYPE] = get([EXPERIMENTS_TABLE_COL_FIELDS.TYPE, 'value'], filters) || [];
     this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.USER] = get([EXPERIMENTS_TABLE_COL_FIELDS.USER, 'value'], filters) || [];
@@ -185,6 +180,9 @@ export class ExperimentsTableComponent extends BaseTableView implements OnDestro
     this.filtersSubValues[EXPERIMENTS_TABLE_COL_FIELDS.TAGS] = (get(['system_tags', 'value'], filters) || []);
     this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.PARENT] = get([EXPERIMENTS_TABLE_COL_FIELDS.PARENT, 'value'], filters) || [];
     this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.PROJECT] = get([EXPERIMENTS_TABLE_COL_FIELDS.PROJECT, 'value'], filters) || [];
+    this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.VERSION] = get([EXPERIMENTS_TABLE_COL_FIELDS.VERSION, 'value'], filters) || [];
+    this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.LAST_UPDATE] = get([EXPERIMENTS_TABLE_COL_FIELDS.LAST_UPDATE, 'value'], filters) || [];
+    this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.STARTED] = get([EXPERIMENTS_TABLE_COL_FIELDS.STARTED, 'value'], filters) || [];
     this.sortOptionalProjectsList();
 
     // handle dynamic filters;
@@ -207,7 +205,8 @@ export class ExperimentsTableComponent extends BaseTableView implements OnDestro
   @Output() tagsMenuOpened = new EventEmitter();
   @Output() typesMenuOpened = new EventEmitter();
   @Output() columnResized = new EventEmitter<{ columnId: string; widthPx: number }>();
-  @ViewChild('contextMenuExtended') contextMenuExtended: ExperimentMenuExtendedComponent;
+  @Output() openContextMenu = new EventEmitter<{ x: number; y: number }>();
+  @Output() removeTag = new EventEmitter<{experiment: ITableExperiment; tag: string}>();
   TIME_FORMAT_STRING = TIME_FORMAT_STRING;
 
   constructor(
@@ -218,18 +217,12 @@ export class ExperimentsTableComponent extends BaseTableView implements OnDestro
     private router: Router
   ) {
     super();
-    this.tagsFilterByProject$ = this.store.select(selectTagsFilterByProject);
-    this.projectTags$ = this.store.select(selectProjectTags);
-    this.companyTags$ = this.store.select(selectCompanyTags);
     this.entitiesKey = 'experiments';
     this.selectedEntitiesKey = 'selectedExperiments';
   }
 
   ngOnDestroy(): void {
     super.ngOnDestroy();
-    if (this.contextMenuExtended?.contextMenu) {
-      this.contextMenuExtended.contextMenu = null;
-    }
   }
 
   onRowSelectionChanged(event) {
@@ -295,14 +288,6 @@ export class ExperimentsTableComponent extends BaseTableView implements OnDestro
     }
   }
 
-  addTag(tag: string) {
-    this.store.dispatch(addTag({
-      tag,
-      experiments: this.selectedExperiments.length > 1 ? this.selectedExperiments.filter(_selected => !isReadOnly(_selected)) : [this.contextExperiment]
-    }));
-    this.filtersOptions[EXPERIMENTS_TABLE_COL_FIELDS.TAGS] = [];
-  }
-
   onContextMenu(data) {
     this.contextExperiment = this._experiments.find(experiment => experiment.id === data.rowData.id);
     if (!this.selectedExperiments.map(exp => exp.id).includes(this.contextExperiment.id)) {
@@ -311,7 +296,7 @@ export class ExperimentsTableComponent extends BaseTableView implements OnDestro
     }
     const event = data.e as MouseEvent;
     event.preventDefault();
-    this.contextMenuExtended?.contextMenu?.openMenu({x: event.clientX, y: event.clientY});
+    this.openContextMenu.emit({x: event.clientX, y: event.clientY});
   }
 
 

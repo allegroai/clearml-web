@@ -1,0 +1,113 @@
+@import "variables";
+
+:host {
+  width: 200px;
+  flex: 0 0 200px;
+  padding: 2px;
+  color: $blue-50;
+}
+.title {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.al-ico-console {
+  display: none;
+  color: $blue-200;
+  &:hover {
+    color: inherit;
+  }
+}
+
+.step-container {
+  border-radius: 4px;
+  padding: 2px;
+
+  &:hover {
+    box-shadow: 0 0 0 2px rgba(220, 224, 238, 0.4);
+    .al-ico-console {
+      display: block;
+    }
+  }
+  &.selected {
+    box-shadow: 0 0 0 2px rgba(220, 224, 238, 1);
+  }
+}
+
+.step-part {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px;
+}
+
+//  STEP TITLE
+.step-title {
+  border-radius: 4px 4px 0 0;
+  height: 48px;
+
+  &.queued {
+    background-color: mix($pipeline-queued, $blue-950, 20%);
+  }
+  &.pending {
+    background-color: mix($pipeline-pending, $blue-950, 20%);
+  }
+  &.skipped {
+    background-color: mix($pipeline-skipped, $blue-950, 20%);
+  }
+  &.cached {
+    background-color: mix($pipeline-cached, $blue-950, 20%);
+  }
+  &.executed {
+    background-color: mix($pipeline-executed, $blue-950, 20%);
+  }
+  &.running {
+    background-color: mix($pipeline-running, $blue-950, 20%);
+  }
+  &.failed {
+    background-color: mix($pipeline-failed, $blue-950, 20%);
+  }
+  &.aborted {
+    background-color: mix($pipeline-aborted, $blue-950, 20%);
+  }
+  &.completed {
+    background-color: mix($pipeline-completed, $blue-950, 20%);
+  }
+}
+
+//  STEP FOOTER
+.step-footer {
+  border-radius: 0 0 4px 4px;
+  justify-content: space-between;
+  height: 26px;
+
+  &.queued {
+    background-color: $pipeline-queued;
+  }
+  &.pending {
+    background-color: $pipeline-pending;
+  }
+  &.skipped {
+    background-color: $pipeline-skipped;
+  }
+  &.cached {
+    background-color: $pipeline-cached;
+  }
+  &.executed {
+    background-color: $pipeline-executed;
+  }
+  &.running {
+    background-color: $pipeline-running;
+  }
+  &.failed {
+    background-color: $pipeline-failed;
+  }
+  &.aborted {
+    background-color: $pipeline-aborted
+  }
+  &.completed {
+    background-color: $pipeline-completed
+  }
+}

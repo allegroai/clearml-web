@@ -60,7 +60,7 @@ $dark-theme: (
     //Hover State,
     stateHoverBorderColor: $blue-500,
     stateHoverBgColor: $blue-500,
-    stateHoverTextColor: #a7b2d8,
+    stateHoverTextColor: $blue-280,
     //Forms,
     inputBgColor: $blue-50,
     inputTextColor: $blue-600,
@@ -78,7 +78,7 @@ $dark-theme: (
     background-color: #000,
     background-color-disabled: #000,
     border-radius: 4px,
-    border-color: #364164,
+    border-color: $blue-500,
     border-width: 1px,
     focus-color: $blue-grey,
     hover-border-color: rgba(206, 209, 220, 0.5),
@@ -89,10 +89,11 @@ $dark-theme: (
 
   search-input: (
     color: $blue-280,
-    icon-color: $blue-grey,
+    icon-color: $blue-280,
     border-color: $blue-grey,
-    border-color-focus: #364164,
-    ph-color: $blue-grey
+    border-color-focus: $blue-500,
+    ph-color: $blue-280,
+    seperator: $blue-900
   ),
   input-select: (
     height: 32px,

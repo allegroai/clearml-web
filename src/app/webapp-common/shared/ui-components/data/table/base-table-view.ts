@@ -6,16 +6,19 @@ import {ISmCol, TABLE_SORT_ORDER, TableSortOrderEnum} from './table.consts';
 import {filter, take} from 'rxjs/operators';
 import {TableComponent} from './table.component';
 import {SortMeta} from 'primeng/api';
+import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 
 @Directive()
 export abstract class BaseTableView implements AfterViewInit, OnDestroy{
+  public entityTypes = EntityTypeEnum;
   public selectionState: TableSelectionState;
   protected entitiesKey: string;
   public selectedEntitiesKey: string;
-  public contextMenuActive: boolean;
+  @Input() contextMenuActive: boolean;
   public table: TableComponent;
 
   @Input() selectionMode: 'multiple' | 'single' | null = 'single';
+  @Input() entityType: EntityTypeEnum;
   @Input() colsOrder: string[];
   private _tableSortFields: SortMeta[];
   public tableSortFieldsObject: {[fieldName: string]: {index: number; field: string; order: TableSortOrderEnum}} = {};

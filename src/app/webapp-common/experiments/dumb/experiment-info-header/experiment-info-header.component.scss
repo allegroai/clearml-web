@@ -5,18 +5,13 @@
   position: relative;
   height: $experiment-info-header-height;
 
-  .alert-warning {
-    padding: 3px 6px;
-    margin-bottom: 3px;
-  }
-
   .experiment-icon {
     margin: 0px 20px 0 5px;
   }
 
   .comment {
     height: 24px;
-    margin-right: 12px;
+    margin: 0 12px 0 24px;
   }
   .middle-col {
     flex-grow: 1;
@@ -50,7 +45,6 @@
 
   .edit-name {
     max-width: 80%;
-    padding-right: 24px;
   }
 
   .menu-button, .menu-button &:hover, .menu-button &:focus {
@@ -83,7 +77,7 @@
     line-height: 18px;
     padding: 0 6px;
     border-radius: 4px;
-    margin: 6px;
+    margin-left: 14px;
     color: white;
     background-color: #FFFFFF;
 

@@ -12,14 +12,14 @@
 
   <ng-container *ngIf="currentUser">
     <a class="item d-block" #rlaHome="routerLinkActive" routerLink="/dashboard" routerLinkActive (click)="resetSearch()"
-      smTooltip="DASHBOARD" showDelay="0" matTooltipPosition="right">
+      smTooltip="DASHBOARD" [matTooltipShowDelay]="0" matTooltipPosition="right">
       <div class="item-icon">
         <i [class]="'al-icon al-ico-home al-color ' + (rlaHome.isActive ? 'neon-yellow': 'blue-300')" ></i>
       </div>
       <div class="caption">dashboard</div>
     </a>
 
-    <a class="item d-block" smTooltip="PROJECTS" showDelay="0" matTooltipPosition="right" routerLink="/projects"
+    <a class="item d-block" smTooltip="PROJECTS" [matTooltipShowDelay]="0" matTooltipPosition="right" routerLink="/projects"
       [routerLinkActive] #rlaProjects="routerLinkActive">
       <div class="item-icon">
         <i [class]="'al-icon al-ico-projects al-color ' + (rlaProjects.isActive ? 'neon-yellow': 'blue-300')" ></i>
@@ -27,12 +27,24 @@
       <div class="caption">projects</div>
     </a>
     <a class="item d-block"
+       routerLink="/pipelines"
+       routerLinkActive
+       #rlaDatasets="routerLinkActive"
+       smTooltip="PIPELINES"
+       [matTooltipShowDelay]="0"
+       matTooltipPosition="right">
+      <div class="item-icon">
+        <i [class]="'al-icon al-ico-pipelines al-color ' + (rlaDatasets.isActive ? 'neon-yellow': 'blue-300')"></i>
+      </div>
+      <div class="caption">pipelines</div>
+    </a>
+    <a class="item d-block"
        *smCheckPermission="true"
        routerLink="/workers-and-queues"
        routerLinkActive
        #rlaQueues="routerLinkActive"
        smTooltip="WORKERS & QUEUES"
-       showDelay="0"
+       [matTooltipShowDelay]="0"
        matTooltipPosition="right">
       <div class="item-icon">
         <i [class]="'al-icon al-ico-queues al-color ' + (rlaQueues.isActive ? 'neon-yellow': 'blue-300')" ></i>
@@ -43,7 +55,9 @@
   </ng-container>
   <div *ngIf="currentUser" class="account">
     <a *ngIf="environment.whiteLabelLink" class="item d-block" target="_blank"
-       [smTooltip]="environment.whiteLabelLink.tooltip" showDelay="0" matTooltipPosition="right"
+       [smTooltip]="environment.whiteLabelLink.tooltip"
+       [matTooltipShowDelay]="0"
+       matTooltipPosition="right"
        [href]="environment.whiteLabelLink.link">
       <div class="item-icon"
            [style.background-image]="'url(' + environment.whiteLabelLink.logo + ')'"
@@ -53,7 +67,9 @@
       <div class="caption">Ignite</div>
     </a>
     <a class="item d-block" href="https://github.com/allegroai/clearml" target="_blank"
-       smTooltip="GitHub Repository" showDelay="0" matTooltipPosition="right">
+       smTooltip="GitHub Repository"
+       [matTooltipShowDelay]="0"
+       matTooltipPosition="right">
       <div class="item-icon">
         <i class="fab fa-github fa-24 al-color blue-300"></i>
       </div>

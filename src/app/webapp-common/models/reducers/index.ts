@@ -32,8 +32,13 @@ export const selectModelsTableColsOrder = createSelector(modelsView, selectRoute
 export const selectModelsUsers = createSelector(modelsView, (state): Array<any> => state.users);
 export const selectModelsFrameworks = createSelector(modelsView, (state): Array<string> => state.frameworks);
 export const selectModelsTags = createSelector(modelsView, (state): Array<string> => state.projectTags);
+export const selectMetadataKeys = createSelector(modelsView, (state): Array<string> => state.projectMetadataKeys);
+export const selectMetadataCols = createSelector(modelsView, (state): ISmCol[] => state.metadataCols);
+
+
 export const selectModelsTableColsWidth = createSelector(modelsView, selectRouterParams,
   (state, params) => state.projectColumnsWidth?.[params?.projectId] || {});
+
 export const selectModelsHiddenTableCols = createSelector(modelsView, selectRouterParams,
   (state, params) => state.hiddenProjectTableCols?.[params?.projectId] || modelsInitialState.hiddenTableCols);
 export const selectModelTableColumns = createSelector(modelsView, selectModelsHiddenTableCols, selectModelsTableColsWidth,
@@ -43,6 +48,14 @@ export const selectModelTableColumns = createSelector(modelsView, selectModelsHi
     hidden: !!hidden[col.id],
     style: {...col.style, ...(colWidth[col.id] && {width: `${colWidth[col.id]}px`})}
   } as ISmCol)));
+export const selectMetadataColsForProject = createSelector([modelsView, selectRouterParams, selectModelsHiddenTableCols, selectModelsTableColsWidth], (state, params, hidden, colWidth) =>
+  state.metadataCols
+    .filter(metaCol => metaCol.projectId === params?.projectId)
+    .map(col => ({
+      ...col,
+      hidden: !!hidden[col.id],
+      style: {...col.style, ...(colWidth[col.id] && {width: `${colWidth[col.id]}px`})}
+    } as ISmCol)))
 export const selectSplitSize = createSelector(modelsView, (state): number => state.splitSize);
 
 

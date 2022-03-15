@@ -1,18 +1,26 @@
 <sm-menu
-    *ngIf="menuOpen && queuesManager"
-    [position]="menuPosition"
-    [header]=""
-    buttonClass="al-icon sm-md al-ico-bars-menu al-color light-grey-blue"
-    [showCart]="false"
-    [showOverlay]="false"
-    [showButton]="false"
-    [openOnInit]="true"
-  >
-    <sm-menu-item itemLabel="Delete"
-                  [disabled]="selectedQueue?.entries?.length>0"
-                  (itemClicked)="deleteQueue.emit(selectedQueue)"></sm-menu-item>
-    <sm-menu-item itemLabel="Rename"
-                  (itemClicked)="renameQueue.emit(selectedQueue)"></sm-menu-item>
+  *ngIf="menuOpen"
+  [position]="menuPosition"
+  [header]=""
+  buttonClass="al-icon sm-md al-ico-bars-menu al-color light-grey-blue"
+  [showCart]="false"
+  [showOverlay]="false"
+  [showButton]="false"
+  [openOnInit]="true"
+>
+  <sm-menu-item
+    *ngIf="queuesManager"
+    itemLabel="Delete"
+    [disabled]="selectedQueue?.entries?.length>0"
+    (itemClicked)="deleteQueue.emit(selectedQueue)"></sm-menu-item>
+  <sm-menu-item
+    *ngIf="queuesManager"
+    itemLabel="Rename"
+    (itemClicked)="renameQueue.emit(selectedQueue)"></sm-menu-item>
+  <sm-menu-item
+    itemLabel="Clear"
+    (itemClicked)="clearQueue.emit(selectedQueue)"
+    [disabled]="selectedQueue?.entries?.length===0"></sm-menu-item>
   <ng-content select="[extendedQueuesMenu]"></ng-content>
-  </sm-menu>
+</sm-menu>
 

@@ -1,4 +1,4 @@
-import {Component, ElementRef, forwardRef, HostListener} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, forwardRef, HostListener} from '@angular/core';
 import {TemplateFormSectionBase} from '../../template-forms-ui/templateFormSectionBase';
 import {NG_VALUE_ACCESSOR} from '@angular/forms';
 
@@ -6,6 +6,7 @@ import {NG_VALUE_ACCESSOR} from '@angular/forms';
   selector: 'sm-duration-input',
   templateUrl: './duration-input.component.html',
   styleUrls: ['./duration-input.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -14,21 +15,23 @@ import {NG_VALUE_ACCESSOR} from '@angular/forms';
     }]
 })
 export class DurationInputComponent extends TemplateFormSectionBase {
-  public val: number;
-  public ms;
-  public seconds;
-  public minutes;
-  public hours;
+  public val = 0;
+  public ms = '0';
+  public seconds = '0';
+  public minutes = '0';
+  public hours = '0';
   public inEdit: boolean;
 
 
   set value(val) {  // this value is updated by programmatic changes if( ngModelValue !== undefined && this.ngModelValue !== ngModelValue){
     this.inEdit = false;
-    this.val = val;
-    this.msToHMSMS(val);
+    if (val !== undefined) {
+      this.val = val;
+      this.msToHMSMS(val);
+    }
   }
 
-  constructor(private eRef: ElementRef) {
+  constructor(private eRef: ElementRef, private cdr: ChangeDetectorRef) {
     super();
   }
 
@@ -36,6 +39,7 @@ export class DurationInputComponent extends TemplateFormSectionBase {
   clickOut(event) {
     if (!this.eRef.nativeElement.contains(event.target)) {
       this.value = this.val;
+      this.cdr.detectChanges();
     }
   }
 
@@ -51,6 +55,7 @@ export class DurationInputComponent extends TemplateFormSectionBase {
     this.minutes = this.toTwoDigits(minutes);
     this.seconds = this.toTwoDigits(seconds);
     this.ms = this.toThreeDigits(convertedMs);
+    this.cdr.detectChanges();
   }
 
   toTwoDigits(n: number) {
@@ -64,7 +69,7 @@ export class DurationInputComponent extends TemplateFormSectionBase {
   onChangePartial($event: any) {
     this.inEdit = false;
     const ms = this.currentTimeInMs();
-
+    this.val = ms;
     this.msToHMSMS(ms);
     this.onChange(ms);
   }
@@ -83,6 +88,6 @@ export class DurationInputComponent extends TemplateFormSectionBase {
   }
 
   currentTimeInMs() {
-    return (this.ms * 1 || 0) + (this.seconds * 1000 || 0) + (this.minutes * 1000 * 60 || 0) + (this.hours * 1000 * 60 * 60 || 0);
+    return (parseInt(this.ms) * 1 || 0) + (parseInt(this.seconds) * 1000 || 0) + (parseInt(this.minutes) * 1000 * 60 || 0) + (parseInt(this.hours) * 1000 * 60 * 60 || 0);
   }
 }

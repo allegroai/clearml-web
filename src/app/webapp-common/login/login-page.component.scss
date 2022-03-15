@@ -28,6 +28,11 @@
   position: absolute;
   z-index: 1;
   display: none;
+  width: 100%;
+  color: $blue-600;
+  background-color: $testing;
+  border: 2px solid darken($testing, 40%);
+  border-radius: 4px;
 
   &.show {
     display: block;

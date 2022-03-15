@@ -2,7 +2,7 @@
 
 @font-face {
   font-family: '#{$icomoon-font-family}';
-  src: url('./#{$icomoon-font-family}.ttf?mmpkhb') format('truetype');
+  src: url('./#{$icomoon-font-family}.ttf?dn2wcr') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -1086,14 +1086,54 @@
     content: $al-ico-no-code;
   }
 }
-.al-ico-automation {
-  &:before {
-    content: $al-ico-automation;
-  }
-}
 .al-ico-calendar-checked {
   &:before {
     content: $al-ico-calendar-checked;
+  }
+}
+.al-ico-no-source {
+  &:before {
+    content: $al-ico-no-source;
+  }
+}
+.al-ico-arrow-up {
+  &:before {
+    content: $al-ico-arrow-up;
+  }
+}
+.al-ico-arrow-down {
+  &:before {
+    content: $al-ico-arrow-down;
+  }
+}
+.al-ico-error-circle {
+  &:before {
+    content: $al-ico-error-circle;
+  }
+}
+.al-ico-pipelines {
+  &:before {
+    content: $al-ico-pipelines;
+  }
+}
+.al-ico-console {
+  &:before {
+    content: $al-ico-console;
+  }
+}
+.al-ico-link-arrow {
+  &:before {
+    content: $al-ico-link-arrow;
+  }
+}
+.al-ico-broken-file {
+  &:before {
+    content: $al-ico-broken-file;
+  }
+}
+.al-ico-run {
+  &:before {
+    content: $al-ico-run;
   }
 }
 .al-ico-status-draft {
@@ -1101,24 +1141,39 @@
     content: $al-ico-status-draft;
   }
 }
+.al-ico-status-published {
+  &:before {
+    content: $al-ico-status-published;
+  }
+}
+.al-ico-status-aborted-sec {
+  &:before {
+    content: $al-ico-status-aborted-sec;
+  }
+}
 .al-ico-status-pending {
   &:before {
     content: $al-ico-status-pending;
   }
 }
+.al-ico-status-skiped {
+  &:before {
+    content: $al-ico-status-skiped;
+  }
+}
+.al-ico-status-cached {
+  &:before {
+    content: $al-ico-status-cached;
+  }
+}
+.al-ico-status-executed {
+  &:before {
+    content: $al-ico-status-executed;
+  }
+}
 .al-ico-status-running {
   &:before {
     content: $al-ico-status-running;
-  }
-}
-.al-ico-status-completed {
-  &:before {
-    content: $al-ico-status-completed;
-  }
-}
-.al-ico-status-published {
-  &:before {
-    content: $al-ico-status-published;
   }
 }
 .al-ico-status-failed {
@@ -1131,9 +1186,14 @@
     content: $al-ico-status-aborted;
   }
 }
-.al-ico-status-aborted-sec {
+.al-ico-status-completed {
   &:before {
-    content: $al-ico-status-aborted-sec;
+    content: $al-ico-status-completed;
+  }
+}
+.al-ico-status-queued {
+  &:before {
+    content: $al-ico-enqueue;
   }
 }
 

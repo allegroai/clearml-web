@@ -1,50 +1,76 @@
 import {Injectable} from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {Action, Store} from '@ngrx/store';
-import {ApiTasksService} from '../../../business-logic/api-services/tasks.service';
-import {ApiAuthService} from '../../../business-logic/api-services/auth.service';
-import {BlTasksService} from '../../../business-logic/services/tasks.service';
-import {ApiEventsService} from '../../../business-logic/api-services/events.service';
+import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
+import {ApiAuthService} from '~/business-logic/api-services/auth.service';
+import {BlTasksService} from '~/business-logic/services/tasks.service';
+import {ApiEventsService} from '~/business-logic/api-services/events.service';
 import {Router} from '@angular/router';
 import {catchError, map, mergeMap, switchMap, tap, withLatestFrom} from 'rxjs/operators';
 import {activeLoader, addMessage, deactivateLoader, setServerError} from '../../core/actions/layout.actions';
 import * as menuActions from '../actions/common-experiments-menu.actions';
-import {of} from 'rxjs';
+import {stopClicked} from '../actions/common-experiments-menu.actions';
+import {Observable, of} from 'rxjs';
 import {requestFailed} from '../../core/actions/http.actions';
-import {IExperimentInfoState} from '../../../features/experiments/reducers/experiment-info.reducer';
-import {ExperimentConverterService} from '../../../features/experiments/shared/services/experiment-converter.service';
+import {IExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
+import {ExperimentConverterService} from '~/features/experiments/shared/services/experiment-converter.service';
 import * as exSelectors from '../reducers';
 import {selectSelectedExperiments} from '../reducers';
-import {selectSelectedExperiment} from '../../../features/experiments/reducers';
+import {selectSelectedExperiment} from '~/features/experiments/reducers';
 import * as infoActions from '../actions/common-experiments-info.actions';
 import {AutoRefreshExperimentInfo, ExperimentDetailsUpdated} from '../actions/common-experiments-info.actions';
-import {EmptyAction, MESSAGES_SEVERITY} from '../../../app.constants';
+import {EmptyAction, MESSAGES_SEVERITY} from '~/app.constants';
 import * as viewActions from '../actions/common-experiments-view.actions';
-import {IExperimentInfo, ISelectedExperiment} from '../../../features/experiments/shared/experiment-info.model';
+import {IExperimentInfo, ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
 import {ResetOutput} from '../actions/common-experiment-output.actions';
-import {ApiProjectsService} from '../../../business-logic/api-services/projects.service';
-import {TasksGetAllExResponse} from '../../../business-logic/model/tasks/tasksGetAllExResponse';
-import {ITask} from '../../../business-logic/model/al-task';
-import {TasksResetManyResponse} from '../../../business-logic/model/tasks/tasksResetManyResponse';
+import {ApiProjectsService} from '~/business-logic/api-services/projects.service';
+import {TasksGetAllExResponse} from '~/business-logic/model/tasks/tasksGetAllExResponse';
+import {ITask} from '~/business-logic/model/al-task';
+import {TasksResetManyResponse} from '~/business-logic/model/tasks/tasksResetManyResponse';
 import {RouterState, selectRouterConfig, selectRouterParams} from '../../core/reducers/router-reducer';
-import {TasksArchiveManyResponse} from '../../../business-logic/model/tasks/tasksArchiveManyResponse';
-import {EntityTypeEnum} from '../../../shared/constants/non-common-consts';
-import {TasksEnqueueManyResponse} from '../../../business-logic/model/tasks/tasksEnqueueManyResponse';
+import {TasksArchiveManyResponse} from '~/business-logic/model/tasks/tasksArchiveManyResponse';
+import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
+import {TasksEnqueueManyResponse} from '~/business-logic/model/tasks/tasksEnqueueManyResponse';
 import {getNotificationAction, MenuItems, MoreMenuItems} from '../../shared/entity-page/items.utils';
 import {getAllSystemProjects} from '../../core/actions/projects.actions';
-import { TaskStatusEnum } from '../../../business-logic/model/tasks/taskStatusEnum';
-import {setAllTasksChildren} from '../actions/common-experiments-menu.actions';
+import {MatDialog} from '@angular/material/dialog';
+import {ApiPipelinesService} from '~/business-logic/api-services/pipelines.service';
+import {PIPELINE_INFO_ONLY_FIELDS} from '../../pipelines-controller/controllers.consts';
+import {AbortAllChildrenDialogComponent} from '../shared/components/abort-all-children-dialog/abort-all-children-dialog.component';
+import {selectIsPipelines} from '@common/experiments-compare/reducers';
+import {AbortControllerDialogComponent} from '@common/pipelines-controller/pipeline-controller-menu/abort-controller-dialog/abort-controller-dialog.component';
+import {get} from 'lodash/fp';
+import { TaskTypeEnum } from '~/business-logic/model/tasks/taskTypeEnum';
+import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
 
+export const getChildrenExperiments = (tasksApi, parents, filters?: { [key: string]: any }): Observable<Task[]> => {
+  return tasksApi.tasksGetAllEx({
+    page_size: 2000,
+    only_fields: ['name', 'status'],
+    status: [TaskStatusEnum.Queued, TaskStatusEnum.InProgress],
+    parent: parents.map(p => p.id), ...(filters && filters)
+  })
+    .pipe(
+      map((res: TasksGetAllExResponse) => res.tasks),
+      catchError(() => of([]))
+    );
+};
 
 @Injectable()
 export class CommonExperimentsMenuEffects {
   private selectedExperiment: IExperimentInfo;
 
-  constructor(private actions$: Actions, private store: Store<IExperimentInfoState>, private apiTasks: ApiTasksService,
-              private authApi: ApiAuthService, private taskBl: BlTasksService, private eventsApi: ApiEventsService,
+  constructor(private actions$: Actions,
+              private store: Store<IExperimentInfoState>,
+              private apiTasks: ApiTasksService,
+              private pipelineApi: ApiPipelinesService,
+              private authApi: ApiAuthService,
+              private taskBl: BlTasksService,
+              private eventsApi: ApiEventsService,
               private projectApi: ApiProjectsService,
               private converter: ExperimentConverterService,
-              private router: Router
+              private router: Router,
+              private dialog: MatDialog
   ) {
     store.select(selectSelectedExperiment).subscribe(exp => this.selectedExperiment = exp);
   }
@@ -57,8 +83,10 @@ export class CommonExperimentsMenuEffects {
       menuActions.publishClicked,
       menuActions.stopClicked,
       menuActions.changeProjectRequested,
-      menuActions.getAllTasksChildren,
-      ),
+      menuActions.startPipeline,
+      menuActions.getControllerForStartPipelineDialog,
+      menuActions.abortAllChildren
+    ),
     map(action => activeLoader(action.type))));
 
   enqueueExperiment$ = createEffect(() => this.actions$.pipe(
@@ -73,6 +101,55 @@ export class CommonExperimentsMenuEffects {
           );
       }
     )
+  ));
+
+  startPipeline$ = createEffect(() => this.actions$.pipe(
+    ofType(menuActions.startPipeline),
+    withLatestFrom(this.store.select(selectRouterParams).pipe(map(params => get('projectId', params)))),
+    switchMap(([action, projectId]) => {
+        return this.pipelineApi.pipelinesStartPipeline({task: action.task, ...(action.queue && {queue: action.queue}), args: action.args})
+          .pipe(
+            mergeMap(res => [
+              viewActions.getExperiments(),
+              viewActions.setSelectedExperiments({experiments: []}),
+              viewActions.experimentSelectionChanged({
+                experiment: {id: res.pipeline},
+                project: projectId
+              }),
+              deactivateLoader(action.type),
+            ]),
+            catchError(error => [
+              deactivateLoader(action.type),
+              setServerError(error, null, 'Run Pipeline failed'),
+              requestFailed(error)
+            ])
+          );
+      }
+    )
+  ));
+
+  getPipelineControllerForRunDialog$ = createEffect(() => this.actions$.pipe(
+    ofType(menuActions.getControllerForStartPipelineDialog),
+    withLatestFrom(this.store.select(selectRouterParams).pipe(map(params => get('projectId', params)))),
+    switchMap(([action, projectId]) => {
+      return this.apiTasks.tasksGetAllEx({
+        project: projectId,
+        type: [TaskTypeEnum.Controller],
+        ...(action.task && {id: [action.task]}),
+        ...(!action.task && {order_by: ['-started'], page_size: 1}),
+        only_fields: PIPELINE_INFO_ONLY_FIELDS
+      }).pipe(
+        mergeMap((res: any) => {
+          return [menuActions.setControllerForStartPipelineDialog({task: res?.tasks[0]}), deactivateLoader(action.type),];
+        }),
+        catchError(error => {
+          return [
+            requestFailed(error),
+            deactivateLoader(action.type),
+          ];
+        })
+      );
+    })
   ));
 
 
@@ -149,16 +226,23 @@ export class CommonExperimentsMenuEffects {
     })
   ));
 
-
-  getAllTasksChildren$ = createEffect(() => this.actions$.pipe(
-    ofType(menuActions.getAllTasksChildren),
-    switchMap((action) => this.apiTasks.tasksGetAllEx({only_fields: ['name', 'status'], parent: action.experiments, status:[TaskStatusEnum.InProgress, TaskStatusEnum.Queued]})
+  abortAllChildren = createEffect(() => this.actions$.pipe(
+    ofType(menuActions.abortAllChildren),
+    withLatestFrom(this.store.select(selectIsPipelines)),
+    switchMap(([action, isPipeline]) => getChildrenExperiments(this.apiTasks, action.experiments)
       .pipe(
-        mergeMap((res) => [setAllTasksChildren({experiments: res.tasks}), deactivateLoader(action.type)]),
-        catchError(error => [deactivateLoader(action.type), requestFailed(error),
-          addMessage(MESSAGES_SEVERITY.ERROR, 'Failed to fetch tasks running children')])
-
-      ))
+        tap( () => this.store.dispatch(deactivateLoader(action.type))),
+        mergeMap(shouldBeAbortedTasks => (isPipeline ? this.dialog.open(AbortControllerDialogComponent, {
+          data: {tasks: action.experiments, shouldBeAbortedTasks}
+        }) : this.dialog.open(AbortAllChildrenDialogComponent, {
+          data: {tasks: action.experiments, shouldBeAbortedTasks}
+        })).afterClosed()),
+        mergeMap(confirmed => [
+          confirmed ? stopClicked({selectedEntities: [...confirmed.shouldBeAbortedTasks, ...action.experiments]}) : new EmptyAction(),
+          deactivateLoader(action.type)
+        ]),
+        catchError(error => [deactivateLoader(action.type), requestFailed(error), addMessage(MESSAGES_SEVERITY.ERROR, 'Failed to fetch tasks running children')])
+      )),
   ));
 
 
@@ -270,10 +354,13 @@ export class CommonExperimentsMenuEffects {
     ofType(menuActions.archiveSelectedExperiments),
     withLatestFrom(
       this.store.select(selectRouterParams),
-      this.store.select(exSelectors.selectSelectedTableExperiment)),
-    tap(([action, routerParams, selectedExperiment]) => {
+      this.store.select(exSelectors.selectSelectedTableExperiment),
+      this.store.select(selectRouterConfig),
+    ),
+    tap(([action, routerParams, selectedExperiment, routeConfig]) => {
       if (this.isSelectedExpInCheckedExps(action.selectedEntities, selectedExperiment)) {
-        this.router.navigate([`projects/${routerParams.projectId}/experiments/`]);
+        const module = routeConfig.includes('pipelines')? 'pipelines': 'projects'
+        this.router.navigate([`${module}/${routerParams.projectId}/experiments/`]);
       }
     }),
     switchMap(([action, routerParams]) => this.apiTasks.tasksArchiveMany({ids: action.selectedEntities.map(exp => exp.id)})
@@ -286,14 +373,18 @@ export class CommonExperimentsMenuEffects {
             {
               name: 'Undo', actions: [
                 viewActions.setSelectedExperiments({experiments}),
-                menuActions.restoreSelectedExperiments({selectedEntities: experiments, skipUndo: true})
+                menuActions.restoreSelectedExperiments({
+                  selectedEntities: experiments,
+                  skipUndo: true,
+                  entityType: action.entityType
+                })
               ]
             }
           ];
           let actions: Action[] = [
             deactivateLoader(action.type),
             viewActions.setSelectedExperiments({experiments: []}),
-            getNotificationAction(res, action, MenuItems.archive, EntityTypeEnum.experiment, (action.skipUndo || allFailed) ? [] : undoAction)
+            getNotificationAction(res, action, MenuItems.archive, action.entityType || EntityTypeEnum.experiment, (action.skipUndo || allFailed) ? [] : undoAction)
           ];
           if (routerConfig.includes('experiments')) {
             const failedIds = res.failed.map(fail => fail.id);
@@ -314,7 +405,7 @@ export class CommonExperimentsMenuEffects {
         catchError(error => [
           requestFailed(error),
           deactivateLoader(action.type),
-          setServerError(error, null, 'Failed To Archive Experiments')
+          setServerError(error, null, `Failed To Archive ${action.entityType || 'Experiment'}s`)
         ])
       )
     )
@@ -325,10 +416,12 @@ export class CommonExperimentsMenuEffects {
     ofType(menuActions.restoreSelectedExperiments),
     withLatestFrom(
       this.store.select(selectRouterParams),
-      this.store.select(exSelectors.selectSelectedTableExperiment)),
-    tap(([action, routerParams, selectedExperiment]) => {
+      this.store.select(exSelectors.selectSelectedTableExperiment),
+      this.store.select(selectRouterConfig)),
+    tap(([action, routerParams, selectedExperiment, routeConfig]) => {
       if (this.isSelectedExpInCheckedExps(action.selectedEntities, selectedExperiment)) {
-        this.router.navigate([`projects/${routerParams.projectId}/experiments/`]);
+        const module = routeConfig.includes('pipelines')? 'pipelines': 'projects'
+        this.router.navigate([`${module}/${routerParams.projectId}/experiments/`]);
       }
     }),
     switchMap(([action, routerParams]) => this.apiTasks.tasksUnarchiveMany({ids: action.selectedEntities.map(exp => exp.id)})
@@ -341,14 +434,18 @@ export class CommonExperimentsMenuEffects {
             {
               name: 'Undo', actions: [
                 viewActions.setSelectedExperiments({experiments}),
-                menuActions.archiveSelectedExperiments({selectedEntities: experiments, skipUndo: true})
+                menuActions.archiveSelectedExperiments({
+                  selectedEntities: experiments,
+                  skipUndo: true,
+                  entityType: action.entityType
+                })
               ]
             }
           ];
           let actions: Action[] = [
             deactivateLoader(action.type),
             viewActions.setSelectedExperiments({experiments: []}),
-            getNotificationAction(res, action, MoreMenuItems.restore, EntityTypeEnum.experiment, (action.skipUndo || allFailed) ? [] : undoAction)
+            getNotificationAction(res, action, MoreMenuItems.restore, action.entityType || EntityTypeEnum.experiment, (action.skipUndo || allFailed) ? [] : undoAction)
           ];
           if (routerConfig.includes('experiments')) {
             const failedIds = res.failed.map(fail => fail.id);
@@ -369,7 +466,7 @@ export class CommonExperimentsMenuEffects {
         catchError(error => [
           requestFailed(error),
           deactivateLoader(action.type),
-          setServerError(error, null, 'Failed To Restore Experiments')
+          setServerError(error, null, `Failed To Restore ${action.entityType || 'Experiment'}s`)
         ])
       )
     )
@@ -399,4 +496,5 @@ export class CommonExperimentsMenuEffects {
   isSelectedExpInCheckedExps(checked: ISelectedExperiment[], selected: ISelectedExperiment): boolean {
     return selected && checked.some(exp => exp.id === selected.id);
   }
+
 }

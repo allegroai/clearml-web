@@ -1,9 +1,6 @@
-@import "../../styles/mixins/search-input";
 @import "../../styles/variables";
 
 $search-font-size: 14px;
-
-@include generate-search-input();
 
 :host {
   background: none !important;
@@ -17,9 +14,17 @@ $search-font-size: 14px;
     width: 32px;
     overflow: hidden;
     transition: width 0.3s ease;
+    border-radius: 4px 4px 0 0;
 
     &.active {
       width: 200px;
+
+      &.with-counter {
+        width: 300px;
+      }
+      &.with-results {
+        width: auto;
+      }
     }
 
     .search-input {
@@ -28,29 +33,30 @@ $search-font-size: 14px;
       width: 100%;
       border: 0;
       outline: none;
-      border-radius: 4px 4px 0 0 !important;
+      border-radius: 4px;
       box-shadow: none !important;
       font-size: $search-font-size;
       font-weight: 400;
 
       input {
         flex-grow: 1;
+        width: 180px;
         display: none;
+        border-radius: 4px 4px 0 0;
 
         &.active {
           display: flex;
+        }
+
+        &::placeholder {
+          color: $blue-200;
         }
       }
 
       .separator {
         width: 1px;
         height: 32px;
-        background: #FFFFFF;
-        display: none;
-
-        &.active {
-          display: flex;
-        }
+        background: $blue-250;
       }
 
       .icon-button {
@@ -59,26 +65,22 @@ $search-font-size: 14px;
         align-items: center;
         justify-content: center;
         flex: 0 0 32px;
-        display: none;
+        display: flex;
 
         &.disabled {
-          color: $blue-300;
           pointer-events: none;
-
-        }
-
-        &.fa-search {
-          display: flex;
-        }
-
-        &.active {
-          display: flex;
+          color: $blue-300;
+          opacity: 0.4;
         }
       }
 
-      i.fa, i.fas {
+      i.al-icon {
         min-width: 32px;
 
+        &.al-ico-search, &.al-ico-dialog-x {
+          font-size: 20px;
+          width: 20px;
+        }
       }
 
       .jump-next {
@@ -92,120 +94,156 @@ $search-font-size: 14px;
       }
 
       input {
-        padding-left: 6px !important;
+        padding-left: 8px;
         font-size: $search-font-size;
 
-
-        &::-webkit-input-placeholder {
-          font-size: $search-font-size;
-        }
-
-        &::-moz-placeholder {
+        &::placeholder {
           font-size: $search-font-size;
         }
       }
+    }
+
+    .match {
+      flex-grow: 1;
+      display: flex;
+      justify-content: center;
+      user-select: none;
+      padding: 0 12px;
     }
   }
 
 }
 
-:host-context(.text-area) {
-  background-color: $blue-600;
-
+:host.text-area {
   .search-input-container {
     .search-input {
-      border-bottom: unset;
-
       input {
-        color: #a7b2d8;
+        color: $white;
       }
     }
   }
 }
 
-:host-context(.table-search) {
-  .match {
-    display: flex;
-    width: fit-content;
-    color: $blue-grey;
-    background: $faint-gray;
-    padding: 2px;
-  }
-
+:host.table-search {
   .search-input-container {
-    &.active {
-      width: 300px;
-    }
+    border-radius: 4px;
 
     .search-input {
-      i.icon-button.fa , i.icon-button.fas{
+      color: #FFFFFF;
+
+      i.icon-button.al-icon {
         color: #FFFFFF;
       }
     }
-    background-color: #7786b5;
-    color: #FFFFFF;
-    border-radius: 4px !important;
 
-    .fa.fa-search, .fa.fa-times {
+    background-color: #7786b5;
+
+    .search-input {
+      input {
+        color: #FFFFFF;
+      }
+    }
+
+    .match {
       color: #FFFFFF;
     }
-
-    .search-input {
-      border-bottom: unset;
-      border-radius: 4px !important;
-      input {
-        color: #FFFFFF;
-      }
-    }
   }
 }
 
-:host-context(.search-header) {
+:host.search-header {
   .search-input-container {
     &.active {
       width: 284px;
     }
+
     .search-input {
+      border-radius: 4px 4px 0 0;
+
       input {
         background-color: $blue-700;
         border-bottom: 2px solid;
         border-color: $blue-grey;
-        border-radius: 4px 4px 0 0;
         color: $blue-280;
         font-weight: 400;
-        padding-left: 12px !important;
         padding-right: 28px;
       }
-      }
     }
+  }
 }
-:host-context(.underline-search) {
+
+:host.underline-search {
   .search-input-container {
     .search-input {
-      i.fa {
-        color: #707ba3;
+      input {padding-left:0;}
+      i.al-icon {
+        color: $blue-480;
       }
     }
+
     color: #5a658e;
-    &.focused{
-      color: #707ba3;
+
+    &.focused {
+      color: $blue-480;
     }
-    border-bottom: 2px  solid;
+
+    border-bottom: 2px solid;
     width: 100%;
   }
 }
-:host-context(.dark-theme) {
-  .search-input-container {
-    color: #a7b2d8;
-    ::placeholder{
-      color: #a7b2d8;
-    }
-    .search-input{
-      i.fa {
-        color: #a7b2d8;
-      }
-      input{
 
+
+:host.light-theme {
+  .search-input-container {
+    color: $blue-400;
+
+    border: 1px solid $blue-200;
+    border-radius: 4px;
+
+    .search-input {
+      color: $blue-400;
+      border-color: $blue-200;
+
+      &:focus {
+        border-color: $blue-480;
+      }
+
+      &::placeholder {
+        color: $blue-250;
+      }
+
+      input {
+        color: $blue-400;
+      }
+      .separator {
+        background: $blue-250;
+      }
+    }
+  }
+}
+
+:host.dark-theme {
+  .search-input-container {
+
+    .search-input {
+      color: $blue-280;
+      border-color: $blue-grey;
+
+      &:focus {
+        border-color: $blue-500;
+      }
+
+      &::placeholder {
+        color: $blue-280;
+      }
+
+      .separator {
+        background: $blue-900;
+      }
+    }
+
+    .icon-button {
+      &:hover:not(.disabled):not(.al-ico-search) {
+        color: $white;
       }
     }
   }

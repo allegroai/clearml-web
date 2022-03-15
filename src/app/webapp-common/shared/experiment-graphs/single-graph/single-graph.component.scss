@@ -35,6 +35,9 @@
       margin-left: 24px;
       margin-right: 24px;
 
+      .resize-handle-bottom, {
+        bottom: -12px;
+      }
     }
 
     .resize-overlay-text {
@@ -63,6 +66,16 @@
   .plot-loader {
     @extend .overlay-text;
   }
+
+  // fix table content overflow 1px above header
+  ::ng-deep svg #header .column-cell {
+    transform: translate(0px, -1px);
+
+    .cell-rect {
+      height: 30px;
+    }
+  }
+
   ::ng-deep sm-color-picker-wrapper {
     display: block;
     top: 0px;

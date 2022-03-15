@@ -1,0 +1,85 @@
+<sm-pipeline-info [entity]="selected$ | async" [project]="projectId$ | async" [step]="selectedEntity"></sm-pipeline-info>
+<div class="console-button">
+  <button class="btn btn-primary d-flex align-items-center" (click)="selectStep(); openLog()">
+    <i class="al-icon al-ico-console sm mr-3"></i>DETAILS
+  </button>
+</div>
+<div
+  #diagramContainer
+  class="pipeline-container"
+  [class.extend]="showLog"
+  (click)="selectStep()"
+>
+  <ng-container *ngIf="dagModel$ | async as dagModel">
+    <div *ngFor="let row of dagModel" class="level" [style.width.px]="chartWidth">
+      <sm-pipeline-controller-step
+        #taskEl
+        *ngFor="let step of row; trackBy: trackById" [step]="step"
+        [selected]="selectedEntity && selectedEntity.id === step?.id"
+        (click)="$event.stopPropagation(); !taskEl.selected && selectStep(step)"
+        (openConsole)="openLog()"
+      ></sm-pipeline-controller-step>
+    </div>
+    <svg class="arrows"
+         *ngIf="chartWidth"
+         [attr.viewBox]="'0 0 ' + chartWidth + ' ' + (50 + 132 * dagModel?.length)"
+         [style.width.px]="chartWidth"
+         [style.height.px]="50 + 132 * dagModel?.length"
+    >
+      <g
+        *ngFor="let arrow of arrows; trackBy: trackArrows"
+        [class.selected]="arrow.selected"
+      >
+        <path [attr.d]="arrow.path" fill="none" stroke-width="2"></path>
+        <polygon
+          points="0,-6 12,0, 0,6"
+          [attr.transform]="arrow.headTransform"
+        />
+      </g>
+    </svg>
+  </ng-container>
+</div>
+<div class="console-log" [class.extend]="showLog">
+  <ng-container *ngIf="showLog">
+    <div class="log-header">
+
+      <div class="log-name">
+        <i class="al-icon al-ico-console mr-2"></i>
+        <span>{{(selected$ | async)?.name}}</span>
+      </div>
+
+
+      <div class="g-btn" [class.invisible]="!stepDiff">
+        <button
+          class="btn btn-primary"
+          [class.selected]="detailsPanelMode === statusOption.log"
+          (click)="detailsPanelMode = statusOption.log">CONSOLE</button>
+        <button
+          class="btn btn-primary"
+          [class.selected]="detailsPanelMode === statusOption.code"
+          (click)="detailsPanelMode = statusOption.code">CODE</button>
+      </div>
+
+      <div class="close">
+        <i class="al-icon al-ico-dialog-x pointer ml-auto" (click)="openLog(false)"></i>
+      </div>
+    </div>
+    <div class="log-content">
+      <sm-experiment-output-log
+        *ngIf="detailsPanelMode === statusOption.log; else stepCode"
+        [experiment]="selected$ | async"
+        [isDarkTheme]="true"
+        [showHeader]="false"
+      ></sm-experiment-output-log>
+      <ng-template #stepCode>
+        <div *ngIf="stepDiff; else empty" class="ace" #aceEditor></div>
+        <ng-template #empty>
+          <div class="no-code">
+              <i class="icon no-output-icon i-no-code-dark"></i>
+              <h3>NO CODE</h3>
+          </div>
+        </ng-template>
+      </ng-template>
+    </div>
+  </ng-container>
+</div>

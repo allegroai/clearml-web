@@ -1,7 +1,7 @@
 <sm-confirm-dialog [displayX]="false">
   <div class="content">
-    <div #box class="box" (scroll)="onScroll($event)" [innerHTML]="text | safe: 'html'">
-    </div>
+    <iframe #box class="box" (load)="iframeLoaded($event)" [srcdoc]="text | safe: 'html'">
+    </iframe>
   </div>
 
   <div class="buttons">

@@ -84,7 +84,7 @@ export class CheckboxThreeStateListComponent implements OnInit {
   private checkIndeterminateStateAndEmit(val) {
     const value = val.source.value;
     const indeterminateCurrentState =
-      this.indeterminateState[value] || (this.checkedList.find( v => v === value) ? CheckboxState.checked : CheckboxState.empty);
+      this.indeterminateState[value] || (this.checkedList?.find( v => v === value) ? CheckboxState.checked : CheckboxState.empty);
 
     switch(indeterminateCurrentState) {
       case CheckboxState.checked: {

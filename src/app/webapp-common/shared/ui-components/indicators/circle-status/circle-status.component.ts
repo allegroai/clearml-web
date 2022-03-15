@@ -1,7 +1,7 @@
-import {Component, Input, OnInit} from '@angular/core';
-import {TaskStatusEnum} from '../../../../../business-logic/model/tasks/taskStatusEnum';
-import {EXPERIMENTS_STATUS_LABELS} from '../../../../../shared/constants/non-common-consts';
-import {TaskTypeEnum} from '../../../../../business-logic/model/tasks/taskTypeEnum';
+import {Component, Input} from '@angular/core';
+import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
+import {EXPERIMENTS_STATUS_LABELS} from '~/shared/constants/non-common-consts';
+import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
 
 
 @Component({

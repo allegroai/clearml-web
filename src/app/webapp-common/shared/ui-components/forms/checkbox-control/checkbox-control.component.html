@@ -14,12 +14,10 @@
     tooltipType='validation'
     [showTooltip]="showErrors"
   >
-    <i class="fas" [ngClass]="{
-    'fa-plus': special && !formData,
-    'fa-trash fa-sm': special && !!formData,
-    'al-ico fa-sm al-color white al-ico-completed': state === 'All',
+    <i class="al-icon sm al-color white" [ngClass]="{
+    'al-ico-success': state === 'All',
     spacer: state === 'None',
-    'fa-minus': state === 'Partial'
+    'al-ico-minus': state === 'Partial'
     }">
     </i>
   </span>

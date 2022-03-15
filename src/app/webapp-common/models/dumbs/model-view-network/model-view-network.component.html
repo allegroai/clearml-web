@@ -2,25 +2,28 @@
   #prototext
   [editable]="!model?.ready && model?.company?.id && !isSharedAndNotOwner"
   [saving]="saving"
+  [hideEditButton]="!!design"
   [disableInEditMode]="true"
   (activateEditClicked)="activateEdit(); editPrototext()"
   (saveClicked)="saveClicked()"
   (cancelClicked)="cancelEdit()"
 >
   <sm-section-header label="MODEL CONFIGURATION"></sm-section-header>
-  <div class="light-theme textarea-container">
-    <sm-scroll-textarea
-      class="form-section"
-      [editable]="inEditMode && prototext.inEditMode"
-      [isInDev]="false"
-      [formData]="design ?? ''"
-      [showSpinner]="false"></sm-scroll-textarea>
-  </div>
-  <button extra-buttons
-          *ngIf="design"
-          class="btn-dark-fill mr-3 flex-1"
-          (click)="clearPrototext()">
-    <i class="p-1 fa fa-trash"></i>
-    CLEAR
-  </button>
+  <sm-scroll-textarea
+    class="flex-grow-1"
+    [editable]="inEditMode && prototext.inEditMode"
+    [formData]="design ?? ''"
+    [showSpinner]="false"
+  >
+    <button extra-buttons
+      *ngIf="!model?.ready && model?.company?.id && !isSharedAndNotOwner"
+      class="btn-dark-fill terminal mr-3 flex-1"
+      (click)="prototext.editModeChanged(true)"
+    >EDIT</button>
+    <button extra-buttons
+            *ngIf="!model?.ready && model?.company?.id && !isSharedAndNotOwner && design"
+            class="btn-dark-fill terminal mr-3 flex-1"
+            (click)="clearPrototext()"
+    ><i class="p-1 fa fa-trash"></i>CLEAR</button>
+  </sm-scroll-textarea>
 </sm-editable-section>

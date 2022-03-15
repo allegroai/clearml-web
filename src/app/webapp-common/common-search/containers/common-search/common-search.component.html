@@ -5,8 +5,8 @@
     [placeholder]="searchPlaceholder$ | async"
     [hideIcons]="true"
     [minimumChars]="minChars"
-    (valueChanged)="onSearchValueChanged($event)"
     (focusout)="onSearchFocusOut()"
+    (valueChanged)="onSearchValueChanged($event)"
   >
     <i
       class="regexp al-ico-regex pointer"

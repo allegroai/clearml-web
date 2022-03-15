@@ -4,7 +4,7 @@
 
   display: block;
   padding: 0 10px 0 24px;
-  margin: 0 12px 0 0;
+  margin: 0;
   overflow: scroll;
 
   ::ng-deep .mat-expansion-panel-header {
@@ -110,12 +110,14 @@
   color: gray;
 }
 
+/*
 i.icon {
   display: block;
   font-size: 15px;
   width: 15px;
   height: 15px;
 }
+*/
 
 .item-key {
   width: 80%;

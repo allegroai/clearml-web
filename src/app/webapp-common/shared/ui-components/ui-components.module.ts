@@ -16,7 +16,6 @@ import {NavbarItemComponent} from './panel/navbar-item/navbar-item.component';
 import {ButtonToggleComponent} from './inputs/button-toggle/button-toggle.component';
 import {ConfirmDialogComponent} from './overlay/confirm-dialog/confirm-dialog.component';
 
-import {CodeComponent} from './data/code/code.component';
 import {DialogTemplateComponent} from './overlay/dialog-template/dialog-template.component';
 import {SMMaterialModule} from '../material/material.module';
 import {AlertDialogComponent} from './overlay/alert-dialog/alert-dialog.component';
@@ -88,25 +87,28 @@ import {JsonValidatorDirective} from './template-forms-ui/json-validator.directi
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {GroupedCheckedFilterListComponent} from './data/grouped-checked-filter-list/grouped-checked-filter-list.component';
 import {ShareDialogComponent} from './overlay/share-dialog/share-dialog.component';
-import { HesitateDirective } from './directives/hesitate.directive';
-import { DividerComponent } from './indicators/divider/divider.component';
-import { DurationInputListComponent } from './inputs/duraion-input-list/duration-input-list.component';
-import { TableFilterDurationComponent } from './data/table/table-duration-sort-template/table-filter-duration/table-filter-duration.component';
-import { TableFilterDurationNumericComponent } from './data/table/table-duration-sort-template/table-filter-duration-numeric/table-filter-duration-numeric.component';
-import { TableFilterDurationDateTimeComponent } from './data/table/table-duration-sort-template/table-filter-duration-date-time/table-filter-duration-date-time.component';
+import {HesitateDirective} from './directives/hesitate.directive';
+import {DividerComponent} from './indicators/divider/divider.component';
+import {DurationInputListComponent} from './inputs/duraion-input-list/duration-input-list.component';
+import {TableFilterDurationComponent} from './data/table/table-duration-sort-template/table-filter-duration/table-filter-duration.component';
+import {TableFilterDurationNumericComponent} from './data/table/table-duration-sort-template/table-filter-duration-numeric/table-filter-duration-numeric.component';
+import {TableFilterDurationDateTimeComponent} from './data/table/table-duration-sort-template/table-filter-duration-date-time/table-filter-duration-date-time.component';
 import {MatInputModule} from '@angular/material/input';
-import {MAT_DATE_LOCALE, MatNativeDateModule} from '@angular/material/core';
+import {MatNativeDateModule} from '@angular/material/core';
 import {SelectAutocompleteWithChipsComponent} from './inputs/select-autocomplete-with-chips/select-autocomplete-with-chips.component';
-import { TableFilterDurationErrorComponent } from './data/table/table-duration-sort-template/table-filter-duration-error/table-filter-duration-error.component';
+import {TableFilterDurationErrorComponent} from './data/table/table-duration-sort-template/table-filter-duration-error/table-filter-duration-error.component';
 import {InvalidPrefixValidatorDirective} from './template-forms-ui/invalid-prefix-validator.directive';
 import {UniquePathValidatorDirective} from './template-forms-ui/unique-path-validator.directive';
 import {OperationErrorDialogComponent} from '@common/shared/ui-components/overlay/operation-error-dialog/operation-error-dialog.component';
-import { CirclesInRowComponent } from './indicators/circles-in-row/circles-in-row.component';
+import {CirclesInRowComponent} from './indicators/circles-in-row/circles-in-row.component';
 import {RequiredAutocompleteSelectionValidatorDirective} from "@common/shared/ui-components/template-forms-ui/required-autocomplete-selection-validator.directive";
 import {OverflowsDirective} from '@common/shared/ui-components/directives/overflows.directive';
-import { RippleButtonComponent } from './buttons/ripple-button/ripple-button.component';
-import { CheckboxThreeStateListComponent } from './panel/checkbox-three-state-list/checkbox-three-state-list.component';
-import { TemplateAliasDirective } from './directives/template-alias.directive';
+import {RippleButtonComponent} from './buttons/ripple-button/ripple-button.component';
+import {CheckboxThreeStateListComponent} from './panel/checkbox-three-state-list/checkbox-three-state-list.component';
+import {TemplateAliasDirective} from './directives/template-alias.directive';
+import {ShowTooltipIfEllipsisDirective} from './indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {MatTooltipModule} from '@angular/material/tooltip';
+import { CodeEditorComponent } from './data/code-editor/code-editor.component';
 
 const declarations = [
   DurationInputComponent,
@@ -134,7 +136,6 @@ const declarations = [
   NumberCounterComponent,
   NeonButtonComponent,
   NavbarItemComponent,
-  CodeComponent,
   DialogTemplateComponent,
   ConfirmDialogComponent,
   OperationErrorDialogComponent,
@@ -148,6 +149,7 @@ const declarations = [
   JsonValidatorDirective,
   AlertDialogComponent,
   TooltipDirective,
+  ShowTooltipIfEllipsisDirective,
   CheckboxControlComponent,
   SimpleTableComponent2,
   SelectableListComponent,
@@ -188,6 +190,7 @@ const declarations = [
 @NgModule({
   imports     : [
     MatExpansionModule,
+    MatTooltipModule,
     DragDropModule,
     CommonModule,
     ChipsModule,
@@ -210,8 +213,8 @@ const declarations = [
     MatNativeDateModule,
   ],
   providers   : [],
-  declarations: [...declarations, TagsMenuComponent, TagColorMenuComponent, ResizableColumnDirective, HesitateDirective, DurationInputListComponent, TableFilterDurationComponent, TableFilterDurationErrorComponent, RippleButtonComponent, CheckboxThreeStateListComponent, TemplateAliasDirective],
-  exports: [...declarations, ChipsModule, SMMaterialModule, ChooseColorModule, SMPortalModule, TagsMenuComponent, TableFilterDurationComponent, MatDatepickerModule, TemplateAliasDirective]
+  declarations: [...declarations, TagsMenuComponent, TagColorMenuComponent, ResizableColumnDirective, HesitateDirective, DurationInputListComponent, TableFilterDurationComponent, TableFilterDurationErrorComponent, RippleButtonComponent, CheckboxThreeStateListComponent, TemplateAliasDirective, CodeEditorComponent],
+  exports: [...declarations, ChipsModule, SMMaterialModule, ChooseColorModule, SMPortalModule, TagsMenuComponent, TableFilterDurationComponent, MatDatepickerModule, TemplateAliasDirective, CodeEditorComponent]
 })
 export class UiComponentsModule {
 }

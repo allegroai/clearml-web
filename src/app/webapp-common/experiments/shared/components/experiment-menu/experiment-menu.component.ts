@@ -3,36 +3,36 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {Store} from '@ngrx/store';
 import {get} from 'lodash/fp';
 import {filter, take, withLatestFrom} from 'rxjs/operators';
-import {ICONS} from '../../../../constants';
-import {Queue} from '../../../../../business-logic/model/queues/queue';
-import {TaskStatusEnum} from '../../../../../business-logic/model/tasks/taskStatusEnum';
-import {TaskTypeEnum} from '../../../../../business-logic/model/tasks/taskTypeEnum';
-import {BlTasksService} from '../../../../../business-logic/services/tasks.service';
-import {IExperimentInfoState} from '../../../../../features/experiments/reducers/experiment-info.reducer';
+import {ICONS} from '@common/constants';
+import {Queue} from '~/business-logic/model/queues/queue';
+import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
+import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
+import {BlTasksService} from '~/business-logic/services/tasks.service';
+import {IExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {CloneForm} from '../../common-experiment-model.model';
-import {selectRouterParams} from '../../../../core/reducers/router-reducer';
-import {SmSyncStateSelectorService} from '../../../../core/services/sync-state-selector.service';
-import {ConfirmDialogComponent} from '../../../../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
-import {htmlTextShorte, isReadOnly} from '../../../../shared/utils/shared-utils';
+import {selectRouterParams} from '@common/core/reducers/router-reducer';
+import {SmSyncStateSelectorService} from '@common/core/services/sync-state-selector.service';
+import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
+import {htmlTextShorte, isReadOnly} from '@common/shared/utils/shared-utils';
 import * as commonMenuActions from '../../../actions/common-experiments-menu.actions';
-import {archiveSelectedExperiments, getAllTasksChildren} from '../../../actions/common-experiments-menu.actions';
+import {archiveSelectedExperiments, abortAllChildren} from '../../../actions/common-experiments-menu.actions';
 import {ChangeProjectDialogComponent} from '../change-project-dialog/change-project-dialog.component';
 import {CloneDialogComponent} from '../clone-dialog/clone-dialog.component';
 import {SelectQueueComponent} from '../select-queue/select-queue.component';
-import {ISelectedExperiment} from '../../../../../features/experiments/shared/experiment-info.model';
+import {ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
 import {GetQueuesForEnqueue} from '../select-queue/select-queue.actions';
 import {selectQueuesList} from '../select-queue/select-queue.reducer';
-import {isDevelopment} from '../../../../../features/experiments/shared/experiments.utils';
+import {isDevelopment} from '~/features/experiments/shared/experiments.utils';
 import {Component, ElementRef, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {BaseContextMenuComponent} from '../../../../shared/components/base-context-menu/base-context-menu.component';
+import {BaseContextMenuComponent} from '@common/shared/components/base-context-menu/base-context-menu.component';
 import * as experimentsActions from '../../../actions/common-experiments-view.actions';
-import {ShareDialogComponent} from '../../../../shared/ui-components/overlay/share-dialog/share-dialog.component';
-import {ConfigurationService} from '../../../../shared/services/configuration.service';
-import {selectNeverShowPopups} from '../../../../core/reducers/view.reducer';
-import {CommonDeleteDialogComponent} from '../../../../shared/entity-page/entity-delete/common-delete-dialog.component';
-import {EntityTypeEnum} from '../../../../../shared/constants/non-common-consts';
+import {ShareDialogComponent} from '@common/shared/ui-components/overlay/share-dialog/share-dialog.component';
+import {ConfigurationService} from '@common/shared/services/configuration.service';
+import {selectNeverShowPopups} from '@common/core/reducers/view.reducer';
+import {CommonDeleteDialogComponent} from '@common/shared/entity-page/entity-delete/common-delete-dialog.component';
+import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {DeactivateEdit, SetExperiment} from '../../../actions/common-experiments-info.actions';
-import {neverShowPopupAgain} from '../../../../core/actions/layout.actions';
+import {neverShowPopupAgain} from '@common/core/actions/layout.actions';
 import {
   selectionDisabledAbort,
   selectionDisabledAbortAllChildren,
@@ -42,10 +42,8 @@ import {
   selectionDisabledMoveTo,
   selectionDisabledPublishExperiments,
   selectionDisabledReset
-} from '../../../../shared/entity-page/items.utils';
-import {WelcomeMessageComponent} from '../../../../dashboard/dumb/welcome-message/welcome-message.component';
-import {AbortAllChildrenDialogComponent} from '../abort-all-children-dialog/abort-all-children-dialog.component';
-import {selectAllRunningTasksChildrenForAbort} from '../../../reducers';
+} from '@common/shared/entity-page/items.utils';
+import {WelcomeMessageComponent} from '@common/dashboard/dumb/welcome-message/welcome-message.component';
 
 
 @Component({
@@ -65,7 +63,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
   protected _experiment: ISelectedExperiment = null;
   //public selectedExperiment
   private _selectedExperiments: ISelectedExperiment[];
-  @Input() selectedExperiment: ISelectedExperiment;
+  @Input() selectedExperiment: any;
   @Input() isSharedAndNotOwner = false;
   @Input() tagsFilterByProject: boolean;
   @Input() projectTags: string[];
@@ -122,19 +120,19 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
     return get('projectId', params);
   }
 
-  public restoreArchive() {
+  public restoreArchive(entityType?: EntityTypeEnum) {
     // info header case
     const selectedExperiments = this.selectedExperiments ? selectionDisabledArchive(this.selectedExperiments).selectedFiltered : [this._experiment];
 
     if (selectedExperiments[0].system_tags?.includes('archived')) {
-      this.store.dispatch(commonMenuActions.restoreSelectedExperiments({selectedEntities: selectedExperiments}));
+      this.store.dispatch(commonMenuActions.restoreSelectedExperiments({selectedEntities: selectedExperiments, entityType}));
     } else {
       const showShareWarningDialog = selectedExperiments.find(item => item?.system_tags.includes('shared')) &&
         !this.syncSelector.selectSync(selectNeverShowPopups)?.includes('archive-shared-task');
       if (showShareWarningDialog) {
         this.showConfirmArchiveExperiments(this.store, this.dialog, selectedExperiments);
       } else {
-        this.store.dispatch(commonMenuActions.archiveSelectedExperiments({selectedEntities: selectedExperiments}));
+        this.store.dispatch(commonMenuActions.archiveSelectedExperiments({selectedEntities: selectedExperiments, entityType}));
       }
     }
   }
@@ -274,7 +272,7 @@ To avoid this, <b>clone the experiment</b> and work with the cloned experiment.`
                 `,
         yes: 'Abort',
         no: 'Cancel',
-        iconClass: 'al-icon al-ico-archive al-color',
+        iconClass: 'al-icon al-ico-abort al-color',
       }
     });
     confirmDialogRef.afterClosed().subscribe((confirmed) => {
@@ -385,13 +383,14 @@ To avoid this, <b>clone the experiment</b> and work with the cloned experiment.`
     }));
   }
 
-  deleteExperimentPopup() {
+  deleteExperimentPopup(entityType?: EntityTypeEnum, includeChildren?: boolean) {
     const confirmDialogRef = this.dialog.open(CommonDeleteDialogComponent, {
       data: {
         entity: this._experiment,
         numSelected: this.numSelected,
-        entityType: EntityTypeEnum.experiment,
-        useCurrentEntity: this.activateFromMenuButton
+        entityType: entityType || EntityTypeEnum.experiment,
+        useCurrentEntity: this.activateFromMenuButton,
+        includeChildren
       },
       width: '600px',
       disableClose: true
@@ -438,22 +437,7 @@ To avoid this, <b>clone the experiment</b> and work with the cloned experiment.`
 
 
   stopAllChildrenPopup() {
-    let stopAllChildrenPopup;
     const selectedExperiments = this.selectedExperiments ? selectionDisabledAbortAllChildren(this.selectedExperiments).selectedFiltered : [this._experiment];
-    const shouldBeAbortedTasksSub = this.store.select(selectAllRunningTasksChildrenForAbort).subscribe((shouldBeAbortedTasks) => {
-      if (!!shouldBeAbortedTasks) {
-        stopAllChildrenPopup = this.dialog.open(AbortAllChildrenDialogComponent, {
-          data: {tasks: selectedExperiments, shouldBeAbortedTasks}
-        });
-        stopAllChildrenPopup.afterClosed().subscribe((confirmed) => {
-          if (confirmed) {
-            this.store.dispatch(commonMenuActions.stopClicked({selectedEntities: confirmed.shouldBeAbortedTasks}));
-          }
-          shouldBeAbortedTasksSub.unsubscribe();
-          this.store.dispatch(commonMenuActions.setAllTasksChildren({experiments: null}));
-        });
-      }
-    });
-    this.store.dispatch(getAllTasksChildren({experiments: selectedExperiments.map(exp => exp.id)}));
+    this.store.dispatch(abortAllChildren({experiments: selectedExperiments}));
   }
 }

@@ -18,6 +18,7 @@ export const ADD_EXPERIMENT_TO_QUEUE = queuesPrefix + 'ADD_EXPERIMENT_TO_QUEUE';
 export const SET_SELECTED_QUEUE = queuesPrefix + 'SET_SELECTED_QUEUE';
 export const QUEUES_TABLE_SORT_CHANGED = queuesPrefix + 'QUEUES_TABLE_SORT_CHANGED';
 export const QUEUES_TABLE_SET_SORT = queuesPrefix + 'QUEUES_TABLE_SET_SORT';
+export const CLEAR_QUEUE = queuesPrefix + 'CLEAR_QUEUE';
 export const REFRESH_SELECTED_QUEUE = queuesPrefix + 'REFRESH_SELECTED_QUEUE';
 export const SET_SELECTED_QUEUE_FROM_SERVER = queuesPrefix + 'SET_SELECTED_QUEUE_FROM_SERVER';
 export const SYNC_SPECIFIC_QUEUE_IN_TABLE = queuesPrefix + 'SYNC_SPECIFIC_QUEUE_IN_TABLE';
@@ -47,6 +48,10 @@ export const queuesTableSetSort = createAction(
 export const setSelectedQueue = createAction(
   SET_SELECTED_QUEUE,
   props<{ queue?: Queue }>()
+);
+export const clearQueue = createAction(
+  CLEAR_QUEUE,
+  props<{ queue?: any }>()
 );
 
 export const refreshSelectedQueue = createAction(

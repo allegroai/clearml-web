@@ -9,7 +9,7 @@ export class ImmutableFormField implements OnInit, OnDestroy, ImmutableForm {
 
   @Input() set formData(formData: any) {
     this._formData = formData;
-    this.formDataUpdated(formData);
+    this.formDataUpdated();
   }
 
   get formData() {
@@ -77,7 +77,7 @@ export class ImmutableFormField implements OnInit, OnDestroy, ImmutableForm {
     }
   }
 
-  formDataUpdated(formData) {
+  formDataUpdated() {
   }
 
 }

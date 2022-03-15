@@ -1,11 +1,11 @@
 import {isReadOnly} from '../utils/shared-utils';
-import {TaskStatusEnum} from '../../../business-logic/model/tasks/taskStatusEnum';
-import {ModelsArchiveManyResponse} from '../../../business-logic/model/models/modelsArchiveManyResponse';
-import {TasksArchiveManyResponse} from '../../../business-logic/model/tasks/tasksArchiveManyResponse';
-import {EntityTypeEnum} from '../../../shared/constants/non-common-consts';
+import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
+import {ModelsArchiveManyResponse} from '~/business-logic/model/models/modelsArchiveManyResponse';
+import {TasksArchiveManyResponse} from '~/business-logic/model/tasks/tasksArchiveManyResponse';
+import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {addMessage} from '@common/core/actions/layout.actions';
 import {openMoreInfoPopup} from '@common/core/actions/projects.actions';
-import { TaskTypeEnum } from '../../../business-logic/model/tasks/taskTypeEnum';
+import { TaskTypeEnum } from '~/business-logic/model/tasks/taskTypeEnum';
 import {Task} from "~/business-logic/model/tasks/task";
 import {TASKS_STATUS} from '@common/tasks/tasks.constants';
 import {TASK_TYPES} from '~/app.constants';
@@ -36,8 +36,12 @@ export const canDequeue = (task: Task): boolean => {
   return !!(task && TASKS_STATUS.QUEUED === task.status);
 }
 
+export const canContinue = (task: Task): boolean => {
+  return !!(task && [TASKS_STATUS.CREATED, TASKS_STATUS.STOPPED].includes(task.status) && task.type !== TASK_TYPES.MANUAL_ANNOTATION) && !!task.execution?.queue;
+}
+
 export const selectionDisabledAbort = (selectedElements: any[]) => {
-  const selectedFiltered = selectedElements.filter( (_selected) => TaskStatusEnum.InProgress === _selected?.status  && !isReadOnly(_selected));
+  const selectedFiltered = selectedElements.filter( (_selected) => [TaskStatusEnum.Queued, TaskStatusEnum.InProgress].includes(_selected?.status)  && !isReadOnly(_selected));
   return {selectedFiltered, ...countAvailableAndIsDisable(selectedFiltered)};
 };
 export const selectionDisabledPublishExperiments = (selectedElements: any[]) => {
@@ -48,6 +52,7 @@ export const selectionDisabledPublishModels = (selectedElements: any[]) => {
   const selectedFiltered = selectedElements.filter(_selected => (!isReadOnly(_selected) && !_selected?.ready) );
   return {selectedFiltered, ...countAvailableAndIsDisable(selectedFiltered)};
 };
+
 export const selectionDisabledReset = (selectedElements: any[]) => {
   const selectedFiltered = selectedElements.filter(_selected => ![TaskStatusEnum.Created, TaskStatusEnum.Published, TaskStatusEnum.Publishing].includes(_selected?.status)  && !isReadOnly(_selected));
   return {selectedFiltered, ...countAvailableAndIsDisable(selectedFiltered)};
@@ -73,7 +78,10 @@ export const selectionDisabledViewWorker = (selectedElements: any[]) => {
   const selectedFiltered = selectedElements.filter(_selected => _selected?.status === TaskStatusEnum.InProgress && !isReadOnly(_selected));
   return {selectedFiltered, ...countAvailableAndIsDisable(selectedFiltered)};
 };
-
+export const selectionDisabledContinue = (selectedElements: any[]) => {
+  const selectedFiltered = selectedElements.filter(_selected => canContinue(_selected) && !isReadOnly(_selected));
+  return {selectedFiltered, ...countAvailableAndIsDisable(selectedFiltered)};
+};
 export const selectionDisabledEnqueue = (selectedElements: any[]) => {
   const selectedFiltered = selectedElements.filter(_selected => canEnqueue(_selected) && !isReadOnly(_selected));
   return {selectedFiltered, ...countAvailableAndIsDisable(selectedFiltered)};
@@ -110,6 +118,7 @@ export const selectionTags = <T extends {tags?: string[]}>(selectedElements: Arr
 export enum MenuItems {
   abort = 'abort',
   abortAllChildren='abortAllChildren',
+  run='runPipeline',
   archive = 'archive',
   compare = 'compare',
   delete = 'delete',
@@ -121,7 +130,8 @@ export enum MenuItems {
   reset = 'reset',
   viewWorker = 'viewWorker',
   tags = 'tags',
-  showAllItems = 'showAllItems'
+  showAllItems = 'showAllItems',
+  continue = 'continue'
 }
 export enum MoreMenuItems {
   restore = 'restore'

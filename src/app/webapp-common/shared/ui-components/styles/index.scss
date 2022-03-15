@@ -3,7 +3,6 @@
 @import "themes";
 @import './bootstrap-settings.scss';
 @import './icons';
-@import '../styles/variables';
 @import 'material-overide';
 @import "duration-input";
 @import "borders";
@@ -23,8 +22,8 @@ $dark-theme-select: map-get($dark-theme, input-select);
 html,
 body {
   height: 100%;
-  margin: 0px;
-  padding: 0px;
+  margin: 0;
+  padding: 0;
 
   @include generate-input();
   @include generate-scroll();
@@ -48,36 +47,6 @@ body {
 
       &:hover {
         color: #FFFFFF;
-      }
-    }
-
-    input {
-      &.highlight {
-        &::placeholder {
-          color: map-get($dark-theme-input-highlight, placeholder-color);
-        }
-
-        color: map-get($dark-theme-input-highlight, color);
-        height: map-get($dark-theme-input-highlight, height);
-        line-height: map-get($dark-theme-input-highlight, height);
-        background-color: map-get($dark-theme-input-highlight, background-color);
-        border: map-get($dark-theme-input-highlight, border);
-        border-radius: map-get($dark-theme-input-highlight, border-radius);
-
-        &:focus {
-          background-color: map-get($dark-theme-input-highlight, background-color);
-          color: map-get($dark-theme-input-highlight, focus-color);
-        }
-      }
-    }
-
-    select {
-      &.highlight {
-        height: map-get($dark-theme-input-highlight, height);
-        line-height: map-get($dark-theme-input-highlight, height);
-        border: map-get($dark-theme-input-highlight, border);
-        border-radius: map-get($dark-theme-input-highlight, border-radius);
-        background-color: map-get($dark-theme-input-highlight, background-color);
       }
     }
 
@@ -110,81 +79,6 @@ body {
       color: map-get($light-theme-select, option-color);
       background-color: map-get($light-theme-select, option-bg);
     }
-
-    input {
-      &.highlight {
-        &::placeholder {
-          color: $light-dusk;
-        }
-
-        font-size: 14px;
-        font-weight: 500;
-        color: $blue-400;
-        height: map-get($light-theme-input-highlight, height);
-        line-height: map-get($light-theme-input-highlight, height);
-        background-color: map-get($light-theme-input-highlight, background-color);
-        border: map-get($light-theme-input-highlight, border);
-        border-radius: map-get($light-theme-input-highlight, border-radius);
-
-        &:focus {
-          background-color: map-get($light-theme-input-highlight, background-color);
-          border: solid 1px $cloudy-blue-two;
-        }
-
-        &:hover {
-          background-color: map-get($light-theme-input-highlight, background-color);
-          border: solid 1px $cloudy-blue-two;
-        }
-      }
-    }
-
-    textarea {
-      &::placeholder {
-        color: $blue-250;
-      }
-
-      &.highlight {
-        &::placeholder {
-          color: $light-dusk;
-        }
-
-        font-size: 14px;
-        font-weight: 500;
-        background-color: map-get($light-theme-input-highlight, background-color);
-        border: map-get($light-theme-input-highlight, border);
-        border-radius: map-get($light-theme-input-highlight, border-radius);
-        color: $blue-400;
-
-        &:focus {
-          background-color: map-get($light-theme-input-highlight, background-color);
-          border: solid 1px $cloudy-blue-two;
-
-        }
-
-        &:hover {
-          border: solid 1px $blue-300;
-        }
-      }
-    }
-
-    select {
-      &.highlight {
-        color: $dusk-two;
-        font-size: 14px;
-        font-weight: 500;
-        height: map-get($light-theme-input-highlight, height);
-        line-height: map-get($light-theme-input-highlight, height);
-        border: map-get($light-theme-input-highlight, border);
-        border-radius: map-get($light-theme-input-highlight, border-radius);
-        background-color: map-get($light-theme-input-highlight, background-color);
-
-        &:focus {
-          background-color: map-get($light-theme-input-highlight, background-color);
-          border: solid 1px $cloudy-blue-two;
-          color: $blue-400;
-        }
-      }
-    }
   }
 }
 
@@ -204,9 +98,17 @@ body {
 .stick-to-corner {
   position: absolute;
   top: 0;
-  right: 0px;
+
   z-index: $generic-base-z-index + 99;
   margin: 16px;
+
+  &.right {
+    right: 0;
+  }
+
+  &.left {
+    left: 0;
+  }
 
 }
 
@@ -220,10 +122,11 @@ body {
 }
 
 .pallete-cursor {
-  cursor: url(/app/webapp-common/assets/icons/pallete-cursor.png) 6 0, pointer;
+  cursor: url(../../../../webapp-common/assets/icons/pallete-cursor.png) 6 0, pointer;
 }
+
 .cursor {
-  &.pointer{
+  &.pointer {
     cursor: pointer;
   }
 }
@@ -232,75 +135,8 @@ body {
   resize: none !important;
 }
 
-//TODO: move to code component...
-pre {
-  .prettyprint {
-    display: block;
-    background-color: $blue-600;
-  }
-
-  .nocode {
-    background-color: none;
-    color: #000
-  }
-
-  .str {
-    color: $neon-yellow !important
-  }
-
-  /* string  - pink */
-  .kwd {
-    color: $training !important;
-    font-weight: bold !important;
-  }
-
-  .com {
-    color: #87ceeb !important
-  }
-
-  /* comment - skyblue */
-  .typ {
-    color: #EA4925 !important
-  }
-
-  /* type    - lightgreen */
-  .lit {
-    color: #cd5c5c !important
-  }
-
-  /* literal - darkred */
-  .pun {
-    color: $white !important
-  }
-
-  /* punctuation */
-  .pln {
-    color: $white !important
-  }
-
-  /* plaintext */
-  .tag {
-    color: $training;
-    font-weight: bold !important
-  }
-
-  /* html/xml tag    - lightyellow */
-  .atn {
-    color: #bdb76b !important;
-    font-weight: bold !important
-  }
-
-  /* attribute name  - khaki */
-  .atv {
-    color: $neon-yellow !important
-  }
-
-  /* attribute value - pink */
-  .dec {
-    color: #EA4925 !important
-  }
-
-  /* decimal         - lightgreen */
+.d-flex-center {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
-
-

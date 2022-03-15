@@ -1,18 +1,18 @@
 <div class="table-card"
-     [class.two-columns]="tableType === 'model'"
-     [ngClass]="{'selected':selected, 'odd': odd, 'checked':checked, 'contexted': activeContextRow?.id ===rowData?.id && contextMenuOpen}">
-    <div class="d-flex align-items-start justify-content-around content-row mx-2">
-      <ng-content select="sm-checkbox-control"></ng-content>
-    </div>
-    <div *ngIf="rowData.type" class="d-flex align-items-start justify-content-around content-row mr-3">
-      <ng-content select="sm-experiment-type-icon-label"></ng-content>
-    </div>
-    <div class="d-flex flex-column flex-grow-1 columns-container">
-      <div class="d-flex content-row flex-shrink-1">
-        <div class="name-container">
-          <div class="ellipsis name">{{cardName}}</div>
-          <ng-content select="[sm-name-icon]"></ng-content>
+     [class.two-columns]="!hasTypeIcon"
+     [ngClass]="{'selected':selected, 'checked':checked, 'contexted': activeContextRow?.id ===rowData?.id && contextMenuOpen}">
 
+      <div class="cbx">
+        <ng-content select="sm-checkbox-control"></ng-content>
+      </div>
+      <div class="type-icon" *ngIf="hasTypeIcon">
+        <ng-content select="sm-experiment-type-icon-label"></ng-content>
+      </div>
+      <div class="card-name">
+        <div class="name-container">
+          <div class="name">{{cardName}}</div>
+          <ng-content select="[sm-name-icon]"></ng-content>
+          <ng-content select="[sm-name-version]"></ng-content>
         </div>
         <div class="d-flex ml-auto">
           <ng-content select="sm-experiment-system-tags"></ng-content>
@@ -20,6 +20,10 @@
           <ng-content select="sm-model-tags"></ng-content>
         </div>
       </div>
-      <ng-content select="sm-tag-list"></ng-content>
-      <ng-content select="[compact-columns-data]"></ng-content>
-  </div>
+      <div class="tags">
+        <ng-content select="sm-tag-list"></ng-content>
+      </div>
+      <div class="data">
+        <ng-content select="[compact-columns-data]"></ng-content>
+      </div>
+</div>

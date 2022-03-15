@@ -1,20 +1,32 @@
-import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {selectExperimentInfoHistograms, selectExperimentMetricsSearchTerm, selectIsExperimentInProgress, selectSelectedExperimentSettings, selectSelectedSettingsGroupBy, selectSelectedSettingsHiddenScalar, selectSelectedSettingsSmoothWeight, selectSelectedSettingsxAxisType, selectShowSettings, selectSplitSize} from '../../reducers';
 import {Observable, Subscription} from 'rxjs';
 import {select, Store} from '@ngrx/store';
 import {distinctUntilChanged, filter, map, tap} from 'rxjs/operators';
-import {selectRouterParams} from '../../../core/reducers/router-reducer';
-import {scrollToElement} from '../../../shared/utils/shared-utils';
+import {selectRouterParams} from '@common/core/reducers/router-reducer';
+import {scrollToElement} from '@common/shared/utils/shared-utils';
 import {ActivatedRoute, Router} from '@angular/router';
-import {of} from 'rxjs';
-import {IExperimentInfoState} from '../../../../features/experiments/reducers/experiment-info.reducer';
-import {ExperimentScalarRequested, ResetExperimentMetrics, SetExperimentMetricsSearchTerm, SetExperimentSettings} from '../../actions/common-experiment-output.actions';
-import {convertScalars} from '../../../tasks/tasks.utils';
-import {ScalarKeyEnum} from '../../../../business-logic/model/events/scalarKeyEnum';
-import {selectSelectedExperiment} from '../../../../features/experiments/reducers';
+import {IExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
+import {
+  ExperimentScalarRequested,
+  ResetExperimentMetrics,
+  SetExperimentMetricsSearchTerm,
+  SetExperimentSettings,
+  toggleSettings
+} from '../../actions/common-experiment-output.actions';
+import {convertScalars} from '@common/tasks/tasks.utils';
+import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
+import {selectSelectedExperiment} from '~/features/experiments/reducers';
 import {GroupByCharts} from '../../reducers/common-experiment-output.reducer';
-import {GroupedList} from '../../../shared/ui-components/data/selectable-grouped-filter-list/selectable-grouped-filter-list.component';
-import {ExtFrame} from '../../../shared/experiment-graphs/single-graph/plotly-graph-base';
+import {GroupedList} from '@common/shared/ui-components/data/selectable-grouped-filter-list/selectable-grouped-filter-list.component';
+import {ExtFrame} from '@common/shared/experiment-graphs/single-graph/plotly-graph-base';
+import {ExperimentGraphsComponent} from '@common/shared/experiment-graphs/experiment-graphs.component';
+
+export const prepareScalarList = (metricsScalar: GroupedList): GroupedList =>
+  Object.keys(metricsScalar || []).reduce((acc, curr) => {
+    acc[curr] = {};
+    return acc;
+  }, {});
 
 
 @Component({
@@ -46,6 +58,7 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
   public groupBy: GroupByCharts;
   private scalars: any;
 
+  @ViewChild(ExperimentGraphsComponent) experimentGraphs;
   groupByOptions = [
     {
       name: 'Metric',
@@ -94,8 +107,11 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
     );
 
     this.subs.add(this.xAxisType$
-      .pipe(filter((axis) => !!axis && !!this.experimentId))
-      .subscribe(() => this.store.dispatch(new ExperimentScalarRequested(this.experimentId)))
+      .pipe(filter(axis => !!axis && !!this.experimentId))
+      .subscribe(() => {
+        this.store.dispatch(new ExperimentScalarRequested(this.experimentId));
+        this.experimentGraphs.prepareRedraw();
+      })
     );
 
     this.subs.add(this.groupBy$
@@ -113,7 +129,7 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.minimized = this.activeRoute.snapshot.routeConfig.data.minimized;
-    this.listOfHidden = this.minimized ? of([]) : this.store.pipe(select(selectSelectedSettingsHiddenScalar))
+    this.listOfHidden = this.store.pipe(select(selectSelectedSettingsHiddenScalar))
       .pipe(distinctUntilChanged());
 
     this.subs.add(this.store.select(selectSelectedExperiment)
@@ -157,7 +173,7 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
   private prepareGraphsAndUpdate(scalars: GroupedList) {
     if (scalars) {
       const splittedScalars = this.groupBy === 'metric' ? scalars : this.splitScalars(scalars);
-      this.scalarList = this.prepareScalarList(splittedScalars);
+      this.scalarList = prepareScalarList(splittedScalars);
       this.graphs = convertScalars(splittedScalars, this.experimentId);
       this.changeDetection.detectChanges();
     }
@@ -166,13 +182,6 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.subs.unsubscribe();
     this.resetMetrics();
-  }
-
-  private prepareScalarList(metricsScalar: GroupedList): GroupedList {
-    return Object.keys(metricsScalar || []).reduce((acc, curr) => {
-      acc[curr] = {};
-      return acc;
-    }, {});
   }
 
   metricSelected(id) {
@@ -212,7 +221,7 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
   }
 
   toggleSettingsBar() {
-    this.showSettingsBar = !this.showSettingsBar;
+    this.store.dispatch(toggleSettings());
   }
 
   private splitScalars(scalars: GroupedList): GroupedList {

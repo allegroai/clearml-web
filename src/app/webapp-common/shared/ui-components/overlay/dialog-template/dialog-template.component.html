@@ -1,9 +1,14 @@
 <div class="dialog-template-container" [ngClass]="containerClass">
 
   <div *ngIf="displayX" style="position: relative">
-    <i (click)="onXPressed()" class="pointer stick-to-corner al-icon al-ico-dialog-x al-color blue-400 sm-md">
+    <i (click)="onXPressed()" class="pointer stick-to-corner right al-icon al-ico-dialog-x al-color blue-400 sm-md">
     </i>
+    <div class="stick-to-corner left" *ngIf="pageHeader">
+      <div [innerHTML]="pageHeader"></div>
+    </div>
   </div>
+
+
 
   <div #container class="generic-container {{theme || 'light-theme'}}" cdkScrollable>
     <div class="d-flex flex-column" *ngIf="iconClass">
@@ -20,8 +25,4 @@
     </div>
     <ng-content></ng-content>
   </div>
-  <sm-code *ngIf="codeTemplateFileName"
-           [closedCodeLabel]="closedCodeLabel"
-           [codeTemplateFileName]="codeTemplateFileName"
-           [params]="codeParams"></sm-code>
 </div>

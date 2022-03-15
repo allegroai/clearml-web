@@ -1,17 +1,21 @@
-import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import {ISmCol} from '../table.consts';
 import {addOrRemoveFromArray} from '../../../../utils/shared-utils';
 import {MatMenuTrigger} from '@angular/material/menu';
 
 @Component({
-  selector   : 'sm-table-card-filter-template',
+  selector: 'sm-table-card-filter-template',
   templateUrl: './table-card-filter-template.component.html',
-  styleUrls  : ['./table-card-filter-template.component.scss']
+  styleUrls: ['./table-card-filter-template.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TableCardFilterTemplateComponent {
 
   private _value: Array<string>;
   public searchTerms = {};
+  public optionsFiltered: {};
+  private _columns: ISmCol[];
+  private _options: { [p: string]: { label: string; value: string; tooltip?: string }[] };
 
   @Input() set value(value: any) {
     this._value = value;
@@ -23,18 +27,35 @@ export class TableCardFilterTemplateComponent {
 
   @Input() fixedOptionsSubheader;
   @Input() subValue: string[] = [];
-  @Input() subOptions: {label: string; value: string}[];
-  @Input() options: { [col: string]: { label: string; value: string; tooltip?: string }[] };
-  @Input() columns: ISmCol[];
-  @Input() filterMatch: {[colId: string]: string};
+  @Input() subOptions: { label: string; value: string }[];
+
+  @Input() set columns(columns: ISmCol[]) {
+    this._columns = columns;
+    this.updateFilterFields();
+  }
+
+  get columns() {
+    return this._columns;
+  }
+
+  @Input() set options(options: { [col: string]: { label: string; value: string; tooltip?: string }[] }) {
+    this._options = options;
+    this.updateFilterFields();
+  }
+
+  get options() {
+    return this._options;
+  }
+
+  @Input() filterMatch: { [colId: string]: string };
   @Output() subFilterChanged = new EventEmitter();
-  @Output() filterChanged = new EventEmitter<{col: string; value: unknown; matchMode?: string}>();
+  @Output() filterChanged = new EventEmitter<{ col: string; value: unknown; matchMode?: string }>();
   @Output() menuClosed = new EventEmitter<ISmCol>();
   @Output() menuOpened = new EventEmitter<ISmCol>();
 
   @ViewChild(MatMenuTrigger, {static: true}) trigger: MatMenuTrigger;
 
-  trackByKey = (index: number, item: {key: string; value: { label: string; value: string; tooltip?: string }[]}) => item['key'];
+  trackByKey = (index: number, item: { key: string; value: { label: string; value: string; tooltip?: string }[] }) => item['key'];
   trackByLabel = (index: number, item) => item.label;
 
   onFilterChanged(colId: string, val) {
@@ -48,6 +69,7 @@ export class TableCardFilterTemplateComponent {
     this.filterChanged.emit({col: colId, value: values, matchMode: this.filterMatch?.[colId]});
 
   }
+
   onSubFilterChanged(col, val) {
     if (val) {
       const newValues = addOrRemoveFromArray(this.subValue, val.itemValue);
@@ -75,8 +97,8 @@ export class TableCardFilterTemplateComponent {
   }
 
   clearSearch(key: string) {
-    this.searchTerms[key]='';
-    this.setSearchTerm({target:{value:''}}, key);
+    this.searchTerms[key] = '';
+    this.setSearchTerm({target: {value: ''}}, key);
   }
 
   toggleCombination(colId: string) {
@@ -88,5 +110,16 @@ export class TableCardFilterTemplateComponent {
 
   getColumnByOption(option: any) {
     return this.columns.find(col => col.id === option.key);
+  }
+
+  private updateFilterFields() {
+    if (this.options && this.columns) {
+      this.optionsFiltered = Object.entries(this.options).reduce((acc, [key, value]) => {
+        if (this.columns?.find(col => col.id === key)?.showInCardFilters) {
+          acc[key] = value;
+        }
+        return acc;
+      }, {});
+    }
   }
 }

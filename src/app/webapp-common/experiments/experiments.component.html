@@ -8,7 +8,8 @@
   [isMetricsLoading]="metricLoading$ | async"
   [autoRefreshState]="autoRefreshState$ | async"
   [tableFilters]="tableFilters$ | async"
-  (isArchivedChanged)="onIsArchivedChanged($event)"
+  [showNavbarLinks]="(isPipeline$ | async) === false"
+  (isArchivedChanged)="archivedChanged($event)"
   (selectedTableColsChanged)="selectedTableColsChanged($event)"
   (refreshListClicked)="refreshList($event)"
   (getMetricsToDisplay)="getMetricsToDisplay()"
@@ -25,7 +26,7 @@
             [useTransition]="true"
             [gutterDblClickDuration]="400"
             (gutterClick)="clickOnSplit()"
-            (gutterDblClick)="closeExperimentPanel()"
+            (gutterDblClick)="closePanel()"
             (dragEnd)="splitSizeChange($event)"
             (dragStart)="disableInfoPanel()"
             (transitionEnd)="experimentsTable.table?.resize(); experimentsTable.afterTableInit()"
@@ -36,6 +37,7 @@
         #experimentsTable
         class="align-self-stretch"
         selectionMode="single"
+        [initialColumns]="tableCols"
         [colsOrder]="(tableColsOrder$ | async)"
         [tableCols]="tableCols$| async"
         [experiments]="experiments$ | async"
@@ -55,6 +57,9 @@
         [minimizedView]="minimizedView"
         [noMoreExperiments]="noMoreExperiments$ | async"
         [split]="selectSplitSize$ | async"
+        [contextMenuTemplate]="contextMenuExtendedTemplate"
+        [contextMenuActive]="contextMenuActive"
+        [entityType]="entityType"
         (experimentSelectionChanged)="experimentSelectionChanged($event)"
         (experimentsSelectionChanged)="experimentsSelectionChanged($event)"
         (sortedChanged)="sortedChanged($event)"
@@ -64,10 +69,11 @@
         (loadMoreExperiments)="getNextExperiments()"
         (columnsReordered)="columnsReordered($event)"
         (columnResized)="columnResized($event)"
+        (openContextMenu)="onContextMenuOpen($event)"
       >
       </sm-experiments-table>
     </as-split-area>
-    <as-split-area [size]="splitInitialSize" class="light-theme" [class.info-disabled]="infoDisabled"
+    <as-split-area [size]="splitInitialSize" [class.light-theme]="(isPipeline$ | async) === false" [class.info-disabled]="infoDisabled"
                    [visible]="minimizedView" [order]="2">
       <router-outlet></router-outlet>
     </as-split-area>
@@ -80,3 +86,21 @@
   (footerItemClick)="onFooterHandler($event)"
   (tagSelected)="tagSelected($event, 'experiments')"
 ></sm-entity-footer>
+
+<ng-template #contextMenuExtendedTemplate let-contextExperiment>
+  <sm-experiment-menu-extended #contextMenuExtended
+                               [experiment]="contextExperiment"
+                               [selectedExperiment]="selectedExperiment$ | async"
+                               [selectedExperiments]="selectedExperiments"
+                               [selectedDisableAvailable]="selectedExperimentsDisableAvailable$ | async"
+                               [numSelected]="selectedExperiments.length"
+                               [tagsFilterByProject]="tagsFilterByProject$ | async"
+                               [projectTags]="projectTags$ | async"
+                               [companyTags]="companyTags$ | async"
+                               [activateFromMenuButton]="false"
+                               [minimizedView]="true"
+                               (tagSelected)="onAddTag($event, contextExperiment)"
+                               (menuOpened)="setContextMenuStatus(true)"
+                               (menuClosed)="setContextMenuStatus(false)"
+  ></sm-experiment-menu-extended>
+</ng-template>

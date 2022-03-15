@@ -12,8 +12,8 @@ import {
 import {createReducer, on} from '@ngrx/store';
 import {Params} from '@angular/router';
 import {ITableExperiment} from '../../experiments/shared/common-experiment-model.model';
-import {commonExperimentsInitialState} from '../../experiments/reducers/common-experiments-view.reducer';
 import {SortMeta} from 'primeng/api';
+import {FilterMetadata} from 'primeng/api/filtermetadata';
 
 export interface CompareHeaderState {
   searchResultsExperiments: ITableExperiment[];
@@ -27,8 +27,8 @@ export interface CompareHeaderState {
   navigationPreferences: Params;
   experimentsUpdateTime: { [key: string]: Date };
   projectColumnsSortOrder: { [projectId: string]: SortMeta[] };
-  projectColumnFilters: { [projectId: string]: { [columnId: string]: { value: any; matchMode: string } } };
-};
+  projectColumnFilters: { [projectId: string]: { [columnId: string]: FilterMetadata } };
+}
 
 
 export const initialState: CompareHeaderState = {
@@ -67,7 +67,7 @@ const _compareHeader = createReducer(initialState,
   on(resetSelectCompareHeader, () => ({...initialState})),
   on(compareAddDialogSetTableSort, (state, action) => {
     let orders = action.orders.filter(order => action.colIds.includes(order.field));
-    orders = orders.length > 0 ? orders : commonExperimentsInitialState.tableOrders;
+    orders = orders.length > 0 ? orders : null;
     return {...state, projectColumnsSortOrder: {...state.projectColumnsSortOrder, [action.projectId]: orders}};
   }),
   on(compareAddTableFilterInit, (state, action) => ({

@@ -1,4 +1,4 @@
-import {MessageSeverityEnum, VIEW_PREFIX} from '../../../app.constants';
+import {MessageSeverityEnum, VIEW_PREFIX} from '~/app.constants';
 import {createAction, props} from '@ngrx/store';
 import {omit} from 'lodash/fp';
 import {HttpErrorResponse} from '@angular/common/http';
@@ -37,12 +37,12 @@ export const setBackdrop = createAction(
 
 export const activeLoader = createAction(
   VIEW_PREFIX + '[activate loader]',
-  (endpoint: string) => ({endpoint})
+  (endpoint: string) => ({endpoint, noPreferences: true})
 );
 
 export const deactivateLoader = createAction(
   VIEW_PREFIX + '[deactivate loader]',
-  (endpoint: string) => ({endpoint})
+  (endpoint: string) => ({endpoint, noPreferences: true})
 );
 
 

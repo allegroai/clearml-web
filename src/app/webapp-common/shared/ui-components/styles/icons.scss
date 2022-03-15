@@ -94,9 +94,9 @@
   }
 
   &.xxl {
-    width: 88px;
-    height: 88px;
-    font-size: 88px;
+    width: 64px;
+    height: 64px;
+    font-size: 64px;
   }
 }
 
@@ -458,6 +458,11 @@
   @include icon('#{$assets-icons-path}/no-log-dk.svg');
 }
 
+//No font icon dark-theme
+.i-no-code-dark {
+  @include icon('#{$assets-icons-path}/no-code-dk.svg');
+}
+
 //No font icon
 .i-no-debug {
   @include icon('#{$assets-icons-path}/no-debug.svg');
@@ -526,6 +531,11 @@
 .i-markdown {
   @include icon('#{$assets-icons-path}/ico-markdown.svg');
 }
+
 .i-c-logo {
   @include icon('#{$assets-icons-path}/c-logomark.svg');
+}
+
+.i-pipeline-empty-state {
+  @include icon('#{$assets-icons-path}/pipeline-empty-state.svg');
 }

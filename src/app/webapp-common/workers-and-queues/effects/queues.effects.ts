@@ -15,8 +15,23 @@ import {activeLoader, addMessage, deactivateLoader} from '../../core/actions/lay
 import {requestFailed} from '../../core/actions/http.actions';
 import {
   getQueues,
-  queuesTableSortChanged, queuesTableSetSort, setQueues, setSelectedQueue, setSelectedQueueFromServer, refreshSelectedQueue, syncSpecificQueueInTable, deleteQueue, moveExperimentToBottomOfQueue,
-  moveExperimentToTopOfQueue, moveExperimentInQueue, removeExperimentFromQueue, moveExperimentToOtherQueue, addExperimentToQueue, getStats, setStats
+  queuesTableSortChanged,
+  queuesTableSetSort,
+  setQueues,
+  setSelectedQueue,
+  setSelectedQueueFromServer,
+  refreshSelectedQueue,
+  syncSpecificQueueInTable,
+  deleteQueue,
+  moveExperimentToBottomOfQueue,
+  moveExperimentToTopOfQueue,
+  moveExperimentInQueue,
+  removeExperimentFromQueue,
+  moveExperimentToOtherQueue,
+  addExperimentToQueue,
+  getStats,
+  setStats,
+  clearQueue
 } from '../actions/queues.actions';
 import {MESSAGES_SEVERITY} from '../../../app.constants';
 import {QueueMetrics} from '../../../business-logic/model/queues/queueMetrics';
@@ -36,7 +51,7 @@ export class QueuesEffect {
   }
 
   activeLoader = createEffect(() => this.actions.pipe(
-    ofType(getQueues, refreshSelectedQueue),
+    ofType(getQueues, refreshSelectedQueue, clearQueue),
     map(action => activeLoader(action.type))
   ));
 
@@ -96,6 +111,17 @@ export class QueuesEffect {
         setSelectedQueue({}),
       ]),
       catchError(err => [deactivateLoader(action.type), requestFailed(err), addMessage(MESSAGES_SEVERITY.ERROR, 'Delete Queue failed')])
+    ))
+  ));
+
+  clearQueue = createEffect(() => this.actions.pipe(
+    ofType(clearQueue),
+    switchMap(action => this.tasksApi.tasksDequeueMany({ids: action.queue.entries.map(ent=>ent.task?.id)}).pipe(
+      mergeMap(() => [getQueues(),
+        refreshSelectedQueue(),
+        deactivateLoader(action.type)
+      ]),
+      catchError(err => [deactivateLoader(action.type), requestFailed(err), addMessage(MESSAGES_SEVERITY.ERROR, 'Clear queue failed')])
     ))
   ));
 

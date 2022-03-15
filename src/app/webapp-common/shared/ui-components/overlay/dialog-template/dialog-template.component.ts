@@ -19,8 +19,8 @@ export class DialogTemplateComponent {
   @Input() iconData: string;
   @Input() header: string;
   @Input() subHeader: string;
+  @Input() pageHeader: string;
   @Input() codeParams;
-  @Input() codeTemplateFileName;
   @Output() xClicked = new EventEmitter();
 
   @ViewChild('container') container: ElementRef<HTMLDivElement>;

@@ -39,13 +39,14 @@
         <button mat-menu-item
                 [matMenuTriggerFor]="tagMenu"
                 [disabled]="footerItemState.disable"
-                (menuOpened)="tagMenuOpened()"
-                (menuClosed)="tagMenuClosed()"
+                (menuOpened)="tagMenuOpened(tagMenuContent)"
+                (menuClosed)="tagMenuClosed(tagMenuContent)"
         >
         <i [class]="'al-icon ' + icons.TAG + ' sm-md'"></i>
       </button>
       <mat-menu #tagMenu="matMenu">
         <sm-tags-menu
+          #tagMenuContent
           class="light-theme"
           [tags]="footerItemState.tags"
           [tagsFilterByProject]="footerItemState.tagsFilterByProject"

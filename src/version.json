@@ -1,10 +1,10 @@
 {
-  "version": "1.2.0",
+  "version": "1.3.0-000",
   "trains-server-treeish": "master",
-  "trains-server-commit": "head",
+  "trains-server-commit": "master",
   "webapp-treeish": "master",
-  "webapp-commit": "head",
+  "webapp-commit": "master",
   "webapp-common-treeish": "master",
-  "webapp-common-commit": "head",
-  "date": "Sun Aug 4 08:44:21 UTC 2019"
+  "webapp-common-commit": "master",
+  "date": "Sun Mar 6 12:44:21 UTC 2022"
 }

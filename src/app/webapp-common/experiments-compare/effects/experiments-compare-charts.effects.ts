@@ -1,19 +1,19 @@
 import {Injectable} from '@angular/core';
-import {act, Actions, Effect, ofType} from '@ngrx/effects';
+import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {Store} from '@ngrx/store';
 import {IExperimentCompareChartsState} from '../reducers/experiments-compare-charts.reducer';
 import * as chartActions from '../actions/experiments-compare-charts.actions';
-import {GetMultiPlotCharts, GetMultiScalarCharts, setAxisCache} from '../actions/experiments-compare-charts.actions';
+import {GetMultiPlotCharts, GetMultiScalarCharts} from '../actions/experiments-compare-charts.actions';
 import {activeLoader, deactivateLoader, setServerError} from '../../core/actions/layout.actions';
 import {catchError, debounceTime, mergeMap, map, withLatestFrom} from 'rxjs/operators';
-import {ApiTasksService} from '../../../business-logic/api-services/tasks.service';
-import {ApiAuthService} from '../../../business-logic/api-services/auth.service';
-import {BlTasksService} from '../../../business-logic/services/tasks.service';
-import {ApiEventsService} from '../../../business-logic/api-services/events.service';
+import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
+import {ApiAuthService} from '~/business-logic/api-services/auth.service';
+import {BlTasksService} from '~/business-logic/services/tasks.service';
+import {ApiEventsService} from '~/business-logic/api-services/events.service';
 import {requestFailed} from '../../core/actions/http.actions';
 import {selectCompareHistogramCacheAxisType, selectCompareSelectedSettingsxAxisType} from '../reducers';
 import {setRefreshing} from '../actions/compare-header.actions';
-import {ScalarKeyEnum} from '../../../business-logic/model/events/scalarKeyEnum';
+import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 
 
 @Injectable()
@@ -23,14 +23,12 @@ export class ExperimentsCompareChartsEffects {
               private authApi: ApiAuthService, private taskBl: BlTasksService, private eventsApi: ApiEventsService) {
   }
 
-  @Effect()
-  activeLoader = this.actions$.pipe(
+  activeLoader = createEffect(() => this.actions$.pipe(
     ofType(chartActions.GET_MULTI_SCALAR_CHARTS, chartActions.GET_MULTI_PLOT_CHARTS),
     map(action => activeLoader(action.type))
-  );
+  ));
 
-  @Effect()
-  getMultiScalarCharts = this.actions$.pipe(
+  getMultiScalarCharts = createEffect(() => this.actions$.pipe(
     ofType<GetMultiScalarCharts>(chartActions.GET_MULTI_SCALAR_CHARTS),
     debounceTime(200),
     withLatestFrom(this.store.select(selectCompareSelectedSettingsxAxisType), this.store.select(selectCompareHistogramCacheAxisType)),
@@ -39,7 +37,7 @@ export class ExperimentsCompareChartsEffects {
         [ScalarKeyEnum.IsoTime, ScalarKeyEnum.Timestamp].includes(axisType) &&
         prevAxisType !== axisType
       ) {
-        return [setRefreshing({payload: false}), deactivateLoader(action.type), setAxisCache({axis: axisType})];
+        return [setRefreshing({payload: false}), deactivateLoader(action.type)];
       }
       return this.eventsApi.eventsMultiTaskScalarMetricsIterHistogram({
         tasks: action.payload.taskIds,
@@ -57,10 +55,9 @@ export class ExperimentsCompareChartsEffects {
         ])
       );
     })
-  );
+  ));
 
-  @Effect()
-  getMultiPlotCharts = this.actions$.pipe(
+  getMultiPlotCharts = createEffect(() => this.actions$.pipe(
     ofType<GetMultiPlotCharts>(chartActions.GET_MULTI_PLOT_CHARTS),
     debounceTime(200),
     mergeMap((action) =>
@@ -77,6 +74,6 @@ export class ExperimentsCompareChartsEffects {
           ])
         )
     )
-  );
+  ));
 
 }

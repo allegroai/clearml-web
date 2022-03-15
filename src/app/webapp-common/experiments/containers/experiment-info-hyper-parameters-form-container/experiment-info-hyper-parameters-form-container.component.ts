@@ -7,11 +7,11 @@ import {
   selectIsSelectedExperimentInDev
 } from '../../reducers';
 import {ICommonExperimentInfoState} from '../../reducers/common-experiment-info.reducer';
-import {IExperimentInfo} from '../../../../features/experiments/shared/experiment-info.model';
-import {selectBackdropActive} from '../../../core/reducers/view.reducer';
+import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
+import {selectBackdropActive} from '@common/core/reducers/view.reducer';
 import {Observable, Subscription} from 'rxjs';
-import {selectIsExperimentEditable, selectSelectedExperiment} from '../../../../features/experiments/reducers';
-import {selectRouterConfig} from '../../../core/reducers/router-reducer';
+import {selectIsExperimentEditable, selectSelectedExperiment} from '~/features/experiments/reducers';
+import {selectRouterConfig} from '@common/core/reducers/router-reducer';
 import {
   ActivateEdit,
   CancelExperimentEdit,
@@ -21,11 +21,11 @@ import {
   SetExperimentFormErrors,
   updateExperimentAtPath
 } from '../../actions/common-experiments-info.actions';
-import {ParamsItem} from '../../../../business-logic/model/tasks/paramsItem';
+import {ParamsItem} from '~/business-logic/model/tasks/paramsItem';
 import {HELP_TEXTS} from '../../shared/common-experiments.const';
 import {Router} from '@angular/router';
 import {ExperimentExecutionParametersComponent} from '../../dumb/experiment-execution-parameters/experiment-execution-parameters.component';
-import {isReadOnly} from '../../../shared/utils/shared-utils';
+import {isReadOnly} from '@common/shared/utils/shared-utils';
 
 @Component({
   selector   : 'sm-experiment-info-hyper-parameters-form-container',
@@ -112,9 +112,16 @@ export class ExperimentInfoHyperParametersFormContainerComponent implements OnIn
     this.store.dispatch(new DeactivateEdit());
   }
 
-  searchTable($event: string) {
-    this.searchedText = $event;
-    this.cdr.detectChanges();
+  searchTable(value: string) {
+    const searchBackward = value === null;
+    if (this.searchedText !== value && !searchBackward) {
+      this.searchedText = value;
+      this.scrollIndexCounter = -1;
+      this.searchResultsCount = 0;
+      this.executionParamsForm.resetIndex();
+      this.cdr.detectChanges();
+    }
+    this.executionParamsForm.jumpToNextResult(!searchBackward)
   }
 
   searchCounterChanged(count: number) {
@@ -122,8 +129,8 @@ export class ExperimentInfoHyperParametersFormContainerComponent implements OnIn
     this.cdr.detectChanges();
   }
 
-  scrollIndexCounterChanged(counterIndex: number) {
-    this.scrollIndexCounter = counterIndex;
+  scrollIndexCounterReset() {
+    this.scrollIndexCounter = -1;
     this.cdr.detectChanges();
   }
 }

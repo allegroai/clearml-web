@@ -22,6 +22,9 @@
     display: flex;
     align-items: center;
 
+    &.caret {
+      margin-left: 4px;
+    }
   }
 
   .hidden-button {

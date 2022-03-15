@@ -1,0 +1,72 @@
+<mat-expansion-panel [expanded]="true">
+  <mat-expansion-panel-header>
+    <div class="expand-header">{{controller ? 'RUN INFO' : 'STEP INFO'}}</div>
+  </mat-expansion-panel-header>
+  <div class="panel-body" *ngIf="entity">
+    <header *ngIf="step">
+      <i
+        class="al-icon lg"
+        [class]="'al-ico-type-' + (entity?.type ? (entity.type.toString()).replace('_', '-') : 'training')"
+      ></i>
+      <div class="name">{{step.name}}</div>
+      <div class="status" [class]="step.data.status">{{step.data.status}}</div>
+    </header>
+    <ng-container *ngIf="!step || step.data.job_id === entity?.id">
+      <div class="section">
+        <div class="header">PARAMETERS</div>
+        <ng-container *ngFor="let section of (entity?.type === 'controller' ? {'Args': {}} : entity?.hyperparams) | keyvalue">
+          <div
+            *ngFor="let param of entity?.hyperparams[section.key]  | keyvalue | filterRegex: '^(?!_).+$'"
+            class="param"
+          ><div class="key">{{param.key}}</div><div class="value">{{param.value.value}}</div></div>
+        </ng-container>
+      </div>
+      <div class="section">
+        <div class="header">METRICS</div>
+        <ng-container *ngIf="(entity?.last_metrics | keyvalue)?.length > 0; else emptyMsg">
+          <ng-container *ngFor="let metric of entity.last_metrics | keyvalue">
+            <div *ngFor="let variant of $any(metric.value) | keyvalue" class="param">
+              <div class="key">{{$any(variant.value).metric}}/{{$any(variant.value).variant}}</div>
+              <div class="value">{{$any(variant.value).value}}</div>
+            </div>
+          </ng-container>
+        </ng-container>
+      </div>
+      <div class="section" *ngIf="!controller">
+        <div class="header">ARTIFACTS</div>
+        <ng-container *ngIf="entity?.execution?.artifacts?.length > 0; else emptyMsg">
+          <div
+            *ngFor="let artifact of entity.execution.artifacts; trackBy: trackByFn"
+            class="param"
+          >
+            <div class="key">{{artifact.key}}</div>
+            <div class="value">{{artifact?.content_size ? (artifact?.content_size | filesize) : ''}}</div>
+          </div>
+        </ng-container>
+      </div>
+      <div class="section" *ngIf="!controller">
+        <div class="header">MODELS</div>
+        <ng-container *ngIf="entity?.models?.['input']?.length > 0 || entity?.models?.['output']?.length > 0; else emptyMsg">
+          <ng-container *ngFor="let type of ['input', 'output']">
+            <div *ngFor="let model of entity.models[type]" class="param">
+              <div class="key">{{type}}</div><div class="value">{{model.name || model.model.name}}</div>
+            </div>
+          </ng-container>
+        </ng-container>
+      </div>
+    </ng-container>
+
+    <ng-template #emptyMsg>
+      <div class="empty-msg">No data to show</div>
+    </ng-template>
+
+  </div>
+  <footer *ngIf="entity?.id">
+      <a
+        class="arr-link"
+        target="_blank"
+        [href]="'/projects/' + project + '/experiments/' + entity?.id + '/output/execution'">
+        Full details<i class="al-icon al-ico-link-arrow sm"></i>
+     </a>
+  </footer>
+</mat-expansion-panel>

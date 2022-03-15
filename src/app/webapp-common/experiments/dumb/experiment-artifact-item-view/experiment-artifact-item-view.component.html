@@ -23,10 +23,11 @@
                        [disableInEditMode]="true"
                        containerClass="h-100">
     <sm-section-header label="PREVIEW"></sm-section-header>
-    <sm-experiment-network-design-form
+    <sm-scroll-textarea
+      class="flex-grow-1"
       [editable]="false"
-      [formData]="artifact?.type_data?.preview">
-    </sm-experiment-network-design-form>
+      [formData]="artifact?.type_data?.preview"
+    ></sm-scroll-textarea>
   </sm-editable-section>
 
 

@@ -34,7 +34,7 @@ export class ExperimentExecutionParametersComponent implements IExperimentInfoFo
   search: string = '';
   lastSearchIndex = -1;
   public searchIndexList: {index:number, col: string}[];
-  public matchIndex: number;
+  public matchIndex: number = -1;
 
   formNames(id) {
     return this.formData.filter(parameter => parameter.id !== id).map(parameter => parameter.name);
@@ -49,7 +49,7 @@ export class ExperimentExecutionParametersComponent implements IExperimentInfoFo
   @Output() formDataChanged = new EventEmitter<{ field: string; value: ParamsItem[] }>();
   @Output() searchCounterChanged = new EventEmitter<number>();
   @Output() resetSearch = new EventEmitter();
-  @Output() scrollToResultCounterChanged = new EventEmitter<number>();
+  @Output() scrollToResultCounterReset = new EventEmitter();
   @Input() section;
 
   @Input() set formData(formData: { name?: string; description?: string; section?: string; id?: string; type?: string; value?: string }[]) {
@@ -110,18 +110,22 @@ export class ExperimentExecutionParametersComponent implements IExperimentInfoFo
     this.formContainersSub?.unsubscribe();
   }
 
-  jumpToResult(counterIndex: number) {
-    this.matchIndex = counterIndex;
+  resetIndex() {
+    this.matchIndex = -1;
+  }
+
+  jumpToNextResult(forward: boolean) {
+    this.matchIndex = forward ? this.matchIndex + 1 : this.matchIndex - 1;
     if(this.editable){
-      this.viewPort.scrollToIndex(this.searchIndexList[counterIndex]?.index, 'smooth');
+      this.viewPort.scrollToIndex(this.searchIndexList[this.matchIndex]?.index, 'smooth');
     } else {
-      this.executionParametersTable.scrollToIndex(this.searchIndexList[counterIndex]?.index);
+      this.executionParametersTable.scrollToIndex(this.searchIndexList[this.matchIndex]?.index);
     }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if(changes?.formData && (!changes.formData?.firstChange) && !isEqual(changes.formData.currentValue, changes.formData.previousValue)){
-      this.matchIndex = undefined;
+      this.matchIndex = -1;
       this.searchIndexList = [];
       this.resetSearch.emit();
     }
@@ -141,7 +145,7 @@ export class ExperimentExecutionParametersComponent implements IExperimentInfoFo
         });
       }
       this.searchCounterChanged.emit(searchResultsCounter);
-      this.scrollToResultCounterChanged.emit(-1);
+      this.scrollToResultCounterReset.emit();
       this.searchIndexList = searchedIndexList;
     }
   }

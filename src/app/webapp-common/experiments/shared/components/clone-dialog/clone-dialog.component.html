@@ -7,7 +7,7 @@
   <ng-template #extendMessage>
     <div class="reference">
       A draft copy of <b *ngIf="reference" [smTooltip]="reference.length > 80 ? reference : undefined">{{reference.length > 80 ? (reference | slice:0:77) + '...' : reference }}</b> will be created,
-      with it's input model set to the output model of <b *ngIf="reference">{{reference}}</b>.
+      with its input model set to the output model of <b *ngIf="reference">{{reference}}</b>.
     </div>
   </ng-template>
   <form #cloneForm="ngForm">

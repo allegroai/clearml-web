@@ -12,7 +12,7 @@ $font-size: 18px;
 }
 
 .empty {
-  background-color: #313955;
+  background-color: $empty-grey;
 }
 
 .running {
@@ -42,7 +42,7 @@ $font-size: 18px;
       background-color: $blue-300;
     }
     &.failed {
-      background-color: $strong-red;
+      background-color: $failed-red;
     }
     &.stopped {
       background-color: $completed-blue;

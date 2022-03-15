@@ -28,10 +28,6 @@
     height: 100%;
     overflow-y: hidden;
 
-    &.with-settings {
-      height: calc(100% - 64px);
-    }
-
     .disable-graphs-interactive {
       pointer-events: none;
     }
@@ -39,7 +35,7 @@
 
   .all-metrics {
     height: 100%;
-    padding: 0px;
+    padding: 0;
     overflow-y: scroll;
   }
 
@@ -85,20 +81,6 @@
     display: none !important;
   }
 
-  sm-graph-settings-bar {
-    overflow: hidden;
-    height: auto;
-    max-height: 0;
-    padding: 0 25px 0 22px;
-    background-color: #f2f3f6;
-    transition: max-height 0.3s;
-
-    &.showSettings {
-      padding-top: 7px ;
-      min-height: 64px;
-      max-height: 128px;
-    }
-  }
   .resize-overlay{
     position: absolute;
     z-index: 13;

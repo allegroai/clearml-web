@@ -20,14 +20,13 @@ import {TableModule} from 'primeng/table';
 import {SectionHeaderComponent} from './components/section-header/section-header.component';
 import {LineChartComponent} from './components/charts/line-chart/line-chart.component';
 import {DonutComponent} from './components/charts/donut/donut.component';
-import {NgxFilesizeModule} from 'ngx-filesize';
 import {NgxJsonViewerComponent} from './components/ngx-json-viewer/ngx-json-viewer.component';
 import {ExperimentRefreshComponent} from './components/experiment-refresh/experiment-refresh.component';
 import {LeavingBeforeSaveAlertGuard} from './guards/leaving-before-save-alert.guard';
 import {CustomColumnsListComponent} from './components/custom-columns-list/custom-columns-list.component';
 import { BaseContextMenuComponent } from './components/base-context-menu/base-context-menu.component';
 import {EntityFooterComponent} from './entity-page/entity-footer/entity-footer.component';
-import {CheckPermissionDirective} from '../../shared/directives/check-permission.directive';
+import {CheckPermissionDirective} from '~/shared/directives/check-permission.directive';
 import {ScrollTextareaComponent} from './components/scroll-textarea/scroll-textarea.component';
 import { ShowOnlyUserWorkComponent } from './components/show-only-user-work/show-only-user-work.component';
 import {GeneralLeavingBeforeSaveAlertGuard} from './guards/general-leaving-before-save-alert.guard';
@@ -76,7 +75,6 @@ const _declarations = [
     MatProgressSpinnerModule,
     MatButtonToggleModule,
     MatSnackBarModule,
-    NgxFilesizeModule,
     ChipsModule
   ],
   declarations: [
@@ -86,7 +84,7 @@ const _declarations = [
     ClearFiltersButtonComponent,
   ],
     exports: [..._declarations, UiComponentsModule, TableModule, ClipboardModule, SharedPipesModule, MatSnackBarModule,
-        NgxFilesizeModule, ScatterPlotComponent, ClearFiltersButtonComponent
+        ScatterPlotComponent, ClearFiltersButtonComponent
     ],
   providers   : [LeavingBeforeSaveAlertGuard, GeneralLeavingBeforeSaveAlertGuard]
 })

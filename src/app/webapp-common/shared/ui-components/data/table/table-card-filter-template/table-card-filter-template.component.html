@@ -4,7 +4,7 @@
     <i [class]="'icon ' + (isFiltered()? 'i-filter-on':'i-filter-off')" [matMenuTriggerFor]="menu"></i>
   </div>
   <mat-menu #menu="matMenu" class="table-card-filter-menu" classList="light-theme">
-    <ng-container *ngFor="let option of (options | keyvalue); trackBy: trackByKey">
+    <ng-container *ngFor="let option of (optionsFiltered | keyvalue); trackBy: trackByKey">
       <ng-template let-col
                    [ngTemplateOutletContext]="{$implicit: getColumnByOption(option)}"
                    [ngTemplateOutlet]="column" #column

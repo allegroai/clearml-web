@@ -1,7 +1,7 @@
 import {Action, createAction, props} from '@ngrx/store';
 import {ISmAction} from '../../core/models/actions';
-import {IExperimentSettings} from '../../experiments/reducers/common-experiment-output.reducer';
-import {ScalarKeyEnum} from '../../../business-logic/model/events/scalarKeyEnum';
+import {ExperimentSettings} from '../../experiments/reducers/common-experiment-output.reducer';
+import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 
 
 export const EXPERIMENTS_COMPARE_METRICS_CHARTS_ = 'EXPERIMENTS_COMPARE_METRICS_CHARTS_';
@@ -68,7 +68,7 @@ export class SetExperimentPlots implements Action {
 export class SetExperimentSettings implements Action {
   readonly type = UPDATE_EXPERIMENT_SETTINGS;
 
-  constructor(public payload: { id: Array<string>; changes: Partial<IExperimentSettings>}) {
+  constructor(public payload: { id: Array<string>; changes: Partial<ExperimentSettings>}) {
   }
 }
 

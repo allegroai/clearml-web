@@ -3,10 +3,11 @@ import {Observable, Subscription} from 'rxjs';
 import {CredentialKeyExt, selectCredentials, selectNewCredential} from '@common/core/reducers/common-auth-reducer';
 import {selectCurrentUser} from '@common/core/reducers/users-reducer';
 import {filter, take} from 'rxjs/operators';
-import {credentialRevoked, getAllCredentials} from '@common/core/actions/common-auth.actions';
+import {credentialRevoked, getAllCredentials, resetCredential} from '@common/core/actions/common-auth.actions';
 import {Store} from '@ngrx/store';
-import { createCredential } from '@common/core/actions/common-auth.actions';
 import {GetCurrentUserResponseUserObject} from '~/business-logic/model/users/getCurrentUserResponseUserObject';
+import {MatDialog} from '@angular/material/dialog';
+import {CreateCredentialDialogComponent} from '~/features/settings/containers/admin/create-credential-dialog/create-credential-dialog.component';
 
 @Component({
   selector: 'sm-user-credentials',
@@ -19,7 +20,7 @@ export class UserCredentialsComponent implements OnInit, OnDestroy {
   private newCredentialSub: Subscription;
   creatingCredentials = false;
   private user: GetCurrentUserResponseUserObject;
-  constructor(private store: Store) { }
+  constructor(private store: Store, private dialog: MatDialog) { }
 
   ngOnInit(): void {
     this.store.select(selectCurrentUser)
@@ -38,7 +39,15 @@ export class UserCredentialsComponent implements OnInit, OnDestroy {
 
   createCredential() {
     this.creatingCredentials = true;
-    this.store.dispatch(createCredential({workspace: this.user.company, openCredentialsPopup: true}));
+    this.dialog.open(CreateCredentialDialogComponent, {
+        data: {workspace : this.user.company},
+        width: '816px'
+      }
+    ).afterClosed().subscribe(() => {
+      this.creatingCredentials = false;
+      this.store.dispatch(resetCredential());
+    });
+    // this.store.dispatch(createCredential({workspace: this.user.company, openCredentialsPopup: true}));
   }
 
   onCredentialRevoked(accessKey) {

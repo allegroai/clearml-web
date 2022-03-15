@@ -89,13 +89,13 @@
       visibility: visible;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
 
       &.hide {
         visibility: hidden;
       }
 
       footer {
+        margin-top: auto;
         position: relative;
         background-color: $card-footer-bg;
         border-bottom-left-radius: $card-border-radius;
@@ -103,12 +103,7 @@
       }
 
       header {
-        padding: $card-spacer-y $card-spacer-x;
-        padding-top: $card-spacer-y * 0.5;
-        padding-bottom: $card-spacer-y * 0.5;
-        font-size: 16px;
-        font-weight: 500;
-        line-height: 1.5;
+        padding: 6px 16px;
       }
 
       header.empty {
@@ -119,16 +114,14 @@
 
       .line {
         border-top: solid 1px $blue-600;
-        margin: 8px 15px;
+        margin: 8px 16px;
         width: auto;
       }
 
       .card-body {
-        padding: $card-spacer-y $card-spacer-x;
-        padding-top: $card-spacer-y * 0.5;
-        padding-bottom: $card-spacer-y * 0.5;
+        padding: 6px 16px;
+        flex: unset;
       }
-
 
       .ribbon {
         transform: rotate(-45deg);

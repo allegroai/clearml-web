@@ -1,5 +1,5 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
-import {ActivatedRoute, Router, NavigationEnd} from '@angular/router';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewChild} from '@angular/core';
+import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import {Store} from '@ngrx/store';
 import {SetIsSearching, setSearchQuery} from '../../common-search.actions';
 import {ICommonSearchState, selectIsSearching, selectPlaceholder, selectSearchQuery} from '../../common-search.reducer';
@@ -10,7 +10,8 @@ import {SearchComponent} from '../../../shared/ui-components/inputs/search/searc
 @Component({
   selector   : 'sm-common-search',
   templateUrl: './common-search.component.html',
-  styleUrls  : ['./common-search.component.scss']
+  styleUrls  : ['./common-search.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CommonSearchComponent implements OnInit {
   public searchQuery$: Observable<ICommonSearchState['searchQuery']>;
@@ -26,7 +27,7 @@ export class CommonSearchComponent implements OnInit {
   private queryString: string;
   minChars = 3;
 
-  constructor(private store: Store<any>, private router: Router, private route: ActivatedRoute) {}
+  constructor(private store: Store<any>, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
     this.searchQuery$       = this.store.select(selectSearchQuery).pipe(tap(searchQuery => this.regExp = searchQuery?.regExp));
@@ -39,9 +40,10 @@ export class CommonSearchComponent implements OnInit {
     setTimeout(this.setSearchActive.bind(this));
   }
 
-  onSearchValueChanged(query) {
+  onSearchValueChanged(query: string) {
     this.queryString = query;
-    this.store.dispatch(setSearchQuery({query, regExp: this.regExp}));
+    this.cdr.detectChanges();
+    this.store.dispatch(setSearchQuery({query: this.regExp? this.queryString: this.queryString.trim(), regExp: this.regExp}));
   }
 
   openSearch() {
@@ -66,6 +68,7 @@ export class CommonSearchComponent implements OnInit {
       }
     }
     this.searchActive = showSearch;
+    this.cdr.detectChanges();
   }
 
   clearSearch() {

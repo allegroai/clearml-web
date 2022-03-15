@@ -2,10 +2,10 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {ExperimentOutputLogComponent} from '../../containers/experiment-output-log/experiment-output-log.component';
 import {ExperimentLogInfoComponent} from '../../dumb/experiment-log-info/experiment-log-info.component';
-import {SMSharedModule} from '../../../shared/shared.module';
-import {UiComponentsModule} from '../../../shared/ui-components/ui-components.module';
+import {SMSharedModule} from '@common/shared/shared.module';
+import {UiComponentsModule} from '@common/shared/ui-components/ui-components.module';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import {SharedPipesModule} from '../../../shared/pipes/shared-pipes.module';
+import {SharedPipesModule} from '@common/shared/pipes/shared-pipes.module';
 
 
 

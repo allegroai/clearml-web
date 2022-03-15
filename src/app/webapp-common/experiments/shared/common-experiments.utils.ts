@@ -1,4 +1,4 @@
-import {DIGITS_AFTER_DECIMAL} from '../../../features/experiments/shared/experiments.const';
+import {DIGITS_AFTER_DECIMAL, EXPERIMENTS_TABLE_COL_FIELDS} from '../../../features/experiments/shared/experiments.const';
 
 export const convertStopToComplete = (tasks) => tasks.map(task => {
   if (task.status === 'closed') {
@@ -16,3 +16,14 @@ export const filterArchivedExperiments = (experiments, showArchived) => {
 };
 
 export const getRoundedNumber = (value: number) => Math.round(value * Math.pow(10, DIGITS_AFTER_DECIMAL)) / Math.pow(10, DIGITS_AFTER_DECIMAL);
+
+export const convertDurationFilter = (filter: string[]): string | string[] => {
+  let newFilter;
+  if (filter[0]) {
+    newFilter = `>=${filter[0]}`;
+  }
+  if (filter[1]) {
+    newFilter = newFilter ? [newFilter, `<=${filter[1]}`] : `<=${filter[1]}`;
+  }
+  return newFilter;
+};

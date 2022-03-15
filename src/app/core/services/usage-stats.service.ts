@@ -19,7 +19,7 @@ export class UsageStatsService {
 
     if (!ConfigurationService.globalEnvironment.demo) {
       this.store.select(selectPromptUser)
-        .pipe(filter(prompt => prompt))
+        .pipe(filter(prompt => !!prompt))
         .subscribe(() => {
           const dialogRef = this.dialog.open(ConfirmDialogComponent,
             {

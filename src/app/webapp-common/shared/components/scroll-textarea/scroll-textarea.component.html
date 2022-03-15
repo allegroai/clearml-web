@@ -6,8 +6,12 @@
     <sm-search
       class="dark-theme text-area"
       [value]="search"
+      [minimumChars]="minimumChars"
       [expandOnHover]="true"
-      (valueChanged)="onSearchValueChanged($event)"
+      [enableNavigation]="true"
+      [searchResultsCount]="searchResultsCount"
+      [searchCounterIndex]="index"
+      (valueChanged)="onFindNextResult($event)"
     ></sm-search>
   </div>
   <cdk-virtual-scroll-viewport #scroll itemSize="19" minBufferPx = 400, maxBufferPx = 600
@@ -15,10 +19,10 @@
                                [style.min-height]="minHeight"
                                [class.disabled]="disabled"
                                [class.isReadonly]="!editable">
-    <div *cdkVirtualFor="let line of lines" class="line"><span
-      *ngFor="let part of (search ? line.split(search) : [line]); let last=last"
-      >{{part}}<span class="found" *ngIf="!last"
-        >{{search}}</span></span></div>
+    <div *cdkVirtualFor="let line of lines; let lineIndex=index" class="line"><span
+      *ngFor="let part of (search ? split(line, search) : [[line, search]]); let last=last"
+      >{{part[0]}}<span class="found" [class.current]="indexes[index] === lineIndex" *ngIf="!last"
+        >{{part[1]}}</span></span></div>
   </cdk-virtual-scroll-viewport>
 </div>
 <span *ngIf="!showSpinner && !lines?.length && !editable" class="no-changes">{{emptyMessage}}</span>

@@ -16,7 +16,7 @@ export class ShowItemsFooterSelected extends ItemFooterModel {
     return {
       title: state.showAllSelectedIsActive ?
         `SHOW ALL ${this.entitiesType.toUpperCase()}S` :
-        `SHOW ${state.selected.length} SELECTED ${this.entitiesType.toUpperCase()}S`,
+        `SHOW ${state.selected.length} ${this.entitiesType.toUpperCase()}S SELECTED`,
       emitValue: state.showAllSelectedIsActive,
       preventCurrentItem: false
     };

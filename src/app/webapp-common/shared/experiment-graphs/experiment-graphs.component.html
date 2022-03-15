@@ -2,18 +2,7 @@
   <i class="icon no-output-icon" [ngClass]="isDarkTheme ? 'i-no-plots-dark' : 'i-no-plots'"></i>
   <h3>NO CHART DATA</h3>
 </div>
-<sm-graph-settings-bar
-  [class.showSettings]="showSettings && minimized"
-  [smoothWeight]="smoothWeight"
-  [xAxisType]="xAxisType"
-  [groupBy]="groupBy"
-  [groupByOptions]="groupByOptions"
-  (changeWeight)="changeWeight.emit($event)"
-  (toggleSettings)="toggleSettings.emit()"
-  (changeXAxisType)="changeXAxisType.emit($event)"
-  (changeGroupBy)="changeGroupBy.emit($event)"
-></sm-graph-settings-bar>
-<div class="metrics-section" [class.with-settings]="showSettings">
+<div class="metrics-section">
   <div #allMetrics
        class="all-metrics"
        [class.row]="!isGroupGraphs"

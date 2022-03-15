@@ -7,7 +7,6 @@ import {TableSortOrderEnum} from '../../../shared/ui-components/data/table/table
   styleUrls: ['./projects-header.component.scss']
 })
 export class ProjectsHeaderComponent {
-  @Input() hideCreateButton: boolean;
   @Input() searchQuery: string;
   @Input() sortOrder: TableSortOrderEnum;
   @Input() selectedProject;

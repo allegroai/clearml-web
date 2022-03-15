@@ -21,12 +21,14 @@ export const selectBreadcrumbsStringsBase = createSelector(
   (project, experiment, model, projects) =>
     ({project, experiment, model, projects}) as IBreadcrumbs);
 
-
-export const prepareNames = (data: IBreadcrumbs) => {
-  const project    = prepareLinkData(data.project, true);
+export function prepareNames(data: IBreadcrumbs, noSubProjects?: boolean) {
+  const project = prepareLinkData(data.project, true);
   if (data.project) {
     const subProjects = [];
-    const subProjectsNames = data.project?.name?.split('/');
+    let subProjectsNames = [data.project?.name];
+    if (!noSubProjects) {
+      subProjectsNames = data.project?.name?.split('/');
+    }
     let currentName = '';
     subProjectsNames.forEach(name => {
       currentName += currentName ? ('/' + name) : name;
@@ -37,11 +39,11 @@ export const prepareNames = (data: IBreadcrumbs) => {
       ].find(proj => currentName === proj.name);
       subProjects.push(foundProject);
     });
-    const subProjectsLinks = subProjects.map(subProject => ({
-      name: subProject?.name.substring(subProject?.name.lastIndexOf('/') + 1),
-      url: `projects/${subProject?.id}/projects`
+    const subProjectsLinks = subProjects.map(proj => ({
+      name: proj?.name.substring(proj?.name.lastIndexOf('/') + 1),
+      url: (noSubProjects || (proj?.name === data.project?.name && data.project?.sub_projects?.length===0)) ? '' : `projects/${proj?.id}/projects`
     })) as { name: string; url: string }[];
-    project.name = project.name.substring(project.name.lastIndexOf('/') + 1);
+    project.name = project?.name.substring(project.name.lastIndexOf('/') + 1);
     project.subCrumbs = subProjectsLinks;
   }
   const task       = prepareLinkData(data.task);

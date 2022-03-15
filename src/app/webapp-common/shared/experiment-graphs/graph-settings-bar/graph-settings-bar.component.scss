@@ -5,8 +5,27 @@
   z-index: 1000;
   width: 100%;
   font-size: 14px;
-  .mat-form-field{
-    padding-top: 3px;
+
+  ::ng-deep .mat-form-field.mat-form-field-appearance-outline {
+    .mat-form-field-wrapper .mat-form-field-flex {
+      margin-top: 0;
+    }
+
+    .mat-form-field-outline {
+      top: 0px;
+    }
+
+    .mat-form-field-infix {
+      top: unset;
+      border: 0;
+      padding: 11px 0;
+    }
+
+    .mat-form-field-label-wrapper {
+      margin-left: unset;
+      top: 0;
+      padding: 0;
+    }
   }
 
   .vertical-layout {
@@ -74,6 +93,7 @@
 .label-text {
   padding-right: 6px;
   margin: auto;
+
   &.axis-text-margin-left {
     margin-left: 24px;
   }

@@ -15,13 +15,13 @@ import {
   selectSelectedExperimentsForCompareAdd
 } from '../../reducers';
 import {BehaviorSubject, combineLatest, Observable, Subscription} from 'rxjs';
-import {Task} from '../../../../business-logic/model/tasks/task';
+import {Task} from '~/business-logic/model/tasks/task';
 import {Params} from '@angular/router';
-import {selectRouterParams} from '../../../core/reducers/router-reducer';
+import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {distinctUntilChanged, distinctUntilKeyChanged, filter, map} from 'rxjs/operators';
-import {compareLimitations} from '../../../shared/entity-page/footer-items/compare-footer-item';
+import {compareLimitations} from '@common/shared/entity-page/footer-items/compare-footer-item';
 import {MatDialogRef} from '@angular/material/dialog';
-import {ITableExperiment} from '../../../experiments/shared/common-experiment-model.model';
+import {ITableExperiment} from '@common/experiments/shared/common-experiment-model.model';
 import {
   selectActiveParentsFilter,
   selectExperimentsList,
@@ -34,21 +34,24 @@ import {
   selectExperimentsUsers,
   selectHyperParamsOptions,
   selectNoMoreExperiments,
-  selectTableFilters
-} from '../../../experiments/reducers';
+  selectTableFilters, selectTableSortFields
+} from '@common/experiments/reducers';
 import {get, isEqual, unionBy} from 'lodash/fp';
-import {ColHeaderTypeEnum, ISmCol, TableSortOrderEnum} from '../../../shared/ui-components/data/table/table.consts';
-import {filterArchivedExperiments} from '../../../experiments/shared/common-experiments.utils';
-import {InitSearch} from '../../../common-search/common-search.actions';
+import {ColHeaderTypeEnum, ISmCol, TableSortOrderEnum} from '@common/shared/ui-components/data/table/table.consts';
+import {filterArchivedExperiments} from '@common/experiments/shared/common-experiments.utils';
+import {InitSearch} from '@common/common-search/common-search.actions';
 import * as experimentsActions from '../../../experiments/actions/common-experiments-view.actions';
-import {resetExperiments, resetGlobalFilter} from '../../../experiments/actions/common-experiments-view.actions';
-import {User} from '../../../../business-logic/model/users/user';
-import {selectProjectSystemTags, selectRootProjects} from '../../../core/reducers/projects.reducer';
+import {resetExperiments, resetGlobalFilter} from '@common/experiments/actions/common-experiments-view.actions';
+import {User} from '~/business-logic/model/users/user';
+import {selectProjectSystemTags, selectRootProjects} from '@common/core/reducers/projects.reducer';
 import {SortMeta} from 'primeng/api';
-import {Project} from '../../../../business-logic/model/projects/project';
-import {addMessage} from '../../../core/actions/layout.actions';
-import {MESSAGES_SEVERITY} from '../../../../app.constants';
-import {ProjectsGetTaskParentsResponseParents} from '../../../../business-logic/model/projects/projectsGetTaskParentsResponseParents';
+import {Project} from '~/business-logic/model/projects/project';
+import {addMessage} from '@common/core/actions/layout.actions';
+import {MESSAGES_SEVERITY} from '~/app.constants';
+import {ProjectsGetTaskParentsResponseParents} from '~/business-logic/model/projects/projectsGetTaskParentsResponseParents';
+import {FilterMetadata} from 'primeng/api/filtermetadata';
+import {INITIAL_EXPERIMENT_TABLE_COLS} from '@common/experiments/experiment.consts';
+import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 
 export const allowAddExperiment$ = (selectRouterParams$: Observable<Params>) => selectRouterParams$.pipe(
   distinctUntilKeyChanged('ids'),
@@ -64,6 +67,8 @@ export const allowAddExperiment$ = (selectRouterParams$: Observable<Params>) => 
   styleUrls: ['./select-experiments-for-compare.component.scss']
 })
 export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
+  public tableCols = INITIAL_EXPERIMENT_TABLE_COLS;
+  public entityTypes = EntityTypeEnum;
   public experimentsResults$: Observable<Task[]>;
   public selectedExperimentsIds: string[] = [];
   private paramsSubscription: Subscription;
@@ -78,7 +83,7 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
   public experiments$: Observable<any>;
   private projectId: string;
   public users$: Observable<User[]>;
-  public tableFilters$: Observable<{ [p: string]: { value: any; matchMode: string } }>;
+  public tableFilters$: Observable<{ [columnId: string]: FilterMetadata }>;
   public tags$: Observable<string[]>;
   public systemTags$: Observable<string[]>;
   public types$: Observable<string[]>;
@@ -119,14 +124,13 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
     this.types$ = this.store.select(selectExperimentsTypes);
     this.systemTags$ = this.store.select(selectProjectSystemTags);
     this.noMoreExperiments$ = this.store.select(selectNoMoreExperiments);
-    this.tableSortFields$ = this.store.select(selectCompareAddTableSortFields);
+    this.tableSortFields$ = this.store.select(selectTableSortFields);
     this.hyperParamsOptions$ = this.store.select(selectHyperParamsOptions);
     this.activeParentsFilter$ = this.store.select(selectActiveParentsFilter);
     this.tableCols$ = combineLatest([this.columns$, this.metricTableCols$, this.resizedCols$])
       .pipe(
-        filter(([tableCols,,]) => !!tableCols),
         map(([tableCols, metricCols, resizedCols]) =>
-          tableCols
+          (tableCols.length > 0 ? tableCols: this.tableCols)
             .concat(metricCols.map(col => ({...col, metric: true})))
             .map(col => ({
               ...col,

@@ -1,5 +1,5 @@
 import {ColHeaderFilterTypeEnum, ColHeaderTypeEnum, ISmCol} from '../shared/ui-components/data/table/table.consts';
-import {EXPERIMENTS_TABLE_COL_FIELDS} from '../../features/experiments/shared/experiments.const';
+import {EXPERIMENTS_TABLE_COL_FIELDS} from '~/features/experiments/shared/experiments.const';
 
 export const INITIAL_EXPERIMENT_TABLE_COLS: ISmCol[] = [
   {
@@ -25,6 +25,7 @@ export const INITIAL_EXPERIMENT_TABLE_COLS: ISmCol[] = [
     header        : 'TYPE',
     bodyStyleClass: 'type-col',
     style         : {width: '115px'},
+    showInCardFilters: true
   },
   {
     id          : EXPERIMENTS_TABLE_COL_FIELDS.NAME,
@@ -45,7 +46,8 @@ export const INITIAL_EXPERIMENT_TABLE_COLS: ISmCol[] = [
     style: {width: '300px'},
     excludeFilter: true,
     andFilter: true,
-    columnExplain: 'Click to include tag. Click again to exclude.'
+    columnExplain: 'Click to include tag. Click again to exclude.',
+    showInCardFilters: true
   },
   {
     id          : EXPERIMENTS_TABLE_COL_FIELDS.STATUS,
@@ -54,6 +56,7 @@ export const INITIAL_EXPERIMENT_TABLE_COLS: ISmCol[] = [
     static      : true,
     header      : 'STATUS',
     style       : {width: '115px'},
+    showInCardFilters: true
   },
   {
     id          : EXPERIMENTS_TABLE_COL_FIELDS.PROJECT,
@@ -72,6 +75,7 @@ export const INITIAL_EXPERIMENT_TABLE_COLS: ISmCol[] = [
     static          : true,
     header          : 'USER',
     style           : {width: '115px'},
+    showInCardFilters: true
   },
   {
     id          : EXPERIMENTS_TABLE_COL_FIELDS.STARTED,
@@ -89,7 +93,7 @@ export const INITIAL_EXPERIMENT_TABLE_COLS: ISmCol[] = [
     headerType  : ColHeaderTypeEnum.sortFilter,
     sortable  : true,
     filterType    : ColHeaderFilterTypeEnum.durationDate,
-    filterable: false,
+    filterable: true,
     searchableFilter: false,
     static        : true,
     header      : 'UPDATED',
@@ -135,7 +139,8 @@ export const INITIAL_EXPERIMENT_TABLE_COLS: ISmCol[] = [
     filterable      : true,
     sortable        : false,
     header    : 'PARENT TASK',
-    style     : {width: '200px'}
+    style     : {width: '200px'},
+    showInCardFilters: true
   }
 ];
 
@@ -204,4 +209,4 @@ export const EXPERIMENT_INFO_ONLY_FIELDS_BASE = [
   'runtime'
 ];
 
-export const MINIMUM_ONLY_FIELDS = ['system_tags', 'project', 'company', 'last_change', 'started', 'last_iteration', 'tags', 'user.name'];
+export const MINIMUM_ONLY_FIELDS = ['name', 'system_tags', 'project', 'company', 'last_change', 'started', 'last_iteration', 'tags', 'user.name'];
