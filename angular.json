@@ -26,7 +26,6 @@
             "assets": [
               "src/assets",
               "src/favicon.ico",
-              "src/env.js",
               "src/app/webapp-common/assets",
               {
                 "glob": "**/*",

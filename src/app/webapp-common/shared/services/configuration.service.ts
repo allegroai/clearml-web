@@ -5,17 +5,10 @@ import {BehaviorSubject, of, timer, throwError} from 'rxjs';
 import {catchError, map, retryWhen, mergeMap} from 'rxjs/operators';
 import {Environment} from '../../../../environments/base';
 import { retryOperation } from '../utils/promie-with-retry';
-import {EnvService} from '../../../env.service';
-import {EnvServiceFactory} from '../../../env.service.provider';
-
-var env : EnvService = EnvServiceFactory();
-export const NAMESPACE               = env.namespace;
-export const SUFFIX                  = NAMESPACE == null ? '/' : '/'+NAMESPACE+'-clearml/';
 
 export const fetchConfigOutSideAngular = async (): Promise<Environment> => {
-  return retryOperation(() => fetch(SUFFIX+'configuration.json').then(res => res.json()), 500, 2) as Promise<Environment>;
+  return retryOperation(() => fetch('/configuration.json').then(res => res.json()), 500, 2) as Promise<Environment>;
 };
-
 
 @Injectable({
   providedIn: 'root'
@@ -33,7 +26,7 @@ export class ConfigurationService {
       this.setEnv((window as any).configuration);
       return of(null);
     }
-    return this.httpClient.get(SUFFIX+'configuration.json')
+    return this.httpClient.get('/configuration.json')
       .pipe(
         retryWhen(errors => errors.pipe(
             mergeMap((err, i) => i > 2 ? throwError('Error from retry!') : timer(500))
