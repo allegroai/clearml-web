@@ -230,6 +230,7 @@ export class SingleGraphComponent extends PlotlyGraphBase {
         }
       }),
       uirevision: 'static', // Saves the UI state between redraws https://plot.ly/javascript/uirevision/
+      hoverlabel: {    namelength: -1,       },
       legend: {
         traceorder: 'normal',
         xanchor: 'left',
