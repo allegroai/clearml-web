@@ -1,6 +1,8 @@
 export class EnvService {
 
-  public namespace = '';
+  public subPath = '';
+
+  public serveFromSubPath = false;
 
   constructor() {
   }
