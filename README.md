@@ -1,6 +1,5 @@
 # ClearML Webapp
 
-
 ## Building the UI from source
 ### Prerequisite
 * a linux machine
