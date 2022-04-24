@@ -8,9 +8,10 @@ import {FormsModule} from '@angular/forms';
 import {CommonLayoutModule} from '../layout/layout.module';
 import { ProjectStatsComponent } from './conteiners/project-stats/project-stats.component';
 import {ExperimentsCommonModule} from '../experiments/common-experiments.module';
+import { MetricForStatsDialogComponent } from './conteiners/metric-for-stats-dialog/metric-for-stats-dialog.component';
 
 @NgModule({
-  declarations: [ProjectInfoComponent, ProjectStatsComponent],
+  declarations: [ProjectInfoComponent, ProjectStatsComponent, MetricForStatsDialogComponent],
   imports: [
     CommonModule,
     SMSharedModule,

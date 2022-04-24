@@ -8,7 +8,6 @@
         class="edit-name"
         [originalText]="model?.name"
         [editable]="editable"
-        [minWidth]="250"
         (textChanged)="onNameChanged($event)"
         (inlineActiveStateChanged)="editExperimentName($event)"
       >

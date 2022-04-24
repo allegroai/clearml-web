@@ -24,3 +24,4 @@ export abstract class FormsTrackBy {
 
 export const trackByIndex = (index: number): number => index;
 export const trackById = (index: number, val) => val.id;
+export const trackByKey = (index: number, item: {key: string; value: any}) => item.key;

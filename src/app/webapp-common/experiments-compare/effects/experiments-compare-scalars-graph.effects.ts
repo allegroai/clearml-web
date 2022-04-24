@@ -1,19 +1,16 @@
 import {Injectable} from '@angular/core';
 import {Actions, createEffect, Effect, ofType} from '@ngrx/effects';
-import {Store} from '@ngrx/store';
-import {IExperimentCompareMetricsValuesState} from '../reducers/experiments-compare-metrics-values.reducer';
 import {activeLoader, deactivateLoader, setServerError} from '../../core/actions/layout.actions';
 import {catchError, mergeMap, map} from 'rxjs/operators';
 import {requestFailed} from '../../core/actions/http.actions';
-import {ApiTasksService} from '../../../business-logic/api-services/tasks.service';
+import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
 import {getExperimentsHyperParams, setHyperParamsList, setMetricsList, setTasks} from '../actions/experiments-compare-scalars-graph.actions';
-import {setRefreshing} from '../actions/compare-header.actions';
 import {GroupedHyperParams, HyperParams} from '../reducers/experiments-compare-charts.reducer';
 
 @Injectable()
 export class ExperimentsCompareScalarsGraphEffects {
 
-  constructor(private actions$: Actions, private store: Store<IExperimentCompareMetricsValuesState>, public tasksApiService: ApiTasksService) {
+  constructor(private actions$: Actions, public tasksApiService: ApiTasksService) {
   }
 
   @Effect()
@@ -38,11 +35,10 @@ export class ExperimentsCompareScalarsGraphEffects {
             setTasks({tasks: res.tasks}),
             setMetricsList({metricsList: metricsList}),
             setHyperParamsList({hyperParams: paramsHasDiffs}),
-            setRefreshing({payload: false}),
             deactivateLoader(action.type)];
         }),
         catchError(error => [
-          requestFailed(error), deactivateLoader(action.type), setRefreshing({payload: false}),
+          requestFailed(error), deactivateLoader(action.type),
           setServerError(error, null, 'Failed to get Compared Experiments')
         ])
       )
@@ -65,14 +61,13 @@ export class ExperimentsCompareScalarsGraphEffects {
         }
       }
     }
-    const metricsList = Object.keys(metrics).sort((a, b) => a.toLowerCase() > b.toLowerCase() ? 1 : -1).map(metricName => ({
+    return Object.keys(metrics).sort((a, b) => a.toLowerCase() > b.toLowerCase() ? 1 : -1).map(metricName => ({
       metricName,
       variants: Object.keys(metrics[metricName]).sort().map(variant => ({
         name: variant,
         value: metrics[metricName][variant]
       }))
     }));
-    return metricsList;
   }
 
   private getParametersHasDiffs(tasks): GroupedHyperParams {

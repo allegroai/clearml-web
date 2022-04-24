@@ -5,14 +5,13 @@ import {IExperimentCompareChartsState} from '../reducers/experiments-compare-cha
 import * as chartActions from '../actions/experiments-compare-charts.actions';
 import {GetMultiPlotCharts, GetMultiScalarCharts} from '../actions/experiments-compare-charts.actions';
 import {activeLoader, deactivateLoader, setServerError} from '../../core/actions/layout.actions';
-import {catchError, debounceTime, mergeMap, map, withLatestFrom} from 'rxjs/operators';
+import {catchError, debounceTime, mergeMap, map, withLatestFrom, filter} from 'rxjs/operators';
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
 import {ApiAuthService} from '~/business-logic/api-services/auth.service';
 import {BlTasksService} from '~/business-logic/services/tasks.service';
 import {ApiEventsService} from '~/business-logic/api-services/events.service';
 import {requestFailed} from '../../core/actions/http.actions';
 import {selectCompareHistogramCacheAxisType, selectCompareSelectedSettingsxAxisType} from '../reducers';
-import {setRefreshing} from '../actions/compare-header.actions';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 
 
@@ -25,6 +24,7 @@ export class ExperimentsCompareChartsEffects {
 
   activeLoader = createEffect(() => this.actions$.pipe(
     ofType(chartActions.GET_MULTI_SCALAR_CHARTS, chartActions.GET_MULTI_PLOT_CHARTS),
+    filter(action => !(action as any).payload?.autoRefresh),
     map(action => activeLoader(action.type))
   ));
 
@@ -37,7 +37,7 @@ export class ExperimentsCompareChartsEffects {
         [ScalarKeyEnum.IsoTime, ScalarKeyEnum.Timestamp].includes(axisType) &&
         prevAxisType !== axisType
       ) {
-        return [setRefreshing({payload: false}), deactivateLoader(action.type)];
+        return [deactivateLoader(action.type)];
       }
       return this.eventsApi.eventsMultiTaskScalarMetricsIterHistogram({
         tasks: action.payload.taskIds,
@@ -46,11 +46,10 @@ export class ExperimentsCompareChartsEffects {
         mergeMap(res => [
           // also here
           new chartActions.SetExperimentHistogram(res, axisType),
-          setRefreshing({payload: false}),
           deactivateLoader(action.type)]
         ),
         catchError(error => [
-          requestFailed(error), deactivateLoader(action.type), setRefreshing({payload: false}),
+          requestFailed(error), deactivateLoader(action.type),
           setServerError(error, null, 'Failed to get Scalar Charts', action.payload.autoRefresh)
         ])
       );
@@ -66,10 +65,9 @@ export class ExperimentsCompareChartsEffects {
           map(res => res.plots),
           mergeMap(res => [
             new chartActions.SetExperimentPlots(res),
-            setRefreshing({payload: false}),
             deactivateLoader(action.type)]),
           catchError(error => [
-            requestFailed(error), deactivateLoader(action.type), setRefreshing({payload: false}),
+            requestFailed(error), deactivateLoader(action.type),
             setServerError(error, null, 'Failed to get Plot Charts', action.payload.autoRefresh)
           ])
         )

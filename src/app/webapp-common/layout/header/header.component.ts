@@ -12,7 +12,7 @@ import {GetCurrentUserResponseUserObjectCompany} from '~/business-logic/model/us
 import {filter} from 'rxjs/operators';
 import {selectRouterUrl} from '../../core/reducers/router-reducer';
 import {TipsService} from '../../shared/services/tips.service';
-import {WelcomeMessageComponent} from '../../dashboard/dumb/welcome-message/welcome-message.component';
+import {WelcomeMessageComponent} from '../welcome-message/welcome-message.component';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import {LoginService} from '~/shared/services/login.service';
 import {selectUserSettingsNotificationPath} from '~/core/reducers/view.reducer';
@@ -95,9 +95,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.dialog.open(WelcomeMessageComponent, {data: {step: 2}});
   }
 
-  openAppsAwareness($event: MouseEvent, appsYouTubeIntroLink: string) {
+  openAppsAwareness($event: MouseEvent, appsYouTubeIntroVideoId: string) {
     $event.preventDefault();
-    this.store.dispatch(openAppsAwarenessDialog({appsYouTubeIntroLink}));
+    this.store.dispatch(openAppsAwarenessDialog({appsYouTubeIntroVideoId}));
   }
 
   navigate(link: string) {

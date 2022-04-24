@@ -1,16 +1,20 @@
-<sm-model-menu-extended #contextMenuExtended
-               [model]="contextModel"
-               [selectedModel]="selectedModel"
-               [selectedModels]="selectedModels"
-               [selectedDisableAvailable]="selectedModelsDisableAvailable"
-               [numSelected]="selectedModels.length"
-               [tagsFilterByProject]="tagsFilterByProject$ | async"
-               [projectTags]="projectTags$ | async"
-               [companyTags]="companyTags$ | async"
-               (tagSelected)="addTag($event)"
-               (menuOpened)="setContextMenuStatus(true)"
-               (menuClosed)="setContextMenuStatus(false)"
-               [showButton]="false"
+<sm-model-menu-extended
+  #contextMenuExtended
+  [model]="contextModel"
+  [tableMode]="!minimizedView"
+  [selectedModel]="selectedModel"
+  [selectedModels]="singleRowContext ? (selectedModel? [selectedModel] : undefined ): selectedModels"
+  [selectedDisableAvailableIsMultiple]="!singleRowContext"
+  [selectedDisableAvailable]="singleRowContext ? getSingleSelectedModelsDisableAvailable(selectedModel? selectedModel: contextModel) : selectedModelsDisableAvailable"
+  [numSelected]="singleRowContext ? 1 : selectedModels.length"
+  [tagsFilterByProject]="tagsFilterByProject$ | async"
+  [projectTags]="projectTags$ | async"
+  [companyTags]="companyTags$ | async"
+  [showButton]="false"
+  [backdrop]="menuBackdrop"
+  (tagSelected)="addTag($event)"
+  (menuOpened)="setContextMenuStatus(true)"
+  (menuClosed)="setContextMenuStatus(false)"
 ></sm-model-menu-extended>
 <div class="table-container" [class.card-view]="minimizedView">
   <sm-table
@@ -30,11 +34,12 @@
     [minimizedView]="minimizedView"
     [minimizedTableHeader]="'MODEL LIST'"
     [sortFields]="tableSortFields"
-    (colReordered)="columnsReordered.emit($event)"
     [keyboardControl]="true"
+    (colReordered)="columnsReordered.emit($event)"
     (rowSelectionChanged)="onRowSelectionChanged($event)"
+    (rowClicked)="tableRowClicked($event)"
     (loadMoreClicked)="onLoadMoreClicked()"
-    (onRowRightClick)="openContextMenu($event)"
+    (rowRightClick)="openContextMenu($event)"
     (sortChanged)="onSortChanged($event.isShift, $event.field)"
     (columnResized)="columnResized.emit($event)"
   >
@@ -53,7 +58,7 @@
     </ng-template>
     <!--CHECKBOX TEMPLATE-->
     <ng-template let-col pTemplate="checkbox">
-      <div class="d-flex">
+      <div class="d-flex align-items-center">
         <sm-checkbox-control
           *ngIf="col.id === MODELS_TABLE_COL_FIELDS.SELECTED"
           class="checkbox-col header"
@@ -101,7 +106,7 @@
       <ng-container [ngSwitch]="col.id">
         <ng-container *ngSwitchCase="MODELS_TABLE_COL_FIELDS.NAME">
           <div class="d-flex flex-row flex-nowrap ellipsis">
-            <div class="model-name" matTooltipPosition="above" [smTooltip]="model.name">{{model.name}}</div>
+            <div class="model-name" matTooltipPosition="above" [smTooltip]="model.name" smShowTooltipIfEllipsis>{{model.name}}</div>
             <i *ngIf="model?.system_tags.includes('shared')" class="al-icon al-ico-link sm-md ml-2"></i>
           </div>
         </ng-container>
@@ -109,12 +114,12 @@
           <sm-tag-list [tags]="model.tags" [sysTags]="getSysTags(model)"></sm-tag-list>
         </ng-container>
         <ng-container *ngSwitchCase="MODELS_TABLE_COL_FIELDS.USER">
-          <span class="ellipsis">{{model.user?.name ? model.user?.name : 'Unknown User'}}</span>
+          <span class="ellipsis" [smTooltip]="model.user?.name ? model.user?.name : 'Unknown User'" smShowTooltipIfEllipsis>{{model.user?.name ? model.user?.name : 'Unknown User'}}</span>
         </ng-container>
-        <span matTooltipPosition="above" class="ellipsis" [smTooltip]="model?.project?.name" *ngSwitchCase="MODELS_TABLE_COL_FIELDS.PROJECT">
+        <span matTooltipPosition="above" class="ellipsis"  smShowTooltipIfEllipsis [smTooltip]="model?.project?.name" *ngSwitchCase="MODELS_TABLE_COL_FIELDS.PROJECT">
           {{model?.project?.name}}
         </span>
-        <span *ngSwitchCase="MODELS_TABLE_COL_FIELDS.TASK" class="ellipsis" matTooltipPosition="above" [smTooltip]="model.task?.name">
+        <span *ngSwitchCase="MODELS_TABLE_COL_FIELDS.TASK" class="ellipsis" matTooltipPosition="above" [smTooltip]="model.task?.name" smShowTooltipIfEllipsis>
           {{model.task?.name}}
         </span>
         <ng-container *ngSwitchCase="MODELS_TABLE_COL_FIELDS.READY">
@@ -134,25 +139,27 @@
           inputClassName="table-check-box table-body">
         </sm-checkbox-control>
         <ng-container *ngSwitchCase="MODELS_TABLE_COL_FIELDS.COMMENT">
-          <span class="ellipsis" matTooltipPosition="above" [smTooltip]="model.comment">{{model.comment}}</span>
+          <span class="ellipsis" smShowTooltipIfEllipsis matTooltipPosition="above" [smTooltip]="model.comment">{{model.comment}}</span>
         </ng-container>
         <ng-container *ngSwitchDefault>
-          <span *ngIf="col.type==='metadata'; else regular " matTooltipPosition="above" [smTooltip]="model | colGetter: col">{{model | colGetter: col}}</span>
-          <ng-template #regular><span class="ellipsis">{{model[col.id]}}</span></ng-template>
+          <span *ngIf="col.type==='metadata'; else regular " smShowTooltipIfEllipsis matTooltipPosition="above" [smTooltip]="model | colGetter: col">{{model | colGetter: col}}</span>
+          <ng-template #regular><span class="ellipsis" [smTooltip]="model[col.id]" smShowTooltipIfEllipsis>{{model[col.id]}}</span></ng-template>
         </ng-container>
       </ng-container>
     </ng-template>
 
     <ng-template let-model="rowData" let-selected="selected" let-rowNumber="rowNumber" pTemplate="card">
-      <sm-table-card class="flex-grow-1"
-                     [selected]="selected"
-                     [cardName]="model.name"
-                     [columns]="tableCols"
-                     [rowData]="model"
-                     [checked]="isRowSelected(model)"
-                     [activeContextRow]="contextModel"
-                     [contextMenuOpen]="contextMenuActive"
-                     [entityType]="entityType"
+      <sm-table-card
+        class="flex-grow-1"
+        [selected]="selected"
+        [cardName]="model.name"
+        [columns]="tableCols"
+        [rowData]="model"
+        [checked]="isRowSelected(model)"
+        [activeContextRow]="contextModel"
+        [contextMenuOpen]="contextMenuActive"
+        [entityType]="entityType"
+        (click)="selected && openContextMenu({e: $event, rowData: model, backdrop: true})"
       >
         <div sm-name-icon><i *ngIf="model?.system_tags.includes('shared')" class="al-icon al-ico-link sm-md ml-2"></i></div>
         <sm-tag-list [sysTags]="getSysTags(model)" [tags]="model?.tags"></sm-tag-list>

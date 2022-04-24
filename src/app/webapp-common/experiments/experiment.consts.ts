@@ -14,7 +14,7 @@ export const INITIAL_EXPERIMENT_TABLE_COLS: ISmCol[] = [
     headerStyleClass: 'selected-col-header',
     style           : {width: '65px'},
     disableDrag     : true,
-    disablePointerEvents: true
+    disablePointerEvents: true,
   },
   {
     id            : EXPERIMENTS_TABLE_COL_FIELDS.TYPE,
@@ -60,9 +60,12 @@ export const INITIAL_EXPERIMENT_TABLE_COLS: ISmCol[] = [
   },
   {
     id          : EXPERIMENTS_TABLE_COL_FIELDS.PROJECT,
-    headerType  : ColHeaderTypeEnum.title,
+    headerType  : ColHeaderTypeEnum.sortFilter,
     static      : true,
     header      : 'PROJECT',
+    filterable  :  true,
+    searchableFilter: true,
+    sortable    : false,
     style       : {width: '150px'},
   },
   {
@@ -164,31 +167,6 @@ export const EXPERIMENT_INFO_ONLY_FIELDS_BASE = [
   'parent.project.name',
   'project.name',
   'output',
-  'models',
-  'models.output.model.name',
-  'models.output.model.project',
-  'models.output.model.design',
-  'models.output.model.uri',
-  'models.output.model.framework',
-  'models.output.model.created',
-  'models.output.model.task',
-  'models.output.model.task.name',
-  'models.output.model.task.project.name',
-  'models.output.model.task.user.name',
-  'models.input.model.user',
-  'models.input.model.user.name',
-  'models.input.model.project',
-  'models.input.model.name',
-  'models.input.model.created',
-  'models.input.model.labels',
-  'models.input.model.design',
-  'models.input.model.uri',
-  'models.input.model.framework',
-  'models.input.model.task',
-  'models.input.model.task.name',
-  'models.input.model.task.project',
-  'models.input.model.task.project.name',
-  'execution',
   'hyperparams',
   'execution.queue.name',
   'script.binary',
@@ -209,4 +187,26 @@ export const EXPERIMENT_INFO_ONLY_FIELDS_BASE = [
   'runtime'
 ];
 
-export const MINIMUM_ONLY_FIELDS = ['name', 'system_tags', 'project', 'company', 'last_change', 'started', 'last_iteration', 'tags', 'user.name'];
+export const MINIMUM_ONLY_FIELDS = ['name', 'status', 'system_tags', 'project', 'company', 'last_change', 'started', 'last_iteration', 'tags', 'user.name'];
+
+export const ARTIFACTS_ONLY_FIELDS = [
+  'execution.artifacts',
+  'models.output.name',
+  'models.output.model.name',
+  'models.output.model.design',
+  'models.output.model.uri',
+  'models.output.model.framework',
+  'models.output.model.created',
+  'models.output.model.task.id',
+  'models.output.model.task.name',
+  'models.output.model.task.project.id',
+  'models.input.name',
+  'models.input.model.name',
+  'models.input.model.design',
+  'models.input.model.uri',
+  'models.input.model.framework',
+  'models.input.model.created',
+  'models.input.model.task.id',
+  'models.input.model.task.name',
+  'models.input.model.task.project.id',
+];

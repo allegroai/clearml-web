@@ -1,8 +1,8 @@
 import {createAction, props} from '@ngrx/store';
-import {Task} from '../../business-logic/model/tasks/task';
-import {TaskMetric} from '../../business-logic/model/events/taskMetric';
-import {EventsDebugImagesResponse} from '../../business-logic/model/events/eventsDebugImagesResponse';
-import {EventsGetDebugImageIterationsResponse} from '../../business-logic/model/events/eventsGetDebugImageIterationsResponse';
+import {Task} from '~/business-logic/model/tasks/task';
+import {TaskMetric} from '~/business-logic/model/events/taskMetric';
+import {EventsDebugImagesResponse} from '~/business-logic/model/events/eventsDebugImagesResponse';
+import {EventsGetDebugImageIterationsResponse} from '~/business-logic/model/events/eventsGetDebugImageIterationsResponse';
 
 export const DEBUG_IMAGES_PREFIX = 'DEBUG_IMAGES_';
 
@@ -20,7 +20,7 @@ export const getDebugImagesMetrics = createAction(
 
 export const refreshDebugImagesMetrics = createAction(
   DEBUG_IMAGES_PREFIX + 'REFRESH_DEBUG_IMAGES_METRICS',
-  props<{ tasks: string[] }>()
+  props<{ tasks: string[], autoRefresh?: boolean }>()
 );
 
 export const fetchExperiments = createAction(
@@ -45,7 +45,7 @@ export const setSelectedMetric = createAction(
 
 export const refreshMetric = createAction(
   DEBUG_IMAGES_PREFIX + 'REFRESH_IMAGES_SELECTED_METRIC',
-  props<{ payload: TaskMetric }>()
+  props<{ payload: TaskMetric; autoRefresh?: boolean }>()
 );
 
 export const getNextBatch= createAction(

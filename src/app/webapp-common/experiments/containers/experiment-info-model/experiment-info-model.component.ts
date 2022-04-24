@@ -2,19 +2,19 @@ import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {selectExperimentModelInfoData, selectExperimentUserKnowledge, selectIsExperimentSaving} from '../../reducers';
 import {IExperimentModelInfo, IModelInfo, IModelInfoSource} from '../../shared/common-experiment-model.model';
-import {Model} from '../../../../business-logic/model/models/model';
+import {Model} from '~/business-logic/model/models/model';
 import {combineLatest, Observable, Subject} from 'rxjs';
-import {IExperimentInfoState} from '../../../../features/experiments/reducers/experiment-info.reducer';
-import {experimentSectionsEnum} from '../../../../features/experiments/shared/experiments.const';
-import {selectIsExperimentEditable, selectSelectedExperiment} from '../../../../features/experiments/reducers';
+import {IExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
+import {experimentSectionsEnum} from '~/features/experiments/shared/experiments.const';
+import {selectIsExperimentEditable, selectSelectedExperiment} from '~/features/experiments/reducers';
 import * as commonInfoActions from '../../actions/common-experiments-info.actions';
 import {ActivateEdit, CancelExperimentEdit, DeactivateEdit} from '../../actions/common-experiments-info.actions';
 import {ExperimentModelsFormViewComponent} from '../../dumb/experiment-models-form-view/experiment-models-form-view.component';
-import {getModelDesign} from '../../../tasks/tasks.utils';
-import {distinctUntilKeyChanged, filter, map, takeUntil} from 'rxjs/operators';
+import {getModelDesign} from '@common/tasks/tasks.utils';
+import {distinctUntilChanged, filter, map, takeUntil} from 'rxjs/operators';
 import {ActivatedRoute, Router} from '@angular/router';
-import {IExperimentInfo} from '../../../../features/experiments/shared/experiment-info.model';
-import {addMessage} from '../../../core/actions/layout.actions';
+import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
+import {addMessage} from '@common/core/actions/layout.actions';
 
 
 @Component({
@@ -48,16 +48,15 @@ export class ExperimentInfoModelComponent implements OnInit, OnDestroy {
     this.saving$ = this.store.select(selectIsExperimentSaving);
     this.selectedExperiment$ = this.store.select(selectSelectedExperiment);
     this.routerModelId$ = this.route.params.pipe(
-      takeUntil(this.unsubscribe$),
-      filter(params => params.modelId),
-      distinctUntilKeyChanged('modelId'),
-      map(params => params.modelId));
+      map(params => params?.modelId),
+      filter(params => !!params),
+      distinctUntilChanged()
+    );
   }
 
   ngOnInit() {
-
-
-    combineLatest([this.routerModelId$, this.modelInfo$]).pipe(takeUntil(this.unsubscribe$))
+    combineLatest([this.routerModelId$, this.modelInfo$])
+      .pipe(takeUntil(this.unsubscribe$))
       .subscribe(([modelId, formData]) => {
         this.modelId = modelId;
         this.outputMode = this.route.snapshot.data?.outputModel;
@@ -72,7 +71,6 @@ export class ExperimentInfoModelComponent implements OnInit, OnDestroy {
         this.inputDesign = (design.value === undefined || design.key === undefined && Object.keys(design.value).length === 0) ? null : design.value;
         this.modelProjectId = this.model?.project?.id ? this.model.project.id : '*';
       });
-
   }
 
   ngOnDestroy(): void {
@@ -91,9 +89,9 @@ export class ExperimentInfoModelComponent implements OnInit, OnDestroy {
       } else {
         newModels = [...this.models.map(model => ({model: model.id, name: model.name})), {model: selectedModel.id, name: selectedModel.name}];
       }
-      this.store.dispatch(new commonInfoActions.SetExperimentInfoData({models: {input: newModels as any}}));
+      this.store.dispatch(new commonInfoActions.UpdateExperimentInfoData({changes: {model: {input: newModels as any}}}));
       this.store.dispatch(commonInfoActions.saveExperimentSection({models: {input: newModels as any}}));
-      this.router.navigate(['..', selectedModel.id || ''], {relativeTo: this.route, queryParamsHandling: 'preserve'});
+      return this.router.navigate([{modelId: selectedModel.id || ''}], {relativeTo: this.route, replaceUrl: true})
     }
   }
 

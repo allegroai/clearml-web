@@ -292,8 +292,8 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBase implement
       graph.selectAll('.axis-title').text((d: any) => this.wrap(d.key)).append('title').text(d => (d as any).key);
       graph.selectAll('.axis .tick text').text((d: string) => this.wrap(d)).append('title').text((d: string) => d);
       graph.selectAll('.axis .tick text').style('pointer-events', 'auto');
-      graph.selectAll('.tick').on('mouseover', (d, i, e) => {
-        const tick = e[i] as unknown as SVGGElement;
+      graph.selectAll('.tick').on('mouseover', (event: MouseEvent) => {
+        const tick = event.currentTarget as SVGGElement;
         const axis = tick.parentNode as SVGGElement;
         if (axis && axis.lastChild !== tick) {
           axis.removeChild(tick);

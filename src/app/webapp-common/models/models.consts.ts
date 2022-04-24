@@ -46,7 +46,7 @@ export const MODELS_TABLE_COLS: ISmCol[] = [
     headerStyleClass: 'selected-col-header',
     style           : {width: '70px', maxWidth: '70px'},
     disableDrag     : true,
-    disablePointerEvents: true
+    disablePointerEvents: true,
   },
   {
     id          : MODELS_TABLE_COL_FIELDS.FRAMEWORK,
@@ -89,6 +89,10 @@ export const MODELS_TABLE_COLS: ISmCol[] = [
   },
   {
     id          : MODELS_TABLE_COL_FIELDS.PROJECT,
+    headerType  : ColHeaderTypeEnum.sortFilter,
+    filterable  :  true,
+    searchableFilter: true,
+    sortable    : false,
     header      : 'PROJECT',
     style       : {width: '135px'}
   },

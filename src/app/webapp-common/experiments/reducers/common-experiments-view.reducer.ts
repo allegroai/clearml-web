@@ -45,6 +45,7 @@ export interface ICommonExperimentsViewState {
   activeParentsFilter: ProjectsGetTaskParentsResponseParents[];
   types: string[];
   splitSize: number;
+  tableMode: 'info' | 'table';
 }
 
 export const commonExperimentsInitialState: ICommonExperimentsViewState = {
@@ -79,6 +80,7 @@ export const commonExperimentsInitialState: ICommonExperimentsViewState = {
   activeParentsFilter: [],
   types: [],
   splitSize: 75,
+  tableMode: 'table'
 };
 
 const setExperimentsAndUpdateSelectedExperiments = (state: ICommonExperimentsViewState, payload): ICommonExperimentsViewState => ({
@@ -118,8 +120,6 @@ export const commonExperimentsViewReducer = createReducer(
     ...state,
     experiments: state.experiments.concat(action.experiments)
   })),
-  // on(actions.freezeTableState, (state) => ({...state, freeze: cloneDeep(state)})),
-  // on(actions.defrostTableState, (state) => ({...cloneDeep(state.freeze), freeze: null})),
   on(actions.removeExperiments, (state, action) => ({
     ...state,
     experiments: state.experiments.filter(exp => !action.experiments.includes(exp.id))
@@ -255,4 +255,5 @@ export const commonExperimentsViewReducer = createReducer(
   on(actions.getCustomMetrics, state => ({...state, metricsLoading: true})),
   on(actions.getCustomHyperParams, state => ({...state, metricsLoading: true})),
   on(actions.setSplitSize, (state, action) => ({...state, splitSize: action.splitSize})),
+  on(actions.setTableMode, (state, action) => ({...state, tableMode: action.mode})),
 );

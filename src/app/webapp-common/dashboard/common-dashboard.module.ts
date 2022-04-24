@@ -14,12 +14,11 @@ import {ProjectsSharedModule} from '../../features/projects/shared/projects-shar
 import {CommonExperimentSharedModule} from '../experiments/shared/common-experiment-shared.module';
 import {CommonProjectsModule} from '../projects/common-projects.module';
 import {SharedModule} from '../../shared/shared.module';
-import { WelcomeMessageComponent } from './dumb/welcome-message/welcome-message.component';
 import {FormsModule} from '@angular/forms';
 
 @NgModule({
-  declarations: [DashboardProjectsComponent, DashboardExperimentsComponent, RecentExperimentTableComponent, WelcomeMessageComponent],
-  exports     : [DashboardProjectsComponent, DashboardExperimentsComponent],
+  declarations: [DashboardProjectsComponent, DashboardExperimentsComponent, RecentExperimentTableComponent],
+  exports: [DashboardProjectsComponent, DashboardExperimentsComponent],
     imports: [
         CommonModule,
         SMSharedModule,

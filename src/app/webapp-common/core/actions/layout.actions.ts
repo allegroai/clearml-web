@@ -79,6 +79,6 @@ export const neverShowPopupAgain = createAction(VIEW_PREFIX + 'NEVER_SHOW_POPUP_
 export const plotlyReady = createAction(VIEW_PREFIX + '[plotly ready]');
 export const aceReady = createAction(VIEW_PREFIX + '[ace ready]');
 export const openAppsAwarenessDialog = createAction(VIEW_PREFIX + '[apps awareness dialog]',
-  props<{appsYouTubeIntroLink}>()
+  props<{appsYouTubeIntroVideoId}>()
 );
 

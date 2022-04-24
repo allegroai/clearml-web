@@ -1,6 +1,6 @@
-import {TaskStatusEnum} from '../../../business-logic/model/tasks/taskStatusEnum';
-import {TaskTypeEnum} from '../../../business-logic/model/tasks/taskTypeEnum';
-import {EXPERIMENTS_STATUS_LABELS} from '../../../features/experiments/shared/experiments.const';
+import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
+import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
+import {EXPERIMENTS_STATUS_LABELS} from '~/features/experiments/shared/experiments.const';
 
 export type ExperimentWizardMethodsEnum = 'create' | 'edit' | 'clone' | 'extend';
 
@@ -60,8 +60,9 @@ export enum ThemeEnum {
 }
 
 export enum CustomColumnMode {
-  Metrics = 'dark',
-  HyperParams = 'light'
+  Standard,
+  Metrics,
+  HyperParams
 }
 
 export const NONE_USER_TASK_TYPES = ['-dataset_import', '-annotation', '-annotation_manual'];

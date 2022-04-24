@@ -7,8 +7,12 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {MatDialog} from '@angular/material/dialog';
 import {INITIAL_CONTROLLER_TABLE_COLS} from '@common/pipelines-controller/controllers.consts';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
-import {Observable, Subscription} from 'rxjs';
-import {CountAvailableAndIsDisableSelectedFiltered, MenuItems} from '@common/shared/entity-page/items.utils';
+import {Observable} from 'rxjs';
+import {
+  CountAvailableAndIsDisableSelectedFiltered,
+  MenuItems,
+  selectionDisabledContinue
+} from '@common/shared/entity-page/items.utils';
 import {ShowItemsFooterSelected} from '@common/shared/entity-page/footer-items/show-items-footer-selected';
 import {CompareFooterItem} from '@common/shared/entity-page/footer-items/compare-footer-item';
 import {DividerFooterItem} from '@common/shared/entity-page/footer-items/divider-footer-item';
@@ -21,6 +25,7 @@ import {PipelineControllerInfoComponent} from '@common/pipelines-controller/pipe
 import {AbortFooterItem} from '@common/shared/entity-page/footer-items/abort-footer-item';
 import { removeTag } from '@common/experiments/actions/common-experiments-menu.actions';
 import {ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
+import {RefreshService} from '@common/core/services/refresh.service';
 
 @Component({
   selector: 'sm-controllers',
@@ -32,21 +37,21 @@ export class ControllersComponent extends ExperimentsComponent implements OnDest
   @ViewChild('contextMenu') contextMenu: PipelineControllerMenuComponent;
   @ViewChild(SplitComponent) split: SplitComponent;
   @ViewChild(PipelineControllerInfoComponent) diagram: PipelineControllerInfoComponent;
-  private sub = new Subscription();
 
   constructor(protected store: Store<IExperimentsViewState>,
               protected syncSelector: SmSyncStateSelectorService,
               protected route: ActivatedRoute,
               protected router: Router,
-              protected dialog: MatDialog) {
-    super(store, syncSelector, route, router, dialog);
+              protected dialog: MatDialog,
+              protected refresh:RefreshService
+  ) {
+    super(store, syncSelector, route, router, dialog, refresh);
     this.tableCols = INITIAL_CONTROLLER_TABLE_COLS;
     this.entityType = EntityTypeEnum.controller;
   }
 
   ngOnDestroy() {
     super.ngOnDestroy();
-    this.sub.unsubscribe();
   }
 
   createFooterItems(config: {
@@ -75,27 +80,14 @@ export class ControllersComponent extends ExperimentsComponent implements OnDest
 
   onFooterHandler({emitValue, item}) {
     switch (item.id) {
-      case MenuItems.showAllItems:
-        this.showAllSelected(!emitValue);
-        break;
-      case MenuItems.compare:
-        this.compareExperiments();
-        break;
-      case MenuItems.archive:
-        this.contextMenu.restoreArchive();
-        break;
-      case MenuItems.enqueue:
-        this.contextMenu.enqueuePopup();
-        break;
-      case MenuItems.dequeue:
-        this.contextMenu.dequeuePopup();
-        break;
       case MenuItems.delete:
         this.contextMenu.deleteExperimentPopup(EntityTypeEnum.controller, true);
         break;
       case MenuItems.abort:
         this.contextMenu.abortControllerPopup();
         break;
+      default:
+        super.onFooterHandler({emitValue, item});
     }
   }
 
@@ -107,11 +99,14 @@ export class ControllersComponent extends ExperimentsComponent implements OnDest
     this.contextMenu.runPipelineController(true)
   }
 
-  onContextMenuOpen(position: { x: number; y: number }) {
-    this.contextMenu?.openMenu(position);
-  }
-
   removeTag({experiment, tag}: {experiment: ISelectedExperiment; tag: string}) {
     this.store.dispatch(removeTag({experiments: [experiment], tag}));
+  }
+
+  getSingleSelectedDisableAvailable(experiment) {
+    return {
+      ...(super.getSingleSelectedDisableAvailable(experiment)),
+      [MenuItems.continue]: selectionDisabledContinue([experiment])
+    };
   }
 }

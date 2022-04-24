@@ -23,7 +23,7 @@
           <mat-error *ngIf="parameterKey.invalid && parameterKey?.errors?.smNotAllowedStringsValidator">
             .(dot) $(dollar) and space are not allowed in parameter key.
           </mat-error>
-          <mat-error *ngIf="parameterKey.invalid && parameterKey?.errors?.uniqueName">
+          <mat-error *ngIf="!parameterKey?.errors?.required && parameterKey.invalid && parameterKey?.errors?.uniqueName">
             key already exists
           </mat-error>
         </mat-form-field>

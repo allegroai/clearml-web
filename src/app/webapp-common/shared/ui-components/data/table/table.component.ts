@@ -70,6 +70,7 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
   public loading: boolean;
   private scrollLeft = 0;
   public buttonLeft: number;
+  public contextButtonPosition: number;
   private resizeTimer: number;
   private scaleFactor: number;
   private waiting: boolean;
@@ -156,11 +157,11 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
   @Input() minimizedTableHeader: string;
 
   @Output() sortChanged = new EventEmitter<{ field: ISmCol['id']; isShift: boolean }>();
-  @Output() rowClicked = new EventEmitter();
+  @Output() rowClicked = new EventEmitter<{e: MouseEvent; data: any}>();
   @Output() rowSelectionChanged = new EventEmitter<{ data: Array<any>; originalEvent?: Event }>();
   @Output() firstChanged = new EventEmitter();
   @Output() loadMoreClicked = new EventEmitter();
-  @Output() onRowRightClick = new EventEmitter();
+  @Output() rowRightClick = new EventEmitter<{e: MouseEvent, rowData; single?: boolean}>();
   @Output() colReordered = new EventEmitter();
   @Output() columnResized = new EventEmitter<{ columnId: string; widthPx: number }>();
   search: string;
@@ -184,17 +185,27 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
           this.table.resizeTableCells(width, null);
           totalWidth = width;
         } else {
+          this.table.destroyStyleElement();
+          this.table.createStyleElement();
+          let innerHTML = '';
           this.columns.forEach((col, index) => {
+            let colWidth;
             if(col.style?.width?.endsWith('px')) {
-              const colWidth = parseInt(col.style.width.slice(0, -2));
+              colWidth = parseInt(col.style.width.slice(0, -2));
               totalWidth += colWidth;
-              this.table.resizeColumnElement = element.getElementsByTagName('th')[index];
-              this.table.resizeTableCells(colWidth, null);
             } else {
-              const width = element.getElementsByTagName('th')[index]?.getBoundingClientRect().width || 0;
-              totalWidth += this.scaleFactor ? width * this.scaleFactor / 100 : width;
+              colWidth = element.getElementsByTagName('th')[index]?.getBoundingClientRect().width || 0;
+              totalWidth += this.scaleFactor ? colWidth * this.scaleFactor / 100 : colWidth;
             }
+            innerHTML += `
+                #${this.table.id} .p-datatable-thead > tr > th:nth-child(${index + 1}),
+                #${this.table.id} .p-datatable-tbody > tr > td:nth-child(${index + 1}),
+                #${this.table.id} .p-datatable-tfoot > tr > td:nth-child(${index + 1}) {
+                    flex: ${col.disableDrag ? 0 : 1} 1 ${colWidth}px !important
+                }
+            `
           });
+          this.table.styleElement.innerHTML = innerHTML;
         }
         this.table.tableViewChild.nativeElement.style.width = `${totalWidth}px`;
       }
@@ -340,17 +351,12 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
   onRowDeselected(event) {
     if (this.minView) {
       this.rowSelectionChanged.emit({data: null, originalEvent: event.originalEvent});
-      this.scrollToElement(event.data);
     } else {
       this.rowSelectionChanged.emit({data: this.table?.selection, originalEvent: event.originalEvent});
     }
   }
-  public scrollToIndex(index){
-    this.table.scrollToVirtualIndex(index);
-  }
 
-  public scrollToElement(data) {
-    const rowIndex = this.tableData.findIndex(row => row.id === data.id);
+  public scrollToIndex(rowIndex){
     if (rowIndex > -1 && this.table) {
       const row = this.table.el.nativeElement.getElementsByTagName('tr')[rowIndex] as HTMLTableRowElement;
       if (row) {
@@ -363,13 +369,18 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
     }
   }
 
+  public scrollToElement(data) {
+    const rowIndex = this.tableData.findIndex(row => row.id === data.id);
+    this.scrollToIndex(rowIndex);
+  }
+
   onFirstChanged(event) {
     this.firstChanged.emit(event);
   }
 
-  openContext(e: { originalEvent: MouseEvent; data: any }) {
-    if (this.onRowRightClick.observers.length > 0) {
-      this.onRowRightClick.emit({e: e.originalEvent, rowData: e.data});
+  openContext({originalEvent, data, single}: { originalEvent: MouseEvent; data: any; single?: boolean }) {
+    if (this.rowRightClick.observed) {
+      this.rowRightClick.emit({e: originalEvent, rowData: data, single: single});
       if (this.table) {
         this.table.contextMenuSelection = null;
       }
@@ -439,7 +450,7 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
     }
 
     return this.checkedItems?.length > 0 &&
-      (this.checkedItems.some((selectedEntity: { id: any }) => selectedEntity.id === entity.id));
+      (this.checkedItems.some((selectedEntity: { id: string }) => selectedEntity?.id === entity.id));
   }
 
   private updateLoadButton(e: Event) {
@@ -447,7 +458,9 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
       this.scrollLeft = (e.target as HTMLDivElement).scrollLeft;
     }
     if (this.table?.el?.nativeElement) {
-      this.buttonLeft = (this.table.el.nativeElement.getBoundingClientRect().width / 2) - 70 + this.scrollLeft;
+      const width = this.table.el.nativeElement.getBoundingClientRect().width * this.scaleFactor / 100;
+      this.buttonLeft = (width / 2) - 70 + this.scrollLeft;
+      this.contextButtonPosition = width - 70 + this.scrollLeft;
     }
     this.cdr.detectChanges();
   }

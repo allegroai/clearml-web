@@ -5,7 +5,8 @@ import {
   EventEmitter,
   Input,
   OnDestroy,
-  Output, TemplateRef,
+  Output,
+  TemplateRef,
 } from '@angular/core';
 import {ICONS, TIME_FORMAT_STRING} from '@common/constants';
 import {ColHeaderTypeEnum, ISmCol} from '@common/shared/ui-components/data/table/table.consts';
@@ -22,15 +23,12 @@ import {Store} from '@ngrx/store';
 import {NoUnderscorePipe} from '@common/shared/pipes/no-underscore.pipe';
 import {TitleCasePipe} from '@angular/common';
 import {INITIAL_EXPERIMENT_TABLE_COLS} from '../../experiment.consts';
-import {
-  ProjectsGetTaskParentsResponseParents
-} from '~/business-logic/model/projects/projectsGetTaskParentsResponseParents';
+import {ProjectsGetTaskParentsResponseParents} from '~/business-logic/model/projects/projectsGetTaskParentsResponseParents';
 import {Router} from '@angular/router';
 import {IOption} from '@common/shared/ui-components/inputs/select-autocomplete-for-template-forms/select-autocomplete-for-template-forms.component';
-import {createFiltersFromStore} from '../../effects/common-experiments-view.effects';
 import {CountAvailableAndIsDisableSelectedFiltered} from '@common/shared/entity-page/items.utils';
 import {hyperParamSelectedExperiments, selectAllExperiments} from '../../actions/common-experiments-view.actions';
-import {excludedKey, uniqueFilterValueAndExcluded} from '@common/shared/utils/tableParamEncode';
+import {createFiltersFromStore, excludedKey, uniqueFilterValueAndExcluded} from '@common/shared/utils/tableParamEncode';
 import {getRoundedNumber} from '../../shared/common-experiments.utils';
 
 @Component({
@@ -56,7 +54,6 @@ export class ExperimentsTableComponent extends BaseTableView implements OnDestro
   private _selectedExperiments: ITableExperiment[] = [];
   readonly colHeaderTypeEnum = ColHeaderTypeEnum;
   @Input() initialColumns = INITIAL_EXPERIMENT_TABLE_COLS;
-  @Input() disableContextMenu = false;
   @Input() contextMenuTemplate: TemplateRef<any> = null;
 
   @Input() tableCols: ISmCol[];
@@ -94,7 +91,7 @@ export class ExperimentsTableComponent extends BaseTableView implements OnDestro
       label: user.name ? user.name : 'Unknown User',
       value: user.id
     }));
-    this.sortOptionalUsersList();
+    this.sortOptionsList(EXPERIMENTS_TABLE_COL_FIELDS.USER);
   }
 
   @Input() set hyperParamsOptions(hyperParamsOptions: Record<ISmCol['id'], string[]>) {
@@ -109,7 +106,6 @@ export class ExperimentsTableComponent extends BaseTableView implements OnDestro
   @Input() activeParentsFilter: ProjectsGetTaskParentsResponseParents[];
 
 
-
   @Input() set parents(parents: ProjectsGetTaskParentsResponseParents[]) {
     const parentsAndActiveFilter = Array.from(new Set(parents.concat(this.activeParentsFilter || [])));
     this.filtersOptions[EXPERIMENTS_TABLE_COL_FIELDS.PARENT] = parentsAndActiveFilter.map(parent => ({
@@ -117,7 +113,7 @@ export class ExperimentsTableComponent extends BaseTableView implements OnDestro
       value: parent.id,
       tooltip: `${parent.project?.name} / ${parent.name}`
     }));
-    this.sortOptionalParentsList();
+    this.sortOptionsList(EXPERIMENTS_TABLE_COL_FIELDS.PARENT);
   }
 
   @Input() set selectedExperiments(experiments: ITableExperiment[]) {
@@ -148,7 +144,7 @@ export class ExperimentsTableComponent extends BaseTableView implements OnDestro
       label: tag === null ? '(No tags)' : tag,
       value: tag
     }) as IOption);
-    this.sortOptionalTagsList();
+    this.sortOptionalTagsList()
   }
 
   @Input() set experimentTypes(types: string[]) {
@@ -160,6 +156,15 @@ export class ExperimentsTableComponent extends BaseTableView implements OnDestro
         value: type
       })
     );
+  }
+
+  @Input() set projects(projects) {
+    this.filtersOptions[EXPERIMENTS_TABLE_COL_FIELDS.PROJECT] = projects.map(project => ({
+      label: project.name,
+      value: project.id,
+      tooltip: `${project.name}`
+    }));
+    this.sortOptionsList(EXPERIMENTS_TABLE_COL_FIELDS.PROJECT);
   }
 
   @Input() systemTags = [] as string[];
@@ -183,20 +188,12 @@ export class ExperimentsTableComponent extends BaseTableView implements OnDestro
     this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.VERSION] = get([EXPERIMENTS_TABLE_COL_FIELDS.VERSION, 'value'], filters) || [];
     this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.LAST_UPDATE] = get([EXPERIMENTS_TABLE_COL_FIELDS.LAST_UPDATE, 'value'], filters) || [];
     this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.STARTED] = get([EXPERIMENTS_TABLE_COL_FIELDS.STARTED, 'value'], filters) || [];
-    this.sortOptionalProjectsList();
 
     // handle dynamic filters;
     const filtersValues = createFiltersFromStore(filters || {}, false);
     this.filtersValues = Object.assign({}, {...this.filtersValues}, {...filtersValues});
   }
-  @Input() set projects(projects) {
-    this.filtersOptions[EXPERIMENTS_TABLE_COL_FIELDS.PROJECT] = projects.map(project => ({
-      label: project.name,
-      value: project.id,
-      tooltip: `${project.name}`
-    }));
-    this.sortOptionalProjectsList();
-  }
+
 
   @Output() experimentSelectionChanged = new EventEmitter<ITableExperiment>();
   @Output() experimentsSelectionChanged = new EventEmitter<Array<ITableExperiment>>();
@@ -205,8 +202,8 @@ export class ExperimentsTableComponent extends BaseTableView implements OnDestro
   @Output() tagsMenuOpened = new EventEmitter();
   @Output() typesMenuOpened = new EventEmitter();
   @Output() columnResized = new EventEmitter<{ columnId: string; widthPx: number }>();
-  @Output() openContextMenu = new EventEmitter<{ x: number; y: number }>();
-  @Output() removeTag = new EventEmitter<{experiment: ITableExperiment; tag: string}>();
+  @Output() openContextMenu = new EventEmitter<{ x: number; y: number; single?: boolean; backdrop?: boolean }>();
+  @Output() removeTag = new EventEmitter<{ experiment: ITableExperiment; tag: string }>();
   TIME_FORMAT_STRING = TIME_FORMAT_STRING;
 
   constructor(
@@ -223,25 +220,6 @@ export class ExperimentsTableComponent extends BaseTableView implements OnDestro
 
   ngOnDestroy(): void {
     super.ngOnDestroy();
-  }
-
-  onRowSelectionChanged(event) {
-    this.experimentSelectionChanged.emit(event.data);
-  }
-
-  sortOptionalUsersList() {
-    this.filtersOptions[EXPERIMENTS_TABLE_COL_FIELDS.USER]
-      .sort((a, b) => sortByArr(a.value, b.value, this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.USER]));
-  }
-
-  sortOptionalParentsList() {
-    this.filtersOptions[EXPERIMENTS_TABLE_COL_FIELDS.PARENT]
-      .sort((a, b) => sortByArr(a.value, b.value, this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.PARENT]));
-  }
-
-  sortOptionalProjectsList() {
-    this.filtersOptions[EXPERIMENTS_TABLE_COL_FIELDS.PROJECT]
-      .sort((a, b) => sortByArr(a.value, b.value, this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.PROJECT]));
   }
 
   sortOptionalTagsList() {
@@ -277,26 +255,32 @@ export class ExperimentsTableComponent extends BaseTableView implements OnDestro
     }
   }
 
+  tableRowClicked(event: { e: MouseEvent; data: ITableExperiment }) {
+    if (this._selectedExperiments.some(exp => exp.id === event.data.id)) {
+      this.onContextMenu({e: event.e, rowData: event.data, backdrop: true});
+    } else {
+      this.experimentsSelectionChanged.emit([event.data]);
+    }
+  }
+
   emitSelection(selection: any[]) {
     this.experimentsSelectionChanged.emit(selection);
   }
 
-  searchValueChanged($event: string, colId) {
-    this.searchValues[colId] = $event;
-    if (colId === EXPERIMENTS_TABLE_COL_FIELDS.TAGS) {
-      this.sortOptionalTagsList();
-    }
-  }
 
-  onContextMenu(data) {
-    this.contextExperiment = this._experiments.find(experiment => experiment.id === data.rowData.id);
-    if (!this.selectedExperiments.map(exp => exp.id).includes(this.contextExperiment.id)) {
-      this.prevSelected = this.contextExperiment;
-      this.emitSelection([this.contextExperiment]);
+  onContextMenu(data: { e: MouseEvent, rowData; single?: boolean; backdrop?: boolean }) {
+    if (!data?.single) {
+      this.contextExperiment = this._experiments.find(experiment => experiment.id === data.rowData.id);
+      if (!this.selectedExperiments.map(exp => exp.id).includes(this.contextExperiment.id)) {
+        this.prevSelected = this.contextExperiment;
+        this.emitSelection([this.contextExperiment]);
+      }
+    } else {
+      this.contextExperiment = data.rowData;
     }
     const event = data.e as MouseEvent;
     event.preventDefault();
-    this.openContextMenu.emit({x: event.clientX, y: event.clientY});
+    this.openContextMenu.emit({x: event.clientX, y: event.clientY, single: data?.single, backdrop: data?.backdrop});
   }
 
 
@@ -322,19 +306,6 @@ export class ExperimentsTableComponent extends BaseTableView implements OnDestro
     }
   }
 
-  columnFilterClosed(col: ISmCol) {
-    switch (col.id) {
-      case EXPERIMENTS_TABLE_COL_FIELDS.TAGS:
-        this.sortOptionalTagsList();
-        break;
-      case EXPERIMENTS_TABLE_COL_FIELDS.USER:
-        this.sortOptionalUsersList();
-        break;
-      case EXPERIMENTS_TABLE_COL_FIELDS.PROJECT:
-        this.sortOptionalProjectsList();
-        break;
-    }
-  }
 
   selectAll(filtered?: boolean) {
     this.store.dispatch(selectAllExperiments({filtered}));

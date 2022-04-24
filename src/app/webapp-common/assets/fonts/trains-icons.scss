@@ -2,7 +2,7 @@
 
 @font-face {
   font-family: '#{$icomoon-font-family}';
-  src: url('./#{$icomoon-font-family}.ttf?dn2wcr') format('truetype');
+  src: url('./#{$icomoon-font-family}.ttf?medlz4') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -411,11 +411,6 @@
 .al-ico-zoom-to-fit {
   &:before {
     content: $al-ico-zoom-to-fit;
-  }
-}
-.al-ico-kibana-code {
-  &:before {
-    content: $al-ico-kibana-code;
   }
 }
 .al-ico-reset {
@@ -1134,6 +1129,46 @@
 .al-ico-run {
   &:before {
     content: $al-ico-run;
+  }
+}
+.al-ico-table-view {
+  &:before {
+    content: $al-ico-table-view;
+  }
+}
+.al-ico-experiment-view {
+  &:before {
+    content: $al-ico-experiment-view;
+  }
+}
+.al-ico-code-file {
+  &:before {
+    content: $al-ico-code-file;
+  }
+}
+.al-ico-code-square {
+  &:before {
+    content: $al-ico-code-square;
+  }
+}
+.al-ico-video {
+  &:before {
+    content: $al-ico-video;
+  }
+}
+.al-ico-less-than {
+  &:before {
+    content: $al-ico-less-than;
+  }
+}
+.al-ico-greater-than {
+  &:before {
+    content: $al-ico-greater-than;
+  }
+}
+.al-ico-toogle-graph {
+  &:before {
+    content: $al-ico-toogle-graph;
   }
 }
 .al-ico-status-draft {

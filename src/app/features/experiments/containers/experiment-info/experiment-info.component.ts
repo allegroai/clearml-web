@@ -4,18 +4,19 @@ import {Store} from '@ngrx/store';
 import {get} from 'lodash/fp';
 import {Observable, Subscription} from 'rxjs';
 import {debounceTime, distinctUntilChanged, filter, map, tap} from 'rxjs/operators';
-import {MESSAGES_SEVERITY} from '../../../../app.constants';
+import {MESSAGES_SEVERITY} from '~/app.constants';
 import {IExperimentInfoState} from '../../reducers/experiment-info.reducer';
 import {selectExperimentInfoData, selectIsExperimentEditable, selectSelectedExperiment} from '../../reducers';
-import {selectBackdropActive} from '../../../../webapp-common/core/reducers/view.reducer';
-import {isReadOnly} from '../../../../webapp-common/shared/utils/shared-utils';
-import {selectRouterConfig, selectRouterParams, selectRouterQueryParams} from '../../../../webapp-common/core/reducers/router-reducer';
+import {selectBackdropActive} from '@common/core/reducers/view.reducer';
+import {isReadOnly} from '@common/shared/utils/shared-utils';
+import {selectRouterConfig, selectRouterParams, selectRouterQueryParams} from '@common/core/reducers/router-reducer';
 import * as commonInfoActions from '../../../../webapp-common/experiments/actions/common-experiments-info.actions';
-import {ExperimentDetailsUpdated} from '../../../../webapp-common/experiments/actions/common-experiments-info.actions';
-import {addMessage} from '../../../../webapp-common/core/actions/layout.actions';
+import {ExperimentDetailsUpdated} from '@common/experiments/actions/common-experiments-info.actions';
+import {addMessage} from '@common/core/actions/layout.actions';
 import {IExperimentInfo} from '../../shared/experiment-info.model';
-import {selectSelectedTableExperiment} from '../../../../webapp-common/experiments/reducers';
-import {ITableExperiment} from '../../../../webapp-common/experiments/shared/common-experiment-model.model';
+import {selectSelectedTableExperiment} from '@common/experiments/reducers';
+import {ITableExperiment} from '@common/experiments/shared/common-experiment-model.model';
+import {setTableMode} from '@common/experiments/actions/common-experiments-view.actions';
 
 
 @Component({
@@ -97,7 +98,7 @@ export class ExperimentInfoComponent implements OnInit, OnDestroy {
 
   updateExperimentName(name) {
     if (name.trim().length > 2) {
-      this.store.dispatch(new ExperimentDetailsUpdated({id: this.selectedExperiment.id, changes: {name: name}}));
+      this.store.dispatch(new ExperimentDetailsUpdated({id: this.selectedExperiment.id, changes: {name}}));
     } else {
       this.store.dispatch(addMessage(MESSAGES_SEVERITY.ERROR, 'Name must be more than three letters long'));
     }
@@ -108,6 +109,7 @@ export class ExperimentInfoComponent implements OnInit, OnDestroy {
   }
 
   navigateAfterExperimentSelectionChanged() {
+    this.store.dispatch(setTableMode({mode: 'table'}));
     this.router.navigate([`projects/${this.projectId}/experiments`], {queryParamsHandling: 'merge'});
   }
 

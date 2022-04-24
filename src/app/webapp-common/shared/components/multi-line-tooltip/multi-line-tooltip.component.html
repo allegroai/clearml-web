@@ -3,15 +3,17 @@
   [delay]="500"
   [action]="'leave'"
   (smHesitate)=" hesitateMenu.hesitateStatus && tooltipMenu.closed.emit()">
-<i class="al-icon pointer fas fa-info-circle"
-   #tooltipElement
-   [matMenuTriggerFor]="tooltipMenu"
-   smClickStopPropagation
-   smHesitate
-   [delay]="100"
-   [action]="'enter'"
-   (smHesitate)="tooltipElement.click(); hesitateMenu.hesitateStatus= true"
-   (click)="false"
+<i
+  class="al-icon pointer"
+  [class]="iconClass ? iconClass : 'fas fa-info-circle'"
+  #tooltipElement
+  [matMenuTriggerFor]="tooltipMenu"
+  smClickStopPropagation
+  smHesitate
+  [delay]="100"
+  [action]="'enter'"
+  (smHesitate)="tooltipElement.click(); hesitateMenu.hesitateStatus= true"
+  (click)="false"
 ></i>
 </span>
 
@@ -23,7 +25,7 @@
     [delay]="500"
     [action]="'leave'"
     (smHesitate)="tooltipMenu.closed.emit()"
-    #hesitateMenu = "hesitate"
+    #hesitateMenu="hesitate"
   >
   </div>
 </mat-menu>

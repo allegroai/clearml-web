@@ -10,7 +10,7 @@
         'al-ico-alert-outline': !missingSource
         }"></i>
     <div class="label">{{missingSource ? 'Source not available' : 'Unable to load image'}}</div>
-    <div class="label">{{baseFile}}</div>
+    <div class="label" [smTooltip]="baseFile" smShowTooltipIfEllipsis>{{baseFile}}</div>
   </div>
   <div class="d-flex justify-content-between buttons-footer align-items-center">
     <div class="clickable-icon d-flex align-items-center justify-content-center pointer"

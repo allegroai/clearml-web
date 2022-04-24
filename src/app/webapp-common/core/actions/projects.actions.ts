@@ -15,13 +15,6 @@ import {MetricColumn} from '@common/shared/utils/tableParamEncode';
 import {ProjectStatsGraphData} from '@common/core/reducers/projects.reducer';
 
 export const PROJECTS_PREFIX = '[ROOT_PROJECTS] ';
-export const SET_PROJECTS = PROJECTS_PREFIX + 'SET_PROJECTS';
-export const RESET_PROJECTS = PROJECTS_PREFIX + 'RESET_PROJECTS';
-export const REFETCH_PROJECTS = PROJECTS_PREFIX + 'REFETCH_PROJECTS';
-export const SET_LAST_UPDATE = PROJECTS_PREFIX + 'SET_LAST_UPDATE';
-export const RESET_SELECTED_PROJECT = PROJECTS_PREFIX + 'RESET_SELECTED_PROJECT';
-export const RESET_PROJECT_SELECTION = PROJECTS_PREFIX + 'RESET_PROJECT_SELECTION';
-export const UPDATE_PROJECT = PROJECTS_PREFIX + 'UPDATE_PROJECT';
 
 export interface TagColor {
   foreground: string;
@@ -35,20 +28,20 @@ export const getAllSystemProjects = createAction(
 
 
 export const updateProject = createAction(
-  UPDATE_PROJECT,
+  PROJECTS_PREFIX + 'UPDATE_PROJECT',
   props<{ id: string; changes: Partial<ProjectsUpdateRequest> }>()
 );
 
 export const setAllProjects = createAction(
-  SET_PROJECTS,
+  PROJECTS_PREFIX + 'SET_PROJECTS',
   props<{ projects: Project[]; updating?: boolean }>()
 );
 
-export const resetProjects = createAction(RESET_PROJECTS);
-export const refetchProjects = createAction(REFETCH_PROJECTS);
+export const resetProjects = createAction(PROJECTS_PREFIX + 'RESET_PROJECTS');
+export const refetchProjects = createAction(PROJECTS_PREFIX + 'REFETCH_PROJECTS');
 
 export const setLastUpdate = createAction(
-  SET_LAST_UPDATE,
+  PROJECTS_PREFIX + 'SET_LAST_UPDATE',
   props<{ lastUpdate: string }>());
 
 export const updateProjectCompleted = createAction(
@@ -114,12 +107,7 @@ export const setCompanyTags = createAction(
   props<{ tags: string[]; systemTags: string[] }>()
 );
 
-export const setAllProjectTags = createAction(
-  PROJECTS_PREFIX + '[set all projects tags]',
-  props<{ tags: string[]; systemTags: string[] }>()
-);
-
-export const addAllProjectTags = createAction(
+export const addProjectTags = createAction(
   PROJECTS_PREFIX + '[add all projects tags]',
   props<{ tags: string[]; systemTags: string[] }>()
 );

@@ -5,15 +5,11 @@ button {
     background: none !important;
     border: none !important;
     transition: color 0.3s;
-    &:hover {
-      color: $blue-200 !important;
-      transition: color 0.3s;
-    }
   }
 
   &.text-area {
-    background-color: $blue-600;
-    color: $blue-280 !important;
+    background-color: transparent;
+    color: $blue-400;
     border: none;
     line-height: 22px;
     border-radius: 4px;
@@ -24,7 +20,7 @@ button {
 
     &:hover {
         background-color: $purple;
-        color: white !important;
+        color: $blue-100 !important;
     }
   }
   .al-icon {
@@ -32,8 +28,8 @@ button {
   }
 }
 
-:host.light {
-  button.hideBackground:hover {
+:host-context(.light-theme) {
+  button:not(.text-area).hideBackground:hover {
     color: $blue-400 !important;
   }
 }

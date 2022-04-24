@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {ChangeDetectorRef, Component, ElementRef, EventEmitter, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {select, Store} from '@ngrx/store';
 import {
   compareAddDialogTableSortChanged,
@@ -10,7 +10,6 @@ import {
   setShowSearchExperimentsForCompare
 } from '../../actions/compare-header.actions';
 import {
-  selectCompareAddTableSortFields,
   selectExperimentsForCompareSearchTerm,
   selectSelectedExperimentsForCompareAdd
 } from '../../reducers';
@@ -52,6 +51,7 @@ import {ProjectsGetTaskParentsResponseParents} from '~/business-logic/model/proj
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {INITIAL_EXPERIMENT_TABLE_COLS} from '@common/experiments/experiment.consts';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
+import {ExperimentsTableComponent} from '@common/experiments/dumb/experiments-table/experiments-table.component';
 
 export const allowAddExperiment$ = (selectRouterParams$: Observable<Params>) => selectRouterParams$.pipe(
   distinctUntilKeyChanged('ids'),
@@ -73,7 +73,6 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
   public selectedExperimentsIds: string[] = [];
   private paramsSubscription: Subscription;
   public searchTerm$: Observable<string>;
-  @ViewChild('searchExperiments', {static: true}) searchExperiments;
   public allowAddExperiment$: Observable<boolean>;
   public tableColsOrder$: Observable<string[]>;
   public tableSortOrder$: Observable<TableSortOrderEnum>;
@@ -98,6 +97,8 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
   public reachedCompareLimit: boolean;
   private _resizedCols = {} as { [colId: string]: string };
   private resizedCols$ = new BehaviorSubject<{[colId: string]: string }>(this._resizedCols);
+  @ViewChild('searchExperiments', {static: true}) searchExperiments;
+  @ViewChild(ExperimentsTableComponent) table: ExperimentsTableComponent;
 
   constructor(
     private store: Store<any>,
@@ -183,6 +184,7 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
 
 
   ngOnInit() {
+    window.setTimeout(() => this.table.table.rowRightClick = new EventEmitter());
     this.paramsSubscription = this.store.pipe(
       select(selectRouterParams),
       map(params => [params && params['ids'], get('projectId', params)]),

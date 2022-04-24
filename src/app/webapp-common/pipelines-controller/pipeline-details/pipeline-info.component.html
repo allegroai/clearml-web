@@ -18,40 +18,41 @@
           <div
             *ngFor="let param of entity?.hyperparams[section.key]  | keyvalue | filterRegex: '^(?!_).+$'"
             class="param"
-          ><div class="key">{{param.key}}</div><div class="value">{{param.value.value}}</div></div>
+          >
+            <div class="key" [smTooltip]="param.key" smShowTooltipIfEllipsis>{{param.key}}</div>
+            <div class="value" [smTooltip]="param.value.value" smShowTooltipIfEllipsis>{{param.value.value}}</div>
+          </div>
         </ng-container>
       </div>
       <div class="section">
         <div class="header">METRICS</div>
         <ng-container *ngIf="(entity?.last_metrics | keyvalue)?.length > 0; else emptyMsg">
           <ng-container *ngFor="let metric of entity.last_metrics | keyvalue">
-            <div *ngFor="let variant of $any(metric.value) | keyvalue" class="param">
-              <div class="key">{{$any(variant.value).metric}}/{{$any(variant.value).variant}}</div>
-              <div class="value">{{$any(variant.value).value}}</div>
+            <div *ngFor="let variant of $any($any(metric.value) | keyvalue) | filterMonitorMetric" class="param">
+              <div class="key" [smTooltip]="$any(variant.value).metric" smShowTooltipIfEllipsis>{{$any(variant.value).metric}}/{{$any(variant.value).variant}}</div>
+              <div class="value" [smTooltip]="$any(variant.value).value" smShowTooltipIfEllipsis>{{$any(variant.value).value}}</div>
             </div>
           </ng-container>
         </ng-container>
       </div>
-      <div class="section" *ngIf="!controller">
+      <div class="section">
         <div class="header">ARTIFACTS</div>
         <ng-container *ngIf="entity?.execution?.artifacts?.length > 0; else emptyMsg">
           <div
             *ngFor="let artifact of entity.execution.artifacts; trackBy: trackByFn"
             class="param"
           >
-            <div class="key">{{artifact.key}}</div>
+            <div class="key" [smTooltip]="artifact.key" smShowTooltipIfEllipsis>{{artifact.key}}</div>
             <div class="value">{{artifact?.content_size ? (artifact?.content_size | filesize) : ''}}</div>
           </div>
         </ng-container>
       </div>
-      <div class="section" *ngIf="!controller">
+      <div class="section">
         <div class="header">MODELS</div>
-        <ng-container *ngIf="entity?.models?.['input']?.length > 0 || entity?.models?.['output']?.length > 0; else emptyMsg">
-          <ng-container *ngFor="let type of ['input', 'output']">
-            <div *ngFor="let model of entity.models[type]" class="param">
-              <div class="key">{{type}}</div><div class="value">{{model.name || model.model.name}}</div>
-            </div>
-          </ng-container>
+        <ng-container *ngIf="entity?.models?.output?.length > 0; else emptyMsg">
+          <div *ngFor="let model of entity.models?.output" class="param">
+            <div class="key">{{model.name || model.model.name}}</div>
+          </div>
         </ng-container>
       </div>
     </ng-container>

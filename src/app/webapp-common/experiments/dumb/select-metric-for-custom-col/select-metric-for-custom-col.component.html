@@ -1,29 +1,32 @@
 <div smClickStopPropagation class="w-100 h-100">
-  <div *ngIf="goBack?.observers.length > 0" class="d-flex justify-content-between p-3">
+  <div *ngIf="goBack.observed" class="d-flex justify-content-between p-3">
     <i (click)="goBack.emit()" class="al-icon sm-md al-ico-back pointer" smClickStopPropagation></i>
     <div class="title">SELECT METRIC TO DISPLAY
     </div>
-    <hr class="m-0" style="margin: 0">
   </div>
   <sm-search
-          class="underline-search"
-          [value]="searchText"
-          [minimumChars]="0"
-          [debounceTime]="0"
-          placeholder="Search metric"
-          (valueChanged)="searchQ($event)"
+    class="underline-search"
+    [value]="searchText"
+    [minimumChars]="0"
+    [debounceTime]="0"
+    placeholder="Search metric"
+    (valueChanged)="searchQ($event)"
   ></sm-search>
-  <div class="metrics" [class.has-title]="goBack?.observers.length > 0">
-    <mat-expansion-panel *ngFor="let metric of metrics"
-                         [expanded]="searchText?.length>0 || hasSelectedVariant(metric)"
-                         [hidden]="(metricTree[metric] | advancedFilter:searchText).length===0">
-      <mat-expansion-panel-header class="py-2" expandedHeight="42px" collapsedHeight="42px">
+  <div class="metrics" [class.has-title]="goBack.observed">
+    <mat-expansion-panel
+      *ngFor="let metric of filteredMetricTree; trackBy: trackByMetric"
+      [expanded]="searchText?.length > 0 || expandedMetrics[metric[1][0].metric_hash]"
+    >
+      <mat-expansion-panel-header
+        class="py-2" expandedHeight="42px" collapsedHeight="42px"
+        (click)="expandedMetrics[metric[1][0].metric_hash] = !expandedMetrics[metric[1][0].metric_hash]"
+      >
         <mat-panel-title>
-          <span class="panel-title">{{metric}}</span>
+          <span class="panel-title">{{metric[0]}}</span>
         </mat-panel-title>
       </mat-expansion-panel-header>
       <ng-template matExpansionPanelContent>
-        <div class="metric-expansion-content" *ngFor="let variant of metricTree[metric] | advancedFilter:searchText">
+        <div class="metric-expansion-content" *ngFor="let variant of metricTree[metric[0]] | advancedFilter:searchText; trackBy: trackByVariant">
           <ng-container *ngIf="multiSelect; else single">
             <div class="variant-label">
               <sm-checkbox-control #metricVariant
@@ -69,5 +72,6 @@
         </div>
       </ng-template>
     </mat-expansion-panel>
+    <div class="more-results" *ngIf="moreResults > 0">And {{moreResults}} more, use search to narrow selection</div>
   </div>
 </div>

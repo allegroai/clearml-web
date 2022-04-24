@@ -68,18 +68,11 @@ export class CommonExperimentReverterService {
       },
       requirements: experiment.script ? this.revertRequirements(experiment.script) : {pip: ''},
       diff: get('diff', experiment.script) || '',
-      docker_cmd: get('docker_cmd', experiment.execution),
+      docker_cmd: get('docker_cmd', experiment.container),
       queue: experiment.execution?.queue,
       container: experiment.container || {setup_shell_script: '', arguments: '', image: ''}
       /* eslint-enable @typescript-eslint/naming-convention */
     };
-  }
-
-  revertExecutionParameters(parameters: Execution['parameters']): Array<{ label: any; key: string }> {
-    return parameters ?
-      Object.entries(parameters).map(([key, val]) => ({label: val, key}))
-        .sort((p, c) => p.key < c.key ? -1 : 1) :
-      [];
   }
 
   revertExecutionSource(script: Task['script']): IExecutionForm['source'] {

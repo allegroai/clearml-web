@@ -1,17 +1,17 @@
 <div class="refresh-wrapper d-flex flex-row-reverse align-items-center" [ngClass]="{'allow-autorefresh': allowAutoRefresh}">
   <span
-    *ngIf="allowAutoRefresh && autoRefreshState; else pause"
+    *ngIf="allowAutoRefresh && autoRefreshState$ | async; else pause"
     class="pl-1 al-icon al-ico-auto-refresh-play"
-    (click)="refreshList.emit(false)"
+    (click)="refresh.trigger()"
   ><span class="path1"></span><span class="path2"></span></span>
   <ng-template #pause>
     <span
       class="pl-1 al-icon al-ico-auto-refresh-pause"
-      (click)="refreshList.emit(false)"
+      (click)="refresh.trigger()"
     ><span class="path1"></span><span class="path2"></span>
     </span>
   </ng-template>
-  <mat-checkbox [ngModel]="autoRefreshState" name="autoRefresh" (ngModelChange)="setAutoRefresh.emit($event)" class="autorefresh-checkbox">
+  <mat-checkbox [ngModel]="autoRefreshState$ | async" name="autoRefresh" (ngModelChange)="setAutoRefresh.emit($event)" class="autorefresh-checkbox">
     Auto Refresh
   </mat-checkbox>
 </div>

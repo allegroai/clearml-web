@@ -17,25 +17,28 @@ import { UiUpdateDialogComponent } from './ui-update-dialog/ui-update-dialog.com
 import {SharedModule} from '~/shared/shared.module';
 import {TipOfTheDayModalComponent} from './tip-of-the-day-modal/tip-of-the-day-modal.component';
 import {HeaderUserMenuActionsComponent} from '~/layout/header/header-user-menu-actions/header-user-menu-actions.component';
+import {WelcomeMessageComponent} from '@common/layout/welcome-message/welcome-message.component';
+import {YouTubePlayerModule} from '@angular/youtube-player';
 
 
 @NgModule({
-    imports: [
-        CommonModule,
-        SMSharedModule,
-        FormsModule,
-        ReactiveFormsModule,
-        CommonSearchModule,
-        RouterModule,
-        StoreModule.forFeature('layout', LayoutReducer),
-        SharedModule,
-    ],
+  imports: [
+    CommonModule,
+    SMSharedModule,
+    FormsModule,
+    ReactiveFormsModule,
+    CommonSearchModule,
+    RouterModule,
+    StoreModule.forFeature('layout', LayoutReducer),
+    SharedModule,
+    YouTubePlayerModule,
+  ],
   declarations: [
     HeaderComponent, BreadcrumbsComponent, ProjectContextNavbarComponent, LoggedOutAlertComponent,
     S3AccessResolverComponent, S3AccessDialogComponent, ServerNotificationDialogContainerComponent,
-    UiUpdateDialogComponent, TipOfTheDayModalComponent, HeaderUserMenuActionsComponent
+    UiUpdateDialogComponent, TipOfTheDayModalComponent, HeaderUserMenuActionsComponent, WelcomeMessageComponent
   ],
-  exports: [HeaderComponent, BreadcrumbsComponent, ProjectContextNavbarComponent, LoggedOutAlertComponent, S3AccessResolverComponent, S3AccessDialogComponent, ServerNotificationDialogContainerComponent, UiUpdateDialogComponent]
+  exports: [HeaderComponent, BreadcrumbsComponent, ProjectContextNavbarComponent, LoggedOutAlertComponent, S3AccessResolverComponent, S3AccessDialogComponent, ServerNotificationDialogContainerComponent, UiUpdateDialogComponent, WelcomeMessageComponent]
 })
 export class CommonLayoutModule {
 }

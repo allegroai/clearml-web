@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import {DonutComponent} from './donut.component';
+import {AppModule} from '~/app.module';
 
 describe('DonutComponent', () => {
   let component: DonutComponent;
@@ -8,7 +9,8 @@ describe('DonutComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [DonutComponent]
+      declarations: [DonutComponent],
+      imports: [AppModule]
     })
       .compileComponents();
   }));

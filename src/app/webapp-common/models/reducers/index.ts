@@ -6,7 +6,13 @@ import {CountAvailableAndIsDisableSelectedFiltered} from '@common/shared/entity-
 import {MODELS_TABLE_COLS} from '@common/models/models.consts';
 import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
-export const reducers: ActionReducerMap<any, any> = {
+
+export interface ModelsState {
+  view: IModelsViewState;
+  info: ModelInfoState;
+}
+
+export const reducers: ActionReducerMap<ModelsState, any> = {
   view: modelsViewReducer,
   info: modelsInfoReducer,
 };
@@ -33,6 +39,7 @@ export const selectModelsUsers = createSelector(modelsView, (state): Array<any> 
 export const selectModelsFrameworks = createSelector(modelsView, (state): Array<string> => state.frameworks);
 export const selectModelsTags = createSelector(modelsView, (state): Array<string> => state.projectTags);
 export const selectMetadataKeys = createSelector(modelsView, (state): Array<string> => state.projectMetadataKeys);
+export const selectMetadataColsOptions = createSelector(modelsView, (state): Record<ISmCol['id'], string[]> => state.metadataColsOptions);
 export const selectMetadataCols = createSelector(modelsView, (state): ISmCol[] => state.metadataCols);
 
 
@@ -57,6 +64,7 @@ export const selectMetadataColsForProject = createSelector([modelsView, selectRo
       style: {...col.style, ...(colWidth[col.id] && {width: `${colWidth[col.id]}px`})}
     } as ISmCol)))
 export const selectSplitSize = createSelector(modelsView, (state): number => state.splitSize);
+export const selectTableMode = createSelector(modelsView, state => state.tableMode);
 
 
 

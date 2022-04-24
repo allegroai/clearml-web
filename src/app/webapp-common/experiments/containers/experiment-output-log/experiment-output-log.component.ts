@@ -24,8 +24,8 @@ import {
   SetLogFilter
 } from '../../actions/common-experiment-output.actions';
 import {ExperimentLogInfoComponent} from '../../dumb/experiment-log-info/experiment-log-info.component';
-import {selectRefreshing} from '@common/experiments-compare/reducers';
 import {ITableExperiment} from '@common/experiments/shared/common-experiment-model.model';
+import {RefreshService} from '@common/core/services/refresh.service';
 
 @Component({
   selector: 'sm-experiment-output-log',
@@ -52,7 +52,7 @@ export class ExperimentOutputLogComponent implements OnInit, AfterViewInit, OnDe
   private experiment$ = new BehaviorSubject<ITableExperiment>(null);
   @ViewChildren(ExperimentLogInfoComponent) private logRefs: QueryList<ExperimentLogInfoComponent>;
 
-  constructor(private store: Store<IExperimentInfoState>, private cdr: ChangeDetectorRef) {
+  constructor(private store: Store<IExperimentInfoState>, private cdr: ChangeDetectorRef, private refresh: RefreshService) {
     this.log$ = this.store.select(selectExperimentLog);
     this.logBeginning$ = this.store.select(selectExperimentBeginningOfLog);
     this.filter$ = this.store.select(selectLogFilter);
@@ -77,13 +77,14 @@ export class ExperimentOutputLogComponent implements OnInit, AfterViewInit, OnDe
               id: this.currExperiment.id,
               direction: null
             }));
-          } else if (!this.logRef?.lines?.length || this.logRef?.canRefresh) {
-            this.store.dispatch(getExperimentLog({
-              id: this.currExperiment.id,
-              direction: !this.logRef?.orgLogs ? 'prev' : 'next',
-              from: last(this.logRef?.orgLogs)?.timestamp
-            }));
           }
+          // else if (!this.logRef?.lines?.length || this.logRef?.canRefresh) {
+          //   this.store.dispatch(getExperimentLog({
+          //     id: this.currExperiment.id,
+          //     direction: !this.logRef?.orgLogs ? 'prev' : 'next',
+          //     from: last(this.logRef?.orgLogs)?.timestamp
+          //   }));
+          // }
         })
     );
   }
@@ -102,9 +103,8 @@ export class ExperimentOutputLogComponent implements OnInit, AfterViewInit, OnDe
       }
     }));
 
-    this.subs.add(this.store.select(selectRefreshing)
-      .pipe(filter(({refreshing}) => refreshing))
-      .subscribe(({autoRefresh}) => this.store.dispatch(getExperimentLog({
+    this.subs.add(this.refresh.tick
+      .subscribe((autoRefresh) => this.store.dispatch(getExperimentLog({
         id: this.currExperiment.id,
         direction: autoRefresh ? 'prev' : 'next',
         from: last(this.logRef?.orgLogs)?.timestamp

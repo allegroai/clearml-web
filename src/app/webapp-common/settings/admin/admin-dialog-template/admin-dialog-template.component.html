@@ -1,10 +1,12 @@
 <div class="label-row cred-visible" *ngIf="!credentialsCreated">
-  <mat-form-field appearance="outline"
-                  class="label-input d-block"
-                  floatLabel="always">
-    <mat-label>Label (optional)</mat-label>
-    <input matInput [(ngModel)]="label" [disabled]="credentialsCreated" placeholder="Credentials label" name="credentials">
-  </mat-form-field>
+  <form (submit)="createCredentials()">
+    <mat-form-field appearance="outline"
+                    class="label-input d-block"
+                    floatLabel="always">
+      <mat-label>Label (optional)</mat-label>
+      <input matInput [(ngModel)]="label" [disabled]="credentialsCreated" placeholder="Credentials label" name="credentials">
+    </mat-form-field>
+  </form>
 </div>
 <div class="credentials-and-code cred-visible"
      *ngIf="newCredential"

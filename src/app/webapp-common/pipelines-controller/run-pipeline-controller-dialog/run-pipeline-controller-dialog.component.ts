@@ -27,7 +27,7 @@ export class RunPipelineControllerDialogComponent implements OnInit, OnDestroy {
   public title: string;
   public params: any;
   public task: IExperimentInfo;
-  public chooseCustomQueue = false;
+  public chooseCustomQueue: boolean= false
   private queuesSub: Subscription;
   private baseControllerSub: Subscription;
   private selectedQueueSub: Subscription;
@@ -38,9 +38,9 @@ export class RunPipelineControllerDialogComponent implements OnInit, OnDestroy {
     @Inject(MAT_DIALOG_DATA) public data: { task }
   ) {
     if (data?.task?.hyperparams?.Args) {
-      this.store.dispatch(setControllerForStartPipelineDialog({task: data.task}));
+      this.store.dispatch(setControllerForStartPipelineDialog({task: data.task}))
     } else {
-      this.store.dispatch(getControllerForStartPipelineDialog({task: data.task?.id}));
+      this.store.dispatch(getControllerForStartPipelineDialog({task: data.task?.id}))
     }
 
     this.queuesSub = this.queues$.subscribe(queues => {
@@ -56,33 +56,31 @@ export class RunPipelineControllerDialogComponent implements OnInit, OnDestroy {
       this.task = task;
       this.title = this.getTitle();
       this.params = task?.hyperparams?.Args && cloneDeep(Object.values(task.hyperparams.Args).filter((param: any) => !param?.name?.startsWith('_')));
-    });
+    })
     this.selectedQueueSub = combineLatest([this.baseController$, this.queues$])
       .pipe(filter(([baseController, queues]) => !!baseController && queues?.length > 0)).subscribe(([baseController, queues]) => {
         this.selectedQueue = queues.find(queue => baseController.execution?.queue?.id === queue?.id) || queues[0];
-      });
+      })
   }
 
   closeDialog(confirmed) {
     this.dialogRef.close({
       confirmed,
-      ...(confirmed && {
-        queue: this.selectedQueue?.id,
-        args: this.params?.map(param => ({name: param.name, value: param.value})),
-        task: this.task.id
-      })
+      queue: this.selectedQueue?.id,
+      args: this.params?.map(param => ({name: param.name, value: param.value})),
+      task: this.task.id
     });
   }
 
   ngOnDestroy(): void {
     this.queuesSub.unsubscribe();
-    this.baseControllerSub.unsubscribe();
-    this.store.dispatch(setControllerForStartPipelineDialog({task: null}));
+    this.baseControllerSub.unsubscribe()
+    this.store.dispatch(setControllerForStartPipelineDialog({task: null}))
   }
 
   changeChooseCustomQueue() {
     this.chooseCustomQueue = !this.chooseCustomQueue;
-    if (!this.chooseCustomQueue) {
+    if(!this.chooseCustomQueue){
       this.selectedQueue = this.queues.find(queue => this.task.execution?.queue?.id === queue?.id) || this.queues[0];
     }
   }

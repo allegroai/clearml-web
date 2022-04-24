@@ -61,9 +61,6 @@
   <div class="settings">
 
     <sm-refresh-button
-      [autoRefreshState]="autoRefreshState$ | async"
-      [allowAutoRefresh]="true"
-      (refreshList)="refreshList($event)"
       (setAutoRefresh)="setAutoRefresh($event)"
       class="light-theme"
     >

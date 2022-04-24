@@ -75,7 +75,9 @@ export class TableFilterSortTemplateComponent {
   @Output() sortOrderChanged = new EventEmitter<boolean>();
   @Output() searchValueChanged = new EventEmitter<string>();
 
-  constructor() {}
+  constructor() {
+  }
+
   trackByLabel = (index: number, item) => item.label;
 
   switchSortOrder($event: MouseEvent) {
@@ -90,7 +92,8 @@ export class TableFilterSortTemplateComponent {
   }
 
   isFiltered() {
-    return (this.value && this.value.length > 0) || (this.subValue && this.subValue.length > 0);
+    const filtered = (this.value && this.value.length > 0) || (this.subValue && this.subValue.length > 0);
+    return filtered;
   }
 
   sortedClass() {

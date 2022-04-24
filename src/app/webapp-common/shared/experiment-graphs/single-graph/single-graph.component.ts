@@ -230,7 +230,7 @@ export class SingleGraphComponent extends PlotlyGraphBase {
         }
       }),
       uirevision: 'static', // Saves the UI state between redraws https://plot.ly/javascript/uirevision/
-      hoverlabel: {    namelength: -1,       },
+      hoverlabel: {namelength: -1},
       legend: {
         traceorder: 'normal',
         xanchor: 'left',
@@ -745,7 +745,7 @@ export class SingleGraphComponent extends PlotlyGraphBase {
   }
 
   validateResize($event: ResizeEvent): boolean {
-    return $event.rectangle.width > 300 && $event.rectangle.height > 250;
+    return $event.rectangle.width > 400 && $event.rectangle.height > 250;
   }
 
   private maximizeGraph() {

@@ -13,6 +13,7 @@ import {ExperimentCompareBase} from '../experiment-compare-base';
 import {ActivatedRoute, Router} from '@angular/router';
 import {IExperimentInfoState} from '../../../../features/experiments/reducers/experiment-info.reducer';
 import {experimentListUpdated, setExperiments} from '../../actions/experiments-compare-params.actions';
+import {RefreshService} from '@common/core/services/refresh.service';
 
 @Component({
   selector: 'sm-experiment-compare-params',
@@ -23,11 +24,14 @@ import {experimentListUpdated, setExperiments} from '../../actions/experiments-c
 export class ExperimentCompareParamsComponent extends ExperimentCompareBase implements OnInit {
   public showEllipsis: boolean = true;
 
-  constructor(public router: Router,
-              public store: Store<IExperimentInfoState>,
-              public changeDetection: ChangeDetectorRef,
-              public activeRoute: ActivatedRoute) {
-    super(router, store, changeDetection, activeRoute);
+  constructor(
+    public router: Router,
+    public store: Store<IExperimentInfoState>,
+    public changeDetection: ChangeDetectorRef,
+    public activeRoute: ActivatedRoute,
+    public refresh: RefreshService
+  ) {
+    super(router, store, changeDetection, activeRoute, refresh);
   }
 
   experiments$ = this.store.pipe(select(selectExperimentsParams));

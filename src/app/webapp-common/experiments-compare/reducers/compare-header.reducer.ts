@@ -4,7 +4,6 @@ import {
   setExperimentsUpdateTime,
   setHideIdenticalFields,
   setNavigationPreferences,
-  setRefreshing,
   setSearchExperimentsForCompareResults,
   setShowSearchExperimentsForCompare,
   toggleShowScalarOptions
@@ -22,7 +21,6 @@ export interface CompareHeaderState {
   hideIdenticalRows: boolean;
   viewMode: string;
   showScalarOptions: boolean;
-  refreshing: boolean;
   autoRefresh: boolean;
   navigationPreferences: Params;
   experimentsUpdateTime: { [key: string]: Date };
@@ -38,7 +36,6 @@ export const initialState: CompareHeaderState = {
   hideIdenticalRows: false,
   viewMode: 'values',
   showScalarOptions: false,
-  refreshing: false,
   autoRefresh: false,
   navigationPreferences: {},
   experimentsUpdateTime: {},
@@ -55,11 +52,6 @@ const _compareHeader = createReducer(initialState,
   on(setExperimentsUpdateTime, (state: CompareHeaderState, {payload}) => ({...state, experimentsUpdateTime: payload})),
   on(setShowSearchExperimentsForCompare, (state: CompareHeaderState, {payload}) => ({...state, showSearch: payload})),
   on(toggleShowScalarOptions, (state: CompareHeaderState) => ({...state, showScalarOptions: !state.showScalarOptions})),
-  on(setRefreshing, (state: CompareHeaderState, {payload, autoRefresh}) => ({
-    ...state,
-    refreshing: payload,
-    autoRefresh
-  })),
   on(setNavigationPreferences, (state: CompareHeaderState, {navigationPreferences}) => ({
     ...state,
     navigationPreferences: {...state.navigationPreferences, ...navigationPreferences}

@@ -1,20 +1,23 @@
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {Observable} from 'rxjs/internal/Observable';
-import {selectMetricVariants} from '../../../../features/experiments/reducers';
+import {selectMetricVariants} from '~/features/experiments/reducers';
 import {Store} from '@ngrx/store';
-import {MetricVariantResult} from '../../../../business-logic/model/projects/metricVariantResult';
-import {getCustomMetrics} from '../../../experiments/actions/common-experiments-view.actions';
-import {fetchGraphData, setMetricVariant} from '../../../core/actions/projects.actions';
-import {ProjectStatsGraphData, selectGraphData, selectSelectedMetricVariant, selectSelectedMetricVariantForCurrProject} from '../../../core/reducers/projects.reducer';
-import {Project} from '../../../../business-logic/model/projects/project';
-import {filter, tap} from 'rxjs/operators';
-import {TaskStatusEnum} from '../../../../business-logic/model/tasks/taskStatusEnum';
+import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
+import {getCustomMetrics} from '@common/experiments/actions/common-experiments-view.actions';
+import {fetchGraphData, setMetricVariant} from '@common/core/actions/projects.actions';
+import {ProjectStatsGraphData, selectGraphData, selectSelectedMetricVariantForCurrProject} from '@common/core/reducers/projects.reducer';
+import {Project} from '~/business-logic/model/projects/project';
+import {filter, skip, take, tap} from 'rxjs/operators';
+import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
 import {Subscription} from 'rxjs';
-import {TaskTypeEnum} from '../../../../business-logic/model/tasks/taskTypeEnum';
-import {MatMenuTrigger} from '@angular/material/menu';
-import {createMetricColumn, MetricColumn} from '../../../shared/utils/tableParamEncode';
+import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
+import {createMetricColumn, MetricColumn} from '@common/shared/utils/tableParamEncode';
 import {Router} from '@angular/router';
-import {MetricValueType} from '../../../experiments-compare/reducers/experiments-compare-charts.reducer';
+import {MetricValueType} from '@common/experiments-compare/reducers/experiments-compare-charts.reducer';
+import {MatDialog} from '@angular/material/dialog';
+import {
+  MetricForStatsDialogComponent
+} from '@common/project-info/conteiners/metric-for-stats-dialog/metric-for-stats-dialog.component';
 
 @Component({
   selector: 'sm-project-stats',
@@ -25,7 +28,6 @@ export class ProjectStatsComponent implements OnInit, OnDestroy {
   private _project: Project;
 
   public metricVariants$: Observable<MetricVariantResult[]>;
-  public selectedVariant$: Observable<MetricVariantResult>;
   public selectedVariant: MetricColumn;
   public colors: string[];
   public metricVariantSelection = [];
@@ -33,8 +35,7 @@ export class ProjectStatsComponent implements OnInit, OnDestroy {
   public loading = false;
   public gotOptions;
   public variantDisplay: string = 'Select Metric & Variant';
-  private sub: Subscription;
-  private selectedVariantSub: Subscription;
+  private sub = new Subscription();
   states = [
     {label: 'Completed or Stopped', type: TaskStatusEnum.Completed},
     {label: 'Published', type: TaskStatusEnum.Published},
@@ -45,51 +46,50 @@ export class ProjectStatsComponent implements OnInit, OnDestroy {
     if (proj) {
       this._project = proj;
       this.gotOptions = undefined;
-      this.selectedVariantSub?.unsubscribe();
-      this.selectedVariantSub = this.store.select(selectSelectedMetricVariant, this.project.id)
-        .subscribe(data => {
-          this.selectedVariant = data;
-          this.variantDisplay = data && (data?.metric + ' \u203A ' +
-            data.variant + ' \u203A ' + this.getValueName(this.selectedVariant.valueType));
-          this.loading = true;
-          this.store.dispatch(fetchGraphData());
-        });
     }
   }
   get project() {
     return this._project;
   }
 
-  constructor(private store: Store, private router: Router) {
+  constructor(private store: Store, private router: Router, private dialog: MatDialog) {
   }
 
   ngOnInit(): void {
-    this.metricVariants$ = this.store.select(selectMetricVariants)
-      .pipe(tap(() => this.gotOptions !== undefined && (this.gotOptions = true)));
-    this.sub = this.store.select(selectGraphData)
+    this.sub.add(this.store.select(selectSelectedMetricVariantForCurrProject)
+      .subscribe(data => {
+        this.selectedVariant = data;
+        this.variantDisplay = data && (data?.metric + ' \u203A ' +
+          data.variant + ' \u203A ' + this.getValueName(this.selectedVariant.valueType));
+        this.loading = true;
+        this.store.dispatch(fetchGraphData());
+        this.metricVariantSelection = data ? [createMetricColumn(data, this.project.id)] : [];
+      })
+    );
+
+    this.sub.add(this.store.select(selectGraphData)
       .pipe(filter(values => !!values))
       .subscribe(values => {
-      this.colors = values.map(val => this.statusToColor(val.status));
-      this.loading = false;
-      this.graphData = values.map(val => ({
-        ...val,
-        title: val.name,
-        nameExt: `Created By ${val.user}, Finished ${new Date(val.x).toLocaleString()}`,
-        name: val.id
-      }));
-    });
-
-    this.sub.add(this.store.select(selectSelectedMetricVariantForCurrProject)
-      .pipe(filter(selection => !!selection))
-      .subscribe(selection => this.metricVariantSelection = [createMetricColumn(selection, this.project.id)])
+        this.colors = values.map(val => this.statusToColor(val.status));
+        this.loading = false;
+        this.graphData = values.map(val => ({
+          ...val,
+          title: val.name,
+          nameExt: `Created By ${val.user}, Finished ${new Date(val.x).toLocaleString()}`,
+          name: val.id
+        }));
+      })
     );
   }
 
   selectedMetricToShow(
     event: { variant: MetricVariantResult; addCol: boolean; valueType: MetricValueType },
-    trigger: MatMenuTrigger
   ) {
-    if (!event.valueType) {
+    if (event === null) {
+      this.store.dispatch(setMetricVariant({projectId: this.project.id, col:null}));
+      return;
+    }
+    if (!event?.valueType) {
       return;
     }
 
@@ -101,14 +101,23 @@ export class ProjectStatsComponent implements OnInit, OnDestroy {
       variant: event.variant.variant
     };
     this.store.dispatch(setMetricVariant({projectId: this.project.id, col}));
-    trigger.closeMenu();
   }
 
-  getOptions() {
+  selectVariant() {
     if(!this.gotOptions) {
       this.gotOptions = false;
       this.store.dispatch(getCustomMetrics());
     }
+    this.store.select(selectMetricVariants)
+      .pipe(
+        skip(this.gotOptions ? 0 : 1),
+        tap(() => this.gotOptions !== undefined && (this.gotOptions = true)),
+        take(1)
+      )
+      .subscribe(variants => this.dialog.open(MetricForStatsDialogComponent,
+        {data: {variants, metricVariantSelection: this.metricVariantSelection}})
+        .afterClosed().subscribe(selection => this.selectedMetricToShow(selection))
+      );
   }
 
   public statusToColor(status: string) {
@@ -127,7 +136,6 @@ export class ProjectStatsComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.sub.unsubscribe();
-    this.selectedVariantSub?.unsubscribe();
   }
 
   private typeToIcon(type: string) {
@@ -170,10 +178,5 @@ export class ProjectStatsComponent implements OnInit, OnDestroy {
       default:
         return 'Last';
     }
-  }
-
-  clear(trigger) {
-    this.store.dispatch(setMetricVariant({projectId: this.project.id, col:null}));
-    trigger.closeMenu();
   }
 }

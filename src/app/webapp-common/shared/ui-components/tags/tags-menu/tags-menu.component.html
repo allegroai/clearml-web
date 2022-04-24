@@ -24,6 +24,7 @@
     *ngFor="let tag of allTags | filter:tags | filter:filterText; trackBy: trackByFn"
     class="item"
     (click)="addTag(tag)"
+    [smTooltip]="tag" matTooltipPosition="above" smShowTooltipIfEllipsis
   >{{tag}}</button>
 </div>
 <hr>

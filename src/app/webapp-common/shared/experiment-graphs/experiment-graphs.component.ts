@@ -17,17 +17,18 @@ import {sortMetricsList} from '../../tasks/tasks.utils';
 import {SingleGraphComponent} from './single-graph/single-graph.component';
 import {EXPERIMENT_GRAPH_ID_PREFIX, SINGLE_GRAPH_ID_PREFIX} from '../../experiments/shared/common-experiments.const';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
-import {getOr} from 'lodash/fp';
+import {get, getOr} from 'lodash/fp';
 import {AdminService} from '~/shared/services/admin.service';
 import {GroupByCharts} from '../../experiments/reducers/common-experiment-output.reducer';
 import {Store} from '@ngrx/store';
 import {selectPlotlyReady} from '../../core/reducers/view.reducer';
 import {ResizeEvent} from 'angular-resizable-element';
-import {filter, map, skip, take, tap} from 'rxjs/operators';
+import {distinctUntilChanged, filter, map, skip, take, tap} from 'rxjs/operators';
 import {Subscription} from 'rxjs';
 import {ExtFrame, ExtLegend} from './single-graph/plotly-graph-base';
 import {getSignedUrl} from '../../core/actions/common-auth.actions';
 import {selectSignedUrl} from '../../core/reducers/common-auth-reducer';
+import {selectRouterParams} from '@common/core/reducers/router-reducer';
 
 @Component({
   selector: 'sm-experiment-graphs',
@@ -53,7 +54,7 @@ export class ExperimentGraphsComponent implements OnDestroy {
   readonly SINGLE_GRAPH_ID_PREFIX = SINGLE_GRAPH_ID_PREFIX;
   public graphList: Array<any> = [];
   public noGraphs: boolean = false;
-  public graphsData: any;
+  public graphsData: {[group: string]: any[]};
   private observer: IntersectionObserver;
   private _xAxisType: ScalarKeyEnum;
   @ViewChild('allMetrics', {static: true}) allMetrics: ElementRef;
@@ -75,13 +76,13 @@ export class ExperimentGraphsComponent implements OnDestroy {
   onResize() {
     clearTimeout(this.timer);
     this.prepareRedraw();
-    this.graphsPerRow = this.allGraphs.length === this.allMetricGroups.length ? 1: this.graphsPerRow;
+    this.graphsPerRow = this.allGroupsSingleGraphs() ? 1 : this.graphsPerRow;
     this.calculateGraphsLayout();
   }
 
   @Input() set hiddenList(list: string[]) {
     this._hiddenList = list || [];
-    window.setTimeout(() => this.prepareRedraw());
+    window.setTimeout(() => this.calculateGraphsLayout());
   }
   get hiddenList() {
     return this._hiddenList;
@@ -118,6 +119,15 @@ export class ExperimentGraphsComponent implements OnDestroy {
     private store: Store<any>,
     private renderer: Renderer2
   ) {
+
+    this.subs.add(this.store.select(selectRouterParams).pipe(
+      map(params => get('experimentId', params)),
+      distinctUntilChanged()
+    ).subscribe( () => {
+      this.graphsData = null;
+      this.graphList = [];
+    }))
+
     this.subs.add(this.plotlyReady$.pipe(
         tap(ready => this.plotlyReady = ready),
         skip(1), // Only work on page load 1: false 2: true
@@ -149,6 +159,10 @@ export class ExperimentGraphsComponent implements OnDestroy {
       return;
     }
     this.graphsData = this.sortGraphsData(graphGroups);
+
+    this.graphsPerRow = this.allGroupsSingleGraphs() ? 1 : this.graphsPerRow;
+    this.calculateGraphsLayout();
+
     Object.values(this.graphsData).forEach((graphs: ExtFrame[]) => {
       graphs.forEach((graph: ExtFrame) => {
         if (getOr(0, 'layout.images.length', graph) > 0) {
@@ -175,7 +189,7 @@ export class ExperimentGraphsComponent implements OnDestroy {
     };
 
     this.observer = new IntersectionObserver(this.graphInView.bind(this), options);
-    window.setTimeout(() => this.prepareRedraw());
+    // window.setTimeout(() => this.prepareRedraw());
   }
 
   observeGraphs() {
@@ -200,14 +214,14 @@ export class ExperimentGraphsComponent implements OnDestroy {
     this.observeGraphs();
   }
 
-  graphInView(entries: IntersectionObserverEntry[]) {
+  graphInView(entries: IntersectionObserverEntry[] = []) {
     this.maintainVisibleEntries(entries);
     for (const entity of entries) {
       if (entity.intersectionRatio === 0) {
         continue;
       }
       const el = entity.target;
-      const graphComponent = this.allGraphs.find(graphComp => graphComp.identifier === el.id);
+      const graphComponent = this.allGraphs?.find(graphComp => graphComp.identifier === el.id);
       if (this.plotlyReady && (!graphComponent?.alreadyDrawn || graphComponent?.shouldRefresh)) {
         graphComponent?.drawGraph(true);
       }
@@ -247,7 +261,14 @@ export class ExperimentGraphsComponent implements OnDestroy {
     return this.el.nativeElement.clientWidth > this.breakPoint;
   }
 
+  private allGroupsSingleGraphs() {
+    return (this.isGroupGraphs || this.disableResize) && Object.values(this.graphsData).some(group => group.length === 1);
+  }
+
   public calculateGraphsLayout(delay = 200) {
+    if (this.noGraphs) {
+      return;
+    }
     this.timer = window.setTimeout(() => {
       if (this.allGraphs) {
         const containerWidth = this.el.nativeElement.clientWidth;
@@ -255,7 +276,7 @@ export class ExperimentGraphsComponent implements OnDestroy {
           this.graphsPerRow -= 1;
         }
         const width = Math.floor(containerWidth / this.graphsPerRow);
-        this.width = width - 4;
+        this.width = width - 16 / this.graphsPerRow;
         if (!this.isGroupGraphs) {
           this.allMetricGroups.forEach(metricGroup => this.renderer.setStyle(metricGroup.nativeElement, 'width', `${this.width}px`));
         } else {
@@ -272,16 +293,16 @@ export class ExperimentGraphsComponent implements OnDestroy {
     if ($event.edges.right) {
       const containerWidth = this.el.nativeElement.clientWidth;
       const userWidth = $event.rectangle.width;
-      this.graphsPerRow = Math.min(Math.floor(containerWidth / userWidth), this.graphsNumberLimit);
+      this.graphsPerRow = this.calcGraphPerRow(userWidth, containerWidth);
 
       if (!this.isGroupGraphs) {
         this.allMetricGroups.forEach(metricGroup => {
-          this.width = containerWidth / this.graphsPerRow - (this.graphsPerRow < 4 ? 10 : 4);
+          this.width = containerWidth / this.graphsPerRow - 16 / this.graphsPerRow;
           this.renderer.setStyle(metricGroup.nativeElement, 'width', `${this.width}px`);
         });
       } else {
         this.allGraphs.forEach(singleGraph => {
-          this.width = containerWidth / this.graphsPerRow - (this.graphsPerRow < 4 ? 10 : 4);
+          this.width = containerWidth / this.graphsPerRow - 16 / this.graphsPerRow;
           this.renderer.setStyle(singleGraph.elementRef.nativeElement, 'width', `${this.width}px`);
         });
       }
@@ -298,6 +319,18 @@ export class ExperimentGraphsComponent implements OnDestroy {
     setTimeout(() => this.graphInView(this.visibleEntries));
   }
 
+  private calcGraphPerRow(userWidth: number, containerWidth: number) {
+    let graphsPerRow;
+    if (userWidth > 0.75 * containerWidth) {
+      graphsPerRow = 1;
+    } else if (userWidth > 0.33 * containerWidth) {
+      graphsPerRow = 2;
+    } else {
+      graphsPerRow = Math.floor(containerWidth / userWidth);
+    }
+    return Math.min(graphsPerRow, this.graphsNumberLimit);
+  }
+
   resizeStarted(metricGroup: HTMLDivElement, singleGraph: SingleGraphComponent) {
     this.activeResizeElement = singleGraph;
     this.changeDetection.detectChanges();
@@ -307,7 +340,7 @@ export class ExperimentGraphsComponent implements OnDestroy {
 
   onResizing($event: ResizeEvent) {
     if ($event.edges.right && this.resizeTextElement) {
-      const graphsPerRow = Math.min(Math.floor(this.el.nativeElement.clientWidth / $event.rectangle.width), this.graphsNumberLimit);
+      const graphsPerRow = this.calcGraphPerRow($event.rectangle.width, this.el.nativeElement.clientWidth);
       const text = `${graphsPerRow > 1 ? graphsPerRow + ' graphs' : '1 graph'} per row`;
       this.renderer.setProperty(this.resizeTextElement, 'textContent', text);
     }

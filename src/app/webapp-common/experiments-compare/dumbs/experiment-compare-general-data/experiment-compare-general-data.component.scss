@@ -38,6 +38,7 @@
   sm-tag-list {
     margin-top: 4px;
     height: 18px;
+    max-width: 530px;
   }
 
   .general-info {
@@ -60,10 +61,10 @@
     }
 
     .bw.i-completed.icon {
-      background-image: url('/app/webapp-common/assets/icons/completed-dark.svg') !important;
+      background-image: url('../../../assets/icons/completed-dark.svg') !important;
     }
     .bw.i-stopped.icon {
-      background-image: url('/app/webapp-common/assets/icons/completed-dark.svg') !important;
+      background-image: url('../../../assets/icons/completed-dark.svg') !important;
     }
   }
 }

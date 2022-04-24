@@ -36,6 +36,7 @@ export interface ICommonExperimentInfoState {
   currentActiveSectionEdit: string;
   infoDataFreeze: IExperimentInfo;
   userKnowledge: Map<experimentSectionsEnum, boolean>;
+  artifactsExperimentId: string;
 }
 
 export const initialCommonExperimentInfoState: ICommonExperimentInfoState = {
@@ -55,6 +56,7 @@ export const initialCommonExperimentInfoState: ICommonExperimentInfoState = {
   userKnowledge: {
     [experimentSections.MODEL_INPUT]: false
   } as any,
+  artifactsExperimentId: null
 };
 
 export function commonExperimentInfoReducer(state: ICommonExperimentInfoState = initialCommonExperimentInfoState, action): ICommonExperimentInfoState {
@@ -109,18 +111,20 @@ export function commonExperimentInfoReducer(state: ICommonExperimentInfoState = 
       const newInfoData = set(payload.path, payload.value, state.infoData);
       return {...state, infoData: newInfoData as any};
     }
-    // case actions.EXPERIMENT_UPDATED_SUCCESSFULLY:
-    //   return {...state, saving: false};
+    case actions.getExperimentArtifacts.type:
+      return {...state, saving: false};
     case SET_EXPERIMENT_ERRORS:
       return {...state, errors: {...state.errors, ...action.payload}};
     case actions.RESET_EXPERIMENT_INFO:
       return {...state, infoData: null};
     case actions.SET_EXPERIMENT_INFO_DATA:
       return {
-        ...state, infoData: {
+        ...state,
+        infoData: {
           ...action.payload,
           configuration: state.infoData?.configuration,
-          execution: {...action.payload?.execution, diff: state.infoData?.execution?.diff}
+          execution: {...action.payload?.execution, diff: state.infoData?.execution?.diff},
+          model: state.infoData?.model
         }
       };
     case actions.UPDATE_EXPERIMENT_INFO_DATA:
@@ -139,6 +143,15 @@ export function commonExperimentInfoReducer(state: ICommonExperimentInfoState = 
         ...state,
         showExtraDataSpinner: false,
         infoData: {...state?.infoData, execution: {...state?.infoData?.execution, diff: action.diff}}
+      };
+    case actions.setExperimentArtifacts.type:
+      return {
+        ...state,
+        infoData: {
+          ...state?.infoData,
+          model :(action as ReturnType<typeof actions.setExperimentArtifacts>).model,
+        },
+        artifactsExperimentId: (action as ReturnType<typeof actions.setExperimentArtifacts>).experimentId
       };
     default:
       return state;

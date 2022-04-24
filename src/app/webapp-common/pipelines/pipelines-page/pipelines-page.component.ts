@@ -1,10 +1,10 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import { pageSize } from '@common/projects/common-projects.consts';
 import {CommonProjectsPageComponent} from '@common/projects/containers/projects-page/common-projects-page.component';
 import { isExample } from '@common/shared/utils/shared-utils';
 import {trackById} from '@common/shared/utils/forms-track-by';
-import {addAllProjectTags, getProjectsTags, setSelectedProjectId} from '@common/core/actions/projects.actions';
-import {selectAllProjectsTagsTags} from '@common/core/reducers/projects.reducer';
+import {addProjectTags, getProjectsTags, setSelectedProjectId, setTags} from '@common/core/actions/projects.actions';
+import {selectProjectTags} from '@common/core/reducers/projects.reducer';
 import {Observable} from 'rxjs';
 import {Project} from '~/business-logic/model/projects/project';
 import { updateProject } from '@common/projects/common-projects.actions';
@@ -15,7 +15,7 @@ import {ProjectsGetAllResponseSingle} from '~/business-logic/model/projects/proj
   templateUrl: './pipelines-page.component.html',
   styleUrls: ['./pipelines-page.component.scss']
 })
-export class PipelinesPageComponent extends CommonProjectsPageComponent implements OnInit {
+export class PipelinesPageComponent extends CommonProjectsPageComponent implements OnInit, OnDestroy {
   initPipelineCode = `from clearml import PipelineDecorator
 
 @PipelineDecorator.component(cache=True, execution_queue="default")
@@ -48,13 +48,18 @@ if __name__ == '__main__':
     super.ngOnInit();
     this.store.dispatch(getProjectsTags())
 
-    this.projectsTags$ = this.store.select(selectAllProjectsTagsTags);
+    this.projectsTags$ = this.store.select(selectProjectTags);
+  }
+
+  ngOnDestroy() {
+    super.ngOnDestroy();
+    this.store.dispatch(setTags({tags: []}));
   }
 
   addTag(project: Project, newTag: string) {
     const tags = [...project.tags, newTag];
     this.store.dispatch(updateProject({id: project.id, changes: {tags}}));
-    this.store.dispatch(addAllProjectTags({tags: [newTag], systemTags: []}));
+    this.store.dispatch(addProjectTags({tags: [newTag], systemTags: []}));
   }
 
   removeTag(project: Project, deleteTag: string) {
@@ -63,7 +68,7 @@ if __name__ == '__main__':
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getExtraProjects(selectedProjectId, selectedProject, projectsList) {
+  protected getExtraProjects(selectedProjectId, selectedProject) {
     return [];
   }
 

@@ -17,6 +17,7 @@ export enum CheckboxState {
 export class CheckboxThreeStateListComponent implements OnInit {
   @Input() options: Array<{ label: string; value: string; tooltip?: string }> = [];
   @Input() supportExcludeFilter: boolean;
+
   @Input() set checkedList(checkedList: Array<string>) {
     if (Array.isArray(checkedList)) {
       if (this.supportExcludeFilter) {
@@ -27,10 +28,11 @@ export class CheckboxThreeStateListComponent implements OnInit {
         return;
       }
       this._checkedList = checkedList;
+    } else {
+      this._checkedList = checkedList;
     }
-
-    this._checkedList = checkedList;
   }
+
   @Output() filterChanged = new EventEmitter();
 
   get checkedList() {
@@ -42,8 +44,8 @@ export class CheckboxThreeStateListComponent implements OnInit {
   }
 
   set excludeList(excludeList: string[]) {
-     this._excludeList = excludeList;
-    (excludeList || []).forEach( _value => this.indeterminateState[_value] = CheckboxState.exclude);
+    this._excludeList = excludeList;
+    (excludeList || []).forEach(_value => this.indeterminateState[_value] = CheckboxState.exclude);
   }
 
   public indeterminateState: Record<string, CheckboxState> = {};
@@ -52,7 +54,9 @@ export class CheckboxThreeStateListComponent implements OnInit {
 
   private _checkedList: string[];
   private _excludeList: string[];
-  constructor() { }
+
+  constructor() {
+  }
 
   ngOnInit(): void {
   }
@@ -84,13 +88,13 @@ export class CheckboxThreeStateListComponent implements OnInit {
   private checkIndeterminateStateAndEmit(val) {
     const value = val.source.value;
     const indeterminateCurrentState =
-      this.indeterminateState[value] || (this.checkedList?.find( v => v === value) ? CheckboxState.checked : CheckboxState.empty);
+      this.indeterminateState[value] || (this.checkedList?.find(v => v === value) ? CheckboxState.checked : CheckboxState.empty);
 
-    switch(indeterminateCurrentState) {
+    switch (indeterminateCurrentState) {
       case CheckboxState.checked: {
         val.source.checked = true;
         this.indeterminateState[value] = CheckboxState.exclude;
-        const newValues = this.checkedList.filter( v => v !== value);
+        const newValues = this.checkedList.filter(v => v !== value);
         this.emitFilterChanged(newValues, value);
         break;
       }
@@ -101,7 +105,7 @@ export class CheckboxThreeStateListComponent implements OnInit {
         this.emitFilterChanged();
         break;
       case CheckboxState.empty:
-      default:{
+      default: {
         this.indeterminateState[value] = CheckboxState.checked;
         const newValues = addOrRemoveFromArray(this.checkedList, value);
         this.emitFilterChanged(newValues);
@@ -113,9 +117,9 @@ export class CheckboxThreeStateListComponent implements OnInit {
 
 function separateValueAndExcludeFromFilters(filters: string[]) {
   return filters.reduce((state, currentFilter) => {
-    if(currentFilter === null || !currentFilter.startsWith(excludedKey)) {
+    if (currentFilter === null || !currentFilter.startsWith(excludedKey)) {
       state.value.push(currentFilter);
-    }else {
+    } else {
       state.exclude.push(currentFilter.substring(excludedKey.length));
     }
     return state;

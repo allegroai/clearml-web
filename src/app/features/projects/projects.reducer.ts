@@ -1,12 +1,11 @@
-import {createFeatureSelector, createSelector} from '@ngrx/store';
+import {on, createReducer, createSelector} from '@ngrx/store';
 import {
   CommonProjectReadyForDeletion,
   commonProjectsInitState,
-  commonProjectsReducer,
+  commonProjectsReducers,
   ICommonProjectsState
 } from '@common/projects/common-projects.reducer';
-import {PROJECTS_ACTIONS} from '@common/projects/common-projects.consts';
-import {selectSelectedProject} from '@common/core/reducers/projects.reducer';
+import {checkProjectForDeletion, resetReadyToDelete, setProjectReadyForDeletion} from '@common/projects/common-projects.actions';
 
 export type IProjectReadyForDeletion = CommonProjectReadyForDeletion;
 
@@ -16,25 +15,33 @@ export interface IProjectsState extends ICommonProjectsState {
 }
 
 const projectsInitState: IProjectsState = {
-        ...commonProjectsInitState,
-        projectReadyForDeletion: {
-          project: null, experiments: null, models: null
-        }
-      };
-
-export const projectsReducer = (state: IProjectsState = projectsInitState, action): IProjectsState => {
-  switch (action.type) {
-    case PROJECTS_ACTIONS.CHECK_PROJECT_FOR_DELETION:
-      return {...state, projectReadyForDeletion: {...projectsInitState.projectReadyForDeletion, project: action.payload.project}};
-    case PROJECTS_ACTIONS.RESET_READY_TO_DELETE:
-      return {...state, projectReadyForDeletion: projectsInitState.projectReadyForDeletion};
-    case PROJECTS_ACTIONS.SET_PROJECT_READY_FOR_DELETION:
-      return {...state, projectReadyForDeletion: {...state.projectReadyForDeletion, ...action.payload.readyForDeletion}};
-    default:
-      return commonProjectsReducer(state, action);
+  ...commonProjectsInitState,
+  projectReadyForDeletion: {
+    project: null, experiments: null, models: null
   }
 };
 
+export const projectsReducer = createReducer(
+  projectsInitState,
+  on(checkProjectForDeletion, (state, action) => ({
+    ...state,
+    projectReadyForDeletion: {
+      ...projectsInitState.projectReadyForDeletion,
+      project: action.project
+    }
+  })),
+  on(resetReadyToDelete, state => ({...state, projectReadyForDeletion: projectsInitState.projectReadyForDeletion})),
+  on(setProjectReadyForDeletion, (state, action) => ({
+    ...state,
+    projectReadyForDeletion: {
+      ...state.projectReadyForDeletion,
+      ...action.readyForDeletion
+    }
+  })),
+  ...commonProjectsReducers
+);
+
 export const projects = state => state.projects as IProjectsState;
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const selectShowHidden = createSelector(projects, (state) => false);

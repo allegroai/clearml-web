@@ -158,8 +158,8 @@ export class DeleteDialogEffectsBase {
           )
         ),
         mergeMap(res => {
-          if (res[0]?.status !== 200) {
-            return [addFailedDeletedFile({filePath: decodeURIComponent(res[0]?.url)})];
+          if ((res[0]?.status || res?.status) !== 200) {
+            return [addFailedDeletedFile({filePath: decodeURIComponent(res[0]?.url|| res?.url)})];
           } else {
             return [setNumberOfSourcesToDelete({numberOfFiles: -1})];
           }

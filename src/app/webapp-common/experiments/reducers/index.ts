@@ -1,4 +1,4 @@
-import {createSelector} from '@ngrx/store';
+import {createSelector, Store} from '@ngrx/store';
 import {ITableExperiment} from '../shared/common-experiment-model.model';
 import {ISmCol, TABLE_SORT_ORDER} from '../../shared/ui-components/data/table/table.consts';
 import {
@@ -25,6 +25,8 @@ import {
 } from '../../experiments-compare/reducers';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {SortMeta} from 'primeng/api';
+import {distinctUntilChanged, map} from 'rxjs/operators';
+import {combineLatest} from 'rxjs';
 
 export const selectExperimentsList = createSelector(experimentsView, (state): ITableExperiment[] => state.experiments);
 export const selectSelectedTableExperiment = createSelector(experimentsView, (state): ITableExperiment => state.selectedExperiment);
@@ -58,21 +60,50 @@ export const selectExperimentsMetricsColsForProject = createSelector([experiment
       style: {...col.style, ...(colWidth[col.id] && {width: `${colWidth[col.id]}px`})}
     } as ISmCol))
 );
+
+export const getCustomColumns$ = (store: Store) => combineLatest([
+  store.select(selectRouterParams)
+    .pipe(
+      map(params => params?.projectId),
+      distinctUntilChanged(),
+    ),
+  store.select(selectExperimentsMetricsCols),
+  store.select(selectExperimentsHiddenTableCols ),
+  store.select(selectExperimentsTableColsWidth),
+])
+  .pipe(
+    map(([projectId, custom, hidden, colWidth]) =>
+      custom
+        .filter(metricCol => metricCol.projectId === projectId)
+        .map(col => ({
+          ...col,
+          hidden: !!hidden[col.id],
+          style: {...col.style, ...(colWidth[col.id] && {width: `${colWidth[col.id]}px`})}
+        } as ISmCol))
+    )
+  );
+
 export const selectCurrentScrollId = createSelector(experimentsView, (state): string => state.scrollId);
 export const selectSplitSize = createSelector(experimentsView, (state): number => state.splitSize);
 export const selectGlobalFilter = createSelector(experimentsView, (state) => state.globalFilter);
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const selectInitTableOrders = createSelector(experimentsView, (state): SortMeta[] => ([{field: EXPERIMENTS_TABLE_COL_FIELDS.LAST_UPDATE, order: TABLE_SORT_ORDER.DESC}]))
-export const selectTableSortFields = createSelector(experimentsView, selectRouterParams, selectIsCompare,selectCompareAddTableSortFields, selectInitTableOrders,
-  (state, params, isCompare, compareSortFields, initTableOrders): SortMeta[] => (isCompare ? compareSortFields : (state.projectColumnsSortOrder?.[params?.projectId])) ?? initTableOrders);
-export const selectTableFilters = createSelector(experimentsView, selectRouterParams, selectIsCompare,selectCompareAddTableFilters,
-  (state, params, isCompare, compareFilters) => isCompare ? compareFilters : state.projectColumnFilters?.[params?.projectId] ?? {} as {[columnId: string]: FilterMetadata});
+export const selectInitTableOrders = createSelector(experimentsView, (state): SortMeta[] => ([{field: EXPERIMENTS_TABLE_COL_FIELDS.LAST_UPDATE, order: TABLE_SORT_ORDER.DESC}]));
+export const selectTableSortFields = createSelector(
+  experimentsView, selectRouterParams, selectIsCompare, selectCompareAddTableSortFields, selectInitTableOrders,
+  (state, params, isCompare, compareSortFields, initTableOrders): SortMeta[] =>
+    (isCompare ? compareSortFields : (state.projectColumnsSortOrder?.[params?.projectId])) ?? initTableOrders
+);
+export const selectTableFilters = createSelector(
+  experimentsView, selectRouterParams, selectIsCompare, selectCompareAddTableFilters,
+  (state, params, isCompare, compareFilters) =>
+    isCompare ? compareFilters : state.projectColumnFilters?.[params?.projectId] ?? {} as {[columnId: string]: FilterMetadata});
 
 export const selectSelectedExperiments = createSelector(experimentsView, state => state.selectedExperiments);
 export const selectedExperimentsDisableAvailable = createSelector(experimentsView, (state) => state.selectedExperimentsDisableAvailable);
 export const selectShowAllSelectedIsActive = createSelector(experimentsView, (state): boolean => state.showAllSelectedIsActive);
 export const selectNoMoreExperiments = createSelector(experimentsView, (state): boolean => state.noMoreExperiment);
+export const selectTableMode = createSelector(experimentsView, state => state.tableMode);
 
 export const selectExperimentInfoDataFreeze = createSelector(experimentInfo, (state): IExperimentInfo => state.infoDataFreeze);
 export const selectExperimentInfoErrors = createSelector(experimentInfo, (state): ICommonExperimentInfoState['errors'] => state.errors);
@@ -148,7 +179,7 @@ export const selectExperimentHyperParamsSelectedSectionParams =
 export const selectFullScreenChartIsOpen = createSelector(experimentOutput, (state): boolean => state.isFullScreenOpen);
 export const selectFullScreenChartIsFetching = createSelector(experimentOutput, (state): boolean => state.fetchingFullScreenData);
 export const selectFullScreenChartXtype = createSelector(experimentOutput, (state): ScalarKeyEnum => state.fullScreenXtype);
-export const selectFullScreenChart = createSelector(selectFullScreenChartXtype,selectFullScreenChartIsFetching, experimentOutput, (axisType, isFetching ,state) => {
+export const selectFullScreenChart = createSelector(selectFullScreenChartXtype, selectFullScreenChartIsFetching, experimentOutput, (axisType, isFetching , state) => {
     if (axisType === ScalarKeyEnum.IsoTime && state.fullScreenDetailedChart) {
       return {
         ...state.fullScreenDetailedChart,
@@ -179,3 +210,5 @@ export const selectExperimentInfoHistograms = createSelector(
     }
     return state.metricsHistogramCharts;
   });
+
+export const selectCurrentArtifactExperimentId = createSelector(experimentInfo, state => state.artifactsExperimentId);

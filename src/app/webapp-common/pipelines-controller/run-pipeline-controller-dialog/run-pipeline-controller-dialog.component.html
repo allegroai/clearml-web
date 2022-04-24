@@ -25,18 +25,20 @@
         </mat-form-field>
       </ng-container>
     </div>
-    <div class="param-line">
-      <div class="section-title">Advanced configuration</div>
+    <div class="section-title d-flex align-items-center">
+      <div style="width: 180px">Advanced configuration</div>
       <sm-checkbox-control class="mat-form-field" [formData]="chooseCustomQueue" (formDataChanged)="changeChooseCustomQueue()"></sm-checkbox-control>
     </div>
-    <mat-form-field appearance="outline" class="queue-select" [style.display]="chooseCustomQueue?'' :'none'">
-      <mat-label>Pipeline controller queue</mat-label>
-      <mat-select [(ngModel)]="selectedQueue" name="queue" panelClass="light-theme">
-        <mat-option *ngFor="let queue of queues" [value]="queue">
-          {{queue.name}}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
+    <div class="param-line" [style.display]="chooseCustomQueue?'' :'none'">
+      <div class="param-key">Pipeline controller queue</div>
+      <mat-form-field appearance="outline" class="queue-select">
+        <mat-select [(ngModel)]="selectedQueue" name="queue" panelClass="light-theme">
+          <mat-option *ngFor="let queue of queues" [value]="queue">
+            {{queue.name}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
   </ng-form>
   <div class="buttons">
     <button (click)="closeDialog(false)" class="btn btn-outline-neon">

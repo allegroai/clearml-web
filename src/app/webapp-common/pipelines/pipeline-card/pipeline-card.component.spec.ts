@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { PipelineCardComponent } from './pipeline-card.component';
+import {SharedPipesModule} from '@common/shared/pipes/shared-pipes.module';
 
 describe('PipelineCardComponent', () => {
   let component: PipelineCardComponent;
@@ -8,7 +9,8 @@ describe('PipelineCardComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ PipelineCardComponent ]
+      declarations: [ PipelineCardComponent ],
+      imports: [SharedPipesModule]
     })
     .compileComponents();
   });

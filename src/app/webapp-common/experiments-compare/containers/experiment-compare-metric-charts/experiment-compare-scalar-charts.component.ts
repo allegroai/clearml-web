@@ -1,19 +1,20 @@
 import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {Observable, Subscription} from 'rxjs';
 import {select, Store} from '@ngrx/store';
-import {IExperimentInfoState} from '../../../../features/experiments/reducers/experiment-info.reducer';
-import {distinctUntilChanged, filter, map, tap} from 'rxjs/operators';
-import {selectRouterParams} from '../../../core/reducers/router-reducer';
+import {IExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
+import {distinctUntilChanged, filter, map} from 'rxjs/operators';
 import {isEqual} from 'lodash/fp';
-import {mergeMultiMetrics, mergeMultiMetricsGroupedVariant} from '../../../tasks/tasks.utils';
-import {scrollToElement} from '../../../shared/utils/shared-utils';
+import {mergeMultiMetrics, mergeMultiMetricsGroupedVariant} from '@common/tasks/tasks.utils';
+import {scrollToElement} from '@common/shared/utils/shared-utils';
 import {GetMultiScalarCharts, ResetExperimentMetrics, SetExperimentMetricsSearchTerm, SetExperimentSettings, SetSelectedExperiments} from '../../actions/experiments-compare-charts.actions';
-import {selectCompareSelectedSettingsGroupBy, selectCompareSelectedSettingsSmoothWeight, selectCompareSelectedSettingsxAxisType, selectCompareTasksScalarCharts, selectExperimentMetricsSearchTerm, selectRefreshing, selectSelectedExperimentSettings, selectSelectedSettingsHiddenScalar, selectShowScalarsOptions} from '../../reducers';
-import {ScalarKeyEnum} from '../../../../business-logic/model/events/scalarKeyEnum';
+import {selectCompareSelectedSettingsGroupBy, selectCompareSelectedSettingsSmoothWeight, selectCompareSelectedSettingsxAxisType, selectCompareTasksScalarCharts, selectExperimentMetricsSearchTerm, selectSelectedExperimentSettings, selectSelectedSettingsHiddenScalar} from '../../reducers';
+import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {toggleShowScalarOptions} from '../../actions/compare-header.actions';
-import {GroupByCharts} from '../../../experiments/reducers/common-experiment-output.reducer';
-import {GroupedList} from '../../../shared/ui-components/data/selectable-grouped-filter-list/selectable-grouped-filter-list.component';
-import {ExtFrame} from '../../../shared/experiment-graphs/single-graph/plotly-graph-base';
+import {GroupByCharts} from '@common/experiments/reducers/common-experiment-output.reducer';
+import {GroupedList} from '@common/shared/ui-components/data/selectable-grouped-filter-list/selectable-grouped-filter-list.component';
+import {ExtFrame} from '@common/shared/experiment-graphs/single-graph/plotly-graph-base';
+import {RefreshService} from '@common/core/services/refresh.service';
+import {selectRouterParams} from '@common/core/reducers/router-reducer';
 
 
 @Component({
@@ -26,8 +27,6 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
   public smoothWeight$: Observable<number>;
   public xAxisType$: Observable<ScalarKeyEnum>;
   public groupBy$: Observable<GroupByCharts>;
-  public showSettingsBar$: Observable<boolean>;
-  private selectRefreshing$: Observable<{ refreshing: boolean, autoRefresh: boolean }>;
   private routerParams$: Observable<any>;
   public metrics$: Observable<any>;
   public experimentSettings$: Observable<any>;
@@ -45,8 +44,6 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
   public selectedGraph: string = null;
   private taskIds: Array<string>;
   public graphs: { [key: string]: ExtFrame[] };
-  public refreshDisabled = false;
-  public showSettingsBar: boolean = false;
   public groupBy: GroupByCharts;
   private metrics: GroupedList;
 
@@ -61,14 +58,16 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
     }
   ];
 
-  constructor(private store: Store<IExperimentInfoState>, private changeDetection: ChangeDetectorRef) {
+  constructor(
+    private store: Store<IExperimentInfoState>,
+    private changeDetection: ChangeDetectorRef,
+    private refresh: RefreshService
+  ) {
     this.listOfHidden = this.store.pipe(select(selectSelectedSettingsHiddenScalar));
     this.searchTerm$ = this.store.pipe(select(selectExperimentMetricsSearchTerm));
-    this.showSettingsBar$ = this.store.pipe(select(selectShowScalarsOptions));
     this.smoothWeight$ = this.store.select(selectCompareSelectedSettingsSmoothWeight);
     this.xAxisType$ = this.store.select(selectCompareSelectedSettingsxAxisType);
     this.groupBy$ = this.store.select(selectCompareSelectedSettingsGroupBy);
-    this.selectRefreshing$ = this.store.select(selectRefreshing);
     this.metrics$ = this.store.pipe(
       select(selectCompareTasksScalarCharts),
       filter(metrics => !!metrics),
@@ -84,13 +83,12 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
     this.routerParams$ = this.store.pipe(
       select(selectRouterParams),
       filter(params => !!params.ids),
-      distinctUntilChanged(),
-      tap(() => this.refreshDisabled = true)
+      distinctUntilChanged()
     );
 
     this.xAxisSub = this.xAxisType$
-      .pipe(filter((axis) => !!axis))
-      .subscribe((axis) => this.store.dispatch(new GetMultiScalarCharts({taskIds: this.taskIds, cached: true})));
+      .pipe(filter(axis => !!axis && this.taskIds?.length > 0))
+      .subscribe(() => this.store.dispatch(new GetMultiScalarCharts({taskIds: this.taskIds, cached: true})));
 
     this.groupBySub = this.groupBy$
       .subscribe(groupBy => {
@@ -102,7 +100,6 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
   ngOnInit() {
     this.metricsSubscription = this.metrics$
       .subscribe((metricsWrapped) => {
-        this.refreshDisabled = false;
         const metrics = metricsWrapped.metrics || {};
         this.metrics = metrics;
         this.prepareGraphsAndUpdate(metrics);
@@ -123,8 +120,9 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
         }
       });
 
-    this.refreshingSubscription = this.selectRefreshing$.pipe(filter(({refreshing}) => refreshing))
-      .subscribe(({autoRefresh}) => this.store.dispatch(new GetMultiScalarCharts({taskIds: this.taskIds, autoRefresh})));
+    this.refreshingSubscription = this.refresh.tick
+      .pipe(filter(auto => auto !== null && this.graphs !== null))
+      .subscribe(autoRefresh => this.store.dispatch(new GetMultiScalarCharts({taskIds: this.taskIds, autoRefresh})));
   }
 
   private prepareGraphsAndUpdate(metrics) {
@@ -146,11 +144,11 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
   }
 
   ngOnDestroy() {
-    this.metricsSubscription.unsubscribe();
-    this.settingsSubscription.unsubscribe();
-    this.routerParamsSubscription.unsubscribe();
-    this.xAxisSub.unsubscribe();
-    this.refreshingSubscription.unsubscribe();
+    this.metricsSubscription?.unsubscribe();
+    this.settingsSubscription?.unsubscribe();
+    this.routerParamsSubscription?.unsubscribe();
+    this.xAxisSub?.unsubscribe();
+    this.refreshingSubscription?.unsubscribe();
     this.resetMetrics();
   }
 

@@ -1,5 +1,4 @@
 import {ModelTableColFieldsEnum} from './models.model';
-import {ExperimentTableColFieldsEnum} from "@common/experiments/shared/common-experiment-model.model";
 
 
 export const MODELS_TABLE_COL_FIELDS = {

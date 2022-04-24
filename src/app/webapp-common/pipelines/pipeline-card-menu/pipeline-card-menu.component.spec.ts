@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { PipelineCardMenuComponent } from './pipeline-card-menu.component';
+import {MatMenuModule} from '@angular/material/menu';
 
 describe('PipelineCardMenuComponent', () => {
   let component: PipelineCardMenuComponent;
@@ -8,7 +9,10 @@ describe('PipelineCardMenuComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ PipelineCardMenuComponent ]
+      declarations: [ PipelineCardMenuComponent ],
+      imports: [
+        MatMenuModule
+      ]
     })
     .compileComponents();
   });

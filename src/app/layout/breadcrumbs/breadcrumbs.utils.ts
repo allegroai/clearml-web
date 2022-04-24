@@ -21,7 +21,7 @@ export const selectBreadcrumbsStringsBase = createSelector(
   (project, experiment, model, projects) =>
     ({project, experiment, model, projects}) as IBreadcrumbs);
 
-export function prepareNames(data: IBreadcrumbs, noSubProjects?: boolean) {
+export const prepareNames = (data: IBreadcrumbs, noSubProjects?: boolean) => {
   const project = prepareLinkData(data.project, true);
   if (data.project) {
     const subProjects = [];
@@ -39,42 +39,33 @@ export function prepareNames(data: IBreadcrumbs, noSubProjects?: boolean) {
       ].find(proj => currentName === proj.name);
       subProjects.push(foundProject);
     });
-    const subProjectsLinks = subProjects.map(proj => ({
-      name: proj?.name.substring(proj?.name.lastIndexOf('/') + 1),
-      url: (noSubProjects || (proj?.name === data.project?.name && data.project?.sub_projects?.length===0)) ? '' : `projects/${proj?.id}/projects`
+    const subProjectsLinks = subProjects.map(subProject => ({
+      name: subProject?.name.substring(subProject?.name.lastIndexOf('/') + 1),
+      url: (noSubProjects || (subProject?.name === data.project?.name && data.project?.sub_projects?.length === 0)) ?
+        `projects/${subProject?.id}` :
+        `projects/${subProject?.id}/projects`
     })) as { name: string; url: string }[];
     project.name = project?.name.substring(project.name.lastIndexOf('/') + 1);
     project.subCrumbs = subProjectsLinks;
   }
   const task       = prepareLinkData(data.task);
   const experiment = (data.experiment) ? prepareLinkData(data.experiment, true) : {};
-  const model      = prepareLinkData(data.model, true);
-  const overview = formatStaticCrumb('overview');
   const output      = formatStaticCrumb('');
   const accountAdministration      = formatStaticCrumb('account-administration');
   const experiments = formatStaticCrumb('experiments');
   const models      = formatStaticCrumb('models');
   const compare     = formatStaticCrumb('compare-experiments');
-
-
   return {
-    ':projectId'         : project,
-    ':experimentId'      : experiment,
-    ':modelId'           : model,
+    ...(project.url !=='*' && {':projectId': project}),
     ':taskId'            : task,
+    ':controllerId': experiment,
     'compare-experiments': compare,
     output,
     experiments,
-    overview,
     models,
-    execution: formatStaticCrumb('execution'),
-    'hyper-params' : formatStaticCrumb('hyper-params'),
-    artifacts: formatStaticCrumb('artifacts'),
-    general: formatStaticCrumb('general'),
-    log: formatStaticCrumb('logs'),
-    scalar: formatStaticCrumb('scalars'),
-    plots: formatStaticCrumb('plots'),
     accountAdministration,
-    debugImages: formatStaticCrumb('Debug Samples'),
+    profile: {url: 'profile', name: 'Profile'},
+    'webapp-configuration': {url: 'webapp-configuration', name: 'Configuration'},
+    'workspace-configuration': {url: 'workspace-configuration', name: 'Workspace'},
   };
 };

@@ -8,42 +8,52 @@ import {
   Output,
   ViewChild
 } from '@angular/core';
-import {ColHeaderTypeEnum, ISmCol} from '../../../shared/ui-components/data/table/table.consts';
+import {ColHeaderTypeEnum, ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {get} from 'lodash/fp';
 import {SelectedModel, TableModel} from '../models.model';
 import {MODELS_FRAMEWORK_LABELS, MODELS_READY_LABELS, MODELS_TABLE_COL_FIELDS} from '../models.const';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
-import {BaseTableView} from '../../../shared/ui-components/data/table/base-table-view';
-import {User} from '../../../../business-logic/model/users/user';
-import {sortByArr} from '../../../shared/pipes/show-selected-first.pipe';
+import {BaseTableView} from '@common/shared/ui-components/data/table/base-table-view';
+import {User} from '~/business-logic/model/users/user';
 import {Observable} from 'rxjs';
-import {selectCompanyTags, selectProjectTags, selectTagsFilterByProject} from '../../../core/reducers/projects.reducer';
+import {selectCompanyTags, selectProjectTags, selectTagsFilterByProject} from '@common/core/reducers/projects.reducer';
 import {Store} from '@ngrx/store';
 import {addTag} from '../../actions/models-menu.actions';
-import {ICONS, TIME_FORMAT_STRING} from '../../../constants';
+import {ICONS, TIME_FORMAT_STRING} from '@common/constants';
 import {getSysTags} from '../../model.utils';
-import {TableComponent} from '../../../shared/ui-components/data/table/table.component';
+import {TableComponent} from '@common/shared/ui-components/data/table/table.component';
 import {MODELS_TABLE_COLS} from '../../models.consts';
-import {IOption} from '../../../shared/ui-components/inputs/select-autocomplete-for-template-forms/select-autocomplete-for-template-forms.component';
-import {CountAvailableAndIsDisableSelectedFiltered} from '../../../shared/entity-page/items.utils';
-import {selectAllModels} from '../../actions/models-view.actions';
-import {ModelMenuExtendedComponent} from '../../../../features/models/containers/model-menu-extended/model-menu-extended.component';
+import {IOption} from '@common/shared/ui-components/inputs/select-autocomplete-for-template-forms/select-autocomplete-for-template-forms.component';
+import {
+  CountAvailableAndIsDisableSelectedFiltered,
+  MenuItems,
+  selectionDisabledArchive,
+  selectionDisabledDelete,
+  selectionDisabledMoveTo,
+  selectionDisabledPublishModels
+} from '@common/shared/entity-page/items.utils';
+import {getModelsMetadataValuesForKey, selectAllModels} from '../../actions/models-view.actions';
+import {ModelMenuExtendedComponent} from '~/features/models/containers/model-menu-extended/model-menu-extended.component';
+import {createFiltersFromStore} from '@common/shared/utils/tableParamEncode';
 
 @Component({
-  selector       : 'sm-models-table',
-  templateUrl    : './models-table.component.html',
-  styleUrls      : ['./models-table.component.scss'],
+  selector: 'sm-models-table',
+  templateUrl: './models-table.component.html',
+  styleUrls: ['./models-table.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ModelsTableComponent extends BaseTableView {
   readonly MODELS_TABLE_COL_FIELDS = MODELS_TABLE_COL_FIELDS;
-  readonly MODELS_FRAMEWORK_OPTIONS = Object.entries(MODELS_FRAMEWORK_LABELS).map(([key, val]) => ({label: val, value: key}));
+  readonly MODELS_FRAMEWORK_OPTIONS = Object.entries(MODELS_FRAMEWORK_LABELS).map(([key, val]) => ({
+    label: val,
+    value: key
+  }));
   readonly MODELS_READY_OPTIONS = Object.entries(MODELS_READY_LABELS).map(([key, val]) => ({label: val, value: key}));
-  public filtersOptions: {[colId: string]: IOption[]} = {
+  public filtersOptions: { [colId: string]: IOption[] } = {
     [MODELS_TABLE_COL_FIELDS.FRAMEWORK]: [],
-    [MODELS_TABLE_COL_FIELDS.READY]    : this.MODELS_READY_OPTIONS,
-    [MODELS_TABLE_COL_FIELDS.USER]    : [],
-    [MODELS_TABLE_COL_FIELDS.TAGS]     : [],
+    [MODELS_TABLE_COL_FIELDS.READY]: this.MODELS_READY_OPTIONS,
+    [MODELS_TABLE_COL_FIELDS.USER]: [],
+    [MODELS_TABLE_COL_FIELDS.TAGS]: [],
   };
 
   readonly icons = ICONS;
@@ -59,10 +69,9 @@ export class ModelsTableComponent extends BaseTableView {
   private _enableMultiSelect: boolean;
   private _tableCols: ISmCol[];
   public getSysTags = getSysTags;
-  public filtersValues: {[colId: string]: any} = {};
-  public filtersMatch: {[colId: string]: string} = {};
-  public filtersSubValues: {[colId: string]: any} = {};
-  public searchValues: {[colId: string]: string} = {};
+  public filtersMatch: { [colId: string]: string } = {};
+  public filtersSubValues: { [colId: string]: any } = {};
+  public singleRowContext: boolean;
 
   @Input() set models(models: SelectedModel[]) {
     this._models = models;
@@ -92,6 +101,14 @@ export class ModelsTableComponent extends BaseTableView {
     const readyCol = this.tableCols.find(col => col.id === MODELS_TABLE_COL_FIELDS.READY);
     readyCol.hidden = only;
   }
+  @Input() set projects(projects) {
+    this.filtersOptions[MODELS_TABLE_COL_FIELDS.PROJECT] = projects.map(project => ({
+      label: project.name,
+      value: project.id,
+      tooltip: `${project.name}`
+    }));
+    this.sortOptionsList(MODELS_TABLE_COL_FIELDS.PROJECT);
+  }
 
   @Input() set enableMultiSelect(enable: boolean) {
     this._enableMultiSelect = enable;
@@ -112,7 +129,9 @@ export class ModelsTableComponent extends BaseTableView {
   get selectedModels() {
     return this._selectedModels;
   }
+
   @Input() selectedModelsDisableAvailable: Record<string, CountAvailableAndIsDisableSelectedFiltered> = {};
+
   @Input() set colRatio(ratio: number) {
     if (ratio) {
       this.tableCols.forEach(col => {
@@ -126,7 +145,7 @@ export class ModelsTableComponent extends BaseTableView {
 
   private _selectedModel;
   @Input() set selectedModel(model) {
-    if(model !== this._selectedModel) {
+    if (model !== this._selectedModel) {
       window.setTimeout(() => this.table.focusSelected());
     }
     this._selectedModel = model;
@@ -142,14 +161,31 @@ export class ModelsTableComponent extends BaseTableView {
     this.filtersValues[MODELS_TABLE_COL_FIELDS.READY] = get([MODELS_TABLE_COL_FIELDS.READY, 'value'], filters) || [];
     this.filtersValues[MODELS_TABLE_COL_FIELDS.USER] = get([MODELS_TABLE_COL_FIELDS.USER, 'value'], filters) || [];
     this.filtersValues[MODELS_TABLE_COL_FIELDS.TAGS] = get([MODELS_TABLE_COL_FIELDS.TAGS, 'value'], filters) || [];
+    this.filtersValues[MODELS_TABLE_COL_FIELDS.PROJECT] = get([MODELS_TABLE_COL_FIELDS.PROJECT, 'value'], filters) || [];
     this.filtersMatch[MODELS_TABLE_COL_FIELDS.TAGS] = filters?.[MODELS_TABLE_COL_FIELDS.TAGS]?.matchMode || '';
     this.filtersSubValues[MODELS_TABLE_COL_FIELDS.TAGS] = get(['system_tags', 'value'], filters) || [];
+    //dynamic filters
+    const filtersValues = createFiltersFromStore(filters || {}, false);
+    this.filtersValues = Object.assign({}, {...this.filtersValues}, {...filtersValues});
   }
 
   @Input() set users(users: User[]) {
-    this.filtersOptions[MODELS_TABLE_COL_FIELDS.USER] = users.map(user => ({label: user.name ? user.name : 'Unknown User', value: user.id}));
+    this.filtersOptions[MODELS_TABLE_COL_FIELDS.USER] = users.map(user => ({
+      label: user.name ? user.name : 'Unknown User',
+      value: user.id
+    }));
     this.sortOptionsList(MODELS_TABLE_COL_FIELDS.USER);
   }
+
+  @Input() set metadataValuesOptions(metadataValuesOptions: Record<ISmCol['id'], string[]>) {
+    Object.entries(metadataValuesOptions).forEach(([id, values]) => {
+      this.filtersOptions[id] = [{label: '(No Value)', value: null}].concat(values.map(value => ({
+        label: value,
+        value
+      })));
+    });
+  }
+
 
   @Input() set frameworks(frameworks: string[]) {
     const frameworksAndActiveFilter = Array.from(new Set(frameworks.concat(this.filtersValues[MODELS_TABLE_COL_FIELDS.FRAMEWORK])));
@@ -162,12 +198,15 @@ export class ModelsTableComponent extends BaseTableView {
 
   @Input() set tags(tags) {
     const tagsAndActiveFilter = Array.from(new Set(tags.concat(this.filtersValues[MODELS_TABLE_COL_FIELDS.TAGS])));
-    this.filtersOptions[MODELS_TABLE_COL_FIELDS.TAGS] = tagsAndActiveFilter.
-    map(tag => ({label: tag===null? 'No tag':tag , value: tag}) as IOption);
+    this.filtersOptions[MODELS_TABLE_COL_FIELDS.TAGS] = tagsAndActiveFilter.map(tag => ({
+      label: tag === null ? 'No tag' : tag,
+      value: tag
+    }) as IOption);
     this.sortOptionsList(MODELS_TABLE_COL_FIELDS.TAGS);
   }
 
   @Input() systemTags = [] as string[];
+
   get validSystemTags() {
     return this.systemTags.filter(tag => tag !== 'archived');
   }
@@ -177,7 +216,7 @@ export class ModelsTableComponent extends BaseTableView {
   @Output() loadMoreModels = new EventEmitter();
   @Output() tagsMenuOpened = new EventEmitter();
   @Output() sortedChanged = new EventEmitter<{ isShift: boolean; colId: ISmCol['id'] }>();
-  @Output() columnResized = new EventEmitter<{columnId: string; widthPx: number}>();
+  @Output() columnResized = new EventEmitter<{ columnId: string; widthPx: number }>();
   @ViewChild(TableComponent, {static: true}) table: TableComponent;
   @ViewChild('contextMenuExtended') contextMenuExtended: ModelMenuExtendedComponent;
   timeFormatString = TIME_FORMAT_STRING;
@@ -200,23 +239,13 @@ export class ModelsTableComponent extends BaseTableView {
 
   }
 
-  sortOptionsList(columnId: string) {
-    this.filtersOptions[columnId]
-      .sort((a, b) => sortByArr(a.value, b.value, [null, ...(this.filtersValues[columnId] || [])]));
-    this.filtersOptions = {...this.filtersOptions, [columnId]: [...this.filtersOptions[columnId]]};
-  }
+
 
   onRowSelectionChanged(event) {
     this.modelSelectionChanged.emit(event.data);
   }
 
-  tableFilterChanged(col: ISmCol, event) {
-    if (event.col === 'users') {
-      event.col = 'user.name';
-    }
-    this.filterChanged.emit({col, value: event.value, andFilter: event.andFilter});
-    this.scrollTableToTop();
-  }
+
 
   onLoadMoreClicked() {
     this.loadMoreModels.emit();
@@ -252,10 +281,7 @@ export class ModelsTableComponent extends BaseTableView {
     this.modelsSelectionChanged.emit(selection);
   }
 
-  searchValueChanged($event: string, colId: string) {
-    this.searchValues[colId] = $event;
-    this.sortOptionsList(colId);
-  }
+
 
   addTag(tag: string) {
     this.store.dispatch(addTag({
@@ -265,15 +291,30 @@ export class ModelsTableComponent extends BaseTableView {
     this.filtersOptions[MODELS_TABLE_COL_FIELDS.TAGS] = [];
   }
 
-  openContextMenu(data) {
-    if (this.modelsSelectionChanged.observers.length === 0) {
+  tableRowClicked(event: {e: MouseEvent; data: TableModel}) {
+    if (this._selectedModels.some(exp => exp.id === event.data.id)) {
+      this.openContextMenu({e: event.e, rowData: event.data, backdrop: true});
+    } else {
+      this.modelsSelectionChanged.emit([event.data]);
+    }
+  }
+
+  openContextMenu(data: {e: MouseEvent, rowData; single?: boolean; backdrop?: boolean}) {
+    if (!this.modelsSelectionChanged.observed) {
       return;
     }
-    this.contextModel = this.models.find(model => model.id === data.rowData.id);
-    if (!this.selectedModels.map(model => model.id).includes(this.contextModel.id)) {
-      this.prevSelected = this.contextModel;
-      this.emitSelection([this.contextModel]);
+    this.singleRowContext = !!data?.single;
+    this.menuBackdrop = !!data?.backdrop;
+    if(!data?.single) {
+      this.contextModel = this.models.find(model => model.id === data.rowData.id);
+      if (!this.selectedModels.map(model => model.id).includes(this.contextModel.id)) {
+        this.prevSelected = this.contextModel;
+        this.emitSelection([this.contextModel]);
+      }
+    } else {
+      this.contextModel = data.rowData;
     }
+
     const event = data.e as MouseEvent;
     event.preventDefault();
     this.contextMenuExtended?.contextMenu.openMenu({x: event.clientX, y: event.clientY});
@@ -282,10 +323,16 @@ export class ModelsTableComponent extends BaseTableView {
   columnFilterOpened(col: ISmCol) {
     if (col.id === MODELS_TABLE_COL_FIELDS.TAGS && !this.filtersOptions[MODELS_TABLE_COL_FIELDS.TAGS]?.length) {
       this.tagsMenuOpened.emit();
+    } else if (col.type === 'metadata') {
+      this.store.dispatch(getModelsMetadataValuesForKey({col}));
     }
   }
 
-  columnFilterClosed(col: ISmCol) {
-    window.setTimeout(() => this.sortOptionsList(col.id));
-  }
+
+  getSingleSelectedModelsDisableAvailable = (model): Record<string, CountAvailableAndIsDisableSelectedFiltered> => ({
+    [MenuItems.publish]: selectionDisabledPublishModels([model]),
+    [MenuItems.moveTo]: selectionDisabledMoveTo([model]),
+    [MenuItems.delete]: selectionDisabledDelete([model]),
+    [MenuItems.archive]: selectionDisabledArchive([model])
+  })
 }

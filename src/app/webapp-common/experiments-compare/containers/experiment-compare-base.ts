@@ -1,6 +1,6 @@
 import * as detailsActions from '../actions/experiments-compare-details.actions';
 import * as paramsActions from '../actions/experiments-compare-params.actions';
-import {ExperimentCompareTree, ExperimentCompareTreeSection, IExperimentDetail} from '../../../features/experiments-compare/experiments-compare-models';
+import {ExperimentCompareTree, ExperimentCompareTreeSection, IExperimentDetail} from '~/features/experiments-compare/experiments-compare-models';
 import {get, has, isEmpty, isEqual} from 'lodash/fp';
 import {treeBuilderService} from '../services/tree-builder.service';
 import {isArrayOrderNotImportant} from '../jsonToDiffConvertor';
@@ -8,20 +8,21 @@ import {ExperimentParams, TreeNode, TreeNodeMetadata} from '../shared/experiment
 import {MatTreeFlatDataSource, MatTreeFlattener} from '@angular/material/tree';
 import {activeLoader, addMessage, deactivateLoader} from '../../core/actions/layout.actions';
 import {ChangeDetectorRef, OnDestroy, QueryList, ViewChildren, Directive} from '@angular/core';
-import {ExperimentCompareDetailsBase} from '../../../features/experiments-compare/experiments-compare-details.base';
+import {ExperimentCompareDetailsBase} from '~/features/experiments-compare/experiments-compare-details.base';
 import {ActivatedRoute, Router} from '@angular/router';
 import {select, Store} from '@ngrx/store';
-import {IExperimentInfoState} from '../../../features/experiments/reducers/experiment-info.reducer';
+import {IExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {Observable, Subscription} from 'rxjs';
 import {FlatTreeControl} from '@angular/cdk/tree';
 import {CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
 import {selectRouterParams} from '../../core/reducers/router-reducer';
 import {distinctUntilChanged, filter, map, tap} from 'rxjs/operators';
-import {selectHideIdenticalFields, selectRefreshing} from '../reducers';
+import {selectHideIdenticalFields} from '../reducers';
 import {refetchExperimentRequested} from '../actions/compare-header.actions';
 import {RENAME_MAP} from '../experiments-compare.constants';
-import {selectHasDataFeature} from '../../../core/reducers/users.reducer';
+import {selectHasDataFeature} from '~/core/reducers/users.reducer';
 import {ListRange} from '@angular/cdk/collections';
+import {RefreshService} from '@common/core/services/refresh.service';
 
 export type NextDiffDirectionEnum = 'down' | 'up';
 
@@ -78,10 +79,13 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
   @ViewChildren('virtualScrollRef') virtualScrollRef: QueryList<CdkVirtualScrollViewport>;
 
 
-  constructor(public router: Router,
-              public store: Store<IExperimentInfoState>,
-              public changeDetection: ChangeDetectorRef,
-              public activeRoute: ActivatedRoute) {
+  constructor (
+    public router: Router,
+    public store: Store<IExperimentInfoState>,
+    public changeDetection: ChangeDetectorRef,
+    public activeRoute: ActivatedRoute,
+    public refresh: RefreshService
+  ) {
     super();
     this.hasDataFeature$ = this.store.pipe(select(selectHasDataFeature));
 
@@ -111,9 +115,9 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
       this.find(this.searchText);
     });
 
-    this.refreshingSubscription = this.store.pipe(select(selectRefreshing))
-      .pipe(filter(({refreshing}) => refreshing))
-      .subscribe(({autoRefresh}) => this.store.dispatch(refetchExperimentRequested({autoRefresh})));
+    this.refreshingSubscription = this.refresh.tick
+      .pipe(filter(auto => auto !== null))
+      .subscribe(auto => this.store.dispatch(refetchExperimentRequested({autoRefresh: auto})));
 
     this.hideIdenticalFieldsSub.add(this.hasDataFeature$.subscribe(hasData => this.hasDataFeature = hasData));
 
@@ -395,7 +399,7 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
     let tooltip;
     if (this.compareTabPage === 'hyper-params') {
       path[path.length - 1] = path[path.length - 1].trim();
-      const hypeParamObject = get(path.join('.'), this.originalExperiments[comparedExperiment.id]);
+      const hypeParamObject = get(path.join('.'), this.originalExperiments[comparedExperiment?.id]);
       if (hypeParamObject && has('name', hypeParamObject) && has('value', hypeParamObject) && hypeParamObject.type !== 'legacy') {
         tooltip = (hypeParamObject.type ? `Type: ${hypeParamObject.type}\n` : '') + (hypeParamObject.description || '');
       }
@@ -415,7 +419,7 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
     };
   };
 
-  metaDataTransformer = (data, key, path, extraParams): TreeNodeMetadata => {
+  metaDataTransformer = (): TreeNodeMetadata => {
     return null;
   };
 

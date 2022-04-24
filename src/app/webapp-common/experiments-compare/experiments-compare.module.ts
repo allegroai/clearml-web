@@ -20,7 +20,6 @@ import {ExperimentGraphsModule} from '../shared/experiment-graphs/experiment-gra
 
 import {DebugImagesModule} from '../debug-images/debug-images.module';
 import {ExperimentCompareSharedModule} from './shared/experiment-compare-shared.module';
-import {ExperimentCompareGeneralDataComponent} from './dumbs/experiment-compare-general-data/experiment-compare-general-data.component';
 import {GetKeyValueArrayPipePipe} from './get-key-value-array-pipe.pipe';
 import {SelectCompareHeaderEffects} from './effects/select-experiment-for-compare-effects.service';
 import {SelectExperimentsForCompareComponent} from './containers/select-experiments-for-compare/select-experiments-for-compare.component';
@@ -59,7 +58,6 @@ export const compareSyncedKeys = [
     ExperimentCompareScalarChartsComponent,
     ExperimentComparePlotsComponent,
     ExperimentCompareHeaderComponent,
-    ExperimentCompareGeneralDataComponent,
     GetKeyValueArrayPipePipe,
     SelectExperimentsForCompareComponent,
     CompareCardListComponent,

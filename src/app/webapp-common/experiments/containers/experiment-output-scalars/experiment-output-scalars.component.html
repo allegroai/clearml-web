@@ -27,7 +27,7 @@
       </sm-selectable-grouped-filter-list>
     </div>
   </mat-drawer>
-  <mat-drawer-content>
+  <mat-drawer-content class="overflow-hidden">
     <sm-graph-settings-bar
       class="ribbon-setting-bar"
       [class.showSettings]="showSettingsBar && minimized"
@@ -42,8 +42,13 @@
     ></sm-graph-settings-bar>
     <div class="graphs-container" [class.maximized]="!minimized">
       <div class="hover-button" *ngIf="minimized">
-        <button class="btn btn-secondary" (click)="drawer.open()">
-          Toggle Graphs
+        <button
+          class="btn btn-secondary"
+          (click)="drawer.open()"
+          smTooltip="Toggle Graphs"
+          matTooltipPosition="above"
+        >
+          <i class="al-icon al-ico-toogle-graph"></i>
         </button>
       </div>
       <sm-experiment-graphs
@@ -52,6 +57,7 @@
         [isGroupGraphs]="false"
         [metrics]="graphs"
         [hiddenList]="listOfHidden | async"
+        [smoothWeight]="smoothWeight$ | async"
         [legendStringLength]="minimized? 14 : undefined"
         [minimized]="minimized"
         [xAxisType]="xAxisType$ | async"

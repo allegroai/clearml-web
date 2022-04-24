@@ -63,6 +63,7 @@ $font-size: 18px;
   }
   .counter-label {
     @include counter-label();
+    text-transform: uppercase;
   }
 }
 

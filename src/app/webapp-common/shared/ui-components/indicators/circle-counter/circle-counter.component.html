@@ -3,5 +3,5 @@
     <div class="counter">{{counter | numberToK}}</div>
   </div>
   <div class="counter-label">{{label}}</div>
-  <div class="counter-label leave-space">{{underLabel}}</div>
+  <div *ngIf="underLabel" class="counter-label leave-space">{{underLabel}}</div>
 </div>

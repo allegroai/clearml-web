@@ -83,6 +83,7 @@ export class SelectModelEffects {
   ): ModelsGetAllExRequest {
     const userFilter = get([MODELS_TABLE_COL_FIELDS.USER, 'value'], tableFilters);
     const tagsFilter = get([MODELS_TABLE_COL_FIELDS.TAGS, 'value'], tableFilters);
+    const projectFilter = get([MODELS_TABLE_COL_FIELDS.PROJECT, 'value'], tableFilters);
     const systemTags = get(['system_tags', 'value'], tableFilters);
     const systemTagsFilter = ['-' + MODEL_TAGS.HIDDEN].concat(systemTags ? systemTags : []);
     return {
@@ -91,13 +92,13 @@ export class SelectModelEffects {
         fields: ['id', 'name', 'framework', 'system_tags', 'uri']
       } : undefined,
       /* eslint-disable @typescript-eslint/naming-convention */
-      project: (isAllProjects || !projectId || projectId === '*') ? undefined : [projectId],
+      project:  projectFilter ? projectFilter : ((isAllProjects || !projectId || projectId === '*') ? undefined : [projectId]),
       scroll_id: scrollId || null, // null to create new scroll (undefined doesn't generate scroll)
       size: MODELS_PAGE_SIZE,
       order_by: encodeOrder(orderFields),
       tags: (tagsFilter && tagsFilter.length > 0) ? tagsFilter : [],
       system_tags: (systemTagsFilter && systemTagsFilter.length > 0) ? systemTagsFilter : [],
-      only_fields: ['created', 'framework', 'id', 'labels', 'name', 'ready', 'tags', 'system_tags', 'task.name', 'uri', 'user.name', 'parent', 'design', 'company'],
+      only_fields: ['created', 'framework', 'id', 'labels', 'name', 'ready', 'tags', 'system_tags', 'task.name', 'uri', 'user.name', 'parent', 'design', 'company', 'project.name'],
       ready: true,
       framework: get([MODELS_TABLE_COL_FIELDS.FRAMEWORK, 'value'], tableFilters) || undefined,
       user: (userFilter && userFilter.length > 0) ? userFilter : undefined

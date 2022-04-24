@@ -5,21 +5,20 @@ import {
   HostListener,
   Input,
   OnDestroy,
-  OnInit,
   Output
 } from '@angular/core';
 import {Store} from '@ngrx/store';
 import {setBackdrop} from '@common/core/actions/layout.actions';
 import {MatDialog} from '@angular/material/dialog';
 import {fromEvent, Subscription} from 'rxjs';
-import {delay, first, tap, throttleTime} from 'rxjs/operators';
+import {tap, throttleTime} from 'rxjs/operators';
 
 @Component({
   selector   : 'sm-editable-section',
   templateUrl: './editable-section.component.html',
   styleUrls  : ['./editable-section.component.scss']
 })
-export class EditableSectionComponent implements OnInit, OnDestroy {
+export class EditableSectionComponent implements OnDestroy {
   public inEditMode = false;
   @Input() editable;
   @Input() disableEditable = false;
@@ -87,9 +86,6 @@ export class EditableSectionComponent implements OnInit, OnDestroy {
     this.unsubscribeToEventListener();
   }
 
-  ngOnInit() {
-  }
-
   unsubscribeToEventListener() {
     this.scrollSub?.unsubscribe();
   }
@@ -114,7 +110,7 @@ export class EditableSectionComponent implements OnInit, OnDestroy {
     let initBottom;
     const factor = initHeight / 2;
 
-    const scroll$ = fromEvent(window,'wheel', {passive: false}).pipe(
+    this.scrollSub = fromEvent(window,'wheel', {passive: false}).pipe(
       tap(() => {
         if (initBottom === undefined) {
           const {bottom: currentBottom} = this.getEdges();
@@ -122,27 +118,24 @@ export class EditableSectionComponent implements OnInit, OnDestroy {
         }
       }),
       throttleTime(10),
-      tap((event: WheelEvent) => {
-        const {bottom: currentBottom} = this.getEdges();
-        const deltaY = Math.abs(event.deltaY);
+    ).subscribe((event: WheelEvent) => {
+      const {bottom: currentBottom} = this.getEdges();
+      const deltaY = Math.abs(event.deltaY);
 
-        const isDownDirection = event.deltaY > 0;
-        const isTopEdge = !isDownDirection && initBottom + factor - deltaY < currentBottom;
-        const isBottomEdge = isDownDirection && initBottom - currentBottom - deltaY > factor;
+      const isDownDirection = event.deltaY > 0;
+      const isTopEdge = !isDownDirection && initBottom + factor - deltaY < currentBottom;
+      const isBottomEdge = isDownDirection && initBottom - currentBottom - deltaY > factor;
 
-        const scrolledMoreThanHeight = Math.abs(initBottom - currentBottom ) > initHeight;
+      const scrolledMoreThanHeight = Math.abs(initBottom - currentBottom ) > initHeight;
 
-        if (deltaY > factor || scrolledMoreThanHeight) {
-          this.elementRef.nativeElement.scrollIntoView({behavior: 'smooth', block: 'nearest'});
-          event.preventDefault();
-          return;
-        }
-        if ( isBottomEdge || isTopEdge)  {
-          event.preventDefault();
-        }
-
-      })
-    );
-    this.scrollSub = scroll$.subscribe();
+      if (deltaY > factor || scrolledMoreThanHeight) {
+        this.elementRef.nativeElement.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+        event.preventDefault();
+        return;
+      }
+      if ( isBottomEdge || isTopEdge)  {
+        event.preventDefault();
+      }
+    });
   }
 }

@@ -1,7 +1,7 @@
-import {ChangeDetectorRef, Component, ElementRef, Input, OnDestroy, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
 import {combineLatest, Observable, Subscription} from 'rxjs';
 import {select, Store} from '@ngrx/store';
-import {IExperimentInfoState} from '../../features/experiments/reducers/experiment-info.reducer';
+import {IExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {AdminService} from '~/shared/services/admin.service';
 import {selectS3BucketCredentials} from '../core/reducers/common-auth-reducer';
 import {MatDialog} from '@angular/material/dialog';
@@ -17,17 +17,43 @@ import {
 } from './debug-images-reducer';
 import {selectRouterParams} from '../core/reducers/router-reducer';
 import {distinctUntilChanged, filter, map, withLatestFrom} from 'rxjs/operators';
-import {Task} from '../../business-logic/model/tasks/task';
+import {Task} from '~/business-logic/model/tasks/task';
 import {ActivatedRoute} from '@angular/router';
-import {TaskStatusEnum} from '../../business-logic/model/tasks/taskStatusEnum';
+import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
 import {ImageDisplayerComponent} from '../experiments/dumb/image-displayer/image-displayer.component';
-import {selectSelectedExperiment} from '../../features/experiments/reducers';
-import {selectRefreshing} from '../experiments-compare/reducers';
-import {TaskMetric} from '../../business-logic/model/events/taskMetric';
+import {selectSelectedExperiment} from '~/features/experiments/reducers';
+import {TaskMetric} from '~/business-logic/model/events/taskMetric';
 import {get, isEqual} from 'lodash/fp';
 import {ALL_IMAGES} from './debug-images-effects';
 import {MatSelectChange} from '@angular/material/select';
 import {getSignedUrl} from '../core/actions/common-auth.actions';
+import {addMessage} from '../core/actions/layout.actions';
+import {RefreshService} from '@common/core/services/refresh.service';
+
+interface Event {
+  timestamp: number;
+  type?: string;
+  task?: string;
+  iter?: number;
+  metric?: string;
+  variant?: string;
+  key?: string;
+  url?: string;
+  '@timestamp'?: string;
+  worker?: string;
+}
+
+interface Iteration {
+  events: Event[];
+  iter: number;
+}
+
+interface DebugSamples {
+  metrics: string[];
+  metric: string;
+  scrollId: string;
+  data: Iteration[]
+}
 
 @Component({
   selector: 'sm-debug-images',
@@ -37,6 +63,8 @@ import {getSignedUrl} from '../core/actions/common-auth.actions';
 export class DebugImagesComponent implements OnInit, OnDestroy {
 
   @Input() isDarkTheme = false;
+  @Output() copyIdClicked = new EventEmitter();
+
   private debugImagesSubscription: Subscription;
   private taskNamesSubscription: Subscription;
   private selectedExperimentSubscription: Subscription;
@@ -51,7 +79,7 @@ export class DebugImagesComponent implements OnInit, OnDestroy {
   public beginningOfTime$: Observable<any>;
 
   public mergeIterations: boolean;
-  public debugImages: { [experimentId: string]: any };
+  public debugImages: { [experimentId: string]: DebugSamples };
   public experimentNames: { [id: string]: string } = {};
   public experimentIds: string[];
   public allowAutorefresh: boolean = false;
@@ -59,7 +87,7 @@ export class DebugImagesComponent implements OnInit, OnDestroy {
   public noMoreData$: Observable<boolean>;
   public optionalMetrics$: Observable<any>;
   public optionalMetrics: any;
-  public selectedMetrics: {[taskId: string] : string} = {};
+  public selectedMetrics: { [taskId: string]: string } = {};
   public beginningOfTime: any;
   private beginningOfTimeSubscription: Subscription;
   public timeIsNow: any;
@@ -68,6 +96,7 @@ export class DebugImagesComponent implements OnInit, OnDestroy {
   readonly allImages = ALL_IMAGES;
   private selectedMetric: string;
   public modifiedExperimentsNames: { [id: string]: string } = {};
+  public experiments: Partial<Task>[];
 
   constructor(
     private store: Store<IExperimentInfoState>,
@@ -75,7 +104,8 @@ export class DebugImagesComponent implements OnInit, OnDestroy {
     private dialog: MatDialog,
     private changeDetection: ChangeDetectorRef,
     private activeRoute: ActivatedRoute,
-    private elRef: ElementRef
+    private elRef: ElementRef,
+    private refresh: RefreshService
   ) {
     this.tasks$ = this.store.select(selectTaskNames);
     this.optionalMetrics$ = this.store.select(selectOptionalMetrics);
@@ -87,20 +117,22 @@ export class DebugImagesComponent implements OnInit, OnDestroy {
       store.pipe(select(selectS3BucketCredentials)),
       store.pipe(select(selectDebugImages))]).pipe(
       map(([, debugImages]) => Object.entries(debugImages).reduce(((acc, val: any) => {
-        acc[val[0]] = val[1].metrics.map(metric => metric.iterations.map(iteration => {
-          const events = iteration.events.map(event => {
-            this.store.dispatch(getSignedUrl({url: event.url, config: {disableCache: event.timestamp}}));
-            return {
-              ...event,
-              url: event.url,
-              variantAndMetric: this.selectedMetric === ALL_IMAGES ? `${event.metric}/${event.variant}` : ''
-            };
-          });
-          return {...iteration, events};
-        }));
-        acc[val[0]].metrics = val[1].metrics.map(metric => metric.metric || metric.iterations[0].events[0].metric);
-        acc[val[0]].metric = acc[val[0]].metrics[0];
-        acc[val[0]].scrollId = val[1].scroll_id;
+        const id = val[0];
+        const iterations = val[1].metrics.find(m => m.task === id).iterations;
+        acc[id] = {data: iterations.map(iteration => ({
+            iter: iteration.iter,
+            events: iteration.events.map(event => {
+              this.store.dispatch(getSignedUrl({url: event.url, config: {disableCache: event.timestamp}}));
+              return {
+                ...event,
+                url: event.url,
+                variantAndMetric: this.selectedMetric === ALL_IMAGES ? `${event.metric}/${event.variant}` : ''
+              };
+            })
+          }))};
+        acc[id].metrics = val[1].metrics.map(metric => metric.metric || metric.iterations[0].events[0].metric);
+        acc[id].metric = acc[id].metrics[0];
+        acc[id].scrollId = val[1].scroll_id;
         return acc;
       }), {}))
     ).subscribe(debugImages => {
@@ -133,7 +165,6 @@ export class DebugImagesComponent implements OnInit, OnDestroy {
       this.timeIsNow = timeIsNow;
     });
 
-    let currentExperiment: string;
 
     if (multipleExperiments) {
       this.routerParamsSubscription = this.routerParams$
@@ -155,48 +186,54 @@ export class DebugImagesComponent implements OnInit, OnDestroy {
             this.store.dispatch(getDebugImagesMetrics({tasks: this.experimentIds}));
           }
 
+          this.experiments = tasks;
           this.experimentNames = tasks.reduce((acc, task) => ({
             ...acc,
             [task.id]: task.name
           }), {}) as { [id: string]: string };
           tasks.forEach(task => {
-              this.modifiedExperimentsNames[task.id] = Object.values(this.experimentNames).filter(name => name === task.name).length > 1 ? `${task.name}.${task.id.substr(0, 6)}` : task.name;
+              this.modifiedExperimentsNames[task.id] = Object.values(this.experimentNames).filter(name => name === task.name).length > 1 ? `${task.name}.${task.id.slice(0, 6)}` : task.name;
             }
           );
           this.changeDetection.detectChanges();
         });
 
-      // auto refresh subscription for compare only.
-      this.refreshingSubscription = this.store.select(selectRefreshing).pipe(
-        filter(({refreshing}) => refreshing),
-        withLatestFrom(
-          this.store.select(selectTimeIsNow),
-        )
-      ).subscribe(([, timeIsNow]) => {
-          this.store.dispatch(debugActions.refreshDebugImagesMetrics({tasks: this.experimentIds}));
-          this.experimentIds.forEach(experiment => {
-            this.refresh(experiment, timeIsNow, this.debugImages);
-          });
-        }
-      );
     } else {
       this.selectedExperimentSubscription = this.store.select(selectSelectedExperiment)
         .pipe(
           filter(experiment => !!experiment),
-          withLatestFrom(
-            this.store.select(selectTimeIsNow),
-          ),
-        ).subscribe(([experiment, timeIsNow]) => {
-          if (currentExperiment === experiment.id && Object.keys(this.debugImages || {}).length > 0) {
-            this.refresh(experiment.id, timeIsNow, this.debugImages);
-          } else {
-            currentExperiment = experiment.id;
-            this.experimentNames = {[experiment.id]: experiment.name};
-            this.experimentIds = [experiment.id];
-            this.store.dispatch(getDebugImagesMetrics({tasks: this.experimentIds}));
-          }
+          distinctUntilChanged((previous, current) => previous?.id === current?.id)
+        ).subscribe(experiment => {
+          this.experimentNames = {[experiment.id]: experiment.name};
+          this.experimentIds = [experiment.id];
+          this.store.dispatch(getDebugImagesMetrics({tasks: this.experimentIds}));
         });
     }
+
+    // auto refresh subscription for compare only.
+    this.refreshingSubscription = this.refresh.tick
+      .pipe(
+        filter(auto => !multipleExperiments || auto !== null),
+        withLatestFrom(
+          this.store.select(selectTimeIsNow),
+        )
+      )
+      .subscribe(([auto, timeIsNow]) => {
+        if (multipleExperiments) {
+          this.store.dispatch(debugActions.refreshDebugImagesMetrics({tasks: this.experimentIds, autoRefresh: auto}));
+        }
+        this.experimentIds.forEach(experimentId => {
+          if (experimentId && timeIsNow?.[experimentId] && this.debugImages[experimentId] && this.elRef.nativeElement.scrollTop < 40) {
+            this.store.dispatch(debugActions.refreshMetric({
+              payload: {
+                task: experimentId,
+                metric: this.debugImages[experimentId]?.metric,
+              },
+              autoRefresh: auto
+            }));
+          }
+        });
+      });
 
     this.optionalMetricsSubscription = this.optionalMetrics$.subscribe(optionalMetrics => {
       const optionalMetricsDic = {};
@@ -250,17 +287,6 @@ export class DebugImagesComponent implements OnInit, OnDestroy {
     });
   }
 
-  refresh(experimentId: string, timeIsNow, debugImages) {
-    if (experimentId && timeIsNow?.[experimentId] && debugImages[experimentId] && this.elRef.nativeElement.scrollTop < 40) {
-      this.store.dispatch(debugActions.refreshMetric({
-        payload: {
-          task: experimentId,
-          metric: debugImages[experimentId].metric
-        }
-      }));
-    }
-  }
-
   private isTaskRunning(tasks: Partial<Task>[]) {
     return tasks.some(task => [TaskStatusEnum.InProgress, TaskStatusEnum.Queued].includes(task.status));
   }
@@ -293,11 +319,19 @@ export class DebugImagesComponent implements OnInit, OnDestroy {
   }
 
   thereAreNoDebugImages(experiment) {
-    return !(this.debugImages && this.debugImages[experiment] && this.debugImages[experiment].length > 0);
+    return !(this.debugImages && this.debugImages[experiment] && this.debugImages[experiment].data.length > 0);
   }
 
   shouldShowNoImagesForExperiment(experiment: string) {
     return (this.thereAreNoMetrics(experiment) && this.optionalMetrics && this.optionalMetrics[experiment]) || (this.thereAreNoDebugImages(experiment) && this.debugImages && this.debugImages[experiment]);
+  }
+
+  // buildUrl() {
+  //   return ['../../', 'experiments', ];
+  // }
+
+  copyIdToClipboard() {
+    this.store.dispatch(addMessage('success', 'Copied to clipboard'));
   }
 
 }

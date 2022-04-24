@@ -54,6 +54,7 @@ export interface Environment {
   serverDownMessage?: string;
   legal: Legal;
   loginPopup?: string;
+  newExperimentYouTubeVideoId: string;
 }
 
 export const BASE_ENV = {
@@ -87,9 +88,10 @@ export const BASE_ENV = {
   plotlyURL: 'app/webapp-common/assets/plotly-2.9.0.min.js',
   slackLink: 'https://join.slack.com/t/allegroai-trains/shared_invite/enQtOTQyMTI1MzQxMzE4LTY5NTUxOTY1NmQ1MzQ5MjRhMGRhZmM4ODE5NTNjMTg2NTBlZGQzZGVkMWU3ZDg1MGE1MjQxNDEzMWU2NmVjZmY',
   docsLink: 'https://clear.ml/docs',
-  branding: {logo: '/assets/logo-white.svg?v=7', logoSmall: '/assets/c-logo.svg?=2'},
+  branding: {logo: 'assets/logo-white.svg?v=7', logoSmall: 'assets/c-logo.svg?=2'},
   serverDownMessage: 'The ClearML server is currently unavailable.<BR>' +
     'Please try to reload this page in a little while.<BR>' +
-    'If the problem persists, verify your network connection is working and check the ClearML server logs for possible errors'
+    'If the problem persists, verify your network connection is working and check the ClearML server logs for possible errors',
+  newExperimentYouTubeVideoId: 's3k9ntmQmD4'
 } as Environment;
 

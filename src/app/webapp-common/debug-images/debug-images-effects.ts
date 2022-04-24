@@ -1,13 +1,12 @@
 import {Injectable} from '@angular/core';
 import {Actions, createEffect,  ofType} from '@ngrx/effects';
-import {catchError, mergeMap, map, switchMap, withLatestFrom} from 'rxjs/operators';
+import {catchError, mergeMap, map, switchMap, withLatestFrom, filter} from 'rxjs/operators';
 import * as  debugActions from './debug-images-actions';
 import {activeLoader, deactivateLoader} from '../core/actions/layout.actions';
-import {ApiTasksService} from '../../business-logic/api-services/tasks.service';
-import {ApiEventsService} from '../../business-logic/api-services/events.service';
+import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
+import {ApiEventsService} from '~/business-logic/api-services/events.service';
 import {requestFailed} from '../core/actions/http.actions';
 import {refreshExperiments} from '../experiments/actions/common-experiments-view.actions';
-import {setRefreshing} from '../experiments-compare/actions/compare-header.actions';
 import {Action, Store} from '@ngrx/store';
 import {selectDebugImages, selectImageViewerScrollId} from './debug-images-reducer';
 import {
@@ -16,8 +15,9 @@ import {
   setDebugImageViewerScrollId,
   setDisplayerBeginningOfTime, setDisplayerEndOfTime
 } from './debug-images-actions';
-import {EventsDebugImagesResponse} from '../../business-logic/model/events/eventsDebugImagesResponse';
-import {EventsGetTaskMetricsResponse} from '../../business-logic/model/events/eventsGetTaskMetricsResponse';
+import {EventsDebugImagesResponse} from '~/business-logic/model/events/eventsDebugImagesResponse';
+import {EventsGetTaskMetricsResponse} from '~/business-logic/model/events/eventsGetTaskMetricsResponse';
+import {COMPARE_DEBUG_IMAGES_ONLY_FIELDS} from '../experiments-compare/experiments-compare.constants';
 
 export const ALL_IMAGES = '-- All --';
 
@@ -48,7 +48,8 @@ export class DebugImagesEffects {
   ) {}
 
   activeLoader = createEffect(() => this.actions$.pipe(
-    ofType(debugActions.fetchExperiments),
+    ofType(debugActions.fetchExperiments, debugActions.refreshMetric, debugActions.refreshDebugImagesMetrics),
+    filter(action => !(action as any).autoRefresh),
     map(action => activeLoader(action.type))
   ));
 
@@ -68,7 +69,7 @@ export class DebugImagesEffects {
       })
         .pipe(
           mergeMap((res: EventsDebugImagesResponse ) => {
-            const actionsToShoot = [deactivateLoader(action.type), setRefreshing({payload: false})] as Action[];
+            const actionsToShoot = [deactivateLoader(action.type)] as Action[];
             if (res.metrics[0].iterations && res.metrics[0].iterations.length > 0) {
               actionsToShoot.push(debugActions.setDebugImages({res, task: action.payload.task}));
               switch (action.type) {
@@ -102,7 +103,6 @@ export class DebugImagesEffects {
           }),
           catchError(error => [
             requestFailed(error),
-            setRefreshing({payload: false}),
             deactivateLoader(action.type),
             deactivateLoader(refreshExperiments.type)
           ])
@@ -113,7 +113,7 @@ export class DebugImagesEffects {
   fetchExperiments$ = createEffect(() => this.actions$.pipe(
     ofType(debugActions.fetchExperiments),
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    switchMap((action) => this.apiTasks.tasksGetAllEx({id: action.tasks, only_fields: ['id', 'name', 'status']})
+    switchMap((action) => this.apiTasks.tasksGetAllEx({id: action.tasks, only_fields: COMPARE_DEBUG_IMAGES_ONLY_FIELDS})
       .pipe(
         mergeMap(res => [debugActions.setExperimentsNames({tasks: res.tasks}), deactivateLoader(action.type)]),
         catchError(error => [requestFailed(error), deactivateLoader(action.type)])

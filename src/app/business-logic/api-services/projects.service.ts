@@ -63,6 +63,8 @@ import {ProjectsGetModelMetadataKeysResponse} from '~/business-logic/model/proje
 import {ProjectsGetModelMetadataKeysRequest} from '~/business-logic/model/projects/projectsGetModelMetadataKeysRequest';
 import {ProjectsGetProjectTagsResponse} from '~/business-logic/model/projects/projectsGetProjectTagsResponse';
 import {ProjectsGetProjectTagsRequest} from '~/business-logic/model/projects/projectsGetProjectTagsRequest';
+import {ProjectsGetModelMetadataValuesRequest} from '~/business-logic/model/projects/projectsGetModelMetadataValuesRequest';
+import {ProjectsGetModelMetadataValuesResponse} from '~/business-logic/model/projects/projectsGetModelMetadataValuesResponse';
 
 
 @Injectable()
@@ -98,7 +100,7 @@ export class ApiProjectsService {
 
 
     /**
-     * 
+     *
      * Create a new project
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -143,7 +145,7 @@ export class ApiProjectsService {
     }
 
     /**
-     * 
+     *
      * Deletes a project
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -188,7 +190,7 @@ export class ApiProjectsService {
     }
 
     /**
-     * 
+     *
      * Get all the company\&#39;s projects and all public projects
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -233,7 +235,7 @@ export class ApiProjectsService {
     }
 
     /**
-     * 
+     *
      * Get all the company\&#39;s projects and all public projects
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -278,8 +280,8 @@ export class ApiProjectsService {
     }
 
     /**
-     * 
-     * 
+     *
+     *
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
@@ -323,7 +325,7 @@ export class ApiProjectsService {
     }
 
     /**
-     * 
+     *
      * Get a list of all hyper parameter sections and names used in tasks within the   given project.
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -368,7 +370,7 @@ export class ApiProjectsService {
     }
 
     /**
-     * 
+     *
      * Get a list of distinct values for the chosen hyperparameter
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -458,12 +460,57 @@ export class ApiProjectsService {
         );
     }
 
+  /**
+   *
+   * Get a list of distinct values for the chosen model metadata key
+   * @param request request body
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   */
+  public projectsGetModelMetadataValues(request: ProjectsGetModelMetadataValuesRequest, options?: any, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    if (request === null || request === undefined) {
+      throw new Error('Required parameter request was null or undefined when calling projectsGetModelMetadataValues.');
+    }
 
-    /**
-     * 
-     * Get user and system tags used for the models under the specified projects
-     * @param request request body
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+    let headers = this.defaultHeaders;
+    if (options && options.async_enable) {
+      headers = headers.set(this.configuration.asyncHeader, '1');
+    }
+
+    // to determine the Accept header
+    const httpHeaderAccepts: string[] = [
+      'application/json'
+    ];
+    const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+    if (httpHeaderAcceptSelected != undefined) {
+      headers = headers.set("Accept", httpHeaderAcceptSelected);
+    }
+
+    // to determine the Content-Type header
+    const consumes: string[] = [
+    ];
+    const httpContentTypeSelected:string | undefined = this.configuration.selectHeaderContentType(consumes);
+    if (httpContentTypeSelected != undefined) {
+      headers = headers.set("Content-Type", httpContentTypeSelected);
+    }
+
+    return this.apiRequest.post<ProjectsGetModelMetadataValuesResponse>(`${this.basePath}/projects.get_model_metadata_values`,
+      request,
+      {
+        withCredentials: this.configuration.withCredentials,
+        headers: headers,
+        observe: observe,
+        reportProgress: reportProgress
+      }
+    );
+  }
+
+
+  /**
+   *
+   * Get user and system tags used for the models under the specified projects
+   * @param request request body
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
     public projectsGetModelTags(request: ProjectsGetModelTagsRequest, options?: any, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
@@ -550,7 +597,7 @@ export class ApiProjectsService {
     }
 
     /**
-     * 
+     *
      * Get unique parent tasks for the tasks in the specified projects
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -595,7 +642,7 @@ export class ApiProjectsService {
     }
 
     /**
-     * 
+     *
      * Get user and system tags used for the tasks under the specified projects
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -640,7 +687,7 @@ export class ApiProjectsService {
     }
 
     /**
-     * 
+     *
      * Get all metric/variant pairs reported for tasks in a specific project. If no   project is specified, metrics/variant paris reported for all tasks will be   returned. If the project does not exist, an empty list will be returned.
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -685,7 +732,7 @@ export class ApiProjectsService {
     }
 
     /**
-     * 
+     *
      * Convert public projects to private
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -730,7 +777,7 @@ export class ApiProjectsService {
     }
 
     /**
-     * 
+     *
      * Convert company projects to public
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -775,7 +822,7 @@ export class ApiProjectsService {
     }
 
     /**
-     * 
+     *
      * Moves all the source project\&#39;s contents to the destination project and remove   the source project
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -820,7 +867,7 @@ export class ApiProjectsService {
     }
 
     /**
-     * 
+     *
      * Moves a project and all of its subprojects under the different location
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -865,7 +912,7 @@ export class ApiProjectsService {
     }
 
     /**
-     * 
+     *
      * Update project information
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -910,7 +957,7 @@ export class ApiProjectsService {
     }
 
     /**
-     * 
+     *
      * Validates that the project existis and can be deleted
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.

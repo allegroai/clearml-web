@@ -18,22 +18,22 @@ import {
   resetDisplayer,
   setDebugImageViewerScrollId,
   setDisplayerEndOfTime
-} from '../../../debug-images/debug-images-actions';
+} from '@common/debug-images/debug-images-actions';
 import {
   selectCurrentImageViewerDebugImage,
   selectDisplayerBeginningOfTime,
   selectDisplayerEndOfTime,
   selectMinMaxIterations
-} from '../../../debug-images/debug-images-reducer';
+} from '@common/debug-images/debug-images-reducer';
 import {interval, Observable, Subscription} from 'rxjs';
-import {EventsGetDebugImageIterationsResponse} from '../../../../business-logic/model/events/eventsGetDebugImageIterationsResponse';
+import {EventsGetDebugImageIterationsResponse} from '~/business-logic/model/events/eventsGetDebugImageIterationsResponse';
 import {filter, map, switchMap, tap, withLatestFrom} from 'rxjs/operators';
-import {selectAppVisible, selectAutoRefresh} from '../../../core/reducers/view.reducer';
-import {isFileserverUrl} from '../../../../shared/utils/url';
-import {getSignedUrl} from '../../../core/actions/common-auth.actions';
-import {getSignedUrlOrOrigin$} from '../../../core/reducers/common-auth-reducer';
-import {IsVideoPipe} from '../../../shared/pipes/is-video.pipe';
-import {IsAudioPipe} from '../../../shared/pipes/is-audio.pipe';
+import {selectAppVisible, selectAutoRefresh} from '@common/core/reducers/view.reducer';
+import {isFileserverUrl} from '~/shared/utils/url';
+import {getSignedUrl} from '@common/core/actions/common-auth.actions';
+import {getSignedUrlOrOrigin$} from '@common/core/reducers/common-auth-reducer';
+import {IsVideoPipe} from '@common/shared/pipes/is-video.pipe';
+import {IsAudioPipe} from '@common/shared/pipes/is-audio.pipe';
 
 const DISPLAYER_AUTO_REFRESH_INTERVAL = 60 * 1000;
 
@@ -292,7 +292,7 @@ export class ImageDisplayerComponent implements OnInit, OnDestroy {
     this.currentDebugImageSubscription.unsubscribe();
     this.begOfTimeSub.unsubscribe();
     this.endOfTimeSub.unsubscribe();
-    this.autoRefreshSub.unsubscribe();
+    this.autoRefreshSub?.unsubscribe();
   }
 
   showImage() {

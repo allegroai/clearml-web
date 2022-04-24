@@ -9,12 +9,12 @@ import {
   selectProjectsSortOrder
 } from '../../common-projects.reducer';
 import {
-  CheckProjectForDeletion,
-  GetAllProjectsPageProjects,
-  ResetProjects,
-  ResetProjectsSearchQuery,
-  ResetReadyToDelete,
-  SetProjectsOrderBy,
+  checkProjectForDeletion,
+  getAllProjectsPageProjects,
+  resetProjects,
+  resetProjectsSearchQuery,
+  resetReadyToDelete,
+  setProjectsOrderBy,
   setProjectsSearchQuery, updateProject
 } from '../../common-projects.actions';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -49,7 +49,6 @@ import {Project} from '~/business-logic/model/projects/project';
 import {CommonDeleteDialogComponent} from '@common/shared/entity-page/entity-delete/common-delete-dialog.component';
 import {resetDeleteState} from '@common/shared/entity-page/entity-delete/common-delete-dialog.actions';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
-import {StatsStatusCount} from '~/business-logic/model/projects/statsStatusCount';
 import {isExample} from '@common/shared/utils/shared-utils';
 import {selectSelectedProject} from '@common/core/reducers/projects.reducer';
 
@@ -133,7 +132,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
             this.router.navigate(['../experiments'], {relativeTo: this.route.parent});
             return [];
           }
-          const pageProjectsList = this.getExtraProjects(selectedProjectId, selectedProject, projectsList);
+          const pageProjectsList = this.getExtraProjects(selectedProjectId, selectedProject);
           return pageProjectsList.concat(projectsList);
         }
       }),
@@ -142,26 +141,25 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
     this.syncAppSearch();
   }
 
-  protected getExtraProjects(selectedProjectId, selectedProject, projectsList) {
+  protected getExtraProjects(selectedProjectId, selectedProject) {
     return [{
       ...((selectedProjectId && selectedProject) ? selectedProject : this.ALL_EXPERIMENTS_CARD),
       // eslint-disable-next-line @typescript-eslint/naming-convention
       id: selectedProjectId ? selectedProjectId : '*', name: 'All Experiments', sub_projects: null,
-      ...(selectedProject && {stats: {active: this.calculateAllExperimentsProjectStats(selectedProject, projectsList)}})
     } as ProjectsGetAllResponseSingle];
   }
 
   ngOnInit() {
     // this.store.dispatch(new ResetSelectedProject());
     this.store.dispatch(setDeep({deep: false}));
-    this.store.dispatch(new GetAllProjectsPageProjects());
+    this.store.dispatch(getAllProjectsPageProjects({}));
 
     this.selectedProjectIdSub = this.selectedProjectId$.pipe(
       filter(projectId => !projectId),
       distinctUntilChanged(),
     ).subscribe(() => {
-        this.store.dispatch(new ResetProjectsSearchQuery());
-        this.store.dispatch(new GetAllProjectsPageProjects());
+        this.store.dispatch(resetProjectsSearchQuery());
+        this.store.dispatch(getAllProjectsPageProjects({}));
       }
     );
     this.selectedProjectSub = this.selectedProject$.pipe(
@@ -169,12 +167,12 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
       distinctUntilKeyChanged('id'),
       skip(1),
     ).subscribe(() => {
-      this.store.dispatch(new ResetProjectsSearchQuery());
-      this.store.dispatch(new GetAllProjectsPageProjects());
+      this.store.dispatch(resetProjectsSearchQuery());
+      this.store.dispatch(getAllProjectsPageProjects({}));
     });
     this.showOnlyUserWorkSub$ = this.store.select(selectShowOnlyUserWork).pipe(skip(1)).subscribe(() => {
-      this.store.dispatch(new ResetProjectsSearchQuery());
-      this.store.dispatch(new GetAllProjectsPageProjects());
+      this.store.dispatch(resetProjectsSearchQuery());
+      this.store.dispatch(getAllProjectsPageProjects({}));
     });
 
     this.projectReadyForDeletionSub = this.projectReadyForDeletion$.subscribe(readyForDeletion => {
@@ -198,7 +196,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
       }
     });
     confirmDialogRef.afterClosed().subscribe(() => {
-      this.store.dispatch(new ResetReadyToDelete());
+      this.store.dispatch(resetReadyToDelete());
     });
   }
 
@@ -216,8 +214,8 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
     confirmDialogRef.afterClosed().subscribe((confirmed) => {
       if (confirmed) {
         this.store.dispatch(resetDeleteState());
-        this.store.dispatch(new ResetProjects());
-        this.store.dispatch(new GetAllProjectsPageProjects());
+        this.store.dispatch(resetProjects());
+        this.store.dispatch(getAllProjectsPageProjects({}));
       }
     });
   }
@@ -228,8 +226,8 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
     this.showOnlyUserWorkSub$.unsubscribe();
     this.selectedProjectSub.unsubscribe();
     this.selectedProjectIdSub.unsubscribe();
-    this.store.dispatch(new ResetReadyToDelete());
-    this.store.dispatch(new ResetProjectsSearchQuery());
+    this.store.dispatch(resetReadyToDelete());
+    this.store.dispatch(resetProjectsSearchQuery());
   }
 
   stopSyncSearch() {
@@ -258,7 +256,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
   }
 
   orderByChanged(sortByFieldName: string) {
-    this.store.dispatch(new SetProjectsOrderBy(sortByFieldName));
+    this.store.dispatch(setProjectsOrderBy({orderBy: sortByFieldName}));
   }
 
   projectNameChanged(updatedProject: {id: string, name: string}) {
@@ -266,11 +264,11 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
   }
 
   deleteProject(project: Project) {
-    this.store.dispatch(new CheckProjectForDeletion(project));
+    this.store.dispatch(checkProjectForDeletion({project}));
   }
 
   loadMore() {
-    this.store.dispatch(new GetAllProjectsPageProjects());
+    this.store.dispatch(getAllProjectsPageProjects({}));
   }
 
 
@@ -283,21 +281,11 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
     });
     this.projectDialog.afterClosed().subscribe(projectHasBeenUpdated => {
       if (projectHasBeenUpdated) {
-        this.store.dispatch(new ResetProjectsSearchQuery());
-        this.store.dispatch(new GetAllProjectsPageProjects());
+        this.store.dispatch(resetProjectsSearchQuery());
+        this.store.dispatch(getAllProjectsPageProjects({}));
         this.store.dispatch(coreProjectsActions.getAllSystemProjects());
       }
     });
-  }
-
-  private calculateAllExperimentsProjectStats(selectedProject: ProjectsGetAllResponseSingle, projectsList: ProjectsGetAllResponseSingle[]): StatsStatusCount {
-    const stats: StatsStatusCount = {};
-    for (const key of Object.keys(selectedProject.stats.active)) {
-      if (['completed_tasks', 'running_tasks', 'total_tasks', 'total_runtime'].includes(key)) {
-        stats[key] = projectsList.map(project => (project.stats.active[key] || 0)).reduce((a, b) => a + b, 0);
-      }
-    }
-    return stats;
   }
 
   protected getName() {

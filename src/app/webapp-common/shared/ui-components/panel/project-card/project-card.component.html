@@ -18,13 +18,12 @@
     </div>
   </div>
   <div header-content>
-    <div class="d-flex justify-content-between align-items-center">
+    <div class="d-flex justify-content-between align-items-center card-name">
       <sm-inline-edit #projectName
                       class="title edit-name dark"
                       [originalText]="project.name | shortProjectName"
                       [editable]="true"
                       pattern="^[^/]+$"
-                      [minWidth]="250"
                       [inlineDisabled]="true"
                       (textChanged)="prepareProjectNameForChange($event)"
                       (inlineActiveStateChanged)="projectNameEditActiveChanged($event)"
@@ -49,7 +48,7 @@
     </div>
 
   </div>
-  <div class="d-flex justify-content-around">
+  <div class="d-flex justify-content-around w-100">
     <ng-template></ng-template>
     <sm-circle-counter
       [counter]="project.id === '*'? '∞' : project.stats?.active?.total_tasks"

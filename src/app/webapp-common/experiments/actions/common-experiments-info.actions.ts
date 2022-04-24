@@ -1,7 +1,7 @@
 import {Action, createAction, props} from '@ngrx/store';
 import {Task} from '~/business-logic/model/tasks/task';
 import {IExperimentInfo, ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
-import {ITableExperiment} from '../shared/common-experiment-model.model';
+import {IExperimentModelInfo, ITableExperiment} from '../shared/common-experiment-model.model';
 import {ParamsItem} from '~/business-logic/model/tasks/paramsItem';
 import {ConfigurationItem} from '~/business-logic/model/tasks/configurationItem';
 import {IExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
@@ -82,10 +82,20 @@ export const setExperimentUncommittedChanges = createAction(
   props<{ diff: string }>()
 );
 
+export const getExperimentArtifacts= createAction(
+  EXPERIMENTS_INFO_PREFIX + '[get artifacts]',
+  props<{ experimentId: string; autoRefresh?: boolean }>()
+);
+
+export const setExperimentArtifacts = createAction(
+  EXPERIMENTS_INFO_PREFIX + '[set artifacts]',
+  props<{model: IExperimentModelInfo; experimentId: string}>()
+);
+
 export class UpdateExperimentInfoData implements Action {
   readonly type = UPDATE_EXPERIMENT_INFO_DATA;
 
-  constructor(public payload: { id: ITableExperiment['id']; changes: Partial<IExperimentInfo> }) {
+  constructor(public payload: { id?: ITableExperiment['id']; changes: Partial<IExperimentInfo> }) {
   }
 }
 export const saveExperimentInputModel = createAction(

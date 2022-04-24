@@ -56,6 +56,9 @@ import {FormgroupHasRequiredFieldPipe} from './formgroup-has-required-field.pipe
 import {FileSizePipe} from '@common/shared/pipes/filesize.pipe';
 import {RegexPipe} from '@common/shared/pipes/filter-regex.pipe';
 import {ColGetterPipe} from './col-getter.pipe';
+import { LabelValueToStringArrayPipe } from './label-value-to-string-array.pipe';
+import {ItemByIdPipe} from './item-by-id.pipe';
+import { FilterMonitorMetricPipe } from './filter-monitor-metric.pipe';
 
 const pipes = [
   CamelToTitlePipe, FilenameFromPath, FilterPipe, FloorPipe, KeyValuePipe, NAPipe, SortPipe, IsVideoPipe, IsAudioPipe,FilterInternalPipe,UuidPipe,
@@ -63,16 +66,17 @@ const pipes = [
   ToExponentialPipe, HighlightSearchTextPipe, HighlightSearchPipe, HideHashPipe, HideHashTitlePipe, TimeAgoPipe, TimeTillNowPipe, HasExampleItemPipe, safeAngularUrlParameterPipe,
   AdvancedFilterPipe, SafePipe, SelectOptionValueToLabelPipe, ToPercentagePipe, ReplaceViaMapPipe, FilterByIdPipe, FilterLast, FilterOutPipe, SimpleFilterPipe,
   BreadcrumbsEllipsisPipe, ShortProjectNamePipe, ProjectLocationPipe,StringIncludedInArrayPipe, ToPropertyArrayPipe, MenuItemTextPipe, InitialsPipe, IdToObjectsArrayPipe, IsEmptyPipe,
-  TemplateInjectorPipe, TestConditionalPipe, GroupHasErrorsPipe, FormgroupHasRequiredFieldPipe, FileSizePipe, RegexPipe
+  TemplateInjectorPipe, TestConditionalPipe, GroupHasErrorsPipe, FormgroupHasRequiredFieldPipe, FileSizePipe, RegexPipe, LabelValueToStringArrayPipe,
+  TemplateInjectorPipe, TestConditionalPipe, GroupHasErrorsPipe, FormgroupHasRequiredFieldPipe, FileSizePipe, RegexPipe, ItemByIdPipe
 ];
 
 @NgModule({
   imports: [
     CommonModule,
   ],
-  declarations: [pipes, ShowSelectedFirstPipe, CountPipe, ColGetterPipe ],
+  declarations: [pipes, ShowSelectedFirstPipe, CountPipe, ColGetterPipe, FilterMonitorMetricPipe ],
   providers: [pipes],
-    exports: [pipes, ShowSelectedFirstPipe, CountPipe, ColGetterPipe]
+    exports: [pipes, ShowSelectedFirstPipe, CountPipe, ColGetterPipe, FilterMonitorMetricPipe]
 })
 export class SharedPipesModule {
 }

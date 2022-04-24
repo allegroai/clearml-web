@@ -80,6 +80,7 @@ export const experimentSelectionChanged = createAction(
   props<{experiment: {id?: string}; project?: string}>()
 );
 
+
 export const selectAllExperiments = createAction(
   EXPERIMENTS_PREFIX + ' [select all experiments]',
   props<{filtered: boolean}>()
@@ -103,6 +104,7 @@ export const setUsers = createAction(
   EXPERIMENTS_PREFIX + 'SET_USERS',
   props<{ users: User[] }>()
 );
+
 
 export const setParents = createAction(
   EXPERIMENTS_PREFIX + '[set project experiment parents]',
@@ -232,3 +234,7 @@ export const setSelectedExperimentsDisableAvailable = createAction(
   EXPERIMENTS_PREFIX + 'setSelectedExperimentsDisableAvailable',
   props<{ selectedExperimentsDisableAvailable: Record<string, CountAvailableAndIsDisableSelectedFiltered> }>()
 );
+export const setTableMode = createAction(
+  EXPERIMENTS_PREFIX + '[set table view mode]',
+  props<{mode: 'info' | 'table'}>()
+)

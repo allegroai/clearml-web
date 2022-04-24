@@ -22,7 +22,6 @@ import {ConfigurationService} from '@common/shared/services/configuration.servic
 import {ProjectsSharedModule} from './features/projects/shared/projects-shared.module';
 import {MAT_FORM_FIELD_DEFAULT_OPTIONS} from '@angular/material/form-field';
 import {LoginService} from '~/shared/services/login.service';
-import {SettingsModule} from '~/features/settings/settings.module';
 
 @NgModule({
   declarations   : [AppComponent],
@@ -42,7 +41,6 @@ import {SettingsModule} from '~/features/settings/settings.module';
       onSameUrlNavigation: 'reload',
       relativeLinkResolution: 'legacy'
 }),
-    SettingsModule,
     NotifierModule.withConfig({
       theme: 'material',
       behaviour: {
@@ -74,7 +72,7 @@ import {SettingsModule} from '~/features/settings/settings.module';
       deps: [ConfigurationService],
       useFactory: (confService: ConfigurationService) =>
         confService.getStaticEnvironment().GTM_ID
-    }
+    },
   ],
   bootstrap      : [AppComponent],
   exports        : []

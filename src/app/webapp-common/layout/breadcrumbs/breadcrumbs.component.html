@@ -21,10 +21,10 @@
          smShowTooltipIfEllipsis
          [routerLink]="subProjects[subProjects.length-1].url!=='projects/*/projects'? subProjects[subProjects.length-1].url: null">{{subProjects[subProjects.length - 1].name}}</a>
        <ng-template #lastNonLink>
-         <a class="sub-project after-collapse"
+         <span class="sub-project after-collapse"
             [smTooltip]="subProjects[subProjects.length - 1].name"
             smShowTooltipIfEllipsis
-            >{{subProjects[subProjects.length - 1].name}}</a>
+            >{{subProjects[subProjects.length - 1].name}}</span>
        </ng-template>
       </div>
       <mat-menu #subProjectsMenu="matMenu">
@@ -39,24 +39,27 @@
       </mat-menu>
     </div>
     <ng-template #shortTree>
-    <div *ngFor="let subProject of subProjects; let lastP=last" class="d-flex align-items-center">
-     <ng-container *ngIf="subProject.name">
-        <a class="sub-project"
-           [class.last]="lastP"
-           *ngIf="subProject.url; else nonLink"
-           [smTooltip]="subProject.name"
-           smShowTooltipIfEllipsis
-           [routerLink]="subProject.url!=='projects/*/projects'? subProject.url: 'projects/*/experiments'">{{subProject.name}}</a>
-       <ng-template #nonLink><a class="sub-project"
-                                [class.last]="lastP"
-                                [smTooltip]="subProject.name"
-                                smShowTooltipIfEllipsis>{{subProject.name}}</a></ng-template>
-        <div *ngIf="!lastP">
-          <i class="al-icon al-ico-slash"></i>
-        </div>
-       </ng-container>
-    </div>
-      </ng-template>
+      <div *ngFor="let subProject of subProjects; let lastP=last" class="d-flex align-items-center">
+       <ng-container *ngIf="subProject.name">
+          <a class="sub-project"
+             [class.last]="lastP"
+             *ngIf="subProject.url && !(lastP && lastSegment === 'projects'); else nonLink"
+             [smTooltip]="subProject.name"
+             smShowTooltipIfEllipsis
+             [routerLink]="subProject.url!=='projects/*/projects'? subProject.url: 'projects/*/experiments'">{{subProject.name}}</a>
+         <ng-template #nonLink>
+           <span class="sub-project"
+              [class.last]="lastP"
+              [smTooltip]="subProject.name"
+              smShowTooltipIfEllipsis
+           >{{subProject.name}}</span>
+         </ng-template>
+          <div *ngIf="!lastP">
+            <i class="al-icon al-ico-slash"></i>
+          </div>
+         </ng-container>
+      </div>
+    </ng-template>
   </div>
 
   <ng-template #crumbDiv>

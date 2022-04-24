@@ -41,10 +41,15 @@
   .checkbox-col {
     display: block;
     float: left;
-    padding-left: 18px;
+    padding: 13px 0 13px 26px;
+    margin-left: -8px;
+
+    &:not(.header) {
+      padding-right: 24px;
+    }
 
     &.header.minimised {
-      padding-left: 16px;
+      padding-left: 24px;
     }
   }
 

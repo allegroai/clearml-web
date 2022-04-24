@@ -109,6 +109,7 @@ import {TemplateAliasDirective} from './directives/template-alias.directive';
 import {ShowTooltipIfEllipsisDirective} from './indicators/tooltip/show-tooltip-if-ellipsis.directive';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import { CodeEditorComponent } from './data/code-editor/code-editor.component';
+import {AppendComponentOnTopElementDirective} from '@common/shared/directive/append-component-on-top-element.directive';
 
 const declarations = [
   DurationInputComponent,
@@ -184,11 +185,12 @@ const declarations = [
   TableFilterDurationDateTimeComponent,
   TableFilterDurationNumericComponent,
   CirclesInRowComponent,
-  OverflowsDirective
+  OverflowsDirective,
+  AppendComponentOnTopElementDirective,
 ];
 
 @NgModule({
-  imports     : [
+  imports: [
     MatExpansionModule,
     MatTooltipModule,
     DragDropModule,

@@ -1,16 +1,17 @@
 import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
-import {SelectableListItem} from '../../../shared/ui-components/data/selectable-list/selectable-list.model';
+import {SelectableListItem} from '@common/shared/ui-components/data/selectable-list/selectable-list.model';
 import {Observable, Subscription} from 'rxjs';
 import {select, Store} from '@ngrx/store';
-import {IExperimentInfoState} from '../../../../features/experiments/reducers/experiment-info.reducer';
+import {IExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {distinctUntilChanged, filter, map, tap} from 'rxjs/operators';
-import {selectRouterParams} from '../../../core/reducers/router-reducer';
-import {convertMultiPlots, prepareMultiPlots, sortMetricsList} from '../../../tasks/tasks.utils';
+import {selectRouterParams} from '@common/core/reducers/router-reducer';
+import {convertMultiPlots, prepareMultiPlots, sortMetricsList} from '@common/tasks/tasks.utils';
 import {isEqual} from 'lodash/fp';
-import {scrollToElement} from '../../../shared/utils/shared-utils';
+import {scrollToElement} from '@common/shared/utils/shared-utils';
 import {GetMultiPlotCharts, ResetExperimentMetrics, SetExperimentMetricsSearchTerm, SetExperimentSettings, SetSelectedExperiments} from '../../actions/experiments-compare-charts.actions';
-import {selectCompareTasksPlotCharts, selectExperimentMetricsSearchTerm, selectRefreshing, selectSelectedExperimentSettings, selectSelectedSettingsHiddenPlot} from '../../reducers';
-import {ExtFrame} from '../../../shared/experiment-graphs/single-graph/plotly-graph-base';
+import {selectCompareTasksPlotCharts, selectExperimentMetricsSearchTerm, selectSelectedExperimentSettings, selectSelectedSettingsHiddenPlot} from '../../reducers';
+import {ExtFrame} from '@common/shared/experiment-graphs/single-graph/plotly-graph-base';
+import {RefreshService} from '@common/core/services/refresh.service';
 
 @Component({
   selector: 'sm-experiment-compare-plots',
@@ -24,7 +25,6 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
   public plots$: Observable<any>;
   public experimentSettings$: Observable<any>;
   public searchTerm$: Observable<string>;
-  private selectRefreshing$: Observable<{refreshing: boolean, autoRefresh: boolean}>;
 
   private plotsSubscription: Subscription;
   private settingsSubscription: Subscription;
@@ -33,16 +33,14 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
 
   public graphList: SelectableListItem[] = [];
   public selectedGraph: string = null;
-  private experimentId: string;
   private taskIds: Array<string>;
   public graphs: { [key: string]: ExtFrame[] };
   public refreshDisabled: boolean;
 
 
-  constructor(private store: Store<IExperimentInfoState>, private changeDetection: ChangeDetectorRef) {
+  constructor(private store: Store<IExperimentInfoState>, private changeDetection: ChangeDetectorRef, private refresh: RefreshService) {
     this.listOfHidden = this.store.pipe(select(selectSelectedSettingsHiddenPlot));
     this.searchTerm$ = this.store.pipe(select(selectExperimentMetricsSearchTerm));
-    this.selectRefreshing$ = this.store.select(selectRefreshing);
     this.plots$ = this.store.pipe(
       select(selectCompareTasksPlotCharts),
       filter(metrics => !!metrics),
@@ -92,8 +90,11 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
         }
       });
 
-    this.refreshingSubscription = this.selectRefreshing$.pipe(filter(({refreshing}) => refreshing))
-    .subscribe(({autoRefresh}) => this.store.dispatch(new GetMultiPlotCharts({taskIds: this.taskIds, autoRefresh})));
+    this.refreshingSubscription = this.refresh.tick
+      .pipe(filter(auto => auto !== null))
+    .subscribe(autoRefresh =>
+      this.store.dispatch(new GetMultiPlotCharts({taskIds: this.taskIds, autoRefresh}))
+    );
   }
 
   ngOnDestroy() {

@@ -1,26 +1,27 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {selectRouterConfig, selectRouterParams} from '../../../core/reducers/router-reducer';
+import {selectRouterConfig, selectRouterParams} from '@common/core/reducers/router-reducer';
 import {get, getOr} from 'lodash/fp';
 import {select, Store} from '@ngrx/store';
-import {interval, Observable, Subscription} from 'rxjs';
+import {Observable, Subscription} from 'rxjs';
 import {ActivatedRoute, Router} from '@angular/router';
 import {distinctUntilChanged, filter, map, tap, withLatestFrom} from 'rxjs/operators';
-import {Project} from '../../../../business-logic/model/projects/project';
-import {IExperimentInfo} from '../../../../features/experiments/shared/experiment-info.model';
-import {ExperimentOutputState} from '../../../../features/experiments/reducers/experiment-output.reducer';
+import {Project} from '~/business-logic/model/projects/project';
+import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
+import {ExperimentOutputState} from '~/features/experiments/reducers/experiment-output.reducer';
 import {
   selectExperimentInfoData,
   selectIsSharedAndNotOwner,
   selectSelectedExperiment
-} from '../../../../features/experiments/reducers';
+} from '~/features/experiments/reducers';
 import {ResetExperimentMetrics, toggleSettings} from '../../actions/common-experiment-output.actions';
 import * as infoActions from '../../actions/common-experiments-info.actions';
-import {selectAppVisible, selectAutoRefresh, selectBackdropActive} from '../../../core/reducers/view.reducer';
-import {addMessage, setAutoRefresh} from '../../../core/actions/layout.actions';
-import {AUTO_REFRESH_INTERVAL, MESSAGES_SEVERITY} from '../../../../app.constants';
+import {selectAppVisible, selectBackdropActive} from '@common/core/reducers/view.reducer';
+import {addMessage, setAutoRefresh} from '@common/core/actions/layout.actions';
+import {MESSAGES_SEVERITY} from '~/app.constants';
 import {selectIsExperimentInEditMode, selectSelectedExperiments} from '../../reducers';
-import {isReadOnly} from '../../../shared/utils/shared-utils';
+import {isReadOnly} from '@common/shared/utils/shared-utils';
 import {ExperimentDetailsUpdated} from '../../actions/common-experiments-info.actions';
+import {RefreshService} from '@common/core/services/refresh.service';
 
 @Component({
   selector: 'sm-base-experiment-output',
@@ -35,7 +36,6 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
   public currentComponent: string;
   public currentMetric: string;
   public minimized: boolean;
-  public autoRefreshState$;
   private isExperimentInEditMode$: Observable<boolean>;
   private projectId: Project['id'];
   public experimentId: string;
@@ -44,10 +44,14 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
   isSharedAndNotOwner$: Observable<boolean>;
   public isExample: boolean;
 
-  constructor(private store: Store<ExperimentOutputState>, private router: Router, private route: ActivatedRoute) {
+  constructor(
+    private store: Store<ExperimentOutputState>,
+    private router: Router,
+    private route: ActivatedRoute,
+    private refresh: RefreshService
+  ) {
     this.infoData$ = this.store.select(selectExperimentInfoData);
     this.isSharedAndNotOwner$ = this.store.select((selectIsSharedAndNotOwner));
-    this.autoRefreshState$ = this.store.select(selectAutoRefresh);
     this.isExperimentInEditMode$ = this.store.select(selectIsExperimentInEditMode);
     this.isAppVisible$ = this.store.select(selectAppVisible);
     this.backdropActive$ = this.store.select(selectBackdropActive);
@@ -76,13 +80,20 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
         this.store.dispatch(new infoActions.GetExperimentInfo(experimentId));
       })
     );
-    this.subs.add(interval(AUTO_REFRESH_INTERVAL).pipe(
-        withLatestFrom(this.autoRefreshState$, this.isAppVisible$, this.isExperimentInEditMode$),
-        filter(([, autoRefreshState, isVisible, isExperimentInEditMode]) => isVisible && autoRefreshState && !isExperimentInEditMode &&!this.minimized)
-      ).subscribe(() => {
-        this.refresh(true);
+
+    this.subs.add(this.refresh.tick
+      .pipe(
+        withLatestFrom(this.isExperimentInEditMode$),
+        filter(([, isExperimentInEditMode]) => !isExperimentInEditMode && !this.minimized)
+      ).subscribe(([auto]) => {
+        if (auto === null) {
+          this.store.dispatch(new infoActions.AutoRefreshExperimentInfo(this.experimentId));
+        } else {
+          this.store.dispatch(new infoActions.GetExperimentInfo(this.experimentId));
+        }
       })
     );
+
     this.subs.add(this.store.pipe(select(selectSelectedExperiment),
       filter(experiment => experiment?.id === this.experimentId))
       .subscribe(experiment => {
@@ -92,25 +103,12 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
     );
   }
 
-
   ngOnDestroy() {
     this.subs.unsubscribe();
   }
 
-  returnToInfo(experiment) {
-    this.router.navigateByUrl(`projects/${this.projectId}/experiments/${experiment.id}`);
-  }
-
   setAutoRefresh($event: boolean) {
     this.store.dispatch(setAutoRefresh({autoRefresh: $event}));
-  }
-
-  refresh(isAutorefresh) {
-    if (isAutorefresh) {
-      this.store.dispatch(new infoActions.AutoRefreshExperimentInfo(this.experimentId));
-    } else {
-      this.store.dispatch(new infoActions.GetExperimentInfo(this.experimentId));
-    }
   }
 
   minimizeView() {
@@ -118,7 +116,7 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
     if (['log', 'metrics/scalar', 'metrics/plots', 'debugImages'].includes(part)) {
       this.router.navigateByUrl(`projects/${this.projectId}/experiments/${this.experimentId}/info-output/${part}`);
     } else {
-      const parts = this.router ? this.router.url.split('/') : window.location.pathname.split('/');;
+      const parts = this.router ? this.router.url.split('/') : window.location.pathname.split('/');
       parts.splice(5, 1);
       this.router.navigateByUrl(parts.join('/'));
     }

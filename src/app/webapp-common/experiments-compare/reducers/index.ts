@@ -53,7 +53,6 @@ export const selectExperimentsForCompareSearchTerm = createSelector(selectCompar
 export const selectShowAddExperimentsForCompare = createSelector(selectCompareHeader, state => state?.showSearch);
 export const selectHideIdenticalFields = createSelector(selectCompareHeader, state => state?.hideIdenticalRows);
 export const selectShowScalarsOptions = createSelector(selectCompareHeader, state => state?.showScalarOptions);
-export const selectRefreshing = createSelector(selectCompareHeader, state => state ? {refreshing: state.refreshing, autoRefresh: state.autoRefresh} : {refreshing: false, autoRefresh: false});
 export const selectExperimentsUpdateTime = createSelector(selectCompareHeader, state => state ? state.experimentsUpdateTime : {});
 export const selectNavigationPreferences = createSelector(selectCompareHeader, state => state ? state.navigationPreferences : {});
 

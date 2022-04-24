@@ -3,17 +3,17 @@ import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {select, Store} from '@ngrx/store';
 import {activeLoader, deactivateLoader, setServerError} from '../../core/actions/layout.actions';
 import {catchError, mergeMap, map, switchMap, withLatestFrom} from 'rxjs/operators';
-import {ApiTasksService} from '../../../business-logic/api-services/tasks.service';
+import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
 import {ExperimentDetailsReverterService} from '../services/experiment-details-reverter.service';
 import {requestFailed} from '../../core/actions/http.actions';
 import {selectExperimentIdsDetails, selectExperimentsDetails} from '../reducers';
 import {Observable, of} from 'rxjs';
-import {IExperimentDetail} from '../../../features/experiments-compare/experiments-compare-models';
-import {REFETCH_EXPERIMENT_REQUESTED, refetchExperimentRequested, setRefreshing} from '../actions/compare-header.actions';
+import {IExperimentDetail} from '~/features/experiments-compare/experiments-compare-models';
+import {REFETCH_EXPERIMENT_REQUESTED, refetchExperimentRequested} from '../actions/compare-header.actions';
 import {ExperimentCompareDetailsState} from '../reducers/experiments-compare-details.reducer';
 import {experimentListUpdated, setExperiments} from '../actions/experiments-compare-details.actions';
-import {getCompareDetailsOnlyFields} from '../../../features/experiments-compare/experiments-compare-consts';
-import {selectHasDataFeature} from '../../../core/reducers/users.reducer';
+import {getCompareDetailsOnlyFields} from '~/features/experiments-compare/experiments-compare-consts';
+import {selectHasDataFeature} from '~/core/reducers/users.reducer';
 
 @Injectable()
 export class ExperimentsCompareDetailsEffects {
@@ -61,13 +61,11 @@ export class ExperimentsCompareDetailsEffects {
     switchMap(([action, newExperimentIds, hasDataFeature]) => this.fetchExperimentDetails$(newExperimentIds, hasDataFeature).pipe(
         mergeMap(experiments => [
           deactivateLoader(action.type),
-          setRefreshing({payload: false}),
           setExperiments({experiments})
         ]),
         catchError(error => [
           requestFailed(error),
           deactivateLoader(action.type),
-          setRefreshing({payload: false}),
           setServerError(
             error, null,
             'The attempt to retrieve your experiment data failed. Refresh your browser and try again.',
