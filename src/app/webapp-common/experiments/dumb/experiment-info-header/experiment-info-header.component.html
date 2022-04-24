@@ -8,7 +8,6 @@
         class="edit-name"
         [originalText]="infoData?.name || experiment?.name"
         [editable]="editable"
-        [minWidth]="250"
         (textChanged)="onNameChanged($event)"
         (inlineActiveStateChanged)="editExperimentName($event)"
         [warning]="isDev && 'Renaming a DEV experiment without changing the code to reflect the rename, will create a new experiment the next time the code is executed.'"

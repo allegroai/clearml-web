@@ -9,7 +9,7 @@ import {EventEmitter} from '@angular/core';
 export class DebugImagesViewComponent {
 
   public trackKey = (index: number, item: any) => item.iter;
-  public trackFrame = (index: number, item: any) => item.key;
+  public trackFrame = (index: number, item: any) => `${item?.key} ${item?.timestamp}`;
   public iterationEvents;
 
   @Input() experimentId;

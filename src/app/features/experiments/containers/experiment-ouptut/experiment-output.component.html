@@ -63,8 +63,6 @@
       <sm-refresh-button
         *ngIf=" ! minimized"
         class="light-theme"
-        [autoRefreshState]="autoRefreshState$ | async"
-        (refreshList)="refresh(false)"
         (setAutoRefresh)="setAutoRefresh($event)"
       >
       </sm-refresh-button>

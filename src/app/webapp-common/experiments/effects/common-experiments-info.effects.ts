@@ -13,7 +13,13 @@ import {
 import {IExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {ExperimentReverterService} from '~/features/experiments/shared/services/experiment-reverter.service';
 import {requestFailed} from '../../core/actions/http.actions';
-import {activeLoader, deactivateLoader, setBackdrop, setServerError} from '../../core/actions/layout.actions';
+import {
+  activeLoader,
+  addMessage,
+  deactivateLoader,
+  setBackdrop,
+  setServerError
+} from '../../core/actions/layout.actions';
 import {selectAppVisible} from '../../core/reducers/view.reducer';
 import * as commonInfoActions from '../actions/common-experiments-info.actions';
 import {
@@ -56,7 +62,10 @@ import {ResetOutput} from '../actions/common-experiment-output.actions';
 import {HttpErrorResponse} from '@angular/common/http';
 import {selectHasDataFeature} from '~/core/reducers/users.reducer';
 import {selectSelectedProject} from '../../core/reducers/projects.reducer';
-import {PIPELINE_INFO_ONLY_FIELDS, PIPELINE_STEP_ONLY_FIELDS} from '@common/pipelines-controller/controllers.consts';
+import {PIPELINE_INFO_ONLY_FIELDS} from '@common/pipelines-controller/controllers.consts';
+import {TasksGetByIdExResponse} from '~/business-logic/model/tasks/tasksGetByIdExResponse';
+import {ARTIFACTS_ONLY_FIELDS} from '@common/experiments/experiment.consts';
+import {ITask} from '~/business-logic/model/al-task';
 
 
 @Injectable()
@@ -116,15 +125,12 @@ export class CommonExperimentsInfoEffects {
             deactivateLoader(action.type),
           ];
         }),
-        catchError(error => {
-          console.log(error);
-          return [
-            requestFailed(error),
-            deactivateLoader(action.type),
-            setServerError(error, null, 'Fetch configuration names failed',
-              action.type === commonInfoActions.AUTO_REFRESH_EXPERIMENT_INFO)
-          ];
-        })
+        catchError(error => [
+          requestFailed(error),
+          deactivateLoader(action.type),
+          setServerError(error, null, 'Fetch configuration names failed',
+            action.type === commonInfoActions.AUTO_REFRESH_EXPERIMENT_INFO)
+        ])
       )
     )
   ));
@@ -141,53 +147,49 @@ export class CommonExperimentsInfoEffects {
         tasks: [experimentId],
         names: [action.type === getPipelineConfigurationObj.type ? 'Pipeline' : configObj]
       })
-        .pipe(
-          mergeMap((res: any) => {
-            const configurationObj = {
-              ...configuration,
-              [action.type === getPipelineConfigurationObj.type ? 'Pipeline' : configObj]: res.configurations[0].configuration[0]
-            };
-            return [
-              new commonInfoActions.UpdateExperimentInfoData({
-                id: experimentId,
-                changes: {configuration: configurationObj}
-              }),
-              deactivateLoader(action.type),
-              setBackdrop({payload: false}),
-              new DeactivateEdit(),
-              setExperimentSaving({saving: false})
-            ];
-          }),
-          catchError(error => {
-            console.log(error);
-            return [
-              requestFailed(error),
-              deactivateLoader(action.type),
-              setBackdrop({payload: false}),
-              new DeactivateEdit(),
-              setExperimentSaving({saving: false}),
-              setServerError(error, null, 'Fetch configuration failed',
-                action.type === commonInfoActions.AUTO_REFRESH_EXPERIMENT_INFO)
-            ];
-          })
-        )
+      .pipe(
+        mergeMap((res: any) => {
+          const configurationObj = {
+            ...configuration,
+            [action.type === getPipelineConfigurationObj.type ? 'Pipeline' : configObj]: res.configurations[0].configuration[0]
+          };
+          return [
+            new commonInfoActions.UpdateExperimentInfoData({
+              id: experimentId,
+              changes: {configuration: configurationObj}
+            }),
+            deactivateLoader(action.type),
+            setBackdrop({payload: false}),
+            new DeactivateEdit(),
+            setExperimentSaving({saving: false})
+          ];
+        }),
+        catchError(error => [
+          requestFailed(error),
+          deactivateLoader(action.type),
+          setBackdrop({payload: false}),
+          new DeactivateEdit(),
+          setExperimentSaving({saving: false}),
+          setServerError(error, null, 'Fetch configuration failed',
+            action.type === commonInfoActions.AUTO_REFRESH_EXPERIMENT_INFO)
+        ])
+      )
     )
   ));
   getPipelineStep$ = createEffect(() => this.actions$.pipe(
     ofType(commonInfoActions.getSelectedPipelineStep),
     switchMap((action) => this.apiTasks.tasksGetByIdEx({
       id: [action.id],
-      only_fields: PIPELINE_STEP_ONLY_FIELDS
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      only_fields: PIPELINE_INFO_ONLY_FIELDS
     }).pipe(
-      mergeMap((res: any) => {
-        return [commonInfoActions.setSelectedPipelineStep({step: res?.tasks[0]}), deactivateLoader(action.type),]
-      }),
-      catchError(error => {
-        return [
-          requestFailed(error),
-          deactivateLoader(action.type),
-        ];
-      })
+      mergeMap((res: any) =>
+        [commonInfoActions.setSelectedPipelineStep({step: res?.tasks[0]}), deactivateLoader(action.type)]
+      ),
+      catchError(error => [
+        requestFailed(error),
+        deactivateLoader(action.type),
+      ])
     ))
   ));
 
@@ -214,6 +216,7 @@ export class CommonExperimentsInfoEffects {
 
       const listed = experiments.find(e => e.id === currentSelected?.id);
       return (listed ? of(listed) :
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         this.apiTasks.tasksGetByIdEx({id: [selected.id], only_fields: ['last_change']}).pipe(map(res => res.tasks[0])))
         .pipe(map(task => [action, task?.last_change ?? task?.last_update, task, selected, pipelines]));
     }),
@@ -253,6 +256,7 @@ export class CommonExperimentsInfoEffects {
     switchMap(([action, hasDataFeature, pipeline]) =>
       this.apiTasks.tasksGetByIdEx({
         id: [action.experimentId],
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         only_fields: pipeline ? PIPELINE_INFO_ONLY_FIELDS : getExperimentInfoOnlyFields(hasDataFeature)
       })
         .pipe(
@@ -293,6 +297,7 @@ export class CommonExperimentsInfoEffects {
   fetchDiff$ = createEffect(() => this.actions$.pipe(
     ofType(commonInfoActions.getExperimentUncommittedChanges),
     switchMap((action) =>
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       this.apiTasks.tasksGetByIdEx({id: [action.experimentId], only_fields: ['script.diff']})
         .pipe(
           mergeMap(res => {
@@ -304,6 +309,23 @@ export class CommonExperimentsInfoEffects {
     )
   ));
 
+  fetchArtifacts$ = createEffect(() => this.actions$.pipe(
+    ofType(commonInfoActions.getExperimentArtifacts),
+    switchMap((action) =>
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      this.apiTasks.tasksGetByIdEx({id: [action.experimentId], only_fields: ARTIFACTS_ONLY_FIELDS})
+        .pipe(
+          mergeMap((res: TasksGetByIdExResponse) => {
+            const experiment = res.tasks[0] as unknown as ITask;
+            return [commonInfoActions.setExperimentArtifacts({
+              model: this.reverter.commonExperimentReverterService.revertModel(experiment),
+              experimentId: action.experimentId
+            })];
+          }),
+          catchError(e => [addMessage('error', e.toString())])
+        )
+    )
+  ));
 
 
   // Changes fields which can be applied regardless of experiment draft state i.e name, comments, tags
@@ -374,9 +396,14 @@ export class CommonExperimentsInfoEffects {
       const {type, parent, ...changes} = action;
       return this.apiTasks.tasksEdit({task: selectedExperiment.id, ...changes, ...(parent && {parent: parent.id})})
         .pipe(
-          mergeMap(() => [
-            new commonInfoActions.ExperimentUpdatedSuccessfully(selectedExperiment.id),
-          ]),
+          mergeMap(() => 'models' in changes ?
+            [
+              commonInfoActions.getExperimentArtifacts({experimentId: selectedExperiment.id}),
+              new DeactivateEdit(),
+              setBackdrop({payload: false})
+            ] :
+            [new commonInfoActions.ExperimentUpdatedSuccessfully(selectedExperiment.id)]
+          ),
           catchError(err => [
             requestFailed(err),
             setServerError(err),
@@ -400,6 +427,7 @@ export class CommonExperimentsInfoEffects {
       this.apiTasks.tasksEditHyperParams({
         task: selectedExperiment.id,
         hyperparams: action.hyperparams.length > 0 ? action.hyperparams : [{section}],
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         replace_hyperparams: ReplaceHyperparamsEnum.Section
       })
         .pipe(

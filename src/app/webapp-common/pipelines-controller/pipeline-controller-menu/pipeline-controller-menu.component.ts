@@ -21,7 +21,7 @@ import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
   styleUrls: ['./pipeline-controller-menu.component.scss']
 })
 export class PipelineControllerMenuComponent extends ExperimentMenuComponent implements OnInit {
-  entityTypeEnum = EntityTypeEnum;
+  EntityTypeEnum = EntityTypeEnum;
 
   constructor(
     protected blTaskService: BlTasksService,
@@ -41,16 +41,16 @@ export class PipelineControllerMenuComponent extends ExperimentMenuComponent imp
   }
 
   runPipelineController(runNew: boolean = false) {
-    this.dialog.open(RunPipelineControllerDialogComponent, {
+    const runPipelineDialog = this.dialog.open(RunPipelineControllerDialogComponent, {
       data: {task: runNew ? null : this._experiment}
-    }).afterClosed()
-      .pipe(filter(res => !!res?.confirmed))
-      .subscribe((res) => this.store.dispatch(commonMenuActions.startPipeline({
-          task: res.task,
-          args: res.args,
-          queue: res.queue
-        }))
-      );
+    });
+    runPipelineDialog.afterClosed().pipe(filter(res => !!res.confirmed)).subscribe((res) => {
+      this.store.dispatch(commonMenuActions.startPipeline({
+        task: res.task,
+        args: res.args,
+        queue: res.queue
+      }))
+    })
   }
 
   continueController() {

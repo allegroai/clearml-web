@@ -1,4 +1,16 @@
-@import "../../../shared/ui-components/styles/variables";
+@import "../../shared/ui-components/styles/variables";
+
+$credentialBaseHeight: 238px;
+
+:host {
+  ::ng-deep .sub-header {
+    padding: 0 32px;
+  }
+
+  ::ng-deep .al-ico-copy-to-clipboard {
+    margin-top: -4px;
+  }
+}
 
 .welcome-content {
   padding: 10px 32px;
@@ -59,7 +71,8 @@
 
 .steps-content {
   padding: 0 32px 10px 32px;
-  .step-container:not(:first-child){
+
+  .step-container:not(:first-child) {
     margin: 20px 0;
   }
 
@@ -69,6 +82,7 @@
     margin-bottom: 12px;
     width: 530px;
   }
+
   .step-header {
     color: $blue-500;
     margin-bottom: 4px;
@@ -80,18 +94,23 @@
     color: $blue-500;
     font-size: 14px;
   }
-  .sub-note{
-    margin: 2px 0 0;
+
+  .sub-note {
+    margin: 2px 0 2px;
     font-size: 12px;
     line-height: 1.5;
-    color:$blue-400;
+    color: $blue-400;
+  }
+
+  .bolder {
+    font-weight: 500;
   }
 
   .code {
     position: relative;
 
     margin: 1px 0 2px;
-    width: 530px;
+    width: 100%;
     color: $blue-100;
     background-color: $blue-900;
     border-radius: 4px;
@@ -133,21 +152,24 @@
       visibility: hidden;
       position: absolute;
       right: 10px;
-      top: 10px;
-      background-color: rgba(0, 0, 0, 0.2);
+      top: 8px;
     }
   }
 
   .cred-step {
-    height: 238px;
+    height: $credentialBaseHeight;
     transition: height 1s ease;
 
+    &.has-ws {
+      height: $credentialBaseHeight + 10;
+    }
+
     &.has-label {
-      height: 272px;
+      height: $credentialBaseHeight + 20;
     }
 
     &.first-step {
-      height: 90px;
+      height: 60px;
     }
   }
 
@@ -158,6 +180,8 @@
 
     &.invisible {
       opacity: 0;
+      height: 0;
+      overflow: hidden;
       visibility: hidden;
     }
   }
@@ -168,8 +192,43 @@
   }
 
   .create-cred-button {
-    margin-top: 18px;
     height: 36px;
-    padding: 0px 28px;
+    padding: 0 28px;
   }
+}
+
+nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 36px;
+  margin: 12px 32px 16px 32px;
+  border-bottom: 1px solid $separator-line;
+
+  .nav-item {
+    padding: 0 12px;
+    color: $blue-300;
+    border-bottom: 4px solid transparent;
+    margin: 0 1px;
+
+    .al-ico-video {
+      margin-bottom: 6px;
+    }
+    &:hover {
+      border-bottom-color: $purple;
+      color: $purple;
+    }
+  }
+
+  .selected {
+    border-bottom-color: $purple;
+    color: $purple;
+  }
+}
+
+.new-experiment-table {
+  height: 120px;
+  background-image: url("../../assets/icons/new-experiment-table.png");
+  background-size: 100%;
+  background-repeat: no-repeat;
 }

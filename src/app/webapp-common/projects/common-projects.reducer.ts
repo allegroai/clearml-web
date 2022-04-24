@@ -1,8 +1,14 @@
-import {createSelector} from '@ngrx/store';
+import {on, createSelector, ReducerTypes, createReducer} from '@ngrx/store';
 import {Project} from '~/business-logic/model/projects/project';
 import {TABLE_SORT_ORDER, TableSortOrderEnum} from '../shared/ui-components/data/table/table.consts';
-import {PROJECTS_ACTIONS} from './common-projects.consts';
-import {setCurrentScrollId, setProjectsSearchQuery, updateProjectSuccess} from './common-projects.actions';
+import {
+  addToProjectsList, checkProjectForDeletion, resetProjects,
+  resetProjectsSearchQuery, resetReadyToDelete,
+  setCurrentScrollId, setNoMoreProjects, setProjectReadyForDeletion, setProjectsOrderBy,
+  setProjectsSearchQuery,
+  setTableModeAwareness,
+  updateProjectSuccess
+} from './common-projects.actions';
 import {ICommonSearchState} from '../common-search/common-search.reducer';
 
 export interface CommonProjectReadyForDeletion {
@@ -22,6 +28,7 @@ export interface ICommonProjectsState {
   projectReadyForDeletion: CommonProjectReadyForDeletion;
   noMoreProjects: boolean;
   scrollId: string;
+  tableModeAwareness: boolean;
 }
 
 export const commonProjectsInitState: ICommonProjectsState = {
@@ -39,6 +46,7 @@ export const commonProjectsInitState: ICommonProjectsState = {
   },
   noMoreProjects: true,
   scrollId: null,
+  tableModeAwareness: true,
 };
 
 const getCorrectSortingOrder = (currentSortOrder: TableSortOrderEnum, currentOrderField: string, nextOrderField: string) => {
@@ -49,63 +57,44 @@ const getCorrectSortingOrder = (currentSortOrder: TableSortOrderEnum, currentOrd
   }
 };
 
-export const commonProjectsReducer = (state: ICommonProjectsState = commonProjectsInitState, action): ICommonProjectsState => {
-
-  switch (action.type) {
-
-    case PROJECTS_ACTIONS.SET_PROJECTS:
-      return {...state, projects: action.payload.projects};
-    case PROJECTS_ACTIONS.ADD_TO_PROJECTS_LIST:
-      return {...state, projects: [...(state.projects || []), ...action.payload.projects]};
-    case setCurrentScrollId.type:
-      return {...state, scrollId: action.scrollId};
-    case PROJECTS_ACTIONS.SET_NO_MORE_PROJECTS:
-      return {...state, noMoreProjects: action.payload};
-    case PROJECTS_ACTIONS.SET_PROJECTS_NON_FILTERED_LIST:
-      return {...state, projectsNonFilteredList: action.payload.projects};
-    case updateProjectSuccess.type: {
-      const payload = action as ReturnType<typeof updateProjectSuccess>;
-      return {
-        ...state,
-        projects: state.projects?.map(ex => ex.id === payload.id ? {...ex, ...payload.changes} : ex)
-      };
+export const commonProjectsReducers = [
+  on(addToProjectsList, (state, action) => ({...state, projects: [...(state.projects || []), ...action.projects]})),
+  on(setCurrentScrollId, (state, action) => ({...state, scrollId: action.scrollId})),
+  on(setNoMoreProjects, (state, action) => ({...state, noMoreProjects: action.payload})),
+  on(updateProjectSuccess, (state, action) => ({...state, projects: state.projects?.map(ex => ex.id === action.id ? {...ex, ...action.changes} : ex)})),
+  on(resetProjects, state => ({...state, scrollId: null, noMoreProjects: false, projects: commonProjectsInitState.projects})),
+  on(setProjectsOrderBy, (state, action) => ({
+    ...state,
+    orderBy: action.orderBy,
+    sortOrder: getCorrectSortingOrder(state.sortOrder, state.orderBy, action.orderBy),
+    scrollId: null,
+    noMoreProjects: false,
+    projects: commonProjectsInitState.projects
+  })),
+  on(setProjectsSearchQuery, (state, action) => ({
+    ...state,
+    searchQuery: (action as ReturnType<typeof setProjectsSearchQuery>),
+    scrollId: null,
+    noMoreProjects: false, projects: commonProjectsInitState.projects
+  })),
+  on(resetProjectsSearchQuery, state => ({
+    ...state,
+    searchQuery: commonProjectsInitState.searchQuery,
+    scrollId: null,
+    noMoreProjects: false, projects: commonProjectsInitState.projects
+  })),
+  on(checkProjectForDeletion, (state, action) => ({
+    ...state,
+    projectReadyForDeletion: {
+      ...commonProjectsInitState.projectReadyForDeletion,
+      project: action.project
     }
-    case PROJECTS_ACTIONS.SET_PROJECT_BY_ID: {
-      const selectedProjectIndex = state.projects.findIndex(project => project.id === action.payload.res.project.id);
-      const projectListInst = [...state.projects];
-      projectListInst[selectedProjectIndex] = Object.assign({}, state.projects[selectedProjectIndex], action.payload.res.project);
-      return {...state, selectedProject: action.payload.res.project, projects: projectListInst};
-    }
-    case PROJECTS_ACTIONS.SELECT_PROJECT: {
-      const selectedProjectIndex = state.projects.findIndex(project =>
-        project.id === action.payload.projectId
-      );
-      const selectedProject = state.projects[selectedProjectIndex];
-      return {...state, selectedProjectId: action.payload.projectId, selectedProject};
-    }
-    case PROJECTS_ACTIONS.CREATE_PROJECT_SUCCESS:
-      return {...state, selectedProjectId: action.payload.projectId};
-    case PROJECTS_ACTIONS.SELECT_ALL_PROJECTS:
-      return {...state, selectedProjectId: null, selectedProject: {}};
-      // TODO: do we need to reset this in new delete?
-    case PROJECTS_ACTIONS.RESET_PROJECTS:
-      return {...state, scrollId: null, noMoreProjects: false, projects: commonProjectsInitState.projects};
-    case PROJECTS_ACTIONS.SET_ORDER_BY:
-      return {...state, orderBy: action.payload.orderBy, sortOrder: getCorrectSortingOrder(state.sortOrder, state.orderBy, action.payload.orderBy), scrollId: null, noMoreProjects: false, projects: commonProjectsInitState.projects};
-    case setProjectsSearchQuery.type:
-      return {...state, searchQuery: (action as ReturnType<typeof setProjectsSearchQuery>), scrollId: null, noMoreProjects: false, projects: commonProjectsInitState.projects};
-    case PROJECTS_ACTIONS.RESET_SEARCH_QUERY:
-      return {...state, searchQuery: commonProjectsInitState.searchQuery, scrollId: null, noMoreProjects: false, projects: commonProjectsInitState.projects};
-    case PROJECTS_ACTIONS.CHECK_PROJECT_FOR_DELETION:
-      return {...state, projectReadyForDeletion: {...commonProjectsInitState.projectReadyForDeletion, project: action.payload.project}};
-    case PROJECTS_ACTIONS.RESET_READY_TO_DELETE:
-      return {...state, projectReadyForDeletion: commonProjectsInitState.projectReadyForDeletion};
-    case PROJECTS_ACTIONS.SET_PROJECT_READY_FOR_DELETION:
-      return {...state, projectReadyForDeletion: {...state.projectReadyForDeletion, ...action.payload.readyForDeletion}};
-    default:
-      return state;
-  }
-};
+  })),
+  on(resetReadyToDelete, state => ({...state, projectReadyForDeletion: commonProjectsInitState.projectReadyForDeletion})),
+  on(setProjectReadyForDeletion, (state, action) => ({...state, projectReadyForDeletion: {...state.projectReadyForDeletion, ...action.readyForDeletion}})),
+  on(setTableModeAwareness, (state, action) => ({...state, tableModeAwareness: (action as ReturnType<typeof setTableModeAwareness>).awareness})),
+] as ReducerTypes<ICommonProjectsState, any>[];
+export const commonProjectsReducer = createReducer(commonProjectsInitState, ...commonProjectsReducers);
 
 export const projects = state => state.projects as ICommonProjectsState;
 
@@ -120,3 +109,4 @@ export const selectProjectReadyForDeletion = createSelector(projects, state => s
 export const selectProjectForDelete = createSelector(projects, state => [state?.projectReadyForDeletion.project]);
 export const selectNoMoreProjects = createSelector(projects, state => state.noMoreProjects);
 export const selectProjectsScrollId = createSelector(projects, (state): string => state?.scrollId || null);
+export const selectTableModeAwareness = createSelector(projects, state => state?.tableModeAwareness);

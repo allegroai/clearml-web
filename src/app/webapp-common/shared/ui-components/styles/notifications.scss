@@ -34,7 +34,7 @@ $levels-list: error warn info success;
       border-left: solid 4px map-get($level-colors, $level);
 
       &:before {
-        background-image: url("#{$assets-icons-path}/#{$level}.svg");
+        background-image: url("../../../assets/icons/#{$level}.svg");
       }
       &has-actions {
         &:before {

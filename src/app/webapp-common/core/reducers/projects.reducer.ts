@@ -1,17 +1,6 @@
-import {createSelector} from '@ngrx/store';
+import {on, createReducer, createSelector} from '@ngrx/store';
 import * as projectsActions from '../actions/projects.actions';
-import {
-  addAllProjectTags,
-  setAllProjects,
-  setCompanyTags,
-  setGraphData,
-  setLastUpdate,
-  setMetricVariant, setAllProjectTags,
-  setTagColors,
-  setTags,
-  setTagsFilterByProject,
-  TagColor
-} from '../actions/projects.actions';
+import {TagColor} from '../actions/projects.actions';
 import {Project} from '~/business-logic/model/projects/project';
 import {getSystemTags} from '~/features/experiments/shared/experiments.utils';
 import {ITableExperiment} from '../../experiments/shared/common-experiment-model.model';
@@ -36,7 +25,6 @@ export interface RootProjects {
   archive: boolean;
   deep: boolean;
   projectTags: string[];
-  allProjectsTags: string[];
   companyTags: string[];
   systemTags: string[];
   tagsColors: { [tag: string]: TagColor };
@@ -52,7 +40,6 @@ const initRootProjects: RootProjects = {
   archive: false,
   deep: false,
   projectTags: [],
-  allProjectsTags: [],
   companyTags: [],
   systemTags: [],
   tagsColors: {},
@@ -72,7 +59,6 @@ export const selectIsDeepMode = createSelector(projects, state => state.deep);
 export const selectTagsFilterByProject = createSelector(projects, state => state.tagsFilterByProject);
 export const selectProjectTags = createSelector(projects, state => state.projectTags);
 export const selectCompanyTags = createSelector(projects, state => state.companyTags);
-export const selectAllProjectsTagsTags = createSelector(projects, state => state.allProjectsTags);
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const selectProjectSystemTags = createSelector(projects, state => getSystemTags({system_tags: state.systemTags} as ITableExperiment));
 export const selectTagsColors = createSelector(projects, state => state.tagsColors);
@@ -80,85 +66,62 @@ export const selectLastUpdate = createSelector(projects, (state): string => stat
 export const selectTagColors = createSelector(selectTagsColors,
   (tagsColors, props: { tag: string }) => tagsColors[props.tag]);
 const selectSelectedProjectsMetricVariant = createSelector(projects, state => state.graphVariant);
-
 export const selectSelectedMetricVariant = createSelector(selectSelectedProjectsMetricVariant,
   (projectsVariant, projectId: string) => projectsVariant[projectId]);
-
 export const selectSelectedMetricVariantForCurrProject = createSelector(
   selectSelectedProjectsMetricVariant, selectSelectedProjectId,
   (projectsVariant, projectId) => projectsVariant[projectId]);
-
 export const selectGraphData = createSelector(projects, state => state.graphData);
 
+export const projectsReducer = createReducer(
+  initRootProjects,
+  on(projectsActions.resetProjects, state => ({...state, projects: [], lastUpdate: null})),
+  on(projectsActions.setAllProjects, (state, action) => {
+    let newProjects = state.projects;
+    if (action.updating) {
+      action.projects.forEach(proj => {
+        const index = state.projects.findIndex(stateProject => stateProject.id === proj.id);
+        if (index > -1) {
+          newProjects = [...newProjects.slice(0, index), proj, ...newProjects.slice(index + 1)];
+        } else {
+          newProjects = [...newProjects, proj];
+        }
+      });
+    } else {
+      newProjects = [...newProjects, ...action.projects];
+    }
+    return {...state, projects: sortByField(newProjects, 'name')};
 
-export const projectsReducer = (state: RootProjects = initRootProjects, action) => {
-  switch (action.type) {
-    case projectsActions.resetProjects.type:
-      return {...state, projects: [], lastUpdate: null};
-    case projectsActions.setAllProjects.type:
-      const payload = action as ReturnType<typeof setAllProjects>;
-      let newProjects = state.projects;
-      if (payload.updating) {
-        payload.projects.forEach(proj => {
-          const index = state.projects.findIndex(stateProject => stateProject.id === proj.id);
-          if (index > -1) {
-            newProjects = [...newProjects.slice(0, index), proj, ...newProjects.slice(index + 1)];
-          } else {
-            newProjects = [...newProjects, proj];
-          }
-        });
-      } else {
-        newProjects = [...newProjects, ...payload.projects];
-      }
-      return {...state, projects: sortByField(newProjects, 'name')};
-    case projectsActions.setSelectedProjectId.type: {
-      const projectId = (action as ReturnType<typeof projectsActions.setSelectedProjectId>).projectId;
-      return {
-        ...state,
-        ...(state.selectedProject?.id !== projectId && {archive: initRootProjects.archive}),
-        graphData: initRootProjects.graphData,
-      };
-    }
-    case projectsActions.setSelectedProject.type:
-      return {...state, selectedProject: action.project};
-    case projectsActions.deletedProjectFromRoot.type:
-      const projectIdsToDelete = [action.project.id].concat(action.project.sub_projects.map(project=> project.id))
-      return {...state, projects: state.projects.filter(project=> !projectIdsToDelete.includes(project.id))};
-    case projectsActions.resetSelectedProject.type:
-      return {...state, selectedProject: initRootProjects.selectedProject};
-    case projectsActions.updateProjectCompleted.type: {
-      const payload = action as ReturnType<typeof projectsActions.updateProjectCompleted>;
-      return {
-        ...state,
-        selectedProject: {...state.selectedProject, ...payload.changes},
-        projects: state.projects.map(project => project.id === payload.id ? project : {...project, ...payload.changes})
-      };
-    }
-    case projectsActions.setArchive.type:
-      return {...state, archive: action.archive};
-    case projectsActions.setDeep.type:
-      return {...state, deep: action.deep};
-    case setTags.type:
-      return {...state, projectTags: action.tags};
-    case setTagsFilterByProject.type:
-      return {...state, tagsFilterByProject: action.tagsFilterByProject};
-    case setCompanyTags.type:
-      return {...state, companyTags: action.tags, systemTags: action.systemTags};
-    case setAllProjectTags.type:
-      return {...state, allProjectsTags: action.tags};
-    case addAllProjectTags.type:
-      return {...state, allProjectsTags: Array.from(new Set(state.allProjectsTags.concat(action.tags))).sort()};
-    case setTagColors.type:
-      return {...state, tagsColors: {...state.tagsColors, [action.tag]: action.colors}};
-    case setMetricVariant.type: {
-      const payLoad = action as ReturnType<typeof setMetricVariant>;
-      return {...state, graphVariant: {...state.graphVariant, [payLoad.projectId]: payLoad.col}};
-    }
-    case setGraphData.type:
-      return {...state, graphData: (action as ReturnType<typeof setGraphData>).stats};
-    case setLastUpdate.type:
-      return {...state, lastUpdate: (action as ReturnType<typeof setLastUpdate>).lastUpdate};
-    default:
-      return state;
-  }
-};
+  }),
+  on(projectsActions.setSelectedProjectId, (state, action) => {
+    const projectId = action.projectId;
+    return {
+      ...state,
+      ...(state.selectedProject?.id !== projectId && {archive: initRootProjects.archive}),
+      graphData: initRootProjects.graphData,
+    };
+  }),
+  on(projectsActions.setSelectedProject, (state, action) => ({...state, selectedProject: action.project})),
+  on(projectsActions.deletedProjectFromRoot, (state, action) => {
+    const projectIdsToDelete = [action.project.id].concat(action.project.sub_projects.map(project=> project.id))
+    return {...state, projects: state.projects.filter(project=> !projectIdsToDelete.includes(project.id))};
+  }),
+  on(projectsActions.resetSelectedProject, state => ({...state, selectedProject: initRootProjects.selectedProject})),
+  on(projectsActions.updateProjectCompleted, (state, action) => ({
+    ...state,
+    selectedProject: {...state.selectedProject, ...action.changes},
+    projects: state.projects.map(project => project.id === action.id ? project : {...project, ...action.changes})
+  })),
+  on(projectsActions.setArchive, (state, action) => ({...state, archive: action.archive})),
+  on(projectsActions.setDeep, (state, action) => ({...state, deep: action.deep})),
+  on(projectsActions.setTags, (state, action) => ({...state, projectTags: action.tags})),
+  on(projectsActions.setTagsFilterByProject, (state, action) => ({...state, tagsFilterByProject: action.tagsFilterByProject})),
+  on(projectsActions.setCompanyTags, (state, action) => ({...state, companyTags: action.tags, systemTags: action.systemTags})),
+  on(projectsActions.addProjectTags, (state, action) => ({...state, projectTags: Array.from(new Set(state.projectTags.concat(action.tags))).sort()})),
+  on(projectsActions.setTagColors, (state, action) => ({...state, tagsColors: {...state.tagsColors, [action.tag]: action.colors}})),
+  on(projectsActions.setMetricVariant, (state, action) => ({
+    ...state, graphVariant: {...state.graphVariant, [action.projectId]: action.col}
+  })),
+  on(projectsActions.setGraphData, (state, action) => ({...state, graphData: action.stats})),
+  on(projectsActions.setLastUpdate, (state, action) => ({...state, lastUpdate: action.lastUpdate})),
+);

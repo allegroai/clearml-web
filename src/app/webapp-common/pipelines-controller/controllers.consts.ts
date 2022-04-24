@@ -14,7 +14,7 @@ export const INITIAL_CONTROLLER_TABLE_COLS: ISmCol[] = [
     headerStyleClass: 'selected-col-header',
     style: {width: '65px'},
     disableDrag: true,
-    disablePointerEvents: true
+    disablePointerEvents: true,
   },
   {
     id: EXPERIMENTS_TABLE_COL_FIELDS.NAME,
@@ -126,6 +126,9 @@ export const PIPELINE_INFO_ONLY_FIELDS = [
   'last_update',
   'last_change',
   'completed',
+  'models.output.model.name',
+  'models.input.model.name',
+  'execution.artifacts',
   'execution.queue',
   'configuration',
   'hyperparams',
@@ -133,12 +136,7 @@ export const PIPELINE_INFO_ONLY_FIELDS = [
   'published',
   'runtime',
   'last_metrics',
-  'runtime._pipeline_hash'
-];
-
-export const PIPELINE_STEP_ONLY_FIELDS = [
-  ...PIPELINE_INFO_ONLY_FIELDS,
+  'runtime._pipeline_hash',
   'models.output.model.name',
-  'models.input.model.name',
   'execution.artifacts'
 ];

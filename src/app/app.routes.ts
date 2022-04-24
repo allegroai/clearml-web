@@ -7,7 +7,6 @@ import {ProjectRedirectGuardGuard} from '@common/shared/guards/project-redirect.
 
 export const routes: Routes = [
   {path: '', redirectTo: 'dashboard', pathMatch: 'full'},
-  {path: 'admin', redirectTo: 'settings', pathMatch: 'full'},
   {
     path: 'dashboard',
     loadChildren: () => import('./features/dashboard/dashboard.module').then(m => m.DashboardModule),

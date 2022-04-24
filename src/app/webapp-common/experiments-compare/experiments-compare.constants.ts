@@ -1,6 +1,3 @@
-import { EXPERIMENTS_TABLE_COL_FIELDS } from "../../features/experiments/shared/experiments.const";
-import {ColHeaderFilterTypeEnum, ColHeaderTypeEnum, ISmCol} from "../shared/ui-components/data/table/table.consts";
-
 export const RENAME_MAP = {
   'network_design': 'Network Design',
   'uncommitted_changes': 'Uncommitted Changes',
@@ -49,138 +46,15 @@ export const COMPARE_DETAILS_ONLY_FIELDS_BASE = [
   'last_iteration',
   'configuration'
 ];
-export const ADD_EXPERIMENT_FOR_COMPARE_TABLE_COLS: ISmCol[] = [
-  {
-    id              : EXPERIMENTS_TABLE_COL_FIELDS.SELECTED,
-    sortable        : false,
-    filterable      : false,
-    headerType      : ColHeaderTypeEnum.checkBox,
-    header          : '',
-    hidden          : false,
-    static          : true,
-    bodyStyleClass  : 'selected-col-body type-col',
-    headerStyleClass: 'selected-col-header',
-    style           : {width: '50px'},
-    disableDrag     : true,
-    disablePointerEvents: true
-  },
-  {
-    id            : EXPERIMENTS_TABLE_COL_FIELDS.TYPE,
-    headerType    : ColHeaderTypeEnum.sortFilter,
-    sortable      : false,
-    filterable    : false,
-    static        : true,
-    header        : 'TYPE',
-    bodyStyleClass: 'type-col',
-    style         : {width: '115px'},
-  },
-  {
-    id          : EXPERIMENTS_TABLE_COL_FIELDS.NAME,
-    headerType  : ColHeaderTypeEnum.sortFilter,
-    sortable    : false,
-    static      : true,
-    header      : 'NAME',
-    style       : {width: '400px'},
-  },
-  {
-    id: EXPERIMENTS_TABLE_COL_FIELDS.TAGS,
-    headerType      : ColHeaderTypeEnum.sortFilter,
-    filterable: false,
-    searchableFilter: false,
-    sortable: false,
-    static: true,
-    header: 'TAGS',
-    style: {width: '300px'},
-    andFilter: true
-  },
-  {
-    id          : EXPERIMENTS_TABLE_COL_FIELDS.STATUS,
-    headerType  : ColHeaderTypeEnum.sortFilter,
-    filterable  : false,
-    static      : false,
-    header      : 'STATUS',
-    style       : {width: '115px'},
-  },
-  {
-    id          : EXPERIMENTS_TABLE_COL_FIELDS.PROJECT,
-    headerType  : ColHeaderTypeEnum.title,
-    static      : true,
-    header      : 'PROJECT',
-    style       : {width: '150px'},
-  },
-  {
-    id              : EXPERIMENTS_TABLE_COL_FIELDS.USER,
-    getter          : 'user.name',
-    headerType      : ColHeaderTypeEnum.sortFilter,
-    searchableFilter: false,
-    filterable      : false,
-    sortable        : false,
-    static          : true,
-    header          : 'USER',
-    style           : {width: '115px'},
-  },
-  {
-    id          : EXPERIMENTS_TABLE_COL_FIELDS.STARTED,
-    headerType  : ColHeaderTypeEnum.sortFilter,
-    sortable  : false,
-    filterType    : ColHeaderFilterTypeEnum.durationDate,
-    filterable: false,
-    searchableFilter: false,
-    static        : true,
-    header      : 'STARTED',
-    style       : {width: '150px'},
-  },
-  {
-    id          : EXPERIMENTS_TABLE_COL_FIELDS.LAST_UPDATE,
-    headerType  : ColHeaderTypeEnum.sortFilter,
-    sortable  : false,
-    filterType    : ColHeaderFilterTypeEnum.durationDate,
-    filterable: false,
-    searchableFilter: false,
-    static        : true,
-    header      : 'UPDATED',
-    label       : 'Updated',
-    style       : {width: '150px'},
-  },
-  {
-    id          : EXPERIMENTS_TABLE_COL_FIELDS.LAST_ITERATION,
-    headerType  : ColHeaderTypeEnum.sortFilter,
-    sortable    : false,
-    filterType    : ColHeaderFilterTypeEnum.durationNumeric,
-    filterable  : false,
-    searchableFilter: false,
-    static        : true,
-    header      : 'ITERATION',
-    label       : 'Iterations:',
-    style       : {width: '115px'},
-  },
-  {
-    id        : EXPERIMENTS_TABLE_COL_FIELDS.COMMENT,
-    headerType: ColHeaderTypeEnum.sortFilter,
-    sortable  : false,
-    header    : 'DESCRIPTION',
-    style     : {width: '300px'}
-  },
-  {
-    id        : EXPERIMENTS_TABLE_COL_FIELDS.ACTIVE_DURATION,
-    headerType: ColHeaderTypeEnum.sortFilter,
-    sortable  : false,
-    filterable: false,
-    filterType    : ColHeaderFilterTypeEnum.duration,
-    searchableFilter: false,
-    static        : true,
-    bodyStyleClass: 'type-col',
-    header    : 'RUN TIME',
-    style     : {width: '150px'}
-  },
-  {
-    id        : EXPERIMENTS_TABLE_COL_FIELDS.PARENT,
-    getter    : [EXPERIMENTS_TABLE_COL_FIELDS.PARENT, 'parent.project.id', 'parent.project.name'],
-    headerType: ColHeaderTypeEnum.sortFilter,
-    searchableFilter: false,
-    filterable      : false,
-    sortable        : false,
-    header    : 'PARENT TASK',
-    style     : {width: '200px'}
-  }
+
+export const COMPARE_DEBUG_IMAGES_ONLY_FIELDS = [
+  'id',
+  'name',
+  'type',
+  'status',
+  'last_update',
+  'project.name',
+  'tags',
+  'published',
+  'last_iteration',
 ];

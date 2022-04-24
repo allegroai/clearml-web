@@ -1,3 +1,4 @@
+@import "~bootstrap/scss/mixins/buttons";
 @import "variables";
 @import "themes";
 
@@ -9,7 +10,19 @@ $light-theme-input: map-get($light-theme, input);
 
 $btn-font-weight: 500;
 $font-family-base: $font-family-base;
+
+// BUTTONS
 //override bootstrap
+$btn-focus-box-shadow: none;
+$btn-active-box-shadow: none;
+$input-btn-focus-color: none;
+$btn-focus-width: 0;
+$btn-font-family: $font-family-base;
+
+// ----------------------------------------------
+//                  DARK THEME
+// ----------------------------------------------
+
 .dark-theme {
   $primary: map-get($dark-bootstrap-theme, primary);
   $grid-columns: $grid-cols;
@@ -28,6 +41,9 @@ $font-family-base: $font-family-base;
   $link-hover-color: $blue-200;
   $link-color: $blue-300;
   $label-margin-bottom: 0;
+
+  $button: map-get($dark-theme, button);
+
 
   //@import '~bootstrap/scss/bootstrap.scss';
   @import "~bootstrap/scss/functions";
@@ -102,8 +118,30 @@ $font-family-base: $font-family-base;
     }
   }
 
-  .btn-primary {
-    color: map-get($light-bootstrap-theme, primary-font-color) !important;
+  $yiq-text-dark: map-get($button, color);
+  $yiq-text-light: map-get($button, color);
+  .btn-cml-primary {
+    @include button-variant(
+      map-get($button, background-color),
+      map-get($button, border-color),
+      map-get($button, background-color-hover),
+      map-get($button, border-color-hover),
+      map-get($button, background-color-focus),
+      map-get($button, border-color-focus)
+    );
+    &:hover {
+      color: $blue-200;
+    }
+    &:focus {
+      background-color: $blue-600;
+      border-color: $blue-600;
+      color: $blue-300;
+      &:hover {
+        background-color: $blue-500;
+        border-color: $blue-500;
+        color: $blue-200;
+      }
+    }
   }
 
   .btn:disabled {
@@ -165,6 +203,11 @@ $font-family-base: $font-family-base;
   }
 }
 
+
+// ----------------------------------------------
+//                  LIGHT THEME
+// ----------------------------------------------
+
 .light-theme {
   $primary: map-get($light-bootstrap-theme, primary);
   $secondary: $white;
@@ -211,6 +254,18 @@ $font-family-base: $font-family-base;
 
   .btn-primary {
     color: map-get($light-bootstrap-theme, primary-font-color) !important;
+
+    &:focus {
+      background-color: $primary;
+      border-color: $primary;
+    }
+  }
+
+  .btn-cml-primary {
+    @include button-variant(
+      $primary,
+      $primary,
+    );
   }
 
   .btn-secondary {
@@ -350,12 +405,6 @@ $font-family-base: $font-family-base;
 label.mat-slide-toggle-label {
   display: flex;
   margin-bottom: 0;
-}
-
-.btn {
-  font-size: 12px;
-  line-height: normal;
-  letter-spacing: 0.03em;
 }
 
 .btn.btn-icon {

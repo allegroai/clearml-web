@@ -1,13 +1,15 @@
 @import "../../../shared/ui-components/styles/variables";
 
 :host {
+  display: block;
+  height: 640px;
+  max-height: calc(100vh - 120px);
   width: 370px;
-  min-height: 470px;
 }
 
 sm-grouped-checked-filter-list {
-  padding: 15px 15px 0 15px;
-  max-height: 419px;
+  height: calc(100% - 52px);
+  padding: 15px 0 0 15px;
   ::ng-deep .actions {
     padding-top: 10px;
   }

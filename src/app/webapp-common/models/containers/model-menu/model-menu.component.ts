@@ -1,4 +1,4 @@
-import {Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
+import {Component, ElementRef, EventEmitter, Input, Output} from '@angular/core';
 import {
   archivedSelectedModels,
   changeProjectRequested,
@@ -13,10 +13,14 @@ import {AdminService} from '~/shared/services/admin.service';
 import {selectS3BucketCredentials} from '@common/core/reducers/common-auth-reducer';
 import {ModelInfoState} from '../../reducers/model-info.reducer';
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
-import {Observable, Subscription} from 'rxjs';
+import {Observable} from 'rxjs';
 import {filter, map, take} from 'rxjs/operators';
 import {ChangeProjectDialogComponent} from '@common/experiments/shared/components/change-project-dialog/change-project-dialog.component';
-import {fetchModelsRequested, modelSelectionChanged, setSelectedModels} from '../../actions/models-view.actions';
+import {
+  fetchModelsRequested,
+  modelSelectionChanged,
+  setSelectedModels,
+} from '../../actions/models-view.actions';
 import {SelectedModel} from '../../shared/models.model';
 import {CommonDeleteDialogComponent} from '@common/shared/entity-page/entity-delete/common-delete-dialog.component';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
@@ -29,8 +33,6 @@ import {
 } from '@common/shared/entity-page/items.utils';
 import {getSignedUrl} from '@common/core/actions/common-auth.actions';
 import {selectSignedUrl} from '@common/core/reducers/common-auth-reducer';
-import {selectRouterParams} from '@common/core/reducers/router-reducer';
-import {get} from 'lodash/fp';
 
 
 @Component({
@@ -38,7 +40,7 @@ import {get} from 'lodash/fp';
   templateUrl: './model-menu.component.html',
   styleUrls: ['./model-menu.component.scss']
 })
-export class ModelMenuComponent extends BaseContextMenuComponent implements OnInit, OnDestroy{
+export class ModelMenuComponent extends BaseContextMenuComponent {
 
   readonly ICONS = ICONS;
   private S3BucketCredentials: Observable<any>;
@@ -47,8 +49,6 @@ export class ModelMenuComponent extends BaseContextMenuComponent implements OnIn
   public isExample: boolean;
   public isLocalFile: boolean;
   public isArchive: boolean;
-  private projectId: string;
-  private subscription: Subscription;
 
   @Input() set model(model: SelectedModel) {
     this._model = model;
@@ -80,16 +80,9 @@ export class ModelMenuComponent extends BaseContextMenuComponent implements OnIn
     this.S3BucketCredentials = store.select(selectS3BucketCredentials);
   }
 
-  ngOnInit(): void {
-    this.subscription = this.store.select(selectRouterParams)
-      .pipe(map(params => get('projectId', params)))
-      .subscribe((id => this.projectId = id));
-  }
-
   archiveClicked() {
     // info header case
-    const selectedModels = this.selectedModels ? selectionDisabledArchive(this.selectedModels).selectedFiltered : [this.selectedModel];
-
+    const selectedModels = this.selectedModels ? selectionDisabledArchive(this.selectedModels).selectedFiltered : [this.model];
     if (this.isArchive) {
       this.store.dispatch(restoreSelectedModels({selectedEntities: selectedModels, skipUndo: false}));
     } else {
@@ -187,7 +180,10 @@ export class ModelMenuComponent extends BaseContextMenuComponent implements OnIn
     });
   }
 
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+  toggleDetails () {
+    this.store.dispatch(modelSelectionChanged({
+      model: this._model,
+      project: this.projectId
+    }));
   }
 }

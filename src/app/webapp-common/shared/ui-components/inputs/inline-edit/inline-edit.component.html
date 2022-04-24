@@ -1,16 +1,15 @@
-<div class="editable-div">
+<div class="editable-div" (click)="active && $event.stopPropagation()">
   <div [style.display]="active ? 'none': 'block'" >
     <div class="d-flex align-items-center" #template (click)="(!inlineDisabled) && inlineActivated($event)"
       ><ng-content></ng-content>
       <i *ngIf="editable && !inlineDisabled" class='p2 al-icon al-ico-edit sm-md pull-right editable-pen pointer'></i>
     </div>
   </div>
-    <div *ngIf="editable" [style.display]=" ! active ? 'none': 'block'" tabindex="12">
+    <div *ngIf="editable" [style.display]=" !active ? 'none': 'block'" tabindex="12">
       <form #form class="inline-edit-form" [class.multiline]="multiline">
         <input type="text" class="form-control inline-edit-input"
                [class.warn]="!!warning"
                *ngIf="!multiline"
-               (blur)="inlineCanceled()"
                [(ngModel)]="inlineValue"
                name="inline"
                [pattern]="pattern"
@@ -23,7 +22,6 @@
 
         <textarea class="form-control inline-edit-textarea"
                   *ngIf="multiline"
-                  (blur)="inlineCanceled()"
                   [(ngModel)]="inlineValue"
                   name="inline"
                   [pattern]="pattern"

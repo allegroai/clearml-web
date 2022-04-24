@@ -117,7 +117,7 @@ import { GetVariantWithoutRoundPipe } from './dumb/experiments-table/hyper-param
     MatProgressSpinnerModule,
     SharedModule,
     ExperimentOutputLogModule,
-    MatRadioModule,
+    MatRadioModule
   ],
   providers: [ExperimentTableCardComponent, NoUnderscorePipe, TitleCasePipe]
 })

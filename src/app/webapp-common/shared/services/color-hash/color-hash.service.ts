@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import {IHue} from './color-hash.model';
 import {BehaviorSubject} from 'rxjs';
 import {Store} from '@ngrx/store';
-import {UsersState} from '../../../core/reducers/users-reducer';
+import {UsersState} from '@common/core/reducers/users-reducer';
 import {filter, take} from 'rxjs/operators';
 import {selectColorPreferences} from '../../ui-components/directives/choose-color/choose-color.reducer';
 import {addUpdateColorPreferences, ColorPreference} from '../../ui-components/directives/choose-color/choose-color.actions';
@@ -10,7 +10,7 @@ import {getHslContrast, hexToRgb, hslToRgb, RGB2HEX, rgbToHsl} from './color-has
 import stc from 'string-to-color';
 import hexRgb from 'hex-rgb';
 
-export interface ColorCache {[label: string]: number[]};
+export interface ColorCache {[label: string]: number[]}
 export const DOT_PLACEHOLDER = '--DOT--';
 
 
@@ -38,13 +38,13 @@ export class ColorHashService {
       .subscribe(preferenceColors => this.batchUpdateColorCache(preferenceColors));
   }
 
-  public initColor(label: string) {
+  public initColor(label: string, initColor?:number[]) {
     const colorCache = this._colorCache.getValue();
     if (colorCache && colorCache[label]) {
       return colorCache[label];
     }
     const {red, green, blue} = hexRgb(stc(label));
-    const color = [red, green, blue];
+    const color = initColor? initColor: [red, green, blue];
     this.setColorForString(label, color, false);
     return color;
   }

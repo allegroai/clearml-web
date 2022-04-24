@@ -51,6 +51,11 @@ $list-width: 300px;
     top: 16px;
     left: 16px;
     z-index: 12;
+    button {
+      padding: 6px;
+      display: flex;
+      align-items: center;
+    }
   }
 
   .graphs-container {

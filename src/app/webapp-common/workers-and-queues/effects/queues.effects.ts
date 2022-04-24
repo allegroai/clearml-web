@@ -33,7 +33,7 @@ import {
   setStats,
   clearQueue
 } from '../actions/queues.actions';
-import {MESSAGES_SEVERITY} from '../../../app.constants';
+import {EmptyAction, MESSAGES_SEVERITY} from '../../../app.constants';
 import {QueueMetrics} from '../../../business-logic/model/queues/queueMetrics';
 import {ApiTasksService} from '../../../business-logic/api-services/tasks.service';
 import {cloneDeep, orderBy} from 'lodash/fp';
@@ -76,7 +76,7 @@ export class QueuesEffect {
     tap(action => this.store.dispatch(activeLoader(action.type))),
     switchMap(action => this.queuesApi.queuesGetAllEx({
         id: [action.queue.id],
-      // eslint-disable-next-line @typescript-eslint/naming-convention
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         only_fields: ['*', 'entries.task.name']
       }).pipe(
         mergeMap(res => [
@@ -116,9 +116,11 @@ export class QueuesEffect {
 
   clearQueue = createEffect(() => this.actions.pipe(
     ofType(clearQueue),
-    switchMap(action => this.tasksApi.tasksDequeueMany({ids: action.queue.entries.map(ent=>ent.task?.id)}).pipe(
-      mergeMap(() => [getQueues(),
-        refreshSelectedQueue(),
+    switchMap(action => this.tasksApi.tasksDequeueMany({ids: action.queue.entries.map(ent => ent.task?.id)}).pipe(
+      withLatestFrom(this.store.select(selectSelectedQueue)),
+      mergeMap(([res,selectedQueue]) => [
+        getQueues(),
+        selectedQueue ? refreshSelectedQueue() : new EmptyAction(),
         deactivateLoader(action.type)
       ]),
       catchError(err => [deactivateLoader(action.type), requestFailed(err), addMessage(MESSAGES_SEVERITY.ERROR, 'Clear queue failed')])

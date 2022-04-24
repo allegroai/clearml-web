@@ -1,5 +1,5 @@
 <div *ngIf="activateFromMenuButton" mat-button [matMenuTriggerFor]="experimentMenu"
-     class="p-0 cell menu-button al-icon sm-md al-color light-grey-blue al-ico-bars-menu"
+     class="p-0 cell menu-button al-icon al-color light-grey-blue al-ico-bars-menu"
 ></div>
 <div *ngIf="!activateFromMenuButton" #contextTrigger
      style="visibility: hidden; position: fixed"
@@ -7,12 +7,18 @@
      [style.top.px]="position.y"
      [matMenuTriggerFor]="experimentMenu">
 </div>
-<mat-menu #experimentMenu="matMenu" [hasBackdrop]="false">
+<mat-menu #experimentMenu="matMenu" [hasBackdrop]="backdrop">
   <ng-container *ngIf="selectedDisableAvailable[menuItems.queue]">
+    <button *ngIf="tableMode" mat-menu-item (click)="toggleDetails()">
+      <i [class]="'al-icon '+ ICONS.DETAILS + ' sm-md'"></i>Details
+    </button>
+
     <button mat-menu-item (click)="toggleFullScreen(minimizedView)" [disabled]="isSharedAndNotOwner">
       <i [class]="'al-icon '+ ICONS.CHART + ' sm-md'"></i>
       {{minimizedView ? 'View Full Screen' : 'View in Experiment Table'}}
     </button>
+
+    <hr>
 
     <button mat-menu-item (click)="manageQueueClicked()"
             [disabled]="selectedDisableAvailable[menuItems.queue].disable">
@@ -99,10 +105,7 @@
       {{selectedDisableAvailable[menuItems.moveTo].available | menuItemText : 'Move to Project' : selectedDisableAvailableIsMultiple}}
     </button>
     <ng-content select="[extended]"></ng-content>
-
-
-
-    </ng-container>
+  </ng-container>
 </mat-menu>
 
 <mat-menu #tagMenu="matMenu">

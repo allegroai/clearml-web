@@ -10,7 +10,6 @@ import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
 import {BlTasksService} from '~/business-logic/services/tasks.service';
 import {IExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {CloneForm} from '../../common-experiment-model.model';
-import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {SmSyncStateSelectorService} from '@common/core/services/sync-state-selector.service';
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {htmlTextShorte, isReadOnly} from '@common/shared/utils/shared-utils';
@@ -43,7 +42,7 @@ import {
   selectionDisabledPublishExperiments,
   selectionDisabledReset
 } from '@common/shared/entity-page/items.utils';
-import {WelcomeMessageComponent} from '@common/dashboard/dumb/welcome-message/welcome-message.component';
+import {WelcomeMessageComponent} from '@common/layout/welcome-message/welcome-message.component';
 
 
 @Component({
@@ -61,7 +60,6 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
   public isArchive: boolean;
   public selectionHasExamples: boolean;
   protected _experiment: ISelectedExperiment = null;
-  //public selectedExperiment
   private _selectedExperiments: ISelectedExperiment[];
   @Input() selectedExperiment: any;
   @Input() isSharedAndNotOwner = false;
@@ -115,11 +113,6 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
     this.isCommunity = this.configService.getStaticEnvironment().communityServer;
   }
 
-  public getProjectId() {
-    const params = this.syncSelector.selectSync(selectRouterParams);
-    return get('projectId', params);
-  }
-
   public restoreArchive(entityType?: EntityTypeEnum) {
     // info header case
     const selectedExperiments = this.selectedExperiments ? selectionDisabledArchive(this.selectedExperiments).selectedFiltered : [this._experiment];
@@ -140,11 +133,11 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
   toggleFullScreen(showFullScreen: boolean) {
     if (showFullScreen) {
       if (!this.selectedExperiment) {
-        this.router.navigateByUrl(`projects/${this.getProjectId()}/experiments/${this._experiment.id}/output/execution`);
+        this.router.navigateByUrl(`projects/${this.projectId}/experiments/${this._experiment.id}/output/execution`);
       } else {
         if (window.location.pathname.includes('info-output')) {
           const resultsPath = window.location.pathname.split('info-output/')[1];
-          this.router.navigateByUrl(`projects/${this.getProjectId()}/experiments/${this._experiment.id}/output/${resultsPath}`);
+          this.router.navigateByUrl(`projects/${this.projectId}/experiments/${this._experiment.id}/output/${resultsPath}`);
         } else {
           const parts = this.router.url.split('/');
           parts.splice(5, 0, 'output');
@@ -154,9 +147,9 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
     } else {
       const part = this.route.firstChild.routeConfig.path;
       if (['log', 'metrics/scalar', 'metrics/plots', 'debugImages'].includes(part)) {
-        this.router.navigateByUrl(`projects/${this.getProjectId()}/experiments/${this._experiment.id}/info-output/${part}`);
+        this.router.navigateByUrl(`projects/${this.projectId}/experiments/${this._experiment.id}/info-output/${part}`);
       } else {
-        this.router.navigateByUrl(`projects/${this.getProjectId()}/experiments/${this._experiment.id}/${part}`);
+        this.router.navigateByUrl(`projects/${this.projectId}/experiments/${this._experiment.id}/${part}`);
       }
     }
   }
@@ -329,7 +322,7 @@ To avoid this, <b>clone the experiment</b> and work with the cloned experiment.`
     const currentProjects = Array.from(new Set(selectedExperiments.map(exp => exp.project?.id).filter(p => p)));
     const dialog = this.dialog.open(ChangeProjectDialogComponent, {
       data: {
-        currentProjects: currentProjects.length > 0 ? currentProjects : [this.getProjectId()],
+        currentProjects: currentProjects.length > 0 ? currentProjects : [this.projectId],
         defaultProject: get('project.id', this._experiment),
         reference: selectedExperiments.length > 1 ? selectedExperiments : selectedExperiments[0]?.name,
         type: 'experiment'
@@ -402,7 +395,7 @@ To avoid this, <b>clone the experiment</b> and work with the cloned experiment.`
         this.store.dispatch(experimentsActions.getExperiments());
         this.store.dispatch(new DeactivateEdit());
         if (this.activateFromMenuButton || this.selectedExperiments.map(e => e.id).includes(this.selectedExperiment?.id)) {
-          window.setTimeout(() => this.router.navigate([`projects/${this.getProjectId()}/experiments`], {queryParamsHandling: 'preserve'}));
+          window.setTimeout(() => this.router.navigate([`projects/${this.projectId}/experiments`], {queryParamsHandling: 'preserve'}));
         }
       }
     });
@@ -430,14 +423,15 @@ To avoid this, <b>clone the experiment</b> and work with the cloned experiment.`
     });
   }
 
-
-  setMenuOpenStatus(status: boolean) {
-    this.open = status;
-  }
-
-
   stopAllChildrenPopup() {
     const selectedExperiments = this.selectedExperiments ? selectionDisabledAbortAllChildren(this.selectedExperiments).selectedFiltered : [this._experiment];
     this.store.dispatch(abortAllChildren({experiments: selectedExperiments}));
+  }
+
+  toggleDetails () {
+    this.store.dispatch(experimentsActions.experimentSelectionChanged({
+      experiment: this._experiment,
+      project: this.projectId
+    }));
   }
 }

@@ -148,6 +148,7 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
       .pipe(filter( bool =>  !isUndefined(bool)))
       .subscribe( setup_shell_script => {
         if (this.formData.container.setup_shell_script !== setup_shell_script) {
+          smEditableSection.saveSection();
           this.store.dispatch(commonInfoActions.saveExperimentSection({container: {...this.formData.container, setup_shell_script}}));
         } else {
           smEditableSection.cancelClickedEvent();
@@ -164,6 +165,7 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
       if (data === undefined) {
         this.requirementsSection.cancelClickedEvent();
       } else {
+        this.requirementsSection.saveSection();
         this.store.dispatch(commonInfoActions.saveExperimentSection({script: {requirements: {...this.formData.requirements, pip: data}}}));
       }
     });
@@ -171,11 +173,14 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
 
   editDiff() {
     this.openEditJsonDialog({textData: this.formData?.diff, readOnly: false, title: 'EDIT UNCOMMITTED CHANGES', typeJson: false}, this.diffSection)
-      .afterClosed().pipe(take(1)).subscribe((data) => {
-      if (!isUndefined(data)) {
-        this.store.dispatch(commonInfoActions.saveExperimentSection({script: {diff: data}}));
-      }
-    });
+      .afterClosed()
+      .pipe(take(1))
+      .subscribe((data) => {
+        this.diffSection.unsubscribeToEventListener();
+        if (!isUndefined(data)) {
+          this.store.dispatch(commonInfoActions.saveExperimentSection({script: {diff: data}}));
+        }
+      });
   }
 
   clearInstalledPackages() {

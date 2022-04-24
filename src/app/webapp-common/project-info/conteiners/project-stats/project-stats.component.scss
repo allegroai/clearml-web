@@ -102,7 +102,7 @@
   }
 
   sm-select-metric-for-custom-col {
-    height: calc(100% - 227px);
-
+    height: 400px;
+    max-height: calc(90vh - 300px);
   }
 }

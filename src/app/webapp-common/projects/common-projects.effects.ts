@@ -4,8 +4,8 @@ import {ApiProjectsService} from '~/business-logic/api-services/projects.service
 import {requestFailed} from '../core/actions/http.actions';
 import {activeLoader, deactivateLoader, setServerError} from '../core/actions/layout.actions';
 import {
-  AddToProjectsList, GetAllProjectsPageProjects, updateProject,
-  setCurrentScrollId, SetNoMoreProjects, SetProjectsOrderBy,
+  addToProjectsList, getAllProjectsPageProjects, updateProject,
+  setCurrentScrollId, setNoMoreProjects, setProjectsOrderBy,
   setProjectsSearchQuery, updateProjectSuccess
 } from './common-projects.actions';
 import {
@@ -19,7 +19,7 @@ import {catchError, debounceTime, map, mergeMap, switchMap, withLatestFrom} from
 import {get} from 'lodash/fp';
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
 import {ApiModelsService} from '~/business-logic/api-services/models.service';
-import {pageSize, PROJECTS_ACTIONS} from './common-projects.consts';
+import {pageSize} from './common-projects.consts';
 import {selectRouterParams} from '../core/reducers/router-reducer';
 import {selectCurrentUser, selectShowOnlyUserWork} from '../core/reducers/users-reducer';
 import {selectShowHidden} from '~/features/projects/projects.reducer';
@@ -42,7 +42,7 @@ export class CommonProjectsEffects {
   }
 
   activeLoader = createEffect(() => this.actions.pipe(
-    ofType(updateProject, PROJECTS_ACTIONS.GET_PROJECTS, PROJECTS_ACTIONS.CREATE_PROJECT),
+    ofType(updateProject, getAllProjectsPageProjects),
     map(action => activeLoader(action.type))
   ));
 
@@ -75,7 +75,7 @@ export class CommonProjectsEffects {
   ));
 
   getAllProjects = createEffect(() => this.actions.pipe(
-    ofType<GetAllProjectsPageProjects>(PROJECTS_ACTIONS.GET_PROJECTS),
+    ofType(getAllProjectsPageProjects),
     debounceTime(10),
     withLatestFrom(
       this.store.select(selectProjectsOrderBy),
@@ -116,7 +116,7 @@ export class CommonProjectsEffects {
                 fields: ['id', 'name', 'description']
               }
             }),
-            ...action.payload.getAllFilter
+            ...action?.getAllFilter
           } as ProjectsGetAllExRequest),
           // Getting [current project] stats from server
           (selectedProjectId && !scrollId && !searchQuery?.query) ? this.projectsApi.projectsGetAllEx({
@@ -140,10 +140,10 @@ export class CommonProjectsEffects {
             }
           )),
           mergeMap(({newScrollId, projects}) => [
-            new AddToProjectsList(projects),
+            addToProjectsList({projects}),
             deactivateLoader(action.type),
             setCurrentScrollId({scrollId: newScrollId}),
-            new SetNoMoreProjects(projects.length < pageSize)]),
+            setNoMoreProjects({payload: projects.length < pageSize})]),
           catchError(error => [deactivateLoader(action.type), requestFailed(error)])
         );
       }
@@ -151,13 +151,13 @@ export class CommonProjectsEffects {
   ));
 
   setProjectsOrderBy = createEffect(() => this.actions.pipe(
-    ofType<SetProjectsOrderBy>(PROJECTS_ACTIONS.SET_ORDER_BY),
-    mergeMap(() => [new GetAllProjectsPageProjects()])
+    ofType(setProjectsOrderBy),
+    mergeMap(() => [getAllProjectsPageProjects({})])
   ));
 
   setProjectsSearchQuery = createEffect(() => this.actions.pipe(
     ofType(setProjectsSearchQuery.type),
-    mergeMap(() => [new GetAllProjectsPageProjects()])
+    mergeMap(() => [getAllProjectsPageProjects({})])
   ));
 
   private isNotEmptyExampleProject(project: Project) {

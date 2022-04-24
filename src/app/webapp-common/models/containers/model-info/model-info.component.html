@@ -1,6 +1,6 @@
 <sm-experiment-info-header-status-progress-bar
   [status]="getReadyStatus((selectedTableModel$ | async)?.ready || selectedModel?.ready)"
-  (closeInfoClicked)="deselectModel()"
+  (closeInfoClicked)="closePanel()"
 >
 </sm-experiment-info-header-status-progress-bar>
 <div class="model-info-container light-theme">
@@ -8,7 +8,7 @@
                         [model]="((selectedTableModel$ | async) || selectedModel)"
                         [editable]="!isExample"
                         [backdropActive]="backdropActive$ | async"
-                        (deselectModel)="deselectModel()"
+                        (deselectModel)="closePanel()"
                         (modelNameChanged)="updateModelName($event)"
   >
   </sm-model-info-header>

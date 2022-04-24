@@ -2,6 +2,7 @@ import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output, ViewChi
 import {ISmCol} from '../table.consts';
 import {addOrRemoveFromArray} from '../../../../utils/shared-utils';
 import {MatMenuTrigger} from '@angular/material/menu';
+import {trackByKey} from '@common/shared/utils/forms-track-by';
 
 @Component({
   selector: 'sm-table-card-filter-template',
@@ -55,7 +56,7 @@ export class TableCardFilterTemplateComponent {
 
   @ViewChild(MatMenuTrigger, {static: true}) trigger: MatMenuTrigger;
 
-  trackByKey = (index: number, item: { key: string; value: { label: string; value: string; tooltip?: string }[] }) => item['key'];
+  trackByKey = trackByKey;
   trackByLabel = (index: number, item) => item.label;
 
   onFilterChanged(colId: string, val) {

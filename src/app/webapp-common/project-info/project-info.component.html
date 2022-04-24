@@ -24,8 +24,8 @@
     <div *ngIf="info || editMode; else noData" class="md-editor-preview" [class.editor]="editMode">
 
       <div class="md-content" [class.edit-mode]="editMode" [class.dirty]="isDirty">
-        <button *ngIf="!example && !editMode" class="btn btn-primary md-btn-edit" (click)="editClicked()">EDIT</button>
-        <button *ngIf="editMode" class="btn btn-primary btn-preview-toggle" (click)="togglePreview()">
+        <button *ngIf="!example && !editMode" class="btn btn-cml-primary md-btn-edit" (click)="editClicked()">EDIT</button>
+        <button *ngIf="editMode" class="btn btn-cml-primary btn-preview-toggle" (click)="togglePreview()">
           {{ editorVisible? 'EDIT' : 'PREVIEW' }}
         </button>
         <span *ngIf="editMode && !editorVisible" class="preview-header">PREVIEW</span>
@@ -43,10 +43,10 @@
       <div class="md-footer">
         <div *ngIf="editMode && isDirty" class="md-warning">* You have unsaved changes</div>
         <div *ngIf="editMode" class="right-buttons">
-          <button class="btn btn-primary btn-outline"
+          <button class="btn btn-cml-primary btn-outline"
                   (click)="cancelClicked()">CANCEL
           </button>
-          <button class="btn btn-primary"
+          <button class="btn btn-cml-primary"
                   [disabled]="!isDirty"
                   (click)="saveInfo()">SAVE
           </button>

@@ -7,7 +7,7 @@ import {projectsReducer} from './projects.reducer';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {CommonProjectsModule} from '../../webapp-common/projects/common-projects.module';
 
-export const projectSyncedKeys = ['showHidden'];
+export const projectSyncedKeys = ['showHidden', 'tableModeAwareness'];
 
 @NgModule({
   imports        : [

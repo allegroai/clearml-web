@@ -9,8 +9,8 @@ import {
 } from '@angular/core';
 import {MatSelectChange} from '@angular/material/select';
 import {Store} from '@ngrx/store';
-import {selectHideIdenticalFields, selectRefreshing} from '../../reducers';
-import {interval, Observable, Subscription} from 'rxjs';
+import {selectHideIdenticalFields} from '../../reducers';
+import {Observable, Subscription} from 'rxjs';
 import {
   refreshIfNeeded,
   setHideIdenticalFields,
@@ -19,19 +19,18 @@ import {
   toggleShowScalarOptions
 } from '../../actions/compare-header.actions';
 import {ActivatedRoute, Router} from '@angular/router';
-import {selectRouterParams, selectRouterQueryParams, selectRouterUrl} from '../../../core/reducers/router-reducer';
+import {selectRouterParams, selectRouterQueryParams, selectRouterUrl} from '@common/core/reducers/router-reducer';
 import {get} from 'lodash/fp';
-import {selectAppVisible, selectAutoRefresh} from '../../../core/reducers/view.reducer';
-import {setAutoRefresh} from '../../../core/actions/layout.actions';
-import {AUTO_REFRESH_INTERVAL} from '../../../../app.constants';
-import {filter, withLatestFrom} from 'rxjs/operators';
+import {setAutoRefresh} from '@common/core/actions/layout.actions';
+import {filter} from 'rxjs/operators';
 import {MatSlideToggleChange} from '@angular/material/slide-toggle';
-import {compareLimitations} from '../../../shared/entity-page/footer-items/compare-footer-item';
+import {compareLimitations} from '@common/shared/entity-page/footer-items/compare-footer-item';
 import {
   allowAddExperiment$,
   SelectExperimentsForCompareComponent
 } from '../../containers/select-experiments-for-compare/select-experiments-for-compare.component';
 import {MatDialog} from "@angular/material/dialog";
+import {RefreshService} from '@common/core/services/refresh.service';
 
 @Component({
   selector: 'sm-experiment-compare-header',
@@ -44,34 +43,32 @@ export class ExperimentCompareHeaderComponent implements OnInit, OnDestroy {
   private queryParamsSubscription: Subscription;
   public selectHideIdenticalFields$: Observable<boolean>;
 
-  public selectRefreshing$: Observable<{ refreshing: boolean; autoRefresh: boolean }>;
   public viewMode: string;
   public currentPage: string;
   public queryParamsViewMode: string;
   public compareLimitations = compareLimitations;
-  public autoRefreshState$: Observable<boolean>;
   public allowAddExperiment$: Observable<boolean>;
   private autorRefreshSub: Subscription;
   private showMenuSub: Subscription;
 
-  private isAppVisible$: Observable<boolean>;
-
   @Output() selectionChanged = new EventEmitter<string[]>();
 
-  constructor(private store: Store<any>, private route: ActivatedRoute, private router: Router, private cdr: ChangeDetectorRef, private dialog: MatDialog) {
+  constructor(
+    private store: Store<any>,
+    private route: ActivatedRoute,
+    private router: Router,
+    private cdr: ChangeDetectorRef,
+    private dialog: MatDialog,
+    private refresh: RefreshService
+  ) {
     this.selectHideIdenticalFields$ = this.store.select(selectHideIdenticalFields);
-    this.selectRefreshing$ = this.store.select(selectRefreshing);
-    this.autoRefreshState$ = this.store.select(selectAutoRefresh);
-    this.isAppVisible$ = this.store.select(selectAppVisible);
   }
 
   ngOnInit() {
-    this.autorRefreshSub = interval(AUTO_REFRESH_INTERVAL).pipe(
-      withLatestFrom(this.autoRefreshState$, this.isAppVisible$),
-      filter(([, autoRefreshState, isAppVisible]) => autoRefreshState && isAppVisible)
-    ).subscribe(() => {
-      this.refreshList(true);
-    });
+    this.autorRefreshSub = this.refresh.tick
+      .pipe(filter(auto => auto === null))
+      .subscribe(() => this.store.dispatch(refreshIfNeeded({payload: true, autoRefresh: true})));
+
     this.routerSubscription = this.store.select(selectRouterUrl).subscribe(() => {
       this.currentPage = get('snapshot.firstChild.url[0].path', this.route);
       this.viewMode = get('snapshot.firstChild.url[1].path', this.route);
@@ -88,10 +85,6 @@ export class ExperimentCompareHeaderComponent implements OnInit, OnDestroy {
     this.routerSubscription.unsubscribe();
     this.autorRefreshSub.unsubscribe();
     this.showMenuSub?.unsubscribe();
-  }
-
-  refresh({isAutoRefresh}: { isAutoRefresh: boolean }) {
-    this.store.dispatch(refreshIfNeeded({payload: true, autoRefresh: isAutoRefresh}));
   }
 
   changeView($event: MatSelectChange) {
@@ -119,10 +112,6 @@ export class ExperimentCompareHeaderComponent implements OnInit, OnDestroy {
 
   toggleSettings() {
     this.store.dispatch(toggleShowScalarOptions());
-  }
-
-  refreshList(isAutorefresh: boolean) {
-    this.store.dispatch(refreshIfNeeded({payload: true, autoRefresh: isAutorefresh}));
   }
 
   setAutoRefresh($event: boolean) {

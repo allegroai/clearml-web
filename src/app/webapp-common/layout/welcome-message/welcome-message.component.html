@@ -1,0 +1,175 @@
+<sm-dialog-template [displayX]="true"
+                    [header]="queue? 'NO WORKERS ASSIGNED TO QUEUE': (step === 1 ? 'Welcome to ClearML' : (showTabs? 'CREATE NEW EXPERIMENT' : 'GETTING STARTED'))"
+                    [subHeader]="showTabs ? 'To create a new experiment you can either run your ML code instrumented with the ClearML SDK, or Relaunch a previously run experiment by cloning it.' : ''"
+                    (xClicked)="closeDialog()" [closeOnX]="false"
+                    [iconClass]="queue?'al-ico-queues': 'i-welcome-researcher'" xmlns="http://www.w3.org/1999/html">
+
+  <nav *ngIf="showTabs" class="pointer">
+    <div *ngFor="let link of links; trackBy: trackByFn"
+         class="d-flex-center nav-item h-100"
+         [class.selected]="link === currentLink"
+         (click)="showSection(link)"
+         >{{link}}</div>
+    <div class="d-flex-center nav-item h-100" (click)="showSection('videoTab')" [class.selected]="currentLink === 'videoTab'">
+      <i class="al-icon al-ico-video sm-md"></i>
+    </div>
+  </nav>
+
+  <div *ngIf="step === 1; else configStep" class="welcome-content">
+    <div class="body">
+      <div class="info">
+        <span class="position-relative">
+          <i class="al-ico-card-example foreground"></i>
+          <span class="background"></span>
+        </span>
+        <div class="mt-2">See the pre-loaded examples to quickly get familiar with ClearML’s various capabilities.</div>
+      </div>
+      <div class="info">
+        <i class="al-ico-help-outlined"></i>
+        <div class="mt-2">Browse "Pro Tips" in the Help menu to jump start your work flow.</div>
+      </div>
+      <div class="info">
+        <i class="al-ico-documentation"></i>
+        <div class="mt-2">Check out the <a target="_blank" [href]="docsLink">ClearML docs</a> for advanced information and in depth how-to’s.
+        </div>
+      </div>
+    </div>
+    <div class="separator"></div>
+    <div class="d-flex justify-content-center">
+      <button class="btn btn-neon" (click)="nextSteps($event)">GET STARTED</button>
+    </div>
+  </div>
+  <ng-template #configStep>
+    <div class="steps-content">
+      <div class="text" *ngIf="queue">
+        Tasks have been enqueued on the <b>{{queue?.name}}</b> queue, which is currently not serviced by any worker. They will remain in the 'pending' state until a ClearML worker services this queue.
+      </div>
+      <ng-container *ngIf="!currentLink || currentLink === links[0]">
+        <div *ngFor="let step of steps" class="step-container">
+          <div class="step-header">{{step.header}}</div>
+          <div class="step">{{step.title}}</div>
+          <div class="code">
+            <div class="content" #stepCode>{{step.code}}</div>
+            <sm-copy-clipboard
+              [hideBackground]="true"
+              [label]="''"
+              [copyIcon]="'al-icon sm-md al-ico-copy-to-clipboard'"
+              theme="text-area"
+              [clipboardText]="stepCode.innerHTML"></sm-copy-clipboard>
+          </div>
+          <div *ngIf="step.subNote" class="sub-note"><i class="mr-1 fas fa-info-circle info"></i>{{step.subNote}}</div>
+        </div>
+        <div class="step-container cred-step" [class.first-step]="!credentialsCreated" [class.has-ws]="community && workspace.name" [class.has-label]="credentialsLabel">
+          <div class="step sub-note">Complete the clearml configuration information as prompted.</div>
+          <div *ngIf="!credentialsCreated" class="d-flex align-items-end">
+<!--            <mat-form-field appearance="outline"-->
+<!--                            class="label-input"-->
+<!--                            floatLabel="always">-->
+<!--              <mat-label>Label (optional)</mat-label>-->
+<!--              <input matInput [(ngModel)]="credentialsLabel" [disabled]="credentialsCreated" placeholder="Credentials label" name="credentials">-->
+<!--            </mat-form-field>-->
+            <button class="mb-2 btn btn-neon create-cred-button" (click)="createCredentials()">CREATE NEW
+              CREDENTIALS
+            </button>
+          </div>
+          <div class="cred-visible" [class.invisible]="!accessKey">
+            <div class="code">
+<div #content class="content"><span class="variable">api</span> {{ '{' }}<ng-container *ngIf="community && workspace.name">
+  <span class="">{{'# ' + workspace.name}}</span></ng-container>
+  <span class="variable">web_server</span><span class="operation">:</span> <span class="string">{{WEB_SERVER_URL}}</span>
+  <span class="variable">api_server</span><span class="operation">:</span> <span class="string">{{API_BASE_URL}}</span>
+<ng-container *ngIf="fileBaseUrl">  <span class="variable">files_server</span><span class="operation">:</span> <span class="string">{{fileBaseUrl}}</span><ng-container *ngIf="credentialsLabel">
+  <span>{{'# ' + credentialsLabel}}</span></ng-container>
+</ng-container>  <span class="variable">credentials</span> {{ '{' }}
+    <span class="string">"access_key"</span> <span class="operation">=</span> <span class="string">"{{accessKey}}"</span>
+    <span class="string">"secret_key"</span> <span class="operation">=</span> <span class="string">"{{secretKey}}"</span>
+  }
+}</div>
+              <sm-copy-clipboard
+                [hideBackground]="true"
+                [label]="''"
+                [copyIcon]="'al-icon sm-md al-ico-copy-to-clipboard'"
+                theme="text-area"
+                [clipboardText]="content.textContent"></sm-copy-clipboard>
+            </div>
+          <div *ngIf="!showTabs" class="sub-note"><i class="mr-1 fas fa-info-circle info"></i>Manage your app credentials in the <a target="_blank" href="settings/workspace-configuration">workspace settings page</a></div>
+          </div>
+        </div>
+      </ng-container>
+      <ng-container *ngIf="!currentLink || currentLink === links[1]">
+        <div class="step-container" *ngIf="!queue">
+          <div *ngIf="!showTabs" class="step">3. Integrate</div>
+          <div class="step sub-note">Add ClearML to your code. For example:</div>
+          <div class="code" #content>
+            <div *ngIf="!showTabs" class="content"><span class="variable">from</span> {{gettingStartedContext?.packageName || 'clearml'}} <span class="variable">import</span> Task
+task <span class="operation">=</span> Task.<span class="variable">init</span>(project_name<span class="operation">=</span><span class="string">"my project"</span>, task_name<span class="operation">=</span><span class="string">"my task"</span>)
+            </div>
+            <div *ngIf="showTabs" class="content"><span class="variable">import</span> numpy <span class="variable">as</span> np
+<span class="variable">import</span> matplotlib.pyplot <span class="variable">as</span> plt
+
+# Add the following two lines to your code, to have ClearML automatically log your experiment
+<span class="variable">from</span> clearml <span class="variable">import</span> Task
+task = Task.init(project_name=<span class="string">'My Project'</span>, task_name=<span class="string">'My Experiment'</span>)
+
+# Create a plot using matplotlib, or you can also use plotly
+plt.scatter(np.random.rand(50), np.random.rand(50), s=area, c=np.random.rand(10), alpha=0.5)
+# Plot will be reported automatically to clearml
+plt.show()
+
+# Report some scalars
+<span class="variable">for</span> i <span class="variable">in</span> range(100):
+  task.get_logger().report_scalar(title=<span class="string">"graph title"</span>, series=<span class="string">"linear"</span>, value=i*2, iteration=i)
+            </div>
+            <sm-copy-clipboard
+              [hideBackground]="true"
+              [label]="''"
+              [copyIcon]="'al-icon sm-md al-ico-copy-to-clipboard'"
+              theme="text-area"
+              [clipboardText]="content.textContent"></sm-copy-clipboard>
+          </div>
+        </div>
+      </ng-container>
+      <ng-container *ngIf="!queue && (currentLink === links[2])">
+        <div class="step-container">
+          <div class="step">1. Clone a previously run experiment</div>
+          <div class="step sub-note mt-2">Use the <span class="bolder">“Clone”</span> action to create a new draft copy.</div>
+          <div class="step sub-note">You can change any of the new experiments’ configurations.</div>
+          <div class="step sub-note mt-3">Experiments table</div>
+          <div class="new-experiment-table"></div>
+
+          <div class="step">2. Run your experiment</div>
+          <div class="step sub-note mt-2">Use the <span class="bolder">“Enqueue”</span> action to enqueue the new experiment on an available queue.</div>
+          <div class="step sub-note mb-1">To have an agent service a queue, on your target machine run:</div>
+          <div class="code">
+            <div #content class="content">clearml-agent daemon —queue &lt;queue name&gt;</div>
+            <sm-copy-clipboard
+              [hideBackground]="true"
+              [label]="''"
+              [copyIcon]="'al-icon sm-md al-ico-copy-to-clipboard'"
+              theme="text-area"
+              [clipboardText]="content.textContent"></sm-copy-clipboard>
+          </div>
+        </div>
+      </ng-container>
+      <ng-container *ngIf="!queue && (currentLink === 'videoTab')">
+        <div class="step-container">
+          <div  [style.height.px]="306"
+                [style.width.px]="544">
+            <youtube-player
+              [videoId]="src"
+              [height]="306"
+              [width]="544"
+            ></youtube-player>
+          </div>
+        </div>
+      </ng-container>
+      <div *ngIf="queue" class="text">
+        <sm-checkbox-control
+          fieldName="orphanedQueue"
+          [formData]="doNotShowAgain"
+          (formDataChanged)="doNotShowThisAgain($event)"
+          label="Don’t show again"></sm-checkbox-control>
+      </div>
+    </div>
+  </ng-template>
+</sm-dialog-template>

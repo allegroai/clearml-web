@@ -1,11 +1,13 @@
 import {
+  ColHeaderFilterTypeEnum,
+  ColHeaderTypeEnum,
   ISmCol,
-  TABLE_SORT_ORDER,
-  ColHeaderTypeEnum, ColHeaderFilterTypeEnum
+  TABLE_SORT_ORDER
 } from '../ui-components/data/table/table.consts';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {SortMeta} from 'primeng/api';
 import {MetricValueType} from '@common/experiments-compare/reducers/experiments-compare-charts.reducer';
+import {hasValue} from './helpers.util';
 
 export interface TableFilter {
   col?: string;
@@ -144,6 +146,7 @@ export const decodeHyperParam = (param: string): { name: string; section: string
     section: split[0]
   };
 };
+
 export const createMetricColumn = (column: MetricColumn, projectId: string): ISmCol => ({
   id: `last_metrics.${column.metricHash}.${column.variantHash}.${column.valueType}`,
   headerType: ColHeaderTypeEnum.sortFilter,
@@ -158,17 +161,29 @@ export const createMetricColumn = (column: MetricColumn, projectId: string): ISm
   projectId: projectId,
   style: {width: '115px'},
 });
+
 export const createMetadataCol = (key, projectId): ISmCol => ({
   id: `metadata.${key}.value`,
   getter: `metadata.${key}.value`,
   key: key,
   headerType: ColHeaderTypeEnum.sortFilter,
   sortable: true,
-  filterable: false,
+  filterable: true,
   header: key,
   style: {width: '240px'},
   projectId: projectId,
   type: 'metadata'
 });
-
-
+export const createFiltersFromStore = (_tableFilters: { [key: string]: FilterMetadata }, removeEmptyValues = true) => {
+  if (!_tableFilters) {
+    return [];
+  }
+  return Object.keys(_tableFilters).reduce((returnTableFilters, currentFilterName) => {
+    const value = _tableFilters?.[currentFilterName]?.value
+    if (removeEmptyValues && (!hasValue(value) || value?.length === 0)) {
+      return returnTableFilters;
+    }
+    returnTableFilters[currentFilterName] = value;
+    return returnTableFilters;
+  }, {});
+};

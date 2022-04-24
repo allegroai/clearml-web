@@ -26,7 +26,7 @@
      &.mat-checkbox-indeterminate  {
        ::ng-deep  .mat-checkbox-background {
         color: red;
-        background-image: url('#{$assets-icons-path}/cbx-exlude.svg');
+        background-image: url('../../../../assets/icons/cbx-exlude.svg');
       }
     }
   }

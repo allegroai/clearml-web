@@ -1,5 +1,11 @@
-<div class="editable-container h-100" [class.dark-theme]="isDarkTheme" [class]="containerClass" [class.edit-mode]="inEditMode && !disableInEditMode" [class.disable-edit]="disableEditable"
-     (dblclick)="editable && !disableEditable && (!inEditMode) && editModeChanged(true)">
+<div
+  class="editable-container h-100"
+  [class.dark-theme]="isDarkTheme"
+  [class]="containerClass"
+  [class.edit-mode]="inEditMode && !disableInEditMode"
+  [class.disable-edit]="disableEditable"
+  (dblclick)="editable && !disableEditable && (!inEditMode) && editModeChanged(true)"
+>
   <div class="edit-wrapper d-flex flex-row-reverse">
     <button *ngIf="!disableEditable && !inEditMode && editable && !hideEditButton" id="editSection" class="edit-pen btn-dark-fill pointer"
             (click)="editModeChanged(true)">

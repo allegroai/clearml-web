@@ -1,21 +1,20 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {selectRouterParams} from '../../../core/reducers/router-reducer';
+import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {Store} from '@ngrx/store';
 import {ModelInfoState} from '../../reducers/model-info.reducer';
 import {get} from 'lodash/fp';
 import * as infoActions from '../../actions/models-info.actions';
 import {selectSelectedModel, selectSelectedTableModel} from '../../reducers';
 import {SelectedModel} from '../../shared/models.model';
-import {AdminService} from '~/shared/services/admin.service';
-import {selectS3BucketCredentials} from '../../../core/reducers/common-auth-reducer';
-import {SmSyncStateSelectorService} from '../../../core/services/sync-state-selector.service';
+import {selectS3BucketCredentials} from '@common/core/reducers/common-auth-reducer';
 import {Observable, Subscription} from 'rxjs';
 import {debounceTime, distinctUntilChanged, filter, map, tap} from 'rxjs/operators';
-import {addMessage} from '../../../core/actions/layout.actions';
-import {MESSAGES_SEVERITY} from '../../../../app.constants';
-import {isReadOnly} from '../../../shared/utils/shared-utils';
-import {selectBackdropActive} from '../../../core/reducers/view.reducer';
+import {addMessage} from '@common/core/actions/layout.actions';
+import {MESSAGES_SEVERITY} from '~/app.constants';
+import {isReadOnly} from '@common/shared/utils/shared-utils';
+import {selectBackdropActive} from '@common/core/reducers/view.reducer';
+import {setTableMode} from '@common/models/actions/models-view.actions';
 
 
 @Component({
@@ -36,7 +35,11 @@ export class ModelInfoComponent implements OnInit, OnDestroy {
   private projectId: string;
   public selectedTableModel$: Observable<SelectedModel>;
 
-  constructor(private router: Router, private store: Store<ModelInfoState>, private route: ActivatedRoute, private adminService: AdminService, private syncSelector: SmSyncStateSelectorService) {
+  constructor(
+    private router: Router,
+    private store: Store<ModelInfoState>,
+    private route: ActivatedRoute
+  ) {
     this.S3BucketCredentials = store.select(selectS3BucketCredentials);
     this.backdropActive$ = this.store.select(selectBackdropActive);
     this.selectedTableModel$ = this.store.select(selectSelectedTableModel);
@@ -83,12 +86,9 @@ export class ModelInfoComponent implements OnInit, OnDestroy {
     return ready ? 'published' : 'created';
   }
 
-  deselectModel() {
-    return this.navigateAfterModelSelectionChanged();
-  }
-
-  navigateAfterModelSelectionChanged() {
-    return this.router.navigate([`projects/${this.projectId}/models`], {queryParamsHandling: 'preserve'});
+  closePanel() {
+    this.store.dispatch(setTableMode({mode: 'table'}));
+    return this.router.navigate(['..'], {relativeTo: this.route, queryParamsHandling: 'merge'});
   }
 }
 

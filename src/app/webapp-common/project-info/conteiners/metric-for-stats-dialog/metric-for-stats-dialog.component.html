@@ -1,0 +1,18 @@
+<sm-dialog-template
+  header="METRIC SNAPSHOT"
+  [iconClass]="'al-ico-no-scatter-graph'"
+  (xClicked)="close()"
+>
+  <sm-select-metric-for-custom-col
+    class="w-100 mb-3"
+    [multiSelect]="false"
+    [metricVariants]="variants"
+    [tableCols]="metricVariantSelection"
+    (selectedMetricToShow)="close($event)">
+  </sm-select-metric-for-custom-col>
+  <div class="d-flex align-items-center justify-content-center w-100 mt-2">
+    <button (click)="close(null)" class="btn-outline-neon">
+      CLEAR
+    </button>
+  </div>
+</sm-dialog-template>

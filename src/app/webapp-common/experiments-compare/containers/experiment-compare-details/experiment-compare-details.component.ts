@@ -22,6 +22,7 @@ import {ExperimentCompareBase} from '../experiment-compare-base';
 import {ActivatedRoute, Router} from '@angular/router';
 import {IExperimentInfoState} from '../../../../features/experiments/reducers/experiment-info.reducer';
 import {ConfigurationItem} from '../../../../business-logic/model/tasks/configurationItem';
+import {RefreshService} from '@common/core/services/refresh.service';
 
 @Component({
   selector: 'sm-experiment-compare-details',
@@ -49,9 +50,10 @@ export class ExperimentCompareDetailsComponent extends ExperimentCompareBase imp
     public store: Store<IExperimentInfoState>,
     public changeDetection: ChangeDetectorRef,
     public activeRoute: ActivatedRoute,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    public refresh: RefreshService
   ) {
-    super(router, store, changeDetection, activeRoute);
+    super(router, store, changeDetection, activeRoute, refresh);
   }
 
   experiments$ = this.store.pipe(select(selectExperimentsDetails));

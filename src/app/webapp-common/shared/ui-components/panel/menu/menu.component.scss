@@ -1,6 +1,11 @@
 @import "../../styles/variables";
 
 :host {
+
+  .al-ico-bars-menu {
+    font-size: 24px;
+  }
+
   .menu-button.btn.icon {
     font-weight: initial;
     min-width: 16px;

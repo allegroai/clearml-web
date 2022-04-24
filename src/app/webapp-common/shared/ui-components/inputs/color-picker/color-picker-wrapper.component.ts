@@ -7,11 +7,11 @@ import {hexToRgb, rgbaToValues} from '../../../services/color-hash/color-hash.ut
 import {ColorHashService} from '../../../services/color-hash/color-hash.service';
 
 @Component({
-  selector   : 'sm-color-picker-wrapper',
+  selector: 'sm-color-picker-wrapper',
   templateUrl: './color-picker-wrapper.component.html',
-  styleUrls  : ['./color-picker-wrapper.component.scss']
+  styleUrls: ['./color-picker-wrapper.component.scss']
 })
-export class ColorPickerWrapperComponent implements OnInit, OnDestroy  {
+export class ColorPickerWrapperComponent implements OnInit, OnDestroy {
 
   public defaultColor: string;
   public presetColors = [
@@ -26,9 +26,12 @@ export class ColorPickerWrapperComponent implements OnInit, OnDestroy  {
     '#bcbd22',  // curry yellow-green
     '#17becf',   // blue-teal
     '#af1d41',
-    '#d5d728'
-
+    '#d5d728',
   ];
+  public alphaPresetColors = [...this.presetColors,
+    'rgba(0,0,0,0)'
+  ]
+
   private propsSub: Subscription;
   public props: ColorPickerProps;
   public toggle = false;
@@ -50,7 +53,7 @@ export class ColorPickerWrapperComponent implements OnInit, OnDestroy  {
     if (event.startsWith('rgba')) {
       color = rgbaToValues(event);
     } else {
-      color = hexToRgb(event.length === 9 ? event.slice(0,7) : event);
+      color = hexToRgb(event.length === 9 ? event.slice(0, 7) : event);
     }
     this.colorHashService.setColorForString(this.props.cacheKey, color);
   }

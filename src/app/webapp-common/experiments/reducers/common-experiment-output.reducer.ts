@@ -125,7 +125,7 @@ export function commonExperimentOutputReducer(state = initialCommonExperimentOut
             currLog = currLog.slice(0, 300);
           }
         } else {
-          currLog = sortBy('timestamp', state.experimentLog.concat(events));
+          currLog = sortBy('timestamp', state.experimentLog?.concat(events));
           if (currLog.length > 300) {
             currLog = currLog.slice(currLog.length - 300, currLog.length);
           }

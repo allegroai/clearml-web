@@ -2,17 +2,17 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Observable, Subscription} from 'rxjs';
 import {Store} from '@ngrx/store';
 import {ActivatedRoute, Router} from '@angular/router';
-import {selectShowOnlyUserWork} from '../../webapp-common/core/reducers/users-reducer';
-import {GetCurrentUserResponseUserObjectCompany} from '../../business-logic/model/users/getCurrentUserResponseUserObjectCompany';
+import {selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
+import {GetCurrentUserResponseUserObjectCompany} from '~/business-logic/model/users/getCurrentUserResponseUserObjectCompany';
 import {filter, skip, take} from 'rxjs/operators';
-import {setDeep} from '../../webapp-common/core/actions/projects.actions';
-import {getRecentProjects, getRecentExperiments} from '../../webapp-common/dashboard/common-dashboard.actions';
-import {selectActiveSearch} from '../../webapp-common/common-search/common-search.reducer';
-import {selectFirstLogin} from '../../webapp-common/core/reducers/view.reducer';
+import {setDeep} from '@common/core/actions/projects.actions';
+import {getRecentProjects, getRecentExperiments} from '@common/dashboard/common-dashboard.actions';
+import {selectActiveSearch} from '@common/common-search/common-search.reducer';
+import {selectFirstLogin} from '@common/core/reducers/view.reducer';
 import {MatDialog} from '@angular/material/dialog';
-import {WelcomeMessageComponent} from '../../webapp-common/dashboard/dumb/welcome-message/welcome-message.component';
-import {firstLogin} from '../../webapp-common/core/actions/layout.actions';
-import {IRecentTask, selectRecentTasks} from '../../webapp-common/dashboard/common-dashboard.reducer';
+import {WelcomeMessageComponent} from '@common/layout/welcome-message/welcome-message.component';
+import {firstLogin} from '@common/core/actions/layout.actions';
+import {IRecentTask, selectRecentTasks} from '@common/dashboard/common-dashboard.reducer';
 
 
 @Component({

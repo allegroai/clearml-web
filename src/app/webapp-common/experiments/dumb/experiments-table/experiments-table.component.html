@@ -1,4 +1,3 @@
-<script src="../../../models/shared/models-table/models-table.component.ts"></script>
 <ng-container *ngTemplateOutlet="contextMenuTemplate; context: { $implicit: contextExperiment}"></ng-container>
 <div class="table-container" [class.card-view]="minimizedView" #tableContainer>
   <sm-table
@@ -11,7 +10,7 @@
     [columns]="tableCols"
     [lazyLoading]="true"
     [minimizedView]="minimizedView"
-    minimizedTableHeader="{{entityType.replace('pipeline ', '')}}S LIST"
+    minimizedTableHeader="{{entityType.replace('ripeline ', '')}}S LIST"
     [noMoreData]="noMoreExperiments"
     [selection]="selectedExperiment"
     [activeContextRow]="contextExperiment"
@@ -19,9 +18,10 @@
     [checkedItems]="selectedExperiments"
     [keyboardControl]="true"
     [sortFields]="tableSortFields"
-    (rowSelectionChanged)="onRowSelectionChanged($event)"
+    (rowSelectionChanged)="experimentSelectionChanged.emit($any($event).data)"
+    (rowClicked)="tableRowClicked($event)"
     (loadMoreClicked)="onLoadMoreClicked()"
-    (onRowRightClick)="onContextMenu($event)"
+    (rowRightClick)="onContextMenu($event)"
     (colReordered)="columnsReordered.emit($event)"
     (sortChanged)="onSortChanged($event.isShift, $event.field)"
     (columnResized)="columnResized.emit($event)"
@@ -42,7 +42,7 @@
     </ng-template>
 
     <ng-template let-col pTemplate="checkbox">
-      <div class="d-flex">
+      <div class="d-flex align-items-center">
         <sm-checkbox-control
           *ngIf="col.headerType === colHeaderTypeEnum.checkBox"
           class="checkbox-col header"
@@ -55,7 +55,7 @@
         <div class="al-icon al-ico-dropdown-arrow sm drop-down" [matMenuTriggerFor]="selectionMenu"></div>
       </div>
       <mat-menu class="light-theme" #selectionMenu="matMenu">
-        <div class="menu-title">Select from project</div>
+        <div *ngIf="entityType !== entityTypes.controller" class="menu-title">Select from project</div>
         <button mat-menu-item (click)="selectAll()">All</button>
         <button mat-menu-item (click)="emitSelection([])">None</button>
         <button mat-menu-item (click)="selectAll(true)">All matching filter</button>
@@ -97,6 +97,7 @@
               class="experiment-name"
               [class.italic]="isDevelopment(experiment)"
               matTooltipPosition="above"
+              smShowTooltipIfEllipsis
               [smTooltip]="experiment.name">
               {{experiment.name}}
             </div>
@@ -107,11 +108,14 @@
           <sm-tag-list [tags]="experiment.tags" [sysTags]="getSystemTags(experiment)"></sm-tag-list>
         </ng-container>
         <ng-container *ngSwitchCase="EXPERIMENTS_TABLE_COL_FIELDS.USER">
-          <span class="ellipsis">{{experiment.user?.name ? experiment.user?.name : 'Unknown User'}}</span>
+          <span class="ellipsis" matTooltipPosition="above"
+                smShowTooltipIfEllipsis
+                [smTooltip]="experiment.user?.name ? experiment.user?.name : 'Unknown User'">{{experiment.user?.name ? experiment.user?.name : 'Unknown User'}}</span>
         </ng-container>
         <span *ngSwitchCase="EXPERIMENTS_TABLE_COL_FIELDS.PROJECT"
               class="ellipsis"
               matTooltipPosition="above"
+              smShowTooltipIfEllipsis
               [smTooltip]="experiment.project?.name">
           {{experiment.project?.name}}
         </span>
@@ -129,7 +133,7 @@
           <span class="ellipsis">{{experiment.active_duration | duration}}</span>
         </ng-container>
         <ng-container *ngSwitchCase="EXPERIMENTS_TABLE_COL_FIELDS.COMMENT">
-          <span class="ellipsis" matTooltipPosition="above" [smTooltip]="experiment.comment">{{experiment.comment}}</span>
+          <span class="ellipsis" matTooltipPosition="above" smShowTooltipIfEllipsis [smTooltip]="experiment.comment">{{experiment.comment}}</span>
         </ng-container>
         <ng-container *ngSwitchCase="EXPERIMENTS_TABLE_COL_FIELDS.SELECTED">
           <sm-checkbox-control
@@ -150,6 +154,7 @@
             class="parent-name"
             *ngIf="experiment?.parent?.id"
             matTooltipPosition="above"
+            smShowTooltipIfEllipsis
             [smTooltip]="experiment.parent.project?.name? experiment.parent.project.name + ' / ' + experiment.parent.name : experiment.parent.name"
           >{{experiment.parent.name}}</span>
         </ng-container>
@@ -165,14 +170,17 @@
     </ng-template>
 
     <ng-template let-experiment="rowData" let-selected="selected" let-rowNumber="rowNumber" pTemplate="card">
-      <sm-table-card class="flex-grow-1" [selected]="selected"
-                     [cardName]="experiment.name"
-                     [columns]="tableCols"
-                     [rowData]="experiment"
-                     [checked]="isRowSelected(experiment)"
-                     [activeContextRow]="contextExperiment"
-                     [contextMenuOpen]="contextMenuActive"
-                     [entityType]="entityType"
+      <sm-table-card
+        class="flex-grow-1"
+        [selected]="selected"
+        [cardName]="experiment.name"
+        [columns]="tableCols"
+        [rowData]="experiment"
+        [checked]="isRowSelected(experiment)"
+        [activeContextRow]="contextExperiment"
+        [contextMenuOpen]="contextMenuActive"
+        [entityType]="entityType"
+        (click)="selected && onContextMenu({e: $event, rowData: experiment, backdrop: true})"
       >
         <div sm-name-icon *ngIf="experiment?.system_tags.includes('shared')"><i class="al-icon al-ico-link sm-md ml-2"></i></div>
         <div sm-name-version *ngIf="experiment?.hyperparams?.properties?.version?.value" class="mr-5">

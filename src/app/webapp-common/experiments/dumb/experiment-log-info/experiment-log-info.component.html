@@ -9,4 +9,4 @@
   </div>
 </cdk-virtual-scroll-viewport>
 <mat-spinner *ngIf="fetching" [diameter]="80" [strokeWidth]="8"></mat-spinner>
-<button *ngIf="!fetching" class="btn btn-primary get-last" [class.at-end]="canRefresh" (click)="getLast()">Jump to end</button>
+<button *ngIf="!fetching" class="btn btn-cml-primary get-last" [class.at-end]="canRefresh" (click)="getLast()">Jump to end</button>

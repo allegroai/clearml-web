@@ -11,8 +11,8 @@
   >
     {{header}}
   </div>
-  <div class='cell pointer caret'>
-    <i [class]="iconClass" *ngIf="showCart" (click)="trigger.openMenu()"></i>
+  <div *ngIf="showCart" class='cell pointer caret'>
+    <i [class]="iconClass" (click)="trigger.openMenu()"></i>
   </div>
 </div>
 <mat-menu

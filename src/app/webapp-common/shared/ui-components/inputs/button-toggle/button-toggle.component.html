@@ -1,3 +1,15 @@
 <mat-button-toggle-group [formControl]="formControl" name="fontStyle" aria-label="Font Style">
-  <mat-button-toggle *ngFor="let option of options" [value]="option.value">{{option.label}}</mat-button-toggle>
+  <mat-button-toggle
+    *ngFor="let option of options; trackBy: trackByValue"
+    [value]="option.value"
+    [disabled]="disabled"
+    [smTooltip]="option.icon ? option.label : ''"
+    matTooltipPosition="above"
+    matTooltipShowDelay="500"
+    (click)="valueChanged.emit(option.value)"
+    [appendComponentOnTopElement]="option.ripple && rippleEffect" [componentToAppend]="rippleComponent"
+  >
+    <i *ngIf="option.icon; else: label" class="al-icon sm-md" [class]="option.icon"></i>
+    <ng-template #label>{{option.label}}</ng-template>
+  </mat-button-toggle>
 </mat-button-toggle-group>

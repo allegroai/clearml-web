@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {Actions, createEffect, Effect, ofType} from '@ngrx/effects';
 import {debounceTime, filter, map, mergeMap, switchMap, withLatestFrom} from 'rxjs/operators';
 import {activeLoader, deactivateLoader} from '../../core/actions/layout.actions';
-import {ApiTasksService} from '../../../business-logic/api-services/tasks.service';
+import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
 import {
   compareAddDialogSetTableSort,
   compareAddDialogTableSortChanged,
@@ -10,13 +10,11 @@ import {
   getSelectedExperimentsForCompareAddDialog,
   refreshIfNeeded,
   setExperimentsUpdateTime,
-  setRefreshing,
-  setSearchExperimentsForCompareResults
+  setSearchExperimentsForCompareResults,
 } from '../actions/compare-header.actions';
 import {select, Store} from '@ngrx/store';
 import {flatten, get, isEmpty} from 'lodash/fp';
-import {selectCompareAddTableSortFields, selectExperimentsUpdateTime} from '../reducers';
-import {EmptyAction} from '../../../app.constants';
+import {selectExperimentsUpdateTime} from '../reducers';
 import {selectRouterParams} from '../../core/reducers/router-reducer';
 import {selectAppVisible} from '../../core/reducers/view.reducer';
 import {MINIMUM_ONLY_FIELDS} from '../../experiments/experiment.consts';
@@ -24,12 +22,17 @@ import * as exSelectors from '../../experiments/reducers';
 import {selectExperimentsMetricsCols, selectExperimentsTableCols, selectTableSortFields} from '../../experiments/reducers';
 import {selectSelectedProjectId} from '../../core/reducers/projects.reducer';
 import {addMultipleSortColumns} from '../../shared/utils/shared-utils';
+import {RefreshService} from '@common/core/services/refresh.service';
 
 @Injectable()
 export class SelectCompareHeaderEffects {
 
-  constructor(private actions: Actions, public experimentsApi: ApiTasksService, private store: Store<any>) {
-  }
+  constructor(
+    private actions: Actions,
+    public experimentsApi: ApiTasksService,
+    private store: Store,
+    private refresh: RefreshService
+  ) {}
 
   @Effect()
   activeLoader = this.actions.pipe(
@@ -48,25 +51,24 @@ export class SelectCompareHeaderEffects {
     filter(([, isAppVisible, ,]) => isAppVisible),
     switchMap(([action, , experimentsIds, experimentsUpdateTime]) =>
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      this.experimentsApi.tasksGetAllEx({id: experimentsIds, only_fields: ['last_update']}).pipe(
+      this.experimentsApi.tasksGetAllEx({id: experimentsIds, only_fields: ['last_change']}).pipe(
         mergeMap((res) => {
           const updatedExperimentsUpdateTime: { [key: string]: Date } = {};
           res.tasks.forEach(task => {
-            updatedExperimentsUpdateTime[task.id] = task.last_update;
+            updatedExperimentsUpdateTime[task.id] = task.last_change;
           });
-          const experimentsWhereUpdated = !!(experimentsIds.find((id) =>
-            (new Date(experimentsUpdateTime[id]).getTime()) < new Date(updatedExperimentsUpdateTime[id]).getTime()
-          ));
-          const shouldUpdate = ((!action.payload) || (!action.autoRefresh) || experimentsWhereUpdated) && !(isEmpty(experimentsUpdateTime));
+          const experimentsWhereUpdated = experimentsIds.some(id =>
+            new Date(experimentsUpdateTime[id]) < new Date(updatedExperimentsUpdateTime[id])
+          );
+          if (((!action.payload) || (!action.autoRefresh) || experimentsWhereUpdated) && !(isEmpty(experimentsUpdateTime))) {
+            this.refresh.trigger(true);
+          }
           return [
-            setExperimentsUpdateTime({payload: updatedExperimentsUpdateTime}),
-            (shouldUpdate) ? setRefreshing({
-              payload: action.payload,
-              autoRefresh: action.autoRefresh
-            }) : new EmptyAction()];
+            setExperimentsUpdateTime({payload: updatedExperimentsUpdateTime})];
         }))
     )
   );
+
   tableSortChange = createEffect(() => this.actions.pipe(
     ofType(compareAddDialogTableSortChanged),
     withLatestFrom(

@@ -1,6 +1,14 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
 import {FormControl} from '@angular/forms';
-import {distinctUntilChanged} from 'rxjs/operators';
+import {RippleButtonComponent} from '@common/shared/ui-components/buttons/ripple-button/ripple-button.component';
+
+export interface Option {
+  value: any;
+  label: string;
+  icon?: string;
+  ripple?: boolean;
+}
+
 
 @Component({
   selector       : 'sm-button-toggle',
@@ -8,30 +16,20 @@ import {distinctUntilChanged} from 'rxjs/operators';
   styleUrls      : ['./button-toggle.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ButtonToggleComponent implements OnInit {
+export class ButtonToggleComponent {
 
+  public rippleComponent = RippleButtonComponent;
   public formControl = new FormControl();
-  private valueChangesSubs: any;
 
-  @Input() options: Array<{ value: any; label: string; icon?: string }>;
+  @Input() options: Option[];
+  @Input() disabled: boolean;
+  @Input() rippleEffect: boolean;
 
   @Input() set value(value: any) {
     this.formControl.setValue(value);
   }
 
   @Output() valueChanged = new EventEmitter();
-
-  constructor() {
-  }
-
-  ngOnInit() {
-    this.valueChangesSubs = this.formControl.valueChanges
-      .pipe(
-        distinctUntilChanged()
-      )
-      .subscribe(value => {
-        this.valueChanged.emit(value);
-      });
-  }
+  trackByValue = (index: number, option: Option) => option.value;
 
 }

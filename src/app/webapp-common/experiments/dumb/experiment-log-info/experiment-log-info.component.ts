@@ -175,20 +175,28 @@ export class ExperimentLogInfoComponent implements OnDestroy, AfterViewInit {
 
   calcLines() {
     this.lines = [];
-    this.orgLogs.filter((row) => !this.hasFilter || this.regex.test(row.msg))
+    this.orgLogs
+      .filter((row) => !this.hasFilter || this.regex.test(row?.msg ?? ''))
       .forEach(logItem => {
         let first = true;
-        logItem.msg.split('\n').filter(msg => !!msg).forEach((msg: string) => {
-          const hasAnsi = this.hasAnsi(msg);
-          const converted = msg ? (hasAnsi ? this.convert.toHtml(msg) :
-            msg) : '';
-          if (first) {
-            this.lines.push({timestamp: logItem['timestamp'] || logItem['@timestamp'], entry: converted, hasAnsi: hasAnsi});
-            first = false;
-          } else {
-            this.lines.push({entry: converted, hasAnsi: hasAnsi});
-          }
-        });
+        if (!logItem.msg) {
+          this.lines.push({timestamp: logItem['timestamp'] || logItem['@timestamp'], entry: '', hasAnsi: false, separator: true});
+          return;
+        }
+        logItem.msg
+          .split('\n')
+          .filter(msg => !!msg)
+          .forEach((msg: string) => {
+            const hasAnsi = this.hasAnsi(msg);
+            const converted = msg ? (hasAnsi ? this.convert.toHtml(msg) :
+              msg) : '';
+            if (first) {
+              this.lines.push({timestamp: logItem['timestamp'] || logItem['@timestamp'], entry: converted, hasAnsi: hasAnsi});
+              first = false;
+            } else {
+              this.lines.push({entry: converted, hasAnsi: hasAnsi});
+            }
+          });
         this.lines[this.lines.length - 1].separator = true;
       });
   }

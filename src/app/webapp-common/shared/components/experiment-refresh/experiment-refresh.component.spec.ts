@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ExperimentRefreshComponent } from './experiment-refresh.component';
+import {StoreModule} from '@ngrx/store';
 
 describe('ExperimentRefreshComponent', () => {
   let component: ExperimentRefreshComponent;
@@ -8,7 +9,8 @@ describe('ExperimentRefreshComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ ExperimentRefreshComponent ]
+      declarations: [ ExperimentRefreshComponent ],
+      imports: [StoreModule.forRoot({})]
     })
     .compileComponents();
   }));

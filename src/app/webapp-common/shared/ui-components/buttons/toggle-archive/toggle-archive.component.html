@@ -1,4 +1,9 @@
-<button (click)="toggleArchived.emit(!showArchived)" class="btn btn-primary d-flex justify-content-between align-items-center">
+<button
+  class="btn btn-cml-primary d-flex justify-content-between align-items-center"
+  (click)="toggleArchived.emit(!showArchived)"
+  [smTooltip]="minimize ? showArchived ? 'EXIT ARCHIVE': 'OPEN ARCHIVE' : ''"
+  matTooltipPosition="above"
+>
   <i [class]="'al-icon sm ' + (showArchived? ' al-ico-exit-archive' : 'al-ico-archive' )"></i>
-  <span class="button-label">{{showArchived? 'EXIT': 'OPEN'}} ARCHIVE</span>
+  <span *ngIf="!minimize" class="button-label">{{showArchived? 'EXIT': 'OPEN'}} ARCHIVE</span>
 </button>

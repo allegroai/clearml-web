@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { RefreshButtonComponent } from './refresh-button.component';
+import {StoreModule} from '@ngrx/store';
 
 describe('RefreshButtonComponent', () => {
   let component: RefreshButtonComponent;
@@ -8,7 +9,8 @@ describe('RefreshButtonComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ RefreshButtonComponent ]
+      declarations: [ RefreshButtonComponent ],
+      imports: [StoreModule.forRoot({})]
     })
     .compileComponents();
   }));

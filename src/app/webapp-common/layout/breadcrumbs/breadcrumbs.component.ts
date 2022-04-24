@@ -31,25 +31,25 @@ export interface IBreadcrumbsLink {
 })
 export class BreadcrumbsComponent implements OnInit, OnDestroy {
   public breadcrumbs: Array<IBreadcrumbsLink> = [];
-  private routeConfig: Array<string> = [];
-  private breadcrumbsStrings;
-  private breadcrumbsSubscription: Subscription;
   public currentUrl: string;
   public showShareButton: boolean = false;
   public isCommunity: boolean;
-
-  @Input() activeWorkspace: GetCurrentUserResponseUserObjectCompany;
-  private confSub: Subscription;
-  private isDeepSub: Subscription;
+  public archive: boolean;
   public workspaceNeutral: boolean;
   public isDeep: boolean;
   public subProjectsMenuIsOpen: boolean;
-  private previousProjectNames: any;
+  public lastSegment: string;
   public shouldCollapse: boolean;
-  @ViewChild('container') private breadCrumbsContainer: ElementRef;
+  private previousProjectNames: any;
   private tempBread:  Array<IBreadcrumbsLink> = [];
-  archive: boolean;
+  private routeConfig: Array<string> = [];
+  private breadcrumbsStrings;
+  private breadcrumbsSubscription: Subscription;
+  private confSub: Subscription;
+  private isDeepSub: Subscription;
 
+  @Input() activeWorkspace: GetCurrentUserResponseUserObjectCompany;
+  @ViewChild('container') private breadCrumbsContainer: ElementRef;
 
   constructor(private store: Store<any>, public route: ActivatedRoute, private configService: ConfigurationService, public cd: ChangeDetectorRef) {
   }
@@ -89,6 +89,7 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
           hide = route.data.workspaceNeutral;
         }
       }
+      this.lastSegment = route.parent.url[0]?.path;
       this.workspaceNeutral = hide;
     });
   }

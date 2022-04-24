@@ -1,21 +1,26 @@
 <div class="p-3 images-container">
-  <div class="single-debug-images-container" *ngFor="let experimentId of experimentIds; trackBy: trackExperiment">
+  <div class="single-debug-images-container" *ngFor="let experimentId of experimentIds; trackBy: trackExperiment" [class.separator]="experimentIds?.length > 1">
     <header *ngIf="experimentIds?.length > 1">
-      <div
-        class="experiment-name">
-        <span [smTooltip]="experimentNames[experimentId]" matTooltipPosition="above">{{modifiedExperimentsNames[experimentId]}}</span>
-      </div>
+      <sm-experiment-compare-general-data
+        *ngIf="(experiments | itemById: experimentId).name"
+        [experiment]="experiments | itemById: experimentId"
+        [tags]="(experiments | itemById: experimentId)?.tags"
+        (copyIdClicked)="copyIdToClipboard()"
+       >
+      </sm-experiment-compare-general-data>
     </header>
-    <div class="d-flex">
+    <div class="d-flex" >
       <div class="metric-bar" [class.minimized]="minimized" *ngIf="!thereAreNoMetrics(experimentId)">
         <label>Metric:</label>
         <mat-form-field appearance="outline" [ngClass]="{'dark thin': isDarkTheme}">
-          <mat-select #metricSelect (selectionChange)="selectMetric($event, experimentId)" [panelClass]="isDarkTheme ? 'dark black dark-theme': 'light-theme'"
-                      [value]="selectedMetrics[experimentId]" name="selectedMetric">
+          <mat-select
+            #metricSelect
+            (selectionChange)="selectMetric($event, experimentId)"
+            [panelClass]="isDarkTheme ? 'dark black dark-theme': 'light-theme'"
+            [value]="selectedMetrics[experimentId]"
+          >
             <mat-option *ngIf="selectedMetrics[experimentId]" [value]="allImages">{{allImages}}</mat-option>
-            <mat-option *ngFor="let metric of optionalMetrics[experimentId]" [value]="metric">
-              {{metric}}
-            </mat-option>
+            <mat-option *ngFor="let metric of optionalMetrics[experimentId]" [value]="metric">{{metric}}</mat-option>
           </mat-select>
         </mat-form-field>
         <label>Iterations:</label>
@@ -25,12 +30,9 @@
              class="al-icon al-ico-next-batch al-color light-grey-blue"
              smTooltip="Older images"></div>
 
-        <b
-          class="text-right">{{debugImages && debugImages[experimentId] && debugImages[experimentId][0][debugImages[experimentId][0].length - 1].iter}}</b>
-
+        <b class="text-right">{{debugImages?.[experimentId]?.data.slice(-1)[0].iter}}</b>
         <div class="al-icon al-ico-between al-color light-blue-grey"></div>
-
-        <b>{{debugImages && debugImages[experimentId] && debugImages[experimentId][0][0].iter}}</b>
+        <b>{{debugImages?.[experimentId]?.data?.[0].iter}}</b>
 
         <div [ngClass]="{'disabled': (timeIsNow$| async)[experimentId]}"
              (click)="(!timeIsNow[experimentId]) && previousBatch({task: experimentId, metric: metricSelect.value})"
@@ -51,8 +53,8 @@
       <h3>NO DEBUG SAMPLES</h3>
     </div>
     <sm-debug-images-view
-      *ngFor="let debugImages of debugImages[experimentId]"
-      [iterations]="debugImages"
+      *ngIf="debugImages?.[experimentId]?.data"
+      [iterations]="debugImages[experimentId].data"
       [experimentId]="experimentId"
       [title]="experimentNames && experimentNames[experimentId]"
       [isMergeIterations]="mergeIterations"
@@ -62,5 +64,5 @@
     >
     </sm-debug-images-view>
   </div>
-</div>
+  </div>
 

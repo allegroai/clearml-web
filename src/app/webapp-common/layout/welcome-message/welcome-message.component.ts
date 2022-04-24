@@ -12,9 +12,15 @@ import {AdminService} from '~/shared/services/admin.service';
 import {ConfigurationService} from '@common/shared/services/configuration.service';
 import {GetCurrentUserResponseUserObjectCompany} from '~/business-logic/model/users/getCurrentUserResponseUserObjectCompany';
 import {Queue} from '~/business-logic/model/queues/queue';
-import {GettingStartedContext} from '../../../../../environments/base';
+import {GettingStartedContext} from '../../../../environments/base';
+import {trackByIndex} from '@common/shared/utils/forms-track-by';
 
-interface StepObject { header?: string; title?: string; code?: string; subNote?: string }
+interface StepObject {
+  header?: string;
+  title?: string;
+  code?: string;
+  subNote?: string;
+}
 
 @Component({
   selector: 'sm-welcome-message',
@@ -55,6 +61,7 @@ export class WelcomeMessageComponent implements OnInit, OnDestroy {
       code: 'clearml-agent init'
     }
     ];
+  links = ['Setup ClearML', 'Run your ML code', 'Relaunch previous experiments'];
   host: string;
   community = false;
   public queue: Queue;
@@ -63,6 +70,10 @@ export class WelcomeMessageComponent implements OnInit, OnDestroy {
   public gettingStartedContext: GettingStartedContext;
   docsLink: string;
   credentialsLabel: string;
+  public currentLink: string;
+  showTabs: boolean;
+  public src: string;
+  trackByFn = trackByIndex;
 
   constructor(
     private store: Store<any>,
@@ -71,12 +82,14 @@ export class WelcomeMessageComponent implements OnInit, OnDestroy {
     private adminService: AdminService,
     private configService: ConfigurationService
   ) {
+    this.loadYoutubeApi(data?.newExperimentYouTubeVideoId);
     this.dialogRef.beforeClosed().subscribe(() => this.dialogRef.close(this.doNotShowAgain));
     this.step = data?.step || this.step;
     this.queue = data?.queue;
     this.gettingStartedContext = this.configService.getStaticEnvironment().gettingStartedContext;
     this.docsLink = this.configService.getStaticEnvironment().docsLink;
-
+    this.showTabs = data?.showTabs;
+    this.currentLink = this.showTabs ? this.links[0] : undefined;
     this.steps = this.queue ? this.ORPHANED_QUEUE_STEPS : this.GETTING_STARTED_STEPS;
     if (this.queue) {
       this.steps[0].code = `clearml-agent daemon --queue ${this.queue.name}`;
@@ -84,6 +97,9 @@ export class WelcomeMessageComponent implements OnInit, OnDestroy {
     } else if (this.gettingStartedContext) {
       this.steps[0].code = this.gettingStartedContext.install;
       this.steps[1].code = this.gettingStartedContext.configure;
+    }
+    if (this.showTabs) {
+      this.steps[0].header = null;
     }
     this.host = `${window.location.protocol}//${window.location.hostname}`;
     if (this.API_BASE_URL === '/api') {
@@ -130,5 +146,18 @@ export class WelcomeMessageComponent implements OnInit, OnDestroy {
 
   doNotShowThisAgain($event: { field: string; value: any; event: Event }) {
     this.doNotShowAgain = $event.value;
+  }
+
+  showSection(selection: string) {
+    this.currentLink = selection;
+  }
+
+  loadYoutubeApi(videoId: string) {
+    if (!window.YT) {
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      document.body.appendChild(tag);
+    }
+    this.src = videoId;
   }
 }

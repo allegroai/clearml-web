@@ -8,10 +8,20 @@
       display: none;
 
     }
+    .preset-color {
+      border-radius: 3px;
+      margin: 4px;
+    }
+    .button-area {
+      margin-top: 16px;
+    }
   }
 
   .color-picker-wrapper {
     position: absolute;
+  }
+  ::ng-deep .cp-preset-colors-class .preset-color:last-child {
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath d='M12,16V12H8V8h4v4h4v4ZM4,16V12H8v4ZM0,12V8H4v4ZM12,8V4H8V0h4V4h4V8ZM4,8V4H0V0H4V4H8V8Z' fill='%23ccc'/%3E%3C/svg%3E");
   }
 }
 

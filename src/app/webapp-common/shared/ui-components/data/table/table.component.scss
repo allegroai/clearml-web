@@ -35,6 +35,7 @@
     font-weight: 500;
     text-transform: uppercase;
     padding-left: 16px;
+    margin-right: auto;
   }
 
   .table-actions {
@@ -64,7 +65,7 @@
     .load-spinner {
       display: inline-block;
       vertical-align: middle;
-      background-image: url("#{$assets-icons-path}/Spinner.svg");
+      background-image: url("../../../../assets/icons/Spinner.svg");
       background-repeat: no-repeat;
       background-size: 16px;
       width: 16px;
@@ -158,12 +159,35 @@
         }
       }
 
-
-
       &.no-data {
         color: $blue-250;
         text-align: center;
         padding: 15px 0 10px 0;;
+      }
+    }
+
+    &:hover {
+      .context-button {
+        opacity: 1;
+      }
+    }
+
+    .context-button {
+      cursor: pointer;
+      position: absolute;
+      opacity: 0;
+      transition: opacity 0.35s ease-in-out;
+      margin-top: 8px;
+      width: calc(var(--rowHeight) * 0.666);
+      height: calc(var(--rowHeight) * 0.666);
+      padding: 3px;
+      color: $blue-400;
+      background-color: rgba($blue-600, 95%);
+      border-radius: 4px;
+      border: solid 1px $blue-400;
+      &:hover {
+        color: $blue-300;
+        background-color: $blue-570;
       }
     }
   }

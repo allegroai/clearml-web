@@ -6,12 +6,13 @@ import {distinctUntilChanged, filter, map} from 'rxjs/operators';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {get, has} from 'lodash/fp';
 import {SetExperimentSettings, SetSelectedExperiments} from '../../actions/experiments-compare-charts.actions';
-import {selectRefreshing, selectScalarsGraphHyperParams, selectScalarsGraphMetrics, selectScalarsGraphShowIdenticalHyperParams, selectScalarsGraphTasks, selectMetricValueType, selectSelectedSettingsHyperParams, selectSelectedSettingsMetric} from '../../reducers';
+import {selectScalarsGraphHyperParams, selectScalarsGraphMetrics, selectScalarsGraphShowIdenticalHyperParams, selectScalarsGraphTasks, selectMetricValueType, selectSelectedSettingsHyperParams, selectSelectedSettingsMetric} from '../../reducers';
 import {getExperimentsHyperParams, setShowIdenticalHyperParams, setvalueType} from '../../actions/experiments-compare-scalars-graph.actions';
 import {GroupedHyperParams, MetricOption, MetricValueType, SelectedMetric, VariantOption} from '../../reducers/experiments-compare-charts.reducer';
 import {MatRadioChange} from '@angular/material/radio';
 import {selectPlotlyReady} from '@common/core/reducers/view.reducer';
 import {ExtFrame} from '@common/shared/experiment-graphs/single-graph/plotly-graph-base';
+import {RefreshService} from '@common/core/services/refresh.service';
 
 
 export const _filter = (opt: VariantOption[], value: string): VariantOption[] => {
@@ -37,7 +38,6 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
   public metrics$: Observable<MetricOption[]>;
   public selectedHyperParams$: Observable<string[]>;
   private selectedMetric$: Observable<SelectedMetric>;
-  private selectRefreshing$: Observable<{ refreshing: boolean, autoRefresh: boolean }>;
   public experiments$: Observable<any[]>;
 
   public graphs: { [key: string]: ExtFrame };
@@ -66,13 +66,12 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
     }
   }
 
-  constructor(private store: Store<IExperimentInfoState>) {
+  constructor(private store: Store<IExperimentInfoState>, private refresh: RefreshService) {
     this.metrics$ = this.store.pipe(select(selectScalarsGraphMetrics));
     this.hyperParams$ = this.store.pipe(select(selectScalarsGraphHyperParams));
     this.selectedHyperParams$ = this.store.pipe(select(selectSelectedSettingsHyperParams));
     this.selectedMetric$ = this.store.pipe(select(selectSelectedSettingsMetric));
     this.selectShowIdenticalHyperParams$ = this.store.pipe(select(selectScalarsGraphShowIdenticalHyperParams));
-    this.selectRefreshing$ = this.store.select(selectRefreshing);
     this.experiments$ = this.store.pipe(select(selectScalarsGraphTasks));
     this.metricValueType$ = this.store.pipe(select(selectMetricValueType));
 
@@ -128,8 +127,11 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
         this.store.dispatch(getExperimentsHyperParams({experimentsIds: this.taskIds}));
       });
 
-    this.refreshingSubscription = this.selectRefreshing$.pipe(filter(({refreshing}) => refreshing)).subscribe(({autoRefresh}) =>
-      this.store.dispatch(getExperimentsHyperParams({experimentsIds: this.taskIds, autoRefresh})));
+    this.refreshingSubscription = this.refresh.tick
+      .pipe(filter(auto => auto !== null))
+      .subscribe(autoRefresh =>
+        this.store.dispatch(getExperimentsHyperParams({experimentsIds: this.taskIds, autoRefresh}))
+      );
 
     this.listOpen = true;
     window.setTimeout(() => {

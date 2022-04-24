@@ -129,6 +129,22 @@ $dark-theme: (
     background-color: $blue-600,
     color-active: $blue-100,
     color: $blue-300
+  ),
+  button: (
+    // default
+    color: $blue-300,
+    background-color: $blue-600,
+    border-color: $blue-600,
+    
+    // hover
+    color-hover: $blue-200,
+    background-color-hover: $blue-500,
+    border-color-hover: $blue-500,
+
+    // focus
+    color-focus: $blue-300,
+    background-color-focus: $blue-600,
+    border-color-focus: $blue-600
   )
 );
 

@@ -1,10 +1,9 @@
 import {createAction, props} from '@ngrx/store';
-import {Task} from '../../../business-logic/model/tasks/task';
+import {Task} from '~/business-logic/model/tasks/task';
 import {Params} from '@angular/router';
 import {ISmCol} from '../../shared/ui-components/data/table/table.consts';
 import {SortMeta} from 'primeng/api';
 import {TableFilter} from '../../shared/utils/tableParamEncode';
-import {EXPERIMENTS_PREFIX} from '../../experiments/actions/common-experiments-view.actions';
 
 export const EXPERIMENTS_COMPARE_SELECT_EXPERIMENT_ = 'EXPERIMENTS_COMPARE_SELECT_EXPERIMENT_';
 
@@ -22,7 +21,6 @@ export const SET_NAVIGATION_PREFERENCES = EXPERIMENTS_COMPARE_SELECT_EXPERIMENT_
 
 
 export const setHideIdenticalFields = createAction(SET_HIDE_IDENTICAL_ROWS, props<{payload: boolean}>());
-export const setRefreshing = createAction(SET_REFRESHING, props<{ payload: boolean; autoRefresh?: boolean }>());
 export const setExperimentsUpdateTime = createAction(SET_EXPERIMENTS_UPDATE_TIME, props<{ payload: {[key: string]: Date}}>());
 export const refreshIfNeeded = createAction(REFRESH_IF_NEEDED, props<{ payload: boolean; autoRefresh?: boolean }>());
 export const toggleShowScalarOptions = createAction(TOGGLE_SHOW_SACLARS_OPTIONS);

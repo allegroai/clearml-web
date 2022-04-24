@@ -11,13 +11,10 @@ import {MetricValueType} from '@common/experiments-compare/reducers/experiments-
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ExperimentCustomColsMenuComponent {
-
-
   public hasHyperParams: boolean;
   private _hyperParams: { [section: string]: any[] };
 
   @Input() metricVariants;
-  @Input() customColumnMode: CustomColumnMode;
   @Input() tableCols;
   @Input() disabled: boolean;
 
@@ -31,7 +28,6 @@ export class ExperimentCustomColsMenuComponent {
 
   @Input() isLoading: boolean;
 
-  @Output() selectMetricActiveChanged = new EventEmitter<CustomColumnMode>();
   @Output() getMetricsToDisplay = new EventEmitter();
   @Output() removeColFromList = new EventEmitter<ISmCol['id']>();
   @Output() selectedTableColsChanged = new EventEmitter<ISmCol>();
@@ -43,5 +39,10 @@ export class ExperimentCustomColsMenuComponent {
   @Output() selectedHyperParamToShow = new EventEmitter<{param: string; addCol: boolean}>();
   @Output() clearSelection = new EventEmitter();
 
+  customColumnMode = CustomColumnMode.Standard as CustomColumnMode;
   public CustomColumnMode = CustomColumnMode;
+
+  setMode(mode: CustomColumnMode) {
+    this.customColumnMode = mode;
+  }
 }

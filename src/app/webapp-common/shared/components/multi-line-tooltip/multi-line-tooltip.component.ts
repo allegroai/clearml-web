@@ -8,6 +8,7 @@ import {ChangeDetectionStrategy, Component, Input, OnInit} from '@angular/core';
 })
 export class MultiLineTooltipComponent {
   @Input() infoData: any;
+  @Input() iconClass: string;
 
   constructor() {
   }

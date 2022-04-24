@@ -177,11 +177,25 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
     } catch {
       return [];
     }
-    const pipelineKeysArr = Object.keys(pipelineObj);
-    return Object.keys(pipelineObj).map((key, index) => ({
+    const pipelineKeysArr = Object.keys(pipelineObj).reverse();
+    // sort nodes to prevent @ngneat/dag from crashing
+    const sortedNodes = [];
+    let i = 0;
+    while (pipelineKeysArr.length > 0 || i > pipelineKeysArr.length) {
+      const node = pipelineObj[pipelineKeysArr[i]];
+      const parents = node.parents ?? [];
+      if (parents.every(parent => sortedNodes.includes(parent))) {
+        sortedNodes.push(pipelineKeysArr[i]);
+        pipelineKeysArr.splice(i, 1);
+        i = 0;
+        continue;
+      }
+      i++;
+    }
+    return sortedNodes.map((key, index) => ({
       id: key,
       stepId: index + 1,
-      parentIds: [0].concat(pipelineObj[key].parents.map(parent => pipelineKeysArr.indexOf(parent) + 1)),
+      parentIds: [0].concat(pipelineObj[key].parents.map(parent => sortedNodes.indexOf(parent) + 1)),
       name: key,
       branchPath: 1,
       data: {

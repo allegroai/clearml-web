@@ -55,7 +55,7 @@
             *ngIf="filterText && isNewName"
             [value]="filterText"
           >"{{filterText}}" <span class="new">(Create New)</span></mat-option>
-          <mat-option *ngFor="let project of filteredProjects | async" [value]="project">{{project.label}}</mat-option>
+          <mat-option *ngFor="let project of filteredProjects | async" [value]="project" [smTooltip]="project.label" matTooltipPosition="above" smShowTooltipIfEllipsis>{{project.label}}</mat-option>
         </mat-autocomplete>
       </mat-form-field>
       <mat-form-field class="w-100" appearance="outline">

@@ -48,9 +48,9 @@ export interface IExperimentModelForm {
 }
 
 export interface IExperimentModelInfo {
-  input: IModelInfo[];
-  output: IModelInfo[];
-  artifacts: Artifact[];
+  input?: IModelInfo[];
+  output?: IModelInfo[];
+  artifacts?: Artifact[];
 }
 
 export type ExperimentTableColFieldsEnum =

@@ -1,12 +1,21 @@
 <div class="d-flex justify-content-between header-container align-items-center"
      [ngClass]="{'archive-mode': isArchived}">
   <div class="d-flex-center">
-    <ng-content></ng-content>
+    <ng-container *ngTemplateOutlet="addButtonTemplate; context: {smallScreen: (isSmallScreen$ | async).matches}">
+    </ng-container>
     <sm-toggle-archive
       [class.hide-item]="sharedView"
       [showArchived]="isArchived"
+      [minimize]="(isSmallScreen$ | async).matches"
       (toggleArchived)="onIsArchivedChanged($event)"
     ></sm-toggle-archive>
+    <sm-button-toggle
+      [disabled]="!tableMode"
+      class="ml-3"
+      [options]="[{label: 'Table view', value: 'table', icon: 'al-ico-table-view'}, {label: 'Details view', value: 'info', icon: 'al-ico-experiment-view', ripple: true}]"
+      [value]="tableMode"
+      [rippleEffect]="rippleEffect"
+      (valueChanged)="tableModeChanged.emit($event)"></sm-button-toggle>
   </div>
   <sm-project-context-navbar
     *ngIf="showNavbarLinks"
@@ -26,20 +35,16 @@
       [metricVariants]="metricVariants"
       [hyperParams]="hyperParams"
       [tableCols]="tableCols"
-      [customColumnMode]="selectMetricActive"
       [isLoading]="isMetricsLoading"
       (selectedMetricToShow)="selectedMetricToShow.emit($event)"
       (selectedHyperParamToShow)="selectedHyperParamToShow.emit($event)"
       (selectedTableColsChanged)="selectedTableColsChanged.emit($event)"
       (getMetricsToDisplay)="getMetricsToDisplay.emit($event)"
       (removeColFromList)="removeColFromList.emit($event)"
-      (selectMetricActiveChanged)="setCustomColumnMode($event)"
       (clearSelection)="clearSelection.emit()"
     ></sm-experiment-custom-cols-menu>
     <sm-refresh-button
-      [autoRefreshState]="autoRefreshState"
       [allowAutoRefresh]="true"
-      (refreshList)="refreshListClicked.emit($event)"
       (setAutoRefresh)="setAutoRefresh.emit($event)"
     >
     </sm-refresh-button>

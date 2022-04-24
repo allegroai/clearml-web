@@ -1,46 +1,43 @@
 import {ActionReducerMap, createSelector} from '@ngrx/store';
-import {experimentsViewReducer, IExperimentsViewState} from './experiments-view.reducer';
-import {experimentInfoReducer, IExperimentInfoState} from './experiment-info.reducer';
-import {experimentOutputReducer} from './experiment-output.reducer';
+import {experimentsViewReducer, IExperimentsViewState, initialState as viewInitialState} from './experiments-view.reducer';
+import {experimentInfoReducer, IExperimentInfoState, initialState as infoInitialState} from './experiment-info.reducer';
+import {experimentOutputReducer, ExperimentOutputState, initialState as outputInitialState} from './experiment-output.reducer';
 import {IExperimentInfo} from '../shared/experiment-info.model';
-import {TaskStatusEnum} from '../../../business-logic/model/tasks/taskStatusEnum';
-import {isReadOnly, isSharedAndNotOwner} from '../../../webapp-common/shared/utils/shared-utils';
-import {EXPERIMENTS_STORE_KEY} from '../../../webapp-common/experiments/shared/common-experiments.const';
-import {CommonExperimentOutputState} from '../../../webapp-common/experiments/reducers/common-experiment-output.reducer';
-import {selectSelectedModel} from "../../../webapp-common/models/reducers";
+import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
+import {isReadOnly, isSharedAndNotOwner} from '@common/shared/utils/shared-utils';
+import {selectSelectedModel} from '@common/models/reducers';
 import {selectCurrentUser} from '@common/core/reducers/users-reducer';
 
-export const experimentsReducers: ActionReducerMap<any, any> = {
+export interface ExperimentState {
+  view: IExperimentsViewState;
+  info: IExperimentInfoState;
+  output: ExperimentOutputState;
+}
+
+export const experimentsReducers: ActionReducerMap<ExperimentState, any> = {
   view: experimentsViewReducer,
   info: experimentInfoReducer,
   output: experimentOutputReducer,
 };
 
-/**
- * The createFeatureSelector function selects a piece of state from the root of the state object.
- * This is used for selecting feature states that are loaded eagerly or lazily.
- */
-export function experiments(state) {
-  return state[EXPERIMENTS_STORE_KEY];
-}
+export const experiments = state => state.experiments ?? {} as ExperimentState;
 
 // view selectors.
-export const experimentsView = createSelector(experiments, (state): IExperimentsViewState => state ? state.view : {});
+export const experimentsView = createSelector(experiments, state => (state?.view ?? viewInitialState) as IExperimentsViewState);
 export const selectExperimentsMetricsCols = createSelector(experimentsView, state => state.metricsCols);
 export const selectMetricVariants = createSelector(experimentsView, state => state.metricVariants);
 export const selectMetricsLoading = createSelector(experimentsView, state => state.metricsLoading);
 
 
 // info selectors
-export const experimentInfo = createSelector(experiments, (state): IExperimentInfoState => state ? state.info : {});
-export const selectSelectedExperiment = createSelector(experimentInfo, state => state.selectedExperiment);
+export const experimentInfo = createSelector(experiments, state => (state?.info ?? infoInitialState) as IExperimentInfoState);
+export const selectSelectedExperiment = createSelector(experimentInfo, state => state?.selectedExperiment);
 export const selectExperimentInfoData = createSelector(experimentInfo, state => state.infoData);
 export const selectShowExtraDataSpinner = createSelector(experimentInfo, state => state.showExtraDataSpinner);
 
 
 // output selectors
-export const experimentOutput = createSelector(experiments, (state): CommonExperimentOutputState => state ? state.output : {});
-
+export const experimentOutput = createSelector(experiments, state => (state.output ?? outputInitialState) as ExperimentOutputState);
 export const selectIsExperimentEditable = createSelector(selectSelectedExperiment, selectCurrentUser,
   (experiment, user): boolean => experiment && experiment.status === TaskStatusEnum.Created && !isReadOnly(experiment) && !isSharedAndNotOwner(experiment, user.company));
 export const selectIsSharedAndNotOwner = createSelector(selectSelectedExperiment, selectSelectedModel, selectCurrentUser,

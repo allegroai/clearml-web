@@ -2,10 +2,10 @@
   <sm-queues-menu-extended
     [menuOpen]="menuOpen"
     [menuPosition]="menuPosition"
-    [selectedQueue]="selectedQueue"
+    [selectedQueue]="contextQueue"
     (deleteQueue)="deleteQueue.emit($event)"
-    (renameQueue)="renameQueue.emit(selectedQueue)"
-    (clearQueue)="clearQueue.emit(selectedQueue)"
+    (renameQueue)="renameQueue.emit($event)"
+    (clearQueue)="clearQueue.emit($event)"
   ></sm-queues-menu-extended>
   <sm-table #table
             [tableData]="queues"
@@ -17,7 +17,7 @@
             [scrollable]="true"
             [selection]="selectedQueue"
             (rowSelectionChanged)="onRowClicked($event)"
-            (onRowRightClick)="openContextMenu($event)"
+            (rowRightClick)="openContextMenu($event)"
   >
     <ng-template let-col pTemplate="sort-filter">
       <sm-table-filter-sort-template
@@ -30,14 +30,14 @@
     <ng-template let-col let-queue="rowData" pTemplate="body">
       <ng-container [ngSwitch]="col.id" class="table-cell">
         <div class="w-100 d-flex align-items-center first id-cell" *ngSwitchCase="QUEUES_TABLE_COL_FIELDS.NAME">
-          <div class="queue-name" matTooltipPosition="above" [smTooltip]="queue?.name">{{queue?.name}}</div>
+          <div class="queue-name" matTooltipPosition="above" [smTooltip]="queue?.name" smShowTooltipIfEllipsis>{{queue?.name}}</div>
           <sm-copy-clipboard [clipboardText]="queue?.id"
                              [hideBackground]="true"
                              [label]="''"
                              [tooltipText]="'Copy Queue ID'" class="copy-btn"></sm-copy-clipboard>
         </div>
         <ng-container *ngSwitchCase="QUEUES_TABLE_COL_FIELDS.TASK">
-          <span class="ellipsis">{{queue?.entries[0]?.task?.name}}</span>
+          <span class="ellipsis" matTooltipPosition="above" [smTooltip]="queue?.entries[0]?.task?.name" smShowTooltipIfEllipsis>{{queue?.entries[0]?.task?.name}}</span>
           <span *ngIf="!queue?.entries[0]?.task?.name">&mdash;</span>
         </ng-container>
         <ng-container *ngSwitchCase="QUEUES_TABLE_COL_FIELDS.LAST_UPDATED">

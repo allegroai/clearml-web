@@ -1,15 +1,16 @@
 import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
-import {selectRouterParams, selectRouterQueryParams} from '../../../core/reducers/router-reducer';
+import {selectRouterParams, selectRouterQueryParams} from '@common/core/reducers/router-reducer';
 import {select, Store} from '@ngrx/store';
 import {distinctUntilChanged, filter, map, tap} from 'rxjs/operators';
 import {get, has} from 'lodash/fp';
 import {Observable, Subscription} from 'rxjs';
 import * as metricsValuesActions from '../../actions/experiments-compare-metrics-values.actions';
-import {selectCompareMetricsValuesExperiments, selectCompareMetricsValuesSortConfig, selectRefreshing} from '../../reducers';
+import {selectCompareMetricsValuesExperiments, selectCompareMetricsValuesSortConfig} from '../../reducers';
 import {Router} from '@angular/router';
-import {addMessage} from '../../../core/actions/layout.actions';
+import {addMessage} from '@common/core/actions/layout.actions';
 import {TreeNode} from '../../shared/experiments-compare-details.model';
 import {createDiffObjectScalars, getAllKeysEmptyObject} from '../../jsonToDiffConvertor';
+import {RefreshService} from '@common/core/services/refresh.service';
 
 interface ValueMode {
   key: string;
@@ -39,7 +40,6 @@ const VALUE_MODES: { [mode: string]: ValueMode } = {
 export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy {
   public sortOrder$: Observable<any>;
   public comparedTasks$: Observable<any>;
-  private selectRefreshing$: Observable<{ refreshing: boolean; autoRefresh: boolean }>;
 
   private comparedTasksSubscription: Subscription;
   private refreshingSubscription: Subscription;
@@ -54,10 +54,14 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
   private taskIds: string;
   public valuesMode: ValueMode;
 
-  constructor(private router: Router, public store: Store<any>, private changeDetection: ChangeDetectorRef) {
+  constructor(
+    private router: Router,
+    public store: Store<any>,
+    private changeDetection: ChangeDetectorRef,
+    private refresh: RefreshService
+  ) {
     this.comparedTasks$ = this.store.pipe(select(selectCompareMetricsValuesExperiments));
     this.sortOrder$ = this.store.pipe(select(selectCompareMetricsValuesSortConfig));
-    this.selectRefreshing$ = this.store.select(selectRefreshing);
   }
 
   ngOnInit() {
@@ -92,8 +96,9 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
         this.changeDetection.detectChanges();
       });
 
-    this.refreshingSubscription = this.selectRefreshing$.pipe(filter(({refreshing}) => refreshing))
-      .subscribe(({autoRefresh}) => this.store.dispatch(
+    this.refreshingSubscription = this.refresh.tick
+      .pipe(filter(auto => auto !== null))
+      .subscribe((autoRefresh) => this.store.dispatch(
         new metricsValuesActions.GetComparedExperimentsMetricsValues({taskIds: this.taskIds.split(','), autoRefresh})
       ));
   }

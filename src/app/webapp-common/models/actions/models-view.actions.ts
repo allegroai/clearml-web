@@ -40,6 +40,8 @@ export const toggleColHidden = createAction(
 
 export const getTags = createAction(
   MODELS_PREFIX + 'GET_TAGS');
+export const getTagsForAllProjects = createAction(
+  MODELS_PREFIX + 'GET_TAGS_ALL_PROJECTS');
 
 export const setTags = createAction(
   MODELS_PREFIX + 'SET_TAGS',
@@ -49,6 +51,11 @@ export const setTags = createAction(
 export const setMetadataKeys = createAction(
   MODELS_PREFIX + 'SET_METADATA_KEYS',
   props<{ keys: string[] }>()
+);
+
+export const setMetadataColValuesOptions = createAction(
+  MODELS_PREFIX + '[setMetadataColValuesOptions]',
+  props<{ col: ISmCol; values: string[] }>()
 );
 
 export const setHiddenCols = createAction(
@@ -85,6 +92,8 @@ export const setUsers = createAction(
 );
 
 export const getUsers = createAction(MODELS_PREFIX + 'GET_USERS');
+export const getUsersForAllProjects = createAction( MODELS_PREFIX +'GET_ALL_PROJECTS_USERS');
+
 
 export const setFrameworks = createAction(
   MODELS_PREFIX + 'SET_FRAMEWORKS',
@@ -93,6 +102,9 @@ export const setFrameworks = createAction(
 
 export const getFrameworks = createAction(
   MODELS_PREFIX + 'GET_FRAMEWORKS');
+
+export const getAllProjectsFrameworks = createAction(
+  MODELS_PREFIX + 'GET_ALL_PROJECTS_FRAMEWORKS');
 
 export const getFilteredUsers = createAction(
   MODELS_PREFIX + 'GET_FILTERED_USERS');
@@ -142,6 +154,11 @@ export const tableFilterChanged = createAction(
   props<{ filters: TableFilter[]; projectId: string }>()
 );
 
+export const getModelsMetadataValuesForKey = createAction(
+  MODELS_PREFIX + '[getModelsMetadataValuesForKey]',
+  props<{  col: ISmCol  }>()
+);
+
 export const setTableFilters = createAction(
   MODELS_PREFIX + 'SET_TABLE_FILTERS',
   props<{ filters: TableFilter[]; projectId: string }>()
@@ -151,6 +168,8 @@ export const setColumnWidth = createAction(
   MODELS_PREFIX + ' [set column width]',
   props<{ projectId: string; columnId: string; widthPx: number }>()
 );
+
+
 
 export const updateUrlParams = createAction(MODELS_PREFIX + '[update URL params from state]');
 
@@ -188,3 +207,7 @@ export const setSelectedModelsDisableAvailable = createAction(
   MODELS_PREFIX + 'setSelectedModelsDisableAvailable',
   props<{ selectedModelsDisableAvailable: Record<string, CountAvailableAndIsDisableSelectedFiltered> }>()
 );
+export const setTableMode = createAction(
+  MODELS_PREFIX + '[set table view mode]',
+  props<{mode: 'info' | 'table'}>()
+)

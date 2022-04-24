@@ -1,9 +1,13 @@
 <div [hidden]="!loading" [class.d-flex]="loading" class="overlay justify-content-center align-items-center">
-  <mat-spinner></mat-spinner>
-  <div class="text">Loading</div>
+  <div class="loading">
+    <mat-spinner strokeWidth="2" diameter="24"></mat-spinner>
+    <div class="text">Loading</div>
+  </div>
 </div>
 <div [hidden]="loading || chartData" [class.d-flex]="!(loading || chartData)"
      class="overlay justify-content-center align-items-center">
-  <div class="text no-data">No data to show</div>
+  <div class="loading">
+    <div class="text no-data">No data to show</div>
+  </div>
 </div>
 <div #chart class="h-100 chart"></div>

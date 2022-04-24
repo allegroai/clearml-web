@@ -28,11 +28,17 @@ import {activeLoader, addMessage, deactivateLoader, setServerError} from '../../
 import {setURLParams} from '../../core/actions/router.actions';
 import {selectIsArchivedMode, selectIsDeepMode, selectSelectedProject} from '../../core/reducers/projects.reducer';
 import {selectRouterConfig, selectRouterParams} from '../../core/reducers/router-reducer';
-import {selectAppVisible} from '../../core/reducers/view.reducer';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {ISmCol} from '../../shared/ui-components/data/table/table.consts';
 import {addMultipleSortColumns, escapeRegex, getRouteFullUrl} from '../../shared/utils/shared-utils';
-import {addExcludeFilters, decodeHyperParam, encodeColumns, encodeOrder, TableFilter} from '../../shared/utils/tableParamEncode';
+import {
+  addExcludeFilters,
+  createFiltersFromStore,
+  decodeHyperParam,
+  encodeColumns,
+  encodeOrder,
+  TableFilter
+} from '../../shared/utils/tableParamEncode';
 import {AutoRefreshExperimentInfo, GetExperimentInfo} from '../actions/common-experiments-info.actions';
 import * as exActions from '../actions/common-experiments-view.actions';
 import {setActiveParentsFilter, setParents, updateManyExperiment} from '../actions/common-experiments-view.actions';
@@ -56,7 +62,8 @@ import {
   MenuItems,
   selectionDisabledAbort,
   selectionDisabledAbortAllChildren,
-  selectionDisabledArchive, selectionDisabledContinue,
+  selectionDisabledArchive,
+  selectionDisabledContinue,
   selectionDisabledDelete,
   selectionDisabledDequeue,
   selectionDisabledEnqueue,
@@ -81,20 +88,6 @@ import {
 } from '../../experiments-compare/actions/compare-header.actions';
 import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
 
-
-export const createFiltersFromStore = (_tableFilters: { [key: string]: FilterMetadata }, removeEmptyValues = true) => {
-  if (!_tableFilters) {
-    return [];
-  }
-  return Object.keys(_tableFilters).reduce((returnTableFilters, currentFilterName) => {
-    const value = _tableFilters?.[currentFilterName]?.value
-    if (removeEmptyValues && (!hasValue(value) || value?.length === 0)) {
-      return returnTableFilters;
-    }
-    returnTableFilters[currentFilterName] = value;
-    return returnTableFilters;
-  }, {});
-};
 
 @Injectable()
 export class CommonExperimentsViewEffects {
@@ -171,9 +164,8 @@ export class CommonExperimentsViewEffects {
     withLatestFrom(
       this.store.select(exSelectors.selectCurrentScrollId),
       this.store.select(selectSelectedExperiment),
-      this.store.select(selectExperimentsList),
-      this.store.select(selectAppVisible),
-      this.store.select(exSelectors.selectExperimentsHiddenTableCols)),
+      this.store.select(selectExperimentsList)
+    ),
     switchMap(([action, currentScrollId, selectedExperiment, experiments]) => this.fetchExperiments$(currentScrollId, true)
       .pipe(
         mergeMap(res => {
@@ -235,7 +227,7 @@ export class CommonExperimentsViewEffects {
     ofType(exActions.experimentSelectionChanged),
     withLatestFrom(this.store.select(selectRouterConfig)),
     tap(([action, routeConfig]) => this.navigateAfterExperimentSelectionChanged(action.experiment as ITableExperiment, action.project, routeConfig)),
-    mergeMap(() => [])
+    mergeMap(() => [exActions.setTableMode({mode: 'info'})])
     // map(action => new exActions.SetSelectedExperiment(action.payload.experiment))
   ));
 
@@ -482,9 +474,12 @@ export class CommonExperimentsViewEffects {
     // wow angular really suck...
     const activeChild = get('firstChild.firstChild.firstChild.firstChild.firstChild.firstChild', this.route);
     const activeChildUrl = activeChild ? getRouteFullUrl(activeChild) : '';
-    const baseUrl = `${module}/${experimentProject}/experiments`;
     selectedExperiment ?
-      this.router.navigate([baseUrl + '/' + selectedExperiment.id + '/' + activeChildUrl], {queryParamsHandling: 'preserve'}) : this.router.navigate([baseUrl], {queryParamsHandling: 'preserve'});
+      this.router.navigate(
+        [module, experimentProject, 'experiments', selectedExperiment.id].concat(activeChild ? activeChildUrl.split('/') : []),
+        {queryParamsHandling: 'preserve'}
+      ) :
+      this.router.navigate([module, experimentProject, 'experiments'], {queryParamsHandling: 'preserve'});
   }
 
   getGetAllQuery({refreshScroll = false, scrollId = null, projectId, searchQuery, archived, orderFields = [],
@@ -506,6 +501,7 @@ export class CommonExperimentsViewEffects {
     isPipeline?: boolean;
     pageSize?: number;
   }): TasksGetAllExRequest {
+    const projectFilter = get([EXPERIMENTS_TABLE_COL_FIELDS.PROJECT, 'value'], tableFilters);
     const typeFilter = get([EXPERIMENTS_TABLE_COL_FIELDS.TYPE, 'value'], tableFilters);
     const statusFilter = get([EXPERIMENTS_TABLE_COL_FIELDS.STATUS, 'value'], tableFilters);
     const userFilter = get([EXPERIMENTS_TABLE_COL_FIELDS.USER, 'value'], tableFilters);
@@ -549,7 +545,7 @@ export class CommonExperimentsViewEffects {
           fields: GET_ALL_QUERY_ANY_FIELDS
         }
       }),
-      project: ((!filters['project.name'] && (!projectId || projectId === '*'))) ? undefined : isCompare ? ((filters['project.name'] || undefined)): [projectId],
+      project: ((!filters['project.name'] && (!projectId || projectId === '*'))) ? undefined : isCompare ? ((filters['project.name'] || undefined)): (filters['project.name'] || [projectId]),
       scroll_id: scrollId || null, // null to create new scroll (undefined doesn't generate scroll)
       refresh_scroll: refreshScroll,
       size: pageSize,
@@ -560,7 +556,7 @@ export class CommonExperimentsViewEffects {
       ...(parentFilter?.length > 0 && {parent: parentFilter}),
       system_tags: (systemTagsFilter && systemTagsFilter.length > 0) ? systemTagsFilter : [],
       ...(tagsFilter?.length > 0 && {tags: [(tagsFilterAnd ? '__$and' : '__$or'), ...addExcludeFilters(tagsFilter)] }),
-      include_subprojects: deep,
+      include_subprojects: deep && !projectFilter,
       search_hidden: showHidden,
       only_fields
     };

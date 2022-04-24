@@ -1,36 +1,44 @@
+@use "sass:math";
 @import "../../../ui-components/styles/variables";
 
 :host {
-  .chart {
-    height: calc(100% - 40px);
-    margin-bottom: 6px;
-  }
-
-  ::ng-deep svg.britechart.line-chart {
-    overflow: visible;
-  }
+  $chart-bar-height: 68px;
 
   display: block;
   position: relative;
   background-color: $black;
 
-
+  .chart {
+    height: calc(100% - 40px);
+    margin-bottom: 6px;
+  }
 
   .overlay {
-    height: 310px;
     position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0 ;
+    right: 0;
     background-color: $black;
-    width: 100%;
-
+    .loading {
+      display: flex;
+      align-items: center;
+      transform: translateY(#{-1 * math.div($chart-bar-height, 2)});
+    }
     .text {
-      font-size: 30px;
-      margin-left: 20px;
+      font-size: 14px;
+      margin-left: 12px;
       &.no-data{
-       font-size: 14px;
+        margin: 0;
         color: $blue-280;
         opacity: 0.5;
       }
     }
+  }
+
+
+  ::ng-deep svg.britechart.line-chart {
+    overflow: visible;
   }
 
   ::ng-deep .masking-rectangle {
@@ -39,7 +47,7 @@
 
   ::ng-deep .horizontal-grid-line {
     stroke: $dark-grey-blue;
-    stroke-dasharray: unset;
+    stroke-dasharray: none;
   }
 
   ::ng-deep .extended-x-line {

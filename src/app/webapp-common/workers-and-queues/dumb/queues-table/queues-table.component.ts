@@ -1,12 +1,12 @@
-import {ChangeDetectorRef, Component, EventEmitter, HostListener, Input, Output, ViewChild} from '@angular/core';
-import {ColHeaderTypeEnum, ISmCol, TableSortOrderEnum} from '../../../shared/ui-components/data/table/table.consts';
+import {ChangeDetectorRef, Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
+import {ColHeaderTypeEnum, ISmCol, TableSortOrderEnum} from '@common/shared/ui-components/data/table/table.consts';
 import {find, get} from 'lodash/fp';
-import {Queue} from '../../../../business-logic/model/queues/queue';
+import {Queue} from '~/business-logic/model/queues/queue';
 import {QUEUES_TABLE_COL_FIELDS} from '../../workers-and-queues.consts';
-import {TableComponent} from '../../../shared/ui-components/data/table/table.component';
-import {BaseTableView} from '../../../shared/ui-components/data/table/base-table-view';
+import {TableComponent} from '@common/shared/ui-components/data/table/table.component';
+import {BaseTableView} from '@common/shared/ui-components/data/table/base-table-view';
 import {ActivatedRoute} from '@angular/router';
-import {ICONS} from '../../../constants';
+import {ICONS} from '@common/constants';
 
 @Component({
   selector: 'sm-queues-table',
@@ -20,6 +20,7 @@ export class QueuesTableComponent extends BaseTableView {
   private _queues: Array<Queue>;
   public queuesManager: boolean;
   readonly ICONS = ICONS;
+  contextQueue: Queue;
 
   @Input() set queues(queues: Array<Queue>) {
     this._queues = queues;
@@ -42,13 +43,6 @@ export class QueuesTableComponent extends BaseTableView {
   @ViewChild('table', {static: false}) table: TableComponent;
 
   public menuPosition: { x: number; y: number };
-
-  @HostListener('document:click', ['$event'])
-  clickHandler(event) {
-    if (event.button != 2) { // Bug in firefox: right click triggers `click` event
-      this.menuOpen = false;
-    }
-  }
 
   constructor(private changeDetector: ChangeDetectorRef, private route: ActivatedRoute) {
     super();
@@ -104,7 +98,7 @@ export class QueuesTableComponent extends BaseTableView {
 
   openContextMenu(data) {
     data.e.preventDefault();
-    this.queueSelected.emit(data.rowData);
+    this.contextQueue = data.rowData;
     this.menuOpen = false;
     setTimeout(() => {
       this.menuPosition = {x: data.e.clientX, y: data.e.clientY};

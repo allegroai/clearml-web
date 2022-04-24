@@ -1,7 +1,7 @@
-import {ChangeDetectionStrategy, Component, Input, AfterViewInit, ChangeDetectorRef} from '@angular/core';
+import {ChangeDetectionStrategy, Component, Input, AfterViewInit, ChangeDetectorRef, HostListener} from '@angular/core';
 import {ImmutableFormField} from '../immutableFormField';
 import {isString} from 'lodash/fp';
-import {TableSelectionState} from '../../../../constants';
+import {TableSelectionState} from '@common/constants';
 
 @Component({
   selector: 'sm-checkbox-control',
@@ -24,6 +24,7 @@ export class CheckboxControlComponent extends ImmutableFormField implements Afte
     this.formDataUpdated();
   }
 
+  @HostListener('click', ['$event'])
   fieldValueChanged(event) {
     if (this.disabled) {
       return;

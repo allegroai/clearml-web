@@ -183,7 +183,7 @@ export class AppComponent implements OnInit, OnDestroy {
     }
 
     loadExternalLibrary(this.store, this.environment.plotlyURL, plotlyReady);
-    loadExternalLibrary(this.store, '/assets/ace-builds/ace.js', aceReady);
+    loadExternalLibrary(this.store, 'assets/ace-builds/ace.js', aceReady);
   }
 
   private setScale() {

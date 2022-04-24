@@ -3,9 +3,8 @@ import {MatDialog} from '@angular/material/dialog';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {select, Store} from '@ngrx/store';
 import {get, isEqual} from 'lodash/fp';
-import {combineLatest, interval, Observable, Subscription} from 'rxjs';
+import {combineLatest, Observable} from 'rxjs';
 import {distinctUntilChanged, filter, map, skip, tap, withLatestFrom} from 'rxjs/operators';
-import {AUTO_REFRESH_INTERVAL} from '~/app.constants';
 import {getTags, setArchive as setProjectArchive, setDeep} from '../core/actions/projects.actions';
 import {InitSearch, ResetSearch} from '../common-search/common-search.actions';
 import {ICommonSearchState, selectSearchQuery} from '../common-search/common-search.reducer';
@@ -18,26 +17,22 @@ import {
   selectTagsFilterByProject
 } from '../core/reducers/projects.reducer';
 import {selectRouterParams} from '../core/reducers/router-reducer';
-import {selectAppVisible, selectAutoRefresh} from '../core/reducers/view.reducer';
+import {selectAppVisible} from '../core/reducers/view.reducer';
 import {BaseEntityPageComponent} from '../shared/entity-page/base-entity-page';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {ISmCol, TableSortOrderEnum} from '../shared/ui-components/data/table/table.consts';
-import {
-  createMetadataCol,
-  decodeColumns,
-  decodeFilter,
-  decodeOrder
-} from '../shared/utils/tableParamEncode';
+import {createMetadataCol, decodeColumns, decodeFilter, decodeOrder} from '../shared/utils/tableParamEncode';
 import * as modelsActions from './actions/models-view.actions';
 import {MODELS_TABLE_COLS} from './models.consts';
 import * as modelsSelectors from './reducers';
 import {
   selectMetadataColsForProject,
+  selectMetadataColsOptions,
   selectMetadataKeys,
   selectModelsFrameworks,
   selectModelsTags,
   selectModelsUsers,
-  selectModelTableColumns
+  selectModelTableColumns, selectTableMode
 } from './reducers';
 import {IModelsViewState} from './reducers/models-view.reducer';
 import {SelectedModel, TableModel} from './shared/models.model';
@@ -56,6 +51,7 @@ import {CountAvailableAndIsDisableSelectedFiltered, MenuItems} from '../shared/e
 import {PublishFooterItem} from '../shared/entity-page/footer-items/publish-footer-item';
 import {HasReadOnlyFooterItem} from '../shared/entity-page/footer-items/has-read-only-footer-item';
 import {SelectedTagsFooterItem} from '../shared/entity-page/footer-items/selected-tags-footer-item';
+import {RefreshService} from '@common/core/services/refresh.service';
 
 
 @Component({
@@ -77,43 +73,42 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
   public noMoreModels$: Observable<boolean>;
   public showAllSelectedIsActive$: Observable<boolean>;
   public showInfo$: Observable<boolean>;
-  protected setSplitSizeAction = modelsActions.setSplitSize;
-  private selectedModels: TableModel[];
-  private selectedModelSubs: Subscription;
-  private searchSubs: Subscription;
-  private selectedModelsSub: Subscription;
-  private modelFromUrlSub: Subscription;
-  private searchQuery$: Observable<ICommonSearchState['searchQuery']>;
-  public autoRefreshState$: Observable<boolean>;
-  private refreshing: boolean;
-  private autoRefreshSub: Subscription;
   public activeSectionEdit$: Observable<string>;
   public selectedProjectId$: Observable<string>;
   public tableColsOrder$: Observable<string[]>;
   public users$: Observable<User[]>;
   public tags$: Observable<string[]>;
-  private tagsFilterByProject$: Observable<boolean>;
-  private projectTags$: Observable<string[]>;
-  private companyTags$: Observable<string[]>;
+  public tableMode$: Observable<'table' | 'info'>;
   public systemTags$: Observable<string[]>;
   public tableCols$: Observable<ISmCol[]>;
   public frameworks$: Observable<string[]>;
   public isSharedAndNotOwner$: Observable<boolean>;
-  private isAppVisible$: Observable<boolean>;
-  protected addTag = addTag;
-  @ViewChild('modelsTable') private table: ModelsTableComponent;
   public selectedModelsDisableAvailable$: Observable<Record<string, CountAvailableAndIsDisableSelectedFiltered>>;
-  metadataKeys$: Observable<string[]>;
+  public metadataKeys$: Observable<string[]>;
   public filteredTableCols$: Observable<ISmCol[]>;
+  public firstModel: TableModel;
+  public metadataColsOptions$: Observable<Record<ISmCol['id'], string[]>>;
+  protected inEditMode$: Observable<boolean>;
+  protected addTag = addTag;
+  protected setSplitSizeAction = modelsActions.setSplitSize;
+  protected setTableModeAction = modelsActions.setTableMode;
+  private selectedModels: TableModel[];
+  private searchQuery$: Observable<ICommonSearchState['searchQuery']>;
+  private isAppVisible$: Observable<boolean>;
+  private readonly tagsFilterByProject$: Observable<boolean>;
+  private readonly projectTags$: Observable<string[]>;
+  private readonly companyTags$: Observable<string[]>;
 
+  @ViewChild('modelsTable') private table: ModelsTableComponent;
 
   constructor(
     protected store: Store<IModelsViewState>,
     protected route: ActivatedRoute,
     protected router: Router,
-    protected dialog: MatDialog
-  ) {
-    super(store, route, router, dialog);
+    protected dialog: MatDialog,
+    protected refresh: RefreshService
+) {
+    super(store, route, router, dialog, refresh);
     this.selectSplitSize$ = this.store.select(modelsSelectors.selectSplitSize);
     this.tableSortFields$ = this.store.select(modelsSelectors.selectTableSortFields);
     this.selectedModel$ = this.store.select(modelsSelectors.selectSelectedTableModel);
@@ -124,12 +119,13 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
     this.isArchived$ = this.store.select(selectIsArchivedMode);
     this.noMoreModels$ = this.store.select(modelsSelectors.selectNoMoreModels);
     this.isSharedAndNotOwner$ = this.store.select(selectIsSharedAndNotOwner);
+    this.metadataColsOptions$ =  this.store.select(selectMetadataColsOptions);
 
     this.showAllSelectedIsActive$ = this.store.select(modelsSelectors.selectShowAllSelectedIsActive);
     this.searchQuery$ = this.store.select(selectSearchQuery);
-    this.autoRefreshState$ = this.store.select(selectAutoRefresh);
     this.isAppVisible$ = this.store.select(selectAppVisible);
     this.activeSectionEdit$ = this.store.select(modelsSelectors.selectActiveSectionEdit);
+    this.inEditMode$ = this.store.select(modelsSelectors.selectIsModelInEditMode);
     this.tableColsOrder$ = this.store.select(modelsSelectors.selectModelsTableColsOrder);
     this.selectedProjectId$ = this.store.select(selectRouterParams).pipe(map(params => get('projectId', params)));
     this.tags$ = this.store.select(selectModelsTags);
@@ -140,6 +136,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
     this.systemTags$ = this.store.select(selectProjectSystemTags);
     this.users$ = this.store.select(selectModelsUsers);
     this.frameworks$ = this.store.select(selectModelsFrameworks);
+    this.tableMode$ = this.store.select(selectTableMode);
     this.filteredTableCols$ = combineLatest([this.store.select(selectModelTableColumns), this.store.select(selectMetadataColsForProject)])
       .pipe(
         map(([tableCols, metaCols]) =>
@@ -167,58 +164,61 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
   ngOnInit() {
     super.ngOnInit();
     let prevQueryParams: Params;
-    this.selectedModelSubs = combineLatest([
+    this.sub.add(combineLatest([
       this.store.select(selectRouterParams).pipe(map(params => params?.projectId)),
       this.route.queryParams,
-    ]).pipe(
-      filter(([projectId, queryParams]) => {
-        if (!projectId) {
-          return false;
-        }
-        const equal = projectId === this.projectId && isEqual(queryParams, prevQueryParams);
-        prevQueryParams = queryParams;
-        return !equal;
-      })
-    ).subscribe(([projectId, params]: [string, Params]) => {
-      if (projectId != this.projectId && Object.keys(params || {}).length ===  0) {
-        this.store.dispatch(modelsActions.updateUrlParams());
-      } else {
-        if (params.order) {
-          const orders = decodeOrder(params.order);
-          this.store.dispatch(modelsActions.setTableSort({orders, projectId: this.projectId}));
-        }
-        if (params.filter) {
-          const filters = decodeFilter(params.filter);
-          this.store.dispatch(modelsActions.setTableFilters({filters, projectId}));
+    ])
+      .pipe(
+        filter(([projectId, queryParams]) => {
+          if (!projectId) {
+            return false;
+          }
+          const equal = projectId === this.projectId && isEqual(queryParams, prevQueryParams);
+          prevQueryParams = queryParams;
+          return !equal;
+        })
+      )
+      .subscribe(([projectId, params]: [string, Params]) => {
+        if (projectId != this.projectId && Object.keys(params || {}).length ===  0) {
+          this.emptyUrlInit()
         } else {
           if (params.order) {
-            this.store.dispatch(modelsActions.setTableFilters({filters: [], projectId}));
+            const orders = decodeOrder(params.order);
+            this.store.dispatch(modelsActions.setTableSort({orders, projectId: this.projectId}));
           }
-        }
-        this.store.dispatch(setProjectArchive({archive: !!params.archive}));
-        if (params.deep) {
-          this.store.dispatch(setDeep({deep: true}));
-        }
-
-        if (params.columns) {
-          const [, , , metadataCols, allIds] = decodeColumns(params.columns, this.originalTableColumns);
-          const hiddenCols = {};
-          this.originalTableColumns.forEach((tableCol) => {
-            if (tableCol.id !== 'selected') {
-              hiddenCols[tableCol.id] = !params.columns.includes(tableCol.id);
+          if (params.filter) {
+            const filters = decodeFilter(params.filter);
+            this.store.dispatch(modelsActions.setTableFilters({filters, projectId}));
+          } else {
+            if (params.order) {
+              this.store.dispatch(modelsActions.setTableFilters({filters: [], projectId}));
             }
-          });
-          this.store.dispatch(modelsActions.setHiddenCols({hiddenCols}));
-          this.store.dispatch(modelsActions.setExtraColumns({
-            projectId: this.projectId,
-            columns: metadataCols.map(metadataCol => createMetadataCol(metadataCol, projectId))
-          }));
-          this.columnsReordered(allIds, false);
+          }
+          this.store.dispatch(setProjectArchive({archive: !!params.archive}));
+          if (params.deep) {
+            this.store.dispatch(setDeep({deep: true}));
+          }
+
+          if (params.columns) {
+            const [, , , metadataCols, allIds] = decodeColumns(params.columns, this.originalTableColumns);
+            const hiddenCols = {};
+            this.originalTableColumns.forEach((tableCol) => {
+              if (tableCol.id !== 'selected') {
+                hiddenCols[tableCol.id] = !params.columns.includes(tableCol.id);
+              }
+            });
+            this.store.dispatch(modelsActions.setHiddenCols({hiddenCols}));
+            this.store.dispatch(modelsActions.setExtraColumns({
+              projectId: this.projectId,
+              columns: metadataCols.map(metadataCol => createMetadataCol(metadataCol, projectId))
+            }));
+            this.columnsReordered(allIds, false);
+          }
+          this.store.dispatch(modelsActions.fetchModelsRequested());
         }
-        this.store.dispatch(modelsActions.fetchModelsRequested());
-      }
-      this.projectId = projectId;
-    });
+        this.projectId = projectId;
+      })
+    );
 
     this.createFooterItems({
       entitiesType: EntityTypeEnum.model,
@@ -231,16 +231,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
       projectTags$: this.projectTags$
     });
 
-    this.selectedModelsSub = this.selectedModels$.subscribe(selectedModels => {
-      this.selectedModels = selectedModels;
-    });
-
-    this.autoRefreshSub = interval(AUTO_REFRESH_INTERVAL).pipe(
-      withLatestFrom(this.autoRefreshState$, this.activeSectionEdit$, this.isAppVisible$),
-      filter(([, autoRefreshState, activeSectionEdit, isAppVisible]) => autoRefreshState && activeSectionEdit === null && isAppVisible)
-    ).subscribe(() => {
-      this.refreshList(true);
-    });
+    this.sub.add(this.selectedModels$.subscribe(selectedModels => this.selectedModels = selectedModels));
 
     this.selectModelFromUrl();
     this.store.dispatch(modelsActions.getUsers());
@@ -251,12 +242,13 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
 
   ngOnDestroy(): void {
     super.ngOnDestroy();
-    this.selectedModelSubs.unsubscribe();
-    this.modelFromUrlSub.unsubscribe();
-    this.autoRefreshSub.unsubscribe();
-    this.selectedModelsSub.unsubscribe();
     this.store.dispatch(modelsActions.resetState());
     this.stopSyncSearch();
+  }
+
+  private emptyUrlInit() {
+    this.store.dispatch(modelsActions.updateUrlParams());
+    this.shouldOpenDetails = true;
   }
 
   getSelectedEntities() {
@@ -264,16 +256,13 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
   }
 
   stopSyncSearch() {
-    this.searchSubs.unsubscribe();
     this.store.dispatch(new ResetSearch());
     this.store.dispatch(modelsActions.resetGlobalFilter());
   }
 
   syncAppSearch() {
     this.store.dispatch(new InitSearch('Search for models'));
-    this.searchSubs = this.searchQuery$.pipe(skip(1)).subscribe(query => {
-      this.store.dispatch(modelsActions.globalFilterChanged(query));
-    });
+    this.sub.add(this.searchQuery$.pipe(skip(1)).subscribe(query => this.store.dispatch(modelsActions.globalFilterChanged(query))));
   }
 
   getNextModels() {
@@ -281,17 +270,29 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
   }
 
   selectModelFromUrl() {
-    this.modelFromUrlSub = combineLatest([
+    this.sub.add(combineLatest([
       this.store.select(selectRouterParams).pipe(
         map(params => get('modelId', params))
       ),
       this.models$
-    ]).pipe(
-      map(([modelId, models]) => models.find(model => model.id === modelId)),
-      distinctUntilChanged()
-    ).subscribe((selectedModel) => {
-      this.store.dispatch(modelsActions.setSelectedModel({model: selectedModel}));
-    });
+    ])
+      .pipe(
+        withLatestFrom(this.store.select(selectTableMode)),
+        map(([[id, models], mode]) => {
+          this.firstModel = models?.[0];
+          if (!id && this.shouldOpenDetails && this.firstModel && mode === 'info') {
+            this.shouldOpenDetails = false;
+            this.store.dispatch(modelsActions.modelSelectionChanged({
+              model: this.firstModel,
+              project: this.projectId
+            }));
+          }
+          return models.find(model => model.id === id);
+        }),
+        distinctUntilChanged()
+      )
+      .subscribe((selectedModel) => this.store.dispatch(modelsActions.setSelectedModel({model: selectedModel})))
+    );
   }
 
   filterArchivedModels(models: TableModel[], showArchived: boolean) {
@@ -303,7 +304,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
   }
 
   modelSelectionChanged(model: SelectedModel) {
-    this.store.dispatch(modelsActions.modelSelectionChanged({model, project: this.projectId}));
+    this.minimizedView && model && this.store.dispatch(modelsActions.modelSelectionChanged({model, project: this.projectId}));
   }
 
   modelsSelectionChanged(models: SelectedModel[]) {
@@ -315,6 +316,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
   }
 
   filterChanged({col, value, andFilter}: { col: ISmCol; value: any; andFilter?: boolean }) {
+
     this.store.dispatch(modelsActions.tableFilterChanged({
       filters: [{
         col: col.id,
@@ -340,13 +342,6 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
   }
 
   refreshList(isAutorefresh: boolean) {
-    if (this.refreshing) {
-      return;
-    }
-    if (!isAutorefresh) {
-      this.refreshing = true;
-    }
-
     this.store.dispatch(modelsActions.refreshModels({hideLoader: isAutorefresh, autoRefresh: isAutorefresh}));
   }
 
@@ -432,7 +427,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
     this.store.dispatch(modelsActions.tableFilterChanged({filters, projectId: this.projectId}));
   }
 
-  selectMetadataKeysActiveChanged($event: any) {
+  selectMetadataKeysActiveChanged() {
     this.store.dispatch(modelsActions.getMetadataKeysForProject());
   }
 
@@ -447,5 +442,17 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
 
   removeColFromList(id: string) {
     this.store.dispatch(modelsActions.removeCol({id: id.split('.')[1], projectId: this.projectId}));
+  }
+
+  modeChanged(mode: 'info' | 'table') {
+    if (mode === 'info') {
+      this.store.dispatch(modelsActions.setTableMode({mode}))
+      this.firstModel && this.store.dispatch(modelsActions.modelSelectionChanged({
+        model: this.selectedModels?.[0] || this.firstModel,
+        project: this.projectId
+      }));
+    } else {
+      return this.closePanel();
+    }
   }
 }

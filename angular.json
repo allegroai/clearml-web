@@ -26,6 +26,7 @@
             "assets": [
               "src/assets",
               "src/favicon.ico",
+	          "src/env.js",
               "src/app/webapp-common/assets",
               {
                 "glob": "**/*",
@@ -54,8 +55,9 @@
               "fast-xml-parser",
               "url",
               "@aws-crypto/sha256-browser",
-              "@aws-crypto/crc32"
-
+              "@aws-crypto/crc32",
+              "@aws-crypto/sha1-browser",
+              "@aws-crypto/crc32c"
             ],
             "vendorChunk": true,
             "extractLicenses": false,

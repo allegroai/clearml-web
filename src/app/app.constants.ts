@@ -1,6 +1,5 @@
 import {Action} from '@ngrx/store';
-import {ConfigurationService} from './webapp-common/shared/services/configuration.service';
-const environment = ConfigurationService.globalEnvironment;
+import {Environment} from '../environments/base';
 
 export const NA                      = 'N/A';
 export const ALLEGRO_TUTORIAL_BUCKET = 'allegro-tutorials';
@@ -62,7 +61,7 @@ export const RECENT_TASKS_ACTIONS = {
 
 export const VIEW_PREFIX  = 'VIEW_';
 
-export type MediaContentTypeEnum = 'image/bmp' | 'image/jpeg' | 'image/png' | 'video/mp4' | 'image/jpeg';
+export type MediaContentTypeEnum = 'image/bmp' | 'image/jpeg' | 'image/png' | 'video/mp4';
 
 export const MEDIA_VIDEO_EXTENSIONS = ['flv', 'avi', 'mp4', 'mov', 'mpg', 'wmv', '3gp', 'mkv'];
 
@@ -94,7 +93,7 @@ export const NAVIGATION_ACTIONS = {
 };
 
 
-export function guessAPIServerURL() {
+export const guessAPIServerURL = () => {
   const url = window.location.origin;
   if (/https?:\/\/(demo|)app\./.test(url)) {
     return url.replace(/(https?):\/\/(demo|)app/, '$1://$2api');
@@ -102,38 +101,47 @@ export function guessAPIServerURL() {
     return url.replace(/:\d+/, '') + ':30008';
   }
   return url.replace(/:\d+/, '') + ':8008';
-}
+};
 
 export const ENVIRONMENT = {API_VERSION: '/v999.0'};
-const url                = window.location.origin;
-let apiBaseUrl: string;
-if (environment.apiBaseUrl) {
-  apiBaseUrl = environment.apiBaseUrl;
-} else {
-  apiBaseUrl = guessAPIServerURL();
-}
-const apiBaseUrlNoVersion = apiBaseUrl;
 
-let fileBaseUrl;
-if (environment.fileBaseUrl) {
-  fileBaseUrl = environment.fileBaseUrl;
-} else if (/https?:\/\/(demo|)app\./.test(url)) {
-  fileBaseUrl = url.replace(/(https?):\/\/(demo|)app/, '$1://$2files');
-} else if (window.location.port === '30080') {
-  fileBaseUrl = url.replace(/:\d+/, '') + ':30081';
-} else if (window.location.port === '8080') {
-  fileBaseUrl = url.replace(/:\d+/, '') + ':8081';
-}
+export let HTTP = {
+  API_BASE_URL: '',
+  API_BASE_URL_NO_VERSION : '',
+  FILE_BASE_URL: '',
+  ALT_FILES: null
+};
 
-apiBaseUrl += ENVIRONMENT.API_VERSION;
+export const updateHttpUrlBaseConstant = (_environment: Environment) => {
+
+  let apiBaseUrl: string;
+  if (_environment.apiBaseUrl) {
+    apiBaseUrl = _environment.apiBaseUrl;
+  } else {
+    apiBaseUrl = guessAPIServerURL();
+  }
+  const apiBaseUrlNoVersion = apiBaseUrl;
+  apiBaseUrl += ENVIRONMENT.API_VERSION;
+
+  const url = window.location.origin;
+  let fileBaseUrl;
+  if (_environment.fileBaseUrl) {
+    fileBaseUrl = _environment.fileBaseUrl;
+  } else if (/https?:\/\/(demo|)app\./.test(url)) {
+    fileBaseUrl = url.replace(/(https?):\/\/(demo|)app/, '$1://$2files');
+  } else if (window.location.port === '30080') {
+    fileBaseUrl = url.replace(/:\d+/, '') + ':30081';
+  } else if (window.location.port === '8080') {
+    fileBaseUrl = url.replace(/:\d+/, '') + ':8081';
+  }
+
+  HTTP.API_BASE_URL = apiBaseUrl;  // <-- DIRECT CALL DOESN'T WORK
+  HTTP.API_BASE_URL_NO_VERSION = apiBaseUrlNoVersion;
+  HTTP.FILE_BASE_URL = fileBaseUrl;
+};
+
 
 export const HTTP_PREFIX         = 'HTTP_';
-
-export const HTTP = {
-  API_BASE_URL           : apiBaseUrl,  // <-- DIRECT CALL DOESN'T WORK
-  API_BASE_URL_NO_VERSION: apiBaseUrlNoVersion,
-  FILE_BASE_URL: fileBaseUrl,
-};
 
 export class EmptyAction implements Action {
   readonly type = 'EMPTY_ACTION';

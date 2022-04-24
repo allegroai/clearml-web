@@ -17,14 +17,13 @@
       </ul>
     </div>
   </div>
-  <div header-content>
-    <div class="d-flex justify-content-between align-items-center">
-      <sm-inline-edit #projectName
+  <div header-content [class.rename-state]="editName.active">
+    <div class="d-flex justify-content-between align-items-center card-name">
+      <sm-inline-edit #editName
                       class="title edit-name dark"
                       [originalText]="project.name | shortProjectName"
                       [editable]="true"
                       pattern="^[^/]+$"
-                      [minWidth]="250"
                       [inlineDisabled]="true"
                       (textChanged)="prepareProjectNameForChange($event)"
                       (inlineActiveStateChanged)="projectNameEditActiveChanged($event)"
@@ -41,14 +40,14 @@
         [project]="project"
         [allTags]="allTags"
         (run)="run.emit()"
-        (rename)="projectName.inlineActivated()"
+        (rename)="editName.inlineActivated()"
         (addTag)="addTag.emit($event)"
       ></sm-pipeline-card-menu>
     </div>
     <div *ngIf="project.stats?.active?.last_task_run; else: noRun" class="last-run">Last run {{project.stats?.active?.last_task_run | timeAgo}}</div>
     <ng-template #noRun><div class="last-run">No pipeline runs yet</div></ng-template>
   </div>
-  <div class="d-flex justify-content-around">
+  <div class="d-flex justify-content-around w-100">
     <ng-template></ng-template>
     <sm-circle-counter
       [counter]="project.stats?.active?.status_count.in_progress"

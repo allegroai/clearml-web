@@ -46,7 +46,7 @@ export class TipsService {
   initTipsService(showAllTips = true) {
     this.nextTimeToShowTips = new Date(window.localStorage.getItem('nextTimeToShowTips') || new Date().getTime());
 
-    this.httpClient.get('/onboarding.json').pipe(withLatestFrom(this.store.select(selectFeatures)))
+    this.httpClient.get('onboarding.json').pipe(withLatestFrom(this.store.select(selectFeatures)))
       .subscribe(([tipsConfig, features]: [{ onboarding: Tip[] }, FeaturesEnum[]]) => {
         const tipsFiltered = tipsConfig.onboarding.filter(tip => !tip.feature || features.includes(tip.feature) || showAllTips);
         this.tipsConfig = {

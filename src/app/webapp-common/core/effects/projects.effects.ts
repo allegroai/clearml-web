@@ -11,7 +11,7 @@ import {
   openTagColorsMenu, refetchProjects,
   resetProjects, resetProjectSelection,
   setCompanyTags,
-  setGraphData, setLastUpdate, setAllProjectTags,
+  setGraphData, setLastUpdate,
   setTags
 } from '../actions/projects.actions';
 
@@ -140,7 +140,7 @@ export class ProjectsEffects {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     switchMap(() => this.projectsApi.projectsGetProjectTags({filter: {system_tags: ['pipeline']}})
       .pipe(
-        map((res: OrganizationGetTagsResponse) => setAllProjectTags({tags: res.tags, systemTags: res.system_tags})),
+        map((res: OrganizationGetTagsResponse) => setTags({tags: res.tags})),
         catchError(error => [requestFailed(error)])
       )
     )

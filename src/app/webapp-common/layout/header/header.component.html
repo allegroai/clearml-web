@@ -23,16 +23,10 @@
   <div class="right-buttons">
     <sm-common-search [class.share-view]="isShareMode"></sm-common-search>
 
-    <a class="pointer resources-trigger"
-       menuTrigger="matMenuTrigger"
-       [matMenuTriggerFor]="resourcesMenu"
-    >
+    <a class="pointer resources-trigger" [matMenuTriggerFor]="resourcesMenu">
       <i class="far al-ico-help-outlined"></i>
     </a>
-    <a class="pointer menu-trigger position-relative"
-       menuTrigger="matMenuTrigger"
-       [matMenuTriggerFor]="profileMenu"
-    >
+    <a class="pointer menu-trigger position-relative" [matMenuTriggerFor]="profileMenu">
       <img alt="avatar" class="avatar" *ngIf="(user | async).avatar; else iconAvatar" [src]="(user | async).avatar">
       <ng-template #iconAvatar>
         <div class="user-icon">
@@ -57,30 +51,29 @@
     </mat-menu>
 
     <mat-menu #resourcesMenu="matMenu" class="user-menu">
-      <button mat-menu-item *ngIf="environment.slackLink" (click)="navigate(environment.slackLink)">
-        <i class="al-icon al-ico-slack sm-md"></i>Community on Slack
+      <button mat-menu-item (click)="openWelcome($event)">
+        <i class="al-icon sm-md al-ico-code-file"></i>ClearML Python Package setup
       </button>
-      <button mat-menu-item (click)="navigate(environment.docsLink)">
-        <i class="al-icon sm-md al-ico-documentation"></i>ClearML Documentation
+      <button mat-menu-item *ngIf="environment.slackLink" (click)="navigate(environment.slackLink)">
+        <i class="al-icon al-ico-slack sm-md"></i>Community support on Slack
       </button>
       <button mat-menu-item (click)="navigate('https://www.youtube.com/c/ClearML/featured')">
         <i class="al-icon al-ico-youtube sm-md"></i>ClearML on Youtube
       </button>
+      <button mat-menu-item (click)="navigate(environment.docsLink)">
+        <i class="al-icon sm-md al-ico-documentation"></i>Online Documentation
+      </button>
       <button mat-menu-item (click)="openTip()">
         <i class="al-icon sm-md al-ico-tips"></i>Pro Tips
       </button>
-      <button mat-menu-item (click)="openWelcome($event)">
-        <i class="al-icon sm-md al-ico-setup"></i>ClearML Python Package setup
-      </button>
       <ng-container *smCheckPermission="'applications'">
         <button mat-menu-item
-                *ngIf="$any(environment)?.appsYouTubeIntroLink && $any(environment).appAwarenessMenu !== false"
-                (click)="openAppsAwareness($event, $any(environment)?.appsYouTubeIntroLink)"
+                *ngIf="$any(environment)?.appsYouTubeIntroVideoId && $any(environment).appAwarenessMenu !== false"
+                (click)="openAppsAwareness($event, $any(environment)?.appsYouTubeIntroVideoId)"
         >
           <i class="al-icon sm-md al-ico-applications"></i>ClearML Apps Introduction
         </button>
       </ng-container>
-
       <button mat-menu-item (click)="navigate('https://www.clear.ml/contact-us/')">
         <i class="al-icon sm-md al-ico-email"></i>Contact Us
       </button>

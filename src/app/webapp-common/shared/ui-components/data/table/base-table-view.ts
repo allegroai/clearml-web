@@ -7,6 +7,8 @@ import {filter, take} from 'rxjs/operators';
 import {TableComponent} from './table.component';
 import {SortMeta} from 'primeng/api';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
+import {sortByArr} from '../../../pipes/show-selected-first.pipe';
+import {IOption} from '../../inputs/select-autocomplete-for-template-forms/select-autocomplete-for-template-forms.component';
 
 @Directive()
 export abstract class BaseTableView implements AfterViewInit, OnDestroy{
@@ -14,15 +16,18 @@ export abstract class BaseTableView implements AfterViewInit, OnDestroy{
   public selectionState: TableSelectionState;
   protected entitiesKey: string;
   public selectedEntitiesKey: string;
-  @Input() contextMenuActive: boolean;
   public table: TableComponent;
+  public menuBackdrop: boolean;
+  public searchValues: { [colId: string]: string } = {};
+  public filtersOptions: { [colId: string]: IOption[] } = {};
+  public filtersValues: { [colId: string]: any } = {};
+  public tableSortFieldsObject: {[fieldName: string]: {index: number; field: string; order: TableSortOrderEnum}} = {};
 
+  @Input() contextMenuActive: boolean;
   @Input() selectionMode: 'multiple' | 'single' | null = 'single';
   @Input() entityType: EntityTypeEnum;
   @Input() colsOrder: string[];
   private _tableSortFields: SortMeta[];
-  public tableSortFieldsObject: {[fieldName: string]: {index: number; field: string; order: TableSortOrderEnum}} = {};
-
   @Input() set tableSortFields(tableSortFields: SortMeta[]) {
     this._tableSortFields = tableSortFields;
     this.tableSortFieldsObject = tableSortFields.reduce((acc, sortField, i) => {
@@ -98,7 +103,7 @@ export abstract class BaseTableView implements AfterViewInit, OnDestroy{
       if (index1 > index2) {
         [index1, index2] = [index2, index1];
       }
-      addList = this[this.entitiesKey].slice(index1, index2 + 1);
+      addList = this[this.entitiesKey].slice(index1 + 1, index2 + 1);
     }
     this.prevSelected = entity;
     return addList;
@@ -107,6 +112,19 @@ export abstract class BaseTableView implements AfterViewInit, OnDestroy{
   tableFilterChanged(col: ISmCol, event) {
     this.filterChanged.emit({col, value: event.value, andFilter: event.andFilter});
     this.scrollTableToTop();
+  }
+
+  sortOptionsList(columnId: string) {
+    this.filtersOptions[columnId]
+      .sort((a, b) => sortByArr(a.value, b.value, [null, ...(this.filtersValues[columnId] || [])]));
+    this.filtersOptions = {...this.filtersOptions, [columnId]: [...this.filtersOptions[columnId]]};
+  }
+  searchValueChanged($event: string, colId: string) {
+    this.searchValues[colId] = $event;
+    this.sortOptionsList(colId);
+  }
+  columnFilterClosed(col: ISmCol) {
+    window.setTimeout(() => this.sortOptionsList(col.id));
   }
 
   tableAllFiltersChanged(event: {col: string; value: unknown; matchMode?: string}) {
@@ -121,7 +139,7 @@ export abstract class BaseTableView implements AfterViewInit, OnDestroy{
   afterTableInit() {
     const key = this.selectedEntitiesKey.slice(0, -1);
     if (this[key]) {
-      window.setTimeout(() => this.table.scrollToElement(this[key]), 100);
+      window.setTimeout(() => this.table.scrollToElement(this[key]), 200);
     }
   }
 

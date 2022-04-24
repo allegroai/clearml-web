@@ -35,8 +35,9 @@ import { ScatterPlotComponent } from './components/charts/scatter-plot/scatter-p
 import {
   ClearFiltersButtonComponent,
 } from './components/clear-filters-button/clear-filters-button.component';
-import { AppendComponentOnTopElementDirective } from './directive/append-component-on-top-element.directive';
 import {MultiLineTooltipComponent} from './components/multi-line-tooltip/multi-line-tooltip.component';
+import {ExperimentCompareGeneralDataComponent} from '../experiments-compare/dumbs/experiment-compare-general-data/experiment-compare-general-data.component';
+import { BaseEntityHeaderComponent } from './entity-page/base-entity-header/base-entity-header.component';
 
 const _declarations = [
   ExperimentInfoHeaderStatusProgressBarComponent,
@@ -57,8 +58,8 @@ const _declarations = [
   ScrollTextareaComponent,
   SortHumanizePipe,
   ShowOnlyUserWorkComponent,
-  AppendComponentOnTopElementDirective,
   MultiLineTooltipComponent,
+  ExperimentCompareGeneralDataComponent,
 ];
 
 
@@ -82,6 +83,7 @@ const _declarations = [
     BaseContextMenuComponent,
     ScatterPlotComponent,
     ClearFiltersButtonComponent,
+    BaseEntityHeaderComponent,
   ],
     exports: [..._declarations, UiComponentsModule, TableModule, ClipboardModule, SharedPipesModule, MatSnackBarModule,
         ScatterPlotComponent, ClearFiltersButtonComponent

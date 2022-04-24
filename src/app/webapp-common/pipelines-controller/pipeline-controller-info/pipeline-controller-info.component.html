@@ -1,6 +1,6 @@
 <sm-pipeline-info [entity]="selected$ | async" [project]="projectId$ | async" [step]="selectedEntity"></sm-pipeline-info>
 <div class="console-button">
-  <button class="btn btn-primary d-flex align-items-center" (click)="selectStep(); openLog()">
+  <button class="btn btn-cml-primary d-flex align-items-center" (click)="selectStep(); openLog()">
     <i class="al-icon al-ico-console sm mr-3"></i>DETAILS
   </button>
 </div>
@@ -51,11 +51,11 @@
 
       <div class="g-btn" [class.invisible]="!stepDiff">
         <button
-          class="btn btn-primary"
+          class="btn btn-cml-primary"
           [class.selected]="detailsPanelMode === statusOption.log"
           (click)="detailsPanelMode = statusOption.log">CONSOLE</button>
         <button
-          class="btn btn-primary"
+          class="btn btn-cml-primary"
           [class.selected]="detailsPanelMode === statusOption.code"
           (click)="detailsPanelMode = statusOption.code">CODE</button>
       </div>
