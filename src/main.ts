@@ -1,8 +1,8 @@
 import {enableProdMode} from '@angular/core';
 import {platformBrowserDynamic} from '@angular/platform-browser-dynamic';
-
-import {AppModule} from './app/app.module';
-import {ConfigurationService} from './app/webapp-common/shared/services/configuration.service';
+import {AppModule} from '~/app.module';
+import {ConfigurationService} from '@common/shared/services/configuration.service';
+import {updateHttpUrlBaseConstant} from '~/app.constants';
 const environment = ConfigurationService.globalEnvironment;
 
 if (environment.production) {
@@ -10,7 +10,7 @@ if (environment.production) {
 }
 
 if (window.navigator && navigator.serviceWorker) {
-  navigator.serviceWorker.getRegistrations().then(function (registrations) {
+  navigator.serviceWorker.getRegistrations().then(registrations => {
     for (const registration of registrations) {
       registration.unregister();
     }
@@ -31,4 +31,8 @@ if (savedData) {
   }
 }
 
-platformBrowserDynamic().bootstrapModule(AppModule);
+(async () => {
+  const baseHref = ( window as any ).__env.subPath || '' as string;
+  updateHttpUrlBaseConstant({...environment, ...(baseHref && !baseHref.startsWith('${') && {apiBaseUrl: baseHref + environment.apiBaseUrl})});
+  await platformBrowserDynamic().bootstrapModule(AppModule);
+})();
