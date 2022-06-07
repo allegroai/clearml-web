@@ -63,7 +63,8 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
     private changeDetection: ChangeDetectorRef,
     private refresh: RefreshService
   ) {
-    this.listOfHidden = this.store.pipe(select(selectSelectedSettingsHiddenScalar));
+    this.listOfHidden = this.store.select(selectSelectedSettingsHiddenScalar)
+      .pipe(distinctUntilChanged(isEqual));
     this.searchTerm$ = this.store.pipe(select(selectExperimentMetricsSearchTerm));
     this.smoothWeight$ = this.store.select(selectCompareSelectedSettingsSmoothWeight);
     this.xAxisType$ = this.store.select(selectCompareSelectedSettingsxAxisType);
@@ -161,7 +162,7 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
   }
 
   searchTermChanged(searchTerm: string) {
-    this.store.dispatch(new SetExperimentMetricsSearchTerm({searchTerm: searchTerm}));
+    this.store.dispatch(new SetExperimentMetricsSearchTerm({searchTerm}));
   }
 
   resetMetrics() {

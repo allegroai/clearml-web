@@ -82,3 +82,7 @@ export const openAppsAwarenessDialog = createAction(VIEW_PREFIX + '[apps awarene
   props<{appsYouTubeIntroVideoId}>()
 );
 
+export const toggleUserFocus = createAction(
+  VIEW_PREFIX + '[toggle user focus in header',
+  props<{show: boolean}>()
+);

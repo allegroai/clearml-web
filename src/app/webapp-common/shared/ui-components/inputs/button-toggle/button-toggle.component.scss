@@ -1,3 +1,14 @@
 @import "../../styles/mixins/button-toggle-group";
 
-@include generate-button-toggle-group();
+:host {
+  @include generate-button-toggle-group();
+
+  ::ng-deep .mat-button-toggle-appearance-standard .mat-button-toggle-label-content {
+    line-height: 30px;
+  }
+
+  .label {
+    font-size: 12px;
+    font-weight: 500;
+  }
+}

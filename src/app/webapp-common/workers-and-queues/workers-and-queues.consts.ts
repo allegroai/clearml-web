@@ -5,7 +5,8 @@ export const QUEUES_TABLE_COL_FIELDS = {
   QUEUED      : 'status_changed',
   TASK        : 'entries[0].task.name',
   IN_QUEUE    : 'entries.length',
-  LAST_UPDATED: 'last_update'
+  LAST_UPDATED: 'last_update',
+  WORKERS     : 'workers.length'
 };
 
 export const WORKERS_TABLE_COL_FIELDS = {

@@ -1,6 +1,6 @@
 {
   "name": "ClearML-webapp",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "license": "",
   "scripts": {
     "ng": "ng",
@@ -48,7 +48,7 @@
     "bootstrap": "^4.6.1",
     "britecharts": "^2.18.0",
     "curved-arrows": "^0.1.0",
-    "d3-selection": "^1.4.2",
+    "d3-selection": "^3.0.0",
     "diff": "^5.0.0",
     "filesize": "^8.0.7",
     "has-ansi": "^5.0.1",
@@ -87,7 +87,7 @@
     "@fortawesome/fontawesome-free": "^6.0.0",
     "@ngrx/schematics": "^13.0.2",
     "@ngrx/store-devtools": "^13.0.2",
-    "@types/d3-selection": "^1.4.3",
+    "@types/d3-selection": "^3.0.2",
     "@types/lodash": "^4.14.178",
     "@types/node": "^16.11.19",
     "@types/plotly.js": "^1.54.20",

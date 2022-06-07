@@ -1,4 +1,4 @@
-import {Component, ElementRef, Inject, Input, Renderer2} from '@angular/core';
+import {Component, ElementRef, Inject, Input, Renderer2, TemplateRef} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {ConfirmDialogConfig} from './confirm-dialog.model';
 
@@ -12,7 +12,8 @@ export class ConfirmDialogComponent {
   @Input() displayX: boolean = true;
   showNeverShowAgain: boolean;
   title: string;
-  body: string;
+  body?: string;
+  template?: TemplateRef<any>;
   yes = 'OK';
   no = 'Cancel';
   iconClass = '';
@@ -31,6 +32,7 @@ export class ConfirmDialogComponent {
     this.title = data.title || '';
     this.reference = data.reference || '';
     this.body = data.body || '';
+    this.template = data.template;
     this.yes = data.yes || '';
     this.no = data.no || '';
     this.iconClass = data.iconClass || '';
@@ -44,8 +46,8 @@ export class ConfirmDialogComponent {
   }
 
   closeDialog(isConfirmed) {
-    if(isConfirmed) {
-      this.dialogRef.close({isConfirmed: isConfirmed, neverShowAgain: this.neverShowAgain});
+    if (isConfirmed) {
+      this.dialogRef.close({isConfirmed, neverShowAgain: this.neverShowAgain});
     } else {
       this.dialogRef.close(isConfirmed);
     }

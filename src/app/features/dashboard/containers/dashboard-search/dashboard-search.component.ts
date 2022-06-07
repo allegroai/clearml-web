@@ -3,10 +3,13 @@ import {Router} from '@angular/router';
 import {combineLatest, Observable, ObservedValueOf, Subscription} from 'rxjs';
 import {filter, skip} from 'rxjs/operators';
 import {Store} from '@ngrx/store';
-import {Project} from '../../../../business-logic/model/projects/project';
-import {Model} from '../../../../business-logic/model/models/model';
-import {DashboardSearchComponentBase} from '../../../../webapp-common/dashboard/dashboard-search.component.base';
-import {SearchClear} from '../../../../webapp-common/dashboard-search/dashboard-search.actions';
+import {Project} from '~/business-logic/model/projects/project';
+import {Model} from '~/business-logic/model/models/model';
+import {DashboardSearchComponentBase} from '@common/dashboard/dashboard-search.component.base';
+import {SearchClear} from '@common/dashboard-search/dashboard-search.actions';
+
+export type ActiveSearchLink = 'projects' | 'experiments' | 'models' | 'pipelines';
+
 
 @Component({
   selector   : '  sm-dashboard-search',

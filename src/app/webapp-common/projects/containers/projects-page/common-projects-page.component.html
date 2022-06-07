@@ -3,16 +3,19 @@
   (loadMore)="loadMore()"
   (projectCardClicked)="projectCardClicked($event)"
   (projectNameChanged)="projectNameChanged($event)"
-  (createNewProjectClicked)="openProjectDialog($event, 'create')"
-  (moveToClicked)="openProjectDialog($event, 'move')"
+  (createNewProjectClicked)="openProjectDialog('create', $event)"
+  (moveToClicked)="openProjectDialog('move', $event)"
   [noMoreProjects]="noMoreProjects$ | async"
   [projects]="projectsList$ | async"
 >
   <sm-projects-header
-    (createProjectClicked)="openProjectDialog($event, 'create')"
     (orderByChanged)="orderByChanged($event)"
     [sortByField]="projectsOrderBy$ | async"
     [sortOrder]="projectsSortOrder$ | async"
-    [selectedProject]="selectedProjectId$ | async"
-  ></sm-projects-header>
+  >
+    <button class="btn btn-cml-primary d-flex align-items-center"
+            (click)="openProjectDialog('create')">
+      <i class="al-icon al-color blue-400 al-ico-add sm mr-2"></i>NEW PROJECT
+    </button>
+  </sm-projects-header>
 </sm-projects-list>

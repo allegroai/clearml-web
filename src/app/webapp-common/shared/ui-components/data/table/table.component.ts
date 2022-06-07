@@ -119,7 +119,7 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
   @Input() rowsNumber = 10;
   @Input() selectionMode: 'multiple' | 'single' | null = 'single';
   @Input() rowHeight = 48;
-  @Input() cardHeight = 100;
+  @Input() cardHeight = 130;
   @Input() lazyLoading = false;
   @Input() keyboardControl: boolean = false;
   @Input() noMoreData: boolean;
@@ -176,7 +176,7 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
         let totalWidth = 0;
         if (this.minView) {
           const scrollableBody = element.getElementsByClassName('p-datatable-wrapper')[0];
-          const scroll = scrollableBody && scrollableBody.scrollHeight > scrollableBody.clientHeight ? 8 : 0;
+          const scroll = scrollableBody && scrollableBody.scrollHeight > scrollableBody.clientHeight ? 14 : 0;
           let width = element.getBoundingClientRect().width - scroll;
           if (this.scaleFactor) {
             width *= this.scaleFactor / 100;
@@ -198,9 +198,9 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
               totalWidth += this.scaleFactor ? colWidth * this.scaleFactor / 100 : colWidth;
             }
             innerHTML += `
-                #${this.table.id} .p-datatable-thead > tr > th:nth-child(${index + 1}),
-                #${this.table.id} .p-datatable-tbody > tr > td:nth-child(${index + 1}),
-                #${this.table.id} .p-datatable-tfoot > tr > td:nth-child(${index + 1}) {
+                #${this.table.id} .p-datatable-thead > tr:not(.cards-table) > th:nth-child(${index + 1}),
+                #${this.table.id} .p-datatable-tbody > tr:not(.cards-table) > td:nth-child(${index + 1}),
+                #${this.table.id} .p-datatable-tfoot > tr:not(.cards-table) > td:nth-child(${index + 1}) {
                     flex: ${col.disableDrag ? 0 : 1} 1 ${colWidth}px !important
                 }
             `

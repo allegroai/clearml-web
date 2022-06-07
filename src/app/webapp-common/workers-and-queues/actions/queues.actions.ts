@@ -1,5 +1,5 @@
 import {createAction, props} from '@ngrx/store';
-import {Queue} from '../../../business-logic/model/queues/queue';
+import {Queue} from '~/business-logic/model/queues/queue';
 import {Topic} from '../../shared/utils/statistics';
 import {SortMeta} from 'primeng/api';
 
@@ -16,7 +16,6 @@ export const REMOVE_EXPERIMENT_FROM_QUEUE = queuesPrefix + 'REMOVE_EXPERIMENT_FR
 export const MOVE_EXPERIMENT_TO_OTHER_QUEUE = queuesPrefix + 'MOVE_EXPERIMENT_TO_OTHER_QUEUE';
 export const ADD_EXPERIMENT_TO_QUEUE = queuesPrefix + 'ADD_EXPERIMENT_TO_QUEUE';
 export const SET_SELECTED_QUEUE = queuesPrefix + 'SET_SELECTED_QUEUE';
-export const QUEUES_TABLE_SORT_CHANGED = queuesPrefix + 'QUEUES_TABLE_SORT_CHANGED';
 export const QUEUES_TABLE_SET_SORT = queuesPrefix + 'QUEUES_TABLE_SET_SORT';
 export const CLEAR_QUEUE = queuesPrefix + 'CLEAR_QUEUE';
 export const REFRESH_SELECTED_QUEUE = queuesPrefix + 'REFRESH_SELECTED_QUEUE';
@@ -35,7 +34,7 @@ export const setQueues = createAction(
 );
 
 export const queuesTableSortChanged = createAction(
-  QUEUES_TABLE_SORT_CHANGED,
+  queuesPrefix + 'QUEUES_TABLE_SORT_CHANGED',
   props<{ colId: string; isShift: boolean }>()
 );
 

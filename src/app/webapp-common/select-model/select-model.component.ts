@@ -19,13 +19,13 @@ import {SelectedModel} from '../models/shared/models.model';
 import {MODELS_TABLE_COLS, ModelsViewModesEnum} from '../models/models.consts';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {
+  selectAllProjectsUsers,
   selectProjectSystemTags,
-  selectProjectTags,
+  selectProjectUsers,
   selectRootProjects,
   selectSelectedProject
 } from '../core/reducers/projects.reducer';
-import {getTags} from '../core/actions/projects.actions';
-import {selectModelsFrameworks, selectModelsTags, selectModelsUsers} from '../models/reducers';
+import {selectModelsFrameworks, selectModelsTags} from '../models/reducers';
 import {User} from '~/business-logic/model/users/user';
 import * as modelsActions from '../models/actions/models-view.actions';
 import {SortMeta} from 'primeng/api';
@@ -66,7 +66,11 @@ export class SelectModelComponent implements OnInit, OnDestroy {
     this.searchValue$    = this.store.select(selectGlobalFilter);
     this.noMoreModels$   = this.store.select(selectNoMoreModels);
     this.isAllProjects$  = this.store.select(selectIsAllProjectsMode);
-    this.users$ = this.store.select(selectModelsUsers);
+    this.users$ = combineLatest([
+      this.isAllProjects$,
+      this.store.select(selectProjectUsers),
+      this.store.select(selectAllProjectsUsers),
+    ]).pipe(map(([all, projUsers, allUsers]) => all ? allUsers : projUsers));
     this.tags$ = this.store.select(selectModelsTags);
     this.systemTags$ = this.store.select(selectProjectSystemTags);
     this.selectedProject$ = this.store.select(selectSelectedProject);
@@ -77,7 +81,7 @@ export class SelectModelComponent implements OnInit, OnDestroy {
         if (isAllProjectsMode) {
           return rootProjects;
         } else {
-          return [selectedProject].concat(selectedProject?.sub_projects ?? [])
+          return [selectedProject].concat(selectedProject?.sub_projects ?? []);
         }
       } else {
         return [];
@@ -89,7 +93,6 @@ export class SelectModelComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.store.dispatch(new actions.GetNextModels());
-    this.store.dispatch(modelsActions.getUsersForAllProjects());
     this.store.dispatch(modelsActions.getAllProjectsFrameworks());
     this.store.dispatch(modelsActions.getTagsForAllProjects());
     window.setTimeout(() => this.table.table.rowRightClick = new EventEmitter());
@@ -127,8 +130,7 @@ export class SelectModelComponent implements OnInit, OnDestroy {
   }
 
   onIsAllProjectsChanged(isAllProjects: boolean) {
-    this.store.dispatch(new actions.ArchivAllProjectsdModeChanged(isAllProjects));
-    isAllProjects? this.store.dispatch(modelsActions.getUsersForAllProjects()): this.store.dispatch(modelsActions.getUsers());
+    this.store.dispatch(new actions.AllProjectsModeChanged(isAllProjects));
     isAllProjects? this.store.dispatch(modelsActions.getTagsForAllProjects()): this.store.dispatch(modelsActions.getTags());
     isAllProjects? this.store.dispatch(modelsActions.getAllProjectsFrameworks()): this.store.dispatch(modelsActions.getFrameworks());
   }

@@ -3,19 +3,34 @@
 :host {
   display: block;
   position: relative;
-  height: $experiment-info-header-height;
+  padding: 0 24px;
+  .tags{
+    grid-area: tags;
+    overflow: hidden;
+  }
+  .line-item{
+    margin-right: 21px;
+    height: 24px;
+    &:last-child{
+      margin-right: 6px;
+      margin-left: 10px;
+    }
+  }
 
   .experiment-icon {
-    margin: 0px 20px 0 5px;
+    margin: 0 20px 0 0;
   }
 
   .comment {
     height: 24px;
-    margin: 0 12px 0 24px;
   }
   .middle-col {
+    height: 28px;
     flex-grow: 1;
+    display: flex;
+    align-items: center;
     overflow: hidden;
+    padding-left: 60px;
   }
 
   .experiment-name {
@@ -42,10 +57,14 @@
   .experiment-id {
     margin-right: 6px;
   }
-
-  .edit-name {
-    max-width: 80%;
+  .experiment-name-cont{
+    max-width: calc(100% - 220px);
+    .edit-name {
+      overflow: hidden;
+    }
   }
+
+
 
   .menu-button, .menu-button &:hover, .menu-button &:focus {
     cursor: pointer;

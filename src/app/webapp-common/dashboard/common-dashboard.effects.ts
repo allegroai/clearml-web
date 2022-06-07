@@ -38,12 +38,13 @@ export class CommonDashboardEffects {
       this.projectsApi.projectsGetAllEx({
         stats_for_state: ProjectsGetAllExRequest.StatsForStateEnum.Active,
         include_stats: true,
+        include_stats_filter: {system_tags: ['-pipeline']},
         order_by: ['featured', '-last_update'],
         page: 0,
         page_size: CARDS_IN_ROW,
         active_users: (showOnlyUserWork ? [user.id] : null),
         only_fields: ['name', 'company', 'user', 'created', 'default_output_destination']
-      }).pipe(
+      } as ProjectsGetAllExRequest).pipe(
           mergeMap(({projects}) => [setRecentProjects({projects}), deactivateLoader(action.type)]),
           catchError(error => [deactivateLoader(action.type), requestFailed(error)])
         )

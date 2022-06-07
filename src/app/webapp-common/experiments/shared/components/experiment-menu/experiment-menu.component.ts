@@ -132,18 +132,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
 
   toggleFullScreen(showFullScreen: boolean) {
     if (showFullScreen) {
-      if (!this.selectedExperiment) {
-        this.router.navigateByUrl(`projects/${this.projectId}/experiments/${this._experiment.id}/output/execution`);
-      } else {
-        if (window.location.pathname.includes('info-output')) {
-          const resultsPath = window.location.pathname.split('info-output/')[1];
-          this.router.navigateByUrl(`projects/${this.projectId}/experiments/${this._experiment.id}/output/${resultsPath}`);
-        } else {
-          const parts = this.router.url.split('/');
-          parts.splice(5, 0, 'output');
-          this.router.navigateByUrl(parts.join('/'));
-        }
-      }
+      this.router.navigateByUrl(`projects/${this.projectId}/experiments/${this._experiment.id}/output/execution`);
     } else {
       const part = this.route.firstChild.routeConfig.path;
       if (['log', 'metrics/scalar', 'metrics/plots', 'debugImages'].includes(part)) {
@@ -166,7 +155,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
       if (res && res.confirmed) {
         this.enqueueExperiment(res.queue, selectedExperiments);
         this.blTaskService.setPreviouslyUsedQueue(res.queue);
-        if (res.queue.workers.length === 0 && (!neverShowAgainPopups.includes('orphanedQueue'))) {
+        if (((!res.queue.workers) || res.queue.workers.length === 0) && (!neverShowAgainPopups.includes('orphanedQueue'))) {
           const orphanedQueueDialog: MatDialogRef<WelcomeMessageComponent> = this.dialog.open(WelcomeMessageComponent, {
             data: {
               queue: res.queue,
@@ -185,7 +174,6 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
 
   dequeuePopup() {
     const selectedExperiments = this.selectedExperiments ? selectionDisabledDequeue(this.selectedExperiments).selectedFiltered : [this._experiment];
-
     const getBody = (queueName: string) => `<b>${selectedExperiments.length === 1 ? htmlTextShorte(this._experiment.name) : selectedExperiments.length + 'experiments'}</b> will be removed from the ${queueName ? '<b>' + queueName + '</b> ' : ''}execution queue.`;
     this.store.dispatch(new GetQueuesForEnqueue());
     const confirmDialogRef = this.dialog.open(ConfirmDialogComponent, {
@@ -429,6 +417,7 @@ To avoid this, <b>clone the experiment</b> and work with the cloned experiment.`
   }
 
   toggleDetails () {
+    this.store.dispatch(experimentsActions.setTableMode({mode:'info'}));
     this.store.dispatch(experimentsActions.experimentSelectionChanged({
       experiment: this._experiment,
       project: this.projectId

@@ -1,25 +1,30 @@
-<div class="table-diff-row header">
-  <div (click)="sortByClicked('key')" class="pointer">{{keyTitle}}
-    <i class="fas"
-       [ngClass]="{
+<div (mouseleave)="rowHovered.emit(null)">
+  <div class="table-diff-row header">
+    <div (click)="sortByClicked('key')" class="pointer">{{keyTitle}}
+      <i class="fas"
+         [ngClass]="{
        'fa-sort-down': sortConfig.keyOrValue === 'key' && sortConfig.order==='asc',
        'fa-sort-up': sortConfig.keyOrValue === 'key' && sortConfig.order==='desc',
        'fa-sort show-only-on-hover': sortConfig.keyOrValue === 'value'}"></i>
-  </div>
-  <div (click)="sortByClicked('value')" class="pointer">{{valueTitle}}
-    <i class="fas"
-       [ngClass]="{
+    </div>
+    <div (click)="sortByClicked('value')" class="pointer">{{valueTitle}}
+      <i class="fas"
+         [ngClass]="{
        'fa-sort-down': sortConfig.keyOrValue === 'value' && sortConfig.order==='asc',
        'fa-sort-up': sortConfig.keyOrValue === 'value' && sortConfig.order==='desc',
        'fa-sort show-only-on-hover': sortConfig.keyOrValue === 'key'}"></i>
+    </div>
   </div>
-</div>
-<div *ngFor="let data of keyValueArray" class="table-diff-row">
-  <div *ngIf="data.value || data.value === 0">{{data.key}}</div>
-  <div [title]="data.value">
-    <ng-template
-      [ngTemplateOutlet]="templateRef"
-      [ngTemplateOutletContext]="{$implicit: data.value}">
-    </ng-template>
+  <div *ngFor="let data of keyValueArray; trackBy: trackByIndex"
+       class="table-diff-row"
+       [class.hovered]="hoveredRow === data.key"
+       (mouseenter)="rowHovered.emit(data.key)">
+    <div class="table-key ellipsis" *ngIf="data.value || data.value === 0">{{data.key}}</div>
+    <div class="table-val" [title]="data.value">
+      <ng-template
+        [ngTemplateOutlet]="templateRef"
+        [ngTemplateOutletContext]="{$implicit: data.value}">
+      </ng-template>
+    </div>
   </div>
 </div>

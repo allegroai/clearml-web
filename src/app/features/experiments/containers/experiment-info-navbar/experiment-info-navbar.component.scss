@@ -1,0 +1,32 @@
+@import "variables";
+$output-tabs-height: 40px;
+
+nav {
+  height: $output-tabs-height;
+  position: relative;
+  text-align: center;
+  border-bottom: 1px solid #efefef;
+  //overflow: hidden;
+  padding: 0 24px;
+
+  .refresh-position {
+    position: absolute;
+    right: 16px;
+    top: 6px;
+    display: flex;
+    align-items: center;
+  }
+  .refreshIcon{
+    margin-right: 10px;
+  }
+  span.disabled {
+    pointer-events: none;
+  }
+}
+.mat-menu-item {
+  padding-left: 22px;
+  &.active {
+    border-left: 6px solid $purple;
+    padding-left: 16px;
+  }
+}

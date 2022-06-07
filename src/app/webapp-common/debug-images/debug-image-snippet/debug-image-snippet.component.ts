@@ -3,7 +3,7 @@ import {isHtmlPage, isTextFileURL} from '../../shared/utils/shared-utils';
 import {IsAudioPipe} from '../../shared/pipes/is-audio.pipe';
 import {IsVideoPipe} from '../../shared/pipes/is-video.pipe';
 import {addMessage} from '../../core/actions/layout.actions';
-import {MESSAGES_SEVERITY} from '../../../app.constants';
+import {MESSAGES_SEVERITY} from '~/app.constants';
 import {Store} from '@ngrx/store';
 import {ThemeEnum} from '../../experiments/shared/common-experiments.const';
 import {getSignedUrlOrOrigin$} from '../../core/reducers/common-auth-reducer';

@@ -13,7 +13,7 @@ import {
   selectCompanyTags,
   selectIsArchivedMode,
   selectProjectSystemTags,
-  selectProjectTags,
+  selectProjectTags, selectProjectUsers,
   selectTagsFilterByProject
 } from '../core/reducers/projects.reducer';
 import {selectRouterParams} from '../core/reducers/router-reducer';
@@ -31,7 +31,6 @@ import {
   selectMetadataKeys,
   selectModelsFrameworks,
   selectModelsTags,
-  selectModelsUsers,
   selectModelTableColumns, selectTableMode
 } from './reducers';
 import {IModelsViewState} from './reducers/models-view.reducer';
@@ -134,7 +133,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
     this.projectTags$ = this.store.select(selectProjectTags);
     this.companyTags$ = this.store.select(selectCompanyTags);
     this.systemTags$ = this.store.select(selectProjectSystemTags);
-    this.users$ = this.store.select(selectModelsUsers);
+    this.users$ = this.store.select(selectProjectUsers);
     this.frameworks$ = this.store.select(selectModelsFrameworks);
     this.tableMode$ = this.store.select(selectTableMode);
     this.filteredTableCols$ = combineLatest([this.store.select(selectModelTableColumns), this.store.select(selectMetadataColsForProject)])
@@ -234,7 +233,6 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
     this.sub.add(this.selectedModels$.subscribe(selectedModels => this.selectedModels = selectedModels));
 
     this.selectModelFromUrl();
-    this.store.dispatch(modelsActions.getUsers());
     this.store.dispatch(modelsActions.getFrameworks());
     this.store.dispatch(modelsActions.getTags());
     this.store.dispatch(getTags());
@@ -280,7 +278,9 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
         withLatestFrom(this.store.select(selectTableMode)),
         map(([[id, models], mode]) => {
           this.firstModel = models?.[0];
-          if (!id && this.shouldOpenDetails && this.firstModel && mode === 'info') {
+          if (!this.shouldOpenDetails) {
+            this.store.dispatch(modelsActions.setTableMode({mode: !!id ? 'info' : 'table'}));
+          } else if (!id && this.shouldOpenDetails && this.firstModel && mode === 'info') {
             this.shouldOpenDetails = false;
             this.store.dispatch(modelsActions.modelSelectionChanged({
               model: this.firstModel,

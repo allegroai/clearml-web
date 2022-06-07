@@ -15,6 +15,8 @@ import {Queue} from '~/business-logic/model/queues/queue';
 import {GettingStartedContext} from '../../../../environments/base';
 import {trackByIndex} from '@common/shared/utils/forms-track-by';
 
+
+
 interface StepObject {
   header?: string;
   title?: string;
@@ -36,6 +38,8 @@ export class WelcomeMessageComponent implements OnInit, OnDestroy {
   private workspacesSub: Subscription;
   public workspace: GetCurrentUserResponseUserObjectCompany;
   private newCredentialSub: Subscription;
+
+
 
   API_BASE_URL = HTTP.API_BASE_URL_NO_VERSION;
   fileBaseUrl = HTTP.FILE_BASE_URL;
@@ -74,6 +78,7 @@ export class WelcomeMessageComponent implements OnInit, OnDestroy {
   showTabs: boolean;
   public src: string;
   trackByFn = trackByIndex;
+  public displayedServerUrls: { apiServer?: string; filesServer?: string };
 
   constructor(
     private store: Store<any>,
@@ -113,6 +118,7 @@ export class WelcomeMessageComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.community = this.configService.getStaticEnvironment().communityServer;
+    this.displayedServerUrls = this.configService.getStaticEnvironment().displayedServerUrls;
 
     this.newCredentialSub = this.store.select(selectNewCredential)
       .pipe(

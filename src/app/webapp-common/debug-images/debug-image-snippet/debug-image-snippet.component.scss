@@ -1,14 +1,9 @@
 @import "../../shared/ui-components/styles/variables";
 
-.item {
+.item-snippet {
   width: 180px;
   height: 180px;
-  margin-top: 8px;
-  margin-right: 8px;
-}
-
-.snippet {
-  border-radius: 3px;
+  border-radius: 4px;
   position: relative;
   text-align: center;
   background: #efefef;
@@ -35,13 +30,12 @@
 
 .image-var {
   position: absolute;
-  color: $blue-300;
-  padding: 1px 5px 0px 5px;
-  bottom: 1px;
+  color: $blue-500;
+  bottom: 2px;
   left: 50%;
   height: 20px;
   transform: translateX(-50%);
-  width: 100%;
+  width: calc(100% - 18px);
 }
 
 .html-wrap {
@@ -59,6 +53,9 @@
   transform-origin: 0 0;
 }
 .html-snippet {
+  border: 1px solid $blue-200;
+  border-radius: 4px;
+
   &:hover {
     .toolbar {
       opacity: 1;
@@ -70,7 +67,8 @@
     display: flex;
     position: absolute;
     bottom: 8px;
-    left: 16px;
+    left: 50%;
+    transform: translateX(-50%);
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.5s, visibility 0.5s;
@@ -78,8 +76,9 @@
 }
 
 .clickable-icon {
-  background-color: #efefef;
-  padding: 4px 24px;
+  background-color: $blue-400;
+  color: $blue-50;
+  padding: 6px 18px;
   border-radius: 4px;
 }
 

@@ -3,7 +3,7 @@ import {Observable, Subscription} from 'rxjs';
 import {CredentialKeyExt, selectCredentials, selectNewCredential} from '@common/core/reducers/common-auth-reducer';
 import {selectCurrentUser} from '@common/core/reducers/users-reducer';
 import {filter, take} from 'rxjs/operators';
-import {credentialRevoked, getAllCredentials, resetCredential} from '@common/core/actions/common-auth.actions';
+import {createCredential, credentialRevoked, getAllCredentials, resetCredential, updateCredentialLabel} from '@common/core/actions/common-auth.actions';
 import {Store} from '@ngrx/store';
 import {GetCurrentUserResponseUserObject} from '~/business-logic/model/users/getCurrentUserResponseUserObject';
 import {MatDialog} from '@angular/material/dialog';
@@ -41,17 +41,21 @@ export class UserCredentialsComponent implements OnInit, OnDestroy {
     this.creatingCredentials = true;
     this.dialog.open(CreateCredentialDialogComponent, {
         data: {workspace : this.user.company},
-        width: '816px'
+        width: '788px'
       }
     ).afterClosed().subscribe(() => {
       this.creatingCredentials = false;
       this.store.dispatch(resetCredential());
     });
-    // this.store.dispatch(createCredential({workspace: this.user.company, openCredentialsPopup: true}));
+    this.store.dispatch(createCredential({workspace: this.user.company, openCredentialsPopup: true}));
   }
 
   onCredentialRevoked(accessKey) {
     this.store.dispatch(credentialRevoked({accessKey, workspaceId: this.user.company.id}));
+  }
+
+  updateLabel({credential, label}) {
+    this.store.dispatch(updateCredentialLabel({credential: {...credential, company: this.user.company.id}, label}));
   }
 
   ngOnDestroy(): void {

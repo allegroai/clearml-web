@@ -1,23 +1,51 @@
-import {Injectable} from '@angular/core';
-import {ExperimentReverterService} from '../../../features/experiments/shared/services/experiment-reverter.service';
+import {Inject, Injectable, LOCALE_ID} from '@angular/core';
+import {ExperimentReverterService} from '~/features/experiments/shared/services/experiment-reverter.service';
 import {get} from 'lodash/fp';
 import {ExecutionDetails, ModelDetails} from '../shared/experiments-compare-details.model';
-import {Task} from '../../../business-logic/model/tasks/task';
-import {ExperimentDetailsReverterServiceBase} from '../../../features/experiments-compare/experiment-details-reverter-service.base';
-import {ARTIFACTS_TYPES} from '../../tasks/tasks.constants';
-import {Artifact} from '../../../business-logic/model/tasks/artifact';
+import {Task} from '~/business-logic/model/tasks/task';
+import {ExperimentDetailsReverterServiceBase} from '~/features/experiments-compare/experiment-details-reverter-service.base';
+import {ARTIFACTS_TYPES, TAGS} from '../../tasks/tasks.constants';
+import {Artifact} from '~/business-logic/model/tasks/artifact';
 import {crc32} from '../../shared/utils/shared-utils';
-import {TaskModelItem} from '../../../business-logic/model/tasks/taskModelItem';
+import {TaskModelItem} from '~/business-logic/model/tasks/taskModelItem';
 import {IModelInfo} from '../../experiments/shared/common-experiment-model.model';
-import {ITask} from '../../../business-logic/model/al-task';
+import {ITask} from '~/business-logic/model/al-task';
+import {formatDate} from '@angular/common';
+import {TIME_FORMAT_STRING} from '@common/constants';
+import {NA} from '~/app.constants';
+import {DurationPipe} from '@common/shared/pipes/duration.pipe';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ExperimentDetailsReverterService extends ExperimentDetailsReverterServiceBase {
 
-  constructor(public experimentReverter: ExperimentReverterService) {
+  private durationPipe: DurationPipe;
+
+  constructor(public experimentReverter: ExperimentReverterService, @Inject(LOCALE_ID) public locale: string) {
     super(experimentReverter);
+    this.durationPipe = new DurationPipe();
+    this.locale = locale;
+  }
+
+  public revertInfo(experiment: ITask) {
+    return {
+      archive: experiment.system_tags.includes(TAGS.HIDDEN) ? 'Yes' : 'No',
+      'changed at': experiment.last_change && formatDate(experiment.last_change, TIME_FORMAT_STRING, this.locale) || NA,
+      'last iteration': experiment.last_iteration || NA,
+      'status message': experiment.status_message || NA,
+      'status reason': experiment.status_reason || NA,
+      'created at': experiment.created && formatDate(experiment.created, TIME_FORMAT_STRING, this.locale) || NA,
+      'started at': experiment.started && formatDate(experiment.started, TIME_FORMAT_STRING, this.locale) || NA,
+      'last update at': experiment.last_update && formatDate(experiment.last_update, TIME_FORMAT_STRING, this.locale) || NA,
+      'completed at': experiment.completed && formatDate(experiment.completed, TIME_FORMAT_STRING, this.locale) || NA,
+      'run time': this.durationPipe.transform(experiment.active_duration) || NA,
+      'queue': experiment.execution.queue?.name  || NA,
+      'worker': experiment.last_worker || NA,
+      'created by': experiment.user.name || NA,
+      'parent task': (experiment.parent as ITask)?.name || NA,
+      'project': experiment.project.name || NA,
+    };
   }
 
   revertArtifacts(experiment: ITask): any {

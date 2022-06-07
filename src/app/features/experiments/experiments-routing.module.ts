@@ -13,7 +13,6 @@ export const routes: Routes = [
   imports: [
     SMSharedModule,
     RouterModule.forChild(routes),
-
   ],
   exports: [RouterModule, SelectableListComponent, SelectableFilterListComponent]
 })

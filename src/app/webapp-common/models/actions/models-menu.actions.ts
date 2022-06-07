@@ -6,7 +6,7 @@ const MODELS_PREFIX = 'MODELS_MENU_';
 
 export const publishModelClicked = createAction(
   MODELS_PREFIX + '[publish model]',
-  props<{selectedModels: SelectedModel[]}>()
+  props<{selectedEntities: SelectedModel[]}>()
 );
 
 export const changeProjectRequested = createAction(

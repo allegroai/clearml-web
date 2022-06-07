@@ -12,6 +12,16 @@ export const createCredential = createAction(
   AUTH_PREFIX + 'CREATE_CREDENTIAL (API)',
   props<{workspace: GetCurrentUserResponseUserObjectCompany; openCredentialsPopup?: boolean; label?: string}>()
 );
+
+export const updateCredentialLabel = createAction(
+  AUTH_PREFIX + 'UPDATE_CREDENTIAL_LABEL',
+  props<{credential: CredentialKeyExt; label?: string}>()
+);
+
+export const setCredentialLabel = createAction(
+  AUTH_PREFIX + 'SET_CREDENTIAL_LABEL',
+  props<{credential: CredentialKeyExt; label?: string}>()
+);
 export const addCredential = createAction(
   AUTH_PREFIX + 'ADD_CREDENTIAL',
   props<{ newCredential: CredentialKeyExt; workspaceId: string }>()
@@ -57,3 +67,7 @@ export const setSignedUrl = createAction(
   props<{url: string; signed: string; expires: number}>()
 );
 
+export const removeSignedUrl = createAction(
+  AUTH_PREFIX + '[remove signed url]',
+  props<{url: string}>()
+);

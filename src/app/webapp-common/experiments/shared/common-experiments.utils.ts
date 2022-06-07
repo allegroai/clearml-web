@@ -1,4 +1,4 @@
-import {DIGITS_AFTER_DECIMAL, EXPERIMENTS_TABLE_COL_FIELDS} from '../../../features/experiments/shared/experiments.const';
+import {DIGITS_AFTER_DECIMAL} from '~/features/experiments/shared/experiments.const';
 
 export const convertStopToComplete = (tasks) => tasks.map(task => {
   if (task.status === 'closed') {

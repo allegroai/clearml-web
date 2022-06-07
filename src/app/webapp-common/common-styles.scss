@@ -449,7 +449,7 @@ body .clean-list {
     box-shadow: 0 -2px 8px 0 rgba(0, 0, 0, 0.2);
     font-family: 'Heebo', sans-serif;
     font-size: 11px;
-    line-height: 1.45;
+    line-height: 1.55;
     letter-spacing: 0.3px;
     color: #ffffff;
     word-break: break-word;
@@ -463,11 +463,6 @@ body .clean-list {
   &.parameter-tooltip {
     margin: 6px auto 6px -74px;
   }
-}
-
-.mat-button-toggle-appearance-standard .mat-button-toggle-label-content {
-  line-height: 30px !important;
-  font-size: 11px !important;
 }
 
 // --------------------------------old------------------------------------------

@@ -1,6 +1,7 @@
 @import "../../styles/mixins/navbar-item";
 @import '../../styles/variables';
 
+
 .navbar-item {
   font-size: 13px;
   font-weight: 500;
@@ -14,7 +15,6 @@
     position: absolute;
   }
 }
-
 
 
 @include generate-navbar-item();

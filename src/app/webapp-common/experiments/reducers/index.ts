@@ -44,7 +44,6 @@ export const selectExperimentsTableCols = createSelector(selectRawExperimentsTab
       style: {...col.style, ...(col.id !== EXPERIMENTS_TABLE_COL_FIELDS.SELECTED && colWidth[col.id] && {width: `${colWidth[col.id]}px`})}
     } as ISmCol)));
 export const selectExperimentsTags = createSelector(experimentsView, (state) => state.projectTags);
-export const selectExperimentsUsers = createSelector(experimentsView, (state) => state.users);
 export const selectExperimentsParents = createSelector(experimentsView, (state) => state.parents);
 export const selectActiveParentsFilter = createSelector(experimentsView, (state) => state.activeParentsFilter);
 export const selectExperimentsTypes = createSelector(experimentsView, (state) => state.types);

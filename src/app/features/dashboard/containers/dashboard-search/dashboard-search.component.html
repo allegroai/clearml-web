@@ -3,8 +3,11 @@
   (projectSelected)="projectCardClicked($event)"
   (experimentSelected)="taskSelected($event)"
   (modelSelected)="modelSelected($event)"
+  (pipelineSelected)="pipelineSelected($event)"
   (activeLinkChanged)="activeLinkChanged($event)"
   [projectsList]="projectsResults$ | async"
+  [pipelinesList]="pipelinesResults$ | async"
   [experimentsList]="experimentsResults$ | async"
   [modelsList]="modelsResults$ | async"
-  [activeLink]="activeLink"></sm-search-results-page>
+  [activeLink]="activeLink">
+</sm-search-results-page>

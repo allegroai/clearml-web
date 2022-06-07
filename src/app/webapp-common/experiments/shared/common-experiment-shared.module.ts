@@ -9,17 +9,19 @@ import {CloneDialogComponent} from './components/clone-dialog/clone-dialog.compo
 import {SelectQueueModule} from './components/select-queue/select-queue.module';
 import {FormsModule} from '@angular/forms';
 import {AbortAllChildrenDialogComponent} from './components/abort-all-children-dialog/abort-all-children-dialog.component';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 
 const DECLARATIONS = [ExperimentStatusIconLabelComponent, ExperimentSystemTagsComponent, ChangeProjectDialogComponent, CloneDialogComponent,AbortAllChildrenDialogComponent
 ];
 
 @NgModule({
-    imports: [
-        SMSharedModule,
-        CommonModule,
-        SelectQueueModule,
-        FormsModule,
-    ],
+  imports: [
+    SMSharedModule,
+    CommonModule,
+    SelectQueueModule,
+    FormsModule,
+    MatProgressSpinnerModule,
+  ],
   declarations   : [...DECLARATIONS],
   providers      : [CommonExperimentConverterService],
   exports        : [...DECLARATIONS]

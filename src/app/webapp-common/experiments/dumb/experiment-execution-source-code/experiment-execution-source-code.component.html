@@ -16,7 +16,8 @@
             {{formData?.branch ? 'Latest in branch ' + formData?.branch : '' }}
           </div>
           <div *ngSwitchCase="sourceTypesEnum.Tag">
-            {{formData?.version_num ? 'Tag ' + formData?.tag + ' (commit id ' + formData?.version_num + ')' : 'Tag ' + formData?.tag }}
+            <ng-container *ngIf="formData?.version_num; else: onlyTag">{{formData?.tag}} (commit id {{formData?.version_num}})</ng-container>
+            <ng-template #onlyTag>{{formData?.tag}}</ng-template>
           </div>
         </div>
       </div>
@@ -36,7 +37,7 @@
                  name="version_num"
                  (blur)="resetOtherScriptParameters(sourceTypesEnum.VersionNum)"
                  [ngModel]="formData?.version_num"
-                 [required]="(!!formData?.repository) && scriptType.value == sourceTypesEnum.VersionNum"
+                 [required]="(!!formData?.repository) && scriptType.value === sourceTypesEnum.VersionNum"
                  [placeholder]="scriptPlaceHolders[sourceTypesEnum.VersionNum]">
         </mat-form-field>
 
@@ -47,7 +48,7 @@
                  name="branch"
                  (blur)="resetOtherScriptParameters(sourceTypesEnum.Branch)"
                  [ngModel]="formData?.branch"
-                 [required]="(!!formData?.repository) && scriptType.value == sourceTypesEnum.Branch"
+                 [required]="(!!formData?.repository) && scriptType.value === sourceTypesEnum.Branch"
                  [placeholder]="scriptPlaceHolders[sourceTypesEnum.Branch]">
         </mat-form-field>
 
@@ -58,7 +59,7 @@
                  name="tag"
                  (blur)="resetOtherScriptParameters(sourceTypesEnum.Tag)"
                  [ngModel]="formData?.tag"
-                 [required]="(!!formData?.repository) && scriptType.value == sourceTypesEnum.Tag"
+                 [required]="(!!formData?.repository) && scriptType.value === sourceTypesEnum.Tag"
                  [placeholder]="scriptPlaceHolders[sourceTypesEnum.Tag]">
         </mat-form-field>
 

@@ -26,23 +26,12 @@
   }
 
   .credentials-and-code {
-    height: 384px;
+    max-height: 384px;
     overflow: hidden;
-    transition: height 1s ease;
+    transition: max-height 1s ease;
 
     &.small-popup {
-      height: 0;
-    }
-  }
-
-  .cred-visible {
-    visibility: visible;
-    opacity: 1;
-    transition: height 1s ease, opacity 1s ease;
-
-    &.invisible {
-      visibility: hidden;
-      opacity: 0;
+      max-height: 0;
     }
   }
 
@@ -56,7 +45,7 @@
     position: relative;
     line-height: 1.5;
     padding: 16px 16px;
-    margin-bottom: 12px;
+    margin-bottom: 24px;
     width: 530px;
     color: $blue-100;
     background-color: $blue-700;
@@ -109,4 +98,20 @@
       pointer-events: none;
     }
   }
+}
+
+form {
+  display: flex;
+}
+
+.label-input {
+  display: inline-block;
+  width: 452px;
+  margin-right: 12px;
+}
+
+.label-button {
+  height: 38px;
+  flex: 1 0 152px;
+  margin-top: 3px;
 }

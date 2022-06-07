@@ -10,7 +10,9 @@
 
     tspan:nth-child(3) {
       stroke: $blue-800;
-      stroke-width: 0.3px;
+      stroke-width: 0.5px;
+      font-weight: 500;
+      pointer-events: none;
     }
   }
 }
@@ -22,8 +24,15 @@
 }
 
 .donut-legend {
-  height: 673px;
-  overflow: auto;
+  width: 260px;
+  height: calc(100% - 24px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  margin: 12px 0 0 -16px;
+}
+
+.donut-container {
+  flex: 1;
 }
 
 ::ng-deep .britechart-legend .legend-entry.is-faded .legend-entry-name {

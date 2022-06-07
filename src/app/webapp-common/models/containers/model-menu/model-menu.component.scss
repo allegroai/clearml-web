@@ -11,7 +11,7 @@ button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    
+
     &.rotate-135 {
       transform: rotate(135deg);
       margin-right: 10px;
@@ -19,6 +19,3 @@ button {
   }
 }
 
-.al-ico-bars-menu {
-  line-height: 20px;
-}

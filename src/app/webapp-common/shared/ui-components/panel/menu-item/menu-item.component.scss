@@ -1,3 +1,6 @@
+.al-icon {
+  margin-right: 12px;
+}
 .item-label {
   display: flex;
   font-size: 14px;
@@ -9,25 +12,8 @@
   width: 85%;
 }
 
-.item-icon {
-  margin-right: 12px;
-
-  &.icon {
-    width: 18px;
-    height: 18px;
-    margin-right: 10px;
-    margin-left: 5px;
-    padding: 0;
-  }
-
-  &.fa:before {
-    width: 20px;
-    display: block;
-  }
-}
-
 .mat-menu-item {
-  font-family: Heebo;
+  font-family: "Heebo", sans-serif;
   height: 40px;
   line-height: normal;
 }
@@ -37,6 +23,10 @@
   opacity: 0;
   transition: opacity 0.2s;
   transform: translateX(12px);
+}
+
+sm-checkbox-control {
+  margin-right: 12px;
 }
 
 :host {

@@ -1,0 +1,7 @@
+<cdk-virtual-scroll-viewport class="card-container" [itemSize]="cardHeight + 32">
+  <div class="card-row" [style.width.px]="rowWidth" *cdkVirtualFor="let row of resultRows$ | async">
+    <ng-container *ngFor="let result of row; trackBy: trackById">
+      <ng-container *ngTemplateOutlet="cardTemplate; context: {result}"></ng-container>
+    </ng-container>
+  </div>
+</cdk-virtual-scroll-viewport>

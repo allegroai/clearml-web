@@ -7,6 +7,7 @@ import {ITableExperiment} from '../../experiments/shared/common-experiment-model
 import {MetricColumn} from '@common/shared/utils/tableParamEncode';
 import {sortByField} from '@common/tasks/tasks.utils';
 import {ProjectsGetAllResponseSingle} from '~/business-logic/model/projects/projectsGetAllResponseSingle';
+import {User} from '~/business-logic/model/users/user';
 
 
 export interface ProjectStatsGraphData {
@@ -32,6 +33,9 @@ export interface RootProjects {
   graphVariant: { [project: string]: MetricColumn };
   graphData: ProjectStatsGraphData[];
   lastUpdate: string;
+  users: User[];
+  allUsers: User[];
+  extraUsers: User[];
 }
 
 const initRootProjects: RootProjects = {
@@ -46,7 +50,10 @@ const initRootProjects: RootProjects = {
   tagsFilterByProject: true,
   graphVariant: {},
   graphData: null,
-  lastUpdate: null
+  lastUpdate: null,
+  users: [],
+  allUsers: [],
+  extraUsers: [],
 };
 
 export const projects = state => state.rootProjects as RootProjects;
@@ -72,6 +79,11 @@ export const selectSelectedMetricVariantForCurrProject = createSelector(
   selectSelectedProjectsMetricVariant, selectSelectedProjectId,
   (projectsVariant, projectId) => projectsVariant[projectId]);
 export const selectGraphData = createSelector(projects, state => state.graphData);
+export const selectProjectUsers = createSelector(projects, state => state.extraUsers.length ?
+  Array.from(new Set([...state.users, ...state.extraUsers])) :
+  state.users
+);
+export const selectAllProjectsUsers = createSelector(projects, state => state.allUsers);
 
 export const projectsReducer = createReducer(
   initRootProjects,
@@ -101,12 +113,12 @@ export const projectsReducer = createReducer(
       graphData: initRootProjects.graphData,
     };
   }),
-  on(projectsActions.setSelectedProject, (state, action) => ({...state, selectedProject: action.project})),
+  on(projectsActions.setSelectedProject, (state, action) => ({...state, selectedProject: action.project, extraUsers: []})),
   on(projectsActions.deletedProjectFromRoot, (state, action) => {
     const projectIdsToDelete = [action.project.id].concat(action.project.sub_projects.map(project=> project.id))
     return {...state, projects: state.projects.filter(project=> !projectIdsToDelete.includes(project.id))};
   }),
-  on(projectsActions.resetSelectedProject, state => ({...state, selectedProject: initRootProjects.selectedProject})),
+  on(projectsActions.resetSelectedProject, state => ({...state, selectedProject: initRootProjects.selectedProject, users: [], extraUsers: []})),
   on(projectsActions.updateProjectCompleted, (state, action) => ({
     ...state,
     selectedProject: {...state.selectedProject, ...action.changes},
@@ -124,4 +136,7 @@ export const projectsReducer = createReducer(
   })),
   on(projectsActions.setGraphData, (state, action) => ({...state, graphData: action.stats})),
   on(projectsActions.setLastUpdate, (state, action) => ({...state, lastUpdate: action.lastUpdate})),
+  on(projectsActions.setProjectUsers, (state, action) => ({...state, users: action.users, extraUsers: []})),
+  on(projectsActions.setAllProjectUsers, (state, action) => ({...state, allUsers: action.users})),
+  on(projectsActions.setProjectExtraUsers, (state, action) => ({...state, extraUsers: action.users})),
 );

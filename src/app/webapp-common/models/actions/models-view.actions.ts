@@ -2,7 +2,6 @@ import {createAction, props} from '@ngrx/store';
 import {ISmCol} from '../../shared/ui-components/data/table/table.consts';
 import {SelectedModel} from '../shared/models.model';
 import {TableFilter} from '../../shared/utils/tableParamEncode';
-import {User} from '~/business-logic/model/users/user';
 import {SortMeta} from 'primeng/api';
 import {CountAvailableAndIsDisableSelectedFiltered} from '@common/shared/entity-page/items.utils';
 
@@ -16,6 +15,7 @@ export const refreshModels = createAction(
 );
 
 export const getNextModels = createAction(MODELS_PREFIX + '[get next model]');
+export const selectNextModel = createAction(MODELS_PREFIX + '[select next model]');
 export const getNextModelsWithPageSize = createAction(MODELS_PREFIX + '[get next model with page size]',
   props<{ pageSize: number }>());
 export const setModels = createAction(
@@ -85,15 +85,6 @@ export const removeCol = createAction(
   MODELS_PREFIX + ' [ remove column]',
   props<{ id: string; projectId: string }>()
 );
-
-export const setUsers = createAction(
-  MODELS_PREFIX + 'SET_USERS',
-  props<{ users: User[] }>()
-);
-
-export const getUsers = createAction(MODELS_PREFIX + 'GET_USERS');
-export const getUsersForAllProjects = createAction( MODELS_PREFIX +'GET_ALL_PROJECTS_USERS');
-
 
 export const setFrameworks = createAction(
   MODELS_PREFIX + 'SET_FRAMEWORKS',

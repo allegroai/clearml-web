@@ -43,7 +43,7 @@
     border-radius: 4px;
 
     &:hover {
-      background-color: $purple;
+      background-color: $blue-500;
     }
   }
 
@@ -70,8 +70,8 @@
       transition: all ease-in-out 0.15s, border ease-in-out 0.15s;
 
       &:hover {
-        border: 1px solid $purple;
-        background-color: $purple;
+        border: 1px solid $blue-500;
+        background-color: $blue-500;
         color: #FFFFFF;
       }
     }

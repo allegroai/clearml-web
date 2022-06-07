@@ -2,16 +2,16 @@ import {createSelector, on, ReducerTypes, select, Store} from '@ngrx/store';
 import {
   addCredential,
   cancelS3Credentials,
-  removeCredential, resetCredential,
+  removeCredential, removeSignedUrl, resetCredential,
   resetDontShowAgainForBucketEndpoint,
-  saveS3Credentials, setSignedUrl,
+  saveS3Credentials, setCredentialLabel, setSignedUrl,
   showLocalFilePopUp,
   updateAllCredentials,
   updateS3Credential
 } from '../actions/common-auth.actions';
 import {CredentialKey} from '~/business-logic/model/auth/credentialKey';
 import {inBucket} from '@common/settings/admin/base-admin.service';
-import {filter, map, timeoutWith} from 'rxjs/operators';
+import {filter, map, takeWhile, timeoutWith} from 'rxjs/operators';
 
 export interface Credentials {
   Bucket?: string;
@@ -68,7 +68,10 @@ export const getSignedUrlOrOrigin$ = (url: string, store: Store) => store.pipe(
   filter(signed => !!signed?.signed),
   map(signed => signed?.signed),
   timeoutWith(900, store.select(selectSignedUrl(url))
-    .pipe(map(signed => signed?.signed || url))
+    .pipe(
+      takeWhile( signed => signed !== null),
+      map(signed => signed?.signed || url)
+    )
   ),
 );
 
@@ -103,7 +106,8 @@ export const commonAuthReducer = [
     }
   }),
   on(resetCredential, state => ({...state, newCredential: initAuth.newCredential})),
-  on(addCredential, (state, action) => ({        ...state,
+  on(addCredential, (state, action) => ({
+    ...state,
     newCredential: {...action.newCredential, company: action.workspaceId},
     credentials: {
       ...state.credentials,
@@ -111,6 +115,14 @@ export const commonAuthReducer = [
         ...(state.credentials[action.workspaceId] || []),
         ...(Object.keys(action.newCredential).length > 0 ? [{...action.newCredential, company: action.workspaceId}] : [])
       ]}})),
+  on(setCredentialLabel, (state, action) => ({
+    ...state,
+    newCredential: {...state.newCredential, label: action.label},
+    credentials: {
+      ...state.credentials,
+      [action.credential.company]: state.credentials[action.credential.company]?.map(cred =>
+        cred.access_key === action.credential.access_key ? {...action.credential, label: action.label} : cred)
+        }})),
   on(removeCredential, (state, action) => ({        ...state, credentials: {
       ...state.credentials,
       [action.workspaceId]: state.credentials[action.workspaceId].filter((cred => cred.access_key !== action.accessKey))
@@ -119,4 +131,5 @@ export const commonAuthReducer = [
     ...state,
     credentials: {[action.credentials[0]?.company || action.workspace]: action.credentials, ...action.extra}, revokeSucceed: false})),
   on(setSignedUrl, (state, action) => ({...state, signedUrls: {...state.signedUrls, [action.url]: {signed: action.signed, expires: action.expires}}})),
+  on(removeSignedUrl, (state, action) => ({...state, signedUrls: {...state.signedUrls, [action.url]: null}})),
 ] as ReducerTypes<AuthState, any>[];

@@ -14,6 +14,7 @@
      [class.move-title]="type !== 'parcoords'"
      (scroll)="repositionModeBar($event.target)"
 >
+  <div #koko class="graph-title ellipsis" [class.table-title]="type === 'table'" [title]="koko.scrollWidth <= koko.clientWidth ? '' : title" (mouseenter)="changeDetector.detectChanges()">{{title}}</div>
   <div
     *ngIf="!disableResize"
     class="resize-handle-right"

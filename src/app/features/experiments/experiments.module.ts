@@ -21,7 +21,6 @@ import {SMMaterialModule} from '@common/shared/material/material.module';
 import {ExperimentsCommonModule} from '@common/experiments/common-experiments.module';
 import {CommonLayoutModule} from '@common/layout/layout.module';
 import {EXPERIMENTS_STORE_KEY} from '@common/experiments/shared/common-experiments.const';
-import {ExperimentInfoComponent} from './containers/experiment-info/experiment-info.component';
 import {DebugImagesModule} from '@common/debug-images/debug-images.module';
 import {ExperimentInfoExecutionComponent} from '@common/experiments/containers/experiment-info-execution/experiment-info-execution.component';
 import {MatSidenavModule} from '@angular/material/sidenav';
@@ -29,6 +28,7 @@ import {MatListModule} from '@angular/material/list';
 import {ExperimentOutputComponent} from './containers/experiment-ouptut/experiment-output.component';
 import {merge, pick} from 'lodash/fp';
 import {EXPERIMENTS_PREFIX} from '@common/experiments/actions/common-experiments-view.actions';
+import {ExperimentInfoNavbarComponent} from './containers/experiment-info-navbar/experiment-info-navbar.component';
 
 
 export const experimentSyncedKeys = [
@@ -90,9 +90,9 @@ const getExperimentsConfig = () => ({
   ],
   declarations: [
     ExperimentsComponent,
-    ExperimentInfoComponent,
     ExperimentInfoExecutionComponent,
     ExperimentOutputComponent,
+    ExperimentInfoNavbarComponent
   ],
   providers: [
     AdminService,

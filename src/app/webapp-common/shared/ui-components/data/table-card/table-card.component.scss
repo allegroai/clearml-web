@@ -1,11 +1,11 @@
 @import "../../styles/variables";
 
-.table-card {  
+.table-card {
   display: grid;
   grid-template-columns: 20px 32px 1fr;
   align-items: center;
-  gap: 4px 12px;
-  margin: 0 24px;
+  gap: 8px 12px;
+  margin: 0 16px;
   grid-template-areas:
     "cbx type-icon card-name"
     ". . tags"

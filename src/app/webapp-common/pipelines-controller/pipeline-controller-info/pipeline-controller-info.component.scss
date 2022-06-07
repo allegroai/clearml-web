@@ -127,13 +127,17 @@ sm-pipeline-controller-step {
   height: $log-header-height;
   display: grid;
   align-items: center;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: 1fr 1fr;
   column-gap: 24px;
   padding: 0 16px;
   background-color: $blue-800;
   border-bottom: 1px solid #303443;
   color: $blue-100;
   box-shadow: 0 -2px 6px rgb(0 0 0 / 40%);
+
+  &.toggle {
+    grid-template-columns: 1fr auto 1fr;
+  }
 }
 
 .log-name {
@@ -145,31 +149,6 @@ sm-pipeline-controller-step {
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
-  }
-}
-
-.g-btn {
-  display: flex;
-  .btn {
-    min-width: 80px;
-    &:first-child {border-radius:4px 0 0 4px; margin-right: 1px;}
-    &:last-child {border-radius:0 4px 4px 0;}
-  }
-  .btn-primary {
-    &:hover {
-      border-color: $blue-570;
-      background-color: $blue-570;
-    }
-    &:focus {
-      box-shadow: none;
-      background-color: $blue-500;
-      border-color: $blue-500;
-    }
-    &.selected {
-      color: $blue-100 !important;
-      background-color: $blue-500;
-      border-color: $blue-500;
-    }
   }
 }
 

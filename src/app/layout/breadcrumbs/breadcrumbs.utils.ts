@@ -21,12 +21,12 @@ export const selectBreadcrumbsStringsBase = createSelector(
   (project, experiment, model, projects) =>
     ({project, experiment, model, projects}) as IBreadcrumbs);
 
-export const prepareNames = (data: IBreadcrumbs, noSubProjects?: boolean) => {
+export const prepareNames = (data: IBreadcrumbs, isPipeline?: boolean, fullScreen = false) => {
   const project = prepareLinkData(data.project, true);
   if (data.project) {
     const subProjects = [];
     let subProjectsNames = [data.project?.name];
-    if (!noSubProjects) {
+    if (!isPipeline) {
       subProjectsNames = data.project?.name?.split('/');
     }
     let currentName = '';
@@ -41,9 +41,11 @@ export const prepareNames = (data: IBreadcrumbs, noSubProjects?: boolean) => {
     });
     const subProjectsLinks = subProjects.map(subProject => ({
       name: subProject?.name.substring(subProject?.name.lastIndexOf('/') + 1),
-      url: (noSubProjects || (subProject?.name === data.project?.name && data.project?.sub_projects?.length === 0)) ?
-        `projects/${subProject?.id}` :
-        `projects/${subProject?.id}/projects`
+      url: isPipeline ? `pipelines/${subProject?.id}/experiments` :
+        fullScreen ? `projects/${subProject?.id}/experiments/${data.experiment.id}` :
+          subProject?.name === data.project?.name && data.project?.sub_projects?.length === 0 ?
+            `projects/${subProject?.id}` :
+            `projects/${subProject?.id}/projects`
     })) as { name: string; url: string }[];
     project.name = project?.name.substring(project.name.lastIndexOf('/') + 1);
     project.subCrumbs = subProjectsLinks;
@@ -56,7 +58,7 @@ export const prepareNames = (data: IBreadcrumbs, noSubProjects?: boolean) => {
   const models      = formatStaticCrumb('models');
   const compare     = formatStaticCrumb('compare-experiments');
   return {
-    ...(project.url !=='*' && {':projectId': project}),
+    ...(project.url !== '*' && {':projectId': project}),
     ':taskId'            : task,
     ':controllerId': experiment,
     'compare-experiments': compare,

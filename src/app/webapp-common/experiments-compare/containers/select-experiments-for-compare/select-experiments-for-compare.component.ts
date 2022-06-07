@@ -30,7 +30,6 @@ import {
   selectExperimentsTableColsOrder,
   selectExperimentsTags,
   selectExperimentsTypes,
-  selectExperimentsUsers,
   selectHyperParamsOptions,
   selectNoMoreExperiments,
   selectTableFilters, selectTableSortFields
@@ -42,7 +41,7 @@ import {InitSearch} from '@common/common-search/common-search.actions';
 import * as experimentsActions from '../../../experiments/actions/common-experiments-view.actions';
 import {resetExperiments, resetGlobalFilter} from '@common/experiments/actions/common-experiments-view.actions';
 import {User} from '~/business-logic/model/users/user';
-import {selectProjectSystemTags, selectRootProjects} from '@common/core/reducers/projects.reducer';
+import {selectProjectSystemTags, selectProjectUsers, selectRootProjects} from '@common/core/reducers/projects.reducer';
 import {SortMeta} from 'primeng/api';
 import {Project} from '~/business-logic/model/projects/project';
 import {addMessage} from '@common/core/actions/layout.actions';
@@ -116,7 +115,7 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
     this.tableColsOrder$ = this.store.select(selectExperimentsTableColsOrder);
     this.columns$ = this.store.select(selectExperimentsTableCols);
     this.metricTableCols$ = this.store.select(selectExperimentsMetricsColsForProject);
-    this.users$ = this.store.select(selectExperimentsUsers);
+    this.users$ = this.store.select(selectProjectUsers);
     this.tableFilters$ = this.store.select(selectTableFilters);
     this.parent$ = this.store.select(selectExperimentsParents);
     this.projects$ = this.store.select(selectRootProjects);
@@ -201,7 +200,6 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
       this.changedDetectRef.detectChanges();
     });
     this.allowAddExperiment$ = allowAddExperiment$(this.store.select(selectRouterParams));
-    this.store.dispatch(experimentsActions.getUsers());
     this.store.dispatch(experimentsActions.getTags());
     this.store.dispatch(experimentsActions.getProjectTypes());
     this.store.dispatch(experimentsActions.getParents());

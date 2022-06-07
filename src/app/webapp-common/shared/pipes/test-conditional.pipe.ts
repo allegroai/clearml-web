@@ -6,20 +6,25 @@ import {Pipe, PipeTransform} from '@angular/core';
 export class TestConditionalPipe implements PipeTransform {
 
   transform(form: any, groupedApplicationForm: [string, any[]][], conditional: {
-    op: string, entries: [{
-      name: string,
-      value: string
-    }]
-  }, groupName?: string, groupIndex?: number): boolean {
-    let conditions = []
+    op: string; entries: [{
+      name: string;
+      value: string;
+    }];
+  }, groupIndex: number = 0): boolean {
+    const conditions = [];
+    const flatForm2Levels = groupedApplicationForm.reduce((acc, group) => {
+      group[1].forEach(groupInst => {
+        acc.push(groupInst.fields);
+      });
+      return acc;
+    }, []);
+    const flatForm1Level = flatForm2Levels.flat(1);
     conditional?.entries?.forEach(ent => {
-        const fieldVal = groupName ?
-          groupedApplicationForm.filter(group => group[0] === groupName)[0][1][groupIndex].fields.filter(field => field.name === ent.name)[0].val :
-          groupedApplicationForm.filter(field => field[0] === ent.name)[0][1][0].fields[0].val
+        const fieldVal = flatForm1Level.filter((field) => field.name === ent.name)[groupIndex].val;
         const r = new RegExp(ent.value);
         conditions.push(r.test(fieldVal));
       }
-    )
+    );
     if (conditional?.op === 'or') {
       return conditions.some(con => con);
     } else {

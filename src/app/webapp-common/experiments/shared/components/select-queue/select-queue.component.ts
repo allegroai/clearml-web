@@ -3,11 +3,12 @@ import {MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import {Store} from '@ngrx/store';
 import {GetQueuesForEnqueue, GetTaskForEnqueue, SetTaskForEnqueue} from './select-queue.actions';
 import {selectQueuesList, selectTaskForEnqueue} from './select-queue.reducer';
-import {Queue} from '../../../../../business-logic/model/queues/queue';
-import {ConfirmDialogComponent} from '../../../../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
-import {BlTasksService} from '../../../../../business-logic/services/tasks.service';
+import {Queue} from '~/business-logic/model/queues/queue';
+import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
+import {BlTasksService} from '~/business-logic/services/tasks.service';
 import {filter} from 'rxjs/operators';
-import {Subscription} from 'rxjs';
+import {Observable, Subscription} from 'rxjs';
+import {userAllowedToCreateQueue$} from '~/core/reducers/users.reducer';
 
 @Component({
   selector: 'sm-select-queue',
@@ -20,8 +21,13 @@ export class SelectQueueComponent implements OnInit, OnDestroy {
   public queues$ = this.store.select(selectQueuesList);
   public tasks$ = this.store.select(selectTaskForEnqueue);
   public enqueueWarning$ = this.tasks$.pipe(filter(tasks => tasks?.some(task => !(task && task.script && (task.script.diff || (task.script.repository && task.script.entry_point))))));
+  public userAllowedToCreateQueue$: Observable<boolean>;
   public reference: string;
   private queuesSub: Subscription;
+  public queuesNames: string[];
+  displayFn(item: any): string {
+    return item?.name ? item.name : item;
+  }
 
   constructor(
     public dialogRef: MatDialogRef<ConfirmDialogComponent>,
@@ -31,6 +37,7 @@ export class SelectQueueComponent implements OnInit, OnDestroy {
       reference?: string;
     }
   ) {
+    this.userAllowedToCreateQueue$ = userAllowedToCreateQueue$(store);
 
     if (data && data.taskIds?.length > 0) {
       this.store.dispatch(new GetTaskForEnqueue(data.taskIds));
@@ -39,6 +46,7 @@ export class SelectQueueComponent implements OnInit, OnDestroy {
     this.queuesSub = this.queues$.subscribe(queues => {
       if (queues) {
         this.queues = queues;
+        this.queuesNames = queues.map(q => q.name);
         this.selectedQueue = this.blTaskService.getDefaultQueue(this.queues) || queues[0];
       }
     });

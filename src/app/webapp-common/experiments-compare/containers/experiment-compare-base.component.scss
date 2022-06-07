@@ -102,15 +102,15 @@ $extra-header-min-height: 50px;
     pre {
       margin-bottom: 0;
       margin-top: 0;
-      padding-right: 20px;
+      padding-right: 30px;
       padding-left: 6px;
 
       .extend-toggle {
         visibility: hidden;
         cursor: pointer;
         position: absolute;
-        right: 0;
-        top: 5px;
+        right: 6px;
+        top: 6px;
         color: $blue-500;
       }
     }
@@ -142,6 +142,14 @@ $extra-header-min-height: 50px;
 
       &.not-existing-on-origin.not-existing-on-compared.equal-row {
         background-color: #f8f9fa;
+      }
+
+      &.hovered {
+        box-shadow: 0 0 0 1px $blue-250 inset;
+
+        &.diff-row {
+          box-shadow: 0 0 0 1px lighten($strong-red, 20%) inset, 0 0 0 2px white inset;
+        }
       }
 
       &.selected-diff {
@@ -195,6 +203,14 @@ $extra-header-min-height: 50px;
 
       &.al-empty-collapse {
         cursor: default;
+      }
+
+      &.hovered {
+        box-shadow: 0 0 0 1px $blue-250 inset;
+
+        &.al-danger {
+          box-shadow: 0 0 0 1px lighten($strong-red, 20%) inset, 0 0 0 2px white inset;
+        }
       }
 
       &.selected-diff {

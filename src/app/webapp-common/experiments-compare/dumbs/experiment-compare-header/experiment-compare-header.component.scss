@@ -9,6 +9,7 @@
     transform: translateX(-50%);
     z-index: 10;
     background-color: white;
+    transition: transform 0.5s;
 
     button {
       font-size: 13px;
@@ -20,6 +21,13 @@
       &.next {
         border-left-color: transparent !important;
       }
+    }
+  }
+
+  @media(max-width: 1620px) {
+    #searchDiff {
+      position: static;
+      transform: unset;
     }
   }
 

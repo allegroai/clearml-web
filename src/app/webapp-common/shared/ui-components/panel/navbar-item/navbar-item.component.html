@@ -1,4 +1,4 @@
-<div [class]="'navbar-item ' + direction" [ngClass]="{'active': active}">
+<div [class]="'navbar-item ' + direction" [class.active]="active">
   <div class="d-flex align-items-center">{{header?.toUpperCase()}}<i *ngIf="multi" class="ml-2 al-icon al-ico-dropdown-arrow sm"></i></div>
   <div>{{subHeader? subHeader: ''}}</div>
 </div>

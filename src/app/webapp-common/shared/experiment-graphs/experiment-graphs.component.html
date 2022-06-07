@@ -2,11 +2,8 @@
   <i class="icon no-output-icon" [ngClass]="isDarkTheme ? 'i-no-plots-dark' : 'i-no-plots'"></i>
   <h3>NO CHART DATA</h3>
 </div>
-<div class="metrics-section">
-  <div #allMetrics
-       class="all-metrics"
-       [class.row]="!isGroupGraphs"
-  >
+<div #allMetrics class="metrics-section">
+  <div class="all-metrics" [class.row]="!isGroupGraphs">
     <div *ngFor="let metric of (graphList | filter: hiddenList); trackBy: trackByFn" class="metric-group-container less-padding"
          #metricGroup
          [class.two-in-a-row]="!isGroupGraphs && graphList.length > 1 && isWidthBigEnough()"

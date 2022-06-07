@@ -10,7 +10,6 @@ import {
   selectExperimentsTableColsOrder,
   selectExperimentsTags,
   selectExperimentsTypes,
-  selectExperimentsUsers,
   selectHyperParamsOptions,
   selectHyperParamsVariants,
   selectIsExperimentInEditMode,
@@ -26,7 +25,7 @@ import {
   selectCompanyTags,
   selectIsArchivedMode, selectIsDeepMode,
   selectProjectSystemTags,
-  selectProjectTags,
+  selectProjectTags, selectProjectUsers,
   selectSelectedProject,
   selectTagsFilterByProject
 } from '../core/reducers/projects.reducer';
@@ -51,7 +50,7 @@ import {
 } from '~/features/experiments/reducers';
 import {EXPERIMENTS_TABLE_COL_FIELDS} from '~/features/experiments/shared/experiments.const';
 import * as experimentsActions from './actions/common-experiments-view.actions';
-import {setTableCols, setTags, tableFilterChanged} from './actions/common-experiments-view.actions';
+import {setTableCols, setTableMode, setTags, tableFilterChanged} from './actions/common-experiments-view.actions';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 import {setAutoRefresh} from '../core/actions/layout.actions';
 import {setArchive as setProjectArchive, setDeep} from '../core/actions/projects.actions';
@@ -210,7 +209,7 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
     this.isAppVisible$ = this.store.select(selectAppVisible);
     this.inEditMode$ = this.store.select(selectIsExperimentInEditMode);
     this.isSharedAndNotOwner$ = this.store.select(selectIsSharedAndNotOwner);
-    this.users$ = this.store.select(selectExperimentsUsers);
+    this.users$ = this.store.select(selectProjectUsers);
     this.parent$ = this.store.select(selectExperimentsParents);
     this.activeParentsFilter$ = this.store.select(selectActiveParentsFilter);
     this.types$ = this.store.select(selectExperimentsTypes);
@@ -328,7 +327,6 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
     });
 
     this.selectExperimentFromUrl();
-    this.store.dispatch(experimentsActions.getUsers());
     this.store.dispatch(experimentsActions.getParents());
     this.store.dispatch(experimentsActions.getTags());
     this.store.dispatch(experimentsActions.getProjectTypes());
@@ -467,7 +465,9 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
           withLatestFrom(this.store.select(selectTableMode)),
         map(([[experimentId, experiments], mode]) => {
           this.firstExperiment = experiments?.[0];
-          if (!experimentId && this.shouldOpenDetails && this.firstExperiment && mode === 'info') {
+          if (!this.shouldOpenDetails) {
+            this.store.dispatch(setTableMode({mode: !!experimentId ? 'info' : 'table'}));
+          } else if (!experimentId && this.shouldOpenDetails && this.firstExperiment && mode === 'info') {
             this.shouldOpenDetails = false;
             this.store.dispatch(experimentsActions.experimentSelectionChanged({
               experiment: this.firstExperiment,
@@ -662,7 +662,7 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
 
   modeChanged(mode: 'info' | 'table') {
     if (mode === 'info') {
-      this.store.dispatch(experimentsActions.setTableMode({mode}))
+      this.store.dispatch(experimentsActions.setTableMode({mode}));
       this.store.dispatch(experimentsActions.experimentSelectionChanged({
         experiment: this.selectedExperiments?.[0] || this.firstExperiment,
         project: this.selectedProject

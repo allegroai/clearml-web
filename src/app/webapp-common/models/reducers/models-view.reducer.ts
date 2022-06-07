@@ -4,7 +4,6 @@ import * as actions from '../actions/models-view.actions';
 import {TableModel, SelectedModel} from '../shared/models.model';
 import {MODELS_TABLE_COL_FIELDS} from '../shared/models.const';
 import {TableFilter} from '../../shared/utils/tableParamEncode';
-import {User} from '~/business-logic/model/users/user';
 import {ICommonSearchState} from '../../common-search/common-search.reducer';
 import {SortMeta} from 'primeng/api';
 import {CountAvailableAndIsDisableSelectedFiltered} from '@common/shared/entity-page/items.utils';
@@ -30,7 +29,6 @@ export interface IModelsViewState {
   scrollId: string;
   globalFilter: ICommonSearchState['searchQuery'];
   showAllSelectedIsActive: boolean;
-  users: User[];
   frameworks: string[];
   projectTags: string[];
   projectMetadataKeys: string[];
@@ -65,7 +63,6 @@ export const modelsInitialState: IModelsViewState = {
   globalFilter: null,
   showAllSelectedIsActive: false,
   metadataColsOptions: {},
-  users: [],
   projectTags: [],
   tableMode: 'table',
 };
@@ -149,7 +146,6 @@ export const modelsViewReducer = createReducer(
       ...state,
       metadataCols: [...state.metadataCols.filter(tableCol => !(tableCol.projectId === action['projectId'])), ...action['columns']]
     })),
-  on(actions.setUsers, (state, action) => ({...state, users: action.users})),
   on(actions.setFrameworks, (state, action) => ({...state, frameworks: action.frameworks})),
   on(actions.setTags, (state, action) => ({...state, projectTags: action.tags})),
   on(actions.setMetadataKeys, (state, action) => ({...state, projectMetadataKeys: action.keys})),

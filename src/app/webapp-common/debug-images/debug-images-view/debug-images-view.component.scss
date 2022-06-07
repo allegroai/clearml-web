@@ -44,7 +44,7 @@
 
   .mat-expansion-panel {
     width: 100%;
-    margin-top: 4px;
+    margin-bottom: 12px;
     box-shadow: unset;
     &:hover{
       background:transparent;
@@ -53,7 +53,7 @@
 
     ::ng-deep .mat-expansion-panel-content {
       .mat-expansion-panel-body {
-        padding: 0 12px 48px 12px;
+        padding: 0 0 12px 28px;
       }
     }
 
@@ -99,5 +99,9 @@
     &.dark-theme {
       background: transparent;
     }
+  }
+
+  .sample-row {
+    gap: 24px;
   }
 }

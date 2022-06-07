@@ -41,25 +41,17 @@
 </div>
 <div class="console-log" [class.extend]="showLog">
   <ng-container *ngIf="showLog">
-    <div class="log-header">
-
+    <div class="log-header" [class.toggle]="stepDiff">
       <div class="log-name">
         <i class="al-icon al-ico-console mr-2"></i>
         <span>{{(selected$ | async)?.name}}</span>
       </div>
-
-
-      <div class="g-btn" [class.invisible]="!stepDiff">
-        <button
-          class="btn btn-cml-primary"
-          [class.selected]="detailsPanelMode === statusOption.log"
-          (click)="detailsPanelMode = statusOption.log">CONSOLE</button>
-        <button
-          class="btn btn-cml-primary"
-          [class.selected]="detailsPanelMode === statusOption.code"
-          (click)="detailsPanelMode = statusOption.code">CODE</button>
-      </div>
-
+      <sm-button-toggle
+        *ngIf="stepDiff"
+        [value]="detailsPanelMode"
+        [options]="[{label: 'CONSOLE', value: statusOption.log}, {label: 'CODE', value: statusOption.code}]"
+        (valueChanged)="detailsPanelMode = $event"
+      ></sm-button-toggle>
       <div class="close">
         <i class="al-icon al-ico-dialog-x pointer ml-auto" (click)="openLog(false)"></i>
       </div>

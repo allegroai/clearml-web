@@ -1,5 +1,5 @@
 import {Component, ElementRef, HostListener, Input, OnInit, ViewChild} from '@angular/core';
-import {PlotlyGraphBase} from '@common/shared/experiment-graphs/single-graph/plotly-graph-base';
+import {PlotlyGraphBaseComponent} from '@common/shared/experiment-graphs/single-graph/plotly-graph-base';
 import {debounceTime, filter} from 'rxjs/operators';
 import {ColorHashService} from '@common/shared/services/color-hash/color-hash.service';
 import {get, getOr, isEqual, max, min, uniq, cloneDeep} from 'lodash/fp';
@@ -38,7 +38,7 @@ interface ParaPlotData {
   templateUrl: './parallel-coordinates-graph.component.html',
   styleUrls: ['./parallel-coordinates-graph.component.scss']
 })
-export class ParallelCoordinatesGraphComponent extends PlotlyGraphBase implements OnInit {
+export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent implements OnInit {
 
   private data: ParaPlotData[];
   private _experiments: ExtraTask[];
@@ -273,8 +273,8 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBase implement
       height: 500,
       width: this.parallelGraph.nativeElement.offsetWidth
     }, {
-      'displaylogo': false,
-      'displayModeBar': false,
+      displaylogo: false,
+      displayModeBar: false,
       modeBarButtonsToRemove: ['toggleHover']
     });
     this.postRenderingGraphManipulation();

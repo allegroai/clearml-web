@@ -54,6 +54,7 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
   public originalExperiments: { [id: string]: IExperimentDetail | ExperimentParams } = {};
   public allPathsDiffs: any = {};
   public selectedPath: string = null;
+  public hoveredPath: string = null;
   private selectedPathIndex: number = -1;
   public onlyDiffsPaths: string[];
 
@@ -462,12 +463,17 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
     }
   }
 
+  rowHovered(path) {
+    this.hoveredPath = path;
+  }
+
   keyClicked(data) {
     const path = data.path;
     this.selectedPathClicked(path);
   }
 
-  checkIfSelectedPath = (data: any) => this.selectedPath === (data.path);
+  checkIfSelectedPath = (data: any) => this.selectedPath === data.path;
+  checkIfHoveredPath = (data: any) => this.hoveredPath === data.path;
 
 // checkIfFoundPathPath = (data: any) => this.foundPath === (data.path);
 

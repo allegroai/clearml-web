@@ -61,7 +61,7 @@ export class RemoveModels implements Action {
 export class UpdateModel implements Action {
   readonly type = UPDATE_ONE_MODELS;
 
-  constructor(public payload: { id: TableModel['id'], changes: Partial<TableModel> }) {
+  constructor(public payload: { id: TableModel['id']; changes: Partial<TableModel> }) {
   }
 }
 
@@ -101,7 +101,7 @@ export const setCurrentScrollId = createAction(
   props<{scrollId: string}>()
 );
 
-export class ArchivAllProjectsdModeChanged implements Action {
+export class AllProjectsModeChanged implements Action {
   public type = ALL_PROJECTS_MODE_CHANGED;
 
   constructor(public payload: boolean) {

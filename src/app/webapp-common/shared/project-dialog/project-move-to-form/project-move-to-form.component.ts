@@ -1,7 +1,18 @@
-import {ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild} from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+  SimpleChanges,
+  ViewChild
+} from '@angular/core';
 import {Project} from '../../../../business-logic/model/projects/project';
 import {NgForm} from '@angular/forms';
 import {MatAutocompleteSelectedEvent} from "@angular/material/autocomplete";
+import {MatOptionSelectionChange} from '@angular/material/core';
 
 
 @Component({
@@ -20,6 +31,7 @@ export class ProjectMoveToFormComponent implements OnChanges, OnInit {
   private _projects: Project[];
 
   @ViewChild('moveToForm', {static: true}) moveToForm: NgForm;
+  private newProjectName: string;
 
   constructor(private changeDetection: ChangeDetectorRef) {
   }
@@ -44,7 +56,7 @@ export class ProjectMoveToFormComponent implements OnChanges, OnInit {
   @ViewChild('projectForm') public form: NgForm;
 
   send() {
-    this.moveProject.emit({location: this.project.parent, name: this.projectName});
+    this.moveProject.emit({location: this.project.parent, name: this.newProjectName});
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -73,6 +85,14 @@ export class ProjectMoveToFormComponent implements OnChanges, OnInit {
 
   closeDialog() {
     this.dismissDialog.emit();
+  }
+
+  createNewSelected($event: MatOptionSelectionChange<any>) {
+    this.newProjectName = $event.source.value;
+  }
+
+  optionSelected($event: MatOptionSelectionChange<any>) {
+    this.newProjectName = null;
   }
 }
 

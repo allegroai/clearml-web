@@ -15,6 +15,7 @@ import {EMPTY, of} from 'rxjs';
 import {SignResponse} from '@common/settings/admin/base-admin.service';
 import {S3AccessResolverComponent} from '@common/layout/s3-access-resolver/s3-access-resolver.component';
 import {MatDialog} from '@angular/material/dialog';
+import {setCredentialLabel} from '../actions/common-auth.actions';
 
 @Injectable()
 export class CommonAuthEffects {
@@ -74,6 +75,20 @@ export class CommonAuthEffects {
     ))
   ));
 
+  updateCredentialLabel = createEffect(() => this.actions.pipe(
+    ofType(authActions.updateCredentialLabel),
+    mergeMap(action => this.credentialsApi.authEditCredentials({access_key: action.credential.access_key, label: action.label}).pipe(
+      mergeMap(() => [
+        setCredentialLabel({credential: action.credential, label: action.label}),
+        deactivateLoader(action.type)
+      ]),
+      catchError(error => [
+        requestFailed(error),
+        setServerError(error, null, 'Unable to update credentials'),
+        deactivateLoader(action.type)])
+    ))
+  ));
+
   signUrl = createEffect(() => this.actions.pipe(
     ofType(authActions.getSignedUrl),
     filter(action => !!action.url),
@@ -83,7 +98,7 @@ export class CommonAuthEffects {
           this.store.select(state => selectSignedUrl(action.url)(state))
         ),
         switchMap(([, signedUrl]) =>
-          (!signedUrl?.expires || signedUrl.expires < (new Date()).getTime()) ?
+          (!signedUrl?.expires || signedUrl.expires < (new Date()).getTime() || action.config?.disableCache) ?
             this.adminService.signUrlIfNeeded(action.url, action.config) : of({type: 'none'})
         ),
         filter(res => !!res),

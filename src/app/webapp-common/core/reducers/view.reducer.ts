@@ -18,6 +18,7 @@ export interface ViewState {
   plotlyReady: boolean;
   aceReady: boolean;
   preferencesReady: boolean;
+  showUserFocus: boolean;
 }
 
 export const initViewState: ViewState = {
@@ -36,7 +37,8 @@ export const initViewState: ViewState = {
   neverShowPopupAgain: [],
   plotlyReady: false,
   aceReady: false,
-  preferencesReady: false
+  preferencesReady: false,
+  showUserFocus: false,
 };
 
 export const views = state => state.views as ViewState;
@@ -56,6 +58,7 @@ export const selectFirstLoginAt = createSelector(views, state => state.firstLogi
 export const selectPlotlyReady = createSelector(views, state => state.plotlyReady);
 export const selectAceReady = createSelector(views, state => state.aceReady);
 export const selectNeverShowPopups = createSelector(views, (state): string[] => state.neverShowPopupAgain);
+export const selectShowUserFocus = createSelector(views, state => state.showUserFocus);
 
 
 export const viewReducers = [
@@ -90,6 +93,7 @@ export const viewReducers = [
     ...state,
     neverShowPopupAgain: action.reset ? state.neverShowPopupAgain.filter(popups => popups !== action.popupId) : Array.from(new Set([...state.neverShowPopupAgain, action.popupId]))
   })),
+  on(layoutActions.toggleUserFocus, (state, action) => ({...state, showUserFocus: action.show}))
 ] as ReducerTypes<ViewState, any>[];
 
 export const viewReducer = createReducer(

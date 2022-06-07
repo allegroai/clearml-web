@@ -1,9 +1,9 @@
-import {MEDIA_VIDEO_EXTENSIONS, MediaContentTypeEnum} from '../../../app.constants';
+import {MEDIA_VIDEO_EXTENSIONS, MediaContentTypeEnum} from '~/app.constants';
 import {ActivatedRoute} from '@angular/router';
 import {EXPERIMENT_GRAPH_ID_PREFIX} from '../../experiments/shared/common-experiments.const';
 import {get, last} from 'lodash/fp';
-import {User} from '../../../business-logic/model/users/user';
-import {GetCurrentUserResponseUserObjectCompany} from '../../../business-logic/model/users/getCurrentUserResponseUserObjectCompany';
+import {User} from '~/business-logic/model/users/user';
+import {GetCurrentUserResponseUserObjectCompany} from '~/business-logic/model/users/getCurrentUserResponseUserObjectCompany';
 import {TABLE_SORT_ORDER} from '../ui-components/data/table/table.consts';
 import {CloseScrollStrategy, Overlay} from '@angular/cdk/overlay';
 import {Store} from '@ngrx/store';
@@ -42,8 +42,13 @@ export const isVideo = (contentType: MediaContentTypeEnum, uri: string) => {
   if (contentType) {
     return (contentType.indexOf('video') > -1);
   } else {
-    const extension = uri && uri.split('.').pop().split('?')[0];
-    return MEDIA_VIDEO_EXTENSIONS.includes(extension);
+    try {
+      const url = new URL(uri);
+      const extension = url.pathname.split('.').pop();
+      return MEDIA_VIDEO_EXTENSIONS.includes(extension);
+    } catch {
+      return false;
+    }
   }
 };
 
@@ -131,8 +136,7 @@ export const isScrolledIntoView = el => {
   // Only completely visible elements return true:
   // const isVisible = (elemTop >= 0) && (elemBottom <= window.innerHeight);
   // Partially visible elements return true:
-  const isVisible = elemTop < window.innerHeight && elemBottom >= 0;
-  return isVisible;
+ return elemTop < window.innerHeight && elemBottom >= 0;
 };
 
 export const getRouteFullUrl = (route: ActivatedRoute) => {
@@ -160,10 +164,8 @@ export const isReadOnly = item => {
 
 export const isExample = item => item?.company && !item.company?.id;
 
-export const isSharedAndNotOwner = (item, activeWorkSpace: GetCurrentUserResponseUserObjectCompany): boolean => {
-  const isSharedandNot = item?.system_tags.includes('shared') && item?.company?.id !== activeWorkSpace?.id && (!!item?.company.id);
-  return isSharedandNot;
-};
+export const isSharedAndNotOwner = (item, activeWorkSpace: GetCurrentUserResponseUserObjectCompany): boolean =>
+  item?.system_tags?.includes('shared') && item?.company?.id !== activeWorkSpace?.id && (!!item?.company.id);
 
 export const isAnnotationTask = entity => entity.system_tags && entity.system_tags.includes('Annotation');
 
@@ -201,7 +203,7 @@ export function crc32(str /* , polynomial = 0x04C11DB7, initialValue = 0xFFFFFFF
 }
 
 export const htmlTextShorte = (name: string, limit = 80) => {
-  if (name.length > limit) {
+  if (name?.length > limit) {
     return `<span title="${name}">${name.slice(0, limit - 3)}...</span>`;
   }
   return name;

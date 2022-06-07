@@ -1,3 +1,4 @@
+export * from '././authCreateCredentialsRequest';
 export * from '././authCreateCredentialsResponse';
 export * from '././authCreateUserRequest';
 export * from '././authCreateUserResponse';

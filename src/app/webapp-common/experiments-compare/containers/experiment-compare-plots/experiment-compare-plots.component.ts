@@ -12,6 +12,7 @@ import {GetMultiPlotCharts, ResetExperimentMetrics, SetExperimentMetricsSearchTe
 import {selectCompareTasksPlotCharts, selectExperimentMetricsSearchTerm, selectSelectedExperimentSettings, selectSelectedSettingsHiddenPlot} from '../../reducers';
 import {ExtFrame} from '@common/shared/experiment-graphs/single-graph/plotly-graph-base';
 import {RefreshService} from '@common/core/services/refresh.service';
+import {addMessage} from '@common/core/actions/layout.actions';
 
 @Component({
   selector: 'sm-experiment-compare-plots',
@@ -66,13 +67,14 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
     this.plotsSubscription = this.plots$
       .subscribe((metricsPlots) => {
         this.refreshDisabled = false;
-        const merged = prepareMultiPlots(metricsPlots);
+        const {merged, parsingError} = prepareMultiPlots(metricsPlots);
         this.graphList = this.prepareList(merged);
         const newGraphs = convertMultiPlots(merged);
         if (!this.graphs || !isEqual(newGraphs, this.graphs)) {
           this.graphs = newGraphs;
         }
         this.changeDetection.detectChanges();
+        parsingError && this.store.dispatch(addMessage('warn', `Couldn't read all plots. Please make sure all plots are properly formatted (NaN & Inf aren't supported).`, [], true))
       });
 
     this.settingsSubscription = this.experimentSettings$

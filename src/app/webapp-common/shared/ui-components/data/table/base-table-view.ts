@@ -115,8 +115,11 @@ export abstract class BaseTableView implements AfterViewInit, OnDestroy{
   }
 
   sortOptionsList(columnId: string) {
-    this.filtersOptions[columnId]
-      .sort((a, b) => sortByArr(a.value, b.value, [null, ...(this.filtersValues[columnId] || [])]));
+    if(!this.filtersOptions[columnId]) {
+      return;
+    }
+    this.filtersOptions[columnId].sort((a, b) =>
+      sortByArr(a.value, b.value, [null, ...(this.filtersValues[columnId] || [])]));
     this.filtersOptions = {...this.filtersOptions, [columnId]: [...this.filtersOptions[columnId]]};
   }
   searchValueChanged($event: string, colId: string) {

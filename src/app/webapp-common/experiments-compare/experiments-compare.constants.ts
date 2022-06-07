@@ -42,9 +42,21 @@ export const COMPARE_DETAILS_ONLY_FIELDS_BASE = [
   'container',
   'script',
   'tags',
+  'system_tags',
   'published',
   'last_iteration',
-  'configuration'
+  'configuration',
+  'last_change',
+  'completed',
+  'created',
+  'user.name',
+  'parent.name',
+  'execution.queue.name',
+  'active_duration',
+  'started',
+  'status_message',
+  'status_reason',
+  'last_worker'
 ];
 
 export const COMPARE_DEBUG_IMAGES_ONLY_FIELDS = [

@@ -1,6 +1,6 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {selectRouterConfig, selectRouterParams} from '@common/core/reducers/router-reducer';
-import {get, getOr} from 'lodash/fp';
+import {get} from 'lodash/fp';
 import {select, Store} from '@ngrx/store';
 import {Observable, Subscription} from 'rxjs';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -18,10 +18,12 @@ import * as infoActions from '../../actions/common-experiments-info.actions';
 import {selectAppVisible, selectBackdropActive} from '@common/core/reducers/view.reducer';
 import {addMessage, setAutoRefresh} from '@common/core/actions/layout.actions';
 import {MESSAGES_SEVERITY} from '~/app.constants';
-import {selectIsExperimentInEditMode, selectSelectedExperiments} from '../../reducers';
+import {selectIsExperimentInEditMode, selectSelectedExperiments, selectSplitSize} from '../../reducers';
 import {isReadOnly} from '@common/shared/utils/shared-utils';
 import {ExperimentDetailsUpdated} from '../../actions/common-experiments-info.actions';
 import {RefreshService} from '@common/core/services/refresh.service';
+import { isDevelopment } from '~/features/experiments/shared/experiments.utils';
+import * as experimentsActions from '../../actions/common-experiments-view.actions';
 
 @Component({
   selector: 'sm-base-experiment-output',
@@ -43,6 +45,10 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
   private isAppVisible$: Observable<boolean>;
   isSharedAndNotOwner$: Observable<boolean>;
   public isExample: boolean;
+  public isDevelopment: boolean;
+  private toMaximize = false;
+  public selectSplitSize$: Observable<number>;
+
 
   constructor(
     private store: Store<ExperimentOutputState>,
@@ -55,12 +61,14 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
     this.isExperimentInEditMode$ = this.store.select(selectIsExperimentInEditMode);
     this.isAppVisible$ = this.store.select(selectAppVisible);
     this.backdropActive$ = this.store.select(selectBackdropActive);
+    this.selectSplitSize$ = this.store.select(selectSplitSize);
+
 
   }
 
   ngOnInit() {
-    this.minimized = getOr(false, 'data.minimized', this.route.snapshot.routeConfig);
     this.subs.add(this.store.select(selectRouterConfig).subscribe(routerConfig => {
+      this.minimized = !routerConfig.includes('output');
       this.routerConfig = routerConfig;
     }));
 
@@ -75,6 +83,7 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
       ).subscribe(([experimentId, selectedExperiments]) => {
         this.selectedExperiment = selectedExperiments.find(experiment => experiment.id === experimentId);
         this.isExample = isReadOnly( this.selectedExperiment);
+        this.isDevelopment = isDevelopment(this.selectedExperiment);
         this.store.dispatch(new ResetExperimentMetrics());
         this.store.dispatch(new infoActions.ResetExperimentInfo());
         this.store.dispatch(new infoActions.GetExperimentInfo(experimentId));
@@ -99,6 +108,7 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
       .subscribe(experiment => {
         this.selectedExperiment = experiment;
         this.isExample = isReadOnly( this.selectedExperiment);
+        this.isDevelopment = isDevelopment(this.selectedExperiment);
       })
     );
   }
@@ -131,5 +141,23 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
     } else {
       this.store.dispatch(addMessage(MESSAGES_SEVERITY.ERROR, 'Name must be more than three letters long'));
     }
+  }
+  maximize() {
+    if (window.location.pathname.includes('info-output')) {
+      const resultsPath = this.route.firstChild?.firstChild?.routeConfig?.path || this.route.firstChild.routeConfig.path;
+      this.router.navigateByUrl(`projects/${this.projectId}/experiments/${this.experimentId}/output/${resultsPath}`);
+    } else {
+      const parts = this.router.url.split('/');
+      parts.splice(5, 0, 'output');
+      this.router.navigateByUrl(parts.join('/'));
+    }
+    this.toMaximize = true;
+  }
+  onActivate(e, scrollContainer) {
+    scrollContainer.scrollTop = 0;
+  }
+  closePanel() {
+    this.store.dispatch(experimentsActions.setTableMode({mode: 'table'}))
+    return this.router.navigate(['..'], {relativeTo: this.route, queryParamsHandling: 'merge'});
   }
 }

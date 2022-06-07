@@ -1,6 +1,7 @@
 @import "../../../shared/ui-components/styles/variables";
 
 :host {
+  padding: 0 24px;
   .model-icon {
     margin-right: 9px;
   }
@@ -29,44 +30,34 @@
     font-size: 11px;
     color: $blue-300;
   }
-
-  .model-id {
-    top: 4px;
-    position: relative;
-  }
-
-  .menu-button, .menu-button &:hover, .menu-button &:focus {
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 12px;
-    text-decoration: none;
-  }
-
-  .tags-list {
-    display: flex;
-    align-items: center;
-    padding-top: 2px;
-  }
-
-  .edit-name {
-    max-width: 80%;
-    padding-right: 24px;
-  }
-
-  .right-buttons {
-    display: flex;
-    align-items: center;
-    margin-right: 24px;
-    margin-left: auto;
-    align-self: start;
-    margin-top: 4px;
-
-    sm-model-menu {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 24px;
-      height: 24px;
+  .line-item{
+    margin-right: 21px;
+    height: 24px;
+    &:last-child{
+      margin-right: 6px;
+      margin-left: 10px;
     }
   }
+
+
+
+
+  .tags-list {
+    height: 28px;
+    flex-grow: 1;
+    display: flex;
+    align-items: end;
+    padding-left: 50px;
+    grid-area: tags;
+    overflow: hidden;
+  }
+  .model-name-cont{
+    max-width: calc(100% - 140px);
+    .edit-name {
+      overflow: hidden;
+    }
+  }
+
+
+
 }

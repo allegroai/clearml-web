@@ -42,6 +42,7 @@
         (run)="run.emit()"
         (rename)="editName.inlineActivated()"
         (addTag)="addTag.emit($event)"
+        (delete)="delete.emit()"
       ></sm-pipeline-card-menu>
     </div>
     <div *ngIf="project.stats?.active?.last_task_run; else: noRun" class="last-run">Last run {{project.stats?.active?.last_task_run | timeAgo}}</div>
@@ -71,6 +72,15 @@
     ></sm-circle-counter>
   </div>
   <div footer class="footer-tags">
-    <sm-tag-list [tags]="project.tags" (remove)="removeTag.emit($event)" smClickStopPropagation></sm-tag-list>
+    <sm-tag-list
+      *ngIf="!hideMenu; else: ReadOnlyTags"
+      class="w-100"
+      [tags]="project.tags"
+      (remove)="removeTag.emit($event)"
+      smClickStopPropagation
+    ></sm-tag-list>
+    <ng-template #ReadOnlyTags>
+      <sm-tag-list [tags]="project.tags"></sm-tag-list>
+    </ng-template>
   </div>
 </sm-card>

@@ -3,7 +3,6 @@ import {ISmCol} from '../../shared/ui-components/data/table/table.consts';
 import * as actions from '../actions/common-experiments-view.actions';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 import {TableFilter} from '../../shared/utils/tableParamEncode';
-import {User} from '~/business-logic/model/users/user';
 import {ProjectsGetTaskParentsResponseParents} from '~/business-logic/model/projects/projectsGetTaskParentsResponseParents';
 import {ICommonSearchState} from '../../common-search/common-search.reducer';
 import {SortMeta} from 'primeng/api';
@@ -39,7 +38,6 @@ export interface ICommonExperimentsViewState {
   hyperParams: Array<any>;
   hyperParamsOptions: Record<ISmCol['id'], string[]>;
   metricsLoading: boolean;
-  users: User[];
   projectTags: string[];
   parents: ProjectsGetTaskParentsResponseParents[];
   activeParentsFilter: ProjectsGetTaskParentsResponseParents[];
@@ -75,11 +73,10 @@ export const commonExperimentsInitialState: ICommonExperimentsViewState = {
   hyperParamsOptions: {},
   metricsLoading: false,
   projectTags: [],
-  users: [],
   parents: [],
   activeParentsFilter: [],
   types: [],
-  splitSize: 75,
+  splitSize: 70,
   tableMode: 'table'
 };
 
@@ -233,7 +230,6 @@ export const commonExperimentsViewReducer = createReducer(
     };
   }),
   on(actions.setTags, (state, action) => ({...state, projectTags: action.tags})),
-  on(actions.setUsers, (state, action) => ({...state, users: action.users})),
   on(actions.setParents, (state, action) => ({...state, parents: action.parents})),
   on(actions.setActiveParentsFilter, (state, action) => ({...state, activeParentsFilter: action.parents})),
   on(actions.setProjectsTypes, (state, action) => ({...state, types: action.types})),

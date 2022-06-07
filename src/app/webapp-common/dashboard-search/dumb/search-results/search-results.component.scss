@@ -1,0 +1,15 @@
+:host {
+  .card-container {
+    height: 100%;
+    padding: 0 24px 24px;
+
+    .card-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, 352px);
+      grid-gap: 32px 24px;
+      margin: 0 auto;
+
+      padding: 16px 0;
+    }
+  }
+}

@@ -16,6 +16,7 @@
       justify-content: flex-start;
 
       .node-key {
+        flex: 1;
         position: relative;
         cursor: pointer;
         white-space: nowrap;
@@ -33,6 +34,7 @@
       }
 
       .node-val {
+        flex: 1;
         position: relative;
         cursor: pointer;
         white-space: nowrap;

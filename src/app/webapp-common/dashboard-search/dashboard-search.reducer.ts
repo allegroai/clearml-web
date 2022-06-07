@@ -4,13 +4,14 @@ import {Task} from '../../business-logic/model/tasks/task';
 import {createFeatureSelector, createSelector} from '@ngrx/store';
 import {SEARCH_ACTIONS} from './dashboard-search.consts';
 import {Model} from '../../business-logic/model/models/model';
-import {searchSetTerm} from './dashboard-search.actions';
+import {searchSetTerm, setPipelinesResults} from './dashboard-search.actions';
 import {ICommonSearchState} from '../common-search/common-search.reducer';
 
 export interface ISearchState {
   projects: Project[];
   experiments: Task[];
   models: Model[];
+  pipelines: Project[];
   users: User[];
   resultsCounter: number;
   term: ICommonSearchState['searchQuery'];
@@ -20,14 +21,15 @@ export interface ISearchState {
 
 
 export const searchInitialState: ISearchState = {
-  term          : null,
+  term: null,
   forceSearch: false,
-  projects      : [],
-  users         : [],
-  experiments   : [],
-  models        : [],
+  projects: [],
+  pipelines: [],
+  users: [],
+  experiments: [],
+  models: [],
   resultsCounter: 0,
-  active        : false
+  active: false
 };
 
 export function dashboardSearchReducer<ActionReducer>(state: ISearchState = searchInitialState, action) {
@@ -42,6 +44,8 @@ export function dashboardSearchReducer<ActionReducer>(state: ISearchState = sear
     }
     case SEARCH_ACTIONS.SET_PROJECTS:
       return {...state, projects: action.payload.projects, resultsCounter: state.resultsCounter + 1};
+    case setPipelinesResults.type:
+      return {...state, pipelines: action.pipelines, resultsCounter: state.resultsCounter + 1};
     case SEARCH_ACTIONS.SET_EXPERIMENTS:
       return {...state, experiments: action.payload.experiments, resultsCounter: state.resultsCounter + 1};
     case SEARCH_ACTIONS.SET_MODELS:
@@ -60,10 +64,11 @@ export function dashboardSearchReducer<ActionReducer>(state: ISearchState = sear
 }
 
 
-export const selectSearch             = createFeatureSelector<ISearchState>('search');
-export const selectProjectsResults    = createSelector(selectSearch, (state: ISearchState): Array<Project> => state.projects);
+export const selectSearch = createFeatureSelector<ISearchState>('search');
+export const selectProjectsResults = createSelector(selectSearch, (state: ISearchState): Array<Project> => state.projects);
 export const selectExperimentsResults = createSelector(selectSearch, (state: ISearchState): Array<Task> => state.experiments);
-export const selectModelsResults      = createSelector(selectSearch, (state: ISearchState): Array<Model> => state.models);
-export const selectActiveSearch       = createSelector(selectSearch, (state: ISearchState): boolean => state.term?.query?.length >= 3 || state.forceSearch);
-export const selectSearchTerm         = createSelector(selectSearch, (state: ISearchState)  => state.term);
-export const selectResultsCounter     = createSelector(selectSearch, (state: ISearchState): number => state.resultsCounter);
+export const selectModelsResults = createSelector(selectSearch, (state: ISearchState): Array<Model> => state.models);
+export const selectPipelinesResults = createSelector(selectSearch, (state: ISearchState): Array<Project> => state.pipelines);
+export const selectActiveSearch = createSelector(selectSearch, (state: ISearchState): boolean => state.term?.query?.length >= 3 || state.forceSearch);
+export const selectSearchTerm = createSelector(selectSearch, (state: ISearchState) => state.term);
+export const selectResultsCounter = createSelector(selectSearch, (state: ISearchState): number => state.resultsCounter);

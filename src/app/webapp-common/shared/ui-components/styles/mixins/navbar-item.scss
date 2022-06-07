@@ -34,6 +34,16 @@
   } @else {
     border-bottom: solid 6px $active-color;
     padding-bottom: 16px;
+      :host-context(.small-nav) {
+        .navbar-item {
+          font-size: 12px;
+          padding: 11px 18px;
+          &.active.bottom {
+            border-bottom: solid 3px;
+            padding-bottom: 8px;
+          }
+        }
+      }
   }
 }
 
@@ -44,11 +54,13 @@
   &:hover {
     color: $active-color
   }
+
   @if $direction == 'bottom' {
+    :host-context(.small-nav) &:not(.active)::after {height: 3px}
     &:not(.active)::after {
       content: "";
-      background: $active-color;
       height: 6px;
+      background: $active-color;
       position: absolute;
       bottom: 0;
       //transition: .16s all 0.025s;
@@ -83,7 +95,6 @@
       position: absolute;
       top: 0;
       //transition: .16s all 0.025s;
-
     }
   }
 }

@@ -1,67 +1,85 @@
 @import "../ui-components/styles/variables";
 
 :host {
-  .label {
-    display: flex;
-    justify-content: center;
-    margin-left: 5px;
-  }
 
-  .fullscreen {
-    margin-right: 29px;
-  }
-
-  .icon {
-    margin: auto 0;
-  }
-
-  .status-icon-container {
-    padding: 0 24px;
-    width: 100%;
-  }
-
-  .failed,
-  .completed,
-  .stopped
-  {
-    font-size: 11px;
-    font-weight: 500;
-    filter: brightness(0) invert(1);
-  }
-
-  .created,
-  .running,
-  .queued,
-  .in_progress,
-  .published {
-    color: $blue-600;
-    opacity: 0.8;
-    font-family: Heebo;
-    font-size: 11px;
-    font-weight: 500;
-    .al-icon{
-      &:hover{
-        color: $blue-800;
-      };
+  .status-line {
+    background: white;
+    height:32px;
+    position: relative;
+    .label {
+      display: flex;
+      justify-content: center;
+      padding: 2px 12px 0 12px;
+      letter-spacing: 0.03em;
     }
-  }
+    .view-only {
+      padding-left: 4px;
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+    &::before {
+      content: "";
+      border-top: 6px solid;
+      display: block;
+      position: relative;
+      z-index: 2;
+    }
+    > span {
+      display: inline-flex;
+      align-items: center;
+      position: absolute; z-index: 1; top: 0; left: 50%;
+      transform: translateX(-50%);
+      height: inherit;
+      font-size: 12px; font-weight: 500;
+      letter-spacing: 0.05em;
+      color: $blue-600;
+      &::before, &::after {
+        content:"";
+        display: block;
+        position: relative;
+        width: 0;
+        height: 0;
+        border-bottom: 32px solid white;
+      }
+      &::before {
+        left: -1px;
+        border-right: 16px solid transparent;
+      }
+      &::after {
+        right: -1px;
+        border-left: 16px solid transparent;
+      }
 
-  .middle {
-    height: 14px;
-    margin-top: 2px
-  }
+    }
 
-  .view-only {
-    padding-left: 4px;
-    margin-top: 0;
-    margin-bottom: 0;
-  }
+    &.published {
+      &::before {border-color: $neon-yellow;}
+      span {background-color: $neon-yellow;}
+    }
 
-  .maximize{
-    font-size: 18px;
-    color: $blue-300;
-    &:hover{
-      color: $blue-200;
+    &.in_progress {
+      &::before {border-color: #50e3c2;}
+      span {background-color: #50e3c2;}
+    }
+
+    &.queued {
+      &::before {border-color: #c4f0e4;}
+      span {background-color: #c4f0e4;}
+    }
+
+    &.created {
+      &::before {border-color: #dbdee6;}
+      span {background-color: #dbdee6;}
+    }
+
+    &.failed {
+      &::before {border-color: $strong-red}
+      span {background-color: $strong-red; color: $blue-25;}
+    }
+
+    &.completed, &.stopped {
+      &::before {border-color: $completed-blue}
+      span {background-color: $completed-blue; color: $blue-25;}
     }
   }
 }
