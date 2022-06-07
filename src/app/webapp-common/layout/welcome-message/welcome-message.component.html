@@ -51,7 +51,7 @@
           <div class="code">
             <div class="content" #stepCode>{{step.code}}</div>
             <sm-copy-clipboard
-              [hideBackground]="true"
+              [hideBackground]="false"
               [label]="''"
               [copyIcon]="'al-icon sm-md al-ico-copy-to-clipboard'"
               theme="text-area"
@@ -77,8 +77,8 @@
 <div #content class="content"><span class="variable">api</span> {{ '{' }}<ng-container *ngIf="community && workspace.name">
   <span class="">{{'# ' + workspace.name}}</span></ng-container>
   <span class="variable">web_server</span><span class="operation">:</span> <span class="string">{{WEB_SERVER_URL}}</span>
-  <span class="variable">api_server</span><span class="operation">:</span> <span class="string">{{API_BASE_URL}}</span>
-<ng-container *ngIf="fileBaseUrl">  <span class="variable">files_server</span><span class="operation">:</span> <span class="string">{{fileBaseUrl}}</span><ng-container *ngIf="credentialsLabel">
+  <span class="variable">api_server</span><span class="operation">:</span> <span class="string">{{displayedServerUrls?.apiServer || API_BASE_URL}}</span>
+<ng-container *ngIf="fileBaseUrl">  <span class="variable">files_server</span><span class="operation">:</span> <span class="string">{{displayedServerUrls?.filesServer || fileBaseUrl}}</span><ng-container *ngIf="credentialsLabel">
   <span>{{'# ' + credentialsLabel}}</span></ng-container>
 </ng-container>  <span class="variable">credentials</span> {{ '{' }}
     <span class="string">"access_key"</span> <span class="operation">=</span> <span class="string">"{{accessKey}}"</span>
@@ -86,7 +86,7 @@
   }
 }</div>
               <sm-copy-clipboard
-                [hideBackground]="true"
+                [hideBackground]="false"
                 [label]="''"
                 [copyIcon]="'al-icon sm-md al-ico-copy-to-clipboard'"
                 theme="text-area"
@@ -121,7 +121,7 @@ plt.show()
   task.get_logger().report_scalar(title=<span class="string">"graph title"</span>, series=<span class="string">"linear"</span>, value=i*2, iteration=i)
             </div>
             <sm-copy-clipboard
-              [hideBackground]="true"
+              [hideBackground]="false"
               [label]="''"
               [copyIcon]="'al-icon sm-md al-ico-copy-to-clipboard'"
               theme="text-area"

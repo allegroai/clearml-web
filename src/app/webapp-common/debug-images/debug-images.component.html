@@ -59,10 +59,10 @@
       [title]="experimentNames && experimentNames[experimentId]"
       [isMergeIterations]="mergeIterations"
       [isDarkTheme]="isDarkTheme"
-      (imageClicked)="imageClicked($event)"
+      (imageClicked)="imageClicked($event, experimentId)"
       (urlError)="urlError()"
     >
     </sm-debug-images-view>
   </div>
-  </div>
+</div>
 

@@ -16,7 +16,7 @@
     }
   }
 
-  * {
+  .content-container, .fixed-width {
     overflow-anchor: none;
   }
 
@@ -30,6 +30,10 @@
     flex-flow: row-reverse;
     width: 100%;
     overflow: hidden;
+
+    &.drawer-closed button {
+      align-items: start;
+    }
   }
 
   .c-drawer-toggle {
@@ -57,14 +61,10 @@
       color: #ffffff;
     }
 
-    .arrows-icon {
-      font-size: 18px;
-    }
-
     .label {
       font-size: 13px;
-      font-weight: bold;
-
+      font-weight: 500;
+      padding-top: 12px;
       writing-mode: tb;
       white-space: nowrap;
       overflow: hidden;

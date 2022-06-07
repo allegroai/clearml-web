@@ -1,24 +1,41 @@
 <sm-overlay [backdropActive]="backdropActive"></sm-overlay>
-
 <div class="d-flex">
-  <div class="p-2 icon i-model model-icon xl"></div>
   <div class="middle-col">
-    <div class="d-flex align-items-center">
-      <sm-inline-edit
-        class="edit-name"
-        [originalText]="model?.name"
-        [editable]="editable"
-        (textChanged)="onNameChanged($event)"
-        (inlineActiveStateChanged)="editExperimentName($event)"
-      >
-        <div class="model-name">
-          <span>{{model?.name}}</span>
+    <div class="d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center model-name-cont">
+        <div class="p-2 icon i-model model-icon l-40"></div>
+        <sm-inline-edit
+          class="edit-name"
+          [originalText]="model?.name"
+          [editable]="editable"
+          (textChanged)="onNameChanged($event)"
+          (inlineActiveStateChanged)="editExperimentName($event)"
+        >
+          <div class="model-name">
+            <span>{{model?.name}}</span>
+          </div>
+        </sm-inline-edit>
+      </div>
+      <div class="d-flex align-items-center light-theme">
+        <i class="al-icon al-ico-id pointer line-item" [smTooltip]="model?.id" ngxClipboard
+           [cbContent]="model?.id"
+           (cbOnSuccess)="copyToClipboard()" *ngIf="!viewId"></i>
+        <sm-model-menu-extended
+          class="line-item"
+          [model]="model"
+          [selectedModel]="model"
+          [tagsFilterByProject]="tagsFilterByProject$ | async"
+          [selectedDisableAvailableIsMultiple]="false"
+          [selectedDisableAvailable]="selectedDisableAvailable"
+          [projectTags]="projectTags$ | async"
+          [companyTags]="companyTags$ | async"
+          [numSelected]="1"
+          (tagSelected)="addTag($event)">
+        </sm-model-menu-extended>
+        <div (click)="closeInfoClicked.emit()" class="d-flex align-items-center line-item">
+          <i class="al-icon al-ico-dialog-x pointer"></i>
         </div>
-      </sm-inline-edit>
-      <i class="al-icon al-ico-id pointer" (click)="viewId = true" *ngIf="!viewId; else showId"></i>
-      <ng-template #showId>
-        <span class="model-id">{{model.id}}</span>
-      </ng-template>
+      </div>
     </div>
     <div class="tags-list">
       <sm-tag-list
@@ -53,18 +70,5 @@
         ></sm-tags-menu>
       </sm-menu>
     </div>
-  </div>
-  <div class="light-theme right-buttons">
-    <sm-model-menu-extended
-      [model]="model"
-      [selectedModel]="model"
-      [tagsFilterByProject]="tagsFilterByProject$ | async"
-      [selectedDisableAvailableIsMultiple]="false"
-      [selectedDisableAvailable]="selectedDisableAvailable"
-      [projectTags]="projectTags$ | async"
-      [companyTags]="companyTags$ | async"
-      [numSelected]="1"
-      (tagSelected)="addTag($event)">
-    </sm-model-menu-extended>
   </div>
 </div>

@@ -1,7 +1,8 @@
 <span class="sys-tag tag-item" *ngFor="let tag of sysTags">{{tag}}</span>
-<ng-container *ngIf="remove.observers.length > 0; else:noRemove">
+<ng-container *ngIf="remove.observed; else:noRemove">
   <sm-user-tag class="tag-item"
                *ngFor="let tag of tagsList; trackBy: trackFn"
+               [style.--max-hover-width]="(ref.nativeElement.getBoundingClientRect().width - (tagsList.length - 1) * 24) + 'px'"
                [colors]="tag.colorObservable | async"
                [caption]="tag.caption"
                [tooltip]="tooltip"
@@ -22,7 +23,7 @@
 <sm-user-tag
   class="add-button"
   [class.no-tags]="!tagsList?.length"
-  *ngIf="add.observers.length > 0"
+  *ngIf="add.observed"
   caption="ADD TAG"
   [colors]="{foreground: '#a7b2d8', background: null}"
   (add)="add.emit($event)"

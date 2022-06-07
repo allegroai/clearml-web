@@ -82,7 +82,7 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
         if (selectedProject?.id === '*') {
           return rootProjects;
         } else {
-          return [selectedProject].concat(selectedProject?.sub_projects ?? [])
+          return [selectedProject].concat(selectedProject?.sub_projects ?? []);
         }
       } else {
         return [];
@@ -93,7 +93,7 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
       .pipe(
         filter(featuresAwareness => featuresAwareness !== null && featuresAwareness !== undefined),
         tap(aware => this.tableModeAwareness = aware)
-      )
+      );
   }
 
   ngOnInit() {
@@ -145,7 +145,7 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
 
   closePanel(queryParams?: Params) {
     window.setTimeout(() => this.infoDisabled = false);
-    this.store.dispatch(this.setTableModeAction({mode: 'table'}))
+    this.store.dispatch(this.setTableModeAction({mode: 'table'}));
     return this.router.navigate(this.minimizedView ? [{}] : [], {
       relativeTo: this.route,
       queryParamsHandling: 'merge',
@@ -251,12 +251,10 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
   }
 
   archivedChanged(isArchived: boolean) {
-    const navigate = () => {
-      return this.closePanel({archive: isArchived || null}).then(() => {
+    const navigate = () => this.closePanel({archive: isArchived || null}).then(() => {
         this.afterArchiveChanged();
         this.store.dispatch(resetProjectSelection());
       });
-    };
 
     if (this.getSelectedEntities().length > 0) {
       const archiveDialog: MatDialogRef<any> = this.dialog.open(ConfirmDialogComponent, {
@@ -284,6 +282,6 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
       relativeTo: this.route,
       queryParamsHandling: 'merge',
       queryParams
-    })
+    });
   }
 }

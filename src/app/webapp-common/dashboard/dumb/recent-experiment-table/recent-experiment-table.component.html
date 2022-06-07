@@ -1,7 +1,7 @@
 <sm-table [tableData]="tasks"
           [columns]="cols"
           [rowHeight]="52"
-          [selectionMode]="null"
+          selectionMode="single"
           [scrollable]="true"
           (rowClicked)="onExperimentSelected($event)"
 >

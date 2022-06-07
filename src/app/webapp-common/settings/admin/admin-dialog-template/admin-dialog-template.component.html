@@ -1,30 +1,12 @@
-<div class="label-row cred-visible" *ngIf="!credentialsCreated">
-  <form (submit)="createCredentials()">
-    <mat-form-field appearance="outline"
-                    class="label-input d-block"
-                    floatLabel="always">
-      <mat-label>Label (optional)</mat-label>
-      <input matInput [(ngModel)]="label" [disabled]="credentialsCreated" placeholder="Credentials label" name="credentials">
-    </mat-form-field>
-  </form>
-</div>
-<div class="credentials-and-code cred-visible"
-     *ngIf="newCredential"
-     [class.invisible]="!newCredential.access_key"
-     [class.small-popup]="!credentialsCreated">
-<!--<div class="credentials-and-code" >-->
+<div class="credentials-and-code">
 <div class="credentials">
   <div class="cred-row">
-    <span class="label">Label</span>
-    <span class="value">{{newCredential.label}}</span>
-  </div>
-  <div class="cred-row">
     <span class="label">Access key</span>
-    <span class="value">{{newCredential.access_key}}</span>
+    <span class="value">{{newCredential?.access_key}}</span>
   </div>
   <div class="cred-row">
     <span class="label">Secret key</span>
-    <span class="value">{{newCredential.secret_key}}</span>
+    <span class="value">{{newCredential?.secret_key}}</span>
   </div>
 
 </div>
@@ -33,16 +15,16 @@
   <div class="mt-2 w-100 code">
     <div #content class="content"><span class="variable">api</span> {{ '{' }} <ng-content></ng-content>
     <span class="variable">web_server</span><span class="operation">:</span> <span class="string">{{WEB_SERVER_URL}}</span>
-    <span class="variable">api_server</span><span class="operation">:</span> <span class="string">{{API_BASE_URL}}</span><ng-container *ngIf="fileBaseUrl">
-    <span class="variable">files_server</span><span class="operation">:</span> <span class="string">{{fileBaseUrl}}</span></ng-container><ng-container *ngIf="label">
-    <span>{{'# ' + label}}</span></ng-container>
+    <span class="variable">api_server</span><span class="operation">:</span> <span class="string">{{displayedServerUrls?.apiServer || API_BASE_URL}}</span><ng-container *ngIf="fileBaseUrl">
+    <span class="variable">files_server</span><span class="operation">:</span> <span class="string">{{displayedServerUrls?.filesServer || fileBaseUrl}}</span></ng-container><ng-container *ngIf="newCredential?.label">
+    <span>{{'# ' + newCredential?.label}}</span></ng-container>
     <span class="variable">credentials</span> {{ '{' }}
-        <span class="string">"access_key"</span> <span class="operation">=</span> <span class="string">"{{newCredential.access_key}}"</span>
-        <span class="string">"secret_key"</span> <span class="operation">=</span> <span class="string">"{{newCredential.secret_key}}"</span>
+        <span class="string">"access_key"</span> <span class="operation">=</span> <span class="string">"{{newCredential?.access_key}}"</span>
+        <span class="string">"secret_key"</span> <span class="operation">=</span> <span class="string">"{{newCredential?.secret_key}}"</span>
     }
 }</div>
     <sm-copy-clipboard
-      *ngIf="newCredential.secret_key"
+      *ngIf="newCredential?.secret_key"
       [hideBackground]="true"
       [label]="''"
       [copyIcon]="'far fa-lg fa-copy'"
@@ -50,6 +32,9 @@
   </div>
 </div>
 </div>
-<div class="footer">
-  <button class="btn btn-neon" (click)="credentialsCreated? close() : createCredentials()">{{credentialsCreated? 'CLOSE' : 'CREATE'}}</button>
-</div>
+<form (submit)="onUpdateLabel()">
+  <mat-form-field appearance="outline" class="label-input" floatLabel="never">
+    <input matInput [(ngModel)]="label" placeholder="Credentials label" name="credentials" [value]="newCredential?.label || ''">
+  </mat-form-field>
+  <button class="btn btn-neon label-button" type="submit" [disabled]="label === newCredential?.label">UPDATE LABEL</button>
+</form>

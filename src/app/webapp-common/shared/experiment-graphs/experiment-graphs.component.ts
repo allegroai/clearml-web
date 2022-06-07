@@ -71,6 +71,8 @@ export class ExperimentGraphsComponent implements OnDestroy {
   private graphsNumberLimit: number;
   public activeResizeElement: SingleGraphComponent;
   private _hiddenList: string[];
+  private maxUserHeight: number;
+  private maxUserWidth: number;
 
   @HostListener('window:resize')
   onResize() {
@@ -161,6 +163,11 @@ export class ExperimentGraphsComponent implements OnDestroy {
     this.graphsData = this.sortGraphsData(graphGroups);
 
     this.graphsPerRow = this.allGroupsSingleGraphs() ? 1 : this.graphsPerRow;
+    this.maxUserHeight = Math.max(...Object.values(this.graphsData).flat().map( (chart: ExtFrame) => chart.layout?.height || 0));
+    this.maxUserWidth = Math.max(...Object.values(this.graphsData).flat().map( (chart: ExtFrame) => chart.layout?.width || 0));
+    if (this.maxUserHeight) {
+      this.height = this.maxUserHeight;
+    }
     this.calculateGraphsLayout();
 
     Object.values(this.graphsData).forEach((graphs: ExtFrame[]) => {
@@ -189,7 +196,7 @@ export class ExperimentGraphsComponent implements OnDestroy {
     };
 
     this.observer = new IntersectionObserver(this.graphInView.bind(this), options);
-    // window.setTimeout(() => this.prepareRedraw());
+    window.setTimeout(() => this.observeGraphs(), 50);
   }
 
   observeGraphs() {
@@ -255,7 +262,7 @@ export class ExperimentGraphsComponent implements OnDestroy {
   trackByFn = (index: number, item) => item + this.xAxisType;
 
   trackByIdFn = (metric: string, index: number, item: ExtFrame) =>
-    metric + item.layout.title + item.iter;
+    metric + item.layout.title + (this.isDarkTheme ? '' : item.iter);
 
   isWidthBigEnough() {
     return this.el.nativeElement.clientWidth > this.breakPoint;
@@ -272,15 +279,18 @@ export class ExperimentGraphsComponent implements OnDestroy {
     this.timer = window.setTimeout(() => {
       if (this.allGraphs) {
         const containerWidth = this.el.nativeElement.clientWidth;
-        while (containerWidth / this.graphsPerRow < this.minWidth && this.graphsPerRow > 1) {
+        while (containerWidth / this.graphsPerRow < this.minWidth && this.graphsPerRow > 1 || containerWidth / this.graphsPerRow < this.maxUserWidth) {
           this.graphsPerRow -= 1;
         }
         const width = Math.floor(containerWidth / this.graphsPerRow);
         this.width = width - 16 / this.graphsPerRow;
+        this.height = this.maxUserHeight || this.height;
         if (!this.isGroupGraphs) {
           this.allMetricGroups.forEach(metricGroup => this.renderer.setStyle(metricGroup.nativeElement, 'width', `${this.width}px`));
+          this.allMetricGroups.forEach(metricGroup => this.renderer.setStyle(metricGroup.nativeElement, 'height', `${this.height}px`));
         } else {
           this.allGraphs.forEach(singleGraph => this.renderer.setStyle(singleGraph.elementRef.nativeElement, 'width', `${this.width}px`));
+          this.allGraphs.forEach(singleGraph => this.renderer.setStyle(singleGraph.elementRef.nativeElement, 'height', `${this.height}px`));
         }
       }
       this.prepareRedraw();

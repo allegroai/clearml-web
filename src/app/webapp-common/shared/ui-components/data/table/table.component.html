@@ -29,8 +29,8 @@
   (onColResize)="colResize($event)"
 >
   <ng-template pTemplate="emptymessage">
-    <tr class="no-data-row">
-      <div [attr.colspan]="columns.length" [class.simple]="simple">
+    <tr class="no-data-row h-100">
+      <div [attr.colspan]="columns.length" [class.simple]="simple" class="d-flex align-items-center">
         <div class="no-data" [style.margin-left.px]="buttonLeft">{{noDataMessage}}</div>
       </div>
     </tr>
@@ -135,7 +135,7 @@
         [style.padding.px]="rowHeight < 42 ? 2 : 3"
       ><i class="al-icon al-ico-dots-v-menu" [class.sm-md]="rowHeight < 42" ></i></div>
     </tr>
-    <tr *ngIf="index === rowsNumber - 1 && lazyLoading && !noMoreData" class="table-load-more load-more-wrapper">
+    <tr *ngIf="index === rowsNumber - 1 && lazyLoading && !noMoreData" class="table-load-more load-more-wrapper d-flex">
       <div>
         <button #loadButton
                 class="btn btn-cml-primary"

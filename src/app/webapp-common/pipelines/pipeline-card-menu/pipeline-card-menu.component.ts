@@ -15,4 +15,5 @@ export class PipelineCardMenuComponent {
   @Output() run = new EventEmitter();
   @Output() addTag = new EventEmitter<string>();
   @Output() rename = new EventEmitter();
+  @Output() delete = new EventEmitter();
 }

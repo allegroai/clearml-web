@@ -40,14 +40,39 @@
         position: relative;
         display: block;
 
-        &:after {
-          position: absolute;
-          content: " ";
-          width: 100%;
-          height: 100%;
-          top: 0;
-          left: 0;
+        .content {
           background: #f2f3f6;
+          pointer-events: none;
+
+          .node-key, .node-chevron {
+            visibility: hidden;
+          }
+        }
+
+        al-table-diff {
+          display: block;
+          position: relative;
+          pointer-events: none;
+
+          &:after {
+            position: absolute;
+            content: " ";
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background: #f2f3f6;
+          }
+        }
+      }
+      &.hovered {
+        .content, &:after {
+
+          box-shadow: 0 0 0 1px $blue-250 inset;
+
+          &.diff-row {
+            box-shadow: 0 0 0 1px lighten($strong-red, 20%) inset, 0 0 0 2px white inset;
+          }
         }
       }
     }

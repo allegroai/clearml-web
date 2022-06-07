@@ -49,7 +49,7 @@
     }
 
     &.header.minimised {
-      padding-left: 24px;
+      padding-left: 33px;
     }
   }
 
@@ -89,4 +89,8 @@ sm-table-card-filter-template {
 .dot {
   color: $blue-500;
   padding: 0 6px;
+}
+
+sm-experiment-status-icon-label {
+  min-width: 90px;
 }

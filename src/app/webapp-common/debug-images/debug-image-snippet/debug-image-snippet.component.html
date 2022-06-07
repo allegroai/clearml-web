@@ -1,5 +1,5 @@
 <ng-container *ngIf="(source$ | async) as source">
-  <div *ngIf="!isFailed" class="item snippet" [ngClass]="{'loading' : isLoading}">
+  <div *ngIf="!isFailed" class="item-snippet" [ngClass]="{'loading' : isLoading}">
     <ng-container [ngSwitch]="type">
       <img
         *ngSwitchCase="'image'"

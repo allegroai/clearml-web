@@ -1,5 +1,6 @@
 import {Component, Input, Output} from '@angular/core';
 import {EventEmitter} from '@angular/core';
+import {Iteration, Event} from '@common/debug-images/debug-images.component';
 
 @Component({
   selector: 'sm-debug-images-view',
@@ -10,26 +11,17 @@ export class DebugImagesViewComponent {
 
   public trackKey = (index: number, item: any) => item.iter;
   public trackFrame = (index: number, item: any) => `${item?.key} ${item?.timestamp}`;
-  public iterationEvents;
 
   @Input() experimentId;
   @Input() isMergeIterations;
   @Input() title;
-  private _iterations;
-  @Input() set iterations(iters) {
-    this._iterations = iters;
-    this.iterationEvents = [];
-    iters.forEach(iteration => this.iterationEvents.push(iteration.events));
-  }
-  get iterations() {
-    return this._iterations;
-  }
+  @Input() iterations: Iteration[];
   @Input() isDarkTheme = false;
   @Output() imageClicked = new EventEmitter();
   @Output() refreshClicked = new EventEmitter();
   @Output() urlError = new EventEmitter();
 
-  public imageUrlError(data: { frame: string; experimentId: string }) {
+  public imageUrlError(data: { frame: Event; experimentId: string }) {
     this.urlError.emit(data);
   }
 }

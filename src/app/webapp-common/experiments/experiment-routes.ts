@@ -1,6 +1,5 @@
 import {Routes} from '@angular/router';
 import {ExperimentsComponent} from '@common/experiments/experiments.component';
-import {ExperimentInfoComponent} from '../../features/experiments/containers/experiment-info/experiment-info.component';
 import {ExperimentInfoExecutionComponent} from './containers/experiment-info-execution/experiment-info-execution.component';
 import {LeavingBeforeSaveAlertGuard} from '../shared/guards/leaving-before-save-alert.guard';
 import {ExperimentInfoArtifactsComponent} from './containers/experiment-info-aritfacts/experiment-info-artifacts.component';
@@ -22,7 +21,7 @@ export const routes: Routes = [
     component: ExperimentsComponent,
     children: [
       {
-        path: ':experimentId', component: ExperimentInfoComponent,
+        path: ':experimentId', component: ExperimentOutputComponent,
         children: [
           {path: '', redirectTo: 'execution', pathMatch: 'full'},
           {
@@ -60,7 +59,6 @@ export const routes: Routes = [
           {path: 'general', component: ExperimentInfoGeneralComponent, data: {minimized: true}},
           {
             path: 'info-output',
-            component: ExperimentOutputComponent,
             data: {minimized: true},
             children: [
               {path: 'metrics/scalar', component: ExperimentOutputScalarsComponent, data: {minimized: true}},

@@ -7,22 +7,51 @@
             (click)="activeLinkChanged.emit('experiments')">EXPERIMENTS {{'(' + experimentsList.length + ')'}}  </span>
       <span [ngClass]="{'active': activeLink === 'models'}" class="pointer category-link"
             (click)="activeLinkChanged.emit('models')">MODELS {{'(' + modelsList.length + ')'}}  </span>
+      <span [ngClass]="{'active': activeLink === 'pipelines'}" class="pointer category-link"
+            (click)="activeLinkChanged.emit('pipelines')">PIPELINES ({{pipelinesList?.length}})  </span>
     </div>
   </div>
-  <div *ngIf="activeLink === 'projects'"  class="page-container">
-    <sm-projects-search-results [projectsList]="projectsList"
-                                (projectClicked)="projectClicked($event)"></sm-projects-search-results>
+  <div class="page-container">
+    <sm-search-results
+      [cardTemplate]="
+        activeLink === 'projects' ? ProjectTemplate :
+        activeLink === 'experiments' ? ExperimentTemplate :
+        activeLink === 'models' ? ModelsTemplate :
+        activeLink === 'pipelines' ? PipelineTemplate :
+       ProjectTemplate"
+      [results]="getResults()"
+      [cardHeight]="getCardHeight()"
+      (resultClicked)="projectClicked($event)">
+    </sm-search-results>
   </div>
 
+  <ng-template #ProjectTemplate let-project="result">
+    <sm-project-card
+      [project]="project"
+      (projectCardClicked)="projectClicked($event)"
+      [hideMenu]="true"
+    ></sm-project-card>
+  </ng-template>
 
-  <div *ngIf="activeLink === 'experiments'" class="page-container">
-    <sm-experiments-search-results [experimentsList]="experimentsList"
-                                   (experimentClicked)="experimentClicked($event)"></sm-experiments-search-results>
-  </div>
+  <ng-template #ExperimentTemplate let-experiment="result">
+    <sm-experiment-card
+      [experiment]="experiment"
+      (experimentCardClicked)="experimentClicked($event)"
+    ></sm-experiment-card>
+  </ng-template>
 
-  <div *ngIf="activeLink === 'models'" class="page-container">
-    <sm-models-search-results [modelsList]="modelsList"
-                              (modelClicked)="modelClicked($event)"></sm-models-search-results>
-  </div>
+  <ng-template #ModelsTemplate let-model="result">
+    <sm-model-card
+      [model]="model"
+      (modelCardClicked)="modelClicked($event)"
+    ></sm-model-card>
+  </ng-template>
 
+  <ng-template #PipelineTemplate let-pipeline="result">
+    <sm-pipeline-card
+      [project]="pipeline"
+      [hideMenu]="true"
+      (projectCardClicked)="pipelineClicked($event)"
+    ></sm-pipeline-card>
+  </ng-template>
 </div>

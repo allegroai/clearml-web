@@ -1,13 +1,12 @@
 import {createFeatureSelector, createSelector} from '@ngrx/store';
 
-import {MODELS_VIEW_MODES, ModelsViewModesEnum} from '../../webapp-common/models/models.consts';
-import {TABLE_SORT_ORDER} from '../../webapp-common/shared/ui-components/data/table/table.consts';
-import {SelectedModel} from '../../webapp-common/models/shared/models.model';
-import {MODELS_TABLE_COL_FIELDS} from '../../webapp-common/models/shared/models.const';
+import {MODELS_VIEW_MODES, ModelsViewModesEnum} from '@common/models/models.consts';
+import {TABLE_SORT_ORDER} from '@common/shared/ui-components/data/table/table.consts';
+import {SelectedModel} from '@common/models/shared/models.model';
+import {MODELS_TABLE_COL_FIELDS} from '@common/models/shared/models.const';
 import * as actions from './select-model.actions';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {SortMeta} from 'primeng/api';
-import {setCurrentScrollId} from './select-model.actions';
 
 export interface SelectModelState {
   models: SelectedModel[];

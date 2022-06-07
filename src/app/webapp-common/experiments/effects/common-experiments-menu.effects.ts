@@ -15,7 +15,7 @@ import {requestFailed} from '../../core/actions/http.actions';
 import {IExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {ExperimentConverterService} from '~/features/experiments/shared/services/experiment-converter.service';
 import * as exSelectors from '../reducers';
-import {selectSelectedExperiments} from '../reducers';
+import {selectSelectedExperiments, selectTableMode} from '../reducers';
 import {selectSelectedExperiment} from '~/features/experiments/reducers';
 import * as infoActions from '../actions/common-experiments-info.actions';
 import {AutoRefreshExperimentInfo, ExperimentDetailsUpdated} from '../actions/common-experiments-info.actions';
@@ -94,7 +94,7 @@ export class CommonExperimentsMenuEffects {
     withLatestFrom(this.store.select(selectSelectedExperiment)),
     switchMap(([action, selectedEntity]: [ReturnType<typeof menuActions.enqueueClicked>, IExperimentInfo]) => {
         const ids = action.selectedEntities.map(exp => exp.id);
-        return this.apiTasks.tasksEnqueueMany({ids, queue: action.queue.id, validate_tasks: true})
+        return this.apiTasks.tasksEnqueueMany({ids, queue: action.queue.id, ...((!action.queue.id) && {queue_name: action.queue.name})  ,validate_tasks: true})
           .pipe(
             mergeMap(res => this.updateExperimentsSuccess(action, MenuItems.enqueue, ids, selectedEntity, res)),
             catchError(error => this.updateExperimentFailed(action.type, error))
@@ -170,7 +170,8 @@ export class CommonExperimentsMenuEffects {
 
   cloneExperimentRequested$ = createEffect(() => this.actions$.pipe(
     ofType<menuActions.CloneExperimentClicked>(menuActions.CLONE_EXPERIMENT_CLICKED),
-    switchMap(action => this.apiTasks.tasksClone({
+    withLatestFrom(this.store.select(selectTableMode)),
+    switchMap(([action, tableMode]) => this.apiTasks.tasksClone({
         task: action.payload.originExperiment.id,
         new_task_project: action.payload.cloneData.project,
         new_task_comment: action.payload.cloneData.comment,
@@ -180,13 +181,15 @@ export class CommonExperimentsMenuEffects {
         .pipe(
           mergeMap(res => [
             viewActions.getExperiments(),
-            viewActions.setSelectedExperiments({experiments: []}),
-            deactivateLoader(action.type),
-            ...action.payload.cloneData.newProjectName ? [getAllSystemProjects()] : [],
-            viewActions.experimentSelectionChanged({
+            viewActions.setSelectedExperiments({experiments: (tableMode ==='info' ? [] :
+                [{id: res?.id}
+            ])}),
+            ...(tableMode === 'info') ? [viewActions.experimentSelectionChanged({
               experiment: {id: res.id},
               project: action.payload.cloneData.project ? action.payload.cloneData.project : res?.new_project?.id
-            }),
+            })] : [],
+            deactivateLoader(action.type),
+            ...action.payload.cloneData.newProjectName ? [getAllSystemProjects()] : [],
           ]),
           catchError(error => [
             deactivateLoader(action.type),
@@ -278,7 +281,7 @@ export class CommonExperimentsMenuEffects {
             deactivateLoader(action.type),
             viewActions.getExperiments()
           ]),
-          catchError(error => [requestFailed(error), deactivateLoader(action.type)])
+          catchError(error => [requestFailed(error), deactivateLoader(action.type), setServerError(error, null, 'Failed to move experiments')])
         )
     )
   ));
@@ -357,13 +360,7 @@ export class CommonExperimentsMenuEffects {
       this.store.select(exSelectors.selectSelectedTableExperiment),
       this.store.select(selectRouterConfig),
     ),
-    tap(([action, routerParams, selectedExperiment, routeConfig]) => {
-      if (this.isSelectedExpInCheckedExps(action.selectedEntities, selectedExperiment)) {
-        const module = routeConfig.includes('pipelines')? 'pipelines': 'projects'
-        this.router.navigate([`${module}/${routerParams.projectId}/experiments/`]);
-      }
-    }),
-    switchMap(([action, routerParams]) => this.apiTasks.tasksArchiveMany({ids: action.selectedEntities.map(exp => exp.id)})
+    switchMap(([action, routerParams, selectedExperiment]) => this.apiTasks.tasksArchiveMany({ids: action.selectedEntities.map(exp => exp.id)})
       .pipe(
         withLatestFrom(this.store.select(selectRouterConfig)),
         mergeMap(([res, routerConfig]: [TasksArchiveManyResponse, RouterState['config']]) => {
@@ -399,6 +396,9 @@ export class CommonExperimentsMenuEffects {
               id: experiments[0].id,
               changes: {system_tags: [...experiments[0]?.system_tags.filter(t => t !== 'shared'), 'archived'].sort()}
             }));
+          }
+          if (this.isSelectedExpInCheckedExps(action.selectedEntities, selectedExperiment)) {
+            actions.push(viewActions.selectNextExperiment());
           }
           return actions;
         }),

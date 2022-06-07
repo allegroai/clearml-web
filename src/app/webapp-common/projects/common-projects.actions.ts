@@ -52,3 +52,4 @@ export const setTableModeAwareness = createAction(
   PROJECTS_PREFIX + '[set table mode awareness]',
   props<{awareness: boolean}>()
 );
+export const showExamplePipelines = createAction(PROJECTS_PREFIX + '[show pipelines examples]')

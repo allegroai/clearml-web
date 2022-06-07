@@ -17,7 +17,6 @@ import {ExperimentExecutionParametersComponent} from './dumb/experiment-executio
 import {ExperimentOutputPlotsComponent} from './containers/experiment-output-plots/experiment-output-plots.component';
 import {ExperimentOutputScalarsComponent} from './containers/experiment-output-scalars/experiment-output-scalars.component';
 import {ModelAutoPopulateDialogComponent} from './dumb/model-auto-populate-dialog/model-auto-populate-dialog.component';
-import {ExperimentTableCardComponent} from './dumb/experiment-table-card/experiment-table-card.component';
 import {SMSharedModule} from '../shared/shared.module';
 import {CommonLayoutModule} from '../layout/layout.module';
 import {ExperimentSharedModule} from '~/features/experiments/shared/experiment-shared.module';
@@ -78,7 +77,6 @@ import { GetVariantWithoutRoundPipe } from './dumb/experiments-table/hyper-param
     ExperimentOutputScalarsComponent,
     ModelAutoPopulateDialogComponent,
     ExperimentCustomColsMenuComponent,
-    ExperimentTableCardComponent,
     ExperimentInfoHyperParametersComponent,
     ExperimentInfoHyperParametersFormContainerComponent,
     ExperimentArtifactsNavbarComponent,
@@ -119,7 +117,7 @@ import { GetVariantWithoutRoundPipe } from './dumb/experiments-table/hyper-param
     ExperimentOutputLogModule,
     MatRadioModule
   ],
-  providers: [ExperimentTableCardComponent, NoUnderscorePipe, TitleCasePipe]
+  providers: [NoUnderscorePipe, TitleCasePipe]
 })
 export class ExperimentsCommonModule {
 }

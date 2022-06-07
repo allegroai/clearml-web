@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, Output} from '@angular/core';
 import {TagColorService} from '../../../services/tag-color.service';
 import {Observable} from 'rxjs';
 
@@ -16,7 +16,7 @@ export interface Tag {
   styleUrls: ['./tag-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class TagListComponent implements OnInit {
+export class TagListComponent {
   public disableRemove: string;
   tagsList = [] as Tag[];
 
@@ -29,10 +29,7 @@ export class TagListComponent implements OnInit {
   @Output() remove = new EventEmitter();
   @Output() add = new EventEmitter<MouseEvent>();
 
-  constructor(private colorService: TagColorService) { }
-
-  ngOnInit(): void {
-  }
+  constructor(private colorService: TagColorService, public ref: ElementRef) { }
 
   public trackFn(index: number, tag: Tag) {
     return tag.caption;

@@ -9,14 +9,42 @@
       <b>Note: Some experiments seems to not contain any executable code.
         <br>If enqueued to run, they might produce no results.</b>
     </p>
-    <mat-form-field appearance="outline" class="w-100">
-      <mat-label>Queue</mat-label>
-      <mat-select [(ngModel)]="selectedQueue" name="queue" panelClass="light-theme">
-        <mat-option *ngFor="let queue of queues" [value]="queue">
-          {{queue.name}}
-        </mat-option>
-      </mat-select>
+    <mat-form-field appearance="outline"
+                    class="thin short"
+                    floatLabel="always">
+
+      <mat-label class="field-label">Queue</mat-label>
+      <input type="text"
+             matInput
+             smRequiredAutocompleteSelectionValidator
+             #autoComplete="ngModel"
+             name="queue"
+             [(ngModel)]="selectedQueue"
+             [matAutocomplete]="auto">
+      <mat-autocomplete
+        panelClass="light-theme"
+        class="light-theme"
+        [displayWith]="displayFn"
+        #auto="matAutocomplete"
+        autoActiveFirstOption
+      >
+        <mat-option
+          class="item"
+          *ngIf="(userAllowedToCreateQueue$ | async) &&(autoComplete.control.value && !(displayFn(autoComplete.control.value) | stringIncludedInArray:queuesNames))"
+          [value]="{name:autoComplete.control.value}"
+        >"{{autoComplete.value}}" <span class="new">(Create New)</span></mat-option>
+        <mat-option
+          *ngFor="let option of queues  | filter:autoComplete.control.value: 'name'"
+          [value]="option"
+          [smTooltip]="option.name" smShowTooltipIfEllipsis
+          [innerHTML]="$any(option)?.name | highlightSearchText:autoComplete.control.value"></mat-option>
+      </mat-autocomplete>
+      <mat-error
+        *ngIf="enqueueForm?.getControl(autoComplete)?.errors && !enqueueForm?.getControl(autoComplete)?.errors['requiredAutocompleteSelection'] && enqueueForm?.getControl(autoComplete)?.errors['required'] ">
+        Please provide a value
+      </mat-error>
     </mat-form-field>
+
   </ng-form>
   <div class="buttons">
     <button (click)="closeDialog(false)" class="btn btn-outline-neon">

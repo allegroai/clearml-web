@@ -51,8 +51,9 @@
         class="item"
         *ngIf="(projectInput.value && !(projectInput.value | stringIncludedInArray:projectsNames))"
         [value]="projectInput.value"
+        (onSelectionChange)="createNewSelected($event)"
       >"{{projectInput.value}}" <span class="new">(Create New)</span></mat-option>
-      <mat-option *ngFor="let projectName of projectsNames | simpleFilter:projectInput.value" [value]="projectName" [smTooltip]="projectName" matTooltipPosition="above" smShowTooltipIfEllipsis>
+      <mat-option *ngFor="let projectName of projectsNames | simpleFilter:projectInput.value" [value]="projectName" [smTooltip]="projectName" matTooltipPosition="above" smShowTooltipIfEllipsis (onSelectionChange)="optionSelected($event)">
         <div [innerHTML]="projectName | highlightSearchText:projectInput.value"></div>
       </mat-option>
     </mat-autocomplete>

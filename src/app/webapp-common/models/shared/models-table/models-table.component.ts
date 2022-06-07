@@ -199,7 +199,7 @@ export class ModelsTableComponent extends BaseTableView {
   @Input() set tags(tags) {
     const tagsAndActiveFilter = Array.from(new Set(tags.concat(this.filtersValues[MODELS_TABLE_COL_FIELDS.TAGS])));
     this.filtersOptions[MODELS_TABLE_COL_FIELDS.TAGS] = tagsAndActiveFilter.map(tag => ({
-      label: tag === null ? 'No tag' : tag,
+      label: tag === null ? '(No tags)' : tag,
       value: tag
     }) as IOption);
     this.sortOptionsList(MODELS_TABLE_COL_FIELDS.TAGS);
@@ -299,7 +299,7 @@ export class ModelsTableComponent extends BaseTableView {
     }
   }
 
-  openContextMenu(data: {e: MouseEvent, rowData; single?: boolean; backdrop?: boolean}) {
+  openContextMenu(data: {e: MouseEvent; rowData; single?: boolean; backdrop?: boolean}) {
     if (!this.modelsSelectionChanged.observed) {
       return;
     }
@@ -334,5 +334,5 @@ export class ModelsTableComponent extends BaseTableView {
     [MenuItems.moveTo]: selectionDisabledMoveTo([model]),
     [MenuItems.delete]: selectionDisabledDelete([model]),
     [MenuItems.archive]: selectionDisabledArchive([model])
-  })
+  });
 }

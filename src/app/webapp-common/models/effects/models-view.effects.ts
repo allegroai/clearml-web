@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {Action, Store} from '@ngrx/store';
-import {flatten, get, isEqual, uniq} from 'lodash/fp';
+import {flatten, get, isEqual} from 'lodash/fp';
 import {EMPTY, of} from 'rxjs';
 import {
   auditTime,
@@ -20,10 +20,14 @@ import {ApiModelsService} from '~/business-logic/api-services/models.service';
 import {BlModelsService} from '~/business-logic/services/models.service';
 import {requestFailed} from '../../core/actions/http.actions';
 import {activeLoader, addMessage, deactivateLoader, setServerError} from '../../core/actions/layout.actions';
-import {setArchive as setProjectArchive} from '../../core/actions/projects.actions';
+import {
+  getFilteredUsers,
+  setArchive as setProjectArchive,
+  setProjectUsers
+} from '../../core/actions/projects.actions';
 import {setURLParams} from '../../core/actions/router.actions';
 import {selectIsArchivedMode, selectIsDeepMode, selectSelectedProject} from '../../core/reducers/projects.reducer';
-import {selectRouterParams} from '../../core/reducers/router-reducer';
+import {selectRouterConfig, selectRouterParams} from '../../core/reducers/router-reducer';
 import {selectAppVisible} from '../../core/reducers/view.reducer';
 import {addMultipleSortColumns, escapeRegex, getRouteFullUrl} from '../../shared/utils/shared-utils';
 import {GetModelInfo, RefreshModelInfo} from '../actions/models-info.actions';
@@ -31,11 +35,10 @@ import * as actions from '../actions/models-view.actions';
 import {setMetadataKeys, setSelectedModelsDisableAvailable} from '../actions/models-view.actions';
 import {MODELS_PAGE_SIZE, MODELS_TABLE_COLS} from '../models.consts';
 import * as modelsSelectors from '../reducers';
-import {selectSelectedModels, selectTableFilters, selectTableSortFields} from '../reducers';
+import {selectModelsList, selectSelectedModels, selectTableFilters, selectTableSortFields} from '../reducers';
 import {IModelsViewState} from '../reducers/models-view.reducer';
 import {MODEL_TAGS, MODELS_ONLY_FIELDS, MODELS_TABLE_COL_FIELDS} from '../shared/models.const';
 import {SelectedModel} from '../shared/models.model';
-import {ApiUsersService} from '~/business-logic/api-services/users.service';
 import {ModelsGetAllExRequest} from '~/business-logic/model/models/modelsGetAllExRequest';
 import {
   addExcludeFilters,
@@ -61,15 +64,18 @@ import {ModelsGetAllExResponse} from '~/business-logic/model/models/modelsGetAll
 import {ISmCol} from '../../shared/ui-components/data/table/table.consts';
 import {hasValue} from '../../shared/utils/helpers.util';
 import {ProjectsGetModelMetadataValuesResponse} from '~/business-logic/model/projects/projectsGetModelMetadataValuesResponse';
+import * as exActions from '../../experiments/actions/common-experiments-view.actions';
+import {selectExperimentsList, selectTableMode} from '../../experiments/reducers';
+import {ITableExperiment} from '../../experiments/shared/common-experiment-model.model';
 
 @Injectable()
 export class ModelsViewEffects {
 
-  constructor(private actions$: Actions, private store: Store<IModelsViewState>,
-              private apiModels: ApiModelsService, private projectsApi: ApiProjectsService, private modelBl: BlModelsService, private usersApi: ApiUsersService,
-              private router: Router, private route: ActivatedRoute
-  ) {
-  }
+  constructor(
+    private actions$: Actions, private store: Store<IModelsViewState>, private apiModels: ApiModelsService,
+    private projectsApi: ApiProjectsService, private modelBl: BlModelsService, private router: Router,
+    private route: ActivatedRoute
+  ) {}
 
   /* eslint-disable @typescript-eslint/naming-convention */
 
@@ -167,51 +173,15 @@ export class ModelsViewEffects {
     )
   ));
 
-  getFilteredUsersEffect = createEffect(() => this.actions$.pipe(
-    ofType(actions.getFilteredUsers),
-    withLatestFrom(this.store.select(modelsSelectors.selectModelsUsers), this.store.select(modelsSelectors.selectTableFilters)),
-    switchMap(([, users, filters]) => this.usersApi.usersGetAllEx({
-      order_by: ['name'],
-      only_fields: ['name'],
-      id: get(['user.name', 'value'], filters) || []
-    }, null, 'body', true).pipe(
-      mergeMap(res => [
-        actions.setUsers({users: uniq(res.users.concat(users))}),
-      ]),
-      catchError(error => [
-        requestFailed(error),
-        setServerError(error, null, 'Fetch users failed')]
-      )
-    ))
-  ));
-
   getUsersEffect = createEffect(() => this.actions$.pipe(
-    ofType(actions.getUsers, actions.getUsersForAllProjects),
-    withLatestFrom(
-      this.store.select(selectRouterParams).pipe(map(params => get('projectId', params))),
-      this.store.select(modelsSelectors.selectTableFilters)
-    ),
-    switchMap(([action, projectId, filters]) => this.usersApi.usersGetAllEx({
-      order_by: ['name'],
-      only_fields: ['name'],
-      active_in_projects: (projectId !== '*' &&  action.type!== actions.getUsersForAllProjects.type ) ? [projectId] : []
-    }, null, 'body', true).pipe(
-      mergeMap(res => {
-        const userFiltersValue = get([MODELS_TABLE_COL_FIELDS.USER, 'value'], filters) || [];
-        const resIds = res.users.map(user => user.id);
-        const shouldGetFilteredUsersNames = !(userFiltersValue.every(id => resIds.includes(id)));
-        return [
-          actions.setUsers(res),
-          shouldGetFilteredUsersNames ? actions.getFilteredUsers() : new EmptyAction(),
-          deactivateLoader('Fetch Models')
-        ];
-      }),
-      catchError(error => [
-        requestFailed(error),
-        deactivateLoader('Fetch Models'),
-        setServerError(error, null, 'Fetch users failed')
-      ])
-    ))
+    ofType(setProjectUsers),
+    withLatestFrom(this.store.select(modelsSelectors.selectTableFilters)),
+    map(([action, filters]) => {
+      const userFiltersValue = get([MODELS_TABLE_COL_FIELDS.USER, 'value'], filters) || [];
+      const resIds = action.users.map(user => user.id);
+      const shouldGetFilteredUsersNames = !(userFiltersValue.every(id => resIds.includes(id)));
+      return shouldGetFilteredUsersNames ? getFilteredUsers({filteredUsers: userFiltersValue}) : new EmptyAction();
+    })
   ));
 
   getTagsEffect = createEffect(() => this.actions$.pipe(
@@ -323,7 +293,7 @@ export class ModelsViewEffects {
     switchMap(([action, projectId, archived, globalSearch, tableFilters, deep]) => {
       const pageSize = 1000;
       const query = this.getGetAllQuery({
-        projectId, searchQuery: action.filtered && globalSearch, archived, orderFields: [],
+        projectId, searchQuery: action.filtered && globalSearch, archived, orderFields: [{order: -1, field: MODELS_TABLE_COL_FIELDS.LAST_UPDATE}],
         filters: action.filtered ? tableFilters : {}, selectedIds: [], deep, pageSize
       });
       query.only_fields = [MODELS_TABLE_COL_FIELDS.NAME, MODELS_TABLE_COL_FIELDS.READY, 'company.id'];
@@ -368,6 +338,17 @@ export class ModelsViewEffects {
     mergeMap(() => [actions.setTableMode({mode: 'info'})])
     // map(action => actions.setSelectedModel({model: action.model}))
   ));
+  selectNextModelEffect = createEffect(() => this.actions$.pipe(
+    ofType(actions.selectNextModel),
+    withLatestFrom(
+      this.store.select(selectModelsList),
+      this.store.select(selectRouterParams).pipe(map(params => get('projectId', params))),
+      this.store.select(selectTableMode)
+    ),
+    filter(([action, models, projectId, tableMode])=>tableMode==='info'),
+    tap(([action, models, projectId]) => this.navigateAfterModelSelectionChanged(models[0] as SelectedModel, projectId)),
+    mergeMap(() => [actions.setTableMode({mode: 'info'})])
+  ));
 
   setArchiveMode = createEffect(() => this.actions$.pipe(
     ofType(actions.setArchive),
@@ -405,7 +386,7 @@ export class ModelsViewEffects {
     metaCols?: ISmCol[];
   }): ModelsGetAllExRequest {
     const userFilter = filters?.[MODELS_TABLE_COL_FIELDS.USER]?.value;
-    const projectFilter = filters?.[MODELS_TABLE_COL_FIELDS.PROJECT]?.value
+    const projectFilter = filters?.[MODELS_TABLE_COL_FIELDS.PROJECT]?.value;
     const tagsFilter = filters?.[MODELS_TABLE_COL_FIELDS.TAGS]?.value;
     const tagsFilterAnd = filters?.[MODELS_TABLE_COL_FIELDS.TAGS]?.matchMode === 'AND';
     const systemTags = get(['system_tags', 'value'], filters);
@@ -416,7 +397,7 @@ export class ModelsViewEffects {
     const colsFilters = flatten(cols.filter(col => col.id !== 'selected' && !col.hidden).map(col => col.getter || col.id));
     const metaColsFilters = metaCols ? flatten(metaCols.map(col => col.getter || col.id)) : [];
     const only_fields = [...new Set([...MODELS_ONLY_FIELDS, ...colsFilters, ...metaColsFilters])];
-    let tableFilters = createFiltersFromStore(filters, true);
+    const tableFilters = createFiltersFromStore(filters, true);
 
     return {
       id: selectedIds,
@@ -438,7 +419,7 @@ export class ModelsViewEffects {
       ...(tagsFilter?.length > 0 && {tags: addExcludeFilters(tagsFilterAnd ? ['__$and', ...tagsFilter] : tagsFilter)}),
       ...(frameworkFilter?.length > 0 && {framework: frameworkFilter}),
       ...(userFilter?.length > 0 && {user: userFilter}),
-      ...(ready !== null && {ready})
+      ready: ready !== null ? ready : null
     };
   }
 

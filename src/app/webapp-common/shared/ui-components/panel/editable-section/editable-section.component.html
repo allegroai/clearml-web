@@ -7,10 +7,7 @@
   (dblclick)="editable && !disableEditable && (!inEditMode) && editModeChanged(true)"
 >
   <div class="edit-wrapper d-flex flex-row-reverse">
-    <button *ngIf="!disableEditable && !inEditMode && editable && !hideEditButton" id="editSection" class="edit-pen btn-dark-fill pointer"
-            (click)="editModeChanged(true)">
-      <i class="fa fa-pencil"></i> EDIT
-    </button>
+    <button *ngIf="!disableEditable && !inEditMode && editable && !hideEditButton" id="editSection" class="edit-pen btn-dark-fill pointer" (click)="editModeChanged(true)">EDIT</button>
     <ng-content *ngIf="!disableEditable && !inEditMode && editable"  select="[extra-buttons]"></ng-content>
     <ng-content select="[search-button]"></ng-content>
   </div>

@@ -74,9 +74,10 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
     ).subscribe(([config, names, isPipelines, params]) => {
       this.archive = !!params?.archive;
       this.routeConfig = this.isDeep ? config : config?.filter( c => !['experiments', 'models', 'dataviews'].includes(c));
-      this.breadcrumbsStrings = prepareNames(names, isPipelines);
+      const experimentFullScreen = config?.[4] === ('output');
+      this.breadcrumbsStrings = prepareNames(names, isPipelines, experimentFullScreen);
       if (!isEqual(this.previousProjectNames, this.breadcrumbsStrings[':projectId']?.subCrumbs) &&
-        this.breadcrumbsStrings[':projectId'].subCrumbs?.map(project => project.name).includes(undefined)) {
+        this.breadcrumbsStrings[':projectId']?.subCrumbs?.map(project => project.name).includes(undefined)) {
         this.previousProjectNames = this.breadcrumbsStrings[':projectId']?.subCrumbs;
         this.store.dispatch(getAllSystemProjects());
       }
@@ -89,7 +90,7 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
           hide = route.data.workspaceNeutral;
         }
       }
-      this.lastSegment = route.parent.url[0]?.path;
+      this.lastSegment = route.parent?.url[0]?.path;
       this.workspaceNeutral = hide;
     });
   }
@@ -109,7 +110,7 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
         const name = this.getRouteName(config);
         const id = this.getRouteId(config);
         const previous = acc.slice(-1)[0]; // get the last item in the array
-        const previousUrl = previous ? previous.url : '';
+        const previousUrl = previous ? previous?.url : '';
         const isProject = config === ':projectId';
         return acc.concat({name: name, url: previousUrl + '/' + id, isProject});
       }, [{url: '', name: '', isProject: true}])
@@ -133,7 +134,7 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
   }
 
   private getRouteId(config: string) {
-    return (Object.keys(this.breadcrumbsStrings).includes(config)) ? this.breadcrumbsStrings[config].url : config;
+    return (Object.keys(this.breadcrumbsStrings).includes(config)) ? this.breadcrumbsStrings[config]?.url : config;
   }
 
   openShareModal() {

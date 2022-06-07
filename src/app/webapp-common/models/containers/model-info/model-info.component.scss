@@ -4,18 +4,19 @@
 
   sm-model-info-header {
     display: block;
-    height: 45px;
   }
 
   .model-info-container {
-    height: calc(100% - 46px);
+    height: calc(100% - 56px);
     padding-left: 10px;
-    padding-top: 24px;
 
     nav {
-      height: 65px;
       border-bottom: 1px solid rgba(2, 2, 2, 0.07);
+      position: relative;
+      text-align: center;
+      padding: 0 24px;
     }
+
   }
 
   .model-info-body {

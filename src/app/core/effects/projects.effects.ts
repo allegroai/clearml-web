@@ -2,12 +2,12 @@ import { Injectable } from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import * as actions from '../../webapp-common/core/actions/projects.actions';
 import {Store} from '@ngrx/store';
-import {selectSelectedProjectId} from '../../webapp-common/core/reducers/projects.reducer';
+import {selectSelectedProjectId} from '@common/core/reducers/projects.reducer';
 import {catchError, finalize, mergeMap, switchMap, withLatestFrom} from 'rxjs/operators';
-import {deactivateLoader} from '../../webapp-common/core/actions/layout.actions';
-import {ALL_PROJECTS_OBJECT} from '../../webapp-common/core/effects/projects.effects';
-import {requestFailed} from '../../webapp-common/core/actions/http.actions';
-import {ApiProjectsService} from '../../business-logic/api-services/projects.service';
+import {deactivateLoader} from '@common/core/actions/layout.actions';
+import {ALL_PROJECTS_OBJECT} from '@common/core/effects/projects.effects';
+import {requestFailed} from '@common/core/actions/http.actions';
+import {ApiProjectsService} from '~/business-logic/api-services/projects.service';
 
 
 
@@ -15,14 +15,21 @@ import {ApiProjectsService} from '../../business-logic/api-services/projects.ser
 export class ProjectsEffects {
   private fetchingExampleExperiment: string = null;
 
-  constructor(private actions$: Actions, private store: Store, private projectsApi: ApiProjectsService) {}
+  constructor(
+    private actions$: Actions,
+    private store: Store,
+    private projectsApi: ApiProjectsService
+  ) {}
 
   getSelectedProject = createEffect(() => this.actions$.pipe(
     ofType(actions.setSelectedProjectId),
     withLatestFrom(this.store.select(selectSelectedProjectId)),
     switchMap(([action, selectedProjectId]) => {
       if (!action.projectId) {
-        return [actions.setSelectedProject({project: null})];
+        return [
+          deactivateLoader(action.type),
+          actions.setSelectedProject({project: null}),
+        ];
       }
       if (action.projectId === selectedProjectId) {
         return [deactivateLoader(action.type)];
@@ -30,8 +37,8 @@ export class ProjectsEffects {
       if (action.projectId === '*') {
         return [
           actions.setSelectedProject({project: ALL_PROJECTS_OBJECT}),
-          deactivateLoader(action.type)
-        ];
+          actions.getProjectUsers(action),
+          deactivateLoader(action.type)];
       } else {
         this.fetchingExampleExperiment = action.example && action.projectId;
         return this.projectsApi.projectsGetAllEx({
@@ -45,6 +52,7 @@ export class ProjectsEffects {
             finalize(() => this.fetchingExampleExperiment = null),
             mergeMap(({projects}) => [
                 actions.setSelectedProject({project: projects[0]}),
+                actions.getProjectUsers(action),
                 deactivateLoader(action.type),
               ]
             ),

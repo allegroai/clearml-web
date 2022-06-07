@@ -3,22 +3,20 @@ import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {Action, Store} from '@ngrx/store';
 import {castArray, cloneDeep} from 'lodash/fp';
 import {catchError, mergeMap, switchMap, withLatestFrom} from 'rxjs/operators';
-import {MESSAGES_SEVERITY} from '../../../app.constants';
-import {ApiWorkersService} from '../../../business-logic/api-services/workers.service';
-import {Worker} from '../../../business-logic/model/workers/worker';
+import {MESSAGES_SEVERITY} from '~/app.constants';
+import {ApiWorkersService} from '~/business-logic/api-services/workers.service';
 import {WORKER_STATS_PARAM_INFO} from '../workers-and-queues.consts';
-import {WorkersGetActivityReportRequest} from '../../../business-logic/model/workers/workersGetActivityReportRequest';
-import {WorkersGetActivityReportResponse} from '../../../business-logic/model/workers/workersGetActivityReportResponse';
-import {WorkersGetStatsRequest} from '../../../business-logic/model/workers/workersGetStatsRequest';
+import {WorkersGetActivityReportRequest} from '~/business-logic/model/workers/workersGetActivityReportRequest';
+import {WorkersGetActivityReportResponse} from '~/business-logic/model/workers/workersGetActivityReportResponse';
+import {WorkersGetStatsRequest} from '~/business-logic/model/workers/workersGetStatsRequest';
 import {requestFailed} from '../../core/actions/http.actions';
 import {addMessage, deactivateLoader} from '../../core/actions/layout.actions';
 import * as workersActions from '../actions/workers.actions';
 import {selectSelectedWorker, selectStats, selectStatsParams, selectStatsTimeFrame, selectWorkers, selectWorkersTableSortFields} from '../reducers/index.reducer';
-import {orderBy} from 'lodash/fp';
 import {addFullRangeMarkers, addStats, getLastTimestamp, removeFullRangeMarkers} from '../../shared/utils/statistics';
 import {showStatsErrorNotice, hideNoStatsNotice} from '../actions/stats.actions';
 import {addMultipleSortColumns} from '../../shared/utils/shared-utils';
-import {WorkerExt} from '../actions/workers.actions';
+import {transformAndSortWorkers} from '@common/workers-and-queues/workers-and-queues.utils';
 
 const prepareStatsQuery = (entitie: string, keys: { key: string }[], range: number, granularity: number): WorkersGetStatsRequest => {
   const now = Math.floor((new Date()).getTime() / 1000);
@@ -49,7 +47,7 @@ export class WorkersEffects {
     ),
     switchMap(([action, selectedWorker, sortFields]) => this.workersApi.workersGetAll({}).pipe(
       mergeMap(res => {
-        const workers = this.transformAndSortWorkers(sortFields, res.workers);
+        const workers = transformAndSortWorkers(sortFields, res.workers);
         const actionsToFire = [
           workersActions.setWorkers({workers}),
           deactivateLoader(action.type)] as Action[];
@@ -72,7 +70,7 @@ export class WorkersEffects {
       this.store.select(selectWorkersTableSortFields),
       this.store.select(selectWorkers)
     ),
-    mergeMap(([, sortFields, workers]) => [workersActions.setWorkers({workers: this.transformAndSortWorkers(sortFields, workers)})]),
+    mergeMap(([, sortFields, workers]) => [workersActions.setWorkers({workers: transformAndSortWorkers(sortFields, workers)})]),
   ));
 
   getStats$ = createEffect(() => this.actions.pipe(
@@ -172,11 +170,4 @@ export class WorkersEffects {
       return [workersActions.workersTableSetSort({orders})];
     })
   ));
-
-  private transformAndSortWorkers(sortFields, workers: Worker[]): WorkerExt[] {
-    workers = workers.map(worker => ({...worker, id: worker.key || worker.id, name: worker.id}));
-    const srtByFields = sortFields.map(f => f.field);
-    const srtByOrders = sortFields.map(f => f.order > 0 ? 'asc' : 'desc');
-    return orderBy<Worker>(srtByFields, srtByOrders, workers) as any;
-  }
 }

@@ -6,20 +6,21 @@ import {
 } from '../../reducers';
 import {Observable, of, Subscription} from 'rxjs';
 import {select, Store} from '@ngrx/store';
-import {SelectableListItem} from '../../../shared/ui-components/data/selectable-list/selectable-list.model';
+import {SelectableListItem} from '@common/shared/ui-components/data/selectable-list/selectable-list.model';
 import {distinctUntilChanged, filter, map} from 'rxjs/operators';
-import {selectRouterParams} from '../../../core/reducers/router-reducer';
-import {scrollToElement} from '../../../shared/utils/shared-utils';
+import {selectRouterParams} from '@common/core/reducers/router-reducer';
+import {scrollToElement} from '@common/shared/utils/shared-utils';
 import {ActivatedRoute, Router} from '@angular/router';
-import {IExperimentInfoState} from '../../../../features/experiments/reducers/experiment-info.reducer';
+import {IExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {
   experimentPlotsRequested, ResetExperimentMetrics, SetExperimentMetricsSearchTerm,
   SetExperimentSettings
 } from '../../actions/common-experiment-output.actions';
-import {convertPlots, groupIterations, sortMetricsList} from '../../../tasks/tasks.utils';
-import {selectSelectedExperiment} from '../../../../features/experiments/reducers';
+import {convertPlots, groupIterations, sortMetricsList} from '@common/tasks/tasks.utils';
+import {selectSelectedExperiment} from '~/features/experiments/reducers';
 import {ExtFrame} from '@common/shared/experiment-graphs/single-graph/plotly-graph-base';
-import {MetricsPlotEvent} from '../../../../business-logic/model/events/metricsPlotEvent';
+import {MetricsPlotEvent} from '~/business-logic/model/events/metricsPlotEvent';
+import {addMessage} from '@common/core/actions/layout.actions';
 
 @Component({
   selector: 'sm-experiment-output-plots',
@@ -84,7 +85,9 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy {
         this.refreshDisabled = false;
         const groupedPlots = groupIterations(metricsPlots);
         this.plotsList = this.preparePlotsList(groupedPlots);
-        this.graphs = convertPlots({plots: groupedPlots, experimentId: this.experimentId});
+        const {graphs, parsingError} = convertPlots({plots: groupedPlots, experimentId: this.experimentId});
+        this.graphs = graphs;
+        parsingError && this.store.dispatch(addMessage('warn', `Couldn't read all plots. Please make sure all plots are properly formatted (NaN & Inf aren't supported).`, [], true))
         this.changeDetection.detectChanges();
       });
 

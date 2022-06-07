@@ -13,6 +13,7 @@ import {TasksStopManyResponse} from '~/business-logic/model/tasks/tasksStopManyR
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {MetricColumn} from '@common/shared/utils/tableParamEncode';
 import {ProjectStatsGraphData} from '@common/core/reducers/projects.reducer';
+import {User} from '~/business-logic/model/users/user';
 
 export const PROJECTS_PREFIX = '[ROOT_PROJECTS] ';
 
@@ -24,8 +25,6 @@ export interface TagColor {
 export const getAllSystemProjects = createAction(
   PROJECTS_PREFIX + 'GET_PROJECTS'
 );
-
-
 
 export const updateProject = createAction(
   PROJECTS_PREFIX + 'UPDATE_PROJECT',
@@ -135,4 +134,25 @@ export const fetchGraphData = createAction(PROJECTS_PREFIX + '[fetch stats for p
 export const setGraphData = createAction(
   PROJECTS_PREFIX + '[set project stats]',
   props<{ stats: ProjectStatsGraphData[] }>()
+);
+
+export const getProjectUsers = createAction(
+  PROJECTS_PREFIX + '[get current project users]',
+  props<{projectId: string}>()
+);
+export const setProjectUsers = createAction(
+  PROJECTS_PREFIX + '[set current project users]',
+  props<{users: User[]}>()
+);
+export const setAllProjectUsers = createAction(
+  PROJECTS_PREFIX + '[set all projects users]',
+  props<{users: User[]}>()
+);
+export const setProjectExtraUsers = createAction(
+  PROJECTS_PREFIX + '[set extra users]',
+  props<{users: User[]}>()
+);
+export const getFilteredUsers = createAction(
+  PROJECTS_PREFIX + 'GET_FILTERED_USERS',
+  props<{filteredUsers: string[]}>()
 );

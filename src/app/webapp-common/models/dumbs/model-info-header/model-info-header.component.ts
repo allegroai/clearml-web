@@ -1,11 +1,11 @@
 import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
-import {TagsMenuComponent} from '../../../shared/ui-components/tags/tags-menu/tags-menu.component';
+import {TagsMenuComponent} from '@common/shared/ui-components/tags/tags-menu/tags-menu.component';
 import {Store} from '@ngrx/store';
-import {selectCompanyTags, selectProjectTags, selectTagsFilterByProject} from '../../../core/reducers/projects.reducer';
+import {selectCompanyTags, selectProjectTags, selectTagsFilterByProject} from '@common/core/reducers/projects.reducer';
 import {Observable} from 'rxjs';
 import {addTag, removeTag} from '../../actions/models-menu.actions';
 import {SelectedModel, TableModel} from '../../shared/models.model';
-import {MenuComponent} from '../../../shared/ui-components/panel/menu/menu.component';
+import {MenuComponent} from '@common/shared/ui-components/panel/menu/menu.component';
 import {getSysTags} from '../../model.utils';
 import {ActivateModelEdit, CancelModelEdit} from '../../actions/models-info.actions';
 import {
@@ -15,7 +15,8 @@ import {
   selectionDisabledDelete,
   selectionDisabledMoveTo,
   selectionDisabledPublishModels
-} from '../../../shared/entity-page/items.utils';
+} from '@common/shared/entity-page/items.utils';
+import {addMessage} from '@common/core/actions/layout.actions';
 
 @Component({
   selector   : 'sm-model-info-header',
@@ -33,8 +34,8 @@ export class ModelInfoHeaderComponent {
 
   @Input() editable: boolean;
   @Input() backdropActive: boolean;
-  @Output() deselectModel    = new EventEmitter();
   @Output() modelNameChanged = new EventEmitter();
+  @Output() closeInfoClicked = new EventEmitter();
   @ViewChild('tagMenu') tagMenu: MenuComponent;
   @ViewChild('tagsMenuContent') tagMenuContent: TagsMenuComponent;
 
@@ -57,13 +58,12 @@ export class ModelInfoHeaderComponent {
     }
     this._model = model;
     this.sysTags = getSysTags(model as TableModel);
-    const selectedModelsDisableAvailable: Record<string, CountAvailableAndIsDisableSelectedFiltered> = {
+    this.selectedDisableAvailable = {
       [MenuItems.publish]: selectionDisabledPublishModels([model]),
       [MenuItems.moveTo]: selectionDisabledMoveTo([model]),
       [MenuItems.delete]: selectionDisabledDelete([model]),
       [MenuItems.archive]: selectionDisabledArchive([model])
     };
-    this.selectedDisableAvailable = selectedModelsDisableAvailable;
   }
 
   public onNameChanged(name) {
@@ -101,5 +101,9 @@ export class ModelInfoHeaderComponent {
     } else {
       this.store.dispatch(new CancelModelEdit());
     }
+  }
+
+  copyToClipboard() {
+    this.store.dispatch(addMessage('success', 'Copied to clipboard'));
   }
 }

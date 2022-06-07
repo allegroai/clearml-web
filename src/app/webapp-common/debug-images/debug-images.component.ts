@@ -8,6 +8,7 @@ import {MatDialog} from '@angular/material/dialog';
 import * as  debugActions from './debug-images-actions';
 import {fetchExperiments, getDebugImagesMetrics, resetDebugImages} from './debug-images-actions';
 import {
+  ITaskOptionalMetrics,
   selectBeginningOfTime,
   selectDebugImages,
   selectNoMore,
@@ -30,7 +31,7 @@ import {getSignedUrl} from '../core/actions/common-auth.actions';
 import {addMessage} from '../core/actions/layout.actions';
 import {RefreshService} from '@common/core/services/refresh.service';
 
-interface Event {
+export interface Event {
   timestamp: number;
   type?: string;
   task?: string;
@@ -43,7 +44,7 @@ interface Event {
   worker?: string;
 }
 
-interface Iteration {
+export interface Iteration {
   events: Event[];
   iter: number;
 }
@@ -85,8 +86,8 @@ export class DebugImagesComponent implements OnInit, OnDestroy {
   public allowAutorefresh: boolean = false;
 
   public noMoreData$: Observable<boolean>;
-  public optionalMetrics$: Observable<any>;
-  public optionalMetrics: any;
+  public optionalMetrics$: Observable<ITaskOptionalMetrics[]>;
+  public optionalMetrics: {[experimentId: string]: string};
   public selectedMetrics: { [taskId: string]: string } = {};
   public beginningOfTime: any;
   private beginningOfTimeSubscription: Subscription;
@@ -270,11 +271,8 @@ export class DebugImagesComponent implements OnInit, OnDestroy {
     // this.adminService.checkImgUrl(frame.oldSrc || frame.src);
   }
 
-  imageClicked({frame, frames}) {
-    let iterationSnippets = [];
-    Object.entries(frames).map(iteration => {
-      iterationSnippets = iterationSnippets.concat(iteration[1]);
-    });
+  imageClicked({frame}, experimentId: string) {
+    const iterationSnippets = this.debugImages?.[experimentId]?.data.map(iter => iter.events).flat();
     const sources = iterationSnippets.map(img => img.url);
     const index = iterationSnippets.findIndex(img => img.url === frame.url);
     this.dialog.open(ImageDisplayerComponent, {
@@ -325,10 +323,6 @@ export class DebugImagesComponent implements OnInit, OnDestroy {
   shouldShowNoImagesForExperiment(experiment: string) {
     return (this.thereAreNoMetrics(experiment) && this.optionalMetrics && this.optionalMetrics[experiment]) || (this.thereAreNoDebugImages(experiment) && this.debugImages && this.debugImages[experiment]);
   }
-
-  // buildUrl() {
-  //   return ['../../', 'experiments', ];
-  // }
 
   copyIdToClipboard() {
     this.store.dispatch(addMessage('success', 'Copied to clipboard'));

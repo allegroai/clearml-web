@@ -307,7 +307,7 @@ $btn-font-family: $font-family-base;
     font-size: 12px;
     font-weight: 500;
     text-align: center;
-    color: #ffffff;
+    color: $white;
     transition: background-color ease-in-out 0.3s;
 
     &.terminal {
@@ -315,10 +315,13 @@ $btn-font-family: $font-family-base;
       color: $blue-280;
       margin: 0 6px !important;
       padding: 0 12px;
+      &:hover:enabled {
+        color: $blue-200;
+      }
     }
 
     &:hover:enabled {
-      background-color: $purple;
+      background-color: $blue-500;
       color: white;
     }
 

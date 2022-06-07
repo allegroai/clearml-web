@@ -2,15 +2,15 @@ import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {htmlTextShorte} from '../../utils/shared-utils';
-import {Task} from '../../../../business-logic/model/tasks/task';
+import {Task} from '~/business-logic/model/tasks/task';
 import {selectEntitiesFailedToDelete, selectFilesFailedToDelete, selectNumberOfSourcesToDelete} from './common-delete-dialog.reducer';
 import {Observable} from 'rxjs/internal/Observable';
 import {Subject} from 'rxjs';
 import {deleteEntities, resetDeleteState} from './common-delete-dialog.actions';
-import {getDeleteProjectPopupStatsBreakdown} from '../../../../features/projects/projects-page.utils';
-import {EntityTypeEnum} from '../../../../shared/constants/non-common-consts';
+import {getDeleteProjectPopupStatsBreakdown} from '~/features/projects/projects-page.utils';
+import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {takeUntil, tap} from 'rxjs/operators';
-import {CommonProjectReadyForDeletion} from '../../../projects/common-projects.reducer';
+import {CommonProjectReadyForDeletion} from '@common/projects/common-projects.reducer';
 
 
 @Component({
@@ -122,7 +122,7 @@ export class CommonDeleteDialogComponent implements OnInit, OnDestroy {
         return 'This will also remove the model weights file. Note: Experiments using deleted models will no longer be able to run.';
       case EntityTypeEnum.project:
         // eslint-disable-next-line no-case-declarations
-        const entitiesBreakDown = getDeleteProjectPopupStatsBreakdown(stats, 'total');
+        const entitiesBreakDown = getDeleteProjectPopupStatsBreakdown(stats, 'total', 'experiments');
         return entitiesBreakDown.trim().length > 0 ? `${entitiesBreakDown} will be deleted, including their artifacts. This may take a few minutes.` : '';
     }
   }

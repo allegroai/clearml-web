@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {Actions, createEffect, Effect, ofType} from '@ngrx/effects';
+import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {debounceTime, filter, map, mergeMap, switchMap, withLatestFrom} from 'rxjs/operators';
 import {activeLoader, deactivateLoader} from '../../core/actions/layout.actions';
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
@@ -34,14 +34,12 @@ export class SelectCompareHeaderEffects {
     private refresh: RefreshService
   ) {}
 
-  @Effect()
-  activeLoader = this.actions.pipe(
+  activeLoader = createEffect(() => this.actions.pipe(
     ofType(GET_SELECTED_EXPERIMENTS_FOR_COMPARE),
     map(action => activeLoader(action.type))
-  );
+  ));
 
-  @Effect()
-  refreshIfNeeded = this.actions.pipe(
+  refreshIfNeeded = createEffect(() => this.actions.pipe(
     ofType(refreshIfNeeded),
     withLatestFrom(
       this.store.select(selectAppVisible),
@@ -67,7 +65,7 @@ export class SelectCompareHeaderEffects {
             setExperimentsUpdateTime({payload: updatedExperimentsUpdateTime})];
         }))
     )
-  );
+  ));
 
   tableSortChange = createEffect(() => this.actions.pipe(
     ofType(compareAddDialogTableSortChanged),
@@ -84,8 +82,7 @@ export class SelectCompareHeaderEffects {
     })
   ));
 
-  @Effect()
-  searchExperimentsForCompare = this.actions.pipe(
+  searchExperimentsForCompare = createEffect(() => this.actions.pipe(
     ofType(getSelectedExperimentsForCompareAddDialog),
     withLatestFrom(this.store.select(selectRouterParams).pipe(map(params => get('ids', params)?.split(','))),
       this.store.select(exSelectors.selectExperimentsTableCols),
@@ -99,5 +96,5 @@ export class SelectCompareHeaderEffects {
       }).pipe(
       mergeMap((res) => [setSearchExperimentsForCompareResults({payload: [...res?.tasks]}), deactivateLoader(action.type)]),
       )
-    ));
+    )));
 }

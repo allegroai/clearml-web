@@ -3,7 +3,6 @@ import {ITableExperiment} from '../shared/common-experiment-model.model';
 import {ISmCol} from '../../shared/ui-components/data/table/table.consts';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 import {TableFilter} from '../../shared/utils/tableParamEncode';
-import {User} from '~/business-logic/model/users/user';
 import {ProjectsGetTaskParentsResponseParents} from '~/business-logic/model/projects/projectsGetTaskParentsResponseParents';
 import {SortMeta} from 'primeng/api';
 import {CountAvailableAndIsDisableSelectedFiltered} from '@common/shared/entity-page/items.utils';
@@ -14,6 +13,8 @@ export const EXPERIMENTS_PREFIX = 'EXPERIMENTS_';
 
 // COMMANDS:
 export const getExperiments = createAction(EXPERIMENTS_PREFIX + ' [get experiments]');
+export const selectNextExperiment = createAction(EXPERIMENTS_PREFIX + ' [select next experiment]');
+
 export const getExperimentsWithPageSize = createAction(EXPERIMENTS_PREFIX + ' [get experiments with size]',
   props<{pageSize: number}>());
 export const getNextExperiments = createAction(EXPERIMENTS_PREFIX + '[get next experiments]');
@@ -100,12 +101,6 @@ export const setHiddenCols = createAction(
   props<{ hiddenCols: { [key: string]: boolean } }>()
 );
 
-export const setUsers = createAction(
-  EXPERIMENTS_PREFIX + 'SET_USERS',
-  props<{ users: User[] }>()
-);
-
-
 export const setParents = createAction(
   EXPERIMENTS_PREFIX + '[set project experiment parents]',
   props<{ parents: ProjectsGetTaskParentsResponseParents[]}>()
@@ -116,9 +111,7 @@ export const setActiveParentsFilter = createAction(
   props<{ parents: ProjectsGetTaskParentsResponseParents[]}>()
 );
 
-export const getUsers = createAction(EXPERIMENTS_PREFIX + 'GET_USERS');
 export const getParents = createAction(EXPERIMENTS_PREFIX + '[get project experiments parents]');
-export const getFilteredUsers = createAction(EXPERIMENTS_PREFIX + 'GET_FILTERED_USERS');
 
 export const tableFilterChanged = createAction(
   EXPERIMENTS_PREFIX + '[table filter changed]',

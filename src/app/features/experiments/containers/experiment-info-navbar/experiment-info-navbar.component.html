@@ -1,0 +1,58 @@
+<nav [smOverflows]="splitSize" (onOverflows)="navbarOverflowed($event)" [class.minimized]="minimized">
+    <span [routerLink]="['execution']" routerLinkActive #rlaExecution="routerLinkActive" queryParamsHandling="preserve">
+      <sm-navbar-item header="execution" [active]="rlaExecution.isActive" class="small-nav"></sm-navbar-item>
+    </span>
+      <span [routerLink]="['hyper-params/hyper-param/_empty_']" queryParamsHandling="merge">
+      <sm-navbar-item header="configuration"
+                      class="small-nav"
+                      [active]="(routerConfig$| async)?.includes('hyper-params')"></sm-navbar-item>
+    </span>
+      <span [routerLink]="['artifacts']" routerLinkActive #rlaModel="routerLinkActive" queryParamsHandling="preserve">
+      <sm-navbar-item header="artifacts"
+                      class="small-nav"
+                      [active]="rlaModel.isActive"></sm-navbar-item>
+    </span>
+      <span [routerLink]="['general']" routerLinkActive #rlaGeneral="routerLinkActive" queryParamsHandling="preserve">
+      <sm-navbar-item header="info"
+                      class="small-nav"
+                      [active]="rlaGeneral.isActive"></sm-navbar-item>
+    </span>
+
+  <span [matMenuTriggerFor]="results" *ngIf="overflow">
+        <sm-navbar-item header="results"
+                        class="small-nav"
+                        [multi]="true"
+                        [active]="rlaDebug.isActive || rlaPlots.isActive || rlaScalars.isActive || rlaLog.isActive"></sm-navbar-item>
+  </span>
+  <div class="d-inline-block" [style.visibility]="overflow ? 'hidden' : 'visible'">
+  <span [routerLink]="baseInfoRoute.concat(['log'])" routerLinkActive queryParamsHandling="preserve"
+        #rlaLog="routerLinkActive">
+        <sm-navbar-item class="small-nav" header="console" [active]="rlaLog.isActive"></sm-navbar-item>
+      </span>
+    <span [routerLink]="baseInfoRoute.concat(['metrics','scalar'])" routerLinkActive queryParamsHandling="preserve"
+          #rlaScalars="routerLinkActive">
+        <sm-navbar-item class="small-nav" header="Scalars" [active]="rlaScalars.isActive"></sm-navbar-item>
+      </span>
+    <span [routerLink]="baseInfoRoute.concat(['metrics','plots'])" routerLinkActive queryParamsHandling="preserve"
+          #rlaPlots="routerLinkActive">
+        <sm-navbar-item class="small-nav" header="PLOTS" [active]="rlaPlots.isActive"></sm-navbar-item>
+      </span>
+    <span [routerLink]="baseInfoRoute.concat(['debugImages'])" routerLinkActive queryParamsHandling="preserve"
+          #rlaDebug="routerLinkActive">
+        <sm-navbar-item class="small-nav" header="DEBUG SAMPLES" [active]="rlaDebug.isActive"></sm-navbar-item>
+      </span>
+  </div>
+  <mat-menu #results="matMenu">
+    <button mat-menu-item [routerLink]="baseInfoRoute.concat(['log'])" [class.active]="rlaLog.isActive">CONSOLE</button>
+    <button mat-menu-item [routerLink]="baseInfoRoute.concat(['metrics','scalar'])"
+            [class.active]="rlaScalars.isActive">SCALARS
+    </button>
+    <button mat-menu-item [routerLink]="baseInfoRoute.concat(['metrics','plots'])" [class.active]="rlaPlots.isActive">
+      PLOTS
+    </button>
+    <button mat-menu-item [routerLink]="baseInfoRoute.concat(['debugImages'])" [class.active]="rlaDebug.isActive">DEBUG
+      SAMPLES
+    </button>
+  </mat-menu>
+  <ng-content select="[refresh]"></ng-content>
+</nav>

@@ -16,9 +16,9 @@ export interface DonutChartData {
 @Component({
   selector       : 'sm-donut',
   template       : `<div #drawHere></div>
-<div class="row" (window:resize)="onResize()">
-  <div class="col-md-10 col-sm-12 donut-legend"></div>
-  <div class="col-md-14 col-sm-12 donut-container"></div>
+<div class="d-flex h-100" (window:resize)="onResize()">
+  <div class="donut-legend"></div>
+  <div class="donut-container"></div>
 </div>`,
   styleUrls      : ['./donut.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -65,19 +65,25 @@ export class DonutComponent implements OnInit {
   }
 
   initLegendChart() {
-    const rect       = this.legendContainer.node().getBoundingClientRect();
-    const {width}    = rect;
-    this.legendWidth = width * 0.8;
+    const {width} = this.legendContainer.node().getBoundingClientRect();
+    this.legendWidth = width - 10;
 
-    if (rect) {
+    if (width) {
       this.legendChart
         .width(this.legendWidth)
+        .margin({
+          top: 0,
+          right: 0,
+          bottom: 0,
+          left: 0
+        })
+        .markerSize(12)
         .numberFormat('l');
     }
   }
 
   updateLegend() {
-    this.legendChart.height(30 + this.donutData?.length * 20);
+    this.legendChart.height(30 + this.donutData?.length * 24);
     this.legendContainer.datum(this.donutData).call(this.legendChart);
     selectAll('.legend-entry').nodes().forEach((node: HTMLElement) => {
       const text   = node.querySelector('.legend-entry-name').textContent;
@@ -92,12 +98,24 @@ export class DonutComponent implements OnInit {
       .attr('id', 'clip-rect')
       .attr('x', '0')
       .attr('y', '-10')
-      .attr('width', this.legendWidth - 100)
+      .attr('width', this.legendWidth - 80)
       .attr('height', 20);
     this.legendContainer.selectAll('.legend-entry-name')
+      .on('mouseenter', (event, data: DonutChartData) => {
+        this.donutChart.highlightSliceById(data.id);
+        this.donutContainer.datum(this.donutData).call(this.donutChart);
+      })
+      .on('mouseleave', (event, data: DonutChartData) => {
+        if (this.donutChart.highlightSliceById() === data.id) {
+          this.donutChart.highlightSliceById(null);
+          this.donutContainer.datum(this.donutData).call(this.donutChart);
+        }
+      })
       .attr('clip-path', 'url(#legend-label-clip)')
       .append('title')
       .text((d: DonutChartData) => d.name);
+
+
   }
 
   initDonutChart() {

@@ -12,6 +12,7 @@ export class NavbarItemComponent implements OnInit {
   @Input() direction: 'bottom' | 'top' = 'bottom';
   @Input() subHeader: string;
   @Input() multi: boolean = false;
+  @Input() large: boolean = true;
 
   @Output() itemSelected = new EventEmitter<string>();
 

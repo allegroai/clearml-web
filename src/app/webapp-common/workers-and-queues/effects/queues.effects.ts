@@ -2,11 +2,12 @@ import {Injectable} from '@angular/core';
 import {catchError, filter, map, mergeMap, switchMap, tap, withLatestFrom} from 'rxjs/operators';
 import {Store} from '@ngrx/store';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
-import {ApiQueuesService} from '../../../business-logic/api-services/queues.service';
-import {QueuesGetQueueMetricsRequest} from '../../../business-logic/model/queues/queuesGetQueueMetricsRequest';
-import {QueuesGetQueueMetricsResponse} from '../../../business-logic/model/queues/queuesGetQueueMetricsResponse';
-import {Queue} from '../../../business-logic/model/queues/queue';
+import {ApiQueuesService} from '~/business-logic/api-services/queues.service';
+import {QueuesGetQueueMetricsRequest} from '~/business-logic/model/queues/queuesGetQueueMetricsRequest';
+import {QueuesGetQueueMetricsResponse} from '~/business-logic/model/queues/queuesGetQueueMetricsResponse';
+import {Queue} from '~/business-logic/model/queues/queue';
 import {
+  selectQueues,
   selectQueuesStatsTimeFrame,
   selectQueuesTableSortFields,
   selectQueueStats, selectSelectedQueue
@@ -33,14 +34,15 @@ import {
   setStats,
   clearQueue
 } from '../actions/queues.actions';
-import {EmptyAction, MESSAGES_SEVERITY} from '../../../app.constants';
-import {QueueMetrics} from '../../../business-logic/model/queues/queueMetrics';
-import {ApiTasksService} from '../../../business-logic/api-services/tasks.service';
-import {cloneDeep, orderBy} from 'lodash/fp';
+import {EmptyAction, MESSAGES_SEVERITY} from '~/app.constants';
+import {QueueMetrics} from '~/business-logic/model/queues/queueMetrics';
+import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
+import {cloneDeep} from 'lodash/fp';
 import {addFullRangeMarkers, addStats, removeFullRangeMarkers} from '../../shared/utils/statistics';
 import {hideNoStatsNotice, showStatsErrorNotice} from '../actions/stats.actions';
 import {encodeOrder} from '../../shared/utils/tableParamEncode';
 import {addMultipleSortColumns} from '../../shared/utils/shared-utils';
+import {sortTable} from '@common/workers-and-queues/workers-and-queues.utils';
 
 @Injectable()
 export class QueuesEffect {
@@ -56,7 +58,7 @@ export class QueuesEffect {
   ));
 
   getQueues = createEffect(() => this.actions.pipe(
-    ofType(getQueues, queuesTableSetSort),
+    ofType(getQueues),
     withLatestFrom(
       this.store.select(selectQueuesTableSortFields)),
     switchMap(([action, orderFields]) => this.queuesApi.queuesGetAllEx({
@@ -65,9 +67,21 @@ export class QueuesEffect {
       order_by: encodeOrder(orderFields)
       /* eslint-enable @typescript-eslint/naming-convention */
     }).pipe(
-      mergeMap(res => [setQueues({queues: this.sortQueues(orderFields, res.queues)}), deactivateLoader(action.type)]),
+      mergeMap(res => [setQueues({queues: sortTable(orderFields, res.queues)}), deactivateLoader(action.type)]),
       catchError(err => [deactivateLoader(action.type), requestFailed(err)])
     ))
+  ));
+
+  setQueuesSort = createEffect(() => this.actions.pipe(
+    ofType(queuesTableSetSort),
+    withLatestFrom(
+      this.store.select(selectQueuesTableSortFields),
+      this.store.select(selectQueues)
+    ),
+    switchMap(([action, orderFields, queues]) =>
+      [setQueues({queues: sortTable(orderFields, queues)}), deactivateLoader(action.type)]
+    ),
+    catchError(err => [deactivateLoader(queuesTableSetSort.type), requestFailed(err)])
   ));
 
   getSelectedQueue = createEffect(() => this.actions.pipe(
@@ -118,7 +132,7 @@ export class QueuesEffect {
     ofType(clearQueue),
     switchMap(action => this.tasksApi.tasksDequeueMany({ids: action.queue.entries.map(ent => ent.task?.id)}).pipe(
       withLatestFrom(this.store.select(selectSelectedQueue)),
-      mergeMap(([res,selectedQueue]) => [
+      mergeMap(([, selectedQueue]) => [
         getQueues(),
         selectedQueue ? refreshSelectedQueue() : new EmptyAction(),
         deactivateLoader(action.type)
@@ -287,10 +301,4 @@ export class QueuesEffect {
       return [queuesTableSetSort({orders})];
     })
   ));
-
-  private sortQueues(sortFields, queues): Queue[] {
-    const srtByFields = sortFields.map(f => f.field);
-    const srtByOrders = sortFields.map(f => f.order > 0 ? 'asc' : 'desc');
-    return orderBy<Queue>(srtByFields, srtByOrders, queues) as any;
-  }
 }

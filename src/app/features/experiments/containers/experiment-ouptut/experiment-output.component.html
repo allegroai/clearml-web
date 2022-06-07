@@ -1,60 +1,24 @@
 <sm-overlay [backdropActive]="backdropActive$|async"></sm-overlay>
-<div class="experiment-output-container light-theme">
+<sm-experiment-info-header-status-icon-label
+  [status]=" (selectedExperiment)?.status || selectedExperiment?.status"
+  [development]="isDevelopment"
+></sm-experiment-info-header-status-icon-label>
+<div class="experiment-output-container light-theme" [class.minimized]="minimized">
   <sm-experiment-info-header
-    *ngIf="!minimized"
-    (minimizeClicked)="minimizeView()"
     [experiment]="selectedExperiment"
     [infoData]="infoData$ | async"
     [editable]="!isExample"
     [showMenu]="true"
-    [showMinimize]="true"
+    [minimized]="minimized"
     [isSharedAndNotOwner]="isSharedAndNotOwner$ | async"
     (experimentNameChanged)="updateExperimentName($event)"
-
+    (closeInfoClicked)="closePanel()"
+    (minimizeClicked)="minimizeView()"
+    (maximizedClicked)="maximize()"
   >
   </sm-experiment-info-header>
-  <nav [class.minimized]="minimized" [smOverflows]="'nav'" (onOverflows)="overflow = $event">
-    <ng-container *ngIf="!minimized">
-      <span [routerLink]="['execution']"  queryParamsHandling="preserve">
-        <sm-navbar-item header="execution" [active]="routerConfig.includes('execution')"></sm-navbar-item>
-      </span>
-        <span [routerLink]="['hyper-params/hyper-param/_empty_']" [class.disabled]="routerConfig.includes('hyper-params')" queryParamsHandling="merge">
-        <sm-navbar-item header="Configuration" [active]="routerConfig.includes('hyper-params')"></sm-navbar-item>
-      </span>
-        <span [routerLink]="['artifacts']" [routerLinkActive]="'disabled'">
-        <sm-navbar-item header="artifacts" [active]="routerConfig.includes('artifacts')"></sm-navbar-item>
-      </span>
-      <span [routerLink]="['general']"  queryParamsHandling="preserve">
-        <sm-navbar-item header="info" [active]="routerConfig.includes('general')"></sm-navbar-item>
-      </span>
-    </ng-container>
-
-    <span [matMenuTriggerFor]="results" *ngIf="!minimized && overflow">
-      <sm-navbar-item header="results" [multi]="true" [active]="console.active || scalar.active || plots.active || samples.active"></sm-navbar-item>
-    </span>
-
-    <mat-menu #results="matMenu">
-      <button mat-menu-item [routerLink]="['log']" [class.active]="routerConfig.includes('log')">CONSOLE</button>
-      <button mat-menu-item [routerLink]="['metrics','scalar']" [class.active]="routerConfig.includes('metrics') && routerConfig.includes('scalar')">SCALARS</button>
-      <button mat-menu-item [routerLink]="['metrics','plots']" [class.active]="routerConfig.includes('metrics') && routerConfig.includes('plots')">PLOTS</button>
-      <button mat-menu-item [routerLink]="['debugImages']" [class.active]="routerConfig.includes('debugImages')">DEBUG SAMPLES</button>
-    </mat-menu>
-
-    <div class="d-inline-block" [style.visibility]="overflow && !minimized ? 'hidden' : 'visible'">
-      <span [routerLink]="['log']" queryParamsHandling="preserve">
-        <sm-navbar-item #console header="console" [active]="routerConfig.includes('log')"></sm-navbar-item>
-      </span>
-      <span [routerLink]="['metrics','scalar']" queryParamsHandling="preserve">
-        <sm-navbar-item #scalar header="Scalars" [active]="routerConfig.includes('metrics') && routerConfig.includes('scalar')"></sm-navbar-item>
-      </span>
-      <span [routerLink]="['metrics','plots']" queryParamsHandling="preserve">
-        <sm-navbar-item #plots header="PLOTS" [active]="routerConfig.includes('metrics') && routerConfig.includes('plots')"></sm-navbar-item>
-      </span>
-      <span [routerLink]="['debugImages']" queryParamsHandling="preserve">
-        <sm-navbar-item #samples header="DEBUG SAMPLES" [active]="routerConfig.includes('debugImages')"></sm-navbar-item>
-      </span>
-    </div>
-    <span class="refresh-position">
+    <sm-experiment-info-navbar [minimized]="minimized" [splitSize]="selectSplitSize$ | async">
+    <span class="refresh-position" refresh>
       <sm-experiment-settings
         [class.maximized]="!minimized"
         [showSettings]="routerConfig.includes('scalar') && minimized"
@@ -67,8 +31,8 @@
       >
       </sm-refresh-button>
     </span>
-  </nav>
-  <div class="output-body" [class.minimized]="minimized">
-    <router-outlet class="output-outlet"></router-outlet>
+    </sm-experiment-info-navbar>
+  <div class="output-body" [class.minimized]="minimized" #scrollContainer>
+    <router-outlet class="output-outlet" (activate)="onActivate($event, scrollContainer)"></router-outlet>
   </div>
 </div>

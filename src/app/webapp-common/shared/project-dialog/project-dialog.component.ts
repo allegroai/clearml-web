@@ -32,7 +32,7 @@ export class ProjectDialogComponent implements OnInit, OnDestroy {
 
   };
 
-  constructor(private store: Store<any>, private matDialogRef: MatDialogRef<ProjectDialogComponent>, @Inject(MAT_DIALOG_DATA) data: { projectId: string, mode: string }) {
+  constructor(private store: Store<any>, private matDialogRef: MatDialogRef<ProjectDialogComponent>, @Inject(MAT_DIALOG_DATA) data: { projectId: string; mode: string }) {
     this.baseProjectId = data.projectId;
     this.mode = data.mode;
     this.projects$ = this.store.select(createProjectSelectors.selectProjects);

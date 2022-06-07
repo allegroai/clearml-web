@@ -6,7 +6,7 @@ import {activeLoader, deactivateLoader, setServerError} from '../core/actions/la
 import {
   addToProjectsList, getAllProjectsPageProjects, updateProject,
   setCurrentScrollId, setNoMoreProjects, setProjectsOrderBy,
-  setProjectsSearchQuery, updateProjectSuccess
+  setProjectsSearchQuery, updateProjectSuccess, showExamplePipelines
 } from './common-projects.actions';
 import {
   selectProjectsOrderBy, selectProjectsScrollId, selectProjectsSearchQuery, selectProjectsSortOrder
@@ -17,8 +17,6 @@ import {ProjectsGetAllExRequest} from '~/business-logic/model/projects/projectsG
 import {escapeRegex, isExample} from '../shared/utils/shared-utils';
 import {catchError, debounceTime, map, mergeMap, switchMap, withLatestFrom} from 'rxjs/operators';
 import {get} from 'lodash/fp';
-import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
-import {ApiModelsService} from '~/business-logic/api-services/models.service';
 import {pageSize} from './common-projects.consts';
 import {selectRouterParams} from '../core/reducers/router-reducer';
 import {selectCurrentUser, selectShowOnlyUserWork} from '../core/reducers/users-reducer';
@@ -36,10 +34,8 @@ export class CommonProjectsEffects {
 
   constructor(
     private actions: Actions, public projectsApi: ApiProjectsService,
-    public experimentsApi: ApiTasksService, public modelsApi: ApiModelsService,
-    private store: Store<any>, private route: ActivatedRoute
-  ) {
-  }
+    private store: Store<any>, private route: ActivatedRoute,
+  ) {}
 
   activeLoader = createEffect(() => this.actions.pipe(
     ofType(updateProject, getAllProjectsPageProjects),
@@ -76,7 +72,6 @@ export class CommonProjectsEffects {
 
   getAllProjects = createEffect(() => this.actions.pipe(
     ofType(getAllProjectsPageProjects),
-    debounceTime(10),
     withLatestFrom(
       this.store.select(selectProjectsOrderBy),
       this.store.select(selectProjectsSortOrder),
@@ -98,7 +93,8 @@ export class CommonProjectsEffects {
         return forkJoin([
           this.projectsApi.projectsGetAllEx({
             stats_for_state: ProjectsGetAllExRequest.StatsForStateEnum.Active,
-            ...(pipelines && {include_stats_filter: {system_tags: ['pipeline', '-archive']}}),
+            ...((!showHidden && !pipelines) && {include_stats_filter: {system_tags: ['-pipeline']}}),
+            ...((pipelines) && {include_stats_filter: {system_tags: ['pipeline'], type:['controller']}}),
             include_stats: true,
             shallow_search: !pipelines && !searchQuery?.query,
             ...(selectedProjectId && {parent: [selectedProjectId]}),
@@ -155,8 +151,13 @@ export class CommonProjectsEffects {
     mergeMap(() => [getAllProjectsPageProjects({})])
   ));
 
+  showExamplePipeline = createEffect(() => this.actions.pipe(
+    ofType(showExamplePipelines),
+    map(() => localStorage.setItem('_saved_pipeline_state_', JSON.stringify({showPipelineExamples: true})))
+  ), {dispatch: false});
+
   setProjectsSearchQuery = createEffect(() => this.actions.pipe(
-    ofType(setProjectsSearchQuery.type),
+    ofType(setProjectsSearchQuery),
     mergeMap(() => [getAllProjectsPageProjects({})])
   ));
 

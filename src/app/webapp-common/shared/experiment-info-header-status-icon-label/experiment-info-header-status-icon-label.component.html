@@ -1,24 +1,10 @@
-<div class="status-icon-container">
-  <div [ngClass]="status" class="d-flex align-items-center justify-content-between">
-    <div></div>
-    <div class="d-flex">
-      <i [class]="'icon xs i-'+status+' bw'" [smTooltip]="EXPERIMENTS_STATUS_LABELS[status]"></i>
-      <div class="label" *ngIf="showLabel">
+<div class="status-line" [class]="status" >
+    <span class="d-flex align-items-center">
+      <span class="label" *ngIf="showLabel">
         {{'  ' + (EXPERIMENTS_STATUS_LABELS[status] ? EXPERIMENTS_STATUS_LABELS[status] : '') | uppercase}}
-      </div>
-      <span class="view-only d-inline" *ngIf="viewOnly === true; else developmentTemp">  (view only) </span>
-      <ng-template #developmentTemp>
-        <span class="view-only d-inline" *ngIf="development === true">  (note: changes will be overridden if re-run locally) </span>
-      </ng-template>
-    </div>
-    <div class="right-buttons d-flex align-items-center">
-      <div *ngIf="showMaximize" (click)="maximizedClicked.emit()"
-        smTooltip="View Full Screen" matTooltipPosition="left" class="d-flex fullscreen">
-        <i class="al-icon al-ico-info-max pointer"></i>
-      </div>
-      <div (click)="closeInfoClicked.emit()" class="d-flex align-items-center">
-        <i class="al-icon al-ico-dialog-x pointer"></i>
-      </div>
-    </div>
-  </div>
+      </span>
+      <i *ngIf="viewOnly === true || development === true" class="al-icon al-ico-error-circle msm mr-1"
+         matTooltipPosition="after"
+         [smTooltip]="viewOnly || status === 'Published' ? 'View only' : 'Changes will be overridden if re-run locally'"></i>
+    </span>
 </div>

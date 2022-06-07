@@ -7,13 +7,12 @@ import {TABLE_SORT_ORDER} from '../../data/table/table.consts';
   styleUrls  : ['./menu-item.component.scss']
 })
 export class MenuItemComponent {
-  @Input() iconFontSize: number = 14;
   @Input() removable: boolean   = false;
   @Input() disabled: boolean    = false;
   @Input() itemLabel: string;
   @Input() itemValue: string;
   @Input() itemTooltip: string;
-  @Input() iconClass: string;
+  @Input() iconClass: string = '';
   @Input() enableIcon: boolean  = true;
   @Input() selectable: boolean  = false;
   @Input() checked: boolean     = false;

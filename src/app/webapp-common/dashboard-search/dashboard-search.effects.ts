@@ -2,7 +2,17 @@ import {Injectable} from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {activeLoader, deactivateLoader} from '../core/actions/layout.actions';
 import {
-  SearchActivate, SearchClear, searchExperiments, searchModels, searchProjects, searchSetTerm, searchStart, SetExperimentsResults, SetModelsResults, SetProjectsResults
+  SearchActivate,
+  SearchClear,
+  searchExperiments,
+  searchModels,
+  searchPipelines,
+  searchProjects,
+  searchSetTerm,
+  searchStart,
+  SetExperimentsResults,
+  SetModelsResults, setPipelinesResults,
+  SetProjectsResults
 } from './dashboard-search.actions';
 import {EXPERIMENT_SEARCH_ONLY_FIELDS, SEARCH_ACTIONS, SEARCH_PAGE_SIZE} from './dashboard-search.consts';
 import {ApiProjectsService} from '~/business-logic/api-services/projects.service';
@@ -28,7 +38,7 @@ export class DashboardSearchEffects {
 
   /* eslint-disable @typescript-eslint/naming-convention */
   activeLoader = createEffect(() => this.actions.pipe(
-    ofType(SEARCH_ACTIONS.SEARCH_PROJECTS, SEARCH_ACTIONS.SEARCH_MODELS, SEARCH_ACTIONS.SEARCH_EXPERIMENTS),
+    ofType(SEARCH_ACTIONS.SEARCH_PROJECTS, SEARCH_ACTIONS.SEARCH_MODELS, SEARCH_ACTIONS.SEARCH_EXPERIMENTS, SEARCH_ACTIONS.SEARCH_PIPELINES),
     map(action => activeLoader(action.type))
   ));
   // add actions for each search
@@ -43,6 +53,7 @@ export class DashboardSearchEffects {
       }
       actionsToFire.push(searchSetTerm(action));
       actionsToFire.push(searchProjects(action));
+      actionsToFire.push(searchPipelines(action));
       actionsToFire.push(searchExperiments(action));
       actionsToFire.push(searchModels(action));
       return actionsToFire;
@@ -56,13 +67,34 @@ export class DashboardSearchEffects {
         ...(action.query && {pattern: action.regExp ? action.query : escapeRegex(action.query) + '[^/]*$'}),
         fields: ['name', 'id']
       },
+      include_stats_filter: {system_tags: ['-pipeline']},
       stats_for_state: ProjectsGetAllExRequest.StatsForStateEnum.Active,
       scroll_id: null,
       size: SEARCH_PAGE_SIZE,
       include_stats: true,
       only_fields: ['name', 'company', 'user', 'created', 'default_output_destination']
-    }).pipe(
+    } as ProjectsGetAllExRequest).pipe(
       mergeMap(res => [new SetProjectsResults(res.projects), deactivateLoader(action.type)]),
+      catchError(error => [deactivateLoader(action.type), requestFailed(error)])))
+  ));
+
+  searchPipelines = createEffect(() => this.actions.pipe(
+    ofType(searchPipelines.type),
+    switchMap((action: ReturnType<typeof searchPipelines>) => this.projectsApi.projectsGetAllEx({
+      _any_: {
+        ...(action.query && {pattern: action.regExp ? action.query : escapeRegex(action.query) + '[^/]*$'}),
+        fields: ['name', 'id']
+      },
+      search_hidden: true,
+      shallow_search: false,
+      system_tags: ['pipeline'],
+      stats_for_state: ProjectsGetAllExRequest.StatsForStateEnum.Active,
+      scroll_id: null,
+      size: SEARCH_PAGE_SIZE,
+      include_stats: true,
+      only_fields: ['name', 'company', 'user', 'created', 'default_output_destination', 'tags', 'system_tags']
+    } as ProjectsGetAllExRequest).pipe(
+      mergeMap(res => [setPipelinesResults({pipelines:res.projects}), deactivateLoader(action.type)]),
       catchError(error => [deactivateLoader(action.type), requestFailed(error)])))
   ));
 

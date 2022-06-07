@@ -1,9 +1,9 @@
 import {Action, createAction, props} from '@ngrx/store';
 import {ISmAction} from '../core/models/actions';
 import {SEARCH_ACTIONS} from './dashboard-search.consts';
-import {Project} from '../../business-logic/model/projects/project';
-import {Task} from '../../business-logic/model/tasks/task';
-import {Model} from '../../business-logic/model/models/model';
+import {Project} from '~/business-logic/model/projects/project';
+import {Task} from '~/business-logic/model/tasks/task';
+import {Model} from '~/business-logic/model/models/model';
 
 
 export const searchSetTerm = createAction(
@@ -35,6 +35,16 @@ export class SearchDeactivate implements Action {
 export const searchProjects = createAction(
   SEARCH_ACTIONS.SEARCH_PROJECTS,
   props<{query: string; regExp?: boolean}>()
+);
+
+export const searchPipelines = createAction(
+  SEARCH_ACTIONS.SEARCH_PIPELINES,
+  props<{query: string; regExp?: boolean}>()
+);
+
+export const setPipelinesResults = createAction(
+  'Set Pipelines Results',
+  props<{pipelines: Project[]}>()
 );
 
 export class SetProjectsResults implements ISmAction {

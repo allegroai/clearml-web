@@ -6,6 +6,9 @@ $output-tabs-height: 64px;
 :host {
   .experiment-output-container {
     height: 100%;
+    &.minimized{
+      height: calc(100% - 32px);
+    }
   }
 
   ::ng-deep .no-output {
@@ -25,63 +28,30 @@ $output-tabs-height: 64px;
     margin-bottom: 10px;
   }
 
-  sm-experiment-info-header {
-    display: block;
-    padding: 7px 0 0 10px;
-    border-bottom: 1px solid $blue-100;
-  }
   sm-experiment-settings.maximized {
     display: block;
-    height: 50px;
     padding-top: 6px;
   }
 
-  nav {
-    height: $output-tabs-height;
-    position: relative;
-    text-align: center;
-    border-bottom: 1px solid #efefef;
-    overflow: hidden;
-    padding: 0 24px;
+  .refresh-position {
+    position: absolute;
+    right: 28px;
+    top: 0px;
+    display: flex;
+    align-items: center;
+  }
 
-    .refresh-position {
-      position: absolute;
-      right: 16px;
-      top: 6px;
-      display: flex;
-      align-items: center;
-    }
-    .refreshIcon{
-      margin-right: 10px;
-    }
-
-    &.minimized{
-      text-align: left;
-
-      .refresh-position {
-        top: 12px;
-      }
-    }
-    span.disabled {
-      pointer-events: none;
-    }
+  .refreshIcon {
+    margin-right: 10px;
   }
 
   .output-body {
     position: relative;
-    height: calc(100% - #{$output-tabs-height + $experiment-info-header-height});
-
+    height: calc(100% - #{$output-tabs-height + $experiment-info-header-height + 36px});
     &.minimized {
-      height: calc(100% - #{$output-tabs-height});
+      height: calc(100% - #{$experiment-info-header-height + $experiment-info-tabs-height + 5px});
     }
   }
 }
 
-.mat-menu-item {
-  padding-left: 22px;
-  &.active {
-    border-left: 6px solid $purple;
-    padding-left: 16px;
-  }
-}
 

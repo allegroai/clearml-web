@@ -201,7 +201,7 @@ export class DeleteDialogEffectsBase {
 
     return commutativeUrls.reduce((acc, url) => {
       const sourceType = this.getSourceType(url);
-      acc[sourceType].push(url);
+      url && acc[sourceType].push(url);
       return acc;
     }, {fs: [], gc: [], s3: [], azure: [], misc: []});
   }

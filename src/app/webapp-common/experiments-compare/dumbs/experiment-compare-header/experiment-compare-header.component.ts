@@ -29,7 +29,7 @@ import {
   allowAddExperiment$,
   SelectExperimentsForCompareComponent
 } from '../../containers/select-experiments-for-compare/select-experiments-for-compare.component';
-import {MatDialog} from "@angular/material/dialog";
+import {MatDialog} from '@angular/material/dialog';
 import {RefreshService} from '@common/core/services/refresh.service';
 
 @Component({

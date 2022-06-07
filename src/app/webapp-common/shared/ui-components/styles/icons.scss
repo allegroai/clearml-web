@@ -34,6 +34,10 @@
     color: $blue-570;
   }
 
+  &.blue-800 {
+    color: $blue-800;
+  }
+
   &.error-dark{
     color: $error-dark
   }
@@ -93,6 +97,11 @@
     width: 32px;
     height: 32px;
     font-size: 32px;
+  }
+  &.l-40{
+    width: 40px;
+    height: 40px;
+    font-size: 40px;
   }
 
   &.xl {

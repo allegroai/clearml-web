@@ -21,6 +21,7 @@ import {GroupByCharts} from '../../reducers/common-experiment-output.reducer';
 import {GroupedList} from '@common/shared/ui-components/data/selectable-grouped-filter-list/selectable-grouped-filter-list.component';
 import {ExtFrame} from '@common/shared/experiment-graphs/single-graph/plotly-graph-base';
 import {ExperimentGraphsComponent} from '@common/shared/experiment-graphs/experiment-graphs.component';
+import {isEqual} from 'lodash/fp';
 
 export const prepareScalarList = (metricsScalar: GroupedList): GroupedList =>
   Object.keys(metricsScalar || []).reduce((acc, curr) => {
@@ -129,8 +130,8 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.minimized = this.activeRoute.snapshot.routeConfig.data.minimized;
-    this.listOfHidden = this.store.pipe(select(selectSelectedSettingsHiddenScalar))
-      .pipe(distinctUntilChanged());
+    this.listOfHidden = this.store.select(selectSelectedSettingsHiddenScalar)
+      .pipe(distinctUntilChanged(isEqual));
 
     this.subs.add(this.store.select(selectSelectedExperiment)
       .pipe(

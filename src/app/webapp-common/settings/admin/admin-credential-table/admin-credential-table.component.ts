@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 import {AdminCredentialTableBaseDirective} from '../admin-credential-table.base';
-import {TIME_FORMAT_STRING} from '../../../constants';
+import {TIME_FORMAT_STRING} from '@common/constants';
 
 
 @Component({

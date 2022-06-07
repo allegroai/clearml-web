@@ -27,7 +27,7 @@ import {
   Root
 } from 'plotly.js';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
-import {ExtData, ExtFrame, ExtLayout, ExtLegend, PlotlyGraphBase} from './plotly-graph-base';
+import {ExtData, ExtFrame, ExtLayout, ExtLegend, PlotlyGraphBaseComponent} from './plotly-graph-base';
 import {Store} from '@ngrx/store';
 import {ResizeEvent} from 'angular-resizable-element';
 import {select} from 'd3-selection';
@@ -35,13 +35,14 @@ import {MatDialog} from '@angular/material/dialog';
 import {GraphDisplayerComponent} from '../graph-displayer/graph-displayer.component';
 import {PALLET} from '@common/constants';
 import {download} from '@common/shared/utils/download';
+import {Subject} from 'rxjs';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 declare const Plotly;
 const DARK_THEME_GRAPH_LINES_COLOR = '#39405f';
 const DARK_THEME_GRAPH_TICK_COLOR = '#c1cdf3';
 const ORIGIN_COLOR = 'origin-color';
-
+const RATIO_OFFSET_FIX = 37;
 
 @Component({
   selector: 'sm-single-graph',
@@ -49,16 +50,24 @@ const ORIGIN_COLOR = 'origin-color';
   styleUrls: ['./single-graph.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SingleGraphComponent extends PlotlyGraphBase {
+export class SingleGraphComponent extends PlotlyGraphBaseComponent {
   public alreadyDrawn: boolean = false;
+  public shouldRefresh: boolean = false;
+  public loading: boolean;
+  public type: PlotData['type'] | 'table';
+  public ratio: number;
+  public title: string;
+  private yaxisType: AxisType = 'linear';
   private originalChart: ExtFrame;
   private _chart: ExtFrame;
   private smoothnessTimeout: number;
   private chartData: HTMLDivElement;
-  public shouldRefresh: boolean = false;
-  private yaxisType: AxisType = 'linear';
-  public type: PlotData['type'] | 'table';
   private previousOffsetWidth: number;
+  private modeBar: HTMLElement;
+  private previousHeight: number;
+  private ratioEnable: boolean;
+  private smooth$ = new Subject();
+
 
   @Input() identifier: string;
   @Input() hideTitle: boolean = false;
@@ -67,11 +76,11 @@ export class SingleGraphComponent extends PlotlyGraphBase {
   @Input() showLoaderOnDraw = true;
   @Input() isMaximized: boolean = false;
   @Input() legendConfiguration: Partial<ExtLegend & { noTextWrap: boolean }> = {};
-  @Input() height: number = 450;
-  public loading: boolean;
-  private modeBar: HTMLElement;
-
+  @Input() height: number;
   @Input() set chart(chart: ExtFrame) {
+    this.ratioEnable = !!chart.layout.width && !!chart.layout.height;
+    this.ratio = this.ratioEnable? chart.layout.width / chart.layout.height : null;
+    this.height = chart.layout.height || 450;
     this.originalChart = cloneDeep(chart);
     this._chart = chart;
   }
@@ -86,15 +95,11 @@ export class SingleGraphComponent extends PlotlyGraphBase {
   @Input() xAxisType: ScalarKeyEnum;
 
   @Input() set smoothWeight(ratio: number) {
+    this._smoothWeight = ratio;
     this.isSmooth = ratio > 0;
     if (this.alreadyDrawn) {
-      clearTimeout(this.smoothnessTimeout);
-      this.smoothnessTimeout = window.setTimeout(() => {
-        this._chart = cloneDeep(this.originalChart);
-        this.drawGraph(true);
-      }, 400);
+      this.smooth$.next(ratio);
     }
-    this._smoothWeight = ratio;
   }
 
   get smoothWeight() {
@@ -113,16 +118,23 @@ export class SingleGraphComponent extends PlotlyGraphBase {
   constructor(
     protected renderer: Renderer2,
     private colorHash: ColorHashService,
-    private changeDetector: ChangeDetectorRef,
+    public changeDetector: ChangeDetectorRef,
     public elementRef: ElementRef,
     protected store: Store,
     private dialog: MatDialog,
     private readonly zone: NgZone
   ) {
     super(store);
+    this.sub.add(this.smooth$
+      .pipe(debounceTime(50))
+      .subscribe(() => {
+        this._chart = cloneDeep(this.originalChart);
+        this.drawGraph(true);
+      })
+    );
   }
 
-  drawGraph(forceRedraw = false) {
+  drawGraph(forceRedraw = false, forceSkipReact = false) {
     if (this.showLoaderOnDraw) {
       this.loading = true;
       this.changeDetector.detectChanges();
@@ -139,10 +151,11 @@ export class SingleGraphComponent extends PlotlyGraphBase {
     }
     let skipReact = false;
     // root.height > 0 to avoid rare plotly exception
-    if (this.singleGraphContainer.nativeElement.offsetWidth !== this.previousOffsetWidth && (root as HTMLElement).offsetHeight > 0) {
+    if ((this.singleGraphContainer.nativeElement.offsetWidth !== this.previousOffsetWidth || forceSkipReact) && (root as HTMLElement).offsetHeight > 0) {
       skipReact = true;
       this.zone.runOutsideAngular(() => Plotly.relayout(root, {
-        width: Math.max(getOr(0, 'data[0].cells.values.length', data) * 100, this.singleGraphContainer.nativeElement.offsetWidth - 3)
+        width: this.ratio ? this.height * this.ratio + RATIO_OFFSET_FIX: Math.max(getOr(0, 'data[0].cells.values.length', data) * 100, this.singleGraphContainer.nativeElement.offsetWidth - 3),
+        height: this.height
       }).then(() => {
         this.loading = false;
         this.changeDetector.detectChanges();
@@ -150,6 +163,7 @@ export class SingleGraphComponent extends PlotlyGraphBase {
       }));
     }
     this.previousOffsetWidth = this.singleGraphContainer.nativeElement.offsetWidth;
+    this.previousHeight = this.height;
 
     if (!skipReact) {
       this.zone.runOutsideAngular(() => Plotly.react(root, data, layout, config).then(() => {
@@ -178,7 +192,8 @@ export class SingleGraphComponent extends PlotlyGraphBase {
 
     const graph = this.formatChartLines() as ExtFrame;
     this.type = getOr(graph.layout.type, 'data[0].type', graph);
-    let layout = {
+    this.title = this.isDarkTheme ? '' : this.addIterationString(graph.layout.title as string, graph.iter) || (graph.layout.title as Record<string, any>).text;
+      let layout = {
       ...this.addParametersIfDarkTheme({
         font: {
           color: '#FFFFFF',
@@ -189,6 +204,7 @@ export class SingleGraphComponent extends PlotlyGraphBase {
       // eslint-disable-next-line @typescript-eslint/naming-convention
       ...this.addParametersIfDarkTheme({plot_bgcolor: 'transparent'}),
       height: this.height,
+      width: this.ratio ? (this.height * this.ratio) + RATIO_OFFSET_FIX : undefined,
       modebar: {
         color: '#8F9DC9',
         activecolor: '#4D66FF',
@@ -198,7 +214,6 @@ export class SingleGraphComponent extends PlotlyGraphBase {
         }),
       },
       title: {
-        ...(!this.hideTitle && {text: this.addIterationString(graph.layout.title as string, graph.iter)}),
         ...this.addParametersIfDarkTheme({
           font: {
             color: this.isDarkTheme ? PALLET.blue100 : 'dce0ee'
@@ -276,10 +291,11 @@ export class SingleGraphComponent extends PlotlyGraphBase {
       };
 
       // override cells design
+      const isFireFox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
       graph.data[0].cells = {
         ...graph.data[0].cells,
         align: 'left',
-        height: 30,
+        height:  (isFireFox && this.isDarkTheme) ? 'auto' : 30,
         font: {
           color: [this.isDarkTheme ? PALLET.blue200 : PALLET.blue400],
           size: 12
@@ -290,7 +306,6 @@ export class SingleGraphComponent extends PlotlyGraphBase {
       layout.width = Math.max(getOr(0, 'data[0].cells.values.length', graph) * 100, this.singleGraphContainer.nativeElement.offsetWidth - 3);
       layout.title = {
         ...layout.title as Record<string, any>,
-        text: this.addIterationString(layout.name, graph.iter) || (layout.title as Record<string, any>).text,
         xanchor: 'left',
         xref: 'paper',
         x: 0
@@ -401,8 +416,8 @@ export class SingleGraphComponent extends PlotlyGraphBase {
         name: 'Hide legend',
         title: this.getHideButtonTitle(),
         icon: this.getToggleLegendIcon(),
-        click: (element, ev: any) => {
-          const pathElement = ev.target.tagName === 'path' ? ev.target : (ev.target as HTMLElement).querySelector('path');
+        click: (element, ev: MouseEvent) => {
+          const pathElement = (ev.target as HTMLElement).tagName === 'path' ? (ev.target as HTMLElement) : (ev.target as HTMLElement).querySelector('path');
           const svg = pathElement.parentElement;
           pathElement.style.fill = this.chartElm.layout?.showlegend ? 'rgb(77, 102, 255)' : 'rgb(143, 157, 201)';
           svg.parentElement.attributes['data-title'].value = this.getHideButtonTitle();
@@ -414,6 +429,21 @@ export class SingleGraphComponent extends PlotlyGraphBase {
             }, 20);
           }
           this.zone.runOutsideAngular(() => Plotly.relayout(this.chartElm, {showlegend: this.chartElm.layout.showlegend}));
+        }
+      });
+    }
+    if (!['table', 'parcoords'].includes(get('data[0].type', graph)) && this.ratioEnable && !this.moveLegendToTitle) {
+      modeBarButtonsToAdd.push({
+        name: 'Auto Layout',
+        title: 'Auto Layout',
+        icon: this.getToggleRatioIcon(),
+        click: (element, ev: MouseEvent) => {
+          const pathElement = (ev.target as HTMLElement).tagName === 'path' ? (ev.target as HTMLElement) : (ev.target as HTMLElement).querySelector('path');
+          const svg = pathElement.parentElement;
+          pathElement.style.fill = this.ratio ? 'rgb(77, 102, 255)' : 'rgb(143, 157, 201)';
+          svg.parentElement.attributes['data-title'].value = this.getLockRatioTitle();
+          this.ratio = this.ratio ? null : this.originalChart.layout.width / this.originalChart.layout.height;
+          this.drawGraph(true, true);
         }
       });
     }
@@ -466,7 +496,7 @@ export class SingleGraphComponent extends PlotlyGraphBase {
   }
 
   private formatChartLines() {
-    if (this.alreadyDrawn) {
+    if (this.alreadyDrawn || !this.chart) {
       return this.chart;
     }
 
@@ -531,32 +561,29 @@ export class SingleGraphComponent extends PlotlyGraphBase {
     }
   }
 
-  private resmoothDataset(line: ExtData, color) {
-    const newLine = cloneDeep(line);
+  private resmoothDataset(data: ExtData, color) {
+    let last = data.y?.[0] as number ?? NaN;
 
-    const data = newLine.y;
-    let last = data.length > 0 ? data[0] as number : NaN;
-    newLine.legendgroup = line.name;
-    newLine.name = `${line.name} (Smoothed)`;
-    newLine.showlegend = true;
-    newLine.isSmoothed = true;
-    newLine.hovertext = newLine.hovertext ? newLine.hovertext + '(Smoothed)' : '(Smoothed)';
-    newLine.hoverinfo = 'all';
-
-    this._reColorTrace(newLine, color);
-    let smoothed;
-    data.forEach((d, index) => {
-      if (!isFinite(last)) {
-        smoothed = d;
-      } else {
-        // 1st-order IIR low-pass filter to attenuate the higher-
-        // frequency components of the time-series.
-        smoothed = last * this.smoothWeight + (1 - this.smoothWeight) * d;
-        newLine.y[index] = smoothed;
-      }
-      last = smoothed;
-    });
-    return newLine;
+    return {
+      ...data,
+      line: {...data.line, color: `rgb(${color[0]},${color[1]},${color[2]})`},
+      legendgroup: data.name,
+      name: `${data.name} (Smoothed)`,
+      showlegend: true,
+      isSmoothed: true,
+      hovertext: data.hovertext ? data.hovertext + '(Smoothed)' : '(Smoothed)',
+      hoverinfo: 'all',
+      y: data.y.map((d ) => {
+        if (!isFinite(last)) {
+          return null;
+        } else {
+          // 1st-order IIR low-pass filter to attenuate the higher-
+          // frequency components of the time-series.
+          last = last * this.smoothWeight + (1 - this.smoothWeight) * d;
+          return last;
+        }
+      })
+    } as ExtData;
   }
 
   private initColorSubscription(forceRedraw = false) {
@@ -692,6 +719,17 @@ export class SingleGraphComponent extends PlotlyGraphBase {
     };
   }
 
+  getToggleRatioIcon() {
+    return {
+      width:500,
+      height: 500,
+      fill: 'rgb(77, 102, 255)',
+      path: 'M419.3,256.4H373v69.9h-69.9v46.3h116.2V256.4z M139.8,186.5h69.9v-46.3h-117v116.2H139v-69.9H139.8z M465.7,46.7H46.3C20.6,46.7,0,68,0,93.1V419c0,25.7,20.6,46.3,46.3,46.3h419.3c25.7,0,46.3-21.3,46.3-46.3V93.1C512,68,491.4,46.7,465.7,46.7z M465.7,419.7H46.3V93.1h419.3v326.6H465.7z',
+      ascent: 300,
+      descent: 0,
+      transform: 'translate(0, -50)'
+    };
+  }
   getMaximizeIcon() {
     return {
       width: 1000,
@@ -742,6 +780,10 @@ export class SingleGraphComponent extends PlotlyGraphBase {
 
   private getHideButtonTitle() {
     return this.chartElm.layout?.showlegend ? 'Show legend' : 'Hide legend';
+  }
+
+  private getLockRatioTitle() {
+    return this.ratio ? 'Original Layout' : 'Auto Layout';
   }
 
   validateResize($event: ResizeEvent): boolean {

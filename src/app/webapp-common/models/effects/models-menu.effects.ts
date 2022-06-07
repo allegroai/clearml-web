@@ -44,11 +44,11 @@ export class ModelsMenuEffects {
     ofType(menuActions.publishModelClicked),
     withLatestFrom(this.store.select(selectSelectedModel)),
     switchMap(([action, selectedModel]) => {
-      const ids = action.selectedModels.map(model => model.id);
+      const ids = action.selectedEntities.map(model => model.id);
       return this.apiModels.modelsPublishMany({ids})
           .pipe(
             mergeMap(res => this.updateModelsSuccess(action, MenuItems.publish, ids, selectedModel, res, {ready: true})),
-            catchError(error => this.publishModelFailedText(error, action.selectedModels).pipe(
+            catchError(error => this.publishModelFailedText(error, action.selectedEntities).pipe(
               mergeMap(errorMessage => [
                 requestFailed(error),
                 deactivateLoader(action.type),
@@ -79,7 +79,7 @@ export class ModelsMenuEffects {
               selectedModel ? new infoActions.SetModel(selectedModel) : new EmptyAction(),
               deactivateLoader(action.type)
             ]),
-            catchError(error => [requestFailed(error), deactivateLoader(action.type)])
+            catchError(error => [requestFailed(error), deactivateLoader(action.type), setServerError(error, null, 'Failed to Move model')])
           )
       }
     )
@@ -153,12 +153,7 @@ export class ModelsMenuEffects {
       this.store.select(selectRouterParams),
       this.store.select(selectSelectedTableModel)
     ),
-    tap(([action, routerParams, selectedModel]) => {
-      if (this.isSelectedModelInCheckedModels(action.selectedEntities, selectedModel)) {
-        this.router.navigate([`projects/${routerParams.projectId}/models/`]);
-      }
-    }),
-    switchMap(([action, routerParams]) => this.apiModels.modelsArchiveMany({ids: action.selectedEntities.map((model) => model.id)})
+    switchMap(([action, routerParams, selectedTableModel]) => this.apiModels.modelsArchiveMany({ids: action.selectedEntities.map((model) => model.id)})
       .pipe(
         withLatestFrom(this.store.select(selectRouterConfig)),
         mergeMap(([res, routerConfig]: [ModelsArchiveManyResponse, RouterState['config']]) => {
@@ -184,6 +179,9 @@ export class ModelsMenuEffects {
               viewActions.removeModels({modelIds: successModels}),
               viewActions.fetchModelsRequested()
             ]);
+          }
+          if (this.isSelectedModelInCheckedModels(action.selectedEntities, selectedTableModel)) {
+            actions.push(viewActions.selectNextModel());
           }
           return actions;
         }),

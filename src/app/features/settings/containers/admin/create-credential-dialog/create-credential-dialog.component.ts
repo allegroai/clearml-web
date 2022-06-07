@@ -1,7 +1,7 @@
 import {Component, Inject} from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import {Store} from '@ngrx/store';
-import {createCredential} from '@common/core/actions/common-auth.actions';
+import {updateCredentialLabel} from '@common/core/actions/common-auth.actions';
 import {OrganizationGetUserCompaniesResponseCompanies} from '~/business-logic/model/organization/organizationGetUserCompaniesResponseCompanies';
 import {Observable} from 'rxjs';
 import {CredentialKeyExt, selectNewCredential} from '@common/core/reducers/common-auth-reducer';
@@ -21,7 +21,7 @@ import {CredentialKeyExt, selectNewCredential} from '@common/core/reducers/commo
     this.newCredential$ = this.store.select(selectNewCredential);
   }
 
-  onCreateCredentials({label}) {
-    this.store.dispatch(createCredential({workspace: this.data.workspace, label}));
+  updateLabel({credential, label}) {
+    this.store.dispatch(updateCredentialLabel({credential, label}));
   }
 }

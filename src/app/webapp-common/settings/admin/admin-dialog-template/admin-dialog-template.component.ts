@@ -1,8 +1,8 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {guessAPIServerURL, HTTP} from '../../../../app.constants';
 import {CredentialKeyExt} from '../../../core/reducers/common-auth-reducer';
-import {MatDialogRef} from '@angular/material/dialog';
-import {CreateCredentialDialogComponent} from '../../../../features/settings/containers/admin/create-credential-dialog/create-credential-dialog.component';
+import {ConfigurationService} from '../../../shared/services/configuration.service';
+
 
 @Component({
   selector: 'sm-admin-dialog-template',
@@ -10,10 +10,9 @@ import {CreateCredentialDialogComponent} from '../../../../features/settings/con
   styleUrls: ['./admin-dialog-template.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AdminDialogTemplateComponent {
+export class AdminDialogTemplateComponent implements OnInit{
   public clipboardText: string;
   public label: string;
-  public credentialsCreated: boolean;
 
   API_BASE_URL = HTTP.API_BASE_URL_NO_VERSION;
   fileBaseUrl = HTTP.FILE_BASE_URL;
@@ -21,20 +20,21 @@ export class AdminDialogTemplateComponent {
 
   @Input() newCredential: CredentialKeyExt;
 
-  @Output() onCreateCredentials = new EventEmitter<{label: string}>();
+  @Output() updateLabel = new EventEmitter<{ credential: CredentialKeyExt; label: string }>();
+  public displayedServerUrls: { apiServer?: string; filesServer?: string };
 
-  constructor(private dialog: MatDialogRef<CreateCredentialDialogComponent>) {
+  constructor(private configService: ConfigurationService) {
     if (this.API_BASE_URL === '/api') {
       this.API_BASE_URL = guessAPIServerURL();
     }
   }
 
-  createCredentials() {
-    this.credentialsCreated = true;
-    this.onCreateCredentials.emit({label: this.label});
+  onUpdateLabel() {
+    this.updateLabel.emit({credential: this.newCredential, label: this.label});
   }
 
-  close() {
-    this.dialog.close();
+  ngOnInit(): void {
+    this.displayedServerUrls = this.configService.getStaticEnvironment().displayedServerUrls;
+
   }
 }

@@ -24,11 +24,22 @@
     z-index: 20;
   }
 
+  ::ng-deep .p-datatable-wrapper {
+    position: relative;
+    &>.p-datatable-table {
+      height: 100%;
+    }
+    .p-datatable-tbody {
+    height: calc(100% - 48px);
+    }
+  }
+
   .table-header {
     padding: 0 24px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    box-shadow: 0 0 12px 6px rgba($blue-700, 0.9);
   }
 
   .table-header-title {
@@ -78,18 +89,16 @@
 
   .no-data {
     text-align: center;
+    white-space: nowrap;
     padding: 15px 0 10px 0;
     font-size: 14px;
     width: 120px;
   }
 
-  tr {
-    transition: height 0.5s cubic-bezier(.55,.06,.68,.19);
-
+  tr:not(.cards-table) {
     &:not(.no-data-row):not(.load-more-wrapper) {
       border-bottom: 1px solid $blue-600;
     }
-
     &:hover:not(.header):not(.selected):not(.no-data-row):not(.simple):not(.load-more-wrapper) {
       background-color: $blue-650;
       border-bottom: 1px solid $blue-600;
@@ -116,7 +125,10 @@
         background-color: $blue-480;
       }
     }
+  }
 
+  tr {
+    transition: height 0.5s linear;
 
     &.header {
       height: 48px;
@@ -190,10 +202,46 @@
         background-color: $blue-570;
       }
     }
+
+    &.cards-table {
+
+      td {
+        margin: 6px 16px;
+        border: 1px solid $dark-border;
+        border-radius: 4px;
+      }
+
+      &:first-child {
+        margin-top: 6px;
+      }
+
+      &:hover:not(.selected):not(.simple) td {
+        background-color: $blue-650;
+      }
+      &.selected {
+        td {
+          background-color: $blue-400;
+        }
+        &:hover td{
+          background-color: $blue-480;
+        }
+      }
+      &.checked:not(.selected):not(.simple) {
+        td {
+          background-color: $blue-500;
+        }
+
+        &:hover, &.contexted {
+          td {
+            background-color: $blue-550;
+          }
+        }
+      }
+    }
   }
 
   :host-context(.light-theme) {
-    tr {
+    tr:not(.cards-table) {
       &:not(.no-data-row):not(.load-more-wrapper) {
         border-bottom: 1px solid $blue-50;
       }

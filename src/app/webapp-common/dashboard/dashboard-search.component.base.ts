@@ -1,26 +1,26 @@
 import {InitSearch, ResetSearch} from '../common-search/common-search.actions';
 import {skip} from 'rxjs/operators';
-import {Model} from '../../business-logic/model/models/model';
+import {Model} from '~/business-logic/model/models/model';
 import {SearchDeactivate, searchStart} from '../dashboard-search/dashboard-search.actions';
 import {IRecentTask} from './common-dashboard.reducer';
-import {ITask} from '../../business-logic/model/al-task';
+import {ITask} from '~/business-logic/model/al-task';
 import {Observable} from 'rxjs';
 import {ICommonSearchState, selectSearchQuery} from '../common-search/common-search.reducer';
 import {Store} from '@ngrx/store';
 import {
-  selectActiveSearch, selectExperimentsResults, selectModelsResults, selectProjectsResults,
+  selectActiveSearch, selectExperimentsResults, selectModelsResults, selectPipelinesResults, selectProjectsResults,
   selectResultsCounter,
   selectSearchTerm
 } from '../dashboard-search/dashboard-search.reducer';
-import {Project} from '../../business-logic/model/projects/project';
+import {Project} from '~/business-logic/model/projects/project';
 import {setSelectedProjectId} from '../core/actions/projects.actions';
 import {isExample} from '../shared/utils/shared-utils';
+import {ActiveSearchLink} from '~/features/dashboard/containers/dashboard-search/dashboard-search.component';
 
 export abstract class DashboardSearchComponentBase {
-
   abstract store;
   abstract router;
-  public activeLink: string = 'projects';
+  public activeLink = 'projects' as ActiveSearchLink;
   private searchSubs;
   public searchQuery$: Observable<ICommonSearchState['searchQuery']>;
   public activeSearch$: Observable<boolean>;
@@ -29,12 +29,14 @@ export abstract class DashboardSearchComponentBase {
   public projectsResults$: Observable<Array<Project>>;
   public experimentsResults$: Observable<any>;
   public searchTerm$: Observable<ICommonSearchState['searchQuery']>;
+  public pipelinesResults$: Observable<Project[]>;
 
   constructor(store: Store<any>){
     this.searchQuery$        = store.select(selectSearchQuery);
     this.activeSearch$       = store.select(selectActiveSearch);
     this.resultsCounter$     = store.select(selectResultsCounter);
     this.modelsResults$      = store.select(selectModelsResults);
+    this.pipelinesResults$   = store.select(selectPipelinesResults);
     this.projectsResults$    = store.select(selectProjectsResults);
     this.experimentsResults$ = store.select(selectExperimentsResults);
     this.searchTerm$         = store.select(selectSearchTerm);
@@ -73,6 +75,10 @@ export abstract class DashboardSearchComponentBase {
     this.router.navigateByUrl(`projects/${project.id}`);
     this.store.dispatch(setSelectedProjectId({projectId: project.id, example: isExample(project)}));
   }
+  pipelineSelected(project: Project) {
+    this.router.navigateByUrl(`pipelines/${project.id}/experiments`);
+    this.store.dispatch(setSelectedProjectId({projectId: project.id, example: isExample(project)}));
+  }
 
   public taskSelected(task: IRecentTask | ITask) {
     // TODO ADD task.id to route
@@ -85,7 +91,7 @@ export abstract class DashboardSearchComponentBase {
     this.activeLink = activeLink;
   }
 
-  setFirstActiveLink(allResults, tabsIndexes: string[]) {
+  setFirstActiveLink(allResults, tabsIndexes) {
     if (!(allResults[tabsIndexes.indexOf(this.activeLink)].length > 0)) {
       const firstTabIndex = allResults.findIndex(list => list.length > 0);
       if (firstTabIndex > -1) {

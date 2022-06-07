@@ -22,21 +22,23 @@
         <cdk-virtual-scroll-viewport #virtualScrollRef class="virtual-scroll-container" [class.is-not-origin]="i > 0" itemSize="28" minBufferPx="280" maxBufferPx="560">
           <ng-container *cdkVirtualFor="let node of dataSource; let i = index">
             <div class="node" [class.parent]="node.hasChildren">
-              <div *ngIf="node.hasChildren" class="section" [ngClass]="'depth-' + node.level">
+              <div *ngIf="node.hasChildren" class="section" [ngClass]="'depth-' + node.level" (mouseenter)="rowHovered(node.data?.path)">
                 <div class="content"
                      (click)="toggleNode(node)"
                      [ngClass]="node?.data?.classStyle"
                      [class.selected-diff]="checkIfSelectedPath(node.data)"
+                     [class.hovered]="checkIfHoveredPath(node.data)"
                      [class.identical-row]="!allPaths[node.data.path]">
                   <i class="fas" [style.margin-left.px]="2 + node.level * 20" [ngClass]="treeControl.isExpanded(node) ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
                   <span class="title-key" [class.ellipsis]="showEllipsis">{{(renameMap[node.data.key] || node.data.key)}}</span>
                 </div>
               </div>
-              <div *ngIf="!node.hasChildren" class="section" (click)="keyClicked(node.data)">
+              <div *ngIf="!node.hasChildren" class="section" (click)="keyClicked(node.data)" (mouseenter)="rowHovered(node.data?.path)">
                 <div [style.padding-left.px]="2 + node.level * 20" [ngClass]="{
                   'node-item-container': true,
                   'identical-row': checkIfIdenticalRow(node.data),
                   'selected-diff': checkIfSelectedPath(node.data),
+                  'hovered': checkIfHoveredPath(node.data),
                   'not-existing-on-origin': !node.data.existOnOrigin,
                   'not-existing-on-compared': !node.data.existOnCompared,
                   'diff-row': !node.data.isValueEqualToOrigin,
@@ -50,7 +52,7 @@
                     >{{node.data.key}}<i  class="al-icon sm al-ico-line-expand extend-toggle" [class.fa-rotate-180]="!showEllipsis" (click)="toggleEllipsis(); $event.stopPropagation()"></i>
                     </pre>
                     <pre class="node-val"
-                         [style.width]="showEllipsis ? (section.clientWidth - 250) + 'px' : null"
+                         [style.width]="showEllipsis ? (section.clientWidth - 320) + 'px' : null"
                          [class.no-ellipsis]="node.data.value.length < 15"
                          [class.ellipsis]="showEllipsis">{{node.data.value}}<i  class="al-icon sm al-ico-line-expand extend-toggle" [class.fa-rotate-180]="!showEllipsis" (click)="toggleEllipsis(); $event.stopPropagation()"></i>
                     </pre>

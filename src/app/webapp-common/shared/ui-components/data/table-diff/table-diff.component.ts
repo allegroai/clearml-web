@@ -4,10 +4,10 @@ import {
   ContentChild,
   EventEmitter,
   Input,
-  OnInit,
   Output,
   TemplateRef
 } from '@angular/core';
+import { trackByIndex } from '@common/shared/utils/forms-track-by';
 
 export interface IKeyValue {
   key: string;
@@ -28,21 +28,19 @@ export interface ITableDiffSortBy {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 
-export class TableDiffComponent implements OnInit {
+export class TableDiffComponent {
   @Input() keyTitle: string;
   @Input() valueTitle: string;
   @Input() keyValueArray: Array<IKeyValue>;
   @Input() isOrigin = false;
   @Input() sortConfig: ITableDiffSortBy;
+  @Input() hoveredRow: string;
 
+  @Output() rowHovered = new EventEmitter<string>();
   @Output() sortByChanged = new EventEmitter<ITableDiffSortBy>();
   @ContentChild(TemplateRef) templateRef: TemplateRef<any>;
 
-  constructor() {
-  }
-
-  ngOnInit() {
-  }
+  trackByIndex = trackByIndex;
 
   sortByClicked(sortBy) {
     this.sortByChanged.emit({ keyOrValue: sortBy, order: this.toggleSortOrder(this.sortConfig.order), keyValueArray: this.keyValueArray });

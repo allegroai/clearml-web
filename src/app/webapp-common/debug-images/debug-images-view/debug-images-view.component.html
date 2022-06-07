@@ -4,12 +4,12 @@
     <mat-panel-title> {{iteration.iter}}</mat-panel-title>
   </mat-expansion-panel-header>
   <ng-template matExpansionPanelContent>
-    <div class="d-flex justify-content flex-wrap">
+    <div class="d-flex justify-content flex-wrap sample-row">
       <sm-debug-image-snippet
         *ngFor="let frame of iteration.events; trackBy:trackFrame"
         [frame]="frame"
-        (imageError)="imageUrlError({frame: frame, experimentId: experimentId})"
-        (imageClicked)="imageClicked.emit({frame: frame, snippetKey: frame.key, frames: iterationEvents})">
+        (imageError)="imageUrlError({frame, experimentId})"
+        (imageClicked)="imageClicked.emit({frame})">
       </sm-debug-image-snippet>
     </div>
   </ng-template>

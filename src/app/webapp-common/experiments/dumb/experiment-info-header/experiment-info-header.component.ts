@@ -26,6 +26,7 @@ import {
   selectionDisabledReset,
   selectionDisabledViewWorker
 } from '@common/shared/entity-page/items.utils';
+import {addMessage} from '../../../core/actions/layout.actions';
 
 @Component({
   selector: 'sm-experiment-info-header',
@@ -51,10 +52,12 @@ export class ExperimentInfoHeaderComponent implements OnDestroy {
   @Input() infoData;
   @Input() backdropActive = false;
   @Input() showMenu: boolean;
-  @Input() showMinimize: boolean;
+  @Input() minimized: boolean;
   @Input() isSharedAndNotOwner: boolean;
   @Output() experimentNameChanged = new EventEmitter<string>();
   @Output() minimizeClicked = new EventEmitter();
+  @Output() closeInfoClicked       = new EventEmitter();
+  @Output() maximizedClicked       = new EventEmitter();
   @ViewChild('tagMenu') tagMenu: MenuComponent;
   @ViewChild('tagsMenuContent') tagMenuContent: TagsMenuComponent;
 
@@ -150,4 +153,7 @@ export class ExperimentInfoHeaderComponent implements OnDestroy {
     this.store.dispatch(new ActivateEdit(EXPERIMENT_COMMENT));
   }
 
+  copyToClipboard() {
+    this.store.dispatch(addMessage('success', 'Copied to clipboard'));
+  }
 }

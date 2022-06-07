@@ -9,17 +9,26 @@
     </sm-experiment-compare-general-data>
   </div>
   <div class="tree-card-body" smSyncScroll *compareCardBody="let experiment; let i = index;">
-    <div *ngFor="let node of comparedTasks[i]" class="node" [ngClass]="node?.metaData?.classStyle">
-      <div class="content" (click)="collapsedToggled(node)">
-        <i class="fas" [style.margin-left.px]="2 + node.level * 20" [ngClass]="realIsNodeOpen(node) ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
-        {{node.data.key}}
+    <div *ngFor="let node of comparedTasks[i]"
+         class="node"
+         [ngClass]="node?.metaData?.classStyle"
+         [class.hovered]="!hoveredTable && hoveredRow === node.data.key"
+         (mouseenter)="onRowHovered(node.data?.key, null)">
+      <div class="content"
+           (click)="collapsedToggled(node)"
+           (mouseenter)="onRowHovered(node.data?.key, null)">
+        <i class="node-chevron fas" [style.margin-left.px]="2 + node.level * 20" [ngClass]="realIsNodeOpen(node) ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
+        <span class="node-key">{{node.data.key}}</span>
       </div>
       <al-table-diff *ngIf="realIsNodeOpen(node)"
                      [valueTitle]="valuesMode.name | uppercase" keyTitle="VARIANT"
                      [isOrigin]="i===0"
-                     (sortByChanged)="metricSortChanged($event,node.data)"
                      [sortConfig]="(sortOrder$| async)[node.data.key] || {order:'asc', keyOrValue: 'key'}"
-                     [keyValueArray]="node.data | getKeyValueArrayPipe:allKeysEmptyObject:(sortOrder$| async)[node.data.key]:valuesMode.key">
+                     [keyValueArray]="node.data | getKeyValueArrayPipe:allKeysEmptyObject:(sortOrder$| async)[node.data.key]:valuesMode.key"
+                     [hoveredRow]="hoveredTable === node.data.key && hoveredRow"
+                     (sortByChanged)="metricSortChanged($event,node.data)"
+                     (rowHovered)="onRowHovered($event, node.data.key)"
+      >
         <ng-template
           let-metricValue>
           {{metricValue}}

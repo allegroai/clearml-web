@@ -1,33 +1,59 @@
-import {NgModule} from '@angular/core';
+import {InjectionToken, NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {PipelinesPageComponent} from './pipelines-page/pipelines-page.component';
-import {PipelineCardComponent} from './pipeline-card/pipeline-card.component';
 import {UiComponentsModule} from '@common/shared/ui-components/ui-components.module';
 import {SMSharedModule} from '@common/shared/shared.module';
-import {PipelineCardMenuComponent} from './pipeline-card-menu/pipeline-card-menu.component';
 import {CommonProjectsModule} from '@common/projects/common-projects.module';
-import {StoreModule} from '@ngrx/store';
-import {projectsReducer} from '~/features/projects/projects.reducer';
+import {StoreConfig, StoreModule} from '@ngrx/store';
+import {IProjectsState, projectsReducer} from '~/features/projects/projects.reducer';
 import {RouterModule, Routes} from '@angular/router';
+import {ProjectsSharedModule} from '~/features/projects/shared/projects-shared.module';
+import {merge} from 'lodash/fp';
 
 export const routes: Routes = [
   { path: '', component: PipelinesPageComponent }
 ];
 
+export const pipelinesSyncedKeys = [
+  'projects.showPipelineExamples',
+];
+
+export const PIPELINES_CONFIG_TOKEN =
+  new InjectionToken<StoreConfig<IProjectsState , any>>('PipelineConfigToken');
+
+const localStorageKey = '_saved_pipeline_state_';
+
+const getPipelineConfig = () => ({
+  metaReducers: [reducer => {
+    let onInit = true;
+    return (state, action) => {
+      const nextState = reducer(state, action);
+      if (onInit) {
+        onInit = false;
+        const savedState = JSON.parse(localStorage.getItem(localStorageKey));
+        return merge(nextState, savedState);
+      }
+      return nextState;
+    };
+  }]
+});
+
 
 @NgModule({
   declarations: [
     PipelinesPageComponent,
-    PipelineCardComponent,
-    PipelineCardMenuComponent,
   ],
   imports: [
     CommonModule,
     UiComponentsModule,
     SMSharedModule,
     CommonProjectsModule,
-    StoreModule.forFeature('projects', projectsReducer),
+    ProjectsSharedModule,
+    StoreModule.forFeature('projects', projectsReducer, PIPELINES_CONFIG_TOKEN),
     RouterModule.forChild(routes)
+  ],
+  providers: [
+    {provide: PIPELINES_CONFIG_TOKEN, useFactory: getPipelineConfig}
   ]
 })
 export class PipelinesModule { }

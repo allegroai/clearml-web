@@ -91,6 +91,11 @@
   <sm-labeled-row label="PROJECT:">
     {{experiment?.project?.name | NA}}
   </sm-labeled-row>
+
+  <sm-labeled-row label="ID:">
+    {{experiment?.id | NA}}
+  </sm-labeled-row>
+
   <ng-container *ngFor="let runtimeItem of $any(experiment?.runtime) | keyvalue | filterInternal ">
     <sm-labeled-row [label]="runtimeItem.key">
       {{runtimeItem.value}}

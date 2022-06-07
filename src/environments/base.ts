@@ -23,6 +23,7 @@ export interface Environment {
   production: boolean;
   apiBaseUrl: string;
   fileBaseUrl: string;
+  displayedServerUrls?: {apiServer?: string, filesServer?: string};
   productName: string;
   demo: boolean;
   headerPrefix: string;

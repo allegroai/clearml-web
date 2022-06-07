@@ -20,6 +20,7 @@ import {
   fetchModelsRequested,
   modelSelectionChanged,
   setSelectedModels,
+  setTableMode
 } from '../../actions/models-view.actions';
 import {SelectedModel} from '../../shared/models.model';
 import {CommonDeleteDialogComponent} from '@common/shared/entity-page/entity-delete/common-delete-dialog.component';
@@ -112,7 +113,7 @@ export class ModelMenuComponent extends BaseContextMenuComponent {
   }
 
   publishModel(selectedModels: SelectedModel[]) {
-    this.store.dispatch(publishModelClicked({selectedModels}));
+    this.store.dispatch(publishModelClicked({selectedEntities: selectedModels}));
   }
 
   public moveToProjectPopup() {
@@ -181,6 +182,7 @@ export class ModelMenuComponent extends BaseContextMenuComponent {
   }
 
   toggleDetails () {
+    this.store.dispatch(setTableMode({mode:'info'}));
     this.store.dispatch(modelSelectionChanged({
       model: this._model,
       project: this.projectId

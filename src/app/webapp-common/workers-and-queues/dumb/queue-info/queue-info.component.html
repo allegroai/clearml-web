@@ -53,23 +53,22 @@
   <sm-menu-item itemLabel="Move to top"
                 [disabled]="selectedQueue.entries.length <= 0"
                 (itemClicked)="moveToTop()"
-                iconClass="al-icon al-ico-arrow-to-top al-color light-periwinkle-two sm mr-2">
+                iconClass="al-icon al-ico-arrow-to-top al-color light-periwinkle-two">
   </sm-menu-item>
   <sm-menu-item itemLabel="Move to bottom"
                 [disabled]="selectedQueue.entries.length <= 0"
                 (itemClicked)="moveToBottom()"
-                iconClass="sm mr-2 al-icon al-ico-arrow-to-bottom al-color light-periwinkle-two">
+                iconClass="al-icon al-ico-arrow-to-bottom al-color light-periwinkle-two">
   </sm-menu-item>
   <sm-menu-item itemLabel="Move to queue..."
                 [disabled]="selectedQueue.entries.length <= 0"
                 (itemClicked)="moveToQueue()"
-                iconClass="sm mr-2 al-icon al-ico-arrow-from-left al-color light-periwinkle-two">
+                iconClass="al-icon al-ico-arrow-from-left al-color light-periwinkle-two">
   </sm-menu-item>
   <sm-menu-item itemLabel="Remove from queue"
                 [disabled]="selectedQueue.entries.length <= 0"
                 (itemClicked)="removeFromQueue()"
-                [iconFontSize]="12"
-                iconClass="fas fa-trash">
+                iconClass="al-icon al-ico-trash">
   </sm-menu-item>
 
 </sm-menu>

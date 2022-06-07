@@ -28,7 +28,7 @@ import {
   distinctUntilKeyChanged,
   filter,
   map,
-  skip,
+  skip, tap,
   withLatestFrom
 } from 'rxjs/operators';
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
@@ -86,22 +86,24 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
   public projectsSortOrder$: Observable<1 | -1>;
   public searching: boolean;
   public selectedProjectId$: Observable<string>;
+  public allExamples: boolean;
   /* eslint-enable @typescript-eslint/naming-convention */
   private searchSubs: Subscription;
   private projectReadyForDeletion$: Observable<CommonProjectReadyForDeletion>;
   private projectReadyForDeletionSub: Subscription;
   private readonly searchQuery$: Observable<ICommonSearchState['searchQuery']>;
   private projectDialog: MatDialogRef<ProjectDialogComponent, any>;
-  private showOnlyUserWorkSub$: Subscription;
+  private showOnlyUserWorkSub: Subscription;
   private selectedProjectSub: Subscription;
   private selectedProject$: Observable<Project>;
   private selectedProjectIdSub: Subscription;
+  private projectId: string;
 
   constructor(
     protected store: Store<any>,
     protected router: Router,
     protected route: ActivatedRoute,
-    private dialog: MatDialog
+    protected dialog: MatDialog
   ) {
     this.searchQuery$ = this.store.select(selectSearchQuery);
     this.projectsOrderBy$ = this.store.select(selectProjectsOrderBy);
@@ -122,6 +124,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
       withLatestFrom(this.selectedProjectId$, this.searchQuery$),
       map(([[projectsList, selectedProject], selectedProjectId, searchQuery]) => {
         this.searching = searchQuery?.query.length > 0;
+        this.allExamples = projectsList?.length > 0 && projectsList?.every(project => isExample(project));
         if (projectsList === null) {
           return null;
         }
@@ -155,6 +158,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
     this.store.dispatch(getAllProjectsPageProjects({}));
 
     this.selectedProjectIdSub = this.selectedProjectId$.pipe(
+      tap(projectId => this.projectId = projectId),
       filter(projectId => !projectId),
       distinctUntilChanged(),
     ).subscribe(() => {
@@ -170,10 +174,12 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
       this.store.dispatch(resetProjectsSearchQuery());
       this.store.dispatch(getAllProjectsPageProjects({}));
     });
-    this.showOnlyUserWorkSub$ = this.store.select(selectShowOnlyUserWork).pipe(skip(1)).subscribe(() => {
-      this.store.dispatch(resetProjectsSearchQuery());
-      this.store.dispatch(getAllProjectsPageProjects({}));
-    });
+    this.showOnlyUserWorkSub = this.store.select(selectShowOnlyUserWork)
+      .pipe(skip(1))
+      .subscribe(() => {
+        this.store.dispatch(resetProjectsSearchQuery());
+        this.store.dispatch(getAllProjectsPageProjects({}));
+      });
 
     this.projectReadyForDeletionSub = this.projectReadyForDeletion$.subscribe(readyForDeletion => {
       if (isDeletableProject(readyForDeletion)) {
@@ -184,13 +190,22 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
     });
   }
 
+  protected getDeletePopupEntitiesList() {
+    return getDeletePopupEntitiesList();
+  }
+
   private showConfirmDialog(readyForDeletion: CommonProjectReadyForDeletion) {
+    const name = this.getName();
     const confirmDialogRef: MatDialogRef<any, boolean> = this.dialog.open(ConfirmDialogComponent, {
       data: {
-        title: `Unable to Delete Project`,
-        body: `You cannot delete project "<b>${readyForDeletion.project.name}</b>" with un-archived ${getDeletePopupEntitiesList()}. <br/>
-                   You have: ${getDeleteProjectPopupStatsBreakdown(readyForDeletion, 'unarchived')} in this project. <br/>
-                   If you wish to delete this project, you must archive, delete, or move these items to another project.`,
+        title: `Unable to Delete ${name[0].toUpperCase()}${name.slice(1)}`,
+        body: `You cannot delete ${name} "<b>${readyForDeletion.project.name}</b>" with un-archived ${this.getDeletePopupEntitiesList()}. <br/>
+                   You have: ${getDeleteProjectPopupStatsBreakdown(
+                     readyForDeletion,
+          'unarchived',
+                    name === 'project' ? 'experiments' : 'runs'
+          )} in this ${name}. <br/>
+                   If you wish to delete this ${name}, you must archive${name === 'project' ? ', delete, or move': ' or delete'} these items to another ${name}.`,
         no: 'OK',
         iconClass: 'i-alert',
       }
@@ -223,7 +238,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.stopSyncSearch();
     this.projectReadyForDeletionSub.unsubscribe();
-    this.showOnlyUserWorkSub$.unsubscribe();
+    this.showOnlyUserWorkSub.unsubscribe();
     this.selectedProjectSub.unsubscribe();
     this.selectedProjectIdSub.unsubscribe();
     this.store.dispatch(resetReadyToDelete());
@@ -237,7 +252,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
 
 
   syncAppSearch() {
-    this.store.dispatch(new InitSearch(`Search for ${this.getName()}`));
+    this.store.dispatch(new InitSearch(`Search for ${this.getName()}s`));
     this.searchSubs = this.searchQuery$.pipe(skip(1)).subscribe(query => this.search(query));
   }
 
@@ -272,7 +287,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
   }
 
 
-  openProjectDialog(projectId?: string, mode?: string) {
+  openProjectDialog(mode?: string, projectId?: string) {
     this.projectDialog = this.dialog.open(ProjectDialogComponent, {
       data: {
         mode,
@@ -288,7 +303,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
     });
   }
 
-  protected getName() {
-    return 'projects';
+  protected getName(): string {
+    return 'project';
   }
 }

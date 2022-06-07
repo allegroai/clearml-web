@@ -6,7 +6,7 @@ import {
   resetProjectsSearchQuery, resetReadyToDelete,
   setCurrentScrollId, setNoMoreProjects, setProjectReadyForDeletion, setProjectsOrderBy,
   setProjectsSearchQuery,
-  setTableModeAwareness,
+  setTableModeAwareness, showExamplePipelines,
   updateProjectSuccess
 } from './common-projects.actions';
 import {ICommonSearchState} from '../common-search/common-search.reducer';
@@ -29,6 +29,7 @@ export interface ICommonProjectsState {
   noMoreProjects: boolean;
   scrollId: string;
   tableModeAwareness: boolean;
+  showPipelineExamples: boolean;
 }
 
 export const commonProjectsInitState: ICommonProjectsState = {
@@ -47,6 +48,7 @@ export const commonProjectsInitState: ICommonProjectsState = {
   noMoreProjects: true,
   scrollId: null,
   tableModeAwareness: true,
+  showPipelineExamples: false,
 };
 
 const getCorrectSortingOrder = (currentSortOrder: TableSortOrderEnum, currentOrderField: string, nextOrderField: string) => {
@@ -91,8 +93,11 @@ export const commonProjectsReducers = [
     }
   })),
   on(resetReadyToDelete, state => ({...state, projectReadyForDeletion: commonProjectsInitState.projectReadyForDeletion})),
-  on(setProjectReadyForDeletion, (state, action) => ({...state, projectReadyForDeletion: {...state.projectReadyForDeletion, ...action.readyForDeletion}})),
-  on(setTableModeAwareness, (state, action) => ({...state, tableModeAwareness: (action as ReturnType<typeof setTableModeAwareness>).awareness})),
+  on(setProjectReadyForDeletion, (state, action) =>
+    ({...state, projectReadyForDeletion: {...state.projectReadyForDeletion, ...action.readyForDeletion}})),
+  on(setTableModeAwareness, (state, action) =>
+    ({...state, tableModeAwareness: (action as ReturnType<typeof setTableModeAwareness>).awareness})),
+  on(showExamplePipelines, state => ({...state, showPipelineExamples: true})),
 ] as ReducerTypes<ICommonProjectsState, any>[];
 export const commonProjectsReducer = createReducer(commonProjectsInitState, ...commonProjectsReducers);
 
@@ -110,3 +115,4 @@ export const selectProjectForDelete = createSelector(projects, state => [state?.
 export const selectNoMoreProjects = createSelector(projects, state => state.noMoreProjects);
 export const selectProjectsScrollId = createSelector(projects, (state): string => state?.scrollId || null);
 export const selectTableModeAwareness = createSelector(projects, state => state?.tableModeAwareness);
+export const selectShowPipelineExamples = createSelector(projects, state => state?.showPipelineExamples);

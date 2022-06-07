@@ -53,6 +53,8 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
   public experiments = [];
   private taskIds: string;
   public valuesMode: ValueMode;
+  public hoveredRow: string;
+  public hoveredTable: string;
 
   constructor(
     private router: Router,
@@ -149,6 +151,7 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
     } else {
       this.paths = this.paths.filter(path => path !== node.data.key);
     }
+    this.hoveredRow = node.data.key;
   }
 
   metricSortChanged(event, nodeData) {
@@ -193,5 +196,10 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
 
   copyIdToClipboard() {
     this.store.dispatch(addMessage('success', 'Copied to clipboard'));
+  }
+
+  onRowHovered(tableKey: string, tableName: string) {
+    this.hoveredRow = tableKey;
+    this.hoveredTable = tableName;
   }
 }

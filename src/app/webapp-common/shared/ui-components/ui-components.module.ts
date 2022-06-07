@@ -108,8 +108,9 @@ import {CheckboxThreeStateListComponent} from './panel/checkbox-three-state-list
 import {TemplateAliasDirective} from './directives/template-alias.directive';
 import {ShowTooltipIfEllipsisDirective} from './indicators/tooltip/show-tooltip-if-ellipsis.directive';
 import {MatTooltipModule} from '@angular/material/tooltip';
-import { CodeEditorComponent } from './data/code-editor/code-editor.component';
+import {CodeEditorComponent} from './data/code-editor/code-editor.component';
 import {AppendComponentOnTopElementDirective} from '@common/shared/directive/append-component-on-top-element.directive';
+import {EditCredentialLabelDialogComponent} from '@common/shared/ui-components/overlay/edit-credential-label-dialog/edit-credential-label-dialog.component';
 
 const declarations = [
   DurationInputComponent,
@@ -187,6 +188,7 @@ const declarations = [
   CirclesInRowComponent,
   OverflowsDirective,
   AppendComponentOnTopElementDirective,
+  EditCredentialLabelDialogComponent
 ];
 
 @NgModule({

@@ -1,6 +1,6 @@
 import {hslToRgb, rgbToHsl} from '../../services/color-hash/color-hash.utils';
 import {Subscription} from 'rxjs';
-import {Input, OnDestroy, Directive} from '@angular/core';
+import {Input, OnDestroy, Component} from '@angular/core';
 import {Config, Frame, Layout, LayoutAxis, Legend, PlotData} from 'plotly.js';
 import {selectScaleFactor} from '@common/core/reducers/view.reducer';
 import {Store} from '@ngrx/store';
@@ -44,20 +44,21 @@ export interface ExtData extends PlotData {
   colorHash: string;
 }
 
-@Directive({
-  selector: 'base-plotly-graph'
+@Component({
+  selector: 'sm-base-plotly-graph',
+  template: ''
 })
-export class PlotlyGraphBase implements OnDestroy {
+export abstract class PlotlyGraphBaseComponent implements OnDestroy {
+  protected sub = new Subscription();
+  protected colorSub: Subscription;
   public isSmooth = false;
-  public colorSub: Subscription;
   public scaleFactor: number;
 
   @Input() isCompare: boolean = false;
-  private scaleSub: Subscription;
 
 
-  constructor(protected store: Store) {
-    this.scaleSub = store.select(selectScaleFactor).subscribe(scaleFactor => this.scaleFactor = scaleFactor);
+  protected constructor(protected store: Store) {
+    this.sub.add(store.select(selectScaleFactor).subscribe(scaleFactor => this.scaleFactor = scaleFactor));
   }
 
   public _reColorTrace(trace: ExtData, newColor: number[]): void {
@@ -109,10 +110,8 @@ export class PlotlyGraphBase implements OnDestroy {
     const duplicateIndexes = filtered.reduce((acc, entry: any) => acc.concat(entry[1]), []);
     const merged = [...duplicateIndexes];
 
-    for (let i = 0; i < merged.length; i++) {
-      const key = merged[i];
+    for (const key of merged) {
       data[key].colorHash = data[key].name;
-
       // Warning: "data[key].task" in compare case. taskId in subplots (multiple plots with same name)
       if (data[key].task || taskId) {
         data[key].name = `${data[key].name}.${(data[key].task || taskId).substring(0, 7)}`;
@@ -129,8 +128,8 @@ export class PlotlyGraphBase implements OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.sub.unsubscribe();
     this.colorSub?.unsubscribe();
-    this.scaleSub?.unsubscribe();
   }
 
 }

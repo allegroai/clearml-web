@@ -1,8 +1,11 @@
+import {TemplateRef} from '@angular/core';
+
 export interface ConfirmDialogConfig {
   width?: number;
   centerText?: boolean;
   title?: string;
   body?: string;
+  template?: TemplateRef<any>;
   reference?: string;
   yes?: string;
   no?: string;

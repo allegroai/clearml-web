@@ -17,6 +17,7 @@ import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import {LoginService} from '~/shared/services/login.service';
 import {selectUserSettingsNotificationPath} from '~/core/reducers/view.reducer';
 import {selectInvitesPending} from '~/core/reducers/users.reducer';
+import {selectShowUserFocus} from '@common/core/reducers/view.reducer';
 
 @Component({
   selector: 'sm-header',
@@ -36,8 +37,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
   public url: Observable<string>;
   public userNotificationPath$: Observable<string>;
   public invitesPending$: Observable<any[]>;
-  private sub = new Subscription();
   public userNotificationPath: string;
+  public showUserFocus$: Observable<boolean>;
+  private sub = new Subscription();
 
   constructor(
     private store: Store<any>,
@@ -52,6 +54,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.user = this.store.select(selectCurrentUser);
     this.sub.add(this.store.select(selectUserSettingsNotificationPath).subscribe(path => this.userNotificationPath = path));
     this.invitesPending$ = this.store.select(selectInvitesPending);
+    this.showUserFocus$ = this.store.select(selectShowUserFocus);
     this.sub.add(this.store.select(selectActiveWorkspace)
       .pipe(filter(workspace => !!workspace))
       .subscribe(workspace => {
@@ -60,15 +63,15 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
     this.sub.add(this.router.events
     .pipe(filter((event) => event instanceof NavigationEnd))
-    .subscribe(() => this.getRotueData()));
+    .subscribe(() => this.getRouteData()));
 
   }
 
   ngOnInit(): void {
-    this.getRotueData();
+    this.getRouteData();
   }
 
-  getRotueData() {
+  getRouteData() {
     this.userFocus = !!this.activeRoute?.firstChild?.snapshot.data?.userFocus;
     this.isDashboard = this.activeRoute?.firstChild?.snapshot.url?.[0]?.path === 'dashboard';
   }
