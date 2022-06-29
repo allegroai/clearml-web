@@ -1,4 +1,15 @@
-import {ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  Output,
+  SimpleChanges
+} from '@angular/core';
 import {combineLatest, Observable, Subscription} from 'rxjs';
 import {select, Store} from '@ngrx/store';
 import {IExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
@@ -21,12 +32,11 @@ import {distinctUntilChanged, filter, map, withLatestFrom} from 'rxjs/operators'
 import {Task} from '~/business-logic/model/tasks/task';
 import {ActivatedRoute} from '@angular/router';
 import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
-import {ImageDisplayerComponent} from '../experiments/dumb/image-displayer/image-displayer.component';
+import {ImageViewerComponent} from '../experiments/dumb/image-viewer/image-viewer.component';
 import {selectSelectedExperiment} from '~/features/experiments/reducers';
 import {TaskMetric} from '~/business-logic/model/events/taskMetric';
 import {get, isEqual} from 'lodash/fp';
 import {ALL_IMAGES} from './debug-images-effects';
-import {MatSelectChange} from '@angular/material/select';
 import {getSignedUrl} from '../core/actions/common-auth.actions';
 import {addMessage} from '../core/actions/layout.actions';
 import {RefreshService} from '@common/core/services/refresh.service';
@@ -40,6 +50,7 @@ export interface Event {
   variant?: string;
   key?: string;
   url?: string;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   '@timestamp'?: string;
   worker?: string;
 }
@@ -53,7 +64,7 @@ interface DebugSamples {
   metrics: string[];
   metric: string;
   scrollId: string;
-  data: Iteration[]
+  data: Iteration[];
 }
 
 @Component({
@@ -61,9 +72,11 @@ interface DebugSamples {
   templateUrl: './debug-images.component.html',
   styleUrls: ['./debug-images.component.scss'],
 })
-export class DebugImagesComponent implements OnInit, OnDestroy {
+export class DebugImagesComponent implements OnInit, OnDestroy, OnChanges {
 
   @Input() isDarkTheme = false;
+  @Input() isDatasetVersionPreview = false;
+  @Input() selected: Task;
   @Output() copyIdClicked = new EventEmitter();
 
   private debugImagesSubscription: Subscription;
@@ -87,7 +100,7 @@ export class DebugImagesComponent implements OnInit, OnDestroy {
 
   public noMoreData$: Observable<boolean>;
   public optionalMetrics$: Observable<ITaskOptionalMetrics[]>;
-  public optionalMetrics: {[experimentId: string]: string};
+  public optionalMetrics: { [experimentId: string]: string };
   public selectedMetrics: { [taskId: string]: string } = {};
   public beginningOfTime: any;
   private beginningOfTimeSubscription: Subscription;
@@ -120,7 +133,8 @@ export class DebugImagesComponent implements OnInit, OnDestroy {
       map(([, debugImages]) => Object.entries(debugImages).reduce(((acc, val: any) => {
         const id = val[0];
         const iterations = val[1].metrics.find(m => m.task === id).iterations;
-        acc[id] = {data: iterations.map(iteration => ({
+        acc[id] = {
+          data: iterations.map(iteration => ({
             iter: iteration.iter,
             events: iteration.events.map(event => {
               this.store.dispatch(getSignedUrl({url: event.url, config: {disableCache: event.timestamp}}));
@@ -130,7 +144,8 @@ export class DebugImagesComponent implements OnInit, OnDestroy {
                 variantAndMetric: this.selectedMetric === ALL_IMAGES ? `${event.metric}/${event.variant}` : ''
               };
             })
-          }))};
+          }))
+        };
         acc[id].metrics = val[1].metrics.map(metric => metric.metric || metric.iterations[0].events[0].metric);
         acc[id].metric = acc[id].metrics[0];
         acc[id].scrollId = val[1].scroll_id;
@@ -151,6 +166,14 @@ export class DebugImagesComponent implements OnInit, OnDestroy {
       filter(params => !!params.ids || !!params.experimentId),
       distinctUntilChanged()
     );
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes.selected && [changes.selected.currentValue.id] !== this.experimentIds) {
+      this.experimentNames = {[changes.selected.currentValue.id]: changes.selected.currentValue.name};
+      this.experimentIds = [changes.selected.currentValue.id];
+      this.selectMetric({value: this.allImages}, changes.selected.currentValue.id);
+    }
   }
 
   ngOnInit() {
@@ -186,7 +209,6 @@ export class DebugImagesComponent implements OnInit, OnDestroy {
           if (this.isTaskRunning(tasks) && (Object.keys(this.debugImages || {}).length > 0 || this.beginningOfTime[this.experimentIds[0]])) {
             this.store.dispatch(getDebugImagesMetrics({tasks: this.experimentIds}));
           }
-
           this.experiments = tasks;
           this.experimentNames = tasks.reduce((acc, task) => ({
             ...acc,
@@ -202,7 +224,7 @@ export class DebugImagesComponent implements OnInit, OnDestroy {
     } else {
       this.selectedExperimentSubscription = this.store.select(selectSelectedExperiment)
         .pipe(
-          filter(experiment => !!experiment),
+          filter(experiment => !!experiment && !this.isDatasetVersionPreview),
           distinctUntilChanged((previous, current) => previous?.id === current?.id)
         ).subscribe(experiment => {
           this.experimentNames = {[experiment.id]: experiment.name};
@@ -211,10 +233,10 @@ export class DebugImagesComponent implements OnInit, OnDestroy {
         });
     }
 
-    // auto refresh subscription for compare only.
+
     this.refreshingSubscription = this.refresh.tick
       .pipe(
-        filter(auto => !multipleExperiments || auto !== null),
+        filter(auto => (!multipleExperiments || auto !== null) && (!this.isDatasetVersionPreview || this.selected.status === TaskStatusEnum.InProgress)),
         withLatestFrom(
           this.store.select(selectTimeIsNow),
         )
@@ -230,7 +252,7 @@ export class DebugImagesComponent implements OnInit, OnDestroy {
                 task: experimentId,
                 metric: this.debugImages[experimentId]?.metric,
               },
-              autoRefresh: auto
+              autoRefresh: (auto!==false)
             }));
           }
         });
@@ -275,9 +297,10 @@ export class DebugImagesComponent implements OnInit, OnDestroy {
     const iterationSnippets = this.debugImages?.[experimentId]?.data.map(iter => iter.events).flat();
     const sources = iterationSnippets.map(img => img.url);
     const index = iterationSnippets.findIndex(img => img.url === frame.url);
-    this.dialog.open(ImageDisplayerComponent, {
-      data: {imageSources: sources, index, snippetsMetaData: iterationSnippets},
-      panelClass: ['image-displayer-dialog'],
+    const isAllMetrics = this.selectedMetrics[experimentId] === ALL_IMAGES;
+    this.dialog.open(ImageViewerComponent, {
+      data: {imageSources: sources, index, snippetsMetaData: iterationSnippets, isAllMetrics},
+      panelClass: ['image-viewer-dialog'],
       height: '100%',
       maxHeight: 'auto',
       width: '100%',
@@ -293,8 +316,9 @@ export class DebugImagesComponent implements OnInit, OnDestroy {
     return experimentID;
   }
 
-  selectMetric(change: MatSelectChange, task) {
+  selectMetric(change: any, task) {
     this.selectedMetric = change.value;
+    this.selectedMetrics[task] = change.value;
     this.store.dispatch(debugActions.setSelectedMetric({payload: {task, metric: change.value}}));
   }
 

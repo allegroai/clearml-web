@@ -2,14 +2,14 @@ import {
   fetchExperiments,
   getDebugImagesMetrics,
   resetDebugImages,
-  resetDisplayer,
+  resetViewer,
   setBeginningOfTime,
   setCurrentDebugImage,
   setDebugImageIterations,
   setDebugImages,
   setDebugImageViewerScrollId,
-  setDisplayerBeginningOfTime,
-  setDisplayerEndOfTime, setExperimentsNames, setMetrics, setSelectedMetric, setTimeIsNow
+  setViewerBeginningOfTime,
+  setViewerEndOfTime, setExperimentsNames, setMetrics, setSelectedMetric, setTimeIsNow
 } from './debug-images-actions';
 import {Task} from '../../business-logic/model/tasks/task';
 import {createFeatureSelector, createReducer, createSelector, on} from '@ngrx/store';
@@ -25,9 +25,9 @@ export interface IDebugImagesState {
   optionalMetrics: Array<ITaskOptionalMetrics>;
   searchTerm: string;
   scrollId: any;
-  imageDisplayerScrollId: string;
-  imageDisplayerBeginningOfTime: boolean;
-  imageDisplayerEndOfTime: boolean;
+  imageViewerScrollId: string;
+  imageViewerBeginningOfTime: boolean;
+  imageViewerEndOfTime: boolean;
   noMore: boolean;
   selectedMetric: any;
   timeIsNow: any;
@@ -53,9 +53,9 @@ export const initialState: IDebugImagesState = {
     tasks: [],
     optionalMetrics: [],
     scrollId: {},
-    imageDisplayerScrollId: null,
-    imageDisplayerBeginningOfTime: null,
-    imageDisplayerEndOfTime: null,
+    imageViewerScrollId: null,
+    imageViewerBeginningOfTime: null,
+    imageViewerEndOfTime: null,
     noMore: true,
     selectedMetric: null,
     timeIsNow: {},
@@ -74,9 +74,9 @@ export const selectTimeIsNow = createSelector(debugImages, (state) => state.time
 export const selectBeginningOfTime = createSelector(debugImages, (state) => state.beginningOfTime);
 export const selectMinMaxIterations = createSelector(debugImages, (state) => state.minMaxIterations);
 export const selectCurrentImageViewerDebugImage = createSelector(debugImages, (state) => state.currentImageViewerDebugImage);
-export const selectImageViewerScrollId = createSelector(debugImages, (state) => state.imageDisplayerScrollId);
-export const selectDisplayerEndOfTime = createSelector(debugImages, (state) => state.imageDisplayerEndOfTime);
-export const selectDisplayerBeginningOfTime = createSelector(debugImages, (state) => state.imageDisplayerBeginningOfTime);
+export const selectImageViewerScrollId = createSelector(debugImages, (state) => state.imageViewerScrollId);
+export const selectViewerEndOfTime = createSelector(debugImages, (state) => state.imageViewerEndOfTime);
+export const selectViewerBeginningOfTime = createSelector(debugImages, (state) => state.imageViewerBeginningOfTime);
 
 export const debugSamplesReducer = createReducer(
   initialState,
@@ -105,14 +105,14 @@ export const debugSamplesReducer = createReducer(
   // eslint-disable-next-line @typescript-eslint/naming-convention
   on(setDebugImageIterations, (state, action) => ({...state, minMaxIterations: {min_iteration: action.min_iteration, max_iteration: action.max_iteration}})),
   on(setCurrentDebugImage, (state, action) => ({...state, currentImageViewerDebugImage: action.event})),
-  on(setDebugImageViewerScrollId, (state, action) => ({...state, imageDisplayerScrollId: action.scrollId})),
-  on(setDisplayerEndOfTime, (state, action) => ({...state, imageDisplayerEndOfTime: action.endOfTime})),
-  on(setDisplayerBeginningOfTime, (state, action) => ({...state, imageDisplayerBeginningOfTime: action.beginningOfTime})),
-  on(resetDisplayer, state => ({
+  on(setDebugImageViewerScrollId, (state, action) => ({...state, imageViewerScrollId: action.scrollId})),
+  on(setViewerEndOfTime, (state, action) => ({...state, imageViewerEndOfTime: action.endOfTime})),
+  on(setViewerBeginningOfTime, (state, action) => ({...state, imageViewerBeginningOfTime: action.beginningOfTime})),
+  on(resetViewer, state => ({
     ...state,
-    imageDisplayerEndOfTime: null,
-    imageDisplayerBeginningOfTime: null,
-    imageDisplayerScrollId: null,
+    imageViewerEndOfTime: null,
+    imageViewerBeginningOfTime: null,
+    imageViewerScrollId: null,
     minMaxIterations: null,
     currentImageViewerDebugImage: null
   })),

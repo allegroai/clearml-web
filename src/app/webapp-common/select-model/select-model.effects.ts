@@ -98,7 +98,7 @@ export class SelectModelEffects {
       order_by: encodeOrder(orderFields),
       tags: (tagsFilter && tagsFilter.length > 0) ? tagsFilter : [],
       system_tags: (systemTagsFilter && systemTagsFilter.length > 0) ? systemTagsFilter : [],
-      only_fields: ['created', 'framework', 'id', 'labels', 'name', 'ready', 'tags', 'system_tags', 'task.name', 'uri', 'user.name', 'parent', 'design', 'company', 'project.name'],
+      only_fields: ['created', 'framework', 'id', 'labels', 'name', 'ready', 'tags', 'system_tags', 'task.name', 'uri', 'user.name', 'parent', 'design', 'company', 'project.name', 'comment', 'last_update'],
       ready: true,
       framework: get([MODELS_TABLE_COL_FIELDS.FRAMEWORK, 'value'], tableFilters) || undefined,
       user: (userFilter && userFilter.length > 0) ? userFilter : undefined

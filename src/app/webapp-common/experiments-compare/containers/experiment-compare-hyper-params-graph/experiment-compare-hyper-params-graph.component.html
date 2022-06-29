@@ -29,7 +29,8 @@
     <div class="metric-list" [ngClass]="{'metric-list--show': listOpen}">
       <mat-expansion-panel *ngFor="let metricGroup of metricsOptions; trackBy: trackMetricByFn"
                            class="metric-list__panel"
-                           [expanded]="listOpen && searchMetric.value.length > 0">
+                           [expanded]="listOpen && searchMetric.value.length > 0"
+                           togglePosition="before">
         <mat-expansion-panel-header (click)="searchMetric.focus()" class="metric-list__header" expandedHeight="40px" collapsedHeight="40px">
           <mat-panel-title class="metric-list__title">
             {{metricGroup.metricName}}

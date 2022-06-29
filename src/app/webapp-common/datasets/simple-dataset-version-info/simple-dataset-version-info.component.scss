@@ -1,0 +1,25 @@
+:host {
+  sm-simple-dataset-version-details {
+    display: block;
+    position: absolute;
+    z-index: 2;
+    top: 24px;
+    right: 24px;
+  }
+
+  .results-panel {
+    &.maximized {
+      height: 100%;
+
+      .content {
+        flex: 1;
+      }
+    }
+  }
+
+  sm-dataset-version-step {
+    margin: 0 50px;
+    position: relative;
+    z-index: 1;
+  }
+}

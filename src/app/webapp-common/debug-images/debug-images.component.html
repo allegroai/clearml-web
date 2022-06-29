@@ -10,7 +10,7 @@
       </sm-experiment-compare-general-data>
     </header>
     <div class="d-flex" >
-      <div class="metric-bar" [class.minimized]="minimized" *ngIf="!thereAreNoMetrics(experimentId)">
+      <div class="metric-bar" [class.minimized]="minimized" *ngIf="!thereAreNoMetrics(experimentId) && !isDatasetVersionPreview">
         <label>Metric:</label>
         <mat-form-field appearance="outline" [ngClass]="{'dark thin': isDarkTheme}">
           <mat-select
@@ -42,7 +42,7 @@
         <div [ngClass]="{'disabled': (timeIsNow$| async)[experimentId] && !allowAutorefresh }"
              (click)="(!(timeIsNow[experimentId] && !allowAutorefresh)) && backToNow({task: experimentId, metric: metricSelect.value})"
              class="al-icon al-ico-back-to-top al-color light-grey-blue"
-             smTooltip="Newest images"></div>
+             smTooltip="Newest samples"></div>
       </div>
     </div>
     <div class="no-images no-output" [class.dark]="isDarkTheme" *ngIf="shouldShowNoImagesForExperiment(experimentId)">
@@ -59,6 +59,7 @@
       [title]="experimentNames && experimentNames[experimentId]"
       [isMergeIterations]="mergeIterations"
       [isDarkTheme]="isDarkTheme"
+      [isDatasetVersionPreview]="isDatasetVersionPreview"
       (imageClicked)="imageClicked($event, experimentId)"
       (urlError)="urlError()"
     >

@@ -37,4 +37,8 @@ export interface EventsGetDebugImageSampleRequest {
      * Scroll ID from the previous call to get_debug_image_sample or empty
      */
     scroll_id?: string;
+    /**
+     * If set then subsequent navigation with next_debug_image_sample is done on the   debug images for the passed metric only. Otherwise for all the metrics
+     */
+    navigate_current_metric?: boolean;
 }

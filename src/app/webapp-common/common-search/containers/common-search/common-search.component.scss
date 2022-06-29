@@ -33,6 +33,12 @@
       color: $blue-900;
       background-color: $blue-280;
     }
+
+    &.al-ico-error-circle {
+      width: 0;
+      right: 48px;
+    }
+
   }
 
   i.fa {
@@ -52,4 +58,10 @@
   i.fa-times {
     margin-right:4px;
   }
+
+  ::ng-deep sm-search.regex-error input {
+    padding-right: 56px !important;
+    border-color: $failed-red !important;
+  }
+
 }

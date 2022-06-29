@@ -5,7 +5,7 @@ import {selectSelectedProjectId} from '../../webapp-common/core/reducers/project
 import {Observable} from 'rxjs';
 import {Router} from '@angular/router';
 import {ConfigurationService} from '../../webapp-common/shared/services/configuration.service';
-import {SearchDeactivate} from '../../webapp-common/dashboard-search/dashboard-search.actions';
+import {searchDeactivate} from '../../webapp-common/dashboard-search/dashboard-search.actions';
 
 @Component({
   selector   : 'sm-side-nav',
@@ -25,7 +25,7 @@ export class SideNavComponent {
 
 
   public resetSearch() {
-    this.store.dispatch(new SearchDeactivate());
+    this.store.dispatch(searchDeactivate());
   }
 
   get guestUser(): boolean {

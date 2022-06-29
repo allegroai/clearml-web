@@ -94,7 +94,7 @@ export const localStorageReducer = (reducer: ActionReducer<any>): ActionReducer<
 
 const userPrefMetaFactory = (userPreferences: UserPreferences): MetaReducer<any>[] => [
   (reducer: ActionReducer<any>) =>
-    createUserPrefReducer('users', ['activeWorkspace'], [USERS_PREFIX], userPreferences, reducer),
+    createUserPrefReducer('users', ['activeWorkspace', 'showOnlyUserWork'], [USERS_PREFIX], userPreferences, reducer),
   (reducer: ActionReducer<any>) =>
     createUserPrefReducer('rootProjects', ['tagsColors', 'graphVariant'], [ROOT_PROJECTS_PREFIX], userPreferences, reducer),
   (reducer: ActionReducer<any>) =>

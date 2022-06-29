@@ -8,10 +8,10 @@ import {Project} from '~/business-logic/model/projects/project';
   styleUrls: ['./pipeline-card-menu.component.scss']
 })
 export class PipelineCardMenuComponent {
-  readonly ICONS = ICONS;
+  readonly icons = ICONS;
 
   @Input() project: Project;
-  @Input() allTags: string[]
+  @Input() allTags: string[];
   @Output() run = new EventEmitter();
   @Output() addTag = new EventEmitter<string>();
   @Output() rename = new EventEmitter();

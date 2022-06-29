@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="338" height="284" viewBox="0 0 338 284">
+    <defs>
+      <style>
+        .cls-1 {
+          opacity: 0.996;
+        }
+  
+        .cls-2 {
+          fill: none;
+          stroke: #5a658e;
+          stroke-width: 2px;
+        }
+  
+        .cls-3 {
+          fill: rgba(0,154,255,0.2);
+        }
+  
+        .cls-4 {
+          fill: #009aff;
+        }
+  
+        .cls-5 {
+          fill: #153856;
+        }
+  
+        .cls-6 {
+          fill: rgba(90,101,142,0.2);
+        }
+  
+        .cls-7 {
+          fill: #5a658e;
+        }
+  
+        .cls-8 {
+          fill: #1a1e2c;
+        }
+      </style>
+    </defs>
+    <g id="datasets-empty-state" class="cls-1" transform="translate(-526.845 -206)">
+      <g id="g" transform="translate(0 -26)">
+        <g id="connectors" transform="translate(574.84 261.145)">
+          <g id="connector" transform="translate(124.333 123.032) rotate(180)">
+            <line id="connector-2" data-name="connector" class="cls-2" y2="24.176" transform="translate(3.429 -3.103)"/>
+            <path id="connector-head" class="cls-2" d="M936.044,346.708l3.429,3.429,3.429-3.429" transform="translate(-936.044 -328.283)"/>
+          </g>
+          <g id="connector-3" data-name="connector" transform="translate(124.333 45.033) rotate(180)">
+            <line id="connector-4" data-name="connector" class="cls-2" y2="24.176" transform="translate(3.429 -3.103)"/>
+            <path id="connector-head-2" data-name="connector-head" class="cls-2" d="M936.044,346.708l3.429,3.429,3.429-3.429" transform="translate(-936.044 -328.283)"/>
+          </g>
+          <g id="connector-5" data-name="connector" transform="translate(124.333 201.033) rotate(180)">
+            <path id="connector-head-3" data-name="connector-head" class="cls-2" d="M936.044,346.708l3.429,3.429,3.429-3.429" transform="translate(-936.044 -328.283)"/>
+            <path id="Path_767" data-name="Path 767" class="cls-2" d="M9.81,21.056c0-44.9,22.7-49.264,31.507-49.264" transform="translate(-6.403)"/>
+          </g>
+          <g id="connector-6" data-name="connector" transform="translate(117.474 179.179)">
+            <path id="connector-head-4" data-name="connector-head" class="cls-2" d="M0,3.429,3.429,0,6.858,3.429" transform="translate(0 0)"/>
+            <path id="Path_767-2" data-name="Path 767" class="cls-2" d="M0,0C0,44.9,22.7,49.264,31.507,49.264" transform="translate(3.407 0.798)"/>
+          </g>
+        </g>
+        <g id="step" transform="translate(625.146 229)">
+          <path id="step-2" data-name="step" class="cls-3" d="M4,0H133a4,4,0,0,1,4,4V33a0,0,0,0,1,0,0H0a0,0,0,0,1,0,0V4A4,4,0,0,1,4,0Z" transform="translate(2.699 3)"/>
+          <path id="step-status" class="cls-4" d="M0,0H137a0,0,0,0,1,0,0V13a4,4,0,0,1-4,4H4a4,4,0,0,1-4-4V0A0,0,0,0,1,0,0Z" transform="translate(2.699 36)"/>
+          <rect id="time" class="cls-5" width="52" height="4" rx="2" transform="translate(79.699 43)"/>
+          <rect id="time-2" data-name="time" class="cls-5" width="20" height="4" rx="2" transform="translate(10.699 43)"/>
+          <rect id="title" class="cls-4" width="55" height="4" rx="2" transform="translate(10.699 17)"/>
+        </g>
+        <g id="step-3" data-name="step" transform="translate(625.146 307)">
+          <path id="step-4" data-name="step" class="cls-3" d="M4,0H133a4,4,0,0,1,4,4V33a0,0,0,0,1,0,0H0a0,0,0,0,1,0,0V4A4,4,0,0,1,4,0Z" transform="translate(2.699 3)"/>
+          <path id="step-status-2" data-name="step-status" class="cls-4" d="M0,0H137a0,0,0,0,1,0,0V13a4,4,0,0,1-4,4H4a4,4,0,0,1-4-4V0A0,0,0,0,1,0,0Z" transform="translate(2.699 36)"/>
+          <rect id="time-3" data-name="time" class="cls-5" width="34" height="4" rx="2" transform="translate(97.699 43)"/>
+          <rect id="time-4" data-name="time" class="cls-5" width="30" height="4" rx="2" transform="translate(10.699 43)"/>
+          <rect id="title-2" data-name="title" class="cls-4" width="36" height="4" rx="2" transform="translate(10.699 17)"/>
+        </g>
+        <g id="step-5" data-name="step" transform="translate(625.146 385)">
+          <path id="step-6" data-name="step" class="cls-3" d="M4,0H133a4,4,0,0,1,4,4V33a0,0,0,0,1,0,0H0a0,0,0,0,1,0,0V4A4,4,0,0,1,4,0Z" transform="translate(2.699 3)"/>
+          <path id="step-status-3" data-name="step-status" class="cls-4" d="M0,0H137a0,0,0,0,1,0,0V13a4,4,0,0,1-4,4H4a4,4,0,0,1-4-4V0A0,0,0,0,1,0,0Z" transform="translate(2.699 36)"/>
+          <rect id="time-5" data-name="time" class="cls-5" width="50" height="4" rx="2" transform="translate(81.699 43)"/>
+          <rect id="time-6" data-name="time" class="cls-5" width="26" height="4" rx="2" transform="translate(10.699 43)"/>
+          <rect id="title-3" data-name="title" class="cls-4" width="37" height="4" rx="2" transform="translate(10.699 17)"/>
+        </g>
+        <g id="step-7" data-name="step" transform="translate(725.146 463)">
+          <path id="step-8" data-name="step" class="cls-6" d="M4,0H133a4,4,0,0,1,4,4V33a0,0,0,0,1,0,0H0a0,0,0,0,1,0,0V4A4,4,0,0,1,4,0Z" transform="translate(2.699 3)"/>
+          <path id="step-status-4" data-name="step-status" class="cls-7" d="M0,0H137a0,0,0,0,1,0,0V13a4,4,0,0,1-4,4H4a4,4,0,0,1-4-4V0A0,0,0,0,1,0,0Z" transform="translate(2.699 36)"/>
+          <rect id="time-7" data-name="time" class="cls-8" width="50" height="4" rx="2" transform="translate(81.699 43)"/>
+          <rect id="time-8" data-name="time" class="cls-8" width="26" height="4" rx="2" transform="translate(10.699 43)"/>
+          <rect id="title-4" data-name="title" class="cls-7" width="37" height="4" rx="2" transform="translate(10.699 17)"/>
+        </g>
+        <g id="step-9" data-name="step" transform="translate(524.146 463)">
+          <path id="step-10" data-name="step" class="cls-6" d="M4,0H133a4,4,0,0,1,4,4V33a0,0,0,0,1,0,0H0a0,0,0,0,1,0,0V4A4,4,0,0,1,4,0Z" transform="translate(2.699 3)"/>
+          <path id="step-status-5" data-name="step-status" class="cls-7" d="M0,0H137a0,0,0,0,1,0,0V13a4,4,0,0,1-4,4H4a4,4,0,0,1-4-4V0A0,0,0,0,1,0,0Z" transform="translate(2.699 36)"/>
+          <rect id="time-9" data-name="time" class="cls-8" width="50" height="4" rx="2" transform="translate(81.699 43)"/>
+          <rect id="time-10" data-name="time" class="cls-8" width="26" height="4" rx="2" transform="translate(10.699 43)"/>
+          <rect id="title-5" data-name="title" class="cls-7" width="37" height="4" rx="2" transform="translate(10.699 17)"/>
+        </g>
+      </g>
+    </g>
+  </svg>
+  

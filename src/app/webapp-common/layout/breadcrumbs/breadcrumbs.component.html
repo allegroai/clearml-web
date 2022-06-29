@@ -1,73 +1,72 @@
-<div class="breadcrumbs-container" #container>
-<span *ngIf="isCommunity && activeWorkspace && !workspaceNeutral" class="breadcrumbLink">
-  <span class="workspace">{{activeWorkspace.name}}</span>
-  <i class="al-icon  al-ico-slash"></i>
-</span>
-  <span *ngFor="let crumb of breadcrumbs; let i=index; let last=last" class="breadcrumbLink">
-  <div *ngIf="crumb.isProject;else crumbDiv;" class="d-flex align-items-center">
-    <div *ngIf="shouldCollapse; else shortTree" class="d-flex align-items-center">
-      <div [matMenuTriggerFor]="subProjectsMenu" class="d-flex align-items-center menu-trigger"
-           (menuOpened)="subProjectsMenuOpened(true)" (menuClosed)="subProjectsMenuOpened(false)">
-        <i class="menu-trigger-icon al-icon msm" [class.al-ico-d-menu-down]="!subProjectsMenuIsOpen"
-           [class.al-ico-d-menu-up]="subProjectsMenuIsOpen"></i>
-      </div>
-      <div class="d-flex">
-        <i class="al-icon al-ico-slash"></i>
-      </div>
-     <div class="d-flex align-items-center">
-      <a *ngIf="subProjects[subProjects.length-1].url else lastNonLink"
-        class="sub-project after-collapse"
-         [smTooltip]="subProjects[subProjects.length - 1].name"
-         smShowTooltipIfEllipsis
-         [routerLink]="subProjects[subProjects.length-1].url!=='projects/*/projects'? subProjects[subProjects.length-1].url: null">{{subProjects[subProjects.length - 1].name}}</a>
-       <ng-template #lastNonLink>
-         <span class="sub-project after-collapse"
-            [smTooltip]="subProjects[subProjects.length - 1].name"
-            smShowTooltipIfEllipsis
-            >{{subProjects[subProjects.length - 1].name}}</span>
-       </ng-template>
-      </div>
-      <mat-menu #subProjectsMenu="matMenu">
-        <div mat-menu-item
-             class="sub-project-menu-item"
-             [smTooltip]="subProject.name"
-             smShowTooltipIfEllipsis
-             *ngFor="let subProject of subProjects | filterLast"
-             [routerLink]="subProject.url!=='projects/*/projects'? subProject.url: 'projects/*'">
-          {{subProject.name}}
-        </div>
-      </mat-menu>
-    </div>
-    <ng-template #shortTree>
-      <div *ngFor="let subProject of subProjects; let lastP=last" class="d-flex align-items-center">
-       <ng-container *ngIf="subProject.name">
-          <a class="sub-project"
-             [class.last]="lastP"
-             *ngIf="subProject.url && !(lastP && lastSegment === 'projects'); else nonLink"
-             [smTooltip]="subProject.name"
-             smShowTooltipIfEllipsis
-             [routerLink]="subProject.url!=='projects/*/projects'? subProject.url: 'projects/*/experiments'">{{subProject.name}}</a>
-         <ng-template #nonLink>
-           <span class="sub-project"
-              [class.last]="lastP"
-              [smTooltip]="subProject.name"
-              smShowTooltipIfEllipsis
-           >{{subProject.name}}</span>
-         </ng-template>
-          <div *ngIf="!lastP">
-            <i class="al-icon al-ico-slash"></i>
-          </div>
-         </ng-container>
-      </div>
-    </ng-template>
-  </div>
+<div class="overflow-container" [class.w-100]="this.subProjects?.length === 1" #container>
+  <ng-container *ngIf="isCommunity && activeWorkspace && !workspaceNeutral">
+    <span class="workspace">{{activeWorkspace.name}}</span>
+    <i class="al-icon  al-ico-slash"></i>
+  </ng-container>
+  <ng-container *ngFor="let crumb of breadcrumbs let i=index; let last=last">
+    <ng-container *ngIf="crumb.isProject; else crumbDiv;">
+      <ng-container *ngIf="shouldCollapse; else shortTree" class="d-flex align-items-center">
+        <i *ngIf="this.subProjects?.length > 1" [matMenuTriggerFor]="subProjectsMenu" class="menu-trigger-icon al-icon msm pointer"
+           [class.al-ico-d-menu-down]="!subProjectsMenuIsOpen"
+           [class.al-ico-d-menu-up]="subProjectsMenuIsOpen" (menuOpened)="subProjectsMenuOpened(true)"
+           (menuClosed)="subProjectsMenuOpened(false)"></i>
+        <ng-container class="d-flex" *ngIf="this.subProjects?.length>1">
+          <i class="al-icon al-ico-slash"></i>
+        </ng-container>
+        <a *ngIf="subProjects[subProjects.length-1].url else lastNonLink"
+           class="sub-project after-collapse"
+           [smTooltip]="subProjects[subProjects.length - 1].name"
+           smShowTooltipIfEllipsis
+           [routerLink]="subProjects[subProjects.length-1].url!=='projects/*/projects'? subProjects[subProjects.length-1].url: null">{{subProjects[subProjects.length - 1].name}}</a>
+        <ng-template #lastNonLink>
+           <span class="sub-project after-collapse"
+                 [smTooltip]="subProjects[subProjects.length - 1].name"
+                 smShowTooltipIfEllipsis
+           >{{subProjects[subProjects.length - 1].name}}</span>
+        </ng-template>
+        <mat-menu #subProjectsMenu="matMenu">
+          <span mat-menu-item
+                class="sub-project-menu-item"
+                [smTooltip]="subProject.name"
+                smShowTooltipIfEllipsis
+                *ngFor="let subProject of subProjects | filterLast"
+                [routerLink]="subProject.url!=='projects/*/projects'? subProject.url: 'projects/*'">
+            {{subProject.name}}
+          </span>
+        </mat-menu>
+      </ng-container>
+      <ng-template #shortTree>
+        <span class="sub-projects-breadcrumbs">
+          <ng-container *ngFor="let subProject of subProjects; let lastP=last">
+           <ng-container *ngIf="subProject.name">
+              <a class="sub-project"
+                 [class.ellipsis]="subProjects.length===1"
+                 [class.last]="lastP"
+                 *ngIf="subProject.url && !(lastP && lastSegment === 'projects'); else nonLink"
+                 [smTooltip]="subProject.name"
+                 smShowTooltipIfEllipsis
+                 [routerLink]="subProject.url !== 'projects/*/projects' ? subProject.url : 'projects/*/experiments'"
+              >{{subProject.name}}</a>
+             <ng-template #nonLink>
+               <span class="sub-project"
+                     [class.last]="lastP"
+                     [smTooltip]="subProject.name"
+                     smShowTooltipIfEllipsis
+               >{{subProject.name}}</span>
+             </ng-template>
+                <i *ngIf="!lastP" class="al-icon al-ico-slash"></i>
+             </ng-container>
+          </ng-container>
+        </span>
+      </ng-template>
+    </ng-container>
 
-  <ng-template #crumbDiv>
-    <a
-      [routerLink]="crumb.url">{{!(['Experiments', 'Models', 'Dataviews'].includes(crumb.name)) ? crumb.name : 'All ' + crumb.name}}</a>
-  </ng-template>
-  <i *ngIf="!last && !['Experiments', 'Models', 'Dataviews'].includes(crumb.name)" class="al-icon  al-ico-slash"></i>
-</span>
+    <ng-template #crumbDiv>
+      <a *ngIf="crumb.url" class="crumb" [class.last]="last" [routerLink]="crumb.url">{{crumb.name}}</a>
+      <span *ngIf="!crumb.url" class="crumb" [class.last]="last">{{crumb.name}}</span>
+    </ng-template>
+    <i *ngIf="!last" class="al-icon  al-ico-slash"></i>
+  </ng-container>
   <div *ngIf="checkIfBreadcrumbsInitiated()">
     <div
       #menuTrigger="matMenuTrigger"
@@ -99,5 +98,5 @@
       </div>
     </mat-menu>
   </div>
+  <div *ngIf="archive" class="archive"><i class="al-icon xs al-ico-archive mr-1"></i>Archive</div>
 </div>
-<div *ngIf="archive" class="archive"><i class="al-icon xs al-ico-archive mr-1"></i>Archive</div>

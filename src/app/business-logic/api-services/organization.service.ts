@@ -25,6 +25,8 @@ import { Observable }                                        from 'rxjs';
 import { OrganizationGetTagsRequest } from '../model/organization/organizationGetTagsRequest';
 import { OrganizationGetTagsResponse } from '../model/organization/organizationGetTagsResponse';
 import { OrganizationGetUserCompaniesResponse } from '../model/organization/organizationGetUserCompaniesResponse';
+import { OrganizationGetEntitiesCountRequest } from '../model/organization/organizationGetEntitiesCountRequest';
+import { OrganizationGetEntitiesCountResponse } from '../model/organization/organizationGetEntitiesCountResponse';
 
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
 import { Configuration }                                     from '../configuration';
@@ -152,4 +154,48 @@ export class ApiOrganizationService {
         );
     }
 
+    /**
+     *
+     * Get counts for the company entities according to the passed search criteria
+     * @param request request body
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public organizationGetEntitiesCount(request: OrganizationGetEntitiesCountRequest, options?: any, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+        if (request === null || request === undefined) {
+            throw new Error('Required parameter request was null or undefined when calling organizationGetEntitiesCount.');
+        }
+
+        let headers = this.defaultHeaders;
+        if (options && options.async_enable) {
+            headers = headers.set(this.configuration.asyncHeader, '1');
+        }
+
+        // to determine the Accept header
+        const httpHeaderAccepts: string[] = [
+            'application/json'
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected != undefined) {
+            headers = headers.set("Accept", httpHeaderAcceptSelected);
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+        ];
+        const httpContentTypeSelected:string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected != undefined) {
+            headers = headers.set("Content-Type", httpContentTypeSelected);
+        }
+
+        return this.apiRequest.post<OrganizationGetEntitiesCountResponse>(`${this.basePath}/organization.get_entities_count`,
+          request,
+          {
+              withCredentials: this.configuration.withCredentials,
+              headers: headers,
+              observe: observe,
+              reportProgress: reportProgress
+          }
+        );
+    }
 }

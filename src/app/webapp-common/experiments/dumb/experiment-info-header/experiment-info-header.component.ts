@@ -1,6 +1,4 @@
 import {Component, EventEmitter, Input, OnDestroy, Output, ViewChild} from '@angular/core';
-import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
-import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
 import {getSystemTags, isDevelopment} from '~/features/experiments/shared/experiments.utils';
 import {Observable} from 'rxjs';
 import {Store} from '@ngrx/store';
@@ -26,7 +24,7 @@ import {
   selectionDisabledReset,
   selectionDisabledViewWorker
 } from '@common/shared/entity-page/items.utils';
-import {addMessage} from '../../../core/actions/layout.actions';
+import {addMessage} from '@common/core/actions/layout.actions';
 
 @Component({
   selector: 'sm-experiment-info-header',
@@ -34,9 +32,6 @@ import {addMessage} from '../../../core/actions/layout.actions';
   styleUrls: ['./experiment-info-header.component.scss']
 })
 export class ExperimentInfoHeaderComponent implements OnDestroy {
-
-  readonly TaskStatusEnum = TaskStatusEnum;
-  readonly TaskTypeEnum = TaskTypeEnum;
 
   public viewId: boolean;
   public tagsFilterByProject$: Observable<boolean>;

@@ -39,13 +39,13 @@
       </i><span>{{selectedDisableAvailable[menuItems.tags]?.available | menuItemText : 'Add Tag' : selectedDisableAvailableIsMultiple }}</span>
     </button>
 
-    <button mat-menu-item (click)="restoreArchive(EntityTypeEnum.controller)"
+    <button mat-menu-item (click)="restoreArchive(entityTypeEnum.controller)"
             [disabled]="selectedDisableAvailable[menuItems.archive].disable">
       <i class="al-icon sm-md" [class]="isArchive ? ICONS.RESTORE : ICONS.ARCHIVE"></i>
       {{selectedDisableAvailable[menuItems.archive].available | menuItemText : isArchive ? 'Restore from Archive' : 'Archive' : selectedDisableAvailableIsMultiple}}
     </button>
 
-    <button mat-menu-item (click)="deleteExperimentPopup(EntityTypeEnum.controller, true)"
+    <button mat-menu-item (click)="deleteExperimentPopup(entityTypeEnum.controller, true)"
             [disabled]="selectedDisableAvailable[menuItems.delete].disable" *ngIf="isArchive">
       <i [class]="'al-icon ' + ICONS.REMOVE + ' sm-md'"></i>
       {{selectedDisableAvailable[menuItems.delete].available | menuItemText : 'Delete' : selectedDisableAvailableIsMultiple}}

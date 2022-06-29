@@ -3,6 +3,7 @@ import {AdminService} from '~/shared/services/admin.service';
 import {Artifact} from '~/business-logic/model/tasks/artifact';
 import {Store} from '@ngrx/store';
 import {BaseClickableArtifactComponent} from '../base-clickable-artifact.component';
+import {fileSizeConfigStorage} from '@common/shared/pipes/filesize.pipe';
 
 @Component({
   selector: 'sm-experiment-artifact-item-view',
@@ -11,12 +12,12 @@ import {BaseClickableArtifactComponent} from '../base-clickable-artifact.compone
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ExperimentArtifactItemViewComponent extends BaseClickableArtifactComponent{
-
   public isLocalFile: boolean;
   private _artifact: Artifact;
 
   @Input() editable: boolean;
   public isLinkable: boolean;
+  public fileSizeConfigStorage = fileSizeConfigStorage;
 
   @Input() set artifact(artifact: Artifact) {
     this._artifact = artifact;

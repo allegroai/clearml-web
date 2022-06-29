@@ -3,6 +3,10 @@
 :host {
   display: flex;
   height: 100%;
+  &.dataset-version-preview{
+    height: auto;
+    display: block;
+  }
 
   .list-container {
     display: block;

@@ -8,7 +8,7 @@ import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
   styleUrls: ['./pipeline-controller-step.component.scss']
 })
 export class PipelineControllerStepComponent {
-  private _step: PipelineItem;
+  protected _step: PipelineItem;
   public runTime: number;
 
   constructor() { }

@@ -7,9 +7,15 @@
 
   a[href] {
     text-decoration: underline;
+    &:hover {
+      text-decoration: none;
+    }
   }
 
   .general-description {
     white-space: pre-wrap;
+  }
+  ::ng-deep .editable-div .form-control {
+    height: 74px;
   }
 }

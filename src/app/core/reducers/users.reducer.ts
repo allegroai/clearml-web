@@ -12,6 +12,7 @@ export const usersReducer = createReducer<UsersState>(initUsers,
   on(setCurrentUser, (state, action) => ({
     ...state,
     currentUser: action.user,
+    gettingStarted: action.getting_started,
     activeWorkspace: action.user?.company,
     userWorkspaces: [action.user?.company],
   }))

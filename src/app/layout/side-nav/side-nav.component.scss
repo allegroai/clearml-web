@@ -21,7 +21,6 @@ $transition-speed: 0.15;
       transition: opacity $transition-speed + $transition-delay + s;
       opacity: 1;
       height: 100%;
-
     }
 
     &:hover {
@@ -29,6 +28,7 @@ $transition-speed: 0.15;
       box-shadow: unset;
 
     }
+
   }
 
   a:hover {
@@ -67,8 +67,11 @@ $transition-speed: 0.15;
         height: 64px;
         width: 64px;
       }
-      .neon {
-        color: $neon-yellow-betterinchrome;
+    }
+
+    &.active {
+      .item-icon i {
+        color: $neon-yellow
       }
     }
 

@@ -155,13 +155,14 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
   @Input() globalFilterFields: string[];
   @Input() enableTableSearch: boolean = false;
   @Input() minimizedTableHeader: string;
+  @Input() hasExperimentUpdate: boolean;
 
   @Output() sortChanged = new EventEmitter<{ field: ISmCol['id']; isShift: boolean }>();
   @Output() rowClicked = new EventEmitter<{e: MouseEvent; data: any}>();
   @Output() rowSelectionChanged = new EventEmitter<{ data: Array<any>; originalEvent?: Event }>();
   @Output() firstChanged = new EventEmitter();
   @Output() loadMoreClicked = new EventEmitter();
-  @Output() rowRightClick = new EventEmitter<{e: MouseEvent, rowData; single?: boolean}>();
+  @Output() rowRightClick = new EventEmitter<{e: MouseEvent; rowData; single?: boolean}>();
   @Output() colReordered = new EventEmitter();
   @Output() columnResized = new EventEmitter<{ columnId: string; widthPx: number }>();
   search: string;
@@ -428,8 +429,8 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
   }
 
   loadMore() {
-    this.loading = true;
-    this.loadMoreDebouncer.next(null);
+      this.loading = true;
+      this.loadMoreDebouncer.next(null);
   }
 
   onColReorder($event: any) {

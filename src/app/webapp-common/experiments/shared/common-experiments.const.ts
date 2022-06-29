@@ -1,6 +1,6 @@
 import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
 import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
-import {EXPERIMENTS_STATUS_LABELS} from '~/features/experiments/shared/experiments.const';
+import {DATASETS_STATUS_LABEL, EXPERIMENTS_STATUS_LABELS} from '~/features/experiments/shared/experiments.const';
 
 export type ExperimentWizardMethodsEnum = 'create' | 'edit' | 'clone' | 'extend';
 
@@ -35,9 +35,9 @@ export const EXPERIMENTS_METRICS_TYPES = {
 export const EXPERIMENTS_PAGE_SIZE = 15;
 export const EXPERIMENT_TABLE_ONLY_FIELDS = ['id', 'type', 'name', 'started', 'completed', 'status', 'system_tags', 'user.name', 'last_metrics', 'last_update', 'active_duration'];
 
-export const FILTERED_EXPERIMENTS_STATUS_OPTIONS = Object.entries(EXPERIMENTS_STATUS_LABELS)
+export const FILTERED_EXPERIMENTS_STATUS_OPTIONS = (isDataset) => Object.entries(EXPERIMENTS_STATUS_LABELS)
   .filter(([key, val]: [TaskStatusEnum, string]) => ![TaskStatusEnum.Closed].includes(key))
-  .map(([key, val]) => ({label: val, value: key}));
+  .map(([key, val]) => ({label: isDataset && DATASETS_STATUS_LABEL[key] || val, value: key}));
 export const EXPERIMENTS_TYPES_LABELS = {
   [TaskTypeEnum.Training]: 'Training',
   [TaskTypeEnum.Testing] : 'Testing',

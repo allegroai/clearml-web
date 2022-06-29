@@ -6,7 +6,8 @@ import {selectSelectedTableModel} from '@common/models/reducers';
 import {createSelector} from '@ngrx/store';
 import {selectSelectedExperiment} from '~/features/experiments/reducers';
 import {selectRootProjects, selectSelectedProject} from '@common/core/reducers/projects.reducer';
-import {formatStaticCrumb, prepareLinkData} from '@common/layout/breadcrumbs/breadcrumbs-common.utils';
+import {formatStaticCrumb as commonFormatStaticCrumb, prepareLinkData} from '@common/layout/breadcrumbs/breadcrumbs-common.utils';
+import {IBreadcrumbsLink} from '@common/layout/breadcrumbs/breadcrumbs.component';
 
 export interface IBreadcrumbs {
   project: Project;
@@ -16,33 +17,42 @@ export interface IBreadcrumbs {
   task: Task;
 }
 
+
+export const formatStaticCrumb = (crumb: string): IBreadcrumbsLink => {
+  if (!crumb) {
+    return {url: null, name: null};
+  }
+  return commonFormatStaticCrumb(crumb);
+};
+
 export const selectBreadcrumbsStringsBase = createSelector(
   selectSelectedProject, selectSelectedExperiment, selectSelectedTableModel, selectRootProjects,
   (project, experiment, model, projects) =>
     ({project, experiment, model, projects}) as IBreadcrumbs);
 
-export const prepareNames = (data: IBreadcrumbs, isPipeline?: boolean, fullScreen = false) => {
+export const prepareNames = (data: IBreadcrumbs, customProject?: boolean, fullScreen = false) => {
   const project = prepareLinkData(data.project, true);
   if (data.project) {
-    const subProjects = [];
     let subProjectsNames = [data.project?.name];
-    if (!isPipeline) {
+    if (!customProject) {
       subProjectsNames = data.project?.name?.split('/');
     }
+    const allProjects = [
+      ...data.projects,
+      {id: '*', name: 'All Experiments'},
+      data.project
+    ];
     let currentName = '';
-    subProjectsNames.forEach(name => {
+    const subProjects = subProjectsNames.map(name => {
       currentName += currentName ? ('/' + name) : name;
-      const foundProject = [
-        ...data.projects,
-        {id: '*', name: 'All Experiments'},
-        {...data.project}
-      ].find(proj => currentName === proj.name);
-      subProjects.push(foundProject);
-    });
-    const subProjectsLinks = subProjects.map(subProject => ({
+      return allProjects.find(proj => currentName === proj.name);
+    }) || [];
+
+    const subProjectsLinks = subProjects.map((subProject, index, arr) => ({
       name: subProject?.name.substring(subProject?.name.lastIndexOf('/') + 1),
-      url: isPipeline ? `pipelines/${subProject?.id}/experiments` :
-        fullScreen ? `projects/${subProject?.id}/experiments/${data.experiment.id}` :
+      url: customProject ?
+        data.project?.system_tags?.includes('pipeline') ? `pipelines/${subProject?.id}/experiments` : '' :
+        fullScreen && index === (arr.length - 1) ? `projects/${subProject?.id}/experiments/${data?.experiment?.id}` :
           subProject?.name === data.project?.name && data.project?.sub_projects?.length === 0 ?
             `projects/${subProject?.id}` :
             `projects/${subProject?.id}/projects`
@@ -50,16 +60,21 @@ export const prepareNames = (data: IBreadcrumbs, isPipeline?: boolean, fullScree
     project.name = project?.name.substring(project.name.lastIndexOf('/') + 1);
     project.subCrumbs = subProjectsLinks;
   }
-  const task       = prepareLinkData(data.task);
+  const task = prepareLinkData(data.task);
   const experiment = (data.experiment) ? prepareLinkData(data.experiment, true) : {};
-  const output      = formatStaticCrumb('');
-  const accountAdministration      = formatStaticCrumb('account-administration');
+  const output = formatStaticCrumb('');
+  const accountAdministration = formatStaticCrumb('account-administration');
   const experiments = formatStaticCrumb('experiments');
-  const models      = formatStaticCrumb('models');
-  const compare     = formatStaticCrumb('compare-experiments');
+  const models = formatStaticCrumb('models');
+  const compare = customProject ?
+    data.project?.system_tags?.includes('pipeline') ?
+      {url: 'compare-experiments', name: 'Compare Runs'} :
+      {url: 'compare-experiments', name: 'Compare Versions'}
+    : formatStaticCrumb('compare-experiments');
+
   return {
     ...(project.url !== '*' && {':projectId': project}),
-    ':taskId'            : task,
+    ':taskId': task,
     ':controllerId': experiment,
     'compare-experiments': compare,
     output,

@@ -141,8 +141,8 @@
                 class="btn btn-cml-primary"
                 (click)="loadMore()"
                 [style.margin-left.px]="buttonLeft">
-          <i *ngIf="loading" class="load-spinner"></i>
-          {{loading ? 'LOADING...' : 'LOAD MORE' }}
+          <i *ngIf="loading && !hasExperimentUpdate" class="load-spinner"></i>
+          {{hasExperimentUpdate ? 'REFRESH LIST': loading ? 'LOADING...' : 'LOAD MORE' }}
         </button>
       </div>
     </tr>

@@ -5,10 +5,6 @@
   flex-direction: column;
   overflow: auto;
 
-  ::ng-deep .mat-expansion-panel-body {
-    padding: 0 0 16px;
-  }
-
   ::ng-deep .mat-expansion-panel-header {
 
     .mat-expansion-indicator {
@@ -51,7 +47,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 30px 20px 5px 0;
+  padding: 30px 24px 6px 0;
   font-size: 12px;
   color: $blue-480;
 }
@@ -113,8 +109,9 @@
   }
 
   label {
+    display: block;
     font-weight: normal;
-    padding-left: 5px;
+    padding-left: 12px;
     margin: 0 !important;
     line-height: normal;
     font-size: 12px;

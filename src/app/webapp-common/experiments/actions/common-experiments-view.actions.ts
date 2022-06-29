@@ -16,80 +16,83 @@ export const getExperiments = createAction(EXPERIMENTS_PREFIX + ' [get experimen
 export const selectNextExperiment = createAction(EXPERIMENTS_PREFIX + ' [select next experiment]');
 
 export const getExperimentsWithPageSize = createAction(EXPERIMENTS_PREFIX + ' [get experiments with size]',
-  props<{pageSize: number}>());
+  props<{ pageSize: number }>());
 export const getNextExperiments = createAction(EXPERIMENTS_PREFIX + '[get next experiments]');
 
 export const setTableCols = createAction(
   EXPERIMENTS_PREFIX + ' [set table cols]',
-  props<{ cols: ISmCol[]}>()
+  props<{ cols: ISmCol[] }>()
 );
 
 export const refreshExperiments = createAction(
   EXPERIMENTS_PREFIX + ' [refresh experiment]',
-  props<{ hideLoader: boolean; autoRefresh?: boolean}>()
+  props<{ hideLoader: boolean; autoRefresh?: boolean }>()
 );
 
 export const setExperiments = createAction(
   EXPERIMENTS_PREFIX + ' [set experiments]',
-  props<{experiments: ITableExperiment[], noPreferences?: boolean}>()
+  props<{ experiments: ITableExperiment[]; noPreferences?: boolean }>()
 );
-
+export const setTableRefreshPending = createAction(
+  EXPERIMENTS_PREFIX + ' [set experiments temporary]',
+  props<{ refresh: boolean }>()
+);
 export const setExperimentInPlace = createAction(
   EXPERIMENTS_PREFIX + '[set experiment in place]',
   props<{ experiments: ITableExperiment[] }>()
 );
 
-export const setNoMoreExperiments =createAction(
+export const setNoMoreExperiments = createAction(
   EXPERIMENTS_PREFIX + ' [set no more experiments]',
-  props<{payload: boolean}>()
+  props<{ payload: boolean }>()
 );
 
 export const addExperiments = createAction(
   EXPERIMENTS_PREFIX + ' [add many experiments]',
-  props<{experiments: ITableExperiment[]}>()
+  props<{ experiments: ITableExperiment[] }>()
 );
 
 export const removeExperiments = createAction(
   EXPERIMENTS_PREFIX + ' [remove many experiments]',
-  props<{experiments: string[]}>()
+  props<{ experiments: string[] }>()
 );
 
 export const updateExperiment = createAction(
   EXPERIMENTS_PREFIX + ' [update experiment]',
-  props<{id: string; changes: Partial<ITableExperiment>}>()
+  props<{ id: string; changes: Partial<ITableExperiment> }>()
 );
 
 export const updateManyExperiment = createAction(
   EXPERIMENTS_PREFIX + 'update many experiments',
-  props<{changeList: TasksEnqueueManyResponseSucceeded[] }>()
+  props<{ changeList: TasksEnqueueManyResponseSucceeded[] }>()
 );
 
 export const setSelectedExperiments = createAction(
   EXPERIMENTS_PREFIX + ' [set selected experiments]',
-  props<{experiments: ITableExperiment[]}>()
+  props<{ experiments: ITableExperiment[] }>()
 );
 
 export const updateUrlParams = createAction(EXPERIMENTS_PREFIX + '[update URL params from state]');
 
 export const setSelectedExperiment = createAction(
   EXPERIMENTS_PREFIX + ' [set selected experiment]',
-  props<{experiment: ITableExperiment}>()
+  props<{ experiment: ITableExperiment }>()
 );
 
 export const experimentSelectionChanged = createAction(
   EXPERIMENTS_PREFIX + ' [experiment selection changed]',
-  props<{experiment: {id?: string}; project?: string}>()
+  props<{ experiment: { id?: string }; project?: string }>()
 );
 
 
 export const selectAllExperiments = createAction(
   EXPERIMENTS_PREFIX + ' [select all experiments]',
-  props<{filtered: boolean}>()
+  props<{ filtered: boolean }>()
 );
 
 export const toggleColHidden = createAction(
   EXPERIMENTS_PREFIX + ' [toggle column hidden state]',
-  props<{columnId: string; projectId: string}>()
+  props<{ columnId: string; projectId: string }>()
 );
 
 export const setVisibleColumnsForProject = createAction(
@@ -103,19 +106,19 @@ export const setHiddenCols = createAction(
 
 export const setParents = createAction(
   EXPERIMENTS_PREFIX + '[set project experiment parents]',
-  props<{ parents: ProjectsGetTaskParentsResponseParents[]}>()
+  props<{ parents: ProjectsGetTaskParentsResponseParents[] }>()
 );
 
 export const setActiveParentsFilter = createAction(
   EXPERIMENTS_PREFIX + '[set active parents filter]',
-  props<{ parents: ProjectsGetTaskParentsResponseParents[]}>()
+  props<{ parents: ProjectsGetTaskParentsResponseParents[] }>()
 );
 
 export const getParents = createAction(EXPERIMENTS_PREFIX + '[get project experiments parents]');
 
 export const tableFilterChanged = createAction(
   EXPERIMENTS_PREFIX + '[table filter changed]',
-  props<{filters: TableFilter[]; projectId: string}>()
+  props<{ filters: TableFilter[]; projectId: string }>()
 );
 
 export const tableSortChanged = createAction(
@@ -142,19 +145,19 @@ export const getProjectTypes = createAction(EXPERIMENTS_PREFIX + 'GET_PROJECT_TY
 
 export const showOnlySelected = createAction(
   EXPERIMENTS_PREFIX + ' [show only selected]',
-  props<{active: boolean; projectId: string}>()
+  props<{ active: boolean; projectId: string }>()
 );
 
 export const globalFilterChanged = createAction(
   EXPERIMENTS_PREFIX + 'GLOBAL_FILTER_CHANGED',
-  props<{query: string; regExp?: boolean}>()
+  props<{ query: string; regExp?: boolean }>()
 );
 
 export const resetGlobalFilter = createAction(EXPERIMENTS_PREFIX + 'RESET_GLOBAL_FILTER');
 
 export const setCurrentScrollId = createAction(
   EXPERIMENTS_PREFIX + ' [set current scrollId]',
-  props<{scrollId: string}>()
+  props<{ scrollId: string }>()
 );
 
 export const resetExperiments = createAction(EXPERIMENTS_PREFIX + ' [reset experiments]');
@@ -163,21 +166,21 @@ export const getCustomHyperParams = createAction(EXPERIMENTS_PREFIX + ' [get cus
 
 export const setCustomMetrics = createAction(
   EXPERIMENTS_PREFIX + ' [set custom metrics]',
-  props<{metrics: MetricVariantResult[]}>()
+  props<{ metrics: MetricVariantResult[] }>()
 );
 export const setCustomHyperParams = createAction(
   EXPERIMENTS_PREFIX + ' [set custom hyper params]',
-  props<{params: any[]}>()
+  props<{ params: any[] }>()
 );
 
 export const setExtraColumns = createAction(
   EXPERIMENTS_PREFIX + 'SET_EXTRA_COLUMNS',
-  props<{ columns: any[] ; projectId: string }>()
+  props<{ columns: any[]; projectId: string }>()
 );
 
 export const addColumn = createAction(
   EXPERIMENTS_PREFIX + ' [ add column]',
-  props<{col: ISmCol}>()
+  props<{ col: ISmCol }>()
 );
 
 export const removeCol = createAction(
@@ -187,22 +190,22 @@ export const removeCol = createAction(
 
 export const setColumnWidth = createAction(
   EXPERIMENTS_PREFIX + ' [set column width]',
-  props<{projectId: string; columnId: string; widthPx: number}>()
+  props<{ projectId: string; columnId: string; widthPx: number }>()
 );
 
 export const setColsOrderForProject = createAction(
   EXPERIMENTS_PREFIX + ' [set cols order]',
-  props<{ cols: string[]; project: string;}>()
+  props<{ cols: string[]; project: string }>()
 );
 
 export const clearHyperParamsCols = createAction(
   EXPERIMENTS_PREFIX + ' [Clear HyperParam Cols]',
-  props<{projectId: string}>()
+  props<{ projectId: string }>()
 );
 
 export const resetSortOrder = createAction(
   EXPERIMENTS_PREFIX + 'RESET_SORT_ORDER',
-  props<{sortIndex: number; projectId: string}>()
+  props<{ sortIndex: number; projectId: string }>()
 );
 
 export const setSplitSize = createAction(EXPERIMENTS_PREFIX + 'SET_SPLIT_SIZE', props<{ splitSize: number }>());
@@ -229,5 +232,5 @@ export const setSelectedExperimentsDisableAvailable = createAction(
 );
 export const setTableMode = createAction(
   EXPERIMENTS_PREFIX + '[set table view mode]',
-  props<{mode: 'info' | 'table'}>()
-)
+  props<{ mode: 'info' | 'table' }>()
+);

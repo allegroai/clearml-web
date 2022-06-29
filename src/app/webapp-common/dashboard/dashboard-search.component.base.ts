@@ -1,59 +1,99 @@
-import {InitSearch, ResetSearch} from '../common-search/common-search.actions';
-import {skip} from 'rxjs/operators';
+import {initSearch, resetSearch} from '../common-search/common-search.actions';
+import {filter, skip} from 'rxjs/operators';
 import {Model} from '~/business-logic/model/models/model';
-import {SearchDeactivate, searchStart} from '../dashboard-search/dashboard-search.actions';
+import {clearSearchResults, getCurrentPageResults, searchClear, searchDeactivate, searchStart} from '../dashboard-search/dashboard-search.actions';
 import {IRecentTask} from './common-dashboard.reducer';
 import {ITask} from '~/business-logic/model/al-task';
-import {Observable} from 'rxjs';
-import {ICommonSearchState, selectSearchQuery} from '../common-search/common-search.reducer';
+import {Observable, Subscription} from 'rxjs';
+import {SearchState, selectSearchQuery} from '../common-search/common-search.reducer';
 import {Store} from '@ngrx/store';
 import {
-  selectActiveSearch, selectExperimentsResults, selectModelsResults, selectPipelinesResults, selectProjectsResults,
-  selectResultsCounter,
+  selectActiveSearch, selectDatasetsResults, selectExperimentsResults, selectModelsResults, selectPipelinesResults, selectProjectsResults, selectResultsCount, selectSearchScrollIds,
   selectSearchTerm
 } from '../dashboard-search/dashboard-search.reducer';
 import {Project} from '~/business-logic/model/projects/project';
 import {setSelectedProjectId} from '../core/actions/projects.actions';
 import {isExample} from '../shared/utils/shared-utils';
-import {ActiveSearchLink} from '~/features/dashboard/containers/dashboard-search/dashboard-search.component';
+import {activeLinksList, ActiveSearchLink, activeSearchLink} from '~/features/dashboard-search/dashboard-search.consts';
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Router} from '@angular/router';
 
-export abstract class DashboardSearchComponentBase {
-  abstract store;
-  abstract router;
+@Component({
+  selector: 'sm-dashboard-search-base',
+  template: `<sm-search-results-page
+    *ngIf="activeSearch$ | async"
+    (projectSelected)="projectCardClicked($event)"
+    (experimentSelected)="taskSelected($event)"
+    (modelSelected)="modelSelected($event)"
+    (pipelineSelected)="pipelineSelected($event)"
+    (activeLinkChanged)="activeLinkChanged($event)"
+    (openDatasetSelected)="openDatasetCardClicked($event)"
+    (loadMoreClicked)="loadMore()"
+    [projectsList]="projectsResults$ | async"
+    [pipelinesList]="pipelinesResults$ | async"
+    [datasetsList]="datasetsResults$ | async"
+    [experimentsList]="experimentsResults$ | async"
+    [modelsList]="modelsResults$ | async"
+    [activeLink]="activeLink"
+    [resultsCount]="resultsCount$ | async">
+  </sm-search-results-page>`,
+})
+export class DashboardSearchBaseComponent implements OnInit, OnDestroy{
   public activeLink = 'projects' as ActiveSearchLink;
   private searchSubs;
-  public searchQuery$: Observable<ICommonSearchState['searchQuery']>;
+  private allResultsSubscription: Subscription;
+  public searchQuery$: Observable<SearchState['searchQuery']>;
   public activeSearch$: Observable<boolean>;
-  protected readonly resultsCounter$: Observable<number>;
   public modelsResults$: Observable<Array<Model>>;
   public projectsResults$: Observable<Array<Project>>;
   public experimentsResults$: Observable<any>;
-  public searchTerm$: Observable<ICommonSearchState['searchQuery']>;
+  public searchTerm$: Observable<SearchState['searchQuery']>;
   public pipelinesResults$: Observable<Project[]>;
+  public datasetsResults$: Observable<Project[]>;
+  private scrollIds: Map<ActiveSearchLink, string>;
+  public resultsCount$: Observable<Map<ActiveSearchLink, number>>;
 
-  constructor(store: Store<any>){
+  constructor(public store: Store<any>, public router: Router){
     this.searchQuery$        = store.select(selectSearchQuery);
     this.activeSearch$       = store.select(selectActiveSearch);
-    this.resultsCounter$     = store.select(selectResultsCounter);
     this.modelsResults$      = store.select(selectModelsResults);
     this.pipelinesResults$   = store.select(selectPipelinesResults);
+    this.datasetsResults$   = store.select(selectDatasetsResults);
     this.projectsResults$    = store.select(selectProjectsResults);
     this.experimentsResults$ = store.select(selectExperimentsResults);
     this.searchTerm$         = store.select(selectSearchTerm);
+    this.resultsCount$ = store.select(selectResultsCount);
+    this.syncAppSearch();
+  }
 
+  public ngOnInit(): void {
+    this.allResultsSubscription = this.resultsCount$.pipe(
+      filter(resultsCount => !!resultsCount),
+    ).subscribe((resultsCount) => {
+      return this.setFirstActiveLink(resultsCount);
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.store.dispatch(searchClear());
+    this.searchTermChanged('');
+    this.stopSyncSearch();
+    this.allResultsSubscription.unsubscribe();
   }
 
   stopSyncSearch() {
-    this.store.dispatch(new ResetSearch());
+    this.store.dispatch(resetSearch());
     this.searchSubs.unsubscribe();
   }
 
   syncAppSearch() {
-    this.store.dispatch(new InitSearch('Search for all'));
+    this.store.dispatch(initSearch({payload: 'Search for all'}));
 
     this.searchSubs = this.searchQuery$
       .pipe(skip(1))
       .subscribe(query => this.searchTermChanged(query?.query, query?.regExp));
+
+    this.searchSubs.add(this.store.select(selectSearchScrollIds).subscribe(scrollIds => this.scrollIds = scrollIds));
   }
 
   public modelSelected(model: Model) {
@@ -64,10 +104,10 @@ export abstract class DashboardSearchComponentBase {
 
   public searchTermChanged(term: string, regExp?: boolean) {
     if (term && term.length > 0) {
-      this.store.dispatch(searchStart({query:term, regExp, force: term.length < 3}));
+      this.store.dispatch(searchStart({query:term, regExp, force: term.length < 3, activeLink: this.activeLink}));
     } else {
-      this.activeLink = 'projects';
-      this.store.dispatch(new SearchDeactivate());
+      this.activeLink = activeSearchLink.projects;
+      this.store.dispatch(searchDeactivate());
     }
   }
 
@@ -75,8 +115,14 @@ export abstract class DashboardSearchComponentBase {
     this.router.navigateByUrl(`projects/${project.id}`);
     this.store.dispatch(setSelectedProjectId({projectId: project.id, example: isExample(project)}));
   }
+
   pipelineSelected(project: Project) {
     this.router.navigateByUrl(`pipelines/${project.id}/experiments`);
+    this.store.dispatch(setSelectedProjectId({projectId: project.id, example: isExample(project)}));
+  }
+
+  public openDatasetCardClicked(project: Project) {
+    this.router.navigateByUrl(`datasets/simple/${project.id}/experiments`);
     this.store.dispatch(setSelectedProjectId({projectId: project.id, example: isExample(project)}));
   }
 
@@ -89,14 +135,26 @@ export abstract class DashboardSearchComponentBase {
 
   public activeLinkChanged(activeLink) {
     this.activeLink = activeLink;
+    if (!this.scrollIds?.[activeLink]) {
+      this.store.dispatch(getCurrentPageResults({activeLink}));
+    }
+
   }
 
-  setFirstActiveLink(allResults, tabsIndexes) {
-    if (!(allResults[tabsIndexes.indexOf(this.activeLink)].length > 0)) {
-      const firstTabIndex = allResults.findIndex(list => list.length > 0);
+  setFirstActiveLink(resultsCount) {
+    if (resultsCount[this.activeLink] > 0) {
+      this.activeLinkChanged(this.activeLink);
+    } else {
+      const firstTabIndex = activeLinksList.findIndex(activeLink => resultsCount[activeLink.name] > 0);
       if (firstTabIndex > -1) {
-        this.activeLink = tabsIndexes[firstTabIndex];
+        this.activeLinkChanged(activeLinksList[firstTabIndex].name);
+      } else {
+        this.store.dispatch(clearSearchResults());
       }
     }
+  }
+
+  loadMore() {
+    this.store.dispatch(getCurrentPageResults({activeLink: this.activeLink}));
   }
 }

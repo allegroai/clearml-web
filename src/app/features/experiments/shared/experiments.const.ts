@@ -1,7 +1,5 @@
-import {TaskStatusEnum} from '../../../business-logic/model/tasks/taskStatusEnum';
+import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
 import {ExperimentTableColFieldsEnum} from './experiments.model';
-import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
-import {Model} from '~/business-logic/model/models/model';
 
 export type experimentSectionsEnum =
   'MODEL_INPUT'
@@ -62,3 +60,11 @@ export const EXPERIMENTS_STATUS_LABELS = {
 export const DevWarningEnabled = false;
 
 export const excludeTypes = [];
+
+export const DATASETS_STATUS_LABEL = {
+  [TaskStatusEnum.InProgress]: 'Uploading',
+  [TaskStatusEnum.Completed]: 'Final',
+  Running: 'Uploading',
+  Completed: 'Final'
+};
+

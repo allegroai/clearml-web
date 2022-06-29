@@ -4,6 +4,14 @@
   display: flex;
   height: 100%;
 
+  ::ng-deep .mat-expansion-panel-header.mat-expansion-toggle-indicator-before {
+    .mat-expansion-indicator {
+      margin: 0 12px 0 2px;
+      height: 20px;
+      line-height: 1;
+    }
+  }
+
   ::ng-deep .list-container {
     display: flex;
     flex-direction: column;
@@ -17,7 +25,11 @@
   }
 
   ::ng-deep .mat-expansion-panel-body {
-    padding: 0;
+    padding: 0 12px 0 24px;
+  }
+  ::ng-deep sm-search {
+    margin-top: 12px;
+    padding-right: 24px;
   }
 }
 
@@ -35,7 +47,7 @@
 
 
 .metrics-container {
-  padding: 20px 0 0 32px;
+  padding: 20px 0 0 24px;
   // dashboard-search icon
   i.fa {
     position: absolute;
@@ -63,7 +75,7 @@
 
 .metrics-search {
   position: relative;
-  margin-bottom: 6px;
+  margin: 12px 24px 6px 0;
 
   input {
     width: 100%;
@@ -173,5 +185,5 @@
 }
 
 sm-grouped-checked-filter-list {
-  margin: 0 12px 0 32px;
+  margin: 0 0 0 24px;
 }

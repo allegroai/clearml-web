@@ -1,7 +1,6 @@
 import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
-import {CircleTypeEnum} from '../../../../../shared/constants/non-common-consts';
-import {Model} from '../../../../../business-logic/model/models/model';
-import {TIME_FORMAT_STRING} from '../../../../constants';
+import {CircleTypeEnum} from '~/shared/constants/non-common-consts';
+import {TIME_FORMAT_STRING} from '@common/constants';
 
 
 @Component({
@@ -17,16 +16,8 @@ export class ModelCardComponent {
   TIME_FORMAT_STRING = TIME_FORMAT_STRING;
   CircleTypeEnum = CircleTypeEnum;
 
+
   public modelClicked() {
     this.modelCardClicked.emit(this.model);
-  }
-
-  public numberOfLabels(labels: Model['labels']): number {
-    if (labels) {
-      return Object.keys(labels).length;
-    } else {
-      return 0;
-    }
-
   }
 }

@@ -5,12 +5,15 @@ import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {MetricsPlotEvent} from '~/business-logic/model/events/metricsPlotEvent';
 import {EventsScalarMetricsIterRawRequest} from '~/business-logic/model/events/eventsScalarMetricsIterRawRequest';
 import {EventsScalarMetricsIterRawResponse} from '~/business-logic/model/events/eventsScalarMetricsIterRawResponse';
+import {PlotSampleResponse} from '~/business-logic/model/events/plotSampleResponse';
+import { EventsGetTaskSingleValueMetricsResponseTasks } from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponseTasks';
 
 export const EXPERIMENTS_OUTPUT_PREFIX = 'EXPERIMENTS_OUTPUT_';
 
 
 export const GET_EXPERIMENT_LOG = EXPERIMENTS_OUTPUT_PREFIX + 'GET_EXPERIMENT_LOG';
 export const SET_EXPERIMENT_LOG = EXPERIMENTS_OUTPUT_PREFIX + 'SET_EXPERIMENT_LOG';
+export const SET_EXPERIMENT_SCALAR_SINGLE_VALUE = EXPERIMENTS_OUTPUT_PREFIX + 'SET_EXPERIMENT_SCALAR_SINGLE_VALUE';
 export const SET_EXPERIMENT_METRICS_SEARCH_TERM = EXPERIMENTS_OUTPUT_PREFIX + 'SET_EXPERIMENT_METRICS_SEARCH_TERM';
 export const SET_EXPERIMENT_HISTOGRAM = EXPERIMENTS_OUTPUT_PREFIX + 'SET_EXPERIMENT_HISTOGRAM';
 export const SET_EXPERIMENT_PLOTS = EXPERIMENTS_OUTPUT_PREFIX + 'SET_EXPERIMENT_PLOTS';
@@ -111,6 +114,11 @@ export const setExperimentLog = createAction(
   props<{ events: any[]; direction?: string; total: number; refresh?: boolean }>()
 );
 
+export const setExperimentScalarSingleValue = createAction(
+  SET_EXPERIMENT_SCALAR_SINGLE_VALUE,
+  props<EventsGetTaskSingleValueMetricsResponseTasks >()
+);
+
 export class SetExperimentSettings implements Action {
   readonly type = UPDATE_EXPERIMENT_SETTINGS;
 
@@ -144,3 +152,11 @@ export class ResetLogFilter implements Action {
 export const downloadFullLog = createAction(EXPERIMENTS_OUTPUT_PREFIX + 'DOWNLOAD_FULL_LOG', props<{ experimentId: string }>());
 export const toggleSettings = createAction(EXPERIMENTS_OUTPUT_PREFIX + 'TOGGLE_SETTINGS');
 
+export const getPlotSample = createAction(EXPERIMENTS_OUTPUT_PREFIX + 'GET_PLOT_FOR_ITERATION', props<{ task: string; metric: string; variant: string; iteration: number }>());
+export const getNextPlotSample = createAction(EXPERIMENTS_OUTPUT_PREFIX + 'GET_NEXT_PLOT', props<{ task: string; navigateEarlier: boolean }>());
+export const setCurrentPlot = createAction(EXPERIMENTS_OUTPUT_PREFIX + 'SET_PLOT_FOR_ITERATION', props<{ event: any }>());
+export const setPlotViewerScrollId = createAction(EXPERIMENTS_OUTPUT_PREFIX + 'SET_PLOT_VIEWER_SCROLL_ID', props<{ scrollId: string }>());
+export const setPlotIterations = createAction(EXPERIMENTS_OUTPUT_PREFIX + 'SET_PLOT_ITERATIONS', props<PlotSampleResponse>());
+export const setViewerEndOfTime = createAction(EXPERIMENTS_OUTPUT_PREFIX + 'SET_VIEWER_END_OF_TIME', props<{ endOfTime: boolean }>());
+export const setViewerBeginningOfTime = createAction(EXPERIMENTS_OUTPUT_PREFIX + 'SET_VIEWER_BEGINNING_OF_TIME', props<{ beginningOfTime: boolean }>());
+export const resetViewer = createAction(EXPERIMENTS_OUTPUT_PREFIX + 'RESET_VIEWER');

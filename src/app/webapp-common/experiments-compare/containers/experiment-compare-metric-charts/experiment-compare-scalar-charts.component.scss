@@ -1,6 +1,6 @@
 @import "variables";
 
-$list-width: 300px;
+$list-width: 360px;
 
 :host {
   display: flex;
@@ -12,6 +12,9 @@ $list-width: 300px;
 
   mat-drawer-container {
     width: 100%;
+  }
+  .mat-drawer-side {
+    border-color: #efefef;
   }
 
   .drawer-settings-bar {
@@ -34,7 +37,6 @@ $list-width: 300px;
     width: $list-width;
     overflow-y: auto;
     overflow-x: hidden;
-    border-right: 1px solid #efefef;
   }
 
   .graphs-container {

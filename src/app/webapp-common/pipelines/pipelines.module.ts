@@ -9,6 +9,7 @@ import {IProjectsState, projectsReducer} from '~/features/projects/projects.redu
 import {RouterModule, Routes} from '@angular/router';
 import {ProjectsSharedModule} from '~/features/projects/shared/projects-shared.module';
 import {merge} from 'lodash/fp';
+import {PipelinesRouterModule} from '@common/pipelines/pipelines.route';
 
 export const routes: Routes = [
   { path: '', component: PipelinesPageComponent }
@@ -20,6 +21,7 @@ export const pipelinesSyncedKeys = [
 
 export const PIPELINES_CONFIG_TOKEN =
   new InjectionToken<StoreConfig<IProjectsState , any>>('PipelineConfigToken');
+
 
 const localStorageKey = '_saved_pipeline_state_';
 
@@ -39,6 +41,7 @@ const getPipelineConfig = () => ({
 });
 
 
+
 @NgModule({
   declarations: [
     PipelinesPageComponent,
@@ -52,8 +55,9 @@ const getPipelineConfig = () => ({
     StoreModule.forFeature('projects', projectsReducer, PIPELINES_CONFIG_TOKEN),
     RouterModule.forChild(routes)
   ],
+  exports: [PipelinesRouterModule, PipelinesPageComponent],
   providers: [
-    {provide: PIPELINES_CONFIG_TOKEN, useFactory: getPipelineConfig}
+    {provide: PIPELINES_CONFIG_TOKEN, useFactory: getPipelineConfig},
   ]
 })
 export class PipelinesModule { }

@@ -1,5 +1,6 @@
 import {ProjectsGetAllResponseSingleSubProjects} from '~/business-logic/model/projects/projectsGetAllResponseSingleSubProjects';
 import {Stats} from '~/business-logic/model/projects/stats';
+import {ProjectsGetAllResponseSingleDatasetStats} from '~/business-logic/model/projects/projectsGetAllResponseSingleDatasetStats';
 
 /**
  * projects
@@ -24,6 +25,10 @@ export interface Project {
      * Project name
      */
     name?: string;
+    /**
+     * Project base name
+     */
+    basename?: string;
     /**
      * Project description
      */
@@ -53,6 +58,7 @@ export interface Project {
      */
     default_output_destination?: string;
     stats?: Stats;
+    dataset_stats?: ProjectsGetAllResponseSingleDatasetStats;
     /**
      * Last project update time. Reflects the last time the project metadata was changed or a task in this project has changed status
      */

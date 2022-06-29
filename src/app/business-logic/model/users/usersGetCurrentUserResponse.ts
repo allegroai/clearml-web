@@ -15,4 +15,5 @@ import { GetCurrentUserResponseUserObject } from '././getCurrentUserResponseUser
 
 export interface UsersGetCurrentUserResponse {
     user?: GetCurrentUserResponseUserObject;
+    getting_started?: object;
 }

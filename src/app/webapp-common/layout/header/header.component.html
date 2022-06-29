@@ -1,13 +1,13 @@
 <div class="header-container" [class.login]="isLogin">
-  <div class="d-flex align-items-center crumbs-contain">
-    <sm-breadcrumbs
-      class="spacer"
-      [class.share-view]="isShareMode"
-      [activeWorkspace]="activeWorkspace">
-    </sm-breadcrumbs>
-    <div class="ml-3 d-flex align-items-center" *ngIf="userFocus || (showUserFocus$ | async)">
-      <sm-show-only-user-work></sm-show-only-user-work>
-    </div>
+  <sm-breadcrumbs
+    class="spacer"
+    [class.flex-grow-1]="!(userFocus || (showUserFocus$ | async))"
+    [class.user-focus]="userFocus || (showUserFocus$ | async)"
+    [class.share-view]="isShareMode"
+    [activeWorkspace]="activeWorkspace">
+  </sm-breadcrumbs>
+  <div class="ml-3 d-flex align-items-center mr-auto" *ngIf="(userFocus || (showUserFocus$ | async)) && !(search.searchQuery$ | async)">
+    <sm-show-only-user-work></sm-show-only-user-work>
   </div>
 
   <div *ngIf="isDashboard && !isLogin" class="logo-full middle"
@@ -21,7 +21,7 @@
   <div *ngIf="isLogin" class="spacer"></div>
 
   <div class="right-buttons">
-    <sm-common-search [class.share-view]="isShareMode"></sm-common-search>
+    <sm-common-search #search [class.share-view]="isShareMode"></sm-common-search>
 
     <a class="pointer resources-trigger" [matMenuTriggerFor]="resourcesMenu">
       <i class="far al-ico-help-outlined"></i>
@@ -53,9 +53,6 @@
     <mat-menu #resourcesMenu="matMenu" class="user-menu">
       <button mat-menu-item (click)="openWelcome($event)">
         <i class="al-icon sm-md al-ico-code-file"></i>ClearML Python Package setup
-      </button>
-      <button mat-menu-item *ngIf="environment.slackLink" (click)="navigate(environment.slackLink)">
-        <i class="al-icon al-ico-slack sm-md"></i>Community support on Slack
       </button>
       <button mat-menu-item (click)="navigate('https://www.youtube.com/c/ClearML/featured')">
         <i class="al-icon al-ico-youtube sm-md"></i>ClearML on Youtube

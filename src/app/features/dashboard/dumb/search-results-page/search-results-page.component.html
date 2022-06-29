@@ -1,27 +1,26 @@
 <div class="search-container">
-  <div class="container">
+  <div class="d-flex-center">
     <div class="pl-3 py-3">
-      <span [ngClass]="{'active': activeLink === 'projects'}" class="pointer category-link"
-            (click)="activeLinkChanged.emit('projects')">PROJECTS {{'(' + projectsList.length + ')'}}  </span>
-      <span [ngClass]="{'active': activeLink === 'experiments'}" class="pointer category-link"
-            (click)="activeLinkChanged.emit('experiments')">EXPERIMENTS {{'(' + experimentsList.length + ')'}}  </span>
-      <span [ngClass]="{'active': activeLink === 'models'}" class="pointer category-link"
-            (click)="activeLinkChanged.emit('models')">MODELS {{'(' + modelsList.length + ')'}}  </span>
-      <span [ngClass]="{'active': activeLink === 'pipelines'}" class="pointer category-link"
-            (click)="activeLinkChanged.emit('pipelines')">PIPELINES ({{pipelinesList?.length}})  </span>
+      <ng-container *ngFor="let searchTab of activeLinksList">
+          <span [class.active]="activeLink === searchTab.name" class="pointer category-link"
+                (click)="activeLinkChanged.emit(searchTab.name)">{{searchTab.label}} ({{resultsCount?.[searchTab.name]}})  </span>
+      </ng-container>
     </div>
   </div>
   <div class="page-container">
     <sm-search-results
       [cardTemplate]="
-        activeLink === 'projects' ? ProjectTemplate :
-        activeLink === 'experiments' ? ExperimentTemplate :
-        activeLink === 'models' ? ModelsTemplate :
-        activeLink === 'pipelines' ? PipelineTemplate :
+        activeLink === searchPages.projects ? ProjectTemplate :
+        activeLink === searchPages.experiments ? ExperimentTemplate :
+        activeLink === searchPages.models ? ModelsTemplate :
+        activeLink === searchPages.openDatasets ? openDatasetTemplate :
+        activeLink === searchPages.pipelines ? PipelineTemplate :
        ProjectTemplate"
       [results]="getResults()"
       [cardHeight]="getCardHeight()"
-      (resultClicked)="projectClicked($event)">
+      [showLoadMoreButton]="getResults().length < resultsCount?.[activeLink]"
+      (resultClicked)="projectClicked($event)"
+      (loadMoreClicked)="loadMoreClicked.emit()">
     </sm-search-results>
   </div>
 
@@ -54,4 +53,13 @@
       (projectCardClicked)="pipelineClicked($event)"
     ></sm-pipeline-card>
   </ng-template>
+
+  <ng-template #openDatasetTemplate let-dataset="result">
+    <sm-simple-dataset-card
+      [hideMenu]="true"
+      [project]="dataset"
+      (projectCardClicked)="openDatasetClicked($event)"
+    ></sm-simple-dataset-card>
+  </ng-template>
+
 </div>

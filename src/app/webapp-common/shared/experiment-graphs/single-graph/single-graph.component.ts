@@ -32,7 +32,7 @@ import {Store} from '@ngrx/store';
 import {ResizeEvent} from 'angular-resizable-element';
 import {select} from 'd3-selection';
 import {MatDialog} from '@angular/material/dialog';
-import {GraphDisplayerComponent} from '../graph-displayer/graph-displayer.component';
+import {GraphViewerComponent} from '../graph-viewer/graph-viewer.component';
 import {PALLET} from '@common/constants';
 import {download} from '@common/shared/utils/download';
 import {Subject} from 'rxjs';
@@ -78,11 +78,13 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
   @Input() legendConfiguration: Partial<ExtLegend & { noTextWrap: boolean }> = {};
   @Input() height: number;
   @Input() set chart(chart: ExtFrame) {
-    this.ratioEnable = !!chart.layout.width && !!chart.layout.height;
-    this.ratio = this.ratioEnable? chart.layout.width / chart.layout.height : null;
-    this.height = chart.layout.height || 450;
-    this.originalChart = cloneDeep(chart);
-    this._chart = chart;
+    if (chart) {
+      this.ratioEnable = !!chart.layout.width && !!chart.layout.height;
+      this.ratio = this.ratioEnable ? chart.layout.width / chart.layout.height : null;
+      this.height = chart.layout.height || this.height || 450;
+      this.originalChart = cloneDeep(chart);
+      this._chart = chart;
+    }
   }
 
   get chart(): ExtFrame {
@@ -126,7 +128,9 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
   ) {
     super(store);
     this.sub.add(this.smooth$
-      .pipe(debounceTime(50))
+      .pipe(
+        debounceTime(50),
+        filter(() => !!this.chart))
       .subscribe(() => {
         this._chart = cloneDeep(this.originalChart);
         this.drawGraph(true);
@@ -376,7 +380,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
 
     if (['multiScalar', 'scalar'].includes(graph.layout.type)) {
       if (['scatter', 'scatter3d'].includes(this.type)) {
-        layout = {...layout, ...scatterLayoutConfig} as Partial<ExtLayout>;
+        layout = {hovermode: 'x', ...layout, ...scatterLayoutConfig} as Partial<ExtLayout>;
       }
     }
     if (['bar'].includes(this.type)) {
@@ -792,7 +796,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
 
   private maximizeGraph() {
 
-    this.dialog.open(GraphDisplayerComponent, {
+    this.dialog.open(GraphViewerComponent, {
       data: {
         // signed url are updated after originChart was cloned - need to update images urls!
         chart: cloneDeep({
@@ -805,7 +809,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
         darkTheme: this.isDarkTheme,
         isCompare: this.isCompare,
       },
-      panelClass: ['image-displayer-dialog', this.isDarkTheme ? 'dark-theme' : 'light-theme'],
+      panelClass: ['image-viewer-dialog', this.isDarkTheme ? 'dark-theme' : 'light-theme'],
       height: '100%',
       maxHeight: 'auto',
       width: '100%',

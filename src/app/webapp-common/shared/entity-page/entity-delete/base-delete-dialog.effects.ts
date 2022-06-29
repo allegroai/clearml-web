@@ -54,6 +54,7 @@ export class DeleteDialogEffectsBase {
   deleteEntityApi(entityType: EntityTypeEnum, entities: any[]): Observable<{ failed: any[]; succeeded: string[] }> {
     const ids = entities.map(entity => entity.id);
     switch (entityType) {
+      case EntityTypeEnum.dataset:
       case EntityTypeEnum.controller:
       case EntityTypeEnum.experiment:
         // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -84,8 +85,8 @@ export class DeleteDialogEffectsBase {
 
   getEntitySelector(entityType: EntityTypeEnum) {
     switch (entityType) {
+      case EntityTypeEnum.dataset:
       case EntityTypeEnum.controller:
-        return selectSelectedExperiments;
       case EntityTypeEnum.experiment:
         return selectSelectedExperiments;
       case EntityTypeEnum.model:

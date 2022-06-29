@@ -11,7 +11,7 @@ import {
 import {ColHeaderTypeEnum, ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {get} from 'lodash/fp';
 import {SelectedModel, TableModel} from '../models.model';
-import {MODELS_FRAMEWORK_LABELS, MODELS_READY_LABELS, MODELS_TABLE_COL_FIELDS} from '../models.const';
+import {MODELS_READY_LABELS, MODELS_TABLE_COL_FIELDS} from '../models.const';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {BaseTableView} from '@common/shared/ui-components/data/table/base-table-view';
 import {User} from '~/business-logic/model/users/user';
@@ -43,15 +43,13 @@ import {createFiltersFromStore} from '@common/shared/utils/tableParamEncode';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ModelsTableComponent extends BaseTableView {
-  readonly MODELS_TABLE_COL_FIELDS = MODELS_TABLE_COL_FIELDS;
-  readonly MODELS_FRAMEWORK_OPTIONS = Object.entries(MODELS_FRAMEWORK_LABELS).map(([key, val]) => ({
-    label: val,
-    value: key
-  }));
-  readonly MODELS_READY_OPTIONS = Object.entries(MODELS_READY_LABELS).map(([key, val]) => ({label: val, value: key}));
+  readonly modelsTableColFields = MODELS_TABLE_COL_FIELDS;
+  readonly modelsReadyOptions = Object.entries(MODELS_READY_LABELS).map(([key, val]) => ({label: val, value: key}));
+  readonly timeFormatString = TIME_FORMAT_STRING;
+
   public filtersOptions: { [colId: string]: IOption[] } = {
     [MODELS_TABLE_COL_FIELDS.FRAMEWORK]: [],
-    [MODELS_TABLE_COL_FIELDS.READY]: this.MODELS_READY_OPTIONS,
+    [MODELS_TABLE_COL_FIELDS.READY]: this.modelsReadyOptions,
     [MODELS_TABLE_COL_FIELDS.USER]: [],
     [MODELS_TABLE_COL_FIELDS.TAGS]: [],
   };
@@ -72,6 +70,7 @@ export class ModelsTableComponent extends BaseTableView {
   public filtersMatch: { [colId: string]: string } = {};
   public filtersSubValues: { [colId: string]: any } = {};
   public singleRowContext: boolean;
+  private _tableFilters: { [p: string]: FilterMetadata };
 
   @Input() set models(models: SelectedModel[]) {
     this._models = models;
@@ -156,6 +155,7 @@ export class ModelsTableComponent extends BaseTableView {
   }
 
   @Input() set tableFilters(filters: { [s: string]: FilterMetadata }) {
+    this._tableFilters = filters;
     this.filtersValues = {};
     this.filtersValues[MODELS_TABLE_COL_FIELDS.FRAMEWORK] = get([MODELS_TABLE_COL_FIELDS.FRAMEWORK, 'value'], filters) || [];
     this.filtersValues[MODELS_TABLE_COL_FIELDS.READY] = get([MODELS_TABLE_COL_FIELDS.READY, 'value'], filters) || [];
@@ -167,6 +167,10 @@ export class ModelsTableComponent extends BaseTableView {
     //dynamic filters
     const filtersValues = createFiltersFromStore(filters || {}, false);
     this.filtersValues = Object.assign({}, {...this.filtersValues}, {...filtersValues});
+  }
+
+  get tableFilters() {
+    return this._tableFilters;
   }
 
   @Input() set users(users: User[]) {
@@ -217,9 +221,10 @@ export class ModelsTableComponent extends BaseTableView {
   @Output() tagsMenuOpened = new EventEmitter();
   @Output() sortedChanged = new EventEmitter<{ isShift: boolean; colId: ISmCol['id'] }>();
   @Output() columnResized = new EventEmitter<{ columnId: string; widthPx: number }>();
+  @Output() clearAllFilters = new EventEmitter<{ [s: string]: FilterMetadata }>();
+
   @ViewChild(TableComponent, {static: true}) table: TableComponent;
   @ViewChild('contextMenuExtended') contextMenuExtended: ModelMenuExtendedComponent;
-  timeFormatString = TIME_FORMAT_STRING;
   public readonly initialColumns = MODELS_TABLE_COLS;
 
   @HostListener('document:click', ['$event'])
@@ -269,7 +274,9 @@ export class ModelsTableComponent extends BaseTableView {
       const addList = this.getSelectionRange<TableModel>(change, model);
       this.modelsSelectionChanged.emit([...this.selectedModels, ...addList]);
     } else {
-      this.modelsSelectionChanged.emit(this.selectedModels.filter((selectedModel) => selectedModel.id !== model.id));
+      const removeList = this.getDeselectionRange(change, model as any);
+      this.modelsSelectionChanged.emit(this.selectedModels.filter((selectedModel) =>
+        !removeList.includes(selectedModel.id)));
     }
   }
 

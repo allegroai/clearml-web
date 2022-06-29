@@ -17,6 +17,7 @@ export class ProjectsListComponent {
 
   @Input() projects: Array<Project>;
   @Input() noMoreProjects: boolean;
+  @Input() showLast: boolean;
   @Output() projectCardClicked = new EventEmitter<ProjectsGetAllResponseSingle>();
   @Output() projectNameChanged = new EventEmitter<{ id: string, name: string }>();
   @Output() deleteProjectClicked = new EventEmitter<Project>();

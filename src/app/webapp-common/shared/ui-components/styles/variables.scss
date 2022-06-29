@@ -1,4 +1,5 @@
 @use "sass:math";
+@use "sass:meta";
 
 // colors
 $white: #fff;
@@ -30,7 +31,6 @@ $light-dusk: rgba(90, 101, 142, 0.5);
 $dusk-two: #515c85;
 $neon-yellow: #d3ff00;
 $neon-green: #82dd22;
-$neon-yellow-betterinchrome: #caff00;
 $neon-yellow-hover: #c6ef06;
 $purple: #4d66ff;
 $eggplant-purple: #222838;
@@ -176,6 +176,7 @@ $border-radius-sm: .2rem; // TODO:
 
 // fonts
 $font-family-base: 'Heebo', sans-serif; // Assumes the browser default, typically `16px`
+$font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 $font-default-color: $blue-100; // Assumes the browser default, typically `16px`
 
 $font-size-base: 1rem; // Assumes the browser default, typically `16px`

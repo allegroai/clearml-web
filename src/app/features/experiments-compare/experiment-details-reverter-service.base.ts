@@ -25,7 +25,8 @@ export abstract class ExperimentDetailsReverterServiceBase {
         tags: exp.tags,
         execution: this.revertExecution(exp),
         artifacts: this.revertArtifacts(exp),
-        configuration: this.revertconfiguration(exp.configuration)
+        configuration: this.revertconfiguration(exp.configuration),
+        info: this.revertInfo(exp)
       };
     });
   }
@@ -56,4 +57,6 @@ export abstract class ExperimentDetailsReverterServiceBase {
   abstract revertArtifacts(exp: ITask);
 
   abstract revertExecution(exp: ITask);
+
+  abstract revertInfo(exp: ITask);
 }

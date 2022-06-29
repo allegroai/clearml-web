@@ -1,5 +1,4 @@
 <span
-  smHesitate
   [delay]="500"
   [action]="'leave'"
   (smHesitate)=" hesitateMenu.hesitateStatus && tooltipMenu.closed.emit()">
@@ -9,7 +8,6 @@
   #tooltipElement
   [matMenuTriggerFor]="tooltipMenu"
   smClickStopPropagation
-  smHesitate
   [delay]="100"
   [action]="'enter'"
   (smHesitate)="tooltipElement.click(); hesitateMenu.hesitateStatus= true"
@@ -21,7 +19,6 @@
   <div
     class="tooltip-container"
     [innerHTML]="infoData"
-    smHesitate
     [delay]="500"
     [action]="'leave'"
     (smHesitate)="tooltipMenu.closed.emit()"

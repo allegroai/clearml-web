@@ -2,7 +2,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  EventEmitter,
+  EventEmitter, Input,
   OnDestroy,
   OnInit,
   Output
@@ -31,6 +31,7 @@ import {
 } from '../../containers/select-experiments-for-compare/select-experiments-for-compare.component';
 import {MatDialog} from '@angular/material/dialog';
 import {RefreshService} from '@common/core/services/refresh.service';
+import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 
 @Component({
   selector: 'sm-experiment-compare-header',
@@ -51,6 +52,7 @@ export class ExperimentCompareHeaderComponent implements OnInit, OnDestroy {
   private autorRefreshSub: Subscription;
   private showMenuSub: Subscription;
 
+  @Input() entityType: EntityTypeEnum;
   @Output() selectionChanged = new EventEmitter<string[]>();
 
   constructor(
@@ -100,6 +102,7 @@ export class ExperimentCompareHeaderComponent implements OnInit, OnDestroy {
 
   openAddExperimentSearch() {
     this.dialog.open(SelectExperimentsForCompareComponent, {
+      data: {entityType: this.entityType},
       height: '100vh',
       width: '100%',
       maxWidth: '100%'

@@ -22,10 +22,12 @@ $output-tabs-height: 64px;
   }
 
   ::ng-deep .no-output-icon {
-    height: 200px;
-    width: 200px;
+    height: 100px;
+    width: 150px;
     left: 50%;
+    transform: translateX(-50%);
     margin-bottom: 10px;
+    position: relative;
   }
 
   sm-experiment-settings.maximized {

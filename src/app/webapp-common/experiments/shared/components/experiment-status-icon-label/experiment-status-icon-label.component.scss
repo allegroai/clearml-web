@@ -17,7 +17,7 @@
   color: $grey-purple
 }
 
-.completed {
+.completed, .Final {
   color: $completed-blue;
 
 }
@@ -32,7 +32,7 @@
   color: $strong-red;
 }
 
-.in_progress {
+.in_progress, .Uploading {
   color: $running-green;
 }
 :host-context(.light-theme) {

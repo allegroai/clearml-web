@@ -1,0 +1,36 @@
+.viewer-iteration {
+  .mat-slider:not(.mat-slider-disabled).cdk-mouse-focused .mat-slider-thumb,
+  .mat-slider:not(.mat-slider-disabled).cdk-touch-focused .mat-slider-thumb,
+  .mat-slider:not(.mat-slider-disabled).cdk-program-focused .mat-slider-thumb{
+    transform: scale(0.7);
+    background-color: $light-grey-blue !important;
+  }
+  .mat-slider-thumb{
+    cursor: grabbing;
+    background-color: white !important;
+    border: 2px solid $light-grey-blue;
+  }
+  .mat-slider-horizontal.cdk-focused .mat-slider-thumb-label{
+    transform: none;
+  }
+
+  .mat-slider-thumb-label {
+    border-radius: 4px!important;
+    background: $purple; /* our tooltip bg. color */
+    width: auto;
+    height: 22px;
+    transition: none;
+    padding: 0 12px;
+  }
+  .mat-slider-horizontal .mat-slider-thumb-label {
+    right: -28px;
+    top: auto;
+    bottom: -36px;
+    transform: scale(0.01);
+    outline: none;
+  }
+  .mat-slider-horizontal .mat-slider-thumb-label-text {
+    transform: none !important;
+    color: #ffffff;
+  }
+}

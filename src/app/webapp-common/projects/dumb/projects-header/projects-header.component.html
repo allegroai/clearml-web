@@ -2,7 +2,7 @@
   <div class="recent-title">
     <sm-menu [header]="sortByTitle" [iconClass]="sortOrder===1?'fa fa-caret-up':'fa fa-caret-down' " class="menu">
       <sm-menu-item itemLabel="RECENT" (itemClicked)="orderByChanged.emit('last_update')"></sm-menu-item>
-      <sm-menu-item itemLabel="NAME" (itemClicked)="orderByChanged.emit('name')"></sm-menu-item>
+      <sm-menu-item itemLabel="NAME" (itemClicked)="orderByChanged.emit('basename')"></sm-menu-item>
     </sm-menu>
     <sm-show-only-user-work></sm-show-only-user-work>
   </div>

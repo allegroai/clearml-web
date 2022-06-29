@@ -4,7 +4,7 @@ import * as actions from '../actions/models-view.actions';
 import {TableModel, SelectedModel} from '../shared/models.model';
 import {MODELS_TABLE_COL_FIELDS} from '../shared/models.const';
 import {TableFilter} from '../../shared/utils/tableParamEncode';
-import {ICommonSearchState} from '../../common-search/common-search.reducer';
+import {SearchState} from '../../common-search/common-search.reducer';
 import {SortMeta} from 'primeng/api';
 import {CountAvailableAndIsDisableSelectedFiltered} from '@common/shared/entity-page/items.utils';
 import {setSelectedProject} from '@common/core/actions/projects.actions';
@@ -27,7 +27,7 @@ export interface IModelsViewState {
   selectedModelSource: string;
   modelToken: string;
   scrollId: string;
-  globalFilter: ICommonSearchState['searchQuery'];
+  globalFilter: SearchState['searchQuery'];
   showAllSelectedIsActive: boolean;
   frameworks: string[];
   projectTags: string[];
@@ -40,9 +40,9 @@ export interface IModelsViewState {
 
 export const modelsInitialState: IModelsViewState = {
   splitSize: 65,
-  models: [],
+  models: null,
   frameworks: [],
-  hiddenTableCols: {comment: true},
+  hiddenTableCols: {comment: true, id: true},
   hiddenProjectTableCols: {},
   tableFilters: {},
   tempFilters: {},
@@ -75,10 +75,10 @@ export const modelsViewReducer = createReducer(
     selectedModel: modelsInitialState.selectedModel,
   })),
   on(setSelectedProject, (state) => ({...state, selectedModels: modelsInitialState.selectedModels})),
-  on(actions.addModels, (state, action) => ({...state, models: state.models.concat(action.models)})),
+  on(actions.addModels, (state, action) => ({...state, models: state.models?.concat(action.models) || null})),
   on(actions.removeModels, (state, action) => ({
     ...state,
-    models: state.models.filter(exp => !action.modelIds.includes(exp.id))
+    models: state.models?.filter(exp => !action.modelIds.includes(exp.id)) || null
   })),
   on(actions.showSelectedOnly, (state, action) => ({
     ...state,
@@ -93,7 +93,7 @@ export const modelsViewReducer = createReducer(
   on(actions.updateModel, (state, action) => {
     const newState = {
       ...state, models:
-        state.models.map(ex => ex.id === action.id ? {...ex, ...action.changes} : ex)
+        state.models?.map(ex => ex.id === action.id ? {...ex, ...action.changes} : ex)
     };
     if (state.selectedModel?.id === action.id) {
       newState.selectedModel = {...state.selectedModel, ...action.changes};
@@ -105,7 +105,8 @@ export const modelsViewReducer = createReducer(
   }),
   on(actions.setModels, (state, action) => ({...state, models: action.models})),
   on(actions.setModelsInPlace, (state, action) =>
-    ({...state, models: state.models.map(currModel => action.models.find(newModel => newModel.id === currModel.id))})),
+    ({...state, models: state.models?.map(currModel => action.models?.find(newModel => newModel.id === currModel.id)) || null
+    })),
   on(actions.setNoMoreModels, (state, action) => ({...state, noMoreModels: action.payload})),
   on(actions.setCurrentScrollId, (state, action) => ({...state, scrollId: action.scrollId})),
   on(actions.setSelectedModels, (state, action) => ({
@@ -130,17 +131,14 @@ export const modelsViewReducer = createReducer(
   })),
   on(actions.setHiddenCols, (state, action) => ({...state, hiddenTableCols: action.hiddenCols})),
   on(actions.addColumn, (state, action) => ({...state, metadataCols: [...state.metadataCols, action.col]})),
-  on(actions.removeCol, (state, action) => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    return {
-      ...state,
-      metadataCols: [...state.metadataCols.filter(tableCol => !(tableCol.key === action.id && tableCol.projectId === action.projectId))],
-      colsOrder: {
-        ...state.colsOrder,
-        [action.projectId]: state.colsOrder[action.projectId] ? state.colsOrder[action.projectId].filter(colId => colId !== action.id) : null
-      }
-    };
-  }),
+  on(actions.removeCol, (state, action) => ({
+    ...state,
+    metadataCols: [...state.metadataCols.filter(tableCol => !(tableCol.key === action.id && tableCol.projectId === action.projectId))],
+    colsOrder: {
+      ...state.colsOrder,
+      [action.projectId]: state.colsOrder[action.projectId] ? state.colsOrder[action.projectId].filter(colId => colId !== action.id) : null
+    }
+  })),
   on(actions.setExtraColumns, (state, action) =>
     ({
       ...state,

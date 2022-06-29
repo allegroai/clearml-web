@@ -1,0 +1,82 @@
+<sm-simple-dataset-version-details [entity]="selected$ | async" [project]="projectId$ | async" [step]="selectedEntity"></sm-simple-dataset-version-details>
+<div class="console-button">
+  <button class="btn btn-cml-primary d-flex align-items-center" (click)="toggleDetails()">
+    <i class="al-icon al-ico-console sm mr-3"></i>DETAILS
+  </button>
+</div>
+<div
+  #diagramContainer
+  class="pipeline-container"
+  [class.extend]="showLog"
+  (click)="selectStep()"
+>
+  <ng-container *ngIf="dagModel$ | async as dagModel">
+    <div *ngFor="let row of dagModel | reverse" class="level" [style.width.px]="chartWidth">
+      <sm-dataset-version-step
+        #taskEl
+        *ngFor="let step of row | uniqueBy: 'stepId'; trackBy: trackByStepId" [step]="step"
+        [selected]="selectedEntity && selectedEntity.id === step?.id"
+        (click)="$event.stopPropagation(); !taskEl.selected && selectStep(step)"
+        (openConsole)="openLog()"
+      ></sm-dataset-version-step>
+    </div>
+    <svg class="arrows"
+         *ngIf="chartWidth"
+         [attr.viewBox]="'0 0 ' + chartWidth + ' ' + (50 + 132 * dagModel?.length)"
+         [style.width.px]="chartWidth"
+         [style.height.px]="50 + 132 * dagModel?.length"
+    >
+      <g
+        *ngFor="let arrow of arrows; trackBy: trackArrows"
+        [class.selected]="arrow.selected"
+      >
+        <path [attr.d]="arrow.path" fill="none" stroke-width="2"></path>
+        <polygon
+          points="0,-6 12,0, 0,6"
+          [attr.transform]="arrow.headTransform"
+        />
+      </g>
+    </svg>
+  </ng-container>
+</div>
+<div class="results-panel" [class.extend]="showLog" [class.maximized]="maximizeResults">
+  <ng-container *ngIf="showLog">
+    <div class="header toggle">
+      <div class="log-name">
+        <i class="al-icon al-ico-console mr-2"></i>
+        <span *ngIf="(selected$ | async) as selected">
+          {{selected?.name}}<ng-container *ngIf="selected?.runtime?.version"> v{{selected.runtime.version}}</ng-container>
+        </span>
+      </div>
+      <sm-button-toggle
+        [value]="detailsPanelMode"
+        [options]="[
+          {label: 'CONTENT', value: statusOption.content},
+          {label: 'PREVIEW', value: statusOption.preview},
+          {label: 'CONSOLE', value: statusOption.log}
+        ]"
+        (valueChanged)="detailsPanelMode = $event"
+      ></sm-button-toggle>
+      <div class="close">
+        <i class="al-icon pointer" [class]="maximizeResults ? 'al-ico-min-panel' : 'al-ico-max-panel'" (click)="toggleResultSize()"></i>
+        <i class="al-icon al-ico-dialog-x pointer ml-4" (click)="openLog(false)"></i>
+      </div>
+    </div>
+    <div [ngSwitch]="detailsPanelMode" class="content">
+      <sm-experiment-output-log
+        *ngSwitchCase="statusOption.log"
+        [experiment]="selected$ | async"
+        [isDarkTheme]="true"
+        [showHeader]="false"
+      ></sm-experiment-output-log>
+      <sm-simple-dataset-version-preview *ngSwitchCase="statusOption.preview" [selected]="(selected$ | async)">
+      </sm-simple-dataset-version-preview>
+      <sm-simple-dataset-version-content
+        *ngSwitchCase="statusOption.content"
+        class="h-100"
+        [id]="selectedEntity?.data?.job_id"
+        [data]="(selected$ | async)?.configuration?.['Dataset Content']?.value"
+      ></sm-simple-dataset-version-content>
+    </div>
+  </ng-container>
+</div>

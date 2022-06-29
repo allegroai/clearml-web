@@ -4,7 +4,7 @@ import * as actions from '../actions/common-experiments-view.actions';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 import {TableFilter} from '../../shared/utils/tableParamEncode';
 import {ProjectsGetTaskParentsResponseParents} from '~/business-logic/model/projects/projectsGetTaskParentsResponseParents';
-import {ICommonSearchState} from '../../common-search/common-search.reducer';
+import {SearchState} from '../../common-search/common-search.reducer';
 import {SortMeta} from 'primeng/api';
 import {CountAvailableAndIsDisableSelectedFiltered} from '../../shared/entity-page/items.utils';
 import {setSelectedProject} from '@common/core/actions/projects.actions';
@@ -25,6 +25,7 @@ export interface ICommonExperimentsViewState {
   hiddenTableCols: { [colName: string]: boolean };
   hiddenProjectTableCols: { [projectId: string]: { [colName: string]: boolean | undefined } };
   experiments: Array<ITableExperiment>;
+  refreshList: boolean;
   noMoreExperiment: boolean;
   selectedExperiment: ITableExperiment;
   selectedExperiments: Array<ITableExperiment>;
@@ -32,7 +33,7 @@ export interface ICommonExperimentsViewState {
   selectedExperimentSource: string;
   experimentToken: string;
   scrollId: string;
-  globalFilter: ICommonSearchState['searchQuery'];
+  globalFilter: SearchState['searchQuery'];
   showAllSelectedIsActive: boolean;
   metricVariants: Array<MetricVariantResult>;
   hyperParams: Array<any>;
@@ -50,9 +51,10 @@ export const commonExperimentsInitialState: ICommonExperimentsViewState = {
   tableCols: [],
   colsOrder: {},
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  hiddenTableCols: {comment: true, active_duration: true},
+  hiddenTableCols: {comment: true, active_duration: true, id: true},
   hiddenProjectTableCols: {},
-  experiments: [],
+  experiments: null,
+  refreshList: false,
   tableFilters: {},
   tempFilters: {},
   projectColumnFilters: {},
@@ -80,9 +82,9 @@ export const commonExperimentsInitialState: ICommonExperimentsViewState = {
   tableMode: 'table'
 };
 
-const setExperimentsAndUpdateSelectedExperiments = (state: ICommonExperimentsViewState, payload): ICommonExperimentsViewState => ({
+const setExperimentsAndUpdateSelectedExperiments = (state: ICommonExperimentsViewState, payload: {id: string; changes: Partial<ITableExperiment>}) => ({
   ...state,
-  experiments: state.experiments.map(ex => ex.id === payload.id ? {...ex, ...payload.changes} : ex),
+  experiments: state.experiments?.map(ex => ex.id === payload.id ? {...ex, ...payload.changes} : ex) || null,
   ...(state.selectedExperiment?.id === payload.id && {selectedExperiment: {...state.selectedExperiment, ...payload.changes}}),
   ...(state.selectedExperiments.find(ex => ex.id === payload.id) && {selectedExperiments: state.selectedExperiments.map(ex => ex.id === payload.id ? {...ex, ...payload.changes} : ex)})
 });
@@ -115,11 +117,11 @@ export const commonExperimentsViewReducer = createReducer(
   })),
   on(actions.addExperiments, (state, action) => ({
     ...state,
-    experiments: state.experiments.concat(action.experiments)
+    experiments: state.experiments?.concat(action.experiments) || null
   })),
   on(actions.removeExperiments, (state, action) => ({
     ...state,
-    experiments: state.experiments.filter(exp => !action.experiments.includes(exp.id))
+    experiments: state.experiments?.filter(exp => !action.experiments.includes(exp.id)) || null
   })),
   on(actions.updateExperiment, (state, action) => setExperimentsAndUpdateSelectedExperiments(state, action)),
   on(actions.updateManyExperiment, (state, action) =>
@@ -129,10 +131,11 @@ export const commonExperimentsViewReducer = createReducer(
     }, state as ICommonExperimentsViewState)
   ),
   on(actions.setExperiments, (state, action) => ({...state, experiments: action.experiments})),
+  on(actions.setTableRefreshPending, (state, action) => ({...state, refreshList: action.refresh})),
   on(actions.setExperimentInPlace, (state, action) => ({
     ...state, experiments: state.experiments
-      .map(currExp => action.experiments.find(newExp => newExp.id === currExp.id))
-      .filter(e => e)
+      ?.map(currExp => action.experiments.find(newExp => newExp.id === currExp.id))
+      .filter(e => e) || null
   })),
   on(actions.setNoMoreExperiments, (state, action) => ({...state, noMoreExperiment: action.payload})),
   on(actions.setCurrentScrollId, (state, action) => ({...state, scrollId: action.scrollId})),

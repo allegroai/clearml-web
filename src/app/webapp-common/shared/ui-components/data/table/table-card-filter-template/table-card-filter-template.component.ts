@@ -17,9 +17,11 @@ export class TableCardFilterTemplateComponent {
   public optionsFiltered: {};
   private _columns: ISmCol[];
   private _options: { [p: string]: { label: string; value: string; tooltip?: string }[] };
+  public isFiltering: boolean;
 
   @Input() set value(value: any) {
     this._value = value;
+    this.isFiltering = this.isFiltered();
   }
 
   get value() {
@@ -53,6 +55,7 @@ export class TableCardFilterTemplateComponent {
   @Output() filterChanged = new EventEmitter<{ col: string; value: unknown; matchMode?: string }>();
   @Output() menuClosed = new EventEmitter<ISmCol>();
   @Output() menuOpened = new EventEmitter<ISmCol>();
+  @Output() clearAll = new EventEmitter();
 
   @ViewChild(MatMenuTrigger, {static: true}) trigger: MatMenuTrigger;
 

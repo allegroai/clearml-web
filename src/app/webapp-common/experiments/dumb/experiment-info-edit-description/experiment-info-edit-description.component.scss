@@ -11,10 +11,10 @@
     div, p {
       color: $white;
     }
-    div.edit-description {
+    div.copy-button {
       color: $light-periwinkle-two;
     }
-    .add-description, .edit-description {
+    .add-description, .copy-button {
       &:hover {
         color: $white;
         text-decoration: underline;

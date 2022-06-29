@@ -1,7 +1,7 @@
 import {TableSelectionState} from '@common/constants';
 import {allItemsAreSelected} from '../../../utils/shared-utils';
 import {unionBy} from 'lodash/fp';
-import {AfterViewInit, EventEmitter, Input, Output, QueryList, ViewChildren, Directive, OnDestroy} from '@angular/core';
+import {AfterViewInit, Directive, EventEmitter, Input, OnDestroy, Output, QueryList, ViewChildren} from '@angular/core';
 import {ISmCol, TABLE_SORT_ORDER, TableSortOrderEnum} from './table.consts';
 import {filter, take} from 'rxjs/operators';
 import {TableComponent} from './table.component';
@@ -9,9 +9,10 @@ import {SortMeta} from 'primeng/api';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {sortByArr} from '../../../pipes/show-selected-first.pipe';
 import {IOption} from '../../inputs/select-autocomplete-for-template-forms/select-autocomplete-for-template-forms.component';
+import {DATASETS_STATUS_LABEL} from '~/features/experiments/shared/experiments.const';
 
 @Directive()
-export abstract class BaseTableView implements AfterViewInit, OnDestroy{
+export abstract class BaseTableView implements AfterViewInit, OnDestroy {
   public entityTypes = EntityTypeEnum;
   public selectionState: TableSelectionState;
   protected entitiesKey: string;
@@ -21,11 +22,27 @@ export abstract class BaseTableView implements AfterViewInit, OnDestroy{
   public searchValues: { [colId: string]: string } = {};
   public filtersOptions: { [colId: string]: IOption[] } = {};
   public filtersValues: { [colId: string]: any } = {};
-  public tableSortFieldsObject: {[fieldName: string]: {index: number; field: string; order: TableSortOrderEnum}} = {};
+  public tableSortFieldsObject: { [fieldName: string]: { index: number; field: string; order: TableSortOrderEnum } } = {};
+  protected prevSelected: any;
+  protected prevDeselect: any;
+  private _entityType: EntityTypeEnum;
+  public convertStatusMap: { [status: string]: string };
 
   @Input() contextMenuActive: boolean;
   @Input() selectionMode: 'multiple' | 'single' | null = 'single';
-  @Input() entityType: EntityTypeEnum;
+
+  @Input() set entityType(entityType: EntityTypeEnum) {
+    this._entityType = entityType;
+    if (entityType === EntityTypeEnum.dataset) {
+      this.convertStatusMap = DATASETS_STATUS_LABEL;
+    }
+  }
+
+  get entityType() {
+    return this._entityType;
+  }
+
+  @Input() hasExperimentUpdate: boolean;
   @Input() colsOrder: string[];
   private _tableSortFields: SortMeta[];
   @Input() set tableSortFields(tableSortFields: SortMeta[]) {
@@ -46,8 +63,6 @@ export abstract class BaseTableView implements AfterViewInit, OnDestroy{
 
   @Input() tableSortOrder: TableSortOrderEnum;
   @Input() minimizedView: boolean;
-  protected prevSelected: any;
-
   @Input() set split(size: number) {
     this.table?.resize();
   }
@@ -95,7 +110,7 @@ export abstract class BaseTableView implements AfterViewInit, OnDestroy{
     this.contextMenuActive = menuStatus;
   }
 
-  getSelectionRange<T>(change: { field: string; value: boolean; event: Event }, entity: T): T[] {
+  protected getSelectionRange<T>(change: { field: string; value: boolean; event: Event }, entity: T): T[] {
     let addList = [entity];
     if ((change.event as MouseEvent).shiftKey && this.prevSelected) {
       let index1 = this[this.entitiesKey].indexOf(this.prevSelected);
@@ -104,9 +119,26 @@ export abstract class BaseTableView implements AfterViewInit, OnDestroy{
         [index1, index2] = [index2, index1];
       }
       addList = this[this.entitiesKey].slice(index1 + 1, index2 + 1);
+      this.prevDeselect = entity;
     }
     this.prevSelected = entity;
     return addList;
+  }
+
+  protected getDeselectionRange(change: { field: string; value: boolean; event: Event }, entity: { id: string }): string[] {
+    let list = [entity.id];
+    const prev = this.prevDeselect || this.prevSelected;
+    if ((change.event as MouseEvent).shiftKey && prev) {
+      let index1 = this[this.entitiesKey].indexOf(prev);
+      let index2 = this[this.entitiesKey].indexOf(entity);
+      if (index1 > index2) {
+        [index1, index2] = [index2, index1];
+      }
+      list = this[this.entitiesKey].slice(index1 + 1, index2 + 1).map(e => e.id);
+      this.prevSelected = entity;
+    }
+    this.prevDeselect = entity;
+    return list;
   }
 
   tableFilterChanged(col: ISmCol, event) {
@@ -115,22 +147,24 @@ export abstract class BaseTableView implements AfterViewInit, OnDestroy{
   }
 
   sortOptionsList(columnId: string) {
-    if(!this.filtersOptions[columnId]) {
+    if (!this.filtersOptions[columnId]) {
       return;
     }
     this.filtersOptions[columnId].sort((a, b) =>
       sortByArr(a.value, b.value, [null, ...(this.filtersValues[columnId] || [])]));
     this.filtersOptions = {...this.filtersOptions, [columnId]: [...this.filtersOptions[columnId]]};
   }
+
   searchValueChanged($event: string, colId: string) {
     this.searchValues[colId] = $event;
     this.sortOptionsList(colId);
   }
+
   columnFilterClosed(col: ISmCol) {
     window.setTimeout(() => this.sortOptionsList(col.id));
   }
 
-  tableAllFiltersChanged(event: {col: string; value: unknown; matchMode?: string}) {
+  tableAllFiltersChanged(event: { col: string; value: unknown; matchMode?: string }) {
     this.filterChanged.emit({col: {id: event.col}, value: event.value, andFilter: event.matchMode === 'AND'});
     this.scrollTableToTop();
   }

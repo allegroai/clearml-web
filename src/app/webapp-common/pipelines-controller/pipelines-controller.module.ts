@@ -49,7 +49,9 @@ export const routes: Routes = [
     RunPipelineControllerDialogComponent,
     AbortControllerDialogComponent
   ],
-  exports: [],
+  exports: [
+    PipelineControllerStepComponent
+  ],
   imports: [
     AngularSplitModule,
     ScrollingModule,

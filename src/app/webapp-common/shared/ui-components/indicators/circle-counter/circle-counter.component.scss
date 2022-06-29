@@ -1,5 +1,5 @@
-@import "../../styles/mixins/common";
-@import "../../styles/variables";
+@import "mixins/common";
+@import "variables";
 
 $reqWidth: 56px;
 $font-size: 18px;
@@ -24,6 +24,29 @@ $font-size: 18px;
     height: $reqWidth;
     border-radius: 50%;
     margin-bottom: 8px;
+    background-color: $blue-600;
+
+    .wrapper {
+      gap: 24px;
+    }
+
+    &.multi {
+      display: flex;
+      padding: 0 28px;
+      border-radius: 30px;
+      width: unset;
+
+      .sub-counter {
+        font-size: 16px;
+        font-weight: bold;
+        color: $white;
+      }
+
+      .sub-label {
+        font-size: 10px;
+        color: $blue-300;
+      }
+    }
 
     &.completed {
       background-color: $completed-blue;

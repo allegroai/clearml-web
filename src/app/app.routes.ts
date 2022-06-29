@@ -3,6 +3,7 @@ import {Routes} from '@angular/router';
 import {AdminComponent} from '@common/settings/admin/admin.component';
 */
 import {ProjectRedirectGuardGuard} from '@common/shared/guards/project-redirect.guard';
+import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 
 
 export const routes: Routes = [
@@ -42,7 +43,7 @@ export const routes: Routes = [
           {
             path: 'compare-experiments',
             loadChildren: () => import('./webapp-common/experiments-compare/experiments-compare.module').then(m => m.ExperimentsCompareModule),
-            data: {search: false}
+            data: {entityType: EntityTypeEnum.experiment},
           },
         ]
       },
@@ -68,11 +69,17 @@ export const routes: Routes = [
           },
           {
             path: 'compare-experiments',
+            data: {entityType: EntityTypeEnum.controller},
             loadChildren: () => import('./webapp-common/experiments-compare/experiments-compare.module').then(m => m.ExperimentsCompareModule)
           },
         ]
       },
     ]
+  },
+  {
+    path: 'datasets',
+    data: {search: true},
+    loadChildren: () => import('./features/datasets/datasets.module').then(m => m.DatasetsModule)
   },
   {path: 'workers-and-queues', loadChildren: () => import('./features/workers-and-queues/workers-and-queues.module').then(m => m.WorkersAndQueuesModule)},
   {path: '404', loadChildren: () => import('./features/not-found/not-found.module').then(m => m.NotFoundModule)},

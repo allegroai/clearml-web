@@ -8,13 +8,15 @@ import {GettingStartedCardComponent} from './dumb/getting-started-card/getting-s
 import {SMSharedModule} from '@common/shared/shared.module';
 import {CommonDashboardModule} from '@common/dashboard/common-dashboard.module';
 import {commonDashboardReducer} from '@common/dashboard/common-dashboard.reducer';
-import {DashboardSearchComponent} from './containers/dashboard-search/dashboard-search.component';
 import {SearchResultsPageComponent} from './dumb/search-results-page/search-results-page.component';
 import {SharedModule} from '~/shared/shared.module';
 import {DashboardSearchModule} from './dashboard-search/dashboard-search.module';
 import {ProjectDialogModule} from '@common/shared/project-dialog/project-dialog.module';
 import {ProjectsSharedModule} from '../projects/shared/projects-shared.module';
 import {SearchResultsComponent} from '@common/dashboard-search/dumb/search-results/search-results.component';
+import {DashboardSearchBaseComponent} from '@common/dashboard/dashboard-search.component.base';
+import {DatasetsModule} from '~/features/datasets/datasets.module';
+import {DatasetsSharedModule} from '~/features/datasets/shared/datasets-shared.module';
 
 @NgModule({
   imports: [
@@ -27,9 +29,11 @@ import {SearchResultsComponent} from '@common/dashboard-search/dumb/search-resul
     StoreModule.forFeature('dashboard', commonDashboardReducer),
     CommonDashboardModule,
     SharedModule,
-    DashboardSearchModule
+    DashboardSearchModule,
+    DatasetsModule,
+    DatasetsSharedModule
   ],
-  declarations   : [DashboardComponent, GettingStartedCardComponent, DashboardSearchComponent, SearchResultsPageComponent, SearchResultsComponent]
+  declarations   : [DashboardComponent, GettingStartedCardComponent, DashboardSearchBaseComponent, SearchResultsPageComponent, SearchResultsComponent]
 })
 export class DashboardModule {
 }

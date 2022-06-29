@@ -8,6 +8,7 @@
 
   .label-container {
     width: 155px;
+    flex: 0 0 155px;
     font-weight: 500;
     color: #71758A;
     font-size: 11px;
@@ -17,7 +18,8 @@
   }
 
   .content {
-    flex: 1;
+    // flex: 1;
+    word-break: break-word;
   }
 }
 

@@ -12,7 +12,7 @@
     <sm-button-toggle
       [disabled]="!tableMode"
       class="ml-3"
-      [options]="[{label: 'Table view', value: 'table', icon: 'al-ico-table-view'}, {label: 'Details view', value: 'info', icon: 'al-ico-experiment-view', ripple: true}]"
+      [options]="[{label: 'Table view', value: 'table', icon: 'al-ico-table-view'}, {label: 'Details view', value: 'info', icon: 'al-ico-experiment-view'}]"
       [value]="tableMode"
       [rippleEffect]="rippleEffect"
       (valueChanged)="tableModeChanged.emit($event)"></sm-button-toggle>
@@ -27,11 +27,12 @@
 
   <div class="d-flex justify-content-end align-items-center right-buttons">
     <sm-clear-filters-button
+      *ngIf="!minimizedView"
       [tableFilters]="tableFilters"
       (clearTableFilters)="clearTableFilters.emit(tableFilters)"
     ></sm-clear-filters-button>
     <sm-experiment-custom-cols-menu
-      [disabled]="minimizedView"
+      *ngIf="!minimizedView"
       [metricVariants]="metricVariants"
       [hyperParams]="hyperParams"
       [tableCols]="tableCols"

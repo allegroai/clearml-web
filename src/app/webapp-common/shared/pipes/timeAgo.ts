@@ -11,15 +11,20 @@ export class TimeAgoPipe implements PipeTransform, OnDestroy {
   }
 
   transform(value: any) {
-    if (!(Date.parse(value) > 0 && !Number.isInteger(value))) {
-      return value;
-    }
+    let d;
     this.removeTimer();
-    // let d            = this.convertUTCDateToLocalDate(new Date(value));
-    if (!value.endsWith('+00:00')) {
-      value = value + '+00:00';
+    if (Number.isInteger(value)) {
+      d = new Date(value);
+    } else {
+      if (!(Date.parse(value) > 0)) {
+        return value;
+      }
+      if (!value.endsWith('+00:00')) {
+        value = value + '+00:00';
+      }
+      d = new Date(value);
     }
-    const d            = new Date(value);
+    // let d            = this.convertUTCDateToLocalDate(new Date(value));
     const now          = new Date();
     const seconds      = Math.round(Math.abs((now.getTime() - d.getTime()) / 1000));
     const timeToUpdate = (Number.isNaN(seconds)) ? 1000 : this.getSecondsUntilUpdate(seconds) * 1000;

@@ -1,0 +1,35 @@
+@import "variables";
+
+:host {
+  .header {
+    width: 100%;
+    margin-top: 12px;
+    padding-bottom: 18px;
+    color: $blue-100;
+    border-bottom: solid 1px $dark-border;
+   }
+
+  .al-ico-copy-to-clipboard {
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .value:hover {
+    .al-ico-copy-to-clipboard {
+      opacity: 1;
+    }
+  }
+
+  .section {
+    .param {
+      &.continue {
+        border-bottom: unset;
+      }
+
+      .comment {
+        color: $blue-300;
+        margin-left: 4px;
+      }
+    }
+  }
+}

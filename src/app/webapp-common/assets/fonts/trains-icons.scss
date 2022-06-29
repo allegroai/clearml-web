@@ -2,7 +2,7 @@
 
 @font-face {
   font-family: '#{$icomoon-font-family}';
-  src: url('./#{$icomoon-font-family}.ttf?2i0eh5') format('truetype');
+  src: url('./#{$icomoon-font-family}.ttf?8714dr') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -23,6 +23,26 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.al-ico-upload {
+  &:before {
+    content: $al-ico-upload;
+  }
+}
+.al-ico-min-panel {
+  &:before {
+    content: $al-ico-min-panel;
+  }
+}
+.al-ico-max-panel {
+  &:before {
+    content: $al-ico-max-panel;
+  }
+}
+.al-ico-datasets {
+  &:before {
+    content: $al-ico-datasets;
+  }
+}
 .al-ico-t-logo-b {
   &:before {
     content: $al-ico-t-logo-b;
@@ -41,11 +61,6 @@
 .al-ico-projects {
   &:before {
     content: $al-ico-projects;
-  }
-}
-.al-ico-datasets {
-  &:before {
-    content: $al-ico-datasets;
   }
 }
 .al-ico-queues {
@@ -1171,6 +1186,11 @@
     content: $al-ico-eye-outline;
   }
 }
+.al-ico-csv {
+  &:before {
+    content: $al-ico-csv;
+  }
+}
 .al-ico-status-draft {
   &:before {
     content: $al-ico-status-draft;
@@ -1191,9 +1211,9 @@
     content: $al-ico-status-pending;
   }
 }
-.al-ico-status-skiped {
+.al-ico-status-skipped {
   &:before {
-    content: $al-ico-status-skiped;
+    content: $al-ico-status-skipped;
   }
 }
 .al-ico-status-cached {
@@ -1224,11 +1244,6 @@
 .al-ico-status-completed {
   &:before {
     content: $al-ico-status-completed;
-  }
-}
-.al-ico-status-queued {
-  &:before {
-    content: $al-ico-enqueue;
   }
 }
 

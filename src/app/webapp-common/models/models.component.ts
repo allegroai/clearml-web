@@ -4,11 +4,11 @@ import {ActivatedRoute, Params, Router} from '@angular/router';
 import {select, Store} from '@ngrx/store';
 import {get, isEqual} from 'lodash/fp';
 import {combineLatest, Observable} from 'rxjs';
-import {distinctUntilChanged, filter, map, skip, tap, withLatestFrom} from 'rxjs/operators';
+import {distinctUntilChanged, filter, map, skip, withLatestFrom} from 'rxjs/operators';
 import {getTags, setArchive as setProjectArchive, setDeep} from '../core/actions/projects.actions';
-import {InitSearch, ResetSearch} from '../common-search/common-search.actions';
-import {ICommonSearchState, selectSearchQuery} from '../common-search/common-search.reducer';
-import {setAutoRefresh} from '../core/actions/layout.actions';
+import {initSearch, resetSearch} from '../common-search/common-search.actions';
+import {SearchState, selectSearchQuery} from '../common-search/common-search.reducer';
+import {resetAceCaretsPositions, setAutoRefresh} from '../core/actions/layout.actions';
 import {
   selectCompanyTags,
   selectIsArchivedMode,
@@ -66,7 +66,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
   public tableSortOrder$: Observable<TableSortOrderEnum>;
   public selectedModels$: Observable<TableModel[]>;
   public selectedModel$: Observable<SelectedModel>;
-  public searchValue$: Observable<ICommonSearchState['searchQuery']>;
+  public searchValue$: Observable<SearchState['searchQuery']>;
   public isArchived$: Observable<boolean>;
   public tableFilters$: Observable<{ [s: string]: FilterMetadata }>;
   public noMoreModels$: Observable<boolean>;
@@ -92,7 +92,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
   protected setSplitSizeAction = modelsActions.setSplitSize;
   protected setTableModeAction = modelsActions.setTableMode;
   private selectedModels: TableModel[];
-  private searchQuery$: Observable<ICommonSearchState['searchQuery']>;
+  private searchQuery$: Observable<SearchState['searchQuery']>;
   private isAppVisible$: Observable<boolean>;
   private readonly tagsFilterByProject$: Observable<boolean>;
   private readonly projectTags$: Observable<string[]>;
@@ -106,7 +106,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
     protected router: Router,
     protected dialog: MatDialog,
     protected refresh: RefreshService
-) {
+  ) {
     super(store, route, router, dialog, refresh);
     this.selectSplitSize$ = this.store.select(modelsSelectors.selectSplitSize);
     this.tableSortFields$ = this.store.select(modelsSelectors.selectTableSortFields);
@@ -118,7 +118,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
     this.isArchived$ = this.store.select(selectIsArchivedMode);
     this.noMoreModels$ = this.store.select(modelsSelectors.selectNoMoreModels);
     this.isSharedAndNotOwner$ = this.store.select(selectIsSharedAndNotOwner);
-    this.metadataColsOptions$ =  this.store.select(selectMetadataColsOptions);
+    this.metadataColsOptions$ = this.store.select(selectMetadataColsOptions);
 
     this.showAllSelectedIsActive$ = this.store.select(modelsSelectors.selectShowAllSelectedIsActive);
     this.searchQuery$ = this.store.select(selectSearchQuery);
@@ -148,10 +148,10 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
     );
 
     this.models$ = this.store.select(modelsSelectors.selectModelsList).pipe(
+      filter(models => models !== null),
       withLatestFrom(this.isArchived$),
       // lil hack for hiding archived models after they been archived from models info or footer...
       map(([models, showArchived]) => this.filterArchivedModels(models, showArchived)),
-      tap(() => this.refreshing = false)
     );
     this.showInfo$ = this.store.pipe(
       select(selectRouterParams),
@@ -164,59 +164,59 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
     super.ngOnInit();
     let prevQueryParams: Params;
     this.sub.add(combineLatest([
-      this.store.select(selectRouterParams).pipe(map(params => params?.projectId)),
-      this.route.queryParams,
-    ])
-      .pipe(
-        filter(([projectId, queryParams]) => {
-          if (!projectId) {
-            return false;
-          }
-          const equal = projectId === this.projectId && isEqual(queryParams, prevQueryParams);
-          prevQueryParams = queryParams;
-          return !equal;
-        })
-      )
-      .subscribe(([projectId, params]: [string, Params]) => {
-        if (projectId != this.projectId && Object.keys(params || {}).length ===  0) {
-          this.emptyUrlInit()
-        } else {
-          if (params.order) {
-            const orders = decodeOrder(params.order);
-            this.store.dispatch(modelsActions.setTableSort({orders, projectId: this.projectId}));
-          }
-          if (params.filter) {
-            const filters = decodeFilter(params.filter);
-            this.store.dispatch(modelsActions.setTableFilters({filters, projectId}));
+        this.store.select(selectRouterParams).pipe(map(params => params?.projectId)),
+        this.route.queryParams,
+      ])
+        .pipe(
+          filter(([projectId, queryParams]) => {
+            if (!projectId) {
+              return false;
+            }
+            const equal = projectId === this.projectId && isEqual(queryParams, prevQueryParams);
+            prevQueryParams = queryParams;
+            return !equal;
+          })
+        )
+        .subscribe(([projectId, params]: [string, Params]) => {
+          if (projectId != this.projectId && Object.keys(params || {}).length === 0) {
+            this.emptyUrlInit();
           } else {
             if (params.order) {
-              this.store.dispatch(modelsActions.setTableFilters({filters: [], projectId}));
+              const orders = decodeOrder(params.order);
+              this.store.dispatch(modelsActions.setTableSort({orders, projectId: this.projectId}));
             }
-          }
-          this.store.dispatch(setProjectArchive({archive: !!params.archive}));
-          if (params.deep) {
-            this.store.dispatch(setDeep({deep: true}));
-          }
-
-          if (params.columns) {
-            const [, , , metadataCols, allIds] = decodeColumns(params.columns, this.originalTableColumns);
-            const hiddenCols = {};
-            this.originalTableColumns.forEach((tableCol) => {
-              if (tableCol.id !== 'selected') {
-                hiddenCols[tableCol.id] = !params.columns.includes(tableCol.id);
+            if (params.filter) {
+              const filters = decodeFilter(params.filter);
+              this.store.dispatch(modelsActions.setTableFilters({filters, projectId}));
+            } else {
+              if (params.order) {
+                this.store.dispatch(modelsActions.setTableFilters({filters: [], projectId}));
               }
-            });
-            this.store.dispatch(modelsActions.setHiddenCols({hiddenCols}));
-            this.store.dispatch(modelsActions.setExtraColumns({
-              projectId: this.projectId,
-              columns: metadataCols.map(metadataCol => createMetadataCol(metadataCol, projectId))
-            }));
-            this.columnsReordered(allIds, false);
+            }
+            this.store.dispatch(setProjectArchive({archive: !!params.archive}));
+            if (params.deep) {
+              this.store.dispatch(setDeep({deep: true}));
+            }
+
+            if (params.columns) {
+              const [, , , metadataCols, allIds] = decodeColumns(params.columns, this.originalTableColumns);
+              const hiddenCols = {};
+              this.originalTableColumns.forEach((tableCol) => {
+                if (tableCol.id !== 'selected') {
+                  hiddenCols[tableCol.id] = !params.columns.includes(tableCol.id);
+                }
+              });
+              this.store.dispatch(modelsActions.setHiddenCols({hiddenCols}));
+              this.store.dispatch(modelsActions.setExtraColumns({
+                projectId: this.projectId,
+                columns: metadataCols.map(metadataCol => createMetadataCol(metadataCol, projectId))
+              }));
+              this.columnsReordered(allIds, false);
+            }
+            this.store.dispatch(modelsActions.fetchModelsRequested());
           }
-          this.store.dispatch(modelsActions.fetchModelsRequested());
-        }
-        this.projectId = projectId;
-      })
+          this.projectId = projectId;
+        })
     );
 
     this.createFooterItems({
@@ -254,12 +254,12 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
   }
 
   stopSyncSearch() {
-    this.store.dispatch(new ResetSearch());
+    this.store.dispatch(resetSearch());
     this.store.dispatch(modelsActions.resetGlobalFilter());
   }
 
   syncAppSearch() {
-    this.store.dispatch(new InitSearch('Search for models'));
+    this.store.dispatch(initSearch({payload: 'Search for models'}));
     this.sub.add(this.searchQuery$.pipe(skip(1)).subscribe(query => this.store.dispatch(modelsActions.globalFilterChanged(query))));
   }
 
@@ -269,42 +269,47 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
 
   selectModelFromUrl() {
     this.sub.add(combineLatest([
-      this.store.select(selectRouterParams).pipe(
-        map(params => get('modelId', params))
-      ),
-      this.models$
-    ])
-      .pipe(
-        withLatestFrom(this.store.select(selectTableMode)),
-        map(([[id, models], mode]) => {
-          this.firstModel = models?.[0];
-          if (!this.shouldOpenDetails) {
-            this.store.dispatch(modelsActions.setTableMode({mode: !!id ? 'info' : 'table'}));
-          } else if (!id && this.shouldOpenDetails && this.firstModel && mode === 'info') {
-            this.shouldOpenDetails = false;
-            this.store.dispatch(modelsActions.modelSelectionChanged({
-              model: this.firstModel,
-              project: this.projectId
-            }));
-          }
-          return models.find(model => model.id === id);
-        }),
-        distinctUntilChanged()
-      )
-      .subscribe((selectedModel) => this.store.dispatch(modelsActions.setSelectedModel({model: selectedModel})))
+        this.store.select(selectRouterParams).pipe(
+          map(params => get('modelId', params))
+        ),
+        this.models$
+      ])
+        .pipe(
+          withLatestFrom(this.store.select(selectTableMode)),
+          map(([[id, models], mode]) => {
+            this.firstModel = models?.[0];
+            if (!id && this.shouldOpenDetails && this.firstModel && mode === 'info') {
+              this.shouldOpenDetails = false;
+              this.store.dispatch(modelsActions.modelSelectionChanged({
+                model: this.firstModel,
+                project: this.projectId
+              }));} else {
+                this.store.dispatch(modelsActions.setTableMode({mode: !!id ? 'info' : 'table'}));
+            }
+            return models?.find(model => model.id === id);
+          }),
+          distinctUntilChanged()
+        )
+        .subscribe((selectedModel) => {
+          this.store.dispatch(modelsActions.setSelectedModel({model: selectedModel}));
+          this.store.dispatch(resetAceCaretsPositions());
+        })
     );
   }
 
   filterArchivedModels(models: TableModel[], showArchived: boolean) {
     if (showArchived) {
-      return models.filter(model => model.system_tags && model.system_tags.includes('archived'));
+      return models?.filter(model => model.system_tags && model.system_tags.includes('archived'));
     } else {
-      return models.filter(model => !model.system_tags || !(model.system_tags.includes('archived')));
+      return models?.filter(model => !model.system_tags || !(model.system_tags.includes('archived')));
     }
   }
 
   modelSelectionChanged(model: SelectedModel) {
-    this.minimizedView && model && this.store.dispatch(modelsActions.modelSelectionChanged({model, project: this.projectId}));
+    this.minimizedView && model && this.store.dispatch(modelsActions.modelSelectionChanged({
+      model,
+      project: this.projectId
+    }));
   }
 
   modelsSelectionChanged(models: SelectedModel[]) {
@@ -383,7 +388,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
     showAllSelectedIsActive$: Observable<boolean>;
     tags$: Observable<string[]>;
     data$?: Observable<Record<string, CountAvailableAndIsDisableSelectedFiltered>>;
-    companyTags$:   Observable<string[]>;
+    companyTags$: Observable<string[]>;
     projectTags$: Observable<string[]>;
     tagsFilterByProject$: Observable<boolean>;
   }) {
@@ -402,6 +407,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
       new HasReadOnlyFooterItem()
     ];
   }
+
   onFooterHandler({emitValue, item}) {
     switch (item.id) {
       case MenuItems.showAllItems:
@@ -423,7 +429,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
   }
 
   clearTableFiltersHandler(tableFilters: any) {
-    const filters = Object.keys(tableFilters).map( col => ({col, value: []}));
+    const filters = Object.keys(tableFilters).map(col => ({col, value: []}));
     this.store.dispatch(modelsActions.tableFilterChanged({filters, projectId: this.projectId}));
   }
 
@@ -446,7 +452,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
 
   modeChanged(mode: 'info' | 'table') {
     if (mode === 'info') {
-      this.store.dispatch(modelsActions.setTableMode({mode}))
+      this.store.dispatch(modelsActions.setTableMode({mode}));
       this.firstModel && this.store.dispatch(modelsActions.modelSelectionChanged({
         model: this.selectedModels?.[0] || this.firstModel,
         project: this.projectId

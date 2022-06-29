@@ -1,0 +1,120 @@
+<sm-overlay [backdropActive]="backdropActive$|async"></sm-overlay>
+<sm-experiment-header
+  [tableCols]="filteredTableCols$| async"
+  [isArchived]="isArchived$ | async"
+  [metricVariants]="metricVariants$ | async"
+  [hyperParams]="hyperParams$ | async"
+  [minimizedView]="minimizedView"
+  [isMetricsLoading]="metricLoading$ | async"
+  [tableFilters]="tableFilters$ | async"
+  [tableMode]="firstExperiment && (tableMode$ | async)"
+  [rippleEffect]="tableModeAwareness$ | async"
+  (isArchivedChanged)="archivedChanged($event)"
+  (selectedTableColsChanged)="selectedTableColsChanged($event)"
+  (getMetricsToDisplay)="getMetricsToDisplay()"
+  (selectedMetricToShow)="selectedMetricToShow($event)"
+  (selectedHyperParamToShow)="selectedHyperParamToShow($event)"
+  (removeColFromList)="removeColFromList($event)"
+  (setAutoRefresh)="setAutoRefresh($event)"
+  (clearSelection)="clearSelection()"
+  (clearTableFilters)="clearTableFiltersHandler($event)"
+  (tableModeChanged)="modeChanged($event); tableModeUserAware()"
+>
+</sm-experiment-header>
+<div class="experiment-body"
+     [class.footer-visible]="((selectedExperiments$ | async) && (selectedExperiments$ | async)?.length > 1) || (showAllSelectedIsActive$ |async)">
+  <as-split #split
+            [useTransition]="true"
+            [gutterDblClickDuration]="400"
+            (gutterClick)="clickOnSplit()"
+            (gutterDblClick)="closePanel()"
+            (dragEnd)="splitSizeChange($event)"
+            (dragStart)="disableInfoPanel()"
+            (transitionEnd)="experimentsTable.table?.resize(); experimentsTable.afterTableInit()"
+  >
+    <as-split-area
+      [size]="100 - (splitInitialSize)"
+      [order]="1"
+    >
+      <sm-experiments-table
+        #experimentsTable
+        class="align-self-stretch"
+        selectionMode="single"
+        [initialColumns]="tableCols"
+        [colsOrder]="(tableColsOrder$ | async)"
+        [tableCols]="tableCols$| async"
+        [experiments]="experiments$ | async"
+        [users]="users$ | async"
+        [hyperParamsOptions]="hyperParamsOptions$ | async"
+        [activeParentsFilter]="activeParentsFilter$ | async"
+        [parents]="parent$ | async"
+        [experimentTypes]="types$ | async"
+        [tags]="tags$ | async"
+        [systemTags]="systemTags$ | async"
+        [tableSortFields]="(tableSortFields$ | async)"
+        [tableSortOrder]="(tableSortOrder$ | async)"
+        [tableFilters]="(tableFilters$ | async)"
+        [selectedExperiments]="selectedExperiments$ | async"
+        [selectedExperimentsDisableAvailable]="selectedExperimentsDisableAvailable$ | async"
+        [selectedExperiment]="selectedTableExperiment$ |async"
+        [minimizedView]="minimizedView"
+        [noMoreExperiments]="noMoreExperiments$ | async"
+        [split]="selectSplitSize$ | async"
+        [contextMenuTemplate]="contextMenuExtendedTemplate"
+        [contextMenuActive]="contextMenuActive"
+        [entityType]="entityType"
+        (experimentSelectionChanged)="experimentSelectionChanged($event)"
+        (experimentsSelectionChanged)="experimentsSelectionChanged($event)"
+        (sortedChanged)="sortedChanged($event)"
+        (filterChanged)="filterChanged($event)"
+        (tagsMenuOpened)="refreshTagsList()"
+        (typesMenuOpened)="refreshTypesList()"
+        (loadMoreExperiments)="getNextExperiments()"
+        (columnsReordered)="columnsReordered($event)"
+        (columnResized)="columnResized($event)"
+        (openContextMenu)="onContextMenuOpen($event)"
+        (removeTag)="removeTag($event)"
+        (clearAllFilters)="clearTableFiltersHandler($event)"
+      >
+      </sm-experiments-table>
+    </as-split-area>
+    <as-split-area
+      [size]="splitInitialSize"
+      [visible]="minimizedView"
+      [order]="2"
+      style="overflow: hidden"
+    >
+      <sm-simple-dataset-version-info></sm-simple-dataset-version-info>
+    </as-split-area>
+  </as-split>
+</div>
+
+<sm-entity-footer
+  [footerState]="footerState$ | async"
+  [footerItems]="footerItems"
+  (footerItemClick)="onFooterHandler($event, entityType)"
+  (tagSelected)="tagSelected($event, 'experiments')"
+></sm-entity-footer>
+
+<ng-template #contextMenuExtendedTemplate let-contextExperiment>
+  <!--    TODO: fix selectedExperimentsDisableAvailable selector -->
+  <sm-simple-dataset-version-menu
+    #contextMenu
+    [experiment]="contextExperiment"
+    [selectedExperiment]="selectedExperiment$ | async"
+    [selectedExperiments]="singleRowContext ? [contextExperiment] : selectedExperiments"
+    [selectedDisableAvailableIsMultiple]="!singleRowContext"
+    [selectedDisableAvailable]="singleRowContext ? getSingleSelectedDisableAvailable(contextExperiment) : (selectedExperimentsDisableAvailable$ | async)"
+    [numSelected]="singleRowContext ? 1 : selectedExperiments.length"
+    [tagsFilterByProject]="tagsFilterByProject$ | async"
+    [projectTags]="projectTags$ | async"
+    [companyTags]="companyTags$ | async"
+    [activateFromMenuButton]="false"
+    [minimizedView]="true"
+    [tableMode]="!minimizedView"
+    [backdrop]="menuBackdrop"
+    (tagSelected)="onAddTag($event, contextExperiment)"
+    (menuOpened)="setContextMenuStatus(true)"
+    (menuClosed)="setContextMenuStatus(false)"
+  ></sm-simple-dataset-version-menu>
+</ng-template>

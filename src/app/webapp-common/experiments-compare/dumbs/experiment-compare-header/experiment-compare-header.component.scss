@@ -12,7 +12,7 @@
     transition: transform 0.5s;
 
     button {
-      font-size: 13px;
+      font-size: 12px;
 
       &.prev {
         border-right-color: transparent !important;
@@ -108,7 +108,9 @@
   }
 
   .btn-add-experiment {
-    width: 146px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
     background-color: $blue-50;
   }
 

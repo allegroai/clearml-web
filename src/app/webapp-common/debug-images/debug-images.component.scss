@@ -10,7 +10,6 @@
 
     .experiment-name {
       font-size: 18px;
-      height: 22px;
       max-width: 93%;
       display: inline-block;
       white-space: nowrap;
@@ -21,12 +20,6 @@
         width: 100%;
         color: inherit;
       }
-    }
-
-    .id-icon {
-      width: 16px;
-      height: 13px;
-      margin-left: 6px;
     }
   }
 }
@@ -75,24 +68,6 @@ sm-debug-images-view {
 
   &.minimized {
     margin: 0 0 24px;
-  }
-
-  .al-ico-next-batch, .al-ico-prev-batch, .al-ico-back-to-top {
-    cursor: pointer;
-  }
-
-  label {
-    color: $blue-400;
-    margin: 0;
-  }
-
-  .disabled {
-    cursor: auto;
-    opacity: 0.5;
-  }
-
-  b {
-    min-width: 45px
   }
 }
 

@@ -8,6 +8,9 @@ import {deactivateLoader} from '@common/core/actions/layout.actions';
 import {ALL_PROJECTS_OBJECT} from '@common/core/effects/projects.effects';
 import {requestFailed} from '@common/core/actions/http.actions';
 import {ApiProjectsService} from '~/business-logic/api-services/projects.service';
+import {selectCurrentUser, selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
+import {ProjectsGetAllExRequest} from '~/business-logic/model/projects/projectsGetAllExRequest';
+import {selectShowHidden} from '@common/projects/common-projects.reducer';
 
 
 
@@ -23,8 +26,13 @@ export class ProjectsEffects {
 
   getSelectedProject = createEffect(() => this.actions$.pipe(
     ofType(actions.setSelectedProjectId),
-    withLatestFrom(this.store.select(selectSelectedProjectId)),
-    switchMap(([action, selectedProjectId]) => {
+    withLatestFrom(
+      this.store.select(selectSelectedProjectId),
+      this.store.select(selectCurrentUser),
+      this.store.select(selectShowOnlyUserWork),
+      this.store.select(selectShowHidden),
+    ),
+    switchMap(([action, selectedProjectId, user, showOnlyUserWork, showHidden]) => {
       if (!action.projectId) {
         return [
           deactivateLoader(action.type),
@@ -45,9 +53,12 @@ export class ProjectsEffects {
           /* eslint-disable @typescript-eslint/naming-convention */
           id: [action.projectId],
           include_stats: true,
-          ...((action.example !== false || this.fetchingExampleExperiment === action.projectId) && {check_own_contents: true})
+          ...(!showHidden && {include_stats_filter: {system_tags: ['-pipeline']}}),
+          ...((action.example !== false || this.fetchingExampleExperiment === action.projectId) && {check_own_contents: true}),
+          ...(showOnlyUserWork && {active_users: [user.id]}),
+          ...(showHidden && {search_hidden: true}),
           /* eslint-enable @typescript-eslint/naming-convention */
-        })
+        } as ProjectsGetAllExRequest)
           .pipe(
             finalize(() => this.fetchingExampleExperiment = null),
             mergeMap(({projects}) => [

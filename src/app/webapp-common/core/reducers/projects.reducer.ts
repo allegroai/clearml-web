@@ -114,9 +114,15 @@ export const projectsReducer = createReducer(
     };
   }),
   on(projectsActions.setSelectedProject, (state, action) => ({...state, selectedProject: action.project, extraUsers: []})),
+  on(projectsActions.setSelectedProjectStats, (state, action) => ({
+    ...state,
+    selectedProject: {
+      ...state.selectedProject,
+      stats: action.project?.stats
+    }})),
   on(projectsActions.deletedProjectFromRoot, (state, action) => {
-    const projectIdsToDelete = [action.project.id].concat(action.project.sub_projects.map(project=> project.id))
-    return {...state, projects: state.projects.filter(project=> !projectIdsToDelete.includes(project.id))};
+    const projectIdsToDelete = [action.project.id].concat(action.project.sub_projects.map(project => project.id));
+    return {...state, projects: state.projects.filter(project => !projectIdsToDelete.includes(project.id))};
   }),
   on(projectsActions.resetSelectedProject, state => ({...state, selectedProject: initRootProjects.selectedProject, users: [], extraUsers: []})),
   on(projectsActions.updateProjectCompleted, (state, action) => ({

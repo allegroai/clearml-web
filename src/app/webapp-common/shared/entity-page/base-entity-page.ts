@@ -35,8 +35,7 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
   protected setSplitSizeAction: any;
   protected addTag: ActionCreator<string, any>;
   protected abstract setTableModeAction: ActionCreator<string, any>;
-  protected refreshing: boolean;
-  protected shouldOpenDetails = false;
+  public shouldOpenDetails = false;
   protected sub = new Subscription();
   public selectedExperiments: ITableExperiment[];
   public projectId: string;
@@ -110,22 +109,14 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
       }
     ));
 
-    this.sub = this.refresh.tick
+    this.sub.add(this.refresh.tick
       .pipe(
         withLatestFrom(this.inEditMode$),
         filter(([, edit]) => !edit),
         map(([auto]) => auto)
       )
-      .subscribe(auto => {
-        if (this.refreshing) {
-          return;
-        }
-        if (!auto) {
-          this.refreshing = true;
-        }
-
-        this.refreshList(auto === null);
-      });
+      .subscribe(auto => this.refreshList(auto === null))
+    );
   }
 
   ngAfterViewInit() {
@@ -252,9 +243,9 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
 
   archivedChanged(isArchived: boolean) {
     const navigate = () => this.closePanel({archive: isArchived || null}).then(() => {
-        this.afterArchiveChanged();
-        this.store.dispatch(resetProjectSelection());
-      });
+      this.afterArchiveChanged();
+      this.store.dispatch(resetProjectSelection());
+    });
 
     if (this.getSelectedEntities().length > 0) {
       const archiveDialog: MatDialogRef<any> = this.dialog.open(ConfirmDialogComponent, {

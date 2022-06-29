@@ -21,9 +21,14 @@ $type-colors: (
   overflow: hidden;
   position: relative;
   margin: 5px 0;
+
+  .braces {
+    margin-left: -12px;
+  }
+
   .segment {
     padding: 2px;
-    margin: 1px 1px 1px 12px;
+    margin: 1px 1px 1px 8px;
 
     .segment-main {
       word-wrap: break-word;

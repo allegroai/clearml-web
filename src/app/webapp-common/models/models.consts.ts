@@ -49,6 +49,12 @@ export const MODELS_TABLE_COLS: ISmCol[] = [
     disablePointerEvents: true,
   },
   {
+    id            : MODELS_TABLE_COL_FIELDS.ID,
+    headerType    : ColHeaderTypeEnum.title,
+    header        : 'ID',
+    style         : {width: '200px'},
+  },
+  {
     id          : MODELS_TABLE_COL_FIELDS.FRAMEWORK,
     headerType  : ColHeaderTypeEnum.sortFilter,
     sortable    : true,
@@ -83,7 +89,6 @@ export const MODELS_TABLE_COLS: ISmCol[] = [
     sortable    : true,
     filterable  : true,
     header      : 'STATUS',
-    hidden      : false,
     style       : {width: '135px'},
     showInCardFilters: true
   },
@@ -126,7 +131,6 @@ export const MODELS_TABLE_COLS: ISmCol[] = [
     id        : MODELS_TABLE_COL_FIELDS.COMMENT,
     headerType: ColHeaderTypeEnum.sortFilter,
     sortable  : true,
-    hidden    : true,
     header    : 'DESCRIPTION',
     style     : {width: '240px'}
   },

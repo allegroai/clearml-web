@@ -1,4 +1,4 @@
-<sm-dialog-template [header]="'Choose compared experiments'">
+<sm-dialog-template [header]="'Choose compared '+ data.entityType + 's'">
   <div class="select-experiments-container light-theme" (click)="closeSearch()">
     <div class="search-experiment-for-compare d-flex justify-content-between">
       <mat-form-field appearance="outline" class="w-50" smClickStopPropagation>
@@ -9,7 +9,7 @@
           name="search-experiments"
           autocomplete="off"
           smClickStopPropagation
-          placeholder="Start typing experiment name or ID to add to your comparison"
+          placeholder="Start typing {{data.entityType}} name or ID to add to your comparison"
           (input)="searchTermChanged(searchExperiments.value)"
         >
       </mat-form-field>

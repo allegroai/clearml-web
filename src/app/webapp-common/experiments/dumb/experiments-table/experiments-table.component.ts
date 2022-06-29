@@ -1,14 +1,5 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  EventEmitter,
-  Input,
-  OnDestroy,
-  Output,
-  TemplateRef,
-} from '@angular/core';
-import {ICONS, TIME_FORMAT_STRING} from '@common/constants';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef,} from '@angular/core';
+import {TIME_FORMAT_STRING} from '@common/constants';
 import {ColHeaderTypeEnum, ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {FILTERED_EXPERIMENTS_STATUS_OPTIONS} from '../../shared/common-experiments.const';
 import {get, uniq} from 'lodash/fp';
@@ -30,6 +21,7 @@ import {CountAvailableAndIsDisableSelectedFiltered} from '@common/shared/entity-
 import {hyperParamSelectedExperiments, selectAllExperiments} from '../../actions/common-experiments-view.actions';
 import {createFiltersFromStore, excludedKey, uniqueFilterValueAndExcluded} from '@common/shared/utils/tableParamEncode';
 import {getRoundedNumber} from '../../shared/common-experiments.utils';
+import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 
 @Component({
   selector: 'sm-experiments-table',
@@ -37,18 +29,18 @@ import {getRoundedNumber} from '../../shared/common-experiments.utils';
   styleUrls: ['./experiments-table.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ExperimentsTableComponent extends BaseTableView implements OnDestroy {
-  readonly EXPERIMENTS_TABLE_COL_FIELDS = EXPERIMENTS_TABLE_COL_FIELDS;
-  readonly FILTERED_EXPERIMENTS_STATUS_OPTIONS = FILTERED_EXPERIMENTS_STATUS_OPTIONS;
+export class ExperimentsTableComponent extends BaseTableView implements OnInit, OnDestroy {
+  readonly experimentsTableColFields = EXPERIMENTS_TABLE_COL_FIELDS;
+  readonly timeFormatString = TIME_FORMAT_STRING;
+
   public filtersOptions: { [colId: string]: IOption[] } = {
-    [EXPERIMENTS_TABLE_COL_FIELDS.STATUS]: this.FILTERED_EXPERIMENTS_STATUS_OPTIONS,
+    [EXPERIMENTS_TABLE_COL_FIELDS.STATUS]: [],
     [EXPERIMENTS_TABLE_COL_FIELDS.TYPE]: [],
     [EXPERIMENTS_TABLE_COL_FIELDS.USER]: [],
     [EXPERIMENTS_TABLE_COL_FIELDS.TAGS]: [],
     [EXPERIMENTS_TABLE_COL_FIELDS.PARENT]: [],
     [EXPERIMENTS_TABLE_COL_FIELDS.PROJECT]: [],
   };
-  readonly ICONS = ICONS;
   readonly getSystemTags = getSystemTags;
   public isDevelopment = isDevelopment;
   private _selectedExperiments: ITableExperiment[] = [];
@@ -61,6 +53,7 @@ export class ExperimentsTableComponent extends BaseTableView implements OnDestro
   private _selectedExperiment: ITableExperiment;
   public searchValues: { [colId: string]: string } = {};
   public roundedMetricValues: { [colId: string]: { [expId: string]: boolean } } = {};
+  private _tableFilters: { [p: string]: FilterMetadata };
 
   @Input() set experiments(experiments: Array<ITableExperiment>) {
     this._experiments = experiments;
@@ -144,7 +137,7 @@ export class ExperimentsTableComponent extends BaseTableView implements OnDestro
       label: tag === null ? '(No tags)' : tag,
       value: tag
     }) as IOption);
-    this.sortOptionalTagsList()
+    this.sortOptionalTagsList();
   }
 
   @Input() set experimentTypes(types: string[]) {
@@ -176,6 +169,7 @@ export class ExperimentsTableComponent extends BaseTableView implements OnDestro
   }
 
   @Input() set tableFilters(filters: { [s: string]: FilterMetadata }) {
+    this._tableFilters = filters;
     this.filtersValues = {};
     this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.STATUS] = get([EXPERIMENTS_TABLE_COL_FIELDS.STATUS, 'value'], filters) || [];
     this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.TYPE] = get([EXPERIMENTS_TABLE_COL_FIELDS.TYPE, 'value'], filters) || [];
@@ -194,6 +188,9 @@ export class ExperimentsTableComponent extends BaseTableView implements OnDestro
     this.filtersValues = Object.assign({}, {...this.filtersValues}, {...filtersValues});
   }
 
+  get tableFilters() {
+    return this._tableFilters;
+  }
 
   @Output() experimentSelectionChanged = new EventEmitter<ITableExperiment>();
   @Output() experimentsSelectionChanged = new EventEmitter<Array<ITableExperiment>>();
@@ -204,7 +201,7 @@ export class ExperimentsTableComponent extends BaseTableView implements OnDestro
   @Output() columnResized = new EventEmitter<{ columnId: string; widthPx: number }>();
   @Output() openContextMenu = new EventEmitter<{ x: number; y: number; single?: boolean; backdrop?: boolean }>();
   @Output() removeTag = new EventEmitter<{ experiment: ITableExperiment; tag: string }>();
-  TIME_FORMAT_STRING = TIME_FORMAT_STRING;
+  @Output() clearAllFilters = new EventEmitter<{ [s: string]: FilterMetadata }>();
 
   constructor(
     private changeDetector: ChangeDetectorRef,
@@ -216,6 +213,10 @@ export class ExperimentsTableComponent extends BaseTableView implements OnDestro
     super();
     this.entitiesKey = 'experiments';
     this.selectedEntitiesKey = 'selectedExperiments';
+  }
+
+  ngOnInit() {
+    this.filtersOptions[EXPERIMENTS_TABLE_COL_FIELDS.STATUS] = FILTERED_EXPERIMENTS_STATUS_OPTIONS(this.entityType === EntityTypeEnum.dataset);
   }
 
   ngOnDestroy(): void {
@@ -251,7 +252,9 @@ export class ExperimentsTableComponent extends BaseTableView implements OnDestro
       const addList = this.getSelectionRange<ITableExperiment>(change, experiment);
       this.experimentsSelectionChanged.emit([...this.selectedExperiments, ...addList]);
     } else {
-      this.experimentsSelectionChanged.emit(this.selectedExperiments.filter((selectedExperiment) => selectedExperiment.id !== experiment.id));
+      const removeList = this.getDeselectionRange(change, experiment as any);
+      this.experimentsSelectionChanged.emit(this.selectedExperiments.filter((selectedExperiment) =>
+        !removeList.includes(selectedExperiment.id)));
     }
   }
 
@@ -268,7 +271,7 @@ export class ExperimentsTableComponent extends BaseTableView implements OnDestro
   }
 
 
-  onContextMenu(data: { e: MouseEvent, rowData; single?: boolean; backdrop?: boolean }) {
+  onContextMenu(data: { e: MouseEvent; rowData; single?: boolean; backdrop?: boolean }) {
     if (!data?.single) {
       this.contextExperiment = this._experiments.find(experiment => experiment.id === data.rowData.id);
       if (!this.selectedExperiments.map(exp => exp.id).includes(this.contextExperiment.id)) {
@@ -310,4 +313,5 @@ export class ExperimentsTableComponent extends BaseTableView implements OnDestro
   selectAll(filtered?: boolean) {
     this.store.dispatch(selectAllExperiments({filtered}));
   }
+
 }

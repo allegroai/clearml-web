@@ -44,7 +44,7 @@ export class CommonDashboardEffects {
         page_size: CARDS_IN_ROW,
         active_users: (showOnlyUserWork ? [user.id] : null),
         only_fields: ['name', 'company', 'user', 'created', 'default_output_destination']
-      } as ProjectsGetAllExRequest).pipe(
+      }).pipe(
           mergeMap(({projects}) => [setRecentProjects({projects}), deactivateLoader(action.type)]),
           catchError(error => [deactivateLoader(action.type), requestFailed(error)])
         )

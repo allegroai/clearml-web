@@ -1,4 +1,4 @@
-import {Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
+import {Component, ElementRef, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import {isHtmlPage, isTextFileURL} from '../../shared/utils/shared-utils';
 import {IsAudioPipe} from '../../shared/pipes/is-audio.pipe';
 import {IsVideoPipe} from '../../shared/pipes/is-video.pipe';
@@ -15,12 +15,13 @@ import {Observable} from 'rxjs/internal/Observable';
   templateUrl: './debug-image-snippet.component.html',
   styleUrls: ['./debug-image-snippet.component.scss']
 })
-export class DebugImageSnippetComponent implements OnInit {
+export class DebugImageSnippetComponent {
   public type: 'image' | 'player' | 'html';
-  public themeEnum = ThemeEnum;
   public source$: Observable<string>;
   private _frame: any;
+  public themeEnum = ThemeEnum;
 
+  @Input() theme: ThemeEnum = ThemeEnum.Light;
   @Input() set frame(frame) {
     if (frame.url) {
       this.source$ = getSignedUrlOrOrigin$(frame.url, this.store).pipe(
@@ -38,9 +39,11 @@ export class DebugImageSnippetComponent implements OnInit {
     }
     this._frame = frame;
   }
+
   get frame() {
     return this._frame;
   }
+
   @Output() imageError = new EventEmitter();
   @Output() imageClicked = new EventEmitter();
   @ViewChild('video') video: ElementRef<HTMLVideoElement>;
@@ -49,9 +52,6 @@ export class DebugImageSnippetComponent implements OnInit {
   isLoading = true;
 
   constructor(private store: Store<any>) {
-  }
-
-  ngOnInit() {
   }
 
   openInNewTab(source: string) {
@@ -74,5 +74,11 @@ export class DebugImageSnippetComponent implements OnInit {
 
   log($event: ErrorEvent) {
     console.log($event);
+  }
+
+  iframeLoaded(event) {
+    if (event.target.src) {
+      this.isLoading = false;
+    }
   }
 }

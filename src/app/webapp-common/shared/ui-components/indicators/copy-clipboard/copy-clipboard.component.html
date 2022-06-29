@@ -6,6 +6,7 @@
         class="btn btn-primary"
         [class]="theme"
         [class.hideBackground]="hideBackground"
+        [class.inline]="inline"
         [cbContent]="clipboardText"
         [disabled]="disabled"
         (cbOnSuccess)="copyToClipboard()"

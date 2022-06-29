@@ -56,7 +56,8 @@ export const COMPARE_DETAILS_ONLY_FIELDS_BASE = [
   'started',
   'status_message',
   'status_reason',
-  'last_worker'
+  'last_worker',
+  'runtime'
 ];
 
 export const COMPARE_DEBUG_IMAGES_ONLY_FIELDS = [

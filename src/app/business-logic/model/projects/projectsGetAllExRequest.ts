@@ -94,6 +94,7 @@ export interface ProjectsGetAllExRequest {
      */
     size?: number;
   stats_with_children?: boolean;
+  include_stats_filter?: any;
 }
 export namespace ProjectsGetAllExRequest {
     export type StatsForStateEnum = 'active' | 'archived';

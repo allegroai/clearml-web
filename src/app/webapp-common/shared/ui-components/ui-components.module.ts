@@ -101,7 +101,7 @@ import {InvalidPrefixValidatorDirective} from './template-forms-ui/invalid-prefi
 import {UniquePathValidatorDirective} from './template-forms-ui/unique-path-validator.directive';
 import {OperationErrorDialogComponent} from '@common/shared/ui-components/overlay/operation-error-dialog/operation-error-dialog.component';
 import {CirclesInRowComponent} from './indicators/circles-in-row/circles-in-row.component';
-import {RequiredAutocompleteSelectionValidatorDirective} from "@common/shared/ui-components/template-forms-ui/required-autocomplete-selection-validator.directive";
+import {RequiredAutocompleteSelectionValidatorDirective} from '@common/shared/ui-components/template-forms-ui/required-autocomplete-selection-validator.directive';
 import {OverflowsDirective} from '@common/shared/ui-components/directives/overflows.directive';
 import {RippleButtonComponent} from './buttons/ripple-button/ripple-button.component';
 import {CheckboxThreeStateListComponent} from './panel/checkbox-three-state-list/checkbox-three-state-list.component';

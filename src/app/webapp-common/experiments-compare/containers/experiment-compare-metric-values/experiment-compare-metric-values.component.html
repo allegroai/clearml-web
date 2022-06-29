@@ -5,7 +5,10 @@
   (experimentListChanged)="experimentListChanged($event)"
 >
   <div *compareCardHeader="let experiment;">
-    <sm-experiment-compare-general-data [experiment]="experiment" (copyIdClicked)="copyIdToClipboard()">
+    <sm-experiment-compare-general-data
+      [experiment]="experiment"
+      [tags]="experimentTags[experiment.id]"
+      (copyIdClicked)="copyIdToClipboard()">
     </sm-experiment-compare-general-data>
   </div>
   <div class="tree-card-body" smSyncScroll *compareCardBody="let experiment; let i = index;">

@@ -1,6 +1,15 @@
 <div class="counter-container">
-  <div class="circle-counter" [class]="type">
-    <div class="counter">{{counter | numberToK}}</div>
+  <div class="circle-counter" [class]="type" [class.multi]="valType === 'array'">
+    <ng-container [ngSwitch]="valType">
+      <div *ngSwitchCase="'array'" class="d-flex-center flex-row wrapper">
+        <div *ngFor="let subCounter of counter; trackBy: trackByLabel">
+          <div class="sub-counter">{{subCounter.value | filesize : fileSizeConfigCount ?? 'N/A'}}</div>
+          <div class="sub-label">{{subCounter.label}}</div>
+        </div>
+      </div>
+      <div *ngSwitchCase="'number'" class="counter">{{counter | filesize : fileSizeConfigCount}}</div>
+      <div *ngSwitchDefault class="counter">{{counter}}</div>
+    </ng-container>
   </div>
   <div class="counter-label">{{label}}</div>
   <div *ngIf="underLabel" class="counter-label leave-space">{{underLabel}}</div>

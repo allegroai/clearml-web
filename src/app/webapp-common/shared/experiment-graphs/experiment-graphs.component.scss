@@ -1,15 +1,33 @@
+@import "../ui-components/styles/variables";
+
 :host {
+
+  &.dark-theme {
+    .metric-group-container {
+      &:not(:first-of-type) .metric-group-header {
+        border-top: 1px solid $blue-600;
+      }
+    }
+  }
+
   display: block;
   position: relative;
   height: 100%;
+
+  .summary-container {
+    border-bottom: 1px solid #efefef;
+  }
+
+  .single-value-summary-table {
+    margin: 16px 0;
+    max-width: 80%;
+  }
 
   .single-graph {
     position: relative;
   }
 
   ::ng-deep .single-graph sm-single-graph {
-    margin-left: auto;
-    margin-right: auto;
 
     .whitebg {
       border: none;
@@ -26,7 +44,7 @@
 
   .metrics-section {
     height: 100%;
-    overflow-y: hidden;
+    overflow-y: scroll;
 
     .disable-graphs-interactive {
       pointer-events: none;
@@ -36,7 +54,6 @@
   .all-metrics {
     height: 100%;
     padding: 0;
-    overflow-y: scroll;
   }
 
   .metric-group-container {
@@ -73,15 +90,18 @@
     flex-basis: 100%;
     text-align: center;
     padding: 20px 0;
-    font-size: 1.5rem;
+    font-size: 18px;
     border-bottom: 1px solid #efefef;
+    &.disable-resize{
+      border-bottom: none;
+    }
   }
 
   .hidden {
     display: none !important;
   }
 
-  .resize-overlay{
+  .resize-overlay {
     position: absolute;
     z-index: 13;
     top: 0;
@@ -91,5 +111,15 @@
       bottom: 0;
       right: 0;
     }
+  }
+
+  .no-output-icon {
+    height: 100px;
+    width: 150px;
+    left: 50%;
+    margin-top: 100px;
+    transform: translateX(-50%);
+    margin-bottom: 10px;
+    position: relative;
   }
 }

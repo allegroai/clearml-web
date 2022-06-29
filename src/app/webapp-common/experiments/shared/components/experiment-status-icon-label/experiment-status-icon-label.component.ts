@@ -9,7 +9,7 @@ import {TASKS_STATUS} from '@common/tasks/tasks.constants';
 })
 export class ExperimentStatusIconLabelComponent {
   public showSpinner: boolean;
-  public EXPERIMENTS_STATUS_LABELS = EXPERIMENTS_STATUS_LABELS;
+  public experimentsStatusLabels = EXPERIMENTS_STATUS_LABELS;
   private _status: string;
 
   @Input() showLabel               = true;
@@ -20,7 +20,7 @@ export class ExperimentStatusIconLabelComponent {
       TASKS_STATUS.IN_PROGRESS,
       TASKS_STATUS.FAILED,
       TASKS_STATUS.STOPPED
-    ].includes(status)
+    ].includes(status);
   }
   get status() {
     return this._status;

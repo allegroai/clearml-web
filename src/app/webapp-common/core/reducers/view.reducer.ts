@@ -1,6 +1,7 @@
 import {createReducer, createSelector, on, ReducerTypes} from '@ngrx/store';
 import * as layoutActions from '../actions/layout.actions';
 import {apiRequest, requestFailed} from '@common/core/actions/http.actions';
+import {Ace} from 'ace-builds';
 
 export interface ViewState {
   loading: { [endpoint: string]: boolean };
@@ -17,6 +18,7 @@ export interface ViewState {
   neverShowPopupAgain: string[];
   plotlyReady: boolean;
   aceReady: boolean;
+  aceCaretPosition: { [key: string]: Ace.Point };
   preferencesReady: boolean;
   showUserFocus: boolean;
 }
@@ -24,7 +26,6 @@ export interface ViewState {
 export const initViewState: ViewState = {
   loading: {},
   dialog: false,
-
   notification: null,
   loggedOut: false,
   backdropActive: false,
@@ -37,6 +38,7 @@ export const initViewState: ViewState = {
   neverShowPopupAgain: [],
   plotlyReady: false,
   aceReady: false,
+  aceCaretPosition: {},
   preferencesReady: false,
   showUserFocus: false,
 };
@@ -57,6 +59,7 @@ export const selectFirstLogin = createSelector(views, state => state.firstLogin)
 export const selectFirstLoginAt = createSelector(views, state => state.firstLoginAt);
 export const selectPlotlyReady = createSelector(views, state => state.plotlyReady);
 export const selectAceReady = createSelector(views, state => state.aceReady);
+export const selectAceCaretPosition = createSelector(views, state => state.aceCaretPosition);
 export const selectNeverShowPopups = createSelector(views, (state): string[] => state.neverShowPopupAgain);
 export const selectShowUserFocus = createSelector(views, state => state.showUserFocus);
 
@@ -77,9 +80,18 @@ export const viewReducers = [
   })),
   on(layoutActions.visibilityChanged, (state, action) => ({...state, applicationVisible: action.visible})),
   on(layoutActions.setScaleFactor, (state, action) => ({...state, scaleFactor: action.scale})),
-  on(layoutActions.firstLogin, (state, action) => ({...state, firstLogin: action.first, firstLoginAt: new Date().getTime()})),
+  on(layoutActions.firstLogin, (state, action) => ({
+    ...state,
+    firstLogin: action.first,
+    firstLoginAt: new Date().getTime()
+  })),
   on(layoutActions.plotlyReady, (state) => ({...state, plotlyReady: true})),
   on(layoutActions.aceReady, (state) => ({...state, aceReady: true})),
+  on(layoutActions.saveAceCaretPosition, (state, action) => ({
+    ...state,
+    aceCaretPosition: {...state.aceCaretPosition, [action.id]: action.position}
+  })),
+  on(layoutActions.resetAceCaretsPositions, (state, action) => ({...state, aceCaretPosition: {}})),
   on(layoutActions.resetLoader, (state) => ({...state, loading: {}})),
   on(apiRequest, (state, action) => ({
     ...state,

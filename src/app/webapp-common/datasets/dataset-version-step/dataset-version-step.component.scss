@@ -1,0 +1,10 @@
+:host {
+  flex: 0 0 220px;
+
+  .step-footer {
+    font-size: 12px;
+  }
+  .title {
+    max-width: 162px; // use for ellipsis
+  }
+}

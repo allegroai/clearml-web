@@ -7,12 +7,12 @@ import {GetCurrentUserResponseUserObjectCompany} from '~/business-logic/model/us
 import {filter, skip, take} from 'rxjs/operators';
 import {setDeep} from '@common/core/actions/projects.actions';
 import {getRecentProjects, getRecentExperiments} from '@common/dashboard/common-dashboard.actions';
-import {selectActiveSearch} from '@common/common-search/common-search.reducer';
 import {selectFirstLogin} from '@common/core/reducers/view.reducer';
 import {MatDialog} from '@angular/material/dialog';
 import {WelcomeMessageComponent} from '@common/layout/welcome-message/welcome-message.component';
 import {firstLogin} from '@common/core/actions/layout.actions';
 import {IRecentTask, selectRecentTasks} from '@common/dashboard/common-dashboard.reducer';
+import {selectActiveSearch} from '@common/dashboard-search/dashboard-search.reducer';
 
 
 @Component({

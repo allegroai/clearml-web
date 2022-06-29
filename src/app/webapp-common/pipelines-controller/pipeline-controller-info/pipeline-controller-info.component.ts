@@ -1,5 +1,5 @@
 import {
-  AfterViewInit,
+  AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef,
   Component,
   ElementRef, HostListener,
   Inject, NgZone,
@@ -9,7 +9,7 @@ import {
   ViewChild,
   ViewChildren
 } from '@angular/core';
-import {DagManagerService, DagModelItem} from '@ngneat/dag';
+import {DagModelItem} from '@ngneat/dag';
 import {combineLatest, fromEvent, Observable, Subscription} from 'rxjs';
 import {DOCUMENT} from '@angular/common';
 import {debounceTime, delay, distinctUntilChanged, filter, map, mergeMap, takeUntil, tap, throttleTime} from 'rxjs/operators';
@@ -25,8 +25,9 @@ import {selectPipelineSelectedStep} from '../../experiments/reducers';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 import {getBoxToBoxArrow} from 'curved-arrows';
 import {Ace, edit} from 'ace-builds';
-import {trackById} from '@common/shared/utils/forms-track-by';
 import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
+import {selectScaleFactor} from '@common/core/reducers/view.reducer';
+import {DagManagerUnsortedService} from '@common/shared/services/dag-manager-unsorted.service';
 
 export interface PipelineItem extends DagModelItem {
   name: string;
@@ -44,6 +45,8 @@ export interface Arrow {
 export enum StatusOption {
   log = 'Console',
   code = 'Code',
+  content = 'Content',
+  preview = 'Preview',
 }
 
 
@@ -51,7 +54,8 @@ export enum StatusOption {
   selector: 'sm-pipeline-controller-diagram',
   templateUrl: './pipeline-controller-info.component.html',
   styleUrls: ['./pipeline-controller-info.component.scss'],
-  providers: [DagManagerService]
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [DagManagerUnsortedService]
 })
 
 export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -63,7 +67,7 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
   private aceEditor: Ace.Editor;
   private sub = new Subscription();
   private dragging: boolean;
-  private pipelineConfiguration: any;
+  protected pipelineConfiguration: any;
   public chartWidth = 0;
   public arrows: Arrow[];
   public diagramRect: DOMRect;
@@ -74,15 +78,17 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
   public projectId$: Observable<string>;
   private tasksElementsLength$: Observable<number>;
   private pipelineController: PipelineItem[];
-  private skipAutoCenter: Boolean;
+  private skipAutoCenter: boolean;
+  private scale: number;
   showLog: boolean;
   public infoData: IExperimentInfo;
   public stepDiff: string;
   statusOption = StatusOption;
   detailsPanelMode = StatusOption.log;
+  defaultDetailsMode = StatusOption.log;
 
   trackArrows = (index: number, arrow: Arrow) => arrow.path;
-  trackById = trackById;
+  trackByStepId = (index: number, step) => step.stepId;
 
   @HostListener('document:keydown', ['$event'])
   onKeyDown(e: KeyboardEvent) {
@@ -92,15 +98,16 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
   }
 
   constructor(
-    private _dagManager: DagManagerService<PipelineItem>,
-    @Inject(DOCUMENT) private document,
-    private store: Store<any>,
-    private zone: NgZone
+    protected _dagManager: DagManagerUnsortedService<PipelineItem>,
+    @Inject(DOCUMENT) protected document,
+    protected store: Store<any>,
+    protected cdr: ChangeDetectorRef,
+    protected zone: NgZone
   ) {
     this.sub.add(this.store.select(selectRouterParams)
       .pipe(
         debounceTime(150),
-        map(params => params?.controllerId),
+        map(params => this.getEntityId(params)),
         filter(id => !!id),
         distinctUntilChanged()
       )
@@ -111,6 +118,8 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
         this.store.dispatch(setSelectedPipelineStep({step: null}));
       })
     );
+
+    this.sub.add(this.store.select(selectScaleFactor).subscribe(factor => this.scale = 100 / factor));
 
     this.selected$ = combineLatest([
       this.store.select(selectSelectedExperiment),
@@ -129,50 +138,55 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
         if (task?.id !== this.infoData?.id) {
           this.selectedEntity = null;
           this.stepDiff = null;
-          this.detailsPanelMode = StatusOption.log;
+          this.detailsPanelMode = this.getPanelMode();
         }
         this.infoData = task;
-        this._dagManager.setNewItemsArrayAsDagModel([]);
         const width = this.diagramContainer?.nativeElement.getBoundingClientRect().width;
         this.chartWidth = Math.max(Number.isNaN(width) ? 0 : width, 4000);
         this.dagModel$ = this._dagManager.dagModel$
-          .pipe(tap((model: any[]) => model.forEach(row => this.chartWidth = Math.max(this.chartWidth, row.length * 300))));
-        // const artifactPipelineObject = task?.execution?.artifacts.filter(artifact => artifact.key === 'pipeline_state');
-        // const pipelineObject = artifactPipelineObject?.length > 0 ? artifactPipelineObject[0]?.type_data?.preview : task?.configuration?.Pipeline?.value;
-        const pipelineObject = task?.configuration?.Pipeline?.value;
+          .pipe(filter(model => model?.length > 0), tap((model: any[]) =>
+            model.forEach(row => this.chartWidth = Math.max(this.chartWidth, row.length * 300))));
+        const pipelineObject = this.getTreeObject(task);
         if (pipelineObject) {
           this.pipelineController = this.convertPipelineToDagModel(pipelineObject);
-          if (!this.infoData?.runtime?._pipeline_hash) {
-            PipelineControllerInfoComponent.resetUninitializedRunningFields(this.pipelineController);
-          }
+          this.resetUninitializedRunningFields();
           this._dagManager.setNewItemsArrayAsDagModel(this.pipelineController);
-          this.dagModel$ = this._dagManager.dagModel$
-            .pipe(tap((model: any[]) => model.forEach(row => this.chartWidth = Math.max(this.chartWidth, row.length * 300))));
-          setTimeout(() => {
+          window.setTimeout(() => {
             if (!this.skipAutoCenter) {
               const element = this.diagramContainer.nativeElement;
               element.scroll({left: (element.scrollWidth - element.getBoundingClientRect().width) / 2});
             }
             this.removeLines();
             this.drawLines();
+            this.cdr.detectChanges();
           }, 0);
         }
       })
     );
   }
 
-  private static resetUninitializedRunningFields(pipelineController) {
-    pipelineController.forEach(step => {
-      step.data.job_started = null;
-      step.data.job_ended = null;
-      step.data.status = 'pending';
-    });
+  protected resetUninitializedRunningFields() {
+    if (!this.infoData?.runtime?._pipeline_hash) {
+      this.pipelineController.forEach(step => {
+        step.data.job_started = null;
+        step.data.job_ended = null;
+        step.data.status = 'pending';
+      });
+    }
+  }
+
+  getEntityId(params) {
+    return params?.controllerId;
   }
 
   convertPipelineToDagModel(pipeline): PipelineItem[] {
     let pipelineObj;
     try {
       pipelineObj = JSON.parse(pipeline);
+      pipelineObj = Object.entries(pipelineObj).reduce((acc, [key, val]: [string, any]) => {
+        acc[key] = {...val, parents: val.parents.map(parent => `${parent}`)};
+        return acc;
+      }, {});
       this.pipelineConfiguration = pipelineObj;
     } catch {
       return [];
@@ -183,7 +197,7 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
     let i = 0;
     while (pipelineKeysArr.length > 0 || i > pipelineKeysArr.length) {
       const node = pipelineObj[pipelineKeysArr[i]];
-      const parents = node.parents ?? [];
+      const parents = node?.parents ?? [];
       if (parents.every(parent => sortedNodes.includes(parent))) {
         sortedNodes.push(pipelineKeysArr[i]);
         pipelineKeysArr.splice(i, 1);
@@ -221,7 +235,7 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
       .pipe(throttleTime(1000))
       .subscribe(() => {
       this.skipAutoCenter = true;
-    })
+    });
 
     const mousedown$ = fromEvent(this.diagramContainer.nativeElement, 'mousedown');
     const mouseup$ = fromEvent(document, 'mouseup');
@@ -231,7 +245,7 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
       .pipe(
         mergeMap(() => mousemove$.pipe(
           tap(() => {
-            this.dragging = true
+            this.dragging = true;
             this.skipAutoCenter = true;
           }),
           map((e: MouseEvent) => {
@@ -274,8 +288,8 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
             const fromRect = parent.nativeElement.getBoundingClientRect();
             const toRect = self.nativeElement.getBoundingClientRect();
             const [sx, sy, c1x, c1y, c2x, c2y, ex, ey, ae] = getBoxToBoxArrow(
-              parent.nativeElement.offsetLeft, parent.nativeElement.offsetTop, fromRect.width, fromRect.height,
-              self.nativeElement.offsetLeft, self.nativeElement.offsetTop, toRect.width, toRect.height,
+              parent.nativeElement.offsetLeft, parent.nativeElement.offsetTop, fromRect.width / this.scale, fromRect.height / this.scale,
+              self.nativeElement.offsetLeft, self.nativeElement.offsetTop, toRect.width / this.scale, toRect.height / this.scale,
               {padStart: 0, padEnd: 7}
             );
             this.arrows.push({
@@ -303,7 +317,7 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
         this.aceEditor?.getSession().setValue(this.stepDiff);
       } catch (e) {
         this.stepDiff = null;
-        this.detailsPanelMode = StatusOption.log;
+        this.detailsPanelMode = this.defaultDetailsMode;
       }
       const id = this.infoData.runtime._pipeline_hash ? (step?.data?.job_id) : null;
       if (id) {
@@ -316,7 +330,7 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
       this.highlightArrows();
     } else if (!this.dragging) {
       this.stepDiff = null;
-      this.detailsPanelMode = StatusOption.log;
+      this.detailsPanelMode = this.defaultDetailsMode;
       this.store.dispatch(setSelectedPipelineStep({step: null}));
       this.selectedEntity = null;
       this.highlightArrows();
@@ -365,9 +379,17 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
     });
   }
 
-  private highlightArrows() {
+  protected highlightArrows() {
     this.arrows = this.arrows
-      .map(arrow => ({...arrow, selected: arrow.targetId === this.selectedEntity?.id}))
+      ?.map(arrow => ({...arrow, selected: arrow.targetId === this.selectedEntity?.id}))
       .sort((a, b) => a.selected && !b.selected ? 1 : -1);
+  }
+
+  protected getTreeObject(task) {
+    return task?.configuration?.Pipeline?.value;
+  }
+
+  protected getPanelMode() {
+    return this.defaultDetailsMode;
   }
 }

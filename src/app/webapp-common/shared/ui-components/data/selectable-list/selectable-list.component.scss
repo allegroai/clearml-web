@@ -24,12 +24,22 @@ i.icon {
     cursor: pointer;
     list-style: none;
     padding: 10px 12px;
+    font-size: 14px;
+    border-radius: 4px;
+
+    .al-ico-show {
+      visibility: hidden;
+    }
 
     &:hover {
       background-color: $blue-50;
       transition: background-color 0.2s;
+      .al-ico-show {
+        visibility: visible;
+      }
     }
   }
+  
 }
 
 .unchecked {

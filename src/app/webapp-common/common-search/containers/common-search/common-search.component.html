@@ -1,19 +1,22 @@
-<span class="search-container" [ngClass]="{'open': isSearching$ | async}">
+<span class="search-container" [class.open]="isSearching$ | async">
   <sm-search
+    #search
     class="search-header"
-    [value]="(searchQuery$ | async)?.query"
+    [class.regex-error]="regexError"
+    [value]="(searchQuery$ | async)?.original"
     [placeholder]="searchPlaceholder$ | async"
     [hideIcons]="true"
     [minimumChars]="minChars"
     (focusout)="onSearchFocusOut()"
     (valueChanged)="onSearchValueChanged($event)"
   >
+    <i *ngIf="regexError" class="regexp al-icon al-ico-error-circle pointer" [smTooltip]="regexError" [matTooltipPosition]="'below'"></i>
     <i
       class="regexp al-ico-regex pointer"
       smClickStopPropagation
       [smTooltip]="'Regex'" [matTooltipPosition]="'below'"
       [class.active]="regExp"
-      (click)="toggleRegExp()"></i>
+      (click)="toggleRegExp(); search.searchBarInput.nativeElement.focus();"></i>
   </sm-search>
 </span>
 <ng-container *ngIf="searchActive">

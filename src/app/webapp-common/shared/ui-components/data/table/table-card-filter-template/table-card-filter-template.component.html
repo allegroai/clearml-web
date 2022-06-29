@@ -1,7 +1,7 @@
 <div class="filter-sort-container d-flex align-items-center"
-     [ngClass]="isFiltered() ? 'active' : 'deactive'">
+     [ngClass]="isFiltering ? 'active' : 'deactive'">
   <div mat-button class='cell pointer'>
-    <i [class]="'icon ' + (isFiltered()? 'i-filter-on':'i-filter-off')" [matMenuTriggerFor]="menu"></i>
+    <i [class]="'icon ' + (isFiltering? 'i-filter-on':'i-filter-off')" [matMenuTriggerFor]="menu"></i>
   </div>
   <mat-menu #menu="matMenu" class="table-card-filter-menu" classList="light-theme">
     <ng-container *ngFor="let option of (optionsFiltered | keyvalue); trackBy: trackByKey">
@@ -48,6 +48,8 @@
         </mat-menu>
       </ng-template>
     </ng-container>
+    <hr class="m-0">
+    <div mat-menu-item class="clear-all mat-menu-item" (click)="isFiltering && clearAll.emit()" [disabled]="!isFiltering">Clear all</div>
   </mat-menu>
 </div>
 
