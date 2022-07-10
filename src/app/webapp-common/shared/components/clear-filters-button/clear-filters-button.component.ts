@@ -10,7 +10,7 @@ import {FilterMetadata} from 'primeng/api/filtermetadata';
 export class ClearFiltersButtonComponent implements OnInit {
 
   @Input() set tableFilters(tableFilters: { [s: string]: FilterMetadata }) {
-    this.isTableFiltered = Object.values(tableFilters).some(({value}) => value.length > 0);
+    this.isTableFiltered = Object.values(tableFilters).some(({value}) => value?.length > 0);
   };
   @Output() clearTableFilters = new EventEmitter<null>();
 

@@ -19,23 +19,23 @@
     <div class="shared line-item"
          *ngIf="(!minimized) && shared"
     ><i class="fas fa-link p-1"></i></div>
+    <sm-id-badge class="mr-3" [id]="experiment?.id" (copied)="copyToClipboard()" *ngIf="!viewId"></sm-id-badge>
     <span class="comment line-item"
-          smHesitate [delay]="1000" [action]="'leave'"
-          (smHesitate)="menuHesitate.hesitateStatus && menu.closed.emit()">
-        <i class="al-icon  pointer"
-           #commentElement
-           [ngClass]="infoData?.comment ? 'al-ico-task-desc' : 'al-ico-task-desc-outline'"
-           [matMenuTriggerFor]="menu"
-           smHesitate
-           [delay]="500"
-           [action]="'enter'"
-           (smHesitate)="commentElement.click(); menuHesitate.hesitateStatus = true"
-           (click)="false"
-        ></i>
-      </span>
-    <mat-menu #menu="matMenu" backdropClass="hello" [hasBackdrop]="false" class="line-item">
+          [delay]="1000" [action]="'leave'"
+          (smHesitate)="menuHesitate.hesitateStatus && menu.closed.emit()"
+    >
+      <i class="al-icon  pointer"
+         #commentElement
+         [ngClass]="infoData?.comment ? 'al-ico-task-desc' : 'al-ico-task-desc-outline'"
+         [matMenuTriggerFor]="menu"
+         [delay]="500"
+         [action]="'enter'"
+         (smHesitate)="commentElement.click(); menuHesitate.hesitateStatus = true"
+         (click)="false"
+      ></i>
+    </span>
+    <mat-menu #menu="matMenu" backdropClass="hello" [hasBackdrop]="false" class="line-item" yPosition="above">
       <sm-experiment-info-edit-description
-        smHesitate
         #menuHesitate="hesitate"
         [delay]="1000"
         [action]="'leave'"
@@ -44,11 +44,8 @@
         (onDescription)="onDescriptionHandler()"
       ></sm-experiment-info-edit-description>
     </mat-menu>
-    <i class="al-icon al-ico-id pointer line-item" [smTooltip]="experiment?.id" ngxClipboard
-       [cbContent]="experiment?.id"
-       (cbOnSuccess)="copyToClipboard()" *ngIf="!viewId"></i>
     <div *ngIf="minimized" (click)="maximizedClicked.emit()"
-         smTooltip="View Full Screen" matTooltipPosition="left" class="d-flex fullscreen line-item">
+         smTooltip="View Full Screen" matTooltipPosition="above" class="d-flex fullscreen line-item">
       <i class="al-icon al-ico-info-max pointer"></i>
     </div>
 
@@ -77,37 +74,35 @@
   </div>
 </div>
 <div class="middle-col">
-  <div class="d-flex align-items-center tags">
+  <sm-tag-list
+    *ngIf="editable; else readOnlyTags"
+    class="w-100"
+    [class.menu-open]="!!tagMenu && tagMenu.trigger.menuOpen"
+    [sysTags]="systemTags"
+    [tags]="experiment?.tags"
+    (add)="openTagMenu($event)"
+    (remove)="removeTag($event)"></sm-tag-list>
+  <ng-template #readOnlyTags>
     <sm-tag-list
-      *ngIf="editable; else readOnlyTags"
       class="w-100"
-      [class.menu-open]="!!tagMenu && tagMenu.trigger.menuOpen"
       [sysTags]="systemTags"
+      [tags]="experiment?.tags"></sm-tag-list>
+  </ng-template>
+  <sm-menu
+    #tagMenu
+    [showCart]="false"
+    [showButton]="false"
+    [showOverlay]="false"
+    (menuClosed)="tagsMenuClosed()"
+  >
+    <sm-tags-menu
+      class="light-theme"
+      #tagsMenuContent
       [tags]="experiment?.tags"
-      (add)="openTagMenu($event)"
-      (remove)="removeTag($event)"></sm-tag-list>
-    <ng-template #readOnlyTags>
-      <sm-tag-list
-        class="w-100"
-        [sysTags]="systemTags"
-        [tags]="experiment?.tags"></sm-tag-list>
-    </ng-template>
-    <sm-menu
-      #tagMenu
-      [showCart]="false"
-      [showButton]="false"
-      [showOverlay]="false"
-      (menuClosed)="tagsMenuClosed()"
-    >
-      <sm-tags-menu
-        class="light-theme"
-        #tagsMenuContent
-        [tags]="experiment?.tags"
-        [tagsFilterByProject]="tagsFilterByProject$ | async"
-        [projectTags]="projectTags$ | async"
-        [companyTags]="companyTags$ | async"
-        (tagSelected)="addTag($event)"
-      ></sm-tags-menu>
-    </sm-menu>
-  </div>
+      [tagsFilterByProject]="tagsFilterByProject$ | async"
+      [projectTags]="projectTags$ | async"
+      [companyTags]="companyTags$ | async"
+      (tagSelected)="addTag($event)"
+    ></sm-tags-menu>
+  </sm-menu>
 </div>

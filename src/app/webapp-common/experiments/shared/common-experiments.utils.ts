@@ -1,4 +1,5 @@
 import {DIGITS_AFTER_DECIMAL} from '~/features/experiments/shared/experiments.const';
+import {ITableExperiment} from '@common/experiments/shared/common-experiment-model.model';
 
 export const convertStopToComplete = (tasks) => tasks.map(task => {
   if (task.status === 'closed') {
@@ -7,7 +8,7 @@ export const convertStopToComplete = (tasks) => tasks.map(task => {
   return task;
 });
 
-export const filterArchivedExperiments = (experiments, showArchived) => {
+export const filterArchivedExperiments = (experiments, showArchived): ITableExperiment[] => {
   if (showArchived) {
     return experiments.filter(ex => ex?.system_tags?.includes('archived'));
   } else {

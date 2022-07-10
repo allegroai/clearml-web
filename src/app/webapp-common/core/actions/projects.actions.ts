@@ -61,6 +61,11 @@ export const setSelectedProject = createAction(
   props<{ project: Project }>()
 );
 
+export const setSelectedProjectStats = createAction(
+  PROJECTS_PREFIX + '[set selected project statistics]',
+  props<{ project: Project }>()
+);
+
 export const resetSelectedProject = createAction(
   PROJECTS_PREFIX + 'RESET_SELECTED_PROJECT'
 );

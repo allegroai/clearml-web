@@ -3,12 +3,14 @@ import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {JsonPipe} from '@angular/common';
 import {validateJson} from '../../../utils/validation-utils';
 import {Store} from '@ngrx/store';
-import {addMessage} from '@common/core/actions/layout.actions';
+import {addMessage, saveAceCaretPosition} from '@common/core/actions/layout.actions';
 import {Ace} from 'ace-builds';
+import {selectAceCaretPosition} from '@common/core/reducers/view.reducer';
+import {Observable, Subscription} from 'rxjs';
 
 declare const ace;
 
-const jsonPlaceholder = `e.q:
+const jsonPlaceholder = `e.g.:
 
       {
         "location" : "london",
@@ -16,6 +18,7 @@ const jsonPlaceholder = `e.q:
       }
 `;
 const regularPlaceholder = '';
+
 @Component({
   selector: 'sm-edit-json',
   templateUrl: './edit-json.component.html',
@@ -34,6 +37,9 @@ export class EditJsonComponent implements AfterViewInit {
   readonly typeJson: boolean;
   @ViewChild('aceEditor') private aceEditorElement: ElementRef;
   private aceEditor: Ace.Editor;
+  private $aceCaretPosition: Observable<{ [key: string]: Ace.Point }>;
+  private aceCaretPositionSub: Subscription;
+
   set readOnly(readOnly: boolean) {
     this._readOnly = readOnly;
   };
@@ -54,26 +60,34 @@ export class EditJsonComponent implements AfterViewInit {
     private dialogRef: MatDialogRef<EditJsonComponent, any>,
     private jsonPipe: JsonPipe,
     private store: Store<any>,
-    private zone: NgZone
+    private zone: NgZone,
   ) {
     this.typeJson = data.typeJson;
     this.placeHolder = data.placeHolder;
     this.textData = data.textData ? (this.typeJson ? jsonPipe.transform(data.textData) : data.textData) : undefined;
     this.readOnly = data.readOnly;
     this.title = data.title;
+    this.$aceCaretPosition = this.store.select(selectAceCaretPosition);
   }
 
   ngAfterViewInit() {
     this.initAceEditor();
+    this.aceCaretPositionSub = this.$aceCaretPosition.subscribe((positions) => {
+      this.aceEditor.moveCursorTo(positions[this.title]?.row || 0, positions[this.title]?.column || 0);
+      this.aceEditor.scrollToLine(positions[this.title]?.row || 0, true, false, () => {
+      });
+    });
   }
 
   closeDialog(isConfirmed) {
+    this.store.dispatch(saveAceCaretPosition({id: this.title, position: this.aceEditor.selection.getCursor()}));
     if (isConfirmed) {
       try {
         const text = this.aceEditor.getValue();
         this.dialogRef.close(text ? (this.typeJson ? JSON.parse(text) : text) : '');
-      } catch (e) {
-        this.store.dispatch(addMessage('warn', 'Not a valid JSON'))
+      } catch
+        (e) {
+        this.store.dispatch(addMessage('warn', 'Not a valid JSON'));
         // this.showErrors = true; // shows warning message bellow texterea
       }
     } else {
@@ -88,12 +102,12 @@ export class EditJsonComponent implements AfterViewInit {
   // we can make this to ace wrapper later on
   private initAceEditor() {
     this.zone.runOutsideAngular(() => {
-      const aceEditor = ace.edit(this.aceEditorElement.nativeElement)  as Ace.Editor;
+      const aceEditor = ace.edit(this.aceEditorElement.nativeElement) as Ace.Editor;
       aceEditor.setOptions({
         readOnly: this.readOnly,
         showLineNumbers: false,
         showGutter: false,
-        fontFamily:"SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace",
+        fontFamily: 'SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
         fontSize: 13,
         highlightActiveLine: false,
         highlightSelectedWord: false,

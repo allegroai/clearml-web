@@ -68,13 +68,13 @@ export const setBeginningOfTime = createAction(
   props<{ task: string; beginningOfTime: boolean }>()
 );
 
-export const getDebugImageSample = createAction(DEBUG_IMAGES_PREFIX + 'GET_DEBUG_IMAGES_FOR_ITERATION', props<{ task: string; metric: string; variant: string; iteration: number }>());
+export const getDebugImageSample = createAction(DEBUG_IMAGES_PREFIX + 'GET_DEBUG_IMAGES_FOR_ITERATION', props<{ task: string; metric: string; variant: string; iteration: number; isAllMetrics: boolean }>());
 export const getNextDebugImageSample = createAction(DEBUG_IMAGES_PREFIX + 'GET_NEXT_DEBUG_IMAGE', props<{ task: string; navigateEarlier: boolean }>());
 export const setCurrentDebugImage = createAction(DEBUG_IMAGES_PREFIX + 'SET_DEBUG_IMAGES_FOR_ITERATION', props<{ event: any }>());
 export const setDebugImageViewerScrollId = createAction(DEBUG_IMAGES_PREFIX + 'SET_DEBUG_IMAGE_VIEWER_SCROLL_ID', props<{ scrollId: string }>());
 export const setDebugImageIterations = createAction(DEBUG_IMAGES_PREFIX + 'SET_DEBUG_IMAGE_ITERATIONS', props<EventsGetDebugImageIterationsResponse>());
-export const setDisplayerEndOfTime = createAction(DEBUG_IMAGES_PREFIX + 'SET_DISPLAYER_END_OF_TIME', props<{ endOfTime: boolean }>());
-export const setDisplayerBeginningOfTime = createAction(DEBUG_IMAGES_PREFIX + 'SET_DISPLAYER_BEGINNING_OF_TIME', props<{ beginningOfTime: boolean }>());
-export const resetDisplayer = createAction(DEBUG_IMAGES_PREFIX + 'RESET_DISPLAYER');
+export const setViewerEndOfTime = createAction(DEBUG_IMAGES_PREFIX + 'SET_VIEWER_END_OF_TIME', props<{ endOfTime: boolean }>());
+export const setViewerBeginningOfTime = createAction(DEBUG_IMAGES_PREFIX + 'SET_VIEWER_BEGINNING_OF_TIME', props<{ beginningOfTime: boolean }>());
+export const resetViewer = createAction(DEBUG_IMAGES_PREFIX + 'RESET_VIEWER');
 
 

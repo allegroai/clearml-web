@@ -1,0 +1,62 @@
+@import 'variables.scss';
+
+:host {
+  display: block;
+  position: relative;
+
+  .download-button {
+    position: absolute;
+    right: 24px;
+    top: 12px;
+    z-index: 21;
+    color: $blue-300;
+  }
+
+  ::ng-deep sm-table {
+    th:nth-child(1) {padding-left: 24px !important;}
+    td:nth-child(1) {padding-left: 24px !important;}
+  }
+}
+
+.action-tooltip {
+  max-width: 400px;
+  background: $purple;
+  padding: 8px;
+  border-radius: 4px;
+  box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
+  font-size: 11px;
+
+  div, p {
+    color: $white;
+
+    &.command {
+      background-color: $black;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+  }
+
+  div.copy-button {
+    color: $light-periwinkle-two;
+  }
+
+  .copy-button {
+    &:hover {
+      color: $white;
+      text-decoration: underline;
+    }
+  }
+
+  .al-ico-success {
+    background-color: $pipeline-queued;
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 200ms;
+
+    &.visible {
+      opacity: 1;
+    }
+  }
+}
+

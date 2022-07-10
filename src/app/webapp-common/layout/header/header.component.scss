@@ -5,9 +5,7 @@
   display: block;
   position: relative;
   height: $top-bar-height;
-  .crumbs-contain{
-    width: calc(100% - 600px);
-  }
+
 
   .share-view {
     visibility: hidden;
@@ -17,6 +15,7 @@
     display: flex;
     background-color: $header-backgroud;
     height: 100%;
+    width: 100%;
     padding: 0 24px;
     align-items: center;
     justify-content: space-between;
@@ -116,10 +115,11 @@
   }
 
   .right-buttons {
+    padding-left: 6px;
     display: flex;
     align-items: center;
-    width: 48px;
     justify-content: flex-end;
+    background-color: $header-backgroud;
   }
 
   .user-notification {

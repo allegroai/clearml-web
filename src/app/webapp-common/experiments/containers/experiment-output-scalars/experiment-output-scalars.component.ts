@@ -1,10 +1,21 @@
 import {ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {selectExperimentInfoHistograms, selectExperimentMetricsSearchTerm, selectIsExperimentInProgress, selectSelectedExperimentSettings, selectSelectedSettingsGroupBy, selectSelectedSettingsHiddenScalar, selectSelectedSettingsSmoothWeight, selectSelectedSettingsxAxisType, selectShowSettings, selectSplitSize} from '../../reducers';
+import {
+  selectExperimentInfoHistograms,
+  selectExperimentMetricsSearchTerm,
+  selectIsExperimentInProgress,
+  selectScalarSingleValue,
+  selectSelectedExperimentSettings,
+  selectSelectedSettingsGroupBy,
+  selectSelectedSettingsHiddenScalar,
+  selectSelectedSettingsSmoothWeight,
+  selectSelectedSettingsxAxisType,
+  selectShowSettings,
+  selectSplitSize
+} from '../../reducers';
 import {Observable, Subscription} from 'rxjs';
 import {select, Store} from '@ngrx/store';
 import {distinctUntilChanged, filter, map, tap} from 'rxjs/operators';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
-import {scrollToElement} from '@common/shared/utils/shared-utils';
 import {ActivatedRoute, Router} from '@angular/router';
 import {IExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {
@@ -22,6 +33,7 @@ import {GroupedList} from '@common/shared/ui-components/data/selectable-grouped-
 import {ExtFrame} from '@common/shared/experiment-graphs/single-graph/plotly-graph-base';
 import {ExperimentGraphsComponent} from '@common/shared/experiment-graphs/experiment-graphs.component';
 import {isEqual} from 'lodash/fp';
+import { EventsGetTaskSingleValueMetricsResponseValues } from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponseValues';
 
 export const prepareScalarList = (metricsScalar: GroupedList): GroupedList =>
   Object.keys(metricsScalar || []).reduce((acc, curr) => {
@@ -33,7 +45,7 @@ export const prepareScalarList = (metricsScalar: GroupedList): GroupedList =>
 @Component({
   selector: 'sm-experiment-output-scalars',
   templateUrl: './experiment-output-scalars.component.html',
-  styleUrls: ['./experiment-output-scalars.component.scss']
+  styleUrls: ['./experiment-output-scalars.component.scss', './shared-experiment-output.scss']
 })
 export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
   public scalarList: GroupedList = {};
@@ -70,6 +82,8 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
       value: GroupByCharts.None
     }
   ];
+  public singleValueData$: Observable<Array<EventsGetTaskSingleValueMetricsResponseValues>>;
+  public experimentName: string;
 
   constructor(private store: Store<IExperimentInfoState>, private router: Router, private activeRoute: ActivatedRoute, private changeDetection: ChangeDetectorRef) {
     this.searchTerm$ = this.store.pipe(select(selectExperimentMetricsSearchTerm));
@@ -89,6 +103,7 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
     this.smoothWeight$ = this.store.select(selectSelectedSettingsSmoothWeight);
     this.xAxisType$ = this.store.select(selectSelectedSettingsxAxisType);
     this.groupBy$ = this.store.select(selectSelectedSettingsGroupBy);
+    this.singleValueData$  =  this.store.select(selectScalarSingleValue);
 
     this.routerParams$ = this.store.pipe(
       select(selectRouterParams),
@@ -123,6 +138,14 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
       })
     );
 
+    this.subs.add(this.singleValueData$
+      .subscribe(data => {
+        if(data?.length>0 && !this.scalarList['Summary']){
+          this.scalarList['Summary'] = {};
+        }
+      })
+    );
+
     this.subs.add(this.store.select(selectShowSettings)
       .subscribe((show) => this.showSettingsBar = show)
     );
@@ -140,6 +163,7 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
       )
       .subscribe(experiment => {
         this.experimentId = experiment.id;
+        this.experimentName = experiment.name;
         this.refresh();
       })
     );
@@ -155,7 +179,7 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
     this.subs.add(this.experimentSettings$
       .subscribe((selectedScalar) => {
         this.selectedGraph = selectedScalar;
-        scrollToElement(this.selectedGraph);
+        this.experimentGraphs.scrollToGraph(selectedScalar);
       })
     );
 
@@ -174,7 +198,7 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
   private prepareGraphsAndUpdate(scalars: GroupedList) {
     if (scalars) {
       const splittedScalars = this.groupBy === 'metric' ? scalars : this.splitScalars(scalars);
-      this.scalarList = prepareScalarList(splittedScalars);
+      this.scalarList = {...this.scalarList, ...prepareScalarList(splittedScalars)};
       this.graphs = convertScalars(splittedScalars, this.experimentId);
       this.changeDetection.detectChanges();
     }

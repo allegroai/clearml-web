@@ -22,22 +22,33 @@ export class SearchResultsComponent {
   public resultRows$: Observable<any[][]>;
   public trackById = trackById;
   public rowWidth = 300;
+  private _cardTemplate: TemplateRef<any>;
 
-  @Input() cardTemplate: TemplateRef<any>;
+  @Input() set cardTemplate(cardTemplate: TemplateRef<any>) {
+    this.viewPort?.scrollToIndex(0);
+    this._cardTemplate = cardTemplate;
+  }
+
+  get cardTemplate() {
+    return this._cardTemplate;
+  }
+
   @Input() set results(results: any[]) {
     this.results$.next(results);
-    this.viewPort?.scrollToIndex(0);
   }
+
   @Input() cardHeight = 246;
+  @Input() showLoadMoreButton = false;
   @Output() resultClicked = new EventEmitter<any>();
-  @ViewChild(CdkVirtualScrollViewport) viewPort : CdkVirtualScrollViewport;
+  @Output() loadMoreClicked = new EventEmitter();
+  @ViewChild(CdkVirtualScrollViewport) viewPort: CdkVirtualScrollViewport;
 
   constructor(private store: Store, private breakpointObserver: BreakpointObserver) {
     this.store.select(selectScaleFactor)
       .pipe(take(1), map(factor => 100 / factor))
       .subscribe(factor => {
-        const points = {} as {[point: string]: number};
-        [2,3,4,5,6].forEach(num =>
+        const points = {} as { [point: string]: number };
+        [2, 3, 4, 5, 6].forEach(num =>
           points[`(min-width: ${num === 2 ? 0 : ((num - 2) * 24 + (num - 1) * CARD_WIDTH + SIDE_NAV_PLUS_PAD) * factor}px) and ` +
           `(max-width: ${num === 6 ? 20000 : ((num - 1) * 24 + num * CARD_WIDTH + SIDE_NAV_PLUS_PAD) * factor}px)`] = num);
         this.cardLayoutChange$ = breakpointObserver.observe(Object.keys(points));
@@ -46,7 +57,7 @@ export class SearchResultsComponent {
           .pipe(map(([match, results]) => {
             const point = Object.entries(match.breakpoints).find(([, val]) => val);
             const cards = point ? points[point[0]] - 1 : 3;
-            this.rowWidth = cards * CARD_WIDTH + (cards - 1) * 24
+            this.rowWidth = cards * CARD_WIDTH + (cards - 1) * 24;
             return chunk(cards, results);
           }));
       });

@@ -1,19 +1,32 @@
-import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {
-  selectExperimentInfoPlots, selectExperimentMetricsSearchTerm,
-  selectIsExperimentInProgress, selectSelectedExperimentSettings,
-  selectSelectedSettingsHiddenPlot, selectSplitSize
+  ChangeDetectorRef,
+  Component,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  SimpleChanges,
+  ViewChild
+} from '@angular/core';
+import {
+  selectExperimentInfoPlots,
+  selectExperimentMetricsSearchTerm,
+  selectIsExperimentInProgress,
+  selectSelectedExperimentSettings,
+  selectSelectedSettingsHiddenPlot,
+  selectSplitSize
 } from '../../reducers';
-import {Observable, of, Subscription} from 'rxjs';
+import {Observable, Subscription} from 'rxjs';
 import {select, Store} from '@ngrx/store';
 import {SelectableListItem} from '@common/shared/ui-components/data/selectable-list/selectable-list.model';
 import {distinctUntilChanged, filter, map} from 'rxjs/operators';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
-import {scrollToElement} from '@common/shared/utils/shared-utils';
 import {ActivatedRoute, Router} from '@angular/router';
 import {IExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {
-  experimentPlotsRequested, ResetExperimentMetrics, SetExperimentMetricsSearchTerm,
+  experimentPlotsRequested,
+  ResetExperimentMetrics,
+  SetExperimentMetricsSearchTerm,
   SetExperimentSettings
 } from '../../actions/common-experiment-output.actions';
 import {convertPlots, groupIterations, sortMetricsList} from '@common/tasks/tasks.utils';
@@ -21,24 +34,26 @@ import {selectSelectedExperiment} from '~/features/experiments/reducers';
 import {ExtFrame} from '@common/shared/experiment-graphs/single-graph/plotly-graph-base';
 import {MetricsPlotEvent} from '~/business-logic/model/events/metricsPlotEvent';
 import {addMessage} from '@common/core/actions/layout.actions';
+import {ExperimentGraphsComponent} from '@common/shared/experiment-graphs/experiment-graphs.component';
 
 @Component({
   selector: 'sm-experiment-output-plots',
   templateUrl: './experiment-output-plots.component.html',
-  styleUrls: ['./experiment-output-plots.component.scss']
+  styleUrls: ['./experiment-output-plots.component.scss', '../experiment-output-scalars/shared-experiment-output.scss']
 })
-export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy {
+export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChanges {
+  @Input() isDatasetVersionPreview = false;
+  @Input() selected;
+  @ViewChild(ExperimentGraphsComponent) graphsComponent: ExperimentGraphsComponent;
 
   public plotsList: Array<SelectableListItem> = [];
   public selectedGraph: string = null;
-
   private plotsSubscription: Subscription;
   private settingsSubscription: Subscription;
   private routerParamsSubscription: Subscription;
   private experimentId: string;
   private routerParams$: Observable<any>;
   public listOfHidden: Observable<Array<any>>;
-  public plots$: Observable<MetricsPlotEvent[]>;
   public experimentSettings$: Observable<any>;
   public searchTerm$: Observable<string>;
   public minimized: boolean = false;
@@ -47,17 +62,12 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy {
   public selectIsExperimentPendingRunning: Observable<boolean>;
   private selectedExperimentSubscription: Subscription;
   public splitSize$: Observable<number>;
+  public dark: boolean;
 
 
   constructor(private store: Store<IExperimentInfoState>, private router: Router, private activeRoute: ActivatedRoute, private changeDetection: ChangeDetectorRef) {
     this.searchTerm$ = this.store.pipe(select(selectExperimentMetricsSearchTerm));
     this.splitSize$ = this.store.pipe(select(selectSplitSize));
-
-    this.plots$ = this.store.pipe(
-      select(selectExperimentInfoPlots),
-      distinctUntilChanged(),
-      filter(metrics => !!metrics)
-    );
 
     this.experimentSettings$ = this.store.pipe(
       select(selectSelectedExperimentSettings),
@@ -68,7 +78,7 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy {
 
     this.routerParams$ = this.store.pipe(
       select(selectRouterParams),
-      filter(params => !!params.experimentId),
+      filter(params => !!params.experimentId && !this.isDatasetVersionPreview),
       distinctUntilChanged()
     );
 
@@ -77,24 +87,37 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy {
     );
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if(changes.selected && this.experimentId!== changes.selected.currentValue.id ){
+      this.dark = true;
+      this.experimentId = changes.selected.currentValue.id;
+      this.refresh();
+    }
+  }
+
   ngOnInit() {
-    this.minimized = this.activeRoute.snapshot.routeConfig.data.minimized;
-    this.listOfHidden = this.minimized ? of([]) : this.store.select(selectSelectedSettingsHiddenPlot);
-    this.plotsSubscription = this.plots$
-      .subscribe((metricsPlots) => {
+    this.minimized = this.activeRoute.snapshot.routeConfig.data?.minimized;
+    this.listOfHidden = this.store.select(selectSelectedSettingsHiddenPlot);
+    this.plotsSubscription = this.store.select(selectExperimentInfoPlots)
+      .pipe(
+        distinctUntilChanged(),
+        filter(metrics => !!metrics),
+        map(plots => this.isDatasetVersionPreview ? plots.filter(plot => !plot.metric.startsWith('_')) : plots),
+      )
+      .subscribe(metricsPlots => {
         this.refreshDisabled = false;
         const groupedPlots = groupIterations(metricsPlots);
         this.plotsList = this.preparePlotsList(groupedPlots);
         const {graphs, parsingError} = convertPlots({plots: groupedPlots, experimentId: this.experimentId});
         this.graphs = graphs;
-        parsingError && this.store.dispatch(addMessage('warn', `Couldn't read all plots. Please make sure all plots are properly formatted (NaN & Inf aren't supported).`, [], true))
+        parsingError && this.store.dispatch(addMessage('warn', `Couldn't read all plots. Please make sure all plots are properly formatted (NaN & Inf aren't supported).`, [], true));
         this.changeDetection.detectChanges();
       });
 
     this.settingsSubscription = this.experimentSettings$
       .subscribe((selectedPlot) => {
         this.selectedGraph = selectedPlot;
-        scrollToElement(this.selectedGraph);
+        this.graphsComponent.scrollToGraph(selectedPlot);
       });
 
     this.routerParamsSubscription = this.routerParams$
@@ -110,7 +133,7 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy {
 
     this.selectedExperimentSubscription = this.store.select(selectSelectedExperiment)
       .pipe(
-        filter(experiment => !!experiment),
+        filter(experiment => !!experiment && !this.isDatasetVersionPreview),
         distinctUntilChanged()
       )
       .subscribe(experiment => {
@@ -129,7 +152,7 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy {
     this.resetMetrics();
   }
 
-  private preparePlotsList(groupedPlots: {[title: string]: MetricsPlotEvent[]}): Array<SelectableListItem> {
+  private preparePlotsList(groupedPlots: { [title: string]: MetricsPlotEvent[] }): Array<SelectableListItem> {
     const list = groupedPlots ? Object.keys(groupedPlots) : [];
     const sortedList = sortMetricsList(list);
     return sortedList.map((item) => ({name: item, value: item}));

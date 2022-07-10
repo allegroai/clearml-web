@@ -1,21 +1,62 @@
-@import "../../shared/ui-components/styles/variables.scss";
-.breadcrumbs-container{
-  display: flex;
-  overflow: hidden;
-  white-space: nowrap;
-}
+@import "variables";
+
 span {
   font-size: 15px;
 }
 
 :host {
-  display: flex;
-  align-items: center;
+  overflow: hidden;
 
-  .menu-trigger {
+  .overflow-container {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .sub-projects-breadcrumbs{
+    display: flex;
+    overflow: hidden;
+  }
+  .crumb{
+    font-size: 15px;
+    color: $blue-100;
+
+    &:hover{
+      color: #fff;
+    }
+  }
+  .crumb:first-of-type {
+    text-transform: uppercase;
+  }
+
+  .crumb.last {
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .sub-project{
+    color: $blue-100;
+    white-space: nowrap;
+
+    &:hover{
+      color: #fff;
+    }
+
+    &:last-of-type {
+      font-weight: 700;
+      color: #fff;
+    }
+
+    &.after-collapse {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  .menu-trigger-icon {
     width: 34px;
 
     .menu-trigger-icon {
+      width: 34px;
       height: 100%;
       color: $blue-100;
     }
@@ -44,7 +85,6 @@ span {
   }
 }
 
-
 .sub-project-menu-item {
   max-width: 400px;
   font-size: 14px;
@@ -52,40 +92,8 @@ span {
   color: $blue-900;
 }
 
-.breadcrumbLink a, .breadcrumbLink span, .workspace {
-  max-width: 400px;
-  &.after-collapse{
-    max-width: 960px;
-  }
-  &.last{
-    max-width: 100%;
-  }
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: $blue-100;
-  font-weight: 400;
-  display: inline-block;
-  height: 100%;
-}
-
 .workspace {
   max-width: 400px;
-}
-
-.breadcrumbLink {
-  height: 22px;
-  display: flex;
-  align-items: center;
-
-  i {
-    color: $blue-400;
-    line-height: 22px;
-  }
-}
-
-.breadcrumbLink:first-of-type a {
-  text-transform: uppercase;
 }
 
 .breadcrumbLink:last-of-type a:not(.sub-project) {

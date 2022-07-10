@@ -56,6 +56,8 @@
         #experimentGraphs
         [isGroupGraphs]="false"
         [metrics]="graphs"
+        [singleValueData]="singleValueData$ | async"
+        [experimentName]="experimentName"
         [hiddenList]="listOfHidden | async"
         [smoothWeight]="smoothWeight$ | async"
         [legendStringLength]="minimized? 14 : undefined"

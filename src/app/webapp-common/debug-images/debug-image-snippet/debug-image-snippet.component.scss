@@ -7,6 +7,19 @@
   position: relative;
   text-align: center;
   background: #efefef;
+  &.dark{
+    background: #1f2434;
+    &.loading {
+      background: #1f2434;
+    }
+
+    .image-var {
+      color: #a4b2db;
+    }
+    .html-viewer {
+      background-color: #1f2434;
+    }
+  }
 
   &.loading {
     background: white;
@@ -16,11 +29,11 @@
     position: relative;
     top: 50%;
     transform: translateY(-50%);
-    max-width: 150px;
+    max-width: 100%;
     max-height: 130px;
   }
 
-  img.loading {
+  img.loading, .html-wrap.loading {
     background-image: url("../../assets/icons/Spinner.svg");
     background-repeat: no-repeat;
     background-position: center center;
@@ -46,15 +59,15 @@
 }
 
 .html-viewer {
-  resize: both;
+  resize: none;
   overflow: auto;
-  border: 1px solid black;
-  transform: scale(0.44);
+  transform: scale(0.448);
   transform-origin: 0 0;
+  border: none;
 }
 .html-snippet {
-  border: 1px solid $blue-200;
   border-radius: 4px;
+  overflow: hidden;
 
   &:hover {
     .toolbar {
@@ -66,7 +79,7 @@
   .toolbar {
     display: flex;
     position: absolute;
-    bottom: 8px;
+    bottom: 32px;
     left: 50%;
     transform: translateX(-50%);
     opacity: 0;

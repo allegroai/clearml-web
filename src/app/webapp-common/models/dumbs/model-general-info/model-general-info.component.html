@@ -3,7 +3,7 @@
     <div *ngIf="!kpi.href">
       {{kpi.value}}
       <span *ngIf="kpi.downloadable">
-        <sm-copy-clipboard *ngIf="isLocalFile" [clipboardText]="kpi.value" [hideBackground]="true" label=""></sm-copy-clipboard>
+        <sm-copy-clipboard *ngIf="isLocalFile" [clipboardText]="kpi.value" [hideBackground]="true" [inline]="true" label=""></sm-copy-clipboard>
         <i *ngIf="model?.uri && !isLocalFile"
            class="pointer fa fa-download ml-2"
            (click)="downloadModelClicked()"
@@ -14,7 +14,7 @@
       <a [routerLink]="kpi.href">
         {{kpi.value}}
       </a>
-      <sm-copy-clipboard  [clipboardText]="kpi.task" [hideBackground]="true" label=""></sm-copy-clipboard>
+      <sm-copy-clipboard  [clipboardText]="kpi.task" [hideBackground]="true" [inline]="true" label=""></sm-copy-clipboard>
     </div>
     <div *ngIf="kpi.href && (!kpi.value) ">N/A</div>
   </sm-labeled-row>

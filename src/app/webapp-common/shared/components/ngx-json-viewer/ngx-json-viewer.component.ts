@@ -25,12 +25,14 @@ export class NgxJsonViewerComponent implements OnChanges {
   @Output() linkAction = new EventEmitter<string>();
 
   segments: Segment[] = [];
+  public isArray: boolean;
 
   ngOnChanges() {
     if (this.cleanOnChange) {
       this.segments = [];
     }
     if (this.json) {
+      this.isArray = Array.isArray(this.json);
       if (typeof this.json === 'object') {
         Object.keys(this.json).forEach(key => {
           this.segments.push(this.parseKeyValue(key, this.json[key]));
@@ -54,8 +56,8 @@ export class NgxJsonViewerComponent implements OnChanges {
 
   private parseKeyValue(key: any, value: any): Segment {
     const segment: Segment = {
-      key: key,
-      value: value,
+      key,
+      value,
       type: undefined,
       description: '' + value,
       expanded: this.expanded

@@ -2,7 +2,7 @@ import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {setSelectedWorkspaceTab} from '@common/core/actions/users.actions';
 import {Subscription} from 'rxjs';
-import {selectActiveWorkspace} from '@common/core/reducers/users-reducer';
+import {selectActiveWorkspace, selectGettingStarted} from '@common/core/reducers/users-reducer';
 import {filter} from 'rxjs/operators';
 import {Store} from '@ngrx/store';
 import {createCredential, resetCredential} from '@common/core/actions/common-auth.actions';
@@ -10,11 +10,12 @@ import {selectNewCredential} from '@common/core/reducers/common-auth-reducer';
 import {guessAPIServerURL, HTTP} from '~/app.constants';
 import {AdminService} from '~/shared/services/admin.service';
 import {ConfigurationService} from '@common/shared/services/configuration.service';
-import {GetCurrentUserResponseUserObjectCompany} from '~/business-logic/model/users/getCurrentUserResponseUserObjectCompany';
+import {
+  GetCurrentUserResponseUserObjectCompany
+} from '~/business-logic/model/users/getCurrentUserResponseUserObjectCompany';
 import {Queue} from '~/business-logic/model/queues/queue';
 import {GettingStartedContext} from '../../../../environments/base';
 import {trackByIndex} from '@common/shared/utils/forms-track-by';
-
 
 
 interface StepObject {
@@ -38,7 +39,6 @@ export class WelcomeMessageComponent implements OnInit, OnDestroy {
   private workspacesSub: Subscription;
   public workspace: GetCurrentUserResponseUserObjectCompany;
   private newCredentialSub: Subscription;
-
 
 
   API_BASE_URL = HTTP.API_BASE_URL_NO_VERSION;
@@ -79,6 +79,7 @@ export class WelcomeMessageComponent implements OnInit, OnDestroy {
   public src: string;
   trackByFn = trackByIndex;
   public displayedServerUrls: { apiServer?: string; filesServer?: string };
+  private userSubscription: Subscription;
 
   constructor(
     private store: Store<any>,
@@ -114,6 +115,18 @@ export class WelcomeMessageComponent implements OnInit, OnDestroy {
     this.workspacesSub = this.store.select(selectActiveWorkspace)
       .pipe(filter(active => !!active))
       .subscribe(active => this.workspace = active);
+    this.userSubscription = this.store.select(selectGettingStarted).subscribe(gettingStarted => {
+      this.gettingStartedContext = gettingStarted;
+      if (!this.queue) {
+        this.steps[0].code = gettingStarted.install;
+        this.steps[1].code = gettingStarted.configure;
+      } else {
+        this.steps[0].code = `clearml-agent daemon --queue ${this.queue.name}`;
+        this.steps[0].header = `To assign a worker to the ${this.queue.name} queue, run:`;
+        this.steps[1].code = `pip install clearml-agent`;
+        this.steps[2].code = `clearml-agent init`;
+      }
+    });
   }
 
   ngOnInit(): void {
@@ -148,6 +161,7 @@ export class WelcomeMessageComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.workspacesSub?.unsubscribe();
     this.newCredentialSub?.unsubscribe();
+    this.userSubscription?.unsubscribe();
   }
 
   doNotShowThisAgain($event: { field: string; value: any; event: Event }) {

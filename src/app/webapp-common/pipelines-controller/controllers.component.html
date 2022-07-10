@@ -71,6 +71,7 @@
         [contextMenuTemplate]="contextMenuExtendedTemplate"
         [contextMenuActive]="contextMenuActive"
         [entityType]="entityType"
+        [hasExperimentUpdate]="selectedExperimentsHasUpdate$ | async"
         (experimentSelectionChanged)="experimentSelectionChanged($event)"
         (experimentsSelectionChanged)="experimentsSelectionChanged($event)"
         (sortedChanged)="sortedChanged($event)"
@@ -82,6 +83,7 @@
         (columnResized)="columnResized($event)"
         (openContextMenu)="onContextMenuOpen($event)"
         (removeTag)="removeTag($event)"
+        (clearAllFilters)="clearTableFiltersHandler($event)"
       >
       </sm-experiments-table>
     </as-split-area>

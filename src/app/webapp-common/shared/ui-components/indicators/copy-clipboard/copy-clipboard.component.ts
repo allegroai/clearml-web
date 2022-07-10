@@ -13,6 +13,7 @@ export class CopyClipboardComponent {
   @Input() label: string = 'Copy to clipboard';
   @Input() tooltipText = 'Copy to clipboard';
   @Input() hideBackground = false;
+  @Input() inline = false;
   @Input() theme: string;
   @Input() copyIcon: string;
 

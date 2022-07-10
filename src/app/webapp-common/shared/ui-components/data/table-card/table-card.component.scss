@@ -5,7 +5,7 @@
   grid-template-columns: 20px 32px 1fr;
   align-items: center;
   gap: 8px 12px;
-  margin: 0 16px;
+  padding: 30px 16px;
   grid-template-areas:
     "cbx type-icon card-name"
     ". . tags"

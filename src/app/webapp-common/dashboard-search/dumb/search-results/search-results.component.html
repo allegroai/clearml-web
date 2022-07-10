@@ -4,4 +4,7 @@
       <ng-container *ngTemplateOutlet="cardTemplate; context: {result}"></ng-container>
     </ng-container>
   </div>
+  <div class="load-more" *ngIf="showLoadMoreButton && (resultRows$ | async).length">
+    <button (click)="loadMoreClicked.emit()" class="btn btn-cml-primary load-more-btn">LOAD MORE</button>
+  </div>
 </cdk-virtual-scroll-viewport>

@@ -1,9 +1,9 @@
 import {Injectable} from '@angular/core';
-import {Action, Store} from '@ngrx/store';
+import {Store} from '@ngrx/store';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {ApiProjectsService} from '~/business-logic/api-services/projects.service';
 import * as actions from '../actions/projects.actions';
-import {catchError, filter, map, mergeMap, switchMap, withLatestFrom} from 'rxjs/operators';
+import {catchError, expand, filter, map, mergeMap, reduce, switchMap, withLatestFrom} from 'rxjs/operators';
 import {requestFailed} from '../actions/http.actions';
 import {activeLoader, deactivateLoader, setServerError} from '../actions/layout.actions';
 import {setSelectedModels} from '../../models/actions/models-view.actions';
@@ -12,12 +12,12 @@ import {MatDialog} from '@angular/material/dialog';
 import {ApiOrganizationService} from '~/business-logic/api-services/organization.service';
 import {OrganizationGetTagsResponse} from '~/business-logic/model/organization/organizationGetTagsResponse';
 import {selectRouterParams} from '../reducers/router-reducer';
-import {forkJoin, of} from 'rxjs';
+import {EMPTY, forkJoin, of} from 'rxjs';
 import {ProjectsGetTaskTagsResponse} from '~/business-logic/model/projects/projectsGetTaskTagsResponse';
 import {ProjectsGetModelTagsResponse} from '~/business-logic/model/projects/projectsGetModelTagsResponse';
 import {
   selectAllProjectsUsers,
-  selectLastUpdate,
+  selectLastUpdate, selectRootProjects,
   selectSelectedMetricVariantForCurrProject,
   selectSelectedProjectId
 } from '../reducers/projects.reducer';
@@ -27,20 +27,20 @@ import {createMetricColumn} from '@common/shared/utils/tableParamEncode';
 import {ITask} from '~/business-logic/model/al-task';
 import {TasksGetAllExRequest} from '~/business-logic/model/tasks/tasksGetAllExRequest';
 import {setSelectedExperiments} from '../../experiments/actions/common-experiments-view.actions';
-import {selectShowHidden} from '~/features/projects/projects.reducer';
 import {setActiveWorkspace} from '@common/core/actions/users.actions';
 import {ProjectsGetAllExResponse} from '~/business-logic/model/projects/projectsGetAllExResponse';
 import {Project} from '~/business-logic/model/projects/project';
 import {ApiUsersService} from '~/business-logic/api-services/users.service';
-import { get } from 'lodash/fp';
+import {get, last} from 'lodash/fp';
+import {selectProjects, selectShowHidden} from '@common/projects/common-projects.reducer';
+import {setShowHidden} from '@common/projects/common-projects.actions';
+import {ProjectsGetAllExRequest} from '~/business-logic/model/projects/projectsGetAllExRequest';
 
 export const ALL_PROJECTS_OBJECT = {id: '*', name: 'All Experiments'};
 
 @Injectable()
 export class ProjectsEffects {
   private pageSize: number = 500;
-  private lastUpdateSoFar: string;
-  private scrollId: string = null;
 
   constructor(
     private actions$: Actions, private projectsApi: ApiProjectsService, private orgApi: ApiOrganizationService,
@@ -56,31 +56,42 @@ export class ProjectsEffects {
 
   getProjects$ = createEffect(() => this.actions$.pipe(
     ofType(actions.getAllSystemProjects),
-    withLatestFrom(this.store.select(selectShowHidden), this.store.select(selectLastUpdate)),
-    switchMap(([, showHidden, lastUpdate]) => this.projectsApi.projectsGetAllEx({
+    withLatestFrom(
+      this.store.select(selectShowHidden),
+      this.store.select(selectLastUpdate),
+    ),
+    switchMap(([, showHidden, lastUpdate]) => {
+      const query = {
         /* eslint-disable @typescript-eslint/naming-convention */
+        scroll_id: null,
         size: this.pageSize,
-        scroll_id: this.scrollId,
         order_by: ['last_update'],
-        last_update: lastUpdate ? [lastUpdate, null] : undefined,
-        only_fields: ['name', 'company', 'parent', 'last_update'], search_hidden: showHidden
+        ...(lastUpdate && {last_update: [lastUpdate, null]}),
+        only_fields: ['name', 'company', 'parent', 'last_update'],
+        search_hidden: showHidden
         /* eslint-enable @typescript-eslint/naming-convention */
-      } as any)
-        .pipe(mergeMap((res: ProjectsGetAllExResponse) => {
-            const resultsActions: Action[] = [actions.setAllProjects({projects: res.projects as unknown as Project[], updating: !!lastUpdate})];
-            if (res.projects.length >= this.pageSize) {
-              this.scrollId = res.scroll_id;
-              this.lastUpdateSoFar = res.projects[res.projects.length - 1].last_update;
-              resultsActions.push(actions.getAllSystemProjects());
-            } else {
-              resultsActions.push(actions.setLastUpdate({lastUpdate: res.projects[res.projects.length - 1]?.last_update || this.lastUpdateSoFar || lastUpdate}));
-              this.scrollId = null;
-              this.lastUpdateSoFar = null;
-            }
-            return resultsActions;
-          })
-        )
-    )
+      } as ProjectsGetAllExRequest;
+      return this.projectsApi.projectsGetAllEx(query)
+        .pipe(
+          expand((res: ProjectsGetAllExResponse) => res.scroll_id && res.projects.length >= this.pageSize ?
+            this.projectsApi.projectsGetAllEx({
+              ...query,
+              // eslint-disable-next-line @typescript-eslint/naming-convention
+              scroll_id: res.scroll_id,
+            }) :
+            EMPTY
+          ),
+          reduce((acc, res: ProjectsGetAllExResponse) => acc.concat(res.projects), []),
+        );
+    }),
+    withLatestFrom(this.store.select(selectRootProjects)),
+    mergeMap(([projects, rootProjects]) => [
+      actions.setAllProjects({
+        projects: projects as Project[],
+        updating: rootProjects.length > 0
+      }),
+      actions.setLastUpdate({lastUpdate: last(projects)?.last_update})
+    ])
   ));
 
   resetProjects$ = createEffect(() => this.actions$.pipe(
@@ -204,7 +215,7 @@ export class ProjectsEffects {
               const end = started + (task.active_duration ?? 0) * 1000;
               return {
                 id: task.id,
-                y: get(col.id, task),
+                y: get(col.id, task), // col.id is a path (e.g.) last_metric.x.max_value, must use lodash get
                 x: end,
                 name: task.name,
                 status: task.status,
@@ -218,7 +229,7 @@ export class ProjectsEffects {
   ));
 
   resetRootProjects = createEffect(() => this.actions$.pipe(
-    ofType(setActiveWorkspace, actions.refetchProjects),
+    ofType(setActiveWorkspace, actions.refetchProjects, setShowHidden),
     mergeMap(() => [
       actions.resetProjects(),
       actions.getAllSystemProjects()
@@ -228,8 +239,10 @@ export class ProjectsEffects {
   getAllProjectsUsersEffect = createEffect(() => this.actions$.pipe(
     ofType(actions.getAllSystemProjects),
     switchMap(() => this.usersApi.usersGetAllEx({
+      /* eslint-disable @typescript-eslint/naming-convention */
       order_by: ['name'],
       only_fields: ['name'],
+      /* eslint-enable @typescript-eslint/naming-convention */
     }, null, 'body', true).pipe(
       mergeMap(res => [actions.setAllProjectUsers(res)]),
       catchError(error => [
@@ -247,10 +260,12 @@ export class ProjectsEffects {
     switchMap(([action, all]) => (!action.projectId || action.projectId === '*' ?
       of({users: all}) :
       this.usersApi.usersGetAllEx({
-      order_by: ['name'],
-      only_fields: ['name'],
-      active_in_projects: [action.projectId]
-    }, null, 'body', true)).pipe(
+        /* eslint-disable @typescript-eslint/naming-convention */
+        order_by: ['name'],
+        only_fields: ['name'],
+        active_in_projects: [action.projectId]
+        /* eslint-enable @typescript-eslint/naming-convention */
+      }, null, 'body', true)).pipe(
       mergeMap(res => [actions.setProjectUsers(res)]),
       catchError(error => [
         requestFailed(error),
@@ -262,9 +277,11 @@ export class ProjectsEffects {
   getExtraUsersEffect = createEffect(() => this.actions$.pipe(
     ofType(actions.getFilteredUsers),
     switchMap(action => this.usersApi.usersGetAllEx({
+      /* eslint-disable @typescript-eslint/naming-convention */
       order_by: ['name'],
       only_fields: ['name'],
       id: action.filteredUsers || []
+      /* eslint-enable @typescript-eslint/naming-convention */
     }, null, 'body', true).pipe(
       mergeMap(res => [
         actions.setProjectExtraUsers(res),

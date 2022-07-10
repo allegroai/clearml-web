@@ -34,8 +34,8 @@ import {
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import * as coreProjectsActions from '../../../core/actions/projects.actions';
 import {setDeep, setSelectedProjectId} from '@common/core/actions/projects.actions';
-import {InitSearch, ResetSearch} from '@common/common-search/common-search.actions';
-import {ICommonSearchState, selectSearchQuery} from '@common/common-search/common-search.reducer';
+import {initSearch, resetSearch} from '@common/common-search/common-search.actions';
+import {SearchState, selectSearchQuery} from '@common/common-search/common-search.reducer';
 import {
   getDeletePopupEntitiesList,
   getDeleteProjectPopupStatsBreakdown,
@@ -91,7 +91,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
   private searchSubs: Subscription;
   private projectReadyForDeletion$: Observable<CommonProjectReadyForDeletion>;
   private projectReadyForDeletionSub: Subscription;
-  private readonly searchQuery$: Observable<ICommonSearchState['searchQuery']>;
+  private readonly searchQuery$: Observable<SearchState['searchQuery']>;
   private projectDialog: MatDialogRef<ProjectDialogComponent, any>;
   private showOnlyUserWorkSub: Subscription;
   private selectedProjectSub: Subscription;
@@ -246,13 +246,13 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
   }
 
   stopSyncSearch() {
-    this.store.dispatch(new ResetSearch());
+    this.store.dispatch(resetSearch());
     this.searchSubs.unsubscribe();
   }
 
 
   syncAppSearch() {
-    this.store.dispatch(new InitSearch(`Search for ${this.getName()}s`));
+    this.store.dispatch(initSearch({payload: `Search for ${this.getName()}s`}));
     this.searchSubs = this.searchQuery$.pipe(skip(1)).subscribe(query => this.search(query));
   }
 
@@ -266,7 +266,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
     this.store.dispatch(setSelectedProjectId({projectId: project.id, example: isExample(project)}));
   }
 
-  search(query: ICommonSearchState['searchQuery']) {
+  search(query: SearchState['searchQuery']) {
     this.store.dispatch(setProjectsSearchQuery(query));
   }
 
@@ -274,7 +274,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
     this.store.dispatch(setProjectsOrderBy({orderBy: sortByFieldName}));
   }
 
-  projectNameChanged(updatedProject: {id: string, name: string}) {
+  projectNameChanged(updatedProject: {id: string; name: string}) {
     this.store.dispatch(updateProject({id: updatedProject.id, changes: {name: updatedProject.name}}));
   }
 

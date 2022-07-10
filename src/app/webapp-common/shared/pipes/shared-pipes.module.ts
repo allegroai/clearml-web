@@ -7,7 +7,6 @@ import {FloorPipe} from './floor.pipe';
 import {JoinPipe} from './join.pipe';
 import {KeyvalPipe} from './keyval.pipe';
 import {NoUnderscorePipe} from './no-underscore.pipe';
-import {NumberToKPipe} from './number-to-k.pipe';
 import {UniqueByPipe} from './unique-by.pipe';
 import {KeyValuePipe} from './key-value.pipe';
 import {NAPipe} from './na.pipe';
@@ -35,18 +34,18 @@ import {safeAngularUrlParameterPipe} from './safeAngularUrlParameter.pipe';
 import {ReplaceViaMapPipe} from './replaceViaMap';
 import {FilterByIdPipe} from './filterById.pipe';
 import {FilterOutPipe} from './filterOut.pipe';
-import {DurationPipe} from "./duration.pipe";
+import {DurationPipe} from './duration.pipe';
 import {BreadcrumbsEllipsisPipe} from './breadcrumbs-ellipsis.pipe';
 import {ShortProjectNamePipe} from './short-project-name.pipe';
-import {ProjectLocationPipe} from "./project-location.pipe";
+import {ProjectLocationPipe} from './project-location.pipe';
 import {StringIncludedInArrayPipe} from './string-included-in-array.pipe';
-import {FilterLast} from "./filterLast.pipe";
-import {ToPropertyArrayPipe} from "@common/shared/pipes/toPropertyArray.pipe";
-import {MenuItemTextPipe} from "@common/shared/pipes/menu-item-text.pipe";
+import {FilterLast} from './filterLast.pipe';
+import {ToPropertyArrayPipe} from '@common/shared/pipes/toPropertyArray.pipe';
+import {MenuItemTextPipe} from '@common/shared/pipes/menu-item-text.pipe';
 import {InitialsPipe} from './initials.pipe';
 import {UuidPipe} from './uuid.pipe';
 import {FilterInternalPipe} from './filter-internal.pipe';
-import {IdToObjectsArrayPipe} from "./idToObjectsArray.pipe";
+import {IdToObjectsArrayPipe} from './idToObjectsArray.pipe';
 import {IsEmptyPipe} from './is-empty.pipe';
 import {HighlightSearchPipe} from './highlight-search.pipe';
 import {TemplateInjectorPipe} from './template-injector.pipe';
@@ -59,10 +58,11 @@ import {ColGetterPipe} from './col-getter.pipe';
 import { LabelValueToStringArrayPipe } from './label-value-to-string-array.pipe';
 import {ItemByIdPipe} from './item-by-id.pipe';
 import { FilterMonitorMetricPipe } from './filter-monitor-metric.pipe';
+import { ReversePipe } from './reverse.pipe';
 
 const pipes = [
   CamelToTitlePipe, FilenameFromPath, FilterPipe, FloorPipe, KeyValuePipe, NAPipe, SortPipe, IsVideoPipe, IsAudioPipe,FilterInternalPipe,UuidPipe,
-  JoinPipe, KeyvalPipe, LabelValuePipe, NoUnderscorePipe, NumberToKPipe, UniqueByPipe, MsToHoursPipe, MsToSecPipe, DurationPipe,
+  JoinPipe, KeyvalPipe, LabelValuePipe, NoUnderscorePipe, UniqueByPipe, MsToHoursPipe, MsToSecPipe, DurationPipe,
   ToExponentialPipe, HighlightSearchTextPipe, HighlightSearchPipe, HideHashPipe, HideHashTitlePipe, TimeAgoPipe, TimeTillNowPipe, HasExampleItemPipe, safeAngularUrlParameterPipe,
   AdvancedFilterPipe, SafePipe, SelectOptionValueToLabelPipe, ToPercentagePipe, ReplaceViaMapPipe, FilterByIdPipe, FilterLast, FilterOutPipe, SimpleFilterPipe,
   BreadcrumbsEllipsisPipe, ShortProjectNamePipe, ProjectLocationPipe,StringIncludedInArrayPipe, ToPropertyArrayPipe, MenuItemTextPipe, InitialsPipe, IdToObjectsArrayPipe, IsEmptyPipe,
@@ -74,9 +74,9 @@ const pipes = [
   imports: [
     CommonModule,
   ],
-  declarations: [pipes, ShowSelectedFirstPipe, CountPipe, ColGetterPipe, FilterMonitorMetricPipe ],
+  declarations: [pipes, ShowSelectedFirstPipe, CountPipe, ColGetterPipe, FilterMonitorMetricPipe, ReversePipe ],
   providers: [pipes],
-    exports: [pipes, ShowSelectedFirstPipe, CountPipe, ColGetterPipe, FilterMonitorMetricPipe]
+  exports: [pipes, ShowSelectedFirstPipe, CountPipe, ColGetterPipe, FilterMonitorMetricPipe, ReversePipe]
 })
 export class SharedPipesModule {
 }

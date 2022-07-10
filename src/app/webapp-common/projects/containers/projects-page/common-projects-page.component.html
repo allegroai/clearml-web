@@ -1,12 +1,13 @@
 <sm-projects-list
+  [noMoreProjects]="noMoreProjects$ | async"
+  [projects]="projectsList$ | async"
+  [showLast]="searching"
   (deleteProjectClicked)="deleteProject($event)"
   (loadMore)="loadMore()"
   (projectCardClicked)="projectCardClicked($event)"
   (projectNameChanged)="projectNameChanged($event)"
   (createNewProjectClicked)="openProjectDialog('create', $event)"
   (moveToClicked)="openProjectDialog('move', $event)"
-  [noMoreProjects]="noMoreProjects$ | async"
-  [projects]="projectsList$ | async"
 >
   <sm-projects-header
     (orderByChanged)="orderByChanged($event)"

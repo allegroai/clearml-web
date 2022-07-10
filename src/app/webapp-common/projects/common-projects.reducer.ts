@@ -1,15 +1,25 @@
-import {on, createSelector, ReducerTypes, createReducer} from '@ngrx/store';
+import {createReducer, createSelector, on, ReducerTypes} from '@ngrx/store';
 import {Project} from '~/business-logic/model/projects/project';
 import {TABLE_SORT_ORDER, TableSortOrderEnum} from '../shared/ui-components/data/table/table.consts';
 import {
-  addToProjectsList, checkProjectForDeletion, resetProjects,
-  resetProjectsSearchQuery, resetReadyToDelete,
-  setCurrentScrollId, setNoMoreProjects, setProjectReadyForDeletion, setProjectsOrderBy,
+  addToProjectsList,
+  checkProjectForDeletion,
+  resetProjects,
+  resetProjectsSearchQuery,
+  resetReadyToDelete,
+  setCurrentScrollId,
+  setNoMoreProjects,
+  setProjectReadyForDeletion,
+  setProjectsOrderBy,
   setProjectsSearchQuery,
-  setTableModeAwareness, showExamplePipelines,
+  setShowHidden,
+  setTableModeAwareness,
+  showExampleDatasets,
+  showExamplePipelines,
   updateProjectSuccess
 } from './common-projects.actions';
-import {ICommonSearchState} from '../common-search/common-search.reducer';
+import {SearchState} from '../common-search/common-search.reducer';
+import {selectSelectedProject} from '@common/core/reducers/projects.reducer';
 
 export interface CommonProjectReadyForDeletion {
   project: Project;
@@ -20,7 +30,7 @@ export interface CommonProjectReadyForDeletion {
 export interface ICommonProjectsState {
   orderBy: string;
   sortOrder: TableSortOrderEnum;
-  searchQuery: ICommonSearchState['searchQuery'];
+  searchQuery: SearchState['searchQuery'];
   projects: Project[];
   projectsNonFilteredList: Project[];
   selectedProjectId: string;
@@ -30,6 +40,8 @@ export interface ICommonProjectsState {
   scrollId: string;
   tableModeAwareness: boolean;
   showPipelineExamples: boolean;
+  showDatasetExamples: boolean;
+  showHidden: boolean;
 }
 
 export const commonProjectsInitState: ICommonProjectsState = {
@@ -49,6 +61,8 @@ export const commonProjectsInitState: ICommonProjectsState = {
   scrollId: null,
   tableModeAwareness: true,
   showPipelineExamples: false,
+  showDatasetExamples: false,
+  showHidden: false
 };
 
 const getCorrectSortingOrder = (currentSortOrder: TableSortOrderEnum, currentOrderField: string, nextOrderField: string) => {
@@ -77,13 +91,15 @@ export const commonProjectsReducers = [
     ...state,
     searchQuery: (action as ReturnType<typeof setProjectsSearchQuery>),
     scrollId: null,
-    noMoreProjects: false, projects: commonProjectsInitState.projects
+    noMoreProjects: true,
+    projects: commonProjectsInitState.projects
   })),
   on(resetProjectsSearchQuery, state => ({
     ...state,
     searchQuery: commonProjectsInitState.searchQuery,
     scrollId: null,
-    noMoreProjects: false, projects: commonProjectsInitState.projects
+    noMoreProjects: true,
+    projects: commonProjectsInitState.projects
   })),
   on(checkProjectForDeletion, (state, action) => ({
     ...state,
@@ -98,6 +114,8 @@ export const commonProjectsReducers = [
   on(setTableModeAwareness, (state, action) =>
     ({...state, tableModeAwareness: (action as ReturnType<typeof setTableModeAwareness>).awareness})),
   on(showExamplePipelines, state => ({...state, showPipelineExamples: true})),
+  on(showExampleDatasets, state => ({...state, showDatasetExamples: true})),
+  on(setShowHidden, (state, action) => ({...state, showHidden: action.show}))
 ] as ReducerTypes<ICommonProjectsState, any>[];
 export const commonProjectsReducer = createReducer(commonProjectsInitState, ...commonProjectsReducers);
 
@@ -116,3 +134,6 @@ export const selectNoMoreProjects = createSelector(projects, state => state.noMo
 export const selectProjectsScrollId = createSelector(projects, (state): string => state?.scrollId || null);
 export const selectTableModeAwareness = createSelector(projects, state => state?.tableModeAwareness);
 export const selectShowPipelineExamples = createSelector(projects, state => state?.showPipelineExamples);
+export const selectShowDatasetExamples = createSelector(projects, state => state?.showDatasetExamples);
+export const selectShowHidden = createSelector(projects, selectSelectedProject,
+    (state, selectedProject) => (state?.showHidden || selectedProject?.system_tags?.includes('hidden')));

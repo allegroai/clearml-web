@@ -1,10 +1,7 @@
 <div class="status-line" [class]="status" >
     <span class="d-flex align-items-center">
       <span class="label" *ngIf="showLabel">
-        {{'  ' + (EXPERIMENTS_STATUS_LABELS[status] ? EXPERIMENTS_STATUS_LABELS[status] : '') | uppercase}}
+        {{'  ' + (experimentsStatusLabels[status] ? experimentsStatusLabels[status] : '') | uppercase}}
       </span>
-      <i *ngIf="viewOnly === true || development === true" class="al-icon al-ico-error-circle msm mr-1"
-         matTooltipPosition="after"
-         [smTooltip]="viewOnly || status === 'Published' ? 'View only' : 'Changes will be overridden if re-run locally'"></i>
     </span>
 </div>

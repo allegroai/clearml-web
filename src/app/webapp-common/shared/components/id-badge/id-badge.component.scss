@@ -1,0 +1,45 @@
+@import "variables";
+
+:host {
+  height: 16px;
+  user-select: none;
+
+  .id-number {
+    color: $blue-250;
+    background-color: $blue-600;
+    border-radius: 2px;
+    white-space: nowrap;
+    line-height: 1;
+
+    span {
+      padding: 0 6px;
+      font-family: $font-family-monospace;
+      font-size: 12px;
+    }
+
+    .id-rect {
+      fill: $light-grey-blue;
+    }
+
+    .id-text {
+      fill: $blue-600;
+    }
+  }
+}
+
+:host-context(.light-theme) {
+  :host {
+    .id-number {
+      color: $blue-400;
+      background-color: $blue-50;
+
+      .id-rect {
+        fill: $blue-400;
+      }
+
+      .id-text {
+        fill: $blue-50;
+      }
+    }
+  }
+}

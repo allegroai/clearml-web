@@ -96,7 +96,7 @@ export class WorkersEffects {
         timeFrame = range;
       }
       if (worker) {
-        const req = prepareStatsQuery(worker.name, keys, timeFrame, granularity);
+        const req = prepareStatsQuery(worker.id, keys, timeFrame, granularity);
         return this.workersApi.workersGetStats(req).pipe(
           mergeMap(res => {
             if (res) {

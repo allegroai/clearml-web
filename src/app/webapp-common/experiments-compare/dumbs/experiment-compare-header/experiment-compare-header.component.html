@@ -1,13 +1,14 @@
 <div class="header-container">
   <div class="actions-container">
     <span [smTooltip]="(allowAddExperiment$ | async) ?
-      'Add/Remove experiments to comparison' :
-      compareLimitations + ' or fewer experiments can be compared'"
+      'Add/Remove ' + entityType + 's to comparison' :
+      compareLimitations + ' or fewer ' + entityType + 's can be compared'"
+          matTooltipPosition="above"
     >
         <button class="btn btn-secondary btn-add-experiment"
                 (click)="openAddExperimentSearch()">
-      <i class="fas fa-plus mr-2"></i>
-      <span>Add Experiment</span>
+      <i class="al-icon al-ico-add sm"></i>
+      <span>ADD {{entityType | uppercase}}</span>
     </button>
     </span>
     <mat-select *ngIf="viewMode"

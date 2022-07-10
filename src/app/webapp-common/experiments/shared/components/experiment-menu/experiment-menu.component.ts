@@ -382,8 +382,10 @@ To avoid this, <b>clone the experiment</b> and work with the cloned experiment.`
         this.store.dispatch(new SetExperiment(null));
         this.store.dispatch(experimentsActions.getExperiments());
         this.store.dispatch(new DeactivateEdit());
+
         if (this.activateFromMenuButton || this.selectedExperiments.map(e => e.id).includes(this.selectedExperiment?.id)) {
-          window.setTimeout(() => this.router.navigate([`projects/${this.projectId}/experiments`], {queryParamsHandling: 'preserve'}));
+          const entityBaseRoute= { [EntityTypeEnum.experiment]: 'projects',[EntityTypeEnum.dataset]: 'datasets/simple', [EntityTypeEnum.controller]:'pipelines' };
+          window.setTimeout(() => this.router.navigate([`${entityBaseRoute[entityType] || 'projects'}/${this.projectId}/experiments`], {queryParamsHandling: 'preserve'}));
         }
       }
     });

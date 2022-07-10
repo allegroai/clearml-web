@@ -13,7 +13,7 @@ import {
   setCurrentDebugImage,
   setDebugImageIterations,
   setDebugImageViewerScrollId,
-  setDisplayerBeginningOfTime, setDisplayerEndOfTime
+  setViewerBeginningOfTime, setViewerEndOfTime
 } from './debug-images-actions';
 import {EventsDebugImagesResponse} from '~/business-logic/model/events/eventsDebugImagesResponse';
 import {EventsGetTaskMetricsResponse} from '~/business-logic/model/events/eventsGetTaskMetricsResponse';
@@ -147,7 +147,8 @@ export class DebugImagesEffects {
         iteration: action.iteration,
         metric: action.metric,
         variant: action.variant,
-        scroll_id: scrollId
+        scroll_id: scrollId,
+        navigate_current_metric: !action.isAllMetrics
         /* eslint-enable @typescript-eslint/naming-convention */
       })
         .pipe(
@@ -176,14 +177,14 @@ export class DebugImagesEffects {
         .pipe(
           mergeMap(res => {
             if (!res.event) {
-              return [action.navigateEarlier ? setDisplayerBeginningOfTime({beginningOfTime: true}) : setDisplayerEndOfTime({endOfTime: true})];
+              return [action.navigateEarlier ? setViewerBeginningOfTime({beginningOfTime: true}) : setViewerEndOfTime({endOfTime: true})];
             } else {
               return [
                 // eslint-disable-next-line @typescript-eslint/naming-convention
                 setDebugImageIterations({min_iteration: res.min_iteration, max_iteration: res.max_iteration}),
                 setCurrentDebugImage({event: res.event}), deactivateLoader(action.type),
                 setDebugImageViewerScrollId({scrollId: res.scroll_id}),
-                action.navigateEarlier ? setDisplayerBeginningOfTime({beginningOfTime: false}) : setDisplayerEndOfTime({endOfTime: false})
+                action.navigateEarlier ? setViewerBeginningOfTime({beginningOfTime: false}) : setViewerEndOfTime({endOfTime: false})
               ];
             }
           }),

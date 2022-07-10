@@ -1,5 +1,5 @@
 import {Component, Input} from '@angular/core';
-import {EXPERIMENTS_STATUS_LABELS} from '../../../features/experiments/shared/experiments.const';
+import {EXPERIMENTS_STATUS_LABELS} from '~/features/experiments/shared/experiments.const';
 
 @Component({
   selector   : 'sm-experiment-info-header-status-icon-label',
@@ -9,11 +9,8 @@ import {EXPERIMENTS_STATUS_LABELS} from '../../../features/experiments/shared/ex
 export class ExperimentInfoHeaderStatusIconLabelComponent {
   @Input() showLabel               = true;
   @Input() status                  = '';
-  @Input() viewOnly                = false;
-  @Input() development             = false;
 
-
-  public EXPERIMENTS_STATUS_LABELS = EXPERIMENTS_STATUS_LABELS;
+  public experimentsStatusLabels = EXPERIMENTS_STATUS_LABELS;
 
   constructor() {}
 }

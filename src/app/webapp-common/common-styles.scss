@@ -12,6 +12,7 @@
 @import "shared/ui-components/styles/material-palette";
 @import "assets/fonts/trains-icons.scss";
 @import "layout/layout";
+@import "shared/ui-components/styles/overrides/viewer-iterations-slider";
 
 @include mat.core();
 //@import "../webapp-common/shared/ui-components/styles/material-theme.scss";
@@ -161,8 +162,8 @@ h5.al-header {
 }
 
 span.highlight-text {
-  background: $neon-yellow-betterinchrome;
-  border: 1px solid darken($neon-yellow-betterinchrome, 5%);
+  background: $neon-yellow;
+  border: 1px solid darken($neon-yellow, 5%);
   border-radius: 4px;
   padding: 0 2px;
 
@@ -458,6 +459,10 @@ body .clean-list {
     &.validation {
       background-color: #ff001f;
     }
+
+    &.break-line {
+      white-space: pre-line;
+    }
   }
 
   &.parameter-tooltip {
@@ -563,7 +568,7 @@ as-split {
 
 $type-colors: (
   string: #ff8400,
-  number: $neon-yellow-betterinchrome,
+  number: $neon-yellow,
   boolean: #b938a4,
   date: #05668D,
 );
@@ -637,7 +642,7 @@ $type-colors: (
   display: inline-flex;
 }
 
-.image-displayer-dialog {
+.image-viewer-dialog {
   .mat-dialog-container {
     padding: 0;
     border-radius: 0;
@@ -744,7 +749,7 @@ button.btn.button-outline-dark {
 .sm-card-list-header {
   display: flex;
   justify-content: space-between;
-  padding: $projects-header-padding 6px $projects-header-padding * 0.5 0;
+  padding-top: $projects-header-padding;
 
   .recent-title {
     display: flex;

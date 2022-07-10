@@ -8,14 +8,15 @@
 }
 
 .toggle-all-text {
-  display: block;
-  margin-top: 13px;
-  font-size: 11px;
-  line-height: 1.55;
-  text-align: right;
-  color: $blue-480;
-  cursor: pointer;
+  display: flex;
+  margin-top: 12px;
   padding: 0 24px;
+  > span  {
+    margin-left: auto;
+    font-size: 11px;
+    color: $blue-480;
+    cursor: pointer;
+  }
 }
 
 i.toggle-icon {

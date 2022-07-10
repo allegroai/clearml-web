@@ -1,8 +1,13 @@
 <div class="toggles">
-  <sm-usage-stats #usage></sm-usage-stats>
+  <sm-usage-stats #usage [class.hidden]="!usage.shown"></sm-usage-stats>
+    <mat-slide-toggle
+      *ngIf="admin || usage.shown"
+      (change)="statsChange($event)"
+      [checked]="show$ | async"
+    >Show Hidden Projects
+    </mat-slide-toggle>
   <mat-slide-toggle
     *ngIf="supportReScaling"
-    [class.first]="!usage.shown"
     (change)="hidpiChange($event)"
     [checked]="disableHidpi">
     Disable HiDPI browser scale override

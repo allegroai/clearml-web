@@ -1,8 +1,12 @@
 import {Component, Input} from '@angular/core';
+import {Store} from '@ngrx/store';
 import {Artifact} from '~/business-logic/model/tasks/artifact';
 import {Task} from '~/business-logic/model/tasks/task';
 import {PipelineItem} from '@common/pipelines-controller/pipeline-controller-info/pipeline-controller-info.component';
 import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
+import {addMessage} from '@common/core/actions/layout.actions';
+import {MESSAGES_SEVERITY} from '~/app.constants';
+import { fileSizeConfigStorage } from '@common/shared/pipes/filesize.pipe';
 
 @Component({
   selector: 'sm-pipeline-info',
@@ -12,6 +16,7 @@ import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
 export class PipelineInfoComponent {
   private _entity: Task;
   public controller: boolean;
+  public fileSizeConfigStorage = fileSizeConfigStorage;
   private _step: { branchPath: number; data: any; name: string; stepId: number; parentIds: number[]; id: string };
 
   @Input() set entity(task: Task) {
@@ -31,5 +36,12 @@ export class PipelineInfoComponent {
   }
   @Input() project: string;
 
+  constructor(private store: Store) {
+  }
+
   trackByFn = (index: number, artifact: Artifact) => artifact.hash || artifact.uri;
+
+  copyToClipboard() {
+    this.store.dispatch(addMessage(MESSAGES_SEVERITY.SUCCESS, 'ID copied successfully'));
+  }
 }

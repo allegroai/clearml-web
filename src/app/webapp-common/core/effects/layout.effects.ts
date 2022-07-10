@@ -65,7 +65,7 @@ export class LayoutEffects {
       }
       let resultMessage: string;
       const subcode = get('error.meta.result_subcode', action.serverError);
-      if (subcode) {
+      if (subcode || subcode === 0) {
         resultMessage = `Error ${subcode} : ${get('error.meta.result_msg', action.serverError)}`;
       }
       this.alertDialogRef = this.dialog.open(AlertDialogComponent, {

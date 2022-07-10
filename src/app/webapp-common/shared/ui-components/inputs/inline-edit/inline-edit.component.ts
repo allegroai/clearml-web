@@ -68,7 +68,7 @@ export class InlineEditComponent implements OnDestroy {
       return;
     }
 
-    const templateWidth = this.fixedWidth || Math.max(this.template.nativeElement.getBoundingClientRect().width - 120, 200);
+    const templateWidth = this.fixedWidth || Math.max(this.template.nativeElement.getBoundingClientRect().width - (this.multiline ? 0 : 120), 200);
     this.renderer.setStyle(this.inlineInput.nativeElement, 'width', `${templateWidth}px`);
     this.inlineValue = this.originalText;
     event?.stopPropagation();

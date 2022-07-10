@@ -43,6 +43,8 @@ export const selectExperimentIdsParams = createSelector(selectExperimentsParams,
 export const selectCompareHeader = createSelector(experimentsCompare, state => (state?.compareHeader ?? {}) as CompareHeaderState);
 export const selectIsCompare = createSelector(selectRouterConfig, (config): boolean => config?.includes('compare-experiments'));
 export const selectIsPipelines = createSelector(selectRouterConfig, (config): boolean => config?.[0] === 'pipelines');
+export const selectIsDatasets = createSelector(selectRouterConfig, (config): boolean => config?.[0] === 'datasets');
+export const selectCustomProject = createSelector(selectRouterConfig, (config): boolean => ['pipelines', 'datasets'].includes(config?.[0]));
 
 export const selectCompareAddTableSortFields = createSelector(selectCompareHeader, selectSelectedProjectId,
   (state, projectId) => state.projectColumnsSortOrder?.[projectId] || null);

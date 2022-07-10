@@ -19,6 +19,16 @@ import {filter} from 'rxjs/operators';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CodeEditorComponent implements AfterViewInit {
+  _mode: string = 'ace/mode/python';
+
+  @Input() set mode(mode) {
+    this.aceEditor?.session?.setMode(mode);
+    this._mode = mode;
+  }
+
+  get mode() {
+    return this._mode;
+  }
 
   @Input() readonly = false;
   private _code: string;
@@ -28,9 +38,11 @@ export class CodeEditorComponent implements AfterViewInit {
       this.aceEditor.getSession().setValue(this.code);
     }
   }
+
   get code() {
     return this._code;
   }
+
   @ViewChild('aceEditor') private aceEditorElement: ElementRef<HTMLDivElement>;
   private aceEditor: Ace.Editor;
 
@@ -59,11 +71,10 @@ export class CodeEditorComponent implements AfterViewInit {
 
       aceEditor.renderer.setScrollMargin(12, 12, 12, 12);
       aceEditor.renderer.setPadding(24);
-
-      aceEditor.session.setMode('ace/mode/python');
+      aceEditor.session.setMode(this.mode);
       aceEditor.setTheme('ace/theme/monokai');
 
-      if (this.readonly){
+      if (this.readonly) {
         aceEditor.renderer.hideCursor();
       } else {
         (aceEditor.renderer.container.querySelector('.ace_cursor') as HTMLElement).style.color = 'white';

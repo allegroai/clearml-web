@@ -59,6 +59,11 @@ import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables'
 import { Configuration }                                     from '../configuration';
 import {EventsScalarMetricsIterRawRequest} from "~/business-logic/model/events/eventsScalarMetricsIterRawRequest";
 import {EventsScalarMetricsIterRawResponse} from "~/business-logic/model/events/eventsScalarMetricsIterRawResponse";
+import {EventsNextPlotSampleRequest} from '~/business-logic/model/events/eventsNextPlotSampleRequest';
+import {PlotSampleResponse} from '~/business-logic/model/events/plotSampleResponse';
+import {EventsGetPlotSampleRequest} from '~/business-logic/model/events/eventsGetPlotSampleRequest';
+import {EventsGetTaskSingleValueMetricsRequest} from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsRequest';
+import {EventsGetTaskSingleValueMetricsResponse} from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponse';
 
 
 @Injectable()
@@ -453,7 +458,97 @@ export class ApiEventsService {
         );
     }
 
-    /**
+  /**
+   *
+   * Get the plot for the next variant for the same iteration or for the next   iteration
+   * @param request request body
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   */
+  public eventsNextPlotSample(request: EventsNextPlotSampleRequest, options?: any, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    if (request === null || request === undefined) {
+      throw new Error('Required parameter request was null or undefined when calling eventsNextPlotSample.');
+    }
+
+    let headers = this.defaultHeaders;
+    if (options && options.async_enable) {
+      headers = headers.set(this.configuration.asyncHeader, '1');
+    }
+
+    // to determine the Accept header
+    const httpHeaderAccepts: string[] = [
+      'application/json'
+    ];
+    const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+    if (httpHeaderAcceptSelected != undefined) {
+      headers = headers.set("Accept", httpHeaderAcceptSelected);
+    }
+
+    // to determine the Content-Type header
+    const consumes: string[] = [
+    ];
+    const httpContentTypeSelected:string | undefined = this.configuration.selectHeaderContentType(consumes);
+    if (httpContentTypeSelected != undefined) {
+      headers = headers.set("Content-Type", httpContentTypeSelected);
+    }
+
+    return this.apiRequest.post<PlotSampleResponse>(`${this.basePath}/events.next_plot_sample`,
+      request,
+      {
+        withCredentials: this.configuration.withCredentials,
+        headers: headers,
+        observe: observe,
+        reportProgress: reportProgress
+      }
+    );
+  }
+
+  /**
+   *
+   * Return the plot per metric and variant for the provided iteration
+   * @param request request body
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   */
+  public eventsGetPlotSample(request: EventsGetPlotSampleRequest, options?: any, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    if (request === null || request === undefined) {
+      throw new Error('Required parameter request was null or undefined when calling eventsGetPlotSample.');
+    }
+
+    let headers = this.defaultHeaders;
+    if (options && options.async_enable) {
+      headers = headers.set(this.configuration.asyncHeader, '1');
+    }
+
+    // to determine the Accept header
+    const httpHeaderAccepts: string[] = [
+      'application/json'
+    ];
+    const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+    if (httpHeaderAcceptSelected != undefined) {
+      headers = headers.set("Accept", httpHeaderAcceptSelected);
+    }
+
+    // to determine the Content-Type header
+    const consumes: string[] = [
+    ];
+    const httpContentTypeSelected:string | undefined = this.configuration.selectHeaderContentType(consumes);
+    if (httpContentTypeSelected != undefined) {
+      headers = headers.set("Content-Type", httpContentTypeSelected);
+    }
+
+    return this.apiRequest.post<PlotSampleResponse>(`${this.basePath}/events.get_plot_sample`,
+      request,
+      {
+        withCredentials: this.configuration.withCredentials,
+        headers: headers,
+        observe: observe,
+        reportProgress: reportProgress
+      }
+    );
+  }
+
+  /**
      *
      * get task scalar metrics and variants
      * @param request request body
@@ -722,6 +817,51 @@ export class ApiEventsService {
             }
         );
     }
+
+  /**
+   *
+   * Get single value metrics for the passed tasks
+   * @param request request body
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   */
+  public eventsGetTaskSingleValueMetrics(request: EventsGetTaskSingleValueMetricsRequest, options?: any, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    if (request === null || request === undefined) {
+      throw new Error('Required parameter request was null or undefined when calling eventsGetTaskSingleValueMetrics.');
+    }
+
+    let headers = this.defaultHeaders;
+    if (options && options.async_enable) {
+      headers = headers.set(this.configuration.asyncHeader, '1');
+    }
+
+    // to determine the Accept header
+    const httpHeaderAccepts: string[] = [
+      'application/json'
+    ];
+    const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+    if (httpHeaderAcceptSelected != undefined) {
+      headers = headers.set("Accept", httpHeaderAcceptSelected);
+    }
+
+    // to determine the Content-Type header
+    const consumes: string[] = [
+    ];
+    const httpContentTypeSelected:string | undefined = this.configuration.selectHeaderContentType(consumes);
+    if (httpContentTypeSelected != undefined) {
+      headers = headers.set("Content-Type", httpContentTypeSelected);
+    }
+
+    return this.apiRequest.post<EventsGetTaskSingleValueMetricsResponse>(`${this.basePath}/events.get_task_single_value_metrics`,
+      request,
+      {
+        withCredentials: this.configuration.withCredentials,
+        headers: headers,
+        observe: observe,
+        reportProgress: reportProgress
+      }
+    );
+  }
 
     /**
      *

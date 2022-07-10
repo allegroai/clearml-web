@@ -1,16 +1,16 @@
-<div mat-button [matMenuTriggerFor]="pipelinesMenu" smClickStopPropagation
+<div [matMenuTriggerFor]="pipelinesMenu" smClickStopPropagation
      class="p-0 cell menu-button al-icon al-color light-grey-blue al-ico-bars-menu"
 ></div>
 <mat-menu #pipelinesMenu="matMenu">
   <button mat-menu-item (click)="rename.emit()">
-    <i class="al-icon sm-md" [class]="ICONS.EDIT"></i>Rename
+    <i class="al-icon sm-md" [class]="icons.EDIT"></i>Rename
   </button>
   <button mat-menu-item [matMenuTriggerFor]="tagMenu">
-    <i class="al-icon sm-md" [class]="ICONS.TAG"></i>Add Tag
+    <i class="al-icon sm-md" [class]="icons.TAG"></i>Add Tag
   </button>
   <hr>
   <button mat-menu-item (click)="delete.emit()">
-    <i class="al-icon sm-md" [class]="ICONS.REMOVE"></i>Delete
+    <i class="al-icon sm-md" [class]="icons.REMOVE"></i>Delete
   </button>
 </mat-menu>
 <mat-menu #tagMenu="matMenu">

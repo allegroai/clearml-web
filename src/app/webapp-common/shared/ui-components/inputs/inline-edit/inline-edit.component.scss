@@ -22,7 +22,7 @@ $inline-edit-base-width: 93%;
   .inline-edit-textarea:focus {
     background-color: transparent;
     color: $blue-100;
-    border: none;
+    min-height: 86px;
   }
 
 
@@ -72,7 +72,12 @@ $inline-edit-base-width: 93%;
       .buttons {
         width: 65px;
         min-width: 65px;
-        margin: 12px 12px 0 0;
+        margin: 6px 0 0 0;
+      }
+      .inline-edit-close,
+      .inline-edit-approve {
+        line-height: 20px;
+        font-size: 20px;
       }
     }
     input.warn {

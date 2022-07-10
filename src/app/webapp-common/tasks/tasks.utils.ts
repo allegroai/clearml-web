@@ -1,4 +1,4 @@
-import {Task} from '../../business-logic/model/tasks/task';
+import {Task} from '~/business-logic/model/tasks/task';
 import {cloneDeep, sortBy} from 'lodash/fp';
 import {SelectableListItem} from '@common/shared/ui-components/data/selectable-list/selectable-list.model';
 import {GroupedList} from '@common/shared/ui-components/data/selectable-grouped-filter-list/selectable-grouped-filter-list.component';
@@ -60,17 +60,34 @@ export const prepareGraph = (data: ExtData[], layout: Partial<ExtLayout>, config
     worker: graph['worker'],
   });
 
-export const convertPlots = ({plots, experimentId}: { plots: { [title: string]: MetricsPlotEvent[] }; experimentId: string }): { graphs: { [title: string]: ExtFrame[] }, parsingError } => {
+const tryParseJson = (plotString: string): { data: any; layout: any; config?: any } => {
+  let parsed: { data: any; layout: any; config?: any };
+  try {
+    parsed = JSON.parse(plotString);
+  } catch (e) {
+    parsed = {data: [], layout: {title: 'Unknown data'}};
+  }
+  return parsed;
+};
+
+export const convertPlot = (graph: MetricsPlotEvent, experimentId?: string) => {
+  const json = tryParseJson(graph.plot_str);
+  let hadError;
+  if (json.data.length === 0 && json.layout.title === 'Unknown data') {
+    hadError = true;
+  }
+  json.data.task = json.data?.task || experimentId;
+  return {plot: prepareGraph(json.data, json.layout, json.config, graph), hadError};
+};
+
+export const convertPlots = ({plots, experimentId}: { plots: { [title: string]: MetricsPlotEvent[] }; experimentId: string }): { graphs: { [title: string]: ExtFrame[] }; parsingError } => {
   let parsingError: boolean;
   return {
     graphs: Object.entries(plots).reduce((acc, [key, graphs]) => {
       acc[key] = graphs?.map(graph => {
-        let json = tryParseJson(graph.plot_str);
-        if (json.data.length === 0 && json.layout.title === 'Unknown data') {
-          parsingError = true;
-        }
-        json.data.task = json.data?.task || experimentId;
-        return prepareGraph(json.data, json.layout, json.config, graph);
+        const {plot, hadError} = convertPlot(graph, experimentId);
+        parsingError = parsingError || hadError;
+        return plot;
       });
       return acc;
     }, {}),
@@ -183,6 +200,48 @@ export const convertMultiPlots = (plots): { [key: string]: ExtFrame[] } =>
     return acc;
   }, {});
 
+export const multiplotsAddChartToGroup = (charts, parsed, metric, experiment, experimentId) => {
+  const allowedTypes = ['scatter', 'bar'];
+  let fullName: string;
+  if (parsed.layout && parsed.layout.images) {
+    if (!charts[metric]) {
+      charts[metric] = {};
+    }
+    const index = Object.keys(charts[metric]).length;
+    charts[metric][index] = parsed;
+  }
+  for (let i = 0; i < parsed.data.length; i++) {
+    let isMultipleTasks = false;
+    const variant = parsed.data.slice()[i];
+    if (!variant) {
+      continue;
+    }
+    const metricName = metric;
+    if (!charts[metricName]) {
+      charts[metricName] = {};
+    }
+    if ((!variant.type || allowedTypes.includes(variant.type)) && variant.name) {
+      fullName = metric + '-' + variant.name;
+      variant.name = (experiment);
+      variant.task = (experimentId);
+    } else {
+      fullName = metric + '-' + experiment;
+    }
+    if (!charts[metricName][fullName]) {
+      charts[metricName][fullName] = Object.assign({}, parsed);
+      charts[metricName][fullName].data = [variant];
+    } else {
+      charts[metricName][fullName].data = _mergeVariants(charts[metricName][fullName].data.slice(), variant);
+      isMultipleTasks = true;
+    }
+    charts[metricName][fullName].layout = Object.assign({}, {...charts[metricName][fullName].layout});
+    charts[metricName][fullName].layout.title = fullName;
+    charts[metricName][fullName].layout.name = charts[metricName][fullName].layout.name ? `${charts[metricName][fullName].layout.name} - ${experiment}` : fullName;
+    charts[metricName][fullName].layout.barmode = isMultipleTasks ? 'group' : 'stack';
+  }
+  return charts;
+};
+
 export const seperateMultiplotsVariants = (mixedPlot: IMultiplot, isMultipleVarients): {charts: any; parsingError: boolean} => {
   let charts = {};
   let parsingError: boolean;
@@ -233,49 +292,12 @@ export const prepareMultiPlots = (multiPlots: MetricsPlotEvent): {merged: any; p
     hadParsingError = hadParsingError || parsingError;
     return {...acc, ...graphsPerVariant};
   }, {});
-  return {merged, parsingError: hadParsingError}
+  return {merged, parsingError: hadParsingError};
 };
 
-export const multiplotsAddChartToGroup = (charts, parsed, metric, experiment, experimentId) => {
-  const allowedTypes = ['scatter', 'bar'];
-  let fullName: string;
-  if (parsed.layout && parsed.layout.images) {
-    if (!charts[metric]) {
-      charts[metric] = {};
-    }
-    const index = Object.keys(charts[metric]).length;
-    charts[metric][index] = parsed;
-  }
-  for (let i = 0; i < parsed.data.length; i++) {
-    let isMultipleTasks = false;
-    const variant = parsed.data.slice()[i];
-    if (!variant) {
-      continue;
-    }
-    const metricName = metric;
-    if (!charts[metricName]) {
-      charts[metricName] = {};
-    }
-    if ((!variant.type || allowedTypes.includes(variant.type)) && variant.name) {
-      fullName = metric + '-' + variant.name;
-      variant.name = (experiment);
-      variant.task = (experimentId);
-    } else {
-      fullName = metric + '-' + experiment;
-    }
-    if (!charts[metricName][fullName]) {
-      charts[metricName][fullName] = Object.assign({}, parsed);
-      charts[metricName][fullName].data = [variant];
-    } else {
-      charts[metricName][fullName].data = _mergeVariants(charts[metricName][fullName].data.slice(), variant);
-      isMultipleTasks = true;
-    }
-    charts[metricName][fullName].layout = Object.assign({}, {...charts[metricName][fullName].layout});
-    charts[metricName][fullName].layout.title = fullName;
-    charts[metricName][fullName].layout.name = charts[metricName][fullName].layout.name ? `${charts[metricName][fullName].layout.name} - ${experiment}` : fullName;
-    charts[metricName][fullName].layout.barmode = isMultipleTasks ? 'group' : 'stack';
-  }
-  return charts;
+export const _testWhite = (x) => {
+  const white = new RegExp(/^[\s\-_]$/);
+  return white.test(x.charAt(0));
 };
 
 export const wordWrap = (str, maxWidth) => {
@@ -310,11 +332,6 @@ export const wordWrap = (str, maxWidth) => {
   } while (!done);
 
   return res + str;
-};
-
-export const _testWhite = (x) => {
-  const white = new RegExp(/^[\s\-_]$/);
-  return white.test(x.charAt(0));
 };
 
 export const stripHtml = (s) => s.replace(/<[^>]*>?/gm, '');
@@ -361,12 +378,3 @@ export const chooseTimeUnit = (data) => {
   return {time: timesConst[lastIndex] * 1000, str: timeStringPlural[lastIndex]};
 };
 
-const tryParseJson = (plotString: string): { data: any; layout: any; config?: any } => {
-  let parsed: { data: any; layout: any; config?: any };
-  try {
-    parsed = JSON.parse(plotString);
-  } catch (e) {
-    parsed = {data: [], layout: {title: 'Unknown data'}};
-  }
-  return parsed;
-};

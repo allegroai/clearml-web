@@ -55,6 +55,7 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
   public valuesMode: ValueMode;
   public hoveredRow: string;
   public hoveredTable: string;
+  public experimentTags: { [experimentId: string]: string[] } = {};
 
   constructor(
     private router: Router,
@@ -90,7 +91,10 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
       .pipe(
         filter(exp => !!exp),
         tap(experiments => this.experiments = experiments),
-        tap(experiments => this.syncUrl(experiments, this.taskIds)),
+        tap(experiments => {
+          this.syncUrl(experiments, this.taskIds);
+          this.extractTags(experiments);
+        }),
         map(experiments => experiments.map(exp => exp.last_metrics)))
       .subscribe(experimentsLastMetrics => {
         this.refreshDisabled = false;
@@ -201,5 +205,14 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
   onRowHovered(tableKey: string, tableName: string) {
     this.hoveredRow = tableKey;
     this.hoveredTable = tableName;
+  }
+
+  public extractTags(experiments) {
+    experiments.map(({tags, ...experiment}) => {
+      if (tags
+        ?.length || !this.experimentTags[experiment.id]?.length) {
+        this.experimentTags[experiment.id] = tags;
+      }
+    });
   }
 }

@@ -6,6 +6,9 @@ button {
     border: none !important;
     transition: color 0.3s;
   }
+  &.inline {
+    padding: 0 12px;
+  }
 
   &.text-area {
     background-color: $blue-600;

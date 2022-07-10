@@ -5,7 +5,7 @@ import {PROJECTS_PREFIX} from './common-projects.consts';
 
 export const updateProject = createAction(
   PROJECTS_PREFIX + '[update project]',
-  props<{id: string, changes: Partial<Project>}>()
+  props<{id: string; changes: Partial<Project>}>()
 );
 export const updateProjectSuccess = createAction(
   PROJECTS_PREFIX + '[update project success]',
@@ -28,7 +28,7 @@ export const addToProjectsList = createAction(
   PROJECTS_PREFIX + 'ADD_TO_PROJECTS_LIST',
   props<{projects: Project[]}>()
 );
-export const resetProjects = createAction(PROJECTS_PREFIX + 'RESET_PROJECTS')
+export const resetProjects = createAction(PROJECTS_PREFIX + 'RESET_PROJECTS');
 
 export const checkProjectForDeletion = createAction(
   PROJECTS_PREFIX + 'CHECK_PROJECT_FOR_DELETION',
@@ -38,7 +38,7 @@ export const setProjectReadyForDeletion= createAction(
   PROJECTS_PREFIX + 'SET_PROJECT_READY_FOR_DELETION',
   props<{readyForDeletion}>()
 );
-export const resetReadyToDelete = createAction(PROJECTS_PREFIX + 'RESET_READY_TO_DELETE')
+export const resetReadyToDelete = createAction(PROJECTS_PREFIX + 'RESET_READY_TO_DELETE');
 
 export const setNoMoreProjects = createAction(
   PROJECTS_PREFIX + 'SET_NO_MORE_PROJECTS',
@@ -52,4 +52,10 @@ export const setTableModeAwareness = createAction(
   PROJECTS_PREFIX + '[set table mode awareness]',
   props<{awareness: boolean}>()
 );
-export const showExamplePipelines = createAction(PROJECTS_PREFIX + '[show pipelines examples]')
+export const showExamplePipelines = createAction(PROJECTS_PREFIX + '[show pipelines examples]');
+export const showExampleDatasets = createAction(PROJECTS_PREFIX + '[show datasets examples]');
+
+export const setShowHidden = createAction(
+  PROJECTS_PREFIX + ' [set show hidden]',
+  props<{ show: boolean }>()
+);

@@ -2,6 +2,7 @@ import {MessageSeverityEnum, VIEW_PREFIX} from '~/app.constants';
 import {createAction, props} from '@ngrx/store';
 import {omit} from 'lodash/fp';
 import {HttpErrorResponse} from '@angular/common/http';
+import {Ace} from 'ace-builds';
 
 export const setAutoRefresh = createAction(
   VIEW_PREFIX + '[set auto refresh]',
@@ -50,6 +51,14 @@ export const visibilityChanged = createAction(
   VIEW_PREFIX + '[visibility changed]',
   props<{visible: boolean}>()
 );
+
+export const saveAceCaretPosition = createAction(
+  VIEW_PREFIX + '[save ace caret position]',
+  props<{id: string; position: Ace.Point}>()
+);
+
+export const resetAceCaretsPositions = createAction(VIEW_PREFIX + '[reset ace carets positions]');
+
 
 export const addMessage = createAction(
   VIEW_PREFIX + '[add message]',

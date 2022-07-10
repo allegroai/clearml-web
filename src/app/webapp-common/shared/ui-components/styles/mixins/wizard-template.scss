@@ -13,7 +13,7 @@
   z-index: 10;
   border-bottom: 8px solid #FFFFFF;
   &:hover {
-    border-bottom: 8px solid $neon-yellow-betterinchrome;
+    border-bottom: 8px solid $neon-yellow;
     ::ng-deep .step-number {
       color: $dark-grey-blue-three;
     }

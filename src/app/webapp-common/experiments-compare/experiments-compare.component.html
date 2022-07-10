@@ -19,6 +19,7 @@
     </span>
   </nav>
   <sm-experiment-compare-header
+    [entityType]="entityType"
     (selectionChanged)="updateUrl($event)"
   ></sm-experiment-compare-header>
   <div class="experiment-compare-body">

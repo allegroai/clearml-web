@@ -1,86 +1,85 @@
-import {Action, createAction, props} from '@ngrx/store';
-import {ISmAction} from '../core/models/actions';
-import {SEARCH_ACTIONS} from './dashboard-search.consts';
+import {createAction, props} from '@ngrx/store';
+import {SEARCH_PREFIX} from './dashboard-search.consts';
 import {Project} from '~/business-logic/model/projects/project';
 import {Task} from '~/business-logic/model/tasks/task';
 import {Model} from '~/business-logic/model/models/model';
+import {ActiveSearchLink} from '~/features/dashboard-search/dashboard-search.consts';
+import {DASHBOARD_PREFIX} from '@common/dashboard/common-dashboard.const';
 
 
 export const searchSetTerm = createAction(
-  SEARCH_ACTIONS.SET_TERM,
-  props<{query: string; regExp?: boolean; force?: boolean}>()
+  SEARCH_PREFIX + 'SET_TERM',
+  props<{ query: string; regExp?: boolean; force?: boolean }>()
 );
 
 export const searchStart = createAction(
-  SEARCH_ACTIONS.SEARCH_START,
-  props<{query: string; regExp?: boolean; force?: boolean}>()
+  SEARCH_PREFIX + 'SEARCH_START',
+  props<{ query: string; regExp?: boolean; force?: boolean; activeLink: ActiveSearchLink }>()
 );
 
-export class SearchError implements ISmAction {
-  readonly type = SEARCH_ACTIONS.SEARCH_ERROR;
-}
-
-export class SearchClear implements Action {
-  readonly type = SEARCH_ACTIONS.SEARCH_CLEAR;
-}
-
-export class SearchActivate implements Action {
-  readonly type = SEARCH_ACTIONS.ACTIVATE;
-}
-
-export class SearchDeactivate implements Action {
-  readonly type = SEARCH_ACTIONS.DEACTIVATE;
-}
+export const searchClear = createAction(SEARCH_PREFIX + 'SEARCH_CLEAR');
+export const searchActivate = createAction(SEARCH_PREFIX + 'ACTIVATE');
+export const searchDeactivate = createAction(SEARCH_PREFIX + 'DEACTIVATE');
 
 export const searchProjects = createAction(
-  SEARCH_ACTIONS.SEARCH_PROJECTS,
-  props<{query: string; regExp?: boolean}>()
+  SEARCH_PREFIX + 'SEARCH_PROJECTS',
+  props<{ query: string; regExp?: boolean }>()
 );
 
 export const searchPipelines = createAction(
-  SEARCH_ACTIONS.SEARCH_PIPELINES,
-  props<{query: string; regExp?: boolean}>()
+  SEARCH_PREFIX + 'SEARCH_PIPELINES',
+  props<{ query: string; regExp?: boolean }>()
+);
+
+export const searchOpenDatasets = createAction(
+  SEARCH_PREFIX + 'SEARCH_OPEN_"DATASETS',
+  props<{ query: string; regExp?: boolean }>()
 );
 
 export const setPipelinesResults = createAction(
   'Set Pipelines Results',
-  props<{pipelines: Project[]}>()
+  props<{ pipelines: Project[]; scrollId: string }>()
 );
 
-export class SetProjectsResults implements ISmAction {
-  public type = SEARCH_ACTIONS.SET_PROJECTS;
-  public payload: { projects: Array<Project> };
-
-  constructor(projects: Array<Project>) {
-    this.payload = {projects};
-  }
-}
-
-export const searchExperiments= createAction(
-  SEARCH_ACTIONS.SEARCH_EXPERIMENTS,
-  props<{query: string; regExp?: boolean}>()
+export const setOpenDatasetsResults = createAction(
+  'Set open datasets Results',
+  props<{ openDatasets: Project[]; scrollId: string }>()
 );
 
-export class SetExperimentsResults implements ISmAction {
-  public type = SEARCH_ACTIONS.SET_EXPERIMENTS;
-  public payload: { experiments: Array<Task> };
+export const setProjectsResults = createAction(SEARCH_PREFIX + 'SET_PROJECTS',
+  props<{ projects: Project[]; scrollId: string }>()
+);
 
-  constructor(experiments: Array<Task>) {
-    this.payload = {experiments};
-  }
-}
+export const searchExperiments = createAction(
+  SEARCH_PREFIX + 'SEARCH_EXPERIMENTS',
+  props<{ query: string; regExp?: boolean }>()
+);
+
+export const setExperimentsResults = createAction(
+  SEARCH_PREFIX + 'SET_EXPERIMENTS',
+  props<{ experiments: Task[]; scrollId: string }>()
+);
 
 export const searchModels = createAction(
-  SEARCH_ACTIONS.SEARCH_MODELS,
-  props<{query: string; regExp?: boolean}>()
+  SEARCH_PREFIX + 'SEARCH_MODELS',
+  props<{ query: string; regExp?: boolean }>()
 );
 
-export class SetModelsResults implements ISmAction {
-  public type = SEARCH_ACTIONS.SET_MODELS;
-  public payload: { models: Array<Model> };
+export const setModelsResults = createAction(
+  SEARCH_PREFIX + 'SET_MODELS',
+  props<{ models: Model[]; scrollId: string }>()
+);
 
-  constructor(models: Array<Model>) {
-    this.payload = {models};
-  }
-}
+export const setResultsCount = createAction(
+  SEARCH_PREFIX + 'SET_COUNTS',
+  props<{ counts: Map<ActiveSearchLink, number> }>()
+);
+export const getCurrentPageResults = createAction(
+  DASHBOARD_PREFIX + '[get current page results]',
+  props<{ activeLink: ActiveSearchLink }>()
+);
+export const getResultsCount = createAction(
+  DASHBOARD_PREFIX + '[get results count]',
+  props<{ query: string; regExp?: boolean; force?: boolean }>());
 
+export const clearSearchResults = createAction(DASHBOARD_PREFIX + '[clear search results]');

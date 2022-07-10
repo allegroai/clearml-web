@@ -1,13 +1,13 @@
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {SMSharedModule} from '../../webapp-common/shared/shared.module';
+import {SMSharedModule} from '@common/shared/shared.module';
 import {StoreModule} from '@ngrx/store';
 import {ProjectRouterModule} from './projects-routing.module';
 import {projectsReducer} from './projects.reducer';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {CommonProjectsModule} from '../../webapp-common/projects/common-projects.module';
+import {CommonProjectsModule} from '@common/projects/common-projects.module';
 
-export const projectSyncedKeys = ['showHidden', 'tableModeAwareness'];
+export const projectSyncedKeys = ['showHidden', 'tableModeAwareness', 'orderBy', 'sortOrder'];
 
 @NgModule({
   imports        : [

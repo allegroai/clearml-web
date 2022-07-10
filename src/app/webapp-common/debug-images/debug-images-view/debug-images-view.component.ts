@@ -1,6 +1,7 @@
 import {Component, Input, Output} from '@angular/core';
 import {EventEmitter} from '@angular/core';
 import {Iteration, Event} from '@common/debug-images/debug-images.component';
+import {ThemeEnum} from '../../experiments/shared/common-experiments.const';
 
 @Component({
   selector: 'sm-debug-images-view',
@@ -8,6 +9,7 @@ import {Iteration, Event} from '@common/debug-images/debug-images.component';
   styleUrls: ['./debug-images-view.component.scss']
 })
 export class DebugImagesViewComponent {
+  public themeEnum = ThemeEnum;
 
   public trackKey = (index: number, item: any) => item.iter;
   public trackFrame = (index: number, item: any) => `${item?.key} ${item?.timestamp}`;
@@ -17,6 +19,7 @@ export class DebugImagesViewComponent {
   @Input() title;
   @Input() iterations: Iteration[];
   @Input() isDarkTheme = false;
+  @Input() isDatasetVersionPreview = false;
   @Output() imageClicked = new EventEmitter();
   @Output() refreshClicked = new EventEmitter();
   @Output() urlError = new EventEmitter();

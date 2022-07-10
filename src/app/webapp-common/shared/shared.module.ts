@@ -38,6 +38,7 @@ import {
 import {MultiLineTooltipComponent} from './components/multi-line-tooltip/multi-line-tooltip.component';
 import {ExperimentCompareGeneralDataComponent} from '../experiments-compare/dumbs/experiment-compare-general-data/experiment-compare-general-data.component';
 import { BaseEntityHeaderComponent } from './entity-page/base-entity-header/base-entity-header.component';
+import { IdBadgeComponent } from './components/id-badge/id-badge.component';
 
 const _declarations = [
   ExperimentInfoHeaderStatusProgressBarComponent,
@@ -84,10 +85,11 @@ const _declarations = [
     ScatterPlotComponent,
     ClearFiltersButtonComponent,
     BaseEntityHeaderComponent,
+    IdBadgeComponent,
   ],
-    exports: [..._declarations, UiComponentsModule, TableModule, ClipboardModule, SharedPipesModule, MatSnackBarModule,
-        ScatterPlotComponent, ClearFiltersButtonComponent
-    ],
+  exports: [..._declarations, UiComponentsModule, TableModule, ClipboardModule, SharedPipesModule, MatSnackBarModule,
+    ScatterPlotComponent, ClearFiltersButtonComponent, IdBadgeComponent
+  ],
   providers   : [LeavingBeforeSaveAlertGuard, GeneralLeavingBeforeSaveAlertGuard]
 })
 export class SMSharedModule {

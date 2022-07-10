@@ -16,6 +16,7 @@
     *ngFor="let bigItem of (itemsObjectList | keyvalue: compareByKey); trackBy: trackByKeyFn"
     [expanded]="searchText?.length > 0"
     [hidden]="(bigItem.value | advancedFilter:searchText).length === 0"
+    togglePosition="before"
   >
     <mat-expansion-panel-header expandedHeight="40px" collapsedHeight="40px" (click)="toggleExpand(bigItem.key)">
       <div class="ellipsis item-key" [smTooltip]="renameMap[bigItem.key]" [matTooltipShowDelay]="500">

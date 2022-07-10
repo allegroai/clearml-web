@@ -7,13 +7,13 @@
       (newProjectClicked)="createNewProjectClicked.emit($event)"
       (projectNameChanged)="projectNameChanged.emit({id: project.id, name:$event})"
       (moveToClicked)="moveToClicked.emit($event)"
-      *ngIf="!last || (last && noMoreProjects)"
+      *ngIf="!last || (last && noMoreProjects) || showLast"
       [hideMenu]="['All Experiments'].includes(project.name) || $any(project).isRoot || isExample(project)"
       [project]="project">
     </sm-project-card>
   </ng-container>
 
-  <div class="load-more" *ngIf="!noMoreProjects && projects?.length > pageSize">
+  <div class="load-more" *ngIf="!noMoreProjects">
     <button (click)="loadMore.emit()" class="btn btn-cml-primary load-more-btn">LOAD MORE</button>
   </div>
 </div>

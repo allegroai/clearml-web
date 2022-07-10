@@ -27,8 +27,10 @@ import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {SortMeta} from 'primeng/api';
 import {distinctUntilChanged, map} from 'rxjs/operators';
 import {combineLatest} from 'rxjs';
+import { EventsGetTaskSingleValueMetricsResponseValues } from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponseValues';
 
 export const selectExperimentsList = createSelector(experimentsView, (state): ITableExperiment[] => state.experiments);
+export const selectTableRefreshList = createSelector(experimentsView, (state): boolean => !!state.refreshList);
 export const selectSelectedTableExperiment = createSelector(experimentsView, (state): ITableExperiment => state.selectedExperiment);
 
 export const selectExperimentsTableColsWidth = createSelector(experimentsView, selectRouterParams,
@@ -178,6 +180,7 @@ export const selectExperimentHyperParamsSelectedSectionParams =
 export const selectFullScreenChartIsOpen = createSelector(experimentOutput, (state): boolean => state.isFullScreenOpen);
 export const selectFullScreenChartIsFetching = createSelector(experimentOutput, (state): boolean => state.fetchingFullScreenData);
 export const selectFullScreenChartXtype = createSelector(experimentOutput, (state): ScalarKeyEnum => state.fullScreenXtype);
+export const selectScalarSingleValue = createSelector(experimentOutput, (state): Array<EventsGetTaskSingleValueMetricsResponseValues> => state.scalarSingleValue);
 export const selectFullScreenChart = createSelector(selectFullScreenChartXtype, selectFullScreenChartIsFetching, experimentOutput, (axisType, isFetching , state) => {
     if (axisType === ScalarKeyEnum.IsoTime && state.fullScreenDetailedChart) {
       return {
@@ -211,3 +214,8 @@ export const selectExperimentInfoHistograms = createSelector(
   });
 
 export const selectCurrentArtifactExperimentId = createSelector(experimentInfo, state => state.artifactsExperimentId);
+export const selectMinMaxIterations = createSelector(experimentOutput, (state) => state.minMaxIterations);
+export const selectCurrentPlotViewer = createSelector(experimentOutput, (state) => state.currentPlotViewer);
+export const selectPlotViewerScrollId = createSelector(experimentOutput, (state) => state.plotViewerScrollId);
+export const selectViewerEndOfTime = createSelector(experimentOutput, (state) => state.plotViewerEndOfTime);
+export const selectViewerBeginningOfTime = createSelector(experimentOutput, (state) => state.plotViewerBeginningOfTime);

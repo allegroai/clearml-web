@@ -25,7 +25,7 @@ $log-header-height: 48px;
     z-index: 2;
   }
 
-  .console-log {
+  .results-panel {
     display: flex;
     flex-direction: column;
     width: 100%;
@@ -38,11 +38,32 @@ $log-header-height: 48px;
     z-index: 3;
 
     visibility: hidden;
-    transition: bottom 0.35s, visibility 0.35s;
+    transition: bottom 0.35s, visibility 0.35s, height ease-in-out 0.5s;
 
     &.extend {
       visibility: visible;
       bottom: 0;
+    }
+
+    .header {
+      height: $log-header-height;
+      display: grid;
+      align-items: center;
+      grid-template-columns: 1fr 1fr;
+      column-gap: 24px;
+      padding: 0 24px;
+      background-color: $blue-700;
+      border-bottom: 1px solid #303443;
+      color: $blue-100;
+      box-shadow: 0 -2px 6px rgb(0 0 0 / 40%);
+
+      &.toggle {
+        grid-template-columns: 1fr auto 1fr;
+      }
+    }
+
+    .content {
+      height: $log-height;
     }
 
     ::ng-deep sm-experiment-output-log {
@@ -123,23 +144,6 @@ sm-pipeline-controller-step {
   z-index: 1;
 }
 
-.log-header {
-  height: $log-header-height;
-  display: grid;
-  align-items: center;
-  grid-template-columns: 1fr 1fr;
-  column-gap: 24px;
-  padding: 0 16px;
-  background-color: $blue-800;
-  border-bottom: 1px solid #303443;
-  color: $blue-100;
-  box-shadow: 0 -2px 6px rgb(0 0 0 / 40%);
-
-  &.toggle {
-    grid-template-columns: 1fr auto 1fr;
-  }
-}
-
 .log-name {
   font-weight: 500;
   display: flex;
@@ -155,16 +159,14 @@ sm-pipeline-controller-step {
 .close {
   display: flex;
   align-items: center;
+  margin-left: auto;
+
   .al-icon {
     color: $blue-300;
     &:hover {
       color: $blue-100;
     }
   }
-}
-
-.log-content {
-  height: $log-height;
 }
 
 .no-code {

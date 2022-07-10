@@ -1,0 +1,72 @@
+<ng-container *ngIf="((projectsList$ | async)?.length !== 0 && (!allExamples || (showExamples$ | async)))||  searching; else emptyState">
+  <div class="sm-card-list-layout projects" *ngIf="projectsList$ | async as projects">
+    <sm-projects-header
+      (orderByChanged)="orderByChanged($event)"
+      [sortByField]="projectsOrderBy$ | async"
+      [sortOrder]="projectsSortOrder$ | async"
+    >
+      <button
+        class="btn btn-cml-primary d-flex align-items-center"
+        (click)="createDataset()">
+        <i class="al-icon al-color blue-400 al-ico-add sm mr-2"></i>NEW DATASET
+      </button>
+    </sm-projects-header>
+    <ng-container *ngFor="let project of projects; trackBy: trackById ;let last=last">
+      <sm-simple-dataset-card
+        [hideMenu]="['All Experiments'].includes(project.name) || project['isRoot'] || isExample(project)"
+        [project]="project"
+        [allTags]="projectsTags$ | async"
+        (projectCardClicked)="projectCardClicked($event)"
+        (projectNameChanged)="projectNameChanged({id: project.id, name: $event})"
+        (addTag)="addTag(project, $event)"
+        (removeTag)="removeTag(project, $event)"
+        (delete)="deleteProject(project)"
+      ></sm-simple-dataset-card>
+    </ng-container>
+
+    <div class="load-more" *ngIf="(noMoreProjects$ | async) === false">
+      <button (click)="loadMore()" class="btn btn-cml-primary load-more-btn">LOAD MORE</button>
+    </div>
+  </div>
+</ng-container>
+<ng-template #emptyState>
+  <div class="empty-datasets">
+    <div class="title-icon"><i class="al-icon al-ico-datasets xxl"></i></div>
+    <div class="title">NO DATASETS TO SHOW</div>
+    <div class="sub-title">Run your first dataset to see it displayed here
+      <ng-container *ngIf="allExamples"> or <a href="" (click)="$event.preventDefault(); createExamples()" class="link">generate example
+    </a></ng-container></div>
+
+    <ng-container *ngTemplateOutlet="datasetEmptyStateContent; context: {createButton: true}"></ng-container>
+  </div>
+</ng-template>
+
+<ng-template #datasetEmptyStateContent let-showButton="createButton">
+  <div class="content">
+
+    <div class="code">
+      <div class="d-flex justify-content-between">
+        <div>
+          Use ClearML Data from CLI or in your Python code.<br>
+          Run these code snippets for a quick example (Requires ClearML 1.6 or above).<br>
+          For more details see the <a [class.dark]="showButton" href="https://clear.ml/docs/latest/docs/clearml_data/clearml_data" target="_blank">documentation</a>
+        </div>
+      </div>
+      <div class="navbar">
+        <sm-navbar-item
+          direction="bottom"
+          header="CLI"
+          [active]="emptyStateTab==='cli'"
+          (click)="emptyStateTabClicked('cli')"></sm-navbar-item>
+        <sm-navbar-item
+          direction="bottom"
+          header="SDK"
+          [active]="emptyStateTab==='sdk'"
+          (click)="emptyStateTabClicked('sdk')"
+        ></sm-navbar-item>
+      </div>
+      <sm-code-editor [code]="emptyStateTab === 'cli'? initDatasetCLICode: initDatasetSDKCode" [readonly]="true" [mode]="emptyStateTab === 'cli'? 'ace/mode/sh': 'ace/mode/python'"  ></sm-code-editor>
+    </div>
+    <div class="diagram"><i class="i-datasets-empty-state"></i></div>
+  </div>
+</ng-template>

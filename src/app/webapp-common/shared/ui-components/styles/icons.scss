@@ -279,7 +279,7 @@
   }
 }
 
-.i-in_progress {
+.i-in_progress, .i-Uploading {
   @include icon('#{$assets-icons-path}/running-green.svg');
 
   &.bw {
@@ -291,7 +291,7 @@
   }
 }
 
-.i-completed {
+.i-completed, .i-Final {
   @include icon('#{$assets-icons-path}/completed.svg');
 
   &.bw {
@@ -555,4 +555,8 @@
 
 .i-pipeline-empty-state {
   @include icon('#{$assets-icons-path}/pipeline-empty-state.svg');
+}
+
+.i-datasets-empty-state {
+  @include icon('#{$assets-icons-path}/datasets-empty-state.svg');
 }

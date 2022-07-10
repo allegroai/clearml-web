@@ -14,7 +14,7 @@
     <div *ngFor="let row of dagModel" class="level" [style.width.px]="chartWidth">
       <sm-pipeline-controller-step
         #taskEl
-        *ngFor="let step of row; trackBy: trackById" [step]="step"
+        *ngFor="let step of row; trackBy: trackByStepId" [step]="step"
         [selected]="selectedEntity && selectedEntity.id === step?.id"
         (click)="$event.stopPropagation(); !taskEl.selected && selectStep(step)"
         (openConsole)="openLog()"
@@ -39,9 +39,9 @@
     </svg>
   </ng-container>
 </div>
-<div class="console-log" [class.extend]="showLog">
+<div class="results-panel" [class.extend]="showLog">
   <ng-container *ngIf="showLog">
-    <div class="log-header" [class.toggle]="stepDiff">
+    <div class="header" [class.toggle]="stepDiff">
       <div class="log-name">
         <i class="al-icon al-ico-console mr-2"></i>
         <span>{{(selected$ | async)?.name}}</span>
@@ -56,7 +56,7 @@
         <i class="al-icon al-ico-dialog-x pointer ml-auto" (click)="openLog(false)"></i>
       </div>
     </div>
-    <div class="log-content">
+    <div class="content">
       <sm-experiment-output-log
         *ngIf="detailsPanelMode === statusOption.log; else stepCode"
         [experiment]="selected$ | async"

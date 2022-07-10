@@ -10,7 +10,7 @@ import {activeLoader, deactivateLoader, setServerError} from '../../core/actions
 import {requestFailed} from '../../core/actions/http.actions';
 import * as outputActions from '../actions/common-experiment-output.actions';
 import {
-  mergeGraphDisplayFullDetailsScalars,
+  mergeGraphDisplayFullDetailsScalars, setExperimentScalarSingleValue, setGraphDisplayFullDetailsScalars,
   setXtypeGraphDisplayFullDetailsScalars
 } from '../actions/common-experiment-output.actions';
 import {ExperimentOutputState} from '~/features/experiments/reducers/experiment-output.reducer';
@@ -19,12 +19,11 @@ import {
   selectExperimentHistogramCacheAxisType,
   selectFullScreenChart,
   selectFullScreenChartIsOpen,
-  selectFullScreenChartXtype,
+  selectFullScreenChartXtype, selectPlotViewerScrollId,
   selectSelectedSettingsxAxisType
 } from '../reducers';
 import {refreshExperiments} from '../actions/common-experiments-view.actions';
 import {EventsGetTaskLogResponse} from '~/business-logic/model/events/eventsGetTaskLogResponse';
-import {HTTP} from '~/app.constants';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {EMPTY} from 'rxjs';
 
@@ -84,7 +83,8 @@ export class CommonExperimentOutputEffects {
     switchMap(([action, fullScreenData, chartType]) => this.eventsApi.eventsScalarMetricsIterRaw({
       task: action.task,
       metric: action.metric,
-      key: action.key? action.key : chartType,
+      key: action.key ? action.key : chartType,
+      /* eslint-disable @typescript-eslint/naming-convention */
       count_total: true,
       batch_size: 200000,
     })
@@ -92,17 +92,18 @@ export class CommonExperimentOutputEffects {
         withLatestFrom(this.store.select(selectFullScreenChartIsOpen)),
         map(([res, isOpen]) => [res.returned, res, isOpen]),
         expand(([returnedTillNow, data, isOpen]) => (returnedTillNow < data.total) && isOpen ? this.eventsApi.eventsScalarMetricsIterRaw({
-            task: action.task,
-            metric: action.metric,
-            scroll_id: data.scroll_id,
-            key: action.key? action.key : chartType,
-            count_total: true,
-            batch_size: 200000,
-          }).pipe(
-          withLatestFrom(this.store.select(selectFullScreenChartIsOpen)),
-          map(([res, isOpen]) => [returnedTillNow + res.returned, res, isOpen])
-          )
-          : EMPTY
+              task: action.task,
+              metric: action.metric,
+              scroll_id: data.scroll_id,
+              key: action.key ? action.key : chartType,
+              count_total: true,
+              batch_size: 200000,
+              /* eslint-enable @typescript-eslint/naming-convention */
+            }).pipe(
+              withLatestFrom(this.store.select(selectFullScreenChartIsOpen)),
+              map(([res, isOpen2]) => [returnedTillNow + res.returned, res, isOpen2])
+            )
+            : EMPTY
         ),
         reduce((acc, [, data]) => {
           const graphData = acc ? acc : fullScreenData.data;
@@ -112,8 +113,8 @@ export class CommonExperimentOutputEffects {
             x: (acc ? item.x : []).concat(data?.variants?.[item.name]?.[action.key || chartType] || [])
           }));
         }, null),
-        mergeMap( data => [
-          ... action.key ? [setXtypeGraphDisplayFullDetailsScalars({xAxisType: action.key})]:[],
+        mergeMap(data => [
+          ...action.key ? [setXtypeGraphDisplayFullDetailsScalars({xAxisType: action.key})] : [],
           mergeGraphDisplayFullDetailsScalars({data}),
           deactivateLoader(outputActions.getGraphDisplayFullDetailsScalars.type),
         ]),
@@ -126,11 +127,11 @@ export class CommonExperimentOutputEffects {
 
   fetchExperimentPlots$ = createEffect(() => this.actions$.pipe(
     ofType(outputActions.experimentPlotsRequested),
-    switchMap(action => this.eventsApi.eventsGetTaskPlots({task: action.task, iters: 5}).pipe(
+    switchMap(action => this.eventsApi.eventsGetTaskPlots({task: action.task, iters: 1}).pipe(
       map(res => [res.plots.length, res]),
       expand(([plotsLength, data]) => plotsLength < data.total
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        ? this.eventsApi.eventsGetTaskPlots({task: action.task, iters: 5, scroll_id: data.scroll_id}).pipe(
+        ? this.eventsApi.eventsGetTaskPlots({task: action.task, iters: 1, scroll_id: data.scroll_id}).pipe(
           map(res => [plotsLength + res.plots.length, res])
         )
         : EMPTY
@@ -148,6 +149,15 @@ export class CommonExperimentOutputEffects {
       deactivateLoader(refreshExperiments.type),
       setServerError(error, null, 'Failed to get Plot Charts')
     ])
+  ));
+
+  fetchExperimentScalarSingleValue$ = createEffect(() => this.actions$.pipe(
+    ofType<outputActions.ExperimentScalarRequested>(outputActions.EXPERIMENT_SCALAR_REQUESTED),
+    switchMap((action) => this.eventsApi.eventsGetTaskSingleValueMetrics({
+      tasks: [action.payload]
+    })),
+    mergeMap((res) => [setExperimentScalarSingleValue(res?.tasks[0])]
+    )
   ));
 
   fetchExperimentScalar$ = createEffect(() => this.actions$.pipe(
@@ -183,15 +193,59 @@ export class CommonExperimentOutputEffects {
     )
   ));
 
-  downloadFullLog$ = createEffect(() => this.actions$.pipe(
-    ofType(outputActions.downloadFullLog),
-    filter(action => !!action.experimentId),
-    map(action => {
-      const a = document.createElement('a');
-      a.href = `${HTTP.API_BASE_URL}/events.download_task_log?line_type=text&task=${action.experimentId}`;
-      a.target = '_blank';
-      a.download = 'Log';
-      a.click();
-    })
-  ), {dispatch: false});
+  fetchPlotsForIter$ = createEffect(() => this.actions$.pipe(
+    ofType(outputActions.getPlotSample),
+    withLatestFrom(this.store.select(selectPlotViewerScrollId)),
+    switchMap(([action, scrollId]) =>
+      this.eventsApi.eventsGetPlotSample({
+        /* eslint-disable @typescript-eslint/naming-convention */
+        task: action.task,
+        iteration: action.iteration,
+        metric: action.metric,
+        variant: action.variant,
+        scroll_id: scrollId,
+        navigate_current_metric: false
+        /* eslint-enable @typescript-eslint/naming-convention */
+      })
+        .pipe(
+          mergeMap(res => [
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            outputActions.setPlotIterations({min_iteration: res.min_iteration, max_iteration: res.max_iteration}),
+            outputActions.setCurrentPlot({event: res.event}), deactivateLoader(action.type),
+            outputActions.setPlotViewerScrollId({scrollId: res.scroll_id}),
+          ]),
+          catchError(error => [requestFailed(error), deactivateLoader(action.type)])
+        )
+    )
+  ));
+
+  getNextPlotsForIter$ = createEffect(() => this.actions$.pipe(
+    ofType(outputActions.getNextPlotSample),
+    withLatestFrom(this.store.select(selectPlotViewerScrollId)),
+    switchMap(([action, scrollId]) =>
+      this.eventsApi.eventsNextPlotSample({
+        /* eslint-disable @typescript-eslint/naming-convention */
+        task: action.task,
+        scroll_id: scrollId,
+        navigate_earlier: action.navigateEarlier
+        /* eslint-enable @typescript-eslint/naming-convention */
+      })
+        .pipe(
+          mergeMap(res => {
+            if (!res.event) {
+              return [action.navigateEarlier ? outputActions.setViewerBeginningOfTime({beginningOfTime: true}) : outputActions.setViewerEndOfTime({endOfTime: true})];
+            } else {
+              return [
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                outputActions.setPlotIterations({min_iteration: res.min_iteration, max_iteration: res.max_iteration}),
+                outputActions.setCurrentPlot({event: res.event}), deactivateLoader(action.type),
+                outputActions.setPlotViewerScrollId({scrollId: res.scroll_id}),
+                action.navigateEarlier ? outputActions.setViewerBeginningOfTime({beginningOfTime: false}) : outputActions.setViewerEndOfTime({endOfTime: false})
+              ];
+            }
+          }),
+          catchError(error => [requestFailed(error), deactivateLoader(action.type)])
+        )
+    )
+  ));
 }

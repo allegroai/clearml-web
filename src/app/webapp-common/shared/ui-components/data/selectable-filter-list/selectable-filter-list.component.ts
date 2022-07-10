@@ -59,7 +59,7 @@ export class SelectableFilterListComponent {
   }
 
   toggleHideAll() {
-    if (this.checkedList.length > 0) {
+    if (this.checkedList?.length > 0) {
       this.hiddenChanged.emit([]);
 
     } else {

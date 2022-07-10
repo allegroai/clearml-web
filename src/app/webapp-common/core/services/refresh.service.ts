@@ -24,7 +24,7 @@ export class RefreshService {
         ),
         filter(([, auto, visible]) => auto && visible)
       )
-      .subscribe(() => this._tick.next(null))
+      .subscribe(() => this._tick.next(null));
   }
 
   trigger(auto = false) {

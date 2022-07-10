@@ -20,13 +20,9 @@
     flex-direction: column;
     margin-top: 0;
 
-    & > *:not(:first-child){
-      display: block;
-      margin-top: 12px;
-
-      &.first {
-        margin-top: 0;
-      }
+    mat-slide-toggle,
+    sm-usage-stats {
+      margin-bottom: 12px;
     }
   }
 }

@@ -17,7 +17,7 @@ import {get} from 'lodash/fp';
 import {Router} from '@angular/router';
 import {ApiTasksService} from '../../../business-logic/api-services/tasks.service';
 import {of} from 'rxjs';
-import {selectSelectedModel, selectSelectedModels, selectSelectedTableModel} from '../reducers';
+import {selectSelectedModel, selectSelectedModels, selectSelectedTableModel, selectTableMode} from '../reducers';
 import {SelectedModel} from '../shared/models.model';
 import {RouterState, selectRouterConfig, selectRouterParams} from '../../core/reducers/router-reducer';
 import {ModelsArchiveManyResponse} from '../../../business-logic/model/models/modelsArchiveManyResponse';
@@ -199,11 +199,12 @@ export class ModelsMenuEffects {
     ofType(menuActions.restoreSelectedModels),
     withLatestFrom(
       this.store.select(selectRouterParams),
-      this.store.select(selectSelectedTableModel)
+      this.store.select(selectSelectedTableModel),
+      this.store.select(selectTableMode)
     ),
-    tap(([action, routerParams, selectedModel]) => {
+    tap(([action, routerParams, selectedModel, tableMode]) => {
       if (this.isSelectedModelInCheckedModels(action.selectedEntities, selectedModel)) {
-        this.router.navigate([`projects/${routerParams.projectId}/models/`]);
+        this.router.navigate([`projects/${routerParams.projectId}/models/${tableMode === 'info' ? routerParams.modelId : ''}`]);
       }
     }),
     switchMap(([action, routerParams]) => this.apiModels.modelsUnarchiveMany({ids: action.selectedEntities.map((model) => model.id)})

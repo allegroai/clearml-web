@@ -3,25 +3,32 @@ import {Project} from '~/business-logic/model/projects/project';
 import {Task} from '~/business-logic/model/tasks/task';
 import {ITask} from '~/business-logic/model/al-task';
 import {Model} from '~/business-logic/model/models/model';
-import {ActiveSearchLink} from '~/features/dashboard/containers/dashboard-search/dashboard-search.component';
+import {activeLinksList, ActiveSearchLink, activeSearchLink} from '~/features/dashboard-search/dashboard-search.consts';
 
 @Component({
-  selector   : 'sm-search-results-page',
+  selector: 'sm-search-results-page',
   templateUrl: './search-results-page.component.html',
-  styleUrls  : ['./search-results-page.component.scss']
+  styleUrls: ['./search-results-page.component.scss']
 })
 export class SearchResultsPageComponent {
+  public searchPages = activeSearchLink;
+  public activeLinksList = activeLinksList;
+
   @Input() projectsList: Array<Project> = [];
   @Input() experimentsList: Array<Task> = [];
-  @Input() modelsList: Array<Model>     = [];
+  @Input() modelsList: Array<Model> = [];
   @Input() pipelinesList: Array<Project> = [];
+  @Input() datasetsList: Array<Project> = [];
   @Input() activeLink: ActiveSearchLink;
+  @Input() resultsCount: Map<ActiveSearchLink, number>;
 
-  @Output() projectSelected    = new EventEmitter<Project>();
-  @Output() activeLinkChanged  = new EventEmitter<string>();
+  @Output() projectSelected = new EventEmitter<Project>();
+  @Output() activeLinkChanged = new EventEmitter<string>();
   @Output() experimentSelected = new EventEmitter<ITask>();
-  @Output() modelSelected      = new EventEmitter<Model>();
-  @Output() pipelineSelected   = new EventEmitter<Project>();
+  @Output() modelSelected = new EventEmitter<Model>();
+  @Output() pipelineSelected = new EventEmitter<Project>();
+  @Output() openDatasetSelected = new EventEmitter<Project>();
+  @Output() loadMoreClicked = new EventEmitter();
 
   public projectClicked(project: Project) {
     this.projectSelected.emit(project);
@@ -39,18 +46,20 @@ export class SearchResultsPageComponent {
     this.pipelineSelected.emit(pipeline);
   }
 
-  getResults() {
-    return this[`${this.activeLink}List`];
+  public openDatasetClicked(project: Project) {
+    this.openDatasetSelected.emit(project);
   }
+
+  getResults = () => this[`${this.activeLink}List`];
 
   getCardHeight() {
     switch (this.activeLink) {
-      case 'projects':
+      case activeSearchLink.projects:
         return 246;
-      case 'experiments':
-      case 'models':
+      case activeSearchLink.experiments:
+      case activeSearchLink.models:
         return 264;
-      case 'pipelines':
+      case activeSearchLink.pipelines:
         return 226;
       default:
         return 250;

@@ -1,0 +1,18 @@
+<div [id]="step.stepId" class="step-container pointer"
+     [class.selected]="selected">
+  <div class="step-part step-title" [class]="step?.data?.status">
+    <div
+      class="title"
+      smShowTooltipIfEllipsis
+      [smTooltip]="step?.data?.name ?? step.name + step?.data?.version ? ' v' + step.data.version : ''"
+      matTooltipPosition="above"
+    >{{step?.data?.name ?? step.name}}<ng-container *ngIf="step?.data?.version"> v{{step.data.version}}</ng-container></div>
+    <i class="al-icon sm-md al-ico-console" (click)="openConsole.emit()"></i>
+  </div>
+  <div class="step-part step-footer" [class]="step?.data?.status">
+    <div *ngIf="step?.data?.job_size">{{step.data.job_size | filesize: fileSizeConfigStorage}}</div>
+    <div class="d-flex-center" *ngIf="step?.data?.last_update">
+      <i class="al-icon al-ico-upload sm mr-1"></i>{{step.data.last_update * 1000 | timeAgo}}
+    </div>
+  </div>
+</div>

@@ -1,11 +1,10 @@
-import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Observable, Subscription} from 'rxjs';
 import {select, Store} from '@ngrx/store';
 import {IExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {distinctUntilChanged, filter, map} from 'rxjs/operators';
 import {isEqual} from 'lodash/fp';
 import {mergeMultiMetrics, mergeMultiMetricsGroupedVariant} from '@common/tasks/tasks.utils';
-import {scrollToElement} from '@common/shared/utils/shared-utils';
 import {GetMultiScalarCharts, ResetExperimentMetrics, SetExperimentMetricsSearchTerm, SetExperimentSettings, SetSelectedExperiments} from '../../actions/experiments-compare-charts.actions';
 import {selectCompareSelectedSettingsGroupBy, selectCompareSelectedSettingsSmoothWeight, selectCompareSelectedSettingsxAxisType, selectCompareTasksScalarCharts, selectExperimentMetricsSearchTerm, selectSelectedExperimentSettings, selectSelectedSettingsHiddenScalar} from '../../reducers';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
@@ -15,6 +14,7 @@ import {GroupedList} from '@common/shared/ui-components/data/selectable-grouped-
 import {ExtFrame} from '@common/shared/experiment-graphs/single-graph/plotly-graph-base';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
+import {ExperimentGraphsComponent} from '@common/shared/experiment-graphs/experiment-graphs.component';
 
 
 @Component({
@@ -57,6 +57,8 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
       value: GroupByCharts.None
     }
   ];
+
+  @ViewChild(ExperimentGraphsComponent) graphsComponent: ExperimentGraphsComponent;
 
   constructor(
     private store: Store<IExperimentInfoState>,
@@ -109,7 +111,7 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
     this.settingsSubscription = this.experimentSettings$
       .subscribe((selectedMetric) => {
         this.selectedGraph = selectedMetric;
-        scrollToElement(this.selectedGraph);
+        this.graphsComponent.scrollToGraph(selectedMetric);
       });
 
     this.routerParamsSubscription = this.routerParams$

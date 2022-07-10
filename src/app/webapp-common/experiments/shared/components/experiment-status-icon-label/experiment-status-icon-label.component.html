@@ -1,6 +1,6 @@
 <div [ngClass]="showIcon && status" class="d-flex align-items-center w-100">
   <i *ngIf="showIcon" class="icon xs" [class]="'i-'+ status" ></i>
-  <div class="ellipsis label" [class.with-spinner]="showSpinner && progress" *ngIf="showLabel">{{EXPERIMENTS_STATUS_LABELS[status]}}</div>
+  <div class="ellipsis label" [class.with-spinner]="showSpinner && progress" *ngIf="showLabel">{{experimentsStatusLabels[status] || status}}</div>
   <mat-progress-spinner
     *ngIf="showSpinner && progress"
     class="spinner"

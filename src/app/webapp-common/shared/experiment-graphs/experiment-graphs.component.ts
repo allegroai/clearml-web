@@ -29,6 +29,7 @@ import {ExtFrame, ExtLegend} from './single-graph/plotly-graph-base';
 import {getSignedUrl} from '../../core/actions/common-auth.actions';
 import {selectSignedUrl} from '../../core/reducers/common-auth-reducer';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
+import { EventsGetTaskSingleValueMetricsResponseValues } from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponseValues';
 
 @Component({
   selector: 'sm-experiment-graphs',
@@ -98,6 +99,8 @@ export class ExperimentGraphsComponent implements OnDestroy {
   @Input() breakPoint: number = 700;
   @Input() isCompare: boolean = false;
   @Input() disableResize: boolean = false;
+  @Input() singleValueData: Array<EventsGetTaskSingleValueMetricsResponseValues>;
+  @Input() experimentName: string;
 
 
   @Input() smoothWeight: number;
@@ -128,7 +131,7 @@ export class ExperimentGraphsComponent implements OnDestroy {
     ).subscribe( () => {
       this.graphsData = null;
       this.graphList = [];
-    }))
+    }));
 
     this.subs.add(this.plotlyReady$.pipe(
         tap(ready => this.plotlyReady = ready),
@@ -162,7 +165,7 @@ export class ExperimentGraphsComponent implements OnDestroy {
     }
     this.graphsData = this.sortGraphsData(graphGroups);
 
-    this.graphsPerRow = this.allGroupsSingleGraphs() ? 1 : this.graphsPerRow;
+    this.graphsPerRow = (this.disableResize || this.allGroupsSingleGraphs()) ? 1 : this.graphsPerRow;
     this.maxUserHeight = Math.max(...Object.values(this.graphsData).flat().map( (chart: ExtFrame) => chart.layout?.height || 0));
     this.maxUserWidth = Math.max(...Object.values(this.graphsData).flat().map( (chart: ExtFrame) => chart.layout?.width || 0));
     if (this.maxUserHeight) {
@@ -269,7 +272,7 @@ export class ExperimentGraphsComponent implements OnDestroy {
   }
 
   private allGroupsSingleGraphs() {
-    return (this.isGroupGraphs || this.disableResize) && Object.values(this.graphsData).some(group => group.length === 1);
+    return (this.isGroupGraphs || this.disableResize) && Object.values(this.graphsData || {}).every(group => group.length === 1);
   }
 
   public calculateGraphsLayout(delay = 200) {
@@ -341,11 +344,11 @@ export class ExperimentGraphsComponent implements OnDestroy {
     return Math.min(graphsPerRow, this.graphsNumberLimit);
   }
 
-  resizeStarted(metricGroup: HTMLDivElement, singleGraph: SingleGraphComponent) {
+  resizeStarted(metricGroup: HTMLDivElement, singleGraph?: SingleGraphComponent) {
     this.activeResizeElement = singleGraph;
     this.changeDetection.detectChanges();
     this.graphsNumberLimit = this.isGroupGraphs ? metricGroup.querySelectorAll('sm-single-graph').length : this.graphList.length;
-    this.resizeTextElement = singleGraph.elementRef.nativeElement.querySelector('.whitebg.resize-active.resize-ghost-element .resize-overlay-text');
+    this.resizeTextElement = singleGraph?.elementRef.nativeElement.querySelector('.whitebg.resize-active.resize-ghost-element .resize-overlay-text');
   }
 
   onResizing($event: ResizeEvent) {
@@ -353,6 +356,17 @@ export class ExperimentGraphsComponent implements OnDestroy {
       const graphsPerRow = this.calcGraphPerRow($event.rectangle.width, this.el.nativeElement.clientWidth);
       const text = `${graphsPerRow > 1 ? graphsPerRow + ' graphs' : '1 graph'} per row`;
       this.renderer.setProperty(this.resizeTextElement, 'textContent', text);
+    }
+  }
+
+  validateResize($event: ResizeEvent): boolean {
+    return $event.rectangle.width > 400 && $event.rectangle.height > 250;
+  }
+
+  scrollToGraph(id: string) {
+    const element = this.allMetrics.nativeElement.getElementsByClassName('graph-id')[EXPERIMENT_GRAPH_ID_PREFIX + id] as HTMLDivElement;
+    if (element) {
+      this.allMetrics.nativeElement.scrollTo({top: element.offsetTop, behavior: 'smooth'});
     }
   }
 }

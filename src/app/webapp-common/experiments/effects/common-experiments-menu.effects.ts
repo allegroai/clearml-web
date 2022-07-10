@@ -36,11 +36,15 @@ import {getAllSystemProjects} from '../../core/actions/projects.actions';
 import {MatDialog} from '@angular/material/dialog';
 import {ApiPipelinesService} from '~/business-logic/api-services/pipelines.service';
 import {PIPELINE_INFO_ONLY_FIELDS} from '../../pipelines-controller/controllers.consts';
-import {AbortAllChildrenDialogComponent} from '../shared/components/abort-all-children-dialog/abort-all-children-dialog.component';
+import {
+  AbortAllChildrenDialogComponent
+} from '../shared/components/abort-all-children-dialog/abort-all-children-dialog.component';
 import {selectIsPipelines} from '@common/experiments-compare/reducers';
-import {AbortControllerDialogComponent} from '@common/pipelines-controller/pipeline-controller-menu/abort-controller-dialog/abort-controller-dialog.component';
+import {
+  AbortControllerDialogComponent
+} from '@common/pipelines-controller/pipeline-controller-menu/abort-controller-dialog/abort-controller-dialog.component';
 import {get} from 'lodash/fp';
-import { TaskTypeEnum } from '~/business-logic/model/tasks/taskTypeEnum';
+import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
 import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
 
 export const getChildrenExperiments = (tasksApi, parents, filters?: { [key: string]: any }): Observable<Task[]> => {
@@ -94,7 +98,11 @@ export class CommonExperimentsMenuEffects {
     withLatestFrom(this.store.select(selectSelectedExperiment)),
     switchMap(([action, selectedEntity]: [ReturnType<typeof menuActions.enqueueClicked>, IExperimentInfo]) => {
         const ids = action.selectedEntities.map(exp => exp.id);
-        return this.apiTasks.tasksEnqueueMany({ids, queue: action.queue.id, ...((!action.queue.id) && {queue_name: action.queue.name})  ,validate_tasks: true})
+        return this.apiTasks.tasksEnqueueMany({
+          ids,
+          queue: action.queue.id, ...((!action.queue.id) && {queue_name: action.queue.name}),
+          validate_tasks: true
+        })
           .pipe(
             mergeMap(res => this.updateExperimentsSuccess(action, MenuItems.enqueue, ids, selectedEntity, res)),
             catchError(error => this.updateExperimentFailed(action.type, error))
@@ -107,7 +115,10 @@ export class CommonExperimentsMenuEffects {
     ofType(menuActions.startPipeline),
     withLatestFrom(this.store.select(selectRouterParams).pipe(map(params => get('projectId', params)))),
     switchMap(([action, projectId]) => {
-        return this.pipelineApi.pipelinesStartPipeline({task: action.task, ...(action.queue && {queue: action.queue}), args: action.args})
+        return this.pipelineApi.pipelinesStartPipeline({
+          task: action.task, ...(action.queue && {queue: action.queue}),
+          args: action.args
+        })
           .pipe(
             mergeMap(res => [
               viewActions.getExperiments(),
@@ -181,9 +192,11 @@ export class CommonExperimentsMenuEffects {
         .pipe(
           mergeMap(res => [
             viewActions.getExperiments(),
-            viewActions.setSelectedExperiments({experiments: (tableMode ==='info' ? [] :
+            viewActions.setSelectedExperiments({
+              experiments: (tableMode === 'info' ? [] :
                 [{id: res?.id}
-            ])}),
+                ])
+            }),
             ...(tableMode === 'info') ? [viewActions.experimentSelectionChanged({
               experiment: {id: res.id},
               project: action.payload.cloneData.project ? action.payload.cloneData.project : res?.new_project?.id
@@ -234,7 +247,7 @@ export class CommonExperimentsMenuEffects {
     withLatestFrom(this.store.select(selectIsPipelines)),
     switchMap(([action, isPipeline]) => getChildrenExperiments(this.apiTasks, action.experiments)
       .pipe(
-        tap( () => this.store.dispatch(deactivateLoader(action.type))),
+        tap(() => this.store.dispatch(deactivateLoader(action.type))),
         mergeMap(shouldBeAbortedTasks => (isPipeline ? this.dialog.open(AbortControllerDialogComponent, {
           data: {tasks: action.experiments, shouldBeAbortedTasks}
         }) : this.dialog.open(AbortAllChildrenDialogComponent, {
@@ -417,11 +430,14 @@ export class CommonExperimentsMenuEffects {
     withLatestFrom(
       this.store.select(selectRouterParams),
       this.store.select(exSelectors.selectSelectedTableExperiment),
-      this.store.select(selectRouterConfig)),
-    tap(([action, routerParams, selectedExperiment, routeConfig]) => {
+      this.store.select(selectRouterConfig),
+      this.store.select(selectTableMode)
+    ),
+    tap(([action, routerParams, selectedExperiment, routeConfig, tableMode]) => {
       if (this.isSelectedExpInCheckedExps(action.selectedEntities, selectedExperiment)) {
-        const module = routeConfig.includes('pipelines')? 'pipelines': 'projects'
-        this.router.navigate([`${module}/${routerParams.projectId}/experiments/`]);
+        const module = routeConfig.includes('pipelines') ? 'pipelines' : (routeConfig.includes('datasets') && routeConfig.includes('simple')) ? 'datasets/simple' : 'projects';
+        this.router.navigate([`${module}/${routerParams.projectId}/experiments/${tableMode === 'info' ?
+          (module === 'datasets/simple' ? routerParams.versionId : routerParams.experimentId) : ''}`]);
       }
     }),
     switchMap(([action, routerParams]) => this.apiTasks.tasksUnarchiveMany({ids: action.selectedEntities.map(exp => exp.id)})

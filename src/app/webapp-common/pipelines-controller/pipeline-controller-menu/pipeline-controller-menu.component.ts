@@ -20,8 +20,8 @@ import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
   templateUrl: './pipeline-controller-menu.component.html',
   styleUrls: ['./pipeline-controller-menu.component.scss']
 })
-export class PipelineControllerMenuComponent extends ExperimentMenuComponent implements OnInit {
-  EntityTypeEnum = EntityTypeEnum;
+export class PipelineControllerMenuComponent extends ExperimentMenuComponent {
+  entityTypeEnum = EntityTypeEnum;
 
   constructor(
     protected blTaskService: BlTasksService,
@@ -36,10 +36,6 @@ export class PipelineControllerMenuComponent extends ExperimentMenuComponent imp
     super(blTaskService, dialog, router, store, syncSelector, eRef, configService, route);
   }
 
-  ngOnInit(): void {
-    super.ngOnInit();
-  }
-
   runPipelineController(runNew: boolean = false) {
     const runPipelineDialog = this.dialog.open(RunPipelineControllerDialogComponent, {
       data: {task: runNew ? null : this._experiment}
@@ -49,8 +45,8 @@ export class PipelineControllerMenuComponent extends ExperimentMenuComponent imp
         task: res.task,
         args: res.args,
         queue: res.queue
-      }))
-    })
+      }));
+    });
   }
 
   continueController() {

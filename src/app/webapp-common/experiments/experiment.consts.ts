@@ -17,6 +17,12 @@ export const INITIAL_EXPERIMENT_TABLE_COLS: ISmCol[] = [
     disablePointerEvents: true,
   },
   {
+    id            : EXPERIMENTS_TABLE_COL_FIELDS.ID,
+    headerType    : ColHeaderTypeEnum.title,
+    header        : 'ID',
+    style         : {width: '100px'},
+  },
+  {
     id            : EXPERIMENTS_TABLE_COL_FIELDS.TYPE,
     headerType    : ColHeaderTypeEnum.sortFilter,
     sortable      : true,

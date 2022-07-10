@@ -31,8 +31,14 @@
     width: 100%;
     overflow: hidden;
 
-    &.drawer-closed button {
-      align-items: start;
+    &.drawer-closed {
+      .content-container {
+        display: none;
+      }
+
+      button {
+        align-items: start;
+      }
     }
   }
 
@@ -40,6 +46,7 @@
     position: relative;
     z-index: 1;
   }
+
   button {
     display: flex;
     justify-content: center;

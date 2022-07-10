@@ -51,14 +51,14 @@
   <div class="d-flex justify-content-around w-100">
     <ng-template></ng-template>
     <sm-circle-counter
-      [counter]="project.id === '*'? '∞' : project.stats?.active?.total_tasks"
+      [counter]="project.id === '*' ? '∞' : project.stats?.active?.total_tasks"
       label="TOTAL"
       [type]="project.stats?.active?.total_tasks===0 ? circleTypeEnum.empty : circleTypeEnum.pending"></sm-circle-counter>
     <sm-circle-counter
-      [counter]="project.id === '*'? '∞' : project.stats?.active?.status_count?.in_progress"
+      [counter]="project.id === '*' ? '∞' : project.stats?.active?.status_count?.in_progress"
       label="RUNNING"
       [type]="project.stats?.active?.status_count?.in_progress ===0 ? circleTypeEnum.empty : circleTypeEnum.running"></sm-circle-counter>
-    <sm-circle-counter [counter]="project.id === '*'? '∞' : project.stats?.active?.completed_tasks_24h"
+    <sm-circle-counter [counter]="project.id === '*' ? '∞' : project.stats?.active?.completed_tasks_24h"
                        label="COMPLETED"
                        [type]="project.stats?.active?.completed_tasks_24h ===0 ? circleTypeEnum.empty : circleTypeEnum.completed"
                        underLabel="(24 hrs)"></sm-circle-counter>

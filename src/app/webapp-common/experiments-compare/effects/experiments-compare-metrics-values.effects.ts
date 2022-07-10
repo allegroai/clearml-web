@@ -24,7 +24,7 @@ export class ExperimentsCompareMetricsValuesEffects {
   @Effect()
   getComparedExperimentsMetricsValues = this.actions$.pipe(
     ofType<metricsValuesActions.GetComparedExperimentsMetricsValues>(metricsValuesActions.GET_COMPARED_EXPERIMENTS_METRICS_VALUES),
-    mergeMap((action) => this.tasksApiService.tasksGetAllEx({id: action.payload.taskIds, only_fields: ['last_metrics', 'name', 'status', 'completed', 'last_update', 'last_iteration', 'project.name']})
+    mergeMap((action) => this.tasksApiService.tasksGetAllEx({id: action.payload.taskIds, only_fields: ['last_metrics', 'name', 'status', 'completed', 'last_update', 'last_iteration', 'project.name', 'tags']})
       .pipe(
         map(res => action.payload.taskIds.map(id => res.tasks.find(ex => ex.id === id))),
         mergeMap(experiments => [

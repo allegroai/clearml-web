@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {SelectableListItem} from '@common/shared/ui-components/data/selectable-list/selectable-list.model';
 import {Observable, Subscription} from 'rxjs';
 import {select, Store} from '@ngrx/store';
@@ -7,12 +7,12 @@ import {distinctUntilChanged, filter, map, tap} from 'rxjs/operators';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {convertMultiPlots, prepareMultiPlots, sortMetricsList} from '@common/tasks/tasks.utils';
 import {isEqual} from 'lodash/fp';
-import {scrollToElement} from '@common/shared/utils/shared-utils';
 import {GetMultiPlotCharts, ResetExperimentMetrics, SetExperimentMetricsSearchTerm, SetExperimentSettings, SetSelectedExperiments} from '../../actions/experiments-compare-charts.actions';
 import {selectCompareTasksPlotCharts, selectExperimentMetricsSearchTerm, selectSelectedExperimentSettings, selectSelectedSettingsHiddenPlot} from '../../reducers';
 import {ExtFrame} from '@common/shared/experiment-graphs/single-graph/plotly-graph-base';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {addMessage} from '@common/core/actions/layout.actions';
+import {ExperimentGraphsComponent} from '@common/shared/experiment-graphs/experiment-graphs.component';
 
 @Component({
   selector: 'sm-experiment-compare-plots',
@@ -38,6 +38,7 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
   public graphs: { [key: string]: ExtFrame[] };
   public refreshDisabled: boolean;
 
+  @ViewChild(ExperimentGraphsComponent) graphsComponent: ExperimentGraphsComponent;
 
   constructor(private store: Store<IExperimentInfoState>, private changeDetection: ChangeDetectorRef, private refresh: RefreshService) {
     this.listOfHidden = this.store.pipe(select(selectSelectedSettingsHiddenPlot));
@@ -74,13 +75,13 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
           this.graphs = newGraphs;
         }
         this.changeDetection.detectChanges();
-        parsingError && this.store.dispatch(addMessage('warn', `Couldn't read all plots. Please make sure all plots are properly formatted (NaN & Inf aren't supported).`, [], true))
+        parsingError && this.store.dispatch(addMessage('warn', `Couldn't read all plots. Please make sure all plots are properly formatted (NaN & Inf aren't supported).`, [], true));
       });
 
     this.settingsSubscription = this.experimentSettings$
       .subscribe((selectedPlot) => {
         this.selectedGraph = selectedPlot;
-        scrollToElement(this.selectedGraph);
+        this.graphsComponent.scrollToGraph(selectedPlot);
       });
 
     this.routerParamsSubscription = this.routerParams$
@@ -107,7 +108,7 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
     this.resetMetrics();
   }
 
-  private prepareList(metricsScalar: Object): Array<SelectableListItem> {
+  private prepareList(metricsScalar): Array<SelectableListItem> {
     const list = metricsScalar ? Object.keys(metricsScalar) : [];
     const sortedList = sortMetricsList(list);
     return sortedList.map((item) => ({name: item, value: item}));
@@ -123,7 +124,7 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
 
 
   searchTermChanged(searchTerm: string) {
-    this.store.dispatch(new SetExperimentMetricsSearchTerm({searchTerm: searchTerm}));
+    this.store.dispatch(new SetExperimentMetricsSearchTerm({searchTerm}));
   }
 
   resetMetrics() {

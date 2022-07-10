@@ -7,18 +7,20 @@ import {GraphSettingsBarComponent} from './graph-settings-bar/graph-settings-bar
 import { MatSliderModule } from '@angular/material/slider';
 import {FormsModule} from '@angular/forms';
 import {ResizableModule} from 'angular-resizable-element';
-import {GraphDisplayerComponent} from './graph-displayer/graph-displayer.component';
+import {GraphViewerComponent} from './graph-viewer/graph-viewer.component';
 import {GraphScalarDataToMetric} from './graph-scalar-data-to-metric.pipe';
 import {GraphPlotDataToMetric} from './graph-plot-data-to-metric.pipe';
 import {SharedPipesModule} from '../pipes/shared-pipes.module';
+import { SingleValueSummaryTableComponent } from './single-value-summary-table/single-value-summary-table.component';
 
 const declarations= [
   ExperimentGraphsComponent,
   SingleGraphComponent,
   GraphSettingsBarComponent,
-  GraphDisplayerComponent,
+  GraphViewerComponent,
   GraphScalarDataToMetric,
   GraphPlotDataToMetric,
+  SingleValueSummaryTableComponent
 ];
 @NgModule({
   declarations,

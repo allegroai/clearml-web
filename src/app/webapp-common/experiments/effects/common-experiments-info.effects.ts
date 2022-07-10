@@ -176,12 +176,16 @@ export class CommonExperimentsInfoEffects {
       )
     )
   ));
+
   getPipelineStep$ = createEffect(() => this.actions$.pipe(
     ofType(commonInfoActions.getSelectedPipelineStep),
-    switchMap((action) => this.apiTasks.tasksGetByIdEx({
+    withLatestFrom(
+      this.store.select(selectRouterConfig).pipe(map(config => !!config?.includes('pipelines')))
+    ),
+    switchMap(([action, pipeline]) => this.apiTasks.tasksGetByIdEx({
       id: [action.id],
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      only_fields: PIPELINE_INFO_ONLY_FIELDS
+      only_fields: pipeline ? PIPELINE_INFO_ONLY_FIELDS : ['name', 'runtime', 'configuration', 'status']
     }).pipe(
       mergeMap((res: any) =>
         [commonInfoActions.setSelectedPipelineStep({step: res?.tasks[0]}), deactivateLoader(action.type)]
@@ -201,9 +205,9 @@ export class CommonExperimentsInfoEffects {
       this.store.select(selectExperimentsList),
       this.store.select(selectExperimentInfoData),
       this.store.select(selectAppVisible),
-      this.store.select(selectRouterConfig).pipe(map(config => !!config?.includes('pipelines')))
+      this.store.select(selectRouterConfig).pipe(map(config => !!config?.includes('pipelines') || !!config?.includes('datasets')))
     ),
-    switchMap(([action, tableSelected, selected, experiments, infoData, visible, pipelines]) => {
+    switchMap(([action, tableSelected, selected, experiments, infoData, visible, customView]) => {
       const currentSelected = tableSelected || selected;
       if (this.previousSelectedId && currentSelected?.id != this.previousSelectedId) {
         this.previousSelectedLastUpdate = null;
@@ -211,24 +215,24 @@ export class CommonExperimentsInfoEffects {
       this.previousSelectedId = currentSelected?.id;
 
       if (!infoData || !currentSelected || !visible) {
-        return of([action, null, tableSelected, selected, pipelines]);
+        return of([action, null, tableSelected, selected, customView]);
       }
 
-      const listed = experiments.find(e => e.id === currentSelected?.id);
+      const listed = experiments?.find(e => e.id === currentSelected?.id);
       return (listed ? of(listed) :
         // eslint-disable-next-line @typescript-eslint/naming-convention
         this.apiTasks.tasksGetByIdEx({id: [selected.id], only_fields: ['last_change']}).pipe(map(res => res.tasks[0])))
-        .pipe(map(task => [action, task?.last_change ?? task?.last_update, task, selected, pipelines]));
+        .pipe(map(task => [action, task?.last_change ?? task?.last_update, task, selected, customView]));
     }),
     filter(([action, , tableSelected, selected]) => (action.type !== commonInfoActions.AUTO_REFRESH_EXPERIMENT_INFO || (!tableSelected) || (tableSelected?.id === selected?.id))),
     // Can't have filter here because we need to deactivate loader
     // filter(([action, selected, updateTime]) => !selected || new Date(selected.last_change) < new Date(updateTime)),
-    switchMap(([action, updateTime, tableSelected, selected, pipelines]) => {
+    switchMap(([action, updateTime, tableSelected, selected, customView]) => {
       // else will deactivate loader
       if (!updateTime || (new Date(this.previousSelectedLastUpdate) < new Date(updateTime)) || action.type === commonInfoActions.EXPERIMENT_UPDATED_SUCCESSFULLY) {
         return [
           commonInfoActions.getExperiment({experimentId: action.payload}),
-          ...(pipelines ? [] : [commonInfoActions.getExperimentUncommittedChanges({
+          ...(customView ? [] : [commonInfoActions.getExperimentUncommittedChanges({
             experimentId: action.payload,
             autoRefresh: action.type === commonInfoActions.AUTO_REFRESH_EXPERIMENT_INFO
           })]),
@@ -251,13 +255,13 @@ export class CommonExperimentsInfoEffects {
       map(() => action))),
     withLatestFrom(
       this.store.select(selectHasDataFeature),
-      this.store.select(selectRouterConfig).pipe(map(config => !!config?.includes('pipelines')))
+      this.store.select(selectRouterConfig).pipe(map(config => !!config?.includes('pipelines') || !!config?.includes('datasets')))
     ),
-    switchMap(([action, hasDataFeature, pipeline]) =>
+    switchMap(([action, hasDataFeature, graphView]) =>
       this.apiTasks.tasksGetByIdEx({
         id: [action.experimentId],
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        only_fields: pipeline ? PIPELINE_INFO_ONLY_FIELDS : getExperimentInfoOnlyFields(hasDataFeature)
+        only_fields: graphView ? PIPELINE_INFO_ONLY_FIELDS : getExperimentInfoOnlyFields(hasDataFeature)
       })
         .pipe(
           withLatestFrom(this.store.select(selectPipelineSelectedStep)),
@@ -276,7 +280,7 @@ export class CommonExperimentsInfoEffects {
                 setBackdrop({payload: false}),
                 new DeactivateEdit(),
                 setExperimentSaving({saving: false}),
-                pipeline && selectedStep?.id ? getSelectedPipelineStep({id: selectedStep.id}) : new EmptyAction()
+                graphView && selectedStep?.id ? getSelectedPipelineStep({id: selectedStep.id}) : new EmptyAction()
               ];
             } else {
               this.router.navigate(['dashboard']);

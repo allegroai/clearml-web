@@ -1,0 +1,14 @@
+.preview-container {
+  overflow: auto;
+  height: 100%;
+}
+
+.debug-title {
+  font-size: 18px;
+  text-align: center;
+  padding: 24px;
+}
+
+.dataset-version-preview.hidden {
+  display: none;
+}

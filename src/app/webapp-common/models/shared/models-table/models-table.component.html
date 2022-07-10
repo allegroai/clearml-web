@@ -46,7 +46,7 @@
     <ng-template let-col pTemplate="cardFilter">
       <sm-table-card-filter-template [options]="filtersOptions"
                                      [value]="filtersValues"
-                                     [subValue]="filtersSubValues[MODELS_TABLE_COL_FIELDS.TAGS]"
+                                     [subValue]="filtersSubValues[modelsTableColFields.TAGS]"
                                      [columns]="initialColumns"
                                      [filterMatch]="filtersMatch"
                                      fixedOptionsSubheader="System tags"
@@ -54,13 +54,14 @@
                                      (filterChanged)="tableAllFiltersChanged($event)"
                                      (menuOpened)="columnFilterOpened($event)"
                                      (menuClosed)="columnFilterClosed($event)"
+                                     (clearAll)="clearAllFilters.emit(tableFilters)"
       ></sm-table-card-filter-template>
     </ng-template>
     <!--CHECKBOX TEMPLATE-->
     <ng-template let-col pTemplate="checkbox">
       <div class="d-flex align-items-center">
         <sm-checkbox-control
-          *ngIf="col.id === MODELS_TABLE_COL_FIELDS.SELECTED"
+          *ngIf="col.id === modelsTableColFields.SELECTED"
           class="checkbox-col header"
           [class.minimised]="minimizedView"
           fieldName="selected"
@@ -104,33 +105,33 @@
                  let-model="rowData"
                  pTemplate="body">
       <ng-container [ngSwitch]="col.id">
-        <ng-container *ngSwitchCase="MODELS_TABLE_COL_FIELDS.NAME">
+        <ng-container *ngSwitchCase="modelsTableColFields.NAME">
           <div class="d-flex flex-row flex-nowrap ellipsis">
             <div class="model-name" matTooltipPosition="above" [smTooltip]="model.name" smShowTooltipIfEllipsis>{{model.name}}</div>
             <i *ngIf="model?.system_tags.includes('shared')" class="al-icon al-ico-link sm-md ml-2"></i>
           </div>
         </ng-container>
-        <ng-container *ngSwitchCase="MODELS_TABLE_COL_FIELDS.TAGS">
+        <ng-container *ngSwitchCase="modelsTableColFields.TAGS">
           <sm-tag-list [tags]="model.tags" [sysTags]="getSysTags(model)"></sm-tag-list>
         </ng-container>
-        <ng-container *ngSwitchCase="MODELS_TABLE_COL_FIELDS.USER">
+        <ng-container *ngSwitchCase="modelsTableColFields.USER">
           <span class="ellipsis" [smTooltip]="model.user?.name ? model.user?.name : 'Unknown User'" smShowTooltipIfEllipsis>{{model.user?.name ? model.user?.name : 'Unknown User'}}</span>
         </ng-container>
-        <span matTooltipPosition="above" class="ellipsis"  smShowTooltipIfEllipsis [smTooltip]="model?.project?.name" *ngSwitchCase="MODELS_TABLE_COL_FIELDS.PROJECT">
+        <span matTooltipPosition="above" class="ellipsis"  smShowTooltipIfEllipsis [smTooltip]="model?.project?.name" *ngSwitchCase="modelsTableColFields.PROJECT">
           {{model?.project?.name}}
         </span>
-        <span *ngSwitchCase="MODELS_TABLE_COL_FIELDS.TASK" class="ellipsis" matTooltipPosition="above" [smTooltip]="model.task?.name" smShowTooltipIfEllipsis>
+        <span *ngSwitchCase="modelsTableColFields.TASK" class="ellipsis" matTooltipPosition="above" [smTooltip]="model.task?.name" smShowTooltipIfEllipsis>
           {{model.task?.name}}
         </span>
-        <ng-container *ngSwitchCase="MODELS_TABLE_COL_FIELDS.READY">
+        <ng-container *ngSwitchCase="modelsTableColFields.READY">
           <sm-experiment-status-icon-label [status]="model?.ready? 'published': 'created'"></sm-experiment-status-icon-label>
         </ng-container>
-        <ng-container *ngSwitchCase="MODELS_TABLE_COL_FIELDS.LAST_UPDATE">
+        <ng-container *ngSwitchCase="modelsTableColFields.LAST_UPDATE">
           <span class="ellipsis" matTooltipPosition="above" [smTooltip]="model.last_update | date : timeFormatString">{{model.last_update | timeAgo}}</span>
         </ng-container>
 
         <sm-checkbox-control
-          *ngSwitchCase="MODELS_TABLE_COL_FIELDS.SELECTED"
+          *ngSwitchCase="modelsTableColFields.SELECTED"
           smClickStopPropagation
           class="checkbox-col"
           fieldName="selected"
@@ -138,7 +139,7 @@
           (formDataChanged)="rowSelectedChanged($event, model)"
           inputClassName="table-check-box table-body">
         </sm-checkbox-control>
-        <ng-container *ngSwitchCase="MODELS_TABLE_COL_FIELDS.COMMENT">
+        <ng-container *ngSwitchCase="modelsTableColFields.COMMENT">
           <span class="ellipsis" smShowTooltipIfEllipsis matTooltipPosition="above" [smTooltip]="model.comment">{{model.comment}}</span>
         </ng-container>
         <ng-container *ngSwitchDefault>

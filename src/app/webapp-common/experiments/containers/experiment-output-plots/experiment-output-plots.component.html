@@ -1,26 +1,46 @@
-<div *ngIf=" !minimized" class="list-container">
-  <sm-selectable-filter-list
-    checkAllIcon="al-ico-show"
-    placeholder="Find plots"
-    [list]="plotsList"
-    [selected]="selectedGraph"
-    [checkedList]="listOfHidden | async"
-    [searchTerm]="searchTerm$ | async"
-    (itemSelect)="metricSelected($event)"
-    (hiddenChanged)="hiddenListChanged($event)"
-    (searchTermChanged)="searchTermChanged($event)"
-  >
-  </sm-selectable-filter-list>
-</div>
-<div class="graphs-container" [ngClass]="{'col-20': !minimized, 'col-24': minimized}">
-  <sm-experiment-graphs
-    [isGroupGraphs]="true"
-    [hiddenList]="listOfHidden | async"
-    [metrics]="graphs"
-    [legendStringLength]="minimized? 14 : undefined"
-    [minimized]="minimized"
-    [splitSize]="splitSize$ | async"
-    (resetGraphs)="resetMetrics()"
-  >
-  </sm-experiment-graphs>
-</div>
+<mat-drawer-container autosize>
+  <mat-drawer #drawer [opened]="!minimized && !isDatasetVersionPreview" [mode]="minimized ? 'over' : 'side'">
+    <i class="close al-icon al-ico-dialog-x sm-md" *ngIf="minimized" (click)="drawer.close()"></i>
+    <div class="list-container">
+      <sm-selectable-filter-list
+        checkAllIcon="al-ico-show"
+        placeholder="Find plots"
+        [list]="plotsList"
+        [selected]="selectedGraph"
+        [checkedList]="listOfHidden | async"
+        [searchTerm]="searchTerm$ | async"
+        (itemSelect)="metricSelected($event)"
+        (hiddenChanged)="hiddenListChanged($event)"
+        (searchTermChanged)="searchTermChanged($event)"
+      >
+      </sm-selectable-filter-list>
+    </div>
+  </mat-drawer>
+  <mat-drawer-content class="overflow-hidden">
+    <div class="graphs-container">
+      <div class="hover-button" *ngIf="minimized">
+        <button
+          class="btn btn-secondary"
+          (click)="drawer.open()"
+          smTooltip="Toggle Graphs"
+          matTooltipPosition="above"
+        >
+          <i class="al-icon al-ico-eye-outline"></i>
+        </button>
+      </div>
+      <sm-experiment-graphs
+        [class.dark-theme]="dark"
+        [disableResize]="isDatasetVersionPreview"
+        [isGroupGraphs]="true"
+        [hiddenList]="listOfHidden | async"
+        [metrics]="graphs"
+        [legendStringLength]="minimized? 14 : undefined"
+        [minimized]="minimized"
+        [splitSize]="splitSize$ | async"
+        [isDarkTheme]="dark"
+        (resetGraphs)="resetMetrics()"
+      >
+      </sm-experiment-graphs>
+    </div>
+  </mat-drawer-content>
+</mat-drawer-container>

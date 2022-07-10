@@ -17,6 +17,12 @@ export const INITIAL_CONTROLLER_TABLE_COLS: ISmCol[] = [
     disablePointerEvents: true,
   },
   {
+    id            : EXPERIMENTS_TABLE_COL_FIELDS.ID,
+    headerType    : ColHeaderTypeEnum.title,
+    header        : 'ID',
+    style         : {width: '200px'}
+  },
+  {
     id: EXPERIMENTS_TABLE_COL_FIELDS.NAME,
     headerType: ColHeaderTypeEnum.sortFilter,
     static: true,
@@ -127,7 +133,7 @@ export const PIPELINE_INFO_ONLY_FIELDS = [
   'last_change',
   'completed',
   'models.output.model.name',
-  'models.input.model.name',
+  'models.output.model.project',
   'execution.artifacts',
   'execution.queue',
   'configuration',
@@ -137,6 +143,7 @@ export const PIPELINE_INFO_ONLY_FIELDS = [
   'runtime',
   'last_metrics',
   'runtime._pipeline_hash',
+  'runtime.version',
   'models.output.model.name',
   'execution.artifacts'
 ];

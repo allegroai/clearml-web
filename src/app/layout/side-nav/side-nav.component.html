@@ -1,53 +1,67 @@
-<!-- DON'T FORGET TO ADD LINK TO 404 PAGE TOO -->
-
 <div class="side-nav">
   <div class="item logo">
     <div class="item-icon">
       <img src="assets/c-logo.svg?v=1" class="logo-a" alt="logo">
     </div>
-    <div class="caption">
-<!--      <img src="../../../assets/logo-white.png" class="logo-full">-->
-    </div>
   </div>
 
   <ng-container *ngIf="currentUser">
-    <a class="item d-block" #rlaHome="routerLinkActive" routerLink="/dashboard" routerLinkActive (click)="resetSearch()"
-      smTooltip="DASHBOARD" [matTooltipShowDelay]="0" matTooltipPosition="right">
+    <a class="item d-block"
+       routerLink="/dashboard"
+       routerLinkActive="active"
+       (click)="resetSearch()"
+       smTooltip="DASHBOARD"
+       [matTooltipShowDelay]="0"
+       matTooltipPosition="right"
+    >
       <div class="item-icon">
-        <i [class]="'al-icon al-ico-home al-color ' + (rlaHome.isActive ? 'neon-yellow': 'blue-300')" ></i>
+        <i class="al-icon al-ico-home al-color blue-300"></i>
       </div>
       <div class="caption">dashboard</div>
     </a>
 
-    <a class="item d-block" smTooltip="PROJECTS" [matTooltipShowDelay]="0" matTooltipPosition="right" routerLink="/projects"
-      [routerLinkActive] #rlaProjects="routerLinkActive">
-      <div class="item-icon">
-        <i [class]="'al-icon al-ico-projects al-color ' + (rlaProjects.isActive ? 'neon-yellow': 'blue-300')" ></i>
+    <a class="item d-block"
+       smTooltip="PROJECTS"
+       [matTooltipShowDelay]="0"
+       matTooltipPosition="right"
+       routerLink="/projects"
+       routerLinkActive="active"
+    >
+       <div class="item-icon">
+         <i class="al-icon al-ico-projects al-color blue-300"></i>
       </div>
       <div class="caption">projects</div>
     </a>
     <a class="item d-block"
+       routerLink="/datasets"
+       routerLinkActive="active"
+       smTooltip="DATASETS"
+       [matTooltipShowDelay]="0"
+       matTooltipPosition="right">
+      <div class="item-icon">
+        <i class="al-icon al-ico-datasets al-color blue-300"></i>
+      </div>
+      <div class="caption">datasets</div>
+    </a>
+    <a class="item d-block"
        routerLink="/pipelines"
-       routerLinkActive
-       #rlaDatasets="routerLinkActive"
+       routerLinkActive="active"
        smTooltip="PIPELINES"
        [matTooltipShowDelay]="0"
        matTooltipPosition="right">
       <div class="item-icon">
-        <i [class]="'al-icon al-ico-pipelines al-color ' + (rlaDatasets.isActive ? 'neon-yellow': 'blue-300')"></i>
+        <i class="al-icon al-ico-pipelines al-color blue-300"></i>
       </div>
       <div class="caption">pipelines</div>
     </a>
     <a class="item d-block"
-       *smCheckPermission="true"
        routerLink="/workers-and-queues"
-       routerLinkActive
-       #rlaQueues="routerLinkActive"
+       routerLinkActive="active"
        smTooltip="WORKERS & QUEUES"
        [matTooltipShowDelay]="0"
        matTooltipPosition="right">
       <div class="item-icon">
-        <i [class]="'al-icon al-ico-queues al-color ' + (rlaQueues.isActive ? 'neon-yellow': 'blue-300')" ></i>
+        <i class="al-icon al-ico-queues al-color blue-300"></i>
       </div>
       <div class="caption">workers & queues</div>
     </a>
@@ -66,14 +80,13 @@
       </div>
       <div class="caption">Ignite</div>
     </a>
-    <a class="item d-block" href="https://github.com/allegroai/clearml" target="_blank"
-       smTooltip="GitHub Repository"
-       [matTooltipShowDelay]="0"
-       matTooltipPosition="right">
+    <a *ngIf="environment.slackLink" class="item d-block" [href]="environment.slackLink"
+       target="_blank"
+       smTooltip="Community support on Slack" [matTooltipShowDelay]="0" matTooltipPosition="right">
       <div class="item-icon">
-        <i class="fab fa-github fa-24 al-color blue-300"></i>
+        <i class="al-icon al-ico-slack md al-color blue-300"></i>
       </div>
-      <div class="caption">GitHub</div>
+      <div class="caption">Slack</div>
     </a>
   </div>
 </div>

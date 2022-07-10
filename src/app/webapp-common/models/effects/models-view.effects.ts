@@ -27,7 +27,7 @@ import {
 } from '../../core/actions/projects.actions';
 import {setURLParams} from '../../core/actions/router.actions';
 import {selectIsArchivedMode, selectIsDeepMode, selectSelectedProject} from '../../core/reducers/projects.reducer';
-import {selectRouterConfig, selectRouterParams} from '../../core/reducers/router-reducer';
+import {selectRouterParams} from '../../core/reducers/router-reducer';
 import {selectAppVisible} from '../../core/reducers/view.reducer';
 import {addMultipleSortColumns, escapeRegex, getRouteFullUrl} from '../../shared/utils/shared-utils';
 import {GetModelInfo, RefreshModelInfo} from '../actions/models-info.actions';
@@ -48,7 +48,7 @@ import {
 } from '../../shared/utils/tableParamEncode';
 import {EmptyAction, MESSAGES_SEVERITY} from '~/app.constants';
 import {ApiProjectsService} from '~/business-logic/api-services/projects.service';
-import {ICommonSearchState} from '../../common-search/common-search.reducer';
+import {SearchState} from '../../common-search/common-search.reducer';
 import {SortMeta} from 'primeng/api';
 import {
   CountAvailableAndIsDisableSelectedFiltered,
@@ -64,9 +64,7 @@ import {ModelsGetAllExResponse} from '~/business-logic/model/models/modelsGetAll
 import {ISmCol} from '../../shared/ui-components/data/table/table.consts';
 import {hasValue} from '../../shared/utils/helpers.util';
 import {ProjectsGetModelMetadataValuesResponse} from '~/business-logic/model/projects/projectsGetModelMetadataValuesResponse';
-import * as exActions from '../../experiments/actions/common-experiments-view.actions';
-import {selectExperimentsList, selectTableMode} from '../../experiments/reducers';
-import {ITableExperiment} from '../../experiments/shared/common-experiment-model.model';
+import {selectTableMode} from '../../experiments/reducers';
 
 @Injectable()
 export class ModelsViewEffects {
@@ -149,7 +147,7 @@ export class ModelsViewEffects {
         catchError(error => [
           requestFailed(error),
           deactivateLoader('Fetch Models'),
-          setServerError(error, null, 'Fetch Models for selection failed')
+          addMessage('warn', 'Fetch Models for selection failed', [{name: 'More info', actions: [setServerError(error, null, 'Fetch Models for selection failed')]}])
         ])
       )
     )
@@ -167,7 +165,7 @@ export class ModelsViewEffects {
         ]),
         catchError(error => [
           requestFailed(error),
-          setServerError(error, null, 'Fetch frameworks failed')]
+          addMessage('warn', 'Fetch frameworks failed', [{name: 'More info', actions: [setServerError(error, null, 'Fetch frameworks failed')]}])]
         )
       )
     )
@@ -197,7 +195,7 @@ export class ModelsViewEffects {
       catchError(error => [
         requestFailed(error),
         deactivateLoader('Fetch Models'),
-        setServerError(error, null, 'Fetch tags failed')]
+        addMessage('warn', 'Fetch tags failed', [{name: 'More info', actions: [setServerError(error, null, 'Fetch tags failed')]}])]
       )
     ))
   ));
@@ -215,43 +213,52 @@ export class ModelsViewEffects {
       catchError(error => [
         requestFailed(error),
         deactivateLoader(action.type),
-        setServerError(error, null, `${action.type} failed`)]
+        addMessage('warn', '${action.type}failed', [{name: 'More info', actions: [setServerError(error, null, '${action.type} failed')]}])]
       )
     ))
   ));
 
+  lockRefresh = false;
   refreshModels = createEffect(() => this.actions$.pipe(
-    ofType<ReturnType<typeof actions.refreshModels>>(actions.refreshModels),
+    ofType(actions.refreshModels),
+    filter(() => !this.lockRefresh),
     withLatestFrom(
       this.store.select(modelsSelectors.selectCurrentScrollId),
       this.store.select(modelsSelectors.selectSelectedModel),
       this.store.select(modelsSelectors.selectModelsList),
       this.store.select(selectAppVisible)),
     filter((values) => values[4]),
-    switchMap(([action, scrollId, selectedModel, models]) => this.fetchModels$(scrollId, true)
-      .pipe(
-        mergeMap(res => {
-          const resActions: Action[] = [deactivateLoader('Fetch Models')];
-          if (selectedModel) {
-            if (action.hideLoader || action.autoRefresh) {
-              resActions.push(new RefreshModelInfo(selectedModel.id));
-            } else {
-              resActions.push(new GetModelInfo(selectedModel.id));
-            }
-          }
-          if (selectedModel && action.autoRefresh && isEqual(models.map(model => model.id).sort(), res.models.map(model => model.id).sort())) {
-            resActions.push(actions.setModelsInPlace({models: res.models}));
-          } else {
-            resActions.push(actions.setModels({models: res.models}));
-          }
-          return resActions;
-        }),
-        catchError(error => [
-          requestFailed(error),
-          deactivateLoader('Fetch Models'),
-          setServerError(error, null, 'Fetch Models failed', action.autoRefresh)
-        ])
-      )
+    switchMap(([action, scrollId, selectedModel, models]) => {
+      this.lockRefresh = !action.autoRefresh;
+      return this.fetchModels$(scrollId, true)
+          .pipe(
+            mergeMap(res => {
+              this.lockRefresh = false;
+              const resActions: Action[] = [deactivateLoader('Fetch Models')];
+              if (selectedModel) {
+                if (action.hideLoader || action.autoRefresh) {
+                  resActions.push(new RefreshModelInfo(selectedModel.id));
+                } else {
+                  resActions.push(new GetModelInfo(selectedModel.id));
+                }
+              }
+              if (selectedModel && action.autoRefresh && isEqual(models.map(model => model.id).sort(), res.models.map(model => model.id).sort())) {
+                resActions.push(actions.setModelsInPlace({models: res.models}));
+              } else {
+                resActions.push(actions.setModels({models: res.models}));
+              }
+              return resActions;
+            }),
+            catchError(error => {
+              this.lockRefresh = false;
+              return [
+                requestFailed(error),
+                deactivateLoader('Fetch Models'),
+                addMessage('warn', 'Fetch models failed', [{name: 'More info', actions: [setServerError(error, null, 'Fetch models failed')]}])
+              ];
+            })
+          );
+      }
     )
   ));
 
@@ -276,7 +283,11 @@ export class ModelsViewEffects {
             deactivateLoader('Fetch Models'),
           ];
         }),
-        catchError(error => [requestFailed(error), deactivateLoader('Fetch Models'), setServerError(error, null, 'Fetch Models failed')])
+        catchError(error => [
+          requestFailed(error),
+          deactivateLoader('Fetch Models'),
+          addMessage('warn', 'Fetch models failed', [{name: 'More info', actions: [setServerError(error, null, 'Fetch models failed')]}])
+        ])
       )
     )
   ));
@@ -306,7 +317,11 @@ export class ModelsViewEffects {
       );
     }),
     switchMap(models => [actions.setSelectedModels({models}), deactivateLoader('Fetch Models')]),
-    catchError(error => [requestFailed(error), deactivateLoader('Fetch Models'), setServerError(error, null, 'Fetch Models failed')])
+    catchError(error => [
+      requestFailed(error),
+      deactivateLoader('Fetch Models'),
+      addMessage('warn', 'Fetch models failed', [{name: 'More info', actions: [setServerError(error, null, 'Fetch models failed')]}])
+    ])
   ));
 
   updateModelsUrlParams = createEffect(() => this.actions$.pipe(
@@ -345,8 +360,8 @@ export class ModelsViewEffects {
       this.store.select(selectRouterParams).pipe(map(params => get('projectId', params))),
       this.store.select(selectTableMode)
     ),
-    filter(([action, models, projectId, tableMode])=>tableMode==='info'),
-    tap(([action, models, projectId]) => this.navigateAfterModelSelectionChanged(models[0] as SelectedModel, projectId)),
+    filter(([, , , tableMode])=>tableMode==='info'),
+    tap(([, models, projectId]) => this.navigateAfterModelSelectionChanged(models[0] as SelectedModel, projectId)),
     mergeMap(() => [actions.setTableMode({mode: 'info'})])
   ));
 
@@ -375,7 +390,7 @@ export class ModelsViewEffects {
     refreshScroll?: boolean;
     scrollId?: string;
     projectId: string;
-    searchQuery: ICommonSearchState['searchQuery'];
+    searchQuery: SearchState['searchQuery'];
     archived: boolean;
     orderFields: SortMeta[];
     filters: { [key: string]: FilterMetadata };

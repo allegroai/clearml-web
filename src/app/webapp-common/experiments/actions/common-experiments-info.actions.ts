@@ -128,12 +128,12 @@ export const getPipelineConfigurationObj = createAction(
 
 export const getSelectedPipelineStep = createAction(
   EXPERIMENTS_INFO_PREFIX + 'GET_PIPELINE_STEP',
-  props<{ id:string }>()
+  props<{ id: string }>()
 );
 
 export const setSelectedPipelineStep = createAction(
   EXPERIMENTS_INFO_PREFIX + 'SET_PIPELINE_STEP',
-  props<{ step:IExperimentInfo }>()
+  props<{ step: IExperimentInfo }>()
 );
 
 export const updateExperimentAtPath = createAction(

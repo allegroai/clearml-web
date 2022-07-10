@@ -18,6 +18,7 @@ export interface UsersState {
   workspaces: GetCurrentUserResponseUserObjectCompany[];
   showOnlyUserWork: boolean;
   serverVersions: { server: string; api: string };
+  gettingStarted: any;
 }
 
 export const initUsers: UsersState = {
@@ -28,6 +29,7 @@ export const initUsers: UsersState = {
   workspaces: [],
   showOnlyUserWork: false,
   serverVersions: null,
+  gettingStarted: null
 };
 
 export const users = state => state.users as UsersState;
@@ -39,6 +41,7 @@ export const selectSelectedWorkspaceTab = createSelector(users, state => state.s
 export const selectWorkspaces = createSelector(users, state => state.workspaces);
 export const selectShowOnlyUserWork = createSelector(users, state => state.showOnlyUserWork);
 export const selectServerVersions = createSelector(users, state  => state.serverVersions);
+export const selectGettingStarted = createSelector(users, state => state.gettingStarted);
 
 export const usersReducerFunctions = [
   on(fetchCurrentUser, state => ({...state})),

@@ -5,6 +5,7 @@ import {sortBy, reverse} from 'lodash/fp';
 import {LOG_BATCH_SIZE} from '../shared/common-experiments.const';
 import {MetricsPlotEvent} from '~/business-logic/model/events/metricsPlotEvent';
 import {ExtFrame} from '@common/shared/experiment-graphs/single-graph/plotly-graph-base';
+import { EventsGetTaskSingleValueMetricsResponseValues } from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponseValues';
 
 export type GroupByCharts = 'metric' | 'none';
 
@@ -34,7 +35,6 @@ export interface HistogramCharts {
   [metric: string]: { [variant: string]: SeriesData };
 }
 
-
 export interface CommonExperimentOutputState {
   metricsMultiScalarsCharts: any;
   metricsHistogramCharts: HistogramCharts;
@@ -51,6 +51,12 @@ export interface CommonExperimentOutputState {
   searchTerm: string;
   logFilter: string;
   showSettings: boolean;
+  minMaxIterations: { minIteration: number; maxIteration: number };
+  currentPlotViewer: any;
+  scalarSingleValue: Array<EventsGetTaskSingleValueMetricsResponseValues>;
+  plotViewerScrollId: string;
+  plotViewerEndOfTime: boolean;
+  plotViewerBeginningOfTime: boolean;
 }
 
 export interface ExperimentSettings {
@@ -80,9 +86,15 @@ export const initialCommonExperimentOutputState: CommonExperimentOutputState = {
   totalLogLines: null,
   beginningOfLog: false,
   settingsList: [],
+  scalarSingleValue:[],
   searchTerm: '',
   logFilter: null,
-  showSettings: false
+  showSettings: false,
+  currentPlotViewer: null,
+  minMaxIterations: null,
+  plotViewerScrollId: null,
+  plotViewerEndOfTime: null,
+  plotViewerBeginningOfTime: null
 };
 
 export function commonExperimentOutputReducer(state = initialCommonExperimentOutputState, action): CommonExperimentOutputState {
@@ -98,7 +110,14 @@ export function commonExperimentOutputReducer(state = initialCommonExperimentOut
     case actions.setGraphDisplayFullDetailsScalars.type:
       return {...state, fullScreenDetailedChart: action.data};
     case actions.setGraphDisplayFullDetailsScalarsIsOpen.type:
-      return {...state, isFullScreenOpen: action.isOpen};
+      return {
+        ...state,
+        isFullScreenOpen: action.isOpen,
+        fullScreenDetailedChart: null,
+        currentPlotViewer: null,
+        plotViewerScrollId: null,
+        minMaxIterations: null
+      };
     case actions.getGraphDisplayFullDetailsScalars.type:
       return {...state, fetchingFullScreenData: true};
     case actions.setXtypeGraphDisplayFullDetailsScalars.type:
@@ -146,11 +165,23 @@ export function commonExperimentOutputReducer(state = initialCommonExperimentOut
       return {...state, metricsHistogramCharts: action.payload, cachedAxisType: action.axisType};
     case actions.SET_EXPERIMENT_PLOTS:
       return {...state, metricsPlotsCharts: action.payload};
+    case actions.setCurrentPlot.type:
+      return {...state, currentPlotViewer: action.event};
+    case actions.setExperimentScalarSingleValue.type:
+      return {...state, scalarSingleValue: action.values};
+    case actions.setPlotIterations.type:
+      return {...state, minMaxIterations: {minIteration: action.min_iteration, maxIteration: action.max_iteration}};
+    case actions.setPlotViewerScrollId.type:
+      return {...state, plotViewerScrollId: action.scrollId};
+    case actions.setViewerEndOfTime.type:
+      return {...state, plotViewerEndOfTime: action.endOfTime};
+    case actions.setViewerBeginningOfTime.type:
+      return {...state, plotViewerBeginningOfTime: action.beginningOfTime};
     case actions.UPDATE_EXPERIMENT_SETTINGS: {
       let newSettings: ExperimentSettings[];
       const changes = {...action.payload.changes, lastModified: (new Date()).getTime()} as ExperimentSettings;
       const experimentExists = state.settingsList.find(setting => setting.id === action.payload.id);
-      const discardBefore = new Date()
+      const discardBefore = new Date();
       discardBefore.setMonth(discardBefore.getMonth() - 6);
       if (experimentExists) {
         newSettings = state.settingsList

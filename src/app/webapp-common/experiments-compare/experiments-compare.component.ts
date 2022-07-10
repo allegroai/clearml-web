@@ -6,6 +6,7 @@ import {ActivatedRoute, Params, Router} from '@angular/router';
 import {selectNavigationPreferences} from './reducers';
 import {debounceTime} from 'rxjs/operators';
 import {setNavigationPreferences} from './actions/compare-header.actions';
+import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 
 @Component({
   selector: 'sm-experiments-compare',
@@ -17,6 +18,7 @@ export class ExperimentsCompareComponent implements OnInit, OnDestroy {
   private queryParams$: Subscription;
   private navigationPreferences$: Subscription;
   private queryParams: Params;
+  public entityType: EntityTypeEnum;
 
   constructor(private store: Store<any>, private router: Router, private activatedRoute: ActivatedRoute) {
     // updating URL with store query params
@@ -31,6 +33,8 @@ export class ExperimentsCompareComponent implements OnInit, OnDestroy {
     });
 
     this.queryParams$ = this.store.select(selectRouterQueryParams).subscribe((queryParams) => this.queryParams = queryParams);
+
+    this.entityType = this.activatedRoute.snapshot.data.entityType;
   }
 
   ngOnDestroy(): void {

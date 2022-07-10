@@ -1,4 +1,4 @@
-import {Component, OnDestroy, ViewChild} from '@angular/core';
+import {Component, ViewChild} from '@angular/core';
 import {ExperimentsComponent} from '@common/experiments/experiments.component';
 import {Store} from '@ngrx/store';
 import {IExperimentsViewState} from '~/features/experiments/reducers/experiments-view.reducer';
@@ -26,13 +26,14 @@ import {AbortFooterItem} from '@common/shared/entity-page/footer-items/abort-foo
 import { removeTag } from '@common/experiments/actions/common-experiments-menu.actions';
 import {ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
 import {RefreshService} from '@common/core/services/refresh.service';
+import {DeleteFooterItem} from '@common/shared/entity-page/footer-items/delete-footer-item';
 
 @Component({
   selector: 'sm-controllers',
   templateUrl: './controllers.component.html',
   styleUrls: ['./controllers.component.scss']
 })
-export class ControllersComponent extends ExperimentsComponent implements OnDestroy {
+export class ControllersComponent extends ExperimentsComponent {
 
   @ViewChild('contextMenu') contextMenu: PipelineControllerMenuComponent;
   @ViewChild(SplitComponent) split: SplitComponent;
@@ -43,15 +44,11 @@ export class ControllersComponent extends ExperimentsComponent implements OnDest
               protected route: ActivatedRoute,
               protected router: Router,
               protected dialog: MatDialog,
-              protected refresh:RefreshService
+              protected refresh: RefreshService
   ) {
     super(store, syncSelector, route, router, dialog, refresh);
     this.tableCols = INITIAL_CONTROLLER_TABLE_COLS;
     this.entityType = EntityTypeEnum.controller;
-  }
-
-  ngOnDestroy() {
-    super.ngOnDestroy();
   }
 
   createFooterItems(config: {
@@ -70,18 +67,18 @@ export class ControllersComponent extends ExperimentsComponent implements OnDest
       new CompareFooterItem(config.entitiesType),
       new DividerFooterItem(),
       new ArchiveFooterItem(config.entitiesType),
+      new DeleteFooterItem(),
       new AbortFooterItem(config.entitiesType),
       new DividerFooterItem(),
-
       new SelectedTagsFooterItem(config.entitiesType),
       new HasReadOnlyFooterItem()
     ];
   }
 
-  onFooterHandler({emitValue, item}) {
+  onFooterHandler({emitValue, item}, entityType?) {
     switch (item.id) {
       case MenuItems.delete:
-        this.contextMenu.deleteExperimentPopup(EntityTypeEnum.controller, true);
+        this.contextMenu.deleteExperimentPopup(entityType || EntityTypeEnum.controller, true);
         break;
       case MenuItems.abort:
         this.contextMenu.abortControllerPopup();
@@ -96,7 +93,7 @@ export class ControllersComponent extends ExperimentsComponent implements OnDest
   }
 
   newRun() {
-    this.contextMenu.runPipelineController(true)
+    this.contextMenu.runPipelineController(true);
   }
 
   removeTag({experiment, tag}: {experiment: ISelectedExperiment; tag: string}) {

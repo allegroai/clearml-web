@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {Action, Store} from '@ngrx/store';
-import {cloneDeep, flatten, get, getOr, isEqual} from 'lodash/fp';
+import {cloneDeep, flatten, get, isEqual} from 'lodash/fp';
 import {EMPTY, Observable, of} from 'rxjs';
 import {
   auditTime,
@@ -26,7 +26,11 @@ import {excludeTypes, EXPERIMENTS_TABLE_COL_FIELDS} from '~/features/experiments
 import {requestFailed} from '../../core/actions/http.actions';
 import {activeLoader, addMessage, deactivateLoader, setServerError} from '../../core/actions/layout.actions';
 import {setURLParams} from '../../core/actions/router.actions';
-import {selectIsArchivedMode, selectIsDeepMode, selectSelectedProject} from '../../core/reducers/projects.reducer';
+import {
+  selectIsArchivedMode,
+  selectIsDeepMode,
+  selectSelectedProject
+} from '../../core/reducers/projects.reducer';
 import {selectRouterConfig, selectRouterParams} from '../../core/reducers/router-reducer';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {ISmCol} from '../../shared/ui-components/data/table/table.consts';
@@ -52,7 +56,7 @@ import {EmptyAction, MESSAGES_SEVERITY} from '~/app.constants';
 import {selectExperimentsList, selectTableFilters, selectTableMode} from '../reducers';
 import {ProjectsGetTaskParentsResponse} from '~/business-logic/model/projects/projectsGetTaskParentsResponse';
 import {ProjectsGetTaskParentsRequest} from '~/business-logic/model/projects/projectsGetTaskParentsRequest';
-import {ICommonSearchState} from '../../common-search/common-search.reducer';
+import {SearchState} from '../../common-search/common-search.reducer';
 import {SortMeta} from 'primeng/api';
 import {hasValue} from '../../shared/utils/helpers.util';
 import {ProjectsGetHyperParametersResponse} from '~/business-logic/model/projects/projectsGetHyperParametersResponse';
@@ -75,10 +79,9 @@ import {
 } from '../../shared/entity-page/items.utils';
 import {MINIMUM_ONLY_FIELDS} from '../experiment.consts';
 import {ProjectsGetHyperparamValuesResponse} from '~/business-logic/model/projects/projectsGetHyperparamValuesResponse';
-import {selectShowHidden} from '~/features/projects/projects.reducer';
 import {TasksGetAllExRequest} from '~/business-logic/model/tasks/tasksGetAllExRequest';
 import {TasksGetAllExResponse} from '~/business-logic/model/tasks/tasksGetAllExResponse';
-import {selectIsCompare, selectIsPipelines} from '../../experiments-compare/reducers';
+import {selectIsCompare, selectIsDatasets, selectIsPipelines} from '../../experiments-compare/reducers';
 import {
   compareAddDialogTableSortChanged,
   compareAddTableClearAllFilters,
@@ -87,6 +90,8 @@ import {
 } from '../../experiments-compare/actions/compare-header.actions';
 import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
 import {getFilteredUsers, setProjectUsers} from '@common/core/actions/projects.actions';
+import {selectTableRefreshList} from '../reducers/index';
+import {selectShowHidden} from '@common/projects/common-projects.reducer';
 
 
 @Injectable()
@@ -160,46 +165,75 @@ export class CommonExperimentsViewEffects {
         catchError(error => [
           requestFailed(error),
           deactivateLoader(action.type),
-          setServerError(error, null, 'Fetch Experiments failed', getOr(false, 'payload.autoRefresh', action))
+          addMessage('warn', 'Fetch Experiments failed', [{name: 'More info', actions: [setServerError(error, null, 'Fetch Experiments failed')]}])
         ])
       )
     )
   ));
 
+  lockRefresh = false;
   refreshExperiments = createEffect(() => this.actions$.pipe(
     ofType<ReturnType<typeof exActions.refreshExperiments>>(exActions.refreshExperiments),
+    filter(() => !this.lockRefresh),
     withLatestFrom(
       this.store.select(exSelectors.selectCurrentScrollId),
       this.store.select(selectSelectedExperiment),
-      this.store.select(selectExperimentsList)
+      this.store.select(selectExperimentsList),
+      this.store.select(selectTableRefreshList)
     ),
-    switchMap(([action, currentScrollId, selectedExperiment, experiments]) => this.fetchExperiments$(currentScrollId, true)
-      .pipe(
-        mergeMap(res => {
-          res.tasks = convertStopToComplete(res.tasks);
-          const actions: Action[] = [deactivateLoader(action.type)];
-          if (selectedExperiment && action.autoRefresh && isEqual(experiments.map(exp => exp.id).sort(), res.tasks.map(exp => exp.id).sort())) {
-            actions.push(exActions.setExperimentInPlace({experiments: res.tasks as ITableExperiment[]}));
-          } else {
-            // SetExperiments must be before GetExperimentInfo!
-            actions.push(exActions.setExperiments({experiments: res.tasks as ITableExperiment[], noPreferences: true}));
-          }
-          if (selectedExperiment) {
-            if (action.autoRefresh) {
-              actions.push(new AutoRefreshExperimentInfo(selectedExperiment.id));
-            } else {
-              // SetExperiments must be before GetExperimentInfo!
-              actions.push(new GetExperimentInfo(selectedExperiment.id));
-            }
-          }
-          return actions;
-        }),
-        catchError(error => [
-          requestFailed(error),
-          deactivateLoader(action.type),
-          setServerError(error, null, 'Fetch Experiments failed', action.autoRefresh)
-        ])
-      )
+    switchMap(([action, currentScrollId, selectedExperiment, experiments, refreshPending]) => {
+        this.lockRefresh = !action.autoRefresh;
+        return this.fetchExperiments$(currentScrollId, true)
+          .pipe(
+            mergeMap(res => {
+              res.tasks = convertStopToComplete(res.tasks);
+              this.lockRefresh = false;
+              const actions: Action[] = [deactivateLoader(action.type)];
+              if (refreshPending) {
+                return [
+                  exActions.getExperimentsWithPageSize({pageSize: experiments.length}),
+                  exActions.setTableRefreshPending({refresh: false}),
+                  deactivateLoader(action.type)
+                ];
+              }
+              if (res.scroll_id !== currentScrollId) {
+                actions.push(
+                  exActions.setCurrentScrollId({scrollId: res.scroll_id}),
+                  exActions.setNoMoreExperiments({payload: (res.tasks.length < EXPERIMENTS_PAGE_SIZE)}));
+                if (!action.autoRefresh) {
+                  actions.push(
+                    addMessage(MESSAGES_SEVERITY.WARN, 'Session expired'),
+                    exActions.setTableRefreshPending({refresh: true}));
+                }
+              }
+              if (action.autoRefresh) {
+                if (selectedExperiment && isEqual(experiments.map(exp => exp.id).sort(), res.tasks.map(exp => exp.id).sort())) {
+                  actions.push(exActions.setExperimentInPlace({experiments: res.tasks as ITableExperiment[]}));
+                } else {
+                  // SetExperiments must be before GetExperimentInfo!
+                  actions.push(exActions.setExperiments({experiments: res.tasks as ITableExperiment[], noPreferences: true}));
+                }
+              }
+              if (selectedExperiment) {
+                if (action.autoRefresh) {
+                  actions.push(new AutoRefreshExperimentInfo(selectedExperiment.id));
+                } else {
+                  // SetExperiments must be before GetExperimentInfo!
+                  actions.push(new GetExperimentInfo(selectedExperiment.id));
+                }
+              }
+              return actions;
+            }),
+            catchError(error => {
+              this.lockRefresh = false;
+              return [
+                requestFailed(error),
+                deactivateLoader(action.type),
+                addMessage('warn', 'Fetch Experiments failed', [{name: 'More info', actions: [setServerError(error, null, 'Fetch Experiments failed')]}])
+              ];
+            })
+          );
+      }
     )
   ));
 
@@ -207,15 +241,23 @@ export class CommonExperimentsViewEffects {
     ofType(exActions.getNextExperiments),
     withLatestFrom(
       this.store.select(exSelectors.selectCurrentScrollId),
-      this.store.select(selectExperimentsList)
+      this.store.select(selectExperimentsList),
+      this.store.select(selectTableRefreshList)
     ),
-    switchMap(([action, scrollId, tasks]) => this.fetchExperiments$(scrollId)
+    switchMap(([action, scrollId, tasks, refreshPending]) => this.fetchExperiments$(scrollId)
       .pipe(
         mergeMap(res => {
+          if (refreshPending) {
+            return [
+              exActions.getExperimentsWithPageSize({pageSize: tasks.length}),
+              exActions.setTableRefreshPending({refresh: false}),
+              deactivateLoader(action.type)
+            ];
+          }
           res.tasks = convertStopToComplete(res.tasks);
           const addTasksAction = scrollId === res.scroll_id
             ? [exActions.addExperiments({experiments: res.tasks as ITableExperiment[]})]
-            : [exActions.getExperimentsWithPageSize({pageSize: tasks.length}), addMessage(MESSAGES_SEVERITY.WARN, 'Session expired')];
+            : [exActions.setTableRefreshPending({refresh: true}), addMessage(MESSAGES_SEVERITY.WARN, 'Session expired')];
 
           return [
             exActions.setNoMoreExperiments({payload: (res.tasks.length < EXPERIMENTS_PAGE_SIZE)}),
@@ -225,7 +267,10 @@ export class CommonExperimentsViewEffects {
           ];
         }),
         catchError(error => [
-          requestFailed(error), deactivateLoader(action.type), setServerError(error, null, 'Fetch Experiments failed')])
+          requestFailed(error),
+          deactivateLoader(action.type),
+          addMessage('warn', 'Fetch Experiments failed', [{name: 'More info', actions: [setServerError(error, null, 'Fetch Experiments failed')]}])
+        ])
       )
     )
   ));
@@ -245,8 +290,8 @@ export class CommonExperimentsViewEffects {
       this.store.select(selectRouterParams).pipe(map(params => get('projectId', params))),
       this.store.select(selectTableMode)
     ),
-    filter(([action, routeConfig, tasks, projectId, tableMode]) => tableMode === 'info'),
-    tap(([action, routeConfig, tasks, projectId]) => this.navigateAfterExperimentSelectionChanged(tasks[0] as ITableExperiment, projectId, routeConfig)),
+    filter(([, , , , tableMode]) => tableMode === 'info'),
+    tap(([, routeConfig, tasks, projectId]) => this.navigateAfterExperimentSelectionChanged(tasks[0] as ITableExperiment, projectId, routeConfig)),
     mergeMap(() => [exActions.setTableMode({mode: 'info'})])
   ));
 
@@ -278,7 +323,7 @@ export class CommonExperimentsViewEffects {
       catchError(error => [
         requestFailed(error),
         deactivateLoader(action.type),
-        setServerError(error, null, 'Fetch types failed')]
+        addMessage('warn', 'Fetch types failed', [{name: 'More info', actions: [setServerError(error, null, 'Fetch types failed')]}])]
       )
     ))));
 
@@ -293,7 +338,7 @@ export class CommonExperimentsViewEffects {
     }),
     catchError(error => [
       requestFailed(error),
-      setServerError(error, null, 'Fetch users failed')]
+      addMessage('warn', 'Fetch users failed', [{name: 'More info', actions: [setServerError(error, null, 'Fetch users failed')]}])]
     )
   ));
 
@@ -322,8 +367,9 @@ export class CommonExperimentsViewEffects {
         );
       }),
       catchError(error => [
-        requestFailed(error),
-        setServerError(error, null, 'Fetch parents failed')]
+          requestFailed(error),
+          addMessage('warn', 'Fetch parents failed', [{name: 'More info', actions: [setServerError(error, null, 'Fetch parents failed')]}])
+        ]
       )
     ))
   ));
@@ -346,7 +392,7 @@ export class CommonExperimentsViewEffects {
           catchError(error => [
             requestFailed(error),
             deactivateLoader(action.type),
-            setServerError(error, null, 'Fetch custom metrics failed'),
+            addMessage('warn', 'Fetch custom metrics failed', [{name: 'More info', actions: [setServerError(error, null, 'Fetch custom metrics failed')]}]),
             exActions.setCustomHyperParams({params: []})])
         )
     )
@@ -368,6 +414,7 @@ export class CommonExperimentsViewEffects {
           catchError(error => [
             requestFailed(error),
             deactivateLoader(action.type),
+            addMessage('warn', 'Fetch hyper parameters failed', [{name: 'More info', actions: [setServerError(error, null, 'Fetch hyper parameters failed')]}]),
             setServerError(error, null, 'Fetch hyper parameters failed'),
             exActions.setCustomHyperParams({params: []})])
         )
@@ -407,8 +454,9 @@ export class CommonExperimentsViewEffects {
       this.store.select(selectIsDeepMode),
       this.store.select(selectShowHidden),
       this.store.select(selectIsPipelines),
+      this.store.select(selectIsDatasets),
     ),
-    switchMap(([action, projectId, archived, globalSearch, tableFilters, deep, showHidden, isPipeline]) => {
+    switchMap(([action, projectId, archived, globalSearch, tableFilters, deep, showHidden, isPipeline, isDataset]) => {
       const pageSize = 5000;
       const query = this.getGetAllQuery({
         projectId,
@@ -419,7 +467,8 @@ export class CommonExperimentsViewEffects {
         deep,
         showHidden,
         pageSize,
-        isPipeline
+        isPipeline,
+        isDataset
       });
       query.only_fields = [EXPERIMENTS_TABLE_COL_FIELDS.NAME, EXPERIMENTS_TABLE_COL_FIELDS.PARENT,
         EXPERIMENTS_TABLE_COL_FIELDS.STATUS, EXPERIMENTS_TABLE_COL_FIELDS.TYPE, 'company.id', 'system_tags'];
@@ -469,7 +518,7 @@ export class CommonExperimentsViewEffects {
   ));
 
   navigateAfterExperimentSelectionChanged(selectedExperiment: ITableExperiment, experimentProject: string, routeConfig: string[]) {
-    const module = routeConfig.includes('pipelines') ? 'pipelines' : 'projects';
+    const module = routeConfig.includes('datasets') ? 'datasets/simple' : routeConfig.includes('pipelines') ? 'pipelines' : 'projects';
     // wow angular really suck...
     const activeChild = get('firstChild.firstChild.firstChild.firstChild.firstChild.firstChild', this.route);
     const activeChildUrl = activeChild ? getRouteFullUrl(activeChild) : '';
@@ -496,12 +545,13 @@ export class CommonExperimentsViewEffects {
                    showHidden = false,
                    isCompare,
                    isPipeline = false,
+                   isDataset = false,
                    pageSize = EXPERIMENTS_PAGE_SIZE
                  }: {
     refreshScroll?: boolean;
     scrollId?: string;
     projectId: string;
-    searchQuery?: ICommonSearchState['searchQuery'];
+    searchQuery?: SearchState['searchQuery'];
     archived: boolean;
     orderFields?: SortMeta[];
     tableFilters: { [columnId: string]: FilterMetadata };
@@ -512,6 +562,7 @@ export class CommonExperimentsViewEffects {
     showHidden?: boolean;
     isCompare?: boolean;
     isPipeline?: boolean;
+    isDataset?: boolean;
     pageSize?: number;
   }): TasksGetAllExRequest {
     const projectFilter = get([EXPERIMENTS_TABLE_COL_FIELDS.PROJECT, 'value'], tableFilters);
@@ -522,8 +573,10 @@ export class CommonExperimentsViewEffects {
     const tagsFilterAnd = tableFilters?.[EXPERIMENTS_TABLE_COL_FIELDS.TAGS]?.matchMode === 'AND';
     const parentFilter = get([EXPERIMENTS_TABLE_COL_FIELDS.PARENT, 'value'], tableFilters);
     const systemTags = get(['system_tags', 'value'], tableFilters);
+
     const systemTagsFilter = (archived ? ['__$and', MODEL_TAGS.HIDDEN] : ['__$and', '__$not', MODEL_TAGS.HIDDEN])
-      .concat(systemTags ? systemTags : []).concat((isPipeline || showHidden) ? [] : ['__$not', 'pipeline']);
+      .concat(systemTags ? systemTags : []).concat((isPipeline || isDataset || showHidden) ? [] : ['__$not', 'pipeline'])
+      .concat(isDataset? ['dataset']: []);
 
     let filters = createFiltersFromStore(tableFilters, true);
     filters = Object.keys(filters).reduce((acc, colId) => {
@@ -549,7 +602,7 @@ export class CommonExperimentsViewEffects {
     const colsFilters = flatten(cols.filter(col => col.id !== 'selected' && !col.hidden).map(col => col.getter || col.id));
     const metricColsFilters = metricCols ? flatten(metricCols.map(col => col.getter || col.id)) : [];
     const only_fields = [...new Set([...MINIMUM_ONLY_FIELDS, ...colsFilters, ...metricColsFilters]
-      .concat(isPipeline ? ['runtime._pipeline_hash', 'execution.queue', 'type', 'hyperparams.properties.version'] : []))];
+      .concat(isPipeline || isDataset ? ['runtime._pipeline_hash', 'runtime.version', 'execution.queue', 'type', 'hyperparams.properties.version'] : []))];
     return {
       ...filters,
       id: selectedIds,
@@ -565,7 +618,7 @@ export class CommonExperimentsViewEffects {
       size: pageSize,
       order_by: encodeOrder(orderFields),
       status: (statusFilter && statusFilter.length > 0) ? statusFilter : undefined,
-      type: isPipeline ? [TaskTypeEnum.Controller] : (typeFilter?.length > 0) ? typeFilter : excludeTypes,
+      type: isPipeline ? [TaskTypeEnum.Controller] : isDataset ? [TaskTypeEnum.DataProcessing] : (typeFilter?.length > 0) ? typeFilter : excludeTypes,
       user: (userFilter?.length > 0) ? userFilter : [],
       ...(parentFilter?.length > 0 && {parent: parentFilter}),
       ...(systemTagsFilter?.length > 0 && {system_tags: systemTagsFilter}),
@@ -593,10 +646,11 @@ export class CommonExperimentsViewEffects {
           this.store.select(selectShowHidden),
           this.store.select(selectIsCompare),
           this.store.select(selectIsPipelines),
+          this.store.select(selectIsDatasets),
         ),
         switchMap(([
                      scrollId, projectId, isArchived, gb, orderFields, filters, selectedExperiments,
-                     showAllSelectedIsActive, cols, metricCols, deep, showHidden, isCompare, isPipeline
+                     showAllSelectedIsActive, cols, metricCols, deep, showHidden, isCompare, isPipeline, isDataset
                    ]) => {
           const tableFilters = cloneDeep(filters) || {} as { [key: string]: FilterMetadata };
           if (tableFilters && tableFilters.status && tableFilters.status.value.includes('completed')) {
@@ -605,7 +659,7 @@ export class CommonExperimentsViewEffects {
           const selectedIds = showAllSelectedIsActive ? selectedExperiments.map(exp => exp.id) : [];
           return this.apiTasks.tasksGetAllEx(this.getGetAllQuery({
             refreshScroll, scrollId, projectId, searchQuery: gb, archived: isArchived, orderFields,
-            tableFilters, selectedIds, cols, metricCols, deep, showHidden, isCompare, isPipeline, pageSize
+            tableFilters, selectedIds, cols, metricCols, deep, showHidden, isCompare, isPipeline, pageSize, isDataset
           }));
         })
       );
@@ -628,7 +682,7 @@ export class CommonExperimentsViewEffects {
       catchError(error => [
         requestFailed(error),
         deactivateLoader(action.type),
-        setServerError(error, null, 'Fetch tags failed')]
+        addMessage('warn', 'Fetch tags failed', [{name: 'More info', actions: [setServerError(error, null, 'Fetch tags failed')]}])]
       )
     ))
   ));

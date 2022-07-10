@@ -94,7 +94,7 @@ import { GetVariantWithoutRoundPipe } from './dumb/experiments-table/hyper-param
     ExperimentInfoHeaderComponent,
     ExperimentExecutionSourceCodeComponent,
     SelectMetricForCustomColComponent,
-    ExperimentExecutionParametersComponent, ExperimentsTableComponent, ExperimentHeaderComponent],
+    ExperimentExecutionParametersComponent, ExperimentsTableComponent, ExperimentHeaderComponent, ExperimentOutputPlotsComponent],
   imports: [
     AngularSplitModule,
     ScrollingModule,

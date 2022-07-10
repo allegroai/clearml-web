@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, ElementRef, EventEmitter, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {ChangeDetectorRef, Component, ElementRef, EventEmitter, Inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {select, Store} from '@ngrx/store';
 import {
   compareAddDialogTableSortChanged,
@@ -19,7 +19,7 @@ import {Params} from '@angular/router';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {distinctUntilChanged, distinctUntilKeyChanged, filter, map} from 'rxjs/operators';
 import {compareLimitations} from '@common/shared/entity-page/footer-items/compare-footer-item';
-import {MatDialogRef} from '@angular/material/dialog';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {ITableExperiment} from '@common/experiments/shared/common-experiment-model.model';
 import {
   selectActiveParentsFilter,
@@ -37,7 +37,7 @@ import {
 import {get, isEqual, unionBy} from 'lodash/fp';
 import {ColHeaderTypeEnum, ISmCol, TableSortOrderEnum} from '@common/shared/ui-components/data/table/table.consts';
 import {filterArchivedExperiments} from '@common/experiments/shared/common-experiments.utils';
-import {InitSearch} from '@common/common-search/common-search.actions';
+import {initSearch} from '@common/common-search/common-search.actions';
 import * as experimentsActions from '../../../experiments/actions/common-experiments-view.actions';
 import {resetExperiments, resetGlobalFilter} from '@common/experiments/actions/common-experiments-view.actions';
 import {User} from '~/business-logic/model/users/user';
@@ -103,7 +103,8 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
     private store: Store<any>,
     private eRef: ElementRef,
     private changedDetectRef: ChangeDetectorRef,
-    public dialogRef: MatDialogRef<SelectExperimentsForCompareComponent>
+    public dialogRef: MatDialogRef<SelectExperimentsForCompareComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: {entityType: EntityTypeEnum}
   ) {
     this.resizedCols$.next(this._resizedCols);
     this.experimentsResults$ = this.store.pipe(select(selectSelectedExperimentsForCompareAdd));
@@ -169,7 +170,7 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
   }
 
   syncAppSearch() {
-    this.store.dispatch(new InitSearch('Search for experiments'));
+    this.store.dispatch(initSearch({payload: 'Search for experiments'}));
     this.store.dispatch(experimentsActions.getExperiments());
   }
 

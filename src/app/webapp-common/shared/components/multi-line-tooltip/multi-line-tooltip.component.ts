@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, Input, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
 
 @Component({
   selector: 'sm-multi-line-tooltip',
@@ -9,7 +9,4 @@ import {ChangeDetectionStrategy, Component, Input, OnInit} from '@angular/core';
 export class MultiLineTooltipComponent {
   @Input() infoData: any;
   @Input() iconClass: string;
-
-  constructor() {
-  }
 }

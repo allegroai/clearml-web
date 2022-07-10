@@ -1,0 +1,29 @@
+{
+  "onboarding": [
+    {
+      "title": "Persistent custom views",
+      "image": "assets/welcome-researcher.svg",
+      "content": "Your view customizations (e.g. column choice, column order, sorting) is also specified in the browser URL bar.<br/><br/>Bookmark the page to easily save your favorite view, or send your team members the URL link so they can share the same view as yours.",
+      "context": ""
+    },
+    {
+      "title": "Creating a new experiment",
+      "image": "assets/welcome-cat.svg",
+      "content": "Clone any task to create a draft copy using right-click or the task context menu.<br/><br/>Reproduce the original run by executing the copy, or modify any element of the new draft to try out a new approach.",
+      "context": "",
+      "feature": "experiments"
+    },
+    {
+      "title": "Comparing experiments",
+      "image": "assets/welcome-researcher.svg",
+      "content": "Select the experiments you want to compare, then compare them using the bottom bar.",
+      "context": ""
+    },
+    {
+      "title": "View in full screen",
+      "image": "assets/welcome-cat.svg",
+      "content": "Focus on a single experiment details by using the full screen view.<br/><br/>Get finer controls on viewing the experiment results thanks to the additional screen real-estate.<br/<<br/>You can toggle between full-screen and experiment table view.",
+      "context": ""
+    }
+  ]
+}
