@@ -111,6 +111,10 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 import {CodeEditorComponent} from './data/code-editor/code-editor.component';
 import {AppendComponentOnTopElementDirective} from '@common/shared/directive/append-component-on-top-element.directive';
 import {EditCredentialLabelDialogComponent} from '@common/shared/ui-components/overlay/edit-credential-label-dialog/edit-credential-label-dialog.component';
+import {FitElementsToContainerDirective} from '@common/shared/ui-components/directives/fitElementsToContainer.directive';
+import { ChipsListComponent } from './buttons/chips-list/chips-list.component';
+import {VirtualGridComponent} from '@common/shared/components/virtual-grid/virtual-grid.component';
+import {ScrollEndDirective, ScrollEndRootDirective} from './directives/scroll-end.directive';
 
 const declarations = [
   DurationInputComponent,
@@ -187,8 +191,11 @@ const declarations = [
   TableFilterDurationNumericComponent,
   CirclesInRowComponent,
   OverflowsDirective,
+  FitElementsToContainerDirective,
   AppendComponentOnTopElementDirective,
-  EditCredentialLabelDialogComponent
+  EditCredentialLabelDialogComponent,
+  VirtualGridComponent,
+  ScrollEndDirective, ScrollEndRootDirective
 ];
 
 @NgModule({
@@ -217,8 +224,8 @@ const declarations = [
     MatNativeDateModule,
   ],
   providers   : [],
-  declarations: [...declarations, TagsMenuComponent, TagColorMenuComponent, ResizableColumnDirective, HesitateDirective, DurationInputListComponent, TableFilterDurationComponent, TableFilterDurationErrorComponent, RippleButtonComponent, CheckboxThreeStateListComponent, TemplateAliasDirective, CodeEditorComponent],
-  exports: [...declarations, ChipsModule, SMMaterialModule, ChooseColorModule, SMPortalModule, TagsMenuComponent, TableFilterDurationComponent, MatDatepickerModule, TemplateAliasDirective, CodeEditorComponent]
+  declarations: [...declarations, TagsMenuComponent, TagColorMenuComponent, ResizableColumnDirective, HesitateDirective, DurationInputListComponent, TableFilterDurationComponent, TableFilterDurationErrorComponent, RippleButtonComponent, CheckboxThreeStateListComponent, TemplateAliasDirective, CodeEditorComponent, ChipsListComponent],
+    exports: [...declarations, ChipsModule, SMMaterialModule, ChooseColorModule, SMPortalModule, TagsMenuComponent, TableFilterDurationComponent, MatDatepickerModule, TemplateAliasDirective, CodeEditorComponent, ChipsListComponent]
 })
 export class UiComponentsModule {
 }

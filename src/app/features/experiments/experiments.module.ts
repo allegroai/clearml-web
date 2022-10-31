@@ -38,6 +38,7 @@ export const experimentSyncedKeys = [
   'view.hiddenProjectTableCols',
   'view.metricsCols',
   'view.colsOrder',
+  'output.scalarsHoverMode',
   'info.userKnowledge',
   'output.settingsList',
 ];

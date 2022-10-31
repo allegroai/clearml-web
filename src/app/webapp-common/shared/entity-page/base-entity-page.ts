@@ -1,10 +1,19 @@
 import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ActionCreator, Store} from '@ngrx/store';
 import {combineLatest, Observable, of, Subject, Subscription} from 'rxjs';
-import {debounceTime, filter, map, take, takeUntil, tap, throttleTime, withLatestFrom} from 'rxjs/operators';
+import {
+  debounceTime,
+  filter,
+  map,
+  take,
+  takeUntil,
+  tap,
+  throttleTime,
+  withLatestFrom
+} from 'rxjs/operators';
 import {Project} from '~/business-logic/model/projects/project';
 import {isReadOnly} from '../utils/shared-utils';
-import {selectRootProjects, selectSelectedProject} from '../../core/reducers/projects.reducer';
+import {selectAllProjectsUsers, selectProjectUsers, selectRootProjects, selectSelectedProject} from '../../core/reducers/projects.reducer';
 import {IOutputData} from 'angular-split/lib/interface';
 import {SplitComponent} from 'angular-split';
 import {selectRouterParams} from '../../core/reducers/router-reducer';
@@ -25,6 +34,7 @@ import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confi
 import {RefreshService} from '@common/core/services/refresh.service';
 import {selectTableModeAwareness} from '@common/projects/common-projects.reducer';
 import {setTableModeAwareness} from '@common/projects/common-projects.actions';
+import {User} from '~/business-logic/model/users/user';
 
 @Component({
   selector: 'sm-base-entity-page',
@@ -49,9 +59,11 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
   public tableModeAwareness$: Observable<boolean>;
   private tableModeAwareness: boolean;
   private destroy$ = new Subject();
+  public users$: Observable<User[]>;
+  public projectsOptions$: Observable<Project[]>;
 
   @ViewChild('split') split: SplitComponent;
-  public projectsOptions$: Observable<Project[]>;
+  protected abstract inEditMode$: Observable<boolean>;
 
   abstract onFooterHandler({emitValue, item}): void;
 
@@ -63,7 +75,10 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
 
   abstract refreshList(auto: boolean);
 
-  protected abstract inEditMode$: Observable<boolean>;
+
+  get selectedProject() {
+    return this.route.parent.snapshot.params.projectId;
+  }
 
   protected constructor(
     protected store: Store,
@@ -72,19 +87,19 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
     protected dialog: MatDialog,
     protected refresh: RefreshService
   ) {
+    this.users$ = this.selectedProject === '*' ? this.store.select(selectAllProjectsUsers) : this.store.select(selectProjectUsers);
     this.selectedProject$ = this.store.select(selectSelectedProject);
     this.selectedProject$.pipe(filter(p => !!p), take(1)).subscribe((project: Project) => {
       this.isExampleProject = isReadOnly(project);
     });
-    this.projectsOptions$ = combineLatest([this.selectedProject$, this.store.select(selectRootProjects)]).pipe(map(([selectedProject, rootProjects]) => {
-      if (selectedProject) {
-        if (selectedProject?.id === '*') {
-          return rootProjects;
-        } else {
-          return [selectedProject].concat(selectedProject?.sub_projects ?? []);
-        }
+    this.projectsOptions$ = combineLatest([
+      this.selectedProject$.pipe(filter(p => !!p?.id)),
+      this.store.select(selectRootProjects).pipe(filter(p => p !== null)),
+    ]).pipe(map(([selectedProject, rootProjects]) => {
+      if (selectedProject?.id === '*') {
+        return rootProjects;
       } else {
-        return [];
+        return [selectedProject].concat(selectedProject?.sub_projects ?? []);
       }
     }));
 
@@ -236,8 +251,7 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
           };
         }
       ),
-      filter(({selected, data}) => !!selected && !!data),
-      //shareReplay()
+      filter(({selected, data}) => !!selected && !!data)
     );
   }
 

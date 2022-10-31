@@ -28,5 +28,6 @@
   [logs]="log$ | async"
   [beginningOfLog]="logBeginning$ | async"
   [filterString]="filter$ | async"
+  [fetching]="fetching$ | async"
   (fetchMore)="getLogs($event)"
 ></sm-experiment-log-info>

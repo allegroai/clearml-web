@@ -40,6 +40,8 @@
       color: $blue-200;
       font-size: $font-size-small;
       font-weight: 500;
+      display: flex;
+      justify-content: space-between;
     }
     .param {
       display: flex;
@@ -69,7 +71,7 @@
   header {
     display: grid;
     grid-template-columns: 48px 1fr;
-    gap: 2px 0;
+    gap: 6px 0;
     grid-template-areas:
       "icon name"
       "icon status";

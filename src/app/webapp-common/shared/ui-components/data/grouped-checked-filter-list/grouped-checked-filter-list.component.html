@@ -11,30 +11,30 @@
   <div class="pointer" (click)="onClearSelection()">Clear Selection</div>
   <ng-content></ng-content>
 </div>
-<div itemSize="40" class="list">
+<div class="list">
   <mat-expansion-panel
-    *ngFor="let bigItem of (itemsObjectList | keyvalue: compareByKey); trackBy: trackByKeyFn"
+    *ngFor="let category of (itemsObjectList | keyvalue: compareByKey); trackBy: trackByKeyFn"
     [expanded]="searchText?.length > 0"
-    [hidden]="(bigItem.value | advancedFilter:searchText).length === 0"
+    [hidden]="(category.value | advancedFilter:searchText).length === 0"
     togglePosition="before"
   >
-    <mat-expansion-panel-header expandedHeight="40px" collapsedHeight="40px" (click)="toggleExpand(bigItem.key)">
-      <div class="ellipsis item-key" [smTooltip]="renameMap[bigItem.key]" [matTooltipShowDelay]="500">
-        {{renameMap[bigItem.key] || bigItem.key}}
+    <mat-expansion-panel-header expandedHeight="40px" collapsedHeight="40px" (click)="toggleExpand(category.key)">
+      <div class="ellipsis item-key" [smTooltip]="renameMap[category.key]" [matTooltipShowDelay]="500">
+        {{renameMap[category.key] || category.key}}
       </div>
     </mat-expansion-panel-header>
     <ng-template matExpansionPanelContent>
-      <div *ngFor="let item of bigItem.value | filter:searchText:'value'; trackBy: trackByValFn"
+      <div *ngFor="let item of category.value | filter:searchText:'value'; trackBy: trackByValFn"
          class="item pointer"
          [class.disabled]="cb.disabled"
          [smTooltip]="!item.checked && selectionLimitReached? 'You can only select up to ' + limitSelection + ' parameters' : ''"
          customClass="parameter-tooltip"
-         (click)="!cb.disabled && toggleParamToDisplay(bigItem.key + '.' + item.value, item.checked)">
+         (click)="!cb.disabled && toggleParamToDisplay(category.key + '.' + item.value, item.checked)">
         <mat-checkbox #cb
                       smClickStopPropagation
                       [ngModel]="item.checked"
                       [disabled]="selectionLimitReached && !item.checked"
-                      (ngModelChange)="toggleParamToDisplay(bigItem.key + '.' + item.value, item.checked)"
+                      (ngModelChange)="toggleParamToDisplay(category.key + '.' + item.value, item.checked)"
         ></mat-checkbox>
         <label class="ellipsis">{{item.value}}</label>
       </div>

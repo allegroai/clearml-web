@@ -5,7 +5,7 @@ import {ActivatedRoute, NavigationEnd, Router, Params, RouterEvent} from '@angul
 import {Title} from '@angular/platform-browser';
 import {selectLoggedOut} from '@common/core/reducers/view.reducer';
 import {Store} from '@ngrx/store';
-import {get} from 'lodash/fp';
+import {castArray, get, last} from 'lodash/fp';
 import {selectRouterParams, selectRouterUrl} from '@common/core/reducers/router-reducer';
 import {ApiProjectsService} from './business-logic/api-services/projects.service';
 import {Project} from './business-logic/model/projects/project';
@@ -226,7 +226,7 @@ export class AppComponent implements OnInit, OnDestroy {
     const crumbs = routeConfig
       .reduce((acc, config) => {
         const dynamicCrumb = this.breadcrumbsStrings[config];
-        return acc.concat(dynamicCrumb ? dynamicCrumb.name : formatStaticCrumb(config).name);
+        return acc.concat(last(castArray(dynamicCrumb ? dynamicCrumb.name : formatStaticCrumb(config))).name);
       }, [''])
       .filter(name => !!name);
     this.titleService.setTitle(`ClearML - ${crumbs.join(' / ')}`);

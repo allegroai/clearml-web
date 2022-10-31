@@ -19,8 +19,9 @@
     [keyboardControl]="true"
     [sortFields]="tableSortFields"
     [hasExperimentUpdate]="hasExperimentUpdate"
-    (rowSelectionChanged)="experimentSelectionChanged.emit($any($event).data)"
+    (rowSelectionChanged)="experimentSelectionChanged.emit({experiment: $any($event).data})"
     (rowClicked)="tableRowClicked($event)"
+    (rowDoubleClicked)="experimentSelectionChanged.emit({experiment: $event.data, openInfo: true})"
     (loadMoreClicked)="onLoadMoreClicked()"
     (rowRightClick)="onContextMenu($event)"
     (colReordered)="columnsReordered.emit($event)"
@@ -46,7 +47,7 @@
     <ng-template let-col pTemplate="checkbox">
       <div class="d-flex align-items-center">
         <sm-checkbox-control
-          *ngIf="col.headerType === colHeaderTypeEnum.checkBox"
+          *ngIf="col?.headerType === colHeaderTypeEnum.checkBox"
           class="checkbox-col header"
           [class.minimised]="minimizedView"
           fieldName="selected"
@@ -88,7 +89,8 @@
 
     <ng-template let-col
                  let-experiment="rowData"
-                 pTemplate="body">
+                 pTemplate="body"
+                 let-expanded="expanded">
       <ng-container [ngSwitch]="col.id">
         <ng-container *ngSwitchCase="experimentsTableColFields.ID">
           <div class="ellipsis"
@@ -103,7 +105,6 @@
             <div
               class="experiment-name"
               [class.italic]="isDevelopment(experiment)"
-              matTooltipPosition="above"
               smShowTooltipIfEllipsis
               [smTooltip]="experiment.name">
               {{experiment.name}}
@@ -115,32 +116,29 @@
           <sm-tag-list [tags]="experiment.tags" [sysTags]="getSystemTags(experiment)"></sm-tag-list>
         </ng-container>
         <ng-container *ngSwitchCase="experimentsTableColFields.USER">
-          <span class="ellipsis" matTooltipPosition="above"
+          <span class="ellipsis"
                 smShowTooltipIfEllipsis
                 [smTooltip]="experiment.user?.name ? experiment.user?.name : 'Unknown User'">{{experiment.user?.name ? experiment.user?.name : 'Unknown User'}}</span>
         </ng-container>
         <span *ngSwitchCase="experimentsTableColFields.PROJECT"
               class="ellipsis"
-              matTooltipPosition="above"
               smShowTooltipIfEllipsis
               [smTooltip]="experiment.project?.name">
           {{experiment.project?.name}}
         </span>
         <ng-container *ngSwitchCase="experimentsTableColFields.STARTED">
-          <span matTooltipPosition="above"
-                class="ellipsis"
+          <span class="ellipsis"
                 [smTooltip]="experiment.started | date : timeFormatString">{{experiment.started | timeAgo}}</span>
         </ng-container>
         <ng-container *ngSwitchCase="experimentsTableColFields.LAST_UPDATE">
-          <span matTooltipPosition="above"
-                class="ellipsis"
+          <span class="ellipsis"
                 [smTooltip]="experiment.last_update | date : timeFormatString">{{experiment.last_update | timeAgo}}</span>
         </ng-container>
         <ng-container *ngSwitchCase="experimentsTableColFields.ACTIVE_DURATION">
           <span class="ellipsis">{{experiment.active_duration | duration}}</span>
         </ng-container>
         <ng-container *ngSwitchCase="experimentsTableColFields.COMMENT">
-          <span class="ellipsis" matTooltipPosition="above" smShowTooltipIfEllipsis [smTooltip]="experiment.comment">{{experiment.comment}}</span>
+          <span class="ellipsis" smShowTooltipIfEllipsis [smTooltip]="experiment.comment">{{experiment.comment}}</span>
         </ng-container>
         <ng-container *ngSwitchCase="experimentsTableColFields.SELECTED">
           <sm-checkbox-control
@@ -163,7 +161,6 @@
           <span
             class="parent-name"
             *ngIf="experiment?.parent?.id"
-            matTooltipPosition="above"
             smShowTooltipIfEllipsis
             [smTooltip]="experiment.parent.project?.name? experiment.parent.project.name + ' / ' + experiment.parent.name : experiment.parent.name"
           >{{experiment.parent.name}}</span>
@@ -177,6 +174,15 @@
           </sm-hyper-param-metric-column>
         </ng-container>
       </ng-container>
+    </ng-template>
+
+    <ng-template pTemplate="rowexpansion" let-experiment>
+      <tr *ngFor="let exp of [experiment]">
+        <td></td>
+        <td *ngFor="let col of tableCols">
+          {{exp[col.id]}}
+        </td>
+      </tr>
     </ng-template>
 
     <ng-template let-experiment="rowData" let-selected="selected" let-rowNumber="rowNumber" pTemplate="card">

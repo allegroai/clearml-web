@@ -11,7 +11,7 @@ import {ChangeDetectorRef, OnDestroy, QueryList, ViewChildren, Directive} from '
 import {ExperimentCompareDetailsBase} from '~/features/experiments-compare/experiments-compare-details.base';
 import {ActivatedRoute, Router} from '@angular/router';
 import {select, Store} from '@ngrx/store';
-import {IExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
+import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {Observable, Subscription} from 'rxjs';
 import {FlatTreeControl} from '@angular/cdk/tree';
 import {CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
@@ -82,7 +82,7 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
 
   constructor (
     public router: Router,
-    public store: Store<IExperimentInfoState>,
+    public store: Store<ExperimentInfoState>,
     public changeDetection: ChangeDetectorRef,
     public activeRoute: ActivatedRoute,
     public refresh: RefreshService

@@ -2,7 +2,7 @@ import {Component, OnDestroy} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {selectBackdropActive} from '@common/core/reducers/view.reducer';
 import {combineLatest, Observable, Subscription} from 'rxjs';
-import {IExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
+import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {selectCurrentArtifactExperimentId, selectExperimentModelInfoData} from '../../reducers';
 import {
   selectExperimentInfoData,
@@ -37,7 +37,7 @@ export class ExperimentInfoArtifactsComponent implements OnDestroy {
   private previousTarget: string;
   private sub = new Subscription();
 
-  constructor(private store: Store<IExperimentInfoState>, public router: Router, private route: ActivatedRoute
+  constructor(private store: Store<ExperimentInfoState>, public router: Router, private route: ActivatedRoute
   ) {
     this.minimized = !!this.route.snapshot?.routeConfig?.data?.minimized;
     this.backdropActive$ = this.store.select(selectBackdropActive);

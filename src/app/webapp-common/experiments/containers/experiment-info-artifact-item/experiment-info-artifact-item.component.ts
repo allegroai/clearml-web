@@ -3,11 +3,11 @@ import {Store} from '@ngrx/store';
 import {selectExperimentModelInfoData} from '../../reducers';
 import {IExperimentModelInfo} from '../../shared/common-experiment-model.model';
 import {combineLatest, Observable, Subscription} from 'rxjs';
-import {IExperimentInfoState} from '../../../../features/experiments/reducers/experiment-info.reducer';
-import {selectRouterParams} from '../../../core/reducers/router-reducer';
+import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
+import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {distinctUntilChanged, filter, map} from 'rxjs/operators';
 import {get} from 'lodash/fp';
-import {Artifact} from '../../../../business-logic/model/tasks/artifact';
+import {Artifact} from '~/business-logic/model/tasks/artifact';
 
 @Component({
   selector: 'sm-experiment-info-artifact-item',
@@ -17,13 +17,13 @@ import {Artifact} from '../../../../business-logic/model/tasks/artifact';
 export class ExperimentInfoArtifactItemComponent implements OnInit, OnDestroy {
   public modelInfo$: Observable<IExperimentModelInfo>;
   public editable$: Observable<boolean>;
-  public errors$: Observable<IExperimentInfoState['errors']>;
+  public errors$: Observable<ExperimentInfoState['errors']>;
   public saving$: Observable<boolean>;
   private artifactSubscription: Subscription;
   public selectedArtifact: Artifact;
   public artifactKey$: Observable<any>;
 
-  constructor(private store: Store<IExperimentInfoState>) {
+  constructor(private store: Store<ExperimentInfoState>) {
     this.modelInfo$ = this.store.select(selectExperimentModelInfoData);
     this.artifactKey$ = this.store.select(selectRouterParams)
       .pipe(

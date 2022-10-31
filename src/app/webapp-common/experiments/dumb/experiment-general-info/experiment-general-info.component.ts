@@ -1,13 +1,13 @@
 import {AfterViewInit, Component, EventEmitter, Input, OnDestroy, Output, ViewChild} from '@angular/core';
-import {FormControl} from '@angular/forms';
-import {IExperimentInfo} from '../../../../features/experiments/shared/experiment-info.model';
-import {TIME_FORMAT_STRING} from '../../../constants';
+import {UntypedFormControl} from '@angular/forms';
+import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
+import {TIME_FORMAT_STRING} from '@common/constants';
 import {Store} from '@ngrx/store';
-import {ActivateEdit, DeactivateEdit} from '../../actions/common-experiments-info.actions';
+import {activateEdit, deactivateEdit} from '../../actions/common-experiments-info.actions';
 import {selectCurrentActiveSectionEdit} from '../../reducers';
 import {filter} from 'rxjs/operators';
 import {Subscription} from 'rxjs';
-import {EditableSectionComponent} from '../../../shared/ui-components/panel/editable-section/editable-section.component';
+import {EditableSectionComponent} from '@common/shared/ui-components/panel/editable-section/editable-section.component';
 
 export const EXPERIMENT_COMMENT = 'ExperimentComment';
 
@@ -20,7 +20,7 @@ export class ExperimentGeneralInfoComponent implements AfterViewInit, OnDestroy 
   constructor(private store: Store<any>) {
   }
 
-  commentControl = new FormControl();
+  commentControl = new UntypedFormControl();
   experimentCommentText: string;
   experimentCommentOriginal: string;
   private selectCurrentActiveSectionEditSub: Subscription;
@@ -48,7 +48,7 @@ export class ExperimentGeneralInfoComponent implements AfterViewInit, OnDestroy 
   }
 
   rebuildCommentControl(comment) {
-    this.commentControl = new FormControl(comment);
+    this.commentControl = new UntypedFormControl(comment);
   }
 
   commentValueChanged(value) {
@@ -63,9 +63,9 @@ export class ExperimentGeneralInfoComponent implements AfterViewInit, OnDestroy 
 
   editExperimentComment(edit) {
     if (edit) {
-      this.store.dispatch(new ActivateEdit(EXPERIMENT_COMMENT));
+      this.store.dispatch(activateEdit(EXPERIMENT_COMMENT));
     } else {
-      this.store.dispatch(new DeactivateEdit());
+      this.store.dispatch(deactivateEdit());
     }
   }
 

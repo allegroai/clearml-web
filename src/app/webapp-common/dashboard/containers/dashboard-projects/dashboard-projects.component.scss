@@ -7,10 +7,11 @@
 }
 
 .sm-card-list-layout {
-  height: 324px;
+  height: 320px;
   overflow: hidden;
   grid-gap: 16px 24px;
   padding-top: 24px;
+  padding-bottom: 0;
 }
 
 .sm-card-list-header {

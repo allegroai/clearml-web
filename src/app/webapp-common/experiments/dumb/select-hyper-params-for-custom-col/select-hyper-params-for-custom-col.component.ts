@@ -22,7 +22,6 @@ export class SelectHyperParamsForCustomColComponent {
 
 
   public toggleParamToDisplay({param, value}) {
-
     this.selectedHyperParamToShow.emit({param: `hyperparams.${param}`, addCol: !value});
   }
 

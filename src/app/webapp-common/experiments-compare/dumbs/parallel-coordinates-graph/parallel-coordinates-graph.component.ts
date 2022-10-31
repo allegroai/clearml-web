@@ -1,6 +1,6 @@
 import {Component, ElementRef, HostListener, Input, OnInit, ViewChild} from '@angular/core';
 import {PlotlyGraphBaseComponent} from '@common/shared/experiment-graphs/single-graph/plotly-graph-base';
-import {debounceTime, filter} from 'rxjs/operators';
+import {debounceTime, filter, take} from 'rxjs/operators';
 import {ColorHashService} from '@common/shared/services/color-hash/color-hash.service';
 import {get, getOr, isEqual, max, min, uniq, cloneDeep} from 'lodash/fp';
 import {MetricValueType, SelectedMetric} from '../../reducers/experiments-compare-charts.reducer';
@@ -9,6 +9,8 @@ import {select} from 'd3-selection';
 import {sortCol} from '@common/shared/utils/tableParamEncode';
 import {Store} from '@ngrx/store';
 import {Axis, Color, ColorScale} from 'plotly.js';
+import domtoimage from 'dom-to-image/dist/dom-to-image.min';
+import {from} from 'rxjs';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 declare let Plotly;
@@ -49,6 +51,7 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
   private _parameters: string[];
 
   @ViewChild('parallelGraph', {static: true}) parallelGraph: ElementRef;
+  @ViewChild('container') container: ElementRef<HTMLDivElement>;
   private graphWidth: any;
   private _metricValueType: MetricValueType;
   private highlighted: ExtraTask;
@@ -338,5 +341,18 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
     this._experiments = this.experiments.map(experiment => ({...experiment, hidden: this.filteredExperiments.includes(experiment.id)}));
     this.prepareGraph();
     this.dimensionsOrder = null;
+  }
+
+  downloadImage() {
+    from(domtoimage.toBlob(this.container.nativeElement))
+      .pipe(take(1))
+      .subscribe((blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.target = '_blank';
+        a.download = `Hyper Parameters ${this._metric.name}.png`;
+        a.click();
+      });
   }
 }

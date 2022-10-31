@@ -1,27 +1,38 @@
 @import "../../../../webapp-common/shared/ui-components/styles/variables";
 
 :host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 
+  sm-simple-table-2 {
+    flex: 1;
+    overflow: auto;
+  }
 
   ::ng-deep .table-row {
+    height: 40px;
     background-color: $blue-800 !important;
     border-bottom: 1px solid $dark-border;
     padding: 0 !important;
+    line-height: 40px !important;
     &:last-of-type {border-bottom-color: $dark-border !important;}
   }
 
   ::ng-deep .row.headers {
-    border-bottom: none !important;
+    height: 39px;
+    color: $blue-400;
+    border-bottom-color: $blue-600 !important;
   }
+
+  ::ng-deep .experiments-table .row.headers {display: none;}
 
 
   .tabs-container {
     position: relative;
-    background-color: $blue-800;
+    height: 48px;
+    padding-top: 12px;
     border-bottom: 1px solid $dark-border;
-    margin: 12px 0 0 0;
-    height: 38px;
-
 
     ::ng-deep .navbar-item {
       height: 100%;
@@ -30,10 +41,14 @@
     }
   }
 
-  .pull-right {
+  .close {
     position: absolute;
     right: 24px;
-    top: 0;
+    top: 12px;
+    color: $blue-400;
+    &:hover {
+      color: $blue-200;
+    }
   }
 
   sm-navbar-item[disabled] {
@@ -44,14 +59,25 @@
     }
   }
 
-  ::ng-deep .drag-grid {
-    color: $dark;
-    transition: color 0.5s;
-  }
-
-  ::ng-deep .table-row:hover .drag-grid {
-    transition: color 0.5s;
-    color: $dark-grey-blue;
+  ::ng-deep .table-row {
+    .row:hover {
+      background-color: $blue-650;
+    }
+    .al-icon {
+      visibility: hidden;
+      color: $blue-400;
+      vertical-align: middle;
+      transition: color 0.35s;
+      &.al-ico-drag {
+        visibility: visible;
+      }
+      &:hover {
+        color: $blue-200;
+      }
+    }
+    &:hover .al-icon {
+      visibility: visible;
+    }
   }
 
   .column {
@@ -64,11 +90,20 @@
 
   .flex-column {
     flex: 1;
-    padding: 0 8px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+
+  .empty-state {
+    height: 100%;
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
 }
 
 

@@ -90,6 +90,8 @@ $credentialBaseHeight: 238px;
     margin-bottom: 2px;
     color: $blue-500;
     font-size: 14px;
+    display: flex;
+    align-items: center;
   }
 
   .sub-note {
@@ -164,9 +166,15 @@ $credentialBaseHeight: 238px;
     &.has-label {
       height: $credentialBaseHeight + 20;
     }
+    &.jupyter{
+      height: 0px;
+    }
 
     &.first-step {
       height: 60px;
+      &.jupyter {
+        height: 40px;
+      }
     }
   }
 
@@ -201,6 +209,9 @@ nav {
   height: 36px;
   margin: 12px 32px 16px 32px;
   border-bottom: 1px solid $separator-line;
+  &.config-nav{
+    margin: 0;
+  }
 
   .nav-item {
     padding: 0 12px;

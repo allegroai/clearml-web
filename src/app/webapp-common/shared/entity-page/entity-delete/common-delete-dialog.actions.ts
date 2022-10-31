@@ -1,12 +1,12 @@
 import {createAction, props} from '@ngrx/store';
-import { Task } from '../../../../business-logic/model/tasks/task';
-import {EntityTypeEnum} from '../../../../shared/constants/non-common-consts';
-import {TasksResetManyResponseFailed} from '../../../../business-logic/model/tasks/tasksResetManyResponseFailed';
+import { Task } from '~/business-logic/model/tasks/task';
+import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
+import {TasksResetManyResponseFailed} from '~/business-logic/model/tasks/tasksResetManyResponseFailed';
 
 const DELETE_PREFIX = 'DELETE_ENTITY ';
 
 export const deleteEntities = createAction( DELETE_PREFIX + '[delete entities]',
-  props<{entityType: EntityTypeEnum; entity?: Task, includeChildren?: boolean}>());
+  props<{entityType: EntityTypeEnum; entity?: Task; includeChildren?: boolean; deleteArtifacts?: boolean; resetMode?: boolean}>());
 
 export const deleteModels = createAction( DELETE_PREFIX + '[delete models]');
 

@@ -22,7 +22,7 @@ import {Router} from '@angular/router';
 
 export type LoginMode = 'simple' | 'password' | 'ssoOnly';
 
-export const LoginModeEnum = {
+export const loginModes = {
   simple: 'simple' as LoginMode,
   password: 'password' as LoginMode,
   ssoOnly: 'ssoOnly' as LoginMode
@@ -69,27 +69,27 @@ export class BaseLoginService {
   }
 
   initCredentials() {
-    const fromEnv = () => {
-      this.userKey = this.environment.userKey;
-      this.userSecret = this.environment.userSecret;
-      this.companyID = this.environment.companyID;
-    };
+    const fromEnv = () => ({
+      userKey: this.environment.userKey,
+      userSecret: this.environment.userSecret,
+      companyID: this.environment.companyID
+    });
 
     return this.getLoginMode().pipe(
       retryWhen(errors => errors.pipe(
-        mergeMap((err, i) => i > 2 ? throwError('Error from retry!') : timer(500))
+        mergeMap((err, i) => i > 2 ? throwError(() => 'Error from retry!') : timer(500))
       )),
       catchError(() => {
         this.openServerError();
         return of({});
       }),
-      switchMap(mode => mode === LoginModeEnum.simple ? this.httpClient.get('credentials.json') : of(fromEnv())),
+      switchMap(mode => mode === loginModes.simple ? this.httpClient.get('credentials.json') : of(fromEnv())),
+      catchError(() => of(fromEnv())),
       tap((credentials: any) => {
         this.userKey = credentials.userKey;
         this.userSecret = credentials.userSecret;
         this.companyID = credentials.companyID;
       }),
-      catchError(() => of(fromEnv()))
     );
   }
 
@@ -112,7 +112,7 @@ export class BaseLoginService {
           filter(res => !this.shouldOpenServerError(res?.server_errors)),
           tap((res: LoginModeResponse) => {
             this._authenticated = res.authenticated;
-            this._loginMode = res.basic.enabled ? LoginModeEnum.password : res.sso_providers?.length > 0 ? LoginModeEnum.ssoOnly : LoginModeEnum.simple;
+            this._loginMode = res.basic.enabled ? loginModes.password : res.sso_providers?.length > 0 ? loginModes.ssoOnly : loginModes.simple;
             this._guestUser = res.basic.guest;
             this._sso = res.sso_providers;
           }),
@@ -306,18 +306,13 @@ After the issue is resolved and Trains Server is up and running, reload this pag
     };
 
     if (this.authenticated === false) {
-      redirectToLogin(401);
+      return redirectToLogin(401);
     } else {
       this.store.dispatch(fetchCurrentUser());
-      this.userPreferences.loadPreferences().pipe(
-        catchError((err) => redirectToLogin(err.status))
-      ).subscribe(
-        () => {
-          resolve(null);
-        },
-        () => {
-          // Do nothing
-        });
+      const obs = this.userPreferences.loadPreferences()
+        .pipe(catchError((err) => redirectToLogin(err.status)));
+      obs.subscribe(() => resolve(null));
+      return obs;
     }
   }
 }

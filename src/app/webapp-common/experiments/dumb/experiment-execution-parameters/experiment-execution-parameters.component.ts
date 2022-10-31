@@ -9,16 +9,15 @@ import {
   ViewChild,
   ViewChildren
 } from '@angular/core';
-import {IExperimentInfoFormComponent} from '../../../../features/experiments/shared/experiment-info.model';
-import {HELP_TEXTS} from '../../shared/common-experiments.const';
+import {IExperimentInfoFormComponent} from '~/features/experiments/shared/experiment-info.model';
 import {cloneDeep} from 'lodash/fp';
 import {v4 as uuidV4} from 'uuid';
 import {NgForm} from '@angular/forms';
-import {ParamsItem} from '../../../../business-logic/model/tasks/paramsItem';
-import {ISmCol} from '../../../shared/ui-components/data/table/table.consts';
+import {ParamsItem} from '~/business-logic/model/tasks/paramsItem';
+import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
 import {Subscription} from 'rxjs';
-import {TableComponent} from '../../../shared/ui-components/data/table/table.component';
+import {TableComponent} from '@common/shared/ui-components/data/table/table.component';
 import {isEqual} from 'lodash/fp';
 
 
@@ -30,20 +29,23 @@ import {isEqual} from 'lodash/fp';
 export class ExperimentExecutionParametersComponent implements IExperimentInfoFormComponent, OnDestroy, AfterViewInit, OnChanges {
   private _formData: { name?: string; description?: string; section?: string; id: string; type?: string; value?: string }[] = [];
   private formContainersSub: Subscription;
+  private _editable: boolean;
+  private formContainer: CdkVirtualScrollViewport;
+  private clickedRow: number;
 
   search: string = '';
-  lastSearchIndex = -1;
-  public searchIndexList: {index:number, col: string}[];
+  public searchIndexList: {index: number; col: string}[];
   public matchIndex: number = -1;
+  public cols = [
+    {id: 'name', style: {width: '300px'}},
+    {id: 'value', style: {width: '300px'}},
+    {id: 'description', style: {width: '48px'}}
+  ] as ISmCol[];
 
-  formNames(id) {
-    return this.formData.filter(parameter => parameter.id !== id).map(parameter => parameter.name);
-  }
 
   @ViewChild('hyperParameters') hyperParameters: NgForm;
-  @ViewChild('parametersTable') executionParametersTable: TableComponent;
+  @ViewChild(TableComponent) executionParametersTable: TableComponent;
 
-  private formContainer: CdkVirtualScrollViewport;
   @ViewChildren('formContainer') formContainers: QueryList<CdkVirtualScrollViewport>;
   @ViewChild(CdkVirtualScrollViewport) viewPort: CdkVirtualScrollViewport;
   @Output() formDataChanged = new EventEmitter<{ field: string; value: ParamsItem[] }>();
@@ -51,8 +53,14 @@ export class ExperimentExecutionParametersComponent implements IExperimentInfoFo
   @Output() resetSearch = new EventEmitter();
   @Output() scrollToResultCounterReset = new EventEmitter();
   @Input() section;
+  private _originalData: ExperimentExecutionParametersComponent['formData'];
+
+  @Input() set size(size: number) {
+    this.executionParametersTable?.resize();
+  }
 
   @Input() set formData(formData: { name?: string; description?: string; section?: string; id?: string; type?: string; value?: string }[]) {
+    this._originalData = formData;
     this._formData = cloneDeep(formData).map((row: ParamsItem) => ({...row, id: uuidV4()}));
   }
 
@@ -61,16 +69,15 @@ export class ExperimentExecutionParametersComponent implements IExperimentInfoFo
   }
 
 
-  @Input() editable: boolean;
-  @Input() searchedText: string;
+  @Input() set editable(editable: boolean) {
+    this._editable = editable;
+    this.executionParametersTable?.resize();
+  }
+  get editable() {
+    return this._editable;
+  }
 
-  HELP_TEXTS = HELP_TEXTS;
-  public cols = [
-    {id: 'name', style: {width: '40%'}},
-    {id: 'value', style: {width: '40%'}},
-    {id: 'description', style: {width: '48px'}}
-  ] as ISmCol[];
-  private clickedRow: number;
+  @Input() searchedText: string;
 
   ngAfterViewInit() {
     this.formContainersSub = this.formContainers.changes
@@ -81,6 +88,11 @@ export class ExperimentExecutionParametersComponent implements IExperimentInfoFo
           this.clickedRow = null;
         }
       });
+    this.executionParametersTable.resize();
+  }
+
+  formNames(id) {
+    return this.formData.filter(parameter => parameter.id !== id).map(parameter => parameter.name);
   }
 
   addRow() {
@@ -116,7 +128,7 @@ export class ExperimentExecutionParametersComponent implements IExperimentInfoFo
 
   jumpToNextResult(forward: boolean) {
     this.matchIndex = forward ? this.matchIndex + 1 : this.matchIndex - 1;
-    if(this.editable){
+    if (this.editable) {
       this.viewPort.scrollToIndex(this.searchIndexList[this.matchIndex]?.index, 'smooth');
     } else {
       this.executionParametersTable.scrollToIndex(this.searchIndexList[this.matchIndex]?.index);
@@ -124,7 +136,7 @@ export class ExperimentExecutionParametersComponent implements IExperimentInfoFo
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if(changes?.formData && (!changes.formData?.firstChange) && !isEqual(changes.formData.currentValue, changes.formData.previousValue)){
+    if (changes?.formData && (!changes.formData?.firstChange) && !isEqual(changes.formData.currentValue, changes.formData.previousValue)) {
       this.matchIndex = -1;
       this.searchIndexList = [];
       this.resetSearch.emit();
@@ -136,11 +148,11 @@ export class ExperimentExecutionParametersComponent implements IExperimentInfoFo
         this.formData.forEach((parameter, index) => {
           if (parameter?.name.includes(changes.searchedText.currentValue)) {
             searchResultsCounter++;
-            searchedIndexList.push({index, col:'name'});
+            searchedIndexList.push({index, col: 'name'});
           }
-          if (parameter?.value.includes(changes.searchedText.currentValue)){
+          if (parameter?.value.includes(changes.searchedText.currentValue)) {
             searchResultsCounter++;
-            searchedIndexList.push({index, col:'value'});
+            searchedIndexList.push({index, col: 'value'});
           }
         });
       }
@@ -150,4 +162,7 @@ export class ExperimentExecutionParametersComponent implements IExperimentInfoFo
     }
   }
 
+  cancel() {
+    this._formData = cloneDeep(this._originalData).map((row: ParamsItem) => ({...row, id: uuidV4()}));
+  }
 }

@@ -26,7 +26,6 @@ import {colorSyncedKeys} from '@common/shared/ui-components/directives/choose-co
 import {UserPreferences} from '@common/user-preferences';
 import {EffectsModule} from '@ngrx/effects';
 import {ActionReducer, MetaReducer, StoreModule, USER_PROVIDED_META_REDUCERS} from '@ngrx/store';
-import {StoreDevtoolsModule} from '@ngrx/store-devtools';
 import {merge, pick} from 'lodash/fp';
 import {USERS_PREFIX, VIEW_PREFIX} from '~/app.constants';
 import {ProjectsEffects} from '~/core/effects/projects.effects';
@@ -42,6 +41,7 @@ import {usageStatsReducer} from './reducers/usage-stats.reducer';
 import {usersReducer} from './reducers/users.reducer';
 import {viewReducer} from './reducers/view.reducer';
 import {UsageStatsService} from './services/usage-stats.service';
+import {extCoreModules} from '~/build-specifics';
 
 export const reducers = {
   auth: authReducer,
@@ -96,9 +96,9 @@ const userPrefMetaFactory = (userPreferences: UserPreferences): MetaReducer<any>
   (reducer: ActionReducer<any>) =>
     createUserPrefReducer('users', ['activeWorkspace', 'showOnlyUserWork'], [USERS_PREFIX], userPreferences, reducer),
   (reducer: ActionReducer<any>) =>
-    createUserPrefReducer('rootProjects', ['tagsColors', 'graphVariant'], [ROOT_PROJECTS_PREFIX], userPreferences, reducer),
+    createUserPrefReducer('rootProjects', ['tagsColors', 'graphVariant', 'showHidden'], [ROOT_PROJECTS_PREFIX], userPreferences, reducer),
   (reducer: ActionReducer<any>) =>
-    createUserPrefReducer('views', ['autoRefresh', 'neverShowPopupAgain'], [VIEW_PREFIX], userPreferences, reducer),
+    createUserPrefReducer('views', ['autoRefresh', 'neverShowPopupAgain', 'redactedArguments', 'hideRedactedArguments'], [VIEW_PREFIX], userPreferences, reducer),
   localStorageReducer,
   (reducer: ActionReducer<any>) =>
     createUserPrefReducer('projects', projectSyncedKeys, [PROJECTS_PREFIX], userPreferences, reducer),
@@ -112,6 +112,7 @@ const userPrefMetaFactory = (userPreferences: UserPreferences): MetaReducer<any>
     createUserPrefReducer('colorsPreference', colorSyncedKeys, [CHOOSE_COLOR_PREFIX], userPreferences, reducer)
 ];
 
+
 @NgModule({
   imports: [
     StoreModule.forRoot(reducers, {
@@ -124,17 +125,15 @@ const userPrefMetaFactory = (userPreferences: UserPreferences): MetaReducer<any>
     }),
     EffectsModule.forRoot([
       CommonAuthEffects,
-      LayoutEffects,
       CommonUserEffects,
-      UserEffects,
+      LayoutEffects,
       RouterEffects,
       CommonProjectsEffect,
-      ProjectsEffects
+      ProjectsEffects,
+      UserEffects,
     ]),
-    StoreDevtoolsModule.instrument({
-      maxAge: 25 //  Retains last 25 states
-    }),
     HttpClientModule,
+    ...extCoreModules
   ],
   providers: [
     SmSyncStateSelectorService,

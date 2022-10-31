@@ -1,5 +1,5 @@
 import {Action, createAction, props} from '@ngrx/store';
-import {ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
+import {IExperimentInfo, ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
 import {Project} from '~/business-logic/model/projects/project';
 import {Queue} from '~/business-logic/model/queues/queue';
 import {CloneExperimentPayload, ITableExperiment} from '../shared/common-experiment-model.model';
@@ -33,7 +33,7 @@ export const getControllerForStartPipelineDialog = createAction(
 
 export const setControllerForStartPipelineDialog = createAction(
   EXPERIMENTS_INFO_PREFIX + '[Set Controller For Start Pipeline]',
-  props<{task:Task}>()
+  props<{task: IExperimentInfo}>()
 );
 
 
@@ -78,10 +78,10 @@ export const navigateToQueue = createAction(
   props<{ experimentId: string }>()
 );
 
-export const resetClicked = createAction(
-  EXPERIMENTS_INFO_PREFIX + '[reset experiments]',
-  props<{ selectedEntities: ISelectedExperiment[] }>()
-);
+// export const resetClicked = createAction(
+//   EXPERIMENTS_INFO_PREFIX + '[reset experiments]',
+//   props<{ selectedEntities: ISelectedExperiment[] }>()
+// );
 
 export const enqueueClicked = createAction(
   EXPERIMENTS_INFO_PREFIX + '[enqueue experiments]',

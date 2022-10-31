@@ -91,13 +91,8 @@
     .first-tab-container {
       padding-top: 10px;
       background-color: $card-bg;
-      visibility: visible;
       display: flex;
       flex-direction: column;
-
-      &.hide {
-        visibility: hidden;
-      }
 
       footer {
         margin-top: auto;
@@ -113,8 +108,6 @@
 
       header.empty {
         padding: 0;
-        padding-top: 0;
-        padding-bottom: 0;
       }
 
       .line {
@@ -152,11 +145,6 @@
 
     .second-tab-container {
       background: $blue-600;
-      visibility: hidden;
-
-      &.show {
-        visibility: visible;
-      }
     }
   }
 

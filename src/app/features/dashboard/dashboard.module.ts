@@ -13,10 +13,9 @@ import {SharedModule} from '~/shared/shared.module';
 import {DashboardSearchModule} from './dashboard-search/dashboard-search.module';
 import {ProjectDialogModule} from '@common/shared/project-dialog/project-dialog.module';
 import {ProjectsSharedModule} from '../projects/shared/projects-shared.module';
-import {SearchResultsComponent} from '@common/dashboard-search/dumb/search-results/search-results.component';
 import {DashboardSearchBaseComponent} from '@common/dashboard/dashboard-search.component.base';
-import {DatasetsModule} from '~/features/datasets/datasets.module';
 import {DatasetsSharedModule} from '~/features/datasets/shared/datasets-shared.module';
+import {ScrollingModule} from '@angular/cdk/scrolling';
 
 @NgModule({
   imports: [
@@ -30,10 +29,10 @@ import {DatasetsSharedModule} from '~/features/datasets/shared/datasets-shared.m
     CommonDashboardModule,
     SharedModule,
     DashboardSearchModule,
-    DatasetsModule,
-    DatasetsSharedModule
+    DatasetsSharedModule,
+    ScrollingModule
   ],
-  declarations   : [DashboardComponent, GettingStartedCardComponent, DashboardSearchBaseComponent, SearchResultsPageComponent, SearchResultsComponent]
+  declarations   : [DashboardComponent, GettingStartedCardComponent, DashboardSearchBaseComponent, SearchResultsPageComponent]
 })
 export class DashboardModule {
 }

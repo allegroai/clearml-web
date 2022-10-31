@@ -8,7 +8,7 @@
     </div>
   </div>
   <div class="page-container">
-    <sm-search-results
+    <sm-virtual-grid
       [cardTemplate]="
         activeLink === searchPages.projects ? ProjectTemplate :
         activeLink === searchPages.experiments ? ExperimentTemplate :
@@ -16,15 +16,15 @@
         activeLink === searchPages.openDatasets ? openDatasetTemplate :
         activeLink === searchPages.pipelines ? PipelineTemplate :
        ProjectTemplate"
-      [results]="getResults()"
+      [items]="getResults()"
       [cardHeight]="getCardHeight()"
       [showLoadMoreButton]="getResults().length < resultsCount?.[activeLink]"
-      (resultClicked)="projectClicked($event)"
+      (itemClicked)="projectClicked($event)"
       (loadMoreClicked)="loadMoreClicked.emit()">
-    </sm-search-results>
+    </sm-virtual-grid>
   </div>
 
-  <ng-template #ProjectTemplate let-project="result">
+  <ng-template #ProjectTemplate let-project>
     <sm-project-card
       [project]="project"
       (projectCardClicked)="projectClicked($event)"
@@ -32,21 +32,21 @@
     ></sm-project-card>
   </ng-template>
 
-  <ng-template #ExperimentTemplate let-experiment="result">
+  <ng-template #ExperimentTemplate let-experiment>
     <sm-experiment-card
       [experiment]="experiment"
       (experimentCardClicked)="experimentClicked($event)"
     ></sm-experiment-card>
   </ng-template>
 
-  <ng-template #ModelsTemplate let-model="result">
+  <ng-template #ModelsTemplate let-model>
     <sm-model-card
       [model]="model"
       (modelCardClicked)="modelClicked($event)"
     ></sm-model-card>
   </ng-template>
 
-  <ng-template #PipelineTemplate let-pipeline="result">
+  <ng-template #PipelineTemplate let-pipeline>
     <sm-pipeline-card
       [project]="pipeline"
       [hideMenu]="true"
@@ -54,7 +54,7 @@
     ></sm-pipeline-card>
   </ng-template>
 
-  <ng-template #openDatasetTemplate let-dataset="result">
+  <ng-template #openDatasetTemplate let-dataset>
     <sm-simple-dataset-card
       [hideMenu]="true"
       [project]="dataset"

@@ -14,8 +14,18 @@ export class ProjectsListComponent {
   isExample = isExample;
   pageSize = pageSize;
   trackById = trackById;
+  private _projects: Project[];
+  public projectsNames: string[];
 
-  @Input() projects: Array<Project>;
+  @Input() set projects(projects: Array<Project>) {
+    this._projects = projects;
+    this.projectsNames = projects?.map(p => p.basename);
+  }
+
+  get projects() {
+    return this._projects;
+  }
+
   @Input() noMoreProjects: boolean;
   @Input() showLast: boolean;
   @Output() projectCardClicked = new EventEmitter<ProjectsGetAllResponseSingle>();

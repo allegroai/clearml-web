@@ -1,5 +1,6 @@
 <div class="p-3 images-container">
-  <div class="single-debug-images-container" *ngFor="let experimentId of experimentIds; trackBy: trackExperiment" [class.separator]="experimentIds?.length > 1">
+  <div class="single-debug-images-container"
+       *ngFor="let experimentId of experimentIds; trackBy: trackExperiment; let first = first; let last = last" [class.separator]="experimentIds?.length > 1">
     <header *ngIf="experimentIds?.length > 1">
       <sm-experiment-compare-general-data
         *ngIf="(experiments | itemById: experimentId).name"
@@ -9,7 +10,9 @@
        >
       </sm-experiment-compare-general-data>
     </header>
-    <div class="d-flex" >
+    <div class="d-flex navigator-container" [class.active]="bindNavigationMode" [class.first]="first" [class.last]="last"  >
+      <div class="connector-icon-container pointer" smTooltip="Sync browsing" [matTooltipShowDelay]="500" [class.active]="bindNavigationMode" [class.hidden]="last" (click)="toggleConnectNavigation()">
+        <i class="al-icon" [class.al-ico-connect]="bindNavigationMode" [class.al-ico-disconnect]="!bindNavigationMode"></i></div>
       <div class="metric-bar" [class.minimized]="minimized" *ngIf="!thereAreNoMetrics(experimentId) && !isDatasetVersionPreview">
         <label>Metric:</label>
         <mat-form-field appearance="outline" [ngClass]="{'dark thin': isDarkTheme}">

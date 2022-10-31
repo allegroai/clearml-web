@@ -25,7 +25,6 @@ export interface GetCurrentUserResponseUserObject {
     avatar?: string;
     company?: GetCurrentUserResponseUserObjectCompany;
     email?: string;
-    getting_started?: any;
     /**
      * User preferences
      */

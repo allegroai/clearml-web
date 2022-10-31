@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import * as actions from '../../webapp-common/core/actions/projects.actions';
 import {Store} from '@ngrx/store';
-import {selectSelectedProjectId} from '@common/core/reducers/projects.reducer';
+import {selectSelectedProjectId, selectShowHidden} from '@common/core/reducers/projects.reducer';
 import {catchError, finalize, mergeMap, switchMap, withLatestFrom} from 'rxjs/operators';
 import {deactivateLoader} from '@common/core/actions/layout.actions';
 import {ALL_PROJECTS_OBJECT} from '@common/core/effects/projects.effects';
@@ -10,7 +10,6 @@ import {requestFailed} from '@common/core/actions/http.actions';
 import {ApiProjectsService} from '~/business-logic/api-services/projects.service';
 import {selectCurrentUser, selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
 import {ProjectsGetAllExRequest} from '~/business-logic/model/projects/projectsGetAllExRequest';
-import {selectShowHidden} from '@common/projects/common-projects.reducer';
 
 
 
@@ -54,9 +53,9 @@ export class ProjectsEffects {
           id: [action.projectId],
           include_stats: true,
           ...(!showHidden && {include_stats_filter: {system_tags: ['-pipeline']}}),
-          ...((action.example !== false || this.fetchingExampleExperiment === action.projectId) && {check_own_contents: true}),
           ...(showOnlyUserWork && {active_users: [user.id]}),
           ...(showHidden && {search_hidden: true}),
+          ...((action.example !== false || this.fetchingExampleExperiment === action.projectId) && {check_own_contents: true}),
           /* eslint-enable @typescript-eslint/naming-convention */
         } as ProjectsGetAllExRequest)
           .pipe(

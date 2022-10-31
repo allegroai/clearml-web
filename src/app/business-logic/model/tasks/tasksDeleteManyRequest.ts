@@ -33,4 +33,8 @@ export interface TasksDeleteManyRequest {
      * If set to \'true\' then delete output models of the tasks that are not referenced   by other tasks. Default value is \'true\'
      */
     delete_output_models?: boolean;
+  /**
+   * If set to \'true\' then BE will try to delete the extenal artifacts associated   with the tasks from the fileserver (if configured to do so)
+   */
+  delete_external_artifacts?: boolean;
 }

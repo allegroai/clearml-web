@@ -28,7 +28,6 @@ body {
   @include generate-input();
   @include generate-scroll();
   @include generate-general();
-  scrollbar-width: thin;
 
   .dark-theme {
 

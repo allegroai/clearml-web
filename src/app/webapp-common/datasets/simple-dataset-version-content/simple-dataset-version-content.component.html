@@ -33,5 +33,19 @@
   [columns]="columns"
   [tableData]="tableData"
   [selectionMode]="null"
-  [scrollable]="true"
-></sm-table>
+  [virtualScroll]="true"
+  [scrollable]="true">
+
+  <ng-template
+    let-col
+    let-i="rowIndex"
+    let-row="rowData"
+    pTemplate="body">
+    <div [ngSwitch]="col.id" class="w-100">
+      <ng-container *ngSwitchCase="'0'">
+        <span class="ellipsis" [attr.fileType]="row[0].match('\\.([^ .]+)$')?.[1] || 'none'" smShowTooltipIfEllipsis [smTooltip]="row[0]">{{row[0]}}</span>
+      </ng-container>
+      <div *ngSwitchDefault class="ellipsis" smShowTooltipIfEllipsis [smTooltip]="row[col.id]">{{row[col.id]}}</div>
+    </div>
+  </ng-template>
+</sm-table>

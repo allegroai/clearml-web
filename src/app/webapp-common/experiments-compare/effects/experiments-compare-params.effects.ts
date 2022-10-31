@@ -1,9 +1,9 @@
 import {Injectable} from '@angular/core';
-import {Actions, Effect, ofType} from '@ngrx/effects';
+import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {select, Store} from '@ngrx/store';
 import * as paramsActions from '../actions/experiments-compare-params.actions';
 import {activeLoader, deactivateLoader, setServerError} from '../../core/actions/layout.actions';
-import {catchError, map, mergeMap, switchMap, withLatestFrom} from 'rxjs/operators';
+import {catchError, filter, map, mergeMap, switchMap, withLatestFrom} from 'rxjs/operators';
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
 import {ExperimentParamsReverterService} from '../services/experiment-params-reverter.service';
 import {requestFailed} from '../../core/actions/http.actions';
@@ -15,6 +15,7 @@ import {REFETCH_EXPERIMENT_REQUESTED, refetchExperimentRequested} from '../actio
 import {ExperimentCompareParamsState} from '../reducers/experiments-compare-params.reducer';
 import {setExperiments} from '../actions/experiments-compare-params.actions';
 import {ExperimentDetailBase, ExperimentParams} from '../shared/experiments-compare-details.model';
+import {selectActiveWorkspaceReady} from '~/core/reducers/view.reducer';
 
 @Injectable()
 export class ExperimentsCompareParamsEffects {
@@ -24,15 +25,16 @@ export class ExperimentsCompareParamsEffects {
   ) {
   }
 
-  @Effect()
-  activeLoader$ = this.actions$.pipe(
+  activeLoader$ = createEffect(() => this.actions$.pipe(
     ofType(paramsActions.experimentListUpdated, REFETCH_EXPERIMENT_REQUESTED),
     map(action => activeLoader(action.type))
-  );
+  ));
 
-  @Effect()
-  UpdateExperimentsDetail$ = this.actions$.pipe(
+  updateExperimentsDetail$ = createEffect(() => this.actions$.pipe(
     ofType(paramsActions.experimentListUpdated),
+    switchMap((action) => this.store.select(selectActiveWorkspaceReady).pipe(
+      filter(ready => ready),
+      map(() => action))),
     withLatestFrom(this.store.pipe(select(selectExperimentIdsParams))),
     switchMap(([action, oldExperimentIds]) => {
       const newExperimentIds = action.ids.filter(id => !oldExperimentIds.includes(id));
@@ -55,10 +57,9 @@ export class ExperimentsCompareParamsEffects {
         );
     }
     )
-  );
+  ));
 
-  @Effect()
-  RefetchExperiment$ = this.actions$.pipe(
+  refetchExperiment$ = createEffect(() => this.actions$.pipe(
     ofType(refetchExperimentRequested),
     withLatestFrom(this.store.select(selectExperimentIdsParams)),
     switchMap(([action, newExperimentIds]) =>
@@ -77,12 +78,13 @@ export class ExperimentsCompareParamsEffects {
           )
         ])
       )),
-  );
+  ));
 
   fetchExperimentParams$(ids): Observable<Array<IExperimentDetail>> {
     return ids.length > 0 ?
       this.tasksApi.tasksGetAllEx({
         id: ids,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         only_fields: COMPARE_PARAMS_ONLY_FIELDS
       })
         .pipe(map(res => this.experimentParamsReverter.revertExperiments(ids, res.tasks)))

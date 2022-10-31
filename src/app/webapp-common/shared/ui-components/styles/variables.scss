@@ -15,7 +15,6 @@ $blue-450: #657099;
 $blue-480: #707ba3;
 $blue-500: #384161; //56,65,97
 $blue-550: #47527A;
-$blue-570: #323a56;
 $blue-600: #2c3246; //44,50,70
 $blue-650: #24293c;
 $blue-700: #202432; //32,36,50
@@ -23,10 +22,11 @@ $blue-800: #1a1e2c; //26,30,44
 $blue-900: #141722; //20,23,34
 $blue-950: #0d0e15; //20,23,34
 
+$black: #000000;
+
 $cloudy-blue: #d4d6e0;
 $cloudy-blue-two: #ced1dc;
 $dark-grey-blue-three: #1e2ce1;
-$dark-grey-blue-nine: #565b6b;
 $light-dusk: rgba(90, 101, 142, 0.5);
 $dusk-two: #515c85;
 $neon-yellow: #d3ff00;
@@ -80,19 +80,13 @@ $level-colors: (
   error: $error-color,
 );
 
-// from josh
-$dark: #191e2c;
-$black: #000000;
-$dark-three: #212431;
 $white-10: rgba(255, 255, 255, 0.1);
 $dark-grey-blue: #39405f;
 $light-periwinkle-two: #c1cdf3;
 $light-grey-blue: #8f9dc9;
-$white: #ffffff;
 $faint-gray: #f4f7ff;
 $blue-grey: #8693be;
-$lightish-blue-dark: #4551AF;
-$dark-four: #0f131c;
+
 
 $dark-primary-text: rgba(black, 0.87);
 $light-primary-text: white;

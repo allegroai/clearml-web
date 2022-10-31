@@ -64,7 +64,7 @@ export class EditableSectionComponent implements OnDestroy {
   editModeChanged(editMode) {
     this.inEditMode = editMode;
     this.activateEditClicked.emit(editMode);
-    this.store.dispatch(setBackdrop({payload: editMode}));
+    this.store.dispatch(setBackdrop({active: editMode}));
     if(editMode) {
       setTimeout(() => {
         this.listenScrollEvent();
@@ -76,7 +76,7 @@ export class EditableSectionComponent implements OnDestroy {
 
   cancelClickedEvent() {
     this.inEditMode = false;
-    this.store.dispatch(setBackdrop({payload: false}));
+    this.store.dispatch(setBackdrop({active: false}));
     this.cancelClicked.emit();
     this.unsubscribeToEventListener();
   }

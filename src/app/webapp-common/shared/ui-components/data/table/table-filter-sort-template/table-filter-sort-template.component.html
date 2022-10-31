@@ -4,7 +4,7 @@
   </div>
   <ng-template #headerWithoutFilters>
     <div [smTooltip]="tooltip ? header : undefined"
-         matTooltipPosition="above"
+
          class="menu-button pointer"
          [class.active]="isSorted"
          (click)="enableSort && switchSortOrder($event)">{{header}}
@@ -15,7 +15,7 @@
       (click)="enableSort && switchSortOrder($event)"
       [class.pointer]="enableSort"
       [smTooltip]="tooltip ? header : undefined"
-      matTooltipPosition="above"
+
       class="ellipsis menu-button"
       [class.active]="isSorted || isFiltered()">{{header}}</div>
     <sm-menu #menu
@@ -25,7 +25,7 @@
              (searchValueChanged)="searchValueChanged.emit($any($event.target).value)"
              [searchValue]="searchValue"
              [buttonClass]="'table-filter-button ' + (isFiltered() ? 'active' : 'deactive')"
-             [iconClass]="'icon ' + (isFiltered()? 'i-filter-on':'i-filter-off')"
+             [iconClass]="'pointer icon ' + (isFiltered()? 'i-filter-on':'i-filter-off')"
              (menuClosed)="menuClosed.emit()"
          (menuOpened)="menuOpened.emit()"
     >

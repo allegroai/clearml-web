@@ -1,12 +1,40 @@
-<sm-dialog-template iconClass="al-icon al-ico-trash" [header]="header" [displayX]="false">
+<sm-dialog-template iconClass="al-icon {{resetMode? 'i-alert' : 'al-ico-trash'}}" [header]="header" [displayX]="false">
   <ng-container *ngIf="!inProgress; else inProgressTemplate">
-    <div class="text-center">Are you sure you want to delete <b [innerHTML]="entityName"></b>? <br/>
-      {{bodyMessage}}</div>
-    <br/>
-    <br/>
+
+    <!---------------- RESET POPUP -------------->
+    <div *ngIf="resetMode; else deleteTemplate">
+      <b [innerHTML]="entityName"></b> will be reset.<br>
+      <br/>
+      <div *ngIf="devWarning">
+        <div><b>Note: resetting a DEV experiment</b> Any subsequent runs of the experiment will overwrite any changes made to it in the Web-App.<br>
+        To avoid this, <b>clone the experiment</b> and work with the cloned experiment.</div>
+        <br/>
+      </div>
+    </div>
+
+    <!---------------- DELETE POPUP -------------->
+    <ng-template #deleteTemplate>
+      <div class="text-center">Are you sure you want to delete
+        <span *ngIf="numSelected === 1">"</span><b [innerHTML]="entityName"></b><span *ngIf="numSelected === 1">"</span>? <br/>
+        {{bodyMessage}}</div>
+
+      <br/>
+    </ng-template>
+
+
+    <div class="text-center">
+      <mat-checkbox
+        #checkboxInput="ngModel"
+        [(ngModel)]="deleteArtifacts"
+        name="isApprove"
+        [class.mr-3]="resetMode"
+      >Remove all related artifacts and debug samples from ClearML file server
+      </mat-checkbox>
+    </div>
+    <br/><br/>
     <div class="buttons">
       <button cdkFocusInitial (click)="delete()"
-              class="btn btn-neon yes-button">DELETE
+              class="btn btn-neon yes-button">{{resetMode ? 'RESET' : 'DELETE'}}
       </button>
       <button (click)="closeDialog(false)"
               class="btn btn-outline-neon">CANCEL
@@ -14,6 +42,7 @@
     </div>
   </ng-container>
 
+  <!---------------- PROGRESS BAR -------------->
 
   <ng-template #inProgressTemplate>
 
@@ -23,14 +52,14 @@
     </mat-progress-bar>
 
     <ng-container *ngIf="totalFilesNumber > 0">
-    <div *ngIf="!showFinishMessage; else successMessage" class="progress-message">
-      Deleting artifacts. This may take some time. Please do not close the window.
-    </div>
-    <ng-template #successMessage>
-      <div class="progress-message success">
-        <i class="al-icon al-ico-success sm-md mr-2"></i>The artifacts were deleted
+      <div *ngIf="!showFinishMessage; else successMessage" class="progress-message">
+        Deleting artifacts. This may take some time. Please do not close the window.
       </div>
-    </ng-template>
+      <ng-template #successMessage>
+        <div class="progress-message success">
+          <i class="al-icon al-ico-success sm-md mr-2"></i>The artifacts were deleted
+        </div>
+      </ng-template>
     </ng-container>
 
     <div [class.visible]="(failedEntities$ | async)?.length > 0" class="files-list-container">

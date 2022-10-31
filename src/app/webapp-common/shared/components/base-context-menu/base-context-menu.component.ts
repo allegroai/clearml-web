@@ -2,7 +2,7 @@ import {Component, ElementRef, EventEmitter, HostListener, Input, OnDestroy, Out
 import {MatMenuTrigger} from '@angular/material/menu';
 import {TagsMenuComponent} from '../../ui-components/tags/tags-menu/tags-menu.component';
 import {Store} from '@ngrx/store';
-import {DeactivateEdit, ActivateEdit} from 'app/webapp-common/experiments/actions/common-experiments-info.actions';
+import {deactivateEdit, activateEdit} from 'app/webapp-common/experiments/actions/common-experiments-info.actions';
 import {ActivateModelEdit, CancelModelEdit} from 'app/webapp-common/models/actions/models-info.actions';
 import {CountAvailableAndIsDisableSelectedFiltered} from '@common/shared/entity-page/items.utils';
 import {MenuItems} from '../../entity-page/items.utils';
@@ -61,7 +61,7 @@ export class BaseContextMenuComponent implements OnDestroy{
 
   tagMenuOpened(tagMenuRef?: TagsMenuComponent) {
     window.setTimeout(() => {
-      this.store.dispatch(new ActivateEdit('tags'));
+      this.store.dispatch(activateEdit('tags'));
       this.store.dispatch(new ActivateModelEdit('tags'));
     }, 200);
     tagMenuRef ? tagMenuRef.focus() : this.tagMenu?.focus();
@@ -69,7 +69,7 @@ export class BaseContextMenuComponent implements OnDestroy{
 
   tagMenuClosed(tagMenuRef?: TagsMenuComponent) {
     window.setTimeout(() => {
-      this.store.dispatch(new DeactivateEdit());
+      this.store.dispatch(deactivateEdit());
       this.store.dispatch(new CancelModelEdit());
     }, 200);
     tagMenuRef ? tagMenuRef.clear() : this.tagMenu?.clear();

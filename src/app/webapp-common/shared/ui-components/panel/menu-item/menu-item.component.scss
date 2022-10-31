@@ -3,8 +3,7 @@
 }
 .item-label {
   display: flex;
-  font-size: 14px;
-  font-weight: 500;
+  align-items: center;
   min-width: 0;
 }
 
@@ -15,7 +14,8 @@
 .mat-menu-item {
   font-family: "Heebo", sans-serif;
   height: 40px;
-  line-height: normal;
+  line-height: 40px;
+  border-radius: 4px;
 }
 
 .remove-button {
@@ -23,6 +23,7 @@
   opacity: 0;
   transition: opacity 0.2s;
   transform: translateX(12px);
+  display: flex;
 }
 
 sm-checkbox-control {

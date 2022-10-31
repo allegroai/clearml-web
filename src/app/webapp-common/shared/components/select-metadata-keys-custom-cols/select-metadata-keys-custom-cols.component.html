@@ -13,7 +13,7 @@
     placeholder="Search metric"
     (valueChanged)="searchQ($event)"
   ></sm-search>
-  <div *ngIf="metadataKeys.length>0; else noData " class="list-container">
+  <div *ngIf="metadataKeys?.length>0; else noData " class="list-container">
     <sm-menu-item *ngFor="let key of metadataKeys | simpleFilter: searchText"
                   #metaKey
                   [itemLabel]="key"

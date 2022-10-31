@@ -6,12 +6,12 @@ import {filter, tap} from 'rxjs/operators';
 import {
   ExperimentCompareTree,
   IExperimentDetail
-} from '../../../../features/experiments-compare/experiments-compare-models';
+} from '~/features/experiments-compare/experiments-compare-models';
 import {ExperimentParams} from '../../shared/experiments-compare-details.model';
 import {convertExperimentsArraysParams, getAllKeysEmptyObject, isParamsConverted} from '../../jsonToDiffConvertor';
 import {ExperimentCompareBase} from '../experiment-compare-base';
 import {ActivatedRoute, Router} from '@angular/router';
-import {IExperimentInfoState} from '../../../../features/experiments/reducers/experiment-info.reducer';
+import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {experimentListUpdated, setExperiments} from '../../actions/experiments-compare-params.actions';
 import {RefreshService} from '@common/core/services/refresh.service';
 
@@ -26,7 +26,7 @@ export class ExperimentCompareParamsComponent extends ExperimentCompareBase impl
 
   constructor(
     public router: Router,
-    public store: Store<IExperimentInfoState>,
+    public store: Store<ExperimentInfoState>,
     public changeDetection: ChangeDetectorRef,
     public activeRoute: ActivatedRoute,
     public refresh: RefreshService

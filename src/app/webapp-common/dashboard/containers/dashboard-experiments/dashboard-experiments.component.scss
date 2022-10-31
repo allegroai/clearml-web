@@ -1,19 +1,20 @@
 @import "../../../shared/ui-components/styles/mixins/common";
 
-.recent-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-top: 24px;
-  padding-bottom: 12px;
-}
+:host {
+  .recent-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 12px;
+  }
 
-.table-container {
-  height: calc(100% - 38px);
-  min-height: 180px;
-  overflow-y: auto;
-}
+  .table-container {
+    height: calc(100% - 38px);
+    min-height: 180px;
+    overflow-y: auto;
+  }
 
-.recent-title {
-  @include recent-title();
+  .recent-title {
+    @include recent-title();
+  }
 }

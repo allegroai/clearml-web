@@ -4,7 +4,7 @@ import {ActivatedRoute, Params, Router} from '@angular/router';
 import {select, Store} from '@ngrx/store';
 import {get, isEqual} from 'lodash/fp';
 import {combineLatest, Observable} from 'rxjs';
-import {distinctUntilChanged, filter, map, skip, withLatestFrom} from 'rxjs/operators';
+import {debounceTime, distinctUntilChanged, filter, map, skip, withLatestFrom} from 'rxjs/operators';
 import {getTags, setArchive as setProjectArchive, setDeep} from '../core/actions/projects.actions';
 import {initSearch, resetSearch} from '../common-search/common-search.actions';
 import {SearchState, selectSearchQuery} from '../common-search/common-search.reducer';
@@ -13,7 +13,7 @@ import {
   selectCompanyTags,
   selectIsArchivedMode,
   selectProjectSystemTags,
-  selectProjectTags, selectProjectUsers,
+  selectProjectTags,
   selectTagsFilterByProject
 } from '../core/reducers/projects.reducer';
 import {selectRouterParams} from '../core/reducers/router-reducer';
@@ -35,7 +35,6 @@ import {
 } from './reducers';
 import {IModelsViewState} from './reducers/models-view.reducer';
 import {SelectedModel, TableModel} from './shared/models.model';
-import {User} from '~/business-logic/model/users/user';
 import {SortMeta} from 'primeng/api';
 import {selectIsSharedAndNotOwner} from '~/features/experiments/reducers';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
@@ -75,7 +74,6 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
   public activeSectionEdit$: Observable<string>;
   public selectedProjectId$: Observable<string>;
   public tableColsOrder$: Observable<string[]>;
-  public users$: Observable<User[]>;
   public tags$: Observable<string[]>;
   public tableMode$: Observable<'table' | 'info'>;
   public systemTags$: Observable<string[]>;
@@ -133,11 +131,14 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
     this.projectTags$ = this.store.select(selectProjectTags);
     this.companyTags$ = this.store.select(selectCompanyTags);
     this.systemTags$ = this.store.select(selectProjectSystemTags);
-    this.users$ = this.store.select(selectProjectUsers);
     this.frameworks$ = this.store.select(selectModelsFrameworks);
     this.tableMode$ = this.store.select(selectTableMode);
-    this.filteredTableCols$ = combineLatest([this.store.select(selectModelTableColumns), this.store.select(selectMetadataColsForProject)])
+    this.filteredTableCols$ = combineLatest([
+      this.store.select(selectModelTableColumns).pipe(distinctUntilChanged(isEqual)),
+      this.store.select(selectMetadataColsForProject).pipe(distinctUntilChanged(isEqual))
+    ])
       .pipe(
+        debounceTime(50),
         map(([tableCols, metaCols]) =>
           tableCols.concat(metaCols.map(col => ({...col, meta: true})))
         ));
@@ -283,7 +284,8 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
               this.store.dispatch(modelsActions.modelSelectionChanged({
                 model: this.firstModel,
                 project: this.projectId
-              }));} else {
+              }));
+            } else {
                 this.store.dispatch(modelsActions.setTableMode({mode: !!id ? 'info' : 'table'}));
             }
             return models?.find(model => model.id === id);
@@ -305,9 +307,9 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
     }
   }
 
-  modelSelectionChanged(model: SelectedModel) {
-    this.minimizedView && model && this.store.dispatch(modelsActions.modelSelectionChanged({
-      model,
+  modelSelectionChanged(event: {model: SelectedModel; openInfo?: boolean}) {
+    (this.minimizedView || event.openInfo) && event.model && this.store.dispatch(modelsActions.modelSelectionChanged({
+      model: event.model,
       project: this.projectId
     }));
   }

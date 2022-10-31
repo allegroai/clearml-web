@@ -27,6 +27,7 @@ export abstract class BaseTableView implements AfterViewInit, OnDestroy {
   protected prevDeselect: any;
   private _entityType: EntityTypeEnum;
   public convertStatusMap: { [status: string]: string };
+  protected waitForClick: number;
 
   @Input() contextMenuActive: boolean;
   @Input() selectionMode: 'multiple' | 'single' | null = 'single';
@@ -43,7 +44,7 @@ export abstract class BaseTableView implements AfterViewInit, OnDestroy {
   }
 
   @Input() hasExperimentUpdate: boolean;
-  @Input() colsOrder: string[];
+  @Input() colsOrder: string[] = [];
   private _tableSortFields: SortMeta[];
   @Input() set tableSortFields(tableSortFields: SortMeta[]) {
     this._tableSortFields = tableSortFields;

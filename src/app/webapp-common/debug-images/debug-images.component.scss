@@ -4,6 +4,44 @@
   display: block;
   height: 100%;
   overflow-y: auto;
+  .connector-icon-container{
+    width: 32px;
+    height: 32px;
+    background: $blue-50;
+    &.active{
+      background: #fff;
+    }
+    border-radius: 32px;
+    position: absolute;
+    right: -16px;
+    top: 152px;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: $blue-300;
+    &.hidden{
+      display: none;
+    }
+  }
+  .navigator-container{
+    &.active{
+      background: $blue-50;
+    }
+    border-radius: 0;
+    margin: 0 0 24px -24px;
+    padding: 8px 0 4px 48px;
+    &.first{
+      border-radius: 6px 0 0 6px;
+      margin: 0 0 24px 0;
+      padding-left: 24px;
+    }
+    &.last{
+      border-radius: 0 6px 6px 0;
+      margin: 0 24px 24px -24px;
+    }
+
+  }
 
   header {
     margin-bottom: 24px;
@@ -60,7 +98,6 @@ sm-debug-images-view {
 }
 
 .metric-bar {
-  margin: 0 auto 24px;
   grid-gap: 12px;
   display: inline-grid;
   grid-template-columns: auto 200px auto auto auto auto auto auto auto;
@@ -73,7 +110,6 @@ sm-debug-images-view {
 
 .single-debug-images-container {
   display: block;
-  overflow: hidden;
   position: relative;
   flex: 1;
   min-width: 640px;
@@ -81,7 +117,7 @@ sm-debug-images-view {
   color: $blue-500;
   margin: 0 12px;
   &.separator:not(:last-child){
-    border-right: 1px solid #f2f4fc;
+    border-right: 1px solid $blue-100;
   }
 
 }
@@ -98,4 +134,5 @@ sm-debug-images-view {
   width: 300px;
   height: 250px;
 }
+
 

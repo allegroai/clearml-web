@@ -9,19 +9,19 @@ import {
   ViewChildren
 } from '@angular/core';
 import {Store} from '@ngrx/store';
-import {selectExperimentBeginningOfLog, selectExperimentLog, selectLogFilter} from '../../reducers';
+import {selectExperimentBeginningOfLog, selectExperimentLog, selectLogFilter, selectLogLoading} from '../../reducers';
 import {BehaviorSubject, combineLatest, Observable, Subscription} from 'rxjs';
 import {debounceTime, filter, map} from 'rxjs/operators';
 import {last} from 'lodash/fp';
 import {ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
-import {IExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
+import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {selectSelectedExperiment} from '~/features/experiments/reducers';
 import {
   downloadFullLog,
   getExperimentLog,
-  ResetLogFilter,
-  ResetOutput,
-  SetLogFilter
+  resetLogFilter,
+  resetOutput,
+  setLogFilter
 } from '../../actions/common-experiment-output.actions';
 import {ExperimentLogInfoComponent} from '../../dumb/experiment-log-info/experiment-log-info.component';
 import {ITableExperiment} from '@common/experiments/shared/common-experiment-model.model';
@@ -41,9 +41,11 @@ export class ExperimentOutputLogComponent implements OnInit, AfterViewInit, OnDe
   }
   private subs = new Subscription();
   private currExperiment: ISelectedExperiment;
+  private loading: boolean;
 
   public log$: Observable<any[]>;
   public filter$: Observable<string>;
+  public fetching$: Observable<boolean>;
   public logBeginning$: Observable<boolean>;
   public creator: string | Worker;
   public disabled: boolean;
@@ -52,10 +54,11 @@ export class ExperimentOutputLogComponent implements OnInit, AfterViewInit, OnDe
   private experiment$ = new BehaviorSubject<ITableExperiment>(null);
   @ViewChildren(ExperimentLogInfoComponent) private logRefs: QueryList<ExperimentLogInfoComponent>;
 
-  constructor(private store: Store<IExperimentInfoState>, private cdr: ChangeDetectorRef, private refresh: RefreshService) {
+  constructor(private store: Store<ExperimentInfoState>, private cdr: ChangeDetectorRef, private refresh: RefreshService) {
     this.log$ = this.store.select(selectExperimentLog);
     this.logBeginning$ = this.store.select(selectExperimentBeginningOfLog);
     this.filter$ = this.store.select(selectLogFilter);
+    this.fetching$ = this.store.select(selectLogLoading);
 
     this.subs.add(
       combineLatest([
@@ -68,10 +71,11 @@ export class ExperimentOutputLogComponent implements OnInit, AfterViewInit, OnDe
       )
         .subscribe(experiment => {
           if (this.currExperiment?.id !== experiment.id || this.currExperiment?.started !== experiment.started) {
-            this.store.dispatch(new ResetOutput());
+            this.store.dispatch(resetOutput());
             this.logRef?.reset();
             this.currExperiment = experiment;
             this.hasLog = undefined;
+            this.loading = true;
             this.cdr.detectChanges();
             this.store.dispatch(getExperimentLog({
               id: this.currExperiment.id,
@@ -95,6 +99,7 @@ export class ExperimentOutputLogComponent implements OnInit, AfterViewInit, OnDe
 
   ngOnInit() {
     this.subs.add(this.log$.subscribe(log => {
+      this.loading = false;
       if (log) {
         this.creator = last(log)?.worker ?? '';
         this.disabled = false;
@@ -104,10 +109,12 @@ export class ExperimentOutputLogComponent implements OnInit, AfterViewInit, OnDe
     }));
 
     this.subs.add(this.refresh.tick
+      .pipe(filter(() => !this.loading && !!this.currExperiment?.id && (!this.logRef || this.logRef.atEnd)))
       .subscribe((autoRefresh) => this.store.dispatch(getExperimentLog({
         id: this.currExperiment.id,
         direction: autoRefresh ? 'prev' : 'next',
-        from: last(this.logRef?.orgLogs)?.timestamp
+        from: last(this.logRef?.orgLogs)?.timestamp,
+        autoRefresh: true
       })))
     );
   }
@@ -116,16 +123,17 @@ export class ExperimentOutputLogComponent implements OnInit, AfterViewInit, OnDe
     this.subs.unsubscribe();
     this.logRef = null;
     this.logRefs = null;
-    this.store.dispatch(new ResetLogFilter());
-    this.store.dispatch(new ResetOutput());
+    this.store.dispatch(resetLogFilter());
+    this.store.dispatch(resetOutput());
   }
 
   public filterLog(event: KeyboardEvent) {
-    this.store.dispatch(new SetLogFilter((event.target as HTMLInputElement).value));
+    this.store.dispatch(setLogFilter({filter: (event.target as HTMLInputElement).value}));
   }
 
   getLogs({direction, from}: {direction: string; from?: number}) {
     this.store.dispatch(getExperimentLog({id: this.currExperiment.id, direction, from, refresh: !from}));
+    this.loading = true;
   }
 
   downloadLog() {

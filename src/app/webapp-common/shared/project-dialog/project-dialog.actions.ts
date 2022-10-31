@@ -7,30 +7,12 @@ import {createAction, props} from "@ngrx/store";
 const CREATE_PROJECT_DIALOG_PREFIX = 'CREATE_PROJECT_DIALOG_';
 
 export const CREATE_PROJECT_ACTIONS = {
-  GET_PROJECTS           : CREATE_PROJECT_DIALOG_PREFIX + 'GET_PROJECTS',
-  SET_PROJECTS           : CREATE_PROJECT_DIALOG_PREFIX + 'SET_PROJECTS',
   RESET_STATE            : CREATE_PROJECT_DIALOG_PREFIX + 'RESET_STATE',
   CREATE_NEW_PROJECT     : CREATE_PROJECT_DIALOG_PREFIX + 'CREATE_NEW_PROJECT',
   SET_CREATION_STATUS    : CREATE_PROJECT_DIALOG_PREFIX + 'SET_CREATION_STATUS',
   NAVIGATE_TO_NEW_PROJECT: CREATE_PROJECT_DIALOG_PREFIX + 'NAVIGATE_TO_NEW_PROJECT'
 };
 
-
-export class GetProjects implements ISmAction {
-  readonly type = CREATE_PROJECT_ACTIONS.GET_PROJECTS;
-
-  constructor() {
-  }
-}
-
-export class SetProjects implements ISmAction {
-  readonly type = CREATE_PROJECT_ACTIONS.SET_PROJECTS;
-  public payload: { projects: Array<Project> };
-
-  constructor(projects: Array<Project>) {
-    this.payload = {projects};
-  }
-}
 
 export class ResetState implements ISmAction {
   readonly type = CREATE_PROJECT_ACTIONS.RESET_STATE;

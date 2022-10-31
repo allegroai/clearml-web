@@ -49,9 +49,9 @@ export class ExperimentsCompareComponent implements OnInit, OnDestroy {
 
   updateUrl(ids: string[]) {
     this.router.navigate(
-      [{ids}],
+      [{ids}, ...this.activatedRoute.firstChild?.snapshot.url.map(segment => segment.path)],
       {
-        relativeTo: this.activatedRoute
+        relativeTo: this.activatedRoute,
       });
   }
 }

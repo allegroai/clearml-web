@@ -23,6 +23,9 @@
         </svg>
       </ng-template>
     </div>
+    <ng-container *ngIf="!showSecondTab">
+
+    </ng-container>
     <div *ngIf="!oneTabMode" [class.tab-hovered]="secondTabIsHovered" [class.show-second-tab]="showSecondTab"
          class="middle-tab" (click)="setShowSecondTab(true)" [class.second-tab-active]="showSecondTab"
          (mouseenter)="setSecondTabHover(true)" (mouseleave)="setSecondTabHover(false)">{{subFolderTitle}}</div>
@@ -35,9 +38,15 @@
     </div>
   </div>
   <div class="card-container" [class.is-folder]="isFolder" [style.height.px]="height">
-    <div class="tab-container first-tab-container" [class.hide]="showSecondTab" [class.is-folder]="isFolder"
-         [class.first-tab-hovered]="highlightFirstTab" [class.tab-hovered]="secondTabIsHovered"
-         (mouseenter)="setHighlightFirstTab(true)" (mouseleave)="setHighlightFirstTab(false)">
+    <div
+      *ngIf="!showSecondTab ; else secondTabContent"
+      class="tab-container first-tab-container"
+      [class.is-folder]="isFolder"
+      [class.first-tab-hovered]="highlightFirstTab"
+      [class.tab-hovered]="secondTabIsHovered"
+      (mouseenter)="setHighlightFirstTab(true)"
+      (mouseleave)="setHighlightFirstTab(false)"
+    >
       <header [class.empty]="(!header) && headerWarp?.children.length===0 ">
         <div #headerWarp>
           {{header}}
@@ -59,8 +68,10 @@
         </div>
       </footer>
     </div>
-    <div class="tab-container second-tab-container" [class.show]="showSecondTab">
-      <ng-content select="[secondTab]"></ng-content>
-    </div>
+    <ng-template #secondTabContent>
+      <div class="tab-container second-tab-container">
+        <ng-content select="[secondTab]"></ng-content>
+      </div>
+    </ng-template>
   </div>
 </div>

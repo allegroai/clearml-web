@@ -1,4 +1,9 @@
-<sm-simple-dataset-version-details [entity]="selected$ | async" [project]="projectId$ | async" [step]="selectedEntity"></sm-simple-dataset-version-details>
+<sm-simple-dataset-version-details
+  [entity]="selected$ | async"
+  [project]="projectId$ | async"
+  [step]="selectedEntity"
+  (editDescription)="editDescription($event)"
+></sm-simple-dataset-version-details>
 <div class="console-button">
   <button class="btn btn-cml-primary d-flex align-items-center" (click)="toggleDetails()">
     <i class="al-icon al-ico-console sm mr-3"></i>DETAILS

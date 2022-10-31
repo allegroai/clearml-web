@@ -13,8 +13,87 @@
   }
 
   ::ng-deep sm-table {
+    tr.header, tr.header th:hover {background-color: $blue-900 !important;}
     th:nth-child(1) {padding-left: 24px !important;}
     td:nth-child(1) {padding-left: 24px !important;}
+
+    .p-datatable-wrapper > .p-datatable-table {
+      width: 100%;
+    }
+
+
+    [filetype]::before {
+      content: "\e9d3"; // fallback icon (file)
+      color: #596c71;
+      font-family: 'trains';
+      font-size: 24px;
+      margin-right: 12px;
+      vertical-align: middle;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    // FILE TYPE ICONS
+    // ---------------
+
+    // Image
+    [filetype="png"]::before,
+    [filetype="jpg"]::before,
+    [filetype="jpeg"]::before,
+    [filetype="gif"]::before {
+      content: "\e958";
+      color: #3a7777;
+    }
+    
+    // Video
+    [filetype="mp4"]::before,
+    [filetype="mov"]::before,
+    [filetype="wmv"]::before,
+    [filetype="avi"]::before {
+      content: "\e9c5";
+      color: #846300;
+    }
+
+    // Audio
+    [filetype="mp3"]::before,
+    [filetype="aac"]::before,
+    [filetype="wav"]::before {
+      content: "\e9d0";
+      color: #833e65;
+    }
+
+    [filetype="csv"]::before {
+      content: "\e9c9";
+      color: #145f82;
+    }
+
+    [filetype="txt"]::before {
+      content: "\e9d6";
+      color: #803d3d;
+    }
+
+    [filetype="zip"]::before,
+    [filetype="gz"]::before {
+      content: "\e9ce";
+      color: #615555;
+    }
+
+    [filetype="pkl"]::before {
+      content: "\e9cd";
+      color: #48507f;
+    }
+
+    [filetype="py"]::before {
+      content: "\e9d7";
+      color: #d1902e;
+    }
+
+    [filetype="html"]::before,
+    [filetype="yaml"]::before,
+    [filetype="json"]::before {
+      content: "\e9a4"; // code-icon
+      color: #a35151;
+    }
   }
 }
 

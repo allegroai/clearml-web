@@ -26,7 +26,7 @@ export interface ISmCol {
   header?: string; // the title header.
   label?: string; // Labels to show in cards mode..
   hidden?: boolean; // the column visibility.
-  static?: boolean;
+  frozen?: boolean;
   headerType?: ColHeaderTypeEnum;
   filterType?: ColHeaderFilterTypeEnum;
   sortable?: boolean; // determine if the column shell be sortable
@@ -46,6 +46,7 @@ export interface ISmCol {
   isParam?: boolean;
   valueType?: string;
   projectId?: string;
+  datasetId?: string;
   textCenter?: boolean;
   andFilter?: boolean;
   excludeFilter?: boolean;

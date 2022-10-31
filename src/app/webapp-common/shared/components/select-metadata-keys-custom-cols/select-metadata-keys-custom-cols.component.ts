@@ -1,5 +1,5 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {ISmCol} from '../../../shared/ui-components/data/table/table.consts';
+import {ISmCol} from '../../ui-components/data/table/table.consts';
 
 @Component({
   selector: 'sm-select-metadata-keys-custom-cols',
@@ -12,7 +12,7 @@ export class SelectMetadataKeysCustomColsComponent {
   metadataColsIds: string[];
 
   @Input() set tableCols(cols: ISmCol[]) {
-    this.metadataColsIds = cols.filter(col => col.type === 'metadata').map(col => col.key);
+    this.metadataColsIds = cols.filter(col => col.type === 'metadata' || col.type==='hdmd').map(col => col.key);
   };
 
   @Output() addOrRemoveMetadataKeyFromColumns = new EventEmitter<{ key: string, show: boolean }>();

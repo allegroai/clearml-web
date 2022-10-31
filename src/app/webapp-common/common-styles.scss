@@ -120,7 +120,7 @@ $sm-theme: mat.define-light-theme($sm-theme-primary, $sm-theme-accent, $sm-theme
     background-color: transparent !important;
   }
 
-  .mat-drawer-side {
+  .mat-drawer {
     border-right: solid 1px $blue-100;
   }
 
@@ -176,6 +176,9 @@ span.highlight-text {
 hr {
   border: none;
   border-top: 1px solid rgba(0, 0, 0, .1);
+  &.dark{
+    border-top: 1px solid $blue-600;
+  }
 }
 
 .pointer {
@@ -511,13 +514,13 @@ html {
   padding: 15px 15px;
   background: $blue-25;
   color: $blue-400;
-  font-weight: 500;
 }
 
 .mat-menu-content .mat-menu-item {
+  height: 40px;
   font-size: 14px;
-  font-weight: 500;
   padding: 0 32px 0 16px;
+  border-radius: 4px;
 }
 
 // hide arrows for number inputs
@@ -651,8 +654,7 @@ $type-colors: (
 
 //material menu
 body .mat-menu-content:not(:empty) {
-  padding-top: 0;
-  padding-bottom: 0;
+  padding: 4px;
 
   .search-results {
     overflow: auto;

@@ -11,6 +11,7 @@ import {selectCurrentUser} from '../../core/reducers/users-reducer';
 import {neverShowPopupAgain} from '../../core/actions/layout.actions';
 import {FeaturesEnum} from '~/business-logic/model/users/featuresEnum';
 import {selectFeatures, selectTermsOfUse} from '~/core/reducers/users.reducer';
+import {mobilecheck} from '@common/shared/utils/mobile';
 
 interface Tips {
   [url: string]: Tip[];
@@ -38,9 +39,11 @@ export class TipsService {
   private modalRef: MatDialogRef<TipOfTheDayModalComponent, any>;
   private neverShowAgain: boolean;
   private firstTime: boolean = true;
+  private mobile: boolean;
 
   constructor(private httpClient: HttpClient, private store: Store<any>, private matDialog: MatDialog,
   ) {
+    this.mobile = mobilecheck();
   }
 
   initTipsService(showAllTips = true) {
@@ -84,7 +87,7 @@ export class TipsService {
     ])
       .pipe(
         debounceTime(1000),
-        filter(([, user, firstLogin, tos]) => !firstLogin && !!user && !tos.accept_required && !this.neverShowAgain && this.matDialog.openDialogs.length === 0),
+        filter(([, user, firstLogin, tos]) => !this.mobile && !firstLogin && !!user && !tos.accept_required && !this.neverShowAgain && this.matDialog.openDialogs.length === 0),
         distinctUntilChanged(([prev], [curr]) => prev?.[prev.length - 1] === curr[curr.length - 1]))
       .subscribe(([routerConfig]) => {
         const urlConfig = routerConfig?.join('/');

@@ -10,17 +10,23 @@
   </div>
 
 </div>
-<div>
-  <div class="instructions">Copy the below info for input to 'clearml-init' configuration request, or modify your existing clearml.conf</div>
+<div >
+  <nav class="config-nav" >
+    <sm-navbar-item header="LOCAL PYTHON" [active]="!isJupyter" class="small-nav" (click)="setIsJupyter(false)"></sm-navbar-item>
+    <sm-navbar-item header="JUPYTER NOTEBOOK" [active]="isJupyter" class="small-nav" (click)="setIsJupyter(true)"></sm-navbar-item>
+  </nav>
+  <div class="code-container" [class.jupyter]="isJupyter">
+  <ng-container  *ngIf="!isJupyter; else jupyter" >
+  <div class="instructions mt-2 mb-2">Copy the below info for input to 'clearml-init' configuration request, or modify your existing clearml.conf</div>
   <div class="mt-2 w-100 code">
     <div #content class="content"><span class="variable">api</span> {{ '{' }} <ng-content></ng-content>
     <span class="variable">web_server</span><span class="operation">:</span> <span class="string">{{WEB_SERVER_URL}}</span>
-    <span class="variable">api_server</span><span class="operation">:</span> <span class="string">{{displayedServerUrls?.apiServer || API_BASE_URL}}</span><ng-container *ngIf="fileBaseUrl">
+    <span class="variable">api_server</span><span class="operation">:</span> <span class="string">{{displayedServerUrls?.apiServer || API_BASE_URL}}</span><ng-container *ngIf="displayedServerUrls?.filesServer || fileBaseUrl">
     <span class="variable">files_server</span><span class="operation">:</span> <span class="string">{{displayedServerUrls?.filesServer || fileBaseUrl}}</span></ng-container><ng-container *ngIf="newCredential?.label">
     <span>{{'# ' + newCredential?.label}}</span></ng-container>
     <span class="variable">credentials</span> {{ '{' }}
         <span class="string">"access_key"</span> <span class="operation">=</span> <span class="string">"{{newCredential?.access_key}}"</span>
-        <span class="string">"secret_key"</span> <span class="operation">=</span> <span class="string">"{{newCredential?.secret_key}}"</span>
+        <span class="string">"secret_key" </span> <span class="operation">=</span> <span class="string">"{{newCredential?.secret_key}}"</span>
     }
 }</div>
     <sm-copy-clipboard
@@ -30,6 +36,20 @@
       [copyIcon]="'far fa-lg fa-copy'"
       [clipboardText]="content.textContent"></sm-copy-clipboard>
   </div>
+  </ng-container>
+  </div>
+  <ng-template #jupyter>
+    <div class="instructions mt-2 mb-2">Add the below to your notebook to configure ClearML</div>
+    <div class="code">
+      <div class="content" #jupyterCodeEl>{{jupyterCode}}</div>
+      <sm-copy-clipboard
+        [hideBackground]="false"
+        [label]="''"
+        [copyIcon]="'al-icon sm-md al-ico-copy-to-clipboard'"
+        theme="text-area"
+        [clipboardText]="jupyterCodeEl.innerHTML"></sm-copy-clipboard>
+    </div>
+  </ng-template>
 </div>
 </div>
 <form (submit)="onUpdateLabel()">

@@ -1,7 +1,7 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {ScalarKeyEnum} from '../../../../business-logic/model/events/scalarKeyEnum';
+import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {MatSelectChange} from '@angular/material/select';
-import {GroupByCharts} from '../../../experiments/reducers/common-experiment-output.reducer';
+import {GroupByCharts} from '@common/experiments/reducers/common-experiment-output.reducer';
 
 @Component({
   selector: 'sm-graph-settings-bar',
@@ -9,7 +9,7 @@ import {GroupByCharts} from '../../../experiments/reducers/common-experiment-out
   styleUrls: ['./graph-settings-bar.component.scss']
 })
 export class GraphSettingsBarComponent {
-  readonly ScalarKeyEnum = ScalarKeyEnum;
+  readonly scalarKeyEnum = ScalarKeyEnum;
   @Input() smoothWeight: number;
   @Input() xAxisType: ScalarKeyEnum = ScalarKeyEnum.Iter;
   @Input() groupBy: GroupByCharts = 'metric';

@@ -11,7 +11,7 @@
            matInput
            autocomplete="off"
            smUniqueNameValidator
-           [forbiddenPrefix]="location.value + '/'"
+           [forbiddenPrefix]="(location.value === projectsRoot) ? '' : location.value + '/'"
            [existingNames]="projectsNames"
            [pattern]="'^[^/]+$'"
            required minlength="3">
@@ -51,7 +51,7 @@
       >"{{location.value}}" <span class="new">(Create New)</span></mat-option>
       <mat-option
         *ngFor="let projectName of projectsNames | simpleFilter:location.value"
-        [value]="projectName" [smTooltip]="projectName" matTooltipPosition="above" smShowTooltipIfEllipsis
+        [value]="projectName" [smTooltip]="projectName"  smShowTooltipIfEllipsis
       >
         <div [innerHTML]="projectName | highlightSearchText:location.value"></div>
       </mat-option>

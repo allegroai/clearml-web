@@ -3,15 +3,16 @@ import {Router} from '@angular/router';
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {fromEvent, Observable, Subscription} from 'rxjs';
 import {Store} from '@ngrx/store';
-import {Project} from '../../../../business-logic/model/projects/project';
+import {Project} from '~/business-logic/model/projects/project';
 import {selectRecentProjects} from '../../common-dashboard.reducer';
 import {getRecentProjects} from '../../common-dashboard.actions';
-import {ProjectDialogComponent} from '../../../shared/project-dialog/project-dialog.component';
-import {resetSelectedProject, setSelectedProjectId} from '../../../core/actions/projects.actions';
-import {selectCurrentUser} from '../../../core/reducers/users-reducer';
+import {ProjectDialogComponent} from '@common/shared/project-dialog/project-dialog.component';
+import {resetSelectedProject, setSelectedProjectId} from '@common/core/actions/projects.actions';
+import {selectCurrentUser} from '@common/core/reducers/users-reducer';
 import {filter, take, throttleTime} from 'rxjs/operators';
-import {isExample} from '../../../shared/utils/shared-utils';
+import {isExample} from '@common/shared/utils/shared-utils';
 import { CARDS_IN_ROW } from '../../common-dashboard.const';
+import {trackById} from '@common/shared/utils/forms-track-by';
 
 @Component({
   selector   : 'sm-dashboard-projects',
@@ -23,6 +24,8 @@ export class DashboardProjectsComponent implements OnInit, AfterViewInit, OnDest
   private dialog: MatDialogRef<ProjectDialogComponent>;
   private sub: Subscription;
   readonly cardsInRow = CARDS_IN_ROW;
+  overflow: boolean;
+  trackById = trackById;
 
   @Output() width = new EventEmitter<number>();
 
@@ -50,7 +53,7 @@ export class DashboardProjectsComponent implements OnInit, AfterViewInit, OnDest
       .subscribe(() => this.width.emit(this.header.nativeElement.getBoundingClientRect().width));
   }
   public projectCardClicked(project: Project) {
-    this.router.navigateByUrl(`projects/${project.id}`);
+    (project.own_tasks===0 && project.sub_projects.length>0) ? this.router.navigateByUrl(`projects/${project.id}/projects`): this.router.navigateByUrl(`projects/${project.id}`);
     this.store.dispatch(setSelectedProjectId({projectId: project.id, example: isExample(project)}));
   }
 

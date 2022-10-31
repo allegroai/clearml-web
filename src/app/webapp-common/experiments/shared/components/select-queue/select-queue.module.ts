@@ -5,17 +5,18 @@ import {StoreModule} from '@ngrx/store';
 import {SelectQueueComponent} from './select-queue.component';
 import {SelectQueueEffects} from './select-queue.effects';
 import {selectQueueReducer} from './select-queue.reducer';
-import {SMSharedModule} from '../../../../shared/shared.module';
-import {FormsModule} from "@angular/forms";
+import {SMSharedModule} from '@common/shared/shared.module';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 
 @NgModule({
-    imports: [
-        CommonModule,
-        SMSharedModule,
-        EffectsModule.forFeature([SelectQueueEffects]),
-        StoreModule.forFeature('selectQueue', selectQueueReducer),
-        FormsModule
-    ],
+  imports: [
+    CommonModule,
+    SMSharedModule,
+    EffectsModule.forFeature([SelectQueueEffects]),
+    StoreModule.forFeature('selectQueue', selectQueueReducer),
+    FormsModule,
+    ReactiveFormsModule
+  ],
   providers      : [],
   declarations   : [SelectQueueComponent],
   exports        : [SelectQueueComponent]

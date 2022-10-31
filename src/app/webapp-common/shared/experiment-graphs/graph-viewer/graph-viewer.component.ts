@@ -71,7 +71,6 @@ export class GraphViewerComponent implements OnInit, AfterViewInit, OnDestroy {
   @HostListener('window:resize')
   onResize() {
     this.height = this.modalContainer.nativeElement.clientHeight - 80;
-    setTimeout(() => this.singleGraph.drawGraph(true), 0);
   }
 
   public chart: ExtFrame;
@@ -165,8 +164,6 @@ export class GraphViewerComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         this.chart = chart;
         this.iteration = currentPlotEvent.iter;
-        this.cdr.detectChanges();
-        setTimeout(() => this.singleGraph.drawGraph(true), 100);
       }));
     this.sub.add(this.beginningOfTime$.subscribe(beg => {
       this.beginningOfTime = beg;
@@ -197,7 +194,6 @@ export class GraphViewerComponent implements OnInit, AfterViewInit, OnDestroy {
         this.singleGraph.shouldRefresh = true;
         this.chart = cloneDeep(chart);
         this.cdr.detectChanges();
-        setTimeout(() => this.singleGraph.drawGraph(true), 0);
       }));
     this.sub.add(this.iterationChanged$
       .pipe(debounceTime(100))

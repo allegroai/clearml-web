@@ -1,5 +1,5 @@
 <sm-dialog-template [closeOnX]="false" (xClicked)="closeDialog(false)" header="Enqueue Experiment" iconClass="al-color blue-300 al-ico-enqueue">
-  <ng-form #enqueueForm="ngForm" class="d-flex flex-column light-theme">
+  <form class="d-flex flex-column light-theme" (submit)="queueControl.valid && closeDialog(true)">
     <p *ngIf="reference">
       <b [smTooltip]="reference.length > 80 ? reference : undefined">{{reference.length > 80 ? (reference | slice:0:77) + '...' : reference }}</b>
       will be scheduled for execution through the selected queue.
@@ -12,45 +12,46 @@
     <mat-form-field appearance="outline"
                     class="thin short"
                     floatLabel="always">
-
       <mat-label class="field-label">Queue</mat-label>
       <input type="text"
+             #text
+             tabindex="0"
              matInput
              smRequiredAutocompleteSelectionValidator
-             #autoComplete="ngModel"
-             name="queue"
-             [(ngModel)]="selectedQueue"
+             [formControl]="queueControl"
              [matAutocomplete]="auto">
       <mat-autocomplete
-        panelClass="light-theme"
         class="light-theme"
         [displayWith]="displayFn"
         #auto="matAutocomplete"
-        autoActiveFirstOption
       >
         <mat-option
           class="item"
-          *ngIf="(userAllowedToCreateQueue$ | async) &&(autoComplete.control.value && !(displayFn(autoComplete.control.value) | stringIncludedInArray:queuesNames))"
-          [value]="{name:autoComplete.control.value}"
-        >"{{autoComplete.value}}" <span class="new">(Create New)</span></mat-option>
+          *ngIf="(userAllowedToCreateQueue$ | async) &&(queueControl.value && !(displayFn(queueControl.value) | stringIncludedInArray:queuesNames))"
+          [value]="{name:queueControl.value}"
+        >"{{displayFn(queueControl.value)}}"<span class="new">(Create New)</span></mat-option>
         <mat-option
-          *ngFor="let option of queues  | filter:autoComplete.control.value: 'name'"
+          *ngFor="let option of filteredOptions | async; trackBy: trackById"
           [value]="option"
           [smTooltip]="option.name" smShowTooltipIfEllipsis
-          [innerHTML]="$any(option)?.name | highlightSearchText:autoComplete.control.value"></mat-option>
+        >
+          <span
+            *ngFor="let part of (text.value ? split(option.name, text.value) : [[option.name, text.value]]); let last=last"
+          >{{part[0]}}<b *ngIf="!last">{{part[1]}}</b></span>
+        </mat-option>
       </mat-autocomplete>
       <mat-error
-        *ngIf="enqueueForm?.getControl(autoComplete)?.errors && !enqueueForm?.getControl(autoComplete)?.errors['requiredAutocompleteSelection'] && enqueueForm?.getControl(autoComplete)?.errors['required'] ">
+        *ngIf="queueControl.hasError('requiredAutocompleteSelection') || queueControl.hasError('required')">
         Please provide a value
       </mat-error>
     </mat-form-field>
 
-  </ng-form>
+  </form>
   <div class="buttons">
     <button (click)="closeDialog(false)" class="btn btn-outline-neon">
       CANCEL
     </button>
-    <button (click)="closeDialog(true)" class="btn btn-neon yes-button" [disabled]="enqueueForm.invalid">
+    <button  (click)="closeDialog(true)" class="btn btn-neon yes-button" [disabled]="!queueControl.valid">
       ENQUEUE
     </button>
   </div>

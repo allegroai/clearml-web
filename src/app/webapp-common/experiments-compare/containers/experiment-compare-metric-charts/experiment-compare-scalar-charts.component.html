@@ -31,9 +31,11 @@
       [hiddenList]="listOfHidden | async"
       [isGroupGraphs]="false"
       [isCompare]="true"
+      [hoverMode]="hoverMode$ | async"
       [smoothWeight]="(smoothWeight$ | async)"
       [xAxisType]="xAxisType$ | async"
       (resetGraphs)="resetMetrics()"
+      (hoverModeChanged)="hoverModeChanged($event)"
     >
     </sm-experiment-graphs>
   </mat-drawer-content>

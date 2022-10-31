@@ -9,7 +9,9 @@
       (moveToClicked)="moveToClicked.emit($event)"
       *ngIf="!last || (last && noMoreProjects) || showLast"
       [hideMenu]="['All Experiments'].includes(project.name) || $any(project).isRoot || isExample(project)"
-      [project]="project">
+      [project]="project"
+      [projectsNames]="projectsNames"
+    >
     </sm-project-card>
   </ng-container>
 

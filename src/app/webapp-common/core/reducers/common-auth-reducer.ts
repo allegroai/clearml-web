@@ -4,7 +4,7 @@ import {
   cancelS3Credentials,
   removeCredential, removeSignedUrl, resetCredential,
   resetDontShowAgainForBucketEndpoint,
-  saveS3Credentials, setCredentialLabel, setSignedUrl,
+  saveS3Credentials, setCredentialLabel, setS3Credentials, setSignedUrl,
   showLocalFilePopUp,
   updateAllCredentials,
   updateS3Credential
@@ -12,6 +12,7 @@ import {
 import {CredentialKey} from '~/business-logic/model/auth/credentialKey';
 import {inBucket} from '@common/settings/admin/base-admin.service';
 import {filter, map, takeWhile, timeout} from 'rxjs/operators';
+import {isEqual} from 'lodash/fp';
 
 export interface Credentials {
   Bucket?: string;
@@ -106,6 +107,13 @@ export const commonAuthReducer = [
       };
     } else {
       return {...state, s3BucketCredentials: {bucketCredentials: [...state.s3BucketCredentials.bucketCredentials, action.newCredential]}};
+    }
+  }),
+  on(setS3Credentials, (state, action) => {
+    if (isEqual(state.s3BucketCredentials?.bucketCredentials, action.bucketCredentials)) {
+      return state;
+    } else {
+      return {...state, s3BucketCredentials: {bucketCredentials: action.bucketCredentials}};
     }
   }),
   on(resetCredential, state => ({...state, newCredential: initAuth.newCredential})),

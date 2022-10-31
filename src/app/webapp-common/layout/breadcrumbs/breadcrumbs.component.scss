@@ -24,7 +24,7 @@ span {
       color: #fff;
     }
   }
-  .crumb:first-of-type {
+  .crumb.first {
     text-transform: uppercase;
   }
 
@@ -41,7 +41,7 @@ span {
       color: #fff;
     }
 
-    &:last-of-type {
+    &.last {
       font-weight: 700;
       color: #fff;
     }

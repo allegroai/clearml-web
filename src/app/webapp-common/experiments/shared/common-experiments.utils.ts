@@ -18,13 +18,16 @@ export const filterArchivedExperiments = (experiments, showArchived): ITableExpe
 
 export const getRoundedNumber = (value: number) => Math.round(value * Math.pow(10, DIGITS_AFTER_DECIMAL)) / Math.pow(10, DIGITS_AFTER_DECIMAL);
 
-export const convertDurationFilter = (filter: string[]): string | string[] => {
-  let newFilter;
-  if (filter[0]) {
-    newFilter = `>=${filter[0]}`;
-  }
-  if (filter[1]) {
-    newFilter = newFilter ? [newFilter, `<=${filter[1]}`] : `<=${filter[1]}`;
-  }
-  return newFilter;
+export const downloadObjectAsJson = (exportObj, exportName) => {
+  const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(exportObj));
+  const downloadAnchorNode = document.createElement('a');
+  downloadAnchorNode.href= dataStr;
+  downloadAnchorNode.download=  exportName + '.json';
+  downloadAnchorNode.click();
+};
+
+export const encodeHyperParameter = (path: string) => {
+  const [prefix, section, ...rest] = path.split('.');
+  const param = rest.slice(0, -1);
+  return [prefix, section, rest.length > 0 ? param.join('%2E') : null, 'value'].filter(val => val !== null).join('.');
 };

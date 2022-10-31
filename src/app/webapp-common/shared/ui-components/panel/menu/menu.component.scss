@@ -19,22 +19,10 @@
     text-decoration: none;
   }
 
-
-  .cell {
-    padding-right: 3px;
-    padding-left: 3px;
-    //height: 30px;
-    display: flex;
-    align-items: center;
-
-    &.caret {
-      margin-left: 4px;
-    }
-  }
-
   .hidden-button {
     opacity: 0;
     padding: 0;
+    border: none;
   }
 
 }

@@ -90,6 +90,7 @@ export class SelectCompareHeaderEffects {
     debounceTime(500),
     switchMap(([action, tasksIds, cols, metricCols]) => this.experimentsApi.tasksGetAllEx({
         id: action.tasksIds ? action.tasksIds : tasksIds,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
         only_fields: [...new Set([...MINIMUM_ONLY_FIELDS,
           ...flatten(cols.filter(col => col.id !== 'selected' && !col.hidden).map(col => col.getter || col.id)),
           ...(metricCols ? flatten(metricCols.map(col => col.getter || col.id)) : [])])] as string[]

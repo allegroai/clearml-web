@@ -39,6 +39,10 @@ import {MultiLineTooltipComponent} from './components/multi-line-tooltip/multi-l
 import {ExperimentCompareGeneralDataComponent} from '../experiments-compare/dumbs/experiment-compare-general-data/experiment-compare-general-data.component';
 import { BaseEntityHeaderComponent } from './entity-page/base-entity-header/base-entity-header.component';
 import { IdBadgeComponent } from './components/id-badge/id-badge.component';
+import {
+  SelectMetadataKeysCustomColsComponent
+} from './components/select-metadata-keys-custom-cols/select-metadata-keys-custom-cols.component';
+import {ScrollingModule} from '@angular/cdk/scrolling';
 
 const _declarations = [
   ExperimentInfoHeaderStatusProgressBarComponent,
@@ -59,6 +63,7 @@ const _declarations = [
   ScrollTextareaComponent,
   SortHumanizePipe,
   ShowOnlyUserWorkComponent,
+  SelectMetadataKeysCustomColsComponent,
   MultiLineTooltipComponent,
   ExperimentCompareGeneralDataComponent,
 ];
@@ -77,7 +82,8 @@ const _declarations = [
     MatProgressSpinnerModule,
     MatButtonToggleModule,
     MatSnackBarModule,
-    ChipsModule
+    ChipsModule,
+    ScrollingModule
   ],
   declarations: [
     _declarations,

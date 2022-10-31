@@ -75,7 +75,7 @@ export class SelectAutocompleteWithChipsComponent extends TemplateFormSectionBas
   @Input() set focusIt(isFocus) {
     if (isFocus && this.autofocus) {
       this._focusIt = isFocus;
-      setTimeout(() => this.autocompleteInput.nativeElement.focus());
+      setTimeout(() => this.autocompleteInput.nativeElement.focus(), 50);
     } else {
       this._focusIt = false;
     }

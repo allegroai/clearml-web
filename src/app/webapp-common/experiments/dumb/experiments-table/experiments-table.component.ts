@@ -22,12 +22,17 @@ import {hyperParamSelectedExperiments, selectAllExperiments} from '../../actions
 import {createFiltersFromStore, excludedKey, uniqueFilterValueAndExcluded} from '@common/shared/utils/tableParamEncode';
 import {getRoundedNumber} from '../../shared/common-experiments.utils';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
+import {MAT_TOOLTIP_DEFAULT_OPTIONS, MatTooltipDefaultOptions} from '@angular/material/tooltip';
 
 @Component({
   selector: 'sm-experiments-table',
   templateUrl: './experiments-table.component.html',
   styleUrls: ['./experiments-table.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [{
+    provide: MAT_TOOLTIP_DEFAULT_OPTIONS,
+    useValue: {showDelay: 500, position: 'above'} as MatTooltipDefaultOptions,
+  }]
 })
 export class ExperimentsTableComponent extends BaseTableView implements OnInit, OnDestroy {
   readonly experimentsTableColFields = EXPERIMENTS_TABLE_COL_FIELDS;
@@ -58,7 +63,7 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit, 
   @Input() set experiments(experiments: Array<ITableExperiment>) {
     this._experiments = experiments;
 
-    this.tableCols?.filter(tableCol => tableCol.id.startsWith('last_metrics')).forEach(col => experiments.forEach(exp => {
+    this.tableCols?.filter(tableCol => tableCol.id.startsWith('last_metrics')).forEach(col => experiments?.forEach(exp => {
       const value = get(col.id, exp);
       this.roundedMetricValues[col.id] = this.roundedMetricValues[col.id] || {};
       this.roundedMetricValues[col.id][exp.id] = value && getRoundedNumber(value) !== value;
@@ -82,7 +87,8 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit, 
   @Input() set users(users: User[]) {
     this.filtersOptions[EXPERIMENTS_TABLE_COL_FIELDS.USER] = users?.map(user => ({
       label: user.name ? user.name : 'Unknown User',
-      value: user.id
+      value: user.id,
+      tooltip: ''
     }));
     this.sortOptionsList(EXPERIMENTS_TABLE_COL_FIELDS.USER);
   }
@@ -152,6 +158,9 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit, 
   }
 
   @Input() set projects(projects) {
+    if (!projects) {
+      return;
+    }
     this.filtersOptions[EXPERIMENTS_TABLE_COL_FIELDS.PROJECT] = projects.map(project => ({
       label: project.name,
       value: project.id,
@@ -192,7 +201,7 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit, 
     return this._tableFilters;
   }
 
-  @Output() experimentSelectionChanged = new EventEmitter<ITableExperiment>();
+  @Output() experimentSelectionChanged = new EventEmitter<{experiment: ITableExperiment; openInfo?: boolean}>();
   @Output() experimentsSelectionChanged = new EventEmitter<Array<ITableExperiment>>();
   @Output() loadMoreExperiments = new EventEmitter();
   @Output() sortedChanged = new EventEmitter<{ isShift: boolean; colId: ISmCol['id'] }>();
@@ -258,7 +267,7 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit, 
     }
   }
 
-  tableRowClicked(event: { e: MouseEvent; data: ITableExperiment }) {
+  tableRowClicked(event: { e: MouseEvent; data: ITableExperiment}) {
     if (this._selectedExperiments.some(exp => exp.id === event.data.id)) {
       this.onContextMenu({e: event.e, rowData: event.data, backdrop: true});
     } else {

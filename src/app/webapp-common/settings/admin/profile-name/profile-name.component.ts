@@ -1,15 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import {ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {filter, take} from 'rxjs/operators';
 import {selectCurrentUser} from '@common/core/reducers/users-reducer';
 import {getAllCredentials} from '@common/core/actions/common-auth.actions';
 import {updateCurrentUser} from '@common/core/actions/users.actions';
-import {GetCurrentUserResponseUserObject} from '../../../../business-logic/model/users/getCurrentUserResponseUserObject';
+import {GetCurrentUserResponseUserObject} from '~/business-logic/model/users/getCurrentUserResponseUserObject';
 
 @Component({
   selector: 'sm-profile-name',
   templateUrl: './profile-name.component.html',
-  styleUrls: ['./profile-name.component.scss']
+  styleUrls: ['./profile-name.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProfileNameComponent implements OnInit {
 
@@ -24,7 +25,6 @@ export class ProfileNameComponent implements OnInit {
         this.store.dispatch(getAllCredentials());
       });
   }
-
 
   nameChange(updatedUserName: string, currentUser: GetCurrentUserResponseUserObject) {
     const user = {name: updatedUserName, user: currentUser.id};

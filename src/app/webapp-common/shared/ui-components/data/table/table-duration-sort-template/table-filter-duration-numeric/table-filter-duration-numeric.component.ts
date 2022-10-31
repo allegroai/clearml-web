@@ -6,14 +6,12 @@ import {
   OnInit,
 } from '@angular/core';
 import {IDurationThan, DurationParameters, TableDurationSortBase} from '../table-duration-sort.base';
-import {FormControl, FormGroup} from '@angular/forms';
+import {UntypedFormControl, UntypedFormGroup} from '@angular/forms';
 import {distinctUntilChanged, debounceTime, map} from 'rxjs/operators';
 import {merge, Subscription} from 'rxjs';
 import {isNil} from 'lodash/fp';
 
-function getDurationValue(data: IDurationThan) {
-  return isNil(data.value) || !data.checked ? '' : data.value;
-}
+const getDurationValue = (data: IDurationThan) => isNil(data.value) || !data.checked ? '' : data.value;
 
 
 @Component({
@@ -24,9 +22,9 @@ function getDurationValue(data: IDurationThan) {
 
 })
 export class TableFilterDurationNumericComponent extends TableDurationSortBase implements OnInit, OnDestroy {
-  iterationsForm = new FormGroup( {
-    greaterThan: new FormControl(''),
-    lessThan: new FormControl('')
+  iterationsForm = new UntypedFormGroup( {
+    greaterThan: new UntypedFormControl(''),
+    lessThan: new UntypedFormControl('')
   });
   private subscription: Subscription;
 

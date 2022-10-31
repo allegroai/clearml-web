@@ -6,7 +6,7 @@ import {selectCompanyTags, selectProjectTags, selectTagsFilterByProject} from '@
 import {addTag, removeTag} from '../../actions/common-experiments-menu.actions';
 import {TagsMenuComponent} from '@common/shared/ui-components/tags/tags-menu/tags-menu.component';
 import {MenuComponent} from '@common/shared/ui-components/panel/menu/menu.component';
-import {ActivateEdit, DeactivateEdit} from '../../actions/common-experiments-info.actions';
+import {activateEdit, deactivateEdit} from '../../actions/common-experiments-info.actions';
 import {EXPERIMENTS_STATUS_LABELS, ExperimentTagsEnum} from '~/features/experiments/shared/experiments.const';
 import {EXPERIMENT_COMMENT} from '../experiment-general-info/experiment-general-info.component';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -106,7 +106,7 @@ export class ExperimentInfoHeaderComponent implements OnDestroy {
     if (!this.tagMenu) {
       return;
     }
-    window.setTimeout(() => this.store.dispatch(new ActivateEdit('tags')), 200);
+    window.setTimeout(() => this.store.dispatch(activateEdit('tags')), 200);
     this.tagMenu.position = {x: event.clientX, y: event.clientY};
     window.setTimeout(() => {
       this.tagMenu.openMenu();
@@ -123,15 +123,15 @@ export class ExperimentInfoHeaderComponent implements OnDestroy {
   }
 
   tagsMenuClosed() {
-    this.store.dispatch(new DeactivateEdit());
+    this.store.dispatch(deactivateEdit());
     this.tagMenuContent.clear();
   }
 
   editExperimentName(edit) {
     if (edit) {
-      this.store.dispatch(new ActivateEdit('ExperimentName'));
+      this.store.dispatch(activateEdit('ExperimentName'));
     } else {
-      this.store.dispatch(new DeactivateEdit());
+      this.store.dispatch(deactivateEdit());
     }
   }
 
@@ -145,7 +145,7 @@ export class ExperimentInfoHeaderComponent implements OnDestroy {
 
   onDescriptionHandler() {
     this.router.navigate(['general'], {relativeTo: this.activatedRoute});
-    this.store.dispatch(new ActivateEdit(EXPERIMENT_COMMENT));
+    this.store.dispatch(activateEdit(EXPERIMENT_COMMENT));
   }
 
   copyToClipboard() {

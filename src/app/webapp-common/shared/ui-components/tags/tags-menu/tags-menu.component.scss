@@ -12,6 +12,7 @@
 .buttons-container {
   height: 300px;
   overflow: auto;
+  margin-top: 4px;
   //&.searching {
   //  height: unset;
   //}
@@ -34,12 +35,12 @@
   max-width: 100%;
   position: relative;
   font-size: 14px;
-  font-weight: 500;
   background-color: transparent;
   width: 100%;
+  border-radius: 4px;
 
   &:hover {
-    background-color: $blue-100;
+    background-color: $blue-50;
   }
 
   .new {
@@ -49,7 +50,7 @@
 }
 
 hr {
-  margin: 0 !important;
+  margin: 4px -4px !important;
 }
 
 :host {

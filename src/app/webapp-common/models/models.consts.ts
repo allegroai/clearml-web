@@ -107,7 +107,6 @@ export const MODELS_TABLE_COLS: ISmCol[] = [
     searchableFilter: true,
     filterable      : true,
     sortable        : false,
-    static          : true,
     header          : 'USER',
     style           : {width: '240px'},
     showInCardFilters: true

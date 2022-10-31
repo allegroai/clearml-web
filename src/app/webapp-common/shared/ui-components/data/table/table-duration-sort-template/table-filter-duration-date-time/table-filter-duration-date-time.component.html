@@ -37,7 +37,7 @@
            (click)="hasGreaterThanValue ? onResetHandler('greaterThan') : onAutoFillCurrentTimeHandler('greaterThan')"
            [smTooltip]="hasGreaterThanValue ? 'Clear' : 'Autofill current time'"
 
-           matTooltipPosition="above"
+           
         ></i>
       </div>
 
@@ -84,7 +84,7 @@
           [class]="'al-icon ' + (hasLessThanValue ? 'al-ico-dialog-x' : 'al-ico-time') + ' sm'"
            (click)="hasLessThanValue ? onResetToDateInput() : onFakeNowCheckbox()"
            [smTooltip]="hasLessThanValue ? 'Clear' : 'Autofill current time'"
-           matTooltipPosition="above"
+           
         ></i>
       </div>
     </div>

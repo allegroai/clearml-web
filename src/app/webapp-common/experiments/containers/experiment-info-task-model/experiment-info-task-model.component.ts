@@ -1,19 +1,19 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {selectExperimentConfigObj, selectExperimentInfoErrors, selectExperimentSelectedConfigObjectFromRoute, selectExperimentUserKnowledge, selectIsExperimentSaving} from '../../reducers';
-import {Model} from '../../../../business-logic/model/models/model';
+import {Model} from '~/business-logic/model/models/model';
 import {Observable, Subscription} from 'rxjs';
-import {IExperimentInfo} from '../../../../features/experiments/shared/experiment-info.model';
-import {IExperimentInfoState} from '../../../../features/experiments/reducers/experiment-info.reducer';
-import {experimentSectionsEnum} from '../../../../features/experiments/shared/experiments.const';
-import {selectIsExperimentEditable, selectSelectedExperiment} from '../../../../features/experiments/reducers';
-import {ActivateEdit, CancelExperimentEdit, DeactivateEdit, getExperimentConfigurationObj, saveExperimentConfigObj, SetExperimentErrors, SetExperimentFormErrors} from '../../actions/common-experiments-info.actions';
-import {ConfigurationItem} from '../../../../business-logic/model/tasks/configurationItem';
-import {EditJsonComponent} from '../../../shared/ui-components/overlay/edit-json/edit-json.component';
+import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
+import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
+import {experimentSectionsEnum} from '~/features/experiments/shared/experiments.const';
+import {selectIsExperimentEditable, selectSelectedExperiment} from '~/features/experiments/reducers';
+import {activateEdit, cancelExperimentEdit, deactivateEdit, getExperimentConfigurationObj, saveExperimentConfigObj, setExperimentErrors, setExperimentFormErrors} from '../../actions/common-experiments-info.actions';
+import {ConfigurationItem} from '~/business-logic/model/tasks/configurationItem';
+import {EditJsonComponent} from '@common/shared/ui-components/overlay/edit-json/edit-json.component';
 import {take} from 'rxjs/operators';
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
-import {ConfirmDialogComponent} from '../../../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
-import {EditableSectionComponent} from '../../../shared/ui-components/panel/editable-section/editable-section.component';
+import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
+import {EditableSectionComponent} from '@common/shared/ui-components/panel/editable-section/editable-section.component';
 
 @Component({
   selector: 'sm-experiment-info-task-model',
@@ -24,7 +24,7 @@ export class ExperimentInfoTaskModelComponent implements OnInit, OnDestroy {
   public selectedExperimentSubscription: Subscription;
   private selectedExperiment: IExperimentInfo;
   public editable$: Observable<boolean>;
-  public errors$: Observable<IExperimentInfoState['errors']>;
+  public errors$: Observable<ExperimentInfoState['errors']>;
   public userKnowledge$: Observable<Map<experimentSectionsEnum, boolean>>;
   public modelLabels$: Observable<Model['labels']>;
   public saving$: Observable<boolean>;
@@ -42,7 +42,7 @@ export class ExperimentInfoTaskModelComponent implements OnInit, OnDestroy {
 
   @ViewChild('prototext') prototext: EditableSectionComponent;
 
-  constructor(private store: Store<IExperimentInfoState>, private dialog: MatDialog) {
+  constructor(private store: Store<ExperimentInfoState>, private dialog: MatDialog) {
     this.configInfo$ = this.store.select(selectExperimentConfigObj);
     this.selectedConfigObj$ = this.store.select(selectExperimentSelectedConfigObjectFromRoute);
     this.editable$ = this.store.select(selectIsExperimentEditable);
@@ -64,7 +64,7 @@ export class ExperimentInfoTaskModelComponent implements OnInit, OnDestroy {
         this.store.dispatch(getExperimentConfigurationObj());
       }
     });
-    this.store.dispatch(new SetExperimentFormErrors(null));
+    this.store.dispatch(setExperimentFormErrors({errors: null}));
   }
 
   ngOnDestroy(): void {
@@ -77,21 +77,21 @@ export class ExperimentInfoTaskModelComponent implements OnInit, OnDestroy {
   }
 
   onFormErrorsChanged(event: { field: string; errors: any }) {
-    this.store.dispatch(new SetExperimentErrors({[event.field]: event.errors}));
+    this.store.dispatch(setExperimentErrors({[event.field]: event.errors}));
   }
 
   saveModelData(configuration: ConfigurationItem[]) {
     this.store.dispatch(saveExperimentConfigObj({configuration}));
-    this.store.dispatch(new DeactivateEdit());
+    this.store.dispatch(deactivateEdit());
   }
 
   cancelModelChange() {
-    this.store.dispatch(new DeactivateEdit());
-    this.store.dispatch(new CancelExperimentEdit());
+    this.store.dispatch(deactivateEdit());
+    this.store.dispatch(cancelExperimentEdit());
   }
 
   activateEditChanged(sectionName: string) {
-    this.store.dispatch(new ActivateEdit(sectionName));
+    this.store.dispatch(activateEdit(sectionName));
   }
 
   editPrototext() {
@@ -104,7 +104,7 @@ export class ExperimentInfoTaskModelComponent implements OnInit, OnDestroy {
         this.prototext.cancelClickedEvent();
       } else {
         this.saveModelData([{name: this.formData.name, type: this.formData.type, value: data, description: this.formData.description}]);
-        this.store.dispatch(new DeactivateEdit());
+        this.store.dispatch(deactivateEdit());
       }
     });
   }
@@ -124,7 +124,7 @@ export class ExperimentInfoTaskModelComponent implements OnInit, OnDestroy {
       if (confirmed) {
         this.activateEditChanged('prototext');
         this.saveModelData([{name: this.formData.name, type: this.formData.type, value: '', description: this.formData.description}]);
-        this.store.dispatch(new DeactivateEdit());
+        this.store.dispatch(deactivateEdit());
       }
     });
   }

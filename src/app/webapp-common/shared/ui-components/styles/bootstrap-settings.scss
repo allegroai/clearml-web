@@ -417,7 +417,7 @@ label.mat-slide-toggle-label {
 
   &:not([disabled]) {
     &:hover {
-      filter: brightness(100);
+      color: $blue-100;
     }
   }
 

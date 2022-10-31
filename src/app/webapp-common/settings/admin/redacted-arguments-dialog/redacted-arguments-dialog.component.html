@@ -1,0 +1,33 @@
+<sm-dialog-template header="REDACTED ARGUMENTS" iconClass="al-ico-access-key">
+  <form class="form-container" #redactedArgumentsForm ='ngForm'>
+    <div class="d-flex align-items-center" *ngFor="let redactedArgument of redactedArguments; let i = index" >
+      <mat-form-field appearance="outline" floatLabel="always" class="argument-input">
+        <mat-error *ngIf="redactedArg?.errors?.required">Required</mat-error>
+        <input type="text"
+               matInput
+               required
+               #redactedArg="ngModel"
+               [autocomplete]="'off'"
+               [name]="'ar' + i | uuid"
+               [(ngModel)]="redactedArgument.key"
+               placeholder="Argument">
+      </mat-form-field>
+      <div>
+        <i class="al-icon al-ico-trash al-color blue-300 pointer flashing-icon sm-md" (click)="redactedArguments.splice(i, 1)"></i>
+      </div>
+    </div>
+    <span class="pointer add" (click)="redactedArguments.push({key:''})"><i class="al-icon al-ico-plus sm mr3"></i><span class="link">Add</span></span>
+  </form>
+  <div class="buttons">
+    <button type="submit"
+            (click)="applyChanges()"
+            [disabled]="redactedArgumentsForm.invalid"
+            class="btn btn-neon yes-button">
+      SAVE
+    </button>
+    <button (click)="closeDialog()" class="btn btn-outline-neon">
+      CANCEL
+    </button>
+  </div>
+
+</sm-dialog-template>

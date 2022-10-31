@@ -1,16 +1,16 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {selectExperimentConfiguration, selectExperimentHyperParamsInfoData, selectExperimentHyperParamsSelectedSectionFromRoute, selectExperimentSelectedConfigObjectFromRoute, selectIsExperimentSaving, selectIsSelectedExperimentInDev} from '../../reducers';
-import {ICommonExperimentInfoState} from '../../reducers/common-experiment-info.reducer';
-import {IExperimentInfo} from '../../../../features/experiments/shared/experiment-info.model';
-import {selectBackdropActive} from '../../../core/reducers/view.reducer';
+import {CommonExperimentInfoState} from '../../reducers/common-experiment-info.reducer';
+import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
+import {selectBackdropActive} from '@common/core/reducers/view.reducer';
 import {combineLatest, Observable, Subscription} from 'rxjs';
-import {selectIsExperimentEditable, selectSelectedExperiment} from '../../../../features/experiments/reducers';
-import {selectRouterConfig, selectRouterParams} from '../../../core/reducers/router-reducer';
+import {selectIsExperimentEditable, selectSelectedExperiment} from '~/features/experiments/reducers';
+import {selectRouterConfig, selectRouterParams} from '@common/core/reducers/router-reducer';
 import {ActivatedRoute, Params, Router} from '@angular/router';
-import {ParamsItem} from '../../../../business-logic/model/tasks/paramsItem';
+import {ParamsItem} from '~/business-logic/model/tasks/paramsItem';
 import {debounceTime, filter, tap, withLatestFrom} from 'rxjs/operators';
-import {ActivateEdit, getExperimentConfigurationNames, getExperimentConfigurationObj, SetExperimentFormErrors} from '../../actions/common-experiments-info.actions';
+import {activateEdit, getExperimentConfigurationNames, getExperimentConfigurationObj, setExperimentFormErrors} from '../../actions/common-experiments-info.actions';
 import {getOr, min} from 'lodash/fp';
 
 @Component({
@@ -34,7 +34,7 @@ export class ExperimentInfoHyperParametersComponent implements OnInit, OnDestroy
   public minimized: boolean;
 
   constructor(
-    private store: Store<ICommonExperimentInfoState>,
+    private store: Store<CommonExperimentInfoState>,
     protected router: Router,
     private route: ActivatedRoute
   ) {
@@ -69,10 +69,10 @@ export class ExperimentInfoHyperParametersComponent implements OnInit, OnDestroy
         this.store.select(selectExperimentSelectedConfigObjectFromRoute)
       )).subscribe(([[hyperparams, configuration], selectedHyperParam, selectedConfig]) => {
       if ((hyperparams && configuration && !(selectedHyperParam in hyperparams) && !(selectedConfig in configuration))) {
-        this.router.navigate(['hyper-param', min(Object.keys(hyperparams))], {relativeTo: this.route, replaceUrl: true});
+        this.router.navigate(['hyper-param', min(Object.keys(hyperparams))], {relativeTo: this.route, replaceUrl: true, queryParamsHandling: 'preserve'});
       }
     });
-    this.store.dispatch(new SetExperimentFormErrors(null));
+    this.store.dispatch(setExperimentFormErrors({errors: null}));
   }
 
   ngOnDestroy(): void {
@@ -81,7 +81,7 @@ export class ExperimentInfoHyperParametersComponent implements OnInit, OnDestroy
   }
 
   activateEditChanged(e) {
-    this.store.dispatch(new ActivateEdit(e.sectionName));
+    this.store.dispatch(activateEdit(e.sectionName));
   }
 
 }

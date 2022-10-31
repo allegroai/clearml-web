@@ -1,8 +1,8 @@
 import {Component, Input} from '@angular/core';
-import {FeaturesEnum} from '../../../../business-logic/model/users/featuresEnum';
-import {selectRouterConfig} from '../../../../webapp-common/core/reducers/router-reducer';
+import {FeaturesEnum} from '~/business-logic/model/users/featuresEnum';
+import {selectRouterConfig} from '@common/core/reducers/router-reducer';
 import {Store} from '@ngrx/store';
-import {IExperimentInfoState} from '../../reducers/experiment-info.reducer';
+import {ExperimentInfoState} from '../../reducers/experiment-info.reducer';
 import {Observable} from 'rxjs';
 
 
@@ -22,14 +22,14 @@ export class ExperimentInfoNavbarComponent {
     this.baseInfoRoute = minimized ? ['info-output'] : [];
     this._minimized = minimized;
   }
-  get minimized(){
+  get minimized() {
     return this._minimized;
   }
 
   @Input() splitSize: number;
 
 
-  constructor(private store: Store<IExperimentInfoState>,) {
+  constructor(private store: Store<ExperimentInfoState>) {
     this.routerConfig$ = this.store.select(selectRouterConfig);
   }
   navbarOverflowed($event: boolean) {

@@ -3,6 +3,7 @@ import {ProjectsGetAllResponseSingle} from '~/business-logic/model/projects/proj
 import {CircleTypeEnum} from '~/shared/constants/non-common-consts';
 import {Project} from '~/business-logic/model/projects/project';
 import {ICONS} from '@common/constants';
+import {trackById} from '@common/shared/utils/forms-track-by';
 
 
 @Component({
@@ -13,8 +14,13 @@ import {ICONS} from '@common/constants';
 })
 export class ProjectCardComponent {
   private _project: ProjectsGetAllResponseSingle;
+  private projectNameActive = false;
   public computeTime: string;
+  trackById = trackById;
+  readonly circleTypeEnum = CircleTypeEnum;
+  readonly icons = ICONS;
 
+  @Input() projectsNames: string[];
   @Input() set project(data: Project) {
     this._project = data;
     this.computeTime = this.convertSecToDaysHrsMinsSec(data.stats?.active?.total_runtime);
@@ -32,10 +38,7 @@ export class ProjectCardComponent {
   @Output() moveToClicked = new EventEmitter<string>();
   @Output() newProjectClicked = new EventEmitter<string>();
   @ViewChild('projectName', {static: true}) projectName;
-  readonly circleTypeEnum = CircleTypeEnum;
-  readonly ICONS = ICONS;
 
-  private projectNameActive = false;
 
   public convertSecToDaysHrsMinsSec(secs) {
     const dayInSec = 60 * 60 * 24;

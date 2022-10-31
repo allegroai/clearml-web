@@ -1,15 +1,21 @@
 @import "../../../../webapp-common/shared/ui-components/styles/variables";
 
 :host {
-  .worker-info-container {
-    padding: 12px 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  .worker-info-container,
+  .queues-table-container {
+    flex: 1;
+    overflow: auto;
   }
 
   ::ng-deep .table-row {
+    height: 40px;
     background-color: $blue-800 !important;
     border-bottom: 1px solid $dark-border;
     padding: 0 !important;
-    height: 40px;
     display: flex;
     &:last-of-type {border-bottom-color: $dark-border !important;}
   }
@@ -25,7 +31,7 @@
       overflow: hidden;
     }
     .row.headers {
-      height: 38px;
+      height: 39px;
       align-items: center;
       line-height: normal !important;
       border-bottom: 1px solid $dark-border !important;
@@ -33,16 +39,11 @@
     }
   } 
 
-  //.queues-table-container {
-  //  padding: 0 20px;
-  //}
-
   .tabs-container {
     position: relative;
-    background-color: $blue-800;
+    height: 48px;
+    padding-top: 12px;
     border-bottom: 1px solid $dark-border;
-    margin: 12px 0 0 0;
-    height: 38px;
 
     ::ng-deep .navbar-item {
       height: 100%;
@@ -51,10 +52,14 @@
     }
   }
 
-  .pull-right {
+  .close {
     position: absolute;
     right: 24px;
-    top: 0;
+    top: 12px;
+    color: $blue-400;
+    &:hover {
+      color: $blue-200;
+    }
   }
 
   .id-cell {
@@ -77,5 +82,14 @@
         visibility: visible;
       }
     }
+  }
+
+  .empty-state {
+    height: 100%;
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
   }
 }

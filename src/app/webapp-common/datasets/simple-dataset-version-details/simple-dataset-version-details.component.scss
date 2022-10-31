@@ -3,15 +3,17 @@
 :host {
   .header {
     width: 100%;
-    margin-top: 12px;
-    padding-bottom: 18px;
+    margin-bottom: 6px;
     color: $blue-100;
-    border-bottom: solid 1px $dark-border;
    }
 
   .al-ico-copy-to-clipboard {
+    color: $blue-300;
     opacity: 0;
     transition: opacity 0.3s;
+    &:hover {
+      color: $blue-100;
+    }
   }
 
   .value:hover {
@@ -29,6 +31,31 @@
       .comment {
         color: $blue-300;
         margin-left: 4px;
+      }
+
+      .multi-line-value {
+        flex: 1 1 0;
+        color: $blue-100;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        white-space: pre-line;
+      }
+    }
+    .al-ico-edit {
+      color: $blue-300;
+      opacity: 0;
+      transition: opacity 0.3s;
+      cursor: pointer;
+      &:hover {
+        color: $blue-100;
+      }
+    }
+
+    &:hover {
+      .al-ico-edit {
+        opacity: 1;
       }
     }
   }

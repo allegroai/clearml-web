@@ -5,6 +5,11 @@ import {Config, Frame, Layout, LayoutAxis, Legend, PlotData} from 'plotly.js';
 import {selectScaleFactor} from '@common/core/reducers/view.reducer';
 import {Store} from '@ngrx/store';
 
+export interface VisibleExtFrame extends ExtFrame {
+  id: string;
+  visible: boolean;
+}
+
 export interface ExtFrame extends Omit<Frame, 'data' | 'layout'> {
   iter: number;
   metric: string;

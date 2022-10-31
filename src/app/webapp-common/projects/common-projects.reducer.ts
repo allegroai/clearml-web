@@ -2,24 +2,10 @@ import {createReducer, createSelector, on, ReducerTypes} from '@ngrx/store';
 import {Project} from '~/business-logic/model/projects/project';
 import {TABLE_SORT_ORDER, TableSortOrderEnum} from '../shared/ui-components/data/table/table.consts';
 import {
-  addToProjectsList,
-  checkProjectForDeletion,
-  resetProjects,
-  resetProjectsSearchQuery,
-  resetReadyToDelete,
-  setCurrentScrollId,
-  setNoMoreProjects,
-  setProjectReadyForDeletion,
-  setProjectsOrderBy,
-  setProjectsSearchQuery,
-  setShowHidden,
-  setTableModeAwareness,
-  showExampleDatasets,
-  showExamplePipelines,
-  updateProjectSuccess
+  addToProjectsList, checkProjectForDeletion, resetProjects, resetProjectsSearchQuery, resetReadyToDelete, setCurrentScrollId, setNoMoreProjects, setProjectReadyForDeletion, setProjectsOrderBy,
+  setProjectsSearchQuery, setTableModeAwareness, showExampleDatasets, showExamplePipelines, updateProjectSuccess
 } from './common-projects.actions';
 import {SearchState} from '../common-search/common-search.reducer';
-import {selectSelectedProject} from '@common/core/reducers/projects.reducer';
 
 export interface CommonProjectReadyForDeletion {
   project: Project;
@@ -41,7 +27,6 @@ export interface ICommonProjectsState {
   tableModeAwareness: boolean;
   showPipelineExamples: boolean;
   showDatasetExamples: boolean;
-  showHidden: boolean;
 }
 
 export const commonProjectsInitState: ICommonProjectsState = {
@@ -62,7 +47,6 @@ export const commonProjectsInitState: ICommonProjectsState = {
   tableModeAwareness: true,
   showPipelineExamples: false,
   showDatasetExamples: false,
-  showHidden: false
 };
 
 const getCorrectSortingOrder = (currentSortOrder: TableSortOrderEnum, currentOrderField: string, nextOrderField: string) => {
@@ -114,8 +98,7 @@ export const commonProjectsReducers = [
   on(setTableModeAwareness, (state, action) =>
     ({...state, tableModeAwareness: (action as ReturnType<typeof setTableModeAwareness>).awareness})),
   on(showExamplePipelines, state => ({...state, showPipelineExamples: true})),
-  on(showExampleDatasets, state => ({...state, showDatasetExamples: true})),
-  on(setShowHidden, (state, action) => ({...state, showHidden: action.show}))
+  on(showExampleDatasets, state => ({...state, showDatasetExamples: true}))
 ] as ReducerTypes<ICommonProjectsState, any>[];
 export const commonProjectsReducer = createReducer(commonProjectsInitState, ...commonProjectsReducers);
 
@@ -135,5 +118,3 @@ export const selectProjectsScrollId = createSelector(projects, (state): string =
 export const selectTableModeAwareness = createSelector(projects, state => state?.tableModeAwareness);
 export const selectShowPipelineExamples = createSelector(projects, state => state?.showPipelineExamples);
 export const selectShowDatasetExamples = createSelector(projects, state => state?.showDatasetExamples);
-export const selectShowHidden = createSelector(projects, selectSelectedProject,
-    (state, selectedProject) => (state?.showHidden || selectedProject?.system_tags?.includes('hidden')));

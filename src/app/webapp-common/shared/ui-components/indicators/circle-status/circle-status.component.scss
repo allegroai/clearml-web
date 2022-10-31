@@ -29,6 +29,8 @@ $font-size: 18px;
     height: $reqWidth;
     border-radius: 50%;
     margin-bottom: 8px;
+    background-color: $blue-300;
+
     &.published {
       background-color: $neon-yellow;
     }

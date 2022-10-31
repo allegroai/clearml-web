@@ -1,5 +1,6 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Input, OnDestroy, Output, Renderer2, ViewChild} from '@angular/core';
 import {ICONS} from '@common/constants';
+import {NgModel} from '@angular/forms';
 
 @Component({
   selector: 'sm-inline-edit',
@@ -8,9 +9,9 @@ import {ICONS} from '@common/constants';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class InlineEditComponent implements OnDestroy {
-  public readonly CANCEL_BUTTON = 'CANCEL_BUTTON';
-  public readonly SAVE_BUTTON = 'SAVE_BUTTON';
-  public ICONS = ICONS;
+  public readonly cancelButton = 'CANCEL_BUTTON';
+  public readonly saveButton = 'SAVE_BUTTON';
+  public icons = ICONS;
   public active = false;
   public inlineValue: string;
   private shouldSave: boolean = true;
@@ -18,6 +19,7 @@ export class InlineEditComponent implements OnDestroy {
   @Input() pattern;
   @Input() minLength = 0;
   @Input() originalText;
+  @Input() forbiddenString: string[];
 
   // *DEFAULTS*
   @Input() editable = true;
@@ -32,7 +34,9 @@ export class InlineEditComponent implements OnDestroy {
   @Output() inlineFocusOutEvent = new EventEmitter<boolean>();
   @Output() cancel = new EventEmitter();
   @Output() cancelClick = new EventEmitter<Event>();
-  @ViewChild('inlineInput') inlineInput: ElementRef;
+  @ViewChild('inlineInput') inlineInput: NgModel;
+  @ViewChild('inlineInput', { read: ElementRef }) inlineInputRef: ElementRef;
+
   @ViewChild('template', {static: true}) template: ElementRef;
 
   @HostListener('document:click', [])
@@ -54,7 +58,7 @@ export class InlineEditComponent implements OnDestroy {
   }
 
   public inlineSaved() {
-    this.inlineValue = this.inlineInput.nativeElement.value;
+    this.inlineValue = this.inlineInput.value;
     if (this.inlineValue != this.originalText) {
       this.textChanged.emit(this.inlineValue);
     }
@@ -69,14 +73,14 @@ export class InlineEditComponent implements OnDestroy {
     }
 
     const templateWidth = this.fixedWidth || Math.max(this.template.nativeElement.getBoundingClientRect().width - (this.multiline ? 0 : 120), 200);
-    this.renderer.setStyle(this.inlineInput.nativeElement, 'width', `${templateWidth}px`);
+    this.renderer.setStyle(this.inlineInputRef.nativeElement, 'width', `${templateWidth}px`);
     this.inlineValue = this.originalText;
     event?.stopPropagation();
     setTimeout(() => {
       this.active = true;
       this.inlineActiveStateChanged.emit(true);
       this.cdr.detectChanges();
-      this.inlineInput.nativeElement.focus();
+      this.inlineInputRef.nativeElement.focus();
     }, 50);
   }
 

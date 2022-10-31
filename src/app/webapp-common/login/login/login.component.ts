@@ -1,12 +1,12 @@
-import {Component, OnDestroy, OnInit, ViewChild, ElementRef, Input} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewChild, ElementRef, Input, ChangeDetectorRef} from '@angular/core';
 import {NgForm} from '@angular/forms';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {Store} from '@ngrx/store';
-import {Observable, Subscription} from 'rxjs';
-import {finalize, map, startWith, take, filter, mergeMap} from 'rxjs/operators';
+import {EMPTY, Observable, Subscription} from 'rxjs';
+import {finalize, map, startWith, take, filter, mergeMap, catchError} from 'rxjs/operators';
 import {selectCurrentUser} from '../../core/reducers/users-reducer';
 import {fetchCurrentUser, setPreferences} from '../../core/actions/users.actions';
-import {LoginMode, LoginModeEnum} from '../../shared/services/login.service';
+import {LoginMode, loginModes} from '../../shared/services/login.service';
 import {selectInviteId} from '../login-reducer';
 import {ConfigurationService} from '../../shared/services/configuration.service';
 import {ConfirmDialogComponent} from '../../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
@@ -34,7 +34,8 @@ export class LoginComponent implements OnInit, OnDestroy {
   loginMode: LoginMode;
   filteredOptions: Observable<any[]>;
   userChanged: Subscription;
-  public loginModeEnum = LoginModeEnum;
+  private sub = new Subscription();
+  public loginModeEnum = loginModes;
 
   public notice: string;
   public demo: boolean;
@@ -62,17 +63,23 @@ export class LoginComponent implements OnInit, OnDestroy {
     private store: Store<any>,
     private route: ActivatedRoute,
     private userPreferences: UserPreferences,
-    private config: ConfigurationService
+    private config: ConfigurationService,
+    private cdr: ChangeDetectorRef
   ) {
     this.environment = config.getStaticEnvironment();
   }
 
   get buttonCaption() {
-    return this.loginMode === LoginModeEnum.simple ? 'START' : 'LOGIN';
+    return this.loginMode === loginModes.simple ? 'START' : 'LOGIN';
   }
 
   ngOnInit() {
-    this.store.select(selectCurrentUser).pipe(filter(user => !!user), take(1)).subscribe(() => this.router.navigateByUrl(this.getNavigateUrl()));
+    this.store.select(selectCurrentUser)
+      .pipe(
+        filter(user => !!user),
+        take(1)
+      )
+      .subscribe(() => this.router.navigateByUrl(this.getNavigateUrl()));
     this.store.select(selectInviteId).pipe(
       filter(invite => !!invite),
       take(1),
@@ -81,6 +88,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       const shorterName = inviteInfo.user_given_name || inviteInfo.user_name?.split(' ')[0];
       this.loginTitle = !shorterName ? '' : `Accept ${shorterName ? shorterName + '\'s' : ''} invitation and
       join their team`;
+      this.cdr.detectChanges();
     });
     this.isInvite = this.router.url.includes('invite');
     this.notice = this.environment.loginNotice;
@@ -88,19 +96,26 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.demo = this.environment.demo;
     this.touLink = this.environment.legal.TOULink;
     this.route.queryParams
-      .pipe(filter(params => !!params), take(1))
+      .pipe(
+        filter(params => !!params),
+        take(1)
+      )
       .subscribe((params: Params) => {
         this.redirectUrl = params['redirect'] || '';
         this.redirectUrl = this.redirectUrl.replace('/login', '/dashboard');
       });
 
-    this.loginService.getLoginMode().pipe(
+    this.sub.add(this.loginService.getLoginMode().pipe(
+      catchError(() => this.loginMode = loginModes.simple),
       finalize(() => {
         this.guestUser = this.loginService.guestUser;
-        if (this.loginMode === LoginModeEnum.simple) {
-          this.loginService.getUsers().subscribe(users => {
-            this.options = users;
-          });
+        if (this.loginMode === loginModes.simple) {
+          this.loginService.getUsers()
+            .pipe(take(1))
+            .subscribe(users => {
+              this.options = users;
+              this.cdr.detectChanges();
+            });
           if (this.environment.autoLogin && this.redirectUrl &&
             !['/dashboard'].includes(this.redirectUrl)) {
             this.loginForm.controls['name'].setValue((new Date()).getTime().toString());
@@ -113,9 +128,9 @@ export class LoginComponent implements OnInit, OnDestroy {
       }))
       .subscribe((loginMode: LoginMode) => {
         this.loginMode = loginMode;
-      }, () => {
-        this.loginMode = LoginModeEnum.simple;
-      });
+        this.cdr.detectChanges();
+      })
+    );
 
     setTimeout(() => {
       if (!this.loginForm?.controls['name']) {
@@ -132,7 +147,8 @@ export class LoginComponent implements OnInit, OnDestroy {
         .subscribe((val: string) => {
           this.loginModel.name = val.trim();
           const user = this.options.find(x => x.name === val);
-          this.newUser = this.loginMode === LoginModeEnum.simple && !user;
+          this.newUser = this.loginMode === loginModes.simple && !user;
+          this.cdr.detectChanges();
         });
     });
 
@@ -153,21 +169,29 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   login() {
     this.showSpinner = true;
-    if (this.loginMode === LoginModeEnum.password) {
+    if (this.loginMode === loginModes.password) {
       const user = this.loginModel.name.trim();
       const password = this.loginModel.password.trim();
       this.loginService.passwordLogin(user, password)
-        .subscribe(
-          () => this.afterLogin(),
-          () => {
+        .pipe(
+          catchError(() => {
             this.showSpinner = false;
             this.loginFailed = true;
-          });
+            this.cdr.detectChanges();
+            return EMPTY;
+          }),
+          take(1)
+        )
+        .subscribe(() => this.afterLogin());
     } else {
       const observer = this.simpleLogin();
-      observer?.subscribe(
-        () => this.showSpinner = false,
-        () => this.showSpinner = false
+      this.sub.add(observer?.pipe(
+          catchError(() => {
+            this.showSpinner = false;
+            return EMPTY;
+          }),
+          finalize( () => this.cdr.detectChanges())
+        ).subscribe(() => this.showSpinner = false)
       );
     }
   }
@@ -190,13 +214,18 @@ export class LoginComponent implements OnInit, OnDestroy {
   private afterLogin() {
     this.userPreferences.loadPreferences()
       .pipe(
-        finalize( () => this.store.dispatch(fetchCurrentUser()))
+        take(1),
+        catchError(() => this.router.navigateByUrl(this.getNavigateUrl())),
+        finalize( () => {
+          this.store.dispatch(fetchCurrentUser());
+          this.cdr.detectChanges();
+        })
       )
       .subscribe(res => {
         this.store.dispatch(setPreferences({payload: res}));
         this.router.navigateByUrl(this.getNavigateUrl());
         this.openLoginNotice();
-      }, () => this.router.navigateByUrl(this.getNavigateUrl()));
+      });
   }
 
   private _filter(value: string): string[] {

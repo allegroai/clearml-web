@@ -1,7 +1,7 @@
 import {Component, ViewChild} from '@angular/core';
 import {ExperimentsComponent} from '@common/experiments/experiments.component';
 import {Store} from '@ngrx/store';
-import {IExperimentsViewState} from '~/features/experiments/reducers/experiments-view.reducer';
+import {ExperimentsViewState} from '~/features/experiments/reducers/experiments-view.reducer';
 import {SmSyncStateSelectorService} from '@common/core/services/sync-state-selector.service';
 import {ActivatedRoute, Router} from '@angular/router';
 import {MatDialog} from '@angular/material/dialog';
@@ -39,7 +39,7 @@ export class ControllersComponent extends ExperimentsComponent {
   @ViewChild(SplitComponent) split: SplitComponent;
   @ViewChild(PipelineControllerInfoComponent) diagram: PipelineControllerInfoComponent;
 
-  constructor(protected store: Store<IExperimentsViewState>,
+  constructor(protected store: Store<ExperimentsViewState>,
               protected syncSelector: SmSyncStateSelectorService,
               protected route: ActivatedRoute,
               protected router: Router,

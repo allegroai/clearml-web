@@ -22,12 +22,12 @@ import {SelectableListItem} from '@common/shared/ui-components/data/selectable-l
 import {distinctUntilChanged, filter, map} from 'rxjs/operators';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {ActivatedRoute, Router} from '@angular/router';
-import {IExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
+import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {
   experimentPlotsRequested,
-  ResetExperimentMetrics,
-  SetExperimentMetricsSearchTerm,
-  SetExperimentSettings
+  resetExperimentMetrics,
+  setExperimentMetricsSearchTerm,
+  setExperimentSettings
 } from '../../actions/common-experiment-output.actions';
 import {convertPlots, groupIterations, sortMetricsList} from '@common/tasks/tasks.utils';
 import {selectSelectedExperiment} from '~/features/experiments/reducers';
@@ -46,7 +46,7 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChan
   @Input() selected;
   @ViewChild(ExperimentGraphsComponent) graphsComponent: ExperimentGraphsComponent;
 
-  public plotsList: Array<SelectableListItem> = [];
+  public plotsList: Array<SelectableListItem>;
   public selectedGraph: string = null;
   private plotsSubscription: Subscription;
   private settingsSubscription: Subscription;
@@ -65,7 +65,7 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChan
   public dark: boolean;
 
 
-  constructor(private store: Store<IExperimentInfoState>, private router: Router, private activeRoute: ActivatedRoute, private changeDetection: ChangeDetectorRef) {
+  constructor(private store: Store<ExperimentInfoState>, private router: Router, private activeRoute: ActivatedRoute, private changeDetection: ChangeDetectorRef) {
     this.searchTerm$ = this.store.pipe(select(selectExperimentMetricsSearchTerm));
     this.splitSize$ = this.store.pipe(select(selectSplitSize));
 
@@ -117,7 +117,7 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChan
     this.settingsSubscription = this.experimentSettings$
       .subscribe((selectedPlot) => {
         this.selectedGraph = selectedPlot;
-        this.graphsComponent.scrollToGraph(selectedPlot);
+        this.graphsComponent?.scrollToGraph(selectedPlot);
       });
 
     this.routerParamsSubscription = this.routerParams$
@@ -126,7 +126,7 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChan
           this.graphs = undefined;
           this.resetMetrics();
           // this.store.dispatch(new ExperimentPlotsRequested(params.experimentId));
-          this.store.dispatch(new SetExperimentMetricsSearchTerm({searchTerm: ''}));
+          this.store.dispatch(setExperimentMetricsSearchTerm({searchTerm: ''}));
         }
         this.experimentId = params.experimentId;
       });
@@ -159,11 +159,11 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChan
   }
 
   metricSelected(id: string) {
-    this.store.dispatch(new SetExperimentSettings({id: this.experimentId, changes: {selectedPlot: id}}));
+    this.store.dispatch(setExperimentSettings({id: this.experimentId, changes: {selectedPlot: id}}));
   }
 
   hiddenListChanged(hiddenList: string[]) {
-    this.store.dispatch(new SetExperimentSettings({id: this.experimentId, changes: {hiddenMetricsPlot: hiddenList}}));
+    this.store.dispatch(setExperimentSettings({id: this.experimentId, changes: {hiddenMetricsPlot: hiddenList}}));
   }
 
   refresh() {
@@ -174,11 +174,11 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChan
   }
 
   searchTermChanged(searchTerm: string) {
-    this.store.dispatch(new SetExperimentMetricsSearchTerm({searchTerm}));
+    this.store.dispatch(setExperimentMetricsSearchTerm({searchTerm}));
   }
 
   resetMetrics() {
-    this.store.dispatch(new ResetExperimentMetrics());
+    this.store.dispatch(resetExperimentMetrics());
   }
 
 }

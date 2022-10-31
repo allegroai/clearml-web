@@ -84,7 +84,7 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
       filter(taskIds => !!taskIds && taskIds !== this.getExperimentIdsParams(this.experiments))
     )
       .subscribe((experimentIds: string) => {
-        this.store.dispatch(new metricsValuesActions.GetComparedExperimentsMetricsValues({taskIds: experimentIds.split(',')}));
+        this.store.dispatch(metricsValuesActions.getComparedExperimentsMetricsValues({taskIds: experimentIds.split(',')}));
       });
 
     this.comparedTasksSubscription = this.comparedTasks$
@@ -105,12 +105,12 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
     this.refreshingSubscription = this.refresh.tick
       .pipe(filter(auto => auto !== null))
       .subscribe((autoRefresh) => this.store.dispatch(
-        new metricsValuesActions.GetComparedExperimentsMetricsValues({taskIds: this.taskIds.split(','), autoRefresh})
+        metricsValuesActions.getComparedExperimentsMetricsValues({taskIds: this.taskIds.split(','), autoRefresh})
       ));
   }
 
   ngOnDestroy(): void {
-    this.store.dispatch(new metricsValuesActions.ResetState());
+    this.store.dispatch(metricsValuesActions.resetState());
     this.paramsSubscription.unsubscribe();
     this.queryParamsSubscription.unsubscribe();
     this.comparedTasksSubscription.unsubscribe();
@@ -160,7 +160,12 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
 
   metricSortChanged(event, nodeData) {
     const orderedKeys = (this.sortByKeyOrValue(event.keyOrValue, event.keyValueArray, event.order)).map(keyValue => keyValue.key);
-    this.store.dispatch(new metricsValuesActions.SetMetricValuesSortBy(nodeData.key, event.keyOrValue, event.order, orderedKeys));
+    this.store.dispatch(metricsValuesActions.setMetricValuesSortBy({
+      metric: nodeData.key,
+      keyOrValue: event.keyOrValue,
+      order: event.order,
+      keyOrder: orderedKeys
+    }));
   }
 
   sortByKeyOrValue(sortBy, keyValueArray, order) {
@@ -184,7 +189,7 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
   }
 
   experimentListChanged(experiments: Array<any>) {
-    this.store.dispatch(new metricsValuesActions.SetComparedExperiments(experiments));
+    this.store.dispatch(metricsValuesActions.setComparedExperiments({experiments}));
   }
 
   private syncUrl(experiments: Array<any>, urlParams: string) {

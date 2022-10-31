@@ -1,12 +1,12 @@
 <div class="d-flex justify-content-center tabs-container">
   <sm-navbar-item header="info" [active]="activeTab==='info'" (click)="activeTab = 'info'"></sm-navbar-item>
   <sm-navbar-item header="queues" [active]="activeTab==='queues'" (click)="activeTab = 'queues'"></sm-navbar-item>
-  <div class="pull-right pointer" (click)="deselectWorkerClicked()">
+  <div class="close pointer" (click)="deselectWorkerClicked()">
     <i class="al-icon al-ico-dialog-x sm-md"></i>
   </div>
 </div>
 <div *ngIf="activeTab === 'queues' &&  selectedWorker?.queues.length===0"
-     class="d-flex align-items-center justify-content-center p-4">No queues currently assigned to this worker
+     class="empty-state">No queues currently assigned to this worker
 </div>
 <div class="queues-table-container" *ngIf="activeTab==='queues' && selectedWorker?.queues.length>0">
   <sm-simple-table-2 [cols]="cols" [rowsData]="selectedWorker?.queues" class="dark-theme">

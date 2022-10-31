@@ -8,7 +8,7 @@
   <i *ngIf="enableIcon" [class]="'sm-md ' + iconClass"></i>
   <div class="item-label" [class.placeForIcon]="enableIcon">
     <div class="ellipsis" [smTooltip]="enableTooltip? (itemTooltip || itemLabel): ''">{{itemLabel}}</div>
-    <i *ngIf="sortOrder" class="pt-1 ml-2" [class]="sortOrder === TABLE_SORT_ORDER.ASC ? 'fa fa-arrow-up' : 'fa fa-arrow-down' "></i>
+    <i *ngIf="sortOrder" class="ml-2 al-icon sm-md" [ngClass]="sortOrder === TABLE_SORT_ORDER.ASC ? 'al-ico-sort-asc' : 'al-ico-sort-desc' "></i>
   </div>
   <div *ngIf="removable" (click)="removeItem($event)" class="remove-button"><i class="al-icon al-ico-trash sm-md al-color blue-300 pointer m-0"></i></div>
 </div>

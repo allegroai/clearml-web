@@ -49,6 +49,10 @@ export class ColorHashService {
     return color;
   }
 
+  public hasColor(label: string): boolean {
+    return !!this._colorCache.getValue()[label];
+  }
+
   public getColorsObservable() {
     return this.getColorCache();
   }
@@ -71,8 +75,8 @@ export class ColorHashService {
   }
 
   setColorForString(str: string, color: number[], savePreference: boolean = true) {
-    this.updateColorCache(str, color);
     if (savePreference) {
+      this.updateColorCache(str, color);
       const cleanString     = str.replace(/\./, DOT_PLACEHOLDER);
       this.store.dispatch(addUpdateColorPreferences({[cleanString]: color}));
     }

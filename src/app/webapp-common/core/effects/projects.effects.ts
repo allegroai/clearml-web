@@ -19,7 +19,7 @@ import {
   selectAllProjectsUsers,
   selectLastUpdate, selectRootProjects,
   selectSelectedMetricVariantForCurrProject,
-  selectSelectedProjectId
+  selectSelectedProjectId, selectShowHidden
 } from '../reducers/projects.reducer';
 import {OperationErrorDialogComponent} from '@common/shared/ui-components/overlay/operation-error-dialog/operation-error-dialog.component';
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
@@ -32,9 +32,8 @@ import {ProjectsGetAllExResponse} from '~/business-logic/model/projects/projects
 import {Project} from '~/business-logic/model/projects/project';
 import {ApiUsersService} from '~/business-logic/api-services/users.service';
 import {get, last} from 'lodash/fp';
-import {selectProjects, selectShowHidden} from '@common/projects/common-projects.reducer';
-import {setShowHidden} from '@common/projects/common-projects.actions';
 import {ProjectsGetAllExRequest} from '~/business-logic/model/projects/projectsGetAllExRequest';
+import {setShowHidden} from '../actions/projects.actions';
 
 export const ALL_PROJECTS_OBJECT = {id: '*', name: 'All Experiments'};
 
@@ -88,7 +87,7 @@ export class ProjectsEffects {
     mergeMap(([projects, rootProjects]) => [
       actions.setAllProjects({
         projects: projects as Project[],
-        updating: rootProjects.length > 0
+        updating: rootProjects?.length > 0
       }),
       actions.setLastUpdate({lastUpdate: last(projects)?.last_update})
     ])

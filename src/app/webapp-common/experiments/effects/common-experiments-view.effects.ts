@@ -21,15 +21,15 @@ import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
 import {BlTasksService} from '~/business-logic/services/tasks.service';
 import {GET_ALL_QUERY_ANY_FIELDS} from '~/features/experiments/experiments.consts';
 import {selectSelectedExperiment} from '~/features/experiments/reducers';
-import {IExperimentsViewState} from '~/features/experiments/reducers/experiments-view.reducer';
+import {ExperimentsViewState} from '~/features/experiments/reducers/experiments-view.reducer';
 import {excludeTypes, EXPERIMENTS_TABLE_COL_FIELDS} from '~/features/experiments/shared/experiments.const';
 import {requestFailed} from '../../core/actions/http.actions';
 import {activeLoader, addMessage, deactivateLoader, setServerError} from '../../core/actions/layout.actions';
 import {setURLParams} from '../../core/actions/router.actions';
 import {
-  selectIsArchivedMode,
-  selectIsDeepMode,
-  selectSelectedProject
+    selectIsArchivedMode,
+    selectIsDeepMode,
+    selectSelectedProject, selectShowHidden
 } from '../../core/reducers/projects.reducer';
 import {selectRouterConfig, selectRouterParams} from '../../core/reducers/router-reducer';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
@@ -43,13 +43,13 @@ import {
   encodeOrder,
   TableFilter
 } from '../../shared/utils/tableParamEncode';
-import {AutoRefreshExperimentInfo, GetExperimentInfo} from '../actions/common-experiments-info.actions';
+import {autoRefreshExperimentInfo, getExperimentInfo} from '../actions/common-experiments-info.actions';
 import * as exActions from '../actions/common-experiments-view.actions';
 import {setActiveParentsFilter, setParents, updateManyExperiment} from '../actions/common-experiments-view.actions';
 import * as exSelectors from '../reducers/index';
 import {ITableExperiment} from '../shared/common-experiment-model.model';
 import {EXPERIMENTS_PAGE_SIZE} from '../shared/common-experiments.const';
-import {convertDurationFilter, convertStopToComplete} from '../shared/common-experiments.utils';
+import {convertStopToComplete, encodeHyperParameter} from '../shared/common-experiments.utils';
 import {sortByField} from '../../tasks/tasks.utils';
 import {MODEL_TAGS} from '../../models/shared/models.const';
 import {EmptyAction, MESSAGES_SEVERITY} from '~/app.constants';
@@ -91,14 +91,14 @@ import {
 import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
 import {getFilteredUsers, setProjectUsers} from '@common/core/actions/projects.actions';
 import {selectTableRefreshList} from '../reducers/index';
-import {selectShowHidden} from '@common/projects/common-projects.reducer';
+import {selectActiveWorkspaceReady} from '~/core/reducers/view.reducer';
 
 
 @Injectable()
 export class CommonExperimentsViewEffects {
   /* eslint-disable @typescript-eslint/naming-convention */
   constructor(
-    private actions$: Actions, private store: Store<IExperimentsViewState>, private apiTasks: ApiTasksService,
+    private actions$: Actions, private store: Store<ExperimentsViewState>, private apiTasks: ApiTasksService,
     private projectsApi: ApiProjectsService, private taskBl: BlTasksService, private router: Router,
     private route: ActivatedRoute
   ) {
@@ -147,6 +147,9 @@ export class CommonExperimentsViewEffects {
       exActions.tableFilterChanged, exActions.setTableFilters,
       exActions.showOnlySelected
     ),
+    switchMap((action) => this.store.select(selectActiveWorkspaceReady).pipe(
+      filter(ready => ready),
+      map(() => action))),
     tap(action => this.refreshActions.push(action.type)),
     auditTime(50),
     switchMap((action) => this.fetchExperiments$(null, false, (action as any).pageSize as number)
@@ -156,7 +159,7 @@ export class CommonExperimentsViewEffects {
           const deactivate = this.refreshActions.map(a => deactivateLoader(a));
           this.refreshActions = [];
           return [
-            exActions.setNoMoreExperiments({payload: (res.tasks.length < EXPERIMENTS_PAGE_SIZE)}),
+            exActions.setNoMoreExperiments({hasMore: (res.tasks.length < EXPERIMENTS_PAGE_SIZE)}),
             exActions.setExperiments({experiments: res.tasks as ITableExperiment[]}),
             exActions.setCurrentScrollId({scrollId: res.scroll_id}),
             ...deactivate
@@ -165,7 +168,7 @@ export class CommonExperimentsViewEffects {
         catchError(error => [
           requestFailed(error),
           deactivateLoader(action.type),
-          addMessage('warn', 'Fetch Experiments failed', [{name: 'More info', actions: [setServerError(error, null, 'Fetch Experiments failed')]}])
+          addMessage('warn', 'Fetch Experiments failed', error?.meta && [{name: 'More info', actions: [setServerError(error, null, 'Fetch Experiments failed')]}])
         ])
       )
     )
@@ -199,14 +202,14 @@ export class CommonExperimentsViewEffects {
               if (res.scroll_id !== currentScrollId) {
                 actions.push(
                   exActions.setCurrentScrollId({scrollId: res.scroll_id}),
-                  exActions.setNoMoreExperiments({payload: (res.tasks.length < EXPERIMENTS_PAGE_SIZE)}));
+                  exActions.setNoMoreExperiments({hasMore: (res.tasks.length < EXPERIMENTS_PAGE_SIZE)}));
                 if (!action.autoRefresh) {
                   actions.push(
                     addMessage(MESSAGES_SEVERITY.WARN, 'Session expired'),
                     exActions.setTableRefreshPending({refresh: true}));
                 }
               }
-              if (action.autoRefresh) {
+              if (action.autoRefresh || res.scroll_id === currentScrollId) {
                 if (selectedExperiment && isEqual(experiments.map(exp => exp.id).sort(), res.tasks.map(exp => exp.id).sort())) {
                   actions.push(exActions.setExperimentInPlace({experiments: res.tasks as ITableExperiment[]}));
                 } else {
@@ -216,10 +219,10 @@ export class CommonExperimentsViewEffects {
               }
               if (selectedExperiment) {
                 if (action.autoRefresh) {
-                  actions.push(new AutoRefreshExperimentInfo(selectedExperiment.id));
+                  actions.push(autoRefreshExperimentInfo({id: selectedExperiment.id}));
                 } else {
                   // SetExperiments must be before GetExperimentInfo!
-                  actions.push(new GetExperimentInfo(selectedExperiment.id));
+                  actions.push(getExperimentInfo({id: selectedExperiment.id}));
                 }
               }
               return actions;
@@ -229,7 +232,7 @@ export class CommonExperimentsViewEffects {
               return [
                 requestFailed(error),
                 deactivateLoader(action.type),
-                addMessage('warn', 'Fetch Experiments failed', [{name: 'More info', actions: [setServerError(error, null, 'Fetch Experiments failed')]}])
+                addMessage('warn', 'Fetch Experiments failed', error?.meta && [{name: 'More info', actions: [setServerError(error, null, 'Fetch Experiments failed')]}])
               ];
             })
           );
@@ -260,7 +263,7 @@ export class CommonExperimentsViewEffects {
             : [exActions.setTableRefreshPending({refresh: true}), addMessage(MESSAGES_SEVERITY.WARN, 'Session expired')];
 
           return [
-            exActions.setNoMoreExperiments({payload: (res.tasks.length < EXPERIMENTS_PAGE_SIZE)}),
+            exActions.setNoMoreExperiments({hasMore: (res.tasks.length < EXPERIMENTS_PAGE_SIZE)}),
             ...addTasksAction,
             exActions.setCurrentScrollId({scrollId: res.scroll_id}),
             deactivateLoader(action.type),
@@ -269,7 +272,7 @@ export class CommonExperimentsViewEffects {
         catchError(error => [
           requestFailed(error),
           deactivateLoader(action.type),
-          addMessage('warn', 'Fetch Experiments failed', [{name: 'More info', actions: [setServerError(error, null, 'Fetch Experiments failed')]}])
+          addMessage('warn', 'Fetch Experiments failed', error?.meta && [{name: 'More info', actions: [setServerError(error, null, 'Fetch Experiments failed')]}])
         ])
       )
     )
@@ -280,7 +283,6 @@ export class CommonExperimentsViewEffects {
     withLatestFrom(this.store.select(selectRouterConfig)),
     tap(([action, routeConfig]) => this.navigateAfterExperimentSelectionChanged(action.experiment as ITableExperiment, action.project, routeConfig)),
     mergeMap(() => [exActions.setTableMode({mode: 'info'})])
-    // map(action => new exActions.SetSelectedExperiment(action.payload.experiment))
   ));
 
   selectNextExperimentEffect = createEffect(() => this.actions$.pipe(
@@ -323,7 +325,7 @@ export class CommonExperimentsViewEffects {
       catchError(error => [
         requestFailed(error),
         deactivateLoader(action.type),
-        addMessage('warn', 'Fetch types failed', [{name: 'More info', actions: [setServerError(error, null, 'Fetch types failed')]}])]
+        addMessage('warn', 'Fetch types failed', error?.meta && [{name: 'More info', actions: [setServerError(error, null, 'Fetch types failed')]}])]
       )
     ))));
 
@@ -338,7 +340,7 @@ export class CommonExperimentsViewEffects {
     }),
     catchError(error => [
       requestFailed(error),
-      addMessage('warn', 'Fetch users failed', [{name: 'More info', actions: [setServerError(error, null, 'Fetch users failed')]}])]
+      addMessage('warn', 'Fetch users failed', error?.meta && [{name: 'More info', actions: [setServerError(error, null, 'Fetch users failed')]}])]
     )
   ));
 
@@ -368,7 +370,7 @@ export class CommonExperimentsViewEffects {
       }),
       catchError(error => [
           requestFailed(error),
-          addMessage('warn', 'Fetch parents failed', [{name: 'More info', actions: [setServerError(error, null, 'Fetch parents failed')]}])
+          addMessage('warn', 'Fetch parents failed', error?.meta && [{name: 'More info', actions: [setServerError(error, null, 'Fetch parents failed')]}])
         ]
       )
     ))
@@ -392,7 +394,7 @@ export class CommonExperimentsViewEffects {
           catchError(error => [
             requestFailed(error),
             deactivateLoader(action.type),
-            addMessage('warn', 'Fetch custom metrics failed', [{name: 'More info', actions: [setServerError(error, null, 'Fetch custom metrics failed')]}]),
+            addMessage('warn', 'Fetch custom metrics failed', error?.meta && [{name: 'More info', actions: [setServerError(error, null, 'Fetch custom metrics failed')]}]),
             exActions.setCustomHyperParams({params: []})])
         )
     )
@@ -414,8 +416,7 @@ export class CommonExperimentsViewEffects {
           catchError(error => [
             requestFailed(error),
             deactivateLoader(action.type),
-            addMessage('warn', 'Fetch hyper parameters failed', [{name: 'More info', actions: [setServerError(error, null, 'Fetch hyper parameters failed')]}]),
-            setServerError(error, null, 'Fetch hyper parameters failed'),
+            addMessage('warn', 'Fetch hyper parameters failed', error?.meta && [{name: 'More info', actions: [setServerError(error, null, 'Fetch hyper parameters failed')]}]),
             exActions.setCustomHyperParams({params: []})])
         )
     )
@@ -582,6 +583,9 @@ export class CommonExperimentsViewEffects {
     filters = Object.keys(filters).reduce((acc, colId) => {
       const col = [...metricCols, ...cols].find(c => c.id === colId);
       let key = col?.getter || colId;
+      if (col?.isParam && typeof col.getter === 'string') {
+        key = encodeHyperParameter(col.getter);
+      }
       if (Array.isArray(key)) {
         key = key[0];
       }
@@ -589,18 +593,20 @@ export class CommonExperimentsViewEffects {
       return acc;
     }, {});
 
-    if (filters[EXPERIMENTS_TABLE_COL_FIELDS.LAST_UPDATE]) {
-      filters[EXPERIMENTS_TABLE_COL_FIELDS.LAST_UPDATE] = convertDurationFilter(filters[EXPERIMENTS_TABLE_COL_FIELDS.LAST_UPDATE]);
-    }
-
     orderFields = orderFields.map(field => {
+      let getter;
       const col = metricCols.find(c => c.id === field.field);
-      const getter = Array.isArray(col?.getter) ? col.getter[0] : col?.getter;
+      if (col?.isParam && typeof col.getter === 'string') {
+        getter = encodeHyperParameter(col.getter);
+      } else {
+        getter = Array.isArray(col?.getter) ? col.getter[0] : col?.getter;
+      }
       return getter ? {...field, field: getter} : field;
     });
 
     const colsFilters = flatten(cols.filter(col => col.id !== 'selected' && !col.hidden).map(col => col.getter || col.id));
-    const metricColsFilters = metricCols ? flatten(metricCols.map(col => col.getter || col.id)) : [];
+    const metricColsFilters = metricCols ? flatten(metricCols.map(col =>
+      (col?.isParam && typeof col.getter === 'string')  ? encodeHyperParameter(col.getter) : col.getter || col.id)) : [];
     const only_fields = [...new Set([...MINIMUM_ONLY_FIELDS, ...colsFilters, ...metricColsFilters]
       .concat(isPipeline || isDataset ? ['runtime._pipeline_hash', 'runtime.version', 'execution.queue', 'type', 'hyperparams.properties.version'] : []))];
     return {
@@ -682,7 +688,7 @@ export class CommonExperimentsViewEffects {
       catchError(error => [
         requestFailed(error),
         deactivateLoader(action.type),
-        addMessage('warn', 'Fetch tags failed', [{name: 'More info', actions: [setServerError(error, null, 'Fetch tags failed')]}])]
+        addMessage('warn', 'Fetch tags failed', error?.meta && [{name: 'More info', actions: [setServerError(error, null, 'Fetch tags failed')]}])]
       )
     ))
   ));
@@ -693,25 +699,25 @@ export class CommonExperimentsViewEffects {
         this.store.select(exSelectors.selectSelectedExperiments),
       ),
       switchMap(([action, selectSelectedExperiments]) => {
-        const payload = action.type === exActions.setSelectedExperiments.type ?
+        const experiments = action.type === exActions.setSelectedExperiments.type ?
           (action as ReturnType<typeof exActions.setSelectedExperiments>).experiments : selectSelectedExperiments;
         const selectedExperimentsDisableAvailable: Record<string, CountAvailableAndIsDisableSelectedFiltered> = {
-          [MenuItems.abort]: selectionDisabledAbort(payload),
-          [MenuItems.abortAllChildren]: selectionDisabledAbortAllChildren(payload),
-          [MenuItems.publish]: selectionDisabledPublishExperiments(payload),
-          [MenuItems.reset]: selectionDisabledReset(payload),
-          [MenuItems.delete]: selectionDisabledDelete(payload),
-          [MenuItems.moveTo]: selectionDisabledMoveTo(payload),
-          [MenuItems.continue]: selectionDisabledContinue(payload),
-          [MenuItems.enqueue]: selectionDisabledEnqueue(payload),
-          [MenuItems.dequeue]: selectionDisabledDequeue(payload),
-          [MenuItems.queue]: selectionDisabledQueue(payload),
-          [MenuItems.viewWorker]: selectionDisabledViewWorker(payload),
-          [MenuItems.archive]: selectionDisabledArchive(payload),
-          [MenuItems.tags]: selectionDisabledTags(payload),
+          [MenuItems.abort]: selectionDisabledAbort(experiments),
+          [MenuItems.abortAllChildren]: selectionDisabledAbortAllChildren(experiments),
+          [MenuItems.publish]: selectionDisabledPublishExperiments(experiments),
+          [MenuItems.reset]: selectionDisabledReset(experiments),
+          [MenuItems.delete]: selectionDisabledDelete(experiments),
+          [MenuItems.moveTo]: selectionDisabledMoveTo(experiments),
+          [MenuItems.continue]: selectionDisabledContinue(experiments),
+          [MenuItems.enqueue]: selectionDisabledEnqueue(experiments),
+          [MenuItems.dequeue]: selectionDisabledDequeue(experiments),
+          [MenuItems.queue]: selectionDisabledQueue(experiments),
+          [MenuItems.viewWorker]: selectionDisabledViewWorker(experiments),
+          [MenuItems.archive]: selectionDisabledArchive(experiments),
+          [MenuItems.tags]: selectionDisabledTags(experiments),
         };
-        //allHasExamples: selectionAllExamples(action.payload),
-        // allArchive: selectionAllIsArchive(action.payload),
+        //allHasExamples: selectionAllExamples(action.experiments),
+        // allArchive: selectionAllIsArchive(action.experiments),
         return [exActions.setSelectedExperimentsDisableAvailable({selectedExperimentsDisableAvailable})];
       })
     )

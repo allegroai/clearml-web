@@ -1,26 +1,19 @@
-.content {
-  position: relative;
-}
+@import "variables";
 
 .box {
-  height: calc(90vh - 360px);
+  height: calc(90vh - 320px);
   width: 100%;
   min-height: 100px;
-  position: relative;
-  border: 0;
+  border: 1px solid $blue-100;
+  border-radius: 4px;
 }
 
-.buttons {
+.footer-buttons {
   display: flex;
-  align-items: baseline;
-  margin: 24px 0 0 40%;
-
-  button {
-    text-transform: uppercase;
-  }
-  p {
-    font-size: 11px;
-    color: lightslategray;
+  flex-direction: column;
+  margin-top: 6px;
+  .cbx {
+    margin-bottom: 24px;
   }
 }
 
@@ -28,5 +21,8 @@
   sm-confirm-dialog {
     width: 100%;
     max-width: 960px;
+    ::ng-deep .buttons {
+       display: none;
+    } 
   }
 }

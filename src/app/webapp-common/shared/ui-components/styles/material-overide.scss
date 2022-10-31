@@ -330,6 +330,8 @@ body mat-form-field.mat-form-field-appearance-outline.dark-outline {
 body.dark-theme .mat-select-panel.dark-outline {
   background-color: #000;
   border: 1px solid $blue-500;
+  padding: 4px;
+  max-height: 280px;
 
   .mat-option:hover:not(.mat-option-disabled), .mat-option:focus:not(.mat-option-disabled) {
     background: $blue-700;
@@ -337,6 +339,11 @@ body.dark-theme .mat-select-panel.dark-outline {
 
   .mat-option {
     color: $blue-200;
+    border-radius: 4px;
+    height: 40px;
+    line-height: 40px;
+    margin-bottom: 2px;
+    &:last-child {margin-bottom: 0;}
 
     &.mat-selected:not(.mat-option-multiple), &.mat-active {
       background: $blue-800;
@@ -393,24 +400,27 @@ body .mat-autocomplete-panel {
 }
 
 body.dark-theme .mat-select-panel.light-theme,
-body.dark-theme .mat-autocomplete-panel.light-theme,
-{
+body.dark-theme .mat-autocomplete-panel.light-theme {
   background: #fff;
-
-  .mat-option:hover:not(.mat-option-disabled), .mat-option:focus:not(.mat-option-disabled) {
-    background: rgba(0, 0, 0, .04);
-  }
+  padding: 4px;
 
   .mat-option {
     color: rgba(0, 0, 0, .87);
+    border-radius: 4px;
+    margin-bottom: 2px;
+    &:last-child {margin-bottom: 0;}
 
     &.mat-selected:not(.mat-option-multiple), &.mat-active {
-      background: rgba(0, 0, 0, .07);
+      background: darken($blue-50, 2%);
     }
 
     &.mat-primary .mat-option.mat-selected:not(.mat-option-disabled) {
       color: rgba(0, 0, 0, .87);
     }
+  }
+
+  .mat-option:hover:not(.mat-option-disabled), .mat-option:focus:not(.mat-option-disabled) {
+    background: $blue-50;
   }
 
 }
@@ -512,16 +522,27 @@ body .mat-autocomplete-panel.annotator-autocomplete {
 }
 
 .mat-menu-panel.dark {
-  border-radius: 3px;
+  border-radius: 6px;
   box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
-  border: solid 1px $blue-500;
-  background-color: #000000;
+  border: solid 1px $blue-600;
+  background-color: $black;
 
   .mat-menu-item {
     color: $blue-200;
-
+    &:disabled{
+      opacity: 0.5;
+    }
     &:hover {
       background-color: $dark-grey-blue;
     }
   }
+  .mat-menu-item-highlighted {background: $blue-800}
+  .mat-menu-submenu-icon {color: $blue-300}
+  .mat-menu-content hr {margin: 4px -4px;}
+}
+
+
+.light-theme .mat-menu-item:hover:not([disabled]),
+.light-theme .mat-menu-item-highlighted:not([disabled]) {
+  background: $blue-50;
 }

@@ -26,8 +26,6 @@ export class ServerUpdatesService {
 
   private timeGap = 1000 * 60 * 60 * 24;
 
-  // private timeGap = 1000 * 10;
-
   checkServerForUpdate(serverPath: string) {
     const nextUpdateCheckTime = new Date(localStorage.getItem('nextCheckForUpdateTime'));
     if (this.httpClient && (!nextUpdateCheckTime || nextUpdateCheckTime < new Date())) {
@@ -37,6 +35,7 @@ export class ServerUpdatesService {
           url: window.location.origin,
           client: window.navigator.userAgent,
           uid: this.currentUser?.id,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
           server_uuid: infoRes['uid'] || '',
           time: new Date().toISOString(),
           versions: {

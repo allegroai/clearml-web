@@ -16,7 +16,7 @@ export const routes: Routes = [
       {
         path    : ':modelId', component: ModelInfoComponent,
         children: [
-          {path: '', redirectTo: 'general'},
+          {path: '', redirectTo: 'general', pathMatch: 'full'},
           {path: 'general', component: ModelInfoGeneralComponent},
           {path: 'network', component: ModelInfoNetworkComponent, canDeactivate: [LeavingBeforeSaveAlertGuard]},
           {path: 'labels', component: ModelInfoLabelsComponent, canDeactivate: [LeavingBeforeSaveAlertGuard]},

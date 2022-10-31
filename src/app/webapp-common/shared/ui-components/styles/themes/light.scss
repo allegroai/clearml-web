@@ -12,7 +12,8 @@ $light-theme: (
     box-shadow: 3px 3px 6px 0 rgba(0, 0, 0, 0.1)
   ),
   scrollbar: (
-    tumb-background: $blue-100
+    tumb-background: $blue-100,
+    tumb-background-hover: darken($blue-100, 20%)
   ),
   bootstrap: (
     primary: $blue-50,

@@ -45,9 +45,14 @@
         Tasks have been enqueued on the <b>{{queue?.name}}</b> queue, which is currently not serviced by any worker. They will remain in the 'pending' state until a ClearML worker services this queue.
       </div>
       <ng-container *ngIf="!currentLink || currentLink === links[0]">
-        <div *ngFor="let step of steps" class="step-container">
+        <div *ngFor="let step of steps; let i = index" class="step-container">
           <div class="step-header">{{step.header}}</div>
           <div class="step">{{step.title}}</div>
+          <nav class="config-nav" *ngIf="step.title==='2. Configure'">
+            <sm-navbar-item header="LOCAL PYTHON" [active]="!isJupyter" class="small-nav" (click)="setIsJupyter(false)"></sm-navbar-item>
+            <sm-navbar-item header="JUPYTER NOTEBOOK" [active]="isJupyter" class="small-nav" (click)="setIsJupyter(true)"></sm-navbar-item>
+          </nav>
+          <div class="step sub-note mt-2 mb-2">{{isJupyter? 'Set the ClearML environment for your notebook':'Run the ClearML setup script'}}</div>
           <div class="code">
             <div class="content" #stepCode>{{step.code}}</div>
             <sm-copy-clipboard
@@ -57,22 +62,28 @@
               theme="text-area"
               [clipboardText]="stepCode.innerHTML"></sm-copy-clipboard>
           </div>
-          <div *ngIf="step.subNote" class="sub-note"><i class="mr-1 fas fa-info-circle info"></i>{{step.subNote}}</div>
+          <div *ngIf="step.subNote || (isJupyter && ((queue && i === 2) || (!queue && i === 1)))" class="sub-note"><i class="mr-1 fas fa-info-circle info"></i>
+            <ng-container *ngIf="(isJupyter && ((queue && i === 2) || (!queue && i === 1))); else subNote">
+              <ng-container *ngIf="accessKey; else credentialsNote">
+                Manage your app credentials in the <a target="_blank" href="settings/workspace-configuration">workspace settings page</a>
+              </ng-container>
+              <ng-template #credentialsNote>
+                Fill in your API credentials (if you don’t have any, create new credentials)
+              </ng-template>
+            </ng-container>
+            <ng-template #subNote>
+              {{step.subNote}}
+            </ng-template>
+          </div>
         </div>
-        <div class="step-container cred-step" [class.first-step]="!credentialsCreated" [class.has-ws]="community && workspace.name" [class.has-label]="credentialsLabel">
-          <div class="step sub-note">Complete the clearml configuration information as prompted.</div>
+        <div class="step-container cred-step" [class.jupyter]="isJupyter" [class.first-step]="!credentialsCreated" [class.has-ws]="community && workspace.name" [class.has-label]="credentialsLabel">
+          <div class="step sub-note" *ngIf="!isJupyter" >Complete the clearml configuration information as prompted.</div>
           <div *ngIf="!credentialsCreated" class="d-flex align-items-end">
-<!--            <mat-form-field appearance="outline"-->
-<!--                            class="label-input"-->
-<!--                            floatLabel="always">-->
-<!--              <mat-label>Label (optional)</mat-label>-->
-<!--              <input matInput [(ngModel)]="credentialsLabel" [disabled]="credentialsCreated" placeholder="Credentials label" name="credentials">-->
-<!--            </mat-form-field>-->
             <button class="mb-2 btn btn-neon create-cred-button" (click)="createCredentials()">CREATE NEW
               CREDENTIALS
             </button>
           </div>
-          <div class="cred-visible" [class.invisible]="!accessKey">
+          <div class="cred-visible" [class.invisible]="!accessKey || isJupyter">
             <div class="code">
 <div #content class="content"><span class="variable">api</span> {{ '{' }}<ng-container *ngIf="community && workspace.name">
   <span class="">{{'# ' + workspace.name}}</span></ng-container>
@@ -92,7 +103,7 @@
                 theme="text-area"
                 [clipboardText]="content.textContent"></sm-copy-clipboard>
             </div>
-          <div *ngIf="!showTabs" class="sub-note"><i class="mr-1 fas fa-info-circle info"></i>Manage your app credentials in the <a target="_blank" href="settings/workspace-configuration">workspace settings page</a></div>
+            <div *ngIf="!showTabs" class="sub-note"><i class="mr-1 fas fa-info-circle info"></i>Manage your app credentials in the <a target="_blank" href="settings/workspace-configuration">workspace settings page</a></div>
           </div>
         </div>
       </ng-container>

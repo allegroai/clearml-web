@@ -61,7 +61,7 @@ export const selectMetadataColsForProject = createSelector([modelsView, selectRo
       ...col,
       hidden: !!hidden[col.id],
       style: {...col.style, ...(colWidth[col.id] && {width: `${colWidth[col.id]}px`})}
-    } as ISmCol)))
+    } as ISmCol)));
 export const selectSplitSize = createSelector(modelsView, (state): number => state.splitSize);
 export const selectTableMode = createSelector(modelsView, state => state.tableMode);
 

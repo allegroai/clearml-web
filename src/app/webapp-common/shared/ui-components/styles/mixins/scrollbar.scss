@@ -31,6 +31,10 @@
         background-color: map-get($scrollbar, tumb-background);
       }
 
+      ::-webkit-scrollbar-thumb:hover {
+        background-color: map-get($scrollbar, tumb-background-hover);
+      }
+
       &::-webkit-scrollbar-thumb {
         background-color: map-get($scrollbar, tumb-background);
       }

@@ -8,93 +8,92 @@
   width: 180px;
   height: 180px;
 
-  .fas.fa-copy, .fas.fa-external-link-alt {
-    font-size: 20px;
+  .labeled-icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: calc(100% - 24px);
+    justify-content: center;
+
+    .error-icon {
+      //font-size: 140%;
+    }
   }
 
-  &.light-theme {
-    background-color: #efefef;
-
-    .fas.fa-copy, .fas.fa-external-link-alt {
-      color: transparent;
-      transition: color 0.5s;
-    }
-
-    &:hover {
-      .fas.fa-copy, .fas.fa-external-link-alt {
-        color: $light-grey-blue;
-        transition: color 0.5s;
-      }
-    }
-
-    .label {
-      color: $blue-500;
-    }
-
+  .label,
+  .file-path {
+    color: $blue-300;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
-  &.dark-theme {
-    background-color: #1f2434;
+  .file-path {
+    font-size: 12px;
+  }
 
-    .fas.fa-copy, .fas.fa-external-link-alt {
-      color: #1f2434;
-      transition: color 0.5s;
-    }
-
-    &:hover {
-      .fas.fa-copy, .fas.fa-external-link-alt {
-        color: $light-grey-blue;
-        transition: color 0.5s;
-      }
-    }
-
-    .clickable-icon {
-      transition: background-color 0.5s;
-
-      &:hover {
-        background-color: #323950;
-        transition: background-color 0.5s;
-      }
-    }
+  .buttons-footer {
+    height: 42px;
+    padding: 2px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.35s, visibility 0.35s;
   }
 
   .clickable-icon {
     width: 100%;
     height: 100%;
+    border-radius: 4px;
+
+    &.disabled {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+  }
+
+  // .frame hover
+  &:hover {
+    .buttons-footer {
+      opacity: 1;
+      visibility: visible;
+    }
+  }
 
 
+  // LIGHT THEME
+  // --------------------------
+
+  &.light-theme {
+    background-color: $blue-50;
+    .label {
+      color: $blue-500;
+    }
+    .clickable-icon {
+      color: $blue-500;
+      background-color: transparent;
+      transition: background-color 0.35s;
+      &:hover {
+        background-color: $blue-100;
+      }
+    }
+  }
+
+
+  // DARK THEME
+  // --------------------------
+
+  &.dark-theme {
+    background-color: $blue-700;
+    .label {
+      color: $blue-200;
+    }
+    .clickable-icon {
+      color: $blue-300;
+      &:hover {
+        background-color: $blue-500;
+      }
+    }
   }
 
 }
-
-
-.clickable-icon {
-  width: 100%;
-  height: 100%;
-}
-
-.buttons-footer {
-  height: 48px;
-}
-
-.labeled-icon {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 12px 12px 0 12px;
-}
-
-
-.label {
-  margin: 0 6px;
-  color: #a4b2db;
-  text-align: center;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  width: 95%;
-  white-space: nowrap;
-}
-
-

@@ -308,3 +308,18 @@ export const loadExternalLibrary = (store: Store, url: string, action) => {
 
   setTimeout(init);
 };
+
+export const getBaseName = (url: string): string => {
+  try {
+    const u = new URL(url);
+    return u.pathname.split('/').at(-1);
+  } catch {
+    return url?.split('/').at(-1) || null;
+  }
+};
+
+export const splitLine = (line: string, search: string) => {
+  const regex = new RegExp(search, 'gi');
+  const match = line.match(regex);
+  return line.split(regex).map( (part, i) => [part, match?.[i]]);
+};

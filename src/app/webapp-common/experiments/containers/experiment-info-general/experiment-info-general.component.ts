@@ -3,11 +3,11 @@ import {Observable} from 'rxjs';
 import {Store} from '@ngrx/store';
 import {filter, map} from 'rxjs/operators';
 import {tap} from 'rxjs/operators';
-import {isReadOnly} from '../../../shared/utils/shared-utils';
-import {IExperimentInfo} from '../../../../features/experiments/shared/experiment-info.model';
-import {IExperimentInfoState} from '../../../../features/experiments/reducers/experiment-info.reducer';
-import {selectExperimentInfoData, selectIsExperimentEditable, selectSelectedExperiment} from '../../../../features/experiments/reducers';
-import {ExperimentDetailsUpdated} from '../../actions/common-experiments-info.actions';
+import {isReadOnly} from '@common/shared/utils/shared-utils';
+import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
+import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
+import {selectExperimentInfoData, selectIsExperimentEditable, selectSelectedExperiment} from '~/features/experiments/reducers';
+import {experimentDetailsUpdated} from '../../actions/common-experiments-info.actions';
 
 @Component({
   selector   : 'sm-experiment-info-general',
@@ -22,7 +22,7 @@ export class ExperimentInfoGeneralComponent {
   public isExample: boolean;
   private selectedExperiment: IExperimentInfo;
 
-  constructor(private store: Store<IExperimentInfoState>) {
+  constructor(private store: Store<ExperimentInfoState>) {
     this.selectedExperiment$ = this.store.select(selectSelectedExperiment)
       .pipe(
         filter(experiment => !!experiment),
@@ -34,7 +34,7 @@ export class ExperimentInfoGeneralComponent {
   }
 
   commentChanged(comment) {
-    this.store.dispatch(new ExperimentDetailsUpdated({id: this.selectedExperiment.id, changes: {comment: comment}}));
+    this.store.dispatch(experimentDetailsUpdated({id: this.selectedExperiment.id, changes: {comment}}));
   }
 
 }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import {deactivateLoader, setServerError} from '@common/core/actions/layout.actions';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {ApiProjectsService} from '~/business-logic/api-services/projects.service';
@@ -27,7 +28,7 @@ import {Observable} from 'rxjs/internal/Observable';
 import {CloudProviders} from './common-delete-dialog.reducer';
 import {selectProjectForDelete} from '@common/projects/common-projects.reducer';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
-import {ActivateEdit} from '@common/experiments/actions/common-experiments-info.actions';
+import {activateEdit} from '@common/experiments/actions/common-experiments-info.actions';
 import {ActivateModelEdit} from '@common/models/actions/models-info.actions';
 import {ModelsDeleteManyResponse} from '~/business-logic/model/models/modelsDeleteManyResponse';
 import {TasksDeleteManyResponse} from '~/business-logic/model/tasks/tasksDeleteManyResponse';
@@ -36,6 +37,8 @@ import {getBucketAndKeyFromSrc, SignResponse} from '@common/settings/admin/base-
 import {isFileserverUrl} from '~/shared/utils/url';
 import {deletedProjectFromRoot} from '@common/core/actions/projects.actions';
 import {getChildrenExperiments} from '@common/experiments/effects/common-experiments-menu.effects';
+import {TasksResetManyResponseSucceeded} from '~/business-logic/model/tasks/tasksResetManyResponseSucceeded';
+import {updateManyExperiment} from '@common/experiments/actions/common-experiments-view.actions';
 
 @Injectable()
 export class DeleteDialogEffectsBase {
@@ -51,17 +54,31 @@ export class DeleteDialogEffectsBase {
   ) {
   }
 
-  deleteEntityApi(entityType: EntityTypeEnum, entities: any[]): Observable<{ failed: any[]; succeeded: string[] }> {
+  deleteEntityApi(entityType: EntityTypeEnum, entities: any[], deleteArtifacts?: boolean,
+                  resetMode?: boolean): Observable<{ failed: any[]; urlsToDelete: string[]; succeeded?: TasksResetManyResponseSucceeded[] }> {
     const ids = entities.map(entity => entity.id);
     switch (entityType) {
       case EntityTypeEnum.dataset:
       case EntityTypeEnum.controller:
       case EntityTypeEnum.experiment:
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        return this.tasksApi.tasksDeleteMany({ids, return_file_urls: true, force: true}).pipe(
+        return (resetMode ? this.tasksApi.tasksResetMany({
+          ids,
+          delete_external_artifacts: deleteArtifacts,
+          delete_output_models: deleteArtifacts,
+          return_file_urls: true,
+          force: true
+        }) : this.tasksApi.tasksDeleteMany({
+          ids,
+          delete_external_artifacts: deleteArtifacts,
+          delete_output_models: deleteArtifacts,
+          return_file_urls: true,
+          force: true
+        })).pipe(
           map((res: TasksDeleteManyResponse) => ({
             failed: res.failed,
-            succeeded: res.succeeded.map(deletedExperiment =>
+            succeeded: res.succeeded,
+            urlsToDelete: res.succeeded.map(deletedExperiment =>
               [...deletedExperiment.urls.artifact_urls, ...deletedExperiment.urls.event_urls, ...deletedExperiment.urls.model_urls]
             ).flat()
           })));
@@ -69,17 +86,19 @@ export class DeleteDialogEffectsBase {
         return this.modelsApi.modelsDeleteMany({ids, force: true}).pipe(
           map((res: ModelsDeleteManyResponse) => ({
             failed: res.failed,
-            succeeded: [...res.succeeded.map(model => model.url)]
+            urlsToDelete: [...res.succeeded.map(model => model.url)]
           })));
       case EntityTypeEnum.project:
+      case EntityTypeEnum.pipeline:
+      case EntityTypeEnum.simpleDataset:
         // eslint-disable-next-line @typescript-eslint/naming-convention
         return this.projectsApi.projectsDelete({project: entities[0].id, delete_contents: true}).pipe(
           map((res: TasksDeleteResponse) => ({
-            succeeded: [...res.urls.model_urls, ...res.urls.artifact_urls, ...res.urls.event_urls],
+            urlsToDelete: [...res.urls.model_urls, ...res.urls.artifact_urls, ...res.urls.event_urls],
             failed: []
           })));
       default:
-        return of({succeeded: [], failed: []});
+        return of({urlsToDelete: [], failed: []});
     }
   }
 
@@ -91,6 +110,8 @@ export class DeleteDialogEffectsBase {
         return selectSelectedExperiments;
       case EntityTypeEnum.model:
         return selectSelectedModels;
+      case EntityTypeEnum.simpleDataset:
+      case EntityTypeEnum.pipeline:
       case EntityTypeEnum.project:
         return selectProjectForDelete;
     }
@@ -99,7 +120,7 @@ export class DeleteDialogEffectsBase {
   pauseAutorefresh(entityType: EntityTypeEnum): Action[] {
     switch (entityType) {
       case EntityTypeEnum.experiment:
-        return [new ActivateEdit('delete')];
+        return [activateEdit('delete')];
       case EntityTypeEnum.model:
         return [new ActivateModelEdit('delete')];
       default:
@@ -118,21 +139,23 @@ export class DeleteDialogEffectsBase {
       switchMap(entities => action.includeChildren ? getChildrenExperiments(this.tasksApi, entities).pipe(
         map((children: Task[]) => [...children, ...entities])) : of(entities)),
       switchMap(entities =>
-        this.deleteEntityApi(action.entityType, entities).pipe(
+        this.deleteEntityApi(action.entityType, entities, action.deleteArtifacts, action.resetMode).pipe(
           map(({
                  failed,
-                 succeeded: urlsToDelete
-               }) => [this.parseErrors(failed, entities), this.getUrlsPerProvider(urlsToDelete)]),
-          mergeMap(([failed, urlsPerSource]: [{ id: string; name: string; message: string }[], { [provider in CloudProviders]: string[] }]) => [
+                 succeeded,
+                 urlsToDelete
+               }) => [this.parseErrors(failed, entities), this.getUrlsPerProvider(action.deleteArtifacts ? urlsToDelete : []), succeeded]),
+          mergeMap(([failed, urlsPerSource, succeeded]: [{ id: string; name: string; message: string }[], { [provider in CloudProviders]: string[] }, TasksResetManyResponseSucceeded[]]) => [
               ...this.pauseAutorefresh(action.entityType),
-              setNumberOfSourcesToDelete({numberOfFiles: Object.values(urlsPerSource).flat().length}),
+              setNumberOfSourcesToDelete({numberOfFiles: 0}),//Object.values(urlsPerSource).flat().length}), // Currently deleting only in BE
               setFailedDeletedEntities({failedEntities: failed}),
-              deleteFileServerSources({files: urlsPerSource['fs']}),
+              // deleteFileServerSources({files: urlsPerSource['fs']}), // Currently deleting only in BE
               // deleteS3Sources({files: urlsPerSource['s3']}),
               // deleteGoogleCloudeSource(urlsPerSource['gc']),
               // deleteAzure(urlsPerSource['azure']),
-              addFailedDeletedFiles({filePaths: urlsPerSource['misc']}),
+              // addFailedDeletedFiles({filePaths: urlsPerSource['misc']}), // Currently deleting only in BE - no need to count files
               (action.entityType === EntityTypeEnum.project) ? deletedProjectFromRoot({project: entities[0]}) : new EmptyAction(),
+              action.resetMode ? updateManyExperiment({changeList: succeeded}) : new EmptyAction()
             ]
           ),
           catchError(error => [
@@ -160,7 +183,7 @@ export class DeleteDialogEffectsBase {
         ),
         mergeMap(res => {
           if ((res[0]?.status || res?.status) !== 200) {
-            return [addFailedDeletedFile({filePath: decodeURIComponent(res[0]?.url|| res?.url)})];
+            return [addFailedDeletedFile({filePath: decodeURIComponent(res[0]?.url || res?.url)})];
           } else {
             return [setNumberOfSourcesToDelete({numberOfFiles: -1})];
           }

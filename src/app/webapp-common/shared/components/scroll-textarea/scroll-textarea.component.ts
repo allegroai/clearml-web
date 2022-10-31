@@ -70,7 +70,7 @@ export class ScrollTextareaComponent {
   }
 
   split(line: string, search: string) {
-    const regex = new RegExp(search, 'gi')
+    const regex = new RegExp(search, 'gi');
     const match = line.match(regex);
     return line.split(regex).map( (part, i) => [part, match?.[i]]);
   }

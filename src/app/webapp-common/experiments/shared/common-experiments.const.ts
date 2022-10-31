@@ -3,6 +3,7 @@ import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
 import {DATASETS_STATUS_LABEL, EXPERIMENTS_STATUS_LABELS} from '~/features/experiments/shared/experiments.const';
 
 export type ExperimentWizardMethodsEnum = 'create' | 'edit' | 'clone' | 'extend';
+export type ChartHoverModeEnum = 'x' | 'y' | 'closest' | false | 'x unified' | 'y unified';
 
 export const EXPERIMENTS_STORE_KEY = 'experiments';
 

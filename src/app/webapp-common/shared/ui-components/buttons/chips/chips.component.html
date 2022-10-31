@@ -15,8 +15,8 @@
       </span>
     </span>
     <span smTooltip="label.length > 12 ? label : ''" class="label-text ellipsis">{{label}}</span>
-    <span class="pointer" *ngIf="allowRemove" (click)="remove.emit($event); $event.stopPropagation()">
-      <i class="fas fa-sm fa-times pointer"></i>
+    <span class="pointer" *ngIf="allowRemove" (mousedown)="$event.stopPropagation(); $event.preventDefault()" (click)="remove.emit($event); $event.stopPropagation()">
+      <i class="al-icon al-ico-dialog-x xs pointer"></i>
     </span>
   </span>
 </div>

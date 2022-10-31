@@ -48,14 +48,14 @@
 <button *ngIf="editable" class="btn btn-dark-fill add-parameter" (click)="addRow()"><i class="fas fa-plus"></i> ADD PARAMETER</button>
 <div class="table-container" *ngIf="!editable">
   <sm-table
-    #parametersTable
     [columns]="cols"
+    columnResizeMode="fit"
     [tableData]="formData"
     [enableTableSearch]="true"
     [globalFilterFields]="['name', 'value','description']"
-    [resizableColumns]="true"
     [noHeader]="true"
     [simple]="true"
+    [scrollable]="true"
     [virtualScroll]="true"
     [rowHeight]="32"
     (rowClicked)="rowActivated($event)"

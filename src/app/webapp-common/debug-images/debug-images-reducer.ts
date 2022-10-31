@@ -11,11 +11,11 @@ import {
   setViewerBeginningOfTime,
   setViewerEndOfTime, setExperimentsNames, setMetrics, setSelectedMetric, setTimeIsNow
 } from './debug-images-actions';
-import {Task} from '../../business-logic/model/tasks/task';
+import {Task} from '~/business-logic/model/tasks/task';
 import {createFeatureSelector, createReducer, createSelector, on} from '@ngrx/store';
 import {omit} from 'lodash/fp';
-import {EventsGetDebugImageIterationsResponse} from '../../business-logic/model/events/eventsGetDebugImageIterationsResponse';
-import {EventsDebugImagesResponse} from '../../business-logic/model/events/eventsDebugImagesResponse';
+import {EventsGetDebugImageIterationsResponse} from '~/business-logic/model/events/eventsGetDebugImageIterationsResponse';
+import {EventsDebugImagesResponse} from '~/business-logic/model/events/eventsDebugImagesResponse';
 
 
 export interface IDebugImagesState {
@@ -47,7 +47,7 @@ export interface ITaskOptionalMetrics {
 }
 
 export const initialState: IDebugImagesState = {
-    debugImages: {},
+    debugImages: null,
     settingsList: [],
     searchTerm: '',
     tasks: [],
@@ -92,7 +92,7 @@ export const debugSamplesReducer = createReducer(
   on(getDebugImagesMetrics, state => ({...state, optionalMetrics: initialState.optionalMetrics, debugImages: initialState.debugImages})),
   on(setSelectedMetric, (state, action) => ({
         ...state,
-        debugImages: omit(action.payload.task, state.debugImages),
+        ...(state.debugImages && {debugImages: omit(action.payload.task, state.debugImages)}),
         timeIsNow: {...state.timeIsNow, [action.payload.task]: true},
         beginningOfTime: {...state.beginningOfTime, [action.payload.task]: false}
   })),

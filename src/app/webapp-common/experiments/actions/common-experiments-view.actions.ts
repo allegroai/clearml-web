@@ -44,7 +44,7 @@ export const setExperimentInPlace = createAction(
 
 export const setNoMoreExperiments = createAction(
   EXPERIMENTS_PREFIX + ' [set no more experiments]',
-  props<{ payload: boolean }>()
+  props<{ hasMore: boolean }>()
 );
 
 export const addExperiments = createAction(

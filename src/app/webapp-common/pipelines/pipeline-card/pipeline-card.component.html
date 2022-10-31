@@ -11,7 +11,7 @@
         <li *ngFor="let subProject of project?.sub_projects; trackBy: trackById"><a class="d-flex align-items-center"
                                                                 (click)="subProjectClicked(subProject.id)"
                                                                 [smTooltip]="subProject?.name"
-                                                                matTooltipPosition="above"
+                                                                
                                                                 [innerHTML]="subProject?.name | breadcrumbsEllipsis"></a>
         </li>
       </ul>
@@ -30,7 +30,7 @@
 
       >
         <span class="project-name"
-              matTooltipPosition="above"
+              
               [smTooltip]="project.name"
         >{{project.name | shortProjectName}}</span>
       </sm-inline-edit>

@@ -5,8 +5,10 @@ export enum EntityTypeEnum {
   experiment = 'experiment',
   model = 'model',
   project = 'project',
+  pipeline = 'pipeline',
   controller = 'pipeline run',
-  dataset = 'version'
+  dataset = 'version',
+  simpleDataset = 'dataset'
 }
 
 export enum CircleTypeEnum {

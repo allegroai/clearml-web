@@ -1,6 +1,6 @@
 import {Component, Input, OnChanges, Output, SimpleChanges, ViewChild} from '@angular/core';
 import {AdminService} from '~/shared/services/admin.service';
-import {FormBuilder, FormControl, FormGroup, NgForm} from '@angular/forms';
+import {UntypedFormBuilder, NgForm} from '@angular/forms';
 import {EventEmitter} from '@angular/core';
 
 @Component({
@@ -27,7 +27,7 @@ export class S3AccessDialogComponent implements OnChanges {
   public formIsSubmitted: boolean;
 
 
-  constructor(public adminService: AdminService, private formBuilder: FormBuilder) {
+  constructor(public adminService: AdminService, private formBuilder: UntypedFormBuilder) {
   }
 
   ngOnChanges(changes: SimpleChanges): void {

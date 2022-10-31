@@ -1,15 +1,21 @@
 <sm-confirm-dialog [displayX]="false">
-  <div class="content">
-    <iframe #box class="box" (load)="iframeLoaded($event)" [srcdoc]="text | safe: 'html'">
-    </iframe>
-  </div>
-
-  <div class="buttons">
-    <button (click)="closeDialog()" class="btn btn-neon"
-            [style.background-color]="disabled ? '#E7E7E8' : ''"
-            [disabled]="disabled">
-      ACCEPT
-    </button>
-    <p class="ml-3" *ngIf="disabled">Read through this document to accept the terms</p>
+  <iframe #box class="box" [srcdoc]="text | safe: 'html'"></iframe>
+  <div class="footer-buttons">
+      <div class="cbx">
+        <mat-checkbox
+        #checkboxInput="ngModel"
+        [(ngModel)]="isApprove"
+        name="isApprove"
+        class="mr-3"
+        >I have read and accept ClearML's Terms Of Use
+        </mat-checkbox>
+      </div>
+      <div class="d-flex justify-content-center">
+        <button (click)="closeDialog()" class="btn btn-neon"
+                [style.background-color]="isApprove ? '' : '#E7E7E8'"
+                [disabled]="!isApprove">
+          ACCEPT
+        </button>
+      </div>
   </div>
 </sm-confirm-dialog>

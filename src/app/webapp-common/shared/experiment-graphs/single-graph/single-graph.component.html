@@ -3,34 +3,10 @@
      [class.whitebg]="!isDarkTheme"
      [class.dark-theme]="isDarkTheme"
      [class.loading]="loading"
-     mwlResizable
-     [validateResize]="validateResize"
-     [enableGhostResize]="!disableResize"
-     [ghostElementPositioning]="'absolute'"
-     (resizing)="resizing.emit($event);"
-     (resizeEnd)="sizeChanged.emit($event)"
-     (resizeStart)="resizeStarted.emit()"
      [class.whitebg-table]="type === 'table'"
      [class.move-title]="type !== 'parcoords'"
      (scroll)="repositionModeBar($event.target)"
 >
-  <div #koko class="graph-title ellipsis" [class.table-title]="type === 'table'" [title]="koko.scrollWidth <= koko.clientWidth ? '' : title" (mouseenter)="changeDetector.detectChanges()">{{title}}</div>
-  <div
-    *ngIf="!disableResize"
-    class="resize-handle-right"
-    mwlResizeHandle
-    [resizeEdges]="{ right: true }">
-    <div class="right-line"></div>
-    <div class="right-handle"></div>
-  </div>
-  <div
-    *ngIf="!disableResize"
-    class="resize-handle-bottom"
-    mwlResizeHandle
-    [resizeEdges]="{ bottom: true }">
-    <div class="bottom-line"></div>
-    <div class="bottom-handle"></div>
-  </div>
-  <div class="resize-overlay-text"></div>
+  <div #graphTitle class="graph-title ellipsis" [class.table-title]="type === 'table'" [title]="graphTitle.scrollWidth <= graphTitle.clientWidth ? '' : title" (mouseenter)="changeDetector.detectChanges()">{{title}}</div>
   <div *ngIf="loading" class="plot-loader">Loading...</div>
 </div>

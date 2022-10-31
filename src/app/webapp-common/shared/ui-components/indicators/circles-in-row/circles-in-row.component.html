@@ -5,7 +5,7 @@
        [ngClass]="circle.class"
        [class.long]="circle.initials?.length > 4"
        [style.left.px]="-6 * index"
-       [smTooltip]="circle.name" matTooltipPosition="above"
+       [smTooltip]="circle.name" 
   >
     <div class="inner-circle">{{circle.name ? circle.initials || (circle.name | initials) : ''}}</div>
   </div>

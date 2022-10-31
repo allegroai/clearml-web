@@ -13,7 +13,7 @@ import {modelsInitialState} from '@common/models/reducers/models-view.reducer';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 
 
-export interface ICommonExperimentsViewState {
+export interface CommonExperimentsViewState {
   tableCols: ISmCol[];
   colsOrder: { [Project: string]: string[] };
   tableFilters: any;
@@ -47,7 +47,7 @@ export interface ICommonExperimentsViewState {
   tableMode: 'info' | 'table';
 }
 
-export const commonExperimentsInitialState: ICommonExperimentsViewState = {
+export const commonExperimentsInitialState: CommonExperimentsViewState = {
   tableCols: [],
   colsOrder: {},
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -79,10 +79,10 @@ export const commonExperimentsInitialState: ICommonExperimentsViewState = {
   activeParentsFilter: [],
   types: [],
   splitSize: 70,
-  tableMode: 'table'
+  tableMode: 'table',
 };
 
-const setExperimentsAndUpdateSelectedExperiments = (state: ICommonExperimentsViewState, payload: {id: string; changes: Partial<ITableExperiment>}) => ({
+const setExperimentsAndUpdateSelectedExperiments = (state: CommonExperimentsViewState, payload: {id: string; changes: Partial<ITableExperiment>}) => ({
   ...state,
   experiments: state.experiments?.map(ex => ex.id === payload.id ? {...ex, ...payload.changes} : ex) || null,
   ...(state.selectedExperiment?.id === payload.id && {selectedExperiment: {...state.selectedExperiment, ...payload.changes}}),
@@ -128,7 +128,7 @@ export const commonExperimentsViewReducer = createReducer(
     action.changeList.reduce((acc, change) => {
       acc = setExperimentsAndUpdateSelectedExperiments(acc, {id: change.id, changes: change.fields});
       return acc;
-    }, state as ICommonExperimentsViewState)
+    }, state as CommonExperimentsViewState)
   ),
   on(actions.setExperiments, (state, action) => ({...state, experiments: action.experiments})),
   on(actions.setTableRefreshPending, (state, action) => ({...state, refreshList: action.refresh})),
@@ -137,7 +137,7 @@ export const commonExperimentsViewReducer = createReducer(
       ?.map(currExp => action.experiments.find(newExp => newExp.id === currExp.id))
       .filter(e => e) || null
   })),
-  on(actions.setNoMoreExperiments, (state, action) => ({...state, noMoreExperiment: action.payload})),
+  on(actions.setNoMoreExperiments, (state, action) => ({...state, noMoreExperiment: action.hasMore})),
   on(actions.setCurrentScrollId, (state, action) => ({...state, scrollId: action.scrollId})),
   on(actions.setSelectedExperiment, (state, action) => ({...state, selectedExperiment: action.experiment})),
   on(actions.setSelectedExperiments, (state, action) => ({...state, selectedExperiments: action.experiments})),

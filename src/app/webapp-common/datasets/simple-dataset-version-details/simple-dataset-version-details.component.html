@@ -3,7 +3,7 @@
     <div class="expand-header">VERSION INFO</div>
   </mat-expansion-panel-header>
   <div class="panel-body" *ngIf="entity">
-    <div class="header">
+    <div class="header mt-2">
       <div class="name ellipsis">{{entity.name}}<ng-container *ngIf="entity?.runtime?.version"> v{{entity.runtime.version}}</ng-container></div>
       <span class="status" [class]="entity.status">{{entity.status | replaceViaMapPipe:convertStatusMap | replaceViaMapPipe:convertStatusMapBase}}</span>
     </div>
@@ -11,7 +11,7 @@
       <div class="param">
         <div class="key">ID</div>
         <div class="value d-flex align-item-center justify-content-between" [smTooltip]="entity.id" smShowTooltipIfEllipsis>
-          <span>{{entity.id?.slice(0, 8)}}</span>
+          <span>{{entity.id?.slice(0, 8)}}...</span>
           <i
             class="pointer al-icon al-ico-copy-to-clipboard sm"
             ngxClipboard
@@ -58,6 +58,12 @@
              [smTooltip]="$any(entity?.runtime?.ds_change_size) | filesize: fileSizeConfigStorage"
              smShowTooltipIfEllipsis
         >{{$any(entity?.runtime?.ds_change_size) | filesize: fileSizeConfigStorage}}</div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="header"><span>DESCRIPTION</span><i class="al-icon al-ico-edit sm" (click)="editDescription.emit(entity)"></i></div>
+      <div class="param continue h-auto">
+        <div class="multi-line-value">{{entity?.comment}}</div>
       </div>
     </div>
   </div>

@@ -3,7 +3,7 @@
     <ng-container [ngSwitch]="valType">
       <div *ngSwitchCase="'array'" class="d-flex-center flex-row wrapper">
         <div *ngFor="let subCounter of counter; trackBy: trackByLabel">
-          <div class="sub-counter">{{subCounter.value | filesize : fileSizeConfigCount ?? 'N/A'}}</div>
+          <div class="sub-counter" [class.no-value]="subCounter.value === NA">{{subCounter.value | filesize : fileSizeConfigCount}}</div>
           <div class="sub-label">{{subCounter.label}}</div>
         </div>
       </div>

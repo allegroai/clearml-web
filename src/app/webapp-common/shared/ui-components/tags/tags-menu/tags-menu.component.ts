@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import {Store} from '@ngrx/store';
 import {getCompanyTags, getTags, openTagColorsMenu, setTagsFilterByProject} from '@common/core/actions/projects.actions';
-import {ActivateEdit} from 'app/webapp-common/experiments/actions/common-experiments-info.actions';
+import {activateEdit} from 'app/webapp-common/experiments/actions/common-experiments-info.actions';
 import {ActivateModelEdit} from '@common/models/actions/models-info.actions';
 
 @Component({
@@ -41,7 +41,7 @@ export class TagsMenuComponent {
 
   openTagColors() {
     window.setTimeout(() => {
-      this.store.dispatch(new ActivateEdit('tags'));
+      this.store.dispatch(activateEdit('tags'));
       this.store.dispatch(new ActivateModelEdit('tags'));
     }, 500);
     this.store.dispatch(openTagColorsMenu());

@@ -26,7 +26,7 @@ export class ExperimentHeaderComponent extends BaseEntityHeaderComponent {
   @Input() addButtonTemplate: TemplateRef<any>;
 
   @Input() set tableCols(tableCols) {
-    this._tableCols = tableCols.filter(col => col.header !== '');
+    this._tableCols = tableCols?.filter(col => col.header !== '');
   }
 
   get tableCols() {

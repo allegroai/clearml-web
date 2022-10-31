@@ -1,10 +1,10 @@
-<div class="sm-card-list-layout">
+<div class="sm-card-list-layout" (smOverflows)="overflow = $event">
   <div #header class="sm-card-list-header">
     <div class="recent-title">RECENT PROJECTS
       <button class="btn btn-link view-all" (click)="router.navigateByUrl('/projects')">VIEW ALL</button>
     </div>
     <div>
-      <button *ngIf="(recentProjectsList$ | async).length >= cardsInRow"
+      <button *ngIf="(recentProjectsList$ | async).length >= cardsInRow || overflow"
               class="btn btn-cml-primary d-flex align-items-center"
               (click)="openCreateProjectDialog()">
         <i class="al-icon al-color sm blue-400 al-ico-add mr-2"></i>NEW PROJECT
@@ -12,7 +12,7 @@
     </div>
   </div>
   <sm-project-card
-    *ngFor="let project of recentProjectsList$ | async"
+    *ngFor="let project of recentProjectsList$ | async; trackBy: trackById"
     [project]="project" (projectCardClicked)="projectCardClicked($event)"
     [hideMenu]="true"
   ></sm-project-card>

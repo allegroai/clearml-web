@@ -1,10 +1,25 @@
+@import "variables";
+
 :host {
   flex: 0 0 220px;
 
-  .step-footer {
-    font-size: 12px;
-  }
   .title {
     max-width: 162px; // use for ellipsis
   }
+
 }
+
+.step-title {
+  &.in_progress {
+    background-color: mix($running-green, $blue-950, 20%);
+  }
+}
+
+.step-footer {
+  font-size: 12px;
+
+  &.in_progress {
+    background-color: $running-green;
+  }
+}
+

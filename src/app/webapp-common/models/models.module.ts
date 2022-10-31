@@ -29,8 +29,7 @@ import {ModelCustomColsMenuComponent} from './dumbs/model-custom-cols-menu/model
 import {ModelHeaderComponent} from '~/webapp-common/models/dumbs/model-header/model-header.component';
 import {SharedModule} from '~/shared/shared.module';
 import {CommonDeleteDialogModule} from '../shared/entity-page/entity-delete/common-delete-dialog.module';
-import { ModelInfoMetadataComponent } from './containers/model-info-metadata/model-info-metadata.component';
-import { SelectMetadataKeysCustomColsComponent } from './dumbs/select-metadata-keys-custom-cols/select-metadata-keys-custom-cols.component';
+import {ModelInfoMetadataComponent} from './containers/model-info-metadata/model-info-metadata.component';
 import {merge, pick} from 'lodash/fp';
 
 export const modelSyncedKeys    = [
@@ -94,8 +93,7 @@ const getInitState = () =>
     ModelInfoLabelsComponent, ModelInfoLabelsViewComponent, ModelInfoGeneralComponent,
     ModelGeneralInfoComponent, ModelHeaderComponent,
     ModelCustomColsMenuComponent,
-    ModelInfoMetadataComponent,
-    SelectMetadataKeysCustomColsComponent]
+    ModelInfoMetadataComponent]
 })
 export class ModelsModule {
 }

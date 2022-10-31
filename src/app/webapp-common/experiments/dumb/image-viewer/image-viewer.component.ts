@@ -25,9 +25,9 @@ import {
   selectViewerEndOfTime,
   selectMinMaxIterations
 } from '@common/debug-images/debug-images-reducer';
-import {interval, Observable, Subscription} from 'rxjs';
+import {BehaviorSubject, interval, Observable, Subscription} from 'rxjs';
 import {EventsGetDebugImageIterationsResponse} from '~/business-logic/model/events/eventsGetDebugImageIterationsResponse';
-import {filter, map, switchMap, tap, withLatestFrom} from 'rxjs/operators';
+import {debounceTime, distinctUntilChanged, filter, map, switchMap, tap, withLatestFrom} from 'rxjs/operators';
 import {selectAppVisible, selectAutoRefresh} from '@common/core/reducers/view.reducer';
 import {isFileserverUrl} from '~/shared/utils/url';
 import {getSignedUrl} from '@common/core/actions/common-auth.actions';
@@ -77,6 +77,8 @@ export class ImageViewerComponent implements OnInit, OnDestroy {
   private endOfTime: boolean = false;
   private begOfTimeSub: Subscription;
   private endOfTimeSub: Subscription;
+  change$: BehaviorSubject<number>;
+  private sub = new Subscription();
 
 
   @HostListener('document:keydown', ['$event'])
@@ -111,6 +113,7 @@ export class ImageViewerComponent implements OnInit, OnDestroy {
       isAllMetrics: data.isAllMetrics
     };
     this.store.dispatch(getDebugImageSample(reqData));
+    this.change$ = new BehaviorSubject<number>(reqData.iteration);
     this.minMaxIterations$ = this.store.select(selectMinMaxIterations);
     this.beginningOfTime$ = this.store.select(selectViewerBeginningOfTime);
     this.endOfTime$ = this.store.select(selectViewerEndOfTime);
@@ -141,6 +144,13 @@ export class ImageViewerComponent implements OnInit, OnDestroy {
         }));
       }
     });
+
+    this.sub.add(this.change$
+      .pipe(
+        debounceTime(100),
+        distinctUntilChanged()
+      )
+      .subscribe(val => this.changeIteration(val)));
   }
 
   canGoNext() {
@@ -248,6 +258,9 @@ export class ImageViewerComponent implements OnInit, OnDestroy {
   }
 
   changeIteration(value: number) {
+    if (this.iteration === value) {
+      return;
+    }
     this.iteration = value;
     if (this.currentDebugImage) {
       const reqData = {
@@ -290,11 +303,13 @@ export class ImageViewerComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.store.dispatch(resetViewer());
     this.store.dispatch(setDebugImageViewerScrollId({scrollId: null}));
     this.currentDebugImageSubscription.unsubscribe();
     this.begOfTimeSub.unsubscribe();
     this.endOfTimeSub.unsubscribe();
     this.autoRefreshSub?.unsubscribe();
+    this.sub.unsubscribe();
   }
 
   showImage() {

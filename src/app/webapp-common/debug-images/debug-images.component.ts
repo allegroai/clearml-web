@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 import {combineLatest, Observable, Subscription} from 'rxjs';
 import {select, Store} from '@ngrx/store';
-import {IExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
+import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {AdminService} from '~/shared/services/admin.service';
 import {selectS3BucketCredentials} from '../core/reducers/common-auth-reducer';
 import {MatDialog} from '@angular/material/dialog';
@@ -93,7 +93,7 @@ export class DebugImagesComponent implements OnInit, OnDestroy, OnChanges {
   public beginningOfTime$: Observable<any>;
 
   public mergeIterations: boolean;
-  public debugImages: { [experimentId: string]: DebugSamples };
+  public debugImages: { [experimentId: string]: DebugSamples } = null;
   public experimentNames: { [id: string]: string } = {};
   public experimentIds: string[];
   public allowAutorefresh: boolean = false;
@@ -111,9 +111,10 @@ export class DebugImagesComponent implements OnInit, OnDestroy, OnChanges {
   private selectedMetric: string;
   public modifiedExperimentsNames: { [id: string]: string } = {};
   public experiments: Partial<Task>[];
+  public bindNavigationMode: boolean = false;
 
   constructor(
-    private store: Store<IExperimentInfoState>,
+    private store: Store<ExperimentInfoState>,
     private adminService: AdminService,
     private dialog: MatDialog,
     private changeDetection: ChangeDetectorRef,
@@ -130,9 +131,12 @@ export class DebugImagesComponent implements OnInit, OnDestroy, OnChanges {
     this.debugImagesSubscription = combineLatest([
       store.pipe(select(selectS3BucketCredentials)),
       store.pipe(select(selectDebugImages))]).pipe(
-      map(([, debugImages]) => Object.entries(debugImages).reduce(((acc, val: any) => {
+      map(([, debugImages]) => !debugImages ? null : Object.entries(debugImages).reduce(((acc, val: any) => {
         const id = val[0];
         const iterations = val[1].metrics.find(m => m.task === id).iterations;
+        if (iterations?.length === 0) {
+          return {[id]:{}};
+        }
         acc[id] = {
           data: iterations.map(iteration => ({
             iter: iteration.iter,
@@ -152,7 +156,11 @@ export class DebugImagesComponent implements OnInit, OnDestroy, OnChanges {
         return acc;
       }), {}))
     ).subscribe(debugImages => {
+      console.log(debugImages);
       this.debugImages = debugImages;
+      if (debugImages === null) {
+        return;
+      }
       Object.keys(debugImages).forEach(key => {
         if (!this.selectedMetrics[key]) {
           this.selectedMetrics[key] = get('metric', debugImages[key]);
@@ -169,7 +177,7 @@ export class DebugImagesComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes.selected && [changes.selected.currentValue.id] !== this.experimentIds) {
+    if (changes.selected && !isEqual([changes.selected.currentValue.id], this.experimentIds)) {
       this.experimentNames = {[changes.selected.currentValue.id]: changes.selected.currentValue.name};
       this.experimentIds = [changes.selected.currentValue.id];
       this.selectMetric({value: this.allImages}, changes.selected.currentValue.id);
@@ -252,7 +260,7 @@ export class DebugImagesComponent implements OnInit, OnDestroy, OnChanges {
                 task: experimentId,
                 metric: this.debugImages[experimentId]?.metric,
               },
-              autoRefresh: (auto!==false)
+              autoRefresh: (auto !== false)
             }));
           }
         });
@@ -318,22 +326,65 @@ export class DebugImagesComponent implements OnInit, OnDestroy, OnChanges {
 
   selectMetric(change: any, task) {
     this.selectedMetric = change.value;
-    this.selectedMetrics[task] = change.value;
-    this.store.dispatch(debugActions.setSelectedMetric({payload: {task, metric: change.value}}));
+    if (this.bindNavigationMode) {
+      this.experimentIds.forEach(experimentId => {
+        this.selectedMetrics[experimentId] = change.value;
+        this.store.dispatch(debugActions.setSelectedMetric({payload: {task: experimentId, metric: change.value}}));
+      });
+    } else {
+      this.selectedMetrics[task] = change.value;
+      this.store.dispatch(debugActions.setSelectedMetric({payload: {task, metric: change.value}}));
+    }
   }
 
   nextBatch(taskMetric: TaskMetric) {
-    if (!this.beginningOfTime[taskMetric.task]) {
-      this.store.dispatch(debugActions.getNextBatch({payload: taskMetric}));
+    if (this.bindNavigationMode) {
+      this.experimentIds.forEach(experimentId => {
+        if (!this.beginningOfTime[experimentId]) {
+          this.store.dispatch(debugActions.getNextBatch({
+            payload: {
+              task: experimentId,
+              metric: this.selectedMetrics[experimentId]
+            }
+          }));
+        }
+      });
+    } else {
+      if (!this.beginningOfTime[taskMetric.task]) {
+        this.store.dispatch(debugActions.getNextBatch({payload: taskMetric}));
+      }
     }
   }
 
   previousBatch(taskMetric: TaskMetric) {
-    this.store.dispatch(debugActions.getPreviousBatch({payload: taskMetric}));
+    if (this.bindNavigationMode) {
+      this.experimentIds.forEach(experimentId => {
+        this.store.dispatch(debugActions.getPreviousBatch({
+          payload: {
+            task: experimentId,
+            metric: this.selectedMetrics[experimentId]
+          }
+        }));
+      });
+    } else {
+      this.store.dispatch(debugActions.getPreviousBatch({payload: taskMetric}));
+    }
   }
 
   backToNow(taskMetric: TaskMetric) {
-    this.store.dispatch(debugActions.setSelectedMetric({payload: taskMetric}));
+    if (this.bindNavigationMode) {
+      this.experimentIds.forEach(experimentId => {
+        this.store.dispatch(debugActions.setSelectedMetric({
+          payload: {
+            task: experimentId,
+            metric: this.selectedMetrics[experimentId]
+          }
+        }));
+      });
+    } else {
+      this.store.dispatch(debugActions.setSelectedMetric({payload: taskMetric}));
+    }
+
   }
 
   thereAreNoMetrics(experiment) {
@@ -341,7 +392,7 @@ export class DebugImagesComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   thereAreNoDebugImages(experiment) {
-    return !(this.debugImages && this.debugImages[experiment] && this.debugImages[experiment].data.length > 0);
+    return !(this.debugImages && this.debugImages[experiment] && this.debugImages[experiment].data?.length > 0);
   }
 
   shouldShowNoImagesForExperiment(experiment: string) {
@@ -352,4 +403,7 @@ export class DebugImagesComponent implements OnInit, OnDestroy, OnChanges {
     this.store.dispatch(addMessage('success', 'Copied to clipboard'));
   }
 
+  toggleConnectNavigation() {
+    this.bindNavigationMode = !this.bindNavigationMode;
+  }
 }

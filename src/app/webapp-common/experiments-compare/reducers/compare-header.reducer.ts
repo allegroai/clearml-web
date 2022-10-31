@@ -43,7 +43,8 @@ export const initialState: CompareHeaderState = {
   projectColumnFilters: {},
 };
 
-const _compareHeader = createReducer(initialState,
+export const compareHeader = createReducer(
+  initialState,
   on(setHideIdenticalFields, (state: CompareHeaderState, {payload}) => ({...state, hideIdenticalRows: payload})),
   on(setSearchExperimentsForCompareResults, (state: CompareHeaderState, {payload}) => ({
     ...state,
@@ -88,7 +89,3 @@ const _compareHeader = createReducer(initialState,
     }
   })),
 );
-
-export function compareHeader(state, action) {
-  return _compareHeader(state, action);
-}
