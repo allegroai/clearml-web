@@ -24,6 +24,7 @@ export class ProjectRedirectGuardGuard implements CanActivate {
         project === null && this.store.dispatch(setSelectedProjectId({projectId: route.params.projectId}))
       ),
       filter(project => project?.id === route.params.projectId),
+
       withLatestFrom(this.store.select(selectSelectedMetricVariantForCurrProject)),
       map(([project, metVar]) => this.router.parseUrl(`projects/${project.id}/${(project.description || metVar) ? 'overview' : 'experiments'}`)));
   }

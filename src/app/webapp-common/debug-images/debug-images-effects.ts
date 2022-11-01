@@ -18,6 +18,7 @@ import {
 import {EventsDebugImagesResponse} from '~/business-logic/model/events/eventsDebugImagesResponse';
 import {EventsGetTaskMetricsResponse} from '~/business-logic/model/events/eventsGetTaskMetricsResponse';
 import {COMPARE_DEBUG_IMAGES_ONLY_FIELDS} from '../experiments-compare/experiments-compare.constants';
+import {selectActiveWorkspaceReady} from '~/core/reducers/view.reducer';
 
 export const ALL_IMAGES = '-- All --';
 
@@ -62,7 +63,7 @@ export class DebugImagesEffects {
         /* eslint-disable @typescript-eslint/naming-convention */
         metrics: [removeAllImagesFromPayload(action.payload)],
         iters: 3,
-        scroll_id: debugImages[action.payload.task] ? debugImages[action.payload.task].scroll_id : null,
+        scroll_id: debugImages?.[action.payload.task] ? debugImages[action.payload.task].scroll_id : null,
         navigate_earlier: action.type !== debugActions.getPreviousBatch.type,
         refresh: [debugActions.setSelectedMetric.type, debugActions.refreshMetric.type].includes(action.type)
         /* eslint-enable @typescript-eslint/naming-convention */
@@ -70,8 +71,8 @@ export class DebugImagesEffects {
         .pipe(
           mergeMap((res: EventsDebugImagesResponse ) => {
             const actionsToShoot = [deactivateLoader(action.type)] as Action[];
+            actionsToShoot.push(debugActions.setDebugImages({res, task: action.payload.task}));
             if (res.metrics[0].iterations && res.metrics[0].iterations.length > 0) {
-              actionsToShoot.push(debugActions.setDebugImages({res, task: action.payload.task}));
               switch (action.type) {
                 case debugActions.getNextBatch.type:
                   actionsToShoot.push(debugActions.setTimeIsNow({task: action.payload.task, timeIsNow: false}));
@@ -112,6 +113,9 @@ export class DebugImagesEffects {
 
   fetchExperiments$ = createEffect(() => this.actions$.pipe(
     ofType(debugActions.fetchExperiments),
+    switchMap((action) => this.store.select(selectActiveWorkspaceReady).pipe(
+      filter(ready => ready),
+      map(() => action))),
     // eslint-disable-next-line @typescript-eslint/naming-convention
     switchMap((action) => this.apiTasks.tasksGetAllEx({id: action.tasks, only_fields: COMPARE_DEBUG_IMAGES_ONLY_FIELDS})
       .pipe(
@@ -124,6 +128,9 @@ export class DebugImagesEffects {
 
   fetchMetrics$ = createEffect(() => this.actions$.pipe(
     ofType(debugActions.getDebugImagesMetrics, debugActions.refreshDebugImagesMetrics),
+    switchMap((action) => this.store.select(selectActiveWorkspaceReady).pipe(
+      filter(ready => ready),
+      map(() => action))),
     switchMap((action) => this.eventsApi.eventsGetTaskMetrics({
       /* eslint-disable @typescript-eslint/naming-convention */
       tasks: action.tasks,

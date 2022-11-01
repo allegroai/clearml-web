@@ -13,6 +13,7 @@ import {CommonExperimentSharedModule} from '../../experiments/shared/common-expe
 import {FeatureModelsModule} from '../../../features/models/feature-models.module';
 import {SharedModule} from '../../../shared/shared.module';
 
+
 const DECLERATIONS = [ModelTypeIconLabelComponent, ModelStatusIconLabelComponent, SelectModelHeaderComponent, ModelsTableComponent, ModelTagsComponent];
 
 @NgModule({

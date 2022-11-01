@@ -13,14 +13,14 @@ import {
   selectIsSharedAndNotOwner,
   selectSelectedExperiment
 } from '~/features/experiments/reducers';
-import {ResetExperimentMetrics, toggleSettings} from '../../actions/common-experiment-output.actions';
+import {resetExperimentMetrics, toggleSettings} from '../../actions/common-experiment-output.actions';
 import * as infoActions from '../../actions/common-experiments-info.actions';
 import {selectAppVisible, selectBackdropActive} from '@common/core/reducers/view.reducer';
 import {addMessage, setAutoRefresh} from '@common/core/actions/layout.actions';
 import {MESSAGES_SEVERITY} from '~/app.constants';
 import {selectIsExperimentInEditMode, selectSelectedExperiments, selectSplitSize} from '../../reducers';
 import {isReadOnly} from '@common/shared/utils/shared-utils';
-import {ExperimentDetailsUpdated} from '../../actions/common-experiments-info.actions';
+import {experimentDetailsUpdated} from '../../actions/common-experiments-info.actions';
 import {RefreshService} from '@common/core/services/refresh.service';
 import { isDevelopment } from '~/features/experiments/shared/experiments.utils';
 import * as experimentsActions from '../../actions/common-experiments-view.actions';
@@ -84,9 +84,9 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
         this.selectedExperiment = selectedExperiments.find(experiment => experiment.id === experimentId);
         this.isExample = isReadOnly( this.selectedExperiment);
         this.isDevelopment = isDevelopment(this.selectedExperiment);
-        this.store.dispatch(new ResetExperimentMetrics());
-        this.store.dispatch(new infoActions.ResetExperimentInfo());
-        this.store.dispatch(new infoActions.GetExperimentInfo(experimentId));
+        this.store.dispatch(resetExperimentMetrics());
+        this.store.dispatch(infoActions.resetExperimentInfo());
+        this.store.dispatch(infoActions.getExperimentInfo({id: experimentId}));
       })
     );
 
@@ -96,9 +96,9 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
         filter(([, isExperimentInEditMode]) => !isExperimentInEditMode && !this.minimized)
       ).subscribe(([auto]) => {
         if (auto === null) {
-          this.store.dispatch(new infoActions.AutoRefreshExperimentInfo(this.experimentId));
+          this.store.dispatch(infoActions.autoRefreshExperimentInfo({id: this.experimentId}));
         } else {
-          this.store.dispatch(new infoActions.GetExperimentInfo(this.experimentId));
+          this.store.dispatch(infoActions.getExperimentInfo({id: this.experimentId}));
         }
       })
     );
@@ -137,7 +137,7 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
   }
   updateExperimentName(name) {
     if (name.trim().length > 2) {
-      this.store.dispatch(new ExperimentDetailsUpdated({id: this.selectedExperiment.id, changes: {name}}));
+      this.store.dispatch(experimentDetailsUpdated({id: this.selectedExperiment.id, changes: {name}}));
     } else {
       this.store.dispatch(addMessage(MESSAGES_SEVERITY.ERROR, 'Name must be more than three letters long'));
     }
@@ -157,7 +157,7 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
     scrollContainer.scrollTop = 0;
   }
   closePanel() {
-    this.store.dispatch(experimentsActions.setTableMode({mode: 'table'}))
+    this.store.dispatch(experimentsActions.setTableMode({mode: 'table'}));
     return this.router.navigate(['..'], {relativeTo: this.route, queryParamsHandling: 'merge'});
   }
 }

@@ -28,7 +28,7 @@ import {
   distinctUntilKeyChanged,
   filter,
   map,
-  skip, tap,
+  skip, take, tap,
   withLatestFrom
 } from 'rxjs/operators';
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
@@ -37,9 +37,8 @@ import {setDeep, setSelectedProjectId} from '@common/core/actions/projects.actio
 import {initSearch, resetSearch} from '@common/common-search/common-search.actions';
 import {SearchState, selectSearchQuery} from '@common/common-search/common-search.reducer';
 import {
-  getDeletePopupEntitiesList,
   getDeleteProjectPopupStatsBreakdown,
-  isDeletableProject,
+  isDeletableProject, popupEntitiesListConst,
   readyForDeletionFilter
 } from '~/features/projects/projects-page.utils';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
@@ -48,9 +47,10 @@ import {selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
 import {Project} from '~/business-logic/model/projects/project';
 import {CommonDeleteDialogComponent} from '@common/shared/entity-page/entity-delete/common-delete-dialog.component';
 import {resetDeleteState} from '@common/shared/entity-page/entity-delete/common-delete-dialog.actions';
-import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {isExample} from '@common/shared/utils/shared-utils';
 import {selectSelectedProject} from '@common/core/reducers/projects.reducer';
+import {selectActiveWorkspaceReady} from '~/core/reducers/view.reducer';
+import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 
 @Component({
   selector: 'sm-common-projects-page',
@@ -88,16 +88,12 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
   public selectedProjectId$: Observable<string>;
   public allExamples: boolean;
   /* eslint-enable @typescript-eslint/naming-convention */
-  private searchSubs: Subscription;
   private projectReadyForDeletion$: Observable<CommonProjectReadyForDeletion>;
-  private projectReadyForDeletionSub: Subscription;
   private readonly searchQuery$: Observable<SearchState['searchQuery']>;
   private projectDialog: MatDialogRef<ProjectDialogComponent, any>;
-  private showOnlyUserWorkSub: Subscription;
-  private selectedProjectSub: Subscription;
   private selectedProject$: Observable<Project>;
-  private selectedProjectIdSub: Subscription;
   private projectId: string;
+  private subs = new Subscription();
 
   constructor(
     protected store: Store<any>,
@@ -155,9 +151,12 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
   ngOnInit() {
     // this.store.dispatch(new ResetSelectedProject());
     this.store.dispatch(setDeep({deep: false}));
-    this.store.dispatch(getAllProjectsPageProjects({}));
 
-    this.selectedProjectIdSub = this.selectedProjectId$.pipe(
+    this.subs.add(this.store.select(selectActiveWorkspaceReady)
+      .pipe(filter(ready => ready), take(1))
+      .subscribe((ready) => ready && this.store.dispatch(getAllProjectsPageProjects({}))));
+
+    this.subs.add(this.selectedProjectId$.pipe(
       tap(projectId => this.projectId = projectId),
       filter(projectId => !projectId),
       distinctUntilChanged(),
@@ -165,33 +164,34 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
         this.store.dispatch(resetProjectsSearchQuery());
         this.store.dispatch(getAllProjectsPageProjects({}));
       }
-    );
-    this.selectedProjectSub = this.selectedProject$.pipe(
+    ));
+
+    this.subs.add(this.selectedProject$.pipe(
       filter(project => (!!project)),
       distinctUntilKeyChanged('id'),
       skip(1),
     ).subscribe(() => {
       this.store.dispatch(resetProjectsSearchQuery());
       this.store.dispatch(getAllProjectsPageProjects({}));
-    });
-    this.showOnlyUserWorkSub = this.store.select(selectShowOnlyUserWork)
+    }));
+    this.subs.add(this.store.select(selectShowOnlyUserWork)
       .pipe(skip(1))
       .subscribe(() => {
         this.store.dispatch(resetProjectsSearchQuery());
         this.store.dispatch(getAllProjectsPageProjects({}));
-      });
+      }));
 
-    this.projectReadyForDeletionSub = this.projectReadyForDeletion$.subscribe(readyForDeletion => {
+    this.subs.add(this.projectReadyForDeletion$.subscribe(readyForDeletion => {
       if (isDeletableProject(readyForDeletion)) {
         this.showDeleteDialog(readyForDeletion);
       } else {
         this.showConfirmDialog(readyForDeletion);
       }
-    });
+    }));
   }
 
   protected getDeletePopupEntitiesList() {
-    return getDeletePopupEntitiesList();
+    return 'experiment';
   }
 
   private showConfirmDialog(readyForDeletion: CommonProjectReadyForDeletion) {
@@ -199,13 +199,13 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
     const confirmDialogRef: MatDialogRef<any, boolean> = this.dialog.open(ConfirmDialogComponent, {
       data: {
         title: `Unable to Delete ${name[0].toUpperCase()}${name.slice(1)}`,
-        body: `You cannot delete ${name} "<b>${readyForDeletion.project.name}</b>" with un-archived ${this.getDeletePopupEntitiesList()}. <br/>
-                   You have: ${getDeleteProjectPopupStatsBreakdown(
-                     readyForDeletion,
+        body: `You cannot delete ${name} "<b>${readyForDeletion.project.name.split('/').pop()}</b>" with un-archived ${name ==='project'? popupEntitiesListConst : this.getDeletePopupEntitiesList()}s. <br/>
+                   You have ${getDeleteProjectPopupStatsBreakdown(
+          readyForDeletion,
           'unarchived',
-                    name === 'project' ? 'experiments' : 'runs'
-          )} in this ${name}. <br/>
-                   If you wish to delete this ${name}, you must archive${name === 'project' ? ', delete, or move': ' or delete'} these items to another ${name}.`,
+          `un-archived ${this.getDeletePopupEntitiesList()}`
+        )} in this ${name}. <br/>
+                   If you wish to delete this ${name}, you must first archive${name === 'project' ? `, delete, or move these items to another ${name}` : ' or delete these items'} .`,
         no: 'OK',
         iconClass: 'i-alert',
       }
@@ -220,7 +220,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
       data: {
         entity: readyForDeletion.project,
         numSelected: 1,
-        entityType: EntityTypeEnum.project,
+        entityType: this.getName(),
         projectStats: readyForDeletion
       },
       width: '600px',
@@ -237,31 +237,28 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.stopSyncSearch();
-    this.projectReadyForDeletionSub.unsubscribe();
-    this.showOnlyUserWorkSub.unsubscribe();
-    this.selectedProjectSub.unsubscribe();
-    this.selectedProjectIdSub.unsubscribe();
+    this.subs.unsubscribe();
     this.store.dispatch(resetReadyToDelete());
     this.store.dispatch(resetProjectsSearchQuery());
   }
 
   stopSyncSearch() {
     this.store.dispatch(resetSearch());
-    this.searchSubs.unsubscribe();
   }
 
 
   syncAppSearch() {
     this.store.dispatch(initSearch({payload: `Search for ${this.getName()}s`}));
-    this.searchSubs = this.searchQuery$.pipe(skip(1)).subscribe(query => this.search(query));
+    this.subs.add(this.searchQuery$.pipe(skip(1)).subscribe(query => this.search(query)));
   }
 
   public projectCardClicked(project: ProjectsGetAllResponseSingle) {
-    if (project.name === 'All Experiments') {
+    const allExperiments = project.name === 'All Experiments';
+    if (allExperiments) {
       this.store.dispatch(setDeep({deep: true}));
     }
     this.router.navigate((project?.sub_projects?.length > 0) ? ['projects', project.id, 'projects'] :
-        (project.id !== '*' ? ['projects', project.id] : ['projects', project.id, 'experiments'])
+      (!(project.id === '*' || allExperiments || (project as any).isRoot) ? ['projects', project.id] : ['projects', project.id, 'experiments'])
     );
     this.store.dispatch(setSelectedProjectId({projectId: project.id, example: isExample(project)}));
   }
@@ -274,7 +271,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
     this.store.dispatch(setProjectsOrderBy({orderBy: sortByFieldName}));
   }
 
-  projectNameChanged(updatedProject: {id: string; name: string}) {
+  projectNameChanged(updatedProject: { id: string; name: string }) {
     this.store.dispatch(updateProject({id: updatedProject.id, changes: {name: updatedProject.name}}));
   }
 
@@ -304,6 +301,6 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
   }
 
   protected getName(): string {
-    return 'project';
+    return EntityTypeEnum.project;
   }
 }

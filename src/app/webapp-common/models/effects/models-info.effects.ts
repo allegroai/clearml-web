@@ -35,6 +35,7 @@ export class ModelsInfoEffects {
     withLatestFrom(this.store.select(selectActiveWorkspace), this.store.select(selectAppVisible)),
     filter(([, , visible]) => visible),
     switchMap(([action, activeWorkspace]) =>
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       this.apiModels.modelsGetByIdEx({id: [action.payload], only_fields: MODELS_INFO_ONLY_FIELDS})
         .pipe(
           mergeMap((res: ModelsGetAllResponse) => {
@@ -64,18 +65,18 @@ export class ModelsInfoEffects {
         model: action.payload.id, ...action.payload,
         project: action.payload.project?.id,
         task: action.payload.task?.id,
-        parent: parent
+        parent
       })
         .pipe(
           mergeMap(() => [
             new infoActions.GetModelInfo(action.payload.id),
             new infoActions.SetIsModelSaving(false),
-            setBackdrop({payload: false})
+            setBackdrop({active: false})
           ]),
           catchError(err => [
             requestFailed(err),
             setServerError(err, null, 'edit models failed'),
-            setBackdrop({payload: false}),
+            setBackdrop({active: false}),
             new infoActions.GetModelInfo(action.payload.id)
           ])
         );
@@ -93,7 +94,7 @@ export class ModelsInfoEffects {
               new infoActions.GetModelInfo(selectedModel.id),
               new infoActions.SetIsModelSaving(false),
               resetActiveSection(),
-              setBackdrop({payload: false})
+              setBackdrop({active: false})
             ]),
           catchError(err => [
             requestFailed(err),

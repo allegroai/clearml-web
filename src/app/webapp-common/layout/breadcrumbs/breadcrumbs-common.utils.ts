@@ -1,5 +1,17 @@
 import {IBreadcrumbsLink} from './breadcrumbs.component';
 import {isExample} from '../../shared/utils/shared-utils';
+import {Project} from '~/business-logic/model/projects/project';
+import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
+import {TableModel} from '@common/models/shared/models.model';
+import {Task} from '~/business-logic/model/tasks/task';
+
+export interface IBreadcrumbs {
+  project: Project;
+  projects: Project[];
+  experiment: IExperimentInfo;
+  model: TableModel;
+  task: Task;
+}
 
 const addSuffixForExamples = crumb => {
   if (!crumb?.name) {
@@ -18,7 +30,7 @@ export const prepareLinkData = (crumb, supportsExamples = false): IBreadcrumbsLi
   return crumb ? {name: preparedName, url: crumb.id} : {name: '', url: ''};
 };
 
-export const formatStaticCrumb = (crumb: string): IBreadcrumbsLink => {
+export const formatStaticCrumb = (crumb: string): IBreadcrumbsLink | IBreadcrumbsLink[] => {
   if (!crumb) {
     return {url: null, name: null};
   }
@@ -30,8 +42,7 @@ export const formatStaticCrumb = (crumb: string): IBreadcrumbsLink => {
       name = 'Results';
       break;
     case 'compare-experiments':
-      name = 'Compare Experiments';
-      break;
+      return [{url: 'experiments', name: 'Experiments'}, {url: null, name: 'Compare Experiments'}];
     case 'hyper-params':
       name = 'Configuration';
       break;
@@ -53,4 +64,64 @@ export const formatStaticCrumb = (crumb: string): IBreadcrumbsLink => {
       break;
   }
   return {url: crumb, name};
+};
+
+export const prepareNames = (data: IBreadcrumbs, customProject?: boolean, fullScreen = false) => {
+  const project = prepareLinkData(data.project, true);
+  if (data.project) {
+    let subProjectsNames = [data.project?.name];
+    if (!customProject) {
+      subProjectsNames = data.project?.name?.split('/');
+    }
+    const allProjects = [
+      ...(data.projects || []),
+      {id: '*', name: 'All Experiments'},
+      data.project
+    ];
+    let currentName = '';
+    const subProjects = subProjectsNames.map(name => {
+      currentName += currentName ? ('/' + name) : name;
+      return allProjects.find(proj => currentName === proj.name);
+    }) || [];
+
+    const subProjectsLinks = subProjects.map((subProject, index, arr) => ({
+      name: subProject?.name.substring(subProject?.name.lastIndexOf('/') + 1),
+      url: customProject ?
+        data.project?.system_tags?.includes('pipeline') ? `pipelines/${subProject?.id}/experiments` : `datasets/simple/${subProject?.id}` :
+        fullScreen && index === (arr.length - 1) ? `projects/${subProject?.id}/experiments/${data?.experiment?.id}` :
+          subProject?.name === data.project?.name && data.project?.sub_projects?.length === 0 ?
+            `projects/${subProject?.id}` :
+            `projects/${subProject?.id}/projects`
+    })) as { name: string; url: string }[];
+    project.name = project?.name.substring(project.name.lastIndexOf('/') + 1);
+    project.subCrumbs = subProjectsLinks;
+  }
+  const task = prepareLinkData(data.task);
+  const experiment = (data.experiment && !customProject) ? prepareLinkData(data.experiment, true) : {};
+
+  const output = formatStaticCrumb('');
+  const experiments = formatStaticCrumb('experiments');
+  const models = formatStaticCrumb('models');
+  const compare = customProject ?
+    data.project?.system_tags?.includes('pipeline') ?
+      {url: 'compare-experiments', name: 'Compare Runs'} :
+      {url: 'compare-experiments', name: 'Compare Versions'}
+    : formatStaticCrumb('compare-experiments');
+  const accountAdministration = formatStaticCrumb('account-administration');
+
+  return {
+    /* eslint-disable @typescript-eslint/naming-convention */
+    ':projectId': project,
+    ':taskId': task,
+    ':controllerId': experiment,
+    'compare-experiments': compare,
+    output,
+    experiments,
+    models,
+    accountAdministration,
+    profile: {url: 'profile', name: 'Profile'},
+    'webapp-configuration': {url: 'webapp-configuration', name: 'Configuration'},
+    'workspace-configuration': {url: 'workspace-configuration', name: 'Workspace'},
+    /* eslint-enable @typescript-eslint/naming-convention */
+  };
 };

@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
-import {FormControl} from '@angular/forms';
+import {UntypedFormControl} from '@angular/forms';
 import {RippleButtonComponent} from '@common/shared/ui-components/buttons/ripple-button/ripple-button.component';
 
 export interface Option {
@@ -19,7 +19,7 @@ export interface Option {
 export class ButtonToggleComponent {
 
   public rippleComponent = RippleButtonComponent;
-  public formControl = new FormControl();
+  public formControl = new UntypedFormControl();
 
   @Input() options: Option[];
   @Input() disabled: boolean;

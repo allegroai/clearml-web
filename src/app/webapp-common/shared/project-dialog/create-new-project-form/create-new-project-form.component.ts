@@ -1,8 +1,8 @@
-import {ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild} from '@angular/core';
-import {URI_REGEX} from '../../../../app.constants';
-import {Project} from '../../../../business-logic/model/projects/project';
+import {ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild} from '@angular/core';
+import {URI_REGEX} from '~/app.constants';
+import {Project} from '~/business-logic/model/projects/project';
 import {NgForm} from '@angular/forms';
-import {MatAutocompleteSelectedEvent} from "@angular/material/autocomplete";
+import {MatAutocompleteSelectedEvent} from '@angular/material/autocomplete';
 
 
 @Component({
@@ -13,7 +13,7 @@ import {MatAutocompleteSelectedEvent} from "@angular/material/autocomplete";
 export class CreateNewProjectFormComponent implements OnChanges {
   constructor(private changeDetection: ChangeDetectorRef) {
   }
-
+  public readonly projectsRoot = 'Projects root';
   public projectsNames: Array<string>;
   public outputDestPattern = `${URI_REGEX.S3_WITH_BUCKET}$|${URI_REGEX.S3_WITH_BUCKET_AND_HOST}$|${URI_REGEX.FILE}$|${URI_REGEX.NON_AWS_S3}$|${URI_REGEX.GS_WITH_BUCKET}$|${URI_REGEX.GS_WITH_BUCKET_AND_HOST}$`;
   public project = {
@@ -28,8 +28,7 @@ export class CreateNewProjectFormComponent implements OnChanges {
 
   @Input() set projects(projects) {
     this._projects = projects;
-    this.projectsNames = ['Projects root'].concat(projects.map(project => project.name));
-    // this.projectsNames =projects.map(project => project.name);
+    this.projectsNames = [this.projectsRoot].concat(projects.map(project => project.name));
   }
 
   get projects(): Project[] {
@@ -49,14 +48,14 @@ export class CreateNewProjectFormComponent implements OnChanges {
     this.projectCreated.emit(this.project);
   }
 
+
   ngOnChanges(changes: SimpleChanges): void {
     if (this.projects.length > 0) {
-      this.project.parent = this.baseProjectId? this.projects.find(project => project.id === this.baseProjectId)?.name: 'Projects root';
+      this.project.parent = this.baseProjectId? this.projects.find(project => project.id === this.baseProjectId)?.name: this.projectsRoot;
     }
   }
 
   detectChanges() {
-    // this.form.controls.projectName.updateValueAndValidity();
     this.changeDetection.detectChanges();
   }
 

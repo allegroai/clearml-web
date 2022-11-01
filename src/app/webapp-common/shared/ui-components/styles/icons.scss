@@ -30,10 +30,6 @@
     color: $blue-400;
   }
 
-  &.blue-570 {
-    color: $blue-570;
-  }
-
   &.blue-800 {
     color: $blue-800;
   }
@@ -447,6 +443,10 @@
 //No font icon
 .i-Keras {
   @include icon('#{$assets-icons-path}/keras-icon.svg');
+}
+
+.i-ScikitLearn {
+  @include icon('#{$assets-icons-path}/scikit_learn_logo.svg');
 }
 
 //No font icon

@@ -1,5 +1,5 @@
 @import "../../../shared/ui-components/styles/variables";
-
+$credentialBaseHeight: 252px;
 :host {
   display: flex;
   flex-direction: column;
@@ -26,17 +26,28 @@
   }
 
   .credentials-and-code {
-    max-height: 384px;
     overflow: hidden;
     transition: max-height 1s ease;
+    .code-container{
+      height: $credentialBaseHeight;
+      transition: height 1s ease;
+      &.jupyter{
+        height: $credentialBaseHeight - 50;
+      }
+    }
 
     &.small-popup {
       max-height: 0;
     }
+    .config-nav{
+      margin-top: 24px;
+      display: flex;
+      border-bottom: 1px solid $blue-100;
+      justify-content: center;
+    }
   }
 
   .instructions {
-    margin-top: 24px;
     line-height: 1.3;
     color: $blue-500;
   }
@@ -46,7 +57,6 @@
     line-height: 1.5;
     padding: 16px 16px;
     margin-bottom: 24px;
-    width: 530px;
     color: $blue-100;
     background-color: $blue-700;
     border-radius: 4px;
@@ -58,6 +68,7 @@
     }
 
     .content {
+      width: 100%;
       white-space: pre;
       font-family: monospace;
       font-size: 12px;

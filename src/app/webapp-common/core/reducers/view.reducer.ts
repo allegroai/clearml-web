@@ -21,6 +21,8 @@ export interface ViewState {
   aceCaretPosition: { [key: string]: Ace.Point };
   preferencesReady: boolean;
   showUserFocus: boolean;
+  redactedArguments: { key: string }[];
+  hideRedactedArguments: boolean;
 }
 
 export const initViewState: ViewState = {
@@ -41,11 +43,18 @@ export const initViewState: ViewState = {
   aceCaretPosition: {},
   preferencesReady: false,
   showUserFocus: false,
+  redactedArguments: [{key: 'CLEARML_API_SECRET_KEY'},
+    {key: 'CLEARML_AGENT_GIT_PASS'},
+    {key: 'AWS_SECRET_ACCESS_KEY'},
+    {key: 'AZURE_STORAGE_KEY'}],
+  hideRedactedArguments: false,
 };
 
 export const views = state => state.views as ViewState;
 export const selectReady = createSelector(views, state => state.preferencesReady);
 export const selectLoading = createSelector(views, state => state.loading);
+export const selectIsLoading = createSelector(views, (state) => Object.values(state.loading).some((value) => value));
+
 export const selectBackdropActive = createSelector(views, state => state.backdropActive);
 
 export const selectNotification = createSelector(views, state => state.notification);
@@ -61,6 +70,8 @@ export const selectPlotlyReady = createSelector(views, state => state.plotlyRead
 export const selectAceReady = createSelector(views, state => state.aceReady);
 export const selectAceCaretPosition = createSelector(views, state => state.aceCaretPosition);
 export const selectNeverShowPopups = createSelector(views, (state): string[] => state.neverShowPopupAgain);
+export const selectRedactedArguments = createSelector(views, (state): { key: string }[] => state.redactedArguments);
+export const selectHideRedactedArguments = createSelector(views, (state): { key: string }[] => state.hideRedactedArguments ? state.redactedArguments : null);
 export const selectShowUserFocus = createSelector(views, state => state.showUserFocus);
 
 
@@ -91,14 +102,16 @@ export const viewReducers = [
     ...state,
     aceCaretPosition: {...state.aceCaretPosition, [action.id]: action.position}
   })),
-  on(layoutActions.resetAceCaretsPositions, (state, action) => ({...state, aceCaretPosition: {}})),
+  on(layoutActions.resetAceCaretsPositions, state => ({...state, aceCaretPosition: {}})),
   on(layoutActions.resetLoader, (state) => ({...state, loading: {}})),
+  on(layoutActions.setRedactedArguments, (state, action) => ({...state, redactedArguments: action.redactedArguments})),
+  on(layoutActions.setHideRedactedArguments, (state, action) => ({...state, hideRedactedArguments: action.hide})),
   on(apiRequest, (state, action) => ({
     ...state,
     loading: {...state.loading, [action?.endpoint || 'default']: true}
   })),
   on(layoutActions.setNotificationDialog, (state, action) => ({...state, notification: action.notification})),
-  on(layoutActions.setBackdrop, (state, action) => ({...state, backdropActive: action.payload})),
+  on(layoutActions.setBackdrop, (state, action) => ({...state, backdropActive: action.active})),
   on(layoutActions.setAutoRefresh, (state, action) => ({...state, autoRefresh: action.autoRefresh})),
   on(layoutActions.setCompareAutoRefresh, (state, action) => ({...state, compareAutoRefresh: action.autoRefresh})),
   on(layoutActions.neverShowPopupAgain, (state, action) => ({

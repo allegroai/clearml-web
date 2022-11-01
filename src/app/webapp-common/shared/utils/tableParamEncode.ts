@@ -39,15 +39,15 @@ export const encodeFilters = (filters: { [key: string]: FilterMetadata }) => {
 };
 export const excludedKey = '__$not';
 export const uniqueFilterValueAndExcluded = (arr1 = [], arr2 = []) => Array.from(new Set(arr1.concat((arr2).map(key => key ? key.replace(/^__\$not/, '') : key))));
-export const addExcludeFilters = (arr1: string[]) => {
-  return arr1.reduce((returnArray, currentFilter) => {
+export const addExcludeFilters = (arr1: string[]) =>
+  arr1.reduce((returnArray, currentFilter) => {
     if (currentFilter?.startsWith(excludedKey)) {
-      return [...returnArray, excludedKey, currentFilter.substring(excludedKey.length)]
+      return [...returnArray, excludedKey, currentFilter.substring(excludedKey.length)];
     }
     return [...returnArray, currentFilter];
 
   }, []);
-}
+
 export const decodeOrder = (orders: string[]): SortMeta[] => {
   if (typeof orders === 'string') {
     orders = [orders];
@@ -96,6 +96,8 @@ export const encodeColumns = (mainCols: ISmCol[] | any, hiddenCols = {}, metrics
       }
       if (col.type === 'metadata') {
         return `meta.${col.key}`;
+      } else if (col.type === 'hdmd') {
+        return `hdmd.${col.key}`;
       } else {
         return col.id;
       }
@@ -107,7 +109,7 @@ export const decodeColumns = (columns: string[], tableCols: ISmCol[]): [string[]
   const metrics = [] as MetricColumn[];
   const params = [] as string[];
   const allIds = [] as string[];
-  const metadataCols = [] as string[]
+  const metadataCols = [] as string[];
 
   columns.forEach(col => {
     if (col.startsWith('m.')) {
@@ -130,6 +132,10 @@ export const decodeColumns = (columns: string[], tableCols: ISmCol[]): [string[]
       const colParts = col.split('.');
       metadataCols.push(colParts[1]);
       allIds.push(colParts[1]);
+    } else if (col.startsWith('hdmd.') && !tableCols.find(tableCol => tableCol.id === col)) {
+      const colPart = col.replace('hdmd.', '');
+      metadataCols.push(colPart);
+      allIds.push(colPart);
     } else {
       cols.push(col);
       allIds.push(col);
@@ -140,10 +146,10 @@ export const decodeColumns = (columns: string[], tableCols: ISmCol[]): [string[]
 
 
 export const decodeHyperParam = (param: string): { name: string; section: string } => {
-  const split = param.replace('hyperparams.', '').split('.');
+  const [section, ...rest] = param.replace('hyperparams.', '').split('.');
   return {
-    name: split[1],
-    section: split[0]
+    name: rest.slice(0, -1).join('.'),
+    section
   };
 };
 
@@ -155,31 +161,46 @@ export const createMetricColumn = (column: MetricColumn, projectId: string): ISm
   filterType: ColHeaderFilterTypeEnum.durationNumeric,
   header: `${column.metric} > ${column.variant} ${getValueTypeName(column.valueType)}`,
   hidden: false,
+  /* eslint-disable @typescript-eslint/naming-convention */
   metric_hash: column.metricHash,
   variant_hash: column.variantHash,
+  /* eslint-enable @typescript-eslint/naming-convention */
   valueType: column.valueType,
-  projectId: projectId,
+  projectId,
   style: {width: '115px'},
 });
 
 export const createMetadataCol = (key, projectId): ISmCol => ({
   id: `metadata.${key}.value`,
   getter: `metadata.${key}.value`,
-  key: key,
+  key,
   headerType: ColHeaderTypeEnum.sortFilter,
   sortable: true,
   filterable: true,
   header: key,
   style: {width: '240px'},
-  projectId: projectId,
+  projectId,
   type: 'metadata'
+});
+
+export const createHyperDatasetMetadataCol = (key, datasetId): ISmCol => ({
+  id: `hdmd.${key}`,
+  getter: `meta.${key}`,
+  key,
+  headerType: ColHeaderTypeEnum.sortFilter,
+  sortable: true,
+  filterable: false,
+  header: key,
+  style: {width: '240px'},
+  datasetId,
+  type: 'hdmd'
 });
 export const createFiltersFromStore = (_tableFilters: { [key: string]: FilterMetadata }, removeEmptyValues = true) => {
   if (!_tableFilters) {
     return [];
   }
   return Object.keys(_tableFilters).reduce((returnTableFilters, currentFilterName) => {
-    const value = _tableFilters?.[currentFilterName]?.value
+    const value = _tableFilters?.[currentFilterName]?.value;
     if (removeEmptyValues && (!hasValue(value) || value?.length === 0)) {
       return returnTableFilters;
     }

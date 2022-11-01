@@ -1,4 +1,4 @@
-import {on, createReducer, createSelector} from '@ngrx/store';
+import {createReducer, createSelector, on} from '@ngrx/store';
 import * as projectsActions from '../actions/projects.actions';
 import {TagColor} from '../actions/projects.actions';
 import {Project} from '~/business-logic/model/projects/project';
@@ -36,10 +36,11 @@ export interface RootProjects {
   users: User[];
   allUsers: User[];
   extraUsers: User[];
+  showHidden: boolean;
 }
 
 const initRootProjects: RootProjects = {
-  projects: [],
+  projects: null,
   selectedProject: null,
   archive: false,
   deep: false,
@@ -54,6 +55,7 @@ const initRootProjects: RootProjects = {
   users: [],
   allUsers: [],
   extraUsers: [],
+  showHidden: false
 };
 
 export const projects = state => state.rootProjects as RootProjects;
@@ -100,7 +102,7 @@ export const projectsReducer = createReducer(
         }
       });
     } else {
-      newProjects = [...newProjects, ...action.projects];
+      newProjects = [...(newProjects || []), ...action.projects];
     }
     return {...state, projects: sortByField(newProjects, 'name')};
 
@@ -145,4 +147,7 @@ export const projectsReducer = createReducer(
   on(projectsActions.setProjectUsers, (state, action) => ({...state, users: action.users, extraUsers: []})),
   on(projectsActions.setAllProjectUsers, (state, action) => ({...state, allUsers: action.users})),
   on(projectsActions.setProjectExtraUsers, (state, action) => ({...state, extraUsers: action.users})),
+  on(projectsActions.setShowHidden, (state, action) => ({...state, showHidden: action.show}))
 );
+export const selectShowHidden = createSelector(projects, selectSelectedProject,
+  (state, selectedProject) => (state?.showHidden || selectedProject?.system_tags?.includes('hidden')));

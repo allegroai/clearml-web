@@ -1,23 +1,32 @@
 import {Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {Observable, Subscription} from 'rxjs';
-import {IExecutionForm, sourceTypesEnum} from '../../../../features/experiments/shared/experiment-execution.model';
-import {IExperimentInfo} from '../../../../features/experiments/shared/experiment-info.model';
-import {IExperimentInfoState} from '../../../../features/experiments/reducers/experiment-info.reducer';
-import {selectIsExperimentEditable, selectSelectedExperiment, selectShowExtraDataSpinner} from '../../../../features/experiments/reducers';
+import {IExecutionForm, sourceTypesEnum} from '~/features/experiments/shared/experiment-execution.model';
+import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
+import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
+import {
+  selectIsExperimentEditable,
+  selectSelectedExperiment,
+  selectShowExtraDataSpinner
+} from '~/features/experiments/reducers';
 import * as commonInfoActions from '../../actions/common-experiments-info.actions';
-import {selectExperimentExecutionInfoData, selectIsExperimentSaving, selectIsSelectedExperimentInDev} from '../../reducers';
-import {selectBackdropActive} from '../../../core/reducers/view.reducer';
-import {EditJsonComponent} from '../../../shared/ui-components/overlay/edit-json/edit-json.component';
+import {
+  selectExperimentExecutionInfoData,
+  selectIsExperimentSaving,
+  selectIsSelectedExperimentInDev
+} from '../../reducers';
+import {selectBackdropActive, selectHideRedactedArguments} from '@common/core/reducers/view.reducer';
+import {EditJsonComponent} from '@common/shared/ui-components/overlay/edit-json/edit-json.component';
 import {filter, take} from 'rxjs/operators';
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
-import {ConfirmDialogComponent} from '../../../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
-import {EditableSectionComponent} from '../../../shared/ui-components/panel/editable-section/editable-section.component';
-import {ExperimentExecutionSourceCodeComponent} from '../../dumb/experiment-execution-source-code/experiment-execution-source-code.component';
-import {getOr} from 'lodash/fp';
+import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
+import {EditableSectionComponent} from '@common/shared/ui-components/panel/editable-section/editable-section.component';
+import {
+  ExperimentExecutionSourceCodeComponent
+} from '../../dumb/experiment-execution-source-code/experiment-execution-source-code.component';
+import {getOr, isUndefined} from 'lodash/fp';
 import {ActivatedRoute} from '@angular/router';
-import {isUndefined} from 'lodash/fp';
-import {Container} from '../../../../business-logic/model/tasks/container';
+import {Container} from '~/business-logic/model/tasks/container';
 
 @Component({
   selector: 'sm-experiment-info-execution',
@@ -49,9 +58,10 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
   @ViewChild('containerArguments') containerArguments: ElementRef;
   links = ['details', 'uncommitted changes', 'installed packages', 'container'];
   currentLink = 'details';
+  public redactedArguments$: Observable<{ key: string }[]>;
 
   constructor(
-    private store: Store<IExperimentInfoState>,
+    private store: Store<ExperimentInfoState>,
     private dialog: MatDialog,
     private route: ActivatedRoute,
     private element: ElementRef
@@ -63,6 +73,8 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
     this.isInDev$ = this.store.select(selectIsSelectedExperimentInDev);
     this.saving$ = this.store.select(selectIsExperimentSaving);
     this.backdropActive$ = this.store.select(selectBackdropActive);
+    this.redactedArguments$ = this.store.select(selectHideRedactedArguments);
+
   }
 
   ngOnInit() {
@@ -70,7 +82,7 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
       .subscribe(selectedExperiment => {
         this.selectedExperiment = selectedExperiment;
       });
-    this.store.dispatch(new commonInfoActions.SetExperimentFormErrors(null));
+    this.store.dispatch(commonInfoActions.setExperimentFormErrors({errors: null}));
 
     this.formDataSubscription = this.executionInfo$.subscribe(formData => {
       this.formData = formData;
@@ -86,9 +98,11 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
     const source = this.sourceCode.sourceCodeForm.form.value;
     this.store.dispatch(commonInfoActions.saveExperimentSection({
       script: {
+        /* eslint-disable @typescript-eslint/naming-convention */
         repository: source.repository,
         entry_point: source.entry_point,
         working_dir: source.working_dir,
+        /* eslint-enable @typescript-eslint/naming-convention */
         ...this.convertScriptType(source)
       }
     }));
@@ -102,11 +116,12 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
     const outputDestination = this.outputDestination.nativeElement.value;
 
     // why BE can't get output.destination as task.edit?
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     this.store.dispatch(commonInfoActions.saveExperimentSection({output_dest: outputDestination} as any));
   }
 
   cancelFormChange() {
-    this.store.dispatch(new commonInfoActions.DeactivateEdit());
+    this.store.dispatch(commonInfoActions.deactivateEdit());
   }
 
   activateEditChanged(sectionName: string, section?: EditableSectionComponent) {
@@ -120,7 +135,7 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
         }
       });
     }
-    this.store.dispatch(new commonInfoActions.ActivateEdit(sectionName));
+    this.store.dispatch(commonInfoActions.activateEdit(sectionName));
   }
 
   discardDiff() {
@@ -143,13 +158,22 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
   }
 
   editContainerSetupShellScript(smEditableSection?: EditableSectionComponent) {
-    this.openEditJsonDialog({textData: this.formData.container?.setup_shell_script, title: 'EDIT SETUP SHELL SCRIPT'}, smEditableSection)
+    this.openEditJsonDialog({
+      textData: this.formData.container?.setup_shell_script,
+      title: 'EDIT SETUP SHELL SCRIPT'
+    }, smEditableSection)
       .afterClosed()
-      .pipe(filter( bool =>  !isUndefined(bool)))
-      .subscribe( setup_shell_script => {
-        if (this.formData.container.setup_shell_script !== setup_shell_script) {
+      .pipe(filter(bool => !isUndefined(bool)))
+      .subscribe(setupShellScript => {
+        if (this.formData.container.setup_shell_script !== setupShellScript) {
           smEditableSection.saveSection();
-          this.store.dispatch(commonInfoActions.saveExperimentSection({container: {...this.formData.container, setup_shell_script}}));
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          this.store.dispatch(commonInfoActions.saveExperimentSection({
+            container: {
+              ...this.formData.container,
+              setup_shell_script: setupShellScript
+            }
+          }));
         } else {
           smEditableSection.cancelClickedEvent();
         }
@@ -158,7 +182,12 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
 
   editInstallPackages() {
     const editInstallPackagesDialog = this.dialog.open(EditJsonComponent, {
-      data: {textData: this.formData?.requirements?.pip, readOnly: false, title: 'EDIT INSTALLED PACKAGES', typeJson: false}
+      data: {
+        textData: this.formData?.requirements?.pip,
+        readOnly: false,
+        title: 'EDIT INSTALLED PACKAGES',
+        typeJson: false
+      }
     });
 
     editInstallPackagesDialog.afterClosed().pipe(take(1)).subscribe((data) => {
@@ -166,13 +195,25 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
         this.requirementsSection.cancelClickedEvent();
       } else {
         this.requirementsSection.saveSection();
-        this.store.dispatch(commonInfoActions.saveExperimentSection({script: {requirements: {...this.formData.requirements, pip: data}}}));
+        this.store.dispatch(commonInfoActions.saveExperimentSection({
+          script: {
+            requirements: {
+              ...this.formData.requirements,
+              pip: data
+            }
+          }
+        }));
       }
     });
   }
 
   editDiff() {
-    this.openEditJsonDialog({textData: this.formData?.diff, readOnly: false, title: 'EDIT UNCOMMITTED CHANGES', typeJson: false}, this.diffSection)
+    this.openEditJsonDialog({
+      textData: this.formData?.diff,
+      readOnly: false,
+      title: 'EDIT UNCOMMITTED CHANGES',
+      typeJson: false
+    }, this.diffSection)
       .afterClosed()
       .pipe(take(1))
       .subscribe((data) => {
@@ -195,16 +236,17 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
   clearSetupShellScript() {
     this.clearConfirmDialog('setup shell script').pipe(take(1)).subscribe((confirmed) => {
       if (confirmed) {
-        this.store.dispatch(commonInfoActions.saveExperimentSection({container: {...this.formData.container, setup_shell_script: ''}}));
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        this.store.dispatch(commonInfoActions.saveExperimentSection({
+          container: {
+            ...this.formData.container,
+            setup_shell_script: ''
+          }
+        }));
       }
     });
   }
 
-  /**
-   * Open confirm dialog with clear entire text
-   * @param title
-   * @private
-   */
   private clearConfirmDialog(title: string): Observable<boolean> {
     return this.dialog.open(ConfirmDialogComponent, {
       data: {
@@ -218,18 +260,11 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
 
   }
 
-  /**
-   * Open dialog for edit the textarea
-   * If passing the container it will close the popup when needed
-   * @param data
-   * @param editableSectionComponent
-   * @private
-   */
-  private openEditJsonDialog(data: {textData: string; readOnly?: boolean; title?: string; typeJson?: boolean}, editableSectionComponent?: EditableSectionComponent ): MatDialogRef<EditJsonComponent> {
+  private openEditJsonDialog(data: { textData: string; readOnly?: boolean; title?: string; typeJson?: boolean }, editableSectionComponent?: EditableSectionComponent): MatDialogRef<EditJsonComponent> {
     const editJsonComponent = this.dialog.open(EditJsonComponent, {
       data
     });
-    editJsonComponent.afterClosed().subscribe( res => {
+    editJsonComponent.afterClosed().subscribe(res => {
       if (isUndefined(res) && !isUndefined(editJsonComponent)) {
         editableSectionComponent.cancelClickedEvent();
       }
@@ -242,9 +277,17 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
       case sourceTypesEnum.Branch:
         return {[sourceTypesEnum.Branch]: source.branch, [sourceTypesEnum.Tag]: '', [sourceTypesEnum.VersionNum]: ''};
       case sourceTypesEnum.Tag:
-        return {[sourceTypesEnum.Branch]: source.branch, [sourceTypesEnum.Tag]: source.tag, [sourceTypesEnum.VersionNum]: ''};
+        return {
+          [sourceTypesEnum.Branch]: source.branch,
+          [sourceTypesEnum.Tag]: source.tag,
+          [sourceTypesEnum.VersionNum]: ''
+        };
       case sourceTypesEnum.VersionNum:
-        return {[sourceTypesEnum.Branch]: source.branch, [sourceTypesEnum.Tag]: source.tag, [sourceTypesEnum.VersionNum]: source.version_num};
+        return {
+          [sourceTypesEnum.Branch]: source.branch,
+          [sourceTypesEnum.Tag]: source.tag,
+          [sourceTypesEnum.VersionNum]: source.version_num
+        };
     }
   }
 

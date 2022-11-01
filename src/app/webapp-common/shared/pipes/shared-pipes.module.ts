@@ -59,6 +59,8 @@ import { LabelValueToStringArrayPipe } from './label-value-to-string-array.pipe'
 import {ItemByIdPipe} from './item-by-id.pipe';
 import { FilterMonitorMetricPipe } from './filter-monitor-metric.pipe';
 import { ReversePipe } from './reverse.pipe';
+import {HideRedactedArgumentsPipe} from './hide-redacted-arguments.pipe';
+import { HasCompletedPipe } from './has-completed.pipe';
 
 const pipes = [
   CamelToTitlePipe, FilenameFromPath, FilterPipe, FloorPipe, KeyValuePipe, NAPipe, SortPipe, IsVideoPipe, IsAudioPipe,FilterInternalPipe,UuidPipe,
@@ -67,7 +69,7 @@ const pipes = [
   AdvancedFilterPipe, SafePipe, SelectOptionValueToLabelPipe, ToPercentagePipe, ReplaceViaMapPipe, FilterByIdPipe, FilterLast, FilterOutPipe, SimpleFilterPipe,
   BreadcrumbsEllipsisPipe, ShortProjectNamePipe, ProjectLocationPipe,StringIncludedInArrayPipe, ToPropertyArrayPipe, MenuItemTextPipe, InitialsPipe, IdToObjectsArrayPipe, IsEmptyPipe,
   TemplateInjectorPipe, TestConditionalPipe, GroupHasErrorsPipe, FormgroupHasRequiredFieldPipe, FileSizePipe, RegexPipe, LabelValueToStringArrayPipe,
-  TemplateInjectorPipe, TestConditionalPipe, GroupHasErrorsPipe, FormgroupHasRequiredFieldPipe, FileSizePipe, RegexPipe, ItemByIdPipe
+  TemplateInjectorPipe, TestConditionalPipe, GroupHasErrorsPipe, FormgroupHasRequiredFieldPipe, FileSizePipe, RegexPipe, ItemByIdPipe, HideRedactedArgumentsPipe, HasCompletedPipe
 ];
 
 @NgModule({

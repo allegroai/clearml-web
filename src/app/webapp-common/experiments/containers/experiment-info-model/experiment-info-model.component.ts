@@ -4,17 +4,18 @@ import {selectExperimentModelInfoData, selectExperimentUserKnowledge, selectIsEx
 import {IExperimentModelInfo, IModelInfo, IModelInfoSource} from '../../shared/common-experiment-model.model';
 import {Model} from '~/business-logic/model/models/model';
 import {combineLatest, Observable, Subject} from 'rxjs';
-import {IExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
+import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {experimentSectionsEnum} from '~/features/experiments/shared/experiments.const';
 import {selectIsExperimentEditable, selectSelectedExperiment} from '~/features/experiments/reducers';
 import * as commonInfoActions from '../../actions/common-experiments-info.actions';
-import {ActivateEdit, CancelExperimentEdit, DeactivateEdit} from '../../actions/common-experiments-info.actions';
+import {activateEdit, cancelExperimentEdit, deactivateEdit} from '../../actions/common-experiments-info.actions';
 import {ExperimentModelsFormViewComponent} from '../../dumb/experiment-models-form-view/experiment-models-form-view.component';
 import {getModelDesign} from '@common/tasks/tasks.utils';
 import {distinctUntilChanged, filter, map, takeUntil} from 'rxjs/operators';
 import {ActivatedRoute, Router} from '@angular/router';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 import {addMessage} from '@common/core/actions/layout.actions';
+import {cloneDeep} from 'lodash/fp';
 
 
 @Component({
@@ -40,8 +41,9 @@ export class ExperimentInfoModelComponent implements OnInit, OnDestroy {
   public outputMode: boolean;
 
   @ViewChild('experimentModelForm') experimentModelForm: ExperimentModelsFormViewComponent;
+  private orgModels: IModelInfo[];
 
-  constructor(private store: Store<IExperimentInfoState>, private router: Router, private route: ActivatedRoute) {
+  constructor(private store: Store<ExperimentInfoState>, private router: Router, private route: ActivatedRoute) {
     this.modelInfo$ = this.store.select(selectExperimentModelInfoData);
     this.editable$ = this.store.select(selectIsExperimentEditable);
     this.userKnowledge$ = this.store.select(selectExperimentUserKnowledge);
@@ -61,6 +63,7 @@ export class ExperimentInfoModelComponent implements OnInit, OnDestroy {
         this.modelId = modelId;
         this.outputMode = this.route.snapshot.data?.outputModel;
         this.models = this.outputMode ? formData?.output : formData?.input;
+        this.orgModels = cloneDeep(this.models);
         this.model = this.models?.find(model => model.id === this.modelId);
         this.source = {
           experimentId: this.model?.task?.id,
@@ -78,30 +81,34 @@ export class ExperimentInfoModelComponent implements OnInit, OnDestroy {
   }
 
   onModelSelected(selectedModel: Model) {
-    const modelFoundIndex = this.models.findIndex(model => model.id === this.modelId);
-    if (this.models.map(m => m.id).includes(selectedModel.id)) {
-      this.store.dispatch(addMessage('warn', 'Selected model is already an input-model'))
+    const modelFoundIndex = this.orgModels.findIndex(model => model.id === this.modelId);
+    if (this.orgModels.map(m => m.id).includes(selectedModel.id)) {
+      this.store.dispatch(addMessage('warn', 'Selected model is already an input-model'));
     } else {
       let newModels: { model: string; name: string }[];
       if (modelFoundIndex >= 0) {
-        newModels = this.models.map(model => model.id !== this.modelId ? {model: model.id, name: model.name} : {model: selectedModel.id, name: selectedModel.name})
-          .filter(model => model.model);
+        newModels = this.orgModels.map(model => model.id !== this.modelId ?
+          {model: model.id, name: model.taskName} :
+          {model: selectedModel.id, name: model.taskName}
+        ).filter(model => model.model);
       } else {
-        newModels = [...this.models.map(model => ({model: model.id, name: model.name})), {model: selectedModel.id, name: selectedModel.name}];
+        newModels = [
+          ...this.orgModels.map(model => ({model: model.id, name: model.taskName})),
+          {model: selectedModel.id, name: 'Input Model'}
+        ];
       }
-      this.store.dispatch(new commonInfoActions.UpdateExperimentInfoData({changes: {model: {input: newModels as any}}}));
       this.store.dispatch(commonInfoActions.saveExperimentSection({models: {input: newModels as any}}));
-      return this.router.navigate([{modelId: selectedModel.id || ''}], {relativeTo: this.route, replaceUrl: true})
+      return this.router.navigate([{modelId: selectedModel.id || ''}], {relativeTo: this.route, replaceUrl: true});
     }
   }
 
   cancelModelChange() {
-    this.store.dispatch(new DeactivateEdit());
-    this.store.dispatch(new CancelExperimentEdit());
+    this.store.dispatch(deactivateEdit());
+    this.store.dispatch(cancelExperimentEdit());
   }
 
   activateEditChanged() {
-    this.store.dispatch(new ActivateEdit('model'));
+    this.store.dispatch(activateEdit('model'));
     !this.model?.id && this.experimentModelForm.chooseModel();
   }
 }

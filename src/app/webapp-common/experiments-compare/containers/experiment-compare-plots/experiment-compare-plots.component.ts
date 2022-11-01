@@ -2,12 +2,12 @@ import {ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild} from '@angul
 import {SelectableListItem} from '@common/shared/ui-components/data/selectable-list/selectable-list.model';
 import {Observable, Subscription} from 'rxjs';
 import {select, Store} from '@ngrx/store';
-import {IExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
+import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {distinctUntilChanged, filter, map, tap} from 'rxjs/operators';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {convertMultiPlots, prepareMultiPlots, sortMetricsList} from '@common/tasks/tasks.utils';
 import {isEqual} from 'lodash/fp';
-import {GetMultiPlotCharts, ResetExperimentMetrics, SetExperimentMetricsSearchTerm, SetExperimentSettings, SetSelectedExperiments} from '../../actions/experiments-compare-charts.actions';
+import {getMultiPlotCharts, resetExperimentMetrics, setExperimentMetricsSearchTerm, setExperimentSettings, setSelectedExperiments} from '../../actions/experiments-compare-charts.actions';
 import {selectCompareTasksPlotCharts, selectExperimentMetricsSearchTerm, selectSelectedExperimentSettings, selectSelectedSettingsHiddenPlot} from '../../reducers';
 import {ExtFrame} from '@common/shared/experiment-graphs/single-graph/plotly-graph-base';
 import {RefreshService} from '@common/core/services/refresh.service';
@@ -40,7 +40,7 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
 
   @ViewChild(ExperimentGraphsComponent) graphsComponent: ExperimentGraphsComponent;
 
-  constructor(private store: Store<IExperimentInfoState>, private changeDetection: ChangeDetectorRef, private refresh: RefreshService) {
+  constructor(private store: Store<ExperimentInfoState>, private changeDetection: ChangeDetectorRef, private refresh: RefreshService) {
     this.listOfHidden = this.store.pipe(select(selectSelectedSettingsHiddenPlot));
     this.searchTerm$ = this.store.pipe(select(selectExperimentMetricsSearchTerm));
     this.plots$ = this.store.pipe(
@@ -81,22 +81,22 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
     this.settingsSubscription = this.experimentSettings$
       .subscribe((selectedPlot) => {
         this.selectedGraph = selectedPlot;
-        this.graphsComponent.scrollToGraph(selectedPlot);
+        this.graphsComponent?.scrollToGraph(selectedPlot);
       });
 
     this.routerParamsSubscription = this.routerParams$
       .subscribe(params => {
         if (!this.taskIds || this.taskIds.join(',') !== params.ids) {
           this.taskIds = params.ids.split(',');
-          this.store.dispatch(new SetSelectedExperiments({selectedExperiments: this.taskIds}));
-          this.store.dispatch(new GetMultiPlotCharts({taskIds: this.taskIds}));
+          this.store.dispatch(setSelectedExperiments({selectedExperiments: this.taskIds}));
+          this.store.dispatch(getMultiPlotCharts({taskIds: this.taskIds}));
         }
       });
 
     this.refreshingSubscription = this.refresh.tick
       .pipe(filter(auto => auto !== null))
     .subscribe(autoRefresh =>
-      this.store.dispatch(new GetMultiPlotCharts({taskIds: this.taskIds, autoRefresh}))
+      this.store.dispatch(getMultiPlotCharts({taskIds: this.taskIds, autoRefresh}))
     );
   }
 
@@ -115,19 +115,19 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
   }
 
   metricSelected(id) {
-    this.store.dispatch(new SetExperimentSettings({id: this.taskIds, changes: {selectedPlot: id}}));
+    this.store.dispatch(setExperimentSettings({id: this.taskIds, changes: {selectedPlot: id}}));
   }
 
   hiddenListChanged(hiddenList) {
-    this.store.dispatch(new SetExperimentSettings({id: this.taskIds, changes: {hiddenMetricsPlot: hiddenList}}));
+    this.store.dispatch(setExperimentSettings({id: this.taskIds, changes: {hiddenMetricsPlot: hiddenList}}));
   }
 
 
   searchTermChanged(searchTerm: string) {
-    this.store.dispatch(new SetExperimentMetricsSearchTerm({searchTerm}));
+    this.store.dispatch(setExperimentMetricsSearchTerm({searchTerm}));
   }
 
   resetMetrics() {
-    this.store.dispatch(new ResetExperimentMetrics());
+    this.store.dispatch(resetExperimentMetrics());
   }
 }

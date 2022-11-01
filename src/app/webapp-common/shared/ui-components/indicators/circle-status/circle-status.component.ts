@@ -12,5 +12,6 @@ import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
 export class CircleStatusComponent {
   @Input() status: TaskStatusEnum;
   @Input() type: TaskTypeEnum;
-  public readonly EXPERIMENTS_STATUS_LABELS = EXPERIMENTS_STATUS_LABELS;
+  @Input() defaultStatus: string = '';
+  public readonly experimentsStatusLabels = EXPERIMENTS_STATUS_LABELS;
 }

@@ -24,19 +24,11 @@ import {PipelinesControllerModule} from '@common/pipelines-controller/pipelines-
 import {DatasetsRoutingModule} from '~/features/datasets/datasets-routing.module';
 import {DatasetVersionStepComponent} from '@common/datasets/dataset-version-step/dataset-version-step.component';
 import {DatasetsSharedModule} from '~/features/datasets/shared/datasets-shared.module';
-import {
-  SimpleDatasetVersionDetailsComponent
-} from '../../webapp-common/datasets/simple-dataset-version-details/simple-dataset-version-details.component';
-import {
-  SimpleDatasetVersionContentComponent
-} from '../../webapp-common/datasets/simple-dataset-version-content/simple-dataset-version-content.component';
-import {
-  SimpleDatasetVersionPreviewComponent
-} from '../../webapp-common/datasets/simple-dataset-version-preview/simple-dataset-version-preview.component';
-import {DebugImagesModule} from '../../webapp-common/debug-images/debug-images.module';
-import {
-  ExperimentOutputLogModule
-} from '../../webapp-common/experiments/shared/experiment-output-log/experiment-output-log.module';
+import {SimpleDatasetVersionDetailsComponent} from '@common/datasets/simple-dataset-version-details/simple-dataset-version-details.component';
+import {SimpleDatasetVersionContentComponent} from '@common/datasets/simple-dataset-version-content/simple-dataset-version-content.component';
+import {SimpleDatasetVersionPreviewComponent} from '@common/datasets/simple-dataset-version-preview/simple-dataset-version-preview.component';
+import {ExperimentOutputLogModule} from '@common/experiments/shared/experiment-output-log/experiment-output-log.module';
+import {DebugImagesModule} from '@common/debug-images/debug-images.module';
 
 
 @NgModule({
@@ -56,18 +48,18 @@ import {
     ExperimentCompareSharedModule,
     PipelinesControllerModule,
     DatasetsSharedModule,
+    ExperimentOutputLogModule,
     DebugImagesModule,
-    ExperimentOutputLogModule
   ],
   declarations: [
     SimpleDatasetsComponent,
     SimpleDatasetVersionsComponent,
     SimpleDatasetVersionMenuComponent,
     SimpleDatasetVersionInfoComponent,
-    DatasetVersionStepComponent,
-    SimpleDatasetVersionDetailsComponent,
     SimpleDatasetVersionContentComponent,
     SimpleDatasetVersionPreviewComponent,
+    DatasetVersionStepComponent,
+    SimpleDatasetVersionDetailsComponent,
   ],
   schemas: [NO_ERRORS_SCHEMA],
   exports: []

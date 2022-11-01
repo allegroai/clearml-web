@@ -21,6 +21,7 @@ import {UserCredentialsComponent} from '~/features/settings/containers/admin/use
 import {UserDataComponent} from '~/features/settings/containers/admin/user-data/user-data.component';
 import {UsageStatsComponent} from '~/features/settings/containers/admin/usage-stats/usage-stats.component';
 import {CreateCredentialDialogComponent} from '~/features/settings/containers/admin/create-credential-dialog/create-credential-dialog.component';
+import {RedactedArgumentsDialogComponent} from '@common/settings/admin/redacted-arguments-dialog/redacted-arguments-dialog.component';
 
 
 
@@ -41,6 +42,7 @@ import {CreateCredentialDialogComponent} from '~/features/settings/containers/ad
     ProfileKeyStorageComponent,
     WorkspaceConfigurationComponent,
     WebappConfigurationComponent,
+    RedactedArgumentsDialogComponent
   ],
   imports: [
     CommonModule,

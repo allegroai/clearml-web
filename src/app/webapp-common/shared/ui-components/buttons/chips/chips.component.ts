@@ -36,6 +36,7 @@ export class ChipsComponent implements OnInit, OnDestroy {
   @Input() set forceColor(forceColor: [number, number, number]) {
     this.colorIsForced = true;
     this._forceColor   = forceColor;
+    this.chooseColor(forceColor);
 
   }
 
@@ -50,7 +51,7 @@ export class ChipsComponent implements OnInit, OnDestroy {
   @Input() allowRemove: boolean = false;
   @Output() remove              = new EventEmitter<any>();
 
-  constructor(private colorHash: ColorHashService, private changeDetection: ChangeDetectorRef, private elRef: ElementRef<HTMLElement>) {
+  constructor(private colorHash: ColorHashService, private changeDetection: ChangeDetectorRef, public elRef: ElementRef<HTMLElement>) {
 
   }
   ngOnInit() {

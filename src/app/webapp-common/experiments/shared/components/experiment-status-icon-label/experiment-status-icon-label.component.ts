@@ -1,11 +1,12 @@
-import {Component, Input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
 import {EXPERIMENTS_STATUS_LABELS} from '~/features/experiments/shared/experiments.const';
 import {TASKS_STATUS} from '@common/tasks/tasks.constants';
 
 @Component({
   selector   : 'sm-experiment-status-icon-label',
   templateUrl: './experiment-status-icon-label.component.html',
-  styleUrls  : ['./experiment-status-icon-label.component.scss']
+  styleUrls: ['./experiment-status-icon-label.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ExperimentStatusIconLabelComponent {
   public showSpinner: boolean;

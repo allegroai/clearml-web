@@ -6,6 +6,7 @@ import {SMSharedModule} from '@common/shared/shared.module';
 import {UiComponentsModule} from '@common/shared/ui-components/ui-components.module';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import {SharedPipesModule} from '@common/shared/pipes/shared-pipes.module';
+import {ScrollingModule} from '@angular/cdk/scrolling';
 
 
 
@@ -17,7 +18,8 @@ import {SharedPipesModule} from '@common/shared/pipes/shared-pipes.module';
     SMSharedModule,
     MatProgressSpinnerModule,
     UiComponentsModule,
-    SharedPipesModule
+    SharedPipesModule,
+    ScrollingModule
   ]
 })
 export class ExperimentOutputLogModule { }

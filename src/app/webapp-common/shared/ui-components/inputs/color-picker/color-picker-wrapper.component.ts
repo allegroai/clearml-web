@@ -1,10 +1,12 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {selectColorPickerProps} from '../../directives/choose-color/choose-color.reducer';
 import {Subscription} from 'rxjs';
 import {ColorPickerProps} from '../../directives/choose-color/choose-color.actions';
 import {hexToRgb, rgbaToValues} from '../../../services/color-hash/color-hash.utils';
 import {ColorHashService} from '../../../services/color-hash/color-hash.service';
+import {distinctUntilChanged} from 'rxjs/operators';
+import {isEqual} from 'lodash/fp';
 
 @Component({
   selector: 'sm-color-picker-wrapper',
@@ -30,21 +32,23 @@ export class ColorPickerWrapperComponent implements OnInit, OnDestroy {
   ];
   public alphaPresetColors = [...this.presetColors,
     'rgba(0,0,0,0)'
-  ]
+  ];
 
   private propsSub: Subscription;
   public props: ColorPickerProps;
   public toggle = false;
 
-  constructor(private store: Store<any>, private colorHashService: ColorHashService) {
+  constructor(private store: Store<any>, private colorHashService: ColorHashService, private cdr: ChangeDetectorRef) {
   }
 
   ngOnInit() {
     this.propsSub = this.store.select(selectColorPickerProps)
+      .pipe(distinctUntilChanged(isEqual))
       .subscribe((props) => {
         this.props = props;
         this.defaultColor = props?.defaultColor;
         this.toggle = !!props;
+        this.cdr.detectChanges();
       });
   }
 

@@ -9,7 +9,7 @@ import {ExperimentInfoHyperParametersComponent} from './containers/experiment-in
 import {ExperimentInfoTaskModelComponent} from './containers/experiment-info-task-model/experiment-info-task-model.component';
 import {ExperimentInfoHyperParametersFormContainerComponent} from './containers/experiment-info-hyper-parameters-form-container/experiment-info-hyper-parameters-form-container.component';
 import {ExperimentInfoGeneralComponent} from './containers/experiment-info-general/experiment-info-general.component';
-import {ExperimentOutputComponent} from '../../features/experiments/containers/experiment-ouptut/experiment-output.component';
+import {ExperimentOutputComponent} from '~/features/experiments/containers/experiment-ouptut/experiment-output.component';
 import {ExperimentOutputScalarsComponent} from './containers/experiment-output-scalars/experiment-output-scalars.component';
 import {ExperimentOutputPlotsComponent} from './containers/experiment-output-plots/experiment-output-plots.component';
 import {DebugImagesComponent} from '../debug-images/debug-images.component';
@@ -78,7 +78,7 @@ export const routes: Routes = [
     component: ExperimentOutputComponent,
     data: {search: false},
     children: [
-      {path: '', redirectTo: 'execution'},
+      {path: '', redirectTo: 'execution', pathMatch: 'full'},
       {path: 'execution',
         component: ExperimentInfoExecutionComponent,
         canDeactivate: [LeavingBeforeSaveAlertGuard]

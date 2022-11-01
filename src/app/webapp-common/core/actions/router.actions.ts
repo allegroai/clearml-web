@@ -41,5 +41,6 @@ export const setURLParams = createAction(
     isArchived?: boolean;
     isDeep?: boolean;
     update?: boolean;
+    version?: string;
   }>()
 );

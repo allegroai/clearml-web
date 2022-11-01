@@ -1,0 +1,17 @@
+<cdk-virtual-scroll-viewport class="card-container" [itemSize]="cardHeight + gridGap">
+  <div
+    class="card-row"
+    [class.snippets-mode]="snippetsMode"
+    [style.--cardWidth]="cardWidth + 'px'"
+    [style.--gridGap]="gridGap + 'px'"
+    *cdkVirtualFor="let row of itemRows$ | async; let rowIndex = index"
+  >
+    <ng-container *ngFor="let item of row; let itemIndex = index; trackBy: trackByFn">
+      <ng-container *ngTemplateOutlet="cardTemplate; context: {$implicit: item, index: itemIndex + rowIndex * cardsInRow}"></ng-container>
+    </ng-container>
+    <div *ngFor="let blankItem of [].constructor(cardsInRow - row.length)"></div>
+  </div>
+  <div class="load-more" *ngIf="showLoadMoreButton && (itemRows$ | async)?.length">
+    <button (click)="loadMoreClicked.emit()" class="btn btn-primary load-more-btn">LOAD MORE</button>
+  </div>
+</cdk-virtual-scroll-viewport>

@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {select, Store} from '@ngrx/store';
-import {from, Observable, of, Subject} from 'rxjs';
+import {from, fromEvent, Observable, of, Subject} from 'rxjs';
 import {
   Credentials, selectRevokeSucceed,
   selectS3BucketCredentials, selectS3BucketCredentialsBucketCredentials
@@ -8,8 +8,8 @@ import {
 import {S3Client, ObjectIdentifier, DeleteObjectsCommand, GetObjectCommand} from '@aws-sdk/client-s3';
 import {S3ClientConfig} from '@aws-sdk/client-s3';
 // import {getSignedUrl} from '@aws-sdk/s3-request-presigner';
-import {getAllCredentials, showLocalFilePopUp} from '../../core/actions/common-auth.actions';
-import {map, skip} from 'rxjs/operators';
+import {getAllCredentials, refreshS3Credential, showLocalFilePopUp} from '../../core/actions/common-auth.actions';
+import {catchError, debounceTime, filter, map, skip} from 'rxjs/operators';
 import {convertToReverseProxy, isFileserverUrl} from '~/shared/utils/url';
 import {ConfigurationService} from '../../shared/services/configuration.service';
 import {selectActiveWorkspace} from '../../core/reducers/users-reducer';
@@ -21,6 +21,10 @@ import {Client, Command} from '@aws-sdk/smithy-client';
 import {HttpRequest} from '@aws-sdk/protocol-http';
 import {formatUrl} from '@aws-sdk/util-format-url';
 import {S3RequestPresigner} from '@aws-sdk/s3-request-presigner';
+import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
+import {selectSelectedExperiment} from '~/features/experiments/reducers';
+import {isSharedAndNotOwner} from '@common/shared/utils/shared-utils';
+import {fromFetch} from 'rxjs/fetch';
 
 const LOCAL_SERVER_PORT = 27878;
 const FOUR_DAYS = 60 * 60 * 24 * 4;
@@ -130,7 +134,7 @@ export const getSignedUrl = async <
         request.headers['host'] = `${request.hostname}:${request.port}`;
       }
 
-      const presigned = await s3Presigner.presign(request, {
+      const s3presigned = await s3Presigner.presign(request, {
         ...options,
         signingRegion: options.signingRegion ?? context['signing_region'],
         signingService: options.signingService ?? context['signing_service'],
@@ -140,7 +144,7 @@ export const getSignedUrl = async <
         response: {},
         output: {
           $metadata: { httpStatusCode: 200 },
-          presigned,
+          presigned: s3presigned,
         },
       } as any;
     };
@@ -170,16 +174,16 @@ export class BaseAdminService {
   bucketCredentials: Observable<any>;
   public s3Services: {[bucket: string]: S3Client} = {};
   revokeSucceed: Observable<any>;
-  protected store: Store<any>;
   private readonly s3BucketCredentials: Observable<any>;
   private previouslySignedUrls = {};
   private localServerWorking = false;
   private workspace: GetCurrentUserResponseUserObjectCompany;
+  private selectedExperiment: IExperimentInfo;
   private environment: Environment;
   private deleteS3FilesSubject: Subject<{ success: boolean; files: string[] }>;
   private credentials: any[];
 
-  constructor(store: Store<any>, protected confService: ConfigurationService) {
+  constructor(protected store: Store, protected confService: ConfigurationService) {
     this.store = store;
     this.revokeSucceed = store.pipe(select(selectRevokeSucceed));
     this.revokeSucceed.subscribe(this.onRevokeSucceed);
@@ -190,8 +194,18 @@ export class BaseAdminService {
     store.select(selectS3BucketCredentialsBucketCredentials)
       .subscribe(cred => this.credentials = cred);
     this.store.select(selectActiveWorkspace).subscribe(workspace => this.workspace = workspace);
+    this.store.select(selectSelectedExperiment).subscribe(experiment => this.selectedExperiment = experiment);
     confService.getEnvironment().subscribe(conf => this.environment = conf);
     this.deleteS3FilesSubject = new Subject();
+
+    fromEvent(window, 'storage')
+      .pipe(
+        filter((event: StorageEvent) => event.key === '_saved_state_'),
+        debounceTime(50)
+      )
+      .subscribe(() => {
+        this.store.dispatch(refreshS3Credential());
+      });
   }
 
   showLocalFilePopUp(url) {
@@ -200,7 +214,7 @@ export class BaseAdminService {
 
   signUrlIfNeeded(url: string, config?: { skipLocalFile?: boolean; skipFileServer?: boolean; disableCache?: number }):
     Observable<SignResponse> {
-    config = {...{skipLocalFile: true, skipFileServer: true, disableCache: null}, ...config};
+    config = {...{skipLocalFile: true, skipFileServer: this.confService.getStaticEnvironment().production, disableCache: null}, ...config};
 
     if (isFileserverUrl(url)) {
       if (this.environment.communityServer) {
@@ -325,10 +339,13 @@ export class BaseAdminService {
       return;
     }
 
-    from(fetch(`http://localhost:${LOCAL_SERVER_PORT}`, {mode: 'no-cors'}))
-      .subscribe(() => {
-        this.localServerWorking = true;
-      }, () => this.showLocalFilePopUp(url));
+    fromFetch(`http://localhost:${LOCAL_SERVER_PORT}`, {mode: 'no-cors'})
+      .pipe(catchError(() => {
+        this.showLocalFilePopUp(url);
+        return [];
+      }))
+      .subscribe(() =>
+        this.localServerWorking = true);
   }
 
   signGoogleCloudUrl(url: string): string {
@@ -349,6 +366,9 @@ export class BaseAdminService {
   private addTenant(url: string) {
     const u = new URL(url);
     u.searchParams.append('tenant', this.workspace?.id);
+    if (isSharedAndNotOwner(this.selectedExperiment, this.workspace)){
+      u.searchParams.append('shared', this.selectedExperiment.id);
+    }
     return u.toString();
   }
 

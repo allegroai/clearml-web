@@ -1,5 +1,5 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {ISmCol} from '../../../shared/ui-components/data/table/table.consts';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 
 @Component({
   selector: 'sm-model-custom-cols-menu',
@@ -14,7 +14,7 @@ export class ModelCustomColsMenuComponent{
   @Output() removeColFromList = new EventEmitter<ISmCol['id']>();
   @Output() selectedTableColsChanged = new EventEmitter();
   @Output() selectMetadataKeysActiveChanged = new EventEmitter();
-  @Output() addOrRemoveMetadataKeyFromColumns = new EventEmitter<{key:string,show: boolean }>();
+  @Output() addOrRemoveMetadataKeyFromColumns = new EventEmitter<{key: string; show: boolean }>();
 
   customColumnMode: string;
 

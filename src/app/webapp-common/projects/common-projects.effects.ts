@@ -9,7 +9,7 @@ import {
   setProjectsSearchQuery, updateProjectSuccess, showExamplePipelines, showExampleDatasets
 } from './common-projects.actions';
 import {
-  selectProjectsOrderBy, selectProjectsScrollId, selectProjectsSearchQuery, selectProjectsSortOrder, selectShowHidden
+  selectProjectsOrderBy, selectProjectsScrollId, selectProjectsSearchQuery, selectProjectsSortOrder
 } from './common-projects.reducer';
 import {Store} from '@ngrx/store';
 import {TABLE_SORT_ORDER} from '../shared/ui-components/data/table/table.consts';
@@ -21,7 +21,7 @@ import {pageSize} from './common-projects.consts';
 import {selectRouterParams} from '../core/reducers/router-reducer';
 import {selectCurrentUser, selectShowOnlyUserWork} from '../core/reducers/users-reducer';
 import {ProjectsGetAllExResponse} from '~/business-logic/model/projects/projectsGetAllExResponse';
-import {selectRootProjects, selectSelectedProject, selectSelectedProjectId} from '../core/reducers/projects.reducer';
+import {selectRootProjects, selectSelectedProject, selectSelectedProjectId, selectShowHidden} from '../core/reducers/projects.reducer';
 import {forkJoin, of} from 'rxjs';
 import {Project} from '~/business-logic/model/projects/project';
 import {setAllProjects, setSelectedProjectStats} from '../core/actions/projects.actions';
@@ -107,16 +107,16 @@ export class CommonProjectsEffects {
             ...(datasets && {include_dataset_stats: true, stats_with_children: false}),
             include_stats: true,
             shallow_search: !pipelines && !datasets && !searchQuery?.query,
+            ...((!pipelines && !datasets && !searchQuery?.query) && {permission_roots_only :true}),
             ...(selectedProjectId && {parent: [selectedProjectId]}),
             scroll_id: scrollId || null, // null to create new scroll (undefined doesn't generate scroll)
             size: pageSize,
             ...(showOnlyUserWork && {active_users: [user?.id]}),
-            active_users: (showOnlyUserWork ? [user?.id] : null),
             ...((showHidden || pipelines || datasets) && {search_hidden: true}),
             ...(pipelines ? {system_tags: ['pipeline']} : datasets ? {system_tags: ['dataset']} : {}),
             ...(datasets && {name: '/\\.datasets/'}),
             order_by: ['featured', sortOrder === TABLE_SORT_ORDER.DESC ? '-' + orderBy : orderBy],
-            only_fields: ['name', 'company', 'user', 'created', 'default_output_destination']
+            only_fields: ['name', 'company', 'user', 'created', 'default_output_destination', 'basename']
               .concat(pipelines || datasets ? ['tags', 'system_tags', 'last_update'] : []),
             ...(searchQuery?.query && {
               _any_: {
@@ -141,19 +141,23 @@ export class CommonProjectsEffects {
             /* eslint-enable @typescript-eslint/naming-convention */
           }) : of(null),
         ]).pipe(
-          map(([projectsRes, currentProjectRes]: [ProjectsGetAllExResponse, ProjectsGetAllExResponse]) => ({
+          withLatestFrom(this.store.select(selectRootProjects).pipe(map(projects => projects?.find(project => project.id === selectedProjectId) ?? []))),
+          map(([[projectsRes, currentProjectRes] , selectedProject]: [[ProjectsGetAllExResponse, ProjectsGetAllExResponse], Project]) => ({
               newScrollId: projectsRes.scroll_id,
-              projects: (currentProjectRes && this.isNotEmptyExampleProject(currentProjectRes.projects[0])) ? [
-                // eslint-disable-next-line @typescript-eslint/naming-convention
-                {
-                  ...currentProjectRes.projects[0],
-                  isRoot: true,
+              projects: currentProjectRes !== null && this.isNotEmptyExampleProject(currentProjectRes.projects[0]) ?
                   // eslint-disable-next-line @typescript-eslint/naming-convention
-                  sub_projects: null,
-                  name: `[${currentProjectRes.projects[0]?.name}]`
-                },
-                ...projectsRes.projects
-              ] : projectsRes.projects
+                  [(currentProjectRes?.projects?.length === 0 ?
+                    {...selectedProject, isRoot: true, sub_projects: null, name: `[${selectedProject.name}]`} :
+                    {
+                      ...currentProjectRes.projects[0],
+                      isRoot: true,
+                      // eslint-disable-next-line @typescript-eslint/naming-convention
+                      sub_projects: null,
+                      name: `[${currentProjectRes.projects[0]?.name}]`
+                    }),
+                    ...projectsRes.projects
+                  ] :
+                  projectsRes.projects
             }
           )),
           mergeMap(({newScrollId, projects}) => [

@@ -271,6 +271,10 @@
     .ace-editor.ace_editor.ace-tm {
       background-color: transparent;
 
+      .ace_marker-layer .ace_selection {
+        background-color: $blue-600;
+      }
+
       .ace_line {
         color: #e1e1e1;
       }

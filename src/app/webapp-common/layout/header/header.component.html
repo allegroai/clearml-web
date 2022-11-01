@@ -6,7 +6,7 @@
     [class.share-view]="isShareMode"
     [activeWorkspace]="activeWorkspace">
   </sm-breadcrumbs>
-  <div class="ml-3 d-flex align-items-center mr-auto" *ngIf="(userFocus || (showUserFocus$ | async)) && !(search.searchQuery$ | async)">
+  <div class="ml-3 d-flex align-items-center mr-auto" *ngIf="(userFocus || (showUserFocus$ | async))">
     <sm-show-only-user-work></sm-show-only-user-work>
   </div>
 

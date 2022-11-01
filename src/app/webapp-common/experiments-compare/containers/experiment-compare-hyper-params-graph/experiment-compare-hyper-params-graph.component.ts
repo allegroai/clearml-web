@@ -1,11 +1,11 @@
 import {Component, HostListener, OnDestroy, OnInit, ElementRef, ViewChild} from '@angular/core';
 import {combineLatest, Observable, Subscription} from 'rxjs';
 import {select, Store} from '@ngrx/store';
-import {IExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
+import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {distinctUntilChanged, filter, map} from 'rxjs/operators';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {get, has} from 'lodash/fp';
-import {SetExperimentSettings, SetSelectedExperiments} from '../../actions/experiments-compare-charts.actions';
+import {setExperimentSettings, setSelectedExperiments} from '../../actions/experiments-compare-charts.actions';
 import {selectScalarsGraphHyperParams, selectScalarsGraphMetrics, selectScalarsGraphShowIdenticalHyperParams, selectScalarsGraphTasks, selectMetricValueType, selectSelectedSettingsHyperParams, selectSelectedSettingsMetric} from '../../reducers';
 import {getExperimentsHyperParams, setShowIdenticalHyperParams, setvalueType} from '../../actions/experiments-compare-scalars-graph.actions';
 import {GroupedHyperParams, MetricOption, MetricValueType, SelectedMetric, VariantOption} from '../../reducers/experiments-compare-charts.reducer';
@@ -55,7 +55,7 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
 
   public metricValueType$: Observable<MetricValueType>;
   public selectedItemsListMapper(data) {
-    return data
+    return data;
   }
   @ViewChild('searchMetric') searchMetricRef: ElementRef;
 
@@ -66,7 +66,7 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
     }
   }
 
-  constructor(private store: Store<IExperimentInfoState>, private refresh: RefreshService) {
+  constructor(private store: Store<ExperimentInfoState>, private refresh: RefreshService) {
     this.metrics$ = this.store.pipe(select(selectScalarsGraphMetrics));
     this.hyperParams$ = this.store.pipe(select(selectScalarsGraphHyperParams));
     this.selectedHyperParams$ = this.store.pipe(select(selectSelectedSettingsHyperParams));
@@ -123,7 +123,7 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
     )
       .subscribe(ids => {
         this.taskIds = ids.split(',');
-        this.store.dispatch(new SetSelectedExperiments({selectedExperiments: ['hyper-param-graph']}));
+        this.store.dispatch(setSelectedExperiments({selectedExperiments: ['hyper-param-graph']}));
         this.store.dispatch(getExperimentsHyperParams({experimentsIds: this.taskIds}));
       });
 
@@ -178,7 +178,7 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
   }
 
   updateServer(selectedMetric, selectedParams) {
-    this.store.dispatch(new SetExperimentSettings({id: ['hyper-param-graph'], changes: {selectedMetric: selectedMetric, selectedHyperParams: selectedParams}}));
+    this.store.dispatch(setExperimentSettings({id: ['hyper-param-graph'], changes: {selectedMetric, selectedHyperParams: selectedParams}}));
 
   }
 

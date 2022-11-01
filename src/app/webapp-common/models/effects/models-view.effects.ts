@@ -65,6 +65,7 @@ import {ISmCol} from '../../shared/ui-components/data/table/table.consts';
 import {hasValue} from '../../shared/utils/helpers.util';
 import {ProjectsGetModelMetadataValuesResponse} from '~/business-logic/model/projects/projectsGetModelMetadataValuesResponse';
 import {selectTableMode} from '../../experiments/reducers';
+import {selectActiveWorkspaceReady} from '~/core/reducers/view.reducer';
 
 @Injectable()
 export class ModelsViewEffects {
@@ -135,6 +136,9 @@ export class ModelsViewEffects {
     ofType(
       actions.fetchModelsRequested, actions.getNextModelsWithPageSize, actions.globalFilterChanged, actions.showSelectedOnly,
     ),
+    switchMap((action) => this.store.select(selectActiveWorkspaceReady).pipe(
+      filter(ready => ready),
+      map(() => action))),
     auditTime(100),
     switchMap((action) => this.fetchModels$(null, false, (action as any).pageSize as number)
       .pipe(

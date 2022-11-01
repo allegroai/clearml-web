@@ -4,7 +4,7 @@
     [hidden]="!selectedVariant"
     (click)="selectVariant()"
     [smTooltip]="variantDisplay?.length > 30 ? variantDisplay : null"
-    matTooltipPosition="above"
+    
   >{{variantDisplay}}</button>
 </div>
 <div class="line-chart-container" *ngIf="selectedVariant; else noData">

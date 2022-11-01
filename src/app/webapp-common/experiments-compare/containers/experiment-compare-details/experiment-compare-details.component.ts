@@ -20,7 +20,7 @@ import {
 } from '../../jsonToDiffConvertor';
 import {ExperimentCompareBase} from '../experiment-compare-base';
 import {ActivatedRoute, Router} from '@angular/router';
-import {IExperimentInfoState} from '../../../../features/experiments/reducers/experiment-info.reducer';
+import {ExperimentInfoState} from '../../../../features/experiments/reducers/experiment-info.reducer';
 import {ConfigurationItem} from '../../../../business-logic/model/tasks/configurationItem';
 import {RefreshService} from '@common/core/services/refresh.service';
 
@@ -47,7 +47,7 @@ export class ExperimentCompareDetailsComponent extends ExperimentCompareBase imp
 
   constructor(
     public router: Router,
-    public store: Store<IExperimentInfoState>,
+    public store: Store<ExperimentInfoState>,
     public changeDetection: ChangeDetectorRef,
     public activeRoute: ActivatedRoute,
     private cdr: ChangeDetectorRef,

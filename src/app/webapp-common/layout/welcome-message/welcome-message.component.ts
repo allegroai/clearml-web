@@ -80,13 +80,14 @@ export class WelcomeMessageComponent implements OnInit, OnDestroy {
   trackByFn = trackByIndex;
   public displayedServerUrls: { apiServer?: string; filesServer?: string };
   private userSubscription: Subscription;
+  isJupyter: boolean = false;
 
   constructor(
     private store: Store<any>,
     private dialogRef: MatDialogRef<any>,
     @Inject(MAT_DIALOG_DATA) public data,
     private adminService: AdminService,
-    private configService: ConfigurationService
+    private configService: ConfigurationService,
   ) {
     this.loadYoutubeApi(data?.newExperimentYouTubeVideoId);
     this.dialogRef.beforeClosed().subscribe(() => this.dialogRef.close(this.doNotShowAgain));
@@ -140,6 +141,7 @@ export class WelcomeMessageComponent implements OnInit, OnDestroy {
         this.accessKey = credential.access_key;
         this.secretKey = credential.secret_key;
         this.store.dispatch(resetCredential());
+        this.setIsJupyter(this.isJupyter);
       });
   }
 
@@ -179,5 +181,24 @@ export class WelcomeMessageComponent implements OnInit, OnDestroy {
       document.body.appendChild(tag);
     }
     this.src = videoId;
+  }
+
+  setIsJupyter(isJupyter: boolean) {
+    this.isJupyter = isJupyter;
+    if (isJupyter) {
+      this.steps[this.queue ? 2 : 1].code =
+        `%env CLEARML_WEB_HOST=${this.WEB_SERVER_URL }
+%env CLEARML_API_HOST=${this.displayedServerUrls?.apiServer || this.API_BASE_URL }
+%env CLEARML_FILES_HOST=${this.displayedServerUrls?.filesServer || this.fileBaseUrl}${this.credentialsLabel? ('\n# ' + this.credentialsLabel):''}
+%env CLEARML_API_ACCESS_KEY=${this.accessKey || `<You’re API access key>`}
+%env CLEARML_API_SECRET_KEY=${this.secretKey ||  `<You’re API secret key>`}`;
+
+    } else {
+      if (this.queue) {
+        this.steps[2].code = `clearml-agent init`;
+      } else {
+        this.steps[1].code = this.gettingStartedContext.configure;
+      }
+    }
   }
 }

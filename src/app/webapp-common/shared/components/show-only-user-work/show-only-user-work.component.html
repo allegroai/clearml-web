@@ -1,9 +1,8 @@
 <sm-menu
-  (menuOpened)="userFilterMenuOpened(true)"
-  (menuClosed)="userFilterMenuOpened(false)"
+  panelClasses="light-theme"
   [header]="(showOnlyUserWork$ | async) ? 'My Work': 'Team\`s work'"
   [prefixIconClass]="'mr-1 al-icon ' + ((showOnlyUserWork$ | async)? 'al-ico-me': 'al-ico-team')"
-  [iconClass]="isUserMenuOpened?'fa fa-caret-up': 'fa fa-caret-down'" class="menu">
+  class="menu">
   <sm-menu-item itemLabel="My Work" (itemClicked)="userFilterChanged(true)" iconClass="al-icon al-ico-me"></sm-menu-item>
   <sm-menu-item itemLabel="Team`s work" (itemClicked)="userFilterChanged(false)"
                 iconClass="al-icon al-ico-team"></sm-menu-item>

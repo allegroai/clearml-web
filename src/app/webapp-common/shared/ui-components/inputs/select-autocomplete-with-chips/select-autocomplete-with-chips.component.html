@@ -34,7 +34,7 @@
 
       </mat-chip-list>
       <i *ngIf="!disabled"
-        [class]="'fa pl-2 mr-1 ml-auto ' + (val ? (multiple && clearable? 'fa-caret-down' : 'fa-times pointer') : 'fa-caret-down')"
+        [class]="'al-icon sm pl-2 mr-1 ml-auto ' + (val ? (multiple && clearable? 'al-ico-dropdown-arrow' : 'al-ico-dialog-x pointer') : 'al-ico-dropdown-arrow')"
         (click)="val && !(multiple && clearable) && removeLastChip(); autocompleteInput.focus();"
         smClickStopPropagation></i>
     </div>

@@ -6,7 +6,6 @@ import {StoreModule} from '@ngrx/store';
 import {EffectsModule} from '@ngrx/effects';
 import {experimentsCompareReducers} from './reducers';
 import {ExperimentsCompareDetailsEffects} from './effects/experiments-compare-details.effects';
-import {ExperimentsCompareDebugImagesEffects} from './effects/experiments-compare-debug-images.effects';
 import {ExperimentsCompareChartsEffects} from './effects/experiments-compare-charts.effects';
 import {ExperimentsCompareMetricsValuesEffects} from './effects/experiments-compare-metrics-values.effects';
 import {SMSharedModule} from '../shared/shared.module';
@@ -39,10 +38,10 @@ import {ScrollingModule} from '@angular/cdk/scrolling';
 import {MatRadioModule} from '@angular/material/radio';
 import {ExperimentCompareParamsComponent} from './containers/experiment-compare-params/experiment-compare-params.component';
 import {ExperimentsCompareParamsEffects} from './effects/experiments-compare-params.effects';
-import {FormsModule} from "@angular/forms";
-import {UiComponentsModule} from "../shared/ui-components/ui-components.module";
-import {SMMaterialModule} from "../shared/material/material.module";
-import {ExperimentsCommonModule} from "../experiments/common-experiments.module";
+import {FormsModule} from '@angular/forms';
+import {UiComponentsModule} from '../shared/ui-components/ui-components.module';
+import {SMMaterialModule} from '../shared/material/material.module';
+import {ExperimentsCommonModule} from '../experiments/common-experiments.module';
 
 export const compareSyncedKeys = [
   'charts.settingsList',
@@ -91,11 +90,11 @@ export const compareSyncedKeys = [
     EffectsModule.forFeature([
       ExperimentsCompareDetailsEffects,
       ExperimentsCompareParamsEffects,
-      ExperimentsCompareDebugImagesEffects,
       ExperimentsCompareChartsEffects,
       ExperimentsCompareMetricsValuesEffects,
       SelectCompareHeaderEffects,
-      ExperimentsCompareScalarsGraphEffects]),
+      ExperimentsCompareScalarsGraphEffects
+    ]),
     MatRadioModule,
     FormsModule,
   ]

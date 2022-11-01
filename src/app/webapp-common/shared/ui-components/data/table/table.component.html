@@ -1,4 +1,5 @@
 <p-table
+  *ngIf="columns?.length > 0"
   class="table"
   dataKey="id"
   [filterDelay]="0"
@@ -12,14 +13,17 @@
   [selection]="selection"
   [reorderableColumns]="reorderableColumns"
   [resizableColumns]="resizableColumns && !minView"
-  columnResizeMode="expand"
+  [columnResizeMode]="columnResizeMode"
   [scrollable]="scrollable || resizableColumns"
   [virtualScroll]="virtualScroll"
-  [virtualRowHeight]="minView ? cardHeight : rowHeight"
+  [virtualScrollItemSize]="minView ? cardHeight : rowHeight"
   [first]="first"
   [rowHover]="true"
   [contextMenu]="cm"
   [rowTrackBy]="trackByFunction"
+  [expandedRowKeys]="expandedRowKeys"
+  (onRowExpand)="updateNumberOfRows({event: $event, expanded: true})"
+  (onRowCollapse)="updateNumberOfRows({event: $event, expanded: false})"
   (firstChange)="onFirstChanged($event)"
   (onColReorder)="onColReorder($event)"
   (onSort)="onSortChanged($event)"
@@ -35,7 +39,10 @@
       </div>
     </tr>
   </ng-template>
-
+  <ng-template pTemplate="rowexpansion" let-row>
+    <ng-container *ngTemplateOutlet="rowExpansionTemplate; context: {$implicit: row, lastFrame: lastRowExpanded}">
+    </ng-container>
+  </ng-template>
   <ng-template pTemplate="header" let-columns *ngIf="!noHeader">
     <tr class="header ui-state-default" *ngIf="!minView; else cardHeader">
       <th *ngFor="let col of columns; trackBy: trackByColFn"
@@ -44,19 +51,21 @@
           smResizableColumn
           [pResizableColumnDisabled]="col?.disableDrag"
           [pReorderableColumnDisabled]="!reorderableColumns || col?.disableDrag"
+          pFrozenColumn
+          [frozen]="col.frozen"
           [class.disable-drag]="!reorderableColumns || col?.disableDrag"
           [class.resize-enabled]="resizableColumns"
           [class.resize-disabled]="!resizableColumns"
           [class.selected-col-header]="col?.disablePointerEvents"
           [style.min-width]="col.style?.minWidth"
           [style.max-width]="col.style?.maxWidth"
-          [style.flex-basis]="col.style?.width"
+          [style.width]="col.style?.width"
       >
         <ng-container [ngSwitch]="col?.headerType">
-          <ng-container *ngSwitchCase="ColHeaderTypeEnum.sortFilter">
+          <ng-container *ngSwitchCase="colHeaderTypeEnum.sortFilter">
             <ng-container *ngTemplateOutlet="sortFilterTemplate; context: {$implicit: col}"></ng-container>
           </ng-container>
-          <ng-container *ngSwitchCase="ColHeaderTypeEnum.checkBox">
+          <ng-container *ngSwitchCase="colHeaderTypeEnum.checkBox">
             <ng-container *ngTemplateOutlet="checkboxTemplate; context: {$implicit: col}"></ng-container>
           </ng-container>
           <ng-container *ngSwitchDefault>
@@ -68,11 +77,11 @@
     <ng-template #cardHeader>
       <tr class="header">
         <th class="table-header" style="flex-basis:100%">
-          <ng-container *ngTemplateOutlet="checkboxTemplate; context: {$implicit: columns[0]}"></ng-container>
+          <ng-container *ngTemplateOutlet="checkboxTemplate; context: {$implicit: columns?.[0]}"></ng-container>
           <div class="table-header-title ellipsis">{{minimizedTableHeader}}</div>
           <div class="table-actions">
             <div class="recent-title">
-              <sm-menu header="SORTED BY " class="menu">
+              <sm-menu header="SORTED BY " class="menu" panelClasses="light-theme">
                 <div *ngFor="let col of sortableCols; trackBy: trackByColFn">
                   <sm-menu-item [itemLabel]="col.header"
                                 [sortOrder]="getOrder(col.id)"
@@ -86,8 +95,10 @@
       </tr>
     </ng-template>
   </ng-template>
-  <ng-template pTemplate="body" let-rowData let-columns="columns" let-index="rowIndex">
+  <ng-template pTemplate="body" let-rowData let-columns="columns" let-index="rowIndex" let-expanded="expanded">
     <tr
+      [pRowToggler]="expandableRows? rowData : null"
+      [pRowTogglerDisabled]="!expandableRows"
       [pSelectableRow]="rowData"
       [pContextMenuRow]="rowData"
       [style.height.px]="minView ? this.cardHeight : this.rowHeight"
@@ -98,25 +109,29 @@
       [class.selected]="selectionMode==='single'? selection?.id === rowData?.id : selection?.includes(rowData)"
       [class.cards-table]="minView"
       [class.pointer]="!!selectionMode"
-      (click)="!minView && rowClicked.emit({e: $event, data: rowData})"
+      (click)="!minView && checkClick({e: $event, data: rowData})"
+      (dblclick)="!minView && checkClick({e: $event, data: rowData})"
     >
       <ng-container *ngIf="!minView; else cardBody">
         <td
           *ngFor="let col of columns; trackBy: trackByColFn; index as i"
+          pFrozenColumn
+          [frozen]="col.frozen"
           [class.ui-resizable-column]="resizableColumns"
           [class.cursor-default]="selectionMode===null"
           [class.simple]="simple"
           [style.min-width]="col.style?.minWidth"
           [style.max-width]="col.style?.maxWidth"
-          [style.flex-basis]="col.style?.width"
+          [style.width]="col.style?.width"
+          [style.flex-basis]="!resizableColumns && columnResizeMode === 'fit' && col.style?.width"
         >
-          <ng-container *ngIf="bodyTemplate">
-            <ng-container *ngTemplateOutlet="bodyTemplate; context: {$implicit: col, rowData: rowData, rowIndex: index}">
+          <ng-container *ngIf="bodyTemplate; else noBodyTemplate">
+            <ng-container *ngTemplateOutlet="bodyTemplate; context: {$implicit: col, rowData: rowData, rowIndex: index, expanded}">
             </ng-container>
           </ng-container>
-          <ng-container *ngIf="!bodyTemplate">
+          <ng-template #noBodyTemplate>
             {{getBodyData(rowData, col)}}
-          </ng-container>
+          </ng-template>
         </td>
       </ng-container>
      <ng-template #cardBody>
@@ -133,10 +148,11 @@
         [style.--rowHeight]="rowHeight + 'px'"
         [style.left.px]="contextButtonPosition"
         [style.padding.px]="rowHeight < 42 ? 2 : 3"
-      ><i class="al-icon al-ico-dots-v-menu" [class.sm-md]="rowHeight < 42" ></i></div>
+      ><i class="al-icon al-ico-dots-v-menu" [class.sm-md]="rowHeight < 42" ></i>
+      </div>
     </tr>
-    <tr *ngIf="index === rowsNumber - 1 && lazyLoading && !noMoreData" class="table-load-more load-more-wrapper d-flex">
-      <div>
+    <tr *ngIf="index === rowsNumber - 1 && lazyLoading && !noMoreData && !lastRowExpanded" class="table-load-more load-more-wrapper d-flex">
+      <div (smScrollEnd)="autoLoadMore && loadMore()">
         <button #loadButton
                 class="btn btn-cml-primary"
                 (click)="loadMore()"

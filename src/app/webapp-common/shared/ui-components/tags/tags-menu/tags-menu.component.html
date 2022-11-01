@@ -7,11 +7,10 @@
       <i matSuffix
          *ngIf="companyTags !== null"
          [class]="'icon sm-md mr-3 ml-4 pointer ' + (tagsFilterByProject ? 'i-project-tags-filter-active' : 'i-project-tags-filter')"
-         matTooltipPosition="above"
          smTooltip="Toggle all/project-only tags"
          (click)="projectTagsFilterToggle()"
          smClickStopPropagation></i>
-      <i matSuffix [class]="'fa mr2 ' + (filterText? 'fa-times pointer':'fa-search')" (click)="filterText && clear()" smClickStopPropagation></i>
+      <i matSuffix [class]="'al-icon sm-md mr2 ' + (filterText? 'al-ico-dialog-x pointer':'al-ico-search')" (click)="filterText && clear()" smClickStopPropagation></i>
   </mat-form-field>
 </form>
 <div class="buttons-container" [class.searching]="filterText">
@@ -24,7 +23,7 @@
     *ngFor="let tag of allTags | filter:tags | filter:filterText; trackBy: trackByFn"
     class="item"
     (click)="addTag(tag)"
-    [smTooltip]="tag" matTooltipPosition="above" smShowTooltipIfEllipsis
+    [smTooltip]="tag"  smShowTooltipIfEllipsis
   >{{tag}}</button>
 </div>
 <hr>

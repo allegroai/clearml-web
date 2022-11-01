@@ -39,9 +39,9 @@ export class QueueInfoComponent implements OnInit {
     {header: '', class: 'col-20'},
   ];
   public readonly workersCols     = [
-    {header: 'Name', class: 'col-9'},
-    {header: 'IP', class: 'col-6'},
-    {header: 'Currently Executing', class: 'col-9'},
+    {header: 'NAME', class: 'col-9 flex-column'},
+    {header: 'IP', class: 'col-6 flex-column'},
+    {header: 'CURRENTLY EXECUTING', class: 'col-9 flex-column'},
   ];
   public menuClosed: any;
 

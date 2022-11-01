@@ -1,19 +1,29 @@
-import {Component, OnInit, Input, OnDestroy, ViewChild, ViewContainerRef} from '@angular/core';
-import {Worker} from '../../../../business-logic/model/workers/worker';
+import {
+  Component,
+  OnInit,
+  Input,
+  OnDestroy,
+  ViewChild,
+  ViewContainerRef,
+  ChangeDetectorRef,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import {Subscription, combineLatest} from 'rxjs';
-import {Store} from '@ngrx/store';
-import {getWorkers, setStats, setStatsParams} from '../../actions/workers.actions';
-import {selectStatsTimeFrame, selectStatsParams, selectStats, selectStatsErrorNotice} from '../../reducers/index.reducer';
 import {filter} from 'rxjs/operators';
 import {get} from 'lodash/fp';
+import {Store} from '@ngrx/store';
+import {Worker} from '~/business-logic/model/workers/worker';
+import {Topic} from '@common/shared/utils/statistics';
+import {IOption} from '@common/shared/ui-components/inputs/select-autocomplete-with-chips/select-autocomplete-with-chips.component';
+import {getWorkers, setStats, setStatsParams} from '../../actions/workers.actions';
+import {selectStatsTimeFrame, selectStatsParams, selectStats, selectStatsErrorNotice} from '../../reducers/index.reducer';
 import {TIME_INTERVALS} from '../../workers-and-queues.consts';
-import {Topic} from '../../../shared/utils/statistics';
-import {IOption} from '../../../shared/ui-components/inputs/select-autocomplete-with-chips/select-autocomplete-with-chips.component';
 
 @Component({
   selector: 'sm-workers-graph',
   templateUrl: './workers-stats.component.html',
-  styleUrls: ['./workers-stats.component.scss']
+  styleUrls: ['./workers-stats.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class WorkersStatsComponent implements OnInit, OnDestroy {
   private chartDataSubscription: Subscription;
@@ -65,12 +75,10 @@ export class WorkersStatsComponent implements OnInit, OnDestroy {
 
   public chartData: { dataByTopic: Topic[] };
 
-  constructor(public store: Store<any>) {
+  constructor(public store: Store<any>, private cdr: ChangeDetectorRef) {
   }
 
   ngOnInit() {
-
-
     this.chartParamSubscription = combineLatest([this.store.select(selectStatsTimeFrame), this.store.select(selectStatsParams)])
       .pipe(filter(([timeFrame, param]) => !!timeFrame && !!param))
       .subscribe(([timeFrame, param]) => {
@@ -85,6 +93,7 @@ export class WorkersStatsComponent implements OnInit, OnDestroy {
         if (data) {
           this.refreshChart = false;
           this.chartData = {dataByTopic: data};
+          this.cdr.detectChanges();
         }
       }
     );

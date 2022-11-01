@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
   ElementRef,
@@ -20,7 +21,7 @@ import {ConfigurationService} from '../../shared/services/configuration.service'
 import {GetCurrentUserResponseUserObjectCompany} from '~/business-logic/model/users/getCurrentUserResponseUserObjectCompany';
 import {selectIsDeepMode, selectRootProjects} from '../../core/reducers/projects.reducer';
 import {getAllSystemProjects} from '@common/core/actions/projects.actions';
-import {isEqual} from 'lodash/fp';
+import {castArray, isEqual} from 'lodash/fp';
 import {selectCustomProject} from '@common/experiments-compare/reducers';
 import {selectIsSearching} from '../../common-search/common-search.reducer';
 
@@ -35,7 +36,8 @@ export interface IBreadcrumbsLink {
 @Component({
   selector: 'sm-breadcrumbs',
   templateUrl: './breadcrumbs.component.html',
-  styleUrls: ['./breadcrumbs.component.scss']
+  styleUrls: ['./breadcrumbs.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BreadcrumbsComponent implements OnInit, OnDestroy {
   public breadcrumbs: Array<IBreadcrumbsLink> = [];
@@ -103,7 +105,8 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
         filter(([, names]) => !!names)
       ).subscribe(([config, names, isPipelines, params]) => {
         this.archive = !!params?.archive;
-        this.routeConfig = this.isDeep ? config : config?.filter( c => !['experiments', 'models', 'dataviews'].includes(c));
+        this.routeConfig = (!config?.includes('compare-experiments') && names.project?.id === '*') ? config?.filter(c => c !== ':projectId') :
+          this.isDeep ? config : config?.filter( c => !['experiments', 'models', 'dataviews'].includes(c));
         const experimentFullScreen = config?.[4] === ('output');
         this.breadcrumbsStrings = prepareNames(names, isPipelines, experimentFullScreen);
         if (!isEqual(this.previousProjectNames, this.breadcrumbsStrings[':projectId']?.subCrumbs) &&
@@ -122,6 +125,7 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
         }
         this.lastSegment = route.parent?.url[0]?.path;
         this.workspaceNeutral = hide;
+        this.cd.detectChanges();
       })
     );
   }
@@ -143,21 +147,32 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
     }
     this.tempBread = this.routeConfig
       .reduce((acc, config) => {
-        const part = this.breadcrumbsStrings?.[config];
-        const id = this.getRouteId(config);
-        let url;
-        if (part?.url === null) {
-          url = '';
+        const parts = this.breadcrumbsStrings?.[config];
+        if (Array.isArray(parts)) {
+          parts.forEach(part => {
+            const previous = acc.slice(-1)[0]; // get the last item in the array
+            const url = part.url ? `${previous ? previous?.url : ''}/${part.url}` : '';
+            const isProject = config === ':projectId';
+            acc.push({name: part?.name ?? '', url, isProject});
+          });
         } else {
-          const previous = acc.slice(-1)[0]; // get the last item in the array
-          url = `${previous ? previous?.url : ''}/${id}`;
+          const part = parts;
+          const id = this.getRouteId(config);
+          const isProject = config === ':projectId';
+          let url;
+          if (part?.url === null) {
+            url = '';
+          } else {
+            const previous = acc.slice(-1)[0]; // get the last item in the array
+            url = `${previous ? previous?.url : ''}/${id}`;
+          }
+          acc.push({name: part?.name ?? '', url, isProject});
         }
-        const isProject = config === ':projectId';
-        return acc.concat({name: part?.name ?? '', url, isProject});
+        return acc;
       }, [{url: '', name: '', isProject: true}])
       .filter((i) => !!i.name);
     const rootCrumb = formatStaticCrumb(this.routeConfig[0]);
-    this.tempBread = [rootCrumb, ...this.tempBread];
+    this.tempBread = [...castArray(rootCrumb), ...this.tempBread];
     if(!isEqual(this.tempBread, this.breadcrumbs)){
       this.shouldCollapse = false;
       this.breadcrumbs = this.tempBread;
@@ -171,7 +186,7 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
   }
 
   private getRouteId(config: string) {
-    return (Object.keys(this.breadcrumbsStrings).includes(config)) ? this.breadcrumbsStrings[config]?.url : config;
+    return this.breadcrumbsStrings?.[config]?.url ?? config;
   }
 
   openShareModal() {

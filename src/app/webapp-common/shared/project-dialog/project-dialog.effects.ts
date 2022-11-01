@@ -7,13 +7,16 @@ import {ApiProjectsService} from '../../../business-logic/api-services/projects.
 import {requestFailed} from '../../core/actions/http.actions';
 import {Injectable} from '@angular/core';
 import {CREATION_STATUS} from './project-dialog.reducer';
-import {catchError, filter, map, mergeMap, switchMap, withLatestFrom} from 'rxjs/operators';
+import {catchError, expand, filter, map, mergeMap, reduce, switchMap, withLatestFrom} from 'rxjs/operators';
 import {Router} from '@angular/router';
 import {getAllSystemProjects} from '../../core/actions/projects.actions';
 import {Store} from '@ngrx/store';
 import {selectActiveWorkspace} from '../../core/reducers/users-reducer';
 import {ShortProjectNamePipe} from '../pipes/short-project-name.pipe';
 import {ProjectLocationPipe} from '../pipes/project-location.pipe';
+import {ProjectsGetAllExResponse} from '~/business-logic/model/projects/projectsGetAllExResponse';
+import {EMPTY} from 'rxjs';
+import {selectLastUpdate, selectShowHidden} from '@common/core/reducers/projects.reducer';
 
 @Injectable()
 export class ProjectDialogEffects {
@@ -24,12 +27,12 @@ export class ProjectDialogEffects {
     private store: Store<any>,
     private shortProjectName: ShortProjectNamePipe,
     private projectLocation: ProjectLocationPipe
-) {
+  ) {
   }
 
   @Effect()
   activeLoader = this.actions.pipe(
-    ofType(CREATE_PROJECT_ACTIONS.CREATE_NEW_PROJECT, CREATE_PROJECT_ACTIONS.GET_PROJECTS),
+    ofType(CREATE_PROJECT_ACTIONS.CREATE_NEW_PROJECT),
     map(action => activeLoader(action.type))
   );
 
@@ -75,16 +78,4 @@ export class ProjectDialogEffects {
       )
     )
   ));
-
-  @Effect()
-  getAllProjects = this.actions.pipe(
-    ofType<createNewProjectActions.GetProjects>(CREATE_PROJECT_ACTIONS.GET_PROJECTS),
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    switchMap(action => this.projectsApiService.projectsGetAllEx({only_fields: ['name']})
-      .pipe(
-        mergeMap(res => [deactivateLoader(action.type), new createNewProjectActions.SetProjects(res.projects)]),
-        catchError(error => [requestFailed(error)])
-      )
-    )
-  );
 }

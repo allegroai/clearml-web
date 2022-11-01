@@ -11,8 +11,10 @@
     }
   }
 
-  ::ng-deep th.resize-disabled span.p-column-resizer {
-    cursor: auto;
+  th.resize-disabled {
+    ::ng-deep  span.p-column-resizer {
+      cursor: auto;
+    }
   }
 
   ::ng-deep .p-column-resizer-helper {
@@ -102,6 +104,11 @@
     &:hover:not(.header):not(.selected):not(.no-data-row):not(.simple):not(.load-more-wrapper) {
       background-color: $blue-650;
       border-bottom: 1px solid $blue-600;
+
+      .p-frozen-column {
+        background-color: $blue-650 !important;
+        z-index: 1;
+      }
     }
 
     &.checked:not(.header):not(.selected):not(.no-data-row):not(.simple) {
@@ -176,6 +183,11 @@
         text-align: center;
         padding: 15px 0 10px 0;;
       }
+
+      &.p-frozen-column {
+        background-color: $blue-800;
+        z-index: 1;
+      }
     }
 
     &:hover {
@@ -199,7 +211,7 @@
       border: solid 1px $blue-400;
       &:hover {
         color: $blue-300;
-        background-color: $blue-570;
+        background-color: lighten($blue-600, 5%);
       }
     }
 
@@ -282,6 +294,12 @@
         &.no-data {
           color: $blue-300;
         }
+
+        &.p-frozen-column {
+          background-color: $blue-100;
+          z-index: 1;
+        }
+
       }
     }
   }

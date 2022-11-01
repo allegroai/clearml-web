@@ -21,15 +21,9 @@ hr {
     padding: 12px
   }
 
-  .card-sp-list {
-    height: inherit;
-    overflow: auto;
-
-    ul {
-      margin: 6px 0;
-      padding: 6px 0;
-      font-size: 13px;
-    }
+  .sub-projects-list {
+    height: 100%;
+    margin: 6px 0;
 
     a {
       color: $blue-200;

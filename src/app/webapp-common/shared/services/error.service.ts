@@ -38,7 +38,8 @@ export class ErrorService {
       58: this.template`No account exists. Use the provider you signed up with or sign up to create a new account`,
       62: this.template`Please check your email to continue the signup process`,
       67: this.template`${'email'} is not registered - please contact your admin`,
-      1205: this.template`This workspace is at its limit for concurrently running instances.`
+      1205: this.template`This workspace is at its limit for concurrently running instances.`,
+      509: this.template`Can't edit frame's metadata for published version.`
     }
   };
 

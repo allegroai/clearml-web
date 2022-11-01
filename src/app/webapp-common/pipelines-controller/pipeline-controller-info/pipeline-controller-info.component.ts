@@ -2,7 +2,7 @@ import {
   AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef,
   Component,
   ElementRef, HostListener,
-  Inject, NgZone,
+  NgZone,
   OnDestroy,
   OnInit,
   QueryList,
@@ -11,7 +11,6 @@ import {
 } from '@angular/core';
 import {DagModelItem} from '@ngneat/dag';
 import {combineLatest, fromEvent, Observable, Subscription} from 'rxjs';
-import {DOCUMENT} from '@angular/common';
 import {debounceTime, delay, distinctUntilChanged, filter, map, mergeMap, takeUntil, tap, throttleTime} from 'rxjs/operators';
 import {Store} from '@ngrx/store';
 import {selectSelectedExperiment} from '~/features/experiments/reducers';
@@ -99,7 +98,6 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
 
   constructor(
     protected _dagManager: DagManagerUnsortedService<PipelineItem>,
-    @Inject(DOCUMENT) protected document,
     protected store: Store<any>,
     protected cdr: ChangeDetectorRef,
     protected zone: NgZone
@@ -113,8 +111,8 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
       )
       .subscribe(id => {
         this.skipAutoCenter = false;
-        this.store.dispatch(new commonInfoActions.ResetExperimentInfo());
-        this.store.dispatch(new commonInfoActions.GetExperimentInfo(id));
+        this.store.dispatch(commonInfoActions.resetExperimentInfo());
+        this.store.dispatch(commonInfoActions.getExperimentInfo({id}));
         this.store.dispatch(setSelectedPipelineStep({step: null}));
       })
     );
@@ -305,7 +303,7 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
   }
 
   ngOnDestroy(): void {
-    this.store.dispatch(new commonInfoActions.SetExperiment(null));
+    this.store.dispatch(commonInfoActions.setExperiment({experiment: null}));
     this.removeLines();
     this.sub.unsubscribe();
   }

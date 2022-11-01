@@ -7,7 +7,7 @@
      [style.top.px]="position.y"
      [matMenuTriggerFor]="experimentMenu">
 </div>
-<mat-menu #experimentMenu="matMenu" [hasBackdrop]="backdrop">
+<mat-menu #experimentMenu="matMenu" [hasBackdrop]="backdrop" classList="light-theme">
   <ng-container *ngIf="selectedDisableAvailable[menuItems.queue]">
     <button *ngIf="tableMode" mat-menu-item (click)="toggleDetails()">
       <i [class]="'al-icon '+ ICONS.DETAILS + ' sm-md'"></i>Details

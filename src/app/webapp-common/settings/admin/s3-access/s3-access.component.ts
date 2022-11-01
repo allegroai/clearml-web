@@ -1,11 +1,11 @@
 import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {FormArray, FormBuilder, FormGroup} from '@angular/forms';
+import {UntypedFormArray, UntypedFormBuilder, UntypedFormGroup} from '@angular/forms';
 import {get} from 'lodash/fp';
-import {ALLEGRO_TUTORIAL_BUCKET} from '../../../../app.constants';
+import {ALLEGRO_TUTORIAL_BUCKET} from '~/app.constants';
 import {debounceTime} from 'rxjs/operators';
 import {Subscription} from 'rxjs';
-import { ICONS } from '../../../constants';
+import { ICONS } from '@common/constants';
 
 @Component({
   selector   : 'sm-s3-access',
@@ -15,7 +15,7 @@ import { ICONS } from '../../../constants';
 export class S3AccessComponent implements OnDestroy, OnInit {
   readonly ALLEGRO_TUTORIAL_BUCKET = ALLEGRO_TUTORIAL_BUCKET;
   readonly BUCKET_CREDENTIALS      = 'bucketCredentials';
-  public S3Form: FormGroup;
+  public S3Form: UntypedFormGroup;
   public ICONS                     = ICONS;
   private formChangeSubscription: Subscription;
 
@@ -30,11 +30,11 @@ export class S3AccessComponent implements OnDestroy, OnInit {
 
   @Output() s3bucketCredentialsChanged = new EventEmitter();
 
-  constructor(private store: Store<any>, private formBuilder: FormBuilder) {
+  constructor(private store: Store<any>, private formBuilder: UntypedFormBuilder) {
   }
 
-  get bucketCredentials(): FormArray {
-    return this.S3Form.get(this.BUCKET_CREDENTIALS) as FormArray;
+  get bucketCredentials(): UntypedFormArray {
+    return this.S3Form.get(this.BUCKET_CREDENTIALS) as UntypedFormArray;
   }
 
   addBucket({Key = '', Secret = '', Region = '', Bucket = '', Endpoint = null} = {}) {

@@ -17,6 +17,7 @@ import {ApiLoginService} from '~/business-logic/api-services/login.service';
 import {Store} from '@ngrx/store';
 import {ErrorService} from '../shared/services/error.service';
 import {selectCurrentUser, selectShowOnlyUserWork} from '../core/reducers/users-reducer';
+import {selectShowHidden} from '@common/core/reducers/projects.reducer';
 
 @Injectable()
 export class CommonDashboardEffects {
@@ -33,16 +34,22 @@ export class CommonDashboardEffects {
 
   getRecentProjects = createEffect(() => this.actions.pipe(
     ofType(getRecentProjects),
-    withLatestFrom(this.store.select(selectCurrentUser), this.store.select(selectShowOnlyUserWork)),
-    mergeMap(([action, user, showOnlyUserWork]) =>
+    withLatestFrom(
+      this.store.select(selectCurrentUser),
+      this.store.select(selectShowOnlyUserWork),
+      this.store.select(selectShowHidden),
+    ),
+    mergeMap(([action, user, showOnlyUserWork, showHidden]) =>
       this.projectsApi.projectsGetAllEx({
         stats_for_state: ProjectsGetAllExRequest.StatsForStateEnum.Active,
         include_stats: true,
-        include_stats_filter: {system_tags: ['-pipeline']},
+        check_own_contents: true,
         order_by: ['featured', '-last_update'],
         page: 0,
         page_size: CARDS_IN_ROW,
-        active_users: (showOnlyUserWork ? [user.id] : null),
+        ...(showOnlyUserWork && {active_users: [user.id]}),
+        ...(showHidden && {search_hidden: true}),
+        ...(!showHidden && {include_stats_filter: {system_tags: ['-pipeline']}}),
         only_fields: ['name', 'company', 'user', 'created', 'default_output_destination']
       }).pipe(
           mergeMap(({projects}) => [setRecentProjects({projects}), deactivateLoader(action.type)]),

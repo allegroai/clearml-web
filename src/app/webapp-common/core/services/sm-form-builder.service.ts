@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import {FormControl, FormGroup, FormArray} from '@angular/forms';
+import {UntypedFormControl, UntypedFormGroup, UntypedFormArray} from '@angular/forms';
 
 import {forEach} from 'lodash/fp';
 
@@ -9,24 +9,24 @@ export class SmFormBuilderService {
   create(formData: any, updateOn?: any) {
     if (Array.isArray(formData)) {
       const arr = formData.map( data => this.create(data));
-      return new FormArray(arr, {updateOn});
+      return new UntypedFormArray(arr, {updateOn});
     } else if (typeof formData === 'function') {
       return formData();
     } else if (formData instanceof Object) {
       if (formData.value) {
-        return new FormControl(formData.value);
+        return new UntypedFormControl(formData.value);
       } else {
         const obj = {};
         Object.entries(formData).forEach(([key, value]) => obj[key] = this.create(value));
-        return new FormGroup(obj, {updateOn});
+        return new UntypedFormGroup(obj, {updateOn});
       }
 
     } else {
-      return new FormControl(formData);
+      return new UntypedFormControl(formData);
     }
   }
 // @ts-ignore
-  getFormErrors(form: FormGroup | FormArray, errors?: any): any {
+  getFormErrors(form: UntypedFormGroup | UntypedFormArray, errors?: any): any {
     // @ts-ignore
     forEach((control: any) => {
       // @ts-ignore
@@ -40,14 +40,14 @@ export class SmFormBuilderService {
     this.create(formData, updateOn);
   }
 
-  array(formData: Array<Object>, updateOn: any = 'change') {
+  array(formData: Array<any>, updateOn: any = 'change') {
     const arr = formData.map( data => this.group(data, updateOn));
-    return new FormArray(arr, {updateOn: 'blur'});
+    return new UntypedFormArray(arr, {updateOn: 'blur'});
   }
 
-  group(formData: Object, updateOn: any = 'change') {
-    const formGroup = new FormGroup({}, {updateOn});
-    Object.entries(formData).forEach(([key, value]) => formGroup.addControl(key, new FormControl(value)));
+  group(formData: any, updateOn: any = 'change') {
+    const formGroup = new UntypedFormGroup({}, {updateOn});
+    Object.entries(formData).forEach(([key, value]) => formGroup.addControl(key, new UntypedFormControl(value)));
 
     return formGroup;
   }

@@ -1,7 +1,7 @@
 <div class="input-model-container">
   <sm-labeled-row label="MODEL NAME">
-    <div class="d-flex justify-content-between">
-      <span>
+    <div class="d-flex align-items-center">
+      <div class="d-flex-center">
         <a [href]="'projects/' + projectId + '/models/' + model?.id" target="_blank"><span>{{model?.name}}</span></a>
         <i *ngIf="model?.uri && !isLocalFile"
            class="pointer fa fa-download ml-2"
@@ -9,14 +9,15 @@
         ></i>
         <sm-copy-clipboard *ngIf="model?.uri && isLocalFile"
                            label="" [clipboardText]="model.uri"
-                           class="pl-2 light"
+                           class="light"
                            [hideBackground]="true"
         ></sm-copy-clipboard>
-      </span>
-      <div *ngIf="editable">
-        <i class="al-icon al-ico-edit al-color blue-300 sm-md pointer mr-2"  smTooltip="Select model" (click)="chooseModel()"></i>
-        <i *ngIf="model?.id" class="al-icon al-ico-trash al-color blue-300 sm-md pointer" smTooltip="Remove model" (click)="removeModel()"></i>
+        <sm-id-badge *ngIf="model?.id" class="ml-3" [id]="model.id"></sm-id-badge>
       </div>
+      <ng-container *ngIf="editable">
+        <i class="al-icon al-ico-edit al-color blue-300 sm-md pointer mx-3"  smTooltip="Select model" (click)="chooseModel()"></i>
+        <i *ngIf="model?.id" class="al-icon al-ico-trash al-color blue-300 sm-md pointer" smTooltip="Remove model" (click)="removeModel()"></i>
+      </ng-container>
     </div>
   </sm-labeled-row>
   <sm-labeled-row *ngIf="showCreatedExperiment" label="CREATING EXPERIMENT">

@@ -18,9 +18,9 @@ export class FileSizePipe implements PipeTransform {
 
   transform(value: number | number[], options?: any) {
     if (Array.isArray(value)) {
-      return value.map(val => FileSizePipe.transformOne(val, options));
+      return value.map(val => this.transform(val, options));
     }
-    if(isNaN(value)) {
+    if(typeof value !== 'number') {
       return value;
     }
     return FileSizePipe.transformOne(value, options);

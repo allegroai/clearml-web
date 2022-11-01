@@ -161,3 +161,7 @@ export const getFilteredUsers = createAction(
   PROJECTS_PREFIX + 'GET_FILTERED_USERS',
   props<{filteredUsers: string[]}>()
 );
+export const setShowHidden = createAction(
+  PROJECTS_PREFIX + ' [set show hidden]',
+  props<{ show: boolean }>()
+);

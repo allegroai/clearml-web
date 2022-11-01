@@ -2,7 +2,6 @@ import {ActionReducerMap, createSelector} from '@ngrx/store';
 import {ExperimentCompareDetailsState, experimentsCompareDetailsReducer} from './experiments-compare-details.reducer';
 import {experimentsCompareChartsReducer, GroupedHyperParams, IExperimentCompareChartsState, ExperimentCompareSettings, MetricOption, MetricValueType} from './experiments-compare-charts.reducer';
 import {experimentsCompareMetricsValuesReducer, IExperimentCompareMetricsValuesState, MetricSortBy} from './experiments-compare-metrics-values.reducer';
-import {experimentsCompareDebugImagesReducer} from './experiments-compare-debug-images.reducer';
 import {Task} from '~/business-logic/model/tasks/task';
 import {compareHeader, CompareHeaderState} from './compare-header.reducer';
 import {IExperimentDetail} from '~/features/experiments-compare/experiments-compare-models';
@@ -10,7 +9,7 @@ import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {scalarsGraphReducer, ScalarsGraphState} from './experiments-compare-scalars-graph.reducer';
 import {ExperimentParams} from '../shared/experiments-compare-details.model';
 import {ExperimentCompareParamsState, experimentsCompareParamsReducer} from './experiments-compare-params.reducer';
-import {GroupByCharts} from '../../experiments/reducers/common-experiment-output.reducer';
+import {groupByCharts, GroupByCharts} from '../../experiments/reducers/common-experiment-output.reducer';
 import {selectSelectedProjectId} from '../../core/reducers/projects.reducer';
 import {selectRouterConfig} from '../../core/reducers/router-reducer';
 
@@ -19,7 +18,6 @@ export const experimentsCompareReducers: ActionReducerMap<any, any> = {
   params       : experimentsCompareParamsReducer,
   metricsValues: experimentsCompareMetricsValuesReducer,
   charts       : experimentsCompareChartsReducer,
-  debugImages  : experimentsCompareDebugImagesReducer,
   compareHeader,
   scalarsGraph : scalarsGraphReducer
 };
@@ -92,7 +90,7 @@ export const selectCompareSelectedSettingsxAxisType = createSelector(selectSelec
   settings => settings?.xAxisType ?? ScalarKeyEnum.Iter as ScalarKeyEnum);
 
 export const selectCompareSelectedSettingsGroupBy = createSelector(selectSelectedExperimentSettings,
-  (settings): GroupByCharts => settings?.groupBy || GroupByCharts.None);
+  (settings): GroupByCharts => settings?.groupBy || groupByCharts.none);
 
 
 export const selectScalarsGraph = createSelector(experimentsCompare, (state): ScalarsGraphState => state ? state.scalarsGraph : {});

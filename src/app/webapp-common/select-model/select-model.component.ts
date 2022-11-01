@@ -125,8 +125,8 @@ export class SelectModelComponent implements OnInit, OnDestroy {
     this.store.dispatch(new actions.GlobalFilterChanged(value));
   }
 
-  modelSelectionChanged(model: SelectedModel) {
-    this.closeDialog(model);
+  modelSelectionChanged(event: {model: SelectedModel}) {
+    this.closeDialog(event.model);
   }
 
   onIsAllProjectsChanged(isAllProjects: boolean) {

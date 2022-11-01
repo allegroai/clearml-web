@@ -14,7 +14,7 @@ export class ModelHeaderComponent extends BaseEntityHeaderComponent {
   @Input() minimizedView: boolean;
   @Input() tableFilters: { [s: string]: FilterMetadata };
   @Input() set tableCols(tableCols: ISmCol[]) {
-    this._tableCols = tableCols.filter(col => col.header !== '');
+    this._tableCols = tableCols?.filter(col => col.header !== '');
   }
 
   get tableCols() {

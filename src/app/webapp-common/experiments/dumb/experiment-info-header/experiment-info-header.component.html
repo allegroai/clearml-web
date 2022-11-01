@@ -45,13 +45,13 @@
       ></sm-experiment-info-edit-description>
     </mat-menu>
     <div *ngIf="minimized" (click)="maximizedClicked.emit()"
-         smTooltip="View Full Screen" matTooltipPosition="above" class="d-flex fullscreen line-item">
+         smTooltip="View Full Screen" class="d-flex fullscreen line-item">
       <i class="al-icon al-ico-info-max pointer"></i>
     </div>
 
     <div class="line-item" (click)="minimizeClicked.emit()"
             *ngIf="experiment && (!minimized) && !isSharedAndNotOwner && !isPipeline"
-            smTooltip="View in experiment table" matTooltipPosition="left">
+            smTooltip="View in experiment table">
       <i class="al-icon al-ico-info-min al-color pointer"></i>
     </div>
     <sm-experiment-menu-extended class="line-item"

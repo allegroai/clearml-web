@@ -43,6 +43,7 @@ import {hideNoStatsNotice, showStatsErrorNotice} from '../actions/stats.actions'
 import {encodeOrder} from '../../shared/utils/tableParamEncode';
 import {addMultipleSortColumns} from '../../shared/utils/shared-utils';
 import {sortTable} from '@common/workers-and-queues/workers-and-queues.utils';
+import {selectActiveWorkspaceReady} from '~/core/reducers/view.reducer';
 
 @Injectable()
 export class QueuesEffect {
@@ -59,6 +60,9 @@ export class QueuesEffect {
 
   getQueues = createEffect(() => this.actions.pipe(
     ofType(getQueues),
+    switchMap((action) => this.store.select(selectActiveWorkspaceReady).pipe(
+      filter(ready => ready),
+      map(() => action))),
     withLatestFrom(
       this.store.select(selectQueuesTableSortFields)),
     switchMap(([action, orderFields]) => this.queuesApi.queuesGetAllEx({

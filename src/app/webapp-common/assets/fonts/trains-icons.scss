@@ -2,7 +2,7 @@
 
 @font-face {
   font-family: '#{$icomoon-font-family}';
-  src: url('./#{$icomoon-font-family}.ttf?8714dr') format('truetype');
+  src: url('./#{$icomoon-font-family}.ttf?ttf?vsfnj4') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -23,6 +23,81 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.al-ico-sort-asc {
+  &:before {
+    content: $al-ico-sort-asc;
+  }
+}
+.al-ico-sort-desc {
+  &:before {
+    content: $al-ico-sort-desc;
+  }
+}
+.al-ico-grid-view {
+  &:before {
+    content: $al-ico-grid-view;
+  }
+}
+.al-ico-connect {
+  &:before {
+    content: $al-ico-connect;
+  }
+}
+.al-ico-disconnect {
+  &:before {
+    content: $al-ico-disconnect;
+  }
+}
+.al-ico-trash-all {
+  &:before {
+    content: $al-ico-trash-all;
+  }
+}
+.al-ico-drag {
+  &:before {
+    content: $al-ico-drag;
+  }
+}
+.al-ico-py {
+  &:before {
+    content: $al-ico-py;
+  }
+}
+.al-ico-file {
+  &:before {
+    content: $al-ico-file;
+  }
+}
+.al-ico-txt {
+  &:before {
+    content: $al-ico-txt;
+  }
+}
+.al-ico-pkl {
+  &:before {
+    content: $al-ico-pkl;
+  }
+}
+.al-ico-image {
+  &:before {
+    content: $al-ico-image;
+  }
+}
+.al-ico-zip {
+  &:before {
+    content: $al-ico-zip;
+  }
+}
+.al-ico-code-file {
+  &:before {
+    content: $al-ico-code-file;
+  }
+}
+.al-ico-audio {
+  &:before {
+    content: $al-ico-audio;
+  }
+}
 .al-ico-upload {
   &:before {
     content: $al-ico-upload;
@@ -759,11 +834,6 @@
     content: $al-ico-link;
   }
 }
-.al-ico-image {
-  &:before {
-    content: $al-ico-image;
-  }
-}
 .al-ico-code {
   &:before {
     content: $al-ico-code;
@@ -1154,11 +1224,6 @@
 .al-ico-experiment-view {
   &:before {
     content: $al-ico-experiment-view;
-  }
-}
-.al-ico-code-file {
-  &:before {
-    content: $al-ico-code-file;
   }
 }
 .al-ico-code-square {

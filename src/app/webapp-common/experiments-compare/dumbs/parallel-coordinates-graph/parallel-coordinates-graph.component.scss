@@ -1,6 +1,16 @@
-@import "../../../shared/ui-components/styles/variables";
+@import "variables";
 
 :host {
+  display: block;
+  position: relative;
+
+  .download {
+    position: absolute;
+    right: 22px;
+    top: 24px;
+    z-index: 1;
+  }
+
   .dot {
     position: absolute;
     top: 0;
@@ -65,5 +75,11 @@
       stroke: $blue-900;
       stroke-opacity: 1;
     }
+  }
+}
+
+:host-context(.light-theme) {
+  .graph-container {
+    background-color: white;
   }
 }

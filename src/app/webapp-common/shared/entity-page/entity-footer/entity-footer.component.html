@@ -11,7 +11,7 @@
         <span
           *ngIf="!footerItemState?.preventCurrentItem"
           [ngClass]="footerItemState?.wrapperClass"
-          matTooltipPosition="above"
+          
           [smTooltip]="footerItem.disable || footerItemState.disable
                                   ? footerItem.disableDescription || footerItemState.disableDescription
                                   : footerItemState.description   || footerItem.description"
@@ -31,7 +31,7 @@
     </ng-container>
     <ng-template #tags>
               <span class="tags-container"
-                    matTooltipPosition="above"
+                    
                     [smTooltip]="footerItem.disable || footerItemState.disable
                                   ? footerItem.disableDescription || footerItemState.disableDescription
                                   : footerItemState.description   || footerItem.description"

@@ -16,7 +16,7 @@ export interface EventsGetMultiTaskPlotsResponse {
     /**
      * Plots mapping (keyed by task name)
      */
-    plots?: object;
+    plots?: any;
     /**
      * Number of results returned
      */

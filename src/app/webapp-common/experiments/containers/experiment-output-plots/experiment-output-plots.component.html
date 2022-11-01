@@ -1,8 +1,9 @@
-<mat-drawer-container autosize>
+<mat-drawer-container autosize class="light-theme">
   <mat-drawer #drawer [opened]="!minimized && !isDatasetVersionPreview" [mode]="minimized ? 'over' : 'side'">
     <i class="close al-icon al-ico-dialog-x sm-md" *ngIf="minimized" (click)="drawer.close()"></i>
     <div class="list-container">
       <sm-selectable-filter-list
+        *ngIf="plotsList !== undefined"
         checkAllIcon="al-ico-show"
         placeholder="Find plots"
         [list]="plotsList"
@@ -23,7 +24,6 @@
           class="btn btn-secondary"
           (click)="drawer.open()"
           smTooltip="Toggle Graphs"
-          matTooltipPosition="above"
         >
           <i class="al-icon al-ico-eye-outline"></i>
         </button>

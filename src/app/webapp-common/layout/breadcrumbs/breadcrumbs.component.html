@@ -3,7 +3,7 @@
     <span class="workspace">{{activeWorkspace.name}}</span>
     <i class="al-icon  al-ico-slash"></i>
   </ng-container>
-  <ng-container *ngFor="let crumb of breadcrumbs let i=index; let last=last">
+  <ng-container *ngFor="let crumb of breadcrumbs let i=index; let last=last; let first = first">
     <ng-container *ngIf="crumb.isProject; else crumbDiv;">
       <ng-container *ngIf="shouldCollapse; else shortTree" class="d-flex align-items-center">
         <i *ngIf="this.subProjects?.length > 1" [matMenuTriggerFor]="subProjectsMenu" class="menu-trigger-icon al-icon msm pointer"
@@ -40,9 +40,9 @@
           <ng-container *ngFor="let subProject of subProjects; let lastP=last">
            <ng-container *ngIf="subProject.name">
               <a class="sub-project"
+                 *ngIf="subProject.url && !(lastP && last); else nonLink"
                  [class.ellipsis]="subProjects.length===1"
-                 [class.last]="lastP"
-                 *ngIf="subProject.url && !(lastP && lastSegment === 'projects'); else nonLink"
+                 [class.last]="lastP && last"
                  [smTooltip]="subProject.name"
                  smShowTooltipIfEllipsis
                  [routerLink]="subProject.url !== 'projects/*/projects' ? subProject.url : 'projects/*/experiments'"
@@ -62,8 +62,10 @@
     </ng-container>
 
     <ng-template #crumbDiv>
-      <a *ngIf="crumb.url" class="crumb" [class.last]="last" [routerLink]="crumb.url">{{crumb.name}}</a>
-      <span *ngIf="!crumb.url" class="crumb" [class.last]="last">{{crumb.name}}</span>
+      <a *ngIf="crumb.url && !last; else noURL" class="crumb" [class.first]="first" [routerLink]="crumb.url">{{crumb.name}}</a>
+      <ng-template #noURL>
+        <span class="crumb" [class.last]="last" [class.first]="first">{{crumb.name}}</span>
+      </ng-template>
     </ng-template>
     <i *ngIf="!last" class="al-icon  al-ico-slash"></i>
   </ng-container>

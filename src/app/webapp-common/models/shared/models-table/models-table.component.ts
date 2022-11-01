@@ -101,6 +101,9 @@ export class ModelsTableComponent extends BaseTableView {
     readyCol.hidden = only;
   }
   @Input() set projects(projects) {
+    if (!projects) {
+      return;
+    }
     this.filtersOptions[MODELS_TABLE_COL_FIELDS.PROJECT] = projects.map(project => ({
       label: project.name,
       value: project.id,
@@ -144,7 +147,7 @@ export class ModelsTableComponent extends BaseTableView {
 
   private _selectedModel;
   @Input() set selectedModel(model) {
-    if (model !== this._selectedModel) {
+    if (model && model !== this._selectedModel) {
       window.setTimeout(() => this.table.focusSelected());
     }
     this._selectedModel = model;
@@ -216,7 +219,7 @@ export class ModelsTableComponent extends BaseTableView {
   }
 
   @Output() modelsSelectionChanged = new EventEmitter<SelectedModel[]>();
-  @Output() modelSelectionChanged = new EventEmitter<SelectedModel>();
+  @Output() modelSelectionChanged = new EventEmitter<{model: SelectedModel; openInfo?: boolean}>();
   @Output() loadMoreModels = new EventEmitter();
   @Output() tagsMenuOpened = new EventEmitter();
   @Output() sortedChanged = new EventEmitter<{ isShift: boolean; colId: ISmCol['id'] }>();
@@ -247,7 +250,7 @@ export class ModelsTableComponent extends BaseTableView {
 
 
   onRowSelectionChanged(event) {
-    this.modelSelectionChanged.emit(event.data);
+    this.modelSelectionChanged.emit({model: event.data});
   }
 
 
@@ -262,11 +265,11 @@ export class ModelsTableComponent extends BaseTableView {
   }
 
   get sortableCols() {
-    return this.tableCols.filter(col => col.sortable);
+    return this.tableCols?.filter(col => col.sortable);
   }
 
   getColName(colId: ISmCol['id']) {
-    return this.tableCols.find(col => colId === col.id)?.header;
+    return this.tableCols?.find(col => colId === col.id)?.header;
   }
 
   rowSelectedChanged(change: { field: string; value: boolean; event: Event }, model: TableModel) {

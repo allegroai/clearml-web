@@ -5,7 +5,7 @@
                      [editable]="(!isExample) && ((editable$ | async) || propSection)"
                      [disableSave]="!executionParamsForm?.hyperParameters?.form?.valid"
                      [saving]="saving$ | async"
-                     (cancelClicked)="cancelHyperParametersChange()"
+                     (cancelClicked)="cancelHyperParametersChange(); executionParamsForm.cancel()"
                      (saveClicked)="sectionSaved()"
                      (activateEditClicked)="activateEditChanged('hyperparams')">
   <sm-section-header [label]="(selectedSection | replaceViaMapPipe:sectionReplaceMap) | uppercase "></sm-section-header>
@@ -28,6 +28,7 @@
     [editable]="(!isExample) && ((editable$ | async) || propSection) && parameterSection.inEditMode"
     [section]="selectedSection"
     [formData]="(selectedSectionHyperParams$ | async) | sort:'name'"
+    [size]="size$ | async"
     (formDataChanged)="onFormValuesChanged($event)"
     (searchCounterChanged)="searchCounterChanged($event)"
     (resetSearch)="search.clear(false)"

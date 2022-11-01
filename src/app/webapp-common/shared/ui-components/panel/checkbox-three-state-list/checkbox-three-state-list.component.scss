@@ -5,13 +5,15 @@
   mat-checkbox {
     width: 100%;
     padding-left: 16px;
+    padding-right: 32px;
     height: 40px;
     align-items: center;
+    border-radius: 4px;
     &:hover {
-      background: rgba(0, 0, 0, 0.04);
+      background: $blue-50;
     }
     ::ng-deep .mat-checkbox-layout {
-      width: calc(100% - 32px);
+      width: 100%;
     }
     ::ng-deep .mat-checkbox-label {
       height: 40px;
@@ -19,7 +21,6 @@
       display: flex;
       align-items: center;
       font-size: 14px;
-      font-weight: 500;
       line-height: normal;
       color: rgba(0, 0, 0, 0.87)
     }

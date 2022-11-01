@@ -1,4 +1,4 @@
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {selectActiveWorkspace, selectCurrentUser} from '../../core/reducers/users-reducer';
 import {Observable, Subscription} from 'rxjs';
@@ -9,7 +9,7 @@ import {MatDialog} from '@angular/material/dialog';
 import {GetCurrentUserResponseUserObject} from '~/business-logic/model/users/getCurrentUserResponseUserObject';
 import {ConfigurationService} from '../../shared/services/configuration.service';
 import {GetCurrentUserResponseUserObjectCompany} from '~/business-logic/model/users/getCurrentUserResponseUserObjectCompany';
-import {filter} from 'rxjs/operators';
+import {distinctUntilKeyChanged, filter} from 'rxjs/operators';
 import {selectRouterUrl} from '../../core/reducers/router-reducer';
 import {TipsService} from '../../shared/services/tips.service';
 import {WelcomeMessageComponent} from '../welcome-message/welcome-message.component';
@@ -22,20 +22,19 @@ import {selectShowUserFocus} from '@common/core/reducers/view.reducer';
 @Component({
   selector: 'sm-header',
   templateUrl: './header.component.html',
-  styleUrls: ['./header.component.scss']
+  styleUrls: ['./header.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HeaderComponent implements OnInit, OnDestroy {
   @Input() isShareMode: boolean;
   @Input() isLogin: boolean;
   isDashboard: boolean;
   profile: boolean;
-  userFiltered: boolean;
   userFocus: boolean;
   environment = ConfigurationService.globalEnvironment;
   public user: Observable<GetCurrentUserResponseUserObject>;
   public activeWorkspace: GetCurrentUserResponseUserObjectCompany;
   public url: Observable<string>;
-  public userNotificationPath$: Observable<string>;
   public invitesPending$: Observable<any[]>;
   public userNotificationPath: string;
   public showUserFocus$: Observable<boolean>;
@@ -56,7 +55,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.invitesPending$ = this.store.select(selectInvitesPending);
     this.showUserFocus$ = this.store.select(selectShowUserFocus);
     this.sub.add(this.store.select(selectActiveWorkspace)
-      .pipe(filter(workspace => !!workspace))
+      .pipe(
+        filter(workspace => !!workspace),
+        distinctUntilKeyChanged('id')
+      )
       .subscribe(workspace => {
         this.activeWorkspace = workspace;
       }));

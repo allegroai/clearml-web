@@ -1,4 +1,4 @@
-import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit} from '@angular/core';
 import {MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import {Store} from '@ngrx/store';
 import {GetQueuesForEnqueue, GetTaskForEnqueue, SetTaskForEnqueue} from './select-queue.actions';
@@ -6,32 +6,41 @@ import {selectQueuesList, selectTaskForEnqueue} from './select-queue.reducer';
 import {Queue} from '~/business-logic/model/queues/queue';
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {BlTasksService} from '~/business-logic/services/tasks.service';
-import {filter} from 'rxjs/operators';
+import {filter, map, startWith} from 'rxjs/operators';
 import {Observable, Subscription} from 'rxjs';
 import {userAllowedToCreateQueue$} from '~/core/reducers/users.reducer';
+import {trackById} from '@common/shared/utils/forms-track-by';
+import {FormControl} from '@angular/forms';
+import { splitLine } from '@common/shared/utils/shared-utils';
 
 @Component({
   selector: 'sm-select-queue',
   templateUrl: './select-queue.component.html',
-  styleUrls: ['./select-queue.component.scss']
+  styleUrls: ['./select-queue.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SelectQueueComponent implements OnInit, OnDestroy {
-  public queues: Array<Queue>;
-  public selectedQueue: Queue;
+  public queues: Queue[];
   public queues$ = this.store.select(selectQueuesList);
-  public tasks$ = this.store.select(selectTaskForEnqueue);
-  public enqueueWarning$ = this.tasks$.pipe(filter(tasks => tasks?.some(task => !(task && task.script && (task.script.diff || (task.script.repository && task.script.entry_point))))));
+  public enqueueWarning$ = this.store.select(selectTaskForEnqueue)
+    .pipe(filter(tasks =>
+      tasks?.some(task => !(task && task.script && (task.script.diff || (task.script.repository && task.script.entry_point))))
+    ));
   public userAllowedToCreateQueue$: Observable<boolean>;
   public reference: string;
   private queuesSub: Subscription;
   public queuesNames: string[];
-  displayFn(item: any): string {
-    return item?.name ? item.name : item;
-  }
+  public queueControl = new FormControl<string | Queue>('');
+  split = splitLine;
+  displayFn = (item: any): string => typeof item === 'string' ? item : item?.name;
+  trackById = trackById;
+  public filteredOptions: Observable<Queue[]>;
 
   constructor(
     public dialogRef: MatDialogRef<ConfirmDialogComponent>,
-    private store: Store<any>, private blTaskService: BlTasksService,
+    private store: Store<any>,
+    private blTaskService: BlTasksService,
+    private cdr: ChangeDetectorRef,
     @Inject(MAT_DIALOG_DATA) public data: {
       taskIds?: string[];
       reference?: string;
@@ -47,21 +56,34 @@ export class SelectQueueComponent implements OnInit, OnDestroy {
       if (queues) {
         this.queues = queues;
         this.queuesNames = queues.map(q => q.name);
-        this.selectedQueue = this.blTaskService.getDefaultQueue(this.queues) || queues[0];
+        const selectedQueue = this.blTaskService.getDefaultQueue(this.queues) || queues[0];
+        this.queueControl.setValue(selectedQueue, {emitEvent: false});
+        this.cdr.detectChanges();
       }
     });
   }
 
   ngOnInit() {
     this.store.dispatch(new GetQueuesForEnqueue());
+    this.filteredOptions = this.queueControl.valueChanges.pipe(
+      startWith(''),
+      map(value => {
+        if (!this.queues) {
+          return [];
+        }
+        const name = (typeof value === 'string' ? value : value?.name).toLowerCase();
+        return name ? this.queues.filter(q => q.name.toLowerCase().includes(name)) : this.queues.slice();
+      }),
+    );
   }
 
   closeDialog(confirmed) {
-    this.dialogRef.close({confirmed, queue: this.selectedQueue});
+    this.dialogRef.close({confirmed, queue: this.queueControl.value});
   }
 
   ngOnDestroy(): void {
     this.queuesSub.unsubscribe();
     this.store.dispatch(new SetTaskForEnqueue(null));
   }
+
 }

@@ -26,7 +26,7 @@ export class MenuComponent implements AfterViewInit {
   @Input() hasButtonClass = true;
   @Input() smMenuClass: string;
   @Input() panelClasses: string;
-  @Input() iconClass: string = 'fa fa-caret-down';
+  @Input() iconClass: string = 'al-icon al-ico-dropdown-arrow sm';
   @Input() showCart: boolean = true;
   @Input() openOnInit: boolean = false;
   @Input() showButton: boolean = true;

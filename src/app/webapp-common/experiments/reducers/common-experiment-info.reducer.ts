@@ -2,29 +2,33 @@ import * as actions from '../actions/common-experiments-info.actions';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 import {experimentSections, experimentSectionsEnum} from '~/features/experiments/shared/experiments.const';
 import {
-  ACTIVATE_EDIT,
-  DEACTIVATE_EDIT,
+  activateEdit,
+  deactivateEdit,
   deleteHyperParamsSection,
-  EXPERIMENT_CANCEL_EDIT,
-  EXPERIMENT_DATA_UPDATED,
-  EXPERIMENT_DETAILS_UPDATED,
-  EXPERIMENT_SAVE,
-  hyperParamsSectionUpdated,
+  experimentDataUpdated,
+  experimentDetailsUpdated,
+  saveExperiment,
   saveExperimentConfigObj,
   saveExperimentSection,
   saveHyperParamsSection,
-  SET_EXPERIMENT,
-  SET_EXPERIMENT_ERRORS,
-  SET_EXPERIMENT_FORM_ERRORS,
+  setExperiment,
+  setExperimentErrors,
+  setExperimentFormErrors,
   setExperimentSaving,
   setSelectedPipelineStep,
-  updateExperimentAtPath
+  updateExperimentAtPath,
+  getExperimentArtifacts,
+  resetExperimentInfo,
+  setExperimentInfoData,
+  updateExperimentInfoData,
+  getExperimentUncommittedChanges, setExperimentUncommittedChanges, setExperimentArtifacts
 } from '../actions/common-experiments-info.actions';
 import {set} from 'lodash/fp';
 import {setControllerForStartPipelineDialog} from '../actions/common-experiments-menu.actions';
+import {createReducer, on, ReducerTypes} from '@ngrx/store';
 
 
-export interface ICommonExperimentInfoState {
+export interface CommonExperimentInfoState {
   selectedExperiment: IExperimentInfo;
   selectedPipelineStep: IExperimentInfo;
   pipelineRunDialogTask: IExperimentInfo;
@@ -39,7 +43,7 @@ export interface ICommonExperimentInfoState {
   artifactsExperimentId: string;
 }
 
-export const initialCommonExperimentInfoState: ICommonExperimentInfoState = {
+export const initialCommonExperimentInfoState: CommonExperimentInfoState = {
   selectedExperiment: null,
   selectedPipelineStep: null,
   pipelineRunDialogTask:null,
@@ -59,101 +63,61 @@ export const initialCommonExperimentInfoState: ICommonExperimentInfoState = {
   artifactsExperimentId: null
 };
 
-export function commonExperimentInfoReducer(state: ICommonExperimentInfoState = initialCommonExperimentInfoState, action): ICommonExperimentInfoState {
-
-  switch (action.type) {
-    case SET_EXPERIMENT:
-      return {...state, selectedExperiment: action.payload};
-    case SET_EXPERIMENT_FORM_ERRORS:
-      return {...state, errors: action.payload};
-    case EXPERIMENT_DATA_UPDATED:
-      return {...state, infoData: {...state.infoData, ...action.payload.changes}};
-    case hyperParamsSectionUpdated.type:
-      return {
-        ...state,
-        infoData: {
-          ...state.infoData,
-          hyperparams: {...state.infoData.hyperparams, [action.section]: action.hyperparams}
-        }
-      };
-
-    case EXPERIMENT_SAVE:
-    case saveHyperParamsSection.type:
-    case saveExperimentConfigObj.type:
-    case deleteHyperParamsSection.type:
-    case saveExperimentSection.type:
-      return {...state, saving: true};
-    case ACTIVATE_EDIT:
-      return {
-        ...state,
-        activeSectionEdit: true,
-        infoDataFreeze: state.infoData,
-        currentActiveSectionEdit: action.payload
-      };
-    case DEACTIVATE_EDIT:
-      return {...state, activeSectionEdit: false, currentActiveSectionEdit: null};
-    case EXPERIMENT_CANCEL_EDIT:
-      return {
-        ...state,
-        infoData: state.infoDataFreeze ? state.infoDataFreeze : state.infoData,
-        currentActiveSectionEdit: null
-      };
-    case EXPERIMENT_DETAILS_UPDATED:
-      return {...state, infoData: {...state.infoData, ...action.payload.changes}};
-    case setExperimentSaving.type:
-      return {...state, saving: action.saving};
-    case setSelectedPipelineStep.type:
-      return {...state, selectedPipelineStep: action.step};
-      case setControllerForStartPipelineDialog.type:
-      return {...state, pipelineRunDialogTask: action.task};
-    case updateExperimentAtPath.type: {
-      const payload = action as ReturnType<typeof updateExperimentAtPath>;
-      const newInfoData = set(payload.path, payload.value, state.infoData);
-      return {...state, infoData: newInfoData as any};
+export const commonExperimentInfoReducers = [
+  on(setExperiment, (state, action) => ({...state, selectedExperiment: action.experiment as unknown})),
+  on(setExperimentFormErrors, (state, action) => ({...state, errors: action.errors})),
+  on(experimentDataUpdated, (state, action) => ({...state, infoData: {...state.infoData, ...action.changes}})),
+  on(saveExperiment, saveHyperParamsSection, saveExperimentConfigObj, deleteHyperParamsSection, saveExperimentSection,
+    state => ({...state, saving: true})),
+  on(activateEdit, (state, action) => ({
+    ...state,
+    activeSectionEdit: true,
+    infoDataFreeze: state.infoData,
+    currentActiveSectionEdit: action.section
+  })),
+  on(deactivateEdit, state => ({...state, activeSectionEdit: false, currentActiveSectionEdit: null})),
+  on(experimentDetailsUpdated, (state, action) => ({...state, infoData: {...state.infoData, ...action.changes}})),
+  on(setExperimentSaving, (state, action) => ({...state, saving: action.saving})),
+  on( setSelectedPipelineStep, (state, action) => ({...state, selectedPipelineStep: action.step})),
+  on(setControllerForStartPipelineDialog, (state, action) => ({...state, pipelineRunDialogTask: action.task})),
+  on(updateExperimentAtPath, (state, action) => ({...state, infoData: set(action.path, action.value, state.infoData) as any})),
+  on(getExperimentArtifacts, state => ({...state, saving: false})),
+  on(setExperimentErrors, (state, action) => ({...state, errors: {...state.errors, ...action}})),
+  on(resetExperimentInfo, state => ({...state, infoData: null})),
+  on(setExperimentInfoData, (state, action) => ({
+    ...state,
+    infoData: {
+      ...action.experiment,
+      configuration: state.infoData?.configuration,
+      execution: {...action.experiment?.execution, diff: state.infoData?.execution?.diff},
+      model: state.infoData?.model
     }
-    case actions.getExperimentArtifacts.type:
-      return {...state, saving: false};
-    case SET_EXPERIMENT_ERRORS:
-      return {...state, errors: {...state.errors, ...action.payload}};
-    case actions.RESET_EXPERIMENT_INFO:
-      return {...state, infoData: null};
-    case actions.SET_EXPERIMENT_INFO_DATA:
-      return {
-        ...state,
-        infoData: {
-          ...action.payload,
-          configuration: state.infoData?.configuration,
-          execution: {...action.payload?.execution, diff: state.infoData?.execution?.diff},
-          model: state.infoData?.model
-        }
-      };
-    case actions.UPDATE_EXPERIMENT_INFO_DATA:
-      return {
-        ...state,
-        selectedExperiment: {...state.selectedExperiment, ...action.payload.changes},
-        infoData: {...state.infoData, ...action.payload.changes}
-      };
-    case actions.getExperimentUncommittedChanges.type:
-      return {
-        ...state,
-        showExtraDataSpinner: !(action as ReturnType<typeof actions.getExperimentUncommittedChanges>).autoRefresh
-      };
-    case actions.setExperimentUncommittedChanges.type:
-      return {
-        ...state,
-        showExtraDataSpinner: false,
-        infoData: {...state?.infoData, execution: {...state?.infoData?.execution, diff: action.diff}}
-      };
-    case actions.setExperimentArtifacts.type:
-      return {
-        ...state,
-        infoData: {
-          ...state?.infoData,
-          model :(action as ReturnType<typeof actions.setExperimentArtifacts>).model,
-        },
-        artifactsExperimentId: (action as ReturnType<typeof actions.setExperimentArtifacts>).experimentId
-      };
-    default:
-      return state;
-  }
-}
+  })),
+  on(updateExperimentInfoData, (state, action) => ({
+    ...state,
+    selectedExperiment: {...state.selectedExperiment, ...action.changes},
+    infoData: {...state.infoData, ...action.changes}
+  })),
+  on(getExperimentUncommittedChanges, (state, action) => ({
+    ...state,
+    showExtraDataSpinner: !(action as ReturnType<typeof actions.getExperimentUncommittedChanges>).autoRefresh
+  })),
+  on(setExperimentUncommittedChanges, (state, action) => ({
+    ...state,
+    showExtraDataSpinner: false,
+    infoData: {...state?.infoData, execution: {...state?.infoData?.execution, diff: action.diff}}
+  })),
+  on(setExperimentArtifacts, (state, action) => ({
+    ...state,
+    infoData: {
+      ...state?.infoData,
+      model :(action as ReturnType<typeof actions.setExperimentArtifacts>).model,
+    },
+    artifactsExperimentId: (action as ReturnType<typeof actions.setExperimentArtifacts>).experimentId
+  }))
+] as ReducerTypes<CommonExperimentInfoState, any>[];
+
+export const commonExperimentInfoReducer = createReducer(
+  initialCommonExperimentInfoState,
+  ...commonExperimentInfoReducers
+);

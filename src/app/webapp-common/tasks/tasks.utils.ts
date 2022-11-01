@@ -1,5 +1,5 @@
 import {Task} from '~/business-logic/model/tasks/task';
-import {cloneDeep, sortBy} from 'lodash/fp';
+import {cloneDeep, isEmpty, sortBy} from 'lodash/fp';
 import {SelectableListItem} from '@common/shared/ui-components/data/selectable-list/selectable-list.model';
 import {GroupedList} from '@common/shared/ui-components/data/selectable-grouped-filter-list/selectable-grouped-filter-list.component';
 import {Config} from 'plotly.js';
@@ -70,7 +70,10 @@ const tryParseJson = (plotString: string): { data: any; layout: any; config?: an
   return parsed;
 };
 
-export const convertPlot = (graph: MetricsPlotEvent, experimentId?: string) => {
+export const convertPlot = (graph: MetricsPlotEvent, experimentId?: string): {plot: Partial<ExtFrame>; hadError: boolean} => {
+  if (!graph?.plot_str) {
+    return null;
+  }
   const json = tryParseJson(graph.plot_str);
   let hadError;
   if (json.data.length === 0 && json.layout.title === 'Unknown data') {
@@ -94,6 +97,13 @@ export const convertPlots = ({plots, experimentId}: { plots: { [title: string]: 
     parsingError
   };
 };
+
+export const convertScalar = (chartData, title?: string): Partial<ExtFrame> => {
+  if (!chartData || isEmpty(chartData)) {
+    return null;
+  }
+  return prepareGraph(chartData, {type: 'scalar', title, xaxis: {title: 'Iterations'}}, {}, {metric: title});
+}
 
 export const convertScalars = (scalars: GroupedList, experimentId: string): { [key: string]: ExtFrame[] } =>
   Object.entries(scalars).reduce((acc, graphGroup) => {

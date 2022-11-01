@@ -1,0 +1,17 @@
+@import "variables";
+
+:host {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.hidden-labels {
+  color: $light-grey-blue;
+  padding-left: 6px;
+
+  &:hover {
+    text-decoration: underline;
+    color: $blue-200;
+  }
+}

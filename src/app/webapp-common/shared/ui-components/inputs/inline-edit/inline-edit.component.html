@@ -14,12 +14,13 @@
                name="inline"
                [pattern]="pattern"
                [minLength]="minLength"
+               smUniqueNameValidator
+               [existingNames]="forbiddenString"
                (keydown.tab)="form.checkValidity() && inlineSaved()"
                (keydown.escape)="inlineCanceled()"
                (keydown.enter)="form.checkValidity() && inlineSaved()"
-               #inlineInput />
+               #inlineInput="ngModel"/>
                <i class="al-icon al-ico-alert sm-md" *ngIf="warning" [smTooltip]="warning"></i>
-
         <textarea class="form-control inline-edit-textarea"
                   *ngIf="multiline"
                   [(ngModel)]="inlineValue"
@@ -28,11 +29,11 @@
                   (keydown.tab)="inlineSaved()"
                   (keydown.escape)="inlineCanceled()"
                   [rows]="multiline?rows:1"
-                  #inlineInput>{{inlineValue}}
+                  #inlineInput="ngModel">{{inlineValue}}
         </textarea>
         <div class="buttons">
-          <i [class.disabled]="!form.checkValidity() || inlineValue?.length < minLength" class="sm al-ico-success inline-edit-approve pointer" (click)="stopProp($event)" (mousedown)="form.checkValidity() && inlineSaved()"></i>
-          <i class="sm al-ico-dialog-x inline-edit-close pointer" [id]="CANCEL_BUTTON"  (click)="stopProp($event); cancelClicked($event);"></i>
+          <i [class.disabled]="inlineInput?.invalid || !form.checkValidity() || inlineValue?.length < minLength" class="sm al-ico-success inline-edit-approve pointer" (click)="stopProp($event)" (mousedown)="form.checkValidity() && inlineSaved()"></i>
+          <i class="sm al-ico-dialog-x inline-edit-close pointer" [id]="cancelButton" (click)="stopProp($event); cancelClicked($event);"></i>
         </div>
       </form>
     </div>

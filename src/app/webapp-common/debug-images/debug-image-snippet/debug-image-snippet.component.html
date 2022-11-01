@@ -25,31 +25,29 @@
           <iframe (load)="iframeLoaded($event)" class="html-viewer" width="400" height="400" referrerpolicy="origin-when-cross-origin" [src]="source | safe:'url'"></iframe>
         </div>
         <div class="toolbar">
-          <div class="clickable-icon d-flex align-items-center justify-content-center pointer mr-2"
+          <div class="clickable-icon d-flex align-items-center justify-content-center pointer"
                ngxClipboard
                smTooltip="Copy URL"
-               matTooltipPosition="above"
                [cbContent]="source"
                (cbOnSuccess)="copyToClipboardSuccess(true)">
-            <i class="fas fa-copy"></i>
+            <i class="al-icon sm-md al-ico-copy-to-clipboard"></i>
           </div>
           <div class="clickable-icon d-flex align-items-center justify-content-center pointer"
                smTooltip="Open URL in a new Tab"
-               matTooltipPosition="above"
                (click)="openInNewTab(source)"
           >
-            <i class="fas fa-external-link-alt"></i>
+            <i class="al-icon sm-md al-ico-export"></i>
           </div>
         </div>
       </div>
     </ng-container>
-    <div *ngIf="!isLoading" class="image-var ellipsis" [smTooltip]="frame?.variant" matTooltipPosition="above" smShowTooltipIfEllipsis
+    <div *ngIf="!isLoading" class="image-var ellipsis" [smTooltip]="frame?.variant" smShowTooltipIfEllipsis
     >{{frame?.variantAndMetric || frame?.variant}}</div>
   </div>
 </ng-container>
 
 <ng-container *ngIf="(source$ | async) as source">
-  <div *ngIf="isFailed" class="item">
+  <div *ngIf="isFailed" class="item-snippet">
     <sm-snippet-error
       [theme]="theme"
       [copyContent]="source?.split('?X-Amz-Date')[0]"

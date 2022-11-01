@@ -1,7 +1,7 @@
 <div class="counter-container">
   <div [class]="'d-flex justify-content-center align-items-center circle ' + (status || type)">
-    <i *ngIf="status" [class]="'icon sm-md white i-'+ status"></i>
-    <i *ngIf="type" [class]="'al-icon xl al-color white al-ico-type-'+ type.replace('_', '-')"></i>
+    <i *ngIf="status" class="icon sm-md white" [class]="defaultStatus + ' i-'+ status"></i>
+    <i *ngIf="type" class="al-icon xl al-color white" [class]="'al-ico-type-'+ type.replace('_', '-')"></i>
   </div>
-  <div class="counter-label">{{EXPERIMENTS_STATUS_LABELS[(status|| type)]}}</div>
+  <div class="counter-label">{{experimentsStatusLabels[(status|| type)]}}</div>
 </div>

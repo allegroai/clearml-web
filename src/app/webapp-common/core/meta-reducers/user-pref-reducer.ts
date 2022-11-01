@@ -3,26 +3,26 @@ import {merge, pick} from 'lodash/fp';
 import {setPreferences} from '../actions/users.actions';
 import {UserPreferences} from '@common/user-preferences';
 
-interface extAction extends Action {
+interface ExtAction extends Action {
   noPreferences?: boolean;
 }
 
 const firstRun = {};
 
-export function createUserPrefReducer(
+export const createUserPrefReducer = (
   key: string,
   syncedKeys: string[],
   actionsPrefix: string[],
   userPreferences: UserPreferences,
   reducer: ActionReducer<any>
-): ActionReducer<any, extAction> {
+): ActionReducer<any, ExtAction> => {
 
   if (firstRun[key] === undefined) {
     firstRun[key] = true;
   }
   let timeout: number;
 
-  return function (state, action): any {
+  return (state, action): any => {
     let nextState = reducer(state, action);
 
     if (firstRun[key] && userPreferences.isReady() && nextState[key]) {
@@ -50,4 +50,4 @@ export function createUserPrefReducer(
     timeout = window.setTimeout(() => userPreferences.setPreferences(key, val), 2000);
     return nextState;
   };
-}
+};

@@ -6,7 +6,7 @@ import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {addMessage} from '@common/core/actions/layout.actions';
 import {openMoreInfoPopup} from '@common/core/actions/projects.actions';
 import { TaskTypeEnum } from '~/business-logic/model/tasks/taskTypeEnum';
-import {Task} from "~/business-logic/model/tasks/task";
+import {Task} from '~/business-logic/model/tasks/task';
 import {TASKS_STATUS} from '@common/tasks/tasks.constants';
 import {TASK_TYPES} from '~/app.constants';
 
@@ -19,26 +19,23 @@ export interface CountAvailableAndIsDisableSelectedFiltered extends CountAvailab
 }
 
 export const countAvailableAndIsDisable = (selectedFiltered: any[]) => ({
-    available: selectedFiltered.length,
-    disable:  selectedFiltered.length === 0
-  });
+  available: selectedFiltered.length,
+  disable:  selectedFiltered.length === 0
+});
 
 export const selectionHasExample = (selectedElements: any[]) => selectedElements.some((exp => isReadOnly(exp)));
 export const selectionAllHasExample = (selectedElements: any[]) => selectedElements.every((exp => isReadOnly(exp)));
 export const selectionAllIsArchive = (selectedElements: any[]) => selectedElements.every( s => s?.system_tags?.includes('archived'));
 export const selectionIsArchive = (selectedElements: any) => selectedElements?.system_tags?.includes('archived');
 export const selectionExamplesCount = (selectedElements: any) => selectedElements.filter((exp => isReadOnly(exp)));
-export const  canEnqueue = (task: Task): boolean => {
-  return !!(task && (TASKS_STATUS.CREATED === task.status || TASKS_STATUS.STOPPED === task.status) && task.type !== TASK_TYPES.MANUAL_ANNOTATION);
-}
+export const  canEnqueue = (task: Task): boolean =>
+  !!(task && (TASKS_STATUS.CREATED === task.status || TASKS_STATUS.STOPPED === task.status) && task.type !== TASK_TYPES.MANUAL_ANNOTATION);
 
-export const canDequeue = (task: Task): boolean => {
-  return !!(task && TASKS_STATUS.QUEUED === task.status);
-}
+export const canDequeue = (task: Task): boolean =>
+  !!(task && TASKS_STATUS.QUEUED === task.status);
 
-export const canContinue = (task: Task): boolean => {
-  return !!(task && [TASKS_STATUS.CREATED, TASKS_STATUS.STOPPED].includes(task.status) && task.type !== TASK_TYPES.MANUAL_ANNOTATION) && !!task.execution?.queue;
-}
+export const canContinue = (task: Task): boolean =>
+  !!(task && [TASKS_STATUS.CREATED, TASKS_STATUS.STOPPED].includes(task.status) && task.type !== TASK_TYPES.MANUAL_ANNOTATION) && !!task.execution?.queue;
 
 export const selectionDisabledAbort = (selectedElements: any[]) => {
   const selectedFiltered = selectedElements.filter( (_selected) => [TaskStatusEnum.Queued, TaskStatusEnum.InProgress].includes(_selected?.status)  && !isReadOnly(_selected));
@@ -139,7 +136,7 @@ export enum MoreMenuItems {
 
 export type AllMenuItems = MenuItems | MoreMenuItems;
 
-function pastify(verb: AllMenuItems): string {
+const pastify = (verb: AllMenuItems): string => {
   switch (verb) {
     case MenuItems.abort:
       return 'aborted';
@@ -160,9 +157,9 @@ function pastify(verb: AllMenuItems): string {
     default:
       return verb;
   }
-}
+};
 
-export function getNotificationAction(res: ModelsArchiveManyResponse | TasksArchiveManyResponse, action, operationName: AllMenuItems, entityType: EntityTypeEnum, notificationActions = []) {
+export const getNotificationAction = (res: ModelsArchiveManyResponse | TasksArchiveManyResponse, action, operationName: AllMenuItems, entityType: EntityTypeEnum, notificationActions = []) => {
   const totalNum = res.failed.length + res.succeeded.length;
   const allFailed = res.succeeded.length === 0;
 
@@ -173,4 +170,4 @@ export function getNotificationAction(res: ModelsArchiveManyResponse | TasksArch
     res.failed.length > 0 ? {actions: [openMoreInfoPopup({parentAction: action, operationName, res, entityType: EntityTypeEnum[entityType]})], name: 'More info'} : null,
     ...notificationActions
   ].filter(a => a));
-}
+};

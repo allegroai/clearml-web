@@ -1,14 +1,7 @@
+import {createReducer, on} from '@ngrx/store';
 import {Task} from '~/business-logic/model/tasks/task';
-import {
-  RESET_EXPERIMENT_METRICS,
-  SET_EXPERIMENT_HISTOGRAM,
-  SET_EXPERIMENT_METRICS_SEARCH_TERM,
-  SET_EXPERIMENT_PLOTS,
-  SET_SELECTED_EXPERIMENTS,
-  setAxisCache,
-  UPDATE_EXPERIMENT_SETTINGS
-} from '../actions/experiments-compare-charts.actions';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
+import * as actions from '../actions/experiments-compare-charts.actions';
 import {ExperimentSettings} from '../../experiments/reducers/common-experiment-output.reducer';
 import {IMultiplot} from '@common/tasks/tasks.utils';
 
@@ -49,7 +42,7 @@ export interface IExperimentCompareChartsState {
 }
 
 export interface ExperimentCompareSettings extends Omit<ExperimentSettings, 'id' | 'selectedMetric'> {
-  id: Array<Task['id']>;
+  id: Task['id'][];
   selectedMetric: SelectedMetric;
 }
 
@@ -64,24 +57,19 @@ export const initialState: IExperimentCompareChartsState = {
   selectedExperiments: [], // TODO: Move this to the general compare reducer
 };
 
-export function experimentsCompareChartsReducer(state: IExperimentCompareChartsState = initialState, action): IExperimentCompareChartsState {
-  switch (action.type) {
-    case SET_SELECTED_EXPERIMENTS:
-      return {...state, selectedExperiments: action.payload.selectedExperiments};
-    case SET_EXPERIMENT_METRICS_SEARCH_TERM:
-      return {...state, searchTerm: action.payload.searchTerm};
-    case SET_EXPERIMENT_HISTOGRAM:
-      return {...state, metricsHistogramCharts: action.payload, cachedAxisType: action.axisType};
-    case setAxisCache.type:
-      return {...state, cachedAxisType: (action as ReturnType<typeof setAxisCache>).axis};
-    case SET_EXPERIMENT_PLOTS:
-      return {...state, metricsPlotsCharts: action.payload};
-    case UPDATE_EXPERIMENT_SETTINGS: {
+export const experimentsCompareChartsReducer = createReducer(
+  initialState,
+  on(actions.setSelectedExperiments, (state, action) => ({...state, selectedExperiments: action.selectedExperiments})),
+  on(actions.setExperimentMetricsSearchTerm, (state, action) => ({...state, searchTerm: action.searchTerm})),
+  on(actions.setExperimentHistogram, (state, action) => ({...state, metricsHistogramCharts: action.payload, cachedAxisType: action.axisType})),
+  on(actions.setAxisCache, (state, action) => ({...state, cachedAxisType: (action as ReturnType<typeof actions.setAxisCache>).axis})),
+  on(actions.setExperimentPlots, (state, action) => ({...state, metricsPlotsCharts: action.plots})),
+  on(actions.setExperimentSettings, (state, action) => {
       let newSettings: ExperimentCompareSettings[];
-      const changes = {...action.payload.changes, lastModified: (new Date()).getTime()} as ExperimentCompareSettings;
-      const ids = action.payload.id.join();
+      const changes = {...action.changes, id: action.id, lastModified: (new Date()).getTime()} as ExperimentCompareSettings;
+      const ids = action.id.join();
       const experimentExists = state.settingsList.find((setting) => setting.id.join() === ids);
-      const discardBefore = new Date()
+      const discardBefore = new Date();
       discardBefore.setMonth(discardBefore.getMonth() - 6);
       if (experimentExists) {
         newSettings = state.settingsList
@@ -90,20 +78,16 @@ export function experimentsCompareChartsReducer(state: IExperimentCompareChartsS
       } else {
         newSettings = [
           ...state.settingsList.filter(setting => discardBefore < new Date(setting.lastModified || 1648771200000)),
-          {id: action.payload.id, ...changes}
+          {id: action.id, ...changes}
         ];
       }
       return {...state, settingsList: newSettings};
-    }
-    case RESET_EXPERIMENT_METRICS:
-      return {
-        ...state,
-        metricsMultiScalarsCharts: initialState.metricsMultiScalarsCharts,
-        metricsHistogramCharts: initialState.metricsHistogramCharts,
-        metricsPlotsCharts: initialState.metricsPlotsCharts,
-        cachedAxisType: initialState.cachedAxisType
-      };
-    default:
-      return state;
-  }
-}
+  }),
+  on(actions.resetExperimentMetrics, state => ({
+    ...state,
+    metricsMultiScalarsCharts: initialState.metricsMultiScalarsCharts,
+    metricsHistogramCharts: initialState.metricsHistogramCharts,
+    metricsPlotsCharts: initialState.metricsPlotsCharts,
+    cachedAxisType: initialState.cachedAxisType
+  })),
+);

@@ -2,6 +2,17 @@ import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output}
 import {excludedKey} from '@common/shared/utils/tableParamEncode';
 import {addOrRemoveFromArray} from '@common/shared/utils/shared-utils';
 
+
+const separateValueAndExcludeFromFilters=(filters: string[])=> filters.reduce((state, currentFilter) => {
+  if (currentFilter === null || !currentFilter.startsWith(excludedKey)) {
+    state.value.push(currentFilter);
+  } else {
+    state.exclude.push(currentFilter.substring(excludedKey.length));
+  }
+  return state;
+}, {value: [], exclude: []});
+
+
 export enum CheckboxState {
   empty,
   checked,
@@ -33,11 +44,11 @@ export class CheckboxThreeStateListComponent implements OnInit {
     }
   }
 
-  @Output() filterChanged = new EventEmitter();
-
   get checkedList() {
     return this._checkedList;
   }
+
+  @Output() filterChanged = new EventEmitter();
 
   get excludeList() {
     return this._excludeList;
@@ -115,14 +126,4 @@ export class CheckboxThreeStateListComponent implements OnInit {
   }
 }
 
-function separateValueAndExcludeFromFilters(filters: string[]) {
-  return filters.reduce((state, currentFilter) => {
-    if (currentFilter === null || !currentFilter.startsWith(excludedKey)) {
-      state.value.push(currentFilter);
-    } else {
-      state.exclude.push(currentFilter.substring(excludedKey.length));
-    }
-    return state;
-  }, {value: [], exclude: []});
-}
 

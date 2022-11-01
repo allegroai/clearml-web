@@ -5,7 +5,7 @@ import {
   Input,
   Output
 } from '@angular/core';
-import {FormControl} from '@angular/forms';
+import {UntypedFormControl} from '@angular/forms';
 import {ColHeaderFilterTypeEnum, ISmCol, TABLE_SORT_ORDER, TableSortOrderEnum} from '../table.consts';
 import {addOrRemoveFromArray} from '../../../../utils/shared-utils';
 
@@ -19,7 +19,7 @@ export class TableFilterSortTemplateComponent {
 
   public readonly TABLE_SORT_ORDER = TABLE_SORT_ORDER;
 
-  public formControl = new FormControl();
+  public formControl = new UntypedFormControl();
   header;
   enableSort = true;
   enableFilter: boolean;

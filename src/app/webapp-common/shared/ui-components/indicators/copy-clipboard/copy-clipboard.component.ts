@@ -1,4 +1,5 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Input} from '@angular/core';
+import { TooltipPosition } from '@angular/material/tooltip';
 
 @Component({
   selector   : 'sm-copy-clipboard',
@@ -16,10 +17,11 @@ export class CopyClipboardComponent {
   @Input() inline = false;
   @Input() theme: string;
   @Input() copyIcon: string;
+  @Input() tooltipPosition: TooltipPosition = 'above';
 
   public copied = false;
 
-  constructor(private cdr:ChangeDetectorRef) {
+  constructor(private cdr: ChangeDetectorRef) {
   }
 
   copyToClipboard() {

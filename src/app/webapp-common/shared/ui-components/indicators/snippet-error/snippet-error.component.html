@@ -1,32 +1,43 @@
 <div class="frame text-center" [ngClass]="{
-'dark-theme':theme===ThemeEnum.Dark,
-'light-theme': theme===ThemeEnum.Light
+'dark-theme':theme===themeEnum.Dark,
+'light-theme': theme===themeEnum.Light
 }">
-  <div class="labeled-icon">
-    <i class="mb-3 al-icon xl al-color" [ngClass]="{
-        'light-grey-blue': theme === ThemeEnum.Light,
-        'neon-yellow': theme === ThemeEnum.Dark,
+  <div class="labeled-icon" #labeled>
+    <i
+      class="error-icon al-icon al-color sm"
+      [style.font-size.px]="min(floor(labeled.getBoundingClientRect().height - 44), 64) || ''"
+      [style.width.px]="min(floor(labeled.getBoundingClientRect().height - 44), 64) || ''"
+      [style.height.px]="min(floor(labeled.getBoundingClientRect().height - 44), 64) || ''"
+      [ngClass]="{
+        'light-grey-blue': theme === themeEnum.Light,
+        'neon-yellow': theme === themeEnum.Dark,
         'al-ico-no-source': missingSource,
         'al-ico-alert-outline': !missingSource
-        }"></i>
-    <div class="label">{{missingSource ? 'Source not available' : 'Unable to load image'}}</div>
-    <div class="label" [smTooltip]="baseFile" smShowTooltipIfEllipsis matTooltipPosition="above">{{baseFile}}</div>
+        }"
+    ></i>
+    <div *ngIf="labeled.getBoundingClientRect().height > 50"
+         class="label"
+         [class.mt-2]="missingSource">
+      {{missingSource ? 'Source not available' : 'Unable to load image'}}
+    </div>
+    <div class="file-path w-100" [smTooltip]="baseFile" smShowTooltipIfEllipsis>{{baseFile}}</div>
   </div>
   <div class="d-flex justify-content-between buttons-footer align-items-center">
     <div class="clickable-icon d-flex align-items-center justify-content-center pointer"
+         [class.disabled]="missingSource"
          ngxClipboard
          smTooltip="Copy Image URL"
-         matTooltipPosition="above"
+
          [cbContent]="copyContent"
          (cbOnSuccess)="copyToClipboardSuccess(true)">
-      <i class="fas fa-copy"></i>
+      <i class="al-icon sm-md al-ico-copy-to-clipboard"></i>
     </div>
     <div class="clickable-icon d-flex align-items-center justify-content-center pointer"
          smTooltip="Open Image"
-         matTooltipPosition="above"
+
          (click)="openImageClicked.emit()"
     >
-      <i class="fas fa-external-link-alt"></i>
+      <i class="al-icon sm-md al-ico-export"></i>
     </div>
   </div>
 </div>

@@ -1,5 +1,6 @@
 import {Component, Input} from '@angular/core';
 import {CircleTypeEnum} from '~/shared/constants/non-common-consts';
+import {NA} from '~/app.constants';
 
 
 @Component({
@@ -10,7 +11,7 @@ import {CircleTypeEnum} from '~/shared/constants/non-common-consts';
 export class CircleCounterComponent {
   public valType: 'array' | 'number' | 'string';
   private _counter: any;
-
+  public  NA = NA;
   @Input() set counter(val: any) { // number | string | {value: number | string; label: string}[];
     this._counter = val;
     this.valType = Array.isArray(val) ? 'array' : Number.isInteger(val) ? 'number' : 'string';

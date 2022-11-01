@@ -8,6 +8,8 @@ import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {Store} from '@ngrx/store';
 import {Observable, Subscription} from 'rxjs';
 import {ProjectsCreateRequest} from '../../../business-logic/model/projects/projectsCreateRequest';
+import {selectRootProjects} from '@common/core/reducers/projects.reducer';
+import {getAllSystemProjects} from '@common/core/actions/projects.actions';
 
 @Component({
   selector: 'sm-project-create-dialog',
@@ -35,11 +37,11 @@ export class ProjectDialogComponent implements OnInit, OnDestroy {
   constructor(private store: Store<any>, private matDialogRef: MatDialogRef<ProjectDialogComponent>, @Inject(MAT_DIALOG_DATA) data: { projectId: string; mode: string }) {
     this.baseProjectId = data.projectId;
     this.mode = data.mode;
-    this.projects$ = this.store.select(createProjectSelectors.selectProjects);
+    this.projects$ = this.store.select(selectRootProjects);
   }
 
   ngOnInit(): void {
-    this.store.dispatch(new createNewProjectActions.GetProjects());
+    this.store.dispatch(getAllSystemProjects());
     this.creationStatusSubscription = this.store.select(createProjectSelectors.selectCreationStatus).subscribe(status => {
       if (status === CREATION_STATUS.SUCCESS) {
         return this.matDialogRef.close(true);

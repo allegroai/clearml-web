@@ -7,11 +7,11 @@ import * as experimentsActions from '@common/experiments/actions/common-experime
 import {INITIAL_CONTROLLER_TABLE_COLS} from '@common/pipelines-controller/controllers.consts';
 import {EXPERIMENTS_TABLE_COL_FIELDS} from '~/features/experiments/shared/experiments.const';
 import {Store} from '@ngrx/store';
-import {IExperimentsViewState} from '~/features/experiments/reducers/experiments-view.reducer';
 import {SmSyncStateSelectorService} from '@common/core/services/sync-state-selector.service';
 import {ActivatedRoute, Router} from '@angular/router';
 import {MatDialog} from '@angular/material/dialog';
 import {RefreshService} from '@common/core/services/refresh.service';
+import { ExperimentsViewState } from '~/features/experiments/reducers/experiments-view.reducer';
 import {take} from 'rxjs/operators';
 
 @Component({
@@ -28,7 +28,7 @@ export class SimpleDatasetVersionsComponent extends ControllersComponent impleme
     return params?.versionId;
   }
 
-  constructor(protected store: Store<IExperimentsViewState>,
+  constructor(protected store: Store<ExperimentsViewState>,
               protected syncSelector: SmSyncStateSelectorService,
               protected route: ActivatedRoute,
               protected router: Router,
@@ -46,7 +46,7 @@ export class SimpleDatasetVersionsComponent extends ControllersComponent impleme
       .pipe(take(1))
       .subscribe(experiments => {
         this.firstExperiment = experiments?.[0];
-        if (this.firstExperiment ) {
+        if (this.firstExperiment) {
           if (!this.route.snapshot.firstChild?.params.versionId) {
             this.store.dispatch(experimentsActions.experimentSelectionChanged({
               experiment: this.firstExperiment,

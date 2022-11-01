@@ -15,6 +15,7 @@
           [min]="minMaxIterations.min_iteration"
           [step]="1"
           (change)="changeIteration($event.value)"
+          (input)="this.change$.next($event.value)"
           (mouseup)="fakeInput.focus()"
         >
         </mat-slider>

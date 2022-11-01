@@ -1,18 +1,30 @@
-import {Component, Input, OnDestroy, OnInit, ViewChild, ViewContainerRef} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  Input,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+  ViewContainerRef
+} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {Subscription} from 'rxjs';
-import {Queue} from '../../../../business-logic/model/queues/queue';
+import {Queue} from '~/business-logic/model/queues/queue';
 import {getStats, setStats, setStatsParams} from '../../actions/queues.actions';
 import {selectQueuesStatsTimeFrame, selectQueueStats, selectStatsErrorNotice} from '../../reducers/index.reducer';
 import {filter} from 'rxjs/operators';
-import {Topic} from '../../../shared/utils/statistics';
+import {Topic} from '@common/shared/utils/statistics';
 import {TIME_INTERVALS} from '../../workers-and-queues.consts';
-import {IOption} from '../../../shared/ui-components/inputs/select-autocomplete-with-chips/select-autocomplete-with-chips.component';
+import {
+  IOption
+} from '@common/shared/ui-components/inputs/select-autocomplete-with-chips/select-autocomplete-with-chips.component';
 
 @Component({
   selector: 'sm-queue-stats',
   templateUrl: './queue-stats.component.html',
-  styleUrls: ['./queue-stats.component.scss']
+  styleUrls: ['./queue-stats.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class QueueStatsComponent implements OnInit, OnDestroy {
   private chartDataSubscription: Subscription;
@@ -44,7 +56,7 @@ export class QueueStatsComponent implements OnInit, OnDestroy {
     }
   }
 
-  constructor(public store: Store<any>) {
+  constructor(public store: Store<any>, private cdr: ChangeDetectorRef) {
   }
 
   ngOnInit() {
@@ -53,6 +65,7 @@ export class QueueStatsComponent implements OnInit, OnDestroy {
       .subscribe((timeFrame) => {
         this.currentTimeFrame = timeFrame;
         this.updateChart();
+        this.cdr.detectChanges();
       });
     this.chartDataSubscription = this.store.select(selectQueueStats).subscribe(
       (data) => {
@@ -60,6 +73,7 @@ export class QueueStatsComponent implements OnInit, OnDestroy {
           this.refreshChart = false;
           this.waitChartData = {dataByTopic: data.wait};
           this.lenChartData = {dataByTopic: data.length};
+          this.cdr.detectChanges();
         }
       }
     );

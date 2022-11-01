@@ -4,7 +4,7 @@
   .filter-sort-container {
     ::ng-deep .menu-button {
       color: $blue-400;
-      font-weight: bold;
+      font-weight: 500;
 
       &.active {
         color: $blue-250;
@@ -26,8 +26,8 @@
 }
 
 button {
-  font-size: 14px;
-  font-weight: 500;
+  // font-size: 12px !important;
+  height: 40px;
 }
 
 .filter-point {

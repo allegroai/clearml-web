@@ -28,7 +28,6 @@
     [disabled]="isArchived$ | async"
     (click)="newExperiment()"
     [smTooltip]="isSmallScreen ? 'NEW EXPERIMENT' : ''"
-    matTooltipPosition="above"
   >
     <i class="al-icon al-ico-add sm"></i>
     <span *ngIf="!isSmallScreen" class="button-label">NEW EXPERIMENT</span>
@@ -43,7 +42,7 @@
             (gutterDblClick)="closePanel()"
             (dragEnd)="splitSizeChange($event)"
             (dragStart)="disableInfoPanel()"
-            (transitionEnd)="experimentsTable.table?.resize(); experimentsTable.afterTableInit()"
+            (transitionEnd)="experimentsTable.table?.resize(100); experimentsTable.afterTableInit()"
   >
     <as-split-area
       [size]="100 - (splitInitialSize)"

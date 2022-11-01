@@ -26,7 +26,7 @@ export class SpinnerComponent implements OnInit, OnDestroy {
   private loading$: Observable<{ [p: string]: boolean }>;
 
   constructor(private store: Store<any>, private router: Router, private cdr: ChangeDetectorRef) {
-    this.loading$ = store.select(selectLoading)
+    this.loading$ = store.select(selectLoading);
 
   }
 
@@ -34,7 +34,7 @@ export class SpinnerComponent implements OnInit, OnDestroy {
     this.spinnerSubscribe = this.loading$.pipe(
       debounceTime(300)
     ).subscribe(loaders => {
-        this.showSpinner = Object.values(loaders).some((value) => value)
+        this.showSpinner = Object.values(loaders).some((value) => value);
         this.cdr.detectChanges();
     });
 

@@ -30,17 +30,15 @@ interface LogRow {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ExperimentLogInfoComponent implements OnDestroy, AfterViewInit {
-
   public orgLogs: Log[];
   public lines = [] as LogRow[];
   private initial = true;
-  public convert: Convert;
+  public convert = new Convert() as Convert;
   private hasFilter = false;
   private regex: RegExp;
   private scrollSubscription: Subscription;
   private indexSubscription: Subscription;
   private shouldFocusLog = false;
-  public fetching = false;
   private scrolling: boolean = false;
   private prevLocation = 0;
   public canRefresh = true;
@@ -48,12 +46,14 @@ export class ExperimentLogInfoComponent implements OnDestroy, AfterViewInit {
   private fetchPrev: boolean;
   private prevLineOffset: number;
 
-  @ViewChild('LogContainer', {static: true}) private logContainer: CdkVirtualScrollViewport;
+  @ViewChild(CdkVirtualScrollViewport) private logContainer: CdkVirtualScrollViewport;
+  @Input() fetching = false;
   @Input() beginningOfLog: boolean;
   @Input() isDarkTheme: boolean;
-  private hasAnsi: any;
+  private readonly hasAnsi = hasAnsi;
   private observer: IntersectionObserver;
   private logInView: boolean;
+  public atEnd = true;
 
   @Input() set filterString(filter: string) {
     if (this.logInView) {
@@ -74,14 +74,17 @@ export class ExperimentLogInfoComponent implements OnDestroy, AfterViewInit {
     if (log === null) {
       return;
     }
+    const autoRefresh = this.fetchPrev === null;
     this.orgLogs = log;
     this.calcLines();
-    let prevLocation = findIndex(this.prevLine, this.lines) + this.prevLineOffset;
-    if (this.fetchPrev) {
-      prevLocation -= 25;
+    let prevLocation;
+    if (autoRefresh && this.atEnd) {
+      prevLocation = this.lines.length;
+    } else {
+      prevLocation = findIndex(this.prevLine, this.lines) + this.prevLineOffset;
     }
     this.fetchPrev = null;
-    if (this.fetching) {
+    if (!this.initial && prevLocation) {
       this.scrolling = true;
       window.setTimeout(() => {
         this.logContainer?.scrollToIndex(prevLocation);
@@ -89,7 +92,7 @@ export class ExperimentLogInfoComponent implements OnDestroy, AfterViewInit {
       });
     } else {
       const elm = this.logContainer?.elementRef.nativeElement;
-      if (log?.length && (elm.scrollTop + elm.offsetHeight > elm.scrollHeight - 100 || this.initial)) {
+      if (!elm || log?.length && (elm.scrollTop + elm.offsetHeight > elm.scrollHeight - 100 || this.initial)) {
         this.initial = false;
         this.scrolling = true;
         window.setTimeout(() => {
@@ -99,18 +102,11 @@ export class ExperimentLogInfoComponent implements OnDestroy, AfterViewInit {
         }, 10);
       }
     }
-    window.setTimeout(() => {
-      this.fetching = false;
-      this.cdr.detectChanges();
-    }, 50);
   }
 
   @Output() fetchMore = new EventEmitter<{ direction: string; from?: number }>();
 
-  constructor(private cdr: ChangeDetectorRef, private element: ElementRef) {
-    this.convert = new Convert();
-    this.hasAnsi = hasAnsi;
-  }
+  constructor(private cdr: ChangeDetectorRef, private element: ElementRef) {}
 
   ngAfterViewInit() {
     this.scrollSubscription = this.logContainer?.elementScrolled().subscribe((event: Event) => {
@@ -121,16 +117,14 @@ export class ExperimentLogInfoComponent implements OnDestroy, AfterViewInit {
 
     window.setTimeout(() => {
       this.indexSubscription = this.logContainer?.scrolledIndexChange.subscribe((location: number) => {
+        const itemsInView = Math.ceil(this.logContainer?.getViewportSize() / 25);
+        this.atEnd = location >= this.lines.length - itemsInView - 1;
         if (!this.fetching && !this.scrolling) {
-          const itemsInView = Math.ceil(this.logContainer?.getViewportSize() / 25);
           if (location < 10 && location < this.prevLocation && !this.beginningOfLog) {
-            this.fetching = true;
-            this.cdr.detectChanges();
             this.fetchPrev = true;
             this.fetchMore.emit({direction: 'prev', from: this.orgLogs?.[0]?.timestamp});
-          } else if (location >= this.lines.length - itemsInView && location > this.prevLocation) {
-            this.fetching = true;
-            this.cdr.detectChanges();
+          } else if (this.atEnd && location > this.prevLocation) {
+            this.fetchPrev = false;
             this.fetchMore.emit({direction: 'next', from: last(this.orgLogs)?.timestamp});
           }
         }
@@ -141,7 +135,7 @@ export class ExperimentLogInfoComponent implements OnDestroy, AfterViewInit {
           this.prevLine = this.lines[location - i];
           i += 1;
         }
-        this.prevLineOffset = i;
+        this.prevLineOffset = Math.max(i - 1, 0);
         if (this.canRefresh !== location > this.lines.length - 30) {
           this.canRefresh = !this.canRefresh;
           this.cdr.detectChanges();
@@ -187,14 +181,14 @@ export class ExperimentLogInfoComponent implements OnDestroy, AfterViewInit {
           .split('\n')
           .filter(msg => !!msg)
           .forEach((msg: string) => {
-            const hasAnsi = this.hasAnsi(msg);
-            const converted = msg ? (hasAnsi ? this.convert.toHtml(msg) :
+            const msgHasAnsi = this.hasAnsi(msg);
+            const converted = msg ? (msgHasAnsi ? this.convert.toHtml(msg) :
               msg) : '';
             if (first) {
-              this.lines.push({timestamp: logItem['timestamp'] || logItem['@timestamp'], entry: converted, hasAnsi: hasAnsi});
+              this.lines.push({timestamp: logItem['timestamp'] || logItem['@timestamp'], entry: converted, hasAnsi: msgHasAnsi});
               first = false;
             } else {
-              this.lines.push({entry: converted, hasAnsi: hasAnsi});
+              this.lines.push({entry: converted, hasAnsi: msgHasAnsi});
             }
           });
         this.lines[this.lines.length - 1].separator = true;
@@ -207,7 +201,6 @@ export class ExperimentLogInfoComponent implements OnDestroy, AfterViewInit {
 
   reset() {
     this.initial = true;
-    this.fetching = false;
     this.cdr.detectChanges();
   }
 

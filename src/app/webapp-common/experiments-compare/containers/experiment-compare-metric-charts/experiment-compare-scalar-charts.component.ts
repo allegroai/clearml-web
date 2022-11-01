@@ -1,20 +1,23 @@
 import {ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Observable, Subscription} from 'rxjs';
 import {select, Store} from '@ngrx/store';
-import {IExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
+import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {distinctUntilChanged, filter, map} from 'rxjs/operators';
 import {isEqual} from 'lodash/fp';
 import {mergeMultiMetrics, mergeMultiMetricsGroupedVariant} from '@common/tasks/tasks.utils';
-import {GetMultiScalarCharts, ResetExperimentMetrics, SetExperimentMetricsSearchTerm, SetExperimentSettings, SetSelectedExperiments} from '../../actions/experiments-compare-charts.actions';
+import {getMultiScalarCharts, resetExperimentMetrics, setExperimentMetricsSearchTerm, setExperimentSettings, setSelectedExperiments} from '../../actions/experiments-compare-charts.actions';
 import {selectCompareSelectedSettingsGroupBy, selectCompareSelectedSettingsSmoothWeight, selectCompareSelectedSettingsxAxisType, selectCompareTasksScalarCharts, selectExperimentMetricsSearchTerm, selectSelectedExperimentSettings, selectSelectedSettingsHiddenScalar} from '../../reducers';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {toggleShowScalarOptions} from '../../actions/compare-header.actions';
-import {GroupByCharts} from '@common/experiments/reducers/common-experiment-output.reducer';
+import {GroupByCharts, groupByCharts} from '@common/experiments/reducers/common-experiment-output.reducer';
 import {GroupedList} from '@common/shared/ui-components/data/selectable-grouped-filter-list/selectable-grouped-filter-list.component';
 import {ExtFrame} from '@common/shared/experiment-graphs/single-graph/plotly-graph-base';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {ExperimentGraphsComponent} from '@common/shared/experiment-graphs/experiment-graphs.component';
+import {selectScalarsHoverMode} from '../../../experiments/reducers';
+import {setScalarsHoverMode} from '../../../experiments/actions/common-experiment-output.actions';
+import {ChartHoverModeEnum} from '../../../experiments/shared/common-experiments.const';
 
 
 @Component({
@@ -50,18 +53,19 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
   groupByOptions = [
     {
       name: 'Metric',
-      value: GroupByCharts.Metric
+      value: groupByCharts.metric
     },
     {
       name: 'Metric + Variant',
-      value: GroupByCharts.None
+      value: groupByCharts.none
     }
   ];
 
   @ViewChild(ExperimentGraphsComponent) graphsComponent: ExperimentGraphsComponent;
+  public hoverMode$: Observable<ChartHoverModeEnum>;
 
   constructor(
-    private store: Store<IExperimentInfoState>,
+    private store: Store<ExperimentInfoState>,
     private changeDetection: ChangeDetectorRef,
     private refresh: RefreshService
   ) {
@@ -70,6 +74,7 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
     this.searchTerm$ = this.store.pipe(select(selectExperimentMetricsSearchTerm));
     this.smoothWeight$ = this.store.select(selectCompareSelectedSettingsSmoothWeight);
     this.xAxisType$ = this.store.select(selectCompareSelectedSettingsxAxisType);
+    this.hoverMode$ = this.store.select(selectScalarsHoverMode);
     this.groupBy$ = this.store.select(selectCompareSelectedSettingsGroupBy);
     this.metrics$ = this.store.pipe(
       select(selectCompareTasksScalarCharts),
@@ -91,7 +96,7 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
 
     this.xAxisSub = this.xAxisType$
       .pipe(filter(axis => !!axis && this.taskIds?.length > 0))
-      .subscribe(() => this.store.dispatch(new GetMultiScalarCharts({taskIds: this.taskIds, cached: true})));
+      .subscribe(() => this.store.dispatch(getMultiScalarCharts({taskIds: this.taskIds, cached: true})));
 
     this.groupBySub = this.groupBy$
       .subscribe(groupBy => {
@@ -118,14 +123,14 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
       .subscribe(params => {
         if (!this.taskIds || this.taskIds.join(',') !== params.ids) {
           this.taskIds = params.ids.split(',');
-          this.store.dispatch(new SetSelectedExperiments({selectedExperiments: this.taskIds}));
-          this.store.dispatch(new GetMultiScalarCharts({taskIds: this.taskIds}));
+          this.store.dispatch(setSelectedExperiments({selectedExperiments: this.taskIds}));
+          this.store.dispatch(getMultiScalarCharts({taskIds: this.taskIds}));
         }
       });
 
     this.refreshingSubscription = this.refresh.tick
       .pipe(filter(auto => auto !== null && this.graphs !== null))
-      .subscribe(autoRefresh => this.store.dispatch(new GetMultiScalarCharts({taskIds: this.taskIds, autoRefresh})));
+      .subscribe(autoRefresh => this.store.dispatch(getMultiScalarCharts({taskIds: this.taskIds, autoRefresh})));
   }
 
   private prepareGraphsAndUpdate(metrics) {
@@ -156,34 +161,38 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
   }
 
   metricSelected(id) {
-    this.store.dispatch(new SetExperimentSettings({id: this.taskIds, changes: {selectedScalar: id}}));
+    this.store.dispatch(setExperimentSettings({id: this.taskIds, changes: {selectedScalar: id}}));
   }
 
   hiddenListChanged(hiddenList) {
-    this.store.dispatch(new SetExperimentSettings({id: this.taskIds, changes: {hiddenMetricsScalar: hiddenList}}));
+    this.store.dispatch(setExperimentSettings({id: this.taskIds, changes: {hiddenMetricsScalar: hiddenList}}));
   }
 
   searchTermChanged(searchTerm: string) {
-    this.store.dispatch(new SetExperimentMetricsSearchTerm({searchTerm}));
+    this.store.dispatch(setExperimentMetricsSearchTerm({searchTerm}));
   }
 
   resetMetrics() {
-    this.store.dispatch(new ResetExperimentMetrics());
+    this.store.dispatch(resetExperimentMetrics());
   }
 
   changeSmoothness($event: any) {
-    this.store.dispatch(new SetExperimentSettings({id: this.taskIds, changes: {smoothWeight: $event}}));
+    this.store.dispatch(setExperimentSettings({id: this.taskIds, changes: {smoothWeight: $event}}));
   }
 
   changeXAxisType($event: ScalarKeyEnum) {
-    this.store.dispatch(new SetExperimentSettings({id: this.taskIds, changes: {xAxisType: $event}}));
+    this.store.dispatch(setExperimentSettings({id: this.taskIds, changes: {xAxisType: $event}}));
   }
 
   changeGroupBy($event: GroupByCharts) {
-    this.store.dispatch(new SetExperimentSettings({id: this.taskIds, changes: {groupBy: $event}}));
+    this.store.dispatch(setExperimentSettings({id: this.taskIds, changes: {groupBy: $event}}));
   }
 
   toggleSettingsBar() {
     this.store.dispatch(toggleShowScalarOptions());
+  }
+
+  hoverModeChanged(hoverMode: ChartHoverModeEnum) {
+    this.store.dispatch(setScalarsHoverMode({hoverMode}));
   }
 }

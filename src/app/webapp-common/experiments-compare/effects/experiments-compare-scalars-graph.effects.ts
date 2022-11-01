@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {Actions, createEffect, Effect, ofType} from '@ngrx/effects';
+import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {activeLoader, deactivateLoader, setServerError} from '../../core/actions/layout.actions';
 import {catchError, mergeMap, map} from 'rxjs/operators';
 import {requestFailed} from '../../core/actions/http.actions';
@@ -13,17 +13,16 @@ export class ExperimentsCompareScalarsGraphEffects {
   constructor(private actions$: Actions, public tasksApiService: ApiTasksService) {
   }
 
-  @Effect()
   activeLoader = createEffect(() => this.actions$.pipe(
     ofType(getExperimentsHyperParams),
     map(action => activeLoader(action.type))
-    )
-  );
+  ));
 
   loadMovies$ = createEffect(() => this.actions$.pipe(
     ofType(getExperimentsHyperParams),
     mergeMap((action) => this.tasksApiService.tasksGetAllEx({
       id: action.experimentsIds,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
       only_fields: ['last_metrics', 'name', 'last_iteration', 'hyperparams']
     })
       .pipe(
@@ -33,7 +32,7 @@ export class ExperimentsCompareScalarsGraphEffects {
           const paramsHasDiffs = this.getParametersHasDiffs(res.tasks);
           return [
             setTasks({tasks: res.tasks}),
-            setMetricsList({metricsList: metricsList}),
+            setMetricsList({metricsList}),
             setHyperParamsList({hyperParams: paramsHasDiffs}),
             deactivateLoader(action.type)];
         }),

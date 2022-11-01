@@ -11,10 +11,15 @@
     white-space: nowrap;
     line-height: 1;
 
-    span {
+    .hash {
       padding: 0 6px;
       font-family: $font-family-monospace;
       font-size: 12px;
+
+      .three-dots {
+        font-family: initial;
+        margin-left: 2px;
+      }
     }
 
     .id-rect {

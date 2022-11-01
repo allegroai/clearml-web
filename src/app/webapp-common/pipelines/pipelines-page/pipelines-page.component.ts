@@ -14,6 +14,7 @@ import {selectShowPipelineExamples} from '@common/projects/common-projects.reduc
 import {toggleUserFocus} from '@common/core/actions/layout.actions';
 import {combineLatest} from 'rxjs';
 import {selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
+import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 
 @Component({
   selector: 'sm-pipelines-page',
@@ -94,11 +95,11 @@ if __name__ == '__main__':
   }
 
   protected getName() {
-    return 'pipeline';
+    return EntityTypeEnum.pipeline;
   }
 
   protected getDeletePopupEntitiesList() {
-    return 'runs';
+    return 'run';
   }
 
   createPipeline() {

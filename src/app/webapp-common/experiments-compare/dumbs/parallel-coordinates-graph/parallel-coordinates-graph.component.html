@@ -1,4 +1,11 @@
-<div class="graph-container">
+<div class="download">
+  <button
+    (click)="downloadImage()"
+    class="btn btn-primary"
+    smTooltip="Download as PNG"
+  ><i class="al-icon al-ico-download sm"></i></button>
+</div>
+<div #container class="graph-container">
   <div class="graph-title">Hyper Parameters Impact on {{metric.name}}</div>
   <div #parallelGraph>
   </div>

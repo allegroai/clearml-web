@@ -3,7 +3,7 @@
     <span [smTooltip]="(allowAddExperiment$ | async) ?
       'Add/Remove ' + entityType + 's to comparison' :
       compareLimitations + ' or fewer ' + entityType + 's can be compared'"
-          matTooltipPosition="above"
+          
     >
         <button class="btn btn-secondary btn-add-experiment"
                 (click)="openAddExperimentSearch()">

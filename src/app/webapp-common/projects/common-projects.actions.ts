@@ -55,7 +55,3 @@ export const setTableModeAwareness = createAction(
 export const showExamplePipelines = createAction(PROJECTS_PREFIX + '[show pipelines examples]');
 export const showExampleDatasets = createAction(PROJECTS_PREFIX + '[show datasets examples]');
 
-export const setShowHidden = createAction(
-  PROJECTS_PREFIX + ' [set show hidden]',
-  props<{ show: boolean }>()
-);

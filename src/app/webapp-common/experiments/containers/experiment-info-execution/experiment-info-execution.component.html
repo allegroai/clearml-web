@@ -116,7 +116,7 @@
         </mat-form-field>
       </sm-labeled-row>
       <sm-labeled-row label="ARGUMENTS" [class.mb-3]="editable" [labelClass]="'this-is-myclass'">
-        <div *ngIf="!((editable && !isInDev) && containerSection.inEditMode)">{{formData.container?.arguments}}</div>
+        <div *ngIf="!((editable && !isInDev) && containerSection.inEditMode)">{{formData.container?.arguments | hideRedactedArguments: (redactedArguments$| async) }}</div>
         <mat-form-field appearance="outline" *ngIf="(editable && !isInDev) && containerSection.inEditMode" class="col-24">
           <input #containerArguments matInput [ngModel]="formData.container?.arguments" name="image">
         </mat-form-field>

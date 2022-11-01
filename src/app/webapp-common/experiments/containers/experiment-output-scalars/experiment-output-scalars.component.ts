@@ -17,18 +17,18 @@ import {select, Store} from '@ngrx/store';
 import {distinctUntilChanged, filter, map, tap} from 'rxjs/operators';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {ActivatedRoute, Router} from '@angular/router';
-import {IExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
+import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {
-  ExperimentScalarRequested,
-  ResetExperimentMetrics,
-  SetExperimentMetricsSearchTerm,
-  SetExperimentSettings,
+  experimentScalarRequested,
+  resetExperimentMetrics,
+  setExperimentMetricsSearchTerm,
+  setExperimentSettings,
   toggleSettings
 } from '../../actions/common-experiment-output.actions';
 import {convertScalars} from '@common/tasks/tasks.utils';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {selectSelectedExperiment} from '~/features/experiments/reducers';
-import {GroupByCharts} from '../../reducers/common-experiment-output.reducer';
+import {GroupByCharts, groupByCharts} from '../../reducers/common-experiment-output.reducer';
 import {GroupedList} from '@common/shared/ui-components/data/selectable-grouped-filter-list/selectable-grouped-filter-list.component';
 import {ExtFrame} from '@common/shared/experiment-graphs/single-graph/plotly-graph-base';
 import {ExperimentGraphsComponent} from '@common/shared/experiment-graphs/experiment-graphs.component';
@@ -75,17 +75,17 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
   groupByOptions = [
     {
       name: 'Metric',
-      value: GroupByCharts.Metric
+      value: groupByCharts.metric
     },
     {
       name: 'None',
-      value: GroupByCharts.None
+      value: groupByCharts.none
     }
   ];
   public singleValueData$: Observable<Array<EventsGetTaskSingleValueMetricsResponseValues>>;
   public experimentName: string;
 
-  constructor(private store: Store<IExperimentInfoState>, private router: Router, private activeRoute: ActivatedRoute, private changeDetection: ChangeDetectorRef) {
+  constructor(private store: Store<ExperimentInfoState>, private router: Router, private activeRoute: ActivatedRoute, private changeDetection: ChangeDetectorRef) {
     this.searchTerm$ = this.store.pipe(select(selectExperimentMetricsSearchTerm));
     this.splitSize$ = this.store.pipe(select(selectSplitSize));
 
@@ -125,7 +125,7 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
     this.subs.add(this.xAxisType$
       .pipe(filter(axis => !!axis && !!this.experimentId))
       .subscribe(() => {
-        this.store.dispatch(new ExperimentScalarRequested(this.experimentId));
+        this.store.dispatch(experimentScalarRequested({experimentId: this.experimentId}));
         this.experimentGraphs.prepareRedraw();
       })
     );
@@ -164,6 +164,7 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
       .subscribe(experiment => {
         this.experimentId = experiment.id;
         this.experimentName = experiment.name;
+        this.scalarList = {};
         this.refresh();
       })
     );
@@ -179,7 +180,7 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
     this.subs.add(this.experimentSettings$
       .subscribe((selectedScalar) => {
         this.selectedGraph = selectedScalar;
-        this.experimentGraphs.scrollToGraph(selectedScalar);
+        this.experimentGraphs?.scrollToGraph(selectedScalar);
       })
     );
 
@@ -189,7 +190,7 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
           this.graphs = undefined;
           this.resetMetrics();
           // this.store.dispatch(new ExperimentScalarRequested(params.experimentId));
-          this.store.dispatch(new SetExperimentMetricsSearchTerm({searchTerm: ''}));
+          this.store.dispatch(setExperimentMetricsSearchTerm({searchTerm: ''}));
         }
       })
     );
@@ -210,39 +211,39 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
   }
 
   metricSelected(id) {
-    this.store.dispatch(new SetExperimentSettings({id: this.experimentId, changes: {selectedScalar: id}}));
+    this.store.dispatch(setExperimentSettings({id: this.experimentId, changes: {selectedScalar: id}}));
   }
 
 
   hiddenListChanged(hiddenList) {
-    this.store.dispatch(new SetExperimentSettings({id: this.experimentId, changes: {hiddenMetricsScalar: hiddenList}}));
+    this.store.dispatch(setExperimentSettings({id: this.experimentId, changes: {hiddenMetricsScalar: hiddenList}}));
   }
 
   refresh() {
     if (!this.refreshDisabled) {
       this.refreshDisabled = true;
-      this.store.dispatch(new ExperimentScalarRequested(this.experimentId));
+      this.store.dispatch(experimentScalarRequested({experimentId: this.experimentId}));
     }
   }
 
   searchTermChanged(searchTerm: string) {
-    this.store.dispatch(new SetExperimentMetricsSearchTerm({searchTerm}));
+    this.store.dispatch(setExperimentMetricsSearchTerm({searchTerm}));
   }
 
   resetMetrics() {
-    this.store.dispatch(new ResetExperimentMetrics());
+    this.store.dispatch(resetExperimentMetrics());
   }
 
   changeSmoothness($event: any) {
-    this.store.dispatch(new SetExperimentSettings({id: this.experimentId, changes: {smoothWeight: $event}}));
+    this.store.dispatch(setExperimentSettings({id: this.experimentId, changes: {smoothWeight: $event}}));
   }
 
   changeXAxisType($event: ScalarKeyEnum) {
-    this.store.dispatch(new SetExperimentSettings({id: this.experimentId, changes: {xAxisType: $event}}));
+    this.store.dispatch(setExperimentSettings({id: this.experimentId, changes: {xAxisType: $event}}));
   }
 
   changeGroupBy($event: GroupByCharts) {
-    this.store.dispatch(new SetExperimentSettings({id: this.experimentId, changes: {groupBy: $event}}));
+    this.store.dispatch(setExperimentSettings({id: this.experimentId, changes: {groupBy: $event}}));
   }
 
   toggleSettingsBar() {

@@ -26,7 +26,8 @@
             "assets": [
               "src/assets",
               "src/favicon.ico",
-	          "src/env.js",
+              "src/env.js",
+              "src/version.json",
               "src/app/webapp-common/assets",
               {
                 "glob": "**/*",
@@ -57,7 +58,15 @@
               "@aws-crypto/sha256-browser",
               "@aws-crypto/crc32",
               "@aws-crypto/sha1-browser",
-              "@aws-crypto/crc32c"
+              "@aws-crypto/crc32c",
+              "filesize/lib/filesize.es6",
+              "hex-rgb",
+              "britecharts/dist/umd/donut.min",
+              "britecharts/dist/umd/legend.min",
+              "britecharts/dist/umd/line.min",
+              "britecharts/dist/umd/tooltip.min",
+              "britecharts/dist/umd/miniTooltip.min",
+              "britecharts/dist/umd/scatterPlot.min"
             ],
             "vendorChunk": true,
             "extractLicenses": false,
@@ -88,69 +97,6 @@
                 }
               ]
             },
-            "demo": {
-              "budgets": [
-                {
-                  "type": "anyComponentStyle",
-                  "maximumWarning": "6kb"
-                }
-              ],
-              "optimization": true,
-              "outputHashing": "all",
-              "sourceMap": false,
-              "namedChunks": false,
-              "extractLicenses": true,
-              "vendorChunk": false,
-              "buildOptimizer": true,
-              "fileReplacements": [
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.demo.ts"
-                }
-              ]
-            },
-            "guest": {
-              "budgets": [
-                {
-                  "type": "anyComponentStyle",
-                  "maximumWarning": "6kb"
-                }
-              ],
-              "optimization": true,
-              "outputHashing": "all",
-              "sourceMap": false,
-              "namedChunks": false,
-              "extractLicenses": true,
-              "vendorChunk": false,
-              "buildOptimizer": true,
-              "fileReplacements": [
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.ignite.ts"
-                }
-              ]
-            },
-            "community": {
-              "budgets": [
-                {
-                  "type": "anyComponentStyle",
-                  "maximumWarning": "6kb"
-                }
-              ],
-              "optimization": true,
-              "outputHashing": "all",
-              "sourceMap": false,
-              "namedChunks": false,
-              "extractLicenses": true,
-              "vendorChunk": false,
-              "buildOptimizer": true,
-              "fileReplacements": [
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.community.ts"
-                }
-              ]
-            },
             "production": {
               "budgets": [
                 {
@@ -169,6 +115,10 @@
                 {
                   "replace": "src/environments/environment.ts",
                   "with": "src/environments/environment.prod.ts"
+                },
+                {
+                  "replace": "src/app/build-specifics/index.ts",
+                  "with": "src/app/build-specifics/index.prod.ts"
                 }
               ]
             }
@@ -216,6 +166,7 @@
             "assets": [
               "src/assets",
               "src/favicon.ico",
+              "src/version.json",
               "src/app/webapp-common/assets"
             ]
           }
@@ -257,7 +208,6 @@
       }
     }
   },
-  "defaultProject": "trains-webapp",
   "schematics": {
     "@schematics/angular:component": {
       "prefix": "sm",

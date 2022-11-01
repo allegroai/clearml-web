@@ -3,7 +3,7 @@
     <div class="d-flex justify-content-between">
       <div class="title mr-auto">{{model?.name}}</div>
     </div>
-    <div style="padding-top: 5px">
+    <div class="pt-2">
       <div class="d-flex align-items-center justify-content-start">
         <span class="sub-title">ID:  {{model?.id}} </span>
         <sm-copy-clipboard [clipboardText]="model?.id" [label]="''" [hideBackground]="true"></sm-copy-clipboard>
@@ -12,7 +12,7 @@
   </div>
 
   <div class="d-flex justify-content-around w-100">
-    <sm-circle-status [status]="model.framework"></sm-circle-status>
+    <sm-circle-status [status]="model.framework" defaultStatus="i-model"></sm-circle-status>
     <sm-circle-counter [counter]="model?.stats?.labels_count" label="LABELS" [type]="CircleTypeEnum['model-labels']"></sm-circle-counter>
     <sm-circle-status [status]="model.ready? 'published' : 'created'"></sm-circle-status>
   </div>

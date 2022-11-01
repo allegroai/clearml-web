@@ -1,17 +1,16 @@
 import {Injectable} from '@angular/core';
-import {IExperimentInfo} from '../../../../features/experiments/shared/experiment-info.model';
-import {IExecutionForm, sourceTypesEnum} from '../../../../features/experiments/shared/experiment-execution.model';
+import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
+import {IExecutionForm, sourceTypesEnum} from '~/features/experiments/shared/experiment-execution.model';
 import {get, getOr} from 'lodash/fp';
-import {Execution} from '../../../../business-logic/model/tasks/execution';
-import {Task} from '../../../../business-logic/model/tasks/task';
-import {Script} from '../../../../business-logic/model/tasks/script';
+import {Task} from '~/business-logic/model/tasks/task';
+import {Script} from '~/business-logic/model/tasks/script';
 import {IExperimentModelInfo} from '../common-experiment-model.model';
 import {Store} from '@ngrx/store';
-import {IExperimentsViewState} from '../../../../features/experiments/reducers/experiments-view.reducer';
-import {selectActiveWorkspace} from '../../../core/reducers/users-reducer';
+import {ExperimentsViewState} from '../../../../features/experiments/reducers/experiments-view.reducer';
+import {selectActiveWorkspace} from '@common/core/reducers/users-reducer';
 import {Observable, Subscription} from 'rxjs';
-import {isExample, isSharedAndNotOwner} from '../../../shared/utils/shared-utils';
-import {ITask} from '../../../../business-logic/model/al-task';
+import {isExample, isSharedAndNotOwner} from '@common/shared/utils/shared-utils';
+import {ITask} from '~/business-logic/model/al-task';
 
 @Injectable({providedIn: 'root'})
 export class CommonExperimentReverterService {
@@ -19,7 +18,7 @@ export class CommonExperimentReverterService {
   private activeWorkSpace: any;
   private activeWorkSpaceSubscription: Subscription;
 
-  constructor(private store: Store<IExperimentsViewState>) {
+  constructor(private store: Store<ExperimentsViewState>) {
     this.activeWorkSpace$ = this.store.select(selectActiveWorkspace);
     this.activeWorkSpaceSubscription = this.activeWorkSpace$.subscribe(activeWorkSpace => {
       this.activeWorkSpace = activeWorkSpace;

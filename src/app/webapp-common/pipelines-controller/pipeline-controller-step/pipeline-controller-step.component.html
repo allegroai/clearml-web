@@ -2,7 +2,7 @@
      [class.selected]="selected">
   <div class="step-part step-title" [class]="step.data.status">
     <sm-experiment-type-icon-label [type]="step.data?.job_type" [showLabel]="false"></sm-experiment-type-icon-label>
-    <div class="title" smShowTooltipIfEllipsis [smTooltip]="step.name" matTooltipPosition="above">{{step.name}}</div>
+    <div class="title" smShowTooltipIfEllipsis [smTooltip]="step.name" >{{step.name}}</div>
     <i class="al-icon sm-md al-ico-console" (click)="openConsole.emit()"></i>
   </div>
   <div class="step-part step-footer" [class]="step.data.status">

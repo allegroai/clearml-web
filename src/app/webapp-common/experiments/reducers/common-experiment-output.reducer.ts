@@ -2,16 +2,18 @@ import {Task} from '~/business-logic/model/tasks/task';
 import * as actions from '../actions/common-experiment-output.actions';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {sortBy, reverse} from 'lodash/fp';
-import {LOG_BATCH_SIZE} from '../shared/common-experiments.const';
+import {ChartHoverModeEnum, LOG_BATCH_SIZE} from '../shared/common-experiments.const';
 import {MetricsPlotEvent} from '~/business-logic/model/events/metricsPlotEvent';
 import {ExtFrame} from '@common/shared/experiment-graphs/single-graph/plotly-graph-base';
-import { EventsGetTaskSingleValueMetricsResponseValues } from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponseValues';
+import {EventsGetTaskSingleValueMetricsResponseValues} from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponseValues';
+import {on, createReducer} from '@ngrx/store';
+import {HistogramCharts} from '../actions/common-experiment-output.actions';
 
 export type GroupByCharts = 'metric' | 'none';
 
-export const GroupByCharts = {
-  Metric: 'metric' as GroupByCharts,
-  None: 'none' as GroupByCharts
+export const groupByCharts = {
+  metric: 'metric' as GroupByCharts,
+  none: 'none' as GroupByCharts
 };
 
 export interface Log {
@@ -23,16 +25,6 @@ export interface Log {
   msg: string;
   metric: string;
   variant: string;
-}
-
-export interface SeriesData {
-  name: string;
-  x: number[];
-  y: number[];
-}
-
-export interface HistogramCharts {
-  [metric: string]: { [variant: string]: SeriesData };
 }
 
 export interface CommonExperimentOutputState {
@@ -50,6 +42,7 @@ export interface CommonExperimentOutputState {
   settingsList: Array<ExperimentSettings>;
   searchTerm: string;
   logFilter: string;
+  logLoading: boolean;
   showSettings: boolean;
   minMaxIterations: { minIteration: number; maxIteration: number };
   currentPlotViewer: any;
@@ -57,6 +50,8 @@ export interface CommonExperimentOutputState {
   plotViewerScrollId: string;
   plotViewerEndOfTime: boolean;
   plotViewerBeginningOfTime: boolean;
+  scalarsHoverMode: ChartHoverModeEnum;
+  graphsPerRow: number;
 }
 
 export interface ExperimentSettings {
@@ -89,128 +84,115 @@ export const initialCommonExperimentOutputState: CommonExperimentOutputState = {
   scalarSingleValue:[],
   searchTerm: '',
   logFilter: null,
+  logLoading: false,
   showSettings: false,
   currentPlotViewer: null,
   minMaxIterations: null,
   plotViewerScrollId: null,
   plotViewerEndOfTime: null,
-  plotViewerBeginningOfTime: null
+  plotViewerBeginningOfTime: null,
+  scalarsHoverMode: 'x',
+  graphsPerRow: 2
 };
 
-export function commonExperimentOutputReducer(state = initialCommonExperimentOutputState, action): CommonExperimentOutputState {
-  switch (action.type) {
-    case actions.RESET_OUTPUT:
-      return {
-        ...state,
-        experimentLog: initialCommonExperimentOutputState.experimentLog,
-        metricsMultiScalarsCharts: initialCommonExperimentOutputState.metricsMultiScalarsCharts,
-        metricsHistogramCharts: initialCommonExperimentOutputState.metricsHistogramCharts,
-        metricsPlotsCharts: initialCommonExperimentOutputState.metricsPlotsCharts
-      };
-    case actions.setGraphDisplayFullDetailsScalars.type:
-      return {...state, fullScreenDetailedChart: action.data};
-    case actions.setGraphDisplayFullDetailsScalarsIsOpen.type:
-      return {
-        ...state,
-        isFullScreenOpen: action.isOpen,
-        fullScreenDetailedChart: null,
-        currentPlotViewer: null,
-        plotViewerScrollId: null,
-        minMaxIterations: null
-      };
-    case actions.getGraphDisplayFullDetailsScalars.type:
-      return {...state, fetchingFullScreenData: true};
-    case actions.setXtypeGraphDisplayFullDetailsScalars.type:
-      return {...state, fullScreenXtype: action.xAxisType};
-    case actions.mergeGraphDisplayFullDetailsScalars.type:
-      return {
-        ...state,
-        fullScreenDetailedChart: {...state.fullScreenDetailedChart, data: action.data},
-        fetchingFullScreenData: false
-      };
-    case actions.setExperimentLog.type: {
-      const events = reverse(action.events);
-      let currLog: any[];
-      let atStart = false;
-      if (action.direction) {
-        if (action.refresh) {
-          currLog = events;
-        } else if (action.direction === 'prev') {
-          if (action.events < LOG_BATCH_SIZE) {
-            atStart = true;
-          }
-          currLog = sortBy('timestamp', events.concat(state.experimentLog));
-          if (currLog.length > 300) {
-            currLog = currLog.slice(0, 300);
-          }
-        } else {
-          currLog = sortBy('timestamp', state.experimentLog?.concat(events));
-          if (currLog.length > 300) {
-            currLog = currLog.slice(currLog.length - 300, currLog.length);
-          }
+export const commonExperimentOutputReducer = createReducer(
+  initialCommonExperimentOutputState,
+  on(actions.resetOutput, state  => ({
+    ...state,
+    experimentLog: initialCommonExperimentOutputState.experimentLog,
+    metricsMultiScalarsCharts: initialCommonExperimentOutputState.metricsMultiScalarsCharts,
+    metricsHistogramCharts: initialCommonExperimentOutputState.metricsHistogramCharts,
+    metricsPlotsCharts: initialCommonExperimentOutputState.metricsPlotsCharts
+  })),
+  on(actions.setGraphDisplayFullDetailsScalars, (state, action) => ({...state, fullScreenDetailedChart: action.data})),
+  on(actions.setGraphDisplayFullDetailsScalarsIsOpen, (state, action) => ({
+    ...state,
+    isFullScreenOpen: action.isOpen,
+    fullScreenDetailedChart: null,
+    currentPlotViewer: null,
+    plotViewerScrollId: null,
+    minMaxIterations: null
+  })),
+  on(actions.getGraphDisplayFullDetailsScalars, state  => ({...state, fetchingFullScreenData: true})),
+  on(actions.setXtypeGraphDisplayFullDetailsScalars, (state, action) => ({...state, fullScreenXtype: action.xAxisType})),
+  on(actions.mergeGraphDisplayFullDetailsScalars, (state, action) => ({
+    ...state,
+    fullScreenDetailedChart: {...state.fullScreenDetailedChart, data: action.data},
+    fetchingFullScreenData: false
+  })),
+  on(actions.getExperimentLog, (state, action) => ({...state, logLoading: !action.autoRefresh})),
+  on(actions.setExperimentLogLoading, (state, action) => ({...state, logLoading: action.loading})),
+  on(actions.setExperimentLog, (state, action) => {
+    const events = reverse(action.events);
+    let currLog: any[];
+    let atStart = false;
+    if (action.direction) {
+      if (action.refresh) {
+        currLog = events;
+      } else if (action.direction === 'prev') {
+        if (action.events?.length < LOG_BATCH_SIZE) {
+          atStart = true;
+        }
+        currLog = sortBy('timestamp', events.concat(state.experimentLog));
+        if (currLog.length > 300) {
+          currLog = currLog.slice(0, 300);
         }
       } else {
-        currLog = events;
+        currLog = sortBy('timestamp', state.experimentLog?.concat(events));
+        if (currLog.length > 300) {
+          currLog = currLog.slice(currLog.length - 300, currLog.length);
+        }
       }
-      return {
-        ...state,
-        experimentLog: currLog,
-        totalLogLines: action.total,
-        beginningOfLog: atStart
-      };
+    } else {
+      currLog = events;
     }
-    case actions.SET_EXPERIMENT_METRICS_SEARCH_TERM:
-      return {...state, searchTerm: action.payload.searchTerm};
-    case actions.SET_EXPERIMENT_HISTOGRAM:
-      return {...state, metricsHistogramCharts: action.payload, cachedAxisType: action.axisType};
-    case actions.SET_EXPERIMENT_PLOTS:
-      return {...state, metricsPlotsCharts: action.payload};
-    case actions.setCurrentPlot.type:
-      return {...state, currentPlotViewer: action.event};
-    case actions.setExperimentScalarSingleValue.type:
-      return {...state, scalarSingleValue: action.values};
-    case actions.setPlotIterations.type:
-      return {...state, minMaxIterations: {minIteration: action.min_iteration, maxIteration: action.max_iteration}};
-    case actions.setPlotViewerScrollId.type:
-      return {...state, plotViewerScrollId: action.scrollId};
-    case actions.setViewerEndOfTime.type:
-      return {...state, plotViewerEndOfTime: action.endOfTime};
-    case actions.setViewerBeginningOfTime.type:
-      return {...state, plotViewerBeginningOfTime: action.beginningOfTime};
-    case actions.UPDATE_EXPERIMENT_SETTINGS: {
-      let newSettings: ExperimentSettings[];
-      const changes = {...action.payload.changes, lastModified: (new Date()).getTime()} as ExperimentSettings;
-      const experimentExists = state.settingsList.find(setting => setting.id === action.payload.id);
-      const discardBefore = new Date();
-      discardBefore.setMonth(discardBefore.getMonth() - 6);
-      if (experimentExists) {
-        newSettings = state.settingsList
-          .filter(setting => discardBefore < new Date(setting.lastModified || 1648771200000))
-          .map(setting => setting.id === action.payload.id ? {...setting, ...changes} : setting);
-      } else {
-        newSettings = [
-          ...state.settingsList.filter(setting => discardBefore < new Date(setting.lastModified || 1648771200000)),
-          {id: action.payload.id, ...changes}
-        ];
-      }
-      return {...state, settingsList: newSettings};
+    return {
+      ...state,
+      experimentLog: currLog,
+      totalLogLines: action.total,
+      beginningOfLog: atStart,
+      logLoading: false
+    };
+  }),
+  on(actions.setExperimentLogAtStart, (state, action) => ({...state, beginningOfLog: action.atStart, logLoading: false})),
+  on(actions.setExperimentMetricsSearchTerm, (state, action) => ({...state, searchTerm: action.searchTerm})),
+  on(actions.setHistogram, (state, action) => ({...state, metricsHistogramCharts: action.histogram, cachedAxisType: action.axisType})),
+  on(actions.setExperimentPlots, (state, action) => ({...state, metricsPlotsCharts: action.plots})),
+  on(actions.setCurrentPlot, (state, action) => ({...state, currentPlotViewer: action.event})),
+  on(actions.setExperimentScalarSingleValue, (state, action) => ({...state, scalarSingleValue: action.values})),
+  on(actions.setPlotIterations, (state, action) => ({...state, minMaxIterations: {minIteration: action.min_iteration, maxIteration: action.max_iteration}})),
+  on(actions.setPlotViewerScrollId, (state, action) => ({...state, plotViewerScrollId: action.scrollId})),
+  on(actions.setViewerEndOfTime, (state, action) => ({...state, plotViewerEndOfTime: action.endOfTime})),
+  on(actions.setViewerBeginningOfTime, (state, action) => ({...state, plotViewerBeginningOfTime: action.beginningOfTime})),
+  on(actions.setExperimentSettings, (state, action) => {
+    let newSettings: ExperimentSettings[];
+    const changes = {...action.changes, lastModified: (new Date()).getTime()} as ExperimentSettings;
+    const experimentExists = state.settingsList.find(setting => setting.id === action.id);
+    const discardBefore = new Date();
+    discardBefore.setMonth(discardBefore.getMonth() - 6);
+    if (experimentExists) {
+      newSettings = state.settingsList
+        .filter(setting => discardBefore < new Date(setting.lastModified || 1648771200000))
+        .map(setting => setting.id === action.id ? {...setting, ...changes} : setting);
+    } else {
+      newSettings = [
+        ...state.settingsList.filter(setting => discardBefore < new Date(setting.lastModified || 1648771200000)),
+        {id: action.id, ...changes}
+      ];
     }
-    case actions.RESET_EXPERIMENT_METRICS:
-      return {
-        ...state,
-        metricsMultiScalarsCharts: initialCommonExperimentOutputState.metricsMultiScalarsCharts,
-        metricsHistogramCharts: initialCommonExperimentOutputState.metricsHistogramCharts,
-        metricsPlotsCharts: initialCommonExperimentOutputState.metricsPlotsCharts,
-        cachedAxisType: initialCommonExperimentOutputState.cachedAxisType,
-        searchTerm: ''
-      };
-    case actions.SET_LOG_FILTER:
-      return {...state, logFilter: (action as actions.SetLogFilter).filterString};
-    case actions.RESET_LOG_FILTER:
-      return {...state, logFilter: null};
-    case actions.toggleSettings.type:
-      return {...state, showSettings: !state.showSettings};
-    default:
-      return state;
-  }
-}
+    return {...state, settingsList: newSettings};
+  }),
+  on(actions.resetExperimentMetrics, state => ({
+    ...state,
+    metricsMultiScalarsCharts: initialCommonExperimentOutputState.metricsMultiScalarsCharts,
+    metricsHistogramCharts: initialCommonExperimentOutputState.metricsHistogramCharts,
+    metricsPlotsCharts: initialCommonExperimentOutputState.metricsPlotsCharts,
+    cachedAxisType: initialCommonExperimentOutputState.cachedAxisType,
+    searchTerm: ''
+  })),
+  on(actions.setLogFilter, (state, action) => ({...state, logFilter: (action as ReturnType<typeof actions.setLogFilter>).filter})),
+  on(actions.resetLogFilter, state => ({...state, logFilter: null})),
+  on(actions.toggleSettings, state => ({...state, showSettings: !state.showSettings})),
+  on(actions.setScalarsHoverMode, (state, action) => ({...state, scalarsHoverMode: action.hoverMode})),
+  on(actions.setGraphsPerRow, (state, action) => ({...state, graphsPerRow: action.graphsPerRow})),
+);

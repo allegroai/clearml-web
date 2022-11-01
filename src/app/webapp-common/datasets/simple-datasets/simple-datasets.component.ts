@@ -5,6 +5,7 @@ import {setSelectedProjectId} from '@common/core/actions/projects.actions';
 import {ConfirmDialogComponent} from '../../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {showExampleDatasets} from '../../projects/common-projects.actions';
 import {selectShowDatasetExamples} from '../../projects/common-projects.reducer';
+import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 
 @Component({
   selector: 'sm-simple-datasets',
@@ -51,11 +52,11 @@ dataset.finalize()`;
   }
 
   protected getName() {
-    return 'dataset';
+    return EntityTypeEnum.simpleDataset;
   }
 
   protected getDeletePopupEntitiesList() {
-    return 'datasets';
+    return 'version';
   }
 
   createDataset() {

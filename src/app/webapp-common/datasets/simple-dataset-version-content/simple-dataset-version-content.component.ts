@@ -6,7 +6,8 @@ import {fileSizeConfigStorage, FileSizePipe} from '@common/shared/pipes/filesize
 @Component({
   selector: 'sm-simple-dataset-version-content',
   templateUrl: './simple-dataset-version-content.component.html',
-  styleUrls: ['./simple-dataset-version-content.component.scss']
+  styleUrls: ['./simple-dataset-version-content.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SimpleDatasetVersionContentComponent {
   public columns: ISmCol[];

@@ -77,6 +77,7 @@ export class CommonAuthEffects {
 
   updateCredentialLabel = createEffect(() => this.actions.pipe(
     ofType(authActions.updateCredentialLabel),
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     mergeMap(action => this.credentialsApi.authEditCredentials({access_key: action.credential.access_key, label: action.label}).pipe(
       mergeMap(() => [
         setCredentialLabel({credential: action.credential, label: action.label}),
@@ -87,6 +88,14 @@ export class CommonAuthEffects {
         setServerError(error, null, 'Unable to update credentials'),
         deactivateLoader(action.type)])
     ))
+  ));
+
+  refresh = createEffect(() => this.actions.pipe(
+    ofType(authActions.refreshS3Credential, authActions.getSignedUrl),
+    map(() => {
+      const state = JSON.parse(window.localStorage.getItem('_saved_state_'));
+      return authActions.setS3Credentials({bucketCredentials: state?.auth?.s3BucketCredentials?.bucketCredentials});
+    })
   ));
 
   signUrl = createEffect(() => this.actions.pipe(

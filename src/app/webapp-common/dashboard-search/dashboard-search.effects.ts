@@ -187,6 +187,8 @@ export class DashboardSearchEffects {
       stats_for_state: ProjectsGetAllExRequest.StatsForStateEnum.Active,
       scroll_id: scrollIds?.[activeSearchLink.openDatasets] || null,
       size: SEARCH_PAGE_SIZE,
+      include_dataset_stats: true,
+      stats_with_children: false,
       include_stats: true,
       only_fields: ['name', 'company', 'user', 'created', 'default_output_destination', 'tags', 'system_tags', 'basename']
       /* eslint-enable @typescript-eslint/naming-convention */

@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {select, Store} from '@ngrx/store';
 import {activeLoader, deactivateLoader, setServerError} from '../../core/actions/layout.actions';
-import {catchError, mergeMap, map, switchMap, withLatestFrom} from 'rxjs/operators';
+import {catchError, mergeMap, map, switchMap, withLatestFrom, filter} from 'rxjs/operators';
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
 import {ExperimentDetailsReverterService} from '../services/experiment-details-reverter.service';
 import {requestFailed} from '../../core/actions/http.actions';
@@ -14,6 +14,7 @@ import {ExperimentCompareDetailsState} from '../reducers/experiments-compare-det
 import {experimentListUpdated, setExperiments} from '../actions/experiments-compare-details.actions';
 import {getCompareDetailsOnlyFields} from '~/features/experiments-compare/experiments-compare-consts';
 import {selectHasDataFeature} from '~/core/reducers/users.reducer';
+import {selectActiveWorkspaceReady} from '~/core/reducers/view.reducer';
 
 @Injectable()
 export class ExperimentsCompareDetailsEffects {
@@ -31,6 +32,9 @@ export class ExperimentsCompareDetailsEffects {
 
   updateExperimentsDetail$ = createEffect(() => this.actions$.pipe(
     ofType(experimentListUpdated),
+    switchMap((action) => this.store.select(selectActiveWorkspaceReady).pipe(
+      filter(ready => ready),
+      map(() => action))),
     withLatestFrom(
       this.store.pipe(select(selectExperimentIdsDetails)),
       this.store.select(selectHasDataFeature)

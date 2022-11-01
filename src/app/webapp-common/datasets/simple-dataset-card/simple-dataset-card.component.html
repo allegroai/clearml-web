@@ -17,10 +17,7 @@
                       (inlineActiveStateChanged)="projectNameEditActiveChanged($event)"
 
       >
-        <span class="project-name"
-              matTooltipPosition="above"
-              [smTooltip]="project.name"
-        >{{project.name | shortProjectName}}</span>
+        <span class="project-name" [smTooltip]="project.name">{{project.name | shortProjectName}}</span>
       </sm-inline-edit>
       <sm-pipeline-card-menu
         class="menu-wrapper"

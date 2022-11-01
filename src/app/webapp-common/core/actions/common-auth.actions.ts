@@ -4,6 +4,12 @@ import {GetCurrentUserResponseUserObjectCompany} from '~/business-logic/model/us
 
 export const AUTH_PREFIX = 'AUTH_';
 
+export const refreshS3Credential = createAction(AUTH_PREFIX + ' [Refresh S3Credential]');
+export const setS3Credentials = createAction(
+  AUTH_PREFIX + ' [Set S3]',
+  props<{ bucketCredentials: Credentials[] }>()
+);
+
 export const updateS3Credential = createAction(
   AUTH_PREFIX + 'SET_BUCKETS_CREDENTIALS',
   props<{s3BucketCredentials: {bucketCredentials: Credentials[]}}>()

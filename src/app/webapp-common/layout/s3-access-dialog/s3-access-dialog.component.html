@@ -26,11 +26,10 @@
       <input matInput [(ngModel)]="S3Form.Endpoint" type="text" name="Endpoint" autocomplete="off"
              placeholder="Host (Endpoint)">
     </mat-form-field>
-    <div class="w-100 d-flex justify-content-center">
+    <div class="w-100 d-flex justify-content-center mt-4">
       <button class="btn btn-neon" (click)="S3NGForm.form.markAllAsTouched(); saveNewCredentials()"
-              [disabled]="(!saveEnabled) || (formIsSubmitted && S3NGForm.invalid)">Save Credentials
+              [disabled]="(!saveEnabled) || (formIsSubmitted && S3NGForm.invalid)">SAVE CREDENTIALS
       </button>
-
     </div>
   </ng-form>
 </div>

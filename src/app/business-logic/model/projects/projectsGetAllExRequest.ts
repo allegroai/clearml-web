@@ -95,6 +95,10 @@ export interface ProjectsGetAllExRequest {
     size?: number;
   stats_with_children?: boolean;
   include_stats_filter?: any;
+    /**
+     * If true, include project dataset statistic in response
+     */
+    include_dataset_stats?: boolean;
 }
 export namespace ProjectsGetAllExRequest {
     export type StatsForStateEnum = 'active' | 'archived';
