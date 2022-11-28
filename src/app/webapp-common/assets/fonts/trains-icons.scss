@@ -2,7 +2,7 @@
 
 @font-face {
   font-family: '#{$icomoon-font-family}';
-  src: url('./#{$icomoon-font-family}.ttf?ttf?vsfnj4') format('truetype');
+  src: url('./#{$icomoon-font-family}.ttf?84hl5c') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -23,6 +23,21 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.al-ico-gpu {
+  &:before {
+    content: $al-ico-gpu;
+  }
+}
+.al-ico-project-path {
+  &:before {
+    content: $al-ico-project-path;
+  }
+}
+.al-ico-tree-view {
+  &:before {
+    content: $al-ico-tree-view;
+  }
+}
 .al-ico-sort-asc {
   &:before {
     content: $al-ico-sort-asc;
@@ -721,52 +736,53 @@
 .al-ico-filter-on .path1 {
   &:before {
     content: $al-ico-filter-on-path1;
-    color: rgb(211, 255, 0);
+    color: $neon-yellow; // don't overwrite
+    // color: rgb(211, 255, 0);
   }
 }
 .al-ico-filter-on .path2 {
   &:before {
     content: $al-ico-filter-on-path2;
     margin-left: -1em;
-    color: rgb(132, 146, 194);
+    color: $blue-300; // don't overwrite
   }
 }
 .al-ico-filter-off {
   &:before {
     content: $al-ico-filter-off;
-    color: #8492c2;
+    color: $blue-400; // don't overwrite
   }
 }
 .al-ico-sort-off {
   &:before {
     content: $al-ico-sort-off;
-    color: #5a658e;
+    color: $blue-400; // don't overwrite
   }
 }
 .al-ico-sort-on-down .path1 {
   &:before {
     content: $al-ico-sort-on-down-path1;
-    color: rgb(90, 101, 142);
+    color: $blue-400; // don't overwrite
   }
 }
 .al-ico-sort-on-down .path2 {
   &:before {
     content: $al-ico-sort-on-down-path2;
     margin-left: -1em;
-    color: rgb(195, 205, 240);
+    color: $blue-200; // don't overwrite
   }
 }
 .al-ico-sort-on-up .path1 {
   &:before {
     content: $al-ico-sort-on-up-path1;
-    color: rgb(90, 101, 142);
+    color: $blue-400; // don't overwrite
   }
 }
 .al-ico-sort-on-up .path2 {
   &:before {
     content: $al-ico-sort-on-up-path2;
     margin-left: -1em;
-    color: rgb(195, 205, 240);
+    color: $blue-200; // don't overwrite
   }
 }
 .al-ico-arrow-left {
@@ -992,27 +1008,28 @@
 .al-ico-auto-refresh-play .path1 {
   &:before {
     content: $al-ico-auto-refresh-play-path1;
-    color: rgb(90, 101, 142);
+    color: $blue-300; // don't overwrite
   }
 }
 .al-ico-auto-refresh-play .path2 {
   &:before {
     content: $al-ico-auto-refresh-play-path2;
     margin-left: -1em;
-    color: rgb(211, 253, 0);
+    color: $neon-yellow; // don't overwrite
   }
 }
 .al-ico-auto-refresh-pause .path1 {
   &:before {
     content: $al-ico-auto-refresh-pause-path1;
-    color: rgb(90, 101, 142);
+    color: $blue-300; // don't overwrite
   }
 }
 .al-ico-auto-refresh-pause .path2 {
   &:before {
     content: $al-ico-auto-refresh-pause-path2;
     margin-left: -1em;
-    color: rgb(211, 253, 0);
+    color: $neon-yellow; // don't overwrite
+    // color: rgb(211, 253, 0);
   }
 }
 .al-ico-sqr-ok {
@@ -1068,14 +1085,15 @@
 .al-ico-filter-reset .path1 {
   &:before {
     content: $al-ico-filter-reset-path1;
-    color: rgb(90, 101, 142);
+    color: $blue-300; // don't overwrite
   }
 }
 .al-ico-filter-reset .path2 {
   &:before {
     content: $al-ico-filter-reset-path2;
     margin-left: -1em;
-    color: rgb(237, 138, 131);
+    color: lighten($failed-red, 10%); // don't overwrite
+    // color: rgb(237, 138, 131);
   }
 }
 .al-ico-version-label {
@@ -1111,14 +1129,15 @@
 .al-ico-settings-alert .path1 {
   &:before {
     content: $al-ico-settings-alert-path1;
-    color: rgb(0, 0, 0);
+    color: $black; // don't overwrite
   }
 }
 .al-ico-settings-alert .path2 {
   &:before {
     content: $al-ico-settings-alert-path2;
     margin-left: -1em;
-    color: rgb(211, 255, 0);
+    color: $neon-yellow; // don't overwrite
+    // color: rgb(211, 255, 0);
   }
 }
 .al-ico-platform {

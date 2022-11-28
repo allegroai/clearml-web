@@ -145,7 +145,6 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
           .pipe(filter(model => model?.length > 0), tap((model: any[]) =>
             model.forEach(row => this.chartWidth = Math.max(this.chartWidth, row.length * 300))));
         const pipelineObject = this.getTreeObject(task);
-        if (pipelineObject) {
           this.pipelineController = this.convertPipelineToDagModel(pipelineObject);
           this.resetUninitializedRunningFields();
           this._dagManager.setNewItemsArrayAsDagModel(this.pipelineController);
@@ -158,7 +157,7 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
             this.drawLines();
             this.cdr.detectChanges();
           }, 0);
-        }
+
       })
     );
   }

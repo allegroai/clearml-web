@@ -1,4 +1,4 @@
-import {Action, createAction, props} from '@ngrx/store';
+import {createAction, props} from '@ngrx/store';
 import {IExperimentInfo, ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
 import {Project} from '~/business-logic/model/projects/project';
 import {Queue} from '~/business-logic/model/queues/queue';
@@ -7,9 +7,6 @@ import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import { PipelinesStartPipelineRequest } from '~/business-logic/model/pipelines/pipelinesStartPipelineRequest';
 
 export const EXPERIMENTS_INFO_PREFIX = 'EXPERIMENTS_INFO_';
-
-// EVENTS:
-export const CLONE_EXPERIMENT_CLICKED = EXPERIMENTS_INFO_PREFIX + 'CLONE_EXPERIMENT_CLICKED';
 
 
 export const publishClicked = createAction(
@@ -28,7 +25,7 @@ export const startPipeline = createAction(
 
 export const getControllerForStartPipelineDialog = createAction(
   EXPERIMENTS_INFO_PREFIX + '[Get Controller For Start Pipeline]',
-  props<{task:string}>()
+  props<{task: string}>()
 );
 
 export const setControllerForStartPipelineDialog = createAction(
@@ -47,12 +44,10 @@ export const dequeueClicked = createAction(
   props<{ selectedEntities: ISelectedExperiment[] }>()
 );
 
-export class CloneExperimentClicked implements Action {
-  readonly type = CLONE_EXPERIMENT_CLICKED;
-
-  constructor(public payload: { originExperiment: ISelectedExperiment; cloneData: CloneExperimentPayload }) {
-  }
-}
+export const cloneExperimentClicked = createAction(
+  EXPERIMENTS_INFO_PREFIX + 'CLONE_EXPERIMENT_CLICKED',
+  props<{ originExperiment: ISelectedExperiment; cloneData: CloneExperimentPayload }>()
+);
 
 export const addTag = createAction(
   EXPERIMENTS_INFO_PREFIX + '[add tag to experiment]',
@@ -85,7 +80,7 @@ export const navigateToQueue = createAction(
 
 export const enqueueClicked = createAction(
   EXPERIMENTS_INFO_PREFIX + '[enqueue experiments]',
-  props<{ selectedEntities: ISelectedExperiment[]; queue: Queue }>()
+  props<{ selectedEntities: ISelectedExperiment[]; queue: Queue; verifyWatchers: boolean }>()
 );
 
 export const archiveSelectedExperiments = createAction(

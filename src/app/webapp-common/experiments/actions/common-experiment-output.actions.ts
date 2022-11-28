@@ -125,9 +125,11 @@ export const toggleSettings = createAction(EXPERIMENTS_OUTPUT_PREFIX + 'TOGGLE_S
 
 export const getPlotSample = createAction(
   EXPERIMENTS_OUTPUT_PREFIX + 'GET_PLOT_FOR_ITERATION',
-  props<{ task: string; metric: string; variant: string; iteration: number }>()
+  props<{ task: string; metric: string; iteration: number }>()
 );
-export const getNextPlotSample = createAction(EXPERIMENTS_OUTPUT_PREFIX + 'GET_NEXT_PLOT', props<{ task: string; navigateEarlier: boolean }>());
+export const getNextPlotSample = createAction(
+  EXPERIMENTS_OUTPUT_PREFIX + 'GET_NEXT_PLOT',
+  props<{ task: string; navigateEarlier: boolean; iteration?: boolean }>());
 export const setCurrentPlot = createAction(EXPERIMENTS_OUTPUT_PREFIX + 'SET_PLOT_FOR_ITERATION', props<{ event: any }>());
 export const setPlotViewerScrollId = createAction(EXPERIMENTS_OUTPUT_PREFIX + 'SET_PLOT_VIEWER_SCROLL_ID', props<{ scrollId: string }>());
 export const setPlotIterations = createAction(EXPERIMENTS_OUTPUT_PREFIX + 'SET_PLOT_ITERATIONS', props<PlotSampleResponse>());

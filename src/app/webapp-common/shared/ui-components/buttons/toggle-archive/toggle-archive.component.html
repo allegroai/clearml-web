@@ -4,6 +4,6 @@
   [smTooltip]="minimize ? showArchived ? 'EXIT ARCHIVE': 'OPEN ARCHIVE' : ''"
   
 >
-  <i [class]="'al-icon sm ' + (showArchived? ' al-ico-exit-archive' : 'al-ico-archive' )"></i>
+  <i [class]="'al-icon sm ' + (showArchived? ' al-ico-exit-archive' : 'al-ico-archive' )" data-id="Open Archive"></i>
   <span *ngIf="!minimize" class="button-label">{{showArchived? 'EXIT': 'OPEN'}} ARCHIVE</span>
 </button>

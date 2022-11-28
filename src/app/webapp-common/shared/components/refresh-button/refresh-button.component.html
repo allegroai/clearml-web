@@ -2,6 +2,7 @@
   <span
     *ngIf="allowAutoRefresh && autoRefreshState$ | async; else pause"
     class="pl-1 al-icon al-ico-auto-refresh-play"
+    data-id="Auto Refresh"
     (click)="refresh.trigger()"
   ><span class="path1"></span><span class="path2"></span></span>
   <ng-template #pause>

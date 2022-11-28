@@ -54,7 +54,8 @@ export class PipelineControllerMenuComponent extends ExperimentMenuComponent {
 
     this.store.dispatch(commonMenuActions.enqueueClicked({
       selectedEntities: selectedExperiments,
-      queue: this._experiment.execution?.queue
+      queue: this._experiment.execution?.queue,
+      verifyWatchers: false
     }));
   }
 

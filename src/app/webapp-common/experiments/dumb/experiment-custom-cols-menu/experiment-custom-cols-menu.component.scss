@@ -9,24 +9,25 @@
 
 .custom-column-buttons {
   display: flex;
-  border-top: 1px solid #C3CDEF;
   font-weight: 500;
-  color: $light-grey-blue;
+  color: $blue-400;
   background: $faint-gray;
   cursor: pointer;
 
   div:not(.disabled):hover {
-    color: $blue-400;
+    color: $blue-300;
     transition: color 0.3s;
   }
 
   .metrics-button {
     width: 50%;
     white-space: nowrap;
-    border-right: 1px solid #C3CDEF;
 
     .caption {
       margin-top: 2px;
+    }
+    &:first-child {
+      border-right: 1px solid $blue-200;
     }
   }
 }
@@ -60,7 +61,6 @@ sm-select-metric-for-custom-col {
   display: block;
   height: 640px;
   max-height: calc(100vh - 120px);
-  padding: 12px;
 }
 
 .custom-columns-disabled {

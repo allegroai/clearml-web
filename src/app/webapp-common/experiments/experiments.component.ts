@@ -141,9 +141,9 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
     protected route: ActivatedRoute,
     protected router: Router,
     protected dialog: MatDialog,
-    protected refresh: RefreshService
+    protected refresh: RefreshService,
   ) {
-    super(store, route, router, dialog, refresh);
+    super(store, route, router, dialog, refresh, syncSelector);
     this.selectSplitSize$ = this.store.select(selectSplitSize);
     this.isPipeline$ = this.store.select(selectIsPipelines);
     this.tableSortFields$ = this.store.select(selectTableSortFields).pipe(tap(field => this.sortFields = field));
@@ -352,7 +352,7 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
         this.compareExperiments();
         break;
       case MenuItems.archive:
-        this.contextMenu.restoreArchive();
+        this.contextMenu.restoreArchive(item.entitiesType);
         break;
       case MenuItems.reset:
         this.contextMenu.resetPopup();

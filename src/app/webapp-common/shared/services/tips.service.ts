@@ -11,7 +11,7 @@ import {selectCurrentUser} from '../../core/reducers/users-reducer';
 import {neverShowPopupAgain} from '../../core/actions/layout.actions';
 import {FeaturesEnum} from '~/business-logic/model/users/featuresEnum';
 import {selectFeatures, selectTermsOfUse} from '~/core/reducers/users.reducer';
-import {mobilecheck} from '@common/shared/utils/mobile';
+import {DeviceDetectorService} from 'ngx-device-detector';
 
 interface Tips {
   [url: string]: Tip[];
@@ -41,9 +41,13 @@ export class TipsService {
   private firstTime: boolean = true;
   private mobile: boolean;
 
-  constructor(private httpClient: HttpClient, private store: Store<any>, private matDialog: MatDialog,
+  constructor(
+    private httpClient: HttpClient,
+    private store: Store,
+    private matDialog: MatDialog,
+    private deviceService: DeviceDetectorService
   ) {
-    this.mobile = mobilecheck();
+    this.mobile = deviceService.isMobile();
   }
 
   initTipsService(showAllTips = true) {

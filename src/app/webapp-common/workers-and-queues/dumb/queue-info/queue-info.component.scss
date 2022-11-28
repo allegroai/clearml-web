@@ -45,7 +45,7 @@
     position: absolute;
     right: 24px;
     top: 12px;
-    color: $blue-400;
+    color: $blue-300;
     &:hover {
       color: $blue-200;
     }
@@ -65,14 +65,14 @@
     }
     .al-icon {
       visibility: hidden;
-      color: $blue-400;
+      color: $blue-300;
       vertical-align: middle;
       transition: color 0.35s;
       &.al-ico-drag {
         visibility: visible;
       }
       &:hover {
-        color: $blue-200;
+        color: $blue-100;
       }
     }
     &:hover .al-icon {

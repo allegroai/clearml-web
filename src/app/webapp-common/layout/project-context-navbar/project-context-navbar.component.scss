@@ -1,4 +1,4 @@
-@import "../../shared/ui-components/styles/variables";
+@import "variables";
 
 $lg-breakpoint: map-get($grid-breakpoints, lg);
 :host {
@@ -7,6 +7,7 @@ $lg-breakpoint: map-get($grid-breakpoints, lg);
     margin-left: $side-bar-close-width;
     .nav-bar-items-container {
       display: flex;
+      gap: 1px;
       position: absolute;
       left: 50%;
       transform: translateX(-50%);

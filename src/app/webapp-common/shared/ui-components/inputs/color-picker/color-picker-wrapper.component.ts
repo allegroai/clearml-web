@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {selectColorPickerProps} from '../../directives/choose-color/choose-color.reducer';
 import {Subscription} from 'rxjs';
@@ -11,7 +11,8 @@ import {isEqual} from 'lodash/fp';
 @Component({
   selector: 'sm-color-picker-wrapper',
   templateUrl: './color-picker-wrapper.component.html',
-  styleUrls: ['./color-picker-wrapper.component.scss']
+  styleUrls: ['./color-picker-wrapper.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ColorPickerWrapperComponent implements OnInit, OnDestroy {
 

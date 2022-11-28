@@ -7,7 +7,6 @@ import {GetCurrentUserResponseUserObjectCompany} from '~/business-logic/model/us
 import {TABLE_SORT_ORDER} from '../ui-components/data/table/table.consts';
 import {CloseScrollStrategy, Overlay} from '@angular/cdk/overlay';
 import {Store} from '@ngrx/store';
-import {mobilecheck} from '@common/shared/utils/mobile';
 
 export const capitalizeFirstLetter = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
 
@@ -148,7 +147,7 @@ export const getRouteFullUrl = (route: ActivatedRoute) => {
   return path;
 };
 
-export const escapeRegex = (input: string) => input.replace(/[.+?^*${}()|[\]\\]/g, '\\$&');
+export const escapeRegex = (input: string) => input?.replace(/[.+?^*${}()|[\]\\]/g, '\\$&');
 
 export const removeAlphaColor = (rgbaColor: string) => {
   const rgbaColorArr = rgbaColor.substring(rgbaColor.indexOf('(') + 1, rgbaColor.indexOf(')')).split(',');
@@ -239,13 +238,13 @@ export const groupHyperParams = (hyperParams: any[]) => hyperParams.reduce((acc,
   return acc;
 }, {});
 
-export const getScaleFactor = () => {
+export const getScaleFactor = (isMobile = false) => {
   const isMac = (navigator.platform.indexOf('Mac') !== -1 || navigator.platform.indexOf('iPad') !== -1);
   const isWin = navigator.platform.indexOf('Win') !== -1;
   let dimensionRatio = 100;
   let screenHeight: number;
 
-  if (mobilecheck()) {
+  if (isMobile) {
     return dimensionRatio;
   }
 

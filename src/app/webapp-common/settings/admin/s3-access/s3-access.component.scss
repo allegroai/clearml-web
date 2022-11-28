@@ -29,6 +29,12 @@
 .delete-button {
   display: flex;
   align-items: center;
+  .al-icon {
+    color: $blue-300;
+    &:hover {
+      color: $blue-200;
+    }
+  }
 }
 
 .add-button {

@@ -23,11 +23,11 @@
   <div class="right-buttons">
     <sm-common-search #search [class.share-view]="isShareMode"></sm-common-search>
 
-    <a class="pointer resources-trigger" [matMenuTriggerFor]="resourcesMenu">
-      <i class="far al-ico-help-outlined"></i>
+    <a class="d-flex pointer resources-trigger" [matMenuTriggerFor]="resourcesMenu">
+      <i class="al-icon al-ico-help-outlined" data-id="help Icon"></i>
     </a>
     <a class="pointer menu-trigger position-relative" [matMenuTriggerFor]="profileMenu">
-      <img alt="avatar" class="avatar" *ngIf="(user | async).avatar; else iconAvatar" [src]="(user | async).avatar">
+      <img alt="avatar" class="avatar" data-id="Avatar" *ngIf="(user | async).avatar; else iconAvatar" [src]="(user | async).avatar">
       <ng-template #iconAvatar>
         <div class="user-icon">
           <i class="al-icon al-ico-account sm-md"></i>
@@ -44,7 +44,7 @@
         Settings
       </button>
       <sm-header-user-menu-actions></sm-header-user-menu-actions>
-      <button mat-menu-item (click)="logout()">
+      <button mat-menu-item (click)="logout()" data-id="Logout">
         <span class="al-ico-logout al-icon icon sm-md"></span>
         Logout
       </button>
@@ -71,7 +71,7 @@
           <i class="al-icon sm-md al-ico-applications"></i>ClearML Apps Introduction
         </button>
       </ng-container>
-      <button mat-menu-item (click)="navigate('https://www.clear.ml/contact-us/')">
+      <button mat-menu-item (click)="navigate('mailto:support@clear.ml')">
         <i class="al-icon sm-md al-ico-email"></i>Contact Us
       </button>
     </mat-menu>

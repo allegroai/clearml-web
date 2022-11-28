@@ -6,8 +6,9 @@
     <div>
       <button *ngIf="(recentProjectsList$ | async).length >= cardsInRow || overflow"
               class="btn btn-cml-primary d-flex align-items-center"
+              data-id="New Project"
               (click)="openCreateProjectDialog()">
-        <i class="al-icon al-color sm blue-400 al-ico-add mr-2"></i>NEW PROJECT
+        <i class="al-icon sm al-ico-add mr-2"></i>NEW PROJECT
       </button>
     </div>
   </div>

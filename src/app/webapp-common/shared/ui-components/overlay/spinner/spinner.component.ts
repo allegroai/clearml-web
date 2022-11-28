@@ -5,6 +5,7 @@ import {NavigationStart, Router} from '@angular/router';
 import {debounceTime, distinctUntilChanged, filter, map} from 'rxjs/operators';
 import {resetLoader} from '@common/core/actions/layout.actions';
 import {Observable, Subscription} from 'rxjs';
+import {isEqual} from 'lodash/fp';
 
 @Component({
   selector: 'sm-spinner',
@@ -32,7 +33,8 @@ export class SpinnerComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.spinnerSubscribe = this.loading$.pipe(
-      debounceTime(300)
+      debounceTime(300),
+      distinctUntilChanged(isEqual)
     ).subscribe(loaders => {
         this.showSpinner = Object.values(loaders).some((value) => value);
         this.cdr.detectChanges();
@@ -45,7 +47,6 @@ export class SpinnerComponent implements OnInit, OnDestroy {
         distinctUntilChanged()
       ).subscribe(() => {
         this.store.dispatch(resetLoader());
-        this.cdr.detectChanges();
       });
   }
 

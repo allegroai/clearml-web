@@ -85,7 +85,8 @@ export const setDeep = createAction(
 );
 
 export const getTags = createAction(
-  PROJECTS_PREFIX + '[get tags]'
+  PROJECTS_PREFIX + '[get tags]',
+  (project = null) => ({projectId: project})
 );
 
 export const getCompanyTags = createAction(

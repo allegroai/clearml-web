@@ -4,7 +4,7 @@ import {Model} from '~/business-logic/model/models/model';
 import {clearSearchResults, getCurrentPageResults, searchClear, searchDeactivate, searchStart} from '../dashboard-search/dashboard-search.actions';
 import {IRecentTask} from './common-dashboard.reducer';
 import {ITask} from '~/business-logic/model/al-task';
-import {Observable, Subscription} from 'rxjs';
+import {combineLatest, Observable, Subscription} from 'rxjs';
 import {SearchState, selectSearchQuery} from '../common-search/common-search.reducer';
 import {Store} from '@ngrx/store';
 import {
@@ -17,6 +17,7 @@ import {isExample} from '../shared/utils/shared-utils';
 import {activeLinksList, ActiveSearchLink, activeSearchLink} from '~/features/dashboard-search/dashboard-search.consts';
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
+import { selectShowOnlyUserWork } from '@common/core/reducers/users-reducer';
 
 @Component({
   selector: 'sm-dashboard-search-base',
@@ -69,9 +70,7 @@ export class DashboardSearchBaseComponent implements OnInit, OnDestroy{
   public ngOnInit(): void {
     this.allResultsSubscription = this.resultsCount$.pipe(
       filter(resultsCount => !!resultsCount),
-    ).subscribe((resultsCount) => {
-      return this.setFirstActiveLink(resultsCount);
-    });
+    ).subscribe((resultsCount) => this.setFirstActiveLink(resultsCount));
   }
 
   ngOnDestroy(): void {
@@ -89,9 +88,12 @@ export class DashboardSearchBaseComponent implements OnInit, OnDestroy{
   syncAppSearch() {
     this.store.dispatch(initSearch({payload: 'Search for all'}));
 
-    this.searchSubs = this.searchQuery$
+    this.searchSubs = combineLatest([
+      this.searchQuery$,
+      this.store.select(selectShowOnlyUserWork),
+    ])
       .pipe(skip(1))
-      .subscribe(query => this.searchTermChanged(query?.query, query?.regExp));
+      .subscribe(([query]) => this.searchTermChanged(query?.query, query?.regExp));
 
     this.searchSubs.add(this.store.select(selectSearchScrollIds).subscribe(scrollIds => this.scrollIds = scrollIds));
   }

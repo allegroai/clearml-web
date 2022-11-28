@@ -110,4 +110,8 @@ export class SearchComponent implements OnInit, OnChanges, OnDestroy {
   focusInput($event: boolean) {
     this.focused = $event;
   }
+
+  getFocus() {
+    this.searchBarInput.nativeElement.focus();
+  }
 }

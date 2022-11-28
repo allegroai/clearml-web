@@ -110,7 +110,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
   }
 
   @Input() moveLegendToTitle = false;
-  @Input() legendStringLength: number;
+  @Input() legendStringLength = 19;
   @Input() graphsNumber: number;
   @Input() xAxisType: ScalarKeyEnum;
 
@@ -148,7 +148,6 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
     protected renderer: Renderer2,
     private colorHash: ColorHashService,
     public changeDetector: ChangeDetectorRef,
-    public elementRef: ElementRef,
     protected store: Store,
     private dialog: MatDialog,
     private readonly zone: NgZone
@@ -244,7 +243,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
       ...this.addParametersIfDarkTheme({
         font: {
           color: '#FFFFFF',
-          family: '"Heebo", sans-serif, sans-serif',
+          family: '"Heebo", sans-serif',
         }
       }),
       ...graph.layout,
@@ -253,10 +252,11 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
       height: this.height,
       width: this.ratio ? (this.height * this.ratio) + RATIO_OFFSET_FIX : undefined,
       modebar: {
-        color: '#8F9DC9',
+        color: '#5a658e',
         activecolor: '#4D66FF',
         ...this.addParametersIfDarkTheme({
-          activecolor: PALLET.blue500,
+          color: PALLET.blue300,
+          activecolor: PALLET.blue100,
           bgcolor: 'transparent',
         }),
       },
@@ -299,11 +299,17 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
         traceorder: 'normal',
         xanchor: 'left',
         yanchor: 'top',
-        x: this.moveLegendToTitle ? 0 : 1,
-        y: 1,
+        ...(this.moveLegendToTitle ? {
+          x: 0,
+          y: 1,
+          orientation: 'v',
+        } : {
+          orientation: 'h',
+          x: 0.05,
+          y: -0.2
+        }),
         borderwidth: 2,
         bordercolor: '#FFFFFF',
-        orientation: 'v',
         valign: 'top',
         font: {color: '#000', size: 12, family: 'sans-serif'},
         ...this.addParametersIfDarkTheme({
@@ -573,10 +579,12 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
         if (graph.data[i].type === 'bar' && !graph.data[i].marker) {
           graph.data[i].marker = {} as Partial<PlotMarker>;
         }
-        const colorKey = this.generateColorKey(graph, i);
-        const wrappedText = !this.legendConfiguration.noTextWrap ? wordWrap(graph.data[i].name, this.legendStringLength || 19) : graph.data[i].name;
+        const genColorKey = this.generateColorKey(graph, i);
+        const wrappedText = this.legendConfiguration.noTextWrap || this.scaleFactor === 100 ?
+          graph.data[i].name :
+          wordWrap(graph.data[i].name, this.legendStringLength / 2);
         const skipColor = !!this.getOriginalColor(i) ? ORIGIN_COLOR : '';
-        graph.data[i].name = wrappedText + `<span style="display: none;" class="color-key" data-color-key="${colorKey}" ${skipColor}></span>`;
+        graph.data[i].name = wrappedText + `<span style="display: none;" class="color-key" data-color-key="${genColorKey}" ${skipColor}></span>`;
       }
       const colorKey = this.extractColorKey(graph.data[i].name);
       const originalColor = this.getOriginalColor(i);
@@ -696,7 +704,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
       const textEl = trace.querySelector('.legendtext') as SVGTextElement;
       const textElData = textEl.getAttribute('data-unformatted');
       const text = textEl ? this.extractColorKey(textElData) : '';
-      const skipColor = textElData.includes(ORIGIN_COLOR);
+      // const skipColor = textElData.includes(ORIGIN_COLOR);
 
       const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
       title.textContent = text.replace('?', '');
@@ -717,7 +725,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
       chart.layout.xaxis = {};
     }
     if (title) {
-      chart.layout.xaxis.title = title;
+      chart.layout.xaxis.title = {text: title, standoff: 10};
     }
     return chart;
   }

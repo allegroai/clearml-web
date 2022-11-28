@@ -81,7 +81,7 @@ export const setSelectedExperiment = createAction(
 
 export const experimentSelectionChanged = createAction(
   EXPERIMENTS_PREFIX + ' [experiment selection changed]',
-  props<{ experiment: { id?: string }; project?: string }>()
+  props<{ experiment: { id?: string }; project?: string; replaceURL?: boolean }>()
 );
 
 

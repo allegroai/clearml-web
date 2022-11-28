@@ -11,10 +11,10 @@
   </ng-template>
   <div class="buttons">
     <button (click)="closeDialog(true)" [disabled]="!(shouldBeAbortedTasks?.length>0)"
-            class="btn btn-neon yes-button">
+            class="btn btn-neon yes-button" data-id ="AbortButton">
       ABORT
     </button>
-    <button (click)="closeDialog(false)" class="btn btn-outline-neon">
+    <button (click)="closeDialog(false)" class="btn btn-outline-neon" data-id ="CancelButton">
       CANCEL
     </button>
   </div>

@@ -2,13 +2,13 @@
 @import "angular-notifier/styles.scss";
 @import "angular-notifier/styles/themes/theme-material.scss";
 @import "shared/ui-components/styles/notifications";
-@import "~britecharts/src/styles/charts/line";
-@import "~britecharts/src/styles/charts/donut";
-@import "~britecharts/src/styles/common/legend";
-@import "~britecharts/src/styles/common/tooltip";
-@import "~britecharts/src/styles/common/axes";
-@import "~britecharts/src/styles/common/grid";
-// @import "~ngx-markdown-editor/assets/highlight.js/agate.min.css";
+@import "britecharts/src/styles/charts/line";
+@import "britecharts/src/styles/charts/donut";
+@import "britecharts/src/styles/common/legend";
+@import "britecharts/src/styles/common/tooltip";
+@import "britecharts/src/styles/common/axes";
+@import "britecharts/src/styles/common/grid";
+// @import "ngx-markdown-editor/assets/highlight.js/agate.min.css";
 @import "shared/ui-components/styles/material-palette";
 @import "assets/fonts/trains-icons.scss";
 @import "layout/layout";
@@ -94,6 +94,14 @@ $sm-theme: mat.define-light-theme($sm-theme-primary, $sm-theme-accent, $sm-theme
   @include mat.datepicker-color($light-theme);
   @include mat.pseudo-checkbox-color($light-theme);
   @include mat.divider-color($light-theme);
+
+  mat-progress-bar {
+    border-radius: 4px;
+    box-shadow: 0 0 0 1px $white, 0 0 0 3px lighten($purple, 30%);
+  }
+  .mat-progress-bar-fill::after {
+    background-color: lighten($purple, 10%);
+  }
 
   .mat-checkbox-frame,
   .mat-radio-outer-circle {
@@ -289,7 +297,7 @@ button {
 }
 
 .color-neon-yellow {
-  color: $neon-yellow;
+  color: $neon-yellow !important;
 }
 
 .background-neon-green {
@@ -511,9 +519,10 @@ html {
 
 .sm-menu-header {
   text-align: center;
-  padding: 15px 15px;
+  padding: 12px;
   background: $blue-25;
   color: $blue-400;
+  border-bottom: 1px solid $blue-200;
 }
 
 .mat-menu-content .mat-menu-item {
@@ -576,36 +585,6 @@ $type-colors: (
   date: #05668D,
 );
 
-.dark-theme {
-  .ngx-json-viewer {
-    background-color: $blue-800;
-    overflow: unset !important;
-    height: 99% !important;
-    font-size: 11px !important;
-    line-height: 11px !important;
-
-    .segment .segment-main {
-      .toggler {
-        font-size: 16px !important;
-        line-height: 4px !important;
-      }
-
-      .segment-key {
-        color: $blue-250 !important;
-      }
-    }
-  }
-
-  @each $type, $color in $type-colors {
-    .segment-type-#{$type} > .segment-main > .segment-value {
-      color: $color !important;
-    }
-  }
-
-  .segment-type-link > .segment-main > .segment-value > a {
-    color: #ff8400 !important;
-  }
-}
 
 .mat-expansion-panel.allegro-style {
   width: 100%;
@@ -731,7 +710,7 @@ button.btn.button-outline-dark {
 .sm-card-list-layout {
   display: grid;
   grid-template-columns: repeat(auto-fit, 352px);
-  grid-gap: 32px 24px;
+  grid-gap: 24px;
   padding: 0 24px 24px;
   justify-content: center;
 
@@ -751,7 +730,7 @@ button.btn.button-outline-dark {
 .sm-card-list-header {
   display: flex;
   justify-content: space-between;
-  padding-top: $projects-header-padding;
+  padding: $projects-header-padding 0 $projects-header-padding * 0.5;
 
   .recent-title {
     display: flex;

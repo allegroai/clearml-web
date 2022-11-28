@@ -1,11 +1,11 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef,} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef} from '@angular/core';
 import {TIME_FORMAT_STRING} from '@common/constants';
 import {ColHeaderTypeEnum, ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {FILTERED_EXPERIMENTS_STATUS_OPTIONS} from '../../shared/common-experiments.const';
 import {get, uniq} from 'lodash/fp';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {ITableExperiment} from '../../shared/common-experiment-model.model';
-import {EXPERIMENTS_TABLE_COL_FIELDS,} from '~/features/experiments/shared/experiments.const';
+import {EXPERIMENTS_TABLE_COL_FIELDS} from '~/features/experiments/shared/experiments.const';
 import {BaseTableView} from '@common/shared/ui-components/data/table/base-table-view';
 import {getSystemTags, isDevelopment} from '~/features/experiments/shared/experiments.utils';
 import {User} from '~/business-logic/model/users/user';
@@ -284,7 +284,7 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit, 
     if (!data?.single) {
       this.contextExperiment = this._experiments.find(experiment => experiment.id === data.rowData.id);
       if (!this.selectedExperiments.map(exp => exp.id).includes(this.contextExperiment.id)) {
-        this.prevSelected = this.contextExperiment;
+        this.prevSelected = this.contextExperiment.id;
         this.emitSelection([this.contextExperiment]);
       }
     } else {

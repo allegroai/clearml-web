@@ -1,77 +1,75 @@
-<div class="card">
-  <div class="folder-tab" smClickStopPropagation *ngIf="isFolder">
-    <div class="first-tab" [class.not-active]="showSecondTab" (click)="setShowSecondTab(false)"
-         [class.hide-second-tab]="oneTabMode">
-      <svg xmlns="http://www.w3.org/2000/svg" width="64" height="20" viewBox="0 0 64 20"
-           *ngIf="!showSecondTab ;else secondTabActive ">
-        <path *ngIf="!oneTabMode && !secondTabIsHovered" d="M30.06,0H64V20H30.06C29.93,19.78,30.06,11.93,30.06,0Z"
-              fill="#2c3246"/>
-        <path *ngIf="!oneTabMode && secondTabIsHovered" d="M30.06,0H64V20H30.06C29.93,19.78,30.06,11.93,30.06,0Z"
-              fill="#5a658e"/>
-        <path *ngIf="!highlightFirstTab" d="M35.61,0H6A6,6,0,0,0,0,6V20H60C44.82,12.36,49.37,0,35.61,0Z" fill="#384161"
-              (mouseenter)="setHighlightFirstTab(true)" (mouseleave)="setHighlightFirstTab(false)"/>
+<div class="folder-tab" smClickStopPropagation *ngIf="isFolder">
+  <div class="first-tab" [class.not-active]="showSecondTab" (click)="setShowSecondTab(false)"
+       [class.hide-second-tab]="oneTabMode">
+    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="20" viewBox="0 0 64 20"
+         *ngIf="!showSecondTab ;else secondTabActive ">
+      <path *ngIf="!oneTabMode && !secondTabIsHovered" d="M30.06,0H64V20H30.06C29.93,19.78,30.06,11.93,30.06,0Z"
+            fill="#2c3246"/>
+      <path *ngIf="!oneTabMode && secondTabIsHovered" d="M30.06,0H64V20H30.06C29.93,19.78,30.06,11.93,30.06,0Z"
+            fill="#5a658e"/>
+      <path *ngIf="!highlightFirstTab" d="M35.61,0H6A6,6,0,0,0,0,6V20H60C44.82,12.36,49.37,0,35.61,0Z" fill="#384161"
+            (mouseenter)="setHighlightFirstTab(true)" (mouseleave)="setHighlightFirstTab(false)"/>
+      <path *ngIf="highlightFirstTab" d="M35.61,0H6A6,6,0,0,0,0,6V20H60C44.82,12.36,49.37,0,35.61,0Z" fill="#5a658e"
+            (mouseenter)="setHighlightFirstTab(true)" (mouseleave)="setHighlightFirstTab(false)"/>
+    </svg>
+    <ng-template #secondTabActive>
+      <svg xmlns="http://www.w3.org/2000/svg" width="64" height="20" viewBox="0 0 64 20">
+        <path *ngIf="!highlightFirstTab" d="M35.61,0H6A6,6,0,0,0,0,6V20H60C44.82,12.36,49.37,0,35.61,0Z"
+              fill="#384161" (mouseenter)="setHighlightFirstTab(true)" (mouseleave)="setHighlightFirstTab(false)"/>
         <path *ngIf="highlightFirstTab" d="M35.61,0H6A6,6,0,0,0,0,6V20H60C44.82,12.36,49.37,0,35.61,0Z" fill="#5a658e"
               (mouseenter)="setHighlightFirstTab(true)" (mouseleave)="setHighlightFirstTab(false)"/>
+        <path d="M64,0V20H30C45.18,12.36,40.63,0,54.39,0Z" fill="#2c3246"/>
       </svg>
-      <ng-template #secondTabActive>
-        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="20" viewBox="0 0 64 20">
-          <path *ngIf="!highlightFirstTab" d="M35.61,0H6A6,6,0,0,0,0,6V20H60C44.82,12.36,49.37,0,35.61,0Z"
-                fill="#384161" (mouseenter)="setHighlightFirstTab(true)" (mouseleave)="setHighlightFirstTab(false)"/>
-          <path *ngIf="highlightFirstTab" d="M35.61,0H6A6,6,0,0,0,0,6V20H60C44.82,12.36,49.37,0,35.61,0Z" fill="#5a658e"
-                (mouseenter)="setHighlightFirstTab(true)" (mouseleave)="setHighlightFirstTab(false)"/>
-          <path d="M64,0V20H30C45.18,12.36,40.63,0,54.39,0Z" fill="#2c3246"/>
-        </svg>
-      </ng-template>
-    </div>
-    <ng-container *ngIf="!showSecondTab">
-
-    </ng-container>
-    <div *ngIf="!oneTabMode" [class.tab-hovered]="secondTabIsHovered" [class.show-second-tab]="showSecondTab"
-         class="middle-tab" (click)="setShowSecondTab(true)" [class.second-tab-active]="showSecondTab"
-         (mouseenter)="setSecondTabHover(true)" (mouseleave)="setSecondTabHover(false)">{{subFolderTitle}}</div>
-    <div *ngIf="!oneTabMode" [class.tab-hovered]="secondTabIsHovered" [class.show-second-tab]="showSecondTab"
-         class="second-tab" (click)="setShowSecondTab(true)">
-      <svg xmlns="http://www.w3.org/2000/svg" width="28" height="20" viewBox="0 0 28 20">
-        <path *ngIf="!secondTabIsHovered || showSecondTab" d="M3.61,0C17.37,0,12.82,12.36,28,20H0V0Z" fill="#2c3246"/>
-        <path *ngIf="secondTabIsHovered && !showSecondTab" d="M3.61,0C17.37,0,12.82,12.36,28,20H0V0Z" fill="#5a658e"/>
-      </svg>
-    </div>
-  </div>
-  <div class="card-container" [class.is-folder]="isFolder" [style.height.px]="height">
-    <div
-      *ngIf="!showSecondTab ; else secondTabContent"
-      class="tab-container first-tab-container"
-      [class.is-folder]="isFolder"
-      [class.first-tab-hovered]="highlightFirstTab"
-      [class.tab-hovered]="secondTabIsHovered"
-      (mouseenter)="setHighlightFirstTab(true)"
-      (mouseleave)="setHighlightFirstTab(false)"
-    >
-      <header [class.empty]="(!header) && headerWarp?.children.length===0 ">
-        <div #headerWarp>
-          {{header}}
-          <ng-content select="[header-content]"></ng-content>
-          <ng-content select="[headerButtons]"></ng-content>
-        </div>
-      </header>
-      <div *ngIf="showSeperator" class="line"></div>
-      <div class="card-body">
-        <ng-content></ng-content>
-      </div>
-      <footer>
-        <ng-content select="[footer]">
-        </ng-content>
-        <div *ngIf="(isExample || !!ribbonText)" class="ribbon">
-          <div class="txt d-flex justify-content-center w-100">
-            <div>{{ribbonText ? ribbonText : 'EXAMPLE' }}</div>
-          </div>
-        </div>
-      </footer>
-    </div>
-    <ng-template #secondTabContent>
-      <div class="tab-container second-tab-container">
-        <ng-content select="[secondTab]"></ng-content>
-      </div>
     </ng-template>
   </div>
+  <ng-container *ngIf="!showSecondTab">
+
+  </ng-container>
+  <div *ngIf="!oneTabMode" [class.tab-hovered]="secondTabIsHovered" [class.show-second-tab]="showSecondTab"
+       class="middle-tab" (click)="setShowSecondTab(true)" [class.second-tab-active]="showSecondTab"
+       (mouseenter)="setSecondTabHover(true)" (mouseleave)="setSecondTabHover(false)">{{subFolderTitle}}</div>
+  <div *ngIf="!oneTabMode" [class.tab-hovered]="secondTabIsHovered" [class.show-second-tab]="showSecondTab"
+       class="second-tab" (click)="setShowSecondTab(true)">
+    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="20" viewBox="0 0 28 20">
+      <path *ngIf="!secondTabIsHovered || showSecondTab" d="M3.61,0C17.37,0,12.82,12.36,28,20H0V0Z" fill="#2c3246"/>
+      <path *ngIf="secondTabIsHovered && !showSecondTab" d="M3.61,0C17.37,0,12.82,12.36,28,20H0V0Z" fill="#5a658e"/>
+    </svg>
+  </div>
+</div>
+<div class="card-container" [class.is-folder]="isFolder" [style.height.px]="height">
+  <div
+    *ngIf="!showSecondTab ; else secondTabContent"
+    class="tab-container first-tab-container"
+    [class.is-folder]="isFolder"
+    [class.first-tab-hovered]="highlightFirstTab"
+    [class.tab-hovered]="secondTabIsHovered"
+    (mouseenter)="setHighlightFirstTab(true)"
+    (mouseleave)="setHighlightFirstTab(false)"
+  >
+    <header [class.empty]="(!header) && headerWarp?.children.length===0 ">
+      <div #headerWarp>
+        {{header}}
+        <ng-content select="[header-content]"></ng-content>
+        <ng-content select="[headerButtons]"></ng-content>
+      </div>
+    </header>
+    <div *ngIf="showSeperator" class="line"></div>
+    <div class="card-body">
+      <ng-content></ng-content>
+    </div>
+    <footer>
+      <ng-content select="[footer]">
+      </ng-content>
+      <div *ngIf="(isExample || !!ribbonText)" class="ribbon">
+        <div class="txt d-flex justify-content-center w-100">
+          <div>{{ribbonText ? ribbonText : 'EXAMPLE' }}</div>
+        </div>
+      </div>
+    </footer>
+  </div>
+  <ng-template #secondTabContent>
+    <div class="tab-container second-tab-container">
+      <ng-content select="[secondTab]"></ng-content>
+    </div>
+  </ng-template>
 </div>

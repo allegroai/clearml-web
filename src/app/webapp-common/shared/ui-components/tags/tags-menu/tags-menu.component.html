@@ -16,7 +16,7 @@
 <div class="buttons-container" [class.searching]="filterText">
   <button
     class="item"
-    *ngIf="filterText && !allTags.includes(filterText)"
+    *ngIf="filterText && !allTags?.includes(filterText)"
     (click)="addTag(filterText)"
   >"{{filterText}}" <span class="new">(Create New)</span></button>
   <button

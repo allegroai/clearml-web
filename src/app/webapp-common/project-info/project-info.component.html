@@ -23,7 +23,7 @@
   <ng-container *ngIf="!loading">
     <div *ngIf="info || editMode; else noData" class="md-editor-preview" [class.editor]="editMode">
 
-      <div class="md-content" [class.edit-mode]="editMode" [class.dirty]="isDirty">
+      <div class="md-content" [class.edit-mode]="editMode" [class.dirty]="isDirty" [class.editor-hidden]="editorVisible">
         <button *ngIf="!example && !editMode" class="btn btn-cml-primary md-btn-edit" (click)="editClicked()">EDIT</button>
         <button *ngIf="editMode" class="btn btn-cml-primary btn-preview-toggle" (click)="togglePreview()">
           {{ editorVisible? 'EDIT' : 'PREVIEW' }}
@@ -41,7 +41,7 @@
       </div>
 
       <div class="md-footer">
-        <div *ngIf="editMode && isDirty" class="md-warning">* You have unsaved changes</div>
+        <div [class]="(editMode && isDirty ? 'active' : '') + ' md-warning'">* You have unsaved changes</div>
         <div *ngIf="editMode" class="right-buttons">
           <button class="btn btn-cml-primary btn-outline"
                   (click)="cancelClicked()">CANCEL

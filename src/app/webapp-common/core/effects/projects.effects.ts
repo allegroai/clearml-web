@@ -53,6 +53,12 @@ export class ProjectsEffects {
     map(action => activeLoader(action.type))
   ));
 
+  setProject = createEffect(() => this.actions$.pipe(
+    ofType(actions.setSelectedProject),
+    switchMap(action => [actions.getCompanyTags()]
+      .concat(!!action.project?.id ? [actions.getTags(action.project.id)] : []))
+  ));
+
   getProjects$ = createEffect(() => this.actions$.pipe(
     ofType(actions.getAllSystemProjects),
     withLatestFrom(
@@ -154,22 +160,28 @@ export class ProjectsEffects {
     ofType(actions.getTags),
     withLatestFrom(this.store.select(selectRouterParams).pipe(
       map(params => (params === null || params?.projectId === '*') ? [] : [params.projectId]))),
-    switchMap(([action, projects]) => forkJoin([
-      this.projectsApi.projectsGetTaskTags({projects}),
-      this.projectsApi.projectsGetModelTags({projects})]
-    ).pipe(
-      map((res: [ProjectsGetTaskTagsResponse, ProjectsGetModelTagsResponse]) =>
-        Array.from(new Set(res[0].tags.concat(res[1].tags))).sort()),
-      mergeMap((tags: string[]) => [
-        actions.setTags({tags}),
-        deactivateLoader(action.type)
-      ]),
-      catchError(error => [
-        requestFailed(error),
-        deactivateLoader(action.type),
-        setServerError(error, null, 'Fetch tags failed')]
-      )
-    ))
+    switchMap(([action, projects]) => {
+      const ids = action?.projectId ? [action.projectId] : projects;
+      if (ids.length === 0 || !ids[0]) {
+        return EMPTY;
+      }
+      return forkJoin([
+        this.projectsApi.projectsGetTaskTags({projects: action?.projectId ? [action.projectId] : projects}),
+        this.projectsApi.projectsGetModelTags({projects: action?.projectId ? [action.projectId] : projects})]
+      ).pipe(
+        map((res: [ProjectsGetTaskTagsResponse, ProjectsGetModelTagsResponse]) =>
+          Array.from(new Set(res[0].tags.concat(res[1].tags))).sort()),
+        mergeMap((tags: string[]) => [
+          actions.setTags({tags}),
+          deactivateLoader(action.type)
+        ]),
+        catchError(error => [
+          requestFailed(error),
+          deactivateLoader(action.type),
+          setServerError(error, null, 'Fetch tags failed')]
+        )
+      );
+    })
   ));
 
   openMoreInfoPopupEffect = createEffect(() => this.actions$.pipe(

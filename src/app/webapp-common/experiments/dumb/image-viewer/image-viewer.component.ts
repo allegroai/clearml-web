@@ -90,6 +90,12 @@ export class ImageViewerComponent implements OnInit, OnDestroy {
       case 'ArrowLeft':
         this.previous();
         break;
+      case 'ArrowUp':
+        this.nextIteration();
+        break;
+      case 'ArrowDown':
+        this.previousIteration();
+        break;
       case '+':
         this.calculateNewScale(true);
         break;
@@ -194,6 +200,20 @@ export class ImageViewerComponent implements OnInit, OnDestroy {
     if (this.canGoBack() && this.currentDebugImage) {
       this.imageLoaded = false;
       this.store.dispatch(getNextDebugImageSample({task: this.currentDebugImage.task, navigateEarlier: true}));
+    }
+  }
+
+  private nextIteration() {
+    if (this.canGoNext() && this.currentDebugImage) {
+      this.imageLoaded = false;
+      this.store.dispatch(getNextDebugImageSample({task: this.currentDebugImage.task, navigateEarlier: false, iteration: true}));
+    }
+  }
+
+  previousIteration() {
+    if (this.canGoBack() && this.currentDebugImage) {
+      this.imageLoaded = false;
+      this.store.dispatch(getNextDebugImageSample({task: this.currentDebugImage.task, navigateEarlier: true, iteration: true}));
     }
   }
 
@@ -315,4 +335,5 @@ export class ImageViewerComponent implements OnInit, OnDestroy {
   showImage() {
     this.imageLoaded = true;
   }
+
 }

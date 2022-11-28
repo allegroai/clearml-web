@@ -6,8 +6,11 @@
     font-size: 16px;
     text-transform: uppercase;
     margin: 55px 0 12px 0;
-    i {
-      color: $blue-250;
+    .al-icon {
+      color: $blue-300;
+      &:hover {
+        color: $blue-200;
+      }
     }
   }
 

@@ -15,8 +15,8 @@
         <sm-id-badge *ngIf="model?.id" class="ml-3" [id]="model.id"></sm-id-badge>
       </div>
       <ng-container *ngIf="editable">
-        <i class="al-icon al-ico-edit al-color blue-300 sm-md pointer mx-3"  smTooltip="Select model" (click)="chooseModel()"></i>
-        <i *ngIf="model?.id" class="al-icon al-ico-trash al-color blue-300 sm-md pointer" smTooltip="Remove model" (click)="removeModel()"></i>
+        <i class="al-icon al-ico-edit al-color blue-400 sm-md pointer mx-3"  smTooltip="Select model" (click)="chooseModel()"></i>
+        <i *ngIf="model?.id" class="al-icon al-ico-trash al-color blue-400 sm-md pointer" smTooltip="Remove model" (click)="removeModel()"></i>
       </ng-container>
     </div>
   </sm-labeled-row>

@@ -1,4 +1,4 @@
-@import "../../styles/variables";
+@import "variables";
 
 $search-font-size: 14px;
 
@@ -10,7 +10,6 @@ $search-font-size: 14px;
     display: flex;
     align-items: center;
     min-width: 32px;
-    height: 32px;
     width: 32px;
     overflow: hidden;
     transition: width 0.3s ease;
@@ -48,9 +47,9 @@ $search-font-size: 14px;
           display: flex;
         }
 
-        &::placeholder {
-          color: $blue-200;
-        }
+        //&::placeholder {
+        //  color: $blue-200;
+        //}
       }
 
       .separator {
@@ -173,6 +172,7 @@ $search-font-size: 14px;
 
 :host.underline-search {
   .search-input-container {
+    height: inherit;
     .search-input {
       input {padding-left:0;}
       i.al-icon {
@@ -246,5 +246,12 @@ $search-font-size: 14px;
         color: $white;
       }
     }
+  }
+}
+
+:host-context(.hyper-params-custom-col) {
+  .search-input-container {
+    margin: 0 12px;
+    width: auto;
   }
 }

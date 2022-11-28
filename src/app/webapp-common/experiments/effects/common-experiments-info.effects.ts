@@ -64,6 +64,7 @@ import {PIPELINE_INFO_ONLY_FIELDS} from '@common/pipelines-controller/controller
 import {TasksGetByIdExResponse} from '~/business-logic/model/tasks/tasksGetByIdExResponse';
 import {ARTIFACTS_ONLY_FIELDS} from '@common/experiments/experiment.consts';
 import {ITask} from '~/business-logic/model/al-task';
+import {getTags} from '@common/core/actions/projects.actions';
 
 
 @Injectable()
@@ -344,10 +345,11 @@ export class CommonExperimentsInfoEffects {
             return [
               commonInfoActions.experimentUpdatedSuccessfully({id: action.id}),
               updateExperiment({id: action.id, changes}),
-              selectedExperiment?.id === action.id ? commonInfoActions.updateExperimentInfoData({
-                id: action.id,
-                changes
-              }) : new EmptyAction()
+              ...(selectedExperiment?.id === action.id ?
+                [commonInfoActions.updateExperimentInfoData({ id: action.id, changes })] :
+                []
+              ),
+              ...(changes.tags ? [getTags()] : [])
             ];
           }),
           catchError((err: HttpErrorResponse) => [

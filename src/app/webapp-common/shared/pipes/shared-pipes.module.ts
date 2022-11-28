@@ -55,28 +55,30 @@ import {FormgroupHasRequiredFieldPipe} from './formgroup-has-required-field.pipe
 import {FileSizePipe} from '@common/shared/pipes/filesize.pipe';
 import {RegexPipe} from '@common/shared/pipes/filter-regex.pipe';
 import {ColGetterPipe} from './col-getter.pipe';
-import { LabelValueToStringArrayPipe } from './label-value-to-string-array.pipe';
+import {LabelValueToStringArrayPipe} from './label-value-to-string-array.pipe';
 import {ItemByIdPipe} from './item-by-id.pipe';
-import { FilterMonitorMetricPipe } from './filter-monitor-metric.pipe';
-import { ReversePipe } from './reverse.pipe';
+import {FilterMonitorMetricPipe} from './filter-monitor-metric.pipe';
+import {ReversePipe} from './reverse.pipe';
 import {HideRedactedArgumentsPipe} from './hide-redacted-arguments.pipe';
-import { HasCompletedPipe } from './has-completed.pipe';
+import {HasCompletedPipe} from './has-completed.pipe';
+import {IsStringPipe} from './is-string.pipe';
+import {CleanProjectPathPipe} from './clean-project-path.pipe';
 
 const pipes = [
-  CamelToTitlePipe, FilenameFromPath, FilterPipe, FloorPipe, KeyValuePipe, NAPipe, SortPipe, IsVideoPipe, IsAudioPipe,FilterInternalPipe,UuidPipe,
+  CamelToTitlePipe, FilenameFromPath, FilterPipe, FloorPipe, KeyValuePipe, NAPipe, SortPipe, IsVideoPipe, IsAudioPipe, FilterInternalPipe, UuidPipe,
   JoinPipe, KeyvalPipe, LabelValuePipe, NoUnderscorePipe, UniqueByPipe, MsToHoursPipe, MsToSecPipe, DurationPipe,
   ToExponentialPipe, HighlightSearchTextPipe, HighlightSearchPipe, HideHashPipe, HideHashTitlePipe, TimeAgoPipe, TimeTillNowPipe, HasExampleItemPipe, safeAngularUrlParameterPipe,
   AdvancedFilterPipe, SafePipe, SelectOptionValueToLabelPipe, ToPercentagePipe, ReplaceViaMapPipe, FilterByIdPipe, FilterLast, FilterOutPipe, SimpleFilterPipe,
-  BreadcrumbsEllipsisPipe, ShortProjectNamePipe, ProjectLocationPipe,StringIncludedInArrayPipe, ToPropertyArrayPipe, MenuItemTextPipe, InitialsPipe, IdToObjectsArrayPipe, IsEmptyPipe,
-  TemplateInjectorPipe, TestConditionalPipe, GroupHasErrorsPipe, FormgroupHasRequiredFieldPipe, FileSizePipe, RegexPipe, LabelValueToStringArrayPipe,
-  TemplateInjectorPipe, TestConditionalPipe, GroupHasErrorsPipe, FormgroupHasRequiredFieldPipe, FileSizePipe, RegexPipe, ItemByIdPipe, HideRedactedArgumentsPipe, HasCompletedPipe
+  BreadcrumbsEllipsisPipe, ShortProjectNamePipe, ProjectLocationPipe, StringIncludedInArrayPipe, ToPropertyArrayPipe, MenuItemTextPipe, InitialsPipe, IdToObjectsArrayPipe, IsEmptyPipe,
+  TemplateInjectorPipe, TestConditionalPipe, GroupHasErrorsPipe, FormgroupHasRequiredFieldPipe, FileSizePipe, RegexPipe, LabelValueToStringArrayPipe, IsStringPipe,
+  ItemByIdPipe, HideRedactedArgumentsPipe, HasCompletedPipe, CleanProjectPathPipe
 ];
 
 @NgModule({
   imports: [
     CommonModule,
   ],
-  declarations: [pipes, ShowSelectedFirstPipe, CountPipe, ColGetterPipe, FilterMonitorMetricPipe, ReversePipe ],
+  declarations: [pipes, ShowSelectedFirstPipe, CountPipe, ColGetterPipe, FilterMonitorMetricPipe, ReversePipe],
   providers: [pipes],
   exports: [pipes, ShowSelectedFirstPipe, CountPipe, ColGetterPipe, FilterMonitorMetricPipe, ReversePipe]
 })

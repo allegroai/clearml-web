@@ -5,10 +5,6 @@
     color: $white;
   }
 
-  &.light-grey-blue {
-    color: $light-grey-blue;
-  }
-
   &.neon-yellow {
     color: $neon-yellow;
   }
@@ -116,6 +112,11 @@
 .al-icon {
   text-align: center;
   display: inline-block;
+}
+
+// no font icon
+.i-slack-mark-color {
+  @include icon('#{$assets-icons-path}/slack-mark-color.svg');
 }
 
 // no font icon
@@ -396,10 +397,6 @@
   @include icon('#{$assets-icons-path}/model.svg');
 }
 
-// No font icon
-.i-generate-code {
-  @include icon('#{$assets-icons-path}/generate-code-copy.svg');
-}
 
 // Font icon looks bad
 .i-alert-purple {

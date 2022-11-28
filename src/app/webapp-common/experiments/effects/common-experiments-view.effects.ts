@@ -176,7 +176,7 @@ export class CommonExperimentsViewEffects {
 
   lockRefresh = false;
   refreshExperiments = createEffect(() => this.actions$.pipe(
-    ofType<ReturnType<typeof exActions.refreshExperiments>>(exActions.refreshExperiments),
+    ofType(exActions.refreshExperiments),
     filter(() => !this.lockRefresh),
     withLatestFrom(
       this.store.select(exSelectors.selectCurrentScrollId),
@@ -232,7 +232,7 @@ export class CommonExperimentsViewEffects {
               return [
                 requestFailed(error),
                 deactivateLoader(action.type),
-                addMessage('warn', 'Fetch Experiments failed', error?.meta && [{name: 'More info', actions: [setServerError(error, null, 'Fetch Experiments failed')]}])
+                ...(action.autoRefresh ? [] : [addMessage('warn', 'Fetch Experiments failed', error?.meta && [{name: 'More info', actions: [setServerError(error, null, 'Fetch Experiments failed')]}])])
               ];
             })
           );
@@ -281,7 +281,8 @@ export class CommonExperimentsViewEffects {
   experimentSelectionChanged = createEffect(() => this.actions$.pipe(
     ofType(exActions.experimentSelectionChanged),
     withLatestFrom(this.store.select(selectRouterConfig)),
-    tap(([action, routeConfig]) => this.navigateAfterExperimentSelectionChanged(action.experiment as ITableExperiment, action.project, routeConfig)),
+    tap(([action, routeConfig]) =>
+      this.navigateAfterExperimentSelectionChanged(action.experiment as ITableExperiment, action.project, routeConfig, action.replaceURL)),
     mergeMap(() => [exActions.setTableMode({mode: 'info'})])
   ));
 
@@ -518,7 +519,7 @@ export class CommonExperimentsViewEffects {
     })
   ));
 
-  navigateAfterExperimentSelectionChanged(selectedExperiment: ITableExperiment, experimentProject: string, routeConfig: string[]) {
+  navigateAfterExperimentSelectionChanged(selectedExperiment: ITableExperiment, experimentProject: string, routeConfig: string[], replaceUrl=false) {
     const module = routeConfig.includes('datasets') ? 'datasets/simple' : routeConfig.includes('pipelines') ? 'pipelines' : 'projects';
     // wow angular really suck...
     const activeChild = get('firstChild.firstChild.firstChild.firstChild.firstChild.firstChild', this.route);
@@ -528,7 +529,7 @@ export class CommonExperimentsViewEffects {
         [module, experimentProject, 'experiments', selectedExperiment.id].concat(activeChild ? activeChildUrl.split('/') : []),
         {queryParamsHandling: 'preserve'}
       ) :
-      this.router.navigate([module, experimentProject, 'experiments'], {queryParamsHandling: 'preserve'});
+      this.router.navigate([module, experimentProject, 'experiments'], {queryParamsHandling: 'preserve', replaceUrl});
   }
 
   getGetAllQuery({

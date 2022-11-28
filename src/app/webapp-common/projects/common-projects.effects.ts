@@ -98,7 +98,7 @@ export class CommonProjectsEffects {
         } else if (datasets) {
           statsFilter = {system_tags: ['dataset'], type: [TaskTypeEnum.DataProcessing]};
         } else if (!showHidden) {
-          statsFilter = {system_tags: ['-pipeline']};
+          statsFilter = {system_tags: ['-pipeline', '-dataset', '-Annotation']};
         }
         return forkJoin([
           this.projectsApi.projectsGetAllEx({
@@ -129,7 +129,7 @@ export class CommonProjectsEffects {
           // Getting [current project] stats from server
           (selectedProjectId && !scrollId && !searchQuery?.query) ? this.projectsApi.projectsGetAllEx({
             id: selectedProjectId,
-            ...((!showHidden && !pipelines) && {include_stats_filter: {system_tags: ['-pipeline']}}),
+            ...((!showHidden && !pipelines) && {include_stats_filter: statsFilter}),
             ...((pipelines) && {include_stats_filter: {system_tags: ['pipeline'], type: ['controller']}}),
             ...(datasets ? {include_dataset_stats: true} : {include_stats: true}),
             stats_with_children: false,
@@ -145,7 +145,7 @@ export class CommonProjectsEffects {
           map(([[projectsRes, currentProjectRes] , selectedProject]: [[ProjectsGetAllExResponse, ProjectsGetAllExResponse], Project]) => ({
               newScrollId: projectsRes.scroll_id,
               projects: currentProjectRes !== null && this.isNotEmptyExampleProject(currentProjectRes.projects[0]) ?
-                  // eslint-disable-next-line @typescript-eslint/naming-convention
+                  /* eslint-disable @typescript-eslint/naming-convention */
                   [(currentProjectRes?.projects?.length === 0 ?
                     {...selectedProject, isRoot: true, sub_projects: null, name: `[${selectedProject.name}]`} :
                     {
@@ -156,6 +156,7 @@ export class CommonProjectsEffects {
                       name: `[${currentProjectRes.projects[0]?.name}]`
                     }),
                     ...projectsRes.projects
+                    /* eslint-enable @typescript-eslint/naming-convention */
                   ] :
                   projectsRes.projects
             }

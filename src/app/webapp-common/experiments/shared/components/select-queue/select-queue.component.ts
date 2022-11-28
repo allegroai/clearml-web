@@ -7,7 +7,7 @@ import {Queue} from '~/business-logic/model/queues/queue';
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {BlTasksService} from '~/business-logic/services/tasks.service';
 import {filter, map, startWith} from 'rxjs/operators';
-import {Observable, Subscription} from 'rxjs';
+import {combineLatest, Observable, Subscription} from 'rxjs';
 import {userAllowedToCreateQueue$} from '~/core/reducers/users.reducer';
 import {trackById} from '@common/shared/utils/forms-track-by';
 import {FormControl} from '@angular/forms';
@@ -34,7 +34,8 @@ export class SelectQueueComponent implements OnInit, OnDestroy {
   split = splitLine;
   displayFn = (item: any): string => typeof item === 'string' ? item : item?.name;
   trackById = trackById;
-  public filteredOptions: Observable<Queue[]>;
+  public filteredOptions$: Observable<Queue[]>;
+  defaultQueue: Queue;
 
   constructor(
     public dialogRef: MatDialogRef<ConfirmDialogComponent>,
@@ -56,8 +57,8 @@ export class SelectQueueComponent implements OnInit, OnDestroy {
       if (queues) {
         this.queues = queues;
         this.queuesNames = queues.map(q => q.name);
-        const selectedQueue = this.blTaskService.getDefaultQueue(this.queues) || queues[0];
-        this.queueControl.setValue(selectedQueue, {emitEvent: false});
+        this.defaultQueue = this.blTaskService.getDefaultQueue(this.queues) || queues[0];
+        this.queueControl.reset(this.defaultQueue, {emitEvent: false});
         this.cdr.detectChanges();
       }
     });
@@ -65,16 +66,22 @@ export class SelectQueueComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.store.dispatch(new GetQueuesForEnqueue());
-    this.filteredOptions = this.queueControl.valueChanges.pipe(
-      startWith(''),
-      map(value => {
-        if (!this.queues) {
-          return [];
-        }
-        const name = (typeof value === 'string' ? value : value?.name).toLowerCase();
-        return name ? this.queues.filter(q => q.name.toLowerCase().includes(name)) : this.queues.slice();
-      }),
-    );
+    this.filteredOptions$ = combineLatest([
+      this.queueControl.valueChanges.pipe(startWith('')),
+      this.queues$
+    ])
+      .pipe(
+        map(([value, queues]) => {
+          if (!queues) {
+            return [];
+          }
+          const name = (typeof value === 'string' ? value : value?.name).toLowerCase();
+          if (this.queueControl.pristine || !name) {
+            return queues;
+          }
+          return queues.filter(q => q.name.toLowerCase().includes(name));
+        }),
+      );
   }
 
   closeDialog(confirmed) {

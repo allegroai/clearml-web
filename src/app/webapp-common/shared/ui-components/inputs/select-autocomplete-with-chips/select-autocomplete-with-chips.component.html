@@ -20,7 +20,7 @@
         <input
           #autocompleteInput
           matInput
-          [placeholder]="placeholder"
+          [placeholder]="!val && placeholder"
           [ngModel]="val"
           [name]="name"
           [matAutocomplete]="auto"
@@ -29,6 +29,7 @@
           [disabled]="disabled"
           (ngModelChange)="selected($event)"
           (click)="!autocomplete.panelOpen && autocomplete.openPanel()"
+          class="chips-input"
         >
 
 

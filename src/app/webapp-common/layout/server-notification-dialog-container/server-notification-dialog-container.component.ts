@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, OnDestroy, OnInit} from '@angular/core';
 import {select, Store} from '@ngrx/store';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import {selectNotification} from '../../core/reducers/view.reducer';
@@ -10,7 +10,8 @@ import {ConfirmDialogComponent} from '../../shared/ui-components/overlay/confirm
 @Component({
   selector   : 'sm-server-notification-dialog-container',
   templateUrl: './server-notification-dialog-container.component.html',
-  styleUrls  : ['./server-notification-dialog-container.component.scss']
+  styleUrls  : ['./server-notification-dialog-container.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ServerNotificationDialogContainerComponent implements OnInit, OnDestroy {
   private notificationSubscription: Subscription;

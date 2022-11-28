@@ -1,5 +1,5 @@
 <div *ngIf="activateFromMenuButton" mat-button [matMenuTriggerFor]="experimentMenu"
-     class="p-0 cell menu-button al-icon sm-md al-color light-grey-blue al-ico-bars-menu"
+     class="p-0 cell menu-button al-icon sm-md al-color blue-300 al-ico-bars-menu"
 ></div>
 <div *ngIf="!activateFromMenuButton" #contextTrigger
      style="visibility: hidden; position: fixed"
@@ -10,17 +10,17 @@
 <mat-menu #experimentMenu="matMenu" [hasBackdrop]="false">
   <ng-container *ngIf="selectedDisableAvailable[menuItems.queue]">
     <button *ngIf="tableMode" mat-menu-item (click)="toggleDetails()">
-      <i [class]="'al-icon '+ ICONS.DETAILS + ' sm-md'"></i>Details
+      <i [class]="'al-icon '+ icons.DETAILS + ' sm-md'"></i>Details
     </button>
     <hr *ngIf="tableMode">
     <button mat-menu-item (click)="runPipelineController()" *ngIf="!selectedDisableAvailable[menuItems.run]?.disable">
-      <i [class]="'al-icon ' + ICONS.RUN + ' sm-md'"></i>
+      <i [class]="'al-icon ' + icons.RUN + ' sm-md'"></i>
       {{selectedDisableAvailable[menuItems.run]?.available | menuItemText : 'Run' : selectedDisableAvailableIsMultiple }}
     </button>
 
     <button mat-menu-item (click)="abortControllerPopup()"
             [disabled]="selectedDisableAvailable[menuItems.abort].disable">
-      <i [class]="'al-icon ' + ICONS.STOPPED + ' sm-md'"></i>
+      <i [class]="'al-icon ' + icons.STOPPED + ' sm-md'"></i>
       {{selectedDisableAvailable[menuItems.abort]?.available | menuItemText : 'Abort' : selectedDisableAvailableIsMultiple}}
     </button>
 
@@ -35,19 +35,19 @@
             [disabled]="selectedDisableAvailable[menuItems.tags]?.disable"
             (menuOpened)="tagMenuOpened()"
             (menuClosed)="tagMenuClosed()">
-      <i [class]="'al-icon ' + ICONS.TAG + ' sm-md'">
+      <i [class]="'al-icon ' + icons.TAG + ' sm-md'">
       </i><span>{{selectedDisableAvailable[menuItems.tags]?.available | menuItemText : 'Add Tag' : selectedDisableAvailableIsMultiple }}</span>
     </button>
 
     <button mat-menu-item (click)="restoreArchive(entityTypeEnum.controller)"
             [disabled]="selectedDisableAvailable[menuItems.archive].disable">
-      <i class="al-icon sm-md" [class]="isArchive ? ICONS.RESTORE : ICONS.ARCHIVE"></i>
+      <i class="al-icon sm-md" [class]="isArchive ? icons.RESTORE : icons.ARCHIVE"></i>
       {{selectedDisableAvailable[menuItems.archive].available | menuItemText : isArchive ? 'Restore from Archive' : 'Archive' : selectedDisableAvailableIsMultiple}}
     </button>
 
     <button mat-menu-item (click)="deleteExperimentPopup(entityTypeEnum.controller, true)"
             [disabled]="selectedDisableAvailable[menuItems.delete].disable" *ngIf="isArchive">
-      <i [class]="'al-icon ' + ICONS.REMOVE + ' sm-md'"></i>
+      <i [class]="'al-icon ' + icons.REMOVE + ' sm-md'"></i>
       {{selectedDisableAvailable[menuItems.delete].available | menuItemText : 'Delete' : selectedDisableAvailableIsMultiple}}
     </button>
 

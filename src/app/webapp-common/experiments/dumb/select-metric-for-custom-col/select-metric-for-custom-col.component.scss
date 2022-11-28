@@ -1,9 +1,26 @@
 @import "variables";
 
 :host {
-  .title {
-    color: $blue-400;
-    flex-basis: 84%;
+
+  .head {
+    margin-bottom: 12px;
+    padding: 12px;
+    display: grid;
+    grid-template-columns: 20px 1fr 20px;
+    gap: 6px;
+    align-items: center;
+    text-align: center;
+    border-bottom: 1px solid $blue-200;
+    h3 {
+      color: $blue-400;
+      font-size: 14px;
+      font-weight: normal;
+      margin: 0;
+    }
+  }
+
+  sm-search {
+    margin: 0 12px;
   }
 
   .variant-label {
@@ -63,12 +80,13 @@
   }
 
   .metrics {
-    height: calc(100% - 32px);
+    height: calc(100% - 34px);
     width: 100%;
     overflow-y: scroll;
+    padding-left: 12px;
 
     &.has-title {
-      height: calc(100% - #{32px + 49px});
+      // height: calc(100% - #{90px});
     }
   }
 

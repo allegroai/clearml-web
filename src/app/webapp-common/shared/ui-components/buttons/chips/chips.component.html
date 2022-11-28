@@ -5,12 +5,14 @@
   (click)="$event.stopPropagation()"
   (mousedown)="$event.stopPropagation()"
 >
-  <span class="label" [ngStyle]="{color: color, background : backgroundColor}">
+  <span class="label"
+        [style.color]="color"
+        [style.background]="backgroundColor">
     <span *ngIf="!colorIsForced" class="dot-container">
       <span #dot class="dot pallete-cursor"
             [ngStyle]="{backgroundColor: color}"
-            smChooseColor [colorButtonRef]="dot"
-            [defaultColor]="colorTuple"
+            [colorButtonRef]="dot"
+            [smChooseColor]="colorTuple"
             [stringToColor]="label">
       </span>
     </span>

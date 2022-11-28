@@ -52,7 +52,7 @@ export class ProjectsEffects {
           /* eslint-disable @typescript-eslint/naming-convention */
           id: [action.projectId],
           include_stats: true,
-          ...(!showHidden && {include_stats_filter: {system_tags: ['-pipeline']}}),
+          ...(!showHidden && {include_stats_filter: {system_tags: ['-pipeline', '-dataset']}}),
           ...(showOnlyUserWork && {active_users: [user.id]}),
           ...(showHidden && {search_hidden: true}),
           ...((action.example !== false || this.fetchingExampleExperiment === action.projectId) && {check_own_contents: true}),

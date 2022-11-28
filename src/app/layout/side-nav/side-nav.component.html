@@ -1,92 +1,52 @@
-<div class="side-nav">
-  <div class="item logo">
-    <div class="item-icon">
-      <img src="assets/c-logo.svg?v=1" class="logo-a" alt="logo">
-    </div>
-  </div>
+<div class="logo">
+  <img src="assets/c-logo.svg?v=1" class="logo-a" alt="logo" width="64" height="64">
+</div>
 
-  <ng-container *ngIf="currentUser">
-    <a class="item d-block"
+<ng-container *ngIf="currentUser">
+  <div #container class="items-container" [class.on-scrolling]="scrolling">
+    <a class="item al-ico-home"
        routerLink="/dashboard"
        routerLinkActive="active"
        (click)="resetSearch()"
        smTooltip="DASHBOARD"
        [matTooltipShowDelay]="0"
-       matTooltipPosition="right"
-    >
-      <div class="item-icon">
-        <i class="al-icon al-ico-home al-color blue-300"></i>
-      </div>
-      <div class="caption">dashboard</div>
+       matTooltipPosition="right">
     </a>
-
-    <a class="item d-block"
+    <a class="item al-ico-projects"
        smTooltip="PROJECTS"
        [matTooltipShowDelay]="0"
        matTooltipPosition="right"
        routerLink="/projects"
-       routerLinkActive="active"
-    >
-       <div class="item-icon">
-         <i class="al-icon al-ico-projects al-color blue-300"></i>
-      </div>
-      <div class="caption">projects</div>
+       routerLinkActive="active">
     </a>
-    <a class="item d-block"
-       routerLink="/pipelines"
-       routerLinkActive="active"
-       smTooltip="PIPELINES"
-       [matTooltipShowDelay]="0"
-       matTooltipPosition="right">
-      <div class="item-icon">
-        <i class="al-icon al-ico-pipelines al-color blue-300"></i>
-      </div>
-      <div class="caption">pipelines</div>
-    </a>
-    <a class="item d-block"
+    <a class="item al-ico-datasets"
        routerLink="/datasets"
        routerLinkActive="active"
        smTooltip="DATASETS"
        [matTooltipShowDelay]="0"
        matTooltipPosition="right">
-      <div class="item-icon">
-        <i class="al-icon al-ico-datasets al-color blue-300"></i>
-      </div>
-      <div class="caption">datasets</div>
     </a>
-    <a class="item d-block"
+    <a class="item al-ico-pipelines"
+       routerLink="/pipelines"
+       routerLinkActive="active"
+       smTooltip="PIPELINES"
+       [matTooltipShowDelay]="0"
+       matTooltipPosition="right">
+    </a>
+    <a class="item al-ico-queues"
        routerLink="/workers-and-queues"
        routerLinkActive="active"
        smTooltip="WORKERS & QUEUES"
        [matTooltipShowDelay]="0"
        matTooltipPosition="right">
-      <div class="item-icon">
-        <i class="al-icon al-ico-queues al-color blue-300"></i>
-      </div>
-      <div class="caption">workers & queues</div>
-    </a>
-
-  </ng-container>
-  <div *ngIf="currentUser" class="account">
-    <a *ngIf="environment.whiteLabelLink" class="item d-block" target="_blank"
-       [smTooltip]="environment.whiteLabelLink.tooltip"
-       [matTooltipShowDelay]="0"
-       matTooltipPosition="right"
-       [href]="environment.whiteLabelLink.link">
-      <div class="item-icon"
-           [style.background-image]="'url(' + environment.whiteLabelLink.logo + ')'"
-           style="width: 64px; height: 64px"
-      >
-      </div>
-      <div class="caption">Ignite</div>
-    </a>
-    <a *ngIf="environment.slackLink" class="item d-block" [href]="environment.slackLink"
-       target="_blank"
-       smTooltip="Community support on Slack" [matTooltipShowDelay]="0" matTooltipPosition="right">
-      <div class="item-icon">
-        <i class="al-icon al-ico-slack md al-color blue-300"></i>
-      </div>
-      <div class="caption">Slack</div>
     </a>
   </div>
+</ng-container>
+
+<div *ngIf="currentUser" class="account">
+  <a *ngIf="environment.slackLink" class="item" [href]="environment.slackLink"
+     target="_blank"
+     smTooltip="Community support on Slack" [matTooltipShowDelay]="0" matTooltipPosition="right">
+    <i class="i-slack-mark-color"></i>
+  </a>
 </div>

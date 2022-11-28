@@ -1,5 +1,4 @@
 <div class="sm-menu-header">CUSTOMIZE COLUMNS</div>
-<mat-divider></mat-divider>
 <div class="list-container">
   <sm-menu-item *ngFor="let col of tableCols; trackBy: trackById"
                 [itemLabel]="col.header"
@@ -11,7 +10,6 @@
                 (itemClicked)="selectedTableColsChanged.emit(col)">
   </sm-menu-item>
 </div>
-<mat-divider></mat-divider>
 <div class="loader" [ngClass]="{'d-none': !isLoading}">
   <mat-spinner diameter="50"></mat-spinner>
 </div>

@@ -8,17 +8,12 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, var(--cardWidth));
     grid-gap: var(--gridGap);
-    padding: calc(var(--gridGap) * 0.5) 0;
+    margin-bottom: var(--gridGap);
     justify-content: center;
 
     &.snippets-mode {
       grid-template-columns: repeat(auto-fit, minmax(var(--cardWidth), 1fr));
     }
-  }
-
-  /* Track */
-  ::-webkit-scrollbar-thumb {
-    background-color: lighten($blue-600, 30%);
   }
 }
 
@@ -30,5 +25,17 @@
 
   .load-more-btn {
     padding: 8px 40px;
+  }
+
+  .load-spinner {
+    display: inline-block;
+    vertical-align: middle;
+    background-image: url("../../../assets/icons/Spinner.svg");
+    background-repeat: no-repeat;
+    background-size: 16px;
+    width: 16px;
+    height: 16px;
+    margin-right: 6px;
+
   }
 }

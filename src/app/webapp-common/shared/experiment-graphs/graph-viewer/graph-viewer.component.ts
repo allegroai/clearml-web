@@ -30,9 +30,11 @@ import {
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {MatSelectChange} from '@angular/material/select';
 import {debounceTime, filter, map, take} from 'rxjs/operators';
-import {convertPlot} from '@common/tasks/tasks.utils';
+import {convertPlots, groupIterations} from '@common/tasks/tasks.utils';
 import {selectSignedUrl} from '@common/core/reducers/common-auth-reducer';
 import {getSignedUrl} from '@common/core/actions/common-auth.actions';
+import {addMessage} from '@common/core/actions/layout.actions';
+import * as outputActions from '@common/experiments/actions/common-experiment-output.actions';
 
 @Component({
   selector: 'sm-graph-viewer',
@@ -44,7 +46,7 @@ export class GraphViewerComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('modalContainer') modalContainer;
   public height;
   private sub = new Subscription();
-  public minMaxIterations$: Observable<{minIteration: number; maxIteration: number}>;
+  public minMaxIterations$: Observable<{ minIteration: number; maxIteration: number }>;
   public isFetchingData$: Observable<boolean>;
   public xAxisType$: Observable<'iter' | 'timestamp' | 'iso_time'>;
   public xAxisType: 'iter' | 'timestamp' | 'iso_time';
@@ -56,6 +58,9 @@ export class GraphViewerComponent implements OnInit, AfterViewInit, OnDestroy {
   public currentPlotEvent$: Observable<any>;
   public currentPlotEvent: any;
   private iterationChanged$ = new Subject<number>();
+  private isForward: boolean = true;
+  private charts: ExtFrame[];
+  public index: number = null;
 
   @HostListener('document:keydown', ['$event'])
   onKeyDown(e: KeyboardEvent) {
@@ -65,6 +70,13 @@ export class GraphViewerComponent implements OnInit, AfterViewInit, OnDestroy {
         break;
       case 'ArrowLeft':
         this.previous();
+        break;
+      case 'ArrowUp':
+        this.nextIteration();
+        break;
+      case 'ArrowDown':
+        this.previousIteration();
+        break;
     }
   }
 
@@ -117,7 +129,6 @@ export class GraphViewerComponent implements OnInit, AfterViewInit, OnDestroy {
     const reqData = {
       task: this.data.chart.task,
       metric: this.data.chart.metric,
-      variant: this.data.chart.variant,
       iteration: this.data.chart.iter
     };
     if (this.isFullDetailsMode) {
@@ -145,25 +156,40 @@ export class GraphViewerComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.sub.add(this.currentPlotEvent$
       .pipe(filter(plot => !!plot))
-      .subscribe(currentPlotEvent => {
+      .subscribe(currentPlotEvents => {
         this.plotLoaded = true;
-        const chart = convertPlot(currentPlotEvent).plot as ExtFrame;
-
-        if (getOr(0, 'layout.images.length', chart) > 0) {
-          chart.layout.images.forEach((image: Plotly.Image) => {
-              this.store.dispatch(getSignedUrl({url: image.source, config: {skipFileServer: false, skipLocalFile: false, disableCache: chart.timestamp}}));
-              this.sub.add(this.store.select(selectSignedUrl(image.source))
-                .pipe(
-                  filter(signed => !!signed?.signed),
-                  map(({signed: signedUrl}) => signedUrl),
-                  take(1)
-                ).subscribe(url => image.source = url)
+        const groupedPlots = groupIterations(currentPlotEvents);
+        const {graphs, parsingError} = convertPlots({plots: groupedPlots, experimentId: 'viewer'});
+        parsingError && this.store.dispatch(addMessage('warn', `Couldn't read all plots. Please make sure all plots are properly formatted (NaN & Inf aren't supported).`, [], true));
+        Object.values(graphs).forEach((graphss: ExtFrame[]) => {
+          graphss.forEach((graph: ExtFrame) => {
+            if (getOr(0, 'layout.images.length', graph) > 0) {
+              graph.layout.images.forEach((image: Plotly.Image) => {
+                  this.store.dispatch(getSignedUrl({
+                    url: image.source,
+                    config: {skipFileServer: false, skipLocalFile: false, disableCache: graph.timestamp}
+                  }));
+                  this.sub.add(this.store.select(selectSignedUrl(image.source))
+                    .pipe(
+                      filter(signed => !!signed?.signed),
+                      map(({signed: signedUrl}) => signedUrl),
+                      take(1)
+                    ).subscribe(url => image.source = url)
+                  );
+                }
               );
             }
-          );
+          });
+        });
+
+        this.charts = Object.values(graphs)[0];
+        if (this.index === null) {
+          this.index = Math.max(this.charts.findIndex(c => c.variant === this.data.chart.variant), 0);
+        } else {
+          this.index = this.isForward ? 0 : this.charts.length - 1;
         }
-        this.chart = chart;
-        this.iteration = currentPlotEvent.iter;
+        this.chart = this.charts[this.index];
+        this.iteration = currentPlotEvents[0].iter;
       }));
     this.sub.add(this.beginningOfTime$.subscribe(beg => {
       this.beginningOfTime = beg;
@@ -198,18 +224,19 @@ export class GraphViewerComponent implements OnInit, AfterViewInit, OnDestroy {
     this.sub.add(this.iterationChanged$
       .pipe(debounceTime(100))
       .subscribe((value) => {
-      const reqData = {
-        task: this.chart.task,
-        metric: this.chart.metric,
-        variant: this.chart.variant,
-        iteration: value
-      };
-      this.store.dispatch(getPlotSample(reqData));
-    }));
+        const reqData = {
+          task: this.chart.task,
+          metric: this.chart.metric,
+          iteration: value
+        };
+        this.store.dispatch(getPlotSample(reqData));
+      }));
   }
 
   ngOnDestroy(): void {
     this.store.dispatch(setGraphDisplayFullDetailsScalarsIsOpen({isOpen: false}));
+    this.store.dispatch(outputActions.setViewerBeginningOfTime({beginningOfTime: false}));
+    this.store.dispatch(outputActions.setViewerEndOfTime({endOfTime: false}));
     this.sub.unsubscribe();
   }
 
@@ -254,15 +281,41 @@ export class GraphViewerComponent implements OnInit, AfterViewInit, OnDestroy {
 
   next() {
     if (this.canGoNext() && this.chart) {
-      this.plotLoaded = false;
-      this.store.dispatch(getNextPlotSample({task: this.chart.task, navigateEarlier: false}));
+      this.isForward = true;
+      if (this.charts[this.index + 1]) {
+        this.chart = this.charts[++this.index];
+        this.store.dispatch(outputActions.setViewerBeginningOfTime({beginningOfTime: false}));
+      } else {
+        this.plotLoaded = false;
+        this.store.dispatch(getNextPlotSample({task: this.chart.task, navigateEarlier: false}));
+      }
     }
   }
 
   previous() {
     if (this.canGoBack() && this.chart) {
+      this.isForward = false;
+      if (this.charts[this.index - 1]) {
+        this.chart = this.charts[--this.index];
+        this.store.dispatch(outputActions.setViewerEndOfTime({endOfTime: false}));
+      } else {
+        this.plotLoaded = false;
+        this.store.dispatch(getNextPlotSample({task: this.chart.task, navigateEarlier: true}));
+      }
+    }
+  }
+
+  nextIteration() {
+    if (this.canGoNext() && this.chart) {
       this.plotLoaded = false;
-      this.store.dispatch(getNextPlotSample({task: this.chart.task, navigateEarlier: true}));
+      this.store.dispatch(getNextPlotSample({task: this.chart.task, navigateEarlier: false, iteration: true}));
+    }
+  }
+
+  previousIteration() {
+    if (this.canGoBack() && this.chart) {
+      this.plotLoaded = false;
+      this.store.dispatch(getNextPlotSample({task: this.chart.task, navigateEarlier: true, iteration: true}));
     }
   }
 

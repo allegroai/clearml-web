@@ -14,9 +14,9 @@
     [sortByField]="projectsOrderBy$ | async"
     [sortOrder]="projectsSortOrder$ | async"
   >
-    <button class="btn btn-cml-primary d-flex align-items-center"
+    <button class="btn btn-cml-primary d-flex align-items-center" data-id="New Project"
             (click)="openProjectDialog('create')">
-      <i class="al-icon al-color blue-400 al-ico-add sm mr-2"></i>NEW PROJECT
+      <i class="al-icon al-ico-add sm mr-2"></i>NEW PROJECT
     </button>
   </sm-projects-header>
 </sm-projects-list>

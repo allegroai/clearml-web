@@ -46,7 +46,10 @@ $tab-width: 15vw;
     text-transform: uppercase;
     margin: 0 0 6px 0;
     i {
-      color: $blue-250;
+      color: $blue-300;
+      &:hover {
+        color: $blue-200;
+      }
     }
     &.first {
       margin-top: 0;
@@ -65,7 +68,7 @@ $tab-width: 15vw;
     display: flex;
     align-items: center;
     margin-left: 12px;
-    color: $light-grey-blue;
+    color: $blue-300;
 
     &:hover {
       color: $purple;

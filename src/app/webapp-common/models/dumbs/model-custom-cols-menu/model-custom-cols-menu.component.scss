@@ -3,7 +3,7 @@
 .custom-column-buttons {
   display: flex;
   font-weight: 500;
-  color: $light-grey-blue;
+  color: $blue-400;
   background: $faint-gray;
   cursor: pointer;
   .add-button {
@@ -21,7 +21,7 @@
   }
 
   div:not(.disabled):hover {
-    color: $blue-400;
+    color: $blue-300;
     transition: color 0.3s;
   }
 }

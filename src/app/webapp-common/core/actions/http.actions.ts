@@ -1,11 +1,14 @@
-import {HTTP_PREFIX} from '../../../app.constants';
-import {omit} from 'lodash/fp';
+import {HTTP_PREFIX} from '~/app.constants';
 import {HttpErrorResponse} from '@angular/common/http';
 import {createAction, props} from '@ngrx/store';
 
 export const requestFailed = createAction(
   HTTP_PREFIX + 'REQUEST_FAILED',
-  (err: HttpErrorResponse) => ({err: omit(['headers'], err)})
+  (err: HttpErrorResponse) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const {headers, ...others} = err;
+    return {err: {...others, error: {meta: others.error.meta}}};
+  }
 );
 
 export const apiRequest = createAction(

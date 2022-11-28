@@ -8,7 +8,7 @@ import {Task} from '~/business-logic/model/tasks/task';
 import {select} from 'd3-selection';
 import {sortCol} from '@common/shared/utils/tableParamEncode';
 import {Store} from '@ngrx/store';
-import {Axis, Color, ColorScale} from 'plotly.js';
+import {Axis, Color, ColorBar, ColorScale} from 'plotly.js';
 import domtoimage from 'dom-to-image/dist/dom-to-image.min';
 import {from} from 'rxjs';
 
@@ -28,10 +28,13 @@ interface Dimension extends Partial<Axis> {
 
 interface ParaPlotData {
   type: string;
+  labelangle: 'auto' | number;
+  labelside?: 'top' | 'bottom';
   dimensions: Dimension[];
   line: {
     color: Color;
     colorscale?: ColorScale;
+    colorbar?: Partial<ColorBar>;
   };
 }
 
@@ -185,6 +188,7 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
     if (this.parameters && filteredExperiments.length > 0) {
       const trace = {
         type: 'parcoords',
+        labelangle: 30,
         dimensions: this.parameters.map((parameter) => {
           parameter = `${parameter}.value`;
           const allValuesIncludingNull = this.experiments.map(experiment => get(parameter, experiment.hyperparams));
@@ -209,7 +213,8 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
             tickvals,
             values: filteredExperiments.map((experiment) => (textVal[['', undefined].includes(get(parameter, experiment.hyperparams)) ? 'N/A' : get(parameter, experiment.hyperparams)])),
             range: [0, max(tickvals)],
-            constraintrange
+            constraintrange,
+
           };
         })
       } as ParaPlotData ;

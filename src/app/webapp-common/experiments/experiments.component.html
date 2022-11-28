@@ -26,6 +26,7 @@
   <button
     class="btn btn-cml-primary d-flex justify-content-between align-items-center mr-3"
     [disabled]="isArchived$ | async"
+    data-id="New Experiment"
     (click)="newExperiment()"
     [smTooltip]="isSmallScreen ? 'NEW EXPERIMENT' : ''"
   >

@@ -1,4 +1,4 @@
-@import "~bootstrap/scss/mixins/buttons";
+@import "bootstrap/scss/mixins/buttons";
 @import "variables";
 @import "themes";
 
@@ -46,16 +46,16 @@ $btn-font-family: $font-family-base;
 
 
   //@import '~bootstrap/scss/bootstrap.scss';
-  @import "~bootstrap/scss/functions";
-  @import "~bootstrap/scss/variables";
-  @import "~bootstrap/scss/mixins";
-  @import "~bootstrap/scss/root";
-  @import "~bootstrap/scss/reboot";
-  @import "~bootstrap/scss/grid";
-  @import "~bootstrap/scss/buttons";
-  @import "~bootstrap/scss/button-group";
-  @import "~bootstrap/scss/card";
-  @import "~bootstrap/scss/utilities";
+  @import "bootstrap/scss/functions";
+  @import "bootstrap/scss/variables";
+  @import "bootstrap/scss/mixins";
+  @import "bootstrap/scss/root";
+  @import "bootstrap/scss/reboot";
+  @import "bootstrap/scss/grid";
+  @import "bootstrap/scss/buttons";
+  @import "bootstrap/scss/button-group";
+  @import "bootstrap/scss/card";
+  @import "bootstrap/scss/utilities";
 
   label {
     display: inline-flex;
@@ -92,7 +92,7 @@ $btn-font-family: $font-family-base;
   }
 
   .btn-dark-fill {
-    line-height: 22px;
+    height: 32px;
     border-width: 0;
     border-radius: 4px;
     font-size: 12px;
@@ -231,16 +231,16 @@ $btn-font-family: $font-family-base;
   $label-margin-bottom: 0;
 
   //@import '~bootstrap/scss/bootstrap.scss';
-  @import "~bootstrap/scss/functions";
-  @import "~bootstrap/scss/variables";
-  @import "~bootstrap/scss/mixins";
-  @import "~bootstrap/scss/root";
-  @import "~bootstrap/scss/reboot";
-  @import "~bootstrap/scss/grid";
-  @import "~bootstrap/scss/buttons";
-  @import "~bootstrap/scss/button-group";
-  @import "~bootstrap/scss/card";
-  @import "~bootstrap/scss/utilities";
+  @import "bootstrap/scss/functions";
+  @import "bootstrap/scss/variables";
+  @import "bootstrap/scss/mixins";
+  @import "bootstrap/scss/root";
+  @import "bootstrap/scss/reboot";
+  @import "bootstrap/scss/grid";
+  @import "bootstrap/scss/buttons";
+  @import "bootstrap/scss/button-group";
+  @import "bootstrap/scss/card";
+  @import "bootstrap/scss/utilities";
 
   label {
     display: inline-flex;

@@ -25,6 +25,7 @@ export interface ExtFrame extends Omit<Frame, 'data' | 'layout'> {
 
 export interface ExtLegend extends Legend {
   valign: 'top' | 'middle' | 'bottom';
+  itemwidth: number;
 }
 
 export interface ExtLayoutAxis extends Omit<LayoutAxis, 'spikesnap'> {

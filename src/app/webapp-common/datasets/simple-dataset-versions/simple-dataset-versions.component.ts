@@ -50,7 +50,8 @@ export class SimpleDatasetVersionsComponent extends ControllersComponent impleme
           if (!this.route.snapshot.firstChild?.params.versionId) {
             this.store.dispatch(experimentsActions.experimentSelectionChanged({
               experiment: this.firstExperiment,
-              project: this.selectedProject
+              project: this.selectedProject,
+              replaceURL: true
             }));
           }
         }

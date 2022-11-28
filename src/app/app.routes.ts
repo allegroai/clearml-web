@@ -11,7 +11,7 @@ export const routes: Routes = [
   {
     path: 'dashboard',
     loadChildren: () => import('./features/dashboard/dashboard.module').then(m => m.DashboardModule),
-    data: {search: true},
+    data: {search: true, userFocus: true},
   },
   {
     path: 'projects',

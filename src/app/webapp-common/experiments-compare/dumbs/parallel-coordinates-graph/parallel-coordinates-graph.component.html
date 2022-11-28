@@ -14,8 +14,8 @@
       <span class="dot-container">
         <span #dot class="dot pallete-cursor"
               [style.background-color]="experimentsColors[experiment.id]"
-              smChooseColor [colorButtonRef]="dot"
-              [defaultColor]="experimentsColors[getExperimentNameForColor(experiment)]"
+              [colorButtonRef]="dot"
+              [smChooseColor]="experimentsColors[getExperimentNameForColor(experiment)]"
               [stringToColor]="getExperimentNameForColor(experiment)">
         </span>
       </span>

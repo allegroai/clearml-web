@@ -34,10 +34,10 @@
     <br/><br/>
     <div class="buttons">
       <button cdkFocusInitial (click)="delete()"
-              class="btn btn-neon yes-button">{{resetMode ? 'RESET' : 'DELETE'}}
+             data-id="DeleteButton" class="btn btn-neon yes-button">{{resetMode ? 'RESET' : 'DELETE'}}
       </button>
       <button (click)="closeDialog(false)"
-              class="btn btn-outline-neon">CANCEL
+              data-id="CancelButton" class="btn btn-outline-neon">CANCEL
       </button>
     </div>
   </ng-container>
@@ -47,7 +47,7 @@
   <ng-template #inProgressTemplate>
 
     <div>Deleting <span *ngIf="progressPercent > 0">{{progressPercent}}%</span></div>
-    <mat-progress-bar [mode]="progressPercent? 'determinate' : 'indeterminate'"
+    <mat-progress-bar class="progress-bar" [mode]="progressPercent? 'determinate' : 'indeterminate'"
                       [value]="progressPercent">
     </mat-progress-bar>
 

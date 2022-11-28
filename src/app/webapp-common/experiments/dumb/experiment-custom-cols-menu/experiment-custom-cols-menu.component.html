@@ -1,6 +1,7 @@
 <sm-menu
-  [iconClass]="'al-icon al-ico-settings al-color pointer create-new-icon ' + (disabled ? 'pointer-events-none blue-600' : 'blue-400')"
+  [iconClass]="'al-icon al-ico-settings al-color pointer create-new-icon ' + (disabled ? 'pointer-events-none blue-600' : 'blue-300')"
   smMenuClass="light-theme custom-columns"
+  data-id="CustomizeColumn"
   buttonTooltip="Customize table"
   [showButton]="false"
   (click)="!disabled && getMetricsToDisplay.emit()"
@@ -23,13 +24,13 @@
              smClickStopPropagation
              [ngClass]="{disabled: !metricVariants.length}"
              (click)="$event.stopPropagation(); metricVariants.length && setMode(CustomColumnMode.Metrics)"
-        ><i class="al-icon al-ico-add sm mr-1"></i><span class="caption">METRIC</span>
+        ><i class="al-icon al-ico-add sm mr-1"></i><span data-id="Metric Button" class="caption">METRIC</span>
         </div>
         <div class="add-button metrics-button"
              smClickStopPropagation
              [ngClass]="{disabled: !hasHyperParams}"
              (click)="$event.stopPropagation(); hasHyperParams && setMode(CustomColumnMode.HyperParams)"
-        ><i class="al-icon al-ico-add sm mr-1"></i><span class="caption">HYPER PARAMETERS</span>
+        ><i class="al-icon al-ico-add sm mr-1"></i><span data-id="Hyper Parameters Button" class="caption">HYPER PARAMETERS</span>
         </div>
       </div>
     </div>
@@ -41,6 +42,7 @@
                                    (selectedMetricToShow)="selectedMetricToShow.emit($event)">
   </sm-select-metric-for-custom-col>
   <sm-select-hyper-params-for-custom-col *ngIf="customColumnMode === CustomColumnMode.HyperParams"
+                                         class="hyper-params-custom-col"
                                          [tableCols]="tableCols"
                                          [hyperParams]="hyperParams"
                                          (goBack)="setMode(CustomColumnMode.Standard)"

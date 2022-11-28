@@ -3,12 +3,12 @@
   .mat-slider:not(.mat-slider-disabled).cdk-touch-focused .mat-slider-thumb,
   .mat-slider:not(.mat-slider-disabled).cdk-program-focused .mat-slider-thumb{
     transform: scale(0.7);
-    background-color: $light-grey-blue !important;
+    background-color: $blue-300 !important;
   }
   .mat-slider-thumb{
     cursor: grabbing;
     background-color: white !important;
-    border: 2px solid $light-grey-blue;
+    border: 2px solid $blue-300;
   }
   .mat-slider-horizontal.cdk-focused .mat-slider-thumb-label{
     transform: none;

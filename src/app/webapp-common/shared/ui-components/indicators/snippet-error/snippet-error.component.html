@@ -9,7 +9,7 @@
       [style.width.px]="min(floor(labeled.getBoundingClientRect().height - 44), 64) || ''"
       [style.height.px]="min(floor(labeled.getBoundingClientRect().height - 44), 64) || ''"
       [ngClass]="{
-        'light-grey-blue': theme === themeEnum.Light,
+        'blue-300': theme === themeEnum.Light,
         'neon-yellow': theme === themeEnum.Dark,
         'al-ico-no-source': missingSource,
         'al-ico-alert-outline': !missingSource
