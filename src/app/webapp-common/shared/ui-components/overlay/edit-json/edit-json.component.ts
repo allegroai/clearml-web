@@ -10,15 +10,6 @@ import {Observable, Subscription} from 'rxjs';
 
 declare const ace;
 
-const jsonPlaceholder = `e.g.:
-
-      {
-        "location" : "london",
-        "date" : "2019-01-31 22:41:03"
-      }
-`;
-const regularPlaceholder = '';
-
 @Component({
   selector: 'sm-edit-json',
   templateUrl: './edit-json.component.html',
@@ -39,6 +30,7 @@ export class EditJsonComponent implements AfterViewInit {
   private aceEditor: Ace.Editor;
   private $aceCaretPosition: Observable<{ [key: string]: Ace.Point }>;
   private aceCaretPositionSub: Subscription;
+  private defaultPlaceHolder = '';
 
   set readOnly(readOnly: boolean) {
     this._readOnly = readOnly;
@@ -63,6 +55,14 @@ export class EditJsonComponent implements AfterViewInit {
     private zone: NgZone,
   ) {
     this.typeJson = data.typeJson;
+    if (this.typeJson) {
+      this.defaultPlaceHolder = `e.g.:
+
+{
+  "location" : "london",
+  "date" : "2019-01-31 22:41:03"
+}`;
+    }
     this.placeHolder = data.placeHolder;
     this.textData = data.textData ? (this.typeJson ? jsonPipe.transform(data.textData) : data.textData) : undefined;
     this.readOnly = data.readOnly;
@@ -112,7 +112,7 @@ export class EditJsonComponent implements AfterViewInit {
         highlightActiveLine: false,
         highlightSelectedWord: false,
         showPrintMargin: false,
-        placeholder: this.typeJson ? jsonPlaceholder : regularPlaceholder,
+        placeholder: this.placeHolder || this.defaultPlaceHolder,
       });
 
 

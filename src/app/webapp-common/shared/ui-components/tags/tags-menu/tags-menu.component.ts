@@ -9,7 +9,7 @@ import {
   ViewChild
 } from '@angular/core';
 import {Store} from '@ngrx/store';
-import {getCompanyTags, getTags, openTagColorsMenu, setTagsFilterByProject} from '@common/core/actions/projects.actions';
+import {openTagColorsMenu, setTagsFilterByProject} from '@common/core/actions/projects.actions';
 import {activateEdit} from 'app/webapp-common/experiments/actions/common-experiments-info.actions';
 import {ActivateModelEdit} from '@common/models/actions/models-info.actions';
 
@@ -32,6 +32,8 @@ export class TagsMenuComponent {
   @Input() companyTags: string[] = [];
   @Input() tagsFilterByProject: boolean;
   @Output() tagSelected = new EventEmitter<string>();
+  @Output() getTags = new EventEmitter();
+  @Output() getCompanyTags = new EventEmitter();
 
   @ViewChild('nameInput') nameInput: ElementRef<HTMLInputElement>;
 
@@ -58,10 +60,12 @@ export class TagsMenuComponent {
   focus() {
     if (this.tagsFilterByProject) {
       this.firstTime = true;
-      this.store.dispatch(getTags());
+      this.getTags.emit();
+      // this.store.dispatch(getTags());
     } else {
       this.firstTime = false;
-      this.store.dispatch(getCompanyTags());
+      this.getCompanyTags.emit();
+      //this.store.dispatch(getCompanyTags());
     }
     this.nameInput.nativeElement.focus();
     this.cdr.detectChanges();
@@ -75,10 +79,9 @@ export class TagsMenuComponent {
     if (this.tagsFilterByProject) {
       if (this.firstTime) {
         this.firstTime = false;
-        this.store.dispatch(getCompanyTags());
+        this.getCompanyTags.emit();
+        // this.store.dispatch(getCompanyTags());
       }
-    } else {
-      this.store.dispatch(getTags());
     }
     this.store.dispatch(setTagsFilterByProject({tagsFilterByProject: !this.tagsFilterByProject}));
   }

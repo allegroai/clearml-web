@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import * as filesize from 'filesize/lib/filesize.es6';
+import {filesize} from 'filesize';
 
 export const fileSizeConfigStorage = {
   base: 2,
@@ -13,7 +13,7 @@ export const fileSizeConfigStorage = {
 })
 export class FileSizePipe implements PipeTransform {
   private static transformOne(value: number, options?: any): string {
-    return filesize(value, options);
+    return filesize(value, options) as string;
   }
 
   transform(value: number | number[], options?: any) {

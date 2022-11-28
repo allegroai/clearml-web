@@ -61,10 +61,10 @@
 </form>
 <div class="buttons d-flex justify-content-center">
   <button [disabled]="projectName === project?.parent || moveToForm.invalid" (click)="send()" cdkFocusInitial
-          class="btn btn-neon yes-button" #moveButton>
+          data-id="MoveButton" class="btn btn-neon yes-button" #moveButton>
     MOVE
   </button>
-  <button (click)="closeDialog()" class="btn btn-outline-neon">
+  <button (click)="closeDialog()" data-id="CancelButton" class="btn btn-outline-neon">
     CANCEL
   </button>
 

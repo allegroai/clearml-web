@@ -2,7 +2,7 @@ import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Store} from '@ngrx/store';
 import {get} from 'lodash/fp';
-import {filter, take, withLatestFrom} from 'rxjs/operators';
+import {filter, take} from 'rxjs/operators';
 import {ICONS} from '@common/constants';
 import {Queue} from '~/business-logic/model/queues/queue';
 import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
@@ -42,9 +42,7 @@ import {
   selectionDisabledPublishExperiments,
   selectionDisabledReset
 } from '@common/shared/entity-page/items.utils';
-import {WelcomeMessageComponent} from '@common/layout/welcome-message/welcome-message.component';
 import {resetOutput} from '@common/experiments/actions/common-experiment-output.actions';
-import {updateManyExperiment} from '../../../actions/common-experiments-view.actions';
 
 
 @Component({
@@ -53,16 +51,18 @@ import {updateManyExperiment} from '../../../actions/common-experiments-view.act
   styleUrls: ['./experiment-menu.component.scss']
 })
 export class ExperimentMenuComponent extends BaseContextMenuComponent implements OnInit {
-  readonly ICONS = ICONS;
-  readonly TaskStatusEnum = TaskStatusEnum;
-  readonly TaskTypeEnum = TaskTypeEnum;
+  readonly icons = ICONS;
+  readonly taskStatusEnum = TaskStatusEnum;
+  readonly taskTypeEnum = TaskTypeEnum;
 
   public open: boolean;
   public isExample: boolean;
   public isArchive: boolean;
   public selectionHasExamples: boolean;
+  public isCommunity: boolean;
   protected _experiment: ISelectedExperiment = null;
   private _selectedExperiments: ISelectedExperiment[];
+
   @Input() selectedExperiment: any;
   @Input() isSharedAndNotOwner = false;
   @Input() tagsFilterByProject: boolean;
@@ -77,8 +77,10 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
     this.isArchive = experiment?.system_tags?.includes('archived');
   }
 
+  get experiment() {
+    return this._experiment;
+  }
 
-  @Output() tagSelected = new EventEmitter<string>();
   @Input() neverShowPopups;
   @Input() minimizedView: boolean;
 
@@ -90,12 +92,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
   get selectedExperiments(): ISelectedExperiment[] {
     return this._selectedExperiments;
   }
-
-  get experiment() {
-    return this._experiment;
-  }
-
-  public isCommunity: boolean;
+  @Output() tagSelected = new EventEmitter<string>();
 
   constructor(
     protected blTaskService: BlTasksService,
@@ -125,7 +122,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
       const showShareWarningDialog = selectedExperiments.find(item => item?.system_tags.includes('shared')) &&
         !this.syncSelector.selectSync(selectNeverShowPopups)?.includes('archive-shared-task');
       if (showShareWarningDialog) {
-        this.showConfirmArchiveExperiments(this.store, this.dialog, selectedExperiments);
+        this.showConfirmArchiveExperiments(this.store, this.dialog, selectedExperiments, entityType);
       } else {
         this.store.dispatch(commonMenuActions.archiveSelectedExperiments({selectedEntities: selectedExperiments, entityType}));
       }
@@ -154,23 +151,10 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
         data: {taskIds: selectedExperiments.map(exp => exp.id), reference: selectedExperiments[0].name}
       });
 
-    selectQueueDialog.afterClosed().pipe(withLatestFrom(this.store.select(selectNeverShowPopups))).subscribe(([res, neverShowAgainPopups]) => {
+    selectQueueDialog.afterClosed().subscribe(res => {
       if (res && res.confirmed) {
         this.enqueueExperiment(res.queue, selectedExperiments);
         this.blTaskService.setPreviouslyUsedQueue(res.queue);
-        if (((!res.queue.workers) || res.queue.workers.length === 0) && (!neverShowAgainPopups.includes('orphanedQueue'))) {
-          const orphanedQueueDialog: MatDialogRef<WelcomeMessageComponent> = this.dialog.open(WelcomeMessageComponent, {
-            data: {
-              queue: res.queue,
-              step: 2
-            }
-          });
-          orphanedQueueDialog.afterClosed().subscribe((doNotShowAgain) => {
-            if (doNotShowAgain) {
-              this.store.dispatch(neverShowPopupAgain({popupId: 'orphanedQueue'}));
-            }
-          });
-        }
       }
     });
   }
@@ -205,7 +189,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
   }
 
   private enqueueExperiment(queue, selectedExperiments) {
-    this.store.dispatch(commonMenuActions.enqueueClicked({selectedEntities: selectedExperiments, queue}));
+    this.store.dispatch(commonMenuActions.enqueueClicked({selectedEntities: selectedExperiments, queue, verifyWatchers: true}));
   }
 
   private dequeueExperiment(selectedExperiments) {
@@ -358,7 +342,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
   }
 
   cloneExperiment(cloneData) {
-    this.store.dispatch(new commonMenuActions.CloneExperimentClicked({
+    this.store.dispatch(commonMenuActions.cloneExperimentClicked({
       originExperiment: this._experiment,
       cloneData: {
         ...cloneData,
@@ -395,7 +379,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
     });
   }
 
-  showConfirmArchiveExperiments(store: Store, dialog: MatDialog, selectedExperiments: ISelectedExperiment[]): void {
+  showConfirmArchiveExperiments(store: Store, dialog: MatDialog, selectedExperiments: ISelectedExperiment[], entityType: EntityTypeEnum): void {
     const confirmDialogRef = dialog.open(ConfirmDialogComponent, {
       data: {
         title: 'ARCHIVE A PUBLICLY SHARED TASK',
@@ -409,7 +393,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
     });
     confirmDialogRef.afterClosed().subscribe((confirmed) => {
       if (confirmed) {
-        store.dispatch(archiveSelectedExperiments({selectedEntities: selectedExperiments}));
+        store.dispatch(archiveSelectedExperiments({selectedEntities: selectedExperiments, entityType}));
         if (confirmed.neverShowAgain) {
           store.dispatch(neverShowPopupAgain({popupId: 'archive-shared-task'}));
         }

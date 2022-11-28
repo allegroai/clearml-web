@@ -21,6 +21,4 @@ const reducer = createReducer(
   on(showColorPicker, (state , action) => ({...state, pickerProps: action}))
 );
 
-export function colorPreferenceReducer(state: ColorPreferenceState | undefined, action: Action) {
-  return reducer(state, action);
-}
+export const colorPreferenceReducer = (state: ColorPreferenceState | undefined, action: Action) => reducer(state, action);

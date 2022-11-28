@@ -12,11 +12,11 @@ import * as viewActions from '../actions/models-view.actions';
 import {ModelInfoState} from '../reducers/model-info.reducer';
 import {MODELS_INFO_ONLY_FIELDS} from '../shared/models.const';
 import {selectSelectedModel} from '../reducers';
-import {EmptyAction} from '~/app.constants';
 import {SelectedModel} from '../shared/models.model';
 import {selectActiveWorkspace} from '../../core/reducers/users-reducer';
 import {isExample, isSharedAndNotOwner} from '../../shared/utils/shared-utils';
 import {resetActiveSection} from '../actions/models-info.actions';
+import {getTags} from '@common/core/actions/projects.actions';
 
 @Injectable()
 export class ModelsInfoEffects {
@@ -116,10 +116,11 @@ export class ModelsInfoEffects {
             const changes = res?.fields || action.changes;
             return [
               viewActions.updateModel({id: action.id, changes}),
-              selectedModel?.id === action.id ? new infoActions.ModelDetailsUpdated({
-                id: action.id,
-                changes
-              }) : new EmptyAction()
+              ...(selectedModel?.id === action.id ?
+                [new infoActions.ModelDetailsUpdated({ id: action.id, changes })]
+                : []
+              ),
+              ...(changes.tags ? [getTags()] : [])
             ];
           }),
           catchError(err => [

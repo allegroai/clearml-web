@@ -7,7 +7,7 @@ import {BlTasksService} from '~/business-logic/services/tasks.service';
 import {ApiEventsService} from '~/business-logic/api-services/events.service';
 import {Router} from '@angular/router';
 import {catchError, map, mergeMap, switchMap, tap, withLatestFrom} from 'rxjs/operators';
-import {activeLoader, addMessage, deactivateLoader, setServerError} from '../../core/actions/layout.actions';
+import {activeLoader, addMessage, deactivateLoader, neverShowPopupAgain, setServerError} from '../../core/actions/layout.actions';
 import * as menuActions from '../actions/common-experiments-menu.actions';
 import {stopClicked} from '../actions/common-experiments-menu.actions';
 import {Observable, of} from 'rxjs';
@@ -45,6 +45,8 @@ import {get} from 'lodash/fp';
 import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
 import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
 import {TasksCloneRequest} from '~/business-logic/model/tasks/tasksCloneRequest';
+import {WelcomeMessageComponent} from '@common/layout/welcome-message/welcome-message.component';
+import {selectNeverShowPopups} from '@common/core/reducers/view.reducer';
 
 export const getChildrenExperiments = (tasksApi, parents, filters?: { [key: string]: any }): Observable<Task[]> =>
   tasksApi.tasksGetAllEx({
@@ -101,11 +103,27 @@ export class CommonExperimentsMenuEffects {
           /* eslint-disable @typescript-eslint/naming-convention */
           ids,
           queue: action.queue.id, ...((!action.queue.id) && {queue_name: action.queue.name}),
-          validate_tasks: true
+          validate_tasks: true,
+          ...( action.verifyWatchers && {verify_watched_queue: true})
           /* eslint-enable @typescript-eslint/naming-convention */
         })
           .pipe(
-            mergeMap(res => this.updateExperimentsSuccess(action, MenuItems.enqueue, ids, selectedEntity, res)),
+            withLatestFrom(this.store.select(selectNeverShowPopups)),
+            tap(([res, neverShowAgainPopups]) => {
+              if (res.queue_watched === false && !neverShowAgainPopups.includes('orphanedQueue')) {
+                this.dialog.open(WelcomeMessageComponent, {
+                  data: {
+                    queue: res.queue,
+                    step: 2
+                  }
+                }).afterClosed().subscribe(doNotShowAgain => {
+                  if (doNotShowAgain) {
+                    this.store.dispatch(neverShowPopupAgain({popupId: 'orphanedQueue'}));
+                  }
+                });
+              }
+            }),
+            mergeMap(([res]) => this.updateExperimentsSuccess(action, MenuItems.enqueue, ids, selectedEntity, res)),
             catchError(error => this.updateExperimentFailed(action.type, error))
           );
       }
@@ -182,32 +200,26 @@ export class CommonExperimentsMenuEffects {
 
 
   cloneExperimentRequested$ = createEffect(() => this.actions$.pipe(
-    ofType<menuActions.CloneExperimentClicked>(menuActions.CLONE_EXPERIMENT_CLICKED),
+    ofType(menuActions.cloneExperimentClicked),
     withLatestFrom(this.store.select(selectTableMode)),
-    switchMap(([action, tableMode]) => this.apiTasks.tasksClone({
-        task: action.payload.originExperiment.id,
+    switchMap(([action, ]) => this.apiTasks.tasksClone({
+        task: action.originExperiment.id,
         /* eslint-disable @typescript-eslint/naming-convention */
-        new_task_project: action.payload.cloneData.project,
-        new_task_comment: action.payload.cloneData.comment,
-        new_task_name: action.payload.cloneData.name,
-        new_project_name: action.payload.cloneData.newProjectName
+        new_task_project: action.cloneData.project,
+        new_task_comment: action.cloneData.comment,
+        new_task_name: action.cloneData.name,
+        new_project_name: action.cloneData.newProjectName
         /* eslint-enable @typescript-eslint/naming-convention */
       } as TasksCloneRequest)
         .pipe(
-          mergeMap(res => [
-            viewActions.getExperiments(),
-            viewActions.setSelectedExperiments({
-              experiments: (tableMode === 'info' ? [] :
-                [{id: res?.id}
-                ])
-            }),
-            viewActions.experimentSelectionChanged({
-              experiment: tableMode === 'info'? {id: res.id}: null ,
-              project: action.payload.cloneData.project ? action.payload.cloneData.project : res?.new_project?.id
-            }),
-            deactivateLoader(action.type),
-            ...action.payload.cloneData.newProjectName ? [getAllSystemProjects()] : [],
-          ]),
+          mergeMap(res => {
+            this.router.navigate(['projects', action.cloneData.project, 'experiments', res.id]);
+            return [
+              viewActions.getExperiments(),
+              deactivateLoader(action.type),
+              ...action.cloneData.newProjectName ? [getAllSystemProjects()] : [],
+            ];
+          }),
           catchError(error => [
             deactivateLoader(action.type),
             setServerError(error, null, 'Clone Experiment failed'),

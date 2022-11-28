@@ -11,15 +11,15 @@
 
   <div *ngIf="showNeverShowAgain" class="body mt-4" >
     <mat-checkbox [(ngModel)]="neverShowAgain">
-      <span class="chkbx-label">Don't show again</span>
+      <span class="chkbx-label">Don't show this message again</span>
     </mat-checkbox>
   </div>
   <div class="buttons">
 
-    <button *ngIf="no" (click)="closeDialog(false)" class="btn btn-outline-neon yes-button">
+    <button *ngIf="no" (click)="closeDialog(false)" id={{no}} class="btn btn-outline-neon yes-button">
       {{no}}
     </button>
-    <button (click)="closeDialog(true)" class="btn btn-neon" *ngIf="yes">
+    <button (click)="closeDialog(true)" id={{yes}} class="btn btn-neon" *ngIf="yes">
       {{yes}}
     </button>
 

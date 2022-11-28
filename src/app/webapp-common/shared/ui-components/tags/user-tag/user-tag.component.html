@@ -11,6 +11,7 @@
 </span>
 <i class="al-icon al-ico-dialog-x sm remove"
    *ngIf="remove.observers.length > 0 && !disabledRemove"
+   data-id="TagCrossButton"
    [style.color]="colors?.foreground"
    (click)="$event.stopPropagation(); onRemoveClicked(caption)">
 </i>

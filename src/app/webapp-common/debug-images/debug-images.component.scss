@@ -25,6 +25,8 @@
     }
   }
   .navigator-container{
+    height: 60px;
+
     &.active{
       background: $blue-50;
     }

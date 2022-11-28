@@ -178,7 +178,8 @@ export class DebugImagesEffects {
         /* eslint-disable @typescript-eslint/naming-convention */
         task: action.task,
         scroll_id: scrollId,
-        navigate_earlier: action.navigateEarlier
+        navigate_earlier: action.navigateEarlier,
+          ...(action.iteration && {next_iteration: true})
         /* eslint-enable @typescript-eslint/naming-convention */
       })
         .pipe(
@@ -191,7 +192,7 @@ export class DebugImagesEffects {
                 setDebugImageIterations({min_iteration: res.min_iteration, max_iteration: res.max_iteration}),
                 setCurrentDebugImage({event: res.event}), deactivateLoader(action.type),
                 setDebugImageViewerScrollId({scrollId: res.scroll_id}),
-                action.navigateEarlier ? setViewerBeginningOfTime({beginningOfTime: false}) : setViewerEndOfTime({endOfTime: false})
+                !action.navigateEarlier ? setViewerBeginningOfTime({beginningOfTime: false}) : setViewerEndOfTime({endOfTime: false})
               ];
             }
           }),

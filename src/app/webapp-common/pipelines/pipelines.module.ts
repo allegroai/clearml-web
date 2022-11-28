@@ -5,7 +5,7 @@ import {UiComponentsModule} from '@common/shared/ui-components/ui-components.mod
 import {SMSharedModule} from '@common/shared/shared.module';
 import {CommonProjectsModule} from '@common/projects/common-projects.module';
 import {StoreConfig, StoreModule} from '@ngrx/store';
-import {IProjectsState, projectsReducer} from '~/features/projects/projects.reducer';
+import {ProjectsState, projectsReducer} from '~/features/projects/projects.reducer';
 import {RouterModule, Routes} from '@angular/router';
 import {ProjectsSharedModule} from '~/features/projects/shared/projects-shared.module';
 import {merge} from 'lodash/fp';
@@ -20,7 +20,7 @@ export const pipelinesSyncedKeys = [
 ];
 
 export const PIPELINES_CONFIG_TOKEN =
-  new InjectionToken<StoreConfig<IProjectsState , any>>('PipelineConfigToken');
+  new InjectionToken<StoreConfig<ProjectsState , any>>('PipelineConfigToken');
 
 
 const localStorageKey = '_saved_pipeline_state_';

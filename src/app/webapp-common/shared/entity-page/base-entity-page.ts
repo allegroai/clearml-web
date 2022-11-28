@@ -13,7 +13,12 @@ import {
 } from 'rxjs/operators';
 import {Project} from '~/business-logic/model/projects/project';
 import {isReadOnly} from '../utils/shared-utils';
-import {selectAllProjectsUsers, selectProjectUsers, selectRootProjects, selectSelectedProject} from '../../core/reducers/projects.reducer';
+import {
+  selectAllProjectsUsers,
+  selectProjectUsers,
+  selectRootProjects,
+  selectSelectedProject
+} from '../../core/reducers/projects.reducer';
 import {IOutputData} from 'angular-split/lib/interface';
 import {SplitComponent} from 'angular-split';
 import {selectRouterParams} from '../../core/reducers/router-reducer';
@@ -35,6 +40,9 @@ import {RefreshService} from '@common/core/services/refresh.service';
 import {selectTableModeAwareness} from '@common/projects/common-projects.reducer';
 import {setTableModeAwareness} from '@common/projects/common-projects.actions';
 import {User} from '~/business-logic/model/users/user';
+import {neverShowPopupAgain} from '../../core/actions/layout.actions';
+import {selectNeverShowPopups} from '../../core/reducers/view.reducer';
+import {SmSyncStateSelectorService} from '../../core/services/sync-state-selector.service';
 
 @Component({
   selector: 'sm-base-entity-page',
@@ -85,7 +93,8 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
     protected route: ActivatedRoute,
     protected router: Router,
     protected dialog: MatDialog,
-    protected refresh: RefreshService
+    protected refresh: RefreshService,
+    protected syncSelector: SmSyncStateSelectorService,
   ) {
     this.users$ = this.selectedProject === '*' ? this.store.select(selectAllProjectsUsers) : this.store.select(selectProjectUsers);
     this.selectedProject$ = this.store.select(selectSelectedProject);
@@ -260,21 +269,24 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
       this.afterArchiveChanged();
       this.store.dispatch(resetProjectSelection());
     });
-
-    if (this.getSelectedEntities().length > 0) {
+    if (this.getSelectedEntities().length > 0 && !this.syncSelector.selectSync(selectNeverShowPopups)?.includes('go-to-archive')) {
       const archiveDialog: MatDialogRef<any> = this.dialog.open(ConfirmDialogComponent, {
         data: {
           title: 'Are you sure?',
           body: 'Navigating between "Live" and "Archive" will deselect your selected data views.',
           yes: 'Proceed',
           no: 'Back',
-          iconClass: ''
+          iconClass: '',
+          showNeverShowAgain: true
         }
       });
 
       archiveDialog.afterClosed().subscribe((confirmed) => {
         if (confirmed) {
           navigate();
+          if (confirmed.neverShowAgain) {
+            this.store.dispatch(neverShowPopupAgain({popupId: 'go-to-archive'}));
+          }
         }
       });
     } else {

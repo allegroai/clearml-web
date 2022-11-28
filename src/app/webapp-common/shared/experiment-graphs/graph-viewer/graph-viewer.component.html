@@ -22,7 +22,7 @@
       <div [class.load-spinner]="(isFetchingData$ | async) || !plotLoaded" class="d-flex align-items-center mr-3"></div>
       <div class="pointer d-flex align-items-center mr-3" *ngIf="(isFetchingData$ | async) === false && isFullDetailsMode" smTooltip="refresh" matTooltipPosition="below" (click)="refresh()"><i class="al-icon al-ico-refresh"></i></div>
       <div (click)="closeGraphViewer()" matTooltipPosition="below" smTooltip="Close" class="icon-container pointer d-flex align-items-center">
-        <i class="al-icon al-ico-dialog-x al-color blue-400 light-grey-blue"></i>
+        <i class="al-icon al-ico-dialog-x al-color blue-300"></i>
       </div>
     </div>
 
@@ -83,11 +83,11 @@
     </sm-single-graph>
     <div *ngIf="!isFullDetailsMode && !isCompare && !darkTheme" class="navigation">
       <div class="icon-container controller d-flex flex-column justify-content-around align-items-center next"
-           (click)="canGoNext() && next()" [class.disabled]="endOfTime || !plotLoaded">
-        <i class="al-icon al-ico-next al-color light-grey-blue"></i></div>
+           (click)="canGoNext() && next()" [class.disabled]="endOfTime">
+        <i class="al-icon al-ico-next al-color blue-300"></i></div>
       <div class="icon-container controller d-flex flex-column justify-content-around align-items-center previous"
-           (click)="canGoBack() && previous()" [class.disabled]="beginningOfTime || !plotLoaded">
-        <i class="al-icon al-ico-previous al-color light-grey-blue"></i></div>
+           (click)="canGoBack() && previous()" [class.disabled]="beginningOfTime">
+        <i class="al-icon al-ico-previous al-color blue-300"></i></div>
     </div>
   </div>
 </div>

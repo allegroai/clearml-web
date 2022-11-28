@@ -1,95 +1,82 @@
-@import "../../webapp-common/shared/ui-components/styles/variables";
+@import "variables";
 
-$transition-delay: 0.1;
-$transition-speed: 0.15;
+$link-item-size: 64px;
+$icon-size: 24px;
 
-.side-nav {
-  z-index: 1000;
-  background-color: $blue-600;
+:host {
+  display: flex;
+  flex-direction: column;
   height: 100%;
   width: $side-bar-close-width;
-  position: relative;
-  transition: width $transition-speed + s;
-  transition-delay: $transition-delay + s;
-  overflow: hidden;
+  background-color: $blue-600;
 
-  .item.logo {
-    background: $eggplant-purple;
-    cursor: default;
-
-    .item-icon {
-      transition: opacity $transition-speed + $transition-delay + s;
-      opacity: 1;
-      height: 100%;
-    }
-
-    &:hover {
-      background-color: $eggplant-purple;
-      box-shadow: unset;
-
-    }
-
+  .logo {
+    width: 64px;
+    height: 64px;
+    background: $blue-700;
   }
 
-  a:hover {
-    color: $blue-250;
+  .items-container {
+    text-align: center;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-width: thin; /* Firefox */
+    -ms-overflow-style: none; /* IE 10+ */
+    &.on-scrolling {
+      box-shadow: 0 3px 3px rgba(0,0,0,0.3) inset, 0 -3px 3px rgba(0,0,0,0.3) inset;
+    }
   }
+
+  .items-container::-webkit-scrollbar-track {
+    box-shadow: none;
+    -webkit-box-shadow: none !important;
+    background-color: transparent !important;
+  }
+
+  .items-container::-webkit-scrollbar {
+    width: 2px !important;
+    background-color: transparent;
+  }
+
+  .items-container::-webkit-scrollbar-thumb {
+    border-radius: unset;
+    border: none;
+  }
+
 
   .item {
-    width: 100%;
-    height: $side-bar-close-width;
-    line-height: $side-bar-close-width;
-    color: #fff;
-    text-align: center;
-    cursor: pointer;
-
-    .fa-24 {
-      font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: $link-item-size;
+    height: $link-item-size;
+    color: $blue-300;
+    margin: 0 auto;
+    // ICON SIZE
+    &:before {
+      font-size: $icon-size;
     }
 
     &:hover {
+      color: $blue-200;
       background-color: $blue-500;
-      box-shadow: inset 0 -1px 0 0 #252b3d;
-
-      .caption {
-        opacity: 1;
-      }
+      text-decoration: none;
     }
 
-    .item-icon {
-      width: $side-bar-close-width;
-      display: inline-block;
-      position: absolute;
-      left: 0;
-      color: #a7b2d8;
-      i{
-        line-height: 64px;
-        height: 64px;
-        width: 64px;
-      }
+    &.active:before {
+      color: $neon-yellow
     }
+  }
 
-    &.active {
-      .item-icon i {
-        color: $neon-yellow
-      }
-    }
-
-    .caption {
-      transition: opacity $transition-speed + s;
-      position: absolute;
-      left: $side-bar-close-width;
-      text-transform: uppercase;
-      font-size: 15px;
-      opacity: 0.4;
-      color: $blue-250;
-    }
+  .i-slack-mark-color {
+    width: $icon-size;
+    height: $icon-size;
+    background-size: $icon-size;
   }
 
   .account {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
+    display: flex;
+    flex-direction: column;
+    margin-top: auto;
   }
 }
-

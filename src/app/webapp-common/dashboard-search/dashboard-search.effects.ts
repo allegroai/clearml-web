@@ -31,6 +31,7 @@ import {escapeRegex} from '../shared/utils/shared-utils';
 import {isEqual} from 'lodash/fp';
 import {activeSearchLink} from '~/features/dashboard-search/dashboard-search.consts';
 import {EmptyAction} from '~/app.constants';
+import {selectCurrentUser, selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
 
 export const getEntityStatQuery = action => ({
   /* eslint-disable @typescript-eslint/naming-convention */
@@ -46,26 +47,27 @@ export const getEntityStatQuery = action => ({
       fields: ['name', 'id']
     },
     type: ['__$not', 'annotation_manual', '__$not', 'annotation', '__$not', 'dataset_import'],
-    system_tags: ['-archived', '-pipeline', '-dataset']
+    system_tags: ['-archived', '-pipeline', '-dataset'],
   },
   models: {_any_: {
       ...(action.query && {pattern: action.regExp ? action.query : escapeRegex(action.query)}),
       fields: ['name', 'id']
-    }},
+    },
+  },
   datasets: {_any_: {
       ...(action.query && {pattern: action.regExp ? action.query : escapeRegex(action.query)}),
       fields: ['basename', 'id']
     },
     search_hidden: true,
     system_tags: ['dataset'],
-    name: '/\\.datasets/'
+    name: '/\\.datasets/',
   },
   pipelines: {_any_: {
       ...(action.query && {pattern: action.regExp ? action.query : escapeRegex(action.query)}),
       fields: ['basename', 'id']
     },
     search_hidden: true,
-    system_tags: ['pipeline']
+    system_tags: ['pipeline'],
   }
   /* eslint-enable @typescript-eslint/naming-convention */
 });
@@ -90,7 +92,8 @@ export class DashboardSearchEffects {
     ofType(searchStart),
     withLatestFrom(
       this.store.select(selectActiveSearch),
-      this.store.select(selectSearchTerm)),
+      this.store.select(selectSearchTerm)
+    ),
     mergeMap(([action, active, term]) => {
       const actionsToFire = [];
       if (!active) {
@@ -108,7 +111,8 @@ export class DashboardSearchEffects {
   getCurrentPageResults = createEffect(() => this.actions.pipe(
     ofType(getCurrentPageResults),
     withLatestFrom(
-      this.store.select(selectSearchTerm)),
+      this.store.select(selectSearchTerm)
+    ),
     map(([action, term]) => {
         switch (action.activeLink) {
           case activeSearchLink.experiments:
@@ -129,8 +133,12 @@ export class DashboardSearchEffects {
 
   searchProjects = createEffect(() => this.actions.pipe(
     ofType(searchProjects),
-    withLatestFrom(this.store.select(selectSearchScrollIds)),
-    switchMap(([action, scrollIds]) => this.projectsApi.projectsGetAllEx({
+    withLatestFrom(
+      this.store.select(selectSearchScrollIds),
+      this.store.select(selectShowOnlyUserWork),
+      this.store.select(selectCurrentUser),
+    ),
+    switchMap(([action, scrollIds, userFocus, user]) => this.projectsApi.projectsGetAllEx({
       _any_: {
         ...(action.query && {pattern: action.regExp ? action.query : escapeRegex(action.query)}),
         fields: ['basename', 'id']
@@ -140,6 +148,7 @@ export class DashboardSearchEffects {
       stats_for_state: ProjectsGetAllExRequest.StatsForStateEnum.Active,
       scroll_id: scrollIds?.[activeSearchLink.projects] || null,
       size: SEARCH_PAGE_SIZE,
+      ...(userFocus && {active_users: [user.id]}),
       include_stats: true,
       only_fields: ['name', 'company', 'user', 'created', 'default_output_destination', 'basename']
       /* eslint-enable @typescript-eslint/naming-convention */
@@ -150,8 +159,12 @@ export class DashboardSearchEffects {
 
   searchPipelines = createEffect(() => this.actions.pipe(
     ofType(searchPipelines),
-    withLatestFrom(this.store.select(selectSearchScrollIds)),
-    switchMap(([action, scrollIds]) => this.projectsApi.projectsGetAllEx({
+    withLatestFrom(
+      this.store.select(selectSearchScrollIds),
+      this.store.select(selectShowOnlyUserWork),
+      this.store.select(selectCurrentUser),
+    ),
+    switchMap(([action, scrollIds, userFocus, user]) => this.projectsApi.projectsGetAllEx({
       _any_: {
         ...(action.query && {pattern: action.regExp ? action.query : escapeRegex(action.query)}),
         fields: ['basename', 'id']
@@ -163,6 +176,7 @@ export class DashboardSearchEffects {
       stats_for_state: ProjectsGetAllExRequest.StatsForStateEnum.Active,
       scroll_id: scrollIds?.[activeSearchLink.pipelines] || null,
       size: SEARCH_PAGE_SIZE,
+      ...(userFocus && {active_users: [user.id]}),
       include_stats: true,
       only_fields: ['name', 'company', 'user', 'created', 'default_output_destination', 'tags', 'system_tags', 'basename']
       /* eslint-enable @typescript-eslint/naming-convention */
@@ -173,8 +187,12 @@ export class DashboardSearchEffects {
 
   searchOpenDatasets = createEffect(() => this.actions.pipe(
     ofType(searchOpenDatasets),
-    withLatestFrom(this.store.select(selectSearchScrollIds)),
-    switchMap(([action, scrollIds]) => this.projectsApi.projectsGetAllEx({
+    withLatestFrom(
+      this.store.select(selectSearchScrollIds),
+      this.store.select(selectShowOnlyUserWork),
+      this.store.select(selectCurrentUser),
+    ),
+    switchMap(([action, scrollIds, userFocus, user]) => this.projectsApi.projectsGetAllEx({
       /* eslint-disable @typescript-eslint/naming-convention */
       _any_: {
         ...(action.query && {pattern: action.regExp ? action.query : escapeRegex(action.query)}),
@@ -187,6 +205,7 @@ export class DashboardSearchEffects {
       stats_for_state: ProjectsGetAllExRequest.StatsForStateEnum.Active,
       scroll_id: scrollIds?.[activeSearchLink.openDatasets] || null,
       size: SEARCH_PAGE_SIZE,
+      ...(userFocus && {active_users: [user.id]}),
       include_dataset_stats: true,
       stats_with_children: false,
       include_stats: true,
@@ -200,8 +219,12 @@ export class DashboardSearchEffects {
 
   searchModels = createEffect(() => this.actions.pipe(
     ofType(searchModels),
-    withLatestFrom(this.store.select(selectSearchScrollIds)),
-    switchMap(([action, scrollIds]) => this.modelsApi.modelsGetAllEx({
+    withLatestFrom(
+      this.store.select(selectSearchScrollIds),
+      this.store.select(selectShowOnlyUserWork),
+      this.store.select(selectCurrentUser),
+    ),
+    switchMap(([action, scrollIds, userFocus, user]) => this.modelsApi.modelsGetAllEx({
       /* eslint-disable @typescript-eslint/naming-convention */
       _any_: {
         ...(action.query && {pattern: action.regExp ? action.query : escapeRegex(action.query)}),
@@ -209,6 +232,7 @@ export class DashboardSearchEffects {
       },
       scroll_id: scrollIds?.[activeSearchLink.models] || null,
       size: SEARCH_PAGE_SIZE,
+      ...(userFocus && {user: [user.id]}),
       system_tags: ['-archived'],
       include_stats: true,
       only_fields: ['ready', 'created', 'framework', 'user.name', 'name', 'parent.name', 'task.name', 'id', 'company']
@@ -220,8 +244,12 @@ export class DashboardSearchEffects {
 
   searchExperiments = createEffect(() => this.actions.pipe(
     ofType(searchExperiments),
-    withLatestFrom(this.store.select(selectSearchScrollIds)),
-    switchMap(([action, scrollIds]) => this.experimentsApi.tasksGetAllEx({
+    withLatestFrom(
+      this.store.select(selectSearchScrollIds),
+      this.store.select(selectShowOnlyUserWork),
+      this.store.select(selectCurrentUser),
+    ),
+    switchMap(([action, scrollIds, userFocus, user]) => this.experimentsApi.tasksGetAllEx({
       /* eslint-disable @typescript-eslint/naming-convention */
       _any_: {
         ...(action.query && {pattern: action.regExp ? action.query : escapeRegex(action.query)}),
@@ -229,6 +257,7 @@ export class DashboardSearchEffects {
       },
       scroll_id: scrollIds?.[activeSearchLink.experiments] || null,
       size: SEARCH_PAGE_SIZE,
+      ...(userFocus && {user: [user.id]}),
       only_fields: EXPERIMENT_SEARCH_ONLY_FIELDS,
       type: ['__$not', 'annotation_manual', '__$not', 'annotation', '__$not', 'dataset_import'],
       system_tags: ['-archived', '-pipeline', '-dataset']

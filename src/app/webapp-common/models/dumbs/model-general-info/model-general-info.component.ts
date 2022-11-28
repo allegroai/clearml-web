@@ -1,15 +1,15 @@
 import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
 import {getOr} from 'lodash/fp';
 import {SelectedModel} from '../../shared/models.model';
-import {NA} from '../../../../app.constants';
-import {TAGS} from '../../../tasks/tasks.constants';
+import {NA} from '~/app.constants';
+import {TAGS} from '@common/tasks/tasks.constants';
 import {DatePipe} from '@angular/common';
-import {TIME_FORMAT_STRING} from '../../../constants';
+import {TIME_FORMAT_STRING} from '@common/constants';
 import {Store} from '@ngrx/store';
 import {ActivateModelEdit, CancelModelEdit} from '../../actions/models-info.actions';
 import {AdminService} from '~/shared/services/admin.service';
-import {getSignedUrl} from '../../../core/actions/common-auth.actions';
-import {selectSignedUrl} from '../../../core/reducers/common-auth-reducer';
+import {getSignedUrl} from '@common/core/actions/common-auth.actions';
+import {selectSignedUrl} from '@common/core/reducers/common-auth-reducer';
 import {filter, map, take} from 'rxjs/operators';
 
 @Component({
@@ -22,7 +22,7 @@ export class ModelGeneralInfoComponent {
   constructor(private datePipe: DatePipe, private store: Store<any>, private adminService: AdminService) {
   }
 
-  public kpis: {label: string; value: string, downloadable?: boolean; href?: string; task?: string}[];
+  public kpis: {label: string; value: string; downloadable?: boolean; href?: string; task?: string}[];
   private _model: SelectedModel;
   public isLocalFile: boolean;
 

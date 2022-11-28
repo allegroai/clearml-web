@@ -1,11 +1,34 @@
-@import 'src/app/webapp-common/shared/ui-components/styles/variables';
+@import 'variables';
 
 :host {
   display: block;
-  padding: 12px;
+
+  .head {
+    margin-bottom: 12px;
+    padding: 12px;
+    display: grid;
+    grid-template-columns: 20px 1fr 20px;
+    gap: 6px;
+    align-items: center;
+    text-align: center;
+    border-bottom: 1px solid $blue-200;
+    h3 {
+      color: $blue-400;
+      font-size: 14px;
+      font-weight: normal;
+      margin: 0;
+    }
+  }
+
+  sm-search {
+    display: block;
+    padding: 0 12px;
+  }
+
 }
 
 .list-container {
+  padding-left: 12px;
   overflow: auto;
   max-height: calc(60vh - 27px);
   min-height: 360px;

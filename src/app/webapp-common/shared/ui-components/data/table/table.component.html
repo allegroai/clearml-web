@@ -148,13 +148,13 @@
         [style.--rowHeight]="rowHeight + 'px'"
         [style.left.px]="contextButtonPosition"
         [style.padding.px]="rowHeight < 42 ? 2 : 3"
-      ><i class="al-icon al-ico-dots-v-menu" [class.sm-md]="rowHeight < 42" ></i>
+      ><i data-id="3Dot Menu Button" class="al-icon al-ico-dots-v-menu" [class.sm-md]="rowHeight < 42" ></i>
       </div>
     </tr>
     <tr *ngIf="index === rowsNumber - 1 && lazyLoading && !noMoreData && !lastRowExpanded" class="table-load-more load-more-wrapper d-flex">
       <div (smScrollEnd)="autoLoadMore && loadMore()">
         <button #loadButton
-                class="btn btn-cml-primary"
+                class="btn btn-cml-primary" data-id="LoadMore"
                 (click)="loadMore()"
                 [style.margin-left.px]="buttonLeft">
           <i *ngIf="loading && !hasExperimentUpdate" class="load-spinner"></i>

@@ -34,10 +34,13 @@ export class SimpleDatasetVersionInfoComponent extends PipelineControllerInfoCom
   ) {
     super(_dagManager, store, cdr, zone);
   }
+
   convertPipelineToDagModel(pipeline): PipelineItem[] {
     const res = super.convertPipelineToDagModel(pipeline);
     if (res?.length > 0) {
       window.setTimeout(() => this.selectStep(last(res)), 1000);
+    } else if (this.infoData?.id){
+      this.store.dispatch(getSelectedPipelineStep({id: this.infoData.id}));
     }
     return res;
   }

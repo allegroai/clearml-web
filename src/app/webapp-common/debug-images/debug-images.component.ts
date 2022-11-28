@@ -156,7 +156,6 @@ export class DebugImagesComponent implements OnInit, OnDestroy, OnChanges {
         return acc;
       }), {}))
     ).subscribe(debugImages => {
-      console.log(debugImages);
       this.debugImages = debugImages;
       if (debugImages === null) {
         return;

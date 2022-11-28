@@ -42,13 +42,12 @@
 
   <cdk-virtual-scroll-viewport itemSize="32" class="tags-list">
     <div *cdkVirtualFor="let tag of (tags$ | async) | filter:filterText:'caption'" class="tag-line">
-      <div class="caption">{{tag.caption}}</div>
+      <div class="caption ellipsis">{{tag.caption}}</div>
       <div
         *ngIf="(tag.colorObservable | async) as colors"
         class="tag pointer"
         [style.backgroundColor]="$any(colors)?.background"
         [style.color]="$any(colors)?.foreground"
-        mat-icon-button
         [matMenuTriggerFor]="colorMenu"
         [matMenuTriggerData]="{tag: tag.caption, colors: colors}"
       >a</div>

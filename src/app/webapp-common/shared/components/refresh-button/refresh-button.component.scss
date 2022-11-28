@@ -1,4 +1,4 @@
-@import "../../../shared/ui-components/styles/variables";
+@import "variables";
 
 :host {
   display: inline-block;
@@ -24,7 +24,7 @@
   .refresh-icon {
     margin: 10px;
     font-size: 20px;
-    color: $blue-400;
+    color: $blue-300;
   }
 
   .autorefresh-checkbox {

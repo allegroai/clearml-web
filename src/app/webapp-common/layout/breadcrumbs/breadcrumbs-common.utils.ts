@@ -70,9 +70,7 @@ export const prepareNames = (data: IBreadcrumbs, customProject?: boolean, fullSc
   const project = prepareLinkData(data.project, true);
   if (data.project) {
     let subProjectsNames = [data.project?.name];
-    if (!customProject) {
-      subProjectsNames = data.project?.name?.split('/');
-    }
+      subProjectsNames = data.project?.name?.split('/').filter(name=> !['.datasets', '.pipelines'].includes(name));
     const allProjects = [
       ...(data.projects || []),
       {id: '*', name: 'All Experiments'},
@@ -81,13 +79,14 @@ export const prepareNames = (data: IBreadcrumbs, customProject?: boolean, fullSc
     let currentName = '';
     const subProjects = subProjectsNames.map(name => {
       currentName += currentName ? ('/' + name) : name;
-      return allProjects.find(proj => currentName === proj.name);
+      return allProjects.find(proj => currentName === proj.name.replace('/.datasets', '').replace('/.pipelines', ''));
     }) || [];
-
     const subProjectsLinks = subProjects.map((subProject, index, arr) => ({
-      name: subProject?.name.substring(subProject?.name.lastIndexOf('/') + 1),
-      url: customProject ?
-        data.project?.system_tags?.includes('pipeline') ? `pipelines/${subProject?.id}/experiments` : `datasets/simple/${subProject?.id}` :
+      name: subProjectsNames[index],
+      url: customProject ? (( index===subProjects.length-1)  ?
+        (data.project?.system_tags?.includes('pipeline') ?
+          `pipelines/${subProject?.id}/experiments` : `datasets/simple/${subProject?.id}`): null)
+        :
         fullScreen && index === (arr.length - 1) ? `projects/${subProject?.id}/experiments/${data?.experiment?.id}` :
           subProject?.name === data.project?.name && data.project?.sub_projects?.length === 0 ?
             `projects/${subProject?.id}` :

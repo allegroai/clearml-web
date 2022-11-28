@@ -13,7 +13,7 @@ export interface CommonProjectReadyForDeletion {
   models: {archived: number; unarchived: number};
 }
 
-export interface ICommonProjectsState {
+export interface CommonProjectsState {
   orderBy: string;
   sortOrder: TableSortOrderEnum;
   searchQuery: SearchState['searchQuery'];
@@ -29,7 +29,7 @@ export interface ICommonProjectsState {
   showDatasetExamples: boolean;
 }
 
-export const commonProjectsInitState: ICommonProjectsState = {
+export const commonProjectsInitState: CommonProjectsState = {
   projects: null,
   selectedProjectId: '',
   selectedProject: {},
@@ -99,10 +99,10 @@ export const commonProjectsReducers = [
     ({...state, tableModeAwareness: (action as ReturnType<typeof setTableModeAwareness>).awareness})),
   on(showExamplePipelines, state => ({...state, showPipelineExamples: true})),
   on(showExampleDatasets, state => ({...state, showDatasetExamples: true}))
-] as ReducerTypes<ICommonProjectsState, any>[];
+] as ReducerTypes<CommonProjectsState, any>[];
 export const commonProjectsReducer = createReducer(commonProjectsInitState, ...commonProjectsReducers);
 
-export const projects = state => state.projects as ICommonProjectsState;
+export const projects = state => state.projects as CommonProjectsState;
 
 
 export const selectProjects = createSelector(projects, state => state?.projects);

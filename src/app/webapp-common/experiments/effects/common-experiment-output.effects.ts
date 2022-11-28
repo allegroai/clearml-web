@@ -27,6 +27,7 @@ import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {EMPTY} from 'rxjs';
 import {selectSelectedExperiment} from '~/features/experiments/reducers';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
+import {PlotSampleResponse} from '~/business-logic/model/events/plotSampleResponse';
 
 
 @Injectable()
@@ -212,16 +213,15 @@ export class CommonExperimentOutputEffects {
         task: action.task,
         iteration: action.iteration,
         metric: action.metric,
-        variant: action.variant,
         scroll_id: scrollId,
         navigate_current_metric: false
         /* eslint-enable @typescript-eslint/naming-convention */
       })
         .pipe(
-          mergeMap(res => [
+          mergeMap((res: PlotSampleResponse) => [
             // eslint-disable-next-line @typescript-eslint/naming-convention
             outputActions.setPlotIterations({min_iteration: res.min_iteration, max_iteration: res.max_iteration}),
-            outputActions.setCurrentPlot({event: res.event}), deactivateLoader(action.type),
+            outputActions.setCurrentPlot({event: res.events}), deactivateLoader(action.type),
             outputActions.setPlotViewerScrollId({scrollId: res.scroll_id}),
           ]),
           catchError(error => [requestFailed(error), deactivateLoader(action.type)])
@@ -237,20 +237,21 @@ export class CommonExperimentOutputEffects {
         /* eslint-disable @typescript-eslint/naming-convention */
         task: action.task,
         scroll_id: scrollId,
-        navigate_earlier: action.navigateEarlier
+        navigate_earlier: action.navigateEarlier,
+        ...(action.iteration && {next_iteration: true})
         /* eslint-enable @typescript-eslint/naming-convention */
       })
         .pipe(
           mergeMap(res => {
-            if (!res.event) {
+            if (res.events.length === 0) {
               return [action.navigateEarlier ? outputActions.setViewerBeginningOfTime({beginningOfTime: true}) : outputActions.setViewerEndOfTime({endOfTime: true})];
             } else {
               return [
                 // eslint-disable-next-line @typescript-eslint/naming-convention
                 outputActions.setPlotIterations({min_iteration: res.min_iteration, max_iteration: res.max_iteration}),
-                outputActions.setCurrentPlot({event: res.event}), deactivateLoader(action.type),
+                outputActions.setCurrentPlot({event: res.events}), deactivateLoader(action.type),
                 outputActions.setPlotViewerScrollId({scrollId: res.scroll_id}),
-                action.navigateEarlier ? outputActions.setViewerBeginningOfTime({beginningOfTime: false}) : outputActions.setViewerEndOfTime({endOfTime: false})
+                !action.navigateEarlier ? outputActions.setViewerBeginningOfTime({beginningOfTime: false}) : outputActions.setViewerEndOfTime({endOfTime: false})
               ];
             }
           }),

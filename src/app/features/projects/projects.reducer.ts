@@ -3,18 +3,18 @@ import {
   CommonProjectReadyForDeletion,
   commonProjectsInitState,
   commonProjectsReducers,
-  ICommonProjectsState
+  CommonProjectsState
 } from '@common/projects/common-projects.reducer';
 import {checkProjectForDeletion, resetReadyToDelete, setProjectReadyForDeletion} from '@common/projects/common-projects.actions';
 
 export type IProjectReadyForDeletion = CommonProjectReadyForDeletion;
 
-export interface IProjectsState extends ICommonProjectsState {
+export interface ProjectsState extends CommonProjectsState {
 
   projectReadyForDeletion: IProjectReadyForDeletion;
 }
 
-const projectsInitState: IProjectsState = {
+const projectsInitState: ProjectsState = {
   ...commonProjectsInitState,
   projectReadyForDeletion: {
     project: null, experiments: null, models: null
@@ -41,7 +41,7 @@ export const projectsReducer = createReducer(
   ...commonProjectsReducers
 );
 
-export const projects = state => state.projects as IProjectsState;
+export const projects = state => state.projects as ProjectsState;
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const selectShowHidden = createSelector(projects, (state) => false);

@@ -17,7 +17,7 @@ export class ImmutableFormField implements OnInit, OnDestroy, ImmutableForm {
   }
 
   @Input() fieldName: string;
-  @Input() errors: Map<string, boolean> = <Map<string, boolean>>{};
+  @Input() errors: Map<string, boolean> = {} as Map<string, boolean>;
   @Input() header: string; // the input title.
   @Input() placeHolder: string = ''; // the input title.
   @Input() validators: Array<ValidatorFn>;
@@ -46,7 +46,7 @@ export class ImmutableFormField implements OnInit, OnDestroy, ImmutableForm {
 
   fieldValueChanged(value, event) {
     this.checkValidity(value);
-    this.formDataChanged.emit({field: this.fieldName, value: value, event});
+    this.formDataChanged.emit({field: this.fieldName, value, event});
   }
 
   hasErrors() {
@@ -63,9 +63,9 @@ export class ImmutableFormField implements OnInit, OnDestroy, ImmutableForm {
 
   checkValidity(newValue) {
     if (this.validators) {
-      let errors = <Map<string, boolean>>{};
+      let errors = {} as Map<string, boolean>;
       this.validators.forEach(validatorFn => {
-        const err = validatorFn(<any>{value: newValue});
+        const err = validatorFn({value: newValue} as any);
         errors = err ? {...errors, ...err} : errors;
       });
 

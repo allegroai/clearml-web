@@ -1,7 +1,6 @@
-import {Component, OnDestroy} from '@angular/core';
+import {Component} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {filter, map, take} from 'rxjs/operators';
-import {Subscription} from 'rxjs';
 import {selectSignedUrl} from '../../core/reducers/common-auth-reducer';
 import {AdminService} from '~/shared/services/admin.service';
 import {getSignedUrl} from '../../core/actions/common-auth.actions';

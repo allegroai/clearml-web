@@ -1,4 +1,4 @@
-@import "../../../shared/ui-components/styles/variables";
+@import "variables";
 
 :host {
   position: relative;
@@ -41,9 +41,8 @@
 
   }
 
-  i.fa {
-    color: $blue-grey;
-    font-size: 18px;
+  .al-icon {
+    color: $blue-300;
     margin-left: auto;
     width: 32px;
     height: 32px;
@@ -55,8 +54,8 @@
       color: $blue-200;
     }
   }
-  i.fa-times {
-    margin-right:4px;
+  .al-ico-dialog-x {
+    transform: scale(0.9);
   }
 
   ::ng-deep sm-search.regex-error input {

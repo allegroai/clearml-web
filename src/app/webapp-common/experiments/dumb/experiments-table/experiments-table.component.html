@@ -55,13 +55,13 @@
           (formDataChanged)="headerCheckboxClicked()"
           inputClassName="table-check-box select-col-checkbox"
         ></sm-checkbox-control>
-        <div class="al-icon al-ico-dropdown-arrow sm drop-down" [matMenuTriggerFor]="selectionMenu"></div>
+        <div class="al-icon al-ico-dropdown-arrow sm drop-down" data-id="Checkbox Dropdown" [matMenuTriggerFor]="selectionMenu"></div>
       </div>
       <mat-menu class="light-theme" #selectionMenu="matMenu">
         <div *ngIf="entityType === entityTypes.experiment" class="menu-title">Select from project</div>
-        <button mat-menu-item (click)="selectAll()">All</button>
-        <button mat-menu-item (click)="emitSelection([])">None</button>
-        <button mat-menu-item (click)="selectAll(true)">All matching filter</button>
+        <button mat-menu-item data-id="All Option" (click)="selectAll()">All</button>
+        <button mat-menu-item data-id="None Option"  (click)="emitSelection([])">None</button>
+        <button mat-menu-item data-id="All Matching Filter Option"  (click)="selectAll(true)">All matching filter</button>
       </mat-menu>
     </ng-template>
     <!--FILTER TEMPLATE-->

@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import {IHue} from './color-hash.model';
 import {BehaviorSubject} from 'rxjs';
 import {Store} from '@ngrx/store';
 import {UsersState} from '@common/core/reducers/users-reducer';
@@ -16,10 +15,7 @@ export const DOT_PLACEHOLDER = '--DOT--';
 
 @Injectable()
 export class ColorHashService {
-  hueRanges: Array<IHue>;
 
-  hash;
-  lightness;
   private _colorCache: BehaviorSubject<ColorCache> = new BehaviorSubject({});
   getColorCache() {
     return this._colorCache.asObservable();
@@ -38,10 +34,10 @@ export class ColorHashService {
       .subscribe(preferenceColors => this.batchUpdateColorCache(preferenceColors));
   }
 
-  public initColor(label: string, initColor?:number[]) {
-    const colorCache = this._colorCache.getValue();
-    if (colorCache && colorCache[label]) {
-      return colorCache[label];
+  public initColor(label: string, initColor?: number[]) {
+    const colorCache = this._colorCache.getValue()?.[label];
+    if (colorCache) {
+      return colorCache;
     }
     const {red, green, blue} = hexRgb(stc(label));
     const color = initColor? initColor: [red, green, blue];

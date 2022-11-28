@@ -1,9 +1,10 @@
-<div smClickStopPropagation class="w-100 h-100">
-  <div *ngIf="goBack.observed" class="d-flex justify-content-between p-3">
-    <i (click)="goBack.emit()" class="al-icon sm-md al-ico-back pointer" smClickStopPropagation></i>
-    <div class="title">SELECT METRIC TO DISPLAY
-    </div>
+<div smClickStopPropagation class="d-flex flex-column w-100 h-100">
+  <div *ngIf="goBack.observed" class="head">
+    <i (click)="goBack.emit()" data-id="Back button" class="al-icon sm-md al-ico-back pointer m-auto" smClickStopPropagation></i>
+    <h3>SELECT METRIC TO DISPLAY</h3>
   </div>
+
+
   <sm-search
     class="underline-search"
     [value]="searchText"

@@ -82,10 +82,10 @@
 
       <div class="buttons">
         <button cdkFocusInitial (click)="closeDialog(true)" [disabled]="!cloneForm.valid"
-                class="btn btn-neon yes-button" #cloneButton>
+                class="btn btn-neon yes-button" data-id="CloneButton" #cloneButton>
           {{extend ? 'EXTEND' : 'CLONE'}}
         </button>
-        <button (click)="closeDialog(false)" class="btn btn-outline-neon">
+        <button (click)="closeDialog(false)" class="btn btn-outline-neon" data-id ="CancelButton">
           CANCEL
         </button>
 

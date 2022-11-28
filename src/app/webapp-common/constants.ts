@@ -67,6 +67,7 @@ export const ICONS = {
   ARROW_DOWN: 'al-ico-ico-chevron-down',
   ARROW_UP: 'al-ico-ico-chevron-up',
   RUN: 'al-ico-run',
+  METADATA: 'al-ico-metadata',
 };
 
 export type IconNames = keyof typeof ICONS;

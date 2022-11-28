@@ -14,13 +14,13 @@ import {trackById} from '@common/shared/utils/forms-track-by';
 })
 export class ProjectCardComponent {
   private _project: ProjectsGetAllResponseSingle;
-  private projectNameActive = false;
   public computeTime: string;
   trackById = trackById;
   readonly circleTypeEnum = CircleTypeEnum;
   readonly icons = ICONS;
 
   @Input() projectsNames: string[];
+
   @Input() set project(data: Project) {
     this._project = data;
     this.computeTime = this.convertSecToDaysHrsMinsSec(data.stats?.active?.total_runtime);
@@ -55,14 +55,10 @@ export class ProjectCardComponent {
   }
 
   public projectClicked() {
-    if (!this.projectNameActive) {
       this.projectCardClicked.emit(this.project);
-    }
   }
 
-  public projectNameEditActiveChanged(active) {
-    setTimeout(() => this.projectNameActive = active, 100);
-  }
+
 
   subProjectClicked(id: string) {
     this.projectCardClicked.emit({id});

@@ -4,7 +4,6 @@
     <mat-error *ngIf="name.touched && name.errors?.required">*Please add name.</mat-error>
     <mat-error *ngIf="name.touched && name.errors?.uniqueName">*Project name in this path already exists.</mat-error>
     <mat-error *ngIf="name.touched && name.errors?.minlength">*Project name should contain more than 3 characters.</mat-error>
-    <mat-error *ngIf="name.touched && name.errors?.pattern">Project name shouldn't contain slash (/)</mat-error>
     <input name="projectName"
            [(ngModel)]="project.name"
            #name="ngModel"
@@ -13,7 +12,6 @@
            smUniqueNameValidator
            [forbiddenPrefix]="(location.value === projectsRoot) ? '' : location.value + '/'"
            [existingNames]="projectsNames"
-           [pattern]="'^[^/]+$'"
            required minlength="3">
   </mat-form-field>
 
@@ -43,7 +41,7 @@
                       (closed)="setIsAutoCompleteOpen(false)"
                       (optionSelected)="locationSelected($event)"
                       #auto="matAutocomplete" autoActiveFirstOption
-                      class="light-theme" classList="light-theme">
+                      class="light-theme">
       <mat-option
         class="item"
         *ngIf="(location.value && !(location.value | stringIncludedInArray:projectsNames))"
@@ -86,7 +84,7 @@
   </mat-form-field>
   <div class="row">
     <div class="col-24 create-project-button">
-      <button class="btn btn-dark-fill center" [disabled]="projectForm.invalid" (click)="send()">CREATE PROJECT
+      <button class="btn btn-dark-fill center" data-id="Create Project" [disabled]="projectForm.invalid" (click)="send()">CREATE PROJECT
       </button>
     </div>
   </div>

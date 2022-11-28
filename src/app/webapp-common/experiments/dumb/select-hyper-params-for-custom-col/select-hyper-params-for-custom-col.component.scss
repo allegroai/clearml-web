@@ -1,25 +1,31 @@
-@import "../../../shared/ui-components/styles/variables";
+@import "variables";
 
 :host {
   display: block;
   height: 640px;
   max-height: calc(100vh - 120px);
-  width: 370px;
 }
 
-sm-grouped-checked-filter-list {
-  height: calc(100% - 52px);
-  padding: 15px 0 0 15px;
-  ::ng-deep .actions {
-    padding-top: 10px;
+.head {
+  margin-bottom: 12px;
+  padding: 12px;
+  display: grid;
+  grid-template-columns: 20px 1fr 20px;
+  gap: 6px;
+  align-items: center;
+  text-align: center;
+  border-bottom: 1px solid $blue-200;
+  h3 {
+    color: $blue-400;
+    font-size: 14px;
+    font-weight: normal;
+    margin: 0;
   }
 }
 
-.hyper-param-header {
-  color: $blue-400;
-  flex-basis: 84%
-}
-
-.hyper-params-container {
-  padding: 15px
+sm-grouped-checked-filter-list {
+  height: calc(100% - 58px);
+  ::ng-deep .actions {
+    padding-top: 10px;
+  }
 }

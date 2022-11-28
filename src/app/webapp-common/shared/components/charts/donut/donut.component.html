@@ -1,0 +1,21 @@
+<div class="d-flex h-100">
+  <div class="donut-legend">
+    <div
+      *ngFor="let slice of this.donutData; let index = index; trackBy: trackById"
+      class="slice"
+      [class.highlight]="index + 1 === highlight"
+      [style.--sliceColor]="colors[index]"
+      (mouseenter)="hoverLegend(slice)"
+      (mouseleave)="leaveLegend(slice)"
+    >
+      <div
+        #colorButton
+        [smChooseColor]="colors[index]"
+        [stringToColor]="slice.name"
+        [colorButtonRef]="colorButton"
+        class="circle"
+      ></div>{{slice.name}}<span class="quantity">({{slice.quantity}})</span>
+    </div>
+  </div>
+  <div class="donut-container"></div>
+</div>

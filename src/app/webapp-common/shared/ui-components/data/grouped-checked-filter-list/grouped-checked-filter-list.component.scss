@@ -119,3 +119,10 @@
   }
 
 }
+
+:host-context(.hyper-params-custom-col) {
+  .actions,
+  .list {
+    padding-left: 12px;
+  }
+}

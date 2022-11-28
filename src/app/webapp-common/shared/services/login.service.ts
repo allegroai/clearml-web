@@ -123,9 +123,7 @@ export class BaseLoginService {
 
   public getLoginSupportedModes(additionalState = ''): Observable<LoginModeResponse> {
     const url = new URL(window.location.href);
-    let state = url.searchParams.get('redirect') ??
-      url.searchParams.get('state') ??
-      (url.pathname === '/login' ? '/' : url.pathname + url.search);
+    let state = url.searchParams.get('redirect') ?? (url.pathname === '/login' ? '/' : url.pathname + url.search);
     if (additionalState && state) {
       const stateUrl = new URL(`http://aaa${state}`);
       stateUrl.searchParams.append(additionalState, '');
@@ -296,7 +294,7 @@ After the issue is resolved and Trains Server is up and running, reload this pag
           } else {
             resolve(null);
           }
-        } else if (!['/login/signup', '/login'].includes(redirectUrl)) {
+        } else if (!['/login/signup', '/login'].some(url => redirectUrl.startsWith(url))) {
           const targetUrl = (redirectUrl && redirectUrl != '/') ? `/login?redirect=${encodeURIComponent(redirectUrl)}` : '/login';
           window.history.replaceState(window.history.state, '', targetUrl);
         }

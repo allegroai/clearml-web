@@ -1,13 +1,13 @@
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {Project} from '../../../../../business-logic/model/projects/project';
+import {Project} from '~/business-logic/model/projects/project';
 import {Component, ElementRef, Inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {NgForm} from '@angular/forms';
 import {Observable, Subscription} from 'rxjs';
-import {selectRootProjects} from '../../../../core/reducers/projects.reducer';
-import {getAllSystemProjects} from '../../../../core/actions/projects.actions';
+import {selectRootProjects} from '@common/core/reducers/projects.reducer';
+import {getAllSystemProjects} from '@common/core/actions/projects.actions';
 import {map} from 'rxjs/operators';
-import {isReadOnly} from '../../../../shared/utils/shared-utils';
+import {isReadOnly} from '@common/shared/utils/shared-utils';
 import {CloneForm} from '../../common-experiment-model.model';
 import {isEqual} from 'lodash/fp';
 
@@ -18,7 +18,6 @@ import {isEqual} from 'lodash/fp';
 })
 export class CloneDialogComponent implements OnInit, OnDestroy {
 
-  CLONE_NAME_PREFIX;
   public reference: string;
   public header: string;
   public type: string;
@@ -28,10 +27,11 @@ export class CloneDialogComponent implements OnInit, OnDestroy {
     name: null,
     comment: null
   } as CloneForm;
+  public projects: { label: string; value: string }[];
 
   private readonly defaultProjectId: string;
   private projectsSub: Subscription;
-  public projects: { label: string; value: string }[];
+  private readonly cloneNamePrefix: string;
 
   @ViewChild('cloneForm', {static: true}) cloneForm: NgForm;
   @ViewChild('cloneButton', {static: true}) cloneButton: ElementRef;
@@ -54,20 +54,20 @@ export class CloneDialogComponent implements OnInit, OnDestroy {
     public dialogRef: MatDialogRef<CloneDialogComponent>
   ) {
     this.readOnlyProjects$ = this.store.select(selectRootProjects)
-      .pipe(map(projects => projects.filter(project => isReadOnly(project)).map(project => project.name)));
+      .pipe(map(projects => projects?.filter(project => isReadOnly(project)).map(project => project.name)));
     this.projects$ = this.store.select(selectRootProjects)
-      .pipe(map(projects => projects.filter(project => !isReadOnly(project))));
+      .pipe(map(projects => projects?.filter(project => !isReadOnly(project))));
     this.defaultProjectId = data.defaultProject;
     this.header = `${data.extend ? 'Extend' : 'Clone'} ${data.type}`;
-    this.CLONE_NAME_PREFIX = data.extend ? '' : 'Clone Of ';
+    this.cloneNamePrefix = data.extend ? '' : 'Clone Of ';
     this.type = data.type.toLowerCase();
     this.reference = data.defaultName;
     this.extend = data.extend;
-    this.formData.name = this.CLONE_NAME_PREFIX;
+    this.formData.name = this.cloneNamePrefix;
     setTimeout(() => {
       this.formData = {
         ...this.formData,
-        name: this.extend ? '' : this.CLONE_NAME_PREFIX + data.defaultName,
+        name: this.extend ? '' : this.cloneNamePrefix + data.defaultName,
         comment: data.defaultComment || '',
       };
     });
@@ -81,7 +81,7 @@ export class CloneDialogComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.store.dispatch(getAllSystemProjects());
     this.projectsSub = this.projects$.subscribe(projects => {
-      const projectList = projects.map(project => ({value: project.id, label: project.name}));
+      const projectList = projects?.map(project => ({value: project.id, label: project.name}));
       if (!isEqual(projectList, this.projects)) {
         this.projects = projectList;
         const defaultProject = this.projects.find(project => project.value === this.defaultProjectId);

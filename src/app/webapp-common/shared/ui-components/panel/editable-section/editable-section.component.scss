@@ -1,13 +1,14 @@
-@import "../../styles/variables";
+@import "variables";
 
 .editable-container {
   display: flex;
   flex-direction: column;
   position: relative;
   height: 100%;
-  background-color: white;
+  background-color: $blue-900;
   padding: 24px;
   border: 1px solid transparent;
+  border-radius: 4px;
 
   &.dark-theme {
     background-color: transparent;
@@ -28,8 +29,6 @@
     position: sticky;
     z-index: 99;
     text-align: right;
-    top: 10px;
-    right: 10px;
     height: 0;
     opacity: 0;
   }
@@ -37,8 +36,8 @@
   .edit-pen {
     z-index: 1;
     transition: opacity 0.5s, background-color ease-in-out 0.3s;
-    background-color: #7786b5;
-    color: white;
+    background-color: $blue-600;
+    color: $blue-300;
     padding: 5px 10px;
     border-radius: 4px;
 
@@ -89,5 +88,16 @@
 :host {
   ::ng-deep .action-button button {
     min-width: 70px;
+  }
+}
+
+:host-context(.light-theme) {
+  .editable-container{
+    background-color: white;
+
+  }
+  .edit-pen {
+    background-color: $blue-480;
+    color: white;
   }
 }

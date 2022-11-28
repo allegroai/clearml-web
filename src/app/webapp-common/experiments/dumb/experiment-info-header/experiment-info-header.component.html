@@ -68,7 +68,7 @@
       [numSelected]="1"
       (tagSelected)="addTag($event)"
     ></sm-experiment-menu-extended>
-    <div *ngIf="minimized" (click)="closeInfoClicked.emit()" class="d-flex align-items-center line-item">
+    <div *ngIf="minimized" (click)="closeInfoClicked.emit()" class="d-flex align-items-center line-item" data-id="Cross Button">
       <i class="al-icon al-ico-dialog-x pointer"></i>
     </div>
   </div>

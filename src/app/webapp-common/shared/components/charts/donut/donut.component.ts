@@ -1,144 +1,139 @@
-import {Component, OnInit, Input, ChangeDetectionStrategy} from '@angular/core';
-import {select, selectAll, Selection} from 'd3-selection';
+import {
+  Component,
+  OnInit,
+  Input,
+  ChangeDetectionStrategy,
+  AfterViewInit,
+  OnDestroy,
+  ChangeDetectorRef
+} from '@angular/core';
+import {select, Selection} from 'd3-selection';
 import {ColorHashService} from '../../../services/color-hash/color-hash.service';
 import donut from 'britecharts/dist/umd/donut.min';
-import legend from 'britecharts/dist/umd/legend.min';
-import {attachColorChooser} from '../../../ui-components/directives/choose-color/choose-color.directive';
 import {Store} from '@ngrx/store';
+import {BehaviorSubject, combineLatest, fromEvent, Subscription} from 'rxjs';
+import {debounceTime, filter, startWith} from 'rxjs/operators';
+import {trackById} from '@common/shared/utils/forms-track-by';
 
 export interface DonutChartData {
   name: string;
   quantity: number;
   percentage?: number;
   id?: number;
+  color?: string;
 }
 
 @Component({
   selector       : 'sm-donut',
-  template       : `<div #drawHere></div>
-<div class="d-flex h-100" (window:resize)="onResize()">
-  <div class="donut-legend"></div>
-  <div class="donut-container"></div>
-</div>`,
+  templateUrl       : './donut.component.html',
   styleUrls      : ['./donut.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DonutComponent implements OnInit {
+export class DonutComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private donutContainer: Selection<SVGElement, DonutChartData, HTMLElement, any>;
   private donutChart;
-  private donutData: DonutChartData[];
+  public donutData: DonutChartData[];
 
-  private legendContainer: Selection<SVGElement, DonutChartData, HTMLElement, any>;
-  private legendChart;
-  private legendWidth: number;
+  public readonly resize = new BehaviorSubject<string>(null);
+  public highlight: number;
+  private sub = new Subscription();
+  private _colors: string[];
+  trackById = trackById;
 
   @Input() set data(data: DonutChartData[]) {
     this.donutData = data;
     if (this.donutContainer !== undefined) {
       this.donutContainer.datum(data).call(this.donutChart);
-      this.updateLegend();
+      this.donutChart.highlightSliceById(1);
     }
   }
 
   @Input() set colors(colors: string[]) {
+    this._colors = colors;
     if (this.donutContainer !== undefined) {
       this.donutChart.colorSchema(colors);
-      this.legendChart.colorSchema(colors);
       if (this.donutData) {
         this.donutContainer.datum(this.donutData).call(this.donutChart);
-        this.updateLegend();
       }
     }
   }
 
-  constructor(private colorHash: ColorHashService, private store: Store<any>) {}
+  get colors(): string[] {
+    return this._colors;
+  }
+
+  constructor(
+    private store: Store,
+    private colorHash: ColorHashService,
+    private cdr: ChangeDetectorRef,
+  ) {}
 
   ngOnInit() {
-    this.legendChart     = legend();
-    this.legendContainer = select('.donut-legend');
-
-    this.initLegendChart();
-    this.donutChart     = donut();
+    this.donutChart = donut();
     this.donutContainer = select('.donut-container');
+
+    this.sub.add(combineLatest([
+      this.resize,
+      fromEvent(window, 'resize').pipe(startWith(null))
+    ])
+      .pipe(
+        filter(source => source !== null),
+        debounceTime(50)
+      )
+      .subscribe(() => this.onResize()));
+  }
+
+  ngAfterViewInit(): void {
     this.initDonutChart();
-  }
-
-  initLegendChart() {
-    const {width} = this.legendContainer.node().getBoundingClientRect();
-    this.legendWidth = width - 10;
-
-    if (width) {
-      this.legendChart
-        .width(this.legendWidth)
-        .margin({
-          top: 0,
-          right: 0,
-          bottom: 0,
-          left: 0
-        })
-        .markerSize(12)
-        .numberFormat('l');
-    }
-  }
-
-  updateLegend() {
-    this.legendChart.height(30 + this.donutData?.length * 24);
-    this.legendContainer.datum(this.donutData).call(this.legendChart);
-    selectAll('.legend-entry').nodes().forEach((node: HTMLElement) => {
-      const text   = node.querySelector('.legend-entry-name').textContent;
-      const circle = node.querySelector('.legend-circle');
-      attachColorChooser(text, circle, this.colorHash, this.store);
-    });
-
-    this.legendContainer.select('defs').remove();
-    this.legendContainer.select('svg').append('defs').append('svg:clipPath')
-      .attr('id', 'legend-label-clip')
-      .append('svg:rect')
-      .attr('id', 'clip-rect')
-      .attr('x', '0')
-      .attr('y', '-10')
-      .attr('width', this.legendWidth - 80)
-      .attr('height', 20);
-    this.legendContainer.selectAll('.legend-entry-name')
-      .on('mouseenter', (event, data: DonutChartData) => {
-        this.donutChart.highlightSliceById(data.id);
-        this.donutContainer.datum(this.donutData).call(this.donutChart);
-      })
-      .on('mouseleave', (event, data: DonutChartData) => {
-        if (this.donutChart.highlightSliceById() === data.id) {
-          this.donutChart.highlightSliceById(null);
-          this.donutContainer.datum(this.donutData).call(this.donutChart);
-        }
-      })
-      .attr('clip-path', 'url(#legend-label-clip)')
-      .append('title')
-      .text((d: DonutChartData) => d.name);
-
-
+    this.donutChart.highlightSliceById(1);
   }
 
   initDonutChart() {
-    const containerWidth = this.donutContainer.node() ? this.donutContainer.node().getBoundingClientRect().width : 10;
+    const {width, height} = this.donutContainer.node().getBoundingClientRect();
+    const length = Math.min(width, height);
     this.donutChart
-      .width(containerWidth)
-      .height(containerWidth)
-      .externalRadius(containerWidth / 2.5)
-      .internalRadius(containerWidth / 5)
+      .width(width)
+      .height(height)
+      .externalRadius(length / 2.5)
+      .internalRadius(length / 5)
       .on('customMouseOver', (data) => {
-        this.legendChart.highlight(data.data.id);
+        this.highlight = data.data.id;
+        this.cdr.detectChanges();
       })
       .on('customMouseOut', () => {
-        this.legendChart.clearHighlight();
+        this.highlight = null;
+        this.cdr.detectChanges();
       });
   }
 
   onResize() {
-    this.initLegendChart();
+    this.donutContainer.select('svg').remove();
+    this.donutChart     = donut();
+    this._colors && this.donutChart.colorSchema(this._colors);
     this.initDonutChart();
     if (this.donutData) {
       this.donutContainer.datum(this.donutData).call(this.donutChart);
-      this.updateLegend();
+      this.donutChart.highlightSliceById(1);
     }
   }
+
+  hoverLegend(slice: DonutChartData) {
+    this.donutChart.highlightSliceById(slice.id);
+    this.donutContainer.datum(this.donutData).call(this.donutChart);
+    this.highlight = slice.id;
+  }
+
+  leaveLegend(slice: DonutChartData) {
+    if (this.donutChart.highlightSliceById() === slice.id) {
+      this.donutChart.highlightSliceById(null);
+      this.donutContainer.datum(this.donutData).call(this.donutChart);
+    }
+    this.highlight = null;
+  }
+
+  ngOnDestroy(): void {
+    this.sub.unsubscribe();
+  }
+
 }

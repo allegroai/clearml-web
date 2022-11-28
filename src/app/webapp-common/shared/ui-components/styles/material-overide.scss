@@ -94,7 +94,7 @@ body mat-form-field.mat-form-field-appearance-outline {
 
   .mat-form-field-outline-thick {
     background: white;
-    color: #99a5cc;
+    color: $blue-250;
 
     .mat-form-field-outline-start,
     .mat-form-field-outline-end,
@@ -517,7 +517,7 @@ body .mat-autocomplete-panel.annotator-autocomplete {
   }
 
   .mat-datepicker-toggle {
-    color: $light-grey-blue;
+    color: $blue-300;
   }
 }
 

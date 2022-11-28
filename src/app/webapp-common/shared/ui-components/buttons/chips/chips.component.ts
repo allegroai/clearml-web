@@ -7,9 +7,9 @@ import {getCssTheme} from '../../../utils/shared-utils';
 import {invertRgb} from '../../../services/color-hash/color-hash.utils';
 
 @Component({
-  selector       : 'sm-chips',
-  templateUrl    : './chips.component.html',
-  styleUrls      : ['./chips.component.scss'],
+  selector: 'sm-chips',
+  templateUrl: './chips.component.html',
+  styleUrls: ['./chips.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ChipsComponent implements OnInit, OnDestroy {
@@ -35,7 +35,7 @@ export class ChipsComponent implements OnInit, OnDestroy {
   // Force setting a single RGB color
   @Input() set forceColor(forceColor: [number, number, number]) {
     this.colorIsForced = true;
-    this._forceColor   = forceColor;
+    this._forceColor = forceColor;
     this.chooseColor(forceColor);
 
   }
@@ -47,17 +47,18 @@ export class ChipsComponent implements OnInit, OnDestroy {
   // Default options are defined in getColorScheme
   @Input() isDarkBackground: boolean = true;
 
-  @Input() maxWidth: string     = '100%';
+  @Input() maxWidth: string = '100%';
   @Input() allowRemove: boolean = false;
-  @Output() remove              = new EventEmitter<any>();
+  @Output() remove = new EventEmitter<any>();
 
   constructor(private colorHash: ColorHashService, private changeDetection: ChangeDetectorRef, public elRef: ElementRef<HTMLElement>) {
 
   }
+
   ngOnInit() {
-    this.isDarkBackground = (getCssTheme(this.elRef.nativeElement) == 'dark-theme') ? true : false;
+    this.isDarkBackground = (getCssTheme(this.elRef.nativeElement) == 'dark-theme');
     const colorObservable = this.colorHash.getColorsObservable();
-    this.colorSub         = colorObservable.pipe(
+    this.colorSub = colorObservable.pipe(
       filter((colorObj) => colorObj[this.label] !== this.colorTuple)
     ).subscribe(colorObj => {
       const color = this.forceColor ? this.forceColor : colorObj[this.label];
@@ -70,14 +71,14 @@ export class ChipsComponent implements OnInit, OnDestroy {
   chooseColor(color: number[]) {
     if (FORCED_COLORS_FOR_STRING[this.label]) {
       this.colorIsForced = true;
-      const forcedColor  = FORCED_COLORS_FOR_STRING[this.label];
-      color              = this.isDarkBackground ? invertRgb(forcedColor) : forcedColor;
+      const forcedColor = FORCED_COLORS_FOR_STRING[this.label];
+      color = this.isDarkBackground ? invertRgb(forcedColor) : forcedColor;
     }
     if (!color) {
       return;
     }
-    this.color           = `rgb(${color[0]},${color[1]},${color[2]})`;
-    const background     = this.colorHash.getMonochromaticHarmony(color, this.isDarkBackground);
+    this.color = `rgb(${color[0]},${color[1]},${color[2]})`;
+    const background = this.colorHash.getMonochromaticHarmony(color, this.isDarkBackground);
     this.backgroundColor = `rgb(${background[0]},${background[1]},${background[2]})`;
   }
 

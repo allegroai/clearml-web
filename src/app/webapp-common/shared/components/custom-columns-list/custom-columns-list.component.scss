@@ -1,6 +1,9 @@
+@import 'variables';
+
 .list-container {
   overflow: auto;
   max-height: 60vh;
+  border-bottom: 1px solid $blue-200;
 }
 
 .loader {

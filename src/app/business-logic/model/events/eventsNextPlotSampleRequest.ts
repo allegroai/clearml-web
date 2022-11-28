@@ -25,4 +25,8 @@ export interface EventsNextPlotSampleRequest {
      * If set then get the either previous variant event from the current iteration or   (if does not exist) the last variant event from the previous iteration.   Otherwise next variant event from the current iteration or first variant event   from the next iteration
      */
     navigate_earlier?: boolean;
+    /**
+     * If set then navigate to the next/previous iteration
+     */
+    next_iteration?: boolean;
 }

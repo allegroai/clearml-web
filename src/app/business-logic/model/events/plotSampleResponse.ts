@@ -18,9 +18,9 @@ export interface PlotSampleResponse {
      */
     scroll_id?: string;
     /**
-     * Plot event
+     * Plot events
      */
-    event?: object;
+    events?: Array<object>;
     /**
      * minimal valid iteration for the variant
      */

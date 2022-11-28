@@ -32,6 +32,9 @@ export class VirtualGridComponent implements OnChanges{
   public cardsInRow: number;
   private _cardTemplate: TemplateRef<any>;
   private width$: Observable<number>;
+  private resize$ = new BehaviorSubject<number>(null);
+  public loading: boolean;
+  private _items: any[];
 
   // snippetMode means the items has no fixed width so we can stretch them to fill the row (consider scroll in calcs and add 1fr to card-width)
   @Input() snippetsMode = false;
@@ -44,22 +47,35 @@ export class VirtualGridComponent implements OnChanges{
     return this._cardTemplate;
   }
 
-  @Input() items: any[];
+  @Input() set items(items: any[]) {
+    this._items = items;
+    this.loading = false;
+  }
+
+  get items() {
+    return this._items;
+  }
+
   @Input() cardHeight = 246;
   @Input() cardWidth = 352;
   @Input() padding = 64 + 24 + 24;
   @Input() showLoadMoreButton = false;
+  @Input() autoLoadMore = false;
   @Output() itemClicked = new EventEmitter<any>();
   @Output() loadMoreClicked = new EventEmitter();
   @ViewChild(CdkVirtualScrollViewport) viewPort: CdkVirtualScrollViewport;
+  trackByFn = (index, item) => item.id + this.cardHeight;
+
 
   constructor(private store: Store, private ref: ElementRef) {
-    this.width$ = fromEvent(window, 'resize')
-      .pipe(
-        filter(() => document?.fullscreenElement?.nodeName !== 'VIDEO'),
-        startWith(null),
-        map(() => this.ref.nativeElement.getBoundingClientRect().width)
-      );
+    this.width$ = combineLatest([
+      fromEvent(window, 'resize').pipe(startWith(null)),
+      this.resize$
+    ]).pipe(
+      filter(() => document?.fullscreenElement?.nodeName !== 'VIDEO'),
+
+      map(() => this.ref.nativeElement.getBoundingClientRect().width)
+    );
     this.itemRows$ = combineLatest([
       this.width$,
       this.items$,
@@ -80,5 +96,12 @@ export class VirtualGridComponent implements OnChanges{
     this.items$.next(this.items);
   }
 
-  trackByFn = (index, item) => item.id + this.cardHeight;
+  resize(size: number) {
+    this.resize$.next(size);
+  }
+
+  autoLoad() {
+    this.loading = true;
+    this.loadMoreClicked.emit();
+  }
 }

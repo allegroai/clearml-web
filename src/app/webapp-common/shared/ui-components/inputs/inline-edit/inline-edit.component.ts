@@ -15,12 +15,18 @@ export class InlineEditComponent implements OnDestroy {
   public active = false;
   public inlineValue: string;
   private shouldSave: boolean = true;
+  private _forbiddenString: string[];
 
   @Input() pattern;
   @Input() minLength = 0;
   @Input() originalText;
-  @Input() forbiddenString: string[];
+  @Input() set forbiddenString(forbiddenString: string[]) {
+    this._forbiddenString = forbiddenString?.filter(fs => fs !== this.originalText);
+  }
 
+  get forbiddenString() {
+    return this._forbiddenString;
+  }
   // *DEFAULTS*
   @Input() editable = true;
   @Input() fixedWidth;
@@ -90,9 +96,6 @@ export class InlineEditComponent implements OnDestroy {
     this.inlineCanceled();
   }
 
-  stopProp(e: MouseEvent) {
-    e.stopPropagation();
-  }
 
   ngOnDestroy(): void {
     this.inlineCanceled();

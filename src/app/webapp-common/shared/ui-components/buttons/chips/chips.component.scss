@@ -22,6 +22,12 @@
       }
     }
 
+    &.with-border {
+      // draft
+      border: 1px dashed $blue-100;
+      padding: 0 0.2em;
+    }
+
   }
 
   .dot-container {

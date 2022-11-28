@@ -59,7 +59,7 @@
 ::ng-deep .ui-state-highlight{
   sm-experiment-status-icon-label, sm-experiment-type-icon-label {
     .published, .created, .in_progress, .queued, .failed, .stopped, .training, .testing, .completed, .aborted{
-      color: $almost-white;
+      color: $blue-50;
       filter: brightness(0) invert(1);
     }
   }
@@ -68,7 +68,7 @@
 ::ng-deep .selected {
   sm-experiment-status-icon-label, sm-experiment-type-icon-label {
     .published, .created, .in_progress, .queued, .failed, .stopped, .training, .testing, .completed, .aborted{
-      color: $almost-white;
+      color: $blue-50;
       filter: brightness(0) invert(1);
     }
   }

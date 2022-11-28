@@ -1,21 +1,33 @@
 import {Injectable} from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
-import {map, switchMap} from 'rxjs/operators';
+import {map, switchMap, withLatestFrom} from 'rxjs/operators';
 import {getResultsCount, setResultsCount} from '@common/dashboard-search/dashboard-search.actions';
 import {getEntityStatQuery} from '@common/dashboard-search/dashboard-search.effects';
 import {ApiOrganizationService} from '~/business-logic/api-services/organization.service';
+import {Store} from '@ngrx/store';
+import {selectCurrentUser, selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
+import {selectShowHidden} from '@common/core/reducers/projects.reducer';
 
 
 @Injectable()
 export class DashboardSearchEffects {
   constructor(
     private actions: Actions,
+    private store: Store,
     public organizationApi: ApiOrganizationService) {
   }
 
   getResultsCount = createEffect(() => this.actions.pipe(
     ofType(getResultsCount),
-    switchMap(action => this.organizationApi.organizationGetEntitiesCount({
+    withLatestFrom(
+      this.store.select(selectShowOnlyUserWork),
+      this.store.select(selectCurrentUser),
+      this.store.select(selectShowHidden),
+    ),
+    switchMap(([action, userFocus, user, hidden]) => this.organizationApi.organizationGetEntitiesCount({
+      /* eslint-disable @typescript-eslint/naming-convention */
+      ...(userFocus && {active_users: [user.id]}),
+      ...(hidden && {search_hidden: true}),
       ...getEntityStatQuery(action)
     })),
     map(({tasks: experiments, ...rest}) =>

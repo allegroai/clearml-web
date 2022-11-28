@@ -56,10 +56,10 @@
   </ng-form>
   <div class="buttons">
     <button [disabled]="moveToForm.invalid" (click)="closeDialog(true)" cdkFocusInitial
-            class="btn btn-neon yes-button" #moveButton>
+            class="btn btn-neon yes-button" data-id="MoveButton" #moveButton>
       MOVE
     </button>
-    <button (click)="closeDialog(false)" class="btn btn-outline-neon">
+    <button (click)="closeDialog(false)" class="btn btn-outline-neon" data-id ="CancelButton">
       CANCEL
     </button>
 

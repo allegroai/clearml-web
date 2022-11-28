@@ -6,6 +6,7 @@ mat-form-field {
     background-color: unset;
   }
 }
+
 .color-picker-wrapper {
   position: absolute;
   top: calc(50% - 200px);
@@ -18,14 +19,16 @@ mat-form-field {
 
 .tags-list {
   height: 300px;
+  width: 400px;
 }
 
 .tag-line {
+  width: 400px;
+  padding-right: 12px;
   display: flex;
   justify-content: space-between;
   height: 32px;
   font-size: 14px;
-  padding-right: 12px;
 
   .caption {
     color: $blue-800;
@@ -33,6 +36,7 @@ mat-form-field {
 
   .tag {
     padding: 0 14px;
+    margin-left: 12px;
     height: 18px;
     line-height: 17px;
     border-radius: 4px;

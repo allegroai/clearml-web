@@ -103,7 +103,7 @@ export class ExperimentGraphsComponent implements OnDestroy {
   }
 
   @Input() isGroupGraphs: boolean;
-  @Input() legendStringLength;
+  @Input() legendStringLength = 19;
   @Input() minimized: boolean;
   @Input() isDarkTheme: boolean;
   @Input() showLoaderOnDraw = true;

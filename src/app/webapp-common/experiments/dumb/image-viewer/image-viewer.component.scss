@@ -9,6 +9,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      gap: 0 24px;
       width: 100%;
       height: 58px;
       background-color: white;
@@ -24,22 +25,38 @@
         align-items: center;
         justify-content: center;
         color: $blue-400;
-        font-size: 18px;
-        line-height: 1.5;
+        font-size: 16px;
 
         .number {
           color: $blue-500;
         }
 
-        mat-slider.mat-slider-horizontal {
-          min-width: 280px;
+        @media screen and (min-width: 960px) {
+          mat-slider.mat-slider-horizontal {
+            min-width: 280px;
+          }
         }
 
       }
 
       .image-title {
-        font-size: 18px;
-        color: $blue-500;
+        h1 {
+          font-size: 16px;
+          font-weight: 400;
+          color: $blue-500;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          padding:0;
+          margin:0;
+        }
+        .invisible {
+          position: absolute;
+          width:0;
+          height:0;
+          padding: 0;
+          opacity: 0;
+        }
       }
 
       .download {

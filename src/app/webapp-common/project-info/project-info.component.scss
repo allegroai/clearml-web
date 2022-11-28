@@ -31,11 +31,6 @@
       height: 100%;
       background-color: $blue-900;
 
-      .mat-expansion-panel-header.mat-expanded {
-        //height: 48px;
-        //padding-top: 6px;
-      }
-
       .mat-expansion-panel-header-title {
         color: $blue-250;
         font-size: 16px;
@@ -57,7 +52,7 @@
     min-height: 300px;
     max-width: 960px;
     margin: 0 auto;
-    padding: 0 24px;
+    padding: 6px 24px;
 
     &.editor {
       max-width: 1580px;
@@ -88,9 +83,12 @@
   right: 24px;
   top: 24px;
   z-index: 10;
+  line-height: normal;
   visibility: hidden;
   opacity: 0;
+  border: none;
   transition: opacity 0.25s, visibility 0.25s, background-color 0.25s, color 0.25s;
+  box-shadow: 0 0 0 3px rgba($blue-900, 50%); // seperate between button to elements below
 }
 
 .md-content {
@@ -107,7 +105,7 @@
     height: calc(100% - 30px);
 
     &.dirty {
-      box-shadow: 0 0 0 2px $blue-600;
+      box-shadow: 0 0 0 1px $black, 0 0 0 3px $blue-500;
     }
   }
 
@@ -135,11 +133,25 @@
 
 .right-buttons {
   margin-left: auto;
+
+  button {
+    line-height: normal;
+  }
 }
 
 .md-warning {
   font-size: 14px;
-  color: #cb6874;
+  color: #e76b7a;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.8s, visibility 0.8s, transform 0.8s;
+  transform: translate(-50px, 0);
+
+  &.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(0, 0);
+  }
 }
 
 .btn-outline {
@@ -156,6 +168,10 @@
       .preview-container {
         display: none;
       }
+    }
+
+    .btn-group::before {
+      background-color: transparent !important;
     }
 
     .tool-bar {
@@ -180,7 +196,8 @@
           background-color: $blue-600;
 
           &:hover {
-            background-color: darken($blue-600, 5);
+            color: $blue-200;
+            background-color: $blue-500;
           }
 
           .fa {
@@ -255,7 +272,11 @@
       background-color: transparent !important;
 
       code.hljs {
-        background-color: $blue-800;
+        background-color: $blue-700;
+        font-size: 12px;
+        line-height: 18px;
+        padding: 16px;
+        border-radius: 4px;
       }
 
       pre {
@@ -353,23 +374,29 @@
         .ace_list {
           color: #ef3bc5;
         }
+
+        .ace_meta.ace_tag {
+          color: $blue-300;
+        }
       }
     }
 
     // Highlighting Preview
     .preview-panel {
       h1 {
-        color: $light-periwinkle-two;
+        color: $blue-100;
+        font-weight: 500;
       }
 
       h2 {
-        color: $light-grey-blue;
+        color: $blue-200;
+        font-weight: 500;
         margin-top: 32px;
       }
 
       h3, h4 {
-        color: #7482ad;
-        font-weight: 400;
+        color: $blue-280;
+        font-weight: 500;
       }
 
       strong, em {
@@ -377,6 +404,7 @@
       }
 
       hr {
+        margin: 24px 0;
         border-bottom: 1px solid $blue-600;
       }
 
@@ -386,16 +414,28 @@
 
       .table {
         background-color: transparent;
+        border: 1px solid $dark-border;
+        margin-bottom: 12px;
 
         td, th {
           border-bottom: 1px solid $dark-border;
-          font-weight: 400;
-          line-height: 32px;
+          padding: 8px 16px;
         }
 
         th {
           background-color: $blue-800;
-          color: $blue-400;
+          color: $blue-300;
+          font-weight: 500;
+        }
+      }
+
+      blockquote {
+        padding: 4px 16px;
+        border-left: 3px solid $purple;
+
+        p {
+          margin: 0;
+          color: $blue-200;
         }
       }
     }
@@ -416,6 +456,13 @@
 @media (max-width: 990px) {
   .preview-header {
     display: none;
+  }
+
+  ::ng-deep .editor-hidden {
+    .tool-bar {
+      opacity: 0.4;
+      pointer-events: none;
+    }
   }
 }
 

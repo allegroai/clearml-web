@@ -85,7 +85,11 @@ export class CommonDeleteDialogComponent implements OnInit, OnDestroy {
       }
       this.progressPercent = this.noFilesToDelete ? 100 : Math.round((this.totalFilesNumber - filesNumber) / this.totalFilesNumber * 100) || 0;
       if (this.progressPercent > 99) {
-        window.setTimeout(() => this.showFinishMessage = true, 1000);
+        if (this.failedFiles?.length > 0) {
+          window.setTimeout(() => this.showFinishMessage = true, 1000);
+        } else {
+          this.closeDialog(true);
+        }
       }
     });
 

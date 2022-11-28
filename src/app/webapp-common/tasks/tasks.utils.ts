@@ -60,7 +60,7 @@ export const prepareGraph = (data: ExtData[], layout: Partial<ExtLayout>, config
     worker: graph['worker'],
   });
 
-const tryParseJson = (plotString: string): { data: any; layout: any; config?: any } => {
+export const tryParseJson = (plotString: string): { data: any; layout: any; config?: any } => {
   let parsed: { data: any; layout: any; config?: any };
   try {
     parsed = JSON.parse(plotString);
@@ -125,19 +125,21 @@ export const groupIterations = (plots: MetricsPlotEvent[]): { [title: string]: M
   if (!plots.length) {
     return {};
   }
+  let previousPlotIsMergable = true;
   const sortedPlots = sortBy('iter', plots);
   return sortedPlots
     .reduce((groupedPlots, plot) => {
       const metric = plot.metric;
       groupedPlots[metric] = cloneDeep(groupedPlots[metric]) || [];
       const index = groupedPlots[metric].findIndex((existingGraph) => plot.iter === existingGraph.iter);
-      const plotParsed = index > -1 && tryParseJson(plot.plot_str);
-      if (index > -1 && plotParsed.data && plotParsed.data[0] && ['scatter', 'bar'].includes(plotParsed.data[0].type)) {
+      const plotParsed = tryParseJson(plot.plot_str);
+      if (index > -1 && plotParsed.data && plotParsed.data[0] && ['scatter', 'bar'].includes(plotParsed.data[0]?.type) && previousPlotIsMergable) {
         const basePlotParsed = tryParseJson(groupedPlots[metric][index].plot_str);
         groupedPlots[metric][index].plot_str = _mergePlotsData(basePlotParsed, plotParsed);
       } else {
         groupedPlots[metric].push(plot);
       }
+      previousPlotIsMergable = index > -1 || (index === -1 && ['scatter', 'bar'].includes(plotParsed.data[0]?.type));
       return groupedPlots;
     }, {});
 };

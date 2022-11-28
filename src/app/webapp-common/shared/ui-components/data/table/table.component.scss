@@ -313,3 +313,9 @@
     }
   }
 }
+
+:host-context(.snippets-sources-container) {
+  tr td.p-frozen-column {
+    background-color: transparent;
+  }
+}

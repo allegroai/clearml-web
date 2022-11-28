@@ -11,7 +11,6 @@
         <li *ngFor="let subProject of project?.sub_projects; trackBy: trackById"><a class="d-flex align-items-center"
                                                                 (click)="subProjectClicked(subProject.id)"
                                                                 [smTooltip]="subProject?.name"
-                                                                
                                                                 [innerHTML]="subProject?.name | breadcrumbsEllipsis"></a>
         </li>
       </ul>
@@ -26,13 +25,12 @@
                       pattern="^[^/]+$"
                       [inlineDisabled]="true"
                       (textChanged)="prepareProjectNameForChange($event)"
-                      (inlineActiveStateChanged)="projectNameEditActiveChanged($event)"
-
       >
+        <span class="d-flex align-items-center">
         <span class="project-name"
-              
-              [smTooltip]="project.name"
-        >{{project.name | shortProjectName}}</span>
+              [smTooltip]="project.name | cleanProjectPath"
+        >{{project.name | shortProjectName}} </span><i *ngIf="project.name | cleanProjectPath: false" [smTooltip]="project.name | cleanProjectPath: false"
+                                                       class="al-icon al-ico-project-path sm ml-2"></i></span>
       </sm-inline-edit>
       <sm-pipeline-card-menu
         class="menu-wrapper"
@@ -45,8 +43,11 @@
         (delete)="delete.emit()"
       ></sm-pipeline-card-menu>
     </div>
-    <div *ngIf="project.stats?.active?.last_task_run; else: noRun" class="last-run">Last run {{project.stats?.active?.last_task_run | timeAgo}}</div>
-    <ng-template #noRun><div class="last-run">No pipeline runs yet</div></ng-template>
+    <div *ngIf="project.stats?.active?.last_task_run; else: noRun" class="last-run">Last
+      run {{project.stats?.active?.last_task_run | timeAgo}}</div>
+    <ng-template #noRun>
+      <div class="last-run">No pipeline runs yet</div>
+    </ng-template>
   </div>
   <div class="d-flex justify-content-around w-100">
     <ng-template></ng-template>

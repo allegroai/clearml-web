@@ -50,6 +50,7 @@ import {PublishFooterItem} from '../shared/entity-page/footer-items/publish-foot
 import {HasReadOnlyFooterItem} from '../shared/entity-page/footer-items/has-read-only-footer-item';
 import {SelectedTagsFooterItem} from '../shared/entity-page/footer-items/selected-tags-footer-item';
 import {RefreshService} from '@common/core/services/refresh.service';
+import {SmSyncStateSelectorService} from '../core/services/sync-state-selector.service';
 
 
 @Component({
@@ -103,9 +104,10 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
     protected route: ActivatedRoute,
     protected router: Router,
     protected dialog: MatDialog,
-    protected refresh: RefreshService
+    protected refresh: RefreshService,
+    protected syncSelector: SmSyncStateSelectorService,
   ) {
-    super(store, route, router, dialog, refresh);
+    super(store, route, router, dialog, refresh, syncSelector);
     this.selectSplitSize$ = this.store.select(modelsSelectors.selectSplitSize);
     this.tableSortFields$ = this.store.select(modelsSelectors.selectTableSortFields);
     this.selectedModel$ = this.store.select(modelsSelectors.selectSelectedTableModel);

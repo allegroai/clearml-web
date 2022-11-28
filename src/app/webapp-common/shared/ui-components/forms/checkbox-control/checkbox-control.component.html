@@ -5,6 +5,7 @@
   <span
     *ngIf="!isReadonly"
     role="button"
+    data-id="Select All Loaded Experiment"
     class="purple-v"
     [ngClass]="inputClassName"
     [class.checked] = "state === 'All' || state === 'Partial'"

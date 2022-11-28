@@ -24,11 +24,19 @@ export class CheckboxControlComponent extends ImmutableFormField implements Afte
     this.formDataUpdated();
   }
 
+  @HostListener('mousedown', ['$event'])
+  @HostListener('selectstart', ['$event'])
+  stopPropagation(event: Event) {
+    event.stopPropagation();
+    event.preventDefault();
+  }
+
   @HostListener('click', ['$event'])
-  fieldValueChanged(event) {
+  fieldValueChanged(event: Event) {
     if (this.disabled) {
       return;
     }
+    event.preventDefault();
     event.stopPropagation();
 
     if (!this.isReadonly) {
@@ -41,7 +49,7 @@ export class CheckboxControlComponent extends ImmutableFormField implements Afte
     if (!isString(this.formData)) {
       this.state = this.formData === true ? 'All' : 'None';
     } else {
-      this.state = <TableSelectionState>this.formData;
+      this.state = this.formData as TableSelectionState;
     }
     this.cdr.detectChanges();
   }

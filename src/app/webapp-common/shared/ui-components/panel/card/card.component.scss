@@ -1,7 +1,7 @@
-@import "../../styles/variables";
-@import "../../styles/mixins/lines";
+@import "variables";
+@import "mixins/lines";
 
-.card {
+:host {
   border: solid 0;
   width: 352px;
   background: unset;
@@ -69,8 +69,9 @@
     transition: $transition-fast;
     height: 226px;
     width: 100%;
-    background-color: #384161;
+    background-color: $blue-500;
     border-radius: 6px;
+    overflow: hidden;
 
     &.is-folder {
       border-top-left-radius: 0;
@@ -98,8 +99,6 @@
         margin-top: auto;
         position: relative;
         background-color: $card-footer-bg;
-        border-bottom-left-radius: $card-border-radius;
-        border-bottom-right-radius: $card-border-radius;
       }
 
       header {
@@ -150,4 +149,3 @@
 
 
 }
-

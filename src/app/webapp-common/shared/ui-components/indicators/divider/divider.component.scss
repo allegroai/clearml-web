@@ -1,4 +1,4 @@
-@import "../../styles/variables";
+@import "variables";
 
 :host {
   --width: 1px;
@@ -16,7 +16,7 @@
     border-top: var(--width) solid var(--divider-line, #ededed);
   }
   span {
-    color: $light-grey-blue;
+    color: $blue-300;
     padding: 4px 12px;
     border-radius: 5px;
     &:empty {

@@ -20,7 +20,7 @@ export const getDebugImagesMetrics = createAction(
 
 export const refreshDebugImagesMetrics = createAction(
   DEBUG_IMAGES_PREFIX + 'REFRESH_DEBUG_IMAGES_METRICS',
-  props<{ tasks: string[], autoRefresh?: boolean }>()
+  props<{ tasks: string[]; autoRefresh?: boolean }>()
 );
 
 export const fetchExperiments = createAction(
@@ -69,7 +69,10 @@ export const setBeginningOfTime = createAction(
 );
 
 export const getDebugImageSample = createAction(DEBUG_IMAGES_PREFIX + 'GET_DEBUG_IMAGES_FOR_ITERATION', props<{ task: string; metric: string; variant: string; iteration: number; isAllMetrics: boolean }>());
-export const getNextDebugImageSample = createAction(DEBUG_IMAGES_PREFIX + 'GET_NEXT_DEBUG_IMAGE', props<{ task: string; navigateEarlier: boolean }>());
+export const getNextDebugImageSample = createAction(
+  DEBUG_IMAGES_PREFIX + 'GET_NEXT_DEBUG_IMAGE',
+  props<{ task: string; navigateEarlier: boolean; iteration?: boolean }>()
+);
 export const setCurrentDebugImage = createAction(DEBUG_IMAGES_PREFIX + 'SET_DEBUG_IMAGES_FOR_ITERATION', props<{ event: any }>());
 export const setDebugImageViewerScrollId = createAction(DEBUG_IMAGES_PREFIX + 'SET_DEBUG_IMAGE_VIEWER_SCROLL_ID', props<{ scrollId: string }>());
 export const setDebugImageIterations = createAction(DEBUG_IMAGES_PREFIX + 'SET_DEBUG_IMAGE_ITERATIONS', props<EventsGetDebugImageIterationsResponse>());

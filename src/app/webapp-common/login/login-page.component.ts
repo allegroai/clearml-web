@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-// import {mobilecheck} from '../shared/utils/mobile';
 import {CommercialContext, Environment} from '../../../environments/base';
 import {ConfigurationService} from '@common/shared/services/configuration.service';
 
@@ -13,11 +12,6 @@ export class LoginPageComponent implements OnInit {
   public mobile: boolean;
   public commercialContext: CommercialContext;
   public environment: Environment;
-
-
-  constructor() {
-    // this.mobile = mobilecheck();
-  }
 
   ngOnInit(): void {
     this.environment = ConfigurationService.globalEnvironment;

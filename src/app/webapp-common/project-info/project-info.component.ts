@@ -11,8 +11,9 @@ import {
   selectSelectedProject
 } from '../core/reducers/projects.reducer';
 import {updateProject} from '../core/actions/projects.actions';
-import {Project} from '../../business-logic/model/projects/project';
+import {Project} from '~/business-logic/model/projects/project';
 import {isExample} from '../shared/utils/shared-utils';
+import {DomSanitizer} from '@angular/platform-browser';
 
 const BREAK_POINT = 990;
 
@@ -29,7 +30,7 @@ export class ProjectInfoComponent implements OnInit, OnDestroy {
   public editMode: boolean;
   public options = {
     markedjsOpt: {
-      sanitize: true
+      sanitizer: this.sanitizer.bypassSecurityTrustHtml
     },
     enablePreviewContentClick: true,
     usingFontAwesome5: true,
@@ -74,7 +75,7 @@ export class ProjectInfoComponent implements OnInit, OnDestroy {
     }
   }
 
-  constructor(private store: Store<RootProjects>, private renderer: Renderer2) {
+  constructor(private store: Store<RootProjects>, private renderer: Renderer2, protected sanitizer: DomSanitizer) {
     this.selecteProject$ = this.store.select(selectSelectedProject);
   }
 

@@ -167,7 +167,7 @@ export class ModelsTableComponent extends BaseTableView {
     this.filtersValues[MODELS_TABLE_COL_FIELDS.PROJECT] = get([MODELS_TABLE_COL_FIELDS.PROJECT, 'value'], filters) || [];
     this.filtersMatch[MODELS_TABLE_COL_FIELDS.TAGS] = filters?.[MODELS_TABLE_COL_FIELDS.TAGS]?.matchMode || '';
     this.filtersSubValues[MODELS_TABLE_COL_FIELDS.TAGS] = get(['system_tags', 'value'], filters) || [];
-    //dynamic filters
+    // dynamic filters
     const filtersValues = createFiltersFromStore(filters || {}, false);
     this.filtersValues = Object.assign({}, {...this.filtersValues}, {...filtersValues});
   }
@@ -315,10 +315,10 @@ export class ModelsTableComponent extends BaseTableView {
     }
     this.singleRowContext = !!data?.single;
     this.menuBackdrop = !!data?.backdrop;
-    if(!data?.single) {
+    if (!data?.single) {
       this.contextModel = this.models.find(model => model.id === data.rowData.id);
       if (!this.selectedModels.map(model => model.id).includes(this.contextModel.id)) {
-        this.prevSelected = this.contextModel;
+        this.prevSelected = this.contextModel.id;
         this.emitSelection([this.contextModel]);
       }
     } else {

@@ -2,6 +2,7 @@
    [class.disabled]="!isTableFiltered"
    [class.pointer]="isTableFiltered"
    smTooltip="Clear all filters"
+   data-id="Clear All Filter"
    (click)="isTableFiltered && clearTableFilters.emit()"
 >
   <span class="path1"></span><span class="path2"></span>

@@ -23,8 +23,8 @@ export abstract class BaseTableView implements AfterViewInit, OnDestroy {
   public filtersOptions: { [colId: string]: IOption[] } = {};
   public filtersValues: { [colId: string]: any } = {};
   public tableSortFieldsObject: { [fieldName: string]: { index: number; field: string; order: TableSortOrderEnum } } = {};
-  protected prevSelected: any;
-  protected prevDeselect: any;
+  protected prevSelected: string;
+  protected prevDeselect: string;
   private _entityType: EntityTypeEnum;
   public convertStatusMap: { [status: string]: string };
   protected waitForClick: number;
@@ -111,34 +111,39 @@ export abstract class BaseTableView implements AfterViewInit, OnDestroy {
     this.contextMenuActive = menuStatus;
   }
 
-  protected getSelectionRange<T>(change: { field: string; value: boolean; event: Event }, entity: T): T[] {
+  protected getSelectionRange<T extends {id?: string}>(change: { field: string; value: boolean; event: Event }, entity: T): T[] {
     let addList = [entity];
     if ((change.event as MouseEvent).shiftKey && this.prevSelected) {
-      let index1 = this[this.entitiesKey].indexOf(this.prevSelected);
-      let index2 = this[this.entitiesKey].indexOf(entity);
+      let index1 = this[this.entitiesKey].findIndex(e => e.id === this.prevSelected);
+      let index2 = this[this.entitiesKey].findIndex(e => e.id === entity.id);
       if (index1 > index2) {
         [index1, index2] = [index2, index1];
+      } else {
+        index1++;
+        index2++;
       }
-      addList = this[this.entitiesKey].slice(index1 + 1, index2 + 1);
-      this.prevDeselect = entity;
+      addList = this[this.entitiesKey].slice(index1, index2);
+      this.prevDeselect = entity.id;
     }
-    this.prevSelected = entity;
+    this.prevSelected = entity.id;
     return addList;
   }
 
-  protected getDeselectionRange(change: { field: string; value: boolean; event: Event }, entity: { id: string }): string[] {
+  protected getDeselectionRange<T extends {id?: string}>(change: { field: string; value: boolean; event: Event }, entity: T) {
     let list = [entity.id];
     const prev = this.prevDeselect || this.prevSelected;
     if ((change.event as MouseEvent).shiftKey && prev) {
-      let index1 = this[this.entitiesKey].indexOf(prev);
-      let index2 = this[this.entitiesKey].indexOf(entity);
+      let index1 = this[this.entitiesKey].findIndex(e => e.id === prev);
+      let index2 = this[this.entitiesKey].findIndex(e => e.id === entity.id);
       if (index1 > index2) {
         [index1, index2] = [index2, index1];
+      } else {
+        index1++;
       }
-      list = this[this.entitiesKey].slice(index1 + 1, index2 + 1).map(e => e.id);
-      this.prevSelected = entity;
+      list = this[this.entitiesKey].slice(index1, index2 + 1).map(e => e.id);
+      this.prevSelected = entity.id;
     }
-    this.prevDeselect = entity;
+    this.prevDeselect = entity.id;
     return list;
   }
 

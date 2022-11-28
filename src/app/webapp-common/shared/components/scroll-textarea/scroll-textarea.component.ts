@@ -11,7 +11,6 @@ export class ScrollTextareaComponent {
 
   lines: string[];
   search: string = '';
-  lastSearchIndex = -1;
   searchResultsCount: number = 0;
 
   @ViewChild('scroll') scroll: CdkVirtualScrollViewport;

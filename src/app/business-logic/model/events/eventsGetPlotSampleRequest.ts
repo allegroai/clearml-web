@@ -22,10 +22,6 @@ export interface EventsGetPlotSampleRequest {
      */
     metric: string;
     /**
-     * Metric variant
-     */
-    variant: string;
-    /**
      * The iteration to bring plot from. If not specified then the latest reported   plot is retrieved
      */
     iteration?: number;

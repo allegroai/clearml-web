@@ -1,4 +1,4 @@
-@import "../../../../shared/ui-components/styles/variables";
+@import "variables";
 
 ::ng-deep .dark-theme {
   .legend-entry-name, .legend-entry-value {
@@ -17,24 +17,56 @@
   }
 }
 
-::ng-deep .legend-circle {
-  &:hover {
-    cursor: url(../../../../assets/icons/pallete-cursor.png) 6 0, pointer;
+.donut-legend {
+  display: flex;
+  flex: 2;
+  height: fit-content;
+  max-height: 100%;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 24px;
+  overflow: auto;
+
+  .slice {
+    color: $blue-300;
+    position: relative;
+    margin-left: 22px;
+
+    &.highlight {
+      font-weight: bold;
+      color: $blue-200;
+
+      .circle {
+        width: 14px;
+        height: 14px;
+        top: 4px;
+        left: -21px;
+      }
+    }
+  }
+
+  .circle {
+    display: block;
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    top: 5px;
+    left: -20px;
+    border-radius: 50%;
+    background-color: var(--sliceColor);
+
+    &:hover {
+      cursor: url(../../../../assets/icons/pallete-cursor.png) 6 0, pointer;
+    }
+  }
+
+  .quantity {
+    color: $blue-200;
+    margin-left: 6px;
   }
 }
 
-.donut-legend {
-  width: 260px;
-  height: calc(100% - 24px);
-  overflow-x: hidden;
-  overflow-y: auto;
-  margin: 12px 0 0 -16px;
-}
-
 .donut-container {
-  flex: 1;
-}
-
-::ng-deep .britechart-legend .legend-entry.is-faded .legend-entry-name {
-  transition: unset !important;
+  flex: 3;
+  height: 100%;
 }
