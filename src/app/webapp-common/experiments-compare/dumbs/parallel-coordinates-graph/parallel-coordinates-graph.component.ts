@@ -1,5 +1,5 @@
 import {Component, ElementRef, HostListener, Input, OnInit, ViewChild} from '@angular/core';
-import {PlotlyGraphBaseComponent} from '@common/shared/experiment-graphs/single-graph/plotly-graph-base';
+import {PlotlyGraphBaseComponent} from '@common/shared/single-graph/plotly-graph-base';
 import {debounceTime, filter, take} from 'rxjs/operators';
 import {ColorHashService} from '@common/shared/services/color-hash/color-hash.service';
 import {get, getOr, isEqual, max, min, uniq, cloneDeep} from 'lodash/fp';

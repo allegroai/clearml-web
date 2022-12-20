@@ -1,7 +1,7 @@
 import {createFeatureSelector, createSelector} from '@ngrx/store';
 import * as actions from './common-delete-dialog.actions';
 
-export type CloudProviders = 'fs' | 'gc' | 's3' | 'azure' | 'misc'
+export type CloudProviders = 'fs' | 'gc' | 's3' | 'azure' | 'misc';
 
 export interface DeleteEntityDialog {
   numberOfSourcesToDelete: number;

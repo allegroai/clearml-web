@@ -20,7 +20,6 @@ import * as  debugActions from './debug-images-actions';
 import {fetchExperiments, getDebugImagesMetrics, resetDebugImages} from './debug-images-actions';
 import {
   ITaskOptionalMetrics,
-  selectBeginningOfTime,
   selectDebugImages,
   selectNoMore,
   selectOptionalMetrics,
@@ -32,7 +31,7 @@ import {distinctUntilChanged, filter, map, withLatestFrom} from 'rxjs/operators'
 import {Task} from '~/business-logic/model/tasks/task';
 import {ActivatedRoute} from '@angular/router';
 import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
-import {ImageViewerComponent} from '../experiments/dumb/image-viewer/image-viewer.component';
+import {ImageViewerComponent} from '../shared/debug-sample/image-viewer/image-viewer.component';
 import {selectSelectedExperiment} from '~/features/experiments/reducers';
 import {TaskMetric} from '~/business-logic/model/events/taskMetric';
 import {get, isEqual} from 'lodash/fp';
@@ -40,6 +39,9 @@ import {ALL_IMAGES} from './debug-images-effects';
 import {getSignedUrl} from '../core/actions/common-auth.actions';
 import {addMessage} from '../core/actions/layout.actions';
 import {RefreshService} from '@common/core/services/refresh.service';
+import {selectBeginningOfTime} from '@common/shared/debug-sample/debug-sample.reducer';
+import {ReportCodeEmbedService} from '@common/shared/services/report-code-embed.service';
+import {LIMITED_VIEW_LIMIT} from '@common/experiments-compare/experiments-compare.constants';
 
 export interface Event {
   timestamp: number;
@@ -75,7 +77,7 @@ interface DebugSamples {
 export class DebugImagesComponent implements OnInit, OnDestroy, OnChanges {
 
   @Input() isDarkTheme = false;
-  @Input() isDatasetVersionPreview = false;
+  @Input() disableStatusRefreshFilter = false;
   @Input() selected: Task;
   @Output() copyIdClicked = new EventEmitter();
 
@@ -112,6 +114,8 @@ export class DebugImagesComponent implements OnInit, OnDestroy, OnChanges {
   public modifiedExperimentsNames: { [id: string]: string } = {};
   public experiments: Partial<Task>[];
   public bindNavigationMode: boolean = false;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  LIMITED_VIEW_LIMIT = LIMITED_VIEW_LIMIT;
 
   constructor(
     private store: Store<ExperimentInfoState>,
@@ -120,13 +124,15 @@ export class DebugImagesComponent implements OnInit, OnDestroy, OnChanges {
     private changeDetection: ChangeDetectorRef,
     private activeRoute: ActivatedRoute,
     private elRef: ElementRef,
-    private refresh: RefreshService
+    private refresh: RefreshService,
+    private reportEmbed: ReportCodeEmbedService,
   ) {
     this.tasks$ = this.store.select(selectTaskNames);
     this.optionalMetrics$ = this.store.select(selectOptionalMetrics);
     this.noMoreData$ = this.store.select(selectNoMore);
     this.timeIsNow$ = this.store.select(selectTimeIsNow);
     this.beginningOfTime$ = this.store.select(selectBeginningOfTime);
+
 
     this.debugImagesSubscription = combineLatest([
       store.pipe(select(selectS3BucketCredentials)),
@@ -135,7 +141,7 @@ export class DebugImagesComponent implements OnInit, OnDestroy, OnChanges {
         const id = val[0];
         const iterations = val[1].metrics.find(m => m.task === id).iterations;
         if (iterations?.length === 0) {
-          return {[id]:{}};
+          return {[id]: {}};
         }
         acc[id] = {
           data: iterations.map(iteration => ({
@@ -200,12 +206,10 @@ export class DebugImagesComponent implements OnInit, OnDestroy, OnChanges {
     if (multipleExperiments) {
       this.routerParamsSubscription = this.routerParams$
         .subscribe(params => {
-          const experiments = params.ids ? params.ids.split(',') : params.experimentId.split(',');
-          if (!isEqual(experiments, this.experimentIds)) {
+          const experiments = (params.ids ? params.ids.split(',') : params.experimentId.split(','));
             this.experimentIds = experiments;
-            this.store.dispatch(getDebugImagesMetrics({tasks: this.experimentIds}));
-            this.store.dispatch(fetchExperiments({tasks: this.experimentIds}));
-          }
+            this.store.dispatch(getDebugImagesMetrics({tasks: this.experimentIds.slice(0, LIMITED_VIEW_LIMIT)}));
+            this.store.dispatch(fetchExperiments({tasks: this.experimentIds.slice(0, LIMITED_VIEW_LIMIT)}));
         });
 
       this.taskNamesSubscription = this.tasks$
@@ -231,7 +235,7 @@ export class DebugImagesComponent implements OnInit, OnDestroy, OnChanges {
     } else {
       this.selectedExperimentSubscription = this.store.select(selectSelectedExperiment)
         .pipe(
-          filter(experiment => !!experiment && !this.isDatasetVersionPreview),
+          filter(experiment => !!experiment && !this.disableStatusRefreshFilter),
           distinctUntilChanged((previous, current) => previous?.id === current?.id)
         ).subscribe(experiment => {
           this.experimentNames = {[experiment.id]: experiment.name};
@@ -243,7 +247,9 @@ export class DebugImagesComponent implements OnInit, OnDestroy, OnChanges {
 
     this.refreshingSubscription = this.refresh.tick
       .pipe(
-        filter(auto => (!multipleExperiments || auto !== null) && (!this.isDatasetVersionPreview || this.selected.status === TaskStatusEnum.InProgress)),
+        filter(auto =>
+          auto !== null && (!this.disableStatusRefreshFilter || this.selected.status === TaskStatusEnum.InProgress)
+        ),
         withLatestFrom(
           this.store.select(selectTimeIsNow),
         )
@@ -404,5 +410,13 @@ export class DebugImagesComponent implements OnInit, OnDestroy, OnChanges {
 
   toggleConnectNavigation() {
     this.bindNavigationMode = !this.bindNavigationMode;
+  }
+
+  createEmbedCode(event: { metrics?: string[]; variants?: string[] }, experimentId: string) {
+    this.reportEmbed.createCode({
+      type: 'sample',
+      tasks: [experimentId],
+      ...event
+    });
   }
 }

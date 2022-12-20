@@ -2,28 +2,43 @@ import {ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild} from '@angul
 import {Observable, Subscription} from 'rxjs';
 import {select, Store} from '@ngrx/store';
 import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
-import {distinctUntilChanged, filter, map} from 'rxjs/operators';
+import {distinctUntilChanged, filter, map, withLatestFrom} from 'rxjs/operators';
 import {isEqual} from 'lodash/fp';
-import {mergeMultiMetrics, mergeMultiMetricsGroupedVariant} from '@common/tasks/tasks.utils';
-import {getMultiScalarCharts, resetExperimentMetrics, setExperimentMetricsSearchTerm, setExperimentSettings, setSelectedExperiments} from '../../actions/experiments-compare-charts.actions';
-import {selectCompareSelectedSettingsGroupBy, selectCompareSelectedSettingsSmoothWeight, selectCompareSelectedSettingsxAxisType, selectCompareTasksScalarCharts, selectExperimentMetricsSearchTerm, selectSelectedExperimentSettings, selectSelectedSettingsHiddenScalar} from '../../reducers';
+import {GroupedList, mergeMultiMetrics, mergeMultiMetricsGroupedVariant} from '@common/tasks/tasks.utils';
+import {
+  getMultiScalarCharts,
+  resetExperimentMetrics,
+  setExperimentMetricsSearchTerm,
+  setExperimentSettings,
+  setSelectedExperiments
+} from '../../actions/experiments-compare-charts.actions';
+import {
+  selectCompareSelectedSettingsGroupBy,
+  selectCompareSelectedSettingsSmoothWeight,
+  selectCompareSelectedSettingsxAxisType,
+  selectCompareTasksScalarCharts,
+  selectExperimentMetricsSearchTerm,
+  selectSelectedExperimentSettings,
+  selectSelectedSettingsHiddenScalar
+} from '../../reducers';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {toggleShowScalarOptions} from '../../actions/compare-header.actions';
 import {GroupByCharts, groupByCharts} from '@common/experiments/reducers/common-experiment-output.reducer';
-import {GroupedList} from '@common/shared/ui-components/data/selectable-grouped-filter-list/selectable-grouped-filter-list.component';
-import {ExtFrame} from '@common/shared/experiment-graphs/single-graph/plotly-graph-base';
+import {ExtFrame} from '@common/shared/single-graph/plotly-graph-base';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {ExperimentGraphsComponent} from '@common/shared/experiment-graphs/experiment-graphs.component';
-import {selectScalarsHoverMode} from '../../../experiments/reducers';
-import {setScalarsHoverMode} from '../../../experiments/actions/common-experiment-output.actions';
-import {ChartHoverModeEnum} from '../../../experiments/shared/common-experiments.const';
+import {selectScalarsHoverMode} from '@common/experiments/reducers';
+import {setScalarsHoverMode} from '@common/experiments/actions/common-experiment-output.actions';
+import {ChartHoverModeEnum} from '@common/experiments/shared/common-experiments.const';
+import {ReportCodeEmbedService} from '@common/shared/services/report-code-embed.service';
+import {Router} from '@angular/router';
 
 
 @Component({
-  selector   : 'sm-experiment-compare-scalar-charts',
+  selector: 'sm-experiment-compare-scalar-charts',
   templateUrl: './experiment-compare-scalar-charts.component.html',
-  styleUrls  : ['./experiment-compare-scalar-charts.component.scss']
+  styleUrls: ['./experiment-compare-scalar-charts.component.scss']
 })
 export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy {
 
@@ -67,7 +82,9 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
   constructor(
     private store: Store<ExperimentInfoState>,
     private changeDetection: ChangeDetectorRef,
-    private refresh: RefreshService
+    private refresh: RefreshService,
+    private reportEmbed: ReportCodeEmbedService,
+    private router: Router
   ) {
     this.listOfHidden = this.store.select(selectSelectedSettingsHiddenScalar)
       .pipe(distinctUntilChanged(isEqual));
@@ -120,12 +137,12 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
       });
 
     this.routerParamsSubscription = this.routerParams$
-      .subscribe(params => {
-        if (!this.taskIds || this.taskIds.join(',') !== params.ids) {
-          this.taskIds = params.ids.split(',');
-          this.store.dispatch(setSelectedExperiments({selectedExperiments: this.taskIds}));
-          this.store.dispatch(getMultiScalarCharts({taskIds: this.taskIds}));
-        }
+      .subscribe((params) => {
+          if (!this.taskIds || this.taskIds.join(',') !== params.ids) {
+            this.taskIds = params.ids.split(',');
+            this.store.dispatch(setSelectedExperiments({selectedExperiments: this.taskIds}));
+            this.store.dispatch(getMultiScalarCharts({taskIds: this.taskIds}));
+          }
       });
 
     this.refreshingSubscription = this.refresh.tick
@@ -194,5 +211,13 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
 
   hoverModeChanged(hoverMode: ChartHoverModeEnum) {
     this.store.dispatch(setScalarsHoverMode({hoverMode}));
+  }
+
+  createEmbedCode(event: { metrics?: string[]; variants?: string[] }) {
+    this.reportEmbed.createCode({
+      type: 'scalar',
+      tasks: this.taskIds,
+      ...event
+    });
   }
 }

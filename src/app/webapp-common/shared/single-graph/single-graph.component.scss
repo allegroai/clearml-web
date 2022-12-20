@@ -1,0 +1,208 @@
+@import "variables";
+// @import "../experiment-graphs/experiment-graphs.component";
+
+.graph-title {
+  position: absolute;
+  top: 36px;
+  width: fit-content;
+  max-width: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0 80px;
+  z-index: 1;
+  font-size: 16px;
+  color: $blue-600;
+
+  &.table-title {
+    top: 20px
+  }
+}
+
+.dark-theme .graph-title {
+  color: $blue-100;
+}
+
+.resize-ghost-element .graph-title {
+  display: none;
+}
+
+:host {
+  display: block;
+  position: relative;
+
+  .whitebg {
+    display: block;
+    background: white;
+    margin-left: -4px;
+    overflow-y: hidden;
+    overflow-x: auto;
+    margin-right: 10px;
+    min-height: 250px;
+
+    &.loading .chart {
+      opacity: 0.3;
+    }
+
+    &.whitebg-table {
+      height: unset;
+      padding-bottom: 12px;
+      margin-left: 24px;
+      margin-right: 24px;
+    }
+
+  }
+
+  .plot-loader {
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateY(-50%) translateX(-50%);
+    font-size: 14px;
+    color: #fff;
+    padding: 0 6px;
+    background-color: $blue-400;
+    border-radius: 4px;
+    z-index: 2;
+  }
+
+  // fix table content overflow 1px above header
+  ::ng-deep svg #header .column-cell {
+    transform: translate(0px, -1px);
+
+    .cell-rect {
+      height: 30px;
+    }
+  }
+
+  ::ng-deep sm-color-picker-wrapper {
+    display: block;
+    top: 0px;
+
+  }
+
+  ::ng-deep .legendlines path, ::ng-deep .legendpoints path {
+    cursor: url('../../assets/icons/pallete-cursor.png') 6 0, pointer;
+  }
+
+  ::ng-deep .legendpoints path:not(.scatterpts) {
+    d: path('M8,8H-8V-8H8Z') !important;
+  }
+
+  ::ng-deep .legendlines path {
+    stroke-width: 12px !important;
+  }
+
+  ::ng-deep .legendpoints path.scatterpts {
+    // chrome only
+    d: path('M5.5,0A5.5,5.5 0 1,1 0,-5.5A5.5,5.5 0 0,1 5.5,0Z') !important;
+  }
+
+  .move-title {
+    ::ng-deep .infolayer > .g-gtitle > .gtitle {
+      transform: translateY(12px);
+    }
+  }
+
+  ::ng-deep .modebar-container svg.icon {
+    height: 1em;
+    width: 1em;
+    font-size: 16px;
+  }
+
+  // moving legend next to title without text
+  ::ng-deep .legend.hide-text {
+    .legendtext,
+    .legendtoggle {
+      display: none;
+    }
+  }
+
+
+
+  .dark-theme {
+    background: transparent !important;
+
+    ::ng-deep .parcoords .tick text {
+      text-shadow: rgb(0 0 0) 1px 1px 1px, rgb(0 0 0) -1px -1px 1px, rgb(0 0 0) 1px -1px 1px, rgb(0 0 0) -1px 1px 1px !important;
+    }
+
+    ::ng-deep .js-plotly-plot .plotly {
+      .modebar-group {
+        border-left: 1px solid $blue-500;
+
+        &:last-child {
+          .modebar-btn:last-child {
+            border-left: 1px solid $blue-500;
+
+            &:only-child {
+              border-left: none;
+            }
+          }
+        }
+      }
+
+      .node-label {
+        fill: white !important;;
+        text-shadow: #0d0e15 1px 1px 1px !important;
+      }
+
+      .svg-container {
+        svg.main-svg {
+          background: transparent !important;
+
+          .scrollbar-kit .scrollbar .scrollbar-glyph {
+            stroke: $blue-200;
+          }
+        }
+      }
+
+      svg a {
+        fill: $blue-300;
+
+        &:hover {
+          fill: $blue-50;
+        }
+      }
+    }
+  }
+
+  ::ng-deep .js-plotly-plot .plotly {
+    .modebar-group {
+      padding-left: 8px; /* instead of padding-right */
+      padding-right: 0;
+      margin-left: 8px;
+      border-left: 1px solid #efefef;
+    }
+
+    .modebar-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modebar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      top: 6px;
+      padding-right: 12px;
+
+    }
+
+    .modebar .modebar-group:last-child {
+      .modebar-btn:last-child {
+        margin-left: 12px;
+        padding-left: 12px;
+        border-left: 1px solid #efefef;
+
+        &:only-child {
+          border-left: none;
+          margin-left: 0px;
+          padding-left: 0px;
+        }
+      }
+    }
+  }
+}
+

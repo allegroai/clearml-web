@@ -1,19 +1,25 @@
 <div class="p-3 images-container">
   <div class="single-debug-images-container"
-       *ngFor="let experimentId of experimentIds; trackBy: trackExperiment; let first = first; let last = last" [class.separator]="experimentIds?.length > 1">
+       *ngFor="let experimentId of experimentIds.slice(0,LIMITED_VIEW_LIMIT); trackBy: trackExperiment; let first = first; let last =
+       last"
+       [class.separator]="experimentIds?.length > 1">
     <header *ngIf="experimentIds?.length > 1">
       <sm-experiment-compare-general-data
         *ngIf="(experiments | itemById: experimentId).name"
         [experiment]="experiments | itemById: experimentId"
         [tags]="(experiments | itemById: experimentId)?.tags"
         (copyIdClicked)="copyIdToClipboard()"
-       >
+      >
       </sm-experiment-compare-general-data>
     </header>
-    <div class="d-flex navigator-container" [class.active]="bindNavigationMode" [class.first]="first" [class.last]="last"  >
-      <div class="connector-icon-container pointer" smTooltip="Sync browsing" [matTooltipShowDelay]="500" [class.active]="bindNavigationMode" [class.hidden]="last" (click)="toggleConnectNavigation()">
-        <i class="al-icon" [class.al-ico-connect]="bindNavigationMode" [class.al-ico-disconnect]="!bindNavigationMode"></i></div>
-      <div class="metric-bar" [class.minimized]="minimized" *ngIf="!thereAreNoMetrics(experimentId) && !isDatasetVersionPreview">
+    <div class="d-flex navigator-container" [class.active]="bindNavigationMode" [class.first]="first"
+         [class.last]="last">
+      <div class="connector-icon-container pointer" smTooltip="Sync browsing" [matTooltipShowDelay]="500"
+           [class.active]="bindNavigationMode" [class.hidden]="last" (click)="toggleConnectNavigation()">
+        <i class="al-icon" [class.al-ico-connect]="bindNavigationMode"
+           [class.al-ico-disconnect]="!bindNavigationMode"></i></div>
+      <div class="metric-bar" [class.minimized]="minimized"
+           *ngIf="!thereAreNoMetrics(experimentId) && !disableStatusRefreshFilter">
         <label>Metric:</label>
         <mat-form-field appearance="outline" [ngClass]="{'dark thin': isDarkTheme}">
           <mat-select
@@ -62,11 +68,18 @@
       [title]="experimentNames && experimentNames[experimentId]"
       [isMergeIterations]="mergeIterations"
       [isDarkTheme]="isDarkTheme"
-      [isDatasetVersionPreview]="isDatasetVersionPreview"
+      [isDatasetVersionPreview]="disableStatusRefreshFilter"
       (imageClicked)="imageClicked($event, experimentId)"
       (urlError)="urlError()"
+      (createEmbedCode)="createEmbedCode($event, experimentId)"
     >
     </sm-debug-images-view>
+  </div>
+  <div *ngIf="experimentIds?.length>LIMITED_VIEW_LIMIT"
+       class="limit-message-container">
+    <div class="limit-message">
+      <i class="al-icon al-ico-info-circle mb-2"></i>Only the first 10 experiments are available for this view...
+    </div>
   </div>
 </div>
 

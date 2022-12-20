@@ -1,0 +1,50 @@
+<ng-container *ngIf="activated; else placeHolder" [ngSwitch]="type">
+  <ng-container *ngIf="(signIsNeeded | async) === false; else signIsNeededTemplate">
+    <ng-template #plotTemplate>
+      <sm-single-graph
+        [class.less-padding]="false"
+        [class.two-in-a-row]="false"
+        [graphsNumber]="1"
+        [height]="singleGraphHeight"
+        [chart]="plotData"
+        [id]="'lala'"
+        [isDarkTheme]="true"
+        [showLoaderOnDraw]="false"
+        [identifier]="'lala'"
+        [width]="400"
+        [isCompare]="true"
+        [noMargins]="true"
+        [legendConfiguration]="{noTextWrap: true}"
+        [hideMaximize]="hideMaximize"
+        (maximizeClicked)="maximize()">
+      </sm-single-graph>
+    </ng-template>
+
+    <ng-container *ngIf="type === 'sample'; else plotTemplate">
+      <sm-debug-image-snippet
+        *ngIf="frame?.url"
+        class="d-flex-center"
+        [class.no-pointer]="hideMaximize !== 'show'"
+        [frame]="frame"
+        [noHoverEffects]="true"
+        (imageClicked)="hideMaximize === 'show' && sampleClicked($event)">
+      </sm-debug-image-snippet>
+    </ng-container>
+  </ng-container>
+</ng-container>
+
+<ng-template #placeHolder>
+  <div class="placeholder">
+    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+      <path
+        d="M43.29,43.65H5.29c-.55,0-1-.45-1-1h0c0-.55,.45-1,1-1H43.29c.55,0,1,.45,1,1h0c0,.55-.45,1-1,1h0Zm1-27v-2h-3.5V5.65h-1V14.79l-8.5,5.04-4.5-5.12V5.65h-1V14.49l-4.7,8.48h-4.3V5.65h-1V22.97h-2.42l-4.58-12.22V5.65h-1v5.1h-3.5v2h3.12l.38,1.02v9.2h-3.5v2h3.5v14.68h1v-14.68h3.18l3.82,10.2v4.48h1v-4.84l5.5-9.84h3.54v14.68h1v-14.82l4-2.42,8.92,10.18v7.06h1v-7h3.54v-2h-3.5v-14h3.5ZM8.79,22.97v-6.52l2.44,6.52h-2.44Zm5.32,2h1.68v4.48l-1.68-4.48Zm2.68,5.72v-5.72h3.18l-3.18,5.72Zm6.58-7.72l2.42-4.36v4.36h-2.42Zm3.42-.46v-4.76l2.74,3.12-2.74,1.64Zm5.84-1.14l7.16-4.26v12.54l-7.16-8.28Z"
+        fill="#5a658e"/>
+    </svg>
+    <span class="show-text" (click)="activate()">Show preview</span>
+  </div>
+</ng-template>
+
+
+<ng-template #signIsNeededTemplate>
+  <div class="s3message">Missing S3 credentials. Please verify credentials in <a target="_blank" class="link" href="/settings/webapp-configuration">WEB APP CLOUD ACCESS</a> in clearml app.</div>
+</ng-template>

@@ -13,10 +13,20 @@
         <sm-experiment-type-icon-label [type]="experiment?.type"></sm-experiment-type-icon-label>
       </ng-container>
       <ng-container *ngSwitchCase="RECENT_TASKS_TABLE_COL_FIELDS.NAME">
+        <div
+          class="experiment-name"
+          smShowTooltipIfEllipsis
+          [smTooltip]="experiment.name">
         {{experiment.name}}
+        </div>
       </ng-container>
       <ng-container *ngSwitchCase="RECENT_TASKS_TABLE_COL_FIELDS.PROJECT">
-        {{experiment.project?.name}}
+        <div
+          class="experiment-name"
+          smShowTooltipIfEllipsis
+          [smTooltip]="experiment.project?.name">
+          {{experiment.project?.name}}
+        </div>
       </ng-container>
       <ng-container *ngSwitchCase="RECENT_TASKS_TABLE_COL_FIELDS.STARTED">
         {{experiment.started | date : TIME_FORMAT_STRING}}

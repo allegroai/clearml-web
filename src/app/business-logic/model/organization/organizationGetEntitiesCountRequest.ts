@@ -26,19 +26,28 @@ export interface OrganizationGetEntitiesCountRequest {
      */
     models?: object;
     /**
+     * Search criteria for dataviews
+     */
+    dataviews?: object;
+    /**
      * Search criteria for pipelines
      */
     pipelines?: object;
     /**
      * Search criteria for datasets
      */
-    datasets: object;
+    datasets?: object;
     /**
-     * If set to 'true' then hidden projects and tasks are included in the search results
+     * If set to \'true\' then hidden projects and tasks are included in the search   results
      */
     search_hidden?: boolean;
+    active_users?: Array<string>;
     /**
-     * The list of users that were active in the project. If passes then the resulting projects are filtered to the ones that have tasks   created by these users
+     * Search criteria for reports
      */
-    active_users?: string[];
+    reports?: object;
+    /**
+     * Allow public entities to be counted in the results
+     */
+    allow_public?: boolean;
 }

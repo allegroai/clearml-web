@@ -14,7 +14,7 @@ import {
   ViewChildren
 } from '@angular/core';
 import {sortMetricsList} from '../../tasks/tasks.utils';
-import {SingleGraphComponent} from './single-graph/single-graph.component';
+import {SingleGraphComponent} from '../single-graph/single-graph.component';
 import {
   ChartHoverModeEnum,
   EXPERIMENT_GRAPH_ID_PREFIX,
@@ -29,7 +29,7 @@ import {selectPlotlyReady} from '../../core/reducers/view.reducer';
 import {ResizeEvent} from 'angular-resizable-element';
 import {distinctUntilChanged, filter, map, skip, take, tap} from 'rxjs/operators';
 import {Subscription} from 'rxjs';
-import {ExtFrame, ExtLegend, VisibleExtFrame} from './single-graph/plotly-graph-base';
+import {ExtFrame, ExtLegend, VisibleExtFrame} from '../single-graph/plotly-graph-base';
 import {getSignedUrl} from '../../core/actions/common-auth.actions';
 import {selectSignedUrl} from '../../core/reducers/common-auth-reducer';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
@@ -128,7 +128,9 @@ export class ExperimentGraphsComponent implements OnDestroy {
     return this._xAxisType;
   }
 
+  @Input() exportForReport = true;
   @Output() hoverModeChanged = new EventEmitter<ChartHoverModeEnum>();
+  @Output() createEmbedCode = new EventEmitter<{metrics?: string[]; variants?: string[]}>();
 
   @ViewChildren('metricGroup') allMetricGroups !: QueryList<ElementRef>;
   @ViewChildren('singleGraphContainer') singleGraphs !: QueryList<ElementRef>;
@@ -415,4 +417,7 @@ export class ExperimentGraphsComponent implements OnDestroy {
 
   public generateIdentifier = (chartItem: any) => `${this.singleGraphidPrefix} ${this.experimentGraphidPrefix} ${chartItem.metric} ${chartItem.layout.title} ${chartItem.iter} ${chartItem.variant} ${(chartItem.layout.images && chartItem.layout.images[0]?.source)}`;
 
+  creatingEmbedCode(chartItem: any) {
+    this.createEmbedCode.emit({metrics: [chartItem.metric], variants: [chartItem.variant]});
+  }
 }

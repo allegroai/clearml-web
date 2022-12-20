@@ -7,9 +7,9 @@ import {Observable, Subscription} from 'rxjs';
 import {selectRootProjects} from '@common/core/reducers/projects.reducer';
 import {getAllSystemProjects} from '@common/core/actions/projects.actions';
 import {map} from 'rxjs/operators';
-import {isReadOnly} from '@common/shared/utils/shared-utils';
 import {CloneForm} from '../../common-experiment-model.model';
 import {isEqual} from 'lodash/fp';
+import {isReadOnly} from '@common/shared/utils/is-read-only';
 
 @Component({
   selector: 'sm-clone-dialog',
@@ -84,9 +84,9 @@ export class CloneDialogComponent implements OnInit, OnDestroy {
       const projectList = projects?.map(project => ({value: project.id, label: project.name}));
       if (!isEqual(projectList, this.projects)) {
         this.projects = projectList;
-        const defaultProject = this.projects.find(project => project.value === this.defaultProjectId);
+        const defaultProject = this.projects.find(project => project.value === this.defaultProjectId) as Project;
         setTimeout(() => {
-          this.formData.project = defaultProject ? defaultProject : projects[0] ? this.projects[0] : null;
+          this.formData.project = (defaultProject && defaultProject.company?.id) ? defaultProject : projects[0] ? this.projects[0] : null;
           this.filterText = this.formData.project?.label;
         }, 0);
       }

@@ -5,7 +5,6 @@ import {ActivatedRoute, NavigationEnd, Router, Params, RouterEvent} from '@angul
 import {Title} from '@angular/platform-browser';
 import {selectLoggedOut} from '@common/core/reducers/view.reducer';
 import {Store} from '@ngrx/store';
-import {castArray, get, last} from 'lodash/fp';
 import {selectRouterParams, selectRouterUrl} from '@common/core/reducers/router-reducer';
 import {ApiProjectsService} from './business-logic/api-services/projects.service';
 import {Project} from './business-logic/model/projects/project';
@@ -27,7 +26,7 @@ import {aceReady, firstLogin, plotlyReady, setScaleFactor, visibilityChanged} fr
 import {UiUpdatesService} from '@common/shared/services/ui-updates.service';
 import {UsageStatsService} from './core/services/usage-stats.service';
 import {dismissSurvey} from './core/actions/layout.actions';
-import {getScaleFactor, loadExternalLibrary} from '@common/shared/utils/shared-utils';
+import {getScaleFactor} from '@common/shared/utils/shared-utils';
 import {User} from './business-logic/model/users/user';
 import {ConfigurationService} from '@common/shared/services/configuration.service';
 import {GoogleTagManagerService} from 'angular-google-tag-manager';
@@ -36,6 +35,7 @@ import {TipsService} from '@common/shared/services/tips.service';
 import {USER_PREFERENCES_KEY} from '@common/user-preferences';
 import {selectIsPipelines} from '@common/experiments-compare/reducers';
 import {Environment} from '../environments/base';
+import {loadExternalLibrary} from '@common/shared/utils/load-external-library';
 
 @Component({
   selector: 'sm-root',
@@ -111,6 +111,20 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    window.addEventListener('message', e => {
+      if (e.data.maximizing) {
+        const drawerContent = document.querySelector('sm-report mat-drawer-container');
+        const iframeElement = document.querySelector(`iframe[name="${e.data.name}"]`);
+        if (iframeElement?.classList.contains('iframe-maximized')) {
+          this.renderer.removeClass(iframeElement, 'iframe-maximized');
+          this.renderer.removeClass(drawerContent, 'iframe-maximized');
+        } else {
+          this.renderer.addClass(iframeElement, 'iframe-maximized');
+          this.renderer.addClass(drawerContent, 'iframe-maximized');
+        }
+      }
+    });
+
     this.configService.globalEnvironmentObservable.subscribe(env => {
       this.hideUpdate = env.hideUpdateNotice;
       this.showSurvey = env.showSurvey;
@@ -156,7 +170,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
     this.urlSubscription = combineLatest([this.store.select(selectRouterUrl), this.store.select(selectRouterParams)])
       .subscribe(([url, params]) => {
-        this.projectId = get('projectId', params);
+        this.projectId = params?.projectId;
         this.isLoginContext = url && url.includes('login');
         this.isWorkersContext = url && url.includes('workers-and-queues');
         if (this.projectId) {
@@ -226,9 +240,11 @@ export class AppComponent implements OnInit, OnDestroy {
     const crumbs = routeConfig
       .reduce((acc, config) => {
         const dynamicCrumb = this.breadcrumbsStrings[config];
-        return acc.concat(last(castArray(dynamicCrumb ? dynamicCrumb.name : formatStaticCrumb(config))).name);
+        let crumb = dynamicCrumb ? dynamicCrumb : formatStaticCrumb(config);
+        crumb = Array.isArray(crumb) ? crumb.at(-1) : crumb;
+        return acc.concat(crumb.name);
       }, [''])
-      .filter(name => !!name);
+      .filter(name => !!name && name !== ':project');
     this.titleService.setTitle(`ClearML - ${crumbs.join(' / ')}`);
   }
 

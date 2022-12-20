@@ -4,22 +4,21 @@ import {NgModule} from '@angular/core';
 import {EffectsModule} from '@ngrx/effects';
 import {StoreModule} from '@ngrx/store';
 import {ExperimentCompareSharedModule} from '../experiments-compare/shared/experiment-compare-shared.module';
-import {ImageViewerComponent} from '../experiments/dumb/image-viewer/image-viewer.component';
 import {SMSharedModule} from '../shared/shared.module';
 import {UiComponentsModule} from '../shared/ui-components/ui-components.module';
-import {DebugImageSnippetComponent} from './debug-image-snippet/debug-image-snippet.component';
 import {DebugImagesEffects} from './debug-images-effects';
 import {debugSamplesReducer} from './debug-images-reducer';
 import {DebugImagesViewComponent} from './debug-images-view/debug-images-view.component';
 import {DebugImagesComponent} from './debug-images.component';
 import {MatSliderModule} from '@angular/material/slider';
 import {ExperimentGraphsModule} from '../shared/experiment-graphs/experiment-graphs.module';
+import {DebugSampleModule} from '@common/shared/debug-sample/debug-sample.module';
 
-const declerations = [DebugImagesComponent, DebugImagesViewComponent, ImageViewerComponent, DebugImageSnippetComponent];
+const declarations = [DebugImagesComponent, DebugImagesViewComponent];
 
 @NgModule({
-  declarations: declerations,
-  exports: declerations,
+  declarations,
+  exports: declarations,
   imports: [
     UiComponentsModule,
     SMSharedModule,
@@ -29,7 +28,8 @@ const declerations = [DebugImagesComponent, DebugImagesViewComponent, ImageViewe
     StoreModule.forFeature('debugImages', debugSamplesReducer),
     EffectsModule.forFeature([DebugImagesEffects]),
     MatSliderModule,
-    ExperimentGraphsModule
+    ExperimentGraphsModule,
+    DebugSampleModule
   ]
 })
 export class DebugImagesModule {

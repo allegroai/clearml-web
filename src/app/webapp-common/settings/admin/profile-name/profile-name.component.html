@@ -2,6 +2,8 @@
     <div class="user-icon"> </div>
     <sm-inline-edit class="dark profile-name"
                     [originalText]="currentUser.name"
+                    [minLength]="2"
+                    [required]="true"
                     [editable]="true"
                     (textChanged)="nameChange($event, currentUser)">
       <div class="text-center">{{currentUser.name}}</div>

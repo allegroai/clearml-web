@@ -1,5 +1,5 @@
 @import "../themes";
-@import "../variables";
+@import "variables";
 
 
 @mixin generate-navbar-item($themes: $themes) {

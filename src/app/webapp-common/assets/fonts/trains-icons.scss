@@ -1,8 +1,9 @@
 @import "variables";
+@import "src/app/webapp-common/shared/ui-components/styles/variables.scss";
 
 @font-face {
   font-family: '#{$icomoon-font-family}';
-  src: url('./#{$icomoon-font-family}.ttf?84hl5c') format('truetype');
+  src: url('./#{$icomoon-font-family}.ttf?f4pbms') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -23,6 +24,31 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.al-ico-md-copy {
+  &:before {
+    content: $al-ico-md-copy; 
+  }
+}
+.al-ico-hor-expand {
+  &:before {
+    content: $al-ico-hor-expand; 
+  }
+}
+.al-ico-hor-minimize {
+  &:before {
+    content: $al-ico-hor-minimize; 
+  }
+}
+.al-ico-pdf {
+  &:before {
+    content: $al-ico-pdf;
+  }
+}
+.al-ico-reports {
+  &:before {
+    content: $al-ico-reports;
+  }
+}
 .al-ico-gpu {
   &:before {
     content: $al-ico-gpu;

@@ -1,9 +1,15 @@
 @import "variables";
 
 :host {
+  .sm-card-list-layout{
+    &.in-empty-state{
+      height: 100%;
+      grid-template-rows: 64px 1fr;
+    }
+  }
   display: block;
   height: 100%;
-  overflow-y: auto;
+  overflow-y: scroll;
   overflow-x: hidden;
 
   sm-projects-header {
@@ -13,18 +19,21 @@
     top: 0;
     z-index: 10;
     background-color: $blue-800;
+    margin-bottom: -12px;
   }
+
   .empty-datasets {
+    width: 100%;
+    grid-column: 1/-1;
     display: flex;
     flex-direction: column;
     max-width: map-get($grid-max-widths, xl);
     margin: 0 auto;
-    padding: 24px;
 
     .title-icon {
       color: $blue-600;
       text-align: center;
-      margin: 48px 0 24px;
+      margin-bottom: 24px;
     }
     .title {
       font-size: 20px;
@@ -51,6 +60,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 24px;
+  padding-bottom: 24px;
 
   .navbar{
     display: flex;

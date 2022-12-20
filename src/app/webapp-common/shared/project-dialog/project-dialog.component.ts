@@ -7,7 +7,7 @@ import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {Store} from '@ngrx/store';
 import {Observable, Subscription} from 'rxjs';
-import {ProjectsCreateRequest} from '../../../business-logic/model/projects/projectsCreateRequest';
+import {ProjectsCreateRequest} from '~/business-logic/model/projects/projectsCreateRequest';
 import {selectRootProjects} from '@common/core/reducers/projects.reducer';
 import {getAllSystemProjects} from '@common/core/actions/projects.actions';
 
@@ -59,11 +59,12 @@ export class ProjectDialogComponent implements OnInit, OnDestroy {
     this.store.dispatch(new createNewProjectActions.CreateNewProject(project));
   }
 
-  moveProject(event) {
-    if (event.location === 'Projects root') {
-      event.location = '';
-    }
-    this.store.dispatch(moveProject({project: this.baseProjectId, new_location: event.location, name: event.name}));
+  moveProject(event: {location: string; name: string; fromName: string; toName: string; projectName: string}) {
+    this.store.dispatch(moveProject({
+      project: this.baseProjectId,
+      ...event,
+      new_location: event.location === 'Projects root' ? '' : event.location,
+    }));
   }
 
   private convertFormToProject(projectForm: any): ProjectsCreateRequest {

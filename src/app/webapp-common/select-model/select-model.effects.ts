@@ -12,13 +12,14 @@ import {ApiModelsService} from '../../business-logic/api-services/models.service
 import {requestFailed} from '../core/actions/http.actions';
 import {activeLoader, deactivateLoader, setServerError} from '../core/actions/layout.actions';
 import {selectRouterParams} from '../core/reducers/router-reducer';
-import {addMultipleSortColumns, escapeRegex} from '../shared/utils/shared-utils';
+import {addMultipleSortColumns} from '../shared/utils/shared-utils';
 import {of} from 'rxjs';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {ModelsGetAllExRequest} from '../../business-logic/model/models/modelsGetAllExRequest';
 import {SortMeta} from 'primeng/api';
 import {encodeOrder} from '../shared/utils/tableParamEncode';
 import {selectTableSortFields} from './select-model.reducer';
+import {escapeRegex} from '@common/shared/utils/escape-regex';
 
 @Injectable()
 export class SelectModelEffects {

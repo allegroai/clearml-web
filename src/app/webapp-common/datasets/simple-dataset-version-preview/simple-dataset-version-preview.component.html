@@ -9,7 +9,7 @@
                      class="dataset-version-preview"
                      [class.hidden]="!debugImages.debugImages?.[selected.id]?.data"
                      [isDarkTheme]="true"
-                     [isDatasetVersionPreview]="true"
+                     [disableStatusRefreshFilter]="true"
                      [selected]="selected" >
     </sm-debug-images>
   <div *ngIf="plots.plotsList !== undefined && plots.plotsList.length < 1 && debugImages.debugImages !== null && (debugImages.debugImages[selected.id] && !debugImages.debugImages[selected.id].data)" class="no-data flex-middle">No preview to show</div>

@@ -6,7 +6,7 @@
   (cdkDropListDropped)="drop($event)"
 >
   <al-drawer
-    *ngFor="let experiment of experiments; let i = index; trackBy: trackByFn"
+    *ngFor="let experiment of (experiments); let i = index; trackBy: trackByFn"
     class="light-theme"
     cdkDrag
     cdkDragLockAxis="x"
@@ -48,8 +48,13 @@
         <ng-container *ngTemplateOutlet="headerTemplate; context: {$implicit: experiment, index: i}">
         </ng-container>
       </div>
-        <ng-container *ngTemplateOutlet="bodyTemplate; context: {$implicit: experiment, index: i}">
-        </ng-container>
+      <ng-container *ngTemplateOutlet="bodyTemplate; context: {$implicit: experiment, index: i}">
+      </ng-container>
     </sm-card2>
   </al-drawer>
+  <div *ngIf="tasksLimitExceeded" class="limit-message-container">
+    <div class="limit-message">
+      <i class="al-icon al-ico-info-circle mb-2"></i>Only the first 10 experiments are available for this view...
+    </div>
+  </div>
 </div>

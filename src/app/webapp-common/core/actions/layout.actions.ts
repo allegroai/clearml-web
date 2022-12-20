@@ -1,8 +1,9 @@
-import {MessageSeverityEnum, VIEW_PREFIX} from '~/app.constants';
+import {VIEW_PREFIX} from '~/app.constants';
 import {createAction, props} from '@ngrx/store';
 import {omit} from 'lodash/fp';
 import {HttpErrorResponse} from '@angular/common/http';
 import {Ace} from 'ace-builds';
+import {MessageSeverityEnum} from '@common/constants';
 
 export const setAutoRefresh = createAction(
   VIEW_PREFIX + '[set auto refresh]',

@@ -74,6 +74,10 @@ export interface ModelsGetAllExRequest {
      * List of model URIs
      */
     uri?: Array<string>;
+    /**
+     * List of last_update constraint strings (utcformat, epoch) with an optional   prefix modifier (>, >=, <, <=)
+     */
+    last_update?: Array<string>;
     _all_?: MultiFieldPatternData;
     _any_?: MultiFieldPatternData;
     /**
@@ -96,4 +100,8 @@ export interface ModelsGetAllExRequest {
      * If true, include models statistic in response
      */
     include_stats?: boolean;
+    /**
+     * Allow public models to be returned in the results
+     */
+    allow_public?: boolean;
 }

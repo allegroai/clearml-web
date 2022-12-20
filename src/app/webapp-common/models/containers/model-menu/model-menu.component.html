@@ -54,7 +54,7 @@
     [tags]="model?.tags"
     [projectTags]="projectTags"
     [companyTags]="companyTags"
-    [tagsFilterByProject]="tagsFilterByProject"
+    [tagsFilterByProject]="projectId !== '*' && tagsFilterByProject"
     (tagSelected)="tagSelected.emit($event)">
   </sm-tags-menu>
 </mat-menu>

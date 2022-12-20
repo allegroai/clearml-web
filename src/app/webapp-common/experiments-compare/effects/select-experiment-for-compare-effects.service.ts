@@ -19,10 +19,16 @@ import {selectRouterParams} from '../../core/reducers/router-reducer';
 import {selectAppVisible} from '../../core/reducers/view.reducer';
 import {MINIMUM_ONLY_FIELDS} from '../../experiments/experiment.consts';
 import * as exSelectors from '../../experiments/reducers';
-import {selectExperimentsMetricsCols, selectExperimentsTableCols, selectTableSortFields} from '../../experiments/reducers';
+import {
+  selectExperimentsMetricsCols,
+  selectExperimentsTableCols,
+  selectTableSortFields
+} from '../../experiments/reducers';
 import {selectSelectedProjectId} from '../../core/reducers/projects.reducer';
 import {addMultipleSortColumns} from '../../shared/utils/shared-utils';
 import {RefreshService} from '@common/core/services/refresh.service';
+import {LIMITED_VIEW_LIMIT} from '@common/experiments-compare/experiments-compare.constants';
+import {ActivatedRoute} from '@angular/router';
 
 @Injectable()
 export class SelectCompareHeaderEffects {
@@ -31,8 +37,10 @@ export class SelectCompareHeaderEffects {
     private actions: Actions,
     public experimentsApi: ApiTasksService,
     private store: Store,
-    private refresh: RefreshService
-  ) {}
+    private refresh: RefreshService,
+    private route: ActivatedRoute
+  ) {
+  }
 
   activeLoader = createEffect(() => this.actions.pipe(
     ofType(GET_SELECTED_EXPERIMENTS_FOR_COMPARE),
@@ -47,9 +55,24 @@ export class SelectCompareHeaderEffects {
       this.store.pipe(select(selectExperimentsUpdateTime)),
     ),
     filter(([, isAppVisible, ,]) => isAppVisible),
-    switchMap(([action, , experimentsIds, experimentsUpdateTime]) =>
+    map(([...args]) => {
+      let route = this.route.snapshot;
+      let limit = false;
+      while (route.firstChild) {
+        route = route.firstChild;
+        if (route.data.limit !== undefined) {
+          limit = route.data.limit;
+        }
+      }
+      return [...args, limit];
+    }),
+    switchMap(([action, , experimentsIds, experimentsUpdateTime, isLimitedView]) =>
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      this.experimentsApi.tasksGetAllEx({id: experimentsIds, only_fields: ['last_change']}).pipe(
+      this.experimentsApi.tasksGetAllEx({
+        id: isLimitedView ? experimentsIds.slice(0, LIMITED_VIEW_LIMIT) : experimentsIds,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        only_fields: ['last_change']
+      }).pipe(
         mergeMap((res) => {
           const updatedExperimentsUpdateTime: { [key: string]: Date } = {};
           res.tasks.forEach(task => {
@@ -90,12 +113,12 @@ export class SelectCompareHeaderEffects {
     debounceTime(500),
     switchMap(([action, tasksIds, cols, metricCols]) => this.experimentsApi.tasksGetAllEx({
         id: action.tasksIds ? action.tasksIds : tasksIds,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         only_fields: [...new Set([...MINIMUM_ONLY_FIELDS,
           ...flatten(cols.filter(col => col.id !== 'selected' && !col.hidden).map(col => col.getter || col.id)),
           ...(metricCols ? flatten(metricCols.map(col => col.getter || col.id)) : [])])] as string[]
       }).pipe(
-      mergeMap((res) => [setSearchExperimentsForCompareResults({payload: [...res?.tasks]}), deactivateLoader(action.type)]),
+        mergeMap((res) => [setSearchExperimentsForCompareResults({payload: [...res?.tasks]}), deactivateLoader(action.type)]),
       )
     )));
 }

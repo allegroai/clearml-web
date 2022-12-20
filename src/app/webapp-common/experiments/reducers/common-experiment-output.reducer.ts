@@ -1,13 +1,12 @@
-import {Task} from '~/business-logic/model/tasks/task';
 import * as actions from '../actions/common-experiment-output.actions';
+import {HistogramCharts} from '../actions/common-experiment-output.actions';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
-import {sortBy, reverse} from 'lodash/fp';
+import {reverse, sortBy} from 'lodash/fp';
 import {ChartHoverModeEnum, LOG_BATCH_SIZE} from '../shared/common-experiments.const';
 import {MetricsPlotEvent} from '~/business-logic/model/events/metricsPlotEvent';
-import {ExtFrame} from '@common/shared/experiment-graphs/single-graph/plotly-graph-base';
 import {EventsGetTaskSingleValueMetricsResponseValues} from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponseValues';
-import {on, createReducer} from '@ngrx/store';
-import {HistogramCharts} from '../actions/common-experiment-output.actions';
+import {createReducer, on} from '@ngrx/store';
+
 
 export type GroupByCharts = 'metric' | 'none';
 
@@ -19,7 +18,7 @@ export const groupByCharts = {
 export interface Log {
   timestamp: number;
   type: 'log';
-  task: Task['id'];
+  task: string;
   level: 'debug' | 'info' | 'warning' | 'error' | 'critical';
   worker: string;
   msg: string;
@@ -30,10 +29,6 @@ export interface Log {
 export interface CommonExperimentOutputState {
   metricsMultiScalarsCharts: any;
   metricsHistogramCharts: HistogramCharts;
-  fullScreenDetailedChart: ExtFrame;
-  fetchingFullScreenData: boolean;
-  fullScreenXtype: ScalarKeyEnum;
-  isFullScreenOpen: boolean;
   cachedAxisType: ScalarKeyEnum;
   metricsPlotsCharts: MetricsPlotEvent[];
   experimentLog: Log[];
@@ -44,18 +39,13 @@ export interface CommonExperimentOutputState {
   logFilter: string;
   logLoading: boolean;
   showSettings: boolean;
-  minMaxIterations: { minIteration: number; maxIteration: number };
-  currentPlotViewer: any;
   scalarSingleValue: Array<EventsGetTaskSingleValueMetricsResponseValues>;
-  plotViewerScrollId: string;
-  plotViewerEndOfTime: boolean;
-  plotViewerBeginningOfTime: boolean;
   scalarsHoverMode: ChartHoverModeEnum;
   graphsPerRow: number;
 }
 
 export interface ExperimentSettings {
-  id: Task['id'];
+  id: string;
   hiddenMetricsScalar: Array<string>;
   hiddenMetricsPlot: Array<string>;
   selectedHyperParams: Array<string>;
@@ -71,12 +61,8 @@ export interface ExperimentSettings {
 export const initialCommonExperimentOutputState: CommonExperimentOutputState = {
   metricsMultiScalarsCharts: null,
   metricsHistogramCharts: null,
-  fullScreenDetailedChart: null,
-  fullScreenXtype: null,
-  fetchingFullScreenData: false,
   cachedAxisType: null,
   metricsPlotsCharts: null,
-  isFullScreenOpen: false,
   experimentLog: null,
   totalLogLines: null,
   beginningOfLog: false,
@@ -86,11 +72,6 @@ export const initialCommonExperimentOutputState: CommonExperimentOutputState = {
   logFilter: null,
   logLoading: false,
   showSettings: false,
-  currentPlotViewer: null,
-  minMaxIterations: null,
-  plotViewerScrollId: null,
-  plotViewerEndOfTime: null,
-  plotViewerBeginningOfTime: null,
   scalarsHoverMode: 'x',
   graphsPerRow: 2
 };
@@ -103,22 +84,6 @@ export const commonExperimentOutputReducer = createReducer(
     metricsMultiScalarsCharts: initialCommonExperimentOutputState.metricsMultiScalarsCharts,
     metricsHistogramCharts: initialCommonExperimentOutputState.metricsHistogramCharts,
     metricsPlotsCharts: initialCommonExperimentOutputState.metricsPlotsCharts
-  })),
-  on(actions.setGraphDisplayFullDetailsScalars, (state, action) => ({...state, fullScreenDetailedChart: action.data})),
-  on(actions.setGraphDisplayFullDetailsScalarsIsOpen, (state, action) => ({
-    ...state,
-    isFullScreenOpen: action.isOpen,
-    fullScreenDetailedChart: null,
-    currentPlotViewer: null,
-    plotViewerScrollId: null,
-    minMaxIterations: null
-  })),
-  on(actions.getGraphDisplayFullDetailsScalars, state  => ({...state, fetchingFullScreenData: true})),
-  on(actions.setXtypeGraphDisplayFullDetailsScalars, (state, action) => ({...state, fullScreenXtype: action.xAxisType})),
-  on(actions.mergeGraphDisplayFullDetailsScalars, (state, action) => ({
-    ...state,
-    fullScreenDetailedChart: {...state.fullScreenDetailedChart, data: action.data},
-    fetchingFullScreenData: false
   })),
   on(actions.getExperimentLog, (state, action) => ({...state, logLoading: !action.autoRefresh})),
   on(actions.setExperimentLogLoading, (state, action) => ({...state, logLoading: action.loading})),
@@ -158,12 +123,7 @@ export const commonExperimentOutputReducer = createReducer(
   on(actions.setExperimentMetricsSearchTerm, (state, action) => ({...state, searchTerm: action.searchTerm})),
   on(actions.setHistogram, (state, action) => ({...state, metricsHistogramCharts: action.histogram, cachedAxisType: action.axisType})),
   on(actions.setExperimentPlots, (state, action) => ({...state, metricsPlotsCharts: action.plots})),
-  on(actions.setCurrentPlot, (state, action) => ({...state, currentPlotViewer: action.event})),
   on(actions.setExperimentScalarSingleValue, (state, action) => ({...state, scalarSingleValue: action.values})),
-  on(actions.setPlotIterations, (state, action) => ({...state, minMaxIterations: {minIteration: action.min_iteration, maxIteration: action.max_iteration}})),
-  on(actions.setPlotViewerScrollId, (state, action) => ({...state, plotViewerScrollId: action.scrollId})),
-  on(actions.setViewerEndOfTime, (state, action) => ({...state, plotViewerEndOfTime: action.endOfTime})),
-  on(actions.setViewerBeginningOfTime, (state, action) => ({...state, plotViewerBeginningOfTime: action.beginningOfTime})),
   on(actions.setExperimentSettings, (state, action) => {
     let newSettings: ExperimentSettings[];
     const changes = {...action.changes, lastModified: (new Date()).getTime()} as ExperimentSettings;

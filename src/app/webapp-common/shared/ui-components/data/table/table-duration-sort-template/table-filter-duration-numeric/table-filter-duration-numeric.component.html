@@ -14,12 +14,14 @@
           <input
                  matInput
                  formControlName="greaterThan"
+                 data-id="Equals Or GreaterThan"
                  type="number"
                  name="greaterThan"
           >
         </div>
         <div class="reset">
           <i *ngIf="greaterThan.value !== null"
+            data-id="cross button"
              [class]="'al-icon al-ico-dialog-x sm'"
              (click)="iterationsForm.get('greaterThan').setValue(null)"
           ></i>
@@ -43,11 +45,13 @@
           <input
                    type="number"
                    formControlName="lessThan"
+                   data-id="Equals Or LessThan"
                    name="greaterThan"
           >
         </div>
         <div class="reset">
           <i *ngIf="lessThan.value !== null"
+              data-id="cross button"
              [class]="'al-icon al-ico-dialog-x sm'"
              (click)="iterationsForm.get('lessThan').setValue(null)"
           ></i>

@@ -12,9 +12,10 @@
     }
   }
 
-  .general-description {
+  .preserve-spaces {
     white-space: pre-wrap;
   }
+
   ::ng-deep .editable-div .form-control {
     height: 74px;
   }

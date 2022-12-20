@@ -3,11 +3,11 @@ import {Observable} from 'rxjs';
 import {Store} from '@ngrx/store';
 import {filter, map} from 'rxjs/operators';
 import {tap} from 'rxjs/operators';
-import {isReadOnly} from '@common/shared/utils/shared-utils';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {selectExperimentInfoData, selectIsExperimentEditable, selectSelectedExperiment} from '~/features/experiments/reducers';
 import {experimentDetailsUpdated} from '../../actions/common-experiments-info.actions';
+import {isReadOnly} from '@common/shared/utils/is-read-only';
 
 @Component({
   selector   : 'sm-experiment-info-general',

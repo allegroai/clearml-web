@@ -3,6 +3,8 @@
 :host {
   display: block;
   position: relative;
+  height: 100%;
+  overflow: auto;
 
   .download {
     position: absolute;
@@ -41,7 +43,6 @@
   }
 
   .graph-container {
-    overflow: auto;
     height: 100%;
     padding: 20px;
   }
@@ -49,6 +50,7 @@
   .legend-container {
     padding: 0 67px;
     flex-wrap: wrap;
+    background-color: white;
   }
 
   .task-name {

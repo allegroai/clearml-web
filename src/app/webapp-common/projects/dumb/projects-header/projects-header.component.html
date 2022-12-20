@@ -4,7 +4,8 @@
       <sm-menu-item itemLabel="Recent" (itemClicked)="orderByChanged.emit('last_update')" [sortOrder]="sortByTitle==='RECENT' && sortOrder" data-id="Recent"></sm-menu-item>
       <sm-menu-item itemLabel="Name" (itemClicked)="orderByChanged.emit('basename')" [sortOrder]="sortByTitle==='NAME' && sortOrder"></sm-menu-item>
     </sm-menu>
-    <sm-show-only-user-work></sm-show-only-user-work>
+    <sm-show-only-user-work *ngIf="!enableTagsFilter"></sm-show-only-user-work>
+    <sm-main-pages-header-filter *ngIf="enableTagsFilter" [allTags]="tags"></sm-main-pages-header-filter>
   </div>
   <div>
     <ng-content></ng-content>

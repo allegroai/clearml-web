@@ -1,0 +1,58 @@
+@import "variables";
+
+:host {
+  cursor: pointer;
+
+  .card-name {
+    height: 32px;
+  }
+
+  .report-name {
+    max-width: 250px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    color: $blue-200;
+  }
+
+  .sub-title {
+    font-size: 12px;
+  }
+
+  .last-run {
+    margin-bottom: 6px;
+    font-size: 12px;
+    color: $blue-300;
+  }
+  .title {
+    font-weight: 500;
+  }
+
+  .footer-tags {
+    display: flex;
+    min-height: 38px;
+    background-color: $blue-600;
+    padding: 0 16px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .rename-state .last-run {
+    visibility: hidden;
+    height: 18px;
+  }
+  .dot {
+    color: $blue-300;
+    padding: 0 6px;
+  }
+
+  .comment {
+    overflow: hidden;
+    height: 80px;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    color: $blue-200;
+  }
+}

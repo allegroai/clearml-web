@@ -15,6 +15,7 @@
         activeLink === searchPages.models ? ModelsTemplate :
         activeLink === searchPages.openDatasets ? openDatasetTemplate :
         activeLink === searchPages.pipelines ? PipelineTemplate :
+        activeLink === searchPages.reports ? ReportsTemplate :
        ProjectTemplate"
       [items]="getResults()"
       [cardHeight]="getCardHeight()"
@@ -60,6 +61,13 @@
       [project]="dataset"
       (projectCardClicked)="openDatasetClicked($event)"
     ></sm-simple-dataset-card>
+  </ng-template>
+  <ng-template #ReportsTemplate let-report>
+    <sm-report-card
+      [hideMenu]="true"
+      [report]="report"
+      (cardClicked)="reportClicked($event)"
+    ></sm-report-card>
   </ng-template>
 
 </div>

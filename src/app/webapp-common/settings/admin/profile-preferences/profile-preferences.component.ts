@@ -12,8 +12,8 @@ import {AuthEditUserRequest} from '~/business-logic/model/auth/authEditUserReque
 import RoleEnum = AuthEditUserRequest.RoleEnum;
 import {MatDialog} from '@angular/material/dialog';
 import {RedactedArgumentsDialogComponent} from '../redacted-arguments-dialog/redacted-arguments-dialog.component';
-import {selectShowHidden} from '@common/core/reducers/projects.reducer';
-import {setShowHidden} from '@common/core/actions/projects.actions';
+import {selectHideExamples, selectShowHidden} from '@common/core/reducers/projects.reducer';
+import {setHideExamples, setShowHidden} from '@common/core/actions/projects.actions';
 
 @Component({
   selector: 'sm-profile-preferences',
@@ -31,11 +31,14 @@ export class ProfilePreferencesComponent implements OnDestroy {
   public admin: boolean;
   private sub = new Subscription();
   public hideRedactedArguments$: Observable<{ key: string }[]>;
+  public hideExamples$: Observable<boolean>;
 
   constructor(private store: Store<any>, private dialog: MatDialog) {
     this.hideRedactedArguments$ = this.store.select(selectHideRedactedArguments);
 
     this.show$ = store.select(selectShowHidden);
+    this.hideExamples$ = store.select(selectHideExamples);
+
     this.sub.add(store.select(selectCurrentUser)
       .pipe(filter(user => !!user))
       .subscribe(user => this.admin = user.role === RoleEnum.Admin)
@@ -73,5 +76,9 @@ export class ProfilePreferencesComponent implements OnDestroy {
 
   editHideSpecificContainerArguments() {
     this.dialog.open(RedactedArgumentsDialogComponent);
+  }
+
+  toggleExamples(toggle: MatSlideToggleChange) {
+    this.store.dispatch(setHideExamples({hide: toggle.checked}));
   }
 }

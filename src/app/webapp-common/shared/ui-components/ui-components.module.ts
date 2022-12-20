@@ -61,7 +61,6 @@ import {ForceInvalidValidatorDirective} from './template-forms-ui/force-invalid-
 import {SelectableGroupedFilterListComponent} from './data/selectable-grouped-filter-list/selectable-grouped-filter-list.component';
 import {GroupedSelectableListComponent} from './data/grouped-selectable-list/grouped-selectable-list.component';
 import {DragDropModule} from '@angular/cdk/drag-drop';
-import {SnippetErrorComponent} from './indicators/snippet-error/snippet-error.component';
 import {UpdateNotifierComponent} from './overlay/update-notifier/update-notifier.component';
 import {SelectAutocompleteForTemplateFormsComponent} from './inputs/select-autocomplete-for-template-forms/select-autocomplete-for-template-forms.component';
 import {UniqueInListValidatorDirective} from './template-forms-ui/unique-in-list-validator.directive';
@@ -119,7 +118,6 @@ import {ScrollEndDirective, ScrollEndRootDirective} from './directives/scroll-en
 const declarations = [
   DurationInputComponent,
   UpdateNotifierComponent,
-  SnippetErrorComponent,
   UniqueInListValidatorDirective,
   UniqueInListSyncValidatorDirective,
   UniqueInListSync2ValidatorDirective,
@@ -154,8 +152,6 @@ const declarations = [
   ThrottledScrollListenerDirective,
   JsonValidatorDirective,
   AlertDialogComponent,
-  TooltipDirective,
-  ShowTooltipIfEllipsisDirective,
   CheckboxControlComponent,
   SimpleTableComponent2,
   SelectableListComponent,
@@ -195,7 +191,9 @@ const declarations = [
   AppendComponentOnTopElementDirective,
   EditCredentialLabelDialogComponent,
   VirtualGridComponent,
-  ScrollEndDirective, ScrollEndRootDirective
+  ScrollEndDirective,
+  ScrollEndRootDirective,
+  CheckboxThreeStateListComponent
 ];
 
 @NgModule({
@@ -222,10 +220,12 @@ const declarations = [
     MatInputModule,
     MatDatepickerModule,
     MatNativeDateModule,
+    TooltipDirective,
+    ShowTooltipIfEllipsisDirective
   ],
   providers   : [],
-  declarations: [...declarations, TagsMenuComponent, TagColorMenuComponent, ResizableColumnDirective, HesitateDirective, DurationInputListComponent, TableFilterDurationComponent, TableFilterDurationErrorComponent, RippleButtonComponent, CheckboxThreeStateListComponent, TemplateAliasDirective, CodeEditorComponent, ChipsListComponent],
-    exports: [...declarations, ChipsModule, SMMaterialModule, ChooseColorModule, SMPortalModule, TagsMenuComponent, TableFilterDurationComponent, MatDatepickerModule, TemplateAliasDirective, CodeEditorComponent, ChipsListComponent]
+  declarations: [...declarations, TagsMenuComponent, TagColorMenuComponent, ResizableColumnDirective, HesitateDirective, DurationInputListComponent, TableFilterDurationComponent, TableFilterDurationErrorComponent, RippleButtonComponent, TemplateAliasDirective, CodeEditorComponent, ChipsListComponent],
+    exports: [...declarations, ChipsModule, SMMaterialModule, ChooseColorModule, SMPortalModule, TagsMenuComponent, TableFilterDurationComponent, MatDatepickerModule, TemplateAliasDirective, CodeEditorComponent, ChipsListComponent, TooltipDirective, ShowTooltipIfEllipsisDirective]
 })
 export class UiComponentsModule {
 }

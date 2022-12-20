@@ -1,5 +1,5 @@
 @import "../../../shared/ui-components/styles/mixins/common";
-@import "../../../shared/ui-components/styles/variables";
+@import "variables";
 
 .view-all {
   font-size: 12px;
@@ -17,6 +17,7 @@
 .sm-card-list-header {
   grid-column: 1 / -1;
   padding: 0;
+  height: unset;
 }
 .recent-title {
   @include recent-title();

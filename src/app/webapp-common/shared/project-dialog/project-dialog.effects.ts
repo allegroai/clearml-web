@@ -1,22 +1,19 @@
 import * as createNewProjectActions from './project-dialog.actions';
 import {CREATE_PROJECT_ACTIONS} from './project-dialog.actions';
-import {MESSAGES_SEVERITY} from '../../../app.constants';
 import {activeLoader, addMessage, deactivateLoader} from '../../core/actions/layout.actions';
 import {Actions, createEffect, Effect, ofType} from '@ngrx/effects';
-import {ApiProjectsService} from '../../../business-logic/api-services/projects.service';
+import {ApiProjectsService} from '~/business-logic/api-services/projects.service';
 import {requestFailed} from '../../core/actions/http.actions';
 import {Injectable} from '@angular/core';
 import {CREATION_STATUS} from './project-dialog.reducer';
-import {catchError, expand, filter, map, mergeMap, reduce, switchMap, withLatestFrom} from 'rxjs/operators';
+import {catchError, filter, map, mergeMap, switchMap, withLatestFrom} from 'rxjs/operators';
 import {Router} from '@angular/router';
 import {getAllSystemProjects} from '../../core/actions/projects.actions';
 import {Store} from '@ngrx/store';
 import {selectActiveWorkspace} from '../../core/reducers/users-reducer';
 import {ShortProjectNamePipe} from '../pipes/short-project-name.pipe';
 import {ProjectLocationPipe} from '../pipes/project-location.pipe';
-import {ProjectsGetAllExResponse} from '~/business-logic/model/projects/projectsGetAllExResponse';
-import {EMPTY} from 'rxjs';
-import {selectLastUpdate, selectShowHidden} from '@common/core/reducers/projects.reducer';
+import {MESSAGES_SEVERITY} from '@common/constants';
 
 @Injectable()
 export class ProjectDialogEffects {
@@ -71,7 +68,7 @@ export class ProjectDialogEffects {
             deactivateLoader(action.type),
             new createNewProjectActions.SetNewProjectCreationStatus(CREATION_STATUS.SUCCESS),
             getAllSystemProjects(),
-            addMessage(MESSAGES_SEVERITY.SUCCESS, `${this.shortProjectName.transform(action.name)} has been moved from ${this.projectLocation.transform(action.name)} to ${action.new_location}`),
+            addMessage(MESSAGES_SEVERITY.SUCCESS, `${action.projectName} has been moved from ${action.fromName} to ${action.toName}`),
           ]
         ),
         catchError(error => [deactivateLoader(action.type), requestFailed(error), addMessage(MESSAGES_SEVERITY.ERROR, 'Project Move Failed'), new createNewProjectActions.SetNewProjectCreationStatus(CREATION_STATUS.FAILED)])

@@ -138,4 +138,8 @@ body {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+
+  &.gap {
+    gap: 12px !important;
+  }
 }

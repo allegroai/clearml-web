@@ -29,7 +29,7 @@ import {resetAceCaretsPositions, setAutoRefresh} from '../core/actions/layout.ac
 import {setArchive as setProjectArchive, setDeep} from '../core/actions/projects.actions';
 import {createMetricColumn, decodeColumns, decodeFilter, decodeOrder} from '../shared/utils/tableParamEncode';
 import {BaseEntityPageComponent} from '../shared/entity-page/base-entity-page';
-import {groupHyperParams, isReadOnly} from '../shared/utils/shared-utils';
+import {groupHyperParams} from '../shared/utils/shared-utils';
 import {selectCurrentUser} from '../core/reducers/users-reducer';
 import {GetCurrentUserResponseUserObject} from '~/business-logic/model/users/getCurrentUserResponseUserObject';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
@@ -67,6 +67,7 @@ import {RefreshService} from '@common/core/services/refresh.service';
 import {ExperimentMenuComponent} from '@common/experiments/shared/components/experiment-menu/experiment-menu.component';
 import {WelcomeMessageComponent} from '@common/layout/welcome-message/welcome-message.component';
 import {ConfigurationService} from '@common/shared/services/configuration.service';
+import {isReadOnly} from '@common/shared/utils/is-read-only';
 
 @Component({
   selector: 'sm-common-experiments',

@@ -1,5 +1,5 @@
 import {Pipe, PipeTransform} from '@angular/core';
-import {isReadOnly} from '../utils/shared-utils';
+import {isReadOnly} from '@common/shared/utils/is-read-only';
 
 @Pipe({
   name: 'hasExampleItem'

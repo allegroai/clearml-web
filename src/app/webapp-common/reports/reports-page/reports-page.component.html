@@ -1,0 +1,32 @@
+<!--[hideMenu]="false"-->
+<sm-reports-list
+  [reports]="reports$ | async"
+  [archive]="archive$ | async"
+  [noMoreReports]="noMoreReports$ | async"
+  [allTags]="reportsTags$ | async"
+  (reportSelected)="reportSelected($event)"
+  (reportCardUpdateName)="reportCardUpdateName($event)"
+  (moveTo)="moveTo($event)"
+  (delete)="delete($event)"
+  (share)="share($event)"
+  (newReport)="openCreateReportDialog()"
+  (loadMore)="loadMore()"
+  (addTag)="addTag($event)"
+  (removeTag)="removeTag($event)"
+  (moveToArchive)="moveToArchive($event)"
+>
+<!--  [sortByField]="reportsOrderBy$ | async"-->
+<!--  [sortOrder]="reportsSortOrder$ | async"-->
+<!--  [disableCreate]="!navigation"-->
+<!--  [activeSearch]="false"-->
+<!--  (orderByChanged)="orderByChanged($event)"-->
+  <sm-reports-header
+    [archive]="archive$ | async"
+    [allTags]="reportsTags$ |async"
+    [sortOrder]="reportsSortOrder$ | async"
+    [sortByField]="reportsOrderBy$ | async"
+    (createReportClicked)="openCreateReportDialog()"
+    (archiveToggled)="toggleArchive($event)"
+    (orderByChanged)="orderByChanged($event)"
+  ></sm-reports-header>
+</sm-reports-list>

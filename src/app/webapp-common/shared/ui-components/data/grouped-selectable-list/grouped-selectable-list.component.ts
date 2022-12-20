@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, TrackByFunction} from '@angular/core';
 import {SelectableListItem} from './grouped-selectable-list.model';
-import {GroupedList} from '../selectable-grouped-filter-list/selectable-grouped-filter-list.component';
 import {MatExpansionPanelHeader} from '@angular/material/expansion';
+import {GroupedList} from '@common/tasks/tasks.utils';
 
 
 interface GroupItem {

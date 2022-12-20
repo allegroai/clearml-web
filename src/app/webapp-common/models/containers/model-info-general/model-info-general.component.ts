@@ -6,9 +6,10 @@ import {SelectedModel} from '../../shared/models.model';
 import {selectSelectedModel} from '../../reducers';
 import {filter} from 'rxjs/operators';
 import {resetDontShowAgainForBucketEndpoint} from '../../../core/actions/common-auth.actions';
-import {createModelLink, isReadOnly} from '../../../shared/utils/shared-utils';
+import {createModelLink} from '../../../shared/utils/shared-utils';
 import {AdminService} from '~/shared/services/admin.service';
 import {ModelDetailsUpdated, updateModelDetails} from '../../actions/models-info.actions';
+import {isReadOnly} from '@common/shared/utils/is-read-only';
 
 @Component({
   selector: 'sm-model-info-general',

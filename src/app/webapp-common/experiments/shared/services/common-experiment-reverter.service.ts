@@ -9,8 +9,9 @@ import {Store} from '@ngrx/store';
 import {ExperimentsViewState} from '../../../../features/experiments/reducers/experiments-view.reducer';
 import {selectActiveWorkspace} from '@common/core/reducers/users-reducer';
 import {Observable, Subscription} from 'rxjs';
-import {isExample, isSharedAndNotOwner} from '@common/shared/utils/shared-utils';
+import {isExample} from '@common/shared/utils/shared-utils';
 import {ITask} from '~/business-logic/model/al-task';
+import {isSharedAndNotOwner} from '@common/shared/utils/is-shared-and-not-owner';
 
 @Injectable({providedIn: 'root'})
 export class CommonExperimentReverterService {

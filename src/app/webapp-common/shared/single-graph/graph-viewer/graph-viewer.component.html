@@ -1,0 +1,96 @@
+<div class="modal-container" [class.dark-theme]="darkTheme" #modalContainer>
+  <div class="graph-viewer-header">
+    <div class="chart-title ellipsis"><span *ngIf="chart?.metric && !darkTheme">{{chart?.metric}} - </span>{{chart?.layout?.title || chart?.metric}}</div>
+    <input #fakeInput name="Don't remove - it take the autofocus from slider" style="opacity: 0; height: 0; width: 0">
+    <div *ngIf="!darkTheme" class="viewer-iteration">
+      <div *ngIf="minMaxIterations$ | async as minMaxIterations">
+        Iteration <span class="number">{{iteration}}</span>
+        <mat-slider
+          [invert]="!(minMaxIterations.maxIteration > minMaxIterations.minIteration)"
+          thumbLabel
+          [value]="iteration"
+          [max]="minMaxIterations.maxIteration"
+          [min]="minMaxIterations.minIteration"
+          [step]="1"
+          (input)="changeIteration($event.value)"
+          (mouseup)="fakeInput.focus()"
+        >
+        </mat-slider>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div [class.load-spinner]="(isFetchingData$ | async) || !plotLoaded" class="d-flex align-items-center mr-3"></div>
+      <div class="pointer d-flex align-items-center mr-3" *ngIf="(isFetchingData$ | async) === false && isFullDetailsMode" smTooltip="refresh" matTooltipPosition="below" (click)="refresh()"><i class="al-icon al-ico-refresh"></i></div>
+      <div (click)="closeGraphViewer()" matTooltipPosition="below" smTooltip="Close" class="icon-container pointer d-flex align-items-center">
+        <i class="al-icon al-ico-dialog-x al-color blue-300"></i>
+      </div>
+    </div>
+
+  </div>
+  <div class="graph-controls" *ngIf="isFullDetailsMode">
+    <div class="d-flex align-items-center"  *ngIf="!isCompare">
+      <span class="label-text axis-text-margin-left">Horizontal Axis</span>
+      <mat-form-field appearance="outline" class="axis-type-field">
+        <mat-select [value]="xAxisType$ | async" (selectionChange)="xAxisTypeChanged($event)" panelClass="light-theme"
+                    name="scriptType" [disabled]="isFetchingData$ | async">
+          <mat-option *ngFor="let type of xAxisTypeOption" [value]="type.value">{{type.name}}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <div class="smooth-options d-flex align-items-center ml-3">
+      <span class="label-text smoothing-text">Smoothing</span>
+      <mat-slider
+        [value]="smoothWeight"
+        [max]="0.999"
+        [min]="0"
+        [step]="0.001"
+        (input)="changeWeight($event.value)"
+      >
+      </mat-slider>
+      <mat-form-field
+        appearance="outline"
+        class="smooth-input">
+        <input
+          matInput
+          name="minCount"
+          type="number"
+          [min]="0"
+          [ngModel]="smoothWeight"
+          (ngModelChange)="changeWeight($any($event))"
+        />
+      </mat-form-field>
+
+    </div>
+  </div>
+  <div class="graph-container">
+    <sm-single-graph
+      #singleGraph
+      [class.less-padding]="true"
+      [class.two-in-a-row]="false"
+      [chart]="chart"
+      [smoothWeight]="smoothWeight"
+      [hideTitle]="true"
+      [hideMaximize]="'hide'"
+      [height]="height"
+      [id]="id"
+      [identifier]="id"
+      [isCompare]="isCompare"
+      [xAxisType]="xAxisType"
+      [moveLegendToTitle]="false"
+      [isDarkTheme]="darkTheme"
+      [graphsNumber]="9999"
+      [exportForReport]="!!embedFunction"
+      (createEmbedCode)="embedFunction()"
+    >
+    </sm-single-graph>
+    <div *ngIf="!isFullDetailsMode && !isCompare && !darkTheme" class="navigation">
+      <div class="icon-container controller d-flex flex-column justify-content-around align-items-center next"
+           (click)="canGoNext() && next()" [class.disabled]="endOfTime">
+        <i class="al-icon al-ico-next al-color blue-300"></i></div>
+      <div class="icon-container controller d-flex flex-column justify-content-around align-items-center previous"
+           (click)="canGoBack() && previous()" [class.disabled]="beginningOfTime">
+        <i class="al-icon al-ico-previous al-color blue-300"></i></div>
+    </div>
+  </div>
+</div>
+

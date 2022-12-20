@@ -38,7 +38,7 @@ export const setExperimentInfoData = createAction(
 
 export const getExperiment = createAction(
   EXPERIMENTS_INFO_PREFIX + '[set experiment]',
-  props<{ experimentId: string; autorefresh?: boolean}>()
+  props<{ experimentId: string; autoRefresh?: boolean}>()
 );
 
 export const getExperimentUncommittedChanges = createAction(

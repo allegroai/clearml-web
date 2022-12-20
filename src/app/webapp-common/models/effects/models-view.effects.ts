@@ -29,7 +29,7 @@ import {setURLParams} from '../../core/actions/router.actions';
 import {selectIsArchivedMode, selectIsDeepMode, selectSelectedProject} from '../../core/reducers/projects.reducer';
 import {selectRouterParams} from '../../core/reducers/router-reducer';
 import {selectAppVisible} from '../../core/reducers/view.reducer';
-import {addMultipleSortColumns, escapeRegex, getRouteFullUrl} from '../../shared/utils/shared-utils';
+import {addMultipleSortColumns, getRouteFullUrl} from '../../shared/utils/shared-utils';
 import {GetModelInfo, RefreshModelInfo} from '../actions/models-info.actions';
 import * as actions from '../actions/models-view.actions';
 import {setMetadataKeys, setSelectedModelsDisableAvailable} from '../actions/models-view.actions';
@@ -46,7 +46,7 @@ import {
   encodeColumns,
   encodeOrder
 } from '../../shared/utils/tableParamEncode';
-import {EmptyAction, MESSAGES_SEVERITY} from '~/app.constants';
+import {EmptyAction} from '~/app.constants';
 import {ApiProjectsService} from '~/business-logic/api-services/projects.service';
 import {SearchState} from '../../common-search/common-search.reducer';
 import {SortMeta} from 'primeng/api';
@@ -66,6 +66,8 @@ import {hasValue} from '../../shared/utils/helpers.util';
 import {ProjectsGetModelMetadataValuesResponse} from '~/business-logic/model/projects/projectsGetModelMetadataValuesResponse';
 import {selectTableMode} from '../../experiments/reducers';
 import {selectActiveWorkspaceReady} from '~/core/reducers/view.reducer';
+import {escapeRegex} from '@common/shared/utils/escape-regex';
+import {MESSAGES_SEVERITY} from '@common/constants';
 
 @Injectable()
 export class ModelsViewEffects {

@@ -34,7 +34,7 @@ import {
   setStats,
   clearQueue
 } from '../actions/queues.actions';
-import {EmptyAction, MESSAGES_SEVERITY} from '~/app.constants';
+import {EmptyAction} from '~/app.constants';
 import {QueueMetrics} from '~/business-logic/model/queues/queueMetrics';
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
 import {cloneDeep} from 'lodash/fp';
@@ -44,6 +44,7 @@ import {encodeOrder} from '../../shared/utils/tableParamEncode';
 import {addMultipleSortColumns} from '../../shared/utils/shared-utils';
 import {sortTable} from '@common/workers-and-queues/workers-and-queues.utils';
 import {selectActiveWorkspaceReady} from '~/core/reducers/view.reducer';
+import {MESSAGES_SEVERITY} from '@common/constants';
 
 @Injectable()
 export class QueuesEffect {

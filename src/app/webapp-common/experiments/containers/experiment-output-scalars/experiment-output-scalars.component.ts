@@ -25,15 +25,15 @@ import {
   setExperimentSettings,
   toggleSettings
 } from '../../actions/common-experiment-output.actions';
-import {convertScalars} from '@common/tasks/tasks.utils';
+import {convertScalars, GroupedList} from '@common/tasks/tasks.utils';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {selectSelectedExperiment} from '~/features/experiments/reducers';
 import {GroupByCharts, groupByCharts} from '../../reducers/common-experiment-output.reducer';
-import {GroupedList} from '@common/shared/ui-components/data/selectable-grouped-filter-list/selectable-grouped-filter-list.component';
-import {ExtFrame} from '@common/shared/experiment-graphs/single-graph/plotly-graph-base';
+import {ExtFrame} from '@common/shared/single-graph/plotly-graph-base';
 import {ExperimentGraphsComponent} from '@common/shared/experiment-graphs/experiment-graphs.component';
 import {isEqual} from 'lodash/fp';
 import { EventsGetTaskSingleValueMetricsResponseValues } from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponseValues';
+import {ReportCodeEmbedService} from '@common/shared/services/report-code-embed.service';
 
 export const prepareScalarList = (metricsScalar: GroupedList): GroupedList =>
   Object.keys(metricsScalar || []).reduce((acc, curr) => {
@@ -85,7 +85,13 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
   public singleValueData$: Observable<Array<EventsGetTaskSingleValueMetricsResponseValues>>;
   public experimentName: string;
 
-  constructor(private store: Store<ExperimentInfoState>, private router: Router, private activeRoute: ActivatedRoute, private changeDetection: ChangeDetectorRef) {
+  constructor(
+    private store: Store<ExperimentInfoState>,
+    private router: Router,
+    private activeRoute: ActivatedRoute,
+    private changeDetection: ChangeDetectorRef,
+    private reportEmbed: ReportCodeEmbedService
+  ) {
     this.searchTerm$ = this.store.pipe(select(selectExperimentMetricsSearchTerm));
     this.splitSize$ = this.store.pipe(select(selectSplitSize));
 
@@ -257,5 +263,13 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
       });
       return acc;
     }, {});
+  }
+
+  createEmbedCode(event: { metrics?: string[]; variants?: string[] }) {
+    this.reportEmbed.createCode({
+      type: 'scalar',
+      tasks: [this.experimentId],
+      ...event
+    });
   }
 }

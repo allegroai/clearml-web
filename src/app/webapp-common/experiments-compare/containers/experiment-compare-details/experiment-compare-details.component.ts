@@ -3,26 +3,31 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  ElementRef, HostListener,
-  OnInit, QueryList,
+  ElementRef,
+  HostListener,
+  OnInit,
+  QueryList,
   ViewChildren
 } from '@angular/core';
 import {select, Store} from '@ngrx/store';
-import {experimentListUpdated, setExperiments} from '../../actions/experiments-compare-details.actions';
+import {experimentListUpdated} from '../../actions/experiments-compare-details.actions';
 import {selectExperimentsDetails} from '../../reducers';
 import {filter, take, tap} from 'rxjs/operators';
-import {ExperimentCompareTree, IExperimentDetail} from '../../../../features/experiments-compare/experiments-compare-models';
+import {ExperimentCompareTree, IExperimentDetail} from '~/features/experiments-compare/experiments-compare-models';
 import {
-  convertConfigurationFromExperiments, convertContainerScriptFromExperiments,
-  convertExperimentsArrays, convertNetworkDesignFromExperiments,
+  convertConfigurationFromExperiments,
+  convertContainerScriptFromExperiments,
+  convertExperimentsArrays,
+  convertNetworkDesignFromExperiments,
   getAllKeysEmptyObject,
   isDetailsConverted
 } from '../../jsonToDiffConvertor';
 import {ExperimentCompareBase} from '../experiment-compare-base';
 import {ActivatedRoute, Router} from '@angular/router';
-import {ExperimentInfoState} from '../../../../features/experiments/reducers/experiment-info.reducer';
-import {ConfigurationItem} from '../../../../business-logic/model/tasks/configurationItem';
+import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
+import {ConfigurationItem} from '~/business-logic/model/tasks/configurationItem';
 import {RefreshService} from '@common/core/services/refresh.service';
+import {LIMITED_VIEW_LIMIT} from '@common/experiments-compare/experiments-compare.constants';
 
 @Component({
   selector: 'sm-experiment-compare-details',
@@ -60,12 +65,14 @@ export class ExperimentCompareDetailsComponent extends ExperimentCompareBase imp
 
   ngOnInit() {
     this.onInit();
-    this.routerParamsSubscription = this.taskIds$.subscribe((experimentIds: string) => this.store.dispatch(experimentListUpdated({ids: experimentIds.split(',')})));
+    this.routerParamsSubscription = this.taskIds$.subscribe((experimentIds) => {
+        this.store.dispatch(experimentListUpdated({ids: experimentIds.slice(0, LIMITED_VIEW_LIMIT)}));
+      }
+    );
 
     this.experimentsSubscription = this.experiments$.pipe(
       filter(experiments => !!experiments && experiments.length > 0),
       tap(experiments => {
-        this.syncUrl(experiments);
         this.extractTags(experiments);
       }),
     ).subscribe(experiments => {
@@ -82,7 +89,6 @@ export class ExperimentCompareDetailsComponent extends ExperimentCompareBase imp
       this.calculateTree(experiments);
     });
   }
-
 
 
   ngAfterViewInit() {
@@ -102,10 +108,6 @@ export class ExperimentCompareDetailsComponent extends ExperimentCompareBase imp
 
         return acc;
       }, {} as ExperimentCompareTree);
-  }
-
-  experimentListChanged(experiments: Array<IExperimentDetail>) {
-    this.store.dispatch(setExperiments({experiments}));
   }
 
   toggleEllipsis() {

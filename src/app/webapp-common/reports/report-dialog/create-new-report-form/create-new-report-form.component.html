@@ -1,0 +1,81 @@
+<form (submit)="reportForm.invalid && send()" #reportForm='ngForm' class="d-flex flex-column">
+  <mat-form-field appearance="outline" hideRequiredMarker class="mat-light">
+    <mat-label>Report name</mat-label>
+    <mat-error *ngIf="name.touched && name.errors?.required">*Please add name.</mat-error>
+    <mat-error *ngIf="name.touched && name.errors?.uniqueName">*Report name already exists.</mat-error>
+    <mat-error *ngIf="name.touched && name.errors?.minlength">*Report name should contain more than 3 characters.</mat-error>
+    <input name="reportName"
+           [(ngModel)]="report.name"
+           #name="ngModel"
+           matInput
+           autocomplete="off"
+           smUniqueNameValidator
+           [existingNames]="reportsNames"
+           required minlength="3">
+  </mat-form-field>
+  <mat-form-field class="w-100" appearance="outline" (click)="filterText && clear()">
+    <mat-label>Project</mat-label>
+    <input matInput
+           type="text"
+           [matAutocomplete]="auto"
+           [(ngModel)]="report.project"
+           name="projectName"
+           placeholder="Search for project path"
+           #projectInputRef
+           #projectInput="ngModel"
+           required
+           (keydown.enter)="projectInput.control.markAsTouched()"
+           [smExistNameValidator]="projectsNames"
+           smUniqueNameValidator
+           [existingNames]="readOnlyProjectsNames"
+    >
+    <i matSuffix [class]="'fa mr2 ' + (filterText ? 'fa-times pointer' :  'fa-search')" (click)="filterText && clear(); projectInputRef.focus();"
+       smClickStopPropagation></i>
+    <mat-error *ngIf="projectInput?.errors?.existName">Please provide a project</mat-error>
+    <mat-error *ngIf="projectInput?.errors?.uniqueName && !readOnlyProjectsNames.includes(report.project?.label)">Please provide a different name as this project name is taken as an Example project</mat-error>
+    <mat-autocomplete
+      #auto="matAutocomplete"
+      class="light-theme"
+      [displayWith]="displayFn"
+      (opened)="setIsAutoCompleteOpen(true)"
+      (closed)="setIsAutoCompleteOpen(false)"
+      autoActiveFirstOption
+    >
+      <!--      <mat-option-->
+      <!--        class="item"-->
+      <!--        *ngIf="filterText && isNewName"-->
+      <!--        [value]="filterText"-->
+      <!--      >"{{filterText}}" <span class="new">(Create New)</span></mat-option>-->
+      <mat-option
+        *ngFor="let project of filteredProjects$ | async; trackBy: trackByValue"
+        [value]="project"
+        [smTooltip]="project.label"
+        smShowTooltipIfEllipsis
+      >
+        <div [innerHTML]="project.label | highlightSearchText:projectInput.value"></div>
+      </mat-option>
+    </mat-autocomplete>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" hideRequiredMarker>
+    <mat-error *ngIf="description?.touched && description?.invalid">*Please add description.
+    </mat-error>
+    <mat-label>Description</mat-label>
+    <textarea class="report-description"
+              name="description"
+              matInput
+              [(ngModel)]="report.description"
+              #description="ngModel"
+    ></textarea>
+  </mat-form-field>
+  <div class="row">
+    <div class="col-24 create-report-button">
+      <button
+        class="btn btn-dark-fill center"
+        data-id="Create Report"
+        [disabled]="reportForm.invalid"
+        (click)="send()">CREATE REPORT
+      </button>
+    </div>
+  </div>
+</form>

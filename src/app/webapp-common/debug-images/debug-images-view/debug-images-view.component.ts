@@ -1,7 +1,7 @@
 import {Component, Input, Output} from '@angular/core';
 import {EventEmitter} from '@angular/core';
 import {Iteration, Event} from '@common/debug-images/debug-images.component';
-import {ThemeEnum} from '../../experiments/shared/common-experiments.const';
+import {ThemeEnum} from '@common/constants';
 
 @Component({
   selector: 'sm-debug-images-view',
@@ -22,6 +22,7 @@ export class DebugImagesViewComponent {
   @Input() isDatasetVersionPreview = false;
   @Output() imageClicked = new EventEmitter();
   @Output() refreshClicked = new EventEmitter();
+  @Output() createEmbedCode = new EventEmitter<{metrics?: string[]; variants?: string[]}>();
   @Output() urlError = new EventEmitter();
 
   public imageUrlError(data: { frame: Event; experimentId: string }) {

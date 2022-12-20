@@ -17,13 +17,13 @@ import {resetExperimentMetrics, toggleSettings} from '../../actions/common-exper
 import * as infoActions from '../../actions/common-experiments-info.actions';
 import {selectAppVisible, selectBackdropActive} from '@common/core/reducers/view.reducer';
 import {addMessage, setAutoRefresh} from '@common/core/actions/layout.actions';
-import {MESSAGES_SEVERITY} from '~/app.constants';
 import {selectIsExperimentInEditMode, selectSelectedExperiments, selectSplitSize} from '../../reducers';
-import {isReadOnly} from '@common/shared/utils/shared-utils';
 import {experimentDetailsUpdated} from '../../actions/common-experiments-info.actions';
 import {RefreshService} from '@common/core/services/refresh.service';
 import { isDevelopment } from '~/features/experiments/shared/experiments.utils';
 import * as experimentsActions from '../../actions/common-experiments-view.actions';
+import {isReadOnly} from '@common/shared/utils/is-read-only';
+import {MESSAGES_SEVERITY} from '@common/constants';
 
 @Component({
   selector: 'sm-base-experiment-output',

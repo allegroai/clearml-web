@@ -1,0 +1,11 @@
+@import "variables";
+
+sm-reports-header {
+  height: 64px;
+  grid-column: 1 / -1;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: $blue-800;
+  margin-bottom: -12px;
+}

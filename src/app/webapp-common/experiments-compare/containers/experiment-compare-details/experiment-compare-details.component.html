@@ -1,8 +1,9 @@
 <sm-compare-card-list
   [experiments]="experiments"
+  [tasksLimitExceeded] = "(taskIds$ | async)?.length> experiments?.length"
   [baseExperiment]="baseExperiment"
   [ngClass]="calculatingTree ? 'pending' : ''"
-  (experimentListChanged)="experimentListChanged($event)"
+  (experimentListChanged)="syncUrl($event)"
   (toggled)="afterResize()"
 >
   <div *compareCardHeader="let experiment; let i = index">
@@ -35,7 +36,7 @@
                     class="title-key"
                     [smTooltip]="(renameMap[node.data.key] || node.data.key) | hideHashTitle"
                     [matTooltipShowDelay]="500"
-                    
+
                     smShowTooltipIfEllipsis
                     [class.ellipsis]="showEllipsis"
                     [style.width.px]="showEllipsis ? nativeWidth - 65 - node.level * 20 : null"

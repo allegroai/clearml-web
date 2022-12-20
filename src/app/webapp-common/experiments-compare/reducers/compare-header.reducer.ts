@@ -1,5 +1,8 @@
 import {
-  compareAddDialogSetTableSort, compareAddTableClearAllFilters, compareAddTableFilterChanged, compareAddTableFilterInit,
+  compareAddDialogSetTableSort,
+  compareAddTableClearAllFilters,
+  compareAddTableFilterChanged,
+  compareAddTableFilterInit,
   resetSelectCompareHeader,
   setExperimentsUpdateTime,
   setHideIdenticalFields,
@@ -68,7 +71,8 @@ export const compareHeader = createReducer(
     projectColumnFilters: {
       ...state.projectColumnFilters,
       [action.projectId]: {['project.name']: {value: [action.projectId], matchMode: undefined}}
-    }})),
+    }
+  })),
   on(compareAddTableClearAllFilters, (state, action) => ({
     ...state,
     projectColumnFilters: {

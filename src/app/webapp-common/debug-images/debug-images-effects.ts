@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {Actions, createEffect,  ofType} from '@ngrx/effects';
+import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {catchError, mergeMap, map, switchMap, withLatestFrom, filter} from 'rxjs/operators';
 import * as  debugActions from './debug-images-actions';
 import {activeLoader, deactivateLoader} from '../core/actions/layout.actions';
@@ -8,17 +8,12 @@ import {ApiEventsService} from '~/business-logic/api-services/events.service';
 import {requestFailed} from '../core/actions/http.actions';
 import {refreshExperiments} from '../experiments/actions/common-experiments-view.actions';
 import {Action, Store} from '@ngrx/store';
-import {selectDebugImages, selectImageViewerScrollId} from './debug-images-reducer';
-import {
-  setCurrentDebugImage,
-  setDebugImageIterations,
-  setDebugImageViewerScrollId,
-  setViewerBeginningOfTime, setViewerEndOfTime
-} from './debug-images-actions';
+import {selectDebugImages} from './debug-images-reducer';
 import {EventsDebugImagesResponse} from '~/business-logic/model/events/eventsDebugImagesResponse';
 import {EventsGetTaskMetricsResponse} from '~/business-logic/model/events/eventsGetTaskMetricsResponse';
 import {COMPARE_DEBUG_IMAGES_ONLY_FIELDS} from '../experiments-compare/experiments-compare.constants';
 import {selectActiveWorkspaceReady} from '~/core/reducers/view.reducer';
+import {setBeginningOfTime} from '@common/shared/debug-sample/debug-sample.actions';
 
 export const ALL_IMAGES = '-- All --';
 
@@ -46,7 +41,8 @@ export class DebugImagesEffects {
   constructor(
     private actions$: Actions, private apiTasks: ApiTasksService,
     private eventsApi: ApiEventsService, private store: Store<any>
-  ) {}
+  ) {
+  }
 
   activeLoader = createEffect(() => this.actions$.pipe(
     ofType(debugActions.fetchExperiments, debugActions.refreshMetric, debugActions.refreshDebugImagesMetrics),
@@ -63,16 +59,18 @@ export class DebugImagesEffects {
         /* eslint-disable @typescript-eslint/naming-convention */
         metrics: [removeAllImagesFromPayload(action.payload)],
         iters: 3,
-        scroll_id: debugImages?.[action.payload.task] ? debugImages[action.payload.task].scroll_id : null,
+        scroll_id: (action.type !== debugActions.setSelectedMetric.type && debugImages?.[action.payload.task]) ?
+          debugImages[action.payload.task].scroll_id :
+          null,
         navigate_earlier: action.type !== debugActions.getPreviousBatch.type,
         refresh: [debugActions.setSelectedMetric.type, debugActions.refreshMetric.type].includes(action.type)
         /* eslint-enable @typescript-eslint/naming-convention */
       })
         .pipe(
-          mergeMap((res: EventsDebugImagesResponse ) => {
+          mergeMap((res: EventsDebugImagesResponse) => {
             const actionsToShoot = [deactivateLoader(action.type)] as Action[];
-            actionsToShoot.push(debugActions.setDebugImages({res, task: action.payload.task}));
             if (res.metrics[0].iterations && res.metrics[0].iterations.length > 0) {
+              actionsToShoot.push(debugActions.setDebugImages({res, task: action.payload.task}));
               switch (action.type) {
                 case debugActions.getNextBatch.type:
                   actionsToShoot.push(debugActions.setTimeIsNow({task: action.payload.task, timeIsNow: false}));
@@ -81,7 +79,7 @@ export class DebugImagesEffects {
                   actionsToShoot.push(debugActions.setTimeIsNow({task: action.payload.task, timeIsNow: true}));
                   break;
                 case debugActions.getPreviousBatch.type:
-                  actionsToShoot.push(debugActions.setBeginningOfTime({
+                  actionsToShoot.push(setBeginningOfTime({
                     task: action.payload.task,
                     beginningOfTime: false
                   }));
@@ -90,7 +88,7 @@ export class DebugImagesEffects {
             } else {
               switch (action.type) {
                 case debugActions.getNextBatch.type:
-                  actionsToShoot.push(debugActions.setBeginningOfTime({
+                  actionsToShoot.push(setBeginningOfTime({
                     task: action.payload.task,
                     beginningOfTime: true
                   }));
@@ -132,70 +130,13 @@ export class DebugImagesEffects {
       filter(ready => ready),
       map(() => action))),
     switchMap((action) => this.eventsApi.eventsGetTaskMetrics({
-      /* eslint-disable @typescript-eslint/naming-convention */
-      tasks: action.tasks,
-      event_type: 'training_debug_image'
-      /* eslint-enable @typescript-eslint/naming-convention */
-    })
-      .pipe(
-        mergeMap((res: EventsGetTaskMetricsResponse) => [debugActions.setMetrics({metrics: res.metrics}), deactivateLoader(action.type)]),
-        catchError(error => [requestFailed(error), deactivateLoader(action.type)])
-      )
-    )
-  ));
-
-  fetchDebugImagesForIter$ = createEffect(() => this.actions$.pipe(
-    ofType(debugActions.getDebugImageSample),
-    withLatestFrom(this.store.select(selectImageViewerScrollId)),
-    switchMap(([action, scrollId]) =>
-      this.eventsApi.eventsGetDebugImageSample({
         /* eslint-disable @typescript-eslint/naming-convention */
-        task: action.task,
-        iteration: action.iteration,
-        metric: action.metric,
-        variant: action.variant,
-        scroll_id: scrollId,
-        navigate_current_metric: !action.isAllMetrics
+        tasks: action.tasks,
+        event_type: 'training_debug_image'
         /* eslint-enable @typescript-eslint/naming-convention */
       })
         .pipe(
-          mergeMap(res => [
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            setDebugImageIterations({min_iteration: res.min_iteration, max_iteration: res.max_iteration}),
-            setCurrentDebugImage({event: res.event}), deactivateLoader(action.type),
-            setDebugImageViewerScrollId({scrollId: res.scroll_id}),
-          ]),
-          catchError(error => [requestFailed(error), deactivateLoader(action.type)])
-        )
-    )
-  ));
-
-  getNextDebugImagesForIter$ = createEffect(() => this.actions$.pipe(
-    ofType(debugActions.getNextDebugImageSample),
-    withLatestFrom(this.store.select(selectImageViewerScrollId)),
-    switchMap(([action, scrollId]) =>
-      this.eventsApi.eventsNextDebugImageSample({
-        /* eslint-disable @typescript-eslint/naming-convention */
-        task: action.task,
-        scroll_id: scrollId,
-        navigate_earlier: action.navigateEarlier,
-          ...(action.iteration && {next_iteration: true})
-        /* eslint-enable @typescript-eslint/naming-convention */
-      })
-        .pipe(
-          mergeMap(res => {
-            if (!res.event) {
-              return [action.navigateEarlier ? setViewerBeginningOfTime({beginningOfTime: true}) : setViewerEndOfTime({endOfTime: true})];
-            } else {
-              return [
-                // eslint-disable-next-line @typescript-eslint/naming-convention
-                setDebugImageIterations({min_iteration: res.min_iteration, max_iteration: res.max_iteration}),
-                setCurrentDebugImage({event: res.event}), deactivateLoader(action.type),
-                setDebugImageViewerScrollId({scrollId: res.scroll_id}),
-                !action.navigateEarlier ? setViewerBeginningOfTime({beginningOfTime: false}) : setViewerEndOfTime({endOfTime: false})
-              ];
-            }
-          }),
+          mergeMap((res: EventsGetTaskMetricsResponse) => [debugActions.setMetrics({metrics: res.metrics}), deactivateLoader(action.type)]),
           catchError(error => [requestFailed(error), deactivateLoader(action.type)])
         )
     )

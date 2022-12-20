@@ -160,7 +160,7 @@ export class ProjectsEffects {
     ofType(actions.getTags),
     withLatestFrom(this.store.select(selectRouterParams).pipe(
       map(params => (params === null || params?.projectId === '*') ? [] : [params.projectId]))),
-    switchMap(([action, projects]) => {
+      mergeMap(([action, projects]) => {
       const ids = action?.projectId ? [action.projectId] : projects;
       if (ids.length === 0 || !ids[0]) {
         return EMPTY;

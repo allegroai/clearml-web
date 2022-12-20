@@ -15,6 +15,7 @@
             <input matInput
                    [value]="_greaterThan.date"
                    [matDatepicker]="fromPicker"
+                   data-id="From Date"
                    placeholder="Date"
                    (dateChange)="$event.value ? setCheckBox(true, 'greaterThan') : null;
                                   onDateHandler($any($event.value), '_greaterThan')"
@@ -61,6 +62,7 @@
                    class="input-to"
                    [value]="_lessThan.date"
                    [matDatepicker]="toPicker"
+                   data-id="to Date"
                    placeholder="Now"
                    (dateChange)="$event.value ? setCheckBox(true, 'lessThan') : null;
                                   onDateHandler($any($event.value), '_lessThan')"

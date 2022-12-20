@@ -3,10 +3,7 @@ import {ActivatedRoute} from '@angular/router';
 import {EXPERIMENT_GRAPH_ID_PREFIX} from '../../experiments/shared/common-experiments.const';
 import {get, last} from 'lodash/fp';
 import {User} from '~/business-logic/model/users/user';
-import {GetCurrentUserResponseUserObjectCompany} from '~/business-logic/model/users/getCurrentUserResponseUserObjectCompany';
 import {TABLE_SORT_ORDER} from '../ui-components/data/table/table.consts';
-import {CloseScrollStrategy, Overlay} from '@angular/cdk/overlay';
-import {Store} from '@ngrx/store';
 
 export const capitalizeFirstLetter = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
 
@@ -59,24 +56,6 @@ export const isSourceVideo = (source) => {
     return false;
   }
   return isVideo(contentType, uri);
-};
-
-export const isHtmlPage = (url: string) => {
-  if (!url) {
-    return false;
-  }
-  const parsed = new URL(url);
-  const ext = last(parsed.pathname.split('.'));
-  return ['html', 'htm'].includes(ext);
-};
-
-export const isTextFileURL = (url: string) => {
-  if (!url) {
-    return false;
-  }
-  const parsed = new URL(url);
-  const ext = last(parsed.pathname.split('.'));
-  return ['txt', 'text'].includes(ext);
 };
 
 export const isHtmlOrText = (url: string) => {
@@ -147,24 +126,12 @@ export const getRouteFullUrl = (route: ActivatedRoute) => {
   return path;
 };
 
-export const escapeRegex = (input: string) => input?.replace(/[.+?^*${}()|[\]\\]/g, '\\$&');
-
 export const removeAlphaColor = (rgbaColor: string) => {
   const rgbaColorArr = rgbaColor.substring(rgbaColor.indexOf('(') + 1, rgbaColor.indexOf(')')).split(',');
   return `rgb(${rgbaColorArr[0]},${rgbaColorArr[1]},${rgbaColorArr[2]})`;
 };
 
-export const isReadOnly = item => {
-  if (get('id', item) === '*') {
-    return false;
-  }
-  return (!get('company.id', item)) || (!!get('readOnly', item));
-};
-
 export const isExample = item => item?.company && !item.company?.id;
-
-export const isSharedAndNotOwner = (item, activeWorkSpace: GetCurrentUserResponseUserObjectCompany): boolean =>
-  item?.system_tags?.includes('shared') && item?.company?.id !== activeWorkSpace?.id && (!!item?.company.id);
 
 export const isAnnotationTask = entity => entity.system_tags && entity.system_tags.includes('Annotation');
 
@@ -285,27 +252,6 @@ export const addMultipleSortColumns = (oldOrders, colId, isShift) => {
     orders = [newField];
   }
   return orders;
-};
-
-export const scrollFactory = (overlay: Overlay): () => CloseScrollStrategy => () => overlay.scrollStrategies.close();
-
-export const loadExternalLibrary = (store: Store, url: string, action) => {
-  if (!url) {
-    return;
-  }
-  const init = () => {
-    const script: HTMLScriptElement = document.createElement('script');
-    script.type = 'text/javascript';
-    script.src = url;
-    script.onerror = () => console.error(`Error loading library from ${url}`);
-    script.crossOrigin = '';// 'use-credentials';
-    script.onload = () => store.dispatch(action());
-
-    const head: HTMLHeadElement = document.getElementsByTagName('head')[0];
-    head.appendChild(script);
-  };
-
-  setTimeout(init);
 };
 
 export const getBaseName = (url: string): string => {

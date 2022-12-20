@@ -1,9 +1,8 @@
-import {Component, HostListener, OnDestroy, OnInit, Renderer2, ViewChild} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {Observable} from 'rxjs/internal/Observable';
 import {Subscription} from 'rxjs';
 import {filter, take} from 'rxjs/operators';
-import {MarkdownEditorComponent} from 'ngx-markdown-editor';
 import 'ngx-markdown-editor';
 import {
   RootProjects,
@@ -13,74 +12,34 @@ import {
 import {updateProject} from '../core/actions/projects.actions';
 import {Project} from '~/business-logic/model/projects/project';
 import {isExample} from '../shared/utils/shared-utils';
-import {DomSanitizer} from '@angular/platform-browser';
 
-const BREAK_POINT = 990;
 
 @Component({
   selector: 'sm-project-info',
   templateUrl: './project-info.component.html',
-  styleUrls: ['./project-info.component.scss']
+  styleUrls: ['./project-info.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProjectInfoComponent implements OnInit, OnDestroy {
   private selecteProject$: Observable<Project>;
-  private originalInfo: string;
   private infoSubs: Subscription;
   public info: string;
   public editMode: boolean;
-  public options = {
-    markedjsOpt: {
-      sanitizer: this.sanitizer.bypassSecurityTrustHtml
-    },
-    enablePreviewContentClick: true,
-    usingFontAwesome5: true,
-    showPreviewPanel: true,
-    resizable: false,
-    hideIcons: ['TogglePreview', 'FullScreen']
-  };
   public loading: boolean;
-  public editorVisible: boolean;
   public project: Project;
   public panelOpen: boolean = false;
   public example: boolean;
   public isDirty: boolean;
-  private preview: Element;
-  private editor: Element;
   private projectId: string;
 
-  @ViewChild('editorComponent', {static: false}) editorComponent: MarkdownEditorComponent;
-  private ready: boolean = false;
   private selectedVariantSub: Subscription;
 
-  @HostListener('window:resize', ['$event'])
-  updateEditorVisibility() {
-    if (!this.ready) {
-      return;
-    }
-
-    if (window.innerWidth > BREAK_POINT) {
-      if (this.editMode) {
-        this.renderer.setStyle(this.preview, 'display', 'block');
-        this.renderer.setStyle(this.editor, 'display', 'block');
-      } else {
-        this.renderer.setStyle(this.preview, 'display', 'block');
-        this.renderer.setStyle(this.editor, 'display', 'none');
-      }
-    } else if (this.editMode) {
-      this.renderer.setStyle(this.preview, 'display', 'none');
-      this.renderer.setStyle(this.editor, 'display', 'block');
-    } else {
-      this.renderer.setStyle(this.preview, 'display', 'block');
-      this.renderer.setStyle(this.editor, 'display', 'none');
-    }
-  }
-
-  constructor(private store: Store<RootProjects>, private renderer: Renderer2, protected sanitizer: DomSanitizer) {
+  constructor(private store: Store<RootProjects>, private cdr: ChangeDetectorRef) {
     this.selecteProject$ = this.store.select(selectSelectedProject);
+    this.loading = true;
   }
 
   ngOnInit(): void {
-    this.loading = true;
     this.infoSubs = this.selecteProject$
       .pipe(
         filter(project => !!project?.id)
@@ -90,12 +49,13 @@ export class ProjectInfoComponent implements OnInit, OnDestroy {
         this.info = project.description;
         this.projectId = project.id;
         this.loading = false;
+        this.cdr.detectChanges();
       });
     this.selectedVariantSub = this.store.select(selectSelectedMetricVariantForCurrProject).pipe(filter(data => !!data), take(1))
       .subscribe(() => {
         this.setMetricsPanel(true);
+        this.cdr.detectChanges();
       });
-
   }
 
   ngOnDestroy() {
@@ -103,44 +63,11 @@ export class ProjectInfoComponent implements OnInit, OnDestroy {
     this.selectedVariantSub.unsubscribe();
   }
 
-  saveInfo() {
-    this.store.dispatch(updateProject({id: this.projectId, changes: {description: this.info}}));
-    this.editMode = false;
-    this.isDirty = false;
-    this.updateEditorVisibility();
-  }
-
-  editClicked() {
-    this.originalInfo = this.info;
-    this.editMode = true;
-    this.editorVisible = false;
-    setTimeout(() => this.updateEditorVisibility());
-  }
-
-  cancelClicked() {
-    this.info = this.originalInfo;
-    this.editMode = false;
-    this.isDirty = false;
-    this.updateEditorVisibility();
-  }
-
-  editorReady() {
-    this.ready = true;
-    this.preview = document.querySelector('.preview-container');
-    this.editor = document.querySelector('.editor-container > div:first-child');
-  }
-
-  togglePreview() {
-    this.renderer.setStyle(this.preview, 'display', this.editorVisible ? 'none' : 'block');
-    this.renderer.setStyle(this.editor, 'display', !this.editorVisible ? 'none' : 'block');
-    this.editorVisible = !this.editorVisible;
-  }
-
-  checkDirty() {
-    this.isDirty = this.originalInfo !== this.info;
-  }
-
   setMetricsPanel(open: boolean) {
     this.panelOpen = open;
+  }
+
+  saveInfo(info: string) {
+    this.store.dispatch(updateProject({id: this.projectId, changes: {description: info}}));
   }
 }

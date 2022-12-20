@@ -5,7 +5,7 @@ import {
   publishModelClicked,
   restoreSelectedModels
 } from '../../actions/models-menu.actions';
-import {htmlTextShorte, isReadOnly} from '@common/shared/utils/shared-utils';
+import {htmlTextShorte} from '@common/shared/utils/shared-utils';
 import {ICONS} from '@common/constants';
 import {MatDialog} from '@angular/material/dialog';
 import {Store} from '@ngrx/store';
@@ -34,6 +34,7 @@ import {
 } from '@common/shared/entity-page/items.utils';
 import {getSignedUrl} from '@common/core/actions/common-auth.actions';
 import {selectSignedUrl} from '@common/core/reducers/common-auth-reducer';
+import {isReadOnly} from '@common/shared/utils/is-read-only';
 
 
 @Component({

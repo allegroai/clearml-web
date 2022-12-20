@@ -7,6 +7,11 @@
   >Show Hidden Projects
   </mat-slide-toggle>
   <mat-slide-toggle
+    (change)="toggleExamples($event)"
+    [checked]="hideExamples$ | async"
+  >Don’t show ClearML examples
+  </mat-slide-toggle>
+  <mat-slide-toggle
     *ngIf="supportReScaling"
     (change)="hidpiChange($event)"
     [checked]="disableHidpi">

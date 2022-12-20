@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {Actions, createEffect, Effect, ofType} from '@ngrx/effects';
-import {EmptyAction, MESSAGES_SEVERITY} from '../../../app.constants';
+import {EmptyAction} from '../../../app.constants';
 import * as layoutActions from '../actions/layout.actions';
 import {filter, map, switchMap, take, mergeMap, bufferTime} from 'rxjs/operators';
 import {get} from 'lodash/fp';
@@ -12,6 +12,7 @@ import {AlertDialogComponent} from '../../shared/ui-components/overlay/alert-dia
 import {NotifierService} from '../../angular-notifier';
 import {requestFailed} from '@common/core/actions/http.actions';
 import {addMessage} from '../actions/layout.actions';
+import {MESSAGES_SEVERITY} from '@common/constants';
 
 const ERROR_AGGREGATION = 600000;
 

@@ -1,4 +1,4 @@
-@import "../../styles/variables";
+@import "variables";
 
 :host {
   ::ng-deep th.resize-enabled span.p-column-resizer {
@@ -28,9 +28,7 @@
 
   ::ng-deep .p-datatable-wrapper {
     position: relative;
-    &>.p-datatable-table {
-      height: 100%;
-    }
+
     .p-datatable-tbody {
     height: calc(100% - 48px);
     }
@@ -135,6 +133,7 @@
   }
 
   tr {
+    display: flex;
     transition: height 0.5s linear;
 
     &.header {
@@ -143,7 +142,9 @@
     }
 
     th {
-      vertical-align: middle;
+      display: flex;
+      align-items: center;
+      flex: 1 1 0;
       color: $blue-300;
       border-bottom: none;
       padding:0 8px;
@@ -164,7 +165,9 @@
     }
 
     td {
-      vertical-align: middle;
+      display: flex;
+      align-items: center;
+      flex: 1 1 0;
       color: $blue-100;
       font-size: 1rem;
       overflow: hidden;

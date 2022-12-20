@@ -1,4 +1,4 @@
-@import "../variables";
+@import "variables";
 
 @mixin vertical-align($position: relative) {
   position: $position;

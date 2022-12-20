@@ -2,8 +2,8 @@ import {Component, Inject} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {Store} from '@ngrx/store';
 import {addMessage} from '../../core/actions/layout.actions';
-import {MESSAGES_SEVERITY} from '../../../app.constants';
 import {Tip} from '../../shared/services/tips.service';
+import {MESSAGES_SEVERITY} from '@common/constants';
 
 @Component({
   selector: 'sm-tip-of-the-day-modal',

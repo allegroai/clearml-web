@@ -2,11 +2,7 @@ import {createAction, props} from '@ngrx/store';
 import {ExperimentSettings} from '../reducers/common-experiment-output.reducer';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {MetricsPlotEvent} from '~/business-logic/model/events/metricsPlotEvent';
-import {EventsScalarMetricsIterRawRequest} from '~/business-logic/model/events/eventsScalarMetricsIterRawRequest';
-import {PlotSampleResponse} from '~/business-logic/model/events/plotSampleResponse';
-import {
-  EventsGetTaskSingleValueMetricsResponseTasks
-} from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponseTasks';
+import {EventsGetTaskSingleValueMetricsResponseTasks} from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponseTasks';
 import {ChartHoverModeEnum} from '../shared/common-experiments.const';
 
 export interface SeriesData {
@@ -26,36 +22,6 @@ export const resetOutput = createAction(EXPERIMENTS_OUTPUT_PREFIX + 'RESET_OUTPU
 export const experimentPlotsRequested = createAction(
   EXPERIMENTS_OUTPUT_PREFIX + 'EXPERIMENT_PLOTS_REQUESTED',
   props<{ task: string }>()
-);
-
-export const getGraphDisplayFullDetailsScalars = createAction(
-  EXPERIMENTS_OUTPUT_PREFIX + 'GET_FULL_DETAILS_SCALAR',
-  props<EventsScalarMetricsIterRawRequest>()
-);
-
-export const convertXtypeGraphDisplayFullDetailsScalars = createAction(
-  EXPERIMENTS_OUTPUT_PREFIX + 'convertXtype_FULL_DETAILS_SCALAR',
-  props<{xAxisType: ScalarKeyEnum}>()
-);
-
-export const setXtypeGraphDisplayFullDetailsScalars = createAction(
-  EXPERIMENTS_OUTPUT_PREFIX + 'SET_Xtype_FULL_DETAILS_SCALAR',
-  props<{xAxisType: ScalarKeyEnum}>()
-);
-
-export const setGraphDisplayFullDetailsScalars = createAction(
-  EXPERIMENTS_OUTPUT_PREFIX + 'SET_FULL_DETAILS_SCALAR',
-  props<{ data }>()
-);
-
-export const setGraphDisplayFullDetailsScalarsIsOpen = createAction(
-  EXPERIMENTS_OUTPUT_PREFIX + 'SET_FULL_DETAILS_SCALAR_IS_OPEN',
-  props<{ isOpen: boolean }>()
-);
-
-export const mergeGraphDisplayFullDetailsScalars = createAction(
-  EXPERIMENTS_OUTPUT_PREFIX + 'MERGE_FULL_DETAILS_SCALAR',
-  props<{data}>()
 );
 
 export const experimentScalarRequested  = createAction(
@@ -122,18 +88,5 @@ export const setLogFilter = createAction(
 export const resetLogFilter = createAction(EXPERIMENTS_OUTPUT_PREFIX + 'RESET_LOG_FILTER');
 export const downloadFullLog = createAction(EXPERIMENTS_OUTPUT_PREFIX + 'DOWNLOAD_FULL_LOG', props<{ experimentId: string }>());
 export const toggleSettings = createAction(EXPERIMENTS_OUTPUT_PREFIX + 'TOGGLE_SETTINGS');
-
-export const getPlotSample = createAction(
-  EXPERIMENTS_OUTPUT_PREFIX + 'GET_PLOT_FOR_ITERATION',
-  props<{ task: string; metric: string; iteration: number }>()
-);
-export const getNextPlotSample = createAction(
-  EXPERIMENTS_OUTPUT_PREFIX + 'GET_NEXT_PLOT',
-  props<{ task: string; navigateEarlier: boolean; iteration?: boolean }>());
-export const setCurrentPlot = createAction(EXPERIMENTS_OUTPUT_PREFIX + 'SET_PLOT_FOR_ITERATION', props<{ event: any }>());
-export const setPlotViewerScrollId = createAction(EXPERIMENTS_OUTPUT_PREFIX + 'SET_PLOT_VIEWER_SCROLL_ID', props<{ scrollId: string }>());
-export const setPlotIterations = createAction(EXPERIMENTS_OUTPUT_PREFIX + 'SET_PLOT_ITERATIONS', props<PlotSampleResponse>());
-export const setViewerEndOfTime = createAction(EXPERIMENTS_OUTPUT_PREFIX + 'SET_VIEWER_END_OF_TIME', props<{ endOfTime: boolean }>());
-export const setViewerBeginningOfTime = createAction(EXPERIMENTS_OUTPUT_PREFIX + 'SET_VIEWER_BEGINNING_OF_TIME', props<{ beginningOfTime: boolean }>());
-export const resetViewer = createAction(EXPERIMENTS_OUTPUT_PREFIX + 'RESET_VIEWER');
 export const setGraphsPerRow = createAction(EXPERIMENTS_OUTPUT_PREFIX + 'SET_GRAPHS_PER_ROW', props<{ graphsPerRow: number }>());
+

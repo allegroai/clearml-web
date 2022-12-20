@@ -18,6 +18,7 @@ export class InlineEditComponent implements OnDestroy {
   private _forbiddenString: string[];
 
   @Input() pattern;
+  @Input() required: boolean;
   @Input() minLength = 0;
   @Input() originalText;
   @Input() set forbiddenString(forbiddenString: string[]) {

@@ -55,11 +55,6 @@ export const TASK_TAGS = {
 
 export const LOG_BATCH_SIZE = 100;
 
-export enum ThemeEnum {
-  Dark = 'dark',
-  Light = 'light'
-}
-
 export enum CustomColumnMode {
   Standard,
   Metrics,

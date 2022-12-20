@@ -1,22 +1,22 @@
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {Project} from '../../../../../business-logic/model/projects/project';
-import {Component, Inject, OnInit, ViewChild} from '@angular/core';
+import {Project} from '~/business-logic/model/projects/project';
+import {Component, Inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {asyncScheduler, Observable, Subscription} from 'rxjs';
-import {selectRootProjects} from '../../../../core/reducers/projects.reducer';
-import {getAllSystemProjects} from '../../../../core/actions/projects.actions';
+import {selectRootProjects} from '@common/core/reducers/projects.reducer';
+import {getAllSystemProjects} from '@common/core/actions/projects.actions';
 import {map, startWith} from 'rxjs/operators';
-import {isReadOnly} from '../../../../shared/utils/shared-utils';
-import {isEqual} from 'lodash/fp';
+import {castArray, isEqual} from 'lodash/fp';
 import {NgForm} from '@angular/forms';
-import {EntityTypeEnum} from '../../../../../shared/constants/non-common-consts';
+import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
+import {isReadOnly} from '@common/shared/utils/is-read-only';
 
 @Component({
   selector: 'sm-change-project-dialog',
   templateUrl: './change-project-dialog.component.html',
   styleUrls: ['./change-project-dialog.component.scss']
 })
-export class ChangeProjectDialogComponent implements OnInit {
+export class ChangeProjectDialogComponent implements OnInit, OnDestroy {
 
   public projects$: Observable<Project[]>;
   public selectedProjectId: Project['id'];
@@ -48,7 +48,7 @@ export class ChangeProjectDialogComponent implements OnInit {
     }
   ) {
     this.selectedProjectId = data.defaultProject;
-    this.currentProjects = Array.isArray(data.currentProjects) ? data.currentProjects : [data.currentProjects];
+    this.currentProjects = castArray(data.currentProjects);
     this.isMulti = !!Array.isArray(data.reference);
     this.type = data.type;
     this.reference = Array.isArray(data.reference) ? `${data.reference.length} ${data.type}s` : data.reference;

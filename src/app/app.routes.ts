@@ -81,6 +81,10 @@ export const routes: Routes = [
     data: {search: true},
     loadChildren: () => import('./features/datasets/datasets.module').then(m => m.DatasetsModule)
   },
+  {
+    path: 'reports',
+    loadChildren: () => import('./webapp-common/reports/reports.module').then(m => m.ReportsModule)
+  },
   {path: 'workers-and-queues', loadChildren: () => import('./features/workers-and-queues/workers-and-queues.module').then(m => m.WorkersAndQueuesModule)},
   {path: '404', loadChildren: () => import('./features/not-found/not-found.module').then(m => m.NotFoundModule)},
   {path: '**', loadChildren: () => import('./features/not-found/not-found.module').then(m => m.NotFoundModule)},

@@ -71,3 +71,5 @@ export const COMPARE_DEBUG_IMAGES_ONLY_FIELDS = [
   'published',
   'last_iteration',
 ];
+
+export const LIMITED_VIEW_LIMIT = 10;

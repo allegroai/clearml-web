@@ -8,7 +8,15 @@ import {combineLatest, Observable, Subscription} from 'rxjs';
 import {SearchState, selectSearchQuery} from '../common-search/common-search.reducer';
 import {Store} from '@ngrx/store';
 import {
-  selectActiveSearch, selectDatasetsResults, selectExperimentsResults, selectModelsResults, selectPipelinesResults, selectProjectsResults, selectResultsCount, selectSearchScrollIds,
+  selectActiveSearch,
+  selectDatasetsResults,
+  selectExperimentsResults,
+  selectModelsResults,
+  selectPipelinesResults,
+  selectProjectsResults,
+  selectReportsResults,
+  selectResultsCount,
+  selectSearchScrollIds,
   selectSearchTerm
 } from '../dashboard-search/dashboard-search.reducer';
 import {Project} from '~/business-logic/model/projects/project';
@@ -18,6 +26,7 @@ import {activeLinksList, ActiveSearchLink, activeSearchLink} from '~/features/da
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
 import { selectShowOnlyUserWork } from '@common/core/reducers/users-reducer';
+import {IReport} from '@common/reports/reports.consts';
 
 @Component({
   selector: 'sm-dashboard-search-base',
@@ -28,6 +37,7 @@ import { selectShowOnlyUserWork } from '@common/core/reducers/users-reducer';
     (modelSelected)="modelSelected($event)"
     (pipelineSelected)="pipelineSelected($event)"
     (activeLinkChanged)="activeLinkChanged($event)"
+    (reportSelected)="reportSelected($event)"
     (openDatasetSelected)="openDatasetCardClicked($event)"
     (loadMoreClicked)="loadMore()"
     [projectsList]="projectsResults$ | async"
@@ -35,6 +45,7 @@ import { selectShowOnlyUserWork } from '@common/core/reducers/users-reducer';
     [datasetsList]="datasetsResults$ | async"
     [experimentsList]="experimentsResults$ | async"
     [modelsList]="modelsResults$ | async"
+    [reportsList]="reportsResults$ | async"
     [activeLink]="activeLink"
     [resultsCount]="resultsCount$ | async">
   </sm-search-results-page>`,
@@ -53,11 +64,13 @@ export class DashboardSearchBaseComponent implements OnInit, OnDestroy{
   public datasetsResults$: Observable<Project[]>;
   private scrollIds: Map<ActiveSearchLink, string>;
   public resultsCount$: Observable<Map<ActiveSearchLink, number>>;
+  public reportsResults$: Observable<Array<IReport>>;
 
   constructor(public store: Store<any>, public router: Router){
     this.searchQuery$        = store.select(selectSearchQuery);
     this.activeSearch$       = store.select(selectActiveSearch);
     this.modelsResults$      = store.select(selectModelsResults);
+    this.reportsResults$      = store.select(selectReportsResults);
     this.pipelinesResults$   = store.select(selectPipelinesResults);
     this.datasetsResults$   = store.select(selectDatasetsResults);
     this.projectsResults$    = store.select(selectProjectsResults);
@@ -121,6 +134,10 @@ export class DashboardSearchBaseComponent implements OnInit, OnDestroy{
   pipelineSelected(project: Project) {
     this.router.navigateByUrl(`pipelines/${project.id}/experiments`);
     this.store.dispatch(setSelectedProjectId({projectId: project.id, example: isExample(project)}));
+  }
+
+  reportSelected(report: IReport) {
+    this.router.navigate(['reports',(report.project as any).id, report.id]);
   }
 
   public openDatasetCardClicked(project: Project) {

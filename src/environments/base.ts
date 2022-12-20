@@ -23,7 +23,7 @@ export interface Environment {
   production: boolean;
   apiBaseUrl: string;
   fileBaseUrl: string;
-  displayedServerUrls?: {apiServer?: string, filesServer?: string};
+  displayedServerUrls?: {apiServer?: string; filesServer?: string};
   productName: string;
   demo: boolean;
   headerPrefix: string;
@@ -56,6 +56,7 @@ export interface Environment {
   legal: Legal;
   loginPopup?: string;
   newExperimentYouTubeVideoId: string;
+  baseHref?: string;
 }
 
 export const BASE_ENV = {
@@ -86,8 +87,8 @@ export const BASE_ENV = {
   accountAdministration: false,
   useFilesProxy: false,
   legal: {TOULink: 'https://allegro.ai/legal-platform-tou/'},
-  plotlyURL: 'app/webapp-common/assets/plotly-2.12.1.min.js',
-  slackLink: 'https://join.slack.com/t/allegroai-trains/shared_invite/enQtOTQyMTI1MzQxMzE4LTY5NTUxOTY1NmQ1MzQ5MjRhMGRhZmM4ODE5NTNjMTg2NTBlZGQzZGVkMWU3ZDg1MGE1MjQxNDEzMWU2NmVjZmY',
+  plotlyURL: 'app/webapp-common/assets/plotly-2.16.1.min.js',
+  slackLink: 'https://join.slack.com/t/clearml/shared_invite/zt-1kvcxu5hf-SRH_rmmHdLL7l2WadRJTQg',
   docsLink: 'https://clear.ml/docs',
   branding: {logo: 'assets/logo-white.svg?v=7', logoSmall: 'assets/c-logo.svg?=2'},
   serverDownMessage: 'The ClearML server is currently unavailable.<BR>' +

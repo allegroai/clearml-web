@@ -95,3 +95,16 @@ export const PALLET = {
   blue900: '#141722', //20,23,34
   blue950: '#0d0e15', //20,23,34
 };
+
+export enum ThemeEnum {
+  Dark = 'dark',
+  Light = 'light'
+}
+
+export type MessageSeverityEnum = 'success' | 'error' | 'info' | 'warn';
+export const MESSAGES_SEVERITY = {
+  SUCCESS: 'success' as MessageSeverityEnum,
+  ERROR: 'error' as MessageSeverityEnum,
+  INFO: 'info' as MessageSeverityEnum,
+  WARN: 'warn' as MessageSeverityEnum
+};

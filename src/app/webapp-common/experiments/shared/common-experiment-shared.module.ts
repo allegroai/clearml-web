@@ -10,18 +10,25 @@ import {SelectQueueModule} from './components/select-queue/select-queue.module';
 import {FormsModule} from '@angular/forms';
 import {AbortAllChildrenDialogComponent} from './components/abort-all-children-dialog/abort-all-children-dialog.component';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {ScrollingModule} from '@angular/cdk/scrolling';
 
-const DECLARATIONS = [ExperimentStatusIconLabelComponent, ExperimentSystemTagsComponent, ChangeProjectDialogComponent, CloneDialogComponent,AbortAllChildrenDialogComponent
+const DECLARATIONS = [
+  ExperimentStatusIconLabelComponent,
+  ExperimentSystemTagsComponent,
+  ChangeProjectDialogComponent,
+  CloneDialogComponent,
+  AbortAllChildrenDialogComponent
 ];
 
 @NgModule({
-  imports: [
-    SMSharedModule,
-    CommonModule,
-    SelectQueueModule,
-    FormsModule,
-    MatProgressSpinnerModule,
-  ],
+    imports: [
+        SMSharedModule,
+        CommonModule,
+        SelectQueueModule,
+        FormsModule,
+        MatProgressSpinnerModule,
+        ScrollingModule,
+    ],
   declarations   : [...DECLARATIONS],
   providers      : [CommonExperimentConverterService],
   exports        : [...DECLARATIONS]

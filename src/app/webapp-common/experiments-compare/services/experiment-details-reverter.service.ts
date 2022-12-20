@@ -44,7 +44,7 @@ export class ExperimentDetailsReverterService extends ExperimentDetailsReverterS
       'worker': experiment.last_worker || NA,
       'created by': experiment.user.name || NA,
       'parent task': (experiment.parent as ITask)?.name || NA,
-      'project': experiment.project.name || NA,
+      'project': experiment.project?.name || NA,
     ...Object.entries(experiment.runtime || {})
       .filter(([key, ]) => !key.startsWith('_'))
       .reduce((res, [key, val]) => {

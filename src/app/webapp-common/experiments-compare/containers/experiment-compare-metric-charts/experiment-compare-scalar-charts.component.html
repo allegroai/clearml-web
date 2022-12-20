@@ -36,6 +36,7 @@
       [xAxisType]="xAxisType$ | async"
       (resetGraphs)="resetMetrics()"
       (hoverModeChanged)="hoverModeChanged($event)"
+      (createEmbedCode)="createEmbedCode($event)"
     >
     </sm-experiment-graphs>
   </mat-drawer-content>

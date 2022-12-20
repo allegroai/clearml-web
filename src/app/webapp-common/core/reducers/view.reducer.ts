@@ -60,10 +60,10 @@ export const selectBackdropActive = createSelector(views, state => state.backdro
 export const selectNotification = createSelector(views, state => state.notification);
 
 export const selectLoggedOut = createSelector(views, state => state.loggedOut);
-export const selectAutoRefresh = createSelector(views, state => state && state.autoRefresh);
+export const selectAutoRefresh = createSelector(views, state => state?.autoRefresh);
 export const selectCompareAutoRefresh = createSelector(views, state => state.compareAutoRefresh);
-export const selectAppVisible = createSelector(views, state => state.applicationVisible);
-export const selectScaleFactor = createSelector(views, state => state.scaleFactor);
+export const selectAppVisible = createSelector(views, state => state?.applicationVisible);
+export const selectScaleFactor = createSelector(views, state => state?.scaleFactor);
 export const selectFirstLogin = createSelector(views, state => state.firstLogin);
 export const selectFirstLoginAt = createSelector(views, state => state.firstLoginAt);
 export const selectPlotlyReady = createSelector(views, state => state.plotlyReady);

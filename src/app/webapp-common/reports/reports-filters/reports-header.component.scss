@@ -1,0 +1,21 @@
+:host {
+  sm-search {
+    position: relative;
+    display: block;
+    width:348px;
+  }
+  .sm-card-list-header.archive-mode::after {
+    content: "";
+    background: #333746;
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    left: -200px;
+    right: -200px;
+    height: 64px;
+  }
+
+  ::ng-deep .search-input-container.active {
+    width: 100% !important;
+  }
+}

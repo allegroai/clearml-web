@@ -1,7 +1,18 @@
 import {ActionReducerMap, createSelector} from '@ngrx/store';
 import {ExperimentCompareDetailsState, experimentsCompareDetailsReducer} from './experiments-compare-details.reducer';
-import {experimentsCompareChartsReducer, GroupedHyperParams, IExperimentCompareChartsState, ExperimentCompareSettings, MetricOption, MetricValueType} from './experiments-compare-charts.reducer';
-import {experimentsCompareMetricsValuesReducer, IExperimentCompareMetricsValuesState, MetricSortBy} from './experiments-compare-metrics-values.reducer';
+import {
+  ExperimentCompareSettings,
+  experimentsCompareChartsReducer,
+  GroupedHyperParams,
+  IExperimentCompareChartsState,
+  MetricOption,
+  MetricValueType
+} from './experiments-compare-charts.reducer';
+import {
+  experimentsCompareMetricsValuesReducer,
+  IExperimentCompareMetricsValuesState,
+  MetricSortBy
+} from './experiments-compare-metrics-values.reducer';
 import {Task} from '~/business-logic/model/tasks/task';
 import {compareHeader, CompareHeaderState} from './compare-header.reducer';
 import {IExperimentDetail} from '~/features/experiments-compare/experiments-compare-models';
@@ -14,12 +25,12 @@ import {selectSelectedProjectId} from '../../core/reducers/projects.reducer';
 import {selectRouterConfig} from '../../core/reducers/router-reducer';
 
 export const experimentsCompareReducers: ActionReducerMap<any, any> = {
-  details      : experimentsCompareDetailsReducer,
-  params       : experimentsCompareParamsReducer,
+  details: experimentsCompareDetailsReducer,
+  params: experimentsCompareParamsReducer,
   metricsValues: experimentsCompareMetricsValuesReducer,
-  charts       : experimentsCompareChartsReducer,
+  charts: experimentsCompareChartsReducer,
   compareHeader,
-  scalarsGraph : scalarsGraphReducer
+  scalarsGraph: scalarsGraphReducer
 };
 
 export const experimentsCompare = state => state.experimentsCompare;
@@ -105,7 +116,7 @@ export const selectCompareTasksScalarCharts = createSelector(
   compareCharts,
   (axisType, state) => {
     if (state?.metricsHistogramCharts?.metrics && (!axisType || axisType === ScalarKeyEnum.IsoTime)) {
-      return  {
+      return {
         metrics: Object.keys(state.metricsHistogramCharts.metrics).reduce((metricAcc, metricName) => {
           const metric = state.metricsHistogramCharts.metrics[metricName];
           metricAcc[metricName] = Object.keys(metric).reduce((groupAcc, groupName) => {

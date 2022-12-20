@@ -9,7 +9,7 @@ export class CleanProjectPathPipe implements PipeTransform {
     if (!value) {
       return '';
     }
-    let cleanPath = value.replace('.datasets/','').replace('.pipelines/', '');
+    let cleanPath = value.replace('.datasets/','').replace('.pipelines/', '').replace('/.reports', '').replace('.reports', 'Root project');
     cleanPath = showLastSegment? cleanPath: cleanPath.substring(0, cleanPath.lastIndexOf('/'));
     return cleanPath;
   }

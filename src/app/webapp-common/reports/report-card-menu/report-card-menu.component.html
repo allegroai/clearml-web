@@ -1,0 +1,38 @@
+<div [matMenuTriggerFor]="pipelinesMenu" smClickStopPropagation
+     class="p-0 cell menu-button al-icon al-color blue-300 al-ico-bars-menu"
+></div>
+<mat-menu #pipelinesMenu="matMenu">
+  <button mat-menu-item (click)="rename.emit()" [disabled]="isExample">
+    <i class="al-icon sm-md" [class]="icons.EDIT"></i>Rename
+  </button>
+  <button mat-menu-item (click)="share.emit()">
+    <i class="al-icon sm-md" [class]="icons.SHARE"></i>Share
+  </button>
+  <button mat-menu-item [matMenuTriggerFor]="tagMenu">
+    <i class="al-icon sm-md" [class]="icons.TAG"></i>Add Tag
+  </button>
+  <hr>
+  <button mat-menu-item (click)="moveTo.emit()" [disabled]="isExample">
+    <i class="al-icon sm-md" [class]="icons.MOVE_TO"></i>Move to
+  </button>
+  <button mat-menu-item (click)="archive.emit(!isArchived)" [disabled]="isExample">
+    <i class="al-icon sm-md"
+       [class]="isArchived ? icons.RESTORE : icons.ARCHIVE"></i>{{isArchived ? 'Restore from archive' : 'Archive'}}
+  </button>
+  <button *ngIf="isArchived" mat-menu-item (click)="delete.emit()">
+    <i class="al-icon sm-md"
+       [class]="icons.REMOVE"></i>Delete
+  </button>
+
+</mat-menu>
+<mat-menu #tagMenu="matMenu">
+  <sm-tags-menu
+    #tagMenuContent
+    class="light-theme"
+    [tags]="report?.tags"
+    [tagsFilterByProject]="true"
+    [projectTags]="allTags"
+    [companyTags]="null"
+    (tagSelected)="addTag.emit($event)">
+  </sm-tags-menu>
+</mat-menu>

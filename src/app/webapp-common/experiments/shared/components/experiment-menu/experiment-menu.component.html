@@ -113,7 +113,7 @@
     #tagMenuContent
     class="light-theme"
     [tags]="experiment?.tags"
-    [tagsFilterByProject]="tagsFilterByProject"
+    [tagsFilterByProject]="projectId !== '*' && tagsFilterByProject"
     [projectTags]="projectTags"
     [companyTags]="companyTags"
     (tagSelected)="tagSelected.emit($event)">

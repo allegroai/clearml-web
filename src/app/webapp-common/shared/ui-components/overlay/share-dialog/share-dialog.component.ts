@@ -2,9 +2,9 @@ import {Component, Inject} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {IShareDialogConfig} from './share-dialog.model';
 import {addMessage} from '../../../../core/actions/layout.actions';
-import {MESSAGES_SEVERITY} from '../../../../../app.constants';
 import {Store} from '@ngrx/store';
 import {shareSelectedExperiments} from '../../../../experiments/actions/common-experiments-menu.actions';
+import {MESSAGES_SEVERITY} from '@common/constants';
 
 @Component({
   selector: 'sm-share-dialog',

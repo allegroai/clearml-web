@@ -9,7 +9,7 @@ import {RouterEffects} from '@common/core/effects/router.effects';
 import {CommonUserEffects} from '@common/core/effects/users.effects';
 import {createUserPrefReducer} from '@common/core/meta-reducers/user-pref-reducer';
 import {messagesReducer} from '@common/core/reducers/messages-reducer';
-import {projectsReducer} from '@common/core/reducers/projects.reducer';
+import {projectsReducer, RootProjects} from '@common/core/reducers/projects.reducer';
 import {routerReducer} from '@common/core/reducers/router-reducer';
 import {SmSyncStateSelectorService} from '@common/core/services/sync-state-selector.service';
 import {EXPERIMENTS_COMPARE_METRICS_CHARTS_} from '@common/experiments-compare/actions/experiments-compare-charts.actions';
@@ -62,6 +62,8 @@ const syncedKeys = [
   'datasets.selected',
   'projects.selectedProjectId',
   'projects.selectedProject',
+  'rootProjects.showHidden',
+  'rootProjects.hideExamples',
   'views.availableUpdates',
   'views.showSurvey',
   'views.neverShowPopupAgain'
@@ -96,7 +98,7 @@ const userPrefMetaFactory = (userPreferences: UserPreferences): MetaReducer<any>
   (reducer: ActionReducer<any>) =>
     createUserPrefReducer('users', ['activeWorkspace', 'showOnlyUserWork'], [USERS_PREFIX], userPreferences, reducer),
   (reducer: ActionReducer<any>) =>
-    createUserPrefReducer('rootProjects', ['tagsColors', 'graphVariant', 'showHidden'], [ROOT_PROJECTS_PREFIX], userPreferences, reducer),
+    createUserPrefReducer('rootProjects', ['tagsColors', 'graphVariant', 'showHidden', 'hideExamples', 'aa'] as (keyof RootProjects)[], [ROOT_PROJECTS_PREFIX], userPreferences, reducer),
   (reducer: ActionReducer<any>) =>
     createUserPrefReducer('views', ['autoRefresh', 'neverShowPopupAgain', 'redactedArguments', 'hideRedactedArguments'], [VIEW_PREFIX], userPreferences, reducer),
   localStorageReducer,

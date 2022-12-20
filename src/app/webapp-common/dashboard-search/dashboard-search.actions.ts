@@ -5,6 +5,7 @@ import {Task} from '~/business-logic/model/tasks/task';
 import {Model} from '~/business-logic/model/models/model';
 import {ActiveSearchLink} from '~/features/dashboard-search/dashboard-search.consts';
 import {DASHBOARD_PREFIX} from '@common/dashboard/common-dashboard.const';
+import {IReport} from "@common/reports/reports.consts";
 
 
 export const searchSetTerm = createAction(
@@ -29,6 +30,16 @@ export const searchProjects = createAction(
 export const searchPipelines = createAction(
   SEARCH_PREFIX + 'SEARCH_PIPELINES',
   props<{ query: string; regExp?: boolean }>()
+);
+
+export const searchReports = createAction(
+  SEARCH_PREFIX + 'SEARCH_REPORTS',
+  props<{ query: string; regExp?: boolean }>()
+);
+
+export const setReportsResults = createAction(
+  'Set Reports Results',
+  props<{ reports: IReport[]; scrollId: string }>()
 );
 
 export const searchOpenDatasets = createAction(

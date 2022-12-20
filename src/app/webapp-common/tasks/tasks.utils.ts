@@ -1,9 +1,8 @@
 import {Task} from '~/business-logic/model/tasks/task';
 import {cloneDeep, isEmpty, sortBy} from 'lodash/fp';
 import {SelectableListItem} from '@common/shared/ui-components/data/selectable-list/selectable-list.model';
-import {GroupedList} from '@common/shared/ui-components/data/selectable-grouped-filter-list/selectable-grouped-filter-list.component';
-import {Config} from 'plotly.js';
-import {ExtData, ExtFrame, ExtLayout} from '../shared/experiment-graphs/single-graph/plotly-graph-base';
+import {Config, PlotData} from 'plotly.js';
+import {ExtData, ExtFrame, ExtLayout} from '../shared/single-graph/plotly-graph-base';
 import {MetricsPlotEvent} from '../../business-logic/model/events/models';
 import {KeyValue} from '@angular/common';
 
@@ -16,6 +15,10 @@ export interface IMultiplot {
       };
     };
   };
+}
+
+export interface GroupedList {
+  [metric: string]: { [variant: string]: { [experimentId: string]: PlotData } };
 }
 
 export const mergeTasks = (tableTask, task) => {
@@ -70,7 +73,7 @@ export const tryParseJson = (plotString: string): { data: any; layout: any; conf
   return parsed;
 };
 
-export const convertPlot = (graph: MetricsPlotEvent, experimentId?: string): {plot: Partial<ExtFrame>; hadError: boolean} => {
+export const convertPlot = (graph: MetricsPlotEvent, experimentId?: string): { plot: Partial<ExtFrame>; hadError: boolean } => {
   if (!graph?.plot_str) {
     return null;
   }
@@ -103,7 +106,7 @@ export const convertScalar = (chartData, title?: string): Partial<ExtFrame> => {
     return null;
   }
   return prepareGraph(chartData, {type: 'scalar', title, xaxis: {title: 'Iterations'}}, {}, {metric: title});
-}
+};
 
 export const convertScalars = (scalars: GroupedList, experimentId: string): { [key: string]: ExtFrame[] } =>
   Object.entries(scalars).reduce((acc, graphGroup) => {
@@ -170,14 +173,14 @@ export const compareByFieldFunc = (field) =>
 
 export const mergeMultiMetrics = (metrics): { [key: string]: ExtFrame[] } => {
   const graphsMap = {};
-  Object.keys(metrics).forEach(key => {
-    Object.keys(metrics[key]).forEach(itemKey => {
-      const chartData = Object.entries(metrics[key][itemKey])
-        .map(([variant, data]: [string, any]) => ({...data, type: 'scatter', task: variant}));
-      graphsMap[key + itemKey] = [prepareGraph(chartData, {
+  Object.keys(metrics).forEach(metric => {
+    Object.keys(metrics[metric]).forEach(variant => {
+      const chartData = Object.entries(metrics[metric][variant])
+        .map(([task, data]: [string, any]) => ({...data, type: 'scatter', task}));
+      graphsMap[metric + variant] = [prepareGraph(chartData, {
         type: 'multiScalar',
-        title: key + ' / ' + itemKey
-      }, {}, {})];
+        title: metric + ' / ' + variant
+      }, {}, {metric, variant})];
     });
   });
   return graphsMap;
@@ -188,16 +191,17 @@ export const mergeMultiMetricsGroupedVariant = (metrics): { [key: string]: ExtFr
   Object.keys(metrics).forEach(metric => {
     const chartData = [];
     Object.keys(metrics[metric]).forEach(variant => {
+      const multipleExperiments = Object.keys(metrics[metric][variant]).length > 1;
       chartData.push(Object.entries(metrics[metric][variant])
         .map(([taskId, data]: [string, any]) => ({
           ...data,
           type: 'scatter',
           task: taskId,
-          name: `${variant} - ${data.name}`
+          name: multipleExperiments? `${variant} - ${data.name}` : variant
         }))
       );
     });
-    graphsMap[metric] = [prepareGraph((chartData as any).flat(), {type: 'multiScalar', title: metric}, {}, {})];
+    graphsMap[metric] = [prepareGraph((chartData as any).flat(), {type: 'multiScalar', title: metric}, {}, {metric})];
   });
   return graphsMap;
 };
@@ -212,49 +216,52 @@ export const convertMultiPlots = (plots): { [key: string]: ExtFrame[] } =>
     return acc;
   }, {});
 
-export const multiplotsAddChartToGroup = (charts, parsed, metric, experiment, experimentId) => {
+export const multiplotsAddChartToGroup = (charts, parsed, metric, experiment, experimentId, variant, isMultipleVar: boolean) => {
   const allowedTypes = ['scatter', 'bar'];
   let fullName: string;
+  const metricVariant = isMultipleVar ? `${metric} - ${variant}` : metric;
   if (parsed.layout && parsed.layout.images) {
-    if (!charts[metric]) {
-      charts[metric] = {};
+    if (!charts[metricVariant]) {
+      charts[metricVariant] = {};
     }
-    const index = Object.keys(charts[metric]).length;
-    charts[metric][index] = parsed;
+    const index = Object.keys(charts[metricVariant]).length;
+    charts[metricVariant][index] = parsed;
   }
   for (let i = 0; i < parsed.data.length; i++) {
     let isMultipleTasks = false;
-    const variant = parsed.data.slice()[i];
-    if (!variant) {
+    const variantPlot = parsed.data.slice()[i];
+    if (!variantPlot) {
       continue;
     }
-    const metricName = metric;
+    const metricName = metricVariant;
     if (!charts[metricName]) {
       charts[metricName] = {};
     }
-    if ((!variant.type || allowedTypes.includes(variant.type)) && variant.name) {
-      fullName = metric + '-' + variant.name;
-      variant.name = (experiment);
-      variant.task = (experimentId);
+    if ((!variantPlot.type || allowedTypes.includes(variantPlot.type)) && variantPlot.name) {
+      fullName = metricVariant + '-' + variantPlot.name;
+      variantPlot.name = (experiment);
+      variantPlot.task = (experimentId);
     } else {
-      fullName = metric + '-' + experiment;
+      fullName = metricVariant + '-' + experiment;
     }
     if (!charts[metricName][fullName]) {
       charts[metricName][fullName] = Object.assign({}, parsed);
-      charts[metricName][fullName].data = [variant];
+      charts[metricName][fullName].data = [variantPlot];
     } else {
-      charts[metricName][fullName].data = _mergeVariants(charts[metricName][fullName].data.slice(), variant);
+      charts[metricName][fullName].data = _mergeVariants(charts[metricName][fullName].data.slice(), variantPlot);
       isMultipleTasks = true;
     }
     charts[metricName][fullName].layout = Object.assign({}, {...charts[metricName][fullName].layout});
     charts[metricName][fullName].layout.title = fullName;
     charts[metricName][fullName].layout.name = charts[metricName][fullName].layout.name ? `${charts[metricName][fullName].layout.name} - ${experiment}` : fullName;
     charts[metricName][fullName].layout.barmode = isMultipleTasks ? 'group' : 'stack';
+    charts[metricName][fullName].metric = metric;
+    charts[metricName][fullName].variant = variant;
   }
   return charts;
 };
 
-export const seperateMultiplotsVariants = (mixedPlot: IMultiplot, isMultipleVarients): {charts: any; parsingError: boolean} => {
+export const seperateMultiplotsVariants = (mixedPlot: IMultiplot, isMultipleVarients): { charts: any; parsingError: boolean } => {
   let charts = {};
   let parsingError: boolean;
   const values = Object.values(mixedPlot);
@@ -281,15 +288,14 @@ export const seperateMultiplotsVariants = (mixedPlot: IMultiplot, isMultipleVari
       if (parsed.data.length === 0 && parsed.layout.title === 'Unknown data') {
         parsingError = true;
       }
-      const metric = isMultipleVarients ? plot.metric + '-' + plot.variant : plot.metric;
-      charts = multiplotsAddChartToGroup(charts, parsed, metric, experimentName, experimentId);
+      charts = multiplotsAddChartToGroup(charts, parsed, plot.metric, experimentName, experimentId, plot.variant, isMultipleVarients);
     });
   }
 
   return {charts, parsingError};
 };
 
-export const prepareMultiPlots = (multiPlots: MetricsPlotEvent): {merged: any; parsingError: boolean} => {
+export const prepareMultiPlots = (multiPlots: any): { merged: any; parsingError: boolean } => {
   let hadParsingError = false;
   if (!multiPlots) {
     return {merged: multiPlots, parsingError: false};
@@ -370,23 +376,5 @@ export const timeInWords = (milliseconds: number, granularityLevel = 3) => {
     }
   }
   return output.join(' ');
-};
-
-export const chooseTimeUnit = (data) => {
-  if (!data[0]?.x || !data[0]?.x[0] || !data[0]?.x[1]) {
-    return {time: 1000, str: 'Seconds'};
-  }
-  const first = data[0].x[0];
-  const last = data[0].x[data[0].x.length - 1];
-  const seconds = Math.floor((last - first) / 1000);
-  const timesConst = [12 * 30 * 24 * 60 * 60, 30 * 24 * 60 * 60, 24 * 60 * 60, 60 * 60, 60, 1];
-  const timeStringPlural = ['Years', 'Months', 'Days', 'Hours', 'Minutes', 'Seconds'];
-  for (let i = 0; i < timesConst.length; i++) {
-    if (seconds / timesConst[i + 1] > 100) {
-      return {time: timesConst[i] * 1000, str: timeStringPlural[i]};
-    }
-  }
-  const lastIndex = timesConst.length - 1;
-  return {time: timesConst[lastIndex] * 1000, str: timeStringPlural[lastIndex]};
 };
 
