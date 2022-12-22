@@ -11,10 +11,10 @@ import {selectS3BucketCredentials} from '@common/core/reducers/common-auth-reduc
 import {Observable, Subscription} from 'rxjs';
 import {debounceTime, distinctUntilChanged, filter, map, tap} from 'rxjs/operators';
 import {addMessage} from '@common/core/actions/layout.actions';
-import {MESSAGES_SEVERITY} from '~/app.constants';
-import {isReadOnly} from '@common/shared/utils/shared-utils';
 import {selectBackdropActive} from '@common/core/reducers/view.reducer';
 import {setTableMode} from '@common/models/actions/models-view.actions';
+import {isReadOnly} from '@common/shared/utils/is-read-only';
+import {MESSAGES_SEVERITY} from '@common/constants';
 
 
 @Component({

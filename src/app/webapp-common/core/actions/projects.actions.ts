@@ -112,6 +112,16 @@ export const setCompanyTags = createAction(
   props<{ tags: string[]; systemTags: string[] }>()
 );
 
+export const setMainPageTagsFilter = createAction(
+  PROJECTS_PREFIX + '[set main page tags filters]',
+  props<{ tags: string[] }>()
+);
+
+export const setMainPageTagsFilterMatchMode = createAction(
+  PROJECTS_PREFIX + '[set main page tags filters match mode]',
+  props<{ matchMode: string }>()
+);
+
 export const addProjectTags = createAction(
   PROJECTS_PREFIX + '[add all projects tags]',
   props<{ tags: string[]; systemTags: string[] }>()
@@ -165,4 +175,9 @@ export const getFilteredUsers = createAction(
 export const setShowHidden = createAction(
   PROJECTS_PREFIX + ' [set show hidden]',
   props<{ show: boolean }>()
+);
+
+export const setHideExamples = createAction(
+  PROJECTS_PREFIX + ' [set hide examples]',
+  props<{ hide: boolean }>()
 );

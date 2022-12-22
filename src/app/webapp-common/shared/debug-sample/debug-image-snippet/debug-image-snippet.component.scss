@@ -1,0 +1,150 @@
+@import "variables";
+
+.item-snippet {
+  width: 180px;
+  height: 180px;
+  border-radius: 4px;
+  position: relative;
+  text-align: center;
+  background: $blue-50;
+
+  video {
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
+
+  img {
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 4px;
+  }
+
+  img.loading, .html-wrap.loading {
+    background-image: url("../../../assets/icons/Spinner.svg");
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 24px;
+  }
+
+  &.loading {
+    background: white;
+  }
+  .image, .player {
+    height: 100%;
+  }
+
+  &:hover:not(.no-hover-effect) {
+    box-shadow: 0 0 0 2px $blue-200;
+    .toolbar {
+      opacity: 1;
+      visibility: visible;
+    }
+    .html-wrap,
+    .image img {
+      filter: blur(1px);
+    }
+  }
+
+  // LIGHT THEME
+  // --------------------------
+  &.light {
+    .image-var {
+      color: $blue-500;
+      background-color: rgba($blue-50, 0.9);
+    }
+  }
+
+
+  // DARK THEME
+  // --------------------------
+  &.dark {
+    background: $blue-700;
+    &.loading {
+      background: $blue-700;
+    }
+    .image-var {
+      color: $blue-300;
+    }
+    &:hover {
+      box-shadow: 0 0 0 2px $blue-500;
+    }
+  }
+
+}
+
+.image-var {
+  width: calc(100% - 18px);
+  height: 20px;
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  border-radius: 4px;
+  padding: 0 12px;
+  color: $blue-100;
+  background-color: rgba($blue-900, 0.6);
+}
+
+.html-wrap {
+  width: 180px;
+  height: 180px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.html-viewer {
+  resize: none;
+  overflow: auto;
+  transform: scale(0.448);
+  transform-origin: 0 0;
+  border: none;
+}
+.html-snippet {
+  border-radius: 4px;
+  overflow: hidden;
+
+  &:hover {
+    .toolbar {
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+}
+
+
+.toolbar {
+  display: flex;
+  justify-content: center;
+  gap: 6px 12px;
+  position: absolute;
+  z-index: 10;
+  bottom: 32px;
+  left: 10px;
+  right: 10px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s, visibility 0.5s;
+
+  &.top {
+    bottom: unset;
+    top: 10px;
+    justify-content: end;
+  }
+}
+
+.clickable-icon {
+  width: 24px;
+  height: 24px;
+  background-color: $blue-400;
+  color: $blue-50;
+  border-radius: 4px;
+  &:hover {
+    background-color: $blue-500;
+  }
+}
+

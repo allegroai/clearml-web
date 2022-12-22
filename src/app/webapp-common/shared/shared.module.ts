@@ -14,8 +14,12 @@ import {ModelCardComponent} from './ui-components/panel/model-card/model-card.co
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
-import {ExperimentInfoHeaderStatusProgressBarComponent} from './experiment-info-header-status-progress-bar/experiment-info-header-status-progress-bar.component';
-import {ExperimentInfoHeaderStatusIconLabelComponent} from './experiment-info-header-status-icon-label/experiment-info-header-status-icon-label.component';
+import {
+  ExperimentInfoHeaderStatusProgressBarComponent
+} from './experiment-info-header-status-progress-bar/experiment-info-header-status-progress-bar.component';
+import {
+  ExperimentInfoHeaderStatusIconLabelComponent
+} from './experiment-info-header-status-icon-label/experiment-info-header-status-icon-label.component';
 import {TableModule} from 'primeng/table';
 import {SectionHeaderComponent} from './components/section-header/section-header.component';
 import {LineChartComponent} from './components/charts/line-chart/line-chart.component';
@@ -24,25 +28,28 @@ import {NgxJsonViewerComponent} from './components/ngx-json-viewer/ngx-json-view
 import {ExperimentRefreshComponent} from './components/experiment-refresh/experiment-refresh.component';
 import {LeavingBeforeSaveAlertGuard} from './guards/leaving-before-save-alert.guard';
 import {CustomColumnsListComponent} from './components/custom-columns-list/custom-columns-list.component';
-import { BaseContextMenuComponent } from './components/base-context-menu/base-context-menu.component';
+import {BaseContextMenuComponent} from './components/base-context-menu/base-context-menu.component';
 import {EntityFooterComponent} from './entity-page/entity-footer/entity-footer.component';
 import {CheckPermissionDirective} from '~/shared/directives/check-permission.directive';
 import {ScrollTextareaComponent} from './components/scroll-textarea/scroll-textarea.component';
-import { ShowOnlyUserWorkComponent } from './components/show-only-user-work/show-only-user-work.component';
+import {ShowOnlyUserWorkComponent} from './components/show-only-user-work/show-only-user-work.component';
 import {GeneralLeavingBeforeSaveAlertGuard} from './guards/general-leaving-before-save-alert.guard';
 import {SortHumanizePipe} from './pipes/sort.pipe';
-import { ScatterPlotComponent } from './components/charts/scatter-plot/scatter-plot.component';
-import {
-  ClearFiltersButtonComponent,
-} from './components/clear-filters-button/clear-filters-button.component';
+import {ScatterPlotComponent} from './components/charts/scatter-plot/scatter-plot.component';
+import {ClearFiltersButtonComponent,} from './components/clear-filters-button/clear-filters-button.component';
 import {MultiLineTooltipComponent} from './components/multi-line-tooltip/multi-line-tooltip.component';
-import {ExperimentCompareGeneralDataComponent} from '../experiments-compare/dumbs/experiment-compare-general-data/experiment-compare-general-data.component';
-import { BaseEntityHeaderComponent } from './entity-page/base-entity-header/base-entity-header.component';
-import { IdBadgeComponent } from './components/id-badge/id-badge.component';
+import {
+  ExperimentCompareGeneralDataComponent
+} from '../experiments-compare/dumbs/experiment-compare-general-data/experiment-compare-general-data.component';
+import {BaseEntityHeaderComponent} from './entity-page/base-entity-header/base-entity-header.component';
+import {IdBadgeComponent} from './components/id-badge/id-badge.component';
 import {
   SelectMetadataKeysCustomColsComponent
 } from './components/select-metadata-keys-custom-cols/select-metadata-keys-custom-cols.component';
 import {ScrollingModule} from '@angular/cdk/scrolling';
+import {MainPagesHeaderFilterComponent} from './components/main-pages-header-filter/main-pages-header-filter.component';
+import {MarkdownEditorComponent} from '@common/shared/components/markdown-editor/markdown-editor.component';
+import {LMarkdownEditorModule} from 'ngx-markdown-editor';
 
 const _declarations = [
   ExperimentInfoHeaderStatusProgressBarComponent,
@@ -66,6 +73,8 @@ const _declarations = [
   SelectMetadataKeysCustomColsComponent,
   MultiLineTooltipComponent,
   ExperimentCompareGeneralDataComponent,
+  MainPagesHeaderFilterComponent,
+  MarkdownEditorComponent
 ];
 
 
@@ -83,7 +92,9 @@ const _declarations = [
     MatButtonToggleModule,
     MatSnackBarModule,
     ChipsModule,
-    ScrollingModule
+    ScrollingModule,
+    LMarkdownEditorModule,
+
   ],
   declarations: [
     _declarations,

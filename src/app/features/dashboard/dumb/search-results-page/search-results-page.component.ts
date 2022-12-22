@@ -4,6 +4,7 @@ import {Task} from '~/business-logic/model/tasks/task';
 import {ITask} from '~/business-logic/model/al-task';
 import {Model} from '~/business-logic/model/models/model';
 import {activeLinksList, ActiveSearchLink, activeSearchLink} from '~/features/dashboard-search/dashboard-search.consts';
+import {IReport} from '../../../../webapp-common/reports/reports.consts';
 
 @Component({
   selector: 'sm-search-results-page',
@@ -19,6 +20,7 @@ export class SearchResultsPageComponent {
   @Input() modelsList: Array<Model> = [];
   @Input() pipelinesList: Array<Project> = [];
   @Input() datasetsList: Array<Project> = [];
+  @Input() reportsList: Array<IReport> = [];
   @Input() activeLink: ActiveSearchLink;
   @Input() resultsCount: Map<ActiveSearchLink, number>;
 
@@ -27,6 +29,7 @@ export class SearchResultsPageComponent {
   @Output() experimentSelected = new EventEmitter<ITask>();
   @Output() modelSelected = new EventEmitter<Model>();
   @Output() pipelineSelected = new EventEmitter<Project>();
+  @Output() reportSelected = new EventEmitter<IReport>();
   @Output() openDatasetSelected = new EventEmitter<Project>();
   @Output() loadMoreClicked = new EventEmitter();
 
@@ -48,6 +51,10 @@ export class SearchResultsPageComponent {
 
   public openDatasetClicked(project: Project) {
     this.openDatasetSelected.emit(project);
+  }
+
+  reportClicked(report: IReport) {
+    this.reportSelected.emit(report);
   }
 
   getResults = () => this[`${this.activeLink}List`];

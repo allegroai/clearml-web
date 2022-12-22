@@ -39,6 +39,7 @@
         [splitSize]="splitSize$ | async"
         [isDarkTheme]="dark"
         (resetGraphs)="resetMetrics()"
+        (createEmbedCode)="createEmbedCode($event)"
       >
       </sm-experiment-graphs>
     </div>

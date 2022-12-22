@@ -5,6 +5,6 @@
               [indeterminate]="indeterminateState[option.value] === checkboxState.exclude"
               (change)="onFilterChanged($event)"
 >
-  <span [smTooltip]="option.tooltip || option.value" smShowTooltipIfEllipsis [showAllwaysTooltip]="!!option.tooltip" matTooltipPosition="above" class="ellipsis label"> {{option.label}}</span>
+  <span [smTooltip]="option.tooltip || option.value" smShowTooltipIfEllipsis [showAllwaysTooltip]="!!option.tooltip" matTooltipPosition="above" data-id="FilterOption" class="ellipsis label"> {{option.label}}</span>
 </mat-checkbox>
 <div *ngIf="options?.length===0" class="empty-menu flex-middle">No item found</div>

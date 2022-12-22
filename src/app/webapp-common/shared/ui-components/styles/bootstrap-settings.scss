@@ -63,7 +63,7 @@ $btn-font-family: $font-family-base;
 
   .btn {
     font-size: 12px;
-    line-height: 1;
+    line-height: normal;
     letter-spacing: 0.03em;
     padding: 6px 12px;
     border-radius: 4px;
@@ -193,8 +193,26 @@ $btn-font-family: $font-family-base;
     }
 
     &:focus {
-      background-color: #f8f9fa; // TODO: ask brio.
+      background-color: #f8f9fa;
       border: solid 1px $neon-yellow-hover;
+    }
+  }
+
+  .btn-outline-dark {
+    border-color: $blue-600;
+    color: $blue-300;
+    background-color: transparent;
+    &:hover {
+      color: $blue-200;
+      border-color: $blue-500;
+      background-color: $blue-500;
+    }
+  }
+  
+  .btn.btn-icon {
+    color: $blue-300;
+    &:hover {
+      background-color: $blue-500;
     }
   }
 

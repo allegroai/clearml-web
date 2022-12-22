@@ -20,48 +20,20 @@
     </mat-expansion-panel>
   </div>
 
-  <ng-container *ngIf="!loading">
-    <div *ngIf="info || editMode; else noData" class="md-editor-preview" [class.editor]="editMode">
-
-      <div class="md-content" [class.edit-mode]="editMode" [class.dirty]="isDirty" [class.editor-hidden]="editorVisible">
-        <button *ngIf="!example && !editMode" class="btn btn-cml-primary md-btn-edit" (click)="editClicked()">EDIT</button>
-        <button *ngIf="editMode" class="btn btn-cml-primary btn-preview-toggle" (click)="togglePreview()">
-          {{ editorVisible? 'EDIT' : 'PREVIEW' }}
-        </button>
-        <span *ngIf="editMode && !editorVisible" class="preview-header">PREVIEW</span>
-        <md-editor #editorComponent
-                   name="Content"
-                   [(ngModel)]="info"
-                   height="100%"
-                   [mode]="editMode? 'editor' : 'preview'"
-                   [options]="options"
-                   (onEditorLoaded)="editorReady()"
-                   (ngModelChange)="checkDirty()">
-        </md-editor>
-      </div>
-
-      <div class="md-footer">
-        <div [class]="(editMode && isDirty ? 'active' : '') + ' md-warning'">* You have unsaved changes</div>
-        <div *ngIf="editMode" class="right-buttons">
-          <button class="btn btn-cml-primary btn-outline"
-                  (click)="cancelClicked()">CANCEL
-          </button>
-          <button class="btn btn-cml-primary"
-                  [disabled]="!isDirty"
-                  (click)="saveInfo()">SAVE
-          </button>
-        </div>
-      </div>
-
+  <sm-markdown-editor
+    #editor
+    *ngIf="!loading"
+    [class.editor]="editor.editMode"
+    [data]="info"
+    [readOnly]="example"
+    (saveInfo)="saveInfo($event)"
+  >
+    <div no-data class="flex-middle overview-placeholder" *ngIf="!example">
+      <i class="icon i-markdown xxl"></i>
+      <div class="no-data-title">THERE’S NOTHING HERE YET…</div>
+      <button (click)="editor.editClicked()" class="no-data-button btn btn-neon">
+        <span>ADD PROJECT OVERVIEW</span>
+      </button>
     </div>
-    <ng-template #noData>
-      <div class="flex-middle overview-placeholder" *ngIf="!example">
-        <i class="icon i-markdown xxl"></i>
-        <div class="no-data-title">THERE’S NOTHING HERE YET…</div>
-        <button (click)="editClicked()" class="no-data-button btn btn-neon">
-          <span>ADD PROJECT OVERVIEW</span>
-        </button>
-      </div>
-    </ng-template>
-  </ng-container>
+  </sm-markdown-editor>
 </div>

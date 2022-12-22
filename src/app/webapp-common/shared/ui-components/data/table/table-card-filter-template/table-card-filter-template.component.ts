@@ -71,7 +71,6 @@ export class TableCardFilterTemplateComponent {
 
   emitFilterChangedCheckBox(colId: string, values: string[]) {
     this.filterChanged.emit({col: colId, value: values, matchMode: this.filterMatch?.[colId]});
-
   }
 
   onSubFilterChanged(col, val) {

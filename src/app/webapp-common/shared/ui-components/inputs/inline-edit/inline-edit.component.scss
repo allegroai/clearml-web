@@ -1,4 +1,4 @@
-@import "../../styles/variables";
+@import "variables";
 
 $inline-edit-base-width: 93%;
 
@@ -103,16 +103,18 @@ $inline-edit-base-width: 93%;
   }
 
   .editable-pen {
-    position: relative;
-    margin-left: 6px;
+    position: absolute;
+    right: 0;
+    top: calc(50% - 10px);
   }
 }
 
 .editable-div {
+  position: relative;
   .editable-pen {
     opacity: 0;
     height: 100%;
-    transition: opacity 1s;
+    transition: opacity 0.35s;
   }
 
   &:hover {

@@ -30,7 +30,7 @@ export class ExperimentsCompareParamsEffects {
     map(action => activeLoader(action.type))
   ));
 
-  updateExperimentsDetail$ = createEffect(() => this.actions$.pipe(
+  updateExperimentsList$ = createEffect(() => this.actions$.pipe(
     ofType(paramsActions.experimentListUpdated),
     switchMap((action) => this.store.select(selectActiveWorkspaceReady).pipe(
       filter(ready => ready),
@@ -44,6 +44,7 @@ export class ExperimentsCompareParamsEffects {
           // get only the relevant experiments
           map(([experiments, oldExperiments]: [ExperimentDetailBase[], ExperimentParams[]]) =>
             oldExperiments.filter(exp => action.ids.includes(exp.id)).concat(experiments as ExperimentParams[])),
+          map(experiments=> action.ids.map(id=> experiments.find(experiment=> experiment.id===id))),
           mergeMap(experiments => [
             deactivateLoader(action.type),
             setExperiments({experiments})

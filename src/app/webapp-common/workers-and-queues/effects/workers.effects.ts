@@ -3,7 +3,6 @@ import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {Action, Store} from '@ngrx/store';
 import {castArray, cloneDeep} from 'lodash/fp';
 import {catchError, mergeMap, switchMap, withLatestFrom} from 'rxjs/operators';
-import {MESSAGES_SEVERITY} from '~/app.constants';
 import {ApiWorkersService} from '~/business-logic/api-services/workers.service';
 import {WORKER_STATS_PARAM_INFO} from '../workers-and-queues.consts';
 import {WorkersGetActivityReportRequest} from '~/business-logic/model/workers/workersGetActivityReportRequest';
@@ -17,6 +16,7 @@ import {addFullRangeMarkers, addStats, getLastTimestamp, removeFullRangeMarkers}
 import {showStatsErrorNotice, hideNoStatsNotice} from '../actions/stats.actions';
 import {addMultipleSortColumns} from '../../shared/utils/shared-utils';
 import {transformAndSortWorkers} from '@common/workers-and-queues/workers-and-queues.utils';
+import {MESSAGES_SEVERITY} from '@common/constants';
 
 const prepareStatsQuery = (entitie: string, keys: { key: string }[], range: number, granularity: number): WorkersGetStatsRequest => {
   const now = Math.floor((new Date()).getTime() / 1000);

@@ -1,0 +1,157 @@
+@import "variables";
+
+:host {
+  display: grid !important;
+  grid-template-rows: 64px calc(100% - 64px);
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 24px;
+
+    .name {
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 1.5;
+      color: $blue-200;
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      .g-btns {
+        display: inherit;
+        margin-left: 12px;
+        gap: 12px;
+      }
+    }
+  }
+
+  .content {
+    padding: 3px 0 0 24px;
+
+    mat-drawer-content {
+      z-index: 2;
+    }
+
+    mat-drawer-container.iframe-maximized {
+      z-index: 15;
+    }
+  }
+
+  .hover-button {
+    position: absolute;
+    left: 70px;
+    top: 110px;
+    z-index: 14;
+
+    button {
+      padding: 6px;
+      display: flex;
+      align-items: center;
+
+      i.open {
+        transform: rotate(180deg);
+      }
+    }
+  }
+
+  mat-drawer {
+    background-color: $blue-800;
+
+    &.mat-drawer-over {
+      box-shadow: 10px 0 5px 5px $blue-800;
+    }
+  }
+
+  .description {
+    width: 300px;
+    margin: 3px 16px auto 0;
+
+    & > textarea {
+      display: block;
+      background-color: $blue-900;
+      width: 100%;
+      height: 200px;
+      padding: 12px;
+      border: 0;
+      border-radius: 4px;
+      resize: none;
+      color: $blue-300;
+
+      &::placeholder {
+        color: $blue-400;
+      }
+    }
+
+    .edit-button {
+      position: absolute;
+      top: 12px;
+      right: 24px;
+      opacity: 0;
+      transition: opacity 300ms ease-in-out;
+    }
+
+    &:hover {
+      .edit-button {
+        opacity: 1;
+      }
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 12px;
+      gap: 12px;
+    }
+  }
+
+  sm-markdown-editor {
+    display: block;
+    width: 100%;
+    min-height: 300px;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 3px 24px 0 3px;
+    transition: max-width 0.5s;
+
+    &.edit {
+      max-width: 1856px;
+      height: 100%
+    }
+
+    &.full-width {
+      max-width: 100%;
+    }
+  }
+
+  mat-drawer-container {
+    margin: 0 auto;
+    max-width: 1856px;
+  }
+}
+
+.placeholder {
+  max-width: 960px;
+  background-color: $blue-900;
+  border-radius: 4px;
+  flex: 1;
+
+  .al-icon {
+    color: $blue-600;
+  }
+
+  .no-data-title {
+    font-size: 20px;
+    color: $blue-100;
+    font-weight: 500;
+    margin: 24px 0;
+  }
+
+  .no-data-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}

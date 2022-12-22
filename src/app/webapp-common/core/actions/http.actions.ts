@@ -7,7 +7,7 @@ export const requestFailed = createAction(
   (err: HttpErrorResponse) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const {headers, ...others} = err;
-    return {err: {...others, error: {meta: others.error.meta}}};
+    return {err: {...others, error: {meta: others.error?.meta}}};
   }
 );
 

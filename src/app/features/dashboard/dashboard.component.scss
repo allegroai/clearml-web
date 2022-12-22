@@ -11,29 +11,8 @@
   .recent {
     height: 100%;
     overflow: auto;
-  }
-
-  .search-bar {
-    padding-top: 16px;
-    padding-bottom: 16px;
-    margin-left: 64px;
-    background-color: $blue-900;
-    text-align: center;
-    position: relative;
-
-    ::ng-deep sm-search {
-      input {
-        font-size: 16px;
-
-        &::-webkit-input-placeholder {
-          font-size: 16px;
-        }
-
-        &::-moz-placeholder {
-          font-size: 16px;
-        }
-      }
-    }
+    max-width: 2400px;
+    margin: 0 auto;
   }
 
   .clear-search {
@@ -45,12 +24,11 @@
   .view-all {
     font-size: 12px;
     font-weight: bold;
-    color: $blue-400;
   }
 
   sm-dashboard-experiments {
     display: block;
-    margin: 0 auto;
+    margin: 24px auto 0;
     height: calc(100% - 356px);
   }
 

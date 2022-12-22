@@ -46,6 +46,7 @@ export class ExperimentsCompareDetailsEffects {
           withLatestFrom(this.store.pipe(select(selectExperimentsDetails))),
           // get only the relevant experiments
           map(([experiments, oldExperiments]) => oldExperiments.filter(exp => action.ids.includes(exp.id)).concat(experiments)),
+          map(experiments=> action.ids.map(id=> experiments.find(experiment=> experiment.id===id))),
           mergeMap(experiments => [
             deactivateLoader(action.type),
             setExperiments({experiments})

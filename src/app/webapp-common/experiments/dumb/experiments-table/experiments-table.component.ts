@@ -1,4 +1,14 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+  TemplateRef
+} from '@angular/core';
 import {TIME_FORMAT_STRING} from '@common/constants';
 import {ColHeaderTypeEnum, ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {FILTERED_EXPERIMENTS_STATUS_OPTIONS} from '../../shared/common-experiments.const';
@@ -14,9 +24,13 @@ import {Store} from '@ngrx/store';
 import {NoUnderscorePipe} from '@common/shared/pipes/no-underscore.pipe';
 import {TitleCasePipe} from '@angular/common';
 import {INITIAL_EXPERIMENT_TABLE_COLS} from '../../experiment.consts';
-import {ProjectsGetTaskParentsResponseParents} from '~/business-logic/model/projects/projectsGetTaskParentsResponseParents';
+import {
+  ProjectsGetTaskParentsResponseParents
+} from '~/business-logic/model/projects/projectsGetTaskParentsResponseParents';
 import {Router} from '@angular/router';
-import {IOption} from '@common/shared/ui-components/inputs/select-autocomplete-for-template-forms/select-autocomplete-for-template-forms.component';
+import {
+  IOption
+} from '@common/shared/ui-components/inputs/select-autocomplete-for-template-forms/select-autocomplete-for-template-forms.component';
 import {CountAvailableAndIsDisableSelectedFiltered} from '@common/shared/entity-page/items.utils';
 import {hyperParamSelectedExperiments, selectAllExperiments} from '../../actions/common-experiments-view.actions';
 import {createFiltersFromStore, excludedKey, uniqueFilterValueAndExcluded} from '@common/shared/utils/tableParamEncode';
@@ -201,7 +215,7 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit, 
     return this._tableFilters;
   }
 
-  @Output() experimentSelectionChanged = new EventEmitter<{experiment: ITableExperiment; openInfo?: boolean}>();
+  @Output() experimentSelectionChanged = new EventEmitter<{ experiment: ITableExperiment; openInfo?: boolean }>();
   @Output() experimentsSelectionChanged = new EventEmitter<Array<ITableExperiment>>();
   @Output() loadMoreExperiments = new EventEmitter();
   @Output() sortedChanged = new EventEmitter<{ isShift: boolean; colId: ISmCol['id'] }>();
@@ -267,10 +281,10 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit, 
     }
   }
 
-  tableRowClicked(event: { e: MouseEvent; data: ITableExperiment}) {
+  tableRowClicked(event: { e: MouseEvent; data: ITableExperiment }) {
     if (this._selectedExperiments.some(exp => exp.id === event.data.id)) {
       this.onContextMenu({e: event.e, rowData: event.data, backdrop: true});
-    } else {
+    } else if (!this.selectionReachedLimit) {
       this.experimentsSelectionChanged.emit([event.data]);
     }
   }

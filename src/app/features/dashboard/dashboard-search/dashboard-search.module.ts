@@ -8,12 +8,14 @@ import {DashboardSearchEffects} from '~/features/dashboard/dashboard-search/dash
 import {ProjectsSharedModule} from '../../projects/shared/projects-shared.module';
 import {SharedModule} from '~/shared/shared.module';
 import {dashboardSearchReducer} from '@common/dashboard-search/dashboard-search.reducer';
+import {ReportsSharedModule} from '../../../webapp-common/reports/reports-shared.module';
 
 @NgModule({
   imports     : [
     CommonModule,
     SMSharedModule,
     ProjectsSharedModule,
+    ReportsSharedModule,
     StoreModule.forFeature('search', dashboardSearchReducer),
     EffectsModule.forFeature([DashboardSearchEffects, commonDashboardSearchEffects]),
     SharedModule

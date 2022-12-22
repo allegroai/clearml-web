@@ -63,6 +63,8 @@ export class ProjectsEffects {
             mergeMap(({projects}) => [
                 actions.setSelectedProject({project: projects[0]}),
                 actions.getProjectUsers(action),
+                actions.getTags(),
+                actions.getCompanyTags(),
                 deactivateLoader(action.type),
               ]
             ),

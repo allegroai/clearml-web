@@ -5,6 +5,8 @@
     <sm-inline-edit
       #editName
       class="edit-name"
+      [minLength]="2"
+      [required]="true"
       [originalText]="infoData?.name || experiment?.name"
       [editable]="editable"
       (textChanged)="onNameChanged($event)"

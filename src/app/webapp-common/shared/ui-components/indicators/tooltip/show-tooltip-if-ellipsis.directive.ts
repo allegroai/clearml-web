@@ -2,7 +2,8 @@ import {Directive, ElementRef, HostListener, Input} from '@angular/core';
 import {TooltipDirective} from './tooltip.directive';
 
 @Directive({
-  selector: '[smShowTooltipIfEllipsis]'
+  selector: '[smShowTooltipIfEllipsis]',
+  standalone:  true
 })
 export class ShowTooltipIfEllipsisDirective {
   constructor(

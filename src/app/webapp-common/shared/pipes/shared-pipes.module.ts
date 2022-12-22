@@ -78,7 +78,7 @@ const pipes = [
   imports: [
     CommonModule,
   ],
-  declarations: [pipes, ShowSelectedFirstPipe, CountPipe, ColGetterPipe, FilterMonitorMetricPipe, ReversePipe],
+  declarations: [pipes, ShowSelectedFirstPipe, CountPipe, ColGetterPipe, FilterMonitorMetricPipe, ReversePipe, ],
   providers: [pipes],
   exports: [pipes, ShowSelectedFirstPipe, CountPipe, ColGetterPipe, FilterMonitorMetricPipe, ReversePipe]
 })

@@ -8,5 +8,5 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
 export class ToggleArchiveComponent {
   @Input() showArchived: boolean;
   @Input() minimize: boolean;
-  @Output() toggleArchived = new EventEmitter();
+  @Output() toggleArchived = new EventEmitter<boolean>();
 }

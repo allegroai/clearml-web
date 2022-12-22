@@ -3,17 +3,29 @@ import { pageSize } from '@common/projects/common-projects.consts';
 import {CommonProjectsPageComponent} from '@common/projects/containers/projects-page/common-projects-page.component';
 import {isExample} from '@common/shared/utils/shared-utils';
 import {trackById} from '@common/shared/utils/forms-track-by';
-import {addProjectTags, getProjectsTags, setSelectedProjectId, setTags} from '@common/core/actions/projects.actions';
-import {selectProjectTags} from '@common/core/reducers/projects.reducer';
+import {
+  addProjectTags,
+  getProjectsTags,
+  setSelectedProjectId,
+  setTags
+} from '@common/core/actions/projects.actions';
+import {
+  selectMainPageTagsFilter,
+  selectMainPageTagsFilterMatchMode,
+  selectProjectTags
+} from '@common/core/reducers/projects.reducer';
 import {Observable, Subscription} from 'rxjs';
 import {Project} from '~/business-logic/model/projects/project';
-import {showExamplePipelines, updateProject} from '@common/projects/common-projects.actions';
+import {
+  getAllProjectsPageProjects,
+  resetProjects,
+  showExamplePipelines,
+  updateProject
+} from '@common/projects/common-projects.actions';
 import {ProjectsGetAllResponseSingle} from '~/business-logic/model/projects/projectsGetAllResponseSingle';
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {selectShowPipelineExamples} from '@common/projects/common-projects.reducer';
-import {toggleUserFocus} from '@common/core/actions/layout.actions';
 import {combineLatest} from 'rxjs';
-import {selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 
 @Component({
@@ -53,6 +65,7 @@ if __name__ == '__main__':
 
   @ViewChild('emptyStateContent') emptyStateRef: TemplateRef<any>;
   private headerUserFocusSub: Subscription;
+  private mainPageFilterSub: Subscription;
 
   ngOnInit() {
     super.ngOnInit();
@@ -60,17 +73,17 @@ if __name__ == '__main__':
     this.store.dispatch(getProjectsTags());
 
     this.projectsTags$ = this.store.select(selectProjectTags);
-
-    this.headerUserFocusSub = combineLatest([this.projectsList$, this.showExamples$, this.store.select(selectShowOnlyUserWork)])
-      .subscribe(([projects, examplesGenerated, userOnly]) =>
-        this.store.dispatch(toggleUserFocus({show: userOnly && (projects?.length === 0 || this.allExamples && !examplesGenerated)})));
+    this.mainPageFilterSub = combineLatest([this.store.select(selectMainPageTagsFilter), this.store.select(selectMainPageTagsFilterMatchMode)]).subscribe(()=>{
+      this.store.dispatch(resetProjects());
+      this.store.dispatch(getAllProjectsPageProjects());
+    });
   }
 
   ngOnDestroy() {
     super.ngOnDestroy();
     this.headerUserFocusSub?.unsubscribe();
+    this.mainPageFilterSub.unsubscribe();
     this.store.dispatch(setTags({tags: []}));
-    this.store.dispatch(toggleUserFocus({show: false}));
   }
 
   addTag(project: Project, newTag: string) {

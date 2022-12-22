@@ -16,6 +16,7 @@ import {ApiServerService} from './api-services/server.service';
 import {ApiOrganizationService} from './api-services/organization.service';
 import {ApiLoginService} from './api-services/login.service';
 import {ApiPipelinesService} from '~/business-logic/api-services/pipelines.service';
+import {ApiReportsService} from '~/business-logic/api-services/reports.service';
 
 @NgModule({
   imports     : [CommonModule, HttpClientModule],
@@ -36,7 +37,8 @@ import {ApiPipelinesService} from '~/business-logic/api-services/pipelines.servi
     ApiServerService,
     ApiOrganizationService,
     ApiLoginService,
-    ApiPipelinesService
+    ApiPipelinesService,
+    ApiReportsService,
   ]
 })
 export class BusinessLogicModule {

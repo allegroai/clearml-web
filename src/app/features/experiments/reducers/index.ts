@@ -4,9 +4,10 @@ import {experimentInfoReducer, ExperimentInfoState, initialState as infoInitialS
 import {experimentOutputReducer, ExperimentOutputState, initialState as outputInitialState} from './experiment-output.reducer';
 import {IExperimentInfo} from '../shared/experiment-info.model';
 import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
-import {isReadOnly, isSharedAndNotOwner} from '@common/shared/utils/shared-utils';
 import {selectSelectedModel} from '@common/models/reducers';
 import {selectCurrentUser} from '@common/core/reducers/users-reducer';
+import {isReadOnly} from '@common/shared/utils/is-read-only';
+import {isSharedAndNotOwner} from '@common/shared/utils/is-shared-and-not-owner';
 
 export interface ExperimentState {
   view: ExperimentsViewState;

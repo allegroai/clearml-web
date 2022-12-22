@@ -2,7 +2,6 @@ import {Injectable} from '@angular/core';
 import {Router} from '@angular/router';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {Store} from '@ngrx/store';
-import {MESSAGES_SEVERITY} from '~/app.constants';
 import {ApiUsersService} from '~/business-logic/api-services/users.service';
 import {
   fetchCurrentUser,
@@ -22,6 +21,7 @@ import {ApiServerService} from '~/business-logic/api-services/server.service';
 import {ServerInfoResponse} from '~/business-logic/model/server/serverInfoResponse';
 import {setCurrentUser} from '~/core/actions/users.action';
 import {UsersUpdateResponse} from '~/business-logic/model/users/usersUpdateResponse';
+import {MESSAGES_SEVERITY} from '@common/constants';
 
 
 @Injectable()

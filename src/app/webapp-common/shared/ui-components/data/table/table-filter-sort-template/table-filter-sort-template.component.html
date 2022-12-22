@@ -1,6 +1,6 @@
 <div class="filter-sort-container d-flex align-items-center" [class.active]="value?.length > 0 || subValue?.length > 0">
   <div class='d-flex pointer'>
-    <i class="sort-icon" [class]="enableSort?  'icon sm ' + sortedClass():''" (click)="switchSortOrder($event)"></i>
+    <i class="sort-icon" [class]="enableSort?  'icon sm ' + sortedClass():''" (click)="switchSortOrder($event)" data-id="Sort Icon"></i>
   </div>
   <ng-template #headerWithoutFilters>
     <div [smTooltip]="tooltip ? header : undefined"

@@ -5,7 +5,8 @@ export const activeSearchLink = {
   experiments: 'experiments' as ActiveSearchLink,
   models: 'models' as ActiveSearchLink,
   pipelines: 'pipelines' as ActiveSearchLink,
-  openDatasets: 'datasets' as ActiveSearchLink
+  openDatasets: 'datasets' as ActiveSearchLink,
+  reports: 'reports' as ActiveSearchLink
 };
 
 export const activeLinksList = [
@@ -28,5 +29,9 @@ export const activeLinksList = [
   {
     label: 'PIPELINES',
     name: activeSearchLink.pipelines,
-  }
+  },
+  {
+    label: 'REPORTS',
+    name: activeSearchLink.reports,
+  },
 ];

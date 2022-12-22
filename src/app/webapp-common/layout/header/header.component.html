@@ -6,7 +6,7 @@
     [class.share-view]="isShareMode"
     [activeWorkspace]="activeWorkspace">
   </sm-breadcrumbs>
-  <div class="ml-3 d-flex align-items-center mr-auto" *ngIf="(userFocus || (showUserFocus$ | async))">
+  <div class="ml-3 d-flex align-items-center mr-auto" *ngIf="userFocus || (showUserFocus$ | async)">
     <sm-show-only-user-work></sm-show-only-user-work>
   </div>
 
@@ -26,8 +26,8 @@
     <a class="d-flex pointer resources-trigger" [matMenuTriggerFor]="resourcesMenu">
       <i class="al-icon al-ico-help-outlined" data-id="help Icon"></i>
     </a>
-    <a class="pointer menu-trigger position-relative" [matMenuTriggerFor]="profileMenu">
-      <img alt="avatar" class="avatar" data-id="Avatar" *ngIf="(user | async).avatar; else iconAvatar" [src]="(user | async).avatar">
+    <a class="pointer menu-trigger position-relative" data-id="Avatar" [matMenuTriggerFor]="profileMenu">
+      <img alt="avatar" class="avatar"  *ngIf="(user | async).avatar; else iconAvatar" [src]="(user | async).avatar">
       <ng-template #iconAvatar>
         <div class="user-icon">
           <i class="al-icon al-ico-account sm-md"></i>

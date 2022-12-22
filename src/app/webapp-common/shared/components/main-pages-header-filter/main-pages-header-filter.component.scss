@@ -1,0 +1,49 @@
+@import "variables";
+
+.al-ico-filter-off:before {
+  color: $blue-300;
+}
+.al-ico-filter-on .path2:hover:before,
+.al-ico-filter-off:hover:before {
+  color: $blue-200;
+}
+
+.results.scroll {
+  height: 60vh;
+  max-height: 400px;
+  overflow: auto;
+}
+.column-explanation {
+  padding: 5px 16px;
+  font-size: 10px;
+}
+.filter-type {
+  padding: 4px 14px;
+  text-align: right;
+
+  .link {
+    font-size: 12px;
+    font-weight: 500;
+    color: $blue-200;
+    cursor: pointer;
+
+    &.selected {
+      color: $blue-400;
+      pointer-events: none;
+      cursor: initial;
+    }
+  }
+}
+.filter-point {
+
+  &.hidden {
+    visibility: hidden;
+  }
+}
+.user-filter-button{
+  display: flex;
+  align-items: center;
+}
+.lbl {
+  margin-left: 34px;
+}

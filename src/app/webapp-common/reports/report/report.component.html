@@ -1,0 +1,99 @@
+<div class="header">
+  <div class="name">{{report?.name}}</div>
+  <div *ngIf="!editMode" class="actions">
+    <sm-tag-list
+      [tags]="report?.tags"
+      (add)="openTagMenu($event, tagMenu, tagsMenuContent)"
+      (remove)="removeTag($event)"
+    ></sm-tag-list>
+    <sm-menu
+      #tagMenu
+      [showCart]="false"
+      [showButton]="false"
+      [showOverlay]="false"
+      (menuClosed)="tagsMenuContent.clear()"
+    >
+      <sm-tags-menu
+        class="light-theme"
+        #tagsMenuContent
+        [tags]="report?.tags"
+        [projectTags]="reportTags$ | async"
+        [companyTags]="null"
+        [tagsFilterByProject]="true"
+        (tagSelected)="addTag($event)"
+      ></sm-tags-menu>
+    </sm-menu>
+    <div class="g-btns">
+      <button class="btn btn-icon" smTooltip="Copy report markdown to clipboard" (click)="copyMarkdown()">
+        <i class="al-icon al-ico-md-copy sm-md"></i>
+      </button>
+      <button class="btn btn-icon" ngxPrint printSectionId="print-element" [printDelay]="3000" [useExistingCss]="true" [printStyle]="printStyle" smTooltip="Export to PDF">
+        <i class="al-icon al-ico-pdf sm-md"></i>
+      </button>
+      <button class="btn btn-icon" (click)="share()" smTooltip="Share">
+        <i class="al-icon al-ico-shared-item sm-md"></i>
+      </button>
+      <button class="btn btn-icon" (click)="moveToProject()" smTooltip="Move to Project">
+        <i class="al-icon al-ico-move-to sm-md"></i>
+      </button>
+      <button class="btn btn-icon" (click)="archive()" [smTooltip]="archived ? 'Restore' : 'Archive'">
+        <i class="al-icon al-ico-archive sm-md" [class]="archived ? icons.RESTORE : icons.ARCHIVE"></i>
+      </button>
+      <button *ngIf="archived" class="btn btn-icon" (click)="deleteReport()" smTooltip="Delete">
+        <i class="al-icon al-ico-trash sm-md"></i>
+      </button>
+      <button *ngIf="draft" class="btn btn-neon px-3 d-flex-center" (click)="publish()"><i class="al-icon al-ico-publish sm mr-2"></i>PUBLISH</button>
+    </div>
+  </div>
+</div>
+<div *ngIf="report" class="content report">
+  <div class="hover-button" *ngIf="(smallScreen$ | async)">
+    <button class="btn btn-cml-primary" (click)="drawer.toggle()">
+      <i class="al-icon al-ico-caret-right" [class.open]="drawer.opened"></i>
+    </button>
+  </div>
+  <mat-drawer-container class="h-100">
+    <mat-drawer
+      #drawer
+      [mode]="(smallScreen$ | async) ? 'over' : 'side'"
+      [opened]="!editor.editMode && (smallScreen$ | async) !== true"
+    >
+      <div class="description">
+        <button
+          *ngIf="!example && report && draft && !editDesc"
+          class="btn btn-cml-primary edit-button"
+          (click)="editReportDesc(descElement)"
+        >EDIT
+        </button>
+        <textarea
+          placeholder="Report description"
+          #descElement
+          [disabled]="!editDesc"
+        >{{report?.comment || ''}}</textarea>
+        <div *ngIf="editDesc" class="buttons">
+          <button class="btn btn-outline-dark" (click)="descElement.value = orgDesc; editDesc = false">CANCEL</button>
+          <button class="btn btn-cml-primary" (click)="saveDesc(descElement.value)">SAVE</button>
+        </div>
+      </div>
+    </mat-drawer>
+    <mat-drawer-content>
+      <sm-markdown-editor
+        #editor
+        [class.edit]="editor.editMode || !report?.report"
+        [class.full-width]="widthExpanded"
+        [data]="report?.['report'] ?? ''"
+        [readOnly]="!draft || example"
+        (saveInfo)="save($event)"
+        (editModeChanged)="editModeChanged();"
+      >
+        <div no-data class="flex-middle placeholder" *ngIf="!example && report && draft">
+          <i class="al-icon al-ico-reports xxl"></i>
+          <div class="no-data-title">THERE'S NOTHING HERE YET…</div>
+          <button (click)="editor.editClicked()" class="no-data-button btn btn-neon">
+            <span>START EDITING THE REPORT</span>
+          </button>
+        </div>
+      </sm-markdown-editor>
+    </mat-drawer-content>
+  </mat-drawer-container>
+</div>

@@ -79,7 +79,7 @@
         <div class="step-container cred-step" [class.jupyter]="isJupyter" [class.first-step]="!credentialsCreated" [class.has-ws]="community && workspace.name" [class.has-label]="credentialsLabel">
           <div class="step sub-note" *ngIf="!isJupyter" >Complete the clearml configuration information as prompted.</div>
           <div *ngIf="!credentialsCreated" class="d-flex align-items-end">
-            <button class="mb-2 btn btn-neon create-cred-button" (click)="createCredentials()">CREATE NEW
+            <button class="mb-2 btn btn-neon create-cred-button" data-id="New Credentials" (click)="createCredentials()">CREATE NEW
               CREDENTIALS
             </button>
           </div>
@@ -111,11 +111,8 @@
         <div class="step-container" *ngIf="!queue">
           <div *ngIf="!showTabs" class="step">3. Integrate</div>
           <div class="step sub-note">Add ClearML to your code. For example:</div>
-          <div class="code" #content>
-            <div *ngIf="!showTabs" class="content"><span class="variable">from</span> {{gettingStartedContext?.packageName || 'clearml'}} <span class="variable">import</span> Task
-task <span class="operation">=</span> Task.<span class="variable">init</span>(project_name<span class="operation">=</span><span class="string">"my project"</span>, task_name<span class="operation">=</span><span class="string">"my task"</span>)
-            </div>
-            <div *ngIf="showTabs" class="content"><span class="variable">import</span> numpy <span class="variable">as</span> np
+          <div class="code" #content><div *ngIf="!showTabs; else: withTabs" class="content"><span class="variable">from</span> {{gettingStartedContext?.packageName || 'clearml'}} <span class="variable">import</span> Task
+task <span class="operation">=</span> Task.<span class="variable">init</span>(project_name<span class="operation">=</span><span class="string">"my project"</span>, task_name<span class="operation">=</span><span class="string">"my task"</span>)</div><ng-template #withTabs><div class="content"><span class="variable">import</span> numpy <span class="variable">as</span> np
 <span class="variable">import</span> matplotlib.pyplot <span class="variable">as</span> plt
 
 # Add the following two lines to your code, to have ClearML automatically log your experiment
@@ -123,21 +120,19 @@ task <span class="operation">=</span> Task.<span class="variable">init</span>(pr
 task = Task.init(project_name=<span class="string">'My Project'</span>, task_name=<span class="string">'My Experiment'</span>)
 
 # Create a plot using matplotlib, or you can also use plotly
-plt.scatter(np.random.rand(50), np.random.rand(50), s=area, c=np.random.rand(10), alpha=0.5)
+<code>plt.scatter(np.random.rand(50), np.random.rand(50), c=np.random.rand(50), alpha=0.5)</code>
 # Plot will be reported automatically to clearml
 plt.show()
 
 # Report some scalars
 <span class="variable">for</span> i <span class="variable">in</span> range(100):
-  task.get_logger().report_scalar(title=<span class="string">"graph title"</span>, series=<span class="string">"linear"</span>, value=i*2, iteration=i)
-            </div>
+task.get_logger().report_scalar(title=<span class="string">"graph title"</span>, series=<span class="string">"linear"</span>, value=i*2, iteration=i)</div></ng-template>
             <sm-copy-clipboard
               [hideBackground]="false"
               [label]="''"
               [copyIcon]="'al-icon sm-md al-ico-copy-to-clipboard'"
               theme="text-area"
-              [clipboardText]="content.textContent"></sm-copy-clipboard>
-          </div>
+              [clipboardText]="content.textContent"></sm-copy-clipboard></div>
         </div>
       </ng-container>
       <ng-container *ngIf="!queue && (currentLink === links[2])">

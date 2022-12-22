@@ -11,6 +11,8 @@
                       class="title edit-name dark"
                       [originalText]="project.name | shortProjectName"
                       [editable]="true"
+                      [minLength]="2"
+                      [required]="true"
                       pattern="^[^/]+$"
                       [inlineDisabled]="true"
                       (textChanged)="prepareProjectNameForChange($event)"

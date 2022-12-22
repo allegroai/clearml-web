@@ -17,7 +17,7 @@ export const BASE_REGEX = {
   SCHEME           : '^[hH][tT][tT][pP][sS]?:\\/\\/',
   FILE_SUFFIX      : '\\/\\S*[^\\/ ]+$',
   FOLDER           : '\\/\\S*[^\\/ ]',
-  S3_BUCKET_NAME   : '(\\w[A-Za-z0-9\\-]+\\w\\.)*\\w[A-Za-z0-9\\-]+\\w',
+  S3_BUCKET_NAME   : '(?!(xn--|.+-s3alias$|.*\\.{2}.*))[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]',
   GS_BUCKET_NAME   : '(\\w[A-Za-z0-9\\-_]+\\w\\.)*\\w[A-Za-z0-9\\-_]+\\w',
   AZURE_BUCKET_NAME: '(\\w[A-Za-z0-9\\-_]+\\w\\.)*\\w[A-Za-z0-9\\-_]+\\w'
 };
@@ -99,6 +99,8 @@ export const guessAPIServerURL = () => {
     return url.replace(/(https?):\/\/(demo|)app/, '$1://$2api');
   } else if (window.location.port === '30080') {
     return url.replace(/:\d+/, '') + ':30008';
+  } else if (window.location.pathname === '/widgets') {
+    return url + '/api';
   }
   return url.replace(/:\d+/, '') + ':8008';
 };

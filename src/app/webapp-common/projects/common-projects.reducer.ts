@@ -58,7 +58,7 @@ const getCorrectSortingOrder = (currentSortOrder: TableSortOrderEnum, currentOrd
 };
 
 export const commonProjectsReducers = [
-  on(addToProjectsList, (state, action) => ({...state, projects: [...(state.projects || []), ...action.projects]})),
+  on(addToProjectsList, (state, action) => ({...state, projects: action.reset? action.projects: [...(state.projects || []), ...action.projects]})),
   on(setCurrentScrollId, (state, action) => ({...state, scrollId: action.scrollId})),
   on(setNoMoreProjects, (state, action) => ({...state, noMoreProjects: action.payload})),
   on(updateProjectSuccess, (state, action) => ({...state, projects: state.projects?.map(ex => ex.id === action.id ? {...ex, ...action.changes} : ex)})),

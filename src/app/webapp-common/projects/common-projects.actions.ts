@@ -1,4 +1,3 @@
-import {ProjectsGetAllRequest} from '~/business-logic/model/projects/projectsGetAllRequest';
 import {Project} from '~/business-logic/model/projects/project';
 import {createAction, props} from '@ngrx/store';
 import {PROJECTS_PREFIX} from './common-projects.consts';
@@ -12,8 +11,7 @@ export const updateProjectSuccess = createAction(
   props<{id: string; changes: Partial<Project>}>()
 );
 export const getAllProjectsPageProjects = createAction(
-  PROJECTS_PREFIX + 'GET_PROJECTS',
-  props<{getAllFilter?: ProjectsGetAllRequest}>()
+  PROJECTS_PREFIX + 'GET_PROJECTS'
 );
 export const setProjectsOrderBy = createAction(
   PROJECTS_PREFIX + 'SET_ORDER_BY',
@@ -26,7 +24,7 @@ export const setProjectsSearchQuery = createAction(
 export const resetProjectsSearchQuery = createAction(PROJECTS_PREFIX + 'RESET_SEARCH_QUERY');
 export const addToProjectsList = createAction(
   PROJECTS_PREFIX + 'ADD_TO_PROJECTS_LIST',
-  props<{projects: Project[]}>()
+  props<{projects: Project[]; reset?: boolean}>()
 );
 export const resetProjects = createAction(PROJECTS_PREFIX + 'RESET_PROJECTS');
 

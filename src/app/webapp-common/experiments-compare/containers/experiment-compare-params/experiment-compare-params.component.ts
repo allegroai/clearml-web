@@ -3,17 +3,15 @@ import {select, Store} from '@ngrx/store';
 import {get} from 'lodash/fp';
 import {selectExperimentsParams} from '../../reducers';
 import {filter, tap} from 'rxjs/operators';
-import {
-  ExperimentCompareTree,
-  IExperimentDetail
-} from '~/features/experiments-compare/experiments-compare-models';
+import {ExperimentCompareTree, IExperimentDetail} from '~/features/experiments-compare/experiments-compare-models';
 import {ExperimentParams} from '../../shared/experiments-compare-details.model';
 import {convertExperimentsArraysParams, getAllKeysEmptyObject, isParamsConverted} from '../../jsonToDiffConvertor';
 import {ExperimentCompareBase} from '../experiment-compare-base';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
-import {experimentListUpdated, setExperiments} from '../../actions/experiments-compare-params.actions';
+import {experimentListUpdated} from '../../actions/experiments-compare-params.actions';
 import {RefreshService} from '@common/core/services/refresh.service';
+import {LIMITED_VIEW_LIMIT} from '@common/experiments-compare/experiments-compare.constants';
 
 @Component({
   selector: 'sm-experiment-compare-params',
@@ -41,12 +39,14 @@ export class ExperimentCompareParamsComponent extends ExperimentCompareBase impl
 
     this.compareTabPage = get('snapshot.routeConfig.data.mode', this.activeRoute);
 
-    this.routerParamsSubscription = this.taskIds$.subscribe((experimentIds: string) => this.store.dispatch(experimentListUpdated({ids: experimentIds.split(',')})));
+    this.routerParamsSubscription = this.taskIds$.subscribe(
+      (experimentIds) => {
+        this.store.dispatch(experimentListUpdated({ids: experimentIds.slice(0, LIMITED_VIEW_LIMIT)}));
+      });
 
     this.experimentsSubscription = this.experiments$.pipe(
       filter(experiments => !!experiments && experiments.length > 0),
       tap(experiments => {
-        this.syncUrl(experiments);
         this.extractTags(experiments);
       }),
     ).subscribe(experiments => {
@@ -72,9 +72,6 @@ export class ExperimentCompareParamsComponent extends ExperimentCompareBase impl
       }, {} as ExperimentCompareTree);
   }
 
-  experimentListChanged(experiments: IExperimentDetail[]) {
-    this.store.dispatch(setExperiments({experiments: experiments as ExperimentParams[]}));
-  }
 
   toggleEllipsis() {
     this.showEllipsis = !this.showEllipsis;

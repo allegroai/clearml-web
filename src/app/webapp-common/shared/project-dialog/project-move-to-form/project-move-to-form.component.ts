@@ -9,10 +9,12 @@ import {
   SimpleChanges,
   ViewChild
 } from '@angular/core';
-import {Project} from '../../../../business-logic/model/projects/project';
+import {Project} from '~/business-logic/model/projects/project';
 import {NgForm} from '@angular/forms';
-import {MatAutocompleteSelectedEvent} from "@angular/material/autocomplete";
+import {MatAutocompleteSelectedEvent} from '@angular/material/autocomplete';
 import {MatOptionSelectionChange} from '@angular/material/core';
+import {ShortProjectNamePipe} from '@common/shared/pipes/short-project-name.pipe';
+import {ProjectLocationPipe} from '@common/shared/pipes/project-location.pipe';
 
 
 @Component({
@@ -33,8 +35,11 @@ export class ProjectMoveToFormComponent implements OnChanges, OnInit {
   @ViewChild('moveToForm', {static: true}) moveToForm: NgForm;
   private newProjectName: string;
 
-  constructor(private changeDetection: ChangeDetectorRef) {
-  }
+  constructor(
+    private changeDetection: ChangeDetectorRef,
+    private shortProjectName: ShortProjectNamePipe,
+    private projectLocation: ProjectLocationPipe
+) {}
 
   ngOnInit(): void {
   }
@@ -51,12 +56,18 @@ export class ProjectMoveToFormComponent implements OnChanges, OnInit {
 
   @Input() baseProjectId;
 
-  @Output() moveProject = new EventEmitter();
+  @Output() moveProject = new EventEmitter<{location: string; name: string; fromName: string; toName: string; projectName: string}>();
   @Output() dismissDialog = new EventEmitter();
   @ViewChild('projectForm') public form: NgForm;
 
   send() {
-    this.moveProject.emit({location: this.project.parent, name: this.newProjectName});
+    this.moveProject.emit({
+      location: this.project.parent,
+      name: this.newProjectName,
+      projectName: this.shortProjectName.transform(this.projectName),
+      fromName: this.projectLocation.transform(this.projectName),
+      toName: this.project.parent
+    });
   }
 
   ngOnChanges(changes: SimpleChanges): void {

@@ -6,7 +6,7 @@ import {getEntityStatQuery} from '@common/dashboard-search/dashboard-search.effe
 import {ApiOrganizationService} from '~/business-logic/api-services/organization.service';
 import {Store} from '@ngrx/store';
 import {selectCurrentUser, selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
-import {selectShowHidden} from '@common/core/reducers/projects.reducer';
+import {selectHideExamples, selectShowHidden} from '@common/core/reducers/projects.reducer';
 
 
 @Injectable()
@@ -14,8 +14,8 @@ export class DashboardSearchEffects {
   constructor(
     private actions: Actions,
     private store: Store,
-    public organizationApi: ApiOrganizationService) {
-  }
+    private organizationApi: ApiOrganizationService,
+  ) {}
 
   getResultsCount = createEffect(() => this.actions.pipe(
     ofType(getResultsCount),
@@ -23,12 +23,15 @@ export class DashboardSearchEffects {
       this.store.select(selectShowOnlyUserWork),
       this.store.select(selectCurrentUser),
       this.store.select(selectShowHidden),
+      this.store.select(selectHideExamples),
     ),
-    switchMap(([action, userFocus, user, hidden]) => this.organizationApi.organizationGetEntitiesCount({
+    switchMap(([action, userFocus, user, hidden, hideExamples]) => this.organizationApi.organizationGetEntitiesCount({
       /* eslint-disable @typescript-eslint/naming-convention */
       ...(userFocus && {active_users: [user.id]}),
       ...(hidden && {search_hidden: true}),
-      ...getEntityStatQuery(action)
+      ...(hideExamples && {allow_public: false}),
+      ...getEntityStatQuery(action, hidden)
+      /* eslint-enable @typescript-eslint/naming-convention */
     })),
     map(({tasks: experiments, ...rest}) =>
       setResultsCount({counts: {...rest, experiments}}))

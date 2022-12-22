@@ -1,0 +1,21 @@
+:host {
+  .create-report-button {
+    padding-top: 32px;
+  }
+
+  small.text-danger {
+    //position: absolute !important;
+    //top: -15px;
+  }
+  #report-description{
+    max-height:250px;
+    padding-top: 12px;
+    height: 65px;
+  }
+  mat-form-field{
+    width: 100%;
+    .report-description{
+      min-height: 68px;
+    }
+  }
+}

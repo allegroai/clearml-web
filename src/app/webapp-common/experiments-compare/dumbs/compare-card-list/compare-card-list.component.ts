@@ -14,6 +14,7 @@ import {IExperimentDetail} from '../../../../features/experiments-compare/experi
 export class CompareCardListComponent {
 
   @Input() experiments: IExperimentDetail[];
+  @Input() tasksLimitExceeded: boolean;
   @Input() baseExperiment: IExperimentDetail;
   @Output() experimentListChanged = new EventEmitter<IExperimentDetail[]>();
   @Output() toggled = new EventEmitter<boolean>();

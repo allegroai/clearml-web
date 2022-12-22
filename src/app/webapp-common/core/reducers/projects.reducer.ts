@@ -37,9 +37,14 @@ export interface RootProjects {
   allUsers: User[];
   extraUsers: User[];
   showHidden: boolean;
+  hideExamples: boolean;
+  mainPageTagsFilter: string[];
+  mainPageTagsFilterMatchMode: string;
 }
 
 const initRootProjects: RootProjects = {
+  mainPageTagsFilter: [],
+  mainPageTagsFilterMatchMode: 'AND',
   projects: null,
   selectedProject: null,
   archive: false,
@@ -55,7 +60,8 @@ const initRootProjects: RootProjects = {
   users: [],
   allUsers: [],
   extraUsers: [],
-  showHidden: false
+  showHidden: false,
+  hideExamples: false
 };
 
 export const projects = state => state.rootProjects as RootProjects;
@@ -67,6 +73,8 @@ export const selectIsArchivedMode = createSelector(projects, state => state.arch
 export const selectIsDeepMode = createSelector(projects, state => state.deep);
 export const selectTagsFilterByProject = createSelector(projects, state => state.tagsFilterByProject);
 export const selectProjectTags = createSelector(projects, state => state.projectTags);
+export const selectMainPageTagsFilter = createSelector(projects, state => state.mainPageTagsFilter);
+export const selectMainPageTagsFilterMatchMode = createSelector(projects, state => state.mainPageTagsFilterMatchMode);
 export const selectCompanyTags = createSelector(projects, state => state.companyTags);
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const selectProjectSystemTags = createSelector(projects, state => getSystemTags({system_tags: state.systemTags} as ITableExperiment));
@@ -138,6 +146,8 @@ export const projectsReducer = createReducer(
   on(projectsActions.setTagsFilterByProject, (state, action) => ({...state, tagsFilterByProject: action.tagsFilterByProject})),
   on(projectsActions.setCompanyTags, (state, action) => ({...state, companyTags: action.tags, systemTags: action.systemTags})),
   on(projectsActions.addProjectTags, (state, action) => ({...state, projectTags: Array.from(new Set(state.projectTags.concat(action.tags))).sort()})),
+  on(projectsActions.setMainPageTagsFilter, (state, action) => ({...state, mainPageTagsFilter: action.tags})),
+  on(projectsActions.setMainPageTagsFilterMatchMode, (state, action) => ({...state, mainPageTagsFilterMatchMode: action.matchMode})),
   on(projectsActions.setTagColors, (state, action) => ({...state, tagsColors: {...state.tagsColors, [action.tag]: action.colors}})),
   on(projectsActions.setMetricVariant, (state, action) => ({
     ...state, graphVariant: {...state.graphVariant, [action.projectId]: action.col}
@@ -147,7 +157,10 @@ export const projectsReducer = createReducer(
   on(projectsActions.setProjectUsers, (state, action) => ({...state, users: action.users, extraUsers: []})),
   on(projectsActions.setAllProjectUsers, (state, action) => ({...state, allUsers: action.users})),
   on(projectsActions.setProjectExtraUsers, (state, action) => ({...state, extraUsers: action.users})),
-  on(projectsActions.setShowHidden, (state, action) => ({...state, showHidden: action.show}))
+  on(projectsActions.setShowHidden, (state, action) => ({...state, showHidden: action.show})),
+  on(projectsActions.setHideExamples, (state, action) => ({...state, hideExamples: action.hide}))
 );
 export const selectShowHidden = createSelector(projects, selectSelectedProject,
   (state, selectedProject) => (state?.showHidden || selectedProject?.system_tags?.includes('hidden')));
+
+export const selectHideExamples = createSelector(projects, state => state?.hideExamples);

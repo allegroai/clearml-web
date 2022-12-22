@@ -188,23 +188,8 @@ export const selectExperimentConfigObj =
 export const selectExperimentHyperParamsSelectedSectionParams =
   createSelector(selectExperimentHyperParamsInfoData, selectExperimentHyperParamsSelectedSectionFromRoute,
     (hyperparams: IExperimentInfo['hyperparams'], section: string): ParamsItem[] => Object.entries(getOr({}, section, hyperparams)).map(([, value]) => value));
-export const selectFullScreenChartIsOpen = createSelector(experimentOutput, (state): boolean => state.isFullScreenOpen);
-export const selectFullScreenChartIsFetching = createSelector(experimentOutput, (state): boolean => state.fetchingFullScreenData);
-export const selectFullScreenChartXtype = createSelector(experimentOutput, (state): ScalarKeyEnum => state.fullScreenXtype);
 export const selectScalarSingleValue = createSelector(experimentOutput, (state): Array<EventsGetTaskSingleValueMetricsResponseValues> => state.scalarSingleValue);
-export const selectFullScreenChart = createSelector(selectFullScreenChartXtype, selectFullScreenChartIsFetching, experimentOutput, (axisType, isFetching, state) => {
-    if (axisType === ScalarKeyEnum.IsoTime && state.fullScreenDetailedChart) {
-      return {
-        ...state.fullScreenDetailedChart,
-        data: state.fullScreenDetailedChart.data.reduce((graphAcc, graph) => {
-          graphAcc.push({...graph, x: graph.x.map(ts => new Date(ts) as any)});
-          return graphAcc;
-        }, [])
-      };
-    }
-    return state.fullScreenDetailedChart;
-  }
-);
+
 
 export const selectExperimentInfoHistograms = createSelector(
   selectSelectedSettingsxAxisType,
@@ -225,8 +210,4 @@ export const selectExperimentInfoHistograms = createSelector(
   });
 
 export const selectCurrentArtifactExperimentId = createSelector(experimentInfo, state => state.artifactsExperimentId);
-export const selectMinMaxIterations = createSelector(experimentOutput, (state) => state.minMaxIterations);
-export const selectCurrentPlotViewer = createSelector(experimentOutput, (state) => state.currentPlotViewer);
-export const selectPlotViewerScrollId = createSelector(experimentOutput, (state) => state.plotViewerScrollId);
-export const selectViewerEndOfTime = createSelector(experimentOutput, (state) => state.plotViewerEndOfTime);
-export const selectViewerBeginningOfTime = createSelector(experimentOutput, (state) => state.plotViewerBeginningOfTime);
+

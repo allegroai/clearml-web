@@ -1,4 +1,4 @@
-@import "../variables";
+@import "variables";
 
 $dark-theme: (
   bg-color: $blue-800,
@@ -136,7 +136,7 @@ $dark-theme: (
     color: $blue-300,
     background-color: $blue-600,
     border-color: $blue-600,
-    
+
     // hover
     color-hover: $blue-200,
     background-color-hover: $blue-500,

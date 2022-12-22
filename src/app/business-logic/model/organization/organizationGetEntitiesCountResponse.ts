@@ -30,11 +30,15 @@ export interface OrganizationGetEntitiesCountResponse {
      */
     dataviews?: number;
     /**
-     * The number of hyper datasets matching the criteria
-     */
-    hyper_datasets?: number;
-    /**
      * The number of pipelines matching the criteria
      */
     pipelines?: number;
+    /**
+     * The number of datasets matching the criteria
+     */
+    datasets?: number;
+    /**
+     * The number of reports matching the criteria
+     */
+    reports?: number;
 }

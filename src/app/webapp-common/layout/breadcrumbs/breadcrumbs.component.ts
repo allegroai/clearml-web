@@ -16,7 +16,6 @@ import {ActivatedRoute} from '@angular/router';
 import {combineLatest, fromEvent, Subscription} from 'rxjs';
 import {formatStaticCrumb, prepareNames} from '~/layout/breadcrumbs/breadcrumbs.utils';
 import {addMessage} from '../../core/actions/layout.actions';
-import {MESSAGES_SEVERITY} from '~/app.constants';
 import {ConfigurationService} from '../../shared/services/configuration.service';
 import {GetCurrentUserResponseUserObjectCompany} from '~/business-logic/model/users/getCurrentUserResponseUserObjectCompany';
 import {selectIsDeepMode, selectRootProjects} from '../../core/reducers/projects.reducer';
@@ -24,6 +23,7 @@ import {getAllSystemProjects} from '@common/core/actions/projects.actions';
 import {castArray, isEqual} from 'lodash/fp';
 import {selectCustomProject} from '@common/experiments-compare/reducers';
 import {selectIsSearching} from '../../common-search/common-search.reducer';
+import {MESSAGES_SEVERITY} from '@common/constants';
 
 
 export interface IBreadcrumbsLink {

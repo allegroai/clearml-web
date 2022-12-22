@@ -1,0 +1,42 @@
+@import "src/app/webapp-common/shared/ui-components/styles/variables";
+
+.placeholder {
+  color: $blue-400;
+  min-height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  font-size: 14px;
+}
+
+.s3message {
+  color: $blue-400;
+  min-height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.show-text {
+  cursor: pointer;
+  color: $neon-yellow;
+  margin-top: 12px;
+}
+
+
+.link {
+  display: inline;
+  cursor: pointer;
+  color: $neon-yellow;
+
+  &:hover {
+    color: $neon-yellow;
+  }
+}
+
+.no-pointer {
+  pointer-events: none;
+}

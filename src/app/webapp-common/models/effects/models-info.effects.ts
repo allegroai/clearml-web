@@ -14,9 +14,10 @@ import {MODELS_INFO_ONLY_FIELDS} from '../shared/models.const';
 import {selectSelectedModel} from '../reducers';
 import {SelectedModel} from '../shared/models.model';
 import {selectActiveWorkspace} from '../../core/reducers/users-reducer';
-import {isExample, isSharedAndNotOwner} from '../../shared/utils/shared-utils';
+import {isExample} from '../../shared/utils/shared-utils';
 import {resetActiveSection} from '../actions/models-info.actions';
 import {getTags} from '@common/core/actions/projects.actions';
+import {isSharedAndNotOwner} from '@common/shared/utils/is-shared-and-not-owner';
 
 @Injectable()
 export class ModelsInfoEffects {

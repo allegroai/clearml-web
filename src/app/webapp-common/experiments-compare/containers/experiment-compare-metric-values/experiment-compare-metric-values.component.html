@@ -1,8 +1,9 @@
 <sm-compare-card-list
   *ngIf="comparedTasks"
   [experiments]="experiments"
+  [tasksLimitExceeded] = "taskIds?.length> experiments?.length"
   [baseExperiment]="experiments[0]"
-  (experimentListChanged)="experimentListChanged($event)"
+  (experimentListChanged)="syncUrl($event)"
 >
   <div *compareCardHeader="let experiment;">
     <sm-experiment-compare-general-data

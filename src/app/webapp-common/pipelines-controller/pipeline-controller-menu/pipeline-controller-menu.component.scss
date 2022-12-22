@@ -1,7 +1,3 @@
-hr {
-  margin: 0 !important;
-}
-
 button {
   display: flex;
   align-items: center;
@@ -11,10 +7,5 @@ button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-
-    &.rotate-135 {
-      transform: rotate(135deg);
-      margin-right: 10px;
-    }
   }
 }

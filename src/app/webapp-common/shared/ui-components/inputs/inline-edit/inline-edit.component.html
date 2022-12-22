@@ -1,6 +1,6 @@
 <div class="editable-div" (click)="active && $event.stopPropagation()">
   <div [style.display]="active ? 'none': 'block'" >
-    <div class="d-flex align-items-center" #template (click)="(!inlineDisabled) && inlineActivated($event)"
+    <div class="d-flex align-items-center pr-4" #template (click)="(!inlineDisabled) && inlineActivated($event)"
       ><ng-content></ng-content>
       <i *ngIf="editable && !inlineDisabled" class='p2 al-icon al-ico-edit sm-md pull-right editable-pen pointer'></i>
     </div>
@@ -12,7 +12,9 @@
                *ngIf="!multiline"
                [(ngModel)]="inlineValue"
                name="inline"
+               autocomplete="off"
                [pattern]="pattern"
+               [required]="required"
                [minLength]="minLength"
                smUniqueNameValidator
                [existingNames]="forbiddenString"

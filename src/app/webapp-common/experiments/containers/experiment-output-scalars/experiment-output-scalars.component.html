@@ -65,6 +65,7 @@
         [groupBy]="groupBy"
         [splitSize]="splitSize$ | async"
         [breakPoint]="900"
+        (createEmbedCode)="createEmbedCode($event)"
         (resetGraphs)="resetMetrics()"
       >
       </sm-experiment-graphs>

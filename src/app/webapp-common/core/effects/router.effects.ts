@@ -6,7 +6,6 @@ import {map, tap} from 'rxjs/operators';
 import {NAVIGATION_ACTIONS} from '~/app.constants';
 import {encodeFilters, encodeOrder} from '../../shared/utils/tableParamEncode';
 import {NavigateTo, NavigationEnd, SetRouterSegments, setURLParams} from '../actions/router.actions';
-import {from} from 'rxjs';
 
 
 @Injectable()
@@ -46,7 +45,7 @@ export class RouterEffects {
           ...(action.orders && {order: encodeOrder(action.orders)}),
           ...(action.filters && {filter: encodeFilters(action.filters)}),
           ...(action.isArchived !== undefined && {archive: action.isArchived ? 'true' : null}),
-          ...(action.isDeep && {deep:  true}),
+          ...(action.isDeep && {deep: true}),
           ...(action.version && {version: action.version})
         }
       } as NavigationExtras;

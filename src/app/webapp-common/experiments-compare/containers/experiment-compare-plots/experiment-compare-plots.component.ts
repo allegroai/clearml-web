@@ -7,12 +7,24 @@ import {distinctUntilChanged, filter, map, tap} from 'rxjs/operators';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {convertMultiPlots, prepareMultiPlots, sortMetricsList} from '@common/tasks/tasks.utils';
 import {isEqual} from 'lodash/fp';
-import {getMultiPlotCharts, resetExperimentMetrics, setExperimentMetricsSearchTerm, setExperimentSettings, setSelectedExperiments} from '../../actions/experiments-compare-charts.actions';
-import {selectCompareTasksPlotCharts, selectExperimentMetricsSearchTerm, selectSelectedExperimentSettings, selectSelectedSettingsHiddenPlot} from '../../reducers';
-import {ExtFrame} from '@common/shared/experiment-graphs/single-graph/plotly-graph-base';
+import {
+  getMultiPlotCharts,
+  resetExperimentMetrics,
+  setExperimentMetricsSearchTerm,
+  setExperimentSettings,
+  setSelectedExperiments
+} from '../../actions/experiments-compare-charts.actions';
+import {
+  selectCompareTasksPlotCharts,
+  selectExperimentMetricsSearchTerm,
+  selectSelectedExperimentSettings,
+  selectSelectedSettingsHiddenPlot
+} from '../../reducers';
+import {ExtFrame} from '@common/shared/single-graph/plotly-graph-base';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {addMessage} from '@common/core/actions/layout.actions';
 import {ExperimentGraphsComponent} from '@common/shared/experiment-graphs/experiment-graphs.component';
+import {ReportCodeEmbedService} from '@common/shared/services/report-code-embed.service';
 
 @Component({
   selector: 'sm-experiment-compare-plots',
@@ -40,7 +52,12 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
 
   @ViewChild(ExperimentGraphsComponent) graphsComponent: ExperimentGraphsComponent;
 
-  constructor(private store: Store<ExperimentInfoState>, private changeDetection: ChangeDetectorRef, private refresh: RefreshService) {
+  constructor(
+    private store: Store<ExperimentInfoState>,
+    private changeDetection: ChangeDetectorRef,
+    private refresh: RefreshService,
+    private reportEmbed: ReportCodeEmbedService,
+  ) {
     this.listOfHidden = this.store.pipe(select(selectSelectedSettingsHiddenPlot));
     this.searchTerm$ = this.store.pipe(select(selectExperimentMetricsSearchTerm));
     this.plots$ = this.store.pipe(
@@ -85,7 +102,7 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
       });
 
     this.routerParamsSubscription = this.routerParams$
-      .subscribe(params => {
+      .subscribe((params) => {
         if (!this.taskIds || this.taskIds.join(',') !== params.ids) {
           this.taskIds = params.ids.split(',');
           this.store.dispatch(setSelectedExperiments({selectedExperiments: this.taskIds}));
@@ -95,9 +112,9 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
 
     this.refreshingSubscription = this.refresh.tick
       .pipe(filter(auto => auto !== null))
-    .subscribe(autoRefresh =>
-      this.store.dispatch(getMultiPlotCharts({taskIds: this.taskIds, autoRefresh}))
-    );
+      .subscribe(autoRefresh =>
+        this.store.dispatch(getMultiPlotCharts({taskIds: this.taskIds, autoRefresh}))
+      );
   }
 
   ngOnDestroy() {
@@ -129,5 +146,13 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
 
   resetMetrics() {
     this.store.dispatch(resetExperimentMetrics());
+  }
+
+  createEmbedCode(event: { metrics?: string[]; variants?: string[] }) {
+    this.reportEmbed.createCode({
+      type: 'plot',
+      tasks: this.taskIds,
+      ...event
+    });
   }
 }

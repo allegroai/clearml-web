@@ -31,10 +31,11 @@ import {
 } from '../../actions/common-experiment-output.actions';
 import {convertPlots, groupIterations, sortMetricsList} from '@common/tasks/tasks.utils';
 import {selectSelectedExperiment} from '~/features/experiments/reducers';
-import {ExtFrame} from '@common/shared/experiment-graphs/single-graph/plotly-graph-base';
+import {ExtFrame} from '@common/shared/single-graph/plotly-graph-base';
 import {MetricsPlotEvent} from '~/business-logic/model/events/metricsPlotEvent';
 import {addMessage} from '@common/core/actions/layout.actions';
 import {ExperimentGraphsComponent} from '@common/shared/experiment-graphs/experiment-graphs.component';
+import {ReportCodeEmbedService} from '@common/shared/services/report-code-embed.service';
 
 @Component({
   selector: 'sm-experiment-output-plots',
@@ -65,7 +66,13 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChan
   public dark: boolean;
 
 
-  constructor(private store: Store<ExperimentInfoState>, private router: Router, private activeRoute: ActivatedRoute, private changeDetection: ChangeDetectorRef) {
+  constructor(
+    private store: Store<ExperimentInfoState>,
+    private router: Router,
+    private activeRoute: ActivatedRoute,
+    private changeDetection: ChangeDetectorRef,
+    private reportEmbed: ReportCodeEmbedService
+  ) {
     this.searchTerm$ = this.store.pipe(select(selectExperimentMetricsSearchTerm));
     this.splitSize$ = this.store.pipe(select(selectSplitSize));
 
@@ -181,4 +188,11 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChan
     this.store.dispatch(resetExperimentMetrics());
   }
 
+  createEmbedCode(event: { metrics?: string[]; variants?: string[] }) {
+    this.reportEmbed.createCode({
+      type: 'plot',
+      tasks: [this.experimentId],
+      ...event
+    });
+  }
 }

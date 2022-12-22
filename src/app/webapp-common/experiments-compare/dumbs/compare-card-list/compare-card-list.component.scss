@@ -1,4 +1,4 @@
-@import "../../../shared/ui-components/styles/variables";
+@import "variables";
 
 .fas.fa-arrows {
   cursor: move;
@@ -63,7 +63,23 @@
     margin-right: 4px;
     width: 100%;
     transition: width 0.4s ease;
-  }
+  }  .limit-message-container {
+       width: 360px;
+       flex: 0 0 360px;
+       display: flex;
+
+       .limit-message {
+         display: flex;
+         flex-direction: column;
+         align-items: center;
+         padding: 24px 48px;
+         text-align: center;
+
+         i {
+           color: $info-color
+         }
+       }
+     }
 
   ::ng-deep .fixed-width {
     height: 100%;

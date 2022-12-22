@@ -1,9 +1,10 @@
-<ng-container *ngIf="((projectsList$ | async)?.length !== 0 && (!allExamples || (showExamples$ | async))) || searching; else emptyState">
-  <div class="sm-card-list-layout projects" *ngIf="projectsList$ | async as projects">
+  <div class="sm-card-list-layout projects"  [class.in-empty-state]="!(((projectsList$ | async)?.length !== 0 && (!allExamples || (showExamples$ | async))) || searching)">
     <sm-projects-header
       (orderByChanged)="orderByChanged($event)"
       [sortByField]="projectsOrderBy$ | async"
       [sortOrder]="projectsSortOrder$ | async"
+      [enableTagsFilter]="true"
+      [tags]="projectsTags$ | async"
     >
       <button
         class="btn btn-cml-primary d-flex align-items-center"
@@ -11,8 +12,9 @@
         <i class="al-icon al-ico-add sm mr-2"></i>NEW PIPELINE
       </button>
     </sm-projects-header>
-    <ng-container *ngFor="let project of projects; trackBy: trackById ;let last=last">
+    <ng-container *ngIf="((projectsList$ | async)?.length !== 0 && (!allExamples || (showExamples$ | async))) || searching; else emptyState" >
       <sm-pipeline-card
+        *ngFor="let project of projectsList$ | async; trackBy: trackById ;let last=last"
         [hideMenu]="['All Experiments'].includes(project.name) || project['isRoot'] || isExample(project)"
         [project]="project"
         [allTags]="projectsTags$ | async"
@@ -28,7 +30,6 @@
       <button (click)="loadMore()" class="btn btn-cml-primary load-more-btn">LOAD MORE</button>
     </div>
   </div>
-</ng-container>
 <ng-template #emptyState>
   <div class="empty-pipelines">
     <div class="title-icon"><i class="al-icon al-ico-pipelines xxl"></i></div>
@@ -51,7 +52,7 @@
           For more details see the <a [class.dark]="showButton" href="https://clear.ml/docs/latest/docs/pipelines/" target="_blank">documentation</a>
         </div>
       </div>
-      <sm-code-editor [code]="initPipelineCode" [readonly]="true"></sm-code-editor>
+      <sm-code-editor [code]="initPipelineCode" [readonly]="true" [showCopyButton]="true"></sm-code-editor>
     </div>
     <div class="diagram"><i class="i-pipeline-empty-state"></i></div>
   </div>

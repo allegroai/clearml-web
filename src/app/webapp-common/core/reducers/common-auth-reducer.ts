@@ -1,4 +1,6 @@
 import {createSelector, on, ReducerTypes, select, Store} from '@ngrx/store';
+import {filter, map, takeWhile, timeout} from 'rxjs/operators';
+import {isEqual} from 'lodash/fp';
 import {
   addCredential,
   cancelS3Credentials,
@@ -10,9 +12,7 @@ import {
   updateS3Credential
 } from '../actions/common-auth.actions';
 import {CredentialKey} from '~/business-logic/model/auth/credentialKey';
-import {inBucket} from '@common/settings/admin/base-admin.service';
-import {filter, map, takeWhile, timeout} from 'rxjs/operators';
-import {isEqual} from 'lodash/fp';
+import {inBucket} from '@common/settings/admin/base-admin-utils';
 
 export interface Credentials {
   Bucket?: string;
@@ -58,8 +58,8 @@ export const selectAuth = state => state.auth as AuthState;
 export const selectRevokeSucceed = createSelector(selectAuth, state => state.revokeSucceed);
 export const selectCredentials = createSelector(selectAuth, state => state.credentials);
 export const selectNewCredential = createSelector(selectAuth, state => state.newCredential);
-export const selectS3BucketCredentials = createSelector(selectAuth, state => state.s3BucketCredentials);
-export const selectS3BucketCredentialsBucketCredentials = createSelector(selectAuth, state => state.s3BucketCredentials?.bucketCredentials);
+export const selectS3BucketCredentials = createSelector(selectAuth, state => state?.s3BucketCredentials);
+export const selectS3BucketCredentialsBucketCredentials = createSelector(selectAuth, state => state?.s3BucketCredentials?.bucketCredentials);
 export const selectShowLocalFilesPopUp = createSelector(selectAuth, state => state.showLocalFilePopup);
 export const selectDontShowAgainForBucketEndpoint = createSelector(selectAuth, state => state.dontShowAgainForBucketEndpoint);
 export const selectSignedUrls = createSelector(selectAuth, state => state.signedUrls);

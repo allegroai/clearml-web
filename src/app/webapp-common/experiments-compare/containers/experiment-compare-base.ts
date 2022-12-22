@@ -1,13 +1,17 @@
 import * as detailsActions from '../actions/experiments-compare-details.actions';
 import * as paramsActions from '../actions/experiments-compare-params.actions';
-import {ExperimentCompareTree, ExperimentCompareTreeSection, IExperimentDetail} from '~/features/experiments-compare/experiments-compare-models';
+import {
+  ExperimentCompareTree,
+  ExperimentCompareTreeSection,
+  IExperimentDetail
+} from '~/features/experiments-compare/experiments-compare-models';
 import {get, has, isEmpty, isEqual} from 'lodash/fp';
 import {treeBuilderService} from '../services/tree-builder.service';
 import {isArrayOrderNotImportant} from '../jsonToDiffConvertor';
 import {ExperimentParams, TreeNode, TreeNodeMetadata} from '../shared/experiments-compare-details.model';
 import {MatTreeFlatDataSource, MatTreeFlattener} from '@angular/material/tree';
 import {activeLoader, addMessage, deactivateLoader} from '../../core/actions/layout.actions';
-import {ChangeDetectorRef, OnDestroy, QueryList, ViewChildren, Directive} from '@angular/core';
+import {ChangeDetectorRef, Directive, OnDestroy, QueryList, ViewChildren} from '@angular/core';
 import {ExperimentCompareDetailsBase} from '~/features/experiments-compare/experiments-compare-details.base';
 import {ActivatedRoute, Router} from '@angular/router';
 import {select, Store} from '@ngrx/store';
@@ -41,7 +45,7 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
 
   public renameMap = RENAME_MAP;
   public experiments$: Observable<any[]>;
-  public taskIds$: Observable<string>;
+  public taskIds$: Observable<string[]>;
 
   public routerParamsSubscription: Subscription;
   public experimentsSubscription: Subscription;
@@ -79,23 +83,20 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
 
   @ViewChildren('virtualScrollRef') virtualScrollRef: QueryList<CdkVirtualScrollViewport>;
 
-
-  constructor (
-    public router: Router,
-    public store: Store<ExperimentInfoState>,
-    public changeDetection: ChangeDetectorRef,
-    public activeRoute: ActivatedRoute,
-    public refresh: RefreshService
+  constructor(
+    protected router: Router,
+    protected store: Store<ExperimentInfoState>,
+    protected changeDetection: ChangeDetectorRef,
+    protected activeRoute: ActivatedRoute,
+    protected refresh: RefreshService
   ) {
     super();
     this.hasDataFeature$ = this.store.pipe(select(selectHasDataFeature));
-
     this.taskIds$ = this.store.pipe(
       select(selectRouterParams),
-      map(params => get('ids', params)),
+      map(params => get('ids', params).split(',')),
       distinctUntilChanged(),
       tap(taskIds => this.taskIds = taskIds),
-      filter(taskIds => !!taskIds && taskIds !== this.getExperimentIdsParams(this.experiments))
     );
   }
 
@@ -420,9 +421,7 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
     };
   };
 
-  metaDataTransformer = (): TreeNodeMetadata => {
-    return null;
-  };
+  metaDataTransformer = (): TreeNodeMetadata => null;
 
   isPrimitive(obj) {
     return (typeof obj === 'string' || typeof obj === 'boolean' || typeof obj === 'number');
@@ -439,9 +438,7 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
 
   public syncUrl(experiments: Array<IExperimentDetail>) {
     const newParams = this.getExperimentIdsParams(experiments);
-    if (newParams !== this.taskIds) {
-      this.router.navigateByUrl(this.router.url.replace(this.taskIds, newParams));
-    }
+    this.router.navigateByUrl(this.router.url.replace(this.experiments.map(ex=>ex.id).toString(), newParams));
   }
 
   public extractTags(experiments) {

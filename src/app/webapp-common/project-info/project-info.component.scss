@@ -1,5 +1,4 @@
 @import "variables";
-@import "../assets/fonts/variables";
 @import "../layout/layout";
 
 .header-container {
@@ -10,9 +9,9 @@
   height: calc(100% - #{$project-header-height});
   min-height: 500px;
   overflow: auto;
-  padding-bottom: 16px;
   display: flex;
   flex-direction: column;
+  padding: 0 24px;
 
   .metric-panel {
     max-height: 340px;
@@ -20,7 +19,6 @@
     width: 100%;
     max-width: 960px;
     margin: 0 auto 16px;
-    padding: 0 24px;
     overflow: hidden;
 
     &.open {
@@ -43,22 +41,6 @@
     }
   }
 
-  .md-editor-preview {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: auto;
-    width: 100%;
-    min-height: 300px;
-    max-width: 960px;
-    margin: 0 auto;
-    padding: 6px 24px;
-
-    &.editor {
-      max-width: 1580px;
-    }
-  }
-
   .overview-placeholder {
     min-height: 320px;
     flex: 1;
@@ -76,408 +58,17 @@
       align-items: center;
     }
   }
-}
 
-.md-btn-edit {
-  position: absolute;
-  right: 24px;
-  top: 24px;
-  z-index: 10;
-  line-height: normal;
-  visibility: hidden;
-  opacity: 0;
-  border: none;
-  transition: opacity 0.25s, visibility 0.25s, background-color 0.25s, color 0.25s;
-  box-shadow: 0 0 0 3px rgba($blue-900, 50%); // seperate between button to elements below
-}
-
-.md-content {
-  height: 100%;
-  position: relative;
-  overflow: hidden;
-  flex: 2 1;
-  background-color: $blue-900;
-  border-radius: 4px;
-  padding: 12px 0 12px 12px;
-
-  &.edit-mode {
-    padding: 0;
-    height: calc(100% - 30px);
-
-    &.dirty {
-      box-shadow: 0 0 0 1px $black, 0 0 0 3px $blue-500;
-    }
-  }
-
-  &:hover {
-    .md-btn-edit {
-      visibility: visible;
-      opacity: 1;
-
-      &:hover {
-        background-color: $purple;
-        color: white !important;
-      }
-    }
-  }
-
-  .btn:focus {
-    box-shadow: none !important;
-  }
-}
-
-.md-footer {
-  display: flex;
-  margin-top: 12px;
-}
-
-.right-buttons {
-  margin-left: auto;
-
-  button {
-    line-height: normal;
-  }
-}
-
-.md-warning {
-  font-size: 14px;
-  color: #e76b7a;
-  visibility: hidden;
-  opacity: 0;
-  transition: opacity 0.8s, visibility 0.8s, transform 0.8s;
-  transform: translate(-50px, 0);
-
-  &.active {
-    opacity: 1;
-    visibility: visible;
-    transform: translate(0, 0);
-  }
-}
-
-.btn-outline {
-  background-color: transparent;
-  margin-right: 12px;
-  border: 1px solid $blue-600;
-}
-
-:host {
-  // dark theme
-  ::ng-deep .md-layout {
-
-    @media (max-width: 990px) {
-      .preview-container {
-        display: none;
-      }
-    }
-
-    .btn-group::before {
-      background-color: transparent !important;
-    }
-
-    .tool-bar {
-      background-color: #141822 !important;
-      border-bottom: 1px solid $blue-600 !important;
-
-      .btn:first-child:before {
-        display: none;
-      }
-
-      .btn-group {
-        button {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 24px;
-          width: 24px;
-          height: 24px;
-          margin: 0 3px;
-          border-radius: 2px !important;
-          color: $blue-300;
-          background-color: $blue-600;
-
-          &:hover {
-            color: $blue-200;
-            background-color: $blue-500;
-          }
-
-          .fa {
-            font-size: 24px;
-            width: 24px;
-            height: 24px;
-            font-family: "trains", sans-serif;
-            font-weight: 400;
-
-            &.fa-bold:before {
-              content: $al-ico-bold;
-            }
-
-            &.fa-italic:before {
-              content: $al-ico-italic;
-            }
-
-            &.fa-header:before {
-              content: $al-ico-heading;
-            }
-
-            &.fa-quote-left:before {
-              content: $al-ico-quote;
-            }
-
-            &.fa-link:before {
-              content: $al-ico-link;
-            }
-
-            &.fa-image:before {
-              content: $al-ico-image;
-            }
-
-            &.fa-list-ul:before {
-              content: $al-ico-list-bulleted;
-            }
-
-            &.fa-list-ol:before {
-              content: $al-ico-list-numbered;
-            }
-
-            &.fa-file-code-o:before {
-              content: $al-ico-code;
-            }
-          }
-        }
-      }
-    }
-
-    .ace_gutter {
-      background-color: #1c2132;
-      color: #989899;
-
-      .ace_gutter-active-line {
-        background-color: #2e4258;
-        color: #d5d9de;
-      }
-    }
-
-    .editor-panel {
-      border-right: 1px solid $blue-500;
-    }
-
-    @media (max-width: 990px) {
-      .editor-panel {
-        border-right: none;
-      }
-    }
-
-    .preview-panel {
-      height: unset !important;
-      background-color: transparent !important;
-
-      code.hljs {
-        background-color: $blue-700;
-        font-size: 12px;
-        line-height: 18px;
-        padding: 16px;
-        border-radius: 4px;
-      }
-
-      pre {
-        color: white !important;
-      }
-    }
-
-    ::ng-deep .ace_scrollbar-v {
-      cursor: default;
-    }
-
-    // Highlighting Editor
-    .ace-editor.ace_editor.ace-tm {
-      background-color: transparent;
-
-      .ace_marker-layer .ace_selection {
-        background-color: $blue-600;
-      }
-
-      .ace_line {
-        color: #e1e1e1;
-      }
-
-      .ace_cursor {
-        color: #e1e1e1;
-      }
-
-      .ace_marker-layer.ace_active-line {
-        color: $blue-600;
-      }
-
-      .ace_print-margin {
-        display: none;
-      }
-
-      .ace_content {
-        .ace_heading {
-          color: #7d7af7;
-        }
-
-        .ace_string {
-          color: #2f9633;
-
-          &.ace_strong,
-          &.ace_emphasis {
-            color: #2f9633;
-          }
-        }
-
-        .ace_storage {
-          &.ace_type {
-            color: #347ff1;
-          }
-        }
-
-        .ace_text {
-          &.ace_xml {
-            color: #e1e1e1;
-          }
-        }
-
-        .ace_support.ace_function,
-        .ace_keyword {
-          color: #cc8705;
-        }
-
-        .ace_entity {
-          &.ace_name {
-            &.ace_function {
-              color: #569fd5;
-            }
-          }
-        }
-
-        .ace_punctuation {
-          &.ace_operator {
-            color: #e1e1e1;
-          }
-        }
-
-        .ace_paren {
-          &.ace_lparen,
-          &.ace_rparen {
-            color: #e1e1e1;
-          }
-        }
-
-        .ace_markup {
-          &.ace_underline {
-            color: #e1e1e1;
-
-          }
-        }
-
-        .ace_list {
-          color: #ef3bc5;
-        }
-
-        .ace_meta.ace_tag {
-          color: $blue-300;
-        }
-      }
-    }
-
-    // Highlighting Preview
-    .preview-panel {
-      h1 {
-        color: $blue-100;
-        font-weight: 500;
-      }
-
-      h2 {
-        color: $blue-200;
-        font-weight: 500;
-        margin-top: 32px;
-      }
-
-      h3, h4 {
-        color: $blue-280;
-        font-weight: 500;
-      }
-
-      strong, em {
-        color: #c4cded;
-      }
-
-      hr {
-        margin: 24px 0;
-        border-bottom: 1px solid $blue-600;
-      }
-
-      a {
-        color: #FFFFFF;
-      }
-
-      .table {
-        background-color: transparent;
-        border: 1px solid $dark-border;
-        margin-bottom: 12px;
-
-        td, th {
-          border-bottom: 1px solid $dark-border;
-          padding: 8px 16px;
-        }
-
-        th {
-          background-color: $blue-800;
-          color: $blue-300;
-          font-weight: 500;
-        }
-      }
-
-      blockquote {
-        padding: 4px 16px;
-        border-left: 3px solid $purple;
-
-        p {
-          margin: 0;
-          color: $blue-200;
-        }
-      }
+  sm-markdown-editor {
+    flex: 1;
+    width: 100%;
+    min-height: 300px;
+    max-width: 960px;
+    margin: 0 auto;
+
+    &.editor {
+      max-width: 1856px;
     }
   }
 }
-
-.preview-header {
-  position: absolute;
-  top: 12px;
-  z-index: 1;
-  right: 25%;
-  transform: translateX(50%);
-  font-size: 12px;
-  font-weight: 500;
-  color: $blue-300;
-}
-
-@media (max-width: 990px) {
-  .preview-header {
-    display: none;
-  }
-
-  ::ng-deep .editor-hidden {
-    .tool-bar {
-      opacity: 0.4;
-      pointer-events: none;
-    }
-  }
-}
-
-.md-content .btn-preview-toggle {
-  position: absolute;
-  top: 6px;
-  right: 12px;
-  z-index: 1;
-  display: none;
-}
-
-@media (max-width: 990px) {
-  .md-content .btn-preview-toggle {
-    display: block;
-  }
-}
-
 

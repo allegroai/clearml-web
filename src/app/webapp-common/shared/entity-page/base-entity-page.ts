@@ -12,7 +12,6 @@ import {
   withLatestFrom
 } from 'rxjs/operators';
 import {Project} from '~/business-logic/model/projects/project';
-import {isReadOnly} from '../utils/shared-utils';
 import {
   selectAllProjectsUsers,
   selectProjectUsers,
@@ -43,6 +42,7 @@ import {User} from '~/business-logic/model/users/user';
 import {neverShowPopupAgain} from '../../core/actions/layout.actions';
 import {selectNeverShowPopups} from '../../core/reducers/view.reducer';
 import {SmSyncStateSelectorService} from '../../core/services/sync-state-selector.service';
+import {isReadOnly} from '@common/shared/utils/is-read-only';
 
 @Component({
   selector: 'sm-base-entity-page',

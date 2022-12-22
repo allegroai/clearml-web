@@ -12,7 +12,7 @@ import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-in
 import {CloneForm} from '../../common-experiment-model.model';
 import {SmSyncStateSelectorService} from '@common/core/services/sync-state-selector.service';
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
-import {htmlTextShorte, isReadOnly} from '@common/shared/utils/shared-utils';
+import {htmlTextShorte} from '@common/shared/utils/shared-utils';
 import * as commonMenuActions from '../../../actions/common-experiments-menu.actions';
 import {archiveSelectedExperiments, abortAllChildren} from '../../../actions/common-experiments-menu.actions';
 import {ChangeProjectDialogComponent} from '../change-project-dialog/change-project-dialog.component';
@@ -43,6 +43,7 @@ import {
   selectionDisabledReset
 } from '@common/shared/entity-page/items.utils';
 import {resetOutput} from '@common/experiments/actions/common-experiment-output.actions';
+import {isReadOnly} from '@common/shared/utils/is-read-only';
 
 
 @Component({

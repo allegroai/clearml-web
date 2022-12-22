@@ -12,10 +12,10 @@ import {GetCurrentUserResponseUserObject} from '~/business-logic/model/users/get
 import {AdminService} from '~/shared/services/admin.service';
 import {selectDontShowAgainForBucketEndpoint, selectS3BucketCredentialsBucketCredentials, selectSignedUrl} from '@common/core/reducers/common-auth-reducer';
 import {EMPTY, of} from 'rxjs';
-import {SignResponse} from '@common/settings/admin/base-admin.service';
 import {S3AccessResolverComponent} from '@common/layout/s3-access-resolver/s3-access-resolver.component';
 import {MatDialog} from '@angular/material/dialog';
 import {setCredentialLabel} from '../actions/common-auth.actions';
+import {SignResponse} from '@common/settings/admin/base-admin-utils';
 
 @Injectable()
 export class CommonAuthEffects {

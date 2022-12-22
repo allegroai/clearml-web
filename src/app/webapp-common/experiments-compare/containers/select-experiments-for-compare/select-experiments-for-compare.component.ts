@@ -1,4 +1,13 @@
-import {ChangeDetectorRef, Component, ElementRef, EventEmitter, Inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  EventEmitter,
+  Inject,
+  OnDestroy,
+  OnInit,
+  ViewChild
+} from '@angular/core';
 import {select, Store} from '@ngrx/store';
 import {
   compareAddDialogTableSortChanged,
@@ -9,10 +18,7 @@ import {
   resetSelectCompareHeader,
   setShowSearchExperimentsForCompare
 } from '../../actions/compare-header.actions';
-import {
-  selectExperimentsForCompareSearchTerm,
-  selectSelectedExperimentsForCompareAdd
-} from '../../reducers';
+import {selectExperimentsForCompareSearchTerm, selectSelectedExperimentsForCompareAdd} from '../../reducers';
 import {BehaviorSubject, combineLatest, Observable, Subscription} from 'rxjs';
 import {Task} from '~/business-logic/model/tasks/task';
 import {Params} from '@angular/router';
@@ -32,7 +38,8 @@ import {
   selectExperimentsTypes,
   selectHyperParamsOptions,
   selectNoMoreExperiments,
-  selectTableFilters, selectTableSortFields
+  selectTableFilters,
+  selectTableSortFields
 } from '@common/experiments/reducers';
 import {get, isEqual, unionBy} from 'lodash/fp';
 import {ColHeaderTypeEnum, ISmCol, TableSortOrderEnum} from '@common/shared/ui-components/data/table/table.consts';
@@ -45,12 +52,14 @@ import {selectProjectSystemTags, selectProjectUsers, selectRootProjects} from '@
 import {SortMeta} from 'primeng/api';
 import {Project} from '~/business-logic/model/projects/project';
 import {addMessage} from '@common/core/actions/layout.actions';
-import {MESSAGES_SEVERITY} from '~/app.constants';
-import {ProjectsGetTaskParentsResponseParents} from '~/business-logic/model/projects/projectsGetTaskParentsResponseParents';
+import {
+  ProjectsGetTaskParentsResponseParents
+} from '~/business-logic/model/projects/projectsGetTaskParentsResponseParents';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {INITIAL_EXPERIMENT_TABLE_COLS} from '@common/experiments/experiment.consts';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {ExperimentsTableComponent} from '@common/experiments/dumb/experiments-table/experiments-table.component';
+import {MESSAGES_SEVERITY} from '@common/constants';
 
 export const allowAddExperiment$ = (selectRouterParams$: Observable<Params>) => selectRouterParams$.pipe(
   distinctUntilKeyChanged('ids'),
@@ -91,11 +100,10 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
   public parent$: Observable<ProjectsGetTaskParentsResponseParents[]>;
   public tableSortFields$: Observable<SortMeta[]>;
   public projects$: Observable<Project[]>;
-  private originalSelectedExperiments: string[];
   selectedExperiment: any;
   public reachedCompareLimit: boolean;
   private _resizedCols = {} as { [colId: string]: string };
-  private resizedCols$ = new BehaviorSubject<{[colId: string]: string }>(this._resizedCols);
+  private resizedCols$ = new BehaviorSubject<{ [colId: string]: string }>(this._resizedCols);
   @ViewChild('searchExperiments', {static: true}) searchExperiments;
   @ViewChild(ExperimentsTableComponent) table: ExperimentsTableComponent;
 
@@ -104,7 +112,7 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
     private eRef: ElementRef,
     private changedDetectRef: ChangeDetectorRef,
     public dialogRef: MatDialogRef<SelectExperimentsForCompareComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: {entityType: EntityTypeEnum}
+    @Inject(MAT_DIALOG_DATA) public data: { entityType: EntityTypeEnum }
   ) {
     this.resizedCols$.next(this._resizedCols);
     this.experimentsResults$ = this.store.pipe(select(selectSelectedExperimentsForCompareAdd));
@@ -131,7 +139,7 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
     this.tableCols$ = combineLatest([this.columns$, this.metricTableCols$, this.resizedCols$])
       .pipe(
         map(([tableCols, metricCols, resizedCols]) =>
-          (tableCols.length > 0 ? tableCols: this.tableCols)
+          (tableCols.length > 0 ? tableCols : this.tableCols)
             .concat(metricCols.map(col => ({...col, metric: true})))
             .map(col => ({
               ...col,
@@ -184,15 +192,16 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
 
 
   ngOnInit() {
+    this.store.dispatch(setShowSearchExperimentsForCompare({payload: true}));
     window.setTimeout(() => this.table.table.rowRightClick = new EventEmitter());
     this.paramsSubscription = this.store.pipe(
       select(selectRouterParams),
       map(params => [params && params['ids'], get('projectId', params)]),
-      filter(([experimentIds,]) => !!experimentIds)
+      filter(([experimentIds,]) => !!experimentIds),
     ).subscribe(([experimentIds, projectId]) => {
       if (this.selectedExperimentsIds.length === 0) {
-        this.selectedExperimentsIds = experimentIds.split(',');
-        this.originalSelectedExperiments = this.selectedExperimentsIds;
+      this.selectedExperimentsIds = experimentIds.split(',');
+      this.syncSelectedExperiments();
       }
       if (!this.projectId && projectId !== '*') {
         this.store.dispatch(compareAddTableFilterInit({projectId}));
@@ -214,12 +223,11 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
     this.store.dispatch(resetExperiments());
     this.store.dispatch(resetGlobalFilter());
     this.store.dispatch(resetSelectCompareHeader());
-
   }
 
 
   experimentsSelectionChanged(experiments: Array<ITableExperiment>) {
-    this.reachedCompareLimit = experiments.length === compareLimitations;
+    this.reachedCompareLimit = experiments.length >= compareLimitations;
     if (experiments.length === 0) {
       this.store.dispatch(addMessage(MESSAGES_SEVERITY.WARN, 'Compare module should include at least one experiment'));
       return;
@@ -264,7 +272,7 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
     this.dialogRef.close(experimentIds);
   }
 
-  resizeCol({columnId, widthPx}: {columnId: string; widthPx: number}) {
+  resizeCol({columnId, widthPx}: { columnId: string; widthPx: number }) {
     this._resizedCols[columnId] = `${widthPx}px`;
     this.resizedCols$.next(this._resizedCols);
   }

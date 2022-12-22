@@ -11,6 +11,8 @@ import {Ace, edit} from 'ace-builds';
 import {Store} from '@ngrx/store';
 import {selectAceReady} from '@common/core/reducers/view.reducer';
 import {filter} from 'rxjs/operators';
+import {addMessage} from '@common/core/actions/layout.actions';
+import {MESSAGES_SEVERITY} from '@common/constants';
 
 @Component({
   selector: 'sm-code-editor',
@@ -31,6 +33,7 @@ export class CodeEditorComponent implements AfterViewInit {
   }
 
   @Input() readonly = false;
+  @Input() showCopyButton = false;
   private _code: string;
   @Input() set code(text: string) {
     this._code = text;
@@ -92,5 +95,9 @@ export class CodeEditorComponent implements AfterViewInit {
         filter((ready: boolean) => ready),
       )
       .subscribe(() => this.initAceEditor());
+  }
+
+  copySuccess() {
+    this.store.dispatch(addMessage(MESSAGES_SEVERITY.SUCCESS, 'Code copied to clipboard'));
   }
 }

@@ -19,6 +19,7 @@
       [isCompare]="true"
       [isGroupGraphs]="true"
       [hiddenList]="listOfHidden | async"
+      (createEmbedCode)="createEmbedCode($event)"
       (resetGraphs)="resetMetrics()"
     >
     </sm-experiment-graphs>

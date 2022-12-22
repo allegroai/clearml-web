@@ -1,8 +1,7 @@
 import {ISmAction} from '../../core/models/actions';
-import {Project} from '../../../business-logic/model/projects/project';
 import {CreationStatusEnum} from './project-dialog.reducer';
-import {ProjectsCreateRequest} from '../../../business-logic/model/projects/projectsCreateRequest';
-import {createAction, props} from "@ngrx/store";
+import {ProjectsCreateRequest} from '~/business-logic/model/projects/projectsCreateRequest';
+import {createAction, props} from '@ngrx/store';
 
 const CREATE_PROJECT_DIALOG_PREFIX = 'CREATE_PROJECT_DIALOG_';
 
@@ -48,5 +47,5 @@ export class SetNewProjectCreationStatus implements ISmAction {
 
 export const moveProject = createAction(
   CREATE_PROJECT_DIALOG_PREFIX + 'MOVE_PROJECT',
-  props<{project?: string; new_location?: string; name: string}>()
+  props<{project?: string; new_location?: string; name: string; fromName: string; toName: string; projectName: string}>()
 );

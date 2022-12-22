@@ -1,19 +1,16 @@
-<div class="frame text-center" [ngClass]="{
-'dark-theme':theme===themeEnum.Dark,
-'light-theme': theme===themeEnum.Light
-}">
+<div class="frame text-center"
+     [class.dark-theme]="theme===themeEnum.Dark"
+     [class.light-theme]="theme===themeEnum.Light">
   <div class="labeled-icon" #labeled>
     <i
       class="error-icon al-icon al-color sm"
       [style.font-size.px]="min(floor(labeled.getBoundingClientRect().height - 44), 64) || ''"
       [style.width.px]="min(floor(labeled.getBoundingClientRect().height - 44), 64) || ''"
       [style.height.px]="min(floor(labeled.getBoundingClientRect().height - 44), 64) || ''"
-      [ngClass]="{
-        'blue-300': theme === themeEnum.Light,
-        'neon-yellow': theme === themeEnum.Dark,
-        'al-ico-no-source': missingSource,
-        'al-ico-alert-outline': !missingSource
-        }"
+      [class.blue-300]="theme === themeEnum.Light"
+      [class.neon-yellow]="theme === themeEnum.Dark"
+      [class.al-ico-no-source]="missingSource"
+      [class.al-ico-alert-outline]="!missingSource"
     ></i>
     <div *ngIf="labeled.getBoundingClientRect().height > 50"
          class="label"

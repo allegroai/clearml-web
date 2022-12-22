@@ -1,6 +1,18 @@
-button {
+@import 'variables';
+
+.btn {
+  display: flex;
+  align-items: center;
   .button-label {
     margin-left: 12px;
-    text-align: right;
+  }
+  :host-context(.dark-theme) {
+    .show-archived {
+      border-color: #636e97;
+      box-shadow: 0 3px 6px rgba(0,0,0,.16);
+      &:hover {
+        border-color: #636e97;
+      }
+    }
   }
 }

@@ -19,7 +19,7 @@ import {selectSelectedExperiments, selectTableMode} from '../reducers';
 import {selectSelectedExperiment} from '~/features/experiments/reducers';
 import * as infoActions from '../actions/common-experiments-info.actions';
 import {autoRefreshExperimentInfo, experimentDetailsUpdated} from '../actions/common-experiments-info.actions';
-import {EmptyAction, MESSAGES_SEVERITY} from '~/app.constants';
+import {EmptyAction} from '~/app.constants';
 import * as viewActions from '../actions/common-experiments-view.actions';
 import {IExperimentInfo, ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
 import {ApiProjectsService} from '~/business-logic/api-services/projects.service';
@@ -47,6 +47,7 @@ import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
 import {TasksCloneRequest} from '~/business-logic/model/tasks/tasksCloneRequest';
 import {WelcomeMessageComponent} from '@common/layout/welcome-message/welcome-message.component';
 import {selectNeverShowPopups} from '@common/core/reducers/view.reducer';
+import {MESSAGES_SEVERITY} from '@common/constants';
 
 export const getChildrenExperiments = (tasksApi, parents, filters?: { [key: string]: any }): Observable<Task[]> =>
   tasksApi.tasksGetAllEx({

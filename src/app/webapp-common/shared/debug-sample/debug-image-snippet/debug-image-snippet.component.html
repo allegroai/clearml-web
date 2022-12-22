@@ -1,0 +1,81 @@
+<ng-container *ngIf="(source$ | async) as source">
+  <div *ngIf="!isFailed" class="item-snippet" [class.loading]="isLoading"  [class]="theme" [class.no-hover-effect]="noHoverEffects">
+    <ng-container [ngSwitch]="type">
+
+      <div class="image" *ngSwitchCase="'image'">
+          <img
+            class="pointer"
+            [src]="source"
+            (error)="isFailed = true"
+            (click)="imageClicked.emit({src: source})"
+            (load)="loadedMedia()"
+            [class.loading]="isLoading"
+          >
+          <div *ngIf="!noHoverEffects" class="toolbar top">
+            <div class="clickable-icon d-flex align-items-center justify-content-center pointer"
+                (click)="createEmbedCode.emit();"
+                smTooltip="Copy to Report">
+              <i class="al-icon al-ico-code sm"></i>
+            </div>
+          </div>
+      </div>
+
+      <div class="player" *ngSwitchCase="'player'">
+        <video
+          #video
+          preload="metadata"
+          [src]="source"
+          (error)="imageError.emit(); isFailed = true"
+          (loadedmetadata)="loadedMedia()"
+          (click)="imageClicked.emit({src: source})"
+        ></video>
+        <div  class="toolbar top">
+          <div *ngIf="!noHoverEffects" class="clickable-icon d-flex align-items-center justify-content-center pointer"
+               (click)="createEmbedCode.emit();"
+               smTooltip="Copy to Report">
+            <i class="al-icon al-ico-code sm"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="html-snippet" *ngSwitchCase="'html'">
+        <div class="html-wrap" [class.loading]="isLoading">
+          <iframe (load)="iframeLoaded($event)" class="html-viewer" width="400" height="400" referrerpolicy="origin-when-cross-origin" [src]="source | safe:'url'"></iframe>
+        </div>
+        <div *ngIf="!noHoverEffects" class="toolbar">
+          <div class="clickable-icon d-flex align-items-center justify-content-center pointer"
+               (click)="createEmbedCode.emit();"
+               smTooltip="Copy to Report">
+            <i class="al-icon al-ico-code sm"></i>
+          </div>
+          <div class="clickable-icon d-flex align-items-center justify-content-center pointer"
+               ngxClipboard
+               smTooltip="Copy URL"
+               [cbContent]="source"
+               (cbOnSuccess)="copyToClipboardSuccess(true)">
+            <i class="al-icon al-ico-copy-to-clipboard sm"></i>
+          </div>
+          <div class="clickable-icon d-flex align-items-center justify-content-center pointer"
+               smTooltip="Open URL in a new Tab"
+               (click)="openInNewTab(source)"
+          >
+            <i class="al-icon al-ico-export sm"></i>
+          </div>
+        </div>
+      </div>
+
+    </ng-container>
+    <div *ngIf="!isLoading" class="image-var ellipsis" [smTooltip]="frame?.variant" smShowTooltipIfEllipsis
+    >{{frame?.variantAndMetric || frame?.variant}}</div>
+  </div>
+</ng-container>
+
+<ng-container *ngIf="(source$ | async) as source">
+  <div *ngIf="isFailed" class="item-snippet">
+    <sm-snippet-error
+      [theme]="theme"
+      [copyContent]="source?.split('?X-Amz-Date')[0]"
+      (openImageClicked)="openInNewTab(source)"
+    ></sm-snippet-error>
+  </div>
+</ng-container>

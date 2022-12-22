@@ -57,6 +57,7 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
   public menuItems = [] as MenuItem[];
   minView: boolean;
   private _filters: { [s: string]: FilterMetadata };
+  private readonly isChrome = navigator.userAgent.indexOf('Chrome') > -1;
   public lastRowExpanded: boolean;
 
 
@@ -168,7 +169,6 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
   @Input() enableTableSearch: boolean = false;
   @Input() minimizedTableHeader: string;
   @Input() hasExperimentUpdate: boolean;
-  @Input() lala: any;
 
   @Output() sortChanged = new EventEmitter<{ field: ISmCol['id']; isShift: boolean }>();
   @Output() rowClicked = new EventEmitter<{e: MouseEvent; data: any}>();
@@ -195,9 +195,10 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
       }
       let totalWidth = 0;
       if (this.minView) {
-        this.table.resizeColumnElement = element.getElementsByTagName('th')[0];
-        this.table.resizeTableCells(width, null);
-        totalWidth = width;
+        if (this.table?.styleElement) {
+          this.table.styleElement.innerHTML = '';
+        }
+        totalWidth = width - (this.isChrome ? 14 : 0);
       } else {
         this.table.destroyStyleElement();
         this.table.createStyleElement();
@@ -216,9 +217,9 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
             grow = 1;
           }
           innerHTML += `
-                #${this.table.id} .p-datatable-thead > tr:not(.cards-table) > th:nth-child(${index + 1}),
-                #${this.table.id} .p-datatable-tbody > tr:not(.cards-table) > td:nth-child(${index + 1}),
-                #${this.table.id} .p-datatable-tfoot > tr:not(.cards-table) > td:nth-child(${index + 1}) {
+                #${this.table.id}-table .p-datatable-thead > tr:not(.cards-table) > th:nth-child(${index + 1}),
+                #${this.table.id}-table .p-datatable-tbody > tr:not(.cards-table) > td:nth-child(${index + 1}),
+                #${this.table.id}-table .p-datatable-tfoot > tr:not(.cards-table) > td:nth-child(${index + 1}) {
                     flex: ${grow} 0 ${colWidth}px !important
                 }
             `;

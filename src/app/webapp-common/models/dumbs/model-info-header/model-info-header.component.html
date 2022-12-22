@@ -6,6 +6,8 @@
         <div class="p-2 icon i-model model-icon l-40"></div>
         <sm-inline-edit
           class="edit-name"
+          [minLength]="2"
+          [required]="true"
           [originalText]="model?.name"
           [editable]="editable"
           (textChanged)="onNameChanged($event)"

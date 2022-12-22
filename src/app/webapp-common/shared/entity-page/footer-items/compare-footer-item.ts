@@ -2,7 +2,7 @@ import {IconNames, ICONS} from '../../../constants';
 import {EntityTypeEnum} from '../../../../shared/constants/non-common-consts';
 import {MenuItems} from '../items.utils';
 import { ItemFooterModel} from './footer-items.models';
-export const compareLimitations = 10;
+export const compareLimitations = 100;
 export class CompareFooterItem extends ItemFooterModel  {
   id = MenuItems.compare;
   icon = ICONS.COMPARE as Partial<IconNames>;
@@ -16,7 +16,7 @@ export class CompareFooterItem extends ItemFooterModel  {
   }
   getItemState(state): any {
     return {
-      disable: state.selected.length > 10,
+      disable: state.selected.length > compareLimitations,
     };
 
   }

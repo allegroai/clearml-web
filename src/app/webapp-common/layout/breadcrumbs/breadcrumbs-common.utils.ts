@@ -4,6 +4,7 @@ import {Project} from '~/business-logic/model/projects/project';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 import {TableModel} from '@common/models/shared/models.model';
 import {Task} from '~/business-logic/model/tasks/task';
+import { Report } from '~/business-logic/model/reports/report';
 
 export interface IBreadcrumbs {
   project: Project;
@@ -11,6 +12,7 @@ export interface IBreadcrumbs {
   experiment: IExperimentInfo;
   model: TableModel;
   task: Task;
+  report: Report;
 }
 
 const addSuffixForExamples = crumb => {
@@ -97,7 +99,7 @@ export const prepareNames = (data: IBreadcrumbs, customProject?: boolean, fullSc
   }
   const task = prepareLinkData(data.task);
   const experiment = (data.experiment && !customProject) ? prepareLinkData(data.experiment, true) : {};
-
+  const report = prepareLinkData(data.report);
   const output = formatStaticCrumb('');
   const experiments = formatStaticCrumb('experiments');
   const models = formatStaticCrumb('models');
@@ -114,6 +116,7 @@ export const prepareNames = (data: IBreadcrumbs, customProject?: boolean, fullSc
     ':taskId': task,
     ':controllerId': experiment,
     'compare-experiments': compare,
+    ':reportId': report,
     output,
     experiments,
     models,

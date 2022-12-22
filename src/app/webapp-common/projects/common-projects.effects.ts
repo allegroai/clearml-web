@@ -14,21 +14,35 @@ import {
 import {Store} from '@ngrx/store';
 import {TABLE_SORT_ORDER} from '../shared/ui-components/data/table/table.consts';
 import {ProjectsGetAllExRequest} from '~/business-logic/model/projects/projectsGetAllExRequest';
-import {escapeRegex, isExample} from '../shared/utils/shared-utils';
+import {isExample} from '../shared/utils/shared-utils';
 import {catchError, filter, map, mergeMap, switchMap, withLatestFrom} from 'rxjs/operators';
 import {get} from 'lodash/fp';
 import {pageSize} from './common-projects.consts';
 import {selectRouterParams} from '../core/reducers/router-reducer';
 import {selectCurrentUser, selectShowOnlyUserWork} from '../core/reducers/users-reducer';
 import {ProjectsGetAllExResponse} from '~/business-logic/model/projects/projectsGetAllExResponse';
-import {selectRootProjects, selectSelectedProject, selectSelectedProjectId, selectShowHidden} from '../core/reducers/projects.reducer';
+import {
+  selectHideExamples,
+  selectMainPageTagsFilter, selectMainPageTagsFilterMatchMode,
+  selectRootProjects,
+  selectSelectedProject,
+  selectSelectedProjectId,
+  selectShowHidden
+} from '../core/reducers/projects.reducer';
 import {forkJoin, of} from 'rxjs';
 import {Project} from '~/business-logic/model/projects/project';
-import {setAllProjects, setSelectedProjectStats} from '../core/actions/projects.actions';
+import {
+  setAllProjects,
+  setMainPageTagsFilter,
+  setMainPageTagsFilterMatchMode,
+  setSelectedProjectStats
+} from '../core/actions/projects.actions';
 import {ActivatedRoute} from '@angular/router';
 import {ProjectsUpdateResponse} from '~/business-logic/model/projects/projectsUpdateResponse';
 import {setFilterByUser} from '@common/core/actions/users.actions';
 import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
+import {escapeRegex} from '@common/shared/utils/escape-regex';
+import {addExcludeFilters} from '../shared/utils/tableParamEncode';
 
 @Injectable()
 export class CommonProjectsEffects {
@@ -82,12 +96,16 @@ export class CommonProjectsEffects {
       this.store.select(selectCurrentUser),
       this.store.select(selectShowOnlyUserWork),
       this.store.select(selectShowHidden),
+      this.store.select(selectHideExamples),
       this.store.select(selectRouterParams).pipe(map(params => get('projectId', params))),
       this.store.select(selectSelectedProjectId),
+      this.store.select(selectMainPageTagsFilter),
+      this.store.select(selectMainPageTagsFilterMatchMode),
     ),
     switchMap(([
-                 action, orderBy, sortOrder, searchQuery, scrollId, user, showOnlyUserWork,
-                 showHidden, routerProjectId, projectId]) => {
+                 action, orderBy, sortOrder, searchQuery, scrollId, user, showOnlyUserWork, showHidden, hideExamples,
+                 routerProjectId, projectId,  mainPageTagsFilter, mainPageTagsFilterMatchMode]
+      ) => {
         const selectedProjectId = routerProjectId || projectId; // In rare cases where router not updated yet with current project id
         const pipelines = this.route.snapshot.firstChild.routeConfig.path === 'pipelines';
         const datasets = this.route.snapshot.firstChild.routeConfig.path === 'datasets';
@@ -102,6 +120,7 @@ export class CommonProjectsEffects {
         }
         return forkJoin([
           this.projectsApi.projectsGetAllEx({
+            ...(mainPageTagsFilter?.length > 0 && {tags: [(mainPageTagsFilterMatchMode ? '__$and' : '__$or'), ...addExcludeFilters(mainPageTagsFilter)]}),
             stats_for_state: ProjectsGetAllExRequest.StatsForStateEnum.Active,
             ...(statsFilter && {include_stats_filter: statsFilter}),
             ...(datasets && {include_dataset_stats: true, stats_with_children: false}),
@@ -115,6 +134,7 @@ export class CommonProjectsEffects {
             ...((showHidden || pipelines || datasets) && {search_hidden: true}),
             ...(pipelines ? {system_tags: ['pipeline']} : datasets ? {system_tags: ['dataset']} : {}),
             ...(datasets && {name: '/\\.datasets/'}),
+            ...(hideExamples && {allow_public: false}),
             order_by: ['featured', sortOrder === TABLE_SORT_ORDER.DESC ? '-' + orderBy : orderBy],
             only_fields: ['name', 'company', 'user', 'created', 'default_output_destination', 'basename']
               .concat(pipelines || datasets ? ['tags', 'system_tags', 'last_update'] : []),
@@ -124,7 +144,6 @@ export class CommonProjectsEffects {
                 fields: ['id', 'basename', 'description']
               }
             }),
-            ...action?.getAllFilter
           }),
           // Getting [current project] stats from server
           (selectedProjectId && !scrollId && !searchQuery?.query) ? this.projectsApi.projectsGetAllEx({
@@ -162,7 +181,8 @@ export class CommonProjectsEffects {
             }
           )),
           mergeMap(({newScrollId, projects}) => [
-            addToProjectsList({projects}),
+            addToProjectsList({projects, reset:
+                [setMainPageTagsFilter.type, setMainPageTagsFilterMatchMode.type].includes(action.type)}),
             deactivateLoader(action.type),
             setCurrentScrollId({scrollId: newScrollId}),
             setNoMoreProjects({payload: projects.length < pageSize})]),
@@ -195,7 +215,7 @@ export class CommonProjectsEffects {
 
   setProjectsOrderBy = createEffect(() => this.actions.pipe(
     ofType(setProjectsOrderBy),
-    mergeMap(() => [getAllProjectsPageProjects({})])
+    mergeMap(() => [getAllProjectsPageProjects()])
   ));
 
   showExamplePipeline = createEffect(() => this.actions.pipe(
@@ -213,7 +233,7 @@ export class CommonProjectsEffects {
 
   setProjectsSearchQuery = createEffect(() => this.actions.pipe(
     ofType(setProjectsSearchQuery),
-    mergeMap(() => [getAllProjectsPageProjects({})])
+    mergeMap(() => [getAllProjectsPageProjects()])
   ));
 
   private isNotEmptyExampleProject(project: Project) {

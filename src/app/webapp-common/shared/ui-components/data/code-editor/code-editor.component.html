@@ -1,1 +1,7 @@
+<button
+  *ngIf="showCopyButton"
+  ngxClipboard [cbContent]="code" (cbOnSuccess)="copySuccess()"
+  class="copy-button btn btn-dark">
+  <i class=" al-icon al-ico-copy-to-clipboard"></i>
+</button>
 <div class="ace" #aceEditor></div>

@@ -17,7 +17,7 @@ import {ApiLoginService} from '~/business-logic/api-services/login.service';
 import {Store} from '@ngrx/store';
 import {ErrorService} from '../shared/services/error.service';
 import {selectCurrentUser, selectShowOnlyUserWork} from '../core/reducers/users-reducer';
-import {selectShowHidden} from '@common/core/reducers/projects.reducer';
+import {selectHideExamples, selectShowHidden} from '@common/core/reducers/projects.reducer';
 
 @Injectable()
 export class CommonDashboardEffects {
@@ -38,8 +38,9 @@ export class CommonDashboardEffects {
       this.store.select(selectCurrentUser),
       this.store.select(selectShowOnlyUserWork),
       this.store.select(selectShowHidden),
+      this.store.select(selectHideExamples),
     ),
-    mergeMap(([action, user, showOnlyUserWork, showHidden]) =>
+    mergeMap(([action, user, showOnlyUserWork, showHidden, hideExamples]) =>
       this.projectsApi.projectsGetAllEx({
         stats_for_state: ProjectsGetAllExRequest.StatsForStateEnum.Active,
         include_stats: true,
@@ -50,6 +51,7 @@ export class CommonDashboardEffects {
         ...(showOnlyUserWork && {active_users: [user.id]}),
         ...(showHidden && {search_hidden: true}),
         ...(!showHidden && {include_stats_filter: {system_tags: ['-pipeline']}}),
+        ...(hideExamples && {allow_public: false}),
         only_fields: ['name', 'company', 'user', 'created', 'default_output_destination']
       }).pipe(
           mergeMap(({projects}) => [setRecentProjects({projects}), deactivateLoader(action.type)]),
@@ -60,8 +62,12 @@ export class CommonDashboardEffects {
 
   getRecentTasks = createEffect(() => this.actions.pipe(
     ofType(getRecentExperiments),
-    withLatestFrom(this.store.select(selectCurrentUser), this.store.select(selectShowOnlyUserWork)),
-    switchMap(([action, user, showOnlyUserWork]) => this.tasksApi.tasksGetAllEx({
+    withLatestFrom(
+      this.store.select(selectCurrentUser),
+      this.store.select(selectShowOnlyUserWork),
+      this.store.select(selectHideExamples),
+    ),
+    switchMap(([action, user, showOnlyUserWork, hideExamples]) => this.tasksApi.tasksGetAllEx({
         page: 0,
         page_size: 5,
         order_by: ['-last_update'],
@@ -70,6 +76,7 @@ export class CommonDashboardEffects {
         only_fields: ['type', 'status', 'created', 'name', 'id', 'last_update', 'started', 'project.name'],
         system_tags: ['-archived', '-pipeline'],
         user: showOnlyUserWork ? [user.id] : null,
+        ...(hideExamples && {allow_public: false}),
       })
         .pipe(
           mergeMap(({tasks: experiments}) => [setRecentExperiments({experiments}), deactivateLoader(action.type)]),

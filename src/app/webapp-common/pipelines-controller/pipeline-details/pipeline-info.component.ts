@@ -5,8 +5,8 @@ import {Task} from '~/business-logic/model/tasks/task';
 import {PipelineItem} from '@common/pipelines-controller/pipeline-controller-info/pipeline-controller-info.component';
 import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
 import {addMessage} from '@common/core/actions/layout.actions';
-import {MESSAGES_SEVERITY} from '~/app.constants';
 import { fileSizeConfigStorage } from '@common/shared/pipes/filesize.pipe';
+import {MESSAGES_SEVERITY} from '@common/constants';
 
 @Component({
   selector: 'sm-pipeline-info',

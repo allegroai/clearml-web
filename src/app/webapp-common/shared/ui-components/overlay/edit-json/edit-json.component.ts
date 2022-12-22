@@ -71,7 +71,7 @@ export class EditJsonComponent implements AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.initAceEditor();
+    window.setTimeout(() => this.initAceEditor(), 200);
     this.aceCaretPositionSub = this.$aceCaretPosition.subscribe((positions) => {
       this.aceEditor.moveCursorTo(positions[this.title]?.row || 0, positions[this.title]?.column || 0);
       this.aceEditor.scrollToLine(positions[this.title]?.row || 0, true, false, () => {
@@ -113,16 +113,18 @@ export class EditJsonComponent implements AfterViewInit {
         highlightSelectedWord: false,
         showPrintMargin: false,
         placeholder: this.placeHolder || this.defaultPlaceHolder,
-      });
+      } as Partial<Ace.VirtualRendererOptions>);
 
 
       aceEditor.renderer.setScrollMargin(12, 12, 12, 12);
       aceEditor.renderer.setPadding(12);
       (aceEditor.renderer.container.querySelector('.ace_cursor') as HTMLElement).style.color = 'white';
 
+      aceEditor.setTheme('ace/theme/monokai');
       if (this.typeJson) {
         aceEditor.session.setMode('ace/mode/json');
-        aceEditor.setTheme('ace/theme/monokai');
+      } else {
+        aceEditor.session.setMode('ace/mode/text');
       }
       aceEditor.getSession().setValue(this.textData || '');
       this.aceEditor = aceEditor;

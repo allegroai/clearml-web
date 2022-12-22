@@ -34,7 +34,7 @@ import {
 import {selectRouterConfig, selectRouterParams} from '../../core/reducers/router-reducer';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {ISmCol} from '../../shared/ui-components/data/table/table.consts';
-import {addMultipleSortColumns, escapeRegex, getRouteFullUrl} from '../../shared/utils/shared-utils';
+import {addMultipleSortColumns, getRouteFullUrl} from '../../shared/utils/shared-utils';
 import {
   addExcludeFilters,
   createFiltersFromStore,
@@ -52,7 +52,7 @@ import {EXPERIMENTS_PAGE_SIZE} from '../shared/common-experiments.const';
 import {convertStopToComplete, encodeHyperParameter} from '../shared/common-experiments.utils';
 import {sortByField} from '../../tasks/tasks.utils';
 import {MODEL_TAGS} from '../../models/shared/models.const';
-import {EmptyAction, MESSAGES_SEVERITY} from '~/app.constants';
+import {EmptyAction} from '~/app.constants';
 import {selectExperimentsList, selectTableFilters, selectTableMode} from '../reducers';
 import {ProjectsGetTaskParentsResponse} from '~/business-logic/model/projects/projectsGetTaskParentsResponse';
 import {ProjectsGetTaskParentsRequest} from '~/business-logic/model/projects/projectsGetTaskParentsRequest';
@@ -92,6 +92,8 @@ import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
 import {getFilteredUsers, setProjectUsers} from '@common/core/actions/projects.actions';
 import {selectTableRefreshList} from '../reducers/index';
 import {selectActiveWorkspaceReady} from '~/core/reducers/view.reducer';
+import {escapeRegex} from '@common/shared/utils/escape-regex';
+import {MESSAGES_SEVERITY} from '@common/constants';
 
 
 @Injectable()

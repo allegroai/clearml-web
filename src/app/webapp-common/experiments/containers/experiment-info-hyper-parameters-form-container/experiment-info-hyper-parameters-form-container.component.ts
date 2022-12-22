@@ -25,7 +25,7 @@ import {
 import {ParamsItem} from '~/business-logic/model/tasks/paramsItem';
 import {Router} from '@angular/router';
 import {ExperimentExecutionParametersComponent} from '../../dumb/experiment-execution-parameters/experiment-execution-parameters.component';
-import {isReadOnly} from '@common/shared/utils/shared-utils';
+import {isReadOnly} from '@common/shared/utils/is-read-only';
 
 @Component({
   selector   : 'sm-experiment-info-hyper-parameters-form-container',

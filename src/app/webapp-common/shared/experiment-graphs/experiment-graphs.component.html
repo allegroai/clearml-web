@@ -18,8 +18,9 @@
       <div [id]="experimentGraphidPrefix + metric" class="graph-id">
         <div>
           <div class="metric-group-header" *ngIf="isGroupGraphs" [class.disable-resize]="disableResize">{{metric}}</div>
-          <div [class.row]="isGroupGraphs"
-               [class.single-graph]="graphsData[metric].length === 1">
+          <div class="row single-graph">
+<!--          <div [class.row]="isGroupGraphs"-->
+<!--               [class.single-graph]="graphsData[metric].length === 1">-->
             <div *ngFor="let chartItem of graphsData[metric]; trackBy: trackByIdFn"
                  #singleGraphContainer
                  mwlResizable
@@ -30,7 +31,8 @@
                  [id]="chartItem.id"
                  (resizing)="onResizing($event);"
                  (resizeEnd)="sizeChanged($event)"
-                 (resizeStart)="resizeStarted(metricGroup, singleGraphContainer)">
+                 (resizeStart)="resizeStarted(metricGroup, singleGraphContainer)"
+            >
               <sm-single-graph
                 *ngIf="chartItem.visible"
                 [class.less-padding]="isGroupGraphs"
@@ -50,6 +52,8 @@
                 [width]="width"
                 [moveLegendToTitle]="groupBy === groupByCharts.none"
                 [identifier]="generateIdentifier(chartItem)"
+                [exportForReport]="exportForReport"
+                (createEmbedCode)="creatingEmbedCode(chartItem)"
                 (hoverModeChanged)="hoverModeChanged.emit($event)"
               >
               </sm-single-graph>

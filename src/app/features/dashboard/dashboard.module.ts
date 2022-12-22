@@ -16,22 +16,24 @@ import {ProjectsSharedModule} from '../projects/shared/projects-shared.module';
 import {DashboardSearchBaseComponent} from '@common/dashboard/dashboard-search.component.base';
 import {DatasetsSharedModule} from '~/features/datasets/shared/datasets-shared.module';
 import {ScrollingModule} from '@angular/cdk/scrolling';
+import {ReportsSharedModule} from '../../webapp-common/reports/reports-shared.module';
 
 @NgModule({
-  imports: [
-    CommonModule,
-    ProjectsSharedModule,
-    ProjectDialogModule,
-    SMSharedModule,
-    ExperimentSharedModule,
-    DashboardRoutingModule,
-    StoreModule.forFeature('dashboard', commonDashboardReducer),
-    CommonDashboardModule,
-    SharedModule,
-    DashboardSearchModule,
-    DatasetsSharedModule,
-    ScrollingModule
-  ],
+    imports: [
+        CommonModule,
+        ProjectsSharedModule,
+        ProjectDialogModule,
+        SMSharedModule,
+        ExperimentSharedModule,
+        DashboardRoutingModule,
+        StoreModule.forFeature('dashboard', commonDashboardReducer),
+        CommonDashboardModule,
+        SharedModule,
+        DashboardSearchModule,
+        DatasetsSharedModule,
+        ScrollingModule,
+        ReportsSharedModule
+    ],
   declarations   : [DashboardComponent, GettingStartedCardComponent, DashboardSearchBaseComponent, SearchResultsPageComponent]
 })
 export class DashboardModule {

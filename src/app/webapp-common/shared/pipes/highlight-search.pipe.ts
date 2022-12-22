@@ -1,5 +1,5 @@
 import {Pipe, PipeTransform} from '@angular/core';
-import {escapeRegex} from '../utils/shared-utils';
+import {escapeRegex} from '@common/shared/utils/escape-regex';
 
 @Pipe({
   name: 'highlightSearch'

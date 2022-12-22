@@ -1,10 +1,6 @@
 import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
-import {PlotData} from 'plotly.js';
 import {isEqual} from 'lodash/fp';
-
-export interface GroupedList {
-  [metric: string]: { [variant: string]: { [experimentId: string]: PlotData } };
-}
+import {GroupedList} from '@common/tasks/tasks.utils';
 
 @Component({
   selector: 'sm-selectable-grouped-filter-list',

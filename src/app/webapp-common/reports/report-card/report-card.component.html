@@ -1,0 +1,65 @@
+<sm-card class="report-card"
+         (click)="cardClicked.emit(report)"
+         [isExample]="isExample"
+         [isFolder]="false"
+         [oneTabMode]="true"
+>
+  <div header-content [class.rename-state]="editName.active">
+    <div class="d-flex justify-content-between align-items-center card-name">
+      <sm-inline-edit #editName
+                      class="title edit-name dark"
+                      [originalText]="report.name"
+                      [editable]="true"
+                      [minLength]="2"
+                      [required]="true"
+                      pattern="^[^/]+$"
+                      [inlineDisabled]="true"
+                      (textChanged)="nameChanged.emit($event)"
+      >
+        <span class="d-flex align-items-center">
+          <span class="report-name" [smTooltip]="report.name | cleanProjectPath">{{report.name}}</span>
+          <i *ngIf="report.name" [smTooltip]="report.name" class="al-icon al-ico-report-path sm ml-2"></i>
+        </span>
+      </sm-inline-edit>
+      <sm-report-card-menu
+        *ngIf="!hideMenu && !isExample"
+        class="menu-wrapper"
+        [report]="report"
+        [isArchived]="isArchive"
+        [allTags]="allTags"
+        (rename)="editName.inlineActivated()"
+        (addTag)="addTag.emit($event)"
+        (archive)="archive.emit($event)"
+        (delete)="delete.emit()"
+        (moveTo)="moveTo.emit()"
+        (share)="share.emit()"
+      ></sm-report-card-menu>
+    </div>
+    <div class="d-flex align-items-center justify-content-start sub-title">
+      <div>{{report?.project?.name | cleanProjectPath}}</div>
+      <span class="dot">●</span>
+      <div>{{report?.user?.name}}</div>
+    </div>
+    <div class="d-flex">
+      <div *ngIf="report?.last_update; else: noRun" class="last-run">Updated {{report.last_update | timeAgo}}</div>
+      <ng-template #noRun>
+        <div class="last-run"></div>
+      </ng-template>
+      <sm-experiment-status-icon-label class="ml-auto" [status]="report?.status"></sm-experiment-status-icon-label>
+    </div>
+  </div>
+  <div class="comment">
+    {{report?.comment}}
+  </div>
+  <div footer class="footer-tags">
+    <sm-tag-list
+      class="w-100"
+      [tags]="report.tags"
+      (remove)="removeTag.emit($event)"
+      smClickStopPropagation
+    ></sm-tag-list>
+<!--    <ng-template #ReadOnlyTags>-->
+<!--      <sm-tag-list [tags]="report.tags"></sm-tag-list>-->
+<!--    </ng-template>-->
+  </div>
+</sm-card>

@@ -1,16 +1,19 @@
-@import "../shared/ui-components/styles/variables";
+@import "variables";
 
 :host {
   display: block;
   height: 100%;
   overflow-y: auto;
-  .connector-icon-container{
+
+  .connector-icon-container {
     width: 32px;
     height: 32px;
     background: $blue-50;
-    &.active{
+
+    &.active {
       background: #fff;
     }
+
     border-radius: 32px;
     position: absolute;
     right: -16px;
@@ -20,25 +23,30 @@
     align-items: center;
     justify-content: center;
     color: $blue-300;
-    &.hidden{
+
+    &.hidden {
       display: none;
     }
   }
-  .navigator-container{
+
+  .navigator-container {
     height: 60px;
 
-    &.active{
+    &.active {
       background: $blue-50;
     }
+
     border-radius: 0;
     margin: 0 0 24px -24px;
     padding: 8px 0 4px 48px;
-    &.first{
+
+    &.first {
       border-radius: 6px 0 0 6px;
       margin: 0 0 24px 0;
       padding-left: 24px;
     }
-    &.last{
+
+    &.last {
       border-radius: 0 6px 6px 0;
       margin: 0 24px 24px -24px;
     }
@@ -75,6 +83,24 @@ sm-debug-images-view {
 .images-container {
   display: flex;
   min-height: 100%;
+
+  .limit-message-container {
+    width: 360px;
+    flex: 0 0 360px;
+    display: flex;
+
+    .limit-message {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 48px;
+      text-align: center;
+
+      i {
+        color: $info-color
+      }
+    }
+  }
 }
 
 .no-images {
@@ -118,7 +144,8 @@ sm-debug-images-view {
   min-height: 100%;
   color: $blue-500;
   margin: 0 12px;
-  &.separator:not(:last-child){
+
+  &.separator:not(:last-child) {
     border-right: 1px solid $blue-100;
   }
 

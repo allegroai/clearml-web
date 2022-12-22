@@ -33,12 +33,12 @@ import {ActivateModelEdit} from '@common/models/actions/models-info.actions';
 import {ModelsDeleteManyResponse} from '~/business-logic/model/models/modelsDeleteManyResponse';
 import {TasksDeleteManyResponse} from '~/business-logic/model/tasks/tasksDeleteManyResponse';
 import {ConfigurationService} from '../../services/configuration.service';
-import {getBucketAndKeyFromSrc, SignResponse} from '@common/settings/admin/base-admin.service';
 import {isFileserverUrl} from '~/shared/utils/url';
 import {deletedProjectFromRoot} from '@common/core/actions/projects.actions';
 import {getChildrenExperiments} from '@common/experiments/effects/common-experiments-menu.effects';
 import {TasksResetManyResponseSucceeded} from '~/business-logic/model/tasks/tasksResetManyResponseSucceeded';
 import {updateManyExperiment} from '@common/experiments/actions/common-experiments-view.actions';
+import {getBucketAndKeyFromSrc, SignResponse} from '@common/settings/admin/base-admin-utils';
 
 @Injectable()
 export class DeleteDialogEffectsBase {

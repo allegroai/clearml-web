@@ -5,10 +5,10 @@ import {Injectable} from '@angular/core';
 import {CREATION_STATUS} from './queue-create-dialog.reducer';
 import {catchError, mergeMap, map, switchMap} from 'rxjs/operators';
 import {Router} from '@angular/router';
-import {MESSAGES_SEVERITY} from '../../../app.constants';
 import {activeLoader, addMessage, deactivateLoader} from '../../core/actions/layout.actions';
 import {requestFailed} from '../../core/actions/http.actions';
 import {ApiQueuesService} from '../../../business-logic/api-services/queues.service';
+import {MESSAGES_SEVERITY} from '@common/constants';
 
 @Injectable()
 export class QueueCreateDialogEffects {

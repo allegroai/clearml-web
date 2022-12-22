@@ -65,6 +65,7 @@ import {TasksGetByIdExResponse} from '~/business-logic/model/tasks/tasksGetByIdE
 import {ARTIFACTS_ONLY_FIELDS} from '@common/experiments/experiment.consts';
 import {ITask} from '~/business-logic/model/al-task';
 import {getTags} from '@common/core/actions/projects.actions';
+import {RefreshService} from '@common/core/services/refresh.service';
 
 
 @Injectable()
@@ -80,7 +81,8 @@ export class CommonExperimentsInfoEffects {
     private reverter: ExperimentReverterService,
     private converter: ExperimentConverterService,
     private router: Router,
-    private commonExperimentReverterService: CommonExperimentReverterService
+    private commonExperimentReverterService: CommonExperimentReverterService,
+    private refreshService: RefreshService
   ) {
   }
 
@@ -218,21 +220,26 @@ export class CommonExperimentsInfoEffects {
       const listed = experiments?.find(e => e.id === currentSelected?.id);
       return (listed ? of(listed) :
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        this.apiTasks.tasksGetByIdEx({id: [selected.id], only_fields: ['last_change']}).pipe(map(res => res.tasks[0])))
-        .pipe(map(task => [action, task?.last_change ?? task?.last_update, task, selected, customView]));
+        this.apiTasks.tasksGetByIdEx({id: [selected.id], only_fields: ['last_change']}).pipe(map(res => res.tasks[0]))
+      ).pipe(map(task => [action, task?.last_change ?? task?.last_update, task, selected, customView]));
     }),
     filter(([action, , tableSelected, selected]) => (action.type !== commonInfoActions.autoRefreshExperimentInfo.type || (!tableSelected) || (tableSelected?.id === selected?.id))),
     // Can't have filter here because we need to deactivate loader
     // filter(([action, selected, updateTime]) => !selected || new Date(selected.last_change) < new Date(updateTime)),
     switchMap(([action, updateTime, tableSelected, selected, customView]) => {
       // else will deactivate loader
-      if (!updateTime || (new Date(this.previousSelectedLastUpdate) < new Date(updateTime)) || action.type === commonInfoActions.experimentUpdatedSuccessfully.type) {
+      if (
+        !updateTime ||
+        (new Date(this.previousSelectedLastUpdate) < new Date(updateTime)) ||
+        action.type === commonInfoActions.experimentUpdatedSuccessfully.type
+      ) {
+        const autoRefresh = action.type === commonInfoActions.autoRefreshExperimentInfo.type;
+        if (autoRefresh) {
+          this.refreshService.trigger(true);
+        }
         return [
-          commonInfoActions.getExperiment({experimentId: action.id, autorefresh: action.type === commonInfoActions.autoRefreshExperimentInfo.type}),
-          ...(customView ? [] : [commonInfoActions.getExperimentUncommittedChanges({
-            experimentId: action.id,
-            autoRefresh: action.type === commonInfoActions.autoRefreshExperimentInfo.type
-          })]),
+          commonInfoActions.getExperiment({experimentId: action.id, autoRefresh}),
+          ...(customView ? [] : [commonInfoActions.getExperimentUncommittedChanges({experimentId: action.id, autoRefresh})]),
           // clear log data if experiment was restarted
           ...(selected?.started && tableSelected?.started && selected.started !== tableSelected?.started ? [resetOutput()] : [])
         ];
@@ -288,7 +295,7 @@ export class CommonExperimentsInfoEffects {
             requestFailed(error),
             deactivateLoader(action.type),
             deactivateLoader(commonInfoActions.getExperimentInfo.type),
-            ...(action.autorefresh ? [] : [setServerError(error, null, 'Fetch experiment failed')])
+            ...(action.autoRefresh ? [] : [setServerError(error, null, 'Fetch experiment failed')])
           ])
         )
     )

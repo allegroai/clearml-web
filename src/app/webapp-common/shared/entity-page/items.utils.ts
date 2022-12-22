@@ -1,4 +1,3 @@
-import {isReadOnly} from '../utils/shared-utils';
 import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
 import {ModelsArchiveManyResponse} from '~/business-logic/model/models/modelsArchiveManyResponse';
 import {TasksArchiveManyResponse} from '~/business-logic/model/tasks/tasksArchiveManyResponse';
@@ -9,6 +8,7 @@ import { TaskTypeEnum } from '~/business-logic/model/tasks/taskTypeEnum';
 import {Task} from '~/business-logic/model/tasks/task';
 import {TASKS_STATUS} from '@common/tasks/tasks.constants';
 import {TASK_TYPES} from '~/app.constants';
+import {isReadOnly} from '@common/shared/utils/is-read-only';
 
 export interface CountAvailableAndIsDisable {
   available: number;

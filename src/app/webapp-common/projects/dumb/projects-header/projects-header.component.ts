@@ -9,6 +9,8 @@ import {TableSortOrderEnum} from '@common/shared/ui-components/data/table/table.
 export class ProjectsHeaderComponent {
   @Input() searchQuery: string;
   @Input() sortOrder: TableSortOrderEnum;
+  @Input() tags: string[];
+  @Input() enableTagsFilter: boolean = false;
 
   @Input() set sortByField(sortByField: string) {
     this.sortByTitle = sortByField.includes('name') ? 'NAME' : 'RECENT';

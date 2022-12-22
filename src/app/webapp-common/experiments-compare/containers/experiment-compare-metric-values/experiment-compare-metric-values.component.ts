@@ -11,6 +11,7 @@ import {addMessage} from '@common/core/actions/layout.actions';
 import {TreeNode} from '../../shared/experiments-compare-details.model';
 import {createDiffObjectScalars, getAllKeysEmptyObject} from '../../jsonToDiffConvertor';
 import {RefreshService} from '@common/core/services/refresh.service';
+import {LIMITED_VIEW_LIMIT} from '@common/experiments-compare/experiments-compare.constants';
 
 interface ValueMode {
   key: string;
@@ -51,7 +52,7 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
   public refreshDisabled: boolean = false;
   private paths = [];
   public experiments = [];
-  private taskIds: string;
+  public taskIds: string[];
   public valuesMode: ValueMode;
   public hoveredRow: string;
   public hoveredTable: string;
@@ -79,12 +80,12 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
 
     this.paramsSubscription = this.store.pipe(
       select(selectRouterParams),
-      map(params => get('ids', params)),
+      map(params => get('ids', params).split(',')),
       tap(taskIds => this.taskIds = taskIds),
       filter(taskIds => !!taskIds && taskIds !== this.getExperimentIdsParams(this.experiments))
     )
-      .subscribe((experimentIds: string) => {
-        this.store.dispatch(metricsValuesActions.getComparedExperimentsMetricsValues({taskIds: experimentIds.split(',')}));
+      .subscribe((experimentIds: string[]) => {
+        this.store.dispatch(metricsValuesActions.getComparedExperimentsMetricsValues({taskIds: experimentIds.slice(0, LIMITED_VIEW_LIMIT)}));
       });
 
     this.comparedTasksSubscription = this.comparedTasks$
@@ -92,7 +93,6 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
         filter(exp => !!exp),
         tap(experiments => this.experiments = experiments),
         tap(experiments => {
-          this.syncUrl(experiments, this.taskIds);
           this.extractTags(experiments);
         }),
         map(experiments => experiments.map(exp => exp.last_metrics)))
@@ -105,7 +105,7 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
     this.refreshingSubscription = this.refresh.tick
       .pipe(filter(auto => auto !== null))
       .subscribe((autoRefresh) => this.store.dispatch(
-        metricsValuesActions.getComparedExperimentsMetricsValues({taskIds: this.taskIds.split(','), autoRefresh})
+        metricsValuesActions.getComparedExperimentsMetricsValues({taskIds: this.taskIds, autoRefresh})
       ));
   }
 
@@ -188,15 +188,9 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
     }
   }
 
-  experimentListChanged(experiments: Array<any>) {
-    this.store.dispatch(metricsValuesActions.setComparedExperiments({experiments}));
-  }
-
-  private syncUrl(experiments: Array<any>, urlParams: string) {
+  public syncUrl(experiments: Array<any>) {
     const newParams = this.getExperimentIdsParams(experiments);
-    if (newParams !== urlParams) {
-      this.router.navigateByUrl(this.router.url.replace(urlParams, newParams));
-    }
+    this.router.navigateByUrl(this.router.url.replace(this.taskIds.toString(), newParams));
   }
 
   private getExperimentIdsParams(experiments: Array<any>): string {

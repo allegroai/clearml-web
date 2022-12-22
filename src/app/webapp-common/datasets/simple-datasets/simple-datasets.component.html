@@ -1,41 +1,45 @@
-<ng-container *ngIf="((projectsList$ | async)?.length !== 0 && (!allExamples || (showExamples$ | async)))||  searching; else emptyState">
-  <div class="sm-card-list-layout projects" *ngIf="projectsList$ | async as projects">
-    <sm-projects-header
-      (orderByChanged)="orderByChanged($event)"
-      [sortByField]="projectsOrderBy$ | async"
-      [sortOrder]="projectsSortOrder$ | async"
-    >
-      <button
-        class="btn btn-cml-primary d-flex align-items-center"
-        (click)="createDataset()">
-        <i class="al-icon al-ico-add sm mr-2"></i>NEW DATASET
-      </button>
-    </sm-projects-header>
-    <ng-container *ngFor="let project of projects; trackBy: trackById ;let last=last">
-      <sm-simple-dataset-card
-        [hideMenu]="['All Experiments'].includes(project.name) || project['isRoot'] || isExample(project)"
-        [project]="project"
-        [allTags]="projectsTags$ | async"
-        (projectCardClicked)="projectCardClicked($event)"
-        (projectNameChanged)="projectNameChanged({id: project.id, name: $event})"
-        (addTag)="addTag(project, $event)"
-        (removeTag)="removeTag(project, $event)"
-        (delete)="deleteProject(project)"
-      ></sm-simple-dataset-card>
-    </ng-container>
+<div class="sm-card-list-layout projects"
+     [class.in-empty-state]="!(((projectsList$ | async)?.length !== 0 && (!allExamples || (showExamples$ | async)))||  searching)">
+  <sm-projects-header
+    (orderByChanged)="orderByChanged($event)"
+    [sortByField]="projectsOrderBy$ | async"
+    [sortOrder]="projectsSortOrder$ | async"
+    [enableTagsFilter]="true"
+    [tags]="projectsTags$ | async"
+  >
+    <button
+      class="btn btn-cml-primary d-flex align-items-center"
+      (click)="createDataset()">
+      <i class="al-icon al-ico-add sm mr-2"></i>NEW DATASET
+    </button>
+  </sm-projects-header>
+  <ng-container
+    *ngIf="((projectsList$ | async)?.length !== 0 && (!allExamples || (showExamples$ | async)))||  searching; else emptyState">
+    <sm-simple-dataset-card *ngFor="let project of projectsList$ | async; trackBy: trackById ;let last=last"
+                            [hideMenu]="['All Experiments'].includes(project.name) || project['isRoot'] || isExample(project)"
+                            [project]="project"
+                            [allTags]="projectsTags$ | async"
+                            (projectCardClicked)="projectCardClicked($event)"
+                            (projectNameChanged)="projectNameChanged({id: project.id, name: $event})"
+                            (addTag)="addTag(project, $event)"
+                            (removeTag)="removeTag(project, $event)"
+                            (delete)="deleteProject(project)"
+    ></sm-simple-dataset-card>
+  </ng-container>
 
-    <div class="load-more" *ngIf="(noMoreProjects$ | async) === false">
-      <button (click)="loadMore()" class="btn btn-cml-primary load-more-btn">LOAD MORE</button>
-    </div>
+  <div class="load-more" *ngIf="(noMoreProjects$ | async) === false">
+    <button (click)="loadMore()" class="btn btn-cml-primary load-more-btn">LOAD MORE</button>
   </div>
-</ng-container>
+</div>
 <ng-template #emptyState>
   <div class="empty-datasets">
     <div class="title-icon"><i class="al-icon al-ico-datasets xxl"></i></div>
     <div class="title">NO DATASETS TO SHOW</div>
     <div class="sub-title">Run your first dataset to see it displayed here
-      <ng-container *ngIf="allExamples"> or <a href="" (click)="$event.preventDefault(); createExamples()" class="link">generate example
-    </a></ng-container></div>
+      <ng-container *ngIf="allExamples"> or <a href="" (click)="$event.preventDefault(); createExamples()" class="link">generate
+        example
+      </a></ng-container>
+    </div>
 
     <ng-container *ngTemplateOutlet="datasetEmptyStateContent; context: {createButton: true}"></ng-container>
   </div>
@@ -43,7 +47,6 @@
 
 <ng-template #datasetEmptyStateContent let-showButton="createButton">
   <div class="content">
-
     <div class="code">
       <div class="d-flex justify-content-between">
         <div>
@@ -65,7 +68,12 @@
           (click)="emptyStateTabClicked('sdk')"
         ></sm-navbar-item>
       </div>
-      <sm-code-editor [code]="emptyStateTab === 'cli'? initDatasetCLICode: initDatasetSDKCode" [readonly]="true" [mode]="emptyStateTab === 'cli'? 'ace/mode/sh': 'ace/mode/python'"  ></sm-code-editor>
+      <sm-code-editor
+        [code]="emptyStateTab === 'cli'? initDatasetCLICode: initDatasetSDKCode"
+        [readonly]="true"
+        [mode]="emptyStateTab === 'cli'? 'ace/mode/sh': 'ace/mode/python'"
+        [showCopyButton]="true"
+      ></sm-code-editor>
     </div>
     <div class="diagram"><i class="i-datasets-empty-state"></i></div>
   </div>

@@ -99,6 +99,7 @@ $sm-theme: mat.define-light-theme($sm-theme-primary, $sm-theme-accent, $sm-theme
     border-radius: 4px;
     box-shadow: 0 0 0 1px $white, 0 0 0 3px lighten($purple, 30%);
   }
+
   .mat-progress-bar-fill::after {
     background-color: lighten($purple, 10%);
   }
@@ -184,7 +185,8 @@ span.highlight-text {
 hr {
   border: none;
   border-top: 1px solid rgba(0, 0, 0, .1);
-  &.dark{
+
+  &.dark {
     border-top: 1px solid $blue-600;
   }
 }
@@ -525,11 +527,17 @@ html {
   border-bottom: 1px solid $blue-200;
 }
 
-.mat-menu-content .mat-menu-item {
-  height: 40px;
-  font-size: 14px;
-  padding: 0 32px 0 16px;
-  border-radius: 4px;
+.mat-menu-content {
+  .mat-menu-item {
+    height: 40px;
+    font-size: 14px;
+    padding: 0 32px 0 16px;
+    border-radius: 4px;
+  }
+
+  hr {
+    margin: 4px -4px;
+  }
 }
 
 // hide arrows for number inputs
@@ -730,7 +738,8 @@ button.btn.button-outline-dark {
 .sm-card-list-header {
   display: flex;
   justify-content: space-between;
-  padding: $projects-header-padding 0 $projects-header-padding * 0.5;
+  height: inherit;
+  align-items: center;
 
   .recent-title {
     display: flex;
@@ -760,4 +769,14 @@ button.btn.button-outline-dark {
 .ace_placeholder {
   font-family: SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
   color: $blue-grey !important;
+}
+
+.modebar-btn[data-attr="plotly-embedded-modebar-button"] {
+  path {
+    fill: $orangada !important;
+  }
+
+  &:hover path {
+    fill: rgb(77, 102, 255) !important;
+  }
 }

@@ -19,16 +19,15 @@ export const routes: Routes = [
     data: {search: false},
     children: [
       {path: '', redirectTo: 'details', pathMatch: 'full'},
-      {path: 'metrics-values', redirectTo: 'scalars/values', pathMatch: 'full'},
+      {path: 'metrics-values', redirectTo: 'scalars/values', pathMatch: 'full', data: {limit: true}},
       {path: 'metrics-charts', redirectTo: 'scalars/graph', pathMatch: 'full'},
-
-      {path: 'details', component: ExperimentCompareDetailsComponent, data: {mode: 'details'}},
-      {path: 'hyper-params/values', component: ExperimentCompareParamsComponent, canActivate: [RouterHelperGuard], data: {mode: 'hyper-params'}},
+      {path: 'details', component: ExperimentCompareDetailsComponent, data: {mode: 'details', limit: true}},
+      {path: 'hyper-params/values', component: ExperimentCompareParamsComponent, canActivate: [RouterHelperGuard], data: {mode: 'hyper-params', limit: true}},
       {path: 'hyper-params/graph', component: ExperimentCompareHyperParamsGraphComponent},
-      {path: 'scalars/values', component: ExperimentCompareMetricValuesComponent, canActivate: [RouterHelperGuard]},
+      {path: 'scalars/values', component: ExperimentCompareMetricValuesComponent, canActivate: [RouterHelperGuard], data: {limit: true}},
       {path: 'scalars/graph', component: ExperimentCompareScalarChartsComponent},
       {path: 'metrics-plots', component: ExperimentComparePlotsComponent},
-      {path: 'debug-images', component: DebugImagesComponent, data: {mergeIterations: true, multiple: true}},
+      {path: 'debug-images', component: DebugImagesComponent, data: {mergeIterations: true, multiple: true, limit: true}},
     ]
   },
 ];

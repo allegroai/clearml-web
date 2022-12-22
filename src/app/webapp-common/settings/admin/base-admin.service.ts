@@ -1,172 +1,21 @@
 import {Injectable} from '@angular/core';
 import {select, Store} from '@ngrx/store';
 import {from, fromEvent, Observable, of, Subject} from 'rxjs';
-import {
-  Credentials, selectRevokeSucceed,
-  selectS3BucketCredentials, selectS3BucketCredentialsBucketCredentials
-} from '../../core/reducers/common-auth-reducer';
-import {S3Client, ObjectIdentifier, DeleteObjectsCommand, GetObjectCommand} from '@aws-sdk/client-s3';
-import {S3ClientConfig} from '@aws-sdk/client-s3';
-// import {getSignedUrl} from '@aws-sdk/s3-request-presigner';
-import {getAllCredentials, refreshS3Credential, showLocalFilePopUp} from '../../core/actions/common-auth.actions';
-import {catchError, debounceTime, filter, map, skip} from 'rxjs/operators';
-import {convertToReverseProxy, isFileserverUrl} from '~/shared/utils/url';
-import {ConfigurationService} from '../../shared/services/configuration.service';
-import {selectActiveWorkspace} from '../../core/reducers/users-reducer';
-import {GetCurrentUserResponseUserObjectCompany} from '~/business-logic/model/users/getCurrentUserResponseUserObjectCompany';
-import {Environment} from '../../../../environments/base';
-import {AmazonS3URI, DEFAULT_REGION} from '../../shared/utils/amazon-s3-uri';
-import {BuildMiddleware, MetadataBearer, RequestPresigningArguments} from '@aws-sdk/types';
-import {Client, Command} from '@aws-sdk/smithy-client';
-import {HttpRequest} from '@aws-sdk/protocol-http';
-import {formatUrl} from '@aws-sdk/util-format-url';
-import {S3RequestPresigner} from '@aws-sdk/s3-request-presigner';
-import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
-import {selectSelectedExperiment} from '~/features/experiments/reducers';
-import {isSharedAndNotOwner} from '@common/shared/utils/shared-utils';
 import {fromFetch} from 'rxjs/fetch';
+import {catchError, debounceTime, filter, map, skip} from 'rxjs/operators';
+import {DeleteObjectsCommand, GetObjectCommand, ObjectIdentifier, S3Client, S3ClientConfig} from '@aws-sdk/client-s3';
+import {getSignedUrl} from '@aws-sdk/s3-request-presigner';
+import {convertToReverseProxy, isFileserverUrl} from '~/shared/utils/url';
+import {selectRevokeSucceed, selectS3BucketCredentials, selectS3BucketCredentialsBucketCredentials} from '../../core/reducers/common-auth-reducer';
+import {getAllCredentials, refreshS3Credential, showLocalFilePopUp} from '../../core/actions/common-auth.actions';
+import {ConfigurationService} from '../../shared/services/configuration.service';
+import {Environment} from '../../../../environments/base';
+import {DEFAULT_REGION} from '../../shared/utils/amazon-s3-uri';
+import {getBucketAndKeyFromSrc, SignResponse} from '@common/settings/admin/base-admin-utils';
 
 const LOCAL_SERVER_PORT = 27878;
 const FOUR_DAYS = 60 * 60 * 24 * 4;
 const HTTP_REGEX = /^https?:\/\//;
-
-export interface SignResponse {
-  type: 'popup' | 'sign' | 'none';
-  signed?: string;
-  expires?: number;
-  bucket?: Credentials;
-  azure?: boolean;
-}
-
-export const isS3Url = (src) => src?.startsWith('s3://');
-
-const replaceAll = (baseString: string, toReplace: string, replaceWith: string, ignore = false) =>
-  baseString.replace(new RegExp(toReplace.replace(/([\/\,\!\\\^\$\{\}\[\]\(\)\.\*\+\?\|\<\>\-\&])/g, '\\$&'), (ignore ? 'gi' : 'g')), (typeof (replaceWith) == 'string') ? replaceWith.replace(/\$/g, '$$$$') : replaceWith);
-
-const encodeSpecialCharacters = (src: string) => {
-  src = replaceAll(src, '%', '%25');
-  src = replaceAll(src, '#', '%23');
-  src = replaceAll(src, '\\', '%5C');
-  src = replaceAll(src, '^', '%5E');
-  return src;
-};
-
-export const getBucketAndKeyFromSrc = (src) => {
-  let key = '';
-  if (src && src.includes('azure://')) {
-    /* eslint-disable @typescript-eslint/naming-convention */
-    return {
-      Bucket: 'azure',
-      Endpoint: 'azure',
-      Key: 'azure',
-      Secret: key
-    };
-    /* eslint-enable @typescript-eslint/naming-convention */
-  }
-  const srcArr = src.split('/');
-  if (!isS3Url(src)) {
-    return null;
-  } else if (srcArr[2].includes(':')) {
-    // We identify minio cae by it's port (:) and use same behavior in case user already set credentials for that endpoint
-    srcArr.forEach((part, index) => {
-      if (index > 3) {
-        key += part + '/';
-      }
-    });
-    key = key.slice(0, -1);
-    /* eslint-disable @typescript-eslint/naming-convention */
-    return {
-      Bucket: srcArr[3],
-      Endpoint: srcArr[2],
-      Key: key,
-    };
-    /* eslint-enable @typescript-eslint/naming-convention */
-  } else {
-    try {
-      src = encodeSpecialCharacters(src);
-      const amazon = new AmazonS3URI(src);
-      /* eslint-disable @typescript-eslint/naming-convention */
-      return {
-        Bucket: amazon.bucket,
-        Key: amazon.key,
-        Region: amazon.region,
-        Endpoint: null
-      };
-      /* eslint-enable @typescript-eslint/naming-convention */
-    } catch (err) {
-      console.log(err);
-      return null;
-    }
-  }
-};
-export const inBucket = (url: string, bucket: string, endpoint: string) => {
-  const {Bucket: urlBucket, Endpoint: urlEndpoint} = getBucketAndKeyFromSrc(url);
-  return urlBucket === bucket && urlEndpoint === endpoint;
-};
-
-
-export const getSignedUrl = async <
-  InputTypesUnion extends object,
-  InputType extends InputTypesUnion,
-  OutputType extends MetadataBearer = MetadataBearer
-  >(
-  client: Client<any, InputTypesUnion, MetadataBearer, any>,
-  command: Command<InputType, OutputType, any, InputTypesUnion, MetadataBearer>,
-  options: RequestPresigningArguments = {}
-): Promise<string> => {
-  const s3Presigner = new S3RequestPresigner({ ...client.config });
-  const presignInterceptMiddleware: BuildMiddleware<InputTypesUnion, MetadataBearer> =
-    (next, context) => async (args) => {
-      const { request } = args;
-      if (!HttpRequest.isInstance(request)) {
-        throw new Error('Request to be presigned is not an valid HTTP request.');
-      }
-      // Retry information headers are not meaningful in presigned URLs
-      delete request.headers['amz-sdk-invocation-id'];
-      delete request.headers['amz-sdk-request'];
-      // User agent header would leak sensitive information
-      delete request.headers['x-amz-user-agent'];
-      delete request.headers['x-amz-content-sha256'];
-
-      delete request.query['x-id'];
-
-      if (request.port) {
-        request.headers['host'] = `${request.hostname}:${request.port}`;
-      }
-
-      const s3presigned = await s3Presigner.presign(request, {
-        ...options,
-        signingRegion: options.signingRegion ?? context['signing_region'],
-        signingService: options.signingService ?? context['signing_service'],
-      });
-      return {
-        // Intercept the middleware stack by returning fake response
-        response: {},
-        output: {
-          $metadata: { httpStatusCode: 200 },
-          presigned: s3presigned,
-        },
-      } as any;
-    };
-  const middlewareName = 'presignInterceptMiddleware';
-  client.middlewareStack.addRelativeTo(presignInterceptMiddleware, {
-    name: middlewareName,
-    relation: 'before',
-    toMiddleware: 'awsAuthMiddleware',
-    override: true,
-  });
-
-  let presigned: HttpRequest;
-  try {
-    const output = await client.send(command);
-    //@ts-ignore the output is faked, so it's not actually OutputType
-    presigned = output.presigned;
-  } finally {
-    client.middlewareStack.remove(middlewareName);
-  }
-
-  return formatUrl(presigned);
-};
 
 
 @Injectable()
@@ -177,8 +26,6 @@ export class BaseAdminService {
   private readonly s3BucketCredentials: Observable<any>;
   private previouslySignedUrls = {};
   private localServerWorking = false;
-  private workspace: GetCurrentUserResponseUserObjectCompany;
-  private selectedExperiment: IExperimentInfo;
   private environment: Environment;
   private deleteS3FilesSubject: Subject<{ success: boolean; files: string[] }>;
   private credentials: any[];
@@ -193,8 +40,6 @@ export class BaseAdminService {
     });
     store.select(selectS3BucketCredentialsBucketCredentials)
       .subscribe(cred => this.credentials = cred);
-    this.store.select(selectActiveWorkspace).subscribe(workspace => this.workspace = workspace);
-    this.store.select(selectSelectedExperiment).subscribe(experiment => this.selectedExperiment = experiment);
     confService.getEnvironment().subscribe(conf => this.environment = conf);
     this.deleteS3FilesSubject = new Subject();
 
@@ -363,13 +208,8 @@ export class BaseAdminService {
   }
 
 
-  private addTenant(url: string) {
-    const u = new URL(url);
-    u.searchParams.append('tenant', this.workspace?.id);
-    if (isSharedAndNotOwner(this.selectedExperiment, this.workspace)){
-      u.searchParams.append('shared', this.selectedExperiment.id);
-    }
-    return u.toString();
+  protected addTenant(url: string) {
+    return url;
   }
 
   public deleteS3Files(files: string[], skipSubjectReturn): Observable<{ success: boolean; files: string[] }> {

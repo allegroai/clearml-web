@@ -154,7 +154,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
 
     this.subs.add(this.store.select(selectActiveWorkspaceReady)
       .pipe(filter(ready => ready), take(1))
-      .subscribe((ready) => ready && this.store.dispatch(getAllProjectsPageProjects({}))));
+      .subscribe((ready) => ready && this.store.dispatch(getAllProjectsPageProjects())));
 
     this.subs.add(this.selectedProjectId$.pipe(
       tap(projectId => this.projectId = projectId),
@@ -162,7 +162,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
       distinctUntilChanged(),
     ).subscribe(() => {
         this.store.dispatch(resetProjectsSearchQuery());
-        this.store.dispatch(getAllProjectsPageProjects({}));
+        this.store.dispatch(getAllProjectsPageProjects());
       }
     ));
 
@@ -172,13 +172,13 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
       skip(1),
     ).subscribe(() => {
       this.store.dispatch(resetProjectsSearchQuery());
-      this.store.dispatch(getAllProjectsPageProjects({}));
+      this.store.dispatch(getAllProjectsPageProjects());
     }));
     this.subs.add(this.store.select(selectShowOnlyUserWork)
       .pipe(skip(1))
       .subscribe(() => {
         this.store.dispatch(resetProjectsSearchQuery());
-        this.store.dispatch(getAllProjectsPageProjects({}));
+        this.store.dispatch(getAllProjectsPageProjects());
       }));
 
     this.subs.add(this.projectReadyForDeletion$.subscribe(readyForDeletion => {
@@ -230,7 +230,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
       if (confirmed) {
         this.store.dispatch(resetDeleteState());
         this.store.dispatch(resetProjects());
-        this.store.dispatch(getAllProjectsPageProjects({}));
+        this.store.dispatch(getAllProjectsPageProjects());
       }
     });
   }
@@ -280,7 +280,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
   }
 
   loadMore() {
-    this.store.dispatch(getAllProjectsPageProjects({}));
+    this.store.dispatch(getAllProjectsPageProjects());
   }
 
 
@@ -294,7 +294,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
     this.projectDialog.afterClosed().subscribe(projectHasBeenUpdated => {
       if (projectHasBeenUpdated) {
         this.store.dispatch(resetProjectsSearchQuery());
-        this.store.dispatch(getAllProjectsPageProjects({}));
+        this.store.dispatch(getAllProjectsPageProjects());
         this.store.dispatch(coreProjectsActions.getAllSystemProjects());
       }
     });
