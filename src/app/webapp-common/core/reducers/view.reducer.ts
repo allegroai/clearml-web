@@ -23,6 +23,7 @@ export interface ViewState {
   showUserFocus: boolean;
   redactedArguments: { key: string }[];
   hideRedactedArguments: boolean;
+  showEmbedReportMenu: { show: boolean; position: { x: number; y: number } };
 }
 
 export const initViewState: ViewState = {
@@ -48,6 +49,7 @@ export const initViewState: ViewState = {
     {key: 'AWS_SECRET_ACCESS_KEY'},
     {key: 'AZURE_STORAGE_KEY'}],
   hideRedactedArguments: false,
+  showEmbedReportMenu: {show: null, position: null}
 };
 
 export const views = state => state.views as ViewState;
@@ -72,7 +74,7 @@ export const selectAceCaretPosition = createSelector(views, state => state.aceCa
 export const selectNeverShowPopups = createSelector(views, (state): string[] => state.neverShowPopupAgain);
 export const selectRedactedArguments = createSelector(views, (state): { key: string }[] => state.redactedArguments);
 export const selectHideRedactedArguments = createSelector(views, (state): { key: string }[] => state.hideRedactedArguments ? state.redactedArguments : null);
-export const selectShowUserFocus = createSelector(views, state => state.showUserFocus);
+export const selectShowEmbedReportMenu = createSelector(views, state => state.showEmbedReportMenu);
 
 
 export const viewReducers = [
@@ -114,11 +116,14 @@ export const viewReducers = [
   on(layoutActions.setBackdrop, (state, action) => ({...state, backdropActive: action.active})),
   on(layoutActions.setAutoRefresh, (state, action) => ({...state, autoRefresh: action.autoRefresh})),
   on(layoutActions.setCompareAutoRefresh, (state, action) => ({...state, compareAutoRefresh: action.autoRefresh})),
+  on(layoutActions.showEmbedReportMenu, (state, action) => ({
+    ...state,
+    showEmbedReportMenu: {show: action.show, position: action.position}
+  })),
   on(layoutActions.neverShowPopupAgain, (state, action) => ({
     ...state,
     neverShowPopupAgain: action.reset ? state.neverShowPopupAgain.filter(popups => popups !== action.popupId) : Array.from(new Set([...state.neverShowPopupAgain, action.popupId]))
   })),
-  on(layoutActions.toggleUserFocus, (state, action) => ({...state, showUserFocus: action.show}))
 ] as ReducerTypes<ViewState, any>[];
 
 export const viewReducer = createReducer(

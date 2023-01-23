@@ -1,0 +1,439 @@
+
+<style>
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+:root {
+    --blue-25: #f9fafb;
+    --blue-50: #f2f4fc;
+    --blue-100: #dce0ee;
+    --blue-200: #c3cdf0;
+    --blue-250: #A4ADCD;
+    --blue-280: #a7b2d8;
+    --blue-300: #8492c2;
+    --blue-400: #5a658e;
+    --blue-450: #657099;
+    --blue-480: #707ba3;
+    --blue-500: #384161;
+    --blue-550: #47527A;
+    --blue-600: #2c3246;
+    --blue-650: #24293c;
+    --blue-700: #202432;
+    --blue-800: #1a1e2c;
+    --blue-900: #141722;
+    --blue-950: #0d0e15;
+    --purple: #4d66ff;
+    --dark-border: #303443;
+}
+
+/* LAYOUT */
+.modal-content {
+    font-family: "Heebo", sans-serif;
+    color: var(--blue-500);
+    font-size: 14px;
+    max-width: 640px;
+    margin: 0 auto;
+}
+.modal-content .intro {
+    margin-bottom: 32px;
+}
+.modal-content .link {
+    color: var(--purple);
+    text-decoration: none;
+}
+.modal-content .link:hover {
+    text-decoration: underline;
+}
+.modal-content h3 {
+    font-size: 16px;
+    font-weight: 500;
+    margin: 0 0 6px 0;
+}
+.modal-content .graph {
+    max-width: 100%;
+    border: 1px solid var(--dark-border);
+    border-radius: 4px;
+    overflow: hidden;
+}
+.modal-content figcaption {
+    color: var(--blue-400);
+}
+
+
+
+.modal-content section::after {
+    content: "✦ ✦ ✦";
+    text-align: center;
+    display: block;
+    padding: 24px 0;
+    font-size: 11px;
+    color: var(--blue-300);
+}
+
+.modal-content p > small {
+    display: block;
+    margin: 6px 0;
+}
+
+/* HEADING */
+.modal-content h1 {font-size: 28px; font-weight: 500;}
+.modal-content h2 {font-size: 22px; font-weight: 500; color: #70a798;}
+.modal-content h3 {font-size: 16px; font-weight: 500; color: #7dafdb;}
+
+/* BLOCKQUOTE */
+.modal-content blockquote {
+    padding: 4px 16px;
+    border-left: 3px solid var(--purple);
+}
+.modal-content blockquote p {
+    margin: 0;
+    color: var(--blue-500);
+}
+
+/* LIST */
+.modal-content ul,
+.modal-content ol {
+    margin-bottom: 14px;
+    padding-left: 40px;
+}
+
+/* TABLES */
+.modal-content .table {
+    background-color: var(--blue-900);
+    border: 1px solid var(--dark-border);
+    border-collapse: collapse;
+    margin-bottom: 12px;
+}
+.modal-content .table thead {
+    color: var(--blue-300);
+    background-color: var(--blue-800);
+}
+.modal-content .table th {
+    font-weight: 500;
+}
+.modal-content .table th,
+.modal-content .table td {
+    border: 1px solid var(--dark-border);
+    padding: 8px 16px;
+}
+
+.modal-content .table td {
+    color: var(--blue-100);
+}
+
+
+/* COLLAPSIBLE SECTIONS */
+.modal-content details {
+    margin-bottom: 2px;
+    padding: 6px 28px;
+    color: var(--blue-250);
+    background-color: var(--blue-900);
+    border: 1px solid var(--dark-border);
+    border-radius: 4px;
+    transition: margin 0.35s;
+}
+.modal-content details summary {
+    cursor: pointer;
+    color: #90bce3;
+    margin-left: -24px;
+}
+.modal-content summary::marker {
+    content:"";
+}
+.modal-content summary::before {
+    content: "\e9af";
+    color: var(--blue-300);
+    display: inline-block;
+    vertical-align: middle;
+    font-family: "trains";
+    font-size: 18px;
+    margin: -3px 6px 0 0;
+    transform: rotate(0deg);
+    transition: transform 0.35s;
+}
+.modal-content summary:hover {
+    color: var(--blue-100);
+}
+.modal-content details[open] summary {
+    color: #e1edf8;
+    margin-bottom: 12px;
+}
+.modal-content details[open] summary::before {
+    transform: rotate(90deg);
+}
+
+
+/* CODE */
+.modal-content code {
+    margin: 0;
+    padding: 1px 4px;
+    font-size: 12px;
+    line-height: 18px;
+    border-radius: 4px;
+    color: var(--blue-100);
+    background-color: var(--blue-600);
+    border: 1px solid var(--blue-500);
+}
+.modal-content .md-code {
+    display: block;
+    position: relative;
+    margin-bottom: 12px;
+    padding: 16px;
+    font-size: 13px;
+    background-color: var(--blue-900);
+    white-space: pre;
+    overflow-x: auto;
+}
+.modal-content .md-code.word-break {
+    white-space: normal;
+    word-break: break-word;
+}
+
+
+/* HORIZONTAL RULES */
+.modal-content hr {
+    margin: 24px 0;
+    border: none;
+    border-bottom: 1px solid #0000001a;
+}
+
+
+</style>
+
+
+<div class="modal-content">
+
+    <p class="intro">The following is a quick reference for the Markdown syntax that can be used in ClearML Reports.</p>
+
+    <!-- EMBEDDED VISUALIZATIONS -->
+    <section>
+        <h2>Embedded Visualizations</h2>
+        <p>You can embed most ClearML plots and images appearing in experiments (or experiment comparison). Each such asset will show a "<b>Copy embed code</b>" button on hover, which will copy specific HTML embed code that, pasted in a report, will embed that asset.</p>
+<code class="md-code hljs html word-break"><span class="hljs-tag">&lt;<span class="hljs-name">iframe</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"/widgets?type=scalar&amp;tasks=e-f6b6632fdd3648d1948fb311baaa3d03&amp;metrics=train&amp;company=aec6c91852c548158a76778aa40c1772"</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"c66c0fda-5196-4d5f-ab0d-50ead9cb8738"</span> <span class="hljs-attr">width</span>=<span class="hljs-string">"100%"</span> <span class="hljs-attr">height</span>=<span class="hljs-string">"400"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">iframe</span>&gt;</span></code>
+        <p><small>The rendered output looks like this:</small></p>
+        <figure>
+            <img class="graph" src="app/webapp-common/assets/icons/training_loss_graph.png"
+                 alt="Training loss">
+            <figcaption><small>Training loss from the Pytorch MNIST example</small></figcaption>
+        </figure>
+    </section>
+
+    <!-- HEADING -->
+    <section>
+       <h2>Heading</h2>
+<code class="md-code"># H1
+## H2
+### H3
+#### H4
+##### H5
+###### H6
+</code>
+       <p><small>The rendered output looks like this:</small></p>
+       <h1>H1</h1>
+       <h2>H2</h2>
+       <h3>H3</h3>
+       <h4>H4</h4>
+       <h5>H5</h5>
+       <h6>H6</h6>
+   </section>
+
+    <!-- EMPHASIS -->
+    <section>
+        <h2>Emphasis</h2>
+ <code class="md-code">**This is bold text** and __so is this__
+*This is italic text* and _so is this_
+~~Strikethrough~~</code>
+        <p><small>The rendered output looks like this:</small></p>
+        <p><strong>This is bold text</strong> and <strong>so is this</strong></p>
+        <p><em>This is italic text</em> and <em>so is this</em></p>
+        <p><del>Strikethrough</del></p>
+    </section>
+
+    <!-- BLOCKQUOTES -->
+    <section>
+        <h2>Blockquotes</h2>
+ <code class="md-code">> Blockquotes can be nested...
+>> ...by using additional greater-than signs right next to each other...
+> > > ...or with spaces between arrows.</code>
+        <p><small>The rendered output looks like this:</small></p>
+        <blockquote>
+            <p>Blockquotes can be nested...</p>
+            <blockquote>
+                <p>...by using additional greater-than signs right next to each other...</p>
+                <blockquote>
+                    <p>...or with spaces between arrows.</p>
+                </blockquote>
+            </blockquote>
+        </blockquote>
+    </section>
+
+   <!-- LIST -->
+   <section>
+       <h2>List</h2>
+
+       <h3>Unordered</h3>
+<code class="md-code">+ Create a list by starting a line with `+`, `-`, or `*`
++ Sub-lists are made by indenting 2 spaces:
+   - Marker character change forces new list start:
+   * Ac tristique libero volutpat at
+   + Facilisis in pretium nisl aliquet
+   - Nulla volutpat aliquam velit
++ [x] Checkmarks are supported as well.
+</code>
+<p><small>The rendered output looks like this:</small></p>
+       <ul>
+           <li>Create a list by starting a line with <code>+</code>, <code>-</code>, or <code>*</code></li><li>Sub-lists are made by indenting 2 spaces:<ul>
+           <li>Marker character change forces new list start:<ul>
+           <li>Ac tristique libero volutpat at</li><li>Facilisis in pretium nisl aliquet</li><li>Nulla volutpat aliquam velit</li></ul>
+           </li></ul>
+           </li><li><i class="fa-solid fa-check-square"></i> Checkmarks are supported as well.</li>
+       </ul>
+       <hr/>
+       <h3>Ordered</h3>
+<code class="md-code">1. Start with a numbered element...
+2. And just keep going.
+1. You can use sequential numbers...
+1. ...or keep all the numbers as `1.`
+</code>
+<p><small>The rendered output looks like this:</small></p>
+       <ol>
+           <li>Start with a numbered element...</li>
+           <li>And just keep going.</li>
+           <li>You can use sequential numbers...</li>
+           <li>...or keep all the numbers as <code>1.</code></li>
+       </ol>
+   </section>
+
+
+
+   <!-- TABLES -->
+   <section>
+       <h2>Tables</h2>
+<code class="md-code">|          | Align Right | Align Left | Align Center |
+| —————-—— | —————————-—:|:—————————- |:—————————-——:|
+| 1        |           1 | 1          |      1       |
+| 11       |          11 | 11         |      11      |
+</code>
+       <p><small>The rendered output looks like this:</small></p>
+
+       <table class="table" style="width: 100%">
+           <thead>
+               <tr>
+                   <th></th>
+                   <th style="text-align: right;">Align Right</th>
+                   <th style="text-align: left;">Align Left</th>
+                   <th style="text-align: center;">Align Center</th>
+               </tr>
+           </thead>
+           <tbody>
+               <tr>
+                   <td>1</td>
+                   <td style="text-align: right;">1</td>
+                   <td>1</td>
+                   <td style="text-align: center;">1</td>
+               </tr>
+               <tr>
+                   <td>11</td>
+                   <td style="text-align: right;">11</td>
+                   <td>11</td>
+                   <td style="text-align: center;">11</td>
+               </tr>
+           </tbody>
+       </table>
+   </section>
+
+
+   <!-- COLLAPSIBLE SECTIONS -->
+   <section>
+       <h2>Collapsible sections</h2>
+<code class="md-code hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">details</span>&gt;</span>
+   <span class="hljs-tag">&lt;<span class="hljs-name">summary</span>&gt;</span>Extra detailed information<span class="hljs-tag">&lt;/<span class="hljs-name">summary</span>&gt;</span>
+   All the gory details!
+<span class="hljs-tag">&lt;/<span class="hljs-name">details</span>&gt;</span></code>
+
+       <p><small>The rendered output looks like this:</small></p>
+       <details>
+           <summary>Extra detailed information</summary>
+           All the gory details!
+       </details>
+   </section>
+
+
+   <!-- CODE -->
+   <section>
+       <h2>Code</h2>
+
+       <h3>Inline code</h3>
+<code class="md-code">Putting `code` in the middle of the sentence</code>
+        <p><small>The rendered output looks like this:</small></p>
+       <p>Putting <code>code</code> in the middle of the sentence</p>
+       <hr/>
+       <h3>Block code with indentation</h3>
+<pre>
+    // Comment
+    line 1
+    line 2
+    line 3</pre>
+       <p><small>The rendered output looks like this:</small></p>
+<code class="md-code">// Comment
+line 1
+line 2
+line 3</code>
+        <hr/>
+       <h3>Block code using "fences"</h3>
+<pre>```
+Meaningful code
+```</pre>
+       <p><small>The rendered output looks like this:</small></p>
+       <code class="md-code">Meaningful code</code>
+       <hr/>
+       <h3>Syntax highlighting</h3>
+
+<code class="md-code">```py
+from clearml import task
+t = task.Init(project_name='Groundbreaking research', task_name='Baseline')
+```</code>
+   <p><small>The rendered output looks like this:</small></p>
+<code class="md-code"><span class="hljs-keyword">from</span> clearml <span class="hljs-keyword">import</span> task
+t = task.Init(project_name=<span class="hljs-string">'Groundbreaking research'</span>, task_name=<span class="hljs-string">'Baseline'</span>)
+</code>
+   </section>
+
+
+   <!-- LINKS -->
+   <section>
+        <h2>Links</h2>
+<code class="md-code hljs md">[<span class="hljs-string">link text</span>](<span class="hljs-link">http://ww.clear.ml</span>)
+[<span class="hljs-string">link with tooltip</span>](<span class="hljs-link">http://www.clear.ml/docs/latest/docs/ "ClearML Documentation"</span>)</code>
+        <p><small>The rendered output looks like this:</small></p>
+        <p><a href="http://www.clear.ml" target="_blank">link text</a></p>
+        <p><a href="http://www.clear.ml/docs/latest/docs/" target="_blank" title="ClearML Documentation">link with tooltip</a></p>
+    </section>
+
+    <!-- HORIZONTAL RULES -->
+    <section>
+        <h2>Horizontal Rules</h2>
+<code class="md-code">___
+---
+***</code>
+        <p><small>The rendered output looks like this:</small></p>
+        <hr>
+        <hr>
+        <hr>
+    </section>
+
+
+    <!-- IMAGES -->
+    <section>
+        <h2>Images</h2>
+<code class="md-code">![Logo with text](c-logomark.svg "ClearML Logo with title")</code>
+        <p><small>The rendered output looks like this:</small></p>
+        <p class="text-center">
+            <img style="max-width: 50%;" src="app/webapp-common/assets/icons/c-logomark.svg" alt="Logo with text" title="ClearML Logo with title">
+        </p>
+    </section>
+
+</div>

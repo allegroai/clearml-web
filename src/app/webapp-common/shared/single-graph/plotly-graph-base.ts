@@ -17,6 +17,7 @@ export interface ExtFrame extends Omit<Frame, 'data' | 'layout'> {
   timestamp: number;
   type: string;
   variant: string;
+  variants?: string[];
   worker: string;
   data: ExtData[];
   layout: Partial<ExtLayout>;

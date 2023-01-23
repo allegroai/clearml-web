@@ -1,19 +1,27 @@
 import {Injectable} from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
-import {getPlot, getSample, getScalar, setPlotData, setSampleData, setSignIsNeeded} from './app.actions';
+import {
+  getPlot,
+  getSample,
+  getScalar,
+  setNoPermissions,
+  setPlotData,
+  setSampleData,
+  setSignIsNeeded
+} from './app.actions';
 import {EMPTY, mergeMap, of, switchMap} from 'rxjs';
 import {Store} from '@ngrx/store';
-import {filter} from 'rxjs/operators';
+import {catchError, filter} from 'rxjs/operators';
 import {ReportsApiMultiplotsResponse, State} from './app.reducer';
 import {ApiReportsService} from '~/business-logic/api-services/reports.service';
 import {BaseAdminService} from '@common/settings/admin/base-admin.service';
 import {ReportsGetTaskDataResponse} from '~/business-logic/model/reports/reportsGetTaskDataResponse';
-import {setCurrentDebugImage} from '@common/shared/debug-sample/debug-sample.actions';
 import {getSignedUrl, setSignedUrl} from '@common/core/actions/common-auth.actions';
 import {SignResponse} from '@common/settings/admin/base-admin-utils';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {HTTP} from '~/app.constants';
 import {DebugSample} from '@common/shared/debug-sample/debug-sample.reducer';
+import {requestFailed} from '@common/core/actions/http.actions';
 
 
 @Injectable()
@@ -37,7 +45,7 @@ export class AppEffects {
 
   getPlot = createEffect(() => this.actions$.pipe(
     ofType(getPlot),
-    switchMap(action => this.httpClient.post<{ data: ReportsGetTaskDataResponse }>(`${this.basePath}/reports.get_task_data`,
+    switchMap(action => this.httpClient.post<{ data: ReportsGetTaskDataResponse }>(`${this.basePath}/reports.get_task_data?${action.otherSearchParams.toString()}`,
       {
         id: action.tasks,
         plots: {
@@ -47,12 +55,13 @@ export class AppEffects {
       },
       {headers: this.getHeaders(action.company)}
     )),
-    mergeMap((res) => [setPlotData({data: res.data.plots as unknown as ReportsApiMultiplotsResponse})])
+    mergeMap((res) => [setPlotData({data: res.data.plots as unknown as ReportsApiMultiplotsResponse})]),
+    catchError(error => [requestFailed(error), ...(error.status === 403 ? [setNoPermissions()] : [])])
   ));
 
   getScalar = createEffect(() => this.actions$.pipe(
     ofType(getScalar),
-    mergeMap(action => this.httpClient.post<{ data: ReportsGetTaskDataResponse }>(`${this.basePath}/reports.get_task_data`,
+    mergeMap(action => this.httpClient.post<{ data: ReportsGetTaskDataResponse }>(`${this.basePath}/reports.get_task_data?${action.otherSearchParams.toString()}`,
         {
           id: action.tasks,
           // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -64,14 +73,14 @@ export class AppEffects {
       ).pipe(
         mergeMap(res => [
           setPlotData({data: res.data.scalar_metrics_iter_histogram as ReportsApiMultiplotsResponse})]
-        )
+        ), catchError(error => [requestFailed(error), ...(error.status === 403 ? [setNoPermissions()] : [])])
       )
     )
   ));
 
   getSample = createEffect(() => this.actions$.pipe(
     ofType(getSample),
-    switchMap(action => this.httpClient.post<{ data: ReportsGetTaskDataResponse }>(`${this.basePath}/reports.get_task_data`,
+    switchMap(action => this.httpClient.post<{ data: ReportsGetTaskDataResponse }>(`${this.basePath}/reports.get_task_data?${action.otherSearchParams.toString()}`,
         {
           id: action.tasks,
           // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -84,7 +93,8 @@ export class AppEffects {
       ).pipe(
         mergeMap(res => [
           setSampleData({data: res.data.debug_images?.[0]?.iterations?.[0]?.events[0] as DebugSample})
-        ])
+        ]),
+        catchError(error => [requestFailed(error), ...(error.status === 403 ? [setNoPermissions()] : [])])
       )
     ))
   );

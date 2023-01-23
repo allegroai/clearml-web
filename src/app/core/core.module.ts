@@ -12,13 +12,20 @@ import {messagesReducer} from '@common/core/reducers/messages-reducer';
 import {projectsReducer, RootProjects} from '@common/core/reducers/projects.reducer';
 import {routerReducer} from '@common/core/reducers/router-reducer';
 import {SmSyncStateSelectorService} from '@common/core/services/sync-state-selector.service';
-import {EXPERIMENTS_COMPARE_METRICS_CHARTS_} from '@common/experiments-compare/actions/experiments-compare-charts.actions';
+import {
+  EXPERIMENTS_COMPARE_METRICS_CHARTS_
+} from '@common/experiments-compare/actions/experiments-compare-charts.actions';
 import {compareSyncedKeys} from '@common/experiments-compare/experiments-compare.module';
 import {EXPERIMENTS_OUTPUT_PREFIX} from '@common/experiments/actions/common-experiment-output.actions';
 import {EXPERIMENTS_INFO_PREFIX} from '@common/experiments/actions/common-experiments-info.actions';
 import {EXPERIMENTS_PREFIX} from '@common/experiments/actions/common-experiments-view.actions';
 import {EXPERIMENTS_STORE_KEY} from '@common/experiments/shared/common-experiments.const';
-import {MODELS_PREFIX_INFO, MODELS_PREFIX_MENU, MODELS_PREFIX_VIEW, MODELS_STORE_KEY} from '@common/models/models.consts';
+import {
+  MODELS_PREFIX_INFO,
+  MODELS_PREFIX_MENU,
+  MODELS_PREFIX_VIEW,
+  MODELS_STORE_KEY
+} from '@common/models/models.consts';
 import {modelSyncedKeys} from '@common/models/models.module';
 import {PROJECTS_PREFIX} from '@common/projects/common-projects.consts';
 import {CHOOSE_COLOR_PREFIX} from '@common/shared/ui-components/directives/choose-color/choose-color.actions';
@@ -42,6 +49,7 @@ import {usersReducer} from './reducers/users.reducer';
 import {viewReducer} from './reducers/view.reducer';
 import {UsageStatsService} from './services/usage-stats.service';
 import {extCoreModules} from '~/build-specifics';
+import {ReportCodeEmbedService} from '../shared/services/report-code-embed.service';
 
 export const reducers = {
   auth: authReducer,
@@ -83,16 +91,16 @@ export const localStorageReducer = (reducer: ActionReducer<any>): ActionReducer<
     if (action.type === '@ngrx/store/init') {
       const savedState = JSON.parse(localStorage.getItem(key));
       nextState = merge(nextState, savedState);
-   }
+    }
     if (state === nextState) {
       return nextState;
-   }
+    }
     if (actionsPrefix && !actionsPrefix.some(ap => action.type.startsWith(ap))) {
       return nextState;
-   }
+    }
     localStorage.setItem(key, JSON.stringify(pick(syncedKeys, nextState)));
     return nextState;
- };
+  };
 
 const userPrefMetaFactory = (userPreferences: UserPreferences): MetaReducer<any>[] => [
   (reducer: ActionReducer<any>) =>
@@ -141,6 +149,7 @@ const userPrefMetaFactory = (userPreferences: UserPreferences): MetaReducer<any>
     SmSyncStateSelectorService,
     UsageStatsService,
     AdminService,
+    ReportCodeEmbedService,
     {
       provide: USER_PROVIDED_META_REDUCERS,
       deps: [UserPreferences],

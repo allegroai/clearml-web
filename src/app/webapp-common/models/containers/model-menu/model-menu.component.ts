@@ -69,7 +69,8 @@ export class ModelMenuComponent extends BaseContextMenuComponent {
   @Input() projectTags: string[];
   @Input() companyTags: string[];
   @Input() tagsFilterByProject: boolean;
-  @Input() showButton = true;
+  @Input() activateFromMenuButton = true;
+  @Input() useCurrentEntity = false;
   @Output() tagSelected = new EventEmitter<string>();
 
   constructor(
@@ -167,7 +168,7 @@ export class ModelMenuComponent extends BaseContextMenuComponent {
         entity: this._model,
         numSelected: this.numSelected,
         entityType: EntityTypeEnum.model,
-        useCurrentEntity: this.showButton
+        useCurrentEntity: this.activateFromMenuButton || this.useCurrentEntity
       },
       width: '600px',
       disableClose: true

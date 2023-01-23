@@ -53,12 +53,6 @@ export class ProjectsEffects {
     map(action => activeLoader(action.type))
   ));
 
-  setProject = createEffect(() => this.actions$.pipe(
-    ofType(actions.setSelectedProject),
-    switchMap(action => [actions.getCompanyTags()]
-      .concat(!!action.project?.id ? [actions.getTags(action.project.id)] : []))
-  ));
-
   getProjects$ = createEffect(() => this.actions$.pipe(
     ofType(actions.getAllSystemProjects),
     withLatestFrom(

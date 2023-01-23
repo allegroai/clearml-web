@@ -158,7 +158,10 @@ export class LoginComponent implements OnInit, OnDestroy {
     if (this.showGitHub) {
       fetch('https://api.github.com/repos/allegroai/clearml', {method: 'GET'})
         .then(response => response.json()
-          .then(json => this.stars = json['stargazers_count'])
+          .then(json => {
+            this.stars = json['stargazers_count'];
+            this.cdr.detectChanges();
+          })
         );
     }
   }

@@ -109,10 +109,10 @@ export class ExperimentOutputLogComponent implements OnInit, AfterViewInit, OnDe
     }));
 
     this.subs.add(this.refresh.tick
-      .pipe(filter(() => !this.loading && !!this.currExperiment?.id && (!this.logRef || this.logRef.atEnd)))
-      .subscribe((autoRefresh) => this.store.dispatch(getExperimentLog({
+      .pipe(filter(autoRefresh => autoRefresh !== null && !this.loading && !!this.currExperiment?.id && (!this.logRef || this.logRef.atEnd)))
+      .subscribe(autoRefresh => this.store.dispatch(getExperimentLog({
         id: this.currExperiment.id,
-        direction: autoRefresh ? 'prev' : 'next',
+        direction: autoRefresh ? 'next' : 'prev',
         from: last(this.logRef?.orgLogs)?.timestamp,
         autoRefresh: true
       })))

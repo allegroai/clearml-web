@@ -11,7 +11,7 @@
         [theme]="isDarkTheme? themeEnum.Dark: themeEnum.Light"
         (imageError)="imageUrlError({frame, experimentId})"
         (imageClicked)="imageClicked.emit({frame})"
-        (createEmbedCode)="createEmbedCode.emit({metrics: [frame.metric], variants: [frame.variant]});">
+        (createEmbedCode)="createEmbedCode.emit({metrics: [frame.metric], variants: [frame.variant], domRect:$event});">
       </sm-debug-image-snippet>
     </div>
   </ng-template>

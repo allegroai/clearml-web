@@ -83,4 +83,8 @@ export class DebugImageSnippetComponent {
       this.isLoading = false;
     }
   }
+
+  createEmbedCodeClicked($event: MouseEvent) {
+    this.createEmbedCode.emit({x: $event.clientX, y: $event.clientY});
+  }
 }

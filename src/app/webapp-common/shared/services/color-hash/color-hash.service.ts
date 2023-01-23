@@ -7,8 +7,7 @@ import {selectColorPreferences} from '../../ui-components/directives/choose-colo
 import {addUpdateColorPreferences, ColorPreference} from '../../ui-components/directives/choose-color/choose-color.actions';
 import {getHslContrast, hexToRgb, hslToRgb, RGB2HEX, rgbToHsl} from './color-hash.utils';
 import stc from 'string-to-color';
-import hexRgb from 'hex-rgb';
-
+import tinycolor from 'tinycolor2';
 export interface ColorCache {[label: string]: number[]}
 export const DOT_PLACEHOLDER = '--DOT--';
 
@@ -34,13 +33,18 @@ export class ColorHashService {
       .subscribe(preferenceColors => this.batchUpdateColorCache(preferenceColors));
   }
 
-  public initColor(label: string, initColor?: number[]) {
+  public initColor(label: string, initColor?: number[], lighten = false) {
     const colorCache = this._colorCache.getValue()?.[label];
     if (colorCache) {
       return colorCache;
     }
-    const {red, green, blue} = hexRgb(stc(label));
-    const color = initColor? initColor: [red, green, blue];
+    const tColor = tinycolor(stc(label));
+    const tLum = tColor.getLuminance();
+    if (tLum < 0.3 && lighten) {
+      tColor.lighten(30 - tLum * 100);
+    }
+    const {r, g, b} = tColor.toRgb();
+    const color = initColor? initColor: [r, g, b];
     this.setColorForString(label, color, false);
     return color;
   }

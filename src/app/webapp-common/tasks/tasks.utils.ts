@@ -6,6 +6,9 @@ import {ExtData, ExtFrame, ExtLayout} from '../shared/single-graph/plotly-graph-
 import {MetricsPlotEvent} from '../../business-logic/model/events/models';
 import {KeyValue} from '@angular/common';
 
+export interface ExtMetricsPlotEvent extends MetricsPlotEvent{
+  variants?: Array<string>;
+}
 export interface IMultiplot {
   [key: string]: { // i.e ROC
     [key: number]: { // Iteration number
@@ -49,7 +52,7 @@ export const getModelDesign = (modelDesc: Task['execution']['model_desc']): { ke
   return {key, value: key ? modelDesc[key] : modelDesc};
 };
 
-export const prepareGraph = (data: ExtData[], layout: Partial<ExtLayout>, config: Partial<Config>, graph: Partial<MetricsPlotEvent>): Partial<ExtFrame> =>
+export const prepareGraph = (data: ExtData[], layout: Partial<ExtLayout>, config: Partial<Config>, graph: Partial<ExtMetricsPlotEvent>): Partial<ExtFrame> =>
   ({
     data,
     layout,
@@ -60,6 +63,7 @@ export const prepareGraph = (data: ExtData[], layout: Partial<ExtLayout>, config
     timestamp: graph.timestamp,
     type: graph.type as unknown as string,
     variant: graph.variant,
+    variants: graph.variants,
     worker: graph['worker'],
   });
 
@@ -124,7 +128,7 @@ export const convertScalars = (scalars: GroupedList, experimentId: string): { [k
     return acc;
   }, {});
 
-export const groupIterations = (plots: MetricsPlotEvent[]): { [title: string]: MetricsPlotEvent[] } => {
+export const groupIterations = (plots: MetricsPlotEvent[]): { [title: string]: ExtMetricsPlotEvent[] } => {
   if (!plots.length) {
     return {};
   }
@@ -139,8 +143,9 @@ export const groupIterations = (plots: MetricsPlotEvent[]): { [title: string]: M
       if (index > -1 && plotParsed.data && plotParsed.data[0] && ['scatter', 'bar'].includes(plotParsed.data[0]?.type) && previousPlotIsMergable) {
         const basePlotParsed = tryParseJson(groupedPlots[metric][index].plot_str);
         groupedPlots[metric][index].plot_str = _mergePlotsData(basePlotParsed, plotParsed);
+        groupedPlots[metric][index].variants.push(plot.variant);
       } else {
-        groupedPlots[metric].push(plot);
+        groupedPlots[metric].push({...plot, variants: [plot.variant]});
       }
       previousPlotIsMergable = index > -1 || (index === -1 && ['scatter', 'bar'].includes(plotParsed.data[0]?.type));
       return groupedPlots;

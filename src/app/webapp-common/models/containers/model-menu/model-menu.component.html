@@ -1,5 +1,5 @@
-<div *ngIf="showButton" mat-button [matMenuTriggerFor]="modelMenu" class="p-0 cell menu-button al-icon al-ico-bars-menu pointer"></div>
-<div *ngIf="!showButton"
+<div *ngIf="activateFromMenuButton" mat-button [matMenuTriggerFor]="modelMenu" class="p-0 cell menu-button al-icon al-ico-bars-menu pointer"></div>
+<div *ngIf="!activateFromMenuButton"
      style="visibility: hidden; position: fixed"
      [style.left.px]="position.x"
      [style.top.px]="position.y"

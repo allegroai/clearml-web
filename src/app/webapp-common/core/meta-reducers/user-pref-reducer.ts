@@ -36,7 +36,7 @@ export const createUserPrefReducer = (
     }
 
     // filter unchanged state.
-    if (action.noPreferences || state === nextState) {
+    if (action.noPreferences || state === nextState || !(nextState?.[key]?.preferencesReady)) {
       return nextState;
     }
 

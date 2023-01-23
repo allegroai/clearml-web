@@ -15,7 +15,7 @@
       *ngFor="let model of inputModels"
       queryParamsHandling="preserve"
       class="artifact-container pointer"
-      [routerLink]="'input-model/' + model.id"
+      [routerLink]="'input-model/' + (model.id | safeUrlParameter)"
       [class.selected]="model.id === selectedArtifactKey && activeSection === ACTIVE_SECTIONS['input-model']"
     >
       <i class="icon sm al-ico-import"></i>
@@ -32,7 +32,7 @@
     *ngFor="let model of outputModels"
     queryParamsHandling="preserve"
     class="artifact-container pointer"
-    [routerLink]="'output-model/' + model.id"
+    [routerLink]="'output-model/' + (model.id | safeUrlParameter)"
     [class.selected]="model.id === selectedArtifactKey && activeSection === ACTIVE_SECTIONS['output-model']"
   >
     <i class="icon sm al-ico-export"></i>
@@ -47,7 +47,7 @@
   <div *ngFor="let artifact of dataAuditArtifacts; trackBy: trackByFn"
        class="artifact-container pointer"
        queryParamsHandling="preserve"
-       [routerLink]="'artifact/' + artifact.key+ '/' + artifact.mode"
+       [routerLink]="'artifact/' + (artifact.key | safeUrlParameter) + '/' + (artifact.mode | safeUrlParameter)"
        [class.selected]="selectedArtifactKey === artifact.key && activeSection === ACTIVE_SECTIONS['artifact']"
   >
     <i class="sm al-icon al-ico-data-audit al-color" [class]="(selectedArtifactKey === artifact.key ? 'white' : 'blue-400')"></i>{{artifact.key}}
@@ -60,7 +60,7 @@
   <div *ngFor="let artifact of otherArtifacts; trackBy: trackByFn"
        class="artifact-container pointer"
        queryParamsHandling="preserve"
-       [routerLink]="'other/' + artifact.key+'/' +artifact.mode"
+       [routerLink]="'other/' + (artifact.key | safeUrlParameter) + '/' + (artifact.mode | safeUrlParameter)"
        [class.selected]="selectedArtifactKey === artifact.key && activeSection === ACTIVE_SECTIONS['other']"
   >
     <i class="sm al-icon al-ico-data-audit al-color" [class]="(selectedArtifactKey === artifact.key ? 'white' : 'blue-400')"></i>

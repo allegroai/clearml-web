@@ -27,9 +27,7 @@ export class ExperimentInfoArtifactItemComponent implements OnInit, OnDestroy {
     this.modelInfo$ = this.store.select(selectExperimentModelInfoData);
     this.artifactKey$ = this.store.select(selectRouterParams)
       .pipe(
-        map(params => {
-          return {key: get('artifactId', params), mode: get('mode', params)};
-        }),
+        map(params => ({key: decodeURIComponent(params?.artifactId), mode: get('mode', params)})),
         filter(artifactId => !!artifactId),
         distinctUntilChanged()
       );

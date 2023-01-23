@@ -1,5 +1,5 @@
 import {createReducer, createSelector, on} from '@ngrx/store';
-import {reportsPlotlyReady, setPlotData, setSampleData, setSignIsNeeded} from './app.actions';
+import {reportsPlotlyReady, setNoPermissions, setPlotData, setSampleData, setSignIsNeeded} from './app.actions';
 import {DebugSample} from '@common/shared/debug-sample/debug-sample.reducer';
 import {MetricsPlotEvent} from '~/business-logic/model/events/metricsPlotEvent';
 
@@ -25,6 +25,7 @@ export interface State {
   scaleFactor: number;
   plotlyReady: boolean;
   signIsNeeded: boolean;
+  noPermissions: boolean;
 }
 
 export const initialState: State = {
@@ -32,7 +33,8 @@ export const initialState: State = {
   sampleData: null,
   scaleFactor: 100,
   plotlyReady: false,
-  signIsNeeded: false
+  signIsNeeded: false,
+  noPermissions: false
 };
 
 export const appReducer = createReducer(
@@ -40,10 +42,8 @@ export const appReducer = createReducer(
   on(reportsPlotlyReady, (state) => ({...state, plotlyReady: true})),
   on(setPlotData, (state, action) => ({...state, plotData: action.data as ReportsApiMultiplotsResponse})),
   on(setSampleData, (state, action) => ({...state, sampleData: action.data})),
-  on(setSignIsNeeded, (state) => {
-    debugger
-    return ({...state, signIsNeeded: true})
-  }),
+  on(setSignIsNeeded, (state) => ({...state, signIsNeeded: true})),
+  on(setNoPermissions, (state) => ({...state, noPermissions: true})),
 );
 
 export const selectFeature = state => state.appReducer as State;
@@ -53,3 +53,4 @@ export const selectReportsPlotlyReady = createSelector(selectFeature, state => s
 export const selectPlotData = createSelector(selectFeature, state => state.plotData);
 export const selectSampleData = createSelector(selectFeature, state => state.sampleData);
 export const selectSignIsNeeded = createSelector(selectFeature, state => state.signIsNeeded);
+export const selectNoPermissions = createSelector(selectFeature, state => state.noPermissions);

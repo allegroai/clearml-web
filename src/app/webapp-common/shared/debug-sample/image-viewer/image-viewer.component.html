@@ -3,7 +3,7 @@
     <div class="image-title third">
       <h1 [smTooltip]="currentDebugImage?.metric? (currentDebugImage?.metric + ' - ' + currentDebugImage?.variant) : ''"
           smShowTooltipIfEllipsis>{{currentDebugImage?.metric ? (currentDebugImage?.metric + ' - ' + currentDebugImage?.variant) : ''}}</h1>
-      <input #fakeInput name="Don't remove - it take the autofocus from slider" class="invisible">
+      <input #fakeInput name="Don't remove - it take the autofocus from slider" class="hide-me">
     </div>
     <div class="third viewer-iteration">
       <ng-container *ngIf="!data.withoutNavigation">

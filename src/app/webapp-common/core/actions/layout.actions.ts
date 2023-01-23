@@ -7,12 +7,12 @@ import {MessageSeverityEnum} from '@common/constants';
 
 export const setAutoRefresh = createAction(
   VIEW_PREFIX + '[set auto refresh]',
-  props<{autoRefresh: boolean}>()
+  props<{ autoRefresh: boolean }>()
 );
 
 export const setCompareAutoRefresh = createAction(
   VIEW_PREFIX + '[set compare auto refresh]',
-  props<{autoRefresh: boolean}>()
+  props<{ autoRefresh: boolean }>()
 );
 
 export const setServerError = createAction(
@@ -25,21 +25,27 @@ export const setServerError = createAction(
   })
 );
 
+
 export const setNotificationDialog = createAction(
   VIEW_PREFIX + '[set notification dialog]',
-  props<{notification: {message: string; title: string}}>()
+  props<{ notification: { message: string; title: string } }>()
 );
 
 export const resetLoader = createAction(VIEW_PREFIX + '[reset loader]');
 
 export const setBackdrop = createAction(
   VIEW_PREFIX + '[set backdrop]',
-  props<{active: boolean}>()
+  props<{ active: boolean }>()
 );
 
 export const activeLoader = createAction(
   VIEW_PREFIX + '[activate loader]',
   (endpoint: string) => ({endpoint, noPreferences: true})
+);
+
+export const showEmbedReportMenu = createAction(
+  VIEW_PREFIX + '[show embed report menu]',
+  props<{ show: boolean; position: { x: number; y: number } }>()
 );
 
 export const deactivateLoader = createAction(
@@ -50,12 +56,12 @@ export const deactivateLoader = createAction(
 
 export const visibilityChanged = createAction(
   VIEW_PREFIX + '[visibility changed]',
-  props<{visible: boolean}>()
+  props<{ visible: boolean }>()
 );
 
 export const saveAceCaretPosition = createAction(
   VIEW_PREFIX + '[save ace caret position]',
-  props<{id: string; position: Ace.Point}>()
+  props<{ id: string; position: Ace.Point }>()
 );
 
 export const resetAceCaretsPositions = createAction(VIEW_PREFIX + '[reset ace carets positions]');
@@ -63,7 +69,7 @@ export const resetAceCaretsPositions = createAction(VIEW_PREFIX + '[reset ace ca
 
 export const addMessage = createAction(
   VIEW_PREFIX + '[add message]',
-  (severity: MessageSeverityEnum, msg: string, userActions?: {actions: any[]; name: string}[], suppressNextMessages?: boolean) =>
+  (severity: MessageSeverityEnum, msg: string, userActions?: { actions: any[]; name: string }[], suppressNextMessages?: boolean) =>
     ({severity, msg, userActions, suppressNextMessages})
 );
 
@@ -71,29 +77,26 @@ export const removeMessage = createAction(VIEW_PREFIX + '[remove message]');
 
 export const setServerUpdatesAvailable = createAction(
   VIEW_PREFIX + '[set server updates available]',
-  props<{availableUpdates}>()
+  props<{ availableUpdates }>()
 );
 
 export const setScaleFactor = createAction(
   VIEW_PREFIX + '[set scale]',
-  props<{scale: number}>()
+  props<{ scale: number }>()
 );
 
 export const firstLogin = createAction(
   VIEW_PREFIX + '[set first Login]',
-  props<{first: boolean}>()
+  props<{ first: boolean }>()
 );
 
 export const neverShowPopupAgain = createAction(VIEW_PREFIX + 'NEVER_SHOW_POPUP_AGAIN', props<{ popupId: string; reset?: boolean }>());
-export const setRedactedArguments = createAction(VIEW_PREFIX + 'SET_REDACTED_ARGUMENTS', props<{ redactedArguments: { key: string} [] }>());
-export const setHideRedactedArguments = createAction(VIEW_PREFIX + 'SET_SHOW_REDACTED_ARGUMENTS', props<{hide: boolean }>());
+export const setRedactedArguments = createAction(VIEW_PREFIX + 'SET_REDACTED_ARGUMENTS', props<{ redactedArguments: { key: string } [] }>());
+export const setHideRedactedArguments = createAction(VIEW_PREFIX + 'SET_SHOW_REDACTED_ARGUMENTS', props<{ hide: boolean }>());
 export const plotlyReady = createAction(VIEW_PREFIX + '[plotly ready]');
 export const aceReady = createAction(VIEW_PREFIX + '[ace ready]');
 export const openAppsAwarenessDialog = createAction(VIEW_PREFIX + '[apps awareness dialog]',
-  props<{appsYouTubeIntroVideoId}>()
+  props<{ appsYouTubeIntroVideoId }>()
 );
 
-export const toggleUserFocus = createAction(
-  VIEW_PREFIX + '[toggle user focus in header',
-  props<{show: boolean}>()
-);
+

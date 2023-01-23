@@ -53,7 +53,7 @@
                 [moveLegendToTitle]="groupBy === groupByCharts.none"
                 [identifier]="generateIdentifier(chartItem)"
                 [exportForReport]="exportForReport"
-                (createEmbedCode)="creatingEmbedCode(chartItem)"
+                (createEmbedCode)="creatingEmbedCode(chartItem, $event)"
                 (hoverModeChanged)="hoverModeChanged.emit($event)"
               >
               </sm-single-graph>

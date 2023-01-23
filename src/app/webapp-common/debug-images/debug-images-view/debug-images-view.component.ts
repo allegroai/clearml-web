@@ -22,7 +22,7 @@ export class DebugImagesViewComponent {
   @Input() isDatasetVersionPreview = false;
   @Output() imageClicked = new EventEmitter();
   @Output() refreshClicked = new EventEmitter();
-  @Output() createEmbedCode = new EventEmitter<{metrics?: string[]; variants?: string[]}>();
+  @Output() createEmbedCode = new EventEmitter<{metrics?: string[]; variants?: string[]; domRect: DOMRect}>();
   @Output() urlError = new EventEmitter();
 
   public imageUrlError(data: { frame: Event; experimentId: string }) {

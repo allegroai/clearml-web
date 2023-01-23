@@ -1,11 +1,6 @@
 <div class="sm-card-list-layout" [class.in-empty-state]="!(!newReport.observed || reports === null || reports?.length > 0)">
   <ng-content></ng-content>
   <ng-container *ngIf="!newReport.observed || reports === null || reports?.length > 0; else: empty">
-    <!--      [allTags]="allTags"-->
-    <!--      (addTag)="addTag.emit({report, tag: $event})"-->
-    <!--      (removeTag)="removeTag.emit({report, tag: $event})"-->
-    <!--      (reportCardUpdateName)="reportCardUpdateName.emit({name: $event, report})"-->
-    <!--      (reportCardUpdateMetadata)="reportCardUpdateMetadata.emit({report: report, readOnly: $event})">-->
     <sm-report-card
       *ngFor="let report of reports; trackBy: trackByFn"
       class="report"

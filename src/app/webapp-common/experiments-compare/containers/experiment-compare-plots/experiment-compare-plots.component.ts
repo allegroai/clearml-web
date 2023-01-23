@@ -24,7 +24,7 @@ import {ExtFrame} from '@common/shared/single-graph/plotly-graph-base';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {addMessage} from '@common/core/actions/layout.actions';
 import {ExperimentGraphsComponent} from '@common/shared/experiment-graphs/experiment-graphs.component';
-import {ReportCodeEmbedService} from '@common/shared/services/report-code-embed.service';
+import { ReportCodeEmbedService } from '~/shared/services/report-code-embed.service';
 
 @Component({
   selector: 'sm-experiment-compare-plots',
@@ -148,7 +148,7 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
     this.store.dispatch(resetExperimentMetrics());
   }
 
-  createEmbedCode(event: { metrics?: string[]; variants?: string[] }) {
+  createEmbedCode(event: { metrics?: string[]; variants?: string[]; domRect: DOMRect }) {
     this.reportEmbed.createCode({
       type: 'plot',
       tasks: this.taskIds,

@@ -1,11 +1,19 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewChild} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, OnInit, ViewChild} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {MatDialog} from '@angular/material/dialog';
 import {Observable} from 'rxjs';
 import {filter, map, switchMap, take} from 'rxjs/operators';
 import {Environment} from '../environments/base';
 import {getPlot, getSample, getScalar, reportsPlotlyReady} from './app.actions';
-import {ReportsApiMultiplotsResponse, selectPlotData, selectReportsPlotlyReady, selectSampleData, selectSignIsNeeded, State} from './app.reducer';
+import {
+  ReportsApiMultiplotsResponse,
+  selectNoPermissions,
+  selectPlotData,
+  selectReportsPlotlyReady,
+  selectSampleData,
+  selectSignIsNeeded,
+  State
+} from './app.reducer';
 import {ExtFrame} from '@common/shared/single-graph/plotly-graph-base';
 import {DebugSample} from '@common/shared/debug-sample/debug-sample.reducer';
 import {getSignedUrl, setS3Credentials} from '@common/core/actions/common-auth.actions';
@@ -18,6 +26,7 @@ import {cloneDeep} from 'lodash/fp';
 import {MetricsPlotEvent} from '~/business-logic/model/events/metricsPlotEvent';
 import {SingleGraphComponent} from '@common/shared/single-graph/single-graph.component';
 import {setCurrentDebugImage} from '@common/shared/debug-sample/debug-sample.actions';
+import {isFileserverUrl} from '~/shared/utils/url';
 
 
 @Component({
@@ -34,12 +43,20 @@ export class AppComponent implements OnInit {
   private environment: Environment;
   public activated: boolean = false;
   private searchParams: URLSearchParams;
+  private otherSearchParams: URLSearchParams;
   public type: string;
   public singleGraphHeight;
   public hideMaximize: 'show' | 'hide' | 'disabled' = 'show';
-  public signIsNeeded: Observable<boolean>;
-
+  public signIsNeeded$: Observable<boolean>;
+  public noPermissions$: Observable<boolean>;
+  public isDarkTheme: boolean;
+  public externalTool: boolean = false;
   @ViewChild(SingleGraphComponent) 'singleGraph': SingleGraphComponent;
+
+  @HostListener('window:resize')
+  onResize() {
+    this.singleGraph?.redrawPlot();
+  }
 
   constructor(
     private store: Store<State>,
@@ -49,18 +66,30 @@ export class AppComponent implements OnInit {
     this.configService.globalEnvironmentObservable.subscribe(env => {
       this.environment = env;
     });
-    this.signIsNeeded = store.select(selectSignIsNeeded);
+    this.signIsNeeded$ = store.select(selectSignIsNeeded);
+    this.noPermissions$ = store.select(selectNoPermissions);
     this.searchParams = new URLSearchParams(window.location.search);
     this.type = this.searchParams.get('type');
     this.singleGraphHeight = window.innerHeight;
+    this.otherSearchParams = this.getOtherSearchParams();
+    this.isDarkTheme = !this.searchParams.get('light');
 
     try {
-      const lala = JSON.parse(localStorage.getItem('_saved_state_'));
-      this.store.dispatch(setS3Credentials(lala.auth.s3BucketCredentials));
+      const data = JSON.parse(localStorage.getItem('_saved_state_'));
+      data.auth && this.store.dispatch(setS3Credentials(data.auth.s3BucketCredentials));
     } catch (e) {
       console.log(e);
     }
 
+  }
+
+  private getOtherSearchParams() {
+    const paramsToRemove = ['light', 'type','tasks', 'metrics', 'variants', 'iterations', 'company'];
+    const otherSearchParams = new URLSearchParams(window.location.search);
+    paramsToRemove.forEach( key => {
+      otherSearchParams.delete(key);
+    });
+    return otherSearchParams;
   }
 
   ngOnInit(): void {
@@ -69,6 +98,7 @@ export class AppComponent implements OnInit {
         this.activate();
       }
     } catch (e) {
+      this.externalTool = true;
       this.hideMaximize = 'hide';
       console.log('no-access-to-parent-window');
       this.activate();
@@ -164,14 +194,18 @@ export class AppComponent implements OnInit {
     this.store.select(selectSampleData)
       .pipe(filter(sample => !!sample))
       .subscribe(sample => {
-        this.store.dispatch(getSignedUrl({url: sample.url}));
-        this.store.select(selectSignedUrl(sample.url))
+        const url = new URL(sample.url);
+        if (isFileserverUrl(sample.url) && this.searchParams.get('company')) {
+          url.searchParams.append('tenant', this.searchParams.get('company'));
+        }
+        this.store.dispatch(getSignedUrl({url: url.toString()}));
+        this.store.select(selectSignedUrl(url.toString()))
           .pipe(
             filter(signed => !!signed?.signed),
             map(({signed: signedUrl}) => signedUrl),
             take(1)
-          ).subscribe(() => {
-          this.frame = sample;
+          ).subscribe((signedUrl) => {
+          this.frame = {...sample, url: signedUrl};
           this.activated = true;
           this.cdr.detectChanges();
         });
@@ -186,18 +220,18 @@ export class AppComponent implements OnInit {
       metrics: this.searchParams.getAll('metrics'),
       variants: this.searchParams.getAll('variants'),
       iterations: this.searchParams.getAll('iterations').map(iteration => parseInt(iteration, 10)),
-      company: this.searchParams.get('company') || '',
+      company:    this.searchParams.get('company') || '',
     };
 
     switch (this.type) {
       case 'plot':
-        this.store.dispatch(getPlot(queryParams));
+        this.store.dispatch(getPlot({...queryParams, otherSearchParams: this.otherSearchParams}));
         break;
       case 'scalar':
-        this.store.dispatch(getScalar(queryParams));
+        this.store.dispatch(getScalar({...queryParams, otherSearchParams: this.otherSearchParams}));
         break;
       case 'sample':
-        this.store.dispatch(getSample(queryParams));
+        this.store.dispatch(getSample({...queryParams, otherSearchParams: this.otherSearchParams}));
     }
     this.activated = true;
   };

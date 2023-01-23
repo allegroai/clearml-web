@@ -8,7 +8,7 @@
         class="al-icon lg"
         [class]="'al-ico-type-' + (entity?.type ? (entity.type.toString()).replace('_', '-') : 'training')"
       ></i>
-      <div class="name">{{step.name}}</div>
+      <div class="name" [smTooltip]="step.name" smShowTooltipIfEllipsis>{{step.name}}</div>
       <div class="d-flex justify-content-between">
         <div class="status" [class]="step.data.status">{{step.data.status}}</div>
         <sm-id-badge class="ml-1" [id]="step.data.job_id" (copied)="copyToClipboard()"></sm-id-badge>

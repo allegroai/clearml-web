@@ -1,9 +1,8 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {setTagColors, TagColor} from '../../core/actions/projects.actions';
 import {Store} from '@ngrx/store';
 import {selectTagColors, selectTagsColors} from '../../core/reducers/projects.reducer';
-import {Subscription} from 'rxjs';
-import { map } from 'rxjs/operators';
+import {map} from 'rxjs/operators';
 
 
 @Injectable({

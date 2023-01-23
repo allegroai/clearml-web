@@ -1,38 +1,39 @@
 <ng-container *ngIf="activated; else placeHolder" [ngSwitch]="type">
-  <ng-container *ngIf="(signIsNeeded | async) === false; else signIsNeededTemplate">
-    <ng-template #plotTemplate>
-      <sm-single-graph
-        [class.less-padding]="false"
-        [class.two-in-a-row]="false"
-        [graphsNumber]="1"
-        [height]="singleGraphHeight"
-        [chart]="plotData"
-        [id]="'lala'"
-        [isDarkTheme]="true"
-        [showLoaderOnDraw]="false"
-        [identifier]="'lala'"
-        [width]="400"
-        [isCompare]="true"
-        [noMargins]="true"
-        [legendConfiguration]="{noTextWrap: true}"
-        [hideMaximize]="hideMaximize"
-        (maximizeClicked)="maximize()">
-      </sm-single-graph>
-    </ng-template>
+  <ng-container *ngIf="(signIsNeeded$ | async) === false; else signIsNeededTemplate">
+    <ng-container *ngIf="(noPermissions$ | async) === false; else noPermissionsTemplate">
+      <ng-template #plotTemplate>
+        <sm-single-graph
+          [hideDownloadButtons]="externalTool"
+          [class.less-padding]="false"
+          [class.two-in-a-row]="false"
+          [graphsNumber]="1"
+          [height]="singleGraphHeight"
+          [chart]="plotData"
+          [id]="'lala'"
+          [isDarkTheme]="isDarkTheme"
+          [showLoaderOnDraw]="false"
+          [identifier]="'lala'"
+          [width]="400"
+          [isCompare]="true"
+          [noMargins]="true"
+          [legendConfiguration]="{noTextWrap: true}"
+          [hideMaximize]="hideMaximize"
+          (maximizeClicked)="maximize()">
+        </sm-single-graph>
+      </ng-template>
 
-    <ng-container *ngIf="type === 'sample'; else plotTemplate">
-      <sm-debug-image-snippet
-        *ngIf="frame?.url"
-        class="d-flex-center"
-        [class.no-pointer]="hideMaximize !== 'show'"
-        [frame]="frame"
-        [noHoverEffects]="true"
-        (imageClicked)="hideMaximize === 'show' && sampleClicked($event)">
-      </sm-debug-image-snippet>
+      <ng-container *ngIf="type === 'sample'; else plotTemplate">
+        <sm-debug-image-snippet
+          *ngIf="frame?.url"
+          class="d-flex-center"
+          [frame]="frame"
+          [noHoverEffects]="true"
+          (imageClicked)="hideMaximize === 'show' && sampleClicked($event)">
+        </sm-debug-image-snippet>
+      </ng-container>
     </ng-container>
   </ng-container>
 </ng-container>
-
 <ng-template #placeHolder>
   <div class="placeholder">
     <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
@@ -44,7 +45,14 @@
   </div>
 </ng-template>
 
-
 <ng-template #signIsNeededTemplate>
-  <div class="s3message">Missing S3 credentials. Please verify credentials in <a target="_blank" class="link" href="/settings/webapp-configuration">WEB APP CLOUD ACCESS</a> in clearml app.</div>
+  <div class="s3message">Missing S3 credentials. Please verify credentials in <a target="_blank" class="link"
+                                                                                 href="/settings/webapp-configuration">WEB
+    APP CLOUD ACCESS</a> in clearml app.
+  </div>
+</ng-template>
+
+<ng-template #noPermissionsTemplate>
+  <div class="placeholder">Missing permissions to view this item.
+  </div>
 </ng-template>

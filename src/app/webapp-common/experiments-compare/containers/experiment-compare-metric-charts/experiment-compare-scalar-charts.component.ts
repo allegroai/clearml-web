@@ -31,8 +31,8 @@ import {ExperimentGraphsComponent} from '@common/shared/experiment-graphs/experi
 import {selectScalarsHoverMode} from '@common/experiments/reducers';
 import {setScalarsHoverMode} from '@common/experiments/actions/common-experiment-output.actions';
 import {ChartHoverModeEnum} from '@common/experiments/shared/common-experiments.const';
-import {ReportCodeEmbedService} from '@common/shared/services/report-code-embed.service';
 import {Router} from '@angular/router';
+import { ReportCodeEmbedService } from '~/shared/services/report-code-embed.service';
 
 
 @Component({
@@ -213,7 +213,7 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
     this.store.dispatch(setScalarsHoverMode({hoverMode}));
   }
 
-  createEmbedCode(event: { metrics?: string[]; variants?: string[] }) {
+  createEmbedCode(event: { metrics?: string[]; variants?: string[]; domRect: DOMRect }) {
     this.reportEmbed.createCode({
       type: 'scalar',
       tasks: this.taskIds,

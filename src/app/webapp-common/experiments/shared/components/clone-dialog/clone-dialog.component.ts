@@ -84,9 +84,9 @@ export class CloneDialogComponent implements OnInit, OnDestroy {
       const projectList = projects?.map(project => ({value: project.id, label: project.name}));
       if (!isEqual(projectList, this.projects)) {
         this.projects = projectList;
-        const defaultProject = this.projects.find(project => project.value === this.defaultProjectId) as Project;
+        const defaultProjectIndex = this.projects.findIndex(project => project.value === this.defaultProjectId);
         setTimeout(() => {
-          this.formData.project = (defaultProject && defaultProject.company?.id) ? defaultProject : projects[0] ? this.projects[0] : null;
+          this.formData.project = (defaultProjectIndex > -1 && projects[defaultProjectIndex].company?.id) ? this.projects[defaultProjectIndex] : projects[0] ? this.projects[0] : null;
           this.filterText = this.formData.project?.label;
         }, 0);
       }

@@ -10,9 +10,10 @@ import {ConfigurationService} from '@common/shared/services/configuration.servic
 import {ClipboardService} from 'ngx-clipboard';
 import { take } from 'rxjs';
 
-interface ReportCodeEmbedConfiguration {
+export interface ReportCodeEmbedConfiguration {
   type: 'plot' | 'multiplot' | 'scalar' | 'multiscalar' | 'sample';
   tasks: string[];
+  domRect: DOMRect;
   name?: string;
   metrics?: string[];
   variants?: string[];
@@ -21,22 +22,22 @@ interface ReportCodeEmbedConfiguration {
 @Injectable({
   providedIn: 'root'
 })
-export class ReportCodeEmbedService {
+export class ReportCodeEmbedBaseService {
   private workspace: GetCurrentUserResponseUserObjectCompany;
   private isCommunity: boolean;
 
   constructor(
-    private store: Store,
-    private locationStrategy: LocationStrategy,
-    private configService: ConfigurationService,
-    private _clipboardService: ClipboardService
+    protected store: Store,
+    protected locationStrategy: LocationStrategy,
+    protected configService: ConfigurationService,
+    protected _clipboardService: ClipboardService
   ) {
     this.isCommunity = this.configService.getStaticEnvironment().communityServer;
     this.store.select(selectActiveWorkspace).subscribe(workspace => this.workspace = workspace);
   }
 
   createCode(conf: ReportCodeEmbedConfiguration) {
-    const code = this.encode(conf);
+    const code = this.generateEmbedSnippet(conf);
     this._clipboardService.copyResponse$
       .pipe(take(1))
       .subscribe(() => this.store.dispatch(addMessage(MESSAGES_SEVERITY.SUCCESS,
@@ -44,8 +45,7 @@ export class ReportCodeEmbedService {
       );
     this._clipboardService.copy(code);
   }
-
-  encode(conf: ReportCodeEmbedConfiguration) {
+  encodeSrc(conf: ReportCodeEmbedConfiguration, internal = true){
     const url = new URL(window.location.origin + this.locationStrategy.getBaseHref());
     url.pathname = url.pathname + 'widgets/';
     url.searchParams.set('type', conf.type);
@@ -55,9 +55,11 @@ export class ReportCodeEmbedService {
         urlStr += '&' + conf[key].map(val => `${key}=${encodeURIComponent(val)}`).join('&');
       }
     });
-    if (this.configService && this.workspace?.id) {
-        urlStr += `&company=${this.workspace.id}`;
-    }
+    return urlStr;
+  }
+
+  generateEmbedSnippet(conf: ReportCodeEmbedConfiguration) {
+    const urlStr = this.encodeSrc(conf);
     return `<iframe
   src="${urlStr}"
   name="${conf.name || v4()}"

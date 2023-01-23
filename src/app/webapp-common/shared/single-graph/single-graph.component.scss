@@ -128,7 +128,7 @@
     }
 
     ::ng-deep .js-plotly-plot .plotly {
-      .modebar-group {
+      .modebar-group:not(:empty) {
         border-left: 1px solid $blue-500;
 
         &:last-child {
@@ -140,6 +140,9 @@
             }
           }
         }
+      }
+      .modebar-group:empty {
+        border-left: none;
       }
 
       .node-label {

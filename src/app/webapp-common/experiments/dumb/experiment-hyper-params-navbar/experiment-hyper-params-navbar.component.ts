@@ -13,7 +13,6 @@ export class ExperimentHyperParamsNavbarComponent {
     properties: 'User Properties',
     design: 'General'
   };
-  encodeURI = encodeURI;
   @Input() hyperParams: { [key: string]: any};
   @Input() configuration: { [key: string]: any};
   @Input() selectedObject;

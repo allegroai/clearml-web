@@ -47,25 +47,16 @@ export class SelectQueueComponent implements OnInit, OnDestroy {
       reference?: string;
     }
   ) {
+    this.store.dispatch(new GetQueuesForEnqueue());
     this.userAllowedToCreateQueue$ = userAllowedToCreateQueue$(store);
 
     if (data && data.taskIds?.length > 0) {
       this.store.dispatch(new GetTaskForEnqueue(data.taskIds));
       this.reference = data.taskIds.length < 2 ?  data.reference : `${data.taskIds.length} experiments `;
     }
-    this.queuesSub = this.queues$.subscribe(queues => {
-      if (queues) {
-        this.queues = queues;
-        this.queuesNames = queues.map(q => q.name);
-        this.defaultQueue = this.blTaskService.getDefaultQueue(this.queues) || queues[0];
-        this.queueControl.reset(this.defaultQueue, {emitEvent: false});
-        this.cdr.detectChanges();
-      }
-    });
   }
 
   ngOnInit() {
-    this.store.dispatch(new GetQueuesForEnqueue());
     this.filteredOptions$ = combineLatest([
       this.queueControl.valueChanges.pipe(startWith('')),
       this.queues$
@@ -82,6 +73,16 @@ export class SelectQueueComponent implements OnInit, OnDestroy {
           return queues.filter(q => q.name.toLowerCase().includes(name));
         }),
       );
+
+    this.queuesSub = this.queues$.subscribe(queues => {
+      if (queues) {
+        this.queues = queues;
+        this.queuesNames = queues.map(q => q.name);
+        this.defaultQueue = this.blTaskService.getDefaultQueue(this.queues) || queues[0];
+        this.queueControl.reset(this.defaultQueue, {emitEvent: false});
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   closeDialog(confirmed) {

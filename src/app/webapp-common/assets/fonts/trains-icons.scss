@@ -3,7 +3,7 @@
 
 @font-face {
   font-family: '#{$icomoon-font-family}';
-  src: url('./#{$icomoon-font-family}.ttf?f4pbms') format('truetype');
+  src: url('./#{$icomoon-font-family}.ttf?s4ibjb') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -24,19 +24,19 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-.al-ico-md-copy {
+.al-ico-markdown {
   &:before {
-    content: $al-ico-md-copy; 
+    content: $al-ico-markdown;
   }
 }
 .al-ico-hor-expand {
   &:before {
-    content: $al-ico-hor-expand; 
+    content: $al-ico-hor-expand;
   }
 }
 .al-ico-hor-minimize {
   &:before {
-    content: $al-ico-hor-minimize; 
+    content: $al-ico-hor-minimize;
   }
 }
 .al-ico-pdf {

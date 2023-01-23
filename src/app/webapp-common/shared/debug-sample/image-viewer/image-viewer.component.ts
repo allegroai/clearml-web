@@ -149,7 +149,7 @@ export class ImageViewerComponent extends BaseImageViewerComponent implements On
   }
 
   changeIteration(value: number) {
-    if (this.iteration === value || this.url) {
+    if (this.iteration === value || this.data.withoutNavigation) {
       return;
     }
     this.iteration = value;

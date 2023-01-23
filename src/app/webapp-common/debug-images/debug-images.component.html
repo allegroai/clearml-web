@@ -1,7 +1,7 @@
 <div class="p-3 images-container">
   <div class="single-debug-images-container"
-       *ngFor="let experimentId of experimentIds.slice(0,LIMITED_VIEW_LIMIT); trackBy: trackExperiment; let first = first; let last =
-       last"
+       *ngFor="let experimentId of experimentIds?.slice(0,LIMITED_VIEW_LIMIT); trackBy: trackExperiment;
+       let first = first; let last = last"
        [class.separator]="experimentIds?.length > 1">
     <header *ngIf="experimentIds?.length > 1">
       <sm-experiment-compare-general-data

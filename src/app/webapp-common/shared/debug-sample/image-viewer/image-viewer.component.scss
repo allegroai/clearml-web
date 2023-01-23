@@ -1,7 +1,7 @@
 @import "variables";
 
 :host {
-  .invisible {
+  .hide-me {
     position: absolute;
     width:0;
     height:0;

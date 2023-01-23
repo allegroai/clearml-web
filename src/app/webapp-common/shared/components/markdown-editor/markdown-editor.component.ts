@@ -12,6 +12,10 @@ import {
 import {DomSanitizer} from '@angular/platform-browser';
 import {MarkdownEditorComponent as MDComponent, MdEditorOption} from 'ngx-markdown-editor';
 import {Ace} from 'ace-builds';
+import {MatDialog} from '@angular/material/dialog';
+import {
+  MarkdownCheatSheetDialogComponent
+} from '@common/shared/components/markdown-editor/markdown-cheat-sheet-dialog/markdown-cheat-sheet-dialog.component';
 
 const BREAK_POINT = 990;
 
@@ -83,7 +87,8 @@ export class MarkdownEditorComponent {
     }
   }
 
-  constructor(private renderer: Renderer2, protected sanitizer: DomSanitizer, protected cdr: ChangeDetectorRef) {
+  constructor(private renderer: Renderer2, protected sanitizer: DomSanitizer, protected cdr: ChangeDetectorRef, protected dialog: MatDialog) {
+    this.editMode = false;
   }
 
   save() {
@@ -97,7 +102,10 @@ export class MarkdownEditorComponent {
     this.originalInfo = this.data;
     this.editMode = true;
     this.editorVisible = false;
-    setTimeout(() => this.updateEditorVisibility());
+    setTimeout(() => {
+      this.updateEditorVisibility();
+      this.ace.focus();
+    });
   }
 
   cancelClicked() {
@@ -115,7 +123,7 @@ export class MarkdownEditorComponent {
     });
     this.ready = true;
     this.preview = document.querySelector('.preview-container');
-    this.editor  = document.querySelector('.editor-container > div:first-child');
+    this.editor = document.querySelector('.editor-container > div:first-child');
   }
 
   togglePreview() {
@@ -133,11 +141,17 @@ export class MarkdownEditorComponent {
     this.renderer.setProperty(this.editorComponent.previewContainer.nativeElement, 'id', 'print-element');
 
     if (this.data.indexOf('```language') > -1) {
-      const range = this.ace.selection.getRange();
-      this.data = this.data.replace('```language', '```py');
-      this.cdr.detectChanges();
-      range.end.column = range.start.column + 2;
-      window.setTimeout(() => this.ace.selection.setRange(range));
+      const manager = this.ace.session.getUndoManager();
+      const range = this.ace.find('```language',{
+        wrap: true,
+        caseSensitive: true,
+        wholeWord: true,
+        regExp: false,
+        preventScroll: true // do not change selection
+      });
+      const deltas = manager.getDeltas(null, null);
+      this.ace.session.replace(range, '```py');
+      manager['$undoStack'] = deltas;
     }
   }
 
@@ -147,7 +161,7 @@ export class MarkdownEditorComponent {
   }
 
   private getDuplicateIframes() {
-    const names = Array.from(this.data.matchAll(/<iframe[^>]*?name=(["\'])?((?:.(?!\1|>))*.?)\1?/g)).map(a=>a[2]);
+    const names = Array.from(this.data.matchAll(/<iframe[^>]*?name=(["\'])?((?:.(?!\1|>))*.?)\1?/g)).map(a => a[2]);
     const uniqueNames = new Set(names);
     let duplicatedNames = [];
     for (const name of uniqueNames) {
@@ -155,6 +169,10 @@ export class MarkdownEditorComponent {
       duplicatedNames = duplicatedNames.concat(dups);
     }
     this.duplicateNames = duplicatedNames.length > 0;
+  }
+
+  openMDCCheatSheet() {
+    this.dialog.open(MarkdownCheatSheetDialogComponent);
   }
 }
 
