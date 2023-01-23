@@ -44,7 +44,8 @@ def step(size: int):
 @PipelineDecorator.pipeline(
     name='ingest',
     project='data processing',
-    version='0.1'
+    version='0.1',
+    pipeline_execution_queue="default"
 )
 def pipeline_logic(do_stuff: bool):
     if do_stuff:
