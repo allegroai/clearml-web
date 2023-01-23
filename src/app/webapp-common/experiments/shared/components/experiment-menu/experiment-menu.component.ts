@@ -71,6 +71,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
   @Input() companyTags: string[];
   @Input() numSelected = 0;
   @Input() activateFromMenuButton = true;
+  @Input() useCurrentEntity = false;
 
   @Input() set experiment(experiment: ISelectedExperiment) {
     this._experiment = experiment;
@@ -202,14 +203,14 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
   }
 
   public resetPopup() {
-    const selectedExperiments = this.selectedExperiments ? selectionDisabledReset(this.selectedExperiments).selectedFiltered : [this._experiment];
+    const selectedExperiments = (!(this.activateFromMenuButton || this.useCurrentEntity) && this.selectedExperiments) ? selectionDisabledReset(this.selectedExperiments).selectedFiltered : [this._experiment];
     const devWarning: boolean = selectedExperiments.some(exp => isDevelopment(exp));
     const confirmDialogRef = this.dialog.open(CommonDeleteDialogComponent, {
       data: {
         entity: this._experiment,
-        numSelected: this.numSelected,
+        numSelected: selectedExperiments?.length ?? this.numSelected,
         entityType: EntityTypeEnum.experiment,
-        useCurrentEntity: this.activateFromMenuButton,
+        useCurrentEntity: this.activateFromMenuButton || this.useCurrentEntity,
         resetMode: true,
         devWarning
       },
@@ -359,7 +360,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
         entity: this._experiment,
         numSelected: this.numSelected,
         entityType: entityType || EntityTypeEnum.experiment,
-        useCurrentEntity: this.activateFromMenuButton,
+        useCurrentEntity: this.activateFromMenuButton || this.useCurrentEntity,
         includeChildren
       },
       width: '600px',

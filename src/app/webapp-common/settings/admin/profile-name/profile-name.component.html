@@ -6,7 +6,7 @@
                     [required]="true"
                     [editable]="true"
                     (textChanged)="nameChange($event, currentUser)">
-      <div class="text-center">{{currentUser.name}}</div>
+      {{currentUser.name}}
     </sm-inline-edit>
     <div *ngIf="currentUser.email" class="profile-email text">Email address:</div>
     <div>{{currentUser.email}}</div>

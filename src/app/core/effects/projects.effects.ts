@@ -45,6 +45,7 @@ export class ProjectsEffects {
         return [
           actions.setSelectedProject({project: ALL_PROJECTS_OBJECT}),
           actions.getProjectUsers(action),
+          actions.getCompanyTags(),
           deactivateLoader(action.type)];
       } else {
         this.fetchingExampleExperiment = action.example && action.projectId;

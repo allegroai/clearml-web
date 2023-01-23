@@ -140,9 +140,10 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
   }
 
   @Input() exportForReport = false;
+  @Input() hideDownloadButtons = false;
   @Input() noMargins = false;
   @Output() hoverModeChanged = new EventEmitter<ChartHoverModeEnum>();
-  @Output() createEmbedCode = new EventEmitter();
+  @Output() createEmbedCode = new EventEmitter<DOMRect>();
   @Output() maximizeClicked = new EventEmitter();
   @ViewChild('drawHere', {static: true}) plotlyContainer: ElementRef;
   private chartElm;
@@ -244,7 +245,8 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
 
     const graph = this.formatChartLines() as ExtFrame;
     this.type = getOr(graph.layout.type, 'data[0].type', graph);
-    this.title = this.isDarkTheme ? '' : this.addIterationString(graph.layout.title as string, graph.iter) || (graph.layout.title as Record<string, any>).text;
+    const title = graph.variants?.length > 1? '' : this.addIterationString(graph.layout.title as string, graph.iter) || (graph.layout.title as Record<string, any>).text;
+    this.title = this.isDarkTheme ? '' : title;
     let layout = {
       ...this.addParametersIfDarkTheme({
         font: {
@@ -514,14 +516,16 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
         }
       });
     }
-    modeBarButtonsToAdd.push({
-      name: 'Download JSON',
-      title: 'Download JSON',
-      icon: this.getJsonDownloadIcon(),
-      click: () => {
-        this.downloadGraphAsJson(cloneDeep(this.originalChart));
-      }
-    });
+    if (!this.hideDownloadButtons) {
+      modeBarButtonsToAdd.push({
+        name: 'Download JSON',
+        title: 'Download JSON',
+        icon: this.getJsonDownloadIcon(),
+        click: () => {
+          this.downloadGraphAsJson(cloneDeep(this.originalChart));
+        }
+      });
+    }
     if (this.type === 'table') {
       modeBarButtonsToAdd.push({
         name: 'Download CSV',
@@ -536,11 +540,12 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
     if (this.exportForReport) {
       const button: ModeBarButton = {
         name: 'Embed',
-        title: 'Copy to Report',
+        title: 'Copy embed code',
         attr: 'plotly-embedded-modebar-button',
         icon: this.getEmbedIcon(),
-        click: () => {
-          this.createEmbedCode.emit();
+        click: (event) => {
+          this.createEmbedCode.emit(event.querySelector('[data-title="Copy embed code"]').getBoundingClientRect()
+          );
         }
       };
       modeBarButtonsToAdd.push(button);
@@ -549,7 +554,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
     if (this.hideMaximize !== 'hide') {
       const maximizeButton: ModeBarButton = {
         name: 'Maximize',
-        title: this.hideMaximize === 'disabled' ? `Can't maximize because an iframe with the same name exists`: 'Maximize Graph',
+        title: this.hideMaximize === 'disabled' ? `Can't maximize because an iframe with the same name exists` : 'Maximize Graph',
         attr: this.hideMaximize === 'disabled' ? 'plotly-disabled-maximize' : '',
         icon: this.getMaximizeIcon(),
         click: () => {
@@ -560,7 +565,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
     }
 
     const config = {
-      modeBarButtonsToRemove: ['sendDataToCloud'] as ModeBarDefaultButtons[],
+      modeBarButtonsToRemove: (this.hideDownloadButtons ? ['sendDataToCloud', 'toImage']: ['sendDataToCloud']) as ModeBarDefaultButtons[],
       displaylogo: false,
       modeBarButtonsToAdd
     };
@@ -617,7 +622,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
       const colorKey = this.extractColorKey(graph.data[i].name);
       const originalColor = this.getOriginalColor(i);
       if (!Array.isArray(originalColor)) {
-        const color = (originalColor && !this.colorHash.hasColor(colorKey)) ? hexToRgb(this.getOriginalColor(i)) : this.colorHash.initColor(colorKey);
+        const color = (originalColor && !this.colorHash.hasColor(colorKey)) ? hexToRgb(this.getOriginalColor(i)) : this.colorHash.initColor(colorKey, null, this.isDarkTheme);
         // if (this.colorHash.hasColor(colorKey)) { // We don't save init color in color cache, so we need to recolor everytime
         this._reColorTrace(graph.data[i], color);
         // }
@@ -885,7 +890,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
     this.zone.run(() => {
       this.dialog.open(GraphViewerComponent, {
         data: {
-          ...(this.exportForReport && {embedFunction: () => this.createEmbedCode.emit()}),
+          ...(this.exportForReport && {embedFunction: (rect: DOMRect) => this.createEmbedCode.emit(rect)}),
           // signed url are updated after originChart was cloned - need to update images urls!
           chart: cloneDeep({
             ...this.originalChart,

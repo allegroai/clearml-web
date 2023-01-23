@@ -65,7 +65,7 @@ export class ExperimentGraphsComponent implements OnDestroy {
   public graphList: Array<any> = [];
   public noGraphs: boolean = false;
   public graphsData: { [group: string]: VisibleExtFrame[] };
-  public visibleGraphsData: {[graphId: string]: boolean} = {};
+  public visibleGraphsData: { [graphId: string]: boolean } = {};
   private observer: IntersectionObserver;
   private _xAxisType: ScalarKeyEnum;
   @ViewChild('allMetrics', {static: true}) allMetrics: ElementRef;
@@ -130,7 +130,7 @@ export class ExperimentGraphsComponent implements OnDestroy {
 
   @Input() exportForReport = true;
   @Output() hoverModeChanged = new EventEmitter<ChartHoverModeEnum>();
-  @Output() createEmbedCode = new EventEmitter<{metrics?: string[]; variants?: string[]}>();
+  @Output() createEmbedCode = new EventEmitter<{ metrics?: string[]; variants?: string[]; domRect: DOMRect }>();
 
   @ViewChildren('metricGroup') allMetricGroups !: QueryList<ElementRef>;
   @ViewChildren('singleGraphContainer') singleGraphs !: QueryList<ElementRef>;
@@ -411,13 +411,26 @@ export class ExperimentGraphsComponent implements OnDestroy {
     return Object.entries(sortGraphsData1).reduce((acc, [label, graphs]) =>
       ({
         ...acc,
-        [label]: graphs.map((graph) => ({...graph, id: v4(), visible: this.visibleGraphsData[this.generateIdentifier(graph)]}))
+        [label]: graphs.map((graph) => ({
+          ...graph,
+          id: v4(),
+          visible: this.visibleGraphsData[this.generateIdentifier(graph)]
+        }))
       }), {} as { [label: string]: VisibleExtFrame[] });
   }
 
   public generateIdentifier = (chartItem: any) => `${this.singleGraphidPrefix} ${this.experimentGraphidPrefix} ${chartItem.metric} ${chartItem.layout.title} ${chartItem.iter} ${chartItem.variant} ${(chartItem.layout.images && chartItem.layout.images[0]?.source)}`;
 
-  creatingEmbedCode(chartItem: any) {
-    this.createEmbedCode.emit({metrics: [chartItem.metric], variants: [chartItem.variant]});
+  creatingEmbedCode(chartItem: any, domRect: DOMRect) {
+    if (this.groupBy === groupByCharts.none) {
+      // split scalars by variants
+      this.createEmbedCode.emit({
+        metrics: [chartItem.metric.substring(0, chartItem.metric.lastIndexOf('/'))?.trim()],
+        variants: [chartItem.data[0].name],
+        domRect
+      });
+    } else {
+      this.createEmbedCode.emit({metrics: [chartItem.metric], variants: chartItem.variants ?? [chartItem.variant], domRect});
+    }
   }
 }

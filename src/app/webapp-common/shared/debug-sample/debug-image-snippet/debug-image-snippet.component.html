@@ -13,7 +13,7 @@
           >
           <div *ngIf="!noHoverEffects" class="toolbar top">
             <div class="clickable-icon d-flex align-items-center justify-content-center pointer"
-                (click)="createEmbedCode.emit();"
+                (click)="createEmbedCodeClicked($event)"
                 smTooltip="Copy to Report">
               <i class="al-icon al-ico-code sm"></i>
             </div>
@@ -22,7 +22,18 @@
 
       <div class="player" *ngSwitchCase="'player'">
         <video
+          *ngIf="!noHoverEffects"
           #video
+          preload="metadata"
+          [src]="source"
+          (error)="imageError.emit(); isFailed = true"
+          (loadedmetadata)="loadedMedia()"
+          (click)="imageClicked.emit({src: source})"
+        ></video>
+        <video
+          *ngIf="noHoverEffects"
+          #video
+          controls
           preload="metadata"
           [src]="source"
           (error)="imageError.emit(); isFailed = true"
@@ -31,7 +42,7 @@
         ></video>
         <div  class="toolbar top">
           <div *ngIf="!noHoverEffects" class="clickable-icon d-flex align-items-center justify-content-center pointer"
-               (click)="createEmbedCode.emit();"
+               (click)="createEmbedCodeClicked($event)"
                smTooltip="Copy to Report">
             <i class="al-icon al-ico-code sm"></i>
           </div>
@@ -44,7 +55,7 @@
         </div>
         <div *ngIf="!noHoverEffects" class="toolbar">
           <div class="clickable-icon d-flex align-items-center justify-content-center pointer"
-               (click)="createEmbedCode.emit();"
+               (click)="createEmbedCodeClicked($event)"
                smTooltip="Copy to Report">
             <i class="al-icon al-ico-code sm"></i>
           </div>

@@ -33,7 +33,7 @@ export class CommonExperimentOutputEffects {
 
   activeLoader = createEffect(() => this.actions$.pipe(
     ofType(outputActions.getExperimentLog, outputActions.experimentScalarRequested, outputActions.experimentPlotsRequested),
-    filter(action => !action?.['from']),
+    filter(action => !action?.['autoRefresh']),
     map(action => activeLoader(action.type))
   ));
 

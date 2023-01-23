@@ -2,7 +2,7 @@
   <div class="md-content" [class.edit-mode]="editMode" [class.dirty]="isDirty" [class.editor-hidden]="editorVisible">
     <div class="actions">
       <div class="actions-buttons ">
-        <button *ngIf="!readOnly && !editMode && editModeChanged.observed"
+        <button *ngIf="!editMode && editModeChanged.observed"
                 class="btn btn-cml-primary btn-icon btn-expand-view  md-button mr-2"
                 [smTooltip]="isExpand? 'Minimize view' : 'Expand view'"
                 matTooltipPosition="below"
@@ -30,10 +30,11 @@
   </div>
 
   <div class="md-footer">
-    <span [class]="(editMode && isDirty ? 'active' : '') + ' md-warning'">
-    <div *ngIf="duplicateNames">* You have duplicate names on different iframes</div>
-    <div *ngIf="!duplicateNames">* You have unsaved changes</div>
-    </span>
+    <i class="al-icon al-ico-markdown" (click)="openMDCCheatSheet()" smTooltip="Markdown cheat sheet"></i>
+    <div [class]="(editMode && isDirty ? 'active' : '') + ' md-warning'">
+      <span *ngIf="duplicateNames">* You have duplicate names on different iframes</span>
+      <span *ngIf="!duplicateNames">* You have unsaved changes</span>
+    </div>
     <div *ngIf="editMode" class="right-buttons">
       <button class="btn btn-cml-primary btn-outline"
               (click)="cancelClicked()">CANCEL

@@ -7,8 +7,12 @@ import {
   setCurrentUserName
 } from '../actions/users.actions';
 import {GetCurrentUserResponseUserObject} from '~/business-logic/model/users/getCurrentUserResponseUserObject';
-import {GetCurrentUserResponseUserObjectCompany} from '~/business-logic/model/users/getCurrentUserResponseUserObjectCompany';
-import {OrganizationGetUserCompaniesResponseCompanies} from '~/business-logic/model/organization/organizationGetUserCompaniesResponseCompanies';
+import {
+  GetCurrentUserResponseUserObjectCompany
+} from '~/business-logic/model/users/getCurrentUserResponseUserObjectCompany';
+import {
+  OrganizationGetUserCompaniesResponseCompanies
+} from '~/business-logic/model/organization/organizationGetUserCompaniesResponseCompanies';
 
 export interface UsersState {
   currentUser: GetCurrentUserResponseUserObject;
@@ -34,13 +38,13 @@ export const initUsers: UsersState = {
 
 export const users = state => state.users as UsersState;
 
-export const selectCurrentUser = createSelector(users, state  => state.currentUser);
+export const selectCurrentUser = createSelector(users, state => state.currentUser);
 export const selectActiveWorkspace = createSelector(users, state => state.activeWorkspace);
 export const selectUserWorkspaces = createSelector(users, state => state.userWorkspaces);
 export const selectSelectedWorkspaceTab = createSelector(users, state => state.selectedWorkspaceTab);
 export const selectWorkspaces = createSelector(users, state => state.workspaces);
 export const selectShowOnlyUserWork = createSelector(users, state => state.showOnlyUserWork);
-export const selectServerVersions = createSelector(users, state  => state.serverVersions);
+export const selectServerVersions = createSelector(users, state => state.serverVersions);
 export const selectGettingStarted = createSelector(users, state => state.gettingStarted);
 
 export const usersReducerFunctions = [
@@ -54,6 +58,8 @@ export const usersReducerFunctions = [
     ...state,
     currentUser: null
   })),
-  on(setFilterByUser, (state, action) => ({...state, showOnlyUserWork: action.showOnlyUserWork})),
+  on(setFilterByUser, (state, action) => {
+    return ({...state, showOnlyUserWork: action.showOnlyUserWork});
+  }),
   on(setApiVersion, (state, action) => ({...state, serverVersions: action.serverVersions}))
 ] as ReducerTypes<UsersState, any>[];

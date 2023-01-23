@@ -66,7 +66,7 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
   private isForward: boolean = true;
   private charts: ExtFrame[];
   public index: number = null;
-  public embedFunction: () => null;
+  public embedFunction: (DOMRect) => null;
 
   @HostListener('document:keydown', ['$event'])
   onKeyDown(e: KeyboardEvent) {

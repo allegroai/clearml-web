@@ -135,6 +135,7 @@
   tr {
     display: flex;
     transition: height 0.5s linear;
+    width: 100%;
 
     &.header {
       height: 48px;

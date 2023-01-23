@@ -62,27 +62,31 @@ export const commonProjectsReducers = [
   on(setCurrentScrollId, (state, action) => ({...state, scrollId: action.scrollId})),
   on(setNoMoreProjects, (state, action) => ({...state, noMoreProjects: action.payload})),
   on(updateProjectSuccess, (state, action) => ({...state, projects: state.projects?.map(ex => ex.id === action.id ? {...ex, ...action.changes} : ex)})),
-  on(resetProjects, state => ({...state, scrollId: null, noMoreProjects: false, projects: commonProjectsInitState.projects})),
+  on(resetProjects, state => ({...state,
+    scrollId: null,
+    noMoreProjects: commonProjectsInitState.noMoreProjects,
+    projects: commonProjectsInitState.projects
+  })),
   on(setProjectsOrderBy, (state, action) => ({
     ...state,
     orderBy: action.orderBy,
     sortOrder: getCorrectSortingOrder(state.sortOrder, state.orderBy, action.orderBy),
     scrollId: null,
-    noMoreProjects: false,
+    noMoreProjects: commonProjectsInitState.noMoreProjects,
     projects: commonProjectsInitState.projects
   })),
   on(setProjectsSearchQuery, (state, action) => ({
     ...state,
     searchQuery: (action as ReturnType<typeof setProjectsSearchQuery>),
     scrollId: null,
-    noMoreProjects: true,
+    noMoreProjects: commonProjectsInitState.noMoreProjects,
     projects: commonProjectsInitState.projects
   })),
   on(resetProjectsSearchQuery, state => ({
     ...state,
     searchQuery: commonProjectsInitState.searchQuery,
     scrollId: null,
-    noMoreProjects: true,
+    noMoreProjects: commonProjectsInitState.noMoreProjects,
     projects: commonProjectsInitState.projects
   })),
   on(checkProjectForDeletion, (state, action) => ({

@@ -6,7 +6,7 @@ import {selectCompanyTags, selectProjectTags, selectTagsFilterByProject} from '@
 import {addTag, removeTag} from '../../actions/common-experiments-menu.actions';
 import {TagsMenuComponent} from '@common/shared/ui-components/tags/tags-menu/tags-menu.component';
 import {MenuComponent} from '@common/shared/ui-components/panel/menu/menu.component';
-import {activateEdit, deactivateEdit} from '../../actions/common-experiments-info.actions';
+import {activateEdit, deactivateEdit, setExperiment} from '../../actions/common-experiments-info.actions';
 import {EXPERIMENTS_STATUS_LABELS, ExperimentTagsEnum} from '~/features/experiments/shared/experiments.const';
 import {EXPERIMENT_COMMENT} from '../experiment-general-info/experiment-general-info.component';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -51,8 +51,8 @@ export class ExperimentInfoHeaderComponent implements OnDestroy {
   @Input() isSharedAndNotOwner: boolean;
   @Output() experimentNameChanged = new EventEmitter<string>();
   @Output() minimizeClicked = new EventEmitter();
-  @Output() closeInfoClicked       = new EventEmitter();
-  @Output() maximizedClicked       = new EventEmitter();
+  @Output() closeInfoClicked = new EventEmitter();
+  @Output() maximizedClicked = new EventEmitter();
   @ViewChild('tagMenu') tagMenu: MenuComponent;
   @ViewChild('tagsMenuContent') tagMenuContent: TagsMenuComponent;
 
@@ -65,6 +65,7 @@ export class ExperimentInfoHeaderComponent implements OnDestroy {
   ngOnDestroy(): void {
     this.tagMenu = null;
     this.tagMenuContent = null;
+    this.store.dispatch(setExperiment(null));
   }
 
   private _experiment: any;

@@ -1,4 +1,3 @@
-<!--[hideMenu]="false"-->
 <sm-reports-list
   [reports]="reports$ | async"
   [archive]="archive$ | async"
@@ -15,11 +14,6 @@
   (removeTag)="removeTag($event)"
   (moveToArchive)="moveToArchive($event)"
 >
-<!--  [sortByField]="reportsOrderBy$ | async"-->
-<!--  [sortOrder]="reportsSortOrder$ | async"-->
-<!--  [disableCreate]="!navigation"-->
-<!--  [activeSearch]="false"-->
-<!--  (orderByChanged)="orderByChanged($event)"-->
   <sm-reports-header
     [archive]="archive$ | async"
     [allTags]="reportsTags$ |async"

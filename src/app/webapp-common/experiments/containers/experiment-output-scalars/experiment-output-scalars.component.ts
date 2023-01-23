@@ -33,7 +33,7 @@ import {ExtFrame} from '@common/shared/single-graph/plotly-graph-base';
 import {ExperimentGraphsComponent} from '@common/shared/experiment-graphs/experiment-graphs.component';
 import {isEqual} from 'lodash/fp';
 import { EventsGetTaskSingleValueMetricsResponseValues } from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponseValues';
-import {ReportCodeEmbedService} from '@common/shared/services/report-code-embed.service';
+import { ReportCodeEmbedService } from '~/shared/services/report-code-embed.service';
 
 export const prepareScalarList = (metricsScalar: GroupedList): GroupedList =>
   Object.keys(metricsScalar || []).reduce((acc, curr) => {
@@ -155,6 +155,8 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
     this.subs.add(this.store.select(selectShowSettings)
       .subscribe((show) => this.showSettingsBar = show)
     );
+
+
   }
 
   ngOnInit() {
@@ -265,7 +267,7 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
     }, {});
   }
 
-  createEmbedCode(event: { metrics?: string[]; variants?: string[] }) {
+  createEmbedCode(event: { metrics?: string[]; variants?: string[]; domRect: DOMRect}) {
     this.reportEmbed.createCode({
       type: 'scalar',
       tasks: [this.experimentId],

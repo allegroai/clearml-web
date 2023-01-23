@@ -27,7 +27,7 @@ import {selectSelectedProject} from '@common/core/reducers/projects.reducer';
 export class ExperimentInfoArtifactsComponent implements OnDestroy {
   public backdropActive$: Observable<boolean>;
   public modelInfo$: Observable<IExperimentModelInfo>;
-  public ExperimentInfo$: Observable<IExperimentInfo>;
+  public experimentInfo$: Observable<IExperimentInfo>;
   public activeSection: any;
   public selectedId$: Observable<string>;
   private experimentKey$: Observable<string>;
@@ -43,9 +43,10 @@ export class ExperimentInfoArtifactsComponent implements OnDestroy {
     this.backdropActive$ = this.store.select(selectBackdropActive);
     this.editable$ = this.store.select(selectIsExperimentEditable);
     this.modelInfo$ = this.store.select(selectExperimentModelInfoData);
-    this.ExperimentInfo$ = this.store.select(selectExperimentInfoData);
+    this.experimentInfo$ = this.store.select(selectExperimentInfoData);
     this.routerConfig$ = this.store.select(selectRouterConfig);
-    this.selectedId$ = this.store.select(selectRouterParams).pipe(map(params => params?.artifactId || params?.modelId));
+    this.selectedId$ = this.store.select(selectRouterParams)
+      .pipe(map(params => decodeURIComponent(params?.artifactId || params?.modelId)));
     this.experimentKey$ = this.store.select(selectRouterParams).pipe(map(params => params?.experimentId));
 
     this.sub.add(this.store.select(selectRouterConfig)
@@ -74,7 +75,7 @@ export class ExperimentInfoArtifactsComponent implements OnDestroy {
         this.selectedId$,
         this.modelInfo$,
         this.experimentKey$,
-        this.ExperimentInfo$,
+        this.experimentInfo$,
         this.store.select(selectCurrentArtifactExperimentId)
       ])
       .pipe(
@@ -110,11 +111,11 @@ export class ExperimentInfoArtifactsComponent implements OnDestroy {
   private resetSelection(modelInfo): void {
     let target: string;
     if (modelInfo.input?.length > 0) {
-      target = `../artifacts/input-model/${modelInfo.input[0]?.id}`;
+      target = `../artifacts/input-model/${encodeURIComponent(modelInfo.input[0]?.id)}`;
     } else if (modelInfo.output?.length > 0) {
-      target = `../artifacts/output-model/${modelInfo.output[0]?.id}/`;
+      target = `../artifacts/output-model/${encodeURIComponent(modelInfo.output[0]?.id)}/`;
     } else if (modelInfo.artifacts.length > 0) {
-      target = `../artifacts/other/${modelInfo.artifacts[0]?.key}/${modelInfo.artifacts[0]?.mode}`;
+      target = `../artifacts/other/${encodeURIComponent(modelInfo.artifacts[0]?.key)}/${encodeURIComponent(modelInfo.artifacts[0]?.mode)}`;
     } else {
       // no items
       target = '../artifacts/input-model/input-model';

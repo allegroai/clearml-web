@@ -25,7 +25,7 @@
     </sm-menu>
     <div class="g-btns">
       <button class="btn btn-icon" smTooltip="Copy report markdown to clipboard" (click)="copyMarkdown()">
-        <i class="al-icon al-ico-md-copy sm-md"></i>
+        <i class="al-icon al-ico-copy-to-clipboard sm-md"></i>
       </button>
       <button class="btn btn-icon" ngxPrint printSectionId="print-element" [printDelay]="3000" [useExistingCss]="true" [printStyle]="printStyle" smTooltip="Export to PDF">
         <i class="al-icon al-ico-pdf sm-md"></i>
@@ -47,8 +47,10 @@
   </div>
 </div>
 <div *ngIf="report" class="content report">
-  <div class="hover-button" *ngIf="(smallScreen$ | async)">
-    <button class="btn btn-cml-primary" (click)="drawer.toggle()">
+  <div class="hover-button" *ngIf="!editor.editMode">
+    <button class="btn btn-cml-primary" (click)="showDescription = !showDescription">
+      <i class="al-icon al-ico-caret-right" [class.open]="drawer.opened"></i>
+      Description
       <i class="al-icon al-ico-caret-right" [class.open]="drawer.opened"></i>
     </button>
   </div>
@@ -56,11 +58,12 @@
     <mat-drawer
       #drawer
       [mode]="(smallScreen$ | async) ? 'over' : 'side'"
-      [opened]="!editor.editMode && (smallScreen$ | async) !== true"
+      [opened]="!editor.editMode && showDescription"
+      (closed)="showDescription = false"
     >
       <div class="description">
         <button
-          *ngIf="!example && report && draft && !editDesc"
+          *ngIf="!example && report && !editDesc"
           class="btn btn-cml-primary edit-button"
           (click)="editReportDesc(descElement)"
         >EDIT
@@ -69,10 +72,11 @@
           placeholder="Report description"
           #descElement
           [disabled]="!editDesc"
+          (keyup)="cdr.detectChanges()"
         >{{report?.comment || ''}}</textarea>
         <div *ngIf="editDesc" class="buttons">
           <button class="btn btn-outline-dark" (click)="descElement.value = orgDesc; editDesc = false">CANCEL</button>
-          <button class="btn btn-cml-primary" (click)="saveDesc(descElement.value)">SAVE</button>
+          <button [disabled]="orgDesc === descElement.value" class="btn btn-cml-primary" (click)="saveDesc(descElement.value)">SAVE</button>
         </div>
       </div>
     </mat-drawer>
@@ -86,7 +90,7 @@
         (saveInfo)="save($event)"
         (editModeChanged)="editModeChanged();"
       >
-        <div no-data class="flex-middle placeholder" *ngIf="!example && report && draft">
+        <div no-data class="flex-middle empty-state" *ngIf="!example && report && draft">
           <i class="al-icon al-ico-reports xxl"></i>
           <div class="no-data-title">THERE'S NOTHING HERE YET…</div>
           <button (click)="editor.editClicked()" class="no-data-button btn btn-neon">

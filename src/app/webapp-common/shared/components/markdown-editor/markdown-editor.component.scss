@@ -85,13 +85,20 @@
   margin: 12px 0;
 }
 .md-editor-preview.editor .md-footer {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 24px;
 }
-
-
+.al-ico-markdown {
+  cursor: pointer;
+  color: $blue-300;
+  transition: color 0.35s;
+  &:hover {
+    color: $blue-100;
+  }
+}
 .right-buttons {
-  margin-left: auto;
-
   button {
     line-height: normal;
   }
@@ -230,12 +237,19 @@
       height: unset !important;
       background-color: transparent !important;
 
-      code.hljs {
-        background-color: $blue-700;
+      code {
+        padding: 1px 4px;
         font-size: 12px;
         line-height: 18px;
-        padding: 16px;
         border-radius: 4px;
+        color: $blue-100;
+        background-color: $blue-600;
+        border: 1px solid $blue-500;  
+      }
+
+      code.hljs {
+        padding: 16px;
+        background-color: $blue-700;
       }
 
       pre {
@@ -259,6 +273,7 @@
     // Highlighting Editor
     .ace-editor.ace_editor.ace-tm {
       background-color: transparent;
+      line-height: 20px;
 
       .ace_marker-layer {
         .ace_selection {

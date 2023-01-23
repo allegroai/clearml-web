@@ -40,8 +40,8 @@ import {getSignedUrl} from '../core/actions/common-auth.actions';
 import {addMessage} from '../core/actions/layout.actions';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {selectBeginningOfTime} from '@common/shared/debug-sample/debug-sample.reducer';
-import {ReportCodeEmbedService} from '@common/shared/services/report-code-embed.service';
 import {LIMITED_VIEW_LIMIT} from '@common/experiments-compare/experiments-compare.constants';
+import { ReportCodeEmbedService } from '~/shared/services/report-code-embed.service';
 
 export interface Event {
   timestamp: number;
@@ -412,7 +412,7 @@ export class DebugImagesComponent implements OnInit, OnDestroy, OnChanges {
     this.bindNavigationMode = !this.bindNavigationMode;
   }
 
-  createEmbedCode(event: { metrics?: string[]; variants?: string[] }, experimentId: string) {
+  createEmbedCode(event: { metrics?: string[]; variants?: string[]; domRect: DOMRect }, experimentId: string) {
     this.reportEmbed.createCode({
       type: 'sample',
       tasks: [experimentId],

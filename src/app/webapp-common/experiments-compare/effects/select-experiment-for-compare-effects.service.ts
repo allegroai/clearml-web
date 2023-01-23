@@ -15,7 +15,7 @@ import {
 import {select, Store} from '@ngrx/store';
 import {flatten, get, isEmpty} from 'lodash/fp';
 import {selectExperimentsUpdateTime} from '../reducers';
-import {selectRouterParams} from '../../core/reducers/router-reducer';
+import {selectRouterConfig, selectRouterParams} from '../../core/reducers/router-reducer';
 import {selectAppVisible} from '../../core/reducers/view.reducer';
 import {MINIMUM_ONLY_FIELDS} from '../../experiments/experiment.consts';
 import * as exSelectors from '../../experiments/reducers';

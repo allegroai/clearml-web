@@ -80,7 +80,7 @@
       [isDarkTheme]="darkTheme"
       [graphsNumber]="9999"
       [exportForReport]="!!embedFunction"
-      (createEmbedCode)="embedFunction()"
+      (createEmbedCode)="embedFunction($event)"
     >
     </sm-single-graph>
     <div *ngIf="!isFullDetailsMode && !isCompare && !darkTheme" class="navigation">

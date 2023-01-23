@@ -35,7 +35,7 @@ import {ExtFrame} from '@common/shared/single-graph/plotly-graph-base';
 import {MetricsPlotEvent} from '~/business-logic/model/events/metricsPlotEvent';
 import {addMessage} from '@common/core/actions/layout.actions';
 import {ExperimentGraphsComponent} from '@common/shared/experiment-graphs/experiment-graphs.component';
-import {ReportCodeEmbedService} from '@common/shared/services/report-code-embed.service';
+import { ReportCodeEmbedService } from '~/shared/services/report-code-embed.service';
 
 @Component({
   selector: 'sm-experiment-output-plots',
@@ -49,9 +49,6 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChan
 
   public plotsList: Array<SelectableListItem>;
   public selectedGraph: string = null;
-  private plotsSubscription: Subscription;
-  private settingsSubscription: Subscription;
-  private routerParamsSubscription: Subscription;
   private experimentId: string;
   private routerParams$: Observable<any>;
   public listOfHidden: Observable<Array<any>>;
@@ -61,9 +58,10 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChan
   public graphs: { [key: string]: ExtFrame[] };
   public refreshDisabled: boolean;
   public selectIsExperimentPendingRunning: Observable<boolean>;
-  private selectedExperimentSubscription: Subscription;
   public splitSize$: Observable<number>;
   public dark: boolean;
+  private subs = new Subscription();
+  private experimentCompany: string | undefined;
 
 
   constructor(
@@ -73,8 +71,9 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChan
     private changeDetection: ChangeDetectorRef,
     private reportEmbed: ReportCodeEmbedService
   ) {
-    this.searchTerm$ = this.store.pipe(select(selectExperimentMetricsSearchTerm));
-    this.splitSize$ = this.store.pipe(select(selectSplitSize));
+    this.searchTerm$ = this.store.select(selectExperimentMetricsSearchTerm);
+    this.splitSize$ = this.store.select(selectSplitSize);
+    this.subs.add(this.store.select(selectSelectedExperiment).subscribe(exp => this.experimentCompany = exp?.company?.id ?? null));
 
     this.experimentSettings$ = this.store.pipe(
       select(selectSelectedExperimentSettings),
@@ -105,7 +104,7 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChan
   ngOnInit() {
     this.minimized = this.activeRoute.snapshot.routeConfig.data?.minimized;
     this.listOfHidden = this.store.select(selectSelectedSettingsHiddenPlot);
-    this.plotsSubscription = this.store.select(selectExperimentInfoPlots)
+    this.subs.add(this.store.select(selectExperimentInfoPlots)
       .pipe(
         distinctUntilChanged(),
         filter(metrics => !!metrics),
@@ -119,15 +118,15 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChan
         this.graphs = graphs;
         parsingError && this.store.dispatch(addMessage('warn', `Couldn't read all plots. Please make sure all plots are properly formatted (NaN & Inf aren't supported).`, [], true));
         this.changeDetection.detectChanges();
-      });
+      }));
 
-    this.settingsSubscription = this.experimentSettings$
+    this.subs.add(this.experimentSettings$
       .subscribe((selectedPlot) => {
         this.selectedGraph = selectedPlot;
         this.graphsComponent?.scrollToGraph(selectedPlot);
-      });
+      }));
 
-    this.routerParamsSubscription = this.routerParams$
+    this.subs.add(this.routerParams$
       .subscribe(params => {
         if (!this.experimentId || this.experimentId !== params.experimentId) {
           this.graphs = undefined;
@@ -136,9 +135,9 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChan
           this.store.dispatch(setExperimentMetricsSearchTerm({searchTerm: ''}));
         }
         this.experimentId = params.experimentId;
-      });
+      }));
 
-    this.selectedExperimentSubscription = this.store.select(selectSelectedExperiment)
+    this.subs.add(this.store.select(selectSelectedExperiment)
       .pipe(
         filter(experiment => !!experiment && !this.isDatasetVersionPreview),
         distinctUntilChanged()
@@ -146,16 +145,13 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChan
       .subscribe(experiment => {
         this.experimentId = experiment.id;
         this.refresh();
-      });
+      }));
 
   }
 
   ngOnDestroy() {
     this.resetMetrics();
-    this.plotsSubscription.unsubscribe();
-    this.settingsSubscription.unsubscribe();
-    this.routerParamsSubscription.unsubscribe();
-    this.selectedExperimentSubscription.unsubscribe();
+    this.subs.unsubscribe();
     this.resetMetrics();
   }
 
@@ -188,7 +184,7 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChan
     this.store.dispatch(resetExperimentMetrics());
   }
 
-  createEmbedCode(event: { metrics?: string[]; variants?: string[] }) {
+  createEmbedCode(event: { metrics?: string[]; variants?: string[]; domRect: DOMRect }) {
     this.reportEmbed.createCode({
       type: 'plot',
       tasks: [this.experimentId],

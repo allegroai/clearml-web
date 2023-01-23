@@ -17,7 +17,7 @@
 </mat-expansion-panel>
 <mat-expansion-panel expanded="true" *ngIf="((hyperParams | keyvalue)|filterOut:'key':'properties')?.length>0">
   <mat-expansion-panel-header collapsedHeight="40px" expandedHeight="40px" class="active">
-    HYPER PARAMETERS
+    HYPERPARAMETERS
   </mat-expansion-panel-header>
   <div
     *ngFor="let hyperParameter of (hyperParams | keyvalue)|filterOut:'key':'properties' | sort:'key'; trackBy: trackByFn"

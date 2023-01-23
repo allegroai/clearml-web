@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {Action, Store} from '@ngrx/store';
 import {ActivatedRoute, Router} from '@angular/router';
-import {catchError, filter, map, mergeMap, switchMap, withLatestFrom} from 'rxjs/operators';
+import {catchError, filter, map, mergeMap, switchMap, tap, withLatestFrom} from 'rxjs/operators';
 import {activeLoader, addMessage, deactivateLoader, setServerError} from '../core/actions/layout.actions';
 import {requestFailed} from '../core/actions/http.actions';
 import {
@@ -161,6 +161,11 @@ export class ReportsEffects {
       filter(ready => ready),
       map(() => action))),
     switchMap(action => this.reportsApiService.reportsGetAllEx({id: [action.id]})),
+    tap(res=> {
+      if(res.tasks.length===0){
+        this.router.navigateByUrl('/404');
+      }
+    }),
     mergeMap((res: ReportsGetAllExResponse) => [
       setReport({report: res.tasks[0] as IReport}),
       deactivateLoader(getReport.type),
@@ -220,6 +225,7 @@ export class ReportsEffects {
             }
           }),
           deactivateLoader(moveReport.type),
+          addMessage(MESSAGES_SEVERITY.SUCCESS, `Report moved successfully to ${moveRequest.project_name}`)
         ]),
         catchError(err => [
           deactivateLoader(moveReport.type),
@@ -261,6 +267,7 @@ export class ReportsEffects {
           ];
           return [
             deactivateLoader(action.type),
+            getReports(),
             ...(!action.skipUndo ?
               [addMessage(MESSAGES_SEVERITY.SUCCESS, 'Report archived successfully', [null, ...undoActions
               ].filter(a => a))] : []),
@@ -296,6 +303,7 @@ export class ReportsEffects {
           ];
           const actions: Action[] = [
             deactivateLoader(action.type),
+            getReports(),
             ...(!action.skipUndo ?
               [(addMessage(MESSAGES_SEVERITY.SUCCESS, 'Report restored successfully', [null, ...undoActions].filter(a => a)))] : []),
             setReportChanges({
@@ -322,10 +330,11 @@ export class ReportsEffects {
       {
         data: {
           title: 'DELETE',
-          body: 'Permanently Delete Report',
+          body: '<p class="text-center">Permanently Delete Report</p>',
           yes: 'Delete',
           no: 'Cancel',
           iconClass: 'al-ico-trash',
+          width: 430
         }
       }).afterClosed().pipe(
       filter(confirm => !!confirm),
@@ -334,6 +343,7 @@ export class ReportsEffects {
         this.router.navigate(['reports'], {queryParamsHandling: 'merge'});
         return [
           removeReport({id: action.report.id}),
+          getReports(),
           deactivateLoader(action.type),
           addMessage(MESSAGES_SEVERITY.SUCCESS, 'Report deleted successfully')
         ];

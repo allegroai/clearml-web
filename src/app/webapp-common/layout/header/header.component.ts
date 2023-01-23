@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {selectActiveWorkspace, selectCurrentUser} from '../../core/reducers/users-reducer';
+import {selectActiveWorkspace, selectCurrentUser, selectShowOnlyUserWork} from '../../core/reducers/users-reducer';
 import {Observable, Subscription} from 'rxjs';
 import {logout} from '../../core/actions/users.actions';
 import {addMessage, openAppsAwarenessDialog} from '../../core/actions/layout.actions';
@@ -16,7 +16,6 @@ import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import {LoginService} from '~/shared/services/login.service';
 import {selectUserSettingsNotificationPath} from '~/core/reducers/view.reducer';
 import {selectInvitesPending} from '~/core/reducers/users.reducer';
-import {selectShowUserFocus} from '@common/core/reducers/view.reducer';
 import {MESSAGES_SEVERITY} from '@common/constants';
 
 @Component({
@@ -37,7 +36,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
   public url: Observable<string>;
   public invitesPending$: Observable<any[]>;
   public userNotificationPath: string;
-  public showUserFocus$: Observable<boolean>;
   private sub = new Subscription();
 
   constructor(
@@ -53,7 +51,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.user = this.store.select(selectCurrentUser);
     this.sub.add(this.store.select(selectUserSettingsNotificationPath).subscribe(path => this.userNotificationPath = path));
     this.invitesPending$ = this.store.select(selectInvitesPending);
-    this.showUserFocus$ = this.store.select(selectShowUserFocus);
     this.sub.add(this.store.select(selectActiveWorkspace)
       .pipe(
         filter(workspace => !!workspace),

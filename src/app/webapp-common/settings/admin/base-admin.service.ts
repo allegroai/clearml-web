@@ -142,7 +142,7 @@ export class BaseAdminService {
       },
       ...(set.Endpoint && {
         endpoint: {
-          protocol: set.Endpoint?.startsWith('https') ? 'https' : 'http',
+          protocol: set.Endpoint?.startsWith('https') ? 'https:' : 'http:',
           hostname,
           ...(!['80', '443'].includes(port) && {port}),
           path: '',

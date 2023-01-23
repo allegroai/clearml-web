@@ -50,6 +50,9 @@ import {ScrollingModule} from '@angular/cdk/scrolling';
 import {MainPagesHeaderFilterComponent} from './components/main-pages-header-filter/main-pages-header-filter.component';
 import {MarkdownEditorComponent} from '@common/shared/components/markdown-editor/markdown-editor.component';
 import {LMarkdownEditorModule} from 'ngx-markdown-editor';
+import {
+  MarkdownCheatSheetDialogComponent
+} from './components/markdown-editor/markdown-cheat-sheet-dialog/markdown-cheat-sheet-dialog.component';
 
 const _declarations = [
   ExperimentInfoHeaderStatusProgressBarComponent,
@@ -103,11 +106,12 @@ const _declarations = [
     ClearFiltersButtonComponent,
     BaseEntityHeaderComponent,
     IdBadgeComponent,
+    MarkdownCheatSheetDialogComponent,
   ],
   exports: [..._declarations, UiComponentsModule, TableModule, ClipboardModule, SharedPipesModule, MatSnackBarModule,
     ScatterPlotComponent, ClearFiltersButtonComponent, IdBadgeComponent
   ],
-  providers   : [LeavingBeforeSaveAlertGuard, GeneralLeavingBeforeSaveAlertGuard]
+  providers: [LeavingBeforeSaveAlertGuard, GeneralLeavingBeforeSaveAlertGuard]
 })
 export class SMSharedModule {
 }

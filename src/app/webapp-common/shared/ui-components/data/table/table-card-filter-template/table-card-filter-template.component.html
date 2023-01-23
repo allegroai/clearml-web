@@ -42,7 +42,7 @@
               *ngFor="let option of subOptions; trackBy: trackByLabel"
               [itemLabel]="option.label"
               [checked]="subValue?.includes(option.value)" [selectable]="true" [itemValue]="option.value"
-              (itemClicked)="onSubFilterChanged({id:'system_tags'},$event)"
+              (itemClicked)="onSubFilterChanged({id :'system_tags'}, $event)"
             ></sm-menu-item>
           </div>
         </mat-menu>

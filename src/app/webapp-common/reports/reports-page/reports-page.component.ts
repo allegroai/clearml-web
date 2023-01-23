@@ -112,7 +112,7 @@ export class ReportsPageComponent implements OnInit, OnDestroy {
 
 
   reportSelected(report: Report) {
-    this.router.navigate([(report.project as any).id, report.id], {relativeTo: this.route});
+    this.router.navigate([(report.project as any)?.id ?? '*', report.id], {relativeTo: this.route});
 
   }
 
@@ -131,8 +131,7 @@ export class ReportsPageComponent implements OnInit, OnDestroy {
   share(report: IReport) {
     this._clipboardService.copyResponse$
       .pipe(take(1))
-      .subscribe(() => this.store.dispatch(addMessage(MESSAGES_SEVERITY.SUCCESS,
-        'Resource embed code copied to clipboard.You can paste in your Reports.'))
+      .subscribe(() => this.store.dispatch(addMessage(MESSAGES_SEVERITY.SUCCESS, 'Report link copied to clipboard'))
       );
     this._clipboardService.copy(`${window.location.href}/${report.project.id}/${report.id}`);
   }

@@ -36,7 +36,7 @@ export class S3AccessResolverComponent {
     this.isAzure        = data.isAzure;
     if (data.credentialsError) {
       this.header = this.header = `${data.credentialsError}, please check credentials for bucket <b>${this.bucket}</b>.`;
-    } else {
+    }  else {
       this.header = `Please provide credentials for bucket <b>${this.bucket}</b>.`;
     }
   }

@@ -1,12 +1,12 @@
 <div class="header-container" [class.login]="isLogin">
   <sm-breadcrumbs
     class="spacer"
-    [class.flex-grow-1]="!(userFocus || (showUserFocus$ | async))"
-    [class.user-focus]="userFocus || (showUserFocus$ | async)"
+    [class.flex-grow-1]="!(userFocus)"
+    [class.user-focus]="userFocus "
     [class.share-view]="isShareMode"
     [activeWorkspace]="activeWorkspace">
   </sm-breadcrumbs>
-  <div class="ml-3 d-flex align-items-center mr-auto" *ngIf="userFocus || (showUserFocus$ | async)">
+  <div class="ml-3 d-flex align-items-center mr-auto" *ngIf="userFocus">
     <sm-show-only-user-work></sm-show-only-user-work>
   </div>
 
@@ -39,7 +39,7 @@
     <mat-menu #profileMenu="matMenu" class="user-menu">
       <button mat-menu-item [routerLink]="'settings/' + userNotificationPath">
         <span class="al-icon icon sm-md" [class]="userNotificationPath ? 'al-ico-settings-alert' : 'al-ico-settings'">
-          <span class="path1"></span><span class="path2"></span>
+          <span class="path1" data-id="Settings Button"></span><span class="path2"></span>
         </span>
         Settings
       </button>

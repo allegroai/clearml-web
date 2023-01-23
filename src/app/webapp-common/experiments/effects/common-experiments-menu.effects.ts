@@ -114,7 +114,7 @@ export class CommonExperimentsMenuEffects {
               if (res.queue_watched === false && !neverShowAgainPopups.includes('orphanedQueue')) {
                 this.dialog.open(WelcomeMessageComponent, {
                   data: {
-                    queue: res.queue,
+                    queue: action.queue,
                     step: 2
                   }
                 }).afterClosed().subscribe(doNotShowAgain => {

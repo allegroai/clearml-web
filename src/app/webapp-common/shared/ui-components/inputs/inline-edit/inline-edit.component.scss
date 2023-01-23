@@ -39,7 +39,7 @@ $inline-edit-base-width: 93%;
 :host {
   ::ng-deep .ui-inplace .ui-inplace-display {
     background-color: transparent;
-    padding: 0px;
+    padding: 0;
   }
 
   .inline-edit-close, .inline-edit-approve {
@@ -53,8 +53,9 @@ $inline-edit-base-width: 93%;
   }
 
   .inline-edit-approve.disabled {
-      opacity: 0.25;
-      cursor: not-allowed !important;
+    opacity: 0.25;
+    cursor: not-allowed !important;
+    pointer-events: none;
   }
 
   .inline-edit-form {
@@ -100,12 +101,6 @@ $inline-edit-base-width: 93%;
         align-items: center;
       }
     }
-  }
-
-  .editable-pen {
-    position: absolute;
-    right: 0;
-    top: calc(50% - 10px);
   }
 }
 

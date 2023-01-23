@@ -9,6 +9,7 @@ export const getPlot = createAction('[App] getPlot', props<{
   metrics: string[];
   variants: string[];
   company: string;
+  otherSearchParams?: URLSearchParams;
 }>());
 
 export const getScalar = createAction('[App] getScalar', props<{
@@ -17,6 +18,7 @@ export const getScalar = createAction('[App] getScalar', props<{
   metrics: string[];
   variants: string[];
   company: string;
+  otherSearchParams?: URLSearchParams;
 }>());
 export const getSample = createAction('[App] getSample', props<{
   tasks: string[];
@@ -24,6 +26,7 @@ export const getSample = createAction('[App] getSample', props<{
   metrics: string[];
   variants: string[];
   company: string;
+  otherSearchParams?: URLSearchParams;
 }>());
 
 export const setPlotData = createAction('[App] setPlot', props<{ data: ReportsApiMultiplotsResponse }>());
@@ -32,3 +35,4 @@ export const setSampleData = createAction('[App] setSample', props<{ data: Debug
 
 export const reportsPlotlyReady = createAction('[App] plotly ready');
 export const setSignIsNeeded = createAction('[App] set sign is needed');
+export const setNoPermissions = createAction('[App] set no permissions');
