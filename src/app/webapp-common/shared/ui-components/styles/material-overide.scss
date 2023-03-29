@@ -61,7 +61,7 @@ body mat-form-field.mat-form-field-appearance-outline {
 
     .mat-form-field-label-wrapper {
       .mat-form-field-label {
-        top: 42px;
+        top: 40px;
         margin-left: -160px;
         width: 156px;
         white-space: normal;
@@ -133,7 +133,7 @@ body mat-form-field.mat-form-field-appearance-outline {
   }
 
   &.mat-form-field-has-label .mat-form-field-flex {
-    margin-top: 0em;
+    margin-top: 0;
   }
 
   .mat-form-field-infix {
@@ -505,19 +505,6 @@ body .mat-autocomplete-panel.annotator-autocomplete {
 
   &:hover {
     background-color: $blue-250 !important;
-  }
-}
-
-
-// date picker
-.mat-datepicker-container {
-  .mat-icon-button {
-    height: 20px;
-    width: 20px;
-  }
-
-  .mat-datepicker-toggle {
-    color: $blue-300;
   }
 }
 

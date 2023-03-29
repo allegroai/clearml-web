@@ -2,7 +2,7 @@ import {ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, Output, Si
 import {URI_REGEX} from '~/app.constants';
 import {Project} from '~/business-logic/model/projects/project';
 import {NgForm} from '@angular/forms';
-import {MatAutocompleteSelectedEvent} from '@angular/material/autocomplete';
+import {MatLegacyAutocompleteSelectedEvent as MatAutocompleteSelectedEvent} from '@angular/material/legacy-autocomplete';
 
 
 @Component({

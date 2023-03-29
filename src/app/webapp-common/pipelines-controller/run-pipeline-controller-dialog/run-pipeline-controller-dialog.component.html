@@ -29,7 +29,7 @@
       <div style="width: 180px">Advanced configuration</div>
       <sm-checkbox-control class="mat-form-field" [formData]="chooseCustomQueue" (formDataChanged)="changeChooseCustomQueue()"></sm-checkbox-control>
     </div>
-    <div class="param-line" [style.display]="chooseCustomQueue?'' :'none'">
+    <div class="param-line" [style.visibility]="chooseCustomQueue?'visible' :'hidden'">
       <div class="param-key">Pipeline controller queue</div>
       <mat-form-field appearance="outline" class="queue-select">
         <mat-select [(ngModel)]="selectedQueue" name="queue" panelClass="light-theme">

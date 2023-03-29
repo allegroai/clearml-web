@@ -22,7 +22,7 @@ $type-colors: (
 
   .segment {
     padding: 2px;
-    margin: 1px 1px 1px 8px;
+    margin: 2px 0 2px 14px;
 
     .segment-main {
       word-wrap: break-word;
@@ -56,7 +56,25 @@ $type-colors: (
     }
 
     .children {
-      margin-left: 12px;
+      margin-top: 2px;
+    }
+  }
+
+
+  .found {
+    &::selection {
+      background-color: $white;
+      color: darken($neon-yellow, 20%);
+    }
+    background-color: lighten($neon-yellow, 20%);
+    border-radius: 4px;
+    padding: 0 2px;
+    &.current {
+      background-color: lighten($orangada, 10%);
+      &::selection {
+        background-color: $white;
+        color: darken($orangada, 10%);
+      }
     }
   }
 

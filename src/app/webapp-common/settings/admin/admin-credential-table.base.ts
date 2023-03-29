@@ -1,8 +1,8 @@
 import {EventEmitter, Input, Output, Directive} from '@angular/core';
-import {MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
 import {ConfirmDialogComponent} from '../../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {ICONS} from '../../constants';
-import {CredentialKey} from '../../../business-logic/model/auth/credentialKey';
+import {CredentialKey} from '~/business-logic/model/auth/credentialKey';
 import {EditCredentialLabelDialogComponent} from '@common/shared/ui-components/overlay/edit-credential-label-dialog/edit-credential-label-dialog.component';
 import {CredentialKeyExt} from '@common/core/reducers/common-auth-reducer';
 
@@ -10,8 +10,8 @@ import {CredentialKeyExt} from '@common/core/reducers/common-auth-reducer';
 export class AdminCredentialTableBaseDirective {
   @Input() credentials: CredentialKey[];
   @Output() credentialRevoked = new EventEmitter();
-  @Output() updateCredentialLabel = new EventEmitter<{ credential: CredentialKeyExt, label: string }>();
-  public ICONS = ICONS;
+  @Output() updateCredentialLabel = new EventEmitter<{ credential: CredentialKeyExt; label: string }>();
+  public icons = ICONS;
   public dialog: MatDialog;
 
   constructor(dialog: MatDialog) {
@@ -46,6 +46,7 @@ export class AdminCredentialTableBaseDirective {
         no: 'CANCEL',
         iconClass: 'al-icon al-ico-access-key',
         width: '200px',
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'max-width': '200px'
       }
     }).afterClosed().subscribe((label) => {

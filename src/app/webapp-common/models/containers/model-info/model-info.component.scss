@@ -7,8 +7,7 @@
   }
 
   .model-info-container {
-    height: calc(100% - 56px);
-    padding-left: 10px;
+    height: calc(100% - 32px);
 
     nav {
       border-bottom: 1px solid rgba(2, 2, 2, 0.07);
@@ -20,9 +19,7 @@
   }
 
   .model-info-body {
-    height: calc(100% - #{$experiment-info-header-height + 46px});
-    overflow: auto;
-    padding-right: 24px;
+    height: calc(100% - 110px);
   }
 
   ::ng-deep nav {

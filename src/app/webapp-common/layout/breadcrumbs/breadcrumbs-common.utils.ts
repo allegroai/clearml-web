@@ -4,7 +4,8 @@ import {Project} from '~/business-logic/model/projects/project';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 import {TableModel} from '@common/models/shared/models.model';
 import {Task} from '~/business-logic/model/tasks/task';
-import { Report } from '~/business-logic/model/reports/report';
+import {Report} from '~/business-logic/model/reports/report';
+import {NestedProjectTypeUrlEnum} from '~/layout/breadcrumbs/breadcrumbs.utils';
 
 export interface IBreadcrumbs {
   project: Project;
@@ -26,13 +27,14 @@ const addSuffixForExamples = crumb => {
   }
 };
 
+
 export const prepareLinkData = (crumb, supportsExamples = false): IBreadcrumbsLink => {
   const crumbName = crumb ? crumb.name : '';
   const preparedName = (supportsExamples === true) ? addSuffixForExamples(crumb) : crumbName;
   return crumb ? {name: preparedName, url: crumb.id} : {name: '', url: ''};
 };
 
-export const formatStaticCrumb = (crumb: string): IBreadcrumbsLink | IBreadcrumbsLink[] => {
+export const formatStaticCrumb = (crumb: string, nested?: boolean, routeConfig?: Array<string>): IBreadcrumbsLink | IBreadcrumbsLink[] => {
   if (!crumb) {
     return {url: null, name: null};
   }
@@ -58,9 +60,15 @@ export const formatStaticCrumb = (crumb: string): IBreadcrumbsLink | IBreadcrumb
       name = 'All Experiments';
       break;
     case 'experiments':
-      return {name: 'All Experiment', url: null};
+      return {name: 'All Experiments', url: null};
     case 'models':
       return {name: 'All Models', url: null};
+    case 'pipelines':
+      return {name: 'Pipelines', url: nested ? 'pipelines/*/projects' : 'pipelines'};
+    case 'datasets':
+      return {name: 'Datasets', url: nested ? 'datasets/simple/*/projects' : 'datasets'};
+    case 'reports':
+      return {name: 'Reports', url: nested ? 'reports/*/projects' : 'reports'};
     default:
       name = crumb.charAt(0).toUpperCase() + crumb.slice(1);
       break;
@@ -68,11 +76,16 @@ export const formatStaticCrumb = (crumb: string): IBreadcrumbsLink | IBreadcrumb
   return {url: crumb, name};
 };
 
-export const prepareNames = (data: IBreadcrumbs, customProject?: boolean, fullScreen = false) => {
+export const prepareNames = (data: IBreadcrumbs, projectType?: NestedProjectTypeUrlEnum, fullScreen = false,
+                             showHidden = false, compare = false) => {
+  if(!data.project && data.report){
+    data.project = data.report.project as Project;
+  }
+  const customProject = projectType !== 'projects';
   const project = prepareLinkData(data.project, true);
   if (data.project) {
     let subProjectsNames = [data.project?.name];
-      subProjectsNames = data.project?.name?.split('/').filter(name=> !['.datasets', '.pipelines'].includes(name));
+    subProjectsNames = data.project?.name?.split('/').filter(name => !['.datasets', '.pipelines', '.reports'].includes(name));
     const allProjects = [
       ...(data.projects || []),
       {id: '*', name: 'All Experiments'},
@@ -81,17 +94,16 @@ export const prepareNames = (data: IBreadcrumbs, customProject?: boolean, fullSc
     let currentName = '';
     const subProjects = subProjectsNames.map(name => {
       currentName += currentName ? ('/' + name) : name;
-      return allProjects.find(proj => currentName === proj.name.replace('/.datasets', '').replace('/.pipelines', ''));
+      return allProjects.find(proj => currentName === proj.name.replace(/\/\.datasets|\/\.pipelines|\/\.reports/, ''));
     }) || [];
     const subProjectsLinks = subProjects.map((subProject, index, arr) => ({
       name: subProjectsNames[index],
-      url: customProject ? (( index===subProjects.length-1)  ?
-        (data.project?.system_tags?.includes('pipeline') ?
-          `pipelines/${subProject?.id}/experiments` : `datasets/simple/${subProject?.id}`): null)
-        :
+      hidden: showHidden && subProject?.hidden,
+      url: customProject ? ((subProject?.id) ?
+          `${projectType}/${subProject?.id}/projects` : null) :
         fullScreen && index === (arr.length - 1) ? `projects/${subProject?.id}/experiments/${data?.experiment?.id}` :
           subProject?.name === data.project?.name && data.project?.sub_projects?.length === 0 ?
-            `projects/${subProject?.id}` :
+            compare ? `projects/${subProject?.id}` : '' :
             `projects/${subProject?.id}/projects`
     })) as { name: string; url: string }[];
     project.name = project?.name.substring(project.name.lastIndexOf('/') + 1);
@@ -99,24 +111,21 @@ export const prepareNames = (data: IBreadcrumbs, customProject?: boolean, fullSc
   }
   const task = prepareLinkData(data.task);
   const experiment = (data.experiment && !customProject) ? prepareLinkData(data.experiment, true) : {};
-  const report = prepareLinkData(data.report);
   const output = formatStaticCrumb('');
   const experiments = formatStaticCrumb('experiments');
   const models = formatStaticCrumb('models');
-  const compare = customProject ?
+  const compareExperiment = customProject ?
     data.project?.system_tags?.includes('pipeline') ?
       {url: 'compare-experiments', name: 'Compare Runs'} :
       {url: 'compare-experiments', name: 'Compare Versions'}
     : formatStaticCrumb('compare-experiments');
   const accountAdministration = formatStaticCrumb('account-administration');
-
   return {
     /* eslint-disable @typescript-eslint/naming-convention */
     ':projectId': project,
     ':taskId': task,
     ':controllerId': experiment,
-    'compare-experiments': compare,
-    ':reportId': report,
+    'compare-experiments': compareExperiment,
     output,
     experiments,
     models,

@@ -1,8 +1,8 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {MatDialog} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {select, Store} from '@ngrx/store';
-import {get, isEqual} from 'lodash/fp';
+import {isEqual} from 'lodash-es';
 import {combineLatest, Observable} from 'rxjs';
 import {debounceTime, distinctUntilChanged, filter, map, skip, withLatestFrom} from 'rxjs/operators';
 import {getTags, setArchive as setProjectArchive, setDeep} from '../core/actions/projects.actions';
@@ -31,7 +31,8 @@ import {
   selectMetadataKeys,
   selectModelsFrameworks,
   selectModelsTags,
-  selectModelTableColumns, selectTableMode
+  selectModelTableColumns,
+  selectTableMode
 } from './reducers';
 import {IModelsViewState} from './reducers/models-view.reducer';
 import {SelectedModel, TableModel} from './shared/models.model';
@@ -72,7 +73,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
   public noMoreModels$: Observable<boolean>;
   public showAllSelectedIsActive$: Observable<boolean>;
   public showInfo$: Observable<boolean>;
-  public activeSectionEdit$: Observable<string>;
+  public activeSectionEdit$: Observable<boolean>;
   public selectedProjectId$: Observable<string>;
   public tableColsOrder$: Observable<string[]>;
   public tags$: Observable<string[]>;
@@ -126,7 +127,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
     this.activeSectionEdit$ = this.store.select(modelsSelectors.selectActiveSectionEdit);
     this.inEditMode$ = this.store.select(modelsSelectors.selectIsModelInEditMode);
     this.tableColsOrder$ = this.store.select(modelsSelectors.selectModelsTableColsOrder);
-    this.selectedProjectId$ = this.store.select(selectRouterParams).pipe(map(params => get('projectId', params)));
+    this.selectedProjectId$ = this.store.select(selectRouterParams).pipe(map(params => params?.projectId));
     this.tags$ = this.store.select(selectModelsTags);
     this.metadataKeys$ = this.store.select(selectMetadataKeys);
     this.tagsFilterByProject$ = this.store.select(selectTagsFilterByProject);
@@ -158,7 +159,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
     );
     this.showInfo$ = this.store.pipe(
       select(selectRouterParams),
-      map(params => !!get('modelId', params))
+      map(params => !!params?.modelId)
     );
     this.syncAppSearch();
   }
@@ -273,7 +274,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
   selectModelFromUrl() {
     this.sub.add(combineLatest([
         this.store.select(selectRouterParams).pipe(
-          map(params => get('modelId', params))
+          map(params => params?.modelId)
         ),
         this.models$
       ])

@@ -11,7 +11,7 @@
   >
     {{header}}
   </div>
-  <i *ngIf="showCart" [class]="iconClass" (click)="trigger.openMenu()"></i>
+  <i *ngIf="showCart" [class]="iconClass" data-id="OpenMenu" (click)="trigger.openMenu()"></i>
 </div>
 <mat-menu
   #menu="matMenu"

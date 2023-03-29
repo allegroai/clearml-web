@@ -1,9 +1,23 @@
+@import 'variables';
+
 :host {
   small.text-danger {
     position: absolute !important;
     top: -20px;
   }
-  .s3-header{
+
+  .s3-header {
     padding-bottom: 18px;
+  }
+
+  .s3-sub-header {
+    width: 100%;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .al-ico-alert {
+    color: $orangada;
   }
 }

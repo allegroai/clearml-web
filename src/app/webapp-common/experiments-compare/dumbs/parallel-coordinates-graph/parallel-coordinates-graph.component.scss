@@ -6,11 +6,14 @@
   height: 100%;
   overflow: auto;
 
-  .download {
+  .actions {
     position: absolute;
     right: 22px;
     top: 24px;
     z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
   }
 
   .dot {
@@ -36,7 +39,7 @@
   }
 
   .experiment-name {
-    padding: 10px;
+    padding: 4px 12px;
     min-width: 200px;
     display: flex;
     align-items: center;
@@ -48,9 +51,15 @@
   }
 
   .legend-container {
-    padding: 0 67px;
+    padding: 0 64px 24px;
     flex-wrap: wrap;
     background-color: white;
+    font-size: 14px;
+
+    &.limit-height {
+      max-height: 30%;
+      overflow: auto;
+    }
   }
 
   .task-name {
@@ -77,6 +86,21 @@
       stroke: $blue-900;
       stroke-opacity: 1;
     }
+  }
+
+  .dark-theme {
+    .graph-title {
+      color: $blue-100;
+    }
+
+    .legend-container {
+      background-color: transparent;
+    }
+
+    .task-name {
+      color: $blue-100;
+    }
+
   }
 }
 

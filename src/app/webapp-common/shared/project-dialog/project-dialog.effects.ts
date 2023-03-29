@@ -1,7 +1,7 @@
 import * as createNewProjectActions from './project-dialog.actions';
 import {CREATE_PROJECT_ACTIONS} from './project-dialog.actions';
 import {activeLoader, addMessage, deactivateLoader} from '../../core/actions/layout.actions';
-import {Actions, createEffect, Effect, ofType} from '@ngrx/effects';
+import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {ApiProjectsService} from '~/business-logic/api-services/projects.service';
 import {requestFailed} from '../../core/actions/http.actions';
 import {Injectable} from '@angular/core';
@@ -27,21 +27,18 @@ export class ProjectDialogEffects {
   ) {
   }
 
-  @Effect()
-  activeLoader = this.actions.pipe(
+  activeLoader = createEffect(() => this.actions.pipe(
     ofType(CREATE_PROJECT_ACTIONS.CREATE_NEW_PROJECT),
     map(action => activeLoader(action.type))
-  );
+  ));
 
-  @Effect({dispatch: false})
-  navigateToNewProject = this.actions.pipe(
+  navigateToNewProject = createEffect(() => this.actions.pipe(
     ofType<createNewProjectActions.NavigateToNewProject>(CREATE_PROJECT_ACTIONS.NAVIGATE_TO_NEW_PROJECT),
     filter(action => !!action.payload),
     map((action) => this.router.navigateByUrl(`projects/${action.payload}`))
-  );
+  ), {dispatch: false});
 
-  @Effect()
-  createProject = this.actions.pipe(
+  createProject = createEffect(() => this.actions.pipe(
     ofType<createNewProjectActions.CreateNewProject>(CREATE_PROJECT_ACTIONS.CREATE_NEW_PROJECT),
     withLatestFrom(this.store.select(selectActiveWorkspace)),
     switchMap(([action]) => this.projectsApiService.projectsCreate(action.payload)
@@ -56,7 +53,7 @@ export class ProjectDialogEffects {
         catchError(error => [deactivateLoader(action.type), requestFailed(error), addMessage(MESSAGES_SEVERITY.ERROR, 'Project Created Failed'), new createNewProjectActions.SetNewProjectCreationStatus(CREATION_STATUS.FAILED)])
       )
     )
-  );
+  ));
 
   moveProject = createEffect(() => this.actions.pipe(
     ofType(createNewProjectActions.moveProject),

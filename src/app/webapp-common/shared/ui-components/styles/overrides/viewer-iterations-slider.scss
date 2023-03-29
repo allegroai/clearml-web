@@ -9,6 +9,7 @@
     cursor: grabbing;
     background-color: white !important;
     border: 2px solid $blue-300;
+    transform: scale(0.7) !important;
   }
   .mat-slider-horizontal.cdk-focused .mat-slider-thumb-label{
     transform: none;

@@ -28,7 +28,7 @@
              [existingNames]="readOnlyProjects$ | async"
              (click)="filterText && clear(); projectInputRef.blur(); projectInputRef.focus()"
       >
-      <span matSuffix *ngIf="(!isAutoCompleteOpen) && (!formData.project?.value) && formData.project" class="creat-new-suffix">(Create New)</span>
+      <span matSuffix *ngIf="(!isAutoCompleteOpen) && (!formData.project?.value) && formData.project && formData.project?.value !== null" class="creat-new-suffix">(Create New)</span>
       <i matSuffix [class]="'fa mr2 ' + (filterText ? 'fa-times pointer' :  'fa-search')" (click)="filterText && clear(); projectInputRef.focus();"
          smClickStopPropagation></i>
       <mat-error *ngIf="projectInput?.errors?.required">Please provide a Project</mat-error>
@@ -50,7 +50,7 @@
           *ngIf="filterText && isNewName"
           [value]="filterText"
         >"{{filterText}}" <span class="new">(Create New)</span></mat-option>
-        <mat-option *ngFor="let project of filteredProjects | async" [value]="project" [smTooltip]="project.label"  smShowTooltipIfEllipsis> <div [innerHTML]="project.label | highlightSearchText:projectInput.value"></div></mat-option>
+        <mat-option *ngFor="let project of filteredProjects | async; trackBy: trackByFn" [value]="project" [smTooltip]="project.label"  smShowTooltipIfEllipsis> <div [innerHTML]="project.label | highlightSearchText:projectInput.value"></div></mat-option>
       </mat-autocomplete>
     </mat-form-field>
   </ng-form>

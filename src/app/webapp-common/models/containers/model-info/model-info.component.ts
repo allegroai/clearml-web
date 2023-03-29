@@ -3,7 +3,6 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {Store} from '@ngrx/store';
 import {ModelInfoState} from '../../reducers/model-info.reducer';
-import {get} from 'lodash/fp';
 import * as infoActions from '../../actions/models-info.actions';
 import {selectSelectedModel, selectSelectedTableModel} from '../../reducers';
 import {SelectedModel} from '../../shared/models.model';
@@ -27,7 +26,7 @@ export class ModelInfoComponent implements OnInit, OnDestroy {
   private paramsSubscription: Subscription;
   public selectedModel: SelectedModel;
   private selectedModelSubscription: Subscription;
-  private S3BucketCredentials: Observable<any>;
+  private s3BucketCredentials: Observable<any>;
   @ViewChild('modelInfoHeader', { static: true }) modelInfoHeader;
   public selectedModel$: Observable<SelectedModel | null>;
   public isExample: boolean;
@@ -40,7 +39,7 @@ export class ModelInfoComponent implements OnInit, OnDestroy {
     private store: Store<ModelInfoState>,
     private route: ActivatedRoute
   ) {
-    this.S3BucketCredentials = store.select(selectS3BucketCredentials);
+    this.s3BucketCredentials = store.select(selectS3BucketCredentials);
     this.backdropActive$ = this.store.select(selectBackdropActive);
     this.selectedTableModel$ = this.store.select(selectSelectedTableModel);
   }
@@ -54,21 +53,21 @@ export class ModelInfoComponent implements OnInit, OnDestroy {
     this.paramsSubscription = this.store.select(selectRouterParams)
       .pipe(
         tap((params) => {
-          this.projectId = get('projectId', params);
+          this.projectId = params?.projectId;
         }),
         debounceTime(150),
-        map(params => get('modelId', params)),
+        map(params => params?.modelId),
         filter(modelId => !!modelId),
         distinctUntilChanged()
       )
-      .subscribe(modelId => this.store.dispatch(new infoActions.GetModelInfo(modelId)));
+      .subscribe(id => this.store.dispatch(infoActions.getModelInfo({id})));
     this.selectedModel$            = this.store.select(selectSelectedModel).pipe(filter(model => !!model));
   }
 
   ngOnDestroy(): void {
     this.paramsSubscription.unsubscribe();
     this.selectedModelSubscription.unsubscribe();
-    this.store.dispatch(new infoActions.SetModel(null));
+    this.store.dispatch(infoActions.setModelInfo({model: null}));
   }
 
   public updateModelName(name) {

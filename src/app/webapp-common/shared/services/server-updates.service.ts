@@ -39,7 +39,7 @@ export class ServerUpdatesService {
           server_uuid: infoRes['uid'] || '',
           time: new Date().toISOString(),
           versions: {
-            ['clearml-server']: infoRes.version
+            ['clearml-server']: `${infoRes.version}`
           }
         })
         )

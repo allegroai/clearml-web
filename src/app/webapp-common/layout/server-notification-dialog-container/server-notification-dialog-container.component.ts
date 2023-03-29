@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component, OnDestroy, OnInit} from '@angular/core';
 import {select, Store} from '@ngrx/store';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef } from '@angular/material/legacy-dialog';
 import {selectNotification} from '../../core/reducers/view.reducer';
 import {filter, take} from 'rxjs/operators';
 import {setNotificationDialog} from '../../core/actions/layout.actions';

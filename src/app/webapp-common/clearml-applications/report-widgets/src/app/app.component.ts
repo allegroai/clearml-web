@@ -1,13 +1,14 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, OnInit, ViewChild} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {MatDialog} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {Observable} from 'rxjs';
 import {filter, map, switchMap, take} from 'rxjs/operators';
 import {Environment} from '../environments/base';
-import {getPlot, getSample, getScalar, reportsPlotlyReady} from './app.actions';
+import {getParcoords, getPlot, getSample, getScalar, reportsPlotlyReady} from './app.actions';
 import {
   ReportsApiMultiplotsResponse,
   selectNoPermissions,
+  selectParallelCoordinateExperiments,
   selectPlotData,
   selectReportsPlotlyReady,
   selectSampleData,
@@ -22,15 +23,19 @@ import {_mergeVariants, convertMultiPlots, mergeMultiMetricsGroupedVariant, prep
 import {selectSignedUrl} from '@common/core/reducers/common-auth-reducer';
 import {loadExternalLibrary} from '@common/shared/utils/load-external-library';
 import {ImageViewerComponent} from '@common/shared/debug-sample/image-viewer/image-viewer.component';
-import {cloneDeep} from 'lodash/fp';
+import {cloneDeep, get} from 'lodash-es';
 import {MetricsPlotEvent} from '~/business-logic/model/events/metricsPlotEvent';
 import {SingleGraphComponent} from '@common/shared/single-graph/single-graph.component';
 import {setCurrentDebugImage} from '@common/shared/debug-sample/debug-sample.actions';
 import {isFileserverUrl} from '~/shared/utils/url';
+import {MetricValueType, SelectedMetric} from '@common/experiments-compare/experiments-compare.constants';
+import {ExtraTask} from '@common/experiments-compare/dumbs/parallel-coordinates-graph/parallel-coordinates-graph.component';
 
+
+type WidgetTypes = 'plot' | 'scalar' | 'sample' | 'parcoords';
 
 @Component({
-  selector: 'app-root',
+  selector: 'sm-app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -39,18 +44,20 @@ export class AppComponent implements OnInit {
   title = 'report-widgets';
   public plotData: ExtFrame;
   public frame: DebugSample;
+  public parcoords: any;
   public plotLoaded: boolean;
   private environment: Environment;
   public activated: boolean = false;
   private searchParams: URLSearchParams;
   private otherSearchParams: URLSearchParams;
-  public type: string;
+  public type: WidgetTypes;
   public singleGraphHeight;
   public hideMaximize: 'show' | 'hide' | 'disabled' = 'show';
   public signIsNeeded$: Observable<boolean>;
   public noPermissions$: Observable<boolean>;
   public isDarkTheme: boolean;
   public externalTool: boolean = false;
+  public parcoordsData: { experiments: ExtraTask[]; params: string[]; metric: SelectedMetric; valueType: MetricValueType };
   @ViewChild(SingleGraphComponent) 'singleGraph': SingleGraphComponent;
 
   @HostListener('window:resize')
@@ -69,7 +76,7 @@ export class AppComponent implements OnInit {
     this.signIsNeeded$ = store.select(selectSignIsNeeded);
     this.noPermissions$ = store.select(selectNoPermissions);
     this.searchParams = new URLSearchParams(window.location.search);
-    this.type = this.searchParams.get('type');
+    this.type = this.searchParams.get('type') as WidgetTypes;
     this.singleGraphHeight = window.innerHeight;
     this.otherSearchParams = this.getOtherSearchParams();
     this.isDarkTheme = !this.searchParams.get('light');
@@ -84,9 +91,9 @@ export class AppComponent implements OnInit {
   }
 
   private getOtherSearchParams() {
-    const paramsToRemove = ['light', 'type','tasks', 'metrics', 'variants', 'iterations', 'company'];
+    const paramsToRemove = ['light', 'type', 'tasks', 'metrics', 'variants', 'iterations', 'company', 'value_type'];
     const otherSearchParams = new URLSearchParams(window.location.search);
-    paramsToRemove.forEach( key => {
+    paramsToRemove.forEach(key => {
       otherSearchParams.delete(key);
     });
     return otherSearchParams;
@@ -113,7 +120,9 @@ export class AppComponent implements OnInit {
         break;
       case 'sample':
         this.getSample();
-
+        break;
+      case 'parcoords':
+        this.getParallelCoordinate();
     }
 
     window.addEventListener('message', (e) => {
@@ -160,12 +169,36 @@ export class AppComponent implements OnInit {
           const merged = this.mergeVariants(metricsPlots as ReportsApiMultiplotsResponse);
           this.plotData = Object.values(merged)[0].plotParsed;
         } else {
-          const {merged, parsingError} = prepareMultiPlots(metricsPlots);
+          const {merged, } = prepareMultiPlots(metricsPlots);
           const newGraphs = convertMultiPlots(merged);
           this.plotData = Object.values(newGraphs)[0]?.[0];
         }
-        this.plotLoaded = true;
-        this.cdr.detectChanges();
+
+
+        if ((this.plotData?.layout?.images?.length ?? 0) > 0) {
+          this.plotData.layout.images.forEach((image: Plotly.Image) => {
+              this.store.dispatch(getSignedUrl({
+                url: image.source,
+                config: {skipFileServer: false, skipLocalFile: false}
+              }));
+              this.store.select(selectSignedUrl(image.source))
+                .pipe(
+                  filter(signed => !!signed?.signed),
+                  map(({signed: signedUrl}) => signedUrl),
+                  take(1)
+                ).subscribe(url => {
+                image.source = url;
+                this.plotLoaded = true;
+                this.cdr.detectChanges();
+              });
+            }
+          );
+        } else {
+          this.plotLoaded = true;
+          this.cdr.detectChanges();
+        }
+
+
       });
   };
 
@@ -189,6 +222,24 @@ export class AppComponent implements OnInit {
         this.cdr.detectChanges();
       });
   }
+
+  private getParallelCoordinate() {
+    this.store.select(selectReportsPlotlyReady).pipe(
+      filter(ready => !!ready),
+      switchMap(() => this.store.select(selectParallelCoordinateExperiments)),
+      filter(experiments => !!experiments),
+      take(1))
+      .subscribe(experiments => {
+        this.parcoordsData = {
+          experiments,
+          valueType: this.searchParams.get('value_type') as MetricValueType,
+          metric: {path: this.searchParams.get('metrics'), name: this.findMetricName(this.searchParams.get('metrics'), experiments)},
+          params: this.searchParams.getAll('variants')
+        };
+        this.cdr.detectChanges();
+      });
+  }
+
 
   private getSample() {
     this.store.select(selectSampleData)
@@ -220,7 +271,7 @@ export class AppComponent implements OnInit {
       metrics: this.searchParams.getAll('metrics'),
       variants: this.searchParams.getAll('variants'),
       iterations: this.searchParams.getAll('iterations').map(iteration => parseInt(iteration, 10)),
-      company:    this.searchParams.get('company') || '',
+      company: this.searchParams.get('company') || '',
     };
 
     switch (this.type) {
@@ -232,6 +283,9 @@ export class AppComponent implements OnInit {
         break;
       case 'sample':
         this.store.dispatch(getSample({...queryParams, otherSearchParams: this.otherSearchParams}));
+        break;
+      case 'parcoords':
+        this.store.dispatch(getParcoords({...queryParams, otherSearchParams: this.otherSearchParams}));
     }
     this.activated = true;
   };
@@ -280,4 +334,9 @@ export class AppComponent implements OnInit {
     }).beforeClosed().subscribe(() => this.maximize());
   }
 
+  private findMetricName(metric: string, experiments: ExtraTask[]) {
+    const experimentWithCurrentMetric = experiments.find(exp => get(exp.last_metrics, metric));
+    const lastMetric = get(experimentWithCurrentMetric.last_metrics, metric) as ExtraTask['last_metrics'];
+    return `${lastMetric.metric}/${lastMetric.variant}`;
+  }
 }

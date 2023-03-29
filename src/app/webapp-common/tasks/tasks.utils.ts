@@ -1,5 +1,5 @@
 import {Task} from '~/business-logic/model/tasks/task';
-import {cloneDeep, isEmpty, sortBy} from 'lodash/fp';
+import {cloneDeep, isEmpty, sortBy} from 'lodash-es';
 import {SelectableListItem} from '@common/shared/ui-components/data/selectable-list/selectable-list.model';
 import {Config, PlotData} from 'plotly.js';
 import {ExtData, ExtFrame, ExtLayout} from '../shared/single-graph/plotly-graph-base';
@@ -90,12 +90,12 @@ export const convertPlot = (graph: MetricsPlotEvent, experimentId?: string): { p
   return {plot: prepareGraph(json.data, json.layout, json.config, graph), hadError};
 };
 
-export const convertPlots = ({plots, experimentId}: { plots: { [title: string]: MetricsPlotEvent[] }; experimentId: string }): { graphs: { [title: string]: ExtFrame[] }; parsingError } => {
+export const convertPlots = ({plots, id}: { plots: { [title: string]: MetricsPlotEvent[] }; id: string }): { graphs: { [title: string]: ExtFrame[] }; parsingError } => {
   let parsingError: boolean;
   return {
     graphs: Object.entries(plots).reduce((acc, [key, graphs]) => {
       acc[key] = graphs?.map(graph => {
-        const {plot, hadError} = convertPlot(graph, experimentId);
+        const {plot, hadError} = convertPlot(graph, id);
         parsingError = parsingError || hadError;
         return plot;
       });
@@ -133,7 +133,7 @@ export const groupIterations = (plots: MetricsPlotEvent[]): { [title: string]: E
     return {};
   }
   let previousPlotIsMergable = true;
-  const sortedPlots = sortBy('iter', plots);
+  const sortedPlots = sortBy(plots,'iter');
   return sortedPlots
     .reduce((groupedPlots, plot) => {
       const metric = plot.metric;
@@ -159,7 +159,7 @@ export const prepareScalarList = (metricsScalar): GroupedList =>
   }, {});
 
 export const sortMetricsList = (list: string[]) =>
-  list ? sortBy(item => item.replace(':', '~').toLowerCase(), list) : list;
+  list ? sortBy(list, item => item.replace(':', '~').toLowerCase()) : list;
 
 export const preparePlotsList = (groupedPlots: Map<string, any[]>): Array<SelectableListItem> => {
   const list = groupedPlots ? Object.keys(groupedPlots) : [];
@@ -169,7 +169,7 @@ export const preparePlotsList = (groupedPlots: Map<string, any[]>): Array<Select
 
 
 export const sortByField = (arr: any[], field: string) =>
-  sortBy(item => item[field].replace(':', '~').toLowerCase(), arr);
+  sortBy(arr, item => item[field].replace(':', '~').toLowerCase());
 
 export const compareByFieldFunc = (field) =>
   (a: KeyValue<string, any>, b: KeyValue<string, any>) =>
@@ -244,10 +244,14 @@ export const multiplotsAddChartToGroup = (charts, parsed, metric, experiment, ex
     }
     if ((!variantPlot.type || allowedTypes.includes(variantPlot.type)) && variantPlot.name) {
       fullName = metricVariant + '-' + variantPlot.name;
-      variantPlot.name = (experiment);
-      variantPlot.task = (experimentId);
-    } else {
+      variantPlot.name = experiment;
+      variantPlot.task = experimentId;
+    } else if (variantPlot.type === 'table') {
       fullName = metricVariant + '-' + experiment;
+    } else {
+      fullName = metricVariant;
+      variantPlot.name = experiment;
+      variantPlot.task = experimentId;
     }
     if (!charts[metricName][fullName]) {
       charts[metricName][fullName] = Object.assign({}, parsed);

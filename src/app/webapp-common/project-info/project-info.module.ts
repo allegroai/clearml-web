@@ -7,8 +7,8 @@ import {LMarkdownEditorModule} from 'ngx-markdown-editor';
 import {FormsModule} from '@angular/forms';
 import {CommonLayoutModule} from '../layout/layout.module';
 import { ProjectStatsComponent } from './conteiners/project-stats/project-stats.component';
-import {ExperimentsCommonModule} from '../experiments/common-experiments.module';
 import {MetricForStatsDialogComponent} from './conteiners/metric-for-stats-dialog/metric-for-stats-dialog.component';
+import {ExperimentCompareSharedModule} from '@common/experiments-compare/shared/experiment-compare-shared.module';
 
 @NgModule({
   declarations: [ProjectInfoComponent, ProjectStatsComponent, MetricForStatsDialogComponent],
@@ -19,7 +19,7 @@ import {MetricForStatsDialogComponent} from './conteiners/metric-for-stats-dialo
     ProjectInfoRoutingModule,
     LMarkdownEditorModule,
     CommonLayoutModule,
-    ExperimentsCommonModule,
+    ExperimentCompareSharedModule,
   ]
 })
 export class ProjectInfoModule {

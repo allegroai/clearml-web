@@ -6,6 +6,8 @@ import {CountAvailableAndIsDisableSelectedFiltered} from '@common/shared/entity-
 import {MODELS_TABLE_COLS} from '@common/models/models.consts';
 import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
+import {FilterMetadata} from 'primeng/api/filtermetadata';
+import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 
 export interface ModelsState {
   view: IModelsViewState;
@@ -71,5 +73,11 @@ export const selectTableMode = createSelector(modelsView, state => state.tableMo
 export const modelInfo = createSelector(models, (state): ModelInfoState => state ? state.info : {});
 export const selectSelectedModel = createSelector(modelInfo, (state): SelectedModel => state.selectedModel);
 export const selectIsModelSaving = createSelector(modelInfo, (state): boolean => state.saving);
-export const selectActiveSectionEdit = createSelector(modelInfo, (state): string => state.activeSectionEdit);
+export const selectActiveSectionEdit = createSelector(modelInfo, state => state.activeSectionEdit);
 export const selectIsModelInEditMode = createSelector(modelInfo, (state): boolean => !!state.activeSectionEdit);
+export const selectModelExperimentsTableFilters = createSelector(modelInfo, (state):  { [columnId: string]: FilterMetadata } => state.modelExperimentsTableFilter);
+
+export const selectModelPlots = createSelector(modelInfo, state => state.plots);
+export const selectSelectedxAxisType = createSelector(modelInfo,
+  state => state?.xAxisType ?? ScalarKeyEnum.Iter as ScalarKeyEnum);
+export const selectCacheAxisType = createSelector(modelInfo, (state) => state.cachedAxisType);

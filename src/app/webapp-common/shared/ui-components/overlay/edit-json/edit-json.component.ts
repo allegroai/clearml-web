@@ -1,12 +1,13 @@
 import {AfterViewInit, Component, ElementRef, HostListener, Inject, NgZone, ViewChild} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
 import {JsonPipe} from '@angular/common';
 import {validateJson} from '../../../utils/validation-utils';
 import {Store} from '@ngrx/store';
 import {addMessage, saveAceCaretPosition} from '@common/core/actions/layout.actions';
 import {Ace} from 'ace-builds';
 import {selectAceCaretPosition} from '@common/core/reducers/view.reducer';
-import {Observable, Subscription} from 'rxjs';
+import {filter, Observable} from 'rxjs';
+import {map, take} from 'rxjs/operators';
 
 declare const ace;
 
@@ -16,7 +17,7 @@ declare const ace;
   styleUrls: ['./edit-json.component.scss'],
   providers: [{provide: JsonPipe, useClass: JsonPipe}]
 })
-export class EditJsonComponent implements AfterViewInit {
+export class EditJsonComponent implements AfterViewInit{
   public errors: Map<string, boolean>;
   public textData: string;
   public showErrors: boolean;
@@ -29,7 +30,6 @@ export class EditJsonComponent implements AfterViewInit {
   @ViewChild('aceEditor') private aceEditorElement: ElementRef;
   private aceEditor: Ace.Editor;
   private $aceCaretPosition: Observable<{ [key: string]: Ace.Point }>;
-  private aceCaretPositionSub: Subscription;
   private defaultPlaceHolder = '';
 
   set readOnly(readOnly: boolean) {
@@ -64,7 +64,7 @@ export class EditJsonComponent implements AfterViewInit {
 }`;
     }
     this.placeHolder = data.placeHolder;
-    this.textData = data.textData ? (this.typeJson ? jsonPipe.transform(data.textData) : data.textData) : undefined;
+    this.textData = data.textData ? (this.typeJson ? jsonPipe.transform(data.textData) : data.textData).slice() : undefined;
     this.readOnly = data.readOnly;
     this.title = data.title;
     this.$aceCaretPosition = this.store.select(selectAceCaretPosition);
@@ -72,11 +72,6 @@ export class EditJsonComponent implements AfterViewInit {
 
   ngAfterViewInit() {
     window.setTimeout(() => this.initAceEditor(), 200);
-    this.aceCaretPositionSub = this.$aceCaretPosition.subscribe((positions) => {
-      this.aceEditor.moveCursorTo(positions[this.title]?.row || 0, positions[this.title]?.column || 0);
-      this.aceEditor.scrollToLine(positions[this.title]?.row || 0, true, false, () => {
-      });
-    });
   }
 
   closeDialog(isConfirmed) {
@@ -93,10 +88,6 @@ export class EditJsonComponent implements AfterViewInit {
     } else {
       this.dialogRef.close();
     }
-  }
-
-  textChanged() {
-    this.showErrors = false;
   }
 
   // we can make this to ace wrapper later on
@@ -128,6 +119,18 @@ export class EditJsonComponent implements AfterViewInit {
       }
       aceEditor.getSession().setValue(this.textData || '');
       this.aceEditor = aceEditor;
+    });
+
+    this.$aceCaretPosition
+      .pipe(
+        take(1),
+        map(positions => positions[this.title]),
+        filter(position => !!position)
+      )
+      .subscribe((position) => {
+      this.aceEditor.moveCursorTo(position?.row || 0, position?.column || 0);
+      this.aceEditor.scrollToLine(position?.row || 0, true, false, () => {
+      });
     });
   }
 }

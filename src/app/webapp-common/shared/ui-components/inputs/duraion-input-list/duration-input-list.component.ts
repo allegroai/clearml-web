@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import {NG_VALUE_ACCESSOR} from '@angular/forms';
 import {DurationInputBase} from '../duration-input/duration-input.base';
-import {isUndefined} from 'lodash/fp';
+import {isUndefined} from 'lodash-es';
 
 export type DURATION_INPUT_TYPE = 'hours' | 'seconds' | 'ms' | 'days' | 'minutes';
 

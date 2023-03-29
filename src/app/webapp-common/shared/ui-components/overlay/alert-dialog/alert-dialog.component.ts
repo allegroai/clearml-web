@@ -1,6 +1,5 @@
 import {Component, Inject} from '@angular/core';
-import {MAT_DIALOG_DATA} from '@angular/material/dialog';
-import {get} from 'lodash/fp';
+import {MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA} from '@angular/material/legacy-dialog';
 import {isAnnotationTask} from '../../../utils/shared-utils';
 
 @Component({
@@ -35,7 +34,7 @@ export class AlertDialogComponent {
     return this._resultMessage;
   }
 
-  constructor(@Inject(MAT_DIALOG_DATA) data: { alertMessage: string, alertSubMessage: string, okMessage: string, moreInfo: any, resultMessage: string }) {
+  constructor(@Inject(MAT_DIALOG_DATA) data: { alertMessage: string; alertSubMessage: string; okMessage: string; moreInfo: any; resultMessage: string }) {
     this.alertMessage    = data.alertMessage || '';
     this.alertSubMessage = data.alertSubMessage;
     this.moreInfo        = data.moreInfo;
@@ -54,6 +53,6 @@ export class AlertDialogComponent {
     if (entityName === 'tasks' && isAnnotationTask(entity)) {
       return `/annotations?annotationId=${entity.id}`;
     }
-    return `/projects/${get('project.id', entity) || '*'}/experiments/${entity.id}`;
+    return `/projects/${entity?.project?.id ?? '*'}/experiments/${entity.id}`;
   }
 }

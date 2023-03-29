@@ -1,70 +1,55 @@
-import {InjectionToken, NgModule} from '@angular/core';
+import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ExperimentSharedModule} from './shared/experiment-shared.module';
 import {SMSharedModule} from '@common/shared/shared.module';
 import {ExperimentRouterModule} from './experiments-routing.module';
-import {ExperimentsComponent} from './experiments.component';
-import {EffectsModule} from '@ngrx/effects';
-import {StoreConfig, StoreModule} from '@ngrx/store';
-import {experimentsReducers, ExperimentState} from './reducers';
 import {AdminService} from '~/shared/services/admin.service';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {SelectModelModule} from '@common/select-model/select-model.module';
 import {SmSyncStateSelectorService} from '@common/core/services/sync-state-selector.service';
-import {ExperimentOutputEffects} from './effects/experiment-output.effects';
-import {ExperimentsMenuEffects} from './effects/experiments-menu.effects';
 import {LayoutModule} from '~/layout/layout.module';
 import {ExperimentGraphsModule} from '@common/shared/experiment-graphs/experiment-graphs.module';
 import {ExperimentCompareSharedModule} from '@common/experiments-compare/shared/experiment-compare-shared.module';
 import {AngularSplitModule} from 'angular-split';
 import {SMMaterialModule} from '@common/shared/material/material.module';
-import {ExperimentsCommonModule} from '@common/experiments/common-experiments.module';
 import {CommonLayoutModule} from '@common/layout/layout.module';
-import {EXPERIMENTS_STORE_KEY} from '@common/experiments/shared/common-experiments.const';
 import {DebugImagesModule} from '@common/debug-images/debug-images.module';
 import {ExperimentInfoExecutionComponent} from '@common/experiments/containers/experiment-info-execution/experiment-info-execution.component';
 import {MatSidenavModule} from '@angular/material/sidenav';
-import {MatListModule} from '@angular/material/list';
+import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
 import {ExperimentOutputComponent} from './containers/experiment-ouptut/experiment-output.component';
-import {merge, pick} from 'lodash/fp';
-import {EXPERIMENTS_PREFIX} from '@common/experiments/actions/common-experiments-view.actions';
 import {ExperimentInfoNavbarComponent} from './containers/experiment-info-navbar/experiment-info-navbar.component';
-
-
-export const experimentSyncedKeys = [
-  'view.projectColumnsSortOrder',
-  'view.projectColumnFilter',
-  'view.projectColumnsWidth',
-  'view.hiddenProjectTableCols',
-  'view.metricsCols',
-  'view.colsOrder',
-  'output.scalarsHoverMode',
-  'info.userKnowledge',
-  'output.settingsList',
-];
-
-export const EXPERIMENT_CONFIG_TOKEN =
-  new InjectionToken<StoreConfig<ExperimentState, any>>('ExperimentConfigToken');
-
-const localStorageKey = '_saved_experiment_state_';
-
-const getExperimentsConfig = () => ({
-  metaReducers: [reducer => {
-    let onInit = true;
-    return (state, action) => {
-      const nextState = reducer(state, action);
-      if (onInit) {
-        onInit = false;
-        const savedState = JSON.parse(localStorage.getItem(localStorageKey));
-        return merge(nextState, savedState);
-      }
-      if (action.type.startsWith(EXPERIMENTS_PREFIX)) {
-        localStorage.setItem(localStorageKey, JSON.stringify(pick(['view.tableMode'], nextState)));
-      }
-      return nextState;
-    };
-  }]
-});
+import {ExperimentInfoHyperParametersComponent} from '@common/experiments/containers/experiment-info-hyper-parameters/experiment-info-hyper-parameters.component';
+import {ExperimentInfoArtifactItemComponent} from '@common/experiments/containers/experiment-info-artifact-item/experiment-info-artifact-item.component';
+import {ExperimentGeneralInfoComponent} from '@common/experiments/dumb/experiment-general-info/experiment-general-info.component';
+import {ExperimentArtifactItemViewComponent} from '@common/experiments/dumb/experiment-artifact-item-view/experiment-artifact-item-view.component';
+import {ExperimentHyperParamsNavbarComponent} from '@common/experiments/dumb/experiment-hyper-params-navbar/experiment-hyper-params-navbar.component';
+import {ExperimentExecutionSourceCodeComponent} from '@common/experiments/dumb/experiment-execution-source-code/experiment-execution-source-code.component';
+import {ExperimentInfoEditDescriptionComponent} from '@common/experiments/dumb/experiment-info-edit-description/experiment-info-edit-description.component';
+import {ExperimentOutputModelViewComponent} from '@common/experiments/dumb/experiment-output-model-view/experiment-output-model-view.component';
+import {ExperimentInfoGeneralComponent} from '@common/experiments/containers/experiment-info-general/experiment-info-general.component';
+import {BaseClickableArtifactComponent} from '@common/experiments/dumb/base-clickable-artifact.component';
+import {ExperimentModelsFormViewComponent} from '@common/experiments/dumb/experiment-models-form-view/experiment-models-form-view.component';
+import {ExperimentArtifactsNavbarComponent} from '@common/experiments/dumb/experiment-artifacts-navbar/experiment-artifacts-navbar.component';
+import {ExperimentInfoArtifactsComponent} from '@common/experiments/containers/experiment-info-aritfacts/experiment-info-artifacts.component';
+import {ExperimentInfoHeaderComponent} from '@common/experiments/dumb/experiment-info-header/experiment-info-header.component';
+import {ExperimentInfoTaskModelComponent} from '@common/experiments/containers/experiment-info-task-model/experiment-info-task-model.component';
+import {ModelAutoPopulateDialogComponent} from '@common/experiments/dumb/model-auto-populate-dialog/model-auto-populate-dialog.component';
+import {ExperimentOutputScalarsComponent} from '@common/experiments/containers/experiment-output-scalars/experiment-output-scalars.component';
+import {ExperimentInfoModelComponent} from '@common/experiments/containers/experiment-info-model/experiment-info-model.component';
+import {ExperimentInfoHyperParametersFormContainerComponent} from '@common/experiments/containers/experiment-info-hyper-parameters-form-container/experiment-info-hyper-parameters-form-container.component';
+import {SharedPipesModule} from '@common/shared/pipes/shared-pipes.module';
+import {ExperimentOutputLogModule} from '@common/experiments/shared/experiment-output-log/experiment-output-log.module';
+import {RouterModule} from '@angular/router';
+import {ScrollingModule} from '@angular/cdk/scrolling';
+import {CommonDeleteDialogModule} from '@common/shared/entity-page/entity-delete/common-delete-dialog.module';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {MatRadioModule} from '@angular/material/radio';
+import {SharedModule} from '~/shared/shared.module';
+import {MAT_AUTOCOMPLETE_SCROLL_STRATEGY} from '@angular/material/autocomplete';
+import {scrollFactory} from '@common/shared/utils/scroll-factory';
+import {Overlay} from '@angular/cdk/overlay';
+import {ExperimentsComponent} from '@common/experiments/experiments.component';
 
 
 @NgModule({
@@ -74,7 +59,6 @@ const getExperimentsConfig = () => ({
     LayoutModule,
     ReactiveFormsModule,
     CommonModule,
-    ExperimentsCommonModule,
     SMSharedModule,
     ExperimentRouterModule,
     ExperimentSharedModule,
@@ -86,19 +70,52 @@ const getExperimentsConfig = () => ({
     MatSidenavModule,
     MatListModule,
     AngularSplitModule,
-    StoreModule.forFeature(EXPERIMENTS_STORE_KEY, experimentsReducers, EXPERIMENT_CONFIG_TOKEN),
-    EffectsModule.forFeature([ExperimentOutputEffects, ExperimentsMenuEffects]),
+    SharedPipesModule,
+    ScrollingModule,
+    CommonDeleteDialogModule,
+    SMSharedModule,
+    RouterModule,
+    SharedModule,
+    ExperimentOutputLogModule,
+    MatProgressSpinnerModule,
+    MatRadioModule,
+    ExperimentSharedModule,
   ],
   declarations: [
     ExperimentsComponent,
     ExperimentInfoExecutionComponent,
     ExperimentOutputComponent,
-    ExperimentInfoNavbarComponent
+    ExperimentInfoNavbarComponent,
+    ExperimentInfoNavbarComponent,
+    BaseClickableArtifactComponent,
+    ExperimentInfoHeaderComponent,
+    ExperimentInfoModelComponent,
+    ExperimentInfoTaskModelComponent,
+    ExperimentInfoGeneralComponent,
+    ExperimentGeneralInfoComponent,
+    ExperimentModelsFormViewComponent,
+    ExperimentOutputModelViewComponent,
+    ExperimentExecutionSourceCodeComponent,
+    ExperimentOutputScalarsComponent,
+    ModelAutoPopulateDialogComponent,
+    ExperimentInfoHyperParametersComponent,
+    ExperimentInfoHyperParametersFormContainerComponent,
+    ExperimentArtifactsNavbarComponent,
+    ExperimentInfoArtifactsComponent,
+    ExperimentHyperParamsNavbarComponent,
+    ExperimentInfoArtifactItemComponent,
+    ExperimentArtifactItemViewComponent,
+    ExperimentInfoEditDescriptionComponent,
+  ],
+  exports: [
+    ExperimentsComponent,
+    ExperimentInfoHeaderComponent,
+    ExperimentExecutionSourceCodeComponent,
   ],
   providers: [
     AdminService,
     SmSyncStateSelectorService,
-    {provide: EXPERIMENT_CONFIG_TOKEN, useFactory: getExperimentsConfig},
+    {provide: MAT_AUTOCOMPLETE_SCROLL_STRATEGY, useFactory: scrollFactory, deps: [Overlay]},
   ]
 })
 export class ExperimentsModule {

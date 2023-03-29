@@ -3,7 +3,7 @@ import {TasksEditRequest} from '../../../../business-logic/model/tasks/tasksEdit
 import {IExperimentInfo, ISelectedExperiment} from '../experiment-info.model';
 import {IExecutionForm} from '../experiment-execution.model';
 import {Execution} from '../../../../business-logic/model/tasks/execution';
-import {isEqual} from 'lodash/fp';
+import {isEqual} from 'lodash-es';
 import {CommonExperimentConverterService} from '../../../../webapp-common/experiments/shared/services/common-experiment-converter.service';
 import {IHyperParamsForm} from '../../../../webapp-common/experiments/shared/experiment-hyper-params.model';
 import {IExperimentModelInfo} from '../../../../webapp-common/experiments/shared/common-experiment-model.model';

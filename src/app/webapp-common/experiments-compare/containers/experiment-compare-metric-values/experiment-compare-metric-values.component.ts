@@ -2,7 +2,7 @@ import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {selectRouterParams, selectRouterQueryParams} from '@common/core/reducers/router-reducer';
 import {select, Store} from '@ngrx/store';
 import {distinctUntilChanged, filter, map, tap} from 'rxjs/operators';
-import {get, has} from 'lodash/fp';
+import {has} from 'lodash-es';
 import {Observable, Subscription} from 'rxjs';
 import * as metricsValuesActions from '../../actions/experiments-compare-metrics-values.actions';
 import {selectCompareMetricsValuesExperiments, selectCompareMetricsValuesSortConfig} from '../../reducers';
@@ -19,15 +19,17 @@ interface ValueMode {
 }
 
 const VALUE_MODES: { [mode: string]: ValueMode } = {
-  'min_values': {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  min_values: {
     key: 'min_value',
     name: 'Min Value'
   },
-  'max_values': {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  max_values: {
     key: 'max_value',
     name: 'Max Value'
   },
-  'values': {
+  values: {
     key: 'value',
     name: 'Last Value'
   },
@@ -71,7 +73,7 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
   ngOnInit() {
     this.queryParamsSubscription = this.store.pipe(
       select(selectRouterQueryParams),
-      map(params => get('scalars', params)),
+      map(params => params?.scalars),
       distinctUntilChanged()
     ).subscribe((valuesMode) => {
       this.valuesMode = VALUE_MODES[valuesMode] || VALUE_MODES['values'];
@@ -80,7 +82,7 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
 
     this.paramsSubscription = this.store.pipe(
       select(selectRouterParams),
-      map(params => get('ids', params).split(',')),
+      map(params => params?.ids?.split(',')),
       tap(taskIds => this.taskIds = taskIds),
       filter(taskIds => !!taskIds && taskIds !== this.getExperimentIdsParams(this.experiments))
     )
@@ -135,7 +137,7 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
 
   public metaDataTransformer = (data, key, path, extraParams) => {
     const fullPath = path.concat([key]);
-    const keyExists = has(fullPath, extraParams.comparedObject);
+    const keyExists = has(extraParams.comparedObject, fullPath);
     return {
       classStyle: keyExists ? 'key-exists' : 'key-not-exists',
     };
@@ -170,7 +172,7 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
 
   sortByKeyOrValue(sortBy, keyValueArray, order) {
     if (sortBy === 'key') {
-      return keyValueArray.sort(function (a, b) {
+      return keyValueArray.sort((a, b) => {
         if (order === 'asc') {
           return a.key.toLowerCase().localeCompare(b.key.toLowerCase());
         } else {
@@ -178,7 +180,7 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
         }
       });
     } else {
-      return keyValueArray.sort(function (a, b) {
+      return keyValueArray.sort((a, b) => {
         if (order === 'asc') {
           return a.value - b.value;
         } else {

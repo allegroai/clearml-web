@@ -1,5 +1,5 @@
 import {Component, OnDestroy} from '@angular/core';
-import {MatSlideToggleChange} from '@angular/material/slide-toggle';
+import {MatLegacySlideToggleChange as MatSlideToggleChange} from '@angular/material/legacy-slide-toggle';
 import {neverShowPopupAgain, setHideRedactedArguments} from '@common/core/actions/layout.actions';
 import {Store} from '@ngrx/store';
 import {popupId} from '@common/shared/services/tips.service';
@@ -10,9 +10,12 @@ import {filter} from 'rxjs/operators';
 import {Observable, Subscription} from 'rxjs';
 import {AuthEditUserRequest} from '~/business-logic/model/auth/authEditUserRequest';
 import RoleEnum = AuthEditUserRequest.RoleEnum;
-import {MatDialog} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {RedactedArgumentsDialogComponent} from '../redacted-arguments-dialog/redacted-arguments-dialog.component';
-import {selectHideExamples, selectShowHidden} from '@common/core/reducers/projects.reducer';
+import {
+  selectHideExamples,
+  selectShowHiddenUserSelection
+} from '@common/core/reducers/projects.reducer';
 import {setHideExamples, setShowHidden} from '@common/core/actions/projects.actions';
 
 @Component({
@@ -36,7 +39,7 @@ export class ProfilePreferencesComponent implements OnDestroy {
   constructor(private store: Store<any>, private dialog: MatDialog) {
     this.hideRedactedArguments$ = this.store.select(selectHideRedactedArguments);
 
-    this.show$ = store.select(selectShowHidden);
+    this.show$ = store.select(selectShowHiddenUserSelection);
     this.hideExamples$ = store.select(selectHideExamples);
 
     this.sub.add(store.select(selectCurrentUser)

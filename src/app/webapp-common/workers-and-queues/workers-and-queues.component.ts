@@ -1,6 +1,6 @@
 import {Component} from '@angular/core';
 import {filter, take} from 'rxjs/operators';
-import {MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
 import {getQueues} from './actions/queues.actions';
 import {Store} from '@ngrx/store';
 import {QueueCreateDialogComponent} from '../shared/queue-create-dialog/queue-create-dialog.component';

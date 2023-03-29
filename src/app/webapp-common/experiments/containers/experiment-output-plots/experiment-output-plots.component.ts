@@ -51,7 +51,7 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChan
   public selectedGraph: string = null;
   private experimentId: string;
   private routerParams$: Observable<any>;
-  public listOfHidden: Observable<Array<any>>;
+  public listOfHidden$: Observable<Array<any>>;
   public experimentSettings$: Observable<any>;
   public searchTerm$: Observable<string>;
   public minimized: boolean = false;
@@ -74,19 +74,20 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChan
     this.searchTerm$ = this.store.select(selectExperimentMetricsSearchTerm);
     this.splitSize$ = this.store.select(selectSplitSize);
     this.subs.add(this.store.select(selectSelectedExperiment).subscribe(exp => this.experimentCompany = exp?.company?.id ?? null));
+    this.listOfHidden$ = this.store.select(selectSelectedSettingsHiddenPlot);
 
-    this.experimentSettings$ = this.store.pipe(
-      select(selectSelectedExperimentSettings),
-      filter(settings => !!settings),
-      map(settings => settings ? settings.selectedPlot : null),
-      distinctUntilChanged()
-    );
+    this.experimentSettings$ = this.store.select(selectSelectedExperimentSettings)
+      .pipe(
+        filter(settings => !!settings),
+        map(settings => settings ? settings.selectedPlot : null),
+        distinctUntilChanged()
+      );
 
-    this.routerParams$ = this.store.pipe(
-      select(selectRouterParams),
-      filter(params => !!params.experimentId && !this.isDatasetVersionPreview),
-      distinctUntilChanged()
-    );
+    this.routerParams$ = this.store.select(selectRouterParams)
+      .pipe(
+        filter(params => !!params.experimentId && !this.isDatasetVersionPreview),
+        distinctUntilChanged()
+      );
 
     this.selectIsExperimentPendingRunning = this.store.pipe(
       select(selectIsExperimentInProgress)
@@ -103,7 +104,6 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChan
 
   ngOnInit() {
     this.minimized = this.activeRoute.snapshot.routeConfig.data?.minimized;
-    this.listOfHidden = this.store.select(selectSelectedSettingsHiddenPlot);
     this.subs.add(this.store.select(selectExperimentInfoPlots)
       .pipe(
         distinctUntilChanged(),
@@ -114,7 +114,7 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChan
         this.refreshDisabled = false;
         const groupedPlots = groupIterations(metricsPlots);
         this.plotsList = this.preparePlotsList(groupedPlots);
-        const {graphs, parsingError} = convertPlots({plots: groupedPlots, experimentId: this.experimentId});
+        const {graphs, parsingError} = convertPlots({plots: groupedPlots, id: this.experimentId});
         this.graphs = graphs;
         parsingError && this.store.dispatch(addMessage('warn', `Couldn't read all plots. Please make sure all plots are properly formatted (NaN & Inf aren't supported).`, [], true));
         this.changeDetection.detectChanges();

@@ -1,5 +1,4 @@
 <sm-editable-section
-  class="d-block"
   [editable]=" ! model?.ready && model?.company?.id && !isSharedAndNotOwner"
   [saving]="saving"
   (activateEditClicked)="activateEdit()"
@@ -10,9 +9,8 @@
 
 
     <sm-section-header label="LABELS"></sm-section-header>
-    <form #labels="ngForm"
-    >
-      <div [hidden]="!editable">
+    <form [class.edit]="editable" #labels="ngForm">
+      <div class="content" [hidden]="!editable">
         <div *ngFor="let parameter of formData; let i = index">
           <div class="row w-100 align-items-center">
             <div class="input-container col-11">
@@ -54,8 +52,7 @@
     </button>
     </div>
   </div>
-    <div *ngIf="!editable">
-
+    <div class="content" *ngIf="!editable">
       <sm-simple-table-2 [cols]="cols" [rowsData]="formData">
         <ng-template
           let-col

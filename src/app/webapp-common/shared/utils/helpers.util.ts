@@ -1,4 +1,4 @@
-import { isNil, isUndefined } from 'lodash/fp';
+import { isNil, isUndefined } from 'lodash-es';
 
 export function hasValue(value): boolean {
   return !isUndefined(value) && !isNil(value);

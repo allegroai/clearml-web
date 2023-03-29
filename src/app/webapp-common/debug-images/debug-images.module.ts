@@ -10,27 +10,29 @@ import {DebugImagesEffects} from './debug-images-effects';
 import {debugSamplesReducer} from './debug-images-reducer';
 import {DebugImagesViewComponent} from './debug-images-view/debug-images-view.component';
 import {DebugImagesComponent} from './debug-images.component';
-import {MatSliderModule} from '@angular/material/slider';
+import {MatLegacySliderModule as MatSliderModule} from '@angular/material/legacy-slider';
 import {ExperimentGraphsModule} from '../shared/experiment-graphs/experiment-graphs.module';
 import {DebugSampleModule} from '@common/shared/debug-sample/debug-sample.module';
+import {SharedPipesModule} from '@common/shared/pipes/shared-pipes.module';
 
 const declarations = [DebugImagesComponent, DebugImagesViewComponent];
 
 @NgModule({
   declarations,
   exports: declarations,
-  imports: [
-    UiComponentsModule,
-    SMSharedModule,
-    CommonModule,
-    ExperimentCompareSharedModule,
-    ScrollingModule,
-    StoreModule.forFeature('debugImages', debugSamplesReducer),
-    EffectsModule.forFeature([DebugImagesEffects]),
-    MatSliderModule,
-    ExperimentGraphsModule,
-    DebugSampleModule
-  ]
+    imports: [
+        UiComponentsModule,
+        SMSharedModule,
+        CommonModule,
+        ExperimentCompareSharedModule,
+        ScrollingModule,
+        StoreModule.forFeature('debugImages', debugSamplesReducer),
+        EffectsModule.forFeature([DebugImagesEffects]),
+        MatSliderModule,
+        ExperimentGraphsModule,
+        DebugSampleModule,
+        SharedPipesModule
+    ]
 })
 export class DebugImagesModule {
 }

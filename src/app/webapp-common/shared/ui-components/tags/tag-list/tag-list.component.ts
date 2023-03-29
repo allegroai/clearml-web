@@ -1,4 +1,12 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, Output} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  Output
+} from '@angular/core';
 import {TagColorService} from '../../../services/tag-color.service';
 import {Observable} from 'rxjs';
 
@@ -18,21 +26,31 @@ export interface Tag {
 })
 export class TagListComponent {
   public disableRemove: string;
-  tagsList = [] as Tag[];
+  public tagsList = [] as Tag[];
+  public maxTagHover: number;
 
   @Input() set tags(tags: string[]) {
     window.setTimeout(() => {
       this.tagsList = tags?.map((tag: string) => ({caption: tag, colorObservable: this.colorService.getColor(tag)}));
+      if (this.tagsList) {
+        window.setTimeout(() => {
+          this.maxTagHover = this.ref.nativeElement.getBoundingClientRect().width
+            - (this.tagsList.length - 1) * 24
+            - 80 * (this.add.observed ? 1 : 0);
+          this.cdr.detectChanges();
+        }, 100);
+      }
       this.disableRemove = null;
       this.cdr.detectChanges();
     });
   }
   @Input() sysTags = [] as string[];
   @Input() tooltip: boolean = false;
+  @Input() readonly: boolean = false;
   @Output() remove = new EventEmitter();
   @Output() add = new EventEmitter<MouseEvent>();
 
-  constructor(private colorService: TagColorService, public ref: ElementRef, private cdr: ChangeDetectorRef) { }
+  constructor(private colorService: TagColorService, private ref: ElementRef, private cdr: ChangeDetectorRef) { }
 
   public trackFn(index: number, tag: Tag) {
     return tag.caption;

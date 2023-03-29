@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output} from '@angular/core';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
-import {MetricValueType} from '@common/experiments-compare/reducers/experiments-compare-charts.reducer';
+import {MetricValueType} from '@common/experiments-compare/experiments-compare.constants';
 
 
 @Component({
@@ -13,7 +13,7 @@ import {MetricValueType} from '@common/experiments-compare/reducers/experiments-
 export class SelectMetricForCustomColComponent {
   public metricTree: {[metricName: string]: MetricVariantResult[]};
   public filteredMetricTree: [string, MetricVariantResult[]][];
-  public expandedMetrics = {}
+  public expandedMetrics = {};
   public metricsCols: {[metVar: string]: string[]};
   public searchText: any;
   public entriesLimit = 300;

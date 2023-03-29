@@ -5,7 +5,6 @@ import {UsersState} from '@common/core/reducers/users-reducer';
 import {filter, take} from 'rxjs/operators';
 import {selectColorPreferences} from '../../ui-components/directives/choose-color/choose-color.reducer';
 import {addUpdateColorPreferences, ColorPreference} from '../../ui-components/directives/choose-color/choose-color.actions';
-import {getHslContrast, hexToRgb, hslToRgb, RGB2HEX, rgbToHsl} from './color-hash.utils';
 import stc from 'string-to-color';
 import tinycolor from 'tinycolor2';
 export interface ColorCache {[label: string]: number[]}
@@ -33,7 +32,7 @@ export class ColorHashService {
       .subscribe(preferenceColors => this.batchUpdateColorCache(preferenceColors));
   }
 
-  public initColor(label: string, initColor?: number[], lighten = false) {
+  public initColor(label: string, initColor?: number[], lighten = false): number[] {
     const colorCache = this._colorCache.getValue()?.[label];
     if (colorCache) {
       return colorCache;
@@ -44,7 +43,7 @@ export class ColorHashService {
       tColor.lighten(30 - tLum * 100);
     }
     const {r, g, b} = tColor.toRgb();
-    const color = initColor? initColor: [r, g, b];
+    const color = initColor ? initColor : [r, g, b];
     this.setColorForString(label, color, false);
     return color;
   }
@@ -84,7 +83,7 @@ export class ColorHashService {
 
   public hex(hash: string) {
     const rgb = this.initColor(hash);
-    return RGB2HEX(rgb);
+    return tinycolor({r: rgb[0], g: rgb[1], b: rgb[2], a: rgb[3]}).toHexString();
   }
 
   public getRgbString(str, opacity = -1) {
@@ -94,29 +93,6 @@ export class ColorHashService {
     } else {
       return `rgb(${color[0]},${color[1]},${color[2]})`;
     }
-  }
-
-  getMonochromaticHarmony(color, isDarkBg = false) {
-    const backgroundSaturation = 0.10;
-    const minLightness         = 0.20;
-    const maxLightness         = 0.95;
-    const stepSize             = 0.05;
-    const contrastLimit        = 3.9;
-
-    const rgb         = Array.isArray(color) ? color : hexToRgb(color);
-    const originalHsl = rgbToHsl(rgb);
-    const hsl         = [...originalHsl];
-    hsl[1]            = backgroundSaturation;
-    hsl[2]            = isDarkBg ? minLightness : maxLightness;
-    let contrast      = getHslContrast(originalHsl, hsl);
-    while (contrast < contrastLimit) {
-      contrast = getHslContrast(originalHsl, hsl);
-      hsl[2]   = isDarkBg ? hsl[2] + stepSize : hsl[2] - stepSize;
-      if ((!isDarkBg && hsl[2] < minLightness) || (isDarkBg && hsl[2] > maxLightness)) {
-        break;
-      }
-    }
-    return hslToRgb(hsl);
   }
 }
 

@@ -1,6 +1,13 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {selectExperimentConfiguration, selectExperimentHyperParamsInfoData, selectExperimentHyperParamsSelectedSectionFromRoute, selectExperimentSelectedConfigObjectFromRoute, selectIsExperimentSaving, selectIsSelectedExperimentInDev} from '../../reducers';
+import {
+  selectExperimentConfiguration,
+  selectExperimentHyperParamsInfoData,
+  selectExperimentHyperParamsSelectedSectionFromRoute,
+  selectExperimentSelectedConfigObjectFromRoute,
+  selectIsExperimentSaving,
+  selectIsSelectedExperimentInDev
+} from '../../reducers';
 import {CommonExperimentInfoState} from '../../reducers/common-experiment-info.reducer';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 import {selectBackdropActive} from '@common/core/reducers/view.reducer';
@@ -10,8 +17,13 @@ import {selectRouterConfig, selectRouterParams} from '@common/core/reducers/rout
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {ParamsItem} from '~/business-logic/model/tasks/paramsItem';
 import {debounceTime, filter, tap, withLatestFrom} from 'rxjs/operators';
-import {activateEdit, getExperimentConfigurationNames, getExperimentConfigurationObj, setExperimentFormErrors} from '../../actions/common-experiments-info.actions';
-import {getOr, min} from 'lodash/fp';
+import {
+  activateEdit,
+  getExperimentConfigurationNames,
+  getExperimentConfigurationObj,
+  setExperimentFormErrors
+} from '../../actions/common-experiments-info.actions';
+import {min} from 'lodash-es';
 
 @Component({
   selector: 'sm-experiment-info-hyper-parameters',
@@ -38,7 +50,7 @@ export class ExperimentInfoHyperParametersComponent implements OnInit, OnDestroy
     protected router: Router,
     private route: ActivatedRoute
   ) {
-    this.minimized = getOr(false, 'data.minimized', this.route.snapshot.routeConfig);
+    this.minimized = this.route.snapshot.routeConfig?.data?.minimized ?? false;
     this.hyperParamsInfo$ = this.store.select(selectExperimentHyperParamsInfoData);
     this.configuration$ = this.store.select(selectExperimentConfiguration);
     this.editable$ = this.store.select(selectIsExperimentEditable);

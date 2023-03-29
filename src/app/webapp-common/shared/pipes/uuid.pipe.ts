@@ -1,5 +1,5 @@
 import {Pipe, PipeTransform} from '@angular/core';
-import * as uuid from 'uuid';
+import {v4} from 'uuid';
 
 @Pipe({
   name: 'uuid'
@@ -7,7 +7,7 @@ import * as uuid from 'uuid';
 export class UuidPipe implements PipeTransform {
 
   transform(value: string): string {
-    return `${value}-${uuid.v4()}`;
+    return `${value}-${v4()}`;
   }
 
 }

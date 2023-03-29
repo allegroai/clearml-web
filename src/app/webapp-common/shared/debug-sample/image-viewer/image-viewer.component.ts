@@ -2,7 +2,7 @@ import {ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, Inj
 import {debounceTime, distinctUntilChanged, filter, withLatestFrom} from 'rxjs/operators';
 import {BehaviorSubject, interval, Observable, Subscription} from 'rxjs';
 import {Store} from '@ngrx/store';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
 import {EventsGetDebugImageIterationsResponse} from '~/business-logic/model/events/eventsGetDebugImageIterationsResponse';
 import {selectAppVisible, selectAutoRefresh} from '@common/core/reducers/view.reducer';
 import {BaseImageViewerComponent} from '@common/shared/debug-sample/image-viewer/base-image-viewer.component';
@@ -31,6 +31,7 @@ export class ImageViewerComponent extends BaseImageViewerComponent implements On
   private endOfTimeSub: Subscription;
   change$: BehaviorSubject<number>;
   private sub = new Subscription();
+  public embedFunction: (DOMRect, metric: string, variant: string) => null;
 
 
   @HostListener('document:keydown', ['$event'])
@@ -60,6 +61,7 @@ export class ImageViewerComponent extends BaseImageViewerComponent implements On
       snippetsMetaData: Array<{task: string; metric: string; variant: string; iter: number}>;
       url: string;
       withoutNavigation: boolean;
+      embedFunction: () => null;
     },
     public dialogRef: MatDialogRef<ImageViewerComponent>,
     public changeDetector: ChangeDetectorRef,
@@ -86,7 +88,7 @@ export class ImageViewerComponent extends BaseImageViewerComponent implements On
     this.endOfTime$ = this.store.select(selectViewerEndOfTime);
     this.autoRefreshState$ = this.store.select(selectAutoRefresh);
     this.isAppVisible$ = this.store.select(selectAppVisible);
-
+    this.embedFunction = data.embedFunction;
     this.autoRefreshSub = interval(VIEWER_AUTO_REFRESH_INTERVAL).pipe(
       withLatestFrom(this.autoRefreshState$, this.isAppVisible$),
       filter(([, autoRefreshState, isVisible]) => isVisible && autoRefreshState)
@@ -122,6 +124,8 @@ export class ImageViewerComponent extends BaseImageViewerComponent implements On
 
   next() {
     if (this.canGoNext() && this.currentDebugImage) {
+      this.imageHeight = null;
+      this.imageWidth = null;
       this.imageLoaded = false;
       this.store.dispatch(getNextDebugImageSample({task: this.currentDebugImage.task, navigateEarlier: false}));
     }
@@ -129,6 +133,8 @@ export class ImageViewerComponent extends BaseImageViewerComponent implements On
 
   previous() {
     if (this.canGoBack() && this.currentDebugImage) {
+      this.imageHeight = null;
+      this.imageWidth = null;
       this.imageLoaded = false;
       this.store.dispatch(getNextDebugImageSample({task: this.currentDebugImage.task, navigateEarlier: true}));
     }
@@ -194,4 +200,7 @@ export class ImageViewerComponent extends BaseImageViewerComponent implements On
     this.imageLoaded = true;
   }
 
+  embedCodeClick($event: MouseEvent) {
+    $event && this.embedFunction(($event?.currentTarget as HTMLElement).getBoundingClientRect(), this.currentDebugImage?.metric, this.currentDebugImage?.variant);
+  }
 }

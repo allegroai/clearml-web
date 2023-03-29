@@ -25,6 +25,11 @@ export const setReportsTags = createAction(
   props<{ tags: string[] }>()
 );
 
+export const addReportsTags = createAction(
+  REPORTS_PREFIX + '[add reports tags]',
+  props<{ tags: string[] }>()
+);
+
 export const setReports = createAction(
   REPORTS_PREFIX + '[set reports]',
   props<{ reports: IReport[]; scroll: ReportsGetAllExResponse['scroll_id']; noMoreReports: boolean }>()
@@ -100,4 +105,8 @@ export const setReportsSearchQuery = createAction(
   props<{ query: string; regExp?: boolean }>()
 );
 
+export const deleteResource = createAction(
+  REPORTS_PREFIX + 'DELETE_RESOURCE',
+  props<{resource: string}>()
+);
 

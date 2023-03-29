@@ -5,7 +5,8 @@ import {SMSharedModule} from '@common/shared/shared.module';
 import {SharedModule} from '~/shared/shared.module';
 import {ReportCardComponent} from '@common/reports/report-card/report-card.component';
 import {ReportCardMenuComponent} from '@common/reports/report-card-menu/report-card-menu.component';
-import {CommonExperimentSharedModule} from "@common/experiments/shared/common-experiment-shared.module";
+import {SharedPipesModule} from '@common/shared/pipes/shared-pipes.module';
+import {ExperimentSharedModule} from '~/features/experiments/shared/experiment-shared.module';
 
 const declarations = [  ReportCardComponent,
   ReportCardMenuComponent,];
@@ -17,7 +18,8 @@ const declarations = [  ReportCardComponent,
     ReactiveFormsModule,
     SMSharedModule,
     SharedModule,
-    CommonExperimentSharedModule,
+    SharedPipesModule,
+    ExperimentSharedModule,
   ],
   declarations: [...declarations],
   exports: [...declarations],

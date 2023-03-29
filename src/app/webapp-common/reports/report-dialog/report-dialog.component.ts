@@ -1,7 +1,7 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {MatDialogRef} from '@angular/material/dialog';
+import {MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
 import {Store} from '@ngrx/store';
-import {Observable, Subscription} from 'rxjs';
+import {Observable} from 'rxjs';
 import {selectRootProjects} from '@common/core/reducers/projects.reducer';
 import {getAllSystemProjects} from '@common/core/actions/projects.actions';
 import { ReportsCreateRequest } from '~/business-logic/model/reports/models';

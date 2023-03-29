@@ -1,36 +1,51 @@
 <ng-container *ngIf="activated; else placeHolder" [ngSwitch]="type">
   <ng-container *ngIf="(signIsNeeded$ | async) === false; else signIsNeededTemplate">
     <ng-container *ngIf="(noPermissions$ | async) === false; else noPermissionsTemplate">
-      <ng-template #plotTemplate>
-        <sm-single-graph
-          [hideDownloadButtons]="externalTool"
-          [class.less-padding]="false"
-          [class.two-in-a-row]="false"
-          [graphsNumber]="1"
-          [height]="singleGraphHeight"
-          [chart]="plotData"
-          [id]="'lala'"
-          [isDarkTheme]="isDarkTheme"
-          [showLoaderOnDraw]="false"
-          [identifier]="'lala'"
-          [width]="400"
-          [isCompare]="true"
-          [noMargins]="true"
-          [legendConfiguration]="{noTextWrap: true}"
-          [hideMaximize]="hideMaximize"
-          (maximizeClicked)="maximize()">
-        </sm-single-graph>
-      </ng-template>
 
-      <ng-container *ngIf="type === 'sample'; else plotTemplate">
-        <sm-debug-image-snippet
-          *ngIf="frame?.url"
-          class="d-flex-center"
-          [frame]="frame"
-          [noHoverEffects]="true"
-          (imageClicked)="hideMaximize === 'show' && sampleClicked($event)">
-        </sm-debug-image-snippet>
+      <ng-container [ngSwitch]="type">
+        <ng-container *ngSwitchCase="type === 'plot' || type === 'scalar' ? type : ''">
+          <sm-single-graph
+            [hideDownloadButtons]="externalTool"
+            [class.less-padding]="false"
+            [class.two-in-a-row]="false"
+            [graphsNumber]="1"
+            [height]="singleGraphHeight"
+            [chart]="plotData"
+            [id]="'lala'"
+            [isDarkTheme]="isDarkTheme"
+            [showLoaderOnDraw]="false"
+            [identifier]="'lala'"
+            [width]="400"
+            [isCompare]="true"
+            [noMargins]="true"
+            [legendConfiguration]="{noTextWrap: true}"
+            [hideMaximize]="hideMaximize"
+            (maximizeClicked)="maximize()">
+          </sm-single-graph>
+        </ng-container>
+
+        <ng-container *ngSwitchCase="'sample'">
+          <sm-debug-image-snippet
+            *ngIf="frame?.url"
+            class="d-flex-center h-100"
+            [frame]="frame"
+            [noHoverEffects]="true"
+            (imageClicked)="hideMaximize === 'show' && sampleClicked($event)">
+          </sm-debug-image-snippet>
+        </ng-container>
+        <ng-container *ngSwitchCase="'parcoords'">
+          <sm-parallel-coordinates-graph
+            *ngIf="parcoordsData"
+            [experiments]="parcoordsData.experiments"
+            [parameters]="parcoordsData.params"
+            [metric]="parcoordsData.metric"
+            [metricValueType]="parcoordsData.valueType"
+            [darkTheme]="isDarkTheme"
+            [reportMode]="true"
+          ></sm-parallel-coordinates-graph>
+        </ng-container>
       </ng-container>
+
     </ng-container>
   </ng-container>
 </ng-container>
@@ -46,9 +61,10 @@
 </ng-template>
 
 <ng-template #signIsNeededTemplate>
-  <div class="s3message">Missing S3 credentials. Please verify credentials in <a target="_blank" class="link"
-                                                                                 href="/settings/webapp-configuration">WEB
-    APP CLOUD ACCESS</a> in clearml app.
+  <div class="container" [class.dark-theme]="isDarkTheme">
+    <div class="s3message">
+      Missing S3 credentials. Please verify credentials in <a target="_blank" href="/settings/webapp-configuration">WEB APP CLOUD ACCESS</a> in clearml app.
+    </div>
   </div>
 </ng-template>
 

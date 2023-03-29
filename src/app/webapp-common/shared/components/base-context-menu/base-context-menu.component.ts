@@ -1,9 +1,9 @@
 import {Component, ElementRef, EventEmitter, HostListener, Input, OnDestroy, Output, ViewChild} from '@angular/core';
-import {MatMenuTrigger} from '@angular/material/menu';
+import {MatLegacyMenuTrigger as MatMenuTrigger} from '@angular/material/legacy-menu';
 import {TagsMenuComponent} from '../../ui-components/tags/tags-menu/tags-menu.component';
 import {Store} from '@ngrx/store';
 import {deactivateEdit, activateEdit} from 'app/webapp-common/experiments/actions/common-experiments-info.actions';
-import {ActivateModelEdit, CancelModelEdit} from 'app/webapp-common/models/actions/models-info.actions';
+import {activateModelEdit, cancelModelEdit} from 'app/webapp-common/models/actions/models-info.actions';
 import {CountAvailableAndIsDisableSelectedFiltered} from '@common/shared/entity-page/items.utils';
 import {MenuItems} from '../../entity-page/items.utils';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
@@ -62,7 +62,7 @@ export class BaseContextMenuComponent implements OnDestroy{
   tagMenuOpened(tagMenuRef?: TagsMenuComponent) {
     window.setTimeout(() => {
       this.store.dispatch(activateEdit('tags'));
-      this.store.dispatch(new ActivateModelEdit('tags'));
+      this.store.dispatch(activateModelEdit('tags'));
     }, 200);
     tagMenuRef ? tagMenuRef.focus() : this.tagMenu?.focus();
   }
@@ -70,7 +70,7 @@ export class BaseContextMenuComponent implements OnDestroy{
   tagMenuClosed(tagMenuRef?: TagsMenuComponent) {
     window.setTimeout(() => {
       this.store.dispatch(deactivateEdit());
-      this.store.dispatch(new CancelModelEdit());
+      this.store.dispatch(cancelModelEdit());
     }, 200);
     tagMenuRef ? tagMenuRef.clear() : this.tagMenu?.clear();
   }

@@ -2,22 +2,28 @@
 
 :host {
   .header {
-    padding-left: 24px;
     font-size: 16px;
-    margin-bottom: 33px;
-
     .user-icon {
       width: 88px;
       height: 88px;
+      margin-bottom: 12px;
       overflow: hidden;
       background-image: url(../../../../webapp-common/assets/icons/icon-profile-user.svg);
     }
-    sm-inline-edit {
-      margin: 12px 0 12px 24px;
-      min-height: 32px;
-    }
-    .profile-email.text{
+    
+    .profile-email {
+      margin-top: 12px;
       color: $blue-400;
+    }
+
+    .profile-name {
+      display: flex;
+      align-items: center;
+      padding-left: 32px;
+      min-height: 32px;
+      &.edit {
+        transform: translateX(18px);
+      }
     }
   }
 }

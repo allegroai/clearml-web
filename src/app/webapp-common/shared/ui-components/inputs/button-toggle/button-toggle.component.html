@@ -4,6 +4,7 @@
     [value]="option.value"
     [disabled]="disabled"
     appearance="legacy"
+    [attr.data-id]="option.value"
     (click)="valueChanged.emit(option.value)"
     [smTooltip]="option.icon ? option.label : ''"
     matTooltipShowDelay="500"

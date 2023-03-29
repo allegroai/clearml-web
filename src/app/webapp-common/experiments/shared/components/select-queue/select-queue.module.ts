@@ -7,6 +7,7 @@ import {SelectQueueEffects} from './select-queue.effects';
 import {selectQueueReducer} from './select-queue.reducer';
 import {SMSharedModule} from '@common/shared/shared.module';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {SharedPipesModule} from '@common/shared/pipes/shared-pipes.module';
 
 @NgModule({
   imports: [
@@ -15,7 +16,8 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
     EffectsModule.forFeature([SelectQueueEffects]),
     StoreModule.forFeature('selectQueue', selectQueueReducer),
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    SharedPipesModule
   ],
   providers      : [],
   declarations   : [SelectQueueComponent],

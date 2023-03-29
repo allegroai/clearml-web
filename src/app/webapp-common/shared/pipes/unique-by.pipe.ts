@@ -1,5 +1,5 @@
 import {Pipe, PipeTransform} from '@angular/core';
-import {uniqBy} from 'lodash/fp';
+import {uniqBy} from 'lodash-es';
 
 @Pipe({
   name: 'uniqueBy'})
@@ -11,7 +11,7 @@ export class UniqueByPipe implements PipeTransform {
       return '';
     }
 
-    return uniqBy(key, arr);
+    return uniqBy(arr,key);
   }
 
 }

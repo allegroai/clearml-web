@@ -8,6 +8,7 @@
              type="text"
              (keydown.escape)="clearMetricSearch(); searchMetric.value= ''"
              placeholder="Search metric"
+             data-id="searchField"
              [smTooltip]="selectedMetric?.name"
              [matTooltipShowDelay]="500"
              [value]="(!metrics || listOpen) ? '' : selectedMetric?.name"
@@ -76,6 +77,7 @@
                                    [parameters]="selectedHyperParams"
                                    [metric]="selectedMetric"
                                    [metricValueType]="metricValueType$ | async"
+                                   (createEmbedCode)="createEmbedCode($event)"
     ></sm-parallel-coordinates-graph>
     <ng-template #no_data>
       <div class="d-flex align-items-center justify-content-center flex-column h-100 no-data">

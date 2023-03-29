@@ -37,28 +37,16 @@ import {LIMITED_VIEW_LIMIT} from '@common/experiments-compare/experiments-compar
 })
 export class ExperimentCompareDetailsComponent extends ExperimentCompareBase implements OnInit, AfterViewInit {
   public showEllipsis: boolean = true;
-  public nativeWidth = 410;
-
-  private treeCardBody: HTMLDivElement;
-  @ViewChildren('treeCardBody') treeCardBodies: QueryList<ElementRef<HTMLDivElement>>;
-
-  @HostListener('window:resize')
-  afterResize() {
-    window.setTimeout(() => {
-      this.nativeWidth = Math.max(this.treeCardBody.getBoundingClientRect().width, 410);
-      this.cdr.detectChanges();
-    });
-  }
 
   constructor(
     public router: Router,
     public store: Store<ExperimentInfoState>,
     public changeDetection: ChangeDetectorRef,
     public activeRoute: ActivatedRoute,
-    private cdr: ChangeDetectorRef,
+    public cdr: ChangeDetectorRef,
     public refresh: RefreshService
   ) {
-    super(router, store, changeDetection, activeRoute, refresh);
+    super(router, store, changeDetection, activeRoute, refresh, cdr);
   }
 
   experiments$ = this.store.pipe(select(selectExperimentsDetails));
@@ -88,16 +76,6 @@ export class ExperimentCompareDetailsComponent extends ExperimentCompareBase imp
       this.resetComponentState(experiments);
       this.calculateTree(experiments);
     });
-  }
-
-
-  ngAfterViewInit() {
-    this.treeCardBodies.changes
-      .pipe(filter(list => list.first), take(1))
-      .subscribe((list: QueryList<ElementRef<HTMLDivElement>>) => {
-        this.treeCardBody = list.first.nativeElement;
-        this.nativeWidth = Math.max(this.treeCardBody.getBoundingClientRect().width, 410);
-      });
   }
 
   buildCompareTree(experiments: Array<IExperimentDetail>, hasDataFeature?: boolean): ExperimentCompareTree {

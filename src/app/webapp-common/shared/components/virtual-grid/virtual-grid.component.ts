@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import {BehaviorSubject, combineLatest, fromEvent, Observable} from 'rxjs';
 import {debounceTime, filter, map, startWith} from 'rxjs/operators';
-import {chunk} from 'lodash/fp';
+import {chunk} from 'lodash-es';
 import {CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
 import {Store} from '@ngrx/store';
 import {selectScaleFactor} from '@common/core/reducers/view.reducer';
@@ -88,7 +88,7 @@ export class VirtualGridComponent implements OnChanges{
         this.gridGap = Math.min(this.cardWidth * 0.075, 24);
         this.cardsInRow = Math.floor(this.rowWidth / (this.cardWidth + this.gridGap)) || 1;
         this.rowWidth = this.cardsInRow * this.cardWidth + (this.cardsInRow - 1) * this.gridGap;
-        return chunk(this.cardsInRow , results);
+        return chunk(results, this.cardsInRow );
       }));
   }
 

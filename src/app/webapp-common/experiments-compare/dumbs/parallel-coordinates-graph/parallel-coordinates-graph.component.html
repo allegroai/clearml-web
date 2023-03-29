@@ -1,16 +1,26 @@
-<div class="download">
+<div class="actions" *ngIf="!darkTheme">
+  <button
+    (click)="maximize()"
+    class="btn btn-icon"
+    smTooltip="Maximize"
+  ><i class="al-icon al-ico-fit sm-md"></i></button>
+  <button
+    (click)="creatingEmbedCode($any($event.target).getBoundingClientRect())"
+    class="btn btn-icon"
+    smTooltip="Copy embed code"
+  ><i class="al-icon al-ico-code sm-md"></i></button>
   <button
     (click)="downloadImage()"
-    class="btn btn-primary"
+    class="btn btn-icon"
     smTooltip="Download as PNG"
-  ><i class="al-icon al-ico-download sm"></i></button>
+  ><i class="al-icon al-ico-download sm-md"></i></button>
 </div>
-<div #container class="graph-container">
-  <div class="graph-title">Hyper Parameters Impact on {{metric.name}}</div>
+<div #container class="graph-container" [class.dark-theme]="darkTheme">
+  <div class="graph-title">Hyperparameters Impact on {{metric?.name}}</div>
   <div #parallelGraph>
   </div>
-  <div class="d-flex legend-container">
-    <div *ngFor="let experiment of experiments" class="experiment-name">
+  <div #legend class="d-flex legend-container" [class.limit-height]="reportMode">
+    <div *ngFor="let experiment of experiments; trackBy: trackById" class="experiment-name">
       <span class="dot-container">
         <span #dot class="dot pallete-cursor"
               [style.background-color]="experimentsColors[experiment.id]"

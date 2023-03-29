@@ -22,12 +22,13 @@ import {
   setReports,
   setReportsOrderBy,
   setReportsTags,
-  updateReport
+  updateReport,
+  deleteResource
 } from './reports.actions';
 import {ApiReportsService} from '~/business-logic/api-services/reports.service';
 import {IReport, PAGE_SIZE} from './reports.consts';
 import {
-  selectArchiveView,
+  selectArchiveView, selectReport,
   selectReportsOrderBy,
   selectReportsQueryString,
   selectReportsScrollId,
@@ -44,7 +45,7 @@ import {selectCurrentUser, selectShowOnlyUserWork} from '../core/reducers/users-
 import {addExcludeFilters} from '../shared/utils/tableParamEncode';
 import {escapeRegex} from '../shared/utils/escape-regex';
 import {MESSAGES_SEVERITY} from '../constants';
-import {MatDialog} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {
   ChangeProjectDialogComponent
 } from '@common/experiments/shared/components/change-project-dialog/change-project-dialog.component';
@@ -52,6 +53,8 @@ import {ReportsMoveRequest} from '~/business-logic/model/reports/reportsMoveRequ
 import {selectActiveWorkspaceReady} from '~/core/reducers/view.reducer';
 import {ReportsCreateResponse} from '~/business-logic/model/reports/reportsCreateResponse';
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
+import {HttpClient} from '@angular/common/http';
+import {selectRouterParams} from "@common/core/reducers/router-reducer";
 
 @Injectable()
 export class ReportsEffects {
@@ -62,6 +65,7 @@ export class ReportsEffects {
     private route: ActivatedRoute,
     private router: Router,
     private reportsApiService: ApiReportsService,
+    private http: HttpClient,
     private matDialog: MatDialog
   ) {
   }
@@ -99,12 +103,14 @@ export class ReportsEffects {
       this.store.select(selectCurrentUser),
       this.store.select(selectReportsQueryString),
       this.store.select(selectHideExamples),
+      this.store.select(selectRouterParams).pipe(map(params => params?.projectId)),
     ),
-    switchMap(([action, scroll, archive, orderBy, sortOrder, showOnlyUserWork, mainPageTagsFilter, mainPageTagsFilterMatchMode, user, searchQuery, hideExamples]) =>
+    switchMap(([action, scroll, archive, orderBy, sortOrder, showOnlyUserWork, mainPageTagsFilter, mainPageTagsFilterMatchMode, user, searchQuery, hideExamples, projectId]) =>
       this.reportsApiService.reportsGetAllEx({
         /* eslint-disable @typescript-eslint/naming-convention */
         only_fields: ['name', 'comment', 'company', 'tags', 'report', 'project.name', 'user.name', 'status', 'last_update', 'system_tags'] as (keyof Report)[],
         size: PAGE_SIZE,
+        ...(projectId && {project: projectId}),
         scroll_id: action['loadMore'] ? scroll : null,
         ...(hideExamples && {allow_public: false}),
         system_tags: [archive ? '__$and' : '__$not', 'archived'],
@@ -114,7 +120,7 @@ export class ReportsEffects {
         ...(searchQuery?.query && {
           _any_: {
             pattern: searchQuery.regExp ? searchQuery.query : escapeRegex(searchQuery.query),
-            fields: ['id', 'name', 'tags', 'project']
+            fields: ['id', 'name', 'tags', 'project', 'comment', 'report']
           }
         })
         /* eslint-enable @typescript-eslint/naming-convention */
@@ -160,9 +166,13 @@ export class ReportsEffects {
     switchMap((action) => this.store.select(selectActiveWorkspaceReady).pipe(
       filter(ready => ready),
       map(() => action))),
-    switchMap(action => this.reportsApiService.reportsGetAllEx({id: [action.id]})),
-    tap(res=> {
-      if(res.tasks.length===0){
+    switchMap(action => this.reportsApiService.reportsGetAllEx({
+      id: [action.id],
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      only_fields: ['name', 'status', 'company.id', 'user.id', 'comment', 'report', 'tags', 'system_tags', 'report_assets', 'project.name']
+    })),
+    tap(res => {
+      if(res.tasks.length === 0){
         this.router.navigateByUrl('/404');
       }
     }),
@@ -202,7 +212,7 @@ export class ReportsEffects {
       this.matDialog.open(ChangeProjectDialogComponent, {
         data: {
           currentProjects: action.report.project?.id ?? action.report.project,
-          defaultProject: action.report.project?.id ?? action.report.project,
+          defaultProject: action.report.project,
           reference: action.report.name,
           type: 'report'
         }
@@ -221,11 +231,11 @@ export class ReportsEffects {
             changes: {
               project: (moveRequest.project ?
                 {id: moveRequest.project, name: moveRequest.project_name} :
-                {id: res.project_id, name: moveRequest.project_name})
+                {id: res.project_id, name: moveRequest.project_name ?? 'Root project'})
             }
           }),
           deactivateLoader(moveReport.type),
-          addMessage(MESSAGES_SEVERITY.SUCCESS, `Report moved successfully to ${moveRequest.project_name}`)
+          addMessage(MESSAGES_SEVERITY.SUCCESS, `Report moved successfully to ${moveRequest.project_name ?? 'Projects root'}`)
         ]),
         catchError(err => [
           deactivateLoader(moveReport.type),
@@ -356,4 +366,20 @@ export class ReportsEffects {
     )),
   ));
 
+  deleteResource = createEffect(() => this.actions.pipe(
+    ofType(deleteResource),
+    switchMap(action => this.http.delete(action.resource)
+      .pipe(
+        catchError(() => [addMessage(MESSAGES_SEVERITY.ERROR, 'failed to delete resource')]),
+        withLatestFrom(this.store.select(selectReport)),
+        mergeMap(([, report]) => [updateReport({
+          id: report.id,
+          changes: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            report_assets: report.report_assets?.filter(r => r !== action.resource),
+          }
+        })])
+      )
+    )
+  ));
 }

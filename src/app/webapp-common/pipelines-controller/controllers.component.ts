@@ -1,10 +1,10 @@
 import {Component, ViewChild} from '@angular/core';
 import {ExperimentsComponent} from '@common/experiments/experiments.component';
 import {Store} from '@ngrx/store';
-import {ExperimentsViewState} from '~/features/experiments/reducers/experiments-view.reducer';
+import {ExperimentsViewState} from '@common/experiments/reducers/experiments-view.reducer';
 import {SmSyncStateSelectorService} from '@common/core/services/sync-state-selector.service';
 import {ActivatedRoute, Router} from '@angular/router';
-import {MatDialog} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {INITIAL_CONTROLLER_TABLE_COLS} from '@common/pipelines-controller/controllers.consts';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {Observable} from 'rxjs';

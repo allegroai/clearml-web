@@ -1,6 +1,10 @@
 import {ColHeaderFilterTypeEnum, ColHeaderTypeEnum, ISmCol} from '../shared/ui-components/data/table/table.consts';
 import {EXPERIMENTS_TABLE_COL_FIELDS} from '~/features/experiments/shared/experiments.const';
 
+export const EXPERIMENTS_STORE_KEY = 'experiments';
+export const EXPERIMENTS_PREFIX = 'EXPERIMENTS_';
+
+
 export const INITIAL_EXPERIMENT_TABLE_COLS: ISmCol[] = [
   {
     id              : EXPERIMENTS_TABLE_COL_FIELDS.SELECTED,

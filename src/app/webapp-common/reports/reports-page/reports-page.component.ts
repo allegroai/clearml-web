@@ -1,9 +1,10 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {ActivatedRoute, Params, Router} from '@angular/router';
-import {MatDialog} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {ReportDialogComponent} from '../report-dialog/report-dialog.component';
 import {
+  addReportsTags,
   archiveReport,
   createReport, deleteReport,
   getReports,
@@ -31,11 +32,12 @@ import {MESSAGES_SEVERITY} from '../../constants';
 import {selectMainPageTagsFilter, selectMainPageTagsFilterMatchMode} from '../../core/reducers/projects.reducer';
 import {selectShowOnlyUserWork} from '../../core/reducers/users-reducer';
 import {selectSearchQuery} from '../../common-search/common-search.reducer';
-import {initSearch} from '../../common-search/common-search.actions';
-import {debounceTime, filter, tap} from 'rxjs/operators';
-import {addProjectTags, setTags} from '@common/core/actions/projects.actions';
-import {isEqual} from 'lodash/fp';
+import {initSearch, setSearching, setSearchQuery} from '../../common-search/common-search.actions';
+import {debounceTime, filter, map, tap} from 'rxjs/operators';
+import {setDefaultNestedModeForFeature} from '@common/core/actions/projects.actions';
+import {isEqual} from 'lodash-es';
 import {ClipboardService} from 'ngx-clipboard';
+import {selectRouterParams} from '@common/core/reducers/router-reducer';
 
 @Component({
   selector: 'sm-reports-page',
@@ -51,6 +53,7 @@ export class ReportsPageComponent implements OnInit, OnDestroy {
   public reportsOrderBy$: Observable<string>;
   public reportsSortOrder$: Observable<1 | -1>;
   private searchQuery$: Observable<{ query: string; regExp?: boolean; original?: string }>;
+  public selectedProjectId$: Observable<string>;
 
   constructor(
     private store: Store<any>,
@@ -60,12 +63,13 @@ export class ReportsPageComponent implements OnInit, OnDestroy {
     private _clipboardService: ClipboardService
 ) {
     this.reports$ = this.store.select(selectReports);
-    this.reportsTags$ = this.store.select(selectReportsTags).pipe(tap(tags => store.dispatch(setTags({tags}))));
+    this.reportsTags$ = this.store.select(selectReportsTags);
     this.archive$ = this.store.select(selectArchiveView);
     this.noMoreReports$ = this.store.select(selectNoMoreReports);
     this.reportsOrderBy$ = this.store.select(selectReportsOrderBy);
     this.reportsSortOrder$ = this.store.select(selectReportsSortOrder);
     this.searchQuery$ = this.store.select(selectSearchQuery);
+    this.selectedProjectId$ = this.store.select(selectRouterParams).pipe(map(params => params?.projectId));
 
     this.store.dispatch(getReportsTags());
   }
@@ -81,7 +85,6 @@ export class ReportsPageComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.sub.unsubscribe();
     this.store.dispatch(resetReports());
-    this.store.dispatch(setTags({tags: []}));
   }
 
   ngOnInit(): void {
@@ -112,8 +115,9 @@ export class ReportsPageComponent implements OnInit, OnDestroy {
 
 
   reportSelected(report: Report) {
-    this.router.navigate([(report.project as any)?.id ?? '*', report.id], {relativeTo: this.route});
-
+    this.store.dispatch(setSearchQuery({query: ''}));
+    this.store.dispatch(setSearching({payload: false}));
+    this.router.navigate(['reports',(report.project as any)?.id ?? '*', report.id]);
   }
 
   toggleArchive(archive: boolean) {
@@ -140,7 +144,7 @@ export class ReportsPageComponent implements OnInit, OnDestroy {
     const tags = [...$event.report.tags, $event.tag];
     tags.sort();
     this.store.dispatch(updateReport({id: $event.report.id, changes: {tags}}));
-    this.store.dispatch(addProjectTags({tags: [$event.tag], systemTags: []}));
+    this.store.dispatch(addReportsTags({tags: [$event.tag]}));
   }
 
   removeTag($event: { report: IReport; tag: string }) {
@@ -168,5 +172,13 @@ export class ReportsPageComponent implements OnInit, OnDestroy {
 
   delete(report: IReport) {
     this.store.dispatch(deleteReport({report}));
+  }
+  toggleNestedView(nested: boolean) {
+    this.store.dispatch(setDefaultNestedModeForFeature({feature: 'reports', isNested: nested}));
+    if (nested) {
+      this.router.navigate(['*', 'projects'], {relativeTo: this.route});
+    } else {
+      this.router.navigateByUrl('reports');
+    }
   }
 }

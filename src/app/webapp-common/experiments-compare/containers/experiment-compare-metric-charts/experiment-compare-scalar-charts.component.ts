@@ -2,12 +2,12 @@ import {ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild} from '@angul
 import {Observable, Subscription} from 'rxjs';
 import {select, Store} from '@ngrx/store';
 import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
-import {distinctUntilChanged, filter, map, withLatestFrom} from 'rxjs/operators';
-import {isEqual} from 'lodash/fp';
+import {distinctUntilChanged, filter, map} from 'rxjs/operators';
+import {isEqual} from 'lodash-es';
 import {GroupedList, mergeMultiMetrics, mergeMultiMetricsGroupedVariant} from '@common/tasks/tasks.utils';
 import {
   getMultiScalarCharts,
-  resetExperimentMetrics,
+  resetExperimentMetrics, setExperimentHistogram,
   setExperimentMetricsSearchTerm,
   setExperimentSettings,
   setSelectedExperiments
@@ -23,7 +23,7 @@ import {
 } from '../../reducers';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {toggleShowScalarOptions} from '../../actions/compare-header.actions';
-import {GroupByCharts, groupByCharts} from '@common/experiments/reducers/common-experiment-output.reducer';
+import {GroupByCharts, groupByCharts} from '@common/experiments/reducers/experiment-output.reducer';
 import {ExtFrame} from '@common/shared/single-graph/plotly-graph-base';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
@@ -31,7 +31,6 @@ import {ExperimentGraphsComponent} from '@common/shared/experiment-graphs/experi
 import {selectScalarsHoverMode} from '@common/experiments/reducers';
 import {setScalarsHoverMode} from '@common/experiments/actions/common-experiment-output.actions';
 import {ChartHoverModeEnum} from '@common/experiments/shared/common-experiments.const';
-import {Router} from '@angular/router';
 import { ReportCodeEmbedService } from '~/shared/services/report-code-embed.service';
 
 
@@ -84,7 +83,6 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
     private changeDetection: ChangeDetectorRef,
     private refresh: RefreshService,
     private reportEmbed: ReportCodeEmbedService,
-    private router: Router
   ) {
     this.listOfHidden = this.store.select(selectSelectedSettingsHiddenScalar)
       .pipe(distinctUntilChanged(isEqual));

@@ -9,12 +9,14 @@
     justify-content: space-between;
     align-items: center;
     padding: 0 24px;
+    overflow: hidden;
 
     .name {
       font-size: 16px;
       font-weight: 500;
       line-height: 1.5;
       color: $blue-200;
+      padding-right: 24px;
     }
 
     .actions {
@@ -24,6 +26,10 @@
         display: inherit;
         margin-left: 12px;
         gap: 12px;
+      }
+
+      sm-tag-list {
+        max-width: 400px;
       }
     }
   }
@@ -163,8 +169,6 @@
 }
 
 
-
-
 @media print {
-  
+
 }

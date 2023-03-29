@@ -15,7 +15,7 @@ import {distinctUntilChanged, filter, map, takeUntil} from 'rxjs/operators';
 import {ActivatedRoute, Router} from '@angular/router';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 import {addMessage} from '@common/core/actions/layout.actions';
-import {cloneDeep} from 'lodash/fp';
+import {cloneDeep} from 'lodash-es';
 
 
 @Component({

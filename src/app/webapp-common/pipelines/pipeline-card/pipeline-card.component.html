@@ -24,14 +24,17 @@
                       [editable]="true"
                       [minLength]="2"
                       [required]="true"
-                      pattern="^[^/]+$"
+                      pattern="^[^/]{2,}$"
                       [inlineDisabled]="true"
                       (textChanged)="prepareProjectNameForChange($event)"
       >
         <span class="d-flex align-items-center">
         <span class="project-name"
               [smTooltip]="project.name | cleanProjectPath"
-        >{{project.name | shortProjectName}} </span><i *ngIf="project.name | cleanProjectPath: false" [smTooltip]="project.name | cleanProjectPath: false"
+              smShowTooltipIfEllipsis
+        >{{project.name | shortProjectName}} </span><i *ngIf="!hideProjectPathIcon && (project.name | cleanProjectPath:
+         false)"
+                                                       [smTooltip]="project.name | cleanProjectPath: false"
                                                        class="al-icon al-ico-project-path sm ml-2"></i></span>
       </sm-inline-edit>
       <sm-pipeline-card-menu

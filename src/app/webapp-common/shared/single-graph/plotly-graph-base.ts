@@ -1,10 +1,12 @@
-import {hslToRgb, rgbToHsl} from '../services/color-hash/color-hash.utils';
 import {Subscription} from 'rxjs';
-import {Input, OnDestroy, Component} from '@angular/core';
+import {Component, Input, OnDestroy} from '@angular/core';
 import {Config, Frame, Layout, LayoutAxis, Legend, PlotData} from 'plotly.js';
 import {selectScaleFactor} from '@common/core/reducers/view.reducer';
 import {Store} from '@ngrx/store';
+import tinycolor from 'tinycolor2';
 
+export const DARK_THEME_GRAPH_LINES_COLOR = '#39405f';
+export const DARK_THEME_GRAPH_TICK_COLOR = '#c1cdf3';
 export interface VisibleExtFrame extends ExtFrame {
   id: string;
   visible: boolean;
@@ -49,6 +51,7 @@ export interface ExtData extends PlotData {
   name: string;
   isSmoothed: boolean;
   colorHash: string;
+  originalMetric?: string;
 }
 
 @Component({
@@ -72,13 +75,8 @@ export abstract class PlotlyGraphBaseComponent implements OnDestroy {
     if (Array.isArray(trace.line?.color) || Array.isArray(trace.marker?.color)) {
       return;
     }
-    let colorString = `rgb(${newColor[0]},${newColor[1]},${newColor[2]})`;
-    if (this.isSmooth && !trace.isSmoothed) {
-      const colorHSL = rgbToHsl(newColor);
-      colorHSL[2] = Math.min(colorHSL[2] + 0.3, 0.9);
-      const lighterColor = hslToRgb(colorHSL);
-      colorString = `rgb(${lighterColor[0]},${lighterColor[1]},${lighterColor[2]})`;
-    }
+    const colorString = tinycolor({r: newColor[0], g: newColor[1], b: newColor[2]})
+      .lighten((this.isSmooth && !trace.isSmoothed) ? 20 : 0).toRgbString();
     if (trace.line) {
       trace.line.color = colorString;
     } else if (trace.marker) {
@@ -127,11 +125,12 @@ export abstract class PlotlyGraphBaseComponent implements OnDestroy {
     return data;
   }
 
-  public extractColorKey(html: string): string {
+  public extractColorKey(html: string): string[] {
     const div = document.createElement('div');
     div.innerHTML = html;
     const el = div.querySelector('.color-key');
-    return el ? el.getAttribute('data-color-key') : '';
+    const orgColor = el?.getAttribute('data-origin-color');
+    return el ? [el.getAttribute('data-color-key'), orgColor === 'undefined' ? null : orgColor] : ['', ''];
   }
 
   ngOnDestroy(): void {

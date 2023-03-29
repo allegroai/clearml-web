@@ -2,7 +2,7 @@ import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@
 import {CustomColumnMode} from '../../shared/common-experiments.const';
 import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
-import {MetricValueType} from '@common/experiments-compare/reducers/experiments-compare-charts.reducer';
+import {MetricValueType} from '@common/experiments-compare/experiments-compare.constants';
 
 @Component({
   selector: 'sm-experiment-custom-cols-menu',

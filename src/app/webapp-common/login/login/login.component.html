@@ -1,11 +1,11 @@
-<div class="login-form">
+<div [ngClass]="['login-form', darkTheme ? 'dark-theme' : 'light-theme']">
   <div class="login-section">
     <section>
-      <img [src]="environment.branding?.logo " class="logo" alt="Clear ML Logo">
+      <img [src]="darkTheme ? 'assets/logo-white.svg' : 'assets/logo.svg'" class="logo" alt="Clear ML Logo">
       <div *ngIf="isInvite || showSimpleLogin" class="login-title">{{loginTitle}}</div>
       <div *ngIf="notice" class="login-notice">{{notice}}</div>
       <div *ngIf="!loginMode" class="circle"></div>
-      <form #loginForm="ngForm" [ngClass]="{'d-none':!loginMode}">
+      <form #loginForm="ngForm" [class.d-none]="!loginMode">
         <div class="username-input pt-4" *ngIf="showSimpleLogin || [loginModeEnum.password, loginModeEnum.simple].includes(loginMode)">
           <label for="name">{{loginMode === loginModeEnum.password ? 'Username' : 'Full Name'}}</label>
           <input type="text"
@@ -31,7 +31,7 @@
           Invalid User/Password combination
         </div>
         <ng-container *ngIf="showSimpleLogin || [loginModeEnum.password, loginModeEnum.simple].includes(loginMode)">
-          <button class="btn mb-4" (click)="login()"
+          <button class="btn btn-neon" (click)="login()"
                   [disabled]="loginForm.touched && (!loginForm.valid || showSpinner)">
             <mat-spinner class="spinner" *ngIf="showSpinner" diameter="16"></mat-spinner>
             {{buttonCaption}}
@@ -44,20 +44,24 @@
           </mat-option>
         </mat-autocomplete>
         <ng-content></ng-content>
-        <div class="terms-of-use" [class.darkerTou]="darkerTou" *ngIf="touLink && !hideTou">
+        <div class="terms-of-use" *ngIf="touLink && !hideTou">
           <span>By signing up you agree to Allegro AI’s <a class="link" [href]="touLink" target="_blank">Privacy Policy and Terms of Use</a>.</span>
         </div>
       </form>
     </section>
   </div>
-
-  <div *ngIf="banner" class="banner">{{banner}}</div>
-  <div *ngIf="showGitHub" class="community-links">
-    <a class="link" target="_blank" href="https://github.com/allegroai/clearml/stargazers">
-      <i class="al-icon al-ico-star sm"></i><span class="text">Star<span class="gazer" *ngIf="stars"> ({{(stars | filesize:{base: 10, round: 1, symbols: {kB: 'k', B: '', mB: 'm'} })}})</span></span></a>
-    <a class="link" target="_blank"
-       href="https://join.slack.com/t/allegroai-trains/shared_invite/enQtOTQyMTI1MzQxMzE4LTY5NTUxOTY1NmQ1MzQ5MjRhMGRhZmM4ODE5NTNjMTg2NTBlZGQzZGVkMWU3ZDg1MGE1MjQxNDEzMWU2NmVjZmY">
-      <i class="al-icon al-ico-slack sm"></i><span class="text">Community on Slack</span></a>
-    <a class="link" href="mailto:support@clear.ml" target="_blank"><i class="al-icon al-ico-email sm"></i><span class="text">Contact us</span></a>
+  <div *ngIf="showGitHub" class="marketing-content-bottom">
+    <ntkme-github-button user="allegroai" repo="clearml" size="large" [count]="true"></ntkme-github-button>
+    <div class="github-text mb-3">If you ❤️ ClearML, ⭐ us on <a class="link" href="https://github.com/allegroai/clearml">GitHub</a></div>
+    <div class="community-links">
+      <a class="link" target="_blank" [href]="environment.slackLink">
+        <i class="al-icon sm al-ico-slack"></i>
+        <span class="text">Join our Community on Slack</span>
+      </a>
+      <a class="link" href="mailto:support@clear.ml" target="_blank">
+        <i class="al-icon sm al-ico-email"></i>
+        <span class="text">Contact Us</span>
+      </a>
+    </div>
   </div>
 </div>

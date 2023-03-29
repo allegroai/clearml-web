@@ -33,7 +33,7 @@ import {
 } from './items.utils';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {resetProjectSelection} from '@common/core/actions/projects.actions';
-import {MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {selectTableModeAwareness} from '@common/projects/common-projects.reducer';

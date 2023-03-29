@@ -15,7 +15,14 @@ hr {
   color: $neon-yellow;
 }
 
+.tag {
+  width: 24px;
+  margin: 0 16px;
+  line-height: 12px;
+}
+
 .footer-title {
+  flex: 1;
   @include counter-label();
   text-align: center;
   font-size: 10px;

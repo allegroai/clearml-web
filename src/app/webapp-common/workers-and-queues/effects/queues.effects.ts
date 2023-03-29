@@ -37,7 +37,7 @@ import {
 import {EmptyAction} from '~/app.constants';
 import {QueueMetrics} from '~/business-logic/model/queues/queueMetrics';
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
-import {cloneDeep} from 'lodash/fp';
+import {cloneDeep} from 'lodash-es';
 import {addFullRangeMarkers, addStats, removeFullRangeMarkers} from '../../shared/utils/statistics';
 import {hideNoStatsNotice, showStatsErrorNotice} from '../actions/stats.actions';
 import {encodeOrder} from '../../shared/utils/tableParamEncode';

@@ -1,17 +1,16 @@
-<div class="editable-div" (click)="active && $event.stopPropagation()">
-  <div [style.display]="active ? 'none': 'block'" >
-    <div class="d-flex align-items-center pr-4" #template (click)="(!inlineDisabled) && inlineActivated($event)"
+<div class="editable-div" [class.edit-mode]="active" [class.is-description]="multiline" (click)="active && $event.stopPropagation()">
+    <div class="value" #template (click)="(!inlineDisabled) && inlineActivated($event)"
       ><ng-content></ng-content>
-      <i *ngIf="editable && !inlineDisabled" class='p2 al-icon al-ico-edit sm-md pull-right editable-pen pointer'></i>
+      <i *ngIf="editable && !inlineDisabled" class='al-icon al-ico-edit sm-md editable-pen pointer'></i>
     </div>
-  </div>
-    <div *ngIf="editable" [style.display]=" !active ? 'none': 'block'" tabindex="12">
+    <div *ngIf="editable" class="input" tabindex="12">
       <form #form class="inline-edit-form" [class.multiline]="multiline">
         <input type="text" class="form-control inline-edit-input"
                [class.warn]="!!warning"
                *ngIf="!multiline"
                [(ngModel)]="inlineValue"
                name="inline"
+               data-id="nameField"
                autocomplete="off"
                [pattern]="pattern"
                [required]="required"

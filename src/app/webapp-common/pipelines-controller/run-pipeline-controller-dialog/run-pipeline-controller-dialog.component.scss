@@ -1,13 +1,6 @@
 @import "variables";
 
 :host {
-  ::ng-deep sm-dialog-template {
-  }
-  display: block;
-  .form-container{
-    width: 512px;
-    margin: 0 32px;
-  }
   .section-title{
     color: $blue-500;
     font-size: 14px;
@@ -15,11 +8,9 @@
   }
 
   .buttons {
-    margin-top: 41px;
-    display: inline-block;
-    position: relative;
-    left: 50%;
-    transform: translateX(-50%);
+    margin-top: 32px;
+    display: flex;
+    justify-content: center;
 
     button {
       &:first-of-type {
@@ -28,7 +19,7 @@
     }
   }
   .param-line{
-    margin-top: 12px;
+    margin-top: 24px;
     display: flex;
     align-items: center;
     justify-content: space-between;

@@ -2,7 +2,6 @@ import {Injectable} from '@angular/core';
 import {TASK_TYPES} from '../../app.constants';
 import {TAGS, TASKS_STATUS} from '../../webapp-common/tasks/tasks.constants';
 import {Task} from '../model/tasks/task';
-import {get} from 'lodash/fp';
 import {DEFAULT_QUEUE_TAG} from '../variables';
 
 @Injectable()
@@ -14,7 +13,7 @@ export class BlTasksService {
   private previouslyUsedQueue;
 
   getDefaultQueue(queues) {
-    return queues.find(queue => get('id', this.previouslyUsedQueue) === queue.id) || queues.find(queue => this.isDefaultQueue(queue));
+    return queues.find(queue => this.previouslyUsedQueue?.id === queue.id) || queues.find(queue => this.isDefaultQueue(queue));
   }
 
   setPreviouslyUsedQueue(queue) {

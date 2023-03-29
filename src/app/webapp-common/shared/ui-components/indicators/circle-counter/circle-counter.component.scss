@@ -18,6 +18,7 @@ $font-size: 18px;
 .counter-container {
   text-align: center;
   padding: 8px;
+
   .circle-counter {
     display: inline-block;
     width: $reqWidth;
@@ -25,6 +26,14 @@ $font-size: 18px;
     border-radius: 50%;
     margin-bottom: 8px;
     background-color: $blue-600;
+
+    .counter-tags {
+      background-color: $blue-900;
+      border-radius: 30px;
+      display: flex;
+      padding: 0 28px;
+      width: 140px;
+    }
 
     .wrapper {
       gap: 24px;
@@ -56,6 +65,14 @@ $font-size: 18px;
       background-color: $completed-blue;
     }
 
+    &.published {
+      background-color: $neon-yellow;
+
+      .counter {
+        color: $blue-600;
+      }
+    }
+
     &.pending {
       background-color: $pending-gray;
     }
@@ -77,6 +94,7 @@ $font-size: 18px;
       @include counter-title();
     }
   }
+
   .counter-label {
     @include counter-label();
   }

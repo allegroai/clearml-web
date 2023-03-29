@@ -1,10 +1,10 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {MatDialogRef} from '@angular/material/dialog';
+import {MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
 import {Store} from '@ngrx/store';
-import {setRedactedArguments} from '../../../core/actions/layout.actions';
-import {selectRedactedArguments} from '../../../core/reducers/view.reducer';
+import {setRedactedArguments} from '@common/core/actions/layout.actions';
+import {selectRedactedArguments} from '@common/core/reducers/view.reducer';
 import {Observable, Subscription} from 'rxjs';
-import {cloneDeep} from 'lodash/fp';
+import {cloneDeep} from 'lodash-es';
 
 
 @Component({

@@ -117,6 +117,7 @@ export interface ProjectsGetAllExRequest {
      * Allow public projects to be returned in the results
      */
     allow_public?: boolean;
+    children_type?: string;
 }
 export namespace ProjectsGetAllExRequest {
     export type StatsForStateEnum = 'active' | 'archived';

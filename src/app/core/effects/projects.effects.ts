@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import * as actions from '../../webapp-common/core/actions/projects.actions';
 import {Store} from '@ngrx/store';
@@ -10,7 +10,7 @@ import {requestFailed} from '@common/core/actions/http.actions';
 import {ApiProjectsService} from '~/business-logic/api-services/projects.service';
 import {selectCurrentUser, selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
 import {ProjectsGetAllExRequest} from '~/business-logic/model/projects/projectsGetAllExRequest';
-
+import {selectRouterConfig} from "@common/core/reducers/router-reducer";
 
 
 @Injectable()
@@ -21,7 +21,8 @@ export class ProjectsEffects {
     private actions$: Actions,
     private store: Store,
     private projectsApi: ApiProjectsService
-  ) {}
+  ) {
+  }
 
   getSelectedProject = createEffect(() => this.actions$.pipe(
     ofType(actions.setSelectedProjectId),
@@ -30,8 +31,10 @@ export class ProjectsEffects {
       this.store.select(selectCurrentUser),
       this.store.select(selectShowOnlyUserWork),
       this.store.select(selectShowHidden),
+      this.store.select(selectRouterConfig),
     ),
-    switchMap(([action, selectedProjectId, user, showOnlyUserWork, showHidden]) => {
+    switchMap(([action, selectedProjectId, user, showOnlyUserWork, showHidden, conf]) => {
+      const customProjectType = conf[0] !== 'projects';
       if (!action.projectId) {
         return [
           deactivateLoader(action.type),
@@ -55,19 +58,30 @@ export class ProjectsEffects {
           include_stats: true,
           ...(!showHidden && {include_stats_filter: {system_tags: ['-pipeline', '-dataset']}}),
           ...(showOnlyUserWork && {active_users: [user.id]}),
-          ...(showHidden && {search_hidden: true}),
+          ...((showHidden || customProjectType) && {search_hidden: true}),
           ...((action.example !== false || this.fetchingExampleExperiment === action.projectId) && {check_own_contents: true}),
           /* eslint-enable @typescript-eslint/naming-convention */
         } as ProjectsGetAllExRequest)
           .pipe(
             finalize(() => this.fetchingExampleExperiment = null),
-            mergeMap(({projects}) => [
-                actions.setSelectedProject({project: projects[0]}),
-                actions.getProjectUsers(action),
-                actions.getTags(),
-                actions.getCompanyTags(),
-                deactivateLoader(action.type),
-              ]
+            mergeMap(({projects}) => {
+                if (projects.length > 0) {
+                  return [
+                    actions.setSelectedProject({project: projects[0]}),
+                    actions.getProjectUsers(action),
+                    ...(!customProjectType ? [actions.getTags()] : []),
+                    actions.getTags(),
+                    actions.getCompanyTags(),
+                    deactivateLoader(action.type),
+                  ];
+                } else {
+                  return [
+                    actions.setSelectedProject({project: ALL_PROJECTS_OBJECT}),
+                    actions.getProjectUsers(action),
+                    deactivateLoader(action.type)
+                  ];
+                }
+              }
             ),
             catchError(error => [
               requestFailed(error),

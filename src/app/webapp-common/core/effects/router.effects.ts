@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {ActivatedRoute, NavigationExtras, Params, Router} from '@angular/router';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
-import {uniq} from 'lodash/fp';
+import {uniq} from 'lodash-es';
 import {map, tap} from 'rxjs/operators';
 import {NAVIGATION_ACTIONS} from '~/app.constants';
 import {encodeFilters, encodeOrder} from '../../shared/utils/tableParamEncode';

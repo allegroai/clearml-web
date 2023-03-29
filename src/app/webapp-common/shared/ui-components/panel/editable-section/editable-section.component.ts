@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import {Store} from '@ngrx/store';
 import {setBackdrop} from '@common/core/actions/layout.actions';
-import {MatDialog} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {fromEvent, Subscription} from 'rxjs';
 import {tap, throttleTime} from 'rxjs/operators';
 
@@ -28,6 +28,7 @@ export class EditableSectionComponent implements OnDestroy {
   @Input() containerClass = '';
   @Input() hideEditButton = false;
   @Input() isDarkTheme = false;
+  @Input() forceButtons = false;
 
   private _saving = false;
   private scrollSub: Subscription;

@@ -6,16 +6,15 @@ import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
 import {
   compareAddDialogSetTableSort,
   compareAddDialogTableSortChanged,
-  GET_SELECTED_EXPERIMENTS_FOR_COMPARE,
   getSelectedExperimentsForCompareAddDialog,
   refreshIfNeeded,
   setExperimentsUpdateTime,
   setSearchExperimentsForCompareResults,
 } from '../actions/compare-header.actions';
 import {select, Store} from '@ngrx/store';
-import {flatten, get, isEmpty} from 'lodash/fp';
+import {flatten, isEmpty} from 'lodash-es';
 import {selectExperimentsUpdateTime} from '../reducers';
-import {selectRouterConfig, selectRouterParams} from '../../core/reducers/router-reducer';
+import {selectRouterParams} from '../../core/reducers/router-reducer';
 import {selectAppVisible} from '../../core/reducers/view.reducer';
 import {MINIMUM_ONLY_FIELDS} from '../../experiments/experiment.consts';
 import * as exSelectors from '../../experiments/reducers';
@@ -43,7 +42,7 @@ export class SelectCompareHeaderEffects {
   }
 
   activeLoader = createEffect(() => this.actions.pipe(
-    ofType(GET_SELECTED_EXPERIMENTS_FOR_COMPARE),
+    ofType(getSelectedExperimentsForCompareAddDialog),
     map(action => activeLoader(action.type))
   ));
 
@@ -51,7 +50,7 @@ export class SelectCompareHeaderEffects {
     ofType(refreshIfNeeded),
     withLatestFrom(
       this.store.select(selectAppVisible),
-      this.store.select(selectRouterParams).pipe(map(params => get('ids', params)?.split(','))),
+      this.store.select(selectRouterParams).pipe(map(params => params?.ids?.split(','))),
       this.store.pipe(select(selectExperimentsUpdateTime)),
     ),
     filter(([, isAppVisible, ,]) => isAppVisible),
@@ -107,7 +106,7 @@ export class SelectCompareHeaderEffects {
 
   searchExperimentsForCompare = createEffect(() => this.actions.pipe(
     ofType(getSelectedExperimentsForCompareAddDialog),
-    withLatestFrom(this.store.select(selectRouterParams).pipe(map(params => get('ids', params)?.split(','))),
+    withLatestFrom(this.store.select(selectRouterParams).pipe(map(params => params?.ids?.split(','))),
       this.store.select(exSelectors.selectExperimentsTableCols),
       this.store.select(exSelectors.selectExperimentsMetricsColsForProject)),
     debounceTime(500),

@@ -37,6 +37,17 @@
   }
 }
 
+.alert-icon {
+  display: flex;
+  align-items: center;
+  .al-icon {
+    color: $error-dark;
+    &:hover {
+      color: $pipeline-failed;
+    }
+  }
+}
+
 .add-button {
   display: inline-block;
   margin: 12px 0 24px;

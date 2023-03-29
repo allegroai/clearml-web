@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { MatSlideToggleChange } from '@angular/material/slide-toggle';
+import { MatLegacySlideToggleChange as MatSlideToggleChange } from '@angular/material/legacy-slide-toggle';
 import {Store} from '@ngrx/store';
 import {selectAllowed} from '~/core/reducers/usage-stats.reducer';
 import {Observable} from 'rxjs';

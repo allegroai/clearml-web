@@ -1,6 +1,5 @@
 import {Injectable} from '@angular/core';
-import {BehaviorSubject, Observable, Subject} from 'rxjs';
-import {debounceTime} from 'rxjs/operators';
+import {Observable, Subject} from 'rxjs';
 
 interface SyncScrollData {
   scrollTop: number;

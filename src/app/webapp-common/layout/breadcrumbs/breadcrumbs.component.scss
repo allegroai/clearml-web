@@ -10,11 +10,13 @@ span {
   .overflow-container {
     display: inline-flex;
     align-items: center;
+    width: 100%;
   }
 
   .sub-projects-breadcrumbs{
     display: flex;
     overflow: hidden;
+    flex-shrink: 0;
   }
   .crumb{
     font-size: 15px;
@@ -31,6 +33,8 @@ span {
   .crumb.last {
     font-weight: 700;
     color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
   }
 
   .sub-project{
@@ -44,6 +48,7 @@ span {
     &.last {
       font-weight: 700;
       color: #fff;
+      overflow: hidden;
     }
 
     &.after-collapse {
@@ -82,6 +87,11 @@ span {
     background-color: $blue-600;
     color: $blue-100;
     font-size: 12px;
+  }
+
+  .align-ghost {
+    height: 24px;
+    padding-top: 4px;
   }
 }
 

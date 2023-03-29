@@ -16,7 +16,7 @@
 
   // Create the theme object (a Sass map containing all of the palettes).
   $custom-dark-theme: mat.define-dark-theme($custom-dark-primary, $custom-dark-accent, $custom-dark-warn);
-  @include mat.all-component-themes($custom-dark-theme);
+  @include mat.all-legacy-component-themes($custom-dark-theme);
 }
 .light-theme{
   $custom-light-primary: mat.define-palette($sm-purple);
@@ -27,7 +27,7 @@
 
   // Create the theme object (a Sass map containing all of the palettes).
   $custom-light-theme: mat.define-light-theme($custom-light-primary, $custom-light-accent, $custom-light-warn);
-  @include mat.all-component-themes($custom-light-theme);
+  @include mat.all-legacy-component-themes($custom-light-theme);
 
 }
 

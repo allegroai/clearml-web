@@ -1,1 +1,1 @@
-export interface IExecutionParameter {label: any; key: string; }
+export interface IExecutionParameter {label: any; key: string}

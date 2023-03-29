@@ -21,9 +21,8 @@ import {
   SINGLE_GRAPH_ID_PREFIX
 } from '../../experiments/shared/common-experiments.const';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
-import {get, getOr} from 'lodash/fp';
 import {AdminService} from '~/shared/services/admin.service';
-import {GroupByCharts, groupByCharts} from '../../experiments/reducers/common-experiment-output.reducer';
+import {GroupByCharts, groupByCharts} from '../../experiments/reducers/experiment-output.reducer';
 import {Store} from '@ngrx/store';
 import {selectPlotlyReady} from '../../core/reducers/view.reducer';
 import {ResizeEvent} from 'angular-resizable-element';
@@ -145,7 +144,7 @@ export class ExperimentGraphsComponent implements OnDestroy {
   ) {
 
     this.subs.add(this.store.select(selectRouterParams).pipe(
-      map(params => get('experimentId', params)),
+      map(params => params?.experimentId),
       distinctUntilChanged(),
       skip(1) // don't need first null->expId
     ).subscribe(() => {
@@ -198,7 +197,7 @@ export class ExperimentGraphsComponent implements OnDestroy {
 
     Object.values(this.graphsData).forEach((graphs: ExtFrame[]) => {
       graphs.forEach((graph: ExtFrame) => {
-        if (getOr(0, 'layout.images.length', graph) > 0) {
+        if ((graph?.layout?.images?.length ?? 0) > 0) {
           graph.layout.images.forEach((image: Plotly.Image) => {
               this.store.dispatch(getSignedUrl({
                 url: image.source,
@@ -298,7 +297,7 @@ export class ExperimentGraphsComponent implements OnDestroy {
         })
       }), {} as { [label: string]: ExtFrame[] });
 
-  trackByFn = (index: number, item) => item + this.xAxisType;
+  trackByFn = (index: number, item) => item;
 
   trackByIdFn = (index: number, item: ExtFrame) =>
     `${item.layout.title} ${(this.isDarkTheme ? '' : item.iter)}`;
@@ -425,7 +424,7 @@ export class ExperimentGraphsComponent implements OnDestroy {
     if (this.groupBy === groupByCharts.none) {
       // split scalars by variants
       this.createEmbedCode.emit({
-        metrics: [chartItem.metric.substring(0, chartItem.metric.lastIndexOf('/'))?.trim()],
+        metrics: [chartItem.data[0].originalMetric ?? chartItem.metric.substring(0, chartItem.metric.lastIndexOf('/'))?.trim()],
         variants: [chartItem.data[0].name],
         domRect
       });

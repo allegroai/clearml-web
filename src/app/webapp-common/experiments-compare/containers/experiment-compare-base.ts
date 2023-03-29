@@ -5,13 +5,13 @@ import {
   ExperimentCompareTreeSection,
   IExperimentDetail
 } from '~/features/experiments-compare/experiments-compare-models';
-import {get, has, isEmpty, isEqual} from 'lodash/fp';
+import {get, has, isEmpty, isEqual} from 'lodash-es';
 import {treeBuilderService} from '../services/tree-builder.service';
 import {isArrayOrderNotImportant} from '../jsonToDiffConvertor';
 import {ExperimentParams, TreeNode, TreeNodeMetadata} from '../shared/experiments-compare-details.model';
 import {MatTreeFlatDataSource, MatTreeFlattener} from '@angular/material/tree';
 import {activeLoader, addMessage, deactivateLoader} from '../../core/actions/layout.actions';
-import {ChangeDetectorRef, Directive, OnDestroy, QueryList, ViewChildren} from '@angular/core';
+import {AfterViewInit, ChangeDetectorRef, Directive, ElementRef, HostListener, OnDestroy, QueryList, ViewChildren} from '@angular/core';
 import {ExperimentCompareDetailsBase} from '~/features/experiments-compare/experiments-compare-details.base';
 import {ActivatedRoute, Router} from '@angular/router';
 import {select, Store} from '@ngrx/store';
@@ -20,7 +20,7 @@ import {Observable, Subscription} from 'rxjs';
 import {FlatTreeControl} from '@angular/cdk/tree';
 import {CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
 import {selectRouterParams} from '../../core/reducers/router-reducer';
-import {distinctUntilChanged, filter, map, tap} from 'rxjs/operators';
+import {distinctUntilChanged, filter, map, take, tap} from 'rxjs/operators';
 import {selectHideIdenticalFields} from '../reducers';
 import {refetchExperimentRequested} from '../actions/compare-header.actions';
 import {RENAME_MAP} from '../experiments-compare.constants';
@@ -39,10 +39,11 @@ export interface FlatNode {
 }
 
 @Directive()
-export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase implements OnDestroy {
+export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase implements OnDestroy, AfterViewInit {
   public hasDataFeature$: Observable<boolean>;
   private hasDataFeature: boolean;
 
+  public nativeWidth = 410;
   public renameMap = RENAME_MAP;
   public experiments$: Observable<any[]>;
   public taskIds$: Observable<string[]>;
@@ -76,33 +77,43 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
   private timeoutIndex: number;
   private originalScrolledElement: EventTarget;
   private taskIds: string;
+  private treeCardBody: HTMLDivElement;
+  @ViewChildren('treeCardBody') treeCardBodies: QueryList<ElementRef<HTMLDivElement>>;
 
   get baseExperiment(): IExperimentDetail {
-    return get('[0]', this.experiments);
+    return this.experiments?.[0];
   }
 
   @ViewChildren('virtualScrollRef') virtualScrollRef: QueryList<CdkVirtualScrollViewport>;
+
+  @HostListener('window:resize')
+  afterResize() {
+    window.setTimeout(() => {
+      this.nativeWidth = Math.max(this.treeCardBody.getBoundingClientRect().width, 410);
+      this.cdr.detectChanges();
+    });
+  }
 
   constructor(
     protected router: Router,
     protected store: Store<ExperimentInfoState>,
     protected changeDetection: ChangeDetectorRef,
     protected activeRoute: ActivatedRoute,
-    protected refresh: RefreshService
+    protected refresh: RefreshService,
+    public cdr: ChangeDetectorRef
   ) {
     super();
     this.hasDataFeature$ = this.store.pipe(select(selectHasDataFeature));
     this.taskIds$ = this.store.pipe(
       select(selectRouterParams),
-      map(params => get('ids', params).split(',')),
+      map(params => params?.ids?.split(',')),
       distinctUntilChanged(),
-      tap(taskIds => this.taskIds = taskIds),
     );
   }
 
   onInit() {
     // todo: remove this
-    this.compareTabPage = get('snapshot.routeConfig.data.mode', this.activeRoute);
+    this.compareTabPage = this.activeRoute?.snapshot?.routeConfig?.data?.mode;
 
     this.hideIdenticalFieldsSub = this.store.select(selectHideIdenticalFields).subscribe(hide => {
       this.hideIdenticalFields = hide;
@@ -123,6 +134,15 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
 
     this.hideIdenticalFieldsSub.add(this.hasDataFeature$.subscribe(hasData => this.hasDataFeature = hasData));
 
+  }
+
+  ngAfterViewInit() {
+    this.treeCardBodies.changes
+      .pipe(filter(list => list.first), take(1))
+      .subscribe((list: QueryList<ElementRef<HTMLDivElement>>) => {
+        this.treeCardBody = list.first.nativeElement;
+        this.nativeWidth = Math.max(this.treeCardBody.getBoundingClientRect().width, 410);
+      });
   }
 
   ngOnDestroy(): void {
@@ -382,10 +402,10 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
     const fullPath = path;
     const fullPathJoined = fullPath.join(',');
 
-    const originData = fullPath.length === 0 ? originExperiment : get(fullPath, originExperiment);
-    const comparedData = fullPath.length === 0 ? comparedExperiment : get(fullPath, comparedExperiment);
-    const existOnOrigin = !!has(fullPath, originExperiment);
-    const existOnCompared = !!has(fullPath, comparedExperiment);
+    const originData = fullPath.length === 0 ? originExperiment : get(originExperiment, fullPath);
+    const comparedData = fullPath.length === 0 ? comparedExperiment : get(comparedExperiment, fullPath);
+    const existOnOrigin = !!has(originExperiment, fullPath);
+    const existOnCompared = !!has(comparedExperiment, fullPath);
     const isEquals = isEqual(comparedData, originData);
     const isEmptyObject = isEmpty(comparedData) || (!Array.isArray(comparedData) && Object.values(comparedData).every(val => val === undefined));
 
@@ -401,8 +421,8 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
     let tooltip;
     if (this.compareTabPage === 'hyper-params') {
       path[path.length - 1] = path[path.length - 1].trim();
-      const hypeParamObject = get(path.join('.'), this.originalExperiments[comparedExperiment?.id]);
-      if (hypeParamObject && has('name', hypeParamObject) && has('value', hypeParamObject) && hypeParamObject.type !== 'legacy') {
+      const hypeParamObject = get(this.originalExperiments[comparedExperiment?.id], path.join('.'));
+      if (hypeParamObject && has(hypeParamObject, 'name') && has(hypeParamObject, 'value') && hypeParamObject.type !== 'legacy') {
         tooltip = (hypeParamObject.type ? `Type: ${hypeParamObject.type}\n` : '') + (hypeParamObject.description || '');
       }
     }
@@ -438,7 +458,7 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
 
   public syncUrl(experiments: Array<IExperimentDetail>) {
     const newParams = this.getExperimentIdsParams(experiments);
-    this.router.navigateByUrl(this.router.url.replace(this.experiments.map(ex=>ex.id).toString(), newParams));
+    this.router.navigateByUrl(this.router.url.replace(this.experiments.map(ex => ex.id).toString(), newParams));
   }
 
   public extractTags(experiments) {

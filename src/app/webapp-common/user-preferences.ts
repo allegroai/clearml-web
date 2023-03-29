@@ -1,7 +1,7 @@
 import {ApiUsersService} from '~/business-logic/api-services/users.service';
 import {Observable, of} from 'rxjs';
 import {catchError, map, tap} from 'rxjs/operators';
-import {cloneDeep, isEqual} from 'lodash/fp';
+import {cloneDeep, isEqual} from 'lodash-es';
 import {UsersSetPreferencesRequest} from '~/business-logic/model/users/usersSetPreferencesRequest';
 import {ConfigurationService} from './shared/services/configuration.service';
 import {LoginService} from '~/shared/services/login.service';
@@ -112,17 +112,6 @@ export const loadUserAndPreferences = (
   confService: ConfigurationService,
 ): () => Promise<any> => (): Promise<any> => new Promise((resolve) => {
   confService.initConfigurationService().subscribe(() =>
-    loginService.initCredentials().subscribe(() => {
-      if (window.location.pathname.startsWith('/callback')) {
-        if (window.location.pathname.endsWith('verify')) {
-          const providerName = window.location.pathname.slice(10, -7);
-          const provider = loginService.sso.find(provide => provide.name === providerName);
-          window.location.href = provider.url;
-        } else {
-          loginService.ssoFlow(resolve);
-        }
-      } else {
-        loginService.loginFlow(resolve);
-      }
-    }));
+    loginService.initCredentials().subscribe(() => loginService.loginFlow(resolve))
+  );
 });

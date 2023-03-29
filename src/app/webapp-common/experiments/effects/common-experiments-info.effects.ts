@@ -37,7 +37,7 @@ import {
   saveHyperParamsSection,
   setExperimentSaving
 } from '../actions/common-experiments-info.actions';
-import {updateExperiment} from '../actions/common-experiments-view.actions';
+import {getTags, updateExperiment} from '../actions/common-experiments-view.actions';
 import {
   selectExperimentConfiguration,
   selectExperimentHyperParamsSelectedSectionFromRoute,
@@ -54,7 +54,7 @@ import {EmptyAction} from '~/app.constants';
 import {ReplaceHyperparamsEnum} from '~/business-logic/model/tasks/replaceHyperparamsEnum';
 import {Router} from '@angular/router';
 import {selectRouterConfig, selectRouterParams} from '../../core/reducers/router-reducer';
-import {cloneDeep, get} from 'lodash/fp';
+import {cloneDeep} from 'lodash-es';
 import {CommonExperimentReverterService} from '../shared/services/common-experiment-reverter.service';
 import {resetOutput} from '../actions/common-experiment-output.actions';
 import {HttpErrorResponse} from '@angular/common/http';
@@ -64,7 +64,6 @@ import {PIPELINE_INFO_ONLY_FIELDS} from '@common/pipelines-controller/controller
 import {TasksGetByIdExResponse} from '~/business-logic/model/tasks/tasksGetByIdExResponse';
 import {ARTIFACTS_ONLY_FIELDS} from '@common/experiments/experiment.consts';
 import {ITask} from '~/business-logic/model/al-task';
-import {getTags} from '@common/core/actions/projects.actions';
 import {RefreshService} from '@common/core/services/refresh.service';
 
 
@@ -238,6 +237,7 @@ export class CommonExperimentsInfoEffects {
           this.refreshService.trigger(true);
         }
         return [
+          deactivateLoader(action.type),
           commonInfoActions.getExperiment({experimentId: action.id, autoRefresh}),
           ...(customView ? [] : [commonInfoActions.getExperimentUncommittedChanges({experimentId: action.id, autoRefresh})]),
           // clear log data if experiment was restarted
@@ -484,7 +484,7 @@ export class CommonExperimentsInfoEffects {
       this.store.select(selectSelectedExperiment),
       this.store.select(selectExperimentInfoDataFreeze),
       this.store.select(selectExperimentFormValidity),
-      this.store.select(selectRouterParams).pipe(map(params => get('projectId', params))),
+      this.store.select(selectRouterParams).pipe(map(params => params?.projectId)),
       this.store.select(selectExperimentHyperParamsSelectedSectionFromRoute)
     ),
     filter(([, , , , valid]) => valid),

@@ -7,7 +7,13 @@ import {BlTasksService} from '~/business-logic/services/tasks.service';
 import {ApiEventsService} from '~/business-logic/api-services/events.service';
 import {Router} from '@angular/router';
 import {catchError, map, mergeMap, switchMap, tap, withLatestFrom} from 'rxjs/operators';
-import {activeLoader, addMessage, deactivateLoader, neverShowPopupAgain, setServerError} from '../../core/actions/layout.actions';
+import {
+  activeLoader,
+  addMessage,
+  deactivateLoader,
+  neverShowPopupAgain,
+  setServerError
+} from '../../core/actions/layout.actions';
 import * as menuActions from '../actions/common-experiments-menu.actions';
 import {stopClicked} from '../actions/common-experiments-menu.actions';
 import {Observable, of} from 'rxjs';
@@ -31,7 +37,7 @@ import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {TasksEnqueueManyResponse} from '~/business-logic/model/tasks/tasksEnqueueManyResponse';
 import {getNotificationAction, MenuItems, MoreMenuItems} from '../../shared/entity-page/items.utils';
 import {getAllSystemProjects} from '../../core/actions/projects.actions';
-import {MatDialog} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {ApiPipelinesService} from '~/business-logic/api-services/pipelines.service';
 import {PIPELINE_INFO_ONLY_FIELDS} from '../../pipelines-controller/controllers.consts';
 import {
@@ -41,13 +47,13 @@ import {selectIsPipelines} from '@common/experiments-compare/reducers';
 import {
   AbortControllerDialogComponent
 } from '@common/pipelines-controller/pipeline-controller-menu/abort-controller-dialog/abort-controller-dialog.component';
-import {get} from 'lodash/fp';
 import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
 import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
 import {TasksCloneRequest} from '~/business-logic/model/tasks/tasksCloneRequest';
 import {WelcomeMessageComponent} from '@common/layout/welcome-message/welcome-message.component';
 import {selectNeverShowPopups} from '@common/core/reducers/view.reducer';
 import {MESSAGES_SEVERITY} from '@common/constants';
+import {TasksCloneResponse} from '~/business-logic/model/tasks/tasksCloneResponse';
 
 export const getChildrenExperiments = (tasksApi, parents, filters?: { [key: string]: any }): Observable<Task[]> =>
   tasksApi.tasksGetAllEx({
@@ -133,7 +139,7 @@ export class CommonExperimentsMenuEffects {
 
   startPipeline$ = createEffect(() => this.actions$.pipe(
     ofType(menuActions.startPipeline),
-    withLatestFrom(this.store.select(selectRouterParams).pipe(map(params => get('projectId', params)))),
+    withLatestFrom(this.store.select(selectRouterParams).pipe(map(params => params?.projectId))),
     switchMap(([action, projectId]) =>
       this.pipelineApi.pipelinesStartPipeline({
           task: action.task, ...(action.queue && {queue: action.queue}),
@@ -160,7 +166,7 @@ export class CommonExperimentsMenuEffects {
 
   getPipelineControllerForRunDialog$ = createEffect(() => this.actions$.pipe(
     ofType(menuActions.getControllerForStartPipelineDialog),
-    withLatestFrom(this.store.select(selectRouterParams).pipe(map(params => get('projectId', params)))),
+    withLatestFrom(this.store.select(selectRouterParams).pipe(map(params => params?.projectId))),
     switchMap(([action, projectId]) =>
       this.apiTasks.tasksGetAllEx({
         /* eslint-disable @typescript-eslint/naming-convention */
@@ -213,8 +219,8 @@ export class CommonExperimentsMenuEffects {
         /* eslint-enable @typescript-eslint/naming-convention */
       } as TasksCloneRequest)
         .pipe(
-          mergeMap(res => {
-            this.router.navigate(['projects', action.cloneData.project, 'experiments', res.id]);
+          mergeMap((res: TasksCloneResponse) => {
+            this.router.navigate(['projects', action.cloneData.project || (res.new_project as any)?.id || '*', 'experiments', res.id]);
             return [
               viewActions.getExperiments(),
               deactivateLoader(action.type),
@@ -304,13 +310,14 @@ export class CommonExperimentsMenuEffects {
         project_name: action.project.name
       })
         .pipe(
-          tap((res) => this.router.navigate([`projects/${action.project.id ? action.project.id : res.project_id}/experiments/${action.selectedEntities.length === 1 ? action.selectedEntities[0].id : ''}`], {queryParamsHandling: 'merge'})),
+          tap((res) => this.router.navigate([`projects/${action.project.id ? action.project.id : res.project_id ?? '*'}/experiments/${action.selectedEntities.length === 1 ? action.selectedEntities[0].id : ''}`], {queryParamsHandling: 'merge'})),
           mergeMap(() => [
             viewActions.resetExperiments(),
             viewActions.setSelectedExperiments({experiments: []}),
-            ...action.selectedEntities.map(exp => this.setExperimentIfSelected(exp.id, {project: action.project})),
+            ...action.selectedEntities.map(exp => this.setExperimentIfSelected(exp.id, {project: action.project ?? '*'})),
             deactivateLoader(action.type),
-            viewActions.getExperiments()
+            viewActions.getExperiments(),
+            addMessage(MESSAGES_SEVERITY.SUCCESS, `Experiment moved successfully to ${action.project.name ?? 'Projects root'}`)
           ]),
           catchError(error => [requestFailed(error), deactivateLoader(action.type), setServerError(error, null, 'Failed to move experiments')])
         )

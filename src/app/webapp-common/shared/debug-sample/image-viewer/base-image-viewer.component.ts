@@ -2,8 +2,8 @@ import {ChangeDetectorRef, Component, ElementRef, HostListener, Inject, OnDestro
 import {filter, map, switchMap, tap} from 'rxjs/operators';
 import {Observable, Subscription} from 'rxjs';
 import {Store} from '@ngrx/store';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {last} from 'lodash/fp';
+import {MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
+import {last} from 'lodash-es';
 import {isFileserverUrl} from '~/shared/utils/url';
 import {IsVideoPipe} from '@common/shared/pipes/is-video.pipe';
 import {IsAudioPipe} from '@common/shared/pipes/is-audio.pipe';

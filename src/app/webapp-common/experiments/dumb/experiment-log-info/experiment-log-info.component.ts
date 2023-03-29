@@ -10,9 +10,9 @@ import {
 } from '@angular/core';
 import {Subscription} from 'rxjs';
 import {CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
-import {last, findIndex} from 'lodash/fp';
+import {last, findIndex} from 'lodash-es';
 import Convert from 'ansi-to-html';
-import {Log} from '../../reducers/common-experiment-output.reducer';
+import {Log} from '../../reducers/experiment-output.reducer';
 
 import hasAnsi from 'has-ansi';
 
@@ -81,7 +81,7 @@ export class ExperimentLogInfoComponent implements OnDestroy, AfterViewInit {
     if (autoRefresh && this.atEnd) {
       prevLocation = this.lines.length;
     } else {
-      prevLocation = findIndex(this.prevLine, this.lines) + this.prevLineOffset;
+      prevLocation = findIndex(this.lines, this.prevLine) + this.prevLineOffset;
     }
     this.fetchPrev = null;
     if (!this.initial && prevLocation) {

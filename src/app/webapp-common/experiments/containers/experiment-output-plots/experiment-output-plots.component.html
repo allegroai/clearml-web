@@ -8,7 +8,7 @@
         placeholder="Find plots"
         [list]="plotsList"
         [selected]="selectedGraph"
-        [checkedList]="listOfHidden | async"
+        [checkedList]="listOfHidden$ | async"
         [searchTerm]="searchTerm$ | async"
         (itemSelect)="metricSelected($event)"
         (hiddenChanged)="hiddenListChanged($event)"
@@ -25,14 +25,14 @@
           (click)="drawer.open()"
           smTooltip="Toggle Graphs"
         >
-          <i class="al-icon al-ico-eye-outline"></i>
+          <i class="al-icon al-ico-eye-outline" data-id="eyeIcon"></i>
         </button>
       </div>
       <sm-experiment-graphs
         [class.dark-theme]="dark"
         [disableResize]="isDatasetVersionPreview"
         [isGroupGraphs]="true"
-        [hiddenList]="listOfHidden | async"
+        [hiddenList]="listOfHidden$ | async"
         [metrics]="graphs"
         [legendStringLength]="minimized ? 14 : 19"
         [minimized]="minimized"

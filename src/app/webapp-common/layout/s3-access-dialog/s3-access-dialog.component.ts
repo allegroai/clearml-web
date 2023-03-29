@@ -25,6 +25,7 @@ export class S3AccessDialogComponent implements OnChanges {
   @Output() closeSave: EventEmitter<any>   = new EventEmitter<any>();
   @Input() saveEnabled = true;
   public formIsSubmitted: boolean;
+  public secured = window.location.protocol === 'https:';
 
 
   constructor(public adminService: AdminService, private formBuilder: UntypedFormBuilder) {

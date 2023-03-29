@@ -3,25 +3,30 @@ import {Store} from '@ngrx/store';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {ApiProjectsService} from '~/business-logic/api-services/projects.service';
 import * as actions from '../actions/projects.actions';
+import {setShowHidden} from '../actions/projects.actions';
 import {catchError, expand, filter, map, mergeMap, reduce, switchMap, withLatestFrom} from 'rxjs/operators';
 import {requestFailed} from '../actions/http.actions';
 import {activeLoader, deactivateLoader, setServerError} from '../actions/layout.actions';
 import {setSelectedModels} from '../../models/actions/models-view.actions';
 import {TagColorMenuComponent} from '../../shared/ui-components/tags/tag-color-menu/tag-color-menu.component';
-import {MatDialog} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {ApiOrganizationService} from '~/business-logic/api-services/organization.service';
 import {OrganizationGetTagsResponse} from '~/business-logic/model/organization/organizationGetTagsResponse';
 import {selectRouterParams} from '../reducers/router-reducer';
-import {EMPTY, forkJoin, of} from 'rxjs';
+import {EMPTY, forkJoin, from, of} from 'rxjs';
 import {ProjectsGetTaskTagsResponse} from '~/business-logic/model/projects/projectsGetTaskTagsResponse';
 import {ProjectsGetModelTagsResponse} from '~/business-logic/model/projects/projectsGetModelTagsResponse';
 import {
   selectAllProjectsUsers,
-  selectLastUpdate, selectRootProjects,
+  selectLastUpdate,
+  selectRootProjects,
   selectSelectedMetricVariantForCurrProject,
-  selectSelectedProjectId, selectShowHidden
+  selectSelectedProjectId,
+  selectShowHidden
 } from '../reducers/projects.reducer';
-import {OperationErrorDialogComponent} from '@common/shared/ui-components/overlay/operation-error-dialog/operation-error-dialog.component';
+import {
+  OperationErrorDialogComponent
+} from '@common/shared/ui-components/overlay/operation-error-dialog/operation-error-dialog.component';
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
 import {createMetricColumn} from '@common/shared/utils/tableParamEncode';
 import {ITask} from '~/business-logic/model/al-task';
@@ -31,15 +36,21 @@ import {setActiveWorkspace} from '@common/core/actions/users.actions';
 import {ProjectsGetAllExResponse} from '~/business-logic/model/projects/projectsGetAllExResponse';
 import {Project} from '~/business-logic/model/projects/project';
 import {ApiUsersService} from '~/business-logic/api-services/users.service';
-import {get, last} from 'lodash/fp';
+import {get} from 'lodash-es';
 import {ProjectsGetAllExRequest} from '~/business-logic/model/projects/projectsGetAllExRequest';
-import {setShowHidden} from '../actions/projects.actions';
+import localForage from 'localforage';
+import {TIME_IN_MILLI} from '@common/shared/utils/time-util';
 
 export const ALL_PROJECTS_OBJECT = {id: '*', name: 'All Experiments'};
+interface RootCache {
+  time: string;
+  hidden: boolean;
+  projects: Project[];
+}
 
 @Injectable()
 export class ProjectsEffects {
-  private pageSize: number = 500;
+  private pageSize: number = 1000;
 
   constructor(
     private actions$: Actions, private projectsApi: ApiProjectsService, private orgApi: ApiOrganizationService,
@@ -59,14 +70,32 @@ export class ProjectsEffects {
       this.store.select(selectShowHidden),
       this.store.select(selectLastUpdate),
     ),
-    switchMap(([, showHidden, lastUpdate]) => {
+    switchMap(([, showHidden, lastUpdate]) => !lastUpdate ? from(localForage.getItem<RootCache>('rootProjects'))
+      .pipe(
+        map((cache: RootCache) =>
+          [showHidden, lastUpdate,
+            (new Date(cache?.time)).getTime() > (new Date()).getTime() - TIME_IN_MILLI.ONE_HOUR &&
+            cache.projects?.length > 0 &&
+            showHidden === cache.hidden ? cache : null
+          ])
+      ) : of([showHidden, lastUpdate, null])
+    ),
+    switchMap(([showHidden, lastUpdate, cache]: [boolean, string, RootCache]) => {
+      if (cache) {
+        return [
+          actions.setAllProjects({projects: cache.projects, updating: false}),
+          actions.setLastUpdate({lastUpdate: cache.time}),
+          actions.getAllSystemProjects()
+        ];
+      }
+      const cacheTime = (new Date()).toISOString();
       const query = {
         /* eslint-disable @typescript-eslint/naming-convention */
         scroll_id: null,
         size: this.pageSize,
         order_by: ['last_update'],
         ...(lastUpdate && {last_update: [lastUpdate, null]}),
-        only_fields: ['name', 'company', 'parent', 'last_update'],
+        only_fields: ['name', 'company', 'last_update'],
         search_hidden: showHidden
         /* eslint-enable @typescript-eslint/naming-convention */
       } as ProjectsGetAllExRequest;
@@ -81,17 +110,31 @@ export class ProjectsEffects {
             EMPTY
           ),
           reduce((acc, res: ProjectsGetAllExResponse) => acc.concat(res.projects), []),
+          withLatestFrom(this.store.select(selectRootProjects)),
+          mergeMap(([projects, rootProjects]) => [
+            actions.setLastUpdate({lastUpdate: cacheTime}),
+            actions.setAllProjects({
+              projects: projects as Project[],
+              updating: rootProjects?.length > 0
+            }),
+          ])
         );
     }),
-    withLatestFrom(this.store.select(selectRootProjects)),
-    mergeMap(([projects, rootProjects]) => [
-      actions.setAllProjects({
-        projects: projects as Project[],
-        updating: rootProjects?.length > 0
-      }),
-      actions.setLastUpdate({lastUpdate: last(projects)?.last_update})
-    ])
   ));
+
+  updateProjectsCache$ = createEffect(() => this.actions$.pipe(
+    ofType(actions.setAllProjects, actions.deletedProjectFromRoot, actions.updateProjectCompleted),
+    withLatestFrom(
+      this.store.select(selectRootProjects),
+      this.store.select(selectLastUpdate),
+      this.store.select(selectShowHidden),
+    ),
+    map(([, projects, lastUpdate, hidden]) => localForage.setItem<RootCache>('rootProjects', {
+      time: lastUpdate,
+      hidden,
+      projects
+    }))
+  ), {dispatch: false});
 
   resetProjects$ = createEffect(() => this.actions$.pipe(
     ofType(actions.resetSelectedProject),
@@ -122,8 +165,8 @@ export class ProjectsEffects {
 
   openTagColor = createEffect(() => this.actions$.pipe(
     ofType(actions.openTagColorsMenu),
-    map(() => {
-      this.dialog.open(TagColorMenuComponent);
+    map(action => {
+      this.dialog.open(TagColorMenuComponent, {data: {tags: action.tags}});
     })
   ), {dispatch: false});
 
@@ -142,7 +185,7 @@ export class ProjectsEffects {
     getProjectsTags = createEffect(() => this.actions$.pipe(
     ofType(actions.getProjectsTags),
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    switchMap(() => this.projectsApi.projectsGetProjectTags({filter: {system_tags: ['pipeline']}})
+    switchMap(action => this.projectsApi.projectsGetProjectTags({filter: {system_tags: [action.entity]}})
       .pipe(
         map((res: OrganizationGetTagsResponse) => actions.setTags({tags: res.tags})),
         catchError(error => [requestFailed(error)])
@@ -205,7 +248,7 @@ export class ProjectsEffects {
         only_fields: ['started', 'last_iteration', 'user.name', 'type', 'name', 'status', 'active_duration', col.id],
         [col.id]: [0, null],
         started: ['2000-01-01T00:00:00', null],
-        status: ['completed', 'published', 'failed', 'stopped', 'closed'],
+        status: ['-draft'],
         order_by: ['-started'],
         type: ['__$not', 'annotation_manual', '__$not', 'annotation', '__$not', 'dataset_import'],
         system_tags: ['-archived'],
@@ -220,7 +263,7 @@ export class ProjectsEffects {
               const end = started + (task.active_duration ?? 0) * 1000;
               return {
                 id: task.id,
-                y: get(col.id, task), // col.id is a path (e.g.) last_metric.x.max_value, must use lodash get
+                y: get(task, col.id), // col.id is a path (e.g.) last_metric.x.max_value, must use lodash get
                 x: end,
                 name: task.name,
                 status: task.status,
@@ -235,6 +278,7 @@ export class ProjectsEffects {
 
   resetRootProjects = createEffect(() => this.actions$.pipe(
     ofType(setActiveWorkspace, actions.refetchProjects, setShowHidden),
+    switchMap(() => from(localForage.removeItem('rootProjects'))),
     mergeMap(() => [
       actions.resetProjects(),
       actions.getAllSystemProjects()

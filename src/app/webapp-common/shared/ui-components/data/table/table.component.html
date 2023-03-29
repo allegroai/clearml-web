@@ -60,6 +60,7 @@
           [style.min-width]="col.style?.minWidth"
           [style.max-width]="col.style?.maxWidth"
           [style.width]="col.style?.width"
+          [style.flex-basis]="!resizableColumns && columnResizeMode === 'fit' && col.style?.width"
       >
         <ng-container [ngSwitch]="col?.headerType">
           <ng-container *ngSwitchCase="colHeaderTypeEnum.sortFilter">

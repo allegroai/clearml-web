@@ -1,10 +1,11 @@
 import {Injectable} from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {
+  getParcoords,
   getPlot,
   getSample,
   getScalar,
-  setNoPermissions,
+  setNoPermissions, setParallelCoordinateExperiments,
   setPlotData,
   setSampleData,
   setSignIsNeeded
@@ -22,6 +23,7 @@ import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {HTTP} from '~/app.constants';
 import {DebugSample} from '@common/shared/debug-sample/debug-sample.reducer';
 import {requestFailed} from '@common/core/actions/http.actions';
+import {Task} from '~/business-logic/model/tasks/task';
 
 
 @Injectable()
@@ -96,6 +98,19 @@ export class AppEffects {
         ]),
         catchError(error => [requestFailed(error), ...(error.status === 403 ? [setNoPermissions()] : [])])
       )
+    ))
+  );
+
+  getExperiments$ = createEffect(() => this.actions$.pipe(
+    ofType(getParcoords),
+    mergeMap((action) => this.httpClient.post<{data: ReportsGetTaskDataResponse}>(`${this.basePath}/reports.get_task_data?${action.otherSearchParams.toString()}`, {
+        id: action.tasks,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        only_fields: ['last_metrics', 'name', 'last_iteration', ...action.variants.map(variant => `hyperparams.${variant}`)]
+      })
+        .pipe(
+          mergeMap(res => [setParallelCoordinateExperiments({data: res.data.tasks as unknown as Task[]})])
+        )
     ))
   );
 

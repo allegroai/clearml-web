@@ -6,6 +6,7 @@ import {ChipsModule} from '@common/shared/ui-components/buttons/chips/chips.modu
 import {SharedModule} from '~/shared/shared.module';
 import {SimpleDatasetCardComponent} from '@common/datasets/simple-dataset-card/simple-dataset-card.component';
 import {ProjectsSharedModule} from '~/features/projects/shared/projects-shared.module';
+import {SharedPipesModule} from '@common/shared/pipes/shared-pipes.module';
 
 const _declerations = [
 SimpleDatasetCardComponent
@@ -20,6 +21,7 @@ SimpleDatasetCardComponent
     ChipsModule,
     SharedModule,
     ProjectsSharedModule,
+    SharedPipesModule,
   ],
   declarations: [..._declerations],
   exports     : [..._declerations]

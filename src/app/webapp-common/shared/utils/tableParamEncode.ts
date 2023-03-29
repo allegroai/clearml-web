@@ -6,8 +6,9 @@ import {
 } from '../ui-components/data/table/table.consts';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {SortMeta} from 'primeng/api';
-import {MetricValueType} from '@common/experiments-compare/reducers/experiments-compare-charts.reducer';
 import {hasValue} from './helpers.util';
+import {MetricValueType} from '@common/experiments-compare/experiments-compare.constants';
+import {sortCol} from '@common/shared/utils/sortCol';
 
 export interface TableFilter {
   col?: string;
@@ -75,12 +76,6 @@ export const decodeFilter = (filters: string): TableFilter[] => filters.split(',
   // }
   return {col, filterMatchMode: mode, value: values?.split('+$+').map(x => x === '' ? null : x)};
 });
-
-export const sortCol = (a, b, colsOrder) => {
-  const indexOfA = colsOrder.indexOf(a);
-  const indexOfB = colsOrder.indexOf(b);
-  return ((indexOfA >= 0) ? indexOfA : 99) - ((indexOfB >= 0) ? indexOfB : 99);
-};
 
 export const encodeColumns = (mainCols: ISmCol[] | any, hiddenCols = {}, metricsCols = [], colsOrder = []): string[] => {
   colsOrder = colsOrder.filter(col => !hiddenCols[col]);
@@ -183,18 +178,7 @@ export const createMetadataCol = (key, projectId): ISmCol => ({
   type: 'metadata'
 });
 
-export const createHyperDatasetMetadataCol = (key, datasetId): ISmCol => ({
-  id: `hdmd.${key}`,
-  getter: `meta.${key}`,
-  key,
-  headerType: ColHeaderTypeEnum.sortFilter,
-  sortable: true,
-  filterable: false,
-  header: key,
-  style: {width: '240px'},
-  datasetId,
-  type: 'hdmd'
-});
+
 export const createFiltersFromStore = (_tableFilters: { [key: string]: FilterMetadata }, removeEmptyValues = true) => {
   if (!_tableFilters) {
     return [];

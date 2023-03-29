@@ -1,4 +1,4 @@
-<div class="w-100">
+<div class="s3-sub-header">
   <div [innerHTML]="header"></div>
 </div>
 <div class="container">
@@ -25,6 +25,11 @@
       <mat-label>Endpoint</mat-label>
       <input matInput [(ngModel)]="S3Form.Endpoint" type="text" name="Endpoint" autocomplete="off"
              placeholder="Host (Endpoint)">
+          <i *ngIf="S3Form.Endpoint.startsWith('http://') && secured"
+             matSuffix
+             class="al-icon sm al-ico-alert"
+             smTooltip="Embedding images through a non-secure transport (HTTP) in a secure web application might require special configuration of your browser"
+          ></i>
     </mat-form-field>
     <div class="w-100 d-flex justify-content-center mt-4">
       <button class="btn btn-neon" (click)="S3NGForm.form.markAllAsTouched(); saveNewCredentials()"

@@ -5,15 +5,11 @@ import {UiComponentsModule} from '@common/shared/ui-components/ui-components.mod
 import {SMSharedModule} from '@common/shared/shared.module';
 import {CommonProjectsModule} from '@common/projects/common-projects.module';
 import {StoreConfig, StoreModule} from '@ngrx/store';
-import {ProjectsState, projectsReducer} from '~/features/projects/projects.reducer';
-import {RouterModule, Routes} from '@angular/router';
+import {projectsReducer, ProjectsState} from '~/features/projects/projects.reducer';
 import {ProjectsSharedModule} from '~/features/projects/shared/projects-shared.module';
-import {merge} from 'lodash/fp';
+import {merge} from 'lodash-es';
 import {PipelinesRouterModule} from '@common/pipelines/pipelines.route';
 
-export const routes: Routes = [
-  { path: '', component: PipelinesPageComponent }
-];
 
 export const pipelinesSyncedKeys = [
   'projects.showPipelineExamples',
@@ -33,7 +29,7 @@ const getPipelineConfig = () => ({
       if (onInit) {
         onInit = false;
         const savedState = JSON.parse(localStorage.getItem(localStorageKey));
-        return merge(nextState, savedState);
+        return merge({}, nextState, savedState);
       }
       return nextState;
     };
@@ -52,10 +48,10 @@ const getPipelineConfig = () => ({
     SMSharedModule,
     CommonProjectsModule,
     ProjectsSharedModule,
+    PipelinesRouterModule,
     StoreModule.forFeature('projects', projectsReducer, PIPELINES_CONFIG_TOKEN),
-    RouterModule.forChild(routes)
   ],
-  exports: [PipelinesRouterModule, PipelinesPageComponent],
+  exports: [PipelinesPageComponent],
   providers: [
     {provide: PIPELINES_CONFIG_TOKEN, useFactory: getPipelineConfig},
   ]

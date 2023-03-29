@@ -1,12 +1,12 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {selectColorPickerProps} from '../../directives/choose-color/choose-color.reducer';
 import {Subscription} from 'rxjs';
-import {ColorPickerProps} from '../../directives/choose-color/choose-color.actions';
-import {hexToRgb, rgbaToValues} from '../../../services/color-hash/color-hash.utils';
-import {ColorHashService} from '../../../services/color-hash/color-hash.service';
 import {distinctUntilChanged} from 'rxjs/operators';
-import {isEqual} from 'lodash/fp';
+import {isEqual} from 'lodash-es';
+import {selectColorPickerProps} from '@common/shared/ui-components/directives/choose-color/choose-color.reducer';
+import {ColorPickerProps} from '@common/shared/ui-components/directives/choose-color/choose-color.actions';
+import {ColorHashService} from '@common/shared/services/color-hash/color-hash.service';
+import tinycolor from 'tinycolor2';
 
 @Component({
   selector: 'sm-color-picker-wrapper',
@@ -54,12 +54,8 @@ export class ColorPickerWrapperComponent implements OnInit, OnDestroy {
   }
 
   selectColor(event: string) {
-    let color;
-    if (event.startsWith('rgba')) {
-      color = rgbaToValues(event);
-    } else {
-      color = hexToRgb(event.length === 9 ? event.slice(0, 7) : event);
-    }
+    const {r, g, b, a} = tinycolor(event).toRgb();
+    const color = [r, g, b, a];
     this.colorHashService.setColorForString(this.props.cacheKey, color);
   }
 

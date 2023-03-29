@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {Action, Store} from '@ngrx/store';
 import {ModelInfoState} from '../reducers/model-info.reducer';
-import {ApiModelsService} from '../../../business-logic/api-services/models.service';
+import {ApiModelsService} from '~/business-logic/api-services/models.service';
 import {catchError, map, mergeMap, switchMap, tap, withLatestFrom} from 'rxjs/operators';
 import * as infoActions from '../actions/models-info.actions';
 import {updateModelDetails} from '../actions/models-info.actions';
@@ -11,27 +11,28 @@ import * as menuActions from '../actions/models-menu.actions';
 import {addTag, removeTag} from '../actions/models-menu.actions';
 import {activeLoader, addMessage, deactivateLoader, setServerError} from '../../core/actions/layout.actions';
 import {requestFailed} from '../../core/actions/http.actions';
-import {ApiAuthService} from '../../../business-logic/api-services/auth.service';
-import {BlModelsService} from '../../../business-logic/services/models.service';
-import {get} from 'lodash/fp';
 import {Router} from '@angular/router';
-import {ApiTasksService} from '../../../business-logic/api-services/tasks.service';
+import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
 import {of} from 'rxjs';
 import {selectSelectedModel, selectSelectedModels, selectSelectedTableModel, selectTableMode} from '../reducers';
 import {SelectedModel} from '../shared/models.model';
 import {RouterState, selectRouterConfig, selectRouterParams} from '../../core/reducers/router-reducer';
-import {ModelsArchiveManyResponse} from '../../../business-logic/model/models/modelsArchiveManyResponse';
-import {MatDialog} from '@angular/material/dialog';
-import {EmptyAction} from '../../../app.constants';
-import {EntityTypeEnum} from '../../../shared/constants/non-common-consts';
-import {ModelsUnarchiveManyResponse} from '../../../business-logic/model/models/modelsUnarchiveManyResponse';
+import {ModelsArchiveManyResponse} from '~/business-logic/model/models/modelsArchiveManyResponse';
+import {EmptyAction} from '~/app.constants';
+import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
+import {ModelsUnarchiveManyResponse} from '~/business-logic/model/models/modelsUnarchiveManyResponse';
 import {getNotificationAction, MenuItems, MoreMenuItems} from '../../shared/entity-page/items.utils';
+import {MESSAGES_SEVERITY} from '@common/constants';
 
 @Injectable()
 export class ModelsMenuEffects {
 
-  constructor(private actions$: Actions, private store: Store<ModelInfoState>, private apiModels: ApiModelsService, private apiTasks: ApiTasksService,
-              private authApi: ApiAuthService, private modelBl: BlModelsService, private router: Router, private matDialog: MatDialog) {
+  constructor(
+    private actions$: Actions,
+    private store: Store<ModelInfoState>,
+    private apiModels: ApiModelsService,
+    private apiTasks: ApiTasksService,
+    private router: Router) {
   }
 
   activeLoader = createEffect( () => this.actions$.pipe(
@@ -56,7 +57,7 @@ export class ModelsMenuEffects {
               ])
               )
             )
-          )
+          );
       }
     )
   ));
@@ -71,22 +72,25 @@ export class ModelsMenuEffects {
         return this.apiModels.modelsMove({
           ids: action.selectedModels.map(model => model.id),
           project: action.project.id,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           project_name: action.project.name})
           .pipe(
-            tap((res) => this.router.navigate([`projects/${action.project.id? action.project.id : res.project_id}/models/${action.selectedModels.length === 1 ? action.selectedModels[0].id : ''}`], {queryParamsHandling: 'merge'})),
+            tap((res) => this.router.navigate([`projects/${action.project.id? action.project.id : res.project_id ?? '*'}/models/${action.selectedModels.length === 1 ? action.selectedModels[0].id : ''}`], {queryParamsHandling: 'merge'})),
             mergeMap(() => [
               viewActions.resetState(),
-              selectedModel ? new infoActions.SetModel(selectedModel) : new EmptyAction(),
-              deactivateLoader(action.type)
+              selectedModel ? infoActions.setModelInfo({model: selectedModel}) : new EmptyAction(),
+              deactivateLoader(action.type),
+              addMessage(MESSAGES_SEVERITY.SUCCESS, `Model moved successfully to ${action.project.name ?? 'Projects root'}`)
             ]),
             catchError(error => [requestFailed(error), deactivateLoader(action.type), setServerError(error, null, 'Failed to Move model')])
-          )
+          );
       }
     )
   ));
 
   publishModelFailedText(error: any, model) {
-    if (model.task && get('error.meta.result_subcode', error) == 110) {
+    if (model.task && error?.error?.meta?.result_subcode == 110) {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       return this.apiTasks.tasksGetAllEx({id: [model.task.id], only_fields: ['id', 'name', 'project']}).pipe(
         map((tasks) => {
           const task = tasks.tasks[0];
@@ -150,47 +154,47 @@ export class ModelsMenuEffects {
   archiveModels = createEffect(() => this.actions$.pipe(
     ofType(menuActions.archivedSelectedModels),
     withLatestFrom(
-      this.store.select(selectRouterParams),
       this.store.select(selectSelectedTableModel)
     ),
-    switchMap(([action, routerParams, selectedTableModel]) => this.apiModels.modelsArchiveMany({ids: action.selectedEntities.map((model) => model.id)})
-      .pipe(
-        withLatestFrom(this.store.select(selectRouterConfig)),
-        mergeMap(([res, routerConfig]: [ModelsArchiveManyResponse, RouterState['config']]) => {
-          const models = action.selectedEntities;
-          const allFailed = res.failed.length === models.length;
-          const undoAction = [
-            {
-              name: 'Undo', actions: [
-                viewActions.setSelectedModels({models}),
-                menuActions.restoreSelectedModels({selectedEntities: models, skipUndo: true})
-              ]
+    switchMap(([action, selectedTableModel]) =>
+      this.apiModels.modelsArchiveMany({ids: action.selectedEntities.map((model) => model.id)})
+        .pipe(
+          withLatestFrom(this.store.select(selectRouterConfig)),
+          mergeMap(([res, routerConfig]: [ModelsArchiveManyResponse, RouterState['config']]) => {
+            const models = action.selectedEntities;
+            const allFailed = res.failed.length === models.length;
+            const undoAction = [
+              {
+                name: 'Undo', actions: [
+                  viewActions.setSelectedModels({models}),
+                  menuActions.restoreSelectedModels({selectedEntities: models, skipUndo: true})
+                ]
+              }
+            ];
+            let actions: Action[] = [
+              deactivateLoader(action.type),
+              viewActions.setSelectedModels({models: []}),
+              getNotificationAction(res, action, MenuItems.archive, EntityTypeEnum.model, (action.skipUndo || allFailed) ? [] : undoAction)
+            ];
+            if (routerConfig.includes('models')) {
+              const failedIds = res.failed.map(fail => fail.id);
+              const successModels = models.map(model => model.id).filter(id => !failedIds.includes(id));
+              actions = actions.concat([
+                viewActions.removeModels({modelIds: successModels}),
+                viewActions.fetchModelsRequested()
+              ]);
             }
-          ];
-          let actions: Action[] = [
+            if (this.isSelectedModelInCheckedModels(action.selectedEntities, selectedTableModel)) {
+              actions.push(viewActions.selectNextModel());
+            }
+            return actions;
+          }),
+          catchError(error => [
+            requestFailed(error),
             deactivateLoader(action.type),
-            viewActions.setSelectedModels({models: []}),
-            getNotificationAction(res, action, MenuItems.archive, EntityTypeEnum.model, (action.skipUndo || allFailed) ? [] : undoAction)
-          ];
-          if (routerConfig.includes('models')) {
-            const failedIds = res.failed.map(fail => fail.id);
-            const successModels = models.map(model => model.id).filter(id => !failedIds.includes(id));
-            actions = actions.concat([
-              viewActions.removeModels({modelIds: successModels}),
-              viewActions.fetchModelsRequested()
-            ]);
-          }
-          if (this.isSelectedModelInCheckedModels(action.selectedEntities, selectedTableModel)) {
-            actions.push(viewActions.selectNextModel());
-          }
-          return actions;
-        }),
-        catchError(error => [
-          requestFailed(error),
-          deactivateLoader(action.type),
-          setServerError(error, null, 'Failed To Archive models')
-        ])
-      )
+            setServerError(error, null, 'Failed To Archive models')
+          ])
+        )
     )
   ));
 
@@ -207,7 +211,7 @@ export class ModelsMenuEffects {
         this.router.navigate([`projects/${routerParams.projectId}/models/${tableMode === 'info' ? routerParams.modelId : ''}`]);
       }
     }),
-    switchMap(([action, routerParams]) => this.apiModels.modelsUnarchiveMany({ids: action.selectedEntities.map((model) => model.id)})
+    switchMap(([action]) => this.apiModels.modelsUnarchiveMany({ids: action.selectedEntities.map((model) => model.id)})
       .pipe(
         withLatestFrom(this.store.select(selectRouterConfig)),
         mergeMap(([res, routerConfig]: [ModelsUnarchiveManyResponse, RouterState['config']]) => {
@@ -252,7 +256,7 @@ export class ModelsMenuEffects {
       deactivateLoader(action.type)
       ] as Action[];
     if (ids.includes(selectedEntity?.id)) {
-      actions.push(new infoActions.SetModel({...selectedEntity, ...changes}));
+      actions.push(infoActions.setModelInfo({model: {...selectedEntity, ...changes}}));
     }
     actions.push(getNotificationAction(res, action, operationName, EntityTypeEnum.model));
     return actions;

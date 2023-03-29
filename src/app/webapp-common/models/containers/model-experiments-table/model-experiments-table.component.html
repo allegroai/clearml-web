@@ -1,0 +1,42 @@
+<div class="select-experiments-container light-theme" >
+    <div class="search-experiment-for-compare d-flex align-items-center">
+      <h4 class="m-0">USED BY</h4>
+      <mat-form-field appearance="outline" class="ml-auto mr-3" smClickStopPropagation>
+        <input
+          #searchExperiments
+          autofocus
+          matInput
+          name="search-experiments"
+          autocomplete="off"
+          smClickStopPropagation
+          placeholder="Search for experiments"
+          [ngModel]="(searchTerm$ | async)?.query"
+          (input)="searchTermChanged(searchExperiments.value)"
+        >
+      </mat-form-field>
+      <sm-clear-filters-button
+        [tableFilters]="(tableFilters$ | async)"
+        (clearTableFilters)="clearTableFilters()"
+      ></sm-clear-filters-button>
+    </div>
+    <div class="hide-table show-table">
+      <sm-experiments-table
+        class="align-self-stretch"
+        [selectionMode]="null"
+        [reorderableColumns]="false"
+        [minimizedView]="false"
+        [tableCols]="tableCols"
+        [experiments]="experiments$ | async"
+        [tableFilters]="(tableFilters$ | async)"
+        [tags]="tags"
+        [noMoreExperiments]="noMoreExperiments$ | async"
+        [systemTags]="systemTags$ | async"
+        [entityType]="entityTypes.experiment"
+        (experimentsSelectionChanged)="experimentsSelectionChanged($event)"
+        (loadMoreExperiments)="getNextExperiments()"
+        (filterChanged)="filterChanged($event)"
+        (columnResized)="resizeCol($event)"
+      >
+      </sm-experiments-table>
+    </div>
+  </div>

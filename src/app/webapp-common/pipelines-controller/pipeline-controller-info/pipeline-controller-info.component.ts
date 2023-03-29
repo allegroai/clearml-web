@@ -303,6 +303,7 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
 
   ngOnDestroy(): void {
     this.store.dispatch(commonInfoActions.setExperiment({experiment: null}));
+    this.store.dispatch(setSelectedPipelineStep({step: null}));
     this.removeLines();
     this.sub.unsubscribe();
   }

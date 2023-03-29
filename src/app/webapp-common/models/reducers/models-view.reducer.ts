@@ -149,13 +149,18 @@ export const modelsViewReducer = createReducer(
   on(actions.setMetadataKeys, (state, action) => ({...state, projectMetadataKeys: action.keys})),
   on(actions.setMetadataColValuesOptions, (state, action) =>
     ({...state, metadataColsOptions: {...state.metadataColsOptions, [action.col.id]: action.values}})),
-  on(actions.setTableSort, (state, action) => ({
-    ...state,
-    projectColumnsSortOrder: {
-      ...state.projectColumnsSortOrder,
-      [action.projectId]: action.orders
-    }
-  })),
+  on(actions.setTableSort, (state, action) => {
+    const colIds = (Object.values(MODELS_TABLE_COL_FIELDS) as string[]).concat(state.metadataCols.map(col => col.id));
+    let orders = action.orders.filter(order => colIds.includes(order.field));
+    orders = orders.length > 0 ? orders : null;
+    return {
+      ...state,
+      projectColumnsSortOrder: {
+        ...state.projectColumnsSortOrder,
+        [action.projectId]: orders
+      }
+    };
+  }),
   on(actions.setColumnWidth, (state, action) => ({
     ...state,
     projectColumnsWidth: {

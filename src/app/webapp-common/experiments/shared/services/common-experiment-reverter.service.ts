@@ -1,12 +1,11 @@
 import {Injectable} from '@angular/core';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 import {IExecutionForm, sourceTypesEnum} from '~/features/experiments/shared/experiment-execution.model';
-import {get, getOr} from 'lodash/fp';
 import {Task} from '~/business-logic/model/tasks/task';
 import {Script} from '~/business-logic/model/tasks/script';
 import {IExperimentModelInfo} from '../common-experiment-model.model';
 import {Store} from '@ngrx/store';
-import {ExperimentsViewState} from '../../../../features/experiments/reducers/experiments-view.reducer';
+import {ExperimentsViewState} from '@common/experiments/reducers/experiments-view.reducer';
 import {selectActiveWorkspace} from '@common/core/reducers/users-reducer';
 import {Observable, Subscription} from 'rxjs';
 import {isExample} from '@common/shared/utils/shared-utils';
@@ -63,12 +62,12 @@ export class CommonExperimentReverterService {
       /* eslint-disable @typescript-eslint/naming-convention */
       source: this.revertExecutionSource(experiment.script),
       output: {
-        destination: get('destination', experiment.output) || '',
+        destination: experiment.output?.destination ?? '',
         logLevel: 'basic'// TODO: should be enum from gencode.
       },
       requirements: experiment.script ? this.revertRequirements(experiment.script) : {pip: ''},
-      diff: get('diff', experiment.script) || '',
-      docker_cmd: get('docker_cmd', experiment.container),
+      diff: experiment.script?.diff ?? '',
+      docker_cmd: experiment.container?.['docker_cmd'],
       queue: experiment.execution?.queue,
       container: experiment.container || {setup_shell_script: '', arguments: '', image: ''}
       /* eslint-enable @typescript-eslint/naming-convention */
@@ -78,12 +77,12 @@ export class CommonExperimentReverterService {
   revertExecutionSource(script: Task['script']): IExecutionForm['source'] {
     return {
       /* eslint-disable @typescript-eslint/naming-convention */
-      repository: get('repository', script) || '',
-      tag: get('tag', script) || '',
-      version_num: get('version_num', script) || '',
-      branch: get('branch', script) || '',
-      entry_point: get('entry_point', script) || '',
-      working_dir: get('working_dir', script) || '',
+      repository: script?.repository ?? '',
+      tag: script?.tag ?? '',
+      version_num: script?.version_num ?? '',
+      branch: script?.branch ?? '',
+      entry_point: script?.entry_point ?? '',
+      working_dir: script?.working_dir ?? '',
       scriptType: this.revertScriptType(script)
       /* eslint-enable @typescript-eslint/naming-convention */
     };
@@ -91,9 +90,9 @@ export class CommonExperimentReverterService {
 
   revertScriptType(script: Task['script']) {
     switch (true) {
-      case !!get('tag', script):
+      case !!script?.tag:
         return sourceTypesEnum.Tag;
-      case !!get('version_num', script):
+      case !!script?.version_num:
         return sourceTypesEnum.VersionNum;
       default:
         return sourceTypesEnum.Branch;
@@ -104,12 +103,12 @@ export class CommonExperimentReverterService {
     return {
       input: experiment.models?.input?.map(modelEx => ({...modelEx.model, taskName: modelEx.name})) || [],
       output: experiment.models?.output?.map(modelEx => ({...modelEx.model, taskName: modelEx.name})) || [],
-      artifacts: get('artifacts', experiment.execution) || []
+      artifacts: experiment.execution?.artifacts ?? []
     };
   }
 
   private revertRequirements(script: Script) {
-    const pip = getOr([], 'requirements.pip', script);
+    const pip = script?.requirements?.['pip'] ?? [];
     return {
       ...script.requirements,
       pip: (Array.isArray(pip) ? pip.join('\n') : pip) || ''

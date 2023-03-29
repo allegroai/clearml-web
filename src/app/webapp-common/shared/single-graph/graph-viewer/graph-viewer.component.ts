@@ -8,14 +8,14 @@ import {
   OnInit,
   ViewChild
 } from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
 import {ExtFrame} from '../plotly-graph-base';
 import {Store} from '@ngrx/store';
 import {Observable} from 'rxjs/internal/Observable';
 import {Subject, Subscription} from 'rxjs';
-import {cloneDeep, getOr} from 'lodash/fp';
+import {cloneDeep} from 'lodash-es';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
-import {MatSelectChange} from '@angular/material/select';
+import {MatLegacySelectChange as MatSelectChange} from '@angular/material/legacy-select';
 import {debounceTime, filter, map, take} from 'rxjs/operators';
 import {convertPlots, groupIterations} from '@common/tasks/tasks.utils';
 import {addMessage} from '@common/core/actions/layout.actions';
@@ -40,6 +40,16 @@ import {
 } from '@common/shared/single-graph/single-graph.reducer';
 import {getSignedUrl} from '@common/core/actions/common-auth.actions';
 import {selectSignedUrl} from '@common/core/reducers/common-auth-reducer';
+
+export interface GraphViewerData {
+  chart: ExtFrame;
+  id: string;
+  xAxisType?: any;
+  smoothWeight?: number;
+  darkTheme: boolean;
+  isCompare: boolean;
+  embedFunction: (rect: DOMRect) => null;
+}
 
 @Component({
   selector: 'sm-graph-viewer',
@@ -114,10 +124,11 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
   ];
   smoothWeight: any = 0;
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: { chart: ExtFrame; id: string; xAxisType: any; smoothWeight; darkTheme: boolean; isCompare: boolean; embedFunction: () => null },
-              public dialogRef: MatDialogRef<GraphViewerComponent>,
-              private store: Store<any>,
-              private cdr: ChangeDetectorRef,
+  constructor(
+    @Inject(MAT_DIALOG_DATA) public data: GraphViewerData,
+    public dialogRef: MatDialogRef<GraphViewerComponent>,
+    private store: Store<any>,
+    private cdr: ChangeDetectorRef,
   ) {
     this.chart$ = this.store.select(selectFullScreenChart);
     this.currentPlotEvent$ = this.store.select(selectCurrentPlotViewer);
@@ -126,13 +137,16 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
     this.minMaxIterations$ = this.store.select(selectMinMaxIterations);
     this.beginningOfTime$ = this.store.select(selectViewerBeginningOfTime);
     this.endOfTime$ = this.store.select(selectViewerEndOfTime);
-    this.store.dispatch(setXtypeGraphDisplayFullDetailsScalars({xAxisType: data.xAxisType}));
+    if (data.xAxisType) {
+      this.store.dispatch(setXtypeGraphDisplayFullDetailsScalars({xAxisType: data.xAxisType}));
+    }
     this.store.dispatch(setGraphDisplayFullDetailsScalarsIsOpen({isOpen: true}));
     this.isCompare = data.isCompare;
     this.isFullDetailsMode = ['multiScalar', 'scalar'].includes(data.chart.layout.type) && !this.isCompare;
     this.id = data.id;
     this.embedFunction = data.embedFunction;
     this.darkTheme = data.darkTheme;
+    this.smoothWeight = data.smoothWeight;
     const reqData = {
       task: this.data.chart.task,
       metric: this.data.chart.metric,
@@ -153,7 +167,7 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
     if (this.isFullDetailsMode) {
       this.store.dispatch(getGraphDisplayFullDetailsScalars({
         task: this.data.chart.data[0].task,
-        metric: {metric: (this.data.chart.metric)},
+        metric: {metric: (this.data.chart.data[0].originalMetric ?? this.data.chart.metric)},
       }));
     }
     this.sub.add(this.xAxisType$.subscribe((xType) => this.xAxisType = xType));
@@ -165,11 +179,11 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
       .subscribe(currentPlotEvents => {
         this.plotLoaded = true;
         const groupedPlots = groupIterations(currentPlotEvents);
-        const {graphs, parsingError} = convertPlots({plots: groupedPlots, experimentId: 'viewer'});
+        const {graphs, parsingError} = convertPlots({plots: groupedPlots, id: 'viewer'});
         parsingError && this.store.dispatch(addMessage('warn', `Couldn't read all plots. Please make sure all plots are properly formatted (NaN & Inf aren't supported).`, [], true));
         Object.values(graphs).forEach((graphss: ExtFrame[]) => {
           graphss.forEach((graph: ExtFrame) => {
-            if (getOr(0, 'layout.images.length', graph) > 0) {
+            if ((graph?.layout?.images?.length ?? 0 ) > 0) {
               graph.layout.images.forEach((image: Plotly.Image) => {
                   this.store.dispatch(getSignedUrl({
                     url: image.source,
@@ -258,7 +272,7 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
       ([ScalarKeyEnum.IsoTime, ScalarKeyEnum.Timestamp].includes(this.xAxisType) && (ScalarKeyEnum.Iter === ($event.value)))) {
       this.store.dispatch(getGraphDisplayFullDetailsScalars({
         task: this.chart.data[0].task,
-        metric: {metric: (this.chart.metric)},
+        metric: {metric: (this.data.chart.data[0].originalMetric ?? this.data.chart.metric)},
         key: $event.value
       }));
     } else {
@@ -273,7 +287,7 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
   refresh() {
     this.store.dispatch(getGraphDisplayFullDetailsScalars({
       task: this.chart.data[0].task,
-      metric: {metric: (this.chart.metric)}
+      metric: {metric: (this.data.chart.data[0].originalMetric ?? this.data.chart.metric)}
     }));
   }
 

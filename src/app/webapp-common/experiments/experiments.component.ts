@@ -10,16 +10,16 @@ import {
 import {Store} from '@ngrx/store';
 import {ColHeaderTypeEnum, ISmCol, TableSortOrderEnum} from '../shared/ui-components/data/table/table.consts';
 import {ActivatedRoute, Params, Router} from '@angular/router';
-import {isEqual} from 'lodash/fp';
+import {isEqual} from 'lodash-es';
 import {selectRouterParams} from '../core/reducers/router-reducer';
 import {debounceTime, distinctUntilChanged, filter, map, skip, tap, withLatestFrom} from 'rxjs/operators';
-import {MatDialog} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {combineLatest, Observable} from 'rxjs';
 import {selectAppVisible, selectBackdropActive} from '../core/reducers/view.reducer';
 import {initSearch, resetSearch} from '../common-search/common-search.actions';
 import {SearchState, selectSearchQuery} from '../common-search/common-search.reducer';
 import {ITableExperiment} from './shared/common-experiment-model.model';
-import {ExperimentsViewState} from '~/features/experiments/reducers/experiments-view.reducer';
+import {ExperimentsViewState} from '@common/experiments/reducers/experiments-view.reducer';
 import {selectIsSharedAndNotOwner, selectMetricsLoading, selectMetricVariants, selectSelectedExperiment} from '~/features/experiments/reducers';
 import {EXPERIMENTS_TABLE_COL_FIELDS} from '~/features/experiments/shared/experiments.const';
 import * as experimentsActions from './actions/common-experiments-view.actions';
@@ -56,7 +56,6 @@ import {
 import {ExperimentsTableComponent} from './dumb/experiments-table/experiments-table.component';
 import {DequeueFooterItem} from '../shared/entity-page/footer-items/dequeue-footer-item';
 import {HasReadOnlyFooterItem} from '../shared/entity-page/footer-items/has-read-only-footer-item';
-import {MetricValueType} from '../experiments-compare/reducers/experiments-compare-charts.reducer';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {filterArchivedExperiments} from './shared/common-experiments.utils';
 import {AbortAllChildrenFooterItem} from '../shared/entity-page/footer-items/abort-all-footer-item';
@@ -68,6 +67,7 @@ import {ExperimentMenuComponent} from '@common/experiments/shared/components/exp
 import {WelcomeMessageComponent} from '@common/layout/welcome-message/welcome-message.component';
 import {ConfigurationService} from '@common/shared/services/configuration.service';
 import {isReadOnly} from '@common/shared/utils/is-read-only';
+import {MetricValueType} from '@common/experiments-compare/experiments-compare.constants';
 
 @Component({
   selector: 'sm-common-experiments',
@@ -215,8 +215,8 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
   }
 
   ngOnInit() {
-    this.store.dispatch(setTableCols({cols: this.tableCols}));
     super.ngOnInit();
+    this.store.dispatch(setTableCols({cols: this.tableCols}));
 
     let prevQueryParams: Params;
     this.sub.add(this.store.select(selectRouterParams).pipe(map(params => this.getParamId(params))).subscribe(() =>
@@ -481,7 +481,7 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
         `compare-experiments`,
         {ids: this.selectedExperiments.map(experiment => experiment.id).join(',')}
       ],
-      {relativeTo: this.entityType === EntityTypeEnum.dataset ? this.route.parent : this.route.parent.parent});
+      {relativeTo:  this.route.parent.parent});
   }
 
   afterArchiveChanged() {
@@ -637,7 +637,7 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
   newExperiment() {
     this.dialog.open(WelcomeMessageComponent, {
       width: '720px',
-      height: '742px',
+      height: '764px',
       data: {
         showTabs: true,
         step: 2,

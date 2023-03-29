@@ -1,5 +1,5 @@
 import {NgModule} from '@angular/core';
-import {CommonModule} from '@angular/common';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {SMSharedModule} from '../shared/shared.module';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {RouterModule} from '@angular/router';
@@ -19,20 +19,23 @@ import {TipOfTheDayModalComponent} from './tip-of-the-day-modal/tip-of-the-day-m
 import {HeaderUserMenuActionsComponent} from '~/layout/header/header-user-menu-actions/header-user-menu-actions.component';
 import {WelcomeMessageComponent} from '@common/layout/welcome-message/welcome-message.component';
 import {YouTubePlayerModule} from '@angular/youtube-player';
+import {SharedPipesModule} from '@common/shared/pipes/shared-pipes.module';
 
 
 @NgModule({
-  imports: [
-    CommonModule,
-    SMSharedModule,
-    FormsModule,
-    ReactiveFormsModule,
-    CommonSearchModule,
-    RouterModule,
-    StoreModule.forFeature('layout', LayoutReducer),
-    SharedModule,
-    YouTubePlayerModule,
-  ],
+    imports: [
+        CommonModule,
+        SMSharedModule,
+        FormsModule,
+        ReactiveFormsModule,
+        CommonSearchModule,
+        RouterModule,
+        StoreModule.forFeature('layout', LayoutReducer),
+        SharedModule,
+        YouTubePlayerModule,
+        SharedPipesModule,
+        NgOptimizedImage,
+    ],
   declarations: [
     HeaderComponent, BreadcrumbsComponent, ProjectContextNavbarComponent, LoggedOutAlertComponent,
     S3AccessResolverComponent, S3AccessDialogComponent, ServerNotificationDialogContainerComponent,

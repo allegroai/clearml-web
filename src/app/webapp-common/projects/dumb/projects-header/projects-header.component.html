@@ -6,6 +6,7 @@
     </sm-menu>
     <sm-show-only-user-work *ngIf="!enableTagsFilter"></sm-show-only-user-work>
     <sm-main-pages-header-filter *ngIf="enableTagsFilter" [allTags]="tags"></sm-main-pages-header-filter>
+    <ng-content select="[left-items]"></ng-content>
   </div>
   <div>
     <ng-content></ng-content>

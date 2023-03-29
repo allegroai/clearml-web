@@ -27,4 +27,5 @@ export interface EventsScalarMetricsIterHistogramRequest {
      * List of metrics and variants
      */
     metrics?: Array<object>;
+  model_events?: boolean;
 }

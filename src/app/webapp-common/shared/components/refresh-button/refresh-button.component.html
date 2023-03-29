@@ -13,6 +13,6 @@
     </span>
   </ng-template>
   <mat-checkbox [ngModel]="autoRefreshState$ | async" name="autoRefresh" (ngModelChange)="setAutoRefresh.emit($event)" class="autorefresh-checkbox">
-    Auto Refresh
+    <span class="no-wrap">Auto Refresh</span>
   </mat-checkbox>
 </div>

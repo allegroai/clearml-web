@@ -6,7 +6,7 @@ import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-in
 import {distinctUntilChanged, filter, map, tap} from 'rxjs/operators';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {convertMultiPlots, prepareMultiPlots, sortMetricsList} from '@common/tasks/tasks.utils';
-import {isEqual} from 'lodash/fp';
+import {isEqual} from 'lodash-es';
 import {
   getMultiPlotCharts,
   resetExperimentMetrics,

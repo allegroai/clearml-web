@@ -7,7 +7,7 @@ import {addTag, removeTag} from '../../actions/models-menu.actions';
 import {SelectedModel, TableModel} from '../../shared/models.model';
 import {MenuComponent} from '@common/shared/ui-components/panel/menu/menu.component';
 import {getSysTags} from '../../model.utils';
-import {ActivateModelEdit, CancelModelEdit} from '../../actions/models-info.actions';
+import {activateModelEdit, cancelModelEdit} from '../../actions/models-info.actions';
 import {
   CountAvailableAndIsDisableSelectedFiltered,
   MenuItems,
@@ -74,7 +74,7 @@ export class ModelInfoHeaderComponent {
     if (!this.tagMenu) {
       return;
     }
-    window.setTimeout(() => this.store.dispatch(new ActivateModelEdit('tags')), 200);
+    window.setTimeout(() => this.store.dispatch(activateModelEdit('tags')), 200);
     this.tagMenu.position = {x: event.clientX, y: event.clientY};
     window.setTimeout(() => {
       this.tagMenu.openMenu();
@@ -91,15 +91,15 @@ export class ModelInfoHeaderComponent {
   }
 
   tagsMenuClosed() {
-    this.store.dispatch(new CancelModelEdit());
+    this.store.dispatch(cancelModelEdit());
     this.tagMenuContent.clear();
   }
 
   editExperimentName(edit: boolean) {
     if (edit) {
-      this.store.dispatch(new ActivateModelEdit('ModelName'));
+      this.store.dispatch(activateModelEdit('ModelName'));
     } else {
-      this.store.dispatch(new CancelModelEdit());
+      this.store.dispatch(cancelModelEdit());
     }
   }
 

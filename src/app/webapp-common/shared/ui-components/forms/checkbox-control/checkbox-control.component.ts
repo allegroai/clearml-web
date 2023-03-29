@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component, Input, AfterViewInit, ChangeDetectorRef, HostListener} from '@angular/core';
 import {ImmutableFormField} from '../immutableFormField';
-import {isString} from 'lodash/fp';
+import {isString} from 'lodash-es';
 import {TableSelectionState} from '@common/constants';
 
 @Component({

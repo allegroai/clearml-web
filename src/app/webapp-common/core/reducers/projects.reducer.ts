@@ -40,6 +40,7 @@ export interface RootProjects {
   hideExamples: boolean;
   mainPageTagsFilter: string[];
   mainPageTagsFilterMatchMode: string;
+  defaultNestedModeForFeature: { [feature: string]: boolean };
 }
 
 const initRootProjects: RootProjects = {
@@ -61,7 +62,8 @@ const initRootProjects: RootProjects = {
   allUsers: [],
   extraUsers: [],
   showHidden: false,
-  hideExamples: false
+  hideExamples: false,
+  defaultNestedModeForFeature: {}
 };
 
 export const projects = state => state.rootProjects as RootProjects;
@@ -79,7 +81,7 @@ export const selectCompanyTags = createSelector(projects, state => state.company
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const selectProjectSystemTags = createSelector(projects, state => getSystemTags({system_tags: state.systemTags} as ITableExperiment));
 export const selectTagsColors = createSelector(projects, state => state.tagsColors);
-export const selectLastUpdate = createSelector(projects, (state): string => state.lastUpdate);
+export const selectLastUpdate = createSelector(projects, state => state.lastUpdate);
 export const selectTagColors = createSelector(selectTagsColors,
   (tagsColors, props: { tag: string }) => tagsColors[props.tag]);
 const selectSelectedProjectsMetricVariant = createSelector(projects, state => state.graphVariant);
@@ -123,18 +125,28 @@ export const projectsReducer = createReducer(
       graphData: initRootProjects.graphData,
     };
   }),
-  on(projectsActions.setSelectedProject, (state, action) => ({...state, selectedProject: action.project, extraUsers: []})),
+  on(projectsActions.setSelectedProject, (state, action) => ({
+    ...state,
+    selectedProject: action.project,
+    extraUsers: []
+  })),
   on(projectsActions.setSelectedProjectStats, (state, action) => ({
     ...state,
     selectedProject: {
       ...state.selectedProject,
       stats: action.project?.stats
-    }})),
+    }
+  })),
   on(projectsActions.deletedProjectFromRoot, (state, action) => {
     const projectIdsToDelete = [action.project.id].concat(action.project.sub_projects.map(project => project.id));
     return {...state, projects: state.projects.filter(project => !projectIdsToDelete.includes(project.id))};
   }),
-  on(projectsActions.resetSelectedProject, state => ({...state, selectedProject: initRootProjects.selectedProject, users: [], extraUsers: []})),
+  on(projectsActions.resetSelectedProject, state => ({
+    ...state,
+    selectedProject: initRootProjects.selectedProject,
+    users: [],
+    extraUsers: []
+  })),
   on(projectsActions.updateProjectCompleted, (state, action) => ({
     ...state,
     selectedProject: {...state.selectedProject, ...action.changes},
@@ -143,12 +155,28 @@ export const projectsReducer = createReducer(
   on(projectsActions.setArchive, (state, action) => ({...state, archive: action.archive})),
   on(projectsActions.setDeep, (state, action) => ({...state, deep: action.deep})),
   on(projectsActions.setTags, (state, action) => ({...state, projectTags: action.tags})),
-  on(projectsActions.setTagsFilterByProject, (state, action) => ({...state, tagsFilterByProject: action.tagsFilterByProject})),
-  on(projectsActions.setCompanyTags, (state, action) => ({...state, companyTags: action.tags, systemTags: action.systemTags})),
-  on(projectsActions.addProjectTags, (state, action) => ({...state, projectTags: Array.from(new Set(state.projectTags.concat(action.tags))).sort()})),
+  on(projectsActions.setTagsFilterByProject, (state, action) => ({
+    ...state,
+    tagsFilterByProject: action.tagsFilterByProject
+  })),
+  on(projectsActions.setCompanyTags, (state, action) => ({
+    ...state,
+    companyTags: action.tags,
+    systemTags: action.systemTags
+  })),
+  on(projectsActions.addProjectTags, (state, action) => ({
+    ...state,
+    projectTags: Array.from(new Set(state.projectTags.concat(action.tags))).sort()
+  })),
   on(projectsActions.setMainPageTagsFilter, (state, action) => ({...state, mainPageTagsFilter: action.tags})),
-  on(projectsActions.setMainPageTagsFilterMatchMode, (state, action) => ({...state, mainPageTagsFilterMatchMode: action.matchMode})),
-  on(projectsActions.setTagColors, (state, action) => ({...state, tagsColors: {...state.tagsColors, [action.tag]: action.colors}})),
+  on(projectsActions.setMainPageTagsFilterMatchMode, (state, action) => ({
+    ...state,
+    mainPageTagsFilterMatchMode: action.matchMode
+  })),
+  on(projectsActions.setTagColors, (state, action) => ({
+    ...state,
+    tagsColors: {...state.tagsColors, [action.tag]: action.colors}
+  })),
   on(projectsActions.setMetricVariant, (state, action) => ({
     ...state, graphVariant: {...state.graphVariant, [action.projectId]: action.col}
   })),
@@ -158,9 +186,12 @@ export const projectsReducer = createReducer(
   on(projectsActions.setAllProjectUsers, (state, action) => ({...state, allUsers: action.users})),
   on(projectsActions.setProjectExtraUsers, (state, action) => ({...state, extraUsers: action.users})),
   on(projectsActions.setShowHidden, (state, action) => ({...state, showHidden: action.show})),
-  on(projectsActions.setHideExamples, (state, action) => ({...state, hideExamples: action.hide}))
+  on(projectsActions.setHideExamples, (state, action) => ({...state, hideExamples: action.hide})),
+  on(projectsActions.setDefaultNestedModeForFeature, (state, action) => ({...state, defaultNestedModeForFeature: {...state.defaultNestedModeForFeature, [action.feature]:action.isNested}}))
 );
+export const selectShowHiddenUserSelection = createSelector(projects, state => state.showHidden);
 export const selectShowHidden = createSelector(projects, selectSelectedProject,
   (state, selectedProject) => (state?.showHidden || selectedProject?.system_tags?.includes('hidden')));
 
 export const selectHideExamples = createSelector(projects, state => state?.hideExamples);
+export const selectDefaultNestedModeForFeature = createSelector(projects, state => state?.defaultNestedModeForFeature);

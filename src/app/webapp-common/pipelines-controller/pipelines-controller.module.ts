@@ -8,17 +8,15 @@ import {CommonDeleteDialogModule} from '@common/shared/entity-page/entity-delete
 import {SMMaterialModule} from '@common/shared/material/material.module';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ExperimentCompareSharedModule} from '@common/experiments-compare/shared/experiment-compare-shared.module';
-import {CommonExperimentSharedModule} from '@common/experiments/shared/common-experiment-shared.module';
 import {CommonLayoutModule} from '@common/layout/layout.module';
 import {ExperimentSharedModule} from '~/features/experiments/shared/experiment-shared.module';
 import {SMSharedModule} from '@common/shared/shared.module';
 import {SharedPipesModule} from '@common/shared/pipes/shared-pipes.module';
 import {RouterModule, Routes} from '@angular/router';
-import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {MatLegacyProgressSpinnerModule as MatProgressSpinnerModule} from '@angular/material/legacy-progress-spinner';
 import {SharedModule} from '~/shared/shared.module';
 import {ExperimentOutputLogModule} from '@common/experiments/shared/experiment-output-log/experiment-output-log.module';
-import {MatRadioModule} from '@angular/material/radio';
-import {ExperimentsCommonModule} from '@common/experiments/common-experiments.module';
+import {MatLegacyRadioModule as MatRadioModule} from '@angular/material/legacy-radio';
 import {PipelineControllerInfoComponent} from './pipeline-controller-info/pipeline-controller-info.component';
 import {PipelineControllerStepComponent} from './pipeline-controller-step/pipeline-controller-step.component';
 import { PipelineInfoComponent } from './pipeline-details/pipeline-info.component';
@@ -61,7 +59,6 @@ export const routes: Routes = [
     FormsModule,
     ReactiveFormsModule,
     ExperimentCompareSharedModule,
-    CommonExperimentSharedModule,
     CommonLayoutModule,
     ExperimentSharedModule,
     SMSharedModule,
@@ -73,8 +70,9 @@ export const routes: Routes = [
     SharedModule,
     ExperimentOutputLogModule,
     MatRadioModule,
-    ExperimentsCommonModule,
   ],
-  providers: [ControllersComponent]
+  providers: [
+    ControllersComponent,
+  ]
 })
 export class PipelinesControllerModule { }

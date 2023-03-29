@@ -63,6 +63,7 @@ import {HideRedactedArgumentsPipe} from './hide-redacted-arguments.pipe';
 import {HasCompletedPipe} from './has-completed.pipe';
 import {IsStringPipe} from './is-string.pipe';
 import {CleanProjectPathPipe} from './clean-project-path.pipe';
+import {BaseNamePipe} from '@common/shared/pipes/base-name.pipe';
 
 const pipes = [
   CamelToTitlePipe, FilenameFromPath, FilterPipe, FloorPipe, KeyValuePipe, NAPipe, SortPipe, IsVideoPipe, IsAudioPipe, FilterInternalPipe, UuidPipe,
@@ -70,17 +71,18 @@ const pipes = [
   ToExponentialPipe, HighlightSearchTextPipe, HighlightSearchPipe, HideHashPipe, HideHashTitlePipe, TimeAgoPipe, TimeTillNowPipe, HasExampleItemPipe, safeAngularUrlParameterPipe,
   AdvancedFilterPipe, SafePipe, SelectOptionValueToLabelPipe, ToPercentagePipe, ReplaceViaMapPipe, FilterByIdPipe, FilterLast, FilterOutPipe, SimpleFilterPipe,
   BreadcrumbsEllipsisPipe, ShortProjectNamePipe, ProjectLocationPipe, StringIncludedInArrayPipe, ToPropertyArrayPipe, MenuItemTextPipe, InitialsPipe, IdToObjectsArrayPipe, IsEmptyPipe,
-  TemplateInjectorPipe, TestConditionalPipe, GroupHasErrorsPipe, FormgroupHasRequiredFieldPipe, FileSizePipe, RegexPipe, LabelValueToStringArrayPipe, IsStringPipe,
-  ItemByIdPipe, HideRedactedArgumentsPipe, HasCompletedPipe, CleanProjectPathPipe
+  TemplateInjectorPipe, TestConditionalPipe, GroupHasErrorsPipe, FormgroupHasRequiredFieldPipe, RegexPipe, LabelValueToStringArrayPipe, IsStringPipe,
+  ItemByIdPipe, HideRedactedArgumentsPipe, HasCompletedPipe, CleanProjectPathPipe, BaseNamePipe
 ];
 
 @NgModule({
   imports: [
     CommonModule,
+    FileSizePipe
   ],
   declarations: [pipes, ShowSelectedFirstPipe, CountPipe, ColGetterPipe, FilterMonitorMetricPipe, ReversePipe, ],
   providers: [pipes],
-  exports: [pipes, ShowSelectedFirstPipe, CountPipe, ColGetterPipe, FilterMonitorMetricPipe, ReversePipe]
+  exports: [pipes, ShowSelectedFirstPipe, CountPipe, ColGetterPipe, FilterMonitorMetricPipe, ReversePipe, FileSizePipe]
 })
 export class SharedPipesModule {
 }

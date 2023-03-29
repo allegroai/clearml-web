@@ -11,7 +11,7 @@ export class GraphPlotDataToMetric implements PipeTransform {
   transform(metricsPlots: MetricsPlotEvent[], taskId: string) {
     if (metricsPlots) {
       const groupedPlots = groupIterations(metricsPlots);
-      return convertPlots({plots: groupedPlots, experimentId: taskId}).graphs;
+      return convertPlots({plots: groupedPlots, id: taskId}).graphs;
     }
     return {} as { [title: string]: ExtFrame[] };
   }

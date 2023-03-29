@@ -1,18 +1,18 @@
 import {Injectable} from '@angular/core';
-import {Actions, createEffect, Effect, ofType} from '@ngrx/effects';
-import {EmptyAction} from '../../../app.constants';
+import {Actions, createEffect, ofType} from '@ngrx/effects';
+import {EmptyAction} from '~/app.constants';
 import * as layoutActions from '../actions/layout.actions';
-import {filter, map, switchMap, take, mergeMap, bufferTime} from 'rxjs/operators';
-import {get} from 'lodash/fp';
-import {ApiTasksService} from '../../../business-logic/api-services/tasks.service';
+import {addMessage} from '../actions/layout.actions';
+import {bufferTime, filter, map, mergeMap, switchMap, take} from 'rxjs/operators';
+import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
 import {EMPTY, Observable, of} from 'rxjs';
-import {ApiModelsService} from '../../../business-logic/api-services/models.service';
-import {MatDialogRef, MatDialog} from '@angular/material/dialog';
+import {ApiModelsService} from '~/business-logic/api-services/models.service';
+import {MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
 import {AlertDialogComponent} from '../../shared/ui-components/overlay/alert-dialog/alert-dialog.component';
 import {NotifierService} from '../../angular-notifier';
 import {requestFailed} from '@common/core/actions/http.actions';
-import {addMessage} from '../actions/layout.actions';
 import {MESSAGES_SEVERITY} from '@common/constants';
+import {Action} from '@ngrx/store';
 
 const ERROR_AGGREGATION = 600000;
 
@@ -31,21 +31,23 @@ export class LayoutEffects {
   ) {
   }
 
-  @Effect({dispatch: false})
-  serverErrorMoreInfo = this.actions.pipe(ofType(layoutActions.setServerError),
+  serverErrorMoreInfo = createEffect(() => this.actions.pipe(
+    ofType(layoutActions.setServerError),
     filter(action => !!action.serverError),
-    map(action => this.parseError(get('error.meta.result_msg', action.serverError))),
+    map(action => this.parseError(action.serverError?.error?.meta?.result_msg)),
     filter(([ids]) => !!ids),
-    switchMap(([ids, entity]) => this.getAllEntity(ids, entity).pipe(
-      filter(res => !!res),
-      map(res => {
-        const moreInfo = {[entity]: res[entity]};
-        if (this.alertDialogRef) {
-          this.alertDialogRef.componentInstance.moreInfo = moreInfo;
-        }
-      })
-    ))
-  );
+    switchMap(([ids, entity]) => this.getAllEntity(ids, entity)
+      .pipe(
+        filter(res => !!res),
+        map(res => {
+          const moreInfo = {[entity]: res[entity]};
+          if (this.alertDialogRef) {
+            this.alertDialogRef.componentInstance.moreInfo = moreInfo;
+          }
+        })
+      )
+    )
+  ), {dispatch: false});
 
   popupError = createEffect(() => this.actions.pipe(
     ofType(layoutActions.setServerError),
@@ -65,9 +67,9 @@ export class LayoutEffects {
         this.errors[customMessage] = now;
       }
       let resultMessage: string;
-      const subcode = get('error.meta.result_subcode', action.serverError);
+      const subcode = action.serverError?.error?.meta?.result_subcode;
       if (subcode || subcode === 0) {
-        resultMessage = `Error ${subcode} : ${get('error.meta.result_msg', action.serverError)}`;
+        resultMessage = `Error ${subcode} : ${action.serverError?.error?.meta?.result_msg}`;
       }
       this.alertDialogRef = this.dialog.open(AlertDialogComponent, {
         data: {alertMessage: 'Error', alertSubMessage: customMessage, resultMessage}
@@ -78,8 +80,7 @@ export class LayoutEffects {
     })
   ), {dispatch: false});
 
-  @Effect()
-  addMessage: Observable<any> = this.actions.pipe(
+  addMessage = createEffect(() => this.actions.pipe(
     ofType(layoutActions.addMessage),
     bufferTime(500),
     filter(messages => messages.length > 0),
@@ -87,9 +88,12 @@ export class LayoutEffects {
       const message403 = messages.find(message => message.suppressNextMessages);
       return message403 ? [message403] : messages;
     }),
-    mergeMap(payload => payload ? this.notifierService.show({type: payload.severity, message: payload.msg, actions: payload.userActions}) : EMPTY),
-    mergeMap(actions => actions.length > 0 ? actions : [new EmptyAction()])
-  );
+    mergeMap(payload => payload ?
+      this.notifierService.show({type: payload.severity, message: payload.msg, actions: payload.userActions}) :
+      EMPTY
+    ),
+    mergeMap((actions: Action[]) => actions.length > 0 ? actions : [new EmptyAction()])
+  ));
 
   requestFailed: Observable<any> = createEffect( () => this.actions.pipe(
     ofType(requestFailed),
@@ -118,11 +122,13 @@ export class LayoutEffects {
       case 'tasks':
         return this.taskService.tasksGetAllEx({
           id: ids,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           only_fields: ['name', 'project', 'system_tags']
         });
       case 'models':
         return this.modelService.modelsGetAllEx({
           id: ids,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           only_fields: ['name', 'project']
         });
       default:

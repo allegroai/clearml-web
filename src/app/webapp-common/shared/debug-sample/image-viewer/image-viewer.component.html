@@ -24,8 +24,13 @@
         </div>
       </ng-container>
     </div>
-    <div class="d-flex third">
-      <div (click)="downloadImage()" smTooltip="Download" class="download icon-container"
+    <div class="d-flex third actions">
+      <div (click)="embedCodeClick($event)"
+           smTooltip="Copy embed code" class="icon-container"
+           [style.visibility]="embedFunction ? 'visible' : 'hidden'">
+        <i class="al-icon al-ico-code-square al-color"></i>
+      </div>
+      <div (click)="downloadImage()" smTooltip="Download" class="icon-container"
            [style.visibility]="(url | isVideo) ? 'hidden' : 'visible'">
         <i class="al-icon al-ico-download al-color"></i>
       </div>

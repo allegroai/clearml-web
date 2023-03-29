@@ -17,8 +17,14 @@
 
   <mat-menu #subMenu="matMenu">
     <ng-template matMenuContent let-tag="tag" let-color="color">
-      <button mat-menu-item (click)="setForeground(tag, 'black')">Black<i *ngIf="color==='black'" class="fas fa-check fa-pull-right"></i></button>
-      <button mat-menu-item (click)="setForeground(tag, 'white')">White<i *ngIf="color==='white'" class="fas fa-check fa-pull-right"></i></button>
+      <button mat-menu-item (click)="setForeground(tag, 'black')">
+        <span class="ico-chk"><i *ngIf="color==='black'" class="al-icon al-ico-success sm-md"></i></span>
+        Black
+      </button>
+      <button mat-menu-item (click)="setForeground(tag, 'white')">
+        <span class="ico-chk"><i *ngIf="color==='white'" class="al-icon al-ico-success sm-md"></i></span>
+        White
+      </button>
     </ng-template>
   </mat-menu>
 

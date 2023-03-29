@@ -1,11 +1,12 @@
-import {Component, OnDestroy, OnInit, TemplateRef, ViewChild} from '@angular/core';
-import { pageSize } from '@common/projects/common-projects.consts';
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import {pageSize} from '@common/projects/common-projects.consts';
 import {CommonProjectsPageComponent} from '@common/projects/containers/projects-page/common-projects-page.component';
 import {isExample} from '@common/shared/utils/shared-utils';
 import {trackById} from '@common/shared/utils/forms-track-by';
 import {
   addProjectTags,
   getProjectsTags,
+  setDefaultNestedModeForFeature,
   setSelectedProjectId,
   setTags
 } from '@common/core/actions/projects.actions';
@@ -14,7 +15,7 @@ import {
   selectMainPageTagsFilterMatchMode,
   selectProjectTags
 } from '@common/core/reducers/projects.reducer';
-import {Observable, Subscription} from 'rxjs';
+import {combineLatest, Observable, Subscription} from 'rxjs';
 import {Project} from '~/business-logic/model/projects/project';
 import {
   getAllProjectsPageProjects,
@@ -23,10 +24,9 @@ import {
   updateProject
 } from '@common/projects/common-projects.actions';
 import {ProjectsGetAllResponseSingle} from '~/business-logic/model/projects/projectsGetAllResponseSingle';
-import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {selectShowPipelineExamples} from '@common/projects/common-projects.reducer';
-import {combineLatest} from 'rxjs';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
+import {PipelinesEmptyStateComponent} from '@common/pipelines/pipelines-page/pipelines-empty-state/pipelines-empty-state.component';
 
 @Component({
   selector: 'sm-pipelines-page',
@@ -44,8 +44,7 @@ def step(size: int):
 @PipelineDecorator.pipeline(
     name='ingest',
     project='data processing',
-    version='0.1',
-    pipeline_execution_queue='default'
+    version='0.1'
 )
 def pipeline_logic(do_stuff: bool):
     if do_stuff:
@@ -53,7 +52,9 @@ def pipeline_logic(do_stuff: bool):
 
 if __name__ == '__main__':
     # run the pipeline on the current machine, for local debugging
-    # for scale-out, comment-out the following line and spin clearml agents
+    # for scale-out, comment-out the following line (Make sure a
+    # 'services' queue is available and serviced by a ClearML agent
+    # running either in services mode or through K8S/Autoscaler)
     PipelineDecorator.run_locally()
 
     pipeline_logic(do_stuff=True)`;
@@ -63,21 +64,22 @@ if __name__ == '__main__':
   trackById = trackById;
   public projectsTags$: Observable<string[]>;
   public showExamples$: Observable<boolean>;
-
-  @ViewChild('emptyStateContent') emptyStateRef: TemplateRef<any>;
   private headerUserFocusSub: Subscription;
   private mainPageFilterSub: Subscription;
+  public isNested$: Observable<boolean>;
 
   ngOnInit() {
     super.ngOnInit();
     this.showExamples$ = this.store.select(selectShowPipelineExamples);
-    this.store.dispatch(getProjectsTags());
-
+    // Todo: delayed because of nested views, remove timeout after implementing nested view template
+    window.setTimeout(() => this.store.dispatch(getProjectsTags({entity: this.getName()})));
+    // this.isNested$ = this.store.select(selectRouterConfig).pipe(map(config.last => config.includes('projects')));
     this.projectsTags$ = this.store.select(selectProjectTags);
-    this.mainPageFilterSub = combineLatest([this.store.select(selectMainPageTagsFilter), this.store.select(selectMainPageTagsFilterMatchMode)]).subscribe(()=>{
+    this.mainPageFilterSub = combineLatest([this.store.select(selectMainPageTagsFilter), this.store.select(selectMainPageTagsFilterMatchMode)]).subscribe(() => {
       this.store.dispatch(resetProjects());
       this.store.dispatch(getAllProjectsPageProjects());
     });
+
   }
 
   ngOnDestroy() {
@@ -104,7 +106,7 @@ if __name__ == '__main__':
   }
 
   public projectCardClicked(project: ProjectsGetAllResponseSingle) {
-    this.router.navigate( [project.id, 'experiments'], {relativeTo: this.route});
+    this.router.navigate([project.id, 'experiments'], {relativeTo: this.projectId ? this.route.parent.parent.parent : this.route});
     this.store.dispatch(setSelectedProjectId({projectId: project.id, example: isExample(project)}));
   }
 
@@ -117,19 +119,26 @@ if __name__ == '__main__':
   }
 
   createPipeline() {
-    this.dialog.open(ConfirmDialogComponent, {
+    this.dialog.open(PipelinesEmptyStateComponent, {
       data: {
-        title: 'CREATE NEW PIPELINE',
-        template: this.emptyStateRef,
-        iconClass: 'al-icon al-ico-pipelines al-color blue-300',
-        width: 1200
+        pipelineCode: this.initPipelineCode
       },
-      maxWidth: '95vw'
+      width: '1248px'
     });
 
-}
+  }
 
   createExamples() {
     this.store.dispatch(showExamplePipelines());
+  }
+
+  toggleNestedView(nested: boolean) {
+    this.store.dispatch(setDefaultNestedModeForFeature({feature: 'pipelines', isNested: nested}));
+
+    if (nested) {
+      this.router.navigate(['*', 'projects'], {relativeTo: this.route});
+    } else {
+      this.router.navigateByUrl('pipelines');
+    }
   }
 }

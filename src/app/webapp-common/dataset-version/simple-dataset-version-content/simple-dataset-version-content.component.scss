@@ -1,0 +1,141 @@
+@import 'src/app/webapp-common/shared/ui-components/styles/variables';
+
+:host {
+  display: block;
+  position: relative;
+
+  .download-button {
+    position: absolute;
+    right: 24px;
+    top: 12px;
+    z-index: 21;
+    color: $blue-300;
+  }
+
+  ::ng-deep sm-table {
+    tr.header, tr.header th:hover {background-color: $blue-900 !important;}
+    th:nth-child(1) {padding-left: 24px !important;}
+    td:nth-child(1) {padding-left: 24px !important;}
+
+    .p-datatable-wrapper > .p-datatable-table {
+      width: 100%;
+    }
+
+
+    [filetype]::before {
+      content: "\e9d3"; // fallback icon (file)
+      color: #596c71;
+      font-family: 'trains';
+      font-size: 24px;
+      margin-right: 12px;
+      vertical-align: middle;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    // FILE TYPE ICONS
+    // ---------------
+
+    // Image
+    [filetype="png"]::before,
+    [filetype="jpg"]::before,
+    [filetype="jpeg"]::before,
+    [filetype="gif"]::before {
+      content: "\e958";
+      color: #3a7777;
+    }
+
+    // Video
+    [filetype="mp4"]::before,
+    [filetype="mov"]::before,
+    [filetype="wmv"]::before,
+    [filetype="avi"]::before {
+      content: "\e9c5";
+      color: #846300;
+    }
+
+    // Audio
+    [filetype="mp3"]::before,
+    [filetype="aac"]::before,
+    [filetype="wav"]::before {
+      content: "\e9d0";
+      color: #833e65;
+    }
+
+    [filetype="csv"]::before {
+      content: "\e9c9";
+      color: #145f82;
+    }
+
+    [filetype="txt"]::before {
+      content: "\e9d6";
+      color: #803d3d;
+    }
+
+    [filetype="zip"]::before,
+    [filetype="gz"]::before {
+      content: "\e9ce";
+      color: #615555;
+    }
+
+    [filetype="pkl"]::before {
+      content: "\e9cd";
+      color: #48507f;
+    }
+
+    [filetype="py"]::before {
+      content: "\e9d7";
+      color: #d1902e;
+    }
+
+    [filetype="html"]::before,
+    [filetype="yaml"]::before,
+    [filetype="json"]::before {
+      content: "\e9a4"; // al-ico-code
+      color: #a35151;
+    }
+  }
+}
+
+.action-tooltip {
+  max-width: 400px;
+  background: $purple;
+  padding: 8px;
+  border-radius: 4px;
+  box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
+  font-size: 11px;
+
+  div, p {
+    color: $white;
+
+    &.command {
+      background-color: $black;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+  }
+
+  div.copy-button {
+    color: $light-periwinkle-two;
+  }
+
+  .copy-button {
+    &:hover {
+      color: $white;
+      text-decoration: underline;
+    }
+  }
+
+  .al-ico-success {
+    background-color: $pipeline-queued;
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 200ms;
+
+    &.visible {
+      opacity: 1;
+    }
+  }
+}
+

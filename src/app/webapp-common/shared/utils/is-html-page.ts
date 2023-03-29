@@ -1,4 +1,4 @@
-import {last} from 'lodash/fp';
+import {last} from 'lodash-es';
 
 export const isHtmlPage = (url: string) => {
   if (!url) {

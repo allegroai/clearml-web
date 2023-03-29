@@ -1,6 +1,6 @@
 import {VIEW_PREFIX} from '~/app.constants';
 import {createAction, props} from '@ngrx/store';
-import {omit} from 'lodash/fp';
+import {omit} from 'lodash-es';
 import {HttpErrorResponse} from '@angular/common/http';
 import {Ace} from 'ace-builds';
 import {MessageSeverityEnum} from '@common/constants';
@@ -18,7 +18,7 @@ export const setCompareAutoRefresh = createAction(
 export const setServerError = createAction(
   VIEW_PREFIX + '[set server error]',
   (serverError: HttpErrorResponse, contextSubCode?: number, customMessage?: string, aggregateSimilar = false) => ({
-    serverError: omit(['headers'], serverError) as Omit<HttpErrorResponse, 'headers'>,
+    serverError: omit(serverError, ['headers'] ) as Omit<HttpErrorResponse, 'headers'>,
     contextSubCode,
     customMessage,
     aggregateSimilar

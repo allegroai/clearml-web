@@ -1,10 +1,10 @@
 <div class="filter-sort-container d-flex align-items-center" data-id="Detailed View Filter"
      [ngClass]="isFiltering ? 'active' : 'deactive'">
-  <div mat-button class='cell pointer'>
-    <i [class]="'icon ' + (isFiltering? 'i-filter-on':'i-filter-off')" [matMenuTriggerFor]="menu"></i>
+  <div class='cell pointer'>
+    <i [class]="'icon ' + (isFiltering? 'i-filter-on':'i-filter-off')" [matMenuTriggerFor]="menu" data-id="filterIcon"></i>
   </div>
   <mat-menu #menu="matMenu" class="table-card-filter-menu" classList="light-theme">
-    <ng-container *ngFor="let option of (optionsFiltered | keyvalue); trackBy: trackByKey">
+    <ng-container *ngFor="let option of optionsFiltered; trackBy: trackByKey">
       <ng-template let-col
                    [ngTemplateOutletContext]="{$implicit: getColumnByOption(option)}"
                    [ngTemplateOutlet]="column" #column

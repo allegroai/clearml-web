@@ -1,21 +1,32 @@
 import {
-  ACTIVATE_MODEL_EDIT,
-  EDIT_MODEL,
-  GET_MODEL_INFO,
-  MODEL_CANCEL_EDIT,
-  MODEL_DETAILS_UPDATED,
+  modelExperimentsTableFilterChanged,
+  modelsExperimentsTableClearAllFilters,
+  activateModelEdit, cancelModelEdit,
+  editModel,
+  getModelInfo,
+  modelDetailsUpdated,
   resetActiveSection,
-  SET_IS_MODEL_SAVING,
-  SET_MODEL
+  setSavingModel,
+  setModelInfo, setPlots
 } from '../actions/models-info.actions';
 import {TableModel} from '../shared/models.model';
-import {cloneDeep} from 'lodash/fp';
+import {cloneDeep} from 'lodash-es';
+import {ITableExperiment} from '@common/experiments/shared/common-experiment-model.model';
+import {FilterMetadata} from 'primeng/api/filtermetadata';
+import {createReducer, on} from '@ngrx/store';
+import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
+import {MetricsPlotEvent} from '~/business-logic/model/events/metricsPlotEvent';
 
 export interface ModelInfoState {
   selectedModel: TableModel;
-  activeSectionEdit: string;
+  activeSectionEdit: boolean;
   infoDataFreeze: any;
   saving: boolean;
+  modelExperiments: ITableExperiment[];
+  modelExperimentsTableFilter: { [columnId: string]: FilterMetadata };
+  xAxisType: ScalarKeyEnum;
+  cachedAxisType: ScalarKeyEnum;
+  plots: MetricsPlotEvent[];
 }
 
 const initialState: ModelInfoState = {
@@ -23,35 +34,41 @@ const initialState: ModelInfoState = {
   activeSectionEdit: null,
   infoDataFreeze: null,
   saving: false,
+  modelExperiments: null,
+  modelExperimentsTableFilter: {},
+  xAxisType: ScalarKeyEnum.Timestamp,
+  cachedAxisType: null,
+  plots: null
 };
 
-export function modelsInfoReducer(state: ModelInfoState = initialState, action): ModelInfoState {
-
-  switch (action.type) {
-    case GET_MODEL_INFO:
-      return {...state, selectedModel: null};
-    case SET_MODEL:
-      return {...state, selectedModel: action.payload};
-    case MODEL_DETAILS_UPDATED: {
-      const newSelectedModel = {...state.selectedModel, ...action.payload.changes};
-      return {...state, selectedModel: newSelectedModel};
+export const modelsInfoReducer = createReducer(
+  initialState,
+  on(getModelInfo, (state) => ({...state, selectedModel: null})),
+  on(setModelInfo, (state, action) => ({...state, selectedModel: action.model as TableModel})),
+  on(modelDetailsUpdated, (state, action) => ({
+    ...state,
+    selectedModel: {...state.selectedModel, ...action.changes}
+  })),
+  on(activateModelEdit, state =>
+    ({...state, activeSectionEdit: true, infoDataFreeze: state.selectedModel})),
+  on(cancelModelEdit, (state) => ({
+    ...state,
+    selectedModel: state.infoDataFreeze ? cloneDeep(state.infoDataFreeze) : state.selectedModel,
+    activeSectionEdit: null
+  })),
+  on(setSavingModel, (state, action) => ({...state, saving: action.saving})),
+  on(editModel, (state) => ({...state, activeSectionEdit: null})),
+  on(resetActiveSection, (state) => ({...state, activeSectionEdit: null})),
+  on(setPlots, (state, action) => ({...state, plots: action.plots})),
+  on(modelExperimentsTableFilterChanged, (state, action) => ({
+    ...state,
+    modelExperimentsTableFilter: {
+      ...state.modelExperimentsTableFilter,
+      [action.filter.col]: {value: action.filter.value, matchMode: action.filter.filterMatchMode}
     }
-    case ACTIVATE_MODEL_EDIT:
-      return {...state, activeSectionEdit: action.payload, infoDataFreeze: state.selectedModel};
-    case MODEL_CANCEL_EDIT:
-      return {
-        ...state,
-        selectedModel: state.infoDataFreeze ? cloneDeep(state.infoDataFreeze) : state.selectedModel,
-        activeSectionEdit: null
-      };
-    case SET_IS_MODEL_SAVING:
-      return {...state, saving: action.payload};
-    case EDIT_MODEL:
-      return {...state, activeSectionEdit: null};
-    case resetActiveSection.type:
-      return {...state, activeSectionEdit: null};
-    default:
-      return state;
-  }
-}
+  })),
+  on(modelsExperimentsTableClearAllFilters, state =>
+     ({...state, modelExperimentsTableFilter: initialState.modelExperimentsTableFilter,})
+    )
+);
 

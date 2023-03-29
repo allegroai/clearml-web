@@ -1,13 +1,12 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {selectRouterConfig, selectRouterParams} from '@common/core/reducers/router-reducer';
-import {get} from 'lodash/fp';
 import {select, Store} from '@ngrx/store';
 import {Observable, Subscription} from 'rxjs';
 import {ActivatedRoute, Router} from '@angular/router';
 import {distinctUntilChanged, filter, map, tap, withLatestFrom} from 'rxjs/operators';
 import {Project} from '~/business-logic/model/projects/project';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
-import {ExperimentOutputState} from '~/features/experiments/reducers/experiment-output.reducer';
+import {ExperimentOutputState} from '@common/experiments/reducers/experiment-output.reducer';
 import {
   selectExperimentInfoData,
   selectIsSharedAndNotOwner,
@@ -15,12 +14,12 @@ import {
 } from '~/features/experiments/reducers';
 import {resetExperimentMetrics, toggleSettings} from '../../actions/common-experiment-output.actions';
 import * as infoActions from '../../actions/common-experiments-info.actions';
+import {experimentDetailsUpdated} from '../../actions/common-experiments-info.actions';
 import {selectAppVisible, selectBackdropActive} from '@common/core/reducers/view.reducer';
 import {addMessage, setAutoRefresh} from '@common/core/actions/layout.actions';
 import {selectIsExperimentInEditMode, selectSelectedExperiments, selectSplitSize} from '../../reducers';
-import {experimentDetailsUpdated} from '../../actions/common-experiments-info.actions';
 import {RefreshService} from '@common/core/services/refresh.service';
-import { isDevelopment } from '~/features/experiments/shared/experiments.utils';
+import {isDevelopment} from '~/features/experiments/shared/experiments.utils';
 import * as experimentsActions from '../../actions/common-experiments-view.actions';
 import {isReadOnly} from '@common/shared/utils/is-read-only';
 import {MESSAGES_SEVERITY} from '@common/constants';
@@ -75,7 +74,7 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
     this.subs.add(this.store.pipe(
         select(selectRouterParams),
         tap((params) => this.projectId = params.projectId),
-        map(params => get('experimentId', params)),
+        map(params => params?.experimentId),
         filter(experimentId => !!experimentId),
         tap((experimentId) => this.experimentId = experimentId),
         distinctUntilChanged(),

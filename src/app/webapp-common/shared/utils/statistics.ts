@@ -1,4 +1,4 @@
-import {last, getOr, flattenDeep} from 'lodash/fp';
+import {flattenDeep, last} from 'lodash-es';
 
 export interface DataPoint {
   date: string;
@@ -102,7 +102,7 @@ export function getLastTimestamp(data: Topic[]): number {
   data.forEach(topic => {
     const dates = topic.dates;
     if (dates) {
-      const topicLastDate = getOr(0, 'date', last(dates));
+      const topicLastDate = last(dates)?.date ?? 0;
       const date          = Math.floor((new Date(topicLastDate)).getTime() / 1000);
       lastDate            = Math.max(lastDate, date);
     }

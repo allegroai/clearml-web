@@ -13,10 +13,13 @@
           (input)="searchTermChanged(searchExperiments.value)"
         >
       </mat-form-field>
-      <sm-clear-filters-button
-        [tableFilters]="(tableFilters$ | async)"
-        (clearTableFilters)="clearTableFilters()"
-      ></sm-clear-filters-button>
+      <div class="d-flex-middle">
+        <mat-slide-toggle class="mr-2" [checked]="showArchived$ | async" (change)="showArchived($event)">Include Archived</mat-slide-toggle>
+        <sm-clear-filters-button
+          [tableFilters]="(tableFilters$ | async)"
+          (clearTableFilters)="clearTableFilters()"
+        ></sm-clear-filters-button>
+      </div>
     </div>
     <div class="hide-table show-table">
       <sm-experiments-table

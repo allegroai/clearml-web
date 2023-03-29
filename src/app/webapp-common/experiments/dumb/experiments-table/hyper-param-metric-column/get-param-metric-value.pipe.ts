@@ -1,5 +1,4 @@
-import { Pipe, PipeTransform } from '@angular/core';
-import {get} from 'lodash/fp';
+import {Pipe, PipeTransform} from '@angular/core';
 import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {ITask} from '~/business-logic/model/al-task';
 import {GetVariantWithoutRoundPipe} from './get-variant-without-round.pipe';
@@ -20,7 +19,7 @@ export class GetParamMetricValuePipe implements PipeTransform {
   getHyperParam(params, col) {
     if (params) {
       const {name, section} = decodeHyperParam(col.getter);
-      return get([section, name, 'value'], params);
+      return params?.[section]?.[name]?.value;
     }
     return '';
   }

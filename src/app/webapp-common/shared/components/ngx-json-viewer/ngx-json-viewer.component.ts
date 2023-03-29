@@ -1,4 +1,4 @@
-import {Component, OnChanges, Input, Output, EventEmitter} from '@angular/core';
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
 
 export interface Segment {
   key: string;
@@ -6,43 +6,50 @@ export interface Segment {
   type: undefined | string;
   description: string;
   expanded: boolean;
+  found?: boolean;
 }
 
 @Component({
   selector: 'ngx-json-viewer',
   templateUrl: './ngx-json-viewer.component.html',
-  styleUrls: ['./ngx-json-viewer.component.scss']
+  styleUrls: ['./ngx-json-viewer.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class NgxJsonViewerComponent implements OnChanges {
+export class NgxJsonViewerComponent {
 
-  @Input() json: any;
-  @Input() expanded = true;
-  /**
-   * @deprecated It will be always true and deleted in version 3.0.0
-   */
-  @Input() cleanOnChange = true;
+  @Input() set json(json: any) {
+    this.segments = [];
+    if (json) {
+      this.isArray = Array.isArray(json);
+      if (typeof json === 'object') {
+        Object.keys(json).forEach(key => {
+          this.segments.push(this.parseKeyValue(key, json[key]));
+        });
+      } else {
+        this.segments.push(this.parseKeyValue(`(${typeof json})`, json));
+      }
+    }
+  }
+
+  @Input() expanded;
+  get search() {
+    return this._search;
+  }
+  @Input() set search(val: string) {
+    this._search = val;
+    this.segments.forEach(segment => {
+      segment.found = !!val && segment.description.includes(val);
+    });
+  }
   @Input() testLink?: (str: string) => boolean;
   @Output() linkAction = new EventEmitter<string>();
 
+  private _search: string = null;
   segments: Segment[] = [];
   public isArray: boolean;
-
-  ngOnChanges() {
-    if (this.cleanOnChange) {
-      this.segments = [];
-    }
-    if (this.json) {
-      this.isArray = Array.isArray(this.json);
-      if (typeof this.json === 'object') {
-        Object.keys(this.json).forEach(key => {
-          this.segments.push(this.parseKeyValue(key, this.json[key]));
-        });
-      } else {
-        this.segments.push(this.parseKeyValue(`(${typeof this.json})`, this.json));
-      }
-    }
-
-  }
+  public indexes: number[] = [];
+  public index: number = 0;
+  public stringify = JSON.stringify;
 
   isExpandable(segment: Segment) {
     return segment.type === 'object' || segment.type === 'array';
@@ -119,5 +126,11 @@ export class NgxJsonViewerComponent implements OnChanges {
 
   subsectionAction(link: string) {
     this.linkAction.emit(link);
+  }
+
+  split(line: string, search: string) {
+    const regex = new RegExp(search, 'gi');
+    const match = line.match(regex);
+    return line.split(regex).map( (part, i) => [part, match?.[i]]);
   }
 }

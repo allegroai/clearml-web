@@ -1,14 +1,19 @@
 <div class="counter-container">
-  <div class="circle-counter" [class]="type" [class.multi]="valType === 'array'">
+  <div class="circle-counter" [class]="type" [class.multi]="valType === 'array'" data-id="cardStats">
     <ng-container [ngSwitch]="valType">
       <div *ngSwitchCase="'array'" class="d-flex-center flex-row wrapper">
+        <ng-content select="[tagsList]"></ng-content>
         <div *ngFor="let subCounter of counter; trackBy: trackByLabel">
-          <div class="sub-counter" [class.no-value]="subCounter.value === NA">{{subCounter.value | filesize : fileSizeConfigCount}}</div>
+          <div class="sub-counter"
+               [class.no-value]="subCounter.value === NA">{{subCounter.value | filesize : fileSizeConfigCount}}</div>
           <div class="sub-label">{{subCounter.label}}</div>
         </div>
       </div>
       <div *ngSwitchCase="'number'" class="counter">{{counter | filesize : fileSizeConfigCount}}</div>
+      <div *ngSwitchCase="'tags'" class="counter-tags">
+      </div>
       <div *ngSwitchDefault class="counter">{{counter}}</div>
+
     </ng-container>
   </div>
   <div class="counter-label">{{label}}</div>

@@ -1,6 +1,6 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {IModelInfo, IModelInfoSource} from '../../shared/common-experiment-model.model';
-import {MatDialog} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {filter} from 'rxjs/operators';
 import {Model} from '~/business-logic/model/models/model';
 import {SelectModelComponent} from '@common/select-model/select-model.component';

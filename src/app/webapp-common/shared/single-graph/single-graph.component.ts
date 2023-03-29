@@ -2,16 +2,17 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  ElementRef, EventEmitter,
-  Input, NgZone, Output,
+  ElementRef,
+  EventEmitter,
+  Input,
+  NgZone,
+  Output,
   Renderer2,
   ViewChild
 } from '@angular/core';
-import {ColorHashService} from '@common/shared/services/color-hash/color-hash.service';
-import {wordWrap} from '@common/tasks/tasks.utils';
-import {attachColorChooser} from '@common/shared/ui-components/directives/choose-color/choose-color.directive';
-import {debounceTime, filter} from 'rxjs/operators';
-import {cloneDeep, escape, get, getOr} from 'lodash/fp';
+import {select} from 'd3-selection';
+import {cloneDeep, escape} from 'lodash-es';
+import {Store} from '@ngrx/store';
 import {
   AxisType,
   Config,
@@ -21,26 +22,27 @@ import {
   ModeBarButton,
   ModeBarDefaultButtons,
   PlotData,
-  PlotlyHTMLElement, PlotMarker,
+  PlotlyHTMLElement,
+  PlotMarker,
+  PlotType,
   Root
 } from 'plotly.js';
+import {Subject} from 'rxjs';
+import {debounceTime, filter} from 'rxjs/operators';
+import tinycolor from 'tinycolor2';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
-import {ExtData, ExtFrame, ExtLayout, ExtLegend, PlotlyGraphBaseComponent} from './plotly-graph-base';
-import {Store} from '@ngrx/store';
-import {select} from 'd3-selection';
-import {MatDialog} from '@angular/material/dialog';
-import {GraphViewerComponent} from './graph-viewer/graph-viewer.component';
+import {ColorHashService} from '@common/shared/services/color-hash/color-hash.service';
+import {wordWrap} from '@common/tasks/tasks.utils';
+import {attachColorChooser} from '@common/shared/ui-components/directives/choose-color/choose-color.directive';
+import {DARK_THEME_GRAPH_LINES_COLOR, DARK_THEME_GRAPH_TICK_COLOR, ExtData, ExtFrame, ExtLayout, ExtLegend, PlotlyGraphBaseComponent} from './plotly-graph-base';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {PALLET} from '@common/constants';
 import {download} from '@common/shared/utils/download';
-import {Subject} from 'rxjs';
-import {hexToRgb} from '@common/shared/services/color-hash/color-hash.utils';
 import {chooseTimeUnit} from '@common/shared/utils/choose-time-unit';
+import {GraphViewerComponent} from './graph-viewer/graph-viewer.component';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 declare const Plotly;
-const DARK_THEME_GRAPH_LINES_COLOR = '#39405f';
-const DARK_THEME_GRAPH_TICK_COLOR = '#c1cdf3';
-const ORIGIN_COLOR = 'origin-color';
 const RATIO_OFFSET_FIX = 37;
 
 export type ChartHoverModeEnum = 'x' | 'y' | 'closest' | false | 'x unified' | 'y unified';
@@ -70,10 +72,12 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
   private smooth$ = new Subject();
   private _height: number;
   private _hoverMode: ChartHoverModeEnum;
+  private listeningToHoverMode = false;
 
-  private drawGraph$ = new Subject();
+  private drawGraph$ = new Subject<{forceRedraw?: boolean; forceSkipReact?: boolean}>();
   @Input() identifier: string;
   @Input() hideTitle: boolean = false;
+  @Input() hideLegend: boolean = false;
   @Input() isDarkTheme: boolean;
   @Input() showLoaderOnDraw = true;
   @Input() hideMaximize: 'show' | 'hide' | 'disabled' = 'show';
@@ -159,6 +163,8 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
     private readonly zone: NgZone
   ) {
     super(store);
+    this.initColorSubscription();
+
     this.sub.add(this.smooth$
       .pipe(
         debounceTime(50),
@@ -168,58 +174,64 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
         this.drawGraph$.next({forceRedraw: true, forceSkipReact: false});
       })
     );
-    this.sub.add(this.drawGraph$.pipe(debounceTime(40)).subscribe(({forceRedraw, forceSkipReact}) => {
-      if (this.showLoaderOnDraw) {
-        this.loading = true;
-        this.changeDetector.detectChanges();
-      }
-      const container = this.plotlyContainer.nativeElement;
-      if (this.alreadyDrawn && !forceRedraw && !this.shouldRefresh) {
-        return;
-      }
-      this.alreadyDrawn = this.alreadyDrawn && !forceRedraw;
-      this.shouldRefresh = false;
-      const [root, data, layout, config, graphEl] = this.drawPlotly();
-      if (!document.body.contains(graphEl)) {
-        container.appendChild(graphEl);
-      }
 
-      let skipReact = false;
-      // root.height > 0 to avoid rare plotly exception
-      if ((this.plotlyContainer.nativeElement.offsetWidth !== this.previousOffsetWidth || forceSkipReact) && (root as HTMLElement).offsetHeight > 0) {
-        skipReact = true;
-        this.zone.runOutsideAngular(() => Plotly.relayout(root, {
-          width: this.ratio ? this.height * this.ratio + RATIO_OFFSET_FIX : Math.max(getOr(0, 'data[0].cells.values.length', data) * 100, this.plotlyContainer.nativeElement.offsetWidth - 3),
-          height: this.height,
-        }).then(() => {
-          this.loading = false;
+    this.sub.add(this.drawGraph$
+      .pipe(debounceTime(100))
+      .subscribe(({forceRedraw, forceSkipReact}) => {
+        if (this.showLoaderOnDraw) {
+          this.loading = true;
           this.changeDetector.detectChanges();
-          this.updateLegend();
-        }));
-      }
-      this.previousOffsetWidth = this.plotlyContainer.nativeElement.offsetWidth;
-      this.previousHeight = this.height;
+        }
+        const container = this.plotlyContainer.nativeElement;
+        if (this.alreadyDrawn && !forceRedraw && !this.shouldRefresh) {
+          return;
+        }
+        this.alreadyDrawn = this.alreadyDrawn && !forceRedraw;
+        this.shouldRefresh = false;
+        const [root, data, layout, config, graphEl] = this.drawPlotly();
+        if (!document.body.contains(graphEl)) {
+          container.appendChild(graphEl);
+        }
 
-      if (!skipReact) {
-        this.zone.runOutsideAngular(() => Plotly.react(root, data, layout, config).then(() => {
-          this.loading = false;
-          this.changeDetector.detectChanges();
-        }));
-      }
+        let skipReact = false;
+        // root.height > 0 to avoid rare plotly exception
+        if ((this.plotlyContainer.nativeElement.offsetWidth !== this.previousOffsetWidth || forceSkipReact) &&
+          (root as HTMLElement).offsetHeight > 0) {
+          skipReact = true;
+          this.zone.runOutsideAngular(() => Plotly.relayout(root, {
+            width: this.ratio ? this.height * this.ratio + RATIO_OFFSET_FIX : Math.max((data?.['data']?.[0]?.cells?.values?.length ?? 0) * 100, this.plotlyContainer.nativeElement.offsetWidth - 3),
+            height: this.height,
+          }).then(() => {
+            this.loading = false;
+            this.changeDetector.detectChanges();
+            this.updateLegend();
+          }));
+        }
+        this.previousOffsetWidth = this.plotlyContainer.nativeElement.offsetWidth;
+        this.previousHeight = this.height;
 
-      this.initColorSubscription();
-      if (!this.alreadyDrawn) {
-        setTimeout(() => {
-          this.subscribeColorButtons(container);
-          this.updateLegend();
-          this.listenToHoverModeChange();
-        });
-      }
-      this.alreadyDrawn = true;
-    }));
+        if (!skipReact) {
+          this.zone.runOutsideAngular(() => Plotly.react(root, data, layout, config).then(() => {
+            this.loading = false;
+            this.changeDetector.detectChanges();
+          }));
+        }
+
+        if (!this.alreadyDrawn) {
+          setTimeout(() => {
+            this.subscribeColorButtons(container);
+            this.updateLegend();
+            this.listenToHoverModeChange();
+          });
+        }
+        this.alreadyDrawn = true;
+      }));
   }
 
   listenToHoverModeChange() {
+    if (this.listeningToHoverMode) {
+      return;
+    }
     this.plotlyContainer.nativeElement.querySelector('.chart')?.on('plotly_afterplot', () => {
       const activeBtns = this.plotlyContainer.nativeElement.querySelectorAll('.modebar-btn.active');
       if (activeBtns.length > 0) {
@@ -233,6 +245,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
         }));
       }
     });
+    this.listeningToHoverMode = true;
   }
 
   drawPlotly(): [Root, Data[], Partial<ExtLayout>, Partial<Config>, Element] {
@@ -244,10 +257,13 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
     }
 
     const graph = this.formatChartLines() as ExtFrame;
-    this.type = getOr(graph.layout.type, 'data[0].type', graph);
-    const title = graph.variants?.length > 1? '' : this.addIterationString(graph.layout.title as string, graph.iter) || (graph.layout.title as Record<string, any>).text;
-    this.title = this.isDarkTheme ? '' : title;
+    this.type = (graph?.data?.[0]?.type ?? graph?.layout?.type) as PlotType;
+    this.title = this.isDarkTheme ? '' : this.addIterationString(graph.layout.title as string, graph.iter) || (graph.layout.title as Record<string, any>).text;
     let layout = {
+      ...this.hideDownloadButtons ? {} : this.addParametersIfDarkTheme({
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        paper_bgcolor: PALLET.blue950
+      }),
       ...this.addParametersIfDarkTheme({
         font: {
           color: '#FFFFFF',
@@ -300,20 +316,15 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
           },
           ...graph.layout.yaxis,
         }
-      }),
+      } as Partial<ExtLayout>),
       uirevision: 'static', // Saves the UI state between redraws https://plot.ly/javascript/uirevision/
       hoverlabel: {namelength: -1},
       legend: {
         traceorder: 'normal',
         xanchor: 'left',
         yanchor: 'top',
-        ...(this.moveLegendToTitle ? {
-          y: 1,
-          orientation: 'v',
-        } : {
-          orientation: 'h',
-          y: -0.2
-        }),
+        orientation: 'h',
+        y: -0.2,
         borderwidth: 2,
         bordercolor: '#FFFFFF',
         valign: 'top',
@@ -326,7 +337,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
         ...this.legendConfiguration,
         ...graph.layout.legend,
       },
-      showlegend: this.chartElm.layout && Object.prototype.hasOwnProperty.call(this.chartElm.layout, 'showlegend') ? this.chartElm.layout.showlegend : graph.layout?.showlegend !== false,
+      showlegend: !this.hideLegend && (this.chartElm.layout && Object.prototype.hasOwnProperty.call(this.chartElm.layout, 'showlegend') ? this.chartElm.layout.showlegend : graph.layout?.showlegend !== false),
       margin: graph.layout.margin ? graph.layout.margin : this.noMargins ? {
         l: 50,
         r: 50,
@@ -372,7 +383,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
         fill: {...graph.data[0].cells, color: this.isDarkTheme ? PALLET.blue950 : '#ffffff'},
         line: {width: 1, color: this.isDarkTheme ? DARK_THEME_GRAPH_LINES_COLOR : PALLET.blue100}
       };
-      layout.width = Math.max(getOr(0, 'data[0].cells.values.length', graph) * 100, this.plotlyContainer.nativeElement.offsetWidth - 3);
+      layout.width = Math.max((graph?.data?.[0]?.cells?.values?.length ?? 0 ) * 100, this.plotlyContainer.nativeElement.offsetWidth - 3);
       layout.title = {
         ...layout.title as Record<string, any>,
         xanchor: 'left',
@@ -385,7 +396,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
         r: 24,
         b: 0
       };
-      layout.height = Math.min(getOr(15, 'data[0].cells.values[0].length', graph) * 30 + 150, this.height);
+      layout.height = Math.min((graph?.data?.[0]?.cells?.values?.[0]?.length ?? 15 ) * 30 + 150, this.height);
     }
     const barLayoutConfig = {
       hovermode: 'closest',
@@ -480,7 +491,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
         }
       });
     }
-    if (!['table', 'parcoords'].includes(get('data[0].type', graph)) && graph.layout?.showlegend !== false && !this.moveLegendToTitle) {
+    if (!['table', 'parcoords'].includes(graph?.data?.[0]?.type) && graph.layout?.showlegend !== false && !this.moveLegendToTitle) {
       modeBarButtonsToAdd.push({
         name: 'Hide legend',
         title: this.getHideButtonTitle(),
@@ -501,7 +512,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
         }
       });
     }
-    if (!['table', 'parcoords'].includes(get('data[0].type', graph)) && this.ratioEnable && !this.moveLegendToTitle) {
+    if (!['table', 'parcoords'].includes(graph?.data?.[0]?.type) && this.ratioEnable && !this.moveLegendToTitle) {
       modeBarButtonsToAdd.push({
         name: 'Auto Layout',
         title: 'Auto Layout',
@@ -616,13 +627,18 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
         const wrappedText = this.legendConfiguration.noTextWrap || this.scaleFactor === 100 ?
           graph.data[i].name :
           wordWrap(graph.data[i].name, this.legendStringLength / 2);
-        const skipColor = !!this.getOriginalColor(i) ? ORIGIN_COLOR : '';
-        graph.data[i].name = wrappedText + `<span style="display: none;" class="color-key" data-color-key="${genColorKey}" ${skipColor}></span>`;
+        const orgColor = this.getOriginalColor(i);
+        graph.data[i].name = wrappedText + `<span style="display: none;" class="color-key" data-color-key="${genColorKey}" data-origin-color="${orgColor}"></span>`;
       }
-      const colorKey = this.extractColorKey(graph.data[i].name);
-      const originalColor = this.getOriginalColor(i);
+      const [colorKey, originalColor] = this.extractColorKey(graph.data[i].name);
       if (!Array.isArray(originalColor)) {
-        const color = (originalColor && !this.colorHash.hasColor(colorKey)) ? hexToRgb(this.getOriginalColor(i)) : this.colorHash.initColor(colorKey, null, this.isDarkTheme);
+        let color;
+        if (originalColor && !this.colorHash.hasColor(colorKey)) {
+          const c = tinycolor(this.getOriginalColor(i)).toRgb();
+          color = [c.r, c.g, c.b];
+        } else {
+          color = this.colorHash.initColor(colorKey, null, this.isDarkTheme);
+        }
         // if (this.colorHash.hasColor(colorKey)) { // We don't save init color in color cache, so we need to recolor everytime
         this._reColorTrace(graph.data[i], color);
         // }
@@ -641,7 +657,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
   }
 
   private getOriginalColor(i: number) {
-    return this.originalChart.data[i]?.marker?.color || this.originalChart.data[i]?.line?.color;
+    return (this.originalChart.data[i]?.marker?.color || this.originalChart.data[i]?.line?.color) as string;
   }
 
   public generateColorKey(graph: ExtFrame, i: number) {
@@ -655,7 +671,8 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
   }
 
   private resmoothDataset(data: ExtData, color) {
-    let last = data.y?.[0] as number ?? NaN;
+    let last = !!data.y?.length ? 0 : NaN;
+    let validPoints = 0;
 
     return {
       ...data,
@@ -666,14 +683,16 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
       isSmoothed: true,
       hovertext: data.hovertext ? data.hovertext + '(Smoothed)' : '(Smoothed)',
       hoverinfo: 'all',
-      y: data.y.map((d) => {
+      y: data.y.map((d, i) => {
         if (!isFinite(last)) {
           return null;
         } else {
-          // 1st-order IIR low-pass filter to attenuate the higher-
-          // frequency components of the time-series.
+          // 1st-order IIR low-pass filter to attenuate the higher-frequency
+          // components of the time-series, with bias fix toward initial value.
           last = last * this.smoothWeight + (1 - this.smoothWeight) * d;
-          return last;
+          validPoints++;
+          const debiasWeight = (i > 0 && this.smoothWeight < 1) ? 1 - Math.pow(this.smoothWeight, validPoints) : 1;
+          return last / debiasWeight;
         }
       })
     } as ExtData;
@@ -698,7 +717,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
         let changed: boolean = false;
         graph.data.forEach(trace => {
           const name = trace.name;
-          const colorKey = this.extractColorKey(name);
+          const [colorKey, ] = this.extractColorKey(name);
           if (!name || !this.colorHash.hasColor(colorKey)) {
             return;
           }
@@ -711,7 +730,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
           }
         });
         if (changed) {
-          this.zone.runOutsideAngular(() => Plotly.redraw(this.chartElm));
+          this.drawGraph$.next({forceRedraw: true});
           this.updateLegend();
         }
 
@@ -736,8 +755,9 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
     for (const trace of traces) {
       const textEl = trace.querySelector('.legendtext') as SVGTextElement;
       const textElData = textEl.getAttribute('data-unformatted');
-      const text = textEl ? this.extractColorKey(textElData) : '';
-      // const skipColor = textElData.includes(ORIGIN_COLOR);
+      const [text, orgColor] = textEl ? this.extractColorKey(textElData) : ['', ''];
+      const {r, g, b, a} = tinycolor(orgColor).toRgb();
+      const originalColor = orgColor ? [r, g, b, a] : null;
 
       const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
       title.textContent = text.replace('?', '');
@@ -747,7 +767,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
       const parentEl = layers.parentElement;
       parentEl.removeChild(layers); // Needed because z-index in svg is by element order
       parentEl.appendChild(layers);
-      attachColorChooser(text, layers, this.colorHash, this.store);
+      attachColorChooser(text, layers, this.colorHash, this.store, null, originalColor);
     }
   }
 

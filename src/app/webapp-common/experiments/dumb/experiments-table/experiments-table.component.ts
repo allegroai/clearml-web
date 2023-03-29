@@ -12,7 +12,7 @@ import {
 import {TIME_FORMAT_STRING} from '@common/constants';
 import {ColHeaderTypeEnum, ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {FILTERED_EXPERIMENTS_STATUS_OPTIONS} from '../../shared/common-experiments.const';
-import {get, uniq} from 'lodash/fp';
+import {get, uniq} from 'lodash-es';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {ITableExperiment} from '../../shared/common-experiment-model.model';
 import {EXPERIMENTS_TABLE_COL_FIELDS} from '~/features/experiments/shared/experiments.const';
@@ -36,7 +36,7 @@ import {hyperParamSelectedExperiments, selectAllExperiments} from '../../actions
 import {createFiltersFromStore, excludedKey, uniqueFilterValueAndExcluded} from '@common/shared/utils/tableParamEncode';
 import {getRoundedNumber} from '../../shared/common-experiments.utils';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
-import {MAT_TOOLTIP_DEFAULT_OPTIONS, MatTooltipDefaultOptions} from '@angular/material/tooltip';
+import {MAT_LEGACY_TOOLTIP_DEFAULT_OPTIONS as MAT_TOOLTIP_DEFAULT_OPTIONS, MatLegacyTooltipDefaultOptions as MatTooltipDefaultOptions} from '@angular/material/legacy-tooltip';
 
 @Component({
   selector: 'sm-experiments-table',
@@ -78,7 +78,7 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit, 
     this._experiments = experiments;
 
     this.tableCols?.filter(tableCol => tableCol.id.startsWith('last_metrics')).forEach(col => experiments?.forEach(exp => {
-      const value = get(col.id, exp);
+      const value = get(exp, col.id);
       this.roundedMetricValues[col.id] = this.roundedMetricValues[col.id] || {};
       this.roundedMetricValues[col.id][exp.id] = value && getRoundedNumber(value) !== value;
     }));
@@ -96,6 +96,8 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit, 
   public filtersValues: { [colId: string]: any } = {};
   public filtersMatch: { [colId: string]: string } = {};
   public filtersSubValues: { [colId: string]: any } = {};
+  private titleCasePipe = new TitleCasePipe();
+
   @Input() selectedExperimentsDisableAvailable: Record<string, CountAvailableAndIsDisableSelectedFiltered>;
 
   @Input() set users(users: User[]) {
@@ -194,17 +196,17 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit, 
   @Input() set tableFilters(filters: { [s: string]: FilterMetadata }) {
     this._tableFilters = filters;
     this.filtersValues = {};
-    this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.STATUS] = get([EXPERIMENTS_TABLE_COL_FIELDS.STATUS, 'value'], filters) || [];
-    this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.TYPE] = get([EXPERIMENTS_TABLE_COL_FIELDS.TYPE, 'value'], filters) || [];
-    this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.USER] = get([EXPERIMENTS_TABLE_COL_FIELDS.USER, 'value'], filters) || [];
-    this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.TAGS] = get([EXPERIMENTS_TABLE_COL_FIELDS.TAGS, 'value'], filters) || [];
-    this.filtersMatch[EXPERIMENTS_TABLE_COL_FIELDS.TAGS] = filters?.[EXPERIMENTS_TABLE_COL_FIELDS.TAGS]?.matchMode || '';
-    this.filtersSubValues[EXPERIMENTS_TABLE_COL_FIELDS.TAGS] = (get(['system_tags', 'value'], filters) || []);
-    this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.PARENT] = get([EXPERIMENTS_TABLE_COL_FIELDS.PARENT, 'value'], filters) || [];
-    this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.PROJECT] = get([EXPERIMENTS_TABLE_COL_FIELDS.PROJECT, 'value'], filters) || [];
-    this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.VERSION] = get([EXPERIMENTS_TABLE_COL_FIELDS.VERSION, 'value'], filters) || [];
-    this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.LAST_UPDATE] = get([EXPERIMENTS_TABLE_COL_FIELDS.LAST_UPDATE, 'value'], filters) || [];
-    this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.STARTED] = get([EXPERIMENTS_TABLE_COL_FIELDS.STARTED, 'value'], filters) || [];
+    this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.STATUS] = filters?.[EXPERIMENTS_TABLE_COL_FIELDS.STATUS]?.value ?? [];
+    this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.TYPE] = filters?.[EXPERIMENTS_TABLE_COL_FIELDS.TYPE]?.value ?? [];
+    this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.USER] = filters?.[EXPERIMENTS_TABLE_COL_FIELDS.USER]?.value ?? [];
+    this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.TAGS] = filters?.[EXPERIMENTS_TABLE_COL_FIELDS.TAGS]?.value ?? [];
+    this.filtersMatch[EXPERIMENTS_TABLE_COL_FIELDS.TAGS] = filters?.[EXPERIMENTS_TABLE_COL_FIELDS.TAGS]?.matchMode ?? '';
+    this.filtersSubValues[EXPERIMENTS_TABLE_COL_FIELDS.TAGS] = filters?.system_tags?.value ?? [];
+    this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.PARENT] = filters?.parent?.['name']?.value ?? [];
+    this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.PROJECT] = filters?.project?.['name']?.value ?? [];
+    this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.VERSION] = filters?.hyperparams?.['properties']?.version?.value ?? [];
+    this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.LAST_UPDATE] = filters?.[EXPERIMENTS_TABLE_COL_FIELDS.LAST_UPDATE]?.value ?? [];
+    this.filtersValues[EXPERIMENTS_TABLE_COL_FIELDS.STARTED] = filters?.[EXPERIMENTS_TABLE_COL_FIELDS.STARTED]?.value ?? [];
 
     // handle dynamic filters;
     const filtersValues = createFiltersFromStore(filters || {}, false);
@@ -230,7 +232,6 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit, 
     private changeDetector: ChangeDetectorRef,
     private store: Store<any>,
     private noUnderscorePipe: NoUnderscorePipe,
-    private titleCasePipe: TitleCasePipe,
     private router: Router
   ) {
     super();

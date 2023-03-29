@@ -1,8 +1,8 @@
-<span class="sys-tag tag-item" *ngFor="let tag of sysTags">{{tag}}</span>
+<span class="sys-tag tag-item" data-id="tagIcon" *ngFor="let tag of sysTags">{{tag}}</span>
 <ng-container *ngIf="remove.observed; else:noRemove">
   <sm-user-tag class="tag-item"
                *ngFor="let tag of tagsList; trackBy: trackFn"
-               [style.--max-hover-width]="(ref.nativeElement.getBoundingClientRect().width - (tagsList.length - 1) * 24) + 'px'"
+               [style.--max-hover-width]="maxTagHover + 'px'"
                [colors]="tag.colorObservable | async"
                [caption]="tag.caption"
                [tooltip]="tooltip"

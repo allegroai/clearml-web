@@ -27,7 +27,7 @@ import {ProjectsGetAllExRequest} from '~/business-logic/model/projects/projectsG
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
 import {ApiModelsService} from '~/business-logic/api-services/models.service';
 import {catchError, mergeMap, map, switchMap, withLatestFrom} from 'rxjs/operators';
-import {isEqual} from 'lodash/fp';
+import {isEqual} from 'lodash-es';
 import {activeSearchLink} from '~/features/dashboard-search/dashboard-search.consts';
 import {EmptyAction} from '~/app.constants';
 import {escapeRegex} from '@common/shared/utils/escape-regex';
@@ -66,22 +66,24 @@ export const getEntityStatQuery = (action, searchHidden) => ({
       ...(action.query && {pattern: action.regExp ? action.query : escapeRegex(action.query)}),
       fields: ['basename', 'id']
     },
-    search_hidden: searchHidden,
+    name:	'/\\.datasets/',
+    search_hidden: true,
+    shallow_search: false,
     system_tags: ['dataset'],
-    name: '/\\.datasets/',
   },
   pipelines: {
     _any_: {
       ...(action.query && {pattern: action.regExp ? action.query : escapeRegex(action.query)}),
       fields: ['basename', 'id']
     },
-    search_hidden: searchHidden,
+    search_hidden: true,
+    shallow_search: false,
     system_tags: ['pipeline'],
   },
   reports: {
     _any_: {
       ...(action.query && {pattern: action.regExp ? action.query : escapeRegex(action.query)}),
-      fields: ['name', 'id']
+      fields: ['id', 'name', 'tags', 'project', 'comment', 'report']
     },
     system_tags: ['-archived'],
     search_hidden: searchHidden,
@@ -325,7 +327,7 @@ export class DashboardSearchEffects {
     switchMap(([action, scrollIds, userFocus, user, hideExamples]) => this.reportsApi.reportsGetAllEx({
       _any_: {
         ...(action.query && {pattern: action.regExp ? action.query : escapeRegex(action.query)}),
-        fields: ['name', 'id']
+        fields: ['id', 'name', 'tags', 'project', 'comment', 'report']
       },
       /* eslint-disable @typescript-eslint/naming-convention */
       scroll_id: scrollIds?.[activeSearchLink.reports] || null,

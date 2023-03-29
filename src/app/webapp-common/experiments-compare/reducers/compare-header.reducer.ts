@@ -2,7 +2,7 @@ import {
   compareAddDialogSetTableSort,
   compareAddTableClearAllFilters,
   compareAddTableFilterChanged,
-  compareAddTableFilterInit,
+  compareAddTableFilterInit, setAddTableViewArchived,
   resetSelectCompareHeader,
   setExperimentsUpdateTime,
   setHideIdenticalFields,
@@ -29,6 +29,7 @@ export interface CompareHeaderState {
   experimentsUpdateTime: { [key: string]: Date };
   projectColumnsSortOrder: { [projectId: string]: SortMeta[] };
   projectColumnFilters: { [projectId: string]: { [columnId: string]: FilterMetadata } };
+  viewArchived: boolean;
 }
 
 
@@ -44,6 +45,7 @@ export const initialState: CompareHeaderState = {
   experimentsUpdateTime: {},
   projectColumnsSortOrder: {},
   projectColumnFilters: {},
+  viewArchived: false,
 };
 
 export const compareHeader = createReducer(
@@ -92,4 +94,5 @@ export const compareHeader = createReducer(
       }
     }
   })),
+  on(setAddTableViewArchived, (state, action) => ({...state, viewArchived: action.show})),
 );

@@ -1,21 +1,65 @@
 @import "variables";
 
+:host {
+
+  .marketing-content-bottom {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+    justify-content: center;
+
+    .link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      color: #dce0ee;
+      font-size: 12px;
+    }
+
+    .community-links {
+      .link {
+        margin: 0 12px;
+
+        &:hover {
+          cursor: pointer;
+          color: #fff;
+        }
+      }
+    }
+
+    ntkme-github-button {
+      ::ng-deep a.gh-btn, ::ng-deep a.social-count {
+        text-decoration: none;
+        color: $blue-800;
+
+        &:hover {
+          color: #000;
+          font-weight: bold;
+        }
+      }
+    }
+  }
 
   .login-form {
-    height: 100%;
-    display: flex;
-    flex: 1 1 300px;
+    color: $blue-200;
     flex-direction: column;
-    justify-content: space-between;
-    width: 560px;
-    background-color: $blue-500;
-    color: #b9bdd4;
-    max-width: 560px;
     overflow: auto;
 
-    @media(max-width: 655px) {
-      max-width: unset;
-      height: unset;
+    background: white;
+    flex: 1;
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+
+    &.dark-theme {
+      background-image: url(~app/webapp-common/assets/infinity_anim--on_light.svg), linear-gradient(100deg, #22408a 6%, #09173c 82%);
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
     }
 
     @media(max-width: 420px) {
@@ -29,6 +73,7 @@
       display: flex;
       flex: 1;
       padding: 24px 0;
+      text-align: center;
 
       @media(max-width: 655px) {
         overflow: unset;
@@ -36,7 +81,6 @@
 
       .logo {
         width: 150px;
-        margin-bottom: 40px;
       }
 
       .login-title {
@@ -55,12 +99,7 @@
 
       section {
         width: 320px;
-        margin: 0 auto;
-
-        form {
-          margin-top: 32px;
-          //background-color: rgba($blue-800, 0.25);
-        }
+        margin: auto;
       }
     }
 
@@ -68,24 +107,25 @@
       margin-bottom: 12px;
 
       input {
-        background-color: $blue-800;
-        color: #ffffff;
+        background-color: #ffffff;
+        color: $blue-500;
         width: 100%;
         padding-left: 12px;
+        height: 36px;
       }
 
-      input:-webkit-autofill,
-      input:-internal-autofill-previewed,
-      input:-internal-autofill-selected {
-        -webkit-box-shadow: 0 0 0 30px $blue-800 inset !important;
-        -webkit-text-fill-color: white !important;
-      }
+      //input:-webkit-autofill,
+      //input:-internal-autofill-previewed,
+      //input:-internal-autofill-selected {
+      //  -webkit-box-shadow: 0 0 0 30px $blue-800 inset !important;
+      //  -webkit-text-fill-color: white !important;
+      //}
     }
 
     label {
       display: block;
       text-align: left;
-      font-size: 11px;
+      font-size: 12px;
       margin-bottom: 0;
       margin-top: 2px;
     }
@@ -96,23 +136,15 @@
       justify-content: center;
       align-items: center;
       width: 100%;
-      height: 32px;
-      margin-top: 16px;
+      height: 36px;
+      margin: 32px 0;
       font-size: 14px;
       font-weight: 500;
-      background-color: $blue-400;
-      color: #ffffff;
       border: 0; /* this was 1px earlier */
       opacity: unset;
 
       &:hover {
-        background-color: $blue-450;
         border: 0 solid transparent; /* this was 1px earlier */
-      }
-
-      &:disabled {
-        background-color: #424b6b;
-        color: $blue-600;
       }
 
       .spinner {
@@ -140,46 +172,29 @@
       font-size: 11px;
 
       .line {
-        border-bottom: 1px solid $blue-250;
         width: 104px;
         margin-bottom: 10px;
       }
     }
 
     .terms-of-use {
-      display: flex;
-      text-align: left;
-      padding: 0 24px 24px 24px;
-      font-size: 14px;
-      color: #b9bdd4;
-
-      &.darkerTou {
-        background-color: rgba($blue-800, 0.25);
-      }
-      a[href] {
-        text-decoration: underline;
-        cursor: pointer;
-        color: #b9bdd4;
-
-        &:hover {
-          text-decoration: none;
-          color: #ffffff;
-        }
-      }
+      display: inline-block;
+      width: 210px;
+      font-size: 12px;
+      color: $blue-300;
     }
   }
-
+}
 
 
 .circle {
-  margin: auto;
+  margin: 0 auto 40px;
   width: 80px;
   height: 80px;
   border-radius: 100%;
   border: 10px solid rgba(255, 255, 255, 0.5);
   border-top-color: #FFFFFF;
   animation: spin 1s infinite linear;
-  margin-bottom: 40px;
   @keyframes spin {
     100% {
       transform: rotate(360deg);
@@ -209,56 +224,18 @@
   font-size: 12px;
 }
 
-.community-links {
-  display: flex;
-  justify-content: space-between;
-  height: 64px;
-  padding: 24px;
-  border-top: $blue-400 solid 1px;
-  background-color: #384161;
-
-  .link {
-    display: flex;
-    align-items: center;
-    margin-right: 24px;
-    font-size: 12px;
-    text-decoration: none;
-    color: $blue-grey;
-
-    &.link-community {
-      margin-left: auto;
-    }
-
-    &:last-child {
-      margin-right: 0;
-    }
-
-    &:hover {
-      color: #ffffff;
-      text-decoration: unset;
-    }
-
-    i {
-      margin-right: 4px;
-      @media(max-width: 420px) {
-        font-size: 24px;
-      }
-    }
-
-    .text {
-      @media(max-width: 420px) {
-        display: none;
-      }
-    }
-    .gazer {
-      white-space: nowrap;
-    }
-  }
-}
-
 :host-context(.mobile) {
   .login-form {
     padding-top: 64px;
   }
 }
 
+.dark-theme {
+  .terms-of-use {
+    color: #b9bdd4;
+
+    a {
+      color: $blue-200;
+    }
+  }
+}

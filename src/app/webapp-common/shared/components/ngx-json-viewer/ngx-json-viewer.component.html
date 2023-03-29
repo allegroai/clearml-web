@@ -1,25 +1,38 @@
 <section class="ngx-json-viewer">
   <span class="braces">{{ isArray ? '[' : '{' }}</span>
   <section
-    *ngFor="let segment of segments"
-    [ngClass]="['segment', 'segment-type-' + segment.type]">
+    *ngFor="let segment of segments; let lineIndex=index"
+    [ngClass]="['segment', 'segment-type-' + segment.type]"
+  >
     <section
-      (click)="toggle(segment)"
+      (click)="$event.stopPropagation(); toggle(segment)"
       [ngClass]="{
         'segment-main': true,
         'expandable': isExpandable(segment),
-        'expanded': segment.expanded
+        'expanded': segment.expanded || segment.found
       }">
       <div *ngIf="isExpandable(segment)" class="toggler"></div>
-      <span class="segment-key">{{ segment.key }}</span>
+      <span class="segment-key" *ngFor="let part of (search ? split(segment.key, search) : [[segment.key, search]]); let last=last"
+      >{{part[0]}}<span class="found" [class.current]="indexes[index] === lineIndex" *ngIf="!last"
+      >{{part[1]}}</span></span>
       <span class="segment-separator">: </span>
-      <span *ngIf="segment.type !== 'link' && (!segment.expanded || !isExpandable(segment))" class="segment-value">{{ segment.description }}</span>
-      <span *ngIf="segment.type === 'link' && (!segment.expanded || !isExpandable(segment))" class="segment-value">
-        <a href="" (click)="linkActionWrapper($event, segment.value)">{{ segment.description }}</a>
-      </span>
-    </section>
-    <section *ngIf="segment.expanded && isExpandable(segment)" class="children">
-      <ngx-json-viewer [testLink]="testLink" (linkAction)="subsectionAction($event)" [json]="segment.value" [expanded]="expanded"></ngx-json-viewer>
+      <section *ngIf="(segment.expanded || segment.found) && isExpandable(segment); else: simple" class="children">
+        <ngx-json-viewer
+          [expanded]="segment.expanded"
+          [json]="segment.value"
+          [search]="search"
+          [testLink]="testLink"
+          (linkAction)="subsectionAction($event)"
+        ></ngx-json-viewer>
+      </section>
+      <ng-template #simple>
+        <span class="segment-value">
+          <a *ngIf="segment.type === 'link'; else: noLink" href="" (click)="linkActionWrapper($event, segment.value)"><ng-container *ngTemplateOutlet="noLink"></ng-container></a>
+          <ng-template #noLink><span class="segment-description" *ngFor="let part of (search ? split(segment.description, search) : [[segment.description, search]]); let last=last"
+          >{{part[0]}}<span class="found" [class.current]="indexes[index] === lineIndex" *ngIf="!last"
+          >{{part[1]}}</span></span></ng-template>
+        </span>
+      </ng-template>
     </section>
   </section>
   <span class="braces">{{ isArray ? ']' : '}' }}</span>

@@ -1,6 +1,6 @@
 import {createReducer, createSelector, on} from '@ngrx/store';
 import {
-  addReports,
+  addReports, addReportsTags,
   removeReport,
   resetReports,
   setArchive,
@@ -69,6 +69,10 @@ export const reportsReducer = createReducer(
       reportsTags: action.tags
     })
   ),
+  on(addReportsTags, (state, action) => ({
+    ...state,
+    reportsTags: Array.from(new Set(state.reportsTags.concat(action.tags))).sort()
+  })),
   on(setReport, (state, action) => ({...state, report: action.report})),
   on(setReportChanges, (state, action) => ({
     ...state,

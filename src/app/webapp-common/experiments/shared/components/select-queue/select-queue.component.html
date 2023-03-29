@@ -38,7 +38,7 @@
           [value]="option"
           [smTooltip]="option.name" smShowTooltipIfEllipsis
         >
-          <span
+          <span class="pointer-events-none"
             *ngFor="let part of (text.value ? split(option.name, text.value) : [[option.name, text.value]]); let last=last"
           >{{part[0]}}<b *ngIf="!last">{{part[1]}}</b></span>
         </mat-option>

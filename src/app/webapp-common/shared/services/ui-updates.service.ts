@@ -3,7 +3,7 @@ import {HttpClient} from '@angular/common/http';
 import versionConf from '../../../../version.json';
 import {Store} from '@ngrx/store';
 import {UiUpdateDialogComponent} from '../../layout/ui-update-dialog/ui-update-dialog.component';
-import {MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
 
 @Injectable({
   providedIn: 'root'

@@ -5,8 +5,8 @@ import {ModelInfoState} from '../../reducers/model-info.reducer';
 import {Observable} from 'rxjs';
 import {selectIsModelSaving, selectSelectedModel} from '../../reducers';
 import {filter} from 'rxjs/operators';
-import {ActivateModelEdit, CancelModelEdit, EditModel, SetIsModelSaving} from '../../actions/models-info.actions';
-import {selectIsSharedAndNotOwner} from "../../../../features/experiments/reducers";
+import {activateModelEdit, cancelModelEdit, editModel, setSavingModel } from '../../actions/models-info.actions';
+import {selectIsSharedAndNotOwner} from '~/features/experiments/reducers';
 
 @Component({
   selector: 'sm-model-info-labels',
@@ -24,18 +24,16 @@ export class ModelInfoLabelsComponent {
     this.saving$         = this.store.select(selectIsModelSaving);
     this.isSharedAndNotOwner$ = this.store.select(selectIsSharedAndNotOwner);
   }
-  ngOnInit() {
-  }
 
   saveFormData(changedModel) {
-    this.store.dispatch(new SetIsModelSaving(true));
-    this.store.dispatch(new EditModel(changedModel));
+    this.store.dispatch(setSavingModel (true));
+    this.store.dispatch(editModel({model: changedModel}));
   }
   cancelClicked() {
-    this.store.dispatch(new CancelModelEdit());
+    this.store.dispatch(cancelModelEdit());
   }
 
   activateEditClicked() {
-    this.store.dispatch(new ActivateModelEdit('labels'));
+    this.store.dispatch(activateModelEdit('labels'));
   }
 }

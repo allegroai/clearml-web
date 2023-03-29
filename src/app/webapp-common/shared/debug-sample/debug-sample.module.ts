@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import {StoreModule} from '@ngrx/store';
 import {EffectsModule} from '@ngrx/effects';
 import {ClipboardModule} from 'ngx-clipboard';
-import {MatSliderModule} from '@angular/material/slider';
+import {MatLegacySliderModule as MatSliderModule} from '@angular/material/legacy-slider';
 import {ImageViewerComponent} from '@common/shared/debug-sample/image-viewer/image-viewer.component';
 import {DebugImageSnippetComponent} from '@common/shared/debug-sample/debug-image-snippet/debug-image-snippet.component';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';

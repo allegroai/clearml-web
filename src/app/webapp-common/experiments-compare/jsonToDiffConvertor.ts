@@ -1,8 +1,11 @@
-import {get, has, isArray, isEqual, mergeWith, isUndefined} from 'lodash/fp';
+import {get, has, isArray, isEqual, mergeWith, isUndefined} from 'lodash-es';
 import {IExperimentDetail} from '../../features/experiments-compare/experiments-compare-models';
 import {treeBuilderService} from './services/tree-builder.service';
 import {TreeNode} from './shared/experiments-compare-details.model';
-import {getAlternativeConvertedExperiment, getDisplayTextForTitles} from '../../features/experiments-compare/experiment-compare-utils';
+import {
+  getAlternativeConvertedExperiment,
+  getDisplayTextForTitles
+} from '../../features/experiments-compare/experiment-compare-utils';
 import {ConfigurationItem} from '../../business-logic/model/tasks/configurationItem';
 import * as Diff from 'diff';
 import {MAX_ROWS_FOR_SMART_COMPARE_ARRAYS} from './experiments-compare.constants';
@@ -16,7 +19,7 @@ export interface TreeNodeJsonData {
   isValueEqualToOrigin: boolean;
   isArray: boolean;
   classStyle: string;
-  tooltip: string
+  tooltip: string;
 }
 
 function arrayOrderIsNotImportant(key) {
@@ -192,7 +195,7 @@ function convertHyperParams(hyperParams: { [section: string]: { [name: string]: 
 
   return Object.entries(hyperParams).reduce((result, [sectionName, section]) => {
     result[sectionName] = Object.entries(section).reduce((acc, [paramName, param]) => {
-      const hasInOrigin = has(`${sectionName}.${paramName}`, originHyperParams);
+      const hasInOrigin = has(originHyperParams, `${sectionName}.${paramName}`);
       acc[(hasInOrigin ? ' ' : '') + paramName] = param.value;
       return acc;
     }, {});
@@ -206,7 +209,7 @@ function convertConfiguration(confParams: { [name: string]: ConfigurationItem },
   }
 
   return Object.entries(confParams).reduce((acc, [paramName, {value}]) => {
-    const hasInOrigin = has(paramName, originConfParams.configuration);
+    const hasInOrigin = has(originConfParams.configuration, paramName);
     acc[(hasInOrigin ? ' ' : '') + paramName] = value ? value.split('\n') : undefined;
     return acc;
   }, {});
@@ -367,7 +370,7 @@ export function convertNetworkDesignFromExperiments<T extends IExperimentDetail>
   const addValuesToNetworkDesign = (model: ' input models' | ' output models', key: string) => {
 
     const modelNetworkDesignData = experiments.map(experiment => {
-      const values = (get([experiment.id, 'artifacts', model, key, 'network_design'], originalExperiments) || []);
+      const values = originalExperiments?.[experiment.id]?.artifacts?.[model]?.[key]?.network_design ?? [];
       return Array.isArray(values) ? values : [];
     }) as Array<string[]>;
 
@@ -490,7 +493,7 @@ export function isParamsConverted(hyperparams) {
 
 export function getAllKeysEmptyObject(jsons) {
   let obj = {};
-  jsons.forEach(json => obj = mergeWith(customMergeStrategyForArrays, obj, json));
+  jsons.forEach(json => obj = mergeWith( obj, json, customMergeStrategyForArrays));
   const sortedObject = sortObject(obj, jsons[0], '');
   return sortedObject;
 }
@@ -498,12 +501,12 @@ export function getAllKeysEmptyObject(jsons) {
 export function createDiffObjectScalars(AllKeysObject, originObject?, comparedObject?, metaTransformerFunction?, originPath?): Array<TreeNode<TreeNodeJsonData>> {
   return treeBuilderService.buildTreeFromJson<TreeNodeJsonData>(AllKeysObject, (data, key, path) => {
 
-    const originData = path.length === 0 ? originObject : get(path, originObject);
-    const comparedData = path.length === 0 ? comparedObject : get(path, comparedObject);
-    const originPartial = get(key, originData);
-    const comparedPartial = get(key, comparedData);
-    const existOnOrigin = originData && has(key, originData);
-    const existOnCompared = comparedData && has(key, comparedData);
+    const originData = path.length === 0 ? originObject : get(originObject, path);
+    const comparedData = path.length === 0 ? comparedObject : get(comparedObject, path);
+    const originPartial = get(originData, key);
+    const comparedPartial = get(comparedData, key);
+    const existOnOrigin = originData && has(originData,key);
+    const existOnCompared = comparedData && has(comparedData,key);
 
     return {
       key,

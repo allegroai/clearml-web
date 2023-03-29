@@ -13,6 +13,7 @@
     <i *ngIf="regexError" class="regexp al-icon al-ico-error-circle pointer" [smTooltip]="regexError" [matTooltipPosition]="'below'"></i>
     <i
       class="regexp al-ico-regex pointer"
+      data-id="enableRegexButton"
       smClickStopPropagation
       [smTooltip]="'Regex'" [matTooltipPosition]="'below'"
       [class.active]="regExp"
@@ -20,8 +21,8 @@
   </sm-search>
 </span>
 <ng-container *ngIf="searchActive">
-  <i *ngIf="(isSearching$ | async); else searchIcon" class="al-icon al-ico-dialog-x pointer" (click)="clearSearch()" smClickStopPropagation></i>
+  <i *ngIf="(isSearching$ | async); else searchIcon" class="al-icon al-ico-dialog-x pointer" data-id="closeSearchButton" (click)="clearSearch()" smClickStopPropagation></i>
   <ng-template #searchIcon>
-    <i class="al-icon al-ico-search pointer" (click)="openSearch()"></i>
+    <i class="al-icon al-ico-search pointer" (click)="openSearch()" data-id="searchIcon"></i>
   </ng-template>
 </ng-container>

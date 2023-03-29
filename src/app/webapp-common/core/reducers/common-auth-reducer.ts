@@ -1,6 +1,6 @@
 import {createSelector, on, ReducerTypes, select, Store} from '@ngrx/store';
 import {filter, map, takeWhile, timeout} from 'rxjs/operators';
-import {isEqual} from 'lodash/fp';
+import {isEqual} from 'lodash-es';
 import {
   addCredential,
   cancelS3Credentials,

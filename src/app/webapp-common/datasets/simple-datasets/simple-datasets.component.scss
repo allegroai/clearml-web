@@ -55,48 +55,5 @@
   }
 
 }
-.content {
-  width: 100%;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 24px;
-  padding-bottom: 24px;
-
-  .navbar{
-    display: flex;
-    justify-content: center;
-    gap: 1px;
-  }
-  .code {
-    min-width: 400px;
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-
-    a.dark {
-      color: white;
-    }
-
-    sm-code-editor {
-      display: block;
-      width: 100%;
-      height: 470px;
-      border-radius: 6px;
-      overflow: hidden;
-    }
-  }
-
-  .diagram {
-    display: flex;
-    flex: 1;
-    justify-content: center;
-
-    i {
-      width: 338px;
-      height: 284px;
-      margin-top: 126px;
-    }
-  }
-}
 
 

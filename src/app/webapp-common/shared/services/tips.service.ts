@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Store} from '@ngrx/store';
-import {MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
 import {selectRouterConfig} from '../../core/reducers/router-reducer';
 import {combineLatest, Subscription} from 'rxjs';
 import {debounceTime, distinctUntilChanged, filter, map, withLatestFrom} from 'rxjs/operators';

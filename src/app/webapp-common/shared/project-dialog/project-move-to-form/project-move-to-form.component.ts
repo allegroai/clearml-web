@@ -11,8 +11,8 @@ import {
 } from '@angular/core';
 import {Project} from '~/business-logic/model/projects/project';
 import {NgForm} from '@angular/forms';
-import {MatAutocompleteSelectedEvent} from '@angular/material/autocomplete';
-import {MatOptionSelectionChange} from '@angular/material/core';
+import {MatLegacyAutocompleteSelectedEvent as MatAutocompleteSelectedEvent} from '@angular/material/legacy-autocomplete';
+import {MatLegacyOptionSelectionChange as MatOptionSelectionChange} from '@angular/material/legacy-core';
 import {ShortProjectNamePipe} from '@common/shared/pipes/short-project-name.pipe';
 import {ProjectLocationPipe} from '@common/shared/pipes/project-location.pipe';
 
@@ -70,7 +70,7 @@ export class ProjectMoveToFormComponent implements OnChanges, OnInit {
     });
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
+  ngOnChanges(changes: SimpleChanges) {
     if (this.projects.length > 0 && this.baseProjectId) {
       this.projectName = this.projects.find(project => project.id === this.baseProjectId)?.name;
     }

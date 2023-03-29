@@ -14,14 +14,23 @@
 @import "layout/layout";
 @import "shared/ui-components/styles/overrides/viewer-iterations-slider";
 
-@include mat.core();
+// TODO(v15): As of v15 mat.legacy-core no longer includes default typography styles.
+//  The following line adds:
+//    1. Default typography styles for all components
+//    2. Styles for typography hierarchy classes (e.g. .mat-headline-1)
+//  If you specify typography styles for the components you use elsewhere, you should delete this line.
+//  If you don't need the default component typographies but still want the hierarchy styles,
+//  you can delete this line and instead use:
+//    `@include mat.legacy-typography-hierarchy(mat.define-legacy-typography-config());`
+@include mat.all-legacy-component-typographies();
+@include mat.legacy-core();
 //@import "../webapp-common/shared/ui-components/styles/material-theme.scss";
 
-$custom-typography: mat.define-typography-config(
+$custom-typography: mat.define-legacy-typography-config(
         $font-family: $font-family-base
 );
 
-@include mat.all-component-typographies($custom-typography);
+@include mat.all-legacy-component-typographies($custom-typography);
 
 $allegro-theme-primary: mat.define-palette($mat-allegro);
 $allegro-theme-accent: mat.define-palette($mat-allegro, A400, A100, A400);
@@ -33,26 +42,44 @@ $sm-theme-primary: mat.define-palette($sm-purple);
 $sm-theme-accent: mat.define-palette($sm-purple, A400, A100, A400);
 $sm-theme-warn: mat.define-palette(mat.$purple-palette);
 
-$green-theme: mat.define-light-theme($custom-theme-primary, $custom-theme-accent, $custom-theme-warn);
-$dark-theme: mat.define-dark-theme($allegro-theme-primary, $allegro-theme-accent);
-$light-theme: mat.define-light-theme($allegro-theme-primary, $allegro-theme-accent);
-$sm-theme: mat.define-light-theme($sm-theme-primary, $sm-theme-accent, $sm-theme-warn);
+$green-theme: mat.define-light-theme((color: (
+  primary: $custom-theme-primary,
+  accent: $custom-theme-accent,
+  warn: $custom-theme-warn
+)));
+$dark-theme: mat.define-dark-theme((color: (
+  primary: $allegro-theme-primary,
+  accent: $allegro-theme-accent
+)));
+$light-theme: mat.define-light-theme((
+  color: (
+    primary: $allegro-theme-primary,
+    accent: $allegro-theme-accent
+  ),
+));
 
-@include mat.form-field-color($light-theme);
-@include mat.progress-spinner-theme($light-theme);
-@include mat.progress-bar-theme($light-theme);
+$sm-theme: mat.define-light-theme((color: (
+  primary: $sm-theme-primary,
+  accent: $sm-theme-accent,
+  warn: $sm-theme-warn
+)));
+
+@include mat.legacy-form-field-color($light-theme);
+@include mat.legacy-progress-spinner-theme($light-theme);
+@include mat.legacy-progress-bar-theme($light-theme);
+@include mat.datepicker-color($light-theme);
 
 .dark-theme {
-  @include mat.core-theme($dark-theme);
-  @include mat.button-theme($dark-theme);
-  @include mat.slide-toggle-color($green-theme);
-  @include mat.radio-color($green-theme);
-  @include mat.select-color($dark-theme);
-  @include mat.menu-color($light-theme);
-  @include mat.autocomplete-color($light-theme);
-  @include mat.datepicker-color($light-theme);
+  @include mat.legacy-core-theme($dark-theme);
+  @include mat.legacy-button-theme($dark-theme);
+  @include mat.legacy-slide-toggle-color($green-theme);
+  @include mat.legacy-radio-color($green-theme);
+  @include mat.legacy-select-color($dark-theme);
+  @include mat.legacy-menu-color($light-theme);
+  @include mat.legacy-autocomplete-color($light-theme);
   @include mat.pseudo-checkbox-color($light-theme);
   @include mat.divider-color($light-theme);
+
 
   .mat-checkbox-frame,
   .mat-radio-outer-circle {
@@ -82,16 +109,15 @@ $sm-theme: mat.define-light-theme($sm-theme-primary, $sm-theme-accent, $sm-theme
 }
 
 .light-theme {
-  @include mat.core-color($light-theme);
-  @include mat.button-color($light-theme);
-  @include mat.slide-toggle-color($sm-theme);
+  @include mat.legacy-core-color($light-theme);
+  @include mat.legacy-button-color($light-theme);
+  @include mat.legacy-slide-toggle-color($sm-theme);
   //  @include mat.radio-color($sm-theme);
-  @include mat.radio-theme($sm-theme);
+  @include mat.legacy-radio-theme($sm-theme);
   //  @include mat.select-color($light-theme);
-  @include mat.select-theme($light-theme);
-  @include mat.menu-color($light-theme);
-  @include mat.autocomplete-color($light-theme);
-  @include mat.datepicker-color($light-theme);
+  @include mat.legacy-select-theme($light-theme);
+  @include mat.legacy-menu-color($light-theme);
+  @include mat.legacy-autocomplete-color($light-theme);
   @include mat.pseudo-checkbox-color($light-theme);
   @include mat.divider-color($light-theme);
 
@@ -223,6 +249,34 @@ hr {
   }
 }
 
+// fix for calendar v15 mix with v14
+.dark-theme, .light-theme {
+  .mat-datepicker-content {
+    .mat-mdc-icon-button.mat-mdc-button-base {
+      width: 40px;
+      height: 40px;
+      padding: 8px;
+    }
+
+    .mat-calendar-body-selected {
+      background-color: $blue-200;
+    }
+
+    .mat-mdc-button:not(:disabled) {
+      color: $blue-700;
+    }
+
+    .mat-calendar-body-label, .mat-calendar-period-button {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .mat-calendar-hidden-label {
+      display: none;
+    }
+  }
+}
+
 mat-expansion-panel {
   box-shadow: unset;
 
@@ -230,17 +284,6 @@ mat-expansion-panel {
     margin-bottom: 0;
   }
 }
-
-//mat-expansion-panel :not(.dark) {
-//  &:hover {
-//    background: transparent !important;
-//  }
-//  .mat-expansion-panel-header {
-//    &:hover {
-//      background: $blue-50 !important;
-//    }
-//  }
-//}
 
 .mat-expansion-panel-header {
   font-family: $font-family-base, sans-serif;
@@ -282,6 +325,16 @@ mat-radio-button.sm {
   .mat-radio-inner-circle {
     width: 16px;
     height: 16px;
+  }
+  .mat-radio-input {
+    height: auto;
+  }
+  .mat-radio-ripple{
+    height: 32px;
+    width: 32px;
+    left: calc(50% - 16px);
+    top: calc(50% - 16px);
+    border-radius: 100%;
   }
 }
 
@@ -517,6 +570,11 @@ html {
       width: 370px;
     }
   }
+  .ico-chk {
+    width: 24px;
+    display: inline-block;
+    vertical-align: middle;
+  }
 }
 
 .sm-menu-header {
@@ -531,8 +589,11 @@ html {
   .mat-menu-item {
     height: 40px;
     font-size: 14px;
-    padding: 0 32px 0 16px;
+    padding: 0 32px 0 12px;
     border-radius: 4px;
+    > .al-icon {
+      margin-right: 12px;
+    }
   }
 
   hr {
@@ -781,6 +842,9 @@ button.btn.button-outline-dark {
   }
 }
 
+#print-element-temp {
+  display: none;
+}
 
 @media print {
   * {

@@ -43,9 +43,13 @@ export const setLastUpdate = createAction(
   PROJECTS_PREFIX + 'SET_LAST_UPDATE',
   props<{ lastUpdate: string }>());
 
+export const setRootProjectsIsReady = createAction(
+  PROJECTS_PREFIX + 'SET_ROOT_PROJECTS_READY',
+  props<{ ready: boolean }>());
+
 export const updateProjectCompleted = createAction(
   PROJECTS_PREFIX + 'UPDATE_PROJECT_COMPLETED',
-  props<{id: string; changes: Partial<Project>}>()
+  props<{ id: string; changes: Partial<Project> }>()
 );
 
 export const setSelectedProjectId = createAction(
@@ -94,7 +98,8 @@ export const getCompanyTags = createAction(
 );
 
 export const getProjectsTags = createAction(
-  PROJECTS_PREFIX + '[get projects tags]'
+  PROJECTS_PREFIX + '[get projects tags]',
+  props<{entity: string}>()
 );
 
 export const setTagsFilterByProject = createAction(
@@ -128,7 +133,8 @@ export const addProjectTags = createAction(
 );
 
 export const openTagColorsMenu = createAction(
-  PROJECTS_PREFIX + '[open tag colors]'
+  PROJECTS_PREFIX + '[open tag colors]',
+  props<{tags: string[]}>()
 );
 
 export const setTagColors = createAction(
@@ -154,23 +160,23 @@ export const setGraphData = createAction(
 
 export const getProjectUsers = createAction(
   PROJECTS_PREFIX + '[get current project users]',
-  props<{projectId: string}>()
+  props<{ projectId: string }>()
 );
 export const setProjectUsers = createAction(
   PROJECTS_PREFIX + '[set current project users]',
-  props<{users: User[]}>()
+  props<{ users: User[] }>()
 );
 export const setAllProjectUsers = createAction(
   PROJECTS_PREFIX + '[set all projects users]',
-  props<{users: User[]}>()
+  props<{ users: User[] }>()
 );
 export const setProjectExtraUsers = createAction(
   PROJECTS_PREFIX + '[set extra users]',
-  props<{users: User[]}>()
+  props<{ users: User[] }>()
 );
 export const getFilteredUsers = createAction(
   PROJECTS_PREFIX + 'GET_FILTERED_USERS',
-  props<{filteredUsers: string[]}>()
+  props<{ filteredUsers: string[] }>()
 );
 export const setShowHidden = createAction(
   PROJECTS_PREFIX + ' [set show hidden]',
@@ -181,3 +187,10 @@ export const setHideExamples = createAction(
   PROJECTS_PREFIX + ' [set hide examples]',
   props<{ hide: boolean }>()
 );
+
+export const setDefaultNestedModeForFeature = createAction(
+  PROJECTS_PREFIX + ' [set defaultNestedModeForFeature]',
+  props<{ feature: string; isNested: boolean }>()
+);
+
+

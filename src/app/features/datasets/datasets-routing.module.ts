@@ -1,11 +1,10 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
-import {SimpleDatasetVersionsComponent} from '@common/datasets/simple-dataset-versions/simple-dataset-versions.component';
-import {
-  SimpleDatasetVersionInfoComponent
-} from '@common/datasets/simple-dataset-version-info/simple-dataset-version-info.component';
 import {SimpleDatasetsComponent} from '@common/datasets/simple-datasets/simple-datasets.component';
-import {EntityTypeEnum} from '../../shared/constants/non-common-consts';
+import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
+import {
+  NestedProjectViewPageComponent
+} from "@common/nested-project-view/nested-project-view-page/nested-project-view-page.component";
 
 const routes: Routes = [
   {
@@ -17,15 +16,20 @@ const routes: Routes = [
     path: 'simple/:projectId',
     data: {search: true},
     children: [
-      {path: '', redirectTo: 'experiments', pathMatch: 'full'},
+      {
+        path: 'datasets',
+        component: SimpleDatasetsComponent,
+        data: {search: true}
+      },
+      {
+        path: 'projects',
+        component: NestedProjectViewPageComponent,
+        data: {search: true}
+      },
       {
         path: 'experiments',
-        component: SimpleDatasetVersionsComponent,
-        children: [
-          {
-            path: ':versionId', component: SimpleDatasetVersionInfoComponent,
-          },
-        ]
+        loadChildren: () => import('@common/dataset-version/dataset-version.module')
+          .then(m => m.DatasetVersionModule)
       },
       {
         path: 'compare-experiments',

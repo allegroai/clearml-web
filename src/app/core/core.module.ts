@@ -16,27 +16,15 @@ import {
   EXPERIMENTS_COMPARE_METRICS_CHARTS_
 } from '@common/experiments-compare/actions/experiments-compare-charts.actions';
 import {compareSyncedKeys} from '@common/experiments-compare/experiments-compare.module';
-import {EXPERIMENTS_OUTPUT_PREFIX} from '@common/experiments/actions/common-experiment-output.actions';
-import {EXPERIMENTS_INFO_PREFIX} from '@common/experiments/actions/common-experiments-info.actions';
-import {EXPERIMENTS_PREFIX} from '@common/experiments/actions/common-experiments-view.actions';
-import {EXPERIMENTS_STORE_KEY} from '@common/experiments/shared/common-experiments.const';
-import {
-  MODELS_PREFIX_INFO,
-  MODELS_PREFIX_MENU,
-  MODELS_PREFIX_VIEW,
-  MODELS_STORE_KEY
-} from '@common/models/models.consts';
-import {modelSyncedKeys} from '@common/models/models.module';
 import {PROJECTS_PREFIX} from '@common/projects/common-projects.consts';
 import {CHOOSE_COLOR_PREFIX} from '@common/shared/ui-components/directives/choose-color/choose-color.actions';
 import {colorSyncedKeys} from '@common/shared/ui-components/directives/choose-color/choose-color.module';
 import {UserPreferences} from '@common/user-preferences';
 import {EffectsModule} from '@ngrx/effects';
 import {ActionReducer, MetaReducer, StoreModule, USER_PROVIDED_META_REDUCERS} from '@ngrx/store';
-import {merge, pick} from 'lodash/fp';
+import {merge, pick} from 'lodash-es';
 import {USERS_PREFIX, VIEW_PREFIX} from '~/app.constants';
 import {ProjectsEffects} from '~/core/effects/projects.effects';
-import {experimentSyncedKeys} from '~/features/experiments/experiments.module';
 import {loginReducer} from '~/features/login/login.reducer';
 import {projectSyncedKeys} from '~/features/projects/projects.module';
 import {authReducer} from '~/features/settings/containers/admin/auth.reducers';
@@ -90,7 +78,7 @@ export const localStorageReducer = (reducer: ActionReducer<any>): ActionReducer<
     // TODO: lil hack to fix ngrx bug in preload strategy that dispatch store/init multiple times.
     if (action.type === '@ngrx/store/init') {
       const savedState = JSON.parse(localStorage.getItem(key));
-      nextState = merge(nextState, savedState);
+      nextState = merge({}, nextState, savedState);
     }
     if (state === nextState) {
       return nextState;
@@ -98,7 +86,7 @@ export const localStorageReducer = (reducer: ActionReducer<any>): ActionReducer<
     if (actionsPrefix && !actionsPrefix.some(ap => action.type.startsWith(ap))) {
       return nextState;
     }
-    localStorage.setItem(key, JSON.stringify(pick(syncedKeys, nextState)));
+    localStorage.setItem(key, JSON.stringify(pick(nextState, syncedKeys )));
     return nextState;
   };
 
@@ -112,10 +100,6 @@ const userPrefMetaFactory = (userPreferences: UserPreferences): MetaReducer<any>
   localStorageReducer,
   (reducer: ActionReducer<any>) =>
     createUserPrefReducer('projects', projectSyncedKeys, [PROJECTS_PREFIX], userPreferences, reducer),
-  (reducer: ActionReducer<any>) =>
-    createUserPrefReducer(EXPERIMENTS_STORE_KEY, experimentSyncedKeys, [EXPERIMENTS_PREFIX, EXPERIMENTS_INFO_PREFIX, EXPERIMENTS_OUTPUT_PREFIX], userPreferences, reducer),
-  (reducer: ActionReducer<any>) =>
-    createUserPrefReducer(MODELS_STORE_KEY, modelSyncedKeys, [MODELS_PREFIX_INFO, MODELS_PREFIX_MENU, MODELS_PREFIX_VIEW], userPreferences, reducer),
   (reducer: ActionReducer<any>) =>
     createUserPrefReducer('compare-experiments', compareSyncedKeys, [EXPERIMENTS_COMPARE_METRICS_CHARTS_], userPreferences, reducer),
   (reducer: ActionReducer<any>) =>

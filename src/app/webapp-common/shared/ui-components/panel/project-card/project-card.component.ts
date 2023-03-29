@@ -15,6 +15,7 @@ import {trackById} from '@common/shared/utils/forms-track-by';
 export class ProjectCardComponent {
   private _project: ProjectsGetAllResponseSingle;
   public computeTime: string;
+  public hidden = false;
   trackById = trackById;
   readonly circleTypeEnum = CircleTypeEnum;
   readonly icons = ICONS;
@@ -23,6 +24,7 @@ export class ProjectCardComponent {
 
   @Input() set project(data: Project) {
     this._project = data;
+    this.hidden = data.system_tags?.includes('hidden');
     this.computeTime = this.convertSecToDaysHrsMinsSec(data.stats?.active?.total_runtime);
   };
 
@@ -31,6 +33,7 @@ export class ProjectCardComponent {
   }
 
   @Input() isRootProject;
+  @Input() hideProjectPathIcon = false;
   @Input() hideMenu = false;
   @Output() projectCardClicked = new EventEmitter<Project>();
   @Output() projectNameChanged = new EventEmitter();

@@ -61,7 +61,7 @@
       <ng-content select="[footer]">
       </ng-content>
       <div *ngIf="(isExample || !!ribbonText)" class="ribbon">
-        <div class="txt d-flex justify-content-center w-100">
+        <div class="txt d-flex justify-content-center w-100" data-id="cardContainer">
           <div>{{ribbonText ? ribbonText : 'EXAMPLE' }}</div>
         </div>
       </div>

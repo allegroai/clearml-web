@@ -7,6 +7,16 @@
     [enableTagsFilter]="true"
     [tags]="projectsTags$ | async"
   >
+    <sm-button-toggle
+      left-items
+      class="ml-3"
+      [value]="!!projectId"
+      [options]="[
+                  {value: false, icon: 'al-ico-flat-view',  label: 'List view'},
+                  {value: true, icon:'al-ico-project-path', label: 'Project view'}
+            ]"
+      (valueChanged)="!(!!projectId && $event) && toggleNestedView($event)"
+    ></sm-button-toggle>
     <button
       class="btn btn-cml-primary d-flex align-items-center"
       (click)="createDataset()">
@@ -17,6 +27,7 @@
     *ngIf="((projectsList$ | async)?.length !== 0 && (!allExamples || (showExamples$ | async)))||  searching; else emptyState">
     <sm-simple-dataset-card *ngFor="let project of projectsList$ | async; trackBy: trackById ;let last=last"
                             [hideMenu]="['All Experiments'].includes(project.name) || project['isRoot'] || isExample(project)"
+                            [hideProjectPathIcon]="!!projectId"
                             [project]="project"
                             [allTags]="projectsTags$ | async"
                             (projectCardClicked)="projectCardClicked($event)"
@@ -41,40 +52,6 @@
       </a></ng-container>
     </div>
 
-    <ng-container *ngTemplateOutlet="datasetEmptyStateContent; context: {createButton: true}"></ng-container>
-  </div>
-</ng-template>
-
-<ng-template #datasetEmptyStateContent let-showButton="createButton">
-  <div class="content">
-    <div class="code">
-      <div class="d-flex justify-content-between">
-        <div>
-          Use ClearML Data from CLI or in your Python code.<br>
-          Run these code snippets for a quick example (Requires ClearML 1.7 or above).<br>
-          For more details see the <a [class.dark]="showButton" href="https://clear.ml/docs/latest/docs/clearml_data/clearml_data" target="_blank">documentation</a>
-        </div>
-      </div>
-      <div class="navbar">
-        <sm-navbar-item
-          direction="bottom"
-          header="CLI"
-          [active]="emptyStateTab==='cli'"
-          (click)="emptyStateTabClicked('cli')"></sm-navbar-item>
-        <sm-navbar-item
-          direction="bottom"
-          header="SDK"
-          [active]="emptyStateTab==='sdk'"
-          (click)="emptyStateTabClicked('sdk')"
-        ></sm-navbar-item>
-      </div>
-      <sm-code-editor
-        [code]="emptyStateTab === 'cli'? initDatasetCLICode: initDatasetSDKCode"
-        [readonly]="true"
-        [mode]="emptyStateTab === 'cli'? 'ace/mode/sh': 'ace/mode/python'"
-        [showCopyButton]="true"
-      ></sm-code-editor>
-    </div>
-    <div class="diagram"><i class="i-datasets-empty-state"></i></div>
+    <sm-dataset-empty [showButton]="true"></sm-dataset-empty>
   </div>
 </ng-template>
