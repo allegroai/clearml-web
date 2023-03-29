@@ -7,6 +7,11 @@ import {ModelInfoNetworkComponent} from './containers/model-info-network/model-i
 import {ModelInfoLabelsComponent} from './containers/model-info-labels/model-info-labels.component';
 import {LeavingBeforeSaveAlertGuard} from '../shared/guards/leaving-before-save-alert.guard';
 import {ModelInfoMetadataComponent} from './containers/model-info-metadata/model-info-metadata.component';
+import {
+  ModelInfoExperimentsComponent
+} from "@common/models/containers/model-info-experiments/model-info-experiments.component";
+import {ModelInfoScalarsComponent} from '@common/models/containers/model-info-scalars/model-info-scalars.component';
+import {ModelInfoPlotsComponent} from '@common/models/containers/model-info-plots/model-info-plots.component';
 
 export const routes: Routes = [
   {
@@ -21,6 +26,9 @@ export const routes: Routes = [
           {path: 'network', component: ModelInfoNetworkComponent, canDeactivate: [LeavingBeforeSaveAlertGuard]},
           {path: 'labels', component: ModelInfoLabelsComponent, canDeactivate: [LeavingBeforeSaveAlertGuard]},
           {path: 'metadata', component: ModelInfoMetadataComponent, canDeactivate: [LeavingBeforeSaveAlertGuard]},
+          {path: 'experiments', component: ModelInfoExperimentsComponent, canDeactivate: [LeavingBeforeSaveAlertGuard]},
+          {path: 'scalars', component: ModelInfoScalarsComponent, data: {minimized: true}},
+          {path: 'plots', component: ModelInfoPlotsComponent},
         ]
       },
     ]

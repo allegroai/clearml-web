@@ -1,6 +1,6 @@
 import {ChangeDetectorRef, Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import {ColHeaderTypeEnum, ISmCol, TableSortOrderEnum} from '@common/shared/ui-components/data/table/table.consts';
-import {find, get} from 'lodash/fp';
+import {find, get} from 'lodash-es';
 import {Queue} from '~/business-logic/model/queues/queue';
 import {QUEUES_TABLE_COL_FIELDS} from '../../workers-and-queues.consts';
 import {TableComponent} from '@common/shared/ui-components/data/table/table.component';
@@ -87,7 +87,7 @@ export class QueuesTableComponent extends BaseTableView {
   }
 
   getBodyData(rowData: any, col: ISmCol) {
-    return get(col.id, rowData);
+    return get(rowData, col.id);
   }
 
   getQNames(queues) {
@@ -95,7 +95,7 @@ export class QueuesTableComponent extends BaseTableView {
   }
 
   getQName(queue) {
-    const queueIns: any = find({'id': queue}, this.queues);
+    const queueIns: any = find(this.queues, {id: queue});
     return queueIns ? queueIns.name : queue;
   }
 

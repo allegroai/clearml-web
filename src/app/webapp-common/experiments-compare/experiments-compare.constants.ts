@@ -1,3 +1,10 @@
+export type MetricValueType = 'min_value' | 'max_value' | 'value';
+
+export interface SelectedMetric {
+  name: string;
+  path: string;
+}
+
 export const RENAME_MAP = {
   'network_design': 'Network Design',
   'uncommitted_changes': 'Uncommitted Changes',

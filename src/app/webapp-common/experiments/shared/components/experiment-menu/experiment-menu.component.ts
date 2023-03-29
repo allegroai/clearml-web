@@ -1,7 +1,6 @@
-import {MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Store} from '@ngrx/store';
-import {get} from 'lodash/fp';
 import {filter, take} from 'rxjs/operators';
 import {ICONS} from '@common/constants';
 import {Queue} from '~/business-logic/model/queues/queue';
@@ -14,7 +13,7 @@ import {SmSyncStateSelectorService} from '@common/core/services/sync-state-selec
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {htmlTextShorte} from '@common/shared/utils/shared-utils';
 import * as commonMenuActions from '../../../actions/common-experiments-menu.actions';
-import {archiveSelectedExperiments, abortAllChildren} from '../../../actions/common-experiments-menu.actions';
+import {abortAllChildren, archiveSelectedExperiments} from '../../../actions/common-experiments-menu.actions';
 import {ChangeProjectDialogComponent} from '../change-project-dialog/change-project-dialog.component';
 import {CloneDialogComponent} from '../clone-dialog/clone-dialog.component';
 import {SelectQueueComponent} from '../select-queue/select-queue.component';
@@ -30,7 +29,11 @@ import {ConfigurationService} from '@common/shared/services/configuration.servic
 import {selectNeverShowPopups} from '@common/core/reducers/view.reducer';
 import {CommonDeleteDialogComponent} from '@common/shared/entity-page/entity-delete/common-delete-dialog.component';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
-import {autoRefreshExperimentInfo, deactivateEdit, setExperiment} from '../../../actions/common-experiments-info.actions';
+import {
+  autoRefreshExperimentInfo,
+  deactivateEdit,
+  setExperiment
+} from '../../../actions/common-experiments-info.actions';
 import {neverShowPopupAgain} from '@common/core/actions/layout.actions';
 import {
   selectionDisabledAbort,
@@ -214,13 +217,12 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
         resetMode: true,
         devWarning
       },
-      width: '600px',
       disableClose: true
     });
     confirmDialogRef.afterClosed().subscribe((confirmed) => {
       if (confirmed) {
         this.store.dispatch(resetOutput());
-        if (!this.tableMode && this.selectedExperiments.some(exp => exp.id === this._experiment.id)) {
+        if (this.activateFromMenuButton || !this.tableMode && this.selectedExperiments.some(exp => exp.id === this._experiment.id)) {
           this.store.dispatch(autoRefreshExperimentInfo({id: this._experiment.id}));
         }
         this.store.dispatch(deactivateEdit());
@@ -301,7 +303,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
     const dialog = this.dialog.open(ChangeProjectDialogComponent, {
       data: {
         currentProjects: currentProjects.length > 0 ? currentProjects : [this.projectId],
-        defaultProject: get('project.id', this._experiment),
+        defaultProject: this._experiment?.project,
         reference: selectedExperiments.length > 1 ? selectedExperiments : selectedExperiments[0]?.name,
         type: 'experiment'
       }
@@ -363,7 +365,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
         useCurrentEntity: this.activateFromMenuButton || this.useCurrentEntity,
         includeChildren
       },
-      width: '600px',
+
       disableClose: true
     });
     confirmDialogRef.afterClosed().subscribe((confirmed) => {

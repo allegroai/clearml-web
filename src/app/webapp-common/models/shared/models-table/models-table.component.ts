@@ -9,7 +9,7 @@ import {
   ViewChild
 } from '@angular/core';
 import {ColHeaderTypeEnum, ISmCol} from '@common/shared/ui-components/data/table/table.consts';
-import {get} from 'lodash/fp';
+import {get} from 'lodash-es';
 import {SelectedModel, TableModel} from '../models.model';
 import {MODELS_READY_LABELS, MODELS_TABLE_COL_FIELDS} from '../models.const';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
@@ -23,7 +23,9 @@ import {ICONS, TIME_FORMAT_STRING} from '@common/constants';
 import {getSysTags} from '../../model.utils';
 import {TableComponent} from '@common/shared/ui-components/data/table/table.component';
 import {MODELS_TABLE_COLS} from '../../models.consts';
-import {IOption} from '@common/shared/ui-components/inputs/select-autocomplete-for-template-forms/select-autocomplete-for-template-forms.component';
+import {
+  IOption
+} from '@common/shared/ui-components/inputs/select-autocomplete-for-template-forms/select-autocomplete-for-template-forms.component';
 import {
   CountAvailableAndIsDisableSelectedFiltered,
   MenuItems,
@@ -33,7 +35,9 @@ import {
   selectionDisabledPublishModels
 } from '@common/shared/entity-page/items.utils';
 import {getModelsMetadataValuesForKey, selectAllModels} from '../../actions/models-view.actions';
-import {ModelMenuExtendedComponent} from '~/features/models/containers/model-menu-extended/model-menu-extended.component';
+import {
+  ModelMenuExtendedComponent
+} from '~/features/models/containers/model-menu-extended/model-menu-extended.component';
 import {createFiltersFromStore} from '@common/shared/utils/tableParamEncode';
 
 @Component({
@@ -100,6 +104,7 @@ export class ModelsTableComponent extends BaseTableView {
     const readyCol = this.tableCols.find(col => col.id === MODELS_TABLE_COL_FIELDS.READY);
     readyCol.hidden = only;
   }
+
   @Input() set projects(projects) {
     if (!projects) {
       return;
@@ -148,7 +153,7 @@ export class ModelsTableComponent extends BaseTableView {
   private _selectedModel;
   @Input() set selectedModel(model) {
     if (model && model !== this._selectedModel) {
-      window.setTimeout(() => this.table.focusSelected());
+      window.setTimeout(() => this.table?.focusSelected());
     }
     this._selectedModel = model;
   }
@@ -160,13 +165,13 @@ export class ModelsTableComponent extends BaseTableView {
   @Input() set tableFilters(filters: { [s: string]: FilterMetadata }) {
     this._tableFilters = filters;
     this.filtersValues = {};
-    this.filtersValues[MODELS_TABLE_COL_FIELDS.FRAMEWORK] = get([MODELS_TABLE_COL_FIELDS.FRAMEWORK, 'value'], filters) || [];
-    this.filtersValues[MODELS_TABLE_COL_FIELDS.READY] = get([MODELS_TABLE_COL_FIELDS.READY, 'value'], filters) || [];
-    this.filtersValues[MODELS_TABLE_COL_FIELDS.USER] = get([MODELS_TABLE_COL_FIELDS.USER, 'value'], filters) || [];
-    this.filtersValues[MODELS_TABLE_COL_FIELDS.TAGS] = get([MODELS_TABLE_COL_FIELDS.TAGS, 'value'], filters) || [];
-    this.filtersValues[MODELS_TABLE_COL_FIELDS.PROJECT] = get([MODELS_TABLE_COL_FIELDS.PROJECT, 'value'], filters) || [];
-    this.filtersMatch[MODELS_TABLE_COL_FIELDS.TAGS] = filters?.[MODELS_TABLE_COL_FIELDS.TAGS]?.matchMode || '';
-    this.filtersSubValues[MODELS_TABLE_COL_FIELDS.TAGS] = get(['system_tags', 'value'], filters) || [];
+    this.filtersValues[MODELS_TABLE_COL_FIELDS.FRAMEWORK] = filters?.[MODELS_TABLE_COL_FIELDS.FRAMEWORK]?.value ?? [];
+    this.filtersValues[MODELS_TABLE_COL_FIELDS.READY] = filters?.[MODELS_TABLE_COL_FIELDS.READY]?.value ?? [];
+    this.filtersValues[MODELS_TABLE_COL_FIELDS.USER] = get(filters, [MODELS_TABLE_COL_FIELDS.USER, 'value'], []);
+    this.filtersValues[MODELS_TABLE_COL_FIELDS.TAGS] = filters?.[MODELS_TABLE_COL_FIELDS.TAGS]?.value ?? [];
+    this.filtersValues[MODELS_TABLE_COL_FIELDS.PROJECT] = get(filters, [MODELS_TABLE_COL_FIELDS.PROJECT, 'value'], []);
+    this.filtersMatch[MODELS_TABLE_COL_FIELDS.TAGS] = filters?.[MODELS_TABLE_COL_FIELDS.TAGS]?.matchMode ?? '';
+    this.filtersSubValues[MODELS_TABLE_COL_FIELDS.TAGS] = filters?.system_tags?.value ?? [];
     // dynamic filters
     const filtersValues = createFiltersFromStore(filters || {}, false);
     this.filtersValues = Object.assign({}, {...this.filtersValues}, {...filtersValues});
@@ -219,7 +224,7 @@ export class ModelsTableComponent extends BaseTableView {
   }
 
   @Output() modelsSelectionChanged = new EventEmitter<SelectedModel[]>();
-  @Output() modelSelectionChanged = new EventEmitter<{model: SelectedModel; openInfo?: boolean}>();
+  @Output() modelSelectionChanged = new EventEmitter<{ model: SelectedModel; openInfo?: boolean }>();
   @Output() loadMoreModels = new EventEmitter();
   @Output() tagsMenuOpened = new EventEmitter();
   @Output() sortedChanged = new EventEmitter<{ isShift: boolean; colId: ISmCol['id'] }>();
@@ -248,11 +253,9 @@ export class ModelsTableComponent extends BaseTableView {
   }
 
 
-
   onRowSelectionChanged(event) {
     this.modelSelectionChanged.emit({model: event.data});
   }
-
 
 
   onLoadMoreClicked() {
@@ -292,7 +295,6 @@ export class ModelsTableComponent extends BaseTableView {
   }
 
 
-
   addTag(tag: string) {
     this.store.dispatch(addTag({
       tag,
@@ -301,7 +303,7 @@ export class ModelsTableComponent extends BaseTableView {
     this.filtersOptions[MODELS_TABLE_COL_FIELDS.TAGS] = [];
   }
 
-  tableRowClicked(event: {e: MouseEvent; data: TableModel}) {
+  tableRowClicked(event: { e: MouseEvent; data: TableModel }) {
     if (this._selectedModels.some(exp => exp.id === event.data.id)) {
       this.openContextMenu({e: event.e, rowData: event.data, backdrop: true});
     } else {
@@ -309,7 +311,7 @@ export class ModelsTableComponent extends BaseTableView {
     }
   }
 
-  openContextMenu(data: {e: MouseEvent; rowData; single?: boolean; backdrop?: boolean}) {
+  openContextMenu(data: { e: MouseEvent; rowData; single?: boolean; backdrop?: boolean }) {
     if (!this.modelsSelectionChanged.observed) {
       return;
     }

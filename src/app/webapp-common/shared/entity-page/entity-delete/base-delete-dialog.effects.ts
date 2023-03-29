@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 import {deactivateLoader, setServerError} from '@common/core/actions/layout.actions';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {ApiProjectsService} from '~/business-logic/api-services/projects.service';
@@ -29,7 +28,7 @@ import {CloudProviders} from './common-delete-dialog.reducer';
 import {selectProjectForDelete} from '@common/projects/common-projects.reducer';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {activateEdit} from '@common/experiments/actions/common-experiments-info.actions';
-import {ActivateModelEdit} from '@common/models/actions/models-info.actions';
+import {activateModelEdit} from '@common/models/actions/models-info.actions';
 import {ModelsDeleteManyResponse} from '~/business-logic/model/models/modelsDeleteManyResponse';
 import {TasksDeleteManyResponse} from '~/business-logic/model/tasks/tasksDeleteManyResponse';
 import {ConfigurationService} from '../../services/configuration.service';
@@ -39,6 +38,7 @@ import {getChildrenExperiments} from '@common/experiments/effects/common-experim
 import {TasksResetManyResponseSucceeded} from '~/business-logic/model/tasks/tasksResetManyResponseSucceeded';
 import {updateManyExperiment} from '@common/experiments/actions/common-experiments-view.actions';
 import {getBucketAndKeyFromSrc, SignResponse} from '@common/settings/admin/base-admin-utils';
+import {MemoizedSelector} from '@ngrx/store/src/selector';
 
 @Injectable()
 export class DeleteDialogEffectsBase {
@@ -102,7 +102,7 @@ export class DeleteDialogEffectsBase {
     }
   }
 
-  getEntitySelector(entityType: EntityTypeEnum) {
+  getEntitySelector(entityType: EntityTypeEnum): MemoizedSelector<any, any[]> {
     switch (entityType) {
       case EntityTypeEnum.dataset:
       case EntityTypeEnum.controller:
@@ -122,7 +122,7 @@ export class DeleteDialogEffectsBase {
       case EntityTypeEnum.experiment:
         return [activateEdit('delete')];
       case EntityTypeEnum.model:
-        return [new ActivateModelEdit('delete')];
+        return [activateModelEdit('delete')];
       default:
         return [new EmptyAction()];
     }
@@ -145,7 +145,7 @@ export class DeleteDialogEffectsBase {
                  succeeded,
                  urlsToDelete
                }) => [this.parseErrors(failed, entities), this.getUrlsPerProvider(action.deleteArtifacts ? urlsToDelete : []), succeeded]),
-          mergeMap(([failed, urlsPerSource, succeeded]: [{ id: string; name: string; message: string }[], { [provider in CloudProviders]: string[] }, TasksResetManyResponseSucceeded[]]) => [
+          mergeMap(([failed, /*urlsPerSource*/, succeeded]: [{ id: string; name: string; message: string }[], { [provider in CloudProviders]: string[] }, TasksResetManyResponseSucceeded[]]) => [
               ...this.pauseAutorefresh(action.entityType),
               setNumberOfSourcesToDelete({numberOfFiles: 0}),//Object.values(urlsPerSource).flat().length}), // Currently deleting only in BE
               setFailedDeletedEntities({failedEntities: failed}),

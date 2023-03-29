@@ -1,83 +1,50 @@
-import {Action, createAction, props} from '@ngrx/store';
-import {Model} from '../../../business-logic/model/models/model';
+import {createAction, props} from '@ngrx/store';
+import {Model} from '~/business-logic/model/models/model';
 import {SelectedModel} from '../shared/models.model';
-import {ModelsUpdateRequest} from '../../../business-logic/model/models/modelsUpdateRequest';
-import {MetadataItem} from '../../../business-logic/model/queues/metadataItem';
-import {IModelMetadataItem, IModelMetadataMap} from '../containers/model-info-metadata/model-info-metadata.component';
+import {ModelsUpdateRequest} from '~/business-logic/model/models/modelsUpdateRequest';
+import {IModelMetadataMap} from '../containers/model-info-metadata/model-info-metadata.component';
+import {TableFilter} from '@common/shared/utils/tableParamEncode';
+import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 
 
 const MODELS_PREFIX = 'MODELS_INFO_';
 
+export const getModelInfo = createAction(
+  MODELS_PREFIX + 'GET_MODEL_INFO',
+  props<{id: string}>()
+);
 
-// COMMANDS:
-export const GET_MODEL_INFO = MODELS_PREFIX + 'GET_MODEL_INFO';
-export const REFRESH_MODEL_INFO = MODELS_PREFIX + 'REFRESH_MODEL_INFO';
-export const SET_MODEL = MODELS_PREFIX + 'SET_MODEL';
-export const ACTIVATE_MODEL_EDIT = MODELS_PREFIX + 'ACTIVATE_EDIT';
-export const MODEL_CANCEL_EDIT = MODELS_PREFIX + 'MODEL_CANCEL_EDIT';
-export const SET_IS_MODEL_SAVING = MODELS_PREFIX + 'SET_IS_MODEL_SAVING';
+export const setModelInfo = createAction(
+  MODELS_PREFIX + 'SET_MODEL_INFO',
+  props<{model: SelectedModel}>()
+);
 
+export const activateModelEdit = createAction(
+  MODELS_PREFIX + 'ACTIVATE_EDIT',
+  name => ({name})
+);
 
-// EVENTS:
-export const MODEL_DETAILS_UPDATED = MODELS_PREFIX + 'MODEL_DETAILS_UPDATED';
-export const EDIT_MODEL = MODELS_PREFIX + 'EDIT_MODEL';
+export const cancelModelEdit = createAction( MODELS_PREFIX + '[cancel edit]');
 
+export const refreshModelInfo = createAction(
+  MODELS_PREFIX + 'REFRESH_MODEL_INFO',
+  id => ({id})
+);
 
-export class GetModelInfo implements Action {
-  readonly type = GET_MODEL_INFO;
+export const editModel = createAction(
+  MODELS_PREFIX + 'EDIT_MODEL',
+  props<{model: SelectedModel}>()
+);
 
-  constructor(public payload: Model['id']) {
-  }
-}
+export const setSavingModel = createAction(
+  MODELS_PREFIX + '[Set saving Model]',
+  savin => ({saving: savin})
+);
 
-export class ActivateModelEdit implements Action {
-  readonly type = ACTIVATE_MODEL_EDIT;
-
-  constructor(public payload: string) {
-  }
-}
-
-export class CancelModelEdit implements Action {
-  readonly type = MODEL_CANCEL_EDIT;
-
-  constructor() {
-  }
-}
-
-export class RefreshModelInfo implements Action {
-  readonly type = REFRESH_MODEL_INFO;
-
-  constructor(public payload: Model['id']) {
-  }
-}
-
-export class SetModel implements Action {
-  readonly type = SET_MODEL;
-
-  constructor(public payload: SelectedModel) {
-  }
-}
-
-export class EditModel implements Action {
-  readonly type = EDIT_MODEL;
-
-  constructor(public payload: SelectedModel) {
-  }
-}
-
-export class SetIsModelSaving implements Action {
-  readonly type = SET_IS_MODEL_SAVING;
-
-  constructor(public payload: boolean) {
-  }
-}
-
-export class ModelDetailsUpdated implements Action {
-  readonly type = MODEL_DETAILS_UPDATED;
-
-  constructor(public payload: { id: Model['id']; changes: Partial<ModelsUpdateRequest> }) {
-  }
-}
+export const modelDetailsUpdated = createAction(
+  MODELS_PREFIX + 'MODEL_DETAILS_UPDATED',
+  props<{ id: Model['id']; changes: Partial<ModelsUpdateRequest> }>()
+);
 
 export const updateModelDetails = createAction(
   MODELS_PREFIX + '[update model details]',
@@ -86,9 +53,40 @@ export const updateModelDetails = createAction(
 
 export const saveMetaData = createAction(
   MODELS_PREFIX + '[save model metadata]',
-  props<{ metadata: IModelMetadataMap}>()
+  props<{ metadata: IModelMetadataMap }>()
 );
+
+
 
 export const resetActiveSection = createAction(
   MODELS_PREFIX + '[reset active section]'
+);
+
+export const modelsExperimentsTableClearAllFilters = createAction(
+  MODELS_PREFIX + '[model experiments clear all filters]'
+);
+
+export const modelExperimentsTableFilterChanged = createAction(
+  MODELS_PREFIX + '[model experiments table filter changed]',
+  props<{ filter: TableFilter }>()
+);
+
+export const getPlots = createAction(
+  MODELS_PREFIX + '[get plots]',
+  props<{id: string}>()
+);
+
+export const setPlots = createAction(
+  MODELS_PREFIX + '[set plots]',
+  props<{plots: any[]}>()
+);
+
+export const getScalars = createAction(
+  MODELS_PREFIX + '[get scalars]',
+  props<{id: string}>()
+);
+
+export const setScalars = createAction(
+  MODELS_PREFIX + '[set scalars]',
+  props<{scalars: any[]; axisType: ScalarKeyEnum}>()
 );

@@ -11,7 +11,7 @@ import {
 import {Store} from '@ngrx/store';
 import {openTagColorsMenu, setTagsFilterByProject} from '@common/core/actions/projects.actions';
 import {activateEdit} from 'app/webapp-common/experiments/actions/common-experiments-info.actions';
-import {ActivateModelEdit} from '@common/models/actions/models-info.actions';
+import {activateModelEdit} from '@common/models/actions/models-info.actions';
 
 @Component({
   selector: 'sm-tags-menu',
@@ -44,9 +44,9 @@ export class TagsMenuComponent {
   openTagColors() {
     window.setTimeout(() => {
       this.store.dispatch(activateEdit('tags'));
-      this.store.dispatch(new ActivateModelEdit('tags'));
+      this.store.dispatch(activateModelEdit('tags'));
     }, 500);
-    this.store.dispatch(openTagColorsMenu());
+    this.store.dispatch(openTagColorsMenu({tags: this.tagsFilterByProject ? this.projectTags : this.companyTags}));
   }
 
   addTag(tag: string) {

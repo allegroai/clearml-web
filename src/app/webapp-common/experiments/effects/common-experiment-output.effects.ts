@@ -5,12 +5,12 @@ import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
 import {ApiAuthService} from '~/business-logic/api-services/auth.service';
 import {BlTasksService} from '~/business-logic/services/tasks.service';
 import {ApiEventsService} from '~/business-logic/api-services/events.service';
-import {catchError, expand, filter, map, mergeMap, reduce, switchMap, withLatestFrom} from 'rxjs/operators';
+import {catchError, expand, map, mergeMap, reduce, switchMap, withLatestFrom} from 'rxjs/operators';
 import {activeLoader, deactivateLoader, setServerError} from '../../core/actions/layout.actions';
 import {requestFailed} from '../../core/actions/http.actions';
 import * as outputActions from '../actions/common-experiment-output.actions';
 import {setExperimentScalarSingleValue} from '../actions/common-experiment-output.actions';
-import {ExperimentOutputState} from '~/features/experiments/reducers/experiment-output.reducer';
+import {ExperimentOutputState} from '@common/experiments/reducers/experiment-output.reducer';
 import {LOG_BATCH_SIZE} from '../shared/common-experiments.const';
 import {selectExperimentHistogramCacheAxisType, selectPipelineSelectedStep, selectSelectedSettingsxAxisType} from '../reducers';
 import {refreshExperiments} from '../actions/common-experiments-view.actions';
@@ -32,8 +32,7 @@ export class CommonExperimentOutputEffects {
   }
 
   activeLoader = createEffect(() => this.actions$.pipe(
-    ofType(outputActions.getExperimentLog, outputActions.experimentScalarRequested, outputActions.experimentPlotsRequested),
-    filter(action => !action?.['autoRefresh']),
+    ofType(outputActions.experimentScalarRequested, outputActions.experimentPlotsRequested),
     map(action => activeLoader(action.type))
   ));
 
@@ -52,13 +51,16 @@ export class CommonExperimentOutputEffects {
           this.store.select(selectSelectedExperiment),
           this.store.select(selectPipelineSelectedStep)),
         mergeMap(([res, selectedTask, pipeStep]: [EventsGetTaskLogResponse, IExperimentInfo, IExperimentInfo]) => [
-          ...((action.id === (pipeStep?.id || selectedTask.id)) ?
-              [outputActions.setExperimentLog({
-                events: res.events,
-                total: res.total,
-                direction: action.direction,
-                refresh: action.refresh
-              })] :
+          ...([pipeStep?.id, selectedTask.id].includes(action.id ) ?
+              [
+                outputActions.setExperimentLog({
+                  events: res.events,
+                  total: res.total,
+                  direction: action.direction,
+                  refresh: action.refresh
+                }),
+                ...(!(action.refresh || action.from) ? [outputActions.setExperimentLogAtStart({atStart: true})] : [])
+              ] :
               action.direction === 'prev' && res.total > 0 && res.events?.length === 0 ?
                 [outputActions.setExperimentLogAtStart({atStart: true})] :
                 [outputActions.setExperimentLogLoading({loading: false})]
@@ -70,7 +72,7 @@ export class CommonExperimentOutputEffects {
           requestFailed(error),
           deactivateLoader(action.type),
           deactivateLoader(refreshExperiments.type),
-          setServerError(error, null, 'Failed to fetch log'),
+          ...(action.refresh || action.from || action.autoRefresh ? [] : [setServerError(error, null, 'Failed to fetch log')]),
           outputActions.setExperimentLogLoading({loading: false})
         ])
       )
@@ -106,7 +108,9 @@ export class CommonExperimentOutputEffects {
   fetchExperimentScalarSingleValue$ = createEffect(() => this.actions$.pipe(
     ofType(outputActions.experimentScalarRequested),
     switchMap((action) => this.eventsApi.eventsGetTaskSingleValueMetrics({
-      tasks: [action.experimentId]
+      tasks: [action.experimentId],
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      ...(action.model && {model_events: true})
     })),
     mergeMap((res) => [setExperimentScalarSingleValue(res?.tasks[0])]
     )
@@ -126,7 +130,9 @@ export class CommonExperimentOutputEffects {
 
         return this.eventsApi.eventsScalarMetricsIterHistogram({
           task: action.experimentId,
-          key: axisType === ScalarKeyEnum.IsoTime ? ScalarKeyEnum.Timestamp : axisType
+          key: axisType === ScalarKeyEnum.IsoTime ? ScalarKeyEnum.Timestamp : axisType,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          ...(action.model && {model_events: true})
         })
           .pipe(
             mergeMap(res => [

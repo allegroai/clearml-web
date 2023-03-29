@@ -1,11 +1,15 @@
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {Observable} from 'rxjs/internal/Observable';
 import {selectMetricVariants} from '~/features/experiments/reducers';
 import {Store} from '@ngrx/store';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 import {getCustomMetrics} from '@common/experiments/actions/common-experiments-view.actions';
 import {fetchGraphData, setMetricVariant} from '@common/core/actions/projects.actions';
-import {ProjectStatsGraphData, selectGraphData, selectSelectedMetricVariantForCurrProject} from '@common/core/reducers/projects.reducer';
+import {
+  ProjectStatsGraphData,
+  selectGraphData,
+  selectSelectedMetricVariantForCurrProject
+} from '@common/core/reducers/projects.reducer';
 import {Project} from '~/business-logic/model/projects/project';
 import {filter, skip, take, tap} from 'rxjs/operators';
 import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
@@ -13,16 +17,17 @@ import {Subscription} from 'rxjs';
 import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
 import {createMetricColumn, MetricColumn} from '@common/shared/utils/tableParamEncode';
 import {Router} from '@angular/router';
-import {MetricValueType} from '@common/experiments-compare/reducers/experiments-compare-charts.reducer';
-import {MatDialog} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {
   MetricForStatsDialogComponent
 } from '@common/project-info/conteiners/metric-for-stats-dialog/metric-for-stats-dialog.component';
+import {MetricValueType} from '@common/experiments-compare/experiments-compare.constants';
 
 @Component({
   selector: 'sm-project-stats',
   templateUrl: './project-stats.component.html',
-  styleUrls: ['./project-stats.component.scss']
+  styleUrls: ['./project-stats.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProjectStatsComponent implements OnInit, OnDestroy {
   private _project: Project;
@@ -32,14 +37,15 @@ export class ProjectStatsComponent implements OnInit, OnDestroy {
   public colors: string[];
   public metricVariantSelection = [];
   public graphData: ProjectStatsGraphData[];
-  public loading = false;
+  public loading = true;
   public gotOptions;
   public variantDisplay: string = 'Select Metric & Variant';
   private sub = new Subscription();
   states = [
     {label: 'Completed or Stopped', type: TaskStatusEnum.Completed},
     {label: 'Published', type: TaskStatusEnum.Published},
-    {label: 'Failed', type: TaskStatusEnum.Failed}
+    {label: 'Failed', type: TaskStatusEnum.Failed},
+    {label: 'Running', type: TaskStatusEnum.InProgress}
   ];
 
   @Input() set project(proj: Project) {
@@ -52,7 +58,7 @@ export class ProjectStatsComponent implements OnInit, OnDestroy {
     return this._project;
   }
 
-  constructor(private store: Store, private router: Router, private dialog: MatDialog) {
+  constructor(private store: Store, private router: Router, private dialog: MatDialog, private cdr: ChangeDetectorRef) {
   }
 
   ngOnInit(): void {
@@ -64,6 +70,7 @@ export class ProjectStatsComponent implements OnInit, OnDestroy {
         this.loading = true;
         this.store.dispatch(fetchGraphData());
         this.metricVariantSelection = data ? [createMetricColumn(data, this.project.id)] : [];
+        this.cdr.detectChanges();
       })
     );
 
@@ -78,6 +85,7 @@ export class ProjectStatsComponent implements OnInit, OnDestroy {
           nameExt: `Created By ${val.user}, Finished ${new Date(val.x).toLocaleString()}`,
           name: val.id
         }));
+        this.cdr.detectChanges();
       })
     );
   }
@@ -114,9 +122,10 @@ export class ProjectStatsComponent implements OnInit, OnDestroy {
         tap(() => this.gotOptions !== undefined && (this.gotOptions = true)),
         take(1)
       )
-      .subscribe(variants => this.dialog.open(MetricForStatsDialogComponent,
-        {data: {variants, metricVariantSelection: this.metricVariantSelection}})
-        .afterClosed().subscribe(selection => this.selectedMetricToShow(selection))
+      .subscribe(variants => this.dialog.open(
+          MetricForStatsDialogComponent,
+          {data: {variants, metricVariantSelection: this.metricVariantSelection}}
+        ).afterClosed().subscribe(selection => this.selectedMetricToShow(selection))
       );
   }
 
@@ -129,6 +138,8 @@ export class ProjectStatsComponent implements OnInit, OnDestroy {
         return '#ff001f';
       case TaskStatusEnum.Published:
         return '#d3ff00';
+      case TaskStatusEnum.InProgress:
+        return '#14aa8c';
       default:
         return '#50e3c2';
     }

@@ -1,0 +1,77 @@
+@import "mixins/common";
+@import "variables";
+
+hr {
+  margin: 0 !important;
+}
+
+.card-name {
+  height: 32px;
+  margin-bottom: 8px;
+}
+
+.project-tag {
+  @include card-header-tag();
+  color: $neon-yellow;
+}
+
+.footer-title {
+  @include counter-label();
+  text-align: center;
+  font-size: 10px;
+  padding: 12px
+}
+
+.sub-projects-list {
+  height: 100%;
+  margin: 6px 0;
+
+  a {
+    color: $blue-200;
+    padding: 0 24px;
+    line-height: 30px;
+    text-decoration: none;
+    display: flex;
+
+    ::ng-deep .sub-path {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 120px;
+      &.double-width{
+        max-width:260px;
+      }
+    }
+
+    &:hover {
+      background-color: $blue-400;
+    }
+  }
+}
+
+.title {
+  @include card-title();
+}
+
+::ng-deep .project-card {
+  cursor: pointer;
+  height: 228px;
+  overflow: hidden;
+}
+
+::ng-deep .project-card {
+
+  .project-name {
+    max-width: 280px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  :host {
+    ::ng-deep .mat-menu-content {
+      background-color: $blue-600;
+    }
+  }
+}
+

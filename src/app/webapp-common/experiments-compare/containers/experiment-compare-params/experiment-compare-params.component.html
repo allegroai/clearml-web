@@ -1,6 +1,6 @@
 <sm-compare-card-list
   [experiments]="experiments"
-  [tasksLimitExceeded] = "(taskIds$ | async)?.length> experiments?.length"
+  [tasksLimitExceeded] = "experiments?.length && (taskIds$ | async)?.length > experiments?.length"
   [baseExperiment]="baseExperiment"
   [ngClass]="calculatingTree ? 'pending' : ''"
   (experimentListChanged)="syncUrl($event)"
@@ -13,15 +13,20 @@
     </sm-experiment-compare-general-data>
   </div>
   <div class="tree-card-body" *compareCardBody="let experiment; let i = index">
-    <div #section class="section h-100" *ngIf="experimentsDataControl[experiment.id]">
+    <div class="section h-100" *ngIf="experimentsDataControl[experiment.id]">
       <!--      TODO: move is-not-origin class outside nodes tree-->
       <ng-template let-dataSource="dataSource"
                    let-treeControl="treeControl"
                    [ngTemplateOutletContext]="{dataSource: experimentsDataControl[experiment.id][0],
                                                treeControl: experimentsDataControl[experiment.id][1]}"
                    [ngTemplateOutlet]="selfie" #selfie>
-        <cdk-virtual-scroll-viewport #virtualScrollRef class="virtual-scroll-container" [class.is-not-origin]="i > 0"
-                                     itemSize="28" minBufferPx="280" maxBufferPx="560">
+        <cdk-virtual-scroll-viewport
+          #virtualScrollRef
+          class="virtual-scroll-container"
+          [class.is-not-origin]="i > 0"
+          [class.with-ellipsis]="showEllipsis"
+          itemSize="28" minBufferPx="280" maxBufferPx="560"
+        >
           <ng-container *cdkVirtualFor="let node of dataSource; let i = index">
             <div class="node" [class.parent]="node.hasChildren">
               <div *ngIf="node.hasChildren" class="section" [ngClass]="'depth-' + node.level"
@@ -61,7 +66,7 @@
                                          (click)="toggleEllipsis(); $event.stopPropagation()"></i>
                     </pre>
                     <pre class="node-val"
-                         [style.width]="showEllipsis ? (section.clientWidth - 320) + 'px' : null"
+                         [style.width.px]="showEllipsis ? nativeWidth - 180 - node.level * 20 : null"
                          [class.no-ellipsis]="node.data.value.length < 15"
                          [class.ellipsis]="showEllipsis">{{node.data.value}}<i
                       class="al-icon sm al-ico-line-expand extend-toggle" [class.fa-rotate-180]="!showEllipsis"

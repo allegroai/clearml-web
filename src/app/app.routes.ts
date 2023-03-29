@@ -63,7 +63,8 @@ export const routes: Routes = [
       {
         path: ':projectId',
         children: [
-          {path: 'pipelines', loadChildren: () => import('./features/projects/projects.module').then(m => m.ProjectsModule)},
+          {path: 'pipelines',  loadChildren: () => import('@common/pipelines/pipelines.module').then(m => m.PipelinesModule)},
+          {path: 'projects',  loadChildren: () => import('@common/nested-project-view/nested-project-view.module').then(m => m.NestedProjectViewModule)},
           {
             path: 'experiments', loadChildren: () => import('@common/pipelines-controller/pipelines-controller.module').then(m => m.PipelinesControllerModule)
           },

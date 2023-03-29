@@ -1,6 +1,6 @@
 import {Directive, ElementRef, HostListener, Input} from '@angular/core';
-import {ColorHashService} from '../../../services/color-hash/color-hash.service';
-import {hexToRgb, normalizeColorToString} from '../../../services/color-hash/color-hash.utils';
+import {ColorHashService} from '@common/shared/services/color-hash/color-hash.service';
+import {hexToRgb, normalizeColorToString} from '@common/shared/services/color-hash/color-hash.utils';
 import {Store} from '@ngrx/store';
 import {showColorPicker} from './choose-color.actions';
 
@@ -74,13 +74,13 @@ export class ChooseColorDirective {
 
 }
 
-export const attachColorChooser = (text: string, buttonElement: Element, colorHash: ColorHashService, store: Store<any>, withAlpha?: boolean) => {
+export const attachColorChooser = (text: string, buttonElement: Element, colorHash: ColorHashService, store: Store<any>, withAlpha?: boolean, orgColor?: number[]) => {
   const directive = new ChooseColorDirective(new ElementRef(buttonElement), store);
   directive.colorButtonRef = new ElementRef(buttonElement);
   directive.stringToColor  = text;
   directive.colorPickerWithAlpha = withAlpha;
   const listener = (e: MouseEvent) => {
-    directive.smChooseColor = colorHash.initColor(text);
+    directive.smChooseColor = colorHash.initColor(text, orgColor);
     directive.openColorPicker(e);
   };
   buttonElement.removeEventListener('click', listener);

@@ -13,7 +13,7 @@
                            [hideBackground]="true"
         ></sm-copy-clipboard>
       </sm-labeled-row>
-      <sm-labeled-row label="FILE SIZE">{{artifact?.content_size | filesize : fileSizeConfigStorage  || ''}}</sm-labeled-row>
+      <sm-labeled-row label="FILE SIZE">{{(artifact?.content_size | filesize : fileSizeConfigStorage)  || ''}}</sm-labeled-row>
       <sm-labeled-row label="HASH">{{artifact?.hash}}</sm-labeled-row>
       <sm-labeled-row *ngFor="let data of artifact?.display_data" [label]="data[0]| uppercase">{{data[1]}}</sm-labeled-row>
     </div>

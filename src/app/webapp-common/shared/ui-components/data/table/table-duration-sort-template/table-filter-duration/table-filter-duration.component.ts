@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import {DurationParameters, TableDurationSortBase} from '../table-duration-sort.base';
-import {isNil} from 'lodash/fp';
+import {isNil} from 'lodash-es';
 
 @Component({
   selector: 'sm-table-filter-duration',

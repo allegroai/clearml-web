@@ -1,9 +1,9 @@
 import {Component, Input} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {AlertDialogComponent} from '../../shared/ui-components/overlay/alert-dialog/alert-dialog.component';
-import { MatDialog } from '@angular/material/dialog';
+import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
 import {take} from 'rxjs/operators';
-import {logout} from '../../../webapp-common/core/actions/users.actions';
+import {logout} from '@common/core/actions/users.actions';
 
 @Component({
   selector   : 'sm-logged-out-alert',
@@ -13,7 +13,9 @@ import {logout} from '../../../webapp-common/core/actions/users.actions';
 export class LoggedOutAlertComponent {
 
   @Input() set login(bool) {
-    if (!bool) return;
+    if (!bool) {
+      return;
+    }
     const alertDialogRef = this.dialog.open(AlertDialogComponent, {
       data: {
         alertMessage   : `Please login again`,

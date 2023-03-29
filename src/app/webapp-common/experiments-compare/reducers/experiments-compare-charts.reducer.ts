@@ -2,15 +2,9 @@ import {createReducer, on} from '@ngrx/store';
 import {Task} from '~/business-logic/model/tasks/task';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import * as actions from '../actions/experiments-compare-charts.actions';
-import {ExperimentSettings} from '../../experiments/reducers/common-experiment-output.reducer';
+import {ExperimentSettings} from '../../experiments/reducers/experiment-output.reducer';
 import {IMultiplot} from '@common/tasks/tasks.utils';
-
-export type MetricValueType = 'min_value' | 'max_value' | 'value';
-
-export interface SelectedMetric {
-  name: string;
-  path: string;
-}
+import {SelectedMetric} from '@common/experiments-compare/experiments-compare.constants';
 
 export interface GroupedHyperParams {
   [section: string]: HyperParams;

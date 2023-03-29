@@ -1,5 +1,5 @@
 import {Component, Inject} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 
@@ -10,7 +10,7 @@ import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 })
 export class MetricForStatsDialogComponent {
   public variants: MetricVariantResult[];
-  public metricVariantSelection : ISmCol[];
+  public metricVariantSelection: ISmCol[];
 
   constructor(
     private matDialogRef: MatDialogRef<MetricForStatsDialogComponent>,

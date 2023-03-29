@@ -13,7 +13,7 @@ import {AdminService} from '~/shared/services/admin.service';
 import {selectDontShowAgainForBucketEndpoint, selectS3BucketCredentialsBucketCredentials, selectSignedUrl} from '@common/core/reducers/common-auth-reducer';
 import {EMPTY, of} from 'rxjs';
 import {S3AccessResolverComponent} from '@common/layout/s3-access-resolver/s3-access-resolver.component';
-import {MatDialog} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {setCredentialLabel} from '../actions/common-auth.actions';
 import {SignResponse} from '@common/settings/admin/base-admin-utils';
 
@@ -141,7 +141,7 @@ export class CommonAuthEffects {
       if (action?.credentials?.Bucket) {
         this.openPopup[action.credentials.Bucket] = true;
       }
-      return this.matDialog.open(S3AccessResolverComponent, {data: action}).afterClosed().pipe(
+      return this.matDialog.open(S3AccessResolverComponent, {data: action, maxWidth: 700}).afterClosed().pipe(
         withLatestFrom(
           this.store.pipe(select(selectS3BucketCredentialsBucketCredentials)),
         ),

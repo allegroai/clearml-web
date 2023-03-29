@@ -6,7 +6,6 @@ import {combineLatest, Observable, Subscription} from 'rxjs';
 import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {distinctUntilChanged, filter, map} from 'rxjs/operators';
-import {get} from 'lodash/fp';
 import {Artifact} from '~/business-logic/model/tasks/artifact';
 
 @Component({
@@ -27,7 +26,7 @@ export class ExperimentInfoArtifactItemComponent implements OnInit, OnDestroy {
     this.modelInfo$ = this.store.select(selectExperimentModelInfoData);
     this.artifactKey$ = this.store.select(selectRouterParams)
       .pipe(
-        map(params => ({key: decodeURIComponent(params?.artifactId), mode: get('mode', params)})),
+        map(params => ({key: decodeURIComponent(params?.artifactId), mode: params?.mode})),
         filter(artifactId => !!artifactId),
         distinctUntilChanged()
       );

@@ -12,7 +12,7 @@ import {
   selectViewMode
 } from './select-model.reducer';
 import {combineLatest, Observable} from 'rxjs';
-import {MatDialogRef} from '@angular/material/dialog';
+import {MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
 import {ConfirmDialogComponent} from '../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {ISmCol, TableSortOrderEnum} from '../shared/ui-components/data/table/table.consts';
 import {SelectedModel} from '../models/shared/models.model';

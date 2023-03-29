@@ -1,6 +1,7 @@
 import {createReducer, on} from '@ngrx/store';
 import {setHyperParamsList, setMetricsList, setShowIdenticalHyperParams, setTasks, setvalueType} from '../actions/experiments-compare-scalars-graph.actions';
-import {GroupedHyperParams, MetricOption, MetricValueType} from './experiments-compare-charts.reducer';
+import {GroupedHyperParams, MetricOption} from './experiments-compare-charts.reducer';
+import {MetricValueType} from '@common/experiments-compare/experiments-compare.constants';
 
 export interface ScalarsGraphState {
   showIdenticalHyperParams: boolean;

@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import {ISmCol} from '../table.consts';
 import {addOrRemoveFromArray} from '../../../../utils/shared-utils';
-import {MatMenuTrigger} from '@angular/material/menu';
+import {MatLegacyMenuTrigger as MatMenuTrigger} from '@angular/material/legacy-menu';
 import {trackByKey} from '@common/shared/utils/forms-track-by';
 
 @Component({
@@ -14,7 +14,7 @@ export class TableCardFilterTemplateComponent {
 
   private _value: Array<string>;
   public searchTerms = {};
-  public optionsFiltered: {};
+  public optionsFiltered: {key: string; value: any}[];
   private _columns: ISmCol[];
   private _options: { [p: string]: { label: string; value: string; tooltip?: string }[] };
   public isFiltering: boolean;
@@ -117,12 +117,9 @@ export class TableCardFilterTemplateComponent {
 
   private updateFilterFields() {
     if (this.options && this.columns) {
-      this.optionsFiltered = Object.entries(this.options).reduce((acc, [key, value]) => {
-        if (this.columns?.find(col => col.id === key)?.showInCardFilters) {
-          acc[key] = value;
-        }
-        return acc;
-      }, {});
+      this.optionsFiltered = this.columns
+        .filter(column => column.showInCardFilters)
+        .map(column => ({key: column.id, value: this.options[column.id]}));
     }
   }
 }

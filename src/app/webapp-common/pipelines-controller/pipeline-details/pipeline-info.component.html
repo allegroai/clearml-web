@@ -51,7 +51,7 @@
             class="param"
           >
             <div class="key" [smTooltip]="artifact.key" smShowTooltipIfEllipsis>{{artifact.key}}</div>
-            <div class="value">{{artifact?.content_size | filesize : fileSizeConfigStorage || ''}}</div>
+            <div class="value">{{(artifact?.content_size | filesize : fileSizeConfigStorage) || ''}}</div>
           </div>
         </ng-container>
       </div>

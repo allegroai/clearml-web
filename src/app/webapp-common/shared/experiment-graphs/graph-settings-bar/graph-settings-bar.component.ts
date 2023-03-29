@@ -1,7 +1,7 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
-import {MatSelectChange} from '@angular/material/select';
-import {GroupByCharts} from '@common/experiments/reducers/common-experiment-output.reducer';
+import {MatLegacySelectChange as MatSelectChange} from '@angular/material/legacy-select';
+import {GroupByCharts} from '@common/experiments/reducers/experiment-output.reducer';
 
 @Component({
   selector: 'sm-graph-settings-bar',

@@ -17,6 +17,8 @@ export class ReportsHeaderComponent {
   @Input() activeSearch: boolean;
   @Input() sortOrder: TableSortOrderEnum;
   @Input() allTags: string[] = [];
+  @Input() projectId;
+
 
   @Input() set sortByField(sortByField: string) {
     this.sortByTitle = sortByField.includes('name') ? 'NAME' : 'RECENT';
@@ -26,6 +28,8 @@ export class ReportsHeaderComponent {
   @Output() orderByChanged = new EventEmitter<string>();
   @Output() createReportClicked = new EventEmitter<string>();
   @Output() archiveToggled = new EventEmitter<boolean>();
+  @Output() toggleNestedView = new EventEmitter<boolean>();
+
 
   filterReports(queryString) {
     this.reportsFilterChanged.emit(queryString);

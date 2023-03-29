@@ -27,7 +27,7 @@
     </div>
 
   </div>
-  <div class="graph-controls" *ngIf="isFullDetailsMode">
+  <div class="graph-controls" *ngIf="isFullDetailsMode || smoothWeight">
     <div class="d-flex align-items-center"  *ngIf="!isCompare">
       <span class="label-text axis-text-margin-left">Horizontal Axis</span>
       <mat-form-field appearance="outline" class="axis-type-field">

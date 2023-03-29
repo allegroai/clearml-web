@@ -1,5 +1,4 @@
-import { Pipe, PipeTransform } from '@angular/core';
-import {get} from 'lodash/fp';
+import {Pipe, PipeTransform} from '@angular/core';
 
 @Pipe({
   name: 'getVariantWithoutRound'
@@ -7,7 +6,7 @@ import {get} from 'lodash/fp';
 export class GetVariantWithoutRoundPipe implements PipeTransform {
 
   transform(col, metrics): number {
-    return get(`${col.metric_hash}.${col.variant_hash}.${col.valueType}`, metrics);
+    return metrics?.[col.metric_hash]?.[col.variant_hash]?.[col.valueType];
   }
 
 }

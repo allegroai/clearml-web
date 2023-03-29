@@ -21,8 +21,7 @@
       <br/>
     </ng-template>
 
-
-    <div class="text-center">
+    <div class="d-flex justify-content-center">
       <mat-checkbox
         #checkboxInput="ngModel"
         [(ngModel)]="deleteArtifacts"
@@ -31,7 +30,6 @@
       >Remove all related artifacts and debug samples from ClearML file server
       </mat-checkbox>
     </div>
-    <br/><br/>
     <div class="buttons">
       <button cdkFocusInitial (click)="delete()"
              data-id="DeleteButton" class="btn btn-neon yes-button">{{resetMode ? 'RESET' : 'DELETE'}}
@@ -94,7 +92,7 @@
     <br><br>
     <div class="buttons">
       <button (click)="closeDialog(true)"
-              class="btn btn-neon" [disabled]="progressPercent < 100">Close
+              class="btn btn-neon" [disabled]="progressPercent < 100">CLOSE
       </button>
     </div>
   </ng-template>

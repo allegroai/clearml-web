@@ -23,7 +23,7 @@ import {
   updateExperimentInfoData,
   getExperimentUncommittedChanges, setExperimentUncommittedChanges, setExperimentArtifacts
 } from '../actions/common-experiments-info.actions';
-import {set} from 'lodash/fp';
+import {set} from 'lodash-es';
 import {setControllerForStartPipelineDialog} from '../actions/common-experiments-menu.actions';
 import {createReducer, on, ReducerTypes} from '@ngrx/store';
 
@@ -80,7 +80,7 @@ export const commonExperimentInfoReducers = [
   on(setExperimentSaving, (state, action) => ({...state, saving: action.saving})),
   on( setSelectedPipelineStep, (state, action) => ({...state, selectedPipelineStep: action.step})),
   on(setControllerForStartPipelineDialog, (state, action) => ({...state, pipelineRunDialogTask: action.task})),
-  on(updateExperimentAtPath, (state, action) => ({...state, infoData: set(action.path, action.value, state.infoData) as any})),
+  on(updateExperimentAtPath, (state, action) => ({...state, infoData: set(state.infoData, action.value, action.path) as any})),
   on(getExperimentArtifacts, state => ({...state, saving: false})),
   on(setExperimentErrors, (state, action) => ({...state, errors: {...state.errors, ...action}})),
   on(resetExperimentInfo, state => ({...state, infoData: null})),

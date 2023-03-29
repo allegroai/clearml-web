@@ -8,8 +8,7 @@ import {SortMeta} from 'primeng/api';
 import {CountAvailableAndIsDisableSelectedFiltered} from '@common/shared/entity-page/items.utils';
 import {TasksEnqueueManyResponseSucceeded} from '~/business-logic/model/tasks/tasksEnqueueManyResponseSucceeded';
 import {EXPERIMENTS_INFO_PREFIX} from '@common/experiments/actions/common-experiments-menu.actions';
-
-export const EXPERIMENTS_PREFIX = 'EXPERIMENTS_';
+import {EXPERIMENTS_PREFIX} from '@common/experiments/experiment.consts';
 
 // COMMANDS:
 export const getExperiments = createAction(EXPERIMENTS_PREFIX + ' [get experiments]');

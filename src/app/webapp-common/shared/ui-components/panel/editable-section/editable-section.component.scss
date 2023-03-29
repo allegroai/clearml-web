@@ -77,7 +77,7 @@
 
   }
 
-  &:hover {
+  &:hover, &.force {
     .edit-wrapper {
       opacity: 1;
     }
@@ -99,5 +99,14 @@
   .edit-pen {
     background-color: $blue-480;
     color: white;
+  }
+}
+
+
+:host-context(.generic-container) {
+  .editable-container {
+    border: 1px solid $blue-100;
+    margin-top: 24px;
+    padding: 12px 24px 24px 24px;
   }
 }

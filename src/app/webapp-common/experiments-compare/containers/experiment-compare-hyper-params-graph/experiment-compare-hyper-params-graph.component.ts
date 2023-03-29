@@ -4,7 +4,7 @@ import {select, Store} from '@ngrx/store';
 import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {distinctUntilChanged, filter, map} from 'rxjs/operators';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
-import {get, has} from 'lodash/fp';
+import {has} from 'lodash-es';
 import {setExperimentSettings, setSelectedExperiments} from '../../actions/experiments-compare-charts.actions';
 import {
   selectMetricValueType,
@@ -23,14 +23,14 @@ import {
 import {
   GroupedHyperParams,
   MetricOption,
-  MetricValueType,
-  SelectedMetric,
   VariantOption
 } from '../../reducers/experiments-compare-charts.reducer';
-import {MatRadioChange} from '@angular/material/radio';
+import {MatLegacyRadioChange as MatRadioChange} from '@angular/material/legacy-radio';
 import {selectPlotlyReady} from '@common/core/reducers/view.reducer';
 import {ExtFrame} from '@common/shared/single-graph/plotly-graph-base';
 import {RefreshService} from '@common/core/services/refresh.service';
+import {MetricValueType, SelectedMetric} from '@common/experiments-compare/experiments-compare.constants';
+import {ReportCodeEmbedService} from '~/shared/services/report-code-embed.service';
 
 
 export const _filter = (opt: VariantOption[], value: string): VariantOption[] => {
@@ -86,7 +86,7 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
     }
   }
 
-  constructor(private store: Store<ExperimentInfoState>, private refresh: RefreshService) {
+  constructor(private store: Store<ExperimentInfoState>, private refresh: RefreshService, private reportEmbed: ReportCodeEmbedService) {
     this.metrics$ = this.store.pipe(select(selectScalarsGraphMetrics));
     this.hyperParams$ = this.store.pipe(select(selectScalarsGraphHyperParams));
     this.selectedHyperParams$ = this.store.pipe(select(selectSelectedSettingsHyperParams));
@@ -132,12 +132,12 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
             }
             return acc;
           }, {});
-        this.selectedHyperParams = selectedParams.filter(selectedParam => has(selectedParam, this.hyperParams));
+        this.selectedHyperParams = selectedParams.filter(selectedParam => has( this.hyperParams, selectedParam));
       });
 
     this.routerParamsSubscription = this.store.pipe(
       select(selectRouterParams),
-      map(params => get('ids', params)),
+      map(params => params?.ids),
       distinctUntilChanged(),
       filter(ids => !!ids),
     )
@@ -234,5 +234,12 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
 
   valueTypeChange($event: MatRadioChange) {
     this.store.dispatch(setvalueType({valueType: $event.value}));
+  }
+
+  createEmbedCode(event: { tasks: string[]; valueType: MetricValueType; metrics?: string[]; variants?: string[]; domRect: DOMRect }) {
+    this.reportEmbed.createCode({
+      type: 'parcoords',
+      ...event
+    });
   }
 }

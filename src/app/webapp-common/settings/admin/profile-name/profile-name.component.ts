@@ -15,6 +15,7 @@ import {GetCurrentUserResponseUserObject} from '~/business-logic/model/users/get
 export class ProfileNameComponent implements OnInit {
 
   currentUser$ = this.store.select(selectCurrentUser);
+  active = false;
 
   constructor(private store: Store<any>) { }
 

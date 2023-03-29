@@ -4,8 +4,8 @@ import {ISelectedModelInput} from '../../shared/models.model';
 import {Store} from '@ngrx/store';
 import {ModelInfoState} from '../../reducers/model-info.reducer';
 import {selectIsModelSaving, selectSelectedModel} from '../../reducers';
-import {ActivateModelEdit, CancelModelEdit, EditModel, SetIsModelSaving} from '../../actions/models-info.actions';
-import {selectIsSharedAndNotOwner} from '../../../../features/experiments/reducers';
+import {activateModelEdit, cancelModelEdit, editModel, setSavingModel } from '../../actions/models-info.actions';
+import {selectIsSharedAndNotOwner} from '~/features/experiments/reducers';
 
 @Component({
   selector   : 'sm-model-info-network',
@@ -26,14 +26,14 @@ export class ModelInfoNetworkComponent implements OnInit {
   }
 
   saveFormData(changedModel) {
-    this.store.dispatch(new SetIsModelSaving(true));
-    this.store.dispatch(new EditModel(changedModel));
+    this.store.dispatch(setSavingModel (true));
+    this.store.dispatch(editModel({model: changedModel}));
   }
   cancelClicked() {
-    this.store.dispatch(new CancelModelEdit());
+    this.store.dispatch(cancelModelEdit());
   }
 
   activateEditClicked() {
-    this.store.dispatch(new ActivateModelEdit('network'));
+    this.store.dispatch(activateModelEdit('network'));
   }
 }

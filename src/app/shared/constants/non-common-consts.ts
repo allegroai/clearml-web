@@ -8,7 +8,8 @@ export enum EntityTypeEnum {
   pipeline = 'pipeline',
   controller = 'pipeline run',
   dataset = 'version',
-  simpleDataset = 'dataset'
+  simpleDataset = 'dataset',
+  report = 'report',
 }
 
 export enum CircleTypeEnum {
@@ -17,6 +18,7 @@ export enum CircleTypeEnum {
   pending = 'pending',
   failed = 'failed',
   empty = 'empty',
+  published = 'published',
   'model-labels' = 'model-labels'
 }
 

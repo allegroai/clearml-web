@@ -9,7 +9,7 @@ import {IDurationThan, DurationParameters, TableDurationSortBase} from '../table
 import {UntypedFormControl, UntypedFormGroup} from '@angular/forms';
 import {distinctUntilChanged, debounceTime, map} from 'rxjs/operators';
 import {merge, Subscription} from 'rxjs';
-import {isNil} from 'lodash/fp';
+import {isNil} from 'lodash-es';
 
 const getDurationValue = (data: IDurationThan) => isNil(data.value) || !data.checked ? '' : data.value;
 

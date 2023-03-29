@@ -52,3 +52,7 @@ export const compareAddDialogSetTableSort = createAction(
 );
 export const refetchExperimentRequested = createAction(REFETCH_EXPERIMENT_REQUESTED, props<{ autoRefresh: boolean }>());
 export const setNavigationPreferences = createAction(SET_NAVIGATION_PREFERENCES, props<{ navigationPreferences: Params }>());
+export const setAddTableViewArchived = createAction(
+  EXPERIMENTS_COMPARE_SELECT_EXPERIMENT_ + '[show archived in add table]',
+  props<{show: boolean}>()
+);

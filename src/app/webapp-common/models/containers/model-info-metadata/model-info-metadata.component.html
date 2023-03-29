@@ -6,7 +6,7 @@
                      (saveClicked)="saveFormData()"
                      (activateEditClicked)="activateEditChanged('metadata')">
   <sm-section-header label="Metadata"></sm-section-header>
-    <div [hidden]="!inEdit && (saving$ | async)===false">
+    <div class="content" [hidden]="!inEdit && (saving$ | async)===false">
       <ng-form #metadataForm="ngForm" smUniqueInListSyncValidator2 prefix2="metadataItemKey-"
       >
       <div *ngFor="let metadataItem of metadata ; let i = index; trackBy:trackByFn" class="d-flex align-items-center mr-3 mb-2">
@@ -50,7 +50,7 @@
       </ng-form>
     </div>
 
-  <div *ngIf="!inEdit && (saving$ | async)===false">
+  <div class="content" *ngIf="!inEdit && (saving$ | async)===false">
     <sm-simple-table-2 [cols]="cols" [rowsData]="metadata">
       <ng-template
         let-col

@@ -1,5 +1,5 @@
 import {Pipe, PipeTransform} from '@angular/core';
-import {last} from 'lodash/fp';
+import {last} from 'lodash-es';
 
 @Pipe({
   name: 'isAudio'

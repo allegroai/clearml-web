@@ -3,7 +3,8 @@
     <mat-label>Project name</mat-label>
     <mat-error *ngIf="name.touched && name.errors?.required">*Please add name.</mat-error>
     <mat-error *ngIf="name.touched && name.errors?.uniqueName">*Project name in this path already exists.</mat-error>
-    <mat-error *ngIf="name.touched && name.errors?.minlength">*Project name should contain more than 3 characters.</mat-error>
+    <mat-error *ngIf="name.touched && name.errors?.minlength">*Project name should contain more than 2 characters.</mat-error>
+    <mat-error *ngIf="name.touched && name.errors?.emptyName && !name.errors?.minlength">*Project name can't contain only spaces.</mat-error>
     <input name="projectName"
            [(ngModel)]="project.name"
            #name="ngModel"
@@ -12,7 +13,7 @@
            smUniqueNameValidator
            [forbiddenPrefix]="(location.value === projectsRoot) ? '' : location.value + '/'"
            [existingNames]="projectsNames"
-           required minlength="3">
+           required minlength="2">
   </mat-form-field>
 
   <mat-form-field appearance="outline" hideRequiredMarker
@@ -31,7 +32,7 @@
            placeholder="Search for project path"
            required
            minlength="3"
-           (blur)="detectChanges()"
+           (blur)="name.control.updateValueAndValidity(); detectChanges()"
            (click)="location.value && clearLocation(); location.reset(); locationRef.blur(); locationRef.focus()">
     <span matSuffix *ngIf="location.value && (!isAutoCompleteOpen) && !(project.parent | stringIncludedInArray:projectsNames)" class="creat-new-suffix">(Create New)</span>
     <i matSuffix [class]="'fa mr2 ' + (location.value? 'fa-times pointer':'fa-search')"

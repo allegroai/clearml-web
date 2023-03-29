@@ -1,5 +1,5 @@
 import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
-import {MatMenuTrigger} from '@angular/material/menu';
+import {MatLegacyMenuTrigger as MatMenuTrigger} from '@angular/material/legacy-menu';
 
 @Component({
   selector: 'sm-id-badge',

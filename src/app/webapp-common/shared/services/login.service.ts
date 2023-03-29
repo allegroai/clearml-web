@@ -6,10 +6,10 @@ import {UsersGetAllResponse} from '~/business-logic/model/users/usersGetAllRespo
 import {AuthCreateUserResponse} from '~/business-logic/model/auth/authCreateUserResponse';
 import {v1 as uuidV1} from 'uuid';
 import {EMPTY, Observable, of, throwError, timer} from 'rxjs';
-import {MatDialog} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {ConfirmDialogComponent} from '../ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {LoginModeResponse} from '~/business-logic/model/LoginModeResponse';
-import {clone} from 'lodash/fp';
+import {clone} from 'lodash-es';
 import {ApiLoginService} from '~/business-logic/api-services/login.service';
 import {ConfigurationService} from './configuration.service';
 import {Environment} from '../../../../environments/base';
@@ -42,10 +42,6 @@ export class BaseLoginService {
   private environment: Environment;
   get guestUser() {
     return clone(this._guestUser);
-  }
-  private _sso: {name: string; url: string; displayName?: string}[];
-  get sso() {
-    return this._sso;
   }
   protected _authenticated: boolean;
   get authenticated(): boolean {
@@ -114,7 +110,6 @@ export class BaseLoginService {
             this._authenticated = res.authenticated;
             this._loginMode = res.basic.enabled ? loginModes.password : res.sso_providers?.length > 0 ? loginModes.ssoOnly : loginModes.simple;
             this._guestUser = res.basic.guest;
-            this._sso = res.sso_providers;
           }),
           map(() => this._loginMode)
         );
@@ -131,24 +126,8 @@ export class BaseLoginService {
     }
     return this.loginApi.loginSupportedModes({
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      callback_url_prefix: url.origin + '/callback_',
       state: (state === '/' || state.startsWith('callback_') || state.startsWith('/callback_')) ? undefined : state
-    }).pipe(map((res: LoginModeResponse) => {
-      const auth0 = res.sso_providers.find(provider => provider.name == 'auth0');
-      if (auth0 && this.signupMode) {
-        const auth0Url = new URL(auth0.url);
-        auth0Url.searchParams.set('screen_hint', 'signup');
-        auth0.url = auth0Url.toString();
-      }
-      return {
-        /* eslint-disable @typescript-eslint/naming-convention */
-        ...res,
-        ...(res.sso_providers ?
-          {sso_providers: res.sso_providers.map(provider => ({...provider, displayName: provider.display_name}))} :
-          res.sso && {sso_providers: Object.keys(res.sso).map((key: string) => ({name: key, url: res.sso[key]}))})
-        /* eslint-enable @typescript-eslint/naming-convention */
-      };
-    }));
+    });
   }
 
   getUsers() {
@@ -206,7 +185,7 @@ export class BaseLoginService {
 
     // Mocking application header
     const imgElement = new Image();
-    imgElement.setAttribute('src', this.environment.branding.logo);
+    imgElement.setAttribute('src', '/assets/logo-white.svg');
     imgElement.setAttribute('style', 'width: 100%; height: 64px; background-color: #141822; padding: 15px;');
     document.body.appendChild(imgElement);
 
@@ -238,7 +217,7 @@ After the issue is resolved and Trains Server is up and running, reload this pag
   private openServerError() {
     // Mocking application header
     const imgElement = new Image();
-    imgElement.setAttribute('src', this.environment.branding.logo);
+    imgElement.setAttribute('src', '/assets/logo-white.svg');
     imgElement.setAttribute('style', 'width: 100%; height: 64px; background-color: #141822; padding: 15px;');
     document.body.appendChild(imgElement);
 
@@ -312,5 +291,9 @@ After the issue is resolved and Trains Server is up and running, reload this pag
       obs.subscribe(() => resolve(null));
       return obs;
     }
+  }
+
+  getInviteInfo(inviteId: string): Observable<any> {
+    return EMPTY;
   }
 }

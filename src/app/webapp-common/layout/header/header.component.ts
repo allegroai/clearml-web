@@ -1,10 +1,10 @@
 import {ChangeDetectionStrategy, Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {selectActiveWorkspace, selectCurrentUser, selectShowOnlyUserWork} from '../../core/reducers/users-reducer';
+import {selectActiveWorkspace, selectCurrentUser} from '../../core/reducers/users-reducer';
 import {Observable, Subscription} from 'rxjs';
 import {logout} from '../../core/actions/users.actions';
 import {addMessage, openAppsAwarenessDialog} from '../../core/actions/layout.actions';
-import {MatDialog} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {GetCurrentUserResponseUserObject} from '~/business-logic/model/users/getCurrentUserResponseUserObject';
 import {ConfigurationService} from '../../shared/services/configuration.service';
 import {GetCurrentUserResponseUserObjectCompany} from '~/business-logic/model/users/getCurrentUserResponseUserObjectCompany';

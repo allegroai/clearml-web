@@ -1,6 +1,6 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {NgIf} from '@angular/common';
-import {last} from 'lodash/fp';
+import {last} from 'lodash-es';
 import {ClipboardModule} from 'ngx-clipboard';
 import {Store} from '@ngrx/store';
 import {addMessage} from '@common/core/actions/layout.actions';

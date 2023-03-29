@@ -5,8 +5,7 @@ import {
   experimentsCompareChartsReducer,
   GroupedHyperParams,
   IExperimentCompareChartsState,
-  MetricOption,
-  MetricValueType
+  MetricOption
 } from './experiments-compare-charts.reducer';
 import {
   experimentsCompareMetricsValuesReducer,
@@ -20,9 +19,10 @@ import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {scalarsGraphReducer, ScalarsGraphState} from './experiments-compare-scalars-graph.reducer';
 import {ExperimentParams} from '../shared/experiments-compare-details.model';
 import {ExperimentCompareParamsState, experimentsCompareParamsReducer} from './experiments-compare-params.reducer';
-import {groupByCharts, GroupByCharts} from '../../experiments/reducers/common-experiment-output.reducer';
+import {groupByCharts, GroupByCharts} from '../../experiments/reducers/experiment-output.reducer';
 import {selectSelectedProjectId} from '../../core/reducers/projects.reducer';
 import {selectRouterConfig} from '../../core/reducers/router-reducer';
+import {MetricValueType} from '@common/experiments-compare/experiments-compare.constants';
 
 export const experimentsCompareReducers: ActionReducerMap<any, any> = {
   details: experimentsCompareDetailsReducer,
@@ -51,6 +51,7 @@ export const selectExperimentIdsParams = createSelector(selectExperimentsParams,
 // select experiments for compare and header
 export const selectCompareHeader = createSelector(experimentsCompare, state => (state?.compareHeader ?? {}) as CompareHeaderState);
 export const selectIsCompare = createSelector(selectRouterConfig, (config): boolean => config?.includes('compare-experiments'));
+export const selectIsModels = createSelector(selectRouterConfig, (config): boolean => config?.includes('models'));
 export const selectIsPipelines = createSelector(selectRouterConfig, (config): boolean => config?.[0] === 'pipelines');
 export const selectIsDatasets = createSelector(selectRouterConfig, (config): boolean => config?.[0] === 'datasets');
 export const selectCustomProject = createSelector(selectRouterConfig, (config): boolean => ['pipelines', 'datasets'].includes(config?.[0]));
@@ -66,6 +67,7 @@ export const selectHideIdenticalFields = createSelector(selectCompareHeader, sta
 export const selectShowScalarsOptions = createSelector(selectCompareHeader, state => state?.showScalarOptions);
 export const selectExperimentsUpdateTime = createSelector(selectCompareHeader, state => state ? state.experimentsUpdateTime : {});
 export const selectNavigationPreferences = createSelector(selectCompareHeader, state => state ? state.navigationPreferences : {});
+export const selectViewArchivedInAddTable = createSelector(selectCompareHeader, state => state?.viewArchived);
 
 // Metric Values
 export const compareMetricsValues = createSelector(experimentsCompare, (state): IExperimentCompareMetricsValuesState => state ? state.metricsValues : {});

@@ -6,7 +6,7 @@ import {ModelRouterModule} from './models-routing.module';
 import {ModelInfoComponent} from './containers/model-info/model-info.component';
 import {ModelsComponent} from './models.component';
 import {EffectsModule} from '@ngrx/effects';
-import {StoreConfig, StoreModule} from '@ngrx/store';
+import {ActionReducer, StoreConfig, StoreModule} from '@ngrx/store';
 import {ModelsState, reducers} from './reducers';
 import {ModelsViewEffects} from './effects/models-view.effects';
 import {ModelInfoHeaderComponent} from './dumbs/model-info-header/model-info-header.component';
@@ -24,13 +24,23 @@ import {AngularSplitModule} from 'angular-split';
 import {CommonLayoutModule} from '../layout/layout.module';
 import {FeatureModelsModule} from '~/features/models/feature-models.module';
 import {SmFormBuilderService} from '../core/services/sm-form-builder.service';
-import {MODELS_PREFIX_VIEW, MODELS_STORE_KEY} from './models.consts';
+import {MODELS_PREFIX_INFO, MODELS_PREFIX_MENU, MODELS_PREFIX_VIEW, MODELS_STORE_KEY} from './models.consts';
 import {ModelCustomColsMenuComponent} from './dumbs/model-custom-cols-menu/model-custom-cols-menu.component';
 import {ModelHeaderComponent} from '~/webapp-common/models/dumbs/model-header/model-header.component';
 import {SharedModule} from '~/shared/shared.module';
 import {CommonDeleteDialogModule} from '../shared/entity-page/entity-delete/common-delete-dialog.module';
 import {ModelInfoMetadataComponent} from './containers/model-info-metadata/model-info-metadata.component';
-import {merge, pick} from 'lodash/fp';
+import {merge, pick} from 'lodash-es';
+import { ModelInfoExperimentsComponent } from './containers/model-info-experiments/model-info-experiments.component';
+import {
+  ModelExperimentsTableComponent
+} from '@common/models/containers/model-experiments-table/model-experiments-table.component';
+import { ModelInfoPlotsComponent } from './containers/model-info-plots/model-info-plots.component';
+import { ModelInfoScalarsComponent } from './containers/model-info-scalars/model-info-scalars.component';
+import {ExperimentGraphsModule} from '@common/shared/experiment-graphs/experiment-graphs.module';
+import {createUserPrefFeatureReducer} from '@common/core/meta-reducers/user-pref-reducer';
+import {UserPreferences} from '@common/user-preferences';
+import {SharedPipesModule} from '@common/shared/pipes/shared-pipes.module';
 
 export const modelSyncedKeys    = [
   'view.projectColumnsSortOrder',
@@ -46,24 +56,30 @@ export const MODELS_CONFIG_TOKEN =
 
 const localStorageKey = '_saved_models_state_';
 
-const getInitState = () =>
-  ({
-    metaReducers: [reducer => {
+const getInitState = (userPreferences: UserPreferences) => ({
+  metaReducers: [
+    reducer => {
       let onInit = true;
       return (state, action) => {
         const nextState = reducer(state, action);
         if (onInit) {
           onInit = false;
           const savedState = JSON.parse(localStorage.getItem(localStorageKey));
-          return merge(nextState, savedState);
+          return merge({}, nextState, savedState);
         }
         if (action.type.startsWith(MODELS_PREFIX_VIEW)) {
-          localStorage.setItem(localStorageKey, JSON.stringify(pick(['view.tableMode'], nextState)));
+          localStorage.setItem(localStorageKey, JSON.stringify(pick(nextState,['view.tableMode'])));
         }
         return nextState;
       };
-    }]
-  });
+    },
+    (reducer: ActionReducer<any>) =>
+      createUserPrefFeatureReducer(
+        MODELS_STORE_KEY, modelSyncedKeys, [MODELS_PREFIX_INFO, MODELS_PREFIX_MENU, MODELS_PREFIX_VIEW],
+        userPreferences, reducer
+      ),
+  ]
+});
 
 
 @NgModule({
@@ -75,6 +91,7 @@ const getInitState = () =>
     CommonLayoutModule,
     ModelRouterModule,
     ModelSharedModule,
+    ExperimentSharedModule,
     CommonDeleteDialogModule,
     SMSharedModule,
     FeatureModelsModule,
@@ -83,17 +100,24 @@ const getInitState = () =>
     EffectsModule.forFeature([ModelsViewEffects, ModelsInfoEffects, ModelsMenuEffects]),
     FeatureModelsModule,
     SharedModule,
+    SharedPipesModule,
+    ExperimentGraphsModule,
   ],
   providers      : [
     SmFormBuilderService, DatePipe,
-    {provide: MODELS_CONFIG_TOKEN, useFactory: getInitState},
+    {provide: MODELS_CONFIG_TOKEN, useFactory: getInitState, deps: [UserPreferences]},
   ],
   declarations   : [ModelInfoComponent, ModelsComponent, ModelInfoHeaderComponent,
     ModelViewNetworkComponent, ModelInfoNetworkComponent,
     ModelInfoLabelsComponent, ModelInfoLabelsViewComponent, ModelInfoGeneralComponent,
     ModelGeneralInfoComponent, ModelHeaderComponent,
     ModelCustomColsMenuComponent,
-    ModelInfoMetadataComponent]
+    ModelInfoMetadataComponent,
+    ModelInfoExperimentsComponent,
+    ModelExperimentsTableComponent,
+    ModelInfoPlotsComponent,
+    ModelInfoScalarsComponent
+  ]
 })
 export class ModelsModule {
 }

@@ -1,5 +1,5 @@
 import {Pipe, PipeTransform} from '@angular/core';
-import {getOr} from 'lodash/fp';
+import {get} from 'lodash-es';
 import {ISmCol} from '../ui-components/data/table/table.consts';
 
 @Pipe({
@@ -8,7 +8,7 @@ import {ISmCol} from '../ui-components/data/table/table.consts';
 export class ColGetterPipe implements PipeTransform {
 
   transform(entity: any, col: ISmCol): string {
-    return getOr('',col.getter, entity);
+    return get(entity, col.getter, '');
   }
 
 }

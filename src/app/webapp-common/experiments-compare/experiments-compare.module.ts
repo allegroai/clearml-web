@@ -37,7 +37,6 @@ import {CompareCardListComponent} from './dumbs/compare-card-list/compare-card-l
 import {CompareCardBodyDirective} from './dumbs/compare-card-body.directive';
 import {CompareCardExtraHeaderDirective} from './dumbs/compare-card-extra-header.directive';
 import {CompareCardHeaderDirective} from './dumbs/compare-card-header.directive';
-import {CommonExperimentSharedModule} from '../experiments/shared/common-experiment-shared.module';
 import {TableDiffModule} from '../shared/ui-components/data/table-diff/table-diff.module';
 import {CardModule} from '../shared/ui-components/panel/card2';
 import {DrawerModule} from '../shared/ui-components/panel/drawer';
@@ -49,7 +48,7 @@ import {
 } from './containers/experiment-compare-hyper-params-graph/experiment-compare-hyper-params-graph.component';
 import {ExperimentsCompareScalarsGraphEffects} from './effects/experiments-compare-scalars-graph.effects';
 import {ScrollingModule} from '@angular/cdk/scrolling';
-import {MatRadioModule} from '@angular/material/radio';
+import {MatLegacyRadioModule as MatRadioModule} from '@angular/material/legacy-radio';
 import {
   ExperimentCompareParamsComponent
 } from './containers/experiment-compare-params/experiment-compare-params.component';
@@ -57,7 +56,7 @@ import {ExperimentsCompareParamsEffects} from './effects/experiments-compare-par
 import {FormsModule} from '@angular/forms';
 import {UiComponentsModule} from '../shared/ui-components/ui-components.module';
 import {SMMaterialModule} from '../shared/material/material.module';
-import {ExperimentsCommonModule} from '../experiments/common-experiments.module';
+import {SharedPipesModule} from '@common/shared/pipes/shared-pipes.module';
 
 export const compareSyncedKeys = [
   'charts.settingsList',
@@ -79,41 +78,40 @@ export const compareSyncedKeys = [
     CompareCardBodyDirective,
     CompareCardExtraHeaderDirective,
     CompareCardHeaderDirective,
-    ParallelCoordinatesGraphComponent,
     ExperimentCompareHyperParamsGraphComponent
   ],
-  exports: [
-    GetKeyValueArrayPipePipe
-  ],
-  imports: [
-    CommonModule,
-    DragDropModule,
-    DebugImagesModule,
-    SMSharedModule,
-    SMMaterialModule,
-    UiComponentsModule,
-    TableDiffModule,
-    ScrollingModule,
-    CardModule,
-    DrawerModule,
-    ExperimentSharedModule,
-    ExperimentsCompareRoutingModule,
-    ExperimentGraphsModule,
-    ExperimentCompareSharedModule,
-    CommonExperimentSharedModule,
-    ExperimentsCommonModule,
-    StoreModule.forFeature('experimentsCompare', experimentsCompareReducers),
-    EffectsModule.forFeature([
-      ExperimentsCompareDetailsEffects,
-      ExperimentsCompareParamsEffects,
-      ExperimentsCompareChartsEffects,
-      ExperimentsCompareMetricsValuesEffects,
-      SelectCompareHeaderEffects,
-      ExperimentsCompareScalarsGraphEffects
-    ]),
-    MatRadioModule,
-    FormsModule,
-  ]
+    exports: [
+        GetKeyValueArrayPipePipe,
+    ],
+    imports: [
+        CommonModule,
+        DragDropModule,
+        DebugImagesModule,
+        SMSharedModule,
+        SMMaterialModule,
+        UiComponentsModule,
+        TableDiffModule,
+        ScrollingModule,
+        CardModule,
+        DrawerModule,
+        ExperimentSharedModule,
+        ExperimentsCompareRoutingModule,
+        ExperimentGraphsModule,
+        ExperimentCompareSharedModule,
+        StoreModule.forFeature('experimentsCompare', experimentsCompareReducers),
+        EffectsModule.forFeature([
+            ExperimentsCompareDetailsEffects,
+            ExperimentsCompareParamsEffects,
+            ExperimentsCompareChartsEffects,
+            ExperimentsCompareMetricsValuesEffects,
+            SelectCompareHeaderEffects,
+            ExperimentsCompareScalarsGraphEffects
+        ]),
+        MatRadioModule,
+        FormsModule,
+        ParallelCoordinatesGraphComponent,
+        SharedPipesModule,
+    ]
 })
 export class ExperimentsCompareModule {
 }

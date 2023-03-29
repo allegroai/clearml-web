@@ -1,6 +1,6 @@
 import {TableSelectionState} from '@common/constants';
 import {allItemsAreSelected} from '../../../utils/shared-utils';
-import {unionBy} from 'lodash/fp';
+import {unionBy} from 'lodash-es';
 import {AfterViewInit, Directive, EventEmitter, Input, OnDestroy, Output, QueryList, ViewChildren} from '@angular/core';
 import {ISmCol, TABLE_SORT_ORDER, TableSortOrderEnum} from './table.consts';
 import {filter, take} from 'rxjs/operators';
@@ -91,7 +91,7 @@ export abstract class BaseTableView implements AfterViewInit, OnDestroy {
   headerCheckboxClicked() {
     let selectionUnion;
     if (this.selectionState === 'None') {
-      selectionUnion = unionBy('id', this[this.entitiesKey], this[this.selectedEntitiesKey]);
+      selectionUnion = unionBy(this[this.entitiesKey], this[this.selectedEntitiesKey], 'id');
     } else {
       selectionUnion = [];
     }

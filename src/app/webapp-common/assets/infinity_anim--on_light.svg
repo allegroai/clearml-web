@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1048" height="1048" viewBox="0 0 1048 1048">
+
+
+  <path id="infinity-2" d="m51.4,727.6c-57.61-162.5,82.37-336.46,267.89-298.43,61.09,12.56,119.19,41.91,181.8,74.24,2.86,1.46,3.78.91,5.06-1.76,48.96-98.75,117.92-247.36,281.24-252.69,68.71-2.24,125.65,24.2,168.21,78.31,142.3,181.24-15.73,422.84-236.37,370.73-55.66-13.16-108.58-39.25-171.75-71.88-3.35-1.76-4.39-1.03-5.91,2.12-35.79,72.24-74.14,150.61-137.42,199.07-128.7,98.62-296.54,57.87-352.76-99.66v-.06h0Zm89.87-33.29c35.73,93.05,122.54,113.12,194.18,70.72,61.88-36.64,98.4-114.1,129.86-179.12,1.04-2.18-.06-2.55-1.52-3.21-54.08-25.05-110.04-59.08-169-66.54-114.19-14.5-184.3,85.65-153.58,178.15h.06Zm765.74-258.7c-32.98-90.44-121.08-116.4-197.29-69.51-59.99,36.94-96.33,114.03-126.81,177.06-1.04,2.18-.18,2.73,1.52,3.52,75.54,35,171.75,97.9,258.68,51.74,57.92-30.75,84.99-99.29,63.95-162.86l-.06.06h0Z" fill="#0b193e" isolation="isolate" opacity=".4"/>
+
+<g transform="translate(-25 -25)">
+  <defs>
+    <radialGradient id="radial-gradient-aqua" cx="0.5" cy="0.5" r="0.5" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="aqua" stop-opacity="0.2"/>
+      <stop offset="1" stop-color="#47527a" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="radial-gradient-green" cx="0.5" cy="0.5" r="0.5" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="green" stop-opacity="0.4"/>
+      <stop offset="1" stop-color="#47527a" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="radial-gradient-yellow" cx="0.5" cy="0.5" r="0.5" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="yellow" stop-opacity="0.4"/>
+      <stop offset="1" stop-color="#47527a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+    <circle cx="25.5" cy="25.5" r="50" fill="url(#radial-gradient-aqua)">
+      <animateMotion
+      dur="100s"
+      repeatCount="indefinite"
+      path="m86.1,712.45c-21.65-55.26-4.25-94.51,9.84-130.6,203.18-386.85,691.01,360,856.67-43.53,11.63-37.4,15.8-87.09,0-135.63s-56.62-86.61-94.79-103.02c-333.18-143.33-288.97,669.82-680.03,516.35-33.64-20.4-70.05-48.31-91.69-103.56Z" />
+    </circle>
+
+    <circle cx="25.5" cy="25.5" r="20" fill="url(#radial-gradient-yellow)">
+      <animateMotion
+      dur="50s"
+      repeatCount="indefinite"
+      path="m86.1,712.45c-21.65-55.26-4.25-94.51,9.84-130.6,203.18-386.85,691.01,360,856.67-43.53,11.63-37.4,15.8-87.09,0-135.63s-56.62-86.61-94.79-103.02c-333.18-143.33-288.97,669.82-680.03,516.35-33.64-20.4-70.05-48.31-91.69-103.56Z" />
+    </circle>
+
+    <circle cx="25.5" cy="25.5" r="10" fill="url(#radial-gradient-green)">
+      <animateMotion
+      dur="30s"
+      repeatCount="indefinite"
+      path="m86.1,712.45c-21.65-55.26-4.25-94.51,9.84-130.6,203.18-386.85,691.01,360,856.67-43.53,11.63-37.4,15.8-87.09,0-135.63s-56.62-86.61-94.79-103.02c-333.18-143.33-288.97,669.82-680.03,516.35-33.64-20.4-70.05-48.31-91.69-103.56Z" />
+    </circle>
+  </g>
+
+
+
+  <g id="dots" opacity="0.8">
+
+    <g id="dots-top">
+
+      <path d="m315.72,257.34c1.66.85,3.7.19,4.55-1.47.82-1.61.24-3.58-1.34-4.48-1.66-.85-3.7-.19-4.55,1.47-.82,1.61-.24,3.58,1.34,4.48Z" fill="DarkOrchid">
+        <animate attributeName="opacity" dur="4s" values="0;1;0" repeatCount="indefinite" begin="0.1" />
+      </path>
+
+      <path d="m88.64,157.52c2.45,1.27,5.47.31,6.74-2.14,1.24-2.39.36-5.33-1.98-6.65-2.45-1.27-5.47-.31-6.74,2.14-1.24,2.39-.36,5.33,1.98,6.65Z" fill="DarkTurquoise">
+        <animate attributeName="opacity" dur="5s" values="0;1;0" repeatCount="indefinite" begin="2" />
+      </path>
+
+      <path d="m221.43,257.25c1.97,1.06,4.42.32,5.48-1.64s.33-4.41-1.63-5.48c-1.97-1.06-4.42-.33-5.49,1.64-1.06,1.97-.33,4.42,1.64,5.49h0Z" fill="DarkOrange">
+        <animate attributeName="opacity" dur="2s" values="0;1;0" repeatCount="indefinite" begin="2" />
+      </path>
+
+      <path d="m172.27,159.87c1.8.99,4.07.34,5.06-1.46.99-1.8.34-4.07-1.46-5.06-1.8-.99-4.07-.34-5.06,1.46,0,0,0,.02,0,.02-.98,1.8-.32,4.05,1.48,5.03h0Z" fill="DarkMagenta">
+        <animate attributeName="opacity" dur="3s" values="0;2;0" repeatCount="indefinite" begin="1" />
+      </path>
+
+      <path d="m131.3,299.02c2.58,1.39,5.79.43,7.19-2.14s.43-5.79-2.14-7.19c-2.58-1.39-5.8-.44-7.19,2.14-1.39,2.58-.44,5.8,2.14,7.19h0Z" fill="DarkSeaGreen">
+        <animate attributeName="opacity" dur="5s" values="0;1;0" repeatCount="indefinite" begin="2" />
+      </path>
+
+      <path d="m154.17,228.95c3.48,1.82,7.78.47,9.6-3.02,1.78-3.41.52-7.62-2.83-9.5-3.48-1.82-7.78-.47-9.6,3.02-1.78,3.41-.52,7.62,2.83,9.5Z" fill="DeepSkyBlue" transform="translate(-55 0)">
+        <animate attributeName="opacity" dur="5s" values="0;1;0" repeatCount="indefinite" begin="5" />
+      </path>
+
+      <path d="m194.72,225.73c1.66.86,3.7.2,4.56-1.46.83-1.61.24-3.6-1.34-4.49-1.64-.89-3.7-.28-4.58,1.37-.89,1.64-.28,3.7,1.37,4.58h0Z" fill="GoldenRod">
+        <animate attributeName="opacity" dur="6s" values="0;1;0" repeatCount="indefinite" begin="3" />
+      </path>
+
+      <path d="m155.95,154.32c1.57.82,3.51.21,4.33-1.36.8-1.54.24-3.44-1.28-4.29-1.57-.82-3.51-.21-4.33,1.36-.8,1.54-.24,3.44,1.28,4.29Z" fill="DarkGreen">
+        <animate attributeName="opacity" dur="3s" values="0;1;0" repeatCount="indefinite" begin="2" />
+      </path>
+
+      <path d="m139.25,179.21c1.97,1.06,4.42.33,5.49-1.64,1.06-1.97.33-4.42-1.64-5.49-1.97-1.06-4.42-.32-5.48,1.64s-.33,4.41,1.63,5.48h0Z" fill="DarkSlateBlue">
+        <animate attributeName="opacity" dur="5s" values="0;1;0" repeatCount="indefinite" begin="8" />
+      </path>
+
+      <path d="m327.1,319.46c1.64.89,3.7.28,4.59-1.37.89-1.64.28-3.7-1.37-4.59-1.64-.89-3.7-.28-4.59,1.37-.89,1.64-.28,3.7,1.37,4.59Z" fill="DarkKhaki">
+        <animate attributeName="opacity" dur="7s" values="0;1;0" repeatCount="indefinite" begin="8" />
+      </path>
+
+      <path d="m350.48,357.4c1.8.99,4.07.34,5.06-1.46s.34-4.07-1.46-5.06-4.07-.34-5.06,1.46c0,0,0,.02-.01.02-.98,1.8-.32,4.05,1.48,5.03h-.01Z" fill="DarkSalmon">
+        <animate attributeName="opacity" dur="7s" values="0;1;0" repeatCount="indefinite" begin="10" />
+      </path>
+
+      <path d="m251.07,239.08c1.8.99,4.07.34,5.06-1.46s.34-4.07-1.46-5.06c-1.8-.99-4.07-.34-5.06,1.46,0,0,0,.02,0,.02-.98,1.8-.32,4.05,1.48,5.03h0Z" fill="DarkOrchid">
+        <animate attributeName="opacity" dur="7s" values="0;1;0" repeatCount="indefinite" begin="12" />
+      </path>
+    </g>
+
+
+
+
+
+    <g id="dots-bottom">
+
+      <path d="m847.63,876.75c3.25-1.03,5.06-4.5,4.02-7.76-1.03-3.25-4.5-5.06-7.76-4.02-3.25,1.03-5.06,4.5-4.02,7.76,0,.01,0,.03.01.04,1.04,3.24,4.51,5.02,7.74,3.98h.01Z" fill="DarkOrchid">
+        <animate attributeName="opacity" dur="3s" values="0;2;0" repeatCount="indefinite" begin="2" />
+      </path>
+
+      <path d="m794.43,892.01c3.02-.96,4.7-4.18,3.74-7.21-.96-3.02-4.18-4.7-7.21-3.74-3.02.96-4.7,4.18-3.74,7.21,0,.01,0,.03.01.04.97,3.01,4.19,4.66,7.19,3.69h.01Z" fill="DarkSalmon">
+        <animate attributeName="opacity" dur="5s" values="0;2;0" repeatCount="indefinite" begin="4" />
+      </path>
+
+      <path d="m949.86,906.81c2.1-.68,3.24-2.93,2.56-5.03s-2.93-3.24-5.03-2.56-3.24,2.93-2.56,5.03,2.93,3.24,5.03,2.56Z" fill="DarkKhaki">
+        <animate attributeName="opacity" dur="4s" values="0;1;0" repeatCount="indefinite" begin="6" />
+      </path>
+
+      <path d="m888.18,969.82c2.07-.76,3.13-3.06,2.37-5.14-.72-1.96-2.83-3.03-4.84-2.47-2.07.76-3.13,3.06-2.37,5.14.72,1.96,2.83,3.03,4.84,2.47Z" fill="DarkSlateBlue">
+        <animate attributeName="opacity" dur="2s" values="0;1;0" repeatCount="indefinite" begin="3" />
+      </path>
+
+      <path d="m736.77,805.6c2.31-.73,3.59-3.2,2.86-5.51-.73-2.31-3.2-3.59-5.51-2.86-2.31.73-3.59,3.2-2.86,5.51v.03c.74,2.3,3.2,3.57,5.5,2.83h.01Z" fill="DarkGreen">
+        <animate attributeName="opacity" dur="7s" values="0;1;0" repeatCount="indefinite" begin="10" />
+      </path>
+
+
+      <path d="m840.2,830.94c4.83-1.53,7.51-6.69,5.98-11.52s-6.69-7.51-11.52-5.98-7.51,6.69-5.98,11.52c0,.02.01.04.02.07,1.54,4.81,6.69,7.46,11.5,5.92h0Z" fill="GoldenRod">
+        <animate attributeName="opacity" dur="3s" values="0;1;0" repeatCount="indefinite" begin="1" />
+      </path>
+
+      <path d="m852.83,924.09c3.77-1.19,5.85-5.21,4.66-8.97-1.19-3.77-5.21-5.85-8.97-4.66-3.77,1.19-5.85,5.21-4.66,8.97,0,.02.01.04.02.06,1.2,3.74,5.21,5.81,8.95,4.61h0Z" fill="DeepSkyBlue">
+        <animate attributeName="opacity" dur="7s" values="0;1;0" repeatCount="indefinite" begin="14" />
+      </path>
+
+
+      <path d="m723.17,851.61c3.77-1.19,5.85-5.21,4.66-8.97-1.19-3.77-5.21-5.85-8.97-4.66-3.77,1.19-5.85,5.21-4.66,8.97,0,.02.01.04.02.06,1.2,3.74,5.21,5.81,8.95,4.61h0Z" fill="DarkSeaGreen">
+        <animate attributeName="opacity" dur="7s" values="0;1;0" repeatCount="indefinite" begin="16" />
+      </path>
+    </g>
+  </g>
+</svg>

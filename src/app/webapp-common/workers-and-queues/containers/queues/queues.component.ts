@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {Observable} from 'rxjs';
-import {Queue} from '../../../../business-logic/model/queues/queue';
-import {Task} from '../../../../business-logic/model/tasks/task';
+import {Queue} from '~/business-logic/model/queues/queue';
+import {Task} from '~/business-logic/model/tasks/task';
 import {Store} from '@ngrx/store';
 import {ActivatedRoute, Router} from '@angular/router';
 import {
@@ -19,15 +19,14 @@ import {
 import {
   selectQueues,
   selectQueuesTableSortFields,
-  selectQueuesTasks,
   selectSelectedQueue
 } from '../../reducers/index.reducer';
 import {filter, take, withLatestFrom} from 'rxjs/operators';
-import {MatDialog, MatDialogRef} from '@angular/material/dialog';
-import {ISmCol} from '../../../shared/ui-components/data/table/table.consts';
-import {QueueCreateDialogComponent} from '../../../shared/queue-create-dialog/queue-create-dialog.component';
+import {MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
+import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
+import {QueueCreateDialogComponent} from '@common/shared/queue-create-dialog/queue-create-dialog.component';
 import {SortMeta} from 'primeng/api';
-import {ConfirmDialogComponent} from '../../../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
+import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'sm-queues',

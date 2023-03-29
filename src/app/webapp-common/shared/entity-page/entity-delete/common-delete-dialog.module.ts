@@ -6,7 +6,7 @@ import {SMMaterialModule} from '../../material/material.module';
 import {commonDeleteDialogReducer} from './common-delete-dialog.reducer';
 import {UiComponentsModule} from '../../ui-components/ui-components.module';
 import {CommonDeleteDialogComponent} from './common-delete-dialog.component';
-import {MatProgressBarModule} from '@angular/material/progress-bar';
+import {MatLegacyProgressBarModule as MatProgressBarModule} from '@angular/material/legacy-progress-bar';
 import {SMSharedModule} from '../../shared.module';
 import {DeleteDialogEffects} from '~/features/delete-entity/delete-dialog.effects';
 import {FormsModule} from '@angular/forms';

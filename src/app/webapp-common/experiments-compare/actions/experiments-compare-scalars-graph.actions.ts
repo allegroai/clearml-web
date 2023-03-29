@@ -1,5 +1,6 @@
 import {createAction, props} from '@ngrx/store';
-import {GroupedHyperParams, MetricOption, MetricValueType} from '../reducers/experiments-compare-charts.reducer';
+import {GroupedHyperParams, MetricOption} from '../reducers/experiments-compare-charts.reducer';
+import {MetricValueType} from '@common/experiments-compare/experiments-compare.constants';
 
 export const EXPERIMENTS_COMPARE_SCALARS_GRAPH = 'EXPERIMENTS_COMPARE_SCALARS_GRAPH_';
 

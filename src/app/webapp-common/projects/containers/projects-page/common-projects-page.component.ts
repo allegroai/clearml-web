@@ -15,10 +15,11 @@ import {
   resetProjectsSearchQuery,
   resetReadyToDelete,
   setProjectsOrderBy,
-  setProjectsSearchQuery, updateProject
+  setProjectsSearchQuery,
+  updateProject
 } from '../../common-projects.actions';
 import {ActivatedRoute, Router} from '@angular/router';
-import {MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
 import {ProjectsGetAllResponseSingle} from '~/business-logic/model/projects/projectsGetAllResponseSingle';
 import {ProjectDialogComponent} from '@common/shared/project-dialog/project-dialog.component';
 import {combineLatest, Observable, Subscription} from 'rxjs';
@@ -28,7 +29,9 @@ import {
   distinctUntilKeyChanged,
   filter,
   map,
-  skip, take, tap,
+  skip,
+  take,
+  tap,
   withLatestFrom
 } from 'rxjs/operators';
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
@@ -38,19 +41,20 @@ import {initSearch, resetSearch} from '@common/common-search/common-search.actio
 import {SearchState, selectSearchQuery} from '@common/common-search/common-search.reducer';
 import {
   getDeleteProjectPopupStatsBreakdown,
-  isDeletableProject, popupEntitiesListConst,
+  isDeletableProject,
+  popupEntitiesListConst,
   readyForDeletionFilter
 } from '~/features/projects/projects-page.utils';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
-import {get} from 'lodash/fp';
 import {selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
 import {Project} from '~/business-logic/model/projects/project';
 import {CommonDeleteDialogComponent} from '@common/shared/entity-page/entity-delete/common-delete-dialog.component';
 import {resetDeleteState} from '@common/shared/entity-page/entity-delete/common-delete-dialog.actions';
 import {isExample} from '@common/shared/utils/shared-utils';
-import {selectSelectedProject} from '@common/core/reducers/projects.reducer';
+import {selectRootProjects, selectSelectedProject} from '@common/core/reducers/projects.reducer';
 import {selectActiveWorkspaceReady} from '~/core/reducers/view.reducer';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
+import {selectIsDatasets} from "@common/experiments-compare/reducers";
 
 @Component({
   selector: 'sm-common-projects-page',
@@ -92,7 +96,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
   private readonly searchQuery$: Observable<SearchState['searchQuery']>;
   private projectDialog: MatDialogRef<ProjectDialogComponent, any>;
   private selectedProject$: Observable<Project>;
-  private projectId: string;
+  public projectId: string;
   private subs = new Subscription();
 
   constructor(
@@ -105,9 +109,8 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
     this.projectsOrderBy$ = this.store.select(selectProjectsOrderBy);
     this.projectsSortOrder$ = this.store.select(selectProjectsSortOrder);
     this.noMoreProjects$ = this.store.select(selectNoMoreProjects);
-    this.selectedProjectId$ = this.store.select(selectRouterParams).pipe(map(params => get('projectId', params)));
+    this.selectedProjectId$ = this.store.select(selectRouterParams).pipe(map(params => params?.projectId));
     this.selectedProject$ = this.store.select(selectSelectedProject);
-
     this.projectReadyForDeletion$ = this.store.select(selectProjectReadyForDeletion).pipe(
       distinctUntilChanged(),
       filter(readyForDeletion => readyForDeletionFilter(readyForDeletion)));
@@ -117,8 +120,8 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
       this.store.select(selectSelectedProject)
     ]).pipe(
       debounceTime(0),
-      withLatestFrom(this.selectedProjectId$, this.searchQuery$),
-      map(([[projectsList, selectedProject], selectedProjectId, searchQuery]) => {
+      withLatestFrom(this.selectedProjectId$, this.searchQuery$, this.store.select(selectIsDatasets)),
+      map(([[projectsList, selectedProject], selectedProjectId, searchQuery, isDatasets]) => {
         this.searching = searchQuery?.query.length > 0;
         this.allExamples = projectsList?.length > 0 && projectsList?.every(project => isExample(project));
         if (projectsList === null) {
@@ -128,7 +131,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
           return projectsList;
         } else {
           if (selectedProject?.sub_projects?.length === 0 && selectedProjectId === selectedProject?.id) {
-            this.router.navigate(['../experiments'], {relativeTo: this.route.parent});
+            this.router.navigate(['..', 'experiments'], {relativeTo: isDatasets ? this.route : this.route.parent});
             return [];
           }
           const pageProjectsList = this.getExtraProjects(selectedProjectId, selectedProject);
@@ -152,9 +155,11 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
     // this.store.dispatch(new ResetSelectedProject());
     this.store.dispatch(setDeep({deep: false}));
 
-    this.subs.add(this.store.select(selectActiveWorkspaceReady)
-      .pipe(filter(ready => ready), take(1))
-      .subscribe((ready) => ready && this.store.dispatch(getAllProjectsPageProjects())));
+    this.subs.add(combineLatest([this.store.select(selectActiveWorkspaceReady), this.store.select(selectRootProjects)])
+      .pipe(filter(([ready, rootProjects]) => ready && rootProjects?.length > 0)).pipe(take(1))
+      .subscribe(() => {
+        this.store.dispatch(getAllProjectsPageProjects());
+      }));
 
     this.subs.add(this.selectedProjectId$.pipe(
       tap(projectId => this.projectId = projectId),
@@ -199,7 +204,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
     const confirmDialogRef: MatDialogRef<any, boolean> = this.dialog.open(ConfirmDialogComponent, {
       data: {
         title: `Unable to Delete ${name[0].toUpperCase()}${name.slice(1)}`,
-        body: `You cannot delete ${name} "<b>${readyForDeletion.project.name.split('/').pop()}</b>" with un-archived ${name ==='project'? popupEntitiesListConst : this.getDeletePopupEntitiesList()}s. <br/>
+        body: `You cannot delete ${name} "<b>${readyForDeletion.project.name.split('/').pop()}</b>" with un-archived ${name === 'project' ? popupEntitiesListConst : this.getDeletePopupEntitiesList()}s. <br/>
                    You have ${getDeleteProjectPopupStatsBreakdown(
           readyForDeletion,
           'unarchived',
@@ -257,9 +262,9 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
     if (allExperiments) {
       this.store.dispatch(setDeep({deep: true}));
     }
-    this.router.navigate((project?.sub_projects?.length > 0) ? ['projects', project.id, 'projects'] :
-      (!(project.id === '*' || allExperiments || (project as any).isRoot) ? ['projects', project.id] : ['projects', project.id, 'experiments'])
-    );
+    this.router.navigate(project?.sub_projects?.length > 0 ? [project.id, 'projects'] :
+        (!(project.id === '*' || allExperiments || (project as any).isRoot) ? [project.id] : [project.id, 'experiments'])
+      , {relativeTo: this.projectId ? this.route.parent.parent.parent : this.route});
     this.store.dispatch(setSelectedProjectId({projectId: project.id, example: isExample(project)}));
   }
 

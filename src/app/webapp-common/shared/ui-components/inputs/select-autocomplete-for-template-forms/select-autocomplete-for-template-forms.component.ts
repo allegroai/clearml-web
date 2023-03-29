@@ -1,12 +1,12 @@
 import {ChangeDetectionStrategy, Component, ElementRef, EventEmitter, forwardRef, Input, OnInit, Output, ViewChild} from '@angular/core';
 import {TemplateFormSectionBase} from '../../template-forms-ui/templateFormSectionBase';
 import {NG_VALUE_ACCESSOR, NgForm} from '@angular/forms';
-import {COMMA, ENTER} from "@angular/cdk/keycodes";
-import {MatAutocompleteSelectedEvent} from "@angular/material/autocomplete";
-import {filter, map, startWith} from "rxjs/operators";
-import {asyncScheduler} from "rxjs";
-import {Observable} from "rxjs/internal/Observable";
-import {MatOptionSelectionChange} from "@angular/material/core";
+import {COMMA, ENTER} from '@angular/cdk/keycodes';
+import {MatLegacyAutocompleteSelectedEvent as MatAutocompleteSelectedEvent} from '@angular/material/legacy-autocomplete';
+import {filter, map, startWith} from 'rxjs/operators';
+import {asyncScheduler} from 'rxjs';
+import {Observable} from 'rxjs/internal/Observable';
+import {MatLegacyOptionSelectionChange as MatOptionSelectionChange} from '@angular/material/legacy-core';
 
 
 export interface IOption {

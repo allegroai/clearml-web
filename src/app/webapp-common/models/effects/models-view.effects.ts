@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {Action, Store} from '@ngrx/store';
-import {flatten, get, isEqual} from 'lodash/fp';
+import {flatten, isEqual} from 'lodash-es';
 import {EMPTY, of} from 'rxjs';
 import {
   auditTime,
@@ -20,17 +20,13 @@ import {ApiModelsService} from '~/business-logic/api-services/models.service';
 import {BlModelsService} from '~/business-logic/services/models.service';
 import {requestFailed} from '../../core/actions/http.actions';
 import {activeLoader, addMessage, deactivateLoader, setServerError} from '../../core/actions/layout.actions';
-import {
-  getFilteredUsers,
-  setArchive as setProjectArchive,
-  setProjectUsers
-} from '../../core/actions/projects.actions';
+import {getFilteredUsers, setArchive as setProjectArchive, setProjectUsers} from '../../core/actions/projects.actions';
 import {setURLParams} from '../../core/actions/router.actions';
 import {selectIsArchivedMode, selectIsDeepMode, selectSelectedProject} from '../../core/reducers/projects.reducer';
 import {selectRouterParams} from '../../core/reducers/router-reducer';
 import {selectAppVisible} from '../../core/reducers/view.reducer';
 import {addMultipleSortColumns, getRouteFullUrl} from '../../shared/utils/shared-utils';
-import {GetModelInfo, RefreshModelInfo} from '../actions/models-info.actions';
+import {getModelInfo, refreshModelInfo} from '../actions/models-info.actions';
 import * as actions from '../actions/models-view.actions';
 import {setMetadataKeys, setSelectedModelsDisableAvailable} from '../actions/models-view.actions';
 import {MODELS_PAGE_SIZE, MODELS_TABLE_COLS} from '../models.consts';
@@ -63,7 +59,9 @@ import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {ModelsGetAllExResponse} from '~/business-logic/model/models/modelsGetAllExResponse';
 import {ISmCol} from '../../shared/ui-components/data/table/table.consts';
 import {hasValue} from '../../shared/utils/helpers.util';
-import {ProjectsGetModelMetadataValuesResponse} from '~/business-logic/model/projects/projectsGetModelMetadataValuesResponse';
+import {
+  ProjectsGetModelMetadataValuesResponse
+} from '~/business-logic/model/projects/projectsGetModelMetadataValuesResponse';
 import {selectTableMode} from '../../experiments/reducers';
 import {selectActiveWorkspaceReady} from '~/core/reducers/view.reducer';
 import {escapeRegex} from '@common/shared/utils/escape-regex';
@@ -162,7 +160,7 @@ export class ModelsViewEffects {
   getFrameworksEffect = createEffect(() => this.actions$.pipe(
     ofType(actions.getFrameworks, actions.getAllProjectsFrameworks),
     withLatestFrom(
-      this.store.select(selectRouterParams).pipe(map(params => get('projectId', params))),
+      this.store.select(selectRouterParams).pipe(map(params => params?.projectId)),
     ),
     switchMap(([action, projectId]) => this.apiModels.modelsGetFrameworks({projects: projectId !== '*' && action.type !==  actions.getAllProjectsFrameworks.type ? [projectId] : []})
       .pipe(
@@ -181,7 +179,7 @@ export class ModelsViewEffects {
     ofType(setProjectUsers),
     withLatestFrom(this.store.select(modelsSelectors.selectTableFilters)),
     map(([action, filters]) => {
-      const userFiltersValue = get([MODELS_TABLE_COL_FIELDS.USER, 'value'], filters) || [];
+      const userFiltersValue = filters?.user?.['name']?.value ?? [];
       const resIds = action.users.map(user => user.id);
       const shouldGetFilteredUsersNames = !(userFiltersValue.every(id => resIds.includes(id)));
       return shouldGetFilteredUsersNames ? getFilteredUsers({filteredUsers: userFiltersValue}) : new EmptyAction();
@@ -190,7 +188,7 @@ export class ModelsViewEffects {
 
   getTagsEffect = createEffect(() => this.actions$.pipe(
     ofType(actions.getTags, actions.getTagsForAllProjects),
-    withLatestFrom(this.store.select(selectRouterParams).pipe(map(params => get('projectId', params)))),
+    withLatestFrom(this.store.select(selectRouterParams).pipe(map(params => params?.projectId))),
     switchMap(([action, projectId]) => this.projectsApi.projectsGetModelTags({
       projects: (projectId === '*' ||  action.type=== actions.getTagsForAllProjects.type) ? [] : [projectId]
     }).pipe(
@@ -208,7 +206,7 @@ export class ModelsViewEffects {
 
   getMetadataKeysForProjectEffect = createEffect(() => this.actions$.pipe(
     ofType(actions.getMetadataKeysForProject),
-    withLatestFrom(this.store.select(selectRouterParams).pipe(map(params => get('projectId', params)))),
+    withLatestFrom(this.store.select(selectRouterParams).pipe(map(params => params?.projectId))),
     switchMap(([action, projectId]) => this.projectsApi.projectsGetModelMetadataKeys({
       project: projectId !== '*' ? projectId : null
     }).pipe(
@@ -243,9 +241,9 @@ export class ModelsViewEffects {
               const resActions: Action[] = [deactivateLoader('Fetch Models')];
               if (selectedModel) {
                 if (action.hideLoader || action.autoRefresh) {
-                  resActions.push(new RefreshModelInfo(selectedModel.id));
+                  resActions.push(refreshModelInfo(selectedModel.id));
                 } else {
-                  resActions.push(new GetModelInfo(selectedModel.id));
+                  resActions.push(getModelInfo({id: selectedModel.id}));
                 }
               }
               if (selectedModel && action.autoRefresh && isEqual(models.map(model => model.id).sort(), res.models.map(model => model.id).sort())) {
@@ -301,7 +299,7 @@ export class ModelsViewEffects {
   selectAll = createEffect(() => this.actions$.pipe(
     ofType(actions.selectAllModels),
     withLatestFrom(
-      this.store.select(selectRouterParams).pipe(map(params => get('projectId', params))),
+      this.store.select(selectRouterParams).pipe(map(params => params?.projectId)),
       this.store.select(selectIsArchivedMode),
       this.store.select(modelsSelectors.selectGlobalFilter),
       this.store.select(modelsSelectors.selectTableFilters),
@@ -363,7 +361,7 @@ export class ModelsViewEffects {
     ofType(actions.selectNextModel),
     withLatestFrom(
       this.store.select(selectModelsList),
-      this.store.select(selectRouterParams).pipe(map(params => get('projectId', params))),
+      this.store.select(selectRouterParams).pipe(map(params => params?.projectId)),
       this.store.select(selectTableMode)
     ),
     filter(([, , , tableMode])=>tableMode==='info'),
@@ -377,7 +375,7 @@ export class ModelsViewEffects {
   ));
 
   getReadyFilter(tableFilters) {
-    switch (get('ready.value.length', tableFilters)) {
+    switch (tableFilters?.ready?.value?.length) {
       case 0:
         return null;
       case 1:
@@ -410,7 +408,7 @@ export class ModelsViewEffects {
     const projectFilter = filters?.[MODELS_TABLE_COL_FIELDS.PROJECT]?.value;
     const tagsFilter = filters?.[MODELS_TABLE_COL_FIELDS.TAGS]?.value;
     const tagsFilterAnd = filters?.[MODELS_TABLE_COL_FIELDS.TAGS]?.matchMode === 'AND';
-    const systemTags = get(['system_tags', 'value'], filters);
+    const systemTags = filters?.system_tags?.value;
     const frameworkFilter = filters?.[MODELS_TABLE_COL_FIELDS.FRAMEWORK]?.value;
     const ready = this.getReadyFilter(filters);
     const systemTagsFilter = (archived ? [MODEL_TAGS.HIDDEN] : ['-' + MODEL_TAGS.HIDDEN])
@@ -449,7 +447,7 @@ export class ModelsViewEffects {
     return of(scrollId1)
       .pipe(
         withLatestFrom(
-          this.store.select(selectRouterParams).pipe(map(params => get('projectId', params))),
+          this.store.select(selectRouterParams).pipe(map(params => params?.projectId)),
           this.store.select(selectIsArchivedMode),
           this.store.select(modelsSelectors.selectMetadataColsForProject),
           this.store.select(modelsSelectors.selectGlobalFilter),
@@ -500,7 +498,7 @@ export class ModelsViewEffects {
 
   navigateAfterModelSelectionChanged(selectedModel: SelectedModel, modelProject: string) {
     // wow angular really suck...
-    const activeChild = get('firstChild.firstChild.firstChild.firstChild.firstChild.firstChild', this.route);
+    const activeChild = this.route?.firstChild?.firstChild?.firstChild?.firstChild?.firstChild?.firstChild;
     const activeChildUrl = activeChild ? getRouteFullUrl(activeChild) : 'general';
     const baseUrl = 'projects/' + modelProject + '/models';
     selectedModel ?

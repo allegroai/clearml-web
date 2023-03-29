@@ -106,15 +106,42 @@ $inline-edit-base-width: 93%;
 
 .editable-div {
   position: relative;
+  .value {
+    display: flex;
+    align-items: center;
+    padding-right: 32px;
+  }
+  .input {
+    display: none;
+  }
+  &.edit-mode {
+    .value {
+      display: none;
+    }
+    .input {
+      display: block;
+    }
+  }
+
   .editable-pen {
+    position: absolute;
+    right: 0;
     opacity: 0;
-    height: 100%;
     transition: opacity 0.35s;
   }
 
   &:hover {
     .editable-pen {
       opacity: 1;
+    }
+  }
+
+  &.is-description {
+    .value {
+      padding-right: 0;
+    }
+    .editable-pen {
+      position: static;
     }
   }
 }

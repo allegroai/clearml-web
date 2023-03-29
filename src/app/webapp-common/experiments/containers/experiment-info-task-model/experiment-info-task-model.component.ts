@@ -11,7 +11,7 @@ import {activateEdit, cancelExperimentEdit, deactivateEdit, getExperimentConfigu
 import {ConfigurationItem} from '~/business-logic/model/tasks/configurationItem';
 import {EditJsonComponent} from '@common/shared/ui-components/overlay/edit-json/edit-json.component';
 import {take} from 'rxjs/operators';
-import {MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {EditableSectionComponent} from '@common/shared/ui-components/panel/editable-section/editable-section.component';
 

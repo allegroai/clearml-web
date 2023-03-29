@@ -6,11 +6,11 @@
           smClickStopPropagation
           class="user-filter-button"
           (click)="switchUserFocus()">
-    <i [class.al-ico-success]="showOnlyUserWork$ | async" class="mr-3 al-icon sm-md"></i>
+    <i [class.al-ico-success]="showOnlyUserWork$ | async" class="al-icon sm-md"></i>
     <div class="mr-3">My Work</div>
   </button>
   <button mat-menu-item [matMenuTriggerFor]="subMenu" class="d-flex align-items-center">
-    <i [class.hidden]="!((tagsFilters$ | async)?.length > 0)" class="filter-point mr-3 al-icon sm-md al-ico-success"></i>
+    <i [class.hidden]="!((tagsFilters$ | async)?.length > 0)" class="filter-point al-icon sm-md al-ico-success"></i>
     <span>Tags</span>
   </button>
   <mat-menu #subMenu="matMenu" class="table-card-filter-menu light-theme" (close)="closeMenu()">

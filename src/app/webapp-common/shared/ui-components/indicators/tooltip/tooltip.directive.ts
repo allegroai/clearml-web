@@ -1,6 +1,6 @@
 import {Directive, Input} from '@angular/core';
-import {MatTooltip} from '@angular/material/tooltip';
-import {MAT_TOOLTIP_SCROLL_STRATEGY} from '@angular/material/tooltip';
+import {MatLegacyTooltip as MatTooltip} from '@angular/material/legacy-tooltip';
+import {MAT_LEGACY_TOOLTIP_SCROLL_STRATEGY as MAT_TOOLTIP_SCROLL_STRATEGY} from '@angular/material/legacy-tooltip';
 import {scrollFactory} from '@common/shared/utils/scroll-factory';
 import {Overlay} from '@angular/cdk/overlay';
 

@@ -11,9 +11,12 @@
  */
 
 import { StatsStatusCount } from '././statsStatusCount';
+import { StatsDatasets } from '././statsDatasets';
 
 
 export interface Stats {
     active?: StatsStatusCount;
     archived?: StatsStatusCount;
+    datasets?: StatsDatasets;
+
 }

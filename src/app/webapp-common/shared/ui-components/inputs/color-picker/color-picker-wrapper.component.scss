@@ -1,16 +1,16 @@
-@import '../../styles/variables';
+@import 'variables';
 
 :host {
   ::ng-deep color-picker .color-picker {
     z-index: $zindex-colorpicker;
-
     .arrow {
       display: none;
-
     }
     .preset-color {
-      border-radius: 3px;
       margin: 4px;
+      border-color: white;
+      border-radius: 3px;
+      box-shadow: 0 0 0 1px $blue-300;
     }
     .button-area {
       margin-top: 16px;

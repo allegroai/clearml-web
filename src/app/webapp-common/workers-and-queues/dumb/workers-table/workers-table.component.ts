@@ -1,6 +1,6 @@
 import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import {ColHeaderTypeEnum, ISmCol} from '../../../shared/ui-components/data/table/table.consts';
-import {get} from 'lodash/fp';
+import {get} from 'lodash-es';
 import {WORKERS_TABLE_COL_FIELDS} from '../../workers-and-queues.consts';
 import {Worker} from '../../../../business-logic/model/workers/worker';
 import {TableComponent} from '../../../shared/ui-components/data/table/table.component';
@@ -68,7 +68,7 @@ export class WorkersTableComponent extends BaseTableView {
   }
 
   getBodyData(rowData: any, col: ISmCol): any {
-    return get(col.id, rowData);
+    return get(rowData, col.id);
   }
 
   onRowClicked(event) {

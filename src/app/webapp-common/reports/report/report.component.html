@@ -1,5 +1,5 @@
 <div class="header">
-  <div class="name">{{report?.name}}</div>
+  <div class="name ellipsis" [smTooltip]="report?.name" smShowTooltipIfEllipsis>{{report?.name}}</div>
   <div *ngIf="!editMode" class="actions">
     <sm-tag-list
       [tags]="report?.tags"
@@ -27,8 +27,10 @@
       <button class="btn btn-icon" smTooltip="Copy report markdown to clipboard" (click)="copyMarkdown()">
         <i class="al-icon al-ico-copy-to-clipboard sm-md"></i>
       </button>
-      <button class="btn btn-icon" ngxPrint printSectionId="print-element" [printDelay]="3000" [useExistingCss]="true" [printStyle]="printStyle" smTooltip="Export to PDF">
+      <button (click)="printReport()" class="btn btn-icon" smTooltip="Export to PDF">
         <i class="al-icon al-ico-pdf sm-md"></i>
+      </button>
+      <button #printHiddenButton class="hidden" ngxPrint printSectionId="print-element-temp" [printDelay]="3000" [useExistingCss]="true" [printStyle]="printStyle">
       </button>
       <button class="btn btn-icon" (click)="share()" smTooltip="Share">
         <i class="al-icon al-ico-shared-item sm-md"></i>
@@ -42,7 +44,13 @@
       <button *ngIf="archived" class="btn btn-icon" (click)="deleteReport()" smTooltip="Delete">
         <i class="al-icon al-ico-trash sm-md"></i>
       </button>
-      <button *ngIf="draft" class="btn btn-neon px-3 d-flex-center" (click)="publish()"><i class="al-icon al-ico-publish sm mr-2"></i>PUBLISH</button>
+      <button
+        *ngIf="draft"
+        class="btn btn-neon px-3 d-flex-center"
+        [disabled]="!this.report.report?.trim()"
+        [smTooltip]="!this.report.report?.trim() ? 'Can\'t publish an empty report' : ''"
+        (click)="publish()"
+      ><i class="al-icon al-ico-publish sm mr-2"></i>PUBLISH</button>
     </div>
   </div>
 </div>
@@ -87,8 +95,12 @@
         [class.full-width]="widthExpanded"
         [data]="report?.['report'] ?? ''"
         [readOnly]="!draft || example"
+        [resources]="resources"
+        [handleUpload]="handleUpload"
         (saveInfo)="save($event)"
         (editModeChanged)="editModeChanged();"
+        (deleteResource)="deleteResource($event)"
+        (imageMenuOpened)="calculateUnusedResources($event)"
       >
         <div no-data class="flex-middle empty-state" *ngIf="!example && report && draft">
           <i class="al-icon al-ico-reports xxl"></i>

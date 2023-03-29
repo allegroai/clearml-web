@@ -5,15 +5,16 @@ import {Store} from '@ngrx/store';
 import {SelectedModel} from '../../shared/models.model';
 import {selectSelectedModel} from '../../reducers';
 import {filter} from 'rxjs/operators';
-import {resetDontShowAgainForBucketEndpoint} from '../../../core/actions/common-auth.actions';
-import {createModelLink} from '../../../shared/utils/shared-utils';
+import {resetDontShowAgainForBucketEndpoint} from '@common/core/actions/common-auth.actions';
+import {createModelLink, isExample} from '@common/shared/utils/shared-utils';
 import {AdminService} from '~/shared/services/admin.service';
-import {ModelDetailsUpdated, updateModelDetails} from '../../actions/models-info.actions';
-import {isReadOnly} from '@common/shared/utils/is-read-only';
+import {updateModelDetails} from '../../actions/models-info.actions';
+
 
 @Component({
   selector: 'sm-model-info-general',
   templateUrl: './model-info-general.component.html',
+  styleUrls: ['./model-info-general.component.scss']
 })
 export class ModelInfoGeneralComponent implements OnDestroy {
 
@@ -25,7 +26,7 @@ export class ModelInfoGeneralComponent implements OnDestroy {
     this.selectedModelSubscription = this.store.select(selectSelectedModel).pipe(
       filter(model => !!model))
       .subscribe(model => {
-        this.isExample     = isReadOnly(model);
+        this.isExample = isExample(model);
         this.selectedModel = model;
       });
   }
@@ -39,7 +40,7 @@ export class ModelInfoGeneralComponent implements OnDestroy {
   }
 
   commentChanged(comment) {
-    this.store.dispatch(updateModelDetails({id: this.selectedModel.id, changes: {comment: comment}}));
+    this.store.dispatch(updateModelDetails({id: this.selectedModel.id, changes: {comment}}));
   }
 
   ngOnDestroy(): void {

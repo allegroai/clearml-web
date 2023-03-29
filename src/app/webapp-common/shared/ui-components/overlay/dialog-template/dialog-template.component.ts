@@ -1,10 +1,18 @@
 import {Component, ElementRef, EventEmitter, Input, Output, ViewChild} from '@angular/core';
-import {MatDialogRef} from '@angular/material/dialog';
+import {MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
+import {NgClass, NgIf} from '@angular/common';
+import {CdkScrollableModule} from '@angular/cdk/scrolling';
 
 @Component({
-  selector   : 'sm-dialog-template',
+  selector: 'sm-dialog-template',
   templateUrl: './dialog-template.component.html',
-  styleUrls  : ['./dialog-template.component.scss']
+  styleUrls: ['./dialog-template.component.scss'],
+  imports: [
+    NgClass,
+    NgIf,
+    CdkScrollableModule
+  ],
+  standalone: true
 })
 export class DialogTemplateComponent {
 

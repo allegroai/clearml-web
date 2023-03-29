@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {CanDeactivate} from '@angular/router';
 import {Observable} from 'rxjs';
-import {MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
 import {ConfirmDialogComponent} from '../ui-components/overlay/confirm-dialog/confirm-dialog.component';
 
 @Injectable()

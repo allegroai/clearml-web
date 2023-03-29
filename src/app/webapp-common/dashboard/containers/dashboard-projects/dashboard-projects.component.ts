@@ -1,6 +1,6 @@
-import {Component, OnInit, Output, EventEmitter, AfterViewInit, ViewChild, ElementRef, OnDestroy} from '@angular/core';
+import {Component, Output, EventEmitter, AfterViewInit, ViewChild, ElementRef, OnDestroy} from '@angular/core';
 import {Router} from '@angular/router';
-import {MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
 import {fromEvent, Observable, Subscription} from 'rxjs';
 import {Store} from '@ngrx/store';
 import {Project} from '~/business-logic/model/projects/project';
@@ -19,7 +19,7 @@ import {trackById} from '@common/shared/utils/forms-track-by';
   templateUrl: './dashboard-projects.component.html',
   styleUrls  : ['./dashboard-projects.component.scss']
 })
-export class DashboardProjectsComponent implements OnInit, AfterViewInit, OnDestroy {
+export class DashboardProjectsComponent implements AfterViewInit, OnDestroy {
   public recentProjectsList$: Observable<Array<Project>>;
   private dialog: MatDialogRef<ProjectDialogComponent>;
   private sub: Subscription;
@@ -34,17 +34,14 @@ export class DashboardProjectsComponent implements OnInit, AfterViewInit, OnDest
     public router: Router,
     private matDialog: MatDialog
   ) {
-    this.recentProjectsList$ = this.store.select(selectRecentProjects);
-  }
-
-  @ViewChild('header') header: ElementRef<HTMLDivElement>;
-
-  ngOnInit() {
     this.store.dispatch(resetSelectedProject());
     this.store.select(selectCurrentUser)
       .pipe(filter(user => !!user), take(1))
       .subscribe(() => this.store.dispatch(getRecentProjects()));
+    this.recentProjectsList$ = this.store.select(selectRecentProjects);
   }
+
+  @ViewChild('header') header: ElementRef<HTMLDivElement>;
 
   ngAfterViewInit() {
     window.setTimeout(() => this.width.emit(this.header.nativeElement.getBoundingClientRect().width));

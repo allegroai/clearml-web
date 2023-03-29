@@ -18,13 +18,13 @@ import {
 import {selectBackdropActive, selectHideRedactedArguments} from '@common/core/reducers/view.reducer';
 import {EditJsonComponent} from '@common/shared/ui-components/overlay/edit-json/edit-json.component';
 import {filter, take} from 'rxjs/operators';
-import {MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {EditableSectionComponent} from '@common/shared/ui-components/panel/editable-section/editable-section.component';
 import {
   ExperimentExecutionSourceCodeComponent
 } from '../../dumb/experiment-execution-source-code/experiment-execution-source-code.component';
-import {getOr, isUndefined} from 'lodash/fp';
+import {isUndefined} from 'lodash-es';
 import {ActivatedRoute} from '@angular/router';
 import {Container} from '~/business-logic/model/tasks/container';
 
@@ -66,7 +66,7 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private element: ElementRef
   ) {
-    this.minimized = getOr(false, 'data.minimized', this.route.snapshot.routeConfig);
+    this.minimized = this.route.snapshot.routeConfig?.data?.minimized ?? false;
     this.executionInfo$ = this.store.select(selectExperimentExecutionInfoData);
     this.showExtraDataSpinner$ = this.store.select(selectShowExtraDataSpinner);
     this.editable$ = this.store.select(selectIsExperimentEditable);
@@ -171,6 +171,7 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
           this.store.dispatch(commonInfoActions.saveExperimentSection({
             container: {
               ...this.formData.container,
+              // eslint-disable-next-line @typescript-eslint/naming-convention
               setup_shell_script: setupShellScript
             }
           }));
@@ -240,6 +241,7 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
         this.store.dispatch(commonInfoActions.saveExperimentSection({
           container: {
             ...this.formData.container,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             setup_shell_script: ''
           }
         }));

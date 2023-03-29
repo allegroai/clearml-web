@@ -1,7 +1,7 @@
 import {MEDIA_VIDEO_EXTENSIONS, MediaContentTypeEnum} from '~/app.constants';
 import {ActivatedRoute} from '@angular/router';
 import {EXPERIMENT_GRAPH_ID_PREFIX} from '../../experiments/shared/common-experiments.const';
-import {get, last} from 'lodash/fp';
+import {get, last} from 'lodash-es';
 import {User} from '~/business-logic/model/users/user';
 import {TABLE_SORT_ORDER} from '../ui-components/data/table/table.consts';
 
@@ -176,7 +176,7 @@ export const htmlTextShorte = (name: string, limit = 80) => {
 };
 
 export const findRegexRecursively = (object, field: string, regex: RegExp) => {
-  const currentValue = get(field, object);
+  const currentValue = get(object, field);
   if (currentValue) {
     return regex.test(currentValue);
   }

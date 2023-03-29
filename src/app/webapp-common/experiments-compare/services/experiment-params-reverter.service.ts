@@ -1,5 +1,4 @@
 import {Injectable} from '@angular/core';
-import {get} from 'lodash/fp';
 import {ITask} from '../../../business-logic/model/al-task';
 
 
@@ -24,7 +23,7 @@ export class ExperimentParamsReverterService {
         project: exp.project,
         completed: exp.completed,
         tags: exp.tags,
-        hyperparams: get('hyperparams', exp) ? exp.hyperparams : {},
+        hyperparams: exp?.hyperparams ?? {},
       };
     });
   }

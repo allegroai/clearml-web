@@ -6,7 +6,8 @@ import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-in
 import {selectCurrentArtifactExperimentId, selectExperimentModelInfoData} from '../../reducers';
 import {
   selectExperimentInfoData,
-  selectIsExperimentEditable
+  selectIsExperimentEditable,
+  selectSelectedExperiment
 } from '~/features/experiments/reducers';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 import {selectRouterConfig, selectRouterParams} from '@common/core/reducers/router-reducer';
@@ -57,18 +58,18 @@ export class ExperimentInfoArtifactsComponent implements OnDestroy {
     );
 
     this.sub.add(combineLatest([
-      this.experimentKey$,
-      this.store.select(selectSelectedProject)
-    ])
-      .pipe(
-        filter(([id, project]) => !!id && !!project?.id),
-        map(([id]) => id),
-        distinctUntilChanged()
-      )
-      .subscribe(experimentId => {
-        this.store.dispatch(setExperimentArtifacts({model: null, experimentId: null}));
-        this.store.dispatch(getExperimentArtifacts({experimentId}));
-      })
+        this.store.select(selectSelectedProject),
+        this.store.select(selectSelectedExperiment)
+      ])
+        .pipe(
+          debounceTime(0),
+          filter(([project, selectedExperiment]) => !!project?.id && !!selectedExperiment),
+          map(([, selectedExperiment]) => selectedExperiment.id)
+        )
+        .subscribe(experimentId => {
+          this.store.dispatch(setExperimentArtifacts({model: null, experimentId: null}));
+          this.store.dispatch(getExperimentArtifacts({experimentId}));
+        })
     );
 
     this.sub.add(combineLatest([
@@ -78,26 +79,26 @@ export class ExperimentInfoArtifactsComponent implements OnDestroy {
         this.experimentInfo$,
         this.store.select(selectCurrentArtifactExperimentId)
       ])
-      .pipe(
-        debounceTime(0),
-        distinctUntilChanged(),
-        filter(([, modelInfo, experimentKey, experimentInfo, artifactsExperiment]) =>
-          !!modelInfo && experimentInfo && experimentKey && artifactsExperiment === experimentKey))
-      .subscribe(([selectedId, modelInfo]) => {
-        const onOutputModel = this.route.snapshot.firstChild?.data?.outputModel;
-        const onInputModel = this.route.snapshot.firstChild?.data?.outputModel === false;
-        if (selectedId) {
-          const selectedArtifact = modelInfo.artifacts?.find(artifact => artifact.key === selectedId);
-          const selectedInputModel = modelInfo.input?.find(model => model.id === selectedId);
-          const selectedOutputModel = modelInfo.output?.find(model => model.id === selectedId);
-          const onArtifact = !onInputModel && !onOutputModel;
-          if ((onOutputModel && !selectedOutputModel) || (onInputModel && !selectedInputModel) || (onArtifact && !selectedArtifact)) {
+        .pipe(
+          debounceTime(0),
+          distinctUntilChanged(),
+          filter(([, modelInfo, experimentKey, experimentInfo, artifactsExperiment]) =>
+            !!modelInfo && experimentInfo && experimentKey && artifactsExperiment === experimentKey))
+        .subscribe(([selectedId, modelInfo]) => {
+          const onOutputModel = this.route.snapshot.firstChild?.data?.outputModel;
+          const onInputModel = this.route.snapshot.firstChild?.data?.outputModel === false;
+          if (selectedId) {
+            const selectedArtifact = modelInfo.artifacts?.find(artifact => artifact.key === selectedId);
+            const selectedInputModel = modelInfo.input?.find(model => model.id === selectedId);
+            const selectedOutputModel = modelInfo.output?.find(model => model.id === selectedId);
+            const onArtifact = !onInputModel && !onOutputModel;
+            if ((onOutputModel && !selectedOutputModel) || (onInputModel && !selectedInputModel) || (onArtifact && !selectedArtifact)) {
+              this.resetSelection(modelInfo);
+            }
+          } else {
             this.resetSelection(modelInfo);
           }
-        } else {
-          this.resetSelection(modelInfo);
-        }
-      })
+        })
     );
   }
 

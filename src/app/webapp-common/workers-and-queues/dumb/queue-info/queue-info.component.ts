@@ -1,10 +1,10 @@
 import {ChangeDetectorRef, Component, EventEmitter, HostListener, Input, OnInit, Output} from '@angular/core';
 import {CdkDragDrop, moveItemInArray} from '@angular/cdk/drag-drop';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import {Queue} from '../../../../business-logic/model/queues/queue';
-import {BlTasksService} from '../../../../business-logic/services/tasks.service';
-import {SelectQueueComponent} from '../../../experiments/shared/components/select-queue/select-queue.component';
-import {cloneDeep} from 'lodash/fp';
+import { MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef } from '@angular/material/legacy-dialog';
+import {Queue} from '~/business-logic/model/queues/queue';
+import {BlTasksService} from '~/business-logic/services/tasks.service';
+import {SelectQueueComponent} from '@common/experiments/shared/components/select-queue/select-queue.component';
+import {cloneDeep} from 'lodash-es';
 
 @Component({
   selector   : 'sm-queue-info',

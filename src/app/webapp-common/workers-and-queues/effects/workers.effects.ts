@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {Action, Store} from '@ngrx/store';
-import {castArray, cloneDeep} from 'lodash/fp';
+import {castArray, cloneDeep} from 'lodash-es';
 import {catchError, mergeMap, switchMap, withLatestFrom} from 'rxjs/operators';
 import {ApiWorkersService} from '~/business-logic/api-services/workers.service';
 import {WORKER_STATS_PARAM_INFO} from '../workers-and-queues.consts';

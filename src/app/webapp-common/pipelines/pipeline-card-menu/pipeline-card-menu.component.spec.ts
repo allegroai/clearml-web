@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { PipelineCardMenuComponent } from './pipeline-card-menu.component';
-import {MatMenuModule} from '@angular/material/menu';
+import {MatLegacyMenuModule as MatMenuModule} from '@angular/material/legacy-menu';
 
 describe('PipelineCardMenuComponent', () => {
   let component: PipelineCardMenuComponent;

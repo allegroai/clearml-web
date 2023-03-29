@@ -12,15 +12,15 @@
 
   <div *ngIf="isDashboard && !isLogin" class="logo-full middle"
        [class.make-room-for-slogan]="environment.whiteLabelSlogan">
-    <img alt="logo" [src]="environment?.branding?.logo" width="122" height="42">
+    <img *ngIf="!environment.whiteLabelLogo" alt="logo" priority ngSrc="assets/logo-white.svg" width="122" height="42">
     <div *ngIf="environment.whiteLabelSlogan" class="slogan">{{environment.whiteLabelSlogan}}</div>
   </div>
   <div *ngIf="isLogin && environment.whiteLabelLogo" class="logo-full">
-    <img alt="logo" [src]="environment?.branding?.logo" width="122" height="42">
+    <img alt="logo" priority ngSrc="assets/logo-white.svg" width="122" height="42">
   </div>
   <div *ngIf="isLogin" class="spacer"></div>
 
-  <div class="right-buttons">
+  <div class="right-buttons" data-id="rightSideHeaderpanel" >
     <sm-common-search #search [class.share-view]="isShareMode"></sm-common-search>
 
     <a class="d-flex pointer resources-trigger" [matMenuTriggerFor]="resourcesMenu">
@@ -37,9 +37,9 @@
     </a>
 
     <mat-menu #profileMenu="matMenu" class="user-menu">
-      <button mat-menu-item [routerLink]="'settings/' + userNotificationPath">
+      <button mat-menu-item [routerLink]="'settings/' + userNotificationPath" data-id="Settings Button">
         <span class="al-icon icon sm-md" [class]="userNotificationPath ? 'al-ico-settings-alert' : 'al-ico-settings'">
-          <span class="path1" data-id="Settings Button"></span><span class="path2"></span>
+          <span class="path1"></span><span class="path2"></span>
         </span>
         Settings
       </button>
@@ -51,27 +51,27 @@
     </mat-menu>
 
     <mat-menu #resourcesMenu="matMenu" class="user-menu">
-      <button mat-menu-item (click)="openWelcome($event)">
+      <button mat-menu-item (click)="openWelcome($event)" data-id="Python Package setup Option">
         <i class="al-icon sm-md al-ico-code-file"></i>ClearML Python Package setup
       </button>
-      <button mat-menu-item (click)="navigate('https://www.youtube.com/c/ClearML/featured')">
+      <button mat-menu-item (click)="navigate('https://www.youtube.com/c/ClearML/featured')" data-id="Youtube Option">
         <i class="al-icon al-ico-youtube sm-md"></i>ClearML on Youtube
       </button>
-      <button mat-menu-item (click)="navigate(environment.docsLink)">
+      <button mat-menu-item (click)="navigate(environment.docsLink)" data-id="Online Documentation Option">
         <i class="al-icon sm-md al-ico-documentation"></i>Online Documentation
       </button>
-      <button mat-menu-item (click)="openTip()">
+      <button mat-menu-item (click)="openTip()" data-id="Pro Tips Option">
         <i class="al-icon sm-md al-ico-tips"></i>Pro Tips
       </button>
       <ng-container *smCheckPermission="'applications'">
         <button mat-menu-item
                 *ngIf="$any(environment)?.appsYouTubeIntroVideoId && $any(environment).appAwarenessMenu !== false"
-                (click)="openAppsAwareness($event, $any(environment)?.appsYouTubeIntroVideoId)"
+                (click)="openAppsAwareness($event, $any(environment)?.appsYouTubeIntroVideoId)" data-id="Apps Introduction Option"
         >
           <i class="al-icon sm-md al-ico-applications"></i>ClearML Apps Introduction
         </button>
       </ng-container>
-      <button mat-menu-item (click)="navigate('mailto:support@clear.ml')">
+      <button mat-menu-item (click)="navigate('mailto:support@clear.ml')" data-id="Contact Us">
         <i class="al-icon sm-md al-ico-email"></i>Contact Us
       </button>
     </mat-menu>

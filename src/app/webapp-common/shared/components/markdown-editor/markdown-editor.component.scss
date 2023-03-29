@@ -125,6 +125,50 @@
   border: 1px solid $blue-600;
 }
 
+.action {
+  position: relative;
+  display: flex;
+  align-items: center;
+  &[disabled="true"] {
+    opacity: 0.5;
+  }
+  i {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  i.al-ico-trash {
+    position: absolute;
+    right: 0;
+    visibility: hidden;
+    color: $blue-300;
+    &:hover {
+      color: $blue-100;
+    }
+  }
+  .ellipsis {
+    max-width: 400px;
+    padding-right: 24px;
+  }
+  &:hover {
+    i.al-ico-trash {
+      visibility: visible;
+    }
+  }
+}
+.action.src-empty {
+  justify-content: center;
+  padding: 24px;
+  color: $blue-400;
+}
+
+.action:has(.al-ico-trash:hover) {
+  .al-ico-broken-file,
+  .ellipsis {
+    opacity: 0.4;
+  }
+}
+
 :host {
   // dark theme
   ::ng-deep .md-layout {
@@ -159,6 +203,10 @@
           border-radius: 2px !important;
           color: $blue-300;
           background-color: $blue-600;
+
+         &.btn-img-menu {
+            width: 42px;
+          }
 
           &:hover {
             color: $blue-200;
@@ -244,7 +292,7 @@
         border-radius: 4px;
         color: $blue-100;
         background-color: $blue-600;
-        border: 1px solid $blue-500;  
+        border: 1px solid $blue-500;
       }
 
       code.hljs {

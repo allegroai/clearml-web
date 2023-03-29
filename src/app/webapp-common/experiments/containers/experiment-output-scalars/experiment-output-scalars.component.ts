@@ -28,10 +28,10 @@ import {
 import {convertScalars, GroupedList} from '@common/tasks/tasks.utils';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {selectSelectedExperiment} from '~/features/experiments/reducers';
-import {GroupByCharts, groupByCharts} from '../../reducers/common-experiment-output.reducer';
+import {GroupByCharts, groupByCharts} from '../../reducers/experiment-output.reducer';
 import {ExtFrame} from '@common/shared/single-graph/plotly-graph-base';
 import {ExperimentGraphsComponent} from '@common/shared/experiment-graphs/experiment-graphs.component';
-import {isEqual} from 'lodash/fp';
+import {isEqual} from 'lodash-es';
 import { EventsGetTaskSingleValueMetricsResponseValues } from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponseValues';
 import { ReportCodeEmbedService } from '~/shared/services/report-code-embed.service';
 
@@ -52,9 +52,8 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
   public selectedGraph: string = null;
 
   private subs = new Subscription();
-  private experimentId: string;
+  protected experimentId: string;
   private routerParams$: Observable<any>;
-  private selectedExperimentId$: Observable<any>;
   public refreshDisabled: boolean;
   public listOfHidden: Observable<Array<any>>;
   public scalars$: any;
@@ -69,6 +68,8 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
   public groupBy$: Observable<GroupByCharts>;
   public splitSize$: Observable<number>;
   public groupBy: GroupByCharts;
+  protected entitySelector = this.store.select(selectSelectedExperiment) as Observable<{id?: string; name?: string}>;
+  protected exportForReport = true;
   private scalars: any;
 
   @ViewChild(ExperimentGraphsComponent) experimentGraphs;
@@ -86,11 +87,11 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
   public experimentName: string;
 
   constructor(
-    private store: Store<ExperimentInfoState>,
-    private router: Router,
-    private activeRoute: ActivatedRoute,
-    private changeDetection: ChangeDetectorRef,
-    private reportEmbed: ReportCodeEmbedService
+    protected store: Store<ExperimentInfoState>,
+    protected router: Router,
+    protected activeRoute: ActivatedRoute,
+    protected changeDetection: ChangeDetectorRef,
+    protected reportEmbed: ReportCodeEmbedService
   ) {
     this.searchTerm$ = this.store.pipe(select(selectExperimentMetricsSearchTerm));
     this.splitSize$ = this.store.pipe(select(selectSplitSize));
@@ -111,29 +112,18 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
     this.groupBy$ = this.store.select(selectSelectedSettingsGroupBy);
     this.singleValueData$  =  this.store.select(selectScalarSingleValue);
 
-    this.routerParams$ = this.store.pipe(
-      select(selectRouterParams),
-      filter(params => !!params.experimentId),
-      tap(params => this.experimentId = params.experimentId),
-      distinctUntilChanged()
-    );
+    this.routerParams$ = this.store.select(selectRouterParams)
+      .pipe(
+        filter(params => !!params.experimentId),
+        tap(params => this.experimentId = params.experimentId),
+        distinctUntilChanged()
+      );
 
-    this.selectIsExperimentPendingRunning = this.store.pipe(
-      select(selectIsExperimentInProgress)
-    );
-
-    this.selectedExperimentId$ = this.store.pipe(
-      select(selectRouterParams),
-      filter(params => !!params.experimentId),
-      distinctUntilChanged()
-    );
+    this.selectIsExperimentPendingRunning = this.store.select(selectIsExperimentInProgress);
 
     this.subs.add(this.xAxisType$
       .pipe(filter(axis => !!axis && !!this.experimentId))
-      .subscribe(() => {
-        this.store.dispatch(experimentScalarRequested({experimentId: this.experimentId}));
-        this.experimentGraphs.prepareRedraw();
-      })
+      .subscribe(() => this.axisChanged())
     );
 
     this.subs.add(this.groupBy$
@@ -164,9 +154,9 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
     this.listOfHidden = this.store.select(selectSelectedSettingsHiddenScalar)
       .pipe(distinctUntilChanged(isEqual));
 
-    this.subs.add(this.store.select(selectSelectedExperiment)
+    this.subs.add(this.entitySelector
       .pipe(
-        filter(experiment => !!experiment),
+        filter(experiment => !!experiment?.id),
         distinctUntilChanged()
       )
       .subscribe(experiment => {
@@ -261,7 +251,7 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
   private splitScalars(scalars: GroupedList): GroupedList {
     return Object.entries(scalars).reduce((acc, [metric, variantGraph]) => {
       Object.entries(variantGraph).forEach(([variant, graph]) => {
-        acc[metric + ' / ' + variant] = {[metric + ' / ' + variant]: graph};
+        acc[metric + ' / ' + variant] = {[metric + ' / ' + variant]: {...graph, originalMetric: metric}};
       });
       return acc;
     }, {});
@@ -273,5 +263,10 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
       tasks: [this.experimentId],
       ...event
     });
+  }
+
+  protected axisChanged() {
+    this.store.dispatch(experimentScalarRequested({experimentId: this.experimentId}));
+    this.experimentGraphs.prepareRedraw();
   }
 }

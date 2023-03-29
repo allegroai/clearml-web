@@ -75,7 +75,7 @@ $dark-theme: (
   input: (
     height: 32px,
     color: $blue-grey,
-    place-holder-color: $blue-400,
+    place-holder-color: $blue-300,
     background-color: #000,
     background-color-disabled: #000,
     border-radius: 4px,
@@ -106,7 +106,7 @@ $dark-theme: (
     border-radius: 4px,
     border: 0px,
     color: $blue-grey,
-    placeholder-color: $blue-400
+    placeholder-color: $blue-300
   ),
   table: (
     cell-padding: .75rem,

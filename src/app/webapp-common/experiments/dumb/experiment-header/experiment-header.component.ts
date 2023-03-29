@@ -1,9 +1,9 @@
 import {Component, EventEmitter, Input, Output, TemplateRef} from '@angular/core';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
-import {MetricValueType} from '@common/experiments-compare/reducers/experiments-compare-charts.reducer';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {BaseEntityHeaderComponent} from '@common/shared/entity-page/base-entity-header/base-entity-header.component';
+import {MetricValueType} from '@common/experiments-compare/experiments-compare.constants';
 
 @Component({
   selector   : 'sm-experiment-header',

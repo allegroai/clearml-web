@@ -1,0 +1,41 @@
+<sm-dialog-template *ngIf="!showButton; else content" iconClass="al-icon al-ico-datasets al-color blue-300" header="CREATE NEW DATASET">
+  <ng-container *ngTemplateOutlet="content"></ng-container>
+</sm-dialog-template>
+
+
+
+
+<ng-template #content>
+  <div class="content">
+  <div class="code">
+    <div class="d-flex justify-content-between">
+      <div>
+        Use ClearML Data from CLI or in your Python code.<br>
+        Run these code snippets for a quick example (Requires ClearML 1.7 or above).<br>
+        For more details see the <a [class.dark]="showButton" href="https://clear.ml/docs/latest/docs/clearml_data/clearml_data" target="_blank">documentation</a>
+      </div>
+    </div>
+    <div class="navbar">
+      <sm-navbar-item
+        direction="bottom"
+        header="CLI"
+        [active]="emptyStateTab==='cli'"
+        (click)="emptyStateTabClicked('cli')"></sm-navbar-item>
+      <sm-navbar-item
+        direction="bottom"
+        header="SDK"
+        [active]="emptyStateTab==='sdk'"
+        (click)="emptyStateTabClicked('sdk')"
+      ></sm-navbar-item>
+    </div>
+    <sm-code-editor
+      *ngIf="showCode"
+      [code]="emptyStateTab === 'cli'? initDatasetCLICode: initDatasetSDKCode"
+      [readonly]="true"
+      [mode]="emptyStateTab === 'cli'? 'ace/mode/sh': 'ace/mode/python'"
+      [showCopyButton]="true"
+    ></sm-code-editor>
+  </div>
+  <div class="diagram"><i class="i-datasets-empty-state"></i></div>
+</div>
+</ng-template>

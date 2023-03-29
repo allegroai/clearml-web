@@ -11,13 +11,17 @@ import {
   ViewChild
 } from '@angular/core';
 import {TemplateFormSectionBase} from '../../template-forms-ui/templateFormSectionBase';
-import {NG_VALUE_ACCESSOR, NgForm} from '@angular/forms';
+import {FormsModule, NG_VALUE_ACCESSOR, NgForm} from '@angular/forms';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {map, startWith} from 'rxjs/operators';
 import {fromEvent, Subscription} from 'rxjs';
 import {Observable} from 'rxjs/internal/Observable';
-import {MatOptionSelectionChange} from '@angular/material/core';
-import {MatAutocompleteTrigger} from '@angular/material/autocomplete';
+import {MatLegacyOptionModule as MatOptionModule, MatLegacyOptionSelectionChange as MatOptionSelectionChange} from '@angular/material/legacy-core';
+import {MatLegacyAutocompleteModule as MatAutocompleteModule, MatLegacyAutocompleteTrigger as MatAutocompleteTrigger} from '@angular/material/legacy-autocomplete';
+import {MatLegacyChipsModule as MatChipsModule} from '@angular/material/legacy-chips';
+import {MatLegacyFormFieldModule as MatFormFieldModule} from '@angular/material/legacy-form-field';
+import {AsyncPipe, NgFor, NgIf} from '@angular/common';
+import {ChipsModule} from '@common/shared/ui-components/buttons/chips/chips.module';
 
 
 export interface IOption {
@@ -35,7 +39,9 @@ export interface IOption {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => SelectAutocompleteWithChipsComponent),
       multi: true
-    }]
+    }],
+  standalone: true,
+  imports: [FormsModule, NgIf, NgFor, AsyncPipe, MatChipsModule, MatOptionModule, MatFormFieldModule, MatAutocompleteModule, ChipsModule]
 })
 
 export class SelectAutocompleteWithChipsComponent extends TemplateFormSectionBase implements OnDestroy, AfterViewInit {

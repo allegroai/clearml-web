@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import {UntypedFormControl, UntypedFormGroup, UntypedFormArray} from '@angular/forms';
 
-import {forEach} from 'lodash/fp';
+import {forEach} from 'lodash-es';
 
 @Injectable()
 export class SmFormBuilderService {
@@ -28,10 +28,10 @@ export class SmFormBuilderService {
 // @ts-ignore
   getFormErrors(form: UntypedFormGroup | UntypedFormArray, errors?: any): any {
     // @ts-ignore
-    forEach((control: any) => {
+    forEach(form.controls, (control: any) => {
       // @ts-ignore
       errors[control.name] = control.errors;
-    }, form.controls);
+    });
 
     return errors;
   }

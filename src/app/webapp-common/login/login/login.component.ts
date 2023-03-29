@@ -10,7 +10,7 @@ import {LoginMode, loginModes} from '../../shared/services/login.service';
 import {selectInviteId} from '../login-reducer';
 import {ConfigurationService} from '../../shared/services/configuration.service';
 import {ConfirmDialogComponent} from '../../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
-import {MatDialog} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {LoginService} from '~/shared/services/login.service';
 import {UserPreferences} from '../../user-preferences';
 import {Environment} from '../../../../environments/base';
@@ -47,14 +47,13 @@ export class LoginComponent implements OnInit, OnDestroy {
   public isInvite: boolean;
   public environment: Environment;
   public touLink: string;
-  private redirectUrl: string;
-  public banner: string;
   public showGitHub: boolean;
-  public stars: number = 0;
+  public stars: number;
+  private redirectUrl: string;
 
   @Input() showSimpleLogin: boolean;
   @Input() hideTou: boolean;
-  @Input() darkerTou = false;
+  @Input() darkTheme = true;
 
   constructor(
     private router: Router,
@@ -67,6 +66,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef
   ) {
     this.environment = config.getStaticEnvironment();
+    this.showGitHub = !this.environment.enterpriseServer && !this.environment.communityServer;
   }
 
   get buttonCaption() {
@@ -152,18 +152,6 @@ export class LoginComponent implements OnInit, OnDestroy {
         });
     });
 
-    this.banner = this.environment.loginBanner;
-    this.showGitHub = !this.environment.enterpriseServer;
-
-    if (this.showGitHub) {
-      fetch('https://api.github.com/repos/allegroai/clearml', {method: 'GET'})
-        .then(response => response.json()
-          .then(json => {
-            this.stars = json['stargazers_count'];
-            this.cdr.detectChanges();
-          })
-        );
-    }
   }
 
   ngOnDestroy() {

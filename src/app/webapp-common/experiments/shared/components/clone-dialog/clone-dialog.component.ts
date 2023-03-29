@@ -1,4 +1,4 @@
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
 import {Project} from '~/business-logic/model/projects/project';
 import {Component, ElementRef, Inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Store} from '@ngrx/store';
@@ -8,7 +8,7 @@ import {selectRootProjects} from '@common/core/reducers/projects.reducer';
 import {getAllSystemProjects} from '@common/core/actions/projects.actions';
 import {map} from 'rxjs/operators';
 import {CloneForm} from '../../common-experiment-model.model';
-import {isEqual} from 'lodash/fp';
+import {isEqual} from 'lodash-es';
 import {isReadOnly} from '@common/shared/utils/is-read-only';
 
 @Component({

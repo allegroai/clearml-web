@@ -15,7 +15,7 @@ import {select, Store} from '@ngrx/store';
 import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {AdminService} from '~/shared/services/admin.service';
 import {selectS3BucketCredentials} from '../core/reducers/common-auth-reducer';
-import {MatDialog} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import * as  debugActions from './debug-images-actions';
 import {fetchExperiments, getDebugImagesMetrics, resetDebugImages} from './debug-images-actions';
 import {
@@ -34,14 +34,14 @@ import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
 import {ImageViewerComponent} from '../shared/debug-sample/image-viewer/image-viewer.component';
 import {selectSelectedExperiment} from '~/features/experiments/reducers';
 import {TaskMetric} from '~/business-logic/model/events/taskMetric';
-import {get, isEqual} from 'lodash/fp';
+import {isEqual} from 'lodash-es';
 import {ALL_IMAGES} from './debug-images-effects';
 import {getSignedUrl} from '../core/actions/common-auth.actions';
 import {addMessage} from '../core/actions/layout.actions';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {selectBeginningOfTime} from '@common/shared/debug-sample/debug-sample.reducer';
 import {LIMITED_VIEW_LIMIT} from '@common/experiments-compare/experiments-compare.constants';
-import { ReportCodeEmbedService } from '~/shared/services/report-code-embed.service';
+import {ReportCodeEmbedService} from '~/shared/services/report-code-embed.service';
 
 export interface Event {
   timestamp: number;
@@ -168,7 +168,7 @@ export class DebugImagesComponent implements OnInit, OnDestroy, OnChanges {
       }
       Object.keys(debugImages).forEach(key => {
         if (!this.selectedMetrics[key]) {
-          this.selectedMetrics[key] = get('metric', debugImages[key]);
+          this.selectedMetrics[key] = debugImages[key]?.metric;
         }
       });
       this.changeDetection.markForCheck();
@@ -206,10 +206,9 @@ export class DebugImagesComponent implements OnInit, OnDestroy, OnChanges {
     if (multipleExperiments) {
       this.routerParamsSubscription = this.routerParams$
         .subscribe(params => {
-          const experiments = (params.ids ? params.ids.split(',') : params.experimentId.split(','));
-            this.experimentIds = experiments;
-            this.store.dispatch(getDebugImagesMetrics({tasks: this.experimentIds.slice(0, LIMITED_VIEW_LIMIT)}));
-            this.store.dispatch(fetchExperiments({tasks: this.experimentIds.slice(0, LIMITED_VIEW_LIMIT)}));
+          this.experimentIds = (params.ids ? params.ids.split(',') : params.experimentId.split(','));
+          this.store.dispatch(getDebugImagesMetrics({tasks: this.experimentIds.slice(0, LIMITED_VIEW_LIMIT)}));
+          this.store.dispatch(fetchExperiments({tasks: this.experimentIds.slice(0, LIMITED_VIEW_LIMIT)}));
         });
 
       this.taskNamesSubscription = this.tasks$
@@ -312,7 +311,11 @@ export class DebugImagesComponent implements OnInit, OnDestroy, OnChanges {
     const index = iterationSnippets.findIndex(img => img.url === frame.url);
     const isAllMetrics = this.selectedMetrics[experimentId] === ALL_IMAGES;
     this.dialog.open(ImageViewerComponent, {
-      data: {imageSources: sources, index, snippetsMetaData: iterationSnippets, isAllMetrics},
+      data: {
+        embedFunction: (rect: DOMRect, metric: string, variant: string) =>
+          this.createEmbedCode({metrics: [metric], variants: [variant], domRect: rect}, experimentId),
+        imageSources: sources, index, snippetsMetaData: iterationSnippets, isAllMetrics
+      },
       panelClass: ['image-viewer-dialog'],
       height: '100%',
       maxHeight: 'auto',

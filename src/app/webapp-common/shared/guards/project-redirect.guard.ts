@@ -17,14 +17,10 @@ export class ProjectRedirectGuardGuard implements CanActivate {
     this.selectedProject$ = this.store.select(selectSelectedProject);
   }
 
-  canActivate(
-    route: ActivatedRouteSnapshot): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
+  canActivate(route: ActivatedRouteSnapshot): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
     return this.selectedProject$.pipe(
-      tap(project =>
-        project === null && this.store.dispatch(setSelectedProjectId({projectId: route.params.projectId}))
-      ),
+      tap(project => project === null && this.store.dispatch(setSelectedProjectId({projectId: route.params.projectId}))),
       filter(project => project?.id === route.params.projectId),
-
       withLatestFrom(this.store.select(selectSelectedMetricVariantForCurrProject)),
       map(([project, metVar]) => this.router.parseUrl(`projects/${project.id}/${(project.description || metVar) ? 'overview' : 'experiments'}`)));
   }

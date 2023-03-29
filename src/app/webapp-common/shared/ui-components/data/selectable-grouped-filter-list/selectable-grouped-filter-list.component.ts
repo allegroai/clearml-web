@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
-import {isEqual} from 'lodash/fp';
+import {isEqual} from 'lodash-es';
 import {GroupedList} from '@common/tasks/tasks.utils';
 
 @Component({

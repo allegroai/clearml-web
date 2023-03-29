@@ -7,7 +7,7 @@ import {
 } from '../../actions/models-menu.actions';
 import {htmlTextShorte} from '@common/shared/utils/shared-utils';
 import {ICONS} from '@common/constants';
-import {MatDialog} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {Store} from '@ngrx/store';
 import {AdminService} from '~/shared/services/admin.service';
 import {selectS3BucketCredentials} from '@common/core/reducers/common-auth-reducer';
@@ -25,7 +25,7 @@ import {
 import {SelectedModel} from '../../shared/models.model';
 import {CommonDeleteDialogComponent} from '@common/shared/entity-page/entity-delete/common-delete-dialog.component';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
-import {CancelModelEdit} from '../../actions/models-info.actions';
+import {cancelModelEdit} from '../../actions/models-info.actions';
 import {BaseContextMenuComponent} from '@common/shared/components/base-context-menu/base-context-menu.component';
 import {
   selectionDisabledArchive,
@@ -44,8 +44,8 @@ import {isReadOnly} from '@common/shared/utils/is-read-only';
 })
 export class ModelMenuComponent extends BaseContextMenuComponent {
 
-  readonly ICONS = ICONS;
-  private S3BucketCredentials: Observable<any>;
+  readonly icons = ICONS;
+  private s3BucketCredentials: Observable<any>;
   public modelSignedUri: string;
   public _model: any;
   public isExample: boolean;
@@ -80,7 +80,7 @@ export class ModelMenuComponent extends BaseContextMenuComponent {
     protected eRef: ElementRef
   ) {
     super(store, eRef);
-    this.S3BucketCredentials = store.select(selectS3BucketCredentials);
+    this.s3BucketCredentials = store.select(selectS3BucketCredentials);
   }
 
   archiveClicked() {
@@ -124,7 +124,7 @@ export class ModelMenuComponent extends BaseContextMenuComponent {
     const dialog = this.dialog.open(ChangeProjectDialogComponent, {
       data: {
         currentProjects: currentProjects.length > 0 ? currentProjects : [selectedModels[0].project?.id],
-        defaultProject: selectedModels[0].project?.id,
+        defaultProject: selectedModels[0].project,
         reference: selectedModels.length > 1 ? selectedModels : selectedModels[0]?.name,
         type: 'model'
       }
@@ -178,12 +178,12 @@ export class ModelMenuComponent extends BaseContextMenuComponent {
         this.store.dispatch(setSelectedModels({models: []}));
         this.store.dispatch(modelSelectionChanged({model: null, project: this.projectId || this.model?.project?.id || '*'}));
         this.store.dispatch(fetchModelsRequested());
-        this.store.dispatch(new CancelModelEdit());
+        this.store.dispatch(cancelModelEdit());
       }
     });
   }
 
-  toggleDetails () {
+  toggleDetails() {
     this.store.dispatch(setTableMode({mode:'info'}));
     this.store.dispatch(modelSelectionChanged({
       model: this._model,

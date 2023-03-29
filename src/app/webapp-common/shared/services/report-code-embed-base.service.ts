@@ -11,12 +11,13 @@ import {ClipboardService} from 'ngx-clipboard';
 import { take } from 'rxjs';
 
 export interface ReportCodeEmbedConfiguration {
-  type: 'plot' | 'multiplot' | 'scalar' | 'multiscalar' | 'sample';
+  type: 'plot' | 'multiplot' | 'scalar' | 'multiscalar' | 'sample' | 'parcoords';
   tasks: string[];
   domRect: DOMRect;
   name?: string;
   metrics?: string[];
   variants?: string[];
+  valueType?: string;
 }
 
 @Injectable({
@@ -49,6 +50,7 @@ export class ReportCodeEmbedBaseService {
     const url = new URL(window.location.origin + this.locationStrategy.getBaseHref());
     url.pathname = url.pathname + 'widgets/';
     url.searchParams.set('type', conf.type);
+    conf.valueType && url.searchParams.set('value_type', conf.valueType);
     let urlStr = url.toString();
     ['tasks', 'metrics', 'variants'].forEach(key => {
       if (conf[key]?.filter(v => !!v).length > 0) {

@@ -1,12 +1,12 @@
 import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
-import {getOr} from 'lodash/fp';
+import {get} from 'lodash-es';
 import {SelectedModel} from '../../shared/models.model';
 import {NA} from '~/app.constants';
 import {TAGS} from '@common/tasks/tasks.constants';
 import {DatePipe} from '@angular/common';
 import {TIME_FORMAT_STRING} from '@common/constants';
 import {Store} from '@ngrx/store';
-import {ActivateModelEdit, CancelModelEdit} from '../../actions/models-info.actions';
+import {activateModelEdit, cancelModelEdit} from '../../actions/models-info.actions';
 import {AdminService} from '~/shared/services/admin.service';
 import {getSignedUrl} from '@common/core/actions/common-auth.actions';
 import {selectSignedUrl} from '@common/core/reducers/common-auth-reducer';
@@ -39,14 +39,9 @@ export class ModelGeneralInfoComponent {
         {label: 'FRAMEWORK', value: model.framework || NA},
         {label: 'STATUS', value: (model.ready !== undefined) ? (model.ready ? 'Published' : 'Draft') : NA},
         {label: 'MODEL URL', value: model.uri || NA, downloadable: true},
-        {label: 'USER', value: getOr(NA, 'user.name', model)},
-        {
-          label: 'CREATING EXPERIMENT', value: getOr(false, 'task.name', model),
-          href: `/projects/${getOr('*', 'task.project.id', model)}/experiments/${getOr('', 'task.id', model)}`,
-          task: getOr(false, 'task.id', model)
-        },
+        {label: 'USER', value: get( model,'user.name', NA)},
         {label: 'ARCHIVED', value: model && model.system_tags && model.system_tags.includes(TAGS.HIDDEN) ? 'Yes' : 'No'},
-        {label: 'PROJECT', value: getOr(NA, 'project.name', model)},
+        {label: 'PROJECT', value: get(model, 'project.name', NA)},
       ];
     }
   }
@@ -71,11 +66,11 @@ export class ModelGeneralInfoComponent {
   }
 
   editExperimentComment(edit) {
-    edit && this.store.dispatch(new ActivateModelEdit('ModelComment'));
+    edit && this.store.dispatch(activateModelEdit('ModelComment'));
   }
 
   cancelEdit() {
-    this.store.dispatch(new CancelModelEdit());
+    this.store.dispatch(cancelModelEdit());
   }
 
   downloadModelClicked() {

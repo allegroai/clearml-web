@@ -1,6 +1,7 @@
 @import "src/app/webapp-common/shared/ui-components/styles/variables";
 
 .placeholder {
+  height: 100%;
   color: $blue-400;
   min-height: 150px;
   display: flex;
@@ -10,15 +11,7 @@
   font-size: 14px;
 }
 
-.s3message {
-  color: $blue-400;
-  min-height: 150px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  font-size: 14px;
-}
+
 
 .show-text {
   cursor: pointer;
@@ -39,4 +32,38 @@
 
 .no-pointer {
   pointer-events: none;
+}
+
+
+.container {
+  height: 100%;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 14px;
+  color: $blue-400;
+  background: #fff;
+
+  // links
+  a:link, a:visited {
+    color: $purple;
+    text-decoration: none;
+  }
+  a:hover {
+    text-decoration: underline;
+  }
+  &.dark-theme {
+    background: $blue-800;
+    color: $blue-250;
+    a:link, a:visited {
+      color: $neon-yellow;
+    }
+  }
+}
+
+.s3message {
+  padding: 24px;
+  // min-height: 150px;
 }

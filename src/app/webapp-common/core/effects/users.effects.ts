@@ -23,7 +23,6 @@ import {setCurrentUser} from '~/core/actions/users.action';
 import {UsersUpdateResponse} from '~/business-logic/model/users/usersUpdateResponse';
 import {MESSAGES_SEVERITY} from '@common/constants';
 
-
 @Injectable()
 export class CommonUserEffects {
 

@@ -23,9 +23,42 @@
                height="100%"
                [mode]="editMode ? 'editor' : 'preview'"
                [options]="options"
+               [upload]="handleUpload"
                (onEditorLoaded)="editorReady($event)"
                (onPreviewDomChanged)="domFixes()"
-               (ngModelChange)="checkDirty()">
+               (ngModelChange)="checkDirty()"
+    >
+      <div *ngIf="handleUpload" custom-btns class="extra-buttons">
+        <input #imgInput type="file" accept=".jpg,.jpeg,.png,.webm" multiple="multiple" style="display: none" (change)="uploadImg($event)" />
+        <mat-menu
+          #imageActions=matMenu
+          smClickStopPropagation
+          class="action-menu dark"
+        >
+          <button mat-menu-item class="action" (click)="imgInput.click()">
+            <i class="al-icon al-ico-upload sm-md pointer"></i>Upload Image
+          </button>
+          <hr class="dark"/>
+          <ng-container *ngIf="resources?.length > 0; else: noResources">
+            <button
+              *ngFor="let resource of resources; trackBy: trackByUrl"
+              mat-menu-item class="action" (click)="insertImage(resource.url)">
+                <i class="al-icon sm-md" [class]="resource.unused ? 'al-ico-broken-file' : 'al-ico-image'"></i>
+                <span class="ellipsis">{{resource.url | baseName}}</span>
+                <i class="al-icon al-ico-trash sm-md" (click)="$event.stopPropagation(); $event.preventDefault(); deleteResource.emit(resource.url)"></i>
+            </button>
+          </ng-container>
+          <ng-template #noResources><div class="action src-empty">No uploads yet</div></ng-template>
+        </mat-menu>
+
+        <button
+          [matMenuTriggerFor]="imageActions"
+          (onMenuOpen)="imageMenuOpened.emit(data)"
+          type="button"
+          class="btn btn-default btn-img-menu"
+          smTooltip="Image resources"
+        ><i class="al-icon al-ico-image sm-md"></i><i class="al-icon al-ico-dropdown-arrow sm"></i></button>
+      </div>
     </md-editor>
   </div>
 

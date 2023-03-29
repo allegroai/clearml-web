@@ -24,14 +24,12 @@
          [class.disabled]="missingSource"
          ngxClipboard
          smTooltip="Copy Image URL"
-
          [cbContent]="copyContent"
          (cbOnSuccess)="copyToClipboardSuccess(true)">
       <i class="al-icon sm-md al-ico-copy-to-clipboard"></i>
     </div>
     <div class="clickable-icon d-flex align-items-center justify-content-center pointer"
          smTooltip="Open Image"
-
          (click)="openImageClicked.emit()"
     >
       <i class="al-icon sm-md al-ico-export"></i>

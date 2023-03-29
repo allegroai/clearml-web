@@ -5,19 +5,19 @@ import {Store} from '@ngrx/store';
 import {ModelInfoState} from '../../reducers/model-info.reducer';
 import {Observable, Subscription} from 'rxjs';
 import {SelectedModel} from '../../shared/models.model';
-import {selectIsSharedAndNotOwner} from '../../../../features/experiments/reducers';
-import {ActivateModelEdit, CancelModelEdit, saveMetaData, SetIsModelSaving} from '../../actions/models-info.actions';
-import {cloneDeep} from 'lodash/fp';
-import {trackById} from '../../../shared/utils/forms-track-by';
+import {selectIsSharedAndNotOwner} from '~/features/experiments/reducers';
+import {activateModelEdit, cancelModelEdit, saveMetaData, setSavingModel } from '../../actions/models-info.actions';
+import {cloneDeep} from 'lodash-es';
+import {trackById} from '@common/shared/utils/forms-track-by';
 
 export interface IModelMetadataMap {
-  [key: string]: IModelMetadataItem
+  [key: string]: IModelMetadataItem;
 }
 
 export interface IModelMetadataItem {
-  key?: string,
-  type?: string,
-  value?: string
+  key?: string;
+  type?: string;
+  value?: string;
 }
 
 @Component({
@@ -51,26 +51,29 @@ export class ModelInfoMetadataComponent implements OnInit, OnDestroy {
     this.modelSub = this.selectedModel$.subscribe(model => {
       this.originalMetadata = Object.values(cloneDeep(model?.metadata));
       this.metadata = Object.values(cloneDeep(model?.metadata));
-    })
+    });
   }
 
   saveFormData() {
     this.inEdit = false;
-    const metadataObject = this.metadata.reduce((acc, metaItem) => (acc[metaItem.key] = metaItem, acc), {}) as IModelMetadataMap;
-    this.store.dispatch(new SetIsModelSaving(true));
-    this.store.dispatch(saveMetaData({metadata: metadataObject}))
+    const metadataObject = this.metadata.reduce((acc, metaItem) => {
+      acc[metaItem.key] = metaItem;
+      return acc;
+    }, {}) as IModelMetadataMap;
+    this.store.dispatch(setSavingModel (true));
+    this.store.dispatch(saveMetaData({metadata: metadataObject}));
   }
 
   cancelModelMetaDataChange() {
     this.inEdit = false;
     this.metadata = cloneDeep(this.originalMetadata);
-    this.store.dispatch(new CancelModelEdit());
+    this.store.dispatch(cancelModelEdit());
   }
 
 
   activateEditChanged(section: string) {
     this.inEdit = true;
-    this.store.dispatch(new ActivateModelEdit(section));
+    this.store.dispatch(activateModelEdit(section));
   }
 
   addRow() {

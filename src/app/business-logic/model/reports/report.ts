@@ -73,4 +73,5 @@ export interface Report {
     last_update?: string;
 
     report?: string;
+    report_assets?: string[];
 }

@@ -1,7 +1,7 @@
 import {EventEmitter, Input, OnDestroy, OnInit, Output, Directive} from '@angular/core';
 import {ImmutableForm} from './immutableForm.model';
 import {ValidatorFn} from '@angular/forms';
-import {isEmpty, isEqual} from 'lodash/fp';
+import {isEmpty, isEqual} from 'lodash-es';
 
 @Directive()
 export class ImmutableFormField implements OnInit, OnDestroy, ImmutableForm {

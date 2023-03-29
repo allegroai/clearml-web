@@ -1,23 +1,35 @@
-import {Component, ElementRef, HostListener, Input, OnInit, ViewChild} from '@angular/core';
-import {PlotlyGraphBaseComponent} from '@common/shared/single-graph/plotly-graph-base';
-import {debounceTime, filter, take} from 'rxjs/operators';
-import {ColorHashService} from '@common/shared/services/color-hash/color-hash.service';
-import {get, getOr, isEqual, max, min, uniq, cloneDeep} from 'lodash/fp';
-import {MetricValueType, SelectedMetric} from '../../reducers/experiments-compare-charts.reducer';
-import {Task} from '~/business-logic/model/tasks/task';
-import {select} from 'd3-selection';
-import {sortCol} from '@common/shared/utils/tableParamEncode';
+import {Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, ViewChild} from '@angular/core';
+import {
+  DARK_THEME_GRAPH_LINES_COLOR,
+  DARK_THEME_GRAPH_TICK_COLOR, ExtData,
+  ExtFrame,
+  ExtLayout,
+  PlotlyGraphBaseComponent
+} from '@common/shared/single-graph/plotly-graph-base';
+import {NgForOf, NgIf, SlicePipe} from '@angular/common';
 import {Store} from '@ngrx/store';
-import {Axis, Color, ColorBar, ColorScale} from 'plotly.js';
-import domtoimage from 'dom-to-image/dist/dom-to-image.min';
+import {debounceTime, filter, take} from 'rxjs/operators';
 import {from} from 'rxjs';
+import {cloneDeep, get, isEqual, max, min, uniq} from 'lodash-es';
+import domtoimage from 'dom-to-image';
+import {Axis, Color, ColorBar, ColorScale} from 'plotly.js';
+import {select} from 'd3-selection';
+import {ColorHashService} from '@common/shared/services/color-hash/color-hash.service';
+import {Task} from '~/business-logic/model/tasks/task';
+import {ChooseColorModule} from '@common/shared/ui-components/directives/choose-color/choose-color.module';
+import {sortCol} from '@common/shared/utils/sortCol';
+import {MetricValueType, SelectedMetric} from '@common/experiments-compare/experiments-compare.constants';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {trackById} from '@common/shared/utils/forms-track-by';
+import {GraphViewerComponent, GraphViewerData} from '@common/shared/single-graph/graph-viewer/graph-viewer.component';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 declare let Plotly;
 
-interface ExtraTask extends Task {
-  duplicateName: boolean;
-  hidden: boolean;
+export interface ExtraTask extends Task {
+  duplicateName?: boolean;
+  hidden?: boolean;
 }
 
 interface Dimension extends Partial<Axis> {
@@ -41,10 +53,19 @@ interface ParaPlotData {
 @Component({
   selector: 'sm-parallel-coordinates-graph',
   templateUrl: './parallel-coordinates-graph.component.html',
-  styleUrls: ['./parallel-coordinates-graph.component.scss']
+  styleUrls: ['./parallel-coordinates-graph.component.scss'],
+  imports: [
+    ChooseColorModule,
+    SlicePipe,
+    TooltipDirective,
+    NgForOf,
+    NgIf
+  ],
+  standalone: true
 })
 export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent implements OnInit {
 
+  public trackById = trackById;
   private data: ParaPlotData[];
   private _experiments: ExtraTask[];
   private _metric: SelectedMetric;
@@ -54,8 +75,9 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
   private _parameters: string[];
 
   @ViewChild('parallelGraph', {static: true}) parallelGraph: ElementRef;
+  @ViewChild('legend', {static: true}) legend: ElementRef;
   @ViewChild('container') container: ElementRef<HTMLDivElement>;
-  private graphWidth: any;
+  private graphWidth: number;
   private _metricValueType: MetricValueType;
   private highlighted: ExtraTask;
   private dimensionsOrder: string[];
@@ -108,7 +130,7 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
 
 
   @Input() set experiments(experiments) {
-    let experimentsCopy = cloneDeep(experiments);
+    let experimentsCopy = cloneDeep(experiments) ?? [];
     if (experimentsCopy && (!this.experiments || !isEqual(experimentsCopy.map(experiment => experiment.id), this.experiments.map(experiment => experiment.id)))) {
 
       const experimentsNames = experimentsCopy.map(experiment => experiment.name);
@@ -127,6 +149,23 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
 
   get experiments(): ExtraTask[] {
     return this._experiments;
+  }
+
+
+  @Input() reportMode = false;
+  @Input() darkTheme = false;
+  @Output() createEmbedCode = new EventEmitter<{ tasks: string[]; valueType: MetricValueType; metrics?: string[]; variants?: string[]; domRect: DOMRect }>();
+
+  constructor(
+    private colorHash: ColorHashService,
+    protected store: Store,
+    private dialog: MatDialog,
+  ) {
+    super(store);
+  }
+
+  ngOnInit(): void {
+    this.initColorSubscription();
   }
 
   private initColorSubscription(forceRedraw = false): void {
@@ -148,29 +187,21 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
       });
   }
 
-  constructor(
-    private colorHash: ColorHashService,
-    protected store: Store
-  ) {
-    super(store);
-  }
-
-  ngOnInit(): void {
-    this.initColorSubscription();
-  }
-
   toggleHideExperiment(experimentId): void {
     if (this.filteredExperiments.includes(experimentId)) {
       this.filteredExperiments = this.filteredExperiments.filter(id => id !== experimentId);
     } else {
       this.filteredExperiments.push(experimentId);
     }
-    this._experiments = this.experiments.map(experiment => ({...experiment, hidden: this.filteredExperiments.includes(experiment.id)}));
+    this._experiments = this.experiments.map(experiment => ({
+      ...experiment,
+      hidden: this.filteredExperiments.includes(experiment.id)
+    }));
     this.prepareGraph();
   }
 
   getStringColor(experiment: ExtraTask): string {
-    const colorArr = this.colorHash.initColor(this.getExperimentNameForColor(experiment));
+    const colorArr = this.colorHash.initColor(this.getExperimentNameForColor(experiment), null, this.darkTheme);
     return `rgb(${colorArr[0]},${colorArr[1]},${colorArr[2]})`;
   }
 
@@ -191,7 +222,7 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
         labelangle: 30,
         dimensions: this.parameters.map((parameter) => {
           parameter = `${parameter}.value`;
-          const allValuesIncludingNull = this.experiments.map(experiment => get(parameter, experiment.hyperparams));
+          const allValuesIncludingNull = this.experiments.map(experiment => get(experiment.hyperparams, parameter));
           const allValues = allValuesIncludingNull.filter(value => (value !== undefined)).filter(value => (value !== ''));
           const textVal: any = {};
           let ticktext = this.naturalCompare(uniq(allValues).filter(text => text !== ''));
@@ -211,13 +242,13 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
             label: parameter,
             ticktext,
             tickvals,
-            values: filteredExperiments.map((experiment) => (textVal[['', undefined].includes(get(parameter, experiment.hyperparams)) ? 'N/A' : get(parameter, experiment.hyperparams)])),
+            values: filteredExperiments.map((experiment) => (textVal[['', undefined].includes(get(experiment.hyperparams, parameter)) ? 'N/A' : get(experiment.hyperparams, parameter)])),
             range: [0, max(tickvals)],
             constraintrange,
 
           };
         })
-      } as ParaPlotData ;
+      } as ParaPlotData;
       if (filteredExperiments.length > 1) {
         trace.line = {
           color: this.getColorsArray(filteredExperiments),
@@ -235,7 +266,7 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
       // this.drawChart();
 
       if (this.metric) {
-        const allValuesIncludingNull = this.experiments.map(experiment => get(`${this.metric.path}.${this.metricValueType}`, experiment.last_metrics));
+        const allValuesIncludingNull = this.experiments.map(experiment => get(experiment.last_metrics, `${this.metric.path}.${this.metricValueType}`));
         const allValues = allValuesIncludingNull.filter(value => value !== undefined);
         const naVal = this.getNAValue(allValues);
         const ticktext = uniq(allValuesIncludingNull.map(value => value !== undefined ? value : 'N/A'));
@@ -249,13 +280,23 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
         }
         trace.dimensions.push({
           label: this.metric.name,
+
           ticktext,
           tickvals,
           values: filteredExperiments.map((experiment) =>
-            parseFloat(getOr(naVal, `${this.metric.path}.${this.metricValueType}`, experiment.last_metrics))
+            parseFloat(get(experiment.last_metrics, `${this.metric.path}.${this.metricValueType}`, naVal))
           ),
           range: [min(tickvals), max(tickvals)],
-          constraintrange
+          constraintrange,
+          color: 'red',
+          gridcolor: 'red',
+          linecolor: 'green',
+          tickcolor: 'red',
+          dividercolor: 'green',
+          spikecolor: 'yellow',
+          dividerwidth: 3,
+          tickwidth: 2,
+          linewidth: 4,
         });
       }
       this.data = [trace];
@@ -275,12 +316,27 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
     return valuesMax === valuesMin ? (valuesMin - 1) : valuesMin - ((valuesMax - valuesMin) / values.length);
   }
 
-  private drawChart() {
-    Plotly.react(this.parallelGraph.nativeElement, this.data, {
+  getLayout(setDimentiosn = true) {
+    return {
       margin: {l: 120, r: 120},
-      height: 500,
-      width: this.parallelGraph.nativeElement.offsetWidth
-    }, {
+      ...(setDimentiosn && {
+        height: 500,
+        width: this.parallelGraph.nativeElement.offsetWidth,
+      }),
+      ...(this.darkTheme ? {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        paper_bgcolor: 'transparent',
+        height: this.parallelGraph.nativeElement.parentElement.offsetHeight - this.legend.nativeElement.offsetHeight - 40,
+        margin: {l: 120, r: 120, b: 20},
+        font: {
+          color: DARK_THEME_GRAPH_TICK_COLOR
+        },
+      } : {})
+    } as ExtLayout;
+  }
+
+  private drawChart() {
+    Plotly.react(this.parallelGraph.nativeElement, this.data, this.getLayout(), {
       displaylogo: false,
       displayModeBar: false,
       modeBarButtonsToRemove: ['toggleHover']
@@ -300,6 +356,7 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
       graph.selectAll('.axis-title').text((d: any) => this.wrap(d.key)).append('title').text(d => (d as any).key);
       graph.selectAll('.axis .tick text').text((d: string) => this.wrap(d)).append('title').text((d: string) => d);
       graph.selectAll('.axis .tick text').style('pointer-events', 'auto');
+      this.darkTheme && graph.selectAll('.dark-theme .axis .domain').style('stroke', DARK_THEME_GRAPH_LINES_COLOR).style('stroke-opacity', 1);
       graph.selectAll('.tick').on('mouseover', (event: MouseEvent) => {
         const tick = event.currentTarget as SVGGElement;
         const axis = tick.parentNode as SVGGElement;
@@ -343,7 +400,10 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
 
   removeHighlightExperiment() {
     this.highlighted = null;
-    this._experiments = this.experiments.map(experiment => ({...experiment, hidden: this.filteredExperiments.includes(experiment.id)}));
+    this._experiments = this.experiments.map(experiment => ({
+      ...experiment,
+      hidden: this.filteredExperiments.includes(experiment.id)
+    }));
     this.prepareGraph();
     this.dimensionsOrder = null;
   }
@@ -356,8 +416,37 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
         const a = document.createElement('a');
         a.href = url;
         a.target = '_blank';
-        a.download = `Hyper Parameters ${this._metric.name}.png`;
+        a.download = `Hyperparameters ${this._metric.name}.png`;
         a.click();
       });
+  }
+
+  creatingEmbedCode(domRect: DOMRect) {
+    this.createEmbedCode.emit({tasks: this.experiments.map(exp => exp.id), valueType: this.metricValueType, metrics: [this.metric.path], variants: this.parameters, domRect});
+  }
+
+  maximize() {
+    this.dialog.open(GraphViewerComponent, {
+      data: {
+        embedFunction: (rect: DOMRect) => this.creatingEmbedCode(rect),
+        // signed url are updated after originChart was cloned - need to update images urls!
+        chart: cloneDeep({
+          data: this.data as unknown as ExtData[],
+          layout: this.getLayout(false),
+          config: {
+            displaylogo: false,
+            displayModeBar: false,
+          }
+        } as ExtFrame),
+        id: `compare params ${this.experiments?.map(e => e.id).join(',')}`,
+        darkTheme: false,
+        isCompare: true,
+      } as GraphViewerData,
+      panelClass: ['image-viewer-dialog', 'light-theme'],
+      height: '100%',
+      maxHeight: 'auto',
+      width: '100%',
+      maxWidth: 'auto'
+    });
   }
 }

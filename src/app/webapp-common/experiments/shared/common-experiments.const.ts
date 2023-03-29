@@ -5,8 +5,6 @@ import {DATASETS_STATUS_LABEL, EXPERIMENTS_STATUS_LABELS} from '~/features/exper
 export type ExperimentWizardMethodsEnum = 'create' | 'edit' | 'clone' | 'extend';
 export type ChartHoverModeEnum = 'x' | 'y' | 'closest' | false | 'x unified' | 'y unified';
 
-export const EXPERIMENTS_STORE_KEY = 'experiments';
-
 export const WIZARD_METHODS = {
   CREATE: 'create' as ExperimentWizardMethodsEnum,
   CLONE : 'clone' as ExperimentWizardMethodsEnum,

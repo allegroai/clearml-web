@@ -1,9 +1,9 @@
 import {Component, Inject} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
 import {IShareDialogConfig} from './share-dialog.model';
-import {addMessage} from '../../../../core/actions/layout.actions';
+import {addMessage} from '@common/core/actions/layout.actions';
 import {Store} from '@ngrx/store';
-import {shareSelectedExperiments} from '../../../../experiments/actions/common-experiments-menu.actions';
+import {shareSelectedExperiments} from '@common/experiments/actions/common-experiments-menu.actions';
 import {MESSAGES_SEVERITY} from '@common/constants';
 
 @Component({

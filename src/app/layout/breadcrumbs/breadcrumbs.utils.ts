@@ -12,3 +12,10 @@ export const selectBreadcrumbsStringsBase = createSelector(
   selectSelectedProject, selectSelectedExperiment, selectSelectedTableModel, selectRootProjects, selectReport,
   (project, experiment, model, projects, report) =>
     ({project, experiment, model, projects, report}) as IBreadcrumbs);
+
+export enum NestedProjectTypeUrlEnum {
+  pipelines = 'pipelines',
+  datasets = 'datasets/simple',
+  reports = 'reports',
+  projects = 'projects'
+}

@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
-import {isEmpty} from 'lodash/fp';
+import {isEmpty} from 'lodash-es';
 import {ITask} from '../../../../../business-logic/model/al-task';
 import {TIME_FORMAT_STRING} from '../../../../constants';
 

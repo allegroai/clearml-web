@@ -1,0 +1,43 @@
+<sm-card class="project-card"
+         (click)="projectClicked()"
+         [isExample]="!['All Experiments'].includes(project.name) && !isRootProject && (!project.company || ! project.company.id)"
+         [isFolder]="true"
+         [oneTabMode]="!(project?.sub_projects?.length>0)"
+         [subFolderTitle]="project?.sub_projects?.length + ' sub projects'"
+>
+  <div secondTab class="sub-projects-list">
+    <cdk-virtual-scroll-viewport [itemSize]="30" class="h-100">
+      <div *cdkVirtualFor="let subProject of project?.sub_projects; trackBy: trackById">
+        <a class="d-flex align-items-center"
+           smClickStopPropagation
+           (click)="subProjectClicked(subProject)"
+           [smTooltip]="subProject?.name | cleanProjectPath "
+           [innerHTML]="subProject?.name | cleanProjectPath | breadcrumbsEllipsis"></a>
+      </div>
+    </cdk-virtual-scroll-viewport>
+  </div>
+  <div header-content class="d-flex justify-content-between align-items-center card-name">
+    <sm-inline-edit #projectName
+                    class="title edit-name dark"
+                    [originalText]="project.name | shortProjectName"
+                    [editable]="false"
+                    [minLength]="2"
+                    [required]="true"
+                    pattern="^[^/]{2,}$"
+                    [forbiddenString]="projectsNames"
+                    [inlineDisabled]="true"
+                    (textChanged)="prepareProjectNameForChange($event)"
+    >
+      <span class="project-name"
+            [smTooltip]="project.name | cleanProjectPath"
+      >{{project.name | shortProjectName}}</span>
+    </sm-inline-edit>
+    <div *ngIf="project.system_tags?.includes('default')" class="justify-content-end project-tag">Sample</div>
+  </div>
+  <div class="d-flex justify-content-around w-100">
+    <ng-content></ng-content>
+  </div>
+  <div footer>
+    <ng-content select="[card-footer]"></ng-content>
+  </div>
+</sm-card>

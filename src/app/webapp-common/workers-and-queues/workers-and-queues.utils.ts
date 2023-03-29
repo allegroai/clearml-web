@@ -1,4 +1,4 @@
-import {orderBy} from 'lodash/fp';
+import {orderBy} from 'lodash-es';
 import {Worker} from '~/business-logic/model/workers/worker';
 import {WorkerExt} from '@common/workers-and-queues/actions/workers.actions';
 import {SortMeta} from 'primeng/api';
@@ -6,7 +6,7 @@ import {SortMeta} from 'primeng/api';
 export const sortTable = <T>(sortFields: SortMeta[], entities: T[]): T[] => {
   const srtByFields = sortFields.map(f => f.field);
   const srtByOrders = sortFields.map(f => f.order > 0 ? 'asc' : 'desc');
-  return orderBy<T>(srtByFields, srtByOrders)(entities);
+  return orderBy<T>(entities, srtByFields, srtByOrders);
 };
 
 export const transformAndSortWorkers = (sortFields, workers: Worker[]): WorkerExt[] => {

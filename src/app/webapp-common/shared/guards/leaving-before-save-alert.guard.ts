@@ -1,11 +1,10 @@
 import {Injectable} from '@angular/core';
 import {ActivatedRouteSnapshot, CanDeactivate, RouterStateSnapshot} from '@angular/router';
 import {Observable} from 'rxjs';
-import {get} from 'lodash/fp';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
 import {ConfirmDialogComponent} from '../ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {Store} from '@ngrx/store';
-import {GuardBase} from '../../../shared/guards/guard-base';
+import {GuardBase} from '~/shared/guards/guard-base';
 
 @Injectable()
 export class LeavingBeforeSaveAlertGuard extends GuardBase implements CanDeactivate<any> {
@@ -13,17 +12,13 @@ export class LeavingBeforeSaveAlertGuard extends GuardBase implements CanDeactiv
   constructor(private dialog: MatDialog, private store: Store<any>) {
     super(store);
     this.inEditMode$.subscribe(inEditModes => {
-      if (inEditModes.includes(true)) {
-        this.inEditMode = true;
-      } else {
-        this.inEditMode = false;
-      }
+      this.inEditMode = inEditModes.includes(true);
     });
   }
 
   public canDeactivate(component: any, currentRoute: ActivatedRouteSnapshot, currentState: RouterStateSnapshot, nextState?: RouterStateSnapshot): Observable<boolean> | Promise<boolean> | boolean {
 
-    const unGuard = get('root.queryParams.unGuard', nextState);
+    const unGuard = nextState?.root?.queryParams?.unGuard;
     if (unGuard === 'true') {
       return true;
     }
@@ -31,7 +26,7 @@ export class LeavingBeforeSaveAlertGuard extends GuardBase implements CanDeactiv
       return true;
     }
 
-    const confirmation$ = Observable.create(observer => {
+    return Observable.create(observer => {
       const confirmDialogRef: MatDialogRef<any, boolean> = this.dialog.open(ConfirmDialogComponent, {
         data: {
           title    : 'Attention',
@@ -52,8 +47,6 @@ export class LeavingBeforeSaveAlertGuard extends GuardBase implements CanDeactiv
         }
       });
     });
-
-    return confirmation$;
   }
 }
 

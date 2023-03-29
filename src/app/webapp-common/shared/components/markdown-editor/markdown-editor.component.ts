@@ -10,12 +10,13 @@ import {
   ViewChild
 } from '@angular/core';
 import {DomSanitizer} from '@angular/platform-browser';
-import {MarkdownEditorComponent as MDComponent, MdEditorOption} from 'ngx-markdown-editor';
+import {MarkdownEditorComponent as MDComponent, MdEditorOption, UploadResult} from 'ngx-markdown-editor';
 import {Ace} from 'ace-builds';
-import {MatDialog} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {
   MarkdownCheatSheetDialogComponent
 } from '@common/shared/components/markdown-editor/markdown-cheat-sheet-dialog/markdown-cheat-sheet-dialog.component';
+import {getBaseName} from '@common/shared/utils/shared-utils';
 
 const BREAK_POINT = 990;
 
@@ -41,11 +42,13 @@ export class MarkdownEditorComponent {
     fontAwesomeVersion: '6',
     showPreviewPanel: true,
     resizable: false,
+    showBorder: true,
     hideIcons: ['TogglePreview', 'FullScreen']
   } as MdEditorOption;
-  private ace: Ace.Editor;
+  public ace: Ace.Editor;
   public isExpand: boolean = false;
   public duplicateNames: boolean;
+  trackByUrl = (index: number, resource) => resource.url;
 
   set editMode(editMode: boolean) {
     this._editMode = editMode;
@@ -60,9 +63,14 @@ export class MarkdownEditorComponent {
 
   @Input() data: string;
   @Input() readOnly: boolean;
+  @Input() handleUpload: (files: File[]) => Promise<UploadResult[]>;
+  @Input() resources = [] as {unused: boolean; url: string}[];
   @Output() saveInfo = new EventEmitter<string>();
   @Output() editModeChanged = new EventEmitter();
+  @Output() deleteResource = new EventEmitter<string>();
+  @Output() imageMenuOpened = new EventEmitter<string>();
   @ViewChild(MDComponent) editorComponent: MDComponent;
+
 
   @HostListener('window:resize', ['$event'])
   updateEditorVisibility() {
@@ -87,7 +95,12 @@ export class MarkdownEditorComponent {
     }
   }
 
-  constructor(private renderer: Renderer2, protected sanitizer: DomSanitizer, protected cdr: ChangeDetectorRef, protected dialog: MatDialog) {
+  constructor(
+    private renderer: Renderer2,
+    protected sanitizer: DomSanitizer,
+    protected cdr: ChangeDetectorRef,
+    protected dialog: MatDialog,
+  ) {
     this.editMode = false;
   }
 
@@ -173,6 +186,19 @@ export class MarkdownEditorComponent {
 
   openMDCCheatSheet() {
     this.dialog.open(MarkdownCheatSheetDialogComponent);
+  }
+
+  uploadImg(evt) {
+    if (!evt) {
+      return;
+    }
+    this.handleUpload(evt.target.files).then(
+      results => results.map(result => this.ace.insert(`![${result.name}](${result.url})\n`))
+    );
+  }
+
+  insertImage(resource: string) {
+    this.ace.insert(`![${getBaseName(resource)}](${resource})\n`);
   }
 }
 

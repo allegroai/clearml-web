@@ -1,6 +1,9 @@
 @import "variables";
 
 :host {
+  display: block;
+  max-width: 640px;
+
   .files-list-container {
     position: relative;
     margin-top: 24px;
@@ -21,17 +24,14 @@
   }
 
   .buttons {
+    margin-top: 32px;
     display: flex;
     flex-direction: row-reverse;
     align-items: center;
     justify-content: center;
-    left: 50%;
-    position: relative;
-    transform: translateX(-50%);
 
     button {
       width: 130px;
-      text-transform: uppercase;
     }
 
     .yes-button {

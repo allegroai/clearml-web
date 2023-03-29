@@ -13,19 +13,23 @@ import {
   compareAddDialogTableSortChanged,
   compareAddTableClearAllFilters,
   compareAddTableFilterChanged,
-  compareAddTableFilterInit,
+  compareAddTableFilterInit, setAddTableViewArchived,
   getSelectedExperimentsForCompareAddDialog,
   resetSelectCompareHeader,
   setShowSearchExperimentsForCompare
 } from '../../actions/compare-header.actions';
-import {selectExperimentsForCompareSearchTerm, selectSelectedExperimentsForCompareAdd} from '../../reducers';
+import {
+  selectExperimentsForCompareSearchTerm,
+  selectSelectedExperimentsForCompareAdd,
+  selectViewArchivedInAddTable
+} from '../../reducers';
 import {BehaviorSubject, combineLatest, Observable, Subscription} from 'rxjs';
 import {Task} from '~/business-logic/model/tasks/task';
 import {Params} from '@angular/router';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {distinctUntilChanged, distinctUntilKeyChanged, filter, map} from 'rxjs/operators';
 import {compareLimitations} from '@common/shared/entity-page/footer-items/compare-footer-item';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
 import {ITableExperiment} from '@common/experiments/shared/common-experiment-model.model';
 import {
   selectActiveParentsFilter,
@@ -41,9 +45,8 @@ import {
   selectTableFilters,
   selectTableSortFields
 } from '@common/experiments/reducers';
-import {get, isEqual, unionBy} from 'lodash/fp';
+import {isEqual, unionBy} from 'lodash-es';
 import {ColHeaderTypeEnum, ISmCol, TableSortOrderEnum} from '@common/shared/ui-components/data/table/table.consts';
-import {filterArchivedExperiments} from '@common/experiments/shared/common-experiments.utils';
 import {initSearch} from '@common/common-search/common-search.actions';
 import * as experimentsActions from '../../../experiments/actions/common-experiments-view.actions';
 import {resetExperiments, resetGlobalFilter} from '@common/experiments/actions/common-experiments-view.actions';
@@ -60,6 +63,7 @@ import {INITIAL_EXPERIMENT_TABLE_COLS} from '@common/experiments/experiment.cons
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {ExperimentsTableComponent} from '@common/experiments/dumb/experiments-table/experiments-table.component';
 import {MESSAGES_SEVERITY} from '@common/constants';
+import {MatLegacySlideToggleChange as MatSlideToggleChange} from '@angular/material/legacy-slide-toggle';
 
 export const allowAddExperiment$ = (selectRouterParams$: Observable<Params>) => selectRouterParams$.pipe(
   distinctUntilKeyChanged('ids'),
@@ -102,6 +106,7 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
   public projects$: Observable<Project[]>;
   selectedExperiment: any;
   public reachedCompareLimit: boolean;
+  public showArchived$: Observable<boolean>;
   private _resizedCols = {} as { [colId: string]: string };
   private resizedCols$ = new BehaviorSubject<{ [colId: string]: string }>(this._resizedCols);
   @ViewChild('searchExperiments', {static: true}) searchExperiments;
@@ -116,10 +121,11 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
   ) {
     this.resizedCols$.next(this._resizedCols);
     this.experimentsResults$ = this.store.pipe(select(selectSelectedExperimentsForCompareAdd));
-    this.experiments$ = combineLatest([this.store.select(selectExperimentsList), this.store.select(selectSelectedExperimentsForCompareAdd)]).pipe(
-      map(([experiments, selectedExperiments]) => unionBy('id', selectedExperiments, experiments)),
-      map((experiments) => filterArchivedExperiments(experiments, false))
-    );
+    this.showArchived$ = this.store.select(selectViewArchivedInAddTable);
+    this.experiments$ = combineLatest([
+      this.store.select(selectExperimentsList),
+      this.store.select(selectSelectedExperimentsForCompareAdd),
+    ]).pipe(map(([experiments, selectedExperiments]) => unionBy(selectedExperiments, experiments, 'id')));
     this.searchTerm$ = this.store.pipe(select(selectExperimentsForCompareSearchTerm));
     this.tableColsOrder$ = this.store.select(selectExperimentsTableColsOrder);
     this.columns$ = this.store.select(selectExperimentsTableCols);
@@ -163,7 +169,6 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
   }
 
   public searchTermChanged(term: string) {
-
     this.store.dispatch(experimentsActions.globalFilterChanged({query: term}));
   }
 
@@ -196,7 +201,7 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
     window.setTimeout(() => this.table.table.rowRightClick = new EventEmitter());
     this.paramsSubscription = this.store.pipe(
       select(selectRouterParams),
-      map(params => [params && params['ids'], get('projectId', params)]),
+      map(params => [params && params['ids'], params?.projectId]),
       filter(([experimentIds,]) => !!experimentIds),
     ).subscribe(([experimentIds, projectId]) => {
       if (this.selectedExperimentsIds.length === 0) {
@@ -275,5 +280,9 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
   resizeCol({columnId, widthPx}: { columnId: string; widthPx: number }) {
     this._resizedCols[columnId] = `${widthPx}px`;
     this.resizedCols$.next(this._resizedCols);
+  }
+
+  showArchived(event: MatSlideToggleChange) {
+    this.store.dispatch(setAddTableViewArchived({show: event.checked}));
   }
 }

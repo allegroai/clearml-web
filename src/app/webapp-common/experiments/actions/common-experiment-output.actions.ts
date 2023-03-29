@@ -1,5 +1,5 @@
 import {createAction, props} from '@ngrx/store';
-import {ExperimentSettings} from '../reducers/common-experiment-output.reducer';
+import {ExperimentSettings} from '../reducers/experiment-output.reducer';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {MetricsPlotEvent} from '~/business-logic/model/events/metricsPlotEvent';
 import {EventsGetTaskSingleValueMetricsResponseTasks} from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponseTasks';
@@ -26,7 +26,7 @@ export const experimentPlotsRequested = createAction(
 
 export const experimentScalarRequested  = createAction(
   EXPERIMENTS_OUTPUT_PREFIX + 'EXPERIMENT_SCALAR_REQUESTED',
-  props<{experimentId: string}>()
+  props<{experimentId: string; model?: boolean}>()
 );
 
 export const setHistogram = createAction(

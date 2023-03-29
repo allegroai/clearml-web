@@ -2,7 +2,7 @@ import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import {getModelDesign} from '@common/tasks/tasks.utils';
 import {EditJsonComponent} from '@common/shared/ui-components/overlay/edit-json/edit-json.component';
 import {take} from 'rxjs/operators';
-import {MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {EditableSectionComponent} from '@common/shared/ui-components/panel/editable-section/editable-section.component';
 
@@ -18,7 +18,7 @@ export class ModelViewNetworkComponent {
 
   @Input() set model(model) {
     this._model = model;
-    const design = getModelDesign(model?.design)
+    const design = getModelDesign(model?.design);
     this.designKey = design.key;
     this.design = typeof design.value === 'string' ? design.value : '';
   }

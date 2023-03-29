@@ -1,8 +1,6 @@
-import {get} from 'lodash/fp';
-
 export const isReadOnly = item => {
-  if (get('id', item) === '*') {
+  if (item?.id === '*') {
     return false;
   }
-  return (!get('company.id', item)) || (!!get('readOnly', item));
+  return (!item?.company?.id) || (!!item?.readOnly);
 };

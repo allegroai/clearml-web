@@ -10,7 +10,7 @@ import {
   ViewChildren
 } from '@angular/core';
 import {IExperimentInfoFormComponent} from '~/features/experiments/shared/experiment-info.model';
-import {cloneDeep} from 'lodash/fp';
+import {cloneDeep} from 'lodash-es';
 import {v4 as uuidV4} from 'uuid';
 import {NgForm} from '@angular/forms';
 import {ParamsItem} from '~/business-logic/model/tasks/paramsItem';
@@ -18,7 +18,7 @@ import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
 import {Subscription} from 'rxjs';
 import {TableComponent} from '@common/shared/ui-components/data/table/table.component';
-import {isEqual} from 'lodash/fp';
+import {isEqual} from 'lodash-es';
 
 
 @Component({

@@ -19,7 +19,7 @@ import {
   ViewChild,
   ViewChildren
 } from '@angular/core';
-import {get} from 'lodash/fp';
+import {get} from 'lodash-es';
 import {MenuItem, PrimeTemplate, SortMeta} from 'primeng/api';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {ContextMenu} from 'primeng/contextmenu';
@@ -28,10 +28,10 @@ import {BehaviorSubject, fromEvent, Subject, Subscription, startWith, combineLat
 import {debounce, debounceTime, filter, take, throttleTime} from 'rxjs/operators';
 import {custumFilterFunc, custumSortSingle} from './overrideFilterFunc';
 import {ColHeaderTypeEnum, ISmCol, TableSortOrderEnum} from './table.consts';
-import {sortCol} from '../../../utils/tableParamEncode';
 import {Store} from '@ngrx/store';
 import {selectScaleFactor} from '@common/core/reducers/view.reducer';
 import {trackById} from '@common/shared/utils/forms-track-by';
+import {sortCol} from '@common/shared/utils/sortCol';
 
 @Component({
   selector: 'sm-table',
@@ -82,7 +82,7 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
   private sub = new Subscription();
 
   @Input() autoLoadMore: boolean = false;
-  @Input() columnResizeMode = 'expand';
+  @Input() columnResizeMode = 'expand' as 'fit' | 'expand';
   @Input() expandableRows = false;
   @Input() initialColumns;
   private waitForClick: number;
@@ -439,7 +439,7 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
   }
 
   getBodyData(rowData, col) {
-    return get(col.id, rowData);
+    return get(rowData, col.id);
   }
 
   incrementIndex(change: number) {

@@ -1,9 +1,10 @@
 import {Inject, Injectable, LOCALE_ID} from '@angular/core';
 import {ExperimentReverterService} from '~/features/experiments/shared/services/experiment-reverter.service';
-import {get} from 'lodash/fp';
 import {ExecutionDetails, ModelDetails} from '../shared/experiments-compare-details.model';
 import {Task} from '~/business-logic/model/tasks/task';
-import {ExperimentDetailsReverterServiceBase} from '~/features/experiments-compare/experiment-details-reverter-service.base';
+import {
+  ExperimentDetailsReverterServiceBase
+} from '~/features/experiments-compare/experiment-details-reverter-service.base';
 import {ARTIFACTS_TYPES, TAGS} from '../../tasks/tasks.constants';
 import {Artifact} from '~/business-logic/model/tasks/artifact';
 import {crc32} from '../../shared/utils/shared-utils';
@@ -112,14 +113,14 @@ export class ExperimentDetailsReverterService extends ExperimentDetailsReverterS
   }
 
   revertExecution(experiment: ITask): ExecutionDetails {
-    let pip = get('script.requirements.pip', experiment);
+    let pip = experiment?.script?.requirements?.['pip'];
     pip = (pip === undefined || Array.isArray(pip)) ? pip : pip.split('\n');
     pip = pip?.filter(row => !row.startsWith('#') && row.length > 0); // Should we remove comments????
 
-    let diff = get('script.diff', experiment);
+    let diff = experiment?.script?.diff as any;
     if (diff) {
       diff = (Array.isArray(diff)) ? diff : diff.split('\n');
-      diff = (diff.length < 3000 && diff[0]?.length < 3000) ? diff : [`** Content is too large to display. Hash: ${crc32(get('script.diff', experiment))}`];
+      diff = (diff.length < 3000 && diff[0]?.length < 3000) ? diff : [`** Content is too large to display. Hash: ${crc32(experiment?.script?.diff)}`];
     }
 
     return {
@@ -137,11 +138,10 @@ export class ExperimentDetailsReverterService extends ExperimentDetailsReverterS
 
   public revertModelInput(model: TaskModelItem): IModelInfo {
     return {
-      id: get('model.id', model),
-      name: get('model.name', model),
-      // taskName: get('name', model),
-      uri: get('model.uri', model),
-      framework: get('framework', model) || get('model.framework', model)
+      id: model?.model?.id,
+      name: model?.model?.name,
+      uri: model?.model?.uri,
+      framework: model?.model?.framework || model?.model?.framework
     };
   }
 

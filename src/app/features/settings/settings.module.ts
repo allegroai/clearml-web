@@ -22,6 +22,8 @@ import {UserDataComponent} from '~/features/settings/containers/admin/user-data/
 import {UsageStatsComponent} from '~/features/settings/containers/admin/usage-stats/usage-stats.component';
 import {CreateCredentialDialogComponent} from '~/features/settings/containers/admin/create-credential-dialog/create-credential-dialog.component';
 import {RedactedArgumentsDialogComponent} from '@common/settings/admin/redacted-arguments-dialog/redacted-arguments-dialog.component';
+import {LayoutModule} from '~/layout/layout.module';
+import {SharedPipesModule} from '@common/shared/pipes/shared-pipes.module';
 
 
 
@@ -53,6 +55,8 @@ import {RedactedArgumentsDialogComponent} from '@common/settings/admin/redacted-
     SharedModule,
     MatExpansionModule,
     FormsModule,
+    LayoutModule,
+    SharedPipesModule
   ],
   exports: [
     UserCredentialsComponent,

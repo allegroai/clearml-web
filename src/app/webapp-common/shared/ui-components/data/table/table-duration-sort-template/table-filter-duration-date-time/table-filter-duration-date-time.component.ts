@@ -2,7 +2,7 @@ import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit} from '@an
 import {DurationParameters, TableDurationSortBase} from '../table-duration-sort.base';
 import {TIME_IN_MILLI} from '../../../../../utils/time-util';
 import {MAT_DATE_FORMATS, MAT_DATE_LOCALE} from '@angular/material/core';
-import {isNil} from 'lodash/fp';
+import {isNil} from 'lodash-es';
 import {hasValue} from '../../../../../utils/helpers.util';
 
 export const MY_DATE_FORMATS = {
@@ -17,9 +17,9 @@ export const MY_DATE_FORMATS = {
   },
 };
 
-type privateParameters = '_lessThan' | '_greaterThan';
-const fromPrivateToGlobal = (privateParameters: privateParameters) => privateParameters.replace('_', '') as DurationParameters;
-const fromGlobalToPrivate = (parameter: DurationParameters) => '_' + parameter.replace('_', '') as privateParameters;
+type PrivateParameters = '_lessThan' | '_greaterThan';
+const fromPrivateToGlobal = (privateParameters: PrivateParameters) => privateParameters.replace('_', '') as DurationParameters;
+const fromGlobalToPrivate = (parameter: DurationParameters) => '_' + parameter.replace('_', '') as PrivateParameters;
 const addUserTimezoneToIsoDate = (data) => {
   const myDate = new Date(data);
   const offset = myDate.getTimezoneOffset() * TIME_IN_MILLI.ONE_MIN;
@@ -27,7 +27,39 @@ const addUserTimezoneToIsoDate = (data) => {
   const withOffset = myDate.getTime();
   const withoutOffset = withOffset - offset;
   return withoutOffset;
-}
+};
+
+/**
+ * Remove Seconds, Minutes and Hours from Date object
+ *
+ * @param date
+ */
+const mutedDateToNoHourMinutesSeconds = (_date: Date | number) => {
+  const date = new Date(_date);
+  date.setSeconds(0);
+  date.setMinutes(0);
+  date.setHours(0);
+  return date;
+};
+
+/**
+ * Get how many seconds in the Date object;
+ *
+ * @example getTimeInSecondsFromDate(01-01-2021 00:01:00)  => 60 seconds
+ * @param _date
+ */
+export const getTimeInSecondsFromDate = (_date: number | Date): number => {
+  if (_date === 0) {
+    return 0;
+  }
+
+  const date = new Date(_date);
+  const seconds = date.getSeconds();
+  const minutes = date.getMinutes() * 60;
+  const hours = date.getHours() * 60 * 60;
+  return seconds + minutes + hours;
+};
+
 @Component({
   selector: 'sm-table-filter-duration-date-time',
   templateUrl: './table-filter-duration-date-time.component.html',
@@ -52,7 +84,7 @@ export class TableFilterDurationDateTimeComponent  extends TableDurationSortBase
     time: 0
   };
   isFakeNowCheckbox = false;
-  MINIMUM_TIME_DISPLAY = 0.001
+  MINIMUM_TIME_DISPLAY = 0.001;
   constructor(cdr: ChangeDetectorRef) {
     super(cdr);
   }
@@ -68,7 +100,7 @@ export class TableFilterDurationDateTimeComponent  extends TableDurationSortBase
   }
   parseServerDataFunction(data): number {
     if (data) {
-      return addUserTimezoneToIsoDate(data)
+      return addUserTimezoneToIsoDate(data);
     }
     return +new Date(data || 0);
   }
@@ -81,7 +113,8 @@ export class TableFilterDurationDateTimeComponent  extends TableDurationSortBase
   _updateValue() {
     const {lessThan: {value: lessThanValue}, greaterThan: {value: greaterThanValue}} = this;
 
-    let lessThanDate, greaterThanDate;
+    let lessThanDate;
+    let greaterThanDate;
 
     if (lessThanValue) {
       lessThanDate = mutedDateToNoHourMinutesSeconds(new Date(lessThanValue));
@@ -98,11 +131,8 @@ export class TableFilterDurationDateTimeComponent  extends TableDurationSortBase
 
   /**
    * Handle the change in mat datepicker
-   * @param value
-   * @param valueName
-   * @param emitValue
    */
-  onDateHandler(value: Date, valueName: privateParameters, emitValue = true): void {
+  onDateHandler(value: Date, valueName: PrivateParameters, emitValue = true): void {
     this[valueName] = {...this[valueName], date: value};
     if (!hasValue(value)) {
       this[valueName] = {...this[valueName], time: null};
@@ -115,16 +145,13 @@ export class TableFilterDurationDateTimeComponent  extends TableDurationSortBase
 
   /**
    * Handle changed in the time component
-   * @param value
-   * @param valueName
-   * @param emitValue
    */
-  onTimeHandler(value: number, valueName: privateParameters, emitValue = true): void {
+  onTimeHandler(value: number, valueName: PrivateParameters, emitValue = true): void {
     this[valueName] = {...this[valueName], time: value};
     emitValue && this.combineDateAndTimeAndEmitValue(valueName);
   }
 
-  combineDateAndTimeAndEmitValue(valueName: privateParameters): void {
+  combineDateAndTimeAndEmitValue(valueName: PrivateParameters): void {
     const {time: timeInSeconds, date} = this[valueName];
 
     const timeObject = new Date(+date + timeInSeconds * TIME_IN_MILLI.ONE_SEC);
@@ -148,13 +175,13 @@ export class TableFilterDurationDateTimeComponent  extends TableDurationSortBase
   }
 
   onAutoFillCurrentTimeHandler(paramName: DurationParameters) {
-    const privateParam = `_${paramName}` as privateParameters;
+    const privateParam = `_${paramName}` as PrivateParameters;
 
     let currentTime = new Date();
 
     const timeInSecondsFromDate = getTimeInSecondsFromDate(currentTime);
 
-    this.onTimeHandler(timeInSecondsFromDate, privateParam as privateParameters, true);
+    this.onTimeHandler(timeInSecondsFromDate, privateParam as PrivateParameters, true);
     currentTime = mutedDateToNoHourMinutesSeconds(currentTime);
 
     this.onDateHandler(currentTime, privateParam);
@@ -167,29 +194,3 @@ export class TableFilterDurationDateTimeComponent  extends TableDurationSortBase
   }
 }
 
-/**
- * Remove Seconds, Minutes and Hours from Date object
- * @param date
- */
-function mutedDateToNoHourMinutesSeconds(_date: Date | number) {
-  const date = new Date(_date);
-  date.setSeconds(0);
-  date.setMinutes(0);
-  date.setHours(0);
-  return date;
-}
-
-/**
- * Get how many seconds in the Date object;
- * @example getTimeInSecondsFromDate(01-01-2021 00:01:00)  => 60 seconds
- * @param _date
- */
-export function getTimeInSecondsFromDate(_date: number | Date): number {
-  if (_date === 0) { return 0; }
-
-  const date = new Date(_date);
-  const seconds = date.getSeconds();
-  const minutes = date.getMinutes() * 60;
-  const hours = date.getHours() * 60 * 60;
-  return seconds + minutes + hours;
-}

@@ -5,19 +5,19 @@ import {ActivatedRoute, NavigationEnd, Router, Params, RouterEvent} from '@angul
 import {Title} from '@angular/platform-browser';
 import {selectLoggedOut} from '@common/core/reducers/view.reducer';
 import {Store} from '@ngrx/store';
-import {selectRouterParams, selectRouterUrl} from '@common/core/reducers/router-reducer';
+import {selectRouterConfig, selectRouterParams, selectRouterUrl} from '@common/core/reducers/router-reducer';
 import {ApiProjectsService} from './business-logic/api-services/projects.service';
 import {Project} from './business-logic/model/projects/project';
 import {getAllSystemProjects, setSelectedProjectId, updateProject} from '@common/core/actions/projects.actions';
 import {selectSelectedProject} from '@common/core/reducers/projects.reducer';
-import {MatDialog} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {getTutorialBucketCredentials} from '@common/core/actions/common-auth.actions';
 import {termsOfUseAccepted} from '@common/core/actions/users.actions';
 import {distinctUntilChanged, filter, map, tap, withLatestFrom} from 'rxjs/operators';
 import * as routerActions from './webapp-common/core/actions/router.actions';
 import {combineLatest, Observable, Subscription} from 'rxjs';
 import {selectBreadcrumbsStrings} from '@common/layout/layout.reducer';
-import {prepareNames} from './layout/breadcrumbs/breadcrumbs.utils';
+import {NestedProjectTypeUrlEnum, prepareNames} from './layout/breadcrumbs/breadcrumbs.utils';
 import {formatStaticCrumb} from '@common/layout/breadcrumbs/breadcrumbs-common.utils';
 import {ServerUpdatesService} from '@common/shared/services/server-updates.service';
 import {selectAvailableUpdates} from './core/reducers/view.reducer';
@@ -33,7 +33,6 @@ import {GoogleTagManagerService} from 'angular-google-tag-manager';
 import {selectIsSharedAndNotOwner} from './features/experiments/reducers';
 import {TipsService} from '@common/shared/services/tips.service';
 import {USER_PREFERENCES_KEY} from '@common/user-preferences';
-import {selectIsPipelines} from '@common/experiments-compare/reducers';
 import {Environment} from '../environments/base';
 import {loadExternalLibrary} from '@common/shared/utils/load-external-library';
 
@@ -184,10 +183,11 @@ export class AppComponent implements OnInit, OnDestroy {
 
     this.breadcrumbsSubscription = this.store.select(selectBreadcrumbsStrings).pipe(
       filter(names => !!names),
-      withLatestFrom(this.store.select(selectIsPipelines))
+      withLatestFrom(this.store.select(selectRouterConfig))
     ).subscribe(
-      ([names, isPipeLines]) => {
-        this.breadcrumbsStrings = prepareNames(names, isPipeLines);
+      ([names, routeConf]) => {
+        const projectType = `${routeConf?.[0]}${routeConf?.[1] === 'simple' ? '/' + routeConf?.[1] : ''}`;
+        this.breadcrumbsStrings = prepareNames(names, projectType as NestedProjectTypeUrlEnum);
         this.updateTitle();
       }
     );

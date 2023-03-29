@@ -19,6 +19,8 @@
     [allTags]="reportsTags$ |async"
     [sortOrder]="reportsSortOrder$ | async"
     [sortByField]="reportsOrderBy$ | async"
+    [projectId]="selectedProjectId$ | async"
+    (toggleNestedView)="toggleNestedView($event)"
     (createReportClicked)="openCreateReportDialog()"
     (archiveToggled)="toggleArchive($event)"
     (orderByChanged)="orderByChanged($event)"

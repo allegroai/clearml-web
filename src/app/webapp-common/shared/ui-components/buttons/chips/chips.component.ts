@@ -5,6 +5,7 @@ import {FORCED_COLORS_FOR_STRING} from '../../../services/color-hash/color-hash-
 import {Subscription} from 'rxjs';
 import {getCssTheme} from '../../../utils/shared-utils';
 import {invertRgb} from '../../../services/color-hash/color-hash.utils';
+import tinycolor from 'tinycolor2';
 
 @Component({
   selector: 'sm-chips',
@@ -20,9 +21,11 @@ export class ChipsComponent implements OnInit, OnDestroy {
   public colorTuple: number[];
   private _label: any;
   private colorSub: Subscription;
-  private _forceColor: [number, number, number];
 
   @Input() set label(label) {
+    if (Array.isArray(label) && label.length === 1) {
+      label = label[0];
+    }
     const initColor = this.colorHash.initColor(label);
     this.chooseColor(initColor);
     this._label = label;
@@ -30,18 +33,6 @@ export class ChipsComponent implements OnInit, OnDestroy {
 
   get label() {
     return this._label;
-  }
-
-  // Force setting a single RGB color
-  @Input() set forceColor(forceColor: [number, number, number]) {
-    this.colorIsForced = true;
-    this._forceColor = forceColor;
-    this.chooseColor(forceColor);
-
-  }
-
-  get forceColor() {
-    return this._forceColor;
   }
 
   // Default options are defined in getColorScheme
@@ -61,7 +52,7 @@ export class ChipsComponent implements OnInit, OnDestroy {
     this.colorSub = colorObservable.pipe(
       filter((colorObj) => colorObj[this.label] !== this.colorTuple)
     ).subscribe(colorObj => {
-      const color = this.forceColor ? this.forceColor : colorObj[this.label];
+      const color = colorObj[this.label];
       this.colorTuple = color;
       this.chooseColor(color);
       this.changeDetection.detectChanges();
@@ -78,8 +69,11 @@ export class ChipsComponent implements OnInit, OnDestroy {
       return;
     }
     this.color = `rgb(${color[0]},${color[1]},${color[2]})`;
-    const background = this.colorHash.getMonochromaticHarmony(color, this.isDarkBackground);
-    this.backgroundColor = `rgb(${background[0]},${background[1]},${background[2]})`;
+    const t = tinycolor(this.color);
+    const background = tinycolor.mostReadable(t.toString(), t.isDark() ?
+      [t.lighten(20).toString(), t.lighten(15).toString(), t.lighten(15).toString()] :
+      [t.darken(20).toString(), t.darken(15).toString(), t.darken(15).toString()], {includeFallbackColors:false, level: 'AA'});
+    this.backgroundColor = background.toRgbString();
   }
 
   ngOnDestroy(): void {

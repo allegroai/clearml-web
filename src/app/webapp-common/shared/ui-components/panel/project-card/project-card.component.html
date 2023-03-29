@@ -23,13 +23,13 @@
                     [editable]="true"
                     [minLength]="2"
                     [required]="true"
-                    pattern="^[^/]+$"
+                    pattern="^[^/]{2,}$"
                     [forbiddenString]="projectsNames"
                     [inlineDisabled]="true"
                     (textChanged)="prepareProjectNameForChange($event)"
     >
       <span class="project-name"
-
+            smShowTooltipIfEllipsis
             [smTooltip]="project.name"
       >{{project.name | shortProjectName}}</span>
     </sm-inline-edit>
@@ -60,9 +60,11 @@
                        [type]="project.stats?.active?.completed_tasks_24h ===0 ? circleTypeEnum.empty : circleTypeEnum.completed"
                        underLabel="(24 hrs)"></sm-circle-counter>
   </div>
-  <div footer>
+  <div class="d-flex-center" footer>
+    <div class="tag"><i *ngIf="hidden" class="al-icon al-ico-ghost sm-md"></i></div>
     <div class="footer-title" *ngIf="project?.stats">
       COMPUTE TIME: {{computeTime}}
     </div>
+    <div class="tag"></div>
   </div>
 </sm-card>

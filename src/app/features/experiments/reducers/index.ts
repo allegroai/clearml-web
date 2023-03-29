@@ -1,7 +1,7 @@
 import {ActionReducerMap, createSelector} from '@ngrx/store';
-import {experimentsViewReducer, ExperimentsViewState, initialState as viewInitialState} from './experiments-view.reducer';
 import {experimentInfoReducer, ExperimentInfoState, initialState as infoInitialState} from './experiment-info.reducer';
-import {experimentOutputReducer, ExperimentOutputState, initialState as outputInitialState} from './experiment-output.reducer';
+import {experimentOutputReducer, ExperimentOutputState, experimentOutputInitState} from '@common/experiments/reducers/experiment-output.reducer';
+import {experimentsViewReducer, ExperimentsViewState, experimentsViewInitialState} from '@common/experiments/reducers/experiments-view.reducer';
 import {IExperimentInfo} from '../shared/experiment-info.model';
 import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
 import {selectSelectedModel} from '@common/models/reducers';
@@ -24,7 +24,7 @@ export const experimentsReducers: ActionReducerMap<ExperimentState, any> = {
 export const experiments = state => state.experiments ?? {} as ExperimentState;
 
 // view selectors.
-export const experimentsView = createSelector(experiments, state => (state?.view ?? viewInitialState) as ExperimentsViewState);
+export const experimentsView = createSelector(experiments, state => (state?.view ?? experimentsViewInitialState) as ExperimentsViewState);
 export const selectExperimentsMetricsCols = createSelector(experimentsView, state => state.metricsCols);
 export const selectMetricVariants = createSelector(experimentsView, state => state.metricVariants);
 export const selectMetricsLoading = createSelector(experimentsView, state => state.metricsLoading);
@@ -38,7 +38,7 @@ export const selectShowExtraDataSpinner = createSelector(experimentInfo, state =
 
 
 // output selectors
-export const experimentOutput = createSelector(experiments, state => (state.output ?? outputInitialState) as ExperimentOutputState);
+export const experimentOutput = createSelector(experiments, state => (state.output ?? experimentOutputInitState) as ExperimentOutputState);
 export const selectIsExperimentEditable = createSelector(selectSelectedExperiment, selectCurrentUser,
   (experiment, user): boolean => experiment && experiment.status === TaskStatusEnum.Created && !isReadOnly(experiment) && !isSharedAndNotOwner(experiment, user.company));
 export const selectIsSharedAndNotOwner = createSelector(selectSelectedExperiment, selectSelectedModel, selectCurrentUser,

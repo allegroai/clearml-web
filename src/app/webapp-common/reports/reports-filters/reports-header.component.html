@@ -7,6 +7,17 @@
                     [sortOrder]="sortByTitle==='NAME' && sortOrder"></sm-menu-item>
     </sm-menu>
     <sm-main-pages-header-filter [allTags]="allTags"></sm-main-pages-header-filter>
+    <sm-button-toggle
+      left-items
+      class="ml-3"
+      [value]="!!projectId"
+      [disabled]="archive"
+      [options]="[
+             {value: false, icon: 'al-ico-flat-view',  label: 'List view'},
+             {value: true, icon:'al-ico-project-path', label: 'Project view'}
+            ]"
+      (valueChanged)="!archive && !(!!projectId && $event) && toggleNestedView.emit($event)"
+    ></sm-button-toggle>
   </div>
   <div *ngIf="activeSearch">
     <sm-search

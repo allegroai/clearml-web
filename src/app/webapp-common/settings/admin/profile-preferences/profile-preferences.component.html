@@ -4,7 +4,7 @@
     *ngIf="admin || usage.shown"
     (change)="statsChange($event)"
     [checked]="show$ | async"
-  >Show Hidden Projects
+  ><span class="d-flex-center">Show Hidden Projects<i class="al-icon al-ico-ghost sm ml-2"></i></span>
   </mat-slide-toggle>
   <mat-slide-toggle
     (change)="toggleExamples($event)"

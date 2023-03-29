@@ -2,12 +2,13 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  EventEmitter, Input,
+  EventEmitter,
+  Input,
   OnDestroy,
   OnInit,
   Output
 } from '@angular/core';
-import {MatSelectChange} from '@angular/material/select';
+import {MatLegacySelectChange as MatSelectChange} from '@angular/material/legacy-select';
 import {Store} from '@ngrx/store';
 import {selectHideIdenticalFields} from '../../reducers';
 import {Observable, Subscription} from 'rxjs';
@@ -20,16 +21,15 @@ import {
 } from '../../actions/compare-header.actions';
 import {ActivatedRoute, Router} from '@angular/router';
 import {selectRouterParams, selectRouterQueryParams, selectRouterUrl} from '@common/core/reducers/router-reducer';
-import {get} from 'lodash/fp';
 import {setAutoRefresh} from '@common/core/actions/layout.actions';
 import {filter} from 'rxjs/operators';
-import {MatSlideToggleChange} from '@angular/material/slide-toggle';
+import {MatLegacySlideToggleChange as MatSlideToggleChange} from '@angular/material/legacy-slide-toggle';
 import {compareLimitations} from '@common/shared/entity-page/footer-items/compare-footer-item';
 import {
   allowAddExperiment$,
   SelectExperimentsForCompareComponent
 } from '../../containers/select-experiments-for-compare/select-experiments-for-compare.component';
-import {MatDialog} from '@angular/material/dialog';
+import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 
@@ -72,8 +72,8 @@ export class ExperimentCompareHeaderComponent implements OnInit, OnDestroy {
       .subscribe(() => this.store.dispatch(refreshIfNeeded({payload: true, autoRefresh: true})));
 
     this.routerSubscription = this.store.select(selectRouterUrl).subscribe(() => {
-      this.currentPage = get('snapshot.firstChild.url[0].path', this.route);
-      this.viewMode = get('snapshot.firstChild.url[1].path', this.route);
+      this.currentPage = this.route?.snapshot?.firstChild?.url?.[0]?.path;
+      this.viewMode = this.route?.snapshot?.firstChild?.url?.[1]?.path;
       this.cdr.detectChanges();
     });
 

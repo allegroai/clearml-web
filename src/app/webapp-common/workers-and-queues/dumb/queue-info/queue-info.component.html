@@ -32,7 +32,8 @@
     </div>
     <div class="col-9 flex-column">
       <a
-        [href]="'/projects/'+ ((row?.task?.project?.id) ? row?.task?.project?.id : '*') + '/experiments/' +row?.task?.id"> {{row?.task?.name}}</a>
+        [routerLink]="'/projects/'+ ((row?.task?.project?.id) ? row?.task?.project?.id : '*') + '/experiments/' + row?.task?.id"
+      >{{row?.task?.name}}</a>
     </div>
   </ng-template>
 
@@ -97,7 +98,7 @@
     </div>
     <div class="flex-column">
       <a
-        [href]="'/projects/'+ ((row?.task?.project?.id) ? row?.task?.project?.id : '*') + '/experiments/' +row?.task?.id">{{row?.task?.name}}
+        [routerLink]="'/projects/'+ ((row?.task?.project?.id) ? row?.task?.project?.id : '*') + '/experiments/' +row?.task?.id">{{row?.task?.name}}
       </a>
     </div>
     <div class="column">

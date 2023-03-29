@@ -8,6 +8,10 @@ import {ProjectCardMenuComponent} from '@common/shared/ui-components/panel/proje
 import {PipelineCardComponent} from '@common/pipelines/pipeline-card/pipeline-card.component';
 import {PipelineCardMenuComponent} from '@common/pipelines/pipeline-card-menu/pipeline-card-menu.component';
 import {ScrollingModule} from '@angular/cdk/scrolling';
+import {DatasetEmptyComponent} from '@common/datasets/dataset-empty/dataset-empty.component';
+import {NestedCardComponent} from '@common/nested-project-view/nested-card/nested-card.component';
+import {SharedPipesModule} from '@common/shared/pipes/shared-pipes.module';
+import {PipelinesEmptyStateComponent} from '@common/pipelines/pipelines-page/pipelines-empty-state/pipelines-empty-state.component';
 
 const _declarations = [
   ProjectCardComponent,
@@ -15,6 +19,8 @@ const _declarations = [
   ProjectCardMenuExtendedComponent,
   PipelineCardComponent,
   PipelineCardMenuComponent,
+  NestedCardComponent,
+  DatasetEmptyComponent,
 ];
 
 @NgModule({
@@ -23,10 +29,11 @@ const _declarations = [
     FormsModule,
     ReactiveFormsModule,
     SMSharedModule,
-    ScrollingModule
+    ScrollingModule,
+    SharedPipesModule
   ],
-  declarations: [..._declarations],
-  exports: [..._declarations]
+  declarations: [..._declarations, PipelinesEmptyStateComponent],
+  exports: [..._declarations, PipelinesEmptyStateComponent]
 })
 export class ProjectsSharedModule {
 }

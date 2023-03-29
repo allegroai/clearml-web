@@ -1,6 +1,5 @@
 import {Injectable} from '@angular/core';
 import {Model} from '../model/models/model';
-import {get} from 'lodash/fp';
 
 @Injectable()
 export class BlModelsService {

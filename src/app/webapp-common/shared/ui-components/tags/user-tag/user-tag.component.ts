@@ -12,6 +12,7 @@ export class UserTagComponent {
   @Input() foreground: string;
   @Input() tooltip: boolean;
   @Input() disabledRemove: string;
+  @Input() readonly: boolean = false;
   @Output() remove = new EventEmitter<string>();
   @Output() add = new EventEmitter<MouseEvent>();
 

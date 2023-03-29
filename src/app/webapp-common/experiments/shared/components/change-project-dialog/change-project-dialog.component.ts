@@ -1,12 +1,12 @@
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
 import {Project} from '~/business-logic/model/projects/project';
 import {Component, Inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {asyncScheduler, Observable, Subscription} from 'rxjs';
 import {selectRootProjects} from '@common/core/reducers/projects.reducer';
 import {getAllSystemProjects} from '@common/core/actions/projects.actions';
-import {map, startWith} from 'rxjs/operators';
-import {castArray, isEqual} from 'lodash/fp';
+import {filter, map, startWith} from 'rxjs/operators';
+import {castArray, isEqual} from 'lodash-es';
 import {NgForm} from '@angular/forms';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {isReadOnly} from '@common/shared/utils/is-read-only';
@@ -19,7 +19,7 @@ import {isReadOnly} from '@common/shared/utils/is-read-only';
 export class ChangeProjectDialogComponent implements OnInit, OnDestroy {
 
   public projects$: Observable<Project[]>;
-  public selectedProjectId: Project['id'];
+  public sourceProject: Project;
   public currentProjects: string[];
   public projects: { label: string; value: string }[];
   public filteredProjects: Observable<{ label: string; value: string }[]>;
@@ -42,12 +42,12 @@ export class ChangeProjectDialogComponent implements OnInit, OnDestroy {
     private store: Store<any>, public dialogRef: MatDialogRef<ChangeProjectDialogComponent>,
     @Inject(MAT_DIALOG_DATA) data: {
       currentProjects: Project['id'] | Project['id'][];
-      defaultProject: Project['id'];
+      defaultProject: Project;
       reference?: string | any[];
       type: EntityTypeEnum;
     }
   ) {
-    this.selectedProjectId = data.defaultProject;
+    this.sourceProject = data.defaultProject;
     this.currentProjects = castArray(data.currentProjects);
     this.isMulti = !!Array.isArray(data.reference);
     this.type = data.type;
@@ -55,6 +55,7 @@ export class ChangeProjectDialogComponent implements OnInit, OnDestroy {
     this.readOnlyProjects$ = this.store.select(selectRootProjects)
       .pipe(map(projects => projects.filter(project => isReadOnly(project)).map(project=> project.name).concat(this.currentProjectInstance?.name)));
     this.projects$ = this.store.select(selectRootProjects).pipe(
+      filter(projects => !!projects),
       map(projects => projects.filter((project) => !isReadOnly(project)))
     );
   }
@@ -65,7 +66,10 @@ export class ChangeProjectDialogComponent implements OnInit, OnDestroy {
       if (this.currentProjects.length === 1) {
         this.currentProjectInstance = projects.find(proj => proj.id === this.currentProjects[0]);
       }
-      const projectList = projects.map(project => ({value: project.id, label: project.name}));
+      const projectNameToHide = (this.sourceProject && !this.sourceProject.name.match(/^\.\w+$/)) ? this.sourceProject.name?.replace(/\/\.\w+$/, '') : 'Projects root';
+      const sourceProjectOrChild = new RegExp(`^${projectNameToHide}(\/\.[a-zA-Z]+)*$`);
+      const projectList = [{value: null, label: 'Projects root'}].concat(projects.map(project => ({value: project.id, label: project.name})))
+          .filter( project => !project.label.match(sourceProjectOrChild) && project.value !== this.sourceProject?.id);
       if (!isEqual(projectList, this.projects)) {
         this.projects = projectList;
       }
@@ -92,7 +96,7 @@ export class ChangeProjectDialogComponent implements OnInit, OnDestroy {
       if (typeof this.formData.project === 'string') {
         this.formData.project = {label: this.formData.project, value: ''};
       }
-      this.dialogRef.close({id: this.formData.project.value, name: this.formData.project.label});
+      this.dialogRef.close({id: this.formData.project.value, name: this.formData.project.value === null ? undefined : this.formData.project.label});
     } else {
       this.dialogRef.close(null);
     }
@@ -117,4 +121,6 @@ export class ChangeProjectDialogComponent implements OnInit, OnDestroy {
   setIsAutoCompleteOpen(focus: boolean) {
     this.isAutoCompleteOpen = focus;
   }
+
+  trackByFn = (index, project) => project.value;
 }

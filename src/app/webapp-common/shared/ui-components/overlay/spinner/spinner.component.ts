@@ -5,7 +5,7 @@ import {NavigationStart, Router} from '@angular/router';
 import {debounceTime, distinctUntilChanged, filter, map} from 'rxjs/operators';
 import {resetLoader} from '@common/core/actions/layout.actions';
 import {Observable, Subscription} from 'rxjs';
-import {isEqual} from 'lodash/fp';
+import {isEqual} from 'lodash-es';
 
 @Component({
   selector: 'sm-spinner',

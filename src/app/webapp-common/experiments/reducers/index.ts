@@ -10,18 +10,18 @@ import {
 } from '~/features/experiments/reducers';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 import {EXPERIMENTS_TABLE_COL_FIELDS, experimentSectionsEnum} from '~/features/experiments/shared/experiments.const';
-import {ExperimentSettings} from './common-experiment-output.reducer';
-import {get, getOr} from 'lodash/fp';
+import {ExperimentSettings} from './experiment-output.reducer';
+import {get} from 'lodash-es';
 import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
 import {CommonExperimentInfoState} from './common-experiment-info.reducer';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {ParamsItem} from '~/business-logic/model/tasks/paramsItem';
 import {selectRouterParams} from '../../core/reducers/router-reducer';
-import {commonExperimentsInitialState} from '@common/experiments/reducers/common-experiments-view.reducer';
+import {experimentsViewInitialState} from '@common/experiments/reducers/experiments-view.reducer';
 import {
   selectCompareAddTableFilters,
   selectCompareAddTableSortFields,
-  selectIsCompare
+  selectIsCompare, selectIsModels
 } from '../../experiments-compare/reducers';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {SortMeta} from 'primeng/api';
@@ -31,6 +31,7 @@ import {
   EventsGetTaskSingleValueMetricsResponseValues
 } from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponseValues';
 import {ChartHoverModeEnum} from '../shared/common-experiments.const';
+import {selectModelExperimentsTableFilters} from '@common/models/reducers';
 
 export const selectExperimentsList = createSelector(experimentsView, (state): ITableExperiment[] => state.experiments);
 export const selectTableRefreshList = createSelector(experimentsView, (state): boolean => !!state.refreshList);
@@ -39,7 +40,7 @@ export const selectSelectedTableExperiment = createSelector(experimentsView, (st
 export const selectExperimentsTableColsWidth = createSelector(experimentsView, selectRouterParams,
   (state, params) => state.projectColumnsWidth?.[params?.projectId] ?? {});
 export const selectExperimentsHiddenTableCols = createSelector(experimentsView, selectRouterParams,
-  (state, params) => state.hiddenProjectTableCols?.[params?.projectId] ?? commonExperimentsInitialState.hiddenTableCols);
+  (state, params) => state.hiddenProjectTableCols?.[params?.projectId] ?? experimentsViewInitialState.hiddenTableCols);
 export const selectRawExperimentsTableCols = createSelector(experimentsView, (state) => state.tableCols);
 export const selectExperimentsTableCols = createSelector(selectRawExperimentsTableCols, selectExperimentsHiddenTableCols, selectExperimentsTableColsWidth,
   (cols, hidden, colWidth) =>
@@ -100,12 +101,12 @@ export const selectInitTableOrders = createSelector(experimentsView, (state): So
 export const selectTableSortFields = createSelector(
   experimentsView, selectRouterParams, selectIsCompare, selectCompareAddTableSortFields, selectInitTableOrders,
   (state, params, isCompare, compareSortFields, initTableOrders): SortMeta[] =>
-    (isCompare ? compareSortFields : (state.projectColumnsSortOrder?.[params?.projectId])) ?? initTableOrders
+   (isCompare ? compareSortFields : (state.projectColumnsSortOrder?.[params?.projectId])) ?? initTableOrders
 );
 export const selectTableFilters = createSelector(
-  experimentsView, selectRouterParams, selectIsCompare, selectCompareAddTableFilters,
-  (state, params, isCompare, compareFilters) =>
-    isCompare ? compareFilters : state.projectColumnFilters?.[params?.projectId] ?? {} as { [columnId: string]: FilterMetadata });
+  experimentsView, selectRouterParams, selectIsCompare, selectCompareAddTableFilters, selectIsModels, selectModelExperimentsTableFilters,
+  (state, params, isCompare, compareFilters, isModels, modelExperimentsFilters) =>
+    isModels ? modelExperimentsFilters : isCompare ? compareFilters : state.projectColumnFilters?.[params?.projectId] ?? {} as { [columnId: string]: FilterMetadata });
 
 export const selectSelectedExperiments = createSelector(experimentsView, state => state.selectedExperiments);
 export const selectedExperimentsDisableAvailable = createSelector(experimentsView, (state) => state.selectedExperimentsDisableAvailable);
@@ -178,16 +179,16 @@ export const selectExperimentSelectedConfigObjectFromRoute = createSelector(sele
 
 
 export const selectSelectedExperimentFromRouter = createSelector(selectRouterParams,
-  (params): string => get('experimentId', params));
+  (params): string => params?.experimentId);
 
 export const selectExperimentConfigObj =
   createSelector(selectExperimentConfiguration, selectExperimentSelectedConfigObjectFromRoute,
-    (configuration: IExperimentInfo['configuration'], configObj: string): any => getOr(null, configObj, configuration));
+    (configuration: IExperimentInfo['configuration'], configObj: string): any => get(configuration, configObj, null));
 
 
 export const selectExperimentHyperParamsSelectedSectionParams =
   createSelector(selectExperimentHyperParamsInfoData, selectExperimentHyperParamsSelectedSectionFromRoute,
-    (hyperparams: IExperimentInfo['hyperparams'], section: string): ParamsItem[] => Object.entries(getOr({}, section, hyperparams)).map(([, value]) => value));
+    (hyperparams: IExperimentInfo['hyperparams'], section: string): ParamsItem[] => Object.entries(get(hyperparams, section, {})).map(([, value]) => value));
 export const selectScalarSingleValue = createSelector(experimentOutput, (state): Array<EventsGetTaskSingleValueMetricsResponseValues> => state.scalarSingleValue);
 
 

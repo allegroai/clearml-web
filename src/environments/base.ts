@@ -88,7 +88,7 @@ export const BASE_ENV = {
   useFilesProxy: false,
   legal: {TOULink: 'https://allegro.ai/legal-platform-tou/'},
   plotlyURL: 'app/webapp-common/assets/plotly-2.16.1.min.js',
-  slackLink: 'https://join.slack.com/t/clearml/shared_invite/zt-1kvcxu5hf-SRH_rmmHdLL7l2WadRJTQg',
+  slackLink: 'https://join.slack.com/t/clearml/shared_invite/zt-1rp61f0cg-Bu_7UlETQrvHHjw~hEBh5A',
   docsLink: 'https://clear.ml/docs',
   branding: {logo: 'assets/logo-white.svg?v=7', logoSmall: 'assets/c-logo.svg?=2'},
   serverDownMessage: 'The ClearML server is currently unavailable.<BR>' +

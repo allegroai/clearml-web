@@ -1,12 +1,12 @@
 import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
 import {Store} from '@ngrx/store';
 import {combineLatest, filter, Subscription} from 'rxjs';
 import {Queue} from '~/business-logic/model/queues/queue';
 import {selectQueuesList} from '../../experiments/shared/components/select-queue/select-queue.reducer';
 import {ConfirmDialogComponent} from '../../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {GetQueuesForEnqueue} from '@common/experiments/shared/components/select-queue/select-queue.actions';
-import {cloneDeep} from 'lodash/fp';
+import {cloneDeep} from 'lodash-es';
 import {
   getControllerForStartPipelineDialog,
   setControllerForStartPipelineDialog
@@ -27,7 +27,7 @@ export class RunPipelineControllerDialogComponent implements OnInit, OnDestroy {
   public title: string;
   public params: any;
   public task: IExperimentInfo;
-  public chooseCustomQueue: boolean= false
+  public chooseCustomQueue: boolean= false;
   private queuesSub: Subscription;
   private baseControllerSub: Subscription;
   private selectedQueueSub: Subscription;
@@ -38,9 +38,9 @@ export class RunPipelineControllerDialogComponent implements OnInit, OnDestroy {
     @Inject(MAT_DIALOG_DATA) public data: { task }
   ) {
     if (data?.task?.hyperparams?.Args) {
-      this.store.dispatch(setControllerForStartPipelineDialog({task: data.task}))
+      this.store.dispatch(setControllerForStartPipelineDialog({task: data.task}));
     } else {
-      this.store.dispatch(getControllerForStartPipelineDialog({task: data.task?.id}))
+      this.store.dispatch(getControllerForStartPipelineDialog({task: data.task?.id}));
     }
 
     this.queuesSub = this.queues$.subscribe(queues => {
@@ -56,11 +56,11 @@ export class RunPipelineControllerDialogComponent implements OnInit, OnDestroy {
       this.task = task;
       this.title = this.getTitle();
       this.params = task?.hyperparams?.Args && cloneDeep(Object.values(task.hyperparams.Args).filter((param: any) => !param?.name?.startsWith('_')));
-    })
+    });
     this.selectedQueueSub = combineLatest([this.baseController$, this.queues$])
       .pipe(filter(([baseController, queues]) => !!baseController && queues?.length > 0)).subscribe(([baseController, queues]) => {
         this.selectedQueue = queues.find(queue => baseController.execution?.queue?.id === queue?.id) || queues[0];
-      })
+      });
   }
 
   closeDialog(confirmed) {
@@ -74,8 +74,8 @@ export class RunPipelineControllerDialogComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.queuesSub.unsubscribe();
-    this.baseControllerSub.unsubscribe()
-    this.store.dispatch(setControllerForStartPipelineDialog({task: null}))
+    this.baseControllerSub.unsubscribe();
+    this.store.dispatch(setControllerForStartPipelineDialog({task: null}));
   }
 
   changeChooseCustomQueue() {

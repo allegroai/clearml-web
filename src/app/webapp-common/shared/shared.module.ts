@@ -8,12 +8,11 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ClipboardModule} from 'ngx-clipboard';
 import {UiComponentsModule} from './ui-components/ui-components.module';
 import {ChipsModule} from './ui-components/buttons/chips/chips.module';
-import {SharedPipesModule} from './pipes/shared-pipes.module';
 import {ExperimentCardComponent} from './ui-components/panel/experiment-card/experiment-card.component';
 import {ModelCardComponent} from './ui-components/panel/model-card/model-card.component';
-import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {MatLegacyProgressSpinnerModule as MatProgressSpinnerModule} from '@angular/material/legacy-progress-spinner';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
-import {MatSnackBarModule} from '@angular/material/snack-bar';
+import {MatLegacySnackBarModule as MatSnackBarModule} from '@angular/material/legacy-snack-bar';
 import {
   ExperimentInfoHeaderStatusProgressBarComponent
 } from './experiment-info-header-status-progress-bar/experiment-info-header-status-progress-bar.component';
@@ -53,6 +52,13 @@ import {LMarkdownEditorModule} from 'ngx-markdown-editor';
 import {
   MarkdownCheatSheetDialogComponent
 } from './components/markdown-editor/markdown-cheat-sheet-dialog/markdown-cheat-sheet-dialog.component';
+import {SharedPipesModule} from '@common/shared/pipes/shared-pipes.module';
+import {
+  ExperimentStatusIconLabelComponent
+} from '@common/shared/experiment-status-icon-label/experiment-status-icon-label.component';
+import {
+  ExperimentTypeIconLabelComponent
+} from '@common/shared/experiment-type-icon-label/experiment-type-icon-label.component';
 
 const _declarations = [
   ExperimentInfoHeaderStatusProgressBarComponent,
@@ -77,7 +83,9 @@ const _declarations = [
   MultiLineTooltipComponent,
   ExperimentCompareGeneralDataComponent,
   MainPagesHeaderFilterComponent,
-  MarkdownEditorComponent
+  MarkdownEditorComponent,
+  ExperimentStatusIconLabelComponent,
+  ExperimentTypeIconLabelComponent,
 ];
 
 
@@ -90,14 +98,13 @@ const _declarations = [
     TableModule,
     ClipboardModule,
     UiComponentsModule,
-    SharedPipesModule,
     MatProgressSpinnerModule,
     MatButtonToggleModule,
     MatSnackBarModule,
     ChipsModule,
     ScrollingModule,
     LMarkdownEditorModule,
-
+    SharedPipesModule,
   ],
   declarations: [
     _declarations,
@@ -108,7 +115,7 @@ const _declarations = [
     IdBadgeComponent,
     MarkdownCheatSheetDialogComponent,
   ],
-  exports: [..._declarations, UiComponentsModule, TableModule, ClipboardModule, SharedPipesModule, MatSnackBarModule,
+  exports: [..._declarations, UiComponentsModule, TableModule, ClipboardModule, MatSnackBarModule,
     ScatterPlotComponent, ClearFiltersButtonComponent, IdBadgeComponent
   ],
   providers: [LeavingBeforeSaveAlertGuard, GeneralLeavingBeforeSaveAlertGuard]

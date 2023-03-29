@@ -1,11 +1,10 @@
 import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {UntypedFormArray, UntypedFormBuilder, UntypedFormGroup} from '@angular/forms';
-import {get} from 'lodash/fp';
 import {ALLEGRO_TUTORIAL_BUCKET} from '~/app.constants';
 import {debounceTime} from 'rxjs/operators';
 import {Subscription} from 'rxjs';
-import { ICONS } from '@common/constants';
+import {ICONS} from '@common/constants';
 
 @Component({
   selector   : 'sm-s3-access',
@@ -13,6 +12,7 @@ import { ICONS } from '@common/constants';
   styleUrls  : ['./s3-access.component.scss']
 })
 export class S3AccessComponent implements OnDestroy, OnInit {
+  public secured = window.location.protocol === 'https:';
   readonly ALLEGRO_TUTORIAL_BUCKET = ALLEGRO_TUTORIAL_BUCKET;
   readonly BUCKET_CREDENTIALS      = 'bucketCredentials';
   public S3Form: UntypedFormGroup;
@@ -57,7 +57,7 @@ export class S3AccessComponent implements OnDestroy, OnInit {
       bucketCredentials: this.formBuilder.array([]),
     });
 
-    if (get('bucketCredentials.length', S3Credentials)) {
+    if (S3Credentials?.bucketCredentials?.length) {
       S3Credentials.bucketCredentials.forEach(bucket => {
         this.addBucket(bucket || {});
       });

@@ -17,11 +17,11 @@ import {SMMaterialModule} from '../shared/material/material.module';
 import {ReportDialogComponent} from './report-dialog/report-dialog.component';
 import {CreateNewReportFormComponent} from './report-dialog/create-new-report-form/create-new-report-form.component';
 import {ReportComponent} from './report/report.component';
-import {CommonExperimentSharedModule} from '../experiments/shared/common-experiment-shared.module';
 import {NgxPrintModule} from 'ngx-print';
 import {ScrollingModule} from '@angular/cdk/scrolling';
 import {ReportsSharedModule} from '@common/reports/reports-shared.module';
 import {ExistNameValidatorDirective} from '@common/shared/ui-components/template-forms-ui/exist-name-validator.directive';
+import {SharedPipesModule} from '@common/shared/pipes/shared-pipes.module';
 
 @NgModule({
   imports: [
@@ -34,13 +34,13 @@ import {ExistNameValidatorDirective} from '@common/shared/ui-components/template
     EffectsModule.forFeature([ReportsEffects]),
     StoreModule.forFeature(REPORTS_KEY, reportsReducer),
     SharedModule,
-    CommonExperimentSharedModule,
     CommonLayoutModule,
     ReportsRoutingModule,
     NgxPrintModule,
     ScrollingModule,
     ReportsSharedModule,
-    ExistNameValidatorDirective
+    ExistNameValidatorDirective,
+    SharedPipesModule
   ],
   declarations: [ReportsPageComponent, ReportsListComponent, ReportsHeaderComponent, ReportDialogComponent,
     CreateNewReportFormComponent, ReportComponent],

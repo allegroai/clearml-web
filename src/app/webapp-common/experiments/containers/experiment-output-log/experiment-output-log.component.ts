@@ -12,7 +12,7 @@ import {Store} from '@ngrx/store';
 import {selectExperimentBeginningOfLog, selectExperimentLog, selectLogFilter, selectLogLoading} from '../../reducers';
 import {BehaviorSubject, combineLatest, Observable, Subscription} from 'rxjs';
 import {debounceTime, filter, map} from 'rxjs/operators';
-import {last} from 'lodash/fp';
+import {last} from 'lodash-es';
 import {ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
 import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {selectSelectedExperiment} from '~/features/experiments/reducers';
@@ -26,6 +26,7 @@ import {
 import {ExperimentLogInfoComponent} from '../../dumb/experiment-log-info/experiment-log-info.component';
 import {ITableExperiment} from '@common/experiments/shared/common-experiment-model.model';
 import {RefreshService} from '@common/core/services/refresh.service';
+import {activeLoader} from '@common/core/actions/layout.actions';
 
 @Component({
   selector: 'sm-experiment-output-log',
@@ -77,10 +78,8 @@ export class ExperimentOutputLogComponent implements OnInit, AfterViewInit, OnDe
             this.hasLog = undefined;
             this.loading = true;
             this.cdr.detectChanges();
-            this.store.dispatch(getExperimentLog({
-              id: this.currExperiment.id,
-              direction: null
-            }));
+            this.store.dispatch(activeLoader(getExperimentLog.type));
+            this.store.dispatch(getExperimentLog({ id: this.currExperiment.id, direction: null }));
           }
           // else if (!this.logRef?.lines?.length || this.logRef?.canRefresh) {
           //   this.store.dispatch(getExperimentLog({
@@ -109,12 +108,14 @@ export class ExperimentOutputLogComponent implements OnInit, AfterViewInit, OnDe
     }));
 
     this.subs.add(this.refresh.tick
-      .pipe(filter(autoRefresh => autoRefresh !== null && !this.loading && !!this.currExperiment?.id && (!this.logRef || this.logRef.atEnd)))
+      .pipe(filter(autoRefresh => autoRefresh !== null && !this.loading && !!this.currExperiment?.id && (!this.logRef || this.logRef.atEnd || autoRefresh === false)))
       .subscribe(autoRefresh => this.store.dispatch(getExperimentLog({
         id: this.currExperiment.id,
-        direction: autoRefresh ? 'next' : 'prev',
-        from: last(this.logRef?.orgLogs)?.timestamp,
-        autoRefresh: true
+        ...(autoRefresh && {
+          direction: autoRefresh ? 'next' : 'prev',
+          from: last(this.logRef?.orgLogs)?.timestamp,
+          autoRefresh: true
+        }),
       })))
     );
   }

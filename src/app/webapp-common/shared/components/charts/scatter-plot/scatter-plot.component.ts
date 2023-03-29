@@ -1,6 +1,6 @@
 import {
   AfterViewInit,
-  ChangeDetectionStrategy,
+  ChangeDetectionStrategy, ChangeDetectorRef,
   Component,
   ElementRef,
   EventEmitter,
@@ -15,9 +15,10 @@ import scatterPlot from 'britecharts/dist/umd/scatterPlot.min';
 import miniTooltip from 'britecharts/dist/umd/miniTooltip.min';
 // import miniTooltip from 'britecharts/src/charts/mini-tooltip';
 import {select, Selection} from 'd3-selection';
-import {cloneDeep} from 'lodash/fp';
+import {cloneDeep} from 'lodash-es';
 import {fromEvent, Subscription} from 'rxjs';
 import {throttleTime} from 'rxjs/operators';
+import {ProjectStatsGraphData} from '@common/core/reducers/projects.reducer';
 
 @Component({
   selector: 'sm-scatter-plot',
@@ -35,35 +36,29 @@ export class ScatterPlotComponent implements AfterViewInit, OnDestroy {
   private initialized = false;
   private sub: Subscription;
 
-  constructor(private readonly zone: NgZone) { }
+  constructor(private readonly zone: NgZone, private cdr: ChangeDetectorRef) { }
 
   @ViewChild('chart') chartRef: ElementRef<HTMLDivElement>;
 
   @Input() colors: string[];
-  @Input() set data(data) {
-    if(data) {
+  @Input() set data(data: ProjectStatsGraphData[]) {
+    if(data?.length > 0) {
+      this.loading = false;
       this.chartData = cloneDeep(data);
-      if (this.chartContainer && !this.loading) {
+      if (this.chartContainer) {
         if (this.initialized) {
           this.updateChart();
         } else {
           this.initChart();
         }
       }
+      this.cdr.detectChanges();
     }
   }
 
-  @Input() set showLoadingOverlay(show: boolean) {
-    if (!show) {
-      this.loading = false;
-      if (this.initialized) {
-        this.onResize();
-      } else {
-        this.initChart();
-      }
-    } else {
-      this.loading  = true;
-    }
+  @Input() set showLoadingOverlay(loading: boolean) {
+    this.loading = loading;
+    this.cdr.detectChanges();
   }
   @Output() clicked = new EventEmitter();
 

@@ -57,14 +57,14 @@
                 (hoverModeChanged)="hoverModeChanged.emit($event)"
               >
               </sm-single-graph>
-              <div
+              <div *ngIf="!disableResize"
                 class="resize-handle-right"
                 mwlResizeHandle
                 [resizeEdges]="{ right: true }">
                 <div class="right-line"></div>
                 <div class="right-handle"></div>
               </div>
-              <div
+              <div *ngIf="!disableResize"
                 class="resize-handle-bottom"
                 mwlResizeHandle
                 [resizeEdges]="{ bottom: true }">

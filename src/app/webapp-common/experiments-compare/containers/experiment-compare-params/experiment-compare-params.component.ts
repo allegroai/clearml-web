@@ -1,6 +1,5 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, OnInit} from '@angular/core';
 import {select, Store} from '@ngrx/store';
-import {get} from 'lodash/fp';
 import {selectExperimentsParams} from '../../reducers';
 import {filter, tap} from 'rxjs/operators';
 import {ExperimentCompareTree, IExperimentDetail} from '~/features/experiments-compare/experiments-compare-models';
@@ -16,7 +15,7 @@ import {LIMITED_VIEW_LIMIT} from '@common/experiments-compare/experiments-compar
 @Component({
   selector: 'sm-experiment-compare-params',
   templateUrl: './experiment-compare-params.component.html',
-  styleUrls: ['./experiment-compare-params.component.scss', '../../cdk-drag.scss'],
+  styleUrls: [ './experiment-compare-params.component.scss', '../../cdk-drag.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ExperimentCompareParamsComponent extends ExperimentCompareBase implements OnInit {
@@ -27,18 +26,17 @@ export class ExperimentCompareParamsComponent extends ExperimentCompareBase impl
     public store: Store<ExperimentInfoState>,
     public changeDetection: ChangeDetectorRef,
     public activeRoute: ActivatedRoute,
-    public refresh: RefreshService
+    public refresh: RefreshService,
+    public cdr: ChangeDetectorRef
   ) {
-    super(router, store, changeDetection, activeRoute, refresh);
+    super(router, store, changeDetection, activeRoute, refresh, cdr);
   }
 
   experiments$ = this.store.pipe(select(selectExperimentsParams));
 
   ngOnInit() {
     this.onInit();
-
-    this.compareTabPage = get('snapshot.routeConfig.data.mode', this.activeRoute);
-
+    this.compareTabPage = this.activeRoute?.snapshot?.routeConfig?.data?.mode;
     this.routerParamsSubscription = this.taskIds$.subscribe(
       (experimentIds) => {
         this.store.dispatch(experimentListUpdated({ids: experimentIds.slice(0, LIMITED_VIEW_LIMIT)}));
@@ -65,6 +63,7 @@ export class ExperimentCompareParamsComponent extends ExperimentCompareBase impl
     return experiments
       .reduce((acc, cur) => {
         acc[cur.id] = {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'hyper-params': this.buildSectionTree(cur, 'hyperparams', mergedExperiment)
         };
 

@@ -23,7 +23,7 @@
         (click)="expandedMetrics[metric[1][0].metric_hash] = !expandedMetrics[metric[1][0].metric_hash]"
       >
         <mat-panel-title>
-          <span class="panel-title">{{metric[0]}}</span>
+          <span class="panel-title" data-id="metricType">{{metric[0]}}</span>
         </mat-panel-title>
       </mat-expansion-panel-header>
       <ng-template matExpansionPanelContent>
@@ -54,6 +54,7 @@
           <ng-template #single>
             <div class="variant-label">
               <mat-radio-button
+                class="sm"
                 #metricVariant
                 (change)="toggleAllMetricsToDisplay(variant, false)"
                 [checked]="metricsCols[variant.metric_hash + variant.variant_hash] !== undefined"
@@ -64,9 +65,9 @@
                 [ngModel]="metricsCols[variant.metric_hash + variant.variant_hash][0]"
                 (change)="toggleMetricToDisplay(variant, true, $event.value)"
               >
-                <mat-radio-button class="pr-4" value="value">LAST</mat-radio-button>
-                <mat-radio-button class="pr-4" value="min_value">MIN</mat-radio-button>
-                <mat-radio-button value="max_value">MAX</mat-radio-button>
+                <mat-radio-button class="sm" value="value" >LAST</mat-radio-button>
+                <mat-radio-button class="sm px-4" value="min_value">MIN</mat-radio-button>
+                <mat-radio-button class="sm" value="max_value">MAX</mat-radio-button>
               </mat-radio-group>
             </div>
           </ng-template>

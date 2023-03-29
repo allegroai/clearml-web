@@ -13,11 +13,15 @@
         <ng-container class="d-flex" *ngIf="this.subProjects?.length>1">
           <i class="al-icon al-ico-slash"></i>
         </ng-container>
-        <a *ngIf="subProjects[subProjects.length-1].url else lastNonLink"
-           class="sub-project after-collapse"
-           [smTooltip]="subProjects[subProjects.length - 1].name"
-           smShowTooltipIfEllipsis
-           [routerLink]="subProjects[subProjects.length-1].url!=='projects/*/projects'? subProjects[subProjects.length-1].url: null">{{subProjects[subProjects.length - 1].name}}</a>
+        <ng-container *ngIf="subProjects[subProjects.length-1].url else lastNonLink">
+          <i *ngIf="subProjects[subProjects.length - 1].hidden" class="al-icon al-ico-ghost sm mr-1 align-ghost"></i>
+          <a
+            class="sub-project after-collapse"
+            [smTooltip]="subProjects[subProjects.length - 1].name"
+            smShowTooltipIfEllipsis
+            [routerLink]="subProjects[subProjects.length-1].url!=='projects/*/projects'? subProjects[subProjects.length-1].url: null"
+          >{{subProjects[subProjects.length - 1].name}}</a>
+        </ng-container>
         <ng-template #lastNonLink>
            <span class="sub-project after-collapse"
                  [smTooltip]="subProjects[subProjects.length - 1].name"
@@ -31,7 +35,7 @@
                 smShowTooltipIfEllipsis
                 *ngFor="let subProject of subProjects | filterLast"
                 [routerLink]="subProject.url!=='projects/*/projects'? subProject.url: 'projects/*'">
-            {{subProject.name}}
+            <i *ngIf="subProject.hidden" class="al-icon al-ico-ghost sm mr-1"></i>{{subProject.name}}
           </span>
         </mat-menu>
       </ng-container>
@@ -39,20 +43,23 @@
         <span class="sub-projects-breadcrumbs">
           <ng-container *ngFor="let subProject of subProjects; let lastP=last">
            <ng-container *ngIf="subProject.name">
-              <a class="sub-project"
-                 *ngIf="subProject.url && !(lastP && last); else nonLink"
-                 [class.ellipsis]="subProjects.length===1"
-                 [class.last]="lastP && last"
-                 [smTooltip]="subProject.name"
-                 smShowTooltipIfEllipsis
-                 [routerLink]="subProject.url !== 'projects/*/projects' ? subProject.url : 'projects/*/experiments'"
-              >{{subProject.name}}</a>
+             <ng-container *ngIf="subProject.url && !(lastP && last); else nonLink">
+               <i *ngIf="subProject.hidden" class="al-icon al-ico-ghost sm mr-1 align-ghost"></i>
+               <a class="sub-project"
+                  [class.ellipsis]="subProjects.length===1"
+                  [class.last]="lastP && last"
+                  [smTooltip]="subProject.name"
+                  smShowTooltipIfEllipsis
+                  [routerLink]="subProject.url !== 'projects/*/projects' ? subProject.url : 'projects/*/experiments'"
+               ><div class="ellipsis">{{subProject.name}}</div></a>
+             </ng-container>
              <ng-template #nonLink>
+               <i *ngIf="subProject.hidden" class="al-icon al-ico-ghost sm mr-1 align-ghost"></i>
                <span class="sub-project"
                      [class.last]="lastP"
                      [smTooltip]="subProject.name"
                      smShowTooltipIfEllipsis
-               >{{subProject.name}}</span>
+               ><div class="ellipsis">{{subProject.name}}</div></span>
              </ng-template>
                 <i *ngIf="!lastP" class="al-icon al-ico-slash"></i>
              </ng-container>
@@ -64,7 +71,8 @@
     <ng-template #crumbDiv>
       <a *ngIf="crumb.url && !last; else noURL" class="crumb" [class.first]="first" [routerLink]="crumb.url">{{crumb.name}}</a>
       <ng-template #noURL>
-        <span class="crumb" [class.last]="last" [class.first]="first">{{crumb.name}}</span>
+        <span class="crumb" [class.last]="last" [class.first]="first"
+        ><div class="ellipsis" [smTooltip]="crumb.name" smShowTooltipIfEllipsis>{{crumb.name}}</div></span>
       </ng-template>
     </ng-template>
     <i *ngIf="!last" class="al-icon  al-ico-slash"></i>

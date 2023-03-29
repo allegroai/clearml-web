@@ -67,6 +67,7 @@ $btn-font-family: $font-family-base;
     letter-spacing: 0.03em;
     padding: 6px 12px;
     border-radius: 4px;
+    transition: opacity 0.2s ease-in;
   }
 
   .btn-neon {
@@ -208,7 +209,7 @@ $btn-font-family: $font-family-base;
       background-color: $blue-500;
     }
   }
-  
+
   .btn.btn-icon {
     color: $blue-300;
     &:hover {
@@ -411,6 +412,17 @@ $btn-font-family: $font-family-base;
     }
   }
 
+  .btn.btn-icon {
+    color: $blue-400;
+    background-color: $blue-50;
+    &:hover {
+      color: $blue-500;
+      background-color: $blue-100;
+      &:not([disabled]) {
+        color: $blue-500;
+      }
+    }
+  }
 }
 
 

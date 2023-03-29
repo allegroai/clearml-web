@@ -13,6 +13,7 @@ import {Store} from '@ngrx/store';
 import {selectFullScreenChart, selectFullScreenChartIsOpen, selectFullScreenChartXtype, selectPlotViewerScrollId, SingleGraphState} from '@common/shared/single-graph/single-graph.reducer';
 import {ApiEventsService} from '~/business-logic/api-services/events.service';
 import {PlotSampleResponse} from '~/business-logic/model/events/plotSampleResponse';
+import {selectRouterConfig} from '@common/core/reducers/router-reducer';
 
 
 
@@ -24,15 +25,19 @@ export class SingleGraphEffects {
 
   fetchPlotsForIter$ = createEffect(() => this.actions$.pipe(
     ofType(getPlotSample),
-    withLatestFrom(this.store.select(selectPlotViewerScrollId)),
-    switchMap(([action, scrollId]) =>
+    withLatestFrom(
+      this.store.select(selectPlotViewerScrollId),
+      this.store.select(selectRouterConfig).pipe(map(config => !!config?.includes('models')))
+    ),
+    switchMap(([action, scrollId, model]) =>
       this.eventsApi.eventsGetPlotSample({
         /* eslint-disable @typescript-eslint/naming-convention */
         task: action.task,
         iteration: action.iteration,
         metric: action.metric,
         scroll_id: scrollId,
-        navigate_current_metric: false
+        navigate_current_metric: false,
+        ...(model && {model_events: true})
         /* eslint-enable @typescript-eslint/naming-convention */
       })
         .pipe(
@@ -50,13 +55,17 @@ export class SingleGraphEffects {
 
   getNextPlotsForIter$ = createEffect(() => this.actions$.pipe(
     ofType(getNextPlotSample),
-    withLatestFrom(this.store.select(selectPlotViewerScrollId)),
-    switchMap(([action, scrollId]) =>
+    withLatestFrom(
+      this.store.select(selectPlotViewerScrollId),
+      this.store.select(selectRouterConfig).pipe(map(config => !!config?.includes('models')))
+    ),
+    switchMap(([action, scrollId, model]) =>
       this.eventsApi.eventsNextPlotSample({
         /* eslint-disable @typescript-eslint/naming-convention */
         task: action.task,
         scroll_id: scrollId,
         navigate_earlier: action.navigateEarlier,
+        ...(model && {model_events: true}),
         ...(action.iteration && {next_iteration: true})
         /* eslint-enable @typescript-eslint/naming-convention */
       })
@@ -84,14 +93,16 @@ export class SingleGraphEffects {
     ofType(getGraphDisplayFullDetailsScalars),
     withLatestFrom(
       this.store.select(selectFullScreenChart),
-      this.store.select(selectFullScreenChartXtype)
+      this.store.select(selectFullScreenChartXtype),
+      this.store.select(selectRouterConfig).pipe(map(config => !!config?.includes('models')))
     ),
-    switchMap(([action, fullScreenData, chartType]) => this.eventsApi.eventsScalarMetricsIterRaw({
+    switchMap(([action, fullScreenData, chartType, model]) => this.eventsApi.eventsScalarMetricsIterRaw({
       task: action.task,
       metric: action.metric,
       key: action.key ? action.key : chartType,
       /* eslint-disable @typescript-eslint/naming-convention */
       count_total: true,
+      ...(model && {model_events: true}),
       batch_size: 200000,
     })
       .pipe(
@@ -103,6 +114,7 @@ export class SingleGraphEffects {
               scroll_id: data.scroll_id,
               key: action.key ? action.key : chartType,
               count_total: true,
+            ...(model && {model_events: true}),
               batch_size: 200000,
               /* eslint-enable @typescript-eslint/naming-convention */
             }).pipe(
