@@ -19,6 +19,7 @@ export interface Credentials {
   Endpoint?: string;
   Key?: string;
   Secret?: string;
+  Token?: string;
   Region?: string;
 }
 

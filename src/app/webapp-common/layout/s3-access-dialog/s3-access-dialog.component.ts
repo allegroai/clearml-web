@@ -16,6 +16,7 @@ export class S3AccessDialogComponent implements OnChanges {
   @Input() key;
   @Input() secret                          = '';
   @Input() region                          = '';
+  @Input() token                           = '';
   @Input() bucket;
   @Input() endpoint;
   @Input() editMode                        = false;
@@ -36,6 +37,7 @@ export class S3AccessDialogComponent implements OnChanges {
       this.S3Form= {
         Key     : changes.isAzure.currentValue ? 'azure' : changes.key.currentValue,
         Secret  : changes.secret.currentValue,
+        Token   : changes.token.currentValue,
         Region  : changes.region.currentValue,
         Bucket  : changes.bucket.currentValue,
         Endpoint: (changes.endpoint.currentValue === null || changes.endpoint.currentValue?.startsWith('http')) ?

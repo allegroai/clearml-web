@@ -37,10 +37,11 @@ export class S3AccessComponent implements OnDestroy, OnInit {
     return this.S3Form.get(this.BUCKET_CREDENTIALS) as UntypedFormArray;
   }
 
-  addBucket({Key = '', Secret = '', Region = '', Bucket = '', Endpoint = null} = {}) {
+  addBucket({Key = '', Secret = '', Token='', Region = '', Bucket = '', Endpoint = null} = {}) {
     this.bucketCredentials.push(this.formBuilder.group({
       Key,
       Secret,
+      Token,
       Region,
       Bucket,
       Endpoint: (Endpoint?.startsWith('http') || Endpoint === null)? Endpoint : `http${Endpoint?.endsWith('443') ? 's' : ''}://${Endpoint}`
