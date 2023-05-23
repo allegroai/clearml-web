@@ -168,7 +168,7 @@ export function crc32(str /* , polynomial = 0x04C11DB7, initialValue = 0xFFFFFFF
   return (crc ^ finalXORValue) >>> 0;
 }
 
-export const htmlTextShorte = (name: string, limit = 80) => {
+export const htmlTextShort = (name: string, limit = 80) => {
   if (name?.length > limit) {
     return `<span title="${name}">${name.slice(0, limit - 3)}...</span>`;
   }

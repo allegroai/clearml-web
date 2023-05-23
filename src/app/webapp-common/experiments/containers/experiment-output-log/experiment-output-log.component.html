@@ -1,10 +1,10 @@
-<div class="px-4 py-2 row align-items-center" *ngIf="hasLog && showHeader">
-  <div class="p-2 mr-auto">
+<div class="px-4 py-2 d-flex align-items-center" *ngIf="hasLog && showHeader">
+  <div class="p-2 me-auto">
     <span>
       <b>Hostname:</b> {{creator}}
     </span>
   </div>
-  <button class="btn btn-cml-primary mr-5" (click)="downloadLog()">
+  <button class="btn btn-cml-primary me-5" (click)="downloadLog()">
     <i class="fa fa-download"></i>
     Download full log
   </button>

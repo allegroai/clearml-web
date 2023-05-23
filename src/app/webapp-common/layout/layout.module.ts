@@ -1,5 +1,5 @@
 import {NgModule} from '@angular/core';
-import {CommonModule, NgOptimizedImage} from '@angular/common';
+import {CommonModule, NgOptimizedImage, TitleCasePipe} from '@angular/common';
 import {SMSharedModule} from '../shared/shared.module';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {RouterModule} from '@angular/router';
@@ -10,7 +10,6 @@ import {S3AccessResolverComponent} from './s3-access-resolver/s3-access-resolver
 import {StoreModule} from '@ngrx/store';
 import {LayoutReducer} from './layout.reducer';
 import {ServerNotificationDialogContainerComponent} from './server-notification-dialog-container/server-notification-dialog-container.component';
-import {BreadcrumbsComponent} from './breadcrumbs/breadcrumbs.component';
 import {CommonSearchModule} from '../common-search/common-search.module';
 import {HeaderComponent} from './header/header.component';
 import { UiUpdateDialogComponent } from './ui-update-dialog/ui-update-dialog.component';
@@ -20,28 +19,31 @@ import {HeaderUserMenuActionsComponent} from '~/layout/header/header-user-menu-a
 import {WelcomeMessageComponent} from '@common/layout/welcome-message/welcome-message.component';
 import {YouTubePlayerModule} from '@angular/youtube-player';
 import {SharedPipesModule} from '@common/shared/pipes/shared-pipes.module';
+import {BreadcrumbsComponent} from '@common/layout/breadcrumbs/breadcrumbs.component';
 
 
 @NgModule({
-    imports: [
-        CommonModule,
-        SMSharedModule,
-        FormsModule,
-        ReactiveFormsModule,
-        CommonSearchModule,
-        RouterModule,
-        StoreModule.forFeature('layout', LayoutReducer),
-        SharedModule,
-        YouTubePlayerModule,
-        SharedPipesModule,
-        NgOptimizedImage,
-    ],
+  imports: [
+    CommonModule,
+    SMSharedModule,
+    FormsModule,
+    ReactiveFormsModule,
+    CommonSearchModule,
+    RouterModule,
+    StoreModule.forFeature('layout', LayoutReducer),
+    SharedModule,
+    YouTubePlayerModule,
+    SharedPipesModule,
+    NgOptimizedImage,
+    BreadcrumbsComponent,
+  ],
   declarations: [
-    HeaderComponent, BreadcrumbsComponent, ProjectContextNavbarComponent, LoggedOutAlertComponent,
+    HeaderComponent, ProjectContextNavbarComponent, LoggedOutAlertComponent,
     S3AccessResolverComponent, S3AccessDialogComponent, ServerNotificationDialogContainerComponent,
     UiUpdateDialogComponent, TipOfTheDayModalComponent, HeaderUserMenuActionsComponent, WelcomeMessageComponent
   ],
-  exports: [HeaderComponent, BreadcrumbsComponent, ProjectContextNavbarComponent, LoggedOutAlertComponent, S3AccessResolverComponent, S3AccessDialogComponent, ServerNotificationDialogContainerComponent, UiUpdateDialogComponent, WelcomeMessageComponent]
+  providers:[TitleCasePipe],
+  exports: [HeaderComponent, ProjectContextNavbarComponent, LoggedOutAlertComponent, S3AccessResolverComponent, S3AccessDialogComponent, ServerNotificationDialogContainerComponent, UiUpdateDialogComponent, WelcomeMessageComponent]
 })
 export class CommonLayoutModule {
 }

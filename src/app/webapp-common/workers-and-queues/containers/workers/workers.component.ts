@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {Worker} from '../../../../business-logic/model/workers/worker';
 import {getSelectedWorker, workersTableSortChanged} from '../../actions/workers.actions';
@@ -40,6 +40,7 @@ export class WorkersComponent implements OnInit {
         const selectedWorker = workers.find(worker => worker.id === this.routerWorkerId);
         this.selectWorker(selectedWorker);
       });
+
   }
 
 
@@ -57,5 +58,6 @@ export class WorkersComponent implements OnInit {
   sortedChanged(sort: { isShift: boolean; colId: ISmCol['id'] }) {
     this.store.dispatch(workersTableSortChanged({colId: sort.colId, isShift: sort.isShift}));
   }
+
 
 }

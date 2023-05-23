@@ -1,25 +1,31 @@
 <form class="filter-form" (ngSubmit)="addTag(filterText)">
-  <mat-form-field appearance="standard"
-                  class="tags-menu-input"
-                  hideRequiredMarker="true"
-                  floatLabel="never">
-    <input #nameInput cdkFocusInitial smClickStopPropagation matInput placeholder="Add Tag" name="filter" [(ngModel)]="filterText" class="filter" autocomplete="off">
-      <i matSuffix
-         *ngIf="companyTags !== null"
-         [class]="'icon sm-md mr-3 ml-4 pointer ' + (tagsFilterByProject ? 'i-project-tags-filter-active' : 'i-project-tags-filter')"
+  <mat-form-field
+    class="tags-menu-input no-bottom"
+    hideRequiredMarker="true"
+    appearance="fill"
+  >
+    <input #nameInput smClickStopPropagation matInput placeholder="Add Tag" name="filter" [(ngModel)]="filterText" class="filter" autocomplete="off">
+    <div matSuffix class="d-flex-center mx-2">
+      <i *ngIf="companyTags !== null && (disableFilterByProject$ | async)=== false"
+         class="icon sm-md me-3 mb-2 pointer"
+         [class]="tagsFilterByProject ? 'i-project-tags-filter-active' : 'i-project-tags-filter'"
          smTooltip="Toggle all/project-only tags"
          (click)="projectTagsFilterToggle()"
          smClickStopPropagation></i>
-      <i matSuffix [class]="'al-icon sm-md mr2 ' + (filterText? 'al-ico-dialog-x pointer':'al-ico-search')" (click)="filterText && clear()" smClickStopPropagation></i>
+      <i class="al-icon sm-md me-3 mb-2" [class]="filterText? 'al-ico-dialog-x pointer':'al-ico-search'"
+         (click)="filterText && clear()" smClickStopPropagation></i>
+    </div>
   </mat-form-field>
 </form>
 <div class="buttons-container" [class.searching]="filterText">
   <button
+    mat-menu-item
     class="item"
     *ngIf="filterText && !allTags?.includes(filterText)"
     (click)="addTag(filterText)"
   >"{{filterText}}" <span class="new">(Create New)</span></button>
   <button
+    mat-menu-item
     *ngFor="let tag of allTags | filter:tags | filter:filterText; trackBy: trackByFn"
     class="item"
     (click)="addTag(tag)"
@@ -27,4 +33,4 @@
   >{{tag}}</button>
 </div>
 <hr>
-<button class="item" (click)="openTagColors()">Tag Colors</button>
+<button mat-menu-item data-id="TagColors" class="item" (click)="openTagColors()">Tag Colors</button>

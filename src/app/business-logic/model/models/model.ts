@@ -10,6 +10,8 @@
  * Do not edit the class manually.
  */
 
+import { ModelStats } from '././modelStats';
+import { LastMetricsEvent } from '././lastMetricsEvent';
 import { MetadataItem } from '././metadataItem';
 
 
@@ -55,11 +57,11 @@ export interface Model {
      */
     comment?: string;
     /**
-     * User-defined tags list
+     * User-defined tags
      */
     tags?: Array<string>;
     /**
-     * System tags list. This field is reserved for system use, please don\'t use it.
+     * System tags. This field is reserved for system use, please don\'t use it.
      */
     system_tags?: Array<string>;
     /**
@@ -89,5 +91,14 @@ export interface Model {
     /**
      * Model metadata
      */
-    metadata?: Array<MetadataItem>;
+    metadata?: { [key: string]: MetadataItem; };
+    /**
+     * Last iteration reported for this model
+     */
+    last_iteration?: number;
+    /**
+     * Last metric variants (hash to events), one for each metric hash
+     */
+    last_metrics?: { [key: string]: { [key: string]: LastMetricsEvent; }; };
+    stats?: ModelStats;
 }

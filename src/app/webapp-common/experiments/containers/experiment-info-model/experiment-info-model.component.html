@@ -22,7 +22,7 @@
     [modelLabels]="modelLabels"
     [source]="source"
     [showCreatedExperiment]="!outputMode"
-    (modelSelected)="onModelSelected($event); modelSection.unsubscribeToEventListener()">
+    (modelSelectedId)="onModelSelected($event); modelSection.unsubscribeToEventListener()">
   </sm-experiment-models-form-view>
 </sm-editable-section>
 <sm-editable-section class="editable-design"

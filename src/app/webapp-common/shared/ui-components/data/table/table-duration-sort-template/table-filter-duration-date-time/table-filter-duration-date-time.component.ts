@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit} from '@angular/core';
-import {DurationParameters, TableDurationSortBase} from '../table-duration-sort.base';
+import {DurationParameters, TableDurationSortBaseComponent} from '../table-duration-sort-base.component';
 import {TIME_IN_MILLI} from '../../../../../utils/time-util';
 import {MAT_DATE_FORMATS, MAT_DATE_LOCALE} from '@angular/material/core';
 import {isNil} from 'lodash-es';
@@ -25,15 +25,9 @@ const addUserTimezoneToIsoDate = (data) => {
   const offset = myDate.getTimezoneOffset() * TIME_IN_MILLI.ONE_MIN;
 
   const withOffset = myDate.getTime();
-  const withoutOffset = withOffset - offset;
-  return withoutOffset;
+  return  withOffset - offset;
 };
 
-/**
- * Remove Seconds, Minutes and Hours from Date object
- *
- * @param date
- */
 const mutedDateToNoHourMinutesSeconds = (_date: Date | number) => {
   const date = new Date(_date);
   date.setSeconds(0);
@@ -71,7 +65,7 @@ export const getTimeInSecondsFromDate = (_date: number | Date): number => {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class TableFilterDurationDateTimeComponent  extends TableDurationSortBase implements OnInit {
+export class TableFilterDurationDateTimeComponent  extends TableDurationSortBaseComponent implements OnInit {
   _selectedDate: Date;
   _selectedTimeInSeconds: number;
 

@@ -6,7 +6,7 @@ import {UsersGetAllResponse} from '~/business-logic/model/users/usersGetAllRespo
 import {AuthCreateUserResponse} from '~/business-logic/model/auth/authCreateUserResponse';
 import {v1 as uuidV1} from 'uuid';
 import {EMPTY, Observable, of, throwError, timer} from 'rxjs';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {MatDialog} from '@angular/material/dialog';
 import {ConfirmDialogComponent} from '../ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {LoginModeResponse} from '~/business-logic/model/LoginModeResponse';
 import {clone} from 'lodash-es';

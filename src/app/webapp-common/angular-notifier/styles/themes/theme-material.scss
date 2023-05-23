@@ -19,7 +19,6 @@ $notifier-shadow-color: rgba(0, 0, 0, .2) !default;
 	}
 
 	.notifier__notification {
-
 		&-message {
 			display: inline-block;
 			margin: { // Reset paragraph default styles
@@ -31,6 +30,8 @@ $notifier-shadow-color: rgba(0, 0, 0, .2) !default;
 			font-size: 15px;
       .message{
         white-space: pre-line;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
 			.user-action {

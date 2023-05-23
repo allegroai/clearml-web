@@ -1,28 +1,26 @@
 <sm-dialog-template iconClass="fas fa-tags rotate-right fa-6x" header="TAG COLORS">
   <form class="filter-form">
-    <mat-form-field appearance="fill"
-                    hideRequiredMarker="true"
-                    floatLabel="never">
-      <input #nameInput smClickStopPropagation  matInput placeholder="Search" name="filter" [(ngModel)]="filterText" autocomplete="off">
-      <i matSuffix [class]="'fa mr2 ' + (filterText? 'fa-times pointer':'fa-search')" (click)="filterText && clearSearch()"></i>
+    <mat-form-field appearance="fill" hideRequiredMarker="true" class="no-bottom w-100">
+      <input smClickStopPropagation  matInput placeholder="Search" name="filter" [(ngModel)]="filterText" autocomplete="off">
+      <i matSuffix class="al-icon me-3" [class]="filterText ? 'al-ico-dialog-x pointer' : 'al-ico-search'" (click)="filterText && clearSearch()"></i>
     </mat-form-field>
   </form>
 
   <mat-menu #colorMenu="matMenu">
     <ng-template matMenuContent let-tag="tag" let-colors="colors">
-      <button mat-menu-item (click)="openColorPicker(tag, colors.background)">Background</button>
-      <button mat-menu-item [matMenuTriggerFor]="subMenu" [matMenuTriggerData]="{tag: tag, color: colors.foreground}">Foreground</button>
+      <button mat-menu-item (click)="openColorPicker(tag, colors.background)" data-id="backgroundOption">Background</button>
+      <button mat-menu-item [matMenuTriggerFor]="subMenu" [matMenuTriggerData]="{tag: tag, color: colors.foreground}" data-id="foregroundOption">Foreground</button>
     </ng-template>
   </mat-menu>
 
   <mat-menu #subMenu="matMenu">
     <ng-template matMenuContent let-tag="tag" let-color="color">
       <button mat-menu-item (click)="setForeground(tag, 'black')">
-        <span class="ico-chk"><i *ngIf="color==='black'" class="al-icon al-ico-success sm-md"></i></span>
+        <span class="ico-chk"><i *ngIf="color==='black'" class="al-icon al-ico-success sm-md" data-id="blackOption" ></i></span>
         Black
       </button>
       <button mat-menu-item (click)="setForeground(tag, 'white')">
-        <span class="ico-chk"><i *ngIf="color==='white'" class="al-icon al-ico-success sm-md"></i></span>
+        <span class="ico-chk"><i *ngIf="color==='white'" class="al-icon al-ico-success sm-md" data-id="whiteOption" ></i></span>
         White
       </button>
     </ng-template>
@@ -48,10 +46,11 @@
 
   <cdk-virtual-scroll-viewport itemSize="32" class="tags-list">
     <div *cdkVirtualFor="let tag of (tags$ | async) | filter:filterText:'caption'" class="tag-line">
-      <div class="caption ellipsis">{{tag.caption}}</div>
+      <div data-id="tagOption" class="caption ellipsis">{{tag.caption}}</div>
       <div
         *ngIf="(tag.colorObservable | async) as colors"
         class="tag pointer"
+        data-id="tagColorButton"
         [style.backgroundColor]="$any(colors)?.background"
         [style.color]="$any(colors)?.foreground"
         [matMenuTriggerFor]="colorMenu"
@@ -62,6 +61,6 @@
 
 
   <div class="btn-row">
-    <button class="btn btn-neon center" (click)="close()">CLOSE</button>
+    <button class="btn btn-neon center" (click)="close()" data-id="closeButton">CLOSE</button>
   </div>
 </sm-dialog-template>

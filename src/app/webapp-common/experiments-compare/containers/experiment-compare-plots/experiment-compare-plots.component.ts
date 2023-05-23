@@ -25,6 +25,8 @@ import {RefreshService} from '@common/core/services/refresh.service';
 import {addMessage} from '@common/core/actions/layout.actions';
 import {ExperimentGraphsComponent} from '@common/shared/experiment-graphs/experiment-graphs.component';
 import { ReportCodeEmbedService } from '~/shared/services/report-code-embed.service';
+import {ActivatedRoute} from '@angular/router';
+import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 
 @Component({
   selector: 'sm-experiment-compare-plots',
@@ -51,10 +53,12 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
   public refreshDisabled: boolean;
 
   @ViewChild(ExperimentGraphsComponent) graphsComponent: ExperimentGraphsComponent;
+  private entityType: EntityTypeEnum;
 
   constructor(
     private store: Store<ExperimentInfoState>,
     private changeDetection: ChangeDetectorRef,
+    private route: ActivatedRoute,
     private refresh: RefreshService,
     private reportEmbed: ReportCodeEmbedService,
   ) {
@@ -82,6 +86,7 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.entityType = this.route.snapshot.parent.parent.data.entityType;
     this.plotsSubscription = this.plots$
       .subscribe((metricsPlots) => {
         this.refreshDisabled = false;
@@ -106,14 +111,14 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
         if (!this.taskIds || this.taskIds.join(',') !== params.ids) {
           this.taskIds = params.ids.split(',');
           this.store.dispatch(setSelectedExperiments({selectedExperiments: this.taskIds}));
-          this.store.dispatch(getMultiPlotCharts({taskIds: this.taskIds}));
+          this.store.dispatch(getMultiPlotCharts({taskIds: this.taskIds, entity: this.entityType}));
         }
       });
 
     this.refreshingSubscription = this.refresh.tick
       .pipe(filter(auto => auto !== null))
       .subscribe(autoRefresh =>
-        this.store.dispatch(getMultiPlotCharts({taskIds: this.taskIds, autoRefresh}))
+        this.store.dispatch(getMultiPlotCharts({taskIds: this.taskIds, entity: this.entityType, autoRefresh}))
       );
   }
 
@@ -149,9 +154,11 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
   }
 
   createEmbedCode(event: { metrics?: string[]; variants?: string[]; domRect: DOMRect }) {
+    const entityType = this.entityType === EntityTypeEnum.model ? 'model' : 'task';
     this.reportEmbed.createCode({
       type: 'plot',
-      tasks: this.taskIds,
+      objects: this.taskIds,
+      objectType: entityType,
       ...event
     });
   }

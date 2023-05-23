@@ -1,4 +1,4 @@
-import {createReducer, createSelector, on, ReducerTypes} from '@ngrx/store';
+import {createSelector, on, ReducerTypes} from '@ngrx/store';
 import {setTOU} from './login.actions';
 
 export interface LoginState {

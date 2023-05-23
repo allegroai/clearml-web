@@ -15,8 +15,7 @@ import {Project} from '~/business-logic/model/projects/project';
 import {
   selectAllProjectsUsers,
   selectProjectUsers,
-  selectRootProjects,
-  selectSelectedProject
+  selectSelectedProject, selectTablesFilterProjectsOptions
 } from '../../core/reducers/projects.reducer';
 import {IOutputData} from 'angular-split/lib/interface';
 import {SplitComponent} from 'angular-split';
@@ -32,8 +31,8 @@ import {
   selectionHasExample
 } from './items.utils';
 import {ActivatedRoute, Params, Router} from '@angular/router';
-import {resetProjectSelection} from '@common/core/actions/projects.actions';
-import {MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
+import {getTablesFilterProjectsOptions, resetProjectSelection, resetTablesFilterProjectsOptions, setTablesFilterProjectsOptions} from '@common/core/actions/projects.actions';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {selectTableModeAwareness} from '@common/projects/common-projects.reducer';
@@ -43,6 +42,9 @@ import {neverShowPopupAgain} from '../../core/actions/layout.actions';
 import {selectNeverShowPopups} from '../../core/reducers/view.reducer';
 import {SmSyncStateSelectorService} from '../../core/services/sync-state-selector.service';
 import {isReadOnly} from '@common/shared/utils/is-read-only';
+import {setCustomMetrics} from '@common/models/actions/models-view.actions';
+import * as experimentsActions from '@common/experiments/actions/common-experiments-view.actions';
+import {setParents} from '@common/experiments/actions/common-experiments-view.actions';
 
 @Component({
   selector: 'sm-base-entity-page',
@@ -69,9 +71,11 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
   private destroy$ = new Subject();
   public users$: Observable<User[]>;
   public projectsOptions$: Observable<Project[]>;
+  protected parents = [];
 
   @ViewChild('split') split: SplitComponent;
   protected abstract inEditMode$: Observable<boolean>;
+  private selectedProject: Project;
 
   abstract onFooterHandler({emitValue, item}): void;
 
@@ -84,7 +88,7 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
   abstract refreshList(auto: boolean);
 
 
-  get selectedProject() {
+  get selectedProjectId() {
     return this.route.parent.snapshot.params.projectId;
   }
 
@@ -96,21 +100,12 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
     protected refresh: RefreshService,
     protected syncSelector: SmSyncStateSelectorService,
   ) {
-    this.users$ = this.selectedProject === '*' ? this.store.select(selectAllProjectsUsers) : this.store.select(selectProjectUsers);
-    this.selectedProject$ = this.store.select(selectSelectedProject);
-    this.selectedProject$.pipe(filter(p => !!p), take(1)).subscribe((project: Project) => {
+    this.users$ = this.selectedProjectId === '*' ? this.store.select(selectAllProjectsUsers) : this.store.select(selectProjectUsers);
+    this.store.select(selectSelectedProject).pipe(filter(p => !!p), take(1)).subscribe((project: Project) => {
+      this.selectedProject = project;
       this.isExampleProject = isReadOnly(project);
     });
-    this.projectsOptions$ = combineLatest([
-      this.selectedProject$.pipe(filter(p => !!p?.id)),
-      this.store.select(selectRootProjects).pipe(filter(p => p !== null)),
-    ]).pipe(map(([selectedProject, rootProjects]) => {
-      if (selectedProject?.id === '*') {
-        return rootProjects;
-      } else {
-        return [selectedProject].concat(selectedProject?.sub_projects ?? []);
-      }
-    }));
+    this.projectsOptions$ = this.store.select(selectTablesFilterProjectsOptions);
 
     this.tableModeAwareness$ = store.select(selectTableModeAwareness)
       .pipe(
@@ -144,6 +139,7 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
   }
 
   ngAfterViewInit() {
+    this.store.dispatch(resetTablesFilterProjectsOptions());
     if (this.setSplitSizeAction) {
       this.sub.add(this.split.dragProgress$.pipe(throttleTime(100))
         .subscribe((progress) => this.store.dispatch(this.setSplitSizeAction({splitSize: progress.sizes[1] as number})))
@@ -154,6 +150,7 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
   ngOnDestroy(): void {
     this.sub.unsubscribe();
     this.footerItems = [];
+    this.store.dispatch(setCustomMetrics({metrics: null}));
     this.destroy$.next(null);
     this.destroy$.complete();
   }
@@ -300,5 +297,26 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
       queryParamsHandling: 'merge',
       queryParams
     });
+  }
+
+  filterSearchChanged({colId, value}: { colId: string; value: {value: string; loadMore?: boolean} }) {
+    switch (colId) {
+      case 'project.name':
+        if (this.selectedProjectId === '*') {
+          !value.loadMore && this.store.dispatch(resetTablesFilterProjectsOptions());
+          this.store.dispatch(getTablesFilterProjectsOptions({searchString: value.value || '', loadMore: value.loadMore}));
+        } else {
+          this.store.dispatch(setTablesFilterProjectsOptions({projects: this.selectedProject ? [this.selectedProject, ...this.selectedProject?.sub_projects] : [], scrollId: null}));
+        }
+        break;
+      case 'parent.name':
+        // No pagination in BE - setting same list will set noMoreOptions to true
+        if (value.loadMore) {
+          this.store.dispatch(setParents({parents: [...this.parents]}));
+        } else {
+          this.store.dispatch(experimentsActions.resetTablesFilterParentsOptions());
+          this.store.dispatch(experimentsActions.getParents({searchValue: value.value}));
+        }
+    }
   }
 }

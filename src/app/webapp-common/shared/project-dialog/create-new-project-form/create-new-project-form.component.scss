@@ -1,4 +1,7 @@
 :host {
+  form {
+    gap: 12px;
+  }
   .create-project-button {
     padding-top: 32px;
   }
@@ -7,15 +10,22 @@
     //position: absolute !important;
     //top: -15px;
   }
-  #project-description{
-    max-height:250px;
+
+  #project-description {
+    max-height: 250px;
     padding-top: 12px;
     height: 65px;
   }
-  mat-form-field{
+
+  mat-form-field {
     width: 100%;
-    .project-description{
+
+    .project-description {
       min-height: 68px;
     }
+  }
+
+  .search-icon {
+    transform: translateY(3px);
   }
 }

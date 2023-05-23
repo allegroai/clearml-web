@@ -78,7 +78,7 @@ export const removeReport = createAction(
 
 export const setReportChanges = createAction(
   REPORTS_PREFIX + '[set report changes]',
-  props<{ id: string; changes: Partial<IReport> }>()
+  props<{ id: string; changes: Partial<IReport>; filterOut?: boolean}>()
 );
 
 export const setArchive = createAction(

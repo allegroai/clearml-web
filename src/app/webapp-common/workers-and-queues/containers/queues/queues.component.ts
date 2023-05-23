@@ -22,7 +22,7 @@ import {
   selectSelectedQueue
 } from '../../reducers/index.reducer';
 import {filter, take, withLatestFrom} from 'rxjs/operators';
-import {MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {QueueCreateDialogComponent} from '@common/shared/queue-create-dialog/queue-create-dialog.component';
 import {SortMeta} from 'primeng/api';

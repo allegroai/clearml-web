@@ -1,7 +1,7 @@
 <div class="editable-div" [class.edit-mode]="active" [class.is-description]="multiline" (click)="active && $event.stopPropagation()">
     <div class="value" #template (click)="(!inlineDisabled) && inlineActivated($event)"
       ><ng-content></ng-content>
-      <i *ngIf="editable && !inlineDisabled" class='al-icon al-ico-edit sm-md editable-pen pointer'></i>
+      <i *ngIf="editable && !inlineDisabled" class='al-icon al-ico-edit sm-md editable-pen pointer' data-id="Edit Description"></i>
     </div>
     <div *ngIf="editable" class="input" tabindex="12">
       <form #form class="inline-edit-form" [class.multiline]="multiline">

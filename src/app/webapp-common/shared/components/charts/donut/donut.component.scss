@@ -24,7 +24,6 @@
   max-height: 100%;
   flex-wrap: wrap;
   gap: 16px;
-  padding: 24px;
   overflow: auto;
 
   .slice {
@@ -33,7 +32,6 @@
     margin-left: 22px;
 
     &.highlight {
-      font-weight: bold;
       color: $blue-200;
 
       .circle {

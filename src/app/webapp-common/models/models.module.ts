@@ -41,6 +41,8 @@ import {ExperimentGraphsModule} from '@common/shared/experiment-graphs/experimen
 import {createUserPrefFeatureReducer} from '@common/core/meta-reducers/user-pref-reducer';
 import {UserPreferences} from '@common/user-preferences';
 import {SharedPipesModule} from '@common/shared/pipes/shared-pipes.module';
+import {ExperimentCompareSharedModule} from '@common/experiments-compare/shared/experiment-compare-shared.module';
+import {RouterTabNavBarComponent} from '@common/shared/components/router-tab-nav-bar/router-tab-nav-bar.component';
 
 export const modelSyncedKeys    = [
   'view.projectColumnsSortOrder',
@@ -83,26 +85,28 @@ const getInitState = (userPreferences: UserPreferences) => ({
 
 
 @NgModule({
-  imports: [
-    ExperimentSharedModule,
-    FormsModule,
-    ReactiveFormsModule,
-    CommonModule,
-    CommonLayoutModule,
-    ModelRouterModule,
-    ModelSharedModule,
-    ExperimentSharedModule,
-    CommonDeleteDialogModule,
-    SMSharedModule,
-    FeatureModelsModule,
-    AngularSplitModule,
-    StoreModule.forFeature(MODELS_STORE_KEY, reducers, MODELS_CONFIG_TOKEN),
-    EffectsModule.forFeature([ModelsViewEffects, ModelsInfoEffects, ModelsMenuEffects]),
-    FeatureModelsModule,
-    SharedModule,
-    SharedPipesModule,
-    ExperimentGraphsModule,
-  ],
+    imports: [
+        ExperimentSharedModule,
+        FormsModule,
+        ReactiveFormsModule,
+        CommonModule,
+        CommonLayoutModule,
+        ModelRouterModule,
+        ModelSharedModule,
+        ExperimentSharedModule,
+        CommonDeleteDialogModule,
+        SMSharedModule,
+        FeatureModelsModule,
+        AngularSplitModule,
+        StoreModule.forFeature(MODELS_STORE_KEY, reducers, MODELS_CONFIG_TOKEN),
+        EffectsModule.forFeature([ModelsViewEffects, ModelsInfoEffects, ModelsMenuEffects]),
+        FeatureModelsModule,
+        SharedModule,
+        SharedPipesModule,
+        ExperimentGraphsModule,
+        ExperimentCompareSharedModule,
+        RouterTabNavBarComponent,
+    ],
   providers      : [
     SmFormBuilderService, DatePipe,
     {provide: MODELS_CONFIG_TOKEN, useFactory: getInitState, deps: [UserPreferences]},

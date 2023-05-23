@@ -24,6 +24,7 @@ import {CreateCredentialDialogComponent} from '~/features/settings/containers/ad
 import {RedactedArgumentsDialogComponent} from '@common/settings/admin/redacted-arguments-dialog/redacted-arguments-dialog.component';
 import {LayoutModule} from '~/layout/layout.module';
 import {SharedPipesModule} from '@common/shared/pipes/shared-pipes.module';
+import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
 
 
 
@@ -56,6 +57,7 @@ import {SharedPipesModule} from '@common/shared/pipes/shared-pipes.module';
     MatExpansionModule,
     FormsModule,
     LayoutModule,
+    LabeledFormFieldDirective,
     SharedPipesModule
   ],
   exports: [

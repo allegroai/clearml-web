@@ -42,7 +42,7 @@ export class ScatterPlotComponent implements AfterViewInit, OnDestroy {
 
   @Input() colors: string[];
   @Input() set data(data: ProjectStatsGraphData[]) {
-    if(data?.length > 0) {
+    if (data) {
       this.loading = false;
       this.chartData = cloneDeep(data);
       if (this.chartContainer) {
@@ -97,6 +97,7 @@ export class ScatterPlotComponent implements AfterViewInit, OnDestroy {
         .xAxisFormatType('time')
         .xAxisFormat('%x')
         .maxCircleArea(3)
+        .isAnimated(false)
         .on('customMouseOver', this.tooltip.show)
         .on('customMouseMove', (dataPoint, mousePos, chartSize) => {
           this.tooltip.title(dataPoint.title);

@@ -43,3 +43,5 @@ export const EXPERIMENTS_STATUS_LABELS = {
   [TaskTypeEnum.Qc]            : 'Qc',
   [TaskTypeEnum.Custom]        : 'Custom'
 };
+
+export const hideDeleteArtifactsEntities = [EntityTypeEnum.model];

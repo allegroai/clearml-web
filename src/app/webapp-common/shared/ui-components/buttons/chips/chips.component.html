@@ -6,19 +6,21 @@
   (mousedown)="$event.stopPropagation()"
 >
   <span class="label"
+        data-id="label"
         [style.color]="color"
         [style.background]="backgroundColor">
     <span *ngIf="!colorIsForced" class="dot-container">
       <span #dot class="dot pallete-cursor"
+            data-id="colorDotButton"
             [ngStyle]="{backgroundColor: color}"
             [colorButtonRef]="dot"
             [smChooseColor]="color"
             [stringToColor]="label">
       </span>
     </span>
-    <span smTooltip="label.length > 12 ? label : ''" class="label-text ellipsis">{{label}}</span>
+    <span smTooltip="label.length > 12 ? label : ''" class="label-text ellipsis" data-id="labelName">{{label}}</span>
     <span class="pointer" *ngIf="allowRemove" (mousedown)="$event.stopPropagation(); $event.preventDefault()" (click)="remove.emit($event); $event.stopPropagation()">
-      <i class="al-icon al-ico-dialog-x xs pointer"></i>
+      <i class="al-icon al-ico-dialog-x xs pointer" data-id="annotation cross button" ></i>
     </span>
   </span>
 </div>

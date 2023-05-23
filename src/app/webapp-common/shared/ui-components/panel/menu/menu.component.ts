@@ -10,7 +10,7 @@ import {
   Renderer2,
   ViewChild
 } from '@angular/core';
-import {MatLegacyMenuTrigger as MatMenuTrigger} from '@angular/material/legacy-menu';
+import {MatMenuTrigger} from '@angular/material/menu';
 
 @Component({
   selector       : 'sm-menu',
@@ -21,6 +21,7 @@ import {MatLegacyMenuTrigger as MatMenuTrigger} from '@angular/material/legacy-m
 export class MenuComponent implements AfterViewInit {
   public isMenuOpen: boolean = false;
 
+  @Input() searchPlaceholder: string = '';
   @Input() header: string;
   @Input() buttonClass: string;
   @Input() hasButtonClass = true;

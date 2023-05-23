@@ -83,7 +83,7 @@ import {ColorPickerModule} from 'ngx-color-picker';
 import {EditJsonComponent} from './overlay/edit-json/edit-json.component';
 import {ResizableColumnDirective} from './data/table/resizable-column.directive';
 import {JsonValidatorDirective} from './template-forms-ui/json-validator.directive';
-import {MatLegacyProgressSpinnerModule as MatProgressSpinnerModule} from '@angular/material/legacy-progress-spinner';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {GroupedCheckedFilterListComponent} from './data/grouped-checked-filter-list/grouped-checked-filter-list.component';
 import {ShareDialogComponent} from './overlay/share-dialog/share-dialog.component';
 import {HesitateDirective} from './directives/hesitate.directive';
@@ -92,7 +92,7 @@ import {DurationInputListComponent} from './inputs/duraion-input-list/duration-i
 import {TableFilterDurationComponent} from './data/table/table-duration-sort-template/table-filter-duration/table-filter-duration.component';
 import {TableFilterDurationNumericComponent} from './data/table/table-duration-sort-template/table-filter-duration-numeric/table-filter-duration-numeric.component';
 import {TableFilterDurationDateTimeComponent} from './data/table/table-duration-sort-template/table-filter-duration-date-time/table-filter-duration-date-time.component';
-import {MatLegacyInputModule as MatInputModule} from '@angular/material/legacy-input';
+import {MatInputModule} from '@angular/material/input';
 import {MatNativeDateModule} from '@angular/material/core';
 import {SelectAutocompleteWithChipsComponent} from './inputs/select-autocomplete-with-chips/select-autocomplete-with-chips.component';
 import {TableFilterDurationErrorComponent} from './data/table/table-duration-sort-template/table-filter-duration-error/table-filter-duration-error.component';
@@ -106,7 +106,7 @@ import {RippleButtonComponent} from './buttons/ripple-button/ripple-button.compo
 import {CheckboxThreeStateListComponent} from './panel/checkbox-three-state-list/checkbox-three-state-list.component';
 import {TemplateAliasDirective} from './directives/template-alias.directive';
 import {ShowTooltipIfEllipsisDirective} from './indicators/tooltip/show-tooltip-if-ellipsis.directive';
-import {MatLegacyTooltipModule as MatTooltipModule} from '@angular/material/legacy-tooltip';
+import {MatTooltipModule} from '@angular/material/tooltip';
 import {CodeEditorComponent} from './data/code-editor/code-editor.component';
 import {AppendComponentOnTopElementDirective} from '@common/shared/directive/append-component-on-top-element.directive';
 import {EditCredentialLabelDialogComponent} from '@common/shared/ui-components/overlay/edit-credential-label-dialog/edit-credential-label-dialog.component';
@@ -114,6 +114,7 @@ import {FitElementsToContainerDirective} from '@common/shared/ui-components/dire
 import { ChipsListComponent } from './buttons/chips-list/chips-list.component';
 import {VirtualGridComponent} from '@common/shared/components/virtual-grid/virtual-grid.component';
 import {ScrollEndDirective, ScrollEndRootDirective} from './directives/scroll-end.directive';
+import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
 
 const declarations = [
   DurationInputComponent,
@@ -143,7 +144,6 @@ const declarations = [
   OperationErrorDialogComponent,
   EditJsonComponent,
   ShareDialogComponent,
-  ClickStopPropagationDirective,
   EllipsisMiddleDirective,
   KeydownStopPropagationDirective,
   PreventArrowKeysDirective,
@@ -221,13 +221,15 @@ const declarations = [
     TooltipDirective,
     ShowTooltipIfEllipsisDirective,
     SelectAutocompleteWithChipsComponent,
-    DialogTemplateComponent
+    DialogTemplateComponent,
+    ClickStopPropagationDirective,
+    LabeledFormFieldDirective,
   ],
   providers   : [],
   declarations: [...declarations, TagsMenuComponent, TagColorMenuComponent, ResizableColumnDirective, HesitateDirective, DurationInputListComponent, TableFilterDurationComponent, TableFilterDurationErrorComponent, RippleButtonComponent, TemplateAliasDirective, CodeEditorComponent, ChipsListComponent],
     exports: [...declarations, ChipsModule, SMMaterialModule, ChooseColorModule, SMPortalModule, TagsMenuComponent,
       TableFilterDurationComponent, MatDatepickerModule, TemplateAliasDirective, CodeEditorComponent, ChipsListComponent,
-      TooltipDirective, ShowTooltipIfEllipsisDirective, SelectAutocompleteWithChipsComponent, DialogTemplateComponent]
+      TooltipDirective, ShowTooltipIfEllipsisDirective, SelectAutocompleteWithChipsComponent, DialogTemplateComponent, ClickStopPropagationDirective]
 })
 export class UiComponentsModule {
 }

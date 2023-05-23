@@ -8,6 +8,15 @@ $log-header-height: 48px;
   position: relative;
   height: 100%;
   background-color: $blue-950;
+  .results-panel {
+    &.maximized {
+      height: 100%;
+
+      .content {
+        flex: 1;
+      }
+    }
+  }
 
   sm-pipeline-info {
     display: block;

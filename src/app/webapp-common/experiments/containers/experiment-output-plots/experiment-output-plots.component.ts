@@ -108,7 +108,7 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChan
       .pipe(
         distinctUntilChanged(),
         filter(metrics => !!metrics),
-        map(plots => this.isDatasetVersionPreview ? plots.filter(plot => !plot.metric.startsWith('_')) : plots),
+        map(plots => this.isDatasetVersionPreview ? plots.filter(plot => !plot.metric.startsWith('_')).filter(plot=> !['Execution Flow', 'Execution Details'].includes(plot.variant)) : plots),
       )
       .subscribe(metricsPlots => {
         this.refreshDisabled = false;
@@ -187,7 +187,8 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChan
   createEmbedCode(event: { metrics?: string[]; variants?: string[]; domRect: DOMRect }) {
     this.reportEmbed.createCode({
       type: 'plot',
-      tasks: [this.experimentId],
+      objects: [this.experimentId],
+      objectType: 'task',
       ...event
     });
   }

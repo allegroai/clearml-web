@@ -1,11 +1,22 @@
 import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
 import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
+import {GetParamMetricValuePipe} from '@common/experiments/shared/components/hyper-param-metric-column/get-param-metric-value.pipe';
+import {GetVariantWithoutRoundPipe} from '@common/experiments/shared/components/hyper-param-metric-column/get-variant-without-round.pipe';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {NgIf} from '@angular/common';
 
 @Component({
   selector: 'sm-hyper-param-metric-column',
   templateUrl: './hyper-param-metric-column.component.html',
   styleUrls: ['./hyper-param-metric-column.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    GetParamMetricValuePipe,
+    GetVariantWithoutRoundPipe,
+    TooltipDirective,
+    NgIf
+  ],
+  standalone: true
 })
 export class HyperParamMetricColumnComponent {
 

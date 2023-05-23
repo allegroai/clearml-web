@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit} from '@angular/core';
-import {DurationParameters, TableDurationSortBase} from '../table-duration-sort.base';
+import {DurationParameters, TableDurationSortBaseComponent} from '../table-duration-sort-base.component';
 import {isNil} from 'lodash-es';
 
 @Component({
@@ -9,7 +9,7 @@ import {isNil} from 'lodash-es';
   changeDetection: ChangeDetectionStrategy.OnPush
 
 })
-export class TableFilterDurationComponent extends TableDurationSortBase implements OnInit {
+export class TableFilterDurationComponent extends TableDurationSortBaseComponent implements OnInit {
 
   constructor(cdr: ChangeDetectorRef) {
     super(cdr);

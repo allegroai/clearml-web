@@ -102,6 +102,7 @@
       [pRowTogglerDisabled]="!expandableRows"
       [pSelectableRow]="rowData"
       [pContextMenuRow]="rowData"
+      [pContextMenuRowDisabled] = !rowRightClick.observed
       [style.height.px]="minView ? this.cardHeight : this.rowHeight"
       [class.even]="(index + 1) % 2 === 0"
       [class.checked]="isRowSelected(rowData)"

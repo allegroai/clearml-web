@@ -13,6 +13,7 @@ import {requestFailed} from '../../core/actions/http.actions';
 import {selectCompareHistogramCacheAxisType, selectCompareSelectedSettingsxAxisType} from '../reducers';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {selectActiveWorkspaceReady} from '~/core/reducers/view.reducer';
+import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 
 
 @Injectable()
@@ -44,6 +45,8 @@ export class ExperimentsCompareChartsEffects {
       }
       return this.eventsApi.eventsMultiTaskScalarMetricsIterHistogram({
         tasks: action.taskIds,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        model_events: action.entity === EntityTypeEnum.model,
         key: !axisType || axisType === ScalarKeyEnum.IsoTime ? ScalarKeyEnum.Timestamp : axisType
       }).pipe(
         mergeMap(res => [
@@ -63,8 +66,14 @@ export class ExperimentsCompareChartsEffects {
     ofType(chartActions.getMultiPlotCharts),
     debounceTime(200),
     mergeMap((action) =>
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      this.eventsApi.eventsGetMultiTaskPlots({tasks: action.taskIds, iters: 1, no_scroll: true})
+      this.eventsApi.eventsGetMultiTaskPlots({
+        tasks: action.taskIds,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        model_events: action.entity === EntityTypeEnum.model,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        no_scroll: true,
+        iters: 1
+      })
         .pipe(
           map(res => res.plots),
           mergeMap(plots => [

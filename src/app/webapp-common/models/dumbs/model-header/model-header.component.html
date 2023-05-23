@@ -8,7 +8,7 @@
       [minimize]="(isSmallScreen$ | async).matches"
       (toggleArchived)="onIsArchivedChanged($event)"></sm-toggle-archive>
     <sm-button-toggle
-      class="ml-3"
+      class="ms-3"
       [disabled]="!tableMode"
       [options]="[{label: 'Table view', value: 'table', icon: 'al-ico-table-view'}, {label: 'Details view', value: 'info', icon: 'al-ico-experiment-view'}]"
       [value]="tableMode"
@@ -31,10 +31,12 @@
       *ngIf="!minimizedView || sharedView"
       [isLoading]="isLoadingMetadataKeys"
       [metadataKeys]="metadataKeys"
+      [metricVariants]="metricVariants"
       [tableCols]="tableCols"
       (removeColFromList)="removeColFromList.emit($event)"
       (selectedTableColsChanged)="selectedTableColsChanged.emit($event)"
       (selectMetadataKeysActiveChanged)="selectMetadataKeysActiveChanged.emit($event)"
+      (selectedMetricToShow)="selectedMetricToShow.emit($event)"
       (addOrRemoveMetadataKeyFromColumns)="addOrRemoveMetadataKeyFromColumns.emit($event)"
     ></sm-model-custom-cols-menu>
     <sm-refresh-button

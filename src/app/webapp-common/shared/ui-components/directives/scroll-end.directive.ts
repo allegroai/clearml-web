@@ -1,4 +1,5 @@
-import { Directive, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Optional, Output } from '@angular/core';
+import {Directive, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Optional, Output} from '@angular/core';
+
 export enum ScrollEndDirection {
   down = 'down',
   up = 'up',
@@ -20,12 +21,14 @@ export class ScrollEndDirective implements OnInit, OnDestroy {
   constructor(
     private el: ElementRef,
     @Optional() private scrollEndRoot: ScrollEndRootDirective,
-  ) { }
+  ) {
+  }
 
   ngOnInit(): void {
     this.observer = new IntersectionObserver(entries => {
       entries.forEach(entry => {
-        this.scrollDirection = this.previousEntry?.boundingClientRect.bottom > entry.boundingClientRect.bottom ? ScrollEndDirection.down : ScrollEndDirection.up;
+        this.scrollDirection = (this.previousEntry?.boundingClientRect.bottom === 0 || this.previousEntry?.boundingClientRect.bottom > entry.boundingClientRect.bottom)
+          ? ScrollEndDirection.down : ScrollEndDirection.up;
 
         if (!this.previousEntry?.isIntersecting && entry.isIntersecting && this.scrollDirection === this.desiredDirection) {
           this.smScrollEnd.emit();

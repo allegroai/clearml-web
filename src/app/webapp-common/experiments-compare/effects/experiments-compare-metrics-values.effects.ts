@@ -5,12 +5,14 @@ import {activeLoader, deactivateLoader, setServerError} from '@common/core/actio
 import {catchError, mergeMap, map} from 'rxjs/operators';
 import {requestFailed} from '../../core/actions/http.actions';
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
+import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
+import {ApiModelsService} from '~/business-logic/api-services/models.service';
 
 
 @Injectable()
 export class ExperimentsCompareMetricsValuesEffects {
 
-  constructor(private actions$: Actions, public tasksApiService: ApiTasksService) {
+  constructor(private actions$: Actions, public tasksApiService: ApiTasksService, private modelsApi: ApiModelsService) {
   }
 
   activeLoader = createEffect(() => this.actions$.pipe(
@@ -20,13 +22,9 @@ export class ExperimentsCompareMetricsValuesEffects {
 
   getComparedExperimentsMetricsValues = createEffect(() => this.actions$.pipe(
     ofType(metricsValuesActions.getComparedExperimentsMetricsValues),
-    mergeMap((action) => this.tasksApiService.tasksGetAllEx({
-      id: action.taskIds,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-      only_fields: ['last_metrics', 'name', 'status', 'completed', 'last_update', 'last_iteration', 'project.name', 'tags']
-    })
+    mergeMap((action) => this.fetchEntities$(action)
       .pipe(
-        map(res => action.taskIds.map(id => res.tasks.find(ex => ex.id === id))),
+        map(res => action.taskIds.map(id => res[action.entity === EntityTypeEnum.model ? 'models' : 'tasks'].find(ex => ex.id === id))),
         mergeMap(experiments => [
           metricsValuesActions.setComparedExperiments({experiments}),
           deactivateLoader(action.type)]),
@@ -37,4 +35,17 @@ export class ExperimentsCompareMetricsValuesEffects {
       )
     )
   ));
+
+  fetchEntities$(action) {
+    return action.entity === EntityTypeEnum.model ? this.modelsApi.modelsGetAllEx({
+      id: action.taskIds,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      only_fields: ['last_metrics', 'name', 'last_update', 'last_iteration', 'last_iteration', 'project.name', 'tags', 'ready']
+    }).pipe(map(res => ({models: res.models.map( model => ({...model, status: model.ready? 'Ready' : 'Draft'}))})))
+      : this.tasksApiService.tasksGetAllEx({
+      id: action.taskIds,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      only_fields: ['last_metrics', 'name', 'status', 'completed', 'last_update', 'last_iteration', 'project.name', 'tags']
+    });
+  }
 }

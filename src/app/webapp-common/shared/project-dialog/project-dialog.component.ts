@@ -4,12 +4,13 @@ import * as createProjectSelectors from './project-dialog.reducer';
 import {CREATION_STATUS} from './project-dialog.reducer';
 
 import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
-import {MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {Store} from '@ngrx/store';
 import {Observable, Subscription} from 'rxjs';
 import {ProjectsCreateRequest} from '~/business-logic/model/projects/projectsCreateRequest';
-import {selectRootProjects} from '@common/core/reducers/projects.reducer';
-import {getAllSystemProjects} from '@common/core/actions/projects.actions';
+import {selectTablesFilterProjectsOptions} from '@common/core/reducers/projects.reducer';
+import {getTablesFilterProjectsOptions, resetTablesFilterProjectsOptions} from '@common/core/actions/projects.actions';
+import {Project} from '~/business-logic/model/projects/project';
 
 @Component({
   selector: 'sm-project-create-dialog',
@@ -19,7 +20,7 @@ import {getAllSystemProjects} from '@common/core/actions/projects.actions';
 export class ProjectDialogComponent implements OnInit, OnDestroy {
   public projects$: Observable<any>;
   private creationStatusSubscription: Subscription;
-  public baseProjectId: string;
+  public baseProject: Project;
   public mode: string;
   public header: string;
   public modeParameters: { [mode: string]: { header: string; icon: string } } = {
@@ -34,14 +35,15 @@ export class ProjectDialogComponent implements OnInit, OnDestroy {
 
   };
 
-  constructor(private store: Store<any>, private matDialogRef: MatDialogRef<ProjectDialogComponent>, @Inject(MAT_DIALOG_DATA) data: { projectId: string; mode: string }) {
-    this.baseProjectId = data.projectId;
+  constructor(private store: Store<any>, private matDialogRef: MatDialogRef<ProjectDialogComponent>,
+              @Inject(MAT_DIALOG_DATA) data: { project: Project; mode: string }) {
+    this.baseProject = data.project;
     this.mode = data.mode;
-    this.projects$ = this.store.select(selectRootProjects);
+    this.projects$ = this.store.select(selectTablesFilterProjectsOptions);
   }
 
   ngOnInit(): void {
-    this.store.dispatch(getAllSystemProjects());
+    this.store.dispatch(getTablesFilterProjectsOptions({searchString: '', loadMore: false}));
     this.creationStatusSubscription = this.store.select(createProjectSelectors.selectCreationStatus).subscribe(status => {
       if (status === CREATION_STATUS.SUCCESS) {
         return this.matDialogRef.close(true);
@@ -61,8 +63,9 @@ export class ProjectDialogComponent implements OnInit, OnDestroy {
 
   moveProject(event: {location: string; name: string; fromName: string; toName: string; projectName: string}) {
     this.store.dispatch(moveProject({
-      project: this.baseProjectId,
+      project: this.baseProject.id,
       ...event,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       new_location: event.location === 'Projects root' ? '' : event.location,
     }));
   }
@@ -71,11 +74,17 @@ export class ProjectDialogComponent implements OnInit, OnDestroy {
     return {
       name: `${projectForm.parent === 'Projects root' ? '' : projectForm.parent + '/'}${projectForm.name}`,
       description: projectForm.description,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       system_tags: projectForm.system_tags,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       default_output_destination: projectForm.default_output_destination
     };
   }
 
+  filterSearchChanged($event: {value: string; loadMore?: boolean}) {
+    !$event.loadMore && this.store.dispatch(resetTablesFilterProjectsOptions());
+    this.store.dispatch(getTablesFilterProjectsOptions({searchString: $event.value || '', loadMore: $event.loadMore}));
+  }
 
   closeDialog() {
     this.matDialogRef.close();

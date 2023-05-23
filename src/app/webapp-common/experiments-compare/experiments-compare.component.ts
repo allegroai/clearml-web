@@ -19,6 +19,7 @@ export class ExperimentsCompareComponent implements OnInit, OnDestroy {
   private navigationPreferences$: Subscription;
   private queryParams: Params;
   public entityType: EntityTypeEnum;
+  public entityTypeEnum = EntityTypeEnum;
 
   constructor(private store: Store<any>, private router: Router, private activatedRoute: ActivatedRoute) {
     // updating URL with store query params

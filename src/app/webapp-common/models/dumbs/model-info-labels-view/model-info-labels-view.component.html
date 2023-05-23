@@ -1,6 +1,7 @@
 <sm-editable-section
   [editable]=" ! model?.ready && model?.company?.id && !isSharedAndNotOwner"
   [saving]="saving"
+  [disableSave]="!labels.valid"
   (activateEditClicked)="activateEdit()"
   (saveClicked)="saveClicked()"
   (cancelClicked)="cancelEdit()"
@@ -18,14 +19,19 @@
                 <input #parameterLabel="ngModel"
                        [(ngModel)]="parameter.label"
                        [name]="'parameterLabel-' + parameter.id"
+                       required
                        matInput>
+                <mat-error *ngIf="parameterLabel.invalid && parameterLabel?.errors?.required">
+                  Required
+                </mat-error>
               </mat-form-field>
 
             </div>
 
             <div class="input-container col-11">
               <mat-form-field [hintLabel]="parameterKey.invalid && parameterKey?.errors?.required? '*Required': ''" appearance="outline" class="strength w-100">
-                <input #parameterKey="ngModel" [(ngModel)]="parameter.id"
+                <input #parameterKey="ngModel"
+                       [(ngModel)]="parameter.id"
                        type="number"
                        [name]="'parameterKey-' + parameter.id"
                        matInput

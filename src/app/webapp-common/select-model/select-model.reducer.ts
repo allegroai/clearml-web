@@ -10,6 +10,7 @@ import {SortMeta} from 'primeng/api';
 
 export interface SelectModelState {
   models: SelectedModel[];
+  selectedModelsList: SelectedModel[];
   selectedModels: SelectedModel[];
   noMoreModels: boolean;
   selectedModelSource: string;
@@ -20,10 +21,12 @@ export interface SelectModelState {
   tableSortFields: SortMeta[];
   scrollId: string;
   globalFilter: string;
+  showArchive: boolean;
 }
 
 const selectModelInitState: SelectModelState = {
   models: [],
+  selectedModelsList: [],
   selectedModels: [],
   noMoreModels: false,
   selectedModelSource: null,
@@ -34,54 +37,62 @@ const selectModelInitState: SelectModelState = {
   tableSortFields: [{field: MODELS_TABLE_COL_FIELDS.CREATED, order: TABLE_SORT_ORDER.DESC}],
   scrollId: null,
   globalFilter: null,
+  showArchive: null
 };
 
 
 export function selectModelReducer<ActionReducer>(state: SelectModelState = selectModelInitState, action): SelectModelState {
   switch (action.type) {
-    case actions.RESET_STATE:
+    case actions.resetState.type:
       return {...selectModelInitState};
-    case actions.ADD_MANY_MODELS:
-      return {...state, models: state.models.concat(action.payload)};
-    case actions.REMOVE_MANY_MODELS:
-      return {...state, models: state.models.filter(exp => !action.payload.includes(exp.id))};
-    case actions.UPDATE_ONE_MODELS:
+    case actions.addModels.type:
+      return {...state, models: state.models.concat(action.models)};
+    case actions.removeModels.type:
+      return {...state, models: state.models.filter(exp => !action.models.includes(exp.id))};
+    case actions.updateModel.type:
       return {
         ...state, models:
-          state.models.map(ex => ex.id === action.payload.id ? {...ex, ...action.payload.changes} : ex)
+          state.models.map(ex => ex.id === action.id ? {...ex, ...action.changes} : ex)
       };
-    case actions.SET_MODELS:
-      return {...state, models: action.payload};
-    case actions.SET_NO_MORE_MODELS:
-      return {...state, noMoreModels: action.payload};
+    case actions.setModels.type:
+      return {...state, models: action.models};
+    case actions.setSelectedModelsList.type:
+      return {...state, selectedModelsList: action.models};
+    case actions.setNoMoreModels.type:
+      return {...state, noMoreModels: action.noMore};
     case actions.setCurrentScrollId.type:
       return {...state, scrollId: action.scrollId};
-    case actions.SET_SELECTED_MODELS:
-      return {...state, selectedModels: action.payload};
-    case actions.ALL_PROJECTS_MODE_CHANGED:
-      return {...state, allProjectsMode: action.payload};
-    case actions.SET_VIEW_MODE:
-      return {...state, viewMode: action.payload};
-    case actions.GLOBAL_FILTER_CHANGED:
-      return {...state, globalFilter: action.payload};
+    case actions.setSelectedModels.type:
+      return {...state, selectedModels: action.models};
+    case actions.allProjectsModeChanged.type:
+      return {...state, allProjectsMode: action.isAllProjects};
+    case actions.setViewMode.type:
+      return {...state, viewMode: action.viewMode};
+    case actions.globalFilterChanged.type:
+      return {...state, globalFilter: action.filter};
     case actions.setTableSort.type:
       return {...state, tableSortFields: action.orders};
-    case actions.TABLE_FILTER_CHANGED:
+    case actions.clearTableFilter.type:
+      return {...state, tableFilters: null};
+    case actions.tableFilterChanged.type:
       return {
         ...state,
         tableFilters: {
           ...state.tableFilters,
-          [action.payload.col.id]: {value: action.payload.value, matchMode: action.payload.col.filterMatchMode}
+          [action.col.id]: {value: action.value, matchMode: action.col.filterMatchMode}
         }
       };
     default:
       return state;
+    case actions.showArchive.type:
+      return {...state, showArchive: action.showArchive};
   }
 }
 
 
 export const models = createFeatureSelector<SelectModelState>('selectModel');
-export const selectModelsList = createSelector(models, (state) => state ? state.models : []);
+export const selectModels = createSelector(models, (state) => state ? state.models : []);
+export const selectSelectedModelsList = createSelector(models, (state) => state ? state.selectedModelsList : []);
 export const selectCurrentScrollId = createSelector(models, (state): string => state.scrollId);
 export const selectGlobalFilter = createSelector(models, (state): string => state.globalFilter);
 export const selectTableSortFields = createSelector(models, (state): SortMeta[] => state.tableSortFields);
@@ -90,3 +101,4 @@ export const selectIsAllProjectsMode = createSelector(models, (state): boolean =
 export const selectViewMode = createSelector(models, (state): ModelsViewModesEnum => state.viewMode);
 export const selectSelectedModels = createSelector(models, (state): Array<any> => state.selectedModels);
 export const selectNoMoreModels = createSelector(models, (state): boolean => state.noMoreModels);
+export const selectShowArchive = createSelector(models, (state): boolean => state.showArchive);

@@ -60,6 +60,10 @@ body {
   }
 
   .light-theme {
+    &.cdk-overlay-pane {
+      background-color: transparent;
+    }
+
     a {
       color: $purple;
 

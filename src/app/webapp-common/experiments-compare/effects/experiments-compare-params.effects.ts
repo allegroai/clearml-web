@@ -16,12 +16,19 @@ import {ExperimentCompareParamsState} from '../reducers/experiments-compare-para
 import {setExperiments} from '../actions/experiments-compare-params.actions';
 import {ExperimentDetailBase, ExperimentParams} from '../shared/experiments-compare-details.model';
 import {selectActiveWorkspaceReady} from '~/core/reducers/view.reducer';
+import {ApiModelsService} from '~/business-logic/api-services/models.service';
+import {ModelDetailsReverterService} from '@common/experiments-compare/services/model-details-reverter.service';
+import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 
 @Injectable()
 export class ExperimentsCompareParamsEffects {
 
-  constructor(private actions$: Actions, private tasksApi: ApiTasksService, private store: Store<ExperimentCompareParamsState>,
-              private experimentParamsReverter: ExperimentParamsReverterService
+  constructor(private actions$: Actions,
+              private store: Store<ExperimentCompareParamsState>,
+              private tasksApi: ApiTasksService,
+              private modelsApi: ApiModelsService,
+              private experimentParamsReverter: ExperimentParamsReverterService,
+              private modelDetailsReverter: ModelDetailsReverterService,
   ) {
   }
 
@@ -37,26 +44,26 @@ export class ExperimentsCompareParamsEffects {
       map(() => action))),
     withLatestFrom(this.store.pipe(select(selectExperimentIdsParams))),
     switchMap(([action, oldExperimentIds]) => {
-      const newExperimentIds = action.ids.filter(id => !oldExperimentIds.includes(id));
-      return this.fetchExperimentParams$(newExperimentIds)
-        .pipe(
-          withLatestFrom(this.store.pipe(select(selectExperimentsParams))),
-          // get only the relevant experiments
-          map(([experiments, oldExperiments]: [ExperimentDetailBase[], ExperimentParams[]]) =>
-            oldExperiments.filter(exp => action.ids.includes(exp.id)).concat(experiments as ExperimentParams[])),
-          map(experiments=> action.ids.map(id=> experiments.find(experiment=> experiment.id===id))),
-          mergeMap(experiments => [
-            deactivateLoader(action.type),
-            setExperiments({experiments})
-          ]),
-          catchError(error => [
-            requestFailed(error),
-            deactivateLoader(action.type),
-            setServerError(error, null, 'The attempt to retrieve your experiment data failed. Refresh your browser and try again.')
-          ]
-          )
-        );
-    }
+        const newExperimentIds = action.ids.filter(id => !oldExperimentIds.includes(id));
+        return this.fetchEntity$(newExperimentIds, action.entity)
+          .pipe(
+            withLatestFrom(this.store.pipe(select(selectExperimentsParams))),
+            // get only the relevant experiments
+            map(([experiments, oldExperiments]: [ExperimentDetailBase[], ExperimentParams[]]) =>
+              oldExperiments.filter(exp => action.ids.includes(exp.id)).concat(experiments as ExperimentParams[])),
+            map(experiments => action.ids.map(id => experiments.find(experiment => experiment.id === id))),
+            mergeMap(experiments => [
+              deactivateLoader(action.type),
+              setExperiments({experiments})
+            ]),
+            catchError(error => [
+                requestFailed(error),
+                deactivateLoader(action.type),
+                setServerError(error, null, 'The attempt to retrieve your experiment data failed. Refresh your browser and try again.')
+              ]
+            )
+          );
+      }
     )
   ));
 
@@ -64,10 +71,10 @@ export class ExperimentsCompareParamsEffects {
     ofType(refetchExperimentRequested),
     withLatestFrom(this.store.select(selectExperimentIdsParams)),
     switchMap(([action, newExperimentIds]) =>
-      this.fetchExperimentParams$(newExperimentIds).pipe(
+      this.fetchEntity$(newExperimentIds, action.entity).pipe(
         mergeMap(experiments => [
           deactivateLoader(action.type),
-          setExperiments({experiments : experiments as ExperimentParams[]})
+          setExperiments({experiments: experiments as ExperimentParams[]})
         ]),
         catchError(error => [
           requestFailed(error),
@@ -81,6 +88,10 @@ export class ExperimentsCompareParamsEffects {
       )),
   ));
 
+  fetchEntity$(ids, entity) {
+    return entity === EntityTypeEnum.model ? this.fetchModelParams$(ids) : this.fetchExperimentParams$(ids);
+  }
+
   fetchExperimentParams$(ids): Observable<Array<IExperimentDetail>> {
     return ids.length > 0 ?
       this.tasksApi.tasksGetAllEx({
@@ -89,6 +100,23 @@ export class ExperimentsCompareParamsEffects {
         only_fields: COMPARE_PARAMS_ONLY_FIELDS
       })
         .pipe(map(res => this.experimentParamsReverter.revertExperiments(ids, res.tasks)))
+      : of([]);
+  }
+
+  fetchModelParams$(ids): Observable<Array<IExperimentDetail>> {
+    return ids.length > 0 ?
+      this.modelsApi.modelsGetAllEx({
+        id: ids,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        only_fields: ['company', 'id', 'labels', 'name', 'ready', 'tags', 'system_tags', 'user.name', 'parent', 'project.name', 'design', 'last_iteration', 'last_update']
+      })
+        .pipe(map(res => {
+          try {
+            return this.modelDetailsReverter.revertModelsDesign(ids, res.models, false);
+          } catch (e) {
+            return this.modelDetailsReverter.revertModelsDesign(ids, res.models, true);
+          }
+        }))
       : of([]);
   }
 }

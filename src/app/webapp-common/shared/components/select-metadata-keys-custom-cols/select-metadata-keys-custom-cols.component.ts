@@ -15,16 +15,11 @@ export class SelectMetadataKeysCustomColsComponent {
     this.metadataColsIds = cols.filter(col => col.type === 'metadata' || col.type==='hdmd').map(col => col.key);
   };
 
-  @Output() addOrRemoveMetadataKeyFromColumns = new EventEmitter<{ key: string, show: boolean }>();
+  @Output() addOrRemoveMetadataKeyFromColumns = new EventEmitter<{ key: string; show: boolean }>();
   @Output() goBack = new EventEmitter();
-
-
-  constructor() {
-  }
 
   searchQ(search: string) {
     this.searchText = search;
   }
-
 
 }

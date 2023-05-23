@@ -66,19 +66,9 @@
     z-index: 2;
   }
 
-  // fix table content overflow 1px above header
-  ::ng-deep svg #header .column-cell {
-    transform: translate(0px, -1px);
-
-    .cell-rect {
-      height: 30px;
-    }
-  }
-
   ::ng-deep sm-color-picker-wrapper {
     display: block;
     top: 0px;
-
   }
 
   ::ng-deep .legendlines path, ::ng-deep .legendpoints path {

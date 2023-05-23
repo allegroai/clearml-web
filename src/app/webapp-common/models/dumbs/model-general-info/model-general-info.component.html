@@ -5,7 +5,7 @@
       <span *ngIf="kpi.downloadable">
         <sm-copy-clipboard *ngIf="isLocalFile" [clipboardText]="kpi.value" [hideBackground]="true" [inline]="true" label=""></sm-copy-clipboard>
         <i *ngIf="model?.uri && !isLocalFile"
-           class="pointer fa fa-download ml-2"
+           class="pointer fa fa-download ms-2"
            (click)="downloadModelClicked()"
         ></i>
       </span>

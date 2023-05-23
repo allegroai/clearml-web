@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NestedProjectViewPageExtendedComponent } from './nested-project-view-page-extended.component';
 import {StoreModule} from '@ngrx/store';
 import {RouterTestingModule} from '@angular/router/testing';
-import {MatLegacyDialogModule as MatDialogModule} from '@angular/material/legacy-dialog';
+import {MatDialogModule} from '@angular/material/dialog';
 
 describe('PipelinesPageComponent', () => {
   let component: NestedProjectViewPageExtendedComponent;

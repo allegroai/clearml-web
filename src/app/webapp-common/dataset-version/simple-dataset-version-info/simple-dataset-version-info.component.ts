@@ -4,8 +4,8 @@ import {DagManagerUnsortedService} from '@common/shared/services/dag-manager-uns
 import {experimentDetailsUpdated, getSelectedPipelineStep, setSelectedPipelineStep} from '@common/experiments/actions/common-experiments-info.actions';
 import {last} from 'lodash-es';
 import {Store} from '@ngrx/store';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
-import {EditJsonComponent} from '@common/shared/ui-components/overlay/edit-json/edit-json.component';
+import {MatDialog} from '@angular/material/dialog';
+import {EditJsonComponent, EditJsonData} from '@common/shared/ui-components/overlay/edit-json/edit-json.component';
 import {Task} from '~/business-logic/model/tasks/task';
 import {CommonExperimentsInfoEffects} from '@common/experiments/effects/common-experiments-info.effects';
 import {tap} from 'rxjs/operators';
@@ -93,8 +93,7 @@ export class SimpleDatasetVersionInfoComponent extends PipelineControllerInfoCom
       data: {
         textData: dataset.comment,
         title: 'EDIT DESCRIPTION',
-        typeJson: false,
-      }
+      } as EditJsonData
     });
     editJsonComponent.afterClosed().subscribe(res => {
       if (res !== undefined) {

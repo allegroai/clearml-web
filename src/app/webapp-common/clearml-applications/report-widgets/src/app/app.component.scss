@@ -67,3 +67,59 @@
   padding: 24px;
   // min-height: 150px;
 }
+
+.webapp-link {
+  position: absolute;
+  display: block;
+  width: 16px;
+  height: 16px;
+  top: 26px;
+  left: 21px;
+  cursor: pointer;
+  z-index: 2;
+  visibility: hidden;
+
+  &:hover {
+    svg path {
+      fill: $blue-100;
+    }
+  }
+}
+
+:host {
+  &:hover .webapp-link {
+    visibility: visible;
+  }
+}
+
+
+.webapp-link_tooltip {
+  display:none;
+  position: absolute;
+  left: 0;
+  top: 24px;
+  z-index: 1;
+  padding: 6px 8px;
+  font-size: 12px;
+  text-align: left;
+  color: white;
+  background-color: #6B7488;
+  text-decoration: none;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+a.webapp-link:hover .webapp-link_tooltip {
+  display: block;
+}
+
+.webapp-link.dark-theme {
+  svg path {
+    fill: $blue-300;
+  }
+  &:hover {
+    svg path {
+      fill: $blue-400;
+    }
+  }
+}

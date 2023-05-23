@@ -6,7 +6,7 @@
 ></sm-simple-dataset-version-details>
 <div class="console-button">
   <button class="btn btn-cml-primary d-flex align-items-center" (click)="toggleDetails()">
-    <i class="al-icon al-ico-console sm mr-3"></i>DETAILS
+    <i class="al-icon al-ico-console sm me-3"></i>DETAILS
   </button>
 </div>
 <div
@@ -48,7 +48,7 @@
   <ng-container *ngIf="showLog">
     <div class="header toggle">
       <div class="log-name">
-        <i class="al-icon al-ico-console mr-2"></i>
+        <i class="al-icon al-ico-console me-2"></i>
         <span *ngIf="(selected$ | async) as selected">
           {{selected?.name}}<ng-container *ngIf="selected?.runtime?.version"> v{{selected.runtime.version}}</ng-container>
         </span>
@@ -64,7 +64,7 @@
       ></sm-button-toggle>
       <div class="close">
         <i class="al-icon pointer" [class]="maximizeResults ? 'al-ico-min-panel' : 'al-ico-max-panel'" (click)="toggleResultSize()"></i>
-        <i class="al-icon al-ico-dialog-x pointer ml-4" (click)="openLog(false)"></i>
+        <i class="al-icon al-ico-dialog-x pointer ms-4" (click)="openLog(false)"></i>
       </div>
     </div>
     <div [ngSwitch]="detailsPanelMode" class="content">

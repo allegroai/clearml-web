@@ -6,6 +6,7 @@
                 [selectable]="true"
                 [removable]="!!col.metric_hash || col.isParam || col.type==='metadata'  || col.type==='hdmd'"
                 [itemValue]="col.id"
+                [enableIcon]="false"
                 (removeItemClicked)="removeColFromList.emit($event)"
                 (itemClicked)="selectedTableColsChanged.emit(col)">
   </sm-menu-item>

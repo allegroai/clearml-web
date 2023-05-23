@@ -7,7 +7,7 @@ import {bufferTime, filter, map, mergeMap, switchMap, take} from 'rxjs/operators
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
 import {EMPTY, Observable, of} from 'rxjs';
 import {ApiModelsService} from '~/business-logic/api-services/models.service';
-import {MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {AlertDialogComponent} from '../../shared/ui-components/overlay/alert-dialog/alert-dialog.component';
 import {NotifierService} from '../../angular-notifier';
 import {requestFailed} from '@common/core/actions/http.actions';

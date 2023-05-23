@@ -118,7 +118,10 @@ export class CommonExperimentOutputEffects {
 
   fetchExperimentScalar$ = createEffect(() => this.actions$.pipe(
     ofType(outputActions.experimentScalarRequested),
-    withLatestFrom(this.store.select(selectSelectedSettingsxAxisType), this.store.select(selectExperimentHistogramCacheAxisType)),
+    withLatestFrom(
+      this.store.select(selectSelectedSettingsxAxisType),
+      this.store.select(selectExperimentHistogramCacheAxisType)
+    ),
     switchMap(([action, axisType, prevAxisType]) => {
         if ([ScalarKeyEnum.IsoTime, ScalarKeyEnum.Timestamp].includes(prevAxisType) &&
           [ScalarKeyEnum.IsoTime, ScalarKeyEnum.Timestamp].includes(axisType)) {

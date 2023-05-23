@@ -8,6 +8,7 @@
     [class.selected]="selectedHyperParam === 'properties'"
     class="hyper-container pointer ellipsis"
     routerLink="hyper-param"
+    data-id="properties"
   >
     <i class='sm al-icon al-ico-data-audit al-color'
        [class.white]= "selectedHyperParam === 'properties'"
@@ -24,13 +25,14 @@
     queryParamsHandling="preserve"
     [routerLink]="'hyper-param/' + (hyperParameter.key | safeUrlParameter)"
     [class.selected]="selectedHyperParam === (hyperParameter.key | safeUrlParameter)"
-    class="hyper-container pointer ellipsis"
+    class="hyper-container pointer"
     routerLink="hyper-param"
+    data-id="paramters"
   >
     <i
       class="sm al-icon al-ico-data-audit al-color"
       [class]="(selectedHyperParam === hyperParameter.key ? 'white' : 'blue-400')"
-    ></i>{{hyperParameter.key | replaceViaMapPipe:sectionReplaceMap}}
+    ></i><span class="ellipsis">{{hyperParameter.key | replaceViaMapPipe:sectionReplaceMap}}</span>
   </div>
 </mat-expansion-panel>
 
@@ -43,10 +45,10 @@
     queryParamsHandling="preserve"
     [routerLink]="'configuration/' + (confObj.key | safeUrlParameter)"
     [class.selected]="selectedObject === confObj.key"
-    class="hyper-container pointer ellipsis"
+    class="hyper-container pointer"
     routerLink="configuration"
   >
-    <i class="sm al-icon al-ico-data-audit al-color" [class]="(selectedObject === confObj.key ? 'white' : 'blue-400')"></i>{{confObj.key | replaceViaMapPipe:sectionReplaceMap}}
+    <i class="sm al-icon al-ico-data-audit al-color" [class]="(selectedObject === confObj.key ? 'white' : 'blue-400')"></i>
+    <span class="ellipsis">{{confObj.key | replaceViaMapPipe:sectionReplaceMap}}</span>
   </div>
-
 </mat-expansion-panel>

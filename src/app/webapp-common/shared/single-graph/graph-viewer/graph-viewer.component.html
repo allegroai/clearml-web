@@ -6,54 +6,56 @@
       <div *ngIf="minMaxIterations$ | async as minMaxIterations">
         Iteration <span class="number">{{iteration}}</span>
         <mat-slider
-          [invert]="!(minMaxIterations.maxIteration > minMaxIterations.minIteration)"
-          thumbLabel
-          [value]="iteration"
           [max]="minMaxIterations.maxIteration"
           [min]="minMaxIterations.minIteration"
           [step]="1"
-          (input)="changeIteration($event.value)"
+          discrete
+          class="indicator-position-bottom"
           (mouseup)="fakeInput.focus()"
         >
+          <input matSliderThumb
+                 [ngModel]="iteration"
+                 (ngModelChange)="changeIteration(ngSliderThumb.value)"
+                 #ngSliderThumb="matSliderThumb" />
         </mat-slider>
       </div>
     </div>
     <div class="header-actions">
-      <div [class.load-spinner]="(isFetchingData$ | async) || !plotLoaded" class="d-flex align-items-center mr-3"></div>
-      <div class="pointer d-flex align-items-center mr-3" *ngIf="(isFetchingData$ | async) === false && isFullDetailsMode" smTooltip="refresh" matTooltipPosition="below" (click)="refresh()"><i class="al-icon al-ico-refresh"></i></div>
+      <div [class.load-spinner]="(isFetchingData$ | async) || !plotLoaded" class="d-flex align-items-center me-3"></div>
+      <div class="pointer d-flex align-items-center me-3" *ngIf="(isFetchingData$ | async) === false && isFullDetailsMode" smTooltip="refresh" matTooltipPosition="below" (click)="refresh()"><i class="al-icon al-ico-refresh"></i></div>
       <div (click)="closeGraphViewer()" matTooltipPosition="below" smTooltip="Close" class="icon-container pointer d-flex align-items-center">
         <i class="al-icon al-ico-dialog-x al-color blue-300"></i>
       </div>
     </div>
 
   </div>
-  <div class="graph-controls" *ngIf="isFullDetailsMode || smoothWeight">
+  <div class="graph-controls" *ngIf="showSmooth || smoothWeight">
     <div class="d-flex align-items-center"  *ngIf="!isCompare">
       <span class="label-text axis-text-margin-left">Horizontal Axis</span>
-      <mat-form-field appearance="outline" class="axis-type-field">
-        <mat-select [value]="xAxisType$ | async" (selectionChange)="xAxisTypeChanged($event)" panelClass="light-theme"
-                    name="scriptType" [disabled]="isFetchingData$ | async">
+      <mat-form-field appearance="outline" class="axis-type-field no-bottom" [class.black]="darkTheme">
+        <mat-select
+          [value]="xAxisType$ | async" (selectionChange)="xAxisTypeChanged($event)"
+          [panelClass]="darkTheme ? 'dark-theme' : 'light-theme'"
+          [disabled]="isFetchingData$ | async"
+        >
           <mat-option *ngFor="let type of xAxisTypeOption" [value]="type.value">{{type.name}}</mat-option>
         </mat-select>
       </mat-form-field>
     </div>
-    <div class="smooth-options d-flex align-items-center ml-3">
+    <div class="smooth-options d-flex align-items-center ms-3">
       <span class="label-text smoothing-text">Smoothing</span>
       <mat-slider
-        [value]="smoothWeight"
         [max]="0.999"
         [min]="0"
         [step]="0.001"
-        (input)="changeWeight($event.value)"
-      >
+      ><input matSliderThumb [(ngModel)]="smoothWeight"/>
       </mat-slider>
-      <mat-form-field
-        appearance="outline"
-        class="smooth-input">
+      <mat-form-field appearance="outline" class="smooth-input no-bottom" [class.black]="darkTheme">
         <input
           matInput
           name="minCount"
           type="number"
+          class="text-center"
           [min]="0"
           [ngModel]="smoothWeight"
           (ngModelChange)="changeWeight($any($event))"
@@ -76,6 +78,7 @@
       [identifier]="id"
       [isCompare]="isCompare"
       [xAxisType]="xAxisType"
+      [yAxisType]="yAxisType"
       [moveLegendToTitle]="false"
       [isDarkTheme]="darkTheme"
       [graphsNumber]="9999"

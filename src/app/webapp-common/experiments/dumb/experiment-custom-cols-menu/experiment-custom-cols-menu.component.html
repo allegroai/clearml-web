@@ -5,7 +5,7 @@
   buttonTooltip="Customize table"
   [showButton]="false"
   (click)="!disabled && getMetricsToDisplay.emit()"
-  (menuClosed)="setMode(CustomColumnMode.Standard)"
+  (menuClosed)="setMode(customColumnModeEnum.Standard)"
   [style.pointer-events]="disabled ? 'none' : 'initial'"
 >
   <div *ngIf="!customColumnMode" (click)="$event.stopPropagation()">
@@ -22,30 +22,30 @@
       <div class="custom-column-buttons">
         <div class="add-button metrics-button"
              smClickStopPropagation
-             [ngClass]="{disabled: !metricVariants.length}"
-             (click)="$event.stopPropagation(); metricVariants.length && setMode(CustomColumnMode.Metrics)"
-        ><i class="al-icon al-ico-add sm mr-1"></i><span data-id="Metric Button" class="caption">METRIC</span>
+             [ngClass]="{disabled: !metricVariants?.length}"
+             (click)="$event.stopPropagation(); metricVariants?.length && setMode(customColumnModeEnum.Metrics)"
+        ><i class="al-icon al-ico-plus sm-md me-1"></i><span data-id="Metric Button" class="caption">METRIC</span>
         </div>
         <div class="add-button metrics-button"
              smClickStopPropagation
              [ngClass]="{disabled: !hasHyperParams}"
-             (click)="$event.stopPropagation(); hasHyperParams && setMode(CustomColumnMode.HyperParams)"
-        ><i class="al-icon al-ico-add sm mr-1"></i><span data-id="Hyperparameters Button" class="caption">HYPERPARAMETERS</span>
+             (click)="$event.stopPropagation(); hasHyperParams && setMode(customColumnModeEnum.HyperParams)"
+        ><i class="al-icon al-ico-plus sm-md me-1"></i><span data-id="Hyperparameters Button" class="caption">HYPERPARAMETERS</span>
         </div>
       </div>
     </div>
   </div>
-  <sm-select-metric-for-custom-col *ngIf="customColumnMode === CustomColumnMode.Metrics"
+  <sm-select-metric-for-custom-col *ngIf="customColumnMode === customColumnModeEnum.Metrics"
                                    [tableCols]="tableCols"
                                    [metricVariants]="metricVariants"
-                                   (goBack)="setMode(CustomColumnMode.Standard)"
+                                   (goBack)="setMode(customColumnModeEnum.Standard)"
                                    (selectedMetricToShow)="selectedMetricToShow.emit($event)">
   </sm-select-metric-for-custom-col>
-  <sm-select-hyper-params-for-custom-col *ngIf="customColumnMode === CustomColumnMode.HyperParams"
+  <sm-select-hyper-params-for-custom-col *ngIf="customColumnMode === customColumnModeEnum.HyperParams"
                                          class="hyper-params-custom-col"
                                          [tableCols]="tableCols"
                                          [hyperParams]="hyperParams"
-                                         (goBack)="setMode(CustomColumnMode.Standard)"
+                                         (goBack)="setMode(customColumnModeEnum.Standard)"
                                          (selectedHyperParamToShow)="selectedHyperParamToShow.emit($event)"
                                          (clearSelection)="clearSelection.emit()">
   </sm-select-hyper-params-for-custom-col>

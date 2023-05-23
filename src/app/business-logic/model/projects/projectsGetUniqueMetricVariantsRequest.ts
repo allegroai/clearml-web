@@ -21,4 +21,8 @@ export interface ProjectsGetUniqueMetricVariantsRequest {
      * If set to \'true\' and the project field is set then the result includes   metrics/variants from the subproject tasks
      */
     include_subprojects?: boolean;
+    /**
+     * If set to Truethen bring unique metric and variant names from the project   models otherwise from the project tasks
+     */
+    model_metrics?: boolean;
 }

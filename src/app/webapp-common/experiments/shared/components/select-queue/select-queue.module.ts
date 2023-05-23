@@ -8,6 +8,7 @@ import {selectQueueReducer} from './select-queue.reducer';
 import {SMSharedModule} from '@common/shared/shared.module';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {SharedPipesModule} from '@common/shared/pipes/shared-pipes.module';
+import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
 
 @NgModule({
   imports: [
@@ -17,7 +18,8 @@ import {SharedPipesModule} from '@common/shared/pipes/shared-pipes.module';
     StoreModule.forFeature('selectQueue', selectQueueReducer),
     FormsModule,
     ReactiveFormsModule,
-    SharedPipesModule
+    SharedPipesModule,
+    LabeledFormFieldDirective,
   ],
   providers      : [],
   declarations   : [SelectQueueComponent],

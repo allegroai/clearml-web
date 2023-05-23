@@ -29,10 +29,17 @@ export class TableFilterSortTemplateComponent {
   supportAndFilter: boolean;
   supportExcludeFilter: boolean;
   columnExplain: string;
+  searching: boolean = true;
   private _value: string[];
+  public loading: boolean;
 
   FILTER_TYPE = ColHeaderFilterTypeEnum;
   @Input() sortOrder: { index: number; field: string; order: TableSortOrderEnum };
+  private _options: Array<{ label: string; value: string; tooltip?: string }>;
+  public previousLength: number | undefined;
+  public noMoreOptions: boolean;
+  public filterPageSize: number;
+  private previousSearchValue: { label: string; value: string; tooltip?: string } | undefined;
 
   @Input() set column(col: ISmCol) {
     this.header = col.header;
@@ -43,12 +50,14 @@ export class TableFilterSortTemplateComponent {
     this.supportAndFilter = col.andFilter;
     this.supportExcludeFilter = col.excludeFilter;
     this.columnExplain = col.columnExplain;
+    this.filterPageSize = col.paginatedFilterPageSize;
   }
 
   @Input() searchValue;
   @Input() fixedOptionsSubheader;
 
   @Input() set value(filters: Array<string>) {
+    this.loading = false;
     if (Array.isArray(filters)) {
       this.formControl.setValue(filters);
       this._value = filters;
@@ -65,7 +74,21 @@ export class TableFilterSortTemplateComponent {
   @Input() subValue: string[] = [];
   @Input() andFilter: boolean = null;
 
-  @Input() options: Array<{ label: string; value: string; tooltip?: string }>;
+  @Input() set options(options: Array<{ label: string; value: string; tooltip?: string }>) {
+    if (options) {
+      this.noMoreOptions = options?.length < this.filterPageSize || options?.length === this.previousLength && this.searchValue === this.previousSearchValue;
+      this.previousLength = options?.length;
+      this.previousSearchValue = this.searchValue;
+      this.searching = false;
+      this.loading = false;
+    }
+    this._options = options;
+  }
+
+  get options() {
+    return this._options;
+  }
+
   @Input() subOptions: Array<{ label: string; value: string }>;
   @Input() tooltip: boolean = false;
   @Output() filterChanged = new EventEmitter();
@@ -73,7 +96,7 @@ export class TableFilterSortTemplateComponent {
   @Output() menuClosed = new EventEmitter();
   @Output() menuOpened = new EventEmitter();
   @Output() sortOrderChanged = new EventEmitter<boolean>();
-  @Output() searchValueChanged = new EventEmitter<string>();
+  @Output() searchValueChanged = new EventEmitter<{ value: string; loadMore?: boolean }>();
 
   constructor() {
   }
@@ -120,5 +143,17 @@ export class TableFilterSortTemplateComponent {
       value: value || this.value,
       andFilter: this.andFilter
     });
+  }
+
+  loadMore() {
+    this.loading = true;
+    this.searchValueChanged.emit({value: this.searchValue || '', loadMore: true});
+  }
+
+  onMenuClose() {
+    if (!this.noMoreOptions) {
+      this.previousLength = 0;
+    }
+    this.menuClosed.emit();
   }
 }

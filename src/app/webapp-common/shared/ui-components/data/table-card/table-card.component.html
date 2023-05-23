@@ -1,4 +1,4 @@
-<div class="table-card"
+<div class="table-card" data-id="cardPanel"
      [class.two-columns]="!hasTypeIcon"
      [ngClass]="{'selected':selected, 'checked':checked, 'contexted': activeContextRow?.id ===rowData?.id && contextMenuOpen}">
 
@@ -14,7 +14,7 @@
           <ng-content select="[sm-name-icon]"></ng-content>
           <ng-content select="[sm-name-version]"></ng-content>
         </div>
-        <div class="d-flex ml-auto">
+        <div class="d-flex ms-auto">
           <ng-content select="sm-experiment-system-tags"></ng-content>
           <ng-content select="sm-experiment-status-icon-label"></ng-content>
           <ng-content select="sm-model-tags"></ng-content>

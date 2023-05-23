@@ -3,9 +3,9 @@ import {AbstractControl, NG_VALIDATORS, ValidationErrors, Validator, ValidatorFn
 
 export const uniqueNameValidator = (names, forbiddenPrefix?, valuePrefix?): ValidatorFn =>
   (control: AbstractControl): { [key: string]: any } | null => {
-    let value = control.value?.label || control.value?.name || control.value;
-    value = value ? value.trim() : value;
-    if (value?.length === 0) {
+    const originValue = control.value?.label || control.value?.name || control.value;
+    let value = originValue ? originValue.trim() : originValue;
+    if (value?.length === 0 && originValue?.length > 0) {
       return {emptyName: value.length === 0};
     }
     if (valuePrefix) {

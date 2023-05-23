@@ -8,6 +8,7 @@ import {SearchState} from '../../common-search/common-search.reducer';
 import {SortMeta} from 'primeng/api';
 import {CountAvailableAndIsDisableSelectedFiltered} from '@common/shared/entity-page/items.utils';
 import {setSelectedProject} from '@common/core/actions/projects.actions';
+import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 
 export interface IModelsViewState {
   splitSize: number;
@@ -34,6 +35,8 @@ export interface IModelsViewState {
   projectMetadataKeys: string[];
   metadataCols: ISmCol[];
   metadataColsOptions: Record<ISmCol['id'], string[]>;
+  metricsCols: ISmCol[];
+  metricVariants: Array<MetricVariantResult>;
   selectedModelsDisableAvailable: Record<string, CountAvailableAndIsDisableSelectedFiltered>;
   tableMode: 'info' | 'table';
 }
@@ -50,8 +53,10 @@ export const modelsInitialState: IModelsViewState = {
   tableSortFields: [{field: MODELS_TABLE_COL_FIELDS.CREATED, order: TABLE_SORT_ORDER.DESC}],
   projectColumnsSortOrder: {},
   projectColumnsWidth: {},
-  projectMetadataKeys: [],
+  projectMetadataKeys: null,
   metadataCols: [],
+  metricsCols: [],
+  metricVariants: null,
   colsOrder: {},
   selectedModels: [],
   selectedModelsDisableAvailable: {},
@@ -67,30 +72,35 @@ export const modelsInitialState: IModelsViewState = {
   tableMode: 'table',
 };
 
-export const modelsViewReducer = createReducer(
+export const modelsViewReducer = createReducer<IModelsViewState>(
   modelsInitialState,
-  on(actions.resetState, (state) => ({
+  on(actions.resetState, (state): IModelsViewState => ({
     ...state,
     models: modelsInitialState.models,
     selectedModel: modelsInitialState.selectedModel,
   })),
-  on(setSelectedProject, (state) => ({...state, selectedModels: modelsInitialState.selectedModels})),
-  on(actions.addModels, (state, action) => ({...state, models: state.models?.concat(action.models) || null})),
-  on(actions.removeModels, (state, action) => ({
-    ...state,
-    models: state.models?.filter(exp => !action.modelIds.includes(exp.id)) || null
-  })),
-  on(actions.showSelectedOnly, (state, action) => ({
-    ...state,
-    showAllSelectedIsActive: action.active,
-    globalFilter: modelsInitialState.globalFilter,
-    tempFilters: state.projectColumnFilters[action.projectId] || {},
-    projectColumnFilters: {
-      ...state.projectColumnFilters,
-      [action.projectId]: action.active ? modelsInitialState.tableFilters : state.tempFilters
-    }
-  })),
-  on(actions.updateModel, (state, action) => {
+  on(setSelectedProject, (state): IModelsViewState => ({...state, selectedModels: modelsInitialState.selectedModels})),
+  on(actions.addModels, (state, action): IModelsViewState =>
+    ({...state, models: state.models?.concat(action.models) || null})),
+  on(actions.removeModels, (state, action): IModelsViewState =>
+    ({
+      ...state,
+      models: state.models?.filter(exp => !action.modelIds.includes(exp.id)) || null
+    })),
+  on(actions.showSelectedOnly, (state, action): IModelsViewState =>
+    ({
+      ...state,
+      showAllSelectedIsActive: action.active,
+      globalFilter: modelsInitialState.globalFilter,
+      tempFilters: state.projectColumnFilters[action.projectId] || {},
+      ...(state.showAllSelectedIsActive && {
+        projectColumnFilters: {
+          ...state.projectColumnFilters,
+          [action.projectId]: action.active ? modelsInitialState.tableFilters : state.tempFilters
+        }
+      })
+    })),
+  on(actions.updateModel, (state, action): IModelsViewState => {
     const newState = {
       ...state, models:
         state.models?.map(ex => ex.id === action.id ? {...ex, ...action.changes} : ex)
@@ -103,35 +113,41 @@ export const modelsViewReducer = createReducer(
     }
     return newState;
   }),
-  on(actions.setModels, (state, action) => ({...state, models: action.models})),
-  on(actions.setModelsInPlace, (state, action) =>
+  on(actions.setModels, (state, action): IModelsViewState =>
+    ({...state, models: action.models})),
+  on(actions.setModelsInPlace, (state, action): IModelsViewState =>
     ({...state, models: state.models?.map(currModel => action.models?.find(newModel => newModel.id === currModel.id)) || null
     })),
-  on(actions.setNoMoreModels, (state, action) => ({...state, noMoreModels: action.payload})),
-  on(actions.setCurrentScrollId, (state, action) => ({...state, scrollId: action.scrollId})),
-  on(actions.setSelectedModels, (state, action) => ({
-    ...state,
-    selectedModels: action.models as unknown as TableModel[]
-  })),
-  on(actions.setSelectedModelsDisableAvailable, (state, action) =>
+  on(actions.setNoMoreModels, (state, action): IModelsViewState =>
+    ({...state, noMoreModels: action.payload})),
+  on(actions.setCurrentScrollId, (state, action): IModelsViewState =>
+    ({...state, scrollId: action.scrollId})),
+  on(actions.setSelectedModels, (state, action): IModelsViewState =>
+    ({...state, selectedModels: action.models as unknown as TableModel[]})),
+  on(actions.setSelectedModelsDisableAvailable, (state, action): IModelsViewState  =>
     ({...state, selectedModelsDisableAvailable: action.selectedModelsDisableAvailable})),
-  on(actions.setSelectedModel, (state, action) => ({...state, selectedModel: action.model})),
-  on(actions.globalFilterChanged, (state, action) =>
+  on(actions.setSelectedModel, (state, action): IModelsViewState =>
+    ({...state, selectedModel: action.model})),
+  on(actions.globalFilterChanged, (state, action): IModelsViewState =>
     ({...state, globalFilter: action as ReturnType<typeof actions.globalFilterChanged>})),
-  on(actions.resetGlobalFilter, (state) => ({...state, globalFilter: modelsInitialState.globalFilter})),
-  on(actions.toggleColHidden, (state, action) => ({
-    ...state,
-    hiddenProjectTableCols: {
-      ...state.hiddenProjectTableCols,
-      [action.projectId]: {
-        ...(state.hiddenProjectTableCols[action.projectId] || modelsInitialState.hiddenTableCols),
-        [action.columnId]: state.hiddenProjectTableCols?.[action.projectId]?.[action.columnId] ? undefined : true
+  on(actions.resetGlobalFilter, (state): IModelsViewState =>
+    ({...state, globalFilter: modelsInitialState.globalFilter})),
+  on(actions.toggleColHidden, (state, action): IModelsViewState =>
+    ({
+      ...state,
+      hiddenProjectTableCols: {
+        ...state.hiddenProjectTableCols,
+        [action.projectId]: {
+          ...(state.hiddenProjectTableCols[action.projectId] || modelsInitialState.hiddenTableCols),
+          [action.columnId]: state.hiddenProjectTableCols?.[action.projectId]?.[action.columnId] ? undefined : true
+        }
       }
-    }
-  })),
-  on(actions.setHiddenCols, (state, action) => ({...state, hiddenTableCols: action.hiddenCols})),
-  on(actions.addColumn, (state, action) => ({...state, metadataCols: [...state.metadataCols, action.col]})),
-  on(actions.removeCol, (state, action) => ({
+    })),
+  on(actions.setHiddenCols, (state, action): IModelsViewState =>
+    ({...state, hiddenTableCols: action.hiddenCols})),
+  on(actions.addColumn, (state, action): IModelsViewState =>
+    ({...state, metadataCols: [...state.metadataCols, action.col]})),
+  on(actions.removeCol, (state, action): IModelsViewState => ({
     ...state,
     metadataCols: [...state.metadataCols.filter(tableCol => !(tableCol.key === action.id && tableCol.projectId === action.projectId))],
     colsOrder: {
@@ -139,17 +155,18 @@ export const modelsViewReducer = createReducer(
       [action.projectId]: state.colsOrder[action.projectId] ? state.colsOrder[action.projectId].filter(colId => colId !== action.id) : null
     }
   })),
-  on(actions.setExtraColumns, (state, action) =>
+  on(actions.setExtraColumns, (state, action): IModelsViewState =>
     ({
       ...state,
       metadataCols: [...state.metadataCols.filter(tableCol => !(tableCol.projectId === action['projectId'])), ...action['columns']]
     })),
-  on(actions.setFrameworks, (state, action) => ({...state, frameworks: action.frameworks})),
-  on(actions.setTags, (state, action) => ({...state, projectTags: action.tags})),
-  on(actions.setMetadataKeys, (state, action) => ({...state, projectMetadataKeys: action.keys})),
-  on(actions.setMetadataColValuesOptions, (state, action) =>
+  on(actions.setFrameworks, (state, action): IModelsViewState =>
+    ({...state, frameworks: action.frameworks})),
+  on(actions.setTags, (state, action): IModelsViewState => ({...state, projectTags: action.tags})),
+  on(actions.setMetadataKeys, (state, action): IModelsViewState => ({...state, projectMetadataKeys: action.keys})),
+  on(actions.setMetadataColValuesOptions, (state, action): IModelsViewState =>
     ({...state, metadataColsOptions: {...state.metadataColsOptions, [action.col.id]: action.values}})),
-  on(actions.setTableSort, (state, action) => {
+  on(actions.setTableSort, (state, action): IModelsViewState => {
     const colIds = (Object.values(MODELS_TABLE_COL_FIELDS) as string[]).concat(state.metadataCols.map(col => col.id));
     let orders = action.orders.filter(order => colIds.includes(order.field));
     orders = orders.length > 0 ? orders : null;
@@ -161,7 +178,7 @@ export const modelsViewReducer = createReducer(
       }
     };
   }),
-  on(actions.setColumnWidth, (state, action) => ({
+  on(actions.setColumnWidth, (state, action): IModelsViewState => ({
     ...state,
     projectColumnsWidth: {
       ...state.projectColumnsWidth,
@@ -171,9 +188,9 @@ export const modelsViewReducer = createReducer(
       }
     }
   })),
-  on(actions.setColsOrderForProject, (state, action) =>
+  on(actions.setColsOrderForProject, (state, action): IModelsViewState =>
     ({...state, colsOrder: {...state.colsOrder, [action.project]: action.cols}})),
-  on(actions.setTableFilters, (state, action) => ({
+  on(actions.setTableFilters, (state, action): IModelsViewState => ({
     ...state,
     projectColumnFilters: {
       ...state.projectColumnFilters,
@@ -185,6 +202,25 @@ export const modelsViewReducer = createReducer(
       }
     }
   })),
-  on(actions.setSplitSize, (state, action) => ({...state, splitSize: action.splitSize})),
-  on(actions.setTableMode, (state, action) => ({...state, tableMode: action.mode})),
+  on(actions.removeMetricCol, (state, action): IModelsViewState => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const {[action.id]: removedCol, ...remainingColsWidth} = state.projectColumnsWidth[action.projectId] || {};
+    return {
+      ...state,
+      metadataCols: [...state.metadataCols.filter(tableCol => !(tableCol.id === action.id && tableCol.projectId === action.projectId))],
+      projectColumnsSortOrder: {
+        ...state.projectColumnsSortOrder,
+        [action.projectId]: state.projectColumnsSortOrder[action.projectId]?.filter(order => order.field !== action.id) || null
+      },
+      projectColumnsWidth: {...state.projectColumnsWidth, [action.projectId]: remainingColsWidth},
+      colsOrder: {
+        ...state.colsOrder,
+        [action.projectId]: state.colsOrder[action.projectId] ? state.colsOrder[action.projectId].filter(colId => colId !== action.id) : null
+      }
+    };
+  }),
+  on(actions.setSplitSize, (state, action): IModelsViewState =>
+    ({...state, splitSize: action.splitSize})),
+  on(actions.setTableMode, (state, action): IModelsViewState => ({...state, tableMode: action.mode})),
+  on(actions.setCustomMetrics, (state, action): IModelsViewState => ({...state, metricVariants: action.metrics})),
 );

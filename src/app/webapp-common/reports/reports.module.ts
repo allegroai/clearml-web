@@ -22,6 +22,8 @@ import {ScrollingModule} from '@angular/cdk/scrolling';
 import {ReportsSharedModule} from '@common/reports/reports-shared.module';
 import {ExistNameValidatorDirective} from '@common/shared/ui-components/template-forms-ui/exist-name-validator.directive';
 import {SharedPipesModule} from '@common/shared/pipes/shared-pipes.module';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
 
 @NgModule({
   imports: [
@@ -40,7 +42,9 @@ import {SharedPipesModule} from '@common/shared/pipes/shared-pipes.module';
     ScrollingModule,
     ReportsSharedModule,
     ExistNameValidatorDirective,
-    SharedPipesModule
+    SharedPipesModule,
+    MatProgressSpinnerModule,
+    LabeledFormFieldDirective,
   ],
   declarations: [ReportsPageComponent, ReportsListComponent, ReportsHeaderComponent, ReportDialogComponent,
     CreateNewReportFormComponent, ReportComponent],

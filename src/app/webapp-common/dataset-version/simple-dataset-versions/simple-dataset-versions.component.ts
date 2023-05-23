@@ -9,7 +9,7 @@ import {EXPERIMENTS_TABLE_COL_FIELDS} from '~/features/experiments/shared/experi
 import {Store} from '@ngrx/store';
 import {SmSyncStateSelectorService} from '@common/core/services/sync-state-selector.service';
 import {ActivatedRoute, Router} from '@angular/router';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {MatDialog} from '@angular/material/dialog';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {take} from 'rxjs/operators';
 import {ExperimentsViewState} from '@common/experiments/reducers/experiments-view.reducer';
@@ -50,7 +50,7 @@ export class SimpleDatasetVersionsComponent extends ControllersComponent impleme
           if (!this.route.snapshot.firstChild?.params.versionId) {
             this.store.dispatch(experimentsActions.experimentSelectionChanged({
               experiment: this.firstExperiment,
-              project: this.selectedProject,
+              project: this.selectedProjectId,
               replaceURL: true
             }));
           }

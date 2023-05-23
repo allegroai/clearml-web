@@ -5,9 +5,10 @@ import {SMSharedModule} from '../../shared/shared.module';
 import {
   SelectMetricForCustomColComponent
 } from '@common/experiments/dumb/select-metric-for-custom-col/select-metric-for-custom-col.component';
-import {MatLegacyRadioModule} from '@angular/material/legacy-radio';
+import {MatRadioModule} from '@angular/material/radio';
 import {FormsModule} from '@angular/forms';
 import {SharedPipesModule} from '@common/shared/pipes/shared-pipes.module';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 
 const declarations = [
   ExperimentSettingsComponent,
@@ -15,13 +16,14 @@ const declarations = [
 ];
 
 @NgModule({
-  imports: [
-    CommonModule,
-    SMSharedModule,
-    MatLegacyRadioModule,
-    FormsModule,
-    SharedPipesModule
-  ],
+    imports: [
+        CommonModule,
+        SMSharedModule,
+        MatRadioModule,
+        FormsModule,
+        SharedPipesModule,
+        MatProgressSpinnerModule
+    ],
   declarations   : [declarations],
   exports        : [...declarations]
 })

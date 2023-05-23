@@ -27,9 +27,9 @@ import {BehaviorSubject, combineLatest, Observable, Subscription} from 'rxjs';
 import {Task} from '~/business-logic/model/tasks/task';
 import {Params} from '@angular/router';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
-import {distinctUntilChanged, distinctUntilKeyChanged, filter, map} from 'rxjs/operators';
+import {distinctUntilChanged, distinctUntilKeyChanged, filter, map, tap} from 'rxjs/operators';
 import {compareLimitations} from '@common/shared/entity-page/footer-items/compare-footer-item';
-import {MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {ITableExperiment} from '@common/experiments/shared/common-experiment-model.model';
 import {
   selectActiveParentsFilter,
@@ -51,7 +51,7 @@ import {initSearch} from '@common/common-search/common-search.actions';
 import * as experimentsActions from '../../../experiments/actions/common-experiments-view.actions';
 import {resetExperiments, resetGlobalFilter} from '@common/experiments/actions/common-experiments-view.actions';
 import {User} from '~/business-logic/model/users/user';
-import {selectProjectSystemTags, selectProjectUsers, selectRootProjects} from '@common/core/reducers/projects.reducer';
+import {selectProjectSystemTags, selectProjectUsers, selectTablesFilterProjectsOptions} from '@common/core/reducers/projects.reducer';
 import {SortMeta} from 'primeng/api';
 import {Project} from '~/business-logic/model/projects/project';
 import {addMessage} from '@common/core/actions/layout.actions';
@@ -63,7 +63,10 @@ import {INITIAL_EXPERIMENT_TABLE_COLS} from '@common/experiments/experiment.cons
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {ExperimentsTableComponent} from '@common/experiments/dumb/experiments-table/experiments-table.component';
 import {MESSAGES_SEVERITY} from '@common/constants';
-import {MatLegacySlideToggleChange as MatSlideToggleChange} from '@angular/material/legacy-slide-toggle';
+import {MatSlideToggleChange} from '@angular/material/slide-toggle';
+import {getTablesFilterProjectsOptions, resetTablesFilterProjectsOptions} from '@common/core/actions/projects.actions';
+import {EXPERIMENTS_PAGE_SIZE} from '@common/experiments/shared/common-experiments.const';
+import {setParents} from '../../../experiments/actions/common-experiments-view.actions';
 
 export const allowAddExperiment$ = (selectRouterParams$: Observable<Params>) => selectRouterParams$.pipe(
   distinctUntilKeyChanged('ids'),
@@ -109,8 +112,10 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
   public showArchived$: Observable<boolean>;
   private _resizedCols = {} as { [colId: string]: string };
   private resizedCols$ = new BehaviorSubject<{ [colId: string]: string }>(this._resizedCols);
+  private loadMoreCount = 0;
   @ViewChild('searchExperiments', {static: true}) searchExperiments;
   @ViewChild(ExperimentsTableComponent) table: ExperimentsTableComponent;
+  private parents: ProjectsGetTaskParentsResponseParents[];
 
   constructor(
     private store: Store<any>,
@@ -125,15 +130,23 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
     this.experiments$ = combineLatest([
       this.store.select(selectExperimentsList),
       this.store.select(selectSelectedExperimentsForCompareAdd),
-    ]).pipe(map(([experiments, selectedExperiments]) => unionBy(selectedExperiments, experiments, 'id')));
+    ]).pipe(
+      map(([experiments, selectedExperiments]) => {
+        const union = unionBy(selectedExperiments, experiments, 'id');
+        if (experiments?.length >= EXPERIMENTS_PAGE_SIZE && (union.length - (selectedExperiments?.length ?? 0) <= EXPERIMENTS_PAGE_SIZE * (this.loadMoreCount + 1))) {
+          this.store.dispatch(experimentsActions.getNextExperiments());
+        }
+        return union;
+      })
+    );
     this.searchTerm$ = this.store.pipe(select(selectExperimentsForCompareSearchTerm));
     this.tableColsOrder$ = this.store.select(selectExperimentsTableColsOrder);
     this.columns$ = this.store.select(selectExperimentsTableCols);
     this.metricTableCols$ = this.store.select(selectExperimentsMetricsColsForProject);
     this.users$ = this.store.select(selectProjectUsers);
     this.tableFilters$ = this.store.select(selectTableFilters);
-    this.parent$ = this.store.select(selectExperimentsParents);
-    this.projects$ = this.store.select(selectRootProjects);
+    this.parent$ = this.store.select(selectExperimentsParents).pipe(tap(parents => this.parents = parents));
+    this.projects$ = this.store.select(selectTablesFilterProjectsOptions);
 
     this.tags$ = this.store.select(selectExperimentsTags);
     this.types$ = this.store.select(selectExperimentsTypes);
@@ -198,6 +211,7 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.store.dispatch(setShowSearchExperimentsForCompare({payload: true}));
+    this.store.dispatch(getTablesFilterProjectsOptions({searchString: '', loadMore: false}));
     window.setTimeout(() => this.table.table.rowRightClick = new EventEmitter());
     this.paramsSubscription = this.store.pipe(
       select(selectRouterParams),
@@ -205,8 +219,8 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
       filter(([experimentIds,]) => !!experimentIds),
     ).subscribe(([experimentIds, projectId]) => {
       if (this.selectedExperimentsIds.length === 0) {
-      this.selectedExperimentsIds = experimentIds.split(',');
-      this.syncSelectedExperiments();
+        this.selectedExperimentsIds = experimentIds.split(',');
+        this.syncSelectedExperiments();
       }
       if (!this.projectId && projectId !== '*') {
         this.store.dispatch(compareAddTableFilterInit({projectId}));
@@ -217,7 +231,7 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
     this.allowAddExperiment$ = allowAddExperiment$(this.store.select(selectRouterParams));
     this.store.dispatch(experimentsActions.getTags());
     this.store.dispatch(experimentsActions.getProjectTypes());
-    this.store.dispatch(experimentsActions.getParents());
+    this.store.dispatch(experimentsActions.getParents({searchValue: null}));
     this.store.dispatch(getSelectedExperimentsForCompareAddDialog(null));
     this.syncAppSearch();
   }
@@ -245,6 +259,7 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
   }
 
   getNextExperiments() {
+    this.loadMoreCount++;
     this.syncSelectedExperiments();
     this.store.dispatch(experimentsActions.getNextExperiments());
   }
@@ -284,5 +299,23 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
 
   showArchived(event: MatSlideToggleChange) {
     this.store.dispatch(setAddTableViewArchived({show: event.checked}));
+  }
+
+  filterSearchChanged({colId, value}: { colId: string; value: {value: string; loadMore?: boolean} }) {
+    switch (colId) {
+      case 'project.name':
+        if (this.projectId === '*' && !value.loadMore) {
+          this.store.dispatch(resetTablesFilterProjectsOptions());
+        }
+        this.store.dispatch(getTablesFilterProjectsOptions({searchString: value.value || '', loadMore: value.loadMore}));
+        break;
+      case 'parent.name':
+        if (value.loadMore) {
+          this.store.dispatch(setParents({parents: [...this.parents]}));
+        } else {
+          this.store.dispatch(experimentsActions.resetTablesFilterParentsOptions());
+          this.store.dispatch(experimentsActions.getParents({searchValue: value.value || ''}));
+        }
+    }
   }
 }

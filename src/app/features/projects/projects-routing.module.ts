@@ -1,9 +1,15 @@
 import {RouterModule, Routes} from '@angular/router';
 import {NgModule} from '@angular/core';
-import {CommonProjectsPageComponent} from '../../webapp-common/projects/containers/projects-page/common-projects-page.component';
+import {CommonProjectsPageComponent} from '@common/projects/containers/projects-page/common-projects-page.component';
+import {CrumbTypeEnum} from '@common/layout/breadcrumbs/breadcrumbs.component';
 
 export const routes: Routes = [
-  {path: '', component: CommonProjectsPageComponent}
+  {path: '', component: CommonProjectsPageComponent, data: {
+      staticBreadcrumb: [[{
+        name: 'PROJECTS',
+        type: CrumbTypeEnum.Feature
+      }]]
+    }}
 ];
 
 

@@ -30,7 +30,7 @@
   <div class="empty-state">
     <i class="al-icon al-ico-reports xxl"></i>
     <h3>NO REPORTS TO SHOW</h3>
-    <button *ngIf="!archive" (click)="newReport.emit()" class="no-data-button btn btn-neon">
+    <button *ngIf="!archive" (click)="newReport.emit(projectId)" class="no-data-button btn btn-neon">
       <span>NEW REPORT</span>
     </button>
   </div>

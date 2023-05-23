@@ -1,9 +1,6 @@
 @import "variables";
 
 :host {
-  ::ng-deep .mat-spinner circle {
-    stroke: #FFFFFF !important;
-  }
   .light-theme {
     overflow: auto;
   }

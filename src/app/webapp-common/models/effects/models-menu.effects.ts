@@ -36,7 +36,7 @@ export class ModelsMenuEffects {
   }
 
   activeLoader = createEffect( () => this.actions$.pipe(
-    ofType(menuActions.archivedSelectedModels, menuActions.publishModelClicked,
+    ofType(menuActions.archiveSelectedModels, menuActions.publishModelClicked,
       menuActions.restoreSelectedModels, menuActions.changeProjectRequested),
     map(action => activeLoader(action.type))));
 
@@ -152,7 +152,7 @@ export class ModelsMenuEffects {
   ));
 
   archiveModels = createEffect(() => this.actions$.pipe(
-    ofType(menuActions.archivedSelectedModels),
+    ofType(menuActions.archiveSelectedModels),
     withLatestFrom(
       this.store.select(selectSelectedTableModel)
     ),
@@ -221,7 +221,7 @@ export class ModelsMenuEffects {
             {
               name: 'Undo', actions: [
                 viewActions.setSelectedModels({models}),
-                menuActions.archivedSelectedModels({selectedEntities: models, skipUndo: true})
+                menuActions.archiveSelectedModels({selectedEntities: models, skipUndo: true})
               ]
             }
           ];

@@ -3,26 +3,23 @@ import {Store} from '@ngrx/store';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {ApiProjectsService} from '~/business-logic/api-services/projects.service';
 import * as actions from '../actions/projects.actions';
-import {setShowHidden} from '../actions/projects.actions';
-import {catchError, expand, filter, map, mergeMap, reduce, switchMap, withLatestFrom} from 'rxjs/operators';
+import {setProjectAncestors, setShowHidden, setTablesFilterProjectsOptions} from '../actions/projects.actions';
+import {catchError, debounceTime, filter, map, mergeMap, switchMap, withLatestFrom} from 'rxjs/operators';
 import {requestFailed} from '../actions/http.actions';
 import {activeLoader, deactivateLoader, setServerError} from '../actions/layout.actions';
 import {setSelectedModels} from '../../models/actions/models-view.actions';
 import {TagColorMenuComponent} from '../../shared/ui-components/tags/tag-color-menu/tag-color-menu.component';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {MatDialog} from '@angular/material/dialog';
 import {ApiOrganizationService} from '~/business-logic/api-services/organization.service';
 import {OrganizationGetTagsResponse} from '~/business-logic/model/organization/organizationGetTagsResponse';
 import {selectRouterParams} from '../reducers/router-reducer';
-import {EMPTY, forkJoin, from, of} from 'rxjs';
+import {EMPTY, forkJoin, of} from 'rxjs';
 import {ProjectsGetTaskTagsResponse} from '~/business-logic/model/projects/projectsGetTaskTagsResponse';
 import {ProjectsGetModelTagsResponse} from '~/business-logic/model/projects/projectsGetModelTagsResponse';
 import {
-  selectAllProjectsUsers,
-  selectLastUpdate,
-  selectRootProjects,
+  selectAllProjectsUsers, selectProjectsOptionsScrollId,
   selectSelectedMetricVariantForCurrProject,
-  selectSelectedProjectId,
-  selectShowHidden
+  selectSelectedProjectId, selectShowHidden,
 } from '../reducers/projects.reducer';
 import {
   OperationErrorDialogComponent
@@ -33,30 +30,25 @@ import {ITask} from '~/business-logic/model/al-task';
 import {TasksGetAllExRequest} from '~/business-logic/model/tasks/tasksGetAllExRequest';
 import {setSelectedExperiments} from '../../experiments/actions/common-experiments-view.actions';
 import {setActiveWorkspace} from '@common/core/actions/users.actions';
-import {ProjectsGetAllExResponse} from '~/business-logic/model/projects/projectsGetAllExResponse';
-import {Project} from '~/business-logic/model/projects/project';
 import {ApiUsersService} from '~/business-logic/api-services/users.service';
-import {get} from 'lodash-es';
+import {escapeRegExp, get} from 'lodash-es';
+import {escapeRegex} from '@common/shared/utils/escape-regex';
 import {ProjectsGetAllExRequest} from '~/business-logic/model/projects/projectsGetAllExRequest';
-import localForage from 'localforage';
-import {TIME_IN_MILLI} from '@common/shared/utils/time-util';
+import {ProjectsGetAllResponseSingle} from '~/business-logic/model/projects/projectsGetAllResponseSingle';
+import {rootProjectsPageSize} from '@common/constants';
 
 export const ALL_PROJECTS_OBJECT = {id: '*', name: 'All Experiments'};
-interface RootCache {
-  time: string;
-  hidden: boolean;
-  projects: Project[];
-}
+
 
 @Injectable()
 export class ProjectsEffects {
-  private pageSize: number = 1000;
 
   constructor(
     private actions$: Actions, private projectsApi: ApiProjectsService, private orgApi: ApiOrganizationService,
     private store: Store<any>, private dialog: MatDialog, private tasksApi: ApiTasksService,
     private usersApi: ApiUsersService,
-  ) {}
+  ) {
+  }
 
   activeLoader = createEffect(() => this.actions$.pipe(
     ofType(actions.setSelectedProjectId),
@@ -64,82 +56,91 @@ export class ProjectsEffects {
     map(action => activeLoader(action.type))
   ));
 
-  getProjects$ = createEffect(() => this.actions$.pipe(
-    ofType(actions.getAllSystemProjects),
-    withLatestFrom(
-      this.store.select(selectShowHidden),
-      this.store.select(selectLastUpdate),
-    ),
-    switchMap(([, showHidden, lastUpdate]) => !lastUpdate ? from(localForage.getItem<RootCache>('rootProjects'))
-      .pipe(
-        map((cache: RootCache) =>
-          [showHidden, lastUpdate,
-            (new Date(cache?.time)).getTime() > (new Date()).getTime() - TIME_IN_MILLI.ONE_HOUR &&
-            cache.projects?.length > 0 &&
-            showHidden === cache.hidden ? cache : null
-          ])
-      ) : of([showHidden, lastUpdate, null])
-    ),
-    switchMap(([showHidden, lastUpdate, cache]: [boolean, string, RootCache]) => {
-      if (cache) {
-        return [
-          actions.setAllProjects({projects: cache.projects, updating: false}),
-          actions.setLastUpdate({lastUpdate: cache.time}),
-          actions.getAllSystemProjects()
-        ];
-      }
-      const cacheTime = (new Date()).toISOString();
-      const query = {
-        /* eslint-disable @typescript-eslint/naming-convention */
-        scroll_id: null,
-        size: this.pageSize,
-        order_by: ['last_update'],
-        ...(lastUpdate && {last_update: [lastUpdate, null]}),
-        only_fields: ['name', 'company', 'last_update'],
-        search_hidden: showHidden
-        /* eslint-enable @typescript-eslint/naming-convention */
-      } as ProjectsGetAllExRequest;
-      return this.projectsApi.projectsGetAllEx(query)
-        .pipe(
-          expand((res: ProjectsGetAllExResponse) => res.scroll_id && res.projects.length >= this.pageSize ?
-            this.projectsApi.projectsGetAllEx({
-              ...query,
-              // eslint-disable-next-line @typescript-eslint/naming-convention
-              scroll_id: res.scroll_id,
-            }) :
-            EMPTY
-          ),
-          reduce((acc, res: ProjectsGetAllExResponse) => acc.concat(res.projects), []),
-          withLatestFrom(this.store.select(selectRootProjects)),
-          mergeMap(([projects, rootProjects]) => [
-            actions.setLastUpdate({lastUpdate: cacheTime}),
-            actions.setAllProjects({
-              projects: projects as Project[],
-              updating: rootProjects?.length > 0
-            }),
-          ])
-        );
-    }),
-  ));
 
-  updateProjectsCache$ = createEffect(() => this.actions$.pipe(
-    ofType(actions.setAllProjects, actions.deletedProjectFromRoot, actions.updateProjectCompleted),
-    withLatestFrom(
-      this.store.select(selectRootProjects),
-      this.store.select(selectLastUpdate),
-      this.store.select(selectShowHidden),
-    ),
-    map(([, projects, lastUpdate, hidden]) => localForage.setItem<RootCache>('rootProjects', {
-      time: lastUpdate,
-      hidden,
-      projects
-    }))
-  ), {dispatch: false});
+  getTablesFilterProjectsOptions$ = createEffect(() => this.actions$.pipe(
+      ofType(actions.getTablesFilterProjectsOptions),
+      debounceTime(300),
+      withLatestFrom(
+        this.store.select(selectShowHidden),
+        this.store.select(selectProjectsOptionsScrollId),
+      ),
+      switchMap(([action, showHidden, scrollId]) => forkJoin([
+          this.projectsApi.projectsGetAllEx({
+            /* eslint-disable @typescript-eslint/naming-convention */
+            page_size: rootProjectsPageSize,
+            size: rootProjectsPageSize,
+            order_by: ['name'],
+            only_fields: ['name', 'company'],
+            search_hidden: showHidden,
+            _any_: {pattern: escapeRegex(action.searchString), fields: ['name']},
+            scroll_id: !!action.loadMore && scrollId
+          } as ProjectsGetAllExRequest),
+          !action.loadMore && action.searchString?.length > 2 ?
+            this.projectsApi.projectsGetAllEx({
+              page_size: 1,
+              only_fields: ['name', 'company'],
+              search_hidden: showHidden,
+              _any_: {pattern: `^${escapeRegex(action.searchString)}$`, fields: ['name', 'id']},
+              /* eslint-enable @typescript-eslint/naming-convention */
+            } as ProjectsGetAllExRequest).pipe(map(res => res.projects)) :
+            of([])
+        ])
+          .pipe(map(([allProjects, specificProjects]) => ({
+              projects: [
+                ...(specificProjects.length > 0 && allProjects.projects.some(project => project.id === specificProjects[0]?.id) ? [] : specificProjects),
+                ...allProjects.projects
+              ],
+              scrollId: allProjects.scroll_id,
+              loadMore: action.loadMore
+            })
+          ))
+      ),
+      mergeMap((projects: { projects: ProjectsGetAllResponseSingle[]; scrollId: string }) => [setTablesFilterProjectsOptions({...projects})])
+    )
+  );
+
 
   resetProjects$ = createEffect(() => this.actions$.pipe(
     ofType(actions.resetSelectedProject),
     mergeMap(() => [actions.resetProjectSelection()])
   ));
+
+  resetAncestorProjects$ = createEffect(() => this.actions$.pipe(
+    ofType(actions.setSelectedProjectId),
+    withLatestFrom(this.store.select(selectSelectedProjectId)),
+    filter(([action, prevProjectId]) => action.projectId !== prevProjectId),
+    mergeMap(() => [setProjectAncestors({projects: null})])
+  ));
+
+  getAncestorProjects$ = createEffect(() => this.actions$.pipe(
+    ofType(actions.setSelectedProject),
+    filter(action => !!action.project),
+    switchMap(action => {
+      const parts = action.project.name?.split('/');
+      if (!action.project.id || action.project.id === ALL_PROJECTS_OBJECT.id || parts.length === 1) {
+        return of([{projects: []}, []]);
+      }
+      parts.pop();
+      const escapedParts = parts.map(escapeRegExp);
+      const [simpleProjectNames, projectsNames] = parts.reduce(
+        ([simpleNames, names], part, index) => [
+          [...simpleNames, parts.slice(0, index + 1).join('/')],
+          [...names, escapedParts.slice(0, index + 1).join('\\/')],
+        ],
+        [[], []]
+      );
+      return this.projectsApi.projectsGetAllEx({
+        /* eslint-disable @typescript-eslint/naming-convention */
+        _any_: {fields: ['name'], pattern: projectsNames.map(name => `^${name}$`).join('|')},
+        search_hidden: true
+        /* eslint-enable @typescript-eslint/naming-convention */
+      }).pipe(map(res => [res, simpleProjectNames]));
+    }),
+    switchMap(([res, projectsNames]) => [actions.setProjectAncestors({
+        projects: res?.projects?.filter(project => projectsNames.includes(project.name))
+          .sort((projectA, projectB) => (projectA.name?.split('/').length >= projectB.name?.split('/').length) ? 1 : -1)
+      })]
+    )));
 
   resetProjectSelections$ = createEffect(() => this.actions$.pipe(
     ofType(actions.resetProjectSelection),
@@ -176,13 +177,16 @@ export class ProjectsEffects {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     switchMap(() => this.orgApi.organizationGetTags({include_system: true})
       .pipe(
-        map((res: OrganizationGetTagsResponse) => actions.setCompanyTags({tags: res.tags, systemTags: res.system_tags})),
+        map((res: OrganizationGetTagsResponse) => actions.setCompanyTags({
+          tags: res.tags,
+          systemTags: res.system_tags
+        })),
         catchError(error => [requestFailed(error)])
       )
     )
   ));
 
-    getProjectsTags = createEffect(() => this.actions$.pipe(
+  getProjectsTags = createEffect(() => this.actions$.pipe(
     ofType(actions.getProjectsTags),
     // eslint-disable-next-line @typescript-eslint/naming-convention
     switchMap(action => this.projectsApi.projectsGetProjectTags({filter: {system_tags: [action.entity]}})
@@ -197,7 +201,7 @@ export class ProjectsEffects {
     ofType(actions.getTags),
     withLatestFrom(this.store.select(selectRouterParams).pipe(
       map(params => (params === null || params?.projectId === '*') ? [] : [params.projectId]))),
-      mergeMap(([action, projects]) => {
+    mergeMap(([action, projects]) => {
       const ids = action?.projectId ? [action.projectId] : projects;
       if (ids.length === 0 || !ids[0]) {
         return EMPTY;
@@ -237,7 +241,7 @@ export class ProjectsEffects {
     ofType(actions.fetchGraphData),
     withLatestFrom(
       this.store.select(selectSelectedProjectId),
-      this.store.select(selectSelectedMetricVariantForCurrProject)
+      this.store.select(selectSelectedMetricVariantForCurrProject),
     ),
     filter(([, , variant]) => !!variant),
     switchMap(([, projectId, variant]) => {
@@ -278,7 +282,6 @@ export class ProjectsEffects {
 
   resetRootProjects = createEffect(() => this.actions$.pipe(
     ofType(setActiveWorkspace, actions.refetchProjects, setShowHidden),
-    switchMap(() => from(localForage.removeItem('rootProjects'))),
     mergeMap(() => [
       actions.resetProjects(),
       actions.getAllSystemProjects()

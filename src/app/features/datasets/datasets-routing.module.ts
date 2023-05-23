@@ -4,13 +4,17 @@ import {SimpleDatasetsComponent} from '@common/datasets/simple-datasets/simple-d
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {
   NestedProjectViewPageComponent
-} from "@common/nested-project-view/nested-project-view-page/nested-project-view-page.component";
+} from '@common/nested-project-view/nested-project-view-page/nested-project-view-page.component';
+import {CrumbTypeEnum} from '@common/layout/breadcrumbs/breadcrumbs.component';
 
 const routes: Routes = [
   {
     path     : '',
     component: SimpleDatasetsComponent,
-    data     : {search: true}
+    data: {search: true, staticBreadcrumb:[[{
+        name: 'DATASETS',
+        type: CrumbTypeEnum.Feature
+      }]]}
   },
   {
     path: 'simple/:projectId',

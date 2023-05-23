@@ -4,34 +4,39 @@
     *ngIf="admin || usage.shown"
     (change)="statsChange($event)"
     [checked]="show$ | async"
-  ><span class="d-flex-center">Show Hidden Projects<i class="al-icon al-ico-ghost sm ml-2"></i></span>
+    color="accent"
+  ><span class="d-flex-center">Show Hidden Projects<i class="al-icon al-ico-ghost sm ms-2"></i></span>
   </mat-slide-toggle>
   <mat-slide-toggle
     (change)="toggleExamples($event)"
     [checked]="hideExamples$ | async"
+    color="accent"
   >Don’t show ClearML examples
   </mat-slide-toggle>
   <mat-slide-toggle
     *ngIf="supportReScaling"
     (change)="hidpiChange($event)"
-    [checked]="disableHidpi">
-    Disable HiDPI browser scale override
-    <i class="al-icon al-ico-info-circle sm info align-middle ml-3 mr-3"
+    [checked]="disableHidpi"
+    color="accent"
+  >Disable HiDPI browser scale override
+    <i class="al-icon al-ico-info-circle sm info align-middle ms-3 me-3"
        smTooltip="ClearML dynamically sets the browser scaling factor for an optimal page layout. Disable for default desktop scale."
     ></i>
     <span class="reload" [class.highlight]="disableHidpiChanged" (click)="reload($event)">Reload to apply</span>
   </mat-slide-toggle>
   <mat-slide-toggle
     (change)="setNeverShowTipsAgain($event)"
-    [checked]="(neverShowTipsAgain$ | async)?.includes(popupId)">
-    Don’t show pro tips periodically
+    [checked]="(neverShowTipsAgain$ | async)?.includes(popupId)"
+    color="accent"
+  >Don’t show pro tips periodically
   </mat-slide-toggle>
   <div class="d-flex">
     <mat-slide-toggle
       (change)="hideSpecificContainerArguments($event)"
-      [checked]="!!(hideRedactedArguments$ | async)">
-      Hide specific container arguments
-      <i class="al-icon al-ico-info-circle sm info align-middle ml-3 mr-3"
+      [checked]="!!(hideRedactedArguments$ | async)"
+      color="accent"
+    >Hide specific container arguments
+      <i class="al-icon al-ico-info-circle sm info align-middle ms-3 me-3"
          smTooltip="Redact the values for the specified container environment variables in the experiment execution page"
       ></i>
     </mat-slide-toggle>

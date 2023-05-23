@@ -34,11 +34,13 @@ import {
   selectionDisabledMoveTo,
   selectionDisabledPublishModels
 } from '@common/shared/entity-page/items.utils';
-import {getModelsMetadataValuesForKey, selectAllModels} from '../../actions/models-view.actions';
+import {getCustomMetrics, getModelsMetadataValuesForKey, selectAllModels} from '../../actions/models-view.actions';
 import {
   ModelMenuExtendedComponent
 } from '~/features/models/containers/model-menu-extended/model-menu-extended.component';
 import {createFiltersFromStore} from '@common/shared/utils/tableParamEncode';
+import {EXPERIMENTS_TABLE_COL_FIELDS} from '~/features/experiments/shared/experiments.const';
+import {getRoundedNumber} from '@common/experiments/shared/common-experiments.utils';
 
 @Component({
   selector: 'sm-models-table',
@@ -75,9 +77,18 @@ export class ModelsTableComponent extends BaseTableView {
   public filtersSubValues: { [colId: string]: any } = {};
   public singleRowContext: boolean;
   private _tableFilters: { [p: string]: FilterMetadata };
+  public roundedMetricValues: { [colId: string]: { [expId: string]: boolean } } = {};
+
 
   @Input() set models(models: SelectedModel[]) {
     this._models = models;
+
+    this.tableCols?.filter(tableCol => tableCol.id.startsWith('last_metrics')).forEach(col => models?.forEach(exp => {
+      const value = get(exp, col.id);
+      this.roundedMetricValues[col.id] = this.roundedMetricValues[col.id] || {};
+      this.roundedMetricValues[col.id][exp.id] = value && getRoundedNumber(value) !== value;
+    }));
+
     if (this.contextModel) {
       this.contextModel = this.models.find(model => model.id === this.contextModel.id);
     }
@@ -88,10 +99,16 @@ export class ModelsTableComponent extends BaseTableView {
   }
 
   @Input() noMoreModels: boolean;
+  @Input() reorderableColumns: boolean = true;
 
   @Input() set tableCols(tableCols: ISmCol[]) {
     if (tableCols?.length > 0) {
       tableCols[0].hidden = this.enableMultiSelect === false;
+      const statusColumn = tableCols.find(col => col.id === 'ready');
+      if (statusColumn) {
+        statusColumn.filterable = this.enableMultiSelect;
+        statusColumn.sortable = this.enableMultiSelect;
+      }
       this._tableCols = tableCols;
     }
   }
@@ -107,6 +124,7 @@ export class ModelsTableComponent extends BaseTableView {
 
   @Input() set projects(projects) {
     if (!projects) {
+      this.filtersOptions[MODELS_TABLE_COL_FIELDS.PROJECT] = null;
       return;
     }
     this.filtersOptions[MODELS_TABLE_COL_FIELDS.PROJECT] = projects.map(project => ({
@@ -114,7 +132,6 @@ export class ModelsTableComponent extends BaseTableView {
       value: project.id,
       tooltip: `${project.name}`
     }));
-    this.sortOptionsList(MODELS_TABLE_COL_FIELDS.PROJECT);
   }
 
   @Input() set enableMultiSelect(enable: boolean) {
@@ -337,9 +354,14 @@ export class ModelsTableComponent extends BaseTableView {
       this.tagsMenuOpened.emit();
     } else if (col.type === 'metadata') {
       this.store.dispatch(getModelsMetadataValuesForKey({col}));
+    } else if (col.type === 'hyperparams') {
+      this.store.dispatch(getCustomMetrics());
+    } else if (col.id === EXPERIMENTS_TABLE_COL_FIELDS.PROJECT) {
+      if (!this.filtersOptions[EXPERIMENTS_TABLE_COL_FIELDS.PROJECT]?.length) {
+        this.filterSearchChanged.emit({colId: col.id, value: {value: ''}});
+      }
     }
   }
-
 
   getSingleSelectedModelsDisableAvailable = (model): Record<string, CountAvailableAndIsDisableSelectedFiltered> => ({
     [MenuItems.publish]: selectionDisabledPublishModels([model]),
@@ -347,4 +369,10 @@ export class ModelsTableComponent extends BaseTableView {
     [MenuItems.delete]: selectionDisabledDelete([model]),
     [MenuItems.archive]: selectionDisabledArchive([model])
   });
+
+  columnsWidthChanged({columnId, width}) {
+    const colIndex = this.tableCols.findIndex(col => col.id === columnId);
+    const delta = width - parseInt(this.tableCols[colIndex].style.width, 10);
+    this.table?.updateColumnsWidth(columnId, width, delta);
+  }
 }

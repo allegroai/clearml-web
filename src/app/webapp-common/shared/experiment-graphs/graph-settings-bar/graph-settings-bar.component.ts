@@ -1,6 +1,6 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
-import {MatLegacySelectChange as MatSelectChange} from '@angular/material/legacy-select';
+import {MatSelectChange} from '@angular/material/select';
 import {GroupByCharts} from '@common/experiments/reducers/experiment-output.reducer';
 
 @Component({
@@ -10,6 +10,8 @@ import {GroupByCharts} from '@common/experiments/reducers/experiment-output.redu
 })
 export class GraphSettingsBarComponent {
   readonly scalarKeyEnum = ScalarKeyEnum;
+  readonly round = Math.round;
+
   @Input() smoothWeight: number;
   @Input() xAxisType: ScalarKeyEnum = ScalarKeyEnum.Iter;
   @Input() groupBy: GroupByCharts = 'metric';

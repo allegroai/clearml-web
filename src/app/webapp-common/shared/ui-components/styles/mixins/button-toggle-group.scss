@@ -7,7 +7,6 @@
       .mat-button-toggle-appearance-standard {
         background-color: map_get($button, background-color);
         color: map_get($button, color);
-
         &.mat-button-toggle-checked {
           background-color: map_get($button, background-color-active);
           color: map_get($button, color-active);

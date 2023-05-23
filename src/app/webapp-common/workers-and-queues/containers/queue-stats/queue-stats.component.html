@@ -22,15 +22,13 @@
           smTooltip="Data temporarily not available">
         </i>
       </div>
-      <div class="time-selector">
-        <mat-form-field appearance="outline" class="dark-outline thin time-selector">
-          <mat-select [ngModel]="currentTimeFrame" (ngModelChange)="timeFrameChanged($event)" name="time-frame" panelClass="dark-outline">
-            <mat-option *ngFor="let timeFrame of timeFrameOptions; trackBy: trackByFn" [value]="timeFrame.value">
-              {{timeFrame.label}}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
+      <mat-form-field appearance="outline" class="dark-outline thin time-selector no-bottom">
+        <mat-select [ngModel]="currentTimeFrame" (ngModelChange)="timeFrameChanged($event)" name="time-frame" panelClass="dark-outline">
+          <mat-option *ngFor="let timeFrame of timeFrameOptions; trackBy: trackByFn" [value]="timeFrame.value">
+            {{timeFrame.label}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
     </div>
     <div #lenchart class="line-chart-container" >
       <sm-line-chart [data]="lenChartData" [showLoadingOverlay]="refreshChart" [tooltipVerticalOffset]="-60"></sm-line-chart>

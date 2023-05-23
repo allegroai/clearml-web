@@ -108,12 +108,18 @@ export const setParents = createAction(
   props<{ parents: ProjectsGetTaskParentsResponseParents[] }>()
 );
 
+export const resetTablesFilterParentsOptions = createAction(
+  EXPERIMENTS_PREFIX + '[reset project experiment parents]'
+);
+
 export const setActiveParentsFilter = createAction(
   EXPERIMENTS_PREFIX + '[set active parents filter]',
   props<{ parents: ProjectsGetTaskParentsResponseParents[] }>()
 );
 
-export const getParents = createAction(EXPERIMENTS_PREFIX + '[get project experiments parents]');
+export const getParents = createAction(
+  EXPERIMENTS_PREFIX + '[get project experiments parents]',
+  props<{searchValue: string}>());
 
 export const tableFilterChanged = createAction(
   EXPERIMENTS_PREFIX + '[table filter changed]',
@@ -222,8 +228,12 @@ export const hyperParamSelectedExperiments = createAction(
 export const getTags = createAction(EXPERIMENTS_PREFIX + ' [get experiments tags]');
 
 export const setTags = createAction(
-  EXPERIMENTS_PREFIX + 'SET_TAGS',
+  EXPERIMENTS_PREFIX + '[set experiment tags]',
   props<{ tags: string[] }>()
+);
+export const addProjectsTag = createAction(
+  EXPERIMENTS_PREFIX + '[add experiment tag]',
+  props<{tag: string}>()
 );
 export const setSelectedExperimentsDisableAvailable = createAction(
   EXPERIMENTS_PREFIX + 'setSelectedExperimentsDisableAvailable',

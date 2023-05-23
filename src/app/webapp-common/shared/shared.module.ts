@@ -10,9 +10,8 @@ import {UiComponentsModule} from './ui-components/ui-components.module';
 import {ChipsModule} from './ui-components/buttons/chips/chips.module';
 import {ExperimentCardComponent} from './ui-components/panel/experiment-card/experiment-card.component';
 import {ModelCardComponent} from './ui-components/panel/model-card/model-card.component';
-import {MatLegacyProgressSpinnerModule as MatProgressSpinnerModule} from '@angular/material/legacy-progress-spinner';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
-import {MatLegacySnackBarModule as MatSnackBarModule} from '@angular/material/legacy-snack-bar';
 import {
   ExperimentInfoHeaderStatusProgressBarComponent
 } from './experiment-info-header-status-progress-bar/experiment-info-header-status-progress-bar.component';
@@ -59,6 +58,7 @@ import {
 import {
   ExperimentTypeIconLabelComponent
 } from '@common/shared/experiment-type-icon-label/experiment-type-icon-label.component';
+import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
 
 const _declarations = [
   ExperimentInfoHeaderStatusProgressBarComponent,
@@ -100,14 +100,14 @@ const _declarations = [
     UiComponentsModule,
     MatProgressSpinnerModule,
     MatButtonToggleModule,
-    MatSnackBarModule,
     ChipsModule,
     ScrollingModule,
     LMarkdownEditorModule,
     SharedPipesModule,
+    LabeledFormFieldDirective,
   ],
   declarations: [
-    _declarations,
+    ..._declarations,
     BaseContextMenuComponent,
     ScatterPlotComponent,
     ClearFiltersButtonComponent,
@@ -115,7 +115,7 @@ const _declarations = [
     IdBadgeComponent,
     MarkdownCheatSheetDialogComponent,
   ],
-  exports: [..._declarations, UiComponentsModule, TableModule, ClipboardModule, MatSnackBarModule,
+  exports: [..._declarations, UiComponentsModule, TableModule, ClipboardModule,
     ScatterPlotComponent, ClearFiltersButtonComponent, IdBadgeComponent
   ],
   providers: [LeavingBeforeSaveAlertGuard, GeneralLeavingBeforeSaveAlertGuard]

@@ -1,7 +1,6 @@
 @import "variables";
 
 :host {
-
   .marketing-content-bottom {
     display: flex;
     flex-direction: column;
@@ -16,15 +15,29 @@
       text-decoration: none;
       color: #dce0ee;
       font-size: 12px;
+
+      &:hover {
+        text-decoration: underline;
+        cursor: pointer;
+        color: #fff;
+      }
     }
 
     .community-links {
       .link {
         margin: 0 12px;
+        text-decoration: none;
 
         &:hover {
           cursor: pointer;
-          color: #fff;
+
+          .text {
+            text-decoration: underline;
+          }
+        }
+
+        i {
+          color: $blue-300 !important;
         }
       }
     }
@@ -199,6 +212,10 @@
     100% {
       transform: rotate(360deg);
     }
+  }
+
+  mat-spinner {
+    --mdc-circular-progress-active-indicator-color: #FFFFFF;
   }
 }
 

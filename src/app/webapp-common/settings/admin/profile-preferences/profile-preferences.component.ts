@@ -1,5 +1,5 @@
 import {Component, OnDestroy} from '@angular/core';
-import {MatLegacySlideToggleChange as MatSlideToggleChange} from '@angular/material/legacy-slide-toggle';
+import {MatSlideToggleChange} from '@angular/material/slide-toggle';
 import {neverShowPopupAgain, setHideRedactedArguments} from '@common/core/actions/layout.actions';
 import {Store} from '@ngrx/store';
 import {popupId} from '@common/shared/services/tips.service';
@@ -10,7 +10,7 @@ import {filter} from 'rxjs/operators';
 import {Observable, Subscription} from 'rxjs';
 import {AuthEditUserRequest} from '~/business-logic/model/auth/authEditUserRequest';
 import RoleEnum = AuthEditUserRequest.RoleEnum;
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {MatDialog} from '@angular/material/dialog';
 import {RedactedArgumentsDialogComponent} from '../redacted-arguments-dialog/redacted-arguments-dialog.component';
 import {
   selectHideExamples,

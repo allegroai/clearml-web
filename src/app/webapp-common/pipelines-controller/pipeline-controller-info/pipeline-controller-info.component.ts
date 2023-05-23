@@ -88,6 +88,7 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
 
   trackArrows = (index: number, arrow: Arrow) => arrow.path;
   trackByStepId = (index: number, step) => step.stepId;
+  public maximizeResults: boolean;
 
   @HostListener('document:keydown', ['$event'])
   onKeyDown(e: KeyboardEvent) {
@@ -375,6 +376,16 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
 
       this.aceEditor = aceEditor;
     });
+  }
+  toggleResultSize() {
+    this.maximizeResults = ! this.maximizeResults;
+    if (this.detailsPanelMode === StatusOption.content) {
+      this.detailsPanelMode = null;
+      window.setTimeout(() => {
+        this.detailsPanelMode = StatusOption.content;
+        this.cdr.detectChanges();
+      }, 450);
+    }
   }
 
   protected highlightArrows() {

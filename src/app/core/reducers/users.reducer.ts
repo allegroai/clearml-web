@@ -18,7 +18,7 @@ export const usersReducer = createReducer<UsersState>(initUsers,
   }))
 );
 
-export const selectFeatures = createSelector(users, (state) => []);
+export const selectFeatures = createSelector(users, (state) => null);
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const selectTermsOfUse = createSelector(users, state => ({accept_required: null}));
 export const selectInvitesPending = createSelector(users, state => []);

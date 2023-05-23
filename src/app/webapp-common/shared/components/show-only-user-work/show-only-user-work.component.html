@@ -1,7 +1,7 @@
 <sm-menu
   panelClasses="light-theme"
   [header]="(showOnlyUserWork$ | async) ? 'My Work': 'Team\`s work'"
-  [prefixIconClass]="'mr-1 al-icon ' + ((showOnlyUserWork$ | async)? 'al-ico-me': 'al-ico-team')"
+  [prefixIconClass]="'me-1 al-icon ' + ((showOnlyUserWork$ | async)? 'al-ico-me': 'al-ico-team')"
   class="menu" data-id="Team's Work">
   <sm-menu-item itemLabel="My Work" (itemClicked)="userFilterChanged(true)" iconClass="al-icon al-ico-me" data-id="My Work Option"></sm-menu-item>
   <sm-menu-item itemLabel="Team`s work" (itemClicked)="userFilterChanged(false)"

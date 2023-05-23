@@ -19,7 +19,7 @@ import {
   updateProject
 } from '../../common-projects.actions';
 import {ActivatedRoute, Router} from '@angular/router';
-import {MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {ProjectsGetAllResponseSingle} from '~/business-logic/model/projects/projectsGetAllResponseSingle';
 import {ProjectDialogComponent} from '@common/shared/project-dialog/project-dialog.component';
 import {combineLatest, Observable, Subscription} from 'rxjs';
@@ -51,10 +51,10 @@ import {Project} from '~/business-logic/model/projects/project';
 import {CommonDeleteDialogComponent} from '@common/shared/entity-page/entity-delete/common-delete-dialog.component';
 import {resetDeleteState} from '@common/shared/entity-page/entity-delete/common-delete-dialog.actions';
 import {isExample} from '@common/shared/utils/shared-utils';
-import {selectRootProjects, selectSelectedProject} from '@common/core/reducers/projects.reducer';
+import {selectSelectedProject} from '@common/core/reducers/projects.reducer';
 import {selectActiveWorkspaceReady} from '~/core/reducers/view.reducer';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
-import {selectIsDatasets} from "@common/experiments-compare/reducers";
+import {selectIsDatasets} from '@common/experiments-compare/reducers';
 
 @Component({
   selector: 'sm-common-projects-page',
@@ -98,6 +98,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
   private selectedProject$: Observable<Project>;
   public projectId: string;
   private subs = new Subscription();
+  private selectedProject: Project;
 
   constructor(
     protected store: Store<any>,
@@ -110,7 +111,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
     this.projectsSortOrder$ = this.store.select(selectProjectsSortOrder);
     this.noMoreProjects$ = this.store.select(selectNoMoreProjects);
     this.selectedProjectId$ = this.store.select(selectRouterParams).pipe(map(params => params?.projectId));
-    this.selectedProject$ = this.store.select(selectSelectedProject);
+    this.selectedProject$ = this.store.select(selectSelectedProject).pipe(tap(selectedProject => this.selectedProject = selectedProject));
     this.projectReadyForDeletion$ = this.store.select(selectProjectReadyForDeletion).pipe(
       distinctUntilChanged(),
       filter(readyForDeletion => readyForDeletionFilter(readyForDeletion)));
@@ -154,9 +155,8 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
   ngOnInit() {
     // this.store.dispatch(new ResetSelectedProject());
     this.store.dispatch(setDeep({deep: false}));
-
-    this.subs.add(combineLatest([this.store.select(selectActiveWorkspaceReady), this.store.select(selectRootProjects)])
-      .pipe(filter(([ready, rootProjects]) => ready && rootProjects?.length > 0)).pipe(take(1))
+    this.subs.add(this.store.select(selectActiveWorkspaceReady)
+      .pipe(filter(ready => ready), take(1))
       .subscribe(() => {
         this.store.dispatch(getAllProjectsPageProjects());
       }));
@@ -262,9 +262,8 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
     if (allExperiments) {
       this.store.dispatch(setDeep({deep: true}));
     }
-    this.router.navigate(project?.sub_projects?.length > 0 ? [project.id, 'projects'] :
-        (!(project.id === '*' || allExperiments || (project as any).isRoot) ? [project.id] : [project.id, 'experiments'])
-      , {relativeTo: this.projectId ? this.route.parent.parent.parent : this.route});
+    this.router.navigate(project?.sub_projects?.length > 0 ? [project.id, 'projects'] : [project.id],
+      {relativeTo: this.projectId ? this.route.parent.parent.parent : this.route});
     this.store.dispatch(setSelectedProjectId({projectId: project.id, example: isExample(project)}));
   }
 
@@ -289,11 +288,11 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
   }
 
 
-  openProjectDialog(mode?: string, projectId?: string) {
+  openProjectDialog(mode?: string, project?: Project) {
     this.projectDialog = this.dialog.open(ProjectDialogComponent, {
       data: {
         mode,
-        projectId
+        project: project ?? this.selectedProject
       }
     });
     this.projectDialog.afterClosed().subscribe(projectHasBeenUpdated => {

@@ -15,7 +15,7 @@ import {select, Store} from '@ngrx/store';
 import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {AdminService} from '~/shared/services/admin.service';
 import {selectS3BucketCredentials} from '../core/reducers/common-auth-reducer';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {MatDialog} from '@angular/material/dialog';
 import * as  debugActions from './debug-images-actions';
 import {fetchExperiments, getDebugImagesMetrics, resetDebugImages} from './debug-images-actions';
 import {
@@ -316,7 +316,7 @@ export class DebugImagesComponent implements OnInit, OnDestroy, OnChanges {
           this.createEmbedCode({metrics: [metric], variants: [variant], domRect: rect}, experimentId),
         imageSources: sources, index, snippetsMetaData: iterationSnippets, isAllMetrics
       },
-      panelClass: ['image-viewer-dialog'],
+      panelClass: ['image-viewer-dialog', 'light-theme'],
       height: '100%',
       maxHeight: 'auto',
       width: '100%',
@@ -418,7 +418,8 @@ export class DebugImagesComponent implements OnInit, OnDestroy, OnChanges {
   createEmbedCode(event: { metrics?: string[]; variants?: string[]; domRect: DOMRect }, experimentId: string) {
     this.reportEmbed.createCode({
       type: 'sample',
-      tasks: [experimentId],
+      objects: [experimentId],
+      objectType: 'task',
       ...event
     });
   }

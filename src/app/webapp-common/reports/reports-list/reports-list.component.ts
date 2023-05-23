@@ -15,11 +15,12 @@ export class ReportsListComponent {
   @Input() noMoreReports = false;
   @Input() allTags: string[] = [];
   @Input() archive = false;
+  @Input() projectId;
   @Output() reportSelected = new EventEmitter();
   @Output() loadMore = new EventEmitter();
   @Output() reportCardUpdateMetadata = new EventEmitter<{report: IReport; readOnly: boolean}>();
   @Output() reportCardUpdateName = new EventEmitter<{name: string; report: IReport}>();
-  @Output() newReport = new EventEmitter();
+  @Output() newReport = new EventEmitter<string>();
   @Output() addTag = new EventEmitter<{report: IReport; tag: string}>();
   @Output() moveToArchive = new EventEmitter<{report: IReport; archive: boolean}>();
   @Output() removeTag = new EventEmitter<{report: IReport; tag: string}>();

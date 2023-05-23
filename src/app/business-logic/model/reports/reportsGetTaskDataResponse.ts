@@ -12,20 +12,25 @@
 
 import { Task } from '././task';
 import { DebugImagesResponseTaskMetrics } from '././debugImagesResponseTaskMetrics';
+import { SingleValueTaskMetrics } from '././singleValueTaskMetrics';
 
 
 export interface ReportsGetTaskDataResponse {
-  /**
-   * List of tasks
-   */
-  tasks?: Array<Task>;
-  /**
-   * Plot events grouped by tasks and iterations
-   */
-  plots?: object;
-  /**
-   * Debug image events grouped by tasks and iterations
-   */
-  debug_images?: Array<DebugImagesResponseTaskMetrics>;
-  scalar_metrics_iter_histogram?: object;
+    /**
+     * List of tasks
+     */
+    tasks?: Array<Task>;
+    /**
+     * Plots mapped by metric, variant, task and iteration
+     */
+    plots?: object;
+    /**
+     * Debug image events grouped by tasks and iterations
+     */
+    debug_images?: Array<DebugImagesResponseTaskMetrics>;
+    scalar_metrics_iter_histogram?: object;
+    /**
+     * Single value metrics grouped by task
+     */
+    single_value_metrics?: Array<SingleValueTaskMetrics>;
 }

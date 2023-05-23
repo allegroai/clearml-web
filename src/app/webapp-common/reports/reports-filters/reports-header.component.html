@@ -9,7 +9,7 @@
     <sm-main-pages-header-filter [allTags]="allTags"></sm-main-pages-header-filter>
     <sm-button-toggle
       left-items
-      class="ml-3"
+      class="ms-3"
       [value]="!!projectId"
       [disabled]="archive"
       [options]="[
@@ -36,7 +36,7 @@
       *ngIf="!disableCreate"
       [disabled]="archive"
       class="btn btn-cml-primary d-flex align-items-center"
-      (click)="createReportClicked.emit()"
-    ><i class="al-icon sm al-ico-add mr-2"></i>NEW REPORT</button>
+      (click)="createReportClicked.emit(projectId)"
+    ><i class="al-icon sm al-ico-add me-2"></i>NEW REPORT</button>
   </div>
 </div>

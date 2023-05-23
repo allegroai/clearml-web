@@ -36,11 +36,10 @@ $output-tabs-height: 64px;
   }
 
   .refresh-position {
-    position: absolute;
-    right: 26px;
-    top: 2px;
     display: flex;
     align-items: center;
+    margin-right: 30px;
+    margin-left: auto;
   }
 
   .refreshIcon {
@@ -49,11 +48,13 @@ $output-tabs-height: 64px;
 
   .output-body {
     position: relative;
-    height: calc(100% - #{$output-tabs-height + $experiment-info-header-height + 36px});
+    height: calc(100% - #{$output-tabs-height + $experiment-info-header-height + 48px});
     &.minimized {
-      height: calc(100% - #{$experiment-info-header-height + $experiment-info-tabs-height + 5px});
+      height: calc(100% - #{$experiment-info-header-height + $experiment-info-tabs-height + 15px});
     }
   }
+
+  sm-experiment-info-header {
+    margin-bottom: 12px;
+  }
 }
-
-

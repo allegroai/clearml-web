@@ -9,7 +9,7 @@
   >
     <sm-button-toggle
       left-items
-      class="ml-3"
+      class="ms-3"
       [value]="!!projectId"
       [options]="[
                   {value: false, icon: 'al-ico-flat-view',  label: 'List view'},
@@ -20,7 +20,7 @@
     <button
       class="btn btn-cml-primary d-flex align-items-center"
       (click)="createDataset()">
-      <i class="al-icon al-ico-add sm mr-2"></i>NEW DATASET
+      <i class="al-icon al-ico-add sm me-2" data-id="NewDatasetButton"></i>NEW DATASET
     </button>
   </sm-projects-header>
   <ng-container

@@ -1,65 +1,35 @@
-<form class="filter-form p-4" #templateForm="ngForm" smClickStopPropagation smKeyDownStopPropagation [formGroup]="iterationsForm">
-
-  <div>
-    <div class="mb-1 label">Equals or greater than</div>
-    <div class="d-flex ">
-     <!-- <sm-checkbox-control
-        (formDataChanged)="setCheckBox($event.value, 'greaterThan')"
-        [formData]="greaterThan.checked"
-        class="align-self-center pr-2"
-      >
-      </sm-checkbox-control>-->
-      <div class="input-border-duration-container">
-        <div>
-          <input
-                 matInput
-                 formControlName="greaterThan"
-                 data-id="Equals Or GreaterThan"
-                 type="number"
-                 name="greaterThan"
-          >
-        </div>
-        <div class="reset">
-          <i *ngIf="greaterThan.value !== null"
-            data-id="cross button"
-             [class]="'al-icon al-ico-dialog-x sm'"
-             (click)="iterationsForm.get('greaterThan').setValue(null)"
-          ></i>
-        </div>
-      </div>
-
-    </div>
-  </div>
+<form class="filter-form p-4" smClickStopPropagation smKeyDownStopPropagation [formGroup]="iterationsForm">
+  <mat-form-field appearance="outline" class="no-bottom">
+    <mat-label>Equals or greater than</mat-label>
+    <input
+      type="text"
+      matInput
+      formControlName="greaterThan"
+      data-id="Equals Or GreaterThan"
+      [errorStateMatcher]="immediate"
+    >
+    <i matSuffix
+       data-id="cross button"
+       class="al-icon al-ico-dialog-x sm me-2"
+       (click)="iterationsForm.get('greaterThan').setValue(null)"
+    ></i>
+  </mat-form-field>
   <sm-divider [label]="'and'"></sm-divider>
-  <div>
-    <div class="mb-1 label">Equals or less than</div>
-    <div class="d-flex " >
-    <!--  <sm-checkbox-control
-        [formData]="lessThan.checked"
-        (formDataChanged)="setCheckBox($event.value, 'lessThan')"
-        class="align-self-center pr-2"
-      >
-      </sm-checkbox-control>-->
-      <div class="input-border-duration-container">
-        <div>
-          <input
-                   type="number"
-                   formControlName="lessThan"
-                   data-id="Equals Or LessThan"
-                   name="greaterThan"
-          >
-        </div>
-        <div class="reset">
-          <i *ngIf="lessThan.value !== null"
-              data-id="cross button"
-             [class]="'al-icon al-ico-dialog-x sm'"
-             (click)="iterationsForm.get('lessThan').setValue(null)"
-          ></i>
-        </div>
-      </div>
-
-    </div>
-  </div>
+  <mat-form-field appearance="outline" class="no-bottom">
+    <mat-label>Equals or less than</mat-label>
+    <input
+      type="text"
+      matInput
+      formControlName="lessThan"
+      data-id="Equals Or LessThan"
+      name="greaterThan"
+      [errorStateMatcher]="immediate"
+    >
+    <i matSuffix
+       data-id="cross button"
+       class="al-icon al-ico-dialog-x sm me-2"
+       (click)="iterationsForm.get('lessThan').setValue(null)"
+    ></i>
+  </mat-form-field>
 </form>
-
 <sm-table-filter-duration-error *ngIf="hasTimeError"  [isFullWidth]="true"></sm-table-filter-duration-error>

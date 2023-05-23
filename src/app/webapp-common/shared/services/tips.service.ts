@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Store} from '@ngrx/store';
-import {MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {selectRouterConfig} from '../../core/reducers/router-reducer';
 import {combineLatest, Subscription} from 'rxjs';
 import {debounceTime, distinctUntilChanged, filter, map, withLatestFrom} from 'rxjs/operators';
@@ -53,9 +53,10 @@ export class TipsService {
   initTipsService(showAllTips = true) {
     this.nextTimeToShowTips = new Date(window.localStorage.getItem('nextTimeToShowTips') || new Date().getTime());
 
-    this.httpClient.get('onboarding.json').pipe(withLatestFrom(this.store.select(selectFeatures)))
+    this.httpClient.get('onboarding.json')
+      .pipe(withLatestFrom(this.store.select(selectFeatures)))
       .subscribe(([tipsConfig, features]: [{ onboarding: Tip[] }, FeaturesEnum[]]) => {
-        const tipsFiltered = tipsConfig.onboarding.filter(tip => !tip.feature || features.includes(tip.feature) || showAllTips);
+        const tipsFiltered = tipsConfig.onboarding.filter(tip => !tip.feature || !features || features.includes(tip.feature) || showAllTips);
         this.tipsConfig = {
           global: [], ...tipsFiltered.reduce((acc, curr) => {
             const context = curr.context || 'global';

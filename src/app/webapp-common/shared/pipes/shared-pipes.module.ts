@@ -64,6 +64,7 @@ import {HasCompletedPipe} from './has-completed.pipe';
 import {IsStringPipe} from './is-string.pipe';
 import {CleanProjectPathPipe} from './clean-project-path.pipe';
 import {BaseNamePipe} from '@common/shared/pipes/base-name.pipe';
+import {CountLinesPipe} from '@common/shared/pipes/count-lines.pipe';
 
 const pipes = [
   CamelToTitlePipe, FilenameFromPath, FilterPipe, FloorPipe, KeyValuePipe, NAPipe, SortPipe, IsVideoPipe, IsAudioPipe, FilterInternalPipe, UuidPipe,
@@ -80,9 +81,9 @@ const pipes = [
     CommonModule,
     FileSizePipe
   ],
-  declarations: [pipes, ShowSelectedFirstPipe, CountPipe, ColGetterPipe, FilterMonitorMetricPipe, ReversePipe, ],
+  declarations: [pipes, ShowSelectedFirstPipe, CountPipe, ColGetterPipe, FilterMonitorMetricPipe, ReversePipe, CountLinesPipe],
   providers: [pipes],
-  exports: [pipes, ShowSelectedFirstPipe, CountPipe, ColGetterPipe, FilterMonitorMetricPipe, ReversePipe, FileSizePipe]
+  exports: [pipes, ShowSelectedFirstPipe, CountPipe, ColGetterPipe, FilterMonitorMetricPipe, ReversePipe, FileSizePipe, CountLinesPipe]
 })
 export class SharedPipesModule {
 }

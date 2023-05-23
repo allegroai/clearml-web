@@ -1,10 +1,6 @@
 import * as detailsActions from '../actions/experiments-compare-details.actions';
 import * as paramsActions from '../actions/experiments-compare-params.actions';
-import {
-  ExperimentCompareTree,
-  ExperimentCompareTreeSection,
-  IExperimentDetail
-} from '~/features/experiments-compare/experiments-compare-models';
+import {ExperimentCompareTree, ExperimentCompareTreeSection, IExperimentDetail} from '~/features/experiments-compare/experiments-compare-models';
 import {get, has, isEmpty, isEqual} from 'lodash-es';
 import {treeBuilderService} from '../services/tree-builder.service';
 import {isArrayOrderNotImportant} from '../jsonToDiffConvertor';
@@ -20,13 +16,14 @@ import {Observable, Subscription} from 'rxjs';
 import {FlatTreeControl} from '@angular/cdk/tree';
 import {CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
 import {selectRouterParams} from '../../core/reducers/router-reducer';
-import {distinctUntilChanged, filter, map, take, tap} from 'rxjs/operators';
+import {distinctUntilChanged, filter, map, take} from 'rxjs/operators';
 import {selectHideIdenticalFields} from '../reducers';
 import {refetchExperimentRequested} from '../actions/compare-header.actions';
 import {RENAME_MAP} from '../experiments-compare.constants';
 import {selectHasDataFeature} from '~/core/reducers/users.reducer';
 import {ListRange} from '@angular/cdk/collections';
 import {RefreshService} from '@common/core/services/refresh.service';
+import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 
 export type NextDiffDirectionEnum = 'down' | 'up';
 
@@ -76,8 +73,8 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
   public experimentTags: { [experimentId: string]: string[] } = {};
   private timeoutIndex: number;
   private originalScrolledElement: EventTarget;
-  private taskIds: string;
   private treeCardBody: HTMLDivElement;
+  protected entityType = EntityTypeEnum.experiment;
   @ViewChildren('treeCardBody') treeCardBodies: QueryList<ElementRef<HTMLDivElement>>;
 
   get baseExperiment(): IExperimentDetail {
@@ -89,7 +86,7 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
   @HostListener('window:resize')
   afterResize() {
     window.setTimeout(() => {
-      this.nativeWidth = Math.max(this.treeCardBody.getBoundingClientRect().width, 410);
+      this.nativeWidth = Math.max(this.treeCardBody?.getBoundingClientRect().width, 410);
       this.cdr.detectChanges();
     });
   }
@@ -130,7 +127,7 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
 
     this.refreshingSubscription = this.refresh.tick
       .pipe(filter(auto => auto !== null))
-      .subscribe(auto => this.store.dispatch(refetchExperimentRequested({autoRefresh: auto})));
+      .subscribe(auto => this.store.dispatch(refetchExperimentRequested({autoRefresh: auto, entity: this.entityType})));
 
     this.hideIdenticalFieldsSub.add(this.hasDataFeature$.subscribe(hasData => this.hasDataFeature = hasData));
 
@@ -141,7 +138,7 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
       .pipe(filter(list => list.first), take(1))
       .subscribe((list: QueryList<ElementRef<HTMLDivElement>>) => {
         this.treeCardBody = list.first.nativeElement;
-        this.nativeWidth = Math.max(this.treeCardBody.getBoundingClientRect().width, 410);
+        this.afterResize();
       });
   }
 

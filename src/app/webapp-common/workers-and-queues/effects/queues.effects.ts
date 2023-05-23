@@ -135,7 +135,11 @@ export class QueuesEffect {
 
   clearQueue = createEffect(() => this.actions.pipe(
     ofType(clearQueue),
-    switchMap(action => this.tasksApi.tasksDequeueMany({ids: action.queue.entries.map(ent => ent.task?.id)}).pipe(
+    switchMap(action => this.tasksApi.tasksDequeueMany({
+      ids: action.queue.entries.map(ent => ent.task?.id),
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      remove_from_all_queues: true
+    }).pipe(
       withLatestFrom(this.store.select(selectSelectedQueue)),
       mergeMap(([, selectedQueue]) => [
         getQueues(),
@@ -187,7 +191,11 @@ export class QueuesEffect {
 
   removeExperimentFromQueue = createEffect(() => this.actions.pipe(
     ofType(removeExperimentFromQueue),
-    switchMap((action) => this.tasksApi.tasksDequeue({task: action.task}).pipe(
+    switchMap((action) => this.tasksApi.tasksDequeue({
+      task: action.task,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      remove_from_all_queues: true
+    }).pipe(
       mergeMap(() => [refreshSelectedQueue()]),
       catchError(err => [deactivateLoader(action.type), requestFailed(err),
         addMessage(MESSAGES_SEVERITY.ERROR, 'Remove Queue failed')])

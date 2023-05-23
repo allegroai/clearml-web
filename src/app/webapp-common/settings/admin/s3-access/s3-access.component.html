@@ -25,7 +25,7 @@
         <input #endpoint matInput class="form-control" formControlName="Endpoint" placeholder="Leave empty for AWS S3">
       </div>
       <div class="col-2 d-flex justify-content-end">
-        <span *ngIf="endpoint.value.startsWith('http://') && secured" class="alert-icon mr-3" smTooltip="Embedding images through a non-secure transport (HTTP) in a secure web application might require special configuration of your browser">
+        <span *ngIf="endpoint.value.startsWith('http://') && secured" class="alert-icon me-3" smTooltip="Embedding images through a non-secure transport (HTTP) in a secure web application might require special configuration of your browser">
           <i class="al-icon sm-md al-ico-alert"></i>
         </span>
         <span class="delete-button" (click)="removeBucket(i)" smTooltip="Remove">
@@ -36,7 +36,7 @@
   </div>
   <div>
     <a href="" class="add-button" (click)="$event.preventDefault(); addBucket({})" type="button">
-      <i class="al-icon sm al-ico-plus mr-1 vertical-middle"></i>Add access keys
+      <i class="al-icon sm al-ico-plus me-1 vertical-middle"></i>Add access keys
     </a>
   </div>
 </form>

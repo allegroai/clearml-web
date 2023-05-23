@@ -20,4 +20,10 @@
       transition: background-color 0.5s;
     }
   }
+
+  ::ng-deep .outlet + * {
+    display: block;
+    height: calc(100% - #{$wnq-tabs-height});
+  }
 }
+

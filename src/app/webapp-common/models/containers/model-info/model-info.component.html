@@ -12,30 +12,18 @@
     (closeInfoClicked)="closePanel()"
   >
   </sm-model-info-header>
-  <nav>
-    <span [routerLink]="['general']" routerLinkActive="active" #rlaGeneral="routerLinkActive" queryParamsHandling="merge">
-      <sm-navbar-item header="general" class="small-nav" [active]="rlaGeneral.isActive"></sm-navbar-item>
-    </span>
-    <span [routerLink]="['network']" routerLinkActive="active" #rlaNetwork="routerLinkActive" queryParamsHandling="merge">
-      <sm-navbar-item header="network" class="small-nav" [active]="rlaNetwork.isActive"></sm-navbar-item>
-    </span>
-    <span [routerLink]="['labels']" routerLinkActive="active" #rlaLabels="routerLinkActive" queryParamsHandling="merge">
-      <sm-navbar-item header="labels" class="small-nav" [active]="rlaLabels.isActive"></sm-navbar-item>
-    </span>
-    <span [routerLink]="['metadata']" routerLinkActive="active" #rlaMetadata="routerLinkActive" queryParamsHandling="merge">
-      <sm-navbar-item header="metadata" class="small-nav" [active]="rlaMetadata.isActive"></sm-navbar-item>
-    </span>
-    <span [routerLink]="['experiments']" routerLinkActive="active" #rlaExperiments="routerLinkActive"
-          queryParamsHandling="merge">
-      <sm-navbar-item header="lineage" class="small-nav" [active]="rlaExperiments.isActive"></sm-navbar-item>
-    </span>
-    <span [routerLink]="['scalars']" routerLinkActive="active" #rlaScalars="routerLinkActive" queryParamsHandling="merge">
-      <sm-navbar-item header="scalars" class="small-nav" [active]="rlaScalars.isActive"></sm-navbar-item>
-    </span>
-    <span [routerLink]="['plots']" routerLinkActive="active" #rlaPlots="routerLinkActive" queryParamsHandling="merge">
-      <sm-navbar-item header="plots" class="small-nav" [active]="rlaPlots.isActive"></sm-navbar-item>
-    </span>
-  </nav>
+  <div class="tab-nav">
+    <span class="leave for grid"></span>
+    <sm-router-tab-nav-bar
+      [splitSize]="splitSize$ | async"
+      [links]="links"
+    ></sm-router-tab-nav-bar>
+    <sm-experiment-settings
+      class="setting-icon"
+      [showSettings]="scalars$ | async"
+      (toggleSettings)="toggleSettingsBar()">
+    </sm-experiment-settings>
+  </div>
   <div class="model-info-body">
     <router-outlet></router-outlet>
   </div>

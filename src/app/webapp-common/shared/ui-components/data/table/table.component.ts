@@ -519,10 +519,12 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
 
   colResize({delta, element}: { delta: number; element: HTMLTableHeaderCellElement }) {
     if (delta) {
-      const width = element.clientWidth;
-      const columnId = element.attributes['data-col-id']?.value;
-      this.columnResized.emit({columnId, widthPx: width});
-      // this.updateColumnsWidth(columnId, width, delta);
+      setTimeout( () => {
+        const width = element.clientWidth;
+        const columnId = element.attributes['data-col-id']?.value;
+        this.columnResized.emit({columnId, widthPx: width});
+        // this.updateColumnsWidth(columnId, width, delta);
+      }, 0);
     }
   }
 

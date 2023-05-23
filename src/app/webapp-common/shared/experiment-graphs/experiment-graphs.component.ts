@@ -307,7 +307,8 @@ export class ExperimentGraphsComponent implements OnDestroy {
   }
 
   private allGroupsSingleGraphs() {
-    return (this.isGroupGraphs || this.disableResize) && Object.values(this.graphsData || {}).every(group => group.length === 1);
+    const groups = Object.values(this.graphsData || {});
+    return (this.isGroupGraphs || this.disableResize || groups.length === 1) && groups.every(group => group.length === 1);
   }
 
   public calculateGraphsLayout(delay = 200) {
@@ -383,7 +384,7 @@ export class ExperimentGraphsComponent implements OnDestroy {
     this.activeResizeElement = singleGraph;
     this.changeDetection.detectChanges();
     this.graphsNumberLimit = this.isGroupGraphs ? metricGroup.querySelectorAll(':not(.resize-ghost-element) > sm-single-graph').length : this.graphList.length;
-    this.resizeTextElement = singleGraph?.parentElement.querySelectorAll('.resize-overlay-text')[1];
+    this.resizeTextElement = singleGraph?.parentElement.querySelectorAll('.resize-ghost-element .resize-overlay-text')[0];
   }
 
   onResizing($event: ResizeEvent) {
@@ -402,6 +403,8 @@ export class ExperimentGraphsComponent implements OnDestroy {
     const element = this.allMetrics.nativeElement.getElementsByClassName('graph-id')[EXPERIMENT_GRAPH_ID_PREFIX + id] as HTMLDivElement;
     if (element) {
       this.allMetrics.nativeElement.scrollTo({top: element.offsetTop, behavior: 'smooth'});
+    } else if (this.allMetrics.nativeElement.getElementsByTagName('sm-single-value-summary-table')[0]){
+      this.allMetrics.nativeElement.scrollTo({top: 0, behavior: 'smooth'});
     }
   }
 
@@ -421,6 +424,11 @@ export class ExperimentGraphsComponent implements OnDestroy {
   public generateIdentifier = (chartItem: any) => `${this.singleGraphidPrefix} ${this.experimentGraphidPrefix} ${chartItem.metric} ${chartItem.layout.title} ${chartItem.iter} ${chartItem.variant} ${(chartItem.layout.images && chartItem.layout.images[0]?.source)}`;
 
   creatingEmbedCode(chartItem: any, domRect: DOMRect) {
+    if (!chartItem) {
+      this.createEmbedCode.emit({domRect});
+      return;
+    }
+
     if (this.groupBy === groupByCharts.none) {
       // split scalars by variants
       this.createEmbedCode.emit({

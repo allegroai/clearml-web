@@ -25,7 +25,8 @@
     [noMoreData]="noMoreModels"
     [resizableColumns]="enableMultiSelect"
     [columns]="tableCols"
-    [reorderableColumns]="enableMultiSelect"
+    [reorderableColumns]="reorderableColumns && enableMultiSelect"
+    [scrollable]="true"
     [columnsOrder]="colsOrder"
     [lazyLoading]="true"
     [selection]="selectedModel"
@@ -61,7 +62,7 @@
     </ng-template>
     <!--CHECKBOX TEMPLATE-->
     <ng-template let-col pTemplate="checkbox">
-      <div class="d-flex align-items-center">
+      <div *ngIf="!hideSelectAll" class="d-flex align-items-center">
         <sm-checkbox-control
           *ngIf="col.id === modelsTableColFields.SELECTED"
           class="checkbox-col header"
@@ -94,7 +95,7 @@
         [andFilter]="col.andFilter ? filtersMatch[col.id] === 'AND' : null"
         (sortOrderChanged)="onSortChanged($event, col.id)"
         (filterChanged)="tableFilterChanged(col, $event);"
-        (searchValueChanged)="searchValueChanged($event, col.id)"
+        (searchValueChanged)="searchValueChanged($event, col.id, col.asyncFilter)"
         (menuOpened)="columnFilterOpened(col)"
         (menuClosed)="columnFilterClosed(col)"
       >
@@ -110,7 +111,7 @@
         <ng-container *ngSwitchCase="modelsTableColFields.NAME">
           <div class="d-flex flex-row flex-nowrap ellipsis">
             <div class="model-name"  [smTooltip]="model.name" smShowTooltipIfEllipsis>{{model.name}}</div>
-            <i *ngIf="model?.system_tags.includes('shared')" class="al-icon al-ico-link sm-md ml-2"></i>
+            <i *ngIf="model?.system_tags?.includes('shared')" class="al-icon al-ico-link sm-md ms-2"></i>
           </div>
         </ng-container>
         <ng-container *ngSwitchCase="modelsTableColFields.TAGS">
@@ -146,7 +147,13 @@
         </ng-container>
         <ng-container *ngSwitchDefault>
           <span *ngIf="col.type==='metadata'; else regular " smShowTooltipIfEllipsis  [smTooltip]="model | colGetter: col">{{model | colGetter: col}}</span>
-          <ng-template #regular><span class="ellipsis" [smTooltip]="model[col.id]" smShowTooltipIfEllipsis>{{model[col.id]}}</span></ng-template>
+          <ng-template #regular>
+            <sm-hyper-param-metric-column [roundedMetricValue]="roundedMetricValues[col.id]"
+                                          [col]="col"
+                                          [experiment]="model"
+                                          (expandClicked)="columnsWidthChanged($event)">
+            </sm-hyper-param-metric-column>
+          </ng-template>
         </ng-container>
       </ng-container>
     </ng-template>
@@ -164,7 +171,7 @@
         [entityType]="entityType"
         (click)="selected && openContextMenu({e: $event, rowData: model, backdrop: true})"
       >
-        <div sm-name-icon><i *ngIf="model?.system_tags.includes('shared')" class="al-icon al-ico-link sm-md ml-2"></i></div>
+        <div sm-name-icon><i *ngIf="model?.system_tags.includes('shared')" class="al-icon al-ico-link sm-md ms-2"></i></div>
         <sm-tag-list [sysTags]="getSysTags(model)" [tags]="model?.tags"></sm-tag-list>
         <div  class="ellipsis compact-columns-data" compact-columns-data>
           Updated {{model.last_update | timeAgo}} by {{model.user?.name || 'Unknown User'}}<ng-container *ngIf="model.task"><span class="dot">●</span>{{model.task.name}}</ng-container>

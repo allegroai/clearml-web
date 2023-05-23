@@ -1,10 +1,10 @@
 <div class="navbar-header-container">
   <div class="header-container">
     <div class="nav-bar-items-container">
-      <span [routerLink]="['workers']" routerLinkActive #rlaWorkers="routerLinkActive">
+      <span [routerLink]="['workers']" routerLinkActive="active" #rlaWorkers="routerLinkActive">
         <sm-navbar-item direction="top" header="workers" [active]="rlaWorkers.isActive"></sm-navbar-item>
       </span>
-      <span [routerLink]="['queues']" routerLinkActive #rlaQueues="routerLinkActive">
+      <span [routerLink]="['queues']" routerLinkActive="active" #rlaQueues="routerLinkActive">
         <sm-navbar-item direction="top" header="queues" [active]="rlaQueues.isActive"></sm-navbar-item>
       </span>
     </div>
@@ -16,4 +16,4 @@
     </div>
   </div>
 </div>
-<router-outlet></router-outlet>
+<router-outlet class="outlet"></router-outlet>

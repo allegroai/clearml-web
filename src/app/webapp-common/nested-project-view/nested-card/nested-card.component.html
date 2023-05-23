@@ -6,14 +6,14 @@
          [subFolderTitle]="project?.sub_projects?.length + ' sub projects'"
 >
   <div secondTab class="sub-projects-list">
-    <cdk-virtual-scroll-viewport [itemSize]="30" class="h-100">
-      <div *cdkVirtualFor="let subProject of project?.sub_projects; trackBy: trackById">
-        <a class="d-flex align-items-center"
-           smClickStopPropagation
-           (click)="subProjectClicked(subProject)"
-           [smTooltip]="subProject?.name | cleanProjectPath "
-           [innerHTML]="subProject?.name | cleanProjectPath | breadcrumbsEllipsis"></a>
-      </div>
+    <cdk-virtual-scroll-viewport [itemSize]="30" [minBufferPx]="440" [maxBufferPx]="660" class="h-100">
+      <a
+        *cdkVirtualFor="let subProject of project?.sub_projects; trackBy: trackById"
+        class="d-flex align-items-center"
+        smClickStopPropagation
+        (click)="subProjectClicked(subProject)"
+        [smTooltip]="subProject?.name | cleanProjectPath "
+        [innerHTML]="subProject?.name | cleanProjectPath | breadcrumbsEllipsis"></a>
     </cdk-virtual-scroll-viewport>
   </div>
   <div header-content class="d-flex justify-content-between align-items-center card-name">

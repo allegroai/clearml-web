@@ -4,6 +4,8 @@ import {SelectedModel} from '../shared/models.model';
 import {TableFilter} from '../../shared/utils/tableParamEncode';
 import {SortMeta} from 'primeng/api';
 import {CountAvailableAndIsDisableSelectedFiltered} from '@common/shared/entity-page/items.utils';
+import {EXPERIMENTS_PREFIX} from '@common/experiments/experiment.consts';
+import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 
 const MODELS_PREFIX = 'MODELS_';
 
@@ -77,12 +79,17 @@ export const getMetadataKeysForProject = createAction(
   MODELS_PREFIX + 'GET_METADATA_FOR_PROJECT'
 );
 export const addColumn = createAction(
-  MODELS_PREFIX + ' [ add column]',
+  MODELS_PREFIX + ' [ add column ]',
   props<{col: ISmCol}>()
 );
 
 export const removeCol = createAction(
-  MODELS_PREFIX + ' [ remove column]',
+  MODELS_PREFIX + ' [ remove column ]',
+  props<{ id: string; projectId: string }>()
+);
+
+export const removeMetricCol = createAction(
+  MODELS_PREFIX + ' [ remove metric column ]',
   props<{ id: string; projectId: string }>()
 );
 
@@ -150,6 +157,10 @@ export const getModelsMetadataValuesForKey = createAction(
   props<{  col: ISmCol  }>()
 );
 
+export const getCustomMetrics = createAction(
+  MODELS_PREFIX + '[get custom metrics]',
+);
+
 export const setTableFilters = createAction(
   MODELS_PREFIX + 'SET_TABLE_FILTERS',
   props<{ filters: TableFilter[]; projectId: string }>()
@@ -201,4 +212,9 @@ export const setSelectedModelsDisableAvailable = createAction(
 export const setTableMode = createAction(
   MODELS_PREFIX + '[set table view mode]',
   props<{mode: 'info' | 'table'}>()
-)
+);
+
+export const setCustomMetrics = createAction(
+  EXPERIMENTS_PREFIX + ' [set custom metrics]',
+  props<{ metrics: MetricVariantResult[] }>()
+);

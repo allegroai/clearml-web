@@ -6,16 +6,23 @@
   color: $blue-400;
   background: $faint-gray;
   cursor: pointer;
+  font-size: 14px;
+
   .add-button {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 15px 15px;
+    padding: 15px;
 
     &.meta-button {
       width: 100%;
       .caption {
-        margin-top: 2px;
+        margin-top: 4px;
+        white-space: nowrap;
+      }
+
+      &:first-child {
+        border-right: 1px solid $blue-200;
       }
     }
   }
@@ -24,4 +31,11 @@
     color: $blue-300;
     transition: color 0.3s;
   }
+}
+
+sm-select-metric-for-custom-col,
+sm-select-metadata-keys-custom-cols {
+  display: block;
+  height: 640px;
+  max-height: calc(100vh - 120px);
 }

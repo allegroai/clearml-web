@@ -23,4 +23,5 @@ export interface EventsMultiTaskScalarMetricsIterHistogramRequest {
      */
     samples?: number;
     key?: ScalarKeyEnum;
+    model_events?: boolean;
 }

@@ -38,8 +38,8 @@ export class ProjectCardComponent {
   @Output() projectCardClicked = new EventEmitter<Project>();
   @Output() projectNameChanged = new EventEmitter();
   @Output() deleteProjectClicked = new EventEmitter<Project>();
-  @Output() moveToClicked = new EventEmitter<string>();
-  @Output() newProjectClicked = new EventEmitter<string>();
+  @Output() moveToClicked = new EventEmitter<Project>();
+  @Output() newProjectClicked = new EventEmitter<Project>();
   @ViewChild('projectName', {static: true}) projectName;
 
 

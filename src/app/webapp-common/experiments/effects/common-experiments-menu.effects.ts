@@ -37,7 +37,7 @@ import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {TasksEnqueueManyResponse} from '~/business-logic/model/tasks/tasksEnqueueManyResponse';
 import {getNotificationAction, MenuItems, MoreMenuItems} from '../../shared/entity-page/items.utils';
 import {getAllSystemProjects} from '../../core/actions/projects.actions';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {MatDialog} from '@angular/material/dialog';
 import {ApiPipelinesService} from '~/business-logic/api-services/pipelines.service';
 import {PIPELINE_INFO_ONLY_FIELDS} from '../../pipelines-controller/controllers.consts';
 import {
@@ -212,7 +212,7 @@ export class CommonExperimentsMenuEffects {
     switchMap(([action, ]) => this.apiTasks.tasksClone({
         task: action.originExperiment.id,
         /* eslint-disable @typescript-eslint/naming-convention */
-        new_task_project: action.cloneData.project,
+        new_task_project: action.cloneData.project === ''? undefined : action.cloneData.project,
         new_task_comment: action.cloneData.comment,
         new_task_name: action.cloneData.name,
         new_project_name: action.cloneData.newProjectName

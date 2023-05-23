@@ -17,7 +17,7 @@ import {compareHeader, CompareHeaderState} from './compare-header.reducer';
 import {IExperimentDetail} from '~/features/experiments-compare/experiments-compare-models';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {scalarsGraphReducer, ScalarsGraphState} from './experiments-compare-scalars-graph.reducer';
-import {ExperimentParams} from '../shared/experiments-compare-details.model';
+import {ExperimentParams, ModelDetail} from '../shared/experiments-compare-details.model';
 import {ExperimentCompareParamsState, experimentsCompareParamsReducer} from './experiments-compare-params.reducer';
 import {groupByCharts, GroupByCharts} from '../../experiments/reducers/experiment-output.reducer';
 import {selectSelectedProjectId} from '../../core/reducers/projects.reducer';
@@ -38,8 +38,11 @@ export const experimentsCompare = state => state.experimentsCompare;
 // Details
 export const experimentsDetails = createSelector(experimentsCompare, (state): ExperimentCompareDetailsState => state ? state.details : {});
 export const selectExperimentsDetails = createSelector(experimentsDetails, (state): Array<IExperimentDetail> => state.experiments);
+export const selectModelsDetails = createSelector(experimentsDetails, (state): Array<ModelDetail> => state.models);
 export const selectExperimentIdsDetails = createSelector(selectExperimentsDetails,
   (experiments): Array<IExperimentDetail['id']> => experiments.map(exp => exp.id));
+export const selectModelIdsDetails = createSelector(selectModelsDetails,
+  (models): Array<ModelDetail['id']> => models.map(model => model.id));
 
 // Params
 export const experimentsParams = createSelector(experimentsCompare, (state): ExperimentCompareParamsState => state ? state.params : {});
@@ -54,6 +57,7 @@ export const selectIsCompare = createSelector(selectRouterConfig, (config): bool
 export const selectIsModels = createSelector(selectRouterConfig, (config): boolean => config?.includes('models'));
 export const selectIsPipelines = createSelector(selectRouterConfig, (config): boolean => config?.[0] === 'pipelines');
 export const selectIsDatasets = createSelector(selectRouterConfig, (config): boolean => config?.[0] === 'datasets');
+export const selectSelectedFeature = createSelector(selectRouterConfig, (config): string => config?.[0]);
 export const selectCustomProject = createSelector(selectRouterConfig, (config): boolean => ['pipelines', 'datasets'].includes(config?.[0]));
 
 export const selectCompareAddTableSortFields = createSelector(selectCompareHeader, selectSelectedProjectId,

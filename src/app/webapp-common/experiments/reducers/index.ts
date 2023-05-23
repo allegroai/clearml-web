@@ -6,7 +6,8 @@ import {
   experimentOutput,
   experimentsView,
   selectExperimentInfoData,
-  selectSelectedExperiment
+  selectSelectedExperiment,
+  selectSelectedModelSettings
 } from '~/features/experiments/reducers';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 import {EXPERIMENTS_TABLE_COL_FIELDS, experimentSectionsEnum} from '~/features/experiments/shared/experiments.const';
@@ -192,23 +193,34 @@ export const selectExperimentHyperParamsSelectedSectionParams =
 export const selectScalarSingleValue = createSelector(experimentOutput, (state): Array<EventsGetTaskSingleValueMetricsResponseValues> => state.scalarSingleValue);
 
 
-export const selectExperimentInfoHistograms = createSelector(
-  selectSelectedSettingsxAxisType,
-  experimentOutput,
-  (axisType, state) => {
-    if (axisType === ScalarKeyEnum.IsoTime && state.metricsHistogramCharts) {
-      return Object.keys(state.metricsHistogramCharts).reduce((groupAcc, groupName) => {
-        const group = state.metricsHistogramCharts[groupName];
-        groupAcc[groupName] = Object.keys(group).reduce((graphAcc, graphName) => {
-          const graph = group[graphName];
-          graphAcc[graphName] = {...graph, x: graph.x.map(ts => new Date(ts))};
-          return graphAcc;
+const createHistogramSelector = (selectAxisType) =>
+  createSelector(
+    selectAxisType,
+    experimentOutput,
+    (axisType, state) => {
+      if (axisType === ScalarKeyEnum.IsoTime && state.metricsHistogramCharts) {
+        return Object.keys(state.metricsHistogramCharts).reduce((groupAcc, groupName) => {
+          const group = state.metricsHistogramCharts[groupName];
+          groupAcc[groupName] = Object.keys(group).reduce((graphAcc, graphName) => {
+            const graph = group[graphName];
+            graphAcc[graphName] = {...graph, x: graph.x.map(ts => new Date(ts))};
+            return graphAcc;
+          }, {});
+          return groupAcc;
         }, {});
-        return groupAcc;
-      }, {});
-    }
-    return state.metricsHistogramCharts;
-  });
+      }
+      return state.metricsHistogramCharts;
+    });
 
+export const selectExperimentInfoHistograms = createHistogramSelector(selectSelectedSettingsxAxisType);
 export const selectCurrentArtifactExperimentId = createSelector(experimentInfo, state => state.artifactsExperimentId);
 
+export const selectModelSettingsXAxisType = createSelector(selectSelectedModelSettings,
+  settings => settings?.xAxisType ?? ScalarKeyEnum.Iter as ScalarKeyEnum);
+export const selectModelInfoHistograms = createHistogramSelector(selectModelSettingsXAxisType);
+export const selectModelSettingsGroupBy = createSelector(selectSelectedModelSettings,
+  settings => settings?.groupBy ?? 'metric');
+export const selectModelSettingsSmoothWeight = createSelector(selectSelectedModelSettings,
+  settings => settings?.smoothWeight ?? 0);
+export const selectModelSettingsHiddenScalar = createSelector(selectSelectedModelSettings,
+  settings => settings?.hiddenMetricsScalar ?? []);

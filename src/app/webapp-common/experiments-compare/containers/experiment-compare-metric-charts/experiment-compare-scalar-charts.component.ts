@@ -1,25 +1,14 @@
-import {ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Observable, Subscription} from 'rxjs';
 import {select, Store} from '@ngrx/store';
 import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {distinctUntilChanged, filter, map} from 'rxjs/operators';
 import {isEqual} from 'lodash-es';
 import {GroupedList, mergeMultiMetrics, mergeMultiMetricsGroupedVariant} from '@common/tasks/tasks.utils';
+import {getMultiScalarCharts, resetExperimentMetrics, setExperimentMetricsSearchTerm, setExperimentSettings, setSelectedExperiments} from '../../actions/experiments-compare-charts.actions';
 import {
-  getMultiScalarCharts,
-  resetExperimentMetrics, setExperimentHistogram,
-  setExperimentMetricsSearchTerm,
-  setExperimentSettings,
-  setSelectedExperiments
-} from '../../actions/experiments-compare-charts.actions';
-import {
-  selectCompareSelectedSettingsGroupBy,
-  selectCompareSelectedSettingsSmoothWeight,
-  selectCompareSelectedSettingsxAxisType,
-  selectCompareTasksScalarCharts,
-  selectExperimentMetricsSearchTerm,
-  selectSelectedExperimentSettings,
-  selectSelectedSettingsHiddenScalar
+  selectCompareSelectedSettingsGroupBy, selectCompareSelectedSettingsSmoothWeight, selectCompareSelectedSettingsxAxisType, selectCompareTasksScalarCharts, selectExperimentMetricsSearchTerm,
+  selectSelectedExperimentSettings, selectSelectedSettingsHiddenScalar
 } from '../../reducers';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {toggleShowScalarOptions} from '../../actions/compare-header.actions';
@@ -31,7 +20,9 @@ import {ExperimentGraphsComponent} from '@common/shared/experiment-graphs/experi
 import {selectScalarsHoverMode} from '@common/experiments/reducers';
 import {setScalarsHoverMode} from '@common/experiments/actions/common-experiment-output.actions';
 import {ChartHoverModeEnum} from '@common/experiments/shared/common-experiments.const';
-import { ReportCodeEmbedService } from '~/shared/services/report-code-embed.service';
+import {ReportCodeEmbedService} from '~/shared/services/report-code-embed.service';
+import {ActivatedRoute} from '@angular/router';
+import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 
 
 @Component({
@@ -39,7 +30,7 @@ import { ReportCodeEmbedService } from '~/shared/services/report-code-embed.serv
   templateUrl: './experiment-compare-scalar-charts.component.html',
   styleUrls: ['./experiment-compare-scalar-charts.component.scss']
 })
-export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy {
+export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy, AfterViewInit {
 
   public smoothWeight$: Observable<number>;
   public xAxisType$: Observable<ScalarKeyEnum>;
@@ -77,10 +68,12 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
 
   @ViewChild(ExperimentGraphsComponent) graphsComponent: ExperimentGraphsComponent;
   public hoverMode$: Observable<ChartHoverModeEnum>;
+  private entityType: EntityTypeEnum;
 
   constructor(
     private store: Store<ExperimentInfoState>,
     private changeDetection: ChangeDetectorRef,
+    private route: ActivatedRoute,
     private refresh: RefreshService,
     private reportEmbed: ReportCodeEmbedService,
   ) {
@@ -111,7 +104,7 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
 
     this.xAxisSub = this.xAxisType$
       .pipe(filter(axis => !!axis && this.taskIds?.length > 0))
-      .subscribe(() => this.store.dispatch(getMultiScalarCharts({taskIds: this.taskIds, cached: true})));
+      .subscribe(() => this.store.dispatch(getMultiScalarCharts({taskIds: this.taskIds, entity: this.entityType, cached: true})));
 
     this.groupBySub = this.groupBy$
       .subscribe(groupBy => {
@@ -121,6 +114,7 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
   }
 
   ngOnInit() {
+    this.entityType = this.route.snapshot.parent.parent.data.entityType;
     this.metricsSubscription = this.metrics$
       .subscribe((metricsWrapped) => {
         const metrics = metricsWrapped.metrics || {};
@@ -128,24 +122,18 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
         this.prepareGraphsAndUpdate(metrics);
       });
 
-    this.settingsSubscription = this.experimentSettings$
-      .subscribe((selectedMetric) => {
-        this.selectedGraph = selectedMetric;
-        this.graphsComponent.scrollToGraph(selectedMetric);
-      });
-
     this.routerParamsSubscription = this.routerParams$
       .subscribe((params) => {
           if (!this.taskIds || this.taskIds.join(',') !== params.ids) {
             this.taskIds = params.ids.split(',');
             this.store.dispatch(setSelectedExperiments({selectedExperiments: this.taskIds}));
-            this.store.dispatch(getMultiScalarCharts({taskIds: this.taskIds}));
+            this.store.dispatch(getMultiScalarCharts({taskIds: this.taskIds, entity: this.entityType}));
           }
       });
 
     this.refreshingSubscription = this.refresh.tick
       .pipe(filter(auto => auto !== null && this.graphs !== null))
-      .subscribe(autoRefresh => this.store.dispatch(getMultiScalarCharts({taskIds: this.taskIds, autoRefresh})));
+      .subscribe(autoRefresh => this.store.dispatch(getMultiScalarCharts({taskIds: this.taskIds, entity: this.entityType, autoRefresh})));
   }
 
   private prepareGraphsAndUpdate(metrics) {
@@ -212,10 +200,21 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
   }
 
   createEmbedCode(event: { metrics?: string[]; variants?: string[]; domRect: DOMRect }) {
+    const entityType = this.entityType === EntityTypeEnum.model ? 'model' : 'task';
     this.reportEmbed.createCode({
       type: 'scalar',
-      tasks: this.taskIds,
+      objects: this.taskIds,
+      objectType: entityType,
       ...event
     });
+  }
+
+  ngAfterViewInit(): void {
+    this.settingsSubscription = this.experimentSettings$
+      .pipe(filter(metric => !!metric))
+      .subscribe(selectedMetric => {
+        this.selectedGraph = selectedMetric;
+        this.graphsComponent.scrollToGraph(selectedMetric);
+      });
   }
 }

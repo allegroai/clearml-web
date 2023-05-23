@@ -12,6 +12,9 @@ import {Store} from '@ngrx/store';
 import {openTagColorsMenu, setTagsFilterByProject} from '@common/core/actions/projects.actions';
 import {activateEdit} from 'app/webapp-common/experiments/actions/common-experiments-info.actions';
 import {activateModelEdit} from '@common/models/actions/models-info.actions';
+import {selectRouterParams} from "@common/core/reducers/router-reducer";
+import {map} from "rxjs/operators";
+import {Observable} from "rxjs";
 
 @Component({
   selector: 'sm-tags-menu',
@@ -22,6 +25,7 @@ import {activateModelEdit} from '@common/models/actions/models-info.actions';
 export class TagsMenuComponent {
   public filterText: string;
   private firstTime = true;
+  public disableFilterByProject$: Observable<boolean>;
 
   get allTags(): string[] {
     return this.tagsFilterByProject ? this.projectTags : this.companyTags;
@@ -39,6 +43,8 @@ export class TagsMenuComponent {
 
 
   constructor(private store: Store, private cdr: ChangeDetectorRef, private elRef: ElementRef) {
+    this.disableFilterByProject$ = this.store.select(selectRouterParams)
+      .pipe(map(params => params?.projectId === '*'));
   }
 
   openTagColors() {

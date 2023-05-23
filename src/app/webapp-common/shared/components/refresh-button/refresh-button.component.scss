@@ -3,26 +3,22 @@
 :host {
   display: inline-block;
 
-  ::ng-deep .mat-checkbox-frame {
-    color: #a4b2db;
-  }
-
   .no-wrap {
     white-space: nowrap;
   }
 
   .refresh-wrapper {
     width: 28px;
-    padding: 5px;
+    padding: 0 5px;
     overflow: hidden;
     transition: all 0.5s 0.5s, background 0.5s 0s;
-  }
 
-  .refresh-wrapper.allow-autorefresh:hover {
-    background: $blue-600;
-    border-radius: 4px;
-    width: 156px;
-    padding-right: 12px;
+    &.allow-autorefresh:hover {
+      background: $blue-600;
+      border-radius: 4px;
+      width: 164px;
+      padding-right: 12px;
+    }
   }
 
   .refresh-icon {

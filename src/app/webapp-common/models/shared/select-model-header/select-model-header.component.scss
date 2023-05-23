@@ -1,17 +1,9 @@
 :host {
-  .center-buttons-container {
-    position: relative;
-    left: 50%;
-    transform: translateX(-50%);
+
+  ::ng-deep .search-input-container.active {
+    width: 500px !important;
   }
-  .search-container {
-    width: 0;
-    overflow: hidden;
-    transition: 0.3s;
-    &.open {
-      width: 250px;
-    }
-  }
+
   sm-search {
     display: contents;
   }

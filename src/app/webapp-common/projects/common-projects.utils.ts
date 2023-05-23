@@ -1,5 +1,5 @@
-import {ProjectsGetAllExRequest} from "~/business-logic/model/projects/projectsGetAllExRequest";
-import {ActivatedRouteSnapshot} from "@angular/router";
+import {ProjectsGetAllExRequest} from '~/business-logic/model/projects/projectsGetAllExRequest';
+import {ActivatedRouteSnapshot} from '@angular/router';
 
 export const getPipelineRequest = (nested, searchQuery, selectedProjectName, selectedProjectId): ProjectsGetAllExRequest => ({
   /* eslint-disable @typescript-eslint/naming-convention */

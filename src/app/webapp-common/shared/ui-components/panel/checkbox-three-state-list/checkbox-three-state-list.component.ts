@@ -26,7 +26,7 @@ export enum CheckboxState {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CheckboxThreeStateListComponent implements OnInit {
-  @Input() options: Array<{ label: string; value: string; tooltip?: string }> = [];
+  @Input() options: Array<{ label: string; value: string; tooltip?: string }>;
   @Input() supportExcludeFilter: boolean;
 
   @Input() set checkedList(checkedList: Array<string>) {

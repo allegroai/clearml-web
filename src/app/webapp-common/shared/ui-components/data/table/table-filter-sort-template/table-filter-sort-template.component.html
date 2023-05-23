@@ -20,14 +20,16 @@
       [class.active]="isSorted || isFiltered()">{{header}}</div>
     <sm-menu #menu
              smMenuClass="light-theme"
+             searchPlaceholder="Search"
              [enableSearch]="enableSearch"
              [fixedOptionsSubheader]="subOptions?.length ? fixedOptionsSubheader : ''"
-             (searchValueChanged)="searchValueChanged.emit($any($event.target).value)"
              [searchValue]="searchValue"
              [buttonClass]="'table-filter-button ' + (isFiltered() ? 'active' : 'deactive')"
              [iconClass]="'pointer icon ' + (isFiltered()? 'i-filter-on':'i-filter-off')"
-             (menuClosed)="menuClosed.emit()"
-         (menuOpened)="menuOpened.emit()"
+             [hasButtonClass]="false"
+             (searchValueChanged)="searching = true; searchValueChanged.emit({value: $any($event.target).value})"
+             (menuClosed)="onMenuClose()"
+             (menuOpened)="menuOpened.emit()"
     >
       <ng-container [ngSwitch]="filterType">
         <sm-table-filter-duration
@@ -46,7 +48,7 @@
         ></sm-table-filter-duration-date-time>
         <ng-container *ngSwitchDefault>
           <div *ngIf="supportAndFilter" class="filter-type" smClickStopPropagation>
-            <span class="link mr-3" [class.selected]="!andFilter" (click)="toggleCombination()">Any</span>
+            <span class="link me-3" [class.selected]="!andFilter" (click)="toggleCombination()">Any</span>
             <span class="link" [class.selected]="andFilter" (click)="toggleCombination()">All</span>
           </div>
           <div [class.options-section]="enableSearch" smClickStopPropagation class="d-flex align-items-start flex-column table-filter-sort-template checkbox-list">
@@ -56,6 +58,9 @@
               [checkedList]="value"
               (filterChanged)="emitFilterChanged($event)"
             ></sm-checkbox-three-state-list>
+            <div class="load-more" title="Load more" [class.hidden]="!(filterPageSize && !noMoreOptions && !searching)" (smScrollEnd)="!loading && loadMore()">
+              <div class="load-more__dot"></div>
+            </div>
             <div fixedOptions>
               <sm-menu-item
                 *ngFor="let option of subOptions; trackBy: trackByLabel"

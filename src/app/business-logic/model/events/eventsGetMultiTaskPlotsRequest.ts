@@ -26,4 +26,5 @@ export interface EventsGetMultiTaskPlotsRequest {
      */
     scroll_id?: string;
     no_scroll?: boolean;
+    model_events?: boolean;
 }

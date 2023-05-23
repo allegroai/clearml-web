@@ -34,7 +34,7 @@ export class ProjectsListComponent {
   @Output() projectNameChanged = new EventEmitter<{ id: string; name: string }>();
   @Output() deleteProjectClicked = new EventEmitter<Project>();
   @Output() loadMore = new EventEmitter();
-  @Output() moveToClicked = new EventEmitter<string>();
-  @Output() createNewProjectClicked = new EventEmitter<string>();
+  @Output() moveToClicked = new EventEmitter<Project>();
+  @Output() createNewProjectClicked = new EventEmitter<Project>();
 
 }

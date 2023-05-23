@@ -32,6 +32,8 @@
 
   .graph-viewer-header {
     border-bottom: solid 1px #f1f1f1;
+    position: relative;
+    z-index: 1;
 
     .header-actions {
       margin-left: auto;
@@ -65,7 +67,7 @@
   }
 
   .smooth-input {
-    width: 66px;
+    width: 76px;
     margin-left: 6px;
   }
 
@@ -141,7 +143,7 @@
     color: $blue-500;
   }
 
-  mat-slider.mat-slider-horizontal {
+  .mat-mdc-slider {
     min-width: 280px;
   }
 }

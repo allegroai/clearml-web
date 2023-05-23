@@ -1,5 +1,6 @@
 import {ColHeaderFilterTypeEnum, ColHeaderTypeEnum, ISmCol} from '../shared/ui-components/data/table/table.consts';
 import {EXPERIMENTS_TABLE_COL_FIELDS} from '~/features/experiments/shared/experiments.const';
+import {rootProjectsPageSize} from '@common/constants';
 
 export const EXPERIMENTS_STORE_KEY = 'experiments';
 export const EXPERIMENTS_PREFIX = 'EXPERIMENTS_';
@@ -69,6 +70,8 @@ export const INITIAL_EXPERIMENT_TABLE_COLS: ISmCol[] = [
     header      : 'PROJECT',
     filterable  :  true,
     searchableFilter: true,
+    asyncFilter: true,
+    paginatedFilterPageSize: rootProjectsPageSize,
     sortable    : false,
     style       : {width: '150px'},
   },
@@ -142,7 +145,8 @@ export const INITIAL_EXPERIMENT_TABLE_COLS: ISmCol[] = [
     sortable        : false,
     header    : 'PARENT TASK',
     style     : {width: '200px'},
-    showInCardFilters: true
+    showInCardFilters: true,
+    asyncFilter: true
   }
 ];
 

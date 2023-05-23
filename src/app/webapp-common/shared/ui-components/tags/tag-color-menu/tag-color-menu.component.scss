@@ -1,14 +1,7 @@
 @import "variables";
 
-mat-form-field {
-  width: 100%;
-  ::ng-deep .mat-form-field-flex {
-    background-color: unset;
-    padding: 0 4px 0 0;
-    input {
-      padding-left: 0;
-    }
-  }
+.filter-form {
+  margin-right: 12px;
 }
 
 .color-picker-wrapper {
@@ -31,7 +24,7 @@ mat-form-field {
     .button-area {
       padding: 16px;
     }
-  } 
+  }
 }
 
 .tags-list {
@@ -41,7 +34,7 @@ mat-form-field {
 .tag-line {
   display: grid;
   align-items: center;
-  grid-template-columns: 1fr 40px;
+  grid-template-columns: 1fr 40px 1px;
   gap: 12px;
   height: 32px;
 

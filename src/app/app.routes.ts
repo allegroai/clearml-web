@@ -1,7 +1,4 @@
 import {Routes} from '@angular/router';
-/*
-import {AdminComponent} from '@common/settings/admin/admin.component';
-*/
 import {ProjectRedirectGuardGuard} from '@common/shared/guards/project-redirect.guard';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 
@@ -44,6 +41,11 @@ export const routes: Routes = [
             path: 'compare-experiments',
             loadChildren: () => import('./webapp-common/experiments-compare/experiments-compare.module').then(m => m.ExperimentsCompareModule),
             data: {entityType: EntityTypeEnum.experiment},
+          },
+          {
+            path: 'compare-models',
+            data: {entityType: EntityTypeEnum.model},
+            loadChildren: () => import('./webapp-common/experiments-compare/experiments-compare.module').then(m => m.ExperimentsCompareModule)
           },
         ]
       },

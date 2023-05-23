@@ -9,6 +9,7 @@ import {convertPlots, groupIterations, sortMetricsList} from '@common/tasks/task
 import { MetricsPlotEvent } from '~/business-logic/model/events/metricsPlotEvent';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {getPlots, setPlots} from '@common/models/actions/models-info.actions';
+import {ReportCodeEmbedService} from '~/shared/services/report-code-embed.service';
 
 @Component({
   selector: 'sm-model-info-plot',
@@ -32,7 +33,11 @@ export class ModelInfoPlotsComponent implements OnInit, OnDestroy {
   private refreshDisabled: boolean;
   private modelId: string;
 
-  constructor(private store: Store, private cdr: ChangeDetectorRef) {
+  constructor(
+    private store: Store,
+    private cdr: ChangeDetectorRef,
+    private reportEmbed: ReportCodeEmbedService
+    ) {
     // this.searchTerm$ = this.store.select(selectExperimentMetricsSearchTerm);
     this.splitSize$ = this.store.select(selectSplitSize);
   }
@@ -107,6 +112,15 @@ export class ModelInfoPlotsComponent implements OnInit, OnDestroy {
 
   resetMetrics() {
     this.store.dispatch(setPlots({plots: null}));
+  }
+
+  createEmbedCode(event: { metrics?: string[]; variants?: string[]; domRect: DOMRect }) {
+    this.reportEmbed.createCode({
+      type: 'plot',
+      objects: [this.modelId],
+      objectType: 'model',
+      ...event
+    });
   }
 
   ngOnDestroy(): void {

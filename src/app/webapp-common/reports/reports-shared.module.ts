@@ -7,6 +7,7 @@ import {ReportCardComponent} from '@common/reports/report-card/report-card.compo
 import {ReportCardMenuComponent} from '@common/reports/report-card-menu/report-card-menu.component';
 import {SharedPipesModule} from '@common/shared/pipes/shared-pipes.module';
 import {ExperimentSharedModule} from '~/features/experiments/shared/experiment-shared.module';
+import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
 
 const declarations = [  ReportCardComponent,
   ReportCardMenuComponent,];
@@ -20,6 +21,7 @@ const declarations = [  ReportCardComponent,
     SharedModule,
     SharedPipesModule,
     ExperimentSharedModule,
+    LabeledFormFieldDirective
   ],
   declarations: [...declarations],
   exports: [...declarations],

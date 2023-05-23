@@ -8,23 +8,11 @@
   width: 85%;
 }
 
-.mat-menu-item {
-  font-family: "Heebo", sans-serif;
-  height: 40px;
-  line-height: 40px;
-  border-radius: 4px;
-}
-
 .remove-button {
   margin-left: auto;
   opacity: 0;
   transition: opacity 0.2s;
-  transform: translateX(12px);
   display: flex;
-}
-
-sm-checkbox-control {
-  margin-right: 12px;
 }
 
 :host {

@@ -3,7 +3,7 @@ import {Store} from '@ngrx/store';
 import {filter} from 'rxjs/operators';
 import {updateUsageStats} from '../actions/usage-stats.actions';
 import {selectPromptUser} from '../reducers/usage-stats.reducer';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {MatDialog} from '@angular/material/dialog';
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {ConfigurationService} from '@common/shared/services/configuration.service';
 

@@ -2,6 +2,8 @@
   <sm-create-new-report-form
     [projects]="projects$| async"
     [readOnlyProjectsNames]="readOnlyProjectsNames$ | async"
+    [defaultProjectId]="data?.defaultProjectId"
     (reportCreated)="createReport($event)"
+    (filterSearchChanged)="filterSearchChanged($event)"
   ></sm-create-new-report-form>
 </sm-dialog-template>

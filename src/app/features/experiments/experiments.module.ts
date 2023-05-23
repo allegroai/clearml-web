@@ -16,7 +16,7 @@ import {CommonLayoutModule} from '@common/layout/layout.module';
 import {DebugImagesModule} from '@common/debug-images/debug-images.module';
 import {ExperimentInfoExecutionComponent} from '@common/experiments/containers/experiment-info-execution/experiment-info-execution.component';
 import {MatSidenavModule} from '@angular/material/sidenav';
-import {MatLegacyListModule as MatListModule} from '@angular/material/legacy-list';
+import {MatListModule} from '@angular/material/list';
 import {ExperimentOutputComponent} from './containers/experiment-ouptut/experiment-output.component';
 import {ExperimentInfoNavbarComponent} from './containers/experiment-info-navbar/experiment-info-navbar.component';
 import {ExperimentInfoHyperParametersComponent} from '@common/experiments/containers/experiment-info-hyper-parameters/experiment-info-hyper-parameters.component';
@@ -34,7 +34,6 @@ import {ExperimentArtifactsNavbarComponent} from '@common/experiments/dumb/exper
 import {ExperimentInfoArtifactsComponent} from '@common/experiments/containers/experiment-info-aritfacts/experiment-info-artifacts.component';
 import {ExperimentInfoHeaderComponent} from '@common/experiments/dumb/experiment-info-header/experiment-info-header.component';
 import {ExperimentInfoTaskModelComponent} from '@common/experiments/containers/experiment-info-task-model/experiment-info-task-model.component';
-import {ModelAutoPopulateDialogComponent} from '@common/experiments/dumb/model-auto-populate-dialog/model-auto-populate-dialog.component';
 import {ExperimentOutputScalarsComponent} from '@common/experiments/containers/experiment-output-scalars/experiment-output-scalars.component';
 import {ExperimentInfoModelComponent} from '@common/experiments/containers/experiment-info-model/experiment-info-model.component';
 import {ExperimentInfoHyperParametersFormContainerComponent} from '@common/experiments/containers/experiment-info-hyper-parameters-form-container/experiment-info-hyper-parameters-form-container.component';
@@ -50,6 +49,8 @@ import {MAT_AUTOCOMPLETE_SCROLL_STRATEGY} from '@angular/material/autocomplete';
 import {scrollFactory} from '@common/shared/utils/scroll-factory';
 import {Overlay} from '@angular/cdk/overlay';
 import {ExperimentsComponent} from '@common/experiments/experiments.component';
+import {RouterTabNavBarComponent} from '@common/shared/components/router-tab-nav-bar/router-tab-nav-bar.component';
+import {MatTabsModule} from '@angular/material/tabs';
 
 
 @NgModule({
@@ -80,6 +81,9 @@ import {ExperimentsComponent} from '@common/experiments/experiments.component';
     MatProgressSpinnerModule,
     MatRadioModule,
     ExperimentSharedModule,
+    RouterTabNavBarComponent,
+    MatTabsModule,
+    RouterTabNavBarComponent,
   ],
   declarations: [
     ExperimentsComponent,
@@ -97,7 +101,6 @@ import {ExperimentsComponent} from '@common/experiments/experiments.component';
     ExperimentOutputModelViewComponent,
     ExperimentExecutionSourceCodeComponent,
     ExperimentOutputScalarsComponent,
-    ModelAutoPopulateDialogComponent,
     ExperimentInfoHyperParametersComponent,
     ExperimentInfoHyperParametersFormContainerComponent,
     ExperimentArtifactsNavbarComponent,

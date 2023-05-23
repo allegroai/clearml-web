@@ -10,6 +10,7 @@ import {DebugImagesComponent} from '../debug-images/debug-images.component';
 import {ExperimentCompareHyperParamsGraphComponent} from './containers/experiment-compare-hyper-params-graph/experiment-compare-hyper-params-graph.component';
 import {RouterHelperGuard} from './experiment-compare-router-helper.guard';
 import {ExperimentCompareParamsComponent} from './containers/experiment-compare-params/experiment-compare-params.component';
+import {ModelCompareDetailsComponent} from '@common/experiments-compare/containers/model-compare-details/model-compare-details.component';
 
 
 export const routes: Routes = [
@@ -22,6 +23,8 @@ export const routes: Routes = [
       {path: 'metrics-values', redirectTo: 'scalars/values', pathMatch: 'full', data: {limit: true}},
       {path: 'metrics-charts', redirectTo: 'scalars/graph', pathMatch: 'full'},
       {path: 'details', component: ExperimentCompareDetailsComponent, data: {mode: 'details', limit: true}},
+      {path: 'models-details', component: ModelCompareDetailsComponent, data: {mode: 'details', limit: true}},
+      {path: 'network', component: ExperimentCompareParamsComponent, data: {mode: 'hyper-params', limit: true}},
       {path: 'hyper-params/values', component: ExperimentCompareParamsComponent, canActivate: [RouterHelperGuard], data: {mode: 'hyper-params', limit: true}},
       {path: 'hyper-params/graph', component: ExperimentCompareHyperParamsGraphComponent},
       {path: 'scalars/values', component: ExperimentCompareMetricValuesComponent, canActivate: [RouterHelperGuard], data: {limit: true}},

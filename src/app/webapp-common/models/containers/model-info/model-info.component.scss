@@ -3,7 +3,16 @@
 :host {
 
   sm-model-info-header {
+    margin-bottom: 12px;
+  }
+
+  sm-model-info-header {
     display: block;
+  }
+
+  sm-router-tab-nav-bar {
+    overflow: hidden;
+    flex-grow: 1;
   }
 
   .model-info-container {
@@ -19,11 +28,46 @@
   }
 
   .model-info-body {
-    height: calc(100% - 110px);
+    height: calc(100% - 119px);
   }
 
-  ::ng-deep nav {
-    border-bottom: 1px solid rgba(2, 2, 2, 0.07);
+  .tab-nav {
+    //display: grid; need to fix when we'll have full page
+    display: flex;
+    grid-template-columns: 200px 1fr 200px;
+    align-items: center;
+    border-bottom: 1px solid #efefef;
+
+    &.minimized {
+      display: flex;
+    }
+
+    @media(max-width: 1200px) {
+      grid-template-columns: 0 1fr 200px;
+    }
+  }
+
+  sm-router-tab-nav-bar {
+    overflow: hidden;
+    flex-grow: 1;
+  }
+
+  .setting-icon {
+    margin-right: 30px;
+    margin-left: auto;
+  }
+
+  .refresh-position {
+    position: absolute;
+    right: 26px;
+    top: 2px;
+    display: flex;
+    align-items: center;
+  }
+
+  sm-experiment-settings.maximized {
+    display: block;
+    padding-top: 6px;
   }
 }
 

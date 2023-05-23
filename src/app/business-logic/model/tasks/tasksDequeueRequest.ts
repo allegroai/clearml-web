@@ -25,4 +25,5 @@ export interface TasksDequeueRequest {
      * Extra information regarding status change
      */
     status_message?: string;
+    remove_from_all_queues?: boolean;
 }

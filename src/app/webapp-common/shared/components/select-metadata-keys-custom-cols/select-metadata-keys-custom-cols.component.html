@@ -1,6 +1,6 @@
-<div smClickStopPropagation class="w-100 h-100">
+<div smClickStopPropagation class="meta-container ">
   <div class="head">
-    <i (click)="goBack.emit()" class="al-icon sm-md al-ico-back pointer m-auto" smClickStopPropagation></i>
+    <i (click)="goBack.emit()" data-id="customBackButton" class="al-icon sm-md al-ico-back pointer m-auto" smClickStopPropagation></i>
     <h3>SELECT METADATA KEY TO DISPLAY</h3>
   </div>
   <sm-search
@@ -11,7 +11,7 @@
     placeholder="Search metadata key"
     (valueChanged)="searchQ($event)"
   ></sm-search>
-  <div *ngIf="metadataKeys?.length>0; else noData " class="list-container">
+  <div *ngIf="metadataKeys?.length > 0; else noData " class="list-container">
     <sm-menu-item *ngFor="let key of metadataKeys | simpleFilter: searchText"
                   #metaKey
                   [itemLabel]="key"
@@ -23,6 +23,9 @@
     </sm-menu-item>
   </div>
   <ng-template #noData>
-    <div class="empty-state">No data to show</div>
+    <div class="d-flex h-100 flex-1">
+      <mat-spinner *ngIf="!metadataKeys" class="spinner" diameter="80" strokeWidth="8"></mat-spinner>
+      <div *ngIf="metadataKeys && metadataKeys.length === 0" class="empty-state">No data to show</div>
+    </div>
   </ng-template>
 </div>

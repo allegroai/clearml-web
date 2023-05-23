@@ -31,7 +31,7 @@ hr {
 
 .sub-projects-list {
   height: 100%;
-  margin: 6px 0;
+  padding: 6px 0;
 
   a {
     color: $blue-200;
@@ -76,7 +76,7 @@ hr {
   }
 
   :host {
-    ::ng-deep .mat-menu-content {
+    ::ng-deep .mat-mdc-menu-content {
       background-color: $blue-600;
     }
   }

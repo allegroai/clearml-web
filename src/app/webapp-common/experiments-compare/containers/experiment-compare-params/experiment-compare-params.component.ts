@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import {select, Store} from '@ngrx/store';
 import {selectExperimentsParams} from '../../reducers';
 import {filter, tap} from 'rxjs/operators';
@@ -11,6 +11,7 @@ import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-in
 import {experimentListUpdated} from '../../actions/experiments-compare-params.actions';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {LIMITED_VIEW_LIMIT} from '@common/experiments-compare/experiments-compare.constants';
+import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 
 @Component({
   selector: 'sm-experiment-compare-params',
@@ -20,6 +21,7 @@ import {LIMITED_VIEW_LIMIT} from '@common/experiments-compare/experiments-compar
 })
 export class ExperimentCompareParamsComponent extends ExperimentCompareBase implements OnInit {
   public showEllipsis: boolean = true;
+  protected entityType: EntityTypeEnum;
 
   constructor(
     public router: Router,
@@ -35,11 +37,12 @@ export class ExperimentCompareParamsComponent extends ExperimentCompareBase impl
   experiments$ = this.store.pipe(select(selectExperimentsParams));
 
   ngOnInit() {
+    this.entityType = this.activeRoute.snapshot.parent.parent.data.entityType;
     this.onInit();
     this.compareTabPage = this.activeRoute?.snapshot?.routeConfig?.data?.mode;
     this.routerParamsSubscription = this.taskIds$.subscribe(
       (experimentIds) => {
-        this.store.dispatch(experimentListUpdated({ids: experimentIds.slice(0, LIMITED_VIEW_LIMIT)}));
+        this.store.dispatch(experimentListUpdated({ids: experimentIds.slice(0, LIMITED_VIEW_LIMIT), entity: this.entityType}));
       });
 
     this.experimentsSubscription = this.experiments$.pipe(
@@ -64,7 +67,7 @@ export class ExperimentCompareParamsComponent extends ExperimentCompareBase impl
       .reduce((acc, cur) => {
         acc[cur.id] = {
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          'hyper-params': this.buildSectionTree(cur, 'hyperparams', mergedExperiment)
+          'hyper-params': this.buildSectionTree(cur, this.entityType === EntityTypeEnum.model? 'design': 'hyperparams', mergedExperiment)
         };
 
         return acc;

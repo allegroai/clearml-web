@@ -1,9 +1,10 @@
 @import "variables";
 
 :host {
-  .creat-new-suffix{
+  .creat-new-suffix {
     margin-right: 18px;
   }
+
   .buttons {
     margin-top: 48px;
     display: flex;
@@ -18,10 +19,12 @@
       width: 130px;
       text-transform: uppercase;
     }
+
     .yes-button {
       margin-left: 16px;
     }
   }
+
   .line {
     line-height: 2;
   }
@@ -37,6 +40,9 @@
 
     .p-name {
       font-weight: bold;
+      max-width: calc(100% - 38px);
+      display: inline-block;
+      vertical-align: middle;
     }
 
     .p-holder {
@@ -66,5 +72,9 @@
     .project-description {
       min-height: 68px;
     }
+  }
+
+  .search-icon {
+    transform: translateY(3px);
   }
 }

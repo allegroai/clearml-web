@@ -8,7 +8,7 @@ export class SimpleFilterPipe implements PipeTransform {
     if (!term) {
       return items;
     }
-    return items.filter(item => item.toLowerCase().includes(term.toLowerCase()));
+    return items?.filter(item => item.toLowerCase().includes(term.toLowerCase())) ?? [];
   }
 }
 

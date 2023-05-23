@@ -38,14 +38,19 @@ import {ReportsGetAllExResponse} from '~/business-logic/model/reports/reportsGet
 import {Report} from '~/business-logic/model/reports/report';
 import {ReportsUpdateResponse} from '~/business-logic/model/reports/reportsUpdateResponse';
 import {ReportsMoveResponse} from '~/business-logic/model/reports/reportsMoveResponse';
-import {selectHideExamples, selectMainPageTagsFilter, selectMainPageTagsFilterMatchMode} from '../core/reducers/projects.reducer';
+import {
+  selectHideExamples,
+  selectMainPageTagsFilter,
+  selectMainPageTagsFilterMatchMode,
+  selectSelectedProjectId
+} from '../core/reducers/projects.reducer';
 import {ReportsGetTagsResponse} from '~/business-logic/model/reports/reportsGetTagsResponse';
 import {TABLE_SORT_ORDER} from '../shared/ui-components/data/table/table.consts';
 import {selectCurrentUser, selectShowOnlyUserWork} from '../core/reducers/users-reducer';
 import {addExcludeFilters} from '../shared/utils/tableParamEncode';
 import {escapeRegex} from '../shared/utils/escape-regex';
 import {MESSAGES_SEVERITY} from '../constants';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {MatDialog} from '@angular/material/dialog';
 import {
   ChangeProjectDialogComponent
 } from '@common/experiments/shared/components/change-project-dialog/change-project-dialog.component';
@@ -54,7 +59,7 @@ import {selectActiveWorkspaceReady} from '~/core/reducers/view.reducer';
 import {ReportsCreateResponse} from '~/business-logic/model/reports/reportsCreateResponse';
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {HttpClient} from '@angular/common/http';
-import {selectRouterParams} from "@common/core/reducers/router-reducer";
+import {selectRouterParams} from '@common/core/reducers/router-reducer';
 
 @Injectable()
 export class ReportsEffects {
@@ -110,7 +115,7 @@ export class ReportsEffects {
         /* eslint-disable @typescript-eslint/naming-convention */
         only_fields: ['name', 'comment', 'company', 'tags', 'report', 'project.name', 'user.name', 'status', 'last_update', 'system_tags'] as (keyof Report)[],
         size: PAGE_SIZE,
-        ...(projectId && {project: projectId}),
+        project: projectId === '*' ? null : projectId,
         scroll_id: action['loadMore'] ? scroll : null,
         ...(hideExamples && {allow_public: false}),
         system_tags: [archive ? '__$and' : '__$not', 'archived'],
@@ -224,10 +229,13 @@ export class ReportsEffects {
           map(project => ({task: action.report.id, project: project.id, project_name: project.name}))
         )
     ),
-    switchMap((moveRequest: ReportsMoveRequest) => this.reportsApiService.reportsMove(moveRequest).pipe(
-        mergeMap((res: ReportsMoveResponse) => [
+    switchMap((moveRequest: ReportsMoveRequest) => this.reportsApiService.reportsMove(moveRequest)
+      .pipe(
+        withLatestFrom(this.store.select(selectSelectedProjectId)),
+        mergeMap(([res, projectId]: [ReportsMoveResponse, string]) => [
           setReportChanges({
             id: moveRequest.task,
+            filterOut: projectId && projectId !== '*' && projectId !== moveRequest.project,
             changes: {
               project: (moveRequest.project ?
                 {id: moveRequest.project, name: moveRequest.project_name} :

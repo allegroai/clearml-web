@@ -8,14 +8,14 @@ import {
   OnInit,
   ViewChild
 } from '@angular/core';
-import {MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {ExtFrame} from '../plotly-graph-base';
 import {Store} from '@ngrx/store';
 import {Observable} from 'rxjs/internal/Observable';
 import {Subject, Subscription} from 'rxjs';
 import {cloneDeep} from 'lodash-es';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
-import {MatLegacySelectChange as MatSelectChange} from '@angular/material/legacy-select';
+import {MatSelectChange} from '@angular/material/select';
 import {debounceTime, filter, map, take} from 'rxjs/operators';
 import {convertPlots, groupIterations} from '@common/tasks/tasks.utils';
 import {addMessage} from '@common/core/actions/layout.actions';
@@ -40,11 +40,13 @@ import {
 } from '@common/shared/single-graph/single-graph.reducer';
 import {getSignedUrl} from '@common/core/actions/common-auth.actions';
 import {selectSignedUrl} from '@common/core/reducers/common-auth-reducer';
+import {AxisType} from 'plotly.js';
 
 export interface GraphViewerData {
   chart: ExtFrame;
   id: string;
   xAxisType?: any;
+  yAxisType?: AxisType;
   smoothWeight?: number;
   darkTheme: boolean;
   isCompare: boolean;
@@ -77,6 +79,8 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
   private charts: ExtFrame[];
   public index: number = null;
   public embedFunction: (DOMRect) => null;
+  public yAxisType: AxisType;
+  public showSmooth: boolean;
 
   @HostListener('document:keydown', ['$event'])
   onKeyDown(e: KeyboardEvent) {
@@ -127,7 +131,7 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: GraphViewerData,
     public dialogRef: MatDialogRef<GraphViewerComponent>,
-    private store: Store<any>,
+    private store: Store,
     private cdr: ChangeDetectorRef,
   ) {
     this.chart$ = this.store.select(selectFullScreenChart);
@@ -142,11 +146,13 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
     }
     this.store.dispatch(setGraphDisplayFullDetailsScalarsIsOpen({isOpen: true}));
     this.isCompare = data.isCompare;
-    this.isFullDetailsMode = ['multiScalar', 'scalar'].includes(data.chart.layout.type) && !this.isCompare;
+    this.yAxisType = data.yAxisType ?? 'linear';
+    this.showSmooth = ['multiScalar', 'scalar'].includes(data.chart.layout.type);
+    this.isFullDetailsMode = this.showSmooth && !this.isCompare;
     this.id = data.id;
     this.embedFunction = data.embedFunction;
     this.darkTheme = data.darkTheme;
-    this.smoothWeight = data.smoothWeight;
+    this.smoothWeight = data.smoothWeight ?? 0;
     const reqData = {
       task: this.data.chart.task,
       metric: this.data.chart.metric,
@@ -206,7 +212,8 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
         if (this.index === null) {
           this.index = Math.max(this.charts.findIndex(c => c.variant === this.data.chart.variant), 0);
         } else {
-          this.index = this.isForward ? 0 : this.charts.length - 1;
+          this.index = this.charts.findIndex(chrt => chrt.metric === this.chart?.metric && chrt.variant === this.chart?.variant);
+          this.index = this.index === -1 ? (this.isForward ? 0 : this.charts.length - 1) : this.index;
         }
         this.chart = this.charts[this.index];
         this.iteration = currentPlotEvents[0].iter;

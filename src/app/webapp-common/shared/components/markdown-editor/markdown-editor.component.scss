@@ -524,6 +524,7 @@
       &[open] {
         border-color: lighten($dark-border, 20%);
         margin-bottom: 12px;
+        overflow: auto;
         summary {
           color: lighten(#90bce3, 20%);
           margin-bottom: 12px;

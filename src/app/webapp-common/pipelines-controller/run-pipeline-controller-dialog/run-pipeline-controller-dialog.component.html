@@ -4,23 +4,23 @@
   <ng-form #enqueueForm="ngForm" class="d-flex flex-column light-theme form-container">
     <div class="section-title" *ngIf="params?.length > 0">Parameters</div>
     <div *ngFor="let param of params" class="param-line">
-      <div class="param-key">{{param.name}}</div>
+      <div class="param-key ellipsis" smShowTooltipIfEllipsis [smTooltip]="param.name">{{param.name}}</div>
       <ng-container [ngSwitch]="param.type">
-        <mat-form-field appearance="outline" *ngSwitchCase="'float'">
+        <mat-form-field appearance="outline" class="no-bottom" *ngSwitchCase="'float'">
           <input #floatInput="ngModel"  type="text" matInput [(ngModel)]="param.value" [name]="param.name" pattern="[+-]?([0-9]*[.])?[0-9]+" >
           <mat-error
             *ngIf="floatInput?.errors && floatInput?.errors['pattern']">
             Please provide an float
           </mat-error>
         </mat-form-field>
-        <mat-form-field appearance="outline" *ngSwitchCase="'int'">
+        <mat-form-field appearance="outline" class="no-bottom" *ngSwitchCase="'int'">
           <input  type="text" step="1" matInput [(ngModel)]="param.value" #intInput="ngModel" [name]="param.name" pattern="^[-\d]\d*$">
           <mat-error
             *ngIf="intInput?.errors && intInput?.errors['pattern']">
             Please provide an integer
           </mat-error>
         </mat-form-field>
-        <mat-form-field appearance="outline" *ngSwitchDefault>
+        <mat-form-field appearance="outline" class="no-bottom" *ngSwitchDefault>
           <input matInput [(ngModel)]="param.value" [name]="param.name">
         </mat-form-field>
       </ng-container>
@@ -31,7 +31,7 @@
     </div>
     <div class="param-line" [style.visibility]="chooseCustomQueue?'visible' :'hidden'">
       <div class="param-key">Pipeline controller queue</div>
-      <mat-form-field appearance="outline" class="queue-select">
+      <mat-form-field appearance="outline" class="no-bottom queue-select">
         <mat-select [(ngModel)]="selectedQueue" name="queue" panelClass="light-theme">
           <mat-option *ngFor="let queue of queues" [value]="queue">
             {{queue.name}}

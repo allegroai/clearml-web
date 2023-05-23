@@ -1,26 +1,29 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {ActivatedRoute, Params, Router} from '@angular/router';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {MatDialog} from '@angular/material/dialog';
 import {ReportDialogComponent} from '../report-dialog/report-dialog.component';
 import {
   addReportsTags,
   archiveReport,
-  createReport, deleteReport,
+  createReport,
+  deleteReport,
   getReports,
   getReportsTags,
   moveReport,
   resetReports,
   restoreReport,
   setArchive,
-  setReportsOrderBy, setReportsSearchQuery,
+  setReportsOrderBy,
+  setReportsSearchQuery,
   updateReport
 } from '../reports.actions';
 import {
   selectArchiveView,
   selectNoMoreReports,
   selectReports,
-  selectReportsOrderBy, selectReportsQueryString,
+  selectReportsOrderBy,
+  selectReportsQueryString,
   selectReportsSortOrder,
   selectReportsTags
 } from '../reports.reducer';
@@ -74,12 +77,17 @@ export class ReportsPageComponent implements OnInit, OnDestroy {
     this.store.dispatch(getReportsTags());
   }
 
-  public openCreateReportDialog() {
-    this.matDialog.open(ReportDialogComponent).afterClosed().subscribe(report => {
-      if (report) {
-        this.store.dispatch(createReport({reportsCreateRequest: report}));
-      }
-    });
+  public openCreateReportDialog(projectId) {
+    this.matDialog.open(ReportDialogComponent, {
+      data: {defaultProjectId: projectId},
+      panelClass: 'light-theme',
+    })
+      .afterClosed()
+      .subscribe(report => {
+        if (report) {
+          this.store.dispatch(createReport({reportsCreateRequest: report}));
+        }
+      });
   }
 
   ngOnDestroy(): void {
@@ -89,7 +97,6 @@ export class ReportsPageComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.store.dispatch(initSearch({payload: 'Search for reports'}));
-
     let prevQueryParams: Params;
     this.sub.add(combineLatest([
         this.store.select(selectMainPageTagsFilter),

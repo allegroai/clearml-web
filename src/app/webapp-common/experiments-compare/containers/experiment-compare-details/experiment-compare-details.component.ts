@@ -1,26 +1,11 @@
-import {
-  AfterViewInit,
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  ElementRef,
-  HostListener,
-  OnInit,
-  QueryList,
-  ViewChildren
-} from '@angular/core';
+import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import {select, Store} from '@ngrx/store';
 import {experimentListUpdated} from '../../actions/experiments-compare-details.actions';
 import {selectExperimentsDetails} from '../../reducers';
-import {filter, take, tap} from 'rxjs/operators';
+import {filter, tap} from 'rxjs/operators';
 import {ExperimentCompareTree, IExperimentDetail} from '~/features/experiments-compare/experiments-compare-models';
 import {
-  convertConfigurationFromExperiments,
-  convertContainerScriptFromExperiments,
-  convertExperimentsArrays,
-  convertNetworkDesignFromExperiments,
-  getAllKeysEmptyObject,
-  isDetailsConverted
+  convertConfigurationFromExperiments, convertContainerScriptFromExperiments, convertExperimentsArrays, convertNetworkDesignFromExperiments, getAllKeysEmptyObject, isDetailsConverted
 } from '../../jsonToDiffConvertor';
 import {ExperimentCompareBase} from '../experiment-compare-base';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -28,6 +13,7 @@ import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-in
 import {ConfigurationItem} from '~/business-logic/model/tasks/configurationItem';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {LIMITED_VIEW_LIMIT} from '@common/experiments-compare/experiments-compare.constants';
+import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 
 @Component({
   selector: 'sm-experiment-compare-details',
@@ -54,7 +40,7 @@ export class ExperimentCompareDetailsComponent extends ExperimentCompareBase imp
   ngOnInit() {
     this.onInit();
     this.routerParamsSubscription = this.taskIds$.subscribe((experimentIds) => {
-        this.store.dispatch(experimentListUpdated({ids: experimentIds.slice(0, LIMITED_VIEW_LIMIT)}));
+        this.store.dispatch(experimentListUpdated({ids: experimentIds.slice(0, LIMITED_VIEW_LIMIT), entity: EntityTypeEnum.experiment}));
       }
     );
 

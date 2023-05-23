@@ -10,7 +10,10 @@ import {UiComponentsModule} from '../ui-components/ui-components.module';
 import {ProjectDialogComponent} from './project-dialog.component';
 import {CreateNewProjectFormComponent} from './create-new-project-form/create-new-project-form.component';
 import {SharedPipesModule} from '../pipes/shared-pipes.module';
-import {ProjectMoveToFormComponent} from "./project-move-to-form/project-move-to-form.component";
+import {ProjectMoveToFormComponent} from './project-move-to-form/project-move-to-form.component';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {UniqueProjectValidator} from '@common/shared/project-dialog/unique-project.validator';
+import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
 
 @NgModule({
   imports: [
@@ -21,8 +24,10 @@ import {ProjectMoveToFormComponent} from "./project-move-to-form/project-move-to
     SMMaterialModule,
     StoreModule.forFeature('projectCreateDialog', projectDialogReducer),
     EffectsModule.forFeature([ProjectDialogEffects]),
-    SharedPipesModule
+    SharedPipesModule,
+    MatProgressSpinnerModule,
+    LabeledFormFieldDirective
   ],
-  declarations: [ProjectDialogComponent, CreateNewProjectFormComponent, ProjectMoveToFormComponent]
+  declarations: [ProjectDialogComponent, CreateNewProjectFormComponent, ProjectMoveToFormComponent, UniqueProjectValidator]
 })
 export class ProjectDialogModule { }

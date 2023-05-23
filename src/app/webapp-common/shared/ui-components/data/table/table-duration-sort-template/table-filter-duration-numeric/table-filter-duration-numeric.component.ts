@@ -5,13 +5,17 @@ import {
   OnDestroy,
   OnInit,
 } from '@angular/core';
-import {IDurationThan, DurationParameters, TableDurationSortBase} from '../table-duration-sort.base';
-import {UntypedFormControl, UntypedFormGroup} from '@angular/forms';
-import {distinctUntilChanged, debounceTime, map} from 'rxjs/operators';
-import {merge, Subscription} from 'rxjs';
+import {
+  IDurationThan,
+  ImmediateErrorStateMatcher,
+  TableDurationSortBaseComponent
+} from '../table-duration-sort-base.component';
+import {FormControl, FormGroup, Validators} from '@angular/forms';
+import {distinctUntilChanged, debounceTime, filter} from 'rxjs/operators';
+import {Subscription} from 'rxjs';
 import {isNil} from 'lodash-es';
 
-const getDurationValue = (data: IDurationThan) => isNil(data.value) || !data.checked ? '' : data.value;
+const getDurationValue = (value: IDurationThan) => value.checked ? `${value.value}` : '';
 
 
 @Component({
@@ -21,31 +25,32 @@ const getDurationValue = (data: IDurationThan) => isNil(data.value) || !data.che
   changeDetection: ChangeDetectionStrategy.OnPush
 
 })
-export class TableFilterDurationNumericComponent extends TableDurationSortBase implements OnInit, OnDestroy {
-  iterationsForm = new UntypedFormGroup( {
-    greaterThan: new UntypedFormControl(''),
-    lessThan: new UntypedFormControl('')
-  });
+export class TableFilterDurationNumericComponent extends TableDurationSortBaseComponent implements OnInit, OnDestroy {
   private subscription: Subscription;
+  immediate = new ImmediateErrorStateMatcher();
+  numericPattern = '(|-?(0\\.|\\.|)\\d*)';
+
+  iterationsForm = new FormGroup( {
+    greaterThan: new FormControl<string>('', [Validators.pattern(this.numericPattern)]),
+    lessThan: new FormControl<string>('', [Validators.pattern(this.numericPattern)])
+  });
 
   constructor(cdr: ChangeDetectorRef) {
     super(cdr);
   }
 
   ngOnInit(): void {
-    const greaterThan$ = this.iterationsForm.get('greaterThan').valueChanges.pipe( map (value => ({name: 'greaterThan', value})));
-    const lessThan$ = this.iterationsForm.get('lessThan').valueChanges.pipe( map (value => ({name: 'lessThan', value})));
-
-    this.subscription = merge(greaterThan$, lessThan$ )
+    this.iterationsForm.valueChanges
       .pipe(
         debounceTime(200),
+        filter(() => this.iterationsForm.valid),
         distinctUntilChanged()
       )
-      .subscribe( ({value, name}: {value: number; name: DurationParameters}) => {
-        if (this[name].checked !== !!value) {
-          this.setCheckBox(!!value, name, false);
-        }
-        this.timeStampChanged(value, name);
+      .subscribe( ({greaterThan, lessThan}) => {
+        !!greaterThan != this.greaterThan.checked && this.setCheckBox(!this.greaterThan.checked, 'greaterThan', false);
+        this.timeStampChanged(!!greaterThan ? parseInt(greaterThan, 10) : greaterThan, 'greaterThan');
+        !!lessThan != this.lessThan.checked && this.setCheckBox(!this.lessThan.checked, 'lessThan', false);
+        this.timeStampChanged(!!lessThan ? parseInt(lessThan, 10) : lessThan, 'lessThan');
       });
   }
 
@@ -55,6 +60,7 @@ export class TableFilterDurationNumericComponent extends TableDurationSortBase i
   prepareDataToServerFunction(data): string | number | null {
     return isNil(data) || data === '' ? null : +data ;
   }
+
   _updateValue(): void {
     const greaterThan = getDurationValue(this.greaterThan);
     const lessThan = getDurationValue(this.lessThan);

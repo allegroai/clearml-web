@@ -4,7 +4,6 @@ import {SelectedModel} from '../shared/models.model';
 import {ModelsUpdateRequest} from '~/business-logic/model/models/modelsUpdateRequest';
 import {IModelMetadataMap} from '../containers/model-info-metadata/model-info-metadata.component';
 import {TableFilter} from '@common/shared/utils/tableParamEncode';
-import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 
 
 const MODELS_PREFIX = 'MODELS_INFO_';
@@ -81,12 +80,12 @@ export const setPlots = createAction(
   props<{plots: any[]}>()
 );
 
-export const getScalars = createAction(
-  MODELS_PREFIX + '[get scalars]',
-  props<{id: string}>()
-);
-
-export const setScalars = createAction(
-  MODELS_PREFIX + '[set scalars]',
-  props<{scalars: any[]; axisType: ScalarKeyEnum}>()
-);
+// export const getScalars = createAction(
+//   MODELS_PREFIX + '[get scalars]',
+//   props<{id: string}>()
+// );
+//
+// export const setScalars = createAction(
+//   MODELS_PREFIX + '[set scalars]',
+//   props<{scalars: any[]; axisType: ScalarKeyEnum}>()
+// );

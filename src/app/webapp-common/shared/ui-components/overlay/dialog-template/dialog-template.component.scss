@@ -58,7 +58,7 @@ $generic-font-size: 11px;
     }
   }
   ::ng-deep .background-transparent {
-    .mat-dialog-container {
+    .mat-mdc-dialog-container {
       max-height: none !important;
       height: 97vh !important;
       background-color: transparent;

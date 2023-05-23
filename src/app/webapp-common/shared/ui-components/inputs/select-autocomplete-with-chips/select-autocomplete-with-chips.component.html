@@ -1,26 +1,28 @@
 <ng-form #autoSelectForm='ngForm'>
-  <mat-form-field [appearance]="appearance" hideRequiredMarker floatLabel="never" [class]="formFieldClass">
-    <div class="d-flex">
-      <mat-chip-list #chipList aria-label="Fruit selection" [disabled]="disabled">
-        <ng-container *ngIf="multiple">
-          <sm-chips *ngFor="let item of val; trackBy: trackByFn"
-                    [label]="item.label"
-                    [allowRemove]="multiple && clearable && !disabled"
-                    (remove)="remove(item)"
-          >
-          </sm-chips>
+  <mat-form-field [appearance]="appearance" hideRequiredMarker [class]="formFieldClass">
+    <div class="d-flex-center">
+      <mat-chip-grid #chipList aria-label="Fruit selection" [disabled]="disabled" [class.single]="!multiple">
+        <ng-container *ngIf="multiple; else: singleChip">
+          <sm-chips
+          *ngFor="let item of val; trackBy: trackByFn"
+          [label]="item.label"
+          [allowRemove]="clearable && !disabled"
+          (remove)="remove(item)"
+          ></sm-chips>
         </ng-container>
-        <sm-chips
-          *ngIf="!multiple && val"
-          [label]="val?.label"
-          [allowRemove]="clearable"
-          (remove)="remove()"
-        ></sm-chips>
-
+        <ng-template #singleChip>
+          <sm-chips
+            *ngIf="val"
+            [label]="val?.label"
+            [allowRemove]="clearable"
+            (remove)="remove()"
+          ></sm-chips>
+        </ng-template>
         <input
           #autocompleteInput
           matInput
           [placeholder]="!val && placeholder"
+          data-id="labelInputField"
           [ngModel]="val"
           [name]="name"
           [matAutocomplete]="auto"
@@ -31,15 +33,14 @@
           (click)="!autocomplete.panelOpen && autocomplete.openPanel()"
           class="chips-input"
         >
-
-
-      </mat-chip-list>
+      </mat-chip-grid>
       <i *ngIf="!disabled"
-        [class]="'al-icon sm pl-2 mr-1 ml-auto ' + (val ? (multiple && clearable? 'al-ico-dropdown-arrow' : 'al-ico-dialog-x pointer') : 'al-ico-dropdown-arrow')"
+         class="al-icon sm ps-2 me-1 ms-auto"
+         data-id="filterBylabelDropdownIcon"
+        [class]="val ? (multiple && clearable ? 'al-ico-dropdown-arrow' : 'al-ico-dialog-x pointer') : 'al-ico-dropdown-arrow'"
         (click)="val && !(multiple && clearable) && removeLastChip(); autocompleteInput.focus();"
         smClickStopPropagation></i>
     </div>
-
     <mat-autocomplete #auto="matAutocomplete"
                       [displayWith]="displayFn"
                       [class]="formFieldClass"
@@ -55,6 +56,5 @@
         {{option.label}}
       </mat-option>
     </mat-autocomplete>
-
   </mat-form-field>
 </ng-form>

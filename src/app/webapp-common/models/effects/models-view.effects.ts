@@ -66,6 +66,7 @@ import {selectTableMode} from '../../experiments/reducers';
 import {selectActiveWorkspaceReady} from '~/core/reducers/view.reducer';
 import {escapeRegex} from '@common/shared/utils/escape-regex';
 import {MESSAGES_SEVERITY} from '@common/constants';
+import {sortByField} from '@common/tasks/tasks.utils';
 
 @Injectable()
 export class ModelsViewEffects {
@@ -74,7 +75,8 @@ export class ModelsViewEffects {
     private actions$: Actions, private store: Store<IModelsViewState>, private apiModels: ApiModelsService,
     private projectsApi: ApiProjectsService, private modelBl: BlModelsService, private router: Router,
     private route: ActivatedRoute
-  ) {}
+  ) {
+  }
 
   /* eslint-disable @typescript-eslint/naming-convention */
 
@@ -105,7 +107,7 @@ export class ModelsViewEffects {
           ...action.filters.reduce((acc, updatedFilter) => {
             acc[updatedFilter.col] = {value: updatedFilter.value, matchMode: updatedFilter.filterMatchMode};
             return acc;
-          }, {} as {[col: string]: FilterMetadata})
+          }, {} as { [col: string]: FilterMetadata })
         }, update: true
       })]
     )
@@ -119,7 +121,7 @@ export class ModelsViewEffects {
     ),
     switchMap(([action, isDeep, selectedProject]) => {
       const projectId = action.col.projectId || selectedProject.id;
-      return this.projectsApi.projectsGetModelMetadataValues ({
+      return this.projectsApi.projectsGetModelMetadataValues({
         include_subprojects: isDeep,
         key: action.col.key,
         ...(projectId !== '*' && {projects: [projectId]})
@@ -162,7 +164,7 @@ export class ModelsViewEffects {
     withLatestFrom(
       this.store.select(selectRouterParams).pipe(map(params => params?.projectId)),
     ),
-    switchMap(([action, projectId]) => this.apiModels.modelsGetFrameworks({projects: projectId !== '*' && action.type !==  actions.getAllProjectsFrameworks.type ? [projectId] : []})
+    switchMap(([action, projectId]) => this.apiModels.modelsGetFrameworks({projects: projectId !== '*' && action.type !== actions.getAllProjectsFrameworks.type ? [projectId] : []})
       .pipe(
         mergeMap(res => [
           actions.setFrameworks({frameworks: res.frameworks.concat(null)}),
@@ -190,7 +192,7 @@ export class ModelsViewEffects {
     ofType(actions.getTags, actions.getTagsForAllProjects),
     withLatestFrom(this.store.select(selectRouterParams).pipe(map(params => params?.projectId))),
     switchMap(([action, projectId]) => this.projectsApi.projectsGetModelTags({
-      projects: (projectId === '*' ||  action.type=== actions.getTagsForAllProjects.type) ? [] : [projectId]
+      projects: (projectId === '*' || action.type === actions.getTagsForAllProjects.type) ? [] : [projectId]
     }).pipe(
       mergeMap(res => [
         actions.setTags({tags: res.tags.concat(null)}),
@@ -222,6 +224,34 @@ export class ModelsViewEffects {
     ))
   ));
 
+  getCustomMetrics = createEffect(() => this.actions$.pipe(
+    ofType(actions.getCustomMetrics),
+    withLatestFrom(
+      this.store.select(selectRouterParams).pipe(map(params => params?.projectId)),
+      this.store.select(selectIsDeepMode)
+    ),
+    switchMap(([action, projectId, isDeep]) => this.projectsApi.projectsGetUniqueMetricVariants({
+        project: projectId === '*' ? null : projectId,
+        model_metrics: true,
+        include_subprojects: isDeep
+      })
+        .pipe(
+          mergeMap(res => [
+            actions.setCustomMetrics({metrics: sortByField(res.metrics, 'metric')}),
+            deactivateLoader(action.type)
+          ]),
+          catchError(error => [
+            requestFailed(error),
+            deactivateLoader(action.type),
+            addMessage('warn', 'Fetch custom metrics failed', error?.meta && [{
+              name: 'More info',
+              actions: [setServerError(error, null, 'Fetch custom metrics failed')]
+            }]),
+          ])
+        )
+    )
+  ));
+
   lockRefresh = false;
   refreshModels = createEffect(() => this.actions$.pipe(
     ofType(actions.refreshModels),
@@ -233,8 +263,8 @@ export class ModelsViewEffects {
       this.store.select(selectAppVisible)),
     filter((values) => values[4]),
     switchMap(([action, scrollId, selectedModel, models]) => {
-      this.lockRefresh = !action.autoRefresh;
-      return this.fetchModels$(scrollId, true)
+        this.lockRefresh = !action.autoRefresh;
+        return this.fetchModels$(scrollId, true)
           .pipe(
             mergeMap(res => {
               this.lockRefresh = false;
@@ -276,7 +306,7 @@ export class ModelsViewEffects {
       .pipe(
         mergeMap(res => {
 
-          const addModelsAction = scrollId === res.scroll_id ?
+          const addModelsAction = scrollId === res.scroll_id || !scrollId ?
             [actions.addModels({models: res.models})] :
             [actions.getNextModelsWithPageSize({pageSize: modelsList.length}), addMessage(MESSAGES_SEVERITY.WARN, 'Session expired')];
 
@@ -364,7 +394,7 @@ export class ModelsViewEffects {
       this.store.select(selectRouterParams).pipe(map(params => params?.projectId)),
       this.store.select(selectTableMode)
     ),
-    filter(([, , , tableMode])=>tableMode==='info'),
+    filter(([, , , tableMode]) => tableMode === 'info'),
     tap(([, models, projectId]) => this.navigateAfterModelSelectionChanged(models[0] as SelectedModel, projectId)),
     mergeMap(() => [actions.setTableMode({mode: 'info'})])
   ));
@@ -460,7 +490,7 @@ export class ModelsViewEffects {
           this.store.select(modelsSelectors.selectModelTableColumns),
           this.store.select(selectIsDeepMode),
         ),
-        switchMap(([scrollId, projectId, isArchived, metadataCols, gb, orderFields, filters, selectedModels, showAllSelectedIsActive, colsOrder, hiddenCols,cols ,deep]) => {
+        switchMap(([scrollId, projectId, isArchived, metadataCols, gb, orderFields, filters, selectedModels, showAllSelectedIsActive, colsOrder, hiddenCols, cols, deep]) => {
           const selectedIds = showAllSelectedIsActive ? selectedModels.map(exp => exp.id) : [];
           const columns = encodeColumns(MODELS_TABLE_COLS, hiddenCols, metadataCols, colsOrder);
           this.setModelsUrlParams(filters, orderFields, isArchived, columns, deep);

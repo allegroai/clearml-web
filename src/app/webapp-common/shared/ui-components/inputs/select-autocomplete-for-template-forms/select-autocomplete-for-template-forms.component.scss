@@ -7,18 +7,4 @@
   mat-form-field {
     display: block;
   }
-
-  .narrow {
-    ::ng-deep .mat-form-field-flex {
-     margin-top: -16px;
-     height: 48px;
-    }
-
-    ::ng-deep .mat-form-field-infix {
-      height: 42px;
-      border-top: 0;
-      line-height: 24px;
-    }
-  }
-
 }

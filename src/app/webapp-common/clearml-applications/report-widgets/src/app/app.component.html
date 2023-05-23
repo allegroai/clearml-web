@@ -2,6 +2,12 @@
   <ng-container *ngIf="(signIsNeeded$ | async) === false; else signIsNeededTemplate">
     <ng-container *ngIf="(noPermissions$ | async) === false; else noPermissionsTemplate">
 
+      <a class="webapp-link" [href]="webappLink" target="_blank" [class.dark-theme]="isDarkTheme">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+          <path d="m2.67,14.66c-.74,0-1.33-.6-1.33-1.33h0V2.67c0-.74.6-1.33,1.33-1.33h5.33v1.33H2.67v10.67h10.67v-5.33h1.34v5.33c0,.74-.6,1.33-1.34,1.33H2.67Zm4.86-7.14l4.86-4.86h-1.72v-1.33h4v4h-1.33v-1.72l-4.86,4.86-.95-.94Z" fill="#8693be"/>
+        </svg>
+        <span class="webapp-link_tooltip">View original resource</span>
+      </a>
       <ng-container [ngSwitch]="type">
         <ng-container *ngSwitchCase="type === 'plot' || type === 'scalar' ? type : ''">
           <sm-single-graph
@@ -33,6 +39,7 @@
             (imageClicked)="hideMaximize === 'show' && sampleClicked($event)">
           </sm-debug-image-snippet>
         </ng-container>
+
         <ng-container *ngSwitchCase="'parcoords'">
           <sm-parallel-coordinates-graph
             *ngIf="parcoordsData"
@@ -43,6 +50,15 @@
             [darkTheme]="isDarkTheme"
             [reportMode]="true"
           ></sm-parallel-coordinates-graph>
+        </ng-container>
+
+        <ng-container *ngSwitchCase="'single'">
+          <sm-single-value-summary-table
+            *ngIf="singleValueData && singleValueData[0]"
+            [data]="singleValueData"
+            [experimentName]="singleValueData[0]?.metric"
+            [darkTheme]="isDarkTheme"
+            class="single-value-summary-table"></sm-single-value-summary-table>
         </ng-container>
       </ng-container>
 

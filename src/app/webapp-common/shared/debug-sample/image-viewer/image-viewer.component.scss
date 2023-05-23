@@ -31,6 +31,8 @@
     background-color: white;
     padding: 0 24px;
     border-bottom: solid 1px #f1f1f1;
+    position: relative;
+    z-index: 1;
 
     .third {
       width: 33.3%;
@@ -48,7 +50,7 @@
       }
 
       @media screen and (min-width: 960px) {
-        mat-slider.mat-slider-horizontal {
+        .mat-mdc-slider {
           min-width: 280px;
         }
       }

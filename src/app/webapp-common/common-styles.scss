@@ -12,92 +12,102 @@
 @import "shared/ui-components/styles/material-palette";
 @import "assets/fonts/trains-icons.scss";
 @import "layout/layout";
-@import "shared/ui-components/styles/overrides/viewer-iterations-slider";
 
-// TODO(v15): As of v15 mat.legacy-core no longer includes default typography styles.
-//  The following line adds:
-//    1. Default typography styles for all components
-//    2. Styles for typography hierarchy classes (e.g. .mat-headline-1)
-//  If you specify typography styles for the components you use elsewhere, you should delete this line.
-//  If you don't need the default component typographies but still want the hierarchy styles,
-//  you can delete this line and instead use:
-//    `@include mat.legacy-typography-hierarchy(mat.define-legacy-typography-config());`
-@include mat.all-legacy-component-typographies();
-@include mat.legacy-core();
-//@import "../webapp-common/shared/ui-components/styles/material-theme.scss";
-
-$custom-typography: mat.define-legacy-typography-config(
-        $font-family: $font-family-base
+@include mat.core();
+$custom-typography: mat.define-typography-config(
+  $font-family: $font-family-base
 );
 
-@include mat.all-legacy-component-typographies($custom-typography);
+@include mat.typography-hierarchy($custom-typography);
+@include mat.all-component-typographies($custom-typography);
 
-$allegro-theme-primary: mat.define-palette($mat-allegro);
-$allegro-theme-accent: mat.define-palette($mat-allegro, A400, A100, A400);
-$custom-theme-primary: mat.define-palette(mat.$green-palette);
-$custom-theme-accent: mat.define-palette(mat.$lime-palette, A400, A100, A400);
-$custom-theme-warn: mat.define-palette(mat.$purple-palette);
+$allegro-palette-primary: mat.define-palette($mat-allegro);
+$allegro-palette-accent: mat.define-palette($mat-allegro, A400, A100, A400);
 
-$sm-theme-primary: mat.define-palette($sm-purple);
-$sm-theme-accent: mat.define-palette($sm-purple, A400, A100, A400);
-$sm-theme-warn: mat.define-palette(mat.$purple-palette);
+$sm-palette-primary: mat.define-palette($sm-purple);
+$sm-palette-accent: mat.define-palette($sm-purple, A100, A200, A400);
+$sm-palette-warn: mat.define-palette(mat.$purple-palette);
 
-$green-theme: mat.define-light-theme((color: (
-  primary: $custom-theme-primary,
-  accent: $custom-theme-accent,
-  warn: $custom-theme-warn
-)));
-$dark-theme: mat.define-dark-theme((color: (
-  primary: $allegro-theme-primary,
-  accent: $allegro-theme-accent
-)));
-$light-theme: mat.define-light-theme((
+$sm-neon-palette-primary: mat.define-palette($sm-neon);
+$sm-neon-palette-accent: mat.define-palette($sm-neon, A200, A100, A400);
+
+$dark-theme: mat.define-dark-theme((
   color: (
-    primary: $allegro-theme-primary,
-    accent: $allegro-theme-accent
+    primary: $allegro-palette-primary,
+    accent: $allegro-palette-accent
   ),
+  typography: $custom-typography,
+  density: -2
 ));
 
-$sm-theme: mat.define-light-theme((color: (
-  primary: $sm-theme-primary,
-  accent: $sm-theme-accent,
-  warn: $sm-theme-warn
-)));
+$light-theme: mat.define-light-theme((
+  color: (
+    primary: $allegro-palette-primary,
+    accent: $allegro-palette-accent
+  ),
+  typography: $custom-typography,
+));
 
-@include mat.legacy-form-field-color($light-theme);
-@include mat.legacy-progress-spinner-theme($light-theme);
-@include mat.legacy-progress-bar-theme($light-theme);
+$sm-theme: mat.define-light-theme((
+  color: (
+    primary: $sm-palette-primary,
+    accent: $sm-palette-accent,
+    warn: $sm-palette-warn
+  ),
+  typography: $custom-typography
+));
+
+$sm-neon-theme: mat.define-dark-theme((
+  color: (
+    primary: $sm-neon-palette-primary,
+    accent: $sm-neon-palette-accent,
+  ),
+  typography: $custom-typography
+));
+
+//@include mat.form-field-theme($light-theme);
+@include mat.progress-spinner-theme($light-theme);
+@include mat.progress-bar-theme($light-theme);
 @include mat.datepicker-color($light-theme);
+@include mat.tooltip-theme($sm-theme);
+@include mat.menu-theme($light-theme);
+@include mat.autocomplete-theme($light-theme);
+@include mat.select-theme($light-theme);
+
+.dark-outline {
+  @include mat.menu-color($dark-theme);
+  @include mat.autocomplete-color($dark-theme);
+  @include mat.select-color($dark-theme);
+}
 
 .dark-theme {
-  @include mat.legacy-core-theme($dark-theme);
-  @include mat.legacy-button-theme($dark-theme);
-  @include mat.legacy-slide-toggle-color($green-theme);
-  @include mat.legacy-radio-color($green-theme);
-  @include mat.legacy-select-color($dark-theme);
-  @include mat.legacy-menu-color($light-theme);
-  @include mat.legacy-autocomplete-color($light-theme);
-  @include mat.pseudo-checkbox-color($light-theme);
-  @include mat.divider-color($light-theme);
+  // @include mat.all-component-themes($dark-theme);
+  @include mat.core-theme($dark-theme);
+  @include mat.form-field-theme($dark-theme);
+  @include mat.input-theme($dark-theme);
+  @include mat.dialog-theme($dark-theme);
+  @include mat.chips-theme($dark-theme);
+  @include mat.button-theme($dark-theme);
+  @include mat.fab-theme($dark-theme);
+  @include mat.icon-button-theme($dark-theme);
+  @include mat.slide-toggle-theme($sm-neon-theme);
+  @include mat.slider-theme($sm-neon-theme);
+  @include mat.radio-color($dark-theme);
+  @include mat.divider-color($dark-theme);
+  @include mat.checkbox-theme($dark-theme);
+  @include mat.list-theme($dark-theme);
 
+  --mdc-typography-body1-letter-spacing: 0;
+  --mdc-typography-button-letter-spacing: 0;
 
-  .mat-checkbox-frame,
-  .mat-radio-outer-circle {
-    border-color: $blue-400;
+  .mat-mdc-checkbox .mdc-checkbox {
+    --mdc-checkbox-selected-icon-color: #{$purple};
+    --mdc-checkbox-selected-hover-icon-color: #{$purple};
+    --mdc-checkbox-selected-focus-icon-color: #{$purple};
   }
 
   .mat-expansion-panel-header-description, .mat-expansion-indicator:after {
     color: $white;
-  }
-
-  .light-theme .mat-radio-button.mat-radio-disabled .mat-radio-outer-circle,
-  .light-theme .mat-radio-button.mat-radio-disabled .mat-radio-label-content {
-    border-color: $blue-200 !important;
-    color: $blue-200 !important;
-  }
-
-  .light-theme .mat-radio-button.mat-radio-disabled .mat-radio-inner-circle {
-    background-color: transparent !important;
   }
 
   .link {
@@ -109,50 +119,34 @@ $sm-theme: mat.define-light-theme((color: (
 }
 
 .light-theme {
-  @include mat.legacy-core-color($light-theme);
-  @include mat.legacy-button-color($light-theme);
-  @include mat.legacy-slide-toggle-color($sm-theme);
-  //  @include mat.radio-color($sm-theme);
-  @include mat.legacy-radio-theme($sm-theme);
-  //  @include mat.select-color($light-theme);
-  @include mat.legacy-select-theme($light-theme);
-  @include mat.legacy-menu-color($light-theme);
-  @include mat.legacy-autocomplete-color($light-theme);
-  @include mat.pseudo-checkbox-color($light-theme);
+  @include mat.core-color($light-theme);
+  @include mat.form-field-color($light-theme);
+  @include mat.input-color($light-theme);
+  @include mat.dialog-color($light-theme);
+  @include mat.chips-color($light-theme);
+  @include mat.button-color($light-theme);
+  @include mat.fab-color($light-theme);
+  @include mat.icon-button-color($light-theme);
+  @include mat.slide-toggle-color($sm-theme);
+  @include mat.slider-color($sm-theme);
+  @include mat.radio-color($sm-theme);
   @include mat.divider-color($light-theme);
+  @include mat.checkbox-color($sm-theme);
+  @include mat.list-color($light-theme);
+
+  --mdc-typography-body1-letter-spacing: 0;
+  --mdc-typography-button-letter-spacing: 0;
 
   mat-progress-bar {
     border-radius: 4px;
     box-shadow: 0 0 0 1px $white, 0 0 0 3px lighten($purple, 30%);
+    --mdc-linear-progress-active-indicator-color: #{lighten($purple, 10%)};
+    --mdc-linear-progress-track-height: 12px;
   }
 
-  .mat-progress-bar-fill::after {
-    background-color: lighten($purple, 10%);
-  }
-
-  .mat-checkbox-frame,
-  .mat-radio-outer-circle {
-    border-color: $purple;
-  }
-
-  .mat-radio-button.mat-accent.disabled, .mat-radio-button.mat-accent.disabled.mat-radio-checked {
-    .mat-radio-outer-circle, .mat-radio-inner-circle {
-      border-color: $blue-300;
-    }
-
-    .mat-radio-inner-circle {
-      background-color: $blue-300;
-    }
-  }
-
-  .light-theme .mat-radio-button.mat-radio-disabled .mat-radio-outer-circle,
-  .light-theme .mat-radio-button.mat-radio-disabled .mat-radio-label-content {
-    border-color: $blue-200 !important;
-    color: $blue-200 !important;
-  }
-
-  .light-theme .mat-radio-button.mat-radio-disabled .mat-radio-inner-circle {
-    background-color: transparent !important;
+  .mat-mdc-radio-button, .mat-mdc-radio-button.mat-accent {
+    --mdc-radio-disabled-selected-icon-color: #{$blue-300};
+    --mdc-radio-disabled-unselected-icon-color: #{$blue-300};
   }
 
   .mat-drawer {
@@ -163,6 +157,18 @@ $sm-theme: mat.define-light-theme((color: (
     color: $blue-300;
   }
 
+  .mat-mdc-nav-list {
+    --mdc-list-list-item-label-text-size: 13px;
+    --mdc-list-list-item-label-text-weight: 500;
+    --mdc-list-list-item-label-text-color: #{$blue-400};
+    --mdc-list-list-item-selected-label-text-color: white;
+
+    .mat-mdc-list-item.selected {
+      .mdc-list-item__primary-text {
+        color: white;
+      }
+    }
+  }
 }
 
 * {
@@ -249,33 +255,33 @@ hr {
   }
 }
 
-// fix for calendar v15 mix with v14
-.dark-theme, .light-theme {
-  .mat-datepicker-content {
-    .mat-mdc-icon-button.mat-mdc-button-base {
-      width: 40px;
-      height: 40px;
-      padding: 8px;
-    }
-
-    .mat-calendar-body-selected {
-      background-color: $blue-200;
-    }
-
-    .mat-mdc-button:not(:disabled) {
-      color: $blue-700;
-    }
-
-    .mat-calendar-body-label, .mat-calendar-period-button {
-      font-size: 14px;
-      font-weight: 500;
-    }
-
-    .mat-calendar-hidden-label {
-      display: none;
-    }
-  }
-}
+//// fix for calendar v15 mix with v14
+//.dark-theme, .light-theme {
+//  .mat-datepicker-content {
+//    .mat-mdc-icon-button.mat-mdc-button-base {
+//      width: 40px;
+//      height: 40px;
+//      padding: 8px;
+//    }
+//
+//    .mat-calendar-body-selected {
+//      background-color: $blue-200;
+//    }
+//
+//    .mat-mdc-button:not(:disabled) {
+//      color: $blue-700;
+//    }
+//
+//    .mat-calendar-body-label, .mat-calendar-period-button {
+//      font-size: 14px;
+//      font-weight: 500;
+//    }
+//
+//    .mat-calendar-hidden-label {
+//      display: none;
+//    }
+//  }
+//}
 
 mat-expansion-panel {
   box-shadow: unset;
@@ -309,31 +315,28 @@ mat-expansion-panel {
   background: $faint-gray !important;
 }
 
-.mat-slide-toggle-label {
-  display: flex !important;
-}
+.mat-mdc-radio-button.sm {
+  --mdc-radio-state-layer-size: 16px;
 
-// Cancel bootstrap css on material component
-mat-radio-group mat-radio-button label.mat-radio-label {
-  display: inline-flex;
-  margin-bottom: 0;
-}
-
-mat-radio-button.sm {
-  .mat-radio-container,
-  .mat-radio-outer-circle,
-  .mat-radio-inner-circle {
-    width: 16px;
+  .mdc-radio {
     height: 16px;
   }
-  .mat-radio-input {
-    height: auto;
+
+  .mdc-radio__background {
+    width: 16px;
+    height: 16px;
+
+    .mdc-radio__inner-circle {
+      top: -2px;
+      left: -2px;
+    }
   }
-  .mat-radio-ripple{
+
+  .mat-radio-ripple {
     height: 32px;
     width: 32px;
-    left: calc(50% - 16px);
-    top: calc(50% - 16px);
+    left: calc(50% - 18px);
+    top: calc(50% - 18px);
     border-radius: 100%;
   }
 }
@@ -357,12 +360,10 @@ button {
 
 .background-neon-green {
   background-color: $neon-green !important;
-  background: $neon-green !important;
 }
 
 .background-neon-yellow {
   background-color: $neon-yellow !important;
-  background: $neon-yellow !important;
 }
 
 .color-neon-green {
@@ -388,6 +389,7 @@ button {
   justify-content: center;
   height: 100%;
   width: 100%;
+  margin-top: 50px;
 }
 
 .empty-menu {
@@ -510,24 +512,27 @@ body .clean-list {
   list-style-type: none;
 }
 
-.mat-tooltip {
+.mat-mdc-tooltip {
   &.sm-tooltip {
-    background-color: $purple;
-    box-shadow: 0 -2px 8px 0 rgba(0, 0, 0, 0.2);
-    font-family: 'Heebo', sans-serif;
-    font-size: 11px;
-    line-height: 1.55;
-    letter-spacing: 0.3px;
-    color: #ffffff;
-    word-break: break-word;
-    max-width: 400px;
+    --mdc-plain-tooltip-container-color: #{$purple};
+
+    .mdc-tooltip__surface {
+      max-width: 400px;
+      font-size: 11px;
+      line-height: 1.55;
+      letter-spacing: 0.3px;
+    }
 
     &.validation {
-      background-color: #ff001f;
+      .mdc-tooltip__surface {
+        --mdc-plain-tooltip-container-color: #{$strong-red};
+      }
     }
 
     &.break-line {
-      white-space: pre-line;
+      .mdc-tooltip__surface {
+        white-space: pre-line;
+      }
     }
   }
 
@@ -539,7 +544,7 @@ body .clean-list {
 // --------------------------------old------------------------------------------
 @import "shared/ui-components/styles/index";
 
-.mat-dialog-container {
+.mat-mdc-dialog-container {
   box-shadow: none !important;
   background-color: transparent !important;
 }
@@ -561,15 +566,21 @@ html {
     overflow: hidden;
   }
 
-  .mat-menu-panel {
-    max-width: none;
+  .mat-mdc-menu-panel.mat-mdc-menu-panel {
+    max-width: 450px;
     min-width: 114px;
     min-height: 32px;
 
     &.custom-columns {
       width: 370px;
     }
+
+    sm-checkbox-three-state-list {
+      min-width: 160px;
+      display: block;
+    }
   }
+
   .ico-chk {
     width: 24px;
     display: inline-block;
@@ -583,22 +594,53 @@ html {
   background: $blue-25;
   color: $blue-400;
   border-bottom: 1px solid $blue-200;
+  font-size: 14px;
 }
 
-.mat-menu-content {
-  .mat-menu-item {
+.light-theme {
+  .mat-mdc-menu-content {
+    .mat-mdc-menu-item {
+      .mdc-list-item__primary-text {
+        --mdc-list-list-item-label-text-color: rgba(0, 0, 0, 0.87);
+      }
+    }
+  }
+}
+
+.mat-mdc-menu-content {
+  padding: 4px 0 !important;
+
+  .mat-mdc-menu-item {
+    margin: 0 4px;
+    width: calc(100% - 8px);
     height: 40px;
+    min-height: 40px;
+    --mdc-typography-body1-line-height: 20px;
     font-size: 14px;
+    --mdc-typography-body1-font-size: 14px;
     padding: 0 32px 0 12px;
     border-radius: 4px;
-    > .al-icon {
-      margin-right: 12px;
+
+    .mdc-list-item__primary-text {
+      --mdc-typography-body1-line-height: 20px;
+      display: flex;
+      align-items: center;
+      gap: 0 12px;
+      flex-grow: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   }
 
   hr {
-    margin: 4px -4px;
+    margin: 4px 0;
   }
+}
+
+.mat-mdc-list-item {
+  --mdc-list-list-item-label-text-size: 14px;
+  --mdc-list-list-item-label-text-line-height: 40px;
+  --mdc-list-list-item-one-line-container-height: 40px;
 }
 
 // hide arrows for number inputs
@@ -641,6 +683,21 @@ as-split {
   }
 }
 
+.dark-theme .light-theme .as-horizontal > .as-split-gutter {
+  background-color: transparent !important;
+
+  .as-split-gutter-icon {
+    background-color: transparent !important;
+    border-left: solid 1px #DEE1E9;
+    border-right: none;
+    background-image: none !important;
+
+    &:hover {
+      border-left: $purple solid 2px;
+    }
+  }
+}
+
 .notifier__container {
   ul {
     margin: 0;
@@ -648,10 +705,10 @@ as-split {
 }
 
 $type-colors: (
-        string: #ff8400,
-        number: $neon-yellow,
-        boolean: #b938a4,
-        date: #05668D,
+  string: #ff8400,
+  number: $neon-yellow,
+  boolean: #b938a4,
+  date: #05668D,
 );
 
 
@@ -688,25 +745,17 @@ $type-colors: (
   }
 }
 
-.mat-checkbox label {
-  margin: 0;
-  display: inline-flex;
-}
-
 .image-viewer-dialog {
-  .mat-dialog-container {
+  .mat-mdc-dialog-container {
     padding: 0;
     border-radius: 0;
   }
 }
 
 //material menu
-body .mat-menu-content:not(:empty) {
-  padding: 4px;
-
+body .mat-mdc-menu-content:not(:empty) {
   .search-results {
     overflow: auto;
-    max-width: 222px;
   }
 
   .fixed-options-subheader {
@@ -714,29 +763,6 @@ body .mat-menu-content:not(:empty) {
     opacity: 0.5;
     font-size: 14px;
     color: rgba(0, 0, 0, 0.87);
-  }
-}
-
-body .mat-menu-panel .mat-form-field.tags-menu-input {
-  .mat-form-field-wrapper {
-    padding: 0;
-
-    .mat-form-field-flex {
-      padding: 0 14px;
-      align-items: center;
-
-      .mat-form-field-infix, .mat-form-field-suffix {
-        display: flex;
-        align-items: center;
-        padding: 10px 0;
-        border: 0;
-        font-size: 14px;
-      }
-    }
-
-    .mat-form-field-underline {
-      bottom: unset;
-    }
   }
 }
 
@@ -823,7 +849,7 @@ button.btn.button-outline-dark {
 .cdk-drag-preview.form-group-drag {
   padding: 8px 16px 32px 16px;
   border-radius: 4px;
-  border: solid 1px #d4d6e0;
+  border: solid 1px $cloudy-blue;
   background-color: white;
 }
 
@@ -884,4 +910,23 @@ button.btn.button-outline-dark {
     margin: 0 !important;
     padding: 0 !important;
   }
+}
+
+.cml-dialog {
+  border-radius: 4px;
+
+  .mdc-dialog .mdc-dialog__content {
+    padding: 0 32px;
+    max-height: 90vh;
+  }
+
+  .mdc-dialog__actions {
+    padding: 24px 0;
+    justify-content: center;
+  }
+}
+
+.select-panel-width {
+  min-width: fit-content;
+  max-width: 50vw !important;
 }

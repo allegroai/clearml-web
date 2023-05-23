@@ -30,6 +30,9 @@ export class TagListComponent {
   public maxTagHover: number;
 
   @Input() set tags(tags: string[]) {
+    if (!tags) {
+      return;
+    }
     window.setTimeout(() => {
       this.tagsList = tags?.map((tag: string) => ({caption: tag, colorObservable: this.colorService.getColor(tag)}));
       if (this.tagsList) {

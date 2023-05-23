@@ -16,9 +16,9 @@ import {
   selectIsSelectedExperimentInDev
 } from '../../reducers';
 import {selectBackdropActive, selectHideRedactedArguments} from '@common/core/reducers/view.reducer';
-import {EditJsonComponent} from '@common/shared/ui-components/overlay/edit-json/edit-json.component';
+import {EditJsonComponent, EditJsonData} from '@common/shared/ui-components/overlay/edit-json/edit-json.component';
 import {filter, take} from 'rxjs/operators';
-import {MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {EditableSectionComponent} from '@common/shared/ui-components/panel/editable-section/editable-section.component';
 import {
@@ -187,8 +187,7 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
         textData: this.formData?.requirements?.pip,
         readOnly: false,
         title: 'EDIT INSTALLED PACKAGES',
-        typeJson: false
-      }
+      } as EditJsonData
     });
 
     editInstallPackagesDialog.afterClosed().pipe(take(1)).subscribe((data) => {
@@ -213,7 +212,6 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
       textData: this.formData?.diff,
       readOnly: false,
       title: 'EDIT UNCOMMITTED CHANGES',
-      typeJson: false
     }, this.diffSection)
       .afterClosed()
       .pipe(take(1))
@@ -262,7 +260,7 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
 
   }
 
-  private openEditJsonDialog(data: { textData: string; readOnly?: boolean; title?: string; typeJson?: boolean }, editableSectionComponent?: EditableSectionComponent): MatDialogRef<EditJsonComponent> {
+  private openEditJsonDialog(data: { textData: string; readOnly?: boolean; title?: string; format?: string }, editableSectionComponent?: EditableSectionComponent): MatDialogRef<EditJsonComponent> {
     const editJsonComponent = this.dialog.open(EditJsonComponent, {
       data
     });

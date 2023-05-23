@@ -24,7 +24,7 @@
 ></sm-experiment-header>
 <ng-template #addButton let-isSmallScreen="smallScreen">
   <button
-    class="btn btn-cml-primary d-flex justify-content-between align-items-center mr-3"
+    class="btn btn-cml-primary d-flex justify-content-between align-items-center me-3"
     [disabled]="isArchived$ | async"
     data-id="New Experiment"
     (click)="newExperiment()"
@@ -61,7 +61,7 @@
         [users]="users$ | async"
         [hyperParamsOptions]="hyperParamsOptions$ | async"
         [activeParentsFilter]="activeParentsFilter$ | async"
-        [parents]="parent$ | async"
+        [parents]="parents$ | async"
         [experimentTypes]="types$ | async"
         [tags]="tags$ | async"
         [systemTags]="systemTags$ | async"
@@ -82,6 +82,7 @@
         (experimentsSelectionChanged)="experimentsSelectionChanged($event)"
         (sortedChanged)="sortedChanged($event)"
         (filterChanged)="filterChanged($event)"
+        (filterSearchChanged)="filterSearchChanged($event)"
         (tagsMenuOpened)="refreshTagsList()"
         (typesMenuOpened)="refreshTypesList()"
         (loadMoreExperiments)="getNextExperiments()"
@@ -120,7 +121,7 @@
     [selectedDisableAvailable]="singleRowContext ? getSingleSelectedDisableAvailable((selectedExperiment$ | async) || contextExperiment ) : (selectedExperimentsDisableAvailable$ | async)"
     [numSelected]="singleRowContext ? 1 : selectedExperiments.length"
     [tagsFilterByProject]="tagsFilterByProject$ | async"
-    [projectTags]="projectTags$ | async"
+    [projectTags]="tags$ | async"
     [companyTags]="companyTags$ | async"
     [activateFromMenuButton]="false"
     [useCurrentEntity]="singleRowContext"

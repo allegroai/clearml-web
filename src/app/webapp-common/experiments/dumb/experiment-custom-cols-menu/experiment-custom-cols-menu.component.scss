@@ -4,7 +4,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 15px 15px;
+  padding: 15px;
 }
 
 .custom-column-buttons {
@@ -13,6 +13,7 @@
   color: $blue-400;
   background: $faint-gray;
   cursor: pointer;
+  font-size: 14px;
 
   div:not(.disabled):hover {
     color: $blue-300;
@@ -24,7 +25,7 @@
     white-space: nowrap;
 
     .caption {
-      margin-top: 2px;
+      margin-top: 4px;
     }
     &:first-child {
       border-right: 1px solid $blue-200;

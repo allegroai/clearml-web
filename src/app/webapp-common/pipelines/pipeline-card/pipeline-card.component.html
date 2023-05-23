@@ -5,16 +5,17 @@
          [oneTabMode]="true"
          [subFolderTitle]="project?.sub_projects?.length + ' sub projects'"
 >
-  <div secondTab class="h-100">
-    <div class="card-sp-list" smClickStopPropagation>
-      <ul>
-        <li *ngFor="let subProject of project?.sub_projects; trackBy: trackById"><a class="d-flex align-items-center"
-                                                                (click)="subProjectClicked(subProject.id)"
-                                                                [smTooltip]="subProject?.name"
-                                                                [innerHTML]="subProject?.name | breadcrumbsEllipsis"></a>
-        </li>
-      </ul>
-    </div>
+  <div secondTab class="sub-projects-list">
+    <cdk-virtual-scroll-viewport [itemSize]="30" [minBufferPx]="440" [maxBufferPx]="660" class="h-100">
+      <a
+        *cdkVirtualFor="let subProject of project?.sub_projects; trackBy: trackById"
+        class="d-flex align-items-center"
+        smClickStopPropagation
+        (click)="subProjectClicked(subProject.id)"
+        [smTooltip]="subProject?.name"
+        [innerHTML]="subProject?.name | breadcrumbsEllipsis"
+      ></a>
+    </cdk-virtual-scroll-viewport>
   </div>
   <div header-content [class.rename-state]="editName.active">
     <div class="d-flex justify-content-between align-items-center card-name">
@@ -35,7 +36,7 @@
         >{{project.name | shortProjectName}} </span><i *ngIf="!hideProjectPathIcon && (project.name | cleanProjectPath:
          false)"
                                                        [smTooltip]="project.name | cleanProjectPath: false"
-                                                       class="al-icon al-ico-project-path sm ml-2"></i></span>
+                                                       class="al-icon al-ico-project-path sm ms-2"></i></span>
       </sm-inline-edit>
       <sm-pipeline-card-menu
         class="menu-wrapper"

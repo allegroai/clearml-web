@@ -5,7 +5,7 @@ import {uniq} from 'lodash-es';
 import {map, tap} from 'rxjs/operators';
 import {NAVIGATION_ACTIONS} from '~/app.constants';
 import {encodeFilters, encodeOrder} from '../../shared/utils/tableParamEncode';
-import {NavigateTo, NavigationEnd, SetRouterSegments, setURLParams} from '../actions/router.actions';
+import {NavigateTo, NavigationEnd, setRouterSegments, setURLParams} from '../actions/router.actions';
 
 
 @Injectable()
@@ -29,7 +29,7 @@ export class RouterEffects {
 
   routerNavigationEnd = createEffect(() => this.actions$.pipe(
     ofType<NavigationEnd>(NAVIGATION_ACTIONS.NAVIGATION_END),
-    map(() => new SetRouterSegments({url: this.getRouterUrl(), params: this.getRouterParams(), config: this.getRouterConfig(), queryParams: this.route.snapshot.queryParams}))
+    map(() => setRouterSegments({url: this.getRouterUrl(), params: this.getRouterParams(), config: this.getRouterConfig(), queryParams: this.route.snapshot.queryParams}))
   ));
 
   setTableParams = createEffect(() => this.actions$.pipe(

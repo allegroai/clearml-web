@@ -2,6 +2,8 @@ import {createReducer, createSelector, on, ReducerTypes} from '@ngrx/store';
 import * as layoutActions from '../actions/layout.actions';
 import {apiRequest, requestFailed} from '@common/core/actions/http.actions';
 import {Ace} from 'ace-builds';
+import {IBreadcrumbsLink} from '@common/layout/breadcrumbs/breadcrumbs.component';
+import {setBreadcrumbs, setTypeBreadcrumbs} from '@common/core/actions/router.actions';
 
 export interface ViewState {
   loading: { [endpoint: string]: boolean };
@@ -24,6 +26,7 @@ export interface ViewState {
   redactedArguments: { key: string }[];
   hideRedactedArguments: boolean;
   showEmbedReportMenu: { show: boolean; position: { x: number; y: number } };
+  breadcrumbs: IBreadcrumbsLink[][];
 }
 
 export const initViewState: ViewState = {
@@ -49,7 +52,8 @@ export const initViewState: ViewState = {
     {key: 'AWS_SECRET_ACCESS_KEY'},
     {key: 'AZURE_STORAGE_KEY'}],
   hideRedactedArguments: false,
-  showEmbedReportMenu: {show: null, position: null}
+  showEmbedReportMenu: {show: null, position: null},
+  breadcrumbs: [[{}]],
 };
 
 export const views = state => state.views as ViewState;
@@ -75,6 +79,8 @@ export const selectNeverShowPopups = createSelector(views, (state): string[] => 
 export const selectRedactedArguments = createSelector(views, (state): { key: string }[] => state.redactedArguments);
 export const selectHideRedactedArguments = createSelector(views, (state): { key: string }[] => state.hideRedactedArguments ? state.redactedArguments : null);
 export const selectShowEmbedReportMenu = createSelector(views, state => state.showEmbedReportMenu);
+export const selectBreadcrumbs = createSelector(views, state => state && state.breadcrumbs);
+
 
 
 export const viewReducers = [
@@ -123,6 +129,14 @@ export const viewReducers = [
   on(layoutActions.neverShowPopupAgain, (state, action) => ({
     ...state,
     neverShowPopupAgain: action.reset ? state.neverShowPopupAgain.filter(popups => popups !== action.popupId) : Array.from(new Set([...state.neverShowPopupAgain, action.popupId]))
+  })),
+  on(setBreadcrumbs, (state, action) => ({
+    ...state, breadcrumbs: action.breadcrumbs
+  })),
+  on(setTypeBreadcrumbs, (state, action) => ({
+    ...state,
+    breadcrumbs: [...state.breadcrumbs?.map(breadcrumbGroup => [...breadcrumbGroup?.map(breadcrumb => breadcrumb.type === action.type ? action.breadcrumb : breadcrumb)
+    ])]
   })),
 ] as ReducerTypes<ViewState, any>[];
 

@@ -11,6 +11,9 @@ $credentialBaseHeight: 252px;
   }
 
   .cred-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
     border-bottom: 1px solid $blue-100;
 
     .label {
@@ -122,7 +125,6 @@ form {
 }
 
 .label-button {
-  height: 38px;
+  height: 36px;
   flex: 1 0 152px;
-  margin-top: 3px;
 }

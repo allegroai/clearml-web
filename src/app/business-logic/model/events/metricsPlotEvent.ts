@@ -23,7 +23,7 @@ export interface MetricsPlotEvent {
     /**
      * \'plot\'
      */
-    type: object;
+    type: any;
     /**
      * Task ID (required)
      */
@@ -41,7 +41,7 @@ export interface MetricsPlotEvent {
      */
     variant?: string;
     /**
-     * An entire plot (not single datapoint) and it\'s layout.                     Used for plotting ROC curves, confidence matrices, etc. when evaluating the net.                     
+     * An entire plot (not single datapoint) and it\'s layout.                     Used for plotting ROC curves, confidence matrices, etc. when evaluating the net.
      */
     plot_str?: string;
     /**

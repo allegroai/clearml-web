@@ -17,7 +17,7 @@
       >
         <span class="d-flex align-items-center">
           <span class="report-name" [smTooltip]="report.name | cleanProjectPath" smShowTooltipIfEllipsis>{{report.name}}</span>
-          <i *ngIf="report.name" [smTooltip]="report.name" class="al-icon al-ico-report-path sm ml-2"></i>
+          <i *ngIf="report.name" [smTooltip]="report.name" class="al-icon al-ico-report-path sm ms-2"></i>
         </span>
       </sm-inline-edit>
       <sm-report-card-menu
@@ -44,7 +44,7 @@
       <ng-template #noRun>
         <div class="last-run"></div>
       </ng-template>
-      <sm-experiment-status-icon-label class="ml-auto" [status]="report?.status"></sm-experiment-status-icon-label>
+      <sm-experiment-status-icon-label class="ms-auto" [status]="report?.status"></sm-experiment-status-icon-label>
     </div>
   </div>
   <div class="comment">{{report?.comment}}</div>

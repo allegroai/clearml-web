@@ -77,7 +77,10 @@ export const reportsReducer = createReducer(
   on(setReportChanges, (state, action) => ({
     ...state,
     report: {...state.report, ...action.changes},
-    reports: state.reports?.map(report => report.id !== action.id ? report : {...report, ...action.changes})
+    reports: (action.filterOut ?
+        state.reports?.filter(report => report.id != action.id) :
+        state.reports
+    )?.map(report => report.id !== action.id ? report : {...report, ...action.changes})
   })),
   on(setArchive, (state, action) => ({...state, archive: action.archive, scroll: null, reports: null})),
   on(resetReports, (state) => ({

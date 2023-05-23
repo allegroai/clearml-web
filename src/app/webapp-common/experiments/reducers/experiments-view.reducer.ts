@@ -75,7 +75,7 @@ export const experimentsViewInitialState: ExperimentsViewState = {
   hyperParamsOptions: {},
   metricsLoading: false,
   projectTags: [],
-  parents: [],
+  parents: null,
   activeParentsFilter: [],
   types: [],
   splitSize: 70,
@@ -89,79 +89,80 @@ const setExperimentsAndUpdateSelectedExperiments = (state: ExperimentsViewState,
   ...(state.selectedExperiments.find(ex => ex.id === payload.id) && {selectedExperiments: state.selectedExperiments.map(ex => ex.id === payload.id ? {...ex, ...payload.changes} : ex)})
 });
 
-export const experimentsViewReducer = createReducer(
+export const experimentsViewReducer = createReducer<ExperimentsViewState>(
   experimentsViewInitialState,
-  on(actions.setTableCols, (state, action) => ({...state, tableCols: action.cols})),
-  on(actions.resetExperiments, state => ({
+  on(actions.setTableCols, (state, action): ExperimentsViewState => ({...state, tableCols: action.cols})),
+  on(actions.resetExperiments, (state): ExperimentsViewState => ({
     ...state,
     experiments: experimentsViewInitialState.experiments,
     selectedExperiment: experimentsViewInitialState.selectedExperiment,
     metricVariants: experimentsViewInitialState.metricVariants,
     showAllSelectedIsActive: experimentsViewInitialState.showAllSelectedIsActive
   })),
-  on(setSelectedProject, state => ({
+  on(setSelectedProject, (state): ExperimentsViewState => ({
     ...state,
     selectedExperiments: experimentsViewInitialState.selectedExperiments,
     metricVariants: experimentsViewInitialState.metricVariants,
     hyperParamsOptions: experimentsViewInitialState.hyperParamsOptions
   })),
-  on(actions.showOnlySelected, (state, action) => ({
+  on(actions.showOnlySelected, (state, action): ExperimentsViewState => ({
     ...state,
     showAllSelectedIsActive: action.active,
     globalFilter: experimentsViewInitialState.globalFilter,
     tempFilters: state.projectColumnFilters[action.projectId] || {},
-    projectColumnFilters: {
-      ...state.projectColumnFilters,
-      [action.projectId]: action.active ? modelsInitialState.tableFilters : state.tempFilters
-    }
+    ...(state.showAllSelectedIsActive && {
+      projectColumnFilters: {
+        ...state.projectColumnFilters,
+        [action.projectId]: action.active ? modelsInitialState.tableFilters : state.tempFilters
+      }})
   })),
-  on(actions.addExperiments, (state, action) => ({
+  on(actions.addExperiments, (state, action): ExperimentsViewState => ({
     ...state,
     experiments: state.experiments?.concat(action.experiments) || null
   })),
-  on(actions.removeExperiments, (state, action) => ({
+  on(actions.removeExperiments, (state, action): ExperimentsViewState => ({
     ...state,
     experiments: state.experiments?.filter(exp => !action.experiments.includes(exp.id)) || null
   })),
-  on(actions.updateExperiment, (state, action) => setExperimentsAndUpdateSelectedExperiments(state, action)),
-  on(actions.updateManyExperiment, (state, action) =>
+  on(actions.updateExperiment, (state, action): ExperimentsViewState => setExperimentsAndUpdateSelectedExperiments(state, action)),
+  on(actions.updateManyExperiment, (state, action): ExperimentsViewState =>
     action.changeList.reduce((acc, change) => {
       acc = setExperimentsAndUpdateSelectedExperiments(acc, {id: change.id, changes: change.fields});
       return acc;
     }, state as ExperimentsViewState)
   ),
-  on(actions.setExperiments, (state, action) => ({...state, experiments: action.experiments})),
-  on(actions.setTableRefreshPending, (state, action) => ({...state, refreshList: action.refresh})),
-  on(actions.setExperimentInPlace, (state, action) => ({
+  on(actions.setExperiments, (state, action): ExperimentsViewState => ({...state, experiments: action.experiments})),
+  on(actions.setTableRefreshPending, (state, action): ExperimentsViewState => ({...state, refreshList: action.refresh})),
+  on(actions.setExperimentInPlace, (state, action): ExperimentsViewState => ({
     ...state, experiments: state.experiments
       ?.map(currExp => action.experiments.find(newExp => newExp.id === currExp.id))
       .filter(e => e) || null
   })),
-  on(actions.setNoMoreExperiments, (state, action) => ({...state, noMoreExperiment: action.hasMore})),
-  on(actions.setCurrentScrollId, (state, action) => ({...state, scrollId: action.scrollId})),
-  on(actions.setSelectedExperiment, (state, action) => ({...state, selectedExperiment: action.experiment})),
-  on(actions.setSelectedExperiments, (state, action) => ({...state, selectedExperiments: action.experiments})),
-  on(actions.setSelectedExperimentsDisableAvailable, (state, action) =>
+  on(actions.setNoMoreExperiments, (state, action): ExperimentsViewState => ({...state, noMoreExperiment: action.hasMore})),
+  on(actions.setCurrentScrollId, (state, action): ExperimentsViewState => ({...state, scrollId: action.scrollId})),
+  on(actions.setSelectedExperiment, (state, action): ExperimentsViewState => ({...state, selectedExperiment: action.experiment})),
+  on(actions.setSelectedExperiments, (state, action): ExperimentsViewState => ({...state, selectedExperiments: action.experiments})),
+  on(actions.setSelectedExperimentsDisableAvailable, (state, action): ExperimentsViewState =>
     ({...state, selectedExperimentsDisableAvailable: action.selectedExperimentsDisableAvailable})),
-  on(actions.globalFilterChanged, (state, action) =>
+  on(actions.globalFilterChanged, (state, action): ExperimentsViewState =>
     ({
       ...state,
       globalFilter: action as ReturnType<typeof actions.globalFilterChanged>,
       showAllSelectedIsActive: false
     })),
-  on(actions.resetGlobalFilter, state => ({...state, globalFilter: experimentsViewInitialState.globalFilter})),
-  on(actions.setTableSort, (state, action) => {
+  on(actions.resetGlobalFilter, (state): ExperimentsViewState => ({...state, globalFilter: experimentsViewInitialState.globalFilter})),
+  on(actions.setTableSort, (state, action): ExperimentsViewState => {
     const colIds = state.tableCols.map(col => col.id).concat(state.metricsCols.map(col => col.id));
     let orders = action.orders.filter(order => colIds.includes(order.field));
     orders = orders.length > 0 ? orders : null;
     return {...state, projectColumnsSortOrder: {...state.projectColumnsSortOrder, [action.projectId]: orders}};
   }),
-  on(actions.resetSortOrder, (state, action) => {
+  on(actions.resetSortOrder, (state, action): ExperimentsViewState => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const {[action.projectId]: remove, ...order} = state.projectColumnsSortOrder;
     return {...state, projectColumnsSortOrder: order};
   }),
-  on(actions.setColumnWidth, (state, action) => ({
+  on(actions.setColumnWidth, (state, action): ExperimentsViewState => ({
     ...state,
     projectColumnsWidth: {
       ...state.projectColumnsWidth,
@@ -171,7 +172,7 @@ export const experimentsViewReducer = createReducer(
       }
     }
   })),
-  on(actions.toggleColHidden, (state, action) => ({
+  on(actions.toggleColHidden, (state, action): ExperimentsViewState => ({
     ...state,
     hiddenProjectTableCols: {
       ...state.hiddenProjectTableCols,
@@ -181,8 +182,8 @@ export const experimentsViewReducer = createReducer(
       }
     }
   })),
-  on(actions.setHiddenCols, (state, action) => ({...state, hiddenTableCols: action.hiddenCols})),
-  on(actions.setVisibleColumnsForProject, (state, action) => {
+  on(actions.setHiddenCols, (state, action): ExperimentsViewState => ({...state, hiddenTableCols: action.hiddenCols})),
+  on(actions.setVisibleColumnsForProject, (state, action): ExperimentsViewState => {
     const visibleColumns = ['selected'].concat(action['visibleColumns']) as string[];
     return {
       ...state,
@@ -197,7 +198,7 @@ export const experimentsViewReducer = createReducer(
     };
 
   }),
-  on(actions.setTableFilters, (state, action) => ({
+  on(actions.setTableFilters, (state, action): ExperimentsViewState => ({
     ...state,
     projectColumnFilters: {
       ...state.projectColumnFilters,
@@ -209,13 +210,13 @@ export const experimentsViewReducer = createReducer(
       }
     }
   })),
-  on(actions.setExtraColumns, (state, action) =>
+  on(actions.setExtraColumns, (state, action): ExperimentsViewState =>
     ({
       ...state,
       metricsCols: [...state.metricsCols.filter(tableCol => !(tableCol.projectId === action['projectId'])), ...action['columns']]
     })),
-  on(actions.addColumn, (state, action) => ({...state, metricsCols: [...state.metricsCols, action.col]})),
-  on(actions.removeCol, (state, action) => {
+  on(actions.addColumn, (state, action): ExperimentsViewState => ({...state, metricsCols: [...state.metricsCols, action.col]})),
+  on(actions.removeCol, (state, action): ExperimentsViewState => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const {[action.id]: removedCol, ...remainingColsWidth} = state.projectColumnsWidth[action.projectId] || {};
     return {
@@ -232,11 +233,13 @@ export const experimentsViewReducer = createReducer(
       }
     };
   }),
-  on(actions.setTags, (state, action) => ({...state, projectTags: action.tags})),
-  on(actions.setParents, (state, action) => ({...state, parents: action.parents})),
-  on(actions.setActiveParentsFilter, (state, action) => ({...state, activeParentsFilter: action.parents})),
-  on(actions.setProjectsTypes, (state, action) => ({...state, types: action.types})),
-  on(actions.clearHyperParamsCols, (state, action) => ({
+  on(actions.setTags, (state, action): ExperimentsViewState => ({...state, projectTags: action.tags})),
+  on(actions.addProjectsTag, (state, action): ExperimentsViewState => ({...state, projectTags: Array.from(new Set(state.projectTags.concat(action.tag))).sort()})),
+  on(actions.setParents, (state, action): ExperimentsViewState => ({...state, parents: action.parents})),
+  on(actions.resetTablesFilterParentsOptions, (state): ExperimentsViewState => ({...state, parents: null})),
+  on(actions.setActiveParentsFilter, (state, action): ExperimentsViewState => ({...state, activeParentsFilter: action.parents})),
+  on(actions.setProjectsTypes, (state, action): ExperimentsViewState => ({...state, types: action.types})),
+  on(actions.clearHyperParamsCols, (state, action): ExperimentsViewState => ({
     ...state,
     metricsCols: [...state.metricsCols.filter(tableCol => !(tableCol.id.startsWith('hyperparams') && tableCol.projectId === action.projectId))],
     projectColumnsSortOrder: {
@@ -244,15 +247,15 @@ export const experimentsViewReducer = createReducer(
       [action.projectId]: state.projectColumnsSortOrder[action.projectId].filter(order => order.field.startsWith('hyperparams'))
     }
   })),
-  on(actions.setCustomMetrics, (state, action) =>
+  on(actions.setCustomMetrics, (state, action): ExperimentsViewState =>
     ({...state, metricVariants: action.metrics, metricsLoading: false})),
-  on(actions.setColsOrderForProject, (state, action) =>
+  on(actions.setColsOrderForProject, (state, action): ExperimentsViewState =>
     ({...state, colsOrder: {...state.colsOrder, [action.project]: action.cols}})),
-  on(actions.setCustomHyperParams, (state, action) => ({...state, hyperParams: action.params, metricsLoading: false})),
-  on(actions.hyperParamSelectedInfoExperiments, (state, action) =>
+  on(actions.setCustomHyperParams, (state, action): ExperimentsViewState => ({...state, hyperParams: action.params, metricsLoading: false})),
+  on(actions.hyperParamSelectedInfoExperiments, (state, action): ExperimentsViewState =>
     ({...state, hyperParamsOptions: {...state.hyperParamsOptions, [action.col.id]: action.values}})),
-  on(actions.getCustomMetrics, state => ({...state, metricsLoading: true})),
-  on(actions.getCustomHyperParams, state => ({...state, metricsLoading: true})),
-  on(actions.setSplitSize, (state, action) => ({...state, splitSize: action.splitSize})),
-  on(actions.setTableMode, (state, action) => ({...state, tableMode: action.mode})),
+  on(actions.getCustomMetrics, (state): ExperimentsViewState => ({...state, metricsLoading: true})),
+  on(actions.getCustomHyperParams, (state): ExperimentsViewState => ({...state, metricsLoading: true})),
+  on(actions.setSplitSize, (state, action): ExperimentsViewState => ({...state, splitSize: action.splitSize})),
+  on(actions.setTableMode, (state, action): ExperimentsViewState => ({...state, tableMode: action.mode})),
 );
