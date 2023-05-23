@@ -13,7 +13,7 @@ import {AdminService} from '~/shared/services/admin.service';
 import {selectDontShowAgainForBucketEndpoint, selectS3BucketCredentialsBucketCredentials, selectSignedUrl} from '@common/core/reducers/common-auth-reducer';
 import {EMPTY, of} from 'rxjs';
 import {S3AccessResolverComponent} from '@common/layout/s3-access-resolver/s3-access-resolver.component';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {MatDialog} from '@angular/material/dialog';
 import {setCredentialLabel} from '../actions/common-auth.actions';
 import {SignResponse} from '@common/settings/admin/base-admin-utils';
 

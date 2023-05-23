@@ -6,7 +6,7 @@ import {filter, take} from 'rxjs/operators';
 import {createCredential, credentialRevoked, getAllCredentials, resetCredential, updateCredentialLabel} from '@common/core/actions/common-auth.actions';
 import {Store} from '@ngrx/store';
 import {GetCurrentUserResponseUserObject} from '~/business-logic/model/users/getCurrentUserResponseUserObject';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {MatDialog} from '@angular/material/dialog';
 import {CreateCredentialDialogComponent} from '~/features/settings/containers/admin/create-credential-dialog/create-credential-dialog.component';
 
 @Component({

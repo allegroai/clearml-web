@@ -4,7 +4,7 @@ import {ProjectsUpdateRequest} from '~/business-logic/model/projects/projectsUpd
 import {ModelsPublishManyResponse} from '~/business-logic/model/models/modelsPublishManyResponse';
 import {ModelsArchiveManyResponse} from '~/business-logic/model/models/modelsArchiveManyResponse';
 import {ModelsDeleteManyResponse} from '~/business-logic/model/models/modelsDeleteManyResponse';
-import {archivedSelectedModels} from '@common/models/actions/models-menu.actions';
+import {archiveSelectedModels} from '@common/models/actions/models-menu.actions';
 import {TasksResetManyResponse} from '~/business-logic/model/tasks/tasksResetManyResponse';
 import {TasksEnqueueManyResponse} from '~/business-logic/model/tasks/tasksEnqueueManyResponse';
 import {TasksArchiveManyResponse} from '~/business-logic/model/tasks/tasksArchiveManyResponse';
@@ -14,6 +14,8 @@ import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {MetricColumn} from '@common/shared/utils/tableParamEncode';
 import {ProjectStatsGraphData} from '@common/core/reducers/projects.reducer';
 import {User} from '~/business-logic/model/users/user';
+import {ProjectsGetAllResponseSingle} from '~/business-logic/model/projects/projectsGetAllResponseSingle';
+import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
 
 export const PROJECTS_PREFIX = '[ROOT_PROJECTS] ';
 
@@ -29,11 +31,6 @@ export const getAllSystemProjects = createAction(
 export const updateProject = createAction(
   PROJECTS_PREFIX + 'UPDATE_PROJECT',
   props<{ id: string; changes: Partial<ProjectsUpdateRequest> }>()
-);
-
-export const setAllProjects = createAction(
-  PROJECTS_PREFIX + 'SET_PROJECTS',
-  props<{ projects: Project[]; updating?: boolean }>()
 );
 
 export const resetProjects = createAction(PROJECTS_PREFIX + 'RESET_PROJECTS');
@@ -56,13 +53,14 @@ export const setSelectedProjectId = createAction(
   PROJECTS_PREFIX + 'SET_SELECTED_PROJECT_ID',
   props<{ projectId: string; example?: boolean }>()
 );
-export const deletedProjectFromRoot = createAction(
-  PROJECTS_PREFIX + 'DELETE_PROJECT_FROM_ROOT',
-  props<{ project: Project }>()
-);
 export const setSelectedProject = createAction(
   PROJECTS_PREFIX + 'SET_SELECTED_PROJECT',
   props<{ project: Project }>()
+);
+
+export const setProjectAncestors = createAction(
+  PROJECTS_PREFIX + 'SET_PROJECT_ANCESTORS',
+  props<{ projects: Project[] }>()
 );
 
 export const setSelectedProjectStats = createAction(
@@ -99,7 +97,7 @@ export const getCompanyTags = createAction(
 
 export const getProjectsTags = createAction(
   PROJECTS_PREFIX + '[get projects tags]',
-  props<{entity: string}>()
+  props<{ entity: string }>()
 );
 
 export const setTagsFilterByProject = createAction(
@@ -119,7 +117,7 @@ export const setCompanyTags = createAction(
 
 export const setMainPageTagsFilter = createAction(
   PROJECTS_PREFIX + '[set main page tags filters]',
-  props<{ tags: string[] }>()
+  props<{ tags: string[]; feature: string }>()
 );
 
 export const setMainPageTagsFilterMatchMode = createAction(
@@ -134,7 +132,7 @@ export const addProjectTags = createAction(
 
 export const openTagColorsMenu = createAction(
   PROJECTS_PREFIX + '[open tag colors]',
-  props<{tags: string[]}>()
+  props<{ tags: string[] }>()
 );
 
 export const setTagColors = createAction(
@@ -144,7 +142,12 @@ export const setTagColors = createAction(
 
 export const openMoreInfoPopup = createAction(
   PROJECTS_PREFIX + '[open more info popup]',
-  props<{ parentAction: ReturnType<typeof archivedSelectedModels>; operationName: string; entityType: EntityTypeEnum; res: ModelsPublishManyResponse | ModelsArchiveManyResponse | ModelsDeleteManyResponse | TasksResetManyResponse | TasksEnqueueManyResponse | TasksArchiveManyResponse | TasksPublishManyResponse | TasksStopManyResponse }>()
+  props<{
+    parentAction: ReturnType<typeof archiveSelectedModels>;
+    operationName: string;
+    entityType: EntityTypeEnum;
+    res: ModelsPublishManyResponse | ModelsArchiveManyResponse | ModelsDeleteManyResponse | TasksResetManyResponse | TasksEnqueueManyResponse | TasksArchiveManyResponse | TasksPublishManyResponse | TasksStopManyResponse
+  }>()
 );
 
 export const setMetricVariant = createAction(
@@ -152,6 +155,11 @@ export const setMetricVariant = createAction(
   props<{ projectId: string; col: MetricColumn }>()
 );
 export const fetchGraphData = createAction(PROJECTS_PREFIX + '[fetch stats for project graph]');
+
+export const toggleState = createAction(
+  PROJECTS_PREFIX + '[toggle state]',
+  props<{ state: TaskStatusEnum }>()
+);
 
 export const setGraphData = createAction(
   PROJECTS_PREFIX + '[set project stats]',
@@ -193,4 +201,16 @@ export const setDefaultNestedModeForFeature = createAction(
   props<{ feature: string; isNested: boolean }>()
 );
 
+export const resetTablesFilterProjectsOptions = createAction(
+  PROJECTS_PREFIX + ' [reset tables filter projects options]'
+);
 
+export const getTablesFilterProjectsOptions = createAction(
+  PROJECTS_PREFIX + ' [get tables filter projects options]',
+  props<{ searchString: string; loadMore: boolean }>()
+);
+
+export const setTablesFilterProjectsOptions = createAction(
+  PROJECTS_PREFIX + ' [set tables filter projects options]',
+  props<{ projects: Partial<ProjectsGetAllResponseSingle>[]; scrollId: string; loadMore?: boolean }>()
+);

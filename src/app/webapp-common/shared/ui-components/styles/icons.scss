@@ -223,6 +223,7 @@
 }
 
 .i-filter-off {
+  opacity: 0.3;
   @include icon('#{$assets-icons-path}/filter-off.svg');
 }
 

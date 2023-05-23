@@ -1,6 +1,6 @@
 <div class="d-flex align-items-center">
   <div class="d-flex align-items-center experiment-name-cont">
-    <sm-experiment-type-icon-label class="experiment-icon" [showLabel]="false" [type]="experiment?.type" iconClass="l-40">
+    <sm-experiment-type-icon-label class="experiment-icon" data-id="experimentIcon" [showLabel]="false" [type]="experiment?.type" iconClass="l-40">
     </sm-experiment-type-icon-label>
     <sm-inline-edit
       #editName
@@ -17,11 +17,11 @@
       </div>
     </sm-inline-edit>
   </div>
-  <div class="d-flex align-items-center ml-auto">
+  <div class="d-flex align-items-center ms-auto">
     <div class="shared line-item"
          *ngIf="(!minimized) && shared"
     ><i class="fas fa-link p-1"></i></div>
-    <sm-id-badge class="mr-3" [id]="experiment?.id" (copied)="copyToClipboard()" *ngIf="!viewId"></sm-id-badge>
+    <sm-id-badge class="me-3" [id]="experiment?.id" (copied)="copyToClipboard()" *ngIf="!viewId"></sm-id-badge>
     <span class="comment line-item"
           [delay]="1000" [action]="'leave'"
           (smHesitate)="menuHesitate.hesitateStatus && menu.closed.emit()"

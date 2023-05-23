@@ -9,7 +9,7 @@
   >
     <sm-button-toggle
       left-items
-      class="ml-3"
+      class="ms-3"
       [value]="!!projectId"
       [options]="[
               {value: false, icon: 'al-ico-flat-view',  label: 'List view'},
@@ -21,7 +21,7 @@
       <button
         class="btn btn-cml-primary d-flex align-items-center"
         (click)="createPipeline()">
-        <i class="al-icon al-ico-add sm mr-2"></i>NEW PIPELINE
+        <i class="al-icon al-ico-add sm me-2" data-id="New Pipeline"></i>NEW PIPELINE
       </button>
     </div>
   </sm-projects-header>

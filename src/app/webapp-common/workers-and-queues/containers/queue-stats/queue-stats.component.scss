@@ -17,7 +17,7 @@
     }
 
     .line-chart-container {
-      height: calc(100% - 48px);
+      height: calc(100% - 36px);
       position: relative;
       z-index: 500;
 
@@ -30,8 +30,6 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      height: 48px;
-      line-height: 47px;
       width: 100%;
       white-space: nowrap;
 

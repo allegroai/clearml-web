@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {MatDialog} from '@angular/material/dialog';
 import {AdminCredentialTableBaseDirective} from '../admin-credential-table.base';
 import {TIME_FORMAT_STRING} from '@common/constants';
 

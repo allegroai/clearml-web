@@ -6,7 +6,8 @@ import {DatasetsRoutingModule} from '~/features/datasets/datasets-routing.module
 import {DatasetsSharedModule} from '~/features/datasets/shared/datasets-shared.module';
 import {SharedPipesModule} from '@common/shared/pipes/shared-pipes.module';
 import {SMSharedModule} from '@common/shared/shared.module';
-import {FeatureNestedProjectViewModule} from "~/features/nested-project-view/feature-nested-project-view.module";
+import {FeatureNestedProjectViewModule} from '~/features/nested-project-view/feature-nested-project-view.module';
+import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
 
 
 @NgModule({
@@ -18,6 +19,7 @@ import {FeatureNestedProjectViewModule} from "~/features/nested-project-view/fea
     DatasetsSharedModule,
     SharedPipesModule,
     FeatureNestedProjectViewModule,
+    LabeledFormFieldDirective,
   ],
   declarations: [
     SimpleDatasetsComponent,

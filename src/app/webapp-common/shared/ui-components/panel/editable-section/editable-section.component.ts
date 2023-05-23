@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import {Store} from '@ngrx/store';
 import {setBackdrop} from '@common/core/actions/layout.actions';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {MatDialog} from '@angular/material/dialog';
 import {fromEvent, Subscription} from 'rxjs';
 import {tap, throttleTime} from 'rxjs/operators';
 

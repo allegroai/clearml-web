@@ -3,7 +3,7 @@
 
 @font-face {
   font-family: '#{$icomoon-font-family}';
-  src: url('./#{$icomoon-font-family}.ttf?i5mliw') format('truetype');
+  src: url('./#{$icomoon-font-family}.ttf?s0lnuq') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -24,6 +24,11 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.al-ico-info-circle-outline {
+  &:before {
+    content: $al-ico-info-circle-outline; 
+  }
+}
 .al-ico-ghost {
   &:before {
     content: $al-ico-ghost;

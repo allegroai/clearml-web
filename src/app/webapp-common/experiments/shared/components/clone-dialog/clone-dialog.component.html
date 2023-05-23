@@ -15,11 +15,10 @@
       <mat-form-field class="w-100"
                       appearance="outline"
                       hideRequiredMarker="true"
-                      (click)="filterText && clear(); projectInputRef.blur(); projectInputRef.focus()">
+                      (mousedown)="!isFocused(projectInputRef) && projectInput.value && clear(); projectInputRef.blur(); projectInputRef.focus()">
         <mat-label>Project</mat-label>
         <input matInput type="text"
                autocomplete="off"
-               (focusin)="clearOnFirstFocus($event);"
                [matAutocomplete]="auto"
                [(ngModel)]="formData.project"
                name="projectName"
@@ -29,17 +28,18 @@
                minlength="3"
                (keydown.enter)="projectInput.control.markAsTouched()"
                smUniqueNameValidator
-               [existingNames]="readOnlyProjects$ | async"
-        >
-        <span matSuffix *ngIf="(!isAutoCompleteOpen) && (!formData.project?.value) && formData.project"
+               [existingNames]="readOnlyProjects$ | async">
+        <span matSuffix *ngIf="(!isAutoCompleteOpen) && (!formData.project?.value) && formData.project && !(formData.project | stringIncludedInArray:projectsNames)"
               class="creat-new-suffix">(Create New)</span>
-        <i matSuffix [class]="'fa mr2 ' + (filterText? 'fa-times pointer':'fa-search')"
-           (click)="filterText && clear(); projectInputRef.focus()"
+        <i matSuffix class="al-icon sm-md search-icon me-2" [ngClass]="formData.project? 'al-ico-dialog-x pointer' : 'al-ico-search'"
+           (click)="formData.project && clear(); projectInputRef.focus()"
            smClickStopPropagation></i>
         <mat-error *ngIf="cloneForm.controls.projectName?.errors?.required">Please provide a Project</mat-error>
         <mat-error *ngIf="cloneForm.controls.projectName?.errors?.minlength">Please provide a name longer than 3 characters</mat-error>
         <mat-error *ngIf="cloneForm.controls.projectName?.errors?.uniqueName">Please provide a different name as this project name is
-          taken as an Example project</mat-error>
+          taken as an Example project
+        </mat-error>
+        <mat-error *ngIf="projectInput.touched && projectInput.errors?.emptyName && !projectInput.errors?.minlength">*Project name can't contain only spaces.</mat-error>
       </mat-form-field>
       <mat-autocomplete #auto="matAutocomplete"
                         name="ExperimentProject"
@@ -51,10 +51,17 @@
       >
         <mat-option
           class="item"
-          *ngIf="filterText && isNewName"
-          [value]="filterText"
-        >"{{filterText}}" <span class="new">(Create New)</span></mat-option>
-        <mat-option *ngFor="let project of filteredProjects | async" [value]="project" [smTooltip]="project.label"  smShowTooltipIfEllipsis>{{project.label}}</mat-option>
+          *ngIf="!projectInput?.errors && projects !== null && projectInput.value && !(projectInput.value | stringIncludedInArray:projectsNames)"
+          [value]="projectInput.value"
+        >"{{projectInput.value.label || projectInput.value}}" <span class="new">(Create New)</span></mat-option>
+        <mat-option *ngFor="let project of projects; trackBy: trackByFn" [value]="project" [smTooltip]="project.label" smShowTooltipIfEllipsis>
+          {{project.label}}
+        </mat-option>
+        <div *ngIf="projects === null" style="line-height: 100px; pointer-events: none;">
+          <mat-spinner class="m-auto" [diameter]="80" [strokeWidth]="8"></mat-spinner>
+        </div>
+        <div *ngIf="projects && !noMoreOptions" (smScrollEnd)="!loading && loadMore()" class="text-center">Loading more...</div>
+        <mat-option disabled style="height: 0; min-height: 0;"></mat-option> <!-- Empty mat-option, so the autocomplete menu will always pop -->
       </mat-autocomplete>
       <mat-form-field class="w-100" appearance="outline">
         <mat-label>Name</mat-label>
@@ -82,7 +89,7 @@
                 class="btn btn-neon yes-button" data-id="CloneButton" #cloneButton>
           {{extend ? 'EXTEND' : 'CLONE'}}
         </button>
-        <button (click)="closeDialog(false)" class="btn btn-outline-neon" data-id ="CancelButton">
+        <button (click)="closeDialog(false)" class="btn btn-outline-neon" data-id="CancelButton">
           CANCEL
         </button>
 

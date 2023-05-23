@@ -1,7 +1,8 @@
 import {Pipe, PipeTransform} from '@angular/core';
 
 @Pipe({
-  name: 'getVariantWithoutRound'
+  name: 'getVariantWithoutRound',
+  standalone: true
 })
 export class GetVariantWithoutRoundPipe implements PipeTransform {
 

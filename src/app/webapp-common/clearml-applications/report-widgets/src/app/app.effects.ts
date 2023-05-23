@@ -4,11 +4,11 @@ import {
   getParcoords,
   getPlot,
   getSample,
-  getScalar,
+  getScalar, getSingleValues,
   setNoPermissions, setParallelCoordinateExperiments,
   setPlotData,
   setSampleData,
-  setSignIsNeeded
+  setSignIsNeeded, setSingleValues, setTaskData
 } from './app.actions';
 import {EMPTY, mergeMap, of, switchMap} from 'rxjs';
 import {Store} from '@ngrx/store';
@@ -50,6 +50,8 @@ export class AppEffects {
     switchMap(action => this.httpClient.post<{ data: ReportsGetTaskDataResponse }>(`${this.basePath}/reports.get_task_data?${action.otherSearchParams.toString()}`,
       {
         id: action.tasks,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        model_events: action.models,
         plots: {
           iters: 1,
           metrics: action.metrics.map(metric => ({metric, variants: action.variants}))
@@ -57,7 +59,13 @@ export class AppEffects {
       },
       {headers: this.getHeaders(action.company)}
     )),
-    mergeMap((res) => [setPlotData({data: res.data.plots as unknown as ReportsApiMultiplotsResponse})]),
+    mergeMap((res) => [
+      setPlotData({data: res.data.plots as unknown as ReportsApiMultiplotsResponse}),
+      setTaskData({
+        sourceProject: (res.data.tasks[0]?.project as any).id,
+        sourceTasks: res.data.tasks.map(t => t.id),
+        appId: (res.data.tasks[0] as any)?.application?.app_id?.id
+      })]),
     catchError(error => [requestFailed(error), ...(error.status === 403 ? [setNoPermissions()] : [])])
   ));
 
@@ -67,6 +75,8 @@ export class AppEffects {
         {
           id: action.tasks,
           // eslint-disable-next-line @typescript-eslint/naming-convention
+          model_events: action.models,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           scalar_metrics_iter_histogram: {
             metrics: action.metrics.map(metric => ({metric, variants: action.variants}))
           }
@@ -74,7 +84,12 @@ export class AppEffects {
         {headers: this.getHeaders(action.company)}
       ).pipe(
         mergeMap(res => [
-          setPlotData({data: res.data.scalar_metrics_iter_histogram as ReportsApiMultiplotsResponse})]
+          setPlotData({data: res.data.scalar_metrics_iter_histogram as ReportsApiMultiplotsResponse}),
+          setTaskData({
+            sourceProject: (res.data.tasks[0]?.project as any).id,
+            sourceTasks: res.data.tasks.map(t => t.id),
+            appId: (res.data.tasks[0] as any)?.application?.app_id?.id
+          })]
         ), catchError(error => [requestFailed(error), ...(error.status === 403 ? [setNoPermissions()] : [])])
       )
     )
@@ -94,25 +109,45 @@ export class AppEffects {
         {headers: this.getHeaders(action.company)}
       ).pipe(
         mergeMap(res => [
-          setSampleData({data: res.data.debug_images?.[0]?.iterations?.[0]?.events[0] as DebugSample})
-        ]),
+          setSampleData({data: res.data.debug_images?.[0]?.iterations?.[0]?.events[0] as DebugSample}),
+          setTaskData({sourceProject: (res.data.tasks[0]?.project as any).id, sourceTasks: res.data.tasks.map(t => t.id)})]),
         catchError(error => [requestFailed(error), ...(error.status === 403 ? [setNoPermissions()] : [])])
       )
     ))
   );
 
-  getExperiments$ = createEffect(() => this.actions$.pipe(
+  getParcoords$ = createEffect(() => this.actions$.pipe(
     ofType(getParcoords),
-    mergeMap((action) => this.httpClient.post<{data: ReportsGetTaskDataResponse}>(`${this.basePath}/reports.get_task_data?${action.otherSearchParams.toString()}`, {
+    mergeMap((action) => this.httpClient.post<{ data: ReportsGetTaskDataResponse }>(`${this.basePath}/reports.get_task_data?${action.otherSearchParams.toString()}`, {
         id: action.tasks,
         // eslint-disable-next-line @typescript-eslint/naming-convention
         only_fields: ['last_metrics', 'name', 'last_iteration', ...action.variants.map(variant => `hyperparams.${variant}`)]
       })
         .pipe(
-          mergeMap(res => [setParallelCoordinateExperiments({data: res.data.tasks as unknown as Task[]})])
+          mergeMap(res => [
+            setParallelCoordinateExperiments({data: res.data.tasks as unknown as Task[]}),
+            setTaskData({sourceProject: (res.data.tasks[0]?.project as any).id, sourceTasks: res.data.tasks.map(t => t.id)})
+          ])
         )
     ))
   );
+
+  getScalarSingleValue$ = createEffect(() => this.actions$.pipe(
+    ofType(getSingleValues),
+    switchMap((action) => this.httpClient.post<{ data: ReportsGetTaskDataResponse }>(`${this.basePath}/reports.get_task_data?${action.otherSearchParams.toString()}`, {
+        id: action.tasks,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        model_events: action.models,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        single_value_metrics: {}
+      })
+    ),
+    mergeMap((res: { data: ReportsGetTaskDataResponse }) => [
+        setSingleValues({data: res.data.single_value_metrics[0]}),
+        setTaskData({sourceProject: (res.data.tasks[0]?.project as any).id, sourceTasks: res.data.tasks.map(t => t.id)})
+      ]
+    )
+  ));
 
   signUrl = createEffect(() => this.actions$.pipe(
     ofType(getSignedUrl),

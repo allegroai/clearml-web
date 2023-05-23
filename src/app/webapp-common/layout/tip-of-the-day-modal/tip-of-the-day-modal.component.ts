@@ -1,5 +1,5 @@
 import {Component, Inject} from '@angular/core';
-import {MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {Store} from '@ngrx/store';
 import {addMessage} from '../../core/actions/layout.actions';
 import {Tip} from '../../shared/services/tips.service';
@@ -24,7 +24,7 @@ export class TipOfTheDayModalComponent {
     this.visitedIndex = data.visitedIndex % this.tips.length;
     this.tipIndex = this.visitedIndex;
     this.saveIndexInLocalstorage();
-    this.matDialogRef.beforeClosed().subscribe(() => this.matDialogRef.close(this.neverShowAgain));
+    this.matDialogRef.beforeClosed().subscribe(res => this.neverShowAgain && !res ? this.matDialogRef.close(this.neverShowAgain) : false);
   }
 
   copyToClipboardSuccess() {

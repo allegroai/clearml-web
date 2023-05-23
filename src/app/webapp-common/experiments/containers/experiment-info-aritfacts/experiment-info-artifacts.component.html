@@ -6,24 +6,25 @@
     editable: editable$ | async
   }" [ngTemplateOutlet]="selfie" #selfie>
   <sm-overlay [backdropActive]="backdropActive$|async"></sm-overlay>
-  <div class="h-100 d-flex" *ngIf="(modelInfo?.output?.length) ||
-                                (modelInfo?.input?.length) ||
-                                (modelInfo?.artifacts?.length) ||
-                                editable; else noData">
-    <sm-experiment-artifacts-navbar
-      [class.minimized]="minimized"
-      [artifacts]="modelInfo?.artifacts"
-      [outputModels]="modelInfo?.output"
-      [inputModels]="modelInfo?.input"
-      [editable]="editable"
-      [activeSection]="activeSection"
-      [routerConfig]="routerConfig$ | async"
-      [selectedArtifactKey]="selectedId$ | async"
-    ></sm-experiment-artifacts-navbar>
-    <div class="artifacts-col">
+  <as-split [unit]="'pixel'"
+    *ngIf="(modelInfo?.output?.length) || (modelInfo?.input?.length) || (modelInfo?.artifacts?.length) || editable; else noData"
+  >
+    <as-split-area [size]="minimized ? 250 : 300" [minSize]="50">
+      <sm-experiment-artifacts-navbar
+        [class.minimized]="minimized"
+        [artifacts]="modelInfo?.artifacts"
+        [outputModels]="modelInfo?.output"
+        [inputModels]="modelInfo?.input"
+        [editable]="editable"
+        [activeSection]="activeSection"
+        [routerConfig]="routerConfig$ | async"
+        [selectedArtifactKey]="selectedId$ | async"
+      ></sm-experiment-artifacts-navbar>
+    </as-split-area>
+    <as-split-area>
       <router-outlet></router-outlet>
-    </div>
-  </div>
+    </as-split-area>
+  </as-split>
   <ng-template #noData>
     <div class="d-flex h-100" *ngIf="modelInfo">
       <div class="no-data">

@@ -1,5 +1,5 @@
 import {EventEmitter, Input, Output, Directive} from '@angular/core';
-import {MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {ConfirmDialogComponent} from '../../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {ICONS} from '../../constants';
 import {CredentialKey} from '~/business-logic/model/auth/credentialKey';

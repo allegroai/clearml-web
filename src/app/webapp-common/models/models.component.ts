@@ -1,10 +1,10 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {MatDialog} from '@angular/material/dialog';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {select, Store} from '@ngrx/store';
 import {isEqual} from 'lodash-es';
-import {combineLatest, Observable} from 'rxjs';
-import {debounceTime, distinctUntilChanged, filter, map, skip, withLatestFrom} from 'rxjs/operators';
+import {combineLatest, Observable, of} from 'rxjs';
+import {debounceTime, distinctUntilChanged, filter, map, skip, switchMap, withLatestFrom} from 'rxjs/operators';
 import {getTags, setArchive as setProjectArchive, setDeep} from '../core/actions/projects.actions';
 import {initSearch, resetSearch} from '../common-search/common-search.actions';
 import {SearchState, selectSearchQuery} from '../common-search/common-search.reducer';
@@ -13,7 +13,7 @@ import {
   selectCompanyTags,
   selectIsArchivedMode,
   selectProjectSystemTags,
-  selectProjectTags,
+  selectProjectTags, selectSelectedProjectId,
   selectTagsFilterByProject
 } from '../core/reducers/projects.reducer';
 import {selectRouterParams} from '../core/reducers/router-reducer';
@@ -21,14 +21,14 @@ import {selectAppVisible} from '../core/reducers/view.reducer';
 import {BaseEntityPageComponent} from '../shared/entity-page/base-entity-page';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {ISmCol, TableSortOrderEnum} from '../shared/ui-components/data/table/table.consts';
-import {createMetadataCol, decodeColumns, decodeFilter, decodeOrder} from '../shared/utils/tableParamEncode';
+import {createMetadataCol, createMetricColumn, decodeColumns, decodeFilter, decodeOrder} from '../shared/utils/tableParamEncode';
 import * as modelsActions from './actions/models-view.actions';
 import {MODELS_TABLE_COLS} from './models.consts';
 import * as modelsSelectors from './reducers';
 import {
   selectMetadataColsForProject,
   selectMetadataColsOptions,
-  selectMetadataKeys,
+  selectMetadataKeys, selectMetricVariants,
   selectModelsFrameworks,
   selectModelsTags,
   selectModelTableColumns,
@@ -52,6 +52,10 @@ import {HasReadOnlyFooterItem} from '../shared/entity-page/footer-items/has-read
 import {SelectedTagsFooterItem} from '../shared/entity-page/footer-items/selected-tags-footer-item';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {SmSyncStateSelectorService} from '../core/services/sync-state-selector.service';
+import {CompareFooterItem} from '@common/shared/entity-page/footer-items/compare-footer-item';
+import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
+import {MetricValueType} from '@common/experiments-compare/experiments-compare.constants';
+import {CustomColumnMode} from '@common/experiments/shared/common-experiments.const';
 
 
 @Component({
@@ -87,6 +91,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
   public filteredTableCols$: Observable<ISmCol[]>;
   public firstModel: TableModel;
   public metadataColsOptions$: Observable<Record<ISmCol['id'], string[]>>;
+  public metricVariants$: Observable<MetricVariantResult[]>;
   protected inEditMode$: Observable<boolean>;
   protected addTag = addTag;
   protected setSplitSizeAction = modelsActions.setSplitSize;
@@ -120,6 +125,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
     this.noMoreModels$ = this.store.select(modelsSelectors.selectNoMoreModels);
     this.isSharedAndNotOwner$ = this.store.select(selectIsSharedAndNotOwner);
     this.metadataColsOptions$ = this.store.select(selectMetadataColsOptions);
+    this.metricVariants$ = this.store.select(selectMetricVariants);
 
     this.showAllSelectedIsActive$ = this.store.select(modelsSelectors.selectShowAllSelectedIsActive);
     this.searchQuery$ = this.store.select(selectSearchQuery);
@@ -203,7 +209,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
             }
 
             if (params.columns) {
-              const [, , , metadataCols, allIds] = decodeColumns(params.columns, this.originalTableColumns);
+              const [,metrics , , metadataCols, allIds] = decodeColumns(params.columns, this.originalTableColumns);
               const hiddenCols = {};
               this.originalTableColumns.forEach((tableCol) => {
                 if (tableCol.id !== 'selected') {
@@ -212,8 +218,9 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
               });
               this.store.dispatch(modelsActions.setHiddenCols({hiddenCols}));
               this.store.dispatch(modelsActions.setExtraColumns({
-                projectId: this.projectId,
+                projectId: projectId ?? this.projectId,
                 columns: metadataCols.map(metadataCol => createMetadataCol(metadataCol, projectId))
+                  .concat(metrics.map(metricCol => createMetricColumn(metricCol, projectId)))
               }));
               this.columnsReordered(allIds, false);
             }
@@ -230,8 +237,10 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
       tags$: this.tags$,
       data$: this.selectedModelsDisableAvailable$,
       tagsFilterByProject$: this.tagsFilterByProject$,
-      companyTags$: this.companyTags$,
-      projectTags$: this.projectTags$
+      companyTags$: this.selectedProjectId === '*' ? of(null) : this.companyTags$,
+      projectTags$: this.store.select(selectSelectedProjectId).pipe(switchMap(id =>
+        id === '*' ? this.companyTags$ : this.projectTags$
+      )),
     });
 
     this.sub.add(this.selectedModels$.subscribe(selectedModels => this.selectedModels = selectedModels));
@@ -289,7 +298,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
                 project: this.projectId
               }));
             } else {
-                this.store.dispatch(modelsActions.setTableMode({mode: !!id ? 'info' : 'table'}));
+              this.store.dispatch(modelsActions.setTableMode({mode: !!id ? 'info' : 'table'}));
             }
             return models?.find(model => model.id === id);
           }),
@@ -310,7 +319,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
     }
   }
 
-  modelSelectionChanged(event: {model: SelectedModel; openInfo?: boolean}) {
+  modelSelectionChanged(event: { model: SelectedModel; openInfo?: boolean }) {
     (this.minimizedView || event.openInfo) && event.model && this.store.dispatch(modelsActions.modelSelectionChanged({
       model: event.model,
       project: this.projectId
@@ -400,6 +409,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
     super.createFooterItems(config);
     this.footerItems = [
       new ShowItemsFooterSelected(config.entitiesType),
+      new CompareFooterItem(config.entitiesType),
       new DividerFooterItem(),
 
       new ArchiveFooterItem(config.entitiesType),
@@ -418,6 +428,9 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
       case MenuItems.showAllItems:
         this.showAllSelected(!emitValue);
         break;
+      case MenuItems.compare:
+        this.compareExperiments();
+        break;
       case MenuItems.archive:
         this.table.contextMenuExtended.contextMenu.archiveClicked();
         break;
@@ -433,13 +446,27 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
     }
   }
 
+  compareExperiments() {
+    this.router.navigate(
+      [
+        `compare-models`,
+        {ids: this.selectedModels.map(experiment => experiment.id).join(',')},
+        'models-details'
+      ],
+      {relativeTo: this.route.parent.parent});
+  }
+
   clearTableFiltersHandler(tableFilters: any) {
     const filters = Object.keys(tableFilters).map(col => ({col, value: []}));
     this.store.dispatch(modelsActions.tableFilterChanged({filters, projectId: this.projectId}));
   }
 
-  selectMetadataKeysActiveChanged() {
-    this.store.dispatch(modelsActions.getMetadataKeysForProject());
+  selectMetadataKeysActiveChanged(mode: {customMode: CustomColumnMode}) {
+    if (mode.customMode === CustomColumnMode.Metadata) {
+      this.store.dispatch(modelsActions.getMetadataKeysForProject());
+    } else if (mode.customMode === CustomColumnMode.Metrics) {
+      this.store.dispatch(modelsActions.getCustomMetrics());
+    }
   }
 
 
@@ -452,7 +479,11 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
   }
 
   removeColFromList(id: string) {
-    this.store.dispatch(modelsActions.removeCol({id: id.split('.')[1], projectId: this.projectId}));
+    if (id.startsWith('last_metrics')) {
+      this.store.dispatch(modelsActions.removeMetricCol({id, projectId: this.projectId}));
+    } else {
+      this.store.dispatch(modelsActions.removeCol({id: id.split('.')[1], projectId: this.projectId}));
+    }
   }
 
   modeChanged(mode: 'info' | 'table') {
@@ -464,6 +495,24 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
       }));
     } else {
       return this.closePanel();
+    }
+  }
+
+  selectedMetricToShow(event: { variant: MetricVariantResult; addCol: boolean; valueType: MetricValueType }) {
+    if (!event.valueType) {
+      return;
+    }
+    const variantCol = createMetricColumn({
+      metricHash: event.variant.metric_hash,
+      variantHash: event.variant.variant_hash,
+      valueType: event.valueType,
+      metric: event.variant.metric,
+      variant: event.variant.variant
+    }, this.projectId);
+    if (event.addCol) {
+      this.store.dispatch(modelsActions.addColumn({col: variantCol}));
+    } else {
+      this.store.dispatch(modelsActions.removeMetricCol({id: variantCol.id, projectId: variantCol.projectId}));
     }
   }
 }

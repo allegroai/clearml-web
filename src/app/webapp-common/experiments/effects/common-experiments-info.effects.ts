@@ -183,7 +183,7 @@ export class CommonExperimentsInfoEffects {
     switchMap(([action, pipeline]) => this.apiTasks.tasksGetByIdEx({
       id: [action.id],
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      only_fields: pipeline ? PIPELINE_INFO_ONLY_FIELDS : ['name', 'comment', 'runtime', 'configuration', 'status']
+      only_fields: pipeline ? PIPELINE_INFO_ONLY_FIELDS : ['name', 'comment', 'parent.name', 'parent.project.id', 'runtime', 'configuration', 'status']
     }).pipe(
       mergeMap((res: any) =>
         [commonInfoActions.setSelectedPipelineStep({step: res?.tasks[0]}), deactivateLoader(action.type)]

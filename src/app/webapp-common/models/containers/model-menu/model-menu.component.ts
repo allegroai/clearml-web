@@ -1,13 +1,13 @@
 import {Component, ElementRef, EventEmitter, Input, Output} from '@angular/core';
 import {
-  archivedSelectedModels,
+  archiveSelectedModels,
   changeProjectRequested,
   publishModelClicked,
   restoreSelectedModels
 } from '../../actions/models-menu.actions';
-import {htmlTextShorte} from '@common/shared/utils/shared-utils';
+import {htmlTextShort} from '@common/shared/utils/shared-utils';
 import {ICONS} from '@common/constants';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {MatDialog} from '@angular/material/dialog';
 import {Store} from '@ngrx/store';
 import {AdminService} from '~/shared/services/admin.service';
 import {selectS3BucketCredentials} from '@common/core/reducers/common-auth-reducer';
@@ -86,10 +86,10 @@ export class ModelMenuComponent extends BaseContextMenuComponent {
   archiveClicked() {
     // info header case
     const selectedModels = this.selectedModels ? selectionDisabledArchive(this.selectedModels).selectedFiltered : [this.model];
-    if (this.isArchive) {
+    if (selectedModels[0].system_tags?.includes('archived')) {
       this.store.dispatch(restoreSelectedModels({selectedEntities: selectedModels, skipUndo: false}));
     } else {
-      this.store.dispatch(archivedSelectedModels({selectedEntities: selectedModels, skipUndo: false}));
+      this.store.dispatch(archiveSelectedModels({selectedEntities: selectedModels, skipUndo: false}));
     }
   }
 
@@ -99,7 +99,7 @@ export class ModelMenuComponent extends BaseContextMenuComponent {
     const confirmDialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
         title: 'PUBLISH',
-        body: `<b>${selectedModels.length === 1 ? htmlTextShorte(selectedModels[0].name) : selectedModels.length + ' models'}</b> status will be set to Published.
+        body: `<b>${selectedModels.length === 1 ? htmlTextShort(selectedModels[0].name) : selectedModels.length + ' models'}</b> status will be set to Published.
 <br><br>Published models are read-only and cannot be reset.`,
         yes: 'Publish',
         no: 'Cancel',

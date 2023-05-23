@@ -2,7 +2,7 @@ import * as createNewQueueActions from './queue-create-dialog.actions';
 import * as createQueueSelectors from './queue-create-dialog.reducer';
 
 import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
-import { MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef } from '@angular/material/legacy-dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import {Store} from '@ngrx/store';
 import {CREATION_STATUS} from './queue-create-dialog.reducer';
 import {Observable, Subscription} from 'rxjs';

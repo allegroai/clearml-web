@@ -1,7 +1,7 @@
 import {Component, Inject} from '@angular/core';
-import {MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {openMoreInfoPopup} from '@common/core/actions/projects.actions';
-import {htmlTextShorte} from '../../../utils/shared-utils';
+import {htmlTextShort} from '../../../utils/shared-utils';
 
 @Component({
   selector: 'sm-operation-error-dialog',
@@ -30,6 +30,6 @@ export class OperationErrorDialogComponent {
   }
 
   getName(fail: any) {
-    return htmlTextShorte(this.action.parentAction.selectedEntities.find(entity => entity.id === fail.id)?.name);
+    return htmlTextShort(this.action.parentAction.selectedEntities.find(entity => entity.id === fail.id)?.name);
   }
 }

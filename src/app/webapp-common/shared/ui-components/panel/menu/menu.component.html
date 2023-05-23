@@ -21,9 +21,9 @@
   [hasBackdrop]="showOverlay"
   (closed)="menuClosed.emit()"
 >
-  <mat-form-field appearance="fill" *ngIf="enableSearch" smClickStopPropagation class="tags-menu-input w-100">
-    <input matInput (input)="searchValueChanged.emit($event)" [(ngModel)]="searchValue" autocomplete="off">
-    <i matSuffix [class]="'fa mr2 ' + (searchValue? 'fa-times pointer':'fa-search')" (click)="searchValue && clearSearch()"></i>
+  <mat-form-field appearance="fill" *ngIf="enableSearch" smClickStopPropagation class="tags-menu-input w-100 no-bottom">
+    <input matInput [placeholder]="searchPlaceholder" (input)="searchValueChanged.emit($event)" [(ngModel)]="searchValue" autocomplete="off">
+    <i matSuffix class="fa me-3" [class]="searchValue ? 'fa-times pointer' : 'fa-search'" (click)="searchValue && clearSearch()"></i>
   </mat-form-field>
   <div class="results" [class.search-results]="enableSearch">
     <ng-content></ng-content>

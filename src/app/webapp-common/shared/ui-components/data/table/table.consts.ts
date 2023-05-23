@@ -31,9 +31,9 @@ export interface ISmCol {
   filterType?: ColHeaderFilterTypeEnum;
   sortable?: boolean; // determine if the column shell be sortable
   searchableFilter?: boolean;
+  asyncFilter?: boolean; // adding filter change event emitter
+  paginatedFilterPageSize?: number; // paginated filter active and its size (for noMoreOptions)
   filterable?: boolean; // determine if the column shell be filterable
-  isFiltered?: boolean; // deprecated.
-  isSorted?: boolean; // deprecated.
   filterMatchMode?: FilterMatchModeEnum; // the filter method.
   style?: { width?: string; minWidth?: string; maxWidth?: string }; // the column style.
   headerStyleClass?: string; // the header css class name.

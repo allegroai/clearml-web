@@ -3,6 +3,7 @@ import {EXPERIMENTS_STATUS_LABELS} from '~/features/experiments/shared/experimen
 import {IExperimentDetail} from '~/features/experiments-compare/experiments-compare-models';
 import {TIME_FORMAT_STRING} from '@common/constants';
 import {ActivatedRoute} from '@angular/router';
+import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 
 @Component({
   selector: 'sm-experiment-compare-general-data',
@@ -29,6 +30,7 @@ export class ExperimentCompareGeneralDataComponent {
 
   buildUrl() {
     const projectOrPipeline = this.route.root.firstChild.routeConfig.path.replace('datasets', 'datasets/simple/');
-    return [`/${projectOrPipeline}`, this.experiment.project?.id || '*', 'experiments', this.experiment.id];
+    const targetEntity = this.route.snapshot.parent.data.entityType === EntityTypeEnum.model ? EntityTypeEnum.model : EntityTypeEnum.experiment;
+    return [`/${projectOrPipeline}`, this.experiment.project?.id || '*', `${targetEntity}s`, this.experiment.id];
   }
 }

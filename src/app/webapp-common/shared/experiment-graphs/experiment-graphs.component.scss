@@ -25,6 +25,8 @@
 
   .single-graph {
     position: relative;
+    display: flex;
+    flex-wrap: wrap;
   }
 
   ::ng-deep .single-graph {

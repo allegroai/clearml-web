@@ -12,9 +12,8 @@ import {NotifierConfigToken, NotifierService} from './services/notifier.service'
 /**
  * Injection Token for notifier options
  */
-export const NotifierOptionsToken: InjectionToken<NotifierOptions>
+export const notifierOptionsToken: InjectionToken<NotifierOptions>
   = new InjectionToken<NotifierOptions>('[angular-notifier] Notifier Options');
-
 
 
 /**
@@ -26,9 +25,7 @@ export const NotifierOptionsToken: InjectionToken<NotifierOptions>
  * @param   options - Custom notifier options
  * @returns - Notifier configuration as result
  */
-export function notifierCustomConfigFactory(options: NotifierOptions): NotifierConfig {
-  return new NotifierConfig(options);
-}
+export const notifierCustomConfigFactory = (options: NotifierOptions): NotifierConfig => new NotifierConfig(options);
 
 /**
  * Factory for a notifier configuration with default options
@@ -38,9 +35,7 @@ export function notifierCustomConfigFactory(options: NotifierOptions): NotifierC
  *
  * @returns - Notifier configuration as result
  */
-export function notifierDefaultConfigFactory(): NotifierConfig {
-  return new NotifierConfig({});
-}
+export const notifierDefaultConfigFactory = (): NotifierConfig => new NotifierConfig({});
 
 /**
  * Notifier module
@@ -84,14 +79,14 @@ export class NotifierModule {
 
         // Provide the options itself upfront (as we need to inject them as dependencies -- see below)
         {
-          provide: NotifierOptionsToken,
+          provide: notifierOptionsToken,
           useValue: options
         },
 
         // Provide a custom notifier configuration, based on the given notifier options
         {
           deps: [
-            NotifierOptionsToken
+            notifierOptionsToken
           ],
           provide: NotifierConfigToken,
           useFactory: notifierCustomConfigFactory

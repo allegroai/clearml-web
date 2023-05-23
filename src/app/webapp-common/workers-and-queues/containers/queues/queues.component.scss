@@ -1,14 +1,13 @@
 @import "../../../../webapp-common/layout/layout.scss";
 
 :host {
-  display: flex;
+  display: flex !important;
   flex-direction: column;
-  height: calc(100% - #{$wnq-tabs-height});
 
-  as-split {
-    height: calc(100% - #{$graph-height});
-    min-height: 180px;
-  }
+  //as-split {
+    //height: calc(100% - #{$graph-height});
+    //min-height: 180px;
+  //}
 
   sm-queue-stats {
     display: block;

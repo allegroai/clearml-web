@@ -20,22 +20,22 @@
        routerLinkActive="active">
     </a>
     <a class="item al-ico-datasets"
-       routerLink="/datasets"
-       routerLinkActive="active"
+       [routerLink]="(defaultNestedModeForFeature$ | async)?.['datasets']? '/datasets/simple/*/projects' : '/datasets'"
+       [class.active]="(baseRouteConfig$ | async) ==='datasets'"
        smTooltip="DATASETS"
        [matTooltipShowDelay]="0"
        matTooltipPosition="right">
     </a>
     <a class="item al-ico-pipelines"
-       routerLink="/pipelines"
-       routerLinkActive="active"
+       [routerLink]="(defaultNestedModeForFeature$ | async)?.['pipelines']? '/pipelines/*/projects' : '/pipelines'"
+       [class.active]="(baseRouteConfig$ | async) ==='pipelines'"
        smTooltip="PIPELINES"
        [matTooltipShowDelay]="0"
        matTooltipPosition="right">
     </a>
     <a class="item al-ico-reports"
-       routerLink="/reports"
-       routerLinkActive="active"
+       [routerLink]="(defaultNestedModeForFeature$ | async)?.['reports']? '/reports/*/projects' : '/reports'"
+       [class.active]="(baseRouteConfig$ | async) ==='reports'"
        smTooltip="REPORTS"
        [matTooltipShowDelay]="0"
        matTooltipPosition="right">

@@ -24,13 +24,13 @@ export const removeTag = createAction(
   props<{models: SelectedModel[]; tag: string}>()
 );
 
-export const archivedSelectedModels = createAction(
+export const archiveSelectedModels = createAction(
   MODELS_PREFIX + '[archive selected models]',
-  props<{selectedEntities: SelectedModel[],  skipUndo: boolean }>()
+  props<{selectedEntities: SelectedModel[]; skipUndo: boolean }>()
 );
 
 export const restoreSelectedModels = createAction(
   MODELS_PREFIX + '[restore selected models]',
-  props<{selectedEntities: SelectedModel[],  skipUndo: boolean }>()
+  props<{selectedEntities: SelectedModel[]; skipUndo: boolean }>()
 );
 

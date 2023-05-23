@@ -9,7 +9,7 @@
     <div class="content" [hidden]="!inEdit && (saving$ | async)===false">
       <ng-form #metadataForm="ngForm" smUniqueInListSyncValidator2 prefix2="metadataItemKey-"
       >
-      <div *ngFor="let metadataItem of metadata ; let i = index; trackBy:trackByFn" class="d-flex align-items-center mr-3 mb-2">
+      <div *ngFor="let metadataItem of metadata ; let i = index; trackBy:trackByFn" class="d-flex align-items-center me-3 mb-2">
           <mat-form-field [hintLabel]="metadataItemKey.invalid && metadataItemKey?.errors?.required? '*Required': ''" appearance="outline" class="w-100">
             <input #metadataItemKey="ngModel"
                    placeholder="key"

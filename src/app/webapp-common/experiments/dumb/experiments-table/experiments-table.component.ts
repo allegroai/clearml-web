@@ -36,7 +36,8 @@ import {hyperParamSelectedExperiments, selectAllExperiments} from '../../actions
 import {createFiltersFromStore, excludedKey, uniqueFilterValueAndExcluded} from '@common/shared/utils/tableParamEncode';
 import {getRoundedNumber} from '../../shared/common-experiments.utils';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
-import {MAT_LEGACY_TOOLTIP_DEFAULT_OPTIONS as MAT_TOOLTIP_DEFAULT_OPTIONS, MatLegacyTooltipDefaultOptions as MatTooltipDefaultOptions} from '@angular/material/legacy-tooltip';
+import {MAT_TOOLTIP_DEFAULT_OPTIONS, MatTooltipDefaultOptions} from '@angular/material/tooltip';
+import {getTablesFilterProjectsOptions, resetTablesFilterProjectsOptions} from '@common/core/actions/projects.actions';
 
 @Component({
   selector: 'sm-experiments-table',
@@ -57,8 +58,8 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit, 
     [EXPERIMENTS_TABLE_COL_FIELDS.TYPE]: [],
     [EXPERIMENTS_TABLE_COL_FIELDS.USER]: [],
     [EXPERIMENTS_TABLE_COL_FIELDS.TAGS]: [],
-    [EXPERIMENTS_TABLE_COL_FIELDS.PARENT]: [],
-    [EXPERIMENTS_TABLE_COL_FIELDS.PROJECT]: [],
+    [EXPERIMENTS_TABLE_COL_FIELDS.PARENT]: null,
+    [EXPERIMENTS_TABLE_COL_FIELDS.PROJECT]: null,
   };
   readonly getSystemTags = getSystemTags;
   public isDevelopment = isDevelopment;
@@ -122,6 +123,10 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit, 
 
 
   @Input() set parents(parents: ProjectsGetTaskParentsResponseParents[]) {
+    if (!parents) {
+      this.filtersOptions[EXPERIMENTS_TABLE_COL_FIELDS.PARENT] = null;
+      return;
+    }
     const parentsAndActiveFilter = Array.from(new Set(parents.concat(this.activeParentsFilter || [])));
     this.filtersOptions[EXPERIMENTS_TABLE_COL_FIELDS.PARENT] = parentsAndActiveFilter.map(parent => ({
       label: parent.name ? parent.name : 'Unknown Experiment',
@@ -175,14 +180,13 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit, 
 
   @Input() set projects(projects) {
     if (!projects) {
+      this.filtersOptions[EXPERIMENTS_TABLE_COL_FIELDS.PROJECT] = null;
       return;
     }
     this.filtersOptions[EXPERIMENTS_TABLE_COL_FIELDS.PROJECT] = projects.map(project => ({
       label: project.name,
       value: project.id,
-      tooltip: `${project.name}`
     }));
-    this.sortOptionsList(EXPERIMENTS_TABLE_COL_FIELDS.PROJECT);
   }
 
   @Input() systemTags = [] as string[];
@@ -330,6 +334,10 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit, 
       }
     } else if (col.id.includes('hyperparams')) {
       this.store.dispatch(hyperParamSelectedExperiments({col}));
+    } else if (col.id === EXPERIMENTS_TABLE_COL_FIELDS.PROJECT) {
+      if (!this.filtersOptions[EXPERIMENTS_TABLE_COL_FIELDS.PROJECT]?.length) {
+        this.filterSearchChanged.emit({colId: col.id, value: {value: ''}});
+      }
     }
   }
 

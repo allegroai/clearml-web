@@ -40,22 +40,20 @@ $btn-font-family: $font-family-base;
   $input-height: map-get($light-theme-input, height);
   $link-hover-color: $blue-200;
   $link-color: $blue-300;
+  $link-decoration: none;
   $label-margin-bottom: 0;
 
   $button: map-get($dark-theme, button);
 
 
-  //@import '~bootstrap/scss/bootstrap.scss';
-  @import "bootstrap/scss/functions";
-  @import "bootstrap/scss/variables";
-  @import "bootstrap/scss/mixins";
-  @import "bootstrap/scss/root";
-  @import "bootstrap/scss/reboot";
+  // @import '~bootstrap/scss/bootstrap.scss';
+  @import 'bootstrap/scss/bootstrap-reboot';
+  @import 'bootstrap/scss/bootstrap-grid';
+  @import 'bootstrap/scss/bootstrap-utilities';
   @import "bootstrap/scss/grid";
   @import "bootstrap/scss/buttons";
   @import "bootstrap/scss/button-group";
   @import "bootstrap/scss/card";
-  @import "bootstrap/scss/utilities";
 
   label {
     display: inline-flex;
@@ -71,47 +69,37 @@ $btn-font-family: $font-family-base;
   }
 
   .btn-neon {
-    font-size: 12px;
+    @include button-variant(
+      $neon-yellow,
+      $neon-yellow,
+      $color: $blue-500,
+      $hover-background: $neon-yellow-hover,
+    );
     font-weight: 500;
-    color: $blue-500;
     height: 32px;
-    border-radius: 4px;
-    background-color: $neon-yellow;
     padding: 0 32px;
-
-    &:hover:not([disabled]) {
-      background-color: $neon-yellow-hover;
-    }
-
-    &:focus {
-      border: none;
-      outline: none;
-    }
-
-    border: none;
-
   }
 
   .btn-dark-fill {
+    @include button-variant(
+      $blue-600,
+      $blue-600,
+      $color: $blue-280,
+      $hover-background: $blue-500,
+      $hover-border: $blue-500,
+      $hover-color: $white,
+      $active-background: $purple,
+      $active-border: $purple,
+      $active-color: $white,
+      $disabled-background: $grey-purple,
+      $disabled-border: $grey-purple,
+      $disabled-color: $white
+    );
     height: 32px;
-    border-width: 0;
-    border-radius: 4px;
     font-size: 12px;
     font-weight: 500;
     text-align: center;
-    transition: background-color ease-in-out 0.3s;
-    background-color: $blue-600;
-    color: $blue-280;
     margin: 0 6px !important;
-
-    &:hover:enabled {
-      background-color: $purple;
-      color: white;
-    }
-
-    &:active:enabled {
-      background-color: $purple;
-    }
 
     &:disabled {
       cursor: auto;
@@ -119,20 +107,17 @@ $btn-font-family: $font-family-base;
     }
   }
 
-  $yiq-text-dark: map-get($button, color);
-  $yiq-text-light: map-get($button, color);
   .btn-cml-primary {
     @include button-variant(
       map-get($button, background-color),
       map-get($button, border-color),
-      map-get($button, background-color-hover),
-      map-get($button, border-color-hover),
-      map-get($button, background-color-focus),
-      map-get($button, border-color-focus)
+      $color: map-get($button, color),
+      $hover-background: map-get($button, background-color-hover),
+      $hover-border: map-get($button, border-color-hover),
+      $hover-color: $blue-200,
+      $active-background: map-get($button, background-color-focus),
+      $active-border: map-get($button, border-color-focus)
     );
-    &:hover {
-      color: $blue-200;
-    }
     &:focus {
       background-color: $blue-600;
       border-color: $blue-600;
@@ -217,9 +202,14 @@ $btn-font-family: $font-family-base;
     }
   }
 
-  .table {
-    color: $blue-100;
+  .btn-link {
+    color: $blue-300;
+    &:hover {
+      color: $blue-200;
+      text-decoration: underline;
+    }
   }
+
 }
 
 
@@ -250,16 +240,13 @@ $btn-font-family: $font-family-base;
   $label-margin-bottom: 0;
 
   //@import '~bootstrap/scss/bootstrap.scss';
-  @import "bootstrap/scss/functions";
-  @import "bootstrap/scss/variables";
-  @import "bootstrap/scss/mixins";
-  @import "bootstrap/scss/root";
-  @import "bootstrap/scss/reboot";
+  @import 'bootstrap/scss/bootstrap-reboot';
+  @import 'bootstrap/scss/bootstrap-grid';
+  @import 'bootstrap/scss/bootstrap-utilities';
   @import "bootstrap/scss/grid";
   @import "bootstrap/scss/buttons";
   @import "bootstrap/scss/button-group";
   @import "bootstrap/scss/card";
-  @import "bootstrap/scss/utilities";
 
   label {
     display: inline-flex;
@@ -285,6 +272,16 @@ $btn-font-family: $font-family-base;
       $primary,
       $primary,
     );
+    &:focus {
+      background-color: $blue-100;
+      border-color: $blue-100;
+      color: $blue-500;
+      &:hover {
+        background-color: $blue-100;
+        border-color: $blue-100;
+        color: $blue-500;
+      }
+    }
   }
 
   .btn-secondary {
@@ -319,15 +316,23 @@ $btn-font-family: $font-family-base;
   }
 
   .btn-dark-fill {
+    @include button-variant(
+      $grey-purple,
+      $grey-purple,
+      $color: $white,
+      $hover-background: $blue-500,
+      $hover-border: $blue-500,
+      $hover-color: $white,
+      $active-background: $purple,
+      $active-border: $purple,
+      $disabled-background: $grey-purple,
+      $disabled-border: $grey-purple,
+      $disabled-color: $white,
+    );
     height: 32px;
-    border-width: 0;
-    border-radius: 4px;
-    background-color: $grey-purple;
     font-size: 12px;
     font-weight: 500;
     text-align: center;
-    color: $white;
-    transition: background-color ease-in-out 0.3s;
 
     &.terminal {
       background-color: $blue-600;
@@ -339,15 +344,6 @@ $btn-font-family: $font-family-base;
       }
     }
 
-    &:hover:enabled {
-      background-color: $blue-500;
-      color: white;
-    }
-
-    &:active:enabled {
-      background-color: $purple;
-    }
-
     &:disabled {
       cursor: auto;
       pointer-events: none !important;
@@ -355,26 +351,16 @@ $btn-font-family: $font-family-base;
   }
 
   .btn-neon {
+    @include button-variant(
+      $neon-yellow,
+      $neon-yellow,
+      $color: $blue-500,
+      $hover-background: $neon-yellow-hover,
+    );
     font-size: 12px;
     font-weight: 500;
-    color: $blue-500;
     height: 32px;
-    border-radius: 4px;
-    background-color: $neon-yellow;
     padding: 0 32px;
-    transition: background-color ease-in-out 0.3s;
-
-    &:hover:not([disabled]) {
-      background-color: $neon-yellow-hover;
-    }
-
-    &:focus {
-      border: none;
-      outline: none;
-    }
-
-    border: none;
-
   }
 
   .btn-outline-neon {
@@ -397,6 +383,15 @@ $btn-font-family: $font-family-base;
       border: solid 1px $neon-yellow-hover;
     }
   }
+
+  .btn-link {
+    color: $blue-300;
+    &:hover {
+      color: $blue-400;
+      text-decoration: underline;
+    }
+  }
+
 
   .form-control {
     color: $blue-500;
@@ -433,11 +428,6 @@ $btn-font-family: $font-family-base;
   i {
     margin-top: 1px;
   }
-}
-
-label.mat-slide-toggle-label {
-  display: flex;
-  margin-bottom: 0;
 }
 
 .btn.btn-icon {

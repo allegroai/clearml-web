@@ -1,7 +1,7 @@
 import {get, has, isArray, isEqual, mergeWith, isUndefined} from 'lodash-es';
 import {IExperimentDetail} from '../../features/experiments-compare/experiments-compare-models';
 import {treeBuilderService} from './services/tree-builder.service';
-import {TreeNode} from './shared/experiments-compare-details.model';
+import {ModelDetail, TreeNode} from './shared/experiments-compare-details.model';
 import {
   getAlternativeConvertedExperiment,
   getDisplayTextForTitles
@@ -24,7 +24,7 @@ export interface TreeNodeJsonData {
 
 function arrayOrderIsNotImportant(key) {
   // List of fields with order important
-  return !['augmentation', 'mapping', 'network_design', 'file content', 'preview'].includes(key);
+  return !['augmentation', 'mapping', 'network_design', 'file content', 'preview', 'design', 'hyper-params'].includes(key);
 }
 
 export function isArrayOrderNotImportant(val, key, allExperiments = []) {
@@ -433,7 +433,7 @@ export function convertExperimentsArrays(experiment, origin, experiments, path =
             const hashedObj = {};
             const currentIndex = path.split(/\.([0-9]+)$/)[1];
             experiment[key].forEach(item => {
-              let convertedItemHash = convertToHashItem(item, origin && (Array.isArray(origin) ? (origin.map(item => item[key]) as any).flat() : origin[key][currentIndex]), newPath);
+              let convertedItemHash = convertToHashItem(item, origin && (Array.isArray(origin) ? (origin.map(item => item[key]) as any).flat() : origin[key]?.[currentIndex]), newPath);
               if (hashedObj[convertedItemHash]) {
                 convertedItemHash = `${counter}${convertedItemHash}`;
                 counter--;
@@ -520,4 +520,47 @@ export function createDiffObjectScalars(AllKeysObject, originObject?, comparedOb
       fullPath: originPath.concat(path).concat(key)
     };
   }, metaTransformerFunction || null, {comparedObject, originPath, originObject}).children;
+}
+
+/////// MODELS /////////
+
+export function convertmodelsArrays(experiment, origin, experiments, path = ''): ModelDetail {
+  const convertedModel: ModelDetail = {};
+  let counter = 9999;
+  Object.keys(experiment).forEach(key => {
+      const newPath = `${path}.${key}`;
+      switch (key) {
+        default:
+          if (isObject(experiment[key]) && (!isArrayOrderNotImportant(experiment[key], key, experiments))) {
+            let newKey = getDisplayTextForTitles(experiment[key], newPath) || key;
+
+            // Makes base/origin rows first
+            if (origin && Array.isArray(origin) && origin.map(item => getDisplayTextForTitles(item, newPath)).includes(newKey)) {
+              newKey = `0${newKey}`;
+            }
+            convertedModel[newKey] = convertExperimentsArrays(experiment[key], origin ? origin[key] : null, experiments.map(exp => exp ? exp[key] : null), newPath);
+          } else if (isArrayOrderNotImportant(experiment[key], key, experiments)) {
+            const hashedObj = {};
+            const currentIndex = path.split(/\.([0-9]+)$/)[1];
+            experiment[key].forEach(item => {
+              let convertedItemHash = convertToHashItem(item, origin && (Array.isArray(origin) ? (origin.map(item => item[key]) as any).flat() : origin[key]?.[currentIndex]), newPath);
+              if (hashedObj[convertedItemHash]) {
+                convertedItemHash = `${counter}${convertedItemHash}`;
+                counter--;
+              }
+              if (isObject(item)) {
+                hashedObj[convertedItemHash] =
+                  convertExperimentsArrays(item, origin ? origin[key] : null, experiments.map(exp => exp ? exp[key] : null), newPath);
+              } else {
+                hashedObj[convertedItemHash] = item;
+              }
+            });
+            convertedModel[key] = hashedObj;
+          } else {
+            convertedModel[key] = experiment[key];
+          }
+      }
+    }
+  );
+  return convertedModel;
 }

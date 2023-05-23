@@ -124,7 +124,12 @@ export const convertScalars = (scalars: GroupedList, experimentId: string): { [k
         type: 'scatter'
       }));
 
-    acc[key] = [prepareGraph(chartData, {type: 'scalar', title: key, xaxis: {title: 'Iterations'}}, {}, {metric: key})];
+    acc[key] = [prepareGraph(
+      chartData,
+      {type: 'scalar', title: key, xaxis: {title: 'Iterations'}},
+      {},
+      {metric: key, type: 'scalar', variants: Object.keys(graph)}
+    )];
     return acc;
   }, {});
 

@@ -1,15 +1,15 @@
 <div class="x-axis-options" [class.vertical-layout]="verticalLayout">
-  <div class="d-flex justify-content-between" [class.w-100]="verticalLayout">
+  <div class="d-flex-center justify-content-between" [class.w-100]="verticalLayout">
     <span class="label-text axis-text-margin-left">Group by</span>
-    <mat-form-field appearance="outline" class="group-by-field">
+    <mat-form-field appearance="outline" class="group-by-field no-bottom">
       <mat-select [value]="groupBy"  (selectionChange)="groupByChanged($event)" panelClass="light-theme">
         <mat-option *ngFor="let type of groupByOptions" [value]="type.value">{{type.name}}</mat-option>
       </mat-select>
     </mat-form-field>
   </div>
-  <div class="d-flex justify-content-between" [class.w-100]="verticalLayout">
+  <div class="d-flex-center justify-content-between" [class.w-100]="verticalLayout">
     <span class="label-text axis-text-margin-left">Horizontal Axis</span>
-    <mat-form-field appearance="outline" class="axis-type-field">
+    <mat-form-field appearance="outline" class="axis-type-field no-bottom">
       <mat-select [value]="xAxisType" (selectionChange)="xAxisTypeChanged($event)" panelClass="light-theme"
                   name="scriptType">
         <mat-option *ngFor="let type of xAxisTypeOption" [value]="type.value">{{type.name}}</mat-option>
@@ -19,20 +19,23 @@
   <div class="smooth-options">
     <span class="label-text smoothing-text">Smoothing</span>
     <mat-slider
-      [value]="smoothWeight"
       [max]="0.999"
       [min]="0"
       [step]="0.001"
-      (input)="changeWeight.emit($event.value)"
+     #ngSlider
     >
+      <input matSliderThumb
+             [ngModel]="smoothWeight"
+             (ngModelChange)="changeWeight.emit(round(ngSliderThumb.value * 100) /100)"
+             #ngSliderThumb="matSliderThumb" />
     </mat-slider>
-    <mat-form-field appearance="outline" class="smooth-input">
+    <mat-form-field appearance="outline" class="smooth-input no-bottom">
       <input
         matInput
         name="minCount"
         type="number"
         [min]="0"
-        [max]="0.999"
+        [max]="0.99"
         [step]="0.05"
         [ngModel]="smoothWeight"
         (keyup)="($any($event.target).value >= 1) ? smoothWeight = 0.999 : null"

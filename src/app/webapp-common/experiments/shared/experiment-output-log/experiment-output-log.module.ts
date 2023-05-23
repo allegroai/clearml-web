@@ -4,7 +4,7 @@ import {ExperimentOutputLogComponent} from '../../containers/experiment-output-l
 import {ExperimentLogInfoComponent} from '../../dumb/experiment-log-info/experiment-log-info.component';
 import {SMSharedModule} from '@common/shared/shared.module';
 import {UiComponentsModule} from '@common/shared/ui-components/ui-components.module';
-import { MatLegacyProgressSpinnerModule as MatProgressSpinnerModule } from '@angular/material/legacy-progress-spinner';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import {SharedPipesModule} from '@common/shared/pipes/shared-pipes.module';
 import {ScrollingModule} from '@angular/cdk/scrolling';
 import {ExperimentSharedModule} from '~/features/experiments/shared/experiment-shared.module';

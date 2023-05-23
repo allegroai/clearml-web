@@ -1,4 +1,4 @@
-<sm-dialog-template header="SELECT A PUBLISHED MODEL">
+<sm-dialog-template [header]="data?.header">
   <div class="model-table-container">
     <div class="w-100 model-header">
       <sm-select-model-header
@@ -6,19 +6,23 @@
         [searchValue]="searchValue$ | async"
         [isAllProjects]="isAllProjects$ | async"
         [viewMode]="viewMode$ | async"
-        [hideArchiveToggle]="true"
+        [hideArchiveToggle]="data.hideShowArchived"
         [hideCreateNewButton]="true"
-        [showAllProjectsToggle]="true"
+        [showAllProjectsToggle]="selectedProject?.id !== '*'"
+        [tableFilters]="tableFilters$ | async"
         (searchValueChanged)="onSearchValueChanged($event)"
         (isAllProjectsChanged)="onIsAllProjectsChanged($event)"
+        (clearFilters)="clearFilters()"
+        (isArchivedChanged)="showArchives($event)"
       ></sm-select-model-header>
     </div>
-    <div class="space-line"></div>
     <sm-models-table
       class="model-info-container align-self-stretch"
-      selectionMode="single"
-      [enableMultiSelect]="false"
+      [selectionMode]="data.selectionMode ?? 'single'"
+      [enableMultiSelect]="data.selectionMode === 'multiple'"
       [minimizedView]="false"
+      [hideSelectAll]="true"
+      [reorderableColumns]="false"
       [models]="models$ | async"
       [tableCols]="tableCols"
       [noMoreModels]="noMoreModels$ | async"
@@ -31,13 +35,24 @@
       [tableSortOrder]="(tableSortOrder$ | async)"
       [tableFilters]="(tableFilters$ | async)"
       [selectedModels]="selectedModels$ | async"
-      [onlyPublished]="true"
-      [colRatio]="0.75"
+      [onlyPublished]="data.selectionMode === 'single'"
+      (modelsSelectionChanged)="modelsSelectionChanged($event)"
       (modelSelectionChanged)="modelSelectionChanged($event)"
       (sortedChanged)="sortedChanged($event)"
       (filterChanged)="filterChanged($event)"
+      (filterSearchChanged)="filterSearchChanged($event)"
       (loadMoreModels)="getNextModels()"
     >
     </sm-models-table>
+    <div class="buttons">
+      <button (click)="closeDialog(null)" class="btn btn-outline-neon" data-id ="CancelButton">
+        CANCEL
+      </button>
+      <button type="submit"
+              (click)="closeDialogMultiple()"
+              class="btn btn-neon yes-button" data-id="ApplyButton">
+        APPLY
+      </button>
+    </div>
   </div>
 </sm-dialog-template>

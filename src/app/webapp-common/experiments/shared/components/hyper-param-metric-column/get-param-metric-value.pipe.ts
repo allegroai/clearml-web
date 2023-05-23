@@ -2,11 +2,12 @@ import {Pipe, PipeTransform} from '@angular/core';
 import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {ITask} from '~/business-logic/model/al-task';
 import {GetVariantWithoutRoundPipe} from './get-variant-without-round.pipe';
-import {getRoundedNumber} from '../../../shared/common-experiments.utils';
+import {getRoundedNumber} from '../../common-experiments.utils';
 import {decodeHyperParam} from '@common/shared/utils/tableParamEncode';
 
 @Pipe({
-  name: 'getParamMetricValue'
+  name: 'getParamMetricValue',
+  standalone: true
 })
 export class GetParamMetricValuePipe implements PipeTransform {
 

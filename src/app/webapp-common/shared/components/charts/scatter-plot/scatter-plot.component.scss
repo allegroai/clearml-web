@@ -14,8 +14,9 @@
   }
 
   .overlay {
+    display: none;
     position: absolute;
-    top: $chart-bar-height; 
+    top: $chart-bar-height;
     bottom: 0;
     left: 0;
     right: 0;

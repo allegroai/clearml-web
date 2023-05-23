@@ -4,6 +4,7 @@ import {Params} from '@angular/router';
 import {ISmCol} from '../../shared/ui-components/data/table/table.consts';
 import {SortMeta} from 'primeng/api';
 import {TableFilter} from '../../shared/utils/tableParamEncode';
+import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 
 export const EXPERIMENTS_COMPARE_SELECT_EXPERIMENT_ = 'EXPERIMENTS_COMPARE_SELECT_EXPERIMENT_';
 
@@ -22,7 +23,7 @@ export const SET_NAVIGATION_PREFERENCES = EXPERIMENTS_COMPARE_SELECT_EXPERIMENT_
 
 export const setHideIdenticalFields = createAction(SET_HIDE_IDENTICAL_ROWS, props<{payload: boolean}>());
 export const setExperimentsUpdateTime = createAction(SET_EXPERIMENTS_UPDATE_TIME, props<{ payload: {[key: string]: Date}}>());
-export const refreshIfNeeded = createAction(REFRESH_IF_NEEDED, props<{ payload: boolean; autoRefresh?: boolean }>());
+export const refreshIfNeeded = createAction(REFRESH_IF_NEEDED, props<{ payload: boolean; autoRefresh?: boolean; entityType: string }>());
 export const toggleShowScalarOptions = createAction(TOGGLE_SHOW_SACLARS_OPTIONS);
 export const setSearchExperimentsForCompareResults = createAction(SET_SELECT_EXPERIMENTS_FOR_COMPARE, props<{ payload: Array<Task> }>());
 export const setShowSearchExperimentsForCompare = createAction(SET_SHOW_SEARCH_EXPERIMENTS_FOR_COMPARE, props<{ payload: boolean }>());
@@ -50,7 +51,7 @@ export const compareAddDialogSetTableSort = createAction(
   EXPERIMENTS_COMPARE_SELECT_EXPERIMENT_ + ' [set table sort]',
   props<{ orders: SortMeta[]; projectId: string; colIds: string[] }>()
 );
-export const refetchExperimentRequested = createAction(REFETCH_EXPERIMENT_REQUESTED, props<{ autoRefresh: boolean }>());
+export const refetchExperimentRequested = createAction(REFETCH_EXPERIMENT_REQUESTED, props<{ autoRefresh: boolean; entity: EntityTypeEnum }>());
 export const setNavigationPreferences = createAction(SET_NAVIGATION_PREFERENCES, props<{ navigationPreferences: Params }>());
 export const setAddTableViewArchived = createAction(
   EXPERIMENTS_COMPARE_SELECT_EXPERIMENT_ + '[show archived in add table]',

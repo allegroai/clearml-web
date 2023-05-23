@@ -10,11 +10,9 @@ import {
 } from '@angular/core';
 import {Store} from '@ngrx/store';
 import {selectRouterConfig, selectRouterQueryParams} from '../../core/reducers/router-reducer';
-import {debounceTime, filter} from 'rxjs/operators';
-import {selectBreadcrumbsStrings} from '../layout.reducer';
-import {ActivatedRoute} from '@angular/router';
-import {combineLatest, fromEvent, Subscription} from 'rxjs';
-import {formatStaticCrumb, NestedProjectTypeUrlEnum, prepareNames} from '~/layout/breadcrumbs/breadcrumbs.utils';
+import {debounceTime, filter, withLatestFrom} from 'rxjs/operators';
+import {ActivatedRoute, NavigationStart, Router, RouterLink} from '@angular/router';
+import {combineLatest, fromEvent, Observable, Subscription} from 'rxjs';
 import {addMessage} from '../../core/actions/layout.actions';
 import {ConfigurationService} from '../../shared/services/configuration.service';
 import {
@@ -23,31 +21,63 @@ import {
 import {
   selectDefaultNestedModeForFeature,
   selectIsDeepMode,
-  selectRootProjects,
+  selectProjectAncestors,
+  selectSelectedProject,
+  selectSelectedProjectId,
   selectShowHiddenUserSelection
 } from '../../core/reducers/projects.reducer';
-import {getAllSystemProjects} from '@common/core/actions/projects.actions';
-import {castArray, isEqual} from 'lodash-es';
 import {selectIsSearching} from '../../common-search/common-search.reducer';
 import {MESSAGES_SEVERITY} from '@common/constants';
-import { routeConfToProjectType } from '~/features/projects/projects-page.utils';
+import {setBreadcrumbs} from '@common/core/actions/router.actions';
+import {selectBreadcrumbs} from '@common/core/reducers/view.reducer';
+import {routeConfToProjectType} from '~/features/projects/projects-page.utils';
+import {isExample} from '@common/shared/utils/shared-utils';
+import {MatMenuModule} from '@angular/material/menu';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {NgForOf, NgIf, TitleCasePipe} from '@angular/common';
+import {
+  ShowTooltipIfEllipsisDirective
+} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {ClipboardModule} from 'ngx-clipboard';
+import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 
+export enum CrumbTypeEnum {
+  Workspace = 'Workspace',
+  Feature = 'Feature',
+  Project = 'Project',
+  SubFeature = 'SubFeature',
+}
 
 export interface IBreadcrumbsLink {
   name?: string;
   url?: string;
   subCrumbs?: { name: string; url: string; hidden?: boolean }[];
   isProject?: boolean;
+  type?: CrumbTypeEnum;
+  hidden?: boolean;
+  collapsable?: boolean;
+  example?: boolean;
 }
 
 @Component({
   selector: 'sm-breadcrumbs',
   templateUrl: './breadcrumbs.component.html',
   styleUrls: ['./breadcrumbs.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    MatMenuModule,
+    TooltipDirective,
+    NgForOf,
+    ShowTooltipIfEllipsisDirective,
+    ClipboardModule,
+    RouterLink,
+    NgIf,
+    ClickStopPropagationDirective
+  ],
+  standalone: true
 })
 export class BreadcrumbsComponent implements OnInit, OnDestroy {
-  public breadcrumbs: Array<IBreadcrumbsLink> = [];
+  public breadcrumbs: IBreadcrumbsLink[][] = [];
   public currentUrl: string;
   public showShareButton: boolean = false;
   public isCommunity: boolean;
@@ -57,24 +87,26 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
   public subProjectsMenuIsOpen: boolean;
   public lastSegment: string;
   public shouldCollapse: boolean;
-  private previousProjectNames: any;
-  private tempBread: Array<IBreadcrumbsLink> = [];
-  private routeConfig: Array<string> = [];
-  public breadcrumbsStrings;
   private sub = new Subscription();
   private isSearching$ = this.store.select(selectIsSearching);
 
   @Input() activeWorkspace: GetCurrentUserResponseUserObjectCompany;
   @ViewChild('container') private breadCrumbsContainer: ElementRef;
   private expandedSize: number;
+  public breadcrumbs$: Observable<IBreadcrumbsLink[][]>;
+  public showHidden: boolean;
+  public projectFeature: boolean;
 
   constructor(
     private store: Store<any>,
     public route: ActivatedRoute,
+    private router: Router,
     private configService: ConfigurationService,
     private cd: ChangeDetectorRef,
-    private ref: ElementRef
+    private ref: ElementRef,
+    private titleCasePipe: TitleCasePipe
   ) {
+    this.breadcrumbs$ = this.store.select(selectBreadcrumbs);
   }
 
   ngOnInit() {
@@ -86,8 +118,19 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
       })
     );
 
+    this.sub.add(this.breadcrumbs$.subscribe(breadcrumbs => {
+      this.breadcrumbs = breadcrumbs.map(breadcrumbsGroup => breadcrumbsGroup.filter(breadcrumb => (!breadcrumb.hidden) || (this.showHidden && this.projectFeature))).filter(breadcrumbsGroup => breadcrumbsGroup.length > 0);
+      this.cd.detectChanges();
+    }));
+
+    this.sub.add(this.breadcrumbs$.pipe(debounceTime(300)).subscribe(() => {
+      this.calcOverflowing();
+      this.cd.detectChanges();
+
+    }));
+
     this.sub.add(this.isSearching$.pipe(debounceTime(300)).subscribe(() => {
-        if (this.checkIfBreadcrumbsInitiated() && !this.shouldCollapse) {
+        if (!this.shouldCollapse) {
           this.calcOverflowing();
           this.cd.detectChanges();
         }
@@ -101,31 +144,88 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
         this.cd.detectChanges();
       })
     );
+    this.sub.add(this.store.select(selectRouterConfig).subscribe(config => {
+      let route = this.route.snapshot;
+      while (route.firstChild) {
+        route = route.firstChild;
+      }
+      !config?.includes(':projectId') && route?.data?.staticBreadcrumb && this.store.dispatch(setBreadcrumbs({
+        breadcrumbs: route?.data?.staticBreadcrumb
+      }));
+    }));
+
+    this.sub.add(this.router.events
+      .pipe(
+        filter(event => event instanceof NavigationStart),
+        withLatestFrom(this.store.select(selectSelectedProjectId)),
+        filter(([event, projectId]) => projectId && !(event as any)?.url?.includes(projectId))
+      )
+      .subscribe(
+        () => {
+          this.store.dispatch(setBreadcrumbs({breadcrumbs: [[]]}));
+        }));
 
     this.sub.add(combineLatest([
         this.store.select(selectRouterConfig),
-        this.store.select(selectBreadcrumbsStrings),
         this.store.select(selectRouterQueryParams),
-        this.store.select(selectDefaultNestedModeForFeature),
         this.store.select(selectShowHiddenUserSelection),
-        this.store.select(selectRootProjects),
+        this.store.select(selectProjectAncestors),
+        this.store.select(selectSelectedProject),
+        this.store.select(selectDefaultNestedModeForFeature)
       ]).pipe(
         debounceTime(200),
-        filter(([, names]) => !!names)
-      ).subscribe(([config, names, params, nestedForFeature, showHidden]) => {
+      ).subscribe(([config, params, showHidden, projectAncestors, selectedProject, nestedModeForFeature]) => {
+        const compareNameMap = {
+          projects: 'Experiments',
+          datasets: 'Versions',
+          pipelines: 'Runs'
+        };
+        this.showHidden = showHidden;
+        this.projectFeature = config?.[0] === 'projects';
+        const nestedDatasets = ['simple', 'hyper'].includes(config?.[1]);
+        const isCompareExperiments = config?.includes('compare-experiments');
+        const isCompareModels = config?.includes('compare-models');
+        const isDeep = params?.deep === 'true';
+        const isPipelinesControllers = config?.[0] === 'pipelines' && config?.[2]?.includes('experiments');
+        const isSimpleDatasetsTasksView = config?.[0] === 'datasets' && config?.[3]?.includes('experiments');
+        !!config && config.includes(':projectId') && (projectAncestors !== null || selectedProject?.id === '*')
+        && this.resetShouldCollapse() && this.store.dispatch(setBreadcrumbs({
+          breadcrumbs: [[{
+            name: config[0].toUpperCase(),
+            url: nestedModeForFeature[routeConfToProjectType(config)] ? `${config[0]}/${nestedDatasets ? config[1] + '/' : ''}/*/projects` : config[0],
+            type: CrumbTypeEnum.Feature
+          }],
+            ...(projectAncestors?.length > 0 ? [projectAncestors?.filter(ancestor => (this.projectFeature || !['.datasets', '.pipelines', '.reports'].includes(ancestor.basename)))
+              .map(ancestor => ({
+                name: ancestor.basename,
+                example: isExample(ancestor),
+                url: `${config[0]}/${nestedDatasets ? config[1] + '/' : ''}${ancestor.id}/projects`,
+                type: CrumbTypeEnum.Project,
+                hidden: ancestor.hidden,
+                collapsable: true
+              }))] : []),
+            ...(!!selectedProject && (!['.datasets', '.pipelines', '.reports'].includes(selectedProject.basename) || config[0] === 'projects') && (selectedProject.id !== '*' || (selectedProject.id === '*' && config[0] === 'projects')) ? [[{
+              name: selectedProject.id === '*' && config[0] === 'projects' ? `All ${isCompareExperiments ? 'Experiments' : isCompareModels ? 'Models' : this.titleCasePipe.transform(config[2])}` : selectedProject.basename,
+              example: isExample(selectedProject),
+              type: CrumbTypeEnum.Project,
+              hidden: selectedProject.hidden && !isSimpleDatasetsTasksView && !isPipelinesControllers,
+              url: `${config[0]}/${nestedDatasets ? config[1] + '/' : ''}${selectedProject.id}/${isCompareExperiments ? 'experiments' : isCompareModels ? 'models' : 'projects'}`,
+            }]] : []),
+            ...((isDeep && selectedProject.id !== '*') ? [[{
+              name: `All ${this.titleCasePipe.transform(config[2])}`,
+              type: CrumbTypeEnum.SubFeature
+            }]] : []),
+            ...(isCompareExperiments ? [[{
+              name: `Compare ${compareNameMap[config[0]]}`,
+              type: CrumbTypeEnum.SubFeature
+            }]] : []),
+            ...(isCompareModels ? [[{
+              name: `Compare Models`,
+              type: CrumbTypeEnum.SubFeature
+            }]] : []),
+          ]
+        }));
         this.archive = !!params?.archive;
-        const compare = config?.includes('compare-experiments');
-        this.routeConfig = (!compare && names.project?.id === '*') ? config?.filter(c => c !== ':projectId') :
-          this.isDeep ? config : config?.filter(c => !['experiments', 'models', 'dataviews'].includes(c));
-        const experimentFullScreen = config?.[4] === ('output');
-        const projectType = `${config?.[0]}${['simple', 'hyper'].includes(config?.[1]) ? '/' + config?.[1] : ''}`;
-        this.breadcrumbsStrings = prepareNames(names, projectType as NestedProjectTypeUrlEnum, experimentFullScreen, showHidden, compare);
-        if (!isEqual(this.previousProjectNames, this.breadcrumbsStrings[':projectId']?.subCrumbs) &&
-          this.breadcrumbsStrings[':projectId']?.subCrumbs?.map(project => project.name).includes(undefined)) {
-          this.previousProjectNames = this.breadcrumbsStrings[':projectId']?.subCrumbs;
-          this.store.dispatch(getAllSystemProjects());
-        }
-        this.refreshBreadcrumbs(nestedForFeature);
         let route = this.route.snapshot;
         let hide = false;
         while (route.firstChild) {
@@ -152,57 +252,6 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
     this.sub.unsubscribe();
   }
 
-  private refreshBreadcrumbs(nestedForFeature?: { [feature: string]: boolean }): Array<IBreadcrumbsLink> {
-    if (!this.routeConfig) {
-      return;
-    }
-    this.tempBread = this.routeConfig
-      .reduce((acc, config) => {
-        const parts = this.breadcrumbsStrings?.[config];
-        if (Array.isArray(parts)) {
-          parts.forEach(part => {
-            const previous = acc.slice(-1)[0]; // get the last item in the array
-            const url = part.url ? `${previous ? previous?.url : ''}/${part.url}` : '';
-            const isProject = config === ':projectId';
-            acc.push({name: part?.name ?? '', url, isProject});
-          });
-        } else {
-          const part = parts;
-          const id = this.getRouteId(config);
-          const isProject = config === ':projectId';
-          let url;
-          if (part?.url === null) {
-            url = '';
-          } else {
-            const previous = acc.slice(-1)[0]; // get the last item in the array
-            url = `${previous ? previous?.url : ''}/${id}`;
-          }
-          if (!isProject || this.subProjects?.length > 0) {
-            acc.push({name: part?.name ?? '', url, isProject});
-          }
-        }
-        return acc;
-      }, [{url: '', name: '', isProject: true}])
-      .filter((i) => !!i.name);
-    const rootCrumb = formatStaticCrumb(this.routeConfig[0], nestedForFeature?.[routeConfToProjectType(this.routeConfig)], this.routeConfig);
-    this.tempBread = [...castArray(rootCrumb), ...this.tempBread];
-    if (!isEqual(this.tempBread, this.breadcrumbs)) {
-      this.shouldCollapse = false;
-      this.breadcrumbs = this.tempBread;
-    }
-    setTimeout(() => {
-      if (this.checkIfBreadcrumbsInitiated()) {
-        this.calcOverflowing();
-        this.cd.detectChanges();
-      }
-    }, 0);
-    // this.showShareButton = !(this.routeConfig.includes('login') || this.routeConfig.includes('dashboard'));
-  }
-
-  private getRouteId(config: string) {
-    return this.breadcrumbsStrings?.[config]?.url ?? config;
-  }
-
   openShareModal() {
     this.currentUrl = window.location.href;
   }
@@ -211,15 +260,13 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
     this.store.dispatch(addMessage(MESSAGES_SEVERITY.SUCCESS, 'URL copied successfully'));
   }
 
-  checkIfBreadcrumbsInitiated() {
-    return this.breadcrumbs && this.routeConfig && this.breadcrumbs.length <= this.routeConfig.length;
-  }
-
-  get subProjects() {
-    return this.breadcrumbsStrings?.[':projectId']?.subCrumbs;
-  }
 
   subProjectsMenuOpened(b: boolean) {
     this.subProjectsMenuIsOpen = b;
+  }
+
+  private resetShouldCollapse() {
+    this.shouldCollapse = false;
+    return true;
   }
 }

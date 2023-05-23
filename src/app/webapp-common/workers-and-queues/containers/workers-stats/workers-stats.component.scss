@@ -10,16 +10,19 @@
   border: 1px solid $dark-grey-blue;
 
   .header {
-    height: 48px;
-    margin: 0 30px;
+    padding: 0 30px;
 
     .title {
       font-size: 15px;
       text-transform: uppercase;
     }
 
-    .time-selector, .param-selector {
+    .time-selector {
       width: 180px;
+      position: relative;
+    }
+    .param-selector {
+      width: 210px;
       position: relative;
     }
     .warnning {
@@ -30,7 +33,7 @@
   }
 
   .line-chart-container {
-    height: calc(100% - 48px);
+    height: calc(100% - 36px);
     position: relative;
     z-index: 500;
   }

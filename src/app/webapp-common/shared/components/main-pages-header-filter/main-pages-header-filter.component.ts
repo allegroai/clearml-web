@@ -6,6 +6,8 @@ import {Observable, Subscription} from 'rxjs';
 import {setMainPageTagsFilter, setMainPageTagsFilterMatchMode} from '../../../core/actions/projects.actions';
 import {selectMainPageTagsFilter, selectMainPageTagsFilterMatchMode} from '../../../core/reducers/projects.reducer';
 import {sortByArr} from '../../pipes/show-selected-first.pipe';
+import {selectRouterConfig} from "@common/core/reducers/router-reducer";
+import {map} from "rxjs/operators";
 
 @Component({
   selector: 'sm-main-pages-header-filter',
@@ -22,6 +24,9 @@ export class MainPagesHeaderFilterComponent implements OnInit, OnDestroy {
   private tagsFiltersSubscription: Subscription;
   private showOnlyUserWork: boolean;
   private showOnlyUserWorkSub: Subscription;
+  private currentFeature$: Observable<string>;
+  private currentFeatureSub: Subscription;
+  private currentFeature: string;
 
   @Input() set allTags(allTags: string[]) {
     if (allTags) {
@@ -39,6 +44,7 @@ export class MainPagesHeaderFilterComponent implements OnInit, OnDestroy {
     this.showOnlyUserWork$ = this.store.select(selectShowOnlyUserWork);
     this.tagsFilterMatchMode$ = this.store.select(selectMainPageTagsFilterMatchMode);
     this.tagsFilters$ = this.store.select(selectMainPageTagsFilter);
+    this.currentFeature$ = this.store.select(selectRouterConfig).pipe(map((conf) => conf?.[0]));
   }
 
 
@@ -65,7 +71,7 @@ export class MainPagesHeaderFilterComponent implements OnInit, OnDestroy {
   }
 
   emitFilterChangedCheckBox(tags: string[]) {
-    this.store.dispatch(setMainPageTagsFilter({tags}));
+    this.store.dispatch(setMainPageTagsFilter({tags, feature: this.currentFeature}));
   }
 
 
@@ -80,14 +86,18 @@ export class MainPagesHeaderFilterComponent implements OnInit, OnDestroy {
       this.showOnlyUserWork = showOnlyUserWork;
     });
 
+    this.currentFeatureSub = this.currentFeature$.subscribe((feature) => {
+      this.currentFeature = feature;
+    });
+
   }
 
   ngOnDestroy(): void {
     this.matchModeSubscription.unsubscribe();
     this.tagsFiltersSubscription.unsubscribe();
     this.showOnlyUserWorkSub.unsubscribe();
+    this.currentFeatureSub.unsubscribe();
     this.store.dispatch(setMainPageTagsFilterMatchMode({matchMode: undefined}));
-    this.store.dispatch(setMainPageTagsFilter({tags: []}));
   }
 
   private sortTags() {
@@ -98,7 +108,7 @@ export class MainPagesHeaderFilterComponent implements OnInit, OnDestroy {
 
   clearAll() {
     this.store.dispatch(setMainPageTagsFilterMatchMode({matchMode: undefined}));
-    this.store.dispatch(setMainPageTagsFilter({tags: []}));
+    this.store.dispatch(setMainPageTagsFilter({tags: [], feature: this.currentFeature}));
     this.store.dispatch(setFilterByUser({showOnlyUserWork: false}));
   }
 }

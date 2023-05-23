@@ -134,6 +134,7 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
   toggleSettingsBar() {
     this.store.dispatch(toggleSettings());
   }
+
   updateExperimentName(name) {
     if (name.trim().length > 2) {
       this.store.dispatch(experimentDetailsUpdated({id: this.selectedExperiment.id, changes: {name}}));
@@ -141,6 +142,7 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
       this.store.dispatch(addMessage(MESSAGES_SEVERITY.ERROR, 'Name must be more than three letters long'));
     }
   }
+
   maximize() {
     if (window.location.pathname.includes('info-output')) {
       const resultsPath = this.route.firstChild?.firstChild?.routeConfig?.path || this.route.firstChild.routeConfig.path;

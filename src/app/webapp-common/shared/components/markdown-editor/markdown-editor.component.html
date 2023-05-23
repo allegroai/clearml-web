@@ -3,7 +3,7 @@
     <div class="actions">
       <div class="actions-buttons ">
         <button *ngIf="!editMode && editModeChanged.observed"
-                class="btn btn-cml-primary btn-icon btn-expand-view  md-button mr-2"
+                class="btn btn-cml-primary btn-icon btn-expand-view  md-button me-2"
                 [smTooltip]="isExpand? 'Minimize view' : 'Expand view'"
                 matTooltipPosition="below"
                 (click)="expandClicked()">
@@ -45,7 +45,7 @@
               mat-menu-item class="action" (click)="insertImage(resource.url)">
                 <i class="al-icon sm-md" [class]="resource.unused ? 'al-ico-broken-file' : 'al-ico-image'"></i>
                 <span class="ellipsis">{{resource.url | baseName}}</span>
-                <i class="al-icon al-ico-trash sm-md" (click)="$event.stopPropagation(); $event.preventDefault(); deleteResource.emit(resource.url)"></i>
+                <i class="al-icon al-ico-trash sm-md me-3" (click)="$event.stopPropagation(); $event.preventDefault(); deleteResource.emit(resource.url)"></i>
             </button>
           </ng-container>
           <ng-template #noResources><div class="action src-empty">No uploads yet</div></ng-template>
@@ -53,7 +53,7 @@
 
         <button
           [matMenuTriggerFor]="imageActions"
-          (onMenuOpen)="imageMenuOpened.emit(data)"
+          (menuOpened)="imageMenuOpened.emit(data)"
           type="button"
           class="btn btn-default btn-img-menu"
           smTooltip="Image resources"

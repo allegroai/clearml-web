@@ -27,6 +27,7 @@ import {ProjectsGetAllResponseSingle} from '~/business-logic/model/projects/proj
 import {selectShowPipelineExamples} from '@common/projects/common-projects.reducer';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {PipelinesEmptyStateComponent} from '@common/pipelines/pipelines-page/pipelines-empty-state/pipelines-empty-state.component';
+import {debounceTime} from 'rxjs/operators';
 
 @Component({
   selector: 'sm-pipelines-page',
@@ -73,12 +74,15 @@ if __name__ == '__main__':
     this.showExamples$ = this.store.select(selectShowPipelineExamples);
     // Todo: delayed because of nested views, remove timeout after implementing nested view template
     window.setTimeout(() => this.store.dispatch(getProjectsTags({entity: this.getName()})));
-    // this.isNested$ = this.store.select(selectRouterConfig).pipe(map(config.last => config.includes('projects')));
     this.projectsTags$ = this.store.select(selectProjectTags);
-    this.mainPageFilterSub = combineLatest([this.store.select(selectMainPageTagsFilter), this.store.select(selectMainPageTagsFilterMatchMode)]).subscribe(() => {
-      this.store.dispatch(resetProjects());
-      this.store.dispatch(getAllProjectsPageProjects());
-    });
+    this.mainPageFilterSub = combineLatest([
+      this.store.select(selectMainPageTagsFilter),
+      this.store.select(selectMainPageTagsFilterMatchMode)
+    ]).pipe(debounceTime(0))
+      .subscribe(() => {
+        this.store.dispatch(resetProjects());
+        this.store.dispatch(getAllProjectsPageProjects());
+      });
 
   }
 

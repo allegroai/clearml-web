@@ -9,11 +9,18 @@ import {Artifact} from '../../../business-logic/model/tasks/artifact';
 export type ExperimentCompareTrees = Array<ExperimentCompareTree>;
 
 
-export interface ExperimentDetailBase extends Omit<Task, 'project' | 'model' | 'execution'>{
+export interface ModelDetail extends Omit<Model, 'project' | 'metadata'> {
+  project?: Project;
+  info?: any;
+  labels?: Model['labels'];
+  metadata?: Model['design'];
+}
+
+export interface ExperimentDetailBase extends Omit<Task, 'project' | 'model' | 'execution'> {
   project?: Project;
   model?: ModelDetails;
   execution?: ExecutionDetails;
-  artifacts?: {[key: string]: Artifact};
+  artifacts?: { [key: string]: Artifact };
 }
 
 export interface ExperimentParams {
@@ -38,7 +45,7 @@ export interface ModelDetailsInput {
   framework?: Model['framework'];
   uri?: Model['uri'];
   name?: Model['name'];
-  taskName?: string
+  taskName?: string;
 }
 
 export interface ModelDetailsSource {

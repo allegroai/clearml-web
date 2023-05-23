@@ -64,11 +64,13 @@ export abstract class BaseTableView implements AfterViewInit, OnDestroy {
 
   @Input() tableSortOrder: TableSortOrderEnum;
   @Input() minimizedView: boolean;
+  @Input() hideSelectAll: boolean;
   @Input() set split(size: number) {
     this.table?.resize();
   }
 
 
+  @Output() filterSearchChanged = new EventEmitter() as EventEmitter<{ colId: string; value: {value: string; loadMore?: boolean} }>;
   @Output() filterChanged = new EventEmitter() as EventEmitter<{ col: ISmCol; value: any; andFilter?: boolean }>;
   @Output() columnsReordered = new EventEmitter<string[]>();
   @ViewChildren(TableComponent) tables: QueryList<TableComponent>;
@@ -161,9 +163,13 @@ export abstract class BaseTableView implements AfterViewInit, OnDestroy {
     this.filtersOptions = {...this.filtersOptions, [columnId]: [...this.filtersOptions[columnId]]};
   }
 
-  searchValueChanged($event: string, colId: string) {
-    this.searchValues[colId] = $event;
-    this.sortOptionsList(colId);
+  searchValueChanged($event: {value: string; loadMore?: boolean}, colId: string, asyncFilter?: boolean) {
+    this.searchValues[colId] = $event.value;
+    if (asyncFilter) {
+      this.filterSearchChanged.emit({colId, value: $event});
+    } else {
+      this.sortOptionsList(colId);
+    }
   }
 
   columnFilterClosed(col: ISmCol) {

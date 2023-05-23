@@ -80,25 +80,25 @@ export class ExperimentInfoModelComponent implements OnInit, OnDestroy {
     this.unsubscribe$.next(true);
   }
 
-  onModelSelected(selectedModel: Model) {
+  onModelSelected(selectedModelId: string) {
     const modelFoundIndex = this.orgModels.findIndex(model => model.id === this.modelId);
-    if (this.orgModels.map(m => m.id).includes(selectedModel.id)) {
+    if (this.orgModels.map(m => m.id).includes(selectedModelId)) {
       this.store.dispatch(addMessage('warn', 'Selected model is already an input-model'));
     } else {
       let newModels: { model: string; name: string }[];
       if (modelFoundIndex >= 0) {
         newModels = this.orgModels.map(model => model.id !== this.modelId ?
           {model: model.id, name: model.taskName} :
-          {model: selectedModel.id, name: model.taskName}
+          {model: selectedModelId, name: model.taskName}
         ).filter(model => model.model);
       } else {
         newModels = [
           ...this.orgModels.map(model => ({model: model.id, name: model.taskName})),
-          {model: selectedModel.id, name: 'Input Model'}
+          {model: selectedModelId, name: 'Input Model'}
         ];
       }
       this.store.dispatch(commonInfoActions.saveExperimentSection({models: {input: newModels as any}}));
-      return this.router.navigate([{modelId: selectedModel.id || ''}], {relativeTo: this.route, replaceUrl: true});
+      return this.router.navigate([{modelId: selectedModelId || ''}], {relativeTo: this.route, replaceUrl: true});
     }
   }
 

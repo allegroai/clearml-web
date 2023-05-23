@@ -9,10 +9,18 @@
   }
 
   .model-table-container {
-    height: 53vh;
-    width: 85vw;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    height: calc(100% - 164px);
+    width: 92vw;
   }
 
+  .buttons {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+  }
 }
 
 ::ng-deep p-table table {

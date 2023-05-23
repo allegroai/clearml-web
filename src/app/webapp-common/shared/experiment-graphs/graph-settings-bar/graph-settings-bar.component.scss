@@ -6,28 +6,6 @@
   width: 100%;
   font-size: 14px;
 
-  ::ng-deep .mat-form-field.mat-form-field-appearance-outline {
-    .mat-form-field-wrapper .mat-form-field-flex {
-      margin-top: 0;
-    }
-
-    .mat-form-field-outline {
-      top: 0px;
-    }
-
-    .mat-form-field-infix {
-      top: unset;
-      border: 0;
-      padding: 11px 0;
-    }
-
-    .mat-form-field-label-wrapper {
-      margin-left: unset;
-      top: 0;
-      padding: 0;
-    }
-  }
-
   .vertical-layout {
     font-size: 14px;
 
@@ -35,6 +13,7 @@
       flex-direction: column;
       flex-wrap: wrap;
       width: 100%;
+      gap: 12px
     }
 
     .group-by-field,
@@ -80,7 +59,8 @@
 }
 
 .smooth-input {
-  width: 55px;
+  height: 36px;
+  width: 74px;
   margin-left: 6px;
 }
 
@@ -115,16 +95,16 @@ mat-form-field {
 }
 
 .axis-type-field {
+  height: 36px;
   width: 130px;
 }
 
 .group-by-field {
+  height: 36px;
   width: 140px;
 }
 
 mat-slider {
   min-width: 121px;
-  top: -15px;
-  height: unset;
 }
 

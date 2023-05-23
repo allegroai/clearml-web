@@ -1,17 +1,17 @@
 import {Component} from '@angular/core';
 import {filter, take} from 'rxjs/operators';
-import {MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
-import {getQueues} from './actions/queues.actions';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {getQueues} from '@common/workers-and-queues/actions/queues.actions';
 import {Store} from '@ngrx/store';
-import {QueueCreateDialogComponent} from '../shared/queue-create-dialog/queue-create-dialog.component';
+import {QueueCreateDialogComponent} from '@common/shared/queue-create-dialog/queue-create-dialog.component';
 import {ActivatedRoute} from '@angular/router';
 
 @Component({
-  selector: 'sm-workers-and-queues',
-  templateUrl: './workers-and-queues.component.html',
-  styleUrls: ['./workers-and-queues.component.scss']
+  selector: 'sm-orchestration',
+  templateUrl: '../../features/workers-and-queues/orchestration.component.html',
+  styleUrls: ['./orchestration.component.scss']
 })
-export class WorkersAndQueuesComponent {
+export class OrchestrationComponent {
   private createQueueDialog: MatDialogRef<any, any>;
   public queuesManager: boolean;
 

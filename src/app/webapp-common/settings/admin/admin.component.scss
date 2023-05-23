@@ -31,11 +31,38 @@ $tab-width: 15vw;
 
   }
 
-
+  .toggle-title {
+    --mdc-theme-text-primary-on-background: #{$blue-200};
+    margin-bottom: 8px;
+  }
 
   .body {
     flex: 1;
     padding: 0 24px;
+  }
+
+  .read-only-section {
+    border-radius: 4px;
+    border: solid 1px $blue-500;
+    background-color: $blue-650;
+    padding: 16px;
+
+    .read-only-title {
+      color: $blue-200;
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+  }
+
+  .vault-group {
+    display: block;
+    color: $blue-280;
+    margin-bottom: 6px;
+
+    &:hover {
+      color: white;
+      text-decoration: underline;
+    }
   }
 
   .title {
@@ -44,7 +71,6 @@ $tab-width: 15vw;
     color: $white;
     font-size: 16px;
     text-transform: uppercase;
-    margin: 0 0 6px 0;
     i {
       color: $blue-300;
       &:hover {

@@ -2,34 +2,38 @@
 
 :host {
   width: 100%;
+
   mat-checkbox {
     width: 100%;
-    padding-left: 16px;
-    padding-right: 32px;
     height: 40px;
     align-items: center;
     border-radius: 4px;
+
     &:hover {
       background: $blue-50;
     }
-    ::ng-deep .mat-checkbox-layout {
+  }
+
+  ::ng-deep .mat-mdc-checkbox {
+    .mdc-checkbox .mdc-checkbox__native-control:indeterminate ~ .mdc-checkbox__background {
+      background-image: url('~app/webapp-common/assets/icons/cbx-exlude.svg');
+      background-size: 18px;
+      border: 0;
+      transition: none;
+    }
+
+    .mdc-checkbox__mixedmark {
+      display: none;
+    }
+
+    .mdc-form-field {
       width: 100%;
     }
-    ::ng-deep .mat-checkbox-label {
-      height: 40px;
-      width: 100%;
-      max-width: 400px;
-      display: flex;
-      align-items: center;
-      font-size: 14px;
-      line-height: normal;
-      color: rgba(0, 0, 0, 0.87)
-    }
-     &.mat-checkbox-indeterminate  {
-       ::ng-deep  .mat-checkbox-background {
-        color: red;
-        background-image: url('../../../../assets/icons/cbx-exlude.svg');
-      }
+
+    label {
+      max-width: 100%;
+      flex-grow: 1;
+      overflow: hidden;
     }
   }
 }

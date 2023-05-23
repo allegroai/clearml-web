@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import {ISmCol} from '../table.consts';
 import {addOrRemoveFromArray} from '../../../../utils/shared-utils';
-import {MatLegacyMenuTrigger as MatMenuTrigger} from '@angular/material/legacy-menu';
+import {MatMenuTrigger} from '@angular/material/menu';
 import {trackByKey} from '@common/shared/utils/forms-track-by';
 
 @Component({

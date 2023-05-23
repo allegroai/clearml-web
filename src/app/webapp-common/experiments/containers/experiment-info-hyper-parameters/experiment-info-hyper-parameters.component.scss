@@ -3,26 +3,11 @@
   position: relative;
   height: 100%;
 
-  .hyper-col {
-    flex: 1;
-    overflow: auto;
-    height: 100%;
-    padding: 0;
-  }
-
   ::ng-deep sm-labeled-row {
     border-bottom: none !important;
   }
 
   ::ng-deep hr {
     margin: 0 26px;
-  }
-
-  sm-experiment-hyper-params-navbar {
-    border-right: 1px solid #dee1e9;
-    flex: 0 0 300px;
-    &.minimized {
-      flex: 0 0 250px;
-    }
   }
 }

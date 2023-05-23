@@ -7,7 +7,7 @@ import {MODELS_TABLE_COLS} from '@common/models/models.consts';
 import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
-import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
+import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 
 export interface ModelsState {
   view: IModelsViewState;
@@ -42,6 +42,7 @@ export const selectModelsTags = createSelector(modelsView, (state): Array<string
 export const selectMetadataKeys = createSelector(modelsView, (state): Array<string> => state.projectMetadataKeys);
 export const selectMetadataColsOptions = createSelector(modelsView, (state): Record<ISmCol['id'], string[]> => state.metadataColsOptions);
 export const selectMetadataCols = createSelector(modelsView, (state): ISmCol[] => state.metadataCols);
+export const selectMetricVariants = createSelector(modelsView, (state): MetricVariantResult[] => state.metricVariants);
 
 
 export const selectModelsTableColsWidth = createSelector(modelsView, selectRouterParams,
@@ -78,6 +79,3 @@ export const selectIsModelInEditMode = createSelector(modelInfo, (state): boolea
 export const selectModelExperimentsTableFilters = createSelector(modelInfo, (state):  { [columnId: string]: FilterMetadata } => state.modelExperimentsTableFilter);
 
 export const selectModelPlots = createSelector(modelInfo, state => state.plots);
-export const selectSelectedxAxisType = createSelector(modelInfo,
-  state => state?.xAxisType ?? ScalarKeyEnum.Iter as ScalarKeyEnum);
-export const selectCacheAxisType = createSelector(modelInfo, (state) => state.cachedAxisType);

@@ -1,7 +1,7 @@
 <sm-pipeline-info [entity]="selected$ | async" [project]="projectId$ | async" [step]="selectedEntity"></sm-pipeline-info>
 <div class="console-button">
   <button class="btn btn-cml-primary d-flex align-items-center" (click)="selectStep(); openLog()">
-    <i class="al-icon al-ico-console sm mr-3"></i>DETAILS
+    <i class="al-icon al-ico-console sm me-3"></i>DETAILS
   </button>
 </div>
 <div
@@ -39,39 +39,46 @@
     </svg>
   </ng-container>
 </div>
-<div class="results-panel" [class.extend]="showLog">
+<div class="results-panel" [class.extend]="showLog" [class.maximized]="maximizeResults">
   <ng-container *ngIf="showLog">
-    <div class="header" [class.toggle]="stepDiff">
+    <div class="header toggle" >
       <div class="log-name">
-        <i class="al-icon al-ico-console mr-2"></i>
+        <i class="al-icon al-ico-console me-2"></i>
         <span>{{(selected$ | async)?.name}}</span>
       </div>
       <sm-button-toggle
-        *ngIf="stepDiff"
         [value]="detailsPanelMode"
-        [options]="[{label: 'CONSOLE', value: statusOption.log}, {label: 'CODE', value: statusOption.code}]"
+        [options]="[
+        {label: 'PREVIEW', value: statusOption.preview},
+        {label: 'CONSOLE', value: statusOption.log},
+        {label: 'CODE', value: statusOption.code}
+        ]"
         (valueChanged)="detailsPanelMode = $event"
       ></sm-button-toggle>
       <div class="close">
-        <i class="al-icon al-ico-dialog-x pointer ml-auto" (click)="openLog(false)"></i>
+        <i class="al-icon pointer" [class]="maximizeResults ? 'al-ico-min-panel' : 'al-ico-max-panel'" (click)="toggleResultSize()"></i>
+        <i class="al-icon al-ico-dialog-x pointer ms-4" (click)="openLog(false)"></i>
       </div>
     </div>
-    <div class="content">
+    <div [ngSwitch]="detailsPanelMode" class="content">
+      <sm-simple-dataset-version-preview
+        *ngSwitchCase="statusOption.preview" [selected]="(selected$ | async)"
+      ></sm-simple-dataset-version-preview>
       <sm-experiment-output-log
-        *ngIf="detailsPanelMode === statusOption.log; else stepCode"
+        *ngSwitchCase="statusOption.log"
         [experiment]="selected$ | async"
         [isDarkTheme]="true"
         [showHeader]="false"
       ></sm-experiment-output-log>
-      <ng-template #stepCode>
+      <ng-container *ngSwitchCase="statusOption.code" >
         <div *ngIf="stepDiff; else empty" class="ace" #aceEditor></div>
         <ng-template #empty>
           <div class="no-code">
-              <i class="icon no-output-icon i-no-code-dark"></i>
-              <h3>NO CODE</h3>
+            <i class="icon no-output-icon i-no-code-dark"></i>
+            <h3>NO CODE</h3>
           </div>
         </ng-template>
-      </ng-template>
+      </ng-container>
     </div>
   </ng-container>
 </div>

@@ -6,7 +6,7 @@ import {cloneDeep, flatten, isEqual} from 'lodash-es';
 import {EMPTY, Observable, of} from 'rxjs';
 import {
   auditTime,
-  catchError,
+  catchError, debounceTime,
   expand,
   filter,
   map,
@@ -215,7 +215,7 @@ export class CommonExperimentsViewEffects {
                   deactivateLoader(action.type)
                 ];
               }
-              if (res.scroll_id !== currentScrollId) {
+              if (res.scroll_id !== currentScrollId && currentScrollId) {
                 actions.push(
                   exActions.setCurrentScrollId({scrollId: res.scroll_id}),
                   exActions.setNoMoreExperiments({hasMore: (res.tasks.length < EXPERIMENTS_PAGE_SIZE)}));
@@ -280,7 +280,7 @@ export class CommonExperimentsViewEffects {
             ];
           }
           res.tasks = convertStopToComplete(res.tasks);
-          const addTasksAction = scrollId === res.scroll_id
+          const addTasksAction = scrollId === res.scroll_id || !scrollId
             ? [exActions.addExperiments({experiments: res.tasks as ITableExperiment[]})]
             : [exActions.setTableRefreshPending({refresh: true}), addMessage(MESSAGES_SEVERITY.WARN, 'Session expired')];
 
@@ -378,15 +378,17 @@ export class CommonExperimentsViewEffects {
 
   getParentsEffect = createEffect(() => this.actions$.pipe(
     ofType(exActions.getParents),
+    debounceTime(300),
     withLatestFrom(
       this.store.select(selectRouterParams).pipe(map(params => params?.projectId)),
       this.store.select(selectIsArchivedMode)
     ),
-    switchMap(([, projectId, isArchive]) => this.projectsApi.projectsGetTaskParents({
+    switchMap(([action, projectId, isArchive]) => this.projectsApi.projectsGetTaskParents({
       projects: projectId !== '*' ? [projectId] : [],
       tasks_state: isArchive ?
         ProjectsGetTaskParentsRequest.TasksStateEnum.Archived :
-        ProjectsGetTaskParentsRequest.TasksStateEnum.Active
+        ProjectsGetTaskParentsRequest.TasksStateEnum.Active,
+    ...(action.searchValue && {task_name: `(?i)${action.searchValue}`}) // (?i) is case insensitive
     }).pipe(
       withLatestFrom(this.store.select(selectTableFilters).pipe(map(filters => filters?.['parent.name']?.value || []))),
       mergeMap(([res, filteredParentIds]: [ProjectsGetTaskParentsResponse, string[]]) => {

@@ -13,19 +13,26 @@ span {
     width: 100%;
   }
 
-  .sub-projects-breadcrumbs{
+  .sub-projects-breadcrumbs {
     display: flex;
     overflow: hidden;
     flex-shrink: 0;
   }
-  .crumb{
+
+  .crumb {
     font-size: 15px;
     color: $blue-100;
 
-    &:hover{
+    &:hover {
       color: #fff;
+
+      &.url {
+        text-decoration: underline;
+      }
     }
+
   }
+
   .crumb.first {
     text-transform: uppercase;
   }
@@ -37,11 +44,11 @@ span {
     overflow: hidden;
   }
 
-  .sub-project{
+  .sub-project {
     color: $blue-100;
     white-space: nowrap;
 
-    &:hover{
+    &:hover {
       color: #fff;
     }
 

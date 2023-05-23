@@ -20,6 +20,8 @@
         "plugin:@angular-eslint/template/process-inline-templates"
       ],
       "rules": {
+        "no-console": "error",
+        "no-debugger": "error",
         "@angular-eslint/component-selector": [
           "error",
           {
@@ -88,7 +90,9 @@
       "extends": [
         "plugin:@angular-eslint/template/recommended"
       ],
-      "rules": {}
+      "rules": {
+        "@angular-eslint/template/use-track-by-function": "warn"
+      }
     }
   ]
 }

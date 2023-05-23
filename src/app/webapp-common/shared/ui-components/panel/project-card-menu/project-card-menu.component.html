@@ -7,11 +7,11 @@
   <sm-menu-item itemLabel="New Project"
                 data-id="New Project"
                 iconClass="al-icon al-color blue-800 al-ico-add"
-                (itemClicked)="newProjectClicked.emit(project.id)"></sm-menu-item>
+                (itemClicked)="newProjectClicked.emit(project)"></sm-menu-item>
   <sm-menu-item itemLabel="Move to"
                 data-id="Move To"
                 iconClass="al-icon al-color blue-800 al-ico-move-to"
-                (itemClicked)="moveToClicked.emit(project.id)"></sm-menu-item>
+                (itemClicked)="moveToClicked.emit(project)"></sm-menu-item>
   <sm-menu-item itemLabel="Delete"
                 data-id="Delete"
                 iconClass="al-icon al-color blue-800 al-ico-trash"

@@ -10,16 +10,17 @@
         <div *ngIf="minMaxIterations$| async as minMaxIterations">
           Iteration <span class="number">{{iteration}}</span>
           <mat-slider
-            [invert]="!(minMaxIterations.max_iteration > minMaxIterations.min_iteration)"
-            [thumbLabel]="true"
-            [value]="iteration"
             [max]="minMaxIterations.max_iteration"
             [min]="minMaxIterations.min_iteration"
             [step]="1"
-            (change)="changeIteration($event.value)"
-            (input)="this.change$.next($event.value)"
             (mouseup)="fakeInput.focus()"
+            discrete
+            class="indicator-position-bottom"
           >
+            <input matSliderThumb
+                   [ngModel]="iteration"
+                   (ngModelChange)="this.change$.next(ngSliderThumb.value)"
+                   #ngSliderThumb="matSliderThumb"/>
           </mat-slider>
         </div>
       </ng-container>

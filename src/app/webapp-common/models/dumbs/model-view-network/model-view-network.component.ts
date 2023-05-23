@@ -1,8 +1,8 @@
 import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import {getModelDesign} from '@common/tasks/tasks.utils';
-import {EditJsonComponent} from '@common/shared/ui-components/overlay/edit-json/edit-json.component';
+import {EditJsonComponent, EditJsonData} from '@common/shared/ui-components/overlay/edit-json/edit-json.component';
 import {take} from 'rxjs/operators';
-import {MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {EditableSectionComponent} from '@common/shared/ui-components/panel/editable-section/editable-section.component';
 
@@ -61,7 +61,7 @@ export class ModelViewNetworkComponent {
 
   editPrototext() {
     const editPrototextDialog = this.dialog.open(EditJsonComponent, {
-      data: {textData: this.design, readOnly: false, title: 'EDIT MODEL CONFIGURATION', typeJson: false}
+      data: {textData: this.design, readOnly: false, title: 'EDIT MODEL CONFIGURATION'} as EditJsonData
     });
 
     editPrototextDialog.afterClosed().pipe(take(1)).subscribe((data) => {

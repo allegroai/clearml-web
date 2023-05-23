@@ -20,7 +20,7 @@ import {ColorHashService} from '@common/shared/services/color-hash/color-hash.se
 import {SharedModule} from './shared/shared.module';
 import {ConfigurationService} from '@common/shared/services/configuration.service';
 import {ProjectsSharedModule} from './features/projects/shared/projects-shared.module';
-import {MAT_LEGACY_FORM_FIELD_DEFAULT_OPTIONS as MAT_FORM_FIELD_DEFAULT_OPTIONS} from '@angular/material/legacy-form-field';
+import {MAT_FORM_FIELD_DEFAULT_OPTIONS} from '@angular/material/form-field';
 import {LoginService} from '~/shared/services/login.service';
 import {ExperimentSharedModule} from '~/features/experiments/shared/experiment-shared.module';
 

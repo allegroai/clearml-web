@@ -9,6 +9,7 @@ import {QueueCreateDialogComponent} from './queue-create-dialog.component';
 import {CreateNewQueueFormComponent} from './create-new-queue-form/create-new-queue-form.component';
 import {UiComponentsModule} from '../ui-components/ui-components.module';
 import {SMMaterialModule} from '../material/material.module';
+import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
 
 @NgModule({
   imports        : [
@@ -18,7 +19,8 @@ import {SMMaterialModule} from '../material/material.module';
     ReactiveFormsModule,
     SMMaterialModule,
     StoreModule.forFeature('queueCreateDialog', queueCreateDialogReducer),
-    EffectsModule.forFeature([QueueCreateDialogEffects])
+    EffectsModule.forFeature([QueueCreateDialogEffects]),
+    LabeledFormFieldDirective,
   ],
   declarations   : [QueueCreateDialogComponent, CreateNewQueueFormComponent]
 })

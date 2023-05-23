@@ -1,6 +1,6 @@
 import {ActionReducerMap, createSelector} from '@ngrx/store';
 import {experimentInfoReducer, ExperimentInfoState, initialState as infoInitialState} from './experiment-info.reducer';
-import {experimentOutputReducer, ExperimentOutputState, experimentOutputInitState} from '@common/experiments/reducers/experiment-output.reducer';
+import {experimentOutputReducer, ExperimentOutputState, experimentOutputInitState, ExperimentSettings} from '@common/experiments/reducers/experiment-output.reducer';
 import {experimentsViewReducer, ExperimentsViewState, experimentsViewInitialState} from '@common/experiments/reducers/experiments-view.reducer';
 import {IExperimentInfo} from '../shared/experiment-info.model';
 import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
@@ -59,3 +59,7 @@ export const selectExperimentFormValidity = createSelector(selectExperimentInfoD
 
     return !error;
   });
+
+export const selectSelectedModelSettings = createSelector(experimentOutput, selectSelectedModel,
+  (output, currentModel): ExperimentSettings =>
+    output.settingsList && output.settingsList.find((setting) => currentModel && setting.id === currentModel.id));

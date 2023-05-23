@@ -6,7 +6,7 @@
     [class.share-view]="isShareMode"
     [activeWorkspace]="activeWorkspace">
   </sm-breadcrumbs>
-  <div class="ml-3 d-flex align-items-center mr-auto" *ngIf="userFocus">
+  <div class="ms-3 d-flex align-items-center me-auto" *ngIf="userFocus">
     <sm-show-only-user-work></sm-show-only-user-work>
   </div>
 
@@ -23,10 +23,10 @@
   <div class="right-buttons" data-id="rightSideHeaderpanel" >
     <sm-common-search #search [class.share-view]="isShareMode"></sm-common-search>
 
-    <a class="d-flex pointer resources-trigger" [matMenuTriggerFor]="resourcesMenu">
+    <span class="d-flex pointer resources-trigger" [matMenuTriggerFor]="resourcesMenu">
       <i class="al-icon al-ico-help-outlined" data-id="help Icon"></i>
-    </a>
-    <a class="pointer menu-trigger position-relative" data-id="Avatar" [matMenuTriggerFor]="profileMenu">
+    </span>
+    <span class="pointer menu-trigger position-relative" data-id="Avatar" [matMenuTriggerFor]="profileMenu">
       <img alt="avatar" class="avatar"  *ngIf="(user | async).avatar; else iconAvatar" [src]="(user | async).avatar">
       <ng-template #iconAvatar>
         <div class="user-icon">
@@ -34,19 +34,16 @@
         </div>
       </ng-template>
       <div *ngIf="userNotificationPath || (invitesPending$ | async)?.length" class="user-notification"></div>
-    </a>
+    </span>
 
     <mat-menu #profileMenu="matMenu" class="user-menu">
       <button mat-menu-item [routerLink]="'settings/' + userNotificationPath" data-id="Settings Button">
-        <span class="al-icon icon sm-md" [class]="userNotificationPath ? 'al-ico-settings-alert' : 'al-ico-settings'">
-          <span class="path1"></span><span class="path2"></span>
-        </span>
-        Settings
+        <i class="al-icon icon sm-md" [class]="userNotificationPath ? 'al-ico-settings-alert' : 'al-ico-settings'">
+        </i>Settings
       </button>
       <sm-header-user-menu-actions></sm-header-user-menu-actions>
       <button mat-menu-item (click)="logout()" data-id="Logout">
-        <span class="al-ico-logout al-icon icon sm-md"></span>
-        Logout
+        <i class="al-ico-logout al-icon icon sm-md"></i>Logout
       </button>
     </mat-menu>
 

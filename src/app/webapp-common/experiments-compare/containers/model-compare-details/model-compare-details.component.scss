@@ -1,0 +1,44 @@
+@import "../experiment-compare-base.component";
+
+:host {
+  display: block;
+  height: 100%;
+  padding-top: 12px;
+
+  .section {
+    pre {
+      display: inline-block;
+      position: relative;
+      overflow: visible;
+
+      &.with-ellipsis {
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      &:hover {
+        .extend-toggle {
+          visibility: visible;
+        }
+      }
+
+      &.no-ellipsis {
+
+        .extend-toggle {
+          visibility: hidden !important;
+        }
+      }
+    }
+
+    .title-key {
+      width: 100%;
+
+      &.ellipsis {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        width: 339px;
+      }
+    }
+  }
+}

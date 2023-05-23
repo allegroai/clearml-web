@@ -24,8 +24,7 @@ import {
   modelsExperimentsTableClearAllFilters
 } from '@common/models/actions/models-info.actions';
 import {EXPERIMENTS_TABLE_COL_FIELDS} from '~/features/experiments/shared/experiments.const';
-import {MatLegacyInput as MatInput} from '@angular/material/legacy-input';
-import {Router} from '@angular/router';
+import {MatInput} from '@angular/material/input';
 
 export const INITIAL_MODEL_EXPERIMENTS_TABLE_COLS: ISmCol[] = [
   {

@@ -37,4 +37,31 @@
     visibility: hidden;
     height: 18px;
   }
+
+  .sub-projects-list {
+    height: 100%;
+    padding: 6px 0;
+
+    a {
+      color: $blue-200;
+      padding: 0 24px;
+      line-height: 30px;
+      text-decoration: none;
+      display: flex;
+
+      ::ng-deep .sub-path {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 120px;
+        &.double-width{
+          max-width:260px;
+        }
+      }
+
+      &:hover {
+        background-color: $blue-400;
+      }
+    }
+  }
 }

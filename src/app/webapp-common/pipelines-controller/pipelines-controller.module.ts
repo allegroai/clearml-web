@@ -13,16 +13,20 @@ import {ExperimentSharedModule} from '~/features/experiments/shared/experiment-s
 import {SMSharedModule} from '@common/shared/shared.module';
 import {SharedPipesModule} from '@common/shared/pipes/shared-pipes.module';
 import {RouterModule, Routes} from '@angular/router';
-import {MatLegacyProgressSpinnerModule as MatProgressSpinnerModule} from '@angular/material/legacy-progress-spinner';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {SharedModule} from '~/shared/shared.module';
 import {ExperimentOutputLogModule} from '@common/experiments/shared/experiment-output-log/experiment-output-log.module';
-import {MatLegacyRadioModule as MatRadioModule} from '@angular/material/legacy-radio';
+import {MatRadioModule} from '@angular/material/radio';
 import {PipelineControllerInfoComponent} from './pipeline-controller-info/pipeline-controller-info.component';
 import {PipelineControllerStepComponent} from './pipeline-controller-step/pipeline-controller-step.component';
 import { PipelineInfoComponent } from './pipeline-details/pipeline-info.component';
 import {PipelineControllerMenuComponent} from '@common/pipelines-controller/pipeline-controller-menu/pipeline-controller-menu.component';
 import {RunPipelineControllerDialogComponent} from './run-pipeline-controller-dialog/run-pipeline-controller-dialog.component';
 import {AbortControllerDialogComponent} from '@common/pipelines-controller/pipeline-controller-menu/abort-controller-dialog/abort-controller-dialog.component';
+import {
+    SimpleDatasetVersionPreviewComponent
+} from '@common/dataset-version/simple-dataset-version-preview/simple-dataset-version-preview.component';
+import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
 
 export const routes: Routes = [
   {
@@ -70,6 +74,8 @@ export const routes: Routes = [
     SharedModule,
     ExperimentOutputLogModule,
     MatRadioModule,
+    SimpleDatasetVersionPreviewComponent,
+    LabeledFormFieldDirective,
   ],
   providers: [
     ControllersComponent,

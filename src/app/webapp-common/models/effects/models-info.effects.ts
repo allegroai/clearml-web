@@ -22,14 +22,13 @@ import {resetActiveSection} from '../actions/models-info.actions';
 import * as viewActions from '../actions/models-view.actions';
 import {ModelInfoState} from '../reducers/model-info.reducer';
 import {MODELS_INFO_ONLY_FIELDS} from '../shared/models.const';
-import {selectCacheAxisType, selectSelectedModel, selectSelectedxAxisType} from '../reducers';
+import {selectSelectedModel} from '../reducers';
 import {SelectedModel} from '../shared/models.model';
 import {selectActiveWorkspace} from '../../core/reducers/users-reducer';
 import {isExample} from '../../shared/utils/shared-utils';
 import {isSharedAndNotOwner} from '@common/shared/utils/is-shared-and-not-owner';
 import {ApiEventsService} from '~/business-logic/api-services/events.service';
 import {EMPTY} from 'rxjs';
-import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 
 @Injectable()
 export class ModelsInfoEffects {
@@ -173,40 +172,40 @@ export class ModelsInfoEffects {
     ])
   ));
 
-  fetchScalars$ = createEffect(() => this.actions$.pipe(
-    ofType(infoActions.getScalars),
-    withLatestFrom(
-      this.store.select(selectSelectedxAxisType),
-      this.store.select(selectCacheAxisType)
-    ),
-    switchMap(([action, axisType, prevAxisType]) => {
-        if ([ScalarKeyEnum.IsoTime, ScalarKeyEnum.Timestamp].includes(prevAxisType) &&
-          [ScalarKeyEnum.IsoTime, ScalarKeyEnum.Timestamp].includes(axisType)) {
-          return [
-            deactivateLoader(infoActions.refreshModelInfo.type),
-            deactivateLoader(action.type)
-          ];
-        }
-
-        return this.eventsService.eventsScalarMetricsIterHistogram({
-          task: action.id,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          model_events: true,
-          key: axisType === ScalarKeyEnum.IsoTime ? ScalarKeyEnum.Timestamp : axisType
-        })
-          .pipe(
-            mergeMap(res => [
-              infoActions.setScalars({scalars: res, axisType}),
-              deactivateLoader(infoActions.refreshModelInfo.type),
-              deactivateLoader(action.type)
-            ]),
-            catchError(error => [
-              requestFailed(error),
-              deactivateLoader(action.type),
-              deactivateLoader(infoActions.refreshModelInfo.type),
-              setServerError(error, null, 'Failed to get Scalar Charts')
-            ])
-          );
-      })
-  ));
+  // fetchScalars$ = createEffect(() => this.actions$.pipe(
+  //   ofType(infoActions.getScalars),
+  //   withLatestFrom(
+  //     this.store.select(selectSelectedSettingsxAxisType),
+  //     this.store.select(selectExperimentHistogramCacheAxisType)
+  //   ),
+  //   switchMap(([action, axisType, prevAxisType]) => {
+  //       if ([ScalarKeyEnum.IsoTime, ScalarKeyEnum.Timestamp].includes(prevAxisType) &&
+  //         [ScalarKeyEnum.IsoTime, ScalarKeyEnum.Timestamp].includes(axisType)) {
+  //         return [
+  //           deactivateLoader(infoActions.refreshModelInfo.type),
+  //           deactivateLoader(action.type)
+  //         ];
+  //       }
+  //
+  //       return this.eventsService.eventsScalarMetricsIterHistogram({
+  //         task: action.id,
+  //         // eslint-disable-next-line @typescript-eslint/naming-convention
+  //         model_events: true,
+  //         key: axisType === ScalarKeyEnum.IsoTime ? ScalarKeyEnum.Timestamp : axisType
+  //       })
+  //         .pipe(
+  //           mergeMap(res => [
+  //             infoActions.setScalars({scalars: res, axisType}),
+  //             deactivateLoader(infoActions.refreshModelInfo.type),
+  //             deactivateLoader(action.type)
+  //           ]),
+  //           catchError(error => [
+  //             requestFailed(error),
+  //             deactivateLoader(action.type),
+  //             deactivateLoader(infoActions.refreshModelInfo.type),
+  //             setServerError(error, null, 'Failed to get Scalar Charts')
+  //           ])
+  //         );
+  //     })
+  // ));
 }

@@ -1,7 +1,7 @@
 @import "variables";
 
 .tooltip-container {
-  margin: -4px;
+  margin: -4px 0;
   max-width: 300px;
   background: $purple;
   padding: 8px;
@@ -21,8 +21,3 @@
     }
   }
 }
-
-.fas.fa-info-circle {
-  font-size: 12px;
-}
-

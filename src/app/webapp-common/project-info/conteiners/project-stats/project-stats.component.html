@@ -4,7 +4,7 @@
     [hidden]="!selectedVariant"
     (click)="selectVariant()"
     [smTooltip]="variantDisplay?.length > 30 ? variantDisplay : null"
-    
+
   >{{variantDisplay}}</button>
 </div>
 <div class="line-chart-container" *ngIf="selectedVariant; else noData">
@@ -15,7 +15,8 @@
     (clicked)="experimentClicked($event)"
   ></sm-scatter-plot>
   <div class="legend">
-    <span *ngFor="let state of states" [style.--color]="statusToColor(state.type)" class="entry">{{state.label}}</span>
+    <span *ngFor="let state of states; trackBy: trackByType" [style.--color]="state.color" class="entry" (click)="toggleState(state.type)"
+    >{{state.label}}</span>
   </div>
 </div>
 <ng-template #noData>

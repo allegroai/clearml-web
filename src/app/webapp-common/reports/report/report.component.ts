@@ -29,11 +29,11 @@ import {
   map,
   switchMap,
 } from 'rxjs/operators';
-import {fromEvent, lastValueFrom, Observable, Subscription, take, combineLatest} from 'rxjs';
+import {fromEvent, lastValueFrom, Observable, Subscription, take, combineLatest, merge} from 'rxjs';
 import {selectReport, selectReportsTags} from '@common/reports/reports.reducer';
 import {ReportStatusEnum} from '~/business-logic/model/reports/reportStatusEnum';
 import {getBaseName, isExample} from '@common/shared/utils/shared-utils';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {MatDialog} from '@angular/material/dialog';
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {activeLoader, addMessage, deactivateLoader} from '@common/core/actions/layout.actions';
 import {ICONS, MESSAGES_SEVERITY} from '@common/constants';
@@ -129,7 +129,10 @@ export class ReportComponent implements OnInit, OnDestroy {
             switchMap(() => {
               const img = new Image();
               img.src = reader.result as string;
-              return fromEvent(img, 'load')
+              return merge(
+                fromEvent(img, 'load'),
+                fromEvent(img, 'error'),
+              )
                 .pipe(
                   map(() => {
                     if (img.width > 0 && img.height > 0) {
@@ -148,6 +151,11 @@ export class ReportComponent implements OnInit, OnDestroy {
         reader.readAsDataURL(file);
         return obs;
       });
+      if (valid.length === 0) {
+        this.store.dispatch(addMessage(MESSAGES_SEVERITY.ERROR, 'invalid file type'));
+        this.store.dispatch(deactivateLoader('upload'));
+        return Promise.reject('Invalid file type');
+      }
       const uploads$ = combineLatest(valid).pipe(
         debounceTime(0),
         take(1),
@@ -156,7 +164,7 @@ export class ReportComponent implements OnInit, OnDestroy {
           const results = [] as UploadResult[];
           validFiles
             .forEach(file => {
-              const url = `reports/${replaceSlash(this.report.name)}.${this.report.id}/${replaceSlash(file.name)}`;
+              const url = `reports/${this.report.id}/${replaceSlash(file.name)}`;
               formData.append(url, file);
               results.push({name: file.name, url: `${filesServerUrl}/${url}`, isImg: true});
             });

@@ -3,7 +3,7 @@
     <span [smTooltip]="(allowAddExperiment$ | async) ?
       'Add/Remove ' + entityType + 's to comparison' :
       compareLimitations + ' or fewer ' + entityType + 's can be compared'"
-          
+
     >
         <button class="btn btn-secondary btn-add-experiment"
                 (click)="openAddExperimentSearch()">
@@ -11,46 +11,44 @@
       <span>ADD {{entityType | uppercase}}</span>
     </button>
     </span>
-    <mat-select *ngIf="viewMode"
-                class="view-mode"
-                panelClass="light-theme"
-                [value]="queryParamsViewMode || viewMode"
-                [disableOptionCentering]="true"
-                (selectionChange)="changeView($event)">
-      <mat-select-trigger>
-        <i class="fas mr-2"
-           [ngClass]="{'fa-align-left': viewMode === 'values', 'fa-chart-area': viewMode === 'graph'}"></i>
-        <ng-container [ngSwitch]="true">
-          <span *ngSwitchCase="currentPage === 'hyper-params' && viewMode === 'graph'">Parallel Coordinates</span>
-          <span *ngSwitchCase="currentPage === 'scalars' && viewMode === 'graph'">Graph</span>
-          <span *ngSwitchCase="currentPage === 'scalars' && viewMode === 'values' && queryParamsViewMode === 'values'">Last Values</span>
-          <span *ngSwitchDefault>{{queryParamsViewMode || viewMode | noUnderscore | titlecase}}</span>
-        </ng-container>
-      </mat-select-trigger>
-      <mat-option value="values" class="compare-mat-option">
-        <i class="fas fa-align-left mr-2"></i>
-        <span *ngIf="currentPage === 'scalars'">Last Values</span>
-        <span *ngIf="currentPage !== 'scalars'">Values</span>
-      </mat-option>
-      <mat-option *ngIf="currentPage === 'scalars'" value="min_values" class="compare-mat-option">
-        <i class="fas fa-align-left mr-2"></i>
-        Min Values
-      </mat-option>
-      <mat-option *ngIf="currentPage === 'scalars'" value="max_values" class="compare-mat-option">
-        <i class="fas fa-align-left mr-2"></i>
-        Max Values
-      </mat-option>
-      <mat-option value="graph" class="compare-mat-option">
-        <i class="fas fa-chart-area mr-2"></i>
-        <span *ngIf="currentPage === 'hyper-params'">Parallel Coordinates</span>
-        <span *ngIf="currentPage !== 'hyper-params'">Graph</span>
-      </mat-option>
-    </mat-select>
+    <mat-form-field *ngIf="viewMode" appearance="outline" class="no-bottom">
+      <mat-select
+        class="view-mode"
+        panelClass="light-theme"
+        [value]="(queryParamsViewMode$ | async) || viewMode"
+        [disableOptionCentering]="true"
+        (selectionChange)="changeView($event)"
+      >
+          <mat-select-trigger>
+            <i class="fas me-2"
+               [ngClass]="{'fa-align-left': viewMode === 'values', 'fa-chart-area': viewMode === 'graph'}"></i>
+            <ng-container [ngSwitch]="true">
+              <span *ngSwitchCase="currentPage === 'hyper-params' && viewMode === 'graph'">Parallel Coordinates</span>
+              <span *ngSwitchCase="currentPage === 'scalars' && viewMode === 'graph'">Graph</span>
+              <span *ngSwitchCase="currentPage === 'scalars' && viewMode === 'values' && (queryParamsViewMode$ | async) === 'values'">Last Values</span>
+              <span *ngSwitchDefault>{{(queryParamsViewMode$ | async) || viewMode | noUnderscore | titlecase}}</span>
+            </ng-container>
+          </mat-select-trigger>
+          <mat-option value="values" class="compare-mat-option">
+            <i class="fas fa-align-left me-2"></i>
+            {{currentPage === 'scalars' ? 'Last Values' : 'Values'}}
+          </mat-option>
+          <mat-option *ngIf="currentPage === 'scalars'" value="min_values" class="compare-mat-option">
+            <i class="fas fa-align-left me-2"></i>Min Values
+          </mat-option>
+          <mat-option *ngIf="currentPage === 'scalars'" value="max_values" class="compare-mat-option">
+            <i class="fas fa-align-left me-2"></i>Max Values
+          </mat-option>
+          <mat-option value="graph" class="compare-mat-option">
+            <i class="fas fa-chart-area me-2"></i>{{currentPage === 'hyper-params' ? 'Parallel Coordinates' : 'Graph'}}
+          </mat-option>
+      </mat-select>
+    </mat-form-field>
 
     <div id="nextDiff"></div>
 
     <mat-slide-toggle
-      *ngIf="['hyper-params', 'details'].includes(currentPage) && viewMode !== 'graph'"
+      *ngIf="['hyper-params', 'details', 'models-details', 'network'].includes(currentPage) && viewMode !== 'graph'"
       (change)="hideIdenticalFieldsToggled($event)"
       [checked]="selectHideIdenticalFields$ | async">Hide Identical Fields
     </mat-slide-toggle>

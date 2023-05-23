@@ -21,7 +21,7 @@
       <div class="metric-bar" [class.minimized]="minimized"
            *ngIf="!thereAreNoMetrics(experimentId) && !disableStatusRefreshFilter">
         <label>Metric:</label>
-        <mat-form-field appearance="outline" [ngClass]="{'dark thin': isDarkTheme}">
+        <mat-form-field appearance="outline" class="no-bottom" [ngClass]="{'dark thin': isDarkTheme}">
           <mat-select
             #metricSelect
             (selectionChange)="selectMetric($event, experimentId)"

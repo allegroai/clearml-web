@@ -1,4 +1,8 @@
 :host {
+  ::ng-deep .mdc-text-field--filled .mdc-line-ripple::before {
+    border-bottom: 0;
+  }
+
   ng-form, mat-form-field {
     display: block;
   }
@@ -10,18 +14,21 @@
     padding: 0;
   }
 
-  .mat-form-field-appearance-fill {
-    ::ng-deep .mat-chip-list-wrapper {
-      line-height: 24px;
+  ::ng-deep .mat-mdc-chip-grid {
+    width: 100%;
+
+    &.single {
+      width: calc(100% - 12px);
+
+      .mdc-evolution-chip-set__chips {
+        flex-wrap: nowrap;
+        overflow: hidden;
+      }
     }
 
-    ::ng-deep &.mat-form-field-disabled .mat-form-field-flex {
-      background-color: #000;
-    }
-    ::ng-deep .mat-form-field-flex {
-      background-color: #000;
-      padding-top: 0;
-      margin-bottom: 1px;
+    .mdc-evolution-chip-set__chips {
+      align-items: center;
+      gap: 6px 0;
     }
   }
 }
@@ -29,6 +36,6 @@
 :host-context(.single-selection) {
   .chips-input {
     width: 100px;
-    flex: 0 0 100px;
+    flex: 1 1 100px;
   }
 }

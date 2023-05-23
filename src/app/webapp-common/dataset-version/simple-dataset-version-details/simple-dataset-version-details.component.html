@@ -20,6 +20,21 @@
           ></i>
         </div>
       </div>
+      <div class="param">
+        <div class="key">Parent</div>
+        <div class="value" [smTooltip]="entity?.parent?.name" smShowTooltipIfEllipsis>
+          <a
+            *ngIf="entity?.parent?.id; else: empty"
+            class="arr-link"
+            target="_blank"
+            [href]="'/projects/' + entity?.parent?.project.id + '/experiments/' + entity?.parent?.id + '/output/execution'">
+            <div class="d-flex-center">
+              <span class="flex-shrink-1 ellipsis">{{entity?.parent?.name}}</span><i *ngIf="entity?.parent?.id" class="al-icon al-ico-export xs"></i>
+            </div>
+          </a>
+          <ng-template #empty>-</ng-template>
+        </div>
+      </div>
       <div class="param continue">
         <div class="key">Size</div>
         <div class="value" [smTooltip]="entity?.runtime?.ds_total_size + ' (original)'" smShowTooltipIfEllipsis>{{($any(entity?.runtime?.ds_total_size) | filesize : fileSizeConfigStorage) || '-'}}<span class="comment">(original)</span></div>

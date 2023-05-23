@@ -11,12 +11,17 @@
     position: relative;
     input {
       width: calc(100% - 15px);
+
+      &:invalid {
+        background-color: $error-color;
+      }
     }
+
     .reset {
       border: none;
       position: absolute;
       top: 0;
-      right: 0px;
+      right: 0;
       display: flex;
       align-items: center;
     }

@@ -1,0 +1,12 @@
+@import 'variables';
+
+nav {
+  --mdc-typography-button-font-size: 12px;
+  &.mat-mdc-tab-header-pagination-controls-enabled {
+    padding: 0 24px;
+  }
+  
+  a {
+    text-decoration: none;
+  }
+}

@@ -2,7 +2,40 @@
 // For more information: https://material.angular.io/guide/theming
 @use '../../../../../../node_modules/@angular/material/index' as mat;
 // Plus imports for other components in your app.
-
+$neon-yellow: #d3ff00;
+$white-primary-text: rgba(white, 0.87);
+$sm-neon: (
+  50: lighten($neon-yellow, 30%),
+  100: lighten($neon-yellow, 25%),
+  200: lighten($neon-yellow, 20%),
+  300: lighten($neon-yellow, 15%),
+  400: lighten($neon-yellow, 10%),
+  500: $neon-yellow,
+  600: darken($neon-yellow, 10%),
+  700: darken($neon-yellow, 15%),
+  800: darken($neon-yellow, 20%),
+  900: darken($neon-yellow, 25%),
+  A100: $neon-yellow,
+  A200: darken($neon-yellow, 5%),
+  A400: darken($neon-yellow, 10%),
+  A700: darken($neon-yellow, 15%),
+  contrast: (
+    50: $white-primary-text,
+    100: $white-primary-text,
+    200: $white-primary-text,
+    300: $white-primary-text,
+    400: white,
+    500: white,
+    600: white,
+    700: white,
+    800: white,
+    900: white,
+    A100: white,
+    A200: white,
+    A400: white,
+    A700: white,
+  )
+);
 // Include the common styles for Angular Material. We include this here so that you only
 // have to load a single css file for Angular Material in your app.
 // Be sure that you only ever include this mixin once!
@@ -14,9 +47,14 @@
 $theme-primary: mat.define-palette(mat.$indigo-palette);
 $theme-accent: mat.define-palette(mat.$pink-palette, A200, A100, A400);
 
+$sm-neon-palette-primary: mat.define-palette($sm-neon);
+$sm-neon-palette-accent: mat.define-palette($sm-neon, A200, A100, A400);
 // The warn palette is optional (defaults to red).
 $theme-warn: mat.define-palette(mat.$red-palette);
-
+$font-family-base: 'Heebo', sans-serif; // Assumes the browser default, typically `16px`
+$custom-typography: mat.define-typography-config(
+  $font-family: $font-family-base
+);
 // Create the theme object. A theme consists of configurations for individual
 // theming systems such as "color" or "typography".
 $theme: mat.define-light-theme((
@@ -24,13 +62,26 @@ $theme: mat.define-light-theme((
     primary: $theme-primary,
     accent: $theme-accent,
     warn: $theme-warn,
-  )
+  ),
+  typography: $custom-typography,
+  density: -2
+));
+
+$sm-neon-theme: mat.define-dark-theme((
+  color: (
+    primary: $sm-neon-palette-primary,
+    accent: $sm-neon-palette-accent,
+  ),
+  typography: $custom-typography,
+  density: -2
 ));
 
 // Include theme styles for core and each component used in your app.
 // Alternatively, you can import and @include the theme mixins for each component
 // that you are using.
 @include mat.dialog-theme($theme);
+@include mat.slider-theme($sm-neon-theme);
+@include mat.form-field-theme($theme);
 
 @import "src/app/webapp-common/shared/ui-components/styles/variables";
 
@@ -68,12 +119,16 @@ body {
   }
 }
 
-.mat-dialog-container {
+.mat-mdc-dialog-container {
   padding: 0 !important;
 }
 
 .d-flex {
   display: flex;
+}
+
+.align-items-center {
+  align-items: center;
 }
 
 .h-100 {
@@ -182,6 +237,107 @@ body {
   cursor: default !important;
 }
 
+sm-debug-image-snippet {
+  .image-var {
+    top: 8px;
+    bottom: unset;
+  }
+}
+
+
+.dark-theme .mdc-text-field:not(.mdc-text-field--disabled) .mdc-text-field__input {
+  color: rgba(255, 255, 255, 0.87);
+}
+  .dark-theme {
+    .mdc-text-field--outlined:not(.mdc-text-field--disabled) {
+      .mdc-notched-outline__leading, .mdc-notched-outline__notch, .mdc-notched-outline__trailing {
+        border-color: $blue-500;
+        border-width: 1px;
+      }
+
+      &:not(.mdc-text-field--focused):hover .mdc-notched-outline {
+        .mdc-notched-outline__leading, .mdc-notched-outline__notch, .mdc-notched-outline__trailing {
+          border-color: $blue-450;
+        }
+      }
+
+      &.mdc-text-field--focused {
+        .mdc-notched-outline__leading, .mdc-notched-outline__notch, .mdc-notched-outline__trailing {
+          border-color: $blue-400;
+        }
+      }
+    }
+  }
+
+.dark-theme, .light-theme {
+  .mat-mdc-form-field {
+    --mdc-typography-body1-font-size: 14px;
+    --mdc-typography-body1-line-height: 16px;
+
+    &.mat-form-field-appearance-outline {
+      &.black {
+        background-color: #000;
+
+        .mat-mdc-select-value, .mat-mdc-select-arrow {
+          color: $blue-200;
+        }
+      }
+
+      .mat-mdc-text-field-wrapper {
+        .mat-mdc-form-field-flex {
+          height: 100%;
+
+          .mat-mdc-form-field-infix {
+            min-height: 100%;
+            padding: 5px 0;
+
+            .mat-mdc-input-element {
+              height: 26px;
+            }
+          }
+
+          .mat-mdc-form-field-icon-suffix {
+            line-height: 24px;
+          }
+        }
+      }
+    }
+    &.mat-form-field-appearance-fill {
+      .mdc-text-field--filled:not(.mdc-text-field--disabled) {
+        background-color: transparent;
+
+        .mat-mdc-input-element {
+          background-color: transparent;
+        }
+      }
+
+      &.mat-focused {
+        .mat-mdc-form-field-focus-overlay {
+          opacity: 5%;
+        }
+      }
+    }
+  }
+}
+
+.mat-mdc-form-field.smooth-input {
+  height: 36px;
+}
+
+.label-text.smoothing-text {
+  color: $blue-200;
+}
+// hide arrows for number inputs
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none !important;
+  margin: 0 !important;
+}
+
+// hide arrows for number inputs (FireFox)
+input[type=number] {
+  -moz-appearance: textfield !important;
+}
 
 /* width */
 ::-webkit-scrollbar {

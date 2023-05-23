@@ -35,11 +35,11 @@ import {ColorHashService} from '@common/shared/services/color-hash/color-hash.se
 import {wordWrap} from '@common/tasks/tasks.utils';
 import {attachColorChooser} from '@common/shared/ui-components/directives/choose-color/choose-color.directive';
 import {DARK_THEME_GRAPH_LINES_COLOR, DARK_THEME_GRAPH_TICK_COLOR, ExtData, ExtFrame, ExtLayout, ExtLegend, PlotlyGraphBaseComponent} from './plotly-graph-base';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {MatDialog} from '@angular/material/dialog';
 import {PALLET} from '@common/constants';
 import {download} from '@common/shared/utils/download';
 import {chooseTimeUnit} from '@common/shared/utils/choose-time-unit';
-import {GraphViewerComponent} from './graph-viewer/graph-viewer.component';
+import {GraphViewerComponent, GraphViewerData} from './graph-viewer/graph-viewer.component';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 declare const Plotly;
@@ -60,7 +60,6 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
   public type: PlotData['type'] | 'table';
   public ratio: number;
   public title: string;
-  private yaxisType: AxisType = 'linear';
   private originalChart: ExtFrame;
   private _chart: ExtFrame;
   private smoothnessTimeout: number;
@@ -82,6 +81,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
   @Input() showLoaderOnDraw = true;
   @Input() hideMaximize: 'show' | 'hide' | 'disabled' = 'show';
   @Input() legendConfiguration: Partial<ExtLegend & { noTextWrap: boolean }> = {};
+  @Input() yAxisType: AxisType = 'linear';
 
   @Input() set height(height: number) {
     this._height = height;
@@ -104,7 +104,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
     if (chart) {
       this.ratioEnable = !!chart.layout.width && !!chart.layout.height;
       this.ratio = this.ratioEnable ? chart.layout.width / chart.layout.height : null;
-      this.height = chart.layout.height || this.height || 450;
+      this._height = chart.layout.height || this.height || 450;
       this.originalChart = chart;
       this._chart = cloneDeep(chart);
       this.drawGraph$.next({forceRedraw: true, forceSkipReact: false});
@@ -176,7 +176,10 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
     );
 
     this.sub.add(this.drawGraph$
-      .pipe(debounceTime(100))
+      .pipe(
+        debounceTime(100),
+        filter(() => !!this.chart)
+        )
       .subscribe(({forceRedraw, forceSkipReact}) => {
         if (this.showLoaderOnDraw) {
           this.loading = true;
@@ -197,7 +200,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
         // root.height > 0 to avoid rare plotly exception
         if ((this.plotlyContainer.nativeElement.offsetWidth !== this.previousOffsetWidth || forceSkipReact) &&
           (root as HTMLElement).offsetHeight > 0) {
-          skipReact = true;
+          skipReact = this.plotlyContainer.nativeElement.offsetWidth === this.previousOffsetWidth;
           this.zone.runOutsideAngular(() => Plotly.relayout(root, {
             width: this.ratio ? this.height * this.ratio + RATIO_OFFSET_FIX : Math.max((data?.['data']?.[0]?.cells?.values?.length ?? 0) * 100, this.plotlyContainer.nativeElement.offsetWidth - 3),
             height: this.height,
@@ -205,6 +208,9 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
             this.loading = false;
             this.changeDetector.detectChanges();
             this.updateLegend();
+            if ((data[0] as any)?.mode === 'gauge+number') {
+              this.fixGaugeValuePositionAfterResize();
+            }
           }));
         }
         this.previousOffsetWidth = this.plotlyContainer.nativeElement.offsetWidth;
@@ -396,7 +402,6 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
         r: 24,
         b: 0
       };
-      layout.height = Math.min((graph?.data?.[0]?.cells?.values?.[0]?.length ?? 15 ) * 30 + 150, this.height);
     }
     const barLayoutConfig = {
       hovermode: 'closest',
@@ -442,7 +447,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
         spikedash: 'dash',
         rangeslider: {visible: false},
         fixedrange: false,
-        type: this.yaxisType,
+        type: this.yAxisType,
         ...this.addParametersIfDarkTheme({
           color: DARK_THEME_GRAPH_LINES_COLOR,
           gridcolor: DARK_THEME_GRAPH_LINES_COLOR,
@@ -468,11 +473,11 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
     if (['multiScalar', 'scalar'].includes(graph.layout.type)) {
       modeBarButtonsToAdd.push({
         name: 'Log view',
-        title: this.getLogButtonTitle(this.yaxisType === 'log'),
-        icon: this.getLogIcon(this.yaxisType === 'log'),
+        title: this.getLogButtonTitle(this.yAxisType === 'log'),
+        icon: this.getLogIcon(this.yAxisType === 'log'),
         click: (gd: PlotlyHTMLElement, ev: MouseEvent) => {
-          this.yaxisType = this.yaxisType === 'log' ? 'linear' : 'log';
-          const icon = this.getLogIcon(this.yaxisType === 'log');
+          this.yAxisType = this.yAxisType === 'log' ? 'linear' : 'log';
+          const icon = this.getLogIcon(this.yAxisType === 'log');
           let path: SVGPathElement;
           let svg: HTMLElement;
           if ((ev.target as SVGElement).tagName === 'svg') {
@@ -482,7 +487,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
             path = ev.target as SVGPathElement;
             svg = path.parentElement as HTMLElement;
           }
-          svg.parentElement.attributes['data-title'].value = this.getLogButtonTitle(this.yaxisType === 'log');
+          svg.parentElement.attributes['data-title'].value = this.getLogButtonTitle(this.yAxisType === 'log');
           path.attributes[0].value = icon.path;
           this.smoothnessTimeout = window.setTimeout(() => {
             this._chart = cloneDeep(this.originalChart);
@@ -578,8 +583,9 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
     const config = {
       modeBarButtonsToRemove: (this.hideDownloadButtons ? ['sendDataToCloud', 'toImage']: ['sendDataToCloud']) as ModeBarDefaultButtons[],
       displaylogo: false,
-      modeBarButtonsToAdd
-    };
+      modeBarButtonsToAdd,
+      toImageButtonOptions : {scale: 3}
+    } as Config;
 
     return [this.chartElm, graph.data, layout, config, this.chartData];
   }
@@ -715,7 +721,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
       .subscribe(colorObj => {
         const graph = this.chart;
         let changed: boolean = false;
-        graph.data.forEach(trace => {
+        graph?.data.forEach(trace => {
           const name = trace.name;
           const [colorKey, ] = this.extractColorKey(name);
           if (!name || !this.colorHash.hasColor(colorKey)) {
@@ -918,10 +924,11 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
           }),
           id: this.identifier,
           xAxisType: this.xAxisType,
+          yAxisType: this.yAxisType,
           smoothWeight: this.smoothWeight,
           darkTheme: this.isDarkTheme,
           isCompare: this.isCompare,
-        },
+        } as GraphViewerData,
         panelClass: ['image-viewer-dialog', this.isDarkTheme ? 'dark-theme' : 'light-theme'],
         height: '100%',
         maxHeight: 'auto',
@@ -966,4 +973,10 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
   public redrawPlot() {
     this.drawGraph$.next({forceRedraw: true, forceSkipReact: false});
   };
+
+  private fixGaugeValuePositionAfterResize() {
+    const graph = select(this.plotlyContainer.nativeElement).selectAll('.main-svg .indicatorlayer .trace');
+    const graphPosition = graph.selectAll('.angular').attr('transform');
+    graph.selectAll('.numbers').attr('transform', graphPosition);
+  }
 }

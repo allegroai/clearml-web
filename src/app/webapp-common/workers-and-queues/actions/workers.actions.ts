@@ -7,6 +7,7 @@ const workersPrefix = 'WORKERS_';
 
 export interface WorkerExt extends Worker {
   name: string;
+  originalName: string;
 }
 
 export const getWorkers = createAction(

@@ -1,8 +1,8 @@
 import {NgModule} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {CommonModule} from '@angular/common';
-import {WorkersAndQueuesRoutingModule} from '@common/workers-and-queues/workers-and-queues-routing.module';
-import {WorkersAndQueuesComponent} from '@common/workers-and-queues/workers-and-queues.component';
+import {WorkersAndQueuesRoutingModule} from './workers-and-queues-routing.module';
+import {OrchestrationComponent} from '@common/workers-and-queues/orchestration.component';
 import {WorkersComponent} from '@common/workers-and-queues/containers/workers/workers.component';
 import {QueuesComponent} from '@common/workers-and-queues/containers/queues/queues.component';
 import {SMSharedModule} from '@common/shared/shared.module';
@@ -41,7 +41,7 @@ import {QueuesMenuExtendedComponent} from './queues-menu-extended/queues-menu-ex
     FormsModule,
   ],
   declarations: [
-    WorkersAndQueuesComponent,
+    OrchestrationComponent,
     WorkersComponent,
     WorkersTableComponent,
     WorkersStatsComponent,

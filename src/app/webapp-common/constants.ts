@@ -108,3 +108,5 @@ export const MESSAGES_SEVERITY = {
   INFO: 'info' as MessageSeverityEnum,
   WARN: 'warn' as MessageSeverityEnum
 };
+
+export const rootProjectsPageSize = 50;

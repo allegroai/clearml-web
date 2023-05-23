@@ -10,7 +10,7 @@ import {DebugImagesEffects} from './debug-images-effects';
 import {debugSamplesReducer} from './debug-images-reducer';
 import {DebugImagesViewComponent} from './debug-images-view/debug-images-view.component';
 import {DebugImagesComponent} from './debug-images.component';
-import {MatLegacySliderModule as MatSliderModule} from '@angular/material/legacy-slider';
+import {MatSliderModule} from '@angular/material/slider';
 import {ExperimentGraphsModule} from '../shared/experiment-graphs/experiment-graphs.module';
 import {DebugSampleModule} from '@common/shared/debug-sample/debug-sample.module';
 import {SharedPipesModule} from '@common/shared/pipes/shared-pipes.module';

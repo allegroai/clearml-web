@@ -2,58 +2,66 @@
   <mat-form-field appearance="outline" hideRequiredMarker class="mat-light">
     <mat-label>Project name</mat-label>
     <mat-error *ngIf="name.touched && name.errors?.required">*Please add name.</mat-error>
-    <mat-error *ngIf="name.touched && name.errors?.uniqueName">*Project name in this path already exists.</mat-error>
-    <mat-error *ngIf="name.touched && name.errors?.minlength">*Project name should contain more than 2 characters.</mat-error>
+    <mat-error *ngIf="name.touched && name.errors?.uniqueProject">*Project name in this path already exists.</mat-error>
+    <mat-error *ngIf="name.touched && name.errors?.minlength">*Project name should contain more than 3 characters.</mat-error>
     <mat-error *ngIf="name.touched && name.errors?.emptyName && !name.errors?.minlength">*Project name can't contain only spaces.</mat-error>
     <input name="projectName"
            [(ngModel)]="project.name"
            #name="ngModel"
            matInput
            autocomplete="off"
+           smUniqueProjectValidator
            smUniqueNameValidator
-           [forbiddenPrefix]="(location.value === projectsRoot) ? '' : location.value + '/'"
-           [existingNames]="projectsNames"
-           required minlength="2">
+           [existingNames]="[]"
+           [parent]="targetFolder.value"
+           required minlength="3" >
   </mat-form-field>
 
   <mat-form-field appearance="outline" hideRequiredMarker
-                  (click)="location.value && clearLocation(); location.reset(); locationRef.blur(); locationRef.focus()">
-    <mat-error *ngIf="location.touched && location.errors?.required">*Please add location.</mat-error>
-    <mat-error *ngIf="location?.errors?.minlength">Please provide a name longer than 3 characters</mat-error>
+                  (mousedown)="!isFocused(locationRef) && targetFolder.value && targetFolder.reset(); locationRef.blur(); locationRef.focus()">
+    <mat-error *ngIf="targetFolder.touched && targetFolder.errors?.required">*Please add location.</mat-error>
+    <mat-error *ngIf="targetFolder?.errors?.minlength">Please provide a name longer than 3 characters</mat-error>
 
     <mat-label>Create in</mat-label>
     <input type="text"
            matInput
-           #location="ngModel"
+           #targetFolder="ngModel"
            #locationRef
            name="location"
-           [ngModel]="project.parent"
+           [(ngModel)]="project.parent"
            [matAutocomplete]="auto"
            placeholder="Search for project path"
            required
-           minlength="3"
-           (blur)="name.control.updateValueAndValidity(); detectChanges()"
-           (click)="location.value && clearLocation(); location.reset(); locationRef.blur(); locationRef.focus()">
-    <span matSuffix *ngIf="location.value && (!isAutoCompleteOpen) && !(project.parent | stringIncludedInArray:projectsNames)" class="creat-new-suffix">(Create New)</span>
-    <i matSuffix [class]="'fa mr2 ' + (location.value? 'fa-times pointer':'fa-search')"
-       (click)="location.value && clearLocation(); location.reset(); locationRef.focus()"
+           minlength="3">
+    <span matSuffix *ngIf="projects && targetFolder.value && (!isAutoCompleteOpen) && !(project.parent | stringIncludedInArray:projectsNames)"
+          class="creat-new-suffix">(Create New)</span>
+    <i matSuffix class="al-icon sm-md search-icon me-2" [ngClass]="targetFolder.value? 'al-ico-dialog-x pointer':'al-ico-search'"
+       (click)="targetFolder.value && targetFolder.reset(); locationRef.focus()"
        smClickStopPropagation></i>
-    <mat-autocomplete (opened)="setIsAutoCompleteOpen(true)"
-                      (closed)="setIsAutoCompleteOpen(false)"
-                      (optionSelected)="locationSelected($event)"
-                      #auto="matAutocomplete" autoActiveFirstOption
-                      class="light-theme">
+    <mat-autocomplete
+      (opened)="setIsAutoCompleteOpen(true)"
+      (closed)="setIsAutoCompleteOpen(false)"
+      (optionSelected)="locationSelected($event)"
+      #auto="matAutocomplete" autoActiveFirstOption
+      class="light-theme"
+      classList="light-theme"
+    >
       <mat-option
         class="item"
-        *ngIf="(location.value && !(location.value | stringIncludedInArray:projectsNames))"
-        [value]="location.value"
-      >"{{location.value}}" <span class="new">(Create New)</span></mat-option>
+        *ngIf="projectsNames !== null && targetFolder.value && !(targetFolder.value | stringIncludedInArray:projectsNames)"
+        [value]="targetFolder.value"
+      >"{{targetFolder.value}}" <span class="new">(Create New)</span></mat-option>
       <mat-option
-        *ngFor="let projectName of projectsNames | simpleFilter:location.value"
+        *ngFor="let projectName of projectsNames"
         [value]="projectName" [smTooltip]="projectName"  smShowTooltipIfEllipsis
       >
-        <div [innerHTML]="projectName | highlightSearchText:location.value"></div>
+        <div [innerHTML]="projectName | highlightSearchText:targetFolder.value"></div>
       </mat-option>
+      <div *ngIf="!projects" style="line-height: 100px; pointer-events: none;">
+        <mat-spinner class="m-auto" [diameter]="80" [strokeWidth]="8"></mat-spinner>
+      </div>
+      <div *ngIf="projects && !noMoreOptions" (smScrollEnd)="!loading && loadMore(targetFolder.value)" class="text-center">Loading more...</div>
+      <mat-option disabled style="height: 0; min-height: 0;"></mat-option> <!-- Empty mat-option, so the autocomplete menu will always pop -->
     </mat-autocomplete>
   </mat-form-field>
   <mat-form-field appearance="outline" hideRequiredMarker>

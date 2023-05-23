@@ -1,5 +1,5 @@
 import {Component, ElementRef, EventEmitter, HostListener, Input, OnDestroy, Output, ViewChild} from '@angular/core';
-import {MatLegacyMenuTrigger as MatMenuTrigger} from '@angular/material/legacy-menu';
+import {MatMenuTrigger} from '@angular/material/menu';
 import {TagsMenuComponent} from '../../ui-components/tags/tags-menu/tags-menu.component';
 import {Store} from '@ngrx/store';
 import {deactivateEdit, activateEdit} from 'app/webapp-common/experiments/actions/common-experiments-info.actions';

@@ -14,8 +14,8 @@
              [value]="(!metrics || listOpen) ? '' : selectedMetric?.name"
              (input)="updateMetricsList($event)"
       >
-      <i *ngIf="searchMetric.value.length === 0" class="fa fa-search pr-2"></i>
-      <i *ngIf="searchMetric.value.length > 0" class="fa fa-times pointer pr-2" (click)="clearMetricSearchAndSelected(); searchMetric.value= ''"></i>
+      <i *ngIf="searchMetric.value.length === 0" class="fa fa-search pe-2"></i>
+      <i *ngIf="searchMetric.value.length > 0" class="fa fa-times pointer pe-2" (click)="clearMetricSearchAndSelected(); searchMetric.value= ''"></i>
     </div>
   <mat-radio-group
     *ngIf="!listOpen"

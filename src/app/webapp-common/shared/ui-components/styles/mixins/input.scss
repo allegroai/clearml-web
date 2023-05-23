@@ -11,7 +11,6 @@
       -webkit-appearance: none;
       font-family: Heebo;
       color: map_get($input, color);
-      padding-left: 4px;
       height: 32px;
 
       &::-webkit-input-placeholder {

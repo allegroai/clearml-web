@@ -2,6 +2,8 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {BaseEntityHeaderComponent} from '@common/shared/entity-page/base-entity-header/base-entity-header.component';
+import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
+import {MetricValueType} from '@common/experiments-compare/experiments-compare.constants';
 
 @Component({
   selector   : 'sm-model-header',
@@ -26,6 +28,7 @@ export class ModelHeaderComponent extends BaseEntityHeaderComponent {
   @Input() hideCreateNewButton: boolean;
   @Input() disableCreateNewButton: boolean;
   @Input() metadataKeys: string[];
+  @Input() metricVariants: Array<MetricVariantResult>;
   @Input() isLoadingMetadataKeys: any;
   @Input() tableMode: string;
   @Input() rippleEffect: boolean;
@@ -34,6 +37,11 @@ export class ModelHeaderComponent extends BaseEntityHeaderComponent {
   @Output() refreshListClicked       = new EventEmitter();
   @Output() setAutoRefresh           = new EventEmitter();
   @Output() selectedTableColsChanged = new EventEmitter();
+  @Output() selectedMetricToShow     = new EventEmitter<{
+    variant: MetricVariantResult;
+    addCol: boolean;
+    valueType: MetricValueType;
+  }>();
   @Output() selectMetadataKeysActiveChanged = new EventEmitter();
   @Output() clearTableFilters        = new EventEmitter<{ [s: string]: FilterMetadata }>();
   @Output() addOrRemoveMetadataKeyFromColumns = new EventEmitter<{key: string; show: boolean}>();

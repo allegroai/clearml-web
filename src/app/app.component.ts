@@ -3,22 +3,19 @@ import {selectCurrentUser} from '@common/core/reducers/users-reducer';
 import {Component, OnDestroy, OnInit, ViewEncapsulation, HostListener, Renderer2, Injector} from '@angular/core';
 import {ActivatedRoute, NavigationEnd, Router, Params, RouterEvent} from '@angular/router';
 import {Title} from '@angular/platform-browser';
-import {selectLoggedOut} from '@common/core/reducers/view.reducer';
+import {selectBreadcrumbs, selectLoggedOut} from '@common/core/reducers/view.reducer';
 import {Store} from '@ngrx/store';
-import {selectRouterConfig, selectRouterParams, selectRouterUrl} from '@common/core/reducers/router-reducer';
+import {selectRouterParams, selectRouterUrl} from '@common/core/reducers/router-reducer';
 import {ApiProjectsService} from './business-logic/api-services/projects.service';
 import {Project} from './business-logic/model/projects/project';
 import {getAllSystemProjects, setSelectedProjectId, updateProject} from '@common/core/actions/projects.actions';
 import {selectSelectedProject} from '@common/core/reducers/projects.reducer';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {MatDialog} from '@angular/material/dialog';
 import {getTutorialBucketCredentials} from '@common/core/actions/common-auth.actions';
 import {termsOfUseAccepted} from '@common/core/actions/users.actions';
-import {distinctUntilChanged, filter, map, tap, withLatestFrom} from 'rxjs/operators';
+import {distinctUntilChanged, filter, map, tap} from 'rxjs/operators';
 import * as routerActions from './webapp-common/core/actions/router.actions';
 import {combineLatest, Observable, Subscription} from 'rxjs';
-import {selectBreadcrumbsStrings} from '@common/layout/layout.reducer';
-import {NestedProjectTypeUrlEnum, prepareNames} from './layout/breadcrumbs/breadcrumbs.utils';
-import {formatStaticCrumb} from '@common/layout/breadcrumbs/breadcrumbs-common.utils';
 import {ServerUpdatesService} from '@common/shared/services/server-updates.service';
 import {selectAvailableUpdates} from './core/reducers/view.reducer';
 import {UPDATE_SERVER_PATH} from './app.constants';
@@ -53,10 +50,8 @@ export class AppComponent implements OnInit, OnDestroy {
   private selectedProjectFromUrl$: Observable<string>;
   private breadcrumbsSubscription: Subscription;
   private selectedCurrentUserSubscription: Subscription;
-  private breadcrumbsStrings;
   private selectedCurrentUser$: Observable<any>;
   public showNotification: boolean = true;
-  public showSurvey$: Observable<boolean>;
   public demo = ConfigurationService.globalEnvironment.demo;
   public isLoginContext: boolean;
   public currentUser: User;
@@ -67,6 +62,7 @@ export class AppComponent implements OnInit, OnDestroy {
   public showSurvey: boolean;
   private plotlyURL: string;
   private environment: Environment;
+  private title = 'ClearML';
 
   @HostListener('document:visibilitychange') onVisibilityChange() {
     this.store.dispatch(visibilityChanged({visible: !document.hidden}));
@@ -140,7 +136,6 @@ export class AppComponent implements OnInit, OnDestroy {
           };
           this.gtmService?.pushTag(gtmTag);
           this.store.dispatch(new routerActions.NavigationEnd());
-          this.updateTitle();
         });
 
     this.selectedCurrentUserSubscription = this.selectedCurrentUser$.pipe(
@@ -181,16 +176,10 @@ export class AppComponent implements OnInit, OnDestroy {
         }
       });
 
-    this.breadcrumbsSubscription = this.store.select(selectBreadcrumbsStrings).pipe(
-      filter(names => !!names),
-      withLatestFrom(this.store.select(selectRouterConfig))
-    ).subscribe(
-      ([names, routeConf]) => {
-        const projectType = `${routeConf?.[0]}${routeConf?.[1] === 'simple' ? '/' + routeConf?.[1] : ''}`;
-        this.breadcrumbsStrings = prepareNames(names, projectType as NestedProjectTypeUrlEnum);
-        this.updateTitle();
-      }
-    );
+    this.breadcrumbsSubscription = this.store.select(selectBreadcrumbs).subscribe(breadcrumbs => {
+      const crumbs = breadcrumbs.flat().map(breadcrumb=> breadcrumb.name);
+      this.titleService.setTitle(`${this.title ? this.title + '-' : ''} ${crumbs.join(' / ')}`);
+    });
 
     if (window.localStorage.getItem('disableHidpi') !== 'true') {
       this.setScale();
@@ -226,26 +215,6 @@ export class AppComponent implements OnInit, OnDestroy {
 
   backToProjects() {
     return this.router.navigateByUrl('projects');
-  }
-
-  updateTitle() {
-    let route = this.route.snapshot.firstChild;
-    let routeConfig = [];
-
-    while (route) {
-      const path = route.routeConfig.path.split('/').filter((item) => !!item);
-      routeConfig = routeConfig.concat(path);
-      route = route.firstChild;
-    }
-    const crumbs = routeConfig
-      .reduce((acc, config) => {
-        const dynamicCrumb = this.breadcrumbsStrings[config];
-        let crumb = dynamicCrumb ? dynamicCrumb : formatStaticCrumb(config);
-        crumb = Array.isArray(crumb) ? crumb.at(-1) : crumb;
-        return acc.concat(crumb.name);
-      }, [''])
-      .filter(name => !!name && name !== ':project');
-    this.titleService.setTitle(`ClearML - ${crumbs.join(' / ')}`);
   }
 
   versionDismissed(version: string) {

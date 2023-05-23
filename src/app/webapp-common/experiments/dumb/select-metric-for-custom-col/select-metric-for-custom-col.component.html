@@ -1,4 +1,4 @@
-<div smClickStopPropagation class="d-flex flex-column w-100 h-100">
+<div smClickStopPropagation class="metrics-container">
   <div *ngIf="goBack.observed" class="head">
     <i (click)="goBack.emit()" data-id="Back button" class="al-icon sm-md al-ico-back pointer m-auto" smClickStopPropagation></i>
     <h3>SELECT METRIC TO DISPLAY</h3>
@@ -14,6 +14,12 @@
     (valueChanged)="searchQ($event)"
   ></sm-search>
   <div class="metrics" [class.has-title]="goBack.observed">
+    <div *ngIf="!filteredMetricTree && !(searchText?.length > 0)" class="d-flex h-100">
+      <mat-spinner class="spinner" diameter="80" strokeWidth="8"></mat-spinner>
+    </div>
+    <div *ngIf="filteredMetricTree && filteredMetricTree.length === 0" class="d-flex h-100">
+      <div class="empty-state">No data to show</div>
+    </div>
     <mat-expansion-panel
       *ngFor="let metric of filteredMetricTree; trackBy: trackByMetric"
       [expanded]="searchText?.length > 0 || expandedMetrics[metric[1][0].metric_hash]"
@@ -65,7 +71,7 @@
                 [ngModel]="metricsCols[variant.metric_hash + variant.variant_hash][0]"
                 (change)="toggleMetricToDisplay(variant, true, $event.value)"
               >
-                <mat-radio-button class="sm" value="value" >LAST</mat-radio-button>
+                <mat-radio-button class="sm" value="value">LAST</mat-radio-button>
                 <mat-radio-button class="sm px-4" value="min_value">MIN</mat-radio-button>
                 <mat-radio-button class="sm" value="max_value">MAX</mat-radio-button>
               </mat-radio-group>

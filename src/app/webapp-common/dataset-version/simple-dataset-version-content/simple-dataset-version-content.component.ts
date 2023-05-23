@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component, Input, ViewChild} from '@angular/core';
-import {MatLegacyMenuTrigger as MatMenuTrigger} from '@angular/material/legacy-menu';
+import {MatMenuTrigger} from '@angular/material/menu';
 import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {fileSizeConfigStorage, FileSizePipe} from '@common/shared/pipes/filesize.pipe';
 

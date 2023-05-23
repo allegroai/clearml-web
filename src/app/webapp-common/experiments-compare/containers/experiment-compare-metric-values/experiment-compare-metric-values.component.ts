@@ -6,12 +6,13 @@ import {has} from 'lodash-es';
 import {Observable, Subscription} from 'rxjs';
 import * as metricsValuesActions from '../../actions/experiments-compare-metrics-values.actions';
 import {selectCompareMetricsValuesExperiments, selectCompareMetricsValuesSortConfig} from '../../reducers';
-import {Router} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {addMessage} from '@common/core/actions/layout.actions';
 import {TreeNode} from '../../shared/experiments-compare-details.model';
 import {createDiffObjectScalars, getAllKeysEmptyObject} from '../../jsonToDiffConvertor';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {LIMITED_VIEW_LIMIT} from '@common/experiments-compare/experiments-compare.constants';
+import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 
 interface ValueMode {
   key: string;
@@ -59,9 +60,11 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
   public hoveredRow: string;
   public hoveredTable: string;
   public experimentTags: { [experimentId: string]: string[] } = {};
+  private entityType: EntityTypeEnum;
 
   constructor(
     private router: Router,
+    private route: ActivatedRoute,
     public store: Store<any>,
     private changeDetection: ChangeDetectorRef,
     private refresh: RefreshService
@@ -71,6 +74,7 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
   }
 
   ngOnInit() {
+    this.entityType = this.route.snapshot.parent.parent.data.entityType;
     this.queryParamsSubscription = this.store.pipe(
       select(selectRouterQueryParams),
       map(params => params?.scalars),
@@ -87,7 +91,10 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
       filter(taskIds => !!taskIds && taskIds !== this.getExperimentIdsParams(this.experiments))
     )
       .subscribe((experimentIds: string[]) => {
-        this.store.dispatch(metricsValuesActions.getComparedExperimentsMetricsValues({taskIds: experimentIds.slice(0, LIMITED_VIEW_LIMIT)}));
+        this.store.dispatch(metricsValuesActions.getComparedExperimentsMetricsValues({
+          taskIds: experimentIds.slice(0, LIMITED_VIEW_LIMIT),
+          entity: this.entityType
+        }));
       });
 
     this.comparedTasksSubscription = this.comparedTasks$
@@ -107,7 +114,7 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
     this.refreshingSubscription = this.refresh.tick
       .pipe(filter(auto => auto !== null))
       .subscribe((autoRefresh) => this.store.dispatch(
-        metricsValuesActions.getComparedExperimentsMetricsValues({taskIds: this.taskIds, autoRefresh})
+        metricsValuesActions.getComparedExperimentsMetricsValues({taskIds: this.taskIds, entity: this.entityType, autoRefresh})
       ));
   }
 

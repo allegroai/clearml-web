@@ -8,7 +8,7 @@ import {filter, skip, take} from 'rxjs/operators';
 import {setDeep} from '@common/core/actions/projects.actions';
 import {getRecentProjects, getRecentExperiments} from '@common/dashboard/common-dashboard.actions';
 import {selectFirstLogin} from '@common/core/reducers/view.reducer';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {MatDialog} from '@angular/material/dialog';
 import {WelcomeMessageComponent} from '@common/layout/welcome-message/welcome-message.component';
 import {firstLogin} from '@common/core/actions/layout.actions';
 import {IRecentTask, selectRecentTasks} from '@common/dashboard/common-dashboard.reducer';

@@ -1,4 +1,4 @@
-import {MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Store} from '@ngrx/store';
 import {filter, take} from 'rxjs/operators';
@@ -11,7 +11,7 @@ import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-in
 import {CloneForm} from '../../common-experiment-model.model';
 import {SmSyncStateSelectorService} from '@common/core/services/sync-state-selector.service';
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
-import {htmlTextShorte} from '@common/shared/utils/shared-utils';
+import {htmlTextShort} from '@common/shared/utils/shared-utils';
 import * as commonMenuActions from '../../../actions/common-experiments-menu.actions';
 import {abortAllChildren, archiveSelectedExperiments} from '../../../actions/common-experiments-menu.actions';
 import {ChangeProjectDialogComponent} from '../change-project-dialog/change-project-dialog.component';
@@ -166,7 +166,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
 
   dequeuePopup() {
     const selectedExperiments = this.selectedExperiments ? selectionDisabledDequeue(this.selectedExperiments).selectedFiltered : [this._experiment];
-    const getBody = (queueName: string) => `<b>${selectedExperiments.length === 1 ? htmlTextShorte(this._experiment.name) : selectedExperiments.length + 'experiments'}</b> will be removed from the ${queueName ? '<b>' + queueName + '</b> ' : ''}execution queue.`;
+    const getBody = (queueName: string) => `<b>${selectedExperiments.length === 1 ? htmlTextShort(this._experiment.name) : selectedExperiments.length + 'experiments'}</b> will be removed from the ${queueName ? '<b>' + queueName + '</b> ' : ''}execution queue.`;
     this.store.dispatch(new GetQueuesForEnqueue());
     const confirmDialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
@@ -240,7 +240,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
     const confirmDialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
         title: 'ABORT',
-        body: `<b>${selectedExperiments.length === 1 ? htmlTextShorte(selectedExperiments[0]?.name || '') : selectedExperiments.length + ' experiments'}</b>
+        body: `<b>${selectedExperiments.length === 1 ? htmlTextShort(selectedExperiments[0]?.name || '') : selectedExperiments.length + ' experiments'}</b>
  will be stopped and additional model updates will not be allowed.<br>
                 `,
         yes: 'Abort',
@@ -262,7 +262,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
 
   public publishPopup() {
     const selectedExperiments = this.selectedExperiments ? selectionDisabledPublishExperiments(this.selectedExperiments).selectedFiltered : [this._experiment];
-    const publishPopupBody = `<b>${selectedExperiments.length === 1 ? htmlTextShorte(selectedExperiments[0]?.name || '') : selectedExperiments.length + ' experiments'}</b>
+    const publishPopupBody = `<b>${selectedExperiments.length === 1 ? htmlTextShort(selectedExperiments[0]?.name || '') : selectedExperiments.length + ' experiments'}</b>
  status will be set to Published.<br><br>
  Published experiments are read-only and cannot be reset. The experiment's output, including models will also be published so that other experiments can use it.`;
 

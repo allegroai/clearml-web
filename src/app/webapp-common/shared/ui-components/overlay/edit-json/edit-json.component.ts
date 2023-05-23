@@ -1,5 +1,5 @@
 import {AfterViewInit, Component, ElementRef, HostListener, Inject, NgZone, ViewChild} from '@angular/core';
-import {MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {JsonPipe} from '@angular/common';
 import {validateJson} from '../../../utils/validation-utils';
 import {Store} from '@ngrx/store';
@@ -10,6 +10,13 @@ import {filter, Observable} from 'rxjs';
 import {map, take} from 'rxjs/operators';
 
 declare const ace;
+export interface EditJsonData {
+  textData?: string | any;
+  readOnly?: boolean;
+  title: string;
+  format?: 'json' | 'yaml' | 'hocon';
+  placeHolder?: string;
+}
 
 @Component({
   selector: 'sm-edit-json',
@@ -31,6 +38,7 @@ export class EditJsonComponent implements AfterViewInit{
   private aceEditor: Ace.Editor;
   private $aceCaretPosition: Observable<{ [key: string]: Ace.Point }>;
   private defaultPlaceHolder = '';
+  private format?: 'json' | 'yaml' | 'hocon';
 
   set readOnly(readOnly: boolean) {
     this._readOnly = readOnly;
@@ -48,13 +56,14 @@ export class EditJsonComponent implements AfterViewInit{
   }
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) public data: { textData: string; readOnly: boolean; title: string; typeJson: boolean; placeHolder: string },
+    @Inject(MAT_DIALOG_DATA) public data: EditJsonData,
     private dialogRef: MatDialogRef<EditJsonComponent, any>,
     private jsonPipe: JsonPipe,
     private store: Store<any>,
     private zone: NgZone,
   ) {
-    this.typeJson = data.typeJson;
+    this.format = data.format;
+    this.typeJson = data.format === 'json';
     if (this.typeJson) {
       this.defaultPlaceHolder = `e.g.:
 
@@ -64,7 +73,7 @@ export class EditJsonComponent implements AfterViewInit{
 }`;
     }
     this.placeHolder = data.placeHolder;
-    this.textData = data.textData ? (this.typeJson ? jsonPipe.transform(data.textData) : data.textData).slice() : undefined;
+    this.textData = data.textData ? (this.typeJson && typeof data.textData !== 'string' ? jsonPipe.transform(data.textData) : data.textData).slice() : undefined;
     this.readOnly = data.readOnly;
     this.title = data.title;
     this.$aceCaretPosition = this.store.select(selectAceCaretPosition);
@@ -112,10 +121,18 @@ export class EditJsonComponent implements AfterViewInit{
       (aceEditor.renderer.container.querySelector('.ace_cursor') as HTMLElement).style.color = 'white';
 
       aceEditor.setTheme('ace/theme/monokai');
-      if (this.typeJson) {
-        aceEditor.session.setMode('ace/mode/json');
-      } else {
-        aceEditor.session.setMode('ace/mode/text');
+      switch (this.format) {
+        case 'hocon':
+          aceEditor.session.setMode('ace/mode/ini');
+          break;
+        case 'json':
+          aceEditor.session.setMode('ace/mode/json');
+          break;
+        case 'yaml':
+          aceEditor.session.setMode('ace/mode/yaml');
+          break;
+        default:
+          aceEditor.session.setMode('ace/mode/text');
       }
       aceEditor.getSession().setValue(this.textData || '');
       this.aceEditor = aceEditor;

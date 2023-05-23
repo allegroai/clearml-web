@@ -49,7 +49,7 @@
     }
   }
 
-    sm-common-search, 
+    sm-common-search,
     .resources-trigger {
       margin-right: 24px;
     }
@@ -133,15 +133,5 @@
     border: solid 2px $blue-800;
     border-radius: 50%;
     background-color: $neon-yellow;
-  }
-}
-
-.mat-menu-item {
-  display: flex;
-  align-items: center;
-  background-color: white;
-
-  .fab {
-    margin-right: 12px;
   }
 }

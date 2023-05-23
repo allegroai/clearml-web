@@ -1,5 +1,5 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
+import {MatDialogRef} from '@angular/material/dialog';
 import {Store} from '@ngrx/store';
 import {setRedactedArguments} from '@common/core/actions/layout.actions';
 import {selectRedactedArguments} from '@common/core/reducers/view.reducer';

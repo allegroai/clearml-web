@@ -11,8 +11,9 @@ import {ClipboardService} from 'ngx-clipboard';
 import { take } from 'rxjs';
 
 export interface ReportCodeEmbedConfiguration {
-  type: 'plot' | 'multiplot' | 'scalar' | 'multiscalar' | 'sample' | 'parcoords';
-  tasks: string[];
+  type: 'plot' | 'multiplot' | 'scalar' | 'multiscalar' | 'sample' | 'parcoords' | 'single';
+  objects?: string[];
+  objectType: 'model' | 'task';
   domRect: DOMRect;
   name?: string;
   metrics?: string[];
@@ -50,9 +51,10 @@ export class ReportCodeEmbedBaseService {
     const url = new URL(window.location.origin + this.locationStrategy.getBaseHref());
     url.pathname = url.pathname + 'widgets/';
     url.searchParams.set('type', conf.type);
+    url.searchParams.set('objectType', conf.objectType);
     conf.valueType && url.searchParams.set('value_type', conf.valueType);
     let urlStr = url.toString();
-    ['tasks', 'metrics', 'variants'].forEach(key => {
+    ['objects', 'metrics', 'variants'].forEach(key => {
       if (conf[key]?.filter(v => !!v).length > 0) {
         urlStr += '&' + conf[key].map(val => `${key}=${encodeURIComponent(val)}`).join('&');
       }

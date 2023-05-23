@@ -1,6 +1,6 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {IModelInfo, IModelInfoSource} from '../../shared/common-experiment-model.model';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {MatDialog} from '@angular/material/dialog';
 import {filter} from 'rxjs/operators';
 import {Model} from '~/business-logic/model/models/model';
 import {SelectModelComponent} from '@common/select-model/select-model.component';
@@ -35,20 +35,28 @@ export class ExperimentModelsFormViewComponent extends BaseClickableArtifactComp
     return this._model;
   }
 
-  @Output() modelSelected = new EventEmitter<Model>();
+  @Output() modelSelectedId = new EventEmitter<string>();
 
   constructor(private dialog: MatDialog, protected adminService: AdminService, protected store: Store<any>) {
     super(adminService, store);
   }
 
   public chooseModel() {
-    const chooseModelDialog = this.dialog.open(SelectModelComponent, {maxWidth: '95vw'});
+    const chooseModelDialog = this.dialog.open(SelectModelComponent, {
+      data: {
+        header: 'Select a published model',
+        hideShowArchived: true
+      },
+      width: '98%',
+      height: '94vh',
+      maxWidth: '100%',
+    });
     chooseModelDialog.afterClosed()
       .pipe(filter(model => !!model))
-      .subscribe((selectedModel: Model) => this.modelSelected.emit(selectedModel));
+      .subscribe((selectedModelId: string) => this.modelSelectedId.emit(selectedModelId));
   }
 
   removeModel() {
-    this.modelSelected.emit({id: null});
+    this.modelSelectedId.emit(null);
   }
 }

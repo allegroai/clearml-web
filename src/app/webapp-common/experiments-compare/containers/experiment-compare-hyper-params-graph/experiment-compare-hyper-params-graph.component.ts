@@ -25,12 +25,13 @@ import {
   MetricOption,
   VariantOption
 } from '../../reducers/experiments-compare-charts.reducer';
-import {MatLegacyRadioChange as MatRadioChange} from '@angular/material/legacy-radio';
+import {MatRadioChange} from '@angular/material/radio';
 import {selectPlotlyReady} from '@common/core/reducers/view.reducer';
 import {ExtFrame} from '@common/shared/single-graph/plotly-graph-base';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {MetricValueType, SelectedMetric} from '@common/experiments-compare/experiments-compare.constants';
 import {ReportCodeEmbedService} from '~/shared/services/report-code-embed.service';
+import {ActivatedRoute} from '@angular/router';
 
 
 export const _filter = (opt: VariantOption[], value: string): VariantOption[] => {
@@ -86,7 +87,10 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
     }
   }
 
-  constructor(private store: Store<ExperimentInfoState>, private refresh: RefreshService, private reportEmbed: ReportCodeEmbedService) {
+  constructor(private store: Store<ExperimentInfoState>,
+              private route: ActivatedRoute,
+              private refresh: RefreshService,
+              private reportEmbed: ReportCodeEmbedService) {
     this.metrics$ = this.store.pipe(select(selectScalarsGraphMetrics));
     this.hyperParams$ = this.store.pipe(select(selectScalarsGraphHyperParams));
     this.selectedHyperParams$ = this.store.pipe(select(selectSelectedSettingsHyperParams));
@@ -239,6 +243,8 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
   createEmbedCode(event: { tasks: string[]; valueType: MetricValueType; metrics?: string[]; variants?: string[]; domRect: DOMRect }) {
     this.reportEmbed.createCode({
       type: 'parcoords',
+      objects: event.tasks,
+      objectType: 'task',
       ...event
     });
   }

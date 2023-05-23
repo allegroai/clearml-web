@@ -4,16 +4,13 @@ import {SMSharedModule} from '@common/shared/shared.module';
 import {ExperimentConverterService} from './services/experiment-converter.service';
 import { ExperimentMenuComponent } from '@common/experiments/shared/components/experiment-menu/experiment-menu.component';
 import {ExperimentMenuExtendedComponent} from '../containers/experiment-menu-extended/experiment-menu-extended.component';
-import {GetParamMetricValuePipe} from '@common/experiments/dumb/experiments-table/hyper-param-metric-column/get-param-metric-value.pipe';
 import {ExperimentHeaderComponent} from '@common/experiments/dumb/experiment-header/experiment-header.component';
 import {SelectHyperParamsForCustomColComponent} from '@common/experiments/dumb/select-hyper-params-for-custom-col/select-hyper-params-for-custom-col.component';
 import {ExperimentExecutionParametersComponent} from '@common/experiments/dumb/experiment-execution-parameters/experiment-execution-parameters.component';
 import {CloneDialogComponent} from '@common/experiments/shared/components/clone-dialog/clone-dialog.component';
-import {HyperParamMetricColumnComponent} from '@common/experiments/dumb/experiments-table/hyper-param-metric-column/hyper-param-metric-column.component';
 import {ExperimentSystemTagsComponent} from '@common/experiments/shared/components/experiments-system-tags/experiment-system-tags.component';
 import {AbortAllChildrenDialogComponent} from '@common/experiments/shared/components/abort-all-children-dialog/abort-all-children-dialog.component';
 import {ExperimentsTableComponent} from '@common/experiments/dumb/experiments-table/experiments-table.component';
-import {GetVariantWithoutRoundPipe} from '@common/experiments/dumb/experiments-table/hyper-param-metric-column/get-variant-without-round.pipe';
 import {ChangeProjectDialogComponent} from '@common/experiments/shared/components/change-project-dialog/change-project-dialog.component';
 import {ExperimentOutputPlotsComponent} from '@common/experiments/containers/experiment-output-plots/experiment-output-plots.component';
 import {ExperimentCustomColsMenuComponent} from '@common/experiments/dumb/experiment-custom-cols-menu/experiment-custom-cols-menu.component';
@@ -41,6 +38,8 @@ import {EXPERIMENTS_OUTPUT_PREFIX} from '@common/experiments/actions/common-expe
 import {EXPERIMENTS_INFO_PREFIX} from '@common/experiments/actions/common-experiments-info.actions';
 import {experimentsReducers} from '~/features/experiments/reducers';
 import {CommonExperimentConverterService} from '@common/experiments/shared/services/common-experiment-converter.service';
+import {HyperParamMetricColumnComponent} from '@common/experiments/shared/components/hyper-param-metric-column/hyper-param-metric-column.component';
+import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
 
 export const experimentSyncedKeys = [
   'view.projectColumnsSortOrder',
@@ -89,9 +88,6 @@ const DECLARATIONS = [
   AbortAllChildrenDialogComponent,
   ExperimentExecutionParametersComponent,
   ExperimentsTableComponent,
-  HyperParamMetricColumnComponent,
-  GetParamMetricValuePipe,
-  GetVariantWithoutRoundPipe,
   ExperimentHeaderComponent,
   ExperimentCustomColsMenuComponent,
   SelectHyperParamsForCustomColComponent,
@@ -117,6 +113,8 @@ const DECLARATIONS = [
     MatProgressSpinnerModule,
     ScrollingModule,
     CommonLayoutModule,
+    HyperParamMetricColumnComponent,
+    LabeledFormFieldDirective,
   ],
   declarations   : [...DECLARATIONS],
   providers      : [

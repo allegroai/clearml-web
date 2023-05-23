@@ -23,12 +23,15 @@ export class SelectMetricForCustomColComponent {
   private debounceTimer: number;
 
   @Input() set metricVariants(metricVar: Array<MetricVariantResult>) {
-    this.metricTree = metricVar.reduce((result, metric) => {
+    if (metricVar === null) {
+      return;
+    }
+    this.metricTree = metricVar?.reduce((result, metric) => {
       result[metric.metric] ? result[metric.metric].push(metric) : result[metric.metric] = [metric];
       return result;
     }, {} as {[metricName: string]: MetricVariantResult[]});
-    this.filteredMetricTree = Object.entries(this.metricTree).slice(0, this.entriesLimit);
-    this.moreResults = Object.keys(this.metricTree).length - this.filteredMetricTree.length;
+    this.filteredMetricTree = Object.entries(this.metricTree || {}).slice(0, this.entriesLimit);
+    this.moreResults = Object.keys(this.metricTree || {}).length - this.filteredMetricTree.length;
   }
 
   @Input() set tableCols(tableCols) {

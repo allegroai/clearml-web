@@ -48,26 +48,6 @@
     margin: 0 5px;
 
   }
-
-  ::ng-deep mat-select.view-mode {
-    width: 142px;
-
-    .mat-select-trigger {
-      width: 142px;
-      border: 1px solid $blue-250;
-      border-radius: 4px;
-      height: 32px;
-      padding: 5px 14px;
-
-      mat-select-trigger {
-        color: $blue-400;
-      }
-    }
-
-    .mat-select-arrow {
-      color: $blue-400;
-    }
-  }
 }
 
 .header-container {
@@ -110,7 +90,7 @@
   .btn-add-experiment {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 6px;
     background-color: $blue-50;
   }
 
@@ -132,6 +112,6 @@
   */
 }
 
-::ng-deep .mat-menu-content {
+::ng-deep .mat-mdc-menu-content {
   height: 100%;
 }

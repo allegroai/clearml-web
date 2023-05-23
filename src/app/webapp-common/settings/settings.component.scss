@@ -8,14 +8,14 @@
       border-right: 1px solid $blue-500;
       width: 220px;
     }
-    .mat-list-item {
-      color: $blue-200;
-      font-size: 14px;
-      padding-left: 8px; // mat-list-item has padding 0 16px
-      height: 40px;
+    .mat-mdc-list-item {
+      --mdc-list-list-item-label-text-color: #{$blue-200};
+      --mdc-theme-text-primary-on-background: #{$blue-200};
+
+      padding-left: 24px;
       &.active {
-        background-color: $blue-500;
-        color: white;
+        --mdc-list-list-item-container-color: #{$blue-500};
+        --mdc-theme-text-primary-on-background: white;
       }
       &:hover {
         background-color: $blue-650;
@@ -34,7 +34,6 @@
         .content {
           height: 100%;
           width: 100%;
-          max-width: 1660px;
         }
       }
     }

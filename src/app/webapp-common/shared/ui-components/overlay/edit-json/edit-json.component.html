@@ -8,11 +8,7 @@
     </small>
   </div>
   <div class="buttons">
-    <button (click)="closeDialog(false)" class="btn btn-outline-neon yes-button">
-      CANCEL
-    </button>
-    <button (click)="closeDialog(!readOnly)" class="btn btn-neon">
-      OK
-    </button>
+    <button *ngIf="!readOnly" (click)="closeDialog(false)" class="btn btn-outline-neon yes-button" data-id="cancelButton">CANCEL</button>
+    <button (click)="closeDialog(!readOnly)" class="btn btn-neon" data-id="okButton">OK</button>
   </div>
 </sm-dialog-template>

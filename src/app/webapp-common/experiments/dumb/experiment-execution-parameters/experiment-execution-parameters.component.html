@@ -45,7 +45,7 @@
     </ng-container>
   </cdk-virtual-scroll-viewport>
 </form>
-<button *ngIf="editable" class="btn btn-dark-fill add-parameter" (click)="addRow()"><i class="fas fa-plus"></i> ADD PARAMETER</button>
+<button *ngIf="editable" class="btn btn-dark-fill add-parameter" (click)="addRow()"><i class="fas fa-plus" data-id="AddParamterButton"></i> ADD PARAMETER</button>
 <div class="table-container" *ngIf="!editable">
   <sm-table
     [columns]="cols"
@@ -69,7 +69,7 @@
               smTooltip="{{(row.type ? ('Type: '+ row.type+'\n') : '') + (row?.description|| '')}}"><i class="al-icon al-ico-description"></i></span>
       </ng-container>
       <ng-template #defaultRow>
-        <span [class.name]="col.id==='name'" smTooltip="{{row[col.id]}}">
+        <span class="ellipsis" [class.name]="col.id==='name'" smShowTooltipIfEllipsis [smTooltip]="row[col.id]">
           <span *ngFor="let part of (searchedText ? row[col.id].split(searchedText) : [row[col.id]]); let last=last">{{part}}<span class="highlight-text" [class.current-match]="searchIndexList[matchIndex]?.index===i && searchIndexList[matchIndex]?.col===col.id" *ngIf="!last">{{searchedText}}</span></span></span>
       </ng-template>
     </ng-template>

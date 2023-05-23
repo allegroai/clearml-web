@@ -1,7 +1,7 @@
 import {Component, Input} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {AlertDialogComponent} from '../../shared/ui-components/overlay/alert-dialog/alert-dialog.component';
-import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
+import { MatDialog } from '@angular/material/dialog';
 import {take} from 'rxjs/operators';
 import {logout} from '@common/core/actions/users.actions';
 

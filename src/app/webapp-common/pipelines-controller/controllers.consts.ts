@@ -1,5 +1,6 @@
 import {ColHeaderFilterTypeEnum, ColHeaderTypeEnum, ISmCol} from '../shared/ui-components/data/table/table.consts';
 import {EXPERIMENTS_TABLE_COL_FIELDS} from '~/features/experiments/shared/experiments.const';
+import {rootProjectsPageSize} from '@common/constants';
 
 export const INITIAL_CONTROLLER_TABLE_COLS: ISmCol[] = [
   {
@@ -64,6 +65,10 @@ export const INITIAL_CONTROLLER_TABLE_COLS: ISmCol[] = [
     headerType: ColHeaderTypeEnum.title,
     header: 'PROJECT',
     style: {width: '150px'},
+    filterable  :  true,
+    searchableFilter: true,
+    asyncFilter: true,
+    paginatedFilterPageSize: rootProjectsPageSize
   },
   {
     id: EXPERIMENTS_TABLE_COL_FIELDS.USER,

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import {StoreModule} from '@ngrx/store';
 import {EffectsModule} from '@ngrx/effects';
 import {ClipboardModule} from 'ngx-clipboard';
-import {MatLegacySliderModule as MatSliderModule} from '@angular/material/legacy-slider';
+import {MatSliderModule} from '@angular/material/slider';
 import {ImageViewerComponent} from '@common/shared/debug-sample/image-viewer/image-viewer.component';
 import {DebugImageSnippetComponent} from '@common/shared/debug-sample/debug-image-snippet/debug-image-snippet.component';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
@@ -12,6 +12,7 @@ import {SnippetErrorComponent} from '@common/shared/ui-components/indicators/sni
 import {debugSampleReducer} from '@common/shared/debug-sample/debug-sample.reducer';
 import {DebugSampleEffects} from '@common/shared/debug-sample/debug-sample.effects';
 import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {FormsModule} from '@angular/forms';
 
 
 
@@ -28,6 +29,7 @@ import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indic
     SharedPipesModule,
     SnippetErrorComponent,
     ShowTooltipIfEllipsisDirective,
+    FormsModule,
   ]
 })
 export class DebugSampleModule { }

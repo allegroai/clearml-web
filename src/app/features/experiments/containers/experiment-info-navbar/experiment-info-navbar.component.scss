@@ -1,31 +1,17 @@
-@import "variables";
-$output-tabs-height: 40px;
-
-nav {
-  height: $output-tabs-height;
-  position: relative;
-  text-align: center;
+.tab-nav {
+  display: grid;
+  grid-template-columns: 200px 1fr 200px;
   border-bottom: 1px solid #efefef;
-  padding: 0 48px 0 24px;
 
-  .refresh-position {
-    position: absolute;
-    right: 16px;
-    top: 6px;
-    display: flex;
-    align-items: center;
+  &.minimized {
+    grid-template-columns: 0 1fr 60px;
   }
-  .refreshIcon{
-    margin-right: 10px;
-  }
-  span.disabled {
-    pointer-events: none;
+
+  @media(max-width: 1200px) {
+    grid-template-columns: 0 1fr 200px;
   }
 }
-.mat-menu-item {
-  padding-left: 22px;
-  &.active {
-    border-left: 6px solid $purple;
-    padding-left: 16px;
-  }
+
+sm-router-tab-nav-bar {
+  overflow: hidden;
 }

@@ -2,6 +2,7 @@ import {createAction, props} from '@ngrx/store';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {EventsGetMultiTaskPlotsResponse} from '~/business-logic/model/events/eventsGetMultiTaskPlotsResponse';
 import {ExperimentCompareSettings} from '@common/experiments-compare/reducers/experiments-compare-charts.reducer';
+import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 
 
 export const EXPERIMENTS_COMPARE_METRICS_CHARTS_ = 'EXPERIMENTS_COMPARE_METRICS_CHARTS_';
@@ -14,12 +15,12 @@ export const SET_EXPERIMENT_PLOTS               = EXPERIMENTS_COMPARE_METRICS_CH
 
 export const getMultiScalarCharts = createAction(
   EXPERIMENTS_COMPARE_METRICS_CHARTS_ + 'GET_MULTI_SCALAR_CHARTS',
-  props<{ taskIds: string[]; autoRefresh?: boolean; cached?: boolean }>()
+  props<{ taskIds: string[]; entity: EntityTypeEnum; autoRefresh?: boolean; cached?: boolean }>()
 );
 
 export const getMultiPlotCharts = createAction(
   EXPERIMENTS_COMPARE_METRICS_CHARTS_ + 'GET_MULTI_PLOT_CHARTS',
-  props<{ taskIds: Array<string>; autoRefresh?: boolean }>()
+  props<{ taskIds: Array<string>; entity: EntityTypeEnum; autoRefresh?: boolean }>()
 );
 
 export const setSelectedExperiments = createAction(

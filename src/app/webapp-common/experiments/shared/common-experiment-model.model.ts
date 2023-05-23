@@ -5,10 +5,11 @@ import {Task} from '../../../business-logic/model/tasks/task';
 import {Artifact} from '../../../business-logic/model/tasks/artifact';
 import {ITask} from '../../../business-logic/model/al-task';
 
-export interface IModelInfo extends  Omit<Model, 'project' | 'task'> {
+export interface IModelInfo extends  Omit<Model, 'project' | 'task' | 'user'> {
   project?: Project;
   task?: ITask;
   taskName?: string;
+  user?: User;
 }
 
 export interface IModelInfoInput {

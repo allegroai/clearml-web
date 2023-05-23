@@ -56,7 +56,8 @@ export const LOG_BATCH_SIZE = 100;
 export enum CustomColumnMode {
   Standard,
   Metrics,
-  HyperParams
+  HyperParams,
+  Metadata
 }
 
 export const NONE_USER_TASK_TYPES = ['-dataset_import', '-annotation', '-annotation_manual'];

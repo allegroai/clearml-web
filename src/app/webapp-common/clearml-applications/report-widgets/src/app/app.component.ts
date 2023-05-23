@@ -1,10 +1,10 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, OnInit, ViewChild} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
-import {Observable} from 'rxjs';
+import {MatDialog} from '@angular/material/dialog';
+import {Observable, withLatestFrom} from 'rxjs';
 import {filter, map, switchMap, take} from 'rxjs/operators';
 import {Environment} from '../environments/base';
-import {getParcoords, getPlot, getSample, getScalar, reportsPlotlyReady} from './app.actions';
+import {getParcoords, getPlot, getSample, getScalar, getSingleValues, reportsPlotlyReady} from './app.actions';
 import {
   ReportsApiMultiplotsResponse,
   selectNoPermissions,
@@ -13,6 +13,8 @@ import {
   selectReportsPlotlyReady,
   selectSampleData,
   selectSignIsNeeded,
+  selectSingleValuesData,
+  selectTaskData,
   State
 } from './app.reducer';
 import {ExtFrame} from '@common/shared/single-graph/plotly-graph-base';
@@ -30,9 +32,10 @@ import {setCurrentDebugImage} from '@common/shared/debug-sample/debug-sample.act
 import {isFileserverUrl} from '~/shared/utils/url';
 import {MetricValueType, SelectedMetric} from '@common/experiments-compare/experiments-compare.constants';
 import {ExtraTask} from '@common/experiments-compare/dumbs/parallel-coordinates-graph/parallel-coordinates-graph.component';
+import {EventsGetTaskSingleValueMetricsResponseValues} from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponseValues';
 
 
-type WidgetTypes = 'plot' | 'scalar' | 'sample' | 'parcoords';
+type WidgetTypes = 'plot' | 'scalar' | 'sample' | 'parcoords' | 'single';
 
 @Component({
   selector: 'sm-app-root',
@@ -59,6 +62,8 @@ export class AppComponent implements OnInit {
   public externalTool: boolean = false;
   public parcoordsData: { experiments: ExtraTask[]; params: string[]; metric: SelectedMetric; valueType: MetricValueType };
   @ViewChild(SingleGraphComponent) 'singleGraph': SingleGraphComponent;
+  public singleValueData: EventsGetTaskSingleValueMetricsResponseValues[];
+  public webappLink: string;
 
   @HostListener('window:resize')
   onResize() {
@@ -77,6 +82,7 @@ export class AppComponent implements OnInit {
     this.noPermissions$ = store.select(selectNoPermissions);
     this.searchParams = new URLSearchParams(window.location.search);
     this.type = this.searchParams.get('type') as WidgetTypes;
+    this.webappLink = this.buildSourceLink(this.searchParams, '*', null);
     this.singleGraphHeight = window.innerHeight;
     this.otherSearchParams = this.getOtherSearchParams();
     this.isDarkTheme = !this.searchParams.get('light');
@@ -91,7 +97,7 @@ export class AppComponent implements OnInit {
   }
 
   private getOtherSearchParams() {
-    const paramsToRemove = ['light', 'type', 'tasks', 'metrics', 'variants', 'iterations', 'company', 'value_type'];
+    const paramsToRemove = ['light', 'type', 'tasks', 'models', 'objects', 'objectType', 'metrics', 'variants', 'iterations', 'company', 'value_type'];
     const otherSearchParams = new URLSearchParams(window.location.search);
     paramsToRemove.forEach(key => {
       otherSearchParams.delete(key);
@@ -123,6 +129,9 @@ export class AppComponent implements OnInit {
         break;
       case 'parcoords':
         this.getParallelCoordinate();
+        break;
+      case 'single':
+        this.getSingleValues();
     }
 
     window.addEventListener('message', (e) => {
@@ -134,6 +143,15 @@ export class AppComponent implements OnInit {
         this.hideMaximize = 'disabled';
       }
     });
+
+    this.store.select(selectTaskData)
+      .pipe(
+        filter(taskData => !!taskData),
+        take(1))
+      .subscribe(({sourceProject, sourceTasks, appId}) => {
+        this.webappLink = appId ? this.buildAppLink(sourceTasks, appId) : this.buildSourceLink(this.searchParams, sourceProject, sourceTasks);
+        this.cdr.detectChanges();
+      });
   }
 
   /// Merging all variants of same metric to same graph. (single experiment)
@@ -169,7 +187,7 @@ export class AppComponent implements OnInit {
           const merged = this.mergeVariants(metricsPlots as ReportsApiMultiplotsResponse);
           this.plotData = Object.values(merged)[0].plotParsed;
         } else {
-          const {merged, } = prepareMultiPlots(metricsPlots);
+          const {merged,} = prepareMultiPlots(metricsPlots);
           const newGraphs = convertMultiPlots(merged);
           this.plotData = Object.values(newGraphs)[0]?.[0];
         }
@@ -264,14 +282,31 @@ export class AppComponent implements OnInit {
       });
   }
 
-  activate = () => {
-    this.type !== 'sample' && loadExternalLibrary(this.store, this.environment.plotlyURL, reportsPlotlyReady);
+  private getSingleValues() {
+    this.store.select(selectSingleValuesData)
+      .pipe(
+        filter(singleValueData => !!singleValueData),
+        take(1)
+      ).subscribe(singleValueData => {
+      this.singleValueData = singleValueData.values;
+      this.cdr.detectChanges();
+    });
+  }
+
+  activate = async () => {
+    this.activated = true;
+    await this.waitForVisibility();
+    this.singleGraphHeight = window.innerHeight;
+    !['sample', 'single'].includes(this.type) && loadExternalLibrary(this.store, this.environment.plotlyURL, reportsPlotlyReady);
+    const models = this.searchParams.has('models') || this.searchParams.get('objectType') === 'model';
+    const objects = this.searchParams.getAll('objects');
     const queryParams = {
-      tasks: this.searchParams.getAll('tasks'),
+      tasks: objects.length > 0 ? objects : this.searchParams.getAll('tasks'),
       metrics: this.searchParams.getAll('metrics'),
       variants: this.searchParams.getAll('variants'),
       iterations: this.searchParams.getAll('iterations').map(iteration => parseInt(iteration, 10)),
       company: this.searchParams.get('company') || '',
+      models
     };
 
     switch (this.type) {
@@ -286,8 +321,11 @@ export class AppComponent implements OnInit {
         break;
       case 'parcoords':
         this.store.dispatch(getParcoords({...queryParams, otherSearchParams: this.otherSearchParams}));
+        break;
+      case 'single':
+        this.store.dispatch(getSingleValues({...queryParams, otherSearchParams: this.otherSearchParams}));
+        break;
     }
-    this.activated = true;
   };
 
 
@@ -339,4 +377,80 @@ export class AppComponent implements OnInit {
     const lastMetric = get(experimentWithCurrentMetric.last_metrics, metric) as ExtraTask['last_metrics'];
     return `${lastMetric.metric}/${lastMetric.variant}`;
   }
+
+  private buildSourceLink(searchParams: URLSearchParams, project: string, tasks: string[]): string {
+    const isModels = searchParams.has('models') || this.searchParams.get('objectType') === 'model';
+    const objects = searchParams.getAll('objects');
+    let entityIds = objects.length > 0? objects : searchParams.getAll(isModels ? 'models' : 'tasks');
+    if (entityIds.length === 0 && tasks?.length > 0) {
+      entityIds = tasks;
+    }
+    const isCompare = entityIds.length > 1;
+    let url = `${window.location.origin.replace('4201', '4200')}/projects/${project ?? '*'}/`;
+    if (isCompare) {
+      url += `${isModels ? 'compare-models;ids=' : 'compare-experiments;ids='}${entityIds.join(',')}/${this.getComparePath(this.type)}`;
+    } else {
+      url += `${isModels ? 'models/' : 'experiments/'}${entityIds}/${this.getOutputPath(isModels, this.type)}`;
+    }
+    return url;
+  }
+
+  private getOutputPath(isModels: boolean, type: WidgetTypes) {
+    if (isModels) {
+      switch (type) {
+        case 'single':
+        case 'scalar':
+          return 'scalars';
+        case 'plot':
+          return 'plots';
+      }
+    } else {
+      switch (type) {
+        case 'single':
+        case 'scalar':
+          return 'info-output/metrics/scalar';
+        case 'plot':
+          return 'info-output/metrics/plots';
+        case 'sample':
+          return 'info-output/debugImages';
+      }
+    }
+  }
+
+  private getComparePath(type: WidgetTypes) {
+    switch (type) {
+      case 'single':
+      case 'scalar':
+        return 'scalars/graph';
+      case 'plot':
+        return 'metrics-plots';
+      case 'parcoords':
+        return 'hyper-params/graph';
+      case 'sample':
+        return 'debug-images';
+    }
+  }
+
+  private buildAppLink(sourceTasks: string[], appId) {
+    const isAutoscaler = appId.includes('autoscaler');
+    return `${window.location.origin.replace('4201', '4200')}/${isAutoscaler ? 'workers-and-queues/autoscalers' : 'applications'}/${appId}/info;experimentId=${sourceTasks[0]}?instancesFilter=All`;
+  }
+
+  private waitForVisibility(): Promise<boolean> {
+    return new Promise(resolve => {
+      if (window.innerHeight > 0) {
+        return resolve(true);
+      }
+
+      const observer = new IntersectionObserver(entities => {
+        if (entities[0].intersectionRatio > 0) {
+          resolve(true);
+          observer.disconnect();
+        }
+      });
+
+      observer.observe(document.body);
+    });
+  }
 }
+

@@ -1,26 +1,32 @@
 <div class="d-flex justify-content-between">
-  <div *ngIf="showAllProjectsToggle" class="center-buttons-container">
+  <div class="d-flex align-items-center">
+    <sm-search
+      #search
+      class="light-theme"
+      placeholder="Start typing model name or ID to add to your comparison"
+      [value]="searchValue"
+      (valueChanged)="onSearchValueChanged($event)"
+      (focusout)="onSearchFocusOut()">
+    </sm-search>
+  </div>
+  <div class="center-buttons-container">
     <sm-button-toggle
+      *ngIf="showAllProjectsToggle"
       [value]="isAllProjects"
       [options]="allProjectsdModeOptions"
-      (valueChanged)="onAllProjectsChanged($event)"
-    >
+      (valueChanged)="onAllProjectsChanged($event)">
     </sm-button-toggle>
   </div>
-
-  <div class="d-flex align-items-center">
-    <div
-      *ngIf="searchActive"
-      class="search-container open">
-      <sm-search
-        #search
-        class="light-theme"
-        placeholder="Search for models"
-        [value]="searchValue"
-        (valueChanged)="onSearchValueChanged($event)"
-        (focusout)="onSearchFocusOut()">
-      </sm-search>
-    </div>
+  <div class="d-flex-center">
+    <mat-slide-toggle
+      *ngIf="!hideArchiveToggle"
+      class="me-2"
+      [checked]="isShowArchived"
+      (change)="isArchivedChanged.emit($event.checked)"
+    >Include Archived</mat-slide-toggle>
+    <sm-clear-filters-button
+      [tableFilters]="tableFilters"
+      (clearTableFilters)="clearFilters.emit()"
+    ></sm-clear-filters-button>
   </div>
-
 </div>

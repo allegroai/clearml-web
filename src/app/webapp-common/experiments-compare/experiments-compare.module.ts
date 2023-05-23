@@ -48,7 +48,7 @@ import {
 } from './containers/experiment-compare-hyper-params-graph/experiment-compare-hyper-params-graph.component';
 import {ExperimentsCompareScalarsGraphEffects} from './effects/experiments-compare-scalars-graph.effects';
 import {ScrollingModule} from '@angular/cdk/scrolling';
-import {MatLegacyRadioModule as MatRadioModule} from '@angular/material/legacy-radio';
+import {MatRadioModule} from '@angular/material/radio';
 import {
   ExperimentCompareParamsComponent
 } from './containers/experiment-compare-params/experiment-compare-params.component';
@@ -57,6 +57,7 @@ import {FormsModule} from '@angular/forms';
 import {UiComponentsModule} from '../shared/ui-components/ui-components.module';
 import {SMMaterialModule} from '../shared/material/material.module';
 import {SharedPipesModule} from '@common/shared/pipes/shared-pipes.module';
+import {ModelCompareDetailsComponent} from '@common/experiments-compare/containers/model-compare-details/model-compare-details.component';
 
 export const compareSyncedKeys = [
   'charts.settingsList',
@@ -67,6 +68,7 @@ export const compareSyncedKeys = [
   declarations: [
     ExperimentsCompareComponent,
     ExperimentCompareDetailsComponent,
+    ModelCompareDetailsComponent,
     ExperimentCompareParamsComponent,
     ExperimentCompareMetricValuesComponent,
     ExperimentCompareScalarChartsComponent,

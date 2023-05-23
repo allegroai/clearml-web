@@ -47,7 +47,6 @@
               "node_modules/ngx-markdown-editor/assets/marked.min.js"
             ],
             "allowedCommonJsDependencies": [
-              "lodash/fp",
               "ansi-to-html",
               "has-ansi",
               "fabric/dist/fabric.min",
@@ -66,7 +65,10 @@
               "britecharts/dist/umd/line.min",
               "britecharts/dist/umd/tooltip.min",
               "britecharts/dist/umd/miniTooltip.min",
-              "britecharts/dist/umd/scatterPlot.min"
+              "britecharts/dist/umd/scatterPlot.min",
+              "localforage",
+              "dom-to-image",
+              "ace-builds"
             ],
             "vendorChunk": true,
             "extractLicenses": false,
@@ -128,7 +130,10 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "trains-webapp:build"
+            "browserTarget": "trains-webapp:build",
+            "proxyConfig": "proxy.config.js",
+            "liveReload": false,
+            "port": 4300
           },
           "configurations": {
             "appdev": {
@@ -292,7 +297,6 @@
               "src/app/webapp-common/clearml-applications/report-widgets/src/app/webapp-common/assets",
               "src/app/webapp-common/clearml-applications/report-widgets/src/app/webapp-common/assets/fonts/trains.ttf"
             ],
-
             "styles": [
               "src/app/webapp-common/clearml-applications/report-widgets/src/styles.scss",
               {
@@ -311,6 +315,12 @@
     "@schematics/angular:component": {
       "prefix": "sm",
       "style": "scss"
+    },
+    "@angular-eslint/schematics:application": {
+      "setParserOptionsProject": true
+    },
+    "@angular-eslint/schematics:library": {
+      "setParserOptionsProject": true
     }
   }
 }

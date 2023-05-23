@@ -22,7 +22,7 @@ import {MetricValueType, SelectedMetric} from '@common/experiments-compare/exper
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {trackById} from '@common/shared/utils/forms-track-by';
 import {GraphViewerComponent, GraphViewerData} from '@common/shared/single-graph/graph-viewer/graph-viewer.component';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {MatDialog} from '@angular/material/dialog';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 declare let Plotly;

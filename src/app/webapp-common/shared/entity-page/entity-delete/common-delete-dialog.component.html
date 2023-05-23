@@ -21,12 +21,12 @@
       <br/>
     </ng-template>
 
-    <div class="d-flex justify-content-center">
+    <div class="delete-artifacts-checkbox" [class.hidden-important]="hideDeleteArtifacts">
       <mat-checkbox
         #checkboxInput="ngModel"
         [(ngModel)]="deleteArtifacts"
         name="isApprove"
-        [class.mr-3]="resetMode"
+        [class.me-3]="resetMode"
       >Remove all related artifacts and debug samples from ClearML file server
       </mat-checkbox>
     </div>
@@ -55,7 +55,7 @@
       </div>
       <ng-template #successMessage>
         <div class="progress-message success">
-          <i class="al-icon al-ico-success sm-md mr-2"></i>The artifacts were deleted
+          <i class="al-icon al-ico-success sm-md me-2"></i>The artifacts were deleted
         </div>
       </ng-template>
     </ng-container>
@@ -80,7 +80,7 @@
       </div>
       <div class="more-info mono" [ngClass]="{'info-open': isOpen}">
         <sm-copy-clipboard label="" [clipboardText]="failedFiles.join('\n')"
-                           class="copy pl-2 light"
+                           class="copy ps-2 light"
         ></sm-copy-clipboard>
         <a></a>
         <div *ngFor="let file of failedFiles | slice:0:1000">

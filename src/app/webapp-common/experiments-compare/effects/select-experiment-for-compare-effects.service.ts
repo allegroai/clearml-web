@@ -28,6 +28,9 @@ import {addMultipleSortColumns} from '../../shared/utils/shared-utils';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {LIMITED_VIEW_LIMIT} from '@common/experiments-compare/experiments-compare.constants';
 import {ActivatedRoute} from '@angular/router';
+import {ApiModelsService} from '~/business-logic/api-services/models.service';
+import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
+import {encodeHyperParameter} from '@common/experiments/shared/common-experiments.utils';
 
 @Injectable()
 export class SelectCompareHeaderEffects {
@@ -35,6 +38,7 @@ export class SelectCompareHeaderEffects {
   constructor(
     private actions: Actions,
     public experimentsApi: ApiTasksService,
+    public modelsApi: ApiModelsService,
     private store: Store,
     private refresh: RefreshService,
     private route: ActivatedRoute
@@ -67,14 +71,18 @@ export class SelectCompareHeaderEffects {
     }),
     switchMap(([action, , experimentsIds, experimentsUpdateTime, isLimitedView]) =>
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      this.experimentsApi.tasksGetAllEx({
+      (action.entityType === EntityTypeEnum.experiment ? this.experimentsApi.tasksGetAllEx({
         id: isLimitedView ? experimentsIds.slice(0, LIMITED_VIEW_LIMIT) : experimentsIds,
         // eslint-disable-next-line @typescript-eslint/naming-convention
         only_fields: ['last_change']
-      }).pipe(
+      }) : this.modelsApi.modelsGetAllEx({
+        id: isLimitedView ? experimentsIds.slice(0, LIMITED_VIEW_LIMIT) : experimentsIds,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        only_fields: ['last_update']
+      })).pipe(
         mergeMap((res) => {
           const updatedExperimentsUpdateTime: { [key: string]: Date } = {};
-          res.tasks.forEach(task => {
+          res[action.entityType === EntityTypeEnum.experiment ? 'tasks' : 'models'].forEach(task => {
             updatedExperimentsUpdateTime[task.id] = task.last_change;
           });
           const experimentsWhereUpdated = experimentsIds.some(id =>
@@ -115,7 +123,7 @@ export class SelectCompareHeaderEffects {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         only_fields: [...new Set([...MINIMUM_ONLY_FIELDS,
           ...flatten(cols.filter(col => col.id !== 'selected' && !col.hidden).map(col => col.getter || col.id)),
-          ...(metricCols ? flatten(metricCols.map(col => col.getter || col.id)) : [])])] as string[]
+          ...(metricCols ? flatten(metricCols.map(col => (col?.isParam && typeof col.getter === 'string') ? encodeHyperParameter(col.getter) : col.getter || col.id)) : [])])] as string[]
       }).pipe(
         mergeMap((res) => [setSearchExperimentsForCompareResults({payload: [...res?.tasks]}), deactivateLoader(action.type)]),
       )

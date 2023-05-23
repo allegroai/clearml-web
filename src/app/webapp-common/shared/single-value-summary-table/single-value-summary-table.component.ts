@@ -1,15 +1,24 @@
-import {Component, Input, OnInit} from '@angular/core';
-import { EventsGetTaskSingleValueMetricsResponseValues } from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponseValues';
-import {download} from '../../utils/download';
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {EventsGetTaskSingleValueMetricsResponseValues} from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponseValues';
+import {download} from '../utils/download';
+import {NgForOf, NgIf} from '@angular/common';
 
 @Component({
   selector: 'sm-single-value-summary-table',
   templateUrl: './single-value-summary-table.component.html',
-  styleUrls: ['./single-value-summary-table.component.scss']
+  styleUrls: ['./single-value-summary-table.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    NgForOf,
+    NgIf
+  ],
+  standalone: true
 })
 export class SingleValueSummaryTableComponent implements OnInit {
   @Input() data: Array<EventsGetTaskSingleValueMetricsResponseValues>;
   @Input() experimentName;
+  @Input() darkTheme: boolean;
+  @Output() createEmbedCode = new EventEmitter<any>();
   public hover: boolean;
   constructor() { }
 
@@ -26,7 +35,7 @@ export class SingleValueSummaryTableComponent implements OnInit {
     }
   }
 
-  setHover(hover: boolean) {
-    this.hover = hover;
+  createEmbedCodeClicked($event: MouseEvent) {
+    this.createEmbedCode.emit({x: $event.clientX, y: $event.clientY});
   }
 }

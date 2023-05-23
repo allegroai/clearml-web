@@ -13,12 +13,13 @@
            [existingNames]="reportsNames"
            required minlength="3">
   </mat-form-field>
-  <mat-form-field class="w-100" appearance="outline" (click)="filterText && clear()">
+  <mat-form-field class="w-100" appearance="outline"
+                  (mousedown)="!isFocused(projectInputRef) && projectInput.value && projectInput.reset(); projectInputRef.blur(); projectInputRef.focus()">
     <mat-label>Project</mat-label>
     <input matInput
            type="text"
            [matAutocomplete]="auto"
-           [(ngModel)]="report.project"
+           [ngModel]="report.project"
            name="projectName"
            placeholder="Search for project path"
            #projectInputRef
@@ -29,10 +30,12 @@
            smUniqueNameValidator
            [existingNames]="readOnlyProjectsNames"
     >
-    <i matSuffix [class]="'fa mr2 ' + (filterText ? 'fa-times pointer' :  'fa-search')" (click)="filterText && clear(); projectInputRef.focus();"
+    <i matSuffix class="al-icon sm-md search-icon me-2" [ngClass]="projectInput.value? 'al-ico-dialog-x pointer':'al-ico-search'"
+       (mousedown)="!isFocused(projectInputRef) && projectInput.value && clear(); projectInput.reset(); projectInputRef.focus()"
        smClickStopPropagation></i>
     <mat-error *ngIf="projectInput?.errors?.existName">Please provide a project</mat-error>
-    <mat-error *ngIf="projectInput?.errors?.uniqueName && !readOnlyProjectsNames.includes(report.project?.label)">Please provide a different name as this project name is taken as an Example project</mat-error>
+    <mat-error *ngIf="projectInput?.errors?.uniqueName && !readOnlyProjectsNames.includes(report.project?.label)">Please provide a different name as this project name is taken as an Example project
+    </mat-error>
     <mat-autocomplete
       #auto="matAutocomplete"
       class="light-theme"
@@ -41,19 +44,27 @@
       (closed)="setIsAutoCompleteOpen(false)"
       autoActiveFirstOption
     >
+      <!--      Currently we don't have create new project in create report-->
       <!--      <mat-option-->
       <!--        class="item"-->
-      <!--        *ngIf="filterText && isNewName"-->
-      <!--        [value]="filterText"-->
-      <!--      >"{{filterText}}" <span class="new">(Create New)</span></mat-option>-->
+      <!--        *ngIf="projects !== null && projectInput.value && !(projectInput.value | stringIncludedInArray:projectsNames)"-->
+      <!--        [value]="projectInput.value"-->
+      <!--        (onSelectionChange)="createNewSelected($event)"-->
+      <!--      >"{{projectInput.value}}" <span class="new">(Create New)</span></mat-option>-->
       <mat-option
-        *ngFor="let project of filteredProjects$ | async; trackBy: trackByValue"
+        *ngFor="let project of projectsOptions; trackBy: trackByValue"
         [value]="project"
         [smTooltip]="project.label"
         smShowTooltipIfEllipsis
+        (onSelectionChange)="projectSelected($event)"
       >
         <div [innerHTML]="project.label | highlightSearchText:projectInput.value"></div>
       </mat-option>
+      <div *ngIf="projects === null" style="line-height: 100px; pointer-events: none;">
+        <mat-spinner class="m-auto" [diameter]="80" [strokeWidth]="8"></mat-spinner>
+      </div>
+      <div *ngIf="projects && !noMoreOptions" (smScrollEnd)="!loading && loadMore(projectInput.value)" class="text-center">Loading more...</div>
+      <mat-option disabled style="height: 0; min-height: 0;"></mat-option> <!-- Empty mat-option, so the autocomplete menu will always pop -->
     </mat-autocomplete>
   </mat-form-field>
 

@@ -1,4 +1,4 @@
-import {Component, ElementRef, Inject, OnDestroy, ViewChild} from '@angular/core';
+import {Component, Inject, OnDestroy} from '@angular/core';
 import {Observable, of} from 'rxjs';
 import {Store} from '@ngrx/store';
 import {selectCompanyTags, selectProjectTags} from '@common/core/reducers/projects.reducer';
@@ -6,9 +6,9 @@ import {map, switchMap} from 'rxjs/operators';
 import {TagColorService} from '../../../services/tag-color.service';
 import {Tag} from '../tag-list/tag-list.component';
 import {
-  MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA,
-  MatLegacyDialogRef as MatDialogRef
-} from '@angular/material/legacy-dialog';
+  MAT_DIALOG_DATA,
+  MatDialogRef
+} from '@angular/material/dialog';
 import {deactivateEdit} from '@common/experiments/actions/common-experiments-info.actions';
 import {cancelModelEdit} from '@common/models/actions/models-info.actions';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
@@ -25,8 +25,6 @@ export class TagColorMenuComponent implements OnDestroy {
   toggle: boolean;
   presetColors = TagColorService.predefined.map(color => color.background) as string[];
   currTag: string;
-
-  @ViewChild('nameInput') nameInput: ElementRef<HTMLInputElement>;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: {tags?: string[]},

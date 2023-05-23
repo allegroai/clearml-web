@@ -14,13 +14,13 @@
         </button>
         <mat-menu #subMenu="matMenu" class="table-card-filter-menu light-theme" (close)="closeMenu(col)">
           <form class="filter-form">
-            <mat-form-field appearance="fill" *ngIf="col?.searchableFilter" smClickStopPropagation class="tags-menu-input w-100">
+            <mat-form-field appearance="fill" *ngIf="col?.searchableFilter" smClickStopPropagation class="tags-menu-input w-100 no-bottom">
               <input matInput (input)="setSearchTerm($event, option.key)" name="filter" [(ngModel)]="searchTerms[option.key]" autocomplete="off">
-              <i matSuffix [class]="'fa mr2 ' + (searchTerms[option.key]? 'fa-times pointer':'fa-search')" (click)="searchTerms[option.key] && clearSearch(option.key)"></i>
+              <i matSuffix class="fa me-3" [class]="searchTerms[option.key] ? 'fa-times pointer' : 'fa-search'" (click)="searchTerms[option.key] && clearSearch(option.key)"></i>
             </mat-form-field>
           </form>
           <div *ngIf="col?.andFilter" class="filter-type" smClickStopPropagation>
-          <span class="link mr-3" [class.selected]="filterMatch[option.key] !== 'AND'"
+          <span class="link me-3" [class.selected]="filterMatch[option.key] !== 'AND'"
                 (click)="toggleCombination(option.key)">Any</span>
             <span class="link" [class.selected]="filterMatch[option.key] === 'AND'"
                   (click)="toggleCombination(option.key)">All</span>
@@ -45,10 +45,11 @@
               (itemClicked)="onSubFilterChanged({id :'system_tags'}, $event)"
             ></sm-menu-item>
           </div>
+          <div *ngIf="col.columnExplain && optionsFiltered.length" class="column-explanation">{{col.columnExplain}}</div>
         </mat-menu>
       </ng-template>
     </ng-container>
-    <hr class="m-0">
+    <hr>
     <div mat-menu-item class="clear-all mat-menu-item" (click)="isFiltering && clearAll.emit()" [disabled]="!isFiltering">Clear all</div>
   </mat-menu>
 </div>

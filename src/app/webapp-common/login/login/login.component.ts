@@ -10,10 +10,12 @@ import {LoginMode, loginModes} from '../../shared/services/login.service';
 import {selectInviteId} from '../login-reducer';
 import {ConfigurationService} from '../../shared/services/configuration.service';
 import {ConfirmDialogComponent} from '../../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {MatDialog} from '@angular/material/dialog';
 import {LoginService} from '~/shared/services/login.service';
 import {UserPreferences} from '../../user-preferences';
 import {Environment} from '../../../../environments/base';
+import {setBreadcrumbs} from "@common/core/actions/router.actions";
+import {CrumbTypeEnum} from "@common/layout/breadcrumbs/breadcrumbs.component";
 
 
 @Component({
@@ -74,6 +76,11 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.store.dispatch(setBreadcrumbs({
+      breadcrumbs: [[{
+        name: 'Login',
+        type: CrumbTypeEnum.Feature
+      }]]}));
     this.store.select(selectCurrentUser)
       .pipe(
         filter(user => !!user),

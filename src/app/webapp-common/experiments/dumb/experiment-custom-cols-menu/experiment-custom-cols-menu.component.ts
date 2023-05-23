@@ -40,7 +40,7 @@ export class ExperimentCustomColsMenuComponent {
   @Output() clearSelection = new EventEmitter();
 
   customColumnMode = CustomColumnMode.Standard as CustomColumnMode;
-  public CustomColumnMode = CustomColumnMode;
+  public customColumnModeEnum = CustomColumnMode;
 
   setMode(mode: CustomColumnMode) {
     this.customColumnMode = mode;

@@ -1,10 +1,10 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {selectRouterParams} from '@common/core/reducers/router-reducer';
+import {selectRouterConfig, selectRouterParams} from '@common/core/reducers/router-reducer';
 import {Store} from '@ngrx/store';
 import {ModelInfoState} from '../../reducers/model-info.reducer';
 import * as infoActions from '../../actions/models-info.actions';
-import {selectSelectedModel, selectSelectedTableModel} from '../../reducers';
+import {selectSelectedModel, selectSelectedTableModel, selectSplitSize} from '../../reducers';
 import {SelectedModel} from '../../shared/models.model';
 import {selectS3BucketCredentials} from '@common/core/reducers/common-auth-reducer';
 import {Observable, Subscription} from 'rxjs';
@@ -14,6 +14,8 @@ import {selectBackdropActive} from '@common/core/reducers/view.reducer';
 import {setTableMode} from '@common/models/actions/models-view.actions';
 import {isReadOnly} from '@common/shared/utils/is-read-only';
 import {MESSAGES_SEVERITY} from '@common/constants';
+import {toggleSettings} from '@common/experiments/actions/common-experiment-output.actions';
+import {Link} from '@common/shared/components/router-tab-nav-bar/router-tab-nav-bar.component';
 
 
 @Component({
@@ -23,9 +25,8 @@ import {MESSAGES_SEVERITY} from '@common/constants';
 })
 export class ModelInfoComponent implements OnInit, OnDestroy {
 
-  private paramsSubscription: Subscription;
   public selectedModel: SelectedModel;
-  private selectedModelSubscription: Subscription;
+  private sub = new Subscription();
   private s3BucketCredentials: Observable<any>;
   @ViewChild('modelInfoHeader', { static: true }) modelInfoHeader;
   public selectedModel$: Observable<SelectedModel | null>;
@@ -33,6 +34,17 @@ export class ModelInfoComponent implements OnInit, OnDestroy {
   public backdropActive$: Observable<any>;
   private projectId: string;
   public selectedTableModel$: Observable<SelectedModel>;
+  public scalars$: Observable<boolean>;
+  public splitSize$: Observable<number>;
+  links = [
+    {name: 'general', url: ['general']},
+    {name: 'network', url: ['network']},
+    {name: 'labels', url: ['labels']},
+    {name: 'metadata', url: ['metadata']},
+    {name: 'lineage', url: ['experiments']},
+    {name: 'scalars', url: ['scalars']},
+    {name: 'plots', url: ['plots']},
+  ] as Link[];
 
   constructor(
     private router: Router,
@@ -42,15 +54,25 @@ export class ModelInfoComponent implements OnInit, OnDestroy {
     this.s3BucketCredentials = store.select(selectS3BucketCredentials);
     this.backdropActive$ = this.store.select(selectBackdropActive);
     this.selectedTableModel$ = this.store.select(selectSelectedTableModel);
+    this.splitSize$ = this.store.select(selectSplitSize);
   }
 
   ngOnInit() {
-    this.selectedModelSubscription = this.store.select(selectSelectedModel)
+    this.scalars$ = this.store.select(selectRouterConfig)
+      .pipe(
+        filter(c => !!c),
+        distinctUntilChanged(),
+        map((config: string[]) => config.includes('scalars'))
+      );
+
+    this.sub.add(this.store.select(selectSelectedModel)
       .subscribe(model => {
         this.selectedModel = model;
         this.isExample     = isReadOnly(model);
-      });
-    this.paramsSubscription = this.store.select(selectRouterParams)
+      })
+    );
+
+    this.sub.add(this.store.select(selectRouterParams)
       .pipe(
         tap((params) => {
           this.projectId = params?.projectId;
@@ -60,13 +82,15 @@ export class ModelInfoComponent implements OnInit, OnDestroy {
         filter(modelId => !!modelId),
         distinctUntilChanged()
       )
-      .subscribe(id => this.store.dispatch(infoActions.getModelInfo({id})));
-    this.selectedModel$            = this.store.select(selectSelectedModel).pipe(filter(model => !!model));
+      .subscribe(id => this.store.dispatch(infoActions.getModelInfo({id})))
+    );
+
+    this.selectedModel$ = this.store.select(selectSelectedModel)
+      .pipe(filter(model => !!model));
   }
 
   ngOnDestroy(): void {
-    this.paramsSubscription.unsubscribe();
-    this.selectedModelSubscription.unsubscribe();
+    this.sub.unsubscribe();
     this.store.dispatch(infoActions.setModelInfo({model: null}));
   }
 
@@ -83,6 +107,10 @@ export class ModelInfoComponent implements OnInit, OnDestroy {
       return null;
     }
     return ready ? 'published' : 'created';
+  }
+
+  toggleSettingsBar() {
+    this.store.dispatch(toggleSettings());
   }
 
   closePanel() {

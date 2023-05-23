@@ -9,8 +9,8 @@ import {Project} from '~/business-logic/model/projects/project';
 })
 export class ProjectCardMenuComponent {
   @Output() deleteProjectClicked = new EventEmitter<Project>();
-  @Output() moveToClicked = new EventEmitter<string>();
-  @Output() newProjectClicked = new EventEmitter<string>();
+  @Output() moveToClicked = new EventEmitter<Project>();
+  @Output() newProjectClicked = new EventEmitter<Project>();
   @Output() projectNameInlineActivated = new EventEmitter();
   @Input() project;
 }

@@ -11,20 +11,22 @@ import {CommonLayoutModule} from '../../layout/layout.module';
 import {FeatureModelsModule} from '~/features/models/feature-models.module';
 import {SharedModule} from '~/shared/shared.module';
 import {SharedPipesModule} from '@common/shared/pipes/shared-pipes.module';
+import {HyperParamMetricColumnComponent} from '@common/experiments/shared/components/hyper-param-metric-column/hyper-param-metric-column.component';
 
 
 const DECLERATIONS = [ModelTypeIconLabelComponent, ModelStatusIconLabelComponent, SelectModelHeaderComponent, ModelsTableComponent, ModelTagsComponent];
 
 @NgModule({
-  imports: [
-    LayoutModule,
-    SMSharedModule,
-    CommonModule,
-    CommonLayoutModule,
-    FeatureModelsModule,
-    SharedModule,
-    SharedPipesModule,
-  ],
+    imports: [
+        LayoutModule,
+        SMSharedModule,
+        CommonModule,
+        CommonLayoutModule,
+        FeatureModelsModule,
+        SharedModule,
+        SharedPipesModule,
+        HyperParamMetricColumnComponent,
+    ],
   declarations: DECLERATIONS,
   exports     : DECLERATIONS
 })

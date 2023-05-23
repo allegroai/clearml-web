@@ -60,6 +60,7 @@ const syncedKeys = [
   'projects.selectedProject',
   'rootProjects.showHidden',
   'rootProjects.hideExamples',
+  'rootProjects.defaultNestedModeForFeature',
   'views.availableUpdates',
   'views.showSurvey',
   'views.neverShowPopupAgain'
@@ -94,7 +95,7 @@ const userPrefMetaFactory = (userPreferences: UserPreferences): MetaReducer<any>
   (reducer: ActionReducer<any>) =>
     createUserPrefReducer('users', ['activeWorkspace', 'showOnlyUserWork'], [USERS_PREFIX], userPreferences, reducer),
   (reducer: ActionReducer<any>) =>
-    createUserPrefReducer('rootProjects', ['tagsColors', 'graphVariant', 'showHidden', 'hideExamples', 'aa'] as (keyof RootProjects)[], [ROOT_PROJECTS_PREFIX], userPreferences, reducer),
+    createUserPrefReducer('rootProjects', ['tagsColors', 'graphVariant', 'showHidden', 'hideExamples', 'defaultNestedModeForFeature'], [ROOT_PROJECTS_PREFIX], userPreferences, reducer),
   (reducer: ActionReducer<any>) =>
     createUserPrefReducer('views', ['autoRefresh', 'neverShowPopupAgain', 'redactedArguments', 'hideRedactedArguments'], [VIEW_PREFIX], userPreferences, reducer),
   localStorageReducer,

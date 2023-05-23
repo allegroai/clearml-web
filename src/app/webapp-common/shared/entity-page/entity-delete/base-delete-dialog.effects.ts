@@ -33,7 +33,6 @@ import {ModelsDeleteManyResponse} from '~/business-logic/model/models/modelsDele
 import {TasksDeleteManyResponse} from '~/business-logic/model/tasks/tasksDeleteManyResponse';
 import {ConfigurationService} from '../../services/configuration.service';
 import {isFileserverUrl} from '~/shared/utils/url';
-import {deletedProjectFromRoot} from '@common/core/actions/projects.actions';
 import {getChildrenExperiments} from '@common/experiments/effects/common-experiments-menu.effects';
 import {TasksResetManyResponseSucceeded} from '~/business-logic/model/tasks/tasksResetManyResponseSucceeded';
 import {updateManyExperiment} from '@common/experiments/actions/common-experiments-view.actions';
@@ -154,7 +153,6 @@ export class DeleteDialogEffectsBase {
               // deleteGoogleCloudeSource(urlsPerSource['gc']),
               // deleteAzure(urlsPerSource['azure']),
               // addFailedDeletedFiles({filePaths: urlsPerSource['misc']}), // Currently deleting only in BE - no need to count files
-              (action.entityType === EntityTypeEnum.project) ? deletedProjectFromRoot({project: entities[0]}) : new EmptyAction(),
               action.resetMode ? updateManyExperiment({changeList: succeeded}) : new EmptyAction()
             ]
           ),

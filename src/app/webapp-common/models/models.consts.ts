@@ -1,5 +1,6 @@
 import {ColHeaderTypeEnum, ISmCol} from '../shared/ui-components/data/table/table.consts';
 import {MODELS_TABLE_COL_FIELDS} from './shared/models.const';
+import {rootProjectsPageSize} from '@common/constants';
 
 export type ModelWizardMethodsEnum = 'create' | 'edit' | 'clone' | 'extend';
 export const WIZARD_METHODS = {
@@ -52,7 +53,7 @@ export const MODELS_TABLE_COLS: ISmCol[] = [
     id            : MODELS_TABLE_COL_FIELDS.ID,
     headerType    : ColHeaderTypeEnum.title,
     header        : 'ID',
-    style         : {width: '200px'},
+    style         : {width: '100px'},
   },
   {
     id          : MODELS_TABLE_COL_FIELDS.FRAMEWORK,
@@ -68,7 +69,7 @@ export const MODELS_TABLE_COLS: ISmCol[] = [
     headerType  : ColHeaderTypeEnum.sortFilter,
     sortable    : true,
     header      : 'NAME',
-    style       : {width: '160px'},
+    style       : {width: '300px'},
   },
   {
     id          : MODELS_TABLE_COL_FIELDS.TAGS,
@@ -98,6 +99,8 @@ export const MODELS_TABLE_COLS: ISmCol[] = [
     filterable  :  true,
     searchableFilter: true,
     sortable    : false,
+    asyncFilter : true,
+    paginatedFilterPageSize : rootProjectsPageSize,
     header      : 'PROJECT',
     style       : {width: '135px'}
   },

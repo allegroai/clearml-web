@@ -1,7 +1,7 @@
 import {Component, OnDestroy} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {selectBackdropActive} from '@common/core/reducers/view.reducer';
-import {combineLatest, Observable, Subscription} from 'rxjs';
+import {combineLatest, Observable, pairwise, Subscription} from 'rxjs';
 import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {selectCurrentArtifactExperimentId, selectExperimentModelInfoData} from '../../reducers';
 import {
@@ -11,7 +11,7 @@ import {
 } from '~/features/experiments/reducers';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 import {selectRouterConfig, selectRouterParams} from '@common/core/reducers/router-reducer';
-import {debounceTime, distinctUntilChanged, filter, map} from 'rxjs/operators';
+import {debounceTime, distinctUntilChanged, filter, map, startWith} from 'rxjs/operators';
 import {ActivatedRoute, Router} from '@angular/router';
 import {IExperimentModelInfo} from '../../shared/common-experiment-model.model';
 import {
@@ -64,10 +64,14 @@ export class ExperimentInfoArtifactsComponent implements OnDestroy {
         .pipe(
           debounceTime(0),
           filter(([project, selectedExperiment]) => !!project?.id && !!selectedExperiment),
-          map(([, selectedExperiment]) => selectedExperiment.id)
+          map(([, selectedExperiment]) => selectedExperiment.id),
+          startWith(null), // emitting first empty value to fill-in the buffer
+          pairwise()
         )
-        .subscribe(experimentId => {
-          this.store.dispatch(setExperimentArtifacts({model: null, experimentId: null}));
+        .subscribe(([previousId, experimentId]) => {
+          if (previousId !== experimentId) {
+            this.store.dispatch(setExperimentArtifacts({model: null, experimentId: null}));
+          }
           this.store.dispatch(getExperimentArtifacts({experimentId}));
         })
     );

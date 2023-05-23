@@ -12,7 +12,7 @@ import {
 import {DomSanitizer} from '@angular/platform-browser';
 import {MarkdownEditorComponent as MDComponent, MdEditorOption, UploadResult} from 'ngx-markdown-editor';
 import {Ace} from 'ace-builds';
-import {MatLegacyDialog as MatDialog} from '@angular/material/legacy-dialog';
+import {MatDialog} from '@angular/material/dialog';
 import {
   MarkdownCheatSheetDialogComponent
 } from '@common/shared/components/markdown-editor/markdown-cheat-sheet-dialog/markdown-cheat-sheet-dialog.component';

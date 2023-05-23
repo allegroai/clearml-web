@@ -9,9 +9,9 @@ import {experimentSectionsEnum} from '~/features/experiments/shared/experiments.
 import {selectIsExperimentEditable, selectSelectedExperiment} from '~/features/experiments/reducers';
 import {activateEdit, cancelExperimentEdit, deactivateEdit, getExperimentConfigurationObj, saveExperimentConfigObj, setExperimentErrors, setExperimentFormErrors} from '../../actions/common-experiments-info.actions';
 import {ConfigurationItem} from '~/business-logic/model/tasks/configurationItem';
-import {EditJsonComponent} from '@common/shared/ui-components/overlay/edit-json/edit-json.component';
+import {EditJsonComponent, EditJsonData} from '@common/shared/ui-components/overlay/edit-json/edit-json.component';
 import {take} from 'rxjs/operators';
-import {MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {EditableSectionComponent} from '@common/shared/ui-components/panel/editable-section/editable-section.component';
 
@@ -72,10 +72,6 @@ export class ExperimentInfoTaskModelComponent implements OnInit, OnDestroy {
     this.selectedConfigObjSubscription.unsubscribe();
   }
 
-  onFormValuesChanged(event: { field: string; value: any }) {
-    // this.store.dispatch(new infoActions.ExperimentDataUpdated({id: this.selectedExperiment.id, changes: {[event.field]: event.value}}));
-  }
-
   onFormErrorsChanged(event: { field: string; errors: any }) {
     this.store.dispatch(setExperimentErrors({[event.field]: event.errors}));
   }
@@ -96,7 +92,7 @@ export class ExperimentInfoTaskModelComponent implements OnInit, OnDestroy {
 
   editPrototext() {
     const editPrototextDialog = this.dialog.open(EditJsonComponent, {
-      data: {textData: this.formData?.value, readOnly: false, title: 'EDIT CONFIGURATION', typeJson: false}
+      data: {textData: this.formData?.value, readOnly: false, title: 'EDIT CONFIGURATION'} as EditJsonData
     });
 
     editPrototextDialog.afterClosed().pipe(take(1)).subscribe((data) => {

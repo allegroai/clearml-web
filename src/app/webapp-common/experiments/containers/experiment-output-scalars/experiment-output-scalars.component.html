@@ -18,7 +18,7 @@
       <sm-selectable-grouped-filter-list
         [list]="scalarList"
         [selected]="selectedGraph"
-        [checkedList]="listOfHidden | async"
+        [checkedList]="listOfHidden$ | async"
         [searchTerm]="searchTerm$ | async"
         (itemSelect)="metricSelected($event)"
         (hiddenChanged)="hiddenListChanged($event)"
@@ -57,7 +57,7 @@
         [metrics]="graphs"
         [singleValueData]="singleValueData$ | async"
         [experimentName]="experimentName"
-        [hiddenList]="listOfHidden | async"
+        [hiddenList]="listOfHidden$ | async"
         [smoothWeight]="smoothWeight$ | async"
         [legendStringLength]="minimized ? 14 : 19"
         [minimized]="minimized"

@@ -13,7 +13,7 @@ import {
   selectSplitSize
 } from '../../reducers';
 import {Observable, Subscription} from 'rxjs';
-import {select, Store} from '@ngrx/store';
+import {Store} from '@ngrx/store';
 import {distinctUntilChanged, filter, map, tap} from 'rxjs/operators';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -53,11 +53,11 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
 
   private subs = new Subscription();
   protected experimentId: string;
-  private routerParams$: Observable<any>;
+  protected routerParams$: Observable<any>;
   public refreshDisabled: boolean;
-  public listOfHidden: Observable<Array<any>>;
+  public listOfHidden$: Observable<Array<any>>;
   public scalars$: any;
-  public experimentSettings$: Observable<any>;
+  public settings$: Observable<any>;
   public searchTerm$: Observable<string>;
   public minimized: boolean = false;
   public graphs: { [key: string]: ExtFrame[] };
@@ -69,6 +69,7 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
   public splitSize$: Observable<number>;
   public groupBy: GroupByCharts;
   protected entitySelector = this.store.select(selectSelectedExperiment) as Observable<{id?: string; name?: string}>;
+  protected entityType: 'task' | 'model' = 'task';
   protected exportForReport = true;
   private scalars: any;
 
@@ -85,6 +86,7 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
   ];
   public singleValueData$: Observable<Array<EventsGetTaskSingleValueMetricsResponseValues>>;
   public experimentName: string;
+  private singleValueExists: boolean;
 
   constructor(
     protected store: Store<ExperimentInfoState>,
@@ -93,24 +95,27 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
     protected changeDetection: ChangeDetectorRef,
     protected reportEmbed: ReportCodeEmbedService
   ) {
-    this.searchTerm$ = this.store.pipe(select(selectExperimentMetricsSearchTerm));
-    this.splitSize$ = this.store.pipe(select(selectSplitSize));
+    this.searchTerm$ = this.store.select(selectExperimentMetricsSearchTerm);
+    this.splitSize$ = this.store.select(selectSplitSize);
 
     this.scalars$ = this.store.select(selectExperimentInfoHistograms)
       .pipe(
         filter((metrics) => !!metrics),
       );
 
-    this.experimentSettings$ = this.store.pipe(
-      select(selectSelectedExperimentSettings),
-      filter(settings => !!settings),
-      map(settings => settings ? settings.selectedScalar : null),
-      distinctUntilChanged()
-    );
+    this.settings$ = this.store.select(selectSelectedExperimentSettings)
+      .pipe(
+        filter(settings => !!settings),
+        map(settings => settings ? settings.selectedScalar : null)
+      );
     this.smoothWeight$ = this.store.select(selectSelectedSettingsSmoothWeight);
     this.xAxisType$ = this.store.select(selectSelectedSettingsxAxisType);
     this.groupBy$ = this.store.select(selectSelectedSettingsGroupBy);
-    this.singleValueData$  =  this.store.select(selectScalarSingleValue);
+    this.singleValueData$  =  this.store.select(selectScalarSingleValue)
+      .pipe(tap( data => this.singleValueExists = data?.length > 0));
+    this.listOfHidden$ = this.store.select(selectSelectedSettingsHiddenScalar)
+      .pipe(distinctUntilChanged(isEqual));
+
 
     this.routerParams$ = this.store.select(selectRouterParams)
       .pipe(
@@ -121,10 +126,13 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
 
     this.selectIsExperimentPendingRunning = this.store.select(selectIsExperimentInProgress);
 
-    this.subs.add(this.xAxisType$
-      .pipe(filter(axis => !!axis && !!this.experimentId))
-      .subscribe(() => this.axisChanged())
+    this.subs.add(this.store.select(selectShowSettings)
+      .subscribe((show) => this.showSettingsBar = show)
     );
+  }
+
+  ngOnInit() {
+    this.minimized = this.activeRoute.snapshot.routeConfig.data.minimized;
 
     this.subs.add(this.groupBy$
       .pipe(filter((groupBy) => !!groupBy))
@@ -134,25 +142,10 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
       })
     );
 
-    this.subs.add(this.singleValueData$
-      .subscribe(data => {
-        if(data?.length>0 && !this.scalarList['Summary']){
-          this.scalarList['Summary'] = {};
-        }
-      })
+    this.subs.add(this.xAxisType$
+      .pipe(filter(axis => !!axis && !!this.experimentId))
+      .subscribe(() => this.axisChanged())
     );
-
-    this.subs.add(this.store.select(selectShowSettings)
-      .subscribe((show) => this.showSettingsBar = show)
-    );
-
-
-  }
-
-  ngOnInit() {
-    this.minimized = this.activeRoute.snapshot.routeConfig.data.minimized;
-    this.listOfHidden = this.store.select(selectSelectedSettingsHiddenScalar)
-      .pipe(distinctUntilChanged(isEqual));
 
     this.subs.add(this.entitySelector
       .pipe(
@@ -175,7 +168,7 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
       })
     );
 
-    this.subs.add(this.experimentSettings$
+    this.subs.add(this.settings$
       .subscribe((selectedScalar) => {
         this.selectedGraph = selectedScalar;
         this.experimentGraphs?.scrollToGraph(selectedScalar);
@@ -184,7 +177,7 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
 
     this.subs.add(this.routerParams$
       .subscribe(params => {
-        if (!this.experimentId || this.experimentId !== params.experimentId) {
+        if (!this.experimentId || ![params.experimentId, params.modelId].includes(this.experimentId)) {
           this.graphs = undefined;
           this.resetMetrics();
           // this.store.dispatch(new ExperimentScalarRequested(params.experimentId));
@@ -197,7 +190,8 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
   private prepareGraphsAndUpdate(scalars: GroupedList) {
     if (scalars) {
       const splittedScalars = this.groupBy === 'metric' ? scalars : this.splitScalars(scalars);
-      this.scalarList = {...this.scalarList, ...prepareScalarList(splittedScalars)};
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      this.scalarList = {...(this.singleValueExists && {Summary: {}}), ...prepareScalarList(splittedScalars)};
       this.graphs = convertScalars(splittedScalars, this.experimentId);
       this.changeDetection.detectChanges();
     }
@@ -259,8 +253,9 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
 
   createEmbedCode(event: { metrics?: string[]; variants?: string[]; domRect: DOMRect}) {
     this.reportEmbed.createCode({
-      type: 'scalar',
-      tasks: [this.experimentId],
+      type: (!event.metrics && !event.variants) ? 'single' : 'scalar',
+      objects: [this.experimentId],
+      objectType: this.entityType,
       ...event
     });
   }

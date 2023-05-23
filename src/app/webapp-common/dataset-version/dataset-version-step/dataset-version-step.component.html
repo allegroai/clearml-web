@@ -12,7 +12,7 @@
   <div class="step-part step-footer" [class]="step?.data?.status">
     <div *ngIf="step?.data?.job_size">{{step.data.job_size | filesize: fileSizeConfigStorage}}</div>
     <div class="d-flex-center" *ngIf="step?.data?.last_update">
-      <i class="al-icon al-ico-upload sm mr-1"></i>{{step.data.last_update * 1000 | timeAgo}}
+      <i class="al-icon al-ico-upload sm me-1"></i>{{step.data.last_update * 1000 | timeAgo}}
     </div>
   </div>
 </div>

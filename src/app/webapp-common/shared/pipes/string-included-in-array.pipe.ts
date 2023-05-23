@@ -9,7 +9,7 @@ export class StringIncludedInArrayPipe implements PipeTransform {
     if (!value) {
       return false;
     }
-    return stingsArr.includes(value);
+    return stingsArr?.includes(value);
   }
 
 }

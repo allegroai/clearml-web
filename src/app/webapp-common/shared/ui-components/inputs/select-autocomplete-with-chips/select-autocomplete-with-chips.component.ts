@@ -16,10 +16,10 @@ import {COMMA, ENTER} from '@angular/cdk/keycodes';
 import {map, startWith} from 'rxjs/operators';
 import {fromEvent, Subscription} from 'rxjs';
 import {Observable} from 'rxjs/internal/Observable';
-import {MatLegacyOptionModule as MatOptionModule, MatLegacyOptionSelectionChange as MatOptionSelectionChange} from '@angular/material/legacy-core';
-import {MatLegacyAutocompleteModule as MatAutocompleteModule, MatLegacyAutocompleteTrigger as MatAutocompleteTrigger} from '@angular/material/legacy-autocomplete';
-import {MatLegacyChipsModule as MatChipsModule} from '@angular/material/legacy-chips';
-import {MatLegacyFormFieldModule as MatFormFieldModule} from '@angular/material/legacy-form-field';
+import {MatOptionModule, MatOptionSelectionChange} from '@angular/material/core';
+import {MatAutocompleteModule, MatAutocompleteTrigger} from '@angular/material/autocomplete';
+import {MatChipsModule} from '@angular/material/chips';
+import {MatFormFieldModule} from '@angular/material/form-field';
 import {AsyncPipe, NgFor, NgIf} from '@angular/common';
 import {ChipsModule} from '@common/shared/ui-components/buttons/chips/chips.module';
 

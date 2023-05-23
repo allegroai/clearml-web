@@ -1,5 +1,5 @@
 <div class="dynamic-subtitle">
-  <div class="line">Move <span class="p-name">{{projectName | shortProjectName}}</span> from <span
+  <div class="line">Move <span class="p-name ellipsis">{{projectName | shortProjectName}}</span> from <span
     class="p-name">{{projectName | projectLocation}}</span></div>
   <div class="line">To <span *ngIf="project.parent; else placeH" class="p-name">{{project.parent}}</span>
     <ng-template #placeH><span class="p-holder">Project…</span></ng-template>
@@ -9,11 +9,11 @@
   <mat-form-field class="w-100"
                   appearance="outline"
                   hideRequiredMarker="true"
-                  (click)="project.parent && clear(); projectInputRef.blur(); projectInputRef.focus()">
+                  (mousedown)="!isFocused(projectInputRef) && projectInput.value && projectInput.reset(); projectInputRef.blur(); projectInputRef.focus()">
     <mat-label>Destination</mat-label>
     <input matInput type="text"
            [matAutocomplete]="auto"
-           [ngModel]="project.parent"
+           [(ngModel)]="project.parent"
            name="projectName"
            placeholder="Search for project path"
            #projectInputRef
@@ -29,15 +29,17 @@
            minlength="3"
            (keydown.enter)="projectInput.control.markAsTouched()"
     >
-    <span matSuffix *ngIf="projectInput.value && (!isAutoCompleteOpen) && !(project.parent | stringIncludedInArray:projectsNames)" class="creat-new-suffix">(Create New)</span>
-    <i matSuffix [class]="'fa mr2 ' + (project.parent? 'fa-times pointer':'fa-search')"
+    <span matSuffix *ngIf="projectsNames && (projectName !== project.parent) && projectInput.value &&
+     (!isAutoCompleteOpen) && !(projectInput.value | stringIncludedInArray:projectsNames)" class="creat-new-suffix">(Create New)</span>
+    <i matSuffix class="al-icon sm-md search-icon me-2" [ngClass]="project.parent? 'al-ico-dialog-x pointer' : 'al-ico-search'"
        (click)="project.parent && clear(); projectInputRef.focus()"
        smClickStopPropagation></i>
     <mat-error *ngIf="projectInput?.errors?.required">Please provide a Project</mat-error>
     <mat-error *ngIf="projectInput?.errors?.minlength">Please provide a project name longer than 3 characters</mat-error>
-    <mat-error *ngIf="projectInput?.errors?.uniqueName">Can't move a project to its current location</mat-error>
+    <mat-error *ngIf="projectInput?.errors?.uniqueName && !projectInput?.errors?.required">Can't move a project to its current location</mat-error>
     <mat-error *ngIf="projectInput?.errors?.invalidPrefix">Can't move a project to its nested projects</mat-error>
     <mat-error *ngIf="projectInput?.errors?.uniquePath">{{projectInput.value}} already contains a project named {{projectName | shortProjectName}}</mat-error>
+    <mat-error *ngIf="projectInput.touched && projectInput.errors?.emptyName && !projectInput.errors?.minlength">*Project name can't contain only spaces.</mat-error>
     <mat-autocomplete #auto="matAutocomplete"
                       name="ExperimentProject"
                       (opened)="setIsAutoCompleteOpen(true)"
@@ -49,13 +51,22 @@
     >
       <mat-option
         class="item"
-        *ngIf="(projectInput.value && !(projectInput.value | stringIncludedInArray:projectsNames))"
+        *ngIf="projectsNames !== null && projectInput.value && !(projectInput.value | stringIncludedInArray:projectsNames)"
         [value]="projectInput.value"
         (onSelectionChange)="createNewSelected($event)"
       >"{{projectInput.value}}" <span class="new">(Create New)</span></mat-option>
-      <mat-option *ngFor="let projectName of projectsNames | simpleFilter:projectInput.value" [value]="projectName" [smTooltip]="projectName"  smShowTooltipIfEllipsis (onSelectionChange)="optionSelected($event)">
+      <mat-option *ngFor="let projectName of projectsNames"
+                  [value]="projectName"
+                  [smTooltip]="projectName"
+                  smShowTooltipIfEllipsis
+                  (onSelectionChange)="optionSelected()">
         <div [innerHTML]="projectName | highlightSearchText:projectInput.value"></div>
       </mat-option>
+      <div *ngIf="projectsNames === null" style="line-height: 100px; pointer-events: none;">
+        <mat-spinner class="m-auto" [diameter]="80" [strokeWidth]="8"></mat-spinner>
+      </div>
+      <div *ngIf="projects && !noMoreOptions" (smScrollEnd)="!loading && loadMore(projectInput.value)" class="text-center">Loading more...</div>
+      <mat-option disabled style="height: 0; min-height: 0;"></mat-option> <!-- Empty mat-option, so the autocomplete menu will always pop -->
     </mat-autocomplete>
   </mat-form-field>
 </form>

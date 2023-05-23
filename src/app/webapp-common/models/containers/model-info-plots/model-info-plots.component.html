@@ -36,7 +36,7 @@
       [minimized]="minimized"
       [splitSize]="splitSize$ | async"
       [isDarkTheme]="dark"
-      [exportForReport]="false"
+      (createEmbedCode)="createEmbedCode($event)"
       (resetGraphs)="resetMetrics()"
     >
     </sm-experiment-graphs>

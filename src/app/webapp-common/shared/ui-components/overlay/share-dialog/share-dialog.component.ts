@@ -1,5 +1,5 @@
 import {Component, Inject} from '@angular/core';
-import {MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {IShareDialogConfig} from './share-dialog.model';
 import {addMessage} from '@common/core/actions/layout.actions';
 import {Store} from '@ngrx/store';
@@ -28,7 +28,7 @@ export class ShareDialogComponent {
               public dialogRef: MatDialogRef<ShareDialogComponent>,
               private store: Store<any>) {
     this.title = data.title || '';
-    this.sharedSubtitle =`<b>Any registered user with this link</b> has read-only access to this task and all it’s contents (Artifacts, Results, etc.)`;
+    this.sharedSubtitle =`<b>Any registered user with this link</b> has read-only access to this task and all its contents (Artifacts, Results, etc.)`;
     this.privateSubtitle =  `Create a shareable link to grant read access to<b> any registered user</b> you provide this link to.`;
     this.task = data.task;
 

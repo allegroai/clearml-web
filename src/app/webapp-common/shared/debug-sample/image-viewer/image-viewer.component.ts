@@ -2,7 +2,7 @@ import {ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, Inj
 import {debounceTime, distinctUntilChanged, filter, withLatestFrom} from 'rxjs/operators';
 import {BehaviorSubject, interval, Observable, Subscription} from 'rxjs';
 import {Store} from '@ngrx/store';
-import {MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA, MatLegacyDialogRef as MatDialogRef} from '@angular/material/legacy-dialog';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {EventsGetDebugImageIterationsResponse} from '~/business-logic/model/events/eventsGetDebugImageIterationsResponse';
 import {selectAppVisible, selectAutoRefresh} from '@common/core/reducers/view.reducer';
 import {BaseImageViewerComponent} from '@common/shared/debug-sample/image-viewer/base-image-viewer.component';

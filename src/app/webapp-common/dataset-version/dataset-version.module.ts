@@ -50,10 +50,10 @@ export const routes: Routes = [
     SimpleDatasetVersionInfoComponent,
     SimpleDatasetVersionDetailsComponent,
     SimpleDatasetVersionContentComponent,
-    SimpleDatasetVersionPreviewComponent,
     DatasetVersionStepComponent,
   ],
   imports: [
+    SimpleDatasetVersionPreviewComponent,
     CommonModule,
     SMSharedModule,
     AngularSplitModule,
@@ -63,6 +63,9 @@ export const routes: Routes = [
     ExperimentOutputLogModule,
     DebugImagesModule,
     RouterModule.forChild(routes),
+  ],
+  exports: [
+    SimpleDatasetVersionPreviewComponent,
   ]
 })
 export class DatasetVersionModule { }
