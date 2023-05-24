@@ -138,7 +138,8 @@ export class BaseAdminService {
       region: set.Region || DEFAULT_REGION,
       credentials: {
         accessKeyId: set.Key,
-        secretAccessKey: set.Secret
+        secretAccessKey: set.Secret,
+        sessionToken: set.Token
       },
       ...(set.Endpoint && {
         endpoint: {

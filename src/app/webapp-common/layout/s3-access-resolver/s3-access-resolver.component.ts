@@ -16,6 +16,7 @@ export class S3AccessResolverComponent {
   endpoint: any;
   key: any;
   secret: any;
+  token: any;
   region: any;
   header: any;
   editMode: any;
@@ -32,6 +33,7 @@ export class S3AccessResolverComponent {
     this.endpoint       = s3Credentials.Endpoint;
     this.key            = s3Credentials.Key;
     this.secret         = s3Credentials.Secret;
+    this.token          = s3Credentials.Token;
     this.region         = s3Credentials.Region;
     this.isAzure        = data.isAzure;
     if (data.credentialsError) {

@@ -17,6 +17,11 @@
       <mat-error *ngIf="secretInput.errors?.required">*Required</mat-error>
     </mat-form-field>
     <mat-form-field *ngIf="!isAzure" class="w-100">
+      <mat-label>Token</mat-label>
+      <input matInput [(ngModel)]="S3Form.Token" type="text" name="Token" placeholder="Token" [(ngModel)]="S3Form.Token" #keyInput="ngModel"
+             autocomplete="off">
+    </mat-form-field>
+    <mat-form-field *ngIf="!isAzure" class="w-100">
       <mat-label>Region</mat-label>
       <input matInput [(ngModel)]="S3Form.Region" type="text" name="Region" placeholder="AWS Region (e.g. us-east-2)"
              autocomplete="off">
