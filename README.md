@@ -7,7 +7,7 @@
 * clone the project to your local machine
 
 ### build
-* cd to the root of the project
+* `cd` to the root of the project
 * run `npm ci` to install required node modules
 * run `npm run build`
 
@@ -24,7 +24,7 @@ Contains only logic. no declarations. no dependency with any other module beside
 Application feature modules. each module can contain declarations and providers **specific to the the feature**  
 Depend only on shared module for ui components
 
-#####each feature should contain the following: 
+##### Each feature should contain the following: 
 - **module** - the feature module: `<featureName>.module.ts`. 
 - **component** - the feature main component js file, should contain the feature's containers components only: `<featureName>.component.ts`. 
 - **component** html - the feature component html: `<featureName>.component.html`. 
@@ -34,8 +34,7 @@ Depend only on shared module for ui components
 - **model** - the feature types, interfaces and objects declarations: `<featureName>.model.ts`.
 - **actions** - redux action classes - file name: `<name>.actions.ts`
 - **effects** - ngrx effects classes. manage data flow and side effects - file name: `<name>.effect.ts`
-- **reducers** - simple functions for state composition. file name: `<name>
-.reducer.ts`
+- **reducers** - simple functions for state composition. file name: `<name>.reducer.ts`
 - **services** - utilities classes with the same responsibility under `services` folder : `<name>.service.ts`.
 - **container components** - components that will include dumb components and will pass data from the state to the dumb components and dispatch actions of the dumb components, the container components will be under `containers` folder.
 - **dumb components** - stateless view components that will communicate through inputs and outputs, the dumb components will be under `dumb` folder. 
