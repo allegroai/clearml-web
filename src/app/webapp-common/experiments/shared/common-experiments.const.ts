@@ -51,7 +51,7 @@ export const TASK_TAGS = {
   HIDDEN: 'archived' as TaskTagsEnum
 };
 
-export const LOG_BATCH_SIZE = 100;
+export const LOG_BATCH_SIZE = 1000;
 
 export enum CustomColumnMode {
   Standard,
