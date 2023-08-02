@@ -1,9 +1,9 @@
 <sm-dialog-template iconClass="fas fa-tags rotate-right fa-6x" header="TAG COLORS">
   <form class="filter-form">
-    <mat-form-field appearance="fill" hideRequiredMarker="true" class="no-bottom w-100">
-      <input smClickStopPropagation  matInput placeholder="Search" name="filter" [(ngModel)]="filterText" autocomplete="off">
-      <i matSuffix class="al-icon me-3" [class]="filterText ? 'al-ico-dialog-x pointer' : 'al-ico-search'" (click)="filterText && clearSearch()"></i>
-    </mat-form-field>
+  <mat-form-field appearance="fill" hideRequiredMarker="true" class="no-bottom w-100">
+    <input smClickStopPropagation  matInput placeholder="Search" name="filter" [(ngModel)]="filterText" autocomplete="off">
+    <i matSuffix data-id="searchIcon" class="al-icon me-3" [class]="filterText ? 'al-ico-dialog-x pointer' : 'al-ico-search'" (click)="filterText && clearSearch()"></i>
+  </mat-form-field>
   </form>
 
   <mat-menu #colorMenu="matMenu">

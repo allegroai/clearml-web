@@ -31,12 +31,21 @@
     </div>
     <div class="param-line" [style.visibility]="chooseCustomQueue?'visible' :'hidden'">
       <div class="param-key">Pipeline controller queue</div>
-      <mat-form-field appearance="outline" class="no-bottom queue-select">
-        <mat-select [(ngModel)]="selectedQueue" name="queue" panelClass="light-theme">
-          <mat-option *ngFor="let queue of queues" [value]="queue">
-            {{queue.name}}
+      <mat-form-field appearance="outline" class="no-bottom queue-select" (mousedown)="selectedQueue && !isFocused(queueInput) && (selectedQueue = null)">
+
+        <input type="text"
+               #queueInput
+               matInput
+               name="queue"
+               [(ngModel)]="selectedQueue"
+               [matAutocomplete]="auto">
+        <i matSuffix class="al-icon sm-md search-icon me-2" [ngClass]="queueInput.value? 'al-ico-dialog-x pointer':'al-ico-search'"
+           (click)="queueInput.value && (selectedQueue = null)"></i>
+        <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete" [displayWith]="displayFn" class="light-theme">
+          <mat-option *ngFor="let queue of queues | filter:queueInput.value:'name'" [value]="queue">
+            <div [innerHTML]="queue.name | highlightSearchText:selectedQueue?.name"></div>
           </mat-option>
-        </mat-select>
+        </mat-autocomplete>
       </mat-form-field>
     </div>
   </ng-form>

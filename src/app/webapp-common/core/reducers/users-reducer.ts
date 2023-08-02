@@ -23,6 +23,7 @@ export interface UsersState {
   showOnlyUserWork: boolean;
   serverVersions: { server: string; api: string };
   gettingStarted: any;
+  settings: any;
 }
 
 export const initUsers: UsersState = {
@@ -33,11 +34,13 @@ export const initUsers: UsersState = {
   workspaces: [],
   showOnlyUserWork: false,
   serverVersions: null,
-  gettingStarted: null
+  gettingStarted: null,
+  settings: null,
 };
 
 export const users = state => state.users as UsersState;
-
+export const selectSettings = createSelector(users, (state): any => state?.settings);
+export const selectMaxDownloadItems = createSelector(selectSettings, (state): number => state?.max_download_items ?? 1000);
 export const selectCurrentUser = createSelector(users, state => state.currentUser);
 export const selectActiveWorkspace = createSelector(users, state => state.activeWorkspace);
 export const selectUserWorkspaces = createSelector(users, state => state.userWorkspaces);

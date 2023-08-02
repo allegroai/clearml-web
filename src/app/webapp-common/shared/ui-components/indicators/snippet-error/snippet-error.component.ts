@@ -28,7 +28,7 @@ export class SnippetErrorComponent {
   public min = Math.min;
   public missingSource: boolean = false;
 
-  constructor(private store: Store<any>) {}
+  constructor(private store: Store) {}
 
   @Output() openImageClicked = new EventEmitter();
   @Input() set copyContent(content: string) {

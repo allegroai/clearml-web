@@ -25,7 +25,9 @@ import {
   PlotlyHTMLElement,
   PlotMarker,
   PlotType,
-  Root
+  Root,
+  deleteTraces,
+  react
 } from 'plotly.js';
 import {Subject} from 'rxjs';
 import {debounceTime, filter} from 'rxjs/operators';
@@ -40,6 +42,7 @@ import {PALLET} from '@common/constants';
 import {download} from '@common/shared/utils/download';
 import {chooseTimeUnit} from '@common/shared/utils/choose-time-unit';
 import {GraphViewerComponent, GraphViewerData} from './graph-viewer/graph-viewer.component';
+import {getSmoothedLine} from '@common/shared/single-graph/single-graph.utils';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 declare const Plotly;
@@ -62,13 +65,12 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
   public title: string;
   private originalChart: ExtFrame;
   private _chart: ExtFrame;
-  private smoothnessTimeout: number;
   private chartData: HTMLDivElement;
   private previousOffsetWidth: number;
   private modeBar: HTMLElement;
   private previousHeight: number;
   private ratioEnable: boolean;
-  private smooth$ = new Subject();
+  private smooth$ = new Subject<number>();
   private _height: number;
   private _hoverMode: ChartHoverModeEnum;
   private listeningToHoverMode = false;
@@ -86,7 +88,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
   @Input() set height(height: number) {
     this._height = height;
     if (this.chart) {
-      this.drawGraph$.next({forceRedraw: true, forceSkipReact: false});
+      this.drawGraph$.next({forceRedraw: false, forceSkipReact: false});
     }
   }
 
@@ -96,8 +98,12 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
 
   @Input() set width(width: number) {
     if (this.chart) {
-      this.drawGraph$.next({forceRedraw: true, forceSkipReact: false});
+      this.drawGraph$.next({forceRedraw: false, forceSkipReact: false});
     }
+  }
+
+  get chart(): ExtFrame {
+    return this._chart;
   }
 
   @Input() set chart(chart: ExtFrame) {
@@ -105,14 +111,29 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
       this.ratioEnable = !!chart.layout.width && !!chart.layout.height;
       this.ratio = this.ratioEnable ? chart.layout.width / chart.layout.height : null;
       this._height = chart.layout.height || this.height || 450;
+      if (this.originalChart?.data.length === chart.data.length) {
+        this.rebootGraph(chart, true);
+      } else {
+        this._chart = cloneDeep(chart);
+      }
       this.originalChart = chart;
-      this._chart = cloneDeep(chart);
       this.drawGraph$.next({forceRedraw: true, forceSkipReact: false});
     }
   }
 
-  get chart(): ExtFrame {
-    return this._chart;
+  private rebootGraph(chart: ExtFrame, clean?: boolean) {
+    const hidden = this._chart?.data
+      .filter(d => !d.isSmoothed)
+      .map((d, i) => d.visible === 'legendonly' ? i : null)
+      .filter(index => index !== null);
+    if (clean && this.alreadyDrawn && this.type === 'scatter' && chart.data[0]?.x?.length === 1) {
+      (Plotly.deleteTraces as typeof deleteTraces)(this.chartElm, Array.from({length: this.chartElm.data.length ?? 0}, (v, i) => i));
+      this.modeBar = null;
+    }
+    this._chart = cloneDeep(chart);
+    if (hidden) {
+      this._chart.data.forEach((d, i) => d.visible = hidden.includes(i) ? 'legendonly': true);
+    }
   }
 
   @Input() moveLegendToTitle = false;
@@ -131,6 +152,18 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
     return this._hoverMode;
   }
 
+  @Input() set smoothType(smoothType: string) {
+    this._smoothType = smoothType;
+    this.isSmooth = this.smoothWeight > 0;
+    if (this.alreadyDrawn) {
+      this.smooth$.next(null);
+    }
+  }
+
+  get smoothType() {
+    return this._smoothType;
+  }
+
   @Input() set smoothWeight(ratio: number) {
     this._smoothWeight = ratio;
     this.isSmooth = ratio > 0;
@@ -147,11 +180,12 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
   @Input() hideDownloadButtons = false;
   @Input() noMargins = false;
   @Output() hoverModeChanged = new EventEmitter<ChartHoverModeEnum>();
-  @Output() createEmbedCode = new EventEmitter<DOMRect>();
+  @Output() createEmbedCode = new EventEmitter<{xaxis: ScalarKeyEnum; domRect: DOMRect}>();
   @Output() maximizeClicked = new EventEmitter();
   @ViewChild('drawHere', {static: true}) plotlyContainer: ElementRef;
   private chartElm;
   private _smoothWeight: number;
+  private _smoothType: string;
 
 
   constructor(
@@ -170,7 +204,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
         debounceTime(50),
         filter(() => !!this.chart))
       .subscribe(() => {
-        this._chart = cloneDeep(this.originalChart);
+        this.rebootGraph(this.originalChart);
         this.drawGraph$.next({forceRedraw: true, forceSkipReact: false});
       })
     );
@@ -217,7 +251,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
         this.previousHeight = this.height;
 
         if (!skipReact) {
-          this.zone.runOutsideAngular(() => Plotly.react(root, data, layout, config).then(() => {
+          this.zone.runOutsideAngular(() => (Plotly.react as typeof react)(root, data, layout, config).then(() => {
             this.loading = false;
             this.changeDetector.detectChanges();
           }));
@@ -264,7 +298,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
 
     const graph = this.formatChartLines() as ExtFrame;
     this.type = (graph?.data?.[0]?.type ?? graph?.layout?.type) as PlotType;
-    this.title = this.isDarkTheme ? '' : this.addIterationString(graph.layout.title as string, graph.iter) || (graph.layout.title as Record<string, any>).text;
+    this.title = (this.isDarkTheme || this.hideTitle) ? '' : this.getTitle(graph);
     let layout = {
       ...this.hideDownloadButtons ? {} : this.addParametersIfDarkTheme({
         // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -279,7 +313,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
       ...graph.layout,
       // eslint-disable-next-line @typescript-eslint/naming-convention
       ...this.addParametersIfDarkTheme({plot_bgcolor: 'transparent'}),
-      height: this.height,
+      height: this.type === 'table' ? this.height - 20 : this.height,
       width: this.ratio ? (this.height * this.ratio) + RATIO_OFFSET_FIX : undefined,
       modebar: {
         color: '#5a658e',
@@ -489,17 +523,14 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
           }
           svg.parentElement.attributes['data-title'].value = this.getLogButtonTitle(this.yAxisType === 'log');
           path.attributes[0].value = icon.path;
-          this.smoothnessTimeout = window.setTimeout(() => {
-            this._chart = cloneDeep(this.originalChart);
-            this.drawGraph$.next({forceRedraw: true, forceSkipReact: false});
-          }, 400);
+          this.smooth$.next(this.smoothWeight);
         }
       });
     }
-    if (!['table', 'parcoords'].includes(graph?.data?.[0]?.type) && graph.layout?.showlegend !== false && !this.moveLegendToTitle) {
+    if (!['table', 'parcoords'].includes(graph?.data?.[0]?.type) && !this.moveLegendToTitle) {
       modeBarButtonsToAdd.push({
         name: 'Hide legend',
-        title: this.getHideButtonTitle(),
+        title: graph.layout?.showlegend !== false ? 'Hide legend' : 'Show legend',
         icon: this.getToggleLegendIcon(),
         click: (element, ev: MouseEvent) => {
           const pathElement = (ev.target as HTMLElement).tagName === 'path' ? (ev.target as HTMLElement) : (ev.target as HTMLElement).querySelector('path');
@@ -538,7 +569,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
         title: 'Download JSON',
         icon: this.getJsonDownloadIcon(),
         click: () => {
-          this.downloadGraphAsJson(cloneDeep(this.originalChart));
+          this.downloadGraphAsJson(this.originalChart);
         }
       });
     }
@@ -560,8 +591,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
         attr: 'plotly-embedded-modebar-button',
         icon: this.getEmbedIcon(),
         click: (event) => {
-          this.createEmbedCode.emit(event.querySelector('[data-title="Copy embed code"]').getBoundingClientRect()
-          );
+          this.createEmbedCode.emit({xaxis: this.xAxisType, domRect: event.querySelector('[data-title="Copy embed code"]').getBoundingClientRect()});
         }
       };
       modeBarButtonsToAdd.push(button);
@@ -584,10 +614,34 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
       modeBarButtonsToRemove: (this.hideDownloadButtons ? ['sendDataToCloud', 'toImage']: ['sendDataToCloud']) as ModeBarDefaultButtons[],
       displaylogo: false,
       modeBarButtonsToAdd,
-      toImageButtonOptions : {scale: 3}
+      toImageButtonOptions : {
+        filename: this.getExportName(this.chart),
+        scale: 3
+      }
     } as Config;
 
     return [this.chartElm, graph.data, layout, config, this.chartData];
+  }
+
+  private getTitle(graph: ExtFrame) {
+    if (graph.layout.title) {
+      const title = (typeof graph.layout.title === 'string') ? graph.layout.title : graph.layout.title.text;
+      return this.addIterationString(title?.trim(), graph.iter);
+    }
+    return '';
+  }
+
+  private getExportName(graph: ExtFrame) {
+      const title = this.getTitle(graph);
+      if (title) {
+        return title;
+      }
+      const metric = this.chart.metric?.trim();
+      const variant = this.chart.variant?.trim();
+      if (metric && variant) {
+        return `${metric} - ${variant}`;
+      }
+      return `${metric || variant}` || 'chart';
   }
 
   private updateLegend() {
@@ -615,7 +669,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
 
     for (let i = 0; i < graph.data.length; i++) {
       if (!graph.data[i].name) {
-        graph.data[i].name = `graph.metric ${i}`;
+        graph.data[i].name = this.getTitle(graph);
       }
 
       if (!this.alreadyDrawn && !graph.data[i].name.includes('<span style="display: none;"')) {
@@ -652,7 +706,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
           graph.data[i].legendgroup = graph.data[i].name;
           graph.data[i].showlegend = false;
           graph.data[i].hoverinfo = 'skip';
-          smoothLines.push(this.resmoothDataset(graph.data[i], color));
+          smoothLines.push(this.resmoothDataset(graph.data[i], color, graph.data[i].visible === 'legendonly'));
         }
       }
     }
@@ -667,7 +721,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
   }
 
   public generateColorKey(graph: ExtFrame, i: number) {
-    const variant = graph.data[i].colorHash || graph.data[i].name;
+    const variant = graph.data[i].colorHash ||  graph.data[i].colorKey || graph.data[i].name;
     if (!this.isCompare) {
       return `${variant}?`;  // "?" to adjust desired colors (legend title is removing this ?)
     } else {
@@ -676,10 +730,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
     }
   }
 
-  private resmoothDataset(data: ExtData, color) {
-    let last = !!data.y?.length ? 0 : NaN;
-    let validPoints = 0;
-
+  private resmoothDataset(data: ExtData, color, hidden: boolean) {
     return {
       ...data,
       line: {...data.line, color: `rgb(${color[0]},${color[1]},${color[2]})`},
@@ -687,20 +738,10 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
       name: `${data.name} (Smoothed)`,
       showlegend: true,
       isSmoothed: true,
+      ...(hidden && {visible: 'legendonly'}),
       hovertext: data.hovertext ? data.hovertext + '(Smoothed)' : '(Smoothed)',
       hoverinfo: 'all',
-      y: data.y.map((d, i) => {
-        if (!isFinite(last)) {
-          return null;
-        } else {
-          // 1st-order IIR low-pass filter to attenuate the higher-frequency
-          // components of the time-series, with bias fix toward initial value.
-          last = last * this.smoothWeight + (1 - this.smoothWeight) * d;
-          validPoints++;
-          const debiasWeight = (i > 0 && this.smoothWeight < 1) ? 1 - Math.pow(this.smoothWeight, validPoints) : 1;
-          return last / debiasWeight;
-        }
-      })
+      y: getSmoothedLine(data.y, this.smoothWeight, this.smoothType)
     } as ExtData;
   }
 
@@ -791,20 +832,21 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
 
   downloadGraphAsJson(chart: ExtFrame) {
     let timeUnit;
+    let data;
     if (this.xAxisType === ScalarKeyEnum.Timestamp) {
-      chart.data.forEach(graphData => {
+      data = chart.data.map(graphData => {
         if (!graphData.name) {
-          return;
+          return graphData;
         }
-
         timeUnit = typeof timeUnit === 'undefined' ? chooseTimeUnit(chart.data) : timeUnit;
         const zeroTime = graphData.x[0] as number;
-        graphData.x = (graphData.x as number[]).map(timestamp => (timestamp - zeroTime) / timeUnit.time);
-        // graph.data[i].hovertext = graph.data[i].x.map(timestamp => timeInWords((timestamp - zeroTime)));
+        return {...graphData, x: (graphData.x as number[]).map(timestamp => (timestamp - zeroTime) / timeUnit.time)};
       });
+    } else {
+      data = chart.data;
     }
-    const exportName = `${chart.layout.title} - ${this.getAxisText(timeUnit) || chart.layout.name}.json`;
-    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(chart.data));
+    const exportName = `${this.getExportName(this.chart)}.json`;
+    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data));
     download(dataStr, exportName);
   }
 
@@ -916,7 +958,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
     this.zone.run(() => {
       this.dialog.open(GraphViewerComponent, {
         data: {
-          ...(this.exportForReport && {embedFunction: (rect: DOMRect) => this.createEmbedCode.emit(rect)}),
+          ...(this.exportForReport && {embedFunction: (data) => this.createEmbedCode.emit({xaxis: data.xaxis, domRect: data.domRect})}),
           // signed url are updated after originChart was cloned - need to update images urls!
           chart: cloneDeep({
             ...this.originalChart,
@@ -926,8 +968,10 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
           xAxisType: this.xAxisType,
           yAxisType: this.yAxisType,
           smoothWeight: this.smoothWeight,
+          smoothType: this.smoothType,
           darkTheme: this.isDarkTheme,
           isCompare: this.isCompare,
+          legendConfiguration: this.legendConfiguration
         } as GraphViewerData,
         panelClass: ['image-viewer-dialog', this.isDarkTheme ? 'dark-theme' : 'light-theme'],
         height: '100%',
@@ -943,6 +987,9 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
   }
 
   private addIterationString(name: string, iter: number) {
+    if (!name) {
+      return name;
+    }
     return name + ((iter || (this.graphsNumber > 1 && iter === 0)) ? ` - Iteration ${iter}` : '');
   }
 
@@ -964,7 +1011,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
         }
         data = data.slice(0, -1) + '\n';
       }
-      const exportName = `${this.chart.layout.title} - ${this.chart.layout.name}.csv`;
+      const exportName = `${this.getExportName(this.chart)}.csv`;
       data = 'data:text/csv;charset=utf-8,' + encodeURIComponent(data);
       download(data, exportName);
     }

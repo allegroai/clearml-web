@@ -7,7 +7,10 @@ import {ITableExperiment} from '../../experiments/shared/common-experiment-model
 import {MetricColumn} from '@common/shared/utils/tableParamEncode';
 import {User} from '~/business-logic/model/users/user';
 import {ProjectsGetAllResponseSingle} from '~/business-logic/model/projects/projectsGetAllResponseSingle';
-import {selectRouterConfig} from "@common/core/reducers/router-reducer";
+import {selectRouterParams} from '@common/core/reducers/router-reducer';
+import {IBreadcrumbsLink, IBreadcrumbsOptions} from '@common/layout/breadcrumbs/breadcrumbs.component';
+import {selectProjectType} from '~/core/reducers/view.reducer';
+import {uniqBy} from 'lodash-es';
 
 
 export interface ProjectStatsGraphData {
@@ -18,10 +21,11 @@ export interface ProjectStatsGraphData {
   type: string;
   status: string;
   user: string;
+  title?: string;
+  value: number;
 }
 
 export interface RootProjects {
-  projects: Project[];
   selectedProject: Project;
   projectAncestors: Project[];
   archive: boolean;
@@ -40,17 +44,18 @@ export interface RootProjects {
   extraUsers: User[];
   showHidden: boolean;
   hideExamples: boolean;
-  mainPageTagsFilter: { [Feature: string]: string[] };
+  mainPageTagsFilter: { [Feature: string]: { tags: string[]; filterMatchMode: string } };
   mainPageTagsFilterMatchMode: string;
   defaultNestedModeForFeature: { [feature: string]: boolean };
+  selectedSubFeature: IBreadcrumbsLink;
   tablesFilterProjectsOptions: Partial<ProjectsGetAllResponseSingle>[];
   projectsOptionsScrollId: string;
+  breadcrumbOptions: IBreadcrumbsOptions;
 }
 
 const initRootProjects: RootProjects = {
   mainPageTagsFilter: {},
   mainPageTagsFilterMatchMode: 'AND',
-  projects: null,
   selectedProject: null,
   projectAncestors: null,
   archive: false,
@@ -70,13 +75,17 @@ const initRootProjects: RootProjects = {
   showHidden: false,
   hideExamples: false,
   defaultNestedModeForFeature: {},
+  selectedSubFeature: null,
+  breadcrumbOptions: null,
   tablesFilterProjectsOptions: null,
   projectsOptionsScrollId: null
 };
 
 export const projects = state => state.rootProjects as RootProjects;
-export const selectRootProjects = createSelector(projects, (state): Project[] => state.projects);
+export const selectRouterProjectId = createSelector(selectRouterParams, params => params?.projectId);
 export const selectSelectedProject = createSelector(projects, state => state.selectedProject);
+export const selectSelectedBreadcrumbSubFeature = createSelector(projects, state => state.selectedSubFeature);
+export const selectBreadcrumbOptions = createSelector(projects, state => state.breadcrumbOptions);
 export const selectProjectAncestors = createSelector(projects, state => state.projectAncestors);
 export const selectSelectedProjectDescription = createSelector(projects, state => state.selectedProject?.description);
 export const selectSelectedProjectId = createSelector(selectSelectedProject, (selectedProject): string => selectedProject ? selectedProject.id : '');
@@ -85,8 +94,9 @@ export const selectIsDeepMode = createSelector(projects, state => state.deep);
 export const selectTagsFilterByProject = createSelector(projects, selectSelectedProjectId,
   (state, projectId) => projectId !== '*' && state.tagsFilterByProject);
 export const selectProjectTags = createSelector(projects, state => state.projectTags);
-export const selectMainPageTagsFilter = createSelector(projects, selectRouterConfig, (state, config) => config?.[0] ? state.mainPageTagsFilter[config?.[0]] : []);
-export const selectMainPageTagsFilterMatchMode = createSelector(projects, state => state.mainPageTagsFilterMatchMode);
+
+export const selectMainPageTagsFilter = createSelector(projects, selectProjectType,(state, projectType) =>  projectType? state.mainPageTagsFilter[projectType]?.tags : []);
+export const selectMainPageTagsFilterMatchMode = createSelector(projects, selectProjectType, (state, projectType) => projectType? state.mainPageTagsFilter[projectType]?.filterMatchMode : null);
 export const selectCompanyTags = createSelector(projects, state => state.companyTags);
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const selectProjectSystemTags = createSelector(projects, state => getSystemTags({system_tags: state.systemTags} as ITableExperiment));
@@ -107,12 +117,14 @@ export const selectProjectUsers = createSelector(projects, state => state.extraU
   state.users
 );
 export const selectAllProjectsUsers = createSelector(projects, state => state.allUsers);
+export const selectSelectedProjectUsers = createSelector(selectSelectedProjectId, selectProjectUsers, selectAllProjectsUsers,
+  (projectId, projectUsers, allUsers) => projectId === '*' ? allUsers : projectUsers);
 export const selectTablesFilterProjectsOptions = createSelector(projects, state => state.tablesFilterProjectsOptions);
 
 export const projectsReducer = createReducer(
   initRootProjects,
-  on(projectsActions.resetProjects, state => ({...state, projects: [], lastUpdate: null})),
-  on(projectsActions.setSelectedProjectId, (state, action) => {
+  on(projectsActions.resetProjects, (state): RootProjects => ({...state, lastUpdate: null})),
+  on(projectsActions.setSelectedProjectId, (state, action): RootProjects => {
     const projectId = action.projectId;
     return {
       ...state,
@@ -120,79 +132,103 @@ export const projectsReducer = createReducer(
       graphData: initRootProjects.graphData,
     };
   }),
-  on(projectsActions.setSelectedProject, (state, action) => ({
+  on(projectsActions.setSelectedProject, (state, action): RootProjects => ({
     ...state,
     selectedProject: action.project,
     extraUsers: []
   })),
-  on(projectsActions.setProjectAncestors, (state, action) => ({...state, projectAncestors: action.projects})),
-  on(projectsActions.setSelectedProjectStats, (state, action) => ({
+  on(projectsActions.setProjectAncestors, (state, action): RootProjects => ({
+    ...state,
+    projectAncestors: action.projects
+  })),
+  on(projectsActions.setSelectedBreadcrumbSubFeature, (state, action): RootProjects => ({
+    ...state,
+    selectedSubFeature: action.breadcrumb
+  })),
+  on(projectsActions.setBreadcrumbsOptions, (state, action): RootProjects => ({
+    ...state,
+    breadcrumbOptions: action.breadcrumbOptions
+  })),
+  on(projectsActions.setSelectedProjectStats, (state, action): RootProjects => ({
     ...state,
     selectedProject: {
       ...state.selectedProject,
       stats: action.project?.stats
     }
   })),
-  on(projectsActions.resetSelectedProject, state => ({
+  on(projectsActions.resetSelectedProject, (state): RootProjects => ({
     ...state,
     selectedProject: initRootProjects.selectedProject,
     users: [],
     extraUsers: []
   })),
-  on(projectsActions.updateProjectCompleted, (state, action) => ({
+  on(projectsActions.updateProjectCompleted, (state, action): RootProjects => ({
     ...state,
     selectedProject: {...state.selectedProject, ...action.changes},
-    projects: state.projects.map(project => project.id === action.id ? project : {...project, ...action.changes})
   })),
-  on(projectsActions.setArchive, (state, action) => ({...state, archive: action.archive})),
-  on(projectsActions.setDeep, (state, action) => ({...state, deep: action.deep})),
-  on(projectsActions.setTags, (state, action) => ({...state, projectTags: action.tags})),
-  on(projectsActions.setTagsFilterByProject, (state, action) => ({
+  on(projectsActions.setArchive, (state, action): RootProjects => ({...state, archive: action.archive})),
+  on(projectsActions.setDeep, (state, action): RootProjects => ({...state, deep: action.deep})),
+  on(projectsActions.setTags, (state, action): RootProjects => ({...state, projectTags: action.tags})),
+  on(projectsActions.setTagsFilterByProject, (state, action): RootProjects => ({
     ...state,
     tagsFilterByProject: action.tagsFilterByProject
   })),
-  on(projectsActions.setCompanyTags, (state, action) => ({
+  on(projectsActions.setCompanyTags, (state, action): RootProjects => ({
     ...state,
     companyTags: action.tags,
     systemTags: action.systemTags
   })),
-  on(projectsActions.addProjectTags, (state, action) => ({
+  on(projectsActions.addProjectTags, (state, action): RootProjects => ({
     ...state,
     projectTags: Array.from(new Set(state.projectTags.concat(action.tags))).sort()
   })),
-  on(projectsActions.setMainPageTagsFilter, (state, action) => ({
+  on(projectsActions.setMainPageTagsFilter, (state, action): RootProjects => ({
     ...state,
-    mainPageTagsFilter: {...state.mainPageTagsFilter, [action.feature] : action.tags }})),
-  on(projectsActions.setMainPageTagsFilterMatchMode, (state, action) => ({
-    ...state,
-    mainPageTagsFilterMatchMode: action.matchMode
+    mainPageTagsFilter: {
+      ...state.mainPageTagsFilter,
+      [action.feature]: {...state.mainPageTagsFilter[action.feature], tags: action.tags}
+    }
   })),
-  on(projectsActions.setTagColors, (state, action) => ({
+  on(projectsActions.setMainPageTagsFilterMatchMode, (state, action): RootProjects => ({
+    ...state,
+    mainPageTagsFilter: {
+      ...state.mainPageTagsFilter,
+      [action.feature]: {...state.mainPageTagsFilter[action.feature], filterMatchMode: action.matchMode}
+    }
+  })),
+  on(projectsActions.setTagColors, (state, action): RootProjects => ({
     ...state,
     tagsColors: {...state.tagsColors, [action.tag]: action.colors}
   })),
-  on(projectsActions.setMetricVariant, (state, action) => ({
+  on(projectsActions.setMetricVariant, (state, action): RootProjects => ({
     ...state, graphVariant: {...state.graphVariant, [action.projectId]: action.col}
   })),
-  on(projectsActions.setGraphData, (state, action) => ({...state, graphData: action.stats})),
-  on(projectsActions.toggleState, (state, action) => ({
+  on(projectsActions.setGraphData, (state, action): RootProjects => ({...state, graphData: action.stats})),
+  on(projectsActions.toggleState, (state, action): RootProjects => ({
     ...state,
     hiddenStates: {...state.hiddenStates, [action.state]: !state.hiddenStates?.[action.state]}
   })),
-  on(projectsActions.setLastUpdate, (state, action) => ({...state, lastUpdate: action.lastUpdate})),
-  on(projectsActions.setProjectUsers, (state, action) => ({...state, users: action.users, extraUsers: []})),
-  on(projectsActions.setAllProjectUsers, (state, action) => ({...state, allUsers: action.users})),
-  on(projectsActions.setProjectExtraUsers, (state, action) => ({...state, extraUsers: action.users})),
-  on(projectsActions.setShowHidden, (state, action) => ({...state, showHidden: action.show})),
-  on(projectsActions.setHideExamples, (state, action) => ({...state, hideExamples: action.hide})),
-  on(projectsActions.setDefaultNestedModeForFeature, (state, action) => ({
+  on(projectsActions.setLastUpdate, (state, action): RootProjects => ({...state, lastUpdate: action.lastUpdate})),
+  on(projectsActions.setProjectUsers, (state, action): RootProjects => ({
+    ...state,
+    users: action.users,
+    extraUsers: []
+  })),
+  on(projectsActions.setAllProjectUsers, (state, action): RootProjects => ({...state, allUsers: action.users})),
+  on(projectsActions.setProjectExtraUsers, (state, action): RootProjects => ({...state, extraUsers: action.users})),
+  on(projectsActions.setShowHidden, (state, action): RootProjects => ({...state, showHidden: action.show})),
+  on(projectsActions.setHideExamples, (state, action): RootProjects => ({...state, hideExamples: action.hide})),
+  on(projectsActions.setDefaultNestedModeForFeature, (state, action): RootProjects => ({
     ...state,
     defaultNestedModeForFeature: {...state.defaultNestedModeForFeature, [action.feature]: action.isNested}
   })),
-  on(projectsActions.resetTablesFilterProjectsOptions, (state) => ({...state, tablesFilterProjectsOptions: null})),
-  on(projectsActions.setTablesFilterProjectsOptions, (state, action) => ({
+  on(projectsActions.resetTablesFilterProjectsOptions, (state): RootProjects => ({
     ...state,
-    tablesFilterProjectsOptions: action.loadMore ? (state.tablesFilterProjectsOptions || []).concat(action.projects) : action.projects,
+    tablesFilterProjectsOptions: null
+  })),
+  on(projectsActions.setTablesFilterProjectsOptions, (state, action): RootProjects => ({
+    ...state,
+    tablesFilterProjectsOptions: action.loadMore ? uniqBy((state.tablesFilterProjectsOptions || []).concat(action.projects), 'id') : uniqBy(action.projects, 'id'),
     projectsOptionsScrollId: action.scrollId
   }))
 );

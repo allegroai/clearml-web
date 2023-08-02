@@ -49,7 +49,7 @@ export class ChooseColorDirective {
     }
   }
 
-  constructor(private el: ElementRef, private store: Store<any>) {}
+  constructor(private el: ElementRef, private store: Store) {}
 
   openColorPicker(event: MouseEvent) {
     let top = event.pageY - (this.colorPickerHeight / 3);
@@ -74,7 +74,7 @@ export class ChooseColorDirective {
 
 }
 
-export const attachColorChooser = (text: string, buttonElement: Element, colorHash: ColorHashService, store: Store<any>, withAlpha?: boolean, orgColor?: number[]) => {
+export const attachColorChooser = (text: string, buttonElement: Element, colorHash: ColorHashService, store: Store, withAlpha?: boolean, orgColor?: number[]) => {
   const directive = new ChooseColorDirective(new ElementRef(buttonElement), store);
   directive.colorButtonRef = new ElementRef(buttonElement);
   directive.stringToColor  = text;

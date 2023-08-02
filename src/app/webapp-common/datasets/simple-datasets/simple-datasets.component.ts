@@ -1,11 +1,17 @@
 import {Component, OnInit} from '@angular/core';
 import {PipelinesPageComponent} from '@common/pipelines/pipelines-page/pipelines-page.component';
 import {ProjectsGetAllResponseSingle} from '~/business-logic/model/projects/projectsGetAllResponseSingle';
-import {setDefaultNestedModeForFeature, setSelectedProjectId} from '@common/core/actions/projects.actions';
+import {
+  setBreadcrumbsOptions,
+  setDefaultNestedModeForFeature,
+  setSelectedProjectId
+} from '@common/core/actions/projects.actions';
 import {showExampleDatasets} from '../../projects/common-projects.actions';
 import {selectShowDatasetExamples} from '../../projects/common-projects.reducer';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {DatasetEmptyComponent} from '@common/datasets/dataset-empty/dataset-empty.component';
+import {withLatestFrom} from 'rxjs/operators';
+import {selectDefaultNestedModeForFeature} from '@common/core/reducers/projects.reducer';
 
 @Component({
   selector: 'sm-simple-datasets',
@@ -49,5 +55,28 @@ export class SimpleDatasetsComponent extends PipelinesPageComponent implements O
     } else {
       this.router.navigateByUrl('datasets');
     }
+  }
+
+  setupBreadcrumbsOptions() {
+    this.subs.add(this.selectedProject$.pipe(
+      withLatestFrom(this.store.select(selectDefaultNestedModeForFeature))
+    ).subscribe(([selectedProject, defaultNestedModeForFeature]) => {
+      this.store.dispatch(setBreadcrumbsOptions({
+        breadcrumbOptions: {
+          showProjects: !!selectedProject,
+          featureBreadcrumb: {
+            name: 'DATASETS',
+            url: defaultNestedModeForFeature['datasets'] ? 'datasets/simple/*/projects' : 'datasets'
+          },
+          projectsOptions: {
+            basePath: 'datasets/simple',
+            filterBaseNameWith: ['.datasets'],
+            compareModule: null,
+            showSelectedProject: selectedProject?.id !== '*',
+            ...(selectedProject && selectedProject?.id !== '*' && {selectedProjectBreadcrumb: {name: selectedProject?.basename}})
+          }
+        }
+      }));
+    }));
   }
 }

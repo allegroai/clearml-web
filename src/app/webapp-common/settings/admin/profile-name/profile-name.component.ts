@@ -17,7 +17,7 @@ export class ProfileNameComponent implements OnInit {
   currentUser$ = this.store.select(selectCurrentUser);
   active = false;
 
-  constructor(private store: Store<any>) { }
+  constructor(private store: Store) { }
 
   ngOnInit(): void {
     this.currentUser$

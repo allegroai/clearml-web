@@ -31,6 +31,10 @@
       gap: 6px 0;
     }
   }
+  // allow changing chip color when edit is disabled
+  ::ng-deep .mdc-text-field--disabled {
+    pointer-events: auto;
+  }
 }
 
 :host-context(.single-selection) {

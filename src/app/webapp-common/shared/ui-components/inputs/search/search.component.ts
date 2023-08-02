@@ -1,5 +1,5 @@
 import {
-  ChangeDetectionStrategy,
+  ChangeDetectionStrategy, ChangeDetectorRef,
   Component,
   EventEmitter,
   Input,
@@ -43,6 +43,8 @@ export class SearchComponent implements OnInit, OnChanges, OnDestroy {
   @Output() valueChanged = new EventEmitter<string>();
   @ViewChild('searchBar', {static: true}) searchBarInput;
 
+  constructor(private readonly cdr: ChangeDetectorRef) {}
+
   ngOnInit(): void {
     this.subs.add(this.value$.pipe(
       tap((val: string) => this.empty = val?.length === 0),
@@ -58,6 +60,7 @@ export class SearchComponent implements OnInit, OnChanges, OnDestroy {
           this.valueChanged.emit('');
           this.clear(true);
         }
+        this.cdr.detectChanges();
       }));
   }
 

@@ -9,16 +9,16 @@ import {SelectModelEffects} from './select-model.effects';
 import {ModelSharedModule} from '../models/shared/model-shared.module';
 
 @NgModule({
-  imports        : [
+  imports: [
     CommonModule,
     SMSharedModule,
     ModelSharedModule,
     EffectsModule.forFeature([SelectModelEffects]),
-    StoreModule.forFeature('selectModel', selectModelReducer)
+    StoreModule.forFeature('selectModel', selectModelReducer),
   ],
-  providers      : [],
-  declarations   : [SelectModelComponent],
-  exports        : [SelectModelComponent]
+  providers: [],
+  declarations: [SelectModelComponent],
+  exports: [SelectModelComponent]
 })
 export class SelectModelModule {
 }

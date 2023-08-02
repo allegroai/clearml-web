@@ -1,10 +1,25 @@
 import {Injectable} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {Actions, createEffect, ofType} from '@ngrx/effects';
+import {Actions, concatLatestFrom, createEffect, ofType} from '@ngrx/effects';
 import {ApiProjectsService} from '~/business-logic/api-services/projects.service';
 import * as actions from '../actions/projects.actions';
-import {setProjectAncestors, setShowHidden, setTablesFilterProjectsOptions} from '../actions/projects.actions';
-import {catchError, debounceTime, filter, map, mergeMap, switchMap, withLatestFrom} from 'rxjs/operators';
+import {
+  downloadForGetAll,
+  setMainPageTagsFilter,
+  setProjectAncestors,
+  setShowHidden,
+  setTablesFilterProjectsOptions
+} from '../actions/projects.actions';
+import {
+  catchError,
+  debounceTime,
+  distinctUntilChanged,
+  filter,
+  map,
+  mergeMap,
+  switchMap,
+  withLatestFrom
+} from 'rxjs/operators';
 import {requestFailed} from '../actions/http.actions';
 import {activeLoader, deactivateLoader, setServerError} from '../actions/layout.actions';
 import {setSelectedModels} from '../../models/actions/models-view.actions';
@@ -12,14 +27,17 @@ import {TagColorMenuComponent} from '../../shared/ui-components/tags/tag-color-m
 import {MatDialog} from '@angular/material/dialog';
 import {ApiOrganizationService} from '~/business-logic/api-services/organization.service';
 import {OrganizationGetTagsResponse} from '~/business-logic/model/organization/organizationGetTagsResponse';
-import {selectRouterParams} from '../reducers/router-reducer';
-import {EMPTY, forkJoin, of} from 'rxjs';
+import {selectRouterConfig, selectRouterParams} from '../reducers/router-reducer';
+import {EMPTY, forkJoin, Observable, of} from 'rxjs';
 import {ProjectsGetTaskTagsResponse} from '~/business-logic/model/projects/projectsGetTaskTagsResponse';
 import {ProjectsGetModelTagsResponse} from '~/business-logic/model/projects/projectsGetModelTagsResponse';
 import {
-  selectAllProjectsUsers, selectProjectsOptionsScrollId,
+  selectAllProjectsUsers, selectIsDeepMode,
+  selectMainPageTagsFilter,
+  selectProjectsOptionsScrollId,
   selectSelectedMetricVariantForCurrProject,
-  selectSelectedProjectId, selectShowHidden,
+  selectSelectedProjectId,
+  selectShowHidden,
 } from '../reducers/projects.reducer';
 import {
   OperationErrorDialogComponent
@@ -36,6 +54,14 @@ import {escapeRegex} from '@common/shared/utils/escape-regex';
 import {ProjectsGetAllExRequest} from '~/business-logic/model/projects/projectsGetAllExRequest';
 import {ProjectsGetAllResponseSingle} from '~/business-logic/model/projects/projectsGetAllResponseSingle';
 import {rootProjectsPageSize} from '@common/constants';
+import {HTTP} from '~/app.constants';
+import {cleanTag} from '@common/shared/utils/helpers.util';
+import {selectProjectType} from '~/core/reducers/view.reducer';
+import {selectExperimentsTableFilters} from '@common/experiments/reducers';
+import {Params} from '@angular/router';
+import {selectCompareAddTableFilters} from '@common/experiments-compare/reducers';
+import {selectTableFilters} from '@common/models/reducers';
+import {selectSelectModelTableFilters} from '@common/select-model/select-model.reducer';
 
 export const ALL_PROJECTS_OBJECT = {id: '*', name: 'All Experiments'};
 
@@ -45,7 +71,7 @@ export class ProjectsEffects {
 
   constructor(
     private actions$: Actions, private projectsApi: ApiProjectsService, private orgApi: ApiOrganizationService,
-    private store: Store<any>, private dialog: MatDialog, private tasksApi: ApiTasksService,
+    private store: Store, private dialog: MatDialog, private tasksApi: ApiTasksService,
     private usersApi: ApiUsersService,
   ) {
   }
@@ -57,14 +83,23 @@ export class ProjectsEffects {
   ));
 
 
+  setDeep = createEffect(() => this.actions$.pipe(
+    ofType(actions.setDeep),
+    debounceTime(300),
+    withLatestFrom(this.store.select(selectSelectedProjectId), this.store.select(selectIsDeepMode)),
+    distinctUntilChanged(([, , preIsDeep], [, , currIsDeep]) => preIsDeep === currIsDeep),
+    map(([, projectId,]) => actions.getProjectUsers({projectId}))));
+
+
   getTablesFilterProjectsOptions$ = createEffect(() => this.actions$.pipe(
       ofType(actions.getTablesFilterProjectsOptions),
       debounceTime(300),
-      withLatestFrom(
+      concatLatestFrom(() => [
         this.store.select(selectShowHidden),
         this.store.select(selectProjectsOptionsScrollId),
-      ),
-      switchMap(([action, showHidden, scrollId]) => forkJoin([
+        this.getRelevantTableFilters(this.store.select(selectRouterConfig))
+      ]),
+      switchMap(([action, showHidden, scrollId, filters]) => forkJoin([
           this.projectsApi.projectsGetAllEx({
             /* eslint-disable @typescript-eslint/naming-convention */
             page_size: rootProjectsPageSize,
@@ -83,19 +118,30 @@ export class ProjectsEffects {
               _any_: {pattern: `^${escapeRegex(action.searchString)}$`, fields: ['name', 'id']},
               /* eslint-enable @typescript-eslint/naming-convention */
             } as ProjectsGetAllExRequest).pipe(map(res => res.projects)) :
-            of([])
+            of([]),
+          !action.loadMore && filters['project.name']?.value.length ?
+            this.projectsApi.projectsGetAllEx({
+              id: filters['project.name']?.value,
+              only_fields: ['name', 'company'],
+              /* eslint-enable @typescript-eslint/naming-convention */
+            } as ProjectsGetAllExRequest).pipe(map(res => res.projects)) :
+            of([]),
         ])
-          .pipe(map(([allProjects, specificProjects]) => ({
+          .pipe(map(([allProjects, specificProjects, selectedProjects]) => ({
               projects: [
                 ...(specificProjects.length > 0 && allProjects.projects.some(project => project.id === specificProjects[0]?.id) ? [] : specificProjects),
-                ...allProjects.projects
+                ...allProjects.projects,
+                ...selectedProjects
               ],
               scrollId: allProjects.scroll_id,
               loadMore: action.loadMore
             })
           ))
       ),
-      mergeMap((projects: { projects: ProjectsGetAllResponseSingle[]; scrollId: string }) => [setTablesFilterProjectsOptions({...projects})])
+      mergeMap((projects: {
+        projects: ProjectsGetAllResponseSingle[];
+        scrollId: string;
+      }) => [setTablesFilterProjectsOptions({...projects})])
     )
   );
 
@@ -107,7 +153,7 @@ export class ProjectsEffects {
 
   resetAncestorProjects$ = createEffect(() => this.actions$.pipe(
     ofType(actions.setSelectedProjectId),
-    withLatestFrom(this.store.select(selectSelectedProjectId)),
+    concatLatestFrom(() => this.store.select(selectSelectedProjectId)),
     filter(([action, prevProjectId]) => action.projectId !== prevProjectId),
     mergeMap(() => [setProjectAncestors({projects: null})])
   ));
@@ -191,7 +237,14 @@ export class ProjectsEffects {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     switchMap(action => this.projectsApi.projectsGetProjectTags({filter: {system_tags: [action.entity]}})
       .pipe(
-        map((res: OrganizationGetTagsResponse) => actions.setTags({tags: res.tags})),
+        withLatestFrom(this.store.select(selectMainPageTagsFilter), this.store.select(selectProjectType)),
+        mergeMap(([res, fTags, projectType]) => [
+          actions.setTags({tags: res.tags}),
+          ...(fTags?.length > 0 && fTags.some(fTag => !res.tags.includes(cleanTag(fTag))) ? [setMainPageTagsFilter({
+            tags: fTags.filter(fTag => res.tags.includes(cleanTag(fTag))),
+            feature: projectType
+          })] : []),
+        ]),
         catchError(error => [requestFailed(error)])
       )
     )
@@ -199,7 +252,7 @@ export class ProjectsEffects {
 
   getTagsEffect = createEffect(() => this.actions$.pipe(
     ofType(actions.getTags),
-    withLatestFrom(this.store.select(selectRouterParams).pipe(
+    concatLatestFrom(() => this.store.select(selectRouterParams).pipe(
       map(params => (params === null || params?.projectId === '*') ? [] : [params.projectId]))),
     mergeMap(([action, projects]) => {
       const ids = action?.projectId ? [action.projectId] : projects;
@@ -239,10 +292,10 @@ export class ProjectsEffects {
 
   fetchProjectStats = createEffect(() => this.actions$.pipe(
     ofType(actions.fetchGraphData),
-    withLatestFrom(
+    concatLatestFrom(() => [
       this.store.select(selectSelectedProjectId),
       this.store.select(selectSelectedMetricVariantForCurrProject),
-    ),
+    ]),
     filter(([, , variant]) => !!variant),
     switchMap(([, projectId, variant]) => {
       const col = createMetricColumn(variant, projectId);
@@ -290,10 +343,9 @@ export class ProjectsEffects {
 
   getAllProjectsUsersEffect = createEffect(() => this.actions$.pipe(
     ofType(actions.getAllSystemProjects),
-    switchMap(() => this.usersApi.usersGetAllEx({
+    switchMap(() => this.projectsApi.projectsGetUserNames({
       /* eslint-disable @typescript-eslint/naming-convention */
-      order_by: ['name'],
-      only_fields: ['name'],
+      include_subprojects: true
       /* eslint-enable @typescript-eslint/naming-convention */
     }, null, 'body', true).pipe(
       mergeMap(res => [actions.setAllProjectUsers(res)]),
@@ -306,17 +358,14 @@ export class ProjectsEffects {
 
   getUsersEffect = createEffect(() => this.actions$.pipe(
     ofType(actions.getProjectUsers),
-    withLatestFrom(
-      this.store.select(selectAllProjectsUsers)
+    concatLatestFrom(() => [this.store.select(selectAllProjectsUsers), this.store.select(selectIsDeepMode)]
     ),
-    switchMap(([action, all]) => (!action.projectId || action.projectId === '*' ?
+    switchMap(([action, all, isDeep]) => (!action.projectId || action.projectId === '*' ?
       of({users: all}) :
-      this.usersApi.usersGetAllEx({
-        /* eslint-disable @typescript-eslint/naming-convention */
-        order_by: ['name'],
-        only_fields: ['name'],
-        active_in_projects: [action.projectId]
-        /* eslint-enable @typescript-eslint/naming-convention */
+      this.projectsApi.projectsGetUserNames({
+        projects: [action.projectId],
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        include_subprojects: isDeep
       }, null, 'body', true)).pipe(
       mergeMap(res => [actions.setProjectUsers(res)]),
       catchError(error => [
@@ -347,6 +396,55 @@ export class ProjectsEffects {
     ))
   ));
 
+  // downloadForGetAll$ = createEffect(() => this.actions$.pipe(
+  //   ofType(downloadForGetAll),
+  //   filter(action => !!action.prepareId),
+  //   withLatestFrom(this.store.select(selectActiveWorkspace)),
+  //   switchMap(([action, workspace]) => fromFetch(`${HTTP.API_BASE_URL}/organization.download_for_get_all`,
+  //     {
+  //       ...(workspace?.id && {headers: {[TENANT_HEADER] : workspace.id}}),
+  //       method: 'POST',
+  //       credentials: 'include',
+  //       // eslint-disable-next-line @typescript-eslint/naming-convention
+  //       body: JSON.stringify({prepare_id: action.prepareId})
+  //     })
+  //     .pipe(
+  //       switchMap(res => from(res.blob())),
+  //       map(fileBlob => {
+  //         const url = window.URL.createObjectURL(fileBlob);
+  //         const a = document.createElement('a');
+  //         a.href = url;
+  //         a.target = '_blank';
+  //         a.download = `full-table.csv`;
+  //         a.click();
+  //       })
+  //     )),
+  // ), {dispatch: false});
+
+  downloadForGetAll$ = createEffect(() => this.actions$.pipe(
+    ofType(downloadForGetAll),
+    filter(action => !!action.prepareId),
+  )).subscribe((action) => {
+      const a = document.createElement('a');
+      a.href = `${HTTP.API_BASE_URL}/organization.download_for_get_all?prepare_id=${action.prepareId}`;
+      a.target = '_blank';
+      a.click();
+    }
+  );
+
+  private getRelevantTableFilters(routerConfig$: Observable<Params>) {
+    return routerConfig$.pipe(switchMap(config => {
+      if (config.includes('compare-experiments')) {
+        return this.store.select(selectCompareAddTableFilters);
+      } else if (config?.includes('models')) {
+        return this.store.select(selectTableFilters);
+      } else if (config?.includes('compare-models') || config?.includes('input-model')) {
+        return this.store.select(selectSelectModelTableFilters);
+      } else {
+        return this.store.select(selectExperimentsTableFilters);
+      }
+    }));
+  }
 }
 
 

@@ -1,12 +1,12 @@
 import {Injectable} from '@angular/core';
-import {Actions, createEffect, ofType} from '@ngrx/effects';
+import {Actions, concatLatestFrom, createEffect, ofType} from '@ngrx/effects';
 import {Action, Store} from '@ngrx/store';
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
 import {ApiAuthService} from '~/business-logic/api-services/auth.service';
 import {BlTasksService} from '~/business-logic/services/tasks.service';
 import {ApiEventsService} from '~/business-logic/api-services/events.service';
-import {Router} from '@angular/router';
-import {catchError, map, mergeMap, switchMap, tap, withLatestFrom} from 'rxjs/operators';
+import {ActivatedRoute, Router} from '@angular/router';
+import {catchError, map, mergeMap, switchMap, tap} from 'rxjs/operators';
 import {
   activeLoader,
   addMessage,
@@ -18,14 +18,13 @@ import * as menuActions from '../actions/common-experiments-menu.actions';
 import {stopClicked} from '../actions/common-experiments-menu.actions';
 import {Observable, of} from 'rxjs';
 import {requestFailed} from '../../core/actions/http.actions';
-import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {ExperimentConverterService} from '~/features/experiments/shared/services/experiment-converter.service';
 import * as exSelectors from '../reducers';
 import {selectSelectedExperiments, selectTableMode} from '../reducers';
 import {selectSelectedExperiment} from '~/features/experiments/reducers';
 import * as infoActions from '../actions/common-experiments-info.actions';
 import {autoRefreshExperimentInfo, experimentDetailsUpdated} from '../actions/common-experiments-info.actions';
-import {EmptyAction} from '~/app.constants';
+import {emptyAction} from '~/app.constants';
 import * as viewActions from '../actions/common-experiments-view.actions';
 import {IExperimentInfo, ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
 import {ApiProjectsService} from '~/business-logic/api-services/projects.service';
@@ -54,6 +53,7 @@ import {WelcomeMessageComponent} from '@common/layout/welcome-message/welcome-me
 import {selectNeverShowPopups} from '@common/core/reducers/view.reducer';
 import {MESSAGES_SEVERITY} from '@common/constants';
 import {TasksCloneResponse} from '~/business-logic/model/tasks/tasksCloneResponse';
+import {addProjectsTag} from '../actions/common-experiments-view.actions';
 
 export const getChildrenExperiments = (tasksApi, parents, filters?: { [key: string]: any }): Observable<Task[]> =>
   tasksApi.tasksGetAllEx({
@@ -71,10 +71,9 @@ export const getChildrenExperiments = (tasksApi, parents, filters?: { [key: stri
 
 @Injectable()
 export class CommonExperimentsMenuEffects {
-  private selectedExperiment: IExperimentInfo;
 
   constructor(private actions$: Actions,
-              private store: Store<ExperimentInfoState>,
+              private store: Store,
               private apiTasks: ApiTasksService,
               private pipelineApi: ApiPipelinesService,
               private authApi: ApiAuthService,
@@ -83,10 +82,9 @@ export class CommonExperimentsMenuEffects {
               private projectApi: ApiProjectsService,
               private converter: ExperimentConverterService,
               private router: Router,
+              private route: ActivatedRoute,
               private dialog: MatDialog
-  ) {
-    store.select(selectSelectedExperiment).subscribe(exp => this.selectedExperiment = exp);
-  }
+  ) {}
 
   activeLoader = createEffect(() => this.actions$.pipe(
     ofType(
@@ -103,7 +101,7 @@ export class CommonExperimentsMenuEffects {
 
   enqueueExperiment$ = createEffect(() => this.actions$.pipe(
     ofType(menuActions.enqueueClicked),
-    withLatestFrom(this.store.select(selectSelectedExperiment)),
+    concatLatestFrom(() => this.store.select(selectSelectedExperiment)),
     switchMap(([action, selectedEntity]: [ReturnType<typeof menuActions.enqueueClicked>, IExperimentInfo]) => {
         const ids = action.selectedEntities.map(exp => exp.id);
         return this.apiTasks.tasksEnqueueMany({
@@ -115,31 +113,33 @@ export class CommonExperimentsMenuEffects {
           /* eslint-enable @typescript-eslint/naming-convention */
         })
           .pipe(
-            withLatestFrom(this.store.select(selectNeverShowPopups)),
-            tap(([res, neverShowAgainPopups]) => {
-              if (res.queue_watched === false && !neverShowAgainPopups.includes('orphanedQueue')) {
-                this.dialog.open(WelcomeMessageComponent, {
-                  data: {
-                    queue: action.queue,
-                    step: 2
-                  }
-                }).afterClosed().subscribe(doNotShowAgain => {
-                  if (doNotShowAgain) {
-                    this.store.dispatch(neverShowPopupAgain({popupId: 'orphanedQueue'}));
-                  }
-                });
-              }
-            }),
-            mergeMap(([res]) => this.updateExperimentsSuccess(action, MenuItems.enqueue, ids, selectedEntity, res)),
+            mergeMap((res: TasksEnqueueManyResponse) => [
+              ...this.updateExperimentsSuccess(action, MenuItems.enqueue, ids, selectedEntity, res),
+              ...(res.queue_watched === false ? [menuActions.openEmptyQueueMessage({queue: action.queue})] : [])
+            ]),
             catchError(error => this.updateExperimentFailed(action.type, error))
           );
       }
     )
   ));
 
+  openMessage = createEffect(() => this.actions$.pipe(
+    ofType(menuActions.openEmptyQueueMessage),
+    concatLatestFrom(() => this.store.select(selectNeverShowPopups)),
+    switchMap(([action, neverShowAgainPopups]) => !neverShowAgainPopups.includes('orphanedQueue') ?
+        this.dialog.open(WelcomeMessageComponent, {
+          data: {
+            queue: action.queue,
+            step: 2
+          }
+        }).afterClosed() : of(null)
+    ),
+    map(doNotShowAgain => doNotShowAgain ? neverShowPopupAgain({popupId: 'orphanedQueue'}) : emptyAction())
+  ));
+
   startPipeline$ = createEffect(() => this.actions$.pipe(
     ofType(menuActions.startPipeline),
-    withLatestFrom(this.store.select(selectRouterParams).pipe(map(params => params?.projectId))),
+    concatLatestFrom(() => this.store.select(selectRouterParams).pipe(map(params => params?.projectId))),
     switchMap(([action, projectId]) =>
       this.pipelineApi.pipelinesStartPipeline({
           task: action.task, ...(action.queue && {queue: action.queue}),
@@ -166,7 +166,7 @@ export class CommonExperimentsMenuEffects {
 
   getPipelineControllerForRunDialog$ = createEffect(() => this.actions$.pipe(
     ofType(menuActions.getControllerForStartPipelineDialog),
-    withLatestFrom(this.store.select(selectRouterParams).pipe(map(params => params?.projectId))),
+    concatLatestFrom(() => this.store.select(selectRouterParams).pipe(map(params => params?.projectId))),
     switchMap(([action, projectId]) =>
       this.apiTasks.tasksGetAllEx({
         /* eslint-disable @typescript-eslint/naming-convention */
@@ -193,7 +193,7 @@ export class CommonExperimentsMenuEffects {
 
   dequeueExperiment$ = createEffect(() => this.actions$.pipe(
     ofType(menuActions.dequeueClicked),
-    withLatestFrom(this.store.select(selectSelectedExperiment)),
+    concatLatestFrom(() => this.store.select(selectSelectedExperiment)),
     switchMap(([action, selectedEntity]) => {
         const ids = action.selectedEntities.map(exp => exp.id);
         return this.apiTasks.tasksDequeueMany({ids})
@@ -208,7 +208,7 @@ export class CommonExperimentsMenuEffects {
 
   cloneExperimentRequested$ = createEffect(() => this.actions$.pipe(
     ofType(menuActions.cloneExperimentClicked),
-    withLatestFrom(this.store.select(selectTableMode)),
+    concatLatestFrom(() => this.store.select(selectTableMode)),
     switchMap(([action, ]) => this.apiTasks.tasksClone({
         task: action.originExperiment.id,
         /* eslint-disable @typescript-eslint/naming-convention */
@@ -238,7 +238,7 @@ export class CommonExperimentsMenuEffects {
 
   // resetExperiment$ = createEffect(() => this.actions$.pipe(
   //   ofType(menuActions.resetClicked),
-  //   withLatestFrom(this.store.select(selectSelectedExperiment)),
+  //   concatLatestFrom(() => this.store.select(selectSelectedExperiment)),
   //   switchMap(
   //     ([action, selectedExp]) => {
   //       const ids = action.selectedEntities.map(exp => exp.id);
@@ -254,7 +254,7 @@ export class CommonExperimentsMenuEffects {
 
   publishExperiment$ = createEffect(() => this.actions$.pipe(
     ofType(menuActions.publishClicked),
-    withLatestFrom(this.store.select(selectSelectedExperiment)),
+    concatLatestFrom(() => this.store.select(selectSelectedExperiment)),
     switchMap(([action, selectedEntity]) => {
       const ids = action.selectedEntities.map(exp => exp.id);
       return this.apiTasks.tasksPublishMany({ids})
@@ -267,7 +267,7 @@ export class CommonExperimentsMenuEffects {
 
   abortAllChildren = createEffect(() => this.actions$.pipe(
     ofType(menuActions.abortAllChildren),
-    withLatestFrom(this.store.select(selectIsPipelines)),
+    concatLatestFrom(() => this.store.select(selectIsPipelines)),
     switchMap(([action, isPipeline]) => getChildrenExperiments(this.apiTasks, action.experiments)
       .pipe(
         tap(() => this.store.dispatch(deactivateLoader(action.type))),
@@ -277,7 +277,7 @@ export class CommonExperimentsMenuEffects {
           data: {tasks: action.experiments, shouldBeAbortedTasks}
         })).afterClosed()),
         mergeMap(confirmed => [
-          confirmed ? stopClicked({selectedEntities: [...confirmed.shouldBeAbortedTasks, ...action.experiments]}) : new EmptyAction(),
+          confirmed ? stopClicked({selectedEntities: [...confirmed.shouldBeAbortedTasks, ...action.experiments]}) : emptyAction(),
           deactivateLoader(action.type)
         ]),
         catchError(error => [deactivateLoader(action.type), requestFailed(error), addMessage(MESSAGES_SEVERITY.ERROR, 'Failed to fetch tasks running children')])
@@ -287,7 +287,7 @@ export class CommonExperimentsMenuEffects {
 
   stopExperiment$ = createEffect(() => this.actions$.pipe(
     ofType(menuActions.stopClicked),
-    withLatestFrom(this.store.select(selectSelectedExperiment)),
+    concatLatestFrom(() => this.store.select(selectSelectedExperiment)),
     switchMap(([action, selectedEntity]) => {
         const ids = action.selectedEntities.map(exp => exp.id);
         return this.apiTasks.tasksStopMany({ids})
@@ -311,10 +311,11 @@ export class CommonExperimentsMenuEffects {
       })
         .pipe(
           tap((res) => this.router.navigate([`projects/${action.project.id ? action.project.id : res.project_id ?? '*'}/experiments/${action.selectedEntities.length === 1 ? action.selectedEntities[0].id : ''}`], {queryParamsHandling: 'merge'})),
-          mergeMap(() => [
+          concatLatestFrom(() => this.store.select(selectSelectedExperiment)),
+          mergeMap(([, selectedExperiment]) => [
             viewActions.resetExperiments(),
             viewActions.setSelectedExperiments({experiments: []}),
-            ...action.selectedEntities.map(exp => this.setExperimentIfSelected(exp.id, {project: action.project ?? '*'})),
+            ...action.selectedEntities.map(exp => this.setExperimentIfSelected(selectedExperiment, exp.id, {project: action.project ?? '*'})),
             deactivateLoader(action.type),
             viewActions.getExperiments(),
             addMessage(MESSAGES_SEVERITY.SUCCESS, `Experiment moved successfully to ${action.project.name ?? 'Projects root'}`)
@@ -344,25 +345,28 @@ export class CommonExperimentsMenuEffects {
     ];
   }
 
-  setExperimentIfSelected(experimentId, payload) {
-    if (this.selectedExperiment?.id === experimentId) {
-      return infoActions.setExperiment({experiment: {...this.selectedExperiment, ...payload}});
+  setExperimentIfSelected(selectedExperiment, experimentId, payload) {
+    if (selectedExperiment?.id === experimentId) {
+      return infoActions.setExperiment({experiment: {...selectedExperiment, ...payload}});
     }
-    return new EmptyAction();
+    return emptyAction();
   }
 
   addTag$ = createEffect(() => this.actions$.pipe(
     ofType(menuActions.addTag),
-    withLatestFrom(this.store.select(selectSelectedExperiments), this.store.select(selectSelectedExperiment)),
+    concatLatestFrom(() => [
+      this.store.select(selectSelectedExperiments),
+      this.store.select(selectSelectedExperiment)
+    ]),
     switchMap(([action, selectedExperiments, selectedExperimentInfo]) => {
       const experimentsFromState = selectedExperimentInfo ? selectedExperiments.concat(selectedExperimentInfo) as ISelectedExperiment[] : selectedExperiments;
-      return action.experiments.map(experiment => {
+      return [...action.experiments.map(experiment => {
         const experimentFromState = experimentsFromState.find(exp => exp.id === experiment.id);
         return experimentDetailsUpdated({
           id: experiment.id,
           changes: {tags: Array.from(new Set((experimentFromState?.tags || experiment.tags || []).concat([action.tag]))).sort()}
         });
-      });
+      }), addProjectsTag({tag: action.tag})];
     })
   ));
 
@@ -393,14 +397,14 @@ export class CommonExperimentsMenuEffects {
 
   archiveExperiments = createEffect(() => this.actions$.pipe(
     ofType(menuActions.archiveSelectedExperiments),
-    withLatestFrom(
+    concatLatestFrom(() => [
       this.store.select(selectRouterParams),
       this.store.select(exSelectors.selectSelectedTableExperiment),
       this.store.select(selectRouterConfig),
-    ),
+    ]),
     switchMap(([action, routerParams, selectedExperiment]) => this.apiTasks.tasksArchiveMany({ids: action.selectedEntities.map(exp => exp.id)})
       .pipe(
-        withLatestFrom(this.store.select(selectRouterConfig)),
+        concatLatestFrom(() => this.store.select(selectRouterConfig)),
         mergeMap(([res, routerConfig]: [TasksArchiveManyResponse, RouterState['config']]) => {
           const experiments = action.selectedEntities;
           const allFailed = res.failed.length === experiments.length;
@@ -453,22 +457,18 @@ export class CommonExperimentsMenuEffects {
 
   restoreExperiments = createEffect(() => this.actions$.pipe(
     ofType(menuActions.restoreSelectedExperiments),
-    withLatestFrom(
+    concatLatestFrom(() => [
       this.store.select(selectRouterParams),
       this.store.select(exSelectors.selectSelectedTableExperiment),
-      this.store.select(selectRouterConfig),
-      this.store.select(selectTableMode)
-    ),
-    tap(([action, routerParams, selectedExperiment, routeConfig, tableMode]) => {
+    ]),
+    tap(([action, , selectedExperiment]) => {
       if (this.isSelectedExpInCheckedExps(action.selectedEntities, selectedExperiment)) {
-        const module = routeConfig.includes('pipelines') ? 'pipelines' : (routeConfig.includes('datasets') && routeConfig.includes('simple')) ? 'datasets/simple' : 'projects';
-        this.router.navigate([`${module}/${routerParams.projectId}/experiments/${tableMode === 'info' ?
-          (module === 'datasets/simple' ? routerParams.versionId : routerParams.experimentId) : ''}`]);
+        this.router.navigate([], {relativeTo: this.route, queryParams: {archive: undefined}, queryParamsHandling: 'merge'});
       }
     }),
     switchMap(([action, routerParams]) => this.apiTasks.tasksUnarchiveMany({ids: action.selectedEntities.map(exp => exp.id)})
       .pipe(
-        withLatestFrom(this.store.select(selectRouterConfig)),
+        concatLatestFrom(() => this.store.select(selectRouterConfig)),
         mergeMap(([res, routerConfig]: [TasksArchiveManyResponse, RouterState['config']]) => {
           const experiments = action.selectedEntities;
           const allFailed = res.failed.length === experiments.length;
@@ -518,7 +518,7 @@ export class CommonExperimentsMenuEffects {
 
   navigateToQueue = createEffect(() => this.actions$.pipe(
     ofType(menuActions.navigateToQueue),
-    withLatestFrom(this.store.select(selectSelectedExperiment)),
+    concatLatestFrom(() => this.store.select(selectSelectedExperiment)),
     switchMap(([action, info]) => {
       if (action.experimentId === info?.id && info?.execution?.queue?.id) {
         return of({tasks: [info]});

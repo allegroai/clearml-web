@@ -38,6 +38,7 @@ import {
 import {v4} from 'uuid';
 import {selectGraphsPerRow} from '@common/experiments/reducers';
 import {setGraphsPerRow} from '@common/experiments/actions/common-experiment-output.actions';
+import {SmoothTypeEnum} from '@common/shared/single-graph/single-graph.utils';
 
 @Component({
   selector: 'sm-experiment-graphs',
@@ -116,6 +117,7 @@ export class ExperimentGraphsComponent implements OnDestroy {
 
 
   @Input() smoothWeight: number;
+  @Input() smoothType: SmoothTypeEnum;
   @Input() groupBy: GroupByCharts;
 
   @Input() set xAxisType(axisType: ScalarKeyEnum) {
@@ -129,7 +131,7 @@ export class ExperimentGraphsComponent implements OnDestroy {
 
   @Input() exportForReport = true;
   @Output() hoverModeChanged = new EventEmitter<ChartHoverModeEnum>();
-  @Output() createEmbedCode = new EventEmitter<{ metrics?: string[]; variants?: string[]; domRect: DOMRect }>();
+  @Output() createEmbedCode = new EventEmitter<{ metrics?: string[]; variants?: string[]; originalObject?: string; xaxis?: ScalarKeyEnum; domRect: DOMRect }>();
 
   @ViewChildren('metricGroup') allMetricGroups !: QueryList<ElementRef>;
   @ViewChildren('singleGraphContainer') singleGraphs !: QueryList<ElementRef>;
@@ -139,7 +141,7 @@ export class ExperimentGraphsComponent implements OnDestroy {
     private el: ElementRef,
     private changeDetection: ChangeDetectorRef,
     private adminService: AdminService,
-    private store: Store<any>,
+    private store: Store,
     private renderer: Renderer2
   ) {
 
@@ -300,7 +302,7 @@ export class ExperimentGraphsComponent implements OnDestroy {
   trackByFn = (index: number, item) => item;
 
   trackByIdFn = (index: number, item: ExtFrame) =>
-    `${item.layout.title} ${(this.isDarkTheme ? '' : item.iter)}`;
+    `${item.layout.title} ${item.data?.length} ${(this.isDarkTheme ? '' : item.iter ?? '')}`;
 
   isWidthBigEnough() {
     return this.el.nativeElement.clientWidth > this.breakPoint;
@@ -325,11 +327,11 @@ export class ExperimentGraphsComponent implements OnDestroy {
         this.width = width - 16 / this.graphsPerRow;
         this.height = this.maxUserHeight || this.height;
         if (!this.isGroupGraphs) {
-          this.allMetricGroups.forEach(metricGroup => this.renderer.setStyle(metricGroup.nativeElement, 'width', `${this.width}px`));
-          this.allMetricGroups.forEach(metricGroup => this.renderer.setStyle(metricGroup.nativeElement, 'height', `${this.height}px`));
+          this.allMetricGroups?.forEach(metricGroup => this.renderer.setStyle(metricGroup.nativeElement, 'width', `${this.width}px`));
+          this.allMetricGroups?.forEach(metricGroup => this.renderer.setStyle(metricGroup.nativeElement, 'height', `${this.height}px`));
         } else {
-          this.singleGraphs.forEach(singleGraph => this.renderer.setStyle(singleGraph.nativeElement, 'width', `${this.width}px`));
-          this.singleGraphs.forEach(singleGraph => this.renderer.setStyle(singleGraph.nativeElement, 'height', `${this.height}px`));
+          this.singleGraphs?.forEach(singleGraph => this.renderer.setStyle(singleGraph.nativeElement, 'width', `${this.width}px`));
+          this.singleGraphs?.forEach(singleGraph => this.renderer.setStyle(singleGraph.nativeElement, 'height', `${this.height}px`));
         }
       }
       this.prepareRedraw();
@@ -359,9 +361,9 @@ export class ExperimentGraphsComponent implements OnDestroy {
     if ($event.edges.bottom) {
       this.height = $event.rectangle.height;
       if (!this.isGroupGraphs) {
-        this.allMetricGroups.forEach(metricGroup => this.renderer.setStyle(metricGroup.nativeElement, 'height', `${this.height}px`));
+        this.allMetricGroups?.forEach(metricGroup => this.renderer.setStyle(metricGroup.nativeElement, 'height', `${this.height}px`));
       } else {
-        this.singleGraphs.forEach(singleGraph => this.renderer.setStyle(singleGraph.nativeElement, 'height', `${this.height}px`));
+        this.singleGraphs?.forEach(singleGraph => this.renderer.setStyle(singleGraph.nativeElement, 'height', `${this.height}px`));
       }
     }
     this.prepareRedraw();
@@ -423,9 +425,9 @@ export class ExperimentGraphsComponent implements OnDestroy {
 
   public generateIdentifier = (chartItem: any) => `${this.singleGraphidPrefix} ${this.experimentGraphidPrefix} ${chartItem.metric} ${chartItem.layout.title} ${chartItem.iter} ${chartItem.variant} ${(chartItem.layout.images && chartItem.layout.images[0]?.source)}`;
 
-  creatingEmbedCode(chartItem: any, domRect: DOMRect) {
+  creatingEmbedCode(chartItem: any, {domRect, xaxis}: {xaxis: ScalarKeyEnum; domRect: DOMRect}) {
     if (!chartItem) {
-      this.createEmbedCode.emit({domRect});
+      this.createEmbedCode.emit({xaxis, domRect});
       return;
     }
 
@@ -434,10 +436,17 @@ export class ExperimentGraphsComponent implements OnDestroy {
       this.createEmbedCode.emit({
         metrics: [chartItem.data[0].originalMetric ?? chartItem.metric.substring(0, chartItem.metric.lastIndexOf('/'))?.trim()],
         variants: [chartItem.data[0].name],
+        ...((xaxis || this.xAxisType) && {xaxis: xaxis ?? this.xAxisType}),
         domRect
       });
     } else {
-      this.createEmbedCode.emit({metrics: [chartItem.metric], variants: chartItem.variants ?? [chartItem.variant], domRect});
+      this.createEmbedCode.emit({
+        metrics: [chartItem.metric],
+        variants: chartItem.variants ?? [chartItem.variant],
+        ...((xaxis || this.xAxisType) && {xaxis: xaxis ?? this.xAxisType}),
+        ...(chartItem.data.length < 2 && {originalObject: chartItem.task}),
+        ...(chartItem.data[0]?.seriesName && {seriesName: chartItem.data[0]?.seriesName}),
+        domRect});
     }
   }
 }

@@ -4,7 +4,6 @@ import {AppModule} from '~/app.module';
 import {ConfigurationService} from '@common/shared/services/configuration.service';
 import {updateHttpUrlBaseConstant} from '~/app.constants';
 const environment = ConfigurationService.globalEnvironment;
-debugger
 
 if (environment.production) {
   enableProdMode();
@@ -34,7 +33,6 @@ if (savedData) {
 
 (async () => {
   const baseHref = ( window as any ).__env.subPath || '' as string;
-  debugger
   updateHttpUrlBaseConstant({...environment, ...(baseHref && !baseHref.startsWith('${') && {apiBaseUrl: baseHref + environment.apiBaseUrl})});
   await platformBrowserDynamic().bootstrapModule(AppModule);
 })();

@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
-import {EmptyAction} from '~/app.constants';
+import {emptyAction} from '~/app.constants';
 import * as layoutActions from '../actions/layout.actions';
 import {addMessage} from '../actions/layout.actions';
 import {bufferTime, filter, map, mergeMap, switchMap, take} from 'rxjs/operators';
@@ -92,7 +92,7 @@ export class LayoutEffects {
       this.notifierService.show({type: payload.severity, message: payload.msg, actions: payload.userActions}) :
       EMPTY
     ),
-    mergeMap((actions: Action[]) => actions.length > 0 ? actions : [new EmptyAction()])
+    mergeMap((actions: Action[]) => actions.length > 0 ? actions : [emptyAction()])
   ));
 
   requestFailed: Observable<any> = createEffect( () => this.actions.pipe(

@@ -1,12 +1,13 @@
 <mat-drawer-container autosize class="light-theme">
   <mat-drawer #drawer [opened]="!minimized" [mode]="minimized ? 'over' : 'side'">
-    <i class="close al-icon al-ico-dialog-x sm-md" *ngIf="minimized" (click)="drawer.close()"></i>
+    <i class="close al-icon al-ico-dialog-x sm-md" *ngIf="minimized" (click)="drawer.close()" data-id="closeToggleGraph"></i>
     <div class="list-container">
       <sm-graph-settings-bar
         class="drawer-settings-bar"
         *ngIf="!minimized"
         [verticalLayout]="true"
         [smoothWeight]="smoothWeight$ | async"
+        [smoothType]="smoothType$ | async"
         [xAxisType]="xAxisType$ | async"
         [groupBy]="groupBy"
         [groupByOptions]="groupByOptions"
@@ -14,6 +15,7 @@
         (toggleSettings)="toggleSettingsBar()"
         (changeXAxisType)="changeXAxisType($event)"
         (changeGroupBy)="changeGroupBy($event)"
+        (changeSmoothType)="changeSmoothType($event)"
       ></sm-graph-settings-bar>
       <sm-selectable-grouped-filter-list
         [list]="scalarList"
@@ -32,13 +34,16 @@
       class="ribbon-setting-bar"
       [class.showSettings]="showSettingsBar && minimized"
       [smoothWeight]="smoothWeight$ | async"
+      [smoothType]="smoothType$ | async"
       [xAxisType]="xAxisType$ | async"
       [groupBy]="groupBy"
       [groupByOptions]="groupByOptions"
+      [splitSize]="splitSize$ | async"
       (changeWeight)="changeSmoothness($event)"
       (toggleSettings)="toggleSettingsBar()"
       (changeXAxisType)="changeXAxisType($event)"
       (changeGroupBy)="changeGroupBy($event)"
+      (changeSmoothType)="changeSmoothType($event)"
     ></sm-graph-settings-bar>
     <div class="graphs-container" [class.maximized]="!minimized">
       <div class="hover-button" *ngIf="minimized">
@@ -47,7 +52,7 @@
           (click)="drawer.open()"
           smTooltip="Toggle Graphs"
         >
-          <i class="al-icon al-ico-eye-outline"></i>
+          <i class="al-icon al-ico-eye-outline" data-id="eyeIcon"></i>
         </button>
       </div>
       <sm-experiment-graphs
@@ -58,7 +63,8 @@
         [singleValueData]="singleValueData$ | async"
         [experimentName]="experimentName"
         [hiddenList]="listOfHidden$ | async"
-        [smoothWeight]="smoothWeight$ | async"
+        [smoothWeight]="smoothWeightDelayed$ | async"
+        [smoothType]="smoothType$ | async"
         [legendStringLength]="minimized ? 14 : 19"
         [minimized]="minimized"
         [xAxisType]="xAxisType$ | async"

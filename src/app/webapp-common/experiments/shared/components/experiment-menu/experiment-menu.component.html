@@ -1,4 +1,4 @@
-<div *ngIf="activateFromMenuButton" mat-button [matMenuTriggerFor]="experimentMenu"
+<div *ngIf="activateFromMenuButton" [matMenuTriggerFor]="experimentMenu"
      class="cell menu-button al-icon al-ico-bars-menu pointer" data-id="menuIcon"
 ></div>
 <div *ngIf="!activateFromMenuButton" #contextTrigger
@@ -7,7 +7,7 @@
      [style.top.px]="position.y"
      [matMenuTriggerFor]="experimentMenu">
 </div>
-<mat-menu #experimentMenu="matMenu" [hasBackdrop]="backdrop" classList="light-theme">
+<mat-menu #experimentMenu="matMenu" [hasBackdrop]="backdrop" class="light-theme entity-context-menu">
   <ng-container *ngIf="selectedDisableAvailable[menuItems.queue]">
     <button *ngIf="tableMode" mat-menu-item (click)="toggleDetails()" data-id="Details Option">
       <i [class]="'al-icon '+ icons.DETAILS + ' sm-md'"></i>Details
@@ -88,7 +88,7 @@
     </button>
     <hr>
     <button mat-menu-item
-            [matMenuTriggerFor]="tagMenu" data-id="Add Tag Option"
+            [matMenuTriggerFor]="tagMenu.matMenu" data-id="Add Tag Option"
             [disabled]="selectedDisableAvailable[menuItems.tags]?.disable"
             (menuOpened)="tagMenuOpened()"
             (menuClosed)="tagMenuClosed()">
@@ -108,14 +108,12 @@
   </ng-container>
 </mat-menu>
 
-<mat-menu #tagMenu="matMenu">
-  <sm-tags-menu
-    #tagMenuContent
-    class="light-theme"
-    [tags]="experiment?.tags"
-    [tagsFilterByProject]="projectId !== '*' && tagsFilterByProject"
-    [projectTags]="projectTags"
-    [companyTags]="companyTags"
-    (tagSelected)="tagSelected.emit($event)">
-  </sm-tags-menu>
-</mat-menu>
+<sm-tags-menu
+  #tagMenu
+  class="light-theme"
+  [tags]="experiment?.tags"
+  [tagsFilterByProject]="!allProjects && tagsFilterByProject"
+  [projectTags]="projectTags"
+  [companyTags]="companyTags"
+  (tagSelected)="tagSelected.emit($event)">
+</sm-tags-menu>

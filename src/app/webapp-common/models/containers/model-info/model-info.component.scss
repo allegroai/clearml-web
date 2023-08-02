@@ -3,10 +3,6 @@
 :host {
 
   sm-model-info-header {
-    margin-bottom: 12px;
-  }
-
-  sm-model-info-header {
     display: block;
   }
 
@@ -28,18 +24,19 @@
   }
 
   .model-info-body {
-    height: calc(100% - 119px);
+    height: calc(100% - 108px);
   }
 
   .tab-nav {
-    //display: grid; need to fix when we'll have full page
-    display: flex;
+    display: grid;
     grid-template-columns: 200px 1fr 200px;
     align-items: center;
     border-bottom: 1px solid #efefef;
+    margin-right: 30px;
 
     &.minimized {
       display: flex;
+      margin-right: 0;
     }
 
     @media(max-width: 1200px) {
@@ -57,12 +54,19 @@
     margin-left: auto;
   }
 
+  sm-experiment-settings.maximized {
+    display: block;
+    padding-top: 6px;
+  }
+
   .refresh-position {
-    position: absolute;
-    right: 26px;
-    top: 2px;
     display: flex;
     align-items: center;
+    margin-left: auto;
+  }
+
+  .refreshIcon {
+    margin-right: 10px;
   }
 
   sm-experiment-settings.maximized {

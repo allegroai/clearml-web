@@ -5,7 +5,6 @@ import {SMSharedModule} from '../shared/shared.module';
 import {EffectsModule} from '@ngrx/effects';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ProjectsListComponent} from './dumb/projects-list/projects-list.component';
-import {ProjectsHeaderComponent} from './dumb/projects-header/projects-header.component';
 import {ProjectDialogModule} from '../shared/project-dialog/project-dialog.module';
 import {ProjectsSharedModule} from '~/features/projects/shared/projects-shared.module';
 import {CommonLayoutModule} from '../layout/layout.module';
@@ -27,8 +26,8 @@ import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-f
     CommonLayoutModule,
     LabeledFormFieldDirective,
   ],
-  declarations: [CommonProjectsPageComponent, ProjectsListComponent, ProjectsHeaderComponent],
-  exports: [CommonProjectsPageComponent, ProjectsListComponent, ProjectsHeaderComponent]
+  declarations: [CommonProjectsPageComponent, ProjectsListComponent],
+  exports: [CommonProjectsPageComponent, ProjectsListComponent]
 })
 export class CommonProjectsModule {
 }

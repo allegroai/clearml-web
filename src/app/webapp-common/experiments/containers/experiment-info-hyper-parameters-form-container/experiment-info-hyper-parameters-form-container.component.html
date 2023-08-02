@@ -2,9 +2,10 @@
 <sm-editable-section #parameterSection
                      class="light-theme"
                      *ngIf="(selectedSectionHyperParams$| async).length>0 || propSection"
-                     [editable]="(!isExample) && ((editable$ | async) || propSection)"
+                     [editable]="(isExample$ | async) !== true && ((editable$ | async) || propSection)"
                      [disableSave]="!executionParamsForm?.hyperParameters?.form?.valid"
                      [saving]="saving$ | async"
+                     [forceButtons]="!!searchedText"
                      (cancelClicked)="cancelHyperParametersChange(); executionParamsForm.cancel()"
                      (saveClicked)="sectionSaved()"
                      (activateEditClicked)="activateEditChanged('hyperparams')">
@@ -25,7 +26,7 @@
     #executionParamsForm
     class="form-section"
     [searchedText]="searchedText"
-    [editable]="(!isExample) && ((editable$ | async) || propSection) && parameterSection.inEditMode"
+    [editable]="(isExample$ | async) !== true && ((editable$ | async) || propSection) && parameterSection.inEditMode"
     [section]="selectedSection"
     [formData]="(selectedSectionHyperParams$ | async) | sort:'name'"
     [size]="size$ | async"

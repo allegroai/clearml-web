@@ -8,8 +8,9 @@
       fill: $blue-100;
     }
 
-    ::ng-deep .extended-x-line {
-      stroke-width: 0;
+    ::ng-deep .extended-x-line, ::ng-deep .extended-y-line {
+      stroke-width: 1px;
+      stroke: $dark-grey-blue;
     }
   }
 
@@ -58,4 +59,12 @@
   ::ng-deep .vertical-grid-line, ::ng-deep .horizontal-grid-line {
     opacity: 0.2;
   }
+
+  ::ng-deep .grid {
+    .grid-line {
+      stroke: $dark-grey-blue !important;
+      stroke-dasharray: none !important;
+    }
+  }
 }
+

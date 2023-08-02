@@ -24,7 +24,7 @@ export class ModelInfoExperimentsComponent {
   public selectedModelCreatingTaskLink$: Observable<string>;
 
 
-  constructor(private store: Store<ModelInfoState>,
+  constructor(private store: Store,
   ) {
     this.selectedModel$ = this.store.select(selectSelectedModel);
     this.selectedModelCreatingTaskLink$ = this.selectedModel$.pipe(map(model=>`/projects/${get( model, 'task.project.id', '*')}/experiments/${get(model, 'task.id','' )}` ));

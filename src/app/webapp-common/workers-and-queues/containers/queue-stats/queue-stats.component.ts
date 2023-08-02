@@ -56,7 +56,7 @@ export class QueueStatsComponent implements OnInit, OnDestroy {
     }
   }
 
-  constructor(public store: Store<any>, private cdr: ChangeDetectorRef) {
+  constructor(public store: Store, private cdr: ChangeDetectorRef) {
   }
 
   ngOnInit() {

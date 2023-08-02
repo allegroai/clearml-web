@@ -23,6 +23,8 @@ import {isDevelopment} from '~/features/experiments/shared/experiments.utils';
 import * as experimentsActions from '../../actions/common-experiments-view.actions';
 import {isReadOnly} from '@common/shared/utils/is-read-only';
 import {MESSAGES_SEVERITY} from '@common/constants';
+import {setBreadcrumbsOptions} from '@common/core/actions/projects.actions';
+import {selectSelectedProject} from '@common/core/reducers/projects.reducer';
 
 @Component({
   selector: 'sm-base-experiment-output',
@@ -47,10 +49,11 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
   public isDevelopment: boolean;
   private toMaximize = false;
   public selectSplitSize$: Observable<number>;
+  private selectedProject$: Observable<Project>;
 
 
   constructor(
-    private store: Store<ExperimentOutputState>,
+    private store: Store,
     private router: Router,
     private route: ActivatedRoute,
     private refresh: RefreshService
@@ -61,6 +64,8 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
     this.isAppVisible$ = this.store.select(selectAppVisible);
     this.backdropActive$ = this.store.select(selectBackdropActive);
     this.selectSplitSize$ = this.store.select(selectSplitSize);
+    this.selectedProject$ = this.store.select(selectSelectedProject);
+
 
 
   }
@@ -68,6 +73,9 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
   ngOnInit() {
     this.subs.add(this.store.select(selectRouterConfig).subscribe(routerConfig => {
       this.minimized = !routerConfig.includes('output');
+      if (!this.minimized){
+        this.setupBreadcrumbsOptions();
+      }
       this.routerConfig = routerConfig;
     }));
 
@@ -160,5 +168,26 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
   closePanel() {
     this.store.dispatch(experimentsActions.setTableMode({mode: 'table'}));
     return this.router.navigate(['..'], {relativeTo: this.route, queryParamsHandling: 'merge'});
+  }
+  setupBreadcrumbsOptions() {
+    this.subs.add(this.selectedProject$.pipe(
+    ).subscribe((selectedProject) => {
+      this.store.dispatch(setBreadcrumbsOptions({
+        breadcrumbOptions: {
+          showProjects: !!selectedProject,
+          featureBreadcrumb: {
+            name: 'PROJECTS',
+            url: 'projects'
+          },
+          projectsOptions: {
+            basePath: 'projects',
+            filterBaseNameWith: null,
+            compareModule: null,
+            showSelectedProject: selectedProject?.id !== '*',
+            ...(selectedProject && {selectedProjectBreadcrumb: {name: selectedProject?.id === '*' ? 'All Experiments' : selectedProject?.basename}})
+          }
+        }
+      }));
+    }));
   }
 }

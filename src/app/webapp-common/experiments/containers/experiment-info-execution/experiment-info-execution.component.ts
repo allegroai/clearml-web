@@ -2,11 +2,8 @@ import {Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core
 import {Store} from '@ngrx/store';
 import {Observable, Subscription} from 'rxjs';
 import {IExecutionForm, sourceTypesEnum} from '~/features/experiments/shared/experiment-execution.model';
-import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
-import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {
   selectIsExperimentEditable,
-  selectSelectedExperiment,
   selectShowExtraDataSpinner
 } from '~/features/experiments/reducers';
 import * as commonInfoActions from '../../actions/common-experiments-info.actions';
@@ -37,8 +34,6 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
 
   public executionInfo$: Observable<IExecutionForm>;
   public showExtraDataSpinner$: Observable<boolean>;
-  public selectedExperimentSubscrition: Subscription;
-  private selectedExperiment: IExperimentInfo;
   public editable$: Observable<boolean>;
   public isInDev$: Observable<boolean>;
   public saving$: Observable<boolean>;
@@ -61,7 +56,7 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
   public redactedArguments$: Observable<{ key: string }[]>;
 
   constructor(
-    private store: Store<ExperimentInfoState>,
+    private store: Store,
     private dialog: MatDialog,
     private route: ActivatedRoute,
     private element: ElementRef
@@ -78,10 +73,6 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.selectedExperimentSubscrition = this.store.select(selectSelectedExperiment)
-      .subscribe(selectedExperiment => {
-        this.selectedExperiment = selectedExperiment;
-      });
     this.store.dispatch(commonInfoActions.setExperimentFormErrors({errors: null}));
 
     this.formDataSubscription = this.executionInfo$.subscribe(formData => {
@@ -90,18 +81,18 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.selectedExperimentSubscrition.unsubscribe();
     this.formDataSubscription.unsubscribe();
   }
 
   saveSourceData() {
-    const source = this.sourceCode.sourceCodeForm.form.value;
+    const source = this.sourceCode.sourceCodeForm.form.value as IExecutionForm['source'];
     this.store.dispatch(commonInfoActions.saveExperimentSection({
       script: {
         /* eslint-disable @typescript-eslint/naming-convention */
         repository: source.repository,
         entry_point: source.entry_point,
         working_dir: source.working_dir,
+        binary: source.binary?.trim(),
         /* eslint-enable @typescript-eslint/naming-convention */
         ...this.convertScriptType(source)
       }

@@ -15,7 +15,8 @@ export class AbortAllChildrenDialogComponent {
 
 
   constructor(
-    private store: Store<any>, public dialogRef: MatDialogRef<AbortAllChildrenDialogComponent>,
+    private store: Store,
+    public dialogRef: MatDialogRef<AbortAllChildrenDialogComponent>,
     @Inject(MAT_DIALOG_DATA) data: {
       tasks: ISelectedExperiment[];
       shouldBeAbortedTasks: ISelectedExperiment[];

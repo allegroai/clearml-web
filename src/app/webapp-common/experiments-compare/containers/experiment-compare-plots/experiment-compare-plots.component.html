@@ -19,6 +19,7 @@
       [isCompare]="true"
       [isGroupGraphs]="true"
       [hiddenList]="listOfHidden | async"
+      [exportForReport]="!modelsFeature"
       (createEmbedCode)="createEmbedCode($event)"
       (resetGraphs)="resetMetrics()"
     >

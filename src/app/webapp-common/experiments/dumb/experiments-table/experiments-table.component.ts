@@ -37,7 +37,6 @@ import {createFiltersFromStore, excludedKey, uniqueFilterValueAndExcluded} from 
 import {getRoundedNumber} from '../../shared/common-experiments.utils';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {MAT_TOOLTIP_DEFAULT_OPTIONS, MatTooltipDefaultOptions} from '@angular/material/tooltip';
-import {getTablesFilterProjectsOptions, resetTablesFilterProjectsOptions} from '@common/core/actions/projects.actions';
 
 @Component({
   selector: 'sm-experiments-table',
@@ -116,6 +115,7 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit, 
         label: value,
         value
       })));
+      this.sortOptionsList(id);
     });
   }
 
@@ -187,6 +187,7 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit, 
       label: project.name,
       value: project.id,
     }));
+    this.sortOptionsList(EXPERIMENTS_TABLE_COL_FIELDS.PROJECT);
   }
 
   @Input() systemTags = [] as string[];
@@ -234,7 +235,7 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit, 
 
   constructor(
     private changeDetector: ChangeDetectorRef,
-    private store: Store<any>,
+    private store: Store,
     private noUnderscorePipe: NoUnderscorePipe,
     private router: Router
   ) {
@@ -328,6 +329,7 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit, 
   }
 
   columnFilterOpened(col: ISmCol) {
+    this.sortOptionsList(col.id);
     if (col.id === EXPERIMENTS_TABLE_COL_FIELDS.TAGS) {
       if (!this.filtersOptions[EXPERIMENTS_TABLE_COL_FIELDS.TAGS]?.length) {
         this.tagsMenuOpened.emit();

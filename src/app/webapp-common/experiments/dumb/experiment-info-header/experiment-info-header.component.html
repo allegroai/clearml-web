@@ -20,7 +20,7 @@
   <div class="d-flex align-items-center ms-auto">
     <div class="shared line-item"
          *ngIf="(!minimized) && shared"
-    ><i class="fas fa-link p-1"></i></div>
+    ><i class="al-icon al-ico-link sm-md"></i></div>
     <sm-id-badge class="me-3" [id]="experiment?.id" (copied)="copyToClipboard()" *ngIf="!viewId"></sm-id-badge>
     <span class="comment line-item"
           [delay]="1000" [action]="'leave'"
@@ -43,7 +43,7 @@
         [action]="'leave'"
         (smHesitate)="menu.closed.emit();"
         [selectedExperiment]="infoData"
-        (onDescription)="onDescriptionHandler()"
+        (editDescription)="editDescriptionHandler()"
       ></sm-experiment-info-edit-description>
     </mat-menu>
     <div *ngIf="minimized" (click)="maximizedClicked.emit()"
@@ -78,33 +78,28 @@
 <div class="middle-col">
   <sm-tag-list
     *ngIf="editable; else readOnlyTags"
-    class="w-100"
-    [class.menu-open]="!!tagMenu && tagMenu.trigger.menuOpen"
+    [class.menu-open]="tagsMenuTrigger?.menuOpen"
     [sysTags]="systemTags"
     [tags]="experiment?.tags"
-    (add)="openTagMenu($event)"
+    (add)="openTagMenu()"
     (remove)="removeTag($event)"></sm-tag-list>
   <ng-template #readOnlyTags>
     <sm-tag-list
-      class="w-100"
       [sysTags]="systemTags"
       [tags]="experiment?.tags"></sm-tag-list>
   </ng-template>
-  <sm-menu
-    #tagMenu
-    [showCart]="false"
-    [showButton]="false"
-    [showOverlay]="false"
+  <span
+    #tagsMenuTrigger="matMenuTrigger"
+    [matMenuTriggerFor]="tagsMenu.matMenu"
     (menuClosed)="tagsMenuClosed()"
-  >
-    <sm-tags-menu
-      class="light-theme"
-      #tagsMenuContent
-      [tags]="experiment?.tags"
-      [tagsFilterByProject]="tagsFilterByProject$ | async"
-      [projectTags]="projectTags$ | async"
-      [companyTags]="companyTags$ | async"
-      (tagSelected)="addTag($event)"
-    ></sm-tags-menu>
-  </sm-menu>
+  ></span>
+  <sm-tags-menu
+    #tagsMenu
+    class="light-theme"
+    [tags]="experiment?.tags"
+    [tagsFilterByProject]="tagsFilterByProject$ | async"
+    [projectTags]="projectTags$ | async"
+    [companyTags]="companyTags$ | async"
+    (tagSelected)="addTag($event)"
+  ></sm-tags-menu>
 </div>

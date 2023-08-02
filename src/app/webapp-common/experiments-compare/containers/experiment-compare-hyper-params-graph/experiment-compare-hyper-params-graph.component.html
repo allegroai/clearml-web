@@ -72,12 +72,13 @@
 </div>
 <div class="graphs-container h-100">
   <div *ngIf="plotlyReady$ | async" class="graph-container">
-    <sm-parallel-coordinates-graph *ngIf="(experiments$ | async).length > 1 && selectedHyperParams.length > 0 && !!selectedMetric; else no_data"
-                                   [experiments]="experiments$ | async"
-                                   [parameters]="selectedHyperParams"
-                                   [metric]="selectedMetric"
-                                   [metricValueType]="metricValueType$ | async"
-                                   (createEmbedCode)="createEmbedCode($event)"
+    <sm-parallel-coordinates-graph
+      *ngIf="(experiments$ | async).length > 1 && selectedHyperParams?.length > 0 && !!selectedMetric; else no_data"
+      [experiments]="experiments$ | async"
+      [parameters]="selectedHyperParams"
+      [metric]="selectedMetric"
+      [metricValueType]="metricValueType$ | async"
+      (createEmbedCode)="createEmbedCode($event)"
     ></sm-parallel-coordinates-graph>
     <ng-template #no_data>
       <div class="d-flex align-items-center justify-content-center flex-column h-100 no-data">

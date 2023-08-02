@@ -5,7 +5,7 @@ import {combineLatest, filter, Subscription} from 'rxjs';
 import {Queue} from '~/business-logic/model/queues/queue';
 import {selectQueuesList} from '../../experiments/shared/components/select-queue/select-queue.reducer';
 import {ConfirmDialogComponent} from '../../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
-import {GetQueuesForEnqueue} from '@common/experiments/shared/components/select-queue/select-queue.actions';
+import {getQueuesForEnqueue} from '@common/experiments/shared/components/select-queue/select-queue.actions';
 import {cloneDeep} from 'lodash-es';
 import {
   getControllerForStartPipelineDialog,
@@ -27,14 +27,14 @@ export class RunPipelineControllerDialogComponent implements OnInit, OnDestroy {
   public title: string;
   public params: any;
   public task: IExperimentInfo;
-  public chooseCustomQueue: boolean= false;
+  public chooseCustomQueue: boolean = false;
   private queuesSub: Subscription;
   private baseControllerSub: Subscription;
   private selectedQueueSub: Subscription;
 
   constructor(
     public dialogRef: MatDialogRef<ConfirmDialogComponent>,
-    private store: Store<any>,
+    private store: Store,
     @Inject(MAT_DIALOG_DATA) public data: { task }
   ) {
     if (data?.task?.hyperparams?.Args) {
@@ -51,7 +51,7 @@ export class RunPipelineControllerDialogComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.store.dispatch(new GetQueuesForEnqueue());
+    this.store.dispatch(getQueuesForEnqueue());
     this.baseControllerSub = this.baseController$.pipe(filter(task => !!task)).subscribe(task => {
       this.task = task;
       this.title = this.getTitle();
@@ -80,7 +80,7 @@ export class RunPipelineControllerDialogComponent implements OnInit, OnDestroy {
 
   changeChooseCustomQueue() {
     this.chooseCustomQueue = !this.chooseCustomQueue;
-    if(!this.chooseCustomQueue){
+    if (!this.chooseCustomQueue) {
       this.selectedQueue = this.queues.find(queue => this.task.execution?.queue?.id === queue?.id) || this.queues[0];
     }
   }
@@ -92,4 +92,9 @@ export class RunPipelineControllerDialogComponent implements OnInit, OnDestroy {
     }
     return this.task.name;
   }
+
+  displayFn = (entityObj: { name: string; id: string }) => entityObj?.name ?? '';
+
+  isFocused = (locationRef: HTMLInputElement) => document.activeElement === locationRef
+
 }

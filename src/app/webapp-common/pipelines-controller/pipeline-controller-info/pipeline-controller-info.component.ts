@@ -99,7 +99,7 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
 
   constructor(
     protected _dagManager: DagManagerUnsortedService<PipelineItem>,
-    protected store: Store<any>,
+    protected store: Store,
     protected cdr: ChangeDetectorRef,
     protected zone: NgZone
   ) {

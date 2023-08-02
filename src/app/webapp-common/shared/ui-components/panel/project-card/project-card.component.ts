@@ -24,7 +24,7 @@ export class ProjectCardComponent {
 
   @Input() set project(data: Project) {
     this._project = data;
-    this.hidden = data.system_tags?.includes('hidden');
+    this.hidden = data.hidden || data.system_tags?.includes('hidden');
     this.computeTime = this.convertSecToDaysHrsMinsSec(data.stats?.active?.total_runtime);
   };
 

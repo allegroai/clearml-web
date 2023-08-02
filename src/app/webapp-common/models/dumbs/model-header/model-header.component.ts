@@ -32,6 +32,7 @@ export class ModelHeaderComponent extends BaseEntityHeaderComponent {
   @Input() isLoadingMetadataKeys: any;
   @Input() tableMode: string;
   @Input() rippleEffect: boolean;
+  @Input() hideNavigation: boolean;
   @Output() isArchivedChanged = new EventEmitter<boolean>();
   @Output() addModelClicked   = new EventEmitter();
   @Output() refreshListClicked       = new EventEmitter();

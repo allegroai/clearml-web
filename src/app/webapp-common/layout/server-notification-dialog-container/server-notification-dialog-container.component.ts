@@ -17,7 +17,7 @@ export class ServerNotificationDialogContainerComponent implements OnInit, OnDes
   private notificationSubscription: Subscription;
   private dialogRef: MatDialogRef<ConfirmDialogComponent, any>;
 
-  constructor(private store: Store<any>, private dialog: MatDialog) {
+  constructor(private store: Store, private dialog: MatDialog) {
   }
 
   ngOnInit() {

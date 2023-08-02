@@ -1,4 +1,5 @@
 @import "variables";
+@import "src/app/webapp-common/assets/fonts/variables";
 
 $type-colors: (
   string: #FF6B6B,
@@ -16,29 +17,45 @@ $type-colors: (
 );
 
 .ngx-json-viewer {
+  height: 100%;
+  overflow: auto;
+
   font-family: $font-family-monospace;
   font-size: 13px;
   position: relative;
 
   .segment {
     padding: 2px;
-    margin: 2px 0 2px 14px;
+    margin-left: 14px;
 
     .segment-main {
       word-wrap: break-word;
 
       .toggler {
         position: absolute;
-        margin-left: -14px;
+        margin-left: -24px;
+        line-height: 16px;
         color: $blue-300;
         &:hover {
           color: $blue-100;
         }
         &::after {
           display: inline-block;
-          content: "▶";
+          font-family: $icomoon-font-family;
+          content: $al-ico-ico-chevron-down;
+          font-size: 18px;
+          transform: rotate(-90deg);
           transition: transform 0.1s ease-in, color 0.1s ease-in;
         }
+      }
+
+      &.expanded > .toggler::after {
+        transform: none;
+      }
+
+      &.expandable,
+      &.expandable > .toggler {
+        cursor: pointer;
       }
 
       .segment-key {
@@ -60,21 +77,21 @@ $type-colors: (
     }
   }
 
-
   .found {
     &::selection {
       background-color: $white;
       color: darken($neon-yellow, 20%);
     }
+
     background-color: lighten($neon-yellow, 20%);
     border-radius: 4px;
     padding: 0 2px;
-    &.current {
-      background-color: lighten($orangada, 10%);
-      &::selection {
-        background-color: $white;
-        color: darken($orangada, 10%);
-      }
+  }
+  .current .found{
+    background-color: lighten($orangada, 10%);
+    &::selection {
+      background-color: $white;
+      color: darken($orangada, 10%);
     }
   }
 
@@ -101,13 +118,15 @@ $type-colors: (
     white-space: nowrap;
   }
 
-  .expanded > .toggler::after {
-    transform: rotate(90deg);
+
+  .braces.last {
+    position: relative;
+    left: -12px;
   }
 
-  .expandable,
-  .expandable > .toggler {
-    cursor: pointer;
+  mat-tree-node {
+    font-size: 13px;
+    line-height: normal;
   }
 }
 

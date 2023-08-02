@@ -38,7 +38,7 @@ export class ExperimentInfoArtifactsComponent implements OnDestroy {
   private previousTarget: string;
   private sub = new Subscription();
 
-  constructor(private store: Store<ExperimentInfoState>, public router: Router, private route: ActivatedRoute
+  constructor(private store: Store, public router: Router, private route: ActivatedRoute
   ) {
     this.minimized = !!this.route.snapshot?.routeConfig?.data?.minimized;
     this.backdropActive$ = this.store.select(selectBackdropActive);

@@ -30,7 +30,7 @@ export class SelectableListComponent implements OnChanges{
 
   ngOnChanges(changes: SimpleChanges): void {
     if ((changes.list || changes.checkedList)) {
-      this.showList = this.list.map(item => ({...item, visible: !this.checkedList.includes(item.name) } as SelectableListItem));
+      this.showList = this.list.map(item => ({...item, visible: !this.checkedList?.includes(item.name) } as SelectableListItem));
       this.cdr.detectChanges();
     }
   }

@@ -23,7 +23,7 @@ export class ColorHashService {
     this._colorCache.next(obj);
   }
 
-  constructor(private store: Store<UsersState>) {
+  constructor(private store: Store) {
     this.store.select(selectColorPreferences)
       .pipe(
         filter(preferenceColors => !!preferenceColors),

@@ -82,6 +82,10 @@ export const enqueueClicked = createAction(
   EXPERIMENTS_INFO_PREFIX + '[enqueue experiments]',
   props<{ selectedEntities: ISelectedExperiment[]; queue: Queue; verifyWatchers: boolean }>()
 );
+export const openEmptyQueueMessage = createAction(
+  EXPERIMENTS_INFO_PREFIX + '[open empty queue message]',
+  props<{ queue: Queue }>()
+);
 
 export const archiveSelectedExperiments = createAction(
   EXPERIMENTS_INFO_PREFIX + '[archive selected experiments]',

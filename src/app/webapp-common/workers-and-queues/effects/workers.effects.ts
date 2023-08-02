@@ -36,7 +36,7 @@ export class WorkersEffects {
 
   constructor(
     private actions: Actions,
-    private workersApi: ApiWorkersService, private store: Store<any>) {
+    private workersApi: ApiWorkersService, private store: Store) {
   }
 
   getWorkers$ = createEffect(() => this.actions.pipe(

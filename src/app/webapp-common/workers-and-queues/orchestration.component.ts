@@ -15,7 +15,7 @@ export class OrchestrationComponent {
   private createQueueDialog: MatDialogRef<any, any>;
   public queuesManager: boolean;
 
-  constructor(private dialog: MatDialog, private store: Store<any>, private route: ActivatedRoute) {
+  constructor(private dialog: MatDialog, private store: Store, private route: ActivatedRoute) {
     this.queuesManager = route.snapshot.data.queuesManager;
   }
 

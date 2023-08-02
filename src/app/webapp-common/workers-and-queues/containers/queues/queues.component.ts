@@ -46,7 +46,7 @@ export class QueuesComponent implements OnInit {
     return url.searchParams.get('id');
   }
 
-  constructor(private store: Store<any>, private router: Router, private route: ActivatedRoute, private dialog: MatDialog) {
+  constructor(private store: Store, private router: Router, private route: ActivatedRoute, private dialog: MatDialog) {
     this.queues$ = this.store.select(selectQueues);
     this.selectedQueue$ = this.store.select(selectSelectedQueue);
     this.tableSortFields$ = this.store.select(selectQueuesTableSortFields);

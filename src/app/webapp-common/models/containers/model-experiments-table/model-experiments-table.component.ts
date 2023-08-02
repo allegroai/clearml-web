@@ -36,6 +36,7 @@ export const INITIAL_MODEL_EXPERIMENTS_TABLE_COLS: ISmCol[] = [
   },
   {
     id: EXPERIMENTS_TABLE_COL_FIELDS.TAGS,
+    getter: ['tags', 'system_tags'],
     headerType: ColHeaderTypeEnum.sortFilter,
     filterable: true,
     searchableFilter: true,
@@ -88,7 +89,7 @@ export class ModelExperimentsTableComponent implements OnInit, OnDestroy {
   public searchTerm$: Observable<{ query: string; regExp?: boolean; original?: string }>;
 
   constructor(
-    private store: Store<any>,
+    private store: Store,
   ) {
     this.resizedCols$.next(this._resizedCols);
     this.experiments$ = this.store.select(selectExperimentsList);

@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, inject, OnDestroy, OnInit} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {
   CommonProjectReadyForDeletion,
@@ -18,7 +18,7 @@ import {
   setProjectsSearchQuery,
   updateProject
 } from '../../common-projects.actions';
-import {ActivatedRoute, Router} from '@angular/router';
+import {ActivatedRoute, Params, Router} from '@angular/router';
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {ProjectsGetAllResponseSingle} from '~/business-logic/model/projects/projectsGetAllResponseSingle';
 import {ProjectDialogComponent} from '@common/shared/project-dialog/project-dialog.component';
@@ -35,7 +35,7 @@ import {
   withLatestFrom
 } from 'rxjs/operators';
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
-import * as coreProjectsActions from '../../../core/actions/projects.actions';
+import * as coreProjectsActions from '@common/core/actions/projects.actions';
 import {setDeep, setSelectedProjectId} from '@common/core/actions/projects.actions';
 import {initSearch, resetSearch} from '@common/common-search/common-search.actions';
 import {SearchState, selectSearchQuery} from '@common/common-search/common-search.reducer';
@@ -45,7 +45,7 @@ import {
   popupEntitiesListConst,
   readyForDeletionFilter
 } from '~/features/projects/projects-page.utils';
-import {selectRouterParams} from '@common/core/reducers/router-reducer';
+import {selectRouterConfig, selectRouterParams} from '@common/core/reducers/router-reducer';
 import {selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
 import {Project} from '~/business-logic/model/projects/project';
 import {CommonDeleteDialogComponent} from '@common/shared/entity-page/entity-delete/common-delete-dialog.component';
@@ -54,7 +54,6 @@ import {isExample} from '@common/shared/utils/shared-utils';
 import {selectSelectedProject} from '@common/core/reducers/projects.reducer';
 import {selectActiveWorkspaceReady} from '~/core/reducers/view.reducer';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
-import {selectIsDatasets} from '@common/experiments-compare/reducers';
 
 @Component({
   selector: 'sm-common-projects-page',
@@ -92,25 +91,24 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
   public selectedProjectId$: Observable<string>;
   public allExamples: boolean;
   /* eslint-enable @typescript-eslint/naming-convention */
-  private projectReadyForDeletion$: Observable<CommonProjectReadyForDeletion>;
-  private readonly searchQuery$: Observable<SearchState['searchQuery']>;
+  protected readonly searchQuery$: Observable<SearchState['searchQuery']>;
   private projectDialog: MatDialogRef<ProjectDialogComponent, any>;
-  private selectedProject$: Observable<Project>;
+  public selectedProject$: Observable<Project>;
   public projectId: string;
-  private subs = new Subscription();
+  public subs = new Subscription();
   private selectedProject: Project;
+  protected store = inject(Store);
+  protected router = inject(Router);
+  protected route = inject(ActivatedRoute);
+  protected dialog = inject(MatDialog);
+  private projectReadyForDeletion$: Observable<CommonProjectReadyForDeletion>;
 
-  constructor(
-    protected store: Store<any>,
-    protected router: Router,
-    protected route: ActivatedRoute,
-    protected dialog: MatDialog
-  ) {
+  constructor() {
     this.searchQuery$ = this.store.select(selectSearchQuery);
     this.projectsOrderBy$ = this.store.select(selectProjectsOrderBy);
     this.projectsSortOrder$ = this.store.select(selectProjectsSortOrder);
     this.noMoreProjects$ = this.store.select(selectNoMoreProjects);
-    this.selectedProjectId$ = this.store.select(selectRouterParams).pipe(map(params => params?.projectId));
+    this.selectedProjectId$ = this.store.select(selectRouterParams).pipe(map((params: Params) => params?.projectId));
     this.selectedProject$ = this.store.select(selectSelectedProject).pipe(tap(selectedProject => this.selectedProject = selectedProject));
     this.projectReadyForDeletion$ = this.store.select(selectProjectReadyForDeletion).pipe(
       distinctUntilChanged(),
@@ -120,9 +118,9 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
       this.store.select(selectProjects),
       this.store.select(selectSelectedProject)
     ]).pipe(
-      debounceTime(0),
-      withLatestFrom(this.selectedProjectId$, this.searchQuery$, this.store.select(selectIsDatasets)),
-      map(([[projectsList, selectedProject], selectedProjectId, searchQuery, isDatasets]) => {
+      debounceTime(50),
+      withLatestFrom(this.selectedProjectId$, this.searchQuery$, this.store.select(selectRouterConfig)),
+      map(([[projectsList, selectedProject = {} as Project], selectedProjectId, searchQuery, config]) => {
         this.searching = searchQuery?.query.length > 0;
         this.allExamples = projectsList?.length > 0 && projectsList?.every(project => isExample(project));
         if (projectsList === null) {
@@ -131,8 +129,8 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
         if ((searchQuery?.query || searchQuery?.regExp)) {
           return projectsList;
         } else {
-          if (selectedProject?.sub_projects?.length === 0 && selectedProjectId === selectedProject?.id) {
-            this.router.navigate(['..', 'experiments'], {relativeTo: isDatasets ? this.route : this.route.parent});
+          if ((selectedProject?.sub_projects?.length === 0 || this.shouldReRoute(selectedProject, config)) && selectedProjectId === selectedProject?.id) {
+            this.noProjectsReRoute();
             return [];
           }
           const pageProjectsList = this.getExtraProjects(selectedProjectId, selectedProject);
@@ -144,19 +142,34 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
     this.syncAppSearch();
   }
 
+  noProjectsReRoute() {
+    return this.router.navigate(['..', 'experiments'], {relativeTo: this.route.parent});
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  shouldReRoute(selectedProject, config) {
+    return false;
+  };
+
   protected getExtraProjects(selectedProjectId, selectedProject) {
     return [{
-      ...((selectedProjectId && selectedProject) ? selectedProject : this.ALL_EXPERIMENTS_CARD),
+      ...((selectedProjectId && selectedProject?.id) ? selectedProject : this.ALL_EXPERIMENTS_CARD),
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      id: selectedProjectId ? selectedProjectId : '*', name: 'All Experiments', sub_projects: null,
+      id: selectedProjectId ? selectedProjectId : '*',
+      name: 'All Experiments',
+      basename: 'All Experiments',
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      sub_projects: null,
     } as ProjectsGetAllResponseSingle];
   }
 
   ngOnInit() {
     // this.store.dispatch(new ResetSelectedProject());
+    this.store.dispatch(resetProjects());
     this.store.dispatch(setDeep({deep: false}));
+    // Todo: join the 2 subscriptions to 1 selector.
     this.subs.add(this.store.select(selectActiveWorkspaceReady)
-      .pipe(filter(ready => ready), take(1))
+      .pipe(filter(ready => !!ready), take(1))
       .subscribe(() => {
         this.store.dispatch(getAllProjectsPageProjects());
       }));
@@ -171,6 +184,10 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
       }
     ));
 
+
+
+
+
     this.subs.add(this.selectedProject$.pipe(
       filter(project => (!!project)),
       distinctUntilKeyChanged('id'),
@@ -182,7 +199,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
     this.subs.add(this.store.select(selectShowOnlyUserWork)
       .pipe(skip(1))
       .subscribe(() => {
-        this.store.dispatch(resetProjectsSearchQuery());
+        this.store.dispatch(resetProjects());
         this.store.dispatch(getAllProjectsPageProjects());
       }));
 
@@ -193,10 +210,32 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
         this.showConfirmDialog(readyForDeletion);
       }
     }));
+    this.setupBreadcrumbsOptions();
   }
 
   protected getDeletePopupEntitiesList() {
     return 'experiment';
+  }
+
+  setupBreadcrumbsOptions(){
+    this.subs.add(this.selectedProject$.pipe().subscribe((selectedProject) => {
+      this.store.dispatch(coreProjectsActions.setBreadcrumbsOptions({
+        breadcrumbOptions: {
+          showProjects: !!selectedProject,
+          featureBreadcrumb: {
+            name: 'PROJECTS',
+            url: 'projects'
+          },
+          projectsOptions: {
+            basePath: 'projects',
+            filterBaseNameWith: null,
+            compareModule: null,
+            showSelectedProject: true,
+            ...(selectedProject && {selectedProjectBreadcrumb: {name: selectedProject?.basename}})
+          }
+        }
+      }));
+    }));
   }
 
   private showConfirmDialog(readyForDeletion: CommonProjectReadyForDeletion) {
@@ -220,7 +259,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
     });
   }
 
-  private showDeleteDialog(readyForDeletion: CommonProjectReadyForDeletion) {
+  private showDeleteDialog(readyForDeletion) {
     const confirmDialogRef = this.dialog.open(CommonDeleteDialogComponent, {
       data: {
         entity: readyForDeletion.project,
@@ -245,6 +284,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
     this.subs.unsubscribe();
     this.store.dispatch(resetReadyToDelete());
     this.store.dispatch(resetProjectsSearchQuery());
+    this.store.dispatch(resetProjects());
   }
 
   stopSyncSearch() {

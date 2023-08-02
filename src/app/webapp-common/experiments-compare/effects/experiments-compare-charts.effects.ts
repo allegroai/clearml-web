@@ -19,7 +19,7 @@ import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 @Injectable()
 export class ExperimentsCompareChartsEffects {
 
-  constructor(private actions$: Actions, private store: Store<IExperimentCompareChartsState>, private apiTasks: ApiTasksService,
+  constructor(private actions$: Actions, private store: Store, private apiTasks: ApiTasksService,
               private authApi: ApiAuthService, private taskBl: BlTasksService, private eventsApi: ApiEventsService) {
   }
 

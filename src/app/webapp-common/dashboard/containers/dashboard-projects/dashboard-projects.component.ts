@@ -30,7 +30,7 @@ export class DashboardProjectsComponent implements OnInit, AfterViewInit, OnDest
   @Output() width = new EventEmitter<number>();
 
   constructor(
-    private store: Store<any>,
+    private store: Store,
     public router: Router,
     private matDialog: MatDialog
   ) {

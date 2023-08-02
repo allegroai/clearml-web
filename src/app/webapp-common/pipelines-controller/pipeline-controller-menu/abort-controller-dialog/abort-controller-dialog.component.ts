@@ -15,7 +15,8 @@ export class AbortControllerDialogComponent {
   shouldBeAbortedTasks: ITableExperiment[] = null;
 
   constructor(
-    private store: Store<any>, public dialogRef: MatDialogRef<AbortControllerDialogComponent>,
+    private store: Store,
+    public dialogRef: MatDialogRef<AbortControllerDialogComponent>,
     @Inject(MAT_DIALOG_DATA) data: {
       tasks: ISelectedExperiment[];
       shouldBeAbortedTasks: ISelectedExperiment[];

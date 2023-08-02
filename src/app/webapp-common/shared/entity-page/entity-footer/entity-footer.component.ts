@@ -22,7 +22,7 @@ export class EntityFooterComponent  extends BaseContextMenuComponent {
 
   icons = ICONS;
   trackBy = trackByIndex;
-  constructor(store: Store<any>, eRef: ElementRef) {
+  constructor(store: Store, eRef: ElementRef) {
     super(store, eRef);
   }
 

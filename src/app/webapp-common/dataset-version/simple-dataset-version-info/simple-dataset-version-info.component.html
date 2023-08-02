@@ -5,7 +5,7 @@
   (editDescription)="editDescription($event)"
 ></sm-simple-dataset-version-details>
 <div class="console-button">
-  <button class="btn btn-cml-primary d-flex align-items-center" (click)="toggleDetails()">
+  <button data-id="detailsButton" class="btn btn-cml-primary d-flex align-items-center" (click)="toggleDetails()">
     <i class="al-icon al-ico-console sm me-3"></i>DETAILS
   </button>
 </div>
@@ -63,8 +63,8 @@
         (valueChanged)="detailsPanelMode = $event"
       ></sm-button-toggle>
       <div class="close">
-        <i class="al-icon pointer" [class]="maximizeResults ? 'al-ico-min-panel' : 'al-ico-max-panel'" (click)="toggleResultSize()"></i>
-        <i class="al-icon al-ico-dialog-x pointer ms-4" (click)="openLog(false)"></i>
+        <i class="al-icon pointer" [class]="maximizeResults ? 'al-ico-min-panel' : 'al-ico-max-panel'" (click)="toggleResultSize()" data-id="expandButton"></i>
+        <i data-id="crossButton" class="al-icon al-ico-dialog-x pointer ms-4" (click)="openLog(false)"></i>
       </div>
     </div>
     <div [ngSwitch]="detailsPanelMode" class="content">

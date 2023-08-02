@@ -36,6 +36,7 @@
       [minimized]="minimized"
       [splitSize]="splitSize$ | async"
       [isDarkTheme]="dark"
+      [exportForReport]="!modelsFeature"
       (createEmbedCode)="createEmbedCode($event)"
       (resetGraphs)="resetMetrics()"
     >

@@ -10,22 +10,9 @@ import {FilterMetadata} from 'primeng/api/filtermetadata';
 })
 export class SelectModelHeaderComponent {
 
-  public readonly archivedModeOptions = [
-    {value: false, label: 'ALL MODELS'},
-    {value: true, label: 'ARCHIVE'}
-  ];
-
-  public readonly allProjectsdModeOptions = [
-    {value: true, label: 'ALL PROJECTS'},
-    {value: false, label: 'CURRENT PROJECT'}
-  ] as {value: any; label: string}[];
-
-
   @Input() searchValue: string;
   @Input() isArchived: boolean;
-  @Input() isAllProjects: boolean = true;
   @Input() hideArchiveToggle: boolean;
-  @Input() showAllProjectsToggle: boolean;
   @Input() hideCreateNewButton: boolean;
   @Input() viewMode: ModelsViewModesEnum;
   @Input() searchActive: boolean;

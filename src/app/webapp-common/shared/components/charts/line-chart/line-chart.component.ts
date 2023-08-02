@@ -8,10 +8,9 @@ import {
   AfterViewInit,
   NgZone,
 } from '@angular/core';
-import line from 'britecharts/dist/umd/line.min';
-import tooltip from 'britecharts/dist/umd/tooltip.min';
-import legend from 'britecharts/dist/umd/legend.min';
+import {line, tooltip, legend} from 'britecharts';
 import {select, Selection} from 'd3-selection';
+import 'd3-transition';
 
 interface Topic {
   topicName: string;

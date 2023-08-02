@@ -53,7 +53,7 @@ export class DebugImageSnippetComponent {
   isFailed = false;
   isLoading = true;
 
-  constructor(private store: Store<any>) {
+  constructor(private store: Store) {
   }
 
   openInNewTab(source: string) {

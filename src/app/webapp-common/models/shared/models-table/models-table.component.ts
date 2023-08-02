@@ -119,7 +119,9 @@ export class ModelsTableComponent extends BaseTableView {
 
   @Input() set onlyPublished(only: boolean) {
     const readyCol = this.tableCols.find(col => col.id === MODELS_TABLE_COL_FIELDS.READY);
-    readyCol.hidden = only;
+    if (readyCol) {
+      readyCol.hidden = only;
+    }
   }
 
   @Input() set projects(projects) {
@@ -132,6 +134,7 @@ export class ModelsTableComponent extends BaseTableView {
       value: project.id,
       tooltip: `${project.name}`
     }));
+    this.sortOptionsList(MODELS_TABLE_COL_FIELDS.PROJECT);
   }
 
   @Input() set enableMultiSelect(enable: boolean) {
@@ -169,7 +172,7 @@ export class ModelsTableComponent extends BaseTableView {
 
   private _selectedModel;
   @Input() set selectedModel(model) {
-    if (model && model !== this._selectedModel) {
+    if (model && model.id !== this._selectedModel?.id) {
       window.setTimeout(() => this.table?.focusSelected());
     }
     this._selectedModel = model;
@@ -259,7 +262,7 @@ export class ModelsTableComponent extends BaseTableView {
     }
   }
 
-  constructor(private changeDetector: ChangeDetectorRef, private store: Store<any>) {
+  constructor(private changeDetector: ChangeDetectorRef, private store: Store) {
     super();
     this.tagsFilterByProject$ = this.store.select(selectTagsFilterByProject);
     this.projectTags$ = this.store.select(selectProjectTags);
@@ -350,6 +353,7 @@ export class ModelsTableComponent extends BaseTableView {
   }
 
   columnFilterOpened(col: ISmCol) {
+    this.sortOptionsList(col.id);
     if (col.id === MODELS_TABLE_COL_FIELDS.TAGS && !this.filtersOptions[MODELS_TABLE_COL_FIELDS.TAGS]?.length) {
       this.tagsMenuOpened.emit();
     } else if (col.type === 'metadata') {

@@ -1,4 +1,3 @@
-@use "sass:math";
 @import "variables";
 
 :host {
@@ -23,7 +22,7 @@
     .loading {
       display: flex;
       align-items: center;
-      transform: translateY(#{-1 * math.div($chart-bar-height, 2)});
+      transform: translateY(#{-1 * $chart-bar-height * 0.5});
     }
     .text {
       font-size: 14px;
@@ -45,11 +44,6 @@
     fill: $black;
   }
 
-  ::ng-deep .horizontal-grid-line {
-    stroke: $dark-grey-blue;
-    stroke-dasharray: none;
-  }
-
   ::ng-deep .extended-x-line {
     stroke: $dark-grey-blue;
   }
@@ -64,7 +58,7 @@
     fill: $light-periwinkle-two;
   }
 
-  ::ng-deep rect.tooltip-text-container {
+  ::ng-deep rect.tooltip-background {
     fill: black !important;
     stroke: $blue-300 !important;
   }
@@ -81,5 +75,12 @@
 
   ::ng-deep .tooltip-left-text, ::ng-deep .tooltip-right-text {
     fill: $blue-200 !important;
+  }
+
+  ::ng-deep .grid {
+    .grid-line {
+      stroke: $dark-grey-blue;
+      stroke-dasharray: none;
+    }
   }
 }

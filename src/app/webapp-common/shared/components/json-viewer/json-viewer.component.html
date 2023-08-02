@@ -1,0 +1,63 @@
+<mat-tree class="ngx-json-viewer" *ngIf="dataSource.data.length > 0" [dataSource]="dataSource" [treeControl]="treeControl">
+  <mat-tree-node
+    *matTreeNodeDef="let segment"
+    [matTreeNodePadding]="segment.level + 1"
+    [matTreeNodePaddingIndent]="12"
+  >
+    <section [ngClass]="['segment', 'segment-type-' + segment.type]">
+      <section
+        matTreeNodeToggle
+        class="segment-main"
+        [class.current]="searchIndex === segment.searchIndex"
+      >
+        <span class="segment-key" *ngFor="let part of (search ? split(segment.key, search) : [[segment.key, search]]); let last=last"
+        >{{part[0]}}<span class="found" *ngIf="!last"
+        >{{part[1]}}</span></span>
+        <span *ngIf="segment.key" class="segment-separator">: </span>
+        <span class="segment-value">
+          <a *ngIf="segment.type === 'link'; else: noLink" href="" (click)="linkActionWrapper($event, segment.value)"><ng-container *ngTemplateOutlet="noLink"></ng-container></a>
+          <ng-template #noLink><span class="segment-description" *ngFor="let part of (search ? split(segment.description, search) : [[segment.description, search]]); let last=last"
+          >{{part[0]}}<span class="found" *ngIf="!last"
+          >{{part[1]}}</span></span></ng-template>
+        </span>
+      </section>
+    </section>
+  </mat-tree-node>
+  <mat-tree-node
+    *matTreeNodeDef="let segment; let lineIndex=index; when: hasChild"
+    [matTreeNodePadding]="segment.level + 1"
+    [matTreeNodePaddingIndent]="12"
+    [disabled]="!segment.expandable"
+  >
+    <section class="segment" [ngClass]="'segment-type-' + segment.type">
+      <section
+        matTreeNodeToggle
+        class="segment-main expandable"
+        [class.current]="searchIndex === segment.searchIndex"
+        [class.expanded]="treeControl.isExpanded(segment)"
+      >
+        <span class="toggler"></span>
+        <span class="segment-key" *ngFor="let part of (search ? split(segment.key, search) : [[segment.key, search]]); let last=last"
+        >{{part[0]}}<span class="found" *ngIf="!last"
+        >{{part[1]}}</span></span>
+        <span *ngIf="segment.key" class="segment-separator">: </span>
+        <div *ngIf="treeControl.isExpanded(segment)" class="braces">{{ segment.type === 'array' ? '[' : '{' }}</div>
+        <span *ngIf="!treeControl.isExpanded(segment)" class="segment-value">
+          <span class="segment-description" *ngFor="let part of (search ? split(segment.description, search) : [[segment.description, search]]); let last=last"
+          >{{part[0]}}<span class="found" *ngIf="!last"
+          >{{part[1]}}</span></span>
+        </span>
+      </section>
+      <div *ngIf="lineIndex === 0 && treeControl.isExpanded(segment)" class="braces">{{ segment.type === 'array' ? ']' : '}' }}</div>
+    </section>
+  </mat-tree-node>
+  <mat-tree-node
+    *matTreeNodeDef="let segment; when: closing"
+    [matTreeNodePadding]="segment.level + 1"
+    [matTreeNodePaddingIndent]="12"
+  >
+    <section class="segment">
+      <div *ngIf="segment.closing" class="braces last">{{ segment.closing }}</div>
+    </section>
+  </mat-tree-node>
+</mat-tree>

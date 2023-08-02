@@ -13,15 +13,16 @@
                       [editable]="true"
                       [minLength]="2"
                       [required]="true"
-                      pattern="^[^/]{2,}$"
+                      pattern="^[^\/]{2,}$"
+                      [forbiddenString]="[]"
                       [inlineDisabled]="true"
                       (textChanged)="prepareProjectNameForChange($event)"
 
       >
         <span class="d-flex align-items-center"><span class="project-name"
-                                                      [smTooltip]="project.name | cleanProjectPath"
+                                                      [smTooltip]="project.basename"
                                                       smShowTooltipIfEllipsis
-        >{{project.name | shortProjectName}}</span>
+        >{{project.basename}}</span>
           <i *ngIf="!hideProjectPathIcon && (project.name | cleanProjectPath: false)" [smTooltip]="project.name |
           cleanProjectPath:false"
              class="al-icon al-ico-project-path sm ms-2"></i></span>

@@ -66,7 +66,7 @@ export class DashboardSearchBaseComponent implements OnInit, OnDestroy{
   public resultsCount$: Observable<Map<ActiveSearchLink, number>>;
   public reportsResults$: Observable<Array<IReport>>;
 
-  constructor(public store: Store<any>, public router: Router){
+  constructor(public store: Store, public router: Router){
     this.searchQuery$        = store.select(selectSearchQuery);
     this.activeSearch$       = store.select(selectActiveSearch);
     this.modelsResults$      = store.select(selectModelsResults);

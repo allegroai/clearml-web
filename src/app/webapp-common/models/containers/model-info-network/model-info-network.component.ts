@@ -17,7 +17,7 @@ export class ModelInfoNetworkComponent implements OnInit {
   public saving$: Observable<boolean>;
   public isSharedAndNotOwner$: Observable<boolean>;
 
-  constructor(private store: Store<ModelInfoState>) {
+  constructor(private store: Store) {
     this.selectedModel$ = this.store.select(selectSelectedModel);
     this.isSharedAndNotOwner$ = this.store.select(selectIsSharedAndNotOwner);
     this.saving$         = this.store.select(selectIsModelSaving);

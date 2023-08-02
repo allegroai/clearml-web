@@ -54,14 +54,16 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
 
   @ViewChild(ExperimentGraphsComponent) graphsComponent: ExperimentGraphsComponent;
   private entityType: EntityTypeEnum;
+  public modelsFeature: boolean;
 
   constructor(
-    private store: Store<ExperimentInfoState>,
+    private store: Store,
     private changeDetection: ChangeDetectorRef,
     private route: ActivatedRoute,
     private refresh: RefreshService,
     private reportEmbed: ReportCodeEmbedService,
   ) {
+    this.modelsFeature = this.route.snapshot?.parent.data?.setAllProject;
     this.listOfHidden = this.store.pipe(select(selectSelectedSettingsHiddenPlot));
     this.searchTerm$ = this.store.pipe(select(selectExperimentMetricsSearchTerm));
     this.plots$ = this.store.pipe(
@@ -73,6 +75,7 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
       select(selectSelectedExperimentSettings),
       filter(settings => !!settings),
       map(settings => settings ? settings.selectedPlot : null),
+      filter(selectedPlot => selectedPlot !== undefined),
       distinctUntilChanged()
     );
 
@@ -104,6 +107,7 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
       .subscribe((selectedPlot) => {
         this.selectedGraph = selectedPlot;
         this.graphsComponent?.scrollToGraph(selectedPlot);
+        this.store.dispatch(setExperimentSettings({id: this.taskIds, changes: {selectedPlot: null}}));
       });
 
     this.routerParamsSubscription = this.routerParams$
@@ -153,11 +157,12 @@ export class ExperimentComparePlotsComponent implements OnInit, OnDestroy {
     this.store.dispatch(resetExperimentMetrics());
   }
 
-  createEmbedCode(event: { metrics?: string[]; variants?: string[]; domRect: DOMRect }) {
+  createEmbedCode(event: { metrics?: string[]; variants?: string[]; originalObject?: string; domRect: DOMRect }) {
     const entityType = this.entityType === EntityTypeEnum.model ? 'model' : 'task';
+    const idsOriginalFirst = event.originalObject ? [event.originalObject, ...this.taskIds.filter(id => id !== event.originalObject)] : this.taskIds;
     this.reportEmbed.createCode({
       type: 'plot',
-      objects: this.taskIds,
+      objects: idsOriginalFirst,
       objectType: entityType,
       ...event
     });

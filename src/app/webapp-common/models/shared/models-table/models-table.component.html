@@ -111,7 +111,7 @@
         <ng-container *ngSwitchCase="modelsTableColFields.NAME">
           <div class="d-flex flex-row flex-nowrap ellipsis">
             <div class="model-name"  [smTooltip]="model.name" smShowTooltipIfEllipsis>{{model.name}}</div>
-            <i *ngIf="model?.system_tags?.includes('shared')" class="al-icon al-ico-link sm-md ms-2"></i>
+            <i *ngIf="model?.system_tags?.includes('shared')" class="al-icon al-ico-link sm ms-2"></i>
           </div>
         </ng-container>
         <ng-container *ngSwitchCase="modelsTableColFields.TAGS">

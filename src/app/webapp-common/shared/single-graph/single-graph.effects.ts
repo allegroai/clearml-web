@@ -21,7 +21,7 @@ import {selectRouterConfig} from '@common/core/reducers/router-reducer';
 export class SingleGraphEffects {
 
 
-  constructor(private actions$: Actions, private store: Store<SingleGraphState>, private eventsApi: ApiEventsService) {}
+  constructor(private actions$: Actions, private store: Store, private eventsApi: ApiEventsService) {}
 
   fetchPlotsForIter$ = createEffect(() => this.actions$.pipe(
     ofType(getPlotSample),

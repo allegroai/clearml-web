@@ -1,0 +1,57 @@
+<sm-nested-project-view-page
+  [projectsList]="projectsList$ | async"
+  [projectsOrderBy]="projectsOrderBy$ | async"
+  [projectsSortOrder]="projectsOrderBy$ | async"
+  [noMoreProjects]="noMoreProjects$ | async"
+  [allExamples]="allExamples"
+  [cardContentTemplateRef]="cardContent"
+  [entityType]="entityType"
+  (cardClicked)="projectCardClicked($event)"
+  (deleteProjectClicked)="deleteProject($event)"
+  (projectNameChanged)="projectNameChanged($event)"
+  (orderByChanged)="orderByChanged($event)"
+  (loadMore)="loadMore()"
+  (toggleNestedView)="toggleNestedView($event)"
+>
+
+  <button create-button
+          class="btn btn-cml-primary d-flex align-items-center"
+          (click)="createExamples()">
+    <i class="al-icon al-ico-add sm me-2"></i>NEW DATASET
+  </button>
+
+  <div empty-state class="empty-datasets">
+    <div class="title-icon"><i class="al-icon al-ico-datasets xxl"></i></div>
+    <div class="title">NO DATASETS TO SHOW</div>
+    <div class="sub-title">Run your first dataset to see it displayed here
+      <ng-container *ngIf="allExamples"> or <a href="" (click)="$event.preventDefault(); createExamples()" class="link">generate
+        example
+      </a></ng-container>
+    </div>
+    <sm-dataset-empty [showButton]="true"></sm-dataset-empty>
+  </div>
+
+</sm-nested-project-view-page>
+
+<ng-template #cardContent let-project>
+  <sm-circle-counter
+    [counter]="project.id === '*' ? '∞' : project.stats?.datasets?.count ?? '0'"
+    [label]="'DATASETS'"
+    [type]="project.stats?.datasets?.count===0 ? circleTypeEnum.empty : circleTypeEnum.pending"></sm-circle-counter>
+  <sm-circle-counter label="TAGS IN USE" [counter]="[]">
+    <sm-tag-list
+      *ngIf="!hideMenu; else: ReadOnlyTags"
+      class="tags-list-counter"
+      [readonly]="true"
+      [class.empty-tags]="!(project.stats?.datasets?.tags.length > 0)"
+      tagsList
+      [tags]="project.stats?.datasets?.tags"
+      smClickStopPropagation
+    ></sm-tag-list>
+  </sm-circle-counter>
+  <ng-template #ReadOnlyTags>
+    <sm-tag-list [tags]="project.tags"></sm-tag-list>
+  </ng-template>
+</ng-template>
+
+

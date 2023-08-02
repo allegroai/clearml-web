@@ -62,7 +62,12 @@ export const compareHeader = createReducer(
     ...state,
     navigationPreferences: {...state.navigationPreferences, ...navigationPreferences}
   })),
-  on(resetSelectCompareHeader, () => ({...initialState})),
+  on(resetSelectCompareHeader, (state, action) => ({
+    ...initialState,
+    ...(!action.fullReset && {projectColumnFilters: state.projectColumnFilters,
+    viewArchived: state.viewArchived,
+    projectColumnsSortOrder: state.projectColumnsSortOrder})
+  })),
   on(compareAddDialogSetTableSort, (state, action) => {
     let orders = action.orders.filter(order => action.colIds.includes(order.field));
     orders = orders.length > 0 ? orders : null;
@@ -72,7 +77,7 @@ export const compareHeader = createReducer(
     ...state,
     projectColumnFilters: {
       ...state.projectColumnFilters,
-      [action.projectId]: {['project.name']: {value: [action.projectId], matchMode: undefined}}
+      [action.projectId]: {...state.projectColumnFilters[action.projectId], ['project.name']: {value: [action.projectId], matchMode: undefined}}
     }
   })),
   on(compareAddTableClearAllFilters, (state, action) => ({

@@ -7,7 +7,6 @@ import {ExperimentCompareTree,} from '~/features/experiments-compare/experiments
 import {convertmodelsArrays, getAllKeysEmptyObject, isDetailsConverted} from '../../jsonToDiffConvertor';
 import {ExperimentCompareBase} from '../experiment-compare-base';
 import {ActivatedRoute, Router} from '@angular/router';
-import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {ConfigurationItem} from '~/business-logic/model/tasks/configurationItem';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {LIMITED_VIEW_LIMIT} from '@common/experiments-compare/experiments-compare.constants';
@@ -25,7 +24,7 @@ export class ModelCompareDetailsComponent extends ExperimentCompareBase implemen
 
   constructor(
     public router: Router,
-    public store: Store<ExperimentInfoState>,
+    public store: Store,
     public changeDetection: ChangeDetectorRef,
     public activeRoute: ActivatedRoute,
     public cdr: ChangeDetectorRef,

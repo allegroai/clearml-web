@@ -213,6 +213,7 @@
       background-color: rgba($blue-600, 95%);
       border-radius: 4px;
       border: solid 1px $blue-400;
+      z-index: 2;
       &:hover {
         color: $blue-300;
         background-color: lighten($blue-600, 5%);

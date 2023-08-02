@@ -10,7 +10,7 @@
     <sm-show-only-user-work></sm-show-only-user-work>
   </div>
 
-  <div *ngIf="isDashboard && !isLogin" class="logo-full middle"
+  <div *ngIf="showLogo && !isLogin" class="logo-full middle"
        [class.make-room-for-slogan]="environment.whiteLabelSlogan">
     <img *ngIf="!environment.whiteLabelLogo" alt="logo" priority ngSrc="assets/logo-white.svg" width="122" height="42">
     <div *ngIf="environment.whiteLabelSlogan" class="slogan">{{environment.whiteLabelSlogan}}</div>

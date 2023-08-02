@@ -1,6 +1,9 @@
 @import "variables";
 
 :host {
+  .search-experiment-for-compare {
+    margin-bottom: 12px;
+  }
 
   .select-experiments-container {
     height: calc(100% - 50px);
@@ -8,7 +11,7 @@
   }
 
   .hide-table {
-    height: 0px;
+    height: 0;
     overflow: hidden;
     transition: $transition-fast;
 

@@ -70,7 +70,6 @@ export class ProjectsEffects {
                     actions.setSelectedProject({project: projects[0]}),
                     actions.getProjectUsers(action),
                     ...(!customProjectType ? [actions.getTags()] : []),
-                    actions.getTags(),
                     actions.getCompanyTags(),
                     deactivateLoader(action.type),
                   ];

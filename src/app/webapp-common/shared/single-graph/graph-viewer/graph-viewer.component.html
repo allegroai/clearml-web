@@ -4,8 +4,11 @@
     <input #fakeInput name="Don't remove - it take the autofocus from slider" style="opacity: 0; height: 0; width: 0">
     <div *ngIf="!darkTheme" class="viewer-iteration">
       <div *ngIf="minMaxIterations$ | async as minMaxIterations">
-        Iteration <span class="number">{{iteration}}</span>
+        <span *ngIf="minMaxIterations.maxIteration !== minMaxIterations.minIteration || minMaxIterations.minIteration > 0">
+          Iteration <span class="number">{{iteration}}</span>
+        </span>
         <mat-slider
+          *ngIf="minMaxIterations.maxIteration !== minMaxIterations.minIteration"
           [max]="minMaxIterations.maxIteration"
           [min]="minMaxIterations.minIteration"
           [step]="1"
@@ -22,7 +25,7 @@
     </div>
     <div class="header-actions">
       <div [class.load-spinner]="(isFetchingData$ | async) || !plotLoaded" class="d-flex align-items-center me-3"></div>
-      <div class="pointer d-flex align-items-center me-3" *ngIf="(isFetchingData$ | async) === false && isFullDetailsMode" smTooltip="refresh" matTooltipPosition="below" (click)="refresh()"><i class="al-icon al-ico-refresh"></i></div>
+      <div class="pointer d-flex align-items-center me-3" *ngIf="(isFetchingData$ | async) === false && isFullDetailsMode" smTooltip="Refresh" matTooltipPosition="below" (click)="refresh()"><i class="al-icon al-ico-refresh"></i></div>
       <div (click)="closeGraphViewer()" matTooltipPosition="below" smTooltip="Close" class="icon-container pointer d-flex align-items-center">
         <i class="al-icon al-ico-dialog-x al-color blue-300"></i>
       </div>
@@ -30,56 +33,77 @@
 
   </div>
   <div class="graph-controls" *ngIf="showSmooth || smoothWeight">
-    <div class="d-flex align-items-center"  *ngIf="!isCompare">
+
+    <div class="d-flex field"  *ngIf="!isCompare">
       <span class="label-text axis-text-margin-left">Horizontal Axis</span>
       <mat-form-field appearance="outline" class="axis-type-field no-bottom" [class.black]="darkTheme">
         <mat-select
           [value]="xAxisType$ | async" (selectionChange)="xAxisTypeChanged($event)"
-          [panelClass]="darkTheme ? 'dark-theme' : 'light-theme'"
+          [panelClass]="darkTheme ? 'dark-theme dark-outline' : 'light-theme'"
           [disabled]="isFetchingData$ | async"
         >
           <mat-option *ngFor="let type of xAxisTypeOption" [value]="type.value">{{type.name}}</mat-option>
         </mat-select>
       </mat-form-field>
     </div>
-    <div class="smooth-options d-flex align-items-center ms-3">
-      <span class="label-text smoothing-text">Smoothing</span>
-      <mat-slider
-        [max]="0.999"
-        [min]="0"
-        [step]="0.001"
-      ><input matSliderThumb [(ngModel)]="smoothWeight"/>
-      </mat-slider>
-      <mat-form-field appearance="outline" class="smooth-input no-bottom" [class.black]="darkTheme">
-        <input
-          matInput
-          name="minCount"
-          type="number"
-          class="text-center"
-          [min]="0"
-          [ngModel]="smoothWeight"
-          (ngModelChange)="changeWeight($any($event))"
-        />
-      </mat-form-field>
 
+    <div class="d-flex field smooth-options" [class.separator]="!isCompare">
+      <span class="label-text">Smoothing</span>
+      <div class="smooth-fields">
+        <mat-slider
+          [max]="smoothType === smoothTypeEnum.exponential ? 0.999 : 100"
+          [min]="smoothType === smoothTypeEnum.exponential ? 0 : 1"
+          [step]="smoothType === smoothTypeEnum.exponential ? 0.001 : 1"
+          [disabled]="smoothType === smoothTypeEnum.any"
+        ><input matSliderThumb [(ngModel)]="smoothWeight"/>
+        </mat-slider>
+
+        <mat-form-field appearance="outline" class="smooth-input no-bottom" [class.black]="darkTheme">
+          <input
+            matInput
+            name="minCount"
+            type="number"
+            title=""
+            [min]="smoothType === smoothTypeEnum.exponential ? 0 : 1"
+            [step]="smoothType === smoothTypeEnum.exponential ? 0.05 : 1"
+            [max]="smoothType === smoothTypeEnum.exponential ? 0.999 : 100"
+            [disabled]="smoothType === smoothTypeEnum.any"
+            [(ngModel)]="smoothWeight"
+            (ngModelChange)="changeWeight($any($event))"
+          />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="smooth-selector no-bottom" [class.black]="darkTheme">
+          <mat-select [panelClass]="darkTheme ? 'dark-theme dark-outline' : 'light-theme'" [value]="smoothType" (selectionChange)="selectSmoothType($event)">
+            <mat-option *ngFor="let smoothTypeOption of smoothTypeEnum | keyvalue" [value]="smoothTypeOption.value">
+              {{smoothTypeOption.value}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
     </div>
+
   </div>
-  <div class="graph-container">
+
+  <div *ngIf="chart" class="graph-container">
     <sm-single-graph
       #singleGraph
       [class.less-padding]="true"
       [class.two-in-a-row]="false"
       [chart]="chart"
       [smoothWeight]="smoothWeight"
+      [smoothType]="smoothType"
       [hideTitle]="true"
       [hideMaximize]="'hide'"
       [height]="height"
+      [width]="width"
       [id]="id"
       [identifier]="id"
       [isCompare]="isCompare"
       [xAxisType]="xAxisType"
       [yAxisType]="yAxisType"
       [moveLegendToTitle]="false"
+      [legendConfiguration]="this.data.legendConfiguration || {}"
       [isDarkTheme]="darkTheme"
       [graphsNumber]="9999"
       [exportForReport]="!!embedFunction"

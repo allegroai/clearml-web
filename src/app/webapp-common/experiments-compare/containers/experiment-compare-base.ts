@@ -93,7 +93,7 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
 
   constructor(
     protected router: Router,
-    protected store: Store<ExperimentInfoState>,
+    protected store: Store,
     protected changeDetection: ChangeDetectorRef,
     protected activeRoute: ActivatedRoute,
     protected refresh: RefreshService,

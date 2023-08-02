@@ -35,8 +35,11 @@ export class ProjectDialogComponent implements OnInit, OnDestroy {
 
   };
 
-  constructor(private store: Store<any>, private matDialogRef: MatDialogRef<ProjectDialogComponent>,
-              @Inject(MAT_DIALOG_DATA) data: { project: Project; mode: string }) {
+  constructor(
+    private store: Store,
+    private matDialogRef: MatDialogRef<ProjectDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) data: { project: Project; mode: string }
+  ) {
     this.baseProject = data.project;
     this.mode = data.mode;
     this.projects$ = this.store.select(selectTablesFilterProjectsOptions);
@@ -52,13 +55,13 @@ export class ProjectDialogComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.store.dispatch(new createNewProjectActions.ResetState());
+    this.store.dispatch(createNewProjectActions.resetState());
     this.creationStatusSubscription.unsubscribe();
   }
 
   public createProject(projectForm) {
     const project = this.convertFormToProject(projectForm);
-    this.store.dispatch(new createNewProjectActions.CreateNewProject(project));
+    this.store.dispatch(createNewProjectActions.createNewProject({req: project}));
   }
 
   moveProject(event: {location: string; name: string; fromName: string; toName: string; projectName: string}) {

@@ -15,6 +15,8 @@ import {BASE_ENV, Environment} from './base';
   13  https://api.staging.hosted.allegro.ai
   14  https://api.clear.ml
   15  https://api.dev.hosted.clear.ml
+  16  https://api.deloitte.hosted.allegro.ai
+  17  https://api.trains-master.hosted.allegro.ai
  */
 
 export const environment = {

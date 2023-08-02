@@ -11,7 +11,6 @@ import {MatDialog} from '@angular/material/dialog';
 import {Store} from '@ngrx/store';
 import {AdminService} from '~/shared/services/admin.service';
 import {selectS3BucketCredentials} from '@common/core/reducers/common-auth-reducer';
-import {ModelInfoState} from '../../reducers/model-info.reducer';
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {Observable} from 'rxjs';
 import {filter, map, take} from 'rxjs/operators';
@@ -75,7 +74,7 @@ export class ModelMenuComponent extends BaseContextMenuComponent {
 
   constructor(
     protected dialog: MatDialog,
-    protected store: Store<ModelInfoState>,
+    protected store: Store,
     protected adminService: AdminService,
     protected eRef: ElementRef
   ) {

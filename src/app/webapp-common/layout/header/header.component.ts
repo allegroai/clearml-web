@@ -27,7 +27,7 @@ import {MESSAGES_SEVERITY} from '@common/constants';
 export class HeaderComponent implements OnInit, OnDestroy {
   @Input() isShareMode: boolean;
   @Input() isLogin: boolean;
-  isDashboard: boolean;
+  showLogo: boolean;
   profile: boolean;
   userFocus: boolean;
   environment = ConfigurationService.globalEnvironment;
@@ -39,7 +39,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private sub = new Subscription();
 
   constructor(
-    private store: Store<any>,
+    private store: Store,
     private dialog: MatDialog,
     private tipsService: TipsService,
     private loginService: LoginService,
@@ -72,7 +72,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   getRouteData() {
     this.userFocus = !!this.activeRoute?.firstChild?.snapshot.data?.userFocus;
-    this.isDashboard = this.activeRoute?.firstChild?.snapshot.url?.[0]?.path === 'dashboard';
+    this.showLogo = this.activeRoute?.firstChild?.snapshot.url?.[0]?.path === 'dashboard' || this.activeRoute?.firstChild?.snapshot.data.hideSideNav;
   }
 
   ngOnDestroy(): void {

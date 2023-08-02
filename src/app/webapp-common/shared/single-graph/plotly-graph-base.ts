@@ -1,6 +1,6 @@
 import {Subscription} from 'rxjs';
 import {Component, Input, OnDestroy} from '@angular/core';
-import {Config, Frame, Layout, LayoutAxis, Legend, PlotData} from 'plotly.js';
+import {Config, Frame, Layout, Legend, PlotData} from 'plotly.js';
 import {selectScaleFactor} from '@common/core/reducers/view.reducer';
 import {Store} from '@ngrx/store';
 import tinycolor from 'tinycolor2';
@@ -31,14 +31,8 @@ export interface ExtLegend extends Legend {
   itemwidth: number;
 }
 
-export interface ExtLayoutAxis extends Omit<LayoutAxis, 'spikesnap'> {
-  spikesnap: string;
-}
-
-export interface ExtLayout extends Omit<Layout, 'xaxis' | 'yaxis' | 'legend'> {
+export interface ExtLayout extends Omit<Layout, 'legend'> {
   type: string;
-  xaxis: Partial<ExtLayoutAxis>;
-  yaxis: Partial<ExtLayoutAxis>;
   legend: Partial<ExtLegend>;
   uirevision: number | string;
   name: string;
@@ -49,6 +43,7 @@ export interface ExtData extends PlotData {
   cells: any;
   header: any;
   name: string;
+  colorKey?: string;
   isSmoothed: boolean;
   colorHash: string;
   originalMetric?: string;
@@ -77,11 +72,15 @@ export abstract class PlotlyGraphBaseComponent implements OnDestroy {
     }
     const colorString = tinycolor({r: newColor[0], g: newColor[1], b: newColor[2]})
       .lighten((this.isSmooth && !trace.isSmoothed) ? 20 : 0).toRgbString();
+    if (trace.marker) {
+      trace.marker.color = colorString;
+      if (trace.marker.line) {
+        trace.marker.line.color = colorString;
+      }
+    }
     if (trace.line) {
       trace.line.color = colorString;
-    } else if (trace.marker) {
-      trace.marker.color = colorString;
-    } else {
+    }  else {
       // Guess that a graph without a lne or a marker should have a line, may cause havoc
       trace.line = {};
       trace.line.color = colorString;

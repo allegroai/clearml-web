@@ -2,7 +2,6 @@
 
 :host {
   display: block;
-  position: relative;
   padding: 0 24px;
   .tags{
     grid-area: tags;
@@ -86,7 +85,9 @@
   }
 
   .shared {
-    margin: 0 6px;
+    margin: 0 24px;
+    display: flex;
+    align-items: center;
   }
 
   .status {
@@ -146,5 +147,9 @@
       width: 24px;
       height: 24px;
     }
+  }
+
+  sm-tag-list {
+    max-width: 100%;
   }
 }

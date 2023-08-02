@@ -35,7 +35,7 @@ export class ModelsInfoEffects {
 
   constructor(
     private actions$: Actions,
-    private store: Store<ModelInfoState>,
+    private store: Store,
     private apiModels: ApiModelsService,
     private eventsService: ApiEventsService
   ) {}
@@ -171,41 +171,4 @@ export class ModelsInfoEffects {
       setServerError(error, null, 'Failed to get Plot Charts')
     ])
   ));
-
-  // fetchScalars$ = createEffect(() => this.actions$.pipe(
-  //   ofType(infoActions.getScalars),
-  //   withLatestFrom(
-  //     this.store.select(selectSelectedSettingsxAxisType),
-  //     this.store.select(selectExperimentHistogramCacheAxisType)
-  //   ),
-  //   switchMap(([action, axisType, prevAxisType]) => {
-  //       if ([ScalarKeyEnum.IsoTime, ScalarKeyEnum.Timestamp].includes(prevAxisType) &&
-  //         [ScalarKeyEnum.IsoTime, ScalarKeyEnum.Timestamp].includes(axisType)) {
-  //         return [
-  //           deactivateLoader(infoActions.refreshModelInfo.type),
-  //           deactivateLoader(action.type)
-  //         ];
-  //       }
-  //
-  //       return this.eventsService.eventsScalarMetricsIterHistogram({
-  //         task: action.id,
-  //         // eslint-disable-next-line @typescript-eslint/naming-convention
-  //         model_events: true,
-  //         key: axisType === ScalarKeyEnum.IsoTime ? ScalarKeyEnum.Timestamp : axisType
-  //       })
-  //         .pipe(
-  //           mergeMap(res => [
-  //             infoActions.setScalars({scalars: res, axisType}),
-  //             deactivateLoader(infoActions.refreshModelInfo.type),
-  //             deactivateLoader(action.type)
-  //           ]),
-  //           catchError(error => [
-  //             requestFailed(error),
-  //             deactivateLoader(action.type),
-  //             deactivateLoader(infoActions.refreshModelInfo.type),
-  //             setServerError(error, null, 'Failed to get Scalar Charts')
-  //           ])
-  //         );
-  //     })
-  // ));
 }

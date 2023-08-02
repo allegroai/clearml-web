@@ -6,6 +6,9 @@ import {SortMeta} from 'primeng/api';
 import {CountAvailableAndIsDisableSelectedFiltered} from '@common/shared/entity-page/items.utils';
 import {EXPERIMENTS_PREFIX} from '@common/experiments/experiment.consts';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
+import {
+  OrganizationPrepareDownloadForGetAllRequest
+} from '~/business-logic/model/organization/organizationPrepareDownloadForGetAllRequest';
 
 const MODELS_PREFIX = 'MODELS_';
 
@@ -42,12 +45,18 @@ export const toggleColHidden = createAction(
 
 export const getTags = createAction(
   MODELS_PREFIX + 'GET_TAGS');
+
 export const getTagsForAllProjects = createAction(
   MODELS_PREFIX + 'GET_TAGS_ALL_PROJECTS');
 
 export const setTags = createAction(
   MODELS_PREFIX + 'SET_TAGS',
   props<{ tags: string[] }>()
+);
+
+export const addProjectTag = createAction(
+  MODELS_PREFIX + 'Add project tag',
+  props<{ tag: string[] }>()
 );
 
 export const setMetadataKeys = createAction(
@@ -217,4 +226,8 @@ export const setTableMode = createAction(
 export const setCustomMetrics = createAction(
   EXPERIMENTS_PREFIX + ' [set custom metrics]',
   props<{ metrics: MetricVariantResult[] }>()
+);
+export const prepareTableForDownload = createAction(
+  MODELS_PREFIX + ' [prepareTableForDownload]',
+  props<{ entityType: OrganizationPrepareDownloadForGetAllRequest.EntityTypeEnum }>()
 );

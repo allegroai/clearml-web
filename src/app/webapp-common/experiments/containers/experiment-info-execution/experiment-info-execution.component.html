@@ -29,7 +29,7 @@
                          [saving]="saving"
                          [editable]="editable"
                          (cancelClicked)="cancelFormChange()"
-                         (saveClicked)="sourceCode.sourceCodeForm.valid? saveSourceData(): sourceCode.sourceCodeForm.onSubmit(null)"
+                         (saveClicked)="sourceCode.sourceCodeForm.valid ? saveSourceData() : sourceCode.sourceCodeForm.onSubmit(null)"
                          (activateEditClicked)="activateEditChanged('source', sourceSection)">
       <sm-section-header label="SOURCE CODE"></sm-section-header>
       <sm-experiment-execution-source-code
@@ -60,11 +60,11 @@
         <button extra-buttons
                 *ngIf="formData.diff && editable && !showExtraDataSpinner"
                 class="btn btn-dark-fill terminal me-3 flex-1"
-                (click)="diffSection.editModeChanged(true)">EDIT</button>
+                (click)="diffSection.editModeChanged(true)" data-id="edit uncommitted changes">EDIT</button>
         <button extra-buttons
                 *ngIf="formData.diff && editable && !showExtraDataSpinner"
                 class="btn btn-dark-fill terminal me-3 flex-1"
-                (click)="discardDiff()">
+                (click)="discardDiff()" data-id="Discard Diffs">
           DISCARD DIFFS
         </button>
       </sm-scroll-textarea>
@@ -90,11 +90,11 @@
         <button extra-buttons
                 *ngIf="formData?.requirements?.pip && editable && !showExtraDataSpinner"
                 class="btn btn-dark-fill terminal me-3 flex-1"
-                (click)="requirementsSection.editModeChanged(true)">EDIT</button>
+                (click)="requirementsSection.editModeChanged(true)" data-id="Edit Installed Packages">EDIT</button>
         <button extra-buttons
                 *ngIf="formData.requirements?.pip && editable && !showExtraDataSpinner"
                 class="btn btn-dark-fill terminal me-3 flex-1"
-                (click)="clearInstalledPackages()">
+                (click)="clearInstalledPackages()" data-id="Clear Installed Packages">
           CLEAR
         </button>
       </sm-scroll-textarea>
@@ -112,13 +112,13 @@
       <sm-labeled-row label="IMAGE" [class.mb-3]="editable">
         <div *ngIf="!((editable && !isInDev) && containerSection.inEditMode)">{{formData.container?.image}}</div>
         <mat-form-field appearance="outline" *ngIf="(editable && !isInDev) && containerSection.inEditMode" class="w-100 no-bottom">
-          <input #containerImage matInput [ngModel]="formData.container?.image" name="image">
+          <input #containerImage matInput [ngModel]="formData.container?.image" name="image" data-id="imageFieldId" >
         </mat-form-field>
       </sm-labeled-row>
       <sm-labeled-row label="ARGUMENTS" [class.mb-3]="editable" [labelClass]="'this-is-myclass'">
         <div *ngIf="!((editable && !isInDev) && containerSection.inEditMode)">{{formData.container?.arguments | hideRedactedArguments: (redactedArguments$| async) }}</div>
         <mat-form-field appearance="outline" *ngIf="(editable && !isInDev) && containerSection.inEditMode" class="w-100 no-bottom">
-          <input #containerArguments matInput [ngModel]="formData.container?.arguments" name="image">
+          <input #containerArguments matInput [ngModel]="formData.container?.arguments" name="image" data-id="argumentsFieldId">
         </mat-form-field>
       </sm-labeled-row>
 
@@ -165,14 +165,14 @@
       <sm-labeled-row label="DESTINATION">
         <div *ngIf="!((editable && !isInDev) && outputSection.inEditMode)">{{formData.output?.destination}}</div>
         <mat-form-field appearance="outline" *ngIf="editable && outputSection.inEditMode" class="w-100 no-bottom">
-          <input #outputDestination matInput [ngModel]="formData.output?.destination" name="output_destination">
+          <input #outputDestination matInput [ngModel]="formData.output?.destination" name="output_destination" data-id="destinationFieldId">
         </mat-form-field>
       </sm-labeled-row>
       <!--      Can we remove this non existing input?-->
       <sm-labeled-row label="LOG LEVEL" [class.mb-3]="editable">
         <div *ngIf="!((editable && !isInDev) && outputSection.inEditMode)">{{formData.output?.logLevel}}</div>
         <mat-form-field appearance="outline" *ngIf="editable && outputSection.inEditMode" class="w-100 no-bottom">
-          <input #outputLogLevel matInput [ngModel]="formData.output?.logLevel" name="output_destination">
+          <input #outputLogLevel matInput [disabled]="true" [ngModel]="formData.output?.logLevel" name="output_destination" data-id="logLevelFieldId">
         </mat-form-field>
       </sm-labeled-row>
     </sm-editable-section>

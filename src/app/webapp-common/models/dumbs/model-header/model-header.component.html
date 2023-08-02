@@ -16,7 +16,7 @@
       (valueChanged)="tableModeChanged.emit($event)"></sm-button-toggle>
   </div>
   <sm-project-context-navbar
-    *ngIf="!hideCreateNewButton"
+    *ngIf="!hideCreateNewButton && !hideNavigation"
     [class.hide-item]="sharedView"
     [activeFeature]="'models'"
     [archivedMode]="isArchived">
@@ -27,6 +27,11 @@
       [tableFilters]="tableFilters"
       (clearTableFilters)="clearTableFilters.emit(tableFilters)"
     ></sm-clear-filters-button>
+    <sm-menu class="download-btn" buttonClass="al-icon al-ico-download pointer lm" panelClasses="light-theme"
+             [showCart]="false" smTooltip="Download table as CSV" [disabled]="noData">
+      <sm-menu-item (itemClicked)="downloadTableAsCSV.emit()" itemLabel="Download on screen items"></sm-menu-item>
+      <sm-menu-item (itemClicked)="downloadFullTableAsCSV.emit()" [itemLabel]="'Download first '+ (maxDownloadItems$ | async) +' items'"></sm-menu-item>
+    </sm-menu>
     <sm-model-custom-cols-menu
       *ngIf="!minimizedView || sharedView"
       [isLoading]="isLoadingMetadataKeys"

@@ -22,7 +22,7 @@ export class ModelInfoGeneralComponent implements OnDestroy {
   public isExample: boolean;
   private selectedModelSubscription: Subscription;
 
-  constructor(private store: Store<ModelInfoState>, private adminService: AdminService) {
+  constructor(private store: Store, private adminService: AdminService) {
     this.selectedModelSubscription = this.store.select(selectSelectedModel).pipe(
       filter(model => !!model))
       .subscribe(model => {

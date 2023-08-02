@@ -30,6 +30,7 @@ import { OrganizationGetEntitiesCountResponse } from '../model/organization/orga
 
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
 import { Configuration }                                     from '../configuration';
+import {OrganizationPrepareDownloadForGetAllRequest} from '~/business-logic/model/organization/organizationPrepareDownloadForGetAllRequest';
 
 
 @Injectable()
@@ -65,7 +66,7 @@ export class ApiOrganizationService {
 
 
     /**
-     * 
+     *
      * Get all the user and system tags used for the company tasks and models
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -110,7 +111,7 @@ export class ApiOrganizationService {
     }
 
     /**
-     * 
+     *
      * Get details for all companies associated with the current user
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -154,7 +155,51 @@ export class ApiOrganizationService {
         );
     }
 
-    /**
+  /**
+   *
+   * Prepares download from get_all_ex parameters
+   * @param request request body
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   */
+  public organizationPrepareDownloadForGetAll(request: OrganizationPrepareDownloadForGetAllRequest, options?: any, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    if (request === null || request === undefined) {
+      throw new Error('Required parameter request was null or undefined when calling organizationPrepareDownloadForGetAll.');
+    }
+
+    let headers = this.defaultHeaders;
+    if (options && options.async_enable) {
+      headers = headers.set(this.configuration.asyncHeader, '1');
+    }
+
+    // to determine the Accept header
+    const httpHeaderAccepts: string[] = [
+    ];
+    const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+    if (httpHeaderAcceptSelected != undefined) {
+      headers = headers.set("Accept", httpHeaderAcceptSelected);
+    }
+
+    // to determine the Content-Type header
+    const consumes: string[] = [
+    ];
+    const httpContentTypeSelected:string | undefined = this.configuration.selectHeaderContentType(consumes);
+    if (httpContentTypeSelected != undefined) {
+      headers = headers.set("Content-Type", httpContentTypeSelected);
+    }
+
+    return this.apiRequest.post<any>(`${this.basePath}/organization.prepare_download_for_get_all`,
+      request,
+      {
+        withCredentials: this.configuration.withCredentials,
+        headers: headers,
+        observe: observe,
+        reportProgress: reportProgress
+      }
+    );
+  }
+
+  /**
      *
      * Get counts for the company entities according to the passed search criteria
      * @param request request body

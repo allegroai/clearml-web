@@ -15,7 +15,7 @@ import {filter, take} from 'rxjs/operators';
 export class DashboardExperimentsComponent implements OnInit {
   @Input() recentTasks: IRecentTask[];
 
-  constructor(private store: Store<any>, private router: Router) {
+  constructor(private store: Store, private router: Router) {
   }
 
   ngOnInit() {

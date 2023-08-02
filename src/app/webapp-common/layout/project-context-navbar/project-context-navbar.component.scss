@@ -7,7 +7,7 @@ $lg-breakpoint: map-get($grid-breakpoints, lg);
     margin-left: $side-bar-close-width;
     .nav-bar-items-container {
       display: flex;
-      gap: 1px;
+      gap: 2px;
       position: absolute;
       left: 50%;
       transform: translateX(-50%);

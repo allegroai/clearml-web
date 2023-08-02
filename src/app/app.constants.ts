@@ -1,4 +1,4 @@
-import {Action} from '@ngrx/store';
+import {createAction} from '@ngrx/store';
 import {Environment} from '../environments/base';
 
 export const NA                      = 'N/A';
@@ -19,12 +19,14 @@ export const BASE_REGEX = {
   FOLDER           : '\\/\\S*[^\\/ ]',
   S3_BUCKET_NAME   : '(?!(xn--|.+-s3alias$|.*\\.{2}.*))[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]',
   GS_BUCKET_NAME   : '(\\w[A-Za-z0-9\\-_]+\\w\\.)*\\w[A-Za-z0-9\\-_]+\\w',
-  AZURE_BUCKET_NAME: '(\\w[A-Za-z0-9\\-_]+\\w\\.)*\\w[A-Za-z0-9\\-_]+\\w'
+  AZURE_BUCKET_NAME: '(\\w[A-Za-z0-9\\-_]+\\w\\.)*\\w[A-Za-z0-9\\-_]+\\w',
+  AZURE_CONTAINER: '\\/[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]'
 };
 
 export const URI_REGEX = {
   S3_WITH_BUCKET            : BASE_REGEX.S3_PROTOCOL + BASE_REGEX.S3_BUCKET_NAME + BASE_REGEX.PATH,
   GS_WITH_BUCKET            : BASE_REGEX.GS_PROTOCOL + BASE_REGEX.GS_BUCKET_NAME + BASE_REGEX.PATH,
+  AZURE_WITH_BUCKET: BASE_REGEX.AZURE_PROTOCOL + BASE_REGEX.AZURE_BUCKET_NAME + BASE_REGEX.AZURE_CONTAINER,
   S3_WITH_BUCKET_AND_HOST   : BASE_REGEX.S3_PROTOCOL + BASE_REGEX.S3_BUCKET_NAME + BASE_REGEX.DOMAIN + BASE_REGEX.PATH,
   GS_WITH_BUCKET_AND_HOST   : BASE_REGEX.GS_PROTOCOL + BASE_REGEX.GS_BUCKET_NAME + BASE_REGEX.DOMAIN + BASE_REGEX.PATH,
   AZURE_WITH_BUCKET_AND_HOST: BASE_REGEX.AZURE_PROTOCOL + BASE_REGEX.AZURE_BUCKET_NAME + BASE_REGEX.DOMAIN + BASE_REGEX.PATH,
@@ -52,13 +54,6 @@ export const TASK_TYPES = {
   TESTING          : 'testing',
 };
 
-const recentTasksPrefix = 'RECENT_TASKS';
-
-export const RECENT_TASKS_ACTIONS = {
-  GET_RECENT_TASKS: recentTasksPrefix + 'GET_RECENT_TASKS',
-  SET_RECENT_TASKS: recentTasksPrefix + 'SET_RECENT_TASKS'
-};
-
 export const VIEW_PREFIX  = 'VIEW_';
 
 export type MediaContentTypeEnum = 'image/bmp' | 'image/jpeg' | 'image/png' | 'video/mp4';
@@ -75,23 +70,8 @@ export const MESSAGES_SEVERITY = {
 };
 
 export const USERS_PREFIX  = 'USERS_';
-export const USERS_ACTIONS = {
-  FETCH_CURRENT_USER: USERS_PREFIX + 'FETCH_USER',
-  SET_CURRENT_USER  : USERS_PREFIX + 'SET_CURRENT_USER',
-  LOGOUT_SUCCESS    : USERS_PREFIX + 'LOGOUT_SUCCESS',
-  LOGOUT            : USERS_PREFIX + 'LOGOUT',
-  SET_PREF          : USERS_PREFIX + 'SET_PREF'
-};
 
 export const NAVIGATION_PREFIX  = 'NAVIGATION_';
-export const NAVIGATION_ACTIONS = {
-  NAVIGATE_TO                            : NAVIGATION_PREFIX + 'NAVIGATE_TO',
-  NAVIGATION_END                         : NAVIGATION_PREFIX + 'NAVIGATION_END',
-  SET_ROUTER_SEGMENT                     : NAVIGATION_PREFIX + 'SET_ROUTER_SEGMENT',
-  UPDATATE_CURRENT_URL_WITHOUT_NAVIGATING: NAVIGATION_PREFIX + 'UPDATATE_CURRENT_URL_WITHOUT_NAVIGATING',
-  NAVIGATION_SKIPPED                     : NAVIGATION_PREFIX + 'NAVIGATION_SKIPPED',
-};
-
 
 export const guessAPIServerURL = () => {
   const url = window.location.origin;
@@ -145,8 +125,7 @@ export const updateHttpUrlBaseConstant = (_environment: Environment) => {
 
 export const HTTP_PREFIX         = 'HTTP_';
 
-export class EmptyAction implements Action {
-  readonly type = 'EMPTY_ACTION';
-}
+export const emptyAction = createAction('EMPTY_ACTION');
+
 
 export const AUTO_REFRESH_INTERVAL = 10 * 1000;

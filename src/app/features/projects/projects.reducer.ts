@@ -1,37 +1,22 @@
 import {on, createReducer, createSelector} from '@ngrx/store';
 import {
-  CommonProjectReadyForDeletion,
   commonProjectsInitState,
   commonProjectsReducers,
-  CommonProjectsState
+  CommonProjectsState, CommonReadyForDeletion
 } from '@common/projects/common-projects.reducer';
-import {checkProjectForDeletion, resetReadyToDelete, setProjectReadyForDeletion} from '@common/projects/common-projects.actions';
+import {setProjectReadyForDeletion} from '~/features/projects/projects.actions';
 
-export type IProjectReadyForDeletion = CommonProjectReadyForDeletion;
+export type ProjectReadyForDeletion = CommonReadyForDeletion;
 
 export interface ProjectsState extends CommonProjectsState {
 
-  projectReadyForDeletion: IProjectReadyForDeletion;
+  projectReadyForDeletion: ProjectReadyForDeletion;
 }
 
-const projectsInitState: ProjectsState = {
-  ...commonProjectsInitState,
-  projectReadyForDeletion: {
-    project: null, experiments: null, models: null
-  }
-};
 
 export const projectsReducer = createReducer(
-  projectsInitState,
-  on(checkProjectForDeletion, (state, action) => ({
-    ...state,
-    projectReadyForDeletion: {
-      ...projectsInitState.projectReadyForDeletion,
-      project: action.project
-    }
-  })),
-  on(resetReadyToDelete, state => ({...state, projectReadyForDeletion: projectsInitState.projectReadyForDeletion})),
-  on(setProjectReadyForDeletion, (state, action) => ({
+  commonProjectsInitState,
+  on(setProjectReadyForDeletion, (state, action): ProjectsState => ({
     ...state,
     projectReadyForDeletion: {
       ...state.projectReadyForDeletion,

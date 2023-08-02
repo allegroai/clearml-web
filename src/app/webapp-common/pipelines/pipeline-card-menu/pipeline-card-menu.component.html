@@ -5,7 +5,7 @@
   <button mat-menu-item (click)="rename.emit()">
     <i class="al-icon sm-md" [class]="icons.EDIT"></i>Rename
   </button>
-  <button mat-menu-item [matMenuTriggerFor]="tagMenu">
+  <button mat-menu-item [matMenuTriggerFor]="tagsMenu.matMenu">
     <i class="al-icon sm-md" [class]="icons.TAG"></i>Add Tag
   </button>
   <hr>
@@ -13,14 +13,12 @@
     <i class="al-icon sm-md" [class]="icons.REMOVE"></i>Delete
   </button>
 </mat-menu>
-<mat-menu #tagMenu="matMenu">
-  <sm-tags-menu
-    #tagMenuContent
-    class="light-theme"
-    [tags]="project?.tags"
-    [tagsFilterByProject]="true"
-    [projectTags]="allTags"
-    [companyTags]="null"
-    (tagSelected)="addTag.emit($event)">
-  </sm-tags-menu>
-</mat-menu>
+<sm-tags-menu
+  #tagsMenu
+  class="light-theme"
+  [tags]="project?.tags"
+  [tagsFilterByProject]="true"
+  [projectTags]="allTags"
+  [companyTags]="null"
+  (tagSelected)="addTag.emit($event)">
+</sm-tags-menu>

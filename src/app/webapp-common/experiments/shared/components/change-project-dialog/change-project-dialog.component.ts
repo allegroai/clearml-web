@@ -48,7 +48,8 @@ export class ChangeProjectDialogComponent implements OnInit, OnDestroy {
   private previousLength: number | undefined;
 
   constructor(
-    private store: Store<any>, public dialogRef: MatDialogRef<ChangeProjectDialogComponent>,
+    private store: Store,
+    public dialogRef: MatDialogRef<ChangeProjectDialogComponent>,
     @Inject(MAT_DIALOG_DATA) data: {
       currentProjects: Project['id'] | Project['id'][];
       defaultProject: Project;

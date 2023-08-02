@@ -163,6 +163,7 @@ export const modelsViewReducer = createReducer<IModelsViewState>(
   on(actions.setFrameworks, (state, action): IModelsViewState =>
     ({...state, frameworks: action.frameworks})),
   on(actions.setTags, (state, action): IModelsViewState => ({...state, projectTags: action.tags})),
+  on(actions.addProjectTag, (state, action): IModelsViewState => ({...state, projectTags: Array.from(new Set(state.projectTags.concat(action.tag))).sort()})),
   on(actions.setMetadataKeys, (state, action): IModelsViewState => ({...state, projectMetadataKeys: action.keys})),
   on(actions.setMetadataColValuesOptions, (state, action): IModelsViewState =>
     ({...state, metadataColsOptions: {...state.metadataColsOptions, [action.col.id]: action.values}})),

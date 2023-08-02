@@ -10,7 +10,7 @@ import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
 })
 export class ExperimentTypeIconLabelComponent{
   @Input() type: TaskTypeEnum;
-  @Input() iconClass = 'md';
+  @Input() iconClass = '';
   @Input() showLabel = true;
   constructor() { }
 }

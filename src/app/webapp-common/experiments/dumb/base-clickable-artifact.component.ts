@@ -12,7 +12,7 @@ import {getSignedUrl} from '../../core/actions/common-auth.actions';
 export class BaseClickableArtifactComponent {
   protected timestamp: number;
 
-  constructor(protected adminService: AdminService, protected store: Store<any>) {
+  constructor(protected adminService: AdminService, protected store: Store) {
   }
 
   artifactFilePathClicked(url: string) {

@@ -9,6 +9,10 @@ import {CountAvailableAndIsDisableSelectedFiltered} from '@common/shared/entity-
 import {TasksEnqueueManyResponseSucceeded} from '~/business-logic/model/tasks/tasksEnqueueManyResponseSucceeded';
 import {EXPERIMENTS_INFO_PREFIX} from '@common/experiments/actions/common-experiments-menu.actions';
 import {EXPERIMENTS_PREFIX} from '@common/experiments/experiment.consts';
+import {
+  OrganizationPrepareDownloadForGetAllRequest
+} from '~/business-logic/model/organization/organizationPrepareDownloadForGetAllRequest';
+import {PROJECTS_PREFIX} from '@common/core/actions/projects.actions';
 
 // COMMANDS:
 export const getExperiments = createAction(EXPERIMENTS_PREFIX + ' [get experiments]');
@@ -119,7 +123,7 @@ export const setActiveParentsFilter = createAction(
 
 export const getParents = createAction(
   EXPERIMENTS_PREFIX + '[get project experiments parents]',
-  props<{searchValue: string}>());
+  props<{searchValue: string; allProjects?: boolean}>());
 
 export const tableFilterChanged = createAction(
   EXPERIMENTS_PREFIX + '[table filter changed]',
@@ -146,7 +150,8 @@ export const setProjectsTypes = createAction(
   props<{ types?: Array<string> }>()
 );
 
-export const getProjectTypes = createAction(EXPERIMENTS_PREFIX + 'GET_PROJECT_TYPES');
+export const getProjectTypes = createAction(EXPERIMENTS_PREFIX + 'GET_PROJECT_TYPES',
+  props<{allProjects?: boolean}>());
 
 export const showOnlySelected = createAction(
   EXPERIMENTS_PREFIX + ' [show only selected]',
@@ -225,7 +230,8 @@ export const hyperParamSelectedExperiments = createAction(
   props<{ col: ISmCol }>()
 );
 
-export const getTags = createAction(EXPERIMENTS_PREFIX + ' [get experiments tags]');
+export const getTags = createAction(EXPERIMENTS_PREFIX + ' [get experiments tags]' ,
+  props<{allProjects?: boolean}>());
 
 export const setTags = createAction(
   EXPERIMENTS_PREFIX + '[set experiment tags]',
@@ -242,4 +248,8 @@ export const setSelectedExperimentsDisableAvailable = createAction(
 export const setTableMode = createAction(
   EXPERIMENTS_PREFIX + '[set table view mode]',
   props<{ mode: 'info' | 'table' }>()
+);
+export const prepareTableForDownload = createAction(
+  EXPERIMENTS_PREFIX + ' [prepareTableForDownload]',
+  props<{ entityType: OrganizationPrepareDownloadForGetAllRequest.EntityTypeEnum }>()
 );

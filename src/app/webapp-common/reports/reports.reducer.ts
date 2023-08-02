@@ -3,7 +3,7 @@ import {
   addReports, addReportsTags,
   removeReport,
   resetReports,
-  setArchive,
+  setArchive, setEditMode,
   setReport,
   setReportChanges,
   setReports,
@@ -13,6 +13,7 @@ import {
 } from './reports.actions';
 import {IReport} from './reports.consts';
 import {TABLE_SORT_ORDER, TableSortOrderEnum} from '../shared/ui-components/data/table/table.consts';
+import {selectRouterConfig} from '@common/core/reducers/router-reducer';
 
 const getCorrectSortingOrder = (currentSortOrder: TableSortOrderEnum, currentOrderField: string, nextOrderField: string) => {
   if (currentOrderField === nextOrderField) {
@@ -34,6 +35,7 @@ export interface ReportsState {
   archive: boolean;
   noMoreReports: boolean;
   queryString: { query: string; regExp?: boolean };
+  editing: boolean;
 }
 
 export const reportsInitState: ReportsState = {
@@ -46,35 +48,36 @@ export const reportsInitState: ReportsState = {
   archive: false,
   noMoreReports: null,
   queryString: null,
+  editing: false
 };
 
 export const reportsReducer = createReducer(
   reportsInitState,
-  on(setReports, (state, action) => ({
+  on(setReports, (state, action): ReportsState => ({
       ...state,
       reports: action.reports,
       scroll: action.scroll,
       noMoreReports: action.noMoreReports
     })
   ),
-  on(addReports, (state, action) => ({
+  on(addReports, (state, action): ReportsState  => ({
       ...state,
       reports: [...(action.scroll && state.reports || []), ...action.reports],
       scroll: action.scroll,
       noMoreReports: action.noMoreReports
     })
   ),
-  on(setReportsTags, (state, action) => ({
+  on(setReportsTags, (state, action): ReportsState  => ({
       ...state,
       reportsTags: action.tags
     })
   ),
-  on(addReportsTags, (state, action) => ({
+  on(addReportsTags, (state, action): ReportsState  => ({
     ...state,
     reportsTags: Array.from(new Set(state.reportsTags.concat(action.tags))).sort()
   })),
-  on(setReport, (state, action) => ({...state, report: action.report})),
-  on(setReportChanges, (state, action) => ({
+  on(setReport, (state, action): ReportsState  => ({...state, report: action.report})),
+  on(setReportChanges, (state, action): ReportsState  => ({
     ...state,
     report: {...state.report, ...action.changes},
     reports: (action.filterOut ?
@@ -82,23 +85,24 @@ export const reportsReducer = createReducer(
         state.reports
     )?.map(report => report.id !== action.id ? report : {...report, ...action.changes})
   })),
-  on(setArchive, (state, action) => ({...state, archive: action.archive, scroll: null, reports: null})),
-  on(resetReports, (state) => ({
+  on(setArchive, (state, action): ReportsState  => ({...state, archive: action.archive, scroll: null, reports: null})),
+  on(resetReports, (state): ReportsState  => ({
     ...state,
     reports: reportsInitState.reports,
-    scrollId: reportsInitState.scroll,
+    scroll: reportsInitState.scroll,
     noMoreReports: reportsInitState.noMoreReports
   })),
-  on(setReportsOrderBy, (state, action) => ({
+  on(setReportsOrderBy, (state, action): ReportsState  => ({
     ...state,
     orderBy: action.orderBy,
     sortOrder: getCorrectSortingOrder(state.sortOrder, state.orderBy, action.orderBy),
   })),
-  on(removeReport, (state, action) => ({...state, reports: state.reports?.filter(report => report.id !== action.id)})),
-  on(setReportsSearchQuery, (state, action) => ({
+  on(removeReport, (state, action): ReportsState  => ({...state, reports: state.reports?.filter(report => report.id !== action.id)})),
+  on(setReportsSearchQuery, (state, action): ReportsState  => ({
     ...state,
     queryString: (action as ReturnType<typeof setReportsSearchQuery>),
   })),
+  on(setEditMode, (state, action): ReportsState => ({...state, editing: action.editing})),
 );
 
 export const selectReportsState = state => state[REPORTS_KEY] as ReportsState;
@@ -112,3 +116,5 @@ export const selectNoMoreReports = createSelector(selectReportsState, state => s
 export const selectReportsOrderBy = createSelector(selectReportsState, state => state ? state.orderBy : reportsInitState.orderBy);
 export const selectReportsSortOrder = createSelector(selectReportsState, state => state ? state.sortOrder : reportsInitState.sortOrder);
 export const selectReportsQueryString = createSelector(selectReportsState, state => state ? state.queryString : reportsInitState.queryString);
+export const selectEditingReport = createSelector(selectReportsState, state => state.editing);
+export const selectNestedReports = createSelector(selectRouterConfig, config => config?.length === 3 && config.at(-1) === 'reports');

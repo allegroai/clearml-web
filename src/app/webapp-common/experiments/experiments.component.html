@@ -11,6 +11,7 @@
   [tableMode]="firstExperiment && (tableMode$ | async)"
   [rippleEffect]="tableModeAwareness$ | async"
   [addButtonTemplate]="addButton"
+  [noData]="!((experiments$ | async)?.length > 0)"
   (isArchivedChanged)="archivedChanged($event)"
   (selectedTableColsChanged)="selectedTableColsChanged($event)"
   (getMetricsToDisplay)="getMetricsToDisplay()"
@@ -21,6 +22,8 @@
   (clearSelection)="clearSelection()"
   (clearTableFilters)="clearTableFiltersHandler($event)"
   (tableModeChanged)="modeChanged($event); tableModeUserAware()"
+  (downloadTableAsCSV)="downloadTableAsCSV()"
+  (downloadFullTableAsCSV)="downloadFullTableAsCSV()"
 ></sm-experiment-header>
 <ng-template #addButton let-isSmallScreen="smallScreen">
   <button

@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, OnInit, ViewChild} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {MatDialog} from '@angular/material/dialog';
-import {Observable, withLatestFrom} from 'rxjs';
+import {Observable} from 'rxjs';
 import {filter, map, switchMap, take} from 'rxjs/operators';
 import {Environment} from '../environments/base';
 import {getParcoords, getPlot, getSample, getScalar, getSingleValues, reportsPlotlyReady} from './app.actions';
@@ -14,8 +14,7 @@ import {
   selectSampleData,
   selectSignIsNeeded,
   selectSingleValuesData,
-  selectTaskData,
-  State
+  selectTaskData
 } from './app.reducer';
 import {ExtFrame} from '@common/shared/single-graph/plotly-graph-base';
 import {DebugSample} from '@common/shared/debug-sample/debug-sample.reducer';
@@ -33,6 +32,7 @@ import {isFileserverUrl} from '~/shared/utils/url';
 import {MetricValueType, SelectedMetric} from '@common/experiments-compare/experiments-compare.constants';
 import {ExtraTask} from '@common/experiments-compare/dumbs/parallel-coordinates-graph/parallel-coordinates-graph.component';
 import {EventsGetTaskSingleValueMetricsResponseValues} from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponseValues';
+import {ScalarKeyEnum} from '~/business-logic/model/reports/scalarKeyEnum';
 
 
 type WidgetTypes = 'plot' | 'scalar' | 'sample' | 'parcoords' | 'single';
@@ -64,6 +64,7 @@ export class AppComponent implements OnInit {
   @ViewChild(SingleGraphComponent) 'singleGraph': SingleGraphComponent;
   public singleValueData: EventsGetTaskSingleValueMetricsResponseValues[];
   public webappLink: string;
+  public readonly xaxis: ScalarKeyEnum;
 
   @HostListener('window:resize')
   onResize() {
@@ -71,7 +72,7 @@ export class AppComponent implements OnInit {
   }
 
   constructor(
-    private store: Store<State>,
+    private store: Store,
     private configService: ConfigurationService,
     private dialog: MatDialog,
     private cdr: ChangeDetectorRef) {
@@ -86,6 +87,7 @@ export class AppComponent implements OnInit {
     this.singleGraphHeight = window.innerHeight;
     this.otherSearchParams = this.getOtherSearchParams();
     this.isDarkTheme = !this.searchParams.get('light');
+    this.xaxis = this.searchParams.get('xaxis') as ScalarKeyEnum;
 
     try {
       const data = JSON.parse(localStorage.getItem('_saved_state_'));
@@ -189,7 +191,11 @@ export class AppComponent implements OnInit {
         } else {
           const {merged,} = prepareMultiPlots(metricsPlots);
           const newGraphs = convertMultiPlots(merged);
-          this.plotData = Object.values(newGraphs)[0]?.[0];
+          const originalObject = this.searchParams.get('objects');
+          const series = this.searchParams.get('series');
+          this.plotData = Object.values(newGraphs)[0]?.find(a => originalObject === (a.task ?? a.data[0].task)) ??
+            Object.values(newGraphs)[0].find(a => (a.data[0] as any).seriesName === series) ??
+            Object.values(newGraphs)[0]?.[0];
         }
 
 
@@ -236,7 +242,10 @@ export class AppComponent implements OnInit {
       take(1))
       .subscribe(metrics => {
         this.plotLoaded = true;
-        this.plotData = Object.values(mergeMultiMetricsGroupedVariant(metrics))?.[0]?.[0];
+
+        const lala = [ScalarKeyEnum.IsoTime, ScalarKeyEnum.Timestamp].includes(this.xaxis) ? this.calcXaxis(metrics) : metrics;
+
+        this.plotData = Object.values(mergeMultiMetricsGroupedVariant(lala))?.[0]?.[0];
         this.cdr.detectChanges();
       });
   }
@@ -306,6 +315,7 @@ export class AppComponent implements OnInit {
       variants: this.searchParams.getAll('variants'),
       iterations: this.searchParams.getAll('iterations').map(iteration => parseInt(iteration, 10)),
       company: this.searchParams.get('company') || '',
+      xaxis: this.searchParams.get('xaxis') || '',
       models
     };
 
@@ -381,14 +391,17 @@ export class AppComponent implements OnInit {
   private buildSourceLink(searchParams: URLSearchParams, project: string, tasks: string[]): string {
     const isModels = searchParams.has('models') || this.searchParams.get('objectType') === 'model';
     const objects = searchParams.getAll('objects');
-    let entityIds = objects.length > 0? objects : searchParams.getAll(isModels ? 'models' : 'tasks');
+    const variants = searchParams.getAll('variants');
+    const metricPath = searchParams.get('metrics') || '';
+    let entityIds = objects.length > 0 ? objects : searchParams.getAll(isModels ? 'models' : 'tasks');
     if (entityIds.length === 0 && tasks?.length > 0) {
       entityIds = tasks;
     }
     const isCompare = entityIds.length > 1;
     let url = `${window.location.origin.replace('4201', '4200')}/projects/${project ?? '*'}/`;
     if (isCompare) {
-      url += `${isModels ? 'compare-models;ids=' : 'compare-experiments;ids='}${entityIds.join(',')}/${this.getComparePath(this.type)}`;
+      url += `${isModels ? 'compare-models;ids=' : 'compare-experiments;ids='}${entityIds.join(',')}/
+${this.getComparePath(this.type)}?metricPath=${metricPath}&metricName=lala${variants.map(par => `&params=${par}`).join('')}`;
     } else {
       url += `${isModels ? 'models/' : 'experiments/'}${entityIds}/${this.getOutputPath(isModels, this.type)}`;
     }
@@ -451,6 +464,22 @@ export class AppComponent implements OnInit {
 
       observer.observe(document.body);
     });
+  }
+
+  private calcXaxis(metrics: MetricsPlotEvent[] | ReportsApiMultiplotsResponse) {
+    return Object.keys(metrics).reduce((groupAcc, groupName) => {
+      const group = metrics[groupName];
+      groupAcc[groupName] = Object.keys(group).reduce((graphAcc, graphName) => {
+        const expGraph = group[graphName];
+        graphAcc[graphName] = {};
+        Object.keys(expGraph).reduce((graphAcc2, exp) => {
+          const graph = expGraph[exp];
+          return graphAcc[graphName][exp] = {...graph, x: graph.x.map(ts => new Date(ts))};
+        }, {});
+        return graphAcc;
+      }, {});
+      return groupAcc;
+    }, {});
   }
 }
 

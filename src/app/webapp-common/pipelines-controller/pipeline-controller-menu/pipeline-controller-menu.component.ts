@@ -5,7 +5,6 @@ import {MatDialog} from '@angular/material/dialog';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Store} from '@ngrx/store';
 import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
-import {SmSyncStateSelectorService} from '@common/core/services/sync-state-selector.service';
 import {ConfigurationService} from '@common/shared/services/configuration.service';
 import {selectionDisabledAbort, selectionDisabledContinue} from '@common/shared/entity-page/items.utils';
 import * as commonMenuActions from '@common/experiments/actions/common-experiments-menu.actions';
@@ -27,13 +26,12 @@ export class PipelineControllerMenuComponent extends ExperimentMenuComponent {
     protected blTaskService: BlTasksService,
     protected dialog: MatDialog,
     protected router: Router,
-    protected store: Store<ExperimentInfoState>,
-    protected syncSelector: SmSyncStateSelectorService,
+    protected store: Store,
     protected eRef: ElementRef,
     protected configService: ConfigurationService,
     protected route?: ActivatedRoute
   ) {
-    super(blTaskService, dialog, router, store, syncSelector, eRef, configService, route);
+    super(blTaskService, dialog, router, store, eRef, configService, route);
   }
 
   runPipelineController(runNew: boolean = false) {

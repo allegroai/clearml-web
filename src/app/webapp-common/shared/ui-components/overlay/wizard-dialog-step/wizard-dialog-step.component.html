@@ -4,9 +4,7 @@
   <div class="text-center sub-label">{{subLabel}}</div>
   <div class="text-center step-number" [ngClass]="{'hide-step' : hideStep}">{{stepNumber}}</div>
   <div cdkScrollable class="choose-box" [ngClass]="{'hide-step' : hideStep}">
-    <div class="choose-section">
-      <ng-content select="[choose-section]"></ng-content>
-    </div>
+    <ng-content select="[choose-section]"></ng-content>
     <div class="buttons-footer" *ngIf="showFooter">
       <div class="w-100">
         <div class="divider"></div>

@@ -7,12 +7,12 @@ import * as experimentsActions from '@common/experiments/actions/common-experime
 import {INITIAL_CONTROLLER_TABLE_COLS} from '@common/pipelines-controller/controllers.consts';
 import {EXPERIMENTS_TABLE_COL_FIELDS} from '~/features/experiments/shared/experiments.const';
 import {Store} from '@ngrx/store';
-import {SmSyncStateSelectorService} from '@common/core/services/sync-state-selector.service';
 import {ActivatedRoute, Router} from '@angular/router';
 import {MatDialog} from '@angular/material/dialog';
 import {RefreshService} from '@common/core/services/refresh.service';
-import {take} from 'rxjs/operators';
-import {ExperimentsViewState} from '@common/experiments/reducers/experiments-view.reducer';
+import {take, withLatestFrom} from 'rxjs/operators';
+import {selectDefaultNestedModeForFeature} from '@common/core/reducers/projects.reducer';
+import {setBreadcrumbsOptions} from '@common/core/actions/projects.actions';
 
 @Component({
   selector: 'sm-simple-dataset-versions',
@@ -28,14 +28,13 @@ export class SimpleDatasetVersionsComponent extends ControllersComponent impleme
     return params?.versionId;
   }
 
-  constructor(protected store: Store<ExperimentsViewState>,
-              protected syncSelector: SmSyncStateSelectorService,
+  constructor(protected store: Store,
               protected route: ActivatedRoute,
               protected router: Router,
               protected dialog: MatDialog,
               protected refresh: RefreshService
   ) {
-    super(store, syncSelector, route, router, dialog, refresh);
+    super(store, route, router, dialog, refresh);
     this.tableCols = INITIAL_CONTROLLER_TABLE_COLS.map((col) =>
       col.id === EXPERIMENTS_TABLE_COL_FIELDS.NAME ? {...col, header: 'VERSION NAME'} : col);
   }
@@ -70,6 +69,32 @@ export class SimpleDatasetVersionsComponent extends ControllersComponent impleme
   }) {
     super.createFooterItems(config);
     this.footerItems.splice(5, 1);
+  }
+
+  downloadTableAsCSV() {
+    this.table.table.downloadTableAsCSV(`ClearML ${this.selectedProject.id === '*'? 'All': this.selectedProject?.basename?.substring(0,60)} Datasets`);
+  }
+  setupBreadcrumbsOptions() {
+    this.sub.add(this.selectedProject$.pipe(
+      withLatestFrom(this.store.select(selectDefaultNestedModeForFeature))
+    ).subscribe(([selectedProject, defaultNestedModeForFeature]) => {
+      this.store.dispatch(setBreadcrumbsOptions({
+        breadcrumbOptions: {
+          showProjects: !!selectedProject,
+          featureBreadcrumb: {
+            name: 'DATASETS',
+            url: defaultNestedModeForFeature['datasets'] ? 'datasets/simple/*/projects' : 'datasets'
+          },
+          projectsOptions: {
+            basePath: 'datasets/simple',
+            filterBaseNameWith: ['.datasets'],
+            compareModule: null,
+            showSelectedProject: selectedProject?.id !== '*',
+            ...(selectedProject && selectedProject?.id !== '*' && {selectedProjectBreadcrumb: {name: selectedProject?.basename}})
+          }
+        }
+      }));
+    }));
   }
 
 }

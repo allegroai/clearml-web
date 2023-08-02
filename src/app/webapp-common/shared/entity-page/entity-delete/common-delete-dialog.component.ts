@@ -14,7 +14,7 @@ import {deleteEntities, resetDeleteState} from './common-delete-dialog.actions';
 import {getDeleteProjectPopupStatsBreakdown} from '~/features/projects/projects-page.utils';
 import {EntityTypeEnum, hideDeleteArtifactsEntities} from '~/shared/constants/non-common-consts';
 import {takeUntil, tap} from 'rxjs/operators';
-import {CommonProjectReadyForDeletion} from '@common/projects/common-projects.reducer';
+import {CommonReadyForDeletion} from '@common/projects/common-projects.reducer';
 
 
 @Component({
@@ -51,12 +51,12 @@ export class CommonDeleteDialogComponent implements OnInit, OnDestroy {
 
 
   constructor(
-    private store: Store<any>,
+    private store: Store,
     @Inject(MAT_DIALOG_DATA) data: {
       numSelected: number;
       entity: Task;
       entityType: EntityTypeEnum;
-      projectStats: CommonProjectReadyForDeletion;
+      projectStats: CommonReadyForDeletion;
       useCurrentEntity: boolean;
       includeChildren: boolean;
       resetMode: boolean;
@@ -140,7 +140,7 @@ export class CommonDeleteDialogComponent implements OnInit, OnDestroy {
     this.isOpenEntities = !this.isOpenEntities;
   }
 
-  getMessageByEntity(entityType: EntityTypeEnum, stats?: CommonProjectReadyForDeletion): string {
+  getMessageByEntity(entityType: EntityTypeEnum, stats?: CommonReadyForDeletion): string {
     switch (entityType as any) {
       case EntityTypeEnum.controller:
       case EntityTypeEnum.experiment:

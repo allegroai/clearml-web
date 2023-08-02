@@ -19,7 +19,7 @@
   font-size: 12px;
 
   &.in_progress {
-    background-color: $running-green;
+    background-color: darken($running-green, 20%);
   }
 }
 

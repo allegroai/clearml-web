@@ -19,7 +19,11 @@ export class ReportDialogComponent {
   public readOnlyProjectsNames$: Observable<string[]>;
 
 
-  constructor(private store: Store<any>, private matDialogRef: MatDialogRef<ReportDialogComponent>, @Inject(MAT_DIALOG_DATA) public data: { defaultProjectId: string}) {
+  constructor(
+    private store: Store,
+    private matDialogRef: MatDialogRef<ReportDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: { defaultProjectId: string}
+  ) {
     this.projects$ = this.store.select(selectTablesFilterProjectsOptions);
     this.readOnlyProjectsNames$ = this.store.select(selectTablesFilterProjectsOptions)
       .pipe(map(projects => projects?.filter(project => isReadOnly(project)).map(project=> project.name)));

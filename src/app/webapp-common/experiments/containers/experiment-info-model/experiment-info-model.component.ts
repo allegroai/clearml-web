@@ -43,7 +43,7 @@ export class ExperimentInfoModelComponent implements OnInit, OnDestroy {
   @ViewChild('experimentModelForm') experimentModelForm: ExperimentModelsFormViewComponent;
   private orgModels: IModelInfo[];
 
-  constructor(private store: Store<ExperimentInfoState>, private router: Router, private route: ActivatedRoute) {
+  constructor(private store: Store, private router: Router, private route: ActivatedRoute) {
     this.modelInfo$ = this.store.select(selectExperimentModelInfoData);
     this.editable$ = this.store.select(selectIsExperimentEditable);
     this.userKnowledge$ = this.store.select(selectExperimentUserKnowledge);
@@ -98,7 +98,7 @@ export class ExperimentInfoModelComponent implements OnInit, OnDestroy {
         ];
       }
       this.store.dispatch(commonInfoActions.saveExperimentSection({models: {input: newModels as any}}));
-      return this.router.navigate([{modelId: selectedModelId || ''}], {relativeTo: this.route, replaceUrl: true});
+      return this.router.navigate([{modelId: selectedModelId || ''}], {relativeTo: this.route, replaceUrl: true, queryParamsHandling:'preserve'});
     }
   }
 

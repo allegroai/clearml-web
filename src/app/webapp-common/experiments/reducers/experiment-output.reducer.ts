@@ -6,6 +6,7 @@ import {ChartHoverModeEnum, LOG_BATCH_SIZE} from '../shared/common-experiments.c
 import {MetricsPlotEvent} from '~/business-logic/model/events/metricsPlotEvent';
 import {EventsGetTaskSingleValueMetricsResponseValues} from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponseValues';
 import {createReducer, on} from '@ngrx/store';
+import {smoothTypeEnum, SmoothTypeEnum} from '@common/shared/single-graph/single-graph.utils';
 
 
 export type GroupByCharts = 'metric' | 'none';
@@ -53,6 +54,7 @@ export interface ExperimentSettings {
   selectedScalar: string;
   selectedPlot: string;
   smoothWeight: number;
+  smoothType: SmoothTypeEnum;
   xAxisType: ScalarKeyEnum;
   groupBy: GroupByCharts;
   lastModified?: number;

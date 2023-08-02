@@ -52,12 +52,13 @@
     overflow: hidden;
   }
   .model-name-cont{
-    max-width: calc(100% - 140px);
+    overflow: hidden;
     .edit-name {
       overflow: hidden;
     }
   }
 
-
-
+  sm-tag-list {
+    max-width: 100%;
+  }
 }

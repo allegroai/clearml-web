@@ -15,9 +15,9 @@ export class EnqueueFooterItem extends ItemFooterModel {
     const enqueue = state.data[this.id];
 
     return {
-      disable: enqueue.disable,
+      disable: enqueue?.disable,
       preventCurrentItem: state.selectionAllIsArchive,
-      description: this.menuItemText.transform(enqueue.available, 'Enqueue'),
+      description: this.menuItemText.transform(enqueue?.available, 'Enqueue'),
       disableDescription: state.selectionIsOnlyExamples ? 'Enqueue' : `You can only enqueue experiments with ‘Draft’/'Aborted' status`
 
     };

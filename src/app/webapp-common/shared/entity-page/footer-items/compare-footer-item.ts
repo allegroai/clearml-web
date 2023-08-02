@@ -16,7 +16,7 @@ export class CompareFooterItem extends ItemFooterModel  {
   }
   getItemState(state): any {
     return {
-      disable: state.selected.length > compareLimitations,
+      disable: state.selected.length > compareLimitations || state.selected?.length <2,
     };
 
   }

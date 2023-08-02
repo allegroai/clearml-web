@@ -135,7 +135,7 @@ export class AppComponent implements OnInit, OnDestroy {
             pageName: item.url
           };
           this.gtmService?.pushTag(gtmTag);
-          this.store.dispatch(new routerActions.NavigationEnd());
+          this.store.dispatch(routerActions.navigationEnd());
         });
 
     this.selectedCurrentUserSubscription = this.selectedCurrentUser$.pipe(

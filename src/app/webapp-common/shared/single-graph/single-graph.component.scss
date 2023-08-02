@@ -44,12 +44,16 @@
     }
 
     &.whitebg-table {
-      height: unset;
-      padding-bottom: 12px;
+      height: unset !important;
       margin-left: 24px;
       margin-right: 24px;
     }
 
+  }
+
+  .whitebg-table {
+    overflow-x: auto;
+    overflow-y: visible;
   }
 
   .plot-loader {
@@ -58,17 +62,12 @@
     top: 50%;
     left: 50%;
     transform: translateY(-50%) translateX(-50%);
-    font-size: 14px;
-    color: #fff;
-    padding: 0 6px;
-    background-color: $blue-400;
-    border-radius: 4px;
     z-index: 2;
   }
 
   ::ng-deep sm-color-picker-wrapper {
     display: block;
-    top: 0px;
+    top: 0;
   }
 
   ::ng-deep .legendlines path, ::ng-deep .legendpoints path {
@@ -109,7 +108,6 @@
   }
 
 
-
   .dark-theme {
     background: transparent !important;
 
@@ -131,6 +129,7 @@
           }
         }
       }
+
       .modebar-group:empty {
         border-left: none;
       }
@@ -156,6 +155,22 @@
         &:hover {
           fill: $blue-50;
         }
+      }
+
+      svg .cell-text:has(a):hover {
+        a {
+          fill: $blue-50;
+        }
+      }
+
+      .hoverlayer .spikeline:nth-child(2) {
+        stroke: $blue-300 !important;
+      }
+
+      .selectionlayer path,
+      .zoomlayer .select-outline {
+        stroke: #ffffff !important;
+        fill: #ffffff !important;
       }
     }
   }
@@ -191,8 +206,8 @@
 
         &:only-child {
           border-left: none;
-          margin-left: 0px;
-          padding-left: 0px;
+          margin-left: 0;
+          padding-left: 0;
         }
       }
     }

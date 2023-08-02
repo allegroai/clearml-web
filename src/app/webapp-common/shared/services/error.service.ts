@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-interface Error {
+export interface Error {
   meta: {
     result_code: number;
     result_subcode: number;
@@ -59,5 +59,9 @@ export class ErrorService {
       }
     }
     return error?.meta?.result_msg || '';
+  }
+
+  lastRunError(error: Error) {
+    return error?.meta?.result_code === 400 && error?.meta?.result_subcode === 160;
   }
 }

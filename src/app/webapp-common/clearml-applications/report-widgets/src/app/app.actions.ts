@@ -22,6 +22,7 @@ export const getScalar = createAction('[App] getScalar', props<{
   variants: string[];
   company: string;
   models: boolean;
+  xaxis: string;
   otherSearchParams?: URLSearchParams;
 }>());
 export const getSample = createAction('[App] getSample', props<{

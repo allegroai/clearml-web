@@ -29,7 +29,7 @@
              [hasButtonClass]="false"
              (searchValueChanged)="searching = true; searchValueChanged.emit({value: $any($event.target).value})"
              (menuClosed)="onMenuClose()"
-             (menuOpened)="menuOpened.emit()"
+             (menuOpened)="onMenuOpen()"
     >
       <ng-container [ngSwitch]="filterType">
         <sm-table-filter-duration

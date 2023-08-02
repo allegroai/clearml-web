@@ -32,7 +32,7 @@ export class ExperimentArtifactItemViewComponent extends BaseClickableArtifactCo
     return this._artifact;
   }
 
-  constructor(protected adminService: AdminService, protected store: Store<any>) {
+  constructor(protected adminService: AdminService, protected store: Store) {
     super(adminService, store);
   }
 

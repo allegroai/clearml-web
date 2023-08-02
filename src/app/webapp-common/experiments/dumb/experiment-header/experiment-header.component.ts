@@ -47,9 +47,4 @@ export class ExperimentHeaderComponent extends BaseEntityHeaderComponent {
   @Output() clearSelection = new EventEmitter();
   @Output() clearTableFilters = new EventEmitter<{ [s: string]: FilterMetadata }>();
   @Output() tableModeChanged = new EventEmitter<'table' | 'info'>();
-
-
-  onIsArchivedChanged(value: boolean) {
-    this.isArchivedChanged.emit(value);
-  }
 }

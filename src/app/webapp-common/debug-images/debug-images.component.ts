@@ -11,8 +11,7 @@ import {
   SimpleChanges
 } from '@angular/core';
 import {combineLatest, Observable, Subscription} from 'rxjs';
-import {select, Store} from '@ngrx/store';
-import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
+import {Store} from '@ngrx/store';
 import {AdminService} from '~/shared/services/admin.service';
 import {selectS3BucketCredentials} from '../core/reducers/common-auth-reducer';
 import {MatDialog} from '@angular/material/dialog';
@@ -118,7 +117,7 @@ export class DebugImagesComponent implements OnInit, OnDestroy, OnChanges {
   LIMITED_VIEW_LIMIT = LIMITED_VIEW_LIMIT;
 
   constructor(
-    private store: Store<ExperimentInfoState>,
+    private store: Store,
     private adminService: AdminService,
     private dialog: MatDialog,
     private changeDetection: ChangeDetectorRef,
@@ -135,50 +134,50 @@ export class DebugImagesComponent implements OnInit, OnDestroy, OnChanges {
 
 
     this.debugImagesSubscription = combineLatest([
-      store.pipe(select(selectS3BucketCredentials)),
-      store.pipe(select(selectDebugImages))]).pipe(
-      map(([, debugImages]) => !debugImages ? null : Object.entries(debugImages).reduce(((acc, val: any) => {
-        const id = val[0];
-        const iterations = val[1].metrics.find(m => m.task === id).iterations;
-        if (iterations?.length === 0) {
-          return {[id]: {}};
-        }
-        acc[id] = {
-          data: iterations.map(iteration => ({
-            iter: iteration.iter,
-            events: iteration.events.map(event => {
-              this.store.dispatch(getSignedUrl({url: event.url, config: {disableCache: event.timestamp}}));
-              return {
-                ...event,
-                url: event.url,
-                variantAndMetric: this.selectedMetric === ALL_IMAGES ? `${event.metric}/${event.variant}` : ''
-              };
-            })
-          }))
-        };
-        acc[id].metrics = val[1].metrics.map(metric => metric.metric || metric.iterations[0].events[0].metric);
-        acc[id].metric = acc[id].metrics[0];
-        acc[id].scrollId = val[1].scroll_id;
-        return acc;
-      }), {}))
-    ).subscribe(debugImages => {
-      this.debugImages = debugImages;
-      if (debugImages === null) {
-        return;
-      }
-      Object.keys(debugImages).forEach(key => {
-        if (!this.selectedMetrics[key]) {
-          this.selectedMetrics[key] = debugImages[key]?.metric;
-        }
+      store.select(selectS3BucketCredentials),
+      store.select(selectDebugImages)
+    ])
+      .pipe(
+        map(([, debugImages]) => !debugImages ? {} : Object.entries(debugImages).reduce(((acc, val: any) => {
+          const id = val[0];
+          const iterations = val[1].metrics.find(m => m.task === id).iterations;
+          if (iterations?.length === 0) {
+            return {[id]: {}};
+          }
+          acc[id] = {
+            data: iterations.map(iteration => ({
+              iter: iteration.iter,
+              events: iteration.events.map(event => {
+                this.store.dispatch(getSignedUrl({url: event.url, config: {disableCache: event.timestamp}}));
+                return {
+                  ...event,
+                  url: event.url,
+                  variantAndMetric: this.selectedMetric === ALL_IMAGES ? `${event.metric}/${event.variant}` : ''
+                };
+              })
+            }))
+          };
+          acc[id].metrics = val[1].metrics.map(metric => metric.metric || metric.iterations[0].events[0].metric);
+          acc[id].metric = acc[id].metrics[0];
+          acc[id].scrollId = val[1].scroll_id;
+          return acc;
+        }), {}))
+      )
+      .subscribe(debugImages => {
+        this.debugImages = debugImages;
+        Object.keys(debugImages).forEach(key => {
+          if (!this.selectedMetrics[key]) {
+            this.selectedMetrics[key] = debugImages[key]?.metric;
+          }
+        });
+        this.changeDetection.markForCheck();
       });
-      this.changeDetection.markForCheck();
-    });
 
-    this.routerParams$ = this.store.pipe(
-      select(selectRouterParams),
-      filter(params => !!params.ids || !!params.experimentId),
-      distinctUntilChanged()
-    );
+    this.routerParams$ = this.store.select(selectRouterParams)
+      .pipe(
+        filter(params => !!params.ids || !!params.experimentId),
+        distinctUntilChanged()
+      );
   }
 
   ngOnChanges(changes: SimpleChanges): void {

@@ -43,6 +43,7 @@ import {UserPreferences} from '@common/user-preferences';
 import {SharedPipesModule} from '@common/shared/pipes/shared-pipes.module';
 import {ExperimentCompareSharedModule} from '@common/experiments-compare/shared/experiment-compare-shared.module';
 import {RouterTabNavBarComponent} from '@common/shared/components/router-tab-nav-bar/router-tab-nav-bar.component';
+import {ExperimentsModule} from '~/features/experiments/experiments.module';
 
 export const modelSyncedKeys    = [
   'view.projectColumnsSortOrder',
@@ -106,22 +107,26 @@ const getInitState = (userPreferences: UserPreferences) => ({
         ExperimentGraphsModule,
         ExperimentCompareSharedModule,
         RouterTabNavBarComponent,
+        ExperimentsModule,
     ],
-  providers      : [
-    SmFormBuilderService, DatePipe,
-    {provide: MODELS_CONFIG_TOKEN, useFactory: getInitState, deps: [UserPreferences]},
-  ],
-  declarations   : [ModelInfoComponent, ModelsComponent, ModelInfoHeaderComponent,
-    ModelViewNetworkComponent, ModelInfoNetworkComponent,
-    ModelInfoLabelsComponent, ModelInfoLabelsViewComponent, ModelInfoGeneralComponent,
-    ModelGeneralInfoComponent, ModelHeaderComponent,
-    ModelCustomColsMenuComponent,
-    ModelInfoMetadataComponent,
-    ModelInfoExperimentsComponent,
-    ModelExperimentsTableComponent,
-    ModelInfoPlotsComponent,
-    ModelInfoScalarsComponent
-  ]
+    providers: [
+        SmFormBuilderService, DatePipe,
+        {provide: MODELS_CONFIG_TOKEN, useFactory: getInitState, deps: [UserPreferences]},
+    ],
+    exports: [
+        ModelsComponent
+    ],
+    declarations: [ModelInfoComponent, ModelsComponent, ModelInfoHeaderComponent,
+        ModelViewNetworkComponent, ModelInfoNetworkComponent,
+        ModelInfoLabelsComponent, ModelInfoLabelsViewComponent, ModelInfoGeneralComponent,
+        ModelGeneralInfoComponent, ModelHeaderComponent,
+        ModelCustomColsMenuComponent,
+        ModelInfoMetadataComponent,
+        ModelInfoExperimentsComponent,
+        ModelExperimentsTableComponent,
+        ModelInfoPlotsComponent,
+        ModelInfoScalarsComponent
+    ]
 })
 export class ModelsModule {
 }

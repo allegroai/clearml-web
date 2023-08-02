@@ -1,23 +1,33 @@
 <div *ngIf="noGraphs" class="no-output" >
   <i class="icon no-output-icon" [ngClass]="isDarkTheme ? 'i-no-plots-dark' : 'i-no-plots'"></i>
-  <h3 class="d-flex justify-content-center">NO CHART DATA</h3>
+  <h3>NO CHART DATA</h3>
 </div>
 
 <div #allMetrics class="metrics-section">
   <div class="d-flex align-items-center justify-content-center summary-container" *ngIf="singleValueData?.length>0 && !hiddenList.includes('Summary')">
     <sm-single-value-summary-table
+      *ngIf="exportForReport; else: noEmbedCode"
       [data]="singleValueData"
       [experimentName]="experimentName"
       class="single-value-summary-table"
-    (createEmbedCode)="creatingEmbedCode(null, $event)"></sm-single-value-summary-table>
+      (createEmbedCode)="creatingEmbedCode(null, $event)"
+    ></sm-single-value-summary-table>
+    <ng-template #noEmbedCode>
+      <sm-single-value-summary-table
+        [data]="singleValueData"
+        [experimentName]="experimentName"
+        class="single-value-summary-table"
+      ></sm-single-value-summary-table>
+    </ng-template>
   </div>
   <div class="all-metrics"
        [class.row]="!isGroupGraphs"
   >
-    <div *ngFor="let metric of (graphList | filter: hiddenList); trackBy: trackByFn" class="metric-group-container less-padding"
+    <div *ngFor="let metric of (graphList); trackBy: trackByFn" class="metric-group-container less-padding"
          #metricGroup
          [class.two-in-a-row]="!isGroupGraphs && graphList.length > 1 && isWidthBigEnough()"
          [style.height.percent]=""
+         [class.hidden]="hiddenList.includes(metric)"
     >
       <div [id]="experimentGraphidPrefix + metric" class="graph-id">
         <div>
@@ -25,17 +35,18 @@
           <div class="single-graph">
 <!--          <div [class.row]="isGroupGraphs"-->
 <!--               [class.single-graph]="graphsData[metric].length === 1">-->
-            <div *ngFor="let chartItem of graphsData[metric]; trackBy: trackByIdFn"
-                 #singleGraphContainer
-                 mwlResizable
-                 class="single-graph-container"
-                 [validateResize]="validateResize"
-                 [enableGhostResize]="!disableResize"
-                 [ghostElementPositioning]="'absolute'"
-                 [id]="chartItem.id"
-                 (resizing)="onResizing($event);"
-                 (resizeEnd)="sizeChanged($event)"
-                 (resizeStart)="resizeStarted(metricGroup, singleGraphContainer)"
+            <div
+              *ngFor="let chartItem of graphsData[metric]; trackBy: trackByIdFn"
+              #singleGraphContainer
+              mwlResizable
+              class="single-graph-container"
+              [validateResize]="validateResize"
+              [enableGhostResize]="!disableResize"
+              [ghostElementPositioning]="'absolute'"
+              [id]="chartItem.id"
+              (resizing)="onResizing($event);"
+              (resizeEnd)="sizeChanged($event)"
+              (resizeStart)="resizeStarted(metricGroup, singleGraphContainer)"
             >
               <sm-single-graph
                 *ngIf="chartItem.visible"
@@ -51,6 +62,7 @@
                 [showLoaderOnDraw]="showLoaderOnDraw"
                 [legendConfiguration]="legendConfiguration"
                 [smoothWeight]="smoothWeight"
+                [smoothType]="smoothType"
                 [xAxisType]="xAxisType"
                 [height]="height"
                 [width]="width"
@@ -59,8 +71,7 @@
                 [exportForReport]="exportForReport"
                 (createEmbedCode)="creatingEmbedCode(chartItem, $event)"
                 (hoverModeChanged)="hoverModeChanged.emit($event)"
-              >
-              </sm-single-graph>
+              ></sm-single-graph>
               <div *ngIf="!disableResize"
                 class="resize-handle-right"
                 mwlResizeHandle

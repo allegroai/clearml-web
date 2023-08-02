@@ -25,7 +25,7 @@ export class WorkersComponent implements OnInit {
     return url.searchParams.get('id');
   }
 
-  constructor(private store: Store<any>, private router: Router, private route: ActivatedRoute) {
+  constructor(private store: Store, private router: Router, private route: ActivatedRoute) {
     this.workers$ = this.store.select(selectWorkers);
     this.selectedWorker$ = this.store.select(selectSelectedWorker);
     this.tableSortFields$ = this.store.select(selectWorkersTableSortFields);
