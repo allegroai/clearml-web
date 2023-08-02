@@ -22,7 +22,7 @@ export class ExperimentRefreshComponent implements OnInit, OnDestroy {
   @Output() onRefreshLogClicked      = new EventEmitter<{isAutoRefresh: boolean}>();
   @Output() toggleSettings           = new EventEmitter();
 
-  constructor(private store: Store<any>) {
+  constructor(private store: Store) {
   }
 
   ngOnInit() {

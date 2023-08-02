@@ -61,14 +61,14 @@ export const experimentsCompareChartsReducer = createReducer(
   on(actions.setExperimentSettings, (state, action) => {
       let newSettings: ExperimentCompareSettings[];
       const changes = {...action.changes, id: action.id, lastModified: (new Date()).getTime()} as ExperimentCompareSettings;
-      const ids = action.id.join();
+      const ids = action.id ? action.id.join() : '';
       const experimentExists = state.settingsList.find((setting) => setting.id.join() === ids);
       const discardBefore = new Date();
       discardBefore.setMonth(discardBefore.getMonth() - 6);
       if (experimentExists) {
         newSettings = state.settingsList
           .filter(setting => discardBefore < new Date(setting.lastModified || 1648771200000))
-          .map(setting => setting.id.join() === ids ? {...setting, ...changes} : setting);
+          .map(setting => setting.id?.join() === ids ? {...setting, ...changes} : setting);
       } else {
         newSettings = [
           ...state.settingsList.filter(setting => discardBefore < new Date(setting.lastModified || 1648771200000)),

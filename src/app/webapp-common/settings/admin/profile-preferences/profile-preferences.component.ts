@@ -36,7 +36,7 @@ export class ProfilePreferencesComponent implements OnDestroy {
   public hideRedactedArguments$: Observable<{ key: string }[]>;
   public hideExamples$: Observable<boolean>;
 
-  constructor(private store: Store<any>, private dialog: MatDialog) {
+  constructor(private store: Store, private dialog: MatDialog) {
     this.hideRedactedArguments$ = this.store.select(selectHideRedactedArguments);
 
     this.show$ = store.select(selectShowHiddenUserSelection);

@@ -1,4 +1,5 @@
 import {ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {RefreshService} from '@common/core/services/refresh.service';
 import {
   selectExperimentInfoHistograms,
   selectExperimentMetricsSearchTerm,
@@ -6,7 +7,7 @@ import {
   selectScalarSingleValue,
   selectSelectedExperimentSettings,
   selectSelectedSettingsGroupBy,
-  selectSelectedSettingsHiddenScalar,
+  selectSelectedSettingsHiddenScalar, selectSelectedSettingsSmoothType,
   selectSelectedSettingsSmoothWeight,
   selectSelectedSettingsxAxisType,
   selectShowSettings,
@@ -14,10 +15,9 @@ import {
 } from '../../reducers';
 import {Observable, Subscription} from 'rxjs';
 import {Store} from '@ngrx/store';
-import {distinctUntilChanged, filter, map, tap} from 'rxjs/operators';
+import {debounceTime, distinctUntilChanged, distinctUntilKeyChanged, filter, map, tap} from 'rxjs/operators';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {ActivatedRoute, Router} from '@angular/router';
-import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {
   experimentScalarRequested,
   resetExperimentMetrics,
@@ -34,6 +34,7 @@ import {ExperimentGraphsComponent} from '@common/shared/experiment-graphs/experi
 import {isEqual} from 'lodash-es';
 import { EventsGetTaskSingleValueMetricsResponseValues } from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponseValues';
 import { ReportCodeEmbedService } from '~/shared/services/report-code-embed.service';
+import {SmoothTypeEnum} from '@common/shared/single-graph/single-graph.utils';
 
 export const prepareScalarList = (metricsScalar: GroupedList): GroupedList =>
   Object.keys(metricsScalar || []).reduce((acc, curr) => {
@@ -63,6 +64,8 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
   public graphs: { [key: string]: ExtFrame[] };
   public selectIsExperimentPendingRunning: Observable<boolean>;
   public smoothWeight$: Observable<number>;
+  public smoothWeightDelayed$: Observable<number>;
+  public smoothType$: Observable<SmoothTypeEnum>;
   public showSettingsBar: boolean = false;
   public xAxisType$: Observable<ScalarKeyEnum>;
   public groupBy$: Observable<GroupByCharts>;
@@ -89,11 +92,12 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
   private singleValueExists: boolean;
 
   constructor(
-    protected store: Store<ExperimentInfoState>,
+    protected store: Store,
     protected router: Router,
     protected activeRoute: ActivatedRoute,
     protected changeDetection: ChangeDetectorRef,
-    protected reportEmbed: ReportCodeEmbedService
+    protected reportEmbed: ReportCodeEmbedService,
+    protected refreshService: RefreshService
   ) {
     this.searchTerm$ = this.store.select(selectExperimentMetricsSearchTerm);
     this.splitSize$ = this.store.select(selectSplitSize);
@@ -106,10 +110,14 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
     this.settings$ = this.store.select(selectSelectedExperimentSettings)
       .pipe(
         filter(settings => !!settings),
-        map(settings => settings ? settings.selectedScalar : null)
+        map(settings => settings ? settings.selectedScalar : null),
+        distinctUntilChanged(),
+        filter(selectedPlot => selectedPlot !== undefined)
       );
     this.smoothWeight$ = this.store.select(selectSelectedSettingsSmoothWeight);
-    this.xAxisType$ = this.store.select(selectSelectedSettingsxAxisType);
+    this.smoothWeightDelayed$ = this.store.select(selectSelectedSettingsSmoothWeight).pipe(debounceTime(75));
+    this.smoothType$ = this.store.select(selectSelectedSettingsSmoothType);
+    this.xAxisType$ = this.store.select(selectSelectedSettingsxAxisType(false));
     this.groupBy$ = this.store.select(selectSelectedSettingsGroupBy);
     this.singleValueData$  =  this.store.select(selectScalarSingleValue)
       .pipe(tap( data => this.singleValueExists = data?.length > 0));
@@ -132,8 +140,7 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.minimized = this.activeRoute.snapshot.routeConfig.data.minimized;
-
+    this.minimized = this.activeRoute.snapshot.routeConfig.data?.minimized;
     this.subs.add(this.groupBy$
       .pipe(filter((groupBy) => !!groupBy))
       .subscribe(groupBy => {
@@ -150,7 +157,7 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
     this.subs.add(this.entitySelector
       .pipe(
         filter(experiment => !!experiment?.id),
-        distinctUntilChanged()
+        distinctUntilKeyChanged('id')
       )
       .subscribe(experiment => {
         this.experimentId = experiment.id;
@@ -158,6 +165,11 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
         this.scalarList = {};
         this.refresh();
       })
+    );
+
+    this.subs.add(this.refreshService.tick
+      .pipe(filter(autoRefresh => autoRefresh !== null && !!this.experimentId))
+      .subscribe(() => this.refresh())
     );
 
     this.subs.add(this.scalars$
@@ -172,6 +184,7 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
       .subscribe((selectedScalar) => {
         this.selectedGraph = selectedScalar;
         this.experimentGraphs?.scrollToGraph(selectedScalar);
+        this.store.dispatch(setExperimentSettings({id: this.experimentId, changes: {selectedScalar: undefined}}));
       })
     );
 
@@ -230,6 +243,10 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
     this.store.dispatch(setExperimentSettings({id: this.experimentId, changes: {smoothWeight: $event}}));
   }
 
+  changeSmoothType($event: SmoothTypeEnum) {
+    this.store.dispatch(setExperimentSettings({id: this.experimentId, changes: {smoothType: $event}}));
+  }
+
   changeXAxisType($event: ScalarKeyEnum) {
     this.store.dispatch(setExperimentSettings({id: this.experimentId, changes: {xAxisType: $event}}));
   }
@@ -251,7 +268,7 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
     }, {});
   }
 
-  createEmbedCode(event: { metrics?: string[]; variants?: string[]; domRect: DOMRect}) {
+  createEmbedCode(event: { metrics?: string[]; variants?: string[]; xaxis?: ScalarKeyEnum; domRect: DOMRect}) {
     this.reportEmbed.createCode({
       type: (!event.metrics && !event.variants) ? 'single' : 'scalar',
       objects: [this.experimentId],

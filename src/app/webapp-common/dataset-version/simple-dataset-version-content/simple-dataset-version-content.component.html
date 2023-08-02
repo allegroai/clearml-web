@@ -24,6 +24,7 @@
   (smHesitate)="menuHesitate.hesitateStatus && menu.closed.emit()"
 >
   <i class="al-icon al-ico-download pointer line-item"
+      data-id="downloadButton"
      #idElement
      [matMenuTriggerFor]="menu"
      (click)="openMenu(); menuHesitate.hesitateStatus = true"

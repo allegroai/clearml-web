@@ -2,10 +2,10 @@ import {RouterModule, Routes} from '@angular/router';
 import {NgModule} from '@angular/core';
 import {ReportsPageComponent} from './reports-page/reports-page.component';
 import {ReportComponent} from '@common/reports/report/report.component';
-import {
-  NestedProjectViewPageComponent
-} from '@common/nested-project-view/nested-project-view-page/nested-project-view-page.component';
 import {CrumbTypeEnum} from '@common/layout/breadcrumbs/breadcrumbs.component';
+import {NestedReportsPageComponent} from '@common/reports/nested-reports-page/nested-reports-page.component';
+import {leavingBeforeSaveAlertGuard} from '@common/shared/guards/leaving-before-save-alert.guard';
+import {selectEditingReport} from '@common/reports/reports.reducer';
 
 export const routes: Routes = [
   {
@@ -19,8 +19,11 @@ export const routes: Routes = [
     path: ':projectId',
     children: [
       {path: 'reports', component: ReportsPageComponent, data: {search: true}},
-      {path: 'projects', component: NestedProjectViewPageComponent, data: {search: true}},
-      {path: ':reportId', component: ReportComponent}
+      {path: 'projects', component: NestedReportsPageComponent, data: {search: true}},
+      {
+        path: ':reportId', component: ReportComponent,
+        canDeactivate: [leavingBeforeSaveAlertGuard(selectEditingReport)],
+      }
     ]
   },
 ];

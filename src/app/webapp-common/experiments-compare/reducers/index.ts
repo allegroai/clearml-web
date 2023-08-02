@@ -23,6 +23,7 @@ import {groupByCharts, GroupByCharts} from '../../experiments/reducers/experimen
 import {selectSelectedProjectId} from '../../core/reducers/projects.reducer';
 import {selectRouterConfig} from '../../core/reducers/router-reducer';
 import {MetricValueType} from '@common/experiments-compare/experiments-compare.constants';
+import {smoothTypeEnum, SmoothTypeEnum} from '@common/shared/single-graph/single-graph.utils';
 
 export const experimentsCompareReducers: ActionReducerMap<any, any> = {
   details: experimentsCompareDetailsReducer,
@@ -54,6 +55,7 @@ export const selectExperimentIdsParams = createSelector(selectExperimentsParams,
 // select experiments for compare and header
 export const selectCompareHeader = createSelector(experimentsCompare, state => (state?.compareHeader ?? {}) as CompareHeaderState);
 export const selectIsCompare = createSelector(selectRouterConfig, (config): boolean => config?.includes('compare-experiments'));
+export const selectIsSelectModel = createSelector(selectRouterConfig, (config): boolean => config?.includes('compare-models') || config?.includes('input-model'));
 export const selectIsModels = createSelector(selectRouterConfig, (config): boolean => config?.includes('models'));
 export const selectIsPipelines = createSelector(selectRouterConfig, (config): boolean => config?.[0] === 'pipelines');
 export const selectIsDatasets = createSelector(selectRouterConfig, (config): boolean => config?.[0] === 'datasets');
@@ -85,7 +87,7 @@ export const selectCompareHistogramCacheAxisType = createSelector(compareCharts,
 export const selectCompareTasksPlotCharts = createSelector(compareCharts, state => state.metricsPlotsCharts);
 
 export const selectSelectedExperimentSettings = createSelector(compareCharts, selectSelectedExperiments,
-  (output, currentExperiments): ExperimentCompareSettings => output.settingsList && output.settingsList.find((setting) => currentExperiments && setting.id.join() === currentExperiments.join()));
+  (output, currentExperiments): ExperimentCompareSettings => output.settingsList && output.settingsList.find((setting) => currentExperiments && setting.id?.join() === currentExperiments.join()));
 
 export const selectSelectedSettingsHiddenPlot = createSelector(selectSelectedExperimentSettings,
   (settings): Array<string> => settings?.hiddenMetricsPlot || []);
@@ -102,6 +104,8 @@ export const selectSelectedSettingsHiddenScalar = createSelector(selectSelectedE
 export const selectExperimentMetricsSearchTerm = createSelector(compareCharts, (state) => state.searchTerm);
 export const selectCompareSelectedSettingsSmoothWeight = createSelector(selectSelectedExperimentSettings,
   (settings): number => settings?.smoothWeight || 0);
+export const selectSelectedSettingsSmoothType = createSelector(selectSelectedExperimentSettings,
+  (settings): SmoothTypeEnum => settings?.smoothType ?? smoothTypeEnum.exponential);
 
 export const selectCompareSelectedSettingsxAxisType = createSelector(selectSelectedExperimentSettings,
   settings => settings?.xAxisType ?? ScalarKeyEnum.Iter as ScalarKeyEnum);

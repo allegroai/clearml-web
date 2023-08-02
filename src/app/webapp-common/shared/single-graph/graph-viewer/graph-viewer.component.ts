@@ -1,15 +1,6 @@
-import {
-  AfterViewInit,
-  ChangeDetectorRef,
-  Component,
-  HostListener,
-  Inject,
-  OnDestroy,
-  OnInit,
-  ViewChild
-} from '@angular/core';
+import {AfterViewInit, ChangeDetectorRef, Component, HostListener, Inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {ExtFrame} from '../plotly-graph-base';
+import {ExtFrame, ExtLegend} from '../plotly-graph-base';
 import {Store} from '@ngrx/store';
 import {Observable} from 'rxjs/internal/Observable';
 import {Subject, Subscription} from 'rxjs';
@@ -20,27 +11,16 @@ import {debounceTime, filter, map, take} from 'rxjs/operators';
 import {convertPlots, groupIterations} from '@common/tasks/tasks.utils';
 import {addMessage} from '@common/core/actions/layout.actions';
 import {
-  getGraphDisplayFullDetailsScalars,
-  getNextPlotSample,
-  getPlotSample,
-  setGraphDisplayFullDetailsScalars,
-  setGraphDisplayFullDetailsScalarsIsOpen,
-  setViewerBeginningOfTime,
-  setViewerEndOfTime,
+  getGraphDisplayFullDetailsScalars, getNextPlotSample, getPlotSample, setGraphDisplayFullDetailsScalars, setGraphDisplayFullDetailsScalarsIsOpen, setViewerBeginningOfTime, setViewerEndOfTime,
   setXtypeGraphDisplayFullDetailsScalars
 } from '@common/shared/single-graph/single-graph.actions';
 import {
-  selectCurrentPlotViewer,
-  selectFullScreenChart,
-  selectFullScreenChartIsFetching,
-  selectFullScreenChartXtype,
-  selectMinMaxIterations,
-  selectViewerBeginningOfTime,
-  selectViewerEndOfTime
+  selectCurrentPlotViewer, selectFullScreenChart, selectFullScreenChartIsFetching, selectFullScreenChartXtype, selectMinMaxIterations, selectViewerBeginningOfTime, selectViewerEndOfTime
 } from '@common/shared/single-graph/single-graph.reducer';
 import {getSignedUrl} from '@common/core/actions/common-auth.actions';
 import {selectSignedUrl} from '@common/core/reducers/common-auth-reducer';
 import {AxisType} from 'plotly.js';
+import {SmoothTypeEnum, smoothTypeEnum} from '@common/shared/single-graph/single-graph.utils';
 
 export interface GraphViewerData {
   chart: ExtFrame;
@@ -48,9 +28,11 @@ export interface GraphViewerData {
   xAxisType?: any;
   yAxisType?: AxisType;
   smoothWeight?: number;
+  smoothType?: SmoothTypeEnum;
   darkTheme: boolean;
   isCompare: boolean;
-  embedFunction: (rect: DOMRect) => null;
+  embedFunction: (data: {xaxis: ScalarKeyEnum; domRect: DOMRect}) => null;
+  legendConfiguration: Partial<ExtLegend & { noTextWrap: boolean }>;
 }
 
 @Component({
@@ -62,6 +44,7 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
   @ViewChild('singleGraph') singleGraph;
   @ViewChild('modalContainer') modalContainer;
   public height;
+  public width;
   private sub = new Subscription();
   public minMaxIterations$: Observable<{ minIteration: number; maxIteration: number }>;
   public isFetchingData$: Observable<boolean>;
@@ -78,9 +61,11 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
   private isForward: boolean = true;
   private charts: ExtFrame[];
   public index: number = null;
-  public embedFunction: (DOMRect) => null;
+  public embedFunction: (data) => null;
   public yAxisType: AxisType;
   public showSmooth: boolean;
+  protected readonly smoothTypeEnum = smoothTypeEnum;
+  public smoothType: SmoothTypeEnum;
 
   @HostListener('document:keydown', ['$event'])
   onKeyDown(e: KeyboardEvent) {
@@ -102,6 +87,8 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
 
   @HostListener('window:resize')
   onResize() {
+    this.singleGraph.shouldRefresh = true;
+    this.width = this.modalContainer.nativeElement.clientWidth;
     this.height = this.modalContainer.nativeElement.clientHeight - 80;
   }
 
@@ -112,6 +99,7 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
   public plotLoaded: boolean = false;
   public beginningOfTime: boolean = false;
   public endOfTime: boolean = false;
+  smoothWeight: any = 0;
   xAxisTypeOption = [
     {
       name: 'Iterations',
@@ -126,7 +114,6 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
       value: ScalarKeyEnum.IsoTime
     },
   ];
-  smoothWeight: any = 0;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: GraphViewerData,
@@ -153,6 +140,8 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
     this.embedFunction = data.embedFunction;
     this.darkTheme = data.darkTheme;
     this.smoothWeight = data.smoothWeight ?? 0;
+    this.smoothType = data.smoothType ?? smoothTypeEnum.exponential;
+
     const reqData = {
       task: this.data.chart.task,
       metric: this.data.chart.metric,
@@ -189,7 +178,7 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
         parsingError && this.store.dispatch(addMessage('warn', `Couldn't read all plots. Please make sure all plots are properly formatted (NaN & Inf aren't supported).`, [], true));
         Object.values(graphs).forEach((graphss: ExtFrame[]) => {
           graphss.forEach((graph: ExtFrame) => {
-            if ((graph?.layout?.images?.length ?? 0 ) > 0) {
+            if ((graph?.layout?.images?.length ?? 0) > 0) {
               graph.layout.images.forEach((image: Plotly.Image) => {
                   this.store.dispatch(getSignedUrl({
                     url: image.source,
@@ -215,6 +204,8 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
           this.index = this.charts.findIndex(chrt => chrt.metric === this.chart?.metric && chrt.variant === this.chart?.variant);
           this.index = this.index === -1 ? (this.isForward ? 0 : this.charts.length - 1) : this.index;
         }
+        this.chart = null;
+        this.cdr.detectChanges();
         this.chart = this.charts[this.index];
         this.iteration = currentPlotEvents[0].iter;
       }));
@@ -245,7 +236,9 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
       .pipe(filter(plot => !!plot))
       .subscribe(chart => {
         this.plotLoaded = true;
-        this.singleGraph.shouldRefresh = true;
+        if (this.singleGraph) {
+          this.singleGraph.shouldRefresh = true;
+        }
         this.chart = cloneDeep(chart);
         this.cdr.detectChanges();
       }));
@@ -288,7 +281,28 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   changeWeight(value: number) {
-    this.smoothWeight = value;
+    if (value === 0) {
+      return;
+    }
+    if (value > (this.smoothType === smoothTypeEnum.exponential ? 0.999 : 100) || value < (this.smoothType === smoothTypeEnum.exponential ? 0 : 1)) {
+      this.smoothWeight = null;
+    }
+    setTimeout(() => {
+      if (this.smoothType === smoothTypeEnum.exponential) {
+        if (value > 0.999) {
+          this.smoothWeight = 0.999;
+        } else if (value < 0) {
+          this.smoothWeight = 0;
+        }
+      } else {
+        if (value > 100) {
+          this.smoothWeight = 100;
+        } else if (value < 1) {
+          this.smoothWeight = 1;
+        }
+      }
+      this.cdr.detectChanges();
+    });
   }
 
   refresh() {
@@ -310,12 +324,14 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
   next() {
     if (this.canGoNext() && this.chart && !this.darkTheme) {
       this.isForward = true;
-      if (this.charts[this.index + 1]) {
+      const task = this.chart.task;
+      if (this.charts?.[this.index + 1]) {
+        this.chart = null;
         this.chart = this.charts[++this.index];
         this.store.dispatch(setViewerBeginningOfTime({beginningOfTime: false}));
       } else {
         this.plotLoaded = false;
-        this.store.dispatch(getNextPlotSample({task: this.chart.task, navigateEarlier: false}));
+        this.store.dispatch(getNextPlotSample({task, navigateEarlier: false}));
       }
     }
   }
@@ -323,25 +339,27 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
   previous() {
     if (this.canGoBack() && this.chart && !this.darkTheme) {
       this.isForward = false;
-      if (this.charts[this.index - 1]) {
+      const task = this.chart.task;
+      if (this.charts?.[this.index - 1]) {
+        this.chart = null;
         this.chart = this.charts[--this.index];
         this.store.dispatch(setViewerEndOfTime({endOfTime: false}));
       } else {
         this.plotLoaded = false;
-        this.store.dispatch(getNextPlotSample({task: this.chart.task, navigateEarlier: true}));
+        this.store.dispatch(getNextPlotSample({task, navigateEarlier: true}));
       }
     }
   }
 
   nextIteration() {
-    if (this.canGoNext() && this.chart && !this.darkTheme) {
+    if (!this.isFullDetailsMode && this.canGoNext() && this.chart && !this.darkTheme) {
       this.plotLoaded = false;
       this.store.dispatch(getNextPlotSample({task: this.chart.task, navigateEarlier: false, iteration: true}));
     }
   }
 
   previousIteration() {
-    if (this.canGoBack() && this.chart && !this.darkTheme) {
+    if (!this.isFullDetailsMode && this.canGoBack() && this.chart && !this.darkTheme) {
       this.plotLoaded = false;
       this.store.dispatch(getNextPlotSample({task: this.chart.task, navigateEarlier: true, iteration: true}));
     }
@@ -355,4 +373,8 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
     return !this.beginningOfTime && this.plotLoaded;
   }
 
+  selectSmoothType($event: MatSelectChange) {
+    this.smoothWeight = [smoothTypeEnum.exponential, smoothTypeEnum.any].includes($event.value) ? 0 : 10;
+    this.smoothType = $event.value;
+  }
 }

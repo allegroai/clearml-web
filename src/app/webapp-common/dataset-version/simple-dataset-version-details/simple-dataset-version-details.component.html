@@ -4,16 +4,17 @@
   </mat-expansion-panel-header>
   <div class="panel-body" *ngIf="entity">
     <div class="header mt-2">
-      <div class="name ellipsis">{{entity.name}}<ng-container *ngIf="entity?.runtime?.version"> v{{entity.runtime.version}}</ng-container></div>
-      <span class="status" [class]="entity.status">{{entity.status | replaceViaMapPipe:convertStatusMap | replaceViaMapPipe:convertStatusMapBase}}</span>
+      <div class="name ellipsis" data-id="datasetName" >{{entity.name}}<ng-container *ngIf="entity?.runtime?.version"> v{{entity.runtime.version}}</ng-container></div>
+      <span data-id="datasetStatus" class="status" [class]="entity.status">{{entity.status | replaceViaMapPipe:convertStatusMap | replaceViaMapPipe:convertStatusMapBase}}</span>
     </div>
     <div class="section">
       <div class="param">
-        <div class="key">ID</div>
+        <div class="key" data-id="id" >ID</div>
         <div class="value d-flex align-item-center justify-content-between" [smTooltip]="entity.id" smShowTooltipIfEllipsis>
           <span>{{entity.id?.slice(0, 8)}}...</span>
           <i
             class="pointer al-icon al-ico-copy-to-clipboard sm"
+            data-id="copyIcon"
             ngxClipboard
             [cbContent]="entity?.id"
             (cbOnSuccess)="copyToClipboard()"
@@ -21,8 +22,8 @@
         </div>
       </div>
       <div class="param">
-        <div class="key">Parent</div>
-        <div class="value" [smTooltip]="entity?.parent?.name" smShowTooltipIfEllipsis>
+        <div class="key" data-id="parent">Parent</div>
+        <div data-id="parentValue" class="value" [smTooltip]="entity?.parent?.name" smShowTooltipIfEllipsis>
           <a
             *ngIf="entity?.parent?.id; else: empty"
             class="arr-link"
@@ -36,39 +37,39 @@
         </div>
       </div>
       <div class="param continue">
-        <div class="key">Size</div>
-        <div class="value" [smTooltip]="entity?.runtime?.ds_total_size + ' (original)'" smShowTooltipIfEllipsis>{{($any(entity?.runtime?.ds_total_size) | filesize : fileSizeConfigStorage) || '-'}}<span class="comment">(original)</span></div>
+        <div class="key" data-id="size">Size</div>
+        <div data-id="sizeValue" class="value" [smTooltip]="entity?.runtime?.ds_total_size + ' (original)'" smShowTooltipIfEllipsis>{{($any(entity?.runtime?.ds_total_size) | filesize : fileSizeConfigStorage) || '-'}}<span class="comment">(original)</span></div>
       </div>
       <div class="param">
         <div class="key"></div>
         <div class="value" [smTooltip]="entity?.runtime?.ds_total_size_compressed + ' (compressed)'" smShowTooltipIfEllipsis>{{($any(entity?.runtime?.ds_total_size_compressed) | filesize : fileSizeConfigStorage) || '-'}}<span class="comment">(compressed)</span></div>
       </div>
       <div class="param">
-        <div class="key">File count</div>
-        <div class="value" [smTooltip]="entity?.runtime?.ds_file_count" smShowTooltipIfEllipsis>{{entity?.runtime?.ds_file_count ?? '-'}}</div>
+        <div class="key" data-id="fileCount">File count</div>
+        <div data-id="fileCountValue" class="value" [smTooltip]="entity?.runtime?.ds_file_count" smShowTooltipIfEllipsis>{{entity?.runtime?.ds_file_count ?? '-'}}</div>
       </div>
       <div class="param">
-        <div class="key">Link count</div>
-        <div class="value" [smTooltip]="entity?.runtime?.ds_link_count" smShowTooltipIfEllipsis>{{entity?.runtime?.ds_link_count ?? '-'}}</div>
+        <div class="key" data-id="linkCount" >Link count</div>
+        <div data-id="linkCountValue" class="value" [smTooltip]="entity?.runtime?.ds_link_count" smShowTooltipIfEllipsis>{{entity?.runtime?.ds_link_count ?? '-'}}</div>
       </div>
     </div>
     <div class="section">
       <div class="header">FILES CHANGED</div>
       <div class="param">
-        <div class="key">Added</div>
-        <div class="value" [smTooltip]="entity?.runtime?.ds_change_add " smShowTooltipIfEllipsis>{{entity?.runtime?.ds_change_add ?? '-'}}</div>
+        <div class="key" data-id="added">Added</div>
+        <div data-id="addedValue" class="value" [smTooltip]="entity?.runtime?.ds_change_add " smShowTooltipIfEllipsis>{{entity?.runtime?.ds_change_add ?? '-'}}</div>
       </div>
       <div class="param">
-        <div class="key">Modified</div>
-        <div class="value" [smTooltip]="entity?.runtime?.ds_change_modify " smShowTooltipIfEllipsis>{{entity?.runtime?.ds_change_modify ?? '-'}}</div>
+        <div class="key" data-id="modified">Modified</div>
+        <div data-id="modifiedValue" class="value" [smTooltip]="entity?.runtime?.ds_change_modify " smShowTooltipIfEllipsis>{{entity?.runtime?.ds_change_modify ?? '-'}}</div>
       </div>
       <div class="param">
-        <div class="key">Removed</div>
-        <div class="value" [smTooltip]="entity?.runtime?.ds_change_remove " smShowTooltipIfEllipsis>{{entity?.runtime?.ds_change_remove ?? '-'}}</div>
+        <div class="key" data-id="removed">Removed</div>
+        <div data-id="removedValue" class="value" [smTooltip]="entity?.runtime?.ds_change_remove " smShowTooltipIfEllipsis>{{entity?.runtime?.ds_change_remove ?? '-'}}</div>
       </div>
       <div class="param">
-        <div class="key">Size</div>
-        <div class="value"
+        <div class="key" data-id="size">Size</div>
+        <div data-id="sizeValue" class="value"
              *ngIf="entity?.runtime?.ds_change_size"
              [smTooltip]="$any(entity?.runtime?.ds_change_size) | filesize: fileSizeConfigStorage"
              smShowTooltipIfEllipsis
@@ -76,7 +77,7 @@
       </div>
     </div>
     <div class="section">
-      <div class="header"><span>DESCRIPTION</span><i class="al-icon al-ico-edit sm" (click)="editDescription.emit(entity)"></i></div>
+      <div class="header"><span>DESCRIPTION</span><i data-id="editIcon" class="al-icon al-ico-edit sm" (click)="editDescription.emit(entity)"></i></div>
       <div class="param continue h-auto">
         <div class="multi-line-value">{{entity?.comment}}</div>
       </div>
@@ -87,7 +88,7 @@
       class="arr-link"
       target="_blank"
       [href]="'/projects/' + project + '/experiments/' + entity?.id + '/output/execution'">
-      Task information<i class="al-icon al-ico-link-arrow sm"></i>
+      Task information<i class="al-icon al-ico-link-arrow sm" data-id="taskInfoIcon" ></i>
     </a>
   </footer>
 </mat-expansion-panel>

@@ -72,22 +72,6 @@ export const deleteQueue = createAction(
   props<{ queue: Queue }>()
 );
 
-// export class GetQueuesTasks implements ISmAction {
-//   type = GET_QUEUES_TASKS;
-//   public payload: { queues: Queue };
-//
-//   constructor(queues: Queue) {
-//     this.payload = {queues};
-//   }
-// }
-
-// export class AddQueuesTasks implements ISmAction {
-//   type = ADD_QUEUES_TASKS;
-//
-//   constructor(public payload: { tasks: Task; queueId: string }) {
-//   }
-// }
-
 export const moveExperimentToBottomOfQueue = createAction(
   MOVE_EXPERIMENT_TO_BOTTOM_OF_QUEUE,
   props<{ task: string }>()

@@ -15,7 +15,7 @@ import {Store} from '@ngrx/store';
 export class DebugSampleEffects {
 
 
-  constructor(private actions$: Actions, private eventsApi: ApiEventsService, private store: Store<any>) {
+  constructor(private actions$: Actions, private eventsApi: ApiEventsService, private store: Store) {
   }
 
   fetchDebugImagesForIter$ = createEffect(() => this.actions$.pipe(

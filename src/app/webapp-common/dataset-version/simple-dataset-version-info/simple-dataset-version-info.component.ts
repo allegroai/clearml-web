@@ -26,7 +26,7 @@ export class SimpleDatasetVersionInfoComponent extends PipelineControllerInfoCom
 
   constructor(
     protected _dagManager: DagManagerUnsortedService<PipelineItem>,
-    protected store: Store<any>,
+    protected store: Store,
     protected cdr: ChangeDetectorRef,
     protected zone: NgZone,
     private dialog: MatDialog,

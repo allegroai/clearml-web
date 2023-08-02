@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ActionCreator, Store} from '@ngrx/store';
-import {combineLatest, Observable, of, Subject, Subscription} from 'rxjs';
+import {combineLatest, Observable, of, Subject, Subscription, switchMap} from 'rxjs';
 import {
   debounceTime,
   filter,
@@ -13,9 +13,7 @@ import {
 } from 'rxjs/operators';
 import {Project} from '~/business-logic/model/projects/project';
 import {
-  selectAllProjectsUsers,
-  selectProjectUsers,
-  selectSelectedProject, selectTablesFilterProjectsOptions
+  selectSelectedProject, selectSelectedProjectUsers, selectTablesFilterProjectsOptions
 } from '../../core/reducers/projects.reducer';
 import {IOutputData} from 'angular-split/lib/interface';
 import {SplitComponent} from 'angular-split';
@@ -31,8 +29,13 @@ import {
   selectionHasExample
 } from './items.utils';
 import {ActivatedRoute, Params, Router} from '@angular/router';
-import {getTablesFilterProjectsOptions, resetProjectSelection, resetTablesFilterProjectsOptions, setTablesFilterProjectsOptions} from '@common/core/actions/projects.actions';
-import {MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {
+  getTablesFilterProjectsOptions,
+  resetProjectSelection,
+  resetTablesFilterProjectsOptions,
+  setTablesFilterProjectsOptions
+} from '@common/core/actions/projects.actions';
+import {MatDialog} from '@angular/material/dialog';
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {selectTableModeAwareness} from '@common/projects/common-projects.reducer';
@@ -40,7 +43,6 @@ import {setTableModeAwareness} from '@common/projects/common-projects.actions';
 import {User} from '~/business-logic/model/users/user';
 import {neverShowPopupAgain} from '../../core/actions/layout.actions';
 import {selectNeverShowPopups} from '../../core/reducers/view.reducer';
-import {SmSyncStateSelectorService} from '../../core/services/sync-state-selector.service';
 import {isReadOnly} from '@common/shared/utils/is-read-only';
 import {setCustomMetrics} from '@common/models/actions/models-view.actions';
 import * as experimentsActions from '@common/experiments/actions/common-experiments-view.actions';
@@ -75,7 +77,10 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
 
   @ViewChild('split') split: SplitComponent;
   protected abstract inEditMode$: Observable<boolean>;
-  private selectedProject: Project;
+  public selectedProject: Project;
+  private currentSelection: any[];
+  public showAllSelectedIsActive$: Observable<boolean>;
+  private allProjects: boolean;
 
   abstract onFooterHandler({emitValue, item}): void;
 
@@ -98,13 +103,13 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
     protected router: Router,
     protected dialog: MatDialog,
     protected refresh: RefreshService,
-    protected syncSelector: SmSyncStateSelectorService,
   ) {
-    this.users$ = this.selectedProjectId === '*' ? this.store.select(selectAllProjectsUsers) : this.store.select(selectProjectUsers);
-    this.store.select(selectSelectedProject).pipe(filter(p => !!p), take(1)).subscribe((project: Project) => {
+    this.users$ = this.store.select(selectSelectedProjectUsers);
+    this.sub.add(this.store.select(selectSelectedProject).pipe(filter(p => !!p)).subscribe((project: Project) => {
       this.selectedProject = project;
+      this.allProjects = project?.id === '*';
       this.isExampleProject = isReadOnly(project);
-    });
+    }));
     this.projectsOptions$ = this.store.select(selectTablesFilterProjectsOptions);
 
     this.tableModeAwareness$ = store.select(selectTableModeAwareness)
@@ -115,6 +120,7 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
   }
 
   ngOnInit() {
+    this.selectedProject$ = this.store.select(selectSelectedProject);
     this.selectSplitSize$?.pipe(filter(x => !!x), take(1))
       .subscribe(x => this.splitInitialSize = x);
 
@@ -130,12 +136,13 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
 
     this.sub.add(this.refresh.tick
       .pipe(
-        withLatestFrom(this.inEditMode$),
-        filter(([, edit]) => !edit),
+        withLatestFrom(this.inEditMode$, this.showAllSelectedIsActive$),
+        filter(([, edit, showAllSelectedIsActive]) => !edit && !showAllSelectedIsActive),
         map(([auto]) => auto)
       )
       .subscribe(auto => this.refreshList(auto === null))
     );
+    this.setupBreadcrumbsOptions();
   }
 
   ngAfterViewInit() {
@@ -207,9 +214,9 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
       config.selected$,
       config.data$,
       config.showAllSelectedIsActive$,
-      config.companyTags$,
-      config.projectTags$,
-      config.tagsFilterByProject$
+      this.allProjects ? of(null) : config.companyTags$,
+      this.allProjects ? config.companyTags$ : config.projectTags$,
+      this.allProjects ? of(true) : config.tagsFilterByProject$
     );
   }
 
@@ -237,7 +244,8 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
     ).pipe(
       takeUntil(this.destroy$),
       debounceTime(100),
-      filter(([selected]) => selected.length > 1),
+      filter(([selected]) => selected.length > 1 || this.currentSelection?.length > 1),
+      tap(([selected]) => this.currentSelection = selected),
       map(([selected, data, showAllSelectedIsActive, companyTags, projectTags, tagsFilterByProject]) => {
           const _selectionAllHasExample = selectionAllHasExample(selected);
           const _selectionHasExample = selectionHasExample(selected);
@@ -266,19 +274,28 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
       this.afterArchiveChanged();
       this.store.dispatch(resetProjectSelection());
     });
-    if (this.getSelectedEntities().length > 0 && !this.syncSelector.selectSync(selectNeverShowPopups)?.includes('go-to-archive')) {
-      const archiveDialog: MatDialogRef<any> = this.dialog.open(ConfirmDialogComponent, {
-        data: {
-          title: 'Are you sure?',
-          body: 'Navigating between "Live" and "Archive" will deselect your selected data views.',
-          yes: 'Proceed',
-          no: 'Back',
-          iconClass: '',
-          showNeverShowAgain: true
-        }
-      });
-
-      archiveDialog.afterClosed().subscribe((confirmed) => {
+    this.store.select(selectNeverShowPopups)
+      .pipe(
+        take(1),
+        switchMap(neverShow => {
+          if (this.getSelectedEntities().length > 0 && !neverShow?.includes('go-to-archive')) {
+            return this.dialog.open(ConfirmDialogComponent, {
+              data: {
+                title: 'Are you sure?',
+                body: 'Navigating between "Live" and "Archive" will deselect your selected data views.',
+                yes: 'Proceed',
+                no: 'Back',
+                iconClass: '',
+                showNeverShowAgain: true
+              }
+            }).afterClosed();
+          } else {
+            navigate();
+            return of(false);
+          }
+        })
+      )
+      .subscribe((confirmed) => {
         if (confirmed) {
           navigate();
           if (confirmed.neverShowAgain) {
@@ -286,9 +303,6 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
           }
         }
       });
-    } else {
-      navigate();
-    }
   }
 
   updateUrl(queryParams: Params) {
@@ -299,14 +313,20 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
     });
   }
 
-  filterSearchChanged({colId, value}: { colId: string; value: {value: string; loadMore?: boolean} }) {
+  filterSearchChanged({colId, value}: { colId: string; value: { value: string; loadMore?: boolean } }) {
     switch (colId) {
       case 'project.name':
-        if (this.selectedProjectId === '*') {
+        if ((this.projectId || this.selectedProjectId) === '*') {
           !value.loadMore && this.store.dispatch(resetTablesFilterProjectsOptions());
-          this.store.dispatch(getTablesFilterProjectsOptions({searchString: value.value || '', loadMore: value.loadMore}));
+          this.store.dispatch(getTablesFilterProjectsOptions({
+            searchString: value.value || '',
+            loadMore: value.loadMore
+          }));
         } else {
-          this.store.dispatch(setTablesFilterProjectsOptions({projects: this.selectedProject ? [this.selectedProject, ...this.selectedProject?.sub_projects] : [], scrollId: null}));
+          this.store.dispatch(setTablesFilterProjectsOptions({
+            projects: this.selectedProject ? [this.selectedProject,
+              ...this.selectedProject?.sub_projects] : [], scrollId: null
+          }));
         }
         break;
       case 'parent.name':
@@ -318,5 +338,9 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
           this.store.dispatch(experimentsActions.getParents({searchValue: value.value}));
         }
     }
+  }
+
+  public setupBreadcrumbsOptions() {
+
   }
 }

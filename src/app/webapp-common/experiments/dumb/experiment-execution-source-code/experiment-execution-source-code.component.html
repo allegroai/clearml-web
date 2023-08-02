@@ -2,7 +2,7 @@
   <div [class.source-code-container]="editable">
     <sm-labeled-row label="REPOSITORY">
       <div *ngIf="!editable">{{formData?.repository}}</div>
-      <mat-form-field appearance="outline" *ngIf="editable" class="col-24">
+      <mat-form-field appearance="outline" *ngIf="editable" class="col-24 no-bottom">
         <input matInput [ngModel]="formData?.repository" name="repository">
       </mat-form-field>
     </sm-labeled-row>
@@ -21,8 +21,8 @@
           </div>
         </div>
       </div>
-      <div class="d-flex" *ngIf="editable">
-        <mat-form-field appearance="outline" class="col-12">
+      <div class="d-flex w-100" *ngIf="editable" style="gap: 12px">
+        <mat-form-field appearance="outline" class="flex-grow-1">
           <mat-label>Type</mat-label>
           <mat-select #scriptType [ngModel]="formData?.scriptType" panelClass="light-theme" name="scriptType">
             <mat-option *ngFor="let type of scriptTypeOptions" [value]="type.value">{{type.label}}</mat-option>
@@ -30,7 +30,7 @@
         </mat-form-field>
 
         <mat-form-field appearance="outline"
-                        [class.d-none]="scriptType.value !== sourceTypesEnum.VersionNum" class="col-12">
+                        [class.d-none]="scriptType.value !== sourceTypesEnum.VersionNum" class="flex-grow-1">
           <mat-error>Required</mat-error>
           <mat-label>Commit ID</mat-label>
           <input matInput type="text"
@@ -41,7 +41,7 @@
                  [placeholder]="scriptPlaceHolders[sourceTypesEnum.VersionNum]">
         </mat-form-field>
 
-        <mat-form-field appearance="outline" [class.d-none]="scriptType.value !== sourceTypesEnum.Branch" class="col-12">
+        <mat-form-field appearance="outline" [class.d-none]="scriptType.value !== sourceTypesEnum.Branch" class="flex-grow-1">
           <mat-label>Branch</mat-label>
           <mat-error>Required</mat-error>
           <input matInput type="text"
@@ -52,7 +52,7 @@
                  [placeholder]="scriptPlaceHolders[sourceTypesEnum.Branch]">
         </mat-form-field>
 
-        <mat-form-field appearance="outline" [class.d-none]="scriptType.value !== sourceTypesEnum.Tag" class="col-12">
+        <mat-form-field appearance="outline" [class.d-none]="scriptType.value !== sourceTypesEnum.Tag" class="flex-grow-1">
           <mat-error>Required</mat-error>
           <mat-label>Tag</mat-label>
           <input matInput type="text"
@@ -68,14 +68,27 @@
     </sm-labeled-row>
     <sm-labeled-row label="SCRIPT PATH">
       <div *ngIf="!editable">{{formData?.entry_point}}</div>
-      <mat-form-field appearance="outline" *ngIf="editable" class="col-24">
+      <mat-form-field appearance="outline" *ngIf="editable" class="col-24 no-bottom">
         <input matInput type="text" [ngModel]="formData?.entry_point" name="entry_point">
       </mat-form-field>
     </sm-labeled-row>
     <sm-labeled-row label="WORKING DIRECTORY">
       <div *ngIf="!editable">{{formData?.working_dir}}</div>
-      <mat-form-field appearance="outline" *ngIf="editable" class="col-24">
+      <mat-form-field appearance="outline" *ngIf="editable" class="col-24 no-bottom">
         <input matInput type="text" [ngModel]="formData?.working_dir" name="working_dir">
+      </mat-form-field>
+    </sm-labeled-row>
+    <sm-labeled-row label="BINARY">
+      <div *ngIf="!editable" class="d-flex align-items-center">
+        {{formData?.binary}}
+        <i
+          *ngIf="formData?.binary && !formData?.binary?.match(pythonRegexp)"
+          class="al-icon al-ico-alert-outline sm ms-2"
+          smTooltip="Please make sure this is a valid python interpreter binary"
+        ></i>
+      </div>
+      <mat-form-field appearance="outline" *ngIf="editable" class="col-24 no-bottom">
+        <input matInput type="text" [ngModel]="formData?.binary" name="binary">
       </mat-form-field>
     </sm-labeled-row>
   </div>

@@ -1,11 +1,10 @@
 import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import {TagsMenuComponent} from '@common/shared/ui-components/tags/tags-menu/tags-menu.component';
 import {Store} from '@ngrx/store';
-import {selectCompanyTags, selectProjectTags, selectTagsFilterByProject} from '@common/core/reducers/projects.reducer';
-import {Observable} from 'rxjs';
+import {selectCompanyTags, selectSelectedProjectId, selectTagsFilterByProject} from '@common/core/reducers/projects.reducer';
+import {Observable, Subscription} from 'rxjs';
 import {addTag, removeTag} from '../../actions/models-menu.actions';
 import {SelectedModel, TableModel} from '../../shared/models.model';
-import {MenuComponent} from '@common/shared/ui-components/panel/menu/menu.component';
 import {getSysTags} from '../../model.utils';
 import {activateModelEdit, cancelModelEdit} from '../../actions/models-info.actions';
 import {
@@ -17,6 +16,8 @@ import {
   selectionDisabledPublishModels
 } from '@common/shared/entity-page/items.utils';
 import {addMessage} from '@common/core/actions/layout.actions';
+import {MatMenuTrigger} from '@angular/material/menu';
+import {selectModelsTags} from '@common/models/reducers';
 
 @Component({
   selector   : 'sm-model-info-header',
@@ -26,24 +27,35 @@ import {addMessage} from '@common/core/actions/layout.actions';
 export class ModelInfoHeaderComponent {
 
   public viewId: boolean;
+  private sub = new Subscription();
   public tagsFilterByProject$: Observable<boolean>;
   public projectTags$: Observable<string[]>;
   public companyTags$: Observable<string[]>;
   public sysTags: string[];
-  selectedDisableAvailable: Record<string, CountAvailableAndIsDisableSelectedFiltered>;
+  public selectedDisableAvailable: Record<string, CountAvailableAndIsDisableSelectedFiltered>;
+  public menuPosition = { x: 0, y: 0 };
+  public allProjects: boolean;
 
   @Input() editable: boolean;
   @Input() backdropActive: boolean;
-  @Output() modelNameChanged = new EventEmitter();
+  @Input() minimized: boolean;
+  @Input() isSharedAndNotOwner: boolean;
+  @Output() modelNameChanged = new EventEmitter<string>();
   @Output() closeInfoClicked = new EventEmitter();
-  @ViewChild('tagMenu') tagMenu: MenuComponent;
-  @ViewChild('tagsMenuContent') tagMenuContent: TagsMenuComponent;
+  @Output() maximizedClicked = new EventEmitter();
+  @Output() minimizeClicked = new EventEmitter();
+  @ViewChild('tagsMenuTrigger') tagMenuTrigger: MatMenuTrigger;
+  @ViewChild(TagsMenuComponent) tagMenu: TagsMenuComponent;
 
-  constructor(private store: Store<any>) {
+  constructor(private store: Store) {
     this.tagsFilterByProject$ = this.store.select(selectTagsFilterByProject);
-    this.projectTags$ = this.store.select(selectProjectTags);
+    this.projectTags$ = this.store.select(selectModelsTags);
     this.companyTags$ = this.store.select(selectCompanyTags);
-
+    this.sub.add(store.select(selectSelectedProjectId)
+      .subscribe(id => {
+        this.allProjects = id === '*';
+      })
+    );
   }
 
   private _model: TableModel | SelectedModel;
@@ -70,15 +82,14 @@ export class ModelInfoHeaderComponent {
     this.modelNameChanged.emit(name);
   }
 
-  openTagMenu(event: MouseEvent) {
+  openTagMenu() {
     if (!this.tagMenu) {
       return;
     }
     window.setTimeout(() => this.store.dispatch(activateModelEdit('tags')), 200);
-    this.tagMenu.position = {x: event.clientX, y: event.clientY};
     window.setTimeout(() => {
-      this.tagMenu.openMenu();
-      this.tagMenuContent.focus();
+      this.tagMenuTrigger.openMenu();
+      this.tagMenu.focus();
     });
   }
 
@@ -92,7 +103,7 @@ export class ModelInfoHeaderComponent {
 
   tagsMenuClosed() {
     this.store.dispatch(cancelModelEdit());
-    this.tagMenuContent.clear();
+    this.tagMenu.clear();
   }
 
   editExperimentName(edit: boolean) {

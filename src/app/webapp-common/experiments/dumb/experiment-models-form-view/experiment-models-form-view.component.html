@@ -12,7 +12,7 @@
                            class="light"
                            [hideBackground]="true"
         ></sm-copy-clipboard>
-        <sm-id-badge *ngIf="model?.id" class="ms-3" [id]="model.id"></sm-id-badge>
+        <sm-id-badge *ngIf="model?.id" class="ms-3" [id]="model.id" (copied)="copySuccess()"></sm-id-badge>
       </div>
       <ng-container *ngIf="editable">
         <i class="al-icon al-ico-edit al-color blue-400 sm-md pointer mx-3"  smTooltip="Select model" (click)="chooseModel()"></i>

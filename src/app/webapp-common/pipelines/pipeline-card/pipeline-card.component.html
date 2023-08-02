@@ -25,7 +25,8 @@
                       [editable]="true"
                       [minLength]="2"
                       [required]="true"
-                      pattern="^[^/]{2,}$"
+                      pattern="^[^\/]{2,}$"
+                      [forbiddenString]="[]"
                       [inlineDisabled]="true"
                       (textChanged)="prepareProjectNameForChange($event)"
       >

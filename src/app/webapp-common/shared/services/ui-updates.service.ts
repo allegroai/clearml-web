@@ -11,7 +11,7 @@ import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 export class UiUpdatesService {
   private updateDialog: MatDialogRef<UiUpdateDialogComponent, any>;
 
-  constructor(private httpClient: HttpClient, private store: Store<any>, private matDialog: MatDialog,
+  constructor(private httpClient: HttpClient, private store: Store, private matDialog: MatDialog,
   ) {
 
   }

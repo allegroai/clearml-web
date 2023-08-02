@@ -35,8 +35,7 @@ import {
   selectActiveParentsFilter,
   selectExperimentsList,
   selectExperimentsMetricsColsForProject,
-  selectExperimentsParents,
-  selectExperimentsTableCols,
+  selectExperimentsParents, selectExperimentsTableCols,
   selectExperimentsTableColsOrder,
   selectExperimentsTags,
   selectExperimentsTypes,
@@ -64,9 +63,12 @@ import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {ExperimentsTableComponent} from '@common/experiments/dumb/experiments-table/experiments-table.component';
 import {MESSAGES_SEVERITY} from '@common/constants';
 import {MatSlideToggleChange} from '@angular/material/slide-toggle';
-import {getTablesFilterProjectsOptions, resetTablesFilterProjectsOptions} from '@common/core/actions/projects.actions';
+import {getProjectUsers, getTablesFilterProjectsOptions, resetTablesFilterProjectsOptions} from '@common/core/actions/projects.actions';
 import {EXPERIMENTS_PAGE_SIZE} from '@common/experiments/shared/common-experiments.const';
-import {setParents} from '../../../experiments/actions/common-experiments-view.actions';
+import {setParents} from '@common/experiments/actions/common-experiments-view.actions';
+import {INITIAL_CONTROLLER_TABLE_COLS} from '@common/pipelines-controller/controllers.consts';
+import {EXPERIMENTS_TABLE_COL_FIELDS} from '~/features/experiments/shared/experiments.const';
+import {setTableCols} from '../../../experiments/actions/common-experiments-view.actions';
 
 export const allowAddExperiment$ = (selectRouterParams$: Observable<Params>) => selectRouterParams$.pipe(
   distinctUntilKeyChanged('ids'),
@@ -82,8 +84,8 @@ export const allowAddExperiment$ = (selectRouterParams$: Observable<Params>) => 
   styleUrls: ['./select-experiments-for-compare.component.scss']
 })
 export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
-  public tableCols = INITIAL_EXPERIMENT_TABLE_COLS;
   public entityTypes = EntityTypeEnum;
+  public initTableCols = this.getInitTablesCols(this.data.entityType);
   public experimentsResults$: Observable<Task[]>;
   public selectedExperimentsIds: string[] = [];
   private paramsSubscription: Subscription;
@@ -118,14 +120,14 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
   private parents: ProjectsGetTaskParentsResponseParents[];
 
   constructor(
-    private store: Store<any>,
+    private store: Store,
     private eRef: ElementRef,
     private changedDetectRef: ChangeDetectorRef,
     public dialogRef: MatDialogRef<SelectExperimentsForCompareComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { entityType: EntityTypeEnum }
   ) {
     this.resizedCols$.next(this._resizedCols);
-    this.experimentsResults$ = this.store.pipe(select(selectSelectedExperimentsForCompareAdd));
+    this.experimentsResults$ = this.store.select(selectSelectedExperimentsForCompareAdd);
     this.showArchived$ = this.store.select(selectViewArchivedInAddTable);
     this.experiments$ = combineLatest([
       this.store.select(selectExperimentsList),
@@ -133,7 +135,7 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
     ]).pipe(
       map(([experiments, selectedExperiments]) => {
         const union = unionBy(selectedExperiments, experiments, 'id');
-        if (experiments?.length >= EXPERIMENTS_PAGE_SIZE && (union.length - (selectedExperiments?.length ?? 0) <= EXPERIMENTS_PAGE_SIZE * (this.loadMoreCount + 1))) {
+        if (experiments?.length >= EXPERIMENTS_PAGE_SIZE && (union.length - (selectedExperiments?.length ?? 0) < EXPERIMENTS_PAGE_SIZE * (this.loadMoreCount + 1))) {
           this.store.dispatch(experimentsActions.getNextExperiments());
         }
         return union;
@@ -158,8 +160,7 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
     this.tableCols$ = combineLatest([this.columns$, this.metricTableCols$, this.resizedCols$])
       .pipe(
         map(([tableCols, metricCols, resizedCols]) =>
-          (tableCols.length > 0 ? tableCols : this.tableCols)
-            .concat(metricCols.map(col => ({...col, metric: true})))
+          tableCols.concat(metricCols.map(col => ({...col, metric: true})))
             .map(col => ({
               ...col,
               style: {...col.style, width: resizedCols[col.id] || col.style?.width}
@@ -201,17 +202,19 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
   }
 
   refreshTagsList() {
-    this.store.dispatch(experimentsActions.getTags());
+    this.store.dispatch(experimentsActions.getTags({allProjects: true}));
   }
 
   refreshTypesList() {
-    this.store.dispatch(experimentsActions.getProjectTypes());
+    this.store.dispatch(experimentsActions.getProjectTypes({allProjects: true}));
   }
 
 
   ngOnInit() {
+    this.store.dispatch(setTableCols({cols: this.initTableCols}));
     this.store.dispatch(setShowSearchExperimentsForCompare({payload: true}));
-    this.store.dispatch(getTablesFilterProjectsOptions({searchString: '', loadMore: false}));
+    this.store.dispatch(resetTablesFilterProjectsOptions());
+    this.store.dispatch(getProjectUsers({projectId: '*'}));
     window.setTimeout(() => this.table.table.rowRightClick = new EventEmitter());
     this.paramsSubscription = this.store.pipe(
       select(selectRouterParams),
@@ -229,9 +232,9 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
       this.changedDetectRef.detectChanges();
     });
     this.allowAddExperiment$ = allowAddExperiment$(this.store.select(selectRouterParams));
-    this.store.dispatch(experimentsActions.getTags());
-    this.store.dispatch(experimentsActions.getProjectTypes());
-    this.store.dispatch(experimentsActions.getParents({searchValue: null}));
+    this.store.dispatch(experimentsActions.getTags({allProjects: true}));
+    this.store.dispatch(experimentsActions.getProjectTypes({allProjects: true}));
+    this.store.dispatch(experimentsActions.getParents({searchValue: null, allProjects: true}));
     this.store.dispatch(getSelectedExperimentsForCompareAddDialog(null));
     this.syncAppSearch();
   }
@@ -241,7 +244,7 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
     this.store.dispatch(setShowSearchExperimentsForCompare({payload: false}));
     this.store.dispatch(resetExperiments());
     this.store.dispatch(resetGlobalFilter());
-    this.store.dispatch(resetSelectCompareHeader());
+    this.store.dispatch(resetSelectCompareHeader({fullReset: false}));
   }
 
 
@@ -301,7 +304,7 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
     this.store.dispatch(setAddTableViewArchived({show: event.checked}));
   }
 
-  filterSearchChanged({colId, value}: { colId: string; value: {value: string; loadMore?: boolean} }) {
+  filterSearchChanged({colId, value}: { colId: string; value: { value: string; loadMore?: boolean } }) {
     switch (colId) {
       case 'project.name':
         if (this.projectId === '*' && !value.loadMore) {
@@ -314,8 +317,21 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
           this.store.dispatch(setParents({parents: [...this.parents]}));
         } else {
           this.store.dispatch(experimentsActions.resetTablesFilterParentsOptions());
-          this.store.dispatch(experimentsActions.getParents({searchValue: value.value || ''}));
+          this.store.dispatch(experimentsActions.getParents({searchValue: value.value || '', allProjects: true}));
         }
+    }
+  }
+
+  private getInitTablesCols(entityType: EntityTypeEnum) {
+    switch (entityType) {
+      case this.entityTypes.controller:
+        return INITIAL_CONTROLLER_TABLE_COLS.map((col) =>
+          col.id === EXPERIMENTS_TABLE_COL_FIELDS.NAME ? {...col, header: 'RUN'} : col);
+      case this.entityTypes.dataset:
+        return INITIAL_CONTROLLER_TABLE_COLS.map((col) =>
+          col.id === EXPERIMENTS_TABLE_COL_FIELDS.NAME ? {...col, header: 'VERSION NAME'} : col);
+      default:
+        return INITIAL_EXPERIMENT_TABLE_COLS;
     }
   }
 }

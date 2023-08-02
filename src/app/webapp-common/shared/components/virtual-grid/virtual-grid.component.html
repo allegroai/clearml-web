@@ -12,7 +12,7 @@
     <div *ngFor="let blankItem of [].constructor(cardsInRow - row.length)"></div>
   </div>
   <div class="load-more" *ngIf="showLoadMoreButton && (itemRows$ | async)?.length"  (smScrollEnd)="autoLoadMore && !loading && autoLoad()">
-    <button (click)="loadMoreClicked.emit()" class="btn btn-primary load-more-btn">
+    <button (click)="loadMoreClicked.emit()" class="btn btn-cml-primary load-more-btn">
       <i *ngIf="loading" class="load-spinner"></i>LOAD MORE</button>
   </div>
 </cdk-virtual-scroll-viewport>

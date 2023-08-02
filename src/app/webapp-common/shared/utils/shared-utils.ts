@@ -131,6 +131,11 @@ export const removeAlphaColor = (rgbaColor: string) => {
   return `rgb(${rgbaColorArr[0]},${rgbaColorArr[1]},${rgbaColorArr[2]})`;
 };
 
+export const addAlphaColor = (rgbaColor: string, alpha: string) => {
+  const rgbaColorArr = rgbaColor.substring(rgbaColor.indexOf('(') + 1, rgbaColor.indexOf(')')).split(',');
+  return `rgb(${rgbaColorArr[0]},${rgbaColorArr[1]},${rgbaColorArr[2]}, ${alpha})`;
+};
+
 export const isExample = item => item?.company && !item.company?.id;
 
 export const isAnnotationTask = entity => entity.system_tags && entity.system_tags.includes('Annotation');

@@ -428,11 +428,11 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
   maximize() {
     this.dialog.open(GraphViewerComponent, {
       data: {
-        embedFunction: (rect: DOMRect) => this.creatingEmbedCode(rect),
+        embedFunction: (data) => this.creatingEmbedCode(data.domRect),
         // signed url are updated after originChart was cloned - need to update images urls!
         chart: cloneDeep({
           data: this.data as unknown as ExtData[],
-          layout: this.getLayout(false),
+          layout: {...this.getLayout(false), title: this.metric?.name || ''},
           config: {
             displaylogo: false,
             displayModeBar: false,

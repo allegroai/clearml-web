@@ -41,7 +41,7 @@ export class ModelInfoMetadataComponent implements OnInit, OnDestroy {
   public searchResultsCount: number;
   public scrollIndexCounter: number;
 
-  constructor(private store: Store<ModelInfoState>) {
+  constructor(private store: Store) {
     this.selectedModel$ = this.store.select(selectSelectedModel).pipe(filter(model => !!model));
     this.saving$ = this.store.select(selectIsModelSaving);
     this.isSharedAndNotOwner$ = this.store.select(selectIsSharedAndNotOwner);

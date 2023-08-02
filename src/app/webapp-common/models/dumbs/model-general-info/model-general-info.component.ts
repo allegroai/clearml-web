@@ -19,7 +19,7 @@ import {filter, map, take} from 'rxjs/operators';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ModelGeneralInfoComponent {
-  constructor(private datePipe: DatePipe, private store: Store<any>, private adminService: AdminService) {
+  constructor(private datePipe: DatePipe, private store: Store, private adminService: AdminService) {
   }
 
   public kpis: {label: string; value: string; downloadable?: boolean; href?: string; task?: string}[];

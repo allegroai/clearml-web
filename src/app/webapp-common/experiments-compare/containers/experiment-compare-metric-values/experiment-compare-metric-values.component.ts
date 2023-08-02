@@ -65,7 +65,7 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    public store: Store<any>,
+    public store: Store,
     private changeDetection: ChangeDetectorRef,
     private refresh: RefreshService
   ) {

@@ -13,7 +13,7 @@ export class ProfileKeyStorageComponent implements OnInit {
 
   public s3BucketCredentials$ = this.store.select(selectS3BucketCredentials);
 
-  constructor(private store: Store<any>,
+  constructor(private store: Store,
               private adminService: AdminService) { }
 
   ngOnInit(): void {

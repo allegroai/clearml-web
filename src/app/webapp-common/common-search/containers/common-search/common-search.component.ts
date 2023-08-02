@@ -27,7 +27,7 @@ export class CommonSearchComponent implements OnInit {
   minChars = 3;
   public regexError: boolean;
 
-  constructor(private store: Store<any>, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef) {
+  constructor(private store: Store, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef) {
   }
 
   ngOnInit() {

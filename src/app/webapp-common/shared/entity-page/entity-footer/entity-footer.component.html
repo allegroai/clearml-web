@@ -1,5 +1,5 @@
 <sm-compare-footer *ngIf="footerState">
-  <ng-container *ngFor="let footerItem of footerItems; trackBy: trackBy"   >
+  <ng-container *ngFor="let footerItem of footerItems; trackBy: trackBy">
     <ng-template
       #templateRef
       [ngTemplateOutletContext]="{ $implicit: footerItem.getItemState(footerState)}"
@@ -21,8 +21,10 @@
             (click)="footerItem.emit && footerItemClick.emit({item: footerItem, emitValue: footerItemState?.emitValue })"
             [class.disabled]="footerItemState?.disable ? footerItemState?.disable : null"
           >
-            <i *ngIf="footerItem.icon" data-id="FooterOptions" class="sm al-icon sm-md al-color blue-100" [class]="footerItem.icon"></i>
-            <i *ngIf="footerItemState?.icon" data-id="archiveOption" class="sm al-icon sm-md al-color blue-100" [class]="footerItemState?.icon"></i>
+            <i *ngIf="footerItem.icon" data-id="FooterOptions" class="sm al-icon sm-md al-color blue-100"
+               [class]="footerItem.icon"></i>
+            <i *ngIf="footerItemState?.icon" data-id="archiveOption" class="sm al-icon sm-md al-color blue-100"
+               [class]="footerItemState?.icon"></i>
             <div *ngIf="footerItem.title" class="title" data-id="compareOption">{{footerItem.title}}</div>
             <div *ngIf="footerItemState?.title" class="title ms-1">{{footerItemState?.title}}</div>
           </button>
@@ -36,24 +38,22 @@
              footerItemState.description   || footerItem.description"
         >
           <button
-            [matMenuTriggerFor]="tagMenu"
+            [matMenuTriggerFor]="tagsMenu.matMenu"
             [disabled]="footerItemState.disable"
-            (menuOpened)="tagMenuOpened(tagMenuContent)"
-            (menuClosed)="tagMenuClosed(tagMenuContent)"
+            (menuOpened)="tagMenuOpened(tagMenu)"
+            (menuClosed)="tagMenuClosed(tagMenu)"
           ><i data-id="AddTagOption" class="al-icon sm-md pt-1" [class]="icons.TAG"></i></button>
-          <mat-menu #tagMenu="matMenu">
-            <sm-tags-menu
-              #tagMenuContent
-              class="light-theme"
-              [tags]="footerItemState.tags"
-              [tagsFilterByProject]="footerItemState.tagsFilterByProject"
-              [projectTags]="footerItemState.projectTags"
-              [companyTags]="footerItemState.companyTags"
-              (tagSelected)="tagSelected.emit({tags: $event, emitValue: footerItemState.emitValue})">
-            </sm-tags-menu>
-          </mat-menu>
-      </span>
+        </span>
 
+        <sm-tags-menu
+          #tagsMenu
+          class="light-theme"
+          [tags]="footerItemState.tags"
+          [tagsFilterByProject]="footerItemState.tagsFilterByProject"
+          [projectTags]="footerItemState.projectTags"
+          [companyTags]="footerItemState.companyTags"
+          (tagSelected)="tagSelected.emit({tags: $event, emitValue: footerItemState.emitValue})">
+        </sm-tags-menu>
       </ng-template>
     </ng-template>
   </ng-container>

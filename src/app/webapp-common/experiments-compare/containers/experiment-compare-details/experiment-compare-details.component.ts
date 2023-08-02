@@ -26,7 +26,7 @@ export class ExperimentCompareDetailsComponent extends ExperimentCompareBase imp
 
   constructor(
     public router: Router,
-    public store: Store<ExperimentInfoState>,
+    public store: Store,
     public changeDetection: ChangeDetectorRef,
     public activeRoute: ActivatedRoute,
     public cdr: ChangeDetectorRef,

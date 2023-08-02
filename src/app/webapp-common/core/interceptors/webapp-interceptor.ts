@@ -13,7 +13,7 @@ import {setCurrentUser} from '~/core/actions/users.action';
 export class WebappInterceptor implements HttpInterceptor {
   protected user: GetCurrentUserResponseUserObject;
 
-  constructor(protected router: Router, protected store: Store<any>) {
+  constructor(protected router: Router, protected store: Store) {
     this.store.select(selectCurrentUser).subscribe(user => this.user = user);
   }
 
@@ -33,7 +33,7 @@ export class WebappInterceptor implements HttpInterceptor {
   protected errorHandler(request: HttpRequest<any>, err: HttpErrorResponse) {
     const redirectUrl: string = window.location.pathname + window.location.search;
     if (request.url.endsWith('system.company_info')) {
-      return throwError(err);
+      return throwError(() => err);
     }
     // For automatic login don't go to login page (login in APP_INITIALIZER)
     if (err.status === 401 && (

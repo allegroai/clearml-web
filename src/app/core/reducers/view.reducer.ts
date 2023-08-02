@@ -6,6 +6,8 @@ import {
 } from '@common/core/reducers/view.reducer';
 import {dismissSurvey} from '../actions/layout.actions';
 import {setServerUpdatesAvailable} from '@common/core/actions/layout.actions';
+import {selectRouterConfig} from '@common/core/reducers/router-reducer';
+import {routeConfToProjectType} from '~/features/projects/projects-page.utils';
 
 interface ViewState extends CommonViewState {
   availableUpdates: string;
@@ -22,6 +24,8 @@ export const selectAvailableUpdates   = createSelector(views, state => state.ava
 export const selectShowSurvey   = createSelector(views, state => state.showSurvey);
 export const selectUserSettingsNotificationPath = createSelector(views, (state) => '');
 export const selectActiveWorkspaceReady = createSelector(views, (state) => true);
+export const selectProjectType = createSelector(selectRouterConfig,
+  config => (config && routeConfToProjectType(config)) ?? 'datasets');
 
 export function viewReducer(viewState: ViewState = initViewState, action) {
 

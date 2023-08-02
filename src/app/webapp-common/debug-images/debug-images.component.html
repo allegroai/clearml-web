@@ -12,16 +12,16 @@
       >
       </sm-experiment-compare-general-data>
     </header>
-    <div class="d-flex navigator-container" [class.active]="bindNavigationMode" [class.first]="first"
-         [class.last]="last">
+    <div class="navigator-container" [class.active]="bindNavigationMode" [class.first]="first"
+         [class.last]="last" [style.display]="isDarkTheme ? 'none' : 'flex'">
       <div class="connector-icon-container pointer" smTooltip="Sync browsing" [matTooltipShowDelay]="500"
            [class.active]="bindNavigationMode" [class.hidden]="last" (click)="toggleConnectNavigation()">
         <i class="al-icon" [class.al-ico-connect]="bindNavigationMode"
            [class.al-ico-disconnect]="!bindNavigationMode"></i></div>
       <div class="metric-bar" [class.minimized]="minimized"
-           *ngIf="!thereAreNoMetrics(experimentId) && !disableStatusRefreshFilter">
-        <label>Metric:</label>
-        <mat-form-field appearance="outline" class="no-bottom" [ngClass]="{'dark thin': isDarkTheme}">
+           *ngIf="!thereAreNoMetrics(experimentId) && !disableStatusRefreshFilter" data-id="metricBar">
+        <label data-id="metricText">Metric:</label>
+        <mat-form-field appearance="outline" class="no-bottom" [ngClass]="{'dark thin': isDarkTheme}" data-id="metricField">
           <mat-select
             #metricSelect
             (selectionChange)="selectMetric($event, experimentId)"
@@ -32,12 +32,12 @@
             <mat-option *ngFor="let metric of optionalMetrics[experimentId]" [value]="metric">{{metric}}</mat-option>
           </mat-select>
         </mat-form-field>
-        <label>Iterations:</label>
+        <label data-id="IterationText">Iterations:</label>
 
         <div [ngClass]="{'disabled': (beginningOfTime$| async)[experimentId]}"
              (click)="nextBatch({task: experimentId, metric: metricSelect.value})"
              class="al-icon al-ico-next-batch al-color blue-300"
-             smTooltip="Older images"></div>
+             smTooltip="Older images" data-id="OlderImages"></div>
 
         <b class="text-right">{{debugImages?.[experimentId]?.data?.slice(-1)[0].iter}}</b>
         <div class="al-icon al-ico-between al-color light-blue-grey"></div>
@@ -46,12 +46,12 @@
         <div [ngClass]="{'disabled': (timeIsNow$| async)[experimentId]}"
              (click)="(!timeIsNow[experimentId]) && previousBatch({task: experimentId, metric: metricSelect.value})"
              class="al-icon al-ico-prev-batch al-color blue-300"
-             smTooltip="Newer images"></div>
+             smTooltip="Newer images" data-id="NewerImages"></div>
 
         <div [ngClass]="{'disabled': (timeIsNow$| async)[experimentId] && !allowAutorefresh }"
              (click)="(!(timeIsNow[experimentId] && !allowAutorefresh)) && backToNow({task: experimentId, metric: metricSelect.value})"
              class="al-icon al-ico-back-to-top al-color blue-300"
-             smTooltip="Newest samples"></div>
+             smTooltip="Newest samples" data-id="NewestSamples"></div>
       </div>
     </div>
     <div class="no-images no-output" [class.dark]="isDarkTheme" *ngIf="shouldShowNoImagesForExperiment(experimentId)">

@@ -3,7 +3,7 @@ import {ReportsCreateRequest} from '~/business-logic/model/reports/reportsCreate
 import {ReportsGetAllExResponse} from '~/business-logic/model/reports/reportsGetAllExResponse';
 import {IReport} from './reports.consts';
 
-const REPORTS_PREFIX = 'REPORTS_';
+export const REPORTS_PREFIX = 'REPORTS_';
 
 export const createReport = createAction(
   REPORTS_PREFIX + 'CREATE_REPORT',
@@ -66,6 +66,12 @@ export const moveReport = createAction(
   props<{ report: IReport }>()
 );
 
+export const navigateToProjectAfterMove = createAction(
+  REPORTS_PREFIX + '[navigateToProjectAfterMove]',
+  props<{ projectId: string }>()
+);
+
+
 export const publishReport = createAction(
   REPORTS_PREFIX + '[publish report]',
   props<{ id: string }>()
@@ -110,3 +116,7 @@ export const deleteResource = createAction(
   props<{resource: string}>()
 );
 
+export const setEditMode = createAction(
+  REPORTS_PREFIX + 'Set Edit Mode',
+  props<{editing: boolean}>()
+);

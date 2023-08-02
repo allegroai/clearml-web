@@ -23,14 +23,12 @@
                     [editable]="false"
                     [minLength]="2"
                     [required]="true"
-                    pattern="^[^/]{2,}$"
+                    pattern="^[^\/]{2,}$"
                     [forbiddenString]="projectsNames"
                     [inlineDisabled]="true"
                     (textChanged)="prepareProjectNameForChange($event)"
     >
-      <span class="project-name"
-            [smTooltip]="project.name | cleanProjectPath"
-      >{{project.name | shortProjectName}}</span>
+      <span class="project-name" [smTooltip]="project.basename" smShowTooltipIfEllipsis>{{project.basename}}</span>
     </sm-inline-edit>
     <div *ngIf="project.system_tags?.includes('default')" class="justify-content-end project-tag">Sample</div>
   </div>

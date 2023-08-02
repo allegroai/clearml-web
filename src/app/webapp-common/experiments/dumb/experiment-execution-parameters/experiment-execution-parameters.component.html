@@ -1,11 +1,12 @@
 <form [class.editable]="editable" #hyperParameters="ngForm">
-  <cdk-virtual-scroll-viewport #formContainer class="form-container" itemSize="60" minBufferPx="280" maxBufferPx="560">
+  <cdk-virtual-scroll-viewport #formContainer class="form-container" itemSize="58" minBufferPx="280" maxBufferPx="560">
     <ng-container *ngIf="editable">
-      <div *ngFor="let parameter of formData; let index= index" class="w-100 d-flex">
+      <div *ngFor="let parameter of formData; let index= index" class="w-100 d-flex pe-2">
         <mat-form-field
           [hintLabel]="parameterKey.invalid && parameterKey?.errors?.required? '*Required': ''"
           appearance="outline"
-          class="strength">
+          class="strength"
+        >
           <input
             #parameterKey="ngModel"
             [(ngModel)]="parameter['name']"

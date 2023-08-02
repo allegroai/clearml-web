@@ -2,6 +2,10 @@
 @import "variables";
 
 .dark-theme, .light-theme {
+
+  .entity-context-menu .cdk-program-focused {
+    background-color: transparent !important;
+  }
   .mat-mdc-form-field {
     --mdc-typography-body1-font-size: 14px;
     --mdc-typography-body1-line-height: 16px;
@@ -31,6 +35,12 @@
           .mat-mdc-form-field-icon-suffix {
             line-height: 24px;
           }
+        }
+      }
+
+      &.mat-mdc-form-field-type-mat-select {
+        .mat-mdc-text-field-wrapper .mat-mdc-form-field-infix {
+          padding: 6px 0;
         }
       }
     }
@@ -72,7 +82,9 @@
 
     .mdc-notched-outline--upgraded {
       .mdc-floating-label--float-above {
-        --mat-mdc-form-field-label-transform: translate(-4px, -42.75px) scale(var(--mat-mdc-form-field-floating-label-scale, 0.75));
+        // --mat-mdc-form-field-label-transform: translate(-4px, -42.75px) scale(var(--mat-mdc-form-field-floating-label-scale, 0.75));
+        --mat-mdc-form-field-label-transform: translate(-4px, -44px) scale(1);
+        font-size: 12px;
       }
     }
 
@@ -187,6 +199,10 @@
         white-space: nowrap;
       }
     }
+
+    &.wider-options {
+     min-width: 250px;
+    }
   }
 }
 
@@ -220,9 +236,9 @@ body.dark-theme .mat-mdc-autocomplete-panel.dark-outline {
     }
   }
 
-  .mat-mdc-option:hover:not(.mdc-list-item--disabled), 
-  .mat-mdc-option:focus:not(.mdc-list-item--disabled), 
-  .mat-mdc-option.mat-mdc-option-active, 
+  .mat-mdc-option:hover:not(.mdc-list-item--disabled),
+  .mat-mdc-option:focus:not(.mdc-list-item--disabled),
+  .mat-mdc-option.mat-mdc-option-active,
   .mat-mdc-option.mdc-list-item--selected:not(.mat-mdc-option-multiple):not(.mdc-list-item--disabled) {
     background: $dark-grey-blue;
   }
@@ -232,12 +248,37 @@ body.dark-theme .mat-mdc-autocomplete-panel.dark-outline {
     padding: 4px;
   }
 
-  .mat-pseudo-checkbox {
+  .mat-pseudo-checkbox::after {
     color: $blue-200;
   }
 
   &.mat-primary .mat-mdc-option.mat-selected:not(.mat-option-disabled) .mdc-list-item__primary-text {
     color: $blue-200;
+  }
+  &.unset-option-height .mat-mdc-option {
+    // show all options text inside
+    height: unset;
+    line-height: normal;
+  }
+}
+
+.mat-mdc-slider.mdc-slider {
+  $size: 36px;
+  height: $size;
+
+  .mdc-slider__thumb {
+    height: $size;
+    width: $size;
+    left: -$size * 0.5;
+  }
+
+  .mat-ripple-element.mat-mdc-slider-active-ripple,
+  .mat-ripple-element.mat-mdc-slider-focus-ripple,
+  .mat-ripple-element.mat-mdc-slider-hover-ripple {
+    height: $size !important;
+    width: $size !important;
+    left: 0 !important;
+    top: 0 !important;
   }
 }
 
@@ -318,7 +359,7 @@ body.dark-theme .mat-mdc-autocomplete-panel.dark-outline {
 }
 
 .mat-mdc-input-element {
-  font-size: 14px !important;
+  font-size: var(--input-font-size, 14px) !important;
 }
 
 .mat-mdc-tab-header {
@@ -332,7 +373,7 @@ body.dark-theme .mat-mdc-autocomplete-panel.dark-outline {
 .mat-mdc-tab-link.mdc-tab {
   height: 38px !important;
   padding: 0 16px;
-  color: #8e95ab;
+  color: $blue-300;
   min-width: 40px;
 
   &.mdc-tab-indicator--active {
@@ -340,3 +381,6 @@ body.dark-theme .mat-mdc-autocomplete-panel.dark-outline {
   }
 }
 
+.dark-theme .mat-primary .mat-pseudo-checkbox-checked.mat-pseudo-checkbox-minimal::after {
+  color: $blue-200;
+}

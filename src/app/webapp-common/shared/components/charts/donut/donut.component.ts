@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import {select, Selection} from 'd3-selection';
 import {ColorHashService} from '../../../services/color-hash/color-hash.service';
-import donut from 'britecharts/dist/umd/donut.min';
+import {donut} from 'britecharts';
 import {Store} from '@ngrx/store';
 import {BehaviorSubject, combineLatest, fromEvent, Subscription} from 'rxjs';
 import {debounceTime, filter, startWith} from 'rxjs/operators';
@@ -54,7 +54,7 @@ export class DonutComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.donutContainer !== undefined) {
       this.donutChart.colorSchema(colors);
       if (this.donutData) {
-        this.donutContainer.datum(this.donutData).call(this.donutChart);
+        this.redraw();
       }
     }
   }
@@ -81,7 +81,7 @@ export class DonutComponent implements OnInit, AfterViewInit, OnDestroy {
         filter(source => source !== null),
         debounceTime(50)
       )
-      .subscribe(() => this.onResize()));
+      .subscribe(() => this.redraw()));
   }
 
   ngAfterViewInit(): void {
@@ -107,7 +107,7 @@ export class DonutComponent implements OnInit, AfterViewInit, OnDestroy {
       });
   }
 
-  onResize() {
+  redraw() {
     this.donutContainer.select('svg').remove();
     this.donutChart     = donut();
     this._colors && this.donutChart.colorSchema(this._colors);

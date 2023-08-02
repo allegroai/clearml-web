@@ -59,7 +59,7 @@ export class EditJsonComponent implements AfterViewInit{
     @Inject(MAT_DIALOG_DATA) public data: EditJsonData,
     private dialogRef: MatDialogRef<EditJsonComponent, any>,
     private jsonPipe: JsonPipe,
-    private store: Store<any>,
+    private store: Store,
     private zone: NgZone,
   ) {
     this.format = data.format;
@@ -116,7 +116,7 @@ export class EditJsonComponent implements AfterViewInit{
       } as Partial<Ace.VirtualRendererOptions>);
 
 
-      aceEditor.renderer.setScrollMargin(12, 12, 12, 12);
+      aceEditor.renderer.setScrollMargin(12, 12, 0, 12);
       aceEditor.renderer.setPadding(12);
       (aceEditor.renderer.container.querySelector('.ace_cursor') as HTMLElement).style.color = 'white';
 

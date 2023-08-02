@@ -39,7 +39,7 @@
   </ng-container>
 
   <div class="load-more" *ngIf="(noMoreProjects$ | async) === false && (projectsList$ | async)?.length > 0">
-    <button (click)="loadMore()" class="btn btn-cml-primary load-more-btn">LOAD MORE</button>
+    <button (click)="loadMore()" class="btn btn-cml-primary load-more-btn" data-id="Load More">LOAD MORE</button>
   </div>
 </div>
 <ng-template #emptyState>

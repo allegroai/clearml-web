@@ -40,6 +40,7 @@ export class TableFilterSortTemplateComponent {
   public noMoreOptions: boolean;
   public filterPageSize: number;
   private previousSearchValue: { label: string; value: string; tooltip?: string } | undefined;
+  private isOpen: boolean;
 
   @Input() set column(col: ISmCol) {
     this.header = col.header;
@@ -75,7 +76,7 @@ export class TableFilterSortTemplateComponent {
   @Input() andFilter: boolean = null;
 
   @Input() set options(options: Array<{ label: string; value: string; tooltip?: string }>) {
-    if (options) {
+    if (options && this.isOpen) {
       this.noMoreOptions = options?.length < this.filterPageSize || options?.length === this.previousLength && this.searchValue === this.previousSearchValue;
       this.previousLength = options?.length;
       this.previousSearchValue = this.searchValue;
@@ -155,5 +156,11 @@ export class TableFilterSortTemplateComponent {
       this.previousLength = 0;
     }
     this.menuClosed.emit();
+    this.isOpen = false;
+  }
+
+  onMenuOpen() {
+    this.isOpen = true;
+    this.menuOpened.emit();
   }
 }

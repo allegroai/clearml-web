@@ -1,0 +1,53 @@
+<sm-nested-project-view-page
+  [projectsList]="projectsList$ | async"
+  [projectsOrderBy]="projectsOrderBy$ | async"
+  [projectsSortOrder]="projectsSortOrder$ | async"
+  [noMoreProjects]="noMoreProjects$ | async"
+  [projectsTags]="reportsTags$ | async"
+  [allExamples]="allExamples"
+  [cardContentTemplateRef]="cardContent"
+  [entityType]="entityType"
+  [totalVirtualCards]="1"
+  [searching]="searching"
+  (cardClicked)="projectCardClicked($event)"
+  (deleteProjectClicked)="deleteProject($event)"
+  (projectNameChanged)="projectNameChanged($event)"
+  (orderByChanged)="orderByChanged($event)"
+  (loadMore)="loadMore()"
+  (toggleNestedView)="toggleNestedView($event)"
+  class="nested-project-view"
+>
+
+  <button create-button
+          class="btn btn-cml-primary d-flex align-items-center"
+          (click)="openCreateReportDialog(projectId)">
+    <i class="al-icon al-ico-add sm me-2" data-id="New Report"></i>NEW REPORT
+  </button>
+
+  <div empty-state class="empty-state justify-content-center">
+    <div class="title-icon"><i class="al-icon al-ico-reports xxl"></i></div>
+    <div class="title">NO REPORTS TO SHOW</div>
+    <div class="sub-title">
+      <button (click)="openCreateReportDialog(projectId)" class="no-data-button btn btn-neon">
+        <span>NEW REPORT</span>
+      </button>
+    </div>
+  </div>
+
+
+</sm-nested-project-view-page>
+
+<ng-template #cardContent let-project>
+  <sm-circle-counter
+    [counter]="project.stats?.active?.total_tasks ?? '0'"
+    label="REPORTS"
+    [type]="circleTypeEnum.empty"></sm-circle-counter>
+  <sm-circle-counter
+    [counter]="project.stats?.active?.status_count?.published ?? '0'"
+    label="PUBLISHED"
+    [type]="project.stats?.active?.status_count?.published ===0 ? circleTypeEnum.empty :
+            circleTypeEnum.published"
+  ></sm-circle-counter>
+</ng-template>
+
+

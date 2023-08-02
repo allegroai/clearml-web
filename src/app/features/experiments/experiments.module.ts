@@ -51,6 +51,7 @@ import {Overlay} from '@angular/cdk/overlay';
 import {ExperimentsComponent} from '@common/experiments/experiments.component';
 import {RouterTabNavBarComponent} from '@common/shared/components/router-tab-nav-bar/router-tab-nav-bar.component';
 import {MatTabsModule} from '@angular/material/tabs';
+import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
 
 
 @NgModule({
@@ -84,6 +85,7 @@ import {MatTabsModule} from '@angular/material/tabs';
     RouterTabNavBarComponent,
     MatTabsModule,
     RouterTabNavBarComponent,
+    LabeledFormFieldDirective,
   ],
   declarations: [
     ExperimentsComponent,

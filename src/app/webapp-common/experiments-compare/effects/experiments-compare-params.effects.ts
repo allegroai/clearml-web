@@ -24,7 +24,7 @@ import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 export class ExperimentsCompareParamsEffects {
 
   constructor(private actions$: Actions,
-              private store: Store<ExperimentCompareParamsState>,
+              private store: Store,
               private tasksApi: ApiTasksService,
               private modelsApi: ApiModelsService,
               private experimentParamsReverter: ExperimentParamsReverterService,

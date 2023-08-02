@@ -37,6 +37,7 @@ export class MenuComponent implements AfterViewInit {
   @Input() fixedOptionsSubheader: string;
   @Input() buttonTooltip: string;
   @Input() prefixIconClass: string;
+  @Input() disabled: boolean;
   @Input() set position(position: { x: number; y: number }) {
     this.movePosition(position);
     this._position = position;

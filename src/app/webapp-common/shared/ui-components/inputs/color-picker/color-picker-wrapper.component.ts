@@ -39,7 +39,7 @@ export class ColorPickerWrapperComponent implements OnInit, OnDestroy {
   public props: ColorPickerProps;
   public toggle = false;
 
-  constructor(private store: Store<any>, private colorHashService: ColorHashService, private cdr: ChangeDetectorRef) {
+  constructor(private store: Store, private colorHashService: ColorHashService, private cdr: ChangeDetectorRef) {
   }
 
   ngOnInit() {

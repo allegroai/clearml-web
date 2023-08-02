@@ -29,7 +29,7 @@ import {ApiModelsService} from '~/business-logic/api-services/models.service';
 import {catchError, mergeMap, map, switchMap, withLatestFrom} from 'rxjs/operators';
 import {isEqual} from 'lodash-es';
 import {activeSearchLink} from '~/features/dashboard-search/dashboard-search.consts';
-import {EmptyAction} from '~/app.constants';
+import {emptyAction} from '~/app.constants';
 import {escapeRegex} from '@common/shared/utils/escape-regex';
 import {selectCurrentUser, selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
 import {selectHideExamples, selectShowHidden} from '@common/core/reducers/projects.reducer';
@@ -60,6 +60,7 @@ export const getEntityStatQuery = (action, searchHidden) => ({
       ...(action.query && {pattern: action.regExp ? action.query : escapeRegex(action.query)}),
       fields: ['name', 'id']
     },
+    system_tags: ['-archived']
   },
   datasets: {
     _any_: {
@@ -148,7 +149,7 @@ export class DashboardSearchEffects {
           case activeSearchLink.reports:
             return searchReports(term);
         }
-        return new EmptyAction();
+        return emptyAction();
       }
     )
   ));

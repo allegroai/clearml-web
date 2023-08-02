@@ -1,7 +1,7 @@
 import {Routes} from '@angular/router';
 import {ExperimentsComponent} from '@common/experiments/experiments.component';
 import {ExperimentInfoExecutionComponent} from './containers/experiment-info-execution/experiment-info-execution.component';
-import {LeavingBeforeSaveAlertGuard} from '../shared/guards/leaving-before-save-alert.guard';
+import {leavingBeforeSaveAlertGuard} from '../shared/guards/leaving-before-save-alert.guard';
 import {ExperimentInfoArtifactsComponent} from './containers/experiment-info-aritfacts/experiment-info-artifacts.component';
 import {ExperimentInfoModelComponent} from './containers/experiment-info-model/experiment-info-model.component';
 import {ExperimentInfoArtifactItemComponent} from './containers/experiment-info-artifact-item/experiment-info-artifact-item.component';
@@ -14,6 +14,7 @@ import {ExperimentOutputScalarsComponent} from './containers/experiment-output-s
 import {ExperimentOutputPlotsComponent} from './containers/experiment-output-plots/experiment-output-plots.component';
 import {DebugImagesComponent} from '../debug-images/debug-images.component';
 import {ExperimentOutputLogComponent} from './containers/experiment-output-log/experiment-output-log.component';
+import {selectIsExperimentInEditMode} from '@common/experiments/reducers';
 
 export const routes: Routes = [
   {
@@ -27,13 +28,13 @@ export const routes: Routes = [
           {
             path: 'execution',
             component: ExperimentInfoExecutionComponent,
-            canDeactivate: [LeavingBeforeSaveAlertGuard],
+            canDeactivate: [leavingBeforeSaveAlertGuard(selectIsExperimentInEditMode)],
             data: {minimized: true}
           },
           {
             path: 'artifacts',
             component: ExperimentInfoArtifactsComponent,
-            canDeactivate: [LeavingBeforeSaveAlertGuard],
+            canDeactivate: [leavingBeforeSaveAlertGuard(selectIsExperimentInEditMode)],
             data     : {minimized: true},
             children: [
               {path: '', redirectTo: 'input-model', pathMatch: 'full'},
@@ -49,7 +50,7 @@ export const routes: Routes = [
           {
             path: 'hyper-params',
             component: ExperimentInfoHyperParametersComponent,
-            canDeactivate: [LeavingBeforeSaveAlertGuard],
+            canDeactivate: [leavingBeforeSaveAlertGuard(selectIsExperimentInEditMode)],
             data     : {minimized: true},
             children: [
               {path: 'configuration/:configObject', component: ExperimentInfoTaskModelComponent},
@@ -81,13 +82,13 @@ export const routes: Routes = [
       {path: '', redirectTo: 'execution', pathMatch: 'full'},
       {path: 'execution',
         component: ExperimentInfoExecutionComponent,
-        canDeactivate: [LeavingBeforeSaveAlertGuard]
+        canDeactivate: [leavingBeforeSaveAlertGuard(selectIsExperimentInEditMode)]
       },
       {
         path: 'hyper-params',
         component: ExperimentInfoHyperParametersComponent,
         data: {},
-        canDeactivate: [LeavingBeforeSaveAlertGuard],
+        canDeactivate: [leavingBeforeSaveAlertGuard(selectIsExperimentInEditMode)],
         children: [
           {path: 'configuration/:configObject', component: ExperimentInfoTaskModelComponent},
           {path: 'hyper-param/:hyperParamId', component: ExperimentInfoHyperParametersFormContainerComponent}
@@ -97,7 +98,7 @@ export const routes: Routes = [
         path: 'artifacts',
         component: ExperimentInfoArtifactsComponent,
         data: {},
-        canDeactivate: [LeavingBeforeSaveAlertGuard],
+        canDeactivate: [leavingBeforeSaveAlertGuard(selectIsExperimentInEditMode)],
         children: [
           {path: '', redirectTo: 'input-model', pathMatch: 'full'},
           {path: 'input-model/:modelId', component: ExperimentInfoModelComponent , data: {outputModel: false}},

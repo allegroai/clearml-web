@@ -1,7 +1,5 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {Store} from '@ngrx/store';
-import {ActivatedRoute, Params, Router} from '@angular/router';
-import {MatDialog} from '@angular/material/dialog';
+import {Component, OnDestroy, OnInit, } from '@angular/core';
+import {Params} from '@angular/router';
 import {ReportDialogComponent} from '../report-dialog/report-dialog.component';
 import {
   addReportsTags,
@@ -32,22 +30,26 @@ import {Report} from '~/business-logic/model/reports/report';
 import {IReport} from '../reports.consts';
 import {addMessage} from '../../core/actions/layout.actions';
 import {MESSAGES_SEVERITY} from '../../constants';
-import {selectMainPageTagsFilter, selectMainPageTagsFilterMatchMode} from '../../core/reducers/projects.reducer';
+import {
+  selectDefaultNestedModeForFeature,
+  selectMainPageTagsFilter,
+  selectMainPageTagsFilterMatchMode
+} from '../../core/reducers/projects.reducer';
 import {selectShowOnlyUserWork} from '../../core/reducers/users-reducer';
-import {selectSearchQuery} from '../../common-search/common-search.reducer';
 import {initSearch, setSearching, setSearchQuery} from '../../common-search/common-search.actions';
-import {debounceTime, filter, map, tap} from 'rxjs/operators';
-import {setDefaultNestedModeForFeature} from '@common/core/actions/projects.actions';
+import {debounceTime, filter, map, tap, withLatestFrom} from 'rxjs/operators';
+import {setBreadcrumbsOptions, setDefaultNestedModeForFeature} from '@common/core/actions/projects.actions';
 import {isEqual} from 'lodash-es';
 import {ClipboardService} from 'ngx-clipboard';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
+import {CommonProjectsPageComponent} from '@common/projects/containers/projects-page/common-projects-page.component';
 
 @Component({
   selector: 'sm-reports-page',
   templateUrl: './reports-page.component.html',
   styleUrls: ['./reports-page.component.scss']
 })
-export class ReportsPageComponent implements OnInit, OnDestroy {
+export class ReportsPageComponent extends CommonProjectsPageComponent implements OnInit, OnDestroy {
   public reports$: Observable<any>;
   public archive$: Observable<any>;
   public reportsTags$: Observable<string[]>;
@@ -55,30 +57,25 @@ export class ReportsPageComponent implements OnInit, OnDestroy {
   public noMoreReports$: Observable<boolean>;
   public reportsOrderBy$: Observable<string>;
   public reportsSortOrder$: Observable<1 | -1>;
-  private searchQuery$: Observable<{ query: string; regExp?: boolean; original?: string }>;
   public selectedProjectId$: Observable<string>;
 
   constructor(
-    private store: Store<any>,
-    private router: Router,
-    private route: ActivatedRoute,
-    private matDialog: MatDialog,
     private _clipboardService: ClipboardService
 ) {
+    super();
     this.reports$ = this.store.select(selectReports);
     this.reportsTags$ = this.store.select(selectReportsTags);
     this.archive$ = this.store.select(selectArchiveView);
     this.noMoreReports$ = this.store.select(selectNoMoreReports);
     this.reportsOrderBy$ = this.store.select(selectReportsOrderBy);
     this.reportsSortOrder$ = this.store.select(selectReportsSortOrder);
-    this.searchQuery$ = this.store.select(selectSearchQuery);
-    this.selectedProjectId$ = this.store.select(selectRouterParams).pipe(map(params => params?.projectId));
+    this.selectedProjectId$ = this.store.select(selectRouterParams).pipe(map((params: Params) => params?.projectId));
 
     this.store.dispatch(getReportsTags());
   }
 
   public openCreateReportDialog(projectId) {
-    this.matDialog.open(ReportDialogComponent, {
+    this.dialog.open(ReportDialogComponent, {
       data: {defaultProjectId: projectId},
       panelClass: 'light-theme',
     })
@@ -91,11 +88,13 @@ export class ReportsPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    super.ngOnDestroy();
     this.sub.unsubscribe();
     this.store.dispatch(resetReports());
   }
 
   ngOnInit(): void {
+    super.ngOnInit();
     this.store.dispatch(initSearch({payload: 'Search for reports'}));
     let prevQueryParams: Params;
     this.sub.add(combineLatest([
@@ -106,12 +105,12 @@ export class ReportsPageComponent implements OnInit, OnDestroy {
         this.route.queryParams
           .pipe(
             filter(params => !isEqual(params, prevQueryParams)),
-            tap(params => this.store.dispatch(setArchive({archive: params?.archive})))
+            tap((params: Params) => this.store.dispatch(setArchive({archive: params?.archive})))
           )
       ])
         .pipe(debounceTime(0))
         .subscribe(() => {
-          this.store.dispatch(getReports());
+          this.getReports();
         })
     );
 
@@ -120,6 +119,9 @@ export class ReportsPageComponent implements OnInit, OnDestroy {
     }));
   }
 
+  protected getReports() {
+    this.store.dispatch(getReports());
+  }
 
   reportSelected(report: Report) {
     this.store.dispatch(setSearchQuery({query: ''}));
@@ -144,7 +146,7 @@ export class ReportsPageComponent implements OnInit, OnDestroy {
       .pipe(take(1))
       .subscribe(() => this.store.dispatch(addMessage(MESSAGES_SEVERITY.SUCCESS, 'Report link copied to clipboard'))
       );
-    this._clipboardService.copy(`${window.location.href}/${report.project.id}/${report.id}`);
+    this._clipboardService.copy(`${window.location.origin}/reports/${report.project.id}/${report.id}`);
   }
 
   addTag($event: { report: IReport; tag: string }) {
@@ -187,5 +189,28 @@ export class ReportsPageComponent implements OnInit, OnDestroy {
     } else {
       this.router.navigateByUrl('reports');
     }
+  }
+
+  setupBreadcrumbsOptions() {
+    this.subs.add(this.selectedProject$.pipe(
+      withLatestFrom(this.store.select(selectDefaultNestedModeForFeature))
+    ).subscribe(([selectedProject, defaultNestedModeForFeature]) => {
+      this.store.dispatch(setBreadcrumbsOptions({
+        breadcrumbOptions: {
+          showProjects: !!selectedProject,
+          featureBreadcrumb: {
+            name: 'REPORTS',
+            url: defaultNestedModeForFeature['reports'] ? 'reports/*/projects' : 'reports'
+          },
+          projectsOptions: {
+            basePath: 'reports',
+            filterBaseNameWith: ['.reports'],
+            compareModule: null,
+            showSelectedProject: selectedProject?.id !== '*',
+            ...(selectedProject && selectedProject?.id !== '*' && {selectedProjectBreadcrumb: {name: selectedProject?.basename}})
+          }
+        }
+      }));
+    }));
   }
 }

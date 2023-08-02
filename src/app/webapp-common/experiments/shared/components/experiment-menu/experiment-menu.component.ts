@@ -7,9 +7,7 @@ import {Queue} from '~/business-logic/model/queues/queue';
 import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
 import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
 import {BlTasksService} from '~/business-logic/services/tasks.service';
-import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {CloneForm} from '../../common-experiment-model.model';
-import {SmSyncStateSelectorService} from '@common/core/services/sync-state-selector.service';
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {htmlTextShort} from '@common/shared/utils/shared-utils';
 import * as commonMenuActions from '../../../actions/common-experiments-menu.actions';
@@ -18,7 +16,7 @@ import {ChangeProjectDialogComponent} from '../change-project-dialog/change-proj
 import {CloneDialogComponent} from '../clone-dialog/clone-dialog.component';
 import {SelectQueueComponent} from '../select-queue/select-queue.component';
 import {ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
-import {GetQueuesForEnqueue} from '../select-queue/select-queue.actions';
+import {getQueuesForEnqueue} from '../select-queue/select-queue.actions';
 import {selectQueuesList} from '../select-queue/select-queue.reducer';
 import {isDevelopment} from '~/features/experiments/shared/experiments.utils';
 import {Component, ElementRef, EventEmitter, Input, OnInit, Output} from '@angular/core';
@@ -38,7 +36,7 @@ import {neverShowPopupAgain} from '@common/core/actions/layout.actions';
 import {
   selectionDisabledAbort,
   selectionDisabledAbortAllChildren,
-  selectionDisabledArchive,
+  selectionDisabledArchive, selectionDisabledDelete,
   selectionDisabledDequeue,
   selectionDisabledEnqueue,
   selectionDisabledMoveTo,
@@ -103,8 +101,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
     protected blTaskService: BlTasksService,
     protected dialog: MatDialog,
     protected router: Router,
-    protected store: Store<ExperimentInfoState>,
-    protected syncSelector: SmSyncStateSelectorService,
+    protected store: Store,
     protected eRef: ElementRef,
     protected configService: ConfigurationService,
     protected route?: ActivatedRoute
@@ -124,13 +121,17 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
     if (selectedExperiments[0].system_tags?.includes('archived')) {
       this.store.dispatch(commonMenuActions.restoreSelectedExperiments({selectedEntities: selectedExperiments, entityType}));
     } else {
-      const showShareWarningDialog = selectedExperiments.find(item => item?.system_tags.includes('shared')) &&
-        !this.syncSelector.selectSync(selectNeverShowPopups)?.includes('archive-shared-task');
-      if (showShareWarningDialog) {
-        this.showConfirmArchiveExperiments(this.store, this.dialog, selectedExperiments, entityType);
-      } else {
-        this.store.dispatch(commonMenuActions.archiveSelectedExperiments({selectedEntities: selectedExperiments, entityType}));
-      }
+      this.store.select(selectNeverShowPopups)
+        .pipe(take(1))
+        .subscribe(neverShow => {
+          const showShareWarningDialog = selectedExperiments.find(item => item?.system_tags.includes('shared')) &&
+            !neverShow?.includes('archive-shared-task');
+          if (showShareWarningDialog) {
+            this.showConfirmArchiveExperiments(this.store, this.dialog, selectedExperiments, entityType);
+          } else {
+            this.store.dispatch(commonMenuActions.archiveSelectedExperiments({selectedEntities: selectedExperiments, entityType}));
+          }
+        });
     }
   }
 
@@ -167,7 +168,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
   dequeuePopup() {
     const selectedExperiments = this.selectedExperiments ? selectionDisabledDequeue(this.selectedExperiments).selectedFiltered : [this._experiment];
     const getBody = (queueName: string) => `<b>${selectedExperiments.length === 1 ? htmlTextShort(this._experiment.name) : selectedExperiments.length + 'experiments'}</b> will be removed from the ${queueName ? '<b>' + queueName + '</b> ' : ''}execution queue.`;
-    this.store.dispatch(new GetQueuesForEnqueue());
+    this.store.dispatch(getQueuesForEnqueue());
     const confirmDialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
         title: 'Dequeue Experiment',
@@ -210,7 +211,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
     const devWarning: boolean = selectedExperiments.some(exp => isDevelopment(exp));
     const confirmDialogRef = this.dialog.open(CommonDeleteDialogComponent, {
       data: {
-        entity: this._experiment,
+        entity: selectedExperiments?.length > 0 ? selectedExperiments?.length === 1 ? selectedExperiments[0] : selectedExperiments : this._experiment,
         numSelected: selectedExperiments?.length ?? this.numSelected,
         entityType: EntityTypeEnum.experiment,
         useCurrentEntity: this.activateFromMenuButton || this.useCurrentEntity,
@@ -357,10 +358,11 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
   }
 
   deleteExperimentPopup(entityType?: EntityTypeEnum, includeChildren?: boolean) {
+    const selectedExperiments = (!(this.activateFromMenuButton || this.useCurrentEntity) && this.selectedExperiments) ? selectionDisabledDelete(this.selectedExperiments).selectedFiltered : [this._experiment];
     const confirmDialogRef = this.dialog.open(CommonDeleteDialogComponent, {
       data: {
-        entity: this._experiment,
-        numSelected: this.numSelected,
+        entity: selectedExperiments?.length > 0 ? selectedExperiments?.length === 1 ? selectedExperiments[0] : selectedExperiments : this._experiment,
+        numSelected: selectedExperiments?.length ?? this.numSelected,
         entityType: entityType || EntityTypeEnum.experiment,
         useCurrentEntity: this.activateFromMenuButton || this.useCurrentEntity,
         includeChildren

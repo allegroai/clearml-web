@@ -1,13 +1,16 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {setFilterByUser} from '../../../core/actions/users.actions';
-import {selectShowOnlyUserWork} from '../../../core/reducers/users-reducer';
+import {setFilterByUser} from '@common/core/actions/users.actions';
+import {selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
 import {Store} from '@ngrx/store';
 import {Observable, Subscription} from 'rxjs';
-import {setMainPageTagsFilter, setMainPageTagsFilterMatchMode} from '../../../core/actions/projects.actions';
-import {selectMainPageTagsFilter, selectMainPageTagsFilterMatchMode} from '../../../core/reducers/projects.reducer';
+import {setMainPageTagsFilter, setMainPageTagsFilterMatchMode} from '@common/core/actions/projects.actions';
+import {
+  selectMainPageTagsFilter,
+  selectMainPageTagsFilterMatchMode,
+} from '@common/core/reducers/projects.reducer';
 import {sortByArr} from '../../pipes/show-selected-first.pipe';
-import {selectRouterConfig} from "@common/core/reducers/router-reducer";
-import {map} from "rxjs/operators";
+import {cleanTag} from '@common/shared/utils/helpers.util';
+import {selectProjectType} from '~/core/reducers/view.reducer';
 
 @Component({
   selector: 'sm-main-pages-header-filter',
@@ -40,11 +43,11 @@ export class MainPagesHeaderFilterComponent implements OnInit, OnDestroy {
   private matchModeSubscription: Subscription;
   public tagsFilters$: Observable<string[]>;
 
-  constructor(private store: Store<any>, private cdr: ChangeDetectorRef) {
+  constructor(private store: Store, private cdr: ChangeDetectorRef) {
     this.showOnlyUserWork$ = this.store.select(selectShowOnlyUserWork);
     this.tagsFilterMatchMode$ = this.store.select(selectMainPageTagsFilterMatchMode);
     this.tagsFilters$ = this.store.select(selectMainPageTagsFilter);
-    this.currentFeature$ = this.store.select(selectRouterConfig).pipe(map((conf) => conf?.[0]));
+    this.currentFeature$ = this.store.select(selectProjectType);
   }
 
 
@@ -67,7 +70,7 @@ export class MainPagesHeaderFilterComponent implements OnInit, OnDestroy {
   }
 
   toggleMatch() {
-    this.store.dispatch(setMainPageTagsFilterMatchMode({matchMode: !this.matchMode ? 'AND' : undefined}));
+    this.store.dispatch(setMainPageTagsFilterMatchMode({matchMode: !this.matchMode ? 'AND' : undefined, feature: this.currentFeature}));
   }
 
   emitFilterChangedCheckBox(tags: string[]) {
@@ -97,17 +100,17 @@ export class MainPagesHeaderFilterComponent implements OnInit, OnDestroy {
     this.tagsFiltersSubscription.unsubscribe();
     this.showOnlyUserWorkSub.unsubscribe();
     this.currentFeatureSub.unsubscribe();
-    this.store.dispatch(setMainPageTagsFilterMatchMode({matchMode: undefined}));
   }
 
   private sortTags() {
+    const cleanTags = this.tagsFilters?.map(tag=> cleanTag(tag));
     this.tagsLabelValue.sort((a, b) =>
-      sortByArr(a.value, b.value, [...(this.tagsFilters || [])]));
+      sortByArr(a.value, b.value, [...(cleanTags || [])]));
     this.cdr.detectChanges();
   }
 
   clearAll() {
-    this.store.dispatch(setMainPageTagsFilterMatchMode({matchMode: undefined}));
+    this.store.dispatch(setMainPageTagsFilterMatchMode({matchMode: undefined, feature: this.currentFeature}));
     this.store.dispatch(setMainPageTagsFilter({tags: [], feature: this.currentFeature}));
     this.store.dispatch(setFilterByUser({showOnlyUserWork: false}));
   }

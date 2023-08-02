@@ -24,4 +24,10 @@
     border: none;
   }
 
+  .disabled-menu-btn {
+    pointer-events: none;
+    cursor: initial;
+    color:$blue-500;
+  }
+
 }

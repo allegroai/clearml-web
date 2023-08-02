@@ -33,7 +33,7 @@ const selectModelInitState: SelectModelState = {
   modelToken: null,
   viewMode: MODELS_VIEW_MODES.TABLE,
   allProjectsMode: true,
-  tableFilters: null,
+  tableFilters: {},
   tableSortFields: [{field: MODELS_TABLE_COL_FIELDS.CREATED, order: TABLE_SORT_ORDER.DESC}],
   scrollId: null,
   globalFilter: null,
@@ -43,8 +43,14 @@ const selectModelInitState: SelectModelState = {
 
 export function selectModelReducer<ActionReducer>(state: SelectModelState = selectModelInitState, action): SelectModelState {
   switch (action.type) {
-    case actions.resetState.type:
-      return {...selectModelInitState};
+    case actions.resetSelectModelState.type:
+      return {
+        ...selectModelInitState,
+        ...(!action.fullReset && {
+          tableFilters: state.tableFilters,
+          tableSortFields: state.tableSortFields,
+          showArchive: state.showArchive})
+      };
     case actions.addModels.type:
       return {...state, models: state.models.concat(action.models)};
     case actions.removeModels.type:
@@ -64,8 +70,6 @@ export function selectModelReducer<ActionReducer>(state: SelectModelState = sele
       return {...state, scrollId: action.scrollId};
     case actions.setSelectedModels.type:
       return {...state, selectedModels: action.models};
-    case actions.allProjectsModeChanged.type:
-      return {...state, allProjectsMode: action.isAllProjects};
     case actions.setViewMode.type:
       return {...state, viewMode: action.viewMode};
     case actions.globalFilterChanged.type:
@@ -73,7 +77,7 @@ export function selectModelReducer<ActionReducer>(state: SelectModelState = sele
     case actions.setTableSort.type:
       return {...state, tableSortFields: action.orders};
     case actions.clearTableFilter.type:
-      return {...state, tableFilters: null};
+      return {...state, tableFilters: {}};
     case actions.tableFilterChanged.type:
       return {
         ...state,
@@ -96,8 +100,7 @@ export const selectSelectedModelsList = createSelector(models, (state) => state 
 export const selectCurrentScrollId = createSelector(models, (state): string => state.scrollId);
 export const selectGlobalFilter = createSelector(models, (state): string => state.globalFilter);
 export const selectTableSortFields = createSelector(models, (state): SortMeta[] => state.tableSortFields);
-export const selectTableFilters = createSelector(models, state => state.tableFilters);
-export const selectIsAllProjectsMode = createSelector(models, (state): boolean => state.allProjectsMode);
+export const selectSelectModelTableFilters = createSelector(models, state => state.tableFilters);
 export const selectViewMode = createSelector(models, (state): ModelsViewModesEnum => state.viewMode);
 export const selectSelectedModels = createSelector(models, (state): Array<any> => state.selectedModels);
 export const selectNoMoreModels = createSelector(models, (state): boolean => state.noMoreModels);

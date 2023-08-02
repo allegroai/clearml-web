@@ -7,16 +7,16 @@
   background-color: $blue-900;
 
   .header {
-    height: 0;
-
-    .trigger {
-      position: absolute;
-      left: 15%;
-    }
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: absolute;
+    top: 7px;
+    width: calc(50% + 33px);
+    left: calc(50% - 90px);
+    z-index: 1;
 
     .btn {
-      position: relative;
-      top: -40px;
       height: 32px;
       width: 180px;
       overflow: hidden;
@@ -26,11 +26,11 @@
   }
 
   .line-chart-container {
-    height: calc(100% - 36px);
+    height: calc(100% - 64px);
   }
 
   .legend {
-    margin-top: -4px;
+    margin-top: 12px;
     text-align: center;
     color: $blue-100;
 

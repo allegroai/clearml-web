@@ -5,7 +5,7 @@ import {Store} from '@ngrx/store';
 @Injectable({providedIn: 'root'})
 export class RouterHelperGuard implements CanActivate {
 
-  constructor(public router: Router, public store: Store<any>) {
+  constructor(public router: Router, public store: Store) {
   }
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {

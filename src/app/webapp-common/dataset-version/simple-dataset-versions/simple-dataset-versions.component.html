@@ -9,6 +9,7 @@
   [tableFilters]="tableFilters$ | async"
   [tableMode]="firstExperiment && (tableMode$ | async)"
   [rippleEffect]="tableModeAwareness$ | async"
+  [noData]="!((experiments$ | async)?.length > 0)"
   (isArchivedChanged)="archivedChanged($event)"
   (selectedTableColsChanged)="selectedTableColsChanged($event)"
   (getMetricsToDisplay)="getMetricsToDisplay()"
@@ -19,6 +20,8 @@
   (clearSelection)="clearSelection()"
   (clearTableFilters)="clearTableFiltersHandler($event)"
   (tableModeChanged)="modeChanged($event); tableModeUserAware()"
+  (downloadTableAsCSV)="downloadTableAsCSV()"
+  (downloadFullTableAsCSV)="downloadFullTableAsCSV()"
 >
 </sm-experiment-header>
 <div class="experiment-body"

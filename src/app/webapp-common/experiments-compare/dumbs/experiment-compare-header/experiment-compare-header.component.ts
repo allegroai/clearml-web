@@ -40,7 +40,7 @@ export class ExperimentCompareHeaderComponent implements OnInit, OnDestroy {
   @Output() selectionChanged = new EventEmitter<string[]>();
 
   constructor(
-    private store: Store<any>,
+    private store: Store,
     private route: ActivatedRoute,
     private router: Router,
     private cdr: ChangeDetectorRef,

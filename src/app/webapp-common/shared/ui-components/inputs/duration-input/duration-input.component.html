@@ -4,7 +4,7 @@
            matInput
            name="hour"
            [(ngModel)]="hours"
-           (keypress)="checkChars($event)"
+           (keydown)="checkChars($event)"
            (keyup)=" ($any($event.target).selectionStart === 2)  && mins.focus()"
            (keyup.enter)="onChangePartial($event)"
            (keyup.arrowRight)="($any($event.target).selectionStart===2 || $any($event.target).value.length <= 1) && mins.focus()"
@@ -17,7 +17,7 @@
            matInput
            name="min"
            [(ngModel)]="minutes"
-           (keypress)="checkChars($event)"
+           (keydown)="checkChars($event)"
            (keyup)="($any($event.target).selectionStart===2 ) && secs.focus()"
            (keyup.enter)="onChangePartial($event)"
            (keyup.arrowRight)="($any($event.target).selectionStart===2 || $any($event.target).value.length <= 1)  && secs.focus()"
@@ -26,12 +26,12 @@
            maxlength="2"
            smKeyDownStopPropagation
            (focus)="$any($event.target).select()"
-           smTooltip="Minuets"><span class="separator">:</span>
+           smTooltip="Minutes"><span class="separator">:</span>
     <input #secs
            matInput
            name="sec"
            [(ngModel)]="seconds"
-           (keypress)="checkChars($event)"
+           (keydown)="checkChars($event)"
            (keyup)="(($any($event.target).selectionStart === 2 ) && mill.focus())"
            (keyup.enter)="onChangePartial($event)"
            (keyup.arrowRight)="($any($event.target).selectionStart === 2 || $any($event.target).value.length <= 1) && mill.focus()"
@@ -45,7 +45,7 @@
            [(ngModel)]="ms"
            matInput
            name="ms"
-           (keypress)="checkChars($event)"
+           (keydown)="checkChars($event)"
            (keyup.enter)="onChangePartial($event)"
            (keyup.arrowLeft)="$any($event.target).selectionEnd === 0 && secs.focus()"
            (blur)="focusOutInput()"

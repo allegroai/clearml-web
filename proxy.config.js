@@ -1,7 +1,7 @@
 const fs = require('fs');
 
 const targets = [
-  'https://demoapi.trains.allegro.ai',               // 1
+  'https://api.trains-master.hosted.allegro.ai',            // 1
 ];
 
 const PROXY_CONFIG = {

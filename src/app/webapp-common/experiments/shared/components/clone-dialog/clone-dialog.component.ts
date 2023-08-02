@@ -49,7 +49,7 @@ export class CloneDialogComponent implements OnInit, OnDestroy {
   private allProjectsBeforeFilter: Partial<ProjectsGetAllResponseSingle>[];
 
   constructor(
-    private store: Store<any>,
+    private store: Store,
     public dialogRef: MatDialogRef<CloneDialogComponent>,
     private cdr: ChangeDetectorRef,
     @Inject(MAT_DIALOG_DATA) data: {

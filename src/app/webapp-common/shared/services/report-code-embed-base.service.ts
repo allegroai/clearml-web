@@ -19,6 +19,8 @@ export interface ReportCodeEmbedConfiguration {
   metrics?: string[];
   variants?: string[];
   valueType?: string;
+  seriesName?: string;
+  xaxis?: string;
 }
 
 @Injectable({
@@ -52,7 +54,9 @@ export class ReportCodeEmbedBaseService {
     url.pathname = url.pathname + 'widgets/';
     url.searchParams.set('type', conf.type);
     url.searchParams.set('objectType', conf.objectType);
+    conf.seriesName && url.searchParams.set('series', conf.seriesName);
     conf.valueType && url.searchParams.set('value_type', conf.valueType);
+    conf.xaxis && url.searchParams.set('xaxis', conf.xaxis);
     let urlStr = url.toString();
     ['objects', 'metrics', 'variants'].forEach(key => {
       if (conf[key]?.filter(v => !!v).length > 0) {

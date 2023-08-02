@@ -10,6 +10,7 @@ import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {sortByArr} from '../../../pipes/show-selected-first.pipe';
 import {IOption} from '../../inputs/select-autocomplete-for-template-forms/select-autocomplete-for-template-forms.component';
 import {DATASETS_STATUS_LABEL} from '~/features/experiments/shared/experiments.const';
+import {cleanTag} from '@common/shared/utils/helpers.util';
 
 @Directive()
 export abstract class BaseTableView implements AfterViewInit, OnDestroy {
@@ -158,8 +159,9 @@ export abstract class BaseTableView implements AfterViewInit, OnDestroy {
     if (!this.filtersOptions[columnId]) {
       return;
     }
+    const cleanFilterValues = columnId ==='tags'? this.filtersValues[columnId]?.map(tag=> cleanTag(tag)): this.filtersValues[columnId];
     this.filtersOptions[columnId].sort((a, b) =>
-      sortByArr(a.value, b.value, [null, ...(this.filtersValues[columnId] || [])]));
+      sortByArr(a.value, b.value, [null, ...(cleanFilterValues || [])]));
     this.filtersOptions = {...this.filtersOptions, [columnId]: [...this.filtersOptions[columnId]]};
   }
 
@@ -188,7 +190,7 @@ export abstract class BaseTableView implements AfterViewInit, OnDestroy {
   afterTableInit() {
     const key = this.selectedEntitiesKey.slice(0, -1);
     if (this[key]) {
-      window.setTimeout(() => this.table.scrollToElement(this[key]), 200);
+      window.setTimeout(() => this.table?.scrollToElement(this[key]), 200);
     }
   }
 

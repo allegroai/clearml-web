@@ -5,7 +5,7 @@ import {take} from 'rxjs/operators';
 @Injectable()
 export class SmSyncStateSelectorService {
 
-  constructor(private store: Store<any>) {
+  constructor(private store: Store) {
   }
 
   selectSync(selector: Selector<any, any>) {

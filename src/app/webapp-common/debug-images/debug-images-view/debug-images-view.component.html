@@ -1,6 +1,6 @@
 <mat-expansion-panel *ngFor="let iteration of iterations; let first = first; trackBy:trackKey"
                      class="images-section" [class.dark-theme]="isDarkTheme" togglePosition="before" [expanded]="first">
-  <mat-expansion-panel-header class="debug-header" [collapsedHeight]="null" *ngIf="!isDatasetVersionPreview">
+  <mat-expansion-panel-header class="debug-header" [collapsedHeight]="null" *ngIf="!isDatasetVersionPreview" data-id="debugHeader">
     <mat-panel-title> {{iteration.iter}}</mat-panel-title>
   </mat-expansion-panel-header>
   <ng-template matExpansionPanelContent>

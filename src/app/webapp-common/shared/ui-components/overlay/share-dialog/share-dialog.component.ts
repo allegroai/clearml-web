@@ -26,7 +26,7 @@ export class ShareDialogComponent {
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: IShareDialogConfig,
               public dialogRef: MatDialogRef<ShareDialogComponent>,
-              private store: Store<any>) {
+              private store: Store) {
     this.title = data.title || '';
     this.sharedSubtitle =`<b>Any registered user with this link</b> has read-only access to this task and all its contents (Artifacts, Results, etc.)`;
     this.privateSubtitle =  `Create a shareable link to grant read access to<b> any registered user</b> you provide this link to.`;
@@ -45,7 +45,7 @@ export class ShareDialogComponent {
   }
 
   createLink() {
-    this.store.dispatch(shareSelectedExperiments({share: !this.shared, task:this.task}));
+    this.store.dispatch(shareSelectedExperiments({share: !this.shared, task: this.task}));
 
     this.shared = !this.shared;
   }

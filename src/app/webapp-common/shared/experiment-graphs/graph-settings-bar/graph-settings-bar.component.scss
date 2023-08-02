@@ -19,16 +19,13 @@
     .group-by-field,
     .axis-type-field {
       width: unset;
-      flex: 1 1 150px;
-      max-width: 150px;
+      max-width: 200px;
     }
 
     .label-text {
       display: flex;
       align-items: center;
       white-space: nowrap;
-      width: 95px;
-      min-width: 95px;
       padding-right: 12px;
       padding-bottom: 4px;
     }
@@ -43,25 +40,44 @@
 
     .smooth-options {
       width: 100%;
+      flex-wrap: wrap;
+      gap: 12px;
+      border-top: 1px solid #efefef;
+      padding-top: 12px;
 
       mat-slider {
-        flex: 1 1 80px;
-        min-width: unset;
+        min-width: 100px;
       }
 
+      .field {
+        flex-grow: 1;
+      }
+
+      .smooth-type {
+        max-width: 200px;
+        margin-left: auto;
+        width: 100%;
+      }
+    }
+
+    .smooth-input {
+      margin-left: 0;
     }
   }
 }
 
 .x-axis-options {
   display: flex;
+  flex-grow: 1;
   justify-content: space-between;
+  align-items: center;
+  gap: 12px;
 }
 
 .smooth-input {
   height: 36px;
   width: 74px;
-  margin-left: 6px;
+  margin-left: 16px;
 }
 
 .smooth-options {
@@ -72,7 +88,7 @@
 
 .label-text {
   padding-right: 6px;
-  margin: auto;
+  flex-grow: 1;
 
   &.axis-text-margin-left {
     margin-left: 24px;
@@ -80,14 +96,11 @@
 }
 
 .smoothing-text {
-  margin: auto 0;
-  margin-left: auto;
-  padding-right: 6px;
+  padding-right: 16px;
 }
 
 .smooth-options i {
-  margin: auto 0;
-  margin-left: 25px;
+  margin: auto 6px auto 25px;
 }
 
 mat-form-field {
@@ -99,6 +112,15 @@ mat-form-field {
   width: 130px;
 }
 
+.smooth-type {
+  margin-left: 6px;
+  width: 200px;
+}
+
+.axis-type-field {
+  width: 170px;
+}
+
 .group-by-field {
   height: 36px;
   width: 140px;
@@ -108,3 +130,23 @@ mat-slider {
   min-width: 121px;
 }
 
+.field {
+  align-items: center;
+}
+
+.short-mode {
+  .field {
+    align-items: unset;
+    flex-direction: column;
+
+    .label-text {
+      margin-left: 0;
+      font-size: 12px;
+    }
+  }
+
+  .smooth-input,
+  .smooth-type {
+    margin-top: 18px;
+  }
+}

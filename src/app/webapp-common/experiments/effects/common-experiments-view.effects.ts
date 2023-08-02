@@ -1,12 +1,13 @@
 import {Injectable} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {Actions, createEffect, ofType} from '@ngrx/effects';
+import {Actions, concatLatestFrom, createEffect, ofType} from '@ngrx/effects';
 import {Action, Store} from '@ngrx/store';
 import {cloneDeep, flatten, isEqual} from 'lodash-es';
 import {EMPTY, Observable, of} from 'rxjs';
 import {
   auditTime,
-  catchError, debounceTime,
+  catchError,
+  debounceTime,
   expand,
   filter,
   map,
@@ -14,12 +15,11 @@ import {
   reduce,
   switchMap,
   tap,
-  withLatestFrom
 } from 'rxjs/operators';
 import {ApiProjectsService} from '~/business-logic/api-services/projects.service';
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
 import {BlTasksService} from '~/business-logic/services/tasks.service';
-import {GET_ALL_QUERY_ANY_FIELDS} from '~/features/experiments/experiments.consts';
+import {GET_ALL_QUERY_ANY_FIELDS, INITIAL_EXPERIMENT_TABLE_COLS} from '~/features/experiments/experiments.consts';
 import {selectSelectedExperiment} from '~/features/experiments/reducers';
 import {excludeTypes, EXPERIMENTS_TABLE_COL_FIELDS} from '~/features/experiments/shared/experiments.const';
 import {requestFailed} from '../../core/actions/http.actions';
@@ -27,7 +27,7 @@ import {activeLoader, addMessage, deactivateLoader, setServerError} from '../../
 import {setURLParams} from '../../core/actions/router.actions';
 import {
   selectIsArchivedMode,
-  selectIsDeepMode,
+  selectIsDeepMode, selectRouterProjectId,
   selectSelectedProject,
   selectShowHidden
 } from '../../core/reducers/projects.reducer';
@@ -53,7 +53,7 @@ import {EXPERIMENTS_PAGE_SIZE} from '../shared/common-experiments.const';
 import {convertStopToComplete, encodeHyperParameter} from '../shared/common-experiments.utils';
 import {sortByField} from '../../tasks/tasks.utils';
 import {MODEL_TAGS} from '../../models/shared/models.const';
-import {EmptyAction} from '~/app.constants';
+import {emptyAction} from '~/app.constants';
 import {selectExperimentsList, selectTableFilters, selectTableMode} from '../reducers';
 import {ProjectsGetTaskParentsResponse} from '~/business-logic/model/projects/projectsGetTaskParentsResponse';
 import {ProjectsGetTaskParentsRequest} from '~/business-logic/model/projects/projectsGetTaskParentsRequest';
@@ -92,27 +92,27 @@ import {
   compareAddDialogTableSortChanged,
   compareAddTableClearAllFilters,
   compareAddTableFilterChanged,
-  setAddTableViewArchived as setCompareAddTableViewArchived,
-  compareAddTableFilterInit
+  compareAddTableFilterInit,
+  setAddTableViewArchived as setCompareAddTableViewArchived
 } from '../../experiments-compare/actions/compare-header.actions';
 import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
-import {getFilteredUsers, setProjectUsers} from '@common/core/actions/projects.actions';
+import {downloadForGetAll, getFilteredUsers, setProjectUsers} from '@common/core/actions/projects.actions';
 import {selectActiveWorkspaceReady} from '~/core/reducers/view.reducer';
 import {escapeRegex} from '@common/shared/utils/escape-regex';
 import {MESSAGES_SEVERITY} from '@common/constants';
-import {
-  modelExperimentsTableFilterChanged,
-} from '@common/models/actions/models-info.actions';
-import {ExperimentsViewState} from '@common/experiments/reducers/experiments-view.reducer';
+import {modelExperimentsTableFilterChanged,} from '@common/models/actions/models-info.actions';
+import {ApiOrganizationService} from '~/business-logic/api-services/organization.service';
+import {INITIAL_CONTROLLER_TABLE_COLS} from '@common/pipelines-controller/controllers.consts';
+import {prepareColsForDownload} from '@common/shared/utils/download';
 
 
 @Injectable()
 export class CommonExperimentsViewEffects {
   /* eslint-disable @typescript-eslint/naming-convention */
   constructor(
-    private actions$: Actions, private store: Store<ExperimentsViewState>, private apiTasks: ApiTasksService,
+    private actions$: Actions, private store: Store, private apiTasks: ApiTasksService,
     private projectsApi: ApiProjectsService, private taskBl: BlTasksService, private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute, private orgApi: ApiOrganizationService
   ) {
   }
 
@@ -128,7 +128,7 @@ export class CommonExperimentsViewEffects {
 
   tableSortChange = createEffect(() => this.actions$.pipe(
     ofType(exActions.tableSortChanged),
-    withLatestFrom(this.store.select(exSelectors.selectTableSortFields)),
+    concatLatestFrom(() => this.store.select(exSelectors.selectTableSortFields)),
     switchMap(([action, oldOrders]) => {
       const orders = addMultipleSortColumns(oldOrders, action.colId, action.isShift);
       return [setURLParams({orders, update: true})];
@@ -137,7 +137,7 @@ export class CommonExperimentsViewEffects {
 
   tableFilterChange = createEffect(() => this.actions$.pipe(
     ofType(exActions.tableFilterChanged),
-    withLatestFrom(this.store.select(exSelectors.selectTableFilters)),
+    concatLatestFrom(() => this.store.select(exSelectors.selectTableFilters)),
     switchMap(([action, oldFilters]) =>
       [setURLParams({
         filters: {
@@ -152,6 +152,65 @@ export class CommonExperimentsViewEffects {
   ));
 
   private refreshActions = [];
+
+  prepareTableForDownload = createEffect(() => this.actions$.pipe(
+      ofType(exActions.prepareTableForDownload),
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      concatLatestFrom(() => [
+        this.store.select(selectRouterParams).pipe(map(params => params?.projectId)),
+        this.store.select(selectIsArchivedMode),
+        this.store.select(exSelectors.selectGlobalFilter),
+        this.store.select(exSelectors.selectTableSortFields),
+        this.store.select(exSelectors.selectTableFilters),
+        this.store.select(exSelectors.selectSelectedExperiments),
+        this.store.select(exSelectors.selectShowAllSelectedIsActive),
+        this.store.select(exSelectors.selectExperimentsTableCols),
+        this.store.select(exSelectors.selectExperimentsMetricsColsForProject),
+        this.store.select(selectIsDeepMode),
+        this.store.select(selectShowHidden),
+        this.store.select(selectIsCompare),
+        this.store.select(selectViewArchivedInAddTable),
+        this.store.select(selectIsPipelines),
+        this.store.select(selectIsDatasets),
+      ]),
+      switchMap(([
+                   , projectId, isArchived, gb, orderFields, filters, selectedExperiments,
+                   showAllSelectedIsActive, cols, metricCols, deep, showHidden, isCompare, showArcived,
+                   isPipeline, isDataset
+                 ]) => {
+          const tableFilters = cloneDeep(filters) || {} as { [key: string]: FilterMetadata };
+          if (tableFilters && tableFilters.status && tableFilters.status.value.includes('completed')) {
+            tableFilters.status.value.push('closed');
+          }
+          const selectedIds = showAllSelectedIsActive ? selectedExperiments.map(exp => exp.id) : [];
+          return this.orgApi.organizationPrepareDownloadForGetAll({
+            entity_type: 'task', only_fields: [],
+            field_mappings: prepareColsForDownload(cols.concat(metricCols)),
+            ...this.getGetAllQuery({
+              projectId,
+              searchQuery: gb,
+              archived: isArchived,
+              orderFields,
+              tableFilters,
+              selectedIds,
+              cols,
+              metricCols,
+              deep,
+              showHidden,
+              isCompare,
+              showArchived: isCompare && showArcived,
+              isPipeline,
+              isDataset
+            })
+          })
+            .pipe(
+              map((res) => downloadForGetAll({prepareId: res.prepare_id})),
+              catchError(error => [requestFailed(error)])
+            );
+        }
+      )
+    )
+  );
 
   reFetchExperiment = createEffect(() => this.actions$.pipe(
     ofType(
@@ -194,12 +253,12 @@ export class CommonExperimentsViewEffects {
   refreshExperiments = createEffect(() => this.actions$.pipe(
     ofType(exActions.refreshExperiments),
     filter(() => !this.lockRefresh),
-    withLatestFrom(
+    concatLatestFrom(() => [
       this.store.select(exSelectors.selectCurrentScrollId),
       this.store.select(selectSelectedExperiment),
       this.store.select(selectExperimentsList),
       this.store.select(selectTableRefreshList)
-    ),
+    ]),
     switchMap(([action, currentScrollId, selectedExperiment, experiments, refreshPending]) => {
         this.lockRefresh = !action.autoRefresh;
         return this.fetchExperiments$(currentScrollId, true)
@@ -264,11 +323,11 @@ export class CommonExperimentsViewEffects {
 
   getNextExperiments = createEffect(() => this.actions$.pipe(
     ofType(exActions.getNextExperiments),
-    withLatestFrom(
+    concatLatestFrom(() => [
       this.store.select(exSelectors.selectCurrentScrollId),
       this.store.select(selectExperimentsList),
       this.store.select(selectTableRefreshList)
-    ),
+    ]),
     switchMap(([action, scrollId, tasks, refreshPending]) => this.fetchExperiments$(scrollId)
       .pipe(
         mergeMap(res => {
@@ -305,7 +364,7 @@ export class CommonExperimentsViewEffects {
 
   experimentSelectionChanged = createEffect(() => this.actions$.pipe(
     ofType(exActions.experimentSelectionChanged),
-    withLatestFrom(this.store.select(selectRouterConfig)),
+    concatLatestFrom(() => this.store.select(selectRouterConfig)),
     tap(([action, routeConfig]) =>
       this.navigateAfterExperimentSelectionChanged(action.experiment as ITableExperiment, action.project, routeConfig, action.replaceURL)),
     mergeMap(() => [exActions.setTableMode({mode: 'info'})])
@@ -313,11 +372,12 @@ export class CommonExperimentsViewEffects {
 
   selectNextExperimentEffect = createEffect(() => this.actions$.pipe(
     ofType(exActions.selectNextExperiment),
-    withLatestFrom(this.store.select(selectRouterConfig),
+    concatLatestFrom(() => [
+      this.store.select(selectRouterConfig),
       this.store.select(selectExperimentsList),
       this.store.select(selectRouterParams).pipe(map(params => params?.projectId)),
       this.store.select(selectTableMode)
-    ),
+    ]),
     filter(([, , , , tableMode]) => tableMode === 'info'),
     tap(([, routeConfig, tasks, projectId]) => this.navigateAfterExperimentSelectionChanged(tasks[0] as ITableExperiment, projectId, routeConfig)),
     mergeMap(() => [exActions.setTableMode({mode: 'info'})])
@@ -326,46 +386,49 @@ export class CommonExperimentsViewEffects {
 
   getTypesEffect = createEffect(() => this.actions$.pipe(
     ofType(exActions.getProjectTypes),
-    withLatestFrom(this.store.select(selectRouterParams).pipe(map(params => params?.projectId))),
-    switchMap(([action, projectId]) => this.apiTasks.tasksGetTypes({projects: (projectId !== '*' ? [projectId] : [])}).pipe(
-      withLatestFrom(this.store.select(exSelectors.selectTableFilters)),
-      mergeMap(([res, tableFilters]) => {
-        let shouldFilterFilters: boolean;
-        let filteredTableFilter = {} as TableFilter;
-        if (tableFilters?.type?.value) {
-          filteredTableFilter = {
-            col: 'type',
-            value: tableFilters.type.value.filter(filterType => res.types.includes(filterType))
-          };
-          shouldFilterFilters = filteredTableFilter.value.length !== tableFilters.type.value.length;
-        }
-        return [
-          shouldFilterFilters ? exActions.tableFilterChanged({
-            filters: [filteredTableFilter],
-            projectId
-          }) : new EmptyAction(),
-          exActions.setProjectsTypes(res),
-          deactivateLoader(action.type)
-        ];
-      }),
-      catchError(error => [
-        requestFailed(error),
-        deactivateLoader(action.type),
-        addMessage('warn', 'Fetch types failed', error?.meta && [{
-          name: 'More info',
-          actions: [setServerError(error, null, 'Fetch types failed')]
-        }])]
-      )
-    ))));
+    concatLatestFrom(() =>
+      this.store.select(selectRouterParams).pipe(map(params => params?.projectId))
+    ),
+    switchMap(([action, projectId]) =>
+      this.apiTasks.tasksGetTypes({projects: (action.allProjects || projectId === '*' ? [] : [projectId])}).pipe(
+        concatLatestFrom(() => this.store.select(exSelectors.selectTableFilters)),
+        mergeMap(([res, tableFilters]) => {
+          let shouldFilterFilters: boolean;
+          let filteredTableFilter = {} as TableFilter;
+          if (tableFilters?.type?.value) {
+            filteredTableFilter = {
+              col: 'type',
+              value: tableFilters.type.value.filter(filterType => res.types.includes(filterType))
+            };
+            shouldFilterFilters = filteredTableFilter.value.length !== tableFilters.type.value.length;
+          }
+          return [
+            shouldFilterFilters ? exActions.tableFilterChanged({
+              filters: [filteredTableFilter],
+              projectId
+            }) : emptyAction(),
+            exActions.setProjectsTypes(res),
+            deactivateLoader(action.type)
+          ];
+        }),
+        catchError(error => [
+          requestFailed(error),
+          deactivateLoader(action.type),
+          addMessage('warn', 'Fetch types failed', error?.meta && [{
+            name: 'More info',
+            actions: [setServerError(error, null, 'Fetch types failed')]
+          }])]
+        )
+      ))));
 
   getUsersEffect = createEffect(() => this.actions$.pipe(
     ofType(setProjectUsers),
-    withLatestFrom(this.store.select(selectTableFilters)),
+    concatLatestFrom(() => this.store.select(selectTableFilters)),
     map(([action, filters]) => {
       const userFiltersValue = filters?.[EXPERIMENTS_TABLE_COL_FIELDS.USER]?.value ?? [];
       const resIds = action.users.map(user => user.id);
       const shouldGetFilteredUsersNames = !(userFiltersValue.every(id => resIds.includes(id)));
-      return shouldGetFilteredUsersNames ? getFilteredUsers({filteredUsers: userFiltersValue}) : new EmptyAction();
+      return shouldGetFilteredUsersNames ? getFilteredUsers({filteredUsers: userFiltersValue}) : emptyAction();
     }),
     catchError(error => [
       requestFailed(error),
@@ -379,18 +442,18 @@ export class CommonExperimentsViewEffects {
   getParentsEffect = createEffect(() => this.actions$.pipe(
     ofType(exActions.getParents),
     debounceTime(300),
-    withLatestFrom(
+    concatLatestFrom(() => [
       this.store.select(selectRouterParams).pipe(map(params => params?.projectId)),
       this.store.select(selectIsArchivedMode)
-    ),
+    ]),
     switchMap(([action, projectId, isArchive]) => this.projectsApi.projectsGetTaskParents({
-      projects: projectId !== '*' ? [projectId] : [],
+      projects: (projectId === '*' || action.allProjects) ? [] : [projectId],
       tasks_state: isArchive ?
         ProjectsGetTaskParentsRequest.TasksStateEnum.Archived :
         ProjectsGetTaskParentsRequest.TasksStateEnum.Active,
-    ...(action.searchValue && {task_name: `(?i)${action.searchValue}`}) // (?i) is case insensitive
+      ...(action.searchValue && {task_name: `(?i)${action.searchValue}`}) // (?i) is case insensitive
     }).pipe(
-      withLatestFrom(this.store.select(selectTableFilters).pipe(map(filters => filters?.['parent.name']?.value || []))),
+      concatLatestFrom(() => this.store.select(selectTableFilters).pipe(map(filters => filters?.['parent.name']?.value || []))),
       mergeMap(([res, filteredParentIds]: [ProjectsGetTaskParentsResponse, string[]]) => {
         const missingParentsIds = filteredParentIds.filter(parentId => !res.parents.find(parent => (parent as any).id === parentId));
         return (missingParentsIds.length ? this.apiTasks.tasksGetAllEx({
@@ -415,10 +478,10 @@ export class CommonExperimentsViewEffects {
 
   getCustomMetrics = createEffect(() => this.actions$.pipe(
     ofType(exActions.getCustomMetrics),
-    withLatestFrom(
+    concatLatestFrom(() => [
       this.store.select(selectRouterParams).pipe(map(params => params?.projectId)),
       this.store.select(selectIsDeepMode)
-    ),
+    ]),
     switchMap(([action, projectId, isDeep]) => this.projectsApi.projectsGetUniqueMetricVariants({
         project: projectId === '*' ? null : projectId,
         include_subprojects: isDeep
@@ -442,7 +505,10 @@ export class CommonExperimentsViewEffects {
 
   getCustomHyperParams = createEffect(() => this.actions$.pipe(
     ofType(exActions.getCustomHyperParams),
-    withLatestFrom(this.store.select(selectRouterParams).pipe(map(params => params?.projectId)), this.store.select(selectIsDeepMode)),
+    concatLatestFrom(() => [
+      this.store.select(selectRouterParams).pipe(map(params => params?.projectId)),
+      this.store.select(selectIsDeepMode)
+    ]),
     switchMap(([action, projectId, isDeep]) => this.projectsApi.projectsGetHyperParameters({
         project: projectId === '*' ? null : projectId,
         page_size: 5000,
@@ -467,18 +533,19 @@ export class CommonExperimentsViewEffects {
 
   hyperParameterMenuClicked = createEffect(() => this.actions$.pipe(
     ofType(exActions.hyperParamSelectedExperiments),
-    withLatestFrom(
+    concatLatestFrom(() => [
       this.store.select(selectIsDeepMode),
-      this.store.select(selectSelectedProject)
-    ),
-    switchMap(([action, isDeep, selectedProject]) => {
+      this.store.select(selectSelectedProject),
+      this.store.select(selectIsCompare),
+    ]),
+    switchMap(([action, isDeep, selectedProject, isCompare]) => {
       const id = action.col.id;
       const getter = Array.isArray(action.col.getter) ? action.col.getter[0] : action.col.getter;
       const projectId = action.col.projectId || selectedProject.id;
       const {section, name} = decodeHyperParam(getter || id);
       return this.projectsApi.projectsGetHyperparamValues({
         include_subprojects: isDeep, section, name,
-        ...(projectId !== '*' && {projects: [projectId]})
+        ...((!isCompare && projectId !== '*') && {projects: [projectId]})
       }).pipe(
         map((data: ProjectsGetHyperparamValuesResponse) => {
           const values = data.values.filter(x => hasValue(x) && x !== '');
@@ -490,22 +557,29 @@ export class CommonExperimentsViewEffects {
 
   selectAll = createEffect(() => this.actions$.pipe(
     ofType(exActions.selectAllExperiments),
-    withLatestFrom(
+    concatLatestFrom(() => [
       this.store.select(selectRouterParams).pipe(map(params => params?.projectId)),
       this.store.select(selectIsArchivedMode),
       this.store.select(exSelectors.selectGlobalFilter),
+      this.store.select(exSelectors.selectExperimentsTableCols),
+      this.store.select(exSelectors.selectExperimentsMetricsColsForProject),
       this.store.select(exSelectors.selectTableFilters),
       this.store.select(selectIsDeepMode),
       this.store.select(selectShowHidden),
       this.store.select(selectIsPipelines),
       this.store.select(selectIsDatasets),
-    ),
-    switchMap(([action, projectId, archived, globalSearch, tableFilters, deep, showHidden, isPipeline, isDataset]) => {
+    ]),
+    switchMap(([
+                 action, projectId, archived, globalSearch, cols, metricCols,
+                 tableFilters, deep, showHidden, isPipeline, isDataset
+               ]) => {
       const pageSize = 5000;
       const query = this.getGetAllQuery({
         projectId,
         searchQuery: globalSearch,
         archived,
+        cols,
+        metricCols,
         tableFilters: action.filtered ? tableFilters : {},
         orderFields: [{order: -1, field: EXPERIMENTS_TABLE_COL_FIELDS.LAST_UPDATE}],
         deep,
@@ -534,7 +608,7 @@ export class CommonExperimentsViewEffects {
 
   setURLParams = createEffect(() => this.actions$.pipe(
     ofType(exActions.updateUrlParams, exActions.toggleColHidden),
-    withLatestFrom(
+    concatLatestFrom(() => [
       this.store.select(selectRouterParams).pipe(map(params => params?.projectId)),
       this.store.select(selectIsArchivedMode),
       this.store.select(exSelectors.selectGlobalFilter),
@@ -546,7 +620,7 @@ export class CommonExperimentsViewEffects {
       this.store.select(exSelectors.selectExperimentsTableColsOrder),
       this.store.select(selectIsDeepMode),
       this.route.queryParams
-    ),
+    ]),
     map(([, projectId, isArchived, , sortFields, filters,
            cols, hiddenCols, metricsCols, colsOrder, isDeep, queryParams
          ]) => {
@@ -626,8 +700,9 @@ export class CommonExperimentsViewEffects {
       .concat(isDataset ? ['dataset'] : []);
 
     let filters = createFiltersFromStore(tableFilters, true);
+    const tableCols = cols.length > 0 ? cols : isDataset ? INITIAL_CONTROLLER_TABLE_COLS : INITIAL_EXPERIMENT_TABLE_COLS;
     filters = Object.keys(filters).reduce((acc, colId) => {
-      const col = [...metricCols, ...cols].find(c => c.id === colId);
+      const col = [...metricCols, ...tableCols].find(c => c.id === colId);
       let key = col?.getter || colId;
       if (col?.isParam && typeof col.getter === 'string') {
         key = encodeHyperParameter(col.getter);
@@ -650,11 +725,11 @@ export class CommonExperimentsViewEffects {
       return getter ? {...field, field: getter} : field;
     });
 
-    const colsFilters = flatten(cols.filter(col => col.id !== 'selected' && !col.hidden).map(col => col.getter || col.id));
+    const colsFilters = flatten(tableCols.filter(col => col.id !== 'selected' && !col.hidden).map(col => col.getter || col.id));
     const metricColsFilters = metricCols ? flatten(metricCols.map(col =>
       (col?.isParam && typeof col.getter === 'string') ? encodeHyperParameter(col.getter) : col.getter || col.id)) : [];
     const only_fields = [...new Set([...MINIMUM_ONLY_FIELDS, ...colsFilters, ...metricColsFilters]
-      .concat(isPipeline || isDataset ? ['runtime._pipeline_hash', 'runtime.version', 'execution.queue', 'type', 'hyperparams.properties.version'] : []))];
+      .concat(isPipeline || isDataset ? ['parent.name', 'runtime._pipeline_hash', 'runtime.version', 'execution.queue', 'type', 'hyperparams.properties.version'] : []))];
     return {
       ...filters,
       id: selectedIds,
@@ -684,8 +759,8 @@ export class CommonExperimentsViewEffects {
   fetchExperiments$(scrollId1: string, refreshScroll: boolean = false, pageSize = EXPERIMENTS_PAGE_SIZE): Observable<TasksGetAllExResponse> {
     return of(scrollId1)
       .pipe(
-        withLatestFrom(
-          this.store.select(selectRouterParams).pipe(map(params => params?.projectId)),
+        concatLatestFrom(() => [
+          this.store.select(selectRouterProjectId),
           this.store.select(selectIsArchivedMode),
           this.store.select(exSelectors.selectGlobalFilter),
           this.store.select(exSelectors.selectTableSortFields),
@@ -700,7 +775,7 @@ export class CommonExperimentsViewEffects {
           this.store.select(selectViewArchivedInAddTable),
           this.store.select(selectIsPipelines),
           this.store.select(selectIsDatasets),
-        ),
+        ]),
         switchMap(([
                      scrollId, projectId, isArchived, gb, orderFields, filters, selectedExperiments,
                      showAllSelectedIsActive, cols, metricCols, deep, showHidden, isCompare, showArcived,
@@ -712,9 +787,23 @@ export class CommonExperimentsViewEffects {
           }
           const selectedIds = showAllSelectedIsActive ? selectedExperiments.map(exp => exp.id) : [];
           return this.apiTasks.tasksGetAllEx(this.getGetAllQuery({
-            refreshScroll, scrollId, projectId, searchQuery: gb, archived: isArchived, orderFields,
-            tableFilters, selectedIds, cols, metricCols, deep, showHidden, isCompare, showArchived: isCompare && showArcived,
-            isPipeline, pageSize, isDataset
+            refreshScroll,
+            scrollId,
+            projectId,
+            searchQuery: gb,
+            archived: isArchived,
+            orderFields,
+            tableFilters,
+            selectedIds,
+            cols,
+            metricCols,
+            deep,
+            showHidden,
+            isCompare,
+            showArchived: isCompare && showArcived,
+            isPipeline,
+            pageSize,
+            isDataset
           }));
         })
       );
@@ -726,9 +815,9 @@ export class CommonExperimentsViewEffects {
 
   getTagsEffect = createEffect(() => this.actions$.pipe(
     ofType(exActions.getTags),
-    withLatestFrom(this.store.select(selectRouterParams).pipe(map(params => params?.projectId))),
+    concatLatestFrom(() => this.store.select(selectRouterParams).pipe(map(params => params?.projectId))),
     switchMap(([action, projectId]) => this.projectsApi.projectsGetTaskTags({
-      projects: projectId === '*' ? [] : [projectId]
+      projects: (projectId === '*' || action.allProjects) ? [] : [projectId]
     }).pipe(
       mergeMap(res => [
         exActions.setTags({tags: res.tags.concat(null)}),
@@ -747,7 +836,7 @@ export class CommonExperimentsViewEffects {
 
   setSelectedExperiments = createEffect(() => this.actions$.pipe(
       ofType(exActions.setSelectedExperiments, exActions.updateExperiment, updateManyExperiment.type),
-      withLatestFrom(
+      concatLatestFrom(() =>
         this.store.select(exSelectors.selectSelectedExperiments),
       ),
       switchMap(([action, selectSelectedExperiments]) => {

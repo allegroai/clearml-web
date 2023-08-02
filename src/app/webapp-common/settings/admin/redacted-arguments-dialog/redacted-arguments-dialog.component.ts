@@ -18,7 +18,7 @@ export class RedactedArgumentsDialogComponent implements OnInit, OnDestroy {
   public redactedArguments$: Observable<{ key: string}[]>;
   private redactedArgumentsSub: Subscription;
 
-  constructor(public dialogRef: MatDialogRef<RedactedArgumentsDialogComponent>, private store: Store<any>) {
+  constructor(public dialogRef: MatDialogRef<RedactedArgumentsDialogComponent>, private store: Store) {
     this.redactedArguments$ = this.store.select(selectRedactedArguments);
   }
 
@@ -29,7 +29,9 @@ export class RedactedArgumentsDialogComponent implements OnInit, OnDestroy {
   }
 
   applyChanges() {
-    this.store.dispatch(setRedactedArguments({redactedArguments: this.redactedArguments}));
+    this.store.dispatch(setRedactedArguments({
+      redactedArguments: this.redactedArguments.filter(value => !!value.key?.trim())
+    }));
     this.dialogRef.close();
   }
 

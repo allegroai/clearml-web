@@ -55,7 +55,7 @@ export class ExperimentOutputLogComponent implements OnInit, AfterViewInit, OnDe
   private experiment$ = new BehaviorSubject<ITableExperiment>(null);
   @ViewChildren(ExperimentLogInfoComponent) private logRefs: QueryList<ExperimentLogInfoComponent>;
 
-  constructor(private store: Store<ExperimentInfoState>, private cdr: ChangeDetectorRef, private refresh: RefreshService) {
+  constructor(private store: Store, private cdr: ChangeDetectorRef, private refresh: RefreshService) {
     this.log$ = this.store.select(selectExperimentLog);
     this.logBeginning$ = this.store.select(selectExperimentBeginningOfLog);
     this.filter$ = this.store.select(selectLogFilter);

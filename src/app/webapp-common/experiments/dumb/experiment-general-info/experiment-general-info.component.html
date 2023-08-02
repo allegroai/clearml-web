@@ -19,7 +19,7 @@
 
 
   <sm-labeled-row label="CHANGED AT:">
-    {{(experiment?.status_changed | date : TIME_FORMAT_STRING) | NA}}
+    {{(experiment?.status_changed | date : timeFormatString) | NA}}
   </sm-labeled-row>
 
   <sm-labeled-row label="LAST ITERATION:">
@@ -38,12 +38,12 @@
 
 
   <sm-labeled-row label="CREATED AT:">
-    {{(experiment?.created | date : TIME_FORMAT_STRING) | NA}}
+    {{(experiment?.created | date : timeFormatString) | NA}}
   </sm-labeled-row>
 
 
   <sm-labeled-row label="STARTED AT:">
-    {{(experiment?.started | date : TIME_FORMAT_STRING) | NA}}
+    {{(experiment?.started | date : timeFormatString) | NA}}
   </sm-labeled-row>
 
 
@@ -53,7 +53,7 @@
 
 
   <sm-labeled-row label="COMPLETED AT:">
-    {{(experiment?.completed | date : TIME_FORMAT_STRING) | NA}}
+    {{(experiment?.completed | date : timeFormatString) | NA}}
   </sm-labeled-row>
 
   <sm-labeled-row label="RUN TIME:">

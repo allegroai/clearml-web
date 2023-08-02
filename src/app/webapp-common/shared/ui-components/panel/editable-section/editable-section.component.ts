@@ -59,7 +59,7 @@ export class EditableSectionComponent implements OnDestroy {
     }
   }
 
-  constructor(private store: Store<any>, private matDialog: MatDialog, public elementRef: ElementRef) {
+  constructor(private store: Store, private matDialog: MatDialog, public elementRef: ElementRef) {
   }
 
   editModeChanged(editMode) {

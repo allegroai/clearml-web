@@ -43,7 +43,7 @@ const initialState: ModelInfoState = {
 
 export const modelsInfoReducer = createReducer(
   initialState,
-  on(getModelInfo, (state) => ({...state, selectedModel: null})),
+  on(getModelInfo, (state, action) => ({...state, ...(state.selectedModel?.id !== action.id && {selectedModel: null})})),
   on(setModelInfo, (state, action) => ({...state, selectedModel: action.model as TableModel})),
   on(modelDetailsUpdated, (state, action) => ({
     ...state,
@@ -68,7 +68,7 @@ export const modelsInfoReducer = createReducer(
     }
   })),
   on(modelsExperimentsTableClearAllFilters, state =>
-     ({...state, modelExperimentsTableFilter: initialState.modelExperimentsTableFilter,})
-    )
+    ({...state, modelExperimentsTableFilter: initialState.modelExperimentsTableFilter,})
+  )
 );
 

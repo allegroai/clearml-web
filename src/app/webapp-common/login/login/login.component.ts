@@ -61,7 +61,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     private router: Router,
     private loginService: LoginService,
     private dialog: MatDialog,
-    private store: Store<any>,
+    private store: Store,
     private route: ActivatedRoute,
     private userPreferences: UserPreferences,
     private config: ConfigurationService,

@@ -102,8 +102,8 @@ export class ProjectStatsComponent implements OnInit, OnDestroy {
             .map(val => ({
             ...val,
             title: val.name,
-            nameExt: `Created By ${val.user}, Finished ${new Date(val.x).toLocaleString()}`,
-            name: val.id
+            name: `Created By ${val.user}, Finished ${new Date(val.x).toLocaleString()}`,
+            value: val.y
           }));
           this.cdr.detectChanges();
           this.plot?.onResize();

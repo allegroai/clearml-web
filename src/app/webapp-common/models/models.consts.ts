@@ -1,4 +1,4 @@
-import {ColHeaderTypeEnum, ISmCol} from '../shared/ui-components/data/table/table.consts';
+import {ColHeaderFilterTypeEnum, ColHeaderTypeEnum, ISmCol} from '../shared/ui-components/data/table/table.consts';
 import {MODELS_TABLE_COL_FIELDS} from './shared/models.const';
 import {rootProjectsPageSize} from '@common/constants';
 
@@ -60,6 +60,7 @@ export const MODELS_TABLE_COLS: ISmCol[] = [
     headerType  : ColHeaderTypeEnum.sortFilter,
     sortable    : true,
     filterable  : true,
+    searchableFilter: true,
     header      : 'FRAMEWORK',
     style       : {width: '100px'},
     showInCardFilters: true
@@ -74,6 +75,7 @@ export const MODELS_TABLE_COLS: ISmCol[] = [
   {
     id          : MODELS_TABLE_COL_FIELDS.TAGS,
     headerType  : ColHeaderTypeEnum.sortFilter,
+    getter: ['tags', 'system_tags'],
     filterable  : true,
     sortable    : false,
     searchableFilter: true,
@@ -123,11 +125,14 @@ export const MODELS_TABLE_COLS: ISmCol[] = [
   },
   {
     id        : MODELS_TABLE_COL_FIELDS.LAST_UPDATE,
-    headerType: ColHeaderTypeEnum.sortFilter,
+    headerType  : ColHeaderTypeEnum.sortFilter,
     sortable  : true,
-    header    : 'UPDATED',
-    label     : 'Updated',
-    style     : {width: '120px'}
+    filterType    : ColHeaderFilterTypeEnum.durationDate,
+    filterable: true,
+    searchableFilter: false,
+    header      : 'UPDATED',
+    label       : 'Updated',
+    style       : {width: '150px'},
   },
   {
     id        : MODELS_TABLE_COL_FIELDS.COMMENT,

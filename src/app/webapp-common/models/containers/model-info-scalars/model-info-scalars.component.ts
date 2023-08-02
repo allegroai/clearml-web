@@ -1,19 +1,19 @@
 import {ChangeDetectorRef, Component} from '@angular/core';
+import {RefreshService} from '@common/core/services/refresh.service';
 import {
   ExperimentOutputScalarsComponent
 } from '@common/experiments/containers/experiment-output-scalars/experiment-output-scalars.component';
-import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
-import {select, Store} from '@ngrx/store';
+import {Store} from '@ngrx/store';
 import {ActivatedRoute, Router} from '@angular/router';
 import {selectSelectedModel} from '@common/models/reducers';
 import {experimentScalarRequested} from '@common/experiments/actions/common-experiment-output.actions';
 import {ReportCodeEmbedService} from '~/shared/services/report-code-embed.service';
-import {distinctUntilChanged, filter, map, tap} from 'rxjs/operators';
+import {debounceTime, distinctUntilChanged, filter, map, tap} from 'rxjs/operators';
 import {selectSelectedModelSettings} from '~/features/experiments/reducers';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {
   selectModelInfoHistograms,
-  selectModelSettingsGroupBy, selectModelSettingsHiddenScalar, selectModelSettingsSmoothWeight,
+  selectModelSettingsGroupBy, selectModelSettingsHiddenScalar, selectModelSettingsSmoothType, selectModelSettingsSmoothWeight,
   selectModelSettingsXAxisType,
 } from '@common/experiments/reducers';
 import {isEqual} from 'lodash-es';
@@ -31,25 +31,31 @@ export class ModelInfoScalarsComponent extends ExperimentOutputScalarsComponent 
   protected entityType: 'task' | 'model' = 'model';
 
   constructor(
-    protected store: Store<ExperimentInfoState>,
+    protected store: Store,
     protected router: Router,
+    private route: ActivatedRoute,
     protected activeRoute: ActivatedRoute,
     protected changeDetection: ChangeDetectorRef,
-    protected reportEmbed: ReportCodeEmbedService
+    protected reportEmbed: ReportCodeEmbedService,
+    protected refreshService: RefreshService
   ) {
-    super(store, router, activeRoute, changeDetection, reportEmbed);
+    super(store, router, activeRoute, changeDetection, reportEmbed, refreshService);
+
+    this.exportForReport = !route.snapshot?.parent?.parent?.data?.setAllProject;
 
     this.xAxisType$ = this.store.select(selectModelSettingsXAxisType);
     this.groupBy$ = this.store.select(selectModelSettingsGroupBy);
     this.smoothWeight$ = this.store.select(selectModelSettingsSmoothWeight);
+    this.smoothWeightDelayed$ = this.store.select(selectModelSettingsSmoothWeight).pipe(debounceTime(75));
+    this.smoothType$ = this.store.select(selectModelSettingsSmoothType);
     this.listOfHidden$ = this.store.select(selectModelSettingsHiddenScalar)
       .pipe(distinctUntilChanged(isEqual));
 
-    this.settings$ = this.store.pipe(
-      select(selectSelectedModelSettings),
+    this.settings$ = this.store.select(selectSelectedModelSettings).pipe(
       filter(settings => !!settings),
       map(settings => settings ? settings.selectedScalar : null),
-      distinctUntilChanged()
+      distinctUntilChanged(),
+      filter(selectedPlot => selectedPlot !== undefined)
     );
 
     this.scalars$ = this.store.select(selectModelInfoHistograms)

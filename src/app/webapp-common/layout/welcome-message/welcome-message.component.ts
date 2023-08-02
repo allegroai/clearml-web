@@ -83,7 +83,7 @@ export class WelcomeMessageComponent implements OnInit, OnDestroy {
   isJupyter: boolean = false;
 
   constructor(
-    private store: Store<any>,
+    private store: Store,
     private dialogRef: MatDialogRef<any>,
     @Inject(MAT_DIALOG_DATA) public data,
     private adminService: AdminService,

@@ -1,11 +1,15 @@
-<div *ngIf="activateFromMenuButton" mat-button [matMenuTriggerFor]="modelMenu" class="p-0 cell menu-button al-icon al-ico-bars-menu pointer"></div>
+<div
+  *ngIf="activateFromMenuButton"
+  [matMenuTriggerFor]="modelMenu"
+  class="p-0 cell menu-button al-icon al-ico-bars-menu pointer"
+></div>
 <div *ngIf="!activateFromMenuButton"
      style="visibility: hidden; position: fixed"
      [style.left.px]="position.x"
      [style.top.px]="position.y"
      [matMenuTriggerFor]="modelMenu">
 </div>
-<mat-menu #modelMenu="matMenu" [hasBackdrop]="backdrop">
+<mat-menu #modelMenu="matMenu" [hasBackdrop]="backdrop" class="light-theme entity-context-menu">
   <ng-container *ngIf="selectedDisableAvailable[menuItems.publish]">
     <button *ngIf="tableMode" mat-menu-item (click)="toggleDetails()">
       <i [class]="'al-icon '+ icons.DETAILS + ' sm-md'"></i>Details
@@ -19,7 +23,6 @@
       <i [class]="'al-icon ' + icons.REMOVE + ' sm-md'"></i>
       {{selectedDisableAvailable[menuItems.delete].available | menuItemText : 'Delete' : selectedDisableAvailableIsMultiple}}
     </button>
-
       <button mat-menu-item (click)="archiveClicked()"
               [disabled]="selectedDisableAvailable[menuItems.archive].disable">
         <i class="al-icon sm-md" [class]="isArchive ? icons.RESTORE : icons.ARCHIVE"></i>
@@ -28,7 +31,7 @@
 
     <hr>
     <button mat-menu-item
-            [matMenuTriggerFor]="tagMenu"
+            [matMenuTriggerFor]="tagsMenu.matMenu"
             [disabled]="isExample"
             (menuOpened)="tagMenuOpened()"
             (menuClosed)="tagMenuClosed()"
@@ -36,6 +39,14 @@
       <i [class]="'al-icon ' + icons.TAG + ' sm-md'"></i>
       <span>{{numSelected | menuItemText : 'Add Tag'  : selectedDisableAvailableIsMultiple}}</span>
     </button>
+    <sm-tags-menu
+      #tagsMenu
+      [tags]="model?.tags"
+      [projectTags]="allProjects ? companyTags : projectTags"
+      [companyTags]="allProjects ? null : companyTags"
+      [tagsFilterByProject]="allProjects || tagsFilterByProject"
+      (tagSelected)="tagSelected.emit($event)">
+    </sm-tags-menu>
     <hr>
     <button mat-menu-item (click)="downloadModelFileClicked()" [disabled]="isLocalFile">
       <i [class]="'al-icon  ' + icons.DOWNLOAD + ' sm-md'"></i>Download
@@ -45,16 +56,4 @@
     </button>
     <ng-content select="[extended]"></ng-content>
   </ng-container>
-</mat-menu>
-
-<mat-menu #tagMenu="matMenu">
-  <sm-tags-menu
-    #tagMenuContent
-    class="light-theme"
-    [tags]="model?.tags"
-    [projectTags]="projectTags"
-    [companyTags]="companyTags"
-    [tagsFilterByProject]="projectId !== '*' && tagsFilterByProject"
-    (tagSelected)="tagSelected.emit($event)">
-  </sm-tags-menu>
 </mat-menu>

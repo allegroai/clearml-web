@@ -3,8 +3,10 @@
 :host {
   display: block;
   height: 100%;
-  overflow-y: scroll;
-  overflow-x: hidden;
+  &.nested-project-view{
+    overflow-y: scroll;
+    overflow-x: hidden;
+  }
 
   .tags-list-counter {
     width: 140px;

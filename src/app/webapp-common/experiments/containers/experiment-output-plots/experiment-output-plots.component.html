@@ -1,6 +1,6 @@
-<mat-drawer-container autosize class="light-theme">
+<mat-drawer-container autosize [class]="dark ? 'dark-theme' : 'light-theme'">
   <mat-drawer #drawer [opened]="!minimized && !isDatasetVersionPreview" [mode]="minimized ? 'over' : 'side'">
-    <i class="close al-icon al-ico-dialog-x sm-md" *ngIf="minimized" (click)="drawer.close()"></i>
+    <i data-id="closeButton" class="close al-icon al-ico-dialog-x sm-md" *ngIf="minimized" (click)="drawer.close()"></i>
     <div class="list-container">
       <sm-selectable-filter-list
         *ngIf="plotsList !== undefined"

@@ -12,6 +12,7 @@
                       [editable]="true"
                       [minLength]="3"
                       [required]="true"
+                      [forbiddenString]="[]"
                       [inlineDisabled]="true"
                       (textChanged)="nameChanged.emit($event)"
       >

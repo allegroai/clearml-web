@@ -10,7 +10,6 @@ import {
   selectExperimentInfoDataFreeze,
   selectSelectedExperiment
 } from '~/features/experiments/reducers';
-import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {ExperimentReverterService} from '~/features/experiments/shared/services/experiment-reverter.service';
 import {requestFailed} from '../../core/actions/http.actions';
 import {
@@ -50,7 +49,7 @@ import {
 import {convertStopToComplete} from '../shared/common-experiments.utils';
 import {ExperimentConverterService} from '~/features/experiments/shared/services/experiment-converter.service';
 import {of} from 'rxjs';
-import {EmptyAction} from '~/app.constants';
+import {emptyAction} from '~/app.constants';
 import {ReplaceHyperparamsEnum} from '~/business-logic/model/tasks/replaceHyperparamsEnum';
 import {Router} from '@angular/router';
 import {selectRouterConfig, selectRouterParams} from '../../core/reducers/router-reducer';
@@ -75,7 +74,7 @@ export class CommonExperimentsInfoEffects {
 
   constructor(
     private actions$: Actions,
-    private store: Store<ExperimentInfoState>,
+    private store: Store,
     private apiTasks: ApiTasksService,
     private reverter: ExperimentReverterService,
     private converter: ExperimentConverterService,
@@ -121,7 +120,7 @@ export class CommonExperimentsInfoEffects {
               id: experimentId,
               changes: {configuration: configurations}
             }),
-            selectedConfiguration ? getExperimentConfigurationObj() : new EmptyAction(),
+            selectedConfiguration ? getExperimentConfigurationObj() : emptyAction(),
             deactivateLoader(action.type),
           ];
         }),
@@ -284,7 +283,7 @@ export class CommonExperimentsInfoEffects {
                 setBackdrop({active: false}),
                 deactivateEdit(),
                 setExperimentSaving({saving: false}),
-                graphView && selectedStep?.id ? getSelectedPipelineStep({id: selectedStep.id}) : new EmptyAction()
+                graphView && selectedStep?.id ? getSelectedPipelineStep({id: selectedStep.id}) : emptyAction()
               ];
             } else {
               this.router.navigate(['dashboard']);
@@ -356,7 +355,7 @@ export class CommonExperimentsInfoEffects {
                 [commonInfoActions.updateExperimentInfoData({ id: action.id, changes })] :
                 []
               ),
-              ...(changes.tags ? [getTags()] : [])
+              ...(changes.tags ? [getTags({})] : [])
             ];
           }),
           catchError((err: HttpErrorResponse) => [

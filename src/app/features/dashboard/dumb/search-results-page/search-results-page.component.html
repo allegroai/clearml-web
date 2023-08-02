@@ -1,6 +1,6 @@
 <div class="search-container">
-  <div class="d-flex-center">
-    <div class="pl-3 py-3">
+  <div class="d-flex-center tabs">
+    <div class="ps-3 py-3">
       <ng-container *ngFor="let searchTab of activeLinksList">
           <span [class.active]="activeLink === searchTab.name" class="pointer category-link"
                 (click)="activeLinkChanged.emit(searchTab.name)">{{searchTab.label}} ({{resultsCount?.[searchTab.name]}})  </span>
@@ -21,7 +21,8 @@
       [cardHeight]="getCardHeight()"
       [showLoadMoreButton]="getResults().length < resultsCount?.[activeLink]"
       (itemClicked)="projectClicked($event)"
-      (loadMoreClicked)="loadMoreClicked.emit()">
+      (loadMoreClicked)="loadMoreClicked.emit()"
+    >
     </sm-virtual-grid>
   </div>
 

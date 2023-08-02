@@ -26,7 +26,7 @@ export class ExperimentsCompareDetailsEffects {
   constructor(private actions$: Actions,
               private tasksApi: ApiTasksService,
               private modelsApi: ApiModelsService,
-              private store: Store<ExperimentCompareDetailsState>,
+              private store: Store,
               private experimentDetailsReverter: ExperimentDetailsReverterService,
               private modelDetailsReverter: ModelDetailsReverterService,
   ) {

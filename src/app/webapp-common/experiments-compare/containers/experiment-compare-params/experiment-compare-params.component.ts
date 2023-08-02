@@ -25,7 +25,7 @@ export class ExperimentCompareParamsComponent extends ExperimentCompareBase impl
 
   constructor(
     public router: Router,
-    public store: Store<ExperimentInfoState>,
+    public store: Store,
     public changeDetection: ChangeDetectorRef,
     public activeRoute: ActivatedRoute,
     public refresh: RefreshService,

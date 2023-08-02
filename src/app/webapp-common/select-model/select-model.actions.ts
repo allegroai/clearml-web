@@ -34,8 +34,6 @@ export const globalFilterChanged = createAction(`${SELECT_MODEL_PREFIX} global f
 
 export const setCurrentScrollId = createAction(SELECT_MODEL_PREFIX + 'set current scrollId', props<{ scrollId: string }>());
 
-export const allProjectsModeChanged = createAction(`${SELECT_MODEL_PREFIX} all projects mode changed`, props<{ isAllProjects: boolean }>());
-
 export const setViewMode = createAction(`${SELECT_MODEL_PREFIX} set view mode`, props<{ viewMode: ModelsViewModesEnum }>());
 
-export const resetState = createAction(`${SELECT_MODEL_PREFIX} reset state`);
+export const resetSelectModelState = createAction(`${SELECT_MODEL_PREFIX} reset state`, props<{fullReset: boolean}>());

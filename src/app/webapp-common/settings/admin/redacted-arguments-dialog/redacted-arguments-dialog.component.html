@@ -1,7 +1,7 @@
 <sm-dialog-template header="REDACTED ARGUMENTS" iconClass="al-ico-access-key">
   <form class="form-container" #redactedArgumentsForm ='ngForm'>
     <div class="d-flex align-items-center" *ngFor="let redactedArgument of redactedArguments; let i = index" >
-      <mat-form-field appearance="outline" floatLabel="always" class="argument-input">
+      <mat-form-field appearance="outline" floatLabel="always" class="argument-input no-bottom">
         <mat-error *ngIf="redactedArg?.errors?.required">Required</mat-error>
         <input type="text"
                matInput

@@ -26,6 +26,10 @@
           color: $blue-100;
         }
       }
+
+      .separator {
+        border-left-color: $blue-500;
+      }
     }
 
   }
@@ -66,13 +70,37 @@
 
   }
 
+  .smooth-options {
+    margin-left: 24px;
+
+    &.separator {
+      border-left: 1px solid $blue-100;
+      padding-left: 24px;
+    }
+  }
   .smooth-input {
     width: 76px;
+    margin-left: 16px;
+  }
+  .smooth-selector {
+    margin-left: 12px;
+    width: 265px;
+  }
+
+  .smooth-type {
+    width: 170px;
     margin-left: 6px;
   }
 
+  .axis-type-field {
+    width: 170px;
+  }
+
   .graph-container {
-    margin-top: 8px;
+    padding-top: 16px;
+    @media (max-width: 1520px) {
+      padding-top: 24px;
+    }
 
     .navigation {
       position: fixed;
@@ -117,16 +145,33 @@
   .graph-controls {
     position: absolute;
     z-index: 1;
+    top: 64px;
     display: flex;
     align-items: center;
-    padding: 8px 128px;
+    padding: 8px 24px 8px 80px;
 
     .label-text {
-      display: flex;
-      align-items: center;
       white-space: nowrap;
       padding-right: 12px;
-      padding-bottom: 4px;
+    }
+    .smooth-options .label-text {
+      padding-right: 16px;
+    }
+    @media (max-width: 1520px) {
+      top: 64px;
+      padding: 0 24px;
+    }
+  }
+
+
+  .field {
+    align-items: center;
+    @media (max-width: 1520px) {
+      align-items: unset;
+      flex-direction: column;
+      .label-text {
+        font-size: 12px;
+      }
     }
   }
 }
@@ -138,6 +183,7 @@
   color: $blue-400;
   font-size: 18px;
   line-height: 1.5;
+  margin-right: 16px;
 
   .number {
     color: $blue-500;

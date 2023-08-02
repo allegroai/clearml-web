@@ -1,14 +1,13 @@
 import {AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Observable, Subscription} from 'rxjs';
-import {select, Store} from '@ngrx/store';
-import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
-import {distinctUntilChanged, filter, map} from 'rxjs/operators';
+import {Store} from '@ngrx/store';
+import {debounceTime, distinctUntilChanged, filter, map} from 'rxjs/operators';
 import {isEqual} from 'lodash-es';
 import {GroupedList, mergeMultiMetrics, mergeMultiMetricsGroupedVariant} from '@common/tasks/tasks.utils';
 import {getMultiScalarCharts, resetExperimentMetrics, setExperimentMetricsSearchTerm, setExperimentSettings, setSelectedExperiments} from '../../actions/experiments-compare-charts.actions';
 import {
   selectCompareSelectedSettingsGroupBy, selectCompareSelectedSettingsSmoothWeight, selectCompareSelectedSettingsxAxisType, selectCompareTasksScalarCharts, selectExperimentMetricsSearchTerm,
-  selectSelectedExperimentSettings, selectSelectedSettingsHiddenScalar
+  selectSelectedExperimentSettings, selectSelectedSettingsHiddenScalar, selectSelectedSettingsSmoothType
 } from '../../reducers';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {toggleShowScalarOptions} from '../../actions/compare-header.actions';
@@ -23,6 +22,7 @@ import {ChartHoverModeEnum} from '@common/experiments/shared/common-experiments.
 import {ReportCodeEmbedService} from '~/shared/services/report-code-embed.service';
 import {ActivatedRoute} from '@angular/router';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
+import {SmoothTypeEnum} from '@common/shared/single-graph/single-graph.utils';
 
 
 @Component({
@@ -33,6 +33,7 @@ import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy, AfterViewInit {
 
   public smoothWeight$: Observable<number>;
+  public smoothWeightDelayed$: Observable<number>;
   public xAxisType$: Observable<ScalarKeyEnum>;
   public groupBy$: Observable<GroupByCharts>;
   private routerParams$: Observable<any>;
@@ -69,35 +70,40 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
   @ViewChild(ExperimentGraphsComponent) graphsComponent: ExperimentGraphsComponent;
   public hoverMode$: Observable<ChartHoverModeEnum>;
   private entityType: EntityTypeEnum;
+  public smoothType$: Observable<SmoothTypeEnum>;
+  public modelsFeature: boolean;
 
   constructor(
-    private store: Store<ExperimentInfoState>,
+    private store: Store,
     private changeDetection: ChangeDetectorRef,
     private route: ActivatedRoute,
     private refresh: RefreshService,
     private reportEmbed: ReportCodeEmbedService,
   ) {
+    this.modelsFeature = this.route.snapshot?.parent.data?.setAllProject;
     this.listOfHidden = this.store.select(selectSelectedSettingsHiddenScalar)
       .pipe(distinctUntilChanged(isEqual));
-    this.searchTerm$ = this.store.pipe(select(selectExperimentMetricsSearchTerm));
+    this.searchTerm$ = this.store.select(selectExperimentMetricsSearchTerm);
     this.smoothWeight$ = this.store.select(selectCompareSelectedSettingsSmoothWeight);
+    this.smoothWeightDelayed$ = this.store.select(selectCompareSelectedSettingsSmoothWeight).pipe(debounceTime(75));
+    this.smoothType$ = this.store.select(selectSelectedSettingsSmoothType);
     this.xAxisType$ = this.store.select(selectCompareSelectedSettingsxAxisType);
     this.hoverMode$ = this.store.select(selectScalarsHoverMode);
     this.groupBy$ = this.store.select(selectCompareSelectedSettingsGroupBy);
-    this.metrics$ = this.store.pipe(
-      select(selectCompareTasksScalarCharts),
+    this.metrics$ = this.store.select(selectCompareTasksScalarCharts).pipe(
       filter(metrics => !!metrics),
       distinctUntilChanged()
     );
-    this.experimentSettings$ = this.store.pipe(
-      select(selectSelectedExperimentSettings),
+    this.experimentSettings$ = this.store.select(selectSelectedExperimentSettings).pipe(
+
       filter(settings => !!settings),
       map(settings => settings ? settings.selectedScalar : null),
+      filter(selectedPlot => selectedPlot !== undefined),
       distinctUntilChanged()
     );
 
-    this.routerParams$ = this.store.pipe(
-      select(selectRouterParams),
+    this.routerParams$ = this.store.select(selectRouterParams).pipe(
+
       filter(params => !!params.ids),
       distinctUntilChanged()
     );
@@ -183,6 +189,10 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
     this.store.dispatch(setExperimentSettings({id: this.taskIds, changes: {smoothWeight: $event}}));
   }
 
+  changeSmoothType($event: SmoothTypeEnum) {
+    this.store.dispatch(setExperimentSettings({id: this.taskIds, changes: {smoothType: $event}}));
+  }
+
   changeXAxisType($event: ScalarKeyEnum) {
     this.store.dispatch(setExperimentSettings({id: this.taskIds, changes: {xAxisType: $event}}));
   }
@@ -215,6 +225,7 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
       .subscribe(selectedMetric => {
         this.selectedGraph = selectedMetric;
         this.graphsComponent.scrollToGraph(selectedMetric);
+        this.store.dispatch(setExperimentSettings({id: this.taskIds, changes: {selectedScalar: undefined}}));
       });
   }
 }

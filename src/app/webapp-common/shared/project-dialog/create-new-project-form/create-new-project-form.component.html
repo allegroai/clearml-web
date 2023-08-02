@@ -5,6 +5,7 @@
     <mat-error *ngIf="name.touched && name.errors?.uniqueProject">*Project name in this path already exists.</mat-error>
     <mat-error *ngIf="name.touched && name.errors?.minlength">*Project name should contain more than 3 characters.</mat-error>
     <mat-error *ngIf="name.touched && name.errors?.emptyName && !name.errors?.minlength">*Project name can't contain only spaces.</mat-error>
+    <mat-error *ngIf="name.touched && name.errors?.pattern &&  !name.errors?.minlength">*Project name can't contain slash (/)</mat-error>
     <input name="projectName"
            [(ngModel)]="project.name"
            #name="ngModel"
@@ -14,6 +15,7 @@
            smUniqueNameValidator
            [existingNames]="[]"
            [parent]="targetFolder.value"
+           pattern="^[^/]*$"
            required minlength="3" >
   </mat-form-field>
 

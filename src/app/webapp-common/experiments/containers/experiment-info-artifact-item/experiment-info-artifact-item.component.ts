@@ -22,7 +22,7 @@ export class ExperimentInfoArtifactItemComponent implements OnInit, OnDestroy {
   public selectedArtifact: Artifact;
   public artifactKey$: Observable<any>;
 
-  constructor(private store: Store<ExperimentInfoState>) {
+  constructor(private store: Store) {
     this.modelInfo$ = this.store.select(selectExperimentModelInfoData);
     this.artifactKey$ = this.store.select(selectRouterParams)
       .pipe(

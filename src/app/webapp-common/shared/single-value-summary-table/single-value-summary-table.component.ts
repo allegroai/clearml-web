@@ -2,6 +2,7 @@ import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output}
 import {EventsGetTaskSingleValueMetricsResponseValues} from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponseValues';
 import {download} from '../utils/download';
 import {NgForOf, NgIf} from '@angular/common';
+import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 
 @Component({
   selector: 'sm-single-value-summary-table',
@@ -18,7 +19,7 @@ export class SingleValueSummaryTableComponent implements OnInit {
   @Input() data: Array<EventsGetTaskSingleValueMetricsResponseValues>;
   @Input() experimentName;
   @Input() darkTheme: boolean;
-  @Output() createEmbedCode = new EventEmitter<any>();
+  @Output() createEmbedCode = new EventEmitter<{xaxis: ScalarKeyEnum; domRect: any}>();
   public hover: boolean;
   constructor() { }
 
@@ -36,6 +37,6 @@ export class SingleValueSummaryTableComponent implements OnInit {
   }
 
   createEmbedCodeClicked($event: MouseEvent) {
-    this.createEmbedCode.emit({x: $event.clientX, y: $event.clientY});
+    this.createEmbedCode.emit({xaxis: null, domRect: {x: $event.clientX, y: $event.clientY}});
   }
 }

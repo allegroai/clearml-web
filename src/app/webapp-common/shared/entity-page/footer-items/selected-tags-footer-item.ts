@@ -23,7 +23,7 @@ export class SelectedTagsFooterItem extends ItemFooterModel {
     const tags = state.data[this.id];
     return {
       disable: state.selectionAllHasExample,
-      description: this.menuItemText.transform(tags.selectedFiltered.length, 'Add Tag'),
+      description: this.menuItemText.transform(tags?.selectedFiltered?.length, 'Add Tag'),
       disableDescription: 'Tags',
       emitValue: tags.selectedFiltered,
       tags: selectionTags(state.selected),

@@ -19,12 +19,12 @@ import {
   ViewChild,
   ViewChildren
 } from '@angular/core';
-import {get} from 'lodash-es';
+import {get, isArray, isString} from 'lodash-es';
 import {MenuItem, PrimeTemplate, SortMeta} from 'primeng/api';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {ContextMenu} from 'primeng/contextmenu';
 import {Table} from 'primeng/table';
-import {BehaviorSubject, fromEvent, Subject, Subscription, startWith, combineLatest, interval} from 'rxjs';
+import {BehaviorSubject, combineLatest, fromEvent, interval, startWith, Subject, Subscription} from 'rxjs';
 import {debounce, debounceTime, filter, take, throttleTime} from 'rxjs/operators';
 import {custumFilterFunc, custumSortSingle} from './overrideFilterFunc';
 import {ColHeaderTypeEnum, ISmCol, TableSortOrderEnum} from './table.consts';
@@ -32,6 +32,8 @@ import {Store} from '@ngrx/store';
 import {selectScaleFactor} from '@common/core/reducers/view.reducer';
 import {trackById} from '@common/shared/utils/forms-track-by';
 import {sortCol} from '@common/shared/utils/sortCol';
+import {Options, Angular2CsvComponent} from 'angular2-csv';
+import {prepareColsForDownload} from '@common/shared/utils/download';
 
 @Component({
   selector: 'sm-table',
@@ -86,6 +88,7 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
   @Input() expandableRows = false;
   @Input() initialColumns;
   private waitForClick: number;
+
   @Input() set tableData(tableData) {
     this.loading = false;
     this.rowsNumber = tableData ? tableData.length : 0;
@@ -171,12 +174,12 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
   @Input() hasExperimentUpdate: boolean;
 
   @Output() sortChanged = new EventEmitter<{ field: ISmCol['id']; isShift: boolean }>();
-  @Output() rowClicked = new EventEmitter<{e: MouseEvent; data: any}>();
-  @Output() rowDoubleClicked = new EventEmitter<{e: MouseEvent; data: any}>();
+  @Output() rowClicked = new EventEmitter<{ e: MouseEvent; data: any }>();
+  @Output() rowDoubleClicked = new EventEmitter<{ e: MouseEvent; data: any }>();
   @Output() rowSelectionChanged = new EventEmitter<{ data: Array<any>; originalEvent?: Event }>();
   @Output() firstChanged = new EventEmitter();
   @Output() loadMoreClicked = new EventEmitter();
-  @Output() rowRightClick = new EventEmitter<{e: MouseEvent; rowData; single?: boolean}>();
+  @Output() rowRightClick = new EventEmitter<{ e: MouseEvent; rowData; single?: boolean }>();
   @Output() colReordered = new EventEmitter();
   @Output() columnResized = new EventEmitter<{ columnId: string; widthPx: number }>();
   search: string;
@@ -395,13 +398,20 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
 
   public scrollToIndex(rowIndex) {
     if (rowIndex > -1 && this.table) {
-      const row = this.table.el.nativeElement.getElementsByTagName('tr')[rowIndex] as HTMLTableRowElement;
-      if (row) {
-        let location = row.offsetTop;
-        if (rowIndex + 1 === this.tableData.length) {
-          location += row.getBoundingClientRect().height;
+      if (this.virtualScroll) {
+        const {height} = this.table.el.nativeElement.getBoundingClientRect();
+        const rowsInPage = height / this.rowHeight;
+        const maxScroll = Math.ceil(this.rowsNumber - rowsInPage);
+        this.table.scrollToVirtualIndex(Math.min(maxScroll, rowIndex));
+      } else {
+        const row = this.table.el.nativeElement.getElementsByTagName('tr')[rowIndex] as HTMLTableRowElement;
+        if (row) {
+          let location = row.offsetTop;
+          if (rowIndex + 1 === this.tableData.length) {
+            location += row.getBoundingClientRect().height;
+          }
+          this.table.scrollTo({top: location, behavior: 'smooth'});
         }
-        this.table.scrollTo({top: location, behavior: 'smooth'});
       }
     }
   }
@@ -465,14 +475,14 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
   }
 
   loadMore() {
-      this.loading = true;
-      this.loadMoreDebouncer.next(null);
+    this.loading = true;
+    this.loadMoreDebouncer.next(null);
   }
 
   onColReorder($event: any) {
     const columnsList = $event.columns.map(column => column.id);
     this.colReordered.emit(columnsList);
-    this.calcResize();
+    this.resize();
   }
 
   orderColumns() {
@@ -514,12 +524,12 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
   }
 
   focusSelected() {
-    this.table.el.nativeElement.getElementsByClassName('selected')[0]?.focus();
+    this.table.el?.nativeElement.getElementsByClassName('selected')[0]?.focus();
   }
 
   colResize({delta, element}: { delta: number; element: HTMLTableHeaderCellElement }) {
     if (delta) {
-      setTimeout( () => {
+      setTimeout(() => {
         const width = element.clientWidth;
         const columnId = element.attributes['data-col-id']?.value;
         this.columnResized.emit({columnId, widthPx: width});
@@ -564,18 +574,56 @@ export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, 
   }
 
   checkClick(param: { data: any; e: MouseEvent }) {
-    if (param.e.type === 'dblclick') {
+    if (param.e.type === 'dblclick' || this.waitForClick) {
       window.clearTimeout(this.waitForClick);
+      this.waitForClick = null;
       this.rowDoubleClicked.emit(param);
     } else {
       this.waitForClick = window.setTimeout(() => {
         this.rowClicked.emit(param);
-      }, 50);
+        this.waitForClick = null;
+      }, 250);
     }
   }
 
-  updateNumberOfRows({event, expanded}: {event: any; expanded: boolean}) {
+  updateNumberOfRows({event, expanded}: { event: any; expanded: boolean }) {
     const expandedIndex = Object.values(this.tableData).findIndex((row: any) => row.id === event.data.id);
     this.lastRowExpanded = expanded && expandedIndex === this.rowsNumber - 1;
   }
+
+
+  downloadTableAsCSV(tableName?: string) {
+    const options: Options = {
+      filename: null,
+      fieldSeparator: ',',
+      quoteStrings: '"',
+      decimalseparator: '.',
+      title: '',
+      showLabels: false,
+      headers: [],
+      showTitle: false,
+      useBom: true,
+      removeNewLines: true,
+      keys: []
+    };
+
+    const rows = [];
+    const downloadCols = prepareColsForDownload(this.columns);
+    options.keys = downloadCols.map(dCol=>dCol.field);
+    options.headers = downloadCols.map(dCol=> dCol.name);
+    this.tableData.forEach(row => {
+      rows.push(options.keys.reduce((acc, key) => {
+        const val = get(row, key, '');
+        acc[key] = isArray(val) ? val.toString() : isString(val) ? val.replace(/\r?\n|\r/g
+          , '') : val;
+        return acc;
+      }, {}));
+    });
+    const angular2csvButton = new Angular2CsvComponent();
+    angular2csvButton.data = rows;
+    angular2csvButton.options = options;
+    angular2csvButton.filename = `${tableName}${tableName ? '-' : ''}table`;
+    angular2csvButton.generateCsv();
+  }
+
 }

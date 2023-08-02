@@ -81,7 +81,7 @@ export class WorkersStatsComponent implements OnInit, OnDestroy {
 
   public chartData: { dataByTopic: Topic[] };
 
-  constructor(public store: Store<any>, private cdr: ChangeDetectorRef) {
+  constructor(public store: Store, private cdr: ChangeDetectorRef) {
   }
 
   ngOnInit() {

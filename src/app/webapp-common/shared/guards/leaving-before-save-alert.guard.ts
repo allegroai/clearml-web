@@ -1,52 +1,40 @@
-import {Injectable} from '@angular/core';
-import {ActivatedRouteSnapshot, CanDeactivate, RouterStateSnapshot} from '@angular/router';
-import {Observable} from 'rxjs';
-import {MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {inject} from '@angular/core';
+import {
+  ActivatedRouteSnapshot,
+  CanDeactivateFn,
+  RouterStateSnapshot
+} from '@angular/router';
+import {of, switchMap} from 'rxjs';
+import {MatDialog} from '@angular/material/dialog';
 import {ConfirmDialogComponent} from '../ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {Store} from '@ngrx/store';
-import {GuardBase} from '~/shared/guards/guard-base';
+import {debounceTime, map} from 'rxjs/operators';
+import {MemoizedSelector} from '@ngrx/store/src/selector';
 
-@Injectable()
-export class LeavingBeforeSaveAlertGuard extends GuardBase implements CanDeactivate<any> {
-  private inEditMode: boolean;
-  constructor(private dialog: MatDialog, private store: Store<any>) {
-    super(store);
-    this.inEditMode$.subscribe(inEditModes => {
-      this.inEditMode = inEditModes.includes(true);
-    });
-  }
 
-  public canDeactivate(component: any, currentRoute: ActivatedRouteSnapshot, currentState: RouterStateSnapshot, nextState?: RouterStateSnapshot): Observable<boolean> | Promise<boolean> | boolean {
+export const leavingBeforeSaveAlertGuard = (inEditSelector: MemoizedSelector<any, boolean>): CanDeactivateFn<any>  =>
+  (component, currentRoute: ActivatedRouteSnapshot, currentState: RouterStateSnapshot, nextState: RouterStateSnapshot) => {
+    const store = inject(Store);
+    const dialog = inject(MatDialog);
 
-    const unGuard = nextState?.root?.queryParams?.unGuard;
-    if (unGuard === 'true') {
-      return true;
-    }
-    if (!this.inEditMode) {
-      return true;
-    }
+    return store.select(inEditSelector)
+      .pipe(
+        debounceTime(0),
+        switchMap(inEditMode => {
+          const unGuard = nextState?.root?.queryParams?.unGuard;
+          if (unGuard === 'true' || !inEditMode) {
+            return of(true);
+          }
 
-    return Observable.create(observer => {
-      const confirmDialogRef: MatDialogRef<any, boolean> = this.dialog.open(ConfirmDialogComponent, {
-        data: {
-          title    : 'Attention',
-          body     : 'You have unsaved changes. Do you want to stay on this page or leave without saving?',
-          yes      : 'Leave',
-          no       : 'Stay',
-          iconClass: 'i-alert',
-        }
-      });
-
-      confirmDialogRef.afterClosed().subscribe((confirmed) => {
-        if (confirmed) {
-          observer.next(true);
-          observer.complete();
-        } else {
-          observer.next(false);
-          observer.complete();
-        }
-      });
-    });
-  }
-}
-
+          return dialog.open(ConfirmDialogComponent, {
+            data: {
+              title    : 'Attention',
+              body     : 'You have unsaved changes. Do you want to stay on this page or leave without saving?',
+              yes      : 'Leave',
+              no       : 'Stay',
+              iconClass: 'i-alert',
+            }
+          }).afterClosed().pipe(map((leave)=> !!leave));
+        }),
+      );
+  };

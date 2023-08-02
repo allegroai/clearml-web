@@ -25,7 +25,7 @@ export class CommonAuthEffects {
   constructor(
     private actions: Actions,
     private credentialsApi: ApiAuthService,
-    private store: Store<any>,
+    private store: Store,
     private adminService: AdminService,
     private matDialog: MatDialog
   ) {}

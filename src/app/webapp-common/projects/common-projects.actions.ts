@@ -32,10 +32,6 @@ export const checkProjectForDeletion = createAction(
   PROJECTS_PREFIX + 'CHECK_PROJECT_FOR_DELETION',
   props<{project: Project}>()
 );
-export const setProjectReadyForDeletion= createAction(
-  PROJECTS_PREFIX + 'SET_PROJECT_READY_FOR_DELETION',
-  props<{readyForDeletion}>()
-);
 export const resetReadyToDelete = createAction(PROJECTS_PREFIX + 'RESET_READY_TO_DELETE');
 
 export const setNoMoreProjects = createAction(

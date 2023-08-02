@@ -3,7 +3,7 @@
 
 @font-face {
   font-family: '#{$icomoon-font-family}';
-  src: url('./#{$icomoon-font-family}.ttf?s0lnuq') format('truetype');
+  src: url('./#{$icomoon-font-family}.ttf?n9hc0z') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -24,6 +24,16 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.al-ico-model-filled {
+  &:before {
+    content: $al-ico-model-filled; 
+  }
+}
+.al-ico-type-report {
+  &:before {
+    content: $al-ico-type-report; 
+  }
+}
 .al-ico-info-circle-outline {
   &:before {
     content: $al-ico-info-circle-outline; 

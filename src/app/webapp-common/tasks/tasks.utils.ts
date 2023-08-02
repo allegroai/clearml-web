@@ -6,9 +6,10 @@ import {ExtData, ExtFrame, ExtLayout} from '../shared/single-graph/plotly-graph-
 import {MetricsPlotEvent} from '../../business-logic/model/events/models';
 import {KeyValue} from '@angular/common';
 
-export interface ExtMetricsPlotEvent extends MetricsPlotEvent{
+export interface ExtMetricsPlotEvent extends MetricsPlotEvent {
   variants?: Array<string>;
 }
+
 export interface IMultiplot {
   [key: string]: { // i.e ROC
     [key: number]: { // Iteration number
@@ -124,9 +125,12 @@ export const convertScalars = (scalars: GroupedList, experimentId: string): { [k
         type: 'scatter'
       }));
 
+    const yValues = chartData?.map((trace: ExtData) => (trace.y as number[])).flat() ?? [0];
+    const maxY = Math.max(...yValues);
+    const tickformat = maxY >= 1e9 || (maxY < 1e-5 && maxY > 0) ? '.1e' : undefined;
     acc[key] = [prepareGraph(
       chartData,
-      {type: 'scalar', title: key, xaxis: {title: 'Iterations'}},
+      {type: 'scalar', title: key, xaxis: {title: 'Iterations'}, yaxis: {tickformat}},
       {},
       {metric: key, type: 'scalar', variants: Object.keys(graph)}
     )];
@@ -138,7 +142,7 @@ export const groupIterations = (plots: MetricsPlotEvent[]): { [title: string]: E
     return {};
   }
   let previousPlotIsMergable = true;
-  const sortedPlots = sortBy(plots,'iter');
+  const sortedPlots = sortBy(plots, 'iter');
   return sortedPlots
     .reduce((groupedPlots, plot) => {
       const metric = plot.metric;
@@ -207,7 +211,7 @@ export const mergeMultiMetricsGroupedVariant = (metrics): { [key: string]: ExtFr
           ...data,
           type: 'scatter',
           task: taskId,
-          name: multipleExperiments? `${variant} - ${data.name}` : variant
+          name: multipleExperiments ? `${variant} - ${data.name}` : variant
         }))
       );
     });
@@ -226,17 +230,27 @@ export const convertMultiPlots = (plots): { [key: string]: ExtFrame[] } =>
     return acc;
   }, {});
 
-export const multiplotsAddChartToGroup = (charts, parsed, metric, experiment, experimentId, variant, isMultipleVar: boolean) => {
-  const allowedTypes = ['scatter', 'bar'];
+export const multiplotsAddChartToGroup = (charts, parsed, metric, experiment, experimentId, variant, iteration, isMultipleVar: boolean) => {
+  const allowedMergedTypes = ['scatter', 'scattergl', 'bar', 'scatter3d'];
   let fullName: string;
-  const metricVariant = isMultipleVar ? `${metric} - ${variant}` : metric;
+  const metricVariant = `${metric} - ${variant}`; //isMultipleVar ? `${metric} - ${variant}` : metric;
   if (parsed.layout && parsed.layout.images) {
     if (!charts[metricVariant]) {
       charts[metricVariant] = {};
     }
     const index = Object.keys(charts[metricVariant]).length;
     charts[metricVariant][index] = parsed;
+    charts[metricVariant][index].layout.title = `${experiment} (iteration ${iteration})`;
+    charts[metricVariant][index].task = experimentId;
+    charts[metricVariant][index].metric = metric;
+    charts[metricVariant][index].variant = variant;
   }
+
+  // // In case no name set to plot, we invent, so we can split accordingly
+  // parsed.data.forEach((varPlot, i) => varPlot.name = varPlot.name || i.toString());
+
+  const isVariantsSplited = (new Set<string>(parsed.data.map(varPlot => varPlot.name))).size > 1;
+
   for (let i = 0; i < parsed.data.length; i++) {
     let isMultipleTasks = false;
     const variantPlot = parsed.data.slice()[i];
@@ -247,15 +261,27 @@ export const multiplotsAddChartToGroup = (charts, parsed, metric, experiment, ex
     if (!charts[metricName]) {
       charts[metricName] = {};
     }
-    if ((!variantPlot.type || allowedTypes.includes(variantPlot.type)) && variantPlot.name) {
-      fullName = metricVariant + '-' + variantPlot.name;
-      variantPlot.name = experiment;
+    isVariantsSplited && delete variantPlot.legendgroup;
+    if ((!variantPlot.type || allowedMergedTypes.includes(variantPlot.type))) {
+      if (variantPlot.name) {
+        fullName = `${metricVariant} - ${variantPlot.name}`;
+      } else {
+        fullName = `${metricVariant}`;
+      }
+      if (isVariantsSplited) {
+        variantPlot.seriesName = variantPlot.name;
+      }
+      variantPlot.name = `${experiment} (iteration ${iteration})`;
+      variantPlot.colorKey = experiment;
       variantPlot.task = experimentId;
     } else if (variantPlot.type === 'table') {
-      fullName = metricVariant + '-' + experiment;
+      fullName = `${metricVariant} - ${experiment}`;
+      variantPlot.task = experimentId;
     } else {
-      fullName = metricVariant;
+      fullName = `${metricVariant} - ${experiment}`;
+      variantPlot.seriesName = variantPlot.name;
       variantPlot.name = experiment;
+      variantPlot.colorKey = experiment;
       variantPlot.task = experimentId;
     }
     if (!charts[metricName][fullName]) {
@@ -266,11 +292,13 @@ export const multiplotsAddChartToGroup = (charts, parsed, metric, experiment, ex
       isMultipleTasks = true;
     }
     charts[metricName][fullName].layout = Object.assign({}, {...charts[metricName][fullName].layout});
-    charts[metricName][fullName].layout.title = fullName;
+    charts[metricName][fullName].layout.title = isMultipleTasks ? variantPlot.seriesName ?? '' : `${experiment} (iteration ${iteration})`;
     charts[metricName][fullName].layout.name = charts[metricName][fullName].layout.name ? `${charts[metricName][fullName].layout.name} - ${experiment}` : fullName;
     charts[metricName][fullName].layout.barmode = isMultipleTasks ? 'group' : 'stack';
+    charts[metricName][fullName].layout.showlegend = isMultipleTasks ? true : charts[metricName][fullName].layout.showlegend;
     charts[metricName][fullName].metric = metric;
     charts[metricName][fullName].variant = variant;
+    charts[metricName][fullName].task = charts[metricName][fullName].task ?? experimentId;
   }
   return charts;
 };
@@ -302,7 +330,7 @@ export const seperateMultiplotsVariants = (mixedPlot: IMultiplot, isMultipleVari
       if (parsed.data.length === 0 && parsed.layout.title === 'Unknown data') {
         parsingError = true;
       }
-      charts = multiplotsAddChartToGroup(charts, parsed, plot.metric, experimentName, experimentId, plot.variant, isMultipleVarients);
+      charts = multiplotsAddChartToGroup(charts, parsed, plot.metric, experimentName, experimentId, plot.variant, iterationKey, isMultipleVarients);
     });
   }
 

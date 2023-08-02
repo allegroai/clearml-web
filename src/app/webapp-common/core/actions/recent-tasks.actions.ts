@@ -1,12 +1,4 @@
-import {ISmAction} from '../models/actions';
-import {RECENT_TASKS_ACTIONS} from '../../../app.constants';
+import {createAction} from '@ngrx/store';
+import {Task} from '~/business-logic/model/tasks/task';
 
-export class SetRecentTasks implements ISmAction {
-  type = RECENT_TASKS_ACTIONS.SET_RECENT_TASKS;
-  public payload: { tasks: Array<any> };
-
-  constructor(tasks: Array<any>) {
-    this.payload = {tasks};
-  }
-}
-
+export const setRecentTasks = createAction('[RECENT_TASKS] SET_RECENT_TASKS', (tasks: Task[]) => ({ tasks }));

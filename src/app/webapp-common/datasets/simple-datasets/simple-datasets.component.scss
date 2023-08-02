@@ -1,4 +1,5 @@
 @import "variables";
+@import "./empty";
 
 :host {
   .sm-card-list-layout{
@@ -21,39 +22,6 @@
     background-color: $blue-800;
     margin-bottom: -12px;
   }
-
-  .empty-datasets {
-    width: 100%;
-    grid-column: 1/-1;
-    display: flex;
-    flex-direction: column;
-    max-width: map-get($grid-max-widths, xl);
-    margin: 0 auto;
-
-    .title-icon {
-      color: $blue-600;
-      text-align: center;
-      margin-bottom: 24px;
-    }
-    .title {
-      font-size: 20px;
-      font-weight: 500;
-      color: $blue-100;
-      margin-bottom: 6px;
-      text-align: center;
-    }
-
-    .sub-title {
-      text-align: center;
-      margin-bottom: 64px;
-
-      .link {
-        color: $neon-yellow;
-      }
-    }
-
-  }
-
 }
 
 

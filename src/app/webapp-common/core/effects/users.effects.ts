@@ -30,7 +30,7 @@ export class CommonUserEffects {
     private actions: Actions, private userService: ApiUsersService,
     private router: Router, private loginApi: ApiLoginService,
     private serverService: ApiServerService,
-    private store: Store<any>, private errorService: ErrorService
+    private store: Store, private errorService: ErrorService
   ) {
   }
 

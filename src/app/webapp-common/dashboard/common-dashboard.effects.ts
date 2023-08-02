@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {ApiProjectsService} from '~/business-logic/api-services/projects.service';
-import {Actions, createEffect, ofType} from '@ngrx/effects';
+import {Actions, concatLatestFrom, createEffect, ofType} from '@ngrx/effects';
 import {requestFailed} from '../core/actions/http.actions';
 import {activeLoader, deactivateLoader} from '../core/actions/layout.actions';
 import {
@@ -12,7 +12,7 @@ import {
 import {CARDS_IN_ROW} from './common-dashboard.const';
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
 import {ProjectsGetAllExRequest} from '~/business-logic/model/projects/projectsGetAllExRequest';
-import {catchError, mergeMap, map, switchMap, withLatestFrom} from 'rxjs/operators';
+import {catchError, mergeMap, map, switchMap} from 'rxjs/operators';
 import {ApiLoginService} from '~/business-logic/api-services/login.service';
 import {Store} from '@ngrx/store';
 import {ErrorService} from '../shared/services/error.service';
@@ -24,7 +24,7 @@ export class CommonDashboardEffects {
   constructor(
     private actions: Actions, private projectsApi: ApiProjectsService,
     private tasksApi: ApiTasksService, private loginApi: ApiLoginService,
-    private errorService: ErrorService, private store: Store<any>,
+    private errorService: ErrorService, private store: Store,
   ) {}
   /* eslint-disable @typescript-eslint/naming-convention */
   activeLoader = createEffect(() => this.actions.pipe(
@@ -34,12 +34,12 @@ export class CommonDashboardEffects {
 
   getRecentProjects = createEffect(() => this.actions.pipe(
     ofType(getRecentProjects),
-    withLatestFrom(
+    concatLatestFrom(() => [
       this.store.select(selectCurrentUser),
       this.store.select(selectShowOnlyUserWork),
       this.store.select(selectShowHidden),
       this.store.select(selectHideExamples),
-    ),
+    ]),
     mergeMap(([action, user, showOnlyUserWork, showHidden, hideExamples]) =>
       this.projectsApi.projectsGetAllEx({
         stats_for_state: ProjectsGetAllExRequest.StatsForStateEnum.Active,
@@ -52,7 +52,7 @@ export class CommonDashboardEffects {
         ...(showHidden && {search_hidden: true}),
         ...(!showHidden && {include_stats_filter: {system_tags: ['-pipeline']}}),
         ...(hideExamples && {allow_public: false}),
-        only_fields: ['name', 'company', 'user', 'created', 'default_output_destination']
+        only_fields: ['name', 'basename', 'company', 'user', 'created', 'default_output_destination']
       }).pipe(
           mergeMap(({projects}) => [setRecentProjects({projects}), deactivateLoader(action.type)]),
           catchError(error => [deactivateLoader(action.type), requestFailed(error)])
@@ -62,11 +62,11 @@ export class CommonDashboardEffects {
 
   getRecentTasks = createEffect(() => this.actions.pipe(
     ofType(getRecentExperiments),
-    withLatestFrom(
+    concatLatestFrom(() => [
       this.store.select(selectCurrentUser),
       this.store.select(selectShowOnlyUserWork),
       this.store.select(selectHideExamples),
-    ),
+    ]),
     switchMap(([action, user, showOnlyUserWork, hideExamples]) => this.tasksApi.tasksGetAllEx({
         page: 0,
         page_size: 5,

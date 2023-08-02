@@ -29,4 +29,20 @@ export interface ProjectsValidateDeleteResponse {
      * The total number of non-archived models under the project and all its children
      */
     non_archived_models?: number;
+    /**
+     * The total number of non-empty datasets under the project and all its children
+     */
+    datasets?: number;
+    /**
+     * The total number of reports under the project and all its children
+     */
+    reports?: number;
+    /**
+     * The total number of non-archived reports under the project and all its children
+     */
+    non_archived_reports?: number;
+    /**
+     * The total number of pipelines with active controllers under the project and all   its children
+     */
+    pipelines?: number;
 }

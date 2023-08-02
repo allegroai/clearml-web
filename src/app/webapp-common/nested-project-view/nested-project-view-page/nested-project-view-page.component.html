@@ -1,11 +1,11 @@
 <div class="sm-card-list-layout projects"
-     [class.in-empty-state]="!((projectsList$ | async)?.length !== 0 || searching)">
+     [class.in-empty-state]="!(projectsList?.length !== 0 || searching)">
   <sm-projects-header
-    (orderByChanged)="orderByChanged($event)"
-    [sortByField]="projectsOrderBy$ | async"
-    [sortOrder]="projectsSortOrder$ | async"
-    [enableTagsFilter]="false"
-    [tags]="projectsTags$ | async"
+    (orderByChanged)="orderByChanged.emit($event)"
+    [sortByField]="projectsOrderBy"
+    [sortOrder]="projectsSortOrder"
+    [enableTagsFilter]="true"
+    [tags]="projectsTags"
   >
     <sm-button-toggle
       left-items
@@ -15,143 +15,38 @@
              {value: false, icon: 'al-ico-flat-view',  label: 'List view'},
              {value: true, icon:'al-ico-project-path', label: 'Project view'}
             ]"
-      (valueChanged)="toggleNestedView($event)"
+      (valueChanged)="toggleNestedView.emit($event)"
     ></sm-button-toggle>
     <div class="d-flex">
-      <button *ngIf="entityType ===  entityTypeEnum.pipelines"
-              class="btn btn-cml-primary d-flex align-items-center"
-              (click)="createPipeline()">
-        <i class="al-icon al-ico-add sm me-2" data-id="New Pipeline"></i>NEW PIPELINE
-      </button>
-      <button
-        *ngIf="entityType ===  entityTypeEnum.datasets"
-        class="btn btn-cml-primary d-flex align-items-center"
-        (click)="createDataset()">
-        <i class="al-icon al-ico-add sm me-2" data-id="New Dataset"></i>NEW DATASET
-      </button>
+      <ng-content select="[create-button]"></ng-content>
       <ng-content select="[extendedButtons]"></ng-content>
-      <button
-        *ngIf="entityType ===  entityTypeEnum.reports"
-        class="btn btn-cml-primary d-flex align-items-center"
-        (click)="openCreateReportDialog()">
-        <i class="al-icon al-ico-add sm me-2" data-id="New Report"></i>NEW REPORT
-      </button>
     </div>
   </sm-projects-header>
-  <ng-container *ngIf="(projectsList$ | async)?.length !== 0 || searching; else emptyState">
-    <ng-container *ngFor="let project of projectsList$ | async; trackBy: trackById ;let last=last; let index=index">
+  <ng-container *ngIf="projectsList?.length !== 0 || searching; else emptyState">
+    <ng-container *ngFor="let project of projectsList; trackBy: trackById ; let last=last; let index=index">
       <sm-nested-card
-        *ngIf="index + totalVirtualCards < (projectsList$ | async)?.length || (noMoreProjects$ | async) || searching"
+        *ngIf="index + totalVirtualCards < projectsList.length || noMoreProjects || searching"
         [hideMenu]="['All Experiments'].includes(project.name) || project['isRoot'] || isExample(project)"
+        [entityType]="entityType"
         [project]="project"
-        (projectCardClicked)="nestedProjectCardClicked($event, project)"
-        (projectNameChanged)="projectNameChanged({id: project.id, name: $event})"
+        (projectCardClicked)="cardClicked.emit($event)"
+        (projectNameChanged)="projectNameChanged.emit({id: project.id, name: $event})"
       >
-        <ng-container *ngIf="entityType === entityTypeEnum.pipelines">
-          <sm-circle-counter
-            [counter]="project.id === '*' ? '∞' : project.stats?.active?.status_count?.in_progress ?? '0'"
-            label="RUNNING"
-            [type]="project.stats?.active?.status_count?.in_progress ===0 ? circleTypeEnum.empty : circleTypeEnum.running"></sm-circle-counter>
-          <sm-circle-counter [counter]="project.id === '*' ? '∞' : project.stats?.active?.completed_tasks_24h ?? '0'"
-                             label="COMPLETED"
-                             [type]="project.stats?.active?.completed_tasks_24h ===0 ? circleTypeEnum.empty : circleTypeEnum.completed"
-                             underLabel="(24 hrs)"></sm-circle-counter>
-          <sm-circle-counter
-            [counter]="project.stats?.active?.status_count.failed"
-            label="FAILED"
-            [type]="project.stats?.active?.status_count.failed ? circleTypeEnum.failed : circleTypeEnum.empty"
-          ></sm-circle-counter>
-        </ng-container>
-        <ng-container *ngIf="entityType === entityTypeEnum.reports">
-          <sm-circle-counter
-            [counter]="project.stats?.active?.total_tasks ?? '0'"
-            label="REPORTS"
-            [type]="circleTypeEnum.empty"></sm-circle-counter>
-          <sm-circle-counter
-            [counter]="project.stats?.active?.status_count?.published ?? '0'"
-            label="PUBLISHED"
-            [type]="project.stats?.active?.status_count?.published ===0 ? circleTypeEnum.empty :
-          circleTypeEnum.published"
-          ></sm-circle-counter>
-        </ng-container>
-        <ng-container *ngIf="isDatasetType(entityType)">
-          <sm-circle-counter
-            [counter]="project.id === '*' ? '∞' : project.stats?.datasets?.count ?? '0'"
-            [label]="datasetLabel(entityType)"
-            [type]="project.stats?.datasets?.count===0 ? circleTypeEnum.empty : circleTypeEnum.pending"></sm-circle-counter>
-          <sm-circle-counter label="TAGS IN USE" [counter]="[]">
-            <sm-tag-list
-              *ngIf="!hideMenu; else: ReadOnlyTags"
-              class="tags-list-counter"
-              [readonly]="true"
-              [class.empty-tags]="!(project.stats?.datasets?.tags.length > 0)"
-              tagsList
-              [tags]="project.stats?.datasets?.tags"
-              smClickStopPropagation
-            ></sm-tag-list>
-          </sm-circle-counter>
-        </ng-container>
-        <div card-footer class="footer-tags" *ngIf="entityType === entityTypeEnum.pipelines">
-          <sm-tag-list
-            *ngIf="!hideMenu; else: ReadOnlyTags"
-            class="w-100"
-            [tags]="project.tags"
-            (remove)="removeTag(project,$event)"
-            smClickStopPropagation
-          ></sm-tag-list>
+        <ng-container *ngTemplateOutlet="cardContentTemplateRef; context: {$implicit: project}"></ng-container>
+        <div card-footer class="footer-tags" *ngIf="cardContentFooterTemplateRef">
+          <ng-container *ngTemplateOutlet="cardContentFooterTemplateRef; context: {$implicit: project}"></ng-container>
         </div>
-        <ng-template #ReadOnlyTags>
-          <sm-tag-list [tags]="project.tags"></sm-tag-list>
-        </ng-template>
+
       </sm-nested-card>
     </ng-container>
   </ng-container>
 
-  <div class="load-more" *ngIf="(noMoreProjects$ | async) === false && (projectsList$ | async)?.length > 0">
-    <button (click)="loadMore()" class="btn btn-cml-primary load-more-btn">LOAD MORE</button>
+  <div class="load-more" *ngIf="noMoreProjects === false && projectsList?.length > 0">
+    <button (click)="loadMore.emit()" class="btn btn-cml-primary load-more-btn">LOAD MORE</button>
   </div>
 </div>
 <ng-template #emptyState>
-  <ng-container *ngIf="entityType === entityTypeEnum.pipelines">
-    <div class="empty-state">
-      <div class="title-icon"><i class="al-icon al-ico-pipelines xxl"></i></div>
-      <div class="title">NO PIPELINES TO SHOW</div>
-      <div class="sub-title">Run your first pipeline to see it displayed here
-        <ng-container *ngIf="allExamples"> or <a href=""
-                                                 (click)="$event.preventDefault(); createPipelineExamples()"
-                                                 class="link">generate example
-        </a></ng-container>
-      </div>
-      <sm-pipelines-empty-state [initPipelineCode]="initPipelineCode" [createButton]="true"></sm-pipelines-empty-state>
-    </div>
-  </ng-container>
-  <ng-container *ngIf="entityType === entityTypeEnum.datasets">
-    <div class="empty-state">
-      <div class="title-icon"><i class="al-icon al-ico-datasets xxl"></i></div>
-      <div class="title">NO DATASETS TO SHOW</div>
-      <div class="sub-title">Run your first dataset to see it displayed here
-        <ng-container *ngIf="allExamples"> or <a href="" (click)="$event.preventDefault(); createDatasetExamples()"
-                                                 class="link">generate
-          example
-        </a></ng-container>
-      </div>
-
-      <sm-dataset-empty [showButton]="true"></sm-dataset-empty>
-    </div>
-  </ng-container>
-  <ng-content select="[extendedEmpty]"></ng-content>
-
-  <ng-container *ngIf="entityType === entityTypeEnum.reports">
-    <div class="empty-state justify-content-center">
-      <div class="title-icon"><i class="al-icon al-ico-reports xxl"></i></div>
-      <div class="title">NO REPORTS TO SHOW</div>
-      <div class="sub-title">
-        <button (click)="openCreateReportDialog()" class="no-data-button btn btn-neon">
-          <span>NEW REPORT</span>
-        </button>
-      </div>
-    </div>
-  </ng-container>
+  <ng-content select="[empty-state]"></ng-content>
 </ng-template>
 
 

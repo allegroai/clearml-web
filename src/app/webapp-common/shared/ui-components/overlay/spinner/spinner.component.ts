@@ -26,7 +26,7 @@ export class SpinnerComponent implements OnInit, OnDestroy {
   private navEndSubscription: Subscription;
   private loading$: Observable<{ [p: string]: boolean }>;
 
-  constructor(private store: Store<any>, private router: Router, private cdr: ChangeDetectorRef) {
+  constructor(private store: Store, private router: Router, private cdr: ChangeDetectorRef) {
     this.loading$ = store.select(selectLoading);
 
   }

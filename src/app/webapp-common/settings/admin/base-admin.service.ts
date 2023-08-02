@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {select, Store} from '@ngrx/store';
+import {Store} from '@ngrx/store';
 import {from, fromEvent, Observable, of, Subject} from 'rxjs';
 import {fromFetch} from 'rxjs/fetch';
 import {catchError, debounceTime, filter, map, skip} from 'rxjs/operators';
@@ -32,9 +32,9 @@ export class BaseAdminService {
 
   constructor(protected store: Store, protected confService: ConfigurationService) {
     this.store = store;
-    this.revokeSucceed = store.pipe(select(selectRevokeSucceed));
+    this.revokeSucceed = store.select(selectRevokeSucceed);
     this.revokeSucceed.subscribe(this.onRevokeSucceed);
-    this.s3BucketCredentials = store.pipe(select(selectS3BucketCredentials));
+    this.s3BucketCredentials = store.select(selectS3BucketCredentials);
     this.s3BucketCredentials.pipe(skip(1)).subscribe(() => {
       this.previouslySignedUrls = {};
     });
@@ -195,7 +195,11 @@ export class BaseAdminService {
   }
 
   signGoogleCloudUrl(url: string): string {
-    return 'https://storage.cloud.google.com' + (url.slice(4));
+    let result =  url.slice(5);
+    if (result.search(/[ !"#$&'()*+,;<=>?@\[\\\]^]/) > -1) {
+      result = result.split('/').map(part => encodeURIComponent(part)).join('/');
+    }
+    return 'https://storage.cloud.google.com/' + result;
   }
 
   signAzureUrl(url: string, azureBucket) {

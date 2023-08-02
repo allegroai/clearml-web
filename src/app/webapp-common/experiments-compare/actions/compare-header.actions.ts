@@ -27,7 +27,7 @@ export const refreshIfNeeded = createAction(REFRESH_IF_NEEDED, props<{ payload: 
 export const toggleShowScalarOptions = createAction(TOGGLE_SHOW_SACLARS_OPTIONS);
 export const setSearchExperimentsForCompareResults = createAction(SET_SELECT_EXPERIMENTS_FOR_COMPARE, props<{ payload: Array<Task> }>());
 export const setShowSearchExperimentsForCompare = createAction(SET_SHOW_SEARCH_EXPERIMENTS_FOR_COMPARE, props<{ payload: boolean }>());
-export const resetSelectCompareHeader = createAction(RESET_SELECT_EXPERIMENT_FOR_COMPARE);
+export const resetSelectCompareHeader = createAction(RESET_SELECT_EXPERIMENT_FOR_COMPARE, props<{fullReset?: boolean}>());
 export const getSelectedExperimentsForCompareAddDialog = createAction(GET_SELECTED_EXPERIMENTS_FOR_COMPARE, props<{tasksIds?: string[]}>());
 export const compareAddDialogTableSortChanged = createAction(
   EXPERIMENTS_COMPARE_SELECT_EXPERIMENT_ + ' [table sort changed]',
