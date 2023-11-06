@@ -15,16 +15,16 @@
       <i [class]="'al-icon '+ icons.DETAILS + ' sm-md'"></i>Details
     </button>
     <hr *ngIf="tableMode">
-    <button mat-menu-item (click)="publishPopup()" [disabled]="selectedDisableAvailable[menuItems.publish].disable">
+    <button mat-menu-item (click)="publishPopup()" [disabled]="selectedDisableAvailable[menuItems.publish].disable" data-id="publishOption">
       <i [class]="'al-icon ' + icons.PUBLISHED + ' sm-md'"></i>
         {{selectedDisableAvailable[menuItems.publish].available | menuItemText : 'Publish' : selectedDisableAvailableIsMultiple}}
     </button>
-    <button mat-menu-item (click)="deleteModelPopup()" [disabled]="selectedDisableAvailable[menuItems.delete].disable" *ngIf="isArchive">
+    <button mat-menu-item (click)="deleteModelPopup()" [disabled]="selectedDisableAvailable[menuItems.delete].disable" *ngIf="isArchive" data-id="removeOption">
       <i [class]="'al-icon ' + icons.REMOVE + ' sm-md'"></i>
       {{selectedDisableAvailable[menuItems.delete].available | menuItemText : 'Delete' : selectedDisableAvailableIsMultiple}}
     </button>
       <button mat-menu-item (click)="archiveClicked()"
-              [disabled]="selectedDisableAvailable[menuItems.archive].disable">
+              [disabled]="selectedDisableAvailable[menuItems.archive].disable" data-id="archiveOption">
         <i class="al-icon sm-md" [class]="isArchive ? icons.RESTORE : icons.ARCHIVE"></i>
         {{selectedDisableAvailable[menuItems.archive].available | menuItemText : isArchive ? 'Restore from Archive' : 'Archive' : selectedDisableAvailableIsMultiple}}
       </button>
@@ -35,6 +35,7 @@
             [disabled]="isExample"
             (menuOpened)="tagMenuOpened()"
             (menuClosed)="tagMenuClosed()"
+            data-id="addTagOption"
     >
       <i [class]="'al-icon ' + icons.TAG + ' sm-md'"></i>
       <span>{{numSelected | menuItemText : 'Add Tag'  : selectedDisableAvailableIsMultiple}}</span>
@@ -48,10 +49,10 @@
       (tagSelected)="tagSelected.emit($event)">
     </sm-tags-menu>
     <hr>
-    <button mat-menu-item (click)="downloadModelFileClicked()" [disabled]="isLocalFile">
+    <button mat-menu-item (click)="downloadModelFileClicked()" [disabled]="isLocalFile" data-id="downloadOption">
       <i [class]="'al-icon  ' + icons.DOWNLOAD + ' sm-md'"></i>Download
     </button>
-    <button mat-menu-item (click)="moveToProjectPopup()" [disabled]="isExample">
+    <button mat-menu-item (click)="moveToProjectPopup()" [disabled]="isExample" data-id="moveToProjectOption">
       <i [class]="'al-icon ' + icons.MOVE_TO + '  sm-md'"></i>{{selectedDisableAvailable[menuItems.moveTo].available | menuItemText : 'Move to Project' : selectedDisableAvailableIsMultiple}}
     </button>
     <ng-content select="[extended]"></ng-content>

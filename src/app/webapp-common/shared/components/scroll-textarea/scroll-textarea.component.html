@@ -26,4 +26,4 @@
   </cdk-virtual-scroll-viewport>
 </div>
 <span *ngIf="!showSpinner && !lines?.length && !editable" class="no-changes">{{emptyMessage}}</span>
-<mat-spinner class="mx-auto mt-3" [diameter]="50" *ngIf="showSpinner"></mat-spinner>
+<mat-spinner *ngIf="showSpinner" class="mx-auto mt-3" [diameter]="32" [strokeWidth]="4" color="accent"></mat-spinner>

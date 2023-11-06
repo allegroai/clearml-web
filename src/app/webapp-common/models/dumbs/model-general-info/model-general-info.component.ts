@@ -43,6 +43,17 @@ export class ModelGeneralInfoComponent {
         {label: 'ARCHIVED', value: model && model.system_tags && model.system_tags.includes(TAGS.HIDDEN) ? 'Yes' : 'No'},
         {label: 'PROJECT', value: get(model, 'project.name', NA)},
       ];
+    } else {
+      this.kpis = [
+        {label: 'CREATED AT', value: '-'},
+        {label: 'UPDATED AT', value: '-'},
+        {label: 'FRAMEWORK', value: '-'},
+        {label: 'STATUS', value: '-'},
+        {label: 'MODEL URL', value: '-'},
+        {label: 'USER', value: '-'},
+        {label: 'ARCHIVED', value: '-'},
+        {label: 'PROJECT',value: '-'},
+      ];
     }
   }
 

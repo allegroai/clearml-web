@@ -5,14 +5,14 @@ import {ReportComponent} from '@common/reports/report/report.component';
 import {CrumbTypeEnum} from '@common/layout/breadcrumbs/breadcrumbs.component';
 import {NestedReportsPageComponent} from '@common/reports/nested-reports-page/nested-reports-page.component';
 import {leavingBeforeSaveAlertGuard} from '@common/shared/guards/leaving-before-save-alert.guard';
-import {selectEditingReport} from '@common/reports/reports.reducer';
+import {selectDirtyReport} from '@common/reports/reports.reducer';
 
 export const routes: Routes = [
   {
-    path: '', component: ReportsPageComponent, data: {search: true, staticBreadcrumb:[[{
-          name: 'REPORTS',
-          type: CrumbTypeEnum.Feature
-        }]]}
+    path: '', component: ReportsPageComponent, data: {search: true, staticBreadcrumb: [[{
+        name: 'REPORTS',
+        type: CrumbTypeEnum.Feature
+      }]]}
   },
   // Adding project param to url, for automatic workspace switching.
   {
@@ -22,7 +22,7 @@ export const routes: Routes = [
       {path: 'projects', component: NestedReportsPageComponent, data: {search: true}},
       {
         path: ':reportId', component: ReportComponent,
-        canDeactivate: [leavingBeforeSaveAlertGuard(selectEditingReport)],
+        canDeactivate: [leavingBeforeSaveAlertGuard(selectDirtyReport)],
       }
     ]
   },

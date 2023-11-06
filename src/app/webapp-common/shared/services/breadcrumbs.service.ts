@@ -35,7 +35,11 @@ export class BreadcrumbsService implements OnDestroy {
         this.store.dispatch(setBreadcrumbs({
           breadcrumbs: [
             [breadcrumbOptions.featureBreadcrumb],
-            ...(projectAncestors?.length > 0 ? [projectAncestors?.filter(ancestor => (!breadcrumbOptions.projectsOptions.filterBaseNameWith || !breadcrumbOptions.projectsOptions.filterBaseNameWith.includes(ancestor.basename)))
+            ...([projectAncestors
+              ?.filter(ancestor =>
+                !breadcrumbOptions.projectsOptions.filterBaseNameWith ||
+                !breadcrumbOptions.projectsOptions.filterBaseNameWith.includes(ancestor.basename)
+              )
               .map(ancestor => ({
                 name: ancestor.basename,
                 example: isExample(ancestor),
@@ -43,9 +47,10 @@ export class BreadcrumbsService implements OnDestroy {
                 type: CrumbTypeEnum.Project,
                 hidden: ancestor.hidden,
                 collapsable: true
-              }))] : []),
+              }))
+            ] ?? []),
             ...(breadcrumbOptions.projectsOptions?.selectedProjectBreadcrumb ? [[breadcrumbOptions.projectsOptions.selectedProjectBreadcrumb]] : []),
-            ...(breadcrumbOptions.subFeatureBreadcrumb ? [[breadcrumbOptions.subFeatureBreadcrumb]] : []),
+            ...(breadcrumbOptions.subFeatureBreadcrumb && (!breadcrumbOptions.subFeatureBreadcrumb.onlyWithProject || projectAncestors?.length > 0) ? [[breadcrumbOptions.subFeatureBreadcrumb]] : []),
           ]
         }));
       })

@@ -1,6 +1,5 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   OnDestroy,
   OnInit,
@@ -35,10 +34,6 @@ export class TableFilterDurationNumericComponent extends TableDurationSortBaseCo
     lessThan: new FormControl<string>('', [Validators.pattern(this.numericPattern)])
   });
 
-  constructor(cdr: ChangeDetectorRef) {
-    super(cdr);
-  }
-
   ngOnInit(): void {
     this.iterationsForm.valueChanges
       .pipe(
@@ -48,9 +43,9 @@ export class TableFilterDurationNumericComponent extends TableDurationSortBaseCo
       )
       .subscribe( ({greaterThan, lessThan}) => {
         !!greaterThan != this.greaterThan.checked && this.setCheckBox(!this.greaterThan.checked, 'greaterThan', false);
-        this.timeStampChanged(!!greaterThan ? parseInt(greaterThan, 10) : greaterThan, 'greaterThan');
+        this.timeStampChanged(greaterThan ? parseInt(greaterThan, 10) : greaterThan, 'greaterThan');
         !!lessThan != this.lessThan.checked && this.setCheckBox(!this.lessThan.checked, 'lessThan', false);
-        this.timeStampChanged(!!lessThan ? parseInt(lessThan, 10) : lessThan, 'lessThan');
+        this.timeStampChanged(lessThan ? parseInt(lessThan, 10) : lessThan, 'lessThan');
       });
   }
 

@@ -98,6 +98,7 @@
         [handleUpload]="handleUpload"
         (saveInfo)="save($event)"
         (editModeChanged)="editModeChanged();"
+        (dirtyChanged)="dirtyChanged($event);"
         (deleteResource)="deleteResource($event)"
         (imageMenuOpened)="calculateUnusedResources($event)"
       >

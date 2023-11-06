@@ -9,6 +9,7 @@ import {SortMeta} from 'primeng/api';
 import {hasValue} from './helpers.util';
 import {MetricValueType} from '@common/experiments-compare/experiments-compare.constants';
 import {sortCol} from '@common/shared/utils/sortCol';
+import {TasksGetAllExRequestFilters} from '~/business-logic/model/tasks/tasksGetAllExRequestFilters';
 
 export interface TableFilter {
   col?: string;
@@ -24,30 +25,19 @@ export interface MetricColumn {
   variant: string;
 }
 
+export const excludedKey = '__$not';
+
 export const getValueTypeName = (valueType: string) => valueType.replace('_', '').replace('value', '').toUpperCase();
+export const getTagsFilters = (tagsFilterAnd: boolean, tagsFilter: (string | null)[]): TasksGetAllExRequestFilters => {
+  return {
+    [tagsFilterAnd ? 'all' : 'any']: {
+      include: tagsFilter.filter(tagI => tagI === null || !tagI.startsWith(excludedKey)),
+      exclude: tagsFilter.filter(tagI => tagI?.startsWith(excludedKey)).map(tagItem => tagItem.substring(excludedKey.length))
+    }
+  };
+};
 
 export const encodeOrder = (orders: SortMeta[]): string[] => orders.map(order => `${order.order === TABLE_SORT_ORDER.DESC ? '-' : ''}${order.field}`);
-
-export const encodeFilters = (filters: { [key: string]: FilterMetadata }) => {
-  if (filters) {
-    return Object.keys(filters)
-      .filter((key: string) => filters[key].value?.length)
-      .map((key: string) => {
-        const val = filters[key] as FilterMetadata;
-        return `${key}:${val.matchMode ? val.matchMode + ':' : ''}${val.value.join('+$+')}`;
-      }).join(',');
-  }
-};
-export const excludedKey = '__$not';
-export const uniqueFilterValueAndExcluded = (arr1 = [], arr2 = []) => Array.from(new Set(arr1.concat((arr2).map(key => key ? key.replace(/^__\$not/, '') : key))));
-export const addExcludeFilters = (arr1: string[]) =>
-  arr1.reduce((returnArray, currentFilter) => {
-    if (currentFilter?.startsWith(excludedKey)) {
-      return [...returnArray, excludedKey, currentFilter.substring(excludedKey.length)];
-    }
-    return [...returnArray, currentFilter];
-
-  }, []);
 
 export const decodeOrder = (orders: string[]): SortMeta[] => {
   if (typeof orders === 'string') {
@@ -62,6 +52,18 @@ export const decodeOrder = (orders: string[]): SortMeta[] => {
   });
 };
 
+export const encodeFilters = (filters: { [key: string]: FilterMetadata }) => {
+  if (filters) {
+    return Object.keys(filters)
+      .filter((key: string) => filters[key].value?.length)
+      .map((key: string) => {
+        const val = filters[key] as FilterMetadata;
+        return `${key}:${val.matchMode ? val.matchMode + ':' : ''}${encodeURIComponent(val.value.join('+$+'))}`;
+      }).join(',');
+  }
+  return null;
+};
+
 export const decodeFilter = (filters: string): TableFilter[] => filters.split(',').map((filter: string) => {
   let mode: string;
   const index = filter.indexOf(':AND');
@@ -74,8 +76,10 @@ export const decodeFilter = (filters: string): TableFilter[] => filters.split(',
   //   mode = parts[1];
   //   parts[1] = parts[2];
   // }
-  return {col, filterMatchMode: mode, value: values?.split('+$+').map(x => x === '' ? null : x)};
+  return {col, filterMatchMode: mode, value: decodeURIComponent(values)?.split('+$+').map(x => x === '' ? null : x)};
 });
+
+export const uniqueFilterValueAndExcluded = (arr1 = [], arr2 = []) => Array.from(new Set(arr1.concat((arr2).map(key => key ? key.replace(/^__\$not/, '') : key))));
 
 export const encodeColumns = (mainCols: ISmCol[] | any, hiddenCols = {}, metricsCols = [], colsOrder = []): string[] => {
   colsOrder = colsOrder.filter(col => !hiddenCols[col]);

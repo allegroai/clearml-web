@@ -102,7 +102,7 @@ export class TimeAgoPipe implements PipeTransform, OnDestroy {
       newDate.setHours(hours - offset);
       return newDate;
     }
-    return;
+    return null;
   }
 
 }

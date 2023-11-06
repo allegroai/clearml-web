@@ -36,6 +36,8 @@ export const INITIAL_CONTROLLER_TABLE_COLS: ISmCol[] = [
     sortable: true,
     isParam: true,
     searchableFilter: true,
+    asyncFilter: true,
+    paginatedFilterPageSize: rootProjectsPageSize,
     header: 'VERSION',
     style: {width: '200px'},
     showInCardFilters: true

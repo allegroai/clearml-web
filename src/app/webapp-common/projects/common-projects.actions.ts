@@ -19,7 +19,7 @@ export const setProjectsOrderBy = createAction(
 );
 export const setProjectsSearchQuery = createAction(
   PROJECTS_PREFIX + 'SET_SEARCH_QUERY',
-  props<{query: string; regExp?: boolean}>()
+  props<{query: string; regExp?: boolean, skipGetAll?: boolean}>()
 );
 export const resetProjectsSearchQuery = createAction(PROJECTS_PREFIX + 'RESET_SEARCH_QUERY');
 export const addToProjectsList = createAction(

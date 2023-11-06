@@ -13,7 +13,7 @@
       (inlineActiveStateChanged)="editExperimentName($event)"
     >
       <div class="experiment-name">
-        <span>{{experiment?.name}}</span>
+        <span [smTooltip]="experiment?.name" smShowTooltipIfEllipsis>{{experiment?.name}}</span>
       </div>
     </sm-inline-edit>
   </div>

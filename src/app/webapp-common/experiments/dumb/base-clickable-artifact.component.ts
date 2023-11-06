@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, inject} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {filter, map, take} from 'rxjs/operators';
 import {selectSignedUrl} from '../../core/reducers/common-auth-reducer';
@@ -11,8 +11,12 @@ import {getSignedUrl} from '../../core/actions/common-auth.actions';
 })
 export class BaseClickableArtifactComponent {
   protected timestamp: number;
+  protected adminService: AdminService;
+  protected store: Store;
 
-  constructor(protected adminService: AdminService, protected store: Store) {
+  constructor() {
+    this.adminService = inject(AdminService);
+    this.store = inject(Store);
   }
 
   artifactFilePathClicked(url: string) {

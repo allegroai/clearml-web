@@ -21,6 +21,7 @@ import {getSignedUrl} from '@common/core/actions/common-auth.actions';
 import {selectSignedUrl} from '@common/core/reducers/common-auth-reducer';
 import {AxisType} from 'plotly.js';
 import {SmoothTypeEnum, smoothTypeEnum} from '@common/shared/single-graph/single-graph.utils';
+import {SingleGraphComponent} from "@common/shared/single-graph/single-graph.component";
 
 export interface GraphViewerData {
   chart: ExtFrame;
@@ -31,6 +32,7 @@ export interface GraphViewerData {
   smoothType?: SmoothTypeEnum;
   darkTheme: boolean;
   isCompare: boolean;
+  moveLegendToTitle: boolean;
   embedFunction: (data: {xaxis: ScalarKeyEnum; domRect: DOMRect}) => null;
   legendConfiguration: Partial<ExtLegend & { noTextWrap: boolean }>;
 }
@@ -41,7 +43,7 @@ export interface GraphViewerData {
   styleUrls: ['./graph-viewer.component.scss']
 })
 export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
-  @ViewChild('singleGraph') singleGraph;
+  @ViewChild('singleGraph') singleGraph: SingleGraphComponent;
   @ViewChild('modalContainer') modalContainer;
   public height;
   public width;
@@ -178,6 +180,10 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
         parsingError && this.store.dispatch(addMessage('warn', `Couldn't read all plots. Please make sure all plots are properly formatted (NaN & Inf aren't supported).`, [], true));
         Object.values(graphs).forEach((graphss: ExtFrame[]) => {
           graphss.forEach((graph: ExtFrame) => {
+            graph.data?.forEach((d, i) => d.visible = this.data.chart.data[i]?.visible)
+            // if (this.data.chart?.layout?.showlegend === false) {
+              graph.layout.showlegend = this.data.chart?.layout?.showlegend ?? false;
+            // }
             if ((graph?.layout?.images?.length ?? 0) > 0) {
               graph.layout.images.forEach((image: Plotly.Image) => {
                   this.store.dispatch(getSignedUrl({
@@ -240,6 +246,7 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
           this.singleGraph.shouldRefresh = true;
         }
         this.chart = cloneDeep(chart);
+        console.log(this.chart?.data[0].line?.color);
         this.cdr.detectChanges();
       }));
     this.sub.add(this.iterationChanged$
@@ -281,7 +288,7 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   changeWeight(value: number) {
-    if (value === 0) {
+    if (value === 0 || value === null) {
       return;
     }
     if (value > (this.smoothType === smoothTypeEnum.exponential ? 0.999 : 100) || value < (this.smoothType === smoothTypeEnum.exponential ? 0 : 1)) {

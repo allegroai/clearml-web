@@ -48,10 +48,15 @@
         (rename)="editName.inlineActivated()"
         (addTag)="addTag.emit($event)"
         (delete)="delete.emit()"
+        data-id="pipelineCardMenu"
       ></sm-pipeline-card-menu>
     </div>
-    <div *ngIf="project.stats?.active?.last_task_run; else: noRun" class="last-run">Last
-      run {{project.stats?.active?.last_task_run | timeAgo}}</div>
+    <span
+      *ngIf="project.stats?.active?.last_task_run; else: noRun"
+      class="last-run"
+      [smTooltip]="project.stats?.active?.last_task_run | date: timeFormatString"
+      matTooltipPosition="after"
+    >Last run {{project.stats?.active?.last_task_run | timeAgo}}</span>
     <ng-template #noRun>
       <div class="last-run">No pipeline runs yet</div>
     </ng-template>

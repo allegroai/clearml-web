@@ -12,7 +12,7 @@ import {CommonLayoutModule} from '@common/layout/layout.module';
 import {HTTP_INTERCEPTORS} from '@angular/common/http';
 import {WebappInterceptor} from '@common/core/interceptors/webapp-interceptor';
 import {CustomReuseStrategy} from '@common/core/router-reuse-strategy';
-import {loadUserAndPreferences, UserPreferences} from '@common/user-preferences';
+import {UserPreferences} from '@common/user-preferences';
 import {AngularSplitModule} from 'angular-split';
 import {NotifierModule} from '@common/angular-notifier';
 import {LayoutModule} from './layout/layout.module';
@@ -23,6 +23,8 @@ import {ProjectsSharedModule} from './features/projects/shared/projects-shared.m
 import {MAT_FORM_FIELD_DEFAULT_OPTIONS} from '@angular/material/form-field';
 import {LoginService} from '~/shared/services/login.service';
 import {ExperimentSharedModule} from '~/features/experiments/shared/experiment-shared.module';
+import {loadUserAndPreferences} from '~/core/app-init';
+import {MAT_TOOLTIP_DEFAULT_OPTIONS, MatTooltipDefaultOptions} from '@angular/material/tooltip';
 
 @NgModule({
   declarations   : [AppComponent],
@@ -69,11 +71,9 @@ import {ExperimentSharedModule} from '~/features/experiments/shared/experiment-s
     {provide: HTTP_INTERCEPTORS, useClass: WebappInterceptor, multi: true},
     {provide: RouteReuseStrategy, useClass: CustomReuseStrategy},
     {
-      provide: 'googleTagManagerId',
-      deps: [ConfigurationService],
-      useFactory: (confService: ConfigurationService) =>
-        confService.getStaticEnvironment().GTM_ID
-    },
+      provide: MAT_TOOLTIP_DEFAULT_OPTIONS,
+      useValue: {position: 'above'} as MatTooltipDefaultOptions
+    }
   ],
   bootstrap      : [AppComponent],
   exports        : []

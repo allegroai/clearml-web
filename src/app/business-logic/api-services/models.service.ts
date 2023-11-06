@@ -66,6 +66,8 @@ import { ModelsUpdateResponse } from '../model/models/modelsUpdateResponse';
 
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
 import { Configuration }                                     from '../configuration';
+import {ModelsUpdateTagsRequest} from '~/business-logic/model/models/modelsUpdateTagsRequest';
+import {ModelsUpdateTagsResponse} from '~/business-logic/model/models/modelsUpdateTagsResponse';
 
 
 @Injectable()
@@ -101,7 +103,7 @@ export class ApiModelsService {
 
 
     /**
-     * 
+     *
      * Add or update model metadata
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -146,7 +148,7 @@ export class ApiModelsService {
     }
 
     /**
-     * 
+     *
      * Archive models
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -191,7 +193,7 @@ export class ApiModelsService {
     }
 
     /**
-     * 
+     *
      * Create a new model not associated with a task
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -236,7 +238,7 @@ export class ApiModelsService {
     }
 
     /**
-     * 
+     *
      * Delete a model.
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -281,7 +283,7 @@ export class ApiModelsService {
     }
 
     /**
-     * 
+     *
      * Delete models
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -326,7 +328,7 @@ export class ApiModelsService {
     }
 
     /**
-     * 
+     *
      * Delete metadata from model
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -371,7 +373,7 @@ export class ApiModelsService {
     }
 
     /**
-     * 
+     *
      * Edit an existing model
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -416,7 +418,7 @@ export class ApiModelsService {
     }
 
     /**
-     * 
+     *
      * Get all models
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -461,7 +463,7 @@ export class ApiModelsService {
     }
 
     /**
-     * 
+     *
      * Get all models
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -506,7 +508,7 @@ export class ApiModelsService {
     }
 
     /**
-     * 
+     *
      * Gets model information
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -551,7 +553,7 @@ export class ApiModelsService {
     }
 
     /**
-     * 
+     *
      * Get all models
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -596,7 +598,7 @@ export class ApiModelsService {
     }
 
     /**
-     * 
+     *
      * Gets model information
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -641,7 +643,7 @@ export class ApiModelsService {
     }
 
     /**
-     * 
+     *
      * Get the list of frameworks used in the company models
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -686,7 +688,7 @@ export class ApiModelsService {
     }
 
     /**
-     * 
+     *
      * Convert public models to private
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -731,7 +733,7 @@ export class ApiModelsService {
     }
 
     /**
-     * 
+     *
      * Convert company models to public
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -776,7 +778,7 @@ export class ApiModelsService {
     }
 
     /**
-     * 
+     *
      * Move models to a project
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -821,7 +823,7 @@ export class ApiModelsService {
     }
 
     /**
-     * 
+     *
      * Publish models
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -866,7 +868,7 @@ export class ApiModelsService {
     }
 
     /**
-     * 
+     *
      * Set the model ready flag to True. If the model is an output model of a task   then try to publish the task.
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -911,7 +913,7 @@ export class ApiModelsService {
     }
 
     /**
-     * 
+     *
      * Unarchive models
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -956,7 +958,7 @@ export class ApiModelsService {
     }
 
     /**
-     * 
+     *
      * Update a model
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -1001,7 +1003,7 @@ export class ApiModelsService {
     }
 
     /**
-     * 
+     *
      * Create or update a new model for a task
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -1045,4 +1047,48 @@ export class ApiModelsService {
         );
     }
 
+  /**
+   *
+   * Add/Remove multiple tags from multiple models
+   * @param request request body
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   */
+  public modelsUpdateTags(request: ModelsUpdateTagsRequest, options?: any, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    if (request === null || request === undefined) {
+      throw new Error('Required parameter request was null or undefined when calling modelsUpdateTags.');
+    }
+
+    let headers = this.defaultHeaders;
+    if (options && options.async_enable) {
+      headers = headers.set(this.configuration.asyncHeader, '1');
+    }
+
+    // to determine the Accept header
+    const httpHeaderAccepts: string[] = [
+      'application/json'
+    ];
+    const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+    if (httpHeaderAcceptSelected != undefined) {
+      headers = headers.set("Accept", httpHeaderAcceptSelected);
+    }
+
+    // to determine the Content-Type header
+    const consumes: string[] = [
+    ];
+    const httpContentTypeSelected:string | undefined = this.configuration.selectHeaderContentType(consumes);
+    if (httpContentTypeSelected != undefined) {
+      headers = headers.set("Content-Type", httpContentTypeSelected);
+    }
+
+    return this.apiRequest.post<ModelsUpdateTagsResponse>(`${this.basePath}/models.update_tags`,
+      request,
+      {
+        withCredentials: this.configuration.withCredentials,
+        headers: headers,
+        observe: observe,
+        reportProgress: reportProgress
+      }
+    );
+  }
 }

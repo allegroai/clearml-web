@@ -9,7 +9,7 @@ import {getAllProjectsPageProjects, resetProjects, setProjectsOrderBy} from '@co
 import {setDefaultNestedModeForFeature} from '@common/core/actions/projects.actions';
 import {selectMainPageTagsFilter, selectMainPageTagsFilterMatchMode} from "@common/core/reducers/projects.reducer";
 import {combineLatest, Subscription} from "rxjs";
-import {debounceTime} from "rxjs/operators";
+import {debounceTime, skip} from "rxjs/operators";
 
 @Component({
   selector: 'sm-nested-reports-page',
@@ -29,7 +29,7 @@ export class NestedReportsPageComponent extends ReportsPageComponent {
   hideMenu = false;
   entityType = ProjectTypeEnum.reports;
   private mainPageFilterSub: Subscription;
-  projectCardClicked(data: { hasSubProjects: boolean; id: string; name: string }) {
+  override projectCardClicked(data: { hasSubProjects: boolean; id: string; name: string }) {
     if (data.hasSubProjects) {
       this.router.navigate([data.id, 'projects'], {relativeTo: this.route.parent?.parent});
     } else {
@@ -37,43 +37,43 @@ export class NestedReportsPageComponent extends ReportsPageComponent {
     }
   }
 
-  protected getReports() {
+  protected override getReports() {
     // Override getReports from reports page - we need projects (from common-projects), not reports.
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getExtraProjects(selectedProjectId, selectedProject) {
+  protected override getExtraProjects(selectedProjectId, selectedProject) {
     return [];
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  orderByChanged(sortByFieldName: string) {
+  override orderByChanged(sortByFieldName: string) {
     this.store.dispatch(setProjectsOrderBy({orderBy: sortByFieldName}));
   }
 
-  loadMore() {
+  override loadMore() {
     this.store.dispatch(getAllProjectsPageProjects());
   }
 
-  toggleNestedView(nested: boolean) {
+  override toggleNestedView(nested: boolean) {
     this.store.dispatch(setDefaultNestedModeForFeature({feature: this.entityType, isNested: nested}));
     if (!nested) {
       this.router.navigateByUrl(this.entityType);
     }
   }
-  ngOnInit() {
+  override ngOnInit() {
     super.ngOnInit();
     this.mainPageFilterSub = combineLatest([
       this.store.select(selectMainPageTagsFilter),
       this.store.select(selectMainPageTagsFilterMatchMode)
-    ]).pipe(debounceTime(0))
+    ]).pipe(debounceTime(0), skip(1))
       .subscribe(() => {
         this.store.dispatch(resetProjects());
         this.store.dispatch(getAllProjectsPageProjects());
       });
   }
 
-  ngOnDestroy() {
+  override ngOnDestroy() {
     super.ngOnDestroy();
     this.mainPageFilterSub.unsubscribe();
   }

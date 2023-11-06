@@ -29,6 +29,7 @@ export class EditableSectionComponent implements OnDestroy {
   @Input() hideEditButton = false;
   @Input() isDarkTheme = false;
   @Input() forceButtons = false;
+  @Input() scrollToSection = true;
 
   private _saving = false;
   private scrollSub: Subscription;
@@ -66,7 +67,7 @@ export class EditableSectionComponent implements OnDestroy {
     this.inEditMode = editMode;
     this.activateEditClicked.emit(editMode);
     this.store.dispatch(setBackdrop({active: editMode}));
-    if(editMode) {
+    if (editMode) {
       setTimeout(() => {
         this.listenScrollEvent();
       }, 50);
@@ -107,6 +108,10 @@ export class EditableSectionComponent implements OnDestroy {
   }
 
   private listenScrollEvent() {
+    if (!this.scrollToSection) {
+      return;
+    }
+
     const {height: initHeight} = this.getEdges();
     let initBottom;
     const factor = initHeight / 2;

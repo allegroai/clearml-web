@@ -120,3 +120,8 @@ export const setEditMode = createAction(
   REPORTS_PREFIX + 'Set Edit Mode',
   props<{editing: boolean}>()
 );
+
+export const setDirty = createAction(
+  REPORTS_PREFIX + 'Set Dirty',
+  props<{dirty: boolean}>()
+);

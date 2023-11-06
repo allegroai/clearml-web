@@ -1,8 +1,10 @@
-@import '../../styles/variables';
+@import 'variables';
+@import "mixins/link";
 
 :host {
   width: 570px;
 
+  @include link();
 
   .sub-title {
     max-width: 500px;

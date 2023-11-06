@@ -160,7 +160,7 @@ export class CloneDialogComponent implements OnInit, OnDestroy {
 
   loadMore() {
     this.loading = true;
-    this.store.dispatch(getTablesFilterProjectsOptions({searchString: this.formData.project || '', loadMore: true}));
+    this.store.dispatch(getTablesFilterProjectsOptions({searchString: this.formData.project || '', loadMore: true,  allowPublic: false}));
   }
 
   isFocused(locationRef: HTMLInputElement) {

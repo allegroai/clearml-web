@@ -9,7 +9,9 @@
         >
           <input
             #parameterKey="ngModel"
+            #row="matInput"
             [(ngModel)]="parameter['name']"
+            (keydown.enter)="nextRow($event, index)"
             placeholder="Parameter"
             name="parameterKey-{{parameter.id}}"
             matInput
@@ -33,15 +35,16 @@
           <input
             #parameterValue="ngModel"
             [(ngModel)]="parameter['value']"
+            (keydown.enter)="nextRow($event, index)"
             name="parameterValue-{{parameter.id}}"
             placeholder="Value"
             [class.highlight-text]="(searchedText?.length > 0) && parameter['value'].includes(searchedText)"
             [class.current-match]="searchIndexList[matchIndex]?.index===index && searchIndexList[matchIndex]?.col==='value'"
             matInput/>
         </mat-form-field>
-        <div class="remove-step">
-          <i (click)="removeRow(index)" class="al-icon al-ico-trash al-color blue-400 sm-md pointer flashing-icon mb-2"></i>
-        </div>
+        <button class="remove-button btn" (click)="removeRow(index)">
+          <i class="al-icon al-ico-trash al-color blue-400 sm-md pointer flashing-icon"></i>
+        </button>
       </div>
     </ng-container>
   </cdk-virtual-scroll-viewport>
@@ -66,12 +69,25 @@
                  let-i="rowIndex"
                  let-row="rowData">
       <ng-container *ngIf="col.id === 'description'; else defaultRow">
-        <span *ngIf="row.type!=='legacy' && (row.description || row.type)" class="allow-multi-space pointer" customClass="hyper-parameters-tooltip parameter-tooltip"
-              smTooltip="{{(row.type ? ('Type: '+ row.type+'\n') : '') + (row?.description|| '')}}"><i class="al-icon al-ico-description"></i></span>
+        <span *ngIf="row.type!=='legacy' && (row.description || row.type)"
+              class="allow-multi-space pointer"
+              customClass="hyper-parameters-tooltip parameter-tooltip"
+              smTooltip="{{(row.type ? ('Type: '+ row.type+'\n') : '') + (row?.description|| '')}}"
+              matTooltipPosition="before"
+        ><i class="al-icon al-ico-description"></i></span>
       </ng-container>
       <ng-template #defaultRow>
-        <span class="ellipsis" [class.name]="col.id==='name'" smShowTooltipIfEllipsis [smTooltip]="row[col.id]">
-          <span *ngFor="let part of (searchedText ? row[col.id].split(searchedText) : [row[col.id]]); let last=last">{{part}}<span class="highlight-text" [class.current-match]="searchIndexList[matchIndex]?.index===i && searchIndexList[matchIndex]?.col===col.id" *ngIf="!last">{{searchedText}}</span></span></span>
+        <span class="ellipsis"
+              [class.name]="col.id==='name'"
+              smShowTooltipIfEllipsis
+              matTooltipPosition="before"
+              matTooltipShowDelay="250"
+              [smTooltip]="row[col.id]"
+        >
+          <span *ngFor="let part of (searchedText ? row[col.id].split(searchedText) : [row[col.id]]); let last=last"
+          >{{part}}<span class="highlight-text"
+                         [class.current-match]="searchIndexList[matchIndex]?.index===i && searchIndexList[matchIndex]?.col===col.id" *ngIf="!last"
+          >{{searchedText}}</span></span></span>
       </ng-template>
     </ng-template>
   </sm-table>

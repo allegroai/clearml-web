@@ -38,6 +38,7 @@
   </mat-menu>
   <hr/>
   <button mat-menu-item
+          [disabled]="!((showOnlyUserWork$ | async) ||  ((tagsFilters$ | async)?.length > 0))"
           smClickStopPropagation
           class="user-filter-button"
           (click)="clearAll()">

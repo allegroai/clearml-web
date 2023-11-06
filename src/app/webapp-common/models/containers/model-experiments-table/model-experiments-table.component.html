@@ -32,6 +32,7 @@
         [noMoreExperiments]="noMoreExperiments$ | async"
         [systemTags]="systemTags$ | async"
         [entityType]="entityTypes.experiment"
+        [split]="selectSplitSize$ | async"
         (experimentsSelectionChanged)="experimentsSelectionChanged($event)"
         (loadMoreExperiments)="getNextExperiments()"
         (filterChanged)="filterChanged($event)"

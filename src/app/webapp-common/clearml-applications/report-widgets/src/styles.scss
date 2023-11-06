@@ -128,6 +128,7 @@ $sm-dark-theme: mat.define-dark-theme((
 @include mat.dialog-theme($theme);
 @include mat.slider-theme($sm-neon-theme);
 @include mat.form-field-theme($theme);
+@include mat.tooltip-theme($theme);
 
 @include mat.select-theme($sm-dark-theme);
 
@@ -142,6 +143,7 @@ $sm-dark-theme: mat.define-dark-theme((
 html, body {
   height: 100%;
   overflow: hidden;
+  --mat-select-trigger-text-size: 14px;
 }
 
 body {
@@ -165,6 +167,13 @@ body {
   &.gap {
     gap: 12px !important;
   }
+}
+
+.ellipsis {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .mat-mdc-dialog-container {
@@ -289,6 +298,7 @@ sm-debug-image-snippet {
   .image-var {
     top: 8px;
     bottom: unset;
+    line-height: 20px;
   }
 }
 
@@ -320,6 +330,9 @@ sm-debug-image-snippet {
 .mat-mdc-select-panel {
   padding: 0;
   font-size: 14px;
+  --mdc-typography-body1-font-size: 14px;
+  --mdc-typography-body1-line-height: 16px;
+  --mat-select-trigger-text-size: 14px;
 
   &.light-theme {
     --mdc-theme-surface: white;
@@ -329,6 +342,8 @@ sm-debug-image-snippet {
   &.dark, &.black, &.dark-theme {
     --mdc-theme-surface: #000;
     border: 1px solid $blue-500;
+    --mat-select-panel-background-color: #000;
+    --mat-option-label-text-color: #{$blue-200};
 
     .mat-mdc-option {
       --mdc-theme-text-primary-on-background: #{$blue-200};
@@ -337,7 +352,7 @@ sm-debug-image-snippet {
 
   .mat-mdc-option {
     --mdc-typography-body1-line-height: 36px;
-    --mdc-typography-body1-font-size: 14px;
+    --mat-menu-item-label-text-size: 14px;
     min-height: 36px;
   }
 
@@ -372,8 +387,8 @@ sm-debug-image-snippet {
 
 .dark-theme, .light-theme {
   .mat-mdc-form-field {
-    --mdc-typography-body1-font-size: 14px;
-    --mdc-typography-body1-line-height: 16px;
+    --mat-menu-item-label-text-line-height: 16;
+    --mat-menu-item-label-text-size: 14px;
 
     &.mat-form-field-appearance-outline {
       &.black {
@@ -510,4 +525,27 @@ input[type=number] {
 
 ::-webkit-scrollbar-corner {
   background-color: transparent
+}
+
+.mat-mdc-tooltip {
+  &.sm-tooltip {
+    --mdc-plain-tooltip-container-color: #{$purple};
+
+    .mdc-tooltip__surface {
+      max-width: 400px;
+      font-size: 11px;
+      line-height: 1.55;
+      letter-spacing: 0.3px;
+    }
+
+    &.break-line {
+      .mdc-tooltip__surface {
+        white-space: pre-line;
+      }
+    }
+  }
+
+  &.parameter-tooltip {
+    margin: 6px auto 6px -74px;
+  }
 }

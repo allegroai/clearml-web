@@ -11,6 +11,6 @@
                 (itemClicked)="selectedTableColsChanged.emit(col)">
   </sm-menu-item>
 </div>
-<div class="loader" [ngClass]="{'d-none': !isLoading}">
-  <mat-spinner diameter="50"></mat-spinner>
+<div class="p-4 pe-none" [ngClass]="{'d-none': !isLoading}">
+  <mat-spinner class="m-auto" [diameter]="32" [strokeWidth]="4" color="accent"></mat-spinner>
 </div>

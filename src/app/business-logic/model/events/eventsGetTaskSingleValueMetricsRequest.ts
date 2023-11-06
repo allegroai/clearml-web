@@ -17,4 +17,5 @@ export interface EventsGetTaskSingleValueMetricsRequest {
      * List of task Task IDs
      */
     tasks: Array<string>;
+    model_events: boolean;
 }

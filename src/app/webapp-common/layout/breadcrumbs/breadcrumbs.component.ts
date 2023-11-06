@@ -5,13 +5,13 @@ import {
   ElementRef,
   Input,
   OnDestroy,
-  OnInit,
-  ViewChild
+  OnInit, QueryList,
+  ViewChild, ViewChildren
 } from '@angular/core';
 import {Store} from '@ngrx/store';
 import {selectRouterConfig, selectRouterQueryParams} from '../../core/reducers/router-reducer';
 import {debounceTime} from 'rxjs/operators';
-import {ActivatedRoute, Router, RouterLink} from '@angular/router';
+import {ActivatedRoute, RouterLink} from '@angular/router';
 import {combineLatest, fromEvent, Observable, Subscription} from 'rxjs';
 import {addMessage} from '../../core/actions/layout.actions';
 import {ConfigurationService} from '../../shared/services/configuration.service';
@@ -32,6 +32,8 @@ import {
 import {ClipboardModule} from 'ngx-clipboard';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 import {BreadcrumbsService} from '@common/shared/services/breadcrumbs.service';
+import {TagListComponent} from '@common/shared/ui-components/tags/tag-list/tag-list.component';
+import {cloneItemIntoDummy} from '@common/shared/utils/shared-utils';
 
 export enum CrumbTypeEnum {
   Workspace = 'Workspace',
@@ -49,6 +51,8 @@ export interface IBreadcrumbsLink {
   hidden?: boolean;
   collapsable?: boolean;
   example?: boolean;
+  tags?: string[];
+  onlyWithProject?: boolean;
 }
 
 export interface IBreadcrumbsOptions {
@@ -78,7 +82,8 @@ export interface IBreadcrumbsOptions {
     ClipboardModule,
     RouterLink,
     NgIf,
-    ClickStopPropagationDirective
+    ClickStopPropagationDirective,
+    TagListComponent
   ],
   standalone: true
 })
@@ -96,8 +101,8 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
   private isSearching$ = this.store.select(selectIsSearching);
 
   @Input() activeWorkspace: GetCurrentUserResponseUserObjectCompany;
-  @ViewChild('container') private breadCrumbsContainer: ElementRef;
-  private expandedSize: number;
+  @ViewChild('container') private breadCrumbsContainer: ElementRef<HTMLDivElement>;
+  @ViewChildren('crumb') private crumbElements: QueryList<ElementRef<HTMLDivElement>>;
   public breadcrumbs$: Observable<IBreadcrumbsLink[][]>;
   public showHidden: boolean;
   public projectFeature: boolean;
@@ -105,10 +110,8 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
   constructor(
     private store: Store,
     public route: ActivatedRoute,
-    private router: Router,
     private configService: ConfigurationService,
     private cd: ChangeDetectorRef,
-    private ref: ElementRef,
     private breadcrumbsService: BreadcrumbsService // don't delete
   ) {
     this.breadcrumbs$ = this.store.select(selectBreadcrumbs);
@@ -124,7 +127,11 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
     );
 
     this.sub.add(this.breadcrumbs$.subscribe(breadcrumbs => {
-      this.breadcrumbs = breadcrumbs.map(breadcrumbsGroup => breadcrumbsGroup.filter(breadcrumb => (!breadcrumb.hidden) || (this.showHidden && this.projectFeature))).filter(breadcrumbsGroup => breadcrumbsGroup.length > 0);
+      this.breadcrumbs = breadcrumbs
+        .map(breadcrumbsGroup => breadcrumbsGroup?.filter( breadcrumb =>
+          (!breadcrumb.hidden) || (this.showHidden && this.projectFeature)
+        ))
+        .filter(breadcrumbsGroup => breadcrumbsGroup?.length > 0);
       this.cd.detectChanges();
     }));
 
@@ -143,6 +150,7 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
 
     this.sub.add(this.configService.globalEnvironmentObservable.subscribe(env => this.isCommunity = env.communityServer));
 
+    // todo: check if needed
     this.sub.add(this.store.select(selectIsDeepMode).subscribe(isDeep => {
         this.isDeep = isDeep;
         this.cd.detectChanges();
@@ -186,12 +194,15 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
   private calcOverflowing() {
     this.shouldCollapse = false;
     this.cd.detectChanges();
-    setTimeout(() => {
-      this.expandedSize = this.breadCrumbsContainer?.nativeElement.scrollWidth;
-      this.shouldCollapse = this.ref?.nativeElement.clientWidth < this.expandedSize;
-      this.cd.detectChanges();
-    }, 150);
-
+    const lastCrumb = this.crumbElements.last.nativeElement;
+    const dummyContainer = document.createElement('span');
+    dummyContainer.style.position = 'fixed';
+    this.breadCrumbsContainer.nativeElement.appendChild(dummyContainer);
+    cloneItemIntoDummy(lastCrumb, dummyContainer);
+    const width = dummyContainer.offsetWidth;
+    this.breadCrumbsContainer.nativeElement.removeChild(dummyContainer);
+    this.shouldCollapse = lastCrumb.clientWidth < width;
+    this.cd.detectChanges();
   }
 
   ngOnDestroy() {
@@ -209,10 +220,5 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
 
   subProjectsMenuOpened(b: boolean) {
     this.subProjectsMenuIsOpen = b;
-  }
-
-  private resetShouldCollapse() {
-    this.shouldCollapse = false;
-    return true;
   }
 }

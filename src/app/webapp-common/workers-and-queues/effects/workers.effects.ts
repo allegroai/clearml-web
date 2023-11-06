@@ -17,6 +17,7 @@ import {showStatsErrorNotice, hideNoStatsNotice} from '../actions/stats.actions'
 import {addMultipleSortColumns} from '../../shared/utils/shared-utils';
 import {transformAndSortWorkers} from '@common/workers-and-queues/workers-and-queues.utils';
 import {MESSAGES_SEVERITY} from '@common/constants';
+import {WorkerExt} from '../actions/workers.actions';
 
 const prepareStatsQuery = (entitie: string, keys: { key: string }[], range: number, granularity: number): WorkersGetStatsRequest => {
   const now = Math.floor((new Date()).getTime() / 1000);

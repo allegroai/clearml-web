@@ -18,7 +18,7 @@
       >
         <span class="d-flex align-items-center">
           <span class="report-name" [smTooltip]="report.name | cleanProjectPath" smShowTooltipIfEllipsis>{{report.name}}</span>
-          <i *ngIf="report.name" [smTooltip]="report.name" class="al-icon al-ico-report-path sm ms-2"></i>
+          <i *ngIf="report.name" [smTooltip]="report.name" class="al-icon al-ico-project-path sm ms-2"></i>
         </span>
       </sm-inline-edit>
       <sm-report-card-menu
@@ -36,12 +36,17 @@
       ></sm-report-card-menu>
     </div>
     <div class="d-flex align-items-center justify-content-start sub-title">
-      <div class="ellipsis">{{report?.project?.name | cleanProjectPath}}</div>
+      <div class="ellipsis" [smTooltip]="report?.project?.name | cleanProjectPath" smShowTooltipIfEllipsis>{{report?.project?.name | cleanProjectPath}}</div>
       <span class="dot">●</span>
       <div class="flex-shrink-0">{{report?.user?.name}}</div>
     </div>
     <div class="d-flex">
-      <div *ngIf="report?.last_update; else: noRun" class="last-run">Updated {{report.last_update | timeAgo}}</div>
+      <div
+        *ngIf="report?.last_update; else: noRun"
+        class="last-run"
+        [smTooltip]="report.last_update | date: timeFormatString"
+        matTooltipPosition="after"
+      >Updated {{report.last_update | timeAgo}}</div>
       <ng-template #noRun>
         <div class="last-run"></div>
       </ng-template>
@@ -51,13 +56,14 @@
   <div class="comment">{{report?.comment}}</div>
   <div footer class="footer-tags">
     <sm-tag-list
+      *ngIf="removeTag.observed; else: ReadOnlyTags"
       class="w-100"
       [tags]="report.tags"
       (remove)="removeTag.emit($event)"
       smClickStopPropagation
     ></sm-tag-list>
-<!--    <ng-template #ReadOnlyTags>-->
-<!--      <sm-tag-list [tags]="report.tags"></sm-tag-list>-->
-<!--    </ng-template>-->
+    <ng-template #ReadOnlyTags>
+      <sm-tag-list class="w-100" [tags]="report.tags"></sm-tag-list>
+    </ng-template>
   </div>
 </sm-card>

@@ -4,6 +4,7 @@
     [initialColumns]="initialColumns"
     [selectionMode]="selectionMode"
     [tableData]="experiments"
+    [scrollable]="true"
     [columnsOrder]="colsOrder"
     [reorderableColumns]="reorderableColumns"
     [resizableColumns]="true"
@@ -19,6 +20,7 @@
     [keyboardControl]="true"
     [sortFields]="tableSortFields"
     [hasExperimentUpdate]="hasExperimentUpdate"
+    [cardHeight]="90"
     (rowSelectionChanged)="experimentSelectionChanged.emit({experiment: $any($event).data})"
     (rowClicked)="tableRowClicked($event)"
     (rowDoubleClicked)="experimentSelectionChanged.emit({experiment: $event.data, openInfo: true})"
@@ -112,6 +114,9 @@
             <i *ngIf="experiment?.system_tags?.includes('shared')" class="al-icon al-ico-link sm ms-2"></i>
           </div>
         </ng-container>
+        <ng-container *ngSwitchCase="experimentsTableColFields.VERSION">
+          {{experiment?.runtime?.version || experiment?.hyperparams?.properties?.version?.value}}
+        </ng-container>
         <ng-container *ngSwitchCase="experimentsTableColFields.TAGS">
           <sm-tag-list [tags]="experiment.tags" [sysTags]="getSystemTags(experiment)"></sm-tag-list>
         </ng-container>
@@ -187,7 +192,6 @@
 
     <ng-template let-experiment="rowData" let-selected="selected" let-rowNumber="rowNumber" pTemplate="card">
       <sm-table-card
-        class="flex-grow-1"
         [selected]="selected"
         [cardName]="experiment.name"
         [columns]="tableCols"
@@ -196,6 +200,7 @@
         [activeContextRow]="contextExperiment"
         [contextMenuOpen]="contextMenuActive"
         [entityType]="entityType"
+        [class.no-tags]="getSystemTags(experiment).length === 0 && experiment?.tags.length === 0"
         (click)="selected && onContextMenu({e: $event, rowData: experiment, backdrop: true})"
       >
         <div sm-name-icon *ngIf="experiment?.system_tags?.includes('shared')"><i
@@ -222,7 +227,8 @@
         ></sm-experiment-status-icon-label>
         <sm-checkbox-control fieldName="selected" [formData]="isRowSelected(experiment)" class="checkbox-align-top"
                              (formDataChanged)="rowSelectedChanged($event, experiment)"
-                             [inputClassName]="'table-check-box table-body' + (selected ? ' row-selected' : '')"></sm-checkbox-control>
+                             inputClassName="table-check-box table-body"
+        ></sm-checkbox-control>
       </sm-table-card>
     </ng-template>
   </sm-table>

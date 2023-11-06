@@ -1,13 +1,8 @@
-import {Component, Input, OnChanges, SimpleChanges} from '@angular/core';
-import {Artifact} from '../../../../business-logic/model/tasks/artifact';
+import {Component, Input, OnChanges} from '@angular/core';
+import {ActiveSectionEnum} from '@common/experiments/experiment.consts';
+import {Artifact} from '~/business-logic/model/tasks/artifact';
 import {IModelInfo} from '../../shared/common-experiment-model.model';
 
- enum ActiveSectionEnum {
-   'input-model' = 'input-model',
-   'output-model' = 'output-model',
-   'artifact' = 'artifact',
-   'other' = 'other',
- }
 @Component({
   selector   : 'sm-experiment-artifacts-navbar',
   templateUrl: './experiment-artifacts-navbar.component.html',
@@ -41,7 +36,7 @@ export class ExperimentArtifactsNavbarComponent implements OnChanges{
     return (artifact.key + artifact.mode);
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
+  ngOnChanges(): void {
     this.noItemsMode = this.outputModels?.length === 0 && this.inputModels?.length === 0 && this.dataAuditArtifacts?.length === 0 && this.otherArtifacts?.length === 0;
   }
 }

@@ -1,14 +1,17 @@
-<sm-pipeline-info [entity]="selected$ | async" [project]="projectId$ | async" [step]="selectedEntity"></sm-pipeline-info>
+<sm-pipeline-info [entity]="selected$ | async" [project]="projectId$ | async" [step]="selectedEntity" data-id="pipelineInfo"></sm-pipeline-info>
 <div class="console-button">
-  <button class="btn btn-cml-primary d-flex align-items-center" (click)="selectStep(); openLog()">
+  <button class="btn btn-cml-primary d-flex align-items-center" (click)="selectStep(); openLog()" data-id="consoleDetailsButton">
     <i class="al-icon al-ico-console sm me-3"></i>DETAILS
   </button>
 </div>
 <div
   #diagramContainer
   class="pipeline-container"
+  tabindex="1"
   [class.extend]="showLog"
   (click)="selectStep()"
+  (keyup)="selectStep()"
+  data-id="pipelineContainer"
 >
   <ng-container *ngIf="dagModel$ | async as dagModel">
     <div *ngFor="let row of dagModel" class="level" [style.width.px]="chartWidth">
@@ -39,7 +42,7 @@
     </svg>
   </ng-container>
 </div>
-<div class="results-panel" [class.extend]="showLog" [class.maximized]="maximizeResults">
+<div class="results-panel" [class.extend]="showLog" [class.maximized]="maximizeResults" data-id="resultsPanel">
   <ng-container *ngIf="showLog">
     <div class="header toggle" >
       <div class="log-name">
@@ -56,8 +59,8 @@
         (valueChanged)="detailsPanelMode = $event"
       ></sm-button-toggle>
       <div class="close">
-        <i class="al-icon pointer" [class]="maximizeResults ? 'al-ico-min-panel' : 'al-ico-max-panel'" (click)="toggleResultSize()"></i>
-        <i class="al-icon al-ico-dialog-x pointer ms-4" (click)="openLog(false)"></i>
+        <i tabindex="1002" class="al-icon pointer" [class]="maximizeResults ? 'al-ico-min-panel' : 'al-ico-max-panel'" (click)="toggleResultSize()" (keyup)="toggleResultSize()" data-id="maxResultPanel"></i>
+        <i tabindex="1003" class="al-icon al-ico-dialog-x pointer ms-4" (click)="openLog(false)" (keyup)="openLog(false)" data-id="closeResultPanel"></i>
       </div>
     </div>
     <div [ngSwitch]="detailsPanelMode" class="content">
@@ -73,9 +76,9 @@
       <ng-container *ngSwitchCase="statusOption.code" >
         <div *ngIf="stepDiff; else empty" class="ace" #aceEditor></div>
         <ng-template #empty>
-          <div class="no-code">
+          <div class="no-code" data-id="noCode">
             <i class="icon no-output-icon i-no-code-dark"></i>
-            <h3>NO CODE</h3>
+            <h4>NO CODE</h4>
           </div>
         </ng-template>
       </ng-container>

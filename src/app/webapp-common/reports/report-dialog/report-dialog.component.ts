@@ -47,6 +47,6 @@ export class ReportDialogComponent {
 
   filterSearchChanged($event: {value: string; loadMore?: boolean}) {
     !$event.loadMore && this.store.dispatch(resetTablesFilterProjectsOptions());
-    this.store.dispatch(getTablesFilterProjectsOptions({searchString: $event.value || '', loadMore: $event.loadMore}));
+    this.store.dispatch(getTablesFilterProjectsOptions({searchString: $event.value || '', loadMore: $event.loadMore, allowPublic: false}));
   }
 }

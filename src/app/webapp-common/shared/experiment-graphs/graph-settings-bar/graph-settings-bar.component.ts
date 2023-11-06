@@ -70,6 +70,10 @@ export class GraphSettingsBarComponent {
     if (value === 0) {
       return;
     }
+    if (value === null) {
+      this.changeWeight.emit(this.smoothWeight);
+      return;
+    }
     if (value > (this.smoothType === smoothTypeEnum.exponential ? 0.999 : 100) || value < (this.smoothType === smoothTypeEnum.exponential ? 0 : 1)) {
       this.smoothWeight = null;
     }

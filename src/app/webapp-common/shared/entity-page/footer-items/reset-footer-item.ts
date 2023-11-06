@@ -5,12 +5,12 @@ import {MenuItems} from '../items.utils';
 import {EntityTypeEnum} from '../../../../shared/constants/non-common-consts';
 
 export class ResetFooterItem<T extends {status: TaskStatusEnum}> extends ItemFooterModel {
-  id = MenuItems.reset;
-  emit = true;
-  icon = ICONS.RESET as Partial<IconNames>;
 
   constructor(public entitiesType: EntityTypeEnum) {
     super();
+    this.id = MenuItems.reset;
+    this.emit = true;
+    this.icon = ICONS.RESET as Partial<IconNames>;
   }
 
   getItemState(state: IFooterState<any>): { icon?: IconNames; title?: string; description?: string; disable?: boolean; disableDescription?: string; emit?: boolean; emitValue?: boolean; preventCurrentItem?: boolean; class?: string; wrapperClass?: string } {

@@ -1,11 +1,11 @@
-import {Injectable} from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
-import {catchError, filter, map, mergeMap, retryWhen, switchMap, tap} from 'rxjs/operators';
+import {catchError, filter, map, retry, switchMap, take, tap} from 'rxjs/operators';
 import {HTTP} from '~/app.constants';
 import {UsersGetAllResponse} from '~/business-logic/model/users/usersGetAllResponse';
 import {AuthCreateUserResponse} from '~/business-logic/model/auth/authCreateUserResponse';
 import {v1 as uuidV1} from 'uuid';
-import {EMPTY, Observable, of, throwError, timer} from 'rxjs';
+import {EMPTY, Observable, of, timer} from 'rxjs';
 import {MatDialog} from '@angular/material/dialog';
 import {ConfirmDialogComponent} from '../ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {LoginModeResponse} from '~/business-logic/model/LoginModeResponse';
@@ -40,6 +40,13 @@ export class BaseLoginService {
   private _loginMode: LoginMode;
   private _guestUser: { enabled: boolean; username: string; password: string };
   private environment: Environment;
+  protected httpClient: HttpClient;
+  protected loginApi: ApiLoginService;
+  protected dialog: MatDialog;
+  protected configService: ConfigurationService;
+  protected store: Store;
+  protected router: Router;
+  protected userPreferences: UserPreferences;
   get guestUser() {
     return clone(this._guestUser);
   }
@@ -48,16 +55,15 @@ export class BaseLoginService {
     return this._authenticated;
   }
 
-  constructor(
-    protected httpClient: HttpClient,
-    protected loginApi: ApiLoginService,
-    protected dialog: MatDialog,
-    protected configService: ConfigurationService,
-    protected store: Store,
-    protected router: Router,
-    protected userPreferences: UserPreferences
-  ) {
-    configService.globalEnvironmentObservable.subscribe(env => {
+  constructor() {
+    this.httpClient = inject(HttpClient);
+    this.loginApi = inject(ApiLoginService);
+    this.dialog = inject(MatDialog);
+    this.configService = inject(ConfigurationService);
+    this.store = inject(Store);
+    this.router = inject(Router);
+    this.userPreferences = inject(UserPreferences);
+    this.configService.globalEnvironmentObservable.subscribe(env => {
       const firstLogin = !window.localStorage.getItem(USER_PREFERENCES_KEY.firstLogin);
       this.environment = env;
       this.signupMode = !!this.environment.communityServer && firstLogin;
@@ -72,12 +78,10 @@ export class BaseLoginService {
     });
 
     return this.getLoginMode().pipe(
-      retryWhen(errors => errors.pipe(
-        mergeMap((err, i) => i > 2 ? throwError(() => 'Error from retry!') : timer(500))
-      )),
-      catchError(() => {
+      retry({count: 3, delay: (err, count) => timer(500 * count)}),
+      catchError(err => {
         this.openServerError();
-        return of({});
+        throw err;
       }),
       switchMap(mode => mode === loginModes.simple ? this.httpClient.get('credentials.json') : of(fromEnv())),
       catchError(() => of(fromEnv())),
@@ -167,12 +171,11 @@ export class BaseLoginService {
       .pipe(map((x: any) => x.data.id));
   }
 
-  autoLogin(name: string, callback: (res) => void) {
+  autoLogin(name: string) {
     return this.createUser(name)
-      .subscribe(id => this.login(id)
-        .subscribe((res: any) => {
-          callback(res);
-        }));
+      .pipe(
+        switchMap(id => this.login(id)),
+      );
   }
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -243,14 +246,6 @@ After the issue is resolved and Trains Server is up and running, reload this pag
     this._loginMode = undefined;
   }
 
-  afterLogin(resolve, store) {
-    this.userPreferences.loadPreferences()
-      .subscribe(() => {
-        store.dispatch(fetchCurrentUser());
-        resolve(null);
-      });
-  }
-
   loginFlow(resolve, skipInvite = false) {
     if (location.search.includes('invite') && !skipInvite) {
       const currentURL = new URL(location.href);
@@ -266,10 +261,25 @@ After the issue is resolved and Trains Server is up and running, reload this pag
         ) {
           if (this.guestUser?.enabled) {
             this.passwordLogin(this.guestUser.username, this.guestUser.password)
-              .subscribe(() => this.afterLogin.bind(this)(resolve, this.store));
+              .pipe(
+                take(1),
+                switchMap(() => this.userPreferences.loadPreferences())
+              )
+              .subscribe(() => {
+                this.store.dispatch(fetchCurrentUser());
+                resolve(null);
+              });
           } else if (ConfigurationService.globalEnvironment.autoLogin) {
             const name = `${(new Date()).getTime().toString()}`;
-            this.autoLogin(name, this.afterLogin.bind(this, resolve, this.store));
+            this.autoLogin(name)
+              .pipe(
+                take(1),
+                switchMap(() => this.userPreferences.loadPreferences())
+              )
+              .subscribe(() => {
+                this.store.dispatch(fetchCurrentUser());
+                resolve(null)
+              });
           } else {
             resolve(null);
           }
@@ -293,6 +303,7 @@ After the issue is resolved and Trains Server is up and running, reload this pag
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getInviteInfo(inviteId: string): Observable<any> {
     return EMPTY;
   }

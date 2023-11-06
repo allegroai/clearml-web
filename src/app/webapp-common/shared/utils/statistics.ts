@@ -1,4 +1,5 @@
 import {flattenDeep, last} from 'lodash-es';
+import {maxInArray} from '@common/shared/utils/helpers.util';
 
 export interface DataPoint {
   date: string;
@@ -19,8 +20,8 @@ export interface RequestParam {
 
 const defaultMaxValHandler = {
   get: function (target: object, name: string) {
-    if (!target.hasOwnProperty(name)) {
-      target[name] = Math.max(...(Object.values(target) as number[]), 0) + 1;
+    if (!Object.hasOwn(target,name)) {
+      target[name] = maxInArray([...Object.values(target) as number[], 0]) + 1;
     }
     return target[name];
   }
@@ -56,9 +57,9 @@ export function addStats(current: Topic[], data, maxPoints: number,
       const dates: number[] = paramData.dates;
       const param = paramData.metric;
       paramData.stats.forEach(aggData => {
-        const aggregation = aggData.aggregation;
-        const topicID     = `${entity} ${param} ${aggregation}`;
-        const topicName   = `${paramInfo[param].title} (${aggregation})${shouldAddEntity && entity ? ' for ' + entity : ''}`;
+        const aggregation = aggData.aggregation ? ` (${aggData.aggregation})` : '';
+        const topicID     = `${entity} ${param}${aggregation}`;
+        const topicName   = `${paramInfo[param].title}${aggregation}${shouldAddEntity && entity ? ' for ' + entity : ''}`;
         let topic: Topic = dataByTopic.find(topic => topic.topicID === topicID);
         if (!topic) {
           topic = {topicName, topicID, topic: topicIDs[topicID], dates: [] as DataPoint[]};

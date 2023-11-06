@@ -7,7 +7,7 @@ import {Queue} from '~/business-logic/model/queues/queue';
 import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
 import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
 import {BlTasksService} from '~/business-logic/services/tasks.service';
-import {CloneForm} from '../../common-experiment-model.model';
+import {CloneForm, ITableExperiment} from '../../common-experiment-model.model';
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {htmlTextShort} from '@common/shared/utils/shared-utils';
 import * as commonMenuActions from '../../../actions/common-experiments-menu.actions';
@@ -15,11 +15,11 @@ import {abortAllChildren, archiveSelectedExperiments} from '../../../actions/com
 import {ChangeProjectDialogComponent} from '../change-project-dialog/change-project-dialog.component';
 import {CloneDialogComponent} from '../clone-dialog/clone-dialog.component';
 import {SelectQueueComponent} from '../select-queue/select-queue.component';
-import {ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
+import {IExperimentInfo, ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
 import {getQueuesForEnqueue} from '../select-queue/select-queue.actions';
 import {selectQueuesList} from '../select-queue/select-queue.reducer';
 import {isDevelopment} from '~/features/experiments/shared/experiments.utils';
-import {Component, ElementRef, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, inject, Input, OnInit, Output} from '@angular/core';
 import {BaseContextMenuComponent} from '@common/shared/components/base-context-menu/base-context-menu.component';
 import * as experimentsActions from '../../../actions/common-experiments-view.actions';
 import {ShareDialogComponent} from '@common/shared/ui-components/overlay/share-dialog/share-dialog.component';
@@ -45,6 +45,7 @@ import {
 } from '@common/shared/entity-page/items.utils';
 import {resetOutput} from '@common/experiments/actions/common-experiment-output.actions';
 import {isReadOnly} from '@common/shared/utils/is-read-only';
+import {resetDebugImages} from '@common/debug-images/debug-images-actions';
 
 
 @Component({
@@ -63,9 +64,9 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
   public selectionHasExamples: boolean;
   public isCommunity: boolean;
   protected _experiment: ISelectedExperiment = null;
-  private _selectedExperiments: ISelectedExperiment[];
+  private _selectedExperiments: IExperimentInfo[];
 
-  @Input() selectedExperiment: any;
+  @Input() selectedExperiment: IExperimentInfo;
   @Input() isSharedAndNotOwner = false;
   @Input() tagsFilterByProject: boolean;
   @Input() projectTags: string[];
@@ -87,26 +88,30 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
   @Input() neverShowPopups;
   @Input() minimizedView: boolean;
 
-  @Input() set selectedExperiments(experiments: ISelectedExperiment[]) {
+  @Input() set selectedExperiments(experiments: IExperimentInfo[]) {
     this._selectedExperiments = experiments;
     this.selectionHasExamples = experiments && experiments.some((exp => isReadOnly(exp)));
   }
 
-  get selectedExperiments(): ISelectedExperiment[] {
+  get selectedExperiments(): IExperimentInfo[] {
     return this._selectedExperiments;
   }
   @Output() tagSelected = new EventEmitter<string>();
 
-  constructor(
-    protected blTaskService: BlTasksService,
-    protected dialog: MatDialog,
-    protected router: Router,
-    protected store: Store,
-    protected eRef: ElementRef,
-    protected configService: ConfigurationService,
-    protected route?: ActivatedRoute
-  ) {
-    super(store, eRef);
+  protected blTaskService: BlTasksService;
+  protected dialog: MatDialog;
+  protected router: Router;
+  protected configService: ConfigurationService;
+  protected route: ActivatedRoute;
+
+  constructor() {
+    super();
+
+  this.blTaskService = inject(BlTasksService);
+  this.dialog = inject(MatDialog);
+  this.router = inject(Router);
+  this.configService = inject(ConfigurationService);
+  this.route = inject(ActivatedRoute);
   }
 
 
@@ -149,7 +154,9 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
   }
 
   enqueuePopup() {
-    const selectedExperiments = this.selectedExperiments ? selectionDisabledEnqueue(this.selectedExperiments).selectedFiltered : [this._experiment];
+    const selectedExperiments = !(this.activateFromMenuButton || this.useCurrentEntity) ?
+        selectionDisabledEnqueue(this.selectedExperiments).selectedFiltered :
+        [this._experiment];
 
     const selectQueueDialog: MatDialogRef<SelectQueueComponent, { confirmed: boolean; queue: Queue }> =
       this.dialog.open(SelectQueueComponent, {
@@ -224,6 +231,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
       if (confirmed) {
         this.store.dispatch(resetOutput());
         if (this.activateFromMenuButton || !this.tableMode && this.selectedExperiments.some(exp => exp.id === this._experiment.id)) {
+          this.store.dispatch(resetDebugImages());
           this.store.dispatch(autoRefreshExperimentInfo({id: this._experiment.id}));
         }
         this.store.dispatch(deactivateEdit());

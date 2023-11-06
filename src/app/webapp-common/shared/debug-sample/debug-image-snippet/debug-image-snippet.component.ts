@@ -1,6 +1,16 @@
-import {Component, ElementRef, EventEmitter, Input, Output, ViewChild} from '@angular/core';
-import {Observable} from 'rxjs/internal/Observable';
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  Output,
+  QueryList,
+  ViewChild,
+  ViewChildren
+} from '@angular/core';
 import {Store} from '@ngrx/store';
+import {Observable} from 'rxjs';
 import {tap} from 'rxjs/operators';
 import {IsAudioPipe} from '../../pipes/is-audio.pipe';
 import {IsVideoPipe} from '../../pipes/is-video.pipe';
@@ -10,12 +20,14 @@ import {isHtmlPage} from '@common/shared/utils/is-html-page';
 import {isTextFileURL} from '@common/shared/utils/is-text-file';
 import {getSignedUrlOrOrigin$} from '@common/core/reducers/common-auth-reducer';
 
+// import {Event} from '@common/debug-images/debug-images-types';
+
 @Component({
   selector: 'sm-debug-image-snippet',
   templateUrl: './debug-image-snippet.component.html',
   styleUrls: ['./debug-image-snippet.component.scss']
 })
-export class DebugImageSnippetComponent {
+export class DebugImageSnippetComponent implements OnDestroy{
   public type: 'image' | 'player' | 'html';
   public source$: Observable<string>;
   private _frame: any;
@@ -49,6 +61,7 @@ export class DebugImageSnippetComponent {
   @Output() imageClicked = new EventEmitter<{src: string}>();
   @Output() createEmbedCode = new EventEmitter();
   @ViewChild('video') video: ElementRef<HTMLVideoElement>;
+  @ViewChildren('imageElement') imageElements: QueryList<ElementRef<HTMLImageElement>>
 
   isFailed = false;
   isLoading = true;
@@ -74,10 +87,6 @@ export class DebugImageSnippetComponent {
     ));
   }
 
-  log($event: ErrorEvent) {
-    console.log($event);
-  }
-
   iframeLoaded(event) {
     if (event.target.src) {
       this.isLoading = false;
@@ -86,5 +95,12 @@ export class DebugImageSnippetComponent {
 
   createEmbedCodeClicked($event: MouseEvent) {
     this.createEmbedCode.emit({x: $event.clientX, y: $event.clientY});
+  }
+
+  ngOnDestroy() {
+    this.imageElements.forEach(imageRef => imageRef.nativeElement.src = '');
+    if (this.video?.nativeElement) {
+      this.video.nativeElement.src = '';
+    }
   }
 }

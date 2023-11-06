@@ -1,13 +1,12 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {selectRouterConfig, selectRouterParams} from '@common/core/reducers/router-reducer';
 import {Store} from '@ngrx/store';
 import * as infoActions from '../../actions/models-info.actions';
 import {selectIsModelInEditMode, selectSelectedModel, selectSelectedTableModel, selectSplitSize} from '../../reducers';
 import {SelectedModel} from '../../shared/models.model';
-import {selectS3BucketCredentials} from '@common/core/reducers/common-auth-reducer';
 import {Observable, Subscription} from 'rxjs';
-import {debounceTime, distinctUntilChanged, filter, map, tap, withLatestFrom} from 'rxjs/operators';
+import {debounceTime, distinctUntilChanged, filter, map, withLatestFrom} from 'rxjs/operators';
 import {addMessage, setAutoRefresh} from '@common/core/actions/layout.actions';
 import {selectBackdropActive} from '@common/core/reducers/view.reducer';
 import {setTableMode} from '@common/models/actions/models-view.actions';
@@ -21,6 +20,7 @@ import {getCompanyTags, setBreadcrumbsOptions, setSelectedProject} from '@common
 import {selectSelectedProject} from '@common/core/reducers/projects.reducer';
 import {Project} from '~/business-logic/model/projects/project';
 import {ALL_PROJECTS_OBJECT} from '@common/core/effects/projects.effects';
+import {ModelsInfoEffects} from '@common/models/effects/models-info.effects';
 
 
 @Component({
@@ -33,11 +33,9 @@ export class ModelInfoComponent implements OnInit, OnDestroy {
 
   public selectedModel: SelectedModel;
   private sub = new Subscription();
-  private s3BucketCredentials: Observable<any>;
   public selectedModel$: Observable<SelectedModel | null>;
   public isExample: boolean;
-  public backdropActive$: Observable<any>;
-  private projectId: string;
+  public backdropActive$: Observable<boolean>;
   public selectedTableModel$: Observable<SelectedModel>;
   public scalars$: Observable<boolean>;
   public splitSize$: Observable<number>;
@@ -60,9 +58,10 @@ export class ModelInfoComponent implements OnInit, OnDestroy {
     private router: Router,
     private store: Store,
     private route: ActivatedRoute,
-    private refresh: RefreshService
+    private refresh: RefreshService,
+    private cdr: ChangeDetectorRef,
+    private modelInfoEffect: ModelsInfoEffects
   ) {
-    this.s3BucketCredentials = store.select(selectS3BucketCredentials);
     this.backdropActive$ = this.store.select(selectBackdropActive);
     this.selectedTableModel$ = this.store.select(selectSelectedTableModel);
     this.splitSize$ = this.store.select(selectSplitSize);
@@ -74,14 +73,13 @@ export class ModelInfoComponent implements OnInit, OnDestroy {
       this.store.dispatch(setSelectedProject({project: ALL_PROJECTS_OBJECT}));
       this.store.dispatch(getCompanyTags());
     }
-
-  }
-
-  ngOnInit() {
     this.minimized = this.route.snapshot.firstChild?.data.minimized;
     if (!this.minimized) {
       this.setupBreadcrumbsOptions();
     }
+  }
+
+  ngOnInit() {
     this.scalars$ = this.store.select(selectRouterConfig)
       .pipe(
         filter(c => !!c),
@@ -93,14 +91,12 @@ export class ModelInfoComponent implements OnInit, OnDestroy {
       .subscribe(model => {
         this.selectedModel = model;
         this.isExample = isReadOnly(model);
+        this.cdr.detectChanges();
       })
     );
 
     this.sub.add(this.store.select(selectRouterParams)
       .pipe(
-        tap((params) => {
-          this.projectId = params?.projectId;
-        }),
         debounceTime(150),
         map(params => params?.modelId),
         filter(modelId => !!modelId),
@@ -129,6 +125,8 @@ export class ModelInfoComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.sub.unsubscribe();
     if (!this.toMaximize) {
+      this.modelInfoEffect.previousSelectedId = null;
+      this.modelInfoEffect.previousSelectedLastUpdate = null;
       this.store.dispatch(infoActions.setModelInfo({model: null}));
     }
   }

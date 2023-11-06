@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { environment } from '../../../../environments/environment';
@@ -12,8 +12,12 @@ import {setCurrentUser} from '~/core/actions/users.action';
 @Injectable()
 export class WebappInterceptor implements HttpInterceptor {
   protected user: GetCurrentUserResponseUserObject;
+  protected router: Router;
+  protected store: Store;
 
-  constructor(protected router: Router, protected store: Store) {
+  constructor() {
+    this.router = inject(Router);
+    this.store = inject(Store);
     this.store.select(selectCurrentUser).subscribe(user => this.user = user);
   }
 
@@ -47,9 +51,9 @@ export class WebappInterceptor implements HttpInterceptor {
         this.store.dispatch(setCurrentUser({user: null, terms_of_use: null}));
         this.router.navigate(['login'], {queryParams: {redirect: redirectUrl}, replaceUrl: true});
       }
-      return throwError(err);
+      return throwError(() => err);
     } else {
-      return throwError(err);
+      return throwError(() => err);
     }
   }
 }

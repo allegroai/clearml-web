@@ -140,7 +140,7 @@ export class CommonDeleteDialogComponent implements OnInit, OnDestroy {
     this.isOpenEntities = !this.isOpenEntities;
   }
 
-  getMessageByEntity(entityType: EntityTypeEnum, stats?: CommonReadyForDeletion): string {
+  getMessageByEntity(entityType: EntityTypeEnum, stats?: CommonReadyForDeletion) {
     switch (entityType as any) {
       case EntityTypeEnum.controller:
       case EntityTypeEnum.experiment:
@@ -151,10 +151,12 @@ export class CommonDeleteDialogComponent implements OnInit, OnDestroy {
         // eslint-disable-next-line no-case-declarations
         const entitiesBreakDown = getDeleteProjectPopupStatsBreakdown(stats, 'total', 'experiment');
         return entitiesBreakDown.trim().length > 0 ? `${entitiesBreakDown} will be deleted, including their artifacts. This may take a few minutes.` : '';
-      case EntityTypeEnum.simpleDataset:
+      case EntityTypeEnum.simpleDataset: {
         const entitiesBreakDown2 = getDeleteProjectPopupStatsBreakdown(stats, 'total', `version`);
         const single = Object.values(stats).reduce((a, b) => a + (b.total || 0), 0) == 1;
         return entitiesBreakDown2.trim().length > 0 ? `${entitiesBreakDown2} will be deleted and ${single ? 'its' : 'their'} data. This may take a few minutes.` : '';
+      }
     }
+    return '';
   }
 }

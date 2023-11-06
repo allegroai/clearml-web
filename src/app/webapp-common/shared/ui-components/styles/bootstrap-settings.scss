@@ -2,6 +2,7 @@
 @import "variables";
 @import "themes";
 
+$link-decoration: none;
 $dark-bootstrap-theme: map-get($dark-theme, bootstrap);
 $light-bootstrap-theme: map-get($light-theme, bootstrap);
 
@@ -25,9 +26,6 @@ $btn-font-family: $font-family-base;
 
 .dark-theme {
   $primary: map-get($dark-bootstrap-theme, primary);
-  $grid-columns: $grid-cols;
-  $grid-gutter-width: $grid-gutter;
-  $container-max-widths: $grid-max-widths;
   $input-color: map-get($dark-theme-input, color);
   $input-placeholder-color: map-get($dark-theme-input, place-holder-color);
   $input-bg: map-get($dark-theme-input, background-color);
@@ -45,12 +43,13 @@ $btn-font-family: $font-family-base;
 
   $button: map-get($dark-theme, button);
 
+  --bs-border-width: 1px;
+
 
   // @import '~bootstrap/scss/bootstrap.scss';
   @import 'bootstrap/scss/bootstrap-reboot';
   @import 'bootstrap/scss/bootstrap-grid';
   @import 'bootstrap/scss/bootstrap-utilities';
-  @import "bootstrap/scss/grid";
   @import "bootstrap/scss/buttons";
   @import "bootstrap/scss/button-group";
   @import "bootstrap/scss/card";
@@ -142,7 +141,7 @@ $btn-font-family: $font-family-base;
     font-size: 1rem;
     font-weight: 400;
     line-height: 1.5;
-    color: $blue-grey;
+    color: $blue-200;
     background-color: $black;
     background-clip: padding-box;
     border: 1px solid $blue-500;
@@ -220,9 +219,6 @@ $btn-font-family: $font-family-base;
 .light-theme {
   $primary: map-get($light-bootstrap-theme, primary);
   $secondary: $white;
-  $grid-columns: $grid-cols;
-  $grid-gutter-width: $grid-gutter;
-  $container-max-widths: $grid-max-widths;
 
   $input-color: map-get($light-theme-input, color);
   $input-placeholder-color: map-get($light-theme-input, place-holder-color);
@@ -248,14 +244,17 @@ $btn-font-family: $font-family-base;
   @import "bootstrap/scss/button-group";
   @import "bootstrap/scss/card";
 
+  --bs-border-width: 1px;
+
   label {
     display: inline-flex;
   }
 
   .btn {
-    font-size: 11px;
+    font-size: 12px;
     line-height: normal;
     letter-spacing: 0.03em;
+    border-radius: 4px;
   }
 
   .btn-primary {
@@ -285,27 +284,23 @@ $btn-font-family: $font-family-base;
   }
 
   .btn-secondary {
-    height: 32px;
-    border: solid 1px $blue-250;
-    color: $blue-480;
-    font-size: 11px;
+    height: 36px;
+    border: solid 1px $cloudy-blue;
+    color: $blue-500;
+    font-size: 12px;
 
     &:hover {
-      border: solid 1px $blue-300;
-      color: $blue-300;
+      border: solid 1px $cloudy-blue-two;
+      color: $blue-600;
       background-color: $white;
     }
 
     &:active,
     &:focus {
-      border: solid 1px $blue-250 !important;
-      color: $blue-400 !important;
+      border: solid 1px $blue-400 !important;
+      color: $blue-600 !important;
       background-color: white !important;
       box-shadow: none !important;
-    }
-
-    &:focus {
-      color: $blue-480 !important;
     }
 
     &:disabled {

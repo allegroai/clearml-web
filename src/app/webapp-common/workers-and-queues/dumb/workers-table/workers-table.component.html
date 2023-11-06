@@ -13,7 +13,7 @@
     <ng-template let-col let-worker="rowData" pTemplate="body">
       <ng-container [ngSwitch]="col.id">
         <ng-container *ngSwitchCase="WORKERS_TABLE_COL_FIELDS.TASK_RUNNING_TIME">
-          <span class="ellipsis">{{worker?.task?.running_time | msToSec}}</span>
+          <span class="ellipsis">{{worker?.task?.running_time | durationFormater:'ms':'ddhhmmss'}}</span>
           <span *ngIf="!worker?.task?.running_time">&mdash;</span>
         </ng-container>
         <ng-container *ngSwitchCase="WORKERS_TABLE_COL_FIELDS.ID">

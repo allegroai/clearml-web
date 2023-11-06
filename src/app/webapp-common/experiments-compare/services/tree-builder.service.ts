@@ -19,7 +19,7 @@ export class TreeBuilderService {
       data    : <any>{},
       metaData: <any>{},
       parent  : null,
-      children: isObject(obj) ?
+      children: isObject(obj) && !obj.dataDictionary ?
         this.buildTreeFromJsonRec(obj, transformer, _metaTransformer, transformerExtraParams) :
         null
     };
@@ -42,7 +42,7 @@ export class TreeBuilderService {
       };
       const value          = obj[key];
       if (value != null) {
-        if (typeof value === 'object' ) {
+        if (typeof value === 'object' && !value.dataDictionary) {
           node.children = this.buildTreeFromJsonRec(
             <any>value, transformer, metaTransformer, transformerExtraParams, level + 1, node, _path
           );

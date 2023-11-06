@@ -12,6 +12,10 @@ import {convertPlots, groupIterations, sortMetricsList} from '@common/tasks/task
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {getPlots, setPlots} from '@common/models/actions/models-info.actions';
 import {ExperimentGraphsComponent} from '@common/shared/experiment-graphs/experiment-graphs.component';
+import {selectModelSettingsHiddenPlot, selectModelSettingsHiddenScalar} from "@common/experiments/reducers";
+import {isEqual} from "lodash-es";
+import {setExperimentSettings} from "@common/experiments/actions/common-experiment-output.actions";
+import {selectSelectedSettingsHiddenPlot} from "@common/experiments-compare/reducers";
 
 @Component({
   selector: 'sm-model-info-plot',
@@ -25,8 +29,6 @@ import {ExperimentGraphsComponent} from '@common/shared/experiment-graphs/experi
 export class ModelInfoPlotsComponent implements OnInit, OnDestroy {
   public graphs: { [key: string]: any[] };
   public plotsList: Array<SelectableListItem>;
-  public selectedGraph: string = null;
-  public listOfHidden = [] as string[];
   public searchTerm: string;
   public minimized = true;
   public dark = false;
@@ -37,6 +39,7 @@ export class ModelInfoPlotsComponent implements OnInit, OnDestroy {
   private modelId: string;
 
   @ViewChild(ExperimentGraphsComponent) graphsComponent: ExperimentGraphsComponent;
+  public listOfHidden$: Observable<any>;
 
   constructor(
     private store: Store,
@@ -47,7 +50,9 @@ export class ModelInfoPlotsComponent implements OnInit, OnDestroy {
     ) {
     // this.searchTerm$ = this.store.select(selectExperimentMetricsSearchTerm);
     this.splitSize$ = this.store.select(selectSplitSize);
-    this.modelsFeature = !!route.snapshot?.parent?.parent?.data?.setAllProject;
+    this.modelsFeature = !!this.route.snapshot?.parent?.parent?.data?.setAllProject;
+    this.listOfHidden$ = this.store.select(selectModelSettingsHiddenPlot)
+      .pipe(distinctUntilChanged(isEqual));
   }
 
   ngOnInit(): void {
@@ -109,12 +114,11 @@ export class ModelInfoPlotsComponent implements OnInit, OnDestroy {
   }
 
   metricSelected(id: string) {
-    this.selectedGraph = id;
     this.graphsComponent?.scrollToGraph(id);
   }
 
   hiddenListChanged(hiddenList: string[]) {
-    this.listOfHidden = hiddenList;
+    this.store.dispatch(setExperimentSettings({id: this.modelId, changes: {hiddenMetricsPlot: hiddenList}}));
   }
   searchTermChanged(searchTerm: string) {
     this.searchTerm = searchTerm;

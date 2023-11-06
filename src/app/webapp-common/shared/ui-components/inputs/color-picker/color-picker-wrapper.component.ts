@@ -6,7 +6,7 @@ import {isEqual} from 'lodash-es';
 import {selectColorPickerProps} from '@common/shared/ui-components/directives/choose-color/choose-color.reducer';
 import {ColorPickerProps} from '@common/shared/ui-components/directives/choose-color/choose-color.actions';
 import {ColorHashService} from '@common/shared/services/color-hash/color-hash.service';
-import tinycolor from 'tinycolor2';
+import { TinyColor } from '@ctrl/tinycolor';
 
 @Component({
   selector: 'sm-color-picker-wrapper',
@@ -54,7 +54,7 @@ export class ColorPickerWrapperComponent implements OnInit, OnDestroy {
   }
 
   selectColor(event: string) {
-    const {r, g, b, a} = tinycolor(event).toRgb();
+    const {r, g, b, a} = new TinyColor(event).toRgb();
     const color = [r, g, b, a];
     this.colorHashService.setColorForString(this.props.cacheKey, color);
   }

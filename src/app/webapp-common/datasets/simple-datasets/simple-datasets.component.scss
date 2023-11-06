@@ -1,13 +1,14 @@
 @import "variables";
-@import "./empty";
+@import "empty";
 
 :host {
-  .sm-card-list-layout{
-    &.in-empty-state{
+  .sm-card-list-layout {
+    &.in-empty-state {
       height: 100%;
       grid-template-rows: 64px 1fr;
     }
   }
+
   display: block;
   height: 100%;
   overflow-y: scroll;
@@ -22,6 +23,5 @@
     background-color: $blue-800;
     margin-bottom: -12px;
   }
+  @include empty-card-mixin();
 }
-
-

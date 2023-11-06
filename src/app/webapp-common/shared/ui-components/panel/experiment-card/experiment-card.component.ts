@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
 import {isEmpty} from 'lodash-es';
-import {ITask} from '../../../../../business-logic/model/al-task';
-import {TIME_FORMAT_STRING} from '../../../../constants';
+import {TIME_FORMAT_STRING} from '@common/constants';
+import {ITask} from '~/business-logic/model/al-task';
 
 
 @Component({
@@ -14,7 +14,7 @@ export class ExperimentCardComponent {
 
   public isEmpty = isEmpty;
 
-  @Input() experiment: any;
+  @Input() experiment: ITask;
   @Output() experimentCardClicked = new EventEmitter();
   TIME_FORMAT_STRING = TIME_FORMAT_STRING;
 

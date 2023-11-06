@@ -53,7 +53,7 @@ import {
   ExperimentCompareParamsComponent
 } from './containers/experiment-compare-params/experiment-compare-params.component';
 import {ExperimentsCompareParamsEffects} from './effects/experiments-compare-params.effects';
-import {FormsModule} from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {UiComponentsModule} from '../shared/ui-components/ui-components.module';
 import {SMMaterialModule} from '../shared/material/material.module';
 import {SharedPipesModule} from '@common/shared/pipes/shared-pipes.module';
@@ -61,11 +61,14 @@ import {ModelCompareDetailsComponent} from '@common/experiments-compare/containe
 import {IExperimentCompareChartsState} from '@common/experiments-compare/reducers/experiments-compare-charts.reducer';
 import {UserPreferences} from '@common/user-preferences';
 import {merge, pick} from 'lodash-es';
-import {EXPERIMENTS_PREFIX, EXPERIMENTS_STORE_KEY} from '@common/experiments/experiment.consts';
+import {EXPERIMENTS_PREFIX} from '@common/experiments/experiment.consts';
 import {createUserPrefFeatureReducer} from '@common/core/meta-reducers/user-pref-reducer';
 import {EXPERIMENTS_COMPARE_METRICS_CHARTS_} from '@common/experiments-compare/actions/experiments-compare-charts.actions';
 import {EXPERIMENTS_COMPARE_SELECT_EXPERIMENT_} from '@common/experiments-compare/actions/compare-header.actions';
+import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
+import {EllipsisMiddleDirective} from '@common/shared/ui-components/directives/ellipsis-middle.directive';
 
+export const COMPARE_STORE_KEY = 'experimentsCompare';
 export const COMPARE_CONFIG_TOKEN =
   new InjectionToken<StoreConfig<IExperimentCompareChartsState, any>>('CompareConfigToken');
 
@@ -85,14 +88,14 @@ export const getCompareConfig = (userPreferences: UserPreferences) => ({
           const savedState = JSON.parse(localStorage.getItem(localStorageKey));
           return merge({}, nextState, savedState);
         }
-        if (action.type.startsWith(EXPERIMENTS_PREFIX)) {
-          localStorage.setItem(localStorageKey, JSON.stringify(pick(nextState, ['charts.settingsList'])));
+        if (action.type.startsWith('EXPERIMENTS_COMPARE_')) {
+          localStorage.setItem(localStorageKey, JSON.stringify(pick(nextState, ['charts.settingsList', 'charts.scalarsHoverMode'])));
         }
         return nextState;
       };
     },
     (reducer: ActionReducer<any>) =>
-      createUserPrefFeatureReducer(EXPERIMENTS_STORE_KEY, compareSyncedKeys, [EXPERIMENTS_COMPARE_METRICS_CHARTS_, EXPERIMENTS_COMPARE_SELECT_EXPERIMENT_], userPreferences, reducer),
+      createUserPrefFeatureReducer(COMPARE_STORE_KEY, compareSyncedKeys, [EXPERIMENTS_COMPARE_METRICS_CHARTS_, EXPERIMENTS_COMPARE_SELECT_EXPERIMENT_], userPreferences, reducer),
   ]
 });
 
@@ -132,7 +135,7 @@ export const getCompareConfig = (userPreferences: UserPreferences) => ({
         ExperimentsCompareRoutingModule,
         ExperimentGraphsModule,
         ExperimentCompareSharedModule,
-        StoreModule.forFeature('experimentsCompare', experimentsCompareReducers, COMPARE_CONFIG_TOKEN),
+        StoreModule.forFeature(COMPARE_STORE_KEY, experimentsCompareReducers, COMPARE_CONFIG_TOKEN),
         EffectsModule.forFeature([
             ExperimentsCompareDetailsEffects,
             ExperimentsCompareParamsEffects,
@@ -145,6 +148,9 @@ export const getCompareConfig = (userPreferences: UserPreferences) => ({
         FormsModule,
         ParallelCoordinatesGraphComponent,
         SharedPipesModule,
+        LabeledFormFieldDirective,
+        ReactiveFormsModule,
+        EllipsisMiddleDirective
     ],
   providers: [
     {provide: COMPARE_CONFIG_TOKEN, useFactory: getCompareConfig, deps: [UserPreferences]},

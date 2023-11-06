@@ -36,7 +36,7 @@
     </svg>
   </div>
 </div>
-<div class="card-container" [class.is-folder]="isFolder" [style.height.px]="height">
+<div class="card-container" [class.is-folder]="isFolder" [style.height.px]="height" data-id="cardContainer">
   <div
     *ngIf="!showSecondTab ; else secondTabContent"
     class="tab-container first-tab-container"

@@ -30,7 +30,7 @@ import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {
   PipelinesEmptyStateComponent
 } from '@common/pipelines/pipelines-page/pipelines-empty-state/pipelines-empty-state.component';
-import {debounceTime, withLatestFrom} from 'rxjs/operators';
+import {debounceTime, skip, withLatestFrom} from 'rxjs/operators';
 import {ProjectTypeEnum} from '@common/nested-project-view/nested-project-view-page/nested-project-view-page.component';
 
 @Component({
@@ -74,7 +74,7 @@ if __name__ == '__main__':
   private mainPageFilterSub: Subscription;
   public isNested$: Observable<boolean>;
 
-  ngOnInit() {
+  override ngOnInit() {
     super.ngOnInit();
     this.store.dispatch(getProjectsTags({entity: this.getName()}));
     this.showExamples$ = this.store.select(selectShowPipelineExamples);
@@ -82,7 +82,7 @@ if __name__ == '__main__':
     this.mainPageFilterSub = combineLatest([
       this.store.select(selectMainPageTagsFilter),
       this.store.select(selectMainPageTagsFilterMatchMode)
-    ]).pipe(debounceTime(0))
+    ]).pipe(debounceTime(0), skip(1))
       .subscribe(() => {
         this.store.dispatch(resetProjects());
         this.store.dispatch(getAllProjectsPageProjects());
@@ -90,7 +90,7 @@ if __name__ == '__main__':
 
   }
 
-  ngOnDestroy() {
+  override ngOnDestroy() {
     super.ngOnDestroy();
     this.headerUserFocusSub?.unsubscribe();
     this.mainPageFilterSub.unsubscribe();
@@ -109,20 +109,20 @@ if __name__ == '__main__':
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getExtraProjects(selectedProjectId, selectedProject) {
+  protected override getExtraProjects(selectedProjectId, selectedProject) {
     return [];
   }
 
-  public projectCardClicked(project: ProjectsGetAllResponseSingle) {
+  public override projectCardClicked(project: ProjectsGetAllResponseSingle) {
     this.router.navigate([project.id, 'experiments'], {relativeTo: this.projectId ? this.route.parent.parent.parent : this.route});
     this.store.dispatch(setSelectedProjectId({projectId: project.id, example: isExample(project)}));
   }
 
-  protected getName() {
+  protected override getName() {
     return EntityTypeEnum.pipeline;
   }
 
-  protected getDeletePopupEntitiesList() {
+  protected override getDeletePopupEntitiesList() {
     return 'run';
   }
 
@@ -140,12 +140,12 @@ if __name__ == '__main__':
     this.store.dispatch(showExamplePipelines());
   }
 
-  shouldReRoute(selectedProject, config) {
+  override shouldReRoute(selectedProject, config) {
     const relevantSubProjects = selectedProject?.sub_projects?.filter(proj => proj.name.includes('.pipelines'));
     return config[2] === 'projects' && selectedProject.id !== '*' && (relevantSubProjects?.every(subProject => subProject.name.startsWith(selectedProject.name + '/.')));
-  };
+  }
 
-  noProjectsReRoute() {
+  override noProjectsReRoute() {
     return this.router.navigate(['..', 'pipelines'], {relativeTo: this.route});
   }
 
@@ -159,7 +159,7 @@ if __name__ == '__main__':
     }
   }
 
-  setupBreadcrumbsOptions() {
+  override setupBreadcrumbsOptions() {
     this.subs.add(this.selectedProject$.pipe(
       withLatestFrom(this.store.select(selectDefaultNestedModeForFeature))
     ).subscribe(([selectedProject, defaultNestedModeForFeature]) => {

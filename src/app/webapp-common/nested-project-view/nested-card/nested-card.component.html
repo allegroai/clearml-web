@@ -4,6 +4,7 @@
          [isFolder]="true"
          [oneTabMode]="!(project?.sub_projects?.length>0)"
          [subFolderTitle]="project?.sub_projects?.length + ' sub projects'"
+         data-id="projectCard"
 >
   <div secondTab class="sub-projects-list">
     <cdk-virtual-scroll-viewport [itemSize]="30" [minBufferPx]="440" [maxBufferPx]="660" class="h-100">

@@ -1,7 +1,7 @@
 import {
-  ChangeDetectionStrategy,
+  ChangeDetectionStrategy, ChangeDetectorRef,
   Component,
-  EventEmitter,
+  EventEmitter, inject,
   Input,
   Output
 } from '@angular/core';
@@ -41,6 +41,7 @@ export class TableFilterSortTemplateComponent {
   public filterPageSize: number;
   private previousSearchValue: { label: string; value: string; tooltip?: string } | undefined;
   private isOpen: boolean;
+  private cdr = inject(ChangeDetectorRef);
 
   @Input() set column(col: ISmCol) {
     this.header = col.header;

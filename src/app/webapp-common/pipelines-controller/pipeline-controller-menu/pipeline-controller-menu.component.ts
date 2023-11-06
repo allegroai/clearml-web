@@ -1,11 +1,5 @@
 import {Component, ElementRef} from '@angular/core';
 import {ExperimentMenuComponent} from '@common/experiments/shared/components/experiment-menu/experiment-menu.component';
-import {BlTasksService} from '~/business-logic/services/tasks.service';
-import {MatDialog} from '@angular/material/dialog';
-import {ActivatedRoute, Router} from '@angular/router';
-import {Store} from '@ngrx/store';
-import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
-import {ConfigurationService} from '@common/shared/services/configuration.service';
 import {selectionDisabledAbort, selectionDisabledContinue} from '@common/shared/entity-page/items.utils';
 import * as commonMenuActions from '@common/experiments/actions/common-experiments-menu.actions';
 import {RunPipelineControllerDialogComponent} from '../run-pipeline-controller-dialog/run-pipeline-controller-dialog.component';
@@ -22,19 +16,11 @@ import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 export class PipelineControllerMenuComponent extends ExperimentMenuComponent {
   entityTypeEnum = EntityTypeEnum;
 
-  constructor(
-    protected blTaskService: BlTasksService,
-    protected dialog: MatDialog,
-    protected router: Router,
-    protected store: Store,
-    protected eRef: ElementRef,
-    protected configService: ConfigurationService,
-    protected route?: ActivatedRoute
-  ) {
-    super(blTaskService, dialog, router, store, eRef, configService, route);
+  constructor() {
+    super();
   }
 
-  runPipelineController(runNew: boolean = false) {
+  runPipelineController(runNew = false) {
     const runPipelineDialog = this.dialog.open(RunPipelineControllerDialogComponent, {
       data: {task: runNew ? null : this._experiment}
     });

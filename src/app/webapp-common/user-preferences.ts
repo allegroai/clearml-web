@@ -3,8 +3,6 @@ import {Observable, of} from 'rxjs';
 import {catchError, map, tap} from 'rxjs/operators';
 import {cloneDeep, isEqual} from 'lodash-es';
 import {UsersSetPreferencesRequest} from '~/business-logic/model/users/usersSetPreferencesRequest';
-import {ConfigurationService} from './shared/services/configuration.service';
-import {LoginService} from '~/shared/services/login.service';
 import {Injectable} from '@angular/core';
 
 const USER_PREFERENCES_STORAGE_KEY = '_USER_PREFERENCES_';
@@ -106,12 +104,3 @@ export class UserPreferences {
     }
   }
 }
-
-export const loadUserAndPreferences = (
-  loginService: LoginService,
-  confService: ConfigurationService,
-): () => Promise<any> => (): Promise<any> => new Promise((resolve) => {
-  confService.initConfigurationService().subscribe(() =>
-    loginService.initCredentials().subscribe(() => loginService.loginFlow(resolve))
-  );
-});

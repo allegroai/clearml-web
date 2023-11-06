@@ -15,16 +15,12 @@
     transform: translateY(-50%) translateX(-50%);
     display: block;
     .i-no-data-artifacts{
-      width: 200px;
-      height: 160px;
+      width: 150px;
+      height: 100px;
     }
-    h3 {
-      color: $cloudy-blue-two;
+    h4 {
+      color: $blue-100;
     }
-  }
-
-  .col-6 {
-    padding: 0;
   }
 
   ::ng-deep sm-labeled-row {

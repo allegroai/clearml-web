@@ -1,5 +1,10 @@
-<sm-dialog-template iconClass="al-ico-access-key" header="S3 credentials" (xClicked)="xClicked()" [header]="isAzure? 'Azure credentials': 'S3 credentials'">
+<sm-dialog-template iconClass="al-ico-access-key" (xClicked)="xClicked()" [header]="title">
+  <ng-container *ngIf="data?.provider === 'gcs'">
+    <div class="gcs-note" ><a href="https://accounts.google.com/AccountChooser?prompt=select_account" target="_blank">signing in</a> with your google account to view <b>{{bucket}}</b> bucket content, and <a href="#" (click)="$event.preventDefault(); reload()">reload</a> the page.</div>
+    <mat-checkbox class="my-2" [(ngModel)]="useGcsHmac">Use <a class="mx-1" href="https://cloud.google.com/storage/docs/authentication/managing-hmackeys#create" target="_blank">HMAC</a> instead</mat-checkbox>
+  </ng-container>
   <sm-s3-access-dialog
+    *ngIf="data?.provider !== 'gcs'|| useGcsHmac"
     [header]="header"
     [bucket]="bucket"
     [endpoint]="endpoint"
@@ -8,7 +13,8 @@
     [key]="key"
     [token]="token"
     [editMode]="editMode"
-    [isAzure]="isAzure"
+    [isAzure]="data?.provider === 'azure'"
+    [isGCS]="data?.provider === 'gcs'"
     (closeSave)="saveS3Credentials($event)"
     (closeCancel)="cancelClicked()">
   </sm-s3-access-dialog>

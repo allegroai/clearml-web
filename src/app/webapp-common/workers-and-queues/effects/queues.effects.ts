@@ -50,7 +50,7 @@ import {MESSAGES_SEVERITY} from '@common/constants';
 export class QueuesEffect {
   constructor(
     private actions: Actions, private queuesApi: ApiQueuesService, private tasksApi: ApiTasksService,
-    private store: Store<any>
+    private store: Store
   ) {
   }
 

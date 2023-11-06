@@ -4,7 +4,6 @@ import {selectExperimentModelInfoData, selectExperimentUserKnowledge, selectIsEx
 import {IExperimentModelInfo, IModelInfo, IModelInfoSource} from '../../shared/common-experiment-model.model';
 import {Model} from '~/business-logic/model/models/model';
 import {combineLatest, Observable, Subject} from 'rxjs';
-import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {experimentSectionsEnum} from '~/features/experiments/shared/experiments.const';
 import {selectIsExperimentEditable, selectSelectedExperiment} from '~/features/experiments/reducers';
 import * as commonInfoActions from '../../actions/common-experiments-info.actions';
@@ -98,7 +97,7 @@ export class ExperimentInfoModelComponent implements OnInit, OnDestroy {
         ];
       }
       this.store.dispatch(commonInfoActions.saveExperimentSection({models: {input: newModels as any}}));
-      return this.router.navigate([{modelId: selectedModelId || ''}], {relativeTo: this.route, replaceUrl: true, queryParamsHandling:'preserve'});
+      this.router.navigate([{modelId: selectedModelId || ''}], {relativeTo: this.route, replaceUrl: true, queryParamsHandling:'preserve'});
     }
   }
 

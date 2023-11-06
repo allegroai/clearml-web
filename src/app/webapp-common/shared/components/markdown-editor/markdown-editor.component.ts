@@ -6,10 +6,8 @@ import {
   Input,
   Output,
   Renderer2,
-  SecurityContext,
   ViewChild
 } from '@angular/core';
-import {DomSanitizer} from '@angular/platform-browser';
 import {MarkdownEditorComponent as MDComponent, MdEditorOption, UploadResult} from 'ngx-markdown-editor';
 import {Ace} from 'ace-builds';
 import {MatDialog} from '@angular/material/dialog';
@@ -17,6 +15,8 @@ import {
   MarkdownCheatSheetDialogComponent
 } from '@common/shared/components/markdown-editor/markdown-cheat-sheet-dialog/markdown-cheat-sheet-dialog.component';
 import {getBaseName} from '@common/shared/utils/shared-utils';
+import * as marked from 'marked';
+import * as DOMPurify from 'dompurify';
 
 const BREAK_POINT = 990;
 
@@ -35,9 +35,12 @@ export class MarkdownEditorComponent {
   public editorVisible: boolean;
   private _editMode: boolean;
   public options = {
-    markedjsOpt: {
-      sanitizer: this.sanitizer.sanitize.bind(SecurityContext.NONE)
-    },
+    // markedjsOpt: {
+    //   sanitizer: (dirty: string): string => {
+    //     debugger
+    //     return DOMPurify.sanitize(dirty, { ADD_TAGS: ["iframe"], ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling'] })
+    //   }
+    // },
     enablePreviewContentClick: true,
     fontAwesomeVersion: '6',
     showPreviewPanel: true,
@@ -48,6 +51,11 @@ export class MarkdownEditorComponent {
   public ace: Ace.Editor;
   public isExpand: boolean = false;
   public duplicateNames: boolean;
+  public postRender = (dirty: string): string => {
+    return DOMPurify.sanitize(dirty, { ADD_TAGS: ["iframe"], ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling'] })
+  };
+
+
   trackByUrl = (index: number, resource) => resource.url;
 
   set editMode(editMode: boolean) {
@@ -67,11 +75,10 @@ export class MarkdownEditorComponent {
   @Input() resources = [] as {unused: boolean; url: string}[];
   @Output() saveInfo = new EventEmitter<string>();
   @Output() editModeChanged = new EventEmitter();
+  @Output() dirtyChanged = new EventEmitter<boolean>();
   @Output() deleteResource = new EventEmitter<string>();
   @Output() imageMenuOpened = new EventEmitter<string>();
   @ViewChild(MDComponent) editorComponent: MDComponent;
-
-
   @HostListener('window:resize', ['$event'])
   updateEditorVisibility() {
     if (!this.ready) {
@@ -97,10 +104,10 @@ export class MarkdownEditorComponent {
 
   constructor(
     private renderer: Renderer2,
-    protected sanitizer: DomSanitizer,
     protected cdr: ChangeDetectorRef,
     protected dialog: MatDialog,
   ) {
+    window['marked'] = marked.marked;
     this.editMode = false;
   }
 
@@ -146,7 +153,9 @@ export class MarkdownEditorComponent {
   }
 
   checkDirty() {
-    this.isDirty = this.originalInfo !== this.data;
+    const isDirty = this.originalInfo !== this.data;
+    isDirty !== this.isDirty && this.dirtyChanged.emit(isDirty);
+    this.isDirty = isDirty;
     this.getDuplicateIframes();
   }
 

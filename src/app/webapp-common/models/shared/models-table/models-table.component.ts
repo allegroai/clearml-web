@@ -53,7 +53,7 @@ export class ModelsTableComponent extends BaseTableView {
   readonly modelsReadyOptions = Object.entries(MODELS_READY_LABELS).map(([key, val]) => ({label: val, value: key}));
   readonly timeFormatString = TIME_FORMAT_STRING;
 
-  public filtersOptions: { [colId: string]: IOption[] } = {
+  public override filtersOptions: { [colId: string]: IOption[] } = {
     [MODELS_TABLE_COL_FIELDS.FRAMEWORK]: [],
     [MODELS_TABLE_COL_FIELDS.READY]: this.modelsReadyOptions,
     [MODELS_TABLE_COL_FIELDS.USER]: [],
@@ -99,7 +99,7 @@ export class ModelsTableComponent extends BaseTableView {
   }
 
   @Input() noMoreModels: boolean;
-  @Input() reorderableColumns: boolean = true;
+  @Input() reorderableColumns = true;
 
   @Input() set tableCols(tableCols: ISmCol[]) {
     if (tableCols?.length > 0) {
@@ -132,7 +132,6 @@ export class ModelsTableComponent extends BaseTableView {
     this.filtersOptions[MODELS_TABLE_COL_FIELDS.PROJECT] = projects.map(project => ({
       label: project.name,
       value: project.id,
-      tooltip: `${project.name}`
     }));
     this.sortOptionsList(MODELS_TABLE_COL_FIELDS.PROJECT);
   }
@@ -211,7 +210,7 @@ export class ModelsTableComponent extends BaseTableView {
 
   @Input() set metadataValuesOptions(metadataValuesOptions: Record<ISmCol['id'], string[]>) {
     Object.entries(metadataValuesOptions).forEach(([id, values]) => {
-      this.filtersOptions[id] = [{label: '(No Value)', value: null}].concat(values.map(value => ({
+      this.filtersOptions[id] = values === null ? null : [{label: '(No Value)', value: null}].concat(values.map(value => ({
         label: value,
         value
       })));
@@ -251,7 +250,7 @@ export class ModelsTableComponent extends BaseTableView {
   @Output() columnResized = new EventEmitter<{ columnId: string; widthPx: number }>();
   @Output() clearAllFilters = new EventEmitter<{ [s: string]: FilterMetadata }>();
 
-  @ViewChild(TableComponent, {static: true}) table: TableComponent;
+  @ViewChild(TableComponent, {static: true}) override table: TableComponent<SelectedModel>;
   @ViewChild('contextMenuExtended') contextMenuExtended: ModelMenuExtendedComponent;
   public readonly initialColumns = MODELS_TABLE_COLS;
 
@@ -300,7 +299,7 @@ export class ModelsTableComponent extends BaseTableView {
       const addList = this.getSelectionRange<TableModel>(change, model);
       this.modelsSelectionChanged.emit([...this.selectedModels, ...addList]);
     } else {
-      const removeList = this.getDeselectionRange(change, model as any);
+      const removeList = this.getDeselectionRange(change, model);
       this.modelsSelectionChanged.emit(this.selectedModels.filter((selectedModel) =>
         !removeList.includes(selectedModel.id)));
     }
@@ -310,7 +309,7 @@ export class ModelsTableComponent extends BaseTableView {
     this.store.dispatch(selectAllModels({filtered}));
   }
 
-  emitSelection(selection: any[]) {
+  emitSelection(selection: SelectedModel[]) {
     this.modelsSelectionChanged.emit(selection);
   }
 
@@ -323,7 +322,7 @@ export class ModelsTableComponent extends BaseTableView {
     this.filtersOptions[MODELS_TABLE_COL_FIELDS.TAGS] = [];
   }
 
-  tableRowClicked(event: { e: MouseEvent; data: TableModel }) {
+  tableRowClicked(event: { e: Event; data: SelectedModel }) {
     if (this._selectedModels.some(exp => exp.id === event.data.id)) {
       this.openContextMenu({e: event.e, rowData: event.data, backdrop: true});
     } else {
@@ -331,7 +330,7 @@ export class ModelsTableComponent extends BaseTableView {
     }
   }
 
-  openContextMenu(data: { e: MouseEvent; rowData; single?: boolean; backdrop?: boolean }) {
+  openContextMenu(data: { e: Event; rowData; single?: boolean; backdrop?: boolean }) {
     if (!this.modelsSelectionChanged.observed) {
       return;
     }

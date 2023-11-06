@@ -2,9 +2,11 @@ import {Injectable} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {Actions, concatLatestFrom, createEffect, ofType} from '@ngrx/effects';
 import * as actions from './select-model.actions';
+import {getNextModels, getSelectedModels, setSelectedModels, setSelectedModelsList} from './select-model.actions';
 import * as exSelectors from './select-model.reducer';
+import {selectTableSortFields} from './select-model.reducer';
 import {MODELS_PAGE_SIZE} from '../models/models.consts';
-import {catchError, mergeMap, map, switchMap, debounceTime} from 'rxjs/operators';
+import {catchError, debounceTime, map, mergeMap, switchMap} from 'rxjs/operators';
 import {get} from 'lodash-es';
 import {MODEL_TAGS, MODELS_TABLE_COL_FIELDS} from '../models/shared/models.const';
 import {ApiModelsService} from '~/business-logic/api-services/models.service';
@@ -15,10 +17,8 @@ import {of} from 'rxjs';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {ModelsGetAllExRequest} from '~/business-logic/model/models/modelsGetAllExRequest';
 import {SortMeta} from 'primeng/api';
-import {addExcludeFilters, createFiltersFromStore, encodeOrder} from '../shared/utils/tableParamEncode';
-import {selectTableSortFields} from './select-model.reducer';
+import {createFiltersFromStore, encodeOrder, excludedKey, getTagsFilters} from '../shared/utils/tableParamEncode';
 import {escapeRegex} from '@common/shared/utils/escape-regex';
-import {getNextModels, getSelectedModels, setSelectedModels, setSelectedModelsList} from './select-model.actions';
 import {selectMetadataColsForProject} from '@common/models/reducers';
 import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {selectRouterProjectId} from '@common/core/reducers/projects.reducer';
@@ -100,8 +100,9 @@ export class SelectModelEffects {
     const projectFilter = get(tableFilters, [MODELS_TABLE_COL_FIELDS.PROJECT, 'value']);
     const systemTags = tableFilters?.system_tags?.value;
     const systemTagsFilter = (showArchived ? [] :
-      ['__$and', '__$not', MODEL_TAGS.HIDDEN]).concat(systemTags ? systemTags : []);
+      ['__$and', excludedKey, MODEL_TAGS.HIDDEN]).concat(systemTags ? systemTags : []);
     const filters = createFiltersFromStore(tableFilters, true);
+    delete filters['tags'];
     return {
       ...filters,
       _any_: searchQuery ? {
@@ -113,7 +114,11 @@ export class SelectModelEffects {
       scroll_id: scrollId || null, // null to create new scroll (undefined doesn't generate scroll)
       size: MODELS_PAGE_SIZE,
       order_by: encodeOrder(orderFields),
-      ...(tagsFilter?.length > 0 && {tags: addExcludeFilters(tagsFilterAnd ? ['__$and', ...tagsFilter] : tagsFilter)}),
+      ...(tagsFilter?.length > 0 && {
+        filters: {
+          tags: getTagsFilters(tagsFilterAnd, tagsFilter),
+        }
+      }),
       system_tags: (systemTagsFilter && systemTagsFilter.length > 0) ? systemTagsFilter : [],
       only_fields: [...this.selectModelsOnlyFields, ...metadataCols.map(col => col.id)],
       ...(tableFilters?.[MODELS_TABLE_COL_FIELDS.READY]?.value.length == 1 && !!tableFilters) ?

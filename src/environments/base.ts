@@ -55,6 +55,7 @@ export interface Environment {
   serverDownMessage?: string;
   legal: Legal;
   loginPopup?: string;
+  appsYouTubeIntroVideoId?: string;
   newExperimentYouTubeVideoId: string;
   baseHref?: string;
 }

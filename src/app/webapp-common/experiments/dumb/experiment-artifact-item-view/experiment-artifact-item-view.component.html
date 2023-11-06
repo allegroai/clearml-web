@@ -4,7 +4,7 @@
         <a *ngIf="artifact?.uri && !isLocalFile && isLinkable" (click)="linkClicked($event)" href="">{{artifact?.uri}}</a>
         <span class="uri" *ngIf="!isLinkable">{{artifact?.uri}}</span>
         <i *ngIf="artifact?.uri && !isLocalFile && !isLinkable"
-           class="pointer fa fa-download ms-2"
+           class="pointer al-icon al-ico-download sm ms-1"
            (click)="artifactFilePathClicked(artifact.uri)"
         ></i>
         <sm-copy-clipboard *ngIf="artifact?.uri && isLocalFile"

@@ -2,6 +2,8 @@
   *ngIf="columns?.length > 0"
   class="table"
   dataKey="id"
+  [style.--table-row-height]="rowHeight + 'px'"
+  [style.--card-height]="cardHeight + 'px'"
   [filterDelay]="0"
   [globalFilterFields]="enableTableSearch? globalFilterFields: null"
   [scrollHeight]="'flex'"
@@ -22,8 +24,9 @@
   [contextMenu]="cm"
   [rowTrackBy]="trackByFunction"
   [expandedRowKeys]="expandedRowKeys"
-  (onRowExpand)="updateNumberOfRows({event: $event, expanded: true})"
-  (onRowCollapse)="updateNumberOfRows({event: $event, expanded: false})"
+  [rowExpandMode]="rowExpandMode"
+  (onRowExpand)="updateNumberOfRows({event: $event, expanded: true}); rowExpanded.emit($event)"
+  (onRowCollapse)="updateNumberOfRows({event: $event, expanded: false}); rowCollapsed.emit($event)"
   (firstChange)="onFirstChanged($event)"
   (onColReorder)="onColReorder($event)"
   (onSort)="onSortChanged($event)"
@@ -33,9 +36,9 @@
   (onColResize)="colResize($event)"
 >
   <ng-template pTemplate="emptymessage">
-    <tr class="no-data-row h-100">
-      <div [attr.colspan]="columns.length" [class.simple]="simple" class="d-flex align-items-center">
-        <div class="no-data" [style.margin-left.px]="buttonLeft">{{noDataMessage}}</div>
+    <tr class="no-data-row" [style.height.px]="rowHeight" [style.line-height.px]="rowHeight">
+      <div [class.simple]="simple" class="no-data-wrapper" [style.top.px]="this.scrollable && noDataTop">
+        <span>{{noDataMessage}}</span>
       </div>
     </tr>
   </ng-template>
@@ -58,9 +61,8 @@
           [class.resize-disabled]="!resizableColumns"
           [class.selected-col-header]="col?.disablePointerEvents"
           [style.min-width]="col.style?.minWidth"
-          [style.max-width]="col.style?.maxWidth"
+          [style.max-width]="col.style?.maxWidth ?? !resizableColumns && columnResizeMode === 'fit' && col.style?.width"
           [style.width]="col.style?.width"
-          [style.flex-basis]="!resizableColumns && columnResizeMode === 'fit' && col.style?.width"
       >
         <ng-container [ngSwitch]="col?.headerType">
           <ng-container *ngSwitchCase="colHeaderTypeEnum.sortFilter">
@@ -77,20 +79,22 @@
     </tr>
     <ng-template #cardHeader>
       <tr class="header">
-        <th class="table-header" style="flex-basis:100%">
-          <ng-container *ngTemplateOutlet="checkboxTemplate; context: {$implicit: columns?.[0]}"></ng-container>
-          <div class="table-header-title ellipsis">{{minimizedTableHeader}}</div>
-          <div class="table-actions">
-            <div class="recent-title">
-              <sm-menu header="SORTED BY " class="menu" panelClasses="light-theme">
-                <div *ngFor="let col of sortableCols; trackBy: trackByColFn">
-                  <sm-menu-item [itemLabel]="col.header"
-                                [sortOrder]="getOrder(col.id)"
-                                (itemClicked)="sortItemClick($event, col.id)"></sm-menu-item>
-                </div>
-              </sm-menu>
+        <th>
+          <div class="table-header" style="flex-basis:100%">
+            <ng-container *ngTemplateOutlet="checkboxTemplate; context: {$implicit: columns?.[0]}"></ng-container>
+            <div class="table-header-title ellipsis">{{minimizedTableHeader}}</div>
+            <div class="table-actions">
+              <div class="recent-title">
+                <sm-menu header="SORTED BY " class="menu" panelClasses="light-theme">
+                  <div *ngFor="let col of sortableCols; trackBy: trackByColFn">
+                    <sm-menu-item [itemLabel]="col.header"
+                                  [sortOrder]="getOrder(col.id)"
+                                  (itemClicked)="sortItemClick($event, col.id)"></sm-menu-item>
+                  </div>
+                </sm-menu>
+              </div>
+              <ng-container *ngTemplateOutlet="cardHeaderTemplate"></ng-container>
             </div>
-            <ng-container *ngTemplateOutlet="cardHeaderTemplate"></ng-container>
           </div>
         </th>
       </tr>
@@ -99,7 +103,7 @@
   <ng-template pTemplate="body" let-rowData let-columns="columns" let-index="rowIndex" let-expanded="expanded">
     <tr
       [pRowToggler]="expandableRows? rowData : null"
-      [pRowTogglerDisabled]="!expandableRows"
+      [pRowTogglerDisabled]="!expandableRows || !expandRowOnClick"
       [pSelectableRow]="rowData"
       [pContextMenuRow]="rowData"
       [pContextMenuRowDisabled] = !rowRightClick.observed
@@ -108,7 +112,7 @@
       [class.checked]="isRowSelected(rowData)"
       [class.simple]="simple"
       [class.contexted]="activeContextRow?.id ===rowData?.id && contextMenuOpen"
-      [class.selected]="selectionMode==='single'? selection?.id === rowData?.id : selection?.includes(rowData)"
+      [class.selected]="isSelected(rowData)"
       [class.cards-table]="minView"
       [class.pointer]="!!selectionMode"
       (click)="!minView && checkClick({e: $event, data: rowData})"
@@ -123,9 +127,8 @@
           [class.cursor-default]="selectionMode===null"
           [class.simple]="simple"
           [style.min-width]="col.style?.minWidth"
-          [style.max-width]="col.style?.maxWidth"
+          [style.max-width]="col.style?.maxWidth ?? !resizableColumns && columnResizeMode === 'fit' && col.style?.width"
           [style.width]="col.style?.width"
-          [style.flex-basis]="!resizableColumns && columnResizeMode === 'fit' && col.style?.width"
         >
           <ng-container *ngIf="bodyTemplate; else noBodyTemplate">
             <ng-container *ngTemplateOutlet="bodyTemplate; context: {$implicit: col, rowData: rowData, rowIndex: index, expanded}">
@@ -138,27 +141,27 @@
       </ng-container>
      <ng-template #cardBody>
         <td class="pointer p-0" role="button">
-          <ng-container
-            *ngTemplateOutlet="cardTemplate;  context: {rowData: rowData, rowNumber: index, selected:  (selectionMode==='single'? selection?.id === rowData.id :  selection?.includes(rowData))}">
-          </ng-container>
+          <div class="card-wrapper">
+            <ng-container
+              *ngTemplateOutlet="cardTemplate;  context: {rowData: rowData, rowNumber: index, selected: isSelected(rowData)}">
+            </ng-container>
+          </div>
         </td>
       </ng-template>
-      <div
-        *ngIf="rowRightClick.observed && !minView"
-        (click)="$event.stopPropagation(); openContext({originalEvent: $event, data: rowData, single: true})"
-        class="context-button"
-        [style.--rowHeight]="rowHeight + 'px'"
-        [style.left.px]="contextButtonPosition"
-        [style.padding.px]="rowHeight < 42 ? 2 : 3"
-      ><i data-id="3Dot Menu Button" class="al-icon al-ico-dots-v-menu" [class.sm-md]="rowHeight < 42" ></i>
+      <div class="context-button-wrapper">
+        <div
+          tabindex="10"
+          class="context-button"
+          *ngIf="rowRightClick.observed && !minView"
+          (click)="$event.stopPropagation(); openContext({originalEvent: $event, data: rowData, single: true})"
+          (keyup)="$event.stopPropagation(); openContext({originalEvent: $event, data: rowData, single: true})"
+        ><i data-id="3Dot Menu Button" class="al-icon al-ico-dots-v-menu" [class.sm-md]="rowHeight < 42" ></i>
+        </div>
       </div>
     </tr>
-    <tr *ngIf="index === rowsNumber - 1 && lazyLoading && !noMoreData && !lastRowExpanded" class="table-load-more load-more-wrapper d-flex">
-      <div (smScrollEnd)="autoLoadMore && loadMore()">
-        <button #loadButton
-                class="btn btn-cml-primary" data-id="LoadMore"
-                (click)="loadMore()"
-                [style.margin-left.px]="buttonLeft">
+    <tr *ngIf="index === rowsNumber - 1 && lazyLoading && !noMoreData && !lastRowExpanded" class="table-load-more">
+      <div (smScrollEnd)="autoLoadMore && loadMore()" class="load-more-wrapper">
+        <button #loadButton class="btn btn-cml-primary" data-id="LoadMore" (click)="loadMore()">
           <i *ngIf="loading && !hasExperimentUpdate" class="load-spinner"></i>
           {{hasExperimentUpdate ? 'REFRESH LIST': loading ? 'LOADING...' : 'LOAD MORE' }}
         </button>

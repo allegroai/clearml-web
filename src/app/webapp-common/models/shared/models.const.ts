@@ -38,5 +38,5 @@ export const MODEL_TAGS = {
 };
 
 
-export const MODELS_ONLY_FIELDS = ['company', 'created', 'last_update', 'framework', 'id', 'labels', 'name', 'ready', 'tags', 'system_tags', 'task.name', 'uri', 'user.name', 'parent', 'comment', 'project.name'];
-export const MODELS_INFO_ONLY_FIELDS = ['company', 'created', 'last_update', 'framework', 'id', 'labels', 'name', 'ready', 'tags', 'system_tags', 'task.name', 'task.project', 'uri', 'user.name', 'parent', 'comment', 'project.name', 'design', 'metadata'];
+export const MODELS_ONLY_FIELDS = ['company', 'created','last_change' ,'last_update', 'framework', 'id', 'labels', 'name', 'ready', 'tags', 'system_tags', 'task.name', 'uri', 'user.name', 'parent', 'comment', 'project.name'];
+export const MODELS_INFO_ONLY_FIELDS = ['company', 'created','last_change' ,'last_update', 'framework', 'id', 'labels', 'name', 'ready', 'tags', 'system_tags', 'task.name', 'task.project', 'uri', 'user.name', 'parent', 'comment', 'project.name', 'design', 'metadata'];

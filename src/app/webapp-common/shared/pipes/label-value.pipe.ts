@@ -9,7 +9,7 @@ export class LabelValuePipe implements PipeTransform {
 
   transform(value: string[], args?: any): Array<{ label: string; value: string }> {
     if (!value) {
-      return;
+      return null;
     }
     if (!value.every(item => typeof item === 'string')) {
       return value as any;

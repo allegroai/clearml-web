@@ -2,6 +2,9 @@ import {AmazonS3URI} from '@common/shared/utils/amazon-s3-uri';
 import {Credentials} from '@common/core/reducers/common-auth-reducer';
 
 export const isS3Url = (src) => src?.startsWith('s3://');
+
+export const isGoogleCloudUrl = (src) => src?.startsWith('gs://');
+
 const replaceAll = (baseString: string, toReplace: string, replaceWith: string, ignore = false) =>
   baseString.replace(new RegExp(toReplace.replace(/([\/\,\!\\\^\$\{\}\[\]\(\)\.\*\+\?\|\<\>\-\&])/g, '\\$&'), (ignore ? 'gi' : 'g')), (typeof (replaceWith) == 'string') ? replaceWith.replace(/\$/g, '$$$$') : replaceWith);
 const encodeSpecialCharacters = (src: string) => {
@@ -24,7 +27,15 @@ export const getBucketAndKeyFromSrc = (src) => {
     /* eslint-enable @typescript-eslint/naming-convention */
   }
   const srcArr = src.split('/');
-  if (!isS3Url(src)) {
+  if(isGoogleCloudUrl(src)) {
+    return {
+      /* eslint-disable @typescript-eslint/naming-convention */
+      Bucket: srcArr[2],
+      Endpoint: 'https://storage.googleapis.com',
+      Key: srcArr.slice(3).join('/')
+      /* eslint-enable @typescript-eslint/naming-convention */
+    };
+  } else if (!isS3Url(src)) {
     return null;
   } else if (srcArr[2].includes(':')) {
     // We identify minio cae by it's port (:) and use same behavior in case user already set credentials for that endpoint
@@ -69,5 +80,5 @@ export interface SignResponse {
   signed?: string;
   expires?: number;
   bucket?: Credentials;
-  azure?: boolean;
+  provider?: 's3' | 'azure' | 'gcs';
 }

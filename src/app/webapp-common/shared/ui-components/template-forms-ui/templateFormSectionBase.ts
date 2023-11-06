@@ -3,7 +3,7 @@ import {ControlValueAccessor, NgForm} from '@angular/forms';
 
 @Directive()
 export class TemplateFormSectionBase implements ControlValueAccessor {
-  public disabled: boolean;
+  @Input() public disabled: boolean;
   public val = null;
   public ngModelValue = null;
   protected valueFromInherit = true;

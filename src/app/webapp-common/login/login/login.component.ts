@@ -1,9 +1,9 @@
-import {Component, OnDestroy, OnInit, ViewChild, ElementRef, Input, ChangeDetectorRef} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewChild, ElementRef, Input, ChangeDetectorRef, Renderer2} from '@angular/core';
 import {NgForm} from '@angular/forms';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {Store} from '@ngrx/store';
-import {EMPTY, Observable, Subscription} from 'rxjs';
-import {finalize, map, startWith, take, filter, mergeMap, catchError} from 'rxjs/operators';
+import {EMPTY, Observable, of, Subscription} from 'rxjs';
+import {finalize, map, startWith, take, filter, mergeMap, catchError, switchMap} from 'rxjs/operators';
 import {selectCurrentUser} from '../../core/reducers/users-reducer';
 import {fetchCurrentUser, setPreferences} from '../../core/actions/users.actions';
 import {LoginMode, loginModes} from '../../shared/services/login.service';
@@ -65,10 +65,15 @@ export class LoginComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private userPreferences: UserPreferences,
     private config: ConfigurationService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private ref: ElementRef,
+    private renderer: Renderer2
   ) {
-    this.environment = config.getStaticEnvironment();
+    this.environment = this.config.getStaticEnvironment();
     this.showGitHub = !this.environment.enterpriseServer && !this.environment.communityServer;
+    if (!this.environment.communityServer) {
+      this.renderer.addClass(this.ref.nativeElement, 'dark-theme');
+    }
   }
 
   get buttonCaption() {
@@ -123,10 +128,11 @@ export class LoginComponent implements OnInit, OnDestroy {
               this.options = users;
               this.cdr.detectChanges();
             });
-          if (this.environment.autoLogin && this.redirectUrl &&
-            !['/dashboard'].includes(this.redirectUrl)) {
+          if (this.environment.autoLogin && this.redirectUrl && !['/dashboard'].includes(this.redirectUrl)) {
             this.loginForm.controls['name'].setValue((new Date()).getTime().toString());
-            this.simpleLogin();
+            this.simpleLogin()
+              .pipe(take(1))
+              .subscribe();
           }
         }
         setTimeout(() => {
@@ -178,9 +184,10 @@ export class LoginComponent implements OnInit, OnDestroy {
             this.cdr.detectChanges();
             return EMPTY;
           }),
-          take(1)
+          take(1),
+          switchMap(() => this.afterLogin())
         )
-        .subscribe(() => this.afterLogin());
+        .subscribe();
     } else {
       const observer = this.simpleLogin();
       this.sub.add(observer?.pipe(
@@ -196,34 +203,40 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   simpleLogin() {
     const user = this.options.find(x => x.name === this.loginModel.name);
-
     if (user) {
-      const loginObserver = this.loginService.login(user.id);
-      loginObserver.subscribe(() => {
-        this.afterLogin();
-      });
-      return loginObserver;
+      return this.loginService.login(user.id)
+        .pipe(
+          switchMap(() => this.afterLogin())
+        );
     } else {
       const name = this.loginModel.name.trim();
-      this.loginService.autoLogin(name, () => this.afterLogin());
+      return this.loginService.autoLogin(name)
+        .pipe(
+          switchMap(() => this.afterLogin())
+        )
     }
   }
 
   private afterLogin() {
-    this.userPreferences.loadPreferences()
+    return this.userPreferences.loadPreferences()
       .pipe(
         take(1),
         catchError(() => this.router.navigateByUrl(this.getNavigateUrl())),
         finalize( () => {
           this.store.dispatch(fetchCurrentUser());
           this.cdr.detectChanges();
+        }),
+        switchMap(res => {
+          this.store.dispatch(setPreferences({payload: res}));
+          this.openLoginNotice();
+          return of(this.router.navigateByUrl(this.getNavigateUrl()));
         })
-      )
-      .subscribe(res => {
-        this.store.dispatch(setPreferences({payload: res}));
-        this.router.navigateByUrl(this.getNavigateUrl());
-        this.openLoginNotice();
-      });
+      );
+      // .subscribe(res => {
+      //   this.store.dispatch(setPreferences({payload: res}));
+      //   this.router.navigateByUrl(this.getNavigateUrl());
+      //   this.openLoginNotice();
+      // });
   }
 
   private _filter(value: string): string[] {

@@ -19,20 +19,20 @@
       color: $blue-600;
       margin-bottom: 24px;
     }
-    h3 {
-      font-size: 20px;
-      font-weight: 500;
+
+    h4 {
       color: $blue-100;
       margin-bottom: 24px;
+      font-size: 20px;
     }
   }
-  .sm-card-list-layout{
-    &.in-empty-state{
+
+  .sm-card-list-layout {
+    &.in-empty-state {
       height: 100%;
       grid-template-rows: 64px 1fr;
     }
   }
-
 
 
 }

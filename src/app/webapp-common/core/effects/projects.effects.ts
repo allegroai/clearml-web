@@ -43,7 +43,7 @@ import {
   OperationErrorDialogComponent
 } from '@common/shared/ui-components/overlay/operation-error-dialog/operation-error-dialog.component';
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
-import {createMetricColumn} from '@common/shared/utils/tableParamEncode';
+import {createMetricColumn, excludedKey} from '@common/shared/utils/tableParamEncode';
 import {ITask} from '~/business-logic/model/al-task';
 import {TasksGetAllExRequest} from '~/business-logic/model/tasks/tasksGetAllExRequest';
 import {setSelectedExperiments} from '../../experiments/actions/common-experiments-view.actions';
@@ -102,6 +102,7 @@ export class ProjectsEffects {
       switchMap(([action, showHidden, scrollId, filters]) => forkJoin([
           this.projectsApi.projectsGetAllEx({
             /* eslint-disable @typescript-eslint/naming-convention */
+            allow_public: action.allowPublic,
             page_size: rootProjectsPageSize,
             size: rootProjectsPageSize,
             order_by: ['name'],
@@ -190,7 +191,10 @@ export class ProjectsEffects {
 
   resetProjectSelections$ = createEffect(() => this.actions$.pipe(
     ofType(actions.resetProjectSelection),
-    mergeMap(() => [setSelectedExperiments({experiments: []}), setSelectedModels({models: []})])
+    mergeMap(() => [
+      setSelectedExperiments({experiments: []}),
+      setSelectedModels({models: []})
+    ])
   ));
 
   updateProject$ = createEffect(() => this.actions$.pipe(
@@ -307,7 +311,7 @@ export class ProjectsEffects {
         started: ['2000-01-01T00:00:00', null],
         status: ['-draft'],
         order_by: ['-started'],
-        type: ['__$not', 'annotation_manual', '__$not', 'annotation', '__$not', 'dataset_import'],
+        type: [excludedKey, 'annotation_manual', excludedKey, 'annotation', excludedKey, 'dataset_import'],
         system_tags: ['-archived'],
         scroll_id: null,
         size: 1000

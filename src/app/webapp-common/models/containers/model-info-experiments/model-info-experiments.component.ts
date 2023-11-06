@@ -1,6 +1,5 @@
 import {Component, ViewChild} from '@angular/core';
 import {Store} from "@ngrx/store";
-import {ModelInfoState} from "@common/models/reducers/model-info.reducer";
 import {selectSelectedModel} from "@common/models/reducers";
 import {Observable} from "rxjs";
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';

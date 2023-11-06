@@ -10,6 +10,9 @@
       display: inline-block;
       position: relative;
       overflow: visible;
+      .link {
+        color: $purple;
+      }
 
       &.with-ellipsis {
         overflow: hidden;

@@ -31,12 +31,12 @@ export interface IOption {
 export class SelectAutocompleteForTemplateFormsComponent extends TemplateFormSectionBase implements OnInit {
   private _items: { label: string; value: string }[];
   private _focusIt: any;
-  public loading: boolean = true;
+  public loading = true;
   separatorKeysCodes: number[] = [ENTER, COMMA];
-  filterText: string = '';
-  isNewName: boolean = false;
+  filterText = '';
+  isNewName = false;
   @Input() errorMsg: string;
-  @Input() multiple: boolean = true;
+  @Input() multiple = true;
   @Input() name: string;
   @Output() customOptionAdded = new EventEmitter();
   @Input() formFieldClass: string;
@@ -57,12 +57,11 @@ export class SelectAutocompleteForTemplateFormsComponent extends TemplateFormSec
     return this._items || [];
   }
 
-  @Input() disabled: boolean = false;
   // @Input() required: boolean = false;
-  @Input() clearable: boolean = true;
-  @Input() placeholder: string = '';
-  @Input() optionAddable: boolean = false;
-  @Input() autofocus: boolean = false;
+  @Input() clearable = true;
+  @Input() placeholder = '';
+  @Input() optionAddable = false;
+  @Input() autofocus = false;
 
   @Input() set focusIt(isFocus) {
     if (isFocus && this.autofocus === true) {

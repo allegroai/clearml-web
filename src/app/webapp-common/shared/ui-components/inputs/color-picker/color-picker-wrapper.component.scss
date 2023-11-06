@@ -3,17 +3,30 @@
 :host {
   ::ng-deep color-picker .color-picker {
     z-index: $zindex-colorpicker;
-    .arrow {
-      display: none;
+    border-radius: 4px;
+    box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
+    border-color: $blue-200;
+    .saturation-lightness {
+      border-radius: 3px 3px 0 0;
     }
-    .preset-color {
-      margin: 4px;
-      border-color: white;
-      border-radius: 3px;
-      box-shadow: 0 0 0 1px $blue-300;
+    .preset-area {
+      hr {
+        margin-top: 0;
+      }
+      .preset-color {
+        margin: 4px;
+        border-color: white;
+        box-shadow: 0 0 0 1px $blue-200;
+        &:hover {
+          box-shadow: 0 0 0 1px $blue-400;
+        }
+      }
     }
     .button-area {
-      margin-top: 16px;
+      padding: 0 16px;
+    }
+    .arrow {
+      display: none;
     }
   }
 

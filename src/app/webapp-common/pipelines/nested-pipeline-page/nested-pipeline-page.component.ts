@@ -24,9 +24,13 @@ export class NestedPipelinePageComponent extends PipelinesPageComponent {
   entityTypeEnum = ProjectTypeEnum;
   circleTypeEnum = CircleTypeEnum;
   hideMenu = false;
-  entityType = ProjectTypeEnum.pipelines;
 
-  projectCardClicked(data: { hasSubProjects: boolean; id: string; name: string }) {
+  constructor() {
+    super();
+    this.entityType = ProjectTypeEnum.pipelines;
+  }
+
+  override projectCardClicked(data: { hasSubProjects: boolean; id: string; name: string }) {
     if (data.hasSubProjects) {
       this.router.navigate([data.id, 'projects'], {relativeTo: this.route.parent?.parent});
     } else {
@@ -38,7 +42,7 @@ export class NestedPipelinePageComponent extends PipelinesPageComponent {
     this.store.dispatch(showExamplePipelines());
   }
 
-  toggleNestedView(nested: boolean) {
+  override toggleNestedView(nested: boolean) {
     this.store.dispatch(setDefaultNestedModeForFeature({feature: this.entityType, isNested: nested}));
     if (!nested) {
       this.router.navigateByUrl(this.entityType);

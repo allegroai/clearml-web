@@ -68,7 +68,7 @@ import {EXPERIMENTS_PAGE_SIZE} from '@common/experiments/shared/common-experimen
 import {setParents} from '@common/experiments/actions/common-experiments-view.actions';
 import {INITIAL_CONTROLLER_TABLE_COLS} from '@common/pipelines-controller/controllers.consts';
 import {EXPERIMENTS_TABLE_COL_FIELDS} from '~/features/experiments/shared/experiments.const';
-import {setTableCols} from '../../../experiments/actions/common-experiments-view.actions';
+import {hyperParamSelectedExperiments, hyperParamSelectedInfoExperiments, setHyperParamsFiltersPage, setTableCols} from '../../../experiments/actions/common-experiments-view.actions';
 
 export const allowAddExperiment$ = (selectRouterParams$: Observable<Params>) => selectRouterParams$.pipe(
   distinctUntilKeyChanged('ids'),
@@ -118,6 +118,8 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
   @ViewChild('searchExperiments', {static: true}) searchExperiments;
   @ViewChild(ExperimentsTableComponent) table: ExperimentsTableComponent;
   private parents: ProjectsGetTaskParentsResponseParents[];
+  private timer: number;
+  private previousExperimentsLength: number;
 
   constructor(
     private store: Store,
@@ -135,10 +137,12 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
     ]).pipe(
       map(([experiments, selectedExperiments]) => {
         const union = unionBy(selectedExperiments, experiments, 'id');
-        if (experiments?.length >= EXPERIMENTS_PAGE_SIZE && (union.length - (selectedExperiments?.length ?? 0) < EXPERIMENTS_PAGE_SIZE * (this.loadMoreCount + 1))) {
+        if (this.previousExperimentsLength !== experiments?.length && experiments?.length >= EXPERIMENTS_PAGE_SIZE && (union.length - (selectedExperiments?.length ?? 0) < EXPERIMENTS_PAGE_SIZE * (this.loadMoreCount + 1))) {
           this.store.dispatch(experimentsActions.getNextExperiments());
+          this.previousExperimentsLength = experiments?.length;
         }
-        return union;
+        // Simple hack to show 'archived' tag in select experiment table (without the table knows)
+        return union.map(e => ({...e, system_tags: e.system_tags?.map((t => t.replace('archive', ' archive')))}));
       })
     );
     this.searchTerm$ = this.store.pipe(select(selectExperimentsForCompareSearchTerm));
@@ -183,7 +187,9 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
   }
 
   public searchTermChanged(term: string) {
-    this.store.dispatch(experimentsActions.globalFilterChanged({query: term}));
+    this.previousExperimentsLength = null;
+    clearTimeout(this.timer);
+    this.timer = window.setTimeout( () => this.store.dispatch(experimentsActions.globalFilterChanged({query: term})), 300);
   }
 
   public closeSearch() {
@@ -211,6 +217,7 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
 
 
   ngOnInit() {
+    this.previousExperimentsLength = null;
     this.store.dispatch(setTableCols({cols: this.initTableCols}));
     this.store.dispatch(setShowSearchExperimentsForCompare({payload: true}));
     this.store.dispatch(resetTablesFilterProjectsOptions());
@@ -268,11 +275,13 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
   }
 
   sortedChanged(event: { isShift: boolean; colId: ISmCol['id'] }) {
+    this.previousExperimentsLength = null;
     this.syncSelectedExperiments();
     this.store.dispatch(compareAddDialogTableSortChanged(event));
   }
 
   filterChanged({col, value, andFilter}: { col: ISmCol; value: any; andFilter?: boolean }) {
+    this.previousExperimentsLength = null;
     this.syncSelectedExperiments();
     this.store.dispatch(compareAddTableFilterChanged({
       filter: {
@@ -301,10 +310,12 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
   }
 
   showArchived(event: MatSlideToggleChange) {
+    this.previousExperimentsLength = null;
     this.store.dispatch(setAddTableViewArchived({show: event.checked}));
   }
 
   filterSearchChanged({colId, value}: { colId: string; value: { value: string; loadMore?: boolean } }) {
+    this.previousExperimentsLength = null;
     switch (colId) {
       case 'project.name':
         if (this.projectId === '*' && !value.loadMore) {
@@ -319,6 +330,13 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
           this.store.dispatch(experimentsActions.resetTablesFilterParentsOptions());
           this.store.dispatch(experimentsActions.getParents({searchValue: value.value || '', allProjects: true}));
         }
+    }
+    if (colId.startsWith('hyperparams.')) {
+      if (!value.loadMore) {
+        this.store.dispatch(hyperParamSelectedInfoExperiments({col: {id: colId}, loadMore: false, values: null}));
+        this.store.dispatch(setHyperParamsFiltersPage({page: 0}));
+      }
+      this.store.dispatch(hyperParamSelectedExperiments({col: {id: colId, getter: `${colId}.value`}, searchValue: value.value || ''}));
     }
   }
 

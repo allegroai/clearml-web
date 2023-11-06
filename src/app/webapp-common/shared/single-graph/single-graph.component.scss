@@ -3,18 +3,34 @@
 
 .graph-title {
   position: absolute;
+  display: flex;
+  gap: 12px;
+  align-items: center;
   top: 36px;
   width: fit-content;
   max-width: 100%;
   left: 50%;
   transform: translateX(-50%);
-  padding: 0 80px;
+  padding: 0 60px;
   z-index: 1;
   font-size: 16px;
   color: $blue-600;
 
   &.table-title {
     top: 20px
+  }
+
+  .title-color {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    flex: 0 0 10px;
+    margin-right: 6px;
+    cursor: pointer;
+  }
+  sm-tag-list {
+    flex-shrink: 2;
+    max-width: 50%;
   }
 }
 

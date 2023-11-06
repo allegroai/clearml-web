@@ -1,3 +1,5 @@
+@import "variables";
+
 .content {
   width: 100%;
   display: flex;
@@ -16,8 +18,15 @@
     flex: 1;
     flex-direction: column;
 
-    a.dark {
-      color: white;
+    a {
+      color: $purple;
+      &.dark {
+        color: white;
+      }
+
+      &:hover {
+        text-decoration: underline;
+      }
     }
 
     sm-code-editor {

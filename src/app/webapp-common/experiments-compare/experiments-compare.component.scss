@@ -2,7 +2,7 @@
 @import "../layout/layout";
 
 $container-padding-top: 24px;
-$nav-height: 65px;
+$nav-height: 62px;
 $header-height: 60px;
 
 :host {
@@ -20,7 +20,8 @@ $header-height: 60px;
     }
 
     nav {
-      height: $nav-height
+      height: $nav-height;
+      gap: 1px;
     }
 
     ::ng-deep nav {
@@ -30,6 +31,8 @@ $header-height: 60px;
     .experiment-compare-body {
       padding: 0;
       height: calc(100% - #{$nav-height + $header-height});
+      display: flex;
+      flex-direction: column;
     }
 
   }
@@ -73,4 +76,105 @@ $header-height: 60px;
   ::ng-deep al-drawer button.drawer-toggle {
     border-radius: 0 6px 6px 0;
   }
+}
+
+.global-legend-container {
+  display: flex;
+  gap: 12px;
+  max-height: 0;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: #f2f3f6;
+  width: 100%;
+  padding: 0 24px;
+  transition: max-height 300ms, padding 300ms;
+
+  &.show {
+    max-height: 200px;
+    padding: 12px 24px;
+    border-bottom: 1px solid $cloudy-blue;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: $blue-500;
+
+    &:hover {
+      background-color: $blue-300;
+    }
+  }
+}
+
+.global-legend {
+  display: flex;
+  flex-grow: 1;
+  flex-wrap: wrap;
+  gap: 12px;
+  overflow: auto;
+  height: 100%;
+  padding: 0 10px 0 0;
+  max-height: 132px;
+  background: transparent;
+}
+
+.legend-experiment {
+  display: flex;
+  align-items: center;
+  flex: 0 1 100px;
+  gap: 6px;
+  white-space: nowrap;
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: solid 1px $cloudy-blue;
+  background-color: #ffffff;
+
+  .experiment-color {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    cursor: pointer;
+    &:hover {
+      box-shadow: 0 0 0 1px white, 0 0 0 2px $blue-300;
+    }
+  }
+
+  .experiment-name {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 500;
+    color: $blue-800;
+    margin-right: 6px;
+    max-width: 300px;
+    > a:hover {
+      text-decoration: underline;
+      text-underline-offset: 4px;
+      text-decoration-color: $blue-300;
+    }
+  }
+
+  sm-tag-list {
+    max-width: 300px;
+  }
+
+  .remove-experiment {
+    margin-left: auto;
+    cursor: pointer;
+
+    &:hover {
+      color: $blue-500;
+    }
+  }
+  &:last-child {
+    margin-right: 12px;
+  }
+}
+
+.close-legend {
+  cursor: pointer;
+  padding-top: 4px;
+}
+
+.legend-add {
+  border-radius: 4px;
+  height: 36px;
 }

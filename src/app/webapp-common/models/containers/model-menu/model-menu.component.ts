@@ -1,4 +1,4 @@
-import {Component, ElementRef, EventEmitter, Input, Output} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {
   archiveSelectedModels,
   changeProjectRequested,
@@ -8,11 +8,8 @@ import {
 import {htmlTextShort} from '@common/shared/utils/shared-utils';
 import {ICONS} from '@common/constants';
 import {MatDialog} from '@angular/material/dialog';
-import {Store} from '@ngrx/store';
 import {AdminService} from '~/shared/services/admin.service';
-import {selectS3BucketCredentials} from '@common/core/reducers/common-auth-reducer';
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
-import {Observable} from 'rxjs';
 import {filter, map, take} from 'rxjs/operators';
 import {ChangeProjectDialogComponent} from '@common/experiments/shared/components/change-project-dialog/change-project-dialog.component';
 import {
@@ -44,9 +41,8 @@ import {isReadOnly} from '@common/shared/utils/is-read-only';
 export class ModelMenuComponent extends BaseContextMenuComponent {
 
   readonly icons = ICONS;
-  private s3BucketCredentials: Observable<any>;
   public modelSignedUri: string;
-  public _model: any;
+  public _model: SelectedModel;
   public isExample: boolean;
   public isLocalFile: boolean;
   public isArchive: boolean;
@@ -74,12 +70,9 @@ export class ModelMenuComponent extends BaseContextMenuComponent {
 
   constructor(
     protected dialog: MatDialog,
-    protected store: Store,
     protected adminService: AdminService,
-    protected eRef: ElementRef
   ) {
-    super(store, eRef);
-    this.s3BucketCredentials = store.select(selectS3BucketCredentials);
+    super();
   }
 
   archiveClicked() {

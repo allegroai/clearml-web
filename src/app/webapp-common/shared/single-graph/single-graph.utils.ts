@@ -34,4 +34,5 @@ export const getSmoothedLine = (arr, weight, smoothType): number[] => {
     case smoothTypeEnum.exponential:
       return averageDebiased(arr, weight);
   }
+  return arr;
 };

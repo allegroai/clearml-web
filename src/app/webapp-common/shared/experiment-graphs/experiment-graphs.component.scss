@@ -18,8 +18,8 @@
     border-bottom: 1px solid #efefef;
   }
 
-  .single-value-summary-table {
-    margin: 16px 0;
+  .single-value-summary-section {
+    margin: 16px 0 8px;
     max-width: 80%;
   }
 
@@ -285,6 +285,9 @@
     }
   }
 
+  .no-output h4 {
+    color: $blue-100;
+  }
   .no-output-icon {
     height: 100px;
     width: 150px;

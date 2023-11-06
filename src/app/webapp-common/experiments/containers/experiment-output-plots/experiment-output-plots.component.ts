@@ -13,7 +13,6 @@ import {
   selectExperimentInfoPlots,
   selectExperimentMetricsSearchTerm,
   selectIsExperimentInProgress,
-  selectSelectedExperimentSettings,
   selectSelectedSettingsHiddenPlot,
   selectSplitSize
 } from '../../reducers';
@@ -48,11 +47,9 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChan
   @ViewChild(ExperimentGraphsComponent) graphsComponent: ExperimentGraphsComponent;
 
   public plotsList: Array<SelectableListItem>;
-  public selectedGraph: string = null;
   private experimentId: string;
   private routerParams$: Observable<any>;
   public listOfHidden$: Observable<Array<any>>;
-  public experimentSettings$: Observable<any>;
   public searchTerm$: Observable<string>;
   public minimized: boolean = false;
   public graphs: { [key: string]: ExtFrame[] };
@@ -75,14 +72,6 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChan
     this.splitSize$ = this.store.select(selectSplitSize);
     this.subs.add(this.store.select(selectSelectedExperiment).subscribe(exp => this.experimentCompany = exp?.company?.id ?? null));
     this.listOfHidden$ = this.store.select(selectSelectedSettingsHiddenPlot);
-
-    this.experimentSettings$ = this.store.select(selectSelectedExperimentSettings)
-      .pipe(
-        filter(settings => !!settings),
-        map(settings => settings ? settings.selectedPlot : null),
-        filter(selectedPlot => selectedPlot !== undefined),
-        distinctUntilChanged()
-      );
 
     this.routerParams$ = this.store.select(selectRouterParams)
       .pipe(
@@ -119,13 +108,6 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChan
         this.graphs = graphs;
         parsingError && this.store.dispatch(addMessage('warn', `Couldn't read all plots. Please make sure all plots are properly formatted (NaN & Inf aren't supported).`, [], true));
         this.changeDetection.detectChanges();
-      }));
-
-    this.subs.add(this.experimentSettings$
-      .subscribe((selectedPlot) => {
-        this.selectedGraph = selectedPlot;
-        this.graphsComponent?.scrollToGraph(selectedPlot);
-        this.store.dispatch(setExperimentSettings({id: this.experimentId, changes: {selectedPlot: null}}));
       }));
 
     this.subs.add(this.routerParams$
@@ -168,7 +150,7 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChan
   }
 
   metricSelected(id: string) {
-    this.store.dispatch(setExperimentSettings({id: this.experimentId, changes: {selectedPlot: id}}));
+    this.graphsComponent?.scrollToGraph(id);
   }
 
   hiddenListChanged(hiddenList: string[]) {

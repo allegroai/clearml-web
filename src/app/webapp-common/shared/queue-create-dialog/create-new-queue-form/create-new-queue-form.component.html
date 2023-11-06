@@ -16,11 +16,9 @@
     </mat-form-field>
   </div>
   <br/>
-  <div class="row">
-    <div class="col-24 create-queue-button">
-      <button class="btn btn-dark-fill center" [disabled]="queueForm.invalid"
-              (click)="send()">{{isEdit ? 'RENAME' : 'CREATE'}}
-      </button>
-    </div>
+  <div class="create-queue-button">
+    <button class="btn btn-dark-fill center" [disabled]="queueForm.invalid || (isEdit && queueForm.pristine)"
+            (click)="send()">{{isEdit ? 'RENAME' : 'CREATE'}}
+    </button>
   </div>
 </form>

@@ -61,6 +61,8 @@ const syncedKeys = [
   'projects.selectedProject',
   'rootProjects.showHidden',
   'rootProjects.hideExamples',
+  'rootProjects.mainPageTagsFilter',
+  'rootProjects.mainPageTagsFilterMatchMode',
   'rootProjects.defaultNestedModeForFeature',
   'views.availableUpdates',
   'views.showSurvey',
@@ -92,7 +94,7 @@ export const localStorageReducer = (reducer: ActionReducer<any>): ActionReducer<
     return nextState;
   };
 
-const userPrefMetaFactory = (userPreferences: UserPreferences): MetaReducer<any>[] => [
+const userPrefMetaFactory = (userPreferences: UserPreferences): MetaReducer[] => [
   (reducer: ActionReducer<any>) =>
     createUserPrefReducer('users', ['activeWorkspace', 'showOnlyUserWork'], [USERS_PREFIX], userPreferences, reducer),
   (reducer: ActionReducer<any>) =>

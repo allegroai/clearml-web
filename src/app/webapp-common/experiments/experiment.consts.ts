@@ -197,6 +197,8 @@ export const MINIMUM_ONLY_FIELDS = [
 ];
 
 export const ARTIFACTS_ONLY_FIELDS = [
+  'name',
+  'project.id',
   'execution.artifacts',
   'models.output.name',
   'models.output.model.name',
@@ -204,9 +206,6 @@ export const ARTIFACTS_ONLY_FIELDS = [
   'models.output.model.uri',
   'models.output.model.framework',
   'models.output.model.created',
-  'models.output.model.task.id',
-  'models.output.model.task.name',
-  'models.output.model.task.project.id',
   'models.input.name',
   'models.input.model.name',
   'models.input.model.design',
@@ -217,3 +216,9 @@ export const ARTIFACTS_ONLY_FIELDS = [
   'models.input.model.task.name',
   'models.input.model.task.project.id',
 ];
+export enum ActiveSectionEnum {
+  'input-model' = 'input-model',
+  'output-model' = 'output-model',
+  'artifact' = 'artifact',
+  'other' = 'other',
+}

@@ -116,6 +116,11 @@ export const setCompanyTags = createAction(
   props<{ tags: string[]; systemTags: string[] }>()
 );
 
+export const addCompanyTag = createAction(
+  PROJECTS_PREFIX + '[add company tag]',
+  props<{tag: string}>()
+);
+
 export const setMainPageTagsFilter = createAction(
   PROJECTS_PREFIX + '[set main page tags filters]',
   props<{ tags?: string[]; feature: string}>()
@@ -222,7 +227,7 @@ export const resetTablesFilterProjectsOptions = createAction(
 
 export const getTablesFilterProjectsOptions = createAction(
   PROJECTS_PREFIX + ' [get tables filter projects options]',
-  props<{ searchString: string; loadMore: boolean}>()
+  props<{ searchString: string; loadMore: boolean; allowPublic?: boolean}>()
 );
 
 export const setTablesFilterProjectsOptions = createAction(

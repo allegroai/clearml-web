@@ -30,15 +30,16 @@
           <i class="fas fa-minus-circle pointer"
              *ngIf="experiments.length > 1"
              (click)="experimentRemoved(experiment)"
-             smTooltip="Remove from comparison"></i>
+             smTooltip="Remove from comparison" data-id="removeComparision"></i>
           <i *ngIf="baseExperiment.id !== experiment.id"
              class="fas fa-adjust pointer"
              (click)="setAsBase(experiment)"
-             smTooltip="Set as baseline">
+             smTooltip="Set as baseline" data-id="setBaselineButton">
           </i>
           <i class="fas fa-arrows-alt"
              cdkDragHandle
              smTooltip="Click and drag to reposition the experiment"
+             data-id="dragAndDropButton"
              [ngClass]="{'invisible': experiments.length === 1}"
           >
           </i>
@@ -53,7 +54,7 @@
     </sm-card2>
   </al-drawer>
   <div *ngIf="tasksLimitExceeded" class="limit-message-container">
-    <div class="limit-message">
+    <div class="limit-message" data-id="limitMessageText">
       <i class="al-icon al-ico-info-circle mb-2"></i>Only the first 10 experiments are available for this view...
     </div>
   </div>

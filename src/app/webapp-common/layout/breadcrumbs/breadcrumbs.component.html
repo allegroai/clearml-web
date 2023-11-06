@@ -5,22 +5,22 @@
   </ng-container>
   <ng-container *ngFor="let breadcrumbGroup of breadcrumbs ; let lastGroup=last; let
   firstGroup=first">
-    <ng-container *ngIf="!(shouldCollapse && breadcrumbGroup?.length > 0 && breadcrumbGroup?.[0]?.collapsable); else
-    collapseMenu">
-      <ng-container *ngFor="let breadcrumb of breadcrumbGroup ; let
-      lastCrumb=last; let firstCrumb=first">
-        <span class="sub-projects-breadcrumbs">
-                    <i *ngIf="breadcrumb.hidden" class="al-icon al-ico-ghost sm me-1 align-ghost"></i>
-                    <a *ngIf="breadcrumb.url && !(lastCrumb && lastGroup); else noURL" class="crumb url"
-                       [class.first]="firstCrumb && firstGroup"
-                       [routerLink]="breadcrumb.url">
-                      {{breadcrumb.name}}</a>
-                    <i *ngIf="!(lastCrumb && lastGroup)" class="al-icon al-ico-slash"></i>
-                </span>
+    <ng-container *ngIf="!(shouldCollapse && breadcrumbGroup?.length > 0 && breadcrumbGroup?.[0]?.collapsable); else collapseMenu">
+      <ng-container *ngFor="let breadcrumb of breadcrumbGroup ; let lastCrumb=last; let firstCrumb=first">
+        <span class="sub-projects-breadcrumbs" [class.last]="lastCrumb && lastGroup">
+          <i *ngIf="breadcrumb.hidden" class="al-icon al-ico-ghost sm me-1 align-ghost"></i>
+          <a *ngIf="breadcrumb.url && !(lastCrumb && lastGroup); else noURL" class="crumb url"
+             [class.first]="firstCrumb && firstGroup"
+             [routerLink]="breadcrumb.url">
+            {{breadcrumb.name}}</a>
+          </span>
+        <i *ngIf="!(lastCrumb && lastGroup)" class="al-icon al-ico-slash"></i>
         <ng-template #noURL>
-                    <span class="crumb" [class.last]="lastGroup && lastCrumb" [class.first]="firstGroup && firstCrumb"
-                    ><div class="ellipsis" [smTooltip]="breadcrumb.name"
-                          smShowTooltipIfEllipsis>{{breadcrumb.name}} {{breadcrumb.example? ' (example)':''}}</div></span>
+          <div #crumb class="crumb" [class.last]="lastGroup && lastCrumb" [class.first]="firstGroup && firstCrumb">
+            <div class="ellipsis name" [smTooltip]="breadcrumb.name" smShowTooltipIfEllipsis
+            >{{breadcrumb.name}}{{breadcrumb.example ? ' (example)' : ''}}</div>
+            <sm-tag-list *ngIf="breadcrumb?.tags" [tags]="breadcrumb.tags"></sm-tag-list>
+          </div>
         </ng-template>
       </ng-container>
     </ng-container>
@@ -33,15 +33,16 @@
       <ng-container class="d-flex" *ngIf="breadcrumbGroup?.length>0">
         <i class="al-icon al-ico-slash"></i>
       </ng-container>
-      <mat-menu #subProjectsMenu="matMenu">
-                <span mat-menu-item
-                      class="sub-project-menu-item"
-                      [smTooltip]="breadcrumb.name"
-                      smShowTooltipIfEllipsis
-                      *ngFor="let breadcrumb of breadcrumbGroup"
-                      [routerLink]="breadcrumb.url!=='projects/*/projects'? breadcrumb.url: 'projects/*'">
-                  <i *ngIf="breadcrumb.hidden" class="al-icon al-ico-ghost sm me-1"></i>{{breadcrumb.name}}
-                </span>
+      <mat-menu #subProjectsMenu="matMenu" >
+        <span mat-menu-item
+          class="sub-project-menu-item"
+          [smTooltip]="breadcrumb.name"
+          smShowTooltipIfEllipsis
+          *ngFor="let breadcrumb of breadcrumbGroup"
+          [routerLink]="breadcrumb.url!=='projects/*/projects'? breadcrumb.url: 'projects/*'"
+        >
+          <i *ngIf="breadcrumb.hidden" class="al-icon al-ico-ghost sm me-1"></i>{{breadcrumb.name}}
+        </span>
       </mat-menu>
 
     </ng-template>

@@ -1,13 +1,10 @@
+@import "mixins/link";
+
 :host {
   display: flex;
   flex-direction: column;
 
-  a[href] {
-    text-decoration: underline;
-    &:hover {
-      text-decoration: none;
-    }
-  }
+  @include link();
 
   .preserve-spaces {
     white-space: pre-wrap;

@@ -28,12 +28,14 @@ export class ChipsListComponent implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    this.calcChipsWidth(this.chips);
-    this.sub.add(this.chips.changes.subscribe((chips) => {
-      this.calcChipsWidth(chips);
+    setTimeout(() => {
+      this.calcChipsWidth(this.chips);
+      this.sub.add(this.chips.changes.subscribe((chips) => {
+        this.calcChipsWidth(chips);
+        this.hideChips();
+      }));
       this.hideChips();
-    }));
-    this.hideChips();
+    }, 100)
   }
 
   hideChips() {

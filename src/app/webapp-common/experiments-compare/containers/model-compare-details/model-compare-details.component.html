@@ -43,7 +43,6 @@
                     class="title-key"
                     [smTooltip]="(renameMap[node.data.key] || node.data.key) | hideHashTitle"
                     [matTooltipShowDelay]="500"
-
                     smShowTooltipIfEllipsis
                     [class.ellipsis]="showEllipsis"
                     [style.width.px]="showEllipsis ? nativeWidth - 65 - node.level * 20 : null"
@@ -69,7 +68,12 @@
                          [class.no-ellipsis]="((node.data.key | hideHash) + node.data.value).length < 45"
                          [class.with-ellipsis]="showEllipsis"
                          [style.width.px]="showEllipsis ? nativeWidth - 55 - node.level * 20 : null"
-                    >{{node.data.key | hideHash}}{{node.data.value}}<i class="al-icon sm al-ico-line-expand extend-toggle" [class.fa-rotate-180]="!showEllipsis" (click)="toggleEllipsis(); $event.stopPropagation()"></i>
+                    ><ng-container
+                            *ngIf="!!node.data.value?.dataDictionary && !!node.data.value?.link; else simple">{{node.data.key |
+                            hideHash}}<span
+                            class="pointer link"
+                            (click)="linkClicked(node.data.value.link)">{{node.data.value.dataValue}}</span></ng-container><ng-template
+                            #simple>{{node.data.key | hideHash}}{{node.data.value}}</ng-template><i class="al-icon sm al-ico-line-expand extend-toggle" [class.fa-rotate-180]="!showEllipsis" (click)="toggleEllipsis(); $event.stopPropagation()"></i>
                     </pre>
                   </div>
                 </div>
@@ -96,7 +100,7 @@
 </sm-portal>
 
 <sm-portal outletId="nextDiff">
-  <button class="btn btn-secondary btn-arrow me-3" smTooltip="Previous diff" (click)="goToNextDiff('up')">
+  <button class="btn btn-secondary btn-arrow" smTooltip="Previous diff" (click)="goToNextDiff('up')">
     <i class="al-icon al-ico-arrow-up sm"></i>
   </button>
 

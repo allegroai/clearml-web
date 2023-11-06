@@ -1,11 +1,11 @@
 import {MEDIA_VIDEO_EXTENSIONS, MediaContentTypeEnum} from '~/app.constants';
 import {ActivatedRoute} from '@angular/router';
 import {EXPERIMENT_GRAPH_ID_PREFIX} from '../../experiments/shared/common-experiments.const';
-import {get, last} from 'lodash-es';
+import {capitalize, get, last, snakeCase} from 'lodash-es';
 import {User} from '~/business-logic/model/users/user';
 import {TABLE_SORT_ORDER} from '../ui-components/data/table/table.consts';
+import {camelCase} from 'lodash-es';
 
-export const capitalizeFirstLetter = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
 
 const CRC_TABLE = () => {
   const polynomial = 0x04C11DB7;
@@ -78,7 +78,7 @@ export const createModelLink = (uri, modelId, modelSignedUri) => {
   return encodeURI(url);
 };
 
-export const allItemsAreSelected = (itemsInView: { id: any }[], selectedItems: { id: any }[]) => {
+export const allItemsAreSelected = (itemsInView: { id: string }[], selectedItems: { id: string }[]) => {
   if (itemsInView?.length === 0 || selectedItems.length === 0) {
     return false;
   } else {
@@ -87,7 +87,7 @@ export const allItemsAreSelected = (itemsInView: { id: any }[], selectedItems: {
   }
 };
 
-export const addOrRemoveFromArray = (arr: Array<any> = [], item) => {
+export const addOrRemoveFromArray = <T>(arr: T[] = [], item: T) => {
   if (arr.includes(item)) {
     return arr.filter(arrItem => item !== arrItem);
   } else {
@@ -114,7 +114,7 @@ export const isScrolledIntoView = el => {
   // Only completely visible elements return true:
   // const isVisible = (elemTop >= 0) && (elemBottom <= window.innerHeight);
   // Partially visible elements return true:
- return elemTop < window.innerHeight && elemBottom >= 0;
+  return elemTop < window.innerHeight && elemBottom >= 0;
 };
 
 export const getRouteFullUrl = (route: ActivatedRoute) => {
@@ -153,12 +153,11 @@ export const getCssTheme = (el: HTMLElement): string => {
   return null;
 };
 
-// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-export function crc32(str /* , polynomial = 0x04C11DB7, initialValue = 0xFFFFFFFF, finalXORValue = 0xFFFFFFFF*/) {
+export function crc32(str, ...rest /* , polynomial = 0x04C11DB7, initialValue = 0xFFFFFFFF, finalXORValue = 0xFFFFFFFF*/) {
   const s = String(str);
   const table = CRC_TABLE;
-  const initialValue = arguments.length < 3 ? 0xFFFFFFFF : (arguments[2] >>> 0);
-  const finalXORValue = arguments.length < 4 ? 0xFFFFFFFF : (arguments[3] >>> 0);
+  const initialValue = arguments.length < 3 ? 0xFFFFFFFF : (rest[1] >>> 0);
+  const finalXORValue = arguments.length < 4 ? 0xFFFFFFFF : (rest[2] >>> 0);
   let crc = initialValue;
   const length = s.length;
   let k = -1;
@@ -271,5 +270,47 @@ export const getBaseName = (url: string): string => {
 export const splitLine = (line: string, search: string) => {
   const regex = new RegExp(search, 'gi');
   const match = line.match(regex);
-  return line.split(regex).map( (part, i) => [part, match?.[i]]);
+  return line.split(regex).map((part, i) => [part, match?.[i]]);
 };
+export const cloneItemIntoDummy = (eCell: HTMLElement, eDummyContainer: HTMLElement) => {
+  // shamelessly copied from ag-grid
+  // make a deep clone of the cell
+  const eCellClone: HTMLElement = eCell.cloneNode(true) as HTMLElement;
+  // the original has a fixed width, we remove this to allow the natural width based on content
+  eCellClone.style.width = '';
+  // the original has position = absolute, we need to remove this, so it's positioned normally
+  eCellClone.style.position = 'static';
+  eCellClone.style.left = '';
+  // we put the cell into a containing div, as otherwise the cells would just line up
+  // on the same line, standard flow layout, by putting them into divs, they are laid
+  // out one per line
+  const eCloneParent = document.createElement('div');
+
+  // table-row, so that each cell is on a row.
+  eCloneParent.style.display = 'table-row';
+  eCloneParent.appendChild(eCellClone);
+  eDummyContainer.appendChild(eCloneParent);
+};
+
+export const convertSnakeToCamel = (obj) => {
+  return Object.keys(obj).reduce((result, key) => ({
+    ...result,
+    [camelCase(key)]: typeof obj[key] === 'object' && obj[key] !== null ?
+      Array.isArray(obj[key]) ?
+        obj[key].map(val => convertSnakeToCamel(val)) :
+        convertSnakeToCamel(obj[key]) :
+      obj[key],
+  }), {});
+};
+
+export const convertCamelToSnake = (obj) => {
+  return Object.keys(obj).reduce(
+    (result, key) => ({
+      ...result,
+      [snakeCase(key)]: obj[key],
+    }),
+    {},
+  );
+};
+
+export const snakeToTitle = (value: string) => value.split('_').map(w => capitalize(w)).join(' ');

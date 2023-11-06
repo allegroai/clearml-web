@@ -30,7 +30,7 @@ import {
 } from '@common/project-info/conteiners/metric-for-stats-dialog/metric-for-stats-dialog.component';
 import {MetricValueType} from '@common/experiments-compare/experiments-compare.constants';
 import {ScatterPlotComponent} from '@common/shared/components/charts/scatter-plot/scatter-plot.component';
-import tinycolor from 'tinycolor2';
+import { TinyColor } from '@ctrl/tinycolor';
 
 @Component({
   selector: 'sm-project-stats',
@@ -171,7 +171,7 @@ export class ProjectStatsComponent implements OnInit, OnDestroy {
         break;
     }
     if (hidden) {
-      return tinycolor(color).darken(30).toHexString();
+      return new TinyColor(color).darken(30).toHexString();
     }
     return color;
   }

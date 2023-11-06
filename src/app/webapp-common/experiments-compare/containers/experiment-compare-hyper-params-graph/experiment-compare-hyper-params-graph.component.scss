@@ -2,7 +2,8 @@
 
 :host {
   display: flex;
-  height: 100%;
+  height: 50%;
+  flex-grow: 1;
 
   ::ng-deep .mat-expansion-panel-header.mat-expansion-toggle-indicator-before {
     .mat-expansion-indicator {
@@ -173,15 +174,15 @@
   font-weight: 400;
 
   .no-data-title {
-    font-size: 16px;
+    color: $blue-100; 
   }
 }
 
 .al-ico-no-data-graph {
-  font-size: 240px;
-  width: 240px;
-  height: 240px;
-  color: #e5e5e5;
+  font-size: 140px;
+  width: 140px;
+  height: auto;
+  color: rgba(0,0,0,0.1);
 }
 
 sm-grouped-checked-filter-list {

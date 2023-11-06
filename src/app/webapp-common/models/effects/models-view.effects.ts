@@ -4,17 +4,7 @@ import {Actions, concatLatestFrom, createEffect, ofType} from '@ngrx/effects';
 import {Action, Store} from '@ngrx/store';
 import {flatten, isEqual} from 'lodash-es';
 import {EMPTY, of} from 'rxjs';
-import {
-  auditTime,
-  catchError,
-  expand,
-  filter,
-  map,
-  mergeMap,
-  reduce,
-  switchMap,
-  tap,
-} from 'rxjs/operators';
+import {auditTime, catchError, expand, filter, map, mergeMap, reduce, switchMap, tap,} from 'rxjs/operators';
 import {ApiModelsService} from '~/business-logic/api-services/models.service';
 import {BlModelsService} from '~/business-logic/services/models.service';
 import {requestFailed} from '../../core/actions/http.actions';
@@ -22,7 +12,6 @@ import {activeLoader, addMessage, deactivateLoader, setServerError} from '../../
 import {
   downloadForGetAll,
   getFilteredUsers,
-  setArchive as setProjectArchive,
   setProjectUsers
 } from '../../core/actions/projects.actions';
 import {setURLParams} from '../../core/actions/router.actions';
@@ -39,12 +28,7 @@ import {selectModelsList, selectSelectedModels, selectTableFilters, selectTableS
 import {MODEL_TAGS, MODELS_ONLY_FIELDS, MODELS_TABLE_COL_FIELDS} from '../shared/models.const';
 import {SelectedModel} from '../shared/models.model';
 import {ModelsGetAllExRequest} from '~/business-logic/model/models/modelsGetAllExRequest';
-import {
-  addExcludeFilters,
-  createFiltersFromStore,
-  encodeColumns,
-  encodeOrder
-} from '../../shared/utils/tableParamEncode';
+import {createFiltersFromStore, encodeColumns, encodeOrder, getTagsFilters} from '../../shared/utils/tableParamEncode';
 import {emptyAction} from '~/app.constants';
 import {ApiProjectsService} from '~/business-logic/api-services/projects.service';
 import {SearchState} from '../../common-search/common-search.reducer';
@@ -285,6 +269,7 @@ export class ModelsViewEffects {
             mergeMap(res => {
               this.lockRefresh = false;
               const resActions: Action[] = [deactivateLoader('Fetch Models')];
+
               if (selectedModel) {
                 if (action.hideLoader || action.autoRefresh) {
                   resActions.push(refreshModelInfo(selectedModel.id));
@@ -428,11 +413,6 @@ export class ModelsViewEffects {
     mergeMap(() => [actions.setTableMode({mode: 'info'})])
   ));
 
-  setArchiveMode = createEffect(() => this.actions$.pipe(
-    ofType(actions.setArchive),
-    switchMap(action => [setProjectArchive(action), setURLParams({isArchived: action.archive, update: true})])
-  ));
-
   getReadyFilter(tableFilters) {
     switch (tableFilters?.ready?.value?.length) {
       case 0:
@@ -512,7 +492,7 @@ export class ModelsViewEffects {
     const metaColsFilters = metaCols ? flatten(metaCols.map(col => col.getter || col.id)) : [];
     const only_fields = [...new Set([...MODELS_ONLY_FIELDS, ...colsFilters, ...metaColsFilters])];
     const tableFilters = createFiltersFromStore(filters, true);
-
+    delete tableFilters['tags'];
     return {
       id: selectedIds,
       ...tableFilters,
@@ -530,7 +510,11 @@ export class ModelsViewEffects {
       order_by: encodeOrder(orderFields),
       system_tags: (systemTagsFilter && systemTagsFilter.length > 0) ? systemTagsFilter : [],
       only_fields,
-      ...(tagsFilter?.length > 0 && {tags: addExcludeFilters(tagsFilterAnd ? ['__$and', ...tagsFilter] : tagsFilter)}),
+      ...(tagsFilter?.length > 0 && {
+        filters: {
+          tags: getTagsFilters(tagsFilterAnd, tagsFilter),
+        }
+      }),
       ...(frameworkFilter?.length > 0 && {framework: frameworkFilter}),
       ...(userFilter?.length > 0 && {user: userFilter}),
       ready: ready !== null ? ready : null
@@ -557,8 +541,8 @@ export class ModelsViewEffects {
         ]),
         switchMap(([scrollId, projectId, isArchived, metadataCols, gb, orderFields, filters, selectedModels, showAllSelectedIsActive, colsOrder, hiddenCols, cols, deep]) => {
           const selectedIds = showAllSelectedIsActive ? selectedModels.map(exp => exp.id) : [];
-          const columns = encodeColumns(MODELS_TABLE_COLS, hiddenCols, metadataCols, colsOrder);
-          this.setModelsUrlParams(filters, orderFields, isArchived, columns, deep);
+          // const columns = encodeColumns(MODELS_TABLE_COLS, hiddenCols, metadataCols, colsOrder);
+          // this.setModelsUrlParams(filters, orderFields, isArchived, columns, deep);
           return this.apiModels.modelsGetAllEx(
             this.getGetAllQuery({
               refreshScroll, scrollId, projectId, searchQuery: gb, archived: isArchived,
@@ -601,7 +585,10 @@ export class ModelsViewEffects {
       baseUrl = baseUrl.firstChild;
     }
     selectedModel ?
-      this.router.navigate([selectedModel.id, activeChildUrl], {queryParamsHandling: 'preserve', relativeTo: baseUrl}) :
+      this.router.navigate([selectedModel.id, activeChildUrl], {
+        queryParamsHandling: 'preserve',
+        relativeTo: baseUrl
+      }) :
       this.router.navigate([], {queryParamsHandling: 'preserve', relativeTo: baseUrl});
   }
 

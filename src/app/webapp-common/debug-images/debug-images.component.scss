@@ -110,9 +110,9 @@ sm-debug-images-view {
   left: 50%;
   transform: translateY(-50%) translateX(-50%);
   display: block;
-  color: $cloudy-blue-two;
-  font-weight: 500;
+  color: $blue-100;
   line-height: 1.2;
+  h4 {color: $blue-100;}
 
   &.dark {
     color: $blue-250;

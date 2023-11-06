@@ -1,12 +1,12 @@
 import {ChangeDetectorRef, Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
-import {ColHeaderTypeEnum, ISmCol, TableSortOrderEnum} from '@common/shared/ui-components/data/table/table.consts';
+import {ColHeaderTypeEnum, ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {find, get} from 'lodash-es';
-import {Queue} from '~/business-logic/model/queues/queue';
 import {QUEUES_TABLE_COL_FIELDS} from '../../workers-and-queues.consts';
-import {TableComponent} from '@common/shared/ui-components/data/table/table.component';
 import {BaseTableView} from '@common/shared/ui-components/data/table/base-table-view';
 import {ActivatedRoute} from '@angular/router';
 import {ICONS} from '@common/constants';
+import {Queue} from '@common/workers-and-queues/actions/queues.actions';
+
 
 @Component({
   selector: 'sm-queues-table',
@@ -22,7 +22,7 @@ export class QueuesTableComponent extends BaseTableView {
   readonly ICONS = ICONS;
   contextQueue: Queue;
 
-  @Input() set queues(queues: Array<Queue>) {
+  @Input() set queues(queues: Queue[]) {
     this._queues = queues;
     this.table && this.table.focusSelected();
   }
@@ -38,9 +38,7 @@ export class QueuesTableComponent extends BaseTableView {
   @Output() clearQueue = new EventEmitter();
   @Output() sortedChanged = new EventEmitter<{ isShift: boolean; colId: ISmCol['id'] }>();
 
-  @Input() tableSortOrder: TableSortOrderEnum;
   @ViewChild('tableContainer', {static: false}) tableContainer;
-  @ViewChild('table', {static: false}) table: TableComponent;
 
   public menuPosition: { x: number; y: number };
 
@@ -115,7 +113,7 @@ export class QueuesTableComponent extends BaseTableView {
 
   }
 
-  scrollTableToTop() {
+  override scrollTableToTop() {
     this.tableContainer.nativeElement.scroll({top: 0});
   }
 
@@ -124,7 +122,7 @@ export class QueuesTableComponent extends BaseTableView {
     this.scrollTableToTop();
   }
 
-  afterTableInit(): void {
+  override afterTableInit(): void {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

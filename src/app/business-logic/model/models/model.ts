@@ -39,7 +39,8 @@ export interface Model {
     /**
      * Model last update time
      */
-    last_update?: string;
+    last_update?: Date;
+    last_change?: Date;
     /**
      * Task ID of task in which the model was created
      */

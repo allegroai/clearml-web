@@ -11,12 +11,14 @@
   </div>
 
   <div *ngIf="showLogo && !isLogin" class="logo-full middle"
-       [class.make-room-for-slogan]="environment.whiteLabelSlogan">
-    <img *ngIf="!environment.whiteLabelLogo" alt="logo" priority ngSrc="assets/logo-white.svg" width="122" height="42">
-    <div *ngIf="environment.whiteLabelSlogan" class="slogan">{{environment.whiteLabelSlogan}}</div>
-  </div>
-  <div *ngIf="isLogin && environment.whiteLabelLogo" class="logo-full">
-    <img alt="logo" priority ngSrc="assets/logo-white.svg" width="122" height="42">
+       [class.make-room-for-slogan]="(environment$ | async).whiteLabelSlogan">
+    <img *ngIf="!(environment$ | async).whiteLabelLogo; else: whiteLabel" alt="logo" [priority]="true" [ngSrc]="(environment$ | async).branding.logo" width="130" height="42">
+    <ng-template #whiteLabel>
+      <div class="slogan">{{(environment$ | async).whiteLabelSlogan}}</div>
+      <div *ngIf="isLogin" class="logo-full">
+        <img alt="logo" [priority]="true" ngSrc="assets/logo-white.svg" width="130" height="42">
+      </div>
+    </ng-template>
   </div>
   <div *ngIf="isLogin" class="spacer"></div>
 
@@ -33,12 +35,12 @@
           <i class="al-icon al-ico-account sm-md"></i>
         </div>
       </ng-template>
-      <div *ngIf="userNotificationPath || (invitesPending$ | async)?.length" class="user-notification"></div>
+      <div *ngIf="(userNotificationPath$ | async) || (invitesPending$ | async)?.length" class="user-notification"></div>
     </span>
 
     <mat-menu #profileMenu="matMenu" class="user-menu">
-      <button mat-menu-item [routerLink]="'settings/' + userNotificationPath" data-id="Settings Button">
-        <i class="al-icon icon sm-md" [class]="userNotificationPath ? 'al-ico-settings-alert' : 'al-ico-settings'">
+      <button mat-menu-item [routerLink]="'settings/' + (userNotificationPath$ | async)" data-id="Settings Button">
+        <i class="al-icon icon sm-md" [class]="(userNotificationPath$ | async) ? 'al-ico-settings-alert' : 'al-ico-settings'">
         </i>Settings
       </button>
       <sm-header-user-menu-actions></sm-header-user-menu-actions>
@@ -47,30 +49,30 @@
       </button>
     </mat-menu>
 
-    <mat-menu #resourcesMenu="matMenu" class="user-menu">
+    <mat-menu #resourcesMenu="matMenu" class="user-menu light-theme" panelClass="light-theme">
       <button mat-menu-item (click)="openWelcome($event)" data-id="Python Package setup Option">
         <i class="al-icon sm-md al-ico-code-file"></i>ClearML Python Package setup
       </button>
-      <button mat-menu-item (click)="navigate('https://www.youtube.com/c/ClearML/featured')" data-id="Youtube Option">
+      <a mat-menu-item href="https://www.youtube.com/c/ClearML/featured" target="_blank" data-id="Youtube Option">
         <i class="al-icon al-ico-youtube sm-md"></i>ClearML on Youtube
-      </button>
-      <button mat-menu-item (click)="navigate(environment.docsLink)" data-id="Online Documentation Option">
+      </a>
+      <a mat-menu-item [href]="(environment$ | async).docsLink" target="_blank" data-id="Online Documentation Option">
         <i class="al-icon sm-md al-ico-documentation"></i>Online Documentation
-      </button>
+      </a>
       <button mat-menu-item (click)="openTip()" data-id="Pro Tips Option">
         <i class="al-icon sm-md al-ico-tips"></i>Pro Tips
       </button>
       <ng-container *smCheckPermission="'applications'">
         <button mat-menu-item
-                *ngIf="$any(environment)?.appsYouTubeIntroVideoId && $any(environment).appAwarenessMenu !== false"
-                (click)="openAppsAwareness($event, $any(environment)?.appsYouTubeIntroVideoId)" data-id="Apps Introduction Option"
+                *ngIf="(environment$ | async)?.appsYouTubeIntroVideoId && $any((environment$ | async)).appAwarenessMenu !== false"
+                (click)="openAppsAwareness($event)" data-id="Apps Introduction Option"
         >
           <i class="al-icon sm-md al-ico-applications"></i>ClearML Apps Introduction
         </button>
       </ng-container>
-      <button mat-menu-item (click)="navigate('mailto:support@clear.ml')" data-id="Contact Us">
+      <a mat-menu-item href="mailto:support@clear.ml" data-id="Contact Us">
         <i class="al-icon sm-md al-ico-email"></i>Contact Us
-      </button>
+      </a>
     </mat-menu>
   </div>
 </div>

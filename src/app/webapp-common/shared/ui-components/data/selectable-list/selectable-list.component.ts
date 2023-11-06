@@ -21,7 +21,6 @@ export class SelectableListComponent implements OnChanges{
 
   @Input() list: SelectableListItem[] = [];
   @Input() checkedList: string[];
-  @Input() selected: SelectableListItem['value'];
   @Input() checkIcon: string[]               = ['al-ico-show', 'al-ico-hide'];
   @Output() onItemSelect                   = new EventEmitter<string>();
   @Output() onItemCheck                    = new EventEmitter<string>();

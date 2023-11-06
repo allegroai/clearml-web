@@ -36,11 +36,10 @@ export class SelectableGroupedFilterListComponent {
   }
 
   @Input() checkedList: Array<any> = [];
-  @Input() selected: string;
   @Input() titleLabel: string;
   @Input() checkAllIcon: string;
   @Output() itemSelect = new EventEmitter<string>();
-  @Output() hiddenChanged = new EventEmitter<any>();
+  @Output() hiddenChanged = new EventEmitter<string[]>();
   @Output() searchTermChanged = new EventEmitter<string>();
 
 

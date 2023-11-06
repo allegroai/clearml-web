@@ -33,20 +33,12 @@ body {
 
     h4 {
       font-size: 14px;
-      font-weight: bold;
+      font-weight: 500;
     }
 
     option {
       color: map-get($dark-theme-select, option-color);
       background-color: map-get($dark-theme-select, option-bg);
-    }
-
-    a {
-      color: $blue-250;
-
-      &:hover {
-        color: #FFFFFF;
-      }
     }
 
     sm-menu .btn {
@@ -64,18 +56,10 @@ body {
       background-color: transparent;
     }
 
-    a {
-      color: $purple;
-
-      &:hover {
-        color: $purple;
-        text-decoration: underline;
-      }
-    }
 
     h4 {
       font-size: 14px;
-      font-weight: bold;
+      font-weight: 500;
     }
 
     option {

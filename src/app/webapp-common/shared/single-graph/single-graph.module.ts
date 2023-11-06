@@ -12,6 +12,8 @@ import {FormsModule} from '@angular/forms';
 import {MatInputModule} from '@angular/material/input';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {ChooseColorModule} from '@common/shared/ui-components/directives/choose-color/choose-color.module';
+import {TagListComponent} from "@common/shared/ui-components/tags/tag-list/tag-list.component";
 
 
 
@@ -28,6 +30,8 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
         MatInputModule,
         TooltipDirective,
         MatProgressSpinnerModule,
+        ChooseColorModule,
+        TagListComponent,
     ]
 })
 export class SingleGraphModule { }

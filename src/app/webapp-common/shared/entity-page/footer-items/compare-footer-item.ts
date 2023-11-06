@@ -4,15 +4,15 @@ import {MenuItems} from '../items.utils';
 import { ItemFooterModel} from './footer-items.models';
 export const compareLimitations = 100;
 export class CompareFooterItem extends ItemFooterModel  {
-  id = MenuItems.compare;
-  icon = ICONS.COMPARE as Partial<IconNames>;
-  class = 'compare';
-  title = 'COMPARE';
-  emit = true;
-  disableDescription = `${compareLimitations} or fewer ${this.entitiesType}s can be compared`;
 
   constructor(public entitiesType: EntityTypeEnum) {
     super();
+    this.id = MenuItems.compare;
+    this.icon = ICONS.COMPARE as Partial<IconNames>;
+    this.class = 'compare';
+    this.title = 'COMPARE';
+    this.emit = true;
+    this.disableDescription = `${compareLimitations} or fewer ${this.entitiesType}s can be compared`;
   }
   getItemState(state): any {
     return {

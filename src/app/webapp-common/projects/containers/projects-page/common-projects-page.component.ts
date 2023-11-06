@@ -13,7 +13,7 @@ import {
   getAllProjectsPageProjects,
   resetProjects,
   resetProjectsSearchQuery,
-  resetReadyToDelete,
+  resetReadyToDelete, setCurrentScrollId,
   setProjectsOrderBy,
   setProjectsSearchQuery,
   updateProject
@@ -25,7 +25,6 @@ import {ProjectDialogComponent} from '@common/shared/project-dialog/project-dial
 import {combineLatest, Observable, Subscription} from 'rxjs';
 import {
   debounceTime,
-  distinctUntilChanged,
   distinctUntilKeyChanged,
   filter,
   map,
@@ -101,7 +100,6 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
   protected router = inject(Router);
   protected route = inject(ActivatedRoute);
   protected dialog = inject(MatDialog);
-  private projectReadyForDeletion$: Observable<CommonProjectReadyForDeletion>;
 
   constructor() {
     this.searchQuery$ = this.store.select(selectSearchQuery);
@@ -110,9 +108,6 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
     this.noMoreProjects$ = this.store.select(selectNoMoreProjects);
     this.selectedProjectId$ = this.store.select(selectRouterParams).pipe(map((params: Params) => params?.projectId));
     this.selectedProject$ = this.store.select(selectSelectedProject).pipe(tap(selectedProject => this.selectedProject = selectedProject));
-    this.projectReadyForDeletion$ = this.store.select(selectProjectReadyForDeletion).pipe(
-      distinctUntilChanged(),
-      filter(readyForDeletion => readyForDeletionFilter(readyForDeletion)));
 
     this.projectsList$ = combineLatest([
       this.store.select(selectProjects),
@@ -138,7 +133,6 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
         }
       }),
     );
-
     this.syncAppSearch();
   }
 
@@ -164,36 +158,25 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    // this.store.dispatch(new ResetSelectedProject());
     this.store.dispatch(resetProjects());
     this.store.dispatch(setDeep({deep: false}));
     // Todo: join the 2 subscriptions to 1 selector.
     this.subs.add(this.store.select(selectActiveWorkspaceReady)
       .pipe(filter(ready => !!ready), take(1))
-      .subscribe(() => {
-        this.store.dispatch(getAllProjectsPageProjects());
-      }));
+      .subscribe(() => this.store.dispatch(getAllProjectsPageProjects())));
 
     this.subs.add(this.selectedProjectId$.pipe(
-      tap(projectId => this.projectId = projectId),
-      filter(projectId => !projectId),
-      distinctUntilChanged(),
-    ).subscribe(() => {
-        this.store.dispatch(resetProjectsSearchQuery());
-        this.store.dispatch(getAllProjectsPageProjects());
+    ).subscribe((projectId) => {
+      this.projectId = projectId;
       }
     ));
-
-
-
-
 
     this.subs.add(this.selectedProject$.pipe(
       filter(project => (!!project)),
       distinctUntilKeyChanged('id'),
       skip(1),
     ).subscribe(() => {
-      this.store.dispatch(resetProjectsSearchQuery());
+      this.store.dispatch(setCurrentScrollId({scrollId: null}));
       this.store.dispatch(getAllProjectsPageProjects());
     }));
     this.subs.add(this.store.select(selectShowOnlyUserWork)
@@ -203,13 +186,18 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
         this.store.dispatch(getAllProjectsPageProjects());
       }));
 
-    this.subs.add(this.projectReadyForDeletion$.subscribe(readyForDeletion => {
-      if (isDeletableProject(readyForDeletion)) {
-        this.showDeleteDialog(readyForDeletion);
-      } else {
-        this.showConfirmDialog(readyForDeletion);
-      }
-    }));
+    this.subs.add(this.store.select(selectProjectReadyForDeletion)
+      .pipe(
+        filter(readyForDeletion => readyForDeletion !== null && readyForDeletionFilter(readyForDeletion))
+      )
+      .subscribe(readyForDeletion => {
+        if (isDeletableProject(readyForDeletion)) {
+          this.showDeleteDialog(readyForDeletion);
+        } else {
+          this.showConfirmDialog(readyForDeletion);
+        }
+      })
+    );
     this.setupBreadcrumbsOptions();
   }
 
@@ -260,7 +248,7 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
   }
 
   private showDeleteDialog(readyForDeletion) {
-    const confirmDialogRef = this.dialog.open(CommonDeleteDialogComponent, {
+    this.dialog.open(CommonDeleteDialogComponent, {
       data: {
         entity: readyForDeletion.project,
         numSelected: 1,
@@ -269,13 +257,13 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
       },
       width: '600px',
       disableClose: true
-    });
-    confirmDialogRef.afterClosed().subscribe((confirmed) => {
+    }).afterClosed()
+      .subscribe((confirmed) => {
       if (confirmed) {
-        this.store.dispatch(resetDeleteState());
         this.store.dispatch(resetProjects());
         this.store.dispatch(getAllProjectsPageProjects());
       }
+      this.store.dispatch(resetDeleteState());
     });
   }
 
@@ -294,6 +282,8 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
 
   syncAppSearch() {
     this.store.dispatch(initSearch({payload: `Search for ${this.getName()}s`}));
+    this.subs.add(this.searchQuery$.pipe(take(1)).subscribe(query =>
+      this.store.dispatch(setProjectsSearchQuery({...query, skipGetAll: true}))));
     this.subs.add(this.searchQuery$.pipe(skip(1)).subscribe(query => this.search(query)));
   }
 

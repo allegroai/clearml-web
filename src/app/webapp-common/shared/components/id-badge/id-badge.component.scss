@@ -3,6 +3,7 @@
 :host {
   height: 16px;
   user-select: none;
+  display: inline-flex;
 
   .id-number {
     color: $blue-250;

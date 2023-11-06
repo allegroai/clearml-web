@@ -1,4 +1,14 @@
 :host {
+  sm-simple-table-2 ::ng-deep .headers, .body {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr auto;
+    grid-gap: 12px;
+  }
+
+  .body-container {
+    height: 100%;
+    overflow: auto;
+  }
 
   form.edit {
     height: calc(100% - 96px);
@@ -9,7 +19,19 @@
     overflow: auto;
   }
 
-  .btn.plus {
-    width: 40px;
+  .trash {
+    width: 48px;
+    height: 33px;
+  }
+
+  .plus {
+    width: 48px;
+  }
+  .outside-error {
+    position: absolute;
+    top: 35px;
+    left: 90px;
+    font-size: 11px;
+    color: red;
   }
 }

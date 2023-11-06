@@ -38,9 +38,14 @@
         (delete)="delete.emit()"
       ></sm-pipeline-card-menu>
     </div>
-    <div *ngIf="project.last_update; else: noRun" class="last-run">Updated {{project.last_update | timeAgo}}</div>
+    <span
+      *ngIf="project.last_update; else: noRun"
+      class="last-run"
+      [smTooltip]="project.last_update | date: timeFormatString"
+      matTooltipPosition="after"
+    >Updated {{project.last_update | timeAgo}}</span>
     <ng-template #noRun>
-      <div class="last-run"></div>
+      <span class="last-run"></span>
     </ng-template>
   </div>
   <div class="d-flex justify-content-around w-100">

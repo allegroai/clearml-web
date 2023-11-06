@@ -62,6 +62,14 @@
       color: $blue-500;
     }
 
+    .title-color {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      margin-right: 6px;
+      cursor: pointer;
+    }
+
     height: 56px;
     display: flex;
     align-items: center;

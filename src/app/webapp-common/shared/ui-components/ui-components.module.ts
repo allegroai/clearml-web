@@ -21,7 +21,7 @@ import {SMMaterialModule} from '../material/material.module';
 import {AlertDialogComponent} from './overlay/alert-dialog/alert-dialog.component';
 import {TooltipDirective} from './indicators/tooltip/tooltip.directive';
 import {CheckboxControlComponent} from './forms/checkbox-control/checkbox-control.component';
-import {SimpleTableComponent2} from './data/simple-table/simple-table.component';
+import {SimpleTableComponent} from './data/simple-table/simple-table.component';
 import {ChipsModule} from './buttons/chips/chips.module';
 import {TermsOfUseDialogComponent} from './overlay/terms-of-use-dialog/terms-of-use-dialog.component';
 import {LeafComponent} from './overlay/leaf/leaf.component';
@@ -73,7 +73,6 @@ import {RefreshButtonComponent} from '../components/refresh-button/refresh-butto
 import {DurationInputComponent} from './inputs/duration-input/duration-input.component';
 import {KeydownStopPropagationDirective} from './directives/keydown-stop-propagation.directive';
 import {PreventArrowKeysDirective} from './directives/prevent-arrow-keys.directive';
-import {EllipsisMiddleDirective} from './directives/ellipsis-middle.directive';
 import {UserTagComponent} from './tags/user-tag/user-tag.component';
 import {TagListComponent} from './tags/tag-list/tag-list.component';
 import {TagsMenuComponent} from './tags/tags-menu/tags-menu.component';
@@ -115,8 +114,10 @@ import { ChipsListComponent } from './buttons/chips-list/chips-list.component';
 import {VirtualGridComponent} from '@common/shared/components/virtual-grid/virtual-grid.component';
 import {ScrollEndDirective, ScrollEndRootDirective} from './directives/scroll-end.directive';
 import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
-import {Angular2CsvModule} from 'angular2-csv';
 import {A11yModule} from '@angular/cdk/a11y';
+import {
+    ExistNameValidatorDirective
+} from '@common/shared/ui-components/template-forms-ui/cross-fields-duplicate-validator.directive';
 
 const declarations = [
   DurationInputComponent,
@@ -146,14 +147,13 @@ const declarations = [
   OperationErrorDialogComponent,
   EditJsonComponent,
   ShareDialogComponent,
-  EllipsisMiddleDirective,
   KeydownStopPropagationDirective,
   PreventArrowKeysDirective,
   ThrottledScrollListenerDirective,
   JsonValidatorDirective,
   AlertDialogComponent,
   CheckboxControlComponent,
-  SimpleTableComponent2,
+  SimpleTableComponent,
   SelectableListComponent,
   GroupedCheckedFilterListComponent,
   GroupedSelectableListComponent,
@@ -171,16 +171,14 @@ const declarations = [
   ToggleArchiveComponent,
   TermsOfUseDialogComponent,
   LoadingButtonComponent,
-  TagComponent,
   UniqueNameValidatorDirective,
   UniquePathValidatorDirective,
   RequiredAutocompleteSelectionValidatorDirective,
   InvalidPrefixValidatorDirective,
   ForceInvalidValidatorDirective,
   NotAllowedStringsValidatorValidatorDirective,
+  ExistNameValidatorDirective,
   RefreshButtonComponent,
-  UserTagComponent,
-  TagListComponent,
   HesitateDirective,
   DividerComponent,
   TableFilterDurationDateTimeComponent,
@@ -226,13 +224,15 @@ const declarations = [
         DialogTemplateComponent,
         ClickStopPropagationDirective,
         LabeledFormFieldDirective,
-        Angular2CsvModule,
         A11yModule,
+        TagListComponent,
+        UserTagComponent,
+        TagComponent
     ],
   providers   : [ ],
   declarations: [...declarations, TagsMenuComponent, TagColorMenuComponent, ResizableColumnDirective, HesitateDirective, DurationInputListComponent, TableFilterDurationComponent, TableFilterDurationErrorComponent, RippleButtonComponent, TemplateAliasDirective, CodeEditorComponent, ChipsListComponent],
     exports: [...declarations, ChipsModule, SMMaterialModule, ChooseColorModule, SMPortalModule, TagsMenuComponent,
-      TableFilterDurationComponent, MatDatepickerModule, TemplateAliasDirective, CodeEditorComponent, ChipsListComponent,
+      TableFilterDurationComponent, MatDatepickerModule, TemplateAliasDirective, CodeEditorComponent, ChipsListComponent, TagComponent, TagListComponent, UserTagComponent,
       TooltipDirective, ShowTooltipIfEllipsisDirective, SelectAutocompleteWithChipsComponent, DialogTemplateComponent, ClickStopPropagationDirective]
 })
 export class UiComponentsModule {

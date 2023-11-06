@@ -7,38 +7,6 @@
   align-items: center;
   z-index: 9999999;
   top: 50%;
-  left: 50%;
+  left: calc(50% + #{$side-bar-close-width * 0.5});
   transform: translate(-50%);
-}
-
-.circle {
-  box-sizing: border-box;
-  width: 80px;
-  height: 80px;
-  border-radius: 100%;
-  border: 10px solid rgba(90, 101, 142, 0.8);
-  border-top-color: $purple;
-  animation: spin 1s infinite linear;
-  @keyframes spin {
-    100% {
-      transform: rotate(360deg);
-    }
-  }
-}
-
-.spinner-overlay {
-  position: absolute;
-  top: 60px;
-  left: 60px;
-  width: calc(100% - 60px);
-  height: calc(100% - 60px);
-  background: $blue-800;
-  opacity: 0;
-  z-index: 999998;
-  animation: showup 0.2s both normal;
-  @keyframes showup {
-    100% {
-      opacity: 0.20;
-    }
-  }
 }

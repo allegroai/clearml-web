@@ -262,7 +262,10 @@ export class NotifierContainerComponent implements OnDestroy, OnInit {
         }
 
         Promise.all(stepPromises).then(() => {
-          if (numberOfNotifications > this.config.behaviour.stacking) {
+          if (typeof this.config.behaviour.stacking === 'number' ?
+            numberOfNotifications > this.config.behaviour.stacking :
+            !this.config.behaviour.stacking
+          ) {
             this.removeNotificationFromList(this.notifications[0]);
           }
           this.tempPromiseResolver(null);

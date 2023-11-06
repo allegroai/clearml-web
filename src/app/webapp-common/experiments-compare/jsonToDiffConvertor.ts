@@ -184,7 +184,9 @@ function convertUncommittedChanges(diff: string[]): { [files: string]: string[] 
   }, {}) : diff;
 }
 
-function convertHyperParams(hyperParams: { [section: string]: { [name: string]: any } }, originHyperParams): { [section: string]: { [name: string]: any } } {
+function convertHyperParams(hyperParams: { [section: string]: { [name: string]: any } }, originHyperParams): {
+  [section: string]: { [name: string]: any }
+} {
   if (!hyperParams) {
     return {};
   }
@@ -203,7 +205,9 @@ function convertHyperParams(hyperParams: { [section: string]: { [name: string]: 
   }, {});
 }
 
-function convertConfiguration(confParams: { [name: string]: ConfigurationItem }, originConfParams): { [name: string]: string | string[] } {
+function convertConfiguration(confParams: { [name: string]: ConfigurationItem }, originConfParams): {
+  [name: string]: string | string[]
+} {
   if (!confParams) {
     return {};
   }
@@ -368,7 +372,6 @@ export function convertContainerScriptFromExperiments<T extends Array<IExperimen
 
 export function convertNetworkDesignFromExperiments<T extends IExperimentDetail>(experiments: T[], originalExperiments: Record<string, IExperimentDetail>): T[] {
   const addValuesToNetworkDesign = (model: ' input models' | ' output models', key: string) => {
-
     const modelNetworkDesignData = experiments.map(experiment => {
       const values = originalExperiments?.[experiment.id]?.artifacts?.[model]?.[key]?.network_design ?? [];
       return Array.isArray(values) ? values : [];
@@ -384,6 +387,7 @@ export function convertNetworkDesignFromExperiments<T extends IExperimentDetail>
         experiment.artifacts[model][key].network_design = inputModelNetworkDesignValues[index];
       }
     });
+    return experiments;
   };
 
   const inputModelKeys = Array.from(new Set(Object.values(originalExperiments).map(exp => [...Object.keys(exp.artifacts[' input models'])]).flat()));
@@ -412,7 +416,9 @@ export function convertExperimentsArrays(experiment, origin, experiments, path =
           convertedExperiment[key] = experiment[key];
           break;
         case 'configuration':
-          convertedExperiment[key] = convertConfiguration(experiment[key], origin) as { [key: string]: ConfigurationItem };
+          convertedExperiment[key] = convertConfiguration(experiment[key], origin) as {
+            [key: string]: ConfigurationItem
+          };
           break;
         case 'setup_shell_script':
           convertedExperiment[key] = experiment[key];
@@ -493,7 +499,7 @@ export function isParamsConverted(hyperparams) {
 
 export function getAllKeysEmptyObject(jsons) {
   let obj = {};
-  jsons.forEach(json => obj = mergeWith( obj, json, customMergeStrategyForArrays));
+  jsons.forEach(json => obj = mergeWith(obj, json, customMergeStrategyForArrays));
   const sortedObject = sortObject(obj, jsons[0], '');
   return sortedObject;
 }
@@ -505,8 +511,8 @@ export function createDiffObjectScalars(AllKeysObject, originObject?, comparedOb
     const comparedData = path.length === 0 ? comparedObject : get(comparedObject, path);
     const originPartial = get(originData, key);
     const comparedPartial = get(comparedData, key);
-    const existOnOrigin = originData && has(originData,key);
-    const existOnCompared = comparedData && has(comparedData,key);
+    const existOnOrigin = originData && has(originData, key);
+    const existOnCompared = comparedData && has(comparedData, key);
 
     return {
       key,

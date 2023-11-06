@@ -57,8 +57,8 @@
         <mat-option *ngFor="let project of projects; trackBy: trackByFn" [value]="project" [smTooltip]="project.label" smShowTooltipIfEllipsis>
           {{project.label}}
         </mat-option>
-        <div *ngIf="projects === null" style="line-height: 100px; pointer-events: none;">
-          <mat-spinner class="m-auto" [diameter]="80" [strokeWidth]="8"></mat-spinner>
+        <div *ngIf="projects === null" class="p-4 pe-none">
+          <mat-spinner class="m-auto" [diameter]="32" [strokeWidth]="4" color="accent"></mat-spinner>
         </div>
         <div *ngIf="projects && !noMoreOptions" (smScrollEnd)="!loading && loadMore()" class="text-center">Loading more...</div>
         <mat-option disabled style="height: 0; min-height: 0;"></mat-option> <!-- Empty mat-option, so the autocomplete menu will always pop -->
@@ -78,9 +78,10 @@
                       hideRequiredMarker="true">
         <mat-label>Description</mat-label>
         <textarea
+          class="clone-description"
+          rows="3"
           name="ExperimentComment"
           matInput
-          [rows]="7"
           [(ngModel)]="formData.comment"></textarea>
       </mat-form-field>
 

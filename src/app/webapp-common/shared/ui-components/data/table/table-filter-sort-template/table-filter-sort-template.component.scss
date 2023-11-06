@@ -8,6 +8,7 @@
     .menu-button {
       font-weight: 500;
       font-size: 12px;
+      white-space: nowrap;
 
       &.active {
         color: $blue-250;

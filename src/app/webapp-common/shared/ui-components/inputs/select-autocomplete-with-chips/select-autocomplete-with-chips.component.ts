@@ -47,15 +47,15 @@ export interface IOption {
 export class SelectAutocompleteWithChipsComponent extends TemplateFormSectionBase implements OnDestroy, AfterViewInit {
   private _items: { label: string; value: string }[];
   private _focusIt: any;
-  public loading: boolean = true;
+  public loading = true;
   separatorKeysCodes: number[] = [ENTER, COMMA];
-  filterText: string = '';
-  isNewName: boolean = false;
+  filterText = '';
+  isNewName = false;
   @Input() errorMsg: string;
-  @Input() multiple: boolean = true;
+  @Input() multiple = true;
   @Input() appearance: 'outline' | 'fill';
   @Input() name: string;
-  @Input() showSearchIcon: boolean = false;
+  @Input() showSearchIcon = false;
   @Input() formFieldClass: string;
   @Output() customOptionAdded = new EventEmitter<MatOptionSelectionChange>();
   public filteredItems: Observable<{ label: string; value: string }[]>;
@@ -72,11 +72,11 @@ export class SelectAutocompleteWithChipsComponent extends TemplateFormSectionBas
     return this._items || [];
   }
 
-  @Input() disabled: boolean = false;
-  @Input() clearable: boolean = true;
-  @Input() placeholder: string = '';
-  @Input() optionAddable: boolean = false;
-  @Input() autofocus: boolean = false;
+  @Input() override disabled = false;
+  @Input() clearable = true;
+  @Input() placeholder = '';
+  @Input() optionAddable = false;
+  @Input() autofocus = false;
 
   @Input() set focusIt(isFocus) {
     if (isFocus && this.autofocus) {

@@ -9,7 +9,7 @@ import {ARTIFACTS_TYPES, TAGS} from '../../tasks/tasks.constants';
 import {Artifact} from '~/business-logic/model/tasks/artifact';
 import {crc32} from '../../shared/utils/shared-utils';
 import {TaskModelItem} from '~/business-logic/model/tasks/taskModelItem';
-import {IModelInfo} from '../../experiments/shared/common-experiment-model.model';
+import {CompareIModelInfo} from '../../experiments/shared/common-experiment-model.model';
 import {ITask} from '~/business-logic/model/al-task';
 import {formatDate} from '@angular/common';
 import {TIME_FORMAT_STRING} from '@common/constants';
@@ -23,7 +23,7 @@ export class ExperimentDetailsReverterService extends ExperimentDetailsReverterS
 
   private durationPipe: DurationPipe;
 
-  constructor(public experimentReverter: ExperimentReverterService, @Inject(LOCALE_ID) public locale: string) {
+  constructor(experimentReverter: ExperimentReverterService, @Inject(LOCALE_ID) public locale: string) {
     super(experimentReverter);
     this.durationPipe = new DurationPipe();
     this.locale = locale;
@@ -41,17 +41,17 @@ export class ExperimentDetailsReverterService extends ExperimentDetailsReverterS
       'last update at': experiment.last_update && formatDate(experiment.last_update, TIME_FORMAT_STRING, this.locale) || NA,
       'completed at': experiment.completed && formatDate(experiment.completed, TIME_FORMAT_STRING, this.locale) || NA,
       'run time': this.durationPipe.transform(experiment.active_duration) || NA,
-      'queue': experiment.execution.queue?.name  || NA,
+      'queue': experiment.execution.queue?.name || NA,
       'worker': experiment.last_worker || NA,
       'created by': experiment.user.name || NA,
       'parent task': (experiment.parent as ITask)?.name || NA,
       'project': experiment.project?.name || NA,
-    ...Object.entries(experiment.runtime || {})
-      .filter(([key, ]) => !key.startsWith('_'))
-      .reduce((res, [key, val]) => {
-        res[key.replace(/_/g, ' ')] = val;
-        return res;
-      }, {})
+      ...Object.entries(experiment.runtime || {})
+        .filter(([key,]) => !key.startsWith('_'))
+        .reduce((res, [key, val]) => {
+          res[key.replace(/_/g, ' ')] = val;
+          return res;
+        }, {})
     };
   }
 
@@ -79,10 +79,15 @@ export class ExperimentDetailsReverterService extends ExperimentDetailsReverterS
       ...restArtifact,
       'file size': content_size,
       'file hash': hash,
+      'file path': {
+        dataDictionary: true,
+        link: uri,
+        dataValue: uri
+      }
     };
 
     if (type_data) {
-      const preview  = type_data.preview && type_data.preview.trim().split('\n') || [];
+      const preview = type_data.preview && type_data.preview.trim().split('\n') || [];
       result['content type'] = type_data['content_type'] || '';
       result['preview'] = (preview.length < 3000 && preview[0]?.length < 3000) ? preview : [`** Content is too large to display. Hash: ${crc32(type_data.preview)}`];
       result['data hash'] = type_data.data_hash || '';
@@ -136,11 +141,14 @@ export class ExperimentDetailsReverterService extends ExperimentDetailsReverterS
   }
 
 
-  public revertModelInput(model: TaskModelItem): IModelInfo {
+  public revertModelInput(model: TaskModelItem): CompareIModelInfo {
     return {
-      id: model?.model?.id,
       name: model?.model?.name,
-      uri: model?.model?.uri,
+      id: {
+        dataDictionary: true,
+        link: `/projects/${model?.model?.project?.id ? model?.model?.project?.id : '*'}/models/${model?.model?.id}`,
+        dataValue: model?.model?.id,
+      },
       framework: model?.model?.framework || model?.model?.framework
     };
   }

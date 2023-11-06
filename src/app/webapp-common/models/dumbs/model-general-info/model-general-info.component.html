@@ -5,7 +5,7 @@
       <span *ngIf="kpi.downloadable">
         <sm-copy-clipboard *ngIf="isLocalFile" [clipboardText]="kpi.value" [hideBackground]="true" [inline]="true" label=""></sm-copy-clipboard>
         <i *ngIf="model?.uri && !isLocalFile"
-           class="pointer fa fa-download ms-2"
+           class="pointer al-icon al-ico-download sm-md ms-2"
            (click)="downloadModelClicked()"
         ></i>
       </span>
@@ -29,5 +29,5 @@
     (inlineActiveStateChanged)="editExperimentComment($event)"
     (cancel)="cancelEdit()"
     >
-    <span class="preserve-spaces">{{model?.comment | NA}}</span></sm-inline-edit>
+    <span class="preserve-spaces">{{!model? '-': (model?.comment | NA)}}</span></sm-inline-edit>
 </sm-labeled-row>

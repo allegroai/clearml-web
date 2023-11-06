@@ -145,7 +145,7 @@ export class AppEffects {
       })
     ),
     mergeMap((res: { data: ReportsGetTaskDataResponse }) => [
-        setSingleValues({data: res.data.single_value_metrics[0]}),
+        setSingleValues({data: res.data.single_value_metrics}),
         setTaskData({sourceProject: (res.data.tasks[0]?.project as any).id, sourceTasks: res.data.tasks.map(t => t.id)})
       ]
     )

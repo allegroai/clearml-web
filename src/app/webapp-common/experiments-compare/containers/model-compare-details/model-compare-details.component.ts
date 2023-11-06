@@ -20,21 +20,14 @@ import {ModelDetail} from '@common/experiments-compare/shared/experiments-compar
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ModelCompareDetailsComponent extends ExperimentCompareBase implements OnInit, AfterViewInit {
-  public showEllipsis: boolean = true;
+  public showEllipsis = true;
 
-  constructor(
-    public router: Router,
-    public store: Store,
-    public changeDetection: ChangeDetectorRef,
-    public activeRoute: ActivatedRoute,
-    public cdr: ChangeDetectorRef,
-    public refresh: RefreshService
-  ) {
-    super(router, store, changeDetection, activeRoute, refresh, cdr);
+  constructor() {
+    super();
     this.entityType = EntityTypeEnum.model;
+    this.experiments$ = this.store.select(selectModelsDetails);
   }
 
-  experiments$ = this.store.pipe(select(selectModelsDetails));
 
   ngOnInit() {
     this.onInit();
@@ -74,7 +67,7 @@ export class ModelCompareDetailsComponent extends ExperimentCompareBase implemen
     this.showEllipsis = !this.showEllipsis;
   }
 
-  public buildExperimentTree(experiment, baseExperiment, mergedExperiment): any {
+  public override buildExperimentTree(experiment, baseExperiment, mergedExperiment): any {
     return {
       general: this.buildSectionTree(experiment, 'general', mergedExperiment),
       labels: this.buildSectionTree(experiment, 'labels', mergedExperiment),

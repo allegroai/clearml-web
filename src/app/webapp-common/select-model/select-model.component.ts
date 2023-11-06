@@ -3,13 +3,13 @@ import {Store} from '@ngrx/store';
 import * as actions from './select-model.actions';
 import {clearTableFilter, setSelectedModels, showArchive} from './select-model.actions';
 import {
-  selectGlobalFilter, selectModels, selectNoMoreModels, selectSelectedModels, selectSelectedModelsList, selectSelectModelTableFilters, selectTableSortFields, selectViewMode
+  selectGlobalFilter, selectModels, selectNoMoreModels, selectSelectedModels, selectSelectedModelsList, selectSelectModelTableFilters, selectShowArchive, selectTableSortFields, selectViewMode
 } from './select-model.reducer';
 import {combineLatest, Observable, Subscription} from 'rxjs';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {ConfirmDialogComponent} from '../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {ColHeaderTypeEnum, ISmCol, TableSortOrderEnum} from '../shared/ui-components/data/table/table.consts';
-import {SelectedModel} from '../models/shared/models.model';
+import {SelectedModel, TableModel} from '../models/shared/models.model';
 import {MODELS_TABLE_COLS, ModelsViewModesEnum} from '../models/models.consts';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {selectAllProjectsUsers, selectProjectSystemTags, selectSelectedProject, selectTablesFilterProjectsOptions} from '../core/reducers/projects.reducer';
@@ -20,7 +20,7 @@ import {SortMeta} from 'primeng/api';
 import {ModelsTableComponent} from '@common/models/shared/models-table/models-table.component';
 import {debounceTime, distinctUntilChanged, map, tap} from 'rxjs/operators';
 import {Project} from '~/business-logic/model/projects/models';
-import {getTablesFilterProjectsOptions, resetTablesFilterProjectsOptions, setTablesFilterProjectsOptions} from '@common/core/actions/projects.actions';
+import {getTablesFilterProjectsOptions, resetTablesFilterProjectsOptions} from '@common/core/actions/projects.actions';
 import {isEqual, unionBy} from 'lodash-es';
 import {compareLimitations} from '@common/shared/entity-page/footer-items/compare-footer-item';
 import {addMessage} from '@common/core/actions/layout.actions';
@@ -40,7 +40,7 @@ export class SelectModelComponent implements OnInit, OnDestroy {
   public noMoreModels$: Observable<boolean>;
   public tableFilters$: Observable<{ [s: string]: FilterMetadata }>;
   public searchValue$: Observable<string>;
-  public selectedModels$: Observable<Array<any>>;
+  public selectedModels$: Observable<Array<TableModel>>;
   public viewMode$: Observable<ModelsViewModesEnum>;
   public users$: Observable<Array<User>>;
   public tags$: Observable<string[]>;
@@ -51,13 +51,13 @@ export class SelectModelComponent implements OnInit, OnDestroy {
   public frameworks$: Observable<string[]>;
   private subs = new Subscription();
 
-  private isAllProjects: any;
   public selectedProject: Project;
   private selectedModels: Array<SelectedModel>;
   private columns$: Observable<ISmCol[]>;
   private metadataTableCols$: Observable<ISmCol[]>;
   public tableCols$: Observable<ISmCol[]>;
   public metadataColsOptions$: Observable<Record<string, string[]>>;
+  public showArchive$: Observable<boolean>;
 
   constructor(private store: Store,
               public dialogRef: MatDialogRef<ConfirmDialogComponent>,
@@ -71,13 +71,17 @@ export class SelectModelComponent implements OnInit, OnDestroy {
     this.models$ = combineLatest([
       this.store.select(selectModels),
       this.store.select(selectSelectedModelsList),
-    ]).pipe(map(([models, selectedModels]) => unionBy(selectedModels, models, 'id')));
+    ]).pipe(
+      map(([models, selectedModels]) => unionBy(selectedModels, models, 'id')),
+      map(models => models?.map(model => ({...model, system_tags: model.system_tags?.map((t => t.replace('archive', ' archive')))})))
+    );
     this.tableSortFields$ = this.store.select(selectTableSortFields);
     this.tableFilters$ = this.store.select(selectSelectModelTableFilters);
     this.selectedModels$ = this.store.select(selectSelectedModels).pipe(tap(models => this.selectedModels = models));
     this.viewMode$ = this.store.select(selectViewMode);
     this.searchValue$ = this.store.select(selectGlobalFilter);
     this.noMoreModels$ = this.store.select(selectNoMoreModels);
+    this.showArchive$ = this.store.select(selectShowArchive);
     this.users$ = this.store.select(selectAllProjectsUsers);
     this.tags$ = this.store.select(selectModelsTags);
     this.systemTags$ = this.store.select(selectProjectSystemTags);
@@ -153,7 +157,7 @@ export class SelectModelComponent implements OnInit, OnDestroy {
     this.store.dispatch(actions.tableSortChanged({colId: sort.colId, isShift: sort.isShift}));
   }
 
-  filterChanged(filter: { col: ISmCol; value: any }) {
+  filterChanged(filter: { col: ISmCol; value: string }) {
     this.store.dispatch(actions.tableFilterChanged({col: filter.col, value: filter.value}));
   }
 

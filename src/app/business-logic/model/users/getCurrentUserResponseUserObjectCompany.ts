@@ -15,4 +15,6 @@
 export interface GetCurrentUserResponseUserObjectCompany {
     id?: string;
     name?: string;
+    tier?: any;
+
 }

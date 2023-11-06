@@ -44,6 +44,7 @@
           [step]="smoothType === smoothTypeEnum.exponential ? 0.05 : 1"
           [(ngModel)]="smoothWeight"
           (ngModelChange)="trimToLimits($event)"
+          (blur)="smoothWeight === null && trimToLimits(-1)"
         />
       </mat-form-field>
       <mat-form-field appearance="outline" class="smooth-type no-bottom">

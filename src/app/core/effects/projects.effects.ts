@@ -1,9 +1,9 @@
 import {Injectable} from '@angular/core';
-import {Actions, createEffect, ofType} from '@ngrx/effects';
+import {Actions, concatLatestFrom, createEffect, ofType} from '@ngrx/effects';
 import * as actions from '../../webapp-common/core/actions/projects.actions';
 import {Store} from '@ngrx/store';
 import {selectSelectedProjectId, selectShowHidden} from '@common/core/reducers/projects.reducer';
-import {catchError, finalize, mergeMap, switchMap, withLatestFrom} from 'rxjs/operators';
+import {catchError, finalize, mergeMap, switchMap} from 'rxjs/operators';
 import {deactivateLoader} from '@common/core/actions/layout.actions';
 import {ALL_PROJECTS_OBJECT} from '@common/core/effects/projects.effects';
 import {requestFailed} from '@common/core/actions/http.actions';
@@ -26,15 +26,14 @@ export class ProjectsEffects {
 
   getSelectedProject = createEffect(() => this.actions$.pipe(
     ofType(actions.setSelectedProjectId),
-    withLatestFrom(
+    concatLatestFrom(() => [
       this.store.select(selectSelectedProjectId),
       this.store.select(selectCurrentUser),
       this.store.select(selectShowOnlyUserWork),
       this.store.select(selectShowHidden),
       this.store.select(selectRouterConfig),
-    ),
+    ]),
     switchMap(([action, selectedProjectId, user, showOnlyUserWork, showHidden, conf]) => {
-      const customProjectType = conf[0] !== 'projects';
       if (!action.projectId) {
         return [
           deactivateLoader(action.type),
@@ -51,6 +50,7 @@ export class ProjectsEffects {
           actions.getCompanyTags(),
           deactivateLoader(action.type)];
       } else {
+        const customProjectType = conf?.[0] !== 'projects';
         this.fetchingExampleExperiment = action.example && action.projectId;
         return this.projectsApi.projectsGetAllEx({
           /* eslint-disable @typescript-eslint/naming-convention */

@@ -1,4 +1,4 @@
-<div class="row headers" *ngIf="!hideHeaders">
+<div class="headers" *ngIf="!hideHeaders">
   <div *ngFor="let col of cols; trackBy: trackById" [class]="col.class">{{col.header}}</div>
 </div>
 <div cdkDropList (cdkDropListDropped)="drop($event)" [cdkDropListDisabled]="!enableDragAndDrop">
@@ -12,12 +12,10 @@
     [class.draggable]="enableDragAndDrop"
     (click)="toggleRow(i)"
   >
-    <div class="row align-items-center">
       <ng-template
         [ngTemplateOutlet]="templateRef"
         [ngTemplateOutletContext]="{$implicit: cols[i], row: row, rowIndex: i}">
       </ng-template>
-    </div>
   </div>
   <div *ngIf="rowsData?.length === 0" class="empty-state">
     {{ noDataMessage || 'No data to show'}}

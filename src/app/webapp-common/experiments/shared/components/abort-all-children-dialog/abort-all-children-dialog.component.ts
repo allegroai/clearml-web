@@ -2,7 +2,6 @@ import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {Component, Inject} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
-import {ITableExperiment} from '../../common-experiment-model.model';
 
 @Component({
   selector: 'sm-abort-all-children-dialog',
@@ -11,7 +10,7 @@ import {ITableExperiment} from '../../common-experiment-model.model';
 })
 export class AbortAllChildrenDialogComponent {
   public experiments: ISelectedExperiment[];
-  shouldBeAbortedTasks: ITableExperiment[] = null;
+  shouldBeAbortedTasks: ISelectedExperiment[] = null;
 
 
   constructor(

@@ -1,15 +1,11 @@
-import {ChangeDetectorRef, Component} from '@angular/core';
-import {RefreshService} from '@common/core/services/refresh.service';
+import {Component} from '@angular/core';
 import {
   ExperimentOutputScalarsComponent
 } from '@common/experiments/containers/experiment-output-scalars/experiment-output-scalars.component';
-import {Store} from '@ngrx/store';
-import {ActivatedRoute, Router} from '@angular/router';
+import {ActivatedRoute} from '@angular/router';
 import {selectSelectedModel} from '@common/models/reducers';
 import {experimentScalarRequested} from '@common/experiments/actions/common-experiment-output.actions';
-import {ReportCodeEmbedService} from '~/shared/services/report-code-embed.service';
-import {debounceTime, distinctUntilChanged, filter, map, tap} from 'rxjs/operators';
-import {selectSelectedModelSettings} from '~/features/experiments/reducers';
+import {debounceTime, distinctUntilChanged, filter, tap} from 'rxjs/operators';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {
   selectModelInfoHistograms,
@@ -27,36 +23,21 @@ import {isEqual} from 'lodash-es';
   ]
 })
 export class ModelInfoScalarsComponent extends ExperimentOutputScalarsComponent {
-  protected entitySelector = this.store.select(selectSelectedModel);
-  protected entityType: 'task' | 'model' = 'model';
 
-  constructor(
-    protected store: Store,
-    protected router: Router,
-    private route: ActivatedRoute,
-    protected activeRoute: ActivatedRoute,
-    protected changeDetection: ChangeDetectorRef,
-    protected reportEmbed: ReportCodeEmbedService,
-    protected refreshService: RefreshService
-  ) {
-    super(store, router, activeRoute, changeDetection, reportEmbed, refreshService);
+  constructor(private route: ActivatedRoute) {
+    super();
 
+    this.entitySelector = this.store.select(selectSelectedModel);
+    this.entityType = 'model';
     this.exportForReport = !route.snapshot?.parent?.parent?.data?.setAllProject;
 
     this.xAxisType$ = this.store.select(selectModelSettingsXAxisType);
     this.groupBy$ = this.store.select(selectModelSettingsGroupBy);
-    this.smoothWeight$ = this.store.select(selectModelSettingsSmoothWeight);
+    this.smoothWeight$ = this.store.select(selectModelSettingsSmoothWeight).pipe(filter(smooth => smooth !== null));
     this.smoothWeightDelayed$ = this.store.select(selectModelSettingsSmoothWeight).pipe(debounceTime(75));
     this.smoothType$ = this.store.select(selectModelSettingsSmoothType);
     this.listOfHidden$ = this.store.select(selectModelSettingsHiddenScalar)
       .pipe(distinctUntilChanged(isEqual));
-
-    this.settings$ = this.store.select(selectSelectedModelSettings).pipe(
-      filter(settings => !!settings),
-      map(settings => settings ? settings.selectedScalar : null),
-      distinctUntilChanged(),
-      filter(selectedPlot => selectedPlot !== undefined)
-    );
 
     this.scalars$ = this.store.select(selectModelInfoHistograms)
       .pipe(
@@ -72,14 +53,14 @@ export class ModelInfoScalarsComponent extends ExperimentOutputScalarsComponent 
 
   }
 
-  refresh() {
+  override refresh() {
     if (!this.refreshDisabled) {
       this.refreshDisabled = true;
       this.store.dispatch(experimentScalarRequested({experimentId: this.experimentId, model: true}));
     }
   }
 
-  protected axisChanged() {
+  protected override axisChanged() {
     this.store.dispatch(experimentScalarRequested({experimentId: this.experimentId, model: true}));
     this.experimentGraphs.prepareRedraw();
   }

@@ -19,6 +19,7 @@
 ></sm-model-menu-extended>
 <div class="table-container" [class.card-view]="minimizedView">
   <sm-table
+    [cardHeight]="90"
     [initialColumns]="initialColumns"
     [selectionMode]="selectionMode"
     [tableData]="models"
@@ -160,7 +161,6 @@
 
     <ng-template let-model="rowData" let-selected="selected" let-rowNumber="rowNumber" pTemplate="card">
       <sm-table-card
-        class="flex-grow-1"
         [selected]="selected"
         [cardName]="model.name"
         [columns]="tableCols"
@@ -169,6 +169,7 @@
         [activeContextRow]="contextModel"
         [contextMenuOpen]="contextMenuActive"
         [entityType]="entityType"
+        [class.no-tags]="getSysTags(model).length === 0 && model?.tags.length === 0"
         (click)="selected && openContextMenu({e: $event, rowData: model, backdrop: true})"
       >
         <div sm-name-icon><i *ngIf="model?.system_tags.includes('shared')" class="al-icon al-ico-link sm-md ms-2"></i></div>
@@ -180,7 +181,7 @@
           [status]="model?.ready? 'published': 'created'"></sm-experiment-status-icon-label>
         <sm-checkbox-control fieldName="selected" [formData]="isRowSelected(model)"
                              (formDataChanged)="rowSelectedChanged($event, model)"
-                             [inputClassName]="'table-check-box table-body' + (selected ? ' row-selected' : '')"></sm-checkbox-control>
+                             inputClassName="table-check-box table-body"></sm-checkbox-control>
       </sm-table-card>
     </ng-template>
   </sm-table>

@@ -1,25 +1,40 @@
-import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
-import {selectRouterParams, selectRouterQueryParams} from '@common/core/reducers/router-reducer';
-import {select, Store} from '@ngrx/store';
-import {distinctUntilChanged, filter, map, tap} from 'rxjs/operators';
-import {has} from 'lodash-es';
-import {Observable, Subscription} from 'rxjs';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit, QueryList, ViewChildren} from '@angular/core';
+import {selectRouterConfig, selectRouterParams} from '@common/core/reducers/router-reducer';
+import {Store} from '@ngrx/store';
+import {combineLatestWith, distinctUntilChanged, distinctUntilKeyChanged, filter, map, take, tap, throttleTime} from 'rxjs/operators';
+import {isEqual, mergeWith} from 'lodash-es';
+import {fromEvent, Observable, startWith, Subscription} from 'rxjs';
 import * as metricsValuesActions from '../../actions/experiments-compare-metrics-values.actions';
-import {selectCompareMetricsValuesExperiments, selectCompareMetricsValuesSortConfig} from '../../reducers';
+import {selectCompareMetricsValuesExperiments, selectExportTable, selectSelectedSettingsHiddenScalar, selectShowRowExtremes} from '../../reducers';
 import {ActivatedRoute, Router} from '@angular/router';
-import {addMessage} from '@common/core/actions/layout.actions';
-import {TreeNode} from '../../shared/experiments-compare-details.model';
-import {createDiffObjectScalars, getAllKeysEmptyObject} from '../../jsonToDiffConvertor';
 import {RefreshService} from '@common/core/services/refresh.service';
-import {LIMITED_VIEW_LIMIT} from '@common/experiments-compare/experiments-compare.constants';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
+import {Task} from '~/business-logic/model/tasks/task';
+import {FormControl} from '@angular/forms';
+import {setExperimentSettings, setSelectedExperiments} from '@common/experiments-compare/actions/experiments-compare-charts.actions';
+import {GroupedList} from '@common/tasks/tasks.utils';
+import {ColorHashService} from '@common/shared/services/color-hash/color-hash.service';
+import {rgbList2Hex} from '@common/shared/services/color-hash/color-hash.utils';
+import {trackById} from '@common/shared/utils/forms-track-by';
+import {ExportToCsv, Options} from 'export-to-csv';
+import {setExportTable} from '@common/experiments-compare/actions/compare-header.actions';
+import {Table} from 'primeng/table';
+import {ExperimentCompareSettings} from "@common/experiments-compare/reducers/experiments-compare-charts.reducer";
 
 interface ValueMode {
   key: string;
   name: string;
 }
 
-const VALUE_MODES: { [mode: string]: ValueMode } = {
+interface ValueModes {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  min_values: ValueMode,
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  max_values: ValueMode,
+  values: ValueMode,
+}
+
+const VALUE_MODES: ValueModes = {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   min_values: {
     key: 'min_value',
@@ -36,191 +51,262 @@ const VALUE_MODES: { [mode: string]: ValueMode } = {
   },
 };
 
+
+interface tableRow {
+  metricId: string;
+  variantId: string;
+  metric: string;
+  variant: string;
+  firstMetricRow: boolean;
+  values: { [expId: string]: Task['last_metrics'] };
+}
+
+interface ExtTask extends Task {
+  orgName?: string;
+}
+
 @Component({
   selector: 'sm-experiment-compare-metric-values',
   templateUrl: './experiment-compare-metric-values.component.html',
-  styleUrls: ['./experiment-compare-metric-values.component.scss', '../../cdk-drag.scss']
+  styleUrls: ['./experiment-compare-metric-values.component.scss', '../../cdk-drag.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy {
-  public sortOrder$: Observable<any>;
-  public comparedTasks$: Observable<any>;
+  protected readonly trackById = trackById;
 
-  private comparedTasksSubscription: Subscription;
-  private refreshingSubscription: Subscription;
-  private paramsSubscription: Subscription;
-  private queryParamsSubscription: Subscription;
-
-  public comparedTasks: TreeNode<any>;
-  public allKeysEmptyObject = {};
-  public refreshDisabled: boolean = false;
-  private paths = [];
-  public experiments = [];
+  public experiments: Array<ExtTask> = [];
   public taskIds: string[];
   public valuesMode: ValueMode;
-  public hoveredRow: string;
-  public hoveredTable: string;
-  public experimentTags: { [experimentId: string]: string[] } = {};
   private entityType: EntityTypeEnum;
+  private comparedTasks$: Observable<Array<Task>>;
+  public dataTable: tableRow[];
+  public dataTableFiltered: tableRow[];
+  public variantFilter = new FormControl('');
+  public selectShowRowExtremes$: Observable<boolean>;
+  public listSearchTerm: string;
+  public metricVariantList: GroupedList;
+  public listOfHidden$: Observable<string[]>;
+  public filterOpen: boolean;
+  public experimentsColor: { [name: string]: string };
+
+  private subs = new Subscription();
+  private selectExportTable$: Observable<boolean>;
+
+  @ViewChildren(Table) public tableComp: QueryList<Table>;
+  private scrollContainer: HTMLDivElement;
+  public scrolled: boolean;
+  private filterValue: string;
+  public settings: ExperimentCompareSettings = {} as ExperimentCompareSettings;
+  private initialSettings = {
+    hiddenMetricsScalar: []
+  } as ExperimentCompareSettings
+  private originalSettings: string[];
+
+  @HostListener("window:beforeunload", ["$event"]) unloadHandler() {
+    this.saveSettingsState();
+  }
 
   constructor(
     private router: Router,
     private route: ActivatedRoute,
     public store: Store,
     private changeDetection: ChangeDetectorRef,
-    private refresh: RefreshService
+    private refresh: RefreshService,
+    private colorHash: ColorHashService
   ) {
-    this.comparedTasks$ = this.store.pipe(select(selectCompareMetricsValuesExperiments));
-    this.sortOrder$ = this.store.pipe(select(selectCompareMetricsValuesSortConfig));
+    this.comparedTasks$ = this.store.select(selectCompareMetricsValuesExperiments);
+    this.selectShowRowExtremes$ = this.store.select(selectShowRowExtremes);
+    this.selectExportTable$ = this.store.select(selectExportTable).pipe(filter(e => !!e));
+    this.listOfHidden$ = this.store.select(selectSelectedSettingsHiddenScalar).pipe(distinctUntilChanged(isEqual));
   }
 
   ngOnInit() {
     this.entityType = this.route.snapshot.parent.parent.data.entityType;
-    this.queryParamsSubscription = this.store.pipe(
-      select(selectRouterQueryParams),
-      map(params => params?.scalars),
+    this.subs.add(this.store.select(selectRouterConfig).pipe(
+      map(params => params?.at(-1).replace('-', '_')),
       distinctUntilChanged()
     ).subscribe((valuesMode) => {
       this.valuesMode = VALUE_MODES[valuesMode] || VALUE_MODES['values'];
-      this.convertExperimentsToNodes(this.experiments.map(exp => exp.last_metrics));
-    });
+      this.changeDetection.detectChanges();
+    }));
 
-    this.paramsSubscription = this.store.pipe(
-      select(selectRouterParams),
+    this.subs.add(this.store.select(selectRouterParams).pipe(
+      distinctUntilKeyChanged('ids'),
       map(params => params?.ids?.split(',')),
       tap(taskIds => this.taskIds = taskIds),
-      filter(taskIds => !!taskIds && taskIds !== this.getExperimentIdsParams(this.experiments))
+      filter(taskIds => !!taskIds && taskIds?.join(',') !== this.getExperimentIdsParams(this.experiments))
     )
       .subscribe((experimentIds: string[]) => {
+        this.store.dispatch(setSelectedExperiments({selectedExperiments: this.taskIds}));
         this.store.dispatch(metricsValuesActions.getComparedExperimentsMetricsValues({
-          taskIds: experimentIds.slice(0, LIMITED_VIEW_LIMIT),
+          taskIds: experimentIds,
           entity: this.entityType
         }));
-      });
+      }));
 
-    this.comparedTasksSubscription = this.comparedTasks$
+    this.subs.add(this.comparedTasks$
       .pipe(
         filter(exp => !!exp),
-        tap(experiments => this.experiments = experiments),
+        distinctUntilChanged(),
         tap(experiments => {
-          this.extractTags(experiments);
-        }),
-        map(experiments => experiments.map(exp => exp.last_metrics)))
-      .subscribe(experimentsLastMetrics => {
-        this.refreshDisabled = false;
-        this.convertExperimentsToNodes(experimentsLastMetrics);
+          const nameRepetitions = experiments.reduce((acc, exp) => {
+            acc[exp.name] = (acc[exp.name] ?? 0) + 1;
+            return acc;
+          }, {});
+          this.experiments = experiments.map(exp => nameRepetitions[exp.name] > 1 ? {...exp, orgName: exp.name, name: `${exp.name}.${exp.id.substring(0, 6)}`} : exp);
+          this.experimentsColor = experiments.reduce((acc, exp) => {
+            acc[exp.id] = rgbList2Hex(this.colorHash.initColor(`${exp.name}-${exp.id}`));
+            return acc;
+          }, {} as { [name: string]: string });
+        })
+      )
+      .subscribe(experiments => {
+        this.buildTableData(experiments);
         this.changeDetection.detectChanges();
-      });
+        this.startTableScrollListener();
+      }));
 
-    this.refreshingSubscription = this.refresh.tick
+    this.subs.add(this.refresh.tick
       .pipe(filter(auto => auto !== null))
       .subscribe((autoRefresh) => this.store.dispatch(
         metricsValuesActions.getComparedExperimentsMetricsValues({taskIds: this.taskIds, entity: this.entityType, autoRefresh})
-      ));
-  }
+      )));
 
-  ngOnDestroy(): void {
-    this.store.dispatch(metricsValuesActions.resetState());
-    this.paramsSubscription.unsubscribe();
-    this.queryParamsSubscription.unsubscribe();
-    this.comparedTasksSubscription.unsubscribe();
-    this.refreshingSubscription.unsubscribe();
-  }
+    this.listOfHidden$.pipe(combineLatestWith(this.variantFilter.valueChanges.pipe(startWith('')))).subscribe(([, variantFilter]) => {
+      this.filterValue = variantFilter;
+      this.filter(this.filterValue);
+    });
 
-  convertExperimentsToNodes(experiments) {
-    if (experiments) {
-      experiments = experiments.map(experiment => {
-        if (experiment) {
-          const convertedExperiment = {};
-          Object.keys(experiment).map(key => {
-            convertedExperiment[Object.values(experiment[key])[0]['metric']] = experiment[key];
-          });
-          return convertedExperiment;
-        }
-      });
-      this.allKeysEmptyObject = getAllKeysEmptyObject(experiments);
-      this.comparedTasks = experiments.map(experiment => createDiffObjectScalars(this.allKeysEmptyObject, experiments[0], experiment, this.metaDataTransformer, ''),);
-    }
-  }
+    this.subs.add(this.colorHash.getColorsObservable().pipe(
+    ).subscribe(() => {
+      this.experimentsColor = this.experiments?.reduce((acc, exp) => {
+        acc[exp.id] = rgbList2Hex(this.colorHash.initColor(`${exp.orgName ?? exp.name}-${exp.id}`));
+        return acc;
+      }, {} as { [name: string]: string });
+      this.changeDetection.detectChanges();
+    }));
 
-  public metaDataTransformer = (data, key, path, extraParams) => {
-    const fullPath = path.concat([key]);
-    const keyExists = has(extraParams.comparedObject, fullPath);
-    return {
-      classStyle: keyExists ? 'key-exists' : 'key-not-exists',
-    };
-  };
+    this.subs.add(this.selectExportTable$.subscribe(() => {
+      this.dataTableFiltered.length && this.exportToCSV();
+      this.store.dispatch(setExportTable({export: false}));
+    }));
 
-  trackByFn(index, item) {
-    return item.id;
-  }
-
-  realIsNodeOpen(node) {
-    return this.paths.includes(node.data.key);
-  }
-
-  collapsedToggled(node) {
-    if (!this.realIsNodeOpen(node)) {
-      this.paths.push(node.data.key);
-    } else {
-      this.paths = this.paths.filter(path => path !== node.data.key);
-    }
-    this.hoveredRow = node.data.key;
-  }
-
-  metricSortChanged(event, nodeData) {
-    const orderedKeys = (this.sortByKeyOrValue(event.keyOrValue, event.keyValueArray, event.order)).map(keyValue => keyValue.key);
-    this.store.dispatch(metricsValuesActions.setMetricValuesSortBy({
-      metric: nodeData.key,
-      keyOrValue: event.keyOrValue,
-      order: event.order,
-      keyOrder: orderedKeys
+    this.subs.add(this.listOfHidden$.pipe(take(1)).subscribe(hiddenScalars => {
+      this.originalSettings = hiddenScalars;
+      this.settings = hiddenScalars ? {...this.initialSettings, hiddenMetricsScalar: hiddenScalars} : {...this.initialSettings} as ExperimentCompareSettings;
     }));
   }
 
-  sortByKeyOrValue(sortBy, keyValueArray, order) {
-    if (sortBy === 'key') {
-      return keyValueArray.sort((a, b) => {
-        if (order === 'asc') {
-          return a.key.toLowerCase().localeCompare(b.key.toLowerCase());
-        } else {
-          return b.key.toLowerCase().localeCompare(a.key.toLowerCase());
-        }
-      });
-    } else {
-      return keyValueArray.sort((a, b) => {
-        if (order === 'asc') {
-          return a.value - b.value;
-        } else {
-          return b.value - a.value;
-        }
+  private startTableScrollListener() {
+    this.scrollContainer = this.tableComp?.first?.el.nativeElement.getElementsByClassName('p-scroller')[0] ?? this.tableComp?.first?.el.nativeElement.getElementsByClassName('p-datatable-wrapper')[0] as HTMLDivElement;
+    if (this.scrollContainer) {
+      fromEvent(this.scrollContainer, 'scroll').pipe(throttleTime(150, undefined, {leading: true, trailing: true})).subscribe((e: Event) => {
+        this.scrolled = (e.target as HTMLDivElement).scrollLeft > 10;
+        this.changeDetection.detectChanges();
       });
     }
   }
 
-  public syncUrl(experiments: Array<any>) {
-    const newParams = this.getExperimentIdsParams(experiments);
-    this.router.navigateByUrl(this.router.url.replace(this.taskIds.toString(), newParams));
+  ngOnDestroy(): void {
+    this.saveSettingsState();
+    this.store.dispatch(metricsValuesActions.resetState());
+    this.subs.unsubscribe();
   }
 
-  private getExperimentIdsParams(experiments: Array<any>): string {
+  buildTableData(experiments: Task[]) {
+    if (experiments?.length > 0) {
+      const lastMetrics = experiments.map(exp => exp.last_metrics);
+      let allMetricsVariants: Task['last_metrics'] = {};
+      allMetricsVariants = mergeWith(allMetricsVariants, ...lastMetrics);
+
+      this.metricVariantList = {};
+      const dataTable = Object.entries(allMetricsVariants).map(([metricId, metricsVar]) => Object.keys(metricsVar).map(variantId => {
+        let metric, variant;
+        return {
+          metricId,
+          variantId,
+          ...experiments.reduce((acc, exp) => {
+            acc.values[exp.id] = exp.last_metrics[metricId]?.[variantId] as Task['last_metrics'];
+            if (!metric && !variant && exp.last_metrics[metricId]?.[variantId]) {
+              metric = metric ?? exp.last_metrics[metricId][variantId].metric;
+              variant = variant ?? exp.last_metrics[metricId][variantId].variant;
+            }
+            if (metric) {
+              if (this.metricVariantList[metric]) {
+                this.metricVariantList[metric][variant] = {};
+              } else {
+                this.metricVariantList[metric] = {[variant]: {}};
+              }
+            }
+            return {
+              metric,
+              variant,
+              values: acc.values,
+              firstMetricRow: false,
+              min: acc.min ? Math.min(acc.min, exp.last_metrics[metricId]?.[variantId]?.[this.valuesMode.key] ?? acc.min) : exp.last_metrics[metricId]?.[variantId]?.[this.valuesMode.key],
+              max: acc.max ? Math.max(acc.max, exp.last_metrics[metricId]?.[variantId]?.[this.valuesMode.key] ?? acc.max) : exp.last_metrics[metricId]?.[variantId]?.[this.valuesMode.key]
+            };
+          }, {values: {}} as { metric, variant, firstMetricRow: boolean, min:  number, max: number, values: { [expId: string]: Task['last_metrics'] } })
+        };
+      })).flat(1);
+      this.dataTable = dataTable.sort((a) => a.metric.startsWith(':') ? 1 : -1);
+      this.filter(this.filterValue);
+    }
+  }
+
+  filter = (value: string) => {
+    if (!this.dataTable) {
+      return;
+    }
+    this.dataTableFiltered = this.dataTable.filter(row => !this.settings.hiddenMetricsScalar?.includes(`${row.metric}${row.variant}`)).filter(row => row.metric.includes(value) || row.variant.includes(value));
+    let previousMetric: string;
+    this.dataTableFiltered.forEach(row => {
+      row.firstMetricRow = row.metric !== previousMetric;
+      previousMetric = row.metric;
+    });
+  };
+
+  private getExperimentIdsParams(experiments: Array<{ id?: string }>): string {
     return experiments ? experiments.map(e => e.id).toString() : '';
   }
 
-  copyIdToClipboard() {
-    this.store.dispatch(addMessage('success', 'Copied to clipboard'));
+  clear() {
+    this.variantFilter.reset('');
   }
 
-  onRowHovered(tableKey: string, tableName: string) {
-    this.hoveredRow = tableKey;
-    this.hoveredTable = tableName;
+  searchTermChanged(searchTerm: string) {
+    this.listSearchTerm = searchTerm;
   }
 
-  public extractTags(experiments) {
-    experiments.map(({tags, ...experiment}) => {
-      if (tags
-        ?.length || !this.experimentTags[experiment.id]?.length) {
-        this.experimentTags[experiment.id] = tags;
-      }
-    });
+  hiddenListChanged(hiddenList: string[]) {
+    this.settings = {...this.settings, hiddenMetricsScalar: hiddenList};
+    this.filter(this.filterValue);
+  }
+
+  exportToCSV() {
+    const options: Options = {
+      filename: `Scalars compare table`,
+      showLabels: true,
+      headers: ['Metric', 'Variant'].concat(this.experiments.map(ex => ex.name))
+    };
+    const csvExporter = new ExportToCsv(options);
+    csvExporter.generateCsv(this.dataTableFiltered.map(row => {
+      return [row.metric, row.variant, ...Object.values(row.values).map(value => value?.[this.valuesMode.key] ?? '')];
+    }));
+  }
+
+  trackByFunction(index: number, item) {
+    return item?.id || item?.name || index;
+  }
+
+  showAll() {
+    this.settings = {...this.settings, hiddenMetricsScalar: []};
+    this.filter(this.filterValue);
+  }
+
+  private saveSettingsState() {
+    if (!isEqual(this.settings.hiddenMetricsScalar, this.originalSettings)) {
+      this.store.dispatch(setExperimentSettings({id: this.taskIds, changes: {hiddenMetricsScalar: this.settings.hiddenMetricsScalar}}));
+    }
   }
 }

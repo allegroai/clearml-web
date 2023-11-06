@@ -41,7 +41,8 @@ export class RouterEffects {
           ...(action.filters && {filter: encodeFilters(action.filters)}),
           ...(action.isArchived !== undefined && {archive: action.isArchived ? 'true' : null}),
           ...(action.isDeep && {deep: true}),
-          ...(action.version && {version: action.version})
+          ...(action.version && {version: action.version}),
+          ...(action.others && action.others)
         }
       } as NavigationExtras;
       this.router.navigate([], extra);
