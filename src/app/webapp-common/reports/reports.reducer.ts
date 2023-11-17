@@ -3,7 +3,7 @@ import {
   addReports, addReportsTags,
   removeReport,
   resetReports,
-  setArchive, setEditMode,
+  setArchive, setDirty, setEditMode,
   setReport,
   setReportChanges,
   setReports,
@@ -36,6 +36,7 @@ export interface ReportsState {
   noMoreReports: boolean;
   queryString: { query: string; regExp?: boolean };
   editing: boolean;
+  dirty: boolean;
 }
 
 export const reportsInitState: ReportsState = {
@@ -48,7 +49,8 @@ export const reportsInitState: ReportsState = {
   archive: false,
   noMoreReports: null,
   queryString: null,
-  editing: false
+  editing: false,
+  dirty: false
 };
 
 export const reportsReducer = createReducer(
@@ -103,6 +105,7 @@ export const reportsReducer = createReducer(
     queryString: (action as ReturnType<typeof setReportsSearchQuery>),
   })),
   on(setEditMode, (state, action): ReportsState => ({...state, editing: action.editing})),
+  on(setDirty, (state, action): ReportsState => ({...state, dirty: action.dirty})),
 );
 
 export const selectReportsState = state => state[REPORTS_KEY] as ReportsState;
@@ -117,4 +120,5 @@ export const selectReportsOrderBy = createSelector(selectReportsState, state => 
 export const selectReportsSortOrder = createSelector(selectReportsState, state => state ? state.sortOrder : reportsInitState.sortOrder);
 export const selectReportsQueryString = createSelector(selectReportsState, state => state ? state.queryString : reportsInitState.queryString);
 export const selectEditingReport = createSelector(selectReportsState, state => state.editing);
+export const selectDirtyReport = createSelector(selectReportsState, state => state.dirty);
 export const selectNestedReports = createSelector(selectRouterConfig, config => config?.length === 3 && config.at(-1) === 'reports');

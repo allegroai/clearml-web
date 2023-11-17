@@ -72,26 +72,31 @@
   .settings {
     display: flex;
     align-items: center;
-    margin-right: 4px;
+    gap: 24px;
 
-    .btn {
-      color: $blue-300;
-      width: 40px;
-      height: 40px;
-      font-size: 15px;
+    .export-button {
+      line-height: 11px;
+      padding: 0;
+      color: $blue-400;
     }
-  }
-
-  button {
-    font-weight: 500;
-    font-size: 13px;
   }
 
   .btn-add-experiment {
     display: flex;
     align-items: center;
     gap: 6px;
+    padding: 0 16px;
     background-color: $blue-50;
+    border-radius: 4px 0 0 4px;
+    &.plus {
+      border-radius: 0 4px 4px 0;
+      padding: 0 12px;
+      margin-left: -1px;
+    }
+    &:focus {
+      position: relative;
+      z-index: 1;
+    }
   }
 
 
@@ -114,4 +119,9 @@
 
 ::ng-deep .mat-mdc-menu-content {
   height: 100%;
+}
+
+.next-diff {
+  display: flex;
+  gap: 12px;
 }

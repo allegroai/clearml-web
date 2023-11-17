@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ActionCreator, Store} from '@ngrx/store';
 import {combineLatest, Observable, of, Subject, Subscription, switchMap} from 'rxjs';
 import {
@@ -20,7 +20,7 @@ import {SplitComponent} from 'angular-split';
 import {selectRouterParams} from '../../core/reducers/router-reducer';
 import {ITableExperiment} from '../../experiments/shared/common-experiment-model.model';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
-import {IFooterState} from './footer-items/footer-items.models';
+import {IFooterState, ItemFooterModel} from './footer-items/footer-items.models';
 import {
   CountAvailableAndIsDisableSelectedFiltered,
   selectionAllHasExample,
@@ -46,7 +46,8 @@ import {selectNeverShowPopups} from '../../core/reducers/view.reducer';
 import {isReadOnly} from '@common/shared/utils/is-read-only';
 import {setCustomMetrics} from '@common/models/actions/models-view.actions';
 import * as experimentsActions from '@common/experiments/actions/common-experiments-view.actions';
-import {setParents} from '@common/experiments/actions/common-experiments-view.actions';
+import {hyperParamSelectedExperiments, hyperParamSelectedInfoExperiments, setHyperParamsFiltersPage, setParents} from '@common/experiments/actions/common-experiments-view.actions';
+import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 
 @Component({
   selector: 'sm-base-entity-page',
@@ -54,19 +55,19 @@ import {setParents} from '@common/experiments/actions/common-experiments-view.ac
 })
 export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, OnDestroy {
   public selectedProject$: Observable<Project>;
-  protected setSplitSizeAction: any;
+  protected setSplitSizeAction: ActionCreator<string, any>;
   protected addTag: ActionCreator<string, any>;
   protected abstract setTableModeAction: ActionCreator<string, any>;
   public shouldOpenDetails = false;
   protected sub = new Subscription();
-  public selectedExperiments: ITableExperiment[];
+  public selectedExperiments: IExperimentInfo[];
   public projectId: string;
   public isExampleProject: boolean;
   public selectSplitSize$?: Observable<number>;
   public infoDisabled: boolean;
   public splitInitialSize: number;
   public minimizedView: boolean;
-  public footerItems = [];
+  public footerItems = [] as ItemFooterModel[];
   public footerState$: Observable<IFooterState<any>>;
   public tableModeAwareness$: Observable<boolean>;
   private tableModeAwareness: boolean;
@@ -78,7 +79,7 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
   @ViewChild('split') split: SplitComponent;
   protected abstract inEditMode$: Observable<boolean>;
   public selectedProject: Project;
-  private currentSelection: any[];
+  private currentSelection: {id: string}[];
   public showAllSelectedIsActive$: Observable<boolean>;
   private allProjects: boolean;
 
@@ -97,13 +98,19 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
     return this.route.parent.snapshot.params.projectId;
   }
 
-  protected constructor(
-    protected store: Store,
-    protected route: ActivatedRoute,
-    protected router: Router,
-    protected dialog: MatDialog,
-    protected refresh: RefreshService,
-  ) {
+  protected store: Store;
+  protected route: ActivatedRoute;
+  protected router: Router;
+  protected dialog: MatDialog;
+  protected refresh: RefreshService;
+
+  protected constructor() {
+    this.store = inject( Store);
+    this.route = inject(ActivatedRoute);
+    this.router = inject(Router);
+    this.dialog = inject(MatDialog);
+    this.refresh = inject(RefreshService);
+
     this.users$ = this.store.select(selectSelectedProjectUsers);
     this.sub.add(this.store.select(selectSelectedProject).pipe(filter(p => !!p)).subscribe((project: Project) => {
       this.selectedProject = project;
@@ -112,7 +119,7 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
     }));
     this.projectsOptions$ = this.store.select(selectTablesFilterProjectsOptions);
 
-    this.tableModeAwareness$ = store.select(selectTableModeAwareness)
+    this.tableModeAwareness$ = this.store.select(selectTableModeAwareness)
       .pipe(
         filter(featuresAwareness => featuresAwareness !== null && featuresAwareness !== undefined),
         tap(aware => this.tableModeAwareness = aware)
@@ -202,7 +209,7 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
 
   createFooterItems(config: {
     entitiesType: EntityTypeEnum;
-    selected$: Observable<Array<any>>;
+    selected$: Observable<{id: string}[]>;
     showAllSelectedIsActive$: Observable<boolean>;
     data$?: Observable<Record<string, CountAvailableAndIsDisableSelectedFiltered>>;
     tags$?: Observable<string[]>;
@@ -220,8 +227,8 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
     );
   }
 
-  createFooterState<T = any>(
-    selected$: Observable<Array<any>>,
+  createFooterState<T extends {id: string}>(
+    selected$: Observable<T[]>,
     data$?: Observable<Record<string, CountAvailableAndIsDisableSelectedFiltered>>,
     showAllSelectedIsActive$?: Observable<boolean>,
     companyTags$?: Observable<string[]>,
@@ -305,14 +312,6 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
       });
   }
 
-  updateUrl(queryParams: Params) {
-    return this.router.navigate([], {
-      relativeTo: this.route,
-      queryParamsHandling: 'merge',
-      queryParams
-    });
-  }
-
   filterSearchChanged({colId, value}: { colId: string; value: { value: string; loadMore?: boolean } }) {
     switch (colId) {
       case 'project.name':
@@ -325,7 +324,7 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
         } else {
           this.store.dispatch(setTablesFilterProjectsOptions({
             projects: this.selectedProject ? [this.selectedProject,
-              ...this.selectedProject?.sub_projects] : [], scrollId: null
+              ...(this.selectedProject?.sub_projects ?? [])] : [], scrollId: null
           }));
         }
         break;
@@ -338,9 +337,15 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
           this.store.dispatch(experimentsActions.getParents({searchValue: value.value}));
         }
     }
+    if (colId.startsWith('hyperparams.')) {
+      if (!value.loadMore) {
+        this.store.dispatch(hyperParamSelectedInfoExperiments({col: {id: colId}, loadMore: false, values: null}));
+        this.store.dispatch(setHyperParamsFiltersPage({page: 0}));
+      }
+      this.store.dispatch(hyperParamSelectedExperiments({col: {id: colId, getter: `${colId}.value`}, searchValue: value.value}));
+    }
   }
 
   public setupBreadcrumbsOptions() {
-
   }
 }

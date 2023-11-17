@@ -1,6 +1,7 @@
-<mat-menu class="light-theme" panelClass="light-theme">
+<mat-menu class="light-theme tags-menu" panelClass="light-theme tags-menu">
 <span cdkTrapFocus (keydown.tab)="$event.stopPropagation()" (keydown.shift.tab)="$event.stopPropagation()">
   <form class="filter-form"
+        smClickStopPropagation
         (submit)="addTag(filterText)"
         (keydown)="$event.stopPropagation()"
         (keyup.arrowDown)="createButtons.first ? createButtons.first.focus() : buttons.first?.focus()"
@@ -12,7 +13,6 @@
     >
       <input
         #nameInput
-        smClickStopPropagation
         matInput
         placeholder="Add Tag"
         name="filter"

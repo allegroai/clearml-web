@@ -1,4 +1,4 @@
-<div [ngClass]="['login-form', darkTheme ? 'dark-theme' : 'light-theme']">
+<div class="login-form" [class]="darkTheme ? 'dark-theme' : 'light-theme'">
   <div class="login-section">
     <section>
       <img [src]="darkTheme ? 'assets/logo-white.svg' : 'assets/logo.svg'" class="logo" alt="Clear ML Logo">
@@ -33,7 +33,7 @@
         <ng-container *ngIf="showSimpleLogin || [loginModeEnum.password, loginModeEnum.simple].includes(loginMode)">
           <button class="btn btn-neon" (click)="login()"
                   [disabled]="loginForm.touched && (!loginForm.valid || showSpinner)">
-            <mat-spinner class="spinner" *ngIf="showSpinner" diameter="16"></mat-spinner>
+            <mat-spinner class="spinner" *ngIf="showSpinner" diameter="16" color="accent"></mat-spinner>
             {{buttonCaption}}
           </button>
         </ng-container>

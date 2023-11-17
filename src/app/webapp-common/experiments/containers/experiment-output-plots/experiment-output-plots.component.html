@@ -1,5 +1,5 @@
 <mat-drawer-container autosize [class]="dark ? 'dark-theme' : 'light-theme'">
-  <mat-drawer #drawer [opened]="!minimized && !isDatasetVersionPreview" [mode]="minimized ? 'over' : 'side'">
+  <mat-drawer #drawer [opened]="!minimized && !isDatasetVersionPreview" [mode]="minimized ? 'over' : 'side'" [disableClose]="!minimized && !isDatasetVersionPreview">
     <i data-id="closeButton" class="close al-icon al-ico-dialog-x sm-md" *ngIf="minimized" (click)="drawer.close()"></i>
     <div class="list-container">
       <sm-selectable-filter-list
@@ -7,7 +7,6 @@
         checkAllIcon="al-ico-show"
         placeholder="Find plots"
         [list]="plotsList"
-        [selected]="selectedGraph"
         [checkedList]="listOfHidden$ | async"
         [searchTerm]="searchTerm$ | async"
         (itemSelect)="metricSelected($event)"

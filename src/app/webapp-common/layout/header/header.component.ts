@@ -17,6 +17,7 @@ import {LoginService} from '~/shared/services/login.service';
 import {selectUserSettingsNotificationPath} from '~/core/reducers/view.reducer';
 import {selectInvitesPending} from '~/core/reducers/users.reducer';
 import {MESSAGES_SEVERITY} from '@common/constants';
+import {UsersGetInvitesResponseInvites} from '~/business-logic/model/users/usersGetInvitesResponseInvites';
 
 @Component({
   selector: 'sm-header',
@@ -30,13 +31,13 @@ export class HeaderComponent implements OnInit, OnDestroy {
   showLogo: boolean;
   profile: boolean;
   userFocus: boolean;
-  environment = ConfigurationService.globalEnvironment;
+  public environment$ = this.configService.getEnvironment();
   public user: Observable<GetCurrentUserResponseUserObject>;
   public activeWorkspace: GetCurrentUserResponseUserObjectCompany;
   public url: Observable<string>;
-  public invitesPending$: Observable<any[]>;
-  public userNotificationPath: string;
+  public invitesPending$: Observable<UsersGetInvitesResponseInvites[]>;
   private sub = new Subscription();
+  public userNotificationPath$: Observable<string>;
 
   constructor(
     private store: Store,
@@ -44,12 +45,12 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private tipsService: TipsService,
     private loginService: LoginService,
     private router: Router,
-    private activeRoute: ActivatedRoute
-
+    private activeRoute: ActivatedRoute,
+    private configService: ConfigurationService
   ) {
     this.url = this.store.select(selectRouterUrl);
     this.user = this.store.select(selectCurrentUser);
-    this.sub.add(this.store.select(selectUserSettingsNotificationPath).subscribe(path => this.userNotificationPath = path));
+    this.userNotificationPath$ = this.store.select(selectUserSettingsNotificationPath);
     this.invitesPending$ = this.store.select(selectInvitesPending);
     this.sub.add(this.store.select(selectActiveWorkspace)
       .pipe(
@@ -97,15 +98,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.dialog.open(WelcomeMessageComponent, {data: {step: 2}});
   }
 
-  openAppsAwareness($event: MouseEvent, appsYouTubeIntroVideoId: string) {
+  openAppsAwareness($event: MouseEvent) {
     $event.preventDefault();
-    this.store.dispatch(openAppsAwarenessDialog({appsYouTubeIntroVideoId}));
-  }
-
-  navigate(link: string) {
-   const a = document.createElement('a');
-   a.target = '_blank';
-   a.href = link;
-   a.click();
+    this.store.dispatch(openAppsAwarenessDialog());
   }
 }

@@ -94,6 +94,9 @@ $sm-neon-theme: mat.define-dark-theme((
 
   --mdc-typography-body1-letter-spacing: 0;
   --mdc-typography-button-letter-spacing: 0;
+  .mat-mdc-slide-toggle{
+    --mdc-switch-state-layer-size: 24px;
+  }
 
   .mat-mdc-checkbox .mdc-checkbox {
     --mdc-checkbox-selected-icon-color: #{$purple};
@@ -101,8 +104,8 @@ $sm-neon-theme: mat.define-dark-theme((
     --mdc-checkbox-selected-focus-icon-color: #{$purple};
   }
 
-  .mat-expansion-panel-header-description, .mat-expansion-indicator:after {
-    color: $white;
+  .mat-expansion-panel-header-description, .mat-expansion-indicator {
+    --mat-expansion-header-indicator-color: #{$blue-300};
   }
 
   .link {
@@ -131,6 +134,9 @@ $sm-neon-theme: mat.define-dark-theme((
 
   --mdc-typography-body1-letter-spacing: 0;
   --mdc-typography-button-letter-spacing: 0;
+  --mdc-switch-state-layer-size: 24px;
+
+  --bs-border-width: 1px #{$blue-300};
 
   mat-progress-bar {
     border-radius: 4px;
@@ -174,7 +180,7 @@ html, body {
   height: 100%;
   margin: 0;
   padding: 0;
-  font-family: $font-family-base, sans-serif;
+  font-family: $font-family-base;
   font-size: 14px;
   overflow: hidden;
 }
@@ -279,7 +285,7 @@ hr {
 //}
 
 mat-expansion-panel {
-  box-shadow: unset;
+  box-shadow: unset !important;
 
   .mat-expansion-panel-header {
     margin-bottom: 0;
@@ -388,6 +394,8 @@ button {
 
 .empty-menu {
   height: 100px;
+  font-size: 14px;
+  --mat-menu-item-label-text-tracking: 0;
 }
 
 .capital-case {
@@ -597,9 +605,11 @@ html {
       &.cdk-keyboard-focused, &.cdk-program-focused {
         color: rgba(0, 0, 0, 0.87);
       }
+
       &.mat-mdc-focus-indicator {
-        --mdc-list-list-item-hover-label-text-color: rgba(0, 0, 0, 0.87);
+        --mat-menu-item-hover-state-layer-color: #{$blue-50};
       }
+
       .mdc-list-item__primary-text {
         --mdc-list-list-item-label-text-color: rgba(0, 0, 0, 0.87);
       }
@@ -615,24 +625,19 @@ html {
     width: calc(100% - 8px);
     height: 40px;
     min-height: 40px;
-    --mdc-typography-body1-line-height: 20px;
-    font-size: 14px;
-    --mdc-typography-body1-font-size: 14px;
+    --mat-menu-item-label-text-line-height: 20px;
+    --mat-menu-item-label-text-size: 14px;
     padding: 0 32px 0 12px;
     border-radius: 4px;
 
     .mdc-list-item__primary-text {
-      --mdc-typography-body1-line-height: 20px;
+      --mat-menu-item-label-text-tracking: 0;
       display: flex;
       align-items: center;
       gap: 0 12px;
       flex-grow: 1;
       overflow: hidden;
       text-overflow: ellipsis;
-    }
-
-    &.mat-mdc-menu-item {
-
     }
   }
 
@@ -859,7 +864,7 @@ button.btn.button-outline-dark {
 
 .ace_placeholder {
   font-family: SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
-  color: $blue-grey !important;
+  color: $blue-300 !important;
 }
 
 .modebar-btn[data-attr="plotly-embedded-modebar-button"] {

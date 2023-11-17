@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {addMessage} from '@common/core/actions/layout.actions';
 import {LocationStrategy} from '@angular/common';
@@ -29,13 +29,16 @@ export interface ReportCodeEmbedConfiguration {
 export class ReportCodeEmbedBaseService {
   private workspace: GetCurrentUserResponseUserObjectCompany;
   private isCommunity: boolean;
+  protected store: Store;
+  protected locationStrategy: LocationStrategy;
+  protected configService: ConfigurationService;
+  protected _clipboardService: ClipboardService;
 
-  constructor(
-    protected store: Store,
-    protected locationStrategy: LocationStrategy,
-    protected configService: ConfigurationService,
-    protected _clipboardService: ClipboardService
-  ) {
+  constructor() {
+  this.store = inject(Store);
+  this.locationStrategy = inject(LocationStrategy);
+  this.configService = inject(ConfigurationService);
+  this._clipboardService = inject(ClipboardService);
     this.isCommunity = this.configService.getStaticEnvironment().communityServer;
     this.store.select(selectActiveWorkspace).subscribe(workspace => this.workspace = workspace);
   }

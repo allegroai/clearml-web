@@ -4,15 +4,15 @@ import {MenuItems, selectionTags} from '../items.utils';
 
 export class SelectedTagsFooterItem extends ItemFooterModel {
 
-  id = MenuItems.tags;
-  isTag = true;
-  disableDescription = 'Tags';
-
   constructor(
     public entitiesType: EntityTypeEnum,
   ) {
     super();
+    this.id = MenuItems.tags;
+    this.isTag = true;
+    this.disableDescription = 'Tags';
   }
+
   getItemState(state: IFooterState<any>): {
     icon?: any; title?: string; description?: string; disable?: boolean; disableDescription?: string;
     emit?: boolean; emitValue?: any; preventCurrentItem?: boolean; class?: string; wrapperClass?: string; tags: string[];

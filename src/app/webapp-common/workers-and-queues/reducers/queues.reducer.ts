@@ -1,11 +1,17 @@
 import {
-  queuesTableSetSort, setQueues, setSelectedQueue, setSelectedQueueFromServer, syncSpecificQueueInTable, setStats, setStatsParams
+  queuesTableSetSort,
+  setQueues,
+  setSelectedQueue,
+  setSelectedQueueFromServer,
+  syncSpecificQueueInTable,
+  setStats,
+  setStatsParams,
+  Queue
 } from '../actions/queues.actions';
-import {Queue} from '../../../business-logic/model/queues/queue';
 import {QUEUES_TABLE_COL_FIELDS, TIME_INTERVALS} from '../workers-and-queues.consts';
 import {TABLE_SORT_ORDER} from '../../shared/ui-components/data/table/table.consts';
 import {SortMeta} from 'primeng/api';
-import {ITask} from '../../../business-logic/model/al-task';
+import {ITask} from '~/business-logic/model/al-task';
 import {Topic} from '@common/shared/utils/statistics';
 
 export interface QueueStoreType {

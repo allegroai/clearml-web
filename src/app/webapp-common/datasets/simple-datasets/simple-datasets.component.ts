@@ -20,17 +20,21 @@ import {selectDefaultNestedModeForFeature} from '@common/core/reducers/projects.
 })
 export class SimpleDatasetsComponent extends PipelinesPageComponent implements OnInit {
 
-  public projectCardClicked(project: ProjectsGetAllResponseSingle) {
+  public override projectCardClicked(project: ProjectsGetAllResponseSingle) {
     this.router.navigate(['simple', project.id, 'experiments'], {relativeTo: this.projectId? this.route.parent.parent: this.route});
     this.store.dispatch(setSelectedProjectId({projectId: project.id, example: this.isExample(project)}));
   }
 
-  protected getName() {
+  protected override getName() {
     return EntityTypeEnum.simpleDataset;
   }
 
-  protected getDeletePopupEntitiesList() {
+  protected override getDeletePopupEntitiesList() {
     return 'version';
+  }
+
+  override noProjectsReRoute() {
+    return this.router.navigate(['..', 'datasets'], {relativeTo: this.route});
   }
 
   createDataset() {
@@ -40,14 +44,14 @@ export class SimpleDatasetsComponent extends PipelinesPageComponent implements O
     });
   }
 
-  public createExamples() {
+  public override createExamples() {
     this.store.dispatch(showExampleDatasets());
   }
-  ngOnInit() {
+  override ngOnInit() {
     super.ngOnInit();
     this.showExamples$ = this.store.select(selectShowDatasetExamples);
   }
-  toggleNestedView(nested: boolean) {
+  override toggleNestedView(nested: boolean) {
     this.store.dispatch(setDefaultNestedModeForFeature({feature: 'datasets', isNested: nested}));
 
     if (nested) {
@@ -57,7 +61,7 @@ export class SimpleDatasetsComponent extends PipelinesPageComponent implements O
     }
   }
 
-  setupBreadcrumbsOptions() {
+  override setupBreadcrumbsOptions() {
     this.subs.add(this.selectedProject$.pipe(
       withLatestFrom(this.store.select(selectDefaultNestedModeForFeature))
     ).subscribe(([selectedProject, defaultNestedModeForFeature]) => {

@@ -33,10 +33,6 @@ export const setHistogram = createAction(
   EXPERIMENTS_OUTPUT_PREFIX + 'SET_EXPERIMENT_HISTOGRAM',
   props<{histogram: HistogramCharts; axisType: ScalarKeyEnum}>()
 );
-export const setScalarsHoverMode = createAction(
-  EXPERIMENTS_OUTPUT_PREFIX + 'SET SCALARS HOVER MODE',
-  props<{ hoverMode: ChartHoverModeEnum }>()
-);
 
 export const setExperimentPlots = createAction(
   EXPERIMENTS_OUTPUT_PREFIX + 'SET_EXPERIMENT_PLOTS',

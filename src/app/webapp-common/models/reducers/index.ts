@@ -1,5 +1,5 @@
 import {ActionReducerMap, createSelector} from '@ngrx/store';
-import {IModelsViewState, modelsInitialState, modelsViewReducer} from './models-view.reducer';
+import {ModelsViewState, modelsInitialState, modelsViewReducer} from './models-view.reducer';
 import {ModelInfoState, modelsInfoReducer} from './model-info.reducer';
 import {SelectedModel} from '../shared/models.model';
 import {CountAvailableAndIsDisableSelectedFiltered} from '@common/shared/entity-page/items.utils';
@@ -10,7 +10,7 @@ import {MetricVariantResult} from '~/business-logic/model/projects/metricVariant
 import {selectSelectedProjectId} from '@common/core/reducers/projects.reducer';
 
 export interface ModelsState {
-  view: IModelsViewState;
+  view: ModelsViewState;
   info: ModelInfoState;
 }
 
@@ -22,19 +22,19 @@ export const reducers: ActionReducerMap<ModelsState, any> = {
 const models = (state) => state.models;
 
 // view selectors.
-export const selectModelsView = createSelector(models, (state): IModelsViewState => state ? state.view : {});
+export const selectModelsView = createSelector(models, (state): ModelsViewState => state ? state.view : {});
 export const selectModelsList = createSelector(selectModelsView, (state) => state.models);
-export const selectCurrentScrollId = createSelector(selectModelsView, (state): string => state.scrollId);
+export const selectCurrentScrollId = createSelector(selectModelsView, (state) => state.scrollId);
 export const selectGlobalFilter = createSelector(selectModelsView, (state) => state.globalFilter);
 export const selectTableSortFields = createSelector(selectModelsView, selectSelectedProjectId,
   (state, projectId) => state.projectColumnsSortOrder[projectId] || modelsInitialState.tableSortFields);
 export const selectTableFilters = createSelector(selectModelsView, selectSelectedProjectId,
   (state, projectId) => state.projectColumnFilters?.[projectId] || {});
-export const selectSelectedModels = createSelector(selectModelsView, (state): Array<any> => state.selectedModels);
-export const selectSelectedModelsDisableAvailable = createSelector(selectModelsView, (state): Record<string, CountAvailableAndIsDisableSelectedFiltered> => state.selectedModelsDisableAvailable);
-export const selectSelectedTableModel = createSelector(selectModelsView, (state): SelectedModel => state.selectedModel);
-export const selectNoMoreModels = createSelector(selectModelsView, (state): boolean => state.noMoreModels);
-export const selectShowAllSelectedIsActive = createSelector(selectModelsView, (state): boolean => state.showAllSelectedIsActive);
+export const selectSelectedModels = createSelector(selectModelsView, state => state.selectedModels);
+export const selectSelectedModelsDisableAvailable = createSelector(selectModelsView, (state) => state.selectedModelsDisableAvailable);
+export const selectSelectedTableModel = createSelector(selectModelsView, (state) => state.selectedModel);
+export const selectNoMoreModels = createSelector(selectModelsView, (state) => state.noMoreModels);
+export const selectShowAllSelectedIsActive = createSelector(selectModelsView, (state) => state.showAllSelectedIsActive);
 export const selectModelsTableColsOrder = createSelector(selectModelsView, selectSelectedProjectId,
   (state, projectId): string[] => (state.colsOrder && projectId) ? state.colsOrder[projectId] : undefined);
 export const selectModelsFrameworks = createSelector(selectModelsView, (state): Array<string> => state.frameworks);
@@ -64,17 +64,17 @@ export const selectMetadataColsForProject = createSelector(selectMetadataColumns
       hidden: !!hidden[col.id],
       style: {...col.style, ...(colWidth[col.id] && {width: `${colWidth[col.id]}px`})}
     } as ISmCol)));
-export const selectSplitSize = createSelector(selectModelsView, (state): number => state.splitSize);
+export const selectSplitSize = createSelector(selectModelsView, (state) => state.splitSize);
 export const selectTableMode = createSelector(selectModelsView, state => state.tableMode);
 
 
 
 // info selectors
 export const selectModelInfo = createSelector(models, (state): ModelInfoState => state ? state.info : {});
-export const selectSelectedModel = createSelector(selectModelInfo, (state): SelectedModel => state.selectedModel);
-export const selectIsModelSaving = createSelector(selectModelInfo, (state): boolean => state.saving);
+export const selectSelectedModel = createSelector(selectModelInfo, (state) => state.selectedModel);
+export const selectIsModelSaving = createSelector(selectModelInfo, (state) => state.saving);
 export const selectActiveSectionEdit = createSelector(selectModelInfo, state => state.activeSectionEdit);
-export const selectIsModelInEditMode = createSelector(selectModelInfo, (state): boolean => !!state.activeSectionEdit);
+export const selectIsModelInEditMode = createSelector(selectModelInfo, (state) => !!state.activeSectionEdit);
 export const selectModelExperimentsTableFilters = createSelector(selectModelInfo, state => state.modelExperimentsTableFilter);
 
 export const selectModelPlots = createSelector(selectModelInfo, state => state.plots);

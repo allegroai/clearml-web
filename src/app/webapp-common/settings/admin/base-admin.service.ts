@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {from, fromEvent, Observable, of, Subject} from 'rxjs';
 import {fromFetch} from 'rxjs/fetch';
@@ -6,12 +6,17 @@ import {catchError, debounceTime, filter, map, skip} from 'rxjs/operators';
 import {DeleteObjectsCommand, GetObjectCommand, ObjectIdentifier, S3Client, S3ClientConfig} from '@aws-sdk/client-s3';
 import {getSignedUrl} from '@aws-sdk/s3-request-presigner';
 import {convertToReverseProxy, isFileserverUrl} from '~/shared/utils/url';
-import {selectRevokeSucceed, selectS3BucketCredentials, selectS3BucketCredentialsBucketCredentials} from '../../core/reducers/common-auth-reducer';
+import {
+  Credentials,
+  selectRevokeSucceed,
+  selectS3BucketCredentials,
+  selectS3BucketCredentialsBucketCredentials
+} from '../../core/reducers/common-auth-reducer';
 import {getAllCredentials, refreshS3Credential, showLocalFilePopUp} from '../../core/actions/common-auth.actions';
 import {ConfigurationService} from '../../shared/services/configuration.service';
 import {Environment} from '../../../../environments/base';
 import {DEFAULT_REGION} from '../../shared/utils/amazon-s3-uri';
-import {getBucketAndKeyFromSrc, SignResponse} from '@common/settings/admin/base-admin-utils';
+import {getBucketAndKeyFromSrc, isGoogleCloudUrl, SignResponse} from '@common/settings/admin/base-admin-utils';
 
 const LOCAL_SERVER_PORT = 27878;
 const FOUR_DAYS = 60 * 60 * 24 * 4;
@@ -20,27 +25,29 @@ const HTTP_REGEX = /^https?:\/\//;
 
 @Injectable()
 export class BaseAdminService {
-  bucketCredentials: Observable<any>;
+  // bucketCredentials: Observable<any>;
   public s3Services: {[bucket: string]: S3Client} = {};
   revokeSucceed: Observable<any>;
   private readonly s3BucketCredentials: Observable<any>;
-  private previouslySignedUrls = {};
   private localServerWorking = false;
   private environment: Environment;
   private deleteS3FilesSubject: Subject<{ success: boolean; files: string[] }>;
   private credentials: any[];
+  protected store: Store;
+  protected confService: ConfigurationService;
+  private gcsFirstAttempt = {};
 
-  constructor(protected store: Store, protected confService: ConfigurationService) {
-    this.store = store;
-    this.revokeSucceed = store.select(selectRevokeSucceed);
+  constructor() {
+    this.store = inject(Store);
+    this.confService = inject(ConfigurationService);
+    this.revokeSucceed = this.store.select(selectRevokeSucceed);
     this.revokeSucceed.subscribe(this.onRevokeSucceed);
-    this.s3BucketCredentials = store.select(selectS3BucketCredentials);
+    this.s3BucketCredentials = this.store.select(selectS3BucketCredentials);
     this.s3BucketCredentials.pipe(skip(1)).subscribe(() => {
-      this.previouslySignedUrls = {};
     });
-    store.select(selectS3BucketCredentialsBucketCredentials)
+    this.store.select(selectS3BucketCredentialsBucketCredentials)
       .subscribe(cred => this.credentials = cred);
-    confService.getEnvironment().subscribe(conf => this.environment = conf);
+    this.confService.getEnvironment().subscribe(conf => this.environment = conf);
     this.deleteS3FilesSubject = new Subject();
 
     fromEvent(window, 'storage')
@@ -79,10 +86,6 @@ export class BaseAdminService {
       return of({type: 'sign', signed: this.redirectToLocalServer(url), expires: Number.MAX_VALUE});
     }
 
-    if (this.isGoogleCloudUrl(url)) {
-      return of({type: 'sign', signed: this.signGoogleCloudUrl(url), expires: Number.MAX_VALUE});
-    }
-
     if (this.isAzureUrl(url)) {
       const azureBucket = this.credentials.find((b) => b.Bucket && b.Bucket.toLowerCase() == 'azure');
       if (azureBucket) {
@@ -92,43 +95,50 @@ export class BaseAdminService {
     const bucketKeyEndpoint = url && getBucketAndKeyFromSrc(url);
     if (bucketKeyEndpoint) {
       if (this.isAzureUrl(url)) {
-        return of({type: 'popup', bucket: bucketKeyEndpoint, azure: true});
+        return of({type: 'popup', bucket: bucketKeyEndpoint, provider: 'azure'});
       }
       const s3 = this.findOrInitBucketS3(bucketKeyEndpoint);
       if (s3) {
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const command = new GetObjectCommand({Key: bucketKeyEndpoint.Key, Bucket: bucketKeyEndpoint.Bucket/*, ResponseContentType: 'image/jpeg'*/});
+        const command = new GetObjectCommand({
+          Key: bucketKeyEndpoint.Key,
+          Bucket: bucketKeyEndpoint.Bucket/*, ResponseContentType: 'image/jpeg'*/
+        });
         return from(getSignedUrl(s3, command, {
           expiresIn: FOUR_DAYS,
           unhoistableHeaders: new Set(['x-amz-content-sha256', 'x-id']),
           unsignableHeaders: new Set(['x-amz-content-sha256', 'x-id']),
         }))
           .pipe(map(signed => ({type: 'sign', signed, expires: (new Date()).getTime() + FOUR_DAYS * 1000})));
+      } else if (isGoogleCloudUrl(url) && !this.gcsFirstAttempt?.[bucketKeyEndpoint.Bucket]) {
+        this.gcsFirstAttempt[bucketKeyEndpoint.Bucket] = true;
+        return of({type: 'sign', signed: this.signGoogleCloudUrl(url), expires: Number.MAX_VALUE});
       } else {
         delete bucketKeyEndpoint.Key;
-        return of({type: 'popup', bucket: bucketKeyEndpoint});
+        return of({type: 'popup', bucket: bucketKeyEndpoint, provider: isGoogleCloudUrl(url) ? 'gcs' : 's3'});
       }
     } else {
       return of({type: 'sign', signed: url, expires: Number.MAX_VALUE});
     }
   }
 
-  findS3CredentialsInStore(bucketKeyEndpoint) {
+  findS3CredentialsInStore(bucketKeyEndpoint: Credentials) {
+    const endpoint = bucketKeyEndpoint.Endpoint?.replace(HTTP_REGEX,'');
     return this.credentials
-      .find(bucket => bucket?.Bucket === bucketKeyEndpoint.Bucket && bucket?.Endpoint?.replace(HTTP_REGEX,'') == bucketKeyEndpoint.Endpoint);
+      .find(bucket => bucket?.Bucket === bucketKeyEndpoint.Bucket && bucket?.Endpoint?.replace(HTTP_REGEX,'') === endpoint);
   }
 
-  findOrInitBucketS3(bucketKeyEndpoint) {
+  findOrInitBucketS3(bucketKeyEndpoint: Credentials) {
     const set = this.findS3CredentialsInStore(bucketKeyEndpoint);
     const s3Service = this.s3Services[bucketKeyEndpoint.Bucket + bucketKeyEndpoint.Endpoint];
-    if (set && s3Service) {
-      return s3Service;
-    } else {
-      if (set) {
-        this.s3Services[bucketKeyEndpoint.Bucket + bucketKeyEndpoint.Endpoint] = this.createS3Service(set);
-        return this.s3Services[bucketKeyEndpoint.Bucket + bucketKeyEndpoint.Endpoint];
+    if (set) {
+      if (s3Service) {
+        return s3Service;
       }
+      this.s3Services[bucketKeyEndpoint.Bucket + bucketKeyEndpoint.Endpoint] = this.createS3Service(set);
+      return this.s3Services[bucketKeyEndpoint.Bucket + bucketKeyEndpoint.Endpoint];
     }
+    return null;
   }
 
   createS3Service(set) {
@@ -164,11 +174,6 @@ export class BaseAdminService {
   }
 
   private onRevokeSucceed = (bool) => bool ? this.getAllCredentials() : false;
-
-  public isGoogleCloudUrl(src) {
-    return src?.startsWith('gs://');
-  }
-
 
   // Uses Allegro Chrome extension injecting patch_local_link function to window - hack to get local files.
   redirectToLocalServer(url: string): string {

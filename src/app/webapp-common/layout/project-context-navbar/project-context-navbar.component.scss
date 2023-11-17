@@ -1,6 +1,5 @@
 @import "variables";
 
-$lg-breakpoint: map-get($grid-breakpoints, lg);
 :host {
   .navbar-header-container {
     min-height: $nav-bar-height;
@@ -31,7 +30,7 @@ $lg-breakpoint: map-get($grid-breakpoints, lg);
       font-size: 16px;
       font-weight: 700;
     }
-    @media screen and (max-width: $lg-breakpoint) {
+    @media screen and (max-width: 1000px) {
       .nav-bar-items-container {
         left: 60%;
       }

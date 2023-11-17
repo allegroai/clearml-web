@@ -1,11 +1,12 @@
 import {createAction, props} from '@ngrx/store';
-import {Worker} from '../../../business-logic/model/workers/worker';
+import {Worker} from '~/business-logic/model/workers/worker';
 import {Topic} from '../../shared/utils/statistics';
 import {SortMeta} from 'primeng/api';
 
 const workersPrefix = 'WORKERS_';
 
-export interface WorkerExt extends Worker {
+export interface WorkerExt extends Omit<Worker, 'id'> {
+  id: string;
   name: string;
   originalName: string;
 }

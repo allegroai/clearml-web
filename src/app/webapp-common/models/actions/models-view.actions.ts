@@ -1,10 +1,9 @@
 import {createAction, props} from '@ngrx/store';
 import {ISmCol} from '../../shared/ui-components/data/table/table.consts';
-import {SelectedModel} from '../shared/models.model';
+import {SelectedModel, TableModel} from '../shared/models.model';
 import {TableFilter} from '../../shared/utils/tableParamEncode';
 import {SortMeta} from 'primeng/api';
 import {CountAvailableAndIsDisableSelectedFiltered} from '@common/shared/entity-page/items.utils';
-import {EXPERIMENTS_PREFIX} from '@common/experiments/experiment.consts';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 import {
   OrganizationPrepareDownloadForGetAllRequest
@@ -25,12 +24,12 @@ export const getNextModelsWithPageSize = createAction(MODELS_PREFIX + '[get next
   props<{ pageSize: number }>());
 export const setModels = createAction(
   MODELS_PREFIX + '[set models]',
-  props<{ models: SelectedModel[] }>()
+  props<{ models: TableModel[] }>()
 );
 
 export const setModelsInPlace = createAction(
   MODELS_PREFIX + '[set models in place]',
-  props<{ models: SelectedModel[] }>()
+  props<{ models: TableModel[] }>()
 );
 
 export const setNoMoreModels = createAction(
@@ -76,7 +75,7 @@ export const setHiddenCols = createAction(
 
 export const setColsOrderForProject = createAction(
   MODELS_PREFIX + 'SET_COLS_ORDER',
-  props<{ cols: string[]; project: string; fromUrl?: boolean }>()
+  props<{ cols: string[]; project: string }>()
 );
 
 export const setExtraColumns = createAction(
@@ -118,7 +117,7 @@ export const getFilteredUsers = createAction(
 
 export const addModels = createAction(
   MODELS_PREFIX + '[add models]',
-  props<{ models: SelectedModel[] }>()
+  props<{ models: TableModel[] }>()
 );
 
 export const removeModels = createAction(
@@ -206,10 +205,6 @@ export const setCurrentScrollId = createAction(
   MODELS_PREFIX + ' [set current scrollId]',
   props<{ scrollId: string }>()
 );
-export const setArchive = createAction(
-  MODELS_PREFIX + 'SET_ARCHIVE',
-  props<{ archive: boolean }>()
-);
 
 export const afterSetArchive = createAction(MODELS_PREFIX + 'AFTER_SET_ARCHIVE');
 
@@ -224,10 +219,15 @@ export const setTableMode = createAction(
 );
 
 export const setCustomMetrics = createAction(
-  EXPERIMENTS_PREFIX + ' [set custom metrics]',
+  MODELS_PREFIX + ' [set custom metrics]',
   props<{ metrics: MetricVariantResult[] }>()
 );
 export const prepareTableForDownload = createAction(
   MODELS_PREFIX + ' [prepareTableForDownload]',
   props<{ entityType: OrganizationPrepareDownloadForGetAllRequest.EntityTypeEnum }>()
 );
+export const updateManyModels = createAction(
+  MODELS_PREFIX + 'update many models',
+  props<{ changeList: {[id: string]: Partial<TableModel>}}>()
+);
+

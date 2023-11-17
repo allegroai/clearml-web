@@ -3,12 +3,12 @@ import {IconNames, ICONS} from '../../../constants';
 import {MenuItems} from '../items.utils';
 
 export class DequeueFooterItem extends ItemFooterModel {
-  id = MenuItems.dequeue;
-  emit = true;
-  icon = ICONS.DEQUEUE as Partial<IconNames>;
 
   constructor() {
     super();
+    this.id = MenuItems.dequeue;
+    this.emit = true;
+    this.icon = ICONS.DEQUEUE as Partial<IconNames>;
   }
 
   getItemState(state: IFooterState<any>): { icon?: IconNames; title?: string; description?: string; disable?: boolean; disableDescription?: string; emit?: boolean; emitValue?: boolean; preventCurrentItem?: boolean; class?: string; wrapperClass?: string } {

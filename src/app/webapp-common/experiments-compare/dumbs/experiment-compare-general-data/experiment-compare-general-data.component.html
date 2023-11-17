@@ -1,13 +1,16 @@
 <header>
-  <div class="project ellipsis">{{experiment.project?.name}}</div>
+  <div data-id="experimentFullPath" class="project ellipsis">{{experiment.project?.name}}</div>
   <div class="d-flex align-items-center">
-    <div [smTooltip]="experiment.name"  class="experiment-name al-header"><a smEllipsisMiddleDirective [routerLink]="buildUrl()">{{experiment.name}}</a>
+    <div [smTooltip]="experiment.name"  class="experiment-name al-header" data-id="experimentName">
+      <a smEllipsisMiddleDirective [routerLink]="buildUrl()" [queryParams]="{archive: [$any(experiment).info?.archive, $any(experiment).general?.archive].includes('Yes') || undefined}">
+        {{experiment.name}}
+      </a>
     </div>
     <sm-id-badge class="ms-3" [id]="experiment.id" (copied)="copyToClipboard()"></sm-id-badge>
   </div>
 </header>
 <sm-tag-list [tags]="tags"></sm-tag-list>
-<div class="general-info">
+<div class="general-info" data-id="generalInfo">
   <i *ngIf="experimentsStatusLabels[experiment.status]" [class]="'me-1 icon sm bw i-'+ experiment.status"></i>
   <span>{{experimentsStatusLabels[experiment.status] ?? experiment.status}}</span>
   <ng-container *ngIf="experiment.last_iteration !== undefined">

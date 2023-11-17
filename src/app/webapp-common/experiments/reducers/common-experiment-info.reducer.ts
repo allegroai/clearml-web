@@ -64,7 +64,7 @@ export const initialCommonExperimentInfoState: CommonExperimentInfoState = {
 };
 
 export const commonExperimentInfoReducers = [
-  on(setExperiment, (state, action): CommonExperimentInfoState => ({...state, selectedExperiment: action.experiment as unknown})),
+  on(setExperiment, (state, action): CommonExperimentInfoState => ({...state, selectedExperiment: action.experiment})),
   on(setExperimentFormErrors, (state, action): CommonExperimentInfoState => ({...state, errors: action.errors})),
   on(experimentDataUpdated, (state, action): CommonExperimentInfoState => ({...state, infoData: {...state.infoData, ...action.changes}})),
   on(saveExperiment, saveHyperParamsSection, saveExperimentConfigObj, deleteHyperParamsSection, saveExperimentSection,

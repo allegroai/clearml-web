@@ -65,7 +65,7 @@ export class WelcomeMessageComponent implements OnInit, OnDestroy {
       code: 'clearml-agent init'
     }
     ];
-  links = ['Setup ClearML', 'Run your ML code', 'Relaunch previous experiments'];
+  links = ['Set up ClearML', 'Run your ML code', 'Relaunch previous experiments'];
   host: string;
   community = false;
   public queue: Queue;

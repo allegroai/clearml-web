@@ -5,7 +5,7 @@ import {FORCED_COLORS_FOR_STRING} from '../../../services/color-hash/color-hash-
 import {Subscription} from 'rxjs';
 import {getCssTheme} from '../../../utils/shared-utils';
 import {invertRgb} from '../../../services/color-hash/color-hash.utils';
-import tinycolor from 'tinycolor2';
+import { TinyColor, mostReadable } from '@ctrl/tinycolor';
 
 @Component({
   selector: 'sm-chips',
@@ -19,7 +19,7 @@ export class ChipsComponent implements OnInit, OnDestroy {
   public backgroundColor: string;
   public colorIsForced: boolean = false;
   public colorTuple: number[];
-  private _label: any;
+  private _label: string;
   private colorSub: Subscription;
 
   @Input() set label(label) {
@@ -69,10 +69,10 @@ export class ChipsComponent implements OnInit, OnDestroy {
       return;
     }
     this.color = `rgb(${color[0]},${color[1]},${color[2]})`;
-    const t = tinycolor(this.color);
-    const background = tinycolor.mostReadable(t.toString(), t.isDark() ?
-      [t.lighten(20).toString(), t.lighten(15).toString(), t.lighten(15).toString()] :
-      [t.darken(20).toString(), t.darken(15).toString(), t.darken(15).toString()], {includeFallbackColors:false, level: 'AA'});
+    const t = new TinyColor(this.color);
+    const background = mostReadable(t.toString(), t.isDark() ?
+      [t.lighten(35).toString(), t.lighten(25).toString(), t.lighten(15).toString()] :
+      [t.darken(35).toString(), t.darken(25).toString(), t.darken(15).toString()], {includeFallbackColors:false, level: 'AA'});
     this.backgroundColor = background.toRgbString();
   }
 

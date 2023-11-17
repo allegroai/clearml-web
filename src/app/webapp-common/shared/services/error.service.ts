@@ -37,7 +37,7 @@ export class ErrorService {
       57: this.template`Account already exists for this ${'provider'}  identity. Use 'Log In' Instead.`,
       58: this.template`No account exists. Use the provider you signed up with or sign up to create a new account`,
       62: this.template`Please check your email to continue the signup process`,
-      67: this.template`${'email'} is not registered - please contact your admin`,
+      67: this.template`${'email'} does not have access to ClearML - Ask your admin to whitelist this address`,
       1205: this.template`This workspace is at its limit for concurrently running instances.`,
       509: this.template`Can't edit frame's metadata for published version.`
     }

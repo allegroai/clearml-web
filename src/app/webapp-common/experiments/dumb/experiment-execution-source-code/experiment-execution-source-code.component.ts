@@ -15,7 +15,7 @@ export class ExperimentExecutionSourceCodeComponent implements OnInit, IExperime
   @Input() formData: IExecutionForm['source'];
   @Input() editable: boolean;
 
-  @Output() formDataChanged = new EventEmitter<{ field: string; value: any }>();
+  @Output() formDataChanged = new EventEmitter<{ field: string; value: IExecutionForm['source'] }>();
 
   @ViewChild('sourceCodeForm', { static: true }) sourceCodeForm: NgForm;
 

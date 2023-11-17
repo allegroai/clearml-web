@@ -1,33 +1,55 @@
-<div *ngIf="noGraphs" class="no-output" >
+<div *ngIf="noGraphs && !(multipleSingleValueData?.data.length > 0) && !(singleValueData?.length > 0)" class="no-output" >
   <i class="icon no-output-icon" [ngClass]="isDarkTheme ? 'i-no-plots-dark' : 'i-no-plots'"></i>
-  <h3>NO CHART DATA</h3>
+  <h4>NO CHART DATA</h4>
 </div>
 
 <div #allMetrics class="metrics-section">
-  <div class="d-flex align-items-center justify-content-center summary-container" *ngIf="singleValueData?.length>0 && !hiddenList.includes('Summary')">
+  <div class="d-flex align-items-center justify-content-center summary-container" *ngIf="singleValueData?.length>0 && !hiddenList.includes(singleValueChartTitle)">
     <sm-single-value-summary-table
       *ngIf="exportForReport; else: noEmbedCode"
       [data]="singleValueData"
       [experimentName]="experimentName"
-      class="single-value-summary-table"
+      class="single-value-summary-section"
       (createEmbedCode)="creatingEmbedCode(null, $event)"
     ></sm-single-value-summary-table>
     <ng-template #noEmbedCode>
       <sm-single-value-summary-table
         [data]="singleValueData"
         [experimentName]="experimentName"
-        class="single-value-summary-table"
+        class="single-value-summary-section"
       ></sm-single-value-summary-table>
     </ng-template>
   </div>
-  <div class="all-metrics"
+    <div
+      *ngIf="multipleSingleValueData?.data.length > 0"
+      [class.hidden]="hiddenList.includes(singleValueChartTitle)"
+      class="d-flex align-items-center justify-content-center summary-container"
+    >
+      <sm-single-graph
+        #singleValueGraph
+        class="w-100 single-value-summary-section"
+        [graphsNumber]="1"
+        [legendStringLength]="legendStringLength"
+        [chart]="multipleSingleValueData"
+        [id]="'singleValues'"
+        [isCompare]="isCompare"
+        [hoverMode]="hoverMode"
+        [isDarkTheme]="isDarkTheme"
+        [showLoaderOnDraw]="showLoaderOnDraw"
+        [identifier]="generateIdentifier(multipleSingleValueData)"
+        [exportForReport]="exportForReport"
+        (createEmbedCode)="creatingEmbedCode(null, $event)"
+        (hoverModeChanged)="hoverModeChanged.emit($event)"
+      ></sm-single-graph>
+  </div>
+  <div [class.all-metrics]="graphList?.length > 0"
        [class.row]="!isGroupGraphs"
   >
     <div *ngFor="let metric of (graphList); trackBy: trackByFn" class="metric-group-container less-padding"
          #metricGroup
          [class.two-in-a-row]="!isGroupGraphs && graphList.length > 1 && isWidthBigEnough()"
          [style.height.percent]=""
-         [class.hidden]="hiddenList.includes(metric)"
+         [class.hidden]="hiddenList?.includes(metric)"
     >
       <div [id]="experimentGraphidPrefix + metric" class="graph-id">
         <div>
@@ -66,7 +88,7 @@
                 [xAxisType]="xAxisType"
                 [height]="height"
                 [width]="width"
-                [moveLegendToTitle]="groupBy === groupByCharts.none"
+                [moveLegendToTitle]="checkIfLegendToTitle(chartItem)"
                 [identifier]="generateIdentifier(chartItem)"
                 [exportForReport]="exportForReport"
                 (createEmbedCode)="creatingEmbedCode(chartItem, $event)"

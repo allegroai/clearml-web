@@ -41,9 +41,9 @@ import {
   selectExperimentConfiguration,
   selectExperimentHyperParamsSelectedSectionFromRoute,
   selectExperimentSelectedConfigObjectFromRoute,
-  selectExperimentsList,
   selectPipelineSelectedStep,
   selectSelectedExperimentFromRouter,
+  selectSelectedFromTable,
   selectSelectedTableExperiment
 } from '../reducers';
 import {convertStopToComplete} from '../shared/common-experiments.utils';
@@ -97,7 +97,7 @@ export class CommonExperimentsInfoEffects {
       this.store.select(selectExperimentSelectedConfigObjectFromRoute)
     ),
     filter(([, experimentId]) => !!experimentId),
-    switchMap(([action, experimentId, configuration, selectedConfiguration]) => this.apiTasks.tasksGetConfigurationNames({tasks: [experimentId]})
+    switchMap(([action, experimentId, configuration, selectedConfiguration]) => this.apiTasks.tasksGetConfigurationNames({tasks: [experimentId], skip_empty: false})
       .pipe(
         mergeMap(res => {
           let configurations = cloneDeep(configuration);
@@ -199,24 +199,23 @@ export class CommonExperimentsInfoEffects {
     withLatestFrom(
       this.store.select(selectSelectedTableExperiment),
       this.store.select(selectSelectedExperiment),
-      this.store.select(selectExperimentsList),
+      this.store.select(selectSelectedFromTable ),
       this.store.select(selectExperimentInfoData),
       this.store.select(selectAppVisible),
       this.store.select(selectRouterConfig).pipe(map(config => !!config?.includes('pipelines') || !!config?.includes('datasets')))
     ),
-    switchMap(([action, tableSelected, selected, experiments, infoData, visible, customView]) => {
+    switchMap(([action, tableSelected, selected,
+                 selectedExperimentFromTable, infoData, visible, customView]) => {
       const currentSelected = tableSelected || selected;
       if (this.previousSelectedId && currentSelected?.id != this.previousSelectedId) {
         this.previousSelectedLastUpdate = null;
       }
       this.previousSelectedId = currentSelected?.id;
-
       if (!infoData || !currentSelected || !visible) {
         return of([action, null, tableSelected, selected, customView]);
       }
 
-      const listed = experiments?.find(e => e.id === currentSelected?.id);
-      return (listed ? of(listed) :
+      return (selectedExperimentFromTable ? of(selectedExperimentFromTable) :
         // eslint-disable-next-line @typescript-eslint/naming-convention
         this.apiTasks.tasksGetByIdEx({id: [selected.id], only_fields: ['last_change']}).pipe(map(res => res.tasks[0]))
       ).pipe(map(task => [action, task?.last_change ?? task?.last_update, task, selected, customView]));

@@ -17,6 +17,7 @@
 
     &.show-table {
       height: calc(100% - 30px);
+      margin: 0 -24px;
       overflow-y: auto;
     }
   }

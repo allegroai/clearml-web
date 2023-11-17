@@ -74,14 +74,14 @@ $dark-theme: (
   ),
   input: (
     height: 32px,
-    color: $blue-grey,
+    color: $blue-200,
     place-holder-color: $blue-300,
     background-color: #000,
     background-color-disabled: #000,
     border-radius: 4px,
     border-color: $blue-500,
     border-width: 1px,
-    focus-color: $blue-grey,
+    focus-color: $blue-100,
     hover-border-color: rgba(206, 209, 220, 0.5),
     focus-border-color: $blue-300,
     focus-box-shadow: none,
@@ -91,7 +91,7 @@ $dark-theme: (
   search-input: (
     color: $blue-280,
     icon-color: $blue-280,
-    border-color: $blue-grey,
+    border-color: $blue-200,
     border-color-focus: $blue-500,
     ph-color: $blue-280,
     seperator: $blue-900
@@ -105,7 +105,7 @@ $dark-theme: (
     background-color: black,
     border-radius: 4px,
     border: 0px,
-    color: $blue-grey,
+    color: $blue-200,
     placeholder-color: $blue-300
   ),
   table: (

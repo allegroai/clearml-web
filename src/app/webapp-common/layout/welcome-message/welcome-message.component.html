@@ -1,6 +1,6 @@
 <sm-dialog-template [displayX]="true"
                     [header]="queue? 'NO WORKERS ASSIGNED TO QUEUE': (step === 1 ? 'Welcome to ClearML' : (showTabs? 'CREATE NEW EXPERIMENT' : 'GETTING STARTED'))"
-                    [subHeader]="showTabs ? 'To create a new experiment you can either run your ML code instrumented with the ClearML SDK, or Relaunch a previously run experiment by cloning it.' : ''"
+                    [subHeader]="showTabs ? 'To create a new experiment you can either run your ML code instrumented with the ClearML SDK, or relaunch a previously run experiment by cloning it.' : ''"
                     (xClicked)="closeDialog()" [closeOnX]="false"
                     [iconClass]="queue?'al-ico-queues': 'i-welcome-researcher'" xmlns="http://www.w3.org/1999/html">
 

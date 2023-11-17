@@ -1,5 +1,4 @@
-import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit} from '@angular/core';
-import {select, Store} from '@ngrx/store';
+import {AfterViewInit, ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
 import {experimentListUpdated} from '../../actions/experiments-compare-details.actions';
 import {selectExperimentsDetails} from '../../reducers';
 import {filter, tap} from 'rxjs/operators';
@@ -8,10 +7,7 @@ import {
   convertConfigurationFromExperiments, convertContainerScriptFromExperiments, convertExperimentsArrays, convertNetworkDesignFromExperiments, getAllKeysEmptyObject, isDetailsConverted
 } from '../../jsonToDiffConvertor';
 import {ExperimentCompareBase} from '../experiment-compare-base';
-import {ActivatedRoute, Router} from '@angular/router';
-import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {ConfigurationItem} from '~/business-logic/model/tasks/configurationItem';
-import {RefreshService} from '@common/core/services/refresh.service';
 import {LIMITED_VIEW_LIMIT} from '@common/experiments-compare/experiments-compare.constants';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 
@@ -22,20 +18,14 @@ import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ExperimentCompareDetailsComponent extends ExperimentCompareBase implements OnInit, AfterViewInit {
-  public showEllipsis: boolean = true;
+  public showEllipsis= true;
 
   constructor(
-    public router: Router,
-    public store: Store,
-    public changeDetection: ChangeDetectorRef,
-    public activeRoute: ActivatedRoute,
-    public cdr: ChangeDetectorRef,
-    public refresh: RefreshService
   ) {
-    super(router, store, changeDetection, activeRoute, refresh, cdr);
+    super();
+    this.experiments$ = this.store.select(selectExperimentsDetails);
   }
 
-  experiments$ = this.store.pipe(select(selectExperimentsDetails));
 
   ngOnInit() {
     this.onInit();

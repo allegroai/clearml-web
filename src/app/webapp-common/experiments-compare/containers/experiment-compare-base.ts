@@ -1,17 +1,30 @@
 import * as detailsActions from '../actions/experiments-compare-details.actions';
-import * as paramsActions from '../actions/experiments-compare-params.actions';
-import {ExperimentCompareTree, ExperimentCompareTreeSection, IExperimentDetail} from '~/features/experiments-compare/experiments-compare-models';
+import {paramsActions} from '../actions/experiments-compare-params.actions';
+import {
+  ExperimentCompareTree,
+  ExperimentCompareTreeSection,
+  IExperimentDetail
+} from '~/features/experiments-compare/experiments-compare-models';
 import {get, has, isEmpty, isEqual} from 'lodash-es';
 import {treeBuilderService} from '../services/tree-builder.service';
 import {isArrayOrderNotImportant} from '../jsonToDiffConvertor';
 import {ExperimentParams, TreeNode, TreeNodeMetadata} from '../shared/experiments-compare-details.model';
 import {MatTreeFlatDataSource, MatTreeFlattener} from '@angular/material/tree';
 import {activeLoader, addMessage, deactivateLoader} from '../../core/actions/layout.actions';
-import {AfterViewInit, ChangeDetectorRef, Directive, ElementRef, HostListener, OnDestroy, QueryList, ViewChildren} from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectorRef,
+  Directive,
+  ElementRef,
+  HostListener,
+  inject,
+  OnDestroy,
+  QueryList,
+  ViewChildren
+} from '@angular/core';
 import {ExperimentCompareDetailsBase} from '~/features/experiments-compare/experiments-compare-details.base';
 import {ActivatedRoute, Router} from '@angular/router';
 import {select, Store} from '@ngrx/store';
-import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {Observable, Subscription} from 'rxjs';
 import {FlatTreeControl} from '@angular/cdk/tree';
 import {CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
@@ -24,6 +37,8 @@ import {selectHasDataFeature} from '~/core/reducers/users.reducer';
 import {ListRange} from '@angular/cdk/collections';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
+import {getSignedUrl} from '@common/core/actions/common-auth.actions';
+import {selectSignedUrl} from '@common/core/reducers/common-auth-reducer';
 
 export type NextDiffDirectionEnum = 'down' | 'up';
 
@@ -63,7 +78,9 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
   public allPaths: any = {};
   public calculatingTree: boolean;
   public hideIdenticalFields = false;
-  public experimentsDataControl: { [key: string]: [MatTreeFlatDataSource<TreeNode<any>, FlatNode>, FlatTreeControl<FlatNode>, FlatNode[]] } = {};
+  public experimentsDataControl: {
+    [key: string]: [MatTreeFlatDataSource<TreeNode<any>, FlatNode>, FlatTreeControl<FlatNode>, FlatNode[]]
+  } = {};
   public compareTabPage: string;
   public foundPaths: string[] = [];
   public foundIndex: number = 0;
@@ -75,7 +92,15 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
   private originalScrolledElement: EventTarget;
   private treeCardBody: HTMLDivElement;
   protected entityType = EntityTypeEnum.experiment;
+  protected router: Router;
+  protected store: Store;
+  protected changeDetection: ChangeDetectorRef;
+  protected activeRoute: ActivatedRoute;
+  protected refresh: RefreshService;
+  public cdr: ChangeDetectorRef;
   @ViewChildren('treeCardBody') treeCardBodies: QueryList<ElementRef<HTMLDivElement>>;
+  private prevIndex : number = 0;
+  private prevOffset: number = 0;
 
   get baseExperiment(): IExperimentDetail {
     return this.experiments?.[0];
@@ -91,15 +116,14 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
     });
   }
 
-  constructor(
-    protected router: Router,
-    protected store: Store,
-    protected changeDetection: ChangeDetectorRef,
-    protected activeRoute: ActivatedRoute,
-    protected refresh: RefreshService,
-    public cdr: ChangeDetectorRef
-  ) {
+  constructor() {
     super();
+    this.router = inject(Router);
+    this.store = inject(Store);
+    this.changeDetection = inject(ChangeDetectorRef);
+    this.activeRoute = inject(ActivatedRoute);
+    this.refresh = inject(RefreshService);
+    this.cdr = inject(ChangeDetectorRef);
     this.hasDataFeature$ = this.store.pipe(select(selectHasDataFeature));
     this.taskIds$ = this.store.pipe(
       select(selectRouterParams),
@@ -168,7 +192,11 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
         this.getNodeChildren
       );
       const expandedsPaths = this.getExpandedPath(experimentTrees);
-
+      this.prevOffset = this.virtualScrollRef.first ? this.virtualScrollRef.first.measureScrollOffset('top') : 0;
+      if (Object.values(this.experimentsDataControl)[0]) {
+        const [, , flatNodes] = Object.values(this.experimentsDataControl)[0];
+        this.prevIndex = this.findRealIndex(flatNodes);
+      }
       Object.keys(experimentTrees).forEach(experimentID => {
         const sectionTree = experimentTrees[experimentID];
         let root = Object.keys(sectionTree).map((section: string) => sectionTree[section].children[0]);
@@ -187,7 +215,7 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
         this.experimentsDataSources[experimentID] = {all: root, onlyDiffs: rootOnlyDiffs};
         dataSource.data = this.experimentsDataSources[experimentID][this.hideIdenticalFields ? 'onlyDiffs' : 'all'];
         this.setExpandedPaths(expandedsPaths, treeControl);
-        this.selectedPath && window.setTimeout(() => this.exapndAndScrollToPath());
+        window.setTimeout(() => this.exapndAndScrollToPath(false));
       });
       this.calculatingTree = false;
       this.store.dispatch(deactivateLoader('CALCULATING_DIFF_TREE'));
@@ -236,14 +264,11 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
   }
 
   getExpandedPath(experimentTrees: ExperimentCompareTree) {
-    let expandedsPaths = [];
-    Object.keys(experimentTrees).some(experimentID => {
-      if (this.experimentsDataControl[experimentID]) {
-        expandedsPaths = this.experimentsDataControl[experimentID][1].expansionModel.selected.map(node => node.data.path);
-        return expandedsPaths.length > 0;
-      }
-    });
-    return expandedsPaths;
+    const id = Object.keys(experimentTrees).find(experimentID => this.experimentsDataControl[experimentID]);
+    if (id) {
+      return this.experimentsDataControl[id][1].expansionModel.selected.map(node => node.data.path);
+    }
+    return [];
   }
 
   syncScrollSubscription() {
@@ -280,7 +305,7 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
     this.exapndAndScrollToPath();
   }
 
-  exapndAndScrollToPath() {
+  exapndAndScrollToPath(jumpToSelected = true) {
     const openPaths = [];
     let pathPartial = '';
     const selectedPath = this.selectedPath ? this.selectedPath.split(',') : [];
@@ -309,15 +334,11 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
     this.previousOpenPaths = openPaths.slice(0, openPaths.length - 1);
     const [, , flatNodes] = Object.values(this.experimentsDataControl)[0];
     const selectedNodeIndex = this.findRealIndex(flatNodes);
-    const scrollToInPixels = (selectedNodeIndex + 1) * 28 - this.virtualScrollRef.first.getViewportSize() / 2;
-    if (nodeGotExpanded) {
-      // Hack to make multiple scroll work with cdk. Don't change
-      window.setTimeout(() => this.virtualScrollRef.forEach(vs => vs.elementRef.nativeElement.scrollTo({top: scrollToInPixels})), 200);
-      window.setTimeout(() => this.virtualScrollRef.forEach(vs => vs.elementRef.nativeElement.scrollTo({top: scrollToInPixels})), 300);
-    } else {
-      this.virtualScrollRef.forEach(vs => vs.elementRef.nativeElement.scrollTo({top: scrollToInPixels}));
-      window.setTimeout(() => this.virtualScrollRef.forEach(vs => vs.elementRef.nativeElement.scrollTo({top: scrollToInPixels})), 0);
-      // window.setTimeout(() => this.virtualScrollRef.forEach(vs => vs.elementRef.nativeElement.scrollTo({top: scrollToInPixels})), 100);
+    const scrollToInPixels = jumpToSelected ?
+      (selectedNodeIndex + 1) * 28 - this.virtualScrollRef.first.getViewportSize() / 2 :
+      this.prevOffset + (selectedNodeIndex - this.prevIndex) * 28;
+    if (jumpToSelected || selectedNodeIndex !== this.prevIndex) {
+      this.virtualScrollRef.forEach(vs => vs.scrollTo({top: scrollToInPixels}));
     }
   }
 
@@ -354,6 +375,7 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
         } else if (keyWithoutHash.includes(text) || (node.data.value !== undefined && JSON.stringify(node.data.value).toLowerCase().includes(text))) {
           return {path: node.data.path, index};
         }
+        return null;
       })
       .filter(i => i)
     );
@@ -431,6 +453,7 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
       existOnOrigin,
       existOnCompared,
       value: comparedData,
+      // link: getLinkHref(fullPathJoined),
       isValueEqualToOrigin: (originExperiment === comparedExperiment) || (isEquals && (existOnOrigin === existOnCompared)),
       isArray: isArrayOrderNotImportant(comparedExperiment, key),
       classStyle: `${(originExperiment === comparedExperiment || isEquals) ? '' : 'al-danger '}${isEmptyObject ? 'al-empty-collapse ' : ''}${existOnCompared ? '' : 'hide-field'}`,
@@ -441,7 +464,7 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
   metaDataTransformer = (): TreeNodeMetadata => null;
 
   isPrimitive(obj) {
-    return (typeof obj === 'string' || typeof obj === 'boolean' || typeof obj === 'number');
+    return (typeof obj === 'string' || typeof obj === 'boolean' || typeof obj === 'number' || obj?.dataDictionary);
   }
 
   private setPathDif(fullPath, isEquals, undefinedOriginFirstRun) {
@@ -556,5 +579,20 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
 // Function that returns a nested node's list of children
   getNodeChildren(node: TreeNode<any>) {
     return node.children;
+  }
+
+  linkClicked(url: string) {
+    this.signUrl(url)
+      .subscribe(signedUrl => window.open(signedUrl, '_blank'));
+  }
+
+  protected signUrl(url: string) {
+    this.store.dispatch(getSignedUrl({url}));
+    return this.store.select(selectSignedUrl(url))
+      .pipe(
+        map((res => res?.signed)),
+        filter(signedUrl => !!signedUrl),
+        take(1)
+      );
   }
 }

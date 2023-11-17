@@ -4,6 +4,7 @@
     [class.snippets-mode]="snippetsMode"
     [style.--cardWidth]="cardWidth + 'px'"
     [style.--gridGap]="gridGap + 'px'"
+    [style.--padding]="snippetsMode ? padding + 'px' : null"
     *cdkVirtualFor="let row of itemRows$ | async; let rowIndex = index"
   >
     <ng-container *ngFor="let item of row; let itemIndex = index; trackBy: trackByFn">

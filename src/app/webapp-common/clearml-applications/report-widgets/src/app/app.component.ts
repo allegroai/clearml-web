@@ -20,7 +20,7 @@ import {ExtFrame} from '@common/shared/single-graph/plotly-graph-base';
 import {DebugSample} from '@common/shared/debug-sample/debug-sample.reducer';
 import {getSignedUrl, setS3Credentials} from '@common/core/actions/common-auth.actions';
 import {ConfigurationService} from '@common/shared/services/configuration.service';
-import {_mergeVariants, convertMultiPlots, mergeMultiMetricsGroupedVariant, prepareMultiPlots, tryParseJson} from '@common/tasks/tasks.utils';
+import {_mergeVariants, convertMultiPlots, createMultiSingleValuesChart, mergeMultiMetricsGroupedVariant, prepareGraph, prepareMultiPlots, tryParseJson} from '@common/tasks/tasks.utils';
 import {selectSignedUrl} from '@common/core/reducers/common-auth-reducer';
 import {loadExternalLibrary} from '@common/shared/utils/load-external-library';
 import {ImageViewerComponent} from '@common/shared/debug-sample/image-viewer/image-viewer.component';
@@ -47,7 +47,6 @@ export class AppComponent implements OnInit {
   title = 'report-widgets';
   public plotData: ExtFrame;
   public frame: DebugSample;
-  public parcoords: any;
   public plotLoaded: boolean;
   private environment: Environment;
   public activated: boolean = false;
@@ -193,8 +192,8 @@ export class AppComponent implements OnInit {
           const newGraphs = convertMultiPlots(merged);
           const originalObject = this.searchParams.get('objects');
           const series = this.searchParams.get('series');
-          this.plotData = Object.values(newGraphs)[0]?.find(a => originalObject === (a.task ?? a.data[0].task)) ??
-            Object.values(newGraphs)[0].find(a => (a.data[0] as any).seriesName === series) ??
+          this.plotData = series ? Object.values(newGraphs)[0].find(a => (a.data[0] as any).seriesName === series) :
+            Object.values(newGraphs)[0]?.find(a => originalObject === (a.task ?? a.data[0].task)) ??
             Object.values(newGraphs)[0]?.[0];
         }
 
@@ -297,7 +296,14 @@ export class AppComponent implements OnInit {
         filter(singleValueData => !!singleValueData),
         take(1)
       ).subscribe(singleValueData => {
-      this.singleValueData = singleValueData.values;
+      const objects = this.searchParams.getAll('objects');
+      if (objects.length > 1) {
+        this.type = 'scalar';
+        const singleValuesData = createMultiSingleValuesChart(singleValueData);
+        this.plotData = prepareGraph(singleValuesData.data, singleValuesData.layout, {}, {type: 'singleValue'});
+      } else {
+        this.singleValueData = singleValueData[0].values;
+      }
       this.cdr.detectChanges();
     });
   }
@@ -306,9 +312,11 @@ export class AppComponent implements OnInit {
     this.activated = true;
     await this.waitForVisibility();
     this.singleGraphHeight = window.innerHeight;
-    !['sample', 'single'].includes(this.type) && loadExternalLibrary(this.store, this.environment.plotlyURL, reportsPlotlyReady);
     const models = this.searchParams.has('models') || this.searchParams.get('objectType') === 'model';
     const objects = this.searchParams.getAll('objects');
+    if ((!['sample', 'single'].includes(this.type) || objects.length > 1)) {
+      loadExternalLibrary(this.store, this.environment.plotlyURL, reportsPlotlyReady);
+    }
     const queryParams = {
       tasks: objects.length > 0 ? objects : this.searchParams.getAll('tasks'),
       metrics: this.searchParams.getAll('metrics'),
@@ -400,7 +408,7 @@ export class AppComponent implements OnInit {
     const isCompare = entityIds.length > 1;
     let url = `${window.location.origin.replace('4201', '4200')}/projects/${project ?? '*'}/`;
     if (isCompare) {
-      url += `${isModels ? 'compare-models;ids=' : 'compare-experiments;ids='}${entityIds.join(',')}/
+      url += `${isModels ? 'compare-models;ids=' : 'compare-experiments;ids='}${entityIds.filter(id => !!id).join(',')}/
 ${this.getComparePath(this.type)}?metricPath=${metricPath}&metricName=lala${variants.map(par => `&params=${par}`).join('')}`;
     } else {
       url += `${isModels ? 'models/' : 'experiments/'}${entityIds}/${this.getOutputPath(isModels, this.type)}`;
@@ -428,6 +436,7 @@ ${this.getComparePath(this.type)}?metricPath=${metricPath}&metricName=lala${vari
           return 'info-output/debugImages';
       }
     }
+    return '';
   }
 
   private getComparePath(type: WidgetTypes) {

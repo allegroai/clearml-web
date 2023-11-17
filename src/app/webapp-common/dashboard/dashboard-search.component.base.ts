@@ -1,7 +1,7 @@
 import {initSearch, resetSearch} from '../common-search/common-search.actions';
-import {filter, skip} from 'rxjs/operators';
+import {distinctUntilChanged, distinctUntilKeyChanged, filter} from 'rxjs/operators';
 import {Model} from '~/business-logic/model/models/model';
-import {clearSearchResults, getCurrentPageResults, searchClear, searchDeactivate, searchStart} from '../dashboard-search/dashboard-search.actions';
+import {clearSearchResults, getCurrentPageResults, searchClear, searchDeactivate, searchSetTerm, searchStart} from '../dashboard-search/dashboard-search.actions';
 import {IRecentTask} from './common-dashboard.reducer';
 import {ITask} from '~/business-logic/model/al-task';
 import {combineLatest, Observable, Subscription} from 'rxjs';
@@ -23,10 +23,11 @@ import {Project} from '~/business-logic/model/projects/project';
 import {setSelectedProjectId} from '../core/actions/projects.actions';
 import {isExample} from '../shared/utils/shared-utils';
 import {activeLinksList, ActiveSearchLink, activeSearchLink} from '~/features/dashboard-search/dashboard-search.consts';
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {Router} from '@angular/router';
+import {ChangeDetectorRef, Component, inject, OnDestroy, OnInit} from '@angular/core';
+import {ActivatedRoute, Router} from '@angular/router';
 import { selectShowOnlyUserWork } from '@common/core/reducers/users-reducer';
 import {IReport} from '@common/reports/reports.consts';
+import {isEqual} from "lodash-es";
 
 @Component({
   selector: 'sm-dashboard-search-base',
@@ -36,7 +37,7 @@ import {IReport} from '@common/reports/reports.consts';
     (experimentSelected)="taskSelected($event)"
     (modelSelected)="modelSelected($event)"
     (pipelineSelected)="pipelineSelected($event)"
-    (activeLinkChanged)="activeLinkChanged($event)"
+    (activeLinkChanged)="changeActiveLink($event)"
     (reportSelected)="reportSelected($event)"
     (openDatasetSelected)="openDatasetCardClicked($event)"
     (loadMoreClicked)="loadMore()"
@@ -53,7 +54,6 @@ import {IReport} from '@common/reports/reports.consts';
 export class DashboardSearchBaseComponent implements OnInit, OnDestroy{
   public activeLink = 'projects' as ActiveSearchLink;
   private searchSubs;
-  private allResultsSubscription: Subscription;
   public searchQuery$: Observable<SearchState['searchQuery']>;
   public activeSearch$: Observable<boolean>;
   public modelsResults$: Observable<Array<Model>>;
@@ -65,32 +65,54 @@ export class DashboardSearchBaseComponent implements OnInit, OnDestroy{
   private scrollIds: Map<ActiveSearchLink, string>;
   public resultsCount$: Observable<Map<ActiveSearchLink, number>>;
   public reportsResults$: Observable<Array<IReport>>;
-
-  constructor(public store: Store, public router: Router){
-    this.searchQuery$        = store.select(selectSearchQuery);
-    this.activeSearch$       = store.select(selectActiveSearch);
-    this.modelsResults$      = store.select(selectModelsResults);
-    this.reportsResults$      = store.select(selectReportsResults);
-    this.pipelinesResults$   = store.select(selectPipelinesResults);
-    this.datasetsResults$   = store.select(selectDatasetsResults);
-    this.projectsResults$    = store.select(selectProjectsResults);
-    this.experimentsResults$ = store.select(selectExperimentsResults);
-    this.searchTerm$         = store.select(selectSearchTerm);
-    this.resultsCount$ = store.select(selectResultsCount);
+  public store = inject(Store);
+  public router = inject(Router);
+  public route = inject(ActivatedRoute);
+  private subs = new Subscription();
+  private cdr: ChangeDetectorRef;
+  constructor() {
+    this.cdr = inject(ChangeDetectorRef);
+    this.searchQuery$        = this.store.select(selectSearchQuery);
+    this.activeSearch$       = this.store.select(selectActiveSearch);
+    this.modelsResults$      = this.store.select(selectModelsResults);
+    this.reportsResults$      = this.store.select(selectReportsResults);
+    this.pipelinesResults$   = this.store.select(selectPipelinesResults);
+    this.datasetsResults$   = this.store.select(selectDatasetsResults);
+    this.projectsResults$    = this.store.select(selectProjectsResults);
+    this.experimentsResults$ = this.store.select(selectExperimentsResults);
+    this.searchTerm$         = this.store.select(selectSearchTerm);
+    this.resultsCount$ = this.store.select(selectResultsCount);
     this.syncAppSearch();
   }
 
   public ngOnInit(): void {
-    this.allResultsSubscription = this.resultsCount$.pipe(
+    this.subs.add(this.resultsCount$.pipe(
       filter(resultsCount => !!resultsCount),
-    ).subscribe((resultsCount) => this.setFirstActiveLink(resultsCount));
+      distinctUntilChanged()
+    ).subscribe((resultsCount) => this.setFirstActiveLink(resultsCount)));
+
+    this.subs.add(this.route.queryParams.pipe(distinctUntilKeyChanged('tab'))
+      .subscribe(params => {
+      if (params.tab && activeLinksList.find( link => link.name === params.tab)) {
+        this.activeLink = params.tab;
+        this.activeLinkChanged(this.activeLink)
+        this.cdr.markForCheck();
+      }
+    }));
+
+    this.subs.add(this.searchQuery$.pipe(
+      distinctUntilChanged((previous, current) => isEqual(previous, current)))
+      .subscribe(query => {
+      this.store.dispatch(searchSetTerm(query));
+    }));
   }
 
   ngOnDestroy(): void {
     this.store.dispatch(searchClear());
     this.searchTermChanged('');
     this.stopSyncSearch();
-    this.allResultsSubscription.unsubscribe();
+    this.subs.unsubscribe();
+    this.searchSubs.unsubscribe();
   }
 
   stopSyncSearch() {
@@ -102,10 +124,9 @@ export class DashboardSearchBaseComponent implements OnInit, OnDestroy{
     this.store.dispatch(initSearch({payload: 'Search for all'}));
 
     this.searchSubs = combineLatest([
-      this.searchQuery$,
+      this.searchTerm$,
       this.store.select(selectShowOnlyUserWork),
     ])
-      .pipe(skip(1))
       .subscribe(([query]) => this.searchTermChanged(query?.query, query?.regExp));
 
     this.searchSubs.add(this.store.select(selectSearchScrollIds).subscribe(scrollIds => this.scrollIds = scrollIds));
@@ -119,7 +140,7 @@ export class DashboardSearchBaseComponent implements OnInit, OnDestroy{
 
   public searchTermChanged(term: string, regExp?: boolean) {
     if (term && term.length > 0) {
-      this.store.dispatch(searchStart({query:term, regExp, force: term.length < 3, activeLink: this.activeLink}));
+      this.store.dispatch(searchStart({query:term, regExp}));
     } else {
       this.activeLink = activeSearchLink.projects;
       this.store.dispatch(searchDeactivate());
@@ -153,7 +174,6 @@ export class DashboardSearchBaseComponent implements OnInit, OnDestroy{
 
 
   public activeLinkChanged(activeLink) {
-    this.activeLink = activeLink;
     if (!this.scrollIds?.[activeLink]) {
       this.store.dispatch(getCurrentPageResults({activeLink}));
     }
@@ -162,11 +182,13 @@ export class DashboardSearchBaseComponent implements OnInit, OnDestroy{
 
   setFirstActiveLink(resultsCount) {
     if (resultsCount[this.activeLink] > 0) {
-      this.activeLinkChanged(this.activeLink);
+      this.router.navigate([], {queryParams: {tab: this.activeLink}, queryParamsHandling: "merge", replaceUrl: true})
+      this.store.dispatch(getCurrentPageResults({activeLink: this.activeLink}));
     } else {
       const firstTabIndex = activeLinksList.findIndex(activeLink => resultsCount[activeLink.name] > 0);
       if (firstTabIndex > -1) {
-        this.activeLinkChanged(activeLinksList[firstTabIndex].name);
+        this.router.navigate([], {queryParams: {tab: activeLinksList[firstTabIndex].name}, queryParamsHandling: "merge"})
+        this.store.dispatch(getCurrentPageResults({activeLink: activeLinksList[firstTabIndex].name as ActiveSearchLink}));
       } else {
         this.store.dispatch(clearSearchResults());
       }
@@ -175,5 +197,9 @@ export class DashboardSearchBaseComponent implements OnInit, OnDestroy{
 
   loadMore() {
     this.store.dispatch(getCurrentPageResults({activeLink: this.activeLink}));
+  }
+
+  changeActiveLink(tab: string) {
+    this.router.navigate([], {queryParams: {tab}, queryParamsHandling: "merge"})
   }
 }

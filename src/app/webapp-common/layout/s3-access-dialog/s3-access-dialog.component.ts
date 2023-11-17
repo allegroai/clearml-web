@@ -16,18 +16,19 @@ export class S3AccessDialogComponent implements OnChanges {
 
   @ViewChild('S3NGForm', {static: true}) s3NGForm: NgForm;
 
-  @Input() isAzure;
-  @Input() key;
-  @Input() secret                          = '';
-  @Input() region                          = '';
-  @Input() token                           = '';
-  @Input() bucket;
-  @Input() endpoint;
-  @Input() editMode                        = false;
-  @Input() header;
+  @Input() isAzure: boolean;
+  @Input() isGCS: boolean;
+  @Input() key: string;
+  @Input() secret = '';
+  @Input() region = '';
+  @Input() token = '';
+  @Input() bucket: string;
+  @Input() endpoint: string;
+  @Input() editMode = false;
+  @Input() header: string;
 
-  @Output() closeCancel: EventEmitter<any> = new EventEmitter();
-  @Output() closeSave: EventEmitter<any>   = new EventEmitter<any>();
+  @Output() closeCancel: EventEmitter<Credentials> = new EventEmitter();
+  @Output() closeSave: EventEmitter<Credentials> = new EventEmitter<any>();
   @Input() saveEnabled = true;
 
 
@@ -56,8 +57,8 @@ export class S3AccessDialogComponent implements OnChanges {
       return false;
     } else {
       this.closeSave.emit(this.s3Form);
+      return true;
     }
-
   }
 
   public cancel() {

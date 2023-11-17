@@ -105,6 +105,8 @@
 
 mat-form-field {
   width: 150px;
+  border-radius: 4px;
+  background-color: white;
 }
 
 .axis-type-field {
@@ -150,3 +152,5 @@ mat-slider {
     margin-top: 18px;
   }
 }
+
+

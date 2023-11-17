@@ -1,16 +1,21 @@
 import {Component, OnDestroy} from '@angular/core';
+import {ActiveSectionEnum} from '@common/experiments/experiment.consts';
 import {Store} from '@ngrx/store';
 import {selectBackdropActive} from '@common/core/reducers/view.reducer';
 import {combineLatest, Observable, pairwise, Subscription} from 'rxjs';
-import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
-import {selectCurrentArtifactExperimentId, selectExperimentModelInfoData} from '../../reducers';
+import {
+  selectArtifactId,
+  selectCurrentArtifactExperimentId,
+  selectExperimentModelInfoData,
+  selectSelectedExperimentFromRouter
+} from '../../reducers';
 import {
   selectExperimentInfoData,
   selectIsExperimentEditable,
   selectSelectedExperiment
 } from '~/features/experiments/reducers';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
-import {selectRouterConfig, selectRouterParams} from '@common/core/reducers/router-reducer';
+import {selectRouterConfig} from '@common/core/reducers/router-reducer';
 import {debounceTime, distinctUntilChanged, filter, map, startWith} from 'rxjs/operators';
 import {ActivatedRoute, Router} from '@angular/router';
 import {IExperimentModelInfo} from '../../shared/common-experiment-model.model';
@@ -29,7 +34,7 @@ export class ExperimentInfoArtifactsComponent implements OnDestroy {
   public backdropActive$: Observable<boolean>;
   public modelInfo$: Observable<IExperimentModelInfo>;
   public experimentInfo$: Observable<IExperimentInfo>;
-  public activeSection: any;
+  public activeSection: ActiveSectionEnum;
   public selectedId$: Observable<string>;
   private experimentKey$: Observable<string>;
   public routerConfig$: Observable<string[]>;
@@ -46,14 +51,13 @@ export class ExperimentInfoArtifactsComponent implements OnDestroy {
     this.modelInfo$ = this.store.select(selectExperimentModelInfoData);
     this.experimentInfo$ = this.store.select(selectExperimentInfoData);
     this.routerConfig$ = this.store.select(selectRouterConfig);
-    this.selectedId$ = this.store.select(selectRouterParams)
-      .pipe(map(params => decodeURIComponent(params?.artifactId || params?.modelId)));
-    this.experimentKey$ = this.store.select(selectRouterParams).pipe(map(params => params?.experimentId));
+    this.selectedId$ = this.store.select(selectArtifactId)
+    this.experimentKey$ = this.store.select(selectSelectedExperimentFromRouter);
 
     this.sub.add(this.store.select(selectRouterConfig)
       .pipe(filter(rc => !!rc))
       .subscribe((routerConfig: string[]) => {
-        this.activeSection = this.minimized ? routerConfig[5] : routerConfig[6];
+        this.activeSection = (this.minimized ? routerConfig[5] : routerConfig[6]) as ActiveSectionEnum;
       })
     );
 
@@ -106,24 +110,25 @@ export class ExperimentInfoArtifactsComponent implements OnDestroy {
     );
   }
 
-  private navigateToTarget(target: string) {
-    if (target !== this.previousTarget || !this.route.firstChild) {
-      this.router.navigate([target], {relativeTo: this.route, queryParamsHandling: 'preserve'});
-      this.previousTarget = target;
+  private navigateToTarget(target: string[]) {
+    const targetStr = target.join('/');
+    if (targetStr !== this.previousTarget || !this.route.firstChild) {
+      this.previousTarget = targetStr;
+      this.router.navigate(target, {relativeTo: this.route, queryParamsHandling: 'preserve', replaceUrl: true});
     }
   }
 
   private resetSelection(modelInfo): void {
-    let target: string;
+    let target: string[];
     if (modelInfo.input?.length > 0) {
-      target = `../artifacts/input-model/${encodeURIComponent(modelInfo.input[0]?.id)}`;
+      target = ['..', 'artifacts', 'input-model', encodeURIComponent(modelInfo.input[0]?.id)];
     } else if (modelInfo.output?.length > 0) {
-      target = `../artifacts/output-model/${encodeURIComponent(modelInfo.output[0]?.id)}/`;
+      target = ['..', 'artifacts', 'output-model', encodeURIComponent(modelInfo.output[0]?.id)];
     } else if (modelInfo.artifacts.length > 0) {
-      target = `../artifacts/other/${encodeURIComponent(modelInfo.artifacts[0]?.key)}/${encodeURIComponent(modelInfo.artifacts[0]?.mode)}`;
+      target = ['..', 'artifacts', 'other', encodeURIComponent(modelInfo.artifacts[0]?.key), encodeURIComponent(modelInfo.artifacts[0]?.mode)];
     } else {
       // no items
-      target = '../artifacts/input-model/input-model';
+      target = ['..', 'artifacts', 'input-model', 'input-model'];
     }
     this.navigateToTarget(target);
   }

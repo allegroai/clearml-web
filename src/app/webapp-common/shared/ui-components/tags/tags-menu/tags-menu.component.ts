@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import {Store} from '@ngrx/store';
 import {openTagColorsMenu, setTagsFilterByProject} from '@common/core/actions/projects.actions';
-import {activateEdit} from 'app/webapp-common/experiments/actions/common-experiments-info.actions';
+import {activateEdit} from '@common/experiments/actions/common-experiments-info.actions';
 import {activateModelEdit} from '@common/models/actions/models-info.actions';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {map} from 'rxjs/operators';

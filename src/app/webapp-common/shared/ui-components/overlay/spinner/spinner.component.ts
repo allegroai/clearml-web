@@ -10,12 +10,9 @@ import {isEqual} from 'lodash-es';
 @Component({
   selector: 'sm-spinner',
   template: `
-    <div *ngIf="showSpinner">
-      <div class="loader-container">
-        <div class="circle"></div>
+      <div *ngIf="showSpinner" class="loader-container">
+        <mat-spinner [diameter]="64" [strokeWidth]="6" color="accent"></mat-spinner>
       </div>
-      <!--<div class="spinner-overlay"></div>-->
-    </div>
   `,
   styleUrls: ['./spinner.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

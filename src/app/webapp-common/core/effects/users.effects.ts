@@ -77,11 +77,7 @@ ${this.errorService.getErrorMsg(err?.error)}`)])
   updateCurrentUser = createEffect(() => this.actions.pipe(
     ofType(updateCurrentUser),
     mergeMap(({user}) => this.userService.usersUpdate({...user}).pipe(
-      mergeMap((res: UsersUpdateResponse) => {
-        if (res.updated) {
-          return [setCurrentUserName({name: user.name})];
-        }
-      })
+      mergeMap((res: UsersUpdateResponse) => res.updated ? [setCurrentUserName({name: user.name})] : [])
     )),
     catchError(err => [addMessage(MESSAGES_SEVERITY.ERROR, `Update User Failed ${this.errorService.getErrorMsg(err?.error)}`)])
   ));

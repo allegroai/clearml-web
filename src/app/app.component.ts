@@ -1,7 +1,7 @@
 import {ApiUsersService} from './business-logic/api-services/users.service';
 import {selectCurrentUser} from '@common/core/reducers/users-reducer';
 import {Component, OnDestroy, OnInit, ViewEncapsulation, HostListener, Renderer2, Injector} from '@angular/core';
-import {ActivatedRoute, NavigationEnd, Router, Params, RouterEvent} from '@angular/router';
+import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import {Title} from '@angular/platform-browser';
 import {selectBreadcrumbs, selectLoggedOut} from '@common/core/reducers/view.reducer';
 import {Store} from '@ngrx/store';
@@ -9,11 +9,11 @@ import {selectRouterParams, selectRouterUrl} from '@common/core/reducers/router-
 import {ApiProjectsService} from './business-logic/api-services/projects.service';
 import {Project} from './business-logic/model/projects/project';
 import {getAllSystemProjects, setSelectedProjectId, updateProject} from '@common/core/actions/projects.actions';
-import {selectSelectedProject} from '@common/core/reducers/projects.reducer';
+import {selectRouterProjectId, selectSelectedProject} from '@common/core/reducers/projects.reducer';
 import {MatDialog} from '@angular/material/dialog';
 import {getTutorialBucketCredentials} from '@common/core/actions/common-auth.actions';
 import {termsOfUseAccepted} from '@common/core/actions/users.actions';
-import {distinctUntilChanged, filter, map, tap} from 'rxjs/operators';
+import {distinctUntilChanged, filter, tap} from 'rxjs/operators';
 import * as routerActions from './webapp-common/core/actions/router.actions';
 import {combineLatest, Observable, Subscription} from 'rxjs';
 import {ServerUpdatesService} from '@common/shared/services/server-updates.service';
@@ -24,14 +24,13 @@ import {UiUpdatesService} from '@common/shared/services/ui-updates.service';
 import {UsageStatsService} from './core/services/usage-stats.service';
 import {dismissSurvey} from './core/actions/layout.actions';
 import {getScaleFactor} from '@common/shared/utils/shared-utils';
-import {User} from './business-logic/model/users/user';
 import {ConfigurationService} from '@common/shared/services/configuration.service';
-import {GoogleTagManagerService} from 'angular-google-tag-manager';
 import {selectIsSharedAndNotOwner} from './features/experiments/reducers';
 import {TipsService} from '@common/shared/services/tips.service';
 import {USER_PREFERENCES_KEY} from '@common/user-preferences';
 import {Environment} from '../environments/base';
 import {loadExternalLibrary} from '@common/shared/utils/load-external-library';
+import {User} from '~/business-logic/model/users/user';
 
 @Component({
   selector: 'sm-root',
@@ -40,17 +39,14 @@ import {loadExternalLibrary} from '@common/shared/utils/load-external-library';
   encapsulation: ViewEncapsulation.None
 })
 export class AppComponent implements OnInit, OnDestroy {
-  public loggedOut$: Observable<any>;
-  public activeFeature: string;
+  public loggedOut$: Observable<boolean>;
   private urlSubscription: Subscription;
   public selectedProject$: Observable<Project>;
   public projectId: string;
   public isWorkersContext: boolean;
-  public updatesAvailable$: Observable<any>;
-  private selectedProjectFromUrl$: Observable<string>;
+  public updatesAvailable$: Observable<string>;
   private breadcrumbsSubscription: Subscription;
   private selectedCurrentUserSubscription: Subscription;
-  private selectedCurrentUser$: Observable<any>;
   public showNotification: boolean = true;
   public demo = ConfigurationService.globalEnvironment.demo;
   public isLoginContext: boolean;
@@ -77,7 +73,7 @@ export class AppComponent implements OnInit, OnDestroy {
     private router: Router,
     private route: ActivatedRoute,
     private titleService: Title,
-    private store: Store<any>,
+    private store: Store,
     private projectsApi: ApiProjectsService,
     private userService: ApiUsersService,
     public serverUpdatesService: ServerUpdatesService,
@@ -93,16 +89,6 @@ export class AppComponent implements OnInit, OnDestroy {
     this.isSharedAndNotOwner$ = this.store.select(selectIsSharedAndNotOwner);
     this.selectedProject$ = this.store.select(selectSelectedProject);
     this.updatesAvailable$ = this.store.select(selectAvailableUpdates);
-    this.selectedCurrentUser$ = this.store.select(selectCurrentUser);
-    this.selectedProjectFromUrl$ = this.store.select(selectRouterParams)
-      .pipe(
-        filter((params: Params) => !!params),
-        map(params => params?.projectId || null)
-      );
-
-    if (ConfigurationService.globalEnvironment.GTM_ID) {
-      this.gtmService = injector.get(GoogleTagManagerService);
-    }
   }
 
   ngOnInit(): void {
@@ -129,7 +115,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe(
-        (item: RouterEvent) => {
+        (item: NavigationEnd) => {
           const gtmTag = {
             event: 'page',
             pageName: item.url
@@ -138,8 +124,8 @@ export class AppComponent implements OnInit, OnDestroy {
           this.store.dispatch(routerActions.navigationEnd());
         });
 
-    this.selectedCurrentUserSubscription = this.selectedCurrentUser$.pipe(
-      tap(user => this.currentUser = user), // should not be filtered
+    this.selectedCurrentUserSubscription = this.store.select(selectCurrentUser).pipe(
+      tap(user => this.currentUser = user as unknown as User),
       filter(user => !!user?.id),
       distinctUntilChanged((prev, next) => prev?.id === next?.id)
     )
@@ -158,27 +144,23 @@ export class AppComponent implements OnInit, OnDestroy {
         }
       });
 
-    this.selectedProjectFromUrl$.subscribe((projectId: string) => {
+    this.store.select(selectRouterProjectId).subscribe((projectId: string) => {
       this.store.dispatch(setSelectedProjectId({projectId}));
     });
 
-    this.urlSubscription = combineLatest([this.store.select(selectRouterUrl), this.store.select(selectRouterParams)])
+    this.urlSubscription = combineLatest([
+      this.store.select(selectRouterUrl),
+      this.store.select(selectRouterParams)
+    ])
       .subscribe(([url, params]) => {
         this.projectId = params?.projectId;
         this.isLoginContext = url && url.includes('login');
         this.isWorkersContext = url && url.includes('workers-and-queues');
-        if (this.projectId) {
-          try { // TODO: refactor to a better solution after all navbar are declared...
-            this.activeFeature = url.split(this.projectId)[1].split('/')[1];
-          } catch (e) {
-
-          }
-        }
       });
 
     this.breadcrumbsSubscription = this.store.select(selectBreadcrumbs).subscribe(breadcrumbs => {
-      const crumbs = breadcrumbs.flat().map(breadcrumb=> breadcrumb.name);
-      this.titleService.setTitle(`${this.title ? this.title + '-' : ''} ${crumbs.join(' / ')}`);
+      const crumbs = breadcrumbs.flat().filter((breadcrumb => !!breadcrumb?.name)).map(breadcrumb => breadcrumb.name);
+      crumbs.length> 0 && this.titleService.setTitle(`${this.title ? this.title + '-' : ''} ${crumbs.join(' / ')}`);
     });
 
     if (window.localStorage.getItem('disableHidpi') !== 'true') {

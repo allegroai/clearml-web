@@ -46,6 +46,7 @@ import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confi
 import {ConfirmDialogConfig} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.model';
 import {ErrorService} from '@common/shared/services/error.service';
 import {Router} from '@angular/router';
+import {Task} from '~/business-logic/model/tasks/task';
 
 @Injectable()
 export class DeleteDialogEffectsBase {
@@ -141,6 +142,7 @@ export class DeleteDialogEffectsBase {
       case EntityTypeEnum.project:
         return selectProjectForDelete;
     }
+    return null;
   }
 
   pauseAutorefresh(entityType: EntityTypeEnum): Action[] {

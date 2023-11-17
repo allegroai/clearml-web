@@ -1,20 +1,20 @@
 import {ChangeDetectionStrategy, Component, OnDestroy, OnInit} from '@angular/core';
 import {selectIsModelSaving, selectSelectedModel} from '../../reducers';
-import {filter} from 'rxjs/operators';
 import {Store} from '@ngrx/store';
-import {ModelInfoState} from '../../reducers/model-info.reducer';
 import {Observable, Subscription} from 'rxjs';
 import {SelectedModel} from '../../shared/models.model';
 import {selectIsSharedAndNotOwner} from '~/features/experiments/reducers';
-import {activateModelEdit, cancelModelEdit, saveMetaData, setSavingModel } from '../../actions/models-info.actions';
-import {cloneDeep} from 'lodash-es';
+import {activateModelEdit, cancelModelEdit, saveMetaData} from '../../actions/models-info.actions';
+import {cloneDeep, toInteger} from 'lodash-es';
 import {trackById} from '@common/shared/utils/forms-track-by';
+import {filter, map} from 'rxjs/operators';
 
 export interface IModelMetadataMap {
   [key: string]: IModelMetadataItem;
 }
 
 export interface IModelMetadataItem {
+  id: string;
   key?: string;
   type?: string;
   value?: string;
@@ -32,35 +32,43 @@ export class ModelInfoMetadataComponent implements OnInit, OnDestroy {
   public isSharedAndNotOwner$: Observable<unknown>;
   public inEdit: boolean;
   trackByFn = trackById;
-  public cols = [{header: 'Key', class: 'col-8'},
-    {header: 'Type', class: 'col-8'}, {header: 'Value', class: 'col-8'}];
-  public metadata: IModelMetadataItem[];
+  public cols = [
+    {id : 'key', header: 'Key'},
+    {id : 'type', header: 'Type'},
+    {id : 'value', header: 'Value'}
+  ];
+  public metadata = null as IModelMetadataItem[];
   private modelSub: Subscription;
-  private originalMetadata: IModelMetadataItem[];
-  searchedText: string;
+  private originalMetadata;
   public searchResultsCount: number;
-  public scrollIndexCounter: number;
 
   constructor(private store: Store) {
-    this.selectedModel$ = this.store.select(selectSelectedModel).pipe(filter(model => !!model));
+    this.selectedModel$ = this.store.select(selectSelectedModel);
     this.saving$ = this.store.select(selectIsModelSaving);
     this.isSharedAndNotOwner$ = this.store.select(selectIsSharedAndNotOwner);
   }
 
   ngOnInit(): void {
-    this.modelSub = this.selectedModel$.subscribe(model => {
-      this.originalMetadata = Object.values(cloneDeep(model?.metadata));
-      this.metadata = Object.values(cloneDeep(model?.metadata));
-    });
+    this.modelSub = this.selectedModel$
+      .pipe(
+        map(model => model?.metadata),
+        filter(metadata => !!metadata)
+      )
+      .subscribe(metadata => {
+        this.originalMetadata = Object.values(cloneDeep(metadata));
+        this.metadata = Object.values(metadata)
+          .map((item, index) => ({...item, id: `${index}`}));
+      });
   }
 
   saveFormData() {
     this.inEdit = false;
     const metadataObject = this.metadata.reduce((acc, metaItem) => {
-      acc[metaItem.key] = metaItem;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const {id, ...item} = metaItem;
+      acc[metaItem.key] = item;
       return acc;
     }, {}) as IModelMetadataMap;
-    this.store.dispatch(setSavingModel (true));
     this.store.dispatch(saveMetaData({metadata: metadataObject}));
   }
 
@@ -78,6 +86,7 @@ export class ModelInfoMetadataComponent implements OnInit, OnDestroy {
 
   addRow() {
     this.metadata.push({
+      id: `${toInteger(this.metadata?.at(-1)?.id ?? '0') + 1}`,
       key: null,
       type: null,
       value: null

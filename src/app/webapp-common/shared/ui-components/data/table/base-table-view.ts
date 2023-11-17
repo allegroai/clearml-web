@@ -18,7 +18,7 @@ export abstract class BaseTableView implements AfterViewInit, OnDestroy {
   public selectionState: TableSelectionState;
   protected entitiesKey: string;
   public selectedEntitiesKey: string;
-  public table: TableComponent;
+  public table: TableComponent<{id: string}>;
   public menuBackdrop: boolean;
   public searchValues: { [colId: string]: string } = {};
   public filtersOptions: { [colId: string]: IOption[] } = {};
@@ -74,12 +74,12 @@ export abstract class BaseTableView implements AfterViewInit, OnDestroy {
   @Output() filterSearchChanged = new EventEmitter() as EventEmitter<{ colId: string; value: {value: string; loadMore?: boolean} }>;
   @Output() filterChanged = new EventEmitter() as EventEmitter<{ col: ISmCol; value: any; andFilter?: boolean }>;
   @Output() columnsReordered = new EventEmitter<string[]>();
-  @ViewChildren(TableComponent) tables: QueryList<TableComponent>;
+  @ViewChildren(TableComponent) tables: QueryList<TableComponent<{id: string}>>;
 
   ngAfterViewInit(): void {
     this.tables.changes
-      .pipe(filter((comps: QueryList<TableComponent>) => !!comps.first), take(1))
-      .subscribe((comps: QueryList<TableComponent>) => {
+      .pipe(filter((comps: QueryList<TableComponent<{id: string}>>) => !!comps.first), take(1))
+      .subscribe((comps: QueryList<TableComponent<{id: string}>>) => {
         this.table = comps.first;
         window.setTimeout(() => this.table?.focusSelected());
         this.afterTableInit();

@@ -178,6 +178,7 @@ export const projectsReducer = createReducer(
     companyTags: action.tags,
     systemTags: action.systemTags
   })),
+  on(projectsActions.addCompanyTag, (state, action): RootProjects => ({...state, companyTags: Array.from(new Set(state.companyTags.concat(action.tag))).sort()})),
   on(projectsActions.addProjectTags, (state, action): RootProjects => ({
     ...state,
     projectTags: Array.from(new Set(state.projectTags.concat(action.tags))).sort()

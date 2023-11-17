@@ -1,7 +1,12 @@
 import {createAction, props} from '@ngrx/store';
-import {Queue} from '~/business-logic/model/queues/queue';
+import {Queue as BLQueue} from '~/business-logic/model/queues/queue';
 import {Topic} from '../../shared/utils/statistics';
 import {SortMeta} from 'primeng/api';
+
+export interface Queue extends Omit<BLQueue, 'id'> {
+  id: string;
+}
+
 
 const queuesPrefix = 'QUEUES_';
 export const GET_QUEUES = queuesPrefix + 'GET_QUEUES';

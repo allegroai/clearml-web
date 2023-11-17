@@ -1,23 +1,22 @@
 import {ChangeDetectorRef, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {combineLatest, Observable, Subscription} from 'rxjs';
 import {select, Store} from '@ngrx/store';
-import {debounceTime, distinctUntilChanged, filter, map, withLatestFrom} from 'rxjs/operators';
+import {debounceTime, distinctUntilChanged, filter, map, take, withLatestFrom} from 'rxjs/operators';
 import {selectRouterParams, selectRouterQueryParams} from '@common/core/reducers/router-reducer';
 import {has} from 'lodash-es';
 import {setExperimentSettings, setSelectedExperiments} from '../../actions/experiments-compare-charts.actions';
 import {
-  selectMetricValueType,
   selectScalarsGraphHyperParams,
   selectScalarsGraphMetrics,
   selectScalarsGraphShowIdenticalHyperParams,
   selectScalarsGraphTasks,
   selectSelectedSettingsHyperParams,
-  selectSelectedSettingsMetric
+  selectSelectedSettingsMetric,
+  selectSelectedSettingsValueType
 } from '../../reducers';
 import {
   getExperimentsHyperParams,
   setShowIdenticalHyperParams,
-  setvalueType
 } from '../../actions/experiments-compare-scalars-graph.actions';
 import {
   GroupedHyperParams,
@@ -68,6 +67,7 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
   private taskIds: string[];
 
   public metricValueType$: Observable<MetricValueType>;
+  public valueType: "min_value" | "max_value" | "value";
 
   public selectedItemsListMapper(data) {
     return data;
@@ -82,6 +82,10 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
     }
   }
 
+  @HostListener("window:beforeunload", ["$event"]) unloadHandler() {
+    this.saveSettingsState();
+  }
+
   constructor(private store: Store,
               private route: ActivatedRoute,
               private router: Router,
@@ -94,18 +98,11 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
     this.selectedMetric$ = this.store.pipe(select(selectSelectedSettingsMetric));
     this.selectShowIdenticalHyperParams$ = this.store.pipe(select(selectScalarsGraphShowIdenticalHyperParams));
     this.experiments$ = this.store.pipe(select(selectScalarsGraphTasks));
-    this.metricValueType$ = this.store.pipe(select(selectMetricValueType));
+    this.metricValueType$ = this.store.pipe(select(selectSelectedSettingsValueType));
 
   }
 
   ngOnInit() {
-    this.subs.add(this.selectedMetric$.pipe(
-      distinctUntilChanged((x, y) => x?.path === y?.path)
-    ).subscribe((selectedMetric: SelectedMetric) => {
-      this.selectedMetric = selectedMetric?.path ? {...selectedMetric} : null;
-      this.cdr.detectChanges();
-    }));
-
     this.subs.add(this.metrics$.pipe(
       filter(metrics => !!metrics)
     ).subscribe((metrics) => {
@@ -113,11 +110,11 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
       this.metricsOptions = [...metrics];
     }));
 
-    this.subs.add(combineLatest([this.selectedHyperParams$, this.hyperParams$, this.selectShowIdenticalHyperParams$])
+    this.subs.add(combineLatest([this.hyperParams$, this.selectShowIdenticalHyperParams$])
       .pipe(
-        filter(([, allParams]) => !!allParams),
+        filter(([allParams]) => !!allParams),
       )
-      .subscribe(([selectedParams, allParams, showIdentical]) => {
+      .subscribe(([allParams, showIdentical]) => {
         this.showIdenticalParamsActive = showIdentical;
         this.hyperParams = Object.entries(allParams)
           .reduce((acc, [sectionKey, params]) => {
@@ -134,7 +131,8 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
             }
             return acc;
           }, {});
-        this.selectedHyperParams = selectedParams?.filter(selectedParam => has(this.hyperParams, selectedParam));
+        const selectedHyperParams = this.selectedHyperParams?.filter(selectedParam => has(this.hyperParams, selectedParam));
+        selectedHyperParams && this.updateServer(this.selectedMetric, selectedHyperParams, this.valueType)
         this.cdr.detectChanges();
       }));
 
@@ -146,7 +144,7 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
       if (queryParams.metricPath) {
         const selectedMetric = metircs.map(a => a.variants).flat(2).find(variant => variant.value.path === queryParams.metricPath)?.value ?? null;
         const params = Array.isArray(queryParams.params) ? queryParams.params : [queryParams.params];
-        this.updateServer(selectedMetric, params, true);
+        this.updateServer(selectedMetric, params, queryParams.valueType, true);
         this.listOpen = false;
         this.cdr.detectChanges();
       }
@@ -160,7 +158,7 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
     )
       .subscribe((ids) => {
         this.taskIds = ids.split(',');
-        this.store.dispatch(setSelectedExperiments({selectedExperiments: ['hyper-param-graph']}));
+        this.store.dispatch(setSelectedExperiments({selectedExperiments: ['hyper-param-graph'].concat(this.taskIds)}));
         this.store.dispatch(getExperimentsHyperParams({experimentsIds: this.taskIds}));
       }));
 
@@ -170,15 +168,26 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
         this.store.dispatch(getExperimentsHyperParams({experimentsIds: this.taskIds, autoRefresh}))
       ));
 
-    this.listOpen = true;
-    window.setTimeout(() => {
-      this.searchMetricRef.nativeElement.focus();
-      this.initView = false;
-      this.cdr.detectChanges();
-    }, 200);
+    this.subs.add(this.metricValueType$.pipe(take(1))
+      .subscribe(valueType => this.valueType = valueType));
+    this.subs.add(this.selectedHyperParams$.pipe(take(1))
+      .subscribe(p => this.selectedHyperParams = p));
+    this.subs.add(this.selectedMetric$.pipe(take(1))
+      .subscribe(selectedMetric => this.selectedMetric = selectedMetric?.path ? {...selectedMetric} : null));
+
+    this.listOpen = false;
+    if (!this.selectedMetric) {
+      this.listOpen = true;
+      window.setTimeout(() => {
+        this.searchMetricRef.nativeElement.focus();
+        this.initView = false;
+        this.cdr.detectChanges();
+      }, 200);
+    }
   }
 
   ngOnDestroy() {
+    this.saveSettingsState();
     this.subs.unsubscribe();
   }
 
@@ -193,36 +202,37 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
   }
 
   metricSelected(metric: VariantOption) {
-    this.updateServer(metric.value, this.selectedHyperParams);
+    this.updateServer(metric.value, this.selectedHyperParams, this.valueType);
     this.listOpen = false;
   }
 
   selectedParamsChanged({param}) {
     const newSelectedParamsList = this.selectedHyperParams.includes(param) ? this.selectedHyperParams.filter(i => i !== param) : [...this.selectedHyperParams, param];
-    this.updateServer(this.selectedMetric, newSelectedParamsList);
+    this.updateServer(this.selectedMetric, newSelectedParamsList, this.valueType);
   }
 
   clearSelection() {
-    this.updateServer(this.selectedMetric, []);
+    this.updateServer(this.selectedMetric, [], this.valueType);
   }
 
   showIdenticalParamsToggled() {
     this.store.dispatch(setShowIdenticalHyperParams());
   }
 
-  updateServer(selectedMetric: SelectedMetric, selectedParams: string[], skipNavigation?: boolean) {
+  updateServer(selectedMetric: SelectedMetric, selectedParams: string[], valueType, skipNavigation?: boolean) {
     !skipNavigation && this.router.navigate([], {
       queryParams: {
         metricPath: selectedMetric?.path || undefined,
         metricName: selectedMetric?.name || undefined,
-        params: selectedParams
+        params: selectedParams,
+        valueType: valueType || 'value'
       },
-      queryParamsHandling: 'merge'
+      queryParamsHandling: 'merge',
+      replaceUrl: true
     });
-    this.store.dispatch(setExperimentSettings({
-      id: ['hyper-param-graph'],
-      changes: {selectedMetric, selectedHyperParams: selectedParams}
-    }));
+    this.selectedMetric = selectedMetric;
+    this.selectedHyperParams = selectedParams;
+    this.valueType = valueType;
   }
 
   updateMetricsList(event: Event) {
@@ -230,7 +240,7 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
   }
 
   clearMetricSearchAndSelected() {
-    this.updateServer(null, this.selectedHyperParams);
+    this.updateServer(null, this.selectedHyperParams, this.valueType);
     this.selectedMetric = null;
     this.metricsOptions = this._filterGroup('');
   }
@@ -253,7 +263,8 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
   }
 
   valueTypeChange($event: MatRadioChange) {
-    this.store.dispatch(setvalueType({valueType: $event.value}));
+    this.valueType = $event.value;
+    this.updateServer(this.selectedMetric, this.selectedHyperParams, $event.value, false);
   }
 
   createEmbedCode(event: { tasks: string[]; valueType: MetricValueType; metrics?: string[]; variants?: string[]; domRect: DOMRect }) {
@@ -263,5 +274,16 @@ export class ExperimentCompareHyperParamsGraphComponent implements OnInit, OnDes
       objectType: 'task',
       ...event
     });
+  }
+
+  saveSettingsState() {
+    this.store.dispatch(setExperimentSettings({
+      id: ['hyper-param-graph'].concat(this.taskIds),
+      changes: {
+        selectedMetric: this.selectedMetric,
+        selectedHyperParams: this.selectedHyperParams,
+        valueType: this.valueType
+      }
+    }));
   }
 }

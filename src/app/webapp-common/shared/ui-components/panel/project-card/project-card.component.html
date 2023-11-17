@@ -30,7 +30,9 @@
                     (textChanged)="prepareProjectNameForChange($event)"
     >
       <span class="project-name"
-            [smTooltip]="project.name?.includes('/') ? project.name : ''"
+            [smTooltip]="project.name"
+            smShowTooltipIfEllipsis
+            [showAlwaysTooltip] = "(project.name?.includes('/'))"
       >{{project.basename}}</span>
     </sm-inline-edit>
     <div *ngIf="project.system_tags?.includes('default')" class="justify-content-end project-tag">Sample</div>

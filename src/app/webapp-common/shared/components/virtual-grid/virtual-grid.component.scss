@@ -13,6 +13,7 @@
 
     &.snippets-mode {
       grid-template-columns: repeat(auto-fit, minmax(var(--cardWidth), 1fr));
+      padding: 0 var(--padding);
     }
   }
 }

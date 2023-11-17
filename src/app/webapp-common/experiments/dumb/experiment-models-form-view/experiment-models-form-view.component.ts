@@ -40,8 +40,8 @@ export class ExperimentModelsFormViewComponent extends BaseClickableArtifactComp
 
   @Output() modelSelectedId = new EventEmitter<string>();
 
-  constructor(private dialog: MatDialog, protected adminService: AdminService, protected store: Store) {
-    super(adminService, store);
+  constructor(private dialog: MatDialog) {
+    super();
   }
 
   public chooseModel() {

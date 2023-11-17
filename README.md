@@ -2,16 +2,22 @@
 
 ## Building the UI from source
 ### Prerequisite
-* a linux machine
-* Node 16 with latest npm
-* clone the project to your local machine
+* Node 18 with latest npm
+* use git to clone the project to your local machine 
 
-### build
-* `cd` to the root of the project
+### Build
+* `cd clearml-web` to the root of the project
 * run `npm ci` to install required node modules
 * run `npm run build`
 
-## Application Structure
+
+### Development
+During development, the development server will need to proxy an API server. to achieve that:
+* in [proxy.config.js](proxy.config.js) update the list of targets in line 3 with a working API server URI.
+* Angular is already configured to use this proxy configuration
+* If more than 1 API server is configured `apiBaseUrl` should be updated with the server enumeration in [environment.ts](src%2Fenvironments%2Fenvironment.ts) 
+
+Start the development server: `npm run start`
 
 #### Business Logic module
 Contains ClearML logic. api calls and ClearML objects (e.g tasks, models) and ClearML logic function (e.g isTaskHidden)

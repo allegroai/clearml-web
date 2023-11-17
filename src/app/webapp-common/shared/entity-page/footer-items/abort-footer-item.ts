@@ -4,12 +4,12 @@ import {MenuItems, selectionDisabledAbort} from '../items.utils';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 
 export class AbortFooterItem extends ItemFooterModel {
-  id = MenuItems.abort;
-  emit = true;
-  icon = ICONS.STOPPED as Partial<IconNames>;
 
   constructor(public entitiesType: EntityTypeEnum) {
     super();
+    this.id = MenuItems.abort;
+    this.emit = true;
+    this.icon = ICONS.STOPPED as Partial<IconNames>;
   }
   getItemState(state: IFooterState<any>) {
     const {available, disable} = selectionDisabledAbort(state.selected);

@@ -1,43 +1,100 @@
-<sm-compare-card-list
-  *ngIf="comparedTasks"
-  [experiments]="experiments"
-  [tasksLimitExceeded] = "experiments?.length && taskIds?.length > experiments?.length"
-  [baseExperiment]="experiments[0]"
-  (experimentListChanged)="syncUrl($event)"
->
-  <div *compareCardHeader="let experiment;">
-    <sm-experiment-compare-general-data
-      [experiment]="experiment"
-      [tags]="experimentTags[experiment.id]"
-      (copyIdClicked)="copyIdToClipboard()">
-    </sm-experiment-compare-general-data>
-  </div>
-  <div class="tree-card-body" smSyncScroll *compareCardBody="let experiment; let i = index;">
-    <div *ngFor="let node of comparedTasks[i]"
-         class="node"
-         [ngClass]="node?.metaData?.classStyle"
-         [class.hovered]="!hoveredTable && hoveredRow === node.data.key"
-         (mouseenter)="onRowHovered(node.data?.key, null)">
-      <div class="content"
-           (click)="collapsedToggled(node)"
-           (mouseenter)="onRowHovered(node.data?.key, null)">
-        <i class="node-chevron fas" [style.margin-left.px]="2 + node.level * 20" [ngClass]="realIsNodeOpen(node) ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
-        <span class="node-key">{{node.data.key}}</span>
-      </div>
-      <al-table-diff *ngIf="realIsNodeOpen(node)"
-                     [valueTitle]="valuesMode.name | uppercase" keyTitle="VARIANT"
-                     [isOrigin]="i===0"
-                     [sortConfig]="(sortOrder$| async)[node.data.key] || {order:'asc', keyOrValue: 'key'}"
-                     [keyValueArray]="node.data | getKeyValueArrayPipe:allKeysEmptyObject:(sortOrder$| async)[node.data.key]:valuesMode.key"
-                     [hoveredRow]="hoveredTable === node.data.key && hoveredRow"
-                     (sortByChanged)="metricSortChanged($event,node.data)"
-                     (rowHovered)="onRowHovered($event, node.data.key)"
+<mat-drawer-container autosize class="h-100">
+  <mat-drawer #drawer [opened]="filterOpen" mode="over" (closedStart)="filterOpen = false">
+    <i class="close al-icon al-ico-dialog-x" (click)="drawer.close()" data-id="closeToggleGraph"></i>
+    <div class="list-container mt-3">
+      <sm-selectable-grouped-filter-list
+          [list]="metricVariantList"
+          [checkedList]="settings.hiddenMetricsScalar"
+          [searchTerm]="listSearchTerm"
+          (hiddenChanged)="hiddenListChanged($event)"
+          (searchTermChanged)="searchTermChanged($event)"
       >
-        <ng-template
-          let-metricValue>
-          {{metricValue}}
-        </ng-template>
-      </al-table-diff>
+      </sm-selectable-grouped-filter-list>
     </div>
-  </div>
-</sm-compare-card-list>
+  </mat-drawer>
+
+  <mat-drawer-content>
+
+    <div *ngIf="dataTable?.length === 0" class="no-output" >
+      <i class="i-no-table-data"></i>
+      <h4>NO METRICS</h4>
+    </div>
+
+    <div *ngIf="dataTable?.length > 0 && dataTableFiltered?.length === 0" class="no-output all-filtered-message">
+      All metrics hidden. <a class="link" (click)="clear(); showAll()">Clear filters</a>
+
+    </div>
+
+    <p-table *ngIf="experiments.length > 0"
+             [value]="dataTableFiltered"
+             [scrollable]="true"
+             [virtualScroll]="true"
+             [virtualScrollItemSize]="50"
+             [rowTrackBy]="trackByFunction"
+             styleClass="p-mt-3"
+             scrollHeight="flex"
+             [class.empty-state]="dataTable?.length < 1"
+             [class.no-rows]="dataTableFiltered?.length < 1">
+      <ng-template pTemplate="header">
+        <tr>
+          <th class="filter-header-cell" [class.freeze-divider]="scrolled" pFrozenColumn [colSpan]="2">
+            <div class="filter-header">
+              <i [class]="'al-icon pointer ' + (settings.hiddenMetricsScalar?.length > 0 ? 'al-ico-filter-on':'al-ico-filter-off')" (click)="filterOpen = !filterOpen">
+                <span class="path1"></span><span class="path2"></span>
+              </i>
+              <mat-form-field appearance="outline" hideRequiredMarker class="light-theme mat-light no-bottom">
+                <input #filterRef
+                       name="filter"
+                       [formControl]="variantFilter"
+                       placeholder="Search metric"
+                       matInput
+                       autocomplete="off">
+                <i matSuffix class="al-icon sm-md search-icon me-2" [ngClass]="variantFilter.value? 'al-ico-dialog-x pointer' : 'al-ico-search'"
+                   (click)="variantFilter.value && clear(); filterRef.focus()"
+                   smClickStopPropagation></i>
+              </mat-form-field>
+            </div>
+          </th>
+          <th *ngFor="let exp of experiments; trackBy: trackById" class="experiment-header">
+            <span #dot class="experiment-color"
+                  [style.background-color]="experimentsColor[exp.id]"
+                  [colorButtonRef]="dot"
+                  [smChooseColor]="experimentsColor[exp.id]"
+                  [stringToColor]="(exp.orgName ?? exp.name) + '-' + exp.id"></span>
+            <span class="experiment-name"
+                  [smEllipsisMiddleDirective]="exp.name"
+                  [smTooltip]="exp.name"
+                  [delay]="0"
+                  [triggerEllipsis]="experiments.length"
+            >{{exp.name}}</span>
+          </th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-metricVariant>
+        <tr [class.first-row]="metricVariant.firstMetricRow">
+          <td class="metrics-column" pFrozenColumn>
+            <span class="ellipsis" [smTooltip]="metricVariant.firstMetricRow ? metricVariant.metric : ''" smShowTooltipIfEllipsis>{{metricVariant.firstMetricRow ? metricVariant.metric : ''}}</span>
+          </td>
+          <td class="variants-column" [class.freeze-divider]="scrolled" pFrozenColumn>
+            <div class="variant-cell">
+              <span class="ellipsis variant-name" [smTooltip]="metricVariant.variant" smShowTooltipIfEllipsis>{{metricVariant.variant}}</span>
+              <i *ngIf="metricVariant.min === metricVariant.max"
+                 class="al-icon al-ico-equal-outline sm row-info-icon"
+                 smTooltip="All scalars have the same value in this row"></i>
+            </div>
+          </td>
+          <td class="value-cell" *ngFor="let exp of experiments; trackBy: trackById">
+            <div class="value">
+              <span class="value-text" smShowTooltipIfEllipsis [smTooltip]="metricVariant.values[exp.id]?.[valuesMode.key]">{{metricVariant.values[exp.id]?.[valuesMode.key]}}</span>
+              <ng-container *ngIf="(selectShowRowExtremes$ | async) && metricVariant.min !== metricVariant.max">
+                <span *ngIf="metricVariant.values[exp.id]?.[valuesMode.key] === metricVariant.max" class="tag tag-max">MAX</span>
+                <span *ngIf="metricVariant.values[exp.id]?.[valuesMode.key] === metricVariant.min" class="tag tag-min">MIN</span>
+              </ng-container>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+
+  </mat-drawer-content>
+</mat-drawer-container>

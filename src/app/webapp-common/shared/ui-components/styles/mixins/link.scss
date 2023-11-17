@@ -1,0 +1,12 @@
+@import "variables";
+
+@mixin link($link-color: $purple) {
+  a[href] {
+    color: $link-color;
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}

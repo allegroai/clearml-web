@@ -31,6 +31,7 @@ export const setURLParams = createAction(
     isDeep?: boolean;
     update?: boolean;
     version?: string;
+    others?: {[key: string]: string};
   }>()
 );
 

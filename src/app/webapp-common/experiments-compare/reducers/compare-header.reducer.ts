@@ -6,10 +6,9 @@ import {
   resetSelectCompareHeader,
   setExperimentsUpdateTime,
   setHideIdenticalFields,
-  setNavigationPreferences,
   setSearchExperimentsForCompareResults,
   setShowSearchExperimentsForCompare,
-  toggleShowScalarOptions
+  toggleShowScalarOptions, setShowRowExtremes, setExportTable, setShowGlobalLegend
 } from '../actions/compare-header.actions';
 import {createReducer, on} from '@ngrx/store';
 import {Params} from '@angular/router';
@@ -22,6 +21,8 @@ export interface CompareHeaderState {
   searchTerm: string;
   showSearch: boolean;
   hideIdenticalRows: boolean;
+  showRowExtremes: boolean;
+  showGlobalLegend: boolean;
   viewMode: string;
   showScalarOptions: boolean;
   autoRefresh: boolean;
@@ -30,6 +31,7 @@ export interface CompareHeaderState {
   projectColumnsSortOrder: { [projectId: string]: SortMeta[] };
   projectColumnFilters: { [projectId: string]: { [columnId: string]: FilterMetadata } };
   viewArchived: boolean;
+  exportTable: boolean;
 }
 
 
@@ -38,6 +40,8 @@ export const initialState: CompareHeaderState = {
   searchTerm: null,
   showSearch: false,
   hideIdenticalRows: false,
+  showRowExtremes: false,
+  showGlobalLegend: false,
   viewMode: 'values',
   showScalarOptions: false,
   autoRefresh: false,
@@ -46,11 +50,14 @@ export const initialState: CompareHeaderState = {
   projectColumnsSortOrder: {},
   projectColumnFilters: {},
   viewArchived: false,
+  exportTable: false
 };
 
 export const compareHeader = createReducer(
   initialState,
   on(setHideIdenticalFields, (state: CompareHeaderState, {payload}) => ({...state, hideIdenticalRows: payload})),
+  on(setShowRowExtremes, (state: CompareHeaderState, {payload}) => ({...state, showRowExtremes: payload})),
+  on(setShowGlobalLegend, (state: CompareHeaderState) => ({...state, showGlobalLegend: !state.showGlobalLegend})),
   on(setSearchExperimentsForCompareResults, (state: CompareHeaderState, {payload}) => ({
     ...state,
     searchResultsExperiments: payload
@@ -58,15 +65,15 @@ export const compareHeader = createReducer(
   on(setExperimentsUpdateTime, (state: CompareHeaderState, {payload}) => ({...state, experimentsUpdateTime: payload})),
   on(setShowSearchExperimentsForCompare, (state: CompareHeaderState, {payload}) => ({...state, showSearch: payload})),
   on(toggleShowScalarOptions, (state: CompareHeaderState) => ({...state, showScalarOptions: !state.showScalarOptions})),
-  on(setNavigationPreferences, (state: CompareHeaderState, {navigationPreferences}) => ({
-    ...state,
-    navigationPreferences: {...state.navigationPreferences, ...navigationPreferences}
-  })),
   on(resetSelectCompareHeader, (state, action) => ({
     ...initialState,
-    ...(!action.fullReset && {projectColumnFilters: state.projectColumnFilters,
-    viewArchived: state.viewArchived,
-    projectColumnsSortOrder: state.projectColumnsSortOrder})
+    ...(!action.fullReset && {
+      projectColumnFilters: state.projectColumnFilters,
+      viewArchived: state.viewArchived,
+      showGlobalLegend: state.showGlobalLegend,
+      showRowExtremes: state.showRowExtremes,
+      projectColumnsSortOrder: state.projectColumnsSortOrder
+    })
   })),
   on(compareAddDialogSetTableSort, (state, action) => {
     let orders = action.orders.filter(order => action.colIds.includes(order.field));
@@ -100,4 +107,5 @@ export const compareHeader = createReducer(
     }
   })),
   on(setAddTableViewArchived, (state, action) => ({...state, viewArchived: action.show})),
+  on(setExportTable, (state, action) => ({...state, exportTable: action.export})),
 );

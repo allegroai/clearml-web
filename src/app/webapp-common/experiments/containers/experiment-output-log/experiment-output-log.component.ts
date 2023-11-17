@@ -13,8 +13,7 @@ import {selectExperimentBeginningOfLog, selectExperimentLog, selectLogFilter, se
 import {BehaviorSubject, combineLatest, Observable, Subscription} from 'rxjs';
 import {debounceTime, filter, map} from 'rxjs/operators';
 import {last} from 'lodash-es';
-import {ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
-import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
+import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 import {selectSelectedExperiment} from '~/features/experiments/reducers';
 import {
   downloadFullLog,
@@ -24,9 +23,9 @@ import {
   setLogFilter
 } from '../../actions/common-experiment-output.actions';
 import {ExperimentLogInfoComponent} from '../../dumb/experiment-log-info/experiment-log-info.component';
-import {ITableExperiment} from '@common/experiments/shared/common-experiment-model.model';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {activeLoader} from '@common/core/actions/layout.actions';
+import {Log} from '@common/experiments/reducers/experiment-output.reducer';
 
 @Component({
   selector: 'sm-experiment-output-log',
@@ -37,14 +36,14 @@ export class ExperimentOutputLogComponent implements OnInit, AfterViewInit, OnDe
 
   @Input() showHeader = true;
   @Input() isDarkTheme = false;
-  @Input() set experiment(experiment: ITableExperiment) {
+  @Input() set experiment(experiment: IExperimentInfo) {
     this.experiment$.next(experiment);
   }
   private subs = new Subscription();
-  private currExperiment: ISelectedExperiment;
+  private currExperiment: IExperimentInfo;
   private loading: boolean;
 
-  public log$: Observable<any[]>;
+  public log$: Observable<Log[]>;
   public filter$: Observable<string>;
   public fetching$: Observable<boolean>;
   public logBeginning$: Observable<boolean>;
@@ -52,7 +51,7 @@ export class ExperimentOutputLogComponent implements OnInit, AfterViewInit, OnDe
   public disabled: boolean;
   public hasLog: boolean;
   private logRef: ExperimentLogInfoComponent;
-  private experiment$ = new BehaviorSubject<ITableExperiment>(null);
+  private experiment$ = new BehaviorSubject<IExperimentInfo>(null);
   @ViewChildren(ExperimentLogInfoComponent) private logRefs: QueryList<ExperimentLogInfoComponent>;
 
   constructor(private store: Store, private cdr: ChangeDetectorRef, private refresh: RefreshService) {
@@ -67,7 +66,7 @@ export class ExperimentOutputLogComponent implements OnInit, AfterViewInit, OnDe
         this.experiment$
       ]).pipe(
         debounceTime(0),
-        map(([selected, input]) => (input || selected) as ISelectedExperiment),
+        map(([selected, input]) => input ?? selected),
         filter(experiment => !!experiment?.id),
       )
         .subscribe(experiment => {

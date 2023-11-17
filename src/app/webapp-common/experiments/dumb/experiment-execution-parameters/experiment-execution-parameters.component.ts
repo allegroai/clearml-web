@@ -19,7 +19,16 @@ import {CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
 import {Subscription} from 'rxjs';
 import {TableComponent} from '@common/shared/ui-components/data/table/table.component';
 import {isEqual} from 'lodash-es';
+import {MatInput} from '@angular/material/input';
 
+export interface ExecutionParameter {
+  name?: string;
+  description?: string;
+  section?: string;
+  id: string;
+  type?: string;
+  value?: string;
+}
 
 @Component({
   selector: 'sm-experiment-execution-parameters',
@@ -27,15 +36,15 @@ import {isEqual} from 'lodash-es';
   styleUrls: ['./experiment-execution-parameters.component.scss']
 })
 export class ExperimentExecutionParametersComponent implements IExperimentInfoFormComponent, OnDestroy, AfterViewInit, OnChanges {
-  private _formData: { name?: string; description?: string; section?: string; id: string; type?: string; value?: string }[] = [];
+  private _formData = [] as ExecutionParameter[];
   private formContainersSub: Subscription;
   private _editable: boolean;
   private formContainer: CdkVirtualScrollViewport;
   private clickedRow: number;
 
-  search: string = '';
+  public search = '';
   public searchIndexList: {index: number; col: string}[];
-  public matchIndex: number = -1;
+  public matchIndex = -1;
   public cols = [
     {id: 'name', style: {width: '300px'}},
     {id: 'value', style: {width: '300px'}},
@@ -44,9 +53,10 @@ export class ExperimentExecutionParametersComponent implements IExperimentInfoFo
 
 
   @ViewChild('hyperParameters') hyperParameters: NgForm;
-  @ViewChild(TableComponent) executionParametersTable: TableComponent;
+  @ViewChild(TableComponent) executionParametersTable: TableComponent<ExecutionParameter>;
 
   @ViewChildren('formContainer') formContainers: QueryList<CdkVirtualScrollViewport>;
+  @ViewChildren('row') rows: QueryList<MatInput>;
   @ViewChild(CdkVirtualScrollViewport) viewPort: CdkVirtualScrollViewport;
   @Output() formDataChanged = new EventEmitter<{ field: string; value: ParamsItem[] }>();
   @Output() searchCounterChanged = new EventEmitter<number>();
@@ -59,12 +69,12 @@ export class ExperimentExecutionParametersComponent implements IExperimentInfoFo
     this.executionParametersTable?.resize();
   }
 
-  @Input() set formData(formData: { name?: string; description?: string; section?: string; id?: string; type?: string; value?: string }[]) {
+  @Input() set formData(formData) {
     this._originalData = formData;
     this._formData = cloneDeep(formData).map((row: ParamsItem) => ({...row, id: uuidV4()}));
   }
 
-  get formData(): { name?: string; description?: string; section?: string; id?: string; type?: string; value?: string }[] {
+  get formData() {
     return this._formData;
   }
 
@@ -72,6 +82,7 @@ export class ExperimentExecutionParametersComponent implements IExperimentInfoFo
   @Input() set editable(editable: boolean) {
     this._editable = editable;
     this.executionParametersTable?.resize();
+    editable && window.setTimeout(() => this.rows.first?.focus());
   }
   get editable() {
     return this._editable;
@@ -114,7 +125,7 @@ export class ExperimentExecutionParametersComponent implements IExperimentInfoFo
     this.formData.splice(index, 1);
   }
 
-  rowActivated({data}: { data: any; e: MouseEvent }) {
+  rowActivated({data}: { data: ExecutionParameter; e: MouseEvent }) {
     this.clickedRow = this.formData.findIndex(row => row.name === data.name);
   }
 
@@ -164,5 +175,14 @@ export class ExperimentExecutionParametersComponent implements IExperimentInfoFo
 
   cancel() {
     this._formData = cloneDeep(this._originalData).map((row: ParamsItem) => ({...row, id: uuidV4()}));
+  }
+
+  nextRow(event: Event, index: number) {
+    event.stopPropagation();
+    event.preventDefault();
+    if (this.formData.length === index + 1) {
+      this.addRow();
+    }
+    window.setTimeout(()=> this.rows.get(index + 1)?.focus());
   }
 }

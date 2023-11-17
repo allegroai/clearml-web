@@ -58,7 +58,7 @@
                 }">
                   <div *ngIf="(node.data.value !== undefined) || (node.data.existOnOrigin && node.data.existOnCompared)"
                        #row class="node-row">
-                    <pre class="node-key"
+                    <pre class="node-key" 
                          [class.no-ellipsis]="node.data.key.length < 15"
                          [class.ellipsis]="showEllipsis"
                     >{{node.data.key}}<i class="al-icon sm al-ico-line-expand extend-toggle"
@@ -68,7 +68,7 @@
                     <pre class="node-val"
                          [style.width.px]="showEllipsis ? nativeWidth - 180 - node.level * 20 : null"
                          [class.no-ellipsis]="node.data.value.length < 15"
-                         [class.ellipsis]="showEllipsis">{{node.data.value}}<i
+                         [class.ellipsis]="showEllipsis" data-id="diffDataRow">{{node.data.value}}<i
                       class="al-icon sm al-ico-line-expand extend-toggle" [class.fa-rotate-180]="!showEllipsis"
                       (click)="toggleEllipsis(); $event.stopPropagation()"></i>
                     </pre>
@@ -99,7 +99,7 @@
 </sm-portal>
 
 <sm-portal outletId="nextDiff">
-  <button class="btn btn-secondary btn-arrow me-1" smTooltip="Previous diff" (click)="goToNextDiff('up')">
+  <button class="btn btn-secondary btn-arrow" smTooltip="Previous diff" (click)="goToNextDiff('up')">
     <i class="al-icon al-ico-arrow-up sm"></i>
   </button>
 

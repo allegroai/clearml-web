@@ -2,7 +2,10 @@
 
 :host {
   .creat-new-suffix {
+    display: inline-block;
     margin-right: 18px;
+    font-size: 14px;
+    transform: translateY(-4px);
   }
 
   .buttons {
@@ -25,45 +28,29 @@
     }
   }
 
-  .line {
-    line-height: 2;
-  }
-
   .create-project-button {
     padding-top: 32px;
   }
 
   .dynamic-subtitle {
-    padding: 9px;
-    margin-bottom: 9px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 12px 6px;
+    padding: 12px;
+    margin-bottom: 12px;
+    border-radius: 4px;
     background-color: $blue-50;
 
     .p-name {
-      font-weight: bold;
-      max-width: calc(100% - 38px);
-      display: inline-block;
-      vertical-align: middle;
+      color: $blue-600;
+      font-weight: 500;
+      word-break: break-word; /* prevent long strings from breaking the layout */
     }
 
     .p-holder {
-      opacity: 0.3;
-      font-weight: bold;
-      font-stretch: normal;
-      font-style: normal;
-      line-height: 1.5;
-      color: $blue-500;
+      opacity: 0.6;
+      font-weight: 500;
     }
-  }
-
-  small.text-danger {
-    //position: absolute !important;
-    //top: -15px;
-  }
-
-  #project-description {
-    max-height: 250px;
-    padding-top: 12px;
-    height: 65px;
   }
 
   mat-form-field {
@@ -72,9 +59,5 @@
     .project-description {
       min-height: 68px;
     }
-  }
-
-  .search-icon {
-    transform: translateY(3px);
   }
 }

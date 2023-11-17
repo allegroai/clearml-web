@@ -4,10 +4,10 @@ import {ItemFooterModel, IFooterState} from './footer-items.models';
 import {MenuItems} from '../items.utils';
 
 export class ArchiveFooterItem extends ItemFooterModel {
-  id = MenuItems.archive;
 
   constructor(public entitiesType: EntityTypeEnum) {
     super();
+    this.id = MenuItems.archive;
   }
 
   getItemState(state: IFooterState<any>): { icon?: IconNames; title?: string; description?: string; disable?: boolean; disableDescription?: string; emit?: boolean; emitValue?: boolean; preventCurrentItem?: boolean; class?: string; wrapperClass?: string } {

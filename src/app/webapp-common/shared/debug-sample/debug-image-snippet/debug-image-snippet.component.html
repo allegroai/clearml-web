@@ -4,9 +4,11 @@
 
       <div class="image" *ngSwitchCase="'image'" data-id="imageContainer">
           <img
+            #imageElement
             class="pointer"
             data-id="sourceImage"
             [src]="source"
+            [alt]="source"
             (error)="isFailed = true"
             (click)="imageClicked.emit({src: source})"
             (load)="loadedMedia()"
@@ -15,7 +17,7 @@
           <div *ngIf="!noHoverEffects" class="toolbar top">
             <div class="clickable-icon d-flex align-items-center justify-content-center pointer"
                 (click)="createEmbedCodeClicked($event)"
-                smTooltip="Copy to Report"
+                smTooltip="Copy embed code"
                 data-id="copyToReportButton">
               <i class="al-icon al-ico-code sm"></i>
             </div>
@@ -46,7 +48,7 @@
         <div  class="toolbar top">
           <div *ngIf="!noHoverEffects" class="clickable-icon d-flex align-items-center justify-content-center pointer"
                (click)="createEmbedCodeClicked($event)"
-               smTooltip="Copy to Report" data-id="CopyToReportButton">
+               smTooltip="Copy embed code" data-id="CopyToReportButton">
             <i class="al-icon al-ico-code sm"></i>
           </div>
         </div>
@@ -59,7 +61,7 @@
         <div *ngIf="!noHoverEffects" class="toolbar">
           <div class="clickable-icon d-flex align-items-center justify-content-center pointer"
                (click)="createEmbedCodeClicked($event)"
-               smTooltip="Copy to Report" data-id="CopyToReportButton">
+               smTooltip="Copy embed code" data-id="CopyToReportButton">
             <i class="al-icon al-ico-code sm"></i>
           </div>
           <div class="clickable-icon d-flex align-items-center justify-content-center pointer"

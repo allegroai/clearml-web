@@ -1,12 +1,11 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {selectRouterConfig, selectRouterParams} from '@common/core/reducers/router-reducer';
-import {select, Store} from '@ngrx/store';
+import {Store} from '@ngrx/store';
 import {Observable, Subscription} from 'rxjs';
 import {ActivatedRoute, Router} from '@angular/router';
 import {distinctUntilChanged, filter, map, tap, withLatestFrom} from 'rxjs/operators';
 import {Project} from '~/business-logic/model/projects/project';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
-import {ExperimentOutputState} from '@common/experiments/reducers/experiment-output.reducer';
 import {
   selectExperimentInfoData,
   selectIsSharedAndNotOwner,
@@ -79,8 +78,8 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
       this.routerConfig = routerConfig;
     }));
 
-    this.subs.add(this.store.pipe(
-        select(selectRouterParams),
+    this.subs.add(this.store.select(selectRouterParams)
+      .pipe(
         tap((params) => this.projectId = params.projectId),
         map(params => params?.experimentId),
         filter(experimentId => !!experimentId),
@@ -88,7 +87,7 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
         distinctUntilChanged(),
         withLatestFrom(this.store.select(selectSelectedExperiments))
       ).subscribe(([experimentId, selectedExperiments]) => {
-        this.selectedExperiment = selectedExperiments.find(experiment => experiment.id === experimentId);
+        this.selectedExperiment = selectedExperiments.find(experiment => experiment.id === experimentId) as unknown as IExperimentInfo;
         this.isExample = isReadOnly( this.selectedExperiment);
         this.isDevelopment = isDevelopment(this.selectedExperiment);
         this.store.dispatch(resetExperimentMetrics());
@@ -110,8 +109,8 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
       })
     );
 
-    this.subs.add(this.store.pipe(select(selectSelectedExperiment),
-      filter(experiment => experiment?.id === this.experimentId))
+    this.subs.add(this.store.select(selectSelectedExperiment)
+      .pipe(filter(experiment => experiment?.id === this.experimentId))
       .subscribe(experiment => {
         this.selectedExperiment = experiment;
         this.isExample = isReadOnly( this.selectedExperiment);

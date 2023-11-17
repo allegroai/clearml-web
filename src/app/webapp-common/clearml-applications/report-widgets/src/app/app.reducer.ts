@@ -31,7 +31,7 @@ export const appFeatureKey = 'app';
 export interface State {
   plotData: MetricsPlotEvent[] | ReportsApiMultiplotsResponse;
   sampleData: DebugSample;
-  singleValuesData: SingleValueTaskMetrics;
+  singleValuesData: SingleValueTaskMetrics[];
   parallelCoordinateData: Task[];
   scaleFactor: number;
   plotlyReady: boolean;

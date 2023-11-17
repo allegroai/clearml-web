@@ -30,6 +30,10 @@
     color: $blue-800;
   }
 
+  &.purple {
+    color: $purple;
+  }
+
   &.error-dark{
     color: $error-dark
   }
@@ -294,6 +298,12 @@
   &.dark {
     @include icon('#{$assets-icons-path}/running-dark.svg');
   }
+  &.notify {
+    @include icon('#{$assets-icons-path}/running-notify.svg');
+    &.grey{
+      @include icon('#{$assets-icons-path}/running-notify-grey.svg');
+    }
+  }
 }
 
 .i-completed, .i-Final {
@@ -325,6 +335,10 @@
 
   &.bw {
     @include icon('#{$assets-icons-path}/failed-white.svg');
+  }
+
+  &.small {
+    @include icon('#{$assets-icons-path}/failed-sm.svg');
   }
 }
 
@@ -510,6 +524,11 @@
 // No font icon
 .i-audio {
   @include icon('#{$assets-icons-path}/audio.svg');
+}
+
+//No font icon
+.i-no-table-data {
+  @include icon('#{$assets-icons-path}/no-table-data.svg');
 }
 
 //No font icon

@@ -1,7 +1,5 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {MatDialog} from '@angular/material/dialog';
-import {ActivatedRoute, Params, Router} from '@angular/router';
-import {Store} from '@ngrx/store';
+import {Params} from '@angular/router';
 import {isEqual} from 'lodash-es';
 import {combineLatest, Observable} from 'rxjs';
 import {debounceTime, distinctUntilChanged, filter, map, skip, switchMap, withLatestFrom} from 'rxjs/operators';
@@ -62,7 +60,6 @@ import {CountAvailableAndIsDisableSelectedFiltered, MenuItems} from '../shared/e
 import {PublishFooterItem} from '../shared/entity-page/footer-items/publish-footer-item';
 import {HasReadOnlyFooterItem} from '../shared/entity-page/footer-items/has-read-only-footer-item';
 import {SelectedTagsFooterItem} from '../shared/entity-page/footer-items/selected-tags-footer-item';
-import {RefreshService} from '@common/core/services/refresh.service';
 import {CompareFooterItem} from '@common/shared/entity-page/footer-items/compare-footer-item';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 import {MetricValueType} from '@common/experiments-compare/experiments-compare.constants';
@@ -87,7 +84,6 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
   public isArchived$: Observable<boolean>;
   public tableFilters$: Observable<{ [s: string]: FilterMetadata }>;
   public noMoreModels$: Observable<boolean>;
-  public showAllSelectedIsActive$: Observable<boolean>;
   public showInfo$: Observable<boolean>;
   public activeSectionEdit$: Observable<boolean>;
   public selectedProjectId$: Observable<string>;
@@ -106,8 +102,8 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
   public metricVariants$: Observable<MetricVariantResult[]>;
   public modelsPage$: Observable<boolean>;
   protected inEditMode$: Observable<boolean>;
-  protected addTag = addTag;
-  protected setSplitSizeAction = modelsActions.setSplitSize;
+  protected override addTag = addTag;
+  protected override setSplitSizeAction = modelsActions.setSplitSize;
   protected setTableModeAction = modelsActions.setTableMode;
   private selectedModels: TableModel[];
   private searchQuery$: Observable<SearchState['searchQuery']>;
@@ -119,14 +115,8 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
   @ViewChild('modelsTable') private table: ModelsTableComponent;
   private modelsFeature = false;
 
-  constructor(
-    protected store: Store,
-    protected route: ActivatedRoute,
-    protected router: Router,
-    protected dialog: MatDialog,
-    protected refresh: RefreshService,
-  ) {
-    super(store, route, router, dialog, refresh);
+  constructor() {
+    super();
     this.selectSplitSize$ = this.store.select(modelsSelectors.selectSplitSize);
     this.tableSortFields$ = this.store.select(modelsSelectors.selectTableSortFields);
     this.selectedModel$ = this.store.select(modelsSelectors.selectSelectedTableModel);
@@ -190,7 +180,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
     this.syncAppSearch();
   }
 
-  ngOnInit() {
+  override ngOnInit() {
     super.ngOnInit();
     let prevQueryParams: Params;
     this.sub.add(this.selectedProject$.pipe(filter(selectedProject => (this.modelsFeature && !selectedProject))).subscribe(() =>
@@ -205,8 +195,10 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
             if (!projectId) {
               return false;
             }
-            const equal = projectId === this.projectId && isEqual(queryParams, prevQueryParams);
-            prevQueryParams = queryParams;
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const {q, qreg, ...queryParamsWithoutSearch} = queryParams;
+            const equal = projectId === this.projectId && isEqual(queryParamsWithoutSearch, prevQueryParams);
+            prevQueryParams = queryParamsWithoutSearch;
             return !equal;
           })
         )
@@ -214,6 +206,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
           if (projectId != this.projectId && Object.keys(params || {}).length === 0) {
             this.emptyUrlInit();
           } else {
+            this.projectId = projectId;
             if (params.order) {
               const orders = decodeOrder(params.order);
               this.store.dispatch(modelsActions.setTableSort({orders, projectId: this.projectId}));
@@ -249,7 +242,6 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
             }
             this.store.dispatch(modelsActions.fetchModelsRequested());
           }
-          this.projectId = projectId;
         })
     );
 
@@ -274,7 +266,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
     this.store.dispatch(getTags());
   }
 
-  ngOnDestroy(): void {
+  override ngOnDestroy(): void {
     super.ngOnDestroy();
     this.store.dispatch(modelsActions.resetState());
     this.stopSyncSearch();
@@ -319,7 +311,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
                 project: this.projectId
               }));
             } else {
-              this.store.dispatch(modelsActions.setTableMode({mode: !!id ? 'info' : 'table'}));
+              this.store.dispatch(modelsActions.setTableMode({mode: id ? 'info' : 'table'}));
             }
             return models?.find(model => model.id === id);
           }),
@@ -367,16 +359,6 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
     }));
   }
 
-  compareModels() {
-    // TODO: temporary until the compare component will be under models module...
-    this.router.navigate(
-      [
-        `${this.route.parent.snapshot.params.projectId}/models/compare-models`,
-        {ids: this.selectedModels.map(model => model.id)}
-      ]
-    );
-  }
-
   afterArchiveChanged() {
     this.store.dispatch(modelsActions.showSelectedOnly({active: false, projectId: this.projectId}));
   }
@@ -394,9 +376,11 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
     this.store.dispatch(setAutoRefresh({autoRefresh: $event}));
   }
 
-  columnsReordered(cols: string[], fromUrl = false) {
-    this.store.dispatch(modelsActions.setColsOrderForProject({cols, project: this.projectId, fromUrl}));
-    this.store.dispatch(modelsActions.updateUrlParams());
+  columnsReordered(cols: string[], updateUrl = true) {
+    this.store.dispatch(modelsActions.setColsOrderForProject({cols, project: this.projectId}));
+    if (updateUrl) {
+      this.store.dispatch(modelsActions.updateUrlParams());
+    }
   }
 
   selectedTableColsChanged(col) {
@@ -418,9 +402,9 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
     return params?.modelId;
   }
 
-  createFooterItems(config: {
+  override createFooterItems(config: {
     entitiesType: EntityTypeEnum;
-    selected$: Observable<Array<any>>;
+    selected$: Observable<SelectedModel[]>;
     showAllSelectedIsActive$: Observable<boolean>;
     tags$: Observable<string[]>;
     data$?: Observable<Record<string, CountAvailableAndIsDisableSelectedFiltered>>;
@@ -446,26 +430,29 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
   }
 
   onFooterHandler({emitValue, item}) {
-    switch (item.id) {
-      case MenuItems.showAllItems:
-        this.showAllSelected(!emitValue);
-        break;
-      case MenuItems.compare:
-        this.compareExperiments();
-        break;
-      case MenuItems.archive:
-        this.table.contextMenuExtended.contextMenu.archiveClicked();
-        break;
-      case MenuItems.delete:
-        this.table.contextMenuExtended.contextMenu.deleteModelPopup();
-        break;
-      case MenuItems.moveTo:
-        this.table.contextMenuExtended.contextMenu.moveToProjectPopup();
-        break;
-      case MenuItems.publish:
-        this.table.contextMenuExtended.contextMenu.publishPopup();
-        break;
-    }
+    this.table.singleRowContext = false;
+    window.setTimeout(() => {
+      switch (item.id) {
+        case MenuItems.showAllItems:
+          this.showAllSelected(!emitValue);
+          break;
+        case MenuItems.compare:
+          this.compareExperiments();
+          break;
+        case MenuItems.archive:
+          this.table.contextMenuExtended.contextMenu.archiveClicked();
+          break;
+        case MenuItems.delete:
+          this.table.contextMenuExtended.contextMenu.deleteModelPopup();
+          break;
+        case MenuItems.moveTo:
+          this.table.contextMenuExtended.contextMenu.moveToProjectPopup();
+          break;
+        case MenuItems.publish:
+          this.table.contextMenuExtended.contextMenu.publishPopup();
+          break;
+      }
+    });
   }
 
   compareExperiments() {
@@ -478,7 +465,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
       {relativeTo: this.route.parent.parent});
   }
 
-  clearTableFiltersHandler(tableFilters: any) {
+  clearTableFiltersHandler(tableFilters: { [s: string]: FilterMetadata }) {
     const filters = Object.keys(tableFilters).map(col => ({col, value: []}));
     this.store.dispatch(modelsActions.tableFilterChanged({filters, projectId: this.projectId}));
   }
@@ -515,6 +502,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
         model: this.selectedModels?.[0] || this.firstModel,
         project: this.projectId
       }));
+      return Promise.resolve()
     } else {
       return this.closePanel();
     }
@@ -546,7 +534,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
     this.store.dispatch(modelsActions.prepareTableForDownload({entityType: 'model'}));
   }
 
-  setupBreadcrumbsOptions() {
+  override setupBreadcrumbsOptions() {
     this.sub.add(this.selectedProject$.pipe(
       withLatestFrom(this.store.select(selectIsDeepMode)),
     ).subscribe(([selectedProject, isDeep]) => {

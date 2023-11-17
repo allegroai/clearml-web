@@ -80,7 +80,7 @@ export class ChangeProjectDialogComponent implements OnInit, OnDestroy {
       this.noMoreOptions = this.allProjectsBeforeFilter?.length === this.previousLength || this.allProjectsBeforeFilter?.length < rootProjectsPageSize;
       this.previousLength = this.allProjectsBeforeFilter?.length;
       if (this.currentProjects.length === 1) {
-        this.currentProjectInstance = projects.find(proj => proj.id === this.currentProjects[0]);
+        this.currentProjectInstance = projects.filter(proj=> !proj.hidden).find(proj => proj.id === this.currentProjects[0]);
       }
       // const projectNameToHide = (this.sourceProject && !this.sourceProject.name.match(/^\.\w+$/)) ? this.sourceProject.name?.replace(/\/\.\w+$/, '') : 'Projects root';
       // const sourceProjectOrChild = new RegExp(`^${projectNameToHide}(\/\.[a-zA-Z]+)*$`);
@@ -114,7 +114,7 @@ export class ChangeProjectDialogComponent implements OnInit, OnDestroy {
     this.projects = null;
     this.rootFiltered = !this.projectRoot.includes(searchString);
     this.store.dispatch(resetTablesFilterProjectsOptions());
-    this.store.dispatch(getTablesFilterProjectsOptions({searchString, loadMore: false}));
+    this.store.dispatch(getTablesFilterProjectsOptions({searchString, loadMore: false,  allowPublic: false}));
   }
 
   ngOnDestroy(): void {
@@ -147,7 +147,7 @@ export class ChangeProjectDialogComponent implements OnInit, OnDestroy {
 
   loadMore(searchString) {
     this.loading = true;
-    this.store.dispatch(getTablesFilterProjectsOptions({searchString: searchString || '', loadMore: true}));
+    this.store.dispatch(getTablesFilterProjectsOptions({searchString: searchString || '', loadMore: true,  allowPublic: false}));
   }
 
   isFocused(locationRef: HTMLInputElement) {

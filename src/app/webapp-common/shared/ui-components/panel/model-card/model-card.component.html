@@ -1,7 +1,7 @@
 <sm-card class="model-card" (click)="modelClicked()" [isExample]="!model?.company?.id" [height]="264">
   <div header-content>
     <div class="d-flex justify-content-between">
-      <div class="title me-auto">{{model?.name}}</div>
+      <div class="title me-auto" [smTooltip]="model?.name" smShowTooltipIfEllipsis>{{model?.name}}</div>
     </div>
     <div class="pt-2">
       <div class="d-flex align-items-center justify-content-start">

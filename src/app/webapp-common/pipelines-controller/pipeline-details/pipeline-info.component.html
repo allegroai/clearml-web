@@ -1,6 +1,6 @@
 <mat-expansion-panel [expanded]="true">
   <mat-expansion-panel-header>
-    <div class="expand-header">{{controller ? 'RUN INFO' : 'STEP INFO'}}</div>
+    <div class="expand-header" data-id="expandInfoPanel">{{controller ? 'RUN INFO' : 'STEP INFO'}}</div>
   </mat-expansion-panel-header>
   <div class="panel-body" *ngIf="entity">
     <header *ngIf="step; else controllerHeader">
@@ -10,7 +10,7 @@
       ></i>
       <div class="name" [smTooltip]="step.name" smShowTooltipIfEllipsis>{{step.name}}</div>
       <div class="d-flex justify-content-between">
-        <div class="status" [class]="step.data.status">{{step.data.status}}</div>
+        <div class="status" [class]="step.data.status" data-id="infoStepStatus">{{step.data.status}}</div>
         <sm-id-badge class="ms-1" [id]="step.data.job_id" (copied)="copyToClipboard()"></sm-id-badge>
       </div>
     </header>
@@ -67,7 +67,7 @@
     </ng-container>
 
     <ng-template #emptyMsg>
-      <div class="empty-msg">No data to show</div>
+      <div class="empty-msg" data-id="emptyMsg">No data to show</div>
     </ng-template>
 
   </div>
@@ -76,7 +76,7 @@
         class="arr-link"
         target="_blank"
         [href]="'/projects/' + project + '/experiments/' + entity?.id + '/output/execution'">
-        Full details<i class="al-icon al-ico-link-arrow sm"></i>
+        Full details<i class="al-icon al-ico-link-arrow sm" data-id="fullDetailsArrow"></i>
      </a>
   </footer>
 </mat-expansion-panel>

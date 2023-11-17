@@ -1,7 +1,5 @@
 import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
-import {AdminService} from '~/shared/services/admin.service';
 import {Artifact} from '~/business-logic/model/tasks/artifact';
-import {Store} from '@ngrx/store';
 import {BaseClickableArtifactComponent} from '../base-clickable-artifact.component';
 import {fileSizeConfigStorage} from '@common/shared/pipes/filesize.pipe';
 
@@ -30,10 +28,6 @@ export class ExperimentArtifactItemViewComponent extends BaseClickableArtifactCo
 
   get artifact(): Artifact {
     return this._artifact;
-  }
-
-  constructor(protected adminService: AdminService, protected store: Store) {
-    super(adminService, store);
   }
 
   linkClicked(event: Event) {

@@ -2,7 +2,7 @@
   <div [class.source-code-container]="editable">
     <sm-labeled-row label="REPOSITORY">
       <div *ngIf="!editable">{{formData?.repository}}</div>
-      <mat-form-field appearance="outline" *ngIf="editable" class="col-24 no-bottom">
+      <mat-form-field appearance="outline" *ngIf="editable" class="w-100 no-bottom">
         <input matInput [ngModel]="formData?.repository" name="repository">
       </mat-form-field>
     </sm-labeled-row>
@@ -64,17 +64,16 @@
         </mat-form-field>
 
       </div>
-
     </sm-labeled-row>
     <sm-labeled-row label="SCRIPT PATH">
       <div *ngIf="!editable">{{formData?.entry_point}}</div>
-      <mat-form-field appearance="outline" *ngIf="editable" class="col-24 no-bottom">
+      <mat-form-field appearance="outline" *ngIf="editable" class="w-100 no-bottom">
         <input matInput type="text" [ngModel]="formData?.entry_point" name="entry_point">
       </mat-form-field>
     </sm-labeled-row>
     <sm-labeled-row label="WORKING DIRECTORY">
       <div *ngIf="!editable">{{formData?.working_dir}}</div>
-      <mat-form-field appearance="outline" *ngIf="editable" class="col-24 no-bottom">
+      <mat-form-field appearance="outline" *ngIf="editable" class="w-100 no-bottom">
         <input matInput type="text" [ngModel]="formData?.working_dir" name="working_dir">
       </mat-form-field>
     </sm-labeled-row>

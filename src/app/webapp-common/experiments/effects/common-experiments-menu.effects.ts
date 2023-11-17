@@ -20,7 +20,7 @@ import {Observable, of} from 'rxjs';
 import {requestFailed} from '../../core/actions/http.actions';
 import {ExperimentConverterService} from '~/features/experiments/shared/services/experiment-converter.service';
 import * as exSelectors from '../reducers';
-import {selectSelectedExperiments, selectTableMode} from '../reducers';
+import {selectExperimentsList, selectTableMode} from '../reducers';
 import {selectSelectedExperiment} from '~/features/experiments/reducers';
 import * as infoActions from '../actions/common-experiments-info.actions';
 import {autoRefreshExperimentInfo, experimentDetailsUpdated} from '../actions/common-experiments-info.actions';
@@ -53,7 +53,12 @@ import {WelcomeMessageComponent} from '@common/layout/welcome-message/welcome-me
 import {selectNeverShowPopups} from '@common/core/reducers/view.reducer';
 import {MESSAGES_SEVERITY} from '@common/constants';
 import {TasksCloneResponse} from '~/business-logic/model/tasks/tasksCloneResponse';
+import {Task} from '~/business-logic/model/tasks/task';
+import {TasksUpdateTagsResponse} from '~/business-logic/model/tasks/tasksUpdateTagsResponse';
+import * as commonInfoActions from '@common/experiments/actions/common-experiments-info.actions';
 import {addProjectsTag} from '../actions/common-experiments-view.actions';
+import {ITableExperiment} from '@common/experiments/shared/common-experiment-model.model';
+import * as projectsActions from '@common/core/actions/projects.actions';
 
 export const getChildrenExperiments = (tasksApi, parents, filters?: { [key: string]: any }): Observable<Task[]> =>
   tasksApi.tasksGetAllEx({
@@ -236,22 +241,6 @@ export class CommonExperimentsMenuEffects {
     )
   ));
 
-  // resetExperiment$ = createEffect(() => this.actions$.pipe(
-  //   ofType(menuActions.resetClicked),
-  //   concatLatestFrom(() => this.store.select(selectSelectedExperiment)),
-  //   switchMap(
-  //     ([action, selectedExp]) => {
-  //       const ids = action.selectedEntities.map(exp => exp.id);
-  //       return this.apiTasks.tasksResetMany({ids})
-  //         .pipe(
-  //           mergeMap((res: TasksResetManyResponse) =>
-  //             [resetOutput(), ...this.updateExperimentsSuccess(action, MenuItems.reset, ids, selectedExp, res)]),
-  //           catchError(error => this.updateExperimentFailed(action.type, error))
-  //         );
-  //     }
-  //   )
-  // ));
-
   publishExperiment$ = createEffect(() => this.actions$.pipe(
     ofType(menuActions.publishClicked),
     concatLatestFrom(() => this.store.select(selectSelectedExperiment)),
@@ -354,32 +343,56 @@ export class CommonExperimentsMenuEffects {
 
   addTag$ = createEffect(() => this.actions$.pipe(
     ofType(menuActions.addTag),
-    concatLatestFrom(() => [
-      this.store.select(selectSelectedExperiments),
-      this.store.select(selectSelectedExperiment)
-    ]),
-    switchMap(([action, selectedExperiments, selectedExperimentInfo]) => {
-      const experimentsFromState = selectedExperimentInfo ? selectedExperiments.concat(selectedExperimentInfo) as ISelectedExperiment[] : selectedExperiments;
-      return [...action.experiments.map(experiment => {
-        const experimentFromState = experimentsFromState.find(exp => exp.id === experiment.id);
-        return experimentDetailsUpdated({
-          id: experiment.id,
-          changes: {tags: Array.from(new Set((experimentFromState?.tags || experiment.tags || []).concat([action.tag]))).sort()}
-        });
-      }), addProjectsTag({tag: action.tag})];
-    })
+    switchMap(action => {
+      const ids = action.experiments.map(e => e.id);
+      return this.apiTasks.tasksUpdateTags({
+        ids,
+        add_tags: [action.tag]
+      })
+        .pipe(
+          concatLatestFrom(() => [
+            this.store.select(selectExperimentsList),
+            this.store.select(selectSelectedExperiment)
+          ]),
+          mergeMap(([res, experiments, selectedExperimentInfo]: [TasksUpdateTagsResponse, ITableExperiment[], IExperimentInfo]) => {
+            if (res.updated === ids.length) {
+              const updatedExperiments = experiments?.filter(exp => ids.includes(exp.id)) ?? action.experiments;
+              return [
+                viewActions.updateManyExperiment({changeList: updatedExperiments.map(exp => ({
+                    id: exp.id,
+                    fields: {tags: Array.from(new Set((exp?.tags || []).concat([action.tag]))).sort()},
+                  }))}),
+                ...(ids.includes(selectedExperimentInfo?.id) ?
+                  [commonInfoActions.updateExperimentInfoData({
+                    id: selectedExperimentInfo.id,
+                    changes: {tags: Array.from(new Set((selectedExperimentInfo?.tags || []).concat([action.tag]))).sort()}
+                  })] :
+                  []),
+                addProjectsTag({tag: action.tag}),
+                projectsActions.addCompanyTag({tag: action.tag}),
+              ];
+            } else {
+              return [addMessage(MESSAGES_SEVERITY.ERROR, 'Not all tags were applied')]
+            }
+          }),
+          catchError(() => [addMessage(MESSAGES_SEVERITY.ERROR, 'Failed to apply tags')])
+        );
+    }),
   ));
 
 
   removeTag$ = createEffect(() => this.actions$.pipe(
     ofType(menuActions.removeTag),
-    switchMap((action) =>
-      action.experiments.filter(experiment => experiment.tags.includes(action.tag)).map(experiment =>
-        experimentDetailsUpdated({
-          id: experiment.id,
-          changes: {tags: experiment.tags.filter(tag => tag !== action.tag)}
-        })
-      ).concat(addMessage('success', `“${action.tag}” tag has been removed from “${action.experiments[0]?.name}” experiment`, [
+    switchMap((action) => [
+      ...action.experiments
+        .filter(experiment => experiment.tags.includes(action.tag))
+        .map(experiment =>
+          experimentDetailsUpdated({
+            id: experiment.id,
+            changes: {tags: experiment.tags.filter(tag => tag !== action.tag)}
+          })
+        ),
+      addMessage('success', `“${action.tag}” tag has been removed from “${action.experiments[0]?.name}” experiment`, [
         {
           name: 'Undo',
           actions: [
@@ -390,8 +403,8 @@ export class CommonExperimentsMenuEffects {
             }))
           ]
         }]
-      ) as any)
-    )
+      )
+    ])
   ));
 
 
@@ -437,7 +450,7 @@ export class CommonExperimentsMenuEffects {
             actions.push(experimentDetailsUpdated({
               id: experiments[0].id,
               // eslint-disable-next-line @typescript-eslint/naming-convention
-              changes: {system_tags: [...experiments[0]?.system_tags.filter(t => t !== 'shared'), 'archived'].sort()}
+              changes: {system_tags: [...(experiments[0]?.system_tags.filter(t => t !== 'shared') ?? []), 'archived'].sort()}
             }));
           }
           if (this.isSelectedExpInCheckedExps(action.selectedEntities, selectedExperiment)) {
@@ -537,7 +550,7 @@ export class CommonExperimentsMenuEffects {
   ), {dispatch: false});
 
 
-  isSelectedExpInCheckedExps(checked: ISelectedExperiment[], selected: ISelectedExperiment): boolean {
+  isSelectedExpInCheckedExps(checked: ISelectedExperiment[], selected: IExperimentInfo): boolean {
     return selected && checked.some(exp => exp.id === selected.id);
   }
 

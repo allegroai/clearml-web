@@ -20,7 +20,7 @@ export class QueueCreateDialogComponent implements OnInit, OnDestroy {
 
   constructor(private store: Store, private matDialogRef: MatDialogRef<QueueCreateDialogComponent>, @Inject(MAT_DIALOG_DATA) public data) {
     if (data) {
-      this.queue    = data;
+      this.queue    = {...data};
       this.editMode = true;
     }
     this.queues$ = this.store.select(createQueueSelectors.selectQueues);

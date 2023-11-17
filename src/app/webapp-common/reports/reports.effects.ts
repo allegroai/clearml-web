@@ -29,7 +29,8 @@ import {
 import {ApiReportsService} from '~/business-logic/api-services/reports.service';
 import {IReport, PAGE_SIZE} from './reports.consts';
 import {
-  selectArchiveView, selectNestedReports,
+  selectArchiveView,
+  selectNestedReports,
   selectReport,
   selectReportsOrderBy,
   selectReportsQueryString,
@@ -48,7 +49,6 @@ import {
 } from '../core/reducers/projects.reducer';
 import {TABLE_SORT_ORDER} from '../shared/ui-components/data/table/table.consts';
 import {selectCurrentUser, selectShowOnlyUserWork} from '../core/reducers/users-reducer';
-import {addExcludeFilters} from '../shared/utils/tableParamEncode';
 import {escapeRegex} from '../shared/utils/escape-regex';
 import {MESSAGES_SEVERITY} from '../constants';
 import {MatDialog} from '@angular/material/dialog';
@@ -63,6 +63,7 @@ import {HttpClient} from '@angular/common/http';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {setMainPageTagsFilter} from '@common/core/actions/projects.actions';
 import {cleanTag} from '@common/shared/utils/helpers.util';
+import {excludedKey, getTagsFilters} from '@common/shared/utils/tableParamEncode';
 
 @Injectable()
 export class ReportsEffects {
@@ -86,16 +87,16 @@ export class ReportsEffects {
 
   createReport$ = createEffect(() => this.actions.pipe(
     ofType(createReport),
-    switchMap((action) => this.reportsApiService.reportsCreate(action.reportsCreateRequest)),
-    mergeMap((res: ReportsCreateResponse) => {
-      this.router.navigate(['reports', res.project_id, res.id]);
-      return [deactivateLoader(createReport.type)];
-    }),
-    catchError(err => [
-      requestFailed(err),
-      setServerError(err, null, 'failed to create a new report'),
-      deactivateLoader(createReport.type),
-    ])
+    switchMap((action) => this.reportsApiService.reportsCreate(action.reportsCreateRequest)
+      .pipe(mergeMap((res: ReportsCreateResponse) => {
+        this.router.navigate(['reports', res.project_id, res.id]);
+        return [deactivateLoader(createReport.type)];
+      }),
+      catchError(err => [
+        requestFailed(err),
+        setServerError(err, null, 'failed to create a new report'),
+        deactivateLoader(createReport.type),
+      ])))
   ));
 
   getReports = createEffect(() => this.actions.pipe(
@@ -121,10 +122,14 @@ export class ReportsEffects {
         project: projectId === '*' ? null : projectId,
         scroll_id: action['loadMore'] ? scroll : null,
         ...(hideExamples && {allow_public: false}),
-        system_tags: [archive ? '__$and' : '__$not', 'archived'],
+        system_tags: [archive ? '__$and' : excludedKey, 'archived'],
         ...(showOnlyUserWork && {user: [user.id]}),
         order_by: [sortOrder === TABLE_SORT_ORDER.DESC ? '-' + orderBy : orderBy],
-        ...(mainPageTagsFilter?.length > 0 && {tags: [(mainPageTagsFilterMatchMode ? '__$and' : '__$or'), ...addExcludeFilters(mainPageTagsFilter)]}),
+        ...(mainPageTagsFilter?.length > 0 && {
+          filters: {
+            tags: getTagsFilters(!!mainPageTagsFilterMatchMode, mainPageTagsFilter),
+          }
+        }),
         ...(searchQuery?.query && {
           _any_: {
             pattern: searchQuery.regExp ? searchQuery.query : escapeRegex(searchQuery.query),
@@ -272,11 +277,11 @@ export class ReportsEffects {
   navigateToProjectAfterMove = createEffect(() => this.actions.pipe(
     ofType(navigateToProjectAfterMove),
     concatLatestFrom(() => this.store.select(selectReport)),
-    filter(([, report])=> !!report?.id),
+    filter(([, report]) => !!report?.id),
     tap(([action, report]) => {
       this.router.navigateByUrl(`reports/${action.projectId}/${report.id}`);
     }),
-    ), {dispatch: false});
+  ), {dispatch: false});
 
   publishReport = createEffect(() => this.actions.pipe(
     ofType(publishReport),

@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit, } from '@angular/core';
+import {Component, OnDestroy, OnInit,} from '@angular/core';
 import {Params} from '@angular/router';
 import {ReportDialogComponent} from '../report-dialog/report-dialog.component';
 import {
@@ -36,13 +36,14 @@ import {
   selectMainPageTagsFilterMatchMode
 } from '../../core/reducers/projects.reducer';
 import {selectShowOnlyUserWork} from '../../core/reducers/users-reducer';
-import {initSearch, setSearching, setSearchQuery} from '../../common-search/common-search.actions';
 import {debounceTime, filter, map, tap, withLatestFrom} from 'rxjs/operators';
 import {setBreadcrumbsOptions, setDefaultNestedModeForFeature} from '@common/core/actions/projects.actions';
 import {isEqual} from 'lodash-es';
 import {ClipboardService} from 'ngx-clipboard';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {CommonProjectsPageComponent} from '@common/projects/containers/projects-page/common-projects-page.component';
+import {EntityTypeEnum} from "~/shared/constants/non-common-consts";
+import {Project} from "~/business-logic/model/projects/project";
 
 @Component({
   selector: 'sm-reports-page',
@@ -50,14 +51,13 @@ import {CommonProjectsPageComponent} from '@common/projects/containers/projects-
   styleUrls: ['./reports-page.component.scss']
 })
 export class ReportsPageComponent extends CommonProjectsPageComponent implements OnInit, OnDestroy {
-  public reports$: Observable<any>;
-  public archive$: Observable<any>;
+  public reports$: Observable<IReport[]>;
+  public archive$: Observable<boolean>;
   public reportsTags$: Observable<string[]>;
   private sub = new Subscription();
   public noMoreReports$: Observable<boolean>;
   public reportsOrderBy$: Observable<string>;
   public reportsSortOrder$: Observable<1 | -1>;
-  public selectedProjectId$: Observable<string>;
 
   constructor(
     private _clipboardService: ClipboardService
@@ -87,15 +87,14 @@ export class ReportsPageComponent extends CommonProjectsPageComponent implements
       });
   }
 
-  ngOnDestroy(): void {
+  override ngOnDestroy(): void {
     super.ngOnDestroy();
     this.sub.unsubscribe();
     this.store.dispatch(resetReports());
   }
 
-  ngOnInit(): void {
+  override ngOnInit(): void {
     super.ngOnInit();
-    this.store.dispatch(initSearch({payload: 'Search for reports'}));
     let prevQueryParams: Params;
     this.sub.add(combineLatest([
         this.store.select(selectMainPageTagsFilter),
@@ -124,9 +123,7 @@ export class ReportsPageComponent extends CommonProjectsPageComponent implements
   }
 
   reportSelected(report: Report) {
-    this.store.dispatch(setSearchQuery({query: ''}));
-    this.store.dispatch(setSearching({payload: false}));
-    this.router.navigate(['reports',(report.project as any)?.id ?? '*', report.id]);
+    this.router.navigate(['reports',(report.project as Project)?.id ?? '*', report.id]);
   }
 
   toggleArchive(archive: boolean) {
@@ -163,7 +160,7 @@ export class ReportsPageComponent extends CommonProjectsPageComponent implements
     }));
   }
 
-  loadMore() {
+  override loadMore() {
     this.store.dispatch(getReports(true));
   }
 
@@ -175,7 +172,7 @@ export class ReportsPageComponent extends CommonProjectsPageComponent implements
     }
   }
 
-  orderByChanged(sortByFieldName: string) {
+  override orderByChanged(sortByFieldName: string) {
     this.store.dispatch(setReportsOrderBy({orderBy: sortByFieldName}));
   }
 
@@ -191,7 +188,7 @@ export class ReportsPageComponent extends CommonProjectsPageComponent implements
     }
   }
 
-  setupBreadcrumbsOptions() {
+  override setupBreadcrumbsOptions() {
     this.subs.add(this.selectedProject$.pipe(
       withLatestFrom(this.store.select(selectDefaultNestedModeForFeature))
     ).subscribe(([selectedProject, defaultNestedModeForFeature]) => {
@@ -212,5 +209,9 @@ export class ReportsPageComponent extends CommonProjectsPageComponent implements
         }
       }));
     }));
+  }
+
+  protected override getName(): string {
+    return EntityTypeEnum.report;
   }
 }

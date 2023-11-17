@@ -1,0 +1,22 @@
+@import "variables";
+@import "primeng/resources/components/slider/slider";
+
+$borderRadius: 12px;
+$formElementTransition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+$transitionDuration: 0.2s;
+
+$sliderBg: $blue-600;
+$sliderBorder: 0 none !default;
+$sliderHorizontalHeight: 4px !default;
+$sliderVerticalWidth: 4px !default;
+$sliderHandleWidth: 40px  !default;
+$sliderHandleHeight: 12px !default;
+$sliderHandleBg: $blue-300 !default;
+$sliderHandleBorder: none !default;
+$sliderHandleBorderRadius: 12px !default;
+$sliderHandleHoverBorderColor: $blue-280 !default;
+$sliderHandleHoverBg: $blue-280 !default;
+$sliderRangeBg: $blue-600 !default;
+
+@import "./_slider";
+

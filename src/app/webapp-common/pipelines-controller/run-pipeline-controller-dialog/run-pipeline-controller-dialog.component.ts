@@ -27,7 +27,6 @@ export class RunPipelineControllerDialogComponent implements OnInit, OnDestroy {
   public title: string;
   public params: any;
   public task: IExperimentInfo;
-  public chooseCustomQueue: boolean = false;
   private queuesSub: Subscription;
   private baseControllerSub: Subscription;
   private selectedQueueSub: Subscription;
@@ -59,7 +58,7 @@ export class RunPipelineControllerDialogComponent implements OnInit, OnDestroy {
     });
     this.selectedQueueSub = combineLatest([this.baseController$, this.queues$])
       .pipe(filter(([baseController, queues]) => !!baseController && queues?.length > 0)).subscribe(([baseController, queues]) => {
-        this.selectedQueue = queues.find(queue => baseController.execution?.queue?.id === queue?.id) || queues[0];
+        this.selectedQueue = queues.find(queue => baseController.execution?.queue?.id === queue?.id) || null;
       });
   }
 
@@ -78,15 +77,8 @@ export class RunPipelineControllerDialogComponent implements OnInit, OnDestroy {
     this.store.dispatch(setControllerForStartPipelineDialog({task: null}));
   }
 
-  changeChooseCustomQueue() {
-    this.chooseCustomQueue = !this.chooseCustomQueue;
-    if (!this.chooseCustomQueue) {
-      this.selectedQueue = this.queues.find(queue => this.task.execution?.queue?.id === queue?.id) || this.queues[0];
-    }
-  }
-
   getTitle() {
-    const version = this.task?.hyperparams?.properties?.version.value;
+    const version = this.task?.hyperparams?.properties?.version?.value;
     if (version) {
       return `${this.task.name} v${version}`;
     }
@@ -95,6 +87,6 @@ export class RunPipelineControllerDialogComponent implements OnInit, OnDestroy {
 
   displayFn = (entityObj: { name: string; id: string }) => entityObj?.name ?? '';
 
-  isFocused = (locationRef: HTMLInputElement) => document.activeElement === locationRef
+  isFocused = (locationRef: HTMLInputElement) => document.activeElement === locationRef;
 
 }

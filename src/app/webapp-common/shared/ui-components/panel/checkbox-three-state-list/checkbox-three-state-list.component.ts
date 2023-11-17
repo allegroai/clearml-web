@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
 import {excludedKey} from '@common/shared/utils/tableParamEncode';
 import {addOrRemoveFromArray} from '@common/shared/utils/shared-utils';
 
@@ -25,7 +25,7 @@ export enum CheckboxState {
   styleUrls: ['./checkbox-three-state-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CheckboxThreeStateListComponent implements OnInit {
+export class CheckboxThreeStateListComponent {
   @Input() options: Array<{ label: string; value: string; tooltip?: string }>;
   @Input() supportExcludeFilter: boolean;
 
@@ -66,13 +66,6 @@ export class CheckboxThreeStateListComponent implements OnInit {
   private _checkedList: string[];
   private _excludeList: string[];
 
-  constructor() {
-  }
-
-  ngOnInit(): void {
-  }
-
-
   onFilterChanged(val) {
     if (val) {
       if (this.supportExcludeFilter && val.source.value !== null) {
@@ -80,14 +73,14 @@ export class CheckboxThreeStateListComponent implements OnInit {
         return;
       }
 
-      const newValues = addOrRemoveFromArray(this.checkedList, val.source.value);
+      const newValues = this.checkedList? addOrRemoveFromArray<string>(this.checkedList, val.source.value) : [val.source.value];
       this.emitFilterChanged(newValues);
     }
   }
 
   emitFilterChanged(values?: string[], exclude = '') {
     const value = this.supportExcludeFilter
-      ? [...(values || this.checkedList), ...this.getExcludedValues(exclude)]
+      ? [...(values || this.checkedList || []), ...this.getExcludedValues(exclude)]
       : values;
     this.filterChanged.emit(value);
   }
@@ -105,7 +98,7 @@ export class CheckboxThreeStateListComponent implements OnInit {
       case CheckboxState.checked: {
         val.source.checked = true;
         this.indeterminateState[value] = CheckboxState.exclude;
-        const newValues = this.checkedList.filter(v => v !== value);
+        const newValues = this.checkedList?.filter(v => v !== value);
         this.emitFilterChanged(newValues, value);
         break;
       }
@@ -118,7 +111,7 @@ export class CheckboxThreeStateListComponent implements OnInit {
       case CheckboxState.empty:
       default: {
         this.indeterminateState[value] = CheckboxState.checked;
-        const newValues = addOrRemoveFromArray(this.checkedList, value);
+        const newValues = this.checkedList ? addOrRemoveFromArray(this.checkedList, value) : value;
         this.emitFilterChanged(newValues);
       }
     }

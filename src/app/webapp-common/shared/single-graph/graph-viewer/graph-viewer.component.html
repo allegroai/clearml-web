@@ -1,6 +1,17 @@
 <div class="modal-container" [class.dark-theme]="darkTheme" #modalContainer>
   <div class="graph-viewer-header">
-    <div class="chart-title ellipsis"><span *ngIf="chart?.metric && !darkTheme">{{chart?.metric}} - </span>{{chart?.layout?.title || chart?.metric}}</div>
+    <div class="chart-title ellipsis">
+      <span #dot
+            *ngIf="singleGraph && data.moveLegendToTitle && chart"
+            [style.background-color]="singleGraph.chart?.data[0]?.line?.color"
+            [colorButtonRef]="dot"
+            [smChooseColor]="$any(singleGraph.chart?.data[0]?.line?.color)"
+            [stringToColor]="singleGraph.singleColorKey"
+            class="title-color">
+    </span>
+      <span *ngIf="chart?.metric && !darkTheme">{{chart?.metric}} - </span>{{chart?.variants?.length > 1 ? chart.variants.join(', ') : chart?.layout?.title || chart?.metric}}
+      <sm-tag-list [tags]="chart?.tags"></sm-tag-list>
+    </div>
     <input #fakeInput name="Don't remove - it take the autofocus from slider" style="opacity: 0; height: 0; width: 0">
     <div *ngIf="!darkTheme" class="viewer-iteration">
       <div *ngIf="minMaxIterations$ | async as minMaxIterations">
@@ -70,6 +81,7 @@
             [disabled]="smoothType === smoothTypeEnum.any"
             [(ngModel)]="smoothWeight"
             (ngModelChange)="changeWeight($any($event))"
+            (blur)="smoothWeight === null && changeWeight(-1)"
           />
         </mat-form-field>
 
@@ -102,7 +114,7 @@
       [isCompare]="isCompare"
       [xAxisType]="xAxisType"
       [yAxisType]="yAxisType"
-      [moveLegendToTitle]="false"
+      [moveLegendToTitle]="data.moveLegendToTitle && !chart.layout.showlegend"
       [legendConfiguration]="this.data.legendConfiguration || {}"
       [isDarkTheme]="darkTheme"
       [graphsNumber]="9999"

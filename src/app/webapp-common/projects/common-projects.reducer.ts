@@ -1,4 +1,4 @@
-import {createReducer, createSelector, on, ReducerTypes} from '@ngrx/store';
+import {ActionCreator, createReducer, createSelector, on, ReducerTypes} from '@ngrx/store';
 import {Project} from '~/business-logic/model/projects/project';
 import {TABLE_SORT_ORDER, TableSortOrderEnum} from '../shared/ui-components/data/table/table.consts';
 import {
@@ -55,13 +55,7 @@ export const commonProjectsInitState: CommonProjectsState = {
   sortOrder: TABLE_SORT_ORDER.DESC,
   searchQuery: null,
   projectsNonFilteredList: [],
-  projectReadyForDeletion: {
-    experiments: null,
-    models: null,
-    pipelines: null,
-    reports: null,
-    datasets: null,
-  },
+  projectReadyForDeletion: null,
   validatedProject: null,
   noMoreProjects: true,
   scrollId: null,
@@ -115,14 +109,15 @@ export const commonProjectsReducers = [
   })),
   on(resetProjectsSearchQuery, state => ({
     ...state,
-    searchQuery: commonProjectsInitState.searchQuery,
+    // searchQuery: commonProjectsInitState.searchQuery,
     scrollId: null,
     noMoreProjects: commonProjectsInitState.noMoreProjects,
     projects: commonProjectsInitState.projects
   })),
   on(checkProjectForDeletion, (state, action) => ({
     ...state,
-    validatedProject: action.project
+    validatedProject: action.project,
+    projectReadyForDeletion: commonProjectsInitState.projectReadyForDeletion
   })),
   on(resetReadyToDelete, state => ({
     ...state,
@@ -133,7 +128,7 @@ export const commonProjectsReducers = [
     ({...state, tableModeAwareness: (action as ReturnType<typeof setTableModeAwareness>).awareness})),
   on(showExamplePipelines, state => ({...state, showPipelineExamples: true})),
   on(showExampleDatasets, state => ({...state, showDatasetExamples: true}))
-] as ReducerTypes<CommonProjectsState, any>[];
+] as ReducerTypes<CommonProjectsState, ActionCreator[]>[];
 export const commonProjectsReducer = createReducer(commonProjectsInitState, ...commonProjectsReducers);
 
 export const projects = state => state.projects as CommonProjectsState;
@@ -149,7 +144,7 @@ export const selectValidatedProject = createSelector(projects, state => state.va
 export const selectReadyForDeletion = createSelector(projects, state =>
   state.projectReadyForDeletion);
 export const selectProjectReadyForDeletion = createSelector(selectValidatedProject, selectReadyForDeletion,
-  (project, projectReadyForDeletion) => ({...projectReadyForDeletion, project}));
+  (project, projectReadyForDeletion) => projectReadyForDeletion ? {...projectReadyForDeletion, project} : null);
 export const selectProjectForDelete = createSelector(projects, state => [state?.validatedProject]);
 export const selectNoMoreProjects = createSelector(projects, state => state.noMoreProjects);
 export const selectProjectsScrollId = createSelector(projects, (state): string => state?.scrollId || null);

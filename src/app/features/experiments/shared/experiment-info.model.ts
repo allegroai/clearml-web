@@ -17,6 +17,7 @@ import {ConfigurationItem} from '../../../business-logic/model/tasks/configurati
 import {GetCurrentUserResponseUserObjectCompany} from '../../../business-logic/model/users/getCurrentUserResponseUserObjectCompany';
 import {Queue} from '../../../business-logic/model/queues/queue';
 import {Container} from '../../../business-logic/model/tasks/container';
+import {Output} from '~/business-logic/model/tasks/output';
 
 /**
  * an extended object of task that includes projection, will come from the server as an api response.
@@ -57,7 +58,7 @@ export interface ISelectedExperiment {
 /**
  * an object that will transfrom from the ISelectedExperiment response to more comfortable object to display.
  */
-export interface IExperimentInfo extends Omit<Task, 'id' | 'user' | 'project' | 'company' | 'execution' | 'container'> {
+export interface IExperimentInfo extends Omit<Task, 'id' | 'user' | 'project' | 'company' | 'execution' | 'container'|'output'> {
   id?: string;
   model?: IExperimentModelInfo;
   execution?: IExecutionForm;
@@ -70,9 +71,10 @@ export interface IExperimentInfo extends Omit<Task, 'id' | 'user' | 'project' | 
   project?: Project;
   company?: GetCurrentUserResponseUserObjectCompany;
   container?: Container;
+  output?: ISelectedExperimentOutput
 }
 
-export interface ISelectedExperimentOutput {
+export interface ISelectedExperimentOutput extends Omit<Output, 'model'> {
   destination?: string;
   model?: {
     id: Model['id'];

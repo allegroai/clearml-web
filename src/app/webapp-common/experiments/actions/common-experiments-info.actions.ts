@@ -1,6 +1,6 @@
 import {createAction, props} from '@ngrx/store';
 import {Task} from '~/business-logic/model/tasks/task';
-import {IExperimentInfo, ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
+import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 import {IExperimentModelInfo, ITableExperiment} from '../shared/common-experiment-model.model';
 import {ParamsItem} from '~/business-logic/model/tasks/paramsItem';
 import {ConfigurationItem} from '~/business-logic/model/tasks/configurationItem';
@@ -23,7 +23,7 @@ export const autoRefreshExperimentInfo = createAction(
 
 export const setExperiment = createAction(
   EXPERIMENTS_INFO_PREFIX + 'SET_EXPERIMENT',
-  props<{experiment: ISelectedExperiment}>()
+  props<{experiment: IExperimentInfo}>()
 );
 
 export const experimentUpdatedSuccessfully = createAction(

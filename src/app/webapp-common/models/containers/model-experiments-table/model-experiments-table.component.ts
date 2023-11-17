@@ -1,5 +1,5 @@
 import {Component, EventEmitter, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {select, Store} from '@ngrx/store';
+import {Store} from '@ngrx/store';
 import {BehaviorSubject, Observable, Subscription} from 'rxjs';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {debounceTime, distinctUntilChanged, filter, map} from 'rxjs/operators';
@@ -8,10 +8,12 @@ import {
   selectExperimentsTableCols,
   selectGlobalFilter,
   selectNoMoreExperiments,
-  selectTableFilters
+  selectTableFilters,
+  selectSplitSize,
 } from '@common/experiments/reducers';
 import {uniq} from 'lodash-es';
 import {ColHeaderTypeEnum, ISmCol} from '@common/shared/ui-components/data/table/table.consts';
+import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 import * as experimentsActions from '../../../experiments/actions/common-experiments-view.actions';
 import {resetExperiments, resetGlobalFilter} from '@common/experiments/actions/common-experiments-view.actions';
 import {selectProjectSystemTags} from '@common/core/reducers/projects.reducer';
@@ -72,13 +74,13 @@ export class ModelExperimentsTableComponent implements OnInit, OnDestroy {
   public entityTypes = EntityTypeEnum;
   private paramsSubscription: Subscription;
   private columns$: Observable<ISmCol[] | undefined>;
-  public experiments$: Observable<any>;
+  public experiments$: Observable<IExperimentInfo[]>;
   public tableFilters$: Observable<{ [columnId: string]: FilterMetadata }>;
   public tags$: Observable<string[]>;
   public systemTags$: Observable<string[]>;
   public noMoreExperiments$: Observable<boolean>;
   public tableSortFields$: Observable<SortMeta[]>;
-  selectedExperiment: any;
+  selectedExperiment: IExperimentInfo;
   private _resizedCols = {} as { [colId: string]: string };
   private resizedCols$ = new BehaviorSubject<{ [colId: string]: string }>(this._resizedCols);
   @ViewChild('searchExperiments', {static: true}) searchExperiments: MatInput;
@@ -87,14 +89,16 @@ export class ModelExperimentsTableComponent implements OnInit, OnDestroy {
   public tags: string[];
   private initTags: boolean;
   public searchTerm$: Observable<{ query: string; regExp?: boolean; original?: string }>;
+  public selectSplitSize$: Observable<number>;
 
   constructor(
     private store: Store,
   ) {
     this.resizedCols$.next(this._resizedCols);
     this.experiments$ = this.store.select(selectExperimentsList);
-    this.searchTerm$ = this.store.pipe(select(selectGlobalFilter));
+    this.searchTerm$ = this.store.select(selectGlobalFilter);
     this.columns$ = this.store.select(selectExperimentsTableCols);
+    this.selectSplitSize$ = this.store.select(selectSplitSize);
 
     this.tableFilters$ = this.store.select(selectTableFilters)
       .pipe(map(filtersObj => Object.fromEntries(Object.entries(filtersObj).filter(([key]) => key !== 'models.input.model'))));
@@ -141,10 +145,10 @@ export class ModelExperimentsTableComponent implements OnInit, OnDestroy {
   }
 
   getNextExperiments() {
-    this.store.dispatch(experimentsActions.getNextExperiments());
+    this.store.dispatch(experimentsActions.getNextExperiments(true));
   }
 
-  filterChanged({col, value, andFilter}: { col: ISmCol; value: any; andFilter?: boolean }) {
+  filterChanged({col, value, andFilter}: { col: ISmCol; value; andFilter?: boolean }) {
     this.store.dispatch(modelExperimentsTableFilterChanged({
       filter: {
         col: col.id,

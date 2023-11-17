@@ -22,7 +22,6 @@ import {TableModule} from 'primeng/table';
 import {SectionHeaderComponent} from './components/section-header/section-header.component';
 import {LineChartComponent} from './components/charts/line-chart/line-chart.component';
 import {DonutComponent} from './components/charts/donut/donut.component';
-import {ExperimentRefreshComponent} from './components/experiment-refresh/experiment-refresh.component';
 import {CustomColumnsListComponent} from './components/custom-columns-list/custom-columns-list.component';
 import {BaseContextMenuComponent} from './components/base-context-menu/base-context-menu.component';
 import {EntityFooterComponent} from './entity-page/entity-footer/entity-footer.component';
@@ -56,6 +55,7 @@ import {
   ExperimentTypeIconLabelComponent
 } from '@common/shared/experiment-type-icon-label/experiment-type-icon-label.component';
 import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
+import {EllipsisMiddleDirective} from '@common/shared/ui-components/directives/ellipsis-middle.directive';
 
 const _declarations = [
   ExperimentInfoHeaderStatusProgressBarComponent,
@@ -68,7 +68,6 @@ const _declarations = [
   SectionHeaderComponent,
   LineChartComponent,
   DonutComponent,
-  ExperimentRefreshComponent,
   CustomColumnsListComponent,
   EntityFooterComponent,
   CheckPermissionDirective,
@@ -101,6 +100,7 @@ const _declarations = [
         LMarkdownEditorModule,
         SharedPipesModule,
         LabeledFormFieldDirective,
+        EllipsisMiddleDirective,
     ],
   declarations: [
     ..._declarations,

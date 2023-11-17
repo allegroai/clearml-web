@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {environment} from '../../../../environments/environment';
 import {HttpClient} from '@angular/common/http';
 import {BehaviorSubject, of, timer, throwError} from 'rxjs';
-import {catchError, map, retryWhen, mergeMap} from 'rxjs/operators';
+import {catchError, retryWhen, mergeMap, tap} from 'rxjs/operators';
 import {Environment} from '../../../../environments/base';
 import { retryOperation } from '../utils/promie-with-retry';
 
@@ -31,10 +31,7 @@ export class ConfigurationService {
             mergeMap((err, i) => i > 2 ? throwError('Error from retry!') : timer(500))
         )),
         catchError(() => of({})),
-        map(env => {
-          ConfigurationService.globalEnvironment = {...ConfigurationService.globalEnvironment, ...env};
-          this.globalEnvironmentObservable.next(ConfigurationService.globalEnvironment);
-        })
+        tap(env => this.setEnv(env))
       );
   }
 

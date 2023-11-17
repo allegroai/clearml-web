@@ -1,13 +1,10 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {Worker} from '../../../../business-logic/model/workers/worker';
 import {getSelectedWorker, workersTableSortChanged} from '../../actions/workers.actions';
 import {selectSelectedWorker, selectWorkers, selectWorkersTableSortFields} from '../../reducers/index.reducer';
 import {ActivatedRoute, Router} from '@angular/router';
-import {Observable} from 'rxjs';
-import {ISmCol} from '../../../shared/ui-components/data/table/table.consts';
+import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {filter, take, withLatestFrom} from 'rxjs/operators';
-import {SortMeta} from 'primeng/api';
 
 @Component({
   selector: 'sm-workers',
@@ -16,9 +13,9 @@ import {SortMeta} from 'primeng/api';
 })
 export class WorkersComponent implements OnInit {
 
-  public workers$: Observable<Worker[]>;
-  public selectedWorker$: Observable<Worker>;
-  public tableSortFields$: Observable<SortMeta[]>;
+  public workers$ = this.store.select(selectWorkers);
+  public selectedWorker$ = this.store.select(selectSelectedWorker);
+  public tableSortFields$ = this.store.select(selectWorkersTableSortFields);
 
   get routerWorkerId() {
     const url = new URL(window.location.href);
@@ -26,9 +23,6 @@ export class WorkersComponent implements OnInit {
   }
 
   constructor(private store: Store, private router: Router, private route: ActivatedRoute) {
-    this.workers$ = this.store.select(selectWorkers);
-    this.selectedWorker$ = this.store.select(selectSelectedWorker);
-    this.tableSortFields$ = this.store.select(selectWorkersTableSortFields);
   }
 
   ngOnInit(): void {
@@ -45,14 +39,15 @@ export class WorkersComponent implements OnInit {
 
 
   public selectWorker(worker) {
-    this.router.navigate(
+    this.store.dispatch(getSelectedWorker({worker}));
+    return this.router.navigate(
       [],
       {
         relativeTo: this.route,
         queryParams: {id: worker?.id},
-        queryParamsHandling: 'merge'
+        queryParamsHandling: 'merge',
+        replaceUrl: true
       });
-    this.store.dispatch(getSelectedWorker({worker}));
   }
 
   sortedChanged(sort: { isShift: boolean; colId: ISmCol['id'] }) {

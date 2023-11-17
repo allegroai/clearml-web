@@ -17,6 +17,10 @@ span {
     display: flex;
     overflow: hidden;
     flex-shrink: 0;
+
+    &.last {
+      flex-shrink: 1;
+    }
   }
 
   .crumb {
@@ -31,17 +35,22 @@ span {
       }
     }
 
-  }
+    &.first {
+      text-transform: uppercase;
+    }
 
-  .crumb.first {
-    text-transform: uppercase;
-  }
-
-  .crumb.last {
-    font-weight: 700;
-    color: #fff;
-    white-space: nowrap;
-    overflow: hidden;
+    &.last {
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      grid-gap: 8px;
+      .name {
+        font-weight: 700;
+      }
+    }
   }
 
   .sub-project {
@@ -100,6 +109,12 @@ span {
     height: 24px;
     padding-top: 4px;
   }
+  sm-tag-list {
+    display: inline-flex;
+    margin-left: 8px;
+  }
+
+
 }
 
 .sub-project-menu-item {
@@ -107,6 +122,13 @@ span {
   font-size: 14px;
   font-weight: 500;
   color: $blue-900;
+
+  ::ng-deep .mdc-list-item__primary-text {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+  }
 }
 
 .workspace {

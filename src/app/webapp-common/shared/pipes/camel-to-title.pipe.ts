@@ -1,4 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
+import {capitalize} from 'lodash-es';
 
 @Pipe({
   name: 'camelToTitle',
@@ -14,11 +15,6 @@ export class CamelToTitlePipe implements PipeTransform {
 
     const words = value.match(/[A-Za-z][a-z]*/g);
 
-    return words.map(this.capitalize).join(' ');
+    return words.map(capitalize).join(' ');
   }
-
-  capitalize(word) {
-    return word.charAt(0).toUpperCase() + word.substring(1);
-  }
-
 }

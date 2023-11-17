@@ -14,11 +14,11 @@ import {Queue} from '~/business-logic/model/queues/queue';
 import {getStats, setStats, setStatsParams} from '../../actions/queues.actions';
 import {selectQueuesStatsTimeFrame, selectQueueStats, selectStatsErrorNotice} from '../../reducers/index.reducer';
 import {filter} from 'rxjs/operators';
-import {Topic} from '@common/shared/utils/statistics';
 import {TIME_INTERVALS} from '../../workers-and-queues.consts';
 import {
   IOption
 } from '@common/shared/ui-components/inputs/select-autocomplete-with-chips/select-autocomplete-with-chips.component';
+import {LineChartData} from '@common/shared/components/charts/line-chart/line-chart.component';
 
 @Component({
   selector: 'sm-queue-stats',
@@ -32,8 +32,8 @@ export class QueueStatsComponent implements OnInit, OnDestroy {
   public statsError$ = this.store.select(selectStatsErrorNotice);
   public selectedQueue: Queue;
   public refreshChart = true;
-  public waitChartData: { dataByTopic: Topic[] };
-  public lenChartData: { dataByTopic: Topic[] };
+  public waitChartData: LineChartData;
+  public lenChartData: LineChartData;
 
   public timeFrameOptions: IOption[] = [
     {label: '3 Hours', value: (3 * TIME_INTERVALS.HOUR).toString()},
@@ -71,8 +71,8 @@ export class QueueStatsComponent implements OnInit, OnDestroy {
       (data) => {
         if (data && (data.wait || data.length)) {
           this.refreshChart = false;
-          this.waitChartData = {dataByTopic: data.wait};
-          this.lenChartData = {dataByTopic: data.length};
+          this.waitChartData = {dataByTopic: data.wait, data: null};
+          this.lenChartData = {dataByTopic: data.length, data: null};
           this.cdr.detectChanges();
         }
       }

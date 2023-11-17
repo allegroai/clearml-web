@@ -13,8 +13,8 @@ import {requestFailed} from '../../core/actions/http.actions';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
 import {of} from 'rxjs';
-import {selectSelectedModel, selectSelectedModels, selectSelectedTableModel} from '../reducers';
-import {SelectedModel} from '../shared/models.model';
+import {selectModelsList, selectSelectedModel, selectSelectedTableModel} from '../reducers';
+import {SelectedModel, TableModel} from '../shared/models.model';
 import {RouterState, selectRouterConfig} from '../../core/reducers/router-reducer';
 import {ModelsArchiveManyResponse} from '~/business-logic/model/models/modelsArchiveManyResponse';
 import {emptyAction} from '~/app.constants';
@@ -22,7 +22,9 @@ import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {ModelsUnarchiveManyResponse} from '~/business-logic/model/models/modelsUnarchiveManyResponse';
 import {getNotificationAction, MenuItems, MoreMenuItems} from '../../shared/entity-page/items.utils';
 import {MESSAGES_SEVERITY} from '@common/constants';
-import {addProjectTag} from '../actions/models-view.actions';
+import {ModelsUpdateTagsResponse} from '~/business-logic/model/models/modelsUpdateTagsResponse';
+import {addProjectsTag} from '@common/experiments/actions/common-experiments-view.actions';
+import * as projectsActions from '@common/core/actions/projects.actions';
 
 @Injectable()
 export class ModelsMenuEffects {
@@ -94,7 +96,7 @@ export class ModelsMenuEffects {
     )
   ));
 
-  publishModelFailedText(error: any, model) {
+  publishModelFailedText(error, model) {
     if (model.task && error?.error?.meta?.result_subcode == 110) {
       // eslint-disable-next-line @typescript-eslint/naming-convention
       return this.apiTasks.tasksGetAllEx({id: [model.task.id], only_fields: ['id', 'name', 'project']}).pipe(
@@ -113,21 +115,41 @@ export class ModelsMenuEffects {
 
   addTag$ = createEffect( () => this.actions$.pipe(
     ofType(addTag),
-    concatLatestFrom(() => [
-      this.store.select(selectSelectedModels),
-      this.store.select(selectSelectedTableModel)
-    ]),
-    switchMap(([action, selectedModels, selectedModelInfo]) => {
-        const modelsFromState = selectedModelInfo ? selectedModels.concat(selectedModelInfo) as SelectedModel[] : selectedModels;
-        return [...action.models.map(model => {
-          const modelFromState = modelsFromState.find(mod => mod.id === model.id);
-          return updateModelDetails({
-            id: model.id,
-            changes: {tags: Array.from(new Set((modelFromState?.tags || model.tags || []).concat([action.tag]))).sort() as string[]}
-          });
-        }), addProjectTag];
-      }
-    )
+    switchMap(action  => {
+      const ids = action.models.map(e => e.id);
+      return this.apiModels.modelsUpdateTags({
+        ids,
+        add_tags: [action.tag]
+      })
+        .pipe(
+          concatLatestFrom(() => [
+            this.store.select(selectModelsList),
+            this.store.select(selectSelectedModel)
+          ]),
+          mergeMap(([res, models, selectedModelInfo]: [ModelsUpdateTagsResponse, TableModel[], SelectedModel]) => {
+            if (res.updated === ids.length) {
+              const updatedModels = models?.filter(exp => ids.includes(exp.id)) ?? action.models as unknown as TableModel[];
+              return [
+                viewActions.updateManyModels({changeList: updatedModels.reduce((acc, model) => {
+                    acc[model.id] = {tags: Array.from(new Set((model?.tags || []).concat([action.tag]))).sort()};
+                    return acc;
+                  }, {})}),
+                ...(ids.includes(selectedModelInfo?.id) ?
+                  [infoActions.modelDetailsUpdated({
+                    id: selectedModelInfo.id,
+                    changes: {tags: Array.from(new Set((selectedModelInfo?.tags || []).concat([action.tag]))).sort()}
+                  })] :
+                  []),
+                addProjectsTag({tag: action.tag}),
+                projectsActions.addCompanyTag({tag: action.tag}),
+              ];
+            } else {
+              return [addMessage(MESSAGES_SEVERITY.ERROR, 'Not all tags were applied')]
+            }
+          }),
+          catchError(() => [addMessage(MESSAGES_SEVERITY.ERROR, 'Failed to apply tags')])
+        );
+    })
   ));
 
   removeTag$ = createEffect( () => this.actions$.pipe(

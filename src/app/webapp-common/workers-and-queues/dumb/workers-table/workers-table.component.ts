@@ -1,10 +1,11 @@
 import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
-import {ColHeaderTypeEnum, ISmCol} from '../../../shared/ui-components/data/table/table.consts';
+import {ColHeaderTypeEnum, ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {get} from 'lodash-es';
 import {WORKERS_TABLE_COL_FIELDS} from '../../workers-and-queues.consts';
-import {Worker} from '../../../../business-logic/model/workers/worker';
-import {TableComponent} from '../../../shared/ui-components/data/table/table.component';
-import {BaseTableView} from '../../../shared/ui-components/data/table/base-table-view';
+import {TableComponent} from '@common/shared/ui-components/data/table/table.component';
+import {BaseTableView} from '@common/shared/ui-components/data/table/base-table-view';
+import {WorkerExt} from '@common/workers-and-queues/actions/workers.actions';
+
 
 @Component({
   selector: 'sm-workers-table',
@@ -15,9 +16,9 @@ export class WorkersTableComponent extends BaseTableView {
 
   public cols: Array<ISmCol>;
   public readonly WORKERS_TABLE_COL_FIELDS = WORKERS_TABLE_COL_FIELDS;
-  private _workers: Worker[];
+  private _workers: WorkerExt[];
 
-  @Input() set workers(workers: Worker[]) {
+  @Input() set workers(workers) {
     this._workers = workers;
     this.table && this.table.focusSelected();
   }
@@ -26,12 +27,11 @@ export class WorkersTableComponent extends BaseTableView {
     return this._workers;
   }
 
-  @Input() selectedWorker: Worker;
+  @Input() selectedWorker: WorkerExt;
   @Output() workerSelected = new EventEmitter();
   @Output() sortedChanged = new EventEmitter<{ isShift: boolean; colId: ISmCol['id'] }>();
 
   @ViewChild('tableContainer', {static: true}) tableContainer;
-  @ViewChild('table', {static: false}) table: TableComponent;
 
   constructor() {
     super();
@@ -75,7 +75,7 @@ export class WorkersTableComponent extends BaseTableView {
     this.workerSelected.emit(event.data);
   }
 
-  scrollTableToTop() {
+  override scrollTableToTop() {
     this.tableContainer.nativeElement.scroll({top: 0});
   }
 
@@ -84,7 +84,7 @@ export class WorkersTableComponent extends BaseTableView {
     this.scrollTableToTop();
   }
 
-  afterTableInit(): void {
+  override afterTableInit(): void {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

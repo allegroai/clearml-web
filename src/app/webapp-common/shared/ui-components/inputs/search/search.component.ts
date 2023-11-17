@@ -48,8 +48,8 @@ export class SearchComponent implements OnInit, OnChanges, OnDestroy {
   ngOnInit(): void {
     this.subs.add(this.value$.pipe(
       tap((val: string) => this.empty = val?.length === 0),
-      debounce((val: string) => val.length > 0 ? timer(this.debounceTime) : timer(0)),
       distinctUntilChanged(),
+      debounce((val: string) => val.length > 0 ? timer(this.debounceTime) : timer(0)),
       filter(val => val.length >= this.minimumChars || val.length === 0)
     )
       .subscribe((value: string) => {

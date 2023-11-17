@@ -4,7 +4,7 @@
       <div class="d-flex-center">
         <a [href]="'projects/' + projectId + '/models/' + model?.id" target="_blank"><span>{{model?.name}}</span></a>
         <i *ngIf="model?.uri && !isLocalFile"
-           class="pointer fa fa-download ms-2"
+           class="pointer al-icon al-ico-download sm-md ms-2"
            (click)="artifactFilePathClicked(model.uri)"
         ></i>
         <sm-copy-clipboard *ngIf="model?.uri && isLocalFile"

@@ -27,6 +27,7 @@
       width: 180px;
       font-size: 12px;
     }
+
     .mat-mdc-form-field{
       width: 340px;
       &.hidden{
@@ -34,7 +35,8 @@
       }
     }
   }
-  .search-icon {
-    transform: translateY(3px);
+
+  .error {
+    color: $error-color
   }
 }

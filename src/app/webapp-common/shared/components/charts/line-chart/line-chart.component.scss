@@ -5,10 +5,10 @@
 
   display: block;
   position: relative;
-  background-color: $black;
+  background-color: var(--line-chart-background-color, $black);
 
   .chart {
-    height: calc(100% - 40px);
+    height: calc(100% - 46px);
     margin-bottom: 6px;
   }
 
@@ -18,7 +18,7 @@
     bottom: 0;
     left: 0 ;
     right: 0;
-    background-color: $black;
+    background-color: var(--line-chart-background-color, $black);
     .loading {
       display: flex;
       align-items: center;
@@ -84,3 +84,8 @@
     }
   }
 }
+
+::ng-deep .legend-circle.circle-hidden {
+  fill-opacity: 0.4;
+}
+

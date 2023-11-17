@@ -1,6 +1,5 @@
 import {Component, OnInit} from '@angular/core';
 import {Observable} from 'rxjs';
-import {Queue} from '~/business-logic/model/queues/queue';
 import {Task} from '~/business-logic/model/tasks/task';
 import {Store} from '@ngrx/store';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -11,7 +10,7 @@ import {
   moveExperimentInQueue,
   moveExperimentToBottomOfQueue,
   moveExperimentToOtherQueue,
-  moveExperimentToTopOfQueue,
+  moveExperimentToTopOfQueue, Queue,
   queuesTableSortChanged,
   removeExperimentFromQueue,
   setSelectedQueue
@@ -37,7 +36,7 @@ export class QueuesComponent implements OnInit {
 
   public queues$: Observable<Queue[]>;
   public selectedQueue$: Observable<Queue>;
-  private createQueueDialog: MatDialogRef<QueueCreateDialogComponent, any>;
+  private createQueueDialog: MatDialogRef<QueueCreateDialogComponent>;
   public tableSortOrder$: Observable<1 | -1>;
   public tableSortFields$: Observable<SortMeta[]>;
 

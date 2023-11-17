@@ -1,8 +1,5 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {ExperimentsComponent} from '@common/experiments/experiments.component';
-import {Store} from '@ngrx/store';
-import {ActivatedRoute, Router} from '@angular/router';
-import {MatDialog} from '@angular/material/dialog';
 import {INITIAL_CONTROLLER_TABLE_COLS} from '@common/pipelines-controller/controllers.consts';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {Observable} from 'rxjs';
@@ -20,14 +17,12 @@ import {HasReadOnlyFooterItem} from '@common/shared/entity-page/footer-items/has
 import {
   PipelineControllerMenuComponent
 } from '@common/pipelines-controller/pipeline-controller-menu/pipeline-controller-menu.component';
-import {SplitComponent} from 'angular-split';
 import {
   PipelineControllerInfoComponent
 } from '@common/pipelines-controller/pipeline-controller-info/pipeline-controller-info.component';
 import {AbortFooterItem} from '@common/shared/entity-page/footer-items/abort-footer-item';
 import {removeTag} from '@common/experiments/actions/common-experiments-menu.actions';
 import {ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
-import {RefreshService} from '@common/core/services/refresh.service';
 import {DeleteFooterItem} from '@common/shared/entity-page/footer-items/delete-footer-item';
 import {setBreadcrumbsOptions} from '@common/core/actions/projects.actions';
 import {withLatestFrom} from 'rxjs/operators';
@@ -40,24 +35,18 @@ import {selectDefaultNestedModeForFeature} from '@common/core/reducers/projects.
 })
 export class ControllersComponent extends ExperimentsComponent implements OnInit {
 
-  @ViewChild('contextMenu') contextMenu: PipelineControllerMenuComponent;
-  @ViewChild(SplitComponent) split: SplitComponent;
+  @ViewChild('contextMenu') override contextMenu: PipelineControllerMenuComponent;
   @ViewChild(PipelineControllerInfoComponent) diagram: PipelineControllerInfoComponent;
 
-  constructor(protected store: Store,
-              protected route: ActivatedRoute,
-              protected router: Router,
-              protected dialog: MatDialog,
-              protected refresh: RefreshService
-  ) {
-    super(store, route, router, dialog, refresh);
+  constructor() {
+    super();
     this.tableCols = INITIAL_CONTROLLER_TABLE_COLS;
     this.entityType = EntityTypeEnum.controller;
   }
 
-  createFooterItems(config: {
+  override createFooterItems(config: {
     entitiesType: EntityTypeEnum;
-    selected$: Observable<Array<any>>;
+    selected$: Observable<Array<{id :string}>>;
     showAllSelectedIsActive$: Observable<boolean>;
     tags$: Observable<string[]>;
     data$?: Observable<Record<string, CountAvailableAndIsDisableSelectedFiltered>>;
@@ -79,20 +68,24 @@ export class ControllersComponent extends ExperimentsComponent implements OnInit
     ];
   }
 
-  onFooterHandler({emitValue, item}, entityType?) {
-    switch (item.id) {
-      case MenuItems.delete:
-        this.contextMenu.deleteExperimentPopup(entityType || EntityTypeEnum.controller, true);
-        break;
-      case MenuItems.abort:
-        this.contextMenu.abortControllerPopup();
-        break;
-      default:
-        super.onFooterHandler({emitValue, item});
-    }
+  override onFooterHandler({emitValue, item}, entityType?) {
+    this.singleRowContext = false;
+
+    window.setTimeout(() => {
+      switch (item.id) {
+        case MenuItems.delete:
+          this.contextMenu.deleteExperimentPopup(entityType || EntityTypeEnum.controller, true);
+          break;
+        case MenuItems.abort:
+          this.contextMenu.abortControllerPopup();
+          break;
+        default:
+          super.onFooterHandler({emitValue, item});
+      }
+    });
   }
 
-  protected getParamId(params) {
+  protected override getParamId(params) {
     return params?.controllerId;
   }
 
@@ -104,17 +97,17 @@ export class ControllersComponent extends ExperimentsComponent implements OnInit
     this.store.dispatch(removeTag({experiments: [experiment], tag}));
   }
 
-  getSingleSelectedDisableAvailable(experiment) {
+  override getSingleSelectedDisableAvailable(experiment) {
     return {
       ...(super.getSingleSelectedDisableAvailable(experiment)),
       [MenuItems.continue]: selectionDisabledContinue([experiment])
     };
   }
 
-  downloadTableAsCSV() {
+  override downloadTableAsCSV() {
     this.table.table.downloadTableAsCSV(`ClearML ${this.selectedProject.id === '*'? 'All': this.selectedProject?.basename?.substring(0,60)} Pipelines`);
   }
-  setupBreadcrumbsOptions() {
+  override setupBreadcrumbsOptions() {
     this.sub.add(this.selectedProject$.pipe(
       withLatestFrom(this.store.select(selectDefaultNestedModeForFeature))
     ).subscribe(([selectedProject, defaultNestedModeForFeature]) => {

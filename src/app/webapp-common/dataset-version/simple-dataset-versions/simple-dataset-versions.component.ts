@@ -6,10 +6,6 @@ import {CountAvailableAndIsDisableSelectedFiltered} from '@common/shared/entity-
 import * as experimentsActions from '@common/experiments/actions/common-experiments-view.actions';
 import {INITIAL_CONTROLLER_TABLE_COLS} from '@common/pipelines-controller/controllers.consts';
 import {EXPERIMENTS_TABLE_COL_FIELDS} from '~/features/experiments/shared/experiments.const';
-import {Store} from '@ngrx/store';
-import {ActivatedRoute, Router} from '@angular/router';
-import {MatDialog} from '@angular/material/dialog';
-import {RefreshService} from '@common/core/services/refresh.service';
 import {take, withLatestFrom} from 'rxjs/operators';
 import {selectDefaultNestedModeForFeature} from '@common/core/reducers/projects.reducer';
 import {setBreadcrumbsOptions} from '@common/core/actions/projects.actions';
@@ -20,26 +16,20 @@ import {setBreadcrumbsOptions} from '@common/core/actions/projects.actions';
   styleUrls: ['./simple-dataset-versions.component.scss', '../../pipelines-controller/controllers.component.scss']
 })
 export class SimpleDatasetVersionsComponent extends ControllersComponent implements OnInit {
-  entityType = EntityTypeEnum.dataset;
-  public shouldOpenDetails = true;
   isArchived: boolean;
 
-  protected getParamId(params) {
+  protected override getParamId(params) {
     return params?.versionId;
   }
 
-  constructor(protected store: Store,
-              protected route: ActivatedRoute,
-              protected router: Router,
-              protected dialog: MatDialog,
-              protected refresh: RefreshService
-  ) {
-    super(store, route, router, dialog, refresh);
+  constructor() {
+    super();
+    this.entityType = EntityTypeEnum.dataset;
     this.tableCols = INITIAL_CONTROLLER_TABLE_COLS.map((col) =>
       col.id === EXPERIMENTS_TABLE_COL_FIELDS.NAME ? {...col, header: 'VERSION NAME'} : col);
   }
 
-  ngOnInit() {
+  override ngOnInit() {
     super.ngOnInit();
     this.experiments$
       .pipe(take(1))
@@ -57,7 +47,7 @@ export class SimpleDatasetVersionsComponent extends ControllersComponent impleme
       });
   }
 
-  createFooterItems(config: {
+  override createFooterItems(config: {
     entitiesType: EntityTypeEnum;
     selected$: Observable<Array<any>>;
     showAllSelectedIsActive$: Observable<boolean>;
@@ -71,10 +61,10 @@ export class SimpleDatasetVersionsComponent extends ControllersComponent impleme
     this.footerItems.splice(5, 1);
   }
 
-  downloadTableAsCSV() {
+  override downloadTableAsCSV() {
     this.table.table.downloadTableAsCSV(`ClearML ${this.selectedProject.id === '*'? 'All': this.selectedProject?.basename?.substring(0,60)} Datasets`);
   }
-  setupBreadcrumbsOptions() {
+  override setupBreadcrumbsOptions() {
     this.sub.add(this.selectedProject$.pipe(
       withLatestFrom(this.store.select(selectDefaultNestedModeForFeature))
     ).subscribe(([selectedProject, defaultNestedModeForFeature]) => {

@@ -9,8 +9,8 @@
     <span
       [smTooltip]="option.tooltip || option.label"
       smShowTooltipIfEllipsis
-      [showAllwaysTooltip]="!!option.tooltip"
-      matTooltipPosition="left"
+      [showAlwaysTooltip]="!!option.tooltip"
+      matTooltipPosition="above"
       data-id="FilterOption"
       class="ellipsis label"
     >{{option.label}}</span>
@@ -18,5 +18,5 @@
 </span>
 <div *ngIf="options?.length === 0" class="empty-menu flex-middle">No item found</div>
 <div *ngIf="options === null" class="flex-middle mt-5">
-  <mat-spinner [diameter]="80" [strokeWidth]="8"></mat-spinner>
+  <mat-spinner class="m-auto" [diameter]="32" [strokeWidth]="4" color="accent"></mat-spinner>
 </div>

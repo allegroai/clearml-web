@@ -23,7 +23,6 @@ export class SelectableFilterListComponent {
   }
 
   @Input() checkedList: Array<any> = [];
-  @Input() selected: string;
   @Input() placeholder: string = 'Search';
   @Input() titleLabel: string;
   @Input() checkAllIcon: string;

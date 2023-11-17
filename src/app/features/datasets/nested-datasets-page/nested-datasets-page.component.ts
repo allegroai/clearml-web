@@ -28,7 +28,7 @@ export class NestedDatasetsPageComponent extends CommonProjectsPageComponent {
   hideMenu = false;
   entityType = ProjectTypeEnum.datasets;
 
-  projectCardClicked(data: { hasSubProjects: boolean; id: string; name: string }) {
+  override projectCardClicked(data: { hasSubProjects: boolean; id: string; name: string }) {
     if (data.hasSubProjects) {
       this.router.navigate(['simple', data.id, 'projects'], {relativeTo: this.route.parent?.parent});
     } else {
@@ -50,7 +50,7 @@ export class NestedDatasetsPageComponent extends CommonProjectsPageComponent {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getExtraProjects(selectedProjectId, selectedProject) {
+  protected override getExtraProjects(selectedProjectId, selectedProject) {
     return [];
   }
 

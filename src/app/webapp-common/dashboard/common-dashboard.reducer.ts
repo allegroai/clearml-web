@@ -5,7 +5,7 @@ import {User} from '~/business-logic/model/users/user';
 import {setRecentExperiments, setRecentProjects} from './common-dashboard.actions';
 
 export interface IRecentTask {
-  id?: Task['id'];
+  id: Task['id'];
   name?: Task['name'];
   user?: User;
   type?: Task['type'];

@@ -4,8 +4,8 @@
       <b>Hostname:</b> {{creator}}
     </span>
   </div>
-  <button class="btn btn-cml-primary me-5" (click)="downloadLog()">
-    <i class="fa fa-download"></i>
+  <button class="d-flex-center btn btn-cml-primary me-5" (click)="downloadLog()">
+    <i class="al-icon al-ico-download sm me-2"></i>
     Download full log
   </button>
   <span style="width: 45px;">Filter: </span>
@@ -19,7 +19,7 @@
 </div>
 <div *ngIf="hasLog === false" class="no-output">
   <i class="icon no-output-icon" [ngClass]="isDarkTheme ? 'i-no-log-dark' : 'i-no-log'"></i>
-  <h3>NO LOG DATA</h3>
+  <h4>NO LOG DATA</h4>
 </div>
 
 <sm-experiment-log-info *ngIf="hasLog"

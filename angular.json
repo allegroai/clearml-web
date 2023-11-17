@@ -43,8 +43,7 @@
               "src/fonts.scss"
             ],
             "scripts": [
-              "node_modules/ngx-markdown-editor/assets/highlight.js/highlight.min.js",
-              "node_modules/ngx-markdown-editor/assets/marked.min.js"
+              "node_modules/ngx-markdown-editor/assets/highlight.js/highlight.min.js"
             ],
             "allowedCommonJsDependencies": [
               "ansi-to-html",
@@ -65,7 +64,9 @@
               "dom-to-image",
               "ace-builds",
               "hocon-parser",
-              "taira"
+              "taira",
+              "base-64",
+              "export-to-csv"
             ],
             "vendorChunk": true,
             "extractLicenses": false,
@@ -319,5 +320,8 @@
     "@angular-eslint/schematics:library": {
       "setParserOptionsProject": true
     }
+  },
+  "cli": {
+    "analytics": false
   }
 }

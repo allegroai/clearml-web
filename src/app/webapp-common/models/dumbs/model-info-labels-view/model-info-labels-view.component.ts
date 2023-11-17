@@ -12,15 +12,14 @@ import {SelectedModel} from '../../shared/models.model';
 })
 export class ModelInfoLabelsViewComponent implements OnInit, OnDestroy {
   public formData: Array<{ label: string; id: number }> = [];
-  public editable: boolean = false;
-  public cols = [{header: 'Label', class: 'col-10'},
-    {header: 'Id', class: 'col-4'}];
+  public editable = false;
+  public cols = [{header: 'Label', class: ''}, {header: 'Id', class: ''}];
 
   private unsavedValue: any;
   private formChangesSubscription: Subscription;
   private _model: SelectedModel;
 
-  @ViewChild('labels', {static: true}) labels: NgForm;
+  @ViewChild('labelsForm', {static: true}) labelsForm: NgForm;
 
   @Input() set model(model: SelectedModel) {
     if (model) {
@@ -43,7 +42,7 @@ export class ModelInfoLabelsViewComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.formChangesSubscription = this.labels.valueChanges.pipe(debounceTime(10)).subscribe(formValue => {
+    this.formChangesSubscription = this.labelsForm.valueChanges.pipe(debounceTime(10)).subscribe(formValue => {
       if (this.editable) {
         this.unsavedValue = this.formData;
       }
@@ -72,7 +71,7 @@ export class ModelInfoLabelsViewComponent implements OnInit, OnDestroy {
 
   saveClicked() {
     this.editable = false;
-    this.saveFormData.emit({...this.model, labels: this.convertParameters(this.unsavedValue)});
+    this.saveFormData.emit({...this.model, labels: this.unsavedValue ? this.convertParameters(this.unsavedValue) : this.model.labels});
   }
 
   cancelEdit() {
@@ -87,7 +86,7 @@ export class ModelInfoLabelsViewComponent implements OnInit, OnDestroy {
 
   convertParameters(labels: Array<{ id: number, label: string }>): Model['labels'] {
     const obj = {};
-    labels.forEach(l => {
+    labels?.forEach(l => {
       obj[l.label] = l.id;
     });
     return obj;

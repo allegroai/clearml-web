@@ -85,7 +85,7 @@ export class JsonViewerComponent {
 
   private _search: string = null;
   public isArray: boolean;
-  public index: number = 0;
+  public index = 0;
   public stringify = JSON.stringify;
   // nestedNodeMap = new Map<any, TreeFlatNode>();
   // flatNodeMap = new Map<TreeFlatNode, Segment>();

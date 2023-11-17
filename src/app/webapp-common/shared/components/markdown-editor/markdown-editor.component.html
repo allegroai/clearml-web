@@ -23,6 +23,7 @@
                height="100%"
                [mode]="editMode ? 'editor' : 'preview'"
                [options]="options"
+               [postRender]="postRender"
                [upload]="handleUpload"
                (onEditorLoaded)="editorReady($event)"
                (onPreviewDomChanged)="domFixes()"

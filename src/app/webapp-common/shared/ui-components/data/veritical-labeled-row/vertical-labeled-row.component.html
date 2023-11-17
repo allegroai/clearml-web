@@ -1,6 +1,6 @@
 <div class="labeled-row">
-  <div class="label">{{label}}</div>
-  <div class="value ellipsis">
+  <div class="label ellipsis">{{label}}</div>
+  <div class="value ellipsis" [smTooltip]="tooltip" [matTooltipShowDelay]="500" smShowTooltipIfEllipsis>
     <ng-content></ng-content>
   </div>
 </div>

@@ -17,8 +17,11 @@ import {
   getReportsTags,
   moveReport,
   publishReport,
-  restoreReport, setEditMode,
-  setReport, setReportChanges,
+  restoreReport,
+  setDirty,
+  setEditMode,
+  setReport,
+  setReportChanges,
   updateReport
 } from '@common/reports/reports.actions';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
@@ -201,26 +204,34 @@ export class ReportComponent implements OnInit, OnDestroy {
     };
   }
   setupBreadcrumbsOptions() {
-    this.sub.add(combineLatest([this.store.select(selectReport), this.store.select(selectSelectedProject)]).pipe(
-      withLatestFrom(this.store.select(selectDefaultNestedModeForFeature))
-    ).subscribe(([[selectedReport,selectedProject], defaultNestedModeForFeature]) => {
-      this.store.dispatch(setBreadcrumbsOptions({
-        breadcrumbOptions: {
-          showProjects: !!selectedReport,
-          featureBreadcrumb: {
-            name: 'REPORTS',
-            url: defaultNestedModeForFeature['reports'] ? 'reports/*/projects' : 'reports'
-          },
-          projectsOptions: {
-            basePath: 'reports',
-            filterBaseNameWith: ['.reports'],
-            compareModule: null,
-            showSelectedProject: false,
-            selectedProjectBreadcrumb: null
+    this.sub.add(
+      combineLatest([
+        this.store.select(selectReport),
+        this.store.select(selectSelectedProject)
+      ]).pipe(
+        filter(([selectedReport]) => !!selectedReport),
+        withLatestFrom(this.store.select(selectDefaultNestedModeForFeature))
+      ).subscribe(([[selectedReport,], defaultNestedModeForFeature]) => this.store.dispatch(setBreadcrumbsOptions({
+          breadcrumbOptions: {
+            showProjects: !!selectedReport,
+            featureBreadcrumb: {
+              name: 'REPORTS',
+              url: defaultNestedModeForFeature['reports'] ? 'reports/*/projects' : 'reports'
+            },
+            projectsOptions: {
+              basePath: 'reports',
+              filterBaseNameWith: ['.reports'],
+              compareModule: null,
+              showSelectedProject: false,
+              selectedProjectBreadcrumb: null
+            },
+            subFeatureBreadcrumb: {
+              name: selectedReport.name,
+              onlyWithProject: true
+            }
           }
-        }
-      }));
-    }));
+        }))
+      ));
   }
 
   ngOnInit() {
@@ -242,6 +253,7 @@ export class ReportComponent implements OnInit, OnDestroy {
 
   save(report: string) {
     this.store.dispatch(updateReport({id: this.report.id, changes: {report}}));
+    this.store.dispatch(setDirty({dirty: false}));
     Array.from(window.frames).forEach(frame => frame.postMessage('renderPlot', '*'));
   }
 
@@ -332,6 +344,10 @@ export class ReportComponent implements OnInit, OnDestroy {
     setTimeout(() => Array.from(window.frames).forEach(frame => frame.postMessage('resizePlot', '*')), 500);
   }
 
+  dirtyChanged(isDirty: boolean) {
+    this.store.dispatch(setDirty({dirty: isDirty}));
+  }
+
   copyMarkdown() {
     this._clipboardService.copyResponse$
       .pipe(take(1))
@@ -353,14 +369,24 @@ export class ReportComponent implements OnInit, OnDestroy {
       .subscribe(() => {
         const test = new RegExp(`!\\[(.*)\\]\\(${escapeRegex(resource)}\\)`, 'gm');
         const ace = this.mdEditor.ace;
-        const range = ace.find(test, {
+        let range = ace.find(test, {
           wrap: true,
           caseSensitive: true,
           wholeWord: true,
           regExp: false,
           preventScroll: true // do not change selection
         });
-        ace.session.replace(range, `![${getBaseName(resource)}]()`);
+
+        while (range) {
+          ace.session.replace(range, `![${getBaseName(resource)}]()`);
+          range = ace.find(test, {
+            wrap: true,
+            caseSensitive: true,
+            wholeWord: true,
+            regExp: false,
+            preventScroll: true // do not change selection
+          });
+        }
       });
   }
 

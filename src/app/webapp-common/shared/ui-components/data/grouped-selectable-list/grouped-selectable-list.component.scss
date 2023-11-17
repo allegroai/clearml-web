@@ -1,13 +1,12 @@
 @import "variables";
 
 :host {
-
   display: block;
   padding: 0 10px 0 24px;
   margin: 0;
   overflow: scroll;
 
-  ::ng-deep .mat-expansion-panel-header {
+  mat-expansion-panel-header {
     padding: 0;
 
     &.mat-expansion-toggle-indicator-before {
@@ -37,45 +36,46 @@
     }
   }
 
-  ::ng-deep mat-expansion-panel.no-children {
-    .mat-expansion-panel-body {
+  mat-panel-description {
+    justify-content: flex-end;
+    color: $blue-400;
+  }
+
+  .no-children {
+    margin-left: -3px;
+    ::ng-deep .mat-expansion-panel-body {
       display: none;
+    }
+
+    mat-panel-description {
+      margin-right: 16px;
     }
   }
 
-  ::ng-deep .mat-expansion-panel-body {
-    padding: 0 0 0 24px;
+  .list {
+    padding: 0;
+    margin: 0 -12px 0 0;
 
-    .list {
-      padding-left: 0;
+    li {
+      &.list-item {
+        display: flex;
+        gap: 12px;
+        justify-content: space-between;
+        align-items: center;
+        border-radius: 4px;
+        cursor: pointer;
+        padding: 0 4px;
+        line-height: 32px;
+        list-style: none;
 
-      li {
-        &.list-item {
-          display: flex;
-          gap: 12px;
-          justify-content: space-between;
-          align-items: center;
-          border-radius: 4px;
-          cursor: pointer;
-          padding: 0 12px;
-          line-height: 32px;
-          list-style: none;
-
-          &:hover {
-            background-color: $blue-50;
-            transition: background-color 0.2s;
-          }
-
+        &:hover {
+          background-color: $blue-50;
+          transition: background-color 0.2s;
         }
 
       }
+
     }
-
-  }
-
-  ::ng-deep .mat-expansion-panel-header-description {
-    flex-grow: 0;
-    color: $blue-400;
   }
 
   .mat-expansion-panel {
@@ -98,31 +98,11 @@
       }
     }
   }
-
-  ::ng-deep .mat-content {
-    padding-right: 2px;
-
-    .mat-expansion-panel-header-title {
-      margin: unset;
-      color: $blue-400;
-    }
-
-  }
-
 }
 
 .gray {
   color: gray;
 }
-
-/*
-i.icon {
-  display: block;
-  font-size: 15px;
-  width: 15px;
-  height: 15px;
-}
-*/
 
 .item-key {
   font-size: 14px;

@@ -49,12 +49,12 @@ export class ProjectInfoComponent implements OnInit, OnDestroy {
         this.info = project.description;
         this.projectId = project.id;
         this.loading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       });
     this.selectedVariantSub = this.store.select(selectSelectedMetricVariantForCurrProject).pipe(filter(data => !!data), take(1))
       .subscribe(() => {
         this.setMetricsPanel(true);
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       });
     this.setupBreadcrumbsOptions();
   }

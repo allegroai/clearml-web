@@ -18,6 +18,7 @@ import {Store} from '@ngrx/store';
 import {ErrorService} from '../shared/services/error.service';
 import {selectCurrentUser, selectShowOnlyUserWork} from '../core/reducers/users-reducer';
 import {selectHideExamples, selectShowHidden} from '@common/core/reducers/projects.reducer';
+import {excludedKey} from '@common/shared/utils/tableParamEncode';
 
 @Injectable()
 export class CommonDashboardEffects {
@@ -72,7 +73,7 @@ export class CommonDashboardEffects {
         page_size: 5,
         order_by: ['-last_update'],
         status: ['published', 'closed', 'failed', 'stopped', 'in_progress', 'completed'],
-        type: ['__$not', 'annotation_manual', '__$not', 'annotation', '__$not', 'dataset_import'],
+        type: [excludedKey, 'annotation_manual', excludedKey, 'annotation', excludedKey, 'dataset_import'],
         only_fields: ['type', 'status', 'created', 'name', 'id', 'last_update', 'started', 'project.name'],
         system_tags: ['-archived', '-pipeline'],
         user: showOnlyUserWork ? [user.id] : null,

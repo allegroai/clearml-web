@@ -50,7 +50,7 @@ export const getSingleValues = createAction('[App] getSingleValues', props<{
 export const setPlotData = createAction('[App] setPlot', props<{ data: ReportsApiMultiplotsResponse }>());
 export const setScalarData = createAction('[App] setScalar', props<{ data: ExtFrame[] }>());
 export const setSampleData = createAction('[App] setSample', props<{ data: DebugSample }>());
-export const setSingleValues = createAction('[App] setSingleValues', props<{ data: SingleValueTaskMetrics }>());
+export const setSingleValues = createAction('[App] setSingleValues', props<{ data: SingleValueTaskMetrics[] }>());
 export const setParallelCoordinateExperiments = createAction('[App] setParcoor', props<{ data: Task[] }>());
 
 export const reportsPlotlyReady = createAction('[App] plotly ready');

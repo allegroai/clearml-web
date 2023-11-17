@@ -17,7 +17,7 @@
                        [saving]="saving"
                        [editable]="editable"
                        [disableInEditMode]="true"
-                       [disableEditable]="true"
+                       [disableEditable]="!(editable && !formData?.value)"
                        (cancelClicked)="cancelModelChange()"
                        (activateEditClicked)="activateEditChanged('prototext'); editPrototext()">
     <sm-section-header label="CONFIGURATION OBJECT"></sm-section-header>
