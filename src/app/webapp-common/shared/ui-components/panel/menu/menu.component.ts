@@ -10,12 +10,12 @@ import {
   Renderer2,
   ViewChild
 } from '@angular/core';
-import {MatMenuTrigger} from '@angular/material/menu';
+import { MatMenuTrigger } from '@angular/material/menu';
 
 @Component({
-  selector       : 'sm-menu',
-  templateUrl    : './menu.component.html',
-  styleUrls      : ['./menu.component.scss'],
+  selector: 'sm-menu',
+  templateUrl: './menu.component.html',
+  styleUrls: ['./menu.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MenuComponent implements AfterViewInit {
@@ -37,7 +37,6 @@ export class MenuComponent implements AfterViewInit {
   @Input() fixedOptionsSubheader: string;
   @Input() buttonTooltip: string;
   @Input() prefixIconClass: string;
-  @Input() disabled: boolean;
   @Input() set position(position: { x: number; y: number }) {
     this.movePosition(position);
     this._position = position;
@@ -51,8 +50,8 @@ export class MenuComponent implements AfterViewInit {
   @Output() menuClosed = new EventEmitter();
   @Output() menuOpened = new EventEmitter();
   @Output() searchValueChanged = new EventEmitter();
-  @ViewChild(MatMenuTrigger, {static: true}) trigger: MatMenuTrigger;
-  @ViewChild('menu', {static: true}) menu;
+  @ViewChild(MatMenuTrigger, { static: true }) trigger: MatMenuTrigger;
+  @ViewChild('menu', { static: true }) menu;
 
   @HostListener('document:click', ['$event'])
   clickOut(event) {
@@ -90,6 +89,6 @@ export class MenuComponent implements AfterViewInit {
 
   clearSearch() {
     this.searchValue = '';
-    this.searchValueChanged.emit({target: {value: ''}});
+    this.searchValueChanged.emit({ target: { value: '' } });
   }
 }

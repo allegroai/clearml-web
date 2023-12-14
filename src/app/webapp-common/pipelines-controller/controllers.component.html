@@ -10,7 +10,6 @@
   [tableMode]="firstExperiment && (tableMode$ | async)"
   [rippleEffect]="tableModeAwareness$ | async"
   [addButtonTemplate]="addButton"
-  [noData]="!((experiments$ | async)?.length > 0)"
   (isArchivedChanged)="archivedChanged($event)"
   (selectedTableColsChanged)="selectedTableColsChanged($event)"
   (getMetricsToDisplay)="getMetricsToDisplay()"
@@ -21,15 +20,13 @@
   (clearSelection)="clearSelection()"
   (clearTableFilters)="clearTableFiltersHandler($event)"
   (tableModeChanged)="modeChanged($event); tableModeUserAware()"
-  (downloadTableAsCSV)="downloadTableAsCSV()"
-  (downloadFullTableAsCSV)="downloadFullTableAsCSV()"
 >
 </sm-experiment-header>
 <ng-template #addButton let-isSmallScreen="smallScreen">
   <button class="btn d-flex-center btn-highlighted"
           [disabled]="isArchived$ | async"
           (click)="newRun()">
-    <i class="al-icon al-ico-add sm" data-id="newRunButton"></i> NEW RUN
+    <i class="al-icon al-ico-add sm"></i> NEW RUN
   </button>
 </ng-template>
 <div class="experiment-body"

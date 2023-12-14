@@ -21,11 +21,13 @@ $blue-700: #202432; //32,36,50
 $blue-800: #1a1e2c; //26,30,44
 $blue-900: #141722; //20,23,34
 $blue-950: #0d0e15; //20,23,34
+
 $black: #000000;
 
 $cloudy-blue: #d4d6e0;
 $cloudy-blue-two: #ced1dc;
 $dark-grey-blue-three: #1e2ce1;
+
 $neon-yellow: #d3ff00;
 $neon-green: #82dd22;
 $neon-yellow-hover: #c6ef06;
@@ -33,7 +35,7 @@ $purple: #4d66ff;
 
 $border-line-color-dark: rgba(0, 0, 0, 0.1);
 $dark-border: #303443;
-$completed-blue: #009aff;
+$completed-blue: rgb(45, 66, 225);
 $blue-sky: #4a90e2;
 $pending-gray: $blue-300;
 $failed-red: #d65b52;
@@ -48,7 +50,7 @@ $dataset_import: #f57e23;
 $testing: #f8e71c;
 $training: #f57e23;
 $grey-purple: #7480aa;
-$strong-red: #ff001f;
+$strong-red: #FF4D4F;
 $header-backgroud: $blue-900;
 
 $pipeline-pending: $blue-400;
@@ -75,23 +77,10 @@ $level-colors: (
   error: $error-color,
 );
 
-$severity-colors: (
-  0: #21B553,
-  1: #4EB243,
-  2: #7BAE32,
-  3: #A6AA21,
-  4: #D2A611,
-  5: #FFA301,
-  6: #F98D0B,
-  7: #F17514,
-  8: #EB5F1E,
-  9: #E54928,
-  10: #DE3232,
-);
-
 $dark-grey-blue: #39405f;
 $light-periwinkle-two: #c1cdf3;
 $faint-gray: #f4f7ff;
+$blue-grey: #8693be;
 
 
 $dark-primary-text: rgba(black, 0.87);
@@ -188,6 +177,28 @@ $font-weight-base: $font-weight-normal; // TODO:
 $font-weight-light: 300; // TODO:
 $font-weight-bold: 700; // TODO:
 
+// grid
+$grid-gutter: 30px;
+
+$grid-cols: 24;
+
+$grid-max-widths: (
+  sm: 540px,
+  md: 720px,
+  lg: 960px,
+  xl: 1528px
+);
+
+$grid-breakpoints: (// TODO:
+  xs: 0,
+  sm: 576px,
+  md: 768px,
+  lg: 992px,
+  xl: 1200px,
+  xxl: 1600px,
+  xxxl: 1900px
+);
+
 $nav-bar-height: 64px;
 $nav-bar-bg: $blue-900;
 $side-bar-close-width: 64px;
@@ -212,6 +223,8 @@ $zindex-popover: 1060;
 $zindex-tooltip: 1070;
 
 // card
+$card-spacer-y: math.div($grid-gutter, 2);
+$card-spacer-x: math.div($grid-gutter, 2);
 $card-border-radius: 6px;
 $card-bg: $blue-500;
 $card-footer-bg: $blue-600;

@@ -35,13 +35,13 @@ export class QueueInfoComponent implements OnInit {
   public menuOpen: boolean;
   public menuPosition: { x: number; y: number };
   public readonly experimentsCols = [
-    {header: '', class: ''},
-    {header: '', class: ''},
+    {header: '', class: 'col-4'},
+    {header: '', class: 'col-20'},
   ];
   public readonly workersCols     = [
-    {header: 'NAME', class: ''},
-    {header: 'IP', class: ''},
-    {header: 'CURRENTLY EXECUTING', class: ''},
+    {header: 'NAME', class: 'col-9 flex-column'},
+    {header: 'IP', class: 'col-6 flex-column'},
+    {header: 'CURRENTLY EXECUTING', class: 'col-9 flex-column'},
   ];
   public menuClosed: any;
 

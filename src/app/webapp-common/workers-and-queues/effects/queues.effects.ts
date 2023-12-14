@@ -34,7 +34,7 @@ import {
   setStats,
   clearQueue
 } from '../actions/queues.actions';
-import {emptyAction} from '~/app.constants';
+import {EmptyAction} from '~/app.constants';
 import {QueueMetrics} from '~/business-logic/model/queues/queueMetrics';
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
 import {cloneDeep} from 'lodash-es';
@@ -50,7 +50,7 @@ import {MESSAGES_SEVERITY} from '@common/constants';
 export class QueuesEffect {
   constructor(
     private actions: Actions, private queuesApi: ApiQueuesService, private tasksApi: ApiTasksService,
-    private store: Store
+    private store: Store<any>
   ) {
   }
 
@@ -143,7 +143,7 @@ export class QueuesEffect {
       withLatestFrom(this.store.select(selectSelectedQueue)),
       mergeMap(([, selectedQueue]) => [
         getQueues(),
-        selectedQueue ? refreshSelectedQueue() : emptyAction(),
+        selectedQueue ? refreshSelectedQueue() : new EmptyAction(),
         deactivateLoader(action.type)
       ]),
       catchError(err => [deactivateLoader(action.type), requestFailed(err), addMessage(MESSAGES_SEVERITY.ERROR, 'Clear queue failed')])

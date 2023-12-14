@@ -4,12 +4,12 @@
   display: grid;
   grid-template-columns: 20px 32px 1fr;
   align-items: center;
-  gap: 12px 6px;
-  padding: 16px;
+  gap: 8px 12px;
+  padding: 30px 16px;
   grid-template-areas:
     "cbx type-icon card-name"
-    ". tags tags"
-    ". data data";
+    ". . tags"
+    ". . data";
   &.two-columns {
     grid-template-columns: 24px 1fr;
     grid-template-areas:

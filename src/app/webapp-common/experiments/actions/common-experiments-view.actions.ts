@@ -9,10 +9,6 @@ import {CountAvailableAndIsDisableSelectedFiltered} from '@common/shared/entity-
 import {TasksEnqueueManyResponseSucceeded} from '~/business-logic/model/tasks/tasksEnqueueManyResponseSucceeded';
 import {EXPERIMENTS_INFO_PREFIX} from '@common/experiments/actions/common-experiments-menu.actions';
 import {EXPERIMENTS_PREFIX} from '@common/experiments/experiment.consts';
-import {
-  OrganizationPrepareDownloadForGetAllRequest
-} from '~/business-logic/model/organization/organizationPrepareDownloadForGetAllRequest';
-import {ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
 
 // COMMANDS:
 export const getExperiments = createAction(EXPERIMENTS_PREFIX + ' [get experiments]');
@@ -20,10 +16,7 @@ export const selectNextExperiment = createAction(EXPERIMENTS_PREFIX + ' [select 
 
 export const getExperimentsWithPageSize = createAction(EXPERIMENTS_PREFIX + ' [get experiments with size]',
   props<{ pageSize: number }>());
-export const getNextExperiments = createAction(
-  EXPERIMENTS_PREFIX + '[get next experiments]',
-  (allProjects = false) => ({allProjects})
-);
+export const getNextExperiments = createAction(EXPERIMENTS_PREFIX + '[get next experiments]');
 
 export const setTableCols = createAction(
   EXPERIMENTS_PREFIX + ' [set table cols]',
@@ -75,7 +68,7 @@ export const updateManyExperiment = createAction(
 
 export const setSelectedExperiments = createAction(
   EXPERIMENTS_PREFIX + ' [set selected experiments]',
-  props<{ experiments: ISelectedExperiment[] }>()
+  props<{ experiments: ITableExperiment[] }>()
 );
 
 export const updateUrlParams = createAction(EXPERIMENTS_PREFIX + '[update URL params from state]');
@@ -126,7 +119,7 @@ export const setActiveParentsFilter = createAction(
 
 export const getParents = createAction(
   EXPERIMENTS_PREFIX + '[get project experiments parents]',
-  props<{searchValue: string; allProjects?: boolean}>());
+  props<{searchValue: string}>());
 
 export const tableFilterChanged = createAction(
   EXPERIMENTS_PREFIX + '[table filter changed]',
@@ -153,8 +146,7 @@ export const setProjectsTypes = createAction(
   props<{ types?: Array<string> }>()
 );
 
-export const getProjectTypes = createAction(EXPERIMENTS_PREFIX + 'GET_PROJECT_TYPES',
-  props<{allProjects?: boolean}>());
+export const getProjectTypes = createAction(EXPERIMENTS_PREFIX + 'GET_PROJECT_TYPES');
 
 export const showOnlySelected = createAction(
   EXPERIMENTS_PREFIX + ' [show only selected]',
@@ -172,10 +164,7 @@ export const setCurrentScrollId = createAction(
   EXPERIMENTS_PREFIX + ' [set current scrollId]',
   props<{ scrollId: string }>()
 );
-export const setHyperParamsFiltersPage = createAction(
-  EXPERIMENTS_PREFIX + ' [set hyper params filters page]',
-  props<{ page: number }>()
-);
+
 export const resetExperiments = createAction(EXPERIMENTS_PREFIX + ' [reset experiments]');
 export const getCustomMetrics = createAction(EXPERIMENTS_PREFIX + ' [get custom metrics]');
 export const getCustomHyperParams = createAction(EXPERIMENTS_PREFIX + ' [get custom hyper parameter]');
@@ -191,7 +180,7 @@ export const setCustomHyperParams = createAction(
 
 export const setExtraColumns = createAction(
   EXPERIMENTS_PREFIX + 'SET_EXTRA_COLUMNS',
-  props<{ columns: ISmCol[]; projectId: string }>()
+  props<{ columns: any[]; projectId: string }>()
 );
 
 export const addColumn = createAction(
@@ -228,16 +217,15 @@ export const setSplitSize = createAction(EXPERIMENTS_PREFIX + 'SET_SPLIT_SIZE', 
 
 export const hyperParamSelectedInfoExperiments = createAction(
   EXPERIMENTS_PREFIX + '[hyper param option add filter experiments]',
-  props<{ col: ISmCol; values: string[]; loadMore: boolean }>()
+  props<{ col: ISmCol; values: string[] }>()
 );
 
 export const hyperParamSelectedExperiments = createAction(
   EXPERIMENTS_INFO_PREFIX + '[hyper param selected in the menu filter experiments]',
-  props<{ col: ISmCol; searchValue: string }>()
+  props<{ col: ISmCol }>()
 );
 
-export const getTags = createAction(EXPERIMENTS_PREFIX + ' [get experiments tags]' ,
-  props<{allProjects?: boolean}>());
+export const getTags = createAction(EXPERIMENTS_PREFIX + ' [get experiments tags]');
 
 export const setTags = createAction(
   EXPERIMENTS_PREFIX + '[set experiment tags]',
@@ -254,8 +242,4 @@ export const setSelectedExperimentsDisableAvailable = createAction(
 export const setTableMode = createAction(
   EXPERIMENTS_PREFIX + '[set table view mode]',
   props<{ mode: 'info' | 'table' }>()
-);
-export const prepareTableForDownload = createAction(
-  EXPERIMENTS_PREFIX + ' [prepareTableForDownload]',
-  props<{ entityType: OrganizationPrepareDownloadForGetAllRequest.EntityTypeEnum }>()
 );

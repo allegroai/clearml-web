@@ -3,13 +3,13 @@ import {IFooterState, ItemFooterModel} from './footer-items.models';
 import {MenuItems} from '../items.utils';
 
 export class ShowItemsFooterSelected extends ItemFooterModel {
+  id = MenuItems.showAllItems;
+  emit = true;
+  class = 'show-all';
+
 
   constructor(public entitiesType: EntityTypeEnum) {
     super();
-    this.id = MenuItems.showAllItems;
-    this.emit = true;
-    this.class = 'show-all';
-
   }
 
   getItemState(state: IFooterState<any>) {

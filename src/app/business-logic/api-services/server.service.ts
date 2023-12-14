@@ -64,7 +64,7 @@ export class ApiServerService {
 
 
     /**
-     * 
+     *
      * Internal. Get server configuration. Secure section is not returned.
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -109,7 +109,7 @@ export class ApiServerService {
     }
 
     /**
-     * 
+     *
      * Internal. Show available endpoints
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -154,7 +154,7 @@ export class ApiServerService {
     }
 
     /**
-     * 
+     *
      * Internal. Get the server collected statistics.
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -199,7 +199,7 @@ export class ApiServerService {
     }
 
     /**
-     * 
+     *
      * Internal. Get server information, including version and build number
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -244,7 +244,7 @@ export class ApiServerService {
     }
 
     /**
-     * 
+     *
      * Internal. Get or set the report statistics option per-company
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -276,16 +276,16 @@ export class ApiServerService {
         if (httpContentTypeSelected != undefined) {
             headers = headers.set("Content-Type", httpContentTypeSelected);
         }
-
-	return this.apiRequest.post<ServerReportStatsOptionResponse>(`${this.basePath}/server.report_stats_option`,
-            request,
-            {
-                withCredentials: this.configuration.withCredentials,
-                headers: headers,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        );
+  return
+	// return this.apiRequest.post<ServerReportStatsOptionResponse>(`${this.basePath}/server.report_stats_option`,
+  //           request,
+  //           {
+  //               withCredentials: this.configuration.withCredentials,
+  //               headers: headers,
+  //               observe: observe,
+  //               reportProgress: reportProgress
+  //           }
+  //       );
     }
 
 }

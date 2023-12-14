@@ -1,13 +1,11 @@
 @import 'variables';
 
 nav {
-  --mat-tab-header-label-text-size: 12px;
-  --mat-tab-header-label-text-letter-spacing: 0.03em;
-  --mat-tab-header-inactive-hover-label-text-color: #{$purple};
+  --mdc-typography-button-font-size: 12px;
   &.mat-mdc-tab-header-pagination-controls-enabled {
     padding: 0 24px;
   }
-
+  
   a {
     text-decoration: none;
   }

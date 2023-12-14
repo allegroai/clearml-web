@@ -8,7 +8,7 @@
   <button mat-menu-item (click)="share.emit()">
     <i class="al-icon sm-md" [class]="icons.SHARE"></i>Share
   </button>
-  <button mat-menu-item [matMenuTriggerFor]="tagsMenu.matMenu">
+  <button mat-menu-item [matMenuTriggerFor]="tagMenu">
     <i class="al-icon sm-md" [class]="icons.TAG"></i>Add Tag
   </button>
   <hr>
@@ -25,12 +25,14 @@
   </button>
 
 </mat-menu>
-<sm-tags-menu
-  #tagsMenu
-  class="light-theme"
-  [tags]="report?.tags"
-  [tagsFilterByProject]="true"
-  [projectTags]="allTags"
-  [companyTags]="null"
-  (tagSelected)="addTag.emit($event)">
-</sm-tags-menu>
+<mat-menu #tagMenu="matMenu">
+  <sm-tags-menu
+    #tagMenuContent
+    class="light-theme"
+    [tags]="report?.tags"
+    [tagsFilterByProject]="true"
+    [projectTags]="allTags"
+    [companyTags]="null"
+    (tagSelected)="addTag.emit($event)">
+  </sm-tags-menu>
+</mat-menu>

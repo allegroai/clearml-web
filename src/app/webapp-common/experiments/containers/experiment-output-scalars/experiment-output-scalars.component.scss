@@ -1,6 +1,6 @@
 @import "variables";
 
-$list-width: 360px;
+$list-width: 300px;
 
 :host {
   display: flex;
@@ -37,7 +37,6 @@ $list-width: 360px;
 
 
   .ribbon-setting-bar {
-    display: flex;
     overflow: hidden;
     height: auto;
     max-height: 0;
@@ -46,6 +45,7 @@ $list-width: 360px;
     transition: max-height 0.3s;
 
     &.showSettings {
+      padding-top: 7px ;
       min-height: 64px;
       max-height: 128px;
     }
@@ -56,10 +56,8 @@ $list-width: 360px;
       height: calc(100% - 64px);
     }
   }
+}
 
-
-
-  ::ng-deep sm-experiment-output-scalars .cursor-crosshair {
-    cursor: default !important;
-  }
+::ng-deep sm-experiment-output-scalars .cursor-crosshair {
+  cursor: default !important;
 }

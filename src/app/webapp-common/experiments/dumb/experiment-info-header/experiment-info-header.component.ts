@@ -2,9 +2,10 @@ import {Component, EventEmitter, Input, OnDestroy, Output, ViewChild} from '@ang
 import {getSystemTags, isDevelopment} from '~/features/experiments/shared/experiments.utils';
 import {Observable} from 'rxjs';
 import {Store} from '@ngrx/store';
-import {selectCompanyTags, selectTagsFilterByProject} from '@common/core/reducers/projects.reducer';
+import {selectCompanyTags, selectProjectTags, selectTagsFilterByProject} from '@common/core/reducers/projects.reducer';
 import {addTag, removeTag} from '../../actions/common-experiments-menu.actions';
 import {TagsMenuComponent} from '@common/shared/ui-components/tags/tags-menu/tags-menu.component';
+import {MenuComponent} from '@common/shared/ui-components/panel/menu/menu.component';
 import {activateEdit, deactivateEdit, setExperiment} from '../../actions/common-experiments-info.actions';
 import {EXPERIMENTS_STATUS_LABELS, ExperimentTagsEnum} from '~/features/experiments/shared/experiments.const';
 import {EXPERIMENT_COMMENT} from '../experiment-general-info/experiment-general-info.component';
@@ -24,8 +25,6 @@ import {
   selectionDisabledViewWorker
 } from '@common/shared/entity-page/items.utils';
 import {addMessage} from '@common/core/actions/layout.actions';
-import {MatMenuTrigger} from '@angular/material/menu';
-import { selectExperimentsTags } from '@common/experiments/reducers';
 
 @Component({
   selector: 'sm-experiment-info-header',
@@ -42,7 +41,7 @@ export class ExperimentInfoHeaderComponent implements OnDestroy {
   public systemTags = [] as string[];
   public shared: boolean;
   public isPipeline: boolean;
-  public selectedDisableAvailable = {};
+  selectedDisableAvailable = {};
 
   @Input() editable: boolean = true;
   @Input() infoData;
@@ -54,18 +53,18 @@ export class ExperimentInfoHeaderComponent implements OnDestroy {
   @Output() minimizeClicked = new EventEmitter();
   @Output() closeInfoClicked = new EventEmitter();
   @Output() maximizedClicked = new EventEmitter();
-  @ViewChild('tagsMenuTrigger') tagMenuTrigger: MatMenuTrigger;
-  @ViewChild(TagsMenuComponent) tagMenu: TagsMenuComponent;
+  @ViewChild('tagMenu') tagMenu: MenuComponent;
+  @ViewChild('tagsMenuContent') tagMenuContent: TagsMenuComponent;
 
-  constructor(private store: Store, private router: Router, private activatedRoute: ActivatedRoute) {
+  constructor(private store: Store<any>, private router: Router, private activatedRoute: ActivatedRoute) {
     this.tagsFilterByProject$ = this.store.select(selectTagsFilterByProject);
-    this.projectTags$ = this.store.select(selectExperimentsTags);
+    this.projectTags$ = this.store.select(selectProjectTags);
     this.companyTags$ = this.store.select(selectCompanyTags);
   }
 
   ngOnDestroy(): void {
-    this.tagMenuTrigger = null;
     this.tagMenu = null;
+    this.tagMenuContent = null;
     this.store.dispatch(setExperiment(null));
   }
 
@@ -104,14 +103,15 @@ export class ExperimentInfoHeaderComponent implements OnDestroy {
     this.experimentNameChanged.emit(name);
   }
 
-  openTagMenu() {
-    if (!this.tagMenuTrigger) {
+  openTagMenu(event: MouseEvent) {
+    if (!this.tagMenu) {
       return;
     }
     window.setTimeout(() => this.store.dispatch(activateEdit('tags')), 200);
+    this.tagMenu.position = {x: event.clientX, y: event.clientY};
     window.setTimeout(() => {
-      this.tagMenuTrigger.openMenu();
-      this.tagMenu.focus();
+      this.tagMenu.openMenu();
+      this.tagMenuContent.focus();
     });
   }
 
@@ -125,7 +125,7 @@ export class ExperimentInfoHeaderComponent implements OnDestroy {
 
   tagsMenuClosed() {
     this.store.dispatch(deactivateEdit());
-    this.tagMenu.clear();
+    this.tagMenuContent.clear();
   }
 
   editExperimentName(edit) {
@@ -144,9 +144,9 @@ export class ExperimentInfoHeaderComponent implements OnDestroy {
     return EXPERIMENTS_STATUS_LABELS[this.experiment?.status] || '';
   }
 
-  editDescriptionHandler() {
+  onDescriptionHandler() {
     this.router.navigate(['general'], {relativeTo: this.activatedRoute});
-    window.setTimeout(() => this.store.dispatch(activateEdit(EXPERIMENT_COMMENT)), 50);
+    this.store.dispatch(activateEdit(EXPERIMENT_COMMENT));
   }
 
   copyToClipboard() {

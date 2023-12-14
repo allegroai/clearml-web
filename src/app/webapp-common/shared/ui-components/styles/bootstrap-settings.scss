@@ -1,8 +1,8 @@
 @import "bootstrap/scss/mixins/buttons";
 @import "variables";
+@import "variables_v2";
 @import "themes";
 
-$link-decoration: none;
 $dark-bootstrap-theme: map-get($dark-theme, bootstrap);
 $light-bootstrap-theme: map-get($light-theme, bootstrap);
 
@@ -26,10 +26,12 @@ $btn-font-family: $font-family-base;
 
 .dark-theme {
   $primary: map-get($dark-bootstrap-theme, primary);
+  $grid-columns: $grid-cols;
+  $grid-gutter-width: $grid-gutter;
+  $container-max-widths: $grid-max-widths;
   $input-color: map-get($dark-theme-input, color);
   $input-placeholder-color: map-get($dark-theme-input, place-holder-color);
   $input-bg: map-get($dark-theme-input, background-color);
-  //$input-disabled-bg: map-get($dark-theme-input, background-color-disabled);
   $input-border-radius: map-get($dark-theme-input, border-radius);
   $input-border-color: map-get($dark-theme-input, border-color);
   $input-border-width: map-get($dark-theme-input, border-width);
@@ -43,13 +45,12 @@ $btn-font-family: $font-family-base;
 
   $button: map-get($dark-theme, button);
 
-  --bs-border-width: 1px;
-
 
   // @import '~bootstrap/scss/bootstrap.scss';
   @import 'bootstrap/scss/bootstrap-reboot';
   @import 'bootstrap/scss/bootstrap-grid';
   @import 'bootstrap/scss/bootstrap-utilities';
+  @import "bootstrap/scss/grid";
   @import "bootstrap/scss/buttons";
   @import "bootstrap/scss/button-group";
   @import "bootstrap/scss/card";
@@ -117,14 +118,16 @@ $btn-font-family: $font-family-base;
       $active-background: map-get($button, background-color-focus),
       $active-border: map-get($button, border-color-focus)
     );
+
     &:focus {
-      background-color: $blue-600;
-      border-color: $blue-600;
-      color: $blue-300;
+      background-color: $primary-color;
+      border-color: $primary-color;
+      color: $text;
+
       &:hover {
-        background-color: $blue-500;
-        border-color: $blue-500;
-        color: $blue-200;
+        background-color: $accent-color;
+        border-color: $accent-color;
+        color: $text;
       }
     }
   }
@@ -141,7 +144,7 @@ $btn-font-family: $font-family-base;
     font-size: 1rem;
     font-weight: 400;
     line-height: 1.5;
-    color: $blue-200;
+    color: $blue-grey;
     background-color: $black;
     background-clip: padding-box;
     border: 1px solid $blue-500;
@@ -202,13 +205,19 @@ $btn-font-family: $font-family-base;
   }
 
   .btn-link {
-    color: $blue-300;
+    color: $text-gray;
     &:hover {
-      color: $blue-200;
+      color: $text;
       text-decoration: underline;
     }
   }
 
+  .btn-danger {
+    height: 32px;
+    font-size: 12px;
+    background-color: $danger-color;
+    color: $text;
+  }
 }
 
 
@@ -219,6 +228,9 @@ $btn-font-family: $font-family-base;
 .light-theme {
   $primary: map-get($light-bootstrap-theme, primary);
   $secondary: $white;
+  $grid-columns: $grid-cols;
+  $grid-gutter-width: $grid-gutter;
+  $container-max-widths: $grid-max-widths;
 
   $input-color: map-get($light-theme-input, color);
   $input-placeholder-color: map-get($light-theme-input, place-holder-color);
@@ -235,6 +247,8 @@ $btn-font-family: $font-family-base;
   $input-height: map-get($light-theme-input, height);
   $label-margin-bottom: 0;
 
+  $button: map-get($light-theme, button);
+
   //@import '~bootstrap/scss/bootstrap.scss';
   @import 'bootstrap/scss/bootstrap-reboot';
   @import 'bootstrap/scss/bootstrap-grid';
@@ -244,17 +258,14 @@ $btn-font-family: $font-family-base;
   @import "bootstrap/scss/button-group";
   @import "bootstrap/scss/card";
 
-  --bs-border-width: 1px;
-
   label {
     display: inline-flex;
   }
 
   .btn {
-    font-size: 12px;
+    font-size: 11px;
     line-height: normal;
     letter-spacing: 0.03em;
-    border-radius: 4px;
   }
 
   .btn-primary {
@@ -268,39 +279,51 @@ $btn-font-family: $font-family-base;
 
   .btn-cml-primary {
     @include button-variant(
-      $primary,
-      $primary,
+      map-get($button, background-color),
+      map-get($button, border-color),
+      $color: map-get($button, color),
+      $hover-background: map-get($button, background-color-hover),
+      $hover-border: map-get($button, border-color-hover),
+      $hover-color: $blue-200,
+      $active-background: map-get($button, background-color-focus),
+      $active-border: map-get($button, border-color-focus)
     );
+
     &:focus {
-      background-color: $blue-100;
-      border-color: $blue-100;
-      color: $blue-500;
+      background-color: $primary-color;
+      border-color: $primary-color;
+      color: $text;
+
       &:hover {
-        background-color: $blue-100;
-        border-color: $blue-100;
-        color: $blue-500;
+        background-color: $accent-color;
+        border-color: $accent-color;
+        color: $text;
       }
     }
   }
 
   .btn-secondary {
-    height: 36px;
-    border: solid 1px $cloudy-blue;
-    color: $blue-500;
-    font-size: 12px;
+    height: 32px;
+    border: solid 1px $blue-250;
+    color: $blue-480;
+    font-size: 11px;
 
     &:hover {
-      border: solid 1px $cloudy-blue-two;
-      color: $blue-600;
+      border: solid 1px $blue-300;
+      color: $blue-300;
       background-color: $white;
     }
 
     &:active,
     &:focus {
-      border: solid 1px $blue-400 !important;
-      color: $blue-600 !important;
+      border: solid 1px $blue-250 !important;
+      color: $blue-400 !important;
       background-color: white !important;
       box-shadow: none !important;
+    }
+
+    &:focus {
+      color: $blue-480 !important;
     }
 
     &:disabled {
@@ -312,14 +335,14 @@ $btn-font-family: $font-family-base;
 
   .btn-dark-fill {
     @include button-variant(
-      $grey-purple,
-      $grey-purple,
-      $color: $white,
-      $hover-background: $blue-500,
-      $hover-border: $blue-500,
+      $primary-color,
+      $primary-color,
+      $color: $text,
+      $hover-background: $primary-color,
+      $hover-border: $accent-color,
       $hover-color: $white,
-      $active-background: $purple,
-      $active-border: $purple,
+      $active-background: $accent-color,
+      $active-border: $accent-color,
       $disabled-background: $grey-purple,
       $disabled-border: $grey-purple,
       $disabled-color: $white,
@@ -347,10 +370,10 @@ $btn-font-family: $font-family-base;
 
   .btn-neon {
     @include button-variant(
-      $neon-yellow,
-      $neon-yellow,
-      $color: $blue-500,
-      $hover-background: $neon-yellow-hover,
+      $primary-color,
+      $primary-color,
+      $color: $text,
+      $hover-background: $accent-color,
     );
     font-size: 12px;
     font-weight: 500;
@@ -363,19 +386,19 @@ $btn-font-family: $font-family-base;
     border-radius: 4px;
     font-weight: 500;
     background-color: $white;
-    border: solid 1px $neon-yellow;
+    border: solid 1px $secondary-color;
     padding: 0 32px;
-    color: $blue-500;
+    color: #000;
     font-size: 12px;
 
     &:hover {
-      background-color: #f8f9fa; // TODO: ask brio.
-      border: solid 1px $neon-yellow-hover;
+      color: $text;
+      background-color: $secondary-color;
     }
 
     &:focus {
-      background-color: #f8f9fa; // TODO: ask brio.
-      border: solid 1px $neon-yellow-hover;
+      color: $text;
+      background-color: $secondary-color;
     }
   }
 

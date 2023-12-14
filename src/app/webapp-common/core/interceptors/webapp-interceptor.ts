@@ -1,4 +1,4 @@
-import {inject, Injectable} from '@angular/core';
+import {Injectable} from '@angular/core';
 import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { environment } from '../../../../environments/environment';
@@ -12,12 +12,8 @@ import {setCurrentUser} from '~/core/actions/users.action';
 @Injectable()
 export class WebappInterceptor implements HttpInterceptor {
   protected user: GetCurrentUserResponseUserObject;
-  protected router: Router;
-  protected store: Store;
 
-  constructor() {
-    this.router = inject(Router);
-    this.store = inject(Store);
+  constructor(protected router: Router, protected store: Store<any>) {
     this.store.select(selectCurrentUser).subscribe(user => this.user = user);
   }
 
@@ -37,7 +33,7 @@ export class WebappInterceptor implements HttpInterceptor {
   protected errorHandler(request: HttpRequest<any>, err: HttpErrorResponse) {
     const redirectUrl: string = window.location.pathname + window.location.search;
     if (request.url.endsWith('system.company_info')) {
-      return throwError(() => err);
+      return throwError(err);
     }
     // For automatic login don't go to login page (login in APP_INITIALIZER)
     if (err.status === 401 && (
@@ -51,9 +47,9 @@ export class WebappInterceptor implements HttpInterceptor {
         this.store.dispatch(setCurrentUser({user: null, terms_of_use: null}));
         this.router.navigate(['login'], {queryParams: {redirect: redirectUrl}, replaceUrl: true});
       }
-      return throwError(() => err);
+      return throwError(err);
     } else {
-      return throwError(() => err);
+      return throwError(err);
     }
   }
 }

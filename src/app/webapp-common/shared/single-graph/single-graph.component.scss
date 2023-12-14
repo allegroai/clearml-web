@@ -3,34 +3,18 @@
 
 .graph-title {
   position: absolute;
-  display: flex;
-  gap: 12px;
-  align-items: center;
   top: 36px;
   width: fit-content;
   max-width: 100%;
   left: 50%;
   transform: translateX(-50%);
-  padding: 0 60px;
+  padding: 0 80px;
   z-index: 1;
   font-size: 16px;
   color: $blue-600;
 
   &.table-title {
     top: 20px
-  }
-
-  .title-color {
-    display: inline-block;
-    width: 10px;
-    height: 10px;
-    flex: 0 0 10px;
-    margin-right: 6px;
-    cursor: pointer;
-  }
-  sm-tag-list {
-    flex-shrink: 2;
-    max-width: 50%;
   }
 }
 
@@ -60,16 +44,12 @@
     }
 
     &.whitebg-table {
-      height: unset !important;
+      height: unset;
+      padding-bottom: 12px;
       margin-left: 24px;
       margin-right: 24px;
     }
 
-  }
-
-  .whitebg-table {
-    overflow-x: auto;
-    overflow-y: visible;
   }
 
   .plot-loader {
@@ -78,12 +58,17 @@
     top: 50%;
     left: 50%;
     transform: translateY(-50%) translateX(-50%);
+    font-size: 14px;
+    color: #fff;
+    padding: 0 6px;
+    background-color: $blue-400;
+    border-radius: 4px;
     z-index: 2;
   }
 
   ::ng-deep sm-color-picker-wrapper {
     display: block;
-    top: 0;
+    top: 0px;
   }
 
   ::ng-deep .legendlines path, ::ng-deep .legendpoints path {
@@ -124,6 +109,7 @@
   }
 
 
+
   .dark-theme {
     background: transparent !important;
 
@@ -145,7 +131,6 @@
           }
         }
       }
-
       .modebar-group:empty {
         border-left: none;
       }
@@ -171,22 +156,6 @@
         &:hover {
           fill: $blue-50;
         }
-      }
-
-      svg .cell-text:has(a):hover {
-        a {
-          fill: $blue-50;
-        }
-      }
-
-      .hoverlayer .spikeline:nth-child(2) {
-        stroke: $blue-300 !important;
-      }
-
-      .selectionlayer path,
-      .zoomlayer .select-outline {
-        stroke: #ffffff !important;
-        fill: #ffffff !important;
       }
     }
   }
@@ -222,8 +191,8 @@
 
         &:only-child {
           border-left: none;
-          margin-left: 0;
-          padding-left: 0;
+          margin-left: 0px;
+          padding-left: 0px;
         }
       }
     }

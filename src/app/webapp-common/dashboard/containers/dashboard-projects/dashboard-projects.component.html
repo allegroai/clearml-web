@@ -1,14 +1,14 @@
 <div class="sm-card-list-layout" (smOverflows)="overflow = $event">
   <div #header class="sm-card-list-header">
-    <div class="recent-title">RECENT PROJECTS
-      <button class="btn btn-link view-all" (click)="router.navigateByUrl('/projects')">VIEW ALL</button>
+    <div class="recent-title">Recent Projects
+      <button class="btn btn-link view-all" (click)="router.navigateByUrl('/projects')">View All</button>
     </div>
     <div>
       <button *ngIf="(recentProjectsList$ | async).length >= cardsInRow || overflow"
               class="btn btn-cml-primary d-flex align-items-center"
               data-id="New Project"
               (click)="openCreateProjectDialog()">
-        <i class="al-icon sm al-ico-add me-2"></i>NEW PROJECT
+        <i class="al-icon sm al-ico-add me-2"></i>New Project
       </button>
     </div>
   </div>

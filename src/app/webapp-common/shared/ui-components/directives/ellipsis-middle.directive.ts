@@ -1,43 +1,33 @@
-import {AfterViewInit, Directive, ElementRef, Input} from '@angular/core';
-import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {AfterViewInit, Directive, ElementRef, HostListener} from '@angular/core';
 
 @Directive({
-  selector: '[smEllipsisMiddleDirective]',
-  standalone: true
+  selector: '[smEllipsisMiddleDirective]'
 })
 export class EllipsisMiddleDirective implements AfterViewInit {
   private timeoutSubscription: NodeJS.Timer;
-  @Input() smEllipsisMiddleDirective: string;
-  @Input() delay: number;
-  @Input() maxChars: number = Infinity;
-  @Input() set triggerEllipsis(triggerEllipsis: number) {
-    this.el.nativeElement.innerHTML = this.smEllipsisMiddleDirective;
-    this.ngAfterViewInit();
-  }
-  constructor(private el: ElementRef, private matTooltip: TooltipDirective,) {
+
+  constructor(private el: ElementRef) {
   }
 
   ngAfterViewInit(): void {
-    if (this.delay !== undefined) {
-      setTimeout( () => this.cropTextToFit(this.el), this.delay);
-    } else {
-      this.cropTextToFit(this.el);
-    }
+    this.cropTextToFit(this.el);
+  }
+
+  @HostListener('window:resize')
+  onResize() {
+    clearTimeout(this.timeoutSubscription);
+    this.timeoutSubscription = setTimeout(this.cropTextToFit.bind(this, this.el), 75);
   }
 
   private cropTextToFit = (el: ElementRef) => {
     const o = el.nativeElement;
     let txt = o.innerText;
-    let ellipsised = txt.includes(' ... ');
 
-    while (o.clientWidth > 10 && o.scrollWidth > o.clientWidth && txt.length > 0 || txt.length > this.maxChars) {
-      txt = `${txt.substring(0, txt.length / 2 - 4)} ... ${txt.substring(txt.length / 2 + 4, txt.length)}`;
-      o.innerHTML = txt;
-      ellipsised = true;
+    while (o.scrollWidth > o.clientWidth && txt.length > 0) {
+      txt = txt.substring(0, txt.length / 2 - 1) + txt.substring(txt.length / 2 + 1, txt.length);
+      o.innerHTML = txt.substring(0, txt.length / 2) + '...' + txt.substring(txt.length / 2, txt.length);
     }
-
-   this.matTooltip.disabled = !ellipsised;
-  }
+  };
 }
 
 

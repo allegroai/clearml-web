@@ -21,7 +21,7 @@ export class TableCardFilterTemplateComponent {
 
   @Input() set value(value: any) {
     this._value = value;
-    this.isFiltering = value && this.isFiltered();
+    this.isFiltering = this.isFiltered();
   }
 
   get value() {
@@ -81,8 +81,7 @@ export class TableCardFilterTemplateComponent {
   }
 
   isFiltered() {
-    return (this.value && Object.keys(this.value).some(col => this.value[col]?.length > 0)) ||
-      this.subValue?.length > 0;
+    return ((this.value && Object.keys(this.value).filter(col => this.value[col].length > 0).length > 0) || (this.subValue && this.subValue.length > 0));
   }
 
 
@@ -112,7 +111,7 @@ export class TableCardFilterTemplateComponent {
     }
   }
 
-  getColumnByOption(option: {key: string}) {
+  getColumnByOption(option: any) {
     return this.columns.find(col => col.id === option.key);
   }
 

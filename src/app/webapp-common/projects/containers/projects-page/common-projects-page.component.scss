@@ -1,4 +1,8 @@
-@import "variables";
+@import "variables_v2";
+
+sm-projects-list {
+  background-color: $background-color-content;
+}
 
 sm-projects-header {
   height: 64px;
@@ -6,6 +10,6 @@ sm-projects-header {
   position: sticky;
   top: 0;
   z-index: 10;
-  background-color: $blue-800;
   margin-bottom: -12px;
+  border-bottom: 1px solid $border-color;
 }

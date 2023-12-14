@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, EventEmitter, inject, Input, Output} from '@angular/core';
+import {ChangeDetectorRef, Component, EventEmitter, Input, Output} from '@angular/core';
 import {getValueOrDefault, hasValue} from '../../../../utils/helpers.util';
 import {ErrorStateMatcher} from '@angular/material/core';
 
@@ -84,8 +84,6 @@ export class DataInputOutputHelper {
   template: 'sm-table-duration-base'
 })
 export abstract class TableDurationSortBaseComponent {
-  protected cdr: ChangeDetectorRef;
-
   @Output() filterChanged = new EventEmitter<{ value: any }>();
   @Output() hasError = new EventEmitter<boolean>();
 
@@ -96,10 +94,8 @@ export abstract class TableDurationSortBaseComponent {
   abstract parseServerDataFunction(data: null | string | number): number;
   abstract prepareDataToServerFunction(data: null | string | number): string | number | null;
 
-  constructor() {
-    this.cdr = inject(ChangeDetectorRef);
+  constructor(private cdr: ChangeDetectorRef) {
   }
-
   lessThan: IDurationThan = {
     checked: false,
     value: null

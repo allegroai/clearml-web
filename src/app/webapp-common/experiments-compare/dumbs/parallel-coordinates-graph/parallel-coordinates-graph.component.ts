@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, ViewChild} from '@angular/core';
+import {Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, ViewChild} from '@angular/core';
 import {
   DARK_THEME_GRAPH_LINES_COLOR,
   DARK_THEME_GRAPH_TICK_COLOR, ExtData,
@@ -7,6 +7,7 @@ import {
   PlotlyGraphBaseComponent
 } from '@common/shared/single-graph/plotly-graph-base';
 import {NgForOf, NgIf, SlicePipe} from '@angular/common';
+import {Store} from '@ngrx/store';
 import {debounceTime, filter, take} from 'rxjs/operators';
 import {from} from 'rxjs';
 import {cloneDeep, get, isEqual, max, min, uniq} from 'lodash-es';
@@ -157,10 +158,10 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
 
   constructor(
     private colorHash: ColorHashService,
+    protected store: Store,
     private dialog: MatDialog,
-    private cdr: ChangeDetectorRef
   ) {
-    super();
+    super(store);
   }
 
   ngOnInit(): void {
@@ -183,7 +184,6 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
       )
       .subscribe(() => {
         this.prepareGraph();
-        window.setTimeout(() => this.cdr.detectChanges());
       });
   }
 
@@ -224,7 +224,7 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
           parameter = `${parameter}.value`;
           const allValuesIncludingNull = this.experiments.map(experiment => get(experiment.hyperparams, parameter));
           const allValues = allValuesIncludingNull.filter(value => (value !== undefined)).filter(value => (value !== ''));
-          const textVal = {} as {[key: string]: number};
+          const textVal: any = {};
           let ticktext = this.naturalCompare(uniq(allValues).filter(text => text !== ''));
           (allValuesIncludingNull.length > allValues.length) && (ticktext = ['N/A'].concat(ticktext));
           const tickvals = ticktext.map((text, index) => {
@@ -348,13 +348,12 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
     if (this.parameters) {
       const graph = select(this.parallelGraph.nativeElement);
       this.graphWidth = graph.node().getBoundingClientRect().width;
-      graph.selectAll('.y-axis')
-        .filter((d: {key: string}) => d.key === this.metric.name)
-        .classed('metric-column', true);
-      graph.selectAll('.axis-title')
-        .text((d: {key: string}) => this.wrap(d.key))
-        .append('title')
-        .text(d => (d as {key: string}).key);
+      graph.selectAll('.y-axis').each((d, index, element) => {
+        if ((d as any).key === this.metric.name) {
+          select(element[index]).attr('class', 'y-axis metric-column');
+        }
+      });
+      graph.selectAll('.axis-title').text((d: any) => this.wrap(d.key)).append('title').text(d => (d as any).key);
       graph.selectAll('.axis .tick text').text((d: string) => this.wrap(d)).append('title').text((d: string) => d);
       graph.selectAll('.axis .tick text').style('pointer-events', 'auto');
       this.darkTheme && graph.selectAll('.dark-theme .axis .domain').style('stroke', DARK_THEME_GRAPH_LINES_COLOR).style('stroke-opacity', 1);
@@ -371,10 +370,8 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
 
   wrap(key) {
     key = key.toString();
-    if (key.length > 20) {
-      return `${key.slice(0, 18)}...`;
-    }
-    return key;
+    const short = (key.slice(0, ((this.graphWidth / this.parameters.length) - 20) / 6));
+    return short + (key.length > short.length ? '...' : '');
   }
 
   private naturalCompare(myArray) {
@@ -431,11 +428,11 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
   maximize() {
     this.dialog.open(GraphViewerComponent, {
       data: {
-        embedFunction: (data) => this.creatingEmbedCode(data.domRect),
+        embedFunction: (rect: DOMRect) => this.creatingEmbedCode(rect),
         // signed url are updated after originChart was cloned - need to update images urls!
         chart: cloneDeep({
           data: this.data as unknown as ExtData[],
-          layout: {...this.getLayout(false), title: this.metric?.name || ''},
+          layout: this.getLayout(false),
           config: {
             displaylogo: false,
             displayModeBar: false,

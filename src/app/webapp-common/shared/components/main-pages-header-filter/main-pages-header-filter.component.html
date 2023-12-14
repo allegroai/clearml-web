@@ -1,7 +1,7 @@
 <div mat-button class='cell pointer'>
   <i [class]="'al-icon ' + ((showOnlyUserWork$ | async)||  ((tagsFilters$ | async)?.length > 0)? 'al-ico-filter-on':'al-ico-filter-off')" [matMenuTriggerFor]="menu"><span class="path1" data-id="FilterMenuIcon"></span><span class="path2"></span></i>
 </div>
-<mat-menu #menu="matMenu" class="light-theme" (close)="closeMenu()">
+<mat-menu #menu="matMenu" classList="light-theme" (close)="closeMenu()">
   <button mat-menu-item
           smClickStopPropagation
           class="user-filter-button"
@@ -38,7 +38,6 @@
   </mat-menu>
   <hr/>
   <button mat-menu-item
-          [disabled]="!((showOnlyUserWork$ | async) ||  ((tagsFilters$ | async)?.length > 0))"
           smClickStopPropagation
           class="user-filter-button"
           (click)="clearAll()">

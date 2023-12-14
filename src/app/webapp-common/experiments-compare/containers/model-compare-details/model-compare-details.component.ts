@@ -7,6 +7,7 @@ import {ExperimentCompareTree,} from '~/features/experiments-compare/experiments
 import {convertmodelsArrays, getAllKeysEmptyObject, isDetailsConverted} from '../../jsonToDiffConvertor';
 import {ExperimentCompareBase} from '../experiment-compare-base';
 import {ActivatedRoute, Router} from '@angular/router';
+import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {ConfigurationItem} from '~/business-logic/model/tasks/configurationItem';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {LIMITED_VIEW_LIMIT} from '@common/experiments-compare/experiments-compare.constants';
@@ -20,14 +21,21 @@ import {ModelDetail} from '@common/experiments-compare/shared/experiments-compar
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ModelCompareDetailsComponent extends ExperimentCompareBase implements OnInit, AfterViewInit {
-  public showEllipsis = true;
+  public showEllipsis: boolean = true;
 
-  constructor() {
-    super();
+  constructor(
+    public router: Router,
+    public store: Store<ExperimentInfoState>,
+    public changeDetection: ChangeDetectorRef,
+    public activeRoute: ActivatedRoute,
+    public cdr: ChangeDetectorRef,
+    public refresh: RefreshService
+  ) {
+    super(router, store, changeDetection, activeRoute, refresh, cdr);
     this.entityType = EntityTypeEnum.model;
-    this.experiments$ = this.store.select(selectModelsDetails);
   }
 
+  experiments$ = this.store.pipe(select(selectModelsDetails));
 
   ngOnInit() {
     this.onInit();
@@ -67,7 +75,7 @@ export class ModelCompareDetailsComponent extends ExperimentCompareBase implemen
     this.showEllipsis = !this.showEllipsis;
   }
 
-  public override buildExperimentTree(experiment, baseExperiment, mergedExperiment): any {
+  public buildExperimentTree(experiment, baseExperiment, mergedExperiment): any {
     return {
       general: this.buildSectionTree(experiment, 'general', mergedExperiment),
       labels: this.buildSectionTree(experiment, 'labels', mergedExperiment),

@@ -33,4 +33,12 @@ export interface UsersUpdateRequest {
      * Avatar URL
      */
     avatar?: string;
+    /**
+     * Role Name
+     */
+    role?: string;
+    email?: string;
+    company?: string;
+    status?: string;
+    password?: string;
 }

@@ -10,9 +10,9 @@
 
 
 
-  <div #container class="generic-container {{theme || 'light-theme'}}" cdkScrollable data-id="comparedExperimentContainer">
+  <div #container class="generic-container {{theme || 'light-theme'}}" cdkScrollable>
     <div class="d-flex flex-column" *ngIf="iconClass">
-      <div [class]="'al-icon icon xxl mx-auto '+ [iconClass]" data-id="pipelineIcon"></div>
+      <div [class]="'al-icon icon xxl mx-auto '+ [iconClass]"></div>
     </div>
     <div class="d-flex justify-content-center" *ngIf="iconData">
         <div class="app-icon-image" [style.background-image]="'url(' + iconData + ')'"></div>

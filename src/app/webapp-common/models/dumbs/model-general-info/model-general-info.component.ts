@@ -19,7 +19,7 @@ import {filter, map, take} from 'rxjs/operators';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ModelGeneralInfoComponent {
-  constructor(private datePipe: DatePipe, private store: Store, private adminService: AdminService) {
+  constructor(private datePipe: DatePipe, private store: Store<any>, private adminService: AdminService) {
   }
 
   public kpis: {label: string; value: string; downloadable?: boolean; href?: string; task?: string}[];
@@ -42,17 +42,6 @@ export class ModelGeneralInfoComponent {
         {label: 'USER', value: get( model,'user.name', NA)},
         {label: 'ARCHIVED', value: model && model.system_tags && model.system_tags.includes(TAGS.HIDDEN) ? 'Yes' : 'No'},
         {label: 'PROJECT', value: get(model, 'project.name', NA)},
-      ];
-    } else {
-      this.kpis = [
-        {label: 'CREATED AT', value: '-'},
-        {label: 'UPDATED AT', value: '-'},
-        {label: 'FRAMEWORK', value: '-'},
-        {label: 'STATUS', value: '-'},
-        {label: 'MODEL URL', value: '-'},
-        {label: 'USER', value: '-'},
-        {label: 'ARCHIVED', value: '-'},
-        {label: 'PROJECT',value: '-'},
       ];
     }
   }

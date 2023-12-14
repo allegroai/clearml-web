@@ -19,7 +19,7 @@ export class ModelInfoLabelsComponent {
   public saving$: Observable<boolean>;
   public isSharedAndNotOwner$: Observable<boolean>;
 
-  constructor(private store: Store) {
+  constructor(private store: Store<ModelInfoState>) {
     this.selectedModel$ = this.store.select(selectSelectedModel).pipe(filter(model => !!model));
     this.saving$         = this.store.select(selectIsModelSaving);
     this.isSharedAndNotOwner$ = this.store.select(selectIsSharedAndNotOwner);

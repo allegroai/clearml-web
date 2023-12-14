@@ -2,8 +2,6 @@
 @import "../../../../webapp-common/layout/layout.scss";
 
 :host {
-  display: flex;
-
   > div {
     height: $graph-height;
   }

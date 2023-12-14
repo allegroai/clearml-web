@@ -1,5 +1,4 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {TIME_FORMAT_STRING} from '@common/constants';
 import {ProjectCardComponent} from '@common/shared/ui-components/panel/project-card/project-card.component';
 import {trackById} from '@common/shared/utils/forms-track-by';
 
@@ -14,6 +13,5 @@ export class PipelineCardComponent extends ProjectCardComponent {
   @Output() addTag = new EventEmitter<string>();
   @Output() removeTag = new EventEmitter<string>();
   @Output() delete = new EventEmitter();
-  protected readonly TIME_FORMAT_STRING = TIME_FORMAT_STRING;
-  timeFormatString = TIME_FORMAT_STRING;
+  trackById = trackById;
 }

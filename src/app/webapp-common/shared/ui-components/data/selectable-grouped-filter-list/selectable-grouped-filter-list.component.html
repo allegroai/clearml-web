@@ -15,6 +15,7 @@
 <sm-grouped-selectable-list
   [list]="filteredList"
   [searchTerm]="searchTerm"
+  [selected]="selected"
   [checkedList]="checkedList"
   (onItemSelect)="itemSelect.emit($event)"
   (onItemCheck)="toggleHide($event)"

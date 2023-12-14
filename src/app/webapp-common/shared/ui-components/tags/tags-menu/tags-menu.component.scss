@@ -11,12 +11,14 @@
 
 .buttons-container {
   height: 300px;
-  max-width: 450px;
   overflow: auto;
   margin-top: 4px;
 }
 
 :host {
+  display: block;
+  width: 260px;
+
   mat-form-field {
     width: 100%;
   }
@@ -26,10 +28,4 @@
   display: flex;
   align-items: center;
   cursor: pointer;
-}
-
-
-::ng-deep .tags-menu .mat-mdc-menu-content .mat-mdc-menu-item .mdc-list-item__primary-text {
-  display: unset;
-  white-space: nowrap;
 }

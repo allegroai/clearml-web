@@ -16,7 +16,6 @@ import {ProjectStatsGraphData} from '@common/core/reducers/projects.reducer';
 import {User} from '~/business-logic/model/users/user';
 import {ProjectsGetAllResponseSingle} from '~/business-logic/model/projects/projectsGetAllResponseSingle';
 import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
-import {IBreadcrumbsLink, IBreadcrumbsOptions} from '@common/layout/breadcrumbs/breadcrumbs.component';
 
 export const PROJECTS_PREFIX = '[ROOT_PROJECTS] ';
 
@@ -116,19 +115,14 @@ export const setCompanyTags = createAction(
   props<{ tags: string[]; systemTags: string[] }>()
 );
 
-export const addCompanyTag = createAction(
-  PROJECTS_PREFIX + '[add company tag]',
-  props<{tag: string}>()
-);
-
 export const setMainPageTagsFilter = createAction(
   PROJECTS_PREFIX + '[set main page tags filters]',
-  props<{ tags?: string[]; feature: string}>()
+  props<{ tags: string[]; feature: string }>()
 );
 
 export const setMainPageTagsFilterMatchMode = createAction(
   PROJECTS_PREFIX + '[set main page tags filters match mode]',
-  props<{ matchMode: string; feature: string}>()
+  props<{ matchMode: string }>()
 );
 
 export const addProjectTags = createAction(
@@ -206,20 +200,6 @@ export const setDefaultNestedModeForFeature = createAction(
   PROJECTS_PREFIX + ' [set defaultNestedModeForFeature]',
   props<{ feature: string; isNested: boolean }>()
 );
-export const setSelectedBreadcrumbSubFeature = createAction(
-  PROJECTS_PREFIX + ' [set SelectedSubFeature]',
-  props<{ breadcrumb: IBreadcrumbsLink }>()
-);
-
-export const setBreadcrumbMainFeature = createAction(
-  PROJECTS_PREFIX + ' [setBreadcrumbMainFeature]',
-  props<{ breadcrumb: IBreadcrumbsLink }>()
-);
-
-export const setBreadcrumbsOptions = createAction(
-  PROJECTS_PREFIX + ' [setBreadcrumbsOptions]',
-  props<{ breadcrumbOptions: IBreadcrumbsOptions }>()
-);
 
 export const resetTablesFilterProjectsOptions = createAction(
   PROJECTS_PREFIX + ' [reset tables filter projects options]'
@@ -227,15 +207,10 @@ export const resetTablesFilterProjectsOptions = createAction(
 
 export const getTablesFilterProjectsOptions = createAction(
   PROJECTS_PREFIX + ' [get tables filter projects options]',
-  props<{ searchString: string; loadMore: boolean; allowPublic?: boolean}>()
+  props<{ searchString: string; loadMore: boolean }>()
 );
 
 export const setTablesFilterProjectsOptions = createAction(
   PROJECTS_PREFIX + ' [set tables filter projects options]',
   props<{ projects: Partial<ProjectsGetAllResponseSingle>[]; scrollId: string; loadMore?: boolean }>()
-);
-
-export const downloadForGetAll = createAction(
-  PROJECTS_PREFIX + ' [downloadForGetAll]',
-  props<{ prepareId: string}>()
 );

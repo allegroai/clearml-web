@@ -21,19 +21,16 @@ export class S3AccessComponent implements OnDestroy, OnInit {
 
   @Input() set s3bucketCredentials(s3bucketCredentials) {
     this.formChangeSubscription && this.formChangeSubscription.unsubscribe();
-    if (!this.S3Form) {
-      this.buildS3Form(s3bucketCredentials);
-    }
-    this.formChangeSubscription = this.S3Form.valueChanges
-      .pipe(debounceTime(300)).subscribe(() => {
-        this.saveCredentials(this.S3Form.getRawValue());
-        this.disableTutorialBucket();
-      });
+    this.buildS3Form(s3bucketCredentials);
+    this.formChangeSubscription = this.S3Form.valueChanges.pipe(debounceTime(300)).subscribe(formData => {
+      this.saveCredentials(this.S3Form.getRawValue());
+      this.disableTutorialBucket();
+    });
   };
 
   @Output() s3bucketCredentialsChanged = new EventEmitter();
 
-  constructor(private store: Store, private formBuilder: UntypedFormBuilder) {
+  constructor(private store: Store<any>, private formBuilder: UntypedFormBuilder) {
   }
 
   get bucketCredentials(): UntypedFormArray {
@@ -56,18 +53,22 @@ export class S3AccessComponent implements OnDestroy, OnInit {
     this.bucketCredentials.removeAt(index);
   }
 
-  private buildS3Form(s3Credentials) {
+  private buildS3Form(S3Credentials) {
     this.S3Form = this.formBuilder.group({
       bucketCredentials: this.formBuilder.array([]),
     });
 
-    if (s3Credentials?.bucketCredentials?.length) {
-      s3Credentials.bucketCredentials.forEach(bucket => {
+    if (S3Credentials?.bucketCredentials?.length) {
+      S3Credentials.bucketCredentials.forEach(bucket => {
         this.addBucket(bucket || {});
       });
     }
 
     this.disableTutorialBucket();
+  }
+
+  public trackByFn(index, item) {
+    return index;
   }
 
   public saveCredentials(formData) {

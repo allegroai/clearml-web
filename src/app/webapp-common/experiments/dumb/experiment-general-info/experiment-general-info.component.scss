@@ -1,6 +1,4 @@
 @import "variables";
-@import "mixins/link";
-
 :host {
   display: block;
   position: relative;
@@ -8,8 +6,6 @@
   .general-info {
     padding: 24px 24px 64px 24px;
   }
-
-  @include link();
 }
 
 textarea {

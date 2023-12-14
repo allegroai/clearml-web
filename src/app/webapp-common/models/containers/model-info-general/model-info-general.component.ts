@@ -1,8 +1,10 @@
-import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnDestroy} from '@angular/core';
 import {Subscription} from 'rxjs';
+import {ModelInfoState} from '../../reducers/model-info.reducer';
 import {Store} from '@ngrx/store';
 import {SelectedModel} from '../../shared/models.model';
 import {selectSelectedModel} from '../../reducers';
+import {filter} from 'rxjs/operators';
 import {resetDontShowAgainForBucketEndpoint} from '@common/core/actions/common-auth.actions';
 import {createModelLink, isExample} from '@common/shared/utils/shared-utils';
 import {AdminService} from '~/shared/services/admin.service';
@@ -14,15 +16,19 @@ import {updateModelDetails} from '../../actions/models-info.actions';
   templateUrl: './model-info-general.component.html',
   styleUrls: ['./model-info-general.component.scss']
 })
-export class ModelInfoGeneralComponent implements OnDestroy, OnInit{
+export class ModelInfoGeneralComponent implements OnDestroy {
 
   public selectedModel: SelectedModel;
   public isExample: boolean;
   private selectedModelSubscription: Subscription;
 
-  constructor(private store: Store, private adminService: AdminService, private cdr: ChangeDetectorRef,
-  ) {
-
+  constructor(private store: Store<ModelInfoState>, private adminService: AdminService) {
+    this.selectedModelSubscription = this.store.select(selectSelectedModel).pipe(
+      filter(model => !!model))
+      .subscribe(model => {
+        this.isExample = isExample(model);
+        this.selectedModel = model;
+      });
   }
 
   showModel(model) {
@@ -39,16 +45,6 @@ export class ModelInfoGeneralComponent implements OnDestroy, OnInit{
 
   ngOnDestroy(): void {
     this.selectedModelSubscription.unsubscribe();
-  }
-
-  ngOnInit(): void {
-    this.selectedModelSubscription = this.store.select(selectSelectedModel).pipe(
-    )
-      .subscribe(model => {
-        this.isExample = isExample(model);
-        this.selectedModel = model;
-        // this.cdr.detectChanges();
-      });
   }
 
 }

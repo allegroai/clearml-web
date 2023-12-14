@@ -1,0 +1,161 @@
+<section>
+  <div class="title first">User & Groups</div>
+
+  <sm-menu class="user-list-menu" *ngIf="menuOpen" [position]="menuPosition" [header]=""
+    buttonClass="al-icon sm-md al-ico-bars-menu al-color blue-300" [showCart]="false" [showOverlay]="false"
+    [showButton]="false" [openOnInit]="true">
+    <sm-menu-item itemLabel="Edit" (itemClicked)="editItemData(selectedItem, activeTable)">
+    </sm-menu-item>
+    <sm-menu-item class="delete" itemLabel="Delete" (itemClicked)="deleteItemData(selectedItem, activeTable)">
+    </sm-menu-item>
+  </sm-menu>
+
+  <div class="table-container">
+    <div class="title">User</div>
+    <button class="new-btn btn btn-cml-primary d-flex align-items-center" data-id="New User"
+      (click)="openCreateUserDialog()">
+      <i class="al-icon sm al-ico-add me-2"></i>New User
+    </button>
+
+    <sm-table [tableData]="listUsers$| async" [columns]="userCols" [rowHeight]="52" selectionMode="single"
+      [scrollable]="true" (rowRightClick)="openContextMenu($event, 'user')" [selection]="selectedItem"
+      (rowClicked)="onRowClick($event)">
+
+      <ng-template let-col let-user="rowData" pTemplate="body">
+        <ng-container [ngSwitch]="col.id">
+          <ng-container *ngSwitchCase="'id'">
+            <div class="experiment-name" smShowTooltipIfEllipsis [smTooltip]="user.id">
+              {{user.id}}
+            </div>
+          </ng-container>
+          <ng-container *ngSwitchCase="'name'">
+            <div class="experiment-name" smShowTooltipIfEllipsis [smTooltip]="user.name">
+              {{user.name}}
+            </div>
+          </ng-container>
+          <ng-container *ngSwitchCase="'role'">
+            <div class="experiment-name" smShowTooltipIfEllipsis [smTooltip]="user.role">
+              {{user.role}}
+            </div>
+          </ng-container>
+          <ng-container *ngSwitchCase="'groups'">
+            <div class="user-table-grops">
+              <ng-container *ngFor="let group of user.groups; let i = index">
+                <ng-container *ngIf="i < 2">
+                  <div class="user-table-grops-item" smShowTooltipIfEllipsis [smTooltip]="group.name">
+                    {{group.name}}
+                  </div>
+                </ng-container>
+                <ng-container *ngIf="i === 2 && user.groups.length > 2">
+                  <div class="more-groups-item">
+                    <span>+{{user.groups.length - 2}}</span>
+                  </div>
+                </ng-container>
+              </ng-container>
+            </div>
+          </ng-container>
+          <ng-container *ngSwitchCase="'family_name'">
+            {{user.family_name}}
+          </ng-container>
+          <ng-container *ngSwitchCase="'given_name'">
+            {{user.given_name}}
+          </ng-container>
+          <ng-container *ngSwitchCase="'status'">
+            {{user.status}}
+          </ng-container>
+          <ng-container *ngSwitchCase="'created'">
+            {{user.created | date : timeFormatString}}
+          </ng-container>
+        </ng-container>
+      </ng-template>
+    </sm-table>
+  </div>
+
+  <div class="table-container">
+    <div class="title">Group</div>
+    <button class="new-btn btn btn-cml-primary d-flex align-items-center" data-id="New User"
+      (click)="openCreateGroupDialog()">
+      <i class="al-icon sm al-ico-add me-2"></i>New Group
+    </button>
+    <sm-table [tableData]="listGroups$| async" [columns]="groupCols" [rowHeight]="52" selectionMode="single"
+      [scrollable]="true" (rowRightClick)="openContextMenu($event, 'group')" [selection]="selectedItem"
+      (rowClicked)="onRowClick($event)">
+
+      <ng-template let-col let-group="rowData" pTemplate="body">
+        <ng-container [ngSwitch]="col.id">
+          <ng-container *ngSwitchCase="'id'">
+            <div class="experiment-name" smShowTooltipIfEllipsis [smTooltip]="group.id">
+              {{group.id}}
+            </div>
+          </ng-container>
+          <ng-container *ngSwitchCase="'name'">
+            <div class="experiment-name" smShowTooltipIfEllipsis [smTooltip]="group.name">
+              {{group.name}}
+            </div>
+          </ng-container>
+          <ng-container *ngSwitchCase="'description'">
+            <div class="experiment-name" smShowTooltipIfEllipsis [smTooltip]="group.description">
+              {{group.description}}
+            </div>
+          </ng-container>
+          <ng-container *ngSwitchCase="'last_update'">
+            {{group.created | date : timeFormatString}}
+          </ng-container>
+          <ng-container *ngSwitchCase="'created'">
+            {{group.created | date : timeFormatString}}
+          </ng-container>
+          <ng-container *ngSwitchCase="'members'">
+            <p-avatarGroup>
+              <ng-container *ngFor="let user of group.users; let i = index">
+                <p-avatar [label]="user.name.charAt(0).toUpperCase()" size="large" shape="circle"></p-avatar>
+                <ng-container *ngIf="i === 5 && group.users.length > 5">
+                  <p-avatar size="large" shape="circle" class="more-users">
+                    <span>+{{group.users.length - 5}}</span>
+                  </p-avatar>
+                </ng-container>
+              </ng-container>
+            </p-avatarGroup>
+          </ng-container>
+        </ng-container>
+      </ng-template>
+    </sm-table>
+  </div>
+
+  <div class="table-container">
+    <div class="title">Company</div>
+    <button class="new-btn btn btn-cml-primary d-flex align-items-center" data-id="New User"
+      (click)="openCreateCompanyDialog()">
+      <i class="al-icon sm al-ico-add me-2"></i>New Company
+    </button>
+    <sm-table [tableData]="listCompanys$| async" [columns]="companyCols" [rowHeight]="52" selectionMode="single"
+      [scrollable]="true" (rowRightClick)="openContextMenu($event, 'company')" [selection]="selectedItem"
+      (rowClicked)="onRowClick($event)">
+
+      <ng-template let-col let-company="rowData" pTemplate="body">
+        <ng-container [ngSwitch]="col.id">
+          <ng-container *ngSwitchCase="'id'">
+            <div class="experiment-name" smShowTooltipIfEllipsis [smTooltip]="company.id">
+              {{company.id}}
+            </div>
+          </ng-container>
+          <ng-container *ngSwitchCase="'name'">
+            <div class="experiment-name" smShowTooltipIfEllipsis [smTooltip]="company.name">
+              {{company.name}}
+            </div>
+          </ng-container>
+          <ng-container *ngSwitchCase="'description'">
+            <div class="experiment-name" smShowTooltipIfEllipsis [smTooltip]="company.description">
+              {{company.description}}
+            </div>
+          </ng-container>
+          <ng-container *ngSwitchCase="'last_update'">
+            {{company.created | date : timeFormatString}}
+          </ng-container>
+          <ng-container *ngSwitchCase="'created'">
+            {{company.created | date : timeFormatString}}
+          </ng-container>
+        </ng-container>
+      </ng-template>
+    </sm-table>
+  </div>
+</section>

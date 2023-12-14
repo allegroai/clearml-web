@@ -3,6 +3,7 @@ import {BehaviorSubject, Observable, Subscription} from 'rxjs';
 import {MatTabNav, MatTabsModule} from '@angular/material/tabs';
 import {AsyncPipe, NgForOf, UpperCasePipe} from '@angular/common';
 import {Store} from '@ngrx/store';
+import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {selectRouterConfig} from '@common/core/reducers/router-reducer';
 import {RouterLink, RouterLinkActive} from '@angular/router';
 import {debounceTime} from 'rxjs/operators';
@@ -40,7 +41,7 @@ export class RouterTabNavBarComponent {
   @ViewChild(MatTabNav) matTabNav: MatTabNav;
   trackByLink = (index: number, link: Link) => link.url.join(',');
 
-  constructor(private store: Store) {
+  constructor(private store: Store<ExperimentInfoState>) {
     this.routerConfig$ = this.store.select(selectRouterConfig);
 
     this.sub.add(this.resize$.pipe(debounceTime(50)).subscribe(() => this.matTabNav.updatePagination()));

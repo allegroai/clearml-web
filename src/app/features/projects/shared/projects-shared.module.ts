@@ -12,8 +12,6 @@ import {DatasetEmptyComponent} from '@common/datasets/dataset-empty/dataset-empt
 import {NestedCardComponent} from '@common/nested-project-view/nested-card/nested-card.component';
 import {SharedPipesModule} from '@common/shared/pipes/shared-pipes.module';
 import {PipelinesEmptyStateComponent} from '@common/pipelines/pipelines-page/pipelines-empty-state/pipelines-empty-state.component';
-import {ProjectsHeaderComponent} from '@common/projects/dumb/projects-header/projects-header.component';
-import {NestedProjectViewPageComponent} from '@common/nested-project-view/nested-project-view-page/nested-project-view-page.component';
 
 const _declarations = [
   ProjectCardComponent,
@@ -23,8 +21,6 @@ const _declarations = [
   PipelineCardMenuComponent,
   NestedCardComponent,
   DatasetEmptyComponent,
-  NestedProjectViewPageComponent,
-  ProjectsHeaderComponent
 ];
 
 @NgModule({

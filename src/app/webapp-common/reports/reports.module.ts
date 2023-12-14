@@ -1,4 +1,4 @@
-import {InjectionToken, NgModule} from '@angular/core';
+import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {SMSharedModule} from '../shared/shared.module';
 import {EffectsModule} from '@ngrx/effects';
@@ -6,8 +6,8 @@ import {CommonLayoutModule} from '../layout/layout.module';
 import {SharedModule} from '~/shared/shared.module';
 import {ReportsEffects} from './reports.effects';
 import {ReportsPageComponent} from './reports-page/reports-page.component';
-import {ActionReducer, StoreConfig, StoreModule} from '@ngrx/store';
-import {REPORTS_KEY, reportsReducer, ReportsState} from './reports.reducer';
+import {StoreModule} from '@ngrx/store';
+import {REPORTS_KEY, reportsReducer} from './reports.reducer';
 import {ReportsRoutingModule} from './reports-routing.module';
 import {ReportsListComponent} from './reports-list/reports-list.component';
 import {ReportsHeaderComponent} from './reports-filters/reports-header.component';
@@ -24,21 +24,7 @@ import {ExistNameValidatorDirective} from '@common/shared/ui-components/template
 import {SharedPipesModule} from '@common/shared/pipes/shared-pipes.module';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
-import {UserPreferences} from '@common/user-preferences';
-import {createUserPrefFeatureReducer} from '@common/core/meta-reducers/user-pref-reducer';
-import {REPORTS_PREFIX} from '@common/reports/reports.actions';
 
-
-const reportsSyncedKeys = ['orderBy', 'sortOrder'];
-export const REPORTS_STORE_CONFIG_TOKEN =
-  new InjectionToken<StoreConfig<ReportsState, any>>('DatasetsConfigToken');
-
-const getInitState = (userPreferences: UserPreferences) => ({
-  metaReducers: [
-    (reducer: ActionReducer<any>) =>
-      createUserPrefFeatureReducer(REPORTS_KEY, reportsSyncedKeys, [REPORTS_PREFIX], userPreferences, reducer),
-  ]
-});
 @NgModule({
   imports: [
     UiComponentsModule,
@@ -48,7 +34,7 @@ const getInitState = (userPreferences: UserPreferences) => ({
     ReactiveFormsModule,
     SMMaterialModule,
     EffectsModule.forFeature([ReportsEffects]),
-    StoreModule.forFeature(REPORTS_KEY, reportsReducer, REPORTS_STORE_CONFIG_TOKEN),
+    StoreModule.forFeature(REPORTS_KEY, reportsReducer),
     SharedModule,
     CommonLayoutModule,
     ReportsRoutingModule,
@@ -62,10 +48,7 @@ const getInitState = (userPreferences: UserPreferences) => ({
   ],
   declarations: [ReportsPageComponent, ReportsListComponent, ReportsHeaderComponent, ReportDialogComponent,
     CreateNewReportFormComponent, ReportComponent],
-  exports: [],
-  providers: [
-    {provide: REPORTS_STORE_CONFIG_TOKEN, useFactory: getInitState, deps: [UserPreferences]},
-  ],
+  exports: []
 })
 export class ReportsModule {
 }

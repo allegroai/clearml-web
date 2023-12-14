@@ -17,6 +17,7 @@ import {HighlightSearchTextPipe} from './highlight-search-text.pipe';
 import {HideHashPipe} from './hide-hash.pipe';
 import {TimeAgoPipe} from './timeAgo';
 import {TimeTillNowPipe} from './time-till-now.pipe';
+import {MsToSecPipe} from './ms-to-sec.pipe';
 import {HasExampleItemPipe} from './has-example-item.pipe';
 import {AdvancedFilterPipe} from './advanced-filter.pipe';
 import {SafePipe} from './safe.pipe';
@@ -64,17 +65,15 @@ import {IsStringPipe} from './is-string.pipe';
 import {CleanProjectPathPipe} from './clean-project-path.pipe';
 import {BaseNamePipe} from '@common/shared/pipes/base-name.pipe';
 import {CountLinesPipe} from '@common/shared/pipes/count-lines.pipe';
-import {SecToHoursPipe} from '@common/shared/pipes/sec-to-hours.pipe';
-import { DurationFormaterPipe } from './duration-formater.pipe';
 
 const pipes = [
   CamelToTitlePipe, FilenameFromPath, FilterPipe, FloorPipe, KeyValuePipe, NAPipe, SortPipe, IsVideoPipe, IsAudioPipe, FilterInternalPipe, UuidPipe,
-  JoinPipe, KeyvalPipe, LabelValuePipe, NoUnderscorePipe, UniqueByPipe, MsToHoursPipe, DurationPipe,
+  JoinPipe, KeyvalPipe, LabelValuePipe, NoUnderscorePipe, UniqueByPipe, MsToHoursPipe, MsToSecPipe, DurationPipe,
   ToExponentialPipe, HighlightSearchTextPipe, HighlightSearchPipe, HideHashPipe, HideHashTitlePipe, TimeAgoPipe, TimeTillNowPipe, HasExampleItemPipe, safeAngularUrlParameterPipe,
   AdvancedFilterPipe, SafePipe, SelectOptionValueToLabelPipe, ToPercentagePipe, ReplaceViaMapPipe, FilterByIdPipe, FilterLast, FilterOutPipe, SimpleFilterPipe,
   BreadcrumbsEllipsisPipe, ShortProjectNamePipe, ProjectLocationPipe, StringIncludedInArrayPipe, ToPropertyArrayPipe, MenuItemTextPipe, InitialsPipe, IdToObjectsArrayPipe, IsEmptyPipe,
   TemplateInjectorPipe, TestConditionalPipe, GroupHasErrorsPipe, FormgroupHasRequiredFieldPipe, RegexPipe, LabelValueToStringArrayPipe, IsStringPipe,
-  ItemByIdPipe, HideRedactedArgumentsPipe, HasCompletedPipe, CleanProjectPathPipe, BaseNamePipe, SecToHoursPipe, DurationFormaterPipe
+  ItemByIdPipe, HideRedactedArgumentsPipe, HasCompletedPipe, CleanProjectPathPipe, BaseNamePipe
 ];
 
 @NgModule({

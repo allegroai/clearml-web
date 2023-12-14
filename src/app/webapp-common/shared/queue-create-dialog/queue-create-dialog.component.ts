@@ -18,16 +18,16 @@ export class QueueCreateDialogComponent implements OnInit, OnDestroy {
   private editMode = false;
   public queue     = {name: null, id: null};
 
-  constructor(private store: Store, private matDialogRef: MatDialogRef<QueueCreateDialogComponent>, @Inject(MAT_DIALOG_DATA) public data) {
+  constructor(private store: Store<any>, private matDialogRef: MatDialogRef<QueueCreateDialogComponent>, @Inject(MAT_DIALOG_DATA) public data) {
     if (data) {
-      this.queue    = {...data};
+      this.queue    = data;
       this.editMode = true;
     }
     this.queues$ = this.store.select(createQueueSelectors.selectQueues);
   }
 
   ngOnInit(): void {
-    this.store.dispatch(createNewQueueActions.getQueues());
+    this.store.dispatch(new createNewQueueActions.GetQueues());
     this.creationStatusSubscription = this.store.select(createQueueSelectors.selectCreationStatus).subscribe(status => {
       if (status === CREATION_STATUS.SUCCESS) {
         return this.matDialogRef.close(true);
@@ -36,15 +36,15 @@ export class QueueCreateDialogComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.store.dispatch(createNewQueueActions.resetState());
+    this.store.dispatch(new createNewQueueActions.ResetState());
     this.creationStatusSubscription.unsubscribe();
   }
 
   public createQueue(queue) {
     if (queue.id) {
-      this.store.dispatch(createNewQueueActions.updateQueue({queue: {queue: queue.id, name: queue.name}}));
+      this.store.dispatch(new createNewQueueActions.UpdateQueue({queue: queue.id, name: queue.name}));
     } else {
-      this.store.dispatch(createNewQueueActions.createNewQueue(queue));
+      this.store.dispatch(new createNewQueueActions.CreateNewQueue(queue));
     }
   }
 

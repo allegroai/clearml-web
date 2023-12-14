@@ -7,7 +7,7 @@
       [class.hide-item]="sharedView"
       [showArchived]="isArchived"
       [minimize]="(isSmallScreen$ | async).matches"
-      (toggleArchived)="isArchivedChanged.emit($event)"
+      (toggleArchived)="onIsArchivedChanged($event)"
     ></sm-toggle-archive>
     <sm-button-toggle
       [disabled]="!tableMode"
@@ -31,13 +31,6 @@
       [tableFilters]="tableFilters"
       (clearTableFilters)="clearTableFilters.emit(tableFilters)"
     ></sm-clear-filters-button>
-    <sm-menu class="download-btn" buttonClass="al-icon al-ico-download pointer lm" panelClasses="light-theme"
-             [showCart]="false" smTooltip="Download table as CSV" [disabled]="noData" data-id="downloadCSV">
-      <sm-menu-item (itemClicked)="downloadTableAsCSV.emit()" itemLabel="Download on screen items"></sm-menu-item>
-      <sm-menu-item (itemClicked)="downloadFullTableAsCSV.emit()"
-                    [itemLabel]="'Download first '+ (maxDownloadItems$ | async) +' items'"></sm-menu-item>
-    </sm-menu>
-
     <sm-experiment-custom-cols-menu
       *ngIf="!minimizedView"
       [metricVariants]="metricVariants"

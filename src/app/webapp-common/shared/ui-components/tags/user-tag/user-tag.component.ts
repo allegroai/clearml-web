@@ -1,19 +1,10 @@
 import {Component, Input, Output, EventEmitter} from '@angular/core';
 import {TagColor} from '../../../../core/actions/projects.actions';
-import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
-import {NgIf} from '@angular/common';
-import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'sm-user-tag',
   templateUrl: './user-tag.component.html',
-  styleUrls: ['./user-tag.component.scss'],
-  imports: [
-    TooltipDirective,
-    NgIf,
-    MatProgressSpinnerModule
-  ],
-  standalone: true
+  styleUrls: ['./user-tag.component.scss']
 })
 export class UserTagComponent {
   @Input() caption: string;

@@ -16,7 +16,7 @@ $search-font-size: 14px;
     border-radius: 4px 4px 0 0;
 
     &.active {
-      width: 100%;
+      width: 200px;
 
       &.with-counter {
         width: 300px;
@@ -161,7 +161,7 @@ $search-font-size: 14px;
       input {
         background-color: $blue-700;
         border-bottom: 2px solid;
-        border-color: $blue-300;
+        border-color: $blue-grey;
         color: $blue-280;
         font-weight: 400;
         padding-right: 28px;
@@ -215,7 +215,7 @@ $search-font-size: 14px;
         color: $blue-400;
       }
       .separator {
-        background: $blue-200;
+        background: $blue-250;
       }
     }
   }
@@ -226,7 +226,7 @@ $search-font-size: 14px;
 
     .search-input {
       color: $blue-280;
-      border-color: $blue-300;
+      border-color: $blue-grey;
 
       &:focus {
         border-color: $blue-500;

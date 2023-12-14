@@ -15,6 +15,7 @@ import {NG_VALUE_ACCESSOR} from '@angular/forms';
     }]
 })
 export class DurationInputComponent extends TemplateFormSectionBase {
+  public val = 0;
   public ms = '0';
   public seconds = '0';
   public minutes = '0';
@@ -22,7 +23,7 @@ export class DurationInputComponent extends TemplateFormSectionBase {
   public inEdit: boolean;
 
 
-  override set value(val) {  // this value is updated by programmatic changes if( ngModelValue !== undefined && this.ngModelValue !== ngModelValue){
+  set value(val) {  // this value is updated by programmatic changes if( ngModelValue !== undefined && this.ngModelValue !== ngModelValue){
     this.inEdit = false;
     if (val !== undefined) {
       this.val = val;
@@ -32,7 +33,6 @@ export class DurationInputComponent extends TemplateFormSectionBase {
 
   constructor(private eRef: ElementRef, private cdr: ChangeDetectorRef) {
     super();
-    this.val = 0;
   }
 
   @HostListener('document:click', ['$event'])

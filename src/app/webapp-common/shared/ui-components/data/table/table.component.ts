@@ -13,37 +13,25 @@ import {
   OnInit,
   Output,
   QueryList,
+  Renderer2,
   TemplateRef,
   TrackByFunction,
   ViewChild,
   ViewChildren
 } from '@angular/core';
-import {get, isArray, isString} from 'lodash-es';
+import {get} from 'lodash-es';
 import {MenuItem, PrimeTemplate, SortMeta} from 'primeng/api';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {ContextMenu} from 'primeng/contextmenu';
-import {
-  Table,
-  TableColumnReorderEvent,
-  TableContextMenuSelectEvent,
-  TableRowCollapseEvent,
-  TableRowExpandEvent
-} from 'primeng/table';
-import {BehaviorSubject, combineLatest, fromEvent, interval, startWith, Subject, Subscription} from 'rxjs';
-import {debounce, filter, take, throttleTime} from 'rxjs/operators';
+import {Table} from 'primeng/table';
+import {BehaviorSubject, fromEvent, Subject, Subscription, startWith, combineLatest, interval} from 'rxjs';
+import {debounce, debounceTime, filter, take, throttleTime} from 'rxjs/operators';
 import {custumFilterFunc, custumSortSingle} from './overrideFilterFunc';
 import {ColHeaderTypeEnum, ISmCol, TableSortOrderEnum} from './table.consts';
 import {Store} from '@ngrx/store';
 import {selectScaleFactor} from '@common/core/reducers/view.reducer';
 import {trackById} from '@common/shared/utils/forms-track-by';
 import {sortCol} from '@common/shared/utils/sortCol';
-import {ExportToCsv, Options} from 'export-to-csv';
-import {prepareColsForDownload} from '@common/shared/utils/download';
-
-export interface TableContextMenuSelectEventExt extends Omit<TableContextMenuSelectEvent, 'index'> {
-  single?: boolean;
-  index?: number;
-}
 
 @Component({
   selector: 'sm-table',
@@ -51,25 +39,26 @@ export interface TableContextMenuSelectEventExt extends Omit<TableContextMenuSel
   styleUrls: ['./table.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class TableComponent<D extends {id: string}> implements AfterContentInit, AfterViewInit, OnInit, OnDestroy {
+export class TableComponent implements AfterContentInit, AfterViewInit, OnInit, OnDestroy {
 
   public active = false;
-  public bodyTemplate: TemplateRef<{$implicit: ISmCol; rowData: D; rowIndex: number; expanded: boolean}>;
-  public cardTemplate: TemplateRef<{rowData: D; rowNumber: number; selected: boolean}>;
-  public footerTemplate: TemplateRef<{$implicit: ISmCol}>;
-  public rowExpansionTemplate: TemplateRef<{$implicit: D; lastFrame: boolean}>;
-  public cardHeaderTemplate: TemplateRef<null>;
-  public checkboxTemplate: TemplateRef<{$implicit: ISmCol}>;
-  public sortFilterTemplate: TemplateRef<{$implicit: ISmCol}>;
+  public bodyTemplate: TemplateRef<any>;
+  public sortTemplate: TemplateRef<any>;
+  public cardTemplate: TemplateRef<any>;
+  public footerTemplate: TemplateRef<any>;
+  public rowExpansionTemplate: TemplateRef<any>;
+  public cardHeaderTemplate: TemplateRef<any>;
+  public checkboxTemplate: any;
+  public sortFilterTemplate: any;
+  public headerTemplate: TemplateRef<any>;
   public trackByColFn: TrackByFunction<ISmCol> = trackById;
   private loadMoreSubscription: Subscription;
-  private loadMoreDebouncer: Subject<null>;
+  private loadMoreDebouncer: Subject<any>;
   public menuItems = [] as MenuItem[];
   minView: boolean;
   private _filters: { [s: string]: FilterMetadata };
   private readonly isChrome = navigator.userAgent.indexOf('Chrome') > -1;
   public lastRowExpanded: boolean;
-  public noDataTop: number;
 
 
   readonly colHeaderTypeEnum = ColHeaderTypeEnum;
@@ -78,24 +67,26 @@ export class TableComponent<D extends {id: string}> implements AfterContentInit,
   loadButton: ElementRef<HTMLDivElement>;
   @ViewChildren('loadButton') loadButtons: QueryList<ElementRef<HTMLDivElement>>;
   @ViewChild('cm', {static: true}) menu: ContextMenu;
-  @ContentChildren(PrimeTemplate) templates: QueryList<PrimeTemplate>;
-  private _tableData: D[];
+  @ContentChildren(PrimeTemplate) templates: QueryList<any>;
+  private _tableData: any;
   private _columnsOrder: string[];
   public loading: boolean;
+  private scrollLeft = 0;
+  public buttonLeft: number;
+  public contextButtonPosition: number;
   private scaleFactor: number;
   private waiting: boolean;
   private scrollContainer: HTMLDivElement;
+  private updateLoadButton$ = new BehaviorSubject<Event>(null);
   private resize$ = new BehaviorSubject<number>(null);
   private sub = new Subscription();
 
-  @Input() autoLoadMore = false;
+  @Input() autoLoadMore: boolean = false;
   @Input() columnResizeMode = 'expand' as 'fit' | 'expand';
   @Input() expandableRows = false;
-  @Input() expandRowOnClick = true;
   @Input() initialColumns;
   private waitForClick: number;
-
-  @Input() set tableData(tableData: any) {
+  @Input() set tableData(tableData) {
     this.loading = false;
     this.rowsNumber = tableData ? tableData.length : 0;
     this._tableData = tableData;
@@ -142,21 +133,22 @@ export class TableComponent<D extends {id: string}> implements AfterContentInit,
   @Input() rowHeight = 48;
   @Input() cardHeight = 130;
   @Input() lazyLoading = false;
-  @Input() keyboardControl = false;
+  @Input() keyboardControl: boolean = false;
   @Input() noMoreData: boolean;
   @Input() rowHover: boolean;
-  @Input() noHeader = false;
-  @Input() simple = false;
+  @Input() noHeader: boolean = false;
+  @Input() simple: boolean = false;
   @Input() expandedRowKeys: { [s: string]: boolean } = {};
-  @Input() rowExpandMode:  'multiple' | 'single' = 'multiple';
 
 
   @Input() set minimizedView(minView: boolean) {
+    const delay = this.minView === undefined ? 0 : 3000;
+
     this.minView = minView;
     if (!minView) {
       window.setTimeout(() => this.table && this.updateFilter());
     }
-    this.calcResize();
+    this.resize$.next(delay);
   }
 
   @Input() set filters(filters: { [s: string]: FilterMetadata }) {
@@ -174,19 +166,17 @@ export class TableComponent<D extends {id: string}> implements AfterContentInit,
   @Input() checkedItems = [];
   @Input() virtualScroll: boolean;
   @Input() globalFilterFields: string[];
-  @Input() enableTableSearch = false;
+  @Input() enableTableSearch: boolean = false;
   @Input() minimizedTableHeader: string;
   @Input() hasExperimentUpdate: boolean;
 
   @Output() sortChanged = new EventEmitter<{ field: ISmCol['id']; isShift: boolean }>();
-  @Output() rowClicked = new EventEmitter<{ e: MouseEvent; data: D }>();
-  @Output() rowDoubleClicked = new EventEmitter<{ e: MouseEvent; data: D }>();
-  @Output() rowSelectionChanged = new EventEmitter<{ data: D; originalEvent?: Event }>();
-  @Output() rowExpanded = new EventEmitter<TableRowExpandEvent>();
-  @Output() rowCollapsed = new EventEmitter<TableRowCollapseEvent>();
+  @Output() rowClicked = new EventEmitter<{e: MouseEvent; data: any}>();
+  @Output() rowDoubleClicked = new EventEmitter<{e: MouseEvent; data: any}>();
+  @Output() rowSelectionChanged = new EventEmitter<{ data: Array<any>; originalEvent?: Event }>();
   @Output() firstChanged = new EventEmitter();
   @Output() loadMoreClicked = new EventEmitter();
-  @Output() rowRightClick = new EventEmitter<{ e: Event; rowData; single?: boolean }>();
+  @Output() rowRightClick = new EventEmitter<{e: MouseEvent; rowData; single?: boolean}>();
   @Output() colReordered = new EventEmitter();
   @Output() columnResized = new EventEmitter<{ columnId: string; widthPx: number }>();
   search: string;
@@ -196,6 +186,7 @@ export class TableComponent<D extends {id: string}> implements AfterContentInit,
   }
 
   private calcResize() {
+    this.updateLoadButton$.next(null);
     if (this.table && this.resizableColumns) {
       const element = (this.table.el.nativeElement as HTMLDivElement);
       let width = element.getBoundingClientRect().width;
@@ -204,16 +195,17 @@ export class TableComponent<D extends {id: string}> implements AfterContentInit,
       }
       let totalWidth = 0;
       if (this.minView) {
-        // if (this.table?.styleElement) {
-        //   this.table.styleElement.innerHTML = '';
-        // }
-        totalWidth = width;
-        this.table.columnWidthsState = `${totalWidth - 4}`;
+        if (this.table?.styleElement) {
+          this.table.styleElement.innerHTML = '';
+        }
+        totalWidth = width - (this.isChrome ? 14 : 0);
       } else {
         this.table.destroyStyleElement();
         this.table.createStyleElement();
-        this.table.columnWidthsState = this.columns.map((col, index) => {
-          let colWidth: number;
+        let innerHTML = '';
+        this.columns.forEach((col, index) => {
+          let colWidth;
+          let grow = 0;
           if (col.style?.width?.endsWith('px')) {
             colWidth = parseInt(col.style.width.slice(0, -2), 10);
             totalWidth += colWidth;
@@ -221,16 +213,23 @@ export class TableComponent<D extends {id: string}> implements AfterContentInit,
             colWidth = element.getElementsByTagName('th')[index]?.getBoundingClientRect().width || 0;
             totalWidth += this.scaleFactor ? colWidth * this.scaleFactor / 100 : colWidth;
           }
-          return colWidth;
-        }).join(',');
+          if (index === this.columns.length - 1 && totalWidth < width) {
+            grow = 1;
+          }
+          innerHTML += `
+                #${this.table.id}-table .p-datatable-thead > tr:not(.cards-table) > th:nth-child(${index + 1}),
+                #${this.table.id}-table .p-datatable-tbody > tr:not(.cards-table) > td:nth-child(${index + 1}),
+                #${this.table.id}-table .p-datatable-tfoot > tr:not(.cards-table) > td:nth-child(${index + 1}) {
+                    flex: ${grow} 0 ${colWidth}px !important
+                }
+            `;
+        });
+        this.table.styleElement.innerHTML = innerHTML;
         totalWidth = Math.max(totalWidth, width);
       }
-      totalWidth = totalWidth - (this.isChrome ? 14 : 0);
-      this.table.tableWidthState = `${totalWidth}`;
-      this.table.restoreColumnWidths();
+      this.renderer.setStyle(this.table.tableViewChild.nativeElement, 'width', `${totalWidth}px`);
+      this.renderer.setStyle(this.table.tableViewChild.nativeElement, 'min-width', `${totalWidth}px`);
     }
-    this.noDataTop = this.table?.wrapperViewChild.nativeElement.getBoundingClientRect().height / 2 - this.rowHeight / 2 - 1;
-    this.noDataTop && this.cdr.detectChanges();
   }
 
   @HostListener('keydown', ['$event'])
@@ -259,6 +258,7 @@ export class TableComponent<D extends {id: string}> implements AfterContentInit,
 
   constructor(
     private element: ElementRef,
+    private renderer: Renderer2,
     private cdr: ChangeDetectorRef,
     private store: Store
   ) {
@@ -269,7 +269,7 @@ export class TableComponent<D extends {id: string}> implements AfterContentInit,
         () => this.loadMoreClicked.emit()
       );
 
-    this.store.select(selectScaleFactor)
+    store.select(selectScaleFactor)
       .pipe(filter(s => !!s), take(1))
       .subscribe(scale => this.scaleFactor = scale);
 
@@ -281,6 +281,10 @@ export class TableComponent<D extends {id: string}> implements AfterContentInit,
         debounce(([delay]) => interval(typeof delay === 'number' ? delay : 50))
       )
       .subscribe(() => this.calcResize()));
+
+    this.sub.add(this.updateLoadButton$
+      .pipe(debounceTime(50))
+      .subscribe(e => this.updateLoadButton(e)));
   }
 
   ngOnInit(): void {
@@ -294,15 +298,17 @@ export class TableComponent<D extends {id: string}> implements AfterContentInit,
         this.table = item;
         this.scrollContainer = this.table.el.nativeElement.getElementsByClassName('p-datatable-wrapper')[0] as HTMLDivElement;
         if (this.scrollContainer) {
-          this.scrollContainer.onscroll = () => {
+          this.scrollContainer.onscroll = (e: Event) => {
             if (!this.waiting) {
               this.waiting = true;
               window.setTimeout(() => {
                 this.waiting = false;
+                this.updateLoadButton$.next(e);
               }, 60);
             }
           };
         }
+        this.updateLoadButton$.next(null);
         this.updateFilter();
       }
     };
@@ -315,6 +321,7 @@ export class TableComponent<D extends {id: string}> implements AfterContentInit,
       .pipe(filter((comps: QueryList<ElementRef<HTMLDivElement>>) => !!comps.first), take(1))
       .subscribe((comps: QueryList<ElementRef<HTMLDivElement>>) => {
         this.loadButton = comps.first;
+        this.updateLoadButton$.next(null);
       });
   }
 
@@ -323,6 +330,12 @@ export class TableComponent<D extends {id: string}> implements AfterContentInit,
       switch (item.getType()) {
         case 'body':
           this.bodyTemplate = item.template;
+          break;
+        case 'header':
+          this.headerTemplate = item.template;
+          break;
+        case 'sort':
+          this.sortTemplate = item.template;
           break;
         case 'card':
           this.cardTemplate = item.template;
@@ -365,7 +378,7 @@ export class TableComponent<D extends {id: string}> implements AfterContentInit,
   }
 
   onRowSelected(event) {
-    if (this.selection && !Array.isArray(this.selection) && event.data.id === this.selection.id) {
+    if (this.selection && event.data.id === this.selection.id) {
       this.rowSelectionChanged.emit({data: null, originalEvent: event.originalEvent});
     } else {
       this.rowSelectionChanged.emit(event);
@@ -382,20 +395,13 @@ export class TableComponent<D extends {id: string}> implements AfterContentInit,
 
   public scrollToIndex(rowIndex) {
     if (rowIndex > -1 && this.table) {
-      if (this.virtualScroll) {
-        const {height} = this.table.el.nativeElement.getBoundingClientRect();
-        const rowsInPage = height / this.rowHeight;
-        const maxScroll = Math.ceil(this.rowsNumber - rowsInPage);
-        this.table.scrollToVirtualIndex(Math.min(maxScroll, rowIndex));
-      } else {
-        const row = this.table.el.nativeElement.getElementsByTagName('tr')[rowIndex] as HTMLTableRowElement;
-        if (row) {
-          let location = row.offsetTop;
-          if (rowIndex + 1 === this.tableData.length) {
-            location += row.getBoundingClientRect().height;
-          }
-          this.table.scrollTo({top: location, behavior: 'smooth'});
+      const row = this.table.el.nativeElement.getElementsByTagName('tr')[rowIndex] as HTMLTableRowElement;
+      if (row) {
+        let location = row.offsetTop;
+        if (rowIndex + 1 === this.tableData.length) {
+          location += row.getBoundingClientRect().height;
         }
+        this.table.scrollTo({top: location, behavior: 'smooth'});
       }
     }
   }
@@ -409,7 +415,7 @@ export class TableComponent<D extends {id: string}> implements AfterContentInit,
     this.firstChanged.emit(event);
   }
 
-  openContext({originalEvent, data, single}: TableContextMenuSelectEventExt) {
+  openContext({originalEvent, data, single}: { originalEvent: MouseEvent; data: any; single?: boolean }) {
     if (this.rowRightClick.observed) {
       this.rowRightClick.emit({e: originalEvent, rowData: data, single});
       if (this.table) {
@@ -423,14 +429,14 @@ export class TableComponent<D extends {id: string}> implements AfterContentInit,
     return item?.id || item?.name || index;
   }
 
-  // public locateInTable() {
-  //   const selectedTask = this.selection;
-  //   const tableData = this.table.filteredValue ? this.table.filteredValue : this.table.value;
-  //   const rowIndex = tableData.findIndex((task) => task.id === selectedTask.id);
-  //   const first = rowIndex > 0 ? (rowIndex - rowIndex % 10) : 0;
-  //   this.first = first;
-  //   this.firstChanged.emit(first);
-  // }
+  public locateInTable() {
+    const selectedTask = this.selection;
+    const tableData = this.table.filteredValue ? this.table.filteredValue : this.table.value;
+    const rowIndex = tableData.findIndex((task) => task.id === selectedTask.id);
+    const first = rowIndex > 0 ? (rowIndex - rowIndex % 10) : 0;
+    this.first = first;
+    this.firstChanged.emit(first);
+  }
 
   getBodyData(rowData, col) {
     return get(rowData, col.id);
@@ -451,22 +457,22 @@ export class TableComponent<D extends {id: string}> implements AfterContentInit,
   }
 
   getCurrentIndex() {
-    if (this.selection && !Array.isArray(this.selection)) {
-      return this.tableData.findIndex((row) => row.id === (this.selection as D).id);
+    if (this.selection) {
+      return this.tableData.findIndex((row) => row.id === this.selection.id);
     } else {
       return 0;
     }
   }
 
   loadMore() {
-    this.loading = true;
-    this.loadMoreDebouncer.next(null);
+      this.loading = true;
+      this.loadMoreDebouncer.next(null);
   }
 
-  onColReorder($event: TableColumnReorderEvent) {
+  onColReorder($event: any) {
     const columnsList = $event.columns.map(column => column.id);
     this.colReordered.emit(columnsList);
-    this.resize();
+    this.calcResize();
   }
 
   orderColumns() {
@@ -476,13 +482,25 @@ export class TableComponent<D extends {id: string}> implements AfterContentInit,
     }
   }
 
-  isRowSelected(entity: { id: string }) {
+  isRowSelected(entity: { id: any }) {
     if (!entity) {
       return false;
     }
 
     return this.checkedItems?.length > 0 &&
       (this.checkedItems.some((selectedEntity: { id: string }) => selectedEntity?.id === entity.id));
+  }
+
+  private updateLoadButton(e: Event) {
+    if (e) {
+      this.scrollLeft = (e.target as HTMLDivElement).scrollLeft;
+    }
+    if (this.table?.el?.nativeElement) {
+      const width = this.table.el.nativeElement.getBoundingClientRect().width * this.scaleFactor / 100;
+      this.buttonLeft = (width / 2) - 70 + this.scrollLeft;
+      this.contextButtonPosition = width - 70 + this.scrollLeft;
+    }
+    this.cdr.detectChanges();
   }
 
   private updateFilter() {
@@ -496,12 +514,12 @@ export class TableComponent<D extends {id: string}> implements AfterContentInit,
   }
 
   focusSelected() {
-    this.table?.el?.nativeElement.getElementsByClassName('selected')[0]?.focus();
+    this.table.el.nativeElement.getElementsByClassName('selected')[0]?.focus();
   }
 
-  colResize({delta, element}: { delta: number; element: HTMLElement }) {
+  colResize({delta, element}: { delta: number; element: HTMLTableHeaderCellElement }) {
     if (delta) {
-      setTimeout(() => {
+      setTimeout( () => {
         const width = element.clientWidth;
         const columnId = element.attributes['data-col-id']?.value;
         this.columnResized.emit({columnId, widthPx: width});
@@ -545,49 +563,19 @@ export class TableComponent<D extends {id: string}> implements AfterContentInit,
     return this.sortFields.find(field => field.field === colId)?.order;
   }
 
-  checkClick(param: { data: D; e: MouseEvent }) {
-    if (param.e.type === 'dblclick' || this.waitForClick) {
+  checkClick(param: { data: any; e: MouseEvent }) {
+    if (param.e.type === 'dblclick') {
       window.clearTimeout(this.waitForClick);
-      this.waitForClick = null;
       this.rowDoubleClicked.emit(param);
     } else {
       this.waitForClick = window.setTimeout(() => {
         this.rowClicked.emit(param);
-        this.waitForClick = null;
-      }, 250);
+      }, 50);
     }
   }
 
-  updateNumberOfRows({event, expanded}: { event: TableRowExpandEvent; expanded: boolean }) {
-    const expandedIndex = Object.values(this.tableData).findIndex((row: D) => row.id === event.data.id);
+  updateNumberOfRows({event, expanded}: {event: any; expanded: boolean}) {
+    const expandedIndex = Object.values(this.tableData).findIndex((row: any) => row.id === event.data.id);
     this.lastRowExpanded = expanded && expandedIndex === this.rowsNumber - 1;
   }
-
-
-  downloadTableAsCSV(tableName?: string) {
-    const options: Options = {
-      filename: `${tableName}${tableName ? '-' : ''}table`,
-      showLabels: true,
-      useKeysAsHeaders: true
-    };
-
-    const downloadCols = prepareColsForDownload(this.columns);
-    options.headers = downloadCols.map(dCol=> dCol.name);
-    const rows = this.tableData.map(row =>
-      downloadCols.reduce((acc, col) => {
-        const key = col.field;
-        const val = get(row, key, '');
-        acc[col.name] = isArray(val) ? val.toString() : isString(val) ? val.replace(/\r?\n|\r/g
-          , '') : val;
-        return acc;
-      }, {})
-    );
-
-    const csvExporter = new ExportToCsv(options);
-    csvExporter.generateCsv(rows);
-  }
-
-  isSelected = (rowData: D) =>
-    Array.isArray(this.selection) ? this.selection?.some(s => s.id === rowData.id) : this.selection?.id === rowData?.id;
-
 }

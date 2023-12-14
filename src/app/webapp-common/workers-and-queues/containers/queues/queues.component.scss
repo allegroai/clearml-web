@@ -3,16 +3,14 @@
 :host {
   display: flex !important;
   flex-direction: column;
-  gap: 24px;
-  height: 100%;
+
+  //as-split {
+    //height: calc(100% - #{$graph-height});
+    //min-height: 180px;
+  //}
 
   sm-queue-stats {
-    margin: 0 48px;
-  }
-}
-
-@media (max-height: 750px) {
-  :host {
-    height: unset;
+    display: block;
+    margin: 0 48px 20px;
   }
 }

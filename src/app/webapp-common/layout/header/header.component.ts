@@ -17,7 +17,6 @@ import {LoginService} from '~/shared/services/login.service';
 import {selectUserSettingsNotificationPath} from '~/core/reducers/view.reducer';
 import {selectInvitesPending} from '~/core/reducers/users.reducer';
 import {MESSAGES_SEVERITY} from '@common/constants';
-import {UsersGetInvitesResponseInvites} from '~/business-logic/model/users/usersGetInvitesResponseInvites';
 
 @Component({
   selector: 'sm-header',
@@ -28,29 +27,29 @@ import {UsersGetInvitesResponseInvites} from '~/business-logic/model/users/users
 export class HeaderComponent implements OnInit, OnDestroy {
   @Input() isShareMode: boolean;
   @Input() isLogin: boolean;
-  showLogo: boolean;
+  isDashboard: boolean;
   profile: boolean;
   userFocus: boolean;
-  public environment$ = this.configService.getEnvironment();
+  environment = ConfigurationService.globalEnvironment;
   public user: Observable<GetCurrentUserResponseUserObject>;
   public activeWorkspace: GetCurrentUserResponseUserObjectCompany;
   public url: Observable<string>;
-  public invitesPending$: Observable<UsersGetInvitesResponseInvites[]>;
+  public invitesPending$: Observable<any[]>;
+  public userNotificationPath: string;
   private sub = new Subscription();
-  public userNotificationPath$: Observable<string>;
 
   constructor(
-    private store: Store,
+    private store: Store<any>,
     private dialog: MatDialog,
     private tipsService: TipsService,
     private loginService: LoginService,
     private router: Router,
-    private activeRoute: ActivatedRoute,
-    private configService: ConfigurationService
+    private activeRoute: ActivatedRoute
+
   ) {
     this.url = this.store.select(selectRouterUrl);
     this.user = this.store.select(selectCurrentUser);
-    this.userNotificationPath$ = this.store.select(selectUserSettingsNotificationPath);
+    this.sub.add(this.store.select(selectUserSettingsNotificationPath).subscribe(path => this.userNotificationPath = path));
     this.invitesPending$ = this.store.select(selectInvitesPending);
     this.sub.add(this.store.select(selectActiveWorkspace)
       .pipe(
@@ -73,7 +72,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   getRouteData() {
     this.userFocus = !!this.activeRoute?.firstChild?.snapshot.data?.userFocus;
-    this.showLogo = this.activeRoute?.firstChild?.snapshot.url?.[0]?.path === 'dashboard' || this.activeRoute?.firstChild?.snapshot.data.hideSideNav;
+    this.isDashboard = this.activeRoute?.firstChild?.snapshot.url?.[0]?.path === 'dashboard';
   }
 
   ngOnDestroy(): void {
@@ -98,8 +97,15 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.dialog.open(WelcomeMessageComponent, {data: {step: 2}});
   }
 
-  openAppsAwareness($event: MouseEvent) {
+  openAppsAwareness($event: MouseEvent, appsYouTubeIntroVideoId: string) {
     $event.preventDefault();
-    this.store.dispatch(openAppsAwarenessDialog());
+    this.store.dispatch(openAppsAwarenessDialog({appsYouTubeIntroVideoId}));
+  }
+
+  navigate(link: string) {
+   const a = document.createElement('a');
+   a.target = '_blank';
+   a.href = link;
+   a.click();
   }
 }

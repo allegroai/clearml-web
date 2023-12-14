@@ -14,8 +14,8 @@
     (valueChanged)="searchQ($event)"
   ></sm-search>
   <div class="metrics" [class.has-title]="goBack.observed">
-    <div *ngIf="!filteredMetricTree && !(searchText?.length > 0)" class="p-4 pe-none">
-      <mat-spinner class="m-auto" [diameter]="32" [strokeWidth]="4" color="accent"></mat-spinner>
+    <div *ngIf="!filteredMetricTree && !(searchText?.length > 0)" class="d-flex h-100">
+      <mat-spinner class="spinner" diameter="80" strokeWidth="8"></mat-spinner>
     </div>
     <div *ngIf="filteredMetricTree && filteredMetricTree.length === 0" class="d-flex h-100">
       <div class="empty-state">No data to show</div>

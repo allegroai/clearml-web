@@ -1,24 +1,20 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
 import {MatSelectChange} from '@angular/material/select';
 import {Store} from '@ngrx/store';
-import {selectHideIdenticalFields, selectShowRowExtremes} from '../../reducers';
+import {selectHideIdenticalFields} from '../../reducers';
 import {Observable, Subscription} from 'rxjs';
-import {
-  refreshIfNeeded, setExportTable, setHideIdenticalFields, setShowGlobalLegend, setShowRowExtremes, setShowSearchExperimentsForCompare, toggleShowScalarOptions
-} from '../../actions/compare-header.actions';
+import {refreshIfNeeded, setHideIdenticalFields, setNavigationPreferences, setShowSearchExperimentsForCompare, toggleShowScalarOptions} from '../../actions/compare-header.actions';
 import {ActivatedRoute, Router} from '@angular/router';
 import {selectRouterParams, selectRouterQueryParams, selectRouterUrl} from '@common/core/reducers/router-reducer';
 import {setAutoRefresh} from '@common/core/actions/layout.actions';
 import {filter, map} from 'rxjs/operators';
 import {MatSlideToggleChange} from '@angular/material/slide-toggle';
 import {compareLimitations} from '@common/shared/entity-page/footer-items/compare-footer-item';
-import {SelectExperimentsForCompareComponent, allowAddExperiment$} from '../../containers/select-experiments-for-compare/select-experiments-for-compare.component';
+import {allowAddExperiment$, SelectExperimentsForCompareComponent} from '../../containers/select-experiments-for-compare/select-experiments-for-compare.component';
+import {MatDialog} from '@angular/material/dialog';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
-import {paramsActions} from '@common/experiments-compare/actions/experiments-compare-params.actions';
 import {SelectModelComponent} from '@common/select-model/select-model.component';
-import { MatDialog } from '@angular/material/dialog';
-import {setArchive} from "@common/core/actions/projects.actions";
 
 @Component({
   selector: 'sm-experiment-compare-header',
@@ -29,7 +25,6 @@ import {setArchive} from "@common/core/actions/projects.actions";
 export class ExperimentCompareHeaderComponent implements OnInit, OnDestroy {
   private routerSubscription: Subscription;
   public selectHideIdenticalFields$: Observable<boolean>;
-  public selectShowRowExtremes$: Observable<boolean>;
 
   public viewMode: string;
   public currentPage: string;
@@ -38,29 +33,26 @@ export class ExperimentCompareHeaderComponent implements OnInit, OnDestroy {
   public queryParamsViewMode$: Observable<string>;
   private autorRefreshSub: Subscription;
   private showMenuSub: Subscription;
+
   private selectedIds: string;
 
   @Input() entityType: EntityTypeEnum;
+  @Output() selectionChanged = new EventEmitter<string[]>();
 
   constructor(
-    private store: Store,
+    private store: Store<any>,
     private route: ActivatedRoute,
     private router: Router,
     private cdr: ChangeDetectorRef,
-    private refresh: RefreshService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private refresh: RefreshService
   ) {
     this.selectHideIdenticalFields$ = this.store.select(selectHideIdenticalFields);
-    this.selectShowRowExtremes$ = this.store.select(selectShowRowExtremes);
     this.queryParamsViewMode$ = this.store.select(selectRouterQueryParams)
       .pipe(map(params => params[this.currentPage]));
-    this.routerSubscription = this.store.select(selectRouterParams).subscribe((params) => {
-      this.selectedIds = params?.ids;
-    })
   }
 
   ngOnInit() {
-    this.store.dispatch(setArchive({archive: false}));
     this.autorRefreshSub = this.refresh.tick
       .pipe(filter(auto => auto === null))
       .subscribe(() => this.store.dispatch(refreshIfNeeded({payload: true, autoRefresh: true, entityType: this.entityType})));
@@ -68,11 +60,12 @@ export class ExperimentCompareHeaderComponent implements OnInit, OnDestroy {
     this.routerSubscription = this.store.select(selectRouterUrl).subscribe(() => {
       this.currentPage = this.route?.snapshot?.firstChild?.url?.[0]?.path;
       this.viewMode = this.route?.snapshot?.firstChild?.url?.[1]?.path;
-      if (this.currentPage && this.viewMode) {
-        this.store.dispatch(paramsActions.setView({primary: this.currentPage, secondary: this.viewMode}))
-      }
       this.cdr.detectChanges();
     });
+
+    this.routerSubscription = this.store.select(selectRouterParams).subscribe((params) => {
+      this.selectedIds = params.ids;
+    })
 
     this.allowAddExperiment$ = allowAddExperiment$(this.store.select(selectRouterParams));
   }
@@ -83,9 +76,12 @@ export class ExperimentCompareHeaderComponent implements OnInit, OnDestroy {
     this.showMenuSub?.unsubscribe();
   }
 
-  changeView(event: MatSelectChange) {
-    const page = event.value.replace(/.*_/, '');
+  changeView($event: MatSelectChange) {
+    const queryParam = {[this.currentPage]: $event.value};
+    const page = $event.value.replace(/.*_/, '');
+    this.store.dispatch(setNavigationPreferences({navigationPreferences: queryParam}));
     this.router.navigate([`./${this.currentPage}/${page}`], {
+      queryParams: queryParam,
       relativeTo: this.route,
       queryParamsHandling: 'merge'
     });
@@ -102,32 +98,19 @@ export class ExperimentCompareHeaderComponent implements OnInit, OnDestroy {
         height: '94vh',
         width: '98%',
         maxWidth: '100%'
-      }).afterClosed().pipe(filter(ids => !!ids)).subscribe(ids => this.updateUrl(ids));
+      }).afterClosed().pipe(filter(ids => !!ids)).subscribe(ids => this.selectionChanged.emit(ids));
     } else {
       this.dialog.open(SelectExperimentsForCompareComponent, {
         data: {entityType: this.entityType},
         height: '94vh',
         width: '98%',
         maxWidth: '100%'
-      }).afterClosed().pipe(filter(ids => !!ids)).subscribe(ids => this.updateUrl(ids));
+      }).afterClosed().pipe(filter(ids => !!ids)).subscribe(ids => this.selectionChanged.emit(ids));
     }
-  }
-
-  updateUrl(ids: string[]) {
-    this.router.navigate(
-      [{ids}, ...this.route.firstChild?.snapshot.url.map(segment => segment.path)],
-      {
-        queryParamsHandling: 'preserve',
-        relativeTo: this.route,
-      });
   }
 
   hideIdenticalFieldsToggled(event: MatSlideToggleChange) {
     this.store.dispatch(setHideIdenticalFields({payload: event.checked}));
-  }
-
-  showExtremesToggled(event: MatSlideToggleChange) {
-    this.store.dispatch(setShowRowExtremes({payload: event.checked}));
   }
 
   toggleSettings() {
@@ -140,14 +123,5 @@ export class ExperimentCompareHeaderComponent implements OnInit, OnDestroy {
 
   menuClosed() {
     this.store.dispatch(setShowSearchExperimentsForCompare({payload: false}));
-  }
-
-  exportCSV() {
-    this.store.dispatch(setExportTable({export: true}));
-  }
-
-  showGlobalLegend() {
-    this.store.dispatch(setShowGlobalLegend());
-
   }
 }

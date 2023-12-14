@@ -35,11 +35,8 @@ export class ProjectDialogComponent implements OnInit, OnDestroy {
 
   };
 
-  constructor(
-    private store: Store,
-    private matDialogRef: MatDialogRef<ProjectDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) data: { project: Project; mode: string }
-  ) {
+  constructor(private store: Store<any>, private matDialogRef: MatDialogRef<ProjectDialogComponent>,
+              @Inject(MAT_DIALOG_DATA) data: { project: Project; mode: string }) {
     this.baseProject = data.project;
     this.mode = data.mode;
     this.projects$ = this.store.select(selectTablesFilterProjectsOptions);
@@ -55,13 +52,13 @@ export class ProjectDialogComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.store.dispatch(createNewProjectActions.resetState());
+    this.store.dispatch(new createNewProjectActions.ResetState());
     this.creationStatusSubscription.unsubscribe();
   }
 
   public createProject(projectForm) {
     const project = this.convertFormToProject(projectForm);
-    this.store.dispatch(createNewProjectActions.createNewProject({req: project}));
+    this.store.dispatch(new createNewProjectActions.CreateNewProject(project));
   }
 
   moveProject(event: {location: string; name: string; fromName: string; toName: string; projectName: string}) {
@@ -86,7 +83,7 @@ export class ProjectDialogComponent implements OnInit, OnDestroy {
 
   filterSearchChanged($event: {value: string; loadMore?: boolean}) {
     !$event.loadMore && this.store.dispatch(resetTablesFilterProjectsOptions());
-    this.store.dispatch(getTablesFilterProjectsOptions({searchString: $event.value || '', loadMore: $event.loadMore,  allowPublic: false}));
+    this.store.dispatch(getTablesFilterProjectsOptions({searchString: $event.value || '', loadMore: $event.loadMore}));
   }
 
   closeDialog() {

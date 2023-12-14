@@ -6,7 +6,7 @@ import {DagManagerService, DagModelItem} from '@ngneat/dag';
 })
 export class DagManagerUnsortedService<T extends DagModelItem> extends DagManagerService<T> {
 
-  override convertArrayToDagModel(itemsArray: Array<T>): Array<Array<T>> {
+  convertArrayToDagModel(itemsArray: Array<T>): Array<Array<T>> {
     const result = [];
     const levels = {};
 

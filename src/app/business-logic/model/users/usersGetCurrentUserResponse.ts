@@ -10,13 +10,10 @@
  * Do not edit the class manually.
  */
 
-import {GetCurrentUserResponseUserObject} from '././getCurrentUserResponseUserObject';
-import {UsersGetCurrentUserResponseSettings} from "~/business-logic/model/users/usersGetCurrentUserResponseSettings";
+import { GetCurrentUserResponseUserObject } from '././getCurrentUserResponseUserObject';
 
 
 export interface UsersGetCurrentUserResponse {
-  user?: GetCurrentUserResponseUserObject;
-  getting_started?: object;
-  settings?: UsersGetCurrentUserResponseSettings;
-
+    user?: GetCurrentUserResponseUserObject;
+    getting_started?: object;
 }

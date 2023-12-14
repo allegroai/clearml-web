@@ -1,6 +1,8 @@
-import {Component, Input} from '@angular/core';
+import {Component, Input, OnDestroy} from '@angular/core';
 import {IModelInfo} from '../../shared/common-experiment-model.model';
-import {Model} from '~/business-logic/model/models/model';
+import {Model} from '../../../../business-logic/model/models/model';
+import {AdminService} from '~/shared/services/admin.service';
+import {Store} from '@ngrx/store';
 import {BaseClickableArtifactComponent} from '../base-clickable-artifact.component';
 
 
@@ -26,5 +28,9 @@ export class ExperimentOutputModelViewComponent extends BaseClickableArtifactCom
 
   get model(): IModelInfo {
     return this._model;
+  }
+
+  constructor(protected adminService: AdminService, protected store: Store<any>) {
+    super(adminService, store);
   }
 }

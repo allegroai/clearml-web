@@ -30,10 +30,10 @@
         <div class="match">{{searchCounterIndex + 1}} of {{searchResultsCount}}</div>
         <div class="separator"></div>
       </ng-container>
-      <i class="icon-button al-icon al-ico-ico-chevron-up" data-id="previousSearchResultButton"
+      <i class="icon-button al-icon al-ico-ico-chevron-up"
          [class.disabled]="empty || searchCounterIndex < 1"
          (click)="findNext(true)"></i>
-      <i class="icon-button al-icon al-ico-ico-chevron-down" data-id="nextSearchResultButton"
+      <i class="icon-button al-icon al-ico-ico-chevron-down"
          [class.disabled]="empty || searchCounterIndex + 1 === searchResultsCount || !searchResultsCount"
          (click)="findNext()"></i>
     </ng-container>

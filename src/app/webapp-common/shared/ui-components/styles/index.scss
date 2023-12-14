@@ -1,4 +1,5 @@
 @import "variables";
+@import "variables_v2";
 @import "mixins";
 @import "themes";
 @import './bootstrap-settings.scss';
@@ -6,6 +7,7 @@
 @import 'material-overide';
 @import "duration-input";
 @import "borders";
+
 /* You can add global styles to this file, and also import other style files */
 $dark-theme-input: map-get($dark-theme, input);
 $light-theme-input: map-get($light-theme, input);
@@ -30,15 +32,24 @@ body {
   @include generate-general();
 
   .dark-theme {
+    // background-color: $background-color;
 
     h4 {
       font-size: 14px;
-      font-weight: 500;
+      font-weight: bold;
     }
 
     option {
       color: map-get($dark-theme-select, option-color);
       background-color: map-get($dark-theme-select, option-bg);
+    }
+
+    a {
+      color: $blue-250;
+
+      &:hover {
+        color: #FFFFFF;
+      }
     }
 
     sm-menu .btn {
@@ -56,10 +67,18 @@ body {
       background-color: transparent;
     }
 
+    a {
+      color: $purple;
+
+      &:hover {
+        color: $purple;
+        text-decoration: underline;
+      }
+    }
 
     h4 {
       font-size: 14px;
-      font-weight: 500;
+      font-weight: bold;
     }
 
     option {

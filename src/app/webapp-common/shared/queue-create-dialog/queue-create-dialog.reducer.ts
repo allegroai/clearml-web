@@ -1,6 +1,6 @@
-import {createFeatureSelector, createReducer, createSelector, on} from '@ngrx/store';
-import {setCreationStatus, setQueues, resetState} from './queue-create-dialog.actions';
-import {Queue} from '~/business-logic/model/queues/queue';
+import {createFeatureSelector, createSelector} from '@ngrx/store';
+import {CREATE_QUEUE_ACTIONS} from './queue-create-dialog.actions';
+import {Queue} from '../../../business-logic/model/queues/queue';
 
 export type CreationStatusEnum = 'success' | 'failed' | 'inProgress';
 export const CREATION_STATUS = {
@@ -23,9 +23,15 @@ export const selectCreateQueueDialog = createFeatureSelector<ICreateQueueDialog>
 export const selectQueues            = createSelector(selectCreateQueueDialog, (state): Array<Queue> => state.queues);
 export const selectCreationStatus    = createSelector(selectCreateQueueDialog, (state): CreationStatusEnum => state.creationStatus);
 
-export const queueCreateDialogReducer = createReducer(
-  createQueueInitState,
-  on(setQueues, (state, action): ICreateQueueDialog => ({...state, queues: action.queues})),
-  on(setCreationStatus, (state, action): ICreateQueueDialog => ({...state, creationStatus: action.status})),
-  on(resetState, (): ICreateQueueDialog => ({...createQueueInitState})),
-);
+export function queueCreateDialogReducer<ActionReducer>(state: ICreateQueueDialog = createQueueInitState, action): ICreateQueueDialog {
+  switch (action.type) {
+    case CREATE_QUEUE_ACTIONS.SET_CREATION_STATUS:
+      return {...state, creationStatus: action.payload.creationStatus};
+    case CREATE_QUEUE_ACTIONS.SET_QUEUES:
+      return {...state, queues: action.payload.queues};
+    case CREATE_QUEUE_ACTIONS.RESET_STATE:
+      return {...createQueueInitState};
+    default:
+      return state;
+  }
+}

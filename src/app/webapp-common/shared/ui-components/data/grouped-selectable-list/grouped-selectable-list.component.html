@@ -10,16 +10,12 @@
     [class.has-children]="item.value.hasChildren"
     (click)="selectedItem(item, panelH)"
   >
-    <mat-panel-title>
     <div class="header-container" [ngClass]="{'unchecked' : isHideAllMode(item.value) || item.value.visible}">
       <div class="ellipsis item-key" [smTooltip]="item.key" [matTooltipShowDelay]="500"  smShowTooltipIfEllipsis>{{item.key}}</div>
+        <i (click)="groupCheck(item); $event.stopPropagation()"
+           [class]="(isHideAllMode(item.value) || item.value.visible? checkIcon[1] : checkIcon[0]) + ' al-icon sm'"
+           ></i>
     </div>
-    </mat-panel-title>
-    <mat-panel-description>
-      <i (click)="groupCheck(item); $event.stopPropagation()"
-         [class]="(isHideAllMode(item.value) || item.value.visible? checkIcon[1] : checkIcon[0]) + ' al-icon sm'"
-      ></i>
-    </mat-panel-description>
 
   </mat-expansion-panel-header>
   <ul class="list">

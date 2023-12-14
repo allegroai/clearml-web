@@ -9,8 +9,6 @@ import {
 } from '@angular/core';
 import {TagColorService} from '../../../services/tag-color.service';
 import {Observable} from 'rxjs';
-import {UserTagComponent} from '@common/shared/ui-components/tags/user-tag/user-tag.component';
-import {AsyncPipe, NgForOf, NgIf} from '@angular/common';
 
 export interface Tag {
   caption: string;
@@ -24,13 +22,6 @@ export interface Tag {
   selector: 'sm-tag-list',
   templateUrl: './tag-list.component.html',
   styleUrls: ['./tag-list.component.scss'],
-  standalone: true,
-  imports: [
-    UserTagComponent,
-    NgIf,
-    NgForOf,
-    AsyncPipe
-  ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TagListComponent {

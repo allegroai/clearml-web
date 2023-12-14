@@ -3,14 +3,6 @@ import {Credentials} from '../../core/reducers/common-auth-reducer';
 import {Observable} from 'rxjs';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {ProjectDialogComponent} from '../../shared/project-dialog/project-dialog.component';
-import {isGoogleCloudUrl} from '@common/settings/admin/base-admin-utils';
-
-
-export interface S3AccessDialogData {
-  credentials: Credentials;
-  provider: 's3' | 'gcs' | 'azure';
-  credentialsError: string;
-}
 
 @Component({
   selector   : 'sm-s3-access-resolver',
@@ -28,14 +20,13 @@ export class S3AccessResolverComponent {
   region: any;
   header: any;
   editMode: any;
-  title: string;
   public useSSL: boolean;
-  useGcsHmac = false;
+  public isAzure: boolean;
 
 
   constructor(
     private matDialogRef: MatDialogRef<ProjectDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: S3AccessDialogData
+    @Inject(MAT_DIALOG_DATA) public data: {credentials: Credentials; isAzure?: boolean; credentialsError}
   ) {
     const s3Credentials = data.credentials;
     this.bucket         = s3Credentials.Bucket;
@@ -44,22 +35,11 @@ export class S3AccessResolverComponent {
     this.secret         = s3Credentials.Secret;
     this.token          = s3Credentials.Token;
     this.region         = s3Credentials.Region;
+    this.isAzure        = data.isAzure;
     if (data.credentialsError) {
       this.header = this.header = `${data.credentialsError}, please check credentials for bucket <b>${this.bucket}</b>.`;
     }  else {
-      if (data?.provider !== 'gcs') {
-        this.header = `Please provide credentials for bucket <b>${this.bucket}</b>.`;
-      }
-    }
-    switch (data?.provider) {
-      case 'azure':
-        this.title = 'Azure Credentials';
-        break;
-      case 'gcs':
-        this.title = 'GCS Credentials';
-        break;
-      default:
-        this.title = 'S3 Credentials';
+      this.header = `Please provide credentials for bucket <b>${this.bucket}</b>.`;
     }
   }
 
@@ -86,9 +66,4 @@ export class S3AccessResolverComponent {
     });
   }
 
-  protected readonly isGoogleCloudUrl = isGoogleCloudUrl;
-
-  reload() {
-    window.location.reload();
-  }
 }

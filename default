@@ -1,0 +1,67 @@
+server {
+    listen       80 default_server;
+    listen       [::]:80 default_server;
+    server_name  _;
+    root         /usr/share/nginx/html;
+    proxy_http_version 1.1;
+    client_max_body_size 0;
+
+    # compression
+    gzip            on;
+    gzip_comp_level 9;
+    gzip_http_version 1.0;
+    gzip_min_length 512;
+    gzip_proxied    expired no-cache no-store private auth;
+    gzip_types  text/plain
+                text/css
+                application/json
+                application/javascript
+                application/x-javascript
+                text/xml application/xml
+                application/xml+rss
+                text/javascript
+                application/x-font-ttf
+                font/woff2
+                image/svg+xml
+                image/x-icon;
+
+    # Load configuration files for the default server block.
+    include /etc/nginx/default.d/*.conf;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    location /version.json {
+        add_header Cache-Control 'no-cache';
+    }
+
+    location /api {
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header Host $host;
+        proxy_pass http://shuyu-clearml-api.shuyu-clearml-ops:8008;
+        rewrite /api/(.*) /$1  break;
+    }
+
+    location /files {
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header Host $host;
+        proxy_pass http://shuyu-clearml-fileserver.shuyu-clearml-ops:8081;
+        rewrite /files/(.*) /$1  break;
+    }
+
+    location /widgets {
+        alias /usr/share/nginx/widgets;
+        try_files $uri $uri/ /widgets/index.html;
+        add_header Content-Security-Policy "frame-ancestors *";
+    }
+
+
+    error_page 404 /404.html;
+        location = /40x.html {
+    }
+
+    error_page 500 502 503 504 /50x.html;
+        location = /50x.html {
+    }
+}

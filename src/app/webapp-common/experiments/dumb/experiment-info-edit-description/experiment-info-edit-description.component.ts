@@ -1,5 +1,5 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
+import {IExperimentInfo} from '../../../../features/experiments/shared/experiment-info.model';
 
 @Component({
   selector: 'sm-experiment-info-edit-description',
@@ -8,7 +8,7 @@ import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.mod
 })
 export class ExperimentInfoEditDescriptionComponent implements OnInit {
   @Input() selectedExperiment: IExperimentInfo;
-  @Output() editDescription = new EventEmitter();
+  @Output() onDescription = new EventEmitter<null>();
 
   public isEntered = false;
   public isOpen = false;

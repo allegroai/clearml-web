@@ -3,42 +3,7 @@
 @use '../../../../../../node_modules/@angular/material/index' as mat;
 // Plus imports for other components in your app.
 $neon-yellow: #d3ff00;
-$purple: #4d66ff;
 $white-primary-text: rgba(white, 0.87);
-$dark-primary-text: rgba(black, 0.87);
-$sm-purple: (
-  50: lighten(#c3cdf0, 20%),
-  100: lighten(#c3cdf0, 15%),
-  200: lighten(#c3cdf0, 10%),
-  300: lighten(#c3cdf0, 5%),
-  400: #c3cdf0,
-  500: #c3cdf0,
-  600: #c3cdf0,
-  700: darken(#c3cdf0, 15%),
-  800: darken(#c3cdf0, 20%),
-  900: darken(#c3cdf0, 55%),
-  A100: $purple,
-  A200: darken($purple, 5%),
-  A400: darken($purple, 10%),
-  A700: darken($purple, 15%),
-  contrast: (
-    50: $dark-primary-text,
-    100: $dark-primary-text,
-    200: $dark-primary-text,
-    300: $dark-primary-text,
-    400: white,
-    500: white,
-    600: white,
-    700: white,
-    800: white,
-    900: white,
-    A100: white,
-    A200: white,
-    A400: white,
-    A700: white,
-  )
-);
-
 $sm-neon: (
   50: lighten($neon-yellow, 30%),
   100: lighten($neon-yellow, 25%),
@@ -82,9 +47,6 @@ $sm-neon: (
 $theme-primary: mat.define-palette(mat.$indigo-palette);
 $theme-accent: mat.define-palette(mat.$pink-palette, A200, A100, A400);
 
-$sm-dark-palette-primary: mat.define-palette($sm-purple);
-$sm-dark-palette-accent: mat.define-palette($sm-purple, A200, A100, A400);
-
 $sm-neon-palette-primary: mat.define-palette($sm-neon);
 $sm-neon-palette-accent: mat.define-palette($sm-neon, A200, A100, A400);
 // The warn palette is optional (defaults to red).
@@ -114,23 +76,12 @@ $sm-neon-theme: mat.define-dark-theme((
   density: -2
 ));
 
-$sm-dark-theme: mat.define-dark-theme((
-  color: (
-    primary: $sm-dark-palette-primary,
-    accent: $sm-dark-palette-accent,
-  ),
-  typography: $custom-typography,
-  density: -2
-));
 // Include theme styles for core and each component used in your app.
 // Alternatively, you can import and @include the theme mixins for each component
 // that you are using.
 @include mat.dialog-theme($theme);
 @include mat.slider-theme($sm-neon-theme);
 @include mat.form-field-theme($theme);
-@include mat.tooltip-theme($theme);
-
-@include mat.select-theme($sm-dark-theme);
 
 @import "src/app/webapp-common/shared/ui-components/styles/variables";
 
@@ -143,7 +94,6 @@ $sm-dark-theme: mat.define-dark-theme((
 html, body {
   height: 100%;
   overflow: hidden;
-  --mat-select-trigger-text-size: 14px;
 }
 
 body {
@@ -167,13 +117,6 @@ body {
   &.gap {
     gap: 12px !important;
   }
-}
-
-.ellipsis {
-  display: block;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
 }
 
 .mat-mdc-dialog-container {
@@ -298,7 +241,6 @@ sm-debug-image-snippet {
   .image-var {
     top: 8px;
     bottom: unset;
-    line-height: 20px;
   }
 }
 
@@ -327,68 +269,10 @@ sm-debug-image-snippet {
     }
   }
 
-.mat-mdc-select-panel {
-  padding: 0;
-  font-size: 14px;
-  --mdc-typography-body1-font-size: 14px;
-  --mdc-typography-body1-line-height: 16px;
-  --mat-select-trigger-text-size: 14px;
-
-  &.light-theme {
-    --mdc-theme-surface: white;
-    --mdc-theme-text-primary-on-background: #{$blue-500};
-  }
-
-  &.dark, &.black, &.dark-theme {
-    --mdc-theme-surface: #000;
-    border: 1px solid $blue-500;
-    --mat-select-panel-background-color: #000;
-    --mat-option-label-text-color: #{$blue-200};
-
-    .mat-mdc-option {
-      --mdc-theme-text-primary-on-background: #{$blue-200};
-    }
-  }
-
-  .mat-mdc-option {
-    --mdc-typography-body1-line-height: 36px;
-    --mat-menu-item-label-text-size: 14px;
-    min-height: 36px;
-  }
-
-  .mat-mdc-option {
-    --mdc-theme-text-primary-on-background: #{$blue-200};
-    border-radius: 4px;
-    height: 40px;
-    min-height: 40px;
-    line-height: 40px;
-    margin-bottom: 2px;
-
-    &:last-child {
-      margin-bottom: 0;
-    }
-
-    &.mat-mdc-selected:not(.mat-mdc-option-multiple), &.mat-active {
-      background: $blue-800;
-    }
-  }
-
- .mat-pseudo-checkbox-checked.mat-pseudo-checkbox-minimal::after {
-   color: $blue-200;
- }
-
-  .mat-mdc-option:hover:not(.mdc-list-item--disabled),
-  .mat-mdc-option:focus:not(.mdc-list-item--disabled),
-  .mat-mdc-option.mat-mdc-option-active,
-  .mat-mdc-option.mdc-list-item--selected:not(.mat-mdc-option-multiple):not(.mdc-list-item--disabled) {
-    background: $dark-grey-blue;
-  }
-}
-
 .dark-theme, .light-theme {
   .mat-mdc-form-field {
-    --mat-menu-item-label-text-line-height: 16;
-    --mat-menu-item-label-text-size: 14px;
+    --mdc-typography-body1-font-size: 14px;
+    --mdc-typography-body1-line-height: 16px;
 
     &.mat-form-field-appearance-outline {
       &.black {
@@ -434,44 +318,6 @@ sm-debug-image-snippet {
       }
     }
   }
-
-  .label-text {
-    color: $blue-250;
-    font-size: 14px;
-  }
-
-  .mat-mdc-slider.mdc-slider {
-    $size: 36px;
-    height: $size;
-
-    .mdc-slider__thumb {
-      height: $size;
-      width: $size;
-      left: -$size * 0.5;
-    }
-
-    .mat-ripple-element.mat-mdc-slider-active-ripple,
-    .mat-ripple-element.mat-mdc-slider-focus-ripple,
-    .mat-ripple-element.mat-mdc-slider-hover-ripple {
-      height: $size !important;
-      width: $size !important;
-      left: 0 !important;
-      top: 0 !important;
-    }
-  }
-
-  .mat-mdc-form-field {
-    &.no-bottom {
-      .mat-mdc-form-field-subscript-wrapper {
-        display: none;
-      }
-    }
-  }
-
-}
-
-.dark-theme .mdc-text-field--disabled .mdc-text-field__input {
-  color: rgba(255, 255, 255, 0.38);
 }
 
 .mat-mdc-form-field.smooth-input {
@@ -525,27 +371,4 @@ input[type=number] {
 
 ::-webkit-scrollbar-corner {
   background-color: transparent
-}
-
-.mat-mdc-tooltip {
-  &.sm-tooltip {
-    --mdc-plain-tooltip-container-color: #{$purple};
-
-    .mdc-tooltip__surface {
-      max-width: 400px;
-      font-size: 11px;
-      line-height: 1.55;
-      letter-spacing: 0.3px;
-    }
-
-    &.break-line {
-      .mdc-tooltip__surface {
-        white-space: pre-line;
-      }
-    }
-  }
-
-  &.parameter-tooltip {
-    margin: 6px auto 6px -74px;
-  }
 }

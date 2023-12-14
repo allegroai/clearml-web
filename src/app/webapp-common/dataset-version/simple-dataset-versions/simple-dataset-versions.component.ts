@@ -6,9 +6,13 @@ import {CountAvailableAndIsDisableSelectedFiltered} from '@common/shared/entity-
 import * as experimentsActions from '@common/experiments/actions/common-experiments-view.actions';
 import {INITIAL_CONTROLLER_TABLE_COLS} from '@common/pipelines-controller/controllers.consts';
 import {EXPERIMENTS_TABLE_COL_FIELDS} from '~/features/experiments/shared/experiments.const';
-import {take, withLatestFrom} from 'rxjs/operators';
-import {selectDefaultNestedModeForFeature} from '@common/core/reducers/projects.reducer';
-import {setBreadcrumbsOptions} from '@common/core/actions/projects.actions';
+import {Store} from '@ngrx/store';
+import {SmSyncStateSelectorService} from '@common/core/services/sync-state-selector.service';
+import {ActivatedRoute, Router} from '@angular/router';
+import {MatDialog} from '@angular/material/dialog';
+import {RefreshService} from '@common/core/services/refresh.service';
+import {take} from 'rxjs/operators';
+import {ExperimentsViewState} from '@common/experiments/reducers/experiments-view.reducer';
 
 @Component({
   selector: 'sm-simple-dataset-versions',
@@ -16,20 +20,27 @@ import {setBreadcrumbsOptions} from '@common/core/actions/projects.actions';
   styleUrls: ['./simple-dataset-versions.component.scss', '../../pipelines-controller/controllers.component.scss']
 })
 export class SimpleDatasetVersionsComponent extends ControllersComponent implements OnInit {
+  entityType = EntityTypeEnum.dataset;
+  public shouldOpenDetails = true;
   isArchived: boolean;
 
-  protected override getParamId(params) {
+  protected getParamId(params) {
     return params?.versionId;
   }
 
-  constructor() {
-    super();
-    this.entityType = EntityTypeEnum.dataset;
+  constructor(protected store: Store<ExperimentsViewState>,
+              protected syncSelector: SmSyncStateSelectorService,
+              protected route: ActivatedRoute,
+              protected router: Router,
+              protected dialog: MatDialog,
+              protected refresh: RefreshService
+  ) {
+    super(store, syncSelector, route, router, dialog, refresh);
     this.tableCols = INITIAL_CONTROLLER_TABLE_COLS.map((col) =>
       col.id === EXPERIMENTS_TABLE_COL_FIELDS.NAME ? {...col, header: 'VERSION NAME'} : col);
   }
 
-  override ngOnInit() {
+  ngOnInit() {
     super.ngOnInit();
     this.experiments$
       .pipe(take(1))
@@ -47,7 +58,7 @@ export class SimpleDatasetVersionsComponent extends ControllersComponent impleme
       });
   }
 
-  override createFooterItems(config: {
+  createFooterItems(config: {
     entitiesType: EntityTypeEnum;
     selected$: Observable<Array<any>>;
     showAllSelectedIsActive$: Observable<boolean>;
@@ -59,32 +70,6 @@ export class SimpleDatasetVersionsComponent extends ControllersComponent impleme
   }) {
     super.createFooterItems(config);
     this.footerItems.splice(5, 1);
-  }
-
-  override downloadTableAsCSV() {
-    this.table.table.downloadTableAsCSV(`ClearML ${this.selectedProject.id === '*'? 'All': this.selectedProject?.basename?.substring(0,60)} Datasets`);
-  }
-  override setupBreadcrumbsOptions() {
-    this.sub.add(this.selectedProject$.pipe(
-      withLatestFrom(this.store.select(selectDefaultNestedModeForFeature))
-    ).subscribe(([selectedProject, defaultNestedModeForFeature]) => {
-      this.store.dispatch(setBreadcrumbsOptions({
-        breadcrumbOptions: {
-          showProjects: !!selectedProject,
-          featureBreadcrumb: {
-            name: 'DATASETS',
-            url: defaultNestedModeForFeature['datasets'] ? 'datasets/simple/*/projects' : 'datasets'
-          },
-          projectsOptions: {
-            basePath: 'datasets/simple',
-            filterBaseNameWith: ['.datasets'],
-            compareModule: null,
-            showSelectedProject: selectedProject?.id !== '*',
-            ...(selectedProject && selectedProject?.id !== '*' && {selectedProjectBreadcrumb: {name: selectedProject?.basename}})
-          }
-        }
-      }));
-    }));
   }
 
 }

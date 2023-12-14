@@ -8,38 +8,22 @@
     [model]="((selectedTableModel$ | async) || selectedModel)"
     [editable]="!isExample"
     [backdropActive]="backdropActive$ | async"
-    [minimized]="minimized"
-    (minimizeClicked)="minimizeView()"
-    (maximizedClicked)="maximize()"
-    [isSharedAndNotOwner]="isSharedAndNotOwner$ | async"
     (modelNameChanged)="updateModelName($event)"
     (closeInfoClicked)="closePanel()"
   >
   </sm-model-info-header>
-  <div class="tab-nav" [class.minimized]="minimized">
+  <div class="tab-nav">
     <span class="leave for grid"></span>
     <sm-router-tab-nav-bar
       [splitSize]="splitSize$ | async"
       [links]="links"
     ></sm-router-tab-nav-bar>
-    <span class="refresh-position">
     <sm-experiment-settings
-      *ngIf="minimized && (scalars$ | async)"
-      [class.maximized]="!minimized"
       class="setting-icon"
-      [showSettings]="true"
+      [showSettings]="scalars$ | async"
       (toggleSettings)="toggleSettingsBar()">
     </sm-experiment-settings>
-    <sm-refresh-button
-      *ngIf="!minimized"
-      class="light-theme me-1"
-      (setAutoRefresh)="setAutoRefresh($event)"
-    >
-    </sm-refresh-button>
-    </span>
   </div>
-
-
   <div class="model-info-body">
     <router-outlet></router-outlet>
   </div>

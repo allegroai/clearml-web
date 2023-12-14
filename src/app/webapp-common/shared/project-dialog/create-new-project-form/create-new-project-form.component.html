@@ -5,7 +5,6 @@
     <mat-error *ngIf="name.touched && name.errors?.uniqueProject">*Project name in this path already exists.</mat-error>
     <mat-error *ngIf="name.touched && name.errors?.minlength">*Project name should contain more than 3 characters.</mat-error>
     <mat-error *ngIf="name.touched && name.errors?.emptyName && !name.errors?.minlength">*Project name can't contain only spaces.</mat-error>
-    <mat-error *ngIf="name.touched && name.errors?.pattern &&  !name.errors?.minlength">*Project name can't contain slash (/)</mat-error>
     <input name="projectName"
            [(ngModel)]="project.name"
            #name="ngModel"
@@ -15,7 +14,6 @@
            smUniqueNameValidator
            [existingNames]="[]"
            [parent]="targetFolder.value"
-           pattern="^[^\/]*$"
            required minlength="3" >
   </mat-form-field>
 
@@ -59,8 +57,8 @@
       >
         <div [innerHTML]="projectName | highlightSearchText:targetFolder.value"></div>
       </mat-option>
-      <div *ngIf="!projects" class="p-4 pe-none">
-        <mat-spinner class="m-auto" [diameter]="32" [strokeWidth]="4" color="accent"></mat-spinner>
+      <div *ngIf="!projects" style="line-height: 100px; pointer-events: none;">
+        <mat-spinner class="m-auto" [diameter]="80" [strokeWidth]="8"></mat-spinner>
       </div>
       <div *ngIf="projects && !noMoreOptions" (smScrollEnd)="!loading && loadMore(targetFolder.value)" class="text-center">Loading more...</div>
       <mat-option disabled style="height: 0; min-height: 0;"></mat-option> <!-- Empty mat-option, so the autocomplete menu will always pop -->
@@ -93,8 +91,10 @@
            [pattern]="outputDestPattern"
            placeholder="e.g. s3://bucket. gs://bucket">
   </mat-form-field>
-  <div class="w-100 create-project-button">
-    <button class="btn btn-dark-fill center" data-id="Create Project" [disabled]="projectForm.invalid" (click)="send()">CREATE PROJECT
-    </button>
+  <div class="row">
+    <div class="col-24 create-project-button">
+      <button class="btn btn-dark-fill center" data-id="Create Project" [disabled]="projectForm.invalid" (click)="send()">CREATE PROJECT
+      </button>
+    </div>
   </div>
 </form>

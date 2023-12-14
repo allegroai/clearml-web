@@ -1,5 +1,5 @@
 @mixin icon($url) {
-  background-image: url('../../../../../../#{$url}');
+  background-image: url('../../../../../' + $url);
   background-repeat: no-repeat;
   background-position-x: center;
   background-position-y: center;

@@ -1,0 +1,17 @@
+<sm-dialog-template [ngSwitch]="mode" [header]="headerTitle" [iconClass]="'al-color blue-300 al-ico-projects'">
+  <sm-create-new-user-form *ngSwitchCase="'user'" (userCreated)="createUser($event)" [editMode]="editMode"
+    [companys]="companys" [user]="baseData">
+  </sm-create-new-user-form>
+  <sm-create-new-group-form *ngSwitchCase="'group'" (groupCreated)="createGroup($event)" [editMode]="editMode"
+    [users]="users" [companys]="companys" [group]="baseData">
+  </sm-create-new-group-form>
+  <sm-create-new-company-form *ngSwitchCase="'company'" (companyCreated)="createCompany($event)" [editMode]="editMode"
+    [company]="baseData">
+  </sm-create-new-company-form>
+
+  <div class="user-buttons">
+    <button (click)="closeDialog()" class="btn btn-outline-neon" data-id="CancelButton">
+      CANCEL
+    </button>
+  </div>
+</sm-dialog-template>

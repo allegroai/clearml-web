@@ -10,9 +10,12 @@ import {isEqual} from 'lodash-es';
 @Component({
   selector: 'sm-spinner',
   template: `
-      <div *ngIf="showSpinner" class="loader-container">
-        <mat-spinner [diameter]="64" [strokeWidth]="6" color="accent"></mat-spinner>
+    <div *ngIf="showSpinner">
+      <div class="loader-container">
+        <div class="circle"></div>
       </div>
+      <!--<div class="spinner-overlay"></div>-->
+    </div>
   `,
   styleUrls: ['./spinner.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -23,7 +26,7 @@ export class SpinnerComponent implements OnInit, OnDestroy {
   private navEndSubscription: Subscription;
   private loading$: Observable<{ [p: string]: boolean }>;
 
-  constructor(private store: Store, private router: Router, private cdr: ChangeDetectorRef) {
+  constructor(private store: Store<any>, private router: Router, private cdr: ChangeDetectorRef) {
     this.loading$ = store.select(selectLoading);
 
   }

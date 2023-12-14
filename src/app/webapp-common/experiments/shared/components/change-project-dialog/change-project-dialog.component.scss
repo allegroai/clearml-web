@@ -5,10 +5,7 @@
     }
   }
   .creat-new-suffix{
-    display: inline-block;
     margin-right: 18px;
-    font-size: 14px;
-    transform: translateY(-4px);
   }
   .message {
     padding: 6px;
@@ -36,5 +33,9 @@
     .yes-button {
       margin-left: 16px;
     }
+  }
+
+  .search-icon {
+    transform: translateY(3px);
   }
 }

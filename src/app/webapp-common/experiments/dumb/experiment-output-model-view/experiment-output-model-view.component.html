@@ -4,15 +4,13 @@
       {{model?.name}}
     </a>
     <i *ngIf="model?.uri && !isLocalFile"
-       class="pointer al-icon al-ico-download sm-md ms-2"
+       class="pointer fa fa-download ms-2"
        (click)="artifactFilePathClicked(model.uri)"
     ></i>
-    <sm-copy-clipboard
-      *ngIf="model?.uri && isLocalFile"
-      label=""
-      class="ps-2 light"
-      [clipboardText]="model.uri"
-      [hideBackground]="true"
+    <sm-copy-clipboard *ngIf="model?.uri && isLocalFile"
+                       label="" [clipboardText]="model.uri"
+                       class="ps-2 light"
+                       [hideBackground]="true"
     ></sm-copy-clipboard>
   </sm-labeled-row>
 </div>

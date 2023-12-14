@@ -30,10 +30,6 @@
     color: $blue-800;
   }
 
-  &.purple {
-    color: $purple;
-  }
-
   &.error-dark{
     color: $error-dark
   }
@@ -47,7 +43,6 @@
   width: 24px;
   height: 24px;
   font-size: 24px;
-  flex-shrink: 0;
   &.flashing-icon {
     transition: opacity 0.3s;
   }
@@ -76,12 +71,6 @@
     min-width: 16px;
     height: 16px;
     font-size: 16px;
-  }
-
-  &.lm {
-    width: 24px;
-    height: 24px;
-    font-size: 24px;
   }
 
   &.sm-md {
@@ -298,12 +287,6 @@
   &.dark {
     @include icon('#{$assets-icons-path}/running-dark.svg');
   }
-  &.notify {
-    @include icon('#{$assets-icons-path}/running-notify.svg');
-    &.grey{
-      @include icon('#{$assets-icons-path}/running-notify-grey.svg');
-    }
-  }
 }
 
 .i-completed, .i-Final {
@@ -335,10 +318,6 @@
 
   &.bw {
     @include icon('#{$assets-icons-path}/failed-white.svg');
-  }
-
-  &.small {
-    @include icon('#{$assets-icons-path}/failed-sm.svg');
   }
 }
 
@@ -524,11 +503,6 @@
 // No font icon
 .i-audio {
   @include icon('#{$assets-icons-path}/audio.svg');
-}
-
-//No font icon
-.i-no-table-data {
-  @include icon('#{$assets-icons-path}/no-table-data.svg');
 }
 
 //No font icon

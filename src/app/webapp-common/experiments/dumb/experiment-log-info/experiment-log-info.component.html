@@ -1,13 +1,12 @@
 <cdk-virtual-scroll-viewport itemSize="25" minBufferPx="1000" maxBufferPx="2000"
   class="viewport" tabindex="0" #LogContainer [class.dark-theme]="isDarkTheme">
-  <div *cdkVirtualFor="let line of lines; trackBy: trackByTimestampFn" data-id="logLine" class="log-line" [class.separator]="line.separator">
-    <div class="timestamp" data-id="timeStamp">{{line.timestamp | date:'y-MM-dd HH:mm:ss'}}</div>
-    <div data-id="resultEntry" class="entry" *ngIf="line.hasAnsi; else regularLine" [innerHTML]="line.entry | safe:'html'"></div>
+  <div *cdkVirtualFor="let line of lines; trackBy: trackByTimestampFn" class="log-line" [class.separator]="line.separator">
+    <div class="timestamp">{{line.timestamp | date:'y-MM-dd HH:mm:ss'}}</div>
+    <div class="entry" *ngIf="line.hasAnsi; else regularLine" [innerHTML]="line.entry | safe:'html'"></div>
     <ng-template #regularLine>
       <div class="entry">{{line.entry}}</div>
     </ng-template>
   </div>
 </cdk-virtual-scroll-viewport>
-<mat-spinner *ngIf="fetching" [diameter]="32" [strokeWidth]="4" color="accent"></mat-spinner>
-
-<button *ngIf="!fetching" class="btn btn-cml-primary get-last" [class.at-end]="canRefresh" (click)="getLast()" data-id="jumpToEndButton">Jump to end</button>
+<mat-spinner *ngIf="fetching" [diameter]="80" [strokeWidth]="8"></mat-spinner>
+<button *ngIf="!fetching" class="btn btn-cml-primary get-last" [class.at-end]="canRefresh" (click)="getLast()">Jump to end</button>

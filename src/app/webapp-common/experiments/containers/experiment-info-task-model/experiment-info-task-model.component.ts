@@ -42,7 +42,7 @@ export class ExperimentInfoTaskModelComponent implements OnInit, OnDestroy {
 
   @ViewChild('prototext') prototext: EditableSectionComponent;
 
-  constructor(private store: Store, private dialog: MatDialog) {
+  constructor(private store: Store<ExperimentInfoState>, private dialog: MatDialog) {
     this.configInfo$ = this.store.select(selectExperimentConfigObj);
     this.selectedConfigObj$ = this.store.select(selectExperimentSelectedConfigObjectFromRoute);
     this.editable$ = this.store.select(selectIsExperimentEditable);

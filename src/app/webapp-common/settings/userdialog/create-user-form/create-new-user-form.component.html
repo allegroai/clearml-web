@@ -1,0 +1,60 @@
+<ng-form class="create-queue-form" #userForm='ngForm'>
+  <div class="row position-relative">
+    <mat-form-field appearance="outline" class="w-100 pt-3">
+      <mat-error *ngIf="name?.errors?.required">Required</mat-error>
+      <!--  <mat-error *ngIf="name?.errors?.minlength">Name should contain at least 3 characters</mat-error>
+      <mat-error *ngIf="name?.errors?.uniqueName">Name should be unique</mat-error> -->
+      <mat-label>User name</mat-label>
+      <input matInput type="text" name="userName" [(ngModel)]="user.name" #name="ngModel" required minlength="3" />
+    </mat-form-field>
+  </div>
+
+  <div class="row position-relative">
+    <mat-form-field appearance="outline" class="w-100 pt-3">
+      <mat-error *ngIf="name?.errors?.required">Required</mat-error>
+      <mat-label>Email</mat-label>
+      <input matInput type="text" [(ngModel)]="user.email" #name="ngModel" name="userEmail" required />
+    </mat-form-field>
+  </div>
+
+  <div class="row position-relative">
+    <mat-form-field appearance="outline" class="w-100 pt-3">
+      <mat-label>Password</mat-label>
+      <input matInput type="password" name="userPassword" [(ngModel)]="user.password" #name="ngModel" />
+    </mat-form-field>
+  </div>
+
+  <div class="row position-relative">
+    <mat-form-field appearance="outline" class="w-100 pt-3">
+      <mat-label>Role</mat-label>
+      <mat-error *ngIf="name?.errors?.required">Required</mat-error>
+      <mat-select disableRipple="" matNativeControl required name="userRole" [(ngModel)]="user.role">
+        <mat-option value="root">root</mat-option>
+        <mat-option value="system">system</mat-option>
+        <mat-option value="user">user</mat-option>
+        <mat-option value="admin">admin</mat-option>
+        <mat-option value="guest">guest</mat-option>
+        <mat-option value="annotator">annotator</mat-option>
+      </mat-select>
+      <mat-hint>You can pick up your Role here</mat-hint>
+    </mat-form-field>
+  </div>
+
+  <div class="row position-relative">
+    <mat-form-field appearance="outline" class="w-100 pt-3">
+      <mat-label>Company</mat-label>
+      <mat-select disableRipple matNativeControl required name="userCompany" [(ngModel)]="user.company">
+        <mat-option *ngFor="let company of companys" [value]="company.id">{{company.name}}</mat-option>
+      </mat-select>
+      <mat-hint>You can pick up your favorite company here</mat-hint>
+    </mat-form-field>
+  </div>
+
+  <div clas s="row">
+    <div class="col-24 create-queue-button">
+      <button class="btn btn-dark-fill center" [disabled]="userForm.invalid" (click)="send()">{{ editMode ? 'EDIT USER'
+        : 'CREATE USER'}}
+      </button>
+    </div>
+  </div>
+</ng-form>

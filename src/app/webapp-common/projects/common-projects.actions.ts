@@ -19,7 +19,7 @@ export const setProjectsOrderBy = createAction(
 );
 export const setProjectsSearchQuery = createAction(
   PROJECTS_PREFIX + 'SET_SEARCH_QUERY',
-  props<{query: string; regExp?: boolean, skipGetAll?: boolean}>()
+  props<{query: string; regExp?: boolean}>()
 );
 export const resetProjectsSearchQuery = createAction(PROJECTS_PREFIX + 'RESET_SEARCH_QUERY');
 export const addToProjectsList = createAction(
@@ -31,6 +31,10 @@ export const resetProjects = createAction(PROJECTS_PREFIX + 'RESET_PROJECTS');
 export const checkProjectForDeletion = createAction(
   PROJECTS_PREFIX + 'CHECK_PROJECT_FOR_DELETION',
   props<{project: Project}>()
+);
+export const setProjectReadyForDeletion= createAction(
+  PROJECTS_PREFIX + 'SET_PROJECT_READY_FOR_DELETION',
+  props<{readyForDeletion}>()
 );
 export const resetReadyToDelete = createAction(PROJECTS_PREFIX + 'RESET_READY_TO_DELETE');
 

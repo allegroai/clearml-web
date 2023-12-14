@@ -15,16 +15,22 @@
   }
 
   mat-form-field {
-    .clone-description {
-      min-height: 68px;
-    }
+    margin-top: -8px;
+  }
+
+  textarea {
+    resize: none;
+    min-height: 60px;
   }
 
   .creat-new-suffix {
-    display: inline-block;
     margin-right: 18px;
-    font-size: 14px;
-    transform: translateY(-4px);
+  }
+
+  textarea,
+  input,
+  select {
+    width: 100%;
   }
 
   .buttons {
@@ -50,5 +56,9 @@
   .text-danger {
     display: block;
     position: absolute;
+  }
+
+  .search-icon {
+    transform: translateY(3px);
   }
 }

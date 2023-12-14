@@ -1,5 +1,5 @@
 import {VIEW_PREFIX} from '~/app.constants';
-import {Action, createAction, props} from '@ngrx/store';
+import {createAction, props} from '@ngrx/store';
 import {omit} from 'lodash-es';
 import {HttpErrorResponse} from '@angular/common/http';
 import {Ace} from 'ace-builds';
@@ -69,7 +69,7 @@ export const resetAceCaretsPositions = createAction(VIEW_PREFIX + '[reset ace ca
 
 export const addMessage = createAction(
   VIEW_PREFIX + '[add message]',
-  (severity: MessageSeverityEnum, msg: string, userActions?: { actions: Action[]; name: string }[], suppressNextMessages?: boolean) =>
+  (severity: MessageSeverityEnum, msg: string, userActions?: { actions: any[]; name: string }[], suppressNextMessages?: boolean) =>
     ({severity, msg, userActions, suppressNextMessages})
 );
 
@@ -95,6 +95,8 @@ export const setRedactedArguments = createAction(VIEW_PREFIX + 'SET_REDACTED_ARG
 export const setHideRedactedArguments = createAction(VIEW_PREFIX + 'SET_SHOW_REDACTED_ARGUMENTS', props<{ hide: boolean }>());
 export const plotlyReady = createAction(VIEW_PREFIX + '[plotly ready]');
 export const aceReady = createAction(VIEW_PREFIX + '[ace ready]');
-export const openAppsAwarenessDialog = createAction(VIEW_PREFIX + '[apps awareness dialog]' );
+export const openAppsAwarenessDialog = createAction(VIEW_PREFIX + '[apps awareness dialog]',
+  props<{ appsYouTubeIntroVideoId }>()
+);
 
 

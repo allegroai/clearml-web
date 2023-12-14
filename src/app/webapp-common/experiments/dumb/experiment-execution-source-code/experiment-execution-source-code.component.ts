@@ -1,8 +1,9 @@
 import {Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild} from '@angular/core';
 import {NgForm} from '@angular/forms';
 import {Subscription} from 'rxjs';
-import {IExperimentInfoFormComponent} from '~/features/experiments/shared/experiment-info.model';
-import {IExecutionForm, sourceTypesEnum} from '~/features/experiments/shared/experiment-execution.model';
+import {IExperimentInfoFormComponent} from '../../../../features/experiments/shared/experiment-info.model';
+import {IExecutionForm, sourceTypesEnum} from '../../../../features/experiments/shared/experiment-execution.model';
+import {HELP_TEXTS} from '../../shared/common-experiments.const';
 
 @Component({
   selector   : 'sm-experiment-execution-source-code',
@@ -15,10 +16,11 @@ export class ExperimentExecutionSourceCodeComponent implements OnInit, IExperime
   @Input() formData: IExecutionForm['source'];
   @Input() editable: boolean;
 
-  @Output() formDataChanged = new EventEmitter<{ field: string; value: IExecutionForm['source'] }>();
+  @Output() formDataChanged = new EventEmitter<{ field: string; value: any }>();
 
   @ViewChild('sourceCodeForm', { static: true }) sourceCodeForm: NgForm;
 
+  HELP_TEXTS               = HELP_TEXTS;
   readonly sourceTypesEnum = sourceTypesEnum;
 
   scriptTypeOptions = [
@@ -45,7 +47,6 @@ export class ExperimentExecutionSourceCodeComponent implements OnInit, IExperime
     [sourceTypesEnum.Tag]       : 'TAG NAME',
     [sourceTypesEnum.Branch]    : 'BRANCH NAME'
   };
-  pythonRegexp = /^python([23](\.\d{1,2}){0,2})?$/;
 
 
   ngOnInit(): void {

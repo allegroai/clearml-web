@@ -30,7 +30,7 @@ import {
 } from '@common/project-info/conteiners/metric-for-stats-dialog/metric-for-stats-dialog.component';
 import {MetricValueType} from '@common/experiments-compare/experiments-compare.constants';
 import {ScatterPlotComponent} from '@common/shared/components/charts/scatter-plot/scatter-plot.component';
-import { TinyColor } from '@ctrl/tinycolor';
+import tinycolor from 'tinycolor2';
 
 @Component({
   selector: 'sm-project-stats',
@@ -102,8 +102,8 @@ export class ProjectStatsComponent implements OnInit, OnDestroy {
             .map(val => ({
             ...val,
             title: val.name,
-            name: `Created By ${val.user}, Finished ${new Date(val.x).toLocaleString()}`,
-            value: val.y
+            nameExt: `Created By ${val.user}, Finished ${new Date(val.x).toLocaleString()}`,
+            name: val.id
           }));
           this.cdr.detectChanges();
           this.plot?.onResize();
@@ -171,7 +171,7 @@ export class ProjectStatsComponent implements OnInit, OnDestroy {
         break;
     }
     if (hidden) {
-      return new TinyColor(color).darken(30).toHexString();
+      return tinycolor(color).darken(30).toHexString();
     }
     return color;
   }

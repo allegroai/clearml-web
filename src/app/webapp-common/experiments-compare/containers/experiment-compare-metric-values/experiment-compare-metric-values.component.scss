@@ -1,422 +1,80 @@
 @import "variables";
 
-////// Default prime theme ///////
-$primaryColor: #fff;
-
-$emphasis-high: rgba(0, 0, 0, .87) !default;
-$emphasis-medium: rgba(0, 0, 0, .60) !default;
-
-//global
-$fontWeight: normal !default;
-$textColor: $emphasis-high !default;
-$textSecondaryColor: $emphasis-medium !default;
-$listItemTransition: none !default;
-$inlineSpacing: .5rem !default;
-$loadingIconFontSize: 2rem !default;
-
-//selected state
-$highlightBg: rgba($primaryColor, .12) !default;
-$highlightTextColor: $primaryColor !default;
-
-//focus
-$focusOutlineColor: transparent !default;
-$focusOutline: 0 none !default;
-
-//table
-$tableHeaderBorder: 1px solid #e4e4e4 !default;
-$tableHeaderBorderWidth: 0 0 1px 0 !default;
-$tableHeaderBg: #ffffff !default;
-$tableHeaderTextColor: $textColor !default;
-$tableHeaderFontWeight: 500 !default;
-$tableHeaderPadding: 5px 16px !default;
-
-$tableHeaderCellPadding: 5px 16px !default;
-$tableHeaderCellBg: $blue-25 !default;
-$tableHeaderCellTextColor: $textColor !default;
-$tableHeaderCellFontWeight: 500 !default;
-$tableHeaderCellBorder: 1px solid #e4e4e4 !default;
-$tableHeaderCellBorderWidth: 0 1px 1px 0 !default;
-
-$tableBodyRowBg: #ffffff !default;
-$tableBodyRowTextColor: $textColor !default;
-$tableBodyRowHoverBg: $blue-50 !default;
-$tableBodyCellBorder: 1px solid $cloudy-blue !default;
-$tableBodyCellPadding: 14px 1rem !default;
-
-$tableResizerHelperBg: $primaryColor !default;
-
-$tableCellContentAlignment: left !default;
-$tableTopPaginatorBorderWidth: 0 0 1px 0 !default;
-$tableBottomPaginatorBorderWidth: 0 0 1px 0 !default;
+.no-metric {
+  background-color: #f2f3f6;
+}
 
 :host {
   display: block;
-  height: 50%;
-  flex-grow: 1;
-  --cell-width: 220px;
-
-  .experiment-header {
-    width: var(--cell-width);
-    min-width: var(--cell-width);
-    max-width: var(--cell-width);
-    white-space: nowrap;
-
-    .experiment-color {
-      display: inline-block;
-      width: 10px;
-      height: 10px;
-      margin-right: 6px;
-      cursor: pointer;
-    }
-
-    .experiment-name {
-      display: inline-block;
-      width: calc(100% - 20px);
-    }
-  }
-
-  .value-cell {
-    max-width: var(--cell-width);
-  }
-}
-
-.mat-drawer {
-  width: 434px;
-  background-color: #fff;
-}
-
-.filter-header-cell {
-  border-right: $tableBodyCellBorder !important;
-  overflow: unset;
-
-  i {
-    color: $blue-400;
-    margin-left: 8px;
-
-    &:hover {
-      color: $blue-300;
-    }
-  }
-}
-
-.filter-header {
-  display: flex;
-  width: 401px;
-  align-items: center;
-  gap: 12px;
-
-  mat-form-field {
-    flex-grow: 1;
-  }
-
-  .al-ico-filter-on,
-  .al-ico-filter-off {
-    .path2:before {
-      color: $blue-400;
-    }
-
-    .path1:before {
-      color: $purple;
-    }
-  }
-}
-
-.freeze-divider::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  right: -10px;
   height: 100%;
-  width: 1px;
-  box-shadow: -6px 0 4px rgba(0, 0, 0, 0.4);
-}
+  padding-top: 12px;
 
-.metrics-column {
-  width: 200px;
-  max-width: 200px;
-  overflow: hidden;
-  border-top: 1px solid transparent !important;
-  border-right: $tableBodyCellBorder;
-  border-left-width: 0px;
-  color: $blue-600;
-  font-weight: 500;
-  padding-left: 24px !important;
-  left: 0 !important;
-}
+  .tree-card-body {
+    padding: 20px 15px 0 15px;
+    height: 100%;
+    overflow: auto;
 
-.variants-column {
-  width: 200px;
-  max-width: 200px;
-  border-right: 1px solid $cloudy-blue !important;
-  border-left-width: 0px;
-  color: $blue-400;
-  font-weight: 500;
-  left: 217px !important;
-}
+    .node {
+      min-height: 28px;
+      margin-bottom: 1px;
 
-.variant-cell {
-  display: flex;
-  align-items: center;
-}
+      .content {
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 500;
+        color: $blue-500;
 
-.variant-name {
-  flex: 1;
-}
+        .fas {
+          margin-left: 6px;
+          font-size: 11px;
+          width: 16px;
+          height: 28px;
+          display: inline-flex;
+          line-height: 28px;
+          align-items: center;
+          justify-content: center;
+        }
+      }
 
-.row-info-icon {
-  color: $blue-300;
-}
+      &.key-not-exists {
+        position: relative;
+        display: block;
 
-tr:hover {
-  background-color: $blue-50;
-}
+        .content {
+          background: #f2f3f6;
+          pointer-events: none;
 
-tr.first-row {
-  td {
-    border-top-color: $blue-300 !important;
-  }
-
-  &:first-child td {
-    border-top-color: transparent !important;
-  }
-}
-
-.value-text {
-  text-overflow: ellipsis;
-  overflow: hidden;
-}
-
-.value {
-  line-height: 1;
-  display: flex;
-  align-items: center;
-}
-
-.tag {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-family: system-ui, sans-serif;
-  font-size: 11px;
-  font-weight: 500;
-  text-align: center;
-  border-radius: 2px;
-  margin-left: 6px;
-  padding: 2px 4px;
-
-  &.tag-max {
-    color: white;
-    background-color: $blue-400;
-  }
-
-  &.tag-min {
-    color: $blue-400;
-    border: 1px solid $blue-400;
-    background-color: white;
-  }
-}
-
-.close {
-  cursor: pointer;
-  position: absolute;
-  right: 10px;
-  top: 10px;
-  z-index: 1;
-}
-
-:host ::ng-deep p-table {
-
-  &.no-rows {
-    table {
-      table-layout: fixed !important;
-    }
-  }
-  .p-datatable {
-    table {
-      border-collapse: separate !important;
-    }
-
-    .p-paginator-bottom {
-      border-width: $tableBottomPaginatorBorderWidth;
-      border-radius: 0;
-    }
-
-    .p-datatable-header {
-      background: $tableHeaderBg;
-      color: $tableHeaderTextColor;
-      border: $tableHeaderBorder;
-      border-width: $tableHeaderBorderWidth;
-      padding: $tableHeaderPadding;
-      font-weight: $tableHeaderFontWeight;
-    }
-
-
-    .p-datatable-thead > tr > th {
-      text-align: $tableCellContentAlignment;
-      padding: $tableHeaderCellPadding;
-      border: $tableHeaderCellBorder;
-      border-width: $tableHeaderCellBorderWidth;
-      font-weight: $tableHeaderCellFontWeight;
-      color: $tableHeaderCellTextColor;
-      background: $tableHeaderCellBg;
-      transition: $listItemTransition;
-    }
-
-    .p-datatable-tbody {
-      > tr {
-        background: $tableBodyRowBg;
-        color: $tableBodyRowTextColor;
-        transition: $listItemTransition;
-
-        > td {
-          text-align: $tableCellContentAlignment;
-          border-top: $tableBodyCellBorder;
-          padding: $tableBodyCellPadding;
-
-          .p-row-editor-save {
-            margin-right: $inlineSpacing;
+          .node-key, .node-chevron {
+            visibility: hidden;
           }
         }
 
-        &:hover {
-          background: $tableBodyRowHoverBg;
-        }
+        al-table-diff {
+          display: block;
+          position: relative;
+          pointer-events: none;
 
-        &:hover .metrics-column {
-          background: #fff;
-        }
-
-        &:focus {
-          outline: 0.15rem solid $focusOutlineColor;
-          outline-offset: 0.15rem;
-        }
-
-        &:last-child td {
-          border-bottom: 1px solid $blue-300;
-        }
-      }
-    }
-
-    .p-column-resizer-helper {
-      background: $tableResizerHelperBg;
-    }
-
-    .p-datatable-scrollable-header,
-    .p-datatable-scrollable-footer {
-      background: #fff;
-    }
-
-    &.p-datatable-scrollable > .p-datatable-wrapper > .p-datatable-table,
-    &.p-datatable-scrollable > .p-datatable-wrapper > .p-scroller-viewport > .p-scroller > .p-datatable-table {
-      > .p-datatable-thead,
-      > .p-datatable-tfoot {
-        background-color: $tableHeaderCellBg;
-      }
-    }
-
-    .p-datatable-loading-icon {
-      font-size: $loadingIconFontSize;
-    }
-
-    &.p-datatable-gridlines {
-      .p-datatable-header {
-        border-width: 1px 1px 0 1px;
-      }
-
-      .p-datatable-footer {
-        border-width: 0 1px 1px 1px;
-      }
-
-      .p-paginator-top {
-        border-width: 0 1px 0 1px;
-      }
-
-      .p-paginator-bottom {
-        border-width: 0 1px 1px 1px;
-      }
-
-      .p-datatable-thead {
-        > tr {
-          > th {
-            border-width: 1px 0 1px 1px;
-
-            &:last-child {
-              border-width: 1px;
-            }
+          &:after {
+            position: absolute;
+            content: " ";
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background: #f2f3f6;
           }
         }
       }
+      &.hovered {
+        .content, &:after {
 
-      .p-datatable-tbody {
-        > tr {
-          > td {
-            border-width: 1px 0 0 1px;
+          box-shadow: 0 0 0 1px $blue-250 inset;
 
-            &:last-child {
-              border-width: 1px 1px 0 1px;
-            }
-          }
-
-          &:last-child {
-            > td {
-              border-width: 1px 0 1px 1px;
-
-              &:last-child {
-                border-width: 1px;
-              }
-            }
-          }
-        }
-      }
-
-      &:has(.p-datatable-thead):has(.p-datatable-tbody) .p-datatable-tbody {
-        > tr {
-          > td {
-            border-width: 0 0 1px 1px;
-
-            &:last-child {
-              border-width: 0 1px 1px 1px;
-            }
+          &.diff-row {
+            box-shadow: 0 0 0 1px lighten($strong-red, 20%) inset, 0 0 0 2px white inset;
           }
         }
       }
     }
-
-    .p-scroller {
-      height: 100% !important;
-    }
   }
-
-  th {
-    overflow: hidden;
-  }
-
-  tr th:first-child {
-    width: 500px;
-    max-width: 500px;
-  }
-
-  tr td:last-child,
-  tr th:last-child {
-    width: auto !important;
-    max-width: none !important;
-  }
-}
-
-.empty-state {pointer-events: none;}
-.no-output {
-  color: $blue-100;
-  z-index: 1;
-
-  &.all-filtered-message {
-    color: $blue-400;
-    .link {
-      color: $purple;
-    }
-  }
-}
-.i-no-table-data {
-  width: 150px;
-  height: 100px;
-  margin-bottom: 10px;
 }

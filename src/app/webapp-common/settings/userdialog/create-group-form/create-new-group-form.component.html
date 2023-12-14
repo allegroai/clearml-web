@@ -1,0 +1,47 @@
+<ng-form class="create-queue-form" #groupForm='ngForm'>
+  <div class="row position-relative">
+    <mat-form-field appearance="outline" class="w-100 pt-3">
+      <mat-error *ngIf="name?.errors?.required">Required</mat-error>
+      <mat-error *ngIf="name?.errors?.minlength">Name should contain at least 3 characters</mat-error>
+      <mat-label>Group Name</mat-label>
+      <input matInput type="text" name="groupName" [(ngModel)]="group.name" #name="ngModel" required minlength="3">
+    </mat-form-field>
+  </div>
+
+  <div class="row position-relative">
+    <mat-form-field appearance="outline" class="w-100 pt-3">
+      <mat-label>Members</mat-label>
+      <mat-select disableRipple required [(ngModel)]="group.users" name=" groupMembers" multiple>
+        <mat-option *ngFor="let user of users" [value]="{name: user.name, id: user.id}">
+          {{ user.name}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <div class="row position-relative">
+    <mat-form-field appearance="outline" class="w-100 pt-3">
+      <mat-label>Group Description</mat-label>
+      <textarea class="w-100" matInput [rows]="4" name="groupDescription" [(ngModel)]="group.description"
+        #name="ngModel"></textarea>
+    </mat-form-field>
+  </div>
+
+  <div class="row position-relative">
+    <mat-form-field appearance="outline" class="w-100 pt-3">
+      <mat-label>Company</mat-label>
+      <mat-select matNativeControl required name="userCompany" [(ngModel)]="group.company">
+        <mat-option *ngFor="let company of companys" [value]="company.id">{{company.name}}</mat-option>
+      </mat-select>
+      <mat-hint>You can pick up your favorite company here</mat-hint>
+    </mat-form-field>
+  </div>
+
+  <div class="row">
+    <div class="col-24 create-queue-button">
+      <button class="btn btn-dark-fill center" [disabled]="groupForm.invalid" (click)="send()">{{editMode ? 'EDIT GROUP'
+        : 'CREATE GROUP'}}
+      </button>
+    </div>
+  </div>
+</ng-form>

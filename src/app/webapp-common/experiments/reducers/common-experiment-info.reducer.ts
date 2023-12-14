@@ -64,27 +64,27 @@ export const initialCommonExperimentInfoState: CommonExperimentInfoState = {
 };
 
 export const commonExperimentInfoReducers = [
-  on(setExperiment, (state, action): CommonExperimentInfoState => ({...state, selectedExperiment: action.experiment})),
-  on(setExperimentFormErrors, (state, action): CommonExperimentInfoState => ({...state, errors: action.errors})),
-  on(experimentDataUpdated, (state, action): CommonExperimentInfoState => ({...state, infoData: {...state.infoData, ...action.changes}})),
+  on(setExperiment, (state, action) => ({...state, selectedExperiment: action.experiment as unknown})),
+  on(setExperimentFormErrors, (state, action) => ({...state, errors: action.errors})),
+  on(experimentDataUpdated, (state, action) => ({...state, infoData: {...state.infoData, ...action.changes}})),
   on(saveExperiment, saveHyperParamsSection, saveExperimentConfigObj, deleteHyperParamsSection, saveExperimentSection,
-    (state): CommonExperimentInfoState => ({...state, saving: true})),
-  on(activateEdit, (state, action): CommonExperimentInfoState => ({
+    state => ({...state, saving: true})),
+  on(activateEdit, (state, action) => ({
     ...state,
     activeSectionEdit: true,
     infoDataFreeze: state.infoData,
     currentActiveSectionEdit: action.section
   })),
-  on(deactivateEdit, (state): CommonExperimentInfoState => ({...state, activeSectionEdit: false, currentActiveSectionEdit: null})),
-  on(experimentDetailsUpdated, (state, action): CommonExperimentInfoState => ({...state, infoData: {...state.infoData, ...action.changes}})),
-  on(setExperimentSaving, (state, action): CommonExperimentInfoState => ({...state, saving: action.saving})),
-  on( setSelectedPipelineStep, (state, action): CommonExperimentInfoState => ({...state, selectedPipelineStep: action.step})),
-  on(setControllerForStartPipelineDialog, (state, action): CommonExperimentInfoState => ({...state, pipelineRunDialogTask: action.task})),
-  on(updateExperimentAtPath, (state, action): CommonExperimentInfoState => ({...state, infoData: set(state.infoData, action.value, action.path) as any})),
-  on(getExperimentArtifacts, (state): CommonExperimentInfoState => ({...state, saving: false})),
-  on(setExperimentErrors, (state, action): CommonExperimentInfoState => ({...state, errors: {...state.errors, ...action}})),
-  on(resetExperimentInfo, (state): CommonExperimentInfoState => ({...state, infoData: null})),
-  on(setExperimentInfoData, (state, action): CommonExperimentInfoState => ({
+  on(deactivateEdit, state => ({...state, activeSectionEdit: false, currentActiveSectionEdit: null})),
+  on(experimentDetailsUpdated, (state, action) => ({...state, infoData: {...state.infoData, ...action.changes}})),
+  on(setExperimentSaving, (state, action) => ({...state, saving: action.saving})),
+  on( setSelectedPipelineStep, (state, action) => ({...state, selectedPipelineStep: action.step})),
+  on(setControllerForStartPipelineDialog, (state, action) => ({...state, pipelineRunDialogTask: action.task})),
+  on(updateExperimentAtPath, (state, action) => ({...state, infoData: set(state.infoData, action.value, action.path) as any})),
+  on(getExperimentArtifacts, state => ({...state, saving: false})),
+  on(setExperimentErrors, (state, action) => ({...state, errors: {...state.errors, ...action}})),
+  on(resetExperimentInfo, state => ({...state, infoData: null})),
+  on(setExperimentInfoData, (state, action) => ({
     ...state,
     infoData: {
       ...action.experiment,
@@ -93,21 +93,21 @@ export const commonExperimentInfoReducers = [
       model: state.infoData?.model
     }
   })),
-  on(updateExperimentInfoData, (state, action): CommonExperimentInfoState => ({
+  on(updateExperimentInfoData, (state, action) => ({
     ...state,
     selectedExperiment: {...state.selectedExperiment, ...action.changes},
     infoData: {...state.infoData, ...action.changes}
   })),
-  on(getExperimentUncommittedChanges, (state, action): CommonExperimentInfoState => ({
+  on(getExperimentUncommittedChanges, (state, action) => ({
     ...state,
     showExtraDataSpinner: !(action as ReturnType<typeof actions.getExperimentUncommittedChanges>).autoRefresh
   })),
-  on(setExperimentUncommittedChanges, (state, action): CommonExperimentInfoState => ({
+  on(setExperimentUncommittedChanges, (state, action) => ({
     ...state,
     showExtraDataSpinner: false,
     infoData: {...state?.infoData, execution: {...state?.infoData?.execution, diff: action.diff}}
   })),
-  on(setExperimentArtifacts, (state, action): CommonExperimentInfoState => ({
+  on(setExperimentArtifacts, (state, action) => ({
     ...state,
     infoData: {
       ...state?.infoData,

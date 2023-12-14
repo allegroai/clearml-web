@@ -1,8 +1,9 @@
 @import "variables";
+@import "variables_v2";
 
 $dark-theme: (
-  bg-color: $blue-800,
-  color: $blue-250,
+  bg-color: $background-color,
+  color: $text,
   al-header: $blue-100,
   card: (
     body-bg-color: $blue-500,
@@ -69,19 +70,19 @@ $dark-theme: (
     inputGroupTextColor: $blue-600,
   ),
   navbar-item: (
-    color: #8f9cc8,
-    active-color: $neon-yellow
+    color: $text,
+    active-color: $primary-color
   ),
   input: (
     height: 32px,
-    color: $blue-200,
+    color: $blue-grey,
     place-holder-color: $blue-300,
     background-color: #000,
     background-color-disabled: #000,
     border-radius: 4px,
     border-color: $blue-500,
     border-width: 1px,
-    focus-color: $blue-100,
+    focus-color: $blue-grey,
     hover-border-color: rgba(206, 209, 220, 0.5),
     focus-border-color: $blue-300,
     focus-box-shadow: none,
@@ -91,7 +92,7 @@ $dark-theme: (
   search-input: (
     color: $blue-280,
     icon-color: $blue-280,
-    border-color: $blue-200,
+    border-color: $blue-grey,
     border-color-focus: $blue-500,
     ph-color: $blue-280,
     seperator: $blue-900
@@ -105,7 +106,7 @@ $dark-theme: (
     background-color: black,
     border-radius: 4px,
     border: 0px,
-    color: $blue-200,
+    color: $blue-grey,
     placeholder-color: $blue-300
   ),
   table: (
@@ -133,14 +134,14 @@ $dark-theme: (
   ),
   button: (
     // default
-    color: $blue-300,
-    background-color: $blue-600,
-    border-color: $blue-600,
+    color: $text,
+    background-color: $primary-color,
+    border-color: $primary-color,
 
     // hover
-    color-hover: $blue-200,
-    background-color-hover: $blue-500,
-    border-color-hover: $blue-500,
+    color-hover: $text,
+    background-color-hover: $accent-color,
+    border-color-hover: $accent-color,
 
     // focus
     color-focus: $blue-300,

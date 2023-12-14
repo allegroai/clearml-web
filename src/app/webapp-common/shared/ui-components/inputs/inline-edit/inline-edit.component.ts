@@ -99,9 +99,7 @@ export class InlineEditComponent implements OnDestroy {
 
 
   ngOnDestroy(): void {
-    if (this.active) {
-      this.inlineCanceled();
-    }
+    this.inlineCanceled();
     this.inlineInput = null;
     this.template = null;
   }

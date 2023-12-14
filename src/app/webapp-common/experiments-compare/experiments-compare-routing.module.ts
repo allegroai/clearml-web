@@ -8,9 +8,9 @@ import {ExperimentCompareScalarChartsComponent} from './containers/experiment-co
 import {ExperimentComparePlotsComponent} from './containers/experiment-compare-plots/experiment-compare-plots.component';
 import {DebugImagesComponent} from '../debug-images/debug-images.component';
 import {ExperimentCompareHyperParamsGraphComponent} from './containers/experiment-compare-hyper-params-graph/experiment-compare-hyper-params-graph.component';
+import {RouterHelperGuard} from './experiment-compare-router-helper.guard';
 import {ExperimentCompareParamsComponent} from './containers/experiment-compare-params/experiment-compare-params.component';
 import {ModelCompareDetailsComponent} from '@common/experiments-compare/containers/model-compare-details/model-compare-details.component';
-import {compareNavigationGuard} from '@common/experiments-compare/compare-navigation.guard';
 
 
 export const routes: Routes = [
@@ -25,13 +25,9 @@ export const routes: Routes = [
       {path: 'details', component: ExperimentCompareDetailsComponent, data: {mode: 'details', limit: true}},
       {path: 'models-details', component: ModelCompareDetailsComponent, data: {mode: 'details', limit: true}},
       {path: 'network', component: ExperimentCompareParamsComponent, data: {mode: 'hyper-params', limit: true}},
-      {path: 'hyper-params', component: ExperimentCompareParamsComponent, pathMatch: 'full', canActivate: [compareNavigationGuard]},
-      {path: 'hyper-params/values', component: ExperimentCompareParamsComponent, data: {mode: 'hyper-params', limit: true}},
+      {path: 'hyper-params/values', component: ExperimentCompareParamsComponent, canActivate: [RouterHelperGuard], data: {mode: 'hyper-params', limit: true}},
       {path: 'hyper-params/graph', component: ExperimentCompareHyperParamsGraphComponent},
-      {path: 'scalars', component: ExperimentCompareMetricValuesComponent, canActivate: [compareNavigationGuard]},
-      {path: 'scalars/values', component: ExperimentCompareMetricValuesComponent, data: {limit: true}},
-      {path: 'scalars/max-values', component: ExperimentCompareMetricValuesComponent, data: {limit: true}},
-      {path: 'scalars/min-values', component: ExperimentCompareMetricValuesComponent, data: {limit: true}},
+      {path: 'scalars/values', component: ExperimentCompareMetricValuesComponent, canActivate: [RouterHelperGuard], data: {limit: true}},
       {path: 'scalars/graph', component: ExperimentCompareScalarChartsComponent},
       {path: 'metrics-plots', component: ExperimentComparePlotsComponent},
       {path: 'debug-images', component: DebugImagesComponent, data: {mergeIterations: true, multiple: true, limit: true}},

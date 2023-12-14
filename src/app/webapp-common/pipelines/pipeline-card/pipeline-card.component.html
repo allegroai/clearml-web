@@ -25,8 +25,7 @@
                       [editable]="true"
                       [minLength]="2"
                       [required]="true"
-                      pattern="^[^\/]{2,}$"
-                      [forbiddenString]="[]"
+                      pattern="^[^/]{2,}$"
                       [inlineDisabled]="true"
                       (textChanged)="prepareProjectNameForChange($event)"
       >
@@ -48,15 +47,10 @@
         (rename)="editName.inlineActivated()"
         (addTag)="addTag.emit($event)"
         (delete)="delete.emit()"
-        data-id="pipelineCardMenu"
       ></sm-pipeline-card-menu>
     </div>
-    <span
-      *ngIf="project.stats?.active?.last_task_run; else: noRun"
-      class="last-run"
-      [smTooltip]="project.stats?.active?.last_task_run | date: timeFormatString"
-      matTooltipPosition="after"
-    >Last run {{project.stats?.active?.last_task_run | timeAgo}}</span>
+    <div *ngIf="project.stats?.active?.last_task_run; else: noRun" class="last-run">Last
+      run {{project.stats?.active?.last_task_run | timeAgo}}</div>
     <ng-template #noRun>
       <div class="last-run">No pipeline runs yet</div>
     </ng-template>

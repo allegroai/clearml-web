@@ -11,7 +11,6 @@ import {setSelectedProject} from '@common/core/actions/projects.actions';
 import {createReducer, on} from '@ngrx/store';
 import {modelsInitialState} from '@common/models/reducers/models-view.reducer';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
-import {IExperimentInfo, ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
 
 
 export interface ExperimentsViewState {
@@ -28,13 +27,12 @@ export interface ExperimentsViewState {
   experiments: Array<ITableExperiment>;
   refreshList: boolean;
   noMoreExperiment: boolean;
-  selectedExperiment: IExperimentInfo;
-  selectedExperiments: Array<ISelectedExperiment>;
+  selectedExperiment: ITableExperiment;
+  selectedExperiments: Array<ITableExperiment>;
   selectedExperimentsDisableAvailable: Record<string, CountAvailableAndIsDisableSelectedFiltered>;
   selectedExperimentSource: string;
   experimentToken: string;
   scrollId: string;
-  hyperParamsFiltersPage: number;
   globalFilter: SearchState['searchQuery'];
   showAllSelectedIsActive: boolean;
   metricVariants: Array<MetricVariantResult>;
@@ -69,7 +67,6 @@ export const experimentsViewInitialState: ExperimentsViewState = {
   selectedExperimentSource: null,
   experimentToken: null,
   scrollId: null, // -1 so the "getNextExperiments" will send 0.
-  hyperParamsFiltersPage: 0,
   globalFilter: null,
   showAllSelectedIsActive: false,
   metricsCols: [],
@@ -143,7 +140,6 @@ export const experimentsViewReducer = createReducer<ExperimentsViewState>(
   })),
   on(actions.setNoMoreExperiments, (state, action): ExperimentsViewState => ({...state, noMoreExperiment: action.hasMore})),
   on(actions.setCurrentScrollId, (state, action): ExperimentsViewState => ({...state, scrollId: action.scrollId})),
-  on(actions.setHyperParamsFiltersPage, (state, action): ExperimentsViewState => ({...state, hyperParamsFiltersPage: action.page})),
   on(actions.setSelectedExperiment, (state, action): ExperimentsViewState => ({...state, selectedExperiment: action.experiment})),
   on(actions.setSelectedExperiments, (state, action): ExperimentsViewState => ({...state, selectedExperiments: action.experiments})),
   on(actions.setSelectedExperimentsDisableAvailable, (state, action): ExperimentsViewState =>
@@ -257,13 +253,7 @@ export const experimentsViewReducer = createReducer<ExperimentsViewState>(
     ({...state, colsOrder: {...state.colsOrder, [action.project]: action.cols}})),
   on(actions.setCustomHyperParams, (state, action): ExperimentsViewState => ({...state, hyperParams: action.params, metricsLoading: false})),
   on(actions.hyperParamSelectedInfoExperiments, (state, action): ExperimentsViewState =>
-    ({
-      ...state,
-      hyperParamsOptions: {
-        ...state.hyperParamsOptions,
-        [action.col.id]: action.loadMore ? state.hyperParamsOptions[action.col.id].concat(action.values) : action.values},
-      hyperParamsFiltersPage: state.hyperParamsFiltersPage + 1
-    })),
+    ({...state, hyperParamsOptions: {...state.hyperParamsOptions, [action.col.id]: action.values}})),
   on(actions.getCustomMetrics, (state): ExperimentsViewState => ({...state, metricsLoading: true})),
   on(actions.getCustomHyperParams, (state): ExperimentsViewState => ({...state, metricsLoading: true})),
   on(actions.setSplitSize, (state, action): ExperimentsViewState => ({...state, splitSize: action.splitSize})),

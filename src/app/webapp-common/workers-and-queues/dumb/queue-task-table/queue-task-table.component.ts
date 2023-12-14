@@ -1,9 +1,9 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {ColHeaderTypeEnum, ISmCol} from '@common/shared/ui-components/data/table/table.consts';
+import {ColHeaderTypeEnum, ISmCol} from '../../../../webapp-common/shared/ui-components/data/table/table.consts';
 import {QUEUES_TABLE_COL_FIELDS} from '../../workers-and-queues.consts';
-import {Queue} from '~/business-logic/model/queues/queue';
-import {TIME_FORMAT_STRING} from '@common/constants';
-import {ITableExperiment} from '@common/experiments/shared/common-experiment-model.model';
+import {Queue} from '../../../../business-logic/model/queues/queue';
+import {Task} from '../../../../business-logic/model/tasks/task';
+import {TIME_FORMAT_STRING} from '../../../constants';
 
 @Component({
   selector   : 'sm-queue-task-table',
@@ -16,7 +16,7 @@ export class QueueTaskTableComponent {
   public readonly QUEUES_TABLE_COL_FIELDS = QUEUES_TABLE_COL_FIELDS;
 
   @Input() queue: Queue;
-  @Input() tasks: ITableExperiment[];
+  @Input() tasks: Array<Task>;
   @Output() taskSelected = new EventEmitter();
   TIME_FORMAT_STRING = TIME_FORMAT_STRING;
 

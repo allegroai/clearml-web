@@ -23,8 +23,7 @@ import {
   selectStatsParams,
   selectStatsTimeFrame
 } from '../../reducers/index.reducer';
-import {timeFrameOptions} from '@common/constants';
-import {LineChartData} from '@common/shared/components/charts/line-chart/line-chart.component';
+import {TIME_INTERVALS} from '../../workers-and-queues.consts';
 
 @Component({
   selector: 'sm-workers-graph',
@@ -55,7 +54,14 @@ export class WorkersStatsComponent implements OnInit, OnDestroy {
     }
   }
 
-  timeFrameOptions = timeFrameOptions;
+  public timeFrameOptions: IOption[] = [
+    {label: '3 Hours', value: (3 * TIME_INTERVALS.HOUR).toString()},
+    {label: '6 Hours', value: (6 * TIME_INTERVALS.HOUR).toString()},
+    {label: '12 Hours', value: (12 * TIME_INTERVALS.HOUR).toString()},
+    {label: '1 Day', value: (TIME_INTERVALS.DAY).toString()},
+    {label: '1 Week', value: (TIME_INTERVALS.WEEK).toString()},
+    {label: '1 Month', value: (TIME_INTERVALS.MONTH).toString()}];
+
   public chartParamOptions: IOption[] = [
     {label: 'CPU and GPU Usage', value: 'cpu_usage;gpu_usage'},
     {label: 'Memory Usage', value: 'memory_used'},
@@ -73,9 +79,9 @@ export class WorkersStatsComponent implements OnInit, OnDestroy {
     /* eslint-enable @typescript-eslint/naming-convention */
   };
 
-  public chartData: LineChartData;
+  public chartData: { dataByTopic: Topic[] };
 
-  constructor(public store: Store, private cdr: ChangeDetectorRef) {
+  constructor(public store: Store<any>, private cdr: ChangeDetectorRef) {
   }
 
   ngOnInit() {
@@ -92,7 +98,7 @@ export class WorkersStatsComponent implements OnInit, OnDestroy {
       (data) => {
         if (data) {
           this.refreshChart = false;
-          this.chartData = {dataByTopic: data, data: null};
+          this.chartData = {dataByTopic: data};
           this.cdr.detectChanges();
         }
       }

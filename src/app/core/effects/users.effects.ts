@@ -18,16 +18,7 @@ export class UserEffects {
   setUser$ = createEffect(() => this.actions.pipe(
     ofType(fetchCurrentUser),
     filter(user => !!user),
-    take(1),
-    mergeMap(() => this.serverService.serverReportStatsOption({})
-      .pipe(
-        switchMap((options: ServerReportStatsOptionResponse) => [setUsageStats({
-          allowed: options.enabled,
-          currVersion: options.current_version,
-          allowedVersion: options.enabled_version
-        })])
-      )
-    )
+    take(1)
   ));
 
   setStatsPref$ = createEffect(

@@ -9,7 +9,7 @@ import {RouterEffects} from '@common/core/effects/router.effects';
 import {CommonUserEffects} from '@common/core/effects/users.effects';
 import {createUserPrefReducer} from '@common/core/meta-reducers/user-pref-reducer';
 import {messagesReducer} from '@common/core/reducers/messages-reducer';
-import {projectsReducer} from '@common/core/reducers/projects.reducer';
+import {projectsReducer, RootProjects} from '@common/core/reducers/projects.reducer';
 import {routerReducer} from '@common/core/reducers/router-reducer';
 import {SmSyncStateSelectorService} from '@common/core/services/sync-state-selector.service';
 import {
@@ -30,6 +30,7 @@ import {projectSyncedKeys} from '~/features/projects/projects.module';
 import {authReducer} from '~/features/settings/containers/admin/auth.reducers';
 import {AdminService} from '~/shared/services/admin.service';
 import {UserEffects} from './effects/users.effects';
+import {recentTasksReducer} from './reducers/recent-tasks-reducer';
 import {sourcesReducer} from './reducers/sources-reducer';
 import {usageStatsReducer} from './reducers/usage-stats.reducer';
 import {usersReducer} from './reducers/users.reducer';
@@ -37,8 +38,6 @@ import {viewReducer} from './reducers/view.reducer';
 import {UsageStatsService} from './services/usage-stats.service';
 import {extCoreModules} from '~/build-specifics';
 import {ReportCodeEmbedService} from '../shared/services/report-code-embed.service';
-import {recentTasksReducer} from '@common/core/reducers/recent-tasks-reducer';
-import {BreadcrumbsService} from '@common/shared/services/breadcrumbs.service';
 
 export const reducers = {
   auth: authReducer,
@@ -61,8 +60,6 @@ const syncedKeys = [
   'projects.selectedProject',
   'rootProjects.showHidden',
   'rootProjects.hideExamples',
-  'rootProjects.mainPageTagsFilter',
-  'rootProjects.mainPageTagsFilterMatchMode',
   'rootProjects.defaultNestedModeForFeature',
   'views.availableUpdates',
   'views.showSurvey',
@@ -94,7 +91,7 @@ export const localStorageReducer = (reducer: ActionReducer<any>): ActionReducer<
     return nextState;
   };
 
-const userPrefMetaFactory = (userPreferences: UserPreferences): MetaReducer[] => [
+const userPrefMetaFactory = (userPreferences: UserPreferences): MetaReducer<any>[] => [
   (reducer: ActionReducer<any>) =>
     createUserPrefReducer('users', ['activeWorkspace', 'showOnlyUserWork'], [USERS_PREFIX], userPreferences, reducer),
   (reducer: ActionReducer<any>) =>
@@ -144,7 +141,6 @@ const userPrefMetaFactory = (userPreferences: UserPreferences): MetaReducer[] =>
       useFactory: userPrefMetaFactory
     },
     {provide: DEFAULT_CURRENCY_CODE, useValue: 'USD'},
-    BreadcrumbsService,
   ],
   declarations: [],
   exports: []

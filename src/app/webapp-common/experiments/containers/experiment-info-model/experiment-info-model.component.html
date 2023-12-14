@@ -8,7 +8,6 @@
   [ngTemplateOutlet]="template" #template>
 <sm-editable-section #modelSection
                      *ngIf="(model?.id || editable)"
-                     [scrollToSection]="false"
                      [saving]="saving"
                      [editable]="editable && !outputMode"
                      [hideSaveButton]="true"

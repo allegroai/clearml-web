@@ -21,9 +21,9 @@
       </mat-checkbox>
     </div>
     <div class="navigate">
-      <div class="btn-rec al-icon al-ico-previous" data-id="previousButton" (click)="prev()"></div>
-      <div class="btn-rec al-icon al-ico-next" data-id="nextButton" (click)="next()"></div>
+      <div class="btn-rec al-icon al-ico-previous" (click)="prev()"></div>
+      <div class="btn-rec al-icon al-ico-next" (click)="next()"></div>
     </div>
-    <div class="tip-page" data-id="proTipsPageCount"> {{tipIndex + 1}} / {{tips.length}}</div>
+    <div class="tip-page"> {{tipIndex + 1}} / {{tips.length}}</div>
   </div>
 </sm-dialog-template>

@@ -51,7 +51,7 @@ export const TASK_TAGS = {
   HIDDEN: 'archived' as TaskTagsEnum
 };
 
-export const LOG_BATCH_SIZE = 1000;
+export const LOG_BATCH_SIZE = 100;
 
 export enum CustomColumnMode {
   Standard,
@@ -61,5 +61,3 @@ export enum CustomColumnMode {
 }
 
 export const NONE_USER_TASK_TYPES = ['-dataset_import', '-annotation', '-annotation_manual'];
-
-export const singleValueChartTitle = ' Summary';

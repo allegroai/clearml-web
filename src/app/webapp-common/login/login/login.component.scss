@@ -1,5 +1,4 @@
 @import "variables";
-@import "mixins/link";
 
 :host {
   .marketing-content-bottom {
@@ -70,7 +69,7 @@
     height: 100%;
 
     &.dark-theme {
-      background-image: url(../../assets/infinity_anim--on_light.svg), linear-gradient(100deg, #22408a 6%, #09173c 82%);
+      background-image: url(~app/webapp-common/assets/infinity_anim--on_light.svg), linear-gradient(100deg, #22408a 6%, #09173c 82%);
       background-size: contain;
       background-position: center;
       background-repeat: no-repeat;
@@ -195,18 +194,7 @@
       display: inline-block;
       width: 210px;
       font-size: 12px;
-      color: $blue-500;
-      @include link();
-    }
-  }
-
-  &.dark-theme {
-    .login-form .terms-of-use {
-      color: $blue-200;
-
-      a[href] {
-        color: $neon-yellow;
-      }
+      color: $blue-300;
     }
   }
 }
@@ -259,3 +247,12 @@
   }
 }
 
+.dark-theme {
+  .terms-of-use {
+    color: #b9bdd4;
+
+    a {
+      color: $blue-200;
+    }
+  }
+}

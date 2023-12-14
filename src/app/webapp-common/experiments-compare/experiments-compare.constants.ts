@@ -5,12 +5,6 @@ export interface SelectedMetric {
   path: string;
 }
 
-export interface DataDictionary {
-  dataDictionary: boolean;
-  link: string;
-  dataValue: string;
-}
-
 export const RENAME_MAP = {
   'network_design': 'Network Design',
   'uncommitted_changes': 'Uncommitted Changes',

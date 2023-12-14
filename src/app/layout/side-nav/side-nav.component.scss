@@ -1,6 +1,7 @@
 @import "variables";
+@import "variables_v2";
 
-$link-item-size: 64px;
+$link-item-size: 54px;
 $icon-size: 24px;
 
 :host {
@@ -8,12 +9,15 @@ $icon-size: 24px;
   flex-direction: column;
   height: 100%;
   width: $side-bar-close-width;
-  background-color: $blue-600;
+  background-color: $background-color;
+  border-right: 1px solid $border-color;
 
   .logo {
     width: 64px;
     height: 64px;
-    background: $blue-700;
+    padding: 5px;
+    background: $background-color;
+    border-right: 1px solid $border-color;
   }
 
   .items-container {
@@ -22,6 +26,13 @@ $icon-size: 24px;
     overflow-y: auto;
     scrollbar-width: thin; /* Firefox */
     -ms-overflow-style: none; /* IE 10+ */
+    padding: 5px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+
     &.on-scrolling {
       box-shadow: 0 3px 3px rgba(0,0,0,0.3) inset, 0 -3px 3px rgba(0,0,0,0.3) inset;
     }
@@ -43,15 +54,16 @@ $icon-size: 24px;
     border: none;
   }
 
-
   .item {
     display: flex;
+    border-radius: 4px;
     align-items: center;
     justify-content: center;
     width: $link-item-size;
     height: $link-item-size;
-    color: $blue-300;
+    color: $text;
     margin: 0 auto;
+
     // ICON SIZE
     &:before {
       font-size: $icon-size;
@@ -59,12 +71,12 @@ $icon-size: 24px;
 
     &:hover {
       color: $blue-200;
-      background-color: $blue-500;
+      background-color: $background-color-hover;
       text-decoration: none;
     }
 
     &.active:before {
-      color: $neon-yellow
+      color: $primary-color;
     }
   }
 

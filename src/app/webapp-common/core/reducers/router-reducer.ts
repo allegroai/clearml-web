@@ -8,7 +8,6 @@ export interface RouterState {
   queryParams: Params;
   config: string[];
   skipNextNavigation: boolean;
-  data: any;
 }
 
 const initRouter: RouterState = {
@@ -17,7 +16,6 @@ const initRouter: RouterState = {
   queryParams: null,
   config: null,
   skipNextNavigation: false,
-  data: null
 };
 
 export const selectRouter = state => state.router as RouterState;
@@ -25,11 +23,10 @@ export const selectRouterUrl = createSelector(selectRouter, router => router && 
 export const selectRouterParams = createSelector(selectRouter, router => router && router?.params);
 export const selectRouterQueryParams = createSelector(selectRouter, router => router && router.queryParams);
 export const selectRouterConfig = createSelector(selectRouter, router => router && router.config);
-export const selectRouterData = createSelector(selectRouter, router => router && router.data);
 
 export const routerReducer = createReducer(initRouter,
-  on(setRouterSegments, (state, action): RouterState => ({
+  on(setRouterSegments, (state, action) => ({
     ...state, params: action.params, queryParams: action.queryParams,
-    url: action.url, config: action.config, data: action.data
+    url: action.url, config: action.config
   })),
 );

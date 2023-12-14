@@ -11,27 +11,27 @@ export const activeSearchLink = {
 
 export const activeLinksList = [
   {
-    label: 'PROJECTS',
+    label: 'Projects',
     name: activeSearchLink.projects,
   },
   {
-    label: 'DATASETS',
+    label: 'DataSets',
     name: activeSearchLink.openDatasets,
   },
   {
-    label: 'EXPERIMENTS',
+    label: 'Experiments',
     name: activeSearchLink.experiments,
   },
   {
-    label: 'MODELS',
+    label: 'Models',
     name: activeSearchLink.models,
   },
   {
-    label: 'PIPELINES',
+    label: 'Piplines',
     name: activeSearchLink.pipelines,
   },
   {
-    label: 'REPORTS',
+    label: 'Reports',
     name: activeSearchLink.reports,
   },
 ];

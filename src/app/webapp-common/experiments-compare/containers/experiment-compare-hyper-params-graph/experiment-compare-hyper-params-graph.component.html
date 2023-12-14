@@ -1,7 +1,7 @@
 <div class="list-container light-theme">
 
   <!--#######  Metrics Autocomplete  ######-->
-  <div smClickStopPropagation class="metrics-container" tabindex="1" (blur)="listOpen = false">
+  <div smClickStopPropagation class="metrics-container">
     <div class="metric-title">Performance Metric</div>
     <div class="metrics-search" (click)="openList()">
       <input #searchMetric
@@ -20,7 +20,7 @@
   <mat-radio-group
     *ngIf="!listOpen"
     class="value-types"
-    [value]="valueType"
+    [value]="metricValueType$ | async"
     [disabled]="searchMetric.value=== ''"
     (change)="valueTypeChange($event)">
     <mat-radio-button class="sm" [value]="'value'">LAST</mat-radio-button>
@@ -72,18 +72,17 @@
 </div>
 <div class="graphs-container h-100">
   <div *ngIf="plotlyReady$ | async" class="graph-container">
-    <sm-parallel-coordinates-graph
-      *ngIf="(experiments$ | async).length > 1 && selectedHyperParams?.length > 0 && !!selectedMetric; else no_data"
-      [experiments]="experiments$ | async"
-      [parameters]="selectedHyperParams"
-      [metric]="selectedMetric"
-      [metricValueType]="valueType"
-      (createEmbedCode)="createEmbedCode($event)"
+    <sm-parallel-coordinates-graph *ngIf="(experiments$ | async).length > 1 && selectedHyperParams.length > 0 && !!selectedMetric; else no_data"
+                                   [experiments]="experiments$ | async"
+                                   [parameters]="selectedHyperParams"
+                                   [metric]="selectedMetric"
+                                   [metricValueType]="metricValueType$ | async"
+                                   (createEmbedCode)="createEmbedCode($event)"
     ></sm-parallel-coordinates-graph>
     <ng-template #no_data>
       <div class="d-flex align-items-center justify-content-center flex-column h-100 no-data">
         <div class="al-icon al-ico-no-data-graph"></div>
-        <h4 class="no-data-title">NO DATA TO SHOW</h4>
+        <div class="no-data-title">No data to show</div>
         <div>Please select parameters & metric</div>
       </div>
     </ng-template>

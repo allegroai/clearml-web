@@ -3,12 +3,12 @@ import {IconNames, ICONS} from '../../../constants';
 import {MenuItems} from '../items.utils';
 
 export class MoveToFooterItem extends ItemFooterModel {
+  id = MenuItems.moveTo;
+  emit = true;
+  icon = ICONS.MOVE_TO as Partial<IconNames>;
+  disableDescription = 'Move To';
   constructor() {
     super();
-    this.id = MenuItems.moveTo;
-    this.emit = true;
-    this.icon = ICONS.MOVE_TO as Partial<IconNames>;
-    this.disableDescription = 'Move To';
   }
 
   getItemState(state: IFooterState<any>): { icon?: IconNames; title?: string; description?: string; disable?: boolean; disableDescription?: string; emit?: boolean; emitValue?: boolean; preventCurrentItem?: boolean; class?: string; wrapperClass?: string } {

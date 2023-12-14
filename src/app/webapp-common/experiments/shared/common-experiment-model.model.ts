@@ -1,24 +1,15 @@
-import {Model} from '~/business-logic/model/models/model';
-import {Project} from '~/business-logic/model/projects/project';
-import {User} from '~/business-logic/model/users/user';
-import {Task} from '~/business-logic/model/tasks/task';
-import {Artifact} from '~/business-logic/model/tasks/artifact';
-import {ITask} from '~/business-logic/model/al-task';
-import {DataDictionary} from '@common/experiments-compare/experiments-compare.constants';
+import {Model} from '../../../business-logic/model/models/model';
+import {Project} from '../../../business-logic/model/projects/project';
+import {User} from '../../../business-logic/model/users/user';
+import {Task} from '../../../business-logic/model/tasks/task';
+import {Artifact} from '../../../business-logic/model/tasks/artifact';
+import {ITask} from '../../../business-logic/model/al-task';
 
 export interface IModelInfo extends  Omit<Model, 'project' | 'task' | 'user'> {
   project?: Project;
   task?: ITask;
   taskName?: string;
   user?: User;
-}
-
-export interface CompareIModelInfo extends  Omit<IModelInfo,  'id'> {
-  project?: Project;
-  task?: ITask;
-  taskName?: string;
-  user?: User;
-  id?: DataDictionary;
 }
 
 export interface IModelInfoInput {
@@ -83,7 +74,7 @@ export type ExperimentTableColFieldsEnum =
   | 'tags';
 
 export interface ITableExperiment {
-  id: Task['id'];
+  id?: Task['id'];
   type?: Task['type'];
   name?: Task['name'];
   created?: Task['created'];

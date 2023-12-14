@@ -1,12 +1,7 @@
 import {createAction, props} from '@ngrx/store';
-import {Queue as BLQueue} from '~/business-logic/model/queues/queue';
+import {Queue} from '~/business-logic/model/queues/queue';
 import {Topic} from '../../shared/utils/statistics';
 import {SortMeta} from 'primeng/api';
-
-export interface Queue extends Omit<BLQueue, 'id'> {
-  id: string;
-}
-
 
 const queuesPrefix = 'QUEUES_';
 export const GET_QUEUES = queuesPrefix + 'GET_QUEUES';
@@ -76,6 +71,22 @@ export const deleteQueue = createAction(
   DELETE_QUEUE,
   props<{ queue: Queue }>()
 );
+
+// export class GetQueuesTasks implements ISmAction {
+//   type = GET_QUEUES_TASKS;
+//   public payload: { queues: Queue };
+//
+//   constructor(queues: Queue) {
+//     this.payload = {queues};
+//   }
+// }
+
+// export class AddQueuesTasks implements ISmAction {
+//   type = ADD_QUEUES_TASKS;
+//
+//   constructor(public payload: { tasks: Task; queueId: string }) {
+//   }
+// }
 
 export const moveExperimentToBottomOfQueue = createAction(
   MOVE_EXPERIMENT_TO_BOTTOM_OF_QUEUE,

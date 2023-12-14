@@ -1,8 +1,14 @@
 @import "variables";
+@import "variables_v2";
 
 .al-ico-filter-off:before {
   color: $blue-300;
 }
+
+.al-ico-filter-on .path1:before {
+  color: $primary-color;
+}
+
 .al-ico-filter-on .path2:hover:before,
 .al-ico-filter-off:hover:before {
   color: $blue-200;

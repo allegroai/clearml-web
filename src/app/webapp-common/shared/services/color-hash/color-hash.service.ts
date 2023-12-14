@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
 import {Store} from '@ngrx/store';
+import {UsersState} from '@common/core/reducers/users-reducer';
 import {filter, take} from 'rxjs/operators';
 import {selectColorPreferences} from '../../ui-components/directives/choose-color/choose-color.reducer';
 import {addUpdateColorPreferences, ColorPreference} from '../../ui-components/directives/choose-color/choose-color.actions';
 import stc from 'string-to-color';
-import { TinyColor } from '@ctrl/tinycolor';
+import tinycolor from 'tinycolor2';
 export interface ColorCache {[label: string]: number[]}
 export const DOT_PLACEHOLDER = '--DOT--';
 
@@ -22,7 +23,7 @@ export class ColorHashService {
     this._colorCache.next(obj);
   }
 
-  constructor(private store: Store) {
+  constructor(private store: Store<UsersState>) {
     this.store.select(selectColorPreferences)
       .pipe(
         filter(preferenceColors => !!preferenceColors),
@@ -36,7 +37,7 @@ export class ColorHashService {
     if (colorCache) {
       return colorCache;
     }
-    const tColor = new TinyColor(stc(label));
+    const tColor = tinycolor(stc(label));
     const tLum = tColor.getLuminance();
     if (tLum < 0.3 && lighten) {
       tColor.lighten(30 - tLum * 100);
@@ -75,13 +76,14 @@ export class ColorHashService {
   setColorForString(str: string, color: number[], savePreference: boolean = true) {
     if (savePreference) {
       this.updateColorCache(str, color);
-      this.store.dispatch(addUpdateColorPreferences({[str]: color}));
+      const cleanString     = str.replace(/\./, DOT_PLACEHOLDER);
+      this.store.dispatch(addUpdateColorPreferences({[cleanString]: color}));
     }
   }
 
   public hex(hash: string) {
     const rgb = this.initColor(hash);
-    return new TinyColor({r: rgb[0], g: rgb[1], b: rgb[2], a: rgb[3]}).toHexString();
+    return tinycolor({r: rgb[0], g: rgb[1], b: rgb[2], a: rgb[3]}).toHexString();
   }
 
   public getRgbString(str, opacity = -1) {

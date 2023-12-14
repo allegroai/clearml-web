@@ -62,11 +62,7 @@ export class ModelDetailsReverterService {
       'created at': model.created && formatDate(model.created, TIME_FORMAT_STRING, this.locale) || NA,
       'update at': model.last_update && formatDate(model.last_update, TIME_FORMAT_STRING, this.locale) || NA,
       framework: model.framework,
-      'model url':{
-        dataDictionary: true,
-        link: model.uri,
-        dataValue: model.uri,
-      },
+      'model url': model.uri,
       user: model.user.name || NA,
       'creating experiment': (model.parent as unknown as ITask)?.name || NA,
       archive: model.system_tags.includes(TAGS.HIDDEN) ? 'Yes' : 'No',

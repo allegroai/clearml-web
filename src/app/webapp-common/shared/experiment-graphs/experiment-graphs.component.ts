@@ -18,7 +18,7 @@ import {SingleGraphComponent} from '../single-graph/single-graph.component';
 import {
   ChartHoverModeEnum,
   EXPERIMENT_GRAPH_ID_PREFIX,
-  SINGLE_GRAPH_ID_PREFIX, singleValueChartTitle
+  SINGLE_GRAPH_ID_PREFIX
 } from '../../experiments/shared/common-experiments.const';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {AdminService} from '~/shared/services/admin.service';
@@ -38,9 +38,6 @@ import {
 import {v4} from 'uuid';
 import {selectGraphsPerRow} from '@common/experiments/reducers';
 import {setGraphsPerRow} from '@common/experiments/actions/common-experiment-output.actions';
-import {SmoothTypeEnum} from '@common/shared/single-graph/single-graph.utils';
-import {maxInArray} from '@common/shared/utils/helpers.util';
-import {Title} from "@angular/platform-browser";
 
 @Component({
   selector: 'sm-experiment-graphs',
@@ -50,6 +47,18 @@ import {Title} from "@angular/platform-browser";
 })
 
 export class ExperimentGraphsComponent implements OnDestroy {
+
+  groupByOptions = [
+    {
+      name: 'Metric',
+      value: groupByCharts.metric
+    },
+    {
+      name: 'None',
+      value: groupByCharts.none
+    }
+  ];
+  public groupByCharts = groupByCharts;
   readonly experimentGraphidPrefix = EXPERIMENT_GRAPH_ID_PREFIX;
   readonly singleGraphidPrefix = SINGLE_GRAPH_ID_PREFIX;
   public graphList: Array<any> = [];
@@ -74,7 +83,6 @@ export class ExperimentGraphsComponent implements OnDestroy {
   private _hiddenList: string[];
   private maxUserHeight: number;
   private maxUserWidth: number;
-  protected readonly singleValueChartTitle = singleValueChartTitle;
 
   @HostListener('window:resize')
   onResize() {
@@ -104,12 +112,10 @@ export class ExperimentGraphsComponent implements OnDestroy {
   @Input() hoverMode: ChartHoverModeEnum;
   @Input() disableResize: boolean = false;
   @Input() singleValueData: Array<EventsGetTaskSingleValueMetricsResponseValues>;
-  @Input() multipleSingleValueData: ExtFrame;
   @Input() experimentName: string;
 
 
   @Input() smoothWeight: number;
-  @Input() smoothType: SmoothTypeEnum;
   @Input() groupBy: GroupByCharts;
 
   @Input() set xAxisType(axisType: ScalarKeyEnum) {
@@ -123,18 +129,17 @@ export class ExperimentGraphsComponent implements OnDestroy {
 
   @Input() exportForReport = true;
   @Output() hoverModeChanged = new EventEmitter<ChartHoverModeEnum>();
-  @Output() createEmbedCode = new EventEmitter<{ metrics?: string[]; variants?: string[]; originalObject?: string; xaxis?: ScalarKeyEnum; domRect: DOMRect }>();
+  @Output() createEmbedCode = new EventEmitter<{ metrics?: string[]; variants?: string[]; domRect: DOMRect }>();
 
   @ViewChildren('metricGroup') allMetricGroups !: QueryList<ElementRef>;
   @ViewChildren('singleGraphContainer') singleGraphs !: QueryList<ElementRef>;
-  @ViewChildren('singleValueGraph') singleValueGraph !: QueryList<SingleGraphComponent>;
   @ViewChildren(SingleGraphComponent) allGraphs !: QueryList<SingleGraphComponent>;
 
   constructor(
     private el: ElementRef,
     private changeDetection: ChangeDetectorRef,
     private adminService: AdminService,
-    private store: Store,
+    private store: Store<any>,
     private renderer: Renderer2
   ) {
 
@@ -183,8 +188,8 @@ export class ExperimentGraphsComponent implements OnDestroy {
     this.graphsData = this.addId(this.sortGraphsData(graphGroups));
 
     this.graphsPerRow = (this.disableResize || this.allGroupsSingleGraphs()) ? 1 : this.graphsPerRow;
-    this.maxUserHeight = maxInArray(Object.values(this.graphsData).flat().map((chart: ExtFrame) => chart.layout?.height || 0));
-    this.maxUserWidth = maxInArray(Object.values(this.graphsData).flat().map((chart: ExtFrame) => chart.layout?.width || 0));
+    this.maxUserHeight = Math.max(...Object.values(this.graphsData).flat().map((chart: ExtFrame) => chart.layout?.height || 0));
+    this.maxUserWidth = Math.max(...Object.values(this.graphsData).flat().map((chart: ExtFrame) => chart.layout?.width || 0));
     if (this.maxUserHeight) {
       this.height = this.maxUserHeight;
     }
@@ -295,7 +300,7 @@ export class ExperimentGraphsComponent implements OnDestroy {
   trackByFn = (index: number, item) => item;
 
   trackByIdFn = (index: number, item: ExtFrame) =>
-    `${item.layout.title} ${item.data?.length} ${(this.isDarkTheme ? '' : item.iter ?? '')}`;
+    `${item.layout.title} ${(this.isDarkTheme ? '' : item.iter)}`;
 
   isWidthBigEnough() {
     return this.el.nativeElement.clientWidth > this.breakPoint;
@@ -320,11 +325,11 @@ export class ExperimentGraphsComponent implements OnDestroy {
         this.width = width - 16 / this.graphsPerRow;
         this.height = this.maxUserHeight || this.height;
         if (!this.isGroupGraphs) {
-          this.allMetricGroups?.forEach(metricGroup => this.renderer.setStyle(metricGroup.nativeElement, 'width', `${this.width}px`));
-          this.allMetricGroups?.forEach(metricGroup => this.renderer.setStyle(metricGroup.nativeElement, 'height', `${this.height}px`));
+          this.allMetricGroups.forEach(metricGroup => this.renderer.setStyle(metricGroup.nativeElement, 'width', `${this.width}px`));
+          this.allMetricGroups.forEach(metricGroup => this.renderer.setStyle(metricGroup.nativeElement, 'height', `${this.height}px`));
         } else {
-          this.singleGraphs?.forEach(singleGraph => this.renderer.setStyle(singleGraph.nativeElement, 'width', `${this.width}px`));
-          this.singleGraphs?.forEach(singleGraph => this.renderer.setStyle(singleGraph.nativeElement, 'height', `${this.height}px`));
+          this.singleGraphs.forEach(singleGraph => this.renderer.setStyle(singleGraph.nativeElement, 'width', `${this.width}px`));
+          this.singleGraphs.forEach(singleGraph => this.renderer.setStyle(singleGraph.nativeElement, 'height', `${this.height}px`));
         }
       }
       this.prepareRedraw();
@@ -337,8 +342,7 @@ export class ExperimentGraphsComponent implements OnDestroy {
     if ($event.edges.right) {
       const containerWidth = this.el.nativeElement.clientWidth;
       const userWidth = $event.rectangle.width;
-      this.graphsPerRow = this.calcGraphPerRow(userWidth, containerWidth)
-      this.store.dispatch(setGraphsPerRow({graphsPerRow: this.graphsPerRow}));
+      this.store.dispatch(setGraphsPerRow({graphsPerRow: this.calcGraphPerRow(userWidth, containerWidth)}));
 
       if (!this.isGroupGraphs) {
         this.allMetricGroups.forEach(metricGroup => {
@@ -355,9 +359,9 @@ export class ExperimentGraphsComponent implements OnDestroy {
     if ($event.edges.bottom) {
       this.height = $event.rectangle.height;
       if (!this.isGroupGraphs) {
-        this.allMetricGroups?.forEach(metricGroup => this.renderer.setStyle(metricGroup.nativeElement, 'height', `${this.height}px`));
+        this.allMetricGroups.forEach(metricGroup => this.renderer.setStyle(metricGroup.nativeElement, 'height', `${this.height}px`));
       } else {
-        this.singleGraphs?.forEach(singleGraph => this.renderer.setStyle(singleGraph.nativeElement, 'height', `${this.height}px`));
+        this.singleGraphs.forEach(singleGraph => this.renderer.setStyle(singleGraph.nativeElement, 'height', `${this.height}px`));
       }
     }
     this.prepareRedraw();
@@ -399,7 +403,7 @@ export class ExperimentGraphsComponent implements OnDestroy {
     const element = this.allMetrics.nativeElement.getElementsByClassName('graph-id')[EXPERIMENT_GRAPH_ID_PREFIX + id] as HTMLDivElement;
     if (element) {
       this.allMetrics.nativeElement.scrollTo({top: element.offsetTop, behavior: 'smooth'});
-    } else if (this.allMetrics.nativeElement.getElementsByClassName('single-value-summary-section')[0]){
+    } else if (this.allMetrics.nativeElement.getElementsByTagName('sm-single-value-summary-table')[0]){
       this.allMetrics.nativeElement.scrollTo({top: 0, behavior: 'smooth'});
     }
   }
@@ -419,33 +423,21 @@ export class ExperimentGraphsComponent implements OnDestroy {
 
   public generateIdentifier = (chartItem: any) => `${this.singleGraphidPrefix} ${this.experimentGraphidPrefix} ${chartItem.metric} ${chartItem.layout.title} ${chartItem.iter} ${chartItem.variant} ${(chartItem.layout.images && chartItem.layout.images[0]?.source)}`;
 
-  creatingEmbedCode(chartItem: any, {domRect, xaxis}: {xaxis: ScalarKeyEnum; domRect: DOMRect}) {
+  creatingEmbedCode(chartItem: any, domRect: DOMRect) {
     if (!chartItem) {
-      this.createEmbedCode.emit({xaxis, domRect});
+      this.createEmbedCode.emit({domRect});
       return;
     }
 
-    if (!this.isCompare && this.groupBy === groupByCharts.none) {
+    if (this.groupBy === groupByCharts.none) {
       // split scalars by variants
       this.createEmbedCode.emit({
         metrics: [chartItem.data[0].originalMetric ?? chartItem.metric.substring(0, chartItem.metric.lastIndexOf('/'))?.trim()],
         variants: [chartItem.data[0].name],
-        ...((xaxis || this.xAxisType) && {xaxis: xaxis ?? this.xAxisType}),
         domRect
       });
     } else {
-      this.createEmbedCode.emit({
-        originalObject: chartItem.task,
-        metrics: [chartItem.metric],
-        variants: chartItem.variants ?? [chartItem.variant],
-        ...((xaxis || this.xAxisType) && {xaxis: xaxis ?? this.xAxisType}),
-        ...(chartItem.data.length < 2 && {originalObject: chartItem.task}),
-        ...(chartItem.data[0]?.seriesName && {seriesName: chartItem.data[0]?.seriesName}),
-        domRect});
+      this.createEmbedCode.emit({metrics: [chartItem.metric], variants: chartItem.variants ?? [chartItem.variant], domRect});
     }
-  }
-
-  checkIfLegendToTitle(chartItem: ExtFrame) {
-    return this.isGroupGraphs && chartItem.data?.length === 1 && (!chartItem.data[0].name || chartItem.data[0].name === chartItem.layout?.title) && ['scatter', 'scattergl', 'bar', 'scatter3d'].includes(chartItem?.data[0]?.type);
   }
 }

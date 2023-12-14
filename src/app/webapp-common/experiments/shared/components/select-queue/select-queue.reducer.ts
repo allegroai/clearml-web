@@ -1,7 +1,7 @@
-import {createFeatureSelector, createReducer, createSelector, on} from '@ngrx/store';
-import {setQueuesForEnqueue, setTaskForEnqueue} from './select-queue.actions';
-import {Queue} from '~/business-logic/model/queues/queue';
-import {Task} from '~/business-logic/model/tasks/task';
+import {createFeatureSelector, createSelector} from '@ngrx/store';
+import {SET_QUEUES_FOR_ENQUEUE, SET_TASK_FOR_ENQUEUE} from './select-queue.actions';
+import {Queue} from '../../../../../business-logic/model/queues/queue';
+import {Task} from '../../../../../business-logic/model/tasks/task';
 
 export interface ISelectQueueState {
   queues: Array<Queue>;
@@ -13,11 +13,18 @@ const selectQueueInitState: ISelectQueueState = {
   tasks: null
 };
 
-export const selectQueueReducer = createReducer(
-  selectQueueInitState,
-  on(setQueuesForEnqueue, (state, action): ISelectQueueState => ({...state, queues: action.queues})),
-  on(setTaskForEnqueue, (state, action): ISelectQueueState => ({...state, tasks: action.tasks})),
-);
+
+export function selectQueueReducer<ActionReducer>(state: ISelectQueueState = selectQueueInitState, action): ISelectQueueState {
+  switch (action.type) {
+    case SET_QUEUES_FOR_ENQUEUE:
+      return {...state, queues: action.payload.queues};
+    case SET_TASK_FOR_ENQUEUE:
+      return {...state, tasks: action.payload.task};
+    default:
+      return state;
+  }
+}
+
 
 export const queues = createFeatureSelector<ISelectQueueState>('selectQueue');
 export const selectQueuesList = createSelector(queues, (state) => state ? state.queues : []);

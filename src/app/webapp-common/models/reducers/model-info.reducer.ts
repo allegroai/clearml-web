@@ -3,10 +3,11 @@ import {
   modelsExperimentsTableClearAllFilters,
   activateModelEdit, cancelModelEdit,
   editModel,
+  getModelInfo,
   modelDetailsUpdated,
   resetActiveSection,
   setSavingModel,
-  setModelInfo, setPlots, saveMetaData
+  setModelInfo, setPlots
 } from '../actions/models-info.actions';
 import {TableModel} from '../shared/models.model';
 import {cloneDeep} from 'lodash-es';
@@ -15,12 +16,11 @@ import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {createReducer, on} from '@ngrx/store';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {MetricsPlotEvent} from '~/business-logic/model/events/metricsPlotEvent';
-import {modelSelectionChanged} from '@common/models/actions/models-view.actions';
 
 export interface ModelInfoState {
   selectedModel: TableModel;
   activeSectionEdit: boolean;
-  infoDataFreeze: TableModel;
+  infoDataFreeze: any;
   saving: boolean;
   modelExperiments: ITableExperiment[];
   modelExperimentsTableFilter: { [columnId: string]: FilterMetadata };
@@ -43,38 +43,32 @@ const initialState: ModelInfoState = {
 
 export const modelsInfoReducer = createReducer(
   initialState,
-  on(setModelInfo, (state, action): ModelInfoState => ({
+  on(getModelInfo, (state) => ({...state, selectedModel: null})),
+  on(setModelInfo, (state, action) => ({...state, selectedModel: action.model as TableModel})),
+  on(modelDetailsUpdated, (state, action) => ({
     ...state,
-    selectedModel: action.model as TableModel,
-    infoDataFreeze: initialState.infoDataFreeze
+    selectedModel: {...state.selectedModel, ...action.changes}
   })),
-  on(modelDetailsUpdated, (state, action): ModelInfoState => ({
-    ...state,
-    selectedModel: {...state.selectedModel, ...action.changes},
-    infoDataFreeze: initialState.infoDataFreeze
-  })),
-  on(activateModelEdit, (state): ModelInfoState =>
+  on(activateModelEdit, state =>
     ({...state, activeSectionEdit: true, infoDataFreeze: state.selectedModel})),
-  on(cancelModelEdit, (state): ModelInfoState => ({
+  on(cancelModelEdit, (state) => ({
     ...state,
     selectedModel: state.infoDataFreeze ? cloneDeep(state.infoDataFreeze) : state.selectedModel,
     activeSectionEdit: null
   })),
-  on(setSavingModel, (state, action): ModelInfoState => ({...state, saving: action.saving})),
-  on(saveMetaData, (state): ModelInfoState => ({...state, saving: true})),
-  on(editModel, (state): ModelInfoState => ({...state, activeSectionEdit: null})),
-  on(resetActiveSection, (state): ModelInfoState => ({...state, activeSectionEdit: null})),
-  on(setPlots, (state, action): ModelInfoState => ({...state, plots: action.plots})),
-  on(modelSelectionChanged, (state, ): ModelInfoState => ({...state, selectedModel: initialState.selectedModel })),
-  on(modelExperimentsTableFilterChanged, (state, action): ModelInfoState => ({
+  on(setSavingModel, (state, action) => ({...state, saving: action.saving})),
+  on(editModel, (state) => ({...state, activeSectionEdit: null})),
+  on(resetActiveSection, (state) => ({...state, activeSectionEdit: null})),
+  on(setPlots, (state, action) => ({...state, plots: action.plots})),
+  on(modelExperimentsTableFilterChanged, (state, action) => ({
     ...state,
     modelExperimentsTableFilter: {
       ...state.modelExperimentsTableFilter,
       [action.filter.col]: {value: action.filter.value, matchMode: action.filter.filterMatchMode}
     }
   })),
-  on(modelsExperimentsTableClearAllFilters, (state): ModelInfoState =>
-    ({...state, modelExperimentsTableFilter: initialState.modelExperimentsTableFilter,})
-  )
+  on(modelsExperimentsTableClearAllFilters, state =>
+     ({...state, modelExperimentsTableFilter: initialState.modelExperimentsTableFilter,})
+    )
 );
 

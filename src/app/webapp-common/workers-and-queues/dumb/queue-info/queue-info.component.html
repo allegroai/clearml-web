@@ -1,4 +1,4 @@
-<div class="d-flex justify-content-center tabs-container" xmlns="http://www.w3.org/1999/html">
+<div class="d-flex justify-content-center tabs-container">
   <sm-navbar-item header="Experiments" [active]="activeTab==='experiments'"
                   (click)="activeTab = 'experiments'"></sm-navbar-item>
   <sm-navbar-item header="Workers" [active]="activeTab==='workers'" (click)="activeTab = 'workers'">
@@ -13,24 +13,30 @@
      class="empty-state">No workers currently assigned to this queue
 </div>
 <sm-simple-table-2
-  class="workers-table dark-theme"
   *ngIf="activeTab==='workers' && selectedQueue?.workers?.length>0"
   [cols]="workersCols"
   [rowsData]="selectedQueue?.workers"
   noDataMessage=" "
+  class="dark-theme"
 >
-  <ng-template let-row="row">
-    <div class="body">
-      <a class="link ellipsis" [smTooltip]="row?.name" smShowTooltipIfEllipsis [matTooltipShowDelay]="500" [routerLink]="['../workers']" [queryParams]="{id: row.name}">{{row?.name}}</a>
-      <div class="ellipsis" [smTooltip]="row.ip" [matTooltipShowDelay]="500" smShowTooltipIfEllipsis>{{row.ip}}</div>
-      <a class="link ellipsis"
-         [smTooltip]="row?.task?.name" smShowTooltipIfEllipsis
-         [matTooltipShowDelay]="500"
-         [class.cursor-default]="!row?.task?.id"
-        [routerLink]="row?.task?.id ? '/projects/'+ ((row?.task?.project?.id) ? row?.task?.project?.id : '*') + '/experiments/' + row?.task?.id : null"
+  <ng-template
+    let-col
+    let-i="rowIndex"
+    let-row="row"
+  >
+    <div class="col-9 flex-column">
+      <a class="link" [routerLink]="['../workers']" [queryParams]="{id: row.name}">{{row?.name}}</a>
+    </div>
+    <div class="col-6 flex-column">
+      {{row.ip}}
+    </div>
+    <div class="col-9 flex-column">
+      <a
+        [routerLink]="'/projects/'+ ((row?.task?.project?.id) ? row?.task?.project?.id : '*') + '/experiments/' + row?.task?.id"
       >{{row?.task?.name}}</a>
     </div>
   </ng-template>
+
 </sm-simple-table-2>
 
 <sm-menu
@@ -80,13 +86,22 @@
   (entryDropped)="experimentDropped($event)"
   class="experiments-table"
 >
-  <ng-template let-i="rowIndex" let-row="row">
-    <div class="body">
+  <ng-template
+    let-col
+    let-i="rowIndex"
+    let-row="row">
+    <div class="column ms-3">
       <i class="al-icon al-ico-drag sm-md"></i>
-      <div>{{i + 1}}</div>
-      <a class="ellipsis" [smTooltip]="row?.task?.name" smShowTooltipIfEllipsis [matTooltipShowDelay]="500"
+    </div>
+    <div class="column">
+      {{i + 1}}
+    </div>
+    <div class="flex-column">
+      <a
         [routerLink]="'/projects/'+ ((row?.task?.project?.id) ? row?.task?.project?.id : '*') + '/experiments/' +row?.task?.id">{{row?.task?.name}}
       </a>
+    </div>
+    <div class="column">
       <i class="al-icon al-ico-dots-v-menu sm-md pointer ms-2" (click)="openContextMenu($event, row?.task)"></i>
     </div>
   </ng-template>

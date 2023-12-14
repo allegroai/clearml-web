@@ -13,44 +13,47 @@
 
 
 export interface User {
-    /**
-     * User ID
-     */
-    id?: string;
-    /**
-     * Full name
-     */
-    name?: string;
-    /**
-     * Given name
-     */
-    given_name?: string;
-    /**
-     * Family name
-     */
-    family_name?: string;
-    /**
-     * Avatar URL
-     */
-    avatar?: string;
-    /**
-     * Company ID
-     */
-    company?: string;
-    /**
-     * User\'s role (admin only)
-     */
-    role?: string;
-    /**
-     * Providers uses has logged-in with
-     */
-    providers?: object;
-    /**
-     * User creation date
-     */
-    created?: string;
-    /**
-     * User email
-     */
-    email?: string;
+  /**
+   * User ID
+   */
+  id?: string;
+  /**
+   * Full name
+   */
+  name?: string;
+  group?: object[];
+  /**
+   * Given name
+   */
+  given_name?: string;
+  /**
+   * Family name
+   */
+  family_name?: string;
+  /**
+   * Avatar URL
+   */
+  avatar?: string;
+  /**
+   * Company ID
+   */
+  company?: string;
+  /**
+   * User\'s role (admin only)
+   */
+  role?: string;
+  /**
+   * Providers uses has logged-in with
+   */
+  providers?: object;
+  /**
+   * User creation date
+   */
+  created?: string;
+  /**
+   * User email
+   */
+  email?: string;
+  status?: string;
+  password?: string;
 }

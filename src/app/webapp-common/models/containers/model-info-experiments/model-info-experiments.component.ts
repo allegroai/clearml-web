@@ -1,5 +1,6 @@
 import {Component, ViewChild} from '@angular/core';
 import {Store} from "@ngrx/store";
+import {ModelInfoState} from "@common/models/reducers/model-info.reducer";
 import {selectSelectedModel} from "@common/models/reducers";
 import {Observable} from "rxjs";
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
@@ -23,7 +24,7 @@ export class ModelInfoExperimentsComponent {
   public selectedModelCreatingTaskLink$: Observable<string>;
 
 
-  constructor(private store: Store,
+  constructor(private store: Store<ModelInfoState>,
   ) {
     this.selectedModel$ = this.store.select(selectSelectedModel);
     this.selectedModelCreatingTaskLink$ = this.selectedModel$.pipe(map(model=>`/projects/${get( model, 'task.project.id', '*')}/experiments/${get(model, 'task.id','' )}` ));

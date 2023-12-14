@@ -1,22 +1,46 @@
 @use '@angular/material' as mat;
 @import "variables";
+@import "variables_v2";
 
 .dark-theme, .light-theme {
+  .p-avatar-group {
+    .p-avatar {
+      color: $text;
+      background-color: $primary-color;
+      border: 2px solid $text;
+    }
+  }
 
-  /* mat select */
-  --mat-select-trigger-text-size: 14px;
-  --mat-select-trigger-text-tracking: 0;
-  --mat-option-label-text-size: 14px;
-  --mat-option-label-text-tracking: 0;
-  --mat-option-label-text-line-height: 32px;
+  .mat-mdc-option:hover:not(.mdc-list-item--disabled) {
+    background-color: $accent-color !important;
+  }
 
-  .entity-context-menu .cdk-program-focused {
-    background-color: transparent !important;
+  .mat-primary {
+    .mat-mdc-option.mdc-list-item--selected:not(.mdc-list-item--disabled) .mdc-list-item__primary-text,
+    .mat-pseudo-checkbox-checked.mat-pseudo-checkbox-minimal::after {
+      color: $primary-color;
+    }
+  }
+
+  .mat-mdc-option {
+    color: $text-gray;
+  }
+
+  .mat-pseudo-checkbox {
+    color: $primary-color
+  }
+
+  .mat-pseudo-checkbox-checked.mat-pseudo-checkbox-full {
+    background-color: $primary-color !important;
+
+    &::after {
+      color: $text !important;
+    }
   }
 
   .mat-mdc-form-field {
-    --mat-menu-item-label-text-size: 14px;
-    --mat-menu-item-label-text-line-height: 16px;
+    --mdc-typography-body1-font-size: 14px;
+    --mdc-typography-body1-line-height: 16px;
 
     &.mat-form-field-appearance-outline {
       &.black {
@@ -32,13 +56,19 @@
           height: 100%;
 
           .mat-mdc-form-field-infix {
-            min-height: 36px;
+            min-height: 100%;
             padding: 5px 0;
+
+            .mat-mdc-input-element {
+              height: 26px;
+            }
+          }
+
+          .mat-mdc-form-field-icon-suffix {
+            line-height: 24px;
           }
         }
       }
-
-
     }
 
     &.mat-form-field-appearance-fill {
@@ -78,9 +108,7 @@
 
     .mdc-notched-outline--upgraded {
       .mdc-floating-label--float-above {
-        // --mat-mdc-form-field-label-transform: translate(-4px, -42.75px) scale(var(--mat-mdc-form-field-floating-label-scale, 0.75));
-        --mat-mdc-form-field-label-transform: translate(-4px, -44px) scale(1);
-        font-size: 12px;
+        --mat-mdc-form-field-label-transform: translate(-4px, -42.75px) scale(var(--mat-mdc-form-field-floating-label-scale, 0.75));
       }
     }
 
@@ -101,7 +129,7 @@
   }
 
   &.dark, &.black {
-    --mat-autocomplete-background-color: #000;
+    --mdc-theme-surface: #000;
 
     .mat-mdc-option {
       --mdc-theme-text-primary-on-background: #{$blue-200};
@@ -109,6 +137,8 @@
   }
 
   .mat-mdc-option {
+    --mdc-typography-body1-line-height: 36px;
+    --mdc-typography-body1-font-size: 14px;
     min-height: 36px;
   }
 }
@@ -117,7 +147,7 @@
   --mdc-theme-primary: #{$blue-200};
   --mdc-list-list-item-label-text-color: #{$blue-200};
   --mdc-theme-text-primary-on-background: #{$blue-200};
-  --mat-menu-item-label-text-size: 14px;
+  --mdc-typography-body1-font-size: 14px;
 }
 
 .dark-theme {
@@ -139,69 +169,9 @@
       }
     }
   }
-
-  .mat-mdc-select {
-    --mat-select-enabled-trigger-text-color: #{$blue-200};
-  }
-  .mat-mdc-option {
-    --mat-option-label-text-color: #{$blue-200};
-    &.mdc-list-item--selected:not(.mdc-list-item--disabled) .mdc-list-item__primary-text {
-      --mat-option-selected-state-label-text-color: #{$blue-100};
-    }
-  }
-  .mat-mdc-select-arrow {
-    --mat-select-enabled-arrow-color: #{$blue-300};
-  }
-  .mat-mdc-form-field.mat-focused .mat-mdc-select-arrow {
-    --mat-select-focused-arrow-color: #{$blue-100};
-  }
-  /* placeholder */
-  .mdc-text-field:not(.mdc-text-field--disabled) .mdc-text-field__input::placeholder {
-    color: $blue-300;
-  }
-  .mat-mdc-menu-item .mat-mdc-menu-submenu-icon {
-    --mat-menu-item-icon-color: #{$blue-300};
-  }
-  .mdc-text-field:not(.mdc-text-field--disabled) .mdc-text-field__input {
-    color: $blue-200;
-  }
 }
 
 .light-theme {
-  mat-option {
-    --mat-option-hover-state-layer-color: #{$blue-50};
-    --mat-option-focus-state-layer-color: #{$blue-100};
-    --mat-option-selected-state-layer-color: #{$blue-50};
-    margin: 0 4px;
-  }
-
-  .mat-mdc-select {
-    --mat-select-enabled-trigger-text-color: #{$blue-500};
-  }
-  .mat-mdc-option {
-    --mat-option-label-text-color: #{$blue-500};
-    &.mdc-list-item--selected:not(.mdc-list-item--disabled) .mdc-list-item__primary-text {
-      --mat-option-selected-state-label-text-color: #{$blue-600};
-    }
-  }
-  .mat-mdc-select-arrow {
-    --mat-select-enabled-arrow-color: #{$blue-400};
-  }
-  .mat-mdc-form-field.mat-focused .mat-mdc-select-arrow {
-    --mat-select-focused-arrow-color: #{$blue-500};
-  }
-  /* placeholder */
-  .mdc-text-field:not(.mdc-text-field--disabled) .mdc-text-field__input::placeholder {
-    color: $blue-300;
-  }
-  .mat-mdc-menu-item .mat-mdc-menu-submenu-icon {
-    --mat-menu-item-icon-color: #{$blue-400};
-  }
-  .mdc-text-field:not(.mdc-text-field--disabled) .mdc-text-field__input {
-    color: $blue-500;
-  }
-
-
   .mat-mdc-form-field, .mat-mdc-form-field.notched {
     .mdc-notched-outline__notch {
       border-radius: 4px 0 0 4px;
@@ -232,7 +202,7 @@
   }
 
   .mat-mdc-select, &.mat-mdc-select-panel {
-    --mat-menu-item-label-text-size: 14px;
+    --mdc-typography-body1-font-size: 14px;
 
     .mat-mdc-option {
       border-radius: 4px;
@@ -253,18 +223,13 @@
         white-space: nowrap;
       }
     }
-
-    &.wider-options {
-      min-width: 250px;
-    }
   }
 }
 
 body.dark-theme .mat-mdc-select-panel.dark-outline,
 body.dark-theme .mat-mdc-autocomplete-panel.dark-outline {
   --mdc-theme-primary: #{$blue-200};
-  --mat-menu-item-label-text-size: 14px;
-  --mat-option-selected-state-label-text-color: $blue-200;
+  --mdc-typography-body1-font-size: 14px;
   background-color: #000;
   border: 1px solid $blue-500;
   padding: 4px;
@@ -303,50 +268,13 @@ body.dark-theme .mat-mdc-autocomplete-panel.dark-outline {
     padding: 4px;
   }
 
-  .mat-pseudo-checkbox::after {
+  .mat-pseudo-checkbox {
     color: $blue-200;
   }
 
   &.mat-primary .mat-mdc-option.mat-selected:not(.mat-option-disabled) .mdc-list-item__primary-text {
     color: $blue-200;
   }
-
-  &.unset-option-height .mat-mdc-option {
-    // show all options text inside
-    height: unset;
-    line-height: normal;
-  }
-}
-
-.mat-mdc-slider.mdc-slider {
-  $size: 36px;
-  height: $size;
-
-  .mdc-slider__thumb {
-    height: $size;
-    width: $size;
-    left: -$size * 0.5;
-  }
-
-  .mat-ripple-element.mat-mdc-slider-active-ripple,
-  .mat-ripple-element.mat-mdc-slider-focus-ripple,
-  .mat-ripple-element.mat-mdc-slider-hover-ripple {
-    height: $size !important;
-    width: $size !important;
-    left: 0 !important;
-    top: 0 !important;
-  }
-}
-
-.light-theme .mat-mdc-slide-toggle.mat-primary {
-  --mdc-switch-selected-hover-handle-color: #{$purple};
-  --mdc-switch-selected-focus-handle-color: #{$purple};
-  --mdc-switch-selected-pressed-handle-color: #{$purple};
-  --mdc-switch-unselected-focus-handle-color: #616161;
-  --mdc-switch-selected-track-color: #{rgba($purple, 0.3)};
-  --mdc-switch-selected-focus-track-color: #{rgba($purple, 0.3)};
-  --mdc-switch-selected-pressed-track-color: #{rgba($purple, 0.4)};
-  --mdc-switch-selected-hover-track-color: #{rgba($purple, 0.4)};
 }
 
 .mat-mdc-slide-toggle {
@@ -426,7 +354,7 @@ body.dark-theme .mat-mdc-autocomplete-panel.dark-outline {
 }
 
 .mat-mdc-input-element {
-  font-size: var(--input-font-size, 14px) !important;
+  font-size: 14px !important;
 }
 
 .mat-mdc-tab-header {
@@ -440,18 +368,10 @@ body.dark-theme .mat-mdc-autocomplete-panel.dark-outline {
 .mat-mdc-tab-link.mdc-tab {
   height: 38px !important;
   padding: 0 16px;
-  color: $blue-300;
+  color: #8e95ab;
   min-width: 40px;
 
   &.mdc-tab-indicator--active {
-    color: $purple;
-  }
-}
-
-.dark-theme, .light-theme {
-  .mat-primary .mat-pseudo-checkbox-checked.mat-pseudo-checkbox-minimal::after,
-  .mat-primary .mat-pseudo-checkbox-checked.mat-pseudo-checkbox-full::after,
-  .mat-primary .mat-pseudo-checkbox-indeterminate.mat-pseudo-checkbox-full::after {
-    color: $blue-200;
+    color: $primary-color;
   }
 }

@@ -29,7 +29,7 @@
              [hasButtonClass]="false"
              (searchValueChanged)="searching = true; searchValueChanged.emit({value: $any($event.target).value})"
              (menuClosed)="onMenuClose()"
-             (menuOpened)="onMenuOpen()"
+             (menuOpened)="menuOpened.emit()"
     >
       <ng-container [ngSwitch]="filterType">
         <sm-table-filter-duration
@@ -48,8 +48,8 @@
         ></sm-table-filter-duration-date-time>
         <ng-container *ngSwitchDefault>
           <div *ngIf="supportAndFilter" class="filter-type" smClickStopPropagation>
-            <span data-id="AnyTagOption" class="link me-3" [class.selected]="!andFilter" (click)="toggleCombination()">Any</span>
-            <span data-id="allTagOption" class="link" [class.selected]="andFilter" (click)="toggleCombination()">All</span>
+            <span class="link me-3" [class.selected]="!andFilter" (click)="toggleCombination()">Any</span>
+            <span class="link" [class.selected]="andFilter" (click)="toggleCombination()">All</span>
           </div>
           <div [class.options-section]="enableSearch" smClickStopPropagation class="d-flex align-items-start flex-column table-filter-sort-template checkbox-list">
             <sm-checkbox-three-state-list
@@ -72,7 +72,7 @@
           </div>
         </ng-container>
       </ng-container>
-      <div *ngIf="columnExplain && options?.length" class="column-explanation">{{columnExplain}}</div>
+      <div *ngIf="columnExplain && options.length" class="column-explanation">{{columnExplain}}</div>
 
     </sm-menu>
   </ng-container>

@@ -12,7 +12,7 @@
 </ng-container>
 
 <ng-template #noRemove>
-  <sm-user-tag class="tag-item" data-id="tagName"
+  <sm-user-tag class="tag-item"
                *ngFor="let tag of tagsList; trackBy: trackFn"
                [colors]="tag.colorObservable | async"
                [caption]="tag.caption"

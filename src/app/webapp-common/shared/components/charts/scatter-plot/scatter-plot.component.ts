@@ -10,9 +10,11 @@ import {
   Output,
   ViewChild
 } from '@angular/core';
-import {scatterPlot, miniTooltip, MousePosition, ChartSize} from 'britecharts';
+import scatterPlot from 'britecharts/dist/umd/scatterPlot.min';
+// import scatterPlot from 'britecharts/src/charts/scatter-plot';
+import miniTooltip from 'britecharts/dist/umd/miniTooltip.min';
+// import miniTooltip from 'britecharts/src/charts/mini-tooltip';
 import {select, Selection} from 'd3-selection';
-import 'd3-zoom';
 import {cloneDeep} from 'lodash-es';
 import {fromEvent, Subscription} from 'rxjs';
 import {throttleTime} from 'rxjs/operators';
@@ -94,11 +96,10 @@ export class ScatterPlotComponent implements AfterViewInit, OnDestroy {
         .yAxisLabelOffset(-40)
         .xAxisFormatType('time')
         .xAxisFormat('%x')
-        .maxCircleArea(0)
+        .maxCircleArea(3)
         .isAnimated(false)
-        .enableZoom(true)
         .on('customMouseOver', this.tooltip.show)
-        .on('customMouseMove', (dataPoint: ProjectStatsGraphData, mousePos: MousePosition, chartSize: ChartSize) => {
+        .on('customMouseMove', (dataPoint, mousePos, chartSize) => {
           this.tooltip.title(dataPoint.title);
           this.tooltip.update(dataPoint, mousePos, chartSize);
         })
@@ -107,7 +108,7 @@ export class ScatterPlotComponent implements AfterViewInit, OnDestroy {
 
       this.updateChart();
 
-      this.tooltip.title('Experiment');
+      this.tooltip.valueLabel('y').nameLabel('nameExt').title('Experiment');
       this.tooltipContainer = this.chartContainer.select('.scatter-plot');
       this.tooltipContainer.datum([]).call(this.tooltip);
       this.initialized = true;
@@ -119,10 +120,10 @@ export class ScatterPlotComponent implements AfterViewInit, OnDestroy {
       this.chart.colorSchema(this.colors);
     }
     if (this.chartData) {
-      this.chartContainer.datum(this.chartData).call(this.chart, null);
+      this.chartContainer.datum(this.chartData).call(this.chart);
       window.setTimeout(() => this.chartContainer.selectAll('circle.data-point').attr('r', 3), 1000);
     }
-    // this.chartContainer.selectAll('#scatter-clip-path').remove();
+    this.chartContainer.selectAll('#scatter-clip-path').remove();
   }
 
   ngOnDestroy(): void {

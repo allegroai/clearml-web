@@ -2,11 +2,18 @@
 @import "angular-notifier/styles.scss";
 @import "angular-notifier/styles/themes/theme-material.scss";
 @import "shared/ui-components/styles/notifications";
-@import "britecharts/src/styles/britecharts";
+@import "britecharts/src/styles/charts/line";
+@import "britecharts/src/styles/charts/donut";
+@import "britecharts/src/styles/common/legend";
+@import "britecharts/src/styles/common/tooltip";
+@import "britecharts/src/styles/common/axes";
+@import "britecharts/src/styles/common/grid";
 // @import "ngx-markdown-editor/assets/highlight.js/agate.min.css";
 @import "shared/ui-components/styles/material-palette";
 @import "assets/fonts/trains-icons.scss";
 @import "layout/layout";
+
+@import "variables_v2";
 
 @include mat.core();
 $custom-typography: mat.define-typography-config(
@@ -94,9 +101,6 @@ $sm-neon-theme: mat.define-dark-theme((
 
   --mdc-typography-body1-letter-spacing: 0;
   --mdc-typography-button-letter-spacing: 0;
-  .mat-mdc-slide-toggle{
-    --mdc-switch-state-layer-size: 24px;
-  }
 
   .mat-mdc-checkbox .mdc-checkbox {
     --mdc-checkbox-selected-icon-color: #{$purple};
@@ -104,8 +108,8 @@ $sm-neon-theme: mat.define-dark-theme((
     --mdc-checkbox-selected-focus-icon-color: #{$purple};
   }
 
-  .mat-expansion-panel-header-description, .mat-expansion-indicator {
-    --mat-expansion-header-indicator-color: #{$blue-300};
+  .mat-expansion-panel-header-description, .mat-expansion-indicator:after {
+    color: $white;
   }
 
   .link {
@@ -134,9 +138,6 @@ $sm-neon-theme: mat.define-dark-theme((
 
   --mdc-typography-body1-letter-spacing: 0;
   --mdc-typography-button-letter-spacing: 0;
-  --mdc-switch-state-layer-size: 24px;
-
-  --bs-border-width: 1px #{$blue-300};
 
   mat-progress-bar {
     border-radius: 4px;
@@ -151,7 +152,7 @@ $sm-neon-theme: mat.define-dark-theme((
   }
 
   .mat-drawer {
-    border-right: solid 1px $blue-100;
+    border-right: solid 1px $border-color;
   }
 
   .mat-expansion-panel-header-description, .mat-expansion-indicator:after {
@@ -180,7 +181,7 @@ html, body {
   height: 100%;
   margin: 0;
   padding: 0;
-  font-family: $font-family-base;
+  font-family: $font-family-base, sans-serif;
   font-size: 14px;
   overflow: hidden;
 }
@@ -256,36 +257,8 @@ hr {
   }
 }
 
-//// fix for calendar v15 mix with v14
-//.dark-theme, .light-theme {
-//  .mat-datepicker-content {
-//    .mat-mdc-icon-button.mat-mdc-button-base {
-//      width: 40px;
-//      height: 40px;
-//      padding: 8px;
-//    }
-//
-//    .mat-calendar-body-selected {
-//      background-color: $blue-200;
-//    }
-//
-//    .mat-mdc-button:not(:disabled) {
-//      color: $blue-700;
-//    }
-//
-//    .mat-calendar-body-label, .mat-calendar-period-button {
-//      font-size: 14px;
-//      font-weight: 500;
-//    }
-//
-//    .mat-calendar-hidden-label {
-//      display: none;
-//    }
-//  }
-//}
-
 mat-expansion-panel {
-  box-shadow: unset !important;
+  box-shadow: unset;
 
   .mat-expansion-panel-header {
     margin-bottom: 0;
@@ -390,12 +363,11 @@ button {
   justify-content: center;
   height: 100%;
   width: 100%;
+  margin-top: 50px;
 }
 
 .empty-menu {
   height: 100px;
-  font-size: 14px;
-  --mat-menu-item-label-text-tracking: 0;
 }
 
 .capital-case {
@@ -516,7 +488,7 @@ body .clean-list {
 
 .mat-mdc-tooltip {
   &.sm-tooltip {
-    --mdc-plain-tooltip-container-color: #{$purple};
+    --mdc-plain-tooltip-container-color: #{$secondary-color};
 
     .mdc-tooltip__surface {
       max-width: 400px;
@@ -602,14 +574,6 @@ html {
 .light-theme {
   .mat-mdc-menu-content {
     .mat-mdc-menu-item {
-      &.cdk-keyboard-focused, &.cdk-program-focused {
-        color: rgba(0, 0, 0, 0.87);
-      }
-
-      &.mat-mdc-focus-indicator {
-        --mat-menu-item-hover-state-layer-color: #{$blue-50};
-      }
-
       .mdc-list-item__primary-text {
         --mdc-list-list-item-label-text-color: rgba(0, 0, 0, 0.87);
       }
@@ -625,13 +589,14 @@ html {
     width: calc(100% - 8px);
     height: 40px;
     min-height: 40px;
-    --mat-menu-item-label-text-line-height: 20px;
-    --mat-menu-item-label-text-size: 14px;
+    --mdc-typography-body1-line-height: 20px;
+    font-size: 14px;
+    --mdc-typography-body1-font-size: 14px;
     padding: 0 32px 0 12px;
     border-radius: 4px;
 
     .mdc-list-item__primary-text {
-      --mat-menu-item-label-text-tracking: 0;
+      --mdc-typography-body1-line-height: 20px;
       display: flex;
       align-items: center;
       gap: 0 12px;
@@ -864,7 +829,7 @@ button.btn.button-outline-dark {
 
 .ace_placeholder {
   font-family: SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
-  color: $blue-300 !important;
+  color: $blue-grey !important;
 }
 
 .modebar-btn[data-attr="plotly-embedded-modebar-button"] {
@@ -938,10 +903,4 @@ button.btn.button-outline-dark {
 .select-panel-width {
   min-width: fit-content;
   max-width: 50vw !important;
-}
-
-.background-transparent {
-  .mat-mdc-dialog-container {
-    --mdc-dialog-container-color: transparent;
-  }
 }

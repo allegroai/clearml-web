@@ -1,15 +1,14 @@
-import {AfterViewInit, Directive, OnDestroy} from '@angular/core';
+import {AfterViewInit, Directive} from '@angular/core';
 import {ResizableColumn} from 'primeng/table';
 import {fromEvent, Subscription} from 'rxjs';
-import {cloneItemIntoDummy} from '@common/shared/utils/shared-utils';
 
 @Directive({
   selector: '[smResizableColumn]'
 })
-export class ResizableColumnDirective extends ResizableColumn implements AfterViewInit, OnDestroy {
+export class ResizableColumnDirective extends ResizableColumn implements AfterViewInit{
   private sub: Subscription;
 
-  override ngAfterViewInit() {
+  ngAfterViewInit() {
     super.ngAfterViewInit();
     if (this.resizer) {
       this.sub = fromEvent(this.resizer, 'dblclick').subscribe((event: MouseEvent) => {
@@ -22,7 +21,7 @@ export class ResizableColumnDirective extends ResizableColumn implements AfterVi
     }
   }
 
-  override ngOnDestroy(): void {
+  ngOnDestroy(): void {
     super.ngOnDestroy();
     this.sub?.unsubscribe();
   }
@@ -37,12 +36,12 @@ export class ResizableColumnDirective extends ResizableColumn implements AfterVi
     // attach the dummy container to our table so all relevant styles will apply to it
     table.el.nativeElement.appendChild(dummyContainer);
 
-    cloneItemIntoDummy(column, dummyContainer);
+    this.cloneItemIntoDummy(column, dummyContainer);
     // add all relevant cells to dummy container
     rows.forEach(row => {
       const cells = row.getElementsByTagName('td');
       if (cells.length > index) {
-        cloneItemIntoDummy(cells.item(index), dummyContainer);
+        this.cloneItemIntoDummy(cells.item(index), dummyContainer);
       }
     });
     // measure and detach container
@@ -52,5 +51,24 @@ export class ResizableColumnDirective extends ResizableColumn implements AfterVi
     return width;
   }
 
+  private cloneItemIntoDummy(eCell: HTMLElement, eDummyContainer: HTMLElement): void {
+    // shamelessly copied from ag-grid
+    // make a deep clone of the cell
+    const eCellClone: HTMLElement = eCell.cloneNode(true) as HTMLElement;
+    // the original has a fixed width, we remove this to allow the natural width based on content
+    eCellClone.style.width = '';
+    // the original has position = absolute, we need to remove this so it's positioned normally
+    eCellClone.style.position = 'static';
+    eCellClone.style.left = '';
+    // we put the cell into a containing div, as otherwise the cells would just line up
+    // on the same line, standard flow layout, by putting them into divs, they are laid
+    // out one per line
+    const eCloneParent = document.createElement('div');
+
+    // table-row, so that each cell is on a row.
+    eCloneParent.style.display = 'table-row';
+    eCloneParent.appendChild(eCellClone);
+    eDummyContainer.appendChild(eCloneParent);
+  }
 
 }

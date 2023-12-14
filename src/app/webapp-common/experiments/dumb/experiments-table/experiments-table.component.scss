@@ -40,11 +40,9 @@
 
   .checkbox-col {
     display: block;
-    position: relative;
-    z-index: 1;
     float: left;
     padding: 13px 0 13px 26px;
-    margin-left: -12px;
+    margin-left: -8px;
 
     &:not(.header) {
       padding-right: 24px;
@@ -64,7 +62,6 @@
   .compact-columns-data {
     gap: 12px;
     color: $blue-250;
-    font-size: 12px;
   }
 }
 

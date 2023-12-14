@@ -1,0 +1,41 @@
+@import 'variables';
+@import 'variables_v2';
+
+:host {
+  .section {
+    margin: 6px 0 24px 0;
+    padding-bottom: 12px;
+  }
+
+  .title {
+    color: $text;
+    font-size: 16px;
+    margin: 42px 0 12px 0;
+
+    &.first {
+      margin-top: 0;
+    }
+  }
+
+  .new-btn {
+    margin-bottom: 12px;
+  }
+
+  .user-table-grops {
+    display: flex;
+    gap: 4px;
+  }
+
+  .user-table-grops-item {
+    padding: 2px 5px;
+    background-color: $primary-color;
+    border-radius: 4px;
+  }
+
+  .more-groups-item {
+    color: $primary-color;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}

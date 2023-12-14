@@ -1,24 +1,24 @@
-import {inject, Injectable} from '@angular/core';
-import {HttpClient, HttpHeaders} from '@angular/common/http';
-import {catchError, filter, map, retry, switchMap, take, tap} from 'rxjs/operators';
-import {HTTP} from '~/app.constants';
-import {UsersGetAllResponse} from '~/business-logic/model/users/usersGetAllResponse';
-import {AuthCreateUserResponse} from '~/business-logic/model/auth/authCreateUserResponse';
-import {v1 as uuidV1} from 'uuid';
-import {EMPTY, Observable, of, timer} from 'rxjs';
-import {MatDialog} from '@angular/material/dialog';
-import {ConfirmDialogComponent} from '../ui-components/overlay/confirm-dialog/confirm-dialog.component';
-import {LoginModeResponse} from '~/business-logic/model/LoginModeResponse';
-import {clone} from 'lodash-es';
-import {ApiLoginService} from '~/business-logic/api-services/login.service';
-import {ConfigurationService} from './configuration.service';
-import {Environment} from '../../../../environments/base';
-import {USER_PREFERENCES_KEY, UserPreferences} from '@common/user-preferences';
-import {setUserLoginState} from '@common/login/login.actions';
-import {fetchCurrentUser} from '@common/core/actions/users.actions';
-import {Store} from '@ngrx/store';
-import {ConfirmDialogConfig} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.model';
-import {Router} from '@angular/router';
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { catchError, filter, map, mergeMap, retryWhen, switchMap, tap } from 'rxjs/operators';
+import { HTTP } from '~/app.constants';
+import { UsersGetAllResponse } from '~/business-logic/model/users/usersGetAllResponse';
+import { AuthCreateUserResponse } from '~/business-logic/model/auth/authCreateUserResponse';
+import { v1 as uuidV1 } from 'uuid';
+import { EMPTY, Observable, of, throwError, timer } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDialogComponent } from '../ui-components/overlay/confirm-dialog/confirm-dialog.component';
+import { LoginModeResponse } from '~/business-logic/model/LoginModeResponse';
+import { clone } from 'lodash-es';
+import { ApiLoginService } from '~/business-logic/api-services/login.service';
+import { ConfigurationService } from './configuration.service';
+import { Environment } from '../../../../environments/base';
+import { USER_PREFERENCES_KEY, UserPreferences } from '@common/user-preferences';
+import { setUserLoginState } from '@common/login/login.actions';
+import { fetchCurrentUser } from '@common/core/actions/users.actions';
+import { Store } from '@ngrx/store';
+import { ConfirmDialogConfig } from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.model';
+import { Router } from '@angular/router';
 
 export type LoginMode = 'simple' | 'password' | 'ssoOnly';
 
@@ -40,13 +40,6 @@ export class BaseLoginService {
   private _loginMode: LoginMode;
   private _guestUser: { enabled: boolean; username: string; password: string };
   private environment: Environment;
-  protected httpClient: HttpClient;
-  protected loginApi: ApiLoginService;
-  protected dialog: MatDialog;
-  protected configService: ConfigurationService;
-  protected store: Store;
-  protected router: Router;
-  protected userPreferences: UserPreferences;
   get guestUser() {
     return clone(this._guestUser);
   }
@@ -55,15 +48,16 @@ export class BaseLoginService {
     return this._authenticated;
   }
 
-  constructor() {
-    this.httpClient = inject(HttpClient);
-    this.loginApi = inject(ApiLoginService);
-    this.dialog = inject(MatDialog);
-    this.configService = inject(ConfigurationService);
-    this.store = inject(Store);
-    this.router = inject(Router);
-    this.userPreferences = inject(UserPreferences);
-    this.configService.globalEnvironmentObservable.subscribe(env => {
+  constructor(
+    protected httpClient: HttpClient,
+    protected loginApi: ApiLoginService,
+    protected dialog: MatDialog,
+    protected configService: ConfigurationService,
+    protected store: Store,
+    protected router: Router,
+    protected userPreferences: UserPreferences
+  ) {
+    configService.globalEnvironmentObservable.subscribe(env => {
       const firstLogin = !window.localStorage.getItem(USER_PREFERENCES_KEY.firstLogin);
       this.environment = env;
       this.signupMode = !!this.environment.communityServer && firstLogin;
@@ -78,10 +72,12 @@ export class BaseLoginService {
     });
 
     return this.getLoginMode().pipe(
-      retry({count: 3, delay: (err, count) => timer(500 * count)}),
-      catchError(err => {
+      retryWhen(errors => errors.pipe(
+        mergeMap((err, i) => i > 2 ? throwError(() => 'Error from retry!') : timer(500))
+      )),
+      catchError(() => {
         this.openServerError();
-        throw err;
+        return of({});
       }),
       switchMap(mode => mode === loginModes.simple ? this.httpClient.get('credentials.json') : of(fromEnv())),
       catchError(() => of(fromEnv())),
@@ -135,7 +131,7 @@ export class BaseLoginService {
   }
 
   getUsers() {
-    return this.httpClient.post<UsersGetAllResponse>(`${this.basePath}/users.get_all`, null, {headers: this.getHeaders()})
+    return this.httpClient.post<UsersGetAllResponse>(`${this.basePath}/users.get_all`, null, { headers: this.getHeaders() })
       .pipe(
         map((x: any) => x.data.users)
       );
@@ -146,13 +142,27 @@ export class BaseLoginService {
     const auth = window.btoa(user + ':' + password);
     headers = headers.append('Authorization', 'Basic ' + auth);
     headers = headers.append('Access-Control-Allow-Credentials', '*');
-    return this.httpClient.post<AuthCreateUserResponse>(`${this.basePath}/auth.login`, null, {headers, withCredentials: true});
+    return this.httpClient.post<AuthCreateUserResponse>(`${this.basePath}/auth.login`, null, { headers, withCredentials: true });
+  }
+
+  registerUser(name: string, password: string, email: string, company: string, realname: string) {
+    let headers = new HttpHeaders();
+    const authObj = {'name': name, 'password': password, 'email': email, 'company': company, 'realname': realname}
+    headers = headers.append('Access-Control-Allow-Credentials', '*');
+    return this.httpClient.post<AuthCreateUserResponse>(`${this.basePath}/auth.register`, authObj, { headers, withCredentials: true });
+  }
+
+  passwordLoginV2(user: string, password: string) {
+    let headers = new HttpHeaders();
+    const authObj = {'name': user, 'password': password}
+    headers = headers.append('Access-Control-Allow-Credentials', '*');
+    return this.httpClient.post<AuthCreateUserResponse>(`${this.basePath}/auth.clogin`, authObj, { headers, withCredentials: true });
   }
 
   login(userId: string) {
     let headers = this.getHeaders();
     headers = headers.append(`${this.environment.headerPrefix}-Impersonate-As`, userId);
-    return this.httpClient.post(`${this.basePath}/auth.login`, null, {headers, withCredentials: true});
+    return this.httpClient.post(`${this.basePath}/auth.login`, null, { headers, withCredentials: true });
   }
 
   createUser(name: string) {
@@ -167,28 +177,29 @@ export class BaseLoginService {
       family_name: name.split(' ')[1] ? name.split(' ')[1] : name.split(' ')[0]
       /* eslint-enable @typescript-eslint/naming-convention */
     };
-    return this.httpClient.post<AuthCreateUserResponse>(`${this.basePath}/auth.create_user`, data, {headers})
+    return this.httpClient.post<AuthCreateUserResponse>(`${this.basePath}/auth.create_user`, data, { headers })
       .pipe(map((x: any) => x.data.id));
   }
 
-  autoLogin(name: string) {
+  autoLogin(name: string, callback: (res) => void) {
     return this.createUser(name)
-      .pipe(
-        switchMap(id => this.login(id)),
-      );
+      .subscribe(id => this.login(id)
+        .subscribe((res: any) => {
+          callback(res);
+        }));
   }
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  private shouldOpenServerError(serverErrors: {missed_es_upgrade: boolean; es_connection_error: boolean}) {
+  private shouldOpenServerError(serverErrors: { missed_es_upgrade: boolean; es_connection_error: boolean }) {
     return serverErrors?.missed_es_upgrade || serverErrors?.es_connection_error;
   }
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  private openEs7MessageDialog(serverErrors: {missed_es_upgrade: boolean; es_connection_error: boolean}) {
+  private openEs7MessageDialog(serverErrors: { missed_es_upgrade: boolean; es_connection_error: boolean }) {
 
     // Mocking application header
     const imgElement = new Image();
-    imgElement.setAttribute('src', '/assets/logo-white.svg');
+    imgElement.setAttribute('src', '/assets/logo-white.png');
     imgElement.setAttribute('style', 'width: 100%; height: 64px; background-color: #141822; padding: 15px;');
     document.body.appendChild(imgElement);
 
@@ -220,7 +231,7 @@ After the issue is resolved and Trains Server is up and running, reload this pag
   private openServerError() {
     // Mocking application header
     const imgElement = new Image();
-    imgElement.setAttribute('src', '/assets/logo-white.svg');
+    imgElement.setAttribute('src', '/assets/logo-white.png');
     imgElement.setAttribute('style', 'width: 100%; height: 64px; background-color: #141822; padding: 15px;');
     document.body.appendChild(imgElement);
 
@@ -246,40 +257,33 @@ After the issue is resolved and Trains Server is up and running, reload this pag
     this._loginMode = undefined;
   }
 
+  afterLogin(resolve, store) {
+    this.userPreferences.loadPreferences()
+      .subscribe(() => {
+        store.dispatch(fetchCurrentUser());
+        resolve(null);
+      });
+  }
+
   loginFlow(resolve, skipInvite = false) {
     if (location.search.includes('invite') && !skipInvite) {
       const currentURL = new URL(location.href);
       const inviteId = currentURL.searchParams.get('invite');
-      this.store.dispatch(setUserLoginState({user: null, inviteId, crmForm: null}));
+      this.store.dispatch(setUserLoginState({ user: null, inviteId, crmForm: null }));
     }
     const redirectToLogin = (status) => {
-      if (status === 401) {
+      if (status === 401 || status === 400) {
         const redirectUrl: string = window.location.pathname + window.location.search;
         if (
           !['/login/signup', '/login', '/dashboard', '/'].includes(redirectUrl) &&
           (this.guestUser?.enabled || ConfigurationService.globalEnvironment.autoLogin)
         ) {
           if (this.guestUser?.enabled) {
-            this.passwordLogin(this.guestUser.username, this.guestUser.password)
-              .pipe(
-                take(1),
-                switchMap(() => this.userPreferences.loadPreferences())
-              )
-              .subscribe(() => {
-                this.store.dispatch(fetchCurrentUser());
-                resolve(null);
-              });
+            this.passwordLoginV2(this.guestUser.username, this.guestUser.password)
+              .subscribe(() => this.afterLogin.bind(this)(resolve, this.store));
           } else if (ConfigurationService.globalEnvironment.autoLogin) {
             const name = `${(new Date()).getTime().toString()}`;
-            this.autoLogin(name)
-              .pipe(
-                take(1),
-                switchMap(() => this.userPreferences.loadPreferences())
-              )
-              .subscribe(() => {
-                this.store.dispatch(fetchCurrentUser());
-                resolve(null)
-              });
+            this.autoLogin(name, this.afterLogin.bind(this, resolve, this.store));
           } else {
             resolve(null);
           }
@@ -303,7 +307,6 @@ After the issue is resolved and Trains Server is up and running, reload this pag
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getInviteInfo(inviteId: string): Observable<any> {
     return EMPTY;
   }

@@ -1,12 +1,12 @@
-import {ChangeDetectorRef, Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
-import {ColHeaderTypeEnum, ISmCol} from '@common/shared/ui-components/data/table/table.consts';
-import {find, get} from 'lodash-es';
-import {QUEUES_TABLE_COL_FIELDS} from '../../workers-and-queues.consts';
-import {BaseTableView} from '@common/shared/ui-components/data/table/base-table-view';
-import {ActivatedRoute} from '@angular/router';
-import {ICONS} from '@common/constants';
-import {Queue} from '@common/workers-and-queues/actions/queues.actions';
-
+import { ChangeDetectorRef, Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import { ColHeaderTypeEnum, ISmCol, TableSortOrderEnum } from '@common/shared/ui-components/data/table/table.consts';
+import { find, get } from 'lodash-es';
+import { Queue } from '~/business-logic/model/queues/queue';
+import { QUEUES_TABLE_COL_FIELDS } from '../../workers-and-queues.consts';
+import { TableComponent } from '@common/shared/ui-components/data/table/table.component';
+import { BaseTableView } from '@common/shared/ui-components/data/table/base-table-view';
+import { ActivatedRoute } from '@angular/router';
+import { ICONS } from '@common/constants';
 
 @Component({
   selector: 'sm-queues-table',
@@ -22,7 +22,7 @@ export class QueuesTableComponent extends BaseTableView {
   readonly ICONS = ICONS;
   contextQueue: Queue;
 
-  @Input() set queues(queues: Queue[]) {
+  @Input() set queues(queues: Array<Queue>) {
     this._queues = queues;
     this.table && this.table.focusSelected();
   }
@@ -32,13 +32,16 @@ export class QueuesTableComponent extends BaseTableView {
   }
 
   @Input() selectedQueue: Queue;
+
   @Output() queueSelected = new EventEmitter();
   @Output() deleteQueue = new EventEmitter();
   @Output() renameQueue = new EventEmitter();
   @Output() clearQueue = new EventEmitter();
   @Output() sortedChanged = new EventEmitter<{ isShift: boolean; colId: ISmCol['id'] }>();
 
-  @ViewChild('tableContainer', {static: false}) tableContainer;
+  @Input() tableSortOrder: TableSortOrderEnum;
+  @ViewChild('tableContainer', { static: false }) tableContainer;
+  @ViewChild('table', { static: false }) table: TableComponent;
 
   public menuPosition: { x: number; y: number };
 
@@ -50,35 +53,35 @@ export class QueuesTableComponent extends BaseTableView {
         id: QUEUES_TABLE_COL_FIELDS.NAME,
         headerType: ColHeaderTypeEnum.sortFilter,
         header: 'QUEUE',
-        style: {width: '35%', maxWidth: '600px'},
+        style: { width: '35%', maxWidth: '600px' },
         sortable: true,
       },
       {
         id: QUEUES_TABLE_COL_FIELDS.WORKERS,
         headerType: ColHeaderTypeEnum.sortFilter,
         header: 'WORKERS',
-        style: {width: '80px', maxWidth: '100px'},
+        style: { width: '80px', maxWidth: '100px' },
         sortable: true,
       },
       {
         id: QUEUES_TABLE_COL_FIELDS.TASK,
         headerType: ColHeaderTypeEnum.sortFilter,
         header: 'NEXT EXPERIMENT',
-        style: {width: '30%', maxWidth: '600px'},
+        style: { width: '30%', maxWidth: '600px' },
         sortable: true,
       },
       {
         id: QUEUES_TABLE_COL_FIELDS.LAST_UPDATED,
         headerType: ColHeaderTypeEnum.sortFilter,
         header: 'LAST UPDATED',
-        style: {width: '150px',  maxWidth: '200px'},
+        style: { width: '150px', maxWidth: '200px' },
         sortable: true,
       },
       {
         id: QUEUES_TABLE_COL_FIELDS.IN_QUEUE,
         headerType: ColHeaderTypeEnum.sortFilter,
         header: 'IN QUEUE',
-        style: {width: '100px',  maxWidth: '150px'},
+        style: { width: '100px', maxWidth: '150px' },
         sortable: true,
       }
     ];
@@ -93,7 +96,7 @@ export class QueuesTableComponent extends BaseTableView {
   }
 
   getQName(queue) {
-    const queueIns: any = find(this.queues, {id: queue});
+    const queueIns: any = find(this.queues, { id: queue });
     return queueIns ? queueIns.name : queue;
   }
 
@@ -104,25 +107,25 @@ export class QueuesTableComponent extends BaseTableView {
   openContextMenu(data) {
     data.e.preventDefault();
     this.contextQueue = data.rowData;
+    this.selectedQueue = data.rowData;
     this.menuOpen = false;
     setTimeout(() => {
-      this.menuPosition = {x: data.e.clientX, y: data.e.clientY};
+      this.menuPosition = { x: data.e.clientX, y: data.e.clientY };
       this.menuOpen = true;
       this.changeDetector.detectChanges();
     }, 0);
-
   }
 
-  override scrollTableToTop() {
-    this.tableContainer.nativeElement.scroll({top: 0});
+  scrollTableToTop() {
+    this.tableContainer.nativeElement.scroll({ top: 0 });
   }
 
   onSortChanged(isShift: boolean, colId: ISmCol['id']) {
-    this.sortedChanged.emit({isShift, colId});
+    this.sortedChanged.emit({ isShift, colId });
     this.scrollTableToTop();
   }
 
-  override afterTableInit(): void {
+  afterTableInit(): void {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

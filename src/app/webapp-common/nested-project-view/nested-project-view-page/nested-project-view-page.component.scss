@@ -1,16 +1,15 @@
 @import "variables";
-@import "empty";
+@import "variables_v2";
 
 :host {
   display: block;
   height: 100%;
-  &.nested-project-view{
-    overflow-y: scroll;
-    overflow-x: hidden;
-  }
+  overflow-y: scroll;
+  overflow-x: hidden;
 
   .tags-list-counter {
     width: 140px;
+
     &.empty-tags{
       background-image: url('../../assets/icons/tags-empty-state.svg');
       height: 100%;
@@ -41,11 +40,44 @@
     position: sticky;
     top: 0;
     z-index: 10;
-    background-color: $blue-800;
+    background-color: $background-color;
     margin-bottom: -12px;
+    border-bottom: 1px solid $border-color;
   }
 
-  @include empty-card-mixin();
+  .empty-state {
+    width: 100%;
+    grid-column: 1/-1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-width: map-get($grid-max-widths, xl);
+    margin: 0 auto;
+
+    .title-icon {
+      color: $blue-600;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .title {
+      font-size: 20px;
+      font-weight: 500;
+      color: $blue-100;
+      margin-bottom: 6px;
+      text-align: center;
+    }
+
+    .sub-title {
+      text-align: center;
+      margin-bottom: 64px;
+
+      .link {
+        color: $neon-yellow;
+      }
+    }
+
+  }
 }
 
 .content {
@@ -61,15 +93,8 @@
     flex: 1;
     flex-direction: column;
 
-    a {
-      color: $purple;
-      &.dark {
-        color: white;
-      }
-
-      &:hover {
-        text-decoration: underline;
-      }
+    a.dark {
+      color: white;
     }
 
     sm-code-editor {

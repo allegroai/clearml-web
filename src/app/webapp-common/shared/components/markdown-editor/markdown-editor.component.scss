@@ -238,10 +238,6 @@
 
             &.fa-link:before {
               content: $al-ico-link;
-              display: flex;
-              align-items: center;
-              font-size: 20px;
-              line-height: 24px;
             }
 
             &.fa-image:before {
@@ -290,9 +286,8 @@
       background-color: transparent !important;
 
       code {
-        padding: 2px 6px;
+        padding: 1px 4px;
         font-size: 12px;
-        font-family: $font-family-monospace;
         line-height: 18px;
         border-radius: 4px;
         color: $blue-100;
@@ -316,59 +311,6 @@
         font-size: 12px;
         padding: 0 4px;
         font-style: normal;
-      }
-      details {
-        margin-bottom: 2px;
-        padding: 6px 28px;
-        border: 1px solid $dark-border;
-        border-radius: 4px;
-        transition: margin 0.35s;
-        summary {
-          color: #90bce3;
-          margin-left: -24px;
-          &::marker {
-            content:"";
-          }
-          &::before {
-            content: "\e9af";
-            color: $blue-300;
-            display: inline-block;
-            vertical-align: middle;
-            font-family: "trains";
-            font-size: 18px;
-            margin: -3px 6px 0 0;
-            transform: rotate(0deg);
-            transition: transform 0.35s;
-          }
-          &:hover {
-            color: $blue-100;
-          }
-        }
-        &[open] {
-          border-color: lighten($dark-border, 20%);
-          margin-bottom: 12px;
-          overflow: auto;
-          summary {
-            color: lighten(#90bce3, 20%);
-            margin-bottom: 12px;
-            &::before {
-              transform: rotate(90deg);
-            }
-          }
-        }
-  
-        // code block
-        code {
-          white-space: pre;
-          background-color: $blue-700;
-          padding: 16px;
-          display: block;
-          margin-bottom: 12px;
-          border: none;
-        }
-        img {
-          margin-bottom: 12px;
-        }
       }
     }
 
@@ -551,6 +493,65 @@
         }
       }
     }
+
+    details {
+      margin-bottom: 2px;
+      padding: 6px 28px;
+      border: 1px solid $dark-border;
+      border-radius: 4px;
+      transition: margin 0.35s;
+      summary {
+        color: #90bce3;
+        margin-left: -24px;
+        &::marker {
+          content:"";
+        }
+        &::before {
+          content: "\e9af";
+          color: $blue-300;
+          display: inline-block;
+          vertical-align: middle;
+          font-family: "trains";
+          font-size: 18px;
+          margin: -3px 6px 0 0;
+          transform: rotate(0deg);
+          transition: transform 0.35s;
+        }
+        &:hover {
+          color: $blue-100;
+        }
+      }
+      &[open] {
+        border-color: lighten($dark-border, 20%);
+        margin-bottom: 12px;
+        overflow: auto;
+        summary {
+          color: lighten(#90bce3, 20%);
+          margin-bottom: 12px;
+          &::before {
+            transform: rotate(90deg);
+          }
+        }
+      }
+
+      // code block
+      code {
+        color: $blue-100;
+        white-space: pre;
+        background-color: $blue-700;
+        font-size: 12px;
+        line-height: 18px;
+        padding: 16px;
+        border-radius: 4px;
+        display: block;
+        margin-bottom: 12px;
+      }
+      img {
+        margin-bottom: 12px;
+      }
+    }
+
+
   }
 }
 

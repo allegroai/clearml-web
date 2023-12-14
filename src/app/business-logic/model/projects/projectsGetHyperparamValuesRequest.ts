@@ -33,13 +33,4 @@ export interface ProjectsGetHyperparamValuesRequest {
      * If set to \'true\' and the project field is set then the result includes hyper   parameters values from the subproject tasks
      */
     include_subprojects?: boolean;
-  /**
-   * Page number
-   */
-  page?: number;
-  /**
-   * Page size
-   */
-  page_size?: number;
-  pattern?: string;
 }

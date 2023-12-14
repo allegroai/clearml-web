@@ -5,11 +5,10 @@ import { Pipe, PipeTransform } from '@angular/core';
 })
 export class InitialsPipe implements PipeTransform {
 
-  transform(value: string) {
+  transform(value: string): unknown {
     if (value !== null) {
       return value.split(' ').map(part => part[0]).join('');
     }
-    return value;
   }
 
 }

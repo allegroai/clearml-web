@@ -42,6 +42,7 @@ export class GroupedSelectableListComponent implements OnChanges {
   }
 
   @Input() checkedList: Array<any>;
+  @Input() selected: SelectableListItem['value'];
   @Output() onItemSelect = new EventEmitter<string>();
   @Output() onItemCheck = new EventEmitter<{ pathString: string; parent: string }>();
   @Output() onGroupCheck = new EventEmitter<any>();

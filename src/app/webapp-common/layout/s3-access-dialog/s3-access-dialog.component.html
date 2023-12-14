@@ -2,49 +2,44 @@
   <div [innerHTML]="header"></div>
 </div>
 <div class="container">
-  <form #S3NGForm="ngForm" (submit)="S3NGForm.form.markAllAsTouched(); saveNewCredentials()">
-    <mat-form-field appearance="outline" class="w-100" *ngIf="!isAzure">
+  <ng-form #S3NGForm="ngForm">
+    <mat-form-field class="w-100" *ngIf="!isAzure">
       <mat-label>Key</mat-label>
-      <input matInput type="text" name="Key" required placeholder="Key" [(ngModel)]="s3Form.Key" #keyInput="ngModel"
+      <input matInput type="text" name="Key" required placeholder="Key" [(ngModel)]="S3Form.Key" #keyInput="ngModel"
              autocomplete="off">
       <mat-error *ngIf="keyInput.errors?.required">*Required</mat-error>
     </mat-form-field>
-    <mat-form-field appearance="outline" class="w-100">
+    <mat-form-field class="w-100">
       <mat-label>Secret</mat-label>
-      <input matInput [(ngModel)]="s3Form.Secret" type="text" name="Secret" required #secretInput="ngModel"
+      <input matInput [(ngModel)]="S3Form.Secret" type="text" name="Secret" required #secretInput="ngModel"
              autocomplete="off"
              [placeholder]="isAzure ? 'Shared access signature (SAS)' : 'Secret'">
       <mat-error *ngIf="secretInput.errors?.required">*Required</mat-error>
     </mat-form-field>
-    <mat-form-field appearance="outline" *ngIf="!isAzure" class="w-100">
+    <mat-form-field *ngIf="!isAzure" class="w-100">
       <mat-label>Token</mat-label>
-      <input matInput [(ngModel)]="s3Form.Token" type="text" name="Token" placeholder="Token" autocomplete="off">
-    </mat-form-field>
-    <mat-form-field appearance="outline" *ngIf="!isAzure && !isGCS" class="w-100">
-      <mat-label>Region</mat-label>
-      <input matInput [(ngModel)]="s3Form.Region" type="text" name="Region" placeholder="AWS Region (e.g. us-east-2)"
+      <input matInput [(ngModel)]="S3Form.Token" type="text" name="Token" placeholder="Token" [(ngModel)]="S3Form.Token" #keyInput="ngModel"
              autocomplete="off">
     </mat-form-field>
-    <mat-form-field appearance="outline" *ngIf="(!isAzure) && endpoint" class="w-100">
+    <mat-form-field *ngIf="!isAzure" class="w-100">
+      <mat-label>Region</mat-label>
+      <input matInput [(ngModel)]="S3Form.Region" type="text" name="Region" placeholder="AWS Region (e.g. us-east-2)"
+             autocomplete="off">
+    </mat-form-field>
+    <mat-form-field *ngIf="(!isAzure) && endpoint" class="w-100">
       <mat-label>Endpoint</mat-label>
-      <input
-        matInput
-        [(ngModel)]="s3Form.Endpoint"
-        name="Endpoint"
-        autocomplete="off"
-        [disabled]="isGCS"
-        placeholder="Host (Endpoint)"
-      >
-      <i *ngIf="s3Form.Endpoint.startsWith('http://') && secured"
-         matSuffix
-         class="al-icon sm al-ico-alert"
-         smTooltip="Embedding images through a non-secure transport (HTTP) in a secure web application might require special configuration of your browser"
-      ></i>
+      <input matInput [(ngModel)]="S3Form.Endpoint" type="text" name="Endpoint" autocomplete="off"
+             placeholder="Host (Endpoint)">
+          <i *ngIf="S3Form.Endpoint.startsWith('http://') && secured"
+             matSuffix
+             class="al-icon sm al-ico-alert"
+             smTooltip="Embedding images through a non-secure transport (HTTP) in a secure web application might require special configuration of your browser"
+          ></i>
     </mat-form-field>
     <div class="w-100 d-flex justify-content-center mt-4">
       <button class="btn btn-neon" (click)="S3NGForm.form.markAllAsTouched(); saveNewCredentials()"
               [disabled]="(!saveEnabled) || (formIsSubmitted && S3NGForm.invalid)">SAVE CREDENTIALS
       </button>
     </div>
-  </form>
+  </ng-form>
 </div>

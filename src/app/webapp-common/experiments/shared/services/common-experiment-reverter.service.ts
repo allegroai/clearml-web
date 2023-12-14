@@ -5,6 +5,7 @@ import {Task} from '~/business-logic/model/tasks/task';
 import {Script} from '~/business-logic/model/tasks/script';
 import {IExperimentModelInfo} from '../common-experiment-model.model';
 import {Store} from '@ngrx/store';
+import {ExperimentsViewState} from '@common/experiments/reducers/experiments-view.reducer';
 import {selectActiveWorkspace} from '@common/core/reducers/users-reducer';
 import {Observable, Subscription} from 'rxjs';
 import {isExample} from '@common/shared/utils/shared-utils';
@@ -17,7 +18,7 @@ export class CommonExperimentReverterService {
   private activeWorkSpace: any;
   private activeWorkSpaceSubscription: Subscription;
 
-  constructor(private store: Store) {
+  constructor(private store: Store<ExperimentsViewState>) {
     this.activeWorkSpace$ = this.store.select(selectActiveWorkspace);
     this.activeWorkSpaceSubscription = this.activeWorkSpace$.subscribe(activeWorkSpace => {
       this.activeWorkSpace = activeWorkSpace;
@@ -62,7 +63,7 @@ export class CommonExperimentReverterService {
       source: this.revertExecutionSource(experiment.script),
       output: {
         destination: experiment.output?.destination ?? '',
-        logLevel: 'INFO'// TODO: should be enum from gencode.
+        logLevel: 'basic'// TODO: should be enum from gencode.
       },
       requirements: experiment.script ? this.revertRequirements(experiment.script) : {pip: ''},
       diff: experiment.script?.diff ?? '',
@@ -82,7 +83,6 @@ export class CommonExperimentReverterService {
       branch: script?.branch ?? '',
       entry_point: script?.entry_point ?? '',
       working_dir: script?.working_dir ?? '',
-      binary: script?.binary ?? '',
       scriptType: this.revertScriptType(script)
       /* eslint-enable @typescript-eslint/naming-convention */
     };

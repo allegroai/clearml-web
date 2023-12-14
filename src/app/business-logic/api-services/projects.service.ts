@@ -65,8 +65,6 @@ import {ProjectsGetProjectTagsResponse} from '~/business-logic/model/projects/pr
 import {ProjectsGetProjectTagsRequest} from '~/business-logic/model/projects/projectsGetProjectTagsRequest';
 import {ProjectsGetModelMetadataValuesRequest} from '~/business-logic/model/projects/projectsGetModelMetadataValuesRequest';
 import {ProjectsGetModelMetadataValuesResponse} from '~/business-logic/model/projects/projectsGetModelMetadataValuesResponse';
-import {ProjectsGetUserNamesResponse} from '~/business-logic/model/projects/projectsGetUserNamesResponse';
-import {ProjectsGetUserNamesRequest} from '~/business-logic/model/projects/projectsGetUserNamesRequest';
 
 
 @Injectable()
@@ -822,53 +820,6 @@ export class ApiProjectsService {
             }
         );
     }
-
-
-  /**
-   *
-   * Get names and ids of the users who created child entitites under the passed   projects
-   * @param request request body
-   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-   * @param reportProgress flag to report request and response progress.
-   */
-  public projectsGetUserNames(request: ProjectsGetUserNamesRequest, options?: any, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
-    if (request === null || request === undefined) {
-      throw new Error('Required parameter request was null or undefined when calling projectsGetUserNames.');
-    }
-
-    let headers = this.defaultHeaders;
-    if (options && options.async_enable) {
-      headers = headers.set(this.configuration.asyncHeader, '1');
-    }
-
-    // to determine the Accept header
-    const httpHeaderAccepts: string[] = [
-      'application/json'
-    ];
-    const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-    if (httpHeaderAcceptSelected != undefined) {
-      headers = headers.set("Accept", httpHeaderAcceptSelected);
-    }
-
-    // to determine the Content-Type header
-    const consumes: string[] = [
-    ];
-    const httpContentTypeSelected:string | undefined = this.configuration.selectHeaderContentType(consumes);
-    if (httpContentTypeSelected != undefined) {
-      headers = headers.set("Content-Type", httpContentTypeSelected);
-    }
-
-    return this.apiRequest.post<ProjectsGetUserNamesResponse>(`${this.basePath}/projects.get_user_names`,
-      request,
-      {
-        withCredentials: this.configuration.withCredentials,
-        headers: headers,
-        observe: observe,
-        reportProgress: reportProgress
-      }
-    );
-  }
-
 
     /**
      *

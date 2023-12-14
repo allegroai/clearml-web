@@ -18,10 +18,7 @@ import {
   moveReport,
   publishReport,
   restoreReport,
-  setDirty,
-  setEditMode,
-  setReport,
-  setReportChanges,
+  setReport, setReportChanges,
   updateReport
 } from '@common/reports/reports.actions';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
@@ -30,10 +27,10 @@ import {
   distinctUntilChanged,
   filter,
   map,
-  switchMap, withLatestFrom,
+  switchMap,
 } from 'rxjs/operators';
 import {fromEvent, lastValueFrom, Observable, Subscription, take, combineLatest, merge} from 'rxjs';
-import {selectEditingReport, selectReport, selectReportsTags} from '@common/reports/reports.reducer';
+import {selectReport, selectReportsTags} from '@common/reports/reports.reducer';
 import {ReportStatusEnum} from '~/business-logic/model/reports/reportStatusEnum';
 import {getBaseName, isExample} from '@common/shared/utils/shared-utils';
 import {MatDialog} from '@angular/material/dialog';
@@ -51,10 +48,6 @@ import {HTTP} from '~/app.constants';
 import {convertToReverseProxy} from '~/shared/utils/url';
 import {escapeRegex} from '@common/shared/utils/escape-regex';
 import {Actions, ofType} from '@ngrx/effects';
-import {MatMenuTrigger} from '@angular/material/menu';
-import {TagsMenuComponent} from '@common/shared/ui-components/tags/tags-menu/tags-menu.component';
-import {selectDefaultNestedModeForFeature, selectSelectedProject} from '@common/core/reducers/projects.reducer';
-import {setBreadcrumbsOptions} from '@common/core/actions/projects.actions';
 
 const replaceSlash = (part) => part
   .replace('\\', '/')
@@ -83,22 +76,18 @@ export class ReportComponent implements OnInit, OnDestroy {
   public archived: boolean;
   public reportTags$: Observable<string[]>;
   public smallScreen$: Observable<boolean>;
-  public editMode$: Observable<boolean>;
   public printStyle = {
     table: {border: '1px solid gray'},
     th: {border: '1px solid gray'},
     td: {border: '1px solid gray'},
     details: {border: '1px solid #ccc', margin: '6px 0', padding: '6px'},
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    code: {'white-space': 'pre'},
     iframe: {border: 'none', width: '840px'}
   };
   public widthExpanded: boolean = false;
+  public editMode: boolean;
   public handleUpload: (files: File[]) => Promise<UploadResult[]>;
   public showDescription = false;
   public resources: { unused: boolean; url: string }[];
-  public menuPosition = { x: 0, y: 0 };
-
   @ViewChild(MarkdownEditorComponent) mdEditor: MarkdownEditorComponent;
   @ViewChild('printHiddenButton') printHiddenButton: ElementRef;
 
@@ -115,7 +104,6 @@ export class ReportComponent implements OnInit, OnDestroy {
   ) {
     this.smallScreen$ = breakpointObserver.observe('(max-width: 1200px)')
       .pipe(map(state => state.matches));
-    this.editMode$ = this.store.select(selectEditingReport);
     this.reportTags$ = this.store.select(selectReportsTags);
 
     this.store.dispatch(getReportsTags());
@@ -203,36 +191,6 @@ export class ReportComponent implements OnInit, OnDestroy {
       return lastValueFrom(uploads$);
     };
   }
-  setupBreadcrumbsOptions() {
-    this.sub.add(
-      combineLatest([
-        this.store.select(selectReport),
-        this.store.select(selectSelectedProject)
-      ]).pipe(
-        filter(([selectedReport]) => !!selectedReport),
-        withLatestFrom(this.store.select(selectDefaultNestedModeForFeature))
-      ).subscribe(([[selectedReport,], defaultNestedModeForFeature]) => this.store.dispatch(setBreadcrumbsOptions({
-          breadcrumbOptions: {
-            showProjects: !!selectedReport,
-            featureBreadcrumb: {
-              name: 'REPORTS',
-              url: defaultNestedModeForFeature['reports'] ? 'reports/*/projects' : 'reports'
-            },
-            projectsOptions: {
-              basePath: 'reports',
-              filterBaseNameWith: ['.reports'],
-              compareModule: null,
-              showSelectedProject: false,
-              selectedProjectBreadcrumb: null
-            },
-            subFeatureBreadcrumb: {
-              name: selectedReport.name,
-              onlyWithProject: true
-            }
-          }
-        }))
-      ));
-  }
 
   ngOnInit() {
     this.sub.add(
@@ -242,29 +200,27 @@ export class ReportComponent implements OnInit, OnDestroy {
           this.report = report;
           this.calculateUnusedResources();
           this.example = isExample(report);
-          this.archived = report?.system_tags?.includes('archived');
+          this.archived = report?.system_tags.includes('archived');
           this.router.navigate(['.'], {relativeTo: this.route, queryParams: {...(this.archived && {archive: this.archived})}});
           this.draft = this.report.status !== ReportStatusEnum.Published;
           this.cdr.detectChanges();
         })
     );
-    this.setupBreadcrumbsOptions();
   }
 
   save(report: string) {
     this.store.dispatch(updateReport({id: this.report.id, changes: {report}}));
-    this.store.dispatch(setDirty({dirty: false}));
     Array.from(window.frames).forEach(frame => frame.postMessage('renderPlot', '*'));
   }
 
-  openTagMenu(event: MouseEvent, tagMenuTrigger: MatMenuTrigger, tagsMenu: TagsMenuComponent) {
-    if (!tagMenuTrigger) {
+  openTagMenu(event: MouseEvent, tagMenu, tagMenuContent) {
+    if (!tagMenu) {
       return;
     }
-    this.menuPosition = {x: event.clientX, y: event.clientY};
+    tagMenu.position = {x: event.clientX, y: event.clientY};
     window.setTimeout(() => {
-      tagMenuTrigger.openMenu();
-      tagsMenu.focus();
+      tagMenu.openMenu();
+      tagMenuContent.focus();
     });
   }
 
@@ -340,12 +296,8 @@ export class ReportComponent implements OnInit, OnDestroy {
 
   editModeChanged() {
     this.widthExpanded = this.mdEditor.isExpand;
-    this.store.dispatch(setEditMode({editing: this.mdEditor.editMode}));
+    this.editMode = this.mdEditor.editMode;
     setTimeout(() => Array.from(window.frames).forEach(frame => frame.postMessage('resizePlot', '*')), 500);
-  }
-
-  dirtyChanged(isDirty: boolean) {
-    this.store.dispatch(setDirty({dirty: isDirty}));
   }
 
   copyMarkdown() {
@@ -369,24 +321,14 @@ export class ReportComponent implements OnInit, OnDestroy {
       .subscribe(() => {
         const test = new RegExp(`!\\[(.*)\\]\\(${escapeRegex(resource)}\\)`, 'gm');
         const ace = this.mdEditor.ace;
-        let range = ace.find(test, {
+        const range = ace.find(test, {
           wrap: true,
           caseSensitive: true,
           wholeWord: true,
           regExp: false,
           preventScroll: true // do not change selection
         });
-
-        while (range) {
-          ace.session.replace(range, `![${getBaseName(resource)}]()`);
-          range = ace.find(test, {
-            wrap: true,
-            caseSensitive: true,
-            wholeWord: true,
-            regExp: false,
-            preventScroll: true // do not change selection
-          });
-        }
+        ace.session.replace(range, `![${getBaseName(resource)}]()`);
       });
   }
 

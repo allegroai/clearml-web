@@ -1,5 +1,6 @@
-import {AfterViewInit, ChangeDetectorRef, ContentChild, ContentChildren, Directive, ElementRef, EventEmitter, Input, OnDestroy, Output, QueryList, Renderer2} from '@angular/core';
-import {Subscription} from 'rxjs';
+import {AfterViewInit, ChangeDetectorRef, ContentChild, ContentChildren, Directive, ElementRef, EventEmitter, Input, OnDestroy, Output, QueryList, Renderer2, ViewChildren} from '@angular/core';
+import {fromEvent, Subscription} from 'rxjs';
+import {debounceTime} from 'rxjs/operators';
 import {ChipsComponent} from '@common/shared/ui-components/buttons/chips/chips.component';
 
 const isElementOverflow = ({clientWidth, clientHeight, scrollWidth, scrollHeight}) =>

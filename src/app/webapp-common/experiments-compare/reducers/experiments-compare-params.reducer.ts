@@ -1,24 +1,18 @@
 import {ExperimentParams} from '../shared/experiments-compare-details.model';
-import {paramsActions} from '../actions/experiments-compare-params.actions';
+import {resetState, setExperiments} from '../actions/experiments-compare-params.actions';
 import {createReducer, on} from '@ngrx/store';
 
-export interface CompareParamsState {
+export interface ExperimentCompareParamsState {
   experiments: Array<ExperimentParams>;
-  viewMode: {[page: string]: string}
 }
 
-export const initialState: CompareParamsState = {
-  experiments: [],
-  viewMode: {'hyper-params': 'values', scalars: 'graph'}
+export const initialState: ExperimentCompareParamsState = {
+  experiments: []
 };
 
 
 
 export const experimentsCompareParamsReducer = createReducer(initialState,
-  on(paramsActions.setExperiments, (state, {experiments}): CompareParamsState =>
-      ({...state, experiments})),
-  on(paramsActions.resetState, (state): CompareParamsState =>
-      ({...state, experiments: initialState.experiments})),
-  on(paramsActions.setView, (state, action): CompareParamsState =>
-      ({...state, viewMode: {...state.viewMode, [action.primary]: action.secondary}}))
+  on(setExperiments, (state: ExperimentCompareParamsState, {experiments}) => ({...state, experiments})),
+  on(resetState, () => ({...initialState}))
 );

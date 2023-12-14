@@ -65,7 +65,7 @@ export class WelcomeMessageComponent implements OnInit, OnDestroy {
       code: 'clearml-agent init'
     }
     ];
-  links = ['Set up ClearML', 'Run your ML code', 'Relaunch previous experiments'];
+  links = ['Setup ClearML', 'Run your ML code', 'Relaunch previous experiments'];
   host: string;
   community = false;
   public queue: Queue;
@@ -83,7 +83,7 @@ export class WelcomeMessageComponent implements OnInit, OnDestroy {
   isJupyter: boolean = false;
 
   constructor(
-    private store: Store,
+    private store: Store<any>,
     private dialogRef: MatDialogRef<any>,
     @Inject(MAT_DIALOG_DATA) public data,
     private adminService: AdminService,

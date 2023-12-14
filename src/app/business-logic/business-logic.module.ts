@@ -6,6 +6,8 @@ import {ApiAuthService} from './api-services/auth.service';
 import {ApiEventsService} from './api-services/events.service';
 import {ApiProjectsService} from './api-services/projects.service';
 import {ApiUsersService} from './api-services/users.service';
+import {ApiGroupService} from './api-services/groups.service';
+import {ApiCompanyService} from './api-services/company.service';
 import {HttpClientModule} from '@angular/common/http';
 import {SmApiRequestsService} from './api-services/api-requests.service';
 import {BlTasksService} from './services/tasks.service';
@@ -39,6 +41,8 @@ import {ApiReportsService} from '~/business-logic/api-services/reports.service';
     ApiLoginService,
     ApiPipelinesService,
     ApiReportsService,
+    ApiGroupService,
+    ApiCompanyService,
   ]
 })
 export class BusinessLogicModule {

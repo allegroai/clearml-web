@@ -2,7 +2,6 @@
                     [pageHeader]="title"
                     iconClass="al-color blue-300 al-ico-pipelines">
   <ng-form #enqueueForm="ngForm" class="d-flex flex-column light-theme form-container">
-    <input #fakeInput name="Don't remove - it take the autofocus dropdown" style="opacity: 0; height: 0; width: 0">
     <div class="section-title" *ngIf="params?.length > 0">Parameters</div>
     <div *ngFor="let param of params" class="param-line">
       <div class="param-key ellipsis" smShowTooltipIfEllipsis [smTooltip]="param.name">{{param.name}}</div>
@@ -26,40 +25,26 @@
         </mat-form-field>
       </ng-container>
     </div>
-    <div class="section-title d-flex align-items-center">Configuration</div>
-    <div class="param-line">
-      <div class="param-key" [class.error]="queueInputModel?.errors?.required">Pipeline controller queue*</div>
-      <mat-form-field
-        appearance="outline" class="no-bottom queue-select"
-        (mousedown)="selectedQueue && !isFocused(queueInput) && (selectedQueue = null)"
-      >
-        <input type="text"
-               #queueInput
-               #queueInputModel="ngModel"
-               matInput
-               name="queue"
-               [(ngModel)]="selectedQueue"
-               [matAutocomplete]="auto"
-               required
-               data-id="queueFiled">
-        <i matSuffix
-           class="al-icon sm-md search-icon me-2"
-           [class]="queueInputModel.value ? 'al-ico-dialog-x pointer':'al-ico-search'"
-           (click)="queueInputModel.value && (selectedQueue = null)"
-        ></i>
-        <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete" [displayWith]="displayFn" class="light-theme">
-          <mat-option *ngFor="let queue of queues | filter:queueInput.value:'name'" [value]="queue">
-            <div [innerHTML]="queue.name | highlightSearchText:selectedQueue?.name"></div>
+    <div class="section-title d-flex align-items-center">
+      <div style="width: 180px">Advanced configuration</div>
+      <sm-checkbox-control class="mat-form-field" [formData]="chooseCustomQueue" (formDataChanged)="changeChooseCustomQueue()"></sm-checkbox-control>
+    </div>
+    <div class="param-line" [style.visibility]="chooseCustomQueue?'visible' :'hidden'">
+      <div class="param-key">Pipeline controller queue</div>
+      <mat-form-field appearance="outline" class="no-bottom queue-select">
+        <mat-select [(ngModel)]="selectedQueue" name="queue" panelClass="light-theme">
+          <mat-option *ngFor="let queue of queues" [value]="queue">
+            {{queue.name}}
           </mat-option>
-        </mat-autocomplete>
+        </mat-select>
       </mat-form-field>
     </div>
   </ng-form>
   <div class="buttons">
-    <button (click)="closeDialog(false)" class="btn btn-outline-neon" data-id="cancleNewRun">
+    <button (click)="closeDialog(false)" class="btn btn-outline-neon">
       CANCEL
     </button>
-    <button [disabled]="enqueueForm.invalid" (click)="closeDialog(true)" class="btn btn-neon yes-button" data-id="confirmNewRun">
+    <button (click)="closeDialog(true)" class="btn btn-neon yes-button">
       RUN
     </button>
   </div>

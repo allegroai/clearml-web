@@ -1,5 +1,4 @@
 import {createAction, props} from '@ngrx/store';
-import {MetricsPlotEvent} from '~/business-logic/model/events/metricsPlotEvent';
 import {Model} from '~/business-logic/model/models/model';
 import {SelectedModel} from '../shared/models.model';
 import {ModelsUpdateRequest} from '~/business-logic/model/models/modelsUpdateRequest';
@@ -12,11 +11,6 @@ const MODELS_PREFIX = 'MODELS_INFO_';
 export const getModelInfo = createAction(
   MODELS_PREFIX + 'GET_MODEL_INFO',
   props<{id: string}>()
-);
-
-export const getModel = createAction(
-  MODELS_PREFIX + '[get model]',
-  props<{ modelId: string; autoRefresh?: boolean}>()
 );
 
 export const setModelInfo = createAction(
@@ -83,7 +77,7 @@ export const getPlots = createAction(
 
 export const setPlots = createAction(
   MODELS_PREFIX + '[set plots]',
-  props<{plots: MetricsPlotEvent[]}>()
+  props<{plots: any[]}>()
 );
 
 // export const getScalars = createAction(

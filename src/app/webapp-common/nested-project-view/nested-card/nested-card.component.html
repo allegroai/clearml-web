@@ -4,7 +4,6 @@
          [isFolder]="true"
          [oneTabMode]="!(project?.sub_projects?.length>0)"
          [subFolderTitle]="project?.sub_projects?.length + ' sub projects'"
-         data-id="projectCard"
 >
   <div secondTab class="sub-projects-list">
     <cdk-virtual-scroll-viewport [itemSize]="30" [minBufferPx]="440" [maxBufferPx]="660" class="h-100">
@@ -24,12 +23,14 @@
                     [editable]="false"
                     [minLength]="2"
                     [required]="true"
-                    pattern="^[^\/]{2,}$"
+                    pattern="^[^/]{2,}$"
                     [forbiddenString]="projectsNames"
                     [inlineDisabled]="true"
                     (textChanged)="prepareProjectNameForChange($event)"
     >
-      <span class="project-name" [smTooltip]="project.basename" smShowTooltipIfEllipsis>{{project.basename}}</span>
+      <span class="project-name"
+            [smTooltip]="project.name | cleanProjectPath"
+      >{{project.name | shortProjectName}}</span>
     </sm-inline-edit>
     <div *ngIf="project.system_tags?.includes('default')" class="justify-content-end project-tag">Sample</div>
   </div>

@@ -46,7 +46,7 @@ export class ExperimentInfoHyperParametersComponent implements OnInit, OnDestroy
   public minimized: boolean;
 
   constructor(
-    private store: Store,
+    private store: Store<CommonExperimentInfoState>,
     protected router: Router,
     private route: ActivatedRoute
   ) {

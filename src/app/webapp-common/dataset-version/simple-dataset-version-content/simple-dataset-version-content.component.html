@@ -6,15 +6,14 @@
     [action]="'leave'"
     (smHesitate)="menu.closed.emit();"
   >
-    <p class="command">{{command}}</p>
-    <div class="w-100 d-flex action">
-      <i class="al-icon al-ico-success sm me-1" [class.visible]="copySuccess"></i>
+  <p class="command">{{command}}</p>
+    <div class="w-100 d-flex flex-row-reverse">
        <div
         class="d-flex-center copy-button pointer"
         ngxClipboard
         [cbContent]="command"
         (cbOnSuccess)="$event.event.stopPropagation(); copied()"
-        >Copy command</div>
+        >Copy command</div><i class="al-icon al-ico-success sm me-1" [class.visible]="copySuccess"></i>
     </div>
   </div>
 </mat-menu>
@@ -24,32 +23,29 @@
   [delay]="1000" [action]="'leave'"
   (smHesitate)="menuHesitate.hesitateStatus && menu.closed.emit()"
 >
-  <button
-    class="btn"
-    data-id="downloadButton"
-    [matMenuTriggerFor]="menu"
-    (click)="openMenu(); menuHesitate.hesitateStatus = true"
-  ><i class="al-icon al-ico-download pointer line-item"></i></button>
+  <i class="al-icon al-ico-download pointer line-item"
+     #idElement
+     [matMenuTriggerFor]="menu"
+     (click)="openMenu(); menuHesitate.hesitateStatus = true"
+  ></i>
 </span>
 <sm-table
   [columns]="columns"
   [tableData]="tableData"
   [selectionMode]="null"
   [virtualScroll]="true"
-  [scrollable]="true"
-  [resizableColumns]="true"
-  (columnResized)="resizeCol($event)"
->
+  [scrollable]="true">
+
   <ng-template
     let-col
     let-i="rowIndex"
-    let-line="rowData"
+    let-row="rowData"
     pTemplate="body">
-    <div [ngSwitch]="col.id">
-      <ng-container *ngSwitchCase="'name'">
-        <span class="ellipsis" [attr.fileType]="line.name?.match('\\.([^ .]+)$')?.[1] || 'none'" smShowTooltipIfEllipsis [smTooltip]="line.name">{{line.name}}</span>
+    <div [ngSwitch]="col.id" class="w-100">
+      <ng-container *ngSwitchCase="'0'">
+        <span class="ellipsis" [attr.fileType]="row[0].match('\\.([^ .]+)$')?.[1] || 'none'" smShowTooltipIfEllipsis [smTooltip]="row[0]">{{row[0]}}</span>
       </ng-container>
-      <div *ngSwitchDefault class="ellipsis" smShowTooltipIfEllipsis [smTooltip]="line[col.id]">{{line[col.id]}}</div>
+      <div *ngSwitchDefault class="ellipsis" smShowTooltipIfEllipsis [smTooltip]="row[col.id]">{{row[col.id]}}</div>
     </div>
   </ng-template>
 </sm-table>

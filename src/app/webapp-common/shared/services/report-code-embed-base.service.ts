@@ -1,4 +1,4 @@
-import {inject, Injectable} from '@angular/core';
+import {Injectable} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {addMessage} from '@common/core/actions/layout.actions';
 import {LocationStrategy} from '@angular/common';
@@ -19,8 +19,6 @@ export interface ReportCodeEmbedConfiguration {
   metrics?: string[];
   variants?: string[];
   valueType?: string;
-  seriesName?: string;
-  xaxis?: string;
 }
 
 @Injectable({
@@ -29,16 +27,13 @@ export interface ReportCodeEmbedConfiguration {
 export class ReportCodeEmbedBaseService {
   private workspace: GetCurrentUserResponseUserObjectCompany;
   private isCommunity: boolean;
-  protected store: Store;
-  protected locationStrategy: LocationStrategy;
-  protected configService: ConfigurationService;
-  protected _clipboardService: ClipboardService;
 
-  constructor() {
-  this.store = inject(Store);
-  this.locationStrategy = inject(LocationStrategy);
-  this.configService = inject(ConfigurationService);
-  this._clipboardService = inject(ClipboardService);
+  constructor(
+    protected store: Store,
+    protected locationStrategy: LocationStrategy,
+    protected configService: ConfigurationService,
+    protected _clipboardService: ClipboardService
+  ) {
     this.isCommunity = this.configService.getStaticEnvironment().communityServer;
     this.store.select(selectActiveWorkspace).subscribe(workspace => this.workspace = workspace);
   }
@@ -57,9 +52,7 @@ export class ReportCodeEmbedBaseService {
     url.pathname = url.pathname + 'widgets/';
     url.searchParams.set('type', conf.type);
     url.searchParams.set('objectType', conf.objectType);
-    conf.seriesName && url.searchParams.set('series', conf.seriesName);
     conf.valueType && url.searchParams.set('value_type', conf.valueType);
-    conf.xaxis && url.searchParams.set('xaxis', conf.xaxis);
     let urlStr = url.toString();
     ['objects', 'metrics', 'variants'].forEach(key => {
       if (conf[key]?.filter(v => !!v).length > 0) {

@@ -5,7 +5,7 @@ import {take} from 'rxjs/operators';
 @Injectable()
 export class SmGetStateService {
 
-  constructor(private store: Store) {}
+  constructor(private store: Store<any>) {}
 
   getState() {
     let _state: any;

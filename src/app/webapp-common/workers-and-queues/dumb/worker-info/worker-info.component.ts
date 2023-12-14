@@ -11,9 +11,9 @@ export class WorkerInfoComponent {
   @Output() deselectWorker = new EventEmitter();
   activeTab: string        = 'info';
   public readonly cols     = [
-    {header: 'QUEUE', class: ''},
-    {header: 'NEXT EXPERIMENT', class: ''},
-    {header: 'IN QUEUE', class: ''},
+    {header: 'QUEUE', class: 'col-8'},
+    {header: 'NEXT EXPERIMENT', class: 'col-12'},
+    {header: 'IN QUEUE', class: 'col-4'},
   ];
 
   constructor() {

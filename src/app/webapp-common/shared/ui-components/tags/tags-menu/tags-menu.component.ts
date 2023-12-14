@@ -5,17 +5,16 @@ import {
   ElementRef,
   EventEmitter,
   Input,
-  Output, QueryList,
-  ViewChild, ViewChildren
+  Output,
+  ViewChild
 } from '@angular/core';
 import {Store} from '@ngrx/store';
 import {openTagColorsMenu, setTagsFilterByProject} from '@common/core/actions/projects.actions';
-import {activateEdit} from '@common/experiments/actions/common-experiments-info.actions';
+import {activateEdit} from 'app/webapp-common/experiments/actions/common-experiments-info.actions';
 import {activateModelEdit} from '@common/models/actions/models-info.actions';
-import {selectRouterParams} from '@common/core/reducers/router-reducer';
-import {map} from 'rxjs/operators';
-import {Observable} from 'rxjs';
-import {MatMenu} from '@angular/material/menu';
+import {selectRouterParams} from "@common/core/reducers/router-reducer";
+import {map} from "rxjs/operators";
+import {Observable} from "rxjs";
 
 @Component({
   selector: 'sm-tags-menu',
@@ -40,13 +39,10 @@ export class TagsMenuComponent {
   @Output() getTags = new EventEmitter();
   @Output() getCompanyTags = new EventEmitter();
 
-  @ViewChild(MatMenu) matMenu: MatMenu;
   @ViewChild('nameInput') nameInput: ElementRef<HTMLInputElement>;
-  @ViewChildren('tagCreateButton') createButtons: QueryList<HTMLButtonElement>;
-  @ViewChildren('tagButton') buttons: QueryList<HTMLButtonElement>;
 
 
-  constructor(private readonly store: Store, private readonly cdr: ChangeDetectorRef, private readonly elRef: ElementRef) {
+  constructor(private store: Store, private cdr: ChangeDetectorRef, private elRef: ElementRef) {
     this.disableFilterByProject$ = this.store.select(selectRouterParams)
       .pipe(map(params => params?.projectId === '*'));
   }
@@ -60,15 +56,14 @@ export class TagsMenuComponent {
   }
 
   addTag(tag: string) {
-    if (tag?.trim().length > 0 && !this.tags.includes(tag)) {
+    if (!this.tags.includes(tag)) {
       this.tagSelected.emit(tag);
       this.filterText = '';
     }
-    this.elRef.nativeElement.blur();
+    this.elRef.nativeElement.click();
   }
 
-  focus(event?: Event) {
-    event?.preventDefault();
+  focus() {
     if (this.tagsFilterByProject) {
       this.firstTime = true;
       this.getTags.emit();

@@ -1,4 +1,5 @@
 @import "variables";
+@import "variables_v2";
 
 sm-reports-header {
   height: 64px;
@@ -6,6 +7,7 @@ sm-reports-header {
   position: sticky;
   top: 0;
   z-index: 10;
-  background-color: $blue-800;
+  background-color: $background-color;
   margin-bottom: -12px;
+  border-bottom: 1px solid $border-color;
 }

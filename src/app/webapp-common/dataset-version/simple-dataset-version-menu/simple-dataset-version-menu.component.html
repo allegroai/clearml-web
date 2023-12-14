@@ -7,13 +7,13 @@
      [style.top.px]="position.y"
      [matMenuTriggerFor]="experimentMenu">
 </div>
-<mat-menu #experimentMenu="matMenu" [hasBackdrop]="false" class="light-theme entity-context-menu">
+<mat-menu #experimentMenu="matMenu" [hasBackdrop]="false">
   <button *ngIf="tableMode" mat-menu-item (click)="toggleDetails()">
     <i [class]="'al-icon '+ icons.DETAILS + ' sm-md'"></i>Details
   </button>
   <hr *ngIf="tableMode">
   <button mat-menu-item
-        [matMenuTriggerFor]="tagMenu.matMenu"
+        [matMenuTriggerFor]="tagMenu"
         [disabled]="selectedDisableAvailable[menuItems.tags]?.disable"
         (menuOpened)="tagMenuOpened()"
         (menuClosed)="tagMenuClosed()">
@@ -34,11 +34,14 @@
   </button>
 </mat-menu>
 
-<sm-tags-menu
-  #tagMenu
-  [tags]="experiment?.tags"
-  [tagsFilterByProject]="tagsFilterByProject"
-  [projectTags]="projectTags"
-  [companyTags]="companyTags"
-  (tagSelected)="tagSelected.emit($event)">
-</sm-tags-menu>
+<mat-menu #tagMenu="matMenu">
+  <sm-tags-menu
+    #tagMenuContent
+    class="light-theme"
+    [tags]="experiment?.tags"
+    [tagsFilterByProject]="tagsFilterByProject"
+    [projectTags]="projectTags"
+    [companyTags]="companyTags"
+    (tagSelected)="tagSelected.emit($event)">
+  </sm-tags-menu>
+</mat-menu>

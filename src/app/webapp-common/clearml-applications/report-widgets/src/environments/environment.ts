@@ -1,23 +1,28 @@
 import {BASE_ENV, Environment} from './base';
 /*
-  'https://api.allegro-master.hosted.allegro.ai',    // 1
-  'https://api.community-master.hosted.allegro.ai',  // 2
-  'https://api.allegro.ai',                          // 3
-  'https://api.clear.ml',                            // 4
-  'https://api1.rnd.dev2.allegro.ai',                // 5
-  'https://api2.rnd.dev2.allegro.ai',                // 6
-  'https://api.dev.hosted.allegro.ai',               // 7
-  'https://api.dev.hosted.clear.ml',                 // 8
-  'https://api.staging.hosted.allegro.ai',           // 9
-  'https://api.neuralguard.hosted.allegro.ai',       // 10
-*/
+  1   https://api1.rnd.dev2.allegro.ai (community)
+  2   https://api2.rnd.dev2.allegro.ai (enterprise)
+  3   https://api.qa.hosted.allegro.ai
+  4   https://api.allegro-master.hosted.allegro.ai
+  5   https://api.allegro.ai
+  6   https://api2.qa.hosted.allegro.ai
+  7   https://api1.testing2.dev2.allegro.ai
+  8   https://api2.testing2.dev2.allegro.ai
+  9   https://api.vimeo.hosted.allegro.ai
+  10  https://api.maxq.hosted.allegro.ai
+  11  https://api.community-master.hosted.allegro.ai
+  12  https://api.dev.hosted.allegro.ai
+  13  https://api.staging.hosted.allegro.ai
+  14  https://api.clear.ml
+  15  https://api.dev.hosted.clear.ml
+ */
 
 export const environment = {
   ...BASE_ENV,
   production: false,
   baseUrl: 'localhost:4200',
   autoLogin: false,
-  apiBaseUrl: 'service/1/api',
+  apiBaseUrl: 'service/4/api',
   // communityServer: true,
   accountAdministration: true,
   fileBaseUrl: 'https://files.allegro.ai',

@@ -4,6 +4,7 @@ import {selectExperimentModelInfoData, selectExperimentUserKnowledge, selectIsEx
 import {IExperimentModelInfo, IModelInfo, IModelInfoSource} from '../../shared/common-experiment-model.model';
 import {Model} from '~/business-logic/model/models/model';
 import {combineLatest, Observable, Subject} from 'rxjs';
+import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {experimentSectionsEnum} from '~/features/experiments/shared/experiments.const';
 import {selectIsExperimentEditable, selectSelectedExperiment} from '~/features/experiments/reducers';
 import * as commonInfoActions from '../../actions/common-experiments-info.actions';
@@ -42,7 +43,7 @@ export class ExperimentInfoModelComponent implements OnInit, OnDestroy {
   @ViewChild('experimentModelForm') experimentModelForm: ExperimentModelsFormViewComponent;
   private orgModels: IModelInfo[];
 
-  constructor(private store: Store, private router: Router, private route: ActivatedRoute) {
+  constructor(private store: Store<ExperimentInfoState>, private router: Router, private route: ActivatedRoute) {
     this.modelInfo$ = this.store.select(selectExperimentModelInfoData);
     this.editable$ = this.store.select(selectIsExperimentEditable);
     this.userKnowledge$ = this.store.select(selectExperimentUserKnowledge);
@@ -97,7 +98,7 @@ export class ExperimentInfoModelComponent implements OnInit, OnDestroy {
         ];
       }
       this.store.dispatch(commonInfoActions.saveExperimentSection({models: {input: newModels as any}}));
-      this.router.navigate([{modelId: selectedModelId || ''}], {relativeTo: this.route, replaceUrl: true, queryParamsHandling:'preserve'});
+      return this.router.navigate([{modelId: selectedModelId || ''}], {relativeTo: this.route, replaceUrl: true});
     }
   }
 

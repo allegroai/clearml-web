@@ -9,7 +9,7 @@
   <as-split [unit]="'pixel'"
     *ngIf="(modelInfo?.output?.length) || (modelInfo?.input?.length) || (modelInfo?.artifacts?.length) || editable; else noData"
   >
-    <as-split-area [size]="minimized ? 250 : 360" [minSize]="50">
+    <as-split-area [size]="minimized ? 250 : 300" [minSize]="50">
       <sm-experiment-artifacts-navbar
         [class.minimized]="minimized"
         [artifacts]="modelInfo?.artifacts"
@@ -29,7 +29,7 @@
     <div class="d-flex h-100" *ngIf="modelInfo">
       <div class="no-data">
         <i class="icon i-no-data-artifacts"></i>
-        <h4>NO ARTIFACTS RECORDED</h4>
+        <span>NO ARTIFACTS RECORDED</span>
       </div>
     </div>
   </ng-template>

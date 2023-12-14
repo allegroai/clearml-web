@@ -2,11 +2,10 @@ import * as actions from '../actions/common-experiment-output.actions';
 import {HistogramCharts} from '../actions/common-experiment-output.actions';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {sortBy} from 'lodash-es';
-import {LOG_BATCH_SIZE} from '../shared/common-experiments.const';
+import {ChartHoverModeEnum, LOG_BATCH_SIZE} from '../shared/common-experiments.const';
 import {MetricsPlotEvent} from '~/business-logic/model/events/metricsPlotEvent';
 import {EventsGetTaskSingleValueMetricsResponseValues} from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponseValues';
 import {createReducer, on} from '@ngrx/store';
-import {SmoothTypeEnum} from '@common/shared/single-graph/single-graph.utils';
 
 
 export type GroupByCharts = 'metric' | 'none';
@@ -41,6 +40,7 @@ export interface ExperimentOutputState {
   logLoading: boolean;
   showSettings: boolean;
   scalarSingleValue: Array<EventsGetTaskSingleValueMetricsResponseValues>;
+  scalarsHoverMode: ChartHoverModeEnum;
   graphsPerRow: number;
 }
 
@@ -50,12 +50,12 @@ export interface ExperimentSettings {
   hiddenMetricsPlot: Array<string>;
   selectedHyperParams: Array<string>;
   selectedMetric: string;
+  selectedScalar: string;
+  selectedPlot: string;
   smoothWeight: number;
-  smoothType: SmoothTypeEnum;
   xAxisType: ScalarKeyEnum;
   groupBy: GroupByCharts;
   lastModified?: number;
-  valueType?: "min_value" | "max_value" | "value"
 }
 
 export const experimentOutputInitState: ExperimentOutputState = {
@@ -72,6 +72,7 @@ export const experimentOutputInitState: ExperimentOutputState = {
   logFilter: null,
   logLoading: false,
   showSettings: false,
+  scalarsHoverMode: 'x',
   graphsPerRow: 2
 };
 
@@ -152,5 +153,6 @@ export const experimentOutputReducer = createReducer(
   on(actions.setLogFilter, (state, action) => ({...state, logFilter: (action as ReturnType<typeof actions.setLogFilter>).filter})),
   on(actions.resetLogFilter, state => ({...state, logFilter: null})),
   on(actions.toggleSettings, state => ({...state, showSettings: !state.showSettings})),
+  on(actions.setScalarsHoverMode, (state, action) => ({...state, scalarsHoverMode: action.hoverMode})),
   on(actions.setGraphsPerRow, (state, action) => ({...state, graphsPerRow: action.graphsPerRow})),
 );

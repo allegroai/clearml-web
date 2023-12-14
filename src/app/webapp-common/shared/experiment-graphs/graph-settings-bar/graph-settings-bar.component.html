@@ -1,59 +1,47 @@
-<div class="x-axis-options" [class.vertical-layout]="verticalLayout" [class.short-mode]="shortMode && !verticalLayout">
-  <div class="d-flex field justify-content-between" [class.w-100]="verticalLayout">
-    <span class="label-text axis-text-margin-left" data-id="GroupBytext">Group by</span>
-    <mat-form-field appearance="outline" class="group-by-field no-bottom" data-id="GroupByField">
-      <mat-select [value]="groupBy" (selectionChange)="groupByChanged($event)" panelClass="light-theme">
+<div class="x-axis-options" [class.vertical-layout]="verticalLayout">
+  <div class="d-flex-center justify-content-between" [class.w-100]="verticalLayout">
+    <span class="label-text axis-text-margin-left">Group by</span>
+    <mat-form-field appearance="outline" class="group-by-field no-bottom">
+      <mat-select [value]="groupBy"  (selectionChange)="groupByChanged($event)" panelClass="light-theme">
         <mat-option *ngFor="let type of groupByOptions" [value]="type.value">{{type.name}}</mat-option>
       </mat-select>
     </mat-form-field>
   </div>
-  <div class="d-flex field justify-content-between" [class.w-100]="verticalLayout">
-    <span class="label-text axis-text-margin-left" data-id="HorizontalAxisText">Horizontal Axis</span>
-    <mat-form-field appearance="outline" class="axis-type-field no-bottom" data-id="HorizontalAxisField">
+  <div class="d-flex-center justify-content-between" [class.w-100]="verticalLayout">
+    <span class="label-text axis-text-margin-left">Horizontal Axis</span>
+    <mat-form-field appearance="outline" class="axis-type-field no-bottom">
       <mat-select [value]="xAxisType" (selectionChange)="xAxisTypeChanged($event)" panelClass="light-theme"
                   name="scriptType">
         <mat-option *ngFor="let type of xAxisTypeOption" [value]="type.value">{{type.name}}</mat-option>
       </mat-select>
     </mat-form-field>
   </div>
-  <div class="d-flex smooth-options">
-    <div class="d-flex field">
-    <span class="label-text smoothing-text" data-id="SmoothingText">Smoothing</span>
-      <mat-slider
-        [max]="smoothType === smoothTypeEnum.exponential ? 0.999 : 100"
-        [min]="smoothType === smoothTypeEnum.exponential ? 0 : 1"
-        [step]="smoothType === smoothTypeEnum.exponential ? 0.001 : 1"
-        #ngSlider
-      >
-        <input matSliderThumb
-               [ngModel]="smoothWeight"
-               (ngModelChange)="changeWeight.emit($any($event))"
-               [disabled]="smoothType === smoothTypeEnum.any"
-               #ngSliderThumb="matSliderThumb"/>
-      </mat-slider>
-    </div>
-      <mat-form-field appearance="outline" class="smooth-input no-bottom" data-id="SmoothingInputField">
-        <input
-          matInput
-          name="minCount"
-          type="number"
-          title=""
-          [disabled]="smoothType === smoothTypeEnum.any"
-          [min]="smoothType === smoothTypeEnum.exponential ? 0 : 1"
-          [max]="smoothType === smoothTypeEnum.exponential ? 0.999 : 100"
-          [step]="smoothType === smoothTypeEnum.exponential ? 0.05 : 1"
-          [(ngModel)]="smoothWeight"
-          (ngModelChange)="trimToLimits($event)"
-          (blur)="smoothWeight === null && trimToLimits(-1)"
-        />
-      </mat-form-field>
-      <mat-form-field appearance="outline" class="smooth-type no-bottom">
-        <mat-select [panelClass]="'light-theme wider-options'" [value]="smoothType" (selectionChange)="selectSmoothType($event)">
-          <mat-option *ngFor="let smoothTypeOption of smoothTypeEnum | keyvalue" [value]="smoothTypeOption.value">
-            {{smoothTypeOption.value}}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-      <i (click)="toggleSettings.emit()" class="al-icon al-ico-dialog-x sm-md pointer close-settings" data-id="CloseScalarSetting"></i>
+  <div class="smooth-options">
+    <span class="label-text smoothing-text">Smoothing</span>
+    <mat-slider
+      [max]="0.999"
+      [min]="0"
+      [step]="0.001"
+     #ngSlider
+    >
+      <input matSliderThumb
+             [ngModel]="smoothWeight"
+             (ngModelChange)="changeWeight.emit(round(ngSliderThumb.value * 100) /100)"
+             #ngSliderThumb="matSliderThumb" />
+    </mat-slider>
+    <mat-form-field appearance="outline" class="smooth-input no-bottom">
+      <input
+        matInput
+        name="minCount"
+        type="number"
+        [min]="0"
+        [max]="0.99"
+        [step]="0.05"
+        [ngModel]="smoothWeight"
+        (keyup)="($any($event.target).value >= 1) ? smoothWeight = 0.999 : null"
+        (ngModelChange)="changeWeight.emit($any($event))"
+      />
+    </mat-form-field>
+    <i (click)="toggleSettings.emit()" class="fas fa-times pointer close-settings"></i>
   </div>
 </div>

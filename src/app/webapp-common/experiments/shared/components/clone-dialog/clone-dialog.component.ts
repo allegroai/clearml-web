@@ -49,7 +49,7 @@ export class CloneDialogComponent implements OnInit, OnDestroy {
   private allProjectsBeforeFilter: Partial<ProjectsGetAllResponseSingle>[];
 
   constructor(
-    private store: Store,
+    private store: Store<any>,
     public dialogRef: MatDialogRef<CloneDialogComponent>,
     private cdr: ChangeDetectorRef,
     @Inject(MAT_DIALOG_DATA) data: {
@@ -160,7 +160,7 @@ export class CloneDialogComponent implements OnInit, OnDestroy {
 
   loadMore() {
     this.loading = true;
-    this.store.dispatch(getTablesFilterProjectsOptions({searchString: this.formData.project || '', loadMore: true,  allowPublic: false}));
+    this.store.dispatch(getTablesFilterProjectsOptions({searchString: this.formData.project || '', loadMore: true}));
   }
 
   isFocused(locationRef: HTMLInputElement) {

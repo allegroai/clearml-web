@@ -1,7 +1,7 @@
 import {
   AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef,
   Component,
-  ElementRef, HostListener, inject,
+  ElementRef, HostListener,
   NgZone,
   OnDestroy,
   OnInit,
@@ -10,8 +10,8 @@ import {
   ViewChildren
 } from '@angular/core';
 import {DagModelItem} from '@ngneat/dag';
-import {fromEvent, Observable, Subscription} from 'rxjs';
-import {debounceTime, distinctUntilChanged, filter, map, mergeMap, takeUntil, tap, throttleTime} from 'rxjs/operators';
+import {combineLatest, fromEvent, Observable, Subscription} from 'rxjs';
+import {debounceTime, delay, distinctUntilChanged, filter, map, mergeMap, takeUntil, tap, throttleTime} from 'rxjs/operators';
 import {Store} from '@ngrx/store';
 import {selectSelectedExperiment} from '~/features/experiments/reducers';
 import {selectRouterParams} from '../../core/reducers/router-reducer';
@@ -20,44 +20,18 @@ import {
   getSelectedPipelineStep,
   setSelectedPipelineStep
 } from '../../experiments/actions/common-experiments-info.actions';
-import {selectPipelineSelectedStepWithFallback} from '../../experiments/reducers';
+import {selectPipelineSelectedStep} from '../../experiments/reducers';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 import {getBoxToBoxArrow} from 'curved-arrows';
 import {Ace, edit} from 'ace-builds';
 import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
 import {selectScaleFactor} from '@common/core/reducers/view.reducer';
 import {DagManagerUnsortedService} from '@common/shared/services/dag-manager-unsorted.service';
-import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
-
-export enum StepStatusEnum {
-  queued = 'queued',
-  pending = 'pending',
-  skipped = 'skipped',
-  cached = 'cached',
-  executed = 'executed',
-  running = 'running',
-  failed = 'failed',
-  aborted = 'aborted',
-  completed = 'completed'
-}
-
-export interface TreeStep {
-  base_task_id: string,
-  queue: string,
-  parents: string[],
-  executed: string;
-  status: StepStatusEnum;
-  job_type: TaskTypeEnum;
-  job_started: number;
-  job_ended: number;
-  job_code_section: string;
-  job_id: string;
-}
 
 export interface PipelineItem extends DagModelItem {
   name: string;
   id: string;
-  data: TreeStep;
+  data: any;
 }
 
 export interface Arrow {
@@ -92,15 +66,17 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
   private aceEditor: Ace.Editor;
   private sub = new Subscription();
   private dragging: boolean;
+  protected pipelineConfiguration: any;
   public chartWidth = 0;
   public arrows: Arrow[];
   public diagramRect: DOMRect;
 
   public dagModel$: Observable<PipelineItem[][]>;
-  public selected$: Observable<IExperimentInfo>;
+  public selected$: Observable<any>;
   public selectedEntity: PipelineItem;
   public projectId$: Observable<string>;
-  protected pipelineController: PipelineItem[];
+  private tasksElementsLength$: Observable<number>;
+  private pipelineController: PipelineItem[];
   private skipAutoCenter: boolean;
   private scale: number;
   showLog: boolean;
@@ -113,10 +89,6 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
   trackArrows = (index: number, arrow: Arrow) => arrow.path;
   trackByStepId = (index: number, step) => step.stepId;
   public maximizeResults: boolean;
-  protected _dagManager: DagManagerUnsortedService<PipelineItem>;
-  protected store: Store;
-  protected cdr: ChangeDetectorRef;
-  protected zone: NgZone;
 
   @HostListener('document:keydown', ['$event'])
   onKeyDown(e: KeyboardEvent) {
@@ -125,12 +97,12 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
     }
   }
 
-  constructor() {
-    this._dagManager = inject(DagManagerUnsortedService<PipelineItem>);
-    this.store = inject(Store);
-    this.cdr = inject(ChangeDetectorRef);
-    this.zone = inject(NgZone);
-
+  constructor(
+    protected _dagManager: DagManagerUnsortedService<PipelineItem>,
+    protected store: Store<any>,
+    protected cdr: ChangeDetectorRef,
+    protected zone: NgZone
+  ) {
     this.sub.add(this.store.select(selectRouterParams)
       .pipe(
         debounceTime(150),
@@ -148,7 +120,12 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
 
     this.sub.add(this.store.select(selectScaleFactor).subscribe(factor => this.scale = 100 / factor));
 
-    this.selected$ = this.store.select(selectPipelineSelectedStepWithFallback);
+    this.selected$ = combineLatest([
+      this.store.select(selectSelectedExperiment),
+      this.store.select(selectPipelineSelectedStep)
+    ]).pipe(
+      map(([selectedPipe, selectedStep]) => selectedStep || selectedPipe)
+    );
 
     this.projectId$ = this.store.select(selectRouterParams)
       .pipe(map(params => params?.projectId));
@@ -166,25 +143,22 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
         const width = this.diagramContainer?.nativeElement.getBoundingClientRect().width;
         this.chartWidth = Math.max(Number.isNaN(width) ? 0 : width, 4000);
         this.dagModel$ = this._dagManager.dagModel$
-          .pipe(filter(model => model?.length > 0), tap(model =>
+          .pipe(filter(model => model?.length > 0), tap((model: any[]) =>
             model.forEach(row => this.chartWidth = Math.max(this.chartWidth, row.length * 300))));
         const pipelineObject = this.getTreeObject(task);
-        this.pipelineController = this.convertPipelineToDagModel(pipelineObject);
-        this.resetUninitializedRunningFields();
-        this._dagManager.setNewItemsArrayAsDagModel(this.pipelineController);
-        window.setTimeout(() => {
-          if (!this.skipAutoCenter) {
-            const element = this.diagramContainer.nativeElement;
-            element.scroll({left: (element.scrollWidth - element.getBoundingClientRect().width) / 2});
-          }
-          this.removeLines();
-          this.drawLines();
-          this.cdr.detectChanges();
-        }, 0);
+          this.pipelineController = this.convertPipelineToDagModel(pipelineObject);
+          this.resetUninitializedRunningFields();
+          this._dagManager.setNewItemsArrayAsDagModel(this.pipelineController);
+          window.setTimeout(() => {
+            if (!this.skipAutoCenter) {
+              const element = this.diagramContainer.nativeElement;
+              element.scroll({left: (element.scrollWidth - element.getBoundingClientRect().width) / 2});
+            }
+            this.removeLines();
+            this.drawLines();
+            this.cdr.detectChanges();
+          }, 0);
 
-        if(this.selectedEntity) {
-          this.selectStep(this.selectedEntity);
-        }
       })
     );
   }
@@ -194,7 +168,7 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
       this.pipelineController.forEach(step => {
         step.data.job_started = null;
         step.data.job_ended = null;
-        step.data.status = StepStatusEnum.pending;
+        step.data.status = 'pending';
       });
     }
   }
@@ -207,10 +181,11 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
     let pipelineObj;
     try {
       pipelineObj = JSON.parse(pipeline);
-      pipelineObj = Object.entries(pipelineObj).reduce((acc, [key, val]: [string, TreeStep]) => {
+      pipelineObj = Object.entries(pipelineObj).reduce((acc, [key, val]: [string, any]) => {
         acc[key] = {...val, parents: val.parents.map(parent => `${parent}`)};
         return acc;
       }, {});
+      this.pipelineConfiguration = pipelineObj;
     } catch {
       return [];
     }
@@ -247,6 +222,11 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
   }
 
   ngAfterViewInit(): void {
+    this.tasksElementsLength$ = this.tasksElements.changes.pipe(
+      delay(0),
+      map((list: QueryList<ElementRef>) => list.toArray().length)
+    );
+
     this.sub.add(this.aceEditorElements.changes.subscribe(() => this.initAceEditor()));
 
     fromEvent(this.diagramContainer.nativeElement, 'wheel')
@@ -342,12 +322,7 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
       if (id) {
         this.store.dispatch(getSelectedPipelineStep({id}));
       } else {
-        this.store.dispatch(setSelectedPipelineStep({step: {
-            id,
-            type: step.data.job_type,
-            status: step.data.status as unknown as TaskStatusEnum,
-            name: step.name
-          }}));
+        this.store.dispatch(setSelectedPipelineStep({step: {id, type: step.data.job_type, status: step.data.status, name: step.name}}));
         this.showLog = false;
       }
       this.selectedEntity = step;

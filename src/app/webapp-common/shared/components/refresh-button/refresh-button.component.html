@@ -1,13 +1,13 @@
-<div class="refresh-wrapper d-flex flex-row-reverse align-items-center pointer" [ngClass]="{'allow-autorefresh': allowAutoRefresh}">
+<div class="refresh-wrapper d-flex flex-row-reverse align-items-center" [ngClass]="{'allow-autorefresh': allowAutoRefresh}">
   <span
     *ngIf="allowAutoRefresh && autoRefreshState$ | async; else pause"
-    class="al-icon al-ico-auto-refresh-play pointer"
+    class="ps-1 al-icon al-ico-auto-refresh-play"
     data-id="Auto Refresh"
     (click)="refresh.trigger()"
   ><span class="path1"></span><span class="path2"></span></span>
   <ng-template #pause>
     <span
-      class="al-icon al-ico-auto-refresh-pause"
+      class="ps-1 al-icon al-ico-auto-refresh-pause"
       (click)="refresh.trigger()"
     ><span class="path1"></span><span class="path2"></span>
     </span>

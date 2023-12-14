@@ -1,7 +1,7 @@
 const fs = require('fs');
 
 const targets = [
-  'https://api.trains-master.hosted.allegro.ai',            // 1
+  'http://192.168.1.100:30080',             // 1
 ];
 
 const PROXY_CONFIG = {
@@ -15,7 +15,7 @@ const PROXY_CONFIG = {
       } else if (req.url === '/onboarding.json') {
         url = 'src/onboarding.json';
       } else {
-        return  req.url;
+        return req.url;
       }
 
       const ver = fs.readFileSync(url);
@@ -30,7 +30,7 @@ const PROXY_CONFIG = {
 };
 
 targets.forEach((target, i) => {
-  const path = `/service/${i+1}/api`;
+  const path = `/service/${i + 1}/api`;
   PROXY_CONFIG[path + '/*'] = {
     target: target,
     secure: false,

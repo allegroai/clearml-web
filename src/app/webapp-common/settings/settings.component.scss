@@ -1,24 +1,33 @@
 @import "variables";
+@import "variables_v2";
 
 :host {
   .settings-container {
     height: 100%;
 
     mat-drawer {
-      border-right: 1px solid $blue-500;
+      border-right: 1px solid $border-color;
       width: 220px;
     }
+
     .mat-mdc-list-item {
-      --mdc-list-list-item-label-text-color: #{$blue-200};
+      padding-left: 24px;
+
+      --mdc-list-list-item-label-text-color: #{$text};
       --mdc-theme-text-primary-on-background: #{$blue-200};
 
-      padding-left: 24px;
-      &.active {
-        --mdc-list-list-item-container-color: #{$blue-500};
-        --mdc-theme-text-primary-on-background: white;
-      }
       &:hover {
-        background-color: $blue-650;
+        background-color: $accent-color;
+        cursor: pointer;
+      }
+
+      &.active {
+        --mdc-list-list-item-container-color: #{$primary-color};
+        --mdc-theme-text-primary-on-background: white;
+
+        &:hover {
+          background-color: $primary-color;
+        }
       }
     }
 
@@ -28,6 +37,7 @@
       height: 100%;
 
       .section {
+        background-color: $background-color-content;
         padding: 20px 24px;
         height: calc(100% - 64px);
         overflow: auto;

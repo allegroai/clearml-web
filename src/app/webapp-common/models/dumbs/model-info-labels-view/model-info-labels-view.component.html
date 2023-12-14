@@ -1,61 +1,62 @@
 <sm-editable-section
   [editable]=" ! model?.ready && model?.company?.id && !isSharedAndNotOwner"
   [saving]="saving"
-  [disableSave]="!labelsForm.valid"
+  [disableSave]="!labels.valid"
   (activateEditClicked)="activateEdit()"
   (saveClicked)="saveClicked()"
   (cancelClicked)="cancelEdit()"
 >
   <ng-template #na>N/A</ng-template>
+
+
     <sm-section-header label="LABELS"></sm-section-header>
-    <form [class.edit]="editable" #labelsForm="ngForm" [hidden]="!editable" smUniqueInListSyncValidator2 prefix2="labelPrefix-">
-      <div class="body-container">
-      <div class="w-100 body">
-        <ng-container *ngFor="let parameter of formData; let i = index">
-          <mat-form-field appearance="outline" class="w-100">
-            <input #parameterLabel="ngModel"
-                   [(ngModel)]="parameter.label"
-                   [name]="'labelPrefix-' | uuid"
-                   data-id="parameterLabelField"
-                   required
-                   matInput>
-            <mat-error *ngIf="parameterLabel.invalid && parameterLabel?.errors?.required">
-              Required
-            </mat-error>
-          </mat-form-field>
-          <mat-error *ngIf="labelsForm?.errors?.uniqueName" class='outside-error'>
-            Labels must be unique.
-          </mat-error>
-          <span *ngIf="labelsForm?.errors?.uniqueName2 && labelsForm?.errors?.uniqueName2[i]" class="outside-error">Label must be unique.
-          </span>
+    <form [class.edit]="editable" #labels="ngForm">
+      <div class="content" [hidden]="!editable">
+        <div *ngFor="let parameter of formData; let i = index">
+          <div class="row w-100 align-items-center">
+            <div class="input-container col-11">
+              <mat-form-field appearance="outline" class="strength w-100">
+                <input #parameterLabel="ngModel"
+                       [(ngModel)]="parameter.label"
+                       [name]="'parameterLabel-' + parameter.id"
+                       required
+                       matInput>
+                <mat-error *ngIf="parameterLabel.invalid && parameterLabel?.errors?.required">
+                  Required
+                </mat-error>
+              </mat-form-field>
 
-            <mat-form-field [hintLabel]="parameterKey.invalid && parameterKey?.errors?.required? '*Required': ''" appearance="outline" class="w-100">
-              <input #parameterKey="ngModel"
-                     [(ngModel)]="parameter.id"
-                     type="number"
-                     [name]="('parameterId-' + parameter.label) | uuid"
-                     data-id="parameterKeyField"
-                     matInput
-                     required>
-              <mat-error *ngIf="parameterKey.invalid && parameterKey?.errors?.required">
-                Required
-              </mat-error>
-              <mat-error *ngIf="parameterKey.invalid && parameterKey?.errors?.smNotAllowedStringsValidator">
-                .(dot) $(dollar) and space are not allowed in parameter id.
-              </mat-error>
-            </mat-form-field>
+            </div>
 
-          <button class="btn btn-primary d-flex-center trash" (click)="$event.detail > 0 && removeRow(i)" data-id="deleteIcon" >
-            <i class="al-icon al-ico-trash sm pointer flashing-icon"></i>
-          </button>
-        </ng-container>
-      </div>
+            <div class="input-container col-11">
+              <mat-form-field [hintLabel]="parameterKey.invalid && parameterKey?.errors?.required? '*Required': ''" appearance="outline" class="strength w-100">
+                <input #parameterKey="ngModel"
+                       [(ngModel)]="parameter.id"
+                       type="number"
+                       [name]="'parameterKey-' + parameter.id"
+                       matInput
+                       required>
+                <mat-error *ngIf="parameterKey.invalid && parameterKey?.errors?.required">
+                  Required
+                </mat-error>
+                <mat-error *ngIf="parameterKey.invalid && parameterKey?.errors?.smNotAllowedStringsValidator">
+                  .(dot) $(dollar) and space are not allowed in parameter id.
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="input-container col-2 remove-step">
+              <i (click)="removeRow(i)" class="al-icon al-ico-trash al-color blue-400 sm-md pointer flashing-icon mb-2"></i>
+            </div>
+          </div>
+        </div>
       </div>
     </form>
-    <div class="w-100">
-      <button *ngIf="editable" class="btn btn-cml-primary d-flex-center" (click)="addRow()" data-id="addParameterButton">
-        <i class="al-icon sm-md al-ico-plus"></i>
-      </button>
+  <div class="row">
+    <div class="col-24">
+    <button *ngIf="editable" class="btn btn-cml-primary plus" (click)="addRow()"><i class="al-icon al-color blue-400 sm al-ico-plus d-flex align-items-center"></i>
+    </button>
+    </div>
   </div>
     <div class="content" *ngIf="!editable">
       <sm-simple-table-2 [cols]="cols" [rowsData]="formData">
@@ -63,11 +64,11 @@
           let-col
           let-i="rowIndex"
           let-row="row">
-          <div class="body">
-            <div class="input-container0">
+          <div class="row w-100">
+            <div class="input-container col-10">
               <b>{{row.label}}</b>
             </div>
-            <div class="input-container">
+            <div class="input-container col-4">
               <b>{{row.id}}</b>
             </div>
           </div>

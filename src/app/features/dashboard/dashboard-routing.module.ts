@@ -1,13 +1,16 @@
-import {RouterModule, Routes} from '@angular/router';
-import {NgModule} from '@angular/core';
-import {DashboardComponent} from './dashboard.component';
-import {CrumbTypeEnum} from '@common/layout/breadcrumbs/breadcrumbs.component';
+import { RouterModule, Routes } from '@angular/router';
+import { NgModule } from '@angular/core';
+import { DashboardComponent } from './dashboard.component';
+import { CrumbTypeEnum } from '@common/layout/breadcrumbs/breadcrumbs.component';
 
 export const routes: Routes = [
-  {path: '', component: DashboardComponent, data:{staticBreadcrumb:[[{
-        name: 'DASHBOARD',
+  {
+    path: '', component: DashboardComponent, data: {
+      staticBreadcrumb: [[{
+        name: 'Dashboard',
         type: CrumbTypeEnum.Feature
-      }]]}
+      }]]
+    }
   }
 ];
 

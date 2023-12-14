@@ -1,4 +1,5 @@
 @import "variables";
+@import "variables_v2";
 
 :host {
   ::ng-deep th.resize-enabled span.p-column-resizer {
@@ -22,30 +23,20 @@
     z-index: 1000;
   }
 
-  ::ng-deep .p-datatable-scrollable, ::ng-deep .p-datatable {
-    &> .p-datatable-wrapper > .p-datatable-table > .p-datatable-thead {
-      z-index: 20;
-
-      &:after {
-        content: "";
-        position: absolute;
-        z-index: -1;
-        left: 0;
-        right: 0;
-        top: 0;
-        height: var(--table-row-height);
-        background-color: $blue-700;
-      }
-    }
+  ::ng-deep .p-datatable-scrollable > .p-datatable-wrapper > .p-datatable-table > .p-datatable-thead {
+    z-index: 20;
   }
 
   ::ng-deep .p-datatable-wrapper {
+    position: relative;
+
     .p-datatable-tbody {
-    height: calc(100% - var(--table-row-height, 48px));
+    height: calc(100% - 48px);
     }
   }
 
   .table-header {
+    padding: 0 24px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -73,22 +64,14 @@
 
   .table-load-more {
     background-color: transparent !important;
-    border-bottom: none !important;
-    height: 100px;
-    position: relative;
   }
 
   .load-more-wrapper {
-    position: absolute;
-    width: 100%;
-    bottom: 32px;
+    padding: 32px 0;
 
     button {
       padding: 8px 40px;
       width: 175px;
-      position: sticky;
-      left: 50%;
-      transform: translateX(-50%);
     }
 
     .load-spinner {
@@ -104,52 +87,41 @@
     }
   }
 
-  .no-data-wrapper {
-    display: flex;
-    position: absolute;
-    width: 100%;
-    span {
-      position: sticky;
-      left: 50%;
-      transform: translateX(-50%);
-    }
+
+  .no-data {
+    text-align: center;
+    white-space: nowrap;
+    padding: 15px 0 10px 0;
+    font-size: 14px;
+    width: 120px;
   }
 
   tr:not(.cards-table) {
     &:not(.no-data-row):not(.load-more-wrapper) {
-      border-bottom: 1px solid $blue-600;
+      border: 1px solid $border-color;
     }
-    &:not(.header):not(.selected):not(.checked):not(.no-data-row):not(.simple):not(.load-more-wrapper) {
-      &:hover, &.contexted {
-        background-color: $blue-650;
-        border-bottom: 1px solid $blue-600;
+    &:hover:not(.header):not(.selected):not(.no-data-row):not(.simple):not(.load-more-wrapper) {
+      background-color: $background-color-hover;
 
-        .p-frozen-column {
-          background-color: $blue-650 !important;
-          z-index: 1;
-        }
+      .p-frozen-column {
+        background-color: $blue-650 !important;
+        z-index: 1;
       }
     }
 
     &.checked:not(.header):not(.selected):not(.no-data-row):not(.simple) {
       background-color: $blue-500;
-      .card-wrapper {
+      .td{
         border-bottom: none;
       }
 
       &:hover, &.contexted {
-        &:not(.cards-table) {
-          background-color: $blue-550;
-        }
-
-        .card-wrapper {
-          background-color: $blue-550;
-        }
+        background-color: $blue-550;
       }
     }
 
     &.selected {
-      .card-wrapper {
+      .td{
         border-bottom-color: $blue-600;
       }
       background-color: $blue-400;
@@ -161,15 +133,19 @@
   }
 
   tr {
-    position: relative;
-    transition: height 0.35s ease-in-out;
+    display: flex;
+    transition: height 0.5s linear;
+    width: 100%;
 
     &.header {
-      height: var(--table-row-height, 48px);
-      background-color: $blue-700;
+      height: 48px;
+      background-color: $background-color;
     }
 
     th {
+      display: flex;
+      align-items: center;
+      flex: 1 1 0;
       color: $blue-300;
       border-bottom: none;
       padding:0 8px;
@@ -182,7 +158,6 @@
         text-align: left;
         font-size: 12px !important;
         font-weight: 500;
-        white-space: nowrap;
       }
 
       &:hover {
@@ -191,7 +166,9 @@
     }
 
     td {
+      display: flex;
       align-items: center;
+      flex: 1 1 0;
       color: $blue-100;
       font-size: 1rem;
       overflow: hidden;
@@ -223,23 +200,14 @@
       }
     }
 
-    .context-button-wrapper {
-      width: 100%;
-      height: 0;
-      position: absolute;
-      left: 0;
-    }
-
     .context-button {
-      position: sticky;
-      z-index: 2;
-      left: calc(100% - 46px);
       cursor: pointer;
+      position: absolute;
       opacity: 0;
       transition: opacity 0.35s ease-in-out;
-      margin-top: calc(var(--table-row-height) * 0.166);
-      width: calc(var(--table-row-height) * 0.666);
-      height: calc(var(--table-row-height) * 0.666);
+      margin-top: 8px;
+      width: calc(var(--rowHeight) * 0.666);
+      height: calc(var(--rowHeight) * 0.666);
       padding: 3px;
       color: $blue-400;
       background-color: rgba($blue-600, 95%);
@@ -253,42 +221,34 @@
 
     &.cards-table {
 
-      .card-wrapper {
-        margin: 6px 2px 6px 12px;
+      td {
+        margin: 6px 16px;
         border: 1px solid $dark-border;
         border-radius: 4px;
-        overflow: hidden;
-        animation-name: expand;
-        animation-duration: 0.35s;
-        animation-timing-function: ease-in-out;
       }
-
 
       &:first-child {
-        .card-wrapper {
-          margin-top: 12px;
-        }
+        margin-top: 6px;
       }
 
-      &:hover:not(.selected):not(.simple) .card-wrapper {
+      &:hover:not(.selected):not(.simple) td {
         background-color: $blue-650;
       }
-
       &.selected {
-        .card-wrapper {
+        td {
           background-color: $blue-400;
         }
-        &:hover .card-wrapper{
+        &:hover td{
           background-color: $blue-480;
         }
       }
       &.checked:not(.selected):not(.simple) {
-        .card-wrapper {
+        td {
           background-color: $blue-500;
         }
 
         &:hover, &.contexted {
-          .card-wrapper {
+          td {
             background-color: $blue-550;
           }
         }
@@ -299,41 +259,26 @@
   :host-context(.light-theme) {
     tr:not(.cards-table) {
       &:not(.no-data-row):not(.load-more-wrapper) {
-        border-bottom: 1px solid $blue-100;
+        border-bottom: 1px solid $blue-50;
       }
-      &:not(.header):not(.selected):not(.no-data-row):not(.simple):not(.load-more-wrapper) {
-        &:hover, &.contexted {
-          background-color: $blue-50;
-          border-bottom: 1px solid $blue-50;
-        }
-      }
-
-      &.checked:not(.header):not(.selected):not(.no-data-row):not(.simple) {
+      &.checked:not(.header):not(.no-data-row):not(.simple):not(.load-more-wrapper) {
         background-color: $blue-100;
         border-bottom-color: $blue-50;
 
         &:hover, &.contexted {
-          .simple-row, .card-wrapper {
-            background-color: $blue-50;
-          }
+          background-color: $blue-50;
         }
+      }
 
-        &.selected {
-          .card-wrapper {
-            border-bottom-color: $blue-50;
-          }
-          background-color: $blue-100;
-
-          &:hover {
-            background-color: $blue-50;
-          }
-        }
+      &:hover:not(.header):not(.no-data-row):not(.simple):not(.load-more-wrapper) {
+        background-color: $blue-50;
+        border-bottom-color: $blue-50;
       }
 
       &.header {
         background-color: $blue-50;
         @supports (-moz-appearance:meterbar) {
-          border-bottom: 3px solid $blue-100;
+          border-bottom: 3px solid $blue-500;
         }
       }
 
@@ -343,7 +288,7 @@
         border-bottom: none;
 
         &:hover {
-          background-color: $blue-50;
+          background-color: $blue-100;
         }
       }
 
@@ -360,30 +305,9 @@
         }
 
       }
-
-      &.selected {
-        background-color: $blue-100;
-
-        &:hover {
-          background-color: $blue-200;
-        }
-      }
-    }
-
-    ::ng-deep .p-datatable-scrollable > .p-datatable-wrapper > .p-datatable-table > .p-datatable-thead {
-      &:after {
-        background-color: $blue-50;
-      }
-    }
-  }
-
-  @supports (-moz-appearance:none) {
-    tr.cards-table .card-wrapper {
-      margin: 6px 12px;
     }
   }
 }
-
 :host-context(.dark-theme-table.table-first-column-color) {
   tr td:not(.no-data):not(.load-more-wrapper).simple {
     border-bottom-color: $dark-grey-blue;
@@ -399,14 +323,3 @@
     background-color: transparent;
   }
 }
-
-@keyframes expand {
-  from {
-    height: var(--table-row-height);
-  }
-
-  to {
-    height: var(--card-height, 90px);
-  }
-}
-

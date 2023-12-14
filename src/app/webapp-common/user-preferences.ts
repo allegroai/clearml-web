@@ -1,9 +1,11 @@
-import {ApiUsersService} from '~/business-logic/api-services/users.service';
-import {Observable, of} from 'rxjs';
-import {catchError, map, tap} from 'rxjs/operators';
-import {cloneDeep, isEqual} from 'lodash-es';
-import {UsersSetPreferencesRequest} from '~/business-logic/model/users/usersSetPreferencesRequest';
-import {Injectable} from '@angular/core';
+import { ApiUsersService } from '~/business-logic/api-services/users.service';
+import { Observable, of } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
+import { cloneDeep, isEqual } from 'lodash-es';
+import { UsersSetPreferencesRequest } from '~/business-logic/model/users/usersSetPreferencesRequest';
+import { ConfigurationService } from './shared/services/configuration.service';
+import { LoginService } from '~/shared/services/login.service';
+import { Injectable } from '@angular/core';
 
 const USER_PREFERENCES_STORAGE_KEY = '_USER_PREFERENCES_';
 
@@ -18,7 +20,7 @@ export class UserPreferences {
   private preferences: { [key: string]: any };
 
   constructor(private userService: ApiUsersService) {
-      this.removeFromLocalStorage();
+    this.removeFromLocalStorage();
   }
 
   loadPreferences(): Observable<{ [key: string]: any }> {
@@ -35,13 +37,11 @@ export class UserPreferences {
           return pref;
         }),
         catchError((err) => {
-          // in case of 401 we have login logic in other places - throw it
-          if (err.status !== 401) {
-            return of({});
-          } else {
+          if (err.status === 401 || err.status === 400) {
             throw err;
+          } else {
+            return of({});
           }
-
         }),
         tap(preferences => this.preferences = preferences),
       );
@@ -49,8 +49,8 @@ export class UserPreferences {
 
   public setPreferences(key: string, value: any) {
     if (this.preferences && !isEqual(this.preferences[key], value)) {
-      const prefs = {[key]: cloneDeep(value)};
-      this.preferences = {...this.preferences, ...{[key]: value}};
+      const prefs = { [key]: cloneDeep(value) };
+      this.preferences = { ...this.preferences, ...{ [key]: value } };
       this.replaceDots(prefs);
       this.saveToServer(prefs);
       return;
@@ -95,7 +95,7 @@ export class UserPreferences {
   }
 
   private saveToServer(partialPreferences: { [key: string]: any }) {
-    this.userService.usersSetPreferences({preferences: partialPreferences} as UsersSetPreferencesRequest).subscribe();
+    this.userService.usersSetPreferences({ preferences: partialPreferences } as UsersSetPreferencesRequest).subscribe();
   }
 
   private cleanPreferencesInPreferences(pref: { [key: string]: any }) {
@@ -104,3 +104,12 @@ export class UserPreferences {
     }
   }
 }
+
+export const loadUserAndPreferences = (
+  loginService: LoginService,
+  confService: ConfigurationService,
+): () => Promise<any> => (): Promise<any> => new Promise((resolve) => {
+  confService.initConfigurationService().subscribe(() =>
+    loginService.initCredentials().subscribe(() => loginService.loginFlow(resolve))
+  );
+});

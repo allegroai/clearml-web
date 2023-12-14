@@ -13,16 +13,15 @@
                       [editable]="true"
                       [minLength]="2"
                       [required]="true"
-                      pattern="^[^\/]{2,}$"
-                      [forbiddenString]="[]"
+                      pattern="^[^/]{2,}$"
                       [inlineDisabled]="true"
                       (textChanged)="prepareProjectNameForChange($event)"
 
       >
         <span class="d-flex align-items-center"><span class="project-name"
-                                                      [smTooltip]="project.basename"
+                                                      [smTooltip]="project.name | cleanProjectPath"
                                                       smShowTooltipIfEllipsis
-        >{{project.basename}}</span>
+        >{{project.name | shortProjectName}}</span>
           <i *ngIf="!hideProjectPathIcon && (project.name | cleanProjectPath: false)" [smTooltip]="project.name |
           cleanProjectPath:false"
              class="al-icon al-ico-project-path sm ms-2"></i></span>
@@ -38,14 +37,9 @@
         (delete)="delete.emit()"
       ></sm-pipeline-card-menu>
     </div>
-    <span
-      *ngIf="project.last_update; else: noRun"
-      class="last-run"
-      [smTooltip]="project.last_update | date: timeFormatString"
-      matTooltipPosition="after"
-    >Updated {{project.last_update | timeAgo}}</span>
+    <div *ngIf="project.last_update; else: noRun" class="last-run">Updated {{project.last_update | timeAgo}}</div>
     <ng-template #noRun>
-      <span class="last-run"></span>
+      <div class="last-run"></div>
     </ng-template>
   </div>
   <div class="d-flex justify-content-around w-100">

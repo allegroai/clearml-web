@@ -1,3 +1,3 @@
 export * from './tasks.service';
-import { TasksService } from './tasks.service';
-export const APIS = [TasksService];
+import { ApiTasksService } from './tasks.service';
+export const APIS = [ApiTasksService];

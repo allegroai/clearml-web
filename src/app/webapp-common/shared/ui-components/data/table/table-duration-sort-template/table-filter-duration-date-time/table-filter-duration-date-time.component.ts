@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import {DurationParameters, TableDurationSortBaseComponent} from '../table-duration-sort-base.component';
 import {TIME_IN_MILLI} from '../../../../../utils/time-util';
 import {MAT_DATE_FORMATS, MAT_DATE_LOCALE} from '@angular/material/core';
@@ -65,7 +65,7 @@ export const getTimeInSecondsFromDate = (_date: number | Date): number => {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class TableFilterDurationDateTimeComponent  extends TableDurationSortBaseComponent {
+export class TableFilterDurationDateTimeComponent  extends TableDurationSortBaseComponent implements OnInit {
   _selectedDate: Date;
   _selectedTimeInSeconds: number;
 
@@ -79,6 +79,13 @@ export class TableFilterDurationDateTimeComponent  extends TableDurationSortBase
   };
   isFakeNowCheckbox = false;
   MINIMUM_TIME_DISPLAY = 0.001;
+  constructor(cdr: ChangeDetectorRef) {
+    super(cdr);
+  }
+
+  ngOnInit(): void {
+  }
+
   get hasGreaterThanValue() {
     return this._greaterThan.date || this._greaterThan.time;
   }

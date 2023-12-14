@@ -20,7 +20,6 @@
     color="accent"
   >Disable HiDPI browser scale override
     <i class="al-icon al-ico-info-circle sm info align-middle ms-3 me-3"
-        data-id="hidpiInfoIcon"
        smTooltip="ClearML dynamically sets the browser scaling factor for an optimal page layout. Disable for default desktop scale."
     ></i>
     <span class="reload" [class.highlight]="disableHidpiChanged" (click)="reload($event)">Reload to apply</span>
@@ -38,11 +37,10 @@
       color="accent"
     >Hide specific container arguments
       <i class="al-icon al-ico-info-circle sm info align-middle ms-3 me-3"
-      data-id="hideSpecificargInfoIcon"
          smTooltip="Redact the values for the specified container environment variables in the experiment execution page"
       ></i>
     </mat-slide-toggle>
-    <span class="reload highlight pointer" data-id="editButton" (click)="editHideSpecificContainerArguments()">Edit</span>
+    <span class="reload highlight pointer" (click)="editHideSpecificContainerArguments()">Edit</span>
   </div>
 
 </div>

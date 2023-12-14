@@ -1,5 +1,5 @@
 <div class="d-flex h-100 p-4">
-  <div class="donut-legend" data-id="annotationPieChart">
+  <div class="donut-legend">
     <div
       *ngFor="let slice of this.donutData; let index = index; trackBy: trackById"
       class="slice"
@@ -14,8 +14,7 @@
         [stringToColor]="slice.name"
         [colorButtonRef]="colorButton"
         class="circle"
-        data-id="annotationColorButton"
-      ></div>{{slice.name}}<span class="quantity" data-id="annotationCount">({{slice.quantity}})</span>
+      ></div>{{slice.name}}<span class="quantity">({{slice.quantity}})</span>
     </div>
   </div>
   <div class="donut-container"></div>

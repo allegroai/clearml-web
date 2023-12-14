@@ -1,7 +1,7 @@
 import {
-  ChangeDetectionStrategy, ChangeDetectorRef,
+  ChangeDetectionStrategy,
   Component,
-  EventEmitter, inject,
+  EventEmitter,
   Input,
   Output
 } from '@angular/core';
@@ -40,8 +40,6 @@ export class TableFilterSortTemplateComponent {
   public noMoreOptions: boolean;
   public filterPageSize: number;
   private previousSearchValue: { label: string; value: string; tooltip?: string } | undefined;
-  private isOpen: boolean;
-  private cdr = inject(ChangeDetectorRef);
 
   @Input() set column(col: ISmCol) {
     this.header = col.header;
@@ -77,7 +75,7 @@ export class TableFilterSortTemplateComponent {
   @Input() andFilter: boolean = null;
 
   @Input() set options(options: Array<{ label: string; value: string; tooltip?: string }>) {
-    if (options && this.isOpen) {
+    if (options) {
       this.noMoreOptions = options?.length < this.filterPageSize || options?.length === this.previousLength && this.searchValue === this.previousSearchValue;
       this.previousLength = options?.length;
       this.previousSearchValue = this.searchValue;
@@ -157,11 +155,5 @@ export class TableFilterSortTemplateComponent {
       this.previousLength = 0;
     }
     this.menuClosed.emit();
-    this.isOpen = false;
-  }
-
-  onMenuOpen() {
-    this.isOpen = true;
-    this.menuOpened.emit();
   }
 }

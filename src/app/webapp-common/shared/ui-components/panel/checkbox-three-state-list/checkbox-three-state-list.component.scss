@@ -8,11 +8,15 @@
     height: 40px;
     align-items: center;
     border-radius: 4px;
+
+    &:hover {
+      background: $blue-50;
+    }
   }
 
   ::ng-deep .mat-mdc-checkbox {
     .mdc-checkbox .mdc-checkbox__native-control:indeterminate ~ .mdc-checkbox__background {
-      background-image: url(../../../../../../app/webapp-common/assets/icons/cbx-exlude.svg);
+      background-image: url('~app/webapp-common/assets/icons/cbx-exlude.svg');
       background-size: 18px;
       border: 0;
       transition: none;

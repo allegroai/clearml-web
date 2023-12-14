@@ -1,8 +1,8 @@
 import {Injectable} from '@angular/core';
-import {Actions, concatLatestFrom, createEffect, ofType} from '@ngrx/effects';
+import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {Action, Store} from '@ngrx/store';
 import {ActivatedRoute, Router} from '@angular/router';
-import {catchError, filter, map, mergeMap, switchMap, tap} from 'rxjs/operators';
+import {catchError, filter, map, mergeMap, switchMap, tap, withLatestFrom} from 'rxjs/operators';
 import {activeLoader, addMessage, deactivateLoader, setServerError} from '../core/actions/layout.actions';
 import {requestFailed} from '../core/actions/http.actions';
 import {
@@ -10,12 +10,10 @@ import {
   archiveReport,
   createReport,
   deleteReport,
-  deleteResource,
   getReport,
   getReports,
   getReportsTags,
   moveReport,
-  navigateToProjectAfterMove,
   publishReport,
   removeReport,
   restoreReport,
@@ -24,14 +22,13 @@ import {
   setReports,
   setReportsOrderBy,
   setReportsTags,
-  updateReport
+  updateReport,
+  deleteResource
 } from './reports.actions';
 import {ApiReportsService} from '~/business-logic/api-services/reports.service';
 import {IReport, PAGE_SIZE} from './reports.consts';
 import {
-  selectArchiveView,
-  selectNestedReports,
-  selectReport,
+  selectArchiveView, selectReport,
   selectReportsOrderBy,
   selectReportsQueryString,
   selectReportsScrollId,
@@ -47,8 +44,10 @@ import {
   selectMainPageTagsFilterMatchMode,
   selectSelectedProjectId
 } from '../core/reducers/projects.reducer';
+import {ReportsGetTagsResponse} from '~/business-logic/model/reports/reportsGetTagsResponse';
 import {TABLE_SORT_ORDER} from '../shared/ui-components/data/table/table.consts';
 import {selectCurrentUser, selectShowOnlyUserWork} from '../core/reducers/users-reducer';
+import {addExcludeFilters} from '../shared/utils/tableParamEncode';
 import {escapeRegex} from '../shared/utils/escape-regex';
 import {MESSAGES_SEVERITY} from '../constants';
 import {MatDialog} from '@angular/material/dialog';
@@ -61,16 +60,13 @@ import {ReportsCreateResponse} from '~/business-logic/model/reports/reportsCreat
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {HttpClient} from '@angular/common/http';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
-import {setMainPageTagsFilter} from '@common/core/actions/projects.actions';
-import {cleanTag} from '@common/shared/utils/helpers.util';
-import {excludedKey, getTagsFilters} from '@common/shared/utils/tableParamEncode';
 
 @Injectable()
 export class ReportsEffects {
 
   constructor(
     private actions: Actions,
-    private store: Store,
+    private store: Store<any>,
     private route: ActivatedRoute,
     private router: Router,
     private reportsApiService: ApiReportsService,
@@ -87,21 +83,21 @@ export class ReportsEffects {
 
   createReport$ = createEffect(() => this.actions.pipe(
     ofType(createReport),
-    switchMap((action) => this.reportsApiService.reportsCreate(action.reportsCreateRequest)
-      .pipe(mergeMap((res: ReportsCreateResponse) => {
-        this.router.navigate(['reports', res.project_id, res.id]);
-        return [deactivateLoader(createReport.type)];
-      }),
-      catchError(err => [
-        requestFailed(err),
-        setServerError(err, null, 'failed to create a new report'),
-        deactivateLoader(createReport.type),
-      ])))
+    switchMap((action) => this.reportsApiService.reportsCreate(action.reportsCreateRequest)),
+    mergeMap((res: ReportsCreateResponse) => {
+      this.router.navigate(['reports', res.project_id, res.id]);
+      return [deactivateLoader(createReport.type)];
+    }),
+    catchError(err => [
+      requestFailed(err),
+      setServerError(err, null, 'failed to create a new report'),
+      deactivateLoader(createReport.type),
+    ])
   ));
 
   getReports = createEffect(() => this.actions.pipe(
     ofType(getReports, setReportsOrderBy),
-    concatLatestFrom(() => [
+    withLatestFrom(
       this.store.select(selectReportsScrollId),
       this.store.select(selectArchiveView),
       this.store.select(selectReportsOrderBy),
@@ -113,7 +109,7 @@ export class ReportsEffects {
       this.store.select(selectReportsQueryString),
       this.store.select(selectHideExamples),
       this.store.select(selectRouterParams).pipe(map(params => params?.projectId)),
-    ]),
+    ),
     switchMap(([action, scroll, archive, orderBy, sortOrder, showOnlyUserWork, mainPageTagsFilter, mainPageTagsFilterMatchMode, user, searchQuery, hideExamples, projectId]) =>
       this.reportsApiService.reportsGetAllEx({
         /* eslint-disable @typescript-eslint/naming-convention */
@@ -122,14 +118,10 @@ export class ReportsEffects {
         project: projectId === '*' ? null : projectId,
         scroll_id: action['loadMore'] ? scroll : null,
         ...(hideExamples && {allow_public: false}),
-        system_tags: [archive ? '__$and' : excludedKey, 'archived'],
+        system_tags: [archive ? '__$and' : '__$not', 'archived'],
         ...(showOnlyUserWork && {user: [user.id]}),
         order_by: [sortOrder === TABLE_SORT_ORDER.DESC ? '-' + orderBy : orderBy],
-        ...(mainPageTagsFilter?.length > 0 && {
-          filters: {
-            tags: getTagsFilters(!!mainPageTagsFilterMatchMode, mainPageTagsFilter),
-          }
-        }),
+        ...(mainPageTagsFilter?.length > 0 && {tags: [(mainPageTagsFilterMatchMode ? '__$and' : '__$or'), ...addExcludeFilters(mainPageTagsFilter)]}),
         ...(searchQuery?.query && {
           _any_: {
             pattern: searchQuery.regExp ? searchQuery.query : escapeRegex(searchQuery.query),
@@ -165,16 +157,8 @@ export class ReportsEffects {
   getReportsTags = createEffect(() => this.actions.pipe(
     ofType(getReportsTags),
     switchMap(() => this.reportsApiService.reportsGetTags({})),
-    concatLatestFrom(() => this.store.select(selectMainPageTagsFilter)),
-    mergeMap(([res, fTags]) => [
-      setReportsTags({tags: res.tags}),
-      ...(fTags?.some(fTag => !res.tags.includes(cleanTag(fTag))) ?
-        [
-          setMainPageTagsFilter({
-            tags: fTags.filter(fTag => res.tags.includes(cleanTag(fTag))),
-            feature: 'reports'
-          })
-        ] : []),
+    mergeMap((res: ReportsGetTagsResponse) => [
+      setReportsTags({tags: res.tags})
     ]),
     catchError(err => [
       requestFailed(err),
@@ -193,7 +177,7 @@ export class ReportsEffects {
       only_fields: ['name', 'status', 'company.id', 'user.id', 'comment', 'report', 'tags', 'system_tags', 'report_assets', 'project.name']
     })),
     tap(res => {
-      if (res.tasks.length === 0) {
+      if(res.tasks.length === 0){
         this.router.navigateByUrl('/404');
       }
     }),
@@ -247,23 +231,19 @@ export class ReportsEffects {
     ),
     switchMap((moveRequest: ReportsMoveRequest) => this.reportsApiService.reportsMove(moveRequest)
       .pipe(
-        concatLatestFrom(() => [
-          this.store.select(selectSelectedProjectId),
-          this.store.select(selectNestedReports)
-        ]),
-        mergeMap(([res, projectId, nested]: [ReportsMoveResponse, string, boolean]) => [
+        withLatestFrom(this.store.select(selectSelectedProjectId)),
+        mergeMap(([res, projectId]: [ReportsMoveResponse, string]) => [
           setReportChanges({
             id: moveRequest.task,
-            filterOut: projectId && (projectId !== '*' || nested) && projectId !== moveRequest.project,
+            filterOut: projectId && projectId !== '*' && projectId !== moveRequest.project,
             changes: {
               project: (moveRequest.project ?
-                {id: res.project_id, name: moveRequest.project_name} :
+                {id: moveRequest.project, name: moveRequest.project_name} :
                 {id: res.project_id, name: moveRequest.project_name ?? 'Root project'})
             }
           }),
           deactivateLoader(moveReport.type),
-          addMessage(MESSAGES_SEVERITY.SUCCESS, `Report moved successfully to ${moveRequest.project_name ?? 'Projects root'}`),
-          navigateToProjectAfterMove({projectId: res.project_id})
+          addMessage(MESSAGES_SEVERITY.SUCCESS, `Report moved successfully to ${moveRequest.project_name ?? 'Projects root'}`)
         ]),
         catchError(err => [
           deactivateLoader(moveReport.type),
@@ -273,15 +253,6 @@ export class ReportsEffects {
       )
     )
   ));
-
-  navigateToProjectAfterMove = createEffect(() => this.actions.pipe(
-    ofType(navigateToProjectAfterMove),
-    concatLatestFrom(() => this.store.select(selectReport)),
-    filter(([, report]) => !!report?.id),
-    tap(([action, report]) => {
-      this.router.navigateByUrl(`reports/${action.projectId}/${report.id}`);
-    }),
-  ), {dispatch: false});
 
   publishReport = createEffect(() => this.actions.pipe(
     ofType(publishReport),
@@ -408,7 +379,7 @@ export class ReportsEffects {
     switchMap(action => this.http.delete(action.resource)
       .pipe(
         catchError(() => [addMessage(MESSAGES_SEVERITY.ERROR, 'failed to delete resource')]),
-        concatLatestFrom(() => this.store.select(selectReport)),
+        withLatestFrom(this.store.select(selectReport)),
         mergeMap(([, report]) => [updateReport({
           id: report.id,
           changes: {

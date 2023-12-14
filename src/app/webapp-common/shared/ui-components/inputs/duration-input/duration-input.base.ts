@@ -26,8 +26,8 @@ export abstract class DurationInputBase  extends TemplateFormSectionBase {
   @Output() onEditing = new EventEmitter<boolean>();
   @Output() onDurationChanged = new EventEmitter();
 
-  override get value() {return this.ngModelValue;}
-  override set value(val) {  // this value is updated by programmatic changes if( ngModelValue !== undefined && this.ngModelValue !== ngModelValue){
+  get value() {return this.ngModelValue;}
+  set value(val) {  // this value is updated by programmatic changes if( ngModelValue !== undefined && this.ngModelValue !== ngModelValue){
     if (val !== undefined && val !== this.val && val !== '0') {
 
       val = `${val || 0}`;

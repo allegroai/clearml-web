@@ -1,3 +1,4 @@
+@use "sass:math";
 @import "variables";
 
 :host {
@@ -5,10 +6,10 @@
 
   display: block;
   position: relative;
-  background-color: var(--line-chart-background-color, $black);
+  background-color: $black;
 
   .chart {
-    height: calc(100% - 46px);
+    height: calc(100% - 40px);
     margin-bottom: 6px;
   }
 
@@ -18,11 +19,11 @@
     bottom: 0;
     left: 0 ;
     right: 0;
-    background-color: var(--line-chart-background-color, $black);
+    background-color: $black;
     .loading {
       display: flex;
       align-items: center;
-      transform: translateY(#{-1 * $chart-bar-height * 0.5});
+      transform: translateY(#{-1 * math.div($chart-bar-height, 2)});
     }
     .text {
       font-size: 14px;
@@ -44,6 +45,11 @@
     fill: $black;
   }
 
+  ::ng-deep .horizontal-grid-line {
+    stroke: $dark-grey-blue;
+    stroke-dasharray: none;
+  }
+
   ::ng-deep .extended-x-line {
     stroke: $dark-grey-blue;
   }
@@ -58,7 +64,7 @@
     fill: $light-periwinkle-two;
   }
 
-  ::ng-deep rect.tooltip-background {
+  ::ng-deep rect.tooltip-text-container {
     fill: black !important;
     stroke: $blue-300 !important;
   }
@@ -76,16 +82,4 @@
   ::ng-deep .tooltip-left-text, ::ng-deep .tooltip-right-text {
     fill: $blue-200 !important;
   }
-
-  ::ng-deep .grid {
-    .grid-line {
-      stroke: $dark-grey-blue;
-      stroke-dasharray: none;
-    }
-  }
 }
-
-::ng-deep .legend-circle.circle-hidden {
-  fill-opacity: 0.4;
-}
-

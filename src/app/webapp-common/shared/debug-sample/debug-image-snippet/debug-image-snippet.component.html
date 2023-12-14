@@ -2,13 +2,10 @@
   <div *ngIf="!isFailed" class="item-snippet" [class.loading]="isLoading"  [class]="theme" [class.no-hover-effect]="noHoverEffects">
     <ng-container [ngSwitch]="type">
 
-      <div class="image" *ngSwitchCase="'image'" data-id="imageContainer">
+      <div class="image" *ngSwitchCase="'image'">
           <img
-            #imageElement
             class="pointer"
-            data-id="sourceImage"
             [src]="source"
-            [alt]="source"
             (error)="isFailed = true"
             (click)="imageClicked.emit({src: source})"
             (load)="loadedMedia()"
@@ -17,14 +14,13 @@
           <div *ngIf="!noHoverEffects" class="toolbar top">
             <div class="clickable-icon d-flex align-items-center justify-content-center pointer"
                 (click)="createEmbedCodeClicked($event)"
-                smTooltip="Copy embed code"
-                data-id="copyToReportButton">
+                smTooltip="Copy to Report">
               <i class="al-icon al-ico-code sm"></i>
             </div>
           </div>
       </div>
 
-      <div class="player" data-id="videoContainer" *ngSwitchCase="'player'">
+      <div class="player" *ngSwitchCase="'player'">
         <video
           *ngIf="!noHoverEffects"
           #video
@@ -39,7 +35,6 @@
           #video
           controls
           preload="metadata"
-          data-id="videoContainer"
           [src]="source"
           (error)="imageError.emit(); isFailed = true"
           (loadedmetadata)="loadedMedia()"
@@ -48,7 +43,7 @@
         <div  class="toolbar top">
           <div *ngIf="!noHoverEffects" class="clickable-icon d-flex align-items-center justify-content-center pointer"
                (click)="createEmbedCodeClicked($event)"
-               smTooltip="Copy embed code" data-id="CopyToReportButton">
+               smTooltip="Copy to Report">
             <i class="al-icon al-ico-code sm"></i>
           </div>
         </div>
@@ -56,25 +51,23 @@
 
       <div class="html-snippet" *ngSwitchCase="'html'">
         <div class="html-wrap" [class.loading]="isLoading">
-          <iframe (load)="iframeLoaded($event)" class="html-viewer" data-id="htmlViewer" width="400" height="400" referrerpolicy="origin-when-cross-origin" [src]="source | safe:'url'"></iframe>
+          <iframe (load)="iframeLoaded($event)" class="html-viewer" width="400" height="400" referrerpolicy="origin-when-cross-origin" [src]="source | safe:'url'"></iframe>
         </div>
         <div *ngIf="!noHoverEffects" class="toolbar">
           <div class="clickable-icon d-flex align-items-center justify-content-center pointer"
                (click)="createEmbedCodeClicked($event)"
-               smTooltip="Copy embed code" data-id="CopyToReportButton">
+               smTooltip="Copy to Report">
             <i class="al-icon al-ico-code sm"></i>
           </div>
           <div class="clickable-icon d-flex align-items-center justify-content-center pointer"
                ngxClipboard
                smTooltip="Copy URL"
-               data-id="CopyURLButton"
                [cbContent]="source"
                (cbOnSuccess)="copyToClipboardSuccess(true)">
             <i class="al-icon al-ico-copy-to-clipboard sm"></i>
           </div>
           <div class="clickable-icon d-flex align-items-center justify-content-center pointer"
                smTooltip="Open URL in a new Tab"
-               data-id="openURLInNewTab"
                (click)="openInNewTab(source)"
           >
             <i class="al-icon al-ico-export sm"></i>

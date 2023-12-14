@@ -1,5 +1,9 @@
 @import "variables";
 
+.filter-form {
+  margin-right: 12px;
+}
+
 .color-picker-wrapper {
   position: absolute;
   top: calc(50% - 200px);
@@ -9,23 +13,12 @@
     display: none;
   }
   ::ng-deep .color-picker {
-    border-radius: 4px;
-    box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
-    border-color: $blue-200;
-    .saturation-lightness {
-      border-radius: 3px 3px 0 0;
-    }
-    .preset-area {
-      hr {
-        margin-top: 0;
-      }
-      .preset-color {
-        margin: 4px;
-        border-color: white;
-        box-shadow: 0 0 0 1px $blue-200;
-        &:hover {
-          box-shadow: 0 0 0 1px $blue-400;
-        }
+    .preset-area .preset-color {
+      margin: 4px;
+      border-color: white;
+      box-shadow: 0 0 0 1px $blue-200;
+      &:hover {
+        box-shadow: 0 0 0 1px $blue-400;
       }
     }
     .button-area {

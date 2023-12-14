@@ -115,8 +115,6 @@ import { TasksValidateRequest } from '../model/tasks/tasksValidateRequest';
 
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
 import { Configuration }                                     from '../configuration';
-import {TasksUpdateTagsResponse} from '~/business-logic/model/tasks/tasksUpdateTagsResponse';
-import {TasksUpdateTagsRequest} from '~/business-logic/model/tasks/tasksUpdateTagsRequest';
 
 
 @Injectable()
@@ -152,7 +150,7 @@ export class ApiTasksService {
 
 
     /**
-     *
+     * 
      * Update existing artifacts (search by key/mode) and add new ones
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -197,7 +195,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Add or update task model
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -242,7 +240,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Archive tasks. If a task is queued it will first be dequeued and then archived.
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -287,7 +285,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Archive tasks
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -332,7 +330,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Clone an existing task
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -377,7 +375,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Indicates that task is closed
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -422,7 +420,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Signal a task has completed
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -467,7 +465,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Create a new task
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -512,7 +510,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Delete a task along with any information stored for it (statistics, frame   updates etc.) Unless Force flag is provided, operation will fail if task has   objects associated with it - i.e. children tasks and projects. Models that   refer to the deleted task will be updated with a task ID indicating a deleted   task.
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -557,7 +555,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Delete existing artifacts (search by key/mode)
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -602,7 +600,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Delete task configuration items
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -647,7 +645,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Delete task hyper parameters
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -692,7 +690,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Delete tasks
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -737,7 +735,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Delete models from task
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -782,7 +780,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Remove a task from its queue. Fails if task status is not queued.
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -827,7 +825,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Dequeue tasks
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -872,7 +870,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Edit task\&#39;s details.
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -917,7 +915,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Add or update task configuration
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -962,7 +960,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Add or update task hyper parameters
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -1007,7 +1005,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Adds a task into a queue.   Fails if task state is not \&#39;created\&#39;.   Fails if the following parameters in the task were not filled:   * execution.script.repository   * execution.script.entrypoint
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -1052,7 +1050,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Enqueue tasks
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -1097,7 +1095,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Indicates that task has failed
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -1142,7 +1140,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Get all the company\&#39;s tasks and all public tasks
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -1187,7 +1185,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Get all the company\&#39;s tasks and all public tasks
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -1232,7 +1230,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Gets task information
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -1277,7 +1275,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Get all the company\&#39;s tasks and all public tasks
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -1322,7 +1320,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Get the list of task configuration items names
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -1367,7 +1365,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Get the list of task configurations
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -1412,7 +1410,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Get the list of task hyper parameters
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -1457,7 +1455,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Get the list of task types used in the specified projects
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -1502,7 +1500,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Convert public tasks to private
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -1547,7 +1545,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Convert company tasks to public
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -1592,7 +1590,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Move tasks to a project
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -1637,7 +1635,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Refresh the task\&#39;s last update time
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -1682,7 +1680,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Mark a task status as published.           For Annotation tasks - if any changes were committed by this task, a   new version in the dataset together with an output view are created.           For Training tasks - if a model was created, it should be set to ready.
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -1727,7 +1725,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Publish tasks
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -1772,7 +1770,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Reset a task to its initial state, along with any information stored for it   (statistics, frame updates etc.).
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -1817,7 +1815,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Reset tasks
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -1862,7 +1860,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Set the script requirements for a task
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -1907,7 +1905,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Mark a task status as in_progress. Optionally allows to set the task\&#39;s   execution progress.
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -1952,7 +1950,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Request to stop a running task
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -1997,7 +1995,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Request to stop running tasks
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -2042,7 +2040,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Signal a task has stopped
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -2087,7 +2085,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Unarchive tasks
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -2132,7 +2130,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Update task\&#39;s runtime parameters
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -2177,7 +2175,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Updates a batch of tasks. Headers Content type should be \&#39;application/json-   lines\&#39;.
      * @param requests Json encoded newline-terminated lines, each representing an event in the batch and uses the same parameters used for tasks.update
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -2222,7 +2220,7 @@ export class ApiTasksService {
     }
 
     /**
-     *
+     * 
      * Validate task properties (before create)
      * @param request request body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -2266,48 +2264,4 @@ export class ApiTasksService {
         );
     }
 
-  /**
-   *
-   * Add/Remove multiple tags from multiple tasks
-   * @param request request body
-   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-   * @param reportProgress flag to report request and response progress.
-   */
-  public tasksUpdateTags(request: TasksUpdateTagsRequest, options?: any, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
-    if (request === null || request === undefined) {
-      throw new Error('Required parameter request was null or undefined when calling tasksUpdateTags.');
-    }
-
-    let headers = this.defaultHeaders;
-    if (options && options.async_enable) {
-      headers = headers.set(this.configuration.asyncHeader, '1');
-    }
-
-    // to determine the Accept header
-    const httpHeaderAccepts: string[] = [
-      'application/json'
-    ];
-    const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-    if (httpHeaderAcceptSelected != undefined) {
-      headers = headers.set("Accept", httpHeaderAcceptSelected);
-    }
-
-    // to determine the Content-Type header
-    const consumes: string[] = [
-    ];
-    const httpContentTypeSelected:string | undefined = this.configuration.selectHeaderContentType(consumes);
-    if (httpContentTypeSelected != undefined) {
-      headers = headers.set("Content-Type", httpContentTypeSelected);
-    }
-
-    return this.apiRequest.post<TasksUpdateTagsResponse>(`${this.basePath}/tasks.update_tags`,
-      request,
-      {
-        withCredentials: this.configuration.withCredentials,
-        headers: headers,
-        observe: observe,
-        reportProgress: reportProgress
-      }
-    );
-  }
 }

@@ -1,7 +1,7 @@
 <div class="preview-container" *ngIf="selected?.id">
   <sm-experiment-output-plots #plots
                               class="dataset-version-preview"
-                              [class.hidden-like]="plots.plotsList?.length < 1"
+                              [class.hidden]="plots.plotsList?.length < 1"
                               [isDatasetVersionPreview]="true"
                               [selected]="selected">
   </sm-experiment-output-plots>
@@ -12,6 +12,6 @@
                      [disableStatusRefreshFilter]="true"
                      [selected]="selected" >
     </sm-debug-images>
-  <div *ngIf="plots.plotsList !== undefined && plots.plotsList.length < 1 && debugImages.debugImages !== null && !debugImages.debugImages?.[selected.id]?.data" class="no-data flex-middle">No preview to show</div>
+  <div *ngIf="plots.plotsList !== undefined && plots.plotsList.length < 1 && debugImages.debugImages !== null && (debugImages.debugImages[selected.id] && !debugImages.debugImages[selected.id].data)" class="no-data flex-middle">No preview to show</div>
 </div>
 

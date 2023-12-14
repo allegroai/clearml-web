@@ -32,7 +32,7 @@ export class CheckboxControlComponent extends ImmutableFormField implements Afte
   }
 
   @HostListener('click', ['$event'])
-  override fieldValueChanged(event: Event) {
+  fieldValueChanged(event: Event) {
     if (this.disabled) {
       return;
     }
@@ -45,7 +45,7 @@ export class CheckboxControlComponent extends ImmutableFormField implements Afte
     // this.formDataChanged.emit({field: this.fieldName, value: !this.formData});
   }
 
-  override formDataUpdated() {
+  formDataUpdated() {
     if (!isString(this.formData)) {
       this.state = this.formData === true ? 'All' : 'None';
     } else {

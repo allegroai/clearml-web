@@ -5,34 +5,9 @@
   flex-direction: column;
   height: 100%;
 
-  a[href]:hover {
-    color: white;
-  }
-
   sm-simple-table-2 {
     flex: 1;
     overflow: auto;
-  }
-
-  .experiments-table .body {
-    display: grid !important;
-    grid-template-columns: 30px minmax(30px, auto) minmax(150px, 1fr) 30px;
-    grid-gap: 12px;
-    padding: 0 18px;
-
-    .al-icon {
-      line-height: 36px;
-    }
-  }
-  .experiments-table ::ng-deep .headers {display: none;}
-
-  .workers-table {
-    ::ng-deep .headers, .body {
-      display: grid !important;
-      grid-template-columns: minmax(150px, 1fr) minmax(150px, 1fr) minmax(150px, 1fr);
-      grid-gap: 12px;
-      padding: 0 18px;
-    }
   }
 
   ::ng-deep .table-row {
@@ -44,12 +19,13 @@
     &:last-of-type {border-bottom-color: $dark-border !important;}
   }
 
-  sm-simple-table-2 ::ng-deep .headers {
+  ::ng-deep .row.headers {
     height: 39px;
     color: $blue-400;
     border-bottom-color: $blue-600 !important;
   }
 
+  ::ng-deep .experiments-table .row.headers {display: none;}
 
 
   .tabs-container {

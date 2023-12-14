@@ -6,12 +6,11 @@
 * See: https://github.com/angular/angular/issues/11058#issuecomment-247367318
 */
 export class CustomHttpUrlEncodingCodec extends HttpUrlEncodingCodec {
-  override encodeKey(k: string): string {
+    encodeKey(k: string): string {
         k = super.encodeKey(k);
         return k.replace(/\+/gi, '%2B');
     }
-
-  override encodeValue(v: string): string {
+    encodeValue(v: string): string {
         v = super.encodeValue(v);
         return v.replace(/\+/gi, '%2B');
     }

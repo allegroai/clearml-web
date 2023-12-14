@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, OnDestroy, Output} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {IModelInfo, IModelInfoSource} from '../../shared/common-experiment-model.model';
 import {MatDialog} from '@angular/material/dialog';
 import {filter} from 'rxjs/operators';
@@ -7,9 +7,6 @@ import {SelectModelComponent} from '@common/select-model/select-model.component'
 import {AdminService} from '~/shared/services/admin.service';
 import {Store} from '@ngrx/store';
 import {BaseClickableArtifactComponent} from '../base-clickable-artifact.component';
-import {addMessage} from '@common/core/actions/layout.actions';
-import {MESSAGES_SEVERITY} from '@common/constants';
-import {resetSelectModelState} from '@common/select-model/select-model.actions';
 
 
 @Component({
@@ -17,7 +14,7 @@ import {resetSelectModelState} from '@common/select-model/select-model.actions';
   templateUrl: './experiment-models-form-view.component.html',
   styleUrls: ['./experiment-models-form-view.component.scss']
 })
-export class ExperimentModelsFormViewComponent extends BaseClickableArtifactComponent implements OnDestroy{
+export class ExperimentModelsFormViewComponent extends BaseClickableArtifactComponent {
 
   public isLocalFile: boolean;
   private _model: IModelInfo;
@@ -40,8 +37,8 @@ export class ExperimentModelsFormViewComponent extends BaseClickableArtifactComp
 
   @Output() modelSelectedId = new EventEmitter<string>();
 
-  constructor(private dialog: MatDialog) {
-    super();
+  constructor(private dialog: MatDialog, protected adminService: AdminService, protected store: Store<any>) {
+    super(adminService, store);
   }
 
   public chooseModel() {
@@ -56,20 +53,10 @@ export class ExperimentModelsFormViewComponent extends BaseClickableArtifactComp
     });
     chooseModelDialog.afterClosed()
       .pipe(filter(model => !!model))
-      .subscribe((selectedModelId: string) => {
-        this.modelSelectedId.emit(selectedModelId);
-      });
+      .subscribe((selectedModelId: string) => this.modelSelectedId.emit(selectedModelId));
   }
 
   removeModel() {
     this.modelSelectedId.emit(null);
-  }
-
-  copySuccess() {
-    this.store.dispatch(addMessage(MESSAGES_SEVERITY.SUCCESS, 'Copied to clipboard'));
-  }
-
-  ngOnDestroy(): void {
-    this.store.dispatch(resetSelectModelState({fullReset: true}));
   }
 }

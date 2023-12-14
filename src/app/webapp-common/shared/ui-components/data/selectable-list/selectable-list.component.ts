@@ -21,6 +21,7 @@ export class SelectableListComponent implements OnChanges{
 
   @Input() list: SelectableListItem[] = [];
   @Input() checkedList: string[];
+  @Input() selected: SelectableListItem['value'];
   @Input() checkIcon: string[]               = ['al-ico-show', 'al-ico-hide'];
   @Output() onItemSelect                   = new EventEmitter<string>();
   @Output() onItemCheck                    = new EventEmitter<string>();
@@ -29,7 +30,7 @@ export class SelectableListComponent implements OnChanges{
 
   ngOnChanges(changes: SimpleChanges): void {
     if ((changes.list || changes.checkedList)) {
-      this.showList = this.list.map(item => ({...item, visible: !this.checkedList?.includes(item.name) } as SelectableListItem));
+      this.showList = this.list.map(item => ({...item, visible: !this.checkedList.includes(item.name) } as SelectableListItem));
       this.cdr.detectChanges();
     }
   }

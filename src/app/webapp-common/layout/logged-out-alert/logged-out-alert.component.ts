@@ -32,7 +32,7 @@ export class LoggedOutAlertComponent {
     });
   }
 
-  constructor(private dialog: MatDialog, private store: Store) {
+  constructor(private dialog: MatDialog, private store: Store<any>) {
   }
 
 }

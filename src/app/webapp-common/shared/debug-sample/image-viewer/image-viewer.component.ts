@@ -25,8 +25,8 @@ export class ImageViewerComponent extends BaseImageViewerComponent implements On
   private autoRefreshState$: Observable<boolean>;
   private isAppVisible$: Observable<boolean>;
   private autoRefreshSub: Subscription;
-  private beginningOfTime = false;
-  private endOfTime = false;
+  private beginningOfTime: boolean = false;
+  private endOfTime: boolean = false;
   private begOfTimeSub: Subscription;
   private endOfTimeSub: Subscription;
   change$: BehaviorSubject<number>;
@@ -55,7 +55,7 @@ export class ImageViewerComponent extends BaseImageViewerComponent implements On
   }
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) public override data: {
+    @Inject(MAT_DIALOG_DATA) public data: {
       index: number;
       isAllMetrics: boolean;
       snippetsMetaData: Array<{task: string; metric: string; variant: string; iter: number}>;
@@ -63,9 +63,9 @@ export class ImageViewerComponent extends BaseImageViewerComponent implements On
       withoutNavigation: boolean;
       embedFunction: () => null;
     },
-    public override dialogRef: MatDialogRef<ImageViewerComponent>,
-    public override changeDetector: ChangeDetectorRef,
-    public override store: Store<any>
+    public dialogRef: MatDialogRef<ImageViewerComponent>,
+    public changeDetector: ChangeDetectorRef,
+    public store: Store<any>
   ) {
     super(data, dialogRef, changeDetector, store);
     if(data.url) {
@@ -171,7 +171,7 @@ export class ImageViewerComponent extends BaseImageViewerComponent implements On
     }
   }
 
-  override ngOnInit(): void {
+  ngOnInit(): void {
     super.ngOnInit();
     this.begOfTimeSub = this.beginningOfTime$.subscribe(beg => {
       this.beginningOfTime = beg;
@@ -187,13 +187,17 @@ export class ImageViewerComponent extends BaseImageViewerComponent implements On
     });
   }
 
-  override ngOnDestroy(): void {
+  ngOnDestroy(): void {
     super.ngOnDestroy();
     this.store.dispatch(setDebugImageViewerScrollId({scrollId: null}));
     this.begOfTimeSub.unsubscribe();
     this.endOfTimeSub.unsubscribe();
     this.autoRefreshSub?.unsubscribe();
     this.sub.unsubscribe();
+  }
+
+  showImage() {
+    this.imageLoaded = true;
   }
 
   embedCodeClick($event: MouseEvent) {

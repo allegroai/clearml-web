@@ -1,11 +1,13 @@
 @import "../../webapp-common/shared/ui-components/styles/mixins/common";
 @import "../../webapp-common/shared/ui-components/styles/variables";
+@import "variables_v2";
 
 :host {
   .dashboard-body {
     height: 100%;
     padding: 0 24px;
     overflow: auto;
+    background-color: $background-color-content;
   }
 
   .recent {

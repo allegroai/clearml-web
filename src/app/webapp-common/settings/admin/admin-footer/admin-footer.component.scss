@@ -1,4 +1,5 @@
 @import "variables";
+@import "variables_v2";
 
 :host {
   footer {
@@ -6,7 +7,7 @@
     justify-content: space-between;
     padding: 18px 24px;
     height: 64px;
-    border-top: $blue-500 solid 1px;
+    border-top: 1px solid $border-color;
     line-height: 26px;
 
     .version {

@@ -10,12 +10,12 @@ $levels-list: error warn info success;
 
   .notifier__notification-button {
     position: absolute;
-    right: 10px;
-    top: 2px;
+    right: 5px;
+    top: -5px;
     fill: $blue-300;
 
     .notifier__notification-button-icon {
-      height: 32px;
+      height: 15px;
     }
   }
 

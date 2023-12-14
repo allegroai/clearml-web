@@ -4,12 +4,14 @@
       <sm-select-model-header
         [searchActive]="true"
         [searchValue]="searchValue$ | async"
+        [isAllProjects]="isAllProjects$ | async"
         [viewMode]="viewMode$ | async"
-        [isShowArchived]="showArchive$ | async"
         [hideArchiveToggle]="data.hideShowArchived"
         [hideCreateNewButton]="true"
+        [showAllProjectsToggle]="selectedProject?.id !== '*'"
         [tableFilters]="tableFilters$ | async"
         (searchValueChanged)="onSearchValueChanged($event)"
+        (isAllProjectsChanged)="onIsAllProjectsChanged($event)"
         (clearFilters)="clearFilters()"
         (isArchivedChanged)="showArchives($event)"
       ></sm-select-model-header>
@@ -22,8 +24,7 @@
       [hideSelectAll]="true"
       [reorderableColumns]="false"
       [models]="models$ | async"
-      [tableCols]="tableCols$ | async"
-      [metadataValuesOptions]="metadataColsOptions$ | async"
+      [tableCols]="tableCols"
       [noMoreModels]="noMoreModels$ | async"
       [users]="users$ |async"
       [frameworks]="frameworks$ |async"
@@ -47,7 +48,7 @@
       <button (click)="closeDialog(null)" class="btn btn-outline-neon" data-id ="CancelButton">
         CANCEL
       </button>
-      <button type="submit" *ngIf="data.selectionMode === 'multiple'"
+      <button type="submit"
               (click)="closeDialogMultiple()"
               class="btn btn-neon yes-button" data-id="ApplyButton">
         APPLY

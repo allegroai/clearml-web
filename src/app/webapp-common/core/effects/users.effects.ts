@@ -30,7 +30,7 @@ export class CommonUserEffects {
     private actions: Actions, private userService: ApiUsersService,
     private router: Router, private loginApi: ApiLoginService,
     private serverService: ApiServerService,
-    private store: Store, private errorService: ErrorService
+    private store: Store<any>, private errorService: ErrorService
   ) {
   }
 
@@ -77,7 +77,11 @@ ${this.errorService.getErrorMsg(err?.error)}`)])
   updateCurrentUser = createEffect(() => this.actions.pipe(
     ofType(updateCurrentUser),
     mergeMap(({user}) => this.userService.usersUpdate({...user}).pipe(
-      mergeMap((res: UsersUpdateResponse) => res.updated ? [setCurrentUserName({name: user.name})] : [])
+      mergeMap((res: UsersUpdateResponse) => {
+        if (res.updated) {
+          return [setCurrentUserName({name: user.name})];
+        }
+      })
     )),
     catchError(err => [addMessage(MESSAGES_SEVERITY.ERROR, `Update User Failed ${this.errorService.getErrorMsg(err?.error)}`)])
   ));

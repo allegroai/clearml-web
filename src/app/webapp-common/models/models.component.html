@@ -9,9 +9,7 @@
     [metadataKeys]="metadataKeys$ | async"
     [metricVariants]="metricVariants$ | async"
     [tableMode]="firstModel && (tableMode$ | async)"
-    [hideNavigation]="modelsPage$| async"
     [rippleEffect]="tableModeAwareness$ | async"
-    [noData]="!((models$ | async)?.length > 0)"
     (isArchivedChanged)="archivedChanged($event)"
     (setAutoRefresh)="setAutoRefresh($event)"
     (selectedTableColsChanged)="selectedTableColsChanged($event)"
@@ -21,13 +19,9 @@
     (selectMetadataKeysActiveChanged)="selectMetadataKeysActiveChanged($event)"
     (clearTableFilters)="clearTableFiltersHandler($event)"
     (tableModeChanged)="modeChanged($event); tableModeUserAware()"
-    (downloadTableAsCSV)="downloadTableAsCSV()"
-    (downloadFullTableAsCSV)="downloadFullTableAsCSV()"
-
   ></sm-model-header>
 </div>
-<div class="models-body"
-     [class.footer-visible]="(selectedModels$ | async)?.length > 1|| (showAllSelectedIsActive$ |async)">
+<div class="models-body" [class.footer-visible]="(selectedModels$ | async)?.length > 1|| (showAllSelectedIsActive$ |async)">
   <as-split #split
             [useTransition]="true"
             [gutterDblClickDuration]="400"
@@ -81,9 +75,9 @@
   </as-split>
 </div>
 <sm-entity-footer
-  [footerState]="footerState$ | async"
-  [footerItems]="footerItems"
-  (footerItemClick)="onFooterHandler($event)"
-  (tagSelected)="tagSelected($event, 'models')"
+ [footerState]="footerState$ | async"
+ [footerItems]="footerItems"
+ (footerItemClick)="onFooterHandler($event)"
+ (tagSelected)="tagSelected($event, 'models')"
 >
 </sm-entity-footer>

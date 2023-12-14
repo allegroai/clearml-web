@@ -15,5 +15,5 @@
    [style.color]="colors?.foreground"
    (click)="$event.stopPropagation(); onRemoveClicked(caption)">
 </i>
-<mat-spinner *ngIf="disabledRemove === caption" class="al-icon sm white" [diameter]="12" [strokeWidth]="1" color="accent"></mat-spinner>
+<mat-spinner *ngIf="disabledRemove === caption" class="al-icon sm white" [diameter]="12" [strokeWidth]="1"></mat-spinner>
 <div class="arrow" [class.add-button]="add.observers.length > 0" [style.backgroundColor]="colors?.background"></div>

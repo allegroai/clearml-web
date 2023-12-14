@@ -9,6 +9,14 @@
       (focusout)="onSearchFocusOut()">
     </sm-search>
   </div>
+  <div class="center-buttons-container">
+    <sm-button-toggle
+      *ngIf="showAllProjectsToggle"
+      [value]="isAllProjects"
+      [options]="allProjectsdModeOptions"
+      (valueChanged)="onAllProjectsChanged($event)">
+    </sm-button-toggle>
+  </div>
   <div class="d-flex-center">
     <mat-slide-toggle
       *ngIf="!hideArchiveToggle"

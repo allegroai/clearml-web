@@ -3,16 +3,13 @@
 :host {
   display: flex !important;
   flex-direction: column;
-  gap: 24px;
-  height: 100%;
 
   sm-workers-graph {
-    margin: 0 48px;
+    margin: 0 50px 20px;
   }
-}
 
-@media (max-height: 750px) {
-  :host {
-    height: unset;
-  }
+  //as-split {
+  //  height: calc(100% - #{$graph-height});
+  //  min-height: 180px;
+  //}
 }

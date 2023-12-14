@@ -82,6 +82,7 @@ export const selectShowEmbedReportMenu = createSelector(views, state => state.sh
 export const selectBreadcrumbs = createSelector(views, state => state && state.breadcrumbs);
 
 
+
 export const viewReducers = [
   on(requestFailed, (state, action) => {
     const isLoggedOut = action.err && action.err.status === 401;

@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit} from '@angular/core';
 import {MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import {Store} from '@ngrx/store';
-import {getQueuesForEnqueue, getTaskForEnqueue, setTaskForEnqueue} from './select-queue.actions';
+import {GetQueuesForEnqueue, GetTaskForEnqueue, SetTaskForEnqueue} from './select-queue.actions';
 import {selectQueuesList, selectTaskForEnqueue} from './select-queue.reducer';
 import {Queue} from '~/business-logic/model/queues/queue';
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
@@ -39,7 +39,7 @@ export class SelectQueueComponent implements OnInit, OnDestroy {
 
   constructor(
     public dialogRef: MatDialogRef<ConfirmDialogComponent>,
-    private store: Store,
+    private store: Store<any>,
     private blTaskService: BlTasksService,
     private cdr: ChangeDetectorRef,
     @Inject(MAT_DIALOG_DATA) public data: {
@@ -47,11 +47,11 @@ export class SelectQueueComponent implements OnInit, OnDestroy {
       reference?: string;
     }
   ) {
-    this.store.dispatch(getQueuesForEnqueue());
+    this.store.dispatch(new GetQueuesForEnqueue());
     this.userAllowedToCreateQueue$ = userAllowedToCreateQueue$(store);
 
     if (data && data.taskIds?.length > 0) {
-      this.store.dispatch(getTaskForEnqueue({taskIds: data.taskIds}));
+      this.store.dispatch(new GetTaskForEnqueue(data.taskIds));
       this.reference = data.taskIds.length < 2 ?  data.reference : `${data.taskIds.length} experiments `;
     }
   }
@@ -91,7 +91,7 @@ export class SelectQueueComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.queuesSub.unsubscribe();
-    this.store.dispatch(setTaskForEnqueue({tasks: null}));
+    this.store.dispatch(new SetTaskForEnqueue(null));
   }
 
 }

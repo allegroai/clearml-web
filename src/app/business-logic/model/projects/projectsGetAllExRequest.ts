@@ -10,135 +10,119 @@
  * Do not edit the class manually.
  */
 
-import {MultiFieldPatternData} from '././multiFieldPatternData';
+import { MultiFieldPatternData } from '././multiFieldPatternData';
 
 
 export interface ProjectsGetAllExRequest {
-  /**
-   * List of IDs to filter by
-   */
-  id?: Array<string>;
-  /**
-   * Get only projects whose name matches this pattern (python regular expression   syntax)
-   */
-  name?: string;
-  /**
-   * Project base name
-   */
-  basename?: string;
-  /**
-   * Get only projects whose description matches this pattern (python regular   expression syntax)
-   */
-  description?: string;
-  /**
-   * User-defined tags list used to filter results. Prepend \'-\' to tag name to   indicate exclusion
-   */
-  tags?: Array<string>;
-  /**
-   * System tags list used to filter results. Prepend \'-\' to system tag name to   indicate exclusion
-   */
-  system_tags?: Array<string>;
-  /**
-   * List of field names to order by. When search_text is used, \'@text_score\' can be   used as a field representing the text score of returned documents. Use \'-\'   prefix to specify descending order. Optional, recommended when using page
-   */
-  order_by?: Array<string>;
-  /**
-   * Page number, returns a specific page out of the resulting list of dataviews
-   */
-  page?: number;
-  /**
-   * Page size, specifies the number of results returned in each page (last page may   contain fewer results)
-   */
-  page_size?: number;
-  /**
-   * Free text search query
-   */
-  search_text?: string;
-  /**
-   * List of document\'s field names (nesting is supported using \'.\', e.g.   execution.model_labels). If provided, this list defines the query\'s projection   (only these fields will be returned for each result entry)
-   */
-  only_fields?: Array<string>;
-  _all_?: MultiFieldPatternData;
-  _any_?: MultiFieldPatternData;
-  /**
-   * If true, include project statistic in response.
-   */
-  include_stats?: boolean;
-  /**
-   * Report stats include only statistics for tasks in the specified state. If Null   is provided, stats for all task states will be returned.
-   */
-  stats_for_state?: ProjectsGetAllExRequest.StatsForStateEnum;
-  /**
-   * Return only non-public projects
-   */
-  non_public?: boolean;
-  active_users?: Array<string>;
-  /**
-   * If set to \'true\' then the search with the specified criteria is performed among top level projects only (or if parents specified, among the direct children of the these parents). Otherwise the search is performed among all the company projects (or among all of the descendants of the specified parents).
-   */
-  shallow_search?: boolean;
-  /**
-   * If set to \'true\' and project ids are passed to the query then for these projects their own tasks, models and dataviews are counted
-   */
-  check_own_contents?: boolean;
-  /**
-   * If set to \'true\' then hidden projects are included in the search results
-   */
-  search_hidden?: boolean;
-  /**
-   * Scroll ID returned from the previos calls to get_all
-   */
-  scroll_id?: string;
-  /**
-   * If set then all the data received with this scroll will be requeried
-   */
-  refresh_scroll?: boolean;
-  /**
-   * The number of projects to retrieve
-   */
-  size?: number;
-  /**
-   * If include_stats flag is set then this flag contols whether the child projects tasks are taken into statistics or not
-   */
-  stats_with_children?: boolean;
-  /**
-   * The filter for selecting entities that participate in statistics calculation. For each task field that you want to filter on pass the list of allowed values. Prepend the value with \'-\' to exclude
-   */
-  include_stats_filter?: object;
-  /**
-   * If true, include project dataset statistic in response
-   */
-  include_dataset_stats?: boolean;
-  /**
-   * If Truethen the shallow search is done among all the top projects that the user has access to beneath the requested parent. Even if these projects are not direct children of the parent
-   */
-  permission_roots_only?: boolean;
-  /**
-   * Allow public projects to be returned in the results
-   */
-  allow_public?: boolean;
-  /**
-   * If specified that only the projects under which the entities of this type can be found will be returned
-   */
-  children_type?: ProjectsGetAllExRequest.ChildrenTypeEnum;
-  /**
-   * The list of tag values to filter children by. Takes effect only if children_type is set. Use \'null\' value to specify empty tags. Use \'__Snot\' value to specify that the following value should be excluded
-   */
-  children_tags?: Array<string>;
+    /**
+     * List of IDs to filter by
+     */
+    id?: Array<string>;
+    /**
+     * Get only projects whose name matches this pattern (python regular expression   syntax)
+     */
+    name?: string;
+    /**
+     * Project base name
+     */
+    basename?: string;
+    /**
+     * Get only projects whose description matches this pattern (python regular   expression syntax)
+     */
+    description?: string;
+    /**
+     * User-defined tags list used to filter results. Prepend \'-\' to tag name to   indicate exclusion
+     */
+    tags?: Array<string>;
+    /**
+     * System tags list used to filter results. Prepend \'-\' to system tag name to   indicate exclusion
+     */
+    system_tags?: Array<string>;
+    /**
+     * List of field names to order by. When search_text is used, \'@text_score\' can be   used as a field representing the text score of returned documents. Use \'-\'   prefix to specify descending order. Optional, recommended when using page
+     */
+    order_by?: Array<string>;
+    /**
+     * Page number, returns a specific page out of the resulting list of dataviews
+     */
+    page?: number;
+    /**
+     * Page size, specifies the number of results returned in each page (last page may   contain fewer results)
+     */
+    page_size?: number;
+    /**
+     * Free text search query
+     */
+    search_text?: string;
+    /**
+     * List of document\'s field names (nesting is supported using \'.\', e.g.   execution.model_labels). If provided, this list defines the query\'s projection   (only these fields will be returned for each result entry)
+     */
+    only_fields?: Array<string>;
+    _all_?: MultiFieldPatternData;
+    _any_?: MultiFieldPatternData;
+    /**
+     * If true, include project statistic in response.
+     */
+    include_stats?: boolean;
+    /**
+     * Report stats include only statistics for tasks in the specified state. If Null   is provided, stats for all task states will be returned.
+     */
+    stats_for_state?: ProjectsGetAllExRequest.StatsForStateEnum;
+    /**
+     * Return only non-public projects
+     */
+    non_public?: boolean;
+    active_users?: Array<string>;
+    /**
+     * If set to \'true\' then the search with the specified criteria is performed among top level projects only (or if parents specified, among the direct children of the these parents). Otherwise the search is performed among all the company projects (or among all of the descendants of the specified parents).
+     */
+    shallow_search?: boolean;
+    /**
+     * If set to \'true\' and project ids are passed to the query then for these projects their own tasks, models and dataviews are counted
+     */
+    check_own_contents?: boolean;
+    /**
+     * If set to \'true\' then hidden projects are included in the search results
+     */
+    search_hidden?: boolean;
+    /**
+     * Scroll ID returned from the previos calls to get_all
+     */
+    scroll_id?: string;
+    /**
+     * If set then all the data received with this scroll will be requeried
+     */
+    refresh_scroll?: boolean;
+    /**
+     * The number of projects to retrieve
+     */
+    size?: number;
+    /**
+     * If include_stats flag is set then this flag contols whether the child projects tasks are taken into statistics or not
+     */
+    stats_with_children?: boolean;
+    /**
+     * The filter for selecting entities that participate in statistics calculation. For each task field that you want to filter on pass the list of allowed values. Prepend the value with \'-\' to exclude
+     */
+    include_stats_filter?: object;
+    /**
+     * If true, include project dataset statistic in response
+     */
+    include_dataset_stats?: boolean;
+    /**
+     * If Truethen the shallow search is done among all the top projects that the user has access to beneath the requested parent. Even if these projects are not direct children of the parent
+     */
+    permission_roots_only?: boolean;
+    /**
+     * Allow public projects to be returned in the results
+     */
+    allow_public?: boolean;
+    children_type?: string;
 }
-
-
 export namespace ProjectsGetAllExRequest {
-  export type ChildrenTypeEnum = 'pipeline' | 'report' | 'dataset';
-
-  export const ChildrenTypeEnum = {
-    Pipeline: 'pipeline' as ChildrenTypeEnum,
-    Report: 'report' as ChildrenTypeEnum,
-    Dataset: 'dataset' as ChildrenTypeEnum
-  };
-  export type StatsForStateEnum = 'active' | 'archived';
-  export const StatsForStateEnum = {
-    Active: 'active' as StatsForStateEnum,
-    Archived: 'archived' as StatsForStateEnum
-  };
+    export type StatsForStateEnum = 'active' | 'archived';
+    export const StatsForStateEnum = {
+        Active: 'active' as StatsForStateEnum,
+        Archived: 'archived' as StatsForStateEnum
+    }
 }

@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {Actions, concatLatestFrom, createEffect, ofType} from '@ngrx/effects';
+import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {Store} from '@ngrx/store';
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
 import {ApiAuthService} from '~/business-logic/api-services/auth.service';
@@ -10,6 +10,7 @@ import {activeLoader, deactivateLoader, setServerError} from '../../core/actions
 import {requestFailed} from '../../core/actions/http.actions';
 import * as outputActions from '../actions/common-experiment-output.actions';
 import {setExperimentScalarSingleValue} from '../actions/common-experiment-output.actions';
+import {ExperimentOutputState} from '@common/experiments/reducers/experiment-output.reducer';
 import {LOG_BATCH_SIZE} from '../shared/common-experiments.const';
 import {selectExperimentHistogramCacheAxisType, selectPipelineSelectedStep, selectSelectedSettingsxAxisType} from '../reducers';
 import {refreshExperiments} from '../actions/common-experiments-view.actions';
@@ -25,7 +26,7 @@ import {EventsGetTaskPlotsResponse} from '~/business-logic/model/events/eventsGe
 export class CommonExperimentOutputEffects {
 
   constructor(
-    private actions$: Actions, private store: Store, private apiTasks: ApiTasksService,
+    private actions$: Actions, private store: Store<ExperimentOutputState>, private apiTasks: ApiTasksService,
     private authApi: ApiAuthService, private taskBl: BlTasksService, private eventsApi: ApiEventsService
   ) {
   }
@@ -117,10 +118,9 @@ export class CommonExperimentOutputEffects {
 
   fetchExperimentScalar$ = createEffect(() => this.actions$.pipe(
     ofType(outputActions.experimentScalarRequested),
-    concatLatestFrom( (action) => [
-      this.store.select(selectSelectedSettingsxAxisType(action.model)),
+    withLatestFrom(
+      this.store.select(selectSelectedSettingsxAxisType),
       this.store.select(selectExperimentHistogramCacheAxisType)
-      ]
     ),
     switchMap(([action, axisType, prevAxisType]) => {
         if ([ScalarKeyEnum.IsoTime, ScalarKeyEnum.Timestamp].includes(prevAxisType) &&

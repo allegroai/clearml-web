@@ -1,10 +1,13 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Store} from '@ngrx/store';
+import {Worker} from '../../../../business-logic/model/workers/worker';
 import {getSelectedWorker, workersTableSortChanged} from '../../actions/workers.actions';
 import {selectSelectedWorker, selectWorkers, selectWorkersTableSortFields} from '../../reducers/index.reducer';
 import {ActivatedRoute, Router} from '@angular/router';
-import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
+import {Observable} from 'rxjs';
+import {ISmCol} from '../../../shared/ui-components/data/table/table.consts';
 import {filter, take, withLatestFrom} from 'rxjs/operators';
+import {SortMeta} from 'primeng/api';
 
 @Component({
   selector: 'sm-workers',
@@ -13,16 +16,19 @@ import {filter, take, withLatestFrom} from 'rxjs/operators';
 })
 export class WorkersComponent implements OnInit {
 
-  public workers$ = this.store.select(selectWorkers);
-  public selectedWorker$ = this.store.select(selectSelectedWorker);
-  public tableSortFields$ = this.store.select(selectWorkersTableSortFields);
+  public workers$: Observable<Worker[]>;
+  public selectedWorker$: Observable<Worker>;
+  public tableSortFields$: Observable<SortMeta[]>;
 
   get routerWorkerId() {
     const url = new URL(window.location.href);
     return url.searchParams.get('id');
   }
 
-  constructor(private store: Store, private router: Router, private route: ActivatedRoute) {
+  constructor(private store: Store<any>, private router: Router, private route: ActivatedRoute) {
+    this.workers$ = this.store.select(selectWorkers);
+    this.selectedWorker$ = this.store.select(selectSelectedWorker);
+    this.tableSortFields$ = this.store.select(selectWorkersTableSortFields);
   }
 
   ngOnInit(): void {
@@ -39,15 +45,14 @@ export class WorkersComponent implements OnInit {
 
 
   public selectWorker(worker) {
-    this.store.dispatch(getSelectedWorker({worker}));
-    return this.router.navigate(
+    this.router.navigate(
       [],
       {
         relativeTo: this.route,
         queryParams: {id: worker?.id},
-        queryParamsHandling: 'merge',
-        replaceUrl: true
+        queryParamsHandling: 'merge'
       });
+    this.store.dispatch(getSelectedWorker({worker}));
   }
 
   sortedChanged(sort: { isShift: boolean; colId: ISmCol['id'] }) {

@@ -5,17 +5,7 @@
   flex-direction: column;
   height: 100%;
 
-  a[href]:hover {
-    color: white;
-  }
-
-  .worker-info-container {
-    display: grid;
-    grid-template-columns: minmax(100px, 2fr) minmax(100px, 1fr);
-    gap: 12px;
-    padding: 12px;
-  }
-
+  .worker-info-container,
   .queues-table-container {
     flex: 1;
     overflow: auto;
@@ -31,22 +21,22 @@
   }
 
   ::ng-deep {
-    .headers {
+    .row {
+      width: 100%;
+      line-height: normal !important;
+    }
+    [class^='col'] {
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+    .row.headers {
       height: 39px;
       align-items: center;
       line-height: normal !important;
       border-bottom: 1px solid $dark-border !important;
       color: $blue-400;
     }
-  }
-
-  sm-simple-table-2 ::ng-deep .headers, .body {
-    width: 100%;
-    display: grid !important;
-    grid-template-columns: 33% 50% 16%;
-    grid-gap: 12px;
-    padding: 0 12px;
-    line-height: 40px;
   }
 
   .tabs-container {

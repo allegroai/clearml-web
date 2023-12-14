@@ -1,13 +1,11 @@
 import {createAction, props} from '@ngrx/store';
 import {ISmCol} from '../../shared/ui-components/data/table/table.consts';
-import {SelectedModel, TableModel} from '../shared/models.model';
+import {SelectedModel} from '../shared/models.model';
 import {TableFilter} from '../../shared/utils/tableParamEncode';
 import {SortMeta} from 'primeng/api';
 import {CountAvailableAndIsDisableSelectedFiltered} from '@common/shared/entity-page/items.utils';
+import {EXPERIMENTS_PREFIX} from '@common/experiments/experiment.consts';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
-import {
-  OrganizationPrepareDownloadForGetAllRequest
-} from '~/business-logic/model/organization/organizationPrepareDownloadForGetAllRequest';
 
 const MODELS_PREFIX = 'MODELS_';
 
@@ -24,12 +22,12 @@ export const getNextModelsWithPageSize = createAction(MODELS_PREFIX + '[get next
   props<{ pageSize: number }>());
 export const setModels = createAction(
   MODELS_PREFIX + '[set models]',
-  props<{ models: TableModel[] }>()
+  props<{ models: SelectedModel[] }>()
 );
 
 export const setModelsInPlace = createAction(
   MODELS_PREFIX + '[set models in place]',
-  props<{ models: TableModel[] }>()
+  props<{ models: SelectedModel[] }>()
 );
 
 export const setNoMoreModels = createAction(
@@ -44,18 +42,12 @@ export const toggleColHidden = createAction(
 
 export const getTags = createAction(
   MODELS_PREFIX + 'GET_TAGS');
-
 export const getTagsForAllProjects = createAction(
   MODELS_PREFIX + 'GET_TAGS_ALL_PROJECTS');
 
 export const setTags = createAction(
   MODELS_PREFIX + 'SET_TAGS',
   props<{ tags: string[] }>()
-);
-
-export const addProjectTag = createAction(
-  MODELS_PREFIX + 'Add project tag',
-  props<{ tag: string[] }>()
 );
 
 export const setMetadataKeys = createAction(
@@ -75,7 +67,7 @@ export const setHiddenCols = createAction(
 
 export const setColsOrderForProject = createAction(
   MODELS_PREFIX + 'SET_COLS_ORDER',
-  props<{ cols: string[]; project: string }>()
+  props<{ cols: string[]; project: string; fromUrl?: boolean }>()
 );
 
 export const setExtraColumns = createAction(
@@ -117,7 +109,7 @@ export const getFilteredUsers = createAction(
 
 export const addModels = createAction(
   MODELS_PREFIX + '[add models]',
-  props<{ models: TableModel[] }>()
+  props<{ models: SelectedModel[] }>()
 );
 
 export const removeModels = createAction(
@@ -205,6 +197,10 @@ export const setCurrentScrollId = createAction(
   MODELS_PREFIX + ' [set current scrollId]',
   props<{ scrollId: string }>()
 );
+export const setArchive = createAction(
+  MODELS_PREFIX + 'SET_ARCHIVE',
+  props<{ archive: boolean }>()
+);
 
 export const afterSetArchive = createAction(MODELS_PREFIX + 'AFTER_SET_ARCHIVE');
 
@@ -219,15 +215,6 @@ export const setTableMode = createAction(
 );
 
 export const setCustomMetrics = createAction(
-  MODELS_PREFIX + ' [set custom metrics]',
+  EXPERIMENTS_PREFIX + ' [set custom metrics]',
   props<{ metrics: MetricVariantResult[] }>()
 );
-export const prepareTableForDownload = createAction(
-  MODELS_PREFIX + ' [prepareTableForDownload]',
-  props<{ entityType: OrganizationPrepareDownloadForGetAllRequest.EntityTypeEnum }>()
-);
-export const updateManyModels = createAction(
-  MODELS_PREFIX + 'update many models',
-  props<{ changeList: {[id: string]: Partial<TableModel>}}>()
-);
-

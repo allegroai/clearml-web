@@ -1,5 +1,5 @@
 <div class="logo">
-  <img src="assets/c-logo.svg?v=1" class="logo-a" alt="logo" width="64" height="64">
+  <img src="assets/c-logo.png?v=1" class="logo-a" alt="logo" width="54" height="54">
 </div>
 
 <ng-container *ngIf="currentUser">
@@ -8,12 +8,12 @@
        routerLink="/dashboard"
        routerLinkActive="active"
        (click)="resetSearch()"
-       smTooltip="DASHBOARD"
+       smTooltip="Dashboard"
        [matTooltipShowDelay]="0"
        matTooltipPosition="right">
     </a>
     <a class="item al-ico-projects"
-       smTooltip="PROJECTS"
+       smTooltip="Projects"
        [matTooltipShowDelay]="0"
        matTooltipPosition="right"
        routerLink="/projects"
@@ -22,38 +22,31 @@
     <a class="item al-ico-datasets"
        [routerLink]="(defaultNestedModeForFeature$ | async)?.['datasets']? '/datasets/simple/*/projects' : '/datasets'"
        [class.active]="(baseRouteConfig$ | async) ==='datasets'"
-       smTooltip="DATASETS"
+       smTooltip="DataSets"
        [matTooltipShowDelay]="0"
        matTooltipPosition="right">
     </a>
     <a class="item al-ico-pipelines"
        [routerLink]="(defaultNestedModeForFeature$ | async)?.['pipelines']? '/pipelines/*/projects' : '/pipelines'"
        [class.active]="(baseRouteConfig$ | async) ==='pipelines'"
-       smTooltip="PIPELINES"
+       smTooltip="PipLines"
        [matTooltipShowDelay]="0"
        matTooltipPosition="right">
     </a>
     <a class="item al-ico-reports"
        [routerLink]="(defaultNestedModeForFeature$ | async)?.['reports']? '/reports/*/projects' : '/reports'"
        [class.active]="(baseRouteConfig$ | async) ==='reports'"
-       smTooltip="REPORTS"
+       smTooltip="Reports"
        [matTooltipShowDelay]="0"
        matTooltipPosition="right">
     </a>
     <a class="item al-ico-queues"
        routerLink="/workers-and-queues"
        routerLinkActive="active"
-       smTooltip="WORKERS & QUEUES"
+       smTooltip="Workers & Quenes"
        [matTooltipShowDelay]="0"
        matTooltipPosition="right">
     </a>
   </div>
 </ng-container>
 
-<div *ngIf="currentUser" class="account">
-  <a *ngIf="environment.slackLink" class="item" [href]="environment.slackLink"
-     target="_blank"
-     smTooltip="Community support on Slack" [matTooltipShowDelay]="0" matTooltipPosition="right">
-    <i class="i-slack-mark-color"></i>
-  </a>
-</div>

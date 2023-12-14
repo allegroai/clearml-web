@@ -9,14 +9,14 @@
     <span
       [smTooltip]="option.tooltip || option.label"
       smShowTooltipIfEllipsis
-      [showAlwaysTooltip]="!!option.tooltip"
-      matTooltipPosition="above"
+      [showAllwaysTooltip]="!!option.tooltip"
+      matTooltipPosition="left"
       data-id="FilterOption"
       class="ellipsis label"
     >{{option.label}}</span>
   </mat-checkbox>
 </span>
 <div *ngIf="options?.length === 0" class="empty-menu flex-middle">No item found</div>
-<div *ngIf="options === null" class="flex-middle mt-5">
-  <mat-spinner class="m-auto" [diameter]="32" [strokeWidth]="4" color="accent"></mat-spinner>
+<div *ngIf="options === null" class="flex-middle">
+  <mat-spinner [diameter]="80" [strokeWidth]="8"></mat-spinner>
 </div>

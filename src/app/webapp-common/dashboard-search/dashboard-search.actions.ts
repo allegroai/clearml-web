@@ -15,7 +15,7 @@ export const searchSetTerm = createAction(
 
 export const searchStart = createAction(
   SEARCH_PREFIX + 'SEARCH_START',
-  props<{ query: string; regExp?: boolean }>()
+  props<{ query: string; regExp?: boolean; force?: boolean; activeLink: ActiveSearchLink }>()
 );
 
 export const searchClear = createAction(SEARCH_PREFIX + 'SEARCH_CLEAR');

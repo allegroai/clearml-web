@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {Actions, concatLatestFrom, createEffect, ofType} from '@ngrx/effects';
+import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {Action, Store} from '@ngrx/store';
 import {
   catchError,
@@ -7,10 +7,10 @@ import {
   expand,
   filter,
   map,
-  mergeMap,
-  reduce,
+  mergeMap, reduce,
   shareReplay,
   switchMap,
+  withLatestFrom
 } from 'rxjs/operators';
 import {ApiModelsService} from '~/business-logic/api-services/models.service';
 import {ModelsGetAllResponse} from '~/business-logic/model/models/modelsGetAllResponse';
@@ -20,49 +20,41 @@ import {selectAppVisible} from '../../core/reducers/view.reducer';
 import * as infoActions from '../actions/models-info.actions';
 import {resetActiveSection} from '../actions/models-info.actions';
 import * as viewActions from '../actions/models-view.actions';
+import {ModelInfoState} from '../reducers/model-info.reducer';
 import {MODELS_INFO_ONLY_FIELDS} from '../shared/models.const';
-import {selectModelsList, selectSelectedModel, selectSelectedTableModel} from '../reducers';
+import {selectSelectedModel} from '../reducers';
 import {SelectedModel} from '../shared/models.model';
 import {selectActiveWorkspace} from '../../core/reducers/users-reducer';
 import {isExample} from '../../shared/utils/shared-utils';
 import {isSharedAndNotOwner} from '@common/shared/utils/is-shared-and-not-owner';
 import {ApiEventsService} from '~/business-logic/api-services/events.service';
-import {EMPTY, of} from 'rxjs';
-import {RefreshService} from '@common/core/services/refresh.service';
-import {ModelsUpdateRequest} from '~/business-logic/model/models/modelsUpdateRequest';
+import {EMPTY} from 'rxjs';
 
 @Injectable()
 export class ModelsInfoEffects {
-  public previousSelectedLastUpdate: Date = null;
-  public previousSelectedId: string;
 
   constructor(
     private actions$: Actions,
-    private store: Store,
+    private store: Store<ModelInfoState>,
     private apiModels: ApiModelsService,
-    private eventsService: ApiEventsService,
-    private refreshService: RefreshService
-) {
-  }
+    private eventsService: ApiEventsService
+  ) {}
 
   activeLoader = createEffect(() => this.actions$.pipe(
     ofType(infoActions.getModelInfo),
     map(action => activeLoader(action.type))));
 
-  getModel = createEffect(() => this.actions$.pipe(
-    ofType(infoActions.getModel),
-    concatLatestFrom(() => [
-      this.store.select(selectActiveWorkspace),
-      this.store.select(selectAppVisible)
-    ]),
+
+  getModelInfo$ = createEffect(() => this.actions$.pipe(
+    ofType(infoActions.getModelInfo, infoActions.refreshModelInfo),
+    withLatestFrom(this.store.select(selectActiveWorkspace), this.store.select(selectAppVisible)),
     filter(([, , visible]) => visible),
     switchMap(([action, activeWorkspace]) =>
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      this.apiModels.modelsGetByIdEx({id: [action.modelId], only_fields: MODELS_INFO_ONLY_FIELDS})
+      this.apiModels.modelsGetByIdEx({id: [action.id], only_fields: MODELS_INFO_ONLY_FIELDS})
         .pipe(
           mergeMap((res: ModelsGetAllResponse) => {
             const model = res.models[0] as SelectedModel;
-            this.previousSelectedLastUpdate = model.last_change;
             const actions = [deactivateLoader(action.type)] as Action[];
             if (model) {
               model.readOnly = isExample(model) || isSharedAndNotOwner(model, activeWorkspace);
@@ -79,55 +71,6 @@ export class ModelsInfoEffects {
     )
   ));
 
-  getModelInfo$ = createEffect(() => this.actions$.pipe(
-    ofType(infoActions.getModelInfo, infoActions.refreshModelInfo),
-    concatLatestFrom(() => [
-      this.store.select(selectSelectedTableModel),
-      this.store.select(selectSelectedModel),
-      this.store.select(selectModelsList),
-      this.store.select(selectActiveWorkspace),
-      this.store.select(selectAppVisible)
-    ]),
-    // filter(([,, , visible]) => visible),
-    switchMap(([action, tableSelected, selected, models, , visible]) => {
-        const currentSelected = tableSelected || selected;
-        if (this.previousSelectedId && currentSelected?.id != this.previousSelectedId) {
-          this.previousSelectedLastUpdate = null;
-        }
-        this.previousSelectedId = currentSelected?.id;
-        if (!currentSelected || !visible) {
-          return of([action, null, tableSelected, selected]);
-        }
-
-        const listed = models?.find(e => e.id === currentSelected?.id);
-        return (listed ? of(listed) :
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-            this.apiModels.modelsGetByIdEx({id: [selected?.id ?? action.id], only_fields: ['last_change']}).pipe(map(res => res.models[0]))
-        ).pipe(map(model => [action, model?.last_change ?? model?.last_update, model, selected]));
-      }
-    ),
-    filter(([action, , tableSelected, selected]) => (action.type !== infoActions.refreshModelInfo.type || (!tableSelected) || (tableSelected?.id === selected?.id))),
-    switchMap(([action, updateTime]) => {
-      // else will deactivate loader
-      if (
-        !updateTime ||
-        (new Date(this.previousSelectedLastUpdate) < new Date(updateTime)) ||
-        action.type === infoActions.modelDetailsUpdated.type
-      ) {
-        const autoRefresh = action.type === infoActions.refreshModelInfo.type;
-        if (autoRefresh) {
-          this.refreshService.trigger(true);
-        }
-        return [
-          deactivateLoader(action.type),
-          infoActions.getModel({modelId: action.id, autoRefresh}),
-        ];
-      } else {
-        return [deactivateLoader(action.type)];
-      }
-    })
-  ));
-
   editModel$ = createEffect(() => this.actions$.pipe(
     ofType(infoActions.editModel),
     debounceTime(1000),
@@ -141,8 +84,8 @@ export class ModelsInfoEffects {
       })
         .pipe(
           mergeMap(() => [
-            infoActions.modelDetailsUpdated({id: action.model.id, changes: action.model as unknown as Partial<ModelsUpdateRequest>}),
-            infoActions.setSavingModel(false),
+            infoActions.getModelInfo({id: action.model.id}),
+            infoActions.setSavingModel (false),
             setBackdrop({active: false})
           ]),
           catchError(err => [
@@ -158,17 +101,16 @@ export class ModelsInfoEffects {
 
   saveModelMetadata$ = createEffect(() => this.actions$.pipe(
     ofType(infoActions.saveMetaData),
-    concatLatestFrom(() => this.store.select(selectSelectedModel)),
+    withLatestFrom(this.store.select(selectSelectedModel)),
     mergeMap(([action, selectedModel]) =>
       this.apiModels.modelsEdit({model: selectedModel.id, metadata: action.metadata})
         .pipe(
           mergeMap(() => [
-            infoActions.modelDetailsUpdated({id:selectedModel.id, changes:{metadata: action.metadata} as Partial<ModelsUpdateRequest>}),
-            infoActions.getModelInfo({id: selectedModel.id}),
-            infoActions.setSavingModel(false),
-            resetActiveSection(),
-            setBackdrop({active: false})
-          ]),
+              infoActions.getModelInfo({id: selectedModel.id}),
+              infoActions.setSavingModel (false),
+              resetActiveSection(),
+              setBackdrop({active: false})
+            ]),
           catchError(err => [
             requestFailed(err),
             setServerError(err, null, 'Update metadata failed'),
@@ -181,7 +123,7 @@ export class ModelsInfoEffects {
 
   updateModelDetails$ = createEffect(() => this.actions$.pipe(
     ofType(infoActions.updateModelDetails),
-    concatLatestFrom(() => this.store.select(selectSelectedModel)),
+    withLatestFrom(this.store.select(selectSelectedModel)),
     mergeMap(([action, selectedModel]) =>
       this.apiModels.modelsUpdate({model: action.id, ...action.changes})
         .pipe(
@@ -190,8 +132,8 @@ export class ModelsInfoEffects {
             return [
               viewActions.updateModel({id: action.id, changes}),
               ...(selectedModel?.id === action.id ?
-                  [infoActions.modelDetailsUpdated({id: action.id, changes})]
-                  : []
+                [infoActions.modelDetailsUpdated({id: action.id, changes})]
+                : []
               ),
               ...(changes.tags ? [viewActions.getTags()] : [])
             ];
@@ -229,4 +171,41 @@ export class ModelsInfoEffects {
       setServerError(error, null, 'Failed to get Plot Charts')
     ])
   ));
+
+  // fetchScalars$ = createEffect(() => this.actions$.pipe(
+  //   ofType(infoActions.getScalars),
+  //   withLatestFrom(
+  //     this.store.select(selectSelectedSettingsxAxisType),
+  //     this.store.select(selectExperimentHistogramCacheAxisType)
+  //   ),
+  //   switchMap(([action, axisType, prevAxisType]) => {
+  //       if ([ScalarKeyEnum.IsoTime, ScalarKeyEnum.Timestamp].includes(prevAxisType) &&
+  //         [ScalarKeyEnum.IsoTime, ScalarKeyEnum.Timestamp].includes(axisType)) {
+  //         return [
+  //           deactivateLoader(infoActions.refreshModelInfo.type),
+  //           deactivateLoader(action.type)
+  //         ];
+  //       }
+  //
+  //       return this.eventsService.eventsScalarMetricsIterHistogram({
+  //         task: action.id,
+  //         // eslint-disable-next-line @typescript-eslint/naming-convention
+  //         model_events: true,
+  //         key: axisType === ScalarKeyEnum.IsoTime ? ScalarKeyEnum.Timestamp : axisType
+  //       })
+  //         .pipe(
+  //           mergeMap(res => [
+  //             infoActions.setScalars({scalars: res, axisType}),
+  //             deactivateLoader(infoActions.refreshModelInfo.type),
+  //             deactivateLoader(action.type)
+  //           ]),
+  //           catchError(error => [
+  //             requestFailed(error),
+  //             deactivateLoader(action.type),
+  //             deactivateLoader(infoActions.refreshModelInfo.type),
+  //             setServerError(error, null, 'Failed to get Scalar Charts')
+  //           ])
+  //         );
+  //     })
+  // ));
 }

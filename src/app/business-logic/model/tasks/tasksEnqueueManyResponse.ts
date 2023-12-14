@@ -17,8 +17,4 @@ import { TasksResetManyResponseFailed } from '././tasksResetManyResponseFailed';
 export interface TasksEnqueueManyResponse {
     succeeded?: Array<TasksEnqueueManyResponseSucceeded>;
     failed?: Array<TasksResetManyResponseFailed>;
-  /**
-   * Returns Trueif there are workers or autscalers working with the queue
-   */
-  queue_watched?: boolean;
 }

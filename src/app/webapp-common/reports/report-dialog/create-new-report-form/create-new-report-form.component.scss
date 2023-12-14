@@ -1,12 +1,25 @@
 :host {
   .create-report-button {
-    padding: 32px 12px 0;
+    padding-top: 32px;
   }
-  mat-form-field {
-    width: 100%;
 
-    .report-description {
+  small.text-danger {
+    //position: absolute !important;
+    //top: -15px;
+  }
+  #report-description{
+    max-height:250px;
+    padding-top: 12px;
+    height: 65px;
+  }
+  mat-form-field{
+    width: 100%;
+    .report-description{
       min-height: 68px;
     }
+  }
+
+  .search-icon {
+    transform: translateY(3px);
   }
 }

@@ -1,11 +1,28 @@
 <div class="header">
   <div class="name ellipsis" [smTooltip]="report?.name" smShowTooltipIfEllipsis>{{report?.name}}</div>
-  <div *ngIf="(editMode$ | async) !== true" class="actions">
+  <div *ngIf="!editMode" class="actions">
     <sm-tag-list
       [tags]="report?.tags"
-      (add)="openTagMenu($event, tagsMenuTrigger, tagsMenu)"
+      (add)="openTagMenu($event, tagMenu, tagsMenuContent)"
       (remove)="removeTag($event)"
     ></sm-tag-list>
+    <sm-menu
+      #tagMenu
+      [showCart]="false"
+      [showButton]="false"
+      [showOverlay]="false"
+      (menuClosed)="tagsMenuContent.clear()"
+    >
+      <sm-tags-menu
+        class="light-theme"
+        #tagsMenuContent
+        [tags]="report?.tags"
+        [projectTags]="reportTags$ | async"
+        [companyTags]="null"
+        [tagsFilterByProject]="true"
+        (tagSelected)="addTag($event)"
+      ></sm-tags-menu>
+    </sm-menu>
     <div class="g-btns">
       <button class="btn btn-icon" smTooltip="Copy report markdown to clipboard" (click)="copyMarkdown()">
         <i class="al-icon al-ico-copy-to-clipboard sm-md"></i>
@@ -35,22 +52,6 @@
         (click)="publish()"
       ><i class="al-icon al-ico-publish sm me-2"></i>PUBLISH</button>
     </div>
-    <span
-      #tagsMenuTrigger="matMenuTrigger"
-      [matMenuTriggerFor]="tagsMenu.matMenu"
-      (menuClosed)="tagsMenu.clear()"
-      class="trigger"
-      [style.left.px]="menuPosition.x"
-      [style.top.px]="menuPosition.y"
-    ></span>
-    <sm-tags-menu
-      #tagsMenu
-      [tags]="report?.tags"
-      [projectTags]="reportTags$ | async"
-      [companyTags]="null"
-      [tagsFilterByProject]="true"
-      (tagSelected)="addTag($event)"
-    ></sm-tags-menu>
   </div>
 </div>
 <div *ngIf="report" class="content report">
@@ -98,7 +99,6 @@
         [handleUpload]="handleUpload"
         (saveInfo)="save($event)"
         (editModeChanged)="editModeChanged();"
-        (dirtyChanged)="dirtyChanged($event);"
         (deleteResource)="deleteResource($event)"
         (imageMenuOpened)="calculateUnusedResources($event)"
       >

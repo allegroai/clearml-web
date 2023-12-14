@@ -1,10 +1,12 @@
 @import "variables";
+@import "variables_v2";
 @import "./../layout/layout.scss";
 
 :host {
   .experiment-body {
     width: 100%;
     height: calc(100% - #{$project-header-height});
+    background-color: $background-color-content;
     transition: height 0.3s;
     &.footer-visible {
       height: calc(100% - #{$project-header-height + $project-footer-height});

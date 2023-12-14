@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
-import {Actions, concatLatestFrom, createEffect, ofType} from '@ngrx/effects';
-import {catchError, mergeMap, map, switchMap, filter} from 'rxjs/operators';
+import {Actions, createEffect, ofType} from '@ngrx/effects';
+import {catchError, mergeMap, map, switchMap, withLatestFrom, filter} from 'rxjs/operators';
 import * as  debugActions from './debug-images-actions';
 import {activeLoader, deactivateLoader} from '../core/actions/layout.actions';
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
@@ -8,7 +8,7 @@ import {ApiEventsService} from '~/business-logic/api-services/events.service';
 import {requestFailed} from '../core/actions/http.actions';
 import {refreshExperiments} from '../experiments/actions/common-experiments-view.actions';
 import {Action, Store} from '@ngrx/store';
-import {selectDebugImages, selectSelectedMetricForTask} from './debug-images-reducer';
+import {selectDebugImages} from './debug-images-reducer';
 import {EventsDebugImagesResponse} from '~/business-logic/model/events/eventsDebugImagesResponse';
 import {EventsGetTaskMetricsResponse} from '~/business-logic/model/events/eventsGetTaskMetricsResponse';
 import {COMPARE_DEBUG_IMAGES_ONLY_FIELDS} from '../experiments-compare/experiments-compare.constants';
@@ -17,10 +17,8 @@ import {setBeginningOfTime} from '@common/shared/debug-sample/debug-sample.actio
 
 export const ALL_IMAGES = '-- All --';
 
-export const removeAllImagesFromPayload = (payload, selectedMetric?: string ) => {
-  const metric =  selectedMetric ?? payload.metric
-  return ({...payload, metric: metric === ALL_IMAGES ? null : metric});
-}
+export const removeAllImagesFromPayload = (payload) =>
+  ({...payload, metric: payload.metric === ALL_IMAGES ? null : payload.metric});
 
 
 // interface Image {
@@ -42,7 +40,7 @@ export class DebugImagesEffects {
 
   constructor(
     private actions$: Actions, private apiTasks: ApiTasksService,
-    private eventsApi: ApiEventsService, private store: Store
+    private eventsApi: ApiEventsService, private store: Store<any>
   ) {
   }
 
@@ -55,11 +53,11 @@ export class DebugImagesEffects {
 
   fetchDebugImages$ = createEffect(() => this.actions$.pipe(
     ofType(debugActions.setSelectedMetric, debugActions.getNextBatch, debugActions.getPreviousBatch, debugActions.refreshMetric),
-    concatLatestFrom(() => [this.store.select(selectDebugImages), this.store.select(selectSelectedMetricForTask)]),
-    mergeMap(([action, debugImages, selectedMetricForTask ]) =>
-       this.eventsApi.eventsDebugImages({
+    withLatestFrom(this.store.select(selectDebugImages)),
+    mergeMap(([action, debugImages]) =>
+      this.eventsApi.eventsDebugImages({
         /* eslint-disable @typescript-eslint/naming-convention */
-        metrics: [removeAllImagesFromPayload(action.payload, selectedMetricForTask[action.payload.task])],
+        metrics: [removeAllImagesFromPayload(action.payload)],
         iters: 3,
         scroll_id: (action.type !== debugActions.setSelectedMetric.type && debugImages?.[action.payload.task]) ?
           debugImages[action.payload.task].scroll_id :
@@ -128,11 +126,9 @@ export class DebugImagesEffects {
 
   fetchMetrics$ = createEffect(() => this.actions$.pipe(
     ofType(debugActions.getDebugImagesMetrics, debugActions.refreshDebugImagesMetrics),
-      switchMap((action) => this.store.select(selectActiveWorkspaceReady)
-      .pipe(
-        filter(ready => ready),
-        map(() => action))
-      ),
+    switchMap((action) => this.store.select(selectActiveWorkspaceReady).pipe(
+      filter(ready => ready),
+      map(() => action))),
     switchMap((action) => this.eventsApi.eventsGetTaskMetrics({
         /* eslint-disable @typescript-eslint/naming-convention */
         tasks: action.tasks,
@@ -140,11 +136,7 @@ export class DebugImagesEffects {
         /* eslint-enable @typescript-eslint/naming-convention */
       })
         .pipe(
-          mergeMap((res: EventsGetTaskMetricsResponse) => [
-            debugActions.setMetrics({metrics: res.metrics}),
-            deactivateLoader(debugActions.getDebugImagesMetrics.type),
-            deactivateLoader(debugActions.refreshDebugImagesMetrics.type),
-          ]),
+          mergeMap((res: EventsGetTaskMetricsResponse) => [debugActions.setMetrics({metrics: res.metrics}), deactivateLoader(action.type)]),
           catchError(error => [requestFailed(error), deactivateLoader(action.type)])
         )
     )

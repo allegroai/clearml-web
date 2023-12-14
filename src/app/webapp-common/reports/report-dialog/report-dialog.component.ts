@@ -19,11 +19,7 @@ export class ReportDialogComponent {
   public readOnlyProjectsNames$: Observable<string[]>;
 
 
-  constructor(
-    private store: Store,
-    private matDialogRef: MatDialogRef<ReportDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { defaultProjectId: string}
-  ) {
+  constructor(private store: Store<any>, private matDialogRef: MatDialogRef<ReportDialogComponent>, @Inject(MAT_DIALOG_DATA) public data: { defaultProjectId: string}) {
     this.projects$ = this.store.select(selectTablesFilterProjectsOptions);
     this.readOnlyProjectsNames$ = this.store.select(selectTablesFilterProjectsOptions)
       .pipe(map(projects => projects?.filter(project => isReadOnly(project)).map(project=> project.name)));
@@ -47,6 +43,6 @@ export class ReportDialogComponent {
 
   filterSearchChanged($event: {value: string; loadMore?: boolean}) {
     !$event.loadMore && this.store.dispatch(resetTablesFilterProjectsOptions());
-    this.store.dispatch(getTablesFilterProjectsOptions({searchString: $event.value || '', loadMore: $event.loadMore, allowPublic: false}));
+    this.store.dispatch(getTablesFilterProjectsOptions({searchString: $event.value || '', loadMore: $event.loadMore}));
   }
 }

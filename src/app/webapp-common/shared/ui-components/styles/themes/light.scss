@@ -71,7 +71,7 @@ $light-theme: (
     inputGroupTextColor: $white,
   ),
   navbar-item: (
-    color: $blue-300,
+    color: #8e95ab,
     active-color: #5871ff,
   ),
   search-input: (
@@ -128,5 +128,21 @@ $light-theme: (
     background-color:#fff,
     color-active: #000,
     color: #222
+  ),
+  button: (
+    // default
+    color: $text,
+    background-color: $primary-color,
+    border-color: $primary-color,
+
+    // hover
+    color-hover: $text,
+    background-color-hover: $accent-color,
+    border-color-hover: $accent-color,
+
+    // focus
+    color-focus: $blue-300,
+    background-color-focus: $blue-600,
+    border-color-focus: $blue-600
   )
 );

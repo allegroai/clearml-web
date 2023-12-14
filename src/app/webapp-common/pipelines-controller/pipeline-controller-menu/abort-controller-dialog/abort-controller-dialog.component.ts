@@ -2,6 +2,7 @@ import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {ChangeDetectionStrategy, Component, Inject} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
+import {ITableExperiment} from '@common/experiments/shared/common-experiment-model.model';
 
 @Component({
   selector: 'sm-abort-controller-dialog',
@@ -11,11 +12,10 @@ import {ISelectedExperiment} from '~/features/experiments/shared/experiment-info
 })
 export class AbortControllerDialogComponent {
   public experiments: ISelectedExperiment[];
-  shouldBeAbortedTasks: ISelectedExperiment[] = null;
+  shouldBeAbortedTasks: ITableExperiment[] = null;
 
   constructor(
-    private store: Store,
-    public dialogRef: MatDialogRef<AbortControllerDialogComponent>,
+    private store: Store<any>, public dialogRef: MatDialogRef<AbortControllerDialogComponent>,
     @Inject(MAT_DIALOG_DATA) data: {
       tasks: ISelectedExperiment[];
       shouldBeAbortedTasks: ISelectedExperiment[];

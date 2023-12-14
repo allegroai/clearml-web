@@ -1,23 +1,14 @@
-import {
-  Component,
-  ElementRef,
-  EventEmitter,
-  HostListener,
-  inject,
-  Input,
-  OnDestroy,
-  Output,
-  ViewChild
-} from '@angular/core';
+import {Component, ElementRef, EventEmitter, HostListener, Input, OnDestroy, Output, ViewChild} from '@angular/core';
 import {MatMenuTrigger} from '@angular/material/menu';
 import {TagsMenuComponent} from '../../ui-components/tags/tags-menu/tags-menu.component';
 import {Store} from '@ngrx/store';
-import {deactivateEdit, activateEdit} from '@common/experiments/actions/common-experiments-info.actions';
-import {activateModelEdit, cancelModelEdit} from '@common/models/actions/models-info.actions';
+import {deactivateEdit, activateEdit} from 'app/webapp-common/experiments/actions/common-experiments-info.actions';
+import {activateModelEdit, cancelModelEdit} from 'app/webapp-common/models/actions/models-info.actions';
 import {CountAvailableAndIsDisableSelectedFiltered} from '@common/shared/entity-page/items.utils';
 import {MenuItems} from '../../entity-page/items.utils';
+import {selectRouterParams} from '@common/core/reducers/router-reducer';
+import {map} from 'rxjs/operators';
 import {Subscription} from 'rxjs';
-import {selectSelectedProjectId} from '@common/core/reducers/projects.reducer';
 
 @Component({
   selector: 'sm-base-context-menu',
@@ -27,7 +18,6 @@ export class BaseContextMenuComponent implements OnDestroy{
   public position = {x: 0, y: 0};
   public menuItems = MenuItems;
   public projectId: string;
-  public allProjects: boolean;
   protected sub = new Subscription();
 
   @ViewChild('tagMenuContent') tagMenu: TagsMenuComponent;
@@ -47,18 +37,13 @@ export class BaseContextMenuComponent implements OnDestroy{
     }
   }
 
-  protected store: Store;
-  protected eRef: ElementRef;
-
-  constructor() {
-    this.store = inject(Store);
-    this.eRef = inject(ElementRef);
-
-    this.sub.add(this.store.select(selectSelectedProjectId)
-      .subscribe(id => {
-        this.projectId = id;
-        this.allProjects = id === '*';
-      })
+  constructor(
+    protected store: Store<any>,
+    protected eRef: ElementRef
+  ) {
+    this.sub.add(store.select(selectRouterParams)
+      .pipe(map(params => params?.projectId))
+      .subscribe(id => this.projectId = id)
     );
   }
 

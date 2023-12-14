@@ -12,7 +12,7 @@ import {selectShowOnlyUserWork} from '@common/core/reducers/users-reducer';
 export class ShowOnlyUserWorkComponent {
   public isUserMenuOpened: boolean;
   public showOnlyUserWork$: Observable<boolean>;
-  constructor(private store: Store) {
+  constructor(private store: Store<any>) {
     this.showOnlyUserWork$ = this.store.select(selectShowOnlyUserWork);
   }
 

@@ -1,11 +1,12 @@
 @import "../../layout/layout";
 @import "variables";
+@import "variables_v2";
 
 :host {
   display: block;
   position: relative;
   height: $top-bar-height;
-
+  border-bottom: 1px solid $border-color;
 
   .share-view {
     visibility: hidden;
@@ -13,7 +14,7 @@
 
   .header-container {
     display: flex;
-    background-color: $header-backgroud;
+    background-color: $background-color;
     height: 100%;
     width: 100%;
     padding: 0 24px;
@@ -32,9 +33,7 @@
     .left-menu {
       display: flex;
       align-items: center;
-
     }
-  ;
 
     sm-breadcrumbs :not(.login) {
       width: 95%;
@@ -51,7 +50,7 @@
 
     sm-common-search,
     .resources-trigger {
-      margin-right: 24px;
+      margin-right: 16px;
     }
 
     .menu-trigger {
@@ -61,7 +60,7 @@
       padding: 2px;
 
       &:hover {
-        background-color: rgba(232, 234, 237, 0.2);
+        background-color: $primary-color;
       }
 
       .avatar {
@@ -121,7 +120,6 @@
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    background-color: $header-backgroud;
   }
 
   .user-notification {

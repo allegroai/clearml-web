@@ -4,7 +4,6 @@ import {Project} from '../../../business-logic/model/projects/project';
 import {User} from '../../../business-logic/model/users/user';
 import {ExperimentCompareTree} from '../../../features/experiments-compare/experiments-compare-models';
 import {Artifact} from '../../../business-logic/model/tasks/artifact';
-import {DataDictionary} from '@common/experiments-compare/experiments-compare.constants';
 
 
 export type ExperimentCompareTrees = Array<ExperimentCompareTree>;
@@ -42,10 +41,10 @@ export interface ModelDetails {
 }
 
 export interface ModelDetailsInput {
-  id?: Model['id'] | DataDictionary;
+  id?: Model['id'];
   framework?: Model['framework'];
   uri?: Model['uri'];
-  name?: Model['name']
+  name?: Model['name'];
   taskName?: string;
 }
 

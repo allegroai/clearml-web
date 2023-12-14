@@ -3,22 +3,19 @@
 
 .category-link{
   padding-right: 24px;
-  color: $blue-300;
-  &:hover {
-    color: $blue-200;
-  }
-  &.active {
-    color: $neon-yellow;
+  font-size: $font-size-lg;
+  color: $blue-100;
+  opacity: 0.3;
+  &.active{
+    opacity: 1;
   }
 }
-
 .search-container{
-  height: calc(100% - 24px);
-  .tabs {
-    @include recent-title();
-  }
+  @include recent-title();
+  height: calc(100% - 20px);
 }
 
 .page-container {
   height: calc(100% - 35px);
+  overflow: auto;
 }

@@ -1,19 +1,17 @@
-import {ChangeDetectorRef, Component, OnDestroy, ViewChild} from '@angular/core';
+import {ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {
   selectExperimentHyperParamsSelectedSectionFromRoute,
   selectExperimentHyperParamsSelectedSectionParams,
   selectIsExperimentSaving,
-  selectIsSelectedExperimentInDev, selectSelectedExperimentReadOnly,
+  selectIsSelectedExperimentInDev,
   selectSplitSize,
 } from '../../reducers';
+import {CommonExperimentInfoState} from '../../reducers/common-experiment-info.reducer';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 import {selectBackdropActive} from '@common/core/reducers/view.reducer';
 import {Observable, Subscription} from 'rxjs';
-import {
-  selectIsExperimentEditable,
-  selectSelectedExperiment,
-} from '~/features/experiments/reducers';
+import {selectIsExperimentEditable, selectSelectedExperiment} from '~/features/experiments/reducers';
 import {selectRouterConfig} from '@common/core/reducers/router-reducer';
 import {
   activateEdit,
@@ -27,13 +25,14 @@ import {
 import {ParamsItem} from '~/business-logic/model/tasks/paramsItem';
 import {Router} from '@angular/router';
 import {ExperimentExecutionParametersComponent} from '../../dumb/experiment-execution-parameters/experiment-execution-parameters.component';
+import {isReadOnly} from '@common/shared/utils/is-read-only';
 
 @Component({
   selector   : 'sm-experiment-info-hyper-parameters-form-container',
   templateUrl: './experiment-info-hyper-parameters-form-container.component.html',
   styleUrls  : ['./experiment-info-hyper-parameters-form-container.component.scss']
 })
-export class ExperimentInfoHyperParametersFormContainerComponent implements OnDestroy {
+export class ExperimentInfoHyperParametersFormContainerComponent implements OnInit, OnDestroy {
   sectionReplaceMap = {
     _legacy: 'General',
     properties: 'User Properties',
@@ -46,11 +45,12 @@ export class ExperimentInfoHyperParametersFormContainerComponent implements OnDe
   public isInDev$: Observable<boolean>;
   public saving$: Observable<boolean>;
   public backdropActive$: Observable<boolean>;
+  private selectedExperimentSubscription: Subscription;
   public routerConfig$: Observable<string[]>;
   public selectedSection$: Observable<string>;
   private selectedSectionSubscription: Subscription;
   public selectedSection: string;
-  public isExample$ = this.store.select(selectSelectedExperimentReadOnly);
+  public isExample: boolean;
   public selectedExperiment$: Observable<IExperimentInfo>;
   public propSection: boolean;
   public searchedText: string;
@@ -58,7 +58,8 @@ export class ExperimentInfoHyperParametersFormContainerComponent implements OnDe
   public scrollIndexCounter: number;
   public size$: Observable<number>;
 
-  constructor(private store: Store, protected router: Router, private cdr: ChangeDetectorRef) {
+  constructor(private store: Store<CommonExperimentInfoState>, protected router: Router, private cdr: ChangeDetectorRef) {
+
     this.selectedSectionHyperParams$ = this.store.select(selectExperimentHyperParamsSelectedSectionParams);
     this.editable$ = this.store.select(selectIsExperimentEditable);
     this.selectedSection$ = this.store.select(selectExperimentHyperParamsSelectedSectionFromRoute);
@@ -76,7 +77,15 @@ export class ExperimentInfoHyperParametersFormContainerComponent implements OnDe
     });
   }
 
+  ngOnInit() {
+    this.selectedExperimentSubscription = this.store.select(selectSelectedExperiment)
+      .subscribe(selectedExperiment => {
+        this.isExample = isReadOnly(selectedExperiment);
+      });
+  }
+
   ngOnDestroy(): void {
+    this.selectedExperimentSubscription?.unsubscribe();
     this.selectedSectionSubscription?.unsubscribe();
   }
 

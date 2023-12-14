@@ -1,4 +1,5 @@
 @import "variables";
+@import "variables_v2";
 
 :host {
   .al-ico-bars-menu {
@@ -23,11 +24,4 @@
     padding: 0;
     border: none;
   }
-
-  .disabled-menu-btn {
-    pointer-events: none;
-    cursor: initial;
-    color:$blue-500;
-  }
-
 }

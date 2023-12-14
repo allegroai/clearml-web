@@ -9,7 +9,6 @@ export class VerticalLabeledRowComponent implements OnInit {
   @Input() label: string;
   @Input() showRow? = true;
   @Input() labelClass: string;
-  @Input() tooltip: string;
   constructor() { }
 
   ngOnInit() {

@@ -1,9 +1,10 @@
 @import "variables";
+@import "variables_v2";
 @import "src/app/webapp-common/shared/ui-components/styles/variables.scss";
 
 @font-face {
   font-family: '#{$icomoon-font-family}';
-  src: url('./#{$icomoon-font-family}.ttf?wj7mzq') format('truetype');
+  src: url('./#{$icomoon-font-family}.ttf?s0lnuq') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -23,42 +24,7 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-.al-ico-tune {
-  &:before {
-    content: $al-ico-tune;
-  }
-}
 
-.al-ico-equal-outline {
-  &:before {
-    content: $al-ico-equal-outline;
-  }
-}
-.al-ico-maximize {
-  &:before {
-    content: $al-ico-maximize;
-  }
-}
-.al-ico-gpu-card {
-  &:before {
-    content: $al-ico-gpu-card;
-  }
-}
-.al-ico-legend {
-  &:before {
-    content: $al-ico-legend;
-  }
-}
-.al-ico-model-filled {
-  &:before {
-    content: $al-ico-model-filled;
-  }
-}
-.al-ico-type-report {
-  &:before {
-    content: $al-ico-type-report;
-  }
-}
 .al-ico-info-circle-outline {
   &:before {
     content: $al-ico-info-circle-outline;
@@ -817,7 +783,7 @@
 .al-ico-filter-on .path1 {
   &:before {
     content: $al-ico-filter-on-path1;
-    color: $neon-yellow; // don't overwrite
+    color: $primary-color; // don't overwrite
     // color: rgb(211, 255, 0);
   }
 }
@@ -1096,7 +1062,7 @@
   &:before {
     content: $al-ico-auto-refresh-play-path2;
     margin-left: -1em;
-    color: $neon-yellow; // don't overwrite
+    color: $primary-color; // don't overwrite
   }
 }
 .al-ico-auto-refresh-pause .path1 {
@@ -1109,7 +1075,7 @@
   &:before {
     content: $al-ico-auto-refresh-pause-path2;
     margin-left: -1em;
-    color: $neon-yellow; // don't overwrite
+    color: $primary-color; // don't overwrite
     // color: rgb(211, 253, 0);
   }
 }
@@ -1217,7 +1183,7 @@
   &:before {
     content: $al-ico-settings-alert-path2;
     margin-left: -1em;
-    color: $neon-yellow; // don't overwrite
+    color: $primary-color; // don't overwrite
     // color: rgb(211, 255, 0);
   }
 }

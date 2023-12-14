@@ -1,30 +1,42 @@
 <form [formGroup]="S3Form" *ngIf="S3Form">
-  <div class="s3-row header" *ngIf="bucketCredentials.controls.length>0">
-    <div>Bucket</div>
-    <div>Key</div>
-    <div>Secret / SAS</div>
-    <div>Token</div>
-    <div>AWS Region</div>
-    <div>Host (Endpoint)</div>
+  <div class="row s3-row header" *ngIf="bucketCredentials.controls.length>0">
+    <div class="col-6">Bucket</div>
+    <div class="col-4">Key</div>
+    <div class="col-6">Secret / SAS</div>
+    <div class="col-6">Token</div>
+    <div class="col-2">AWS Region</div>
+    <div class="col-6">Host (Endpoint)</div>
   </div>
-  <div class="s3-row" *ngFor="let bucket of bucketCredentials.controls; let i = index"
+  <div *ngFor="let bucket of bucketCredentials.controls; let i = index; trackBy: trackByFn"
        formArrayName="bucketCredentials">
-    <ng-container [formGroupName]="i">
-      <input matInput class="form-control" formControlName="Bucket">
-      <input matInput class="form-control" formControlName="Key">
-      <input matInput class="form-control" formControlName="Secret">
-      <input matInput class="form-control" formControlName="Token">
-      <input matInput class="form-control" formControlName="Region" placeholder="us-east-2">
-      <input #endpoint matInput class="form-control" formControlName="Endpoint" placeholder="Leave empty for AWS S3">
-      <div class="d-flex justify-content-end">
-        <span *ngIf="endpoint.value.startsWith('http://') && secured" class="alert-icon me-2" smTooltip="Embedding images through a non-secure transport (HTTP) in a secure web application might require special configuration of your browser">
+    <div class="row s3-row" [formGroupName]="i">
+      <div class="col-6">
+        <input matInput class="form-control" formControlName="Bucket">
+      </div>
+      <div class="col-4">
+        <input matInput class="form-control" formControlName="Key">
+      </div>
+      <div class="col-6">
+        <input matInput class="form-control" formControlName="Secret">
+      </div>
+      <div class="col-6">
+        <input matInput class="form-control" formControlName="Token">
+      </div>
+      <div class="col-2">
+        <input matInput class="form-control" formControlName="Region" placeholder="us-east-2">
+      </div>
+      <div class="col-4">
+        <input #endpoint matInput class="form-control" formControlName="Endpoint" placeholder="Leave empty for AWS S3">
+      </div>
+      <div class="col-2 d-flex justify-content-end">
+        <span *ngIf="endpoint.value.startsWith('http://') && secured" class="alert-icon me-3" smTooltip="Embedding images through a non-secure transport (HTTP) in a secure web application might require special configuration of your browser">
           <i class="al-icon sm-md al-ico-alert"></i>
         </span>
         <span class="delete-button" (click)="removeBucket(i)" smTooltip="Remove">
           <i class="al-icon sm-md pointer" [ngClass]="ICONS.REMOVE"></i>
         </span>
       </div>
-    </ng-container>
+    </div>
   </div>
   <div>
     <a href="" class="add-button" (click)="$event.preventDefault(); addBucket({})" type="button">

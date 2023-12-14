@@ -1,7 +1,11 @@
-@import "variables";
+@import "src/app/webapp-common/shared/ui-components/styles/variables";
 :host{
   display: inline-flex;
   align-items: center;
   justify-content: left;
-  vertical-align: middle;
+}
+
+.middle {
+  height: 14px;
+  margin-top: 2px
 }

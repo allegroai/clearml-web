@@ -20,7 +20,6 @@ import {WelcomeMessageComponent} from '@common/layout/welcome-message/welcome-me
 import {YouTubePlayerModule} from '@angular/youtube-player';
 import {SharedPipesModule} from '@common/shared/pipes/shared-pipes.module';
 import {BreadcrumbsComponent} from '@common/layout/breadcrumbs/breadcrumbs.component';
-import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
 
 
 @NgModule({
@@ -37,7 +36,6 @@ import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-f
     SharedPipesModule,
     NgOptimizedImage,
     BreadcrumbsComponent,
-    LabeledFormFieldDirective
   ],
   declarations: [
     HeaderComponent, ProjectContextNavbarComponent, LoggedOutAlertComponent,

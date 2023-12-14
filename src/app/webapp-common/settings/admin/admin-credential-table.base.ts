@@ -1,4 +1,4 @@
-import {EventEmitter, Input, Output, Directive, inject} from '@angular/core';
+import {EventEmitter, Input, Output, Directive} from '@angular/core';
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {ConfirmDialogComponent} from '../../shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {ICONS} from '../../constants';
@@ -14,8 +14,8 @@ export class AdminCredentialTableBaseDirective {
   public icons = ICONS;
   public dialog: MatDialog;
 
-  constructor() {
-    this.dialog = inject(MatDialog);
+  constructor(dialog: MatDialog) {
+    this.dialog = dialog;
   }
 
   confirmPopUp(credential) {

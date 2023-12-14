@@ -60,8 +60,8 @@
       >
         <div [innerHTML]="project.label | highlightSearchText:projectInput.value"></div>
       </mat-option>
-      <div *ngIf="projects === null" class="p-4 pe-none">
-        <mat-spinner class="m-auto" [diameter]="32" [strokeWidth]="4" color="accent"></mat-spinner>
+      <div *ngIf="projects === null" style="line-height: 100px; pointer-events: none;">
+        <mat-spinner class="m-auto" [diameter]="80" [strokeWidth]="8"></mat-spinner>
       </div>
       <div *ngIf="projects && !noMoreOptions" (smScrollEnd)="!loading && loadMore(projectInput.value)" class="text-center">Loading more...</div>
       <mat-option disabled style="height: 0; min-height: 0;"></mat-option> <!-- Empty mat-option, so the autocomplete menu will always pop -->
@@ -79,12 +79,14 @@
               #description="ngModel"
     ></textarea>
   </mat-form-field>
-  <div class="w-100 create-report-button">
-    <button
-      class="btn btn-dark-fill center"
-      data-id="Create Report"
-      [disabled]="reportForm.invalid"
-      (click)="send()">CREATE REPORT
-    </button>
+  <div class="row">
+    <div class="col-24 create-report-button">
+      <button
+        class="btn btn-dark-fill center"
+        data-id="Create Report"
+        [disabled]="reportForm.invalid"
+        (click)="send()">CREATE REPORT
+      </button>
+    </div>
   </div>
 </form>

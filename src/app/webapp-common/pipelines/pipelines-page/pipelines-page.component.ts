@@ -5,13 +5,12 @@ import {isExample} from '@common/shared/utils/shared-utils';
 import {trackById} from '@common/shared/utils/forms-track-by';
 import {
   addProjectTags,
-  getProjectsTags, setBreadcrumbsOptions,
+  getProjectsTags,
   setDefaultNestedModeForFeature,
   setSelectedProjectId,
   setTags
 } from '@common/core/actions/projects.actions';
 import {
-  selectDefaultNestedModeForFeature,
   selectMainPageTagsFilter,
   selectMainPageTagsFilterMatchMode,
   selectProjectTags
@@ -27,11 +26,8 @@ import {
 import {ProjectsGetAllResponseSingle} from '~/business-logic/model/projects/projectsGetAllResponseSingle';
 import {selectShowPipelineExamples} from '@common/projects/common-projects.reducer';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
-import {
-  PipelinesEmptyStateComponent
-} from '@common/pipelines/pipelines-page/pipelines-empty-state/pipelines-empty-state.component';
-import {debounceTime, skip, withLatestFrom} from 'rxjs/operators';
-import {ProjectTypeEnum} from '@common/nested-project-view/nested-project-view-page/nested-project-view-page.component';
+import {PipelinesEmptyStateComponent} from '@common/pipelines/pipelines-page/pipelines-empty-state/pipelines-empty-state.component';
+import {debounceTime} from 'rxjs/operators';
 
 @Component({
   selector: 'sm-pipelines-page',
@@ -65,7 +61,6 @@ if __name__ == '__main__':
     pipeline_logic(do_stuff=True)`;
 
   pageSize = pageSize;
-  protected entityType = ProjectTypeEnum.pipelines;
   isExample = isExample;
   trackById = trackById;
   public projectsTags$: Observable<string[]>;
@@ -74,15 +69,16 @@ if __name__ == '__main__':
   private mainPageFilterSub: Subscription;
   public isNested$: Observable<boolean>;
 
-  override ngOnInit() {
+  ngOnInit() {
     super.ngOnInit();
-    this.store.dispatch(getProjectsTags({entity: this.getName()}));
     this.showExamples$ = this.store.select(selectShowPipelineExamples);
+    // Todo: delayed because of nested views, remove timeout after implementing nested view template
+    window.setTimeout(() => this.store.dispatch(getProjectsTags({entity: this.getName()})));
     this.projectsTags$ = this.store.select(selectProjectTags);
     this.mainPageFilterSub = combineLatest([
       this.store.select(selectMainPageTagsFilter),
       this.store.select(selectMainPageTagsFilterMatchMode)
-    ]).pipe(debounceTime(0), skip(1))
+    ]).pipe(debounceTime(0))
       .subscribe(() => {
         this.store.dispatch(resetProjects());
         this.store.dispatch(getAllProjectsPageProjects());
@@ -90,7 +86,7 @@ if __name__ == '__main__':
 
   }
 
-  override ngOnDestroy() {
+  ngOnDestroy() {
     super.ngOnDestroy();
     this.headerUserFocusSub?.unsubscribe();
     this.mainPageFilterSub.unsubscribe();
@@ -109,20 +105,20 @@ if __name__ == '__main__':
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected override getExtraProjects(selectedProjectId, selectedProject) {
+  protected getExtraProjects(selectedProjectId, selectedProject) {
     return [];
   }
 
-  public override projectCardClicked(project: ProjectsGetAllResponseSingle) {
+  public projectCardClicked(project: ProjectsGetAllResponseSingle) {
     this.router.navigate([project.id, 'experiments'], {relativeTo: this.projectId ? this.route.parent.parent.parent : this.route});
     this.store.dispatch(setSelectedProjectId({projectId: project.id, example: isExample(project)}));
   }
 
-  protected override getName() {
+  protected getName() {
     return EntityTypeEnum.pipeline;
   }
 
-  protected override getDeletePopupEntitiesList() {
+  protected getDeletePopupEntitiesList() {
     return 'run';
   }
 
@@ -140,15 +136,6 @@ if __name__ == '__main__':
     this.store.dispatch(showExamplePipelines());
   }
 
-  override shouldReRoute(selectedProject, config) {
-    const relevantSubProjects = selectedProject?.sub_projects?.filter(proj => proj.name.includes('.pipelines'));
-    return config[2] === 'projects' && selectedProject.id !== '*' && (relevantSubProjects?.every(subProject => subProject.name.startsWith(selectedProject.name + '/.')));
-  }
-
-  override noProjectsReRoute() {
-    return this.router.navigate(['..', 'pipelines'], {relativeTo: this.route});
-  }
-
   toggleNestedView(nested: boolean) {
     this.store.dispatch(setDefaultNestedModeForFeature({feature: 'pipelines', isNested: nested}));
 
@@ -157,28 +144,5 @@ if __name__ == '__main__':
     } else {
       this.router.navigateByUrl('pipelines');
     }
-  }
-
-  override setupBreadcrumbsOptions() {
-    this.subs.add(this.selectedProject$.pipe(
-      withLatestFrom(this.store.select(selectDefaultNestedModeForFeature))
-    ).subscribe(([selectedProject, defaultNestedModeForFeature]) => {
-      this.store.dispatch(setBreadcrumbsOptions({
-        breadcrumbOptions: {
-          showProjects: !!selectedProject,
-          featureBreadcrumb: {
-            name: 'PIPELINES',
-            url: defaultNestedModeForFeature['pipelines'] ? 'pipelines/*/projects' : 'pipelines'
-          },
-          projectsOptions: {
-            basePath: 'pipelines',
-            filterBaseNameWith: ['.pipelines'],
-            compareModule: null,
-            showSelectedProject: selectedProject?.id !== '*',
-            ...(selectedProject && selectedProject?.id !== '*' && {selectedProjectBreadcrumb: {name: selectedProject?.basename}})
-          }
-        }
-      }));
-    }));
   }
 }

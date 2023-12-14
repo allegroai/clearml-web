@@ -1,60 +1,60 @@
-<div
-  *ngIf="activateFromMenuButton"
-  [matMenuTriggerFor]="modelMenu"
-  class="p-0 cell menu-button al-icon al-ico-bars-menu pointer"
-></div>
+<div *ngIf="activateFromMenuButton" mat-button [matMenuTriggerFor]="modelMenu" class="p-0 cell menu-button al-icon al-ico-bars-menu pointer"></div>
 <div *ngIf="!activateFromMenuButton"
      style="visibility: hidden; position: fixed"
      [style.left.px]="position.x"
      [style.top.px]="position.y"
      [matMenuTriggerFor]="modelMenu">
 </div>
-<mat-menu #modelMenu="matMenu" [hasBackdrop]="backdrop" class="light-theme entity-context-menu">
+<mat-menu #modelMenu="matMenu" [hasBackdrop]="backdrop">
   <ng-container *ngIf="selectedDisableAvailable[menuItems.publish]">
     <button *ngIf="tableMode" mat-menu-item (click)="toggleDetails()">
       <i [class]="'al-icon '+ icons.DETAILS + ' sm-md'"></i>Details
     </button>
     <hr *ngIf="tableMode">
-    <button mat-menu-item (click)="publishPopup()" [disabled]="selectedDisableAvailable[menuItems.publish].disable" data-id="publishOption">
+    <button mat-menu-item (click)="publishPopup()" [disabled]="selectedDisableAvailable[menuItems.publish].disable">
       <i [class]="'al-icon ' + icons.PUBLISHED + ' sm-md'"></i>
         {{selectedDisableAvailable[menuItems.publish].available | menuItemText : 'Publish' : selectedDisableAvailableIsMultiple}}
     </button>
-    <button mat-menu-item (click)="deleteModelPopup()" [disabled]="selectedDisableAvailable[menuItems.delete].disable" *ngIf="isArchive" data-id="removeOption">
+    <button mat-menu-item (click)="deleteModelPopup()" [disabled]="selectedDisableAvailable[menuItems.delete].disable" *ngIf="isArchive">
       <i [class]="'al-icon ' + icons.REMOVE + ' sm-md'"></i>
       {{selectedDisableAvailable[menuItems.delete].available | menuItemText : 'Delete' : selectedDisableAvailableIsMultiple}}
     </button>
+
       <button mat-menu-item (click)="archiveClicked()"
-              [disabled]="selectedDisableAvailable[menuItems.archive].disable" data-id="archiveOption">
+              [disabled]="selectedDisableAvailable[menuItems.archive].disable">
         <i class="al-icon sm-md" [class]="isArchive ? icons.RESTORE : icons.ARCHIVE"></i>
         {{selectedDisableAvailable[menuItems.archive].available | menuItemText : isArchive ? 'Restore from Archive' : 'Archive' : selectedDisableAvailableIsMultiple}}
       </button>
 
     <hr>
     <button mat-menu-item
-            [matMenuTriggerFor]="tagsMenu.matMenu"
+            [matMenuTriggerFor]="tagMenu"
             [disabled]="isExample"
             (menuOpened)="tagMenuOpened()"
             (menuClosed)="tagMenuClosed()"
-            data-id="addTagOption"
     >
       <i [class]="'al-icon ' + icons.TAG + ' sm-md'"></i>
       <span>{{numSelected | menuItemText : 'Add Tag'  : selectedDisableAvailableIsMultiple}}</span>
     </button>
-    <sm-tags-menu
-      #tagsMenu
-      [tags]="model?.tags"
-      [projectTags]="allProjects ? companyTags : projectTags"
-      [companyTags]="allProjects ? null : companyTags"
-      [tagsFilterByProject]="allProjects || tagsFilterByProject"
-      (tagSelected)="tagSelected.emit($event)">
-    </sm-tags-menu>
     <hr>
-    <button mat-menu-item (click)="downloadModelFileClicked()" [disabled]="isLocalFile" data-id="downloadOption">
+    <button mat-menu-item (click)="downloadModelFileClicked()" [disabled]="isLocalFile">
       <i [class]="'al-icon  ' + icons.DOWNLOAD + ' sm-md'"></i>Download
     </button>
-    <button mat-menu-item (click)="moveToProjectPopup()" [disabled]="isExample" data-id="moveToProjectOption">
+    <button mat-menu-item (click)="moveToProjectPopup()" [disabled]="isExample">
       <i [class]="'al-icon ' + icons.MOVE_TO + '  sm-md'"></i>{{selectedDisableAvailable[menuItems.moveTo].available | menuItemText : 'Move to Project' : selectedDisableAvailableIsMultiple}}
     </button>
     <ng-content select="[extended]"></ng-content>
   </ng-container>
+</mat-menu>
+
+<mat-menu #tagMenu="matMenu">
+  <sm-tags-menu
+    #tagMenuContent
+    class="light-theme"
+    [tags]="model?.tags"
+    [projectTags]="projectTags"
+    [companyTags]="companyTags"
+    [tagsFilterByProject]="projectId !== '*' && tagsFilterByProject"
+    (tagSelected)="tagSelected.emit($event)">
+  </sm-tags-menu>
 </mat-menu>

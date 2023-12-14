@@ -1,5 +1,4 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {TIME_FORMAT_STRING} from '@common/constants';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {IReport} from '../reports.consts';
 
 @Component({
@@ -7,7 +6,7 @@ import {IReport} from '../reports.consts';
   templateUrl: './report-card.component.html',
   styleUrls: ['./report-card.component.scss']
 })
-export class ReportCardComponent {
+export class ReportCardComponent implements OnInit {
 
   public isExample: boolean;
   private _report: IReport;
@@ -16,7 +15,7 @@ export class ReportCardComponent {
   @Input() set report(data: IReport) {
     this._report = data;
     this.isExample = !['All Experiments'].includes(data.name) && (!data.company || ! data.company['id']);
-  }
+  };
   get report() {
     return this._report;
   }
@@ -33,5 +32,11 @@ export class ReportCardComponent {
   @Output() archive = new EventEmitter<boolean>();
   @Output() moveTo = new EventEmitter<string>();
   @Output() share = new EventEmitter();
-  timeFormatString = TIME_FORMAT_STRING;
+
+
+  constructor() { }
+
+  ngOnInit(): void {
+  }
+
 }

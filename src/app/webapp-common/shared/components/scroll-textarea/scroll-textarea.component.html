@@ -2,7 +2,7 @@
 <div *ngIf="!showSpinner && !editable && lines?.length" class="diff-container h-100">
   <div class="floating-buttons">
     <ng-content select="[extra-buttons]"></ng-content>
-    <sm-copy-clipboard *ngIf="formData" [clipboardText]="formData" label="" class="copy-textarea" tooltipText='Copy to clipboard' theme="text-area" data-id="copy to clipboard"></sm-copy-clipboard>
+    <sm-copy-clipboard *ngIf="formData" [clipboardText]="formData" label="" class="copy-textarea" tooltipText='Copy to clipboard' theme="text-area"></sm-copy-clipboard>
     <sm-search
       class="dark-theme text-area"
       [value]="search"
@@ -26,4 +26,4 @@
   </cdk-virtual-scroll-viewport>
 </div>
 <span *ngIf="!showSpinner && !lines?.length && !editable" class="no-changes">{{emptyMessage}}</span>
-<mat-spinner *ngIf="showSpinner" class="mx-auto mt-3" [diameter]="32" [strokeWidth]="4" color="accent"></mat-spinner>
+<mat-spinner class="mx-auto mt-3" [diameter]="50" *ngIf="showSpinner"></mat-spinner>

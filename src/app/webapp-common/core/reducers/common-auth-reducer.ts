@@ -149,9 +149,5 @@ export const commonAuthReducer = [
     credentials: {[action.credentials[0]?.company || action.workspace]: action.credentials, ...action.extra}, revokeSucceed: false
   })),
   on(setSignedUrl, (state, action) => ({...state, signedUrls: {...state.signedUrls, [action.url]: {signed: action.signed, expires: action.expires}}})),
-  on(removeSignedUrl, (state, action) => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const {[action.url]: remove, ...rest} = state.signedUrls;
-    return {...state, signedUrls: rest};
-  }),
+  on(removeSignedUrl, (state, action) => ({...state, signedUrls: {...state.signedUrls, [action.url]: null}})),
 ] as ReducerTypes<AuthState, any>[];

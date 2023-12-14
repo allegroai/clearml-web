@@ -17,7 +17,7 @@ export class TipOfTheDayModalComponent {
   private visitedIndex: number = 0;
   public hideDontShow: boolean;
 
-  constructor(public matDialogRef: MatDialogRef<TipOfTheDayModalComponent>, private store: Store,
+  constructor(public matDialogRef: MatDialogRef<TipOfTheDayModalComponent>, private store: Store<any>,
               @Inject(MAT_DIALOG_DATA) public data: { tips: Tip[]; visitedIndex: number; hideDontShow: boolean }) {
     this.tips = data.tips;
     this.hideDontShow = data.hideDontShow;

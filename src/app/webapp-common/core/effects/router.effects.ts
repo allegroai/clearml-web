@@ -3,8 +3,9 @@ import {ActivatedRoute, NavigationExtras, Params, Router} from '@angular/router'
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {uniq} from 'lodash-es';
 import {map, tap} from 'rxjs/operators';
+import {NAVIGATION_ACTIONS} from '~/app.constants';
 import {encodeFilters, encodeOrder} from '../../shared/utils/tableParamEncode';
-import {navigationEnd, setRouterSegments, setURLParams} from '../actions/router.actions';
+import {NavigateTo, NavigationEnd, setRouterSegments, setURLParams} from '../actions/router.actions';
 
 
 @Injectable()
@@ -16,15 +17,19 @@ export class RouterEffects {
   ) {
   }
 
+  // TODO: (itay) remove after delete old pages.
+  activeLoader = createEffect(() => this.actions$.pipe(
+    ofType<NavigateTo>(NAVIGATION_ACTIONS.NAVIGATE_TO),
+    tap(action => {
+      (!action.payload.params || !action.payload.url) ?
+        this.router.navigateByUrl(action.payload.url, /* Removed unsupported properties by Angular migration: queryParams. */ {}) :
+        this.router.navigate([action.payload.url, action.payload.params], {queryParams: {unGuard: action.payload.unGuard}});
+    })
+  ), {dispatch: false});
+
   routerNavigationEnd = createEffect(() => this.actions$.pipe(
-    ofType(navigationEnd),
-    map(() => setRouterSegments({
-      url: this.getRouterUrl(),
-      params: this.getRouterParams(),
-      config: this.getRouterConfig(),
-      queryParams: this.route.snapshot.queryParams,
-      data: this.route.snapshot.firstChild?.data
-    }))
+    ofType<NavigationEnd>(NAVIGATION_ACTIONS.NAVIGATION_END),
+    map(() => setRouterSegments({url: this.getRouterUrl(), params: this.getRouterParams(), config: this.getRouterConfig(), queryParams: this.route.snapshot.queryParams}))
   ));
 
   setTableParams = createEffect(() => this.actions$.pipe(
@@ -41,8 +46,7 @@ export class RouterEffects {
           ...(action.filters && {filter: encodeFilters(action.filters)}),
           ...(action.isArchived !== undefined && {archive: action.isArchived ? 'true' : null}),
           ...(action.isDeep && {deep: true}),
-          ...(action.version && {version: action.version}),
-          ...(action.others && action.others)
+          ...(action.version && {version: action.version})
         }
       } as NavigationExtras;
       this.router.navigate([], extra);

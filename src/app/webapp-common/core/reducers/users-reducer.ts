@@ -23,7 +23,6 @@ export interface UsersState {
   showOnlyUserWork: boolean;
   serverVersions: { server: string; api: string };
   gettingStarted: any;
-  settings: any;
 }
 
 export const initUsers: UsersState = {
@@ -32,31 +31,21 @@ export const initUsers: UsersState = {
   userWorkspaces: [],
   selectedWorkspaceTab: null,
   workspaces: [],
-  showOnlyUserWork: false,
+  showOnlyUserWork: true,
   serverVersions: null,
-  gettingStarted: null,
-  settings: null,
+  gettingStarted: null
 };
 
 export const users = state => state.users as UsersState;
-export const selectSettings = createSelector(users, (state) => state?.settings);
-export const selectMaxDownloadItems = createSelector(selectSettings, (state): number => state?.max_download_items ?? 1000);
+
 export const selectCurrentUser = createSelector(users, state => state.currentUser);
 export const selectActiveWorkspace = createSelector(users, state => state.activeWorkspace);
-export const selectActiveWorkspaceTier = createSelector(selectActiveWorkspace, workspace => workspace?.tier);
 export const selectUserWorkspaces = createSelector(users, state => state.userWorkspaces);
 export const selectSelectedWorkspaceTab = createSelector(users, state => state.selectedWorkspaceTab);
 export const selectWorkspaces = createSelector(users, state => state.workspaces);
 export const selectShowOnlyUserWork = createSelector(users, state => state.showOnlyUserWork);
 export const selectServerVersions = createSelector(users, state => state.serverVersions);
 export const selectGettingStarted = createSelector(users, state => state.gettingStarted);
-export const selectWorkspaceOwner = createSelector(selectActiveWorkspace, selectUserWorkspaces, (active, workspaces) => {
-  if (workspaces && active) {
-    const activeWs = workspaces.find(ws => ws.id === active.id);
-    return activeWs?.owners?.[0]?.name || '';
-  }
-  return null;
-});
 
 export const usersReducerFunctions = [
   on(fetchCurrentUser, state => ({...state})),

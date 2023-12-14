@@ -1,8 +1,9 @@
 import {Injectable} from '@angular/core';
-import {Actions, concatLatestFrom, createEffect, ofType} from '@ngrx/effects';
+import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {Action, Store} from '@ngrx/store';
+import {ModelInfoState} from '../reducers/model-info.reducer';
 import {ApiModelsService} from '~/business-logic/api-services/models.service';
-import {catchError, map, mergeMap, switchMap, tap} from 'rxjs/operators';
+import {catchError, map, mergeMap, switchMap, tap, withLatestFrom} from 'rxjs/operators';
 import * as infoActions from '../actions/models-info.actions';
 import {updateModelDetails} from '../actions/models-info.actions';
 import * as viewActions from '../actions/models-view.actions';
@@ -10,33 +11,29 @@ import * as menuActions from '../actions/models-menu.actions';
 import {addTag, removeTag} from '../actions/models-menu.actions';
 import {activeLoader, addMessage, deactivateLoader, setServerError} from '../../core/actions/layout.actions';
 import {requestFailed} from '../../core/actions/http.actions';
-import {ActivatedRoute, Router} from '@angular/router';
+import {Router} from '@angular/router';
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
 import {of} from 'rxjs';
-import {selectModelsList, selectSelectedModel, selectSelectedTableModel} from '../reducers';
-import {SelectedModel, TableModel} from '../shared/models.model';
-import {RouterState, selectRouterConfig} from '../../core/reducers/router-reducer';
+import {selectSelectedModel, selectSelectedModels, selectSelectedTableModel, selectTableMode} from '../reducers';
+import {SelectedModel} from '../shared/models.model';
+import {RouterState, selectRouterConfig, selectRouterParams} from '../../core/reducers/router-reducer';
 import {ModelsArchiveManyResponse} from '~/business-logic/model/models/modelsArchiveManyResponse';
-import {emptyAction} from '~/app.constants';
+import {EmptyAction} from '~/app.constants';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {ModelsUnarchiveManyResponse} from '~/business-logic/model/models/modelsUnarchiveManyResponse';
 import {getNotificationAction, MenuItems, MoreMenuItems} from '../../shared/entity-page/items.utils';
 import {MESSAGES_SEVERITY} from '@common/constants';
-import {ModelsUpdateTagsResponse} from '~/business-logic/model/models/modelsUpdateTagsResponse';
-import {addProjectsTag} from '@common/experiments/actions/common-experiments-view.actions';
-import * as projectsActions from '@common/core/actions/projects.actions';
 
 @Injectable()
 export class ModelsMenuEffects {
 
   constructor(
     private actions$: Actions,
-    private store: Store,
+    private store: Store<ModelInfoState>,
     private apiModels: ApiModelsService,
     private apiTasks: ApiTasksService,
-    private router: Router,
-    private readonly route: ActivatedRoute
-  ) {}
+    private router: Router) {
+  }
 
   activeLoader = createEffect( () => this.actions$.pipe(
     ofType(menuActions.archiveSelectedModels, menuActions.publishModelClicked,
@@ -46,7 +43,7 @@ export class ModelsMenuEffects {
 
   publishModel$ = createEffect( () => this.actions$.pipe(
     ofType(menuActions.publishModelClicked),
-    concatLatestFrom(() => this.store.select(selectSelectedModel)),
+    withLatestFrom(this.store.select(selectSelectedModel)),
     switchMap(([action, selectedModel]) => {
       const ids = action.selectedEntities.map(model => model.id);
       return this.apiModels.modelsPublishMany({ids})
@@ -68,7 +65,7 @@ export class ModelsMenuEffects {
 
   changeProject$ = createEffect( () => this.actions$.pipe(
     ofType(menuActions.changeProjectRequested),
-    concatLatestFrom(() => this.store.select(selectSelectedModel)),
+    withLatestFrom(this.store.select(selectSelectedModel)),
     switchMap(
       ([action, selectedInfoModel]) => {
         const selectedModel = action.selectedModels.find(model => model.id === selectedInfoModel?.id);
@@ -78,15 +75,10 @@ export class ModelsMenuEffects {
           // eslint-disable-next-line @typescript-eslint/naming-convention
           project_name: action.project.name})
           .pipe(
-            tap(res => this.route.snapshot.firstChild.data.setAllProject ?
-              this.router.navigate([]) :
-              this.router.navigate([
-                'projects', action.project.id? action.project.id : res.project_id ?? '*',
-                'models', action.selectedModels.length === 1 ? action.selectedModels[0].id : ''
-              ], {queryParamsHandling: 'merge'})),
+            tap((res) => this.router.navigate([`projects/${action.project.id? action.project.id : res.project_id ?? '*'}/models/${action.selectedModels.length === 1 ? action.selectedModels[0].id : ''}`], {queryParamsHandling: 'merge'})),
             mergeMap(() => [
               viewActions.resetState(),
-              selectedModel ? infoActions.setModelInfo({model: selectedModel}) : emptyAction(),
+              selectedModel ? infoActions.setModelInfo({model: selectedModel}) : new EmptyAction(),
               deactivateLoader(action.type),
               addMessage(MESSAGES_SEVERITY.SUCCESS, `Model moved successfully to ${action.project.name ?? 'Projects root'}`)
             ]),
@@ -96,7 +88,7 @@ export class ModelsMenuEffects {
     )
   ));
 
-  publishModelFailedText(error, model) {
+  publishModelFailedText(error: any, model) {
     if (model.task && error?.error?.meta?.result_subcode == 110) {
       // eslint-disable-next-line @typescript-eslint/naming-convention
       return this.apiTasks.tasksGetAllEx({id: [model.task.id], only_fields: ['id', 'name', 'project']}).pipe(
@@ -115,41 +107,18 @@ export class ModelsMenuEffects {
 
   addTag$ = createEffect( () => this.actions$.pipe(
     ofType(addTag),
-    switchMap(action  => {
-      const ids = action.models.map(e => e.id);
-      return this.apiModels.modelsUpdateTags({
-        ids,
-        add_tags: [action.tag]
-      })
-        .pipe(
-          concatLatestFrom(() => [
-            this.store.select(selectModelsList),
-            this.store.select(selectSelectedModel)
-          ]),
-          mergeMap(([res, models, selectedModelInfo]: [ModelsUpdateTagsResponse, TableModel[], SelectedModel]) => {
-            if (res.updated === ids.length) {
-              const updatedModels = models?.filter(exp => ids.includes(exp.id)) ?? action.models as unknown as TableModel[];
-              return [
-                viewActions.updateManyModels({changeList: updatedModels.reduce((acc, model) => {
-                    acc[model.id] = {tags: Array.from(new Set((model?.tags || []).concat([action.tag]))).sort()};
-                    return acc;
-                  }, {})}),
-                ...(ids.includes(selectedModelInfo?.id) ?
-                  [infoActions.modelDetailsUpdated({
-                    id: selectedModelInfo.id,
-                    changes: {tags: Array.from(new Set((selectedModelInfo?.tags || []).concat([action.tag]))).sort()}
-                  })] :
-                  []),
-                addProjectsTag({tag: action.tag}),
-                projectsActions.addCompanyTag({tag: action.tag}),
-              ];
-            } else {
-              return [addMessage(MESSAGES_SEVERITY.ERROR, 'Not all tags were applied')]
-            }
-          }),
-          catchError(() => [addMessage(MESSAGES_SEVERITY.ERROR, 'Failed to apply tags')])
-        );
-    })
+    withLatestFrom(this.store.select(selectSelectedModels), this.store.select(selectSelectedTableModel)),
+    switchMap(([action, selectedModels, selectedModelInfo]) => {
+        const modelsFromState = selectedModelInfo ? selectedModels.concat(selectedModelInfo) as SelectedModel[] : selectedModels;
+        return action.models.map(model => {
+          const modelFromState = modelsFromState.find(mod => mod.id === model.id);
+          return updateModelDetails({
+            id: model.id,
+            changes: {tags: Array.from(new Set((modelFromState?.tags || model.tags || []).concat([action.tag]))).sort() as string[]}
+          });
+        });
+      }
+    )
   ));
 
   removeTag$ = createEffect( () => this.actions$.pipe(
@@ -184,11 +153,13 @@ export class ModelsMenuEffects {
 
   archiveModels = createEffect(() => this.actions$.pipe(
     ofType(menuActions.archiveSelectedModels),
-    concatLatestFrom(() => this.store.select(selectSelectedTableModel)),
+    withLatestFrom(
+      this.store.select(selectSelectedTableModel)
+    ),
     switchMap(([action, selectedTableModel]) =>
       this.apiModels.modelsArchiveMany({ids: action.selectedEntities.map((model) => model.id)})
         .pipe(
-          concatLatestFrom(() => this.store.select(selectRouterConfig)),
+          withLatestFrom(this.store.select(selectRouterConfig)),
           mergeMap(([res, routerConfig]: [ModelsArchiveManyResponse, RouterState['config']]) => {
             const models = action.selectedEntities;
             const allFailed = res.failed.length === models.length;
@@ -230,22 +201,19 @@ export class ModelsMenuEffects {
 
   restoreModels = createEffect(() => this.actions$.pipe(
     ofType(menuActions.restoreSelectedModels),
-    concatLatestFrom(() => [
+    withLatestFrom(
+      this.store.select(selectRouterParams),
       this.store.select(selectSelectedTableModel),
-    ]),
-    tap(([action, selectedModel]) => {
+      this.store.select(selectTableMode)
+    ),
+    tap(([action, routerParams, selectedModel, tableMode]) => {
       if (this.isSelectedModelInCheckedModels(action.selectedEntities, selectedModel)) {
-        this.router.navigate([],
-          {
-            relativeTo: this.route,
-            queryParams: {archive: undefined},
-            queryParamsHandling: 'merge',
-          });
+        this.router.navigate([`projects/${routerParams.projectId}/models/${tableMode === 'info' ? routerParams.modelId : ''}`]);
       }
     }),
     switchMap(([action]) => this.apiModels.modelsUnarchiveMany({ids: action.selectedEntities.map((model) => model.id)})
       .pipe(
-        concatLatestFrom(() => this.store.select(selectRouterConfig)),
+        withLatestFrom(this.store.select(selectRouterConfig)),
         mergeMap(([res, routerConfig]: [ModelsUnarchiveManyResponse, RouterState['config']]) => {
           const models = action.selectedEntities;
           const allFailed = res.failed.length === models.length;

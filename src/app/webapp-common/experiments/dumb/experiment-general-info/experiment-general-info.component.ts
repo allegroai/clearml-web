@@ -1,9 +1,12 @@
-import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, EventEmitter, Input, OnDestroy, Output, ViewChild} from '@angular/core';
 import {UntypedFormControl} from '@angular/forms';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 import {TIME_FORMAT_STRING} from '@common/constants';
 import {Store} from '@ngrx/store';
 import {activateEdit, deactivateEdit} from '../../actions/common-experiments-info.actions';
+import {selectCurrentActiveSectionEdit} from '../../reducers';
+import {filter} from 'rxjs/operators';
+import {Subscription} from 'rxjs';
 import {EditableSectionComponent} from '@common/shared/ui-components/panel/editable-section/editable-section.component';
 
 export const EXPERIMENT_COMMENT = 'ExperimentComment';
@@ -13,18 +16,20 @@ export const EXPERIMENT_COMMENT = 'ExperimentComment';
   templateUrl: './experiment-general-info.component.html',
   styleUrls: ['./experiment-general-info.component.scss']
 })
-export class ExperimentGeneralInfoComponent {
-  constructor(private store: Store) {}
+export class ExperimentGeneralInfoComponent implements AfterViewInit, OnDestroy {
+  constructor(private store: Store<any>) {
+  }
 
   commentControl = new UntypedFormControl();
   experimentCommentText: string;
   experimentCommentOriginal: string;
-
-  @ViewChild('experimentDescriptionSection') experimentDescriptionSection: EditableSectionComponent;
+  private selectCurrentActiveSectionEditSub: Subscription;
+  @ViewChild('experimentDescriptionSection') private experimentDescriptionSection: EditableSectionComponent;
   @Input() experiment: IExperimentInfo;
   @Input() editable: boolean;
   @Input() isExample: boolean;
 
+  // TODO: remove ISelectedExperiment and use the form object...
   @Input() set experimentComment(experimentComment: string) {
     this.experimentCommentText = experimentComment;
     this.experimentCommentOriginal = experimentComment;
@@ -32,7 +37,15 @@ export class ExperimentGeneralInfoComponent {
   }
 
   @Output() commentChanged = new EventEmitter<string>();
-  timeFormatString = TIME_FORMAT_STRING;
+  TIME_FORMAT_STRING = TIME_FORMAT_STRING;
+
+  ngAfterViewInit() {
+    this.selectCurrentActiveSectionEditSub = this.store.select(selectCurrentActiveSectionEdit)
+      .pipe(filter(currentActiveSectionEdit => currentActiveSectionEdit === EXPERIMENT_COMMENT))
+      .subscribe(() => {
+        this.experimentDescriptionSection.editModeChanged(true);
+      });
+  }
 
   rebuildCommentControl(comment) {
     this.commentControl = new UntypedFormControl(comment);
@@ -55,4 +68,9 @@ export class ExperimentGeneralInfoComponent {
       this.store.dispatch(deactivateEdit());
     }
   }
+
+  ngOnDestroy() {
+    this.selectCurrentActiveSectionEditSub?.unsubscribe();
+  }
+
 }

@@ -8,20 +8,21 @@ import {
   SimpleChanges,
   ViewChild
 } from '@angular/core';
-import {RefreshService} from '@common/core/services/refresh.service';
 import {
   selectExperimentInfoPlots,
   selectExperimentMetricsSearchTerm,
   selectIsExperimentInProgress,
+  selectSelectedExperimentSettings,
   selectSelectedSettingsHiddenPlot,
   selectSplitSize
 } from '../../reducers';
 import {Observable, Subscription} from 'rxjs';
 import {select, Store} from '@ngrx/store';
 import {SelectableListItem} from '@common/shared/ui-components/data/selectable-list/selectable-list.model';
-import {distinctUntilChanged, distinctUntilKeyChanged, filter, map} from 'rxjs/operators';
+import {distinctUntilChanged, filter, map} from 'rxjs/operators';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
+import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {
   experimentPlotsRequested,
   resetExperimentMetrics,
@@ -47,9 +48,11 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChan
   @ViewChild(ExperimentGraphsComponent) graphsComponent: ExperimentGraphsComponent;
 
   public plotsList: Array<SelectableListItem>;
+  public selectedGraph: string = null;
   private experimentId: string;
   private routerParams$: Observable<any>;
   public listOfHidden$: Observable<Array<any>>;
+  public experimentSettings$: Observable<any>;
   public searchTerm$: Observable<string>;
   public minimized: boolean = false;
   public graphs: { [key: string]: ExtFrame[] };
@@ -62,16 +65,23 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChan
 
 
   constructor(
-    private store: Store,
+    private store: Store<ExperimentInfoState>,
+    private router: Router,
     private activeRoute: ActivatedRoute,
     private changeDetection: ChangeDetectorRef,
-    private reportEmbed: ReportCodeEmbedService,
-    protected refreshService: RefreshService
+    private reportEmbed: ReportCodeEmbedService
   ) {
     this.searchTerm$ = this.store.select(selectExperimentMetricsSearchTerm);
     this.splitSize$ = this.store.select(selectSplitSize);
     this.subs.add(this.store.select(selectSelectedExperiment).subscribe(exp => this.experimentCompany = exp?.company?.id ?? null));
     this.listOfHidden$ = this.store.select(selectSelectedSettingsHiddenPlot);
+
+    this.experimentSettings$ = this.store.select(selectSelectedExperimentSettings)
+      .pipe(
+        filter(settings => !!settings),
+        map(settings => settings ? settings.selectedPlot : null),
+        distinctUntilChanged()
+      );
 
     this.routerParams$ = this.store.select(selectRouterParams)
       .pipe(
@@ -85,7 +95,7 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChan
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if(changes.selected && this.experimentId !== changes.selected.currentValue.id ){
+    if(changes.selected && this.experimentId!== changes.selected.currentValue.id ){
       this.dark = true;
       this.experimentId = changes.selected.currentValue.id;
       this.refresh();
@@ -110,6 +120,12 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChan
         this.changeDetection.detectChanges();
       }));
 
+    this.subs.add(this.experimentSettings$
+      .subscribe((selectedPlot) => {
+        this.selectedGraph = selectedPlot;
+        this.graphsComponent?.scrollToGraph(selectedPlot);
+      }));
+
     this.subs.add(this.routerParams$
       .subscribe(params => {
         if (!this.experimentId || this.experimentId !== params.experimentId) {
@@ -124,17 +140,13 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChan
     this.subs.add(this.store.select(selectSelectedExperiment)
       .pipe(
         filter(experiment => !!experiment && !this.isDatasetVersionPreview),
-        distinctUntilKeyChanged('id')
+        distinctUntilChanged()
       )
       .subscribe(experiment => {
         this.experimentId = experiment.id;
         this.refresh();
       }));
 
-    this.subs.add(this.refreshService.tick
-      .pipe(filter(autoRefresh => autoRefresh !== null && !!this.experimentId))
-      .subscribe(() => this.refresh())
-    );
   }
 
   ngOnDestroy() {
@@ -150,7 +162,7 @@ export class ExperimentOutputPlotsComponent implements OnInit, OnDestroy, OnChan
   }
 
   metricSelected(id: string) {
-    this.graphsComponent?.scrollToGraph(id);
+    this.store.dispatch(setExperimentSettings({id: this.experimentId, changes: {selectedPlot: id}}));
   }
 
   hiddenListChanged(hiddenList: string[]) {

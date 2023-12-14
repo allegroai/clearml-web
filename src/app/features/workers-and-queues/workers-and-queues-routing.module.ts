@@ -1,13 +1,13 @@
-import {RouterModule, Routes} from '@angular/router';
-import {NgModule} from '@angular/core';
-import {OrchestrationComponent} from '@common/workers-and-queues/orchestration.component';
-import {WorkersComponent} from '@common/workers-and-queues/containers/workers/workers.component';
-import {QueuesComponent} from '@common/workers-and-queues/containers/queues/queues.component';
-import {WorkersAndQueuesResolver} from '~/shared/resolvers/workers-and-queues.resolver';
-import {CrumbTypeEnum} from '@common/layout/breadcrumbs/breadcrumbs.component';
+import { RouterModule, Routes } from '@angular/router';
+import { NgModule } from '@angular/core';
+import { OrchestrationComponent } from '@common/workers-and-queues/orchestration.component';
+import { WorkersComponent } from '@common/workers-and-queues/containers/workers/workers.component';
+import { QueuesComponent } from '@common/workers-and-queues/containers/queues/queues.component';
+import { WorkersAndQueuesResolver } from '~/shared/resolvers/workers-and-queues.resolver';
+import { CrumbTypeEnum } from '@common/layout/breadcrumbs/breadcrumbs.component';
 
 const wQBreadcrumb = [[{
-  name: 'WORKERS AND QUEUES',
+  name: 'Workers And Quenes',
   type: CrumbTypeEnum.Feature
 }]];
 export const routes: Routes = [
@@ -18,12 +18,12 @@ export const routes: Routes = [
       queuesManager: WorkersAndQueuesResolver
     },
     children: [
-      {path: '', redirectTo: 'workers', pathMatch: 'full'},
-      {path: 'workers', component: WorkersComponent, data: {staticBreadcrumb: wQBreadcrumb}},
+      { path: '', redirectTo: 'workers', pathMatch: 'full' },
+      { path: 'workers', component: WorkersComponent, data: { staticBreadcrumb: wQBreadcrumb } },
       {
         path: 'queues',
         component: QueuesComponent,
-        data: {staticBreadcrumb: wQBreadcrumb, queuesManager: true}
+        data: { staticBreadcrumb: wQBreadcrumb, queuesManager: true }
       },
     ]
   }

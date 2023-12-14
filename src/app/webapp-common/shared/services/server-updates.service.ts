@@ -17,7 +17,7 @@ export class ServerUpdatesService {
   private initialized = false;
   private currentUser: GetCurrentUserResponseUserObject;
 
-  constructor(private httpClient: HttpClient, private store: Store, private serverService: ApiServerService) {
+  constructor(private httpClient: HttpClient, private store: Store<any>, private serverService: ApiServerService) {
     if (localStorage.getItem('currentVersion') !== versionConf.version) {
       this.resetUpdateState();
     }

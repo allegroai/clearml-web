@@ -1,16 +1,15 @@
 import {ProjectsGetAllExRequest} from '~/business-logic/model/projects/projectsGetAllExRequest';
 import {ActivatedRouteSnapshot} from '@angular/router';
-import ChildrenTypeEnum = ProjectsGetAllExRequest.ChildrenTypeEnum;
 
 export const getPipelineRequest = (nested, searchQuery, selectedProjectName, selectedProjectId): ProjectsGetAllExRequest => ({
   /* eslint-disable @typescript-eslint/naming-convention */
-  ...(nested ? {
-    children_type: ChildrenTypeEnum.Pipeline,
+  ...(nested && {
+    children_type: 'pipeline',
     shallow_search: true,
     ...(selectedProjectName && {parent: [selectedProjectId]}),
     search_hidden: false,
-  } :
-  {
+  }),
+  ...(!nested && {
     search_hidden: true,
     shallow_search: false,
     name: selectedProjectName ? `^${selectedProjectName}/.pipelines/` : '/\\.pipelines/',
@@ -22,7 +21,7 @@ export const getPipelineRequest = (nested, searchQuery, selectedProjectName, sel
 
 export const getReportRequest = (nested, searchQuery, selectedProjectName, selectedProjectId): ProjectsGetAllExRequest => ({
   /* eslint-disable @typescript-eslint/naming-convention */
-  children_type: ChildrenTypeEnum.Report,
+  children_type: 'report',
   shallow_search: nested,
   search_hidden: !nested && selectedProjectName,
   ...(!nested && selectedProjectName && {name: `^${selectedProjectName}/.reports/`}),
@@ -32,12 +31,12 @@ export const getReportRequest = (nested, searchQuery, selectedProjectName, selec
 
 export const getDatasetsRequest = (nested: boolean, searchQuery: any, selectedProjectName: any, selectedProjectId: any) => ({
   /* eslint-disable @typescript-eslint/naming-convention */
-  ...(nested ? {
-    children_type: ChildrenTypeEnum.Dataset,
+  ...(nested && {
+    children_type: 'dataset',
     shallow_search: true, ...(selectedProjectName && {parent: [selectedProjectId]}),
     search_hidden: false,
-  } :
-  {
+  }),
+  ...(!nested && {
     search_hidden: true,
     shallow_search: false,
     name: selectedProjectName ? `^${selectedProjectName}/.datasets/` : '/\\.datasets/',

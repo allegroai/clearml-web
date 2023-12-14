@@ -1,0 +1,30 @@
+<ng-form class="create-company-form" #companyForm='ngForm'>
+  <div class="row position-relative">
+    <mat-form-field appearance="outline" class="w-100 pt-3">
+      <mat-error *ngIf="name?.errors?.required">Required</mat-error>
+      <mat-error *ngIf="name?.errors?.minlength">Name should contain at least 3 characters</mat-error>
+      <mat-label>Company Name</mat-label>
+      <input matInput type="text" name="companyName" [(ngModel)]="company.name" #name="ngModel" required minlength="3">
+    </mat-form-field>
+  </div>
+  <br />
+  <div class="row position-relative">
+    <mat-form-field appearance="outline" class="w-100 pt-3">
+      <!-- <mat-error *ngIf="name?.errors?.required">Required</mat-error>
+    <mat-error *ngIf="name?.errors?.minlength">Name should contain at least 3 characters</mat-error>
+    <mat-error *ngIf="name?.errors?.uniqueName">Name should be unique</mat-error> -->
+      <mat-label>Company Description</mat-label>
+      <textarea class="w-100" matInput [rows]="4" name="companyDescription" [(ngModel)]="company.description"
+        #name="ngModel"></textarea>
+    </mat-form-field>
+  </div>
+
+  <br />
+  <div class="row">
+    <div class="col-24 create-queue-button">
+      <button class="btn btn-dark-fill center" [disabled]="companyForm.invalid" (click)="send()">
+        {{editMode ? 'EDIT COMPANY' : 'CREATE COMPANY'}}
+      </button>
+    </div>
+  </div>
+</ng-form>

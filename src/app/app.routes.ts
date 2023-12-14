@@ -1,5 +1,5 @@
 import {Routes} from '@angular/router';
-import {projectRedirectGuardGuard} from '@common/shared/guards/project-redirect.guard';
+import {ProjectRedirectGuardGuard} from '@common/shared/guards/project-redirect.guard';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 
 
@@ -31,7 +31,7 @@ export const routes: Routes = [
         path: ':projectId',
         data: {search: true},
         children: [
-          {path: '', pathMatch: 'full', children: [], canActivate: [projectRedirectGuardGuard]},
+          {path: '', pathMatch: 'full', children: [], canActivate: [ProjectRedirectGuardGuard]},
           {path: '', redirectTo: '*', pathMatch: 'full'},
           {path: 'overview', loadChildren: () => import('./webapp-common/project-info/project-info.module').then(m => m.ProjectInfoModule)},
           {path: 'projects', loadChildren: () => import('./features/projects/projects.module').then(m => m.ProjectsModule)},
@@ -66,8 +66,7 @@ export const routes: Routes = [
         path: ':projectId',
         children: [
           {path: 'pipelines',  loadChildren: () => import('@common/pipelines/pipelines.module').then(m => m.PipelinesModule)},
-          {path: 'projects',  loadComponent: () => import('@common/pipelines/nested-pipeline-page/nested-pipeline-page.component')
-              .then(m => m.NestedPipelinePageComponent)},
+          {path: 'projects',  loadChildren: () => import('@common/nested-project-view/nested-project-view.module').then(m => m.NestedProjectViewModule)},
           {
             path: 'experiments', loadChildren: () => import('@common/pipelines-controller/pipelines-controller.module').then(m => m.PipelinesControllerModule)
           },

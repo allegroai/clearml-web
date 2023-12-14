@@ -1,11 +1,12 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {selectRouterConfig, selectRouterParams} from '@common/core/reducers/router-reducer';
-import {Store} from '@ngrx/store';
+import {select, Store} from '@ngrx/store';
 import {Observable, Subscription} from 'rxjs';
 import {ActivatedRoute, Router} from '@angular/router';
 import {distinctUntilChanged, filter, map, tap, withLatestFrom} from 'rxjs/operators';
 import {Project} from '~/business-logic/model/projects/project';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
+import {ExperimentOutputState} from '@common/experiments/reducers/experiment-output.reducer';
 import {
   selectExperimentInfoData,
   selectIsSharedAndNotOwner,
@@ -22,8 +23,6 @@ import {isDevelopment} from '~/features/experiments/shared/experiments.utils';
 import * as experimentsActions from '../../actions/common-experiments-view.actions';
 import {isReadOnly} from '@common/shared/utils/is-read-only';
 import {MESSAGES_SEVERITY} from '@common/constants';
-import {setBreadcrumbsOptions} from '@common/core/actions/projects.actions';
-import {selectSelectedProject} from '@common/core/reducers/projects.reducer';
 
 @Component({
   selector: 'sm-base-experiment-output',
@@ -48,11 +47,10 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
   public isDevelopment: boolean;
   private toMaximize = false;
   public selectSplitSize$: Observable<number>;
-  private selectedProject$: Observable<Project>;
 
 
   constructor(
-    private store: Store,
+    private store: Store<ExperimentOutputState>,
     private router: Router,
     private route: ActivatedRoute,
     private refresh: RefreshService
@@ -63,8 +61,6 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
     this.isAppVisible$ = this.store.select(selectAppVisible);
     this.backdropActive$ = this.store.select(selectBackdropActive);
     this.selectSplitSize$ = this.store.select(selectSplitSize);
-    this.selectedProject$ = this.store.select(selectSelectedProject);
-
 
 
   }
@@ -72,14 +68,11 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
   ngOnInit() {
     this.subs.add(this.store.select(selectRouterConfig).subscribe(routerConfig => {
       this.minimized = !routerConfig.includes('output');
-      if (!this.minimized){
-        this.setupBreadcrumbsOptions();
-      }
       this.routerConfig = routerConfig;
     }));
 
-    this.subs.add(this.store.select(selectRouterParams)
-      .pipe(
+    this.subs.add(this.store.pipe(
+        select(selectRouterParams),
         tap((params) => this.projectId = params.projectId),
         map(params => params?.experimentId),
         filter(experimentId => !!experimentId),
@@ -87,7 +80,7 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
         distinctUntilChanged(),
         withLatestFrom(this.store.select(selectSelectedExperiments))
       ).subscribe(([experimentId, selectedExperiments]) => {
-        this.selectedExperiment = selectedExperiments.find(experiment => experiment.id === experimentId) as unknown as IExperimentInfo;
+        this.selectedExperiment = selectedExperiments.find(experiment => experiment.id === experimentId);
         this.isExample = isReadOnly( this.selectedExperiment);
         this.isDevelopment = isDevelopment(this.selectedExperiment);
         this.store.dispatch(resetExperimentMetrics());
@@ -109,8 +102,8 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
       })
     );
 
-    this.subs.add(this.store.select(selectSelectedExperiment)
-      .pipe(filter(experiment => experiment?.id === this.experimentId))
+    this.subs.add(this.store.pipe(select(selectSelectedExperiment),
+      filter(experiment => experiment?.id === this.experimentId))
       .subscribe(experiment => {
         this.selectedExperiment = experiment;
         this.isExample = isReadOnly( this.selectedExperiment);
@@ -167,26 +160,5 @@ export abstract class BaseExperimentOutputComponent implements OnInit, OnDestroy
   closePanel() {
     this.store.dispatch(experimentsActions.setTableMode({mode: 'table'}));
     return this.router.navigate(['..'], {relativeTo: this.route, queryParamsHandling: 'merge'});
-  }
-  setupBreadcrumbsOptions() {
-    this.subs.add(this.selectedProject$.pipe(
-    ).subscribe((selectedProject) => {
-      this.store.dispatch(setBreadcrumbsOptions({
-        breadcrumbOptions: {
-          showProjects: !!selectedProject,
-          featureBreadcrumb: {
-            name: 'PROJECTS',
-            url: 'projects'
-          },
-          projectsOptions: {
-            basePath: 'projects',
-            filterBaseNameWith: null,
-            compareModule: null,
-            showSelectedProject: selectedProject?.id !== '*',
-            ...(selectedProject && {selectedProjectBreadcrumb: {name: selectedProject?.id === '*' ? 'All Experiments' : selectedProject?.basename}})
-          }
-        }
-      }));
-    }));
   }
 }

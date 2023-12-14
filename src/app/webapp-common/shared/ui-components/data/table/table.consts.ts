@@ -54,5 +54,4 @@ export interface ISmCol {
   key?: string;
   type?: string;
   showInCardFilters?: boolean;
-  downloadKey?: string;
 }

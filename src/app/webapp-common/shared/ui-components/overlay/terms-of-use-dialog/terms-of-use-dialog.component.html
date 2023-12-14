@@ -1,12 +1,11 @@
 <sm-confirm-dialog [displayX]="false">
-  <iframe #box class="box" data-id="termsOfUseText" [srcdoc]="text | safe: 'html'"></iframe>
+  <iframe #box class="box" [srcdoc]="text | safe: 'html'"></iframe>
   <div class="footer-buttons">
       <div class="cbx">
         <mat-checkbox
         #checkboxInput="ngModel"
         [(ngModel)]="isApprove"
         name="isApprove"
-        data-id="termsOfUseConfirmationCheckboxText"
         class="me-3"
         >I have read and accept ClearML's Terms Of Use
         </mat-checkbox>

@@ -55,7 +55,6 @@ export interface Environment {
   serverDownMessage?: string;
   legal: Legal;
   loginPopup?: string;
-  appsYouTubeIntroVideoId?: string;
   newExperimentYouTubeVideoId: string;
   baseHref?: string;
 }
@@ -91,7 +90,7 @@ export const BASE_ENV = {
   plotlyURL: 'app/webapp-common/assets/plotly-2.16.1.min.js',
   slackLink: 'https://joinslack.clear.ml',
   docsLink: 'https://clear.ml/docs',
-  branding: {logo: 'assets/logo-white.svg?v=7', logoSmall: 'assets/c-logo.svg?=2'},
+  branding: {logo: 'assets/logo-white.png?v=7', logoSmall: 'assets/c-logo.png?=2'},
   serverDownMessage: 'The ClearML server is currently unavailable.<BR>' +
     'Please try to reload this page in a little while.<BR>' +
     'If the problem persists, verify your network connection is working and check the ClearML server logs for possible errors',

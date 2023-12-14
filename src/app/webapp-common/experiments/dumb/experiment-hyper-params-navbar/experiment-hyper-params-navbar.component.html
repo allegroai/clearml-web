@@ -1,5 +1,5 @@
 <mat-expansion-panel [expanded]="true">
-  <mat-expansion-panel-header collapsedHeight="40px" expandedHeight="40px" class="active" data-id="User Properties">
+  <mat-expansion-panel-header collapsedHeight="40px" expandedHeight="40px" class="active">
     USER PROPERTIES
   </mat-expansion-panel-header>
   <div
@@ -12,13 +12,12 @@
   >
     <i class='sm al-icon al-ico-data-audit al-color'
        [class.white]= "selectedHyperParam === 'properties'"
-       [class.blue-400]="selectedHyperParam !== 'properties'"
-       data-id="properties">
+       [class.blue-400]="selectedHyperParam !== 'properties'">
     </i>Properties
   </div>
 </mat-expansion-panel>
 <mat-expansion-panel expanded="true" *ngIf="((hyperParams | keyvalue)|filterOut:'key':'properties')?.length>0">
-  <mat-expansion-panel-header collapsedHeight="40px" expandedHeight="40px" class="active" data-id="HyperParameters">
+  <mat-expansion-panel-header collapsedHeight="40px" expandedHeight="40px" class="active">
     HYPERPARAMETERS
   </mat-expansion-panel-header>
   <div

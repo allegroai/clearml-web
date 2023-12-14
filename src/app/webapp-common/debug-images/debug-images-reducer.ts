@@ -1,11 +1,5 @@
 import {
-  fetchExperiments,
-  getDebugImagesMetrics,
-  resetDebugImages,
-  setDebugImages,
-  setExperimentsNames,
-  setMetrics, setSelectedMetric,
-  setTimeIsNow
+  fetchExperiments, getDebugImagesMetrics, resetDebugImages, setDebugImages, setExperimentsNames, setMetrics, setTimeIsNow
 } from './debug-images-actions';
 import {Task} from '~/business-logic/model/tasks/task';
 import {createFeatureSelector, createReducer, createSelector, on} from '@ngrx/store';
@@ -13,14 +7,14 @@ import {EventsDebugImagesResponse} from '~/business-logic/model/events/eventsDeb
 
 
 export interface IDebugImagesState {
-  debugImages: { [taskId: string]: EventsDebugImagesResponse };
+  debugImages: {[taskId: string]: EventsDebugImagesResponse};
   settingsList: Array<IDebugImagesSettings>;
   tasks: Array<Partial<Task>>;
   optionalMetrics: Array<ITaskOptionalMetrics>;
-  selectedMetricsForTask: { [taskId: string]: string };
   searchTerm: string;
   scrollId: any;
   noMore: boolean;
+  selectedMetric: any;
   timeIsNow: any;
 
 }
@@ -43,7 +37,7 @@ export const initialState: IDebugImagesState = {
     optionalMetrics: [],
     scrollId: {},
     noMore: true,
-    selectedMetricsForTask: {},
+    selectedMetric: null,
     timeIsNow: {}
   }
 ;
@@ -53,7 +47,6 @@ export const selectDebugImages = createSelector(debugImages, (state) => state.de
 export const selectTaskNames = createSelector(debugImages, (state) => state.tasks);
 export const selectNoMore = createSelector(debugImages, (state) => state.noMore);
 export const selectOptionalMetrics = createSelector(debugImages, (state) => state.optionalMetrics);
-export const selectSelectedMetricForTask = createSelector(debugImages, (state) => state.selectedMetricsForTask);
 export const selectTimeIsNow = createSelector(debugImages, (state) => state.timeIsNow);
 
 
@@ -68,8 +61,8 @@ export const debugSamplesReducer = createReducer(
   on(setDebugImages, (state, action) => ({...state, debugImages: {...state.debugImages, [action.task]: action.res}})),
   on(setExperimentsNames, (state, action) => ({...state, tasks: action.tasks})),
   on(setMetrics, (state, action) => ({...state, optionalMetrics: action.metrics})),
-  on(setSelectedMetric, (state, action) => ({...state, selectedMetricsForTask: {...state.selectedMetricsForTask, [action.payload.task]: action.payload.metric}})),
   on(getDebugImagesMetrics, state => ({...state, optionalMetrics: initialState.optionalMetrics, debugImages: initialState.debugImages})),
+
   on(setTimeIsNow, (state, action) => ({...state, timeIsNow: {...state.timeIsNow, [action.task]: action.timeIsNow}})),
   on(fetchExperiments, () => ({...initialState})),
   // eslint-disable-next-line @typescript-eslint/naming-convention

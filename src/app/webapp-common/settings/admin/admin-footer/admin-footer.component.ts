@@ -14,7 +14,7 @@ export class AdminFooterComponent implements OnInit {
   public serverVersions$ = this.store.select(selectServerVersions);
   public version = version;
 
-  constructor(private store: Store) {
+  constructor(private store: Store<any>) {
     store.dispatch(getApiVersion());
   }
 

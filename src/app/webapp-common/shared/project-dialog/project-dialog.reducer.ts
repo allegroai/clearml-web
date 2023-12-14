@@ -1,5 +1,5 @@
-import {createFeatureSelector, createReducer, createSelector, on} from '@ngrx/store';
-import {setCreationStatus, resetState} from './project-dialog.actions';
+import {createFeatureSelector, createSelector} from '@ngrx/store';
+import {CREATE_PROJECT_ACTIONS} from './project-dialog.actions';
 
 export type CreationStatusEnum = 'success' | 'failed' | 'inProgress';
 export const CREATION_STATUS = {
@@ -19,8 +19,13 @@ const createProjectInitState: ICreateProjectDialog = {
 export const selectCreateProjectDialog = createFeatureSelector<ICreateProjectDialog>('projectCreateDialog');
 export const selectCreationStatus      = createSelector(selectCreateProjectDialog, (state): CreationStatusEnum => state.creationStatus);
 
-export const projectDialogReducer = createReducer(
-  createProjectInitState,
-  on(setCreationStatus, (state, action): ICreateProjectDialog => ({...state, creationStatus: action.status})),
-  on(resetState, (): ICreateProjectDialog => ({...createProjectInitState})),
-);
+export function projectDialogReducer<ActionReducer>(state: ICreateProjectDialog = createProjectInitState, action): ICreateProjectDialog {
+  switch (action.type) {
+    case CREATE_PROJECT_ACTIONS.SET_CREATION_STATUS:
+      return {...state, creationStatus: action.payload.creationStatus};
+    case CREATE_PROJECT_ACTIONS.RESET_STATE:
+      return {...createProjectInitState};
+    default:
+      return state;
+  }
+}

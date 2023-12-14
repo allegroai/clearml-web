@@ -1,5 +1,4 @@
 @import "variables";
-@import "mixins/link";
 
 $credentialBaseHeight: 238px;
 
@@ -7,8 +6,6 @@ $credentialBaseHeight: 238px;
   ::ng-deep .sub-header {
     padding: 0 32px;
   }
-
-  @include link();
 }
 
 .welcome-content {
@@ -59,6 +56,13 @@ $credentialBaseHeight: 238px;
     border-bottom: $separator-line solid 2px;
   }
 
+  .link {
+    .title {
+      color: $blue-500;
+      font-size: 14px;
+      font-weight: 500;
+    }
+  }
 }
 
 .steps-content {
@@ -98,7 +102,6 @@ $credentialBaseHeight: 238px;
 
   .bolder {
     font-weight: 500;
-    margin: 0 4px;
   }
 
   .code {
@@ -163,7 +166,7 @@ $credentialBaseHeight: 238px;
       height: $credentialBaseHeight + 20;
     }
     &.jupyter{
-      height: 0;
+      height: 0px;
     }
 
     &.first-step {

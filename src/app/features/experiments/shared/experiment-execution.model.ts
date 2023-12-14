@@ -16,7 +16,6 @@ export interface IExecutionForm {
     branch?: string;
     entry_point: string;
     working_dir: string;
-    binary: string;
     scriptType: sourceTypesEnum;
   };
   docker_cmd?: string;
@@ -24,7 +23,7 @@ export interface IExecutionForm {
   diff: string;
   output: {
     destination: string;
-    logLevel?: 'INFO' | 'DEBUG' | 'ERROR'; // TODO: should be enum from gencode.
+    logLevel?: 'basic' | 'details'; // TODO: should be enum from gencode.
   };
   queue: Queue;
   container?: Container;

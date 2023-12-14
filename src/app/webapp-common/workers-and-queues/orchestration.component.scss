@@ -6,11 +6,9 @@
     min-height: $nav-bar-height;
 
     .nav-bar-items-container {
-      display: flex;
       position: absolute;
       left: 50%;
       transform: translateX(-50%);
-      gap: 2px;
     }
 
     .header-container {
@@ -23,9 +21,9 @@
     }
   }
 
-  .content {
-    overflow: auto;
-    height: calc(100% - 66px);
+  ::ng-deep .outlet + * {
+    display: block;
+    height: calc(100% - #{$wnq-tabs-height});
   }
 }
 

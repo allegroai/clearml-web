@@ -1,11 +1,15 @@
-import {ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {select, Store} from '@ngrx/store';
 import {selectExperimentsParams} from '../../reducers';
 import {filter, tap} from 'rxjs/operators';
 import {ExperimentCompareTree, IExperimentDetail} from '~/features/experiments-compare/experiments-compare-models';
 import {ExperimentParams} from '../../shared/experiments-compare-details.model';
 import {convertExperimentsArraysParams, getAllKeysEmptyObject, isParamsConverted} from '../../jsonToDiffConvertor';
 import {ExperimentCompareBase} from '../experiment-compare-base';
-import {paramsActions} from '../../actions/experiments-compare-params.actions';
+import {ActivatedRoute, Router} from '@angular/router';
+import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
+import {experimentListUpdated} from '../../actions/experiments-compare-params.actions';
+import {RefreshService} from '@common/core/services/refresh.service';
 import {LIMITED_VIEW_LIMIT} from '@common/experiments-compare/experiments-compare.constants';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 
@@ -16,14 +20,21 @@ import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ExperimentCompareParamsComponent extends ExperimentCompareBase implements OnInit {
-  public showEllipsis = true;
+  public showEllipsis: boolean = true;
+  protected entityType: EntityTypeEnum;
 
   constructor(
+    public router: Router,
+    public store: Store<ExperimentInfoState>,
+    public changeDetection: ChangeDetectorRef,
+    public activeRoute: ActivatedRoute,
+    public refresh: RefreshService,
+    public cdr: ChangeDetectorRef
   ) {
-    super();
-    this.experiments$ = this.store.select(selectExperimentsParams);
+    super(router, store, changeDetection, activeRoute, refresh, cdr);
   }
 
+  experiments$ = this.store.pipe(select(selectExperimentsParams));
 
   ngOnInit() {
     this.entityType = this.activeRoute.snapshot.parent.parent.data.entityType;
@@ -31,7 +42,7 @@ export class ExperimentCompareParamsComponent extends ExperimentCompareBase impl
     this.compareTabPage = this.activeRoute?.snapshot?.routeConfig?.data?.mode;
     this.routerParamsSubscription = this.taskIds$.subscribe(
       (experimentIds) => {
-        this.store.dispatch(paramsActions.experimentListUpdated({ids: experimentIds.slice(0, LIMITED_VIEW_LIMIT), entity: this.entityType}));
+        this.store.dispatch(experimentListUpdated({ids: experimentIds.slice(0, LIMITED_VIEW_LIMIT), entity: this.entityType}));
       });
 
     this.experimentsSubscription = this.experiments$.pipe(

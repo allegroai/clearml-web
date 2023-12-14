@@ -14,7 +14,7 @@ import {deleteEntities, resetDeleteState} from './common-delete-dialog.actions';
 import {getDeleteProjectPopupStatsBreakdown} from '~/features/projects/projects-page.utils';
 import {EntityTypeEnum, hideDeleteArtifactsEntities} from '~/shared/constants/non-common-consts';
 import {takeUntil, tap} from 'rxjs/operators';
-import {CommonReadyForDeletion} from '@common/projects/common-projects.reducer';
+import {CommonProjectReadyForDeletion} from '@common/projects/common-projects.reducer';
 
 
 @Component({
@@ -51,12 +51,12 @@ export class CommonDeleteDialogComponent implements OnInit, OnDestroy {
 
 
   constructor(
-    private store: Store,
+    private store: Store<any>,
     @Inject(MAT_DIALOG_DATA) data: {
       numSelected: number;
       entity: Task;
       entityType: EntityTypeEnum;
-      projectStats: CommonReadyForDeletion;
+      projectStats: CommonProjectReadyForDeletion;
       useCurrentEntity: boolean;
       includeChildren: boolean;
       resetMode: boolean;
@@ -140,7 +140,7 @@ export class CommonDeleteDialogComponent implements OnInit, OnDestroy {
     this.isOpenEntities = !this.isOpenEntities;
   }
 
-  getMessageByEntity(entityType: EntityTypeEnum, stats?: CommonReadyForDeletion) {
+  getMessageByEntity(entityType: EntityTypeEnum, stats?: CommonProjectReadyForDeletion): string {
     switch (entityType as any) {
       case EntityTypeEnum.controller:
       case EntityTypeEnum.experiment:
@@ -151,12 +151,10 @@ export class CommonDeleteDialogComponent implements OnInit, OnDestroy {
         // eslint-disable-next-line no-case-declarations
         const entitiesBreakDown = getDeleteProjectPopupStatsBreakdown(stats, 'total', 'experiment');
         return entitiesBreakDown.trim().length > 0 ? `${entitiesBreakDown} will be deleted, including their artifacts. This may take a few minutes.` : '';
-      case EntityTypeEnum.simpleDataset: {
+      case EntityTypeEnum.simpleDataset:
         const entitiesBreakDown2 = getDeleteProjectPopupStatsBreakdown(stats, 'total', `version`);
         const single = Object.values(stats).reduce((a, b) => a + (b.total || 0), 0) == 1;
         return entitiesBreakDown2.trim().length > 0 ? `${entitiesBreakDown2} will be deleted and ${single ? 'its' : 'their'} data. This may take a few minutes.` : '';
-      }
     }
-    return '';
   }
 }

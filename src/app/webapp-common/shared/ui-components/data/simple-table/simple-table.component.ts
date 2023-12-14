@@ -7,7 +7,7 @@ import {FormsTrackBy, trackById} from '../../../utils/forms-track-by';
   templateUrl: './simple-table.component.html',
   styleUrls: ['./simple-table.component.scss'],
 })
-export class SimpleTableComponent extends FormsTrackBy {
+export class SimpleTableComponent2 extends FormsTrackBy {
 
   public open = [];
   public trackById = trackById;

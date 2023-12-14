@@ -6,7 +6,7 @@ import {isEqual} from 'lodash-es';
 import {selectColorPickerProps} from '@common/shared/ui-components/directives/choose-color/choose-color.reducer';
 import {ColorPickerProps} from '@common/shared/ui-components/directives/choose-color/choose-color.actions';
 import {ColorHashService} from '@common/shared/services/color-hash/color-hash.service';
-import { TinyColor } from '@ctrl/tinycolor';
+import tinycolor from 'tinycolor2';
 
 @Component({
   selector: 'sm-color-picker-wrapper',
@@ -39,7 +39,7 @@ export class ColorPickerWrapperComponent implements OnInit, OnDestroy {
   public props: ColorPickerProps;
   public toggle = false;
 
-  constructor(private store: Store, private colorHashService: ColorHashService, private cdr: ChangeDetectorRef) {
+  constructor(private store: Store<any>, private colorHashService: ColorHashService, private cdr: ChangeDetectorRef) {
   }
 
   ngOnInit() {
@@ -54,7 +54,7 @@ export class ColorPickerWrapperComponent implements OnInit, OnDestroy {
   }
 
   selectColor(event: string) {
-    const {r, g, b, a} = new TinyColor(event).toRgb();
+    const {r, g, b, a} = tinycolor(event).toRgb();
     const color = [r, g, b, a];
     this.colorHashService.setColorForString(this.props.cacheKey, color);
   }

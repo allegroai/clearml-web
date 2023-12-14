@@ -1,4 +1,5 @@
-import {AfterViewInit, ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
+import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {select, Store} from '@ngrx/store';
 import {experimentListUpdated} from '../../actions/experiments-compare-details.actions';
 import {selectExperimentsDetails} from '../../reducers';
 import {filter, tap} from 'rxjs/operators';
@@ -7,7 +8,10 @@ import {
   convertConfigurationFromExperiments, convertContainerScriptFromExperiments, convertExperimentsArrays, convertNetworkDesignFromExperiments, getAllKeysEmptyObject, isDetailsConverted
 } from '../../jsonToDiffConvertor';
 import {ExperimentCompareBase} from '../experiment-compare-base';
+import {ActivatedRoute, Router} from '@angular/router';
+import {ExperimentInfoState} from '~/features/experiments/reducers/experiment-info.reducer';
 import {ConfigurationItem} from '~/business-logic/model/tasks/configurationItem';
+import {RefreshService} from '@common/core/services/refresh.service';
 import {LIMITED_VIEW_LIMIT} from '@common/experiments-compare/experiments-compare.constants';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 
@@ -18,14 +22,20 @@ import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ExperimentCompareDetailsComponent extends ExperimentCompareBase implements OnInit, AfterViewInit {
-  public showEllipsis= true;
+  public showEllipsis: boolean = true;
 
   constructor(
+    public router: Router,
+    public store: Store<ExperimentInfoState>,
+    public changeDetection: ChangeDetectorRef,
+    public activeRoute: ActivatedRoute,
+    public cdr: ChangeDetectorRef,
+    public refresh: RefreshService
   ) {
-    super();
-    this.experiments$ = this.store.select(selectExperimentsDetails);
+    super(router, store, changeDetection, activeRoute, refresh, cdr);
   }
 
+  experiments$ = this.store.pipe(select(selectExperimentsDetails));
 
   ngOnInit() {
     this.onInit();

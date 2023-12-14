@@ -4,13 +4,13 @@ import {MenuItems} from '../items.utils';
 import {EntityTypeEnum} from '../../../../shared/constants/non-common-consts';
 
 export class PublishFooterItem extends ItemFooterModel {
+  id = MenuItems.publish;
+  emit = true;
+  icon = ICONS.PUBLISHED as Partial<IconNames>;
 
   constructor(private entityType: EntityTypeEnum) {
     super();
     this.disableDescription = entityType === EntityTypeEnum.experiment ? this.disableDescription : ``;
-    this.id = MenuItems.publish;
-    this.emit = true;
-    this.icon = ICONS.PUBLISHED as Partial<IconNames>;
   }
 
   getItemState(state: IFooterState<any>): { icon?: IconNames; title?: string; description?: string; disable?: boolean; disableDescription?: string; emit?: boolean; emitValue?: boolean; preventCurrentItem?: boolean; class?: string; wrapperClass?: string } {

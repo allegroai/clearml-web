@@ -17,5 +17,5 @@ export interface DebugImagesResponseIterations {
      * Iteration number
      */
     iter?: number;
-    events?: Array<any>;
+    events?: Array<object>;
 }

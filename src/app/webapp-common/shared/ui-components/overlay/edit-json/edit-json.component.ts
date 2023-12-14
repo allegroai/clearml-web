@@ -1,6 +1,7 @@
 import {AfterViewInit, Component, ElementRef, HostListener, Inject, NgZone, ViewChild} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {JsonPipe} from '@angular/common';
+import {validateJson} from '../../../utils/validation-utils';
 import {Store} from '@ngrx/store';
 import {addMessage, saveAceCaretPosition} from '@common/core/actions/layout.actions';
 import {Ace} from 'ace-builds';
@@ -10,12 +11,11 @@ import {map, take} from 'rxjs/operators';
 
 declare const ace;
 export interface EditJsonData {
-  textData?: string | object;
+  textData?: string | any;
   readOnly?: boolean;
   title: string;
   format?: 'json' | 'yaml' | 'hocon';
   placeHolder?: string;
-  reorder?: boolean;
 }
 
 @Component({
@@ -28,6 +28,7 @@ export class EditJsonComponent implements AfterViewInit{
   public errors: Map<string, boolean>;
   public textData: string;
   public showErrors: boolean;
+  public validators: Array<any> = [validateJson];
 
   private _readOnly: boolean;
   public placeHolder: string;
@@ -36,12 +37,12 @@ export class EditJsonComponent implements AfterViewInit{
   @ViewChild('aceEditor') private aceEditorElement: ElementRef;
   private aceEditor: Ace.Editor;
   private $aceCaretPosition: Observable<{ [key: string]: Ace.Point }>;
-  private readonly defaultPlaceHolder: string;
-  private readonly format?: 'json' | 'yaml' | 'hocon';
+  private defaultPlaceHolder = '';
+  private format?: 'json' | 'yaml' | 'hocon';
 
   set readOnly(readOnly: boolean) {
     this._readOnly = readOnly;
-  }
+  };
 
   get readOnly(): boolean {
     return this._readOnly;
@@ -56,9 +57,9 @@ export class EditJsonComponent implements AfterViewInit{
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: EditJsonData,
-    private dialogRef: MatDialogRef<EditJsonComponent, string | null>,
+    private dialogRef: MatDialogRef<EditJsonComponent, any>,
     private jsonPipe: JsonPipe,
-    private store: Store,
+    private store: Store<any>,
     private zone: NgZone,
   ) {
     this.format = data.format;
@@ -70,21 +71,9 @@ export class EditJsonComponent implements AfterViewInit{
   "location" : "london",
   "date" : "2019-01-31 22:41:03"
 }`;
-    } else {
-      this.defaultPlaceHolder = '';
     }
     this.placeHolder = data.placeHolder;
-    if(!data.textData) {
-      this.textData = undefined;
-    } else if (this.typeJson && typeof data.textData !== 'string') {
-      if (data.reorder) {
-        this.textData = jsonPipe.transform(this.orderJson(data.textData));
-      } else {
-        this.textData = jsonPipe.transform(data.textData);
-      }
-    } else {
-      this.textData = data.textData as string;
-    }
+    this.textData = data.textData ? (this.typeJson && typeof data.textData !== 'string' ? jsonPipe.transform(data.textData) : data.textData).slice() : undefined;
     this.readOnly = data.readOnly;
     this.title = data.title;
     this.$aceCaretPosition = this.store.select(selectAceCaretPosition);
@@ -127,7 +116,7 @@ export class EditJsonComponent implements AfterViewInit{
       } as Partial<Ace.VirtualRendererOptions>);
 
 
-      aceEditor.renderer.setScrollMargin(12, 12, 0, 12);
+      aceEditor.renderer.setScrollMargin(12, 12, 12, 12);
       aceEditor.renderer.setPadding(12);
       (aceEditor.renderer.container.querySelector('.ace_cursor') as HTMLElement).style.color = 'white';
 
@@ -160,18 +149,5 @@ export class EditJsonComponent implements AfterViewInit{
       this.aceEditor.scrollToLine(position?.row || 0, true, false, () => {
       });
     });
-  }
-
-  private orderJson(data) {
-    if (data !== null && typeof data === 'object') {
-      if (Array.isArray(data)) {
-        return data.map(val => this.orderJson(val));
-      }
-      return Object.keys(data).sort().reduce((acc, key) => {
-        acc[key] = this.orderJson(data[key]);
-        return acc;
-      }, {});
-    }
-    return data;
   }
 }

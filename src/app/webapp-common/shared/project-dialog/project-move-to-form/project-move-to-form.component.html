@@ -1,8 +1,9 @@
 <div class="dynamic-subtitle">
-  <div>Move</div>
-  <div><span class="p-name">{{projectName | shortProjectName}}</span> from <span class="p-name">{{projectName | projectLocation}}</span></div>
-  <div>To</div>
-  <div><span *ngIf="project.parent; else placeH" class="p-name">{{project.parent}}</span> <ng-template #placeH><span class="p-holder">Project…</span></ng-template></div>
+  <div class="line">Move <span class="p-name ellipsis">{{projectName | shortProjectName}}</span> from <span
+    class="p-name">{{projectName | projectLocation}}</span></div>
+  <div class="line">To <span *ngIf="project.parent; else placeH" class="p-name">{{project.parent}}</span>
+    <ng-template #placeH><span class="p-holder">Project…</span></ng-template>
+  </div>
 </div>
 <form #moveToForm="ngForm" (submit)="send()">
   <mat-form-field class="w-100"
@@ -61,8 +62,8 @@
                   (onSelectionChange)="optionSelected()">
         <div [innerHTML]="projectName | highlightSearchText:projectInput.value"></div>
       </mat-option>
-      <div *ngIf="projectsNames === null" class="p-4 pe-none">
-        <mat-spinner class="m-auto" [diameter]="32" [strokeWidth]="4" color="accent"></mat-spinner>
+      <div *ngIf="projectsNames === null" style="line-height: 100px; pointer-events: none;">
+        <mat-spinner class="m-auto" [diameter]="80" [strokeWidth]="8"></mat-spinner>
       </div>
       <div *ngIf="projects && !noMoreOptions" (smScrollEnd)="!loading && loadMore(projectInput.value)" class="text-center">Loading more...</div>
       <mat-option disabled style="height: 0; min-height: 0;"></mat-option> <!-- Empty mat-option, so the autocomplete menu will always pop -->

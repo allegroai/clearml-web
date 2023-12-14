@@ -24,7 +24,6 @@ import {HTTP} from '~/app.constants';
 import {DebugSample} from '@common/shared/debug-sample/debug-sample.reducer';
 import {requestFailed} from '@common/core/actions/http.actions';
 import {Task} from '~/business-logic/model/tasks/task';
-import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 
 
 @Injectable()
@@ -34,7 +33,7 @@ export class AppEffects {
 
   constructor(
     private httpClient: HttpClient,
-    private store: Store,
+    private store: Store<State>,
     private actions$: Actions,
     private reportsApi: ApiReportsService,
     private adminService: BaseAdminService) {
@@ -79,8 +78,7 @@ export class AppEffects {
           model_events: action.models,
           // eslint-disable-next-line @typescript-eslint/naming-convention
           scalar_metrics_iter_histogram: {
-            metrics: action.metrics.map(metric => ({metric, variants: action.variants})),
-            key: action.xaxis || ScalarKeyEnum.Iter
+            metrics: action.metrics.map(metric => ({metric, variants: action.variants}))
           }
         },
         {headers: this.getHeaders(action.company)}
@@ -123,7 +121,7 @@ export class AppEffects {
     mergeMap((action) => this.httpClient.post<{ data: ReportsGetTaskDataResponse }>(`${this.basePath}/reports.get_task_data?${action.otherSearchParams.toString()}`, {
         id: action.tasks,
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        only_fields: ['last_metrics', 'name', 'last_iteration', 'project', ...action.variants.map(variant => `hyperparams.${variant}`)]
+        only_fields: ['last_metrics', 'name', 'last_iteration', ...action.variants.map(variant => `hyperparams.${variant}`)]
       })
         .pipe(
           mergeMap(res => [
@@ -145,7 +143,7 @@ export class AppEffects {
       })
     ),
     mergeMap((res: { data: ReportsGetTaskDataResponse }) => [
-        setSingleValues({data: res.data.single_value_metrics}),
+        setSingleValues({data: res.data.single_value_metrics[0]}),
         setTaskData({sourceProject: (res.data.tasks[0]?.project as any).id, sourceTasks: res.data.tasks.map(t => t.id)})
       ]
     )

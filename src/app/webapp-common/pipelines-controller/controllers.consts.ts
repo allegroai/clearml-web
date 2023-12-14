@@ -35,16 +35,12 @@ export const INITIAL_CONTROLLER_TABLE_COLS: ISmCol[] = [
     filterable: true,
     sortable: true,
     isParam: true,
-    searchableFilter: true,
-    asyncFilter: true,
-    paginatedFilterPageSize: rootProjectsPageSize,
     header: 'VERSION',
     style: {width: '200px'},
     showInCardFilters: true
   },
   {
     id: EXPERIMENTS_TABLE_COL_FIELDS.TAGS,
-    getter: ['tags', 'system_tags'],
     headerType: ColHeaderTypeEnum.sortFilter,
     filterable: true,
     searchableFilter: true,
@@ -115,14 +111,7 @@ export const INITIAL_CONTROLLER_TABLE_COLS: ISmCol[] = [
     searchableFilter: false,
     header: 'UPDATED',
     style: {width: '150px'},
-  },
-  {
-    id        : EXPERIMENTS_TABLE_COL_FIELDS.COMMENT,
-    headerType: ColHeaderTypeEnum.sortFilter,
-    sortable  : true,
-    header    : 'DESCRIPTION',
-    style     : {width: '300px'}
-  },
+  }
 ];
 
 export const PIPELINE_INFO_ONLY_FIELDS = [

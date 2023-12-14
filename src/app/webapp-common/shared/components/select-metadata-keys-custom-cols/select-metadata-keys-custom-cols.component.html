@@ -24,7 +24,7 @@
   </div>
   <ng-template #noData>
     <div class="d-flex h-100 flex-1">
-      <mat-spinner *ngIf="!metadataKeys" class="spinner" [diameter]="32" [strokeWidth]="4" color="accent"></mat-spinner>
+      <mat-spinner *ngIf="!metadataKeys" class="spinner" diameter="80" strokeWidth="8"></mat-spinner>
       <div *ngIf="metadataKeys && metadataKeys.length === 0" class="empty-state">No data to show</div>
     </div>
   </ng-template>

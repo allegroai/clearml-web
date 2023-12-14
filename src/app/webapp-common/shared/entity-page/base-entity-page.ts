@@ -1,6 +1,6 @@
-import {AfterViewInit, Component, inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ActionCreator, Store} from '@ngrx/store';
-import {combineLatest, Observable, of, Subject, Subscription, switchMap} from 'rxjs';
+import {combineLatest, Observable, of, Subject, Subscription} from 'rxjs';
 import {
   debounceTime,
   filter,
@@ -13,14 +13,16 @@ import {
 } from 'rxjs/operators';
 import {Project} from '~/business-logic/model/projects/project';
 import {
-  selectSelectedProject, selectSelectedProjectUsers, selectTablesFilterProjectsOptions
+  selectAllProjectsUsers,
+  selectProjectUsers,
+  selectSelectedProject, selectTablesFilterProjectsOptions
 } from '../../core/reducers/projects.reducer';
 import {IOutputData} from 'angular-split/lib/interface';
 import {SplitComponent} from 'angular-split';
 import {selectRouterParams} from '../../core/reducers/router-reducer';
 import {ITableExperiment} from '../../experiments/shared/common-experiment-model.model';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
-import {IFooterState, ItemFooterModel} from './footer-items/footer-items.models';
+import {IFooterState} from './footer-items/footer-items.models';
 import {
   CountAvailableAndIsDisableSelectedFiltered,
   selectionAllHasExample,
@@ -29,13 +31,8 @@ import {
   selectionHasExample
 } from './items.utils';
 import {ActivatedRoute, Params, Router} from '@angular/router';
-import {
-  getTablesFilterProjectsOptions,
-  resetProjectSelection,
-  resetTablesFilterProjectsOptions,
-  setTablesFilterProjectsOptions
-} from '@common/core/actions/projects.actions';
-import {MatDialog} from '@angular/material/dialog';
+import {getTablesFilterProjectsOptions, resetProjectSelection, resetTablesFilterProjectsOptions, setTablesFilterProjectsOptions} from '@common/core/actions/projects.actions';
+import {MatDialog, MatDialogRef} from '@angular/material/dialog';
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {selectTableModeAwareness} from '@common/projects/common-projects.reducer';
@@ -43,11 +40,11 @@ import {setTableModeAwareness} from '@common/projects/common-projects.actions';
 import {User} from '~/business-logic/model/users/user';
 import {neverShowPopupAgain} from '../../core/actions/layout.actions';
 import {selectNeverShowPopups} from '../../core/reducers/view.reducer';
+import {SmSyncStateSelectorService} from '../../core/services/sync-state-selector.service';
 import {isReadOnly} from '@common/shared/utils/is-read-only';
 import {setCustomMetrics} from '@common/models/actions/models-view.actions';
 import * as experimentsActions from '@common/experiments/actions/common-experiments-view.actions';
-import {hyperParamSelectedExperiments, hyperParamSelectedInfoExperiments, setHyperParamsFiltersPage, setParents} from '@common/experiments/actions/common-experiments-view.actions';
-import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
+import {setParents} from '@common/experiments/actions/common-experiments-view.actions';
 
 @Component({
   selector: 'sm-base-entity-page',
@@ -55,19 +52,19 @@ import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.mod
 })
 export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, OnDestroy {
   public selectedProject$: Observable<Project>;
-  protected setSplitSizeAction: ActionCreator<string, any>;
+  protected setSplitSizeAction: any;
   protected addTag: ActionCreator<string, any>;
   protected abstract setTableModeAction: ActionCreator<string, any>;
   public shouldOpenDetails = false;
   protected sub = new Subscription();
-  public selectedExperiments: IExperimentInfo[];
+  public selectedExperiments: ITableExperiment[];
   public projectId: string;
   public isExampleProject: boolean;
   public selectSplitSize$?: Observable<number>;
   public infoDisabled: boolean;
   public splitInitialSize: number;
   public minimizedView: boolean;
-  public footerItems = [] as ItemFooterModel[];
+  public footerItems = [];
   public footerState$: Observable<IFooterState<any>>;
   public tableModeAwareness$: Observable<boolean>;
   private tableModeAwareness: boolean;
@@ -78,10 +75,7 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
 
   @ViewChild('split') split: SplitComponent;
   protected abstract inEditMode$: Observable<boolean>;
-  public selectedProject: Project;
-  private currentSelection: {id: string}[];
-  public showAllSelectedIsActive$: Observable<boolean>;
-  private allProjects: boolean;
+  private selectedProject: Project;
 
   abstract onFooterHandler({emitValue, item}): void;
 
@@ -98,28 +92,22 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
     return this.route.parent.snapshot.params.projectId;
   }
 
-  protected store: Store;
-  protected route: ActivatedRoute;
-  protected router: Router;
-  protected dialog: MatDialog;
-  protected refresh: RefreshService;
-
-  protected constructor() {
-    this.store = inject( Store);
-    this.route = inject(ActivatedRoute);
-    this.router = inject(Router);
-    this.dialog = inject(MatDialog);
-    this.refresh = inject(RefreshService);
-
-    this.users$ = this.store.select(selectSelectedProjectUsers);
-    this.sub.add(this.store.select(selectSelectedProject).pipe(filter(p => !!p)).subscribe((project: Project) => {
+  protected constructor(
+    protected store: Store,
+    protected route: ActivatedRoute,
+    protected router: Router,
+    protected dialog: MatDialog,
+    protected refresh: RefreshService,
+    protected syncSelector: SmSyncStateSelectorService,
+  ) {
+    this.users$ = this.selectedProjectId === '*' ? this.store.select(selectAllProjectsUsers) : this.store.select(selectProjectUsers);
+    this.store.select(selectSelectedProject).pipe(filter(p => !!p), take(1)).subscribe((project: Project) => {
       this.selectedProject = project;
-      this.allProjects = project?.id === '*';
       this.isExampleProject = isReadOnly(project);
-    }));
+    });
     this.projectsOptions$ = this.store.select(selectTablesFilterProjectsOptions);
 
-    this.tableModeAwareness$ = this.store.select(selectTableModeAwareness)
+    this.tableModeAwareness$ = store.select(selectTableModeAwareness)
       .pipe(
         filter(featuresAwareness => featuresAwareness !== null && featuresAwareness !== undefined),
         tap(aware => this.tableModeAwareness = aware)
@@ -127,7 +115,6 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
   }
 
   ngOnInit() {
-    this.selectedProject$ = this.store.select(selectSelectedProject);
     this.selectSplitSize$?.pipe(filter(x => !!x), take(1))
       .subscribe(x => this.splitInitialSize = x);
 
@@ -143,13 +130,12 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
 
     this.sub.add(this.refresh.tick
       .pipe(
-        withLatestFrom(this.inEditMode$, this.showAllSelectedIsActive$),
-        filter(([, edit, showAllSelectedIsActive]) => !edit && !showAllSelectedIsActive),
+        withLatestFrom(this.inEditMode$),
+        filter(([, edit]) => !edit),
         map(([auto]) => auto)
       )
       .subscribe(auto => this.refreshList(auto === null))
     );
-    this.setupBreadcrumbsOptions();
   }
 
   ngAfterViewInit() {
@@ -209,7 +195,7 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
 
   createFooterItems(config: {
     entitiesType: EntityTypeEnum;
-    selected$: Observable<{id: string}[]>;
+    selected$: Observable<Array<any>>;
     showAllSelectedIsActive$: Observable<boolean>;
     data$?: Observable<Record<string, CountAvailableAndIsDisableSelectedFiltered>>;
     tags$?: Observable<string[]>;
@@ -221,14 +207,14 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
       config.selected$,
       config.data$,
       config.showAllSelectedIsActive$,
-      this.allProjects ? of(null) : config.companyTags$,
-      this.allProjects ? config.companyTags$ : config.projectTags$,
-      this.allProjects ? of(true) : config.tagsFilterByProject$
+      config.companyTags$,
+      config.projectTags$,
+      config.tagsFilterByProject$
     );
   }
 
-  createFooterState<T extends {id: string}>(
-    selected$: Observable<T[]>,
+  createFooterState<T = any>(
+    selected$: Observable<Array<any>>,
     data$?: Observable<Record<string, CountAvailableAndIsDisableSelectedFiltered>>,
     showAllSelectedIsActive$?: Observable<boolean>,
     companyTags$?: Observable<string[]>,
@@ -251,8 +237,7 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
     ).pipe(
       takeUntil(this.destroy$),
       debounceTime(100),
-      filter(([selected]) => selected.length > 1 || this.currentSelection?.length > 1),
-      tap(([selected]) => this.currentSelection = selected),
+      filter(([selected]) => selected.length > 1),
       map(([selected, data, showAllSelectedIsActive, companyTags, projectTags, tagsFilterByProject]) => {
           const _selectionAllHasExample = selectionAllHasExample(selected);
           const _selectionHasExample = selectionHasExample(selected);
@@ -281,28 +266,19 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
       this.afterArchiveChanged();
       this.store.dispatch(resetProjectSelection());
     });
-    this.store.select(selectNeverShowPopups)
-      .pipe(
-        take(1),
-        switchMap(neverShow => {
-          if (this.getSelectedEntities().length > 0 && !neverShow?.includes('go-to-archive')) {
-            return this.dialog.open(ConfirmDialogComponent, {
-              data: {
-                title: 'Are you sure?',
-                body: 'Navigating between "Live" and "Archive" will deselect your selected data views.',
-                yes: 'Proceed',
-                no: 'Back',
-                iconClass: '',
-                showNeverShowAgain: true
-              }
-            }).afterClosed();
-          } else {
-            navigate();
-            return of(false);
-          }
-        })
-      )
-      .subscribe((confirmed) => {
+    if (this.getSelectedEntities().length > 0 && !this.syncSelector.selectSync(selectNeverShowPopups)?.includes('go-to-archive')) {
+      const archiveDialog: MatDialogRef<any> = this.dialog.open(ConfirmDialogComponent, {
+        data: {
+          title: 'Are you sure?',
+          body: 'Navigating between "Live" and "Archive" will deselect your selected data views.',
+          yes: 'Proceed',
+          no: 'Back',
+          iconClass: '',
+          showNeverShowAgain: true
+        }
+      });
+
+      archiveDialog.afterClosed().subscribe((confirmed) => {
         if (confirmed) {
           navigate();
           if (confirmed.neverShowAgain) {
@@ -310,22 +286,27 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
           }
         }
       });
+    } else {
+      navigate();
+    }
   }
 
-  filterSearchChanged({colId, value}: { colId: string; value: { value: string; loadMore?: boolean } }) {
+  updateUrl(queryParams: Params) {
+    return this.router.navigate([], {
+      relativeTo: this.route,
+      queryParamsHandling: 'merge',
+      queryParams
+    });
+  }
+
+  filterSearchChanged({colId, value}: { colId: string; value: {value: string; loadMore?: boolean} }) {
     switch (colId) {
       case 'project.name':
-        if ((this.projectId || this.selectedProjectId) === '*') {
+        if (this.selectedProjectId === '*') {
           !value.loadMore && this.store.dispatch(resetTablesFilterProjectsOptions());
-          this.store.dispatch(getTablesFilterProjectsOptions({
-            searchString: value.value || '',
-            loadMore: value.loadMore
-          }));
+          this.store.dispatch(getTablesFilterProjectsOptions({searchString: value.value || '', loadMore: value.loadMore}));
         } else {
-          this.store.dispatch(setTablesFilterProjectsOptions({
-            projects: this.selectedProject ? [this.selectedProject,
-              ...(this.selectedProject?.sub_projects ?? [])] : [], scrollId: null
-          }));
+          this.store.dispatch(setTablesFilterProjectsOptions({projects: this.selectedProject ? [this.selectedProject, ...this.selectedProject?.sub_projects] : [], scrollId: null}));
         }
         break;
       case 'parent.name':
@@ -337,15 +318,5 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
           this.store.dispatch(experimentsActions.getParents({searchValue: value.value}));
         }
     }
-    if (colId.startsWith('hyperparams.')) {
-      if (!value.loadMore) {
-        this.store.dispatch(hyperParamSelectedInfoExperiments({col: {id: colId}, loadMore: false, values: null}));
-        this.store.dispatch(setHyperParamsFiltersPage({page: 0}));
-      }
-      this.store.dispatch(hyperParamSelectedExperiments({col: {id: colId, getter: `${colId}.value`}, searchValue: value.value}));
-    }
-  }
-
-  public setupBreadcrumbsOptions() {
   }
 }

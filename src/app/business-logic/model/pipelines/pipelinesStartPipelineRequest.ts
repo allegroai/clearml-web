@@ -10,7 +10,6 @@
  * Do not edit the class manually.
  */
 
-import { PipelinesStartPipelineRequestArgs } from '././pipelinesStartPipelineRequestArgs';
 
 
 export interface PipelinesStartPipelineRequest {
@@ -23,7 +22,7 @@ export interface PipelinesStartPipelineRequest {
      */
     queue?: string;
     /**
-     * Task arguments, name/value to be placed in the hyperparameters Args section
+     * Task arguments, key/value to be placed in the hyperparameters Args section
      */
-    args?: Array<PipelinesStartPipelineRequestArgs>;
+    args?: object;
 }

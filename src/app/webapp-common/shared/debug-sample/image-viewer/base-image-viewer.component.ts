@@ -40,7 +40,7 @@ export class BaseImageViewerComponent implements OnInit, OnDestroy {
   public currentDebugImageSubscription: Subscription;
   public imageLoaded: boolean = false;
   public iteration: number;
-  public isFileserverUrl = isFileserverUrl;
+
 
   @HostListener('document:keydown', ['$event'])
   baseOnKeyDown(e: KeyboardEvent) {
@@ -55,7 +55,7 @@ export class BaseImageViewerComponent implements OnInit, OnDestroy {
   }
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) public data: {index: number; isAllMetrics: boolean; withoutNavigation: boolean; snippetsMetaData: Array<{task: string; metric: string; variant: string; iter: number}>},
+    @Inject(MAT_DIALOG_DATA) public data: {index: number; isAllMetrics: boolean; snippetsMetaData: Array<{task: string; metric: string; variant: string; iter: number}>},
     public dialogRef: MatDialogRef<BaseImageViewerComponent>,
     public changeDetector: ChangeDetectorRef,
     public store: Store<any>
@@ -140,15 +140,13 @@ export class BaseImageViewerComponent implements OnInit, OnDestroy {
 
   downloadImage() {
     if (this.currentDebugImage) {
-      const src = new URL(this.url ?? this.currentDebugImage.url);
+      const src = new URL(this.currentDebugImage.url);
       if (isFileserverUrl(this.currentDebugImage.url)) {
         src.searchParams.set('download', '');
       }
       const a = document.createElement('a') as HTMLAnchorElement;
       a.href = src.toString();
-      if (!this.data.withoutNavigation) {
-        a.download = last(src.pathname.split('/'));
-      }
+      a.download = last(src.pathname.split('/'));
       a.target = '_blank';
       a.click();
     }

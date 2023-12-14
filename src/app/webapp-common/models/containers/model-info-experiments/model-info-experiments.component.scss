@@ -1,9 +1,6 @@
-@import "mixins/link";
-
 :host{
   .lineage-container{
     height: 100%;
     padding: 24px;
   }
-  @include link();
 }

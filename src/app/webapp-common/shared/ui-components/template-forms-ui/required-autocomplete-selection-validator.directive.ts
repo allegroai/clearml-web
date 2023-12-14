@@ -9,7 +9,7 @@ import {AbstractControl, NG_VALIDATORS, ValidationErrors, Validator} from '@angu
 export class RequiredAutocompleteSelectionValidatorDirective implements Validator {
 
   validate(control: AbstractControl): ValidationErrors | null {
-    return (typeof control.value === 'string' && control.value !== '') ? {requiredAutocompleteSelection: {value: control.value}} : null;
+    return (typeof control.value === 'string') ? {requiredAutocompleteSelection: {value: control.value}} : null;
   }
 }
 

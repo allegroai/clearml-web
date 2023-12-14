@@ -1,6 +1,6 @@
 <sm-overlay [backdropActive]="backdropActive$|async"></sm-overlay>
 <as-split [unit]="'pixel'">
-  <as-split-area [size]="minimized ? 250 : 360" [minSize]="50">
+  <as-split-area [size]="minimized ? 250 : 300" [minSize]="50">
     <sm-experiment-hyper-params-navbar
       [class.minimized]="minimized"
       [hyperParams]="(hyperParamsInfo$| async)"

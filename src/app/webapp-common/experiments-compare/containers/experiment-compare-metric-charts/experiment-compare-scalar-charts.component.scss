@@ -4,9 +4,7 @@ $list-width: 360px;
 
 :host {
   display: flex;
-  flex-direction: column;
-  height: 50%;
-  flex-grow: 1;
+  height: 100%;
 
   mat-drawer {
     background-color: $white;
@@ -14,9 +12,7 @@ $list-width: 360px;
 
   mat-drawer-container {
     width: 100%;
-    flex: 1;
   }
-
   .mat-drawer-side {
     border-color: #efefef;
   }

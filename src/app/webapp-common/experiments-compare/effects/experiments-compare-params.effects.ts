@@ -1,6 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {select, Store} from '@ngrx/store';
+import * as paramsActions from '../actions/experiments-compare-params.actions';
 import {activeLoader, deactivateLoader, setServerError} from '../../core/actions/layout.actions';
 import {catchError, filter, map, mergeMap, switchMap, withLatestFrom} from 'rxjs/operators';
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
@@ -11,7 +12,8 @@ import {Observable, of} from 'rxjs';
 import {COMPARE_PARAMS_ONLY_FIELDS} from '~/features/experiments-compare/experiments-compare-consts';
 import {IExperimentDetail} from '~/features/experiments-compare/experiments-compare-models';
 import {REFETCH_EXPERIMENT_REQUESTED, refetchExperimentRequested} from '../actions/compare-header.actions';
-import {paramsActions} from '../actions/experiments-compare-params.actions';
+import {ExperimentCompareParamsState} from '../reducers/experiments-compare-params.reducer';
+import {setExperiments} from '../actions/experiments-compare-params.actions';
 import {ExperimentDetailBase, ExperimentParams} from '../shared/experiments-compare-details.model';
 import {selectActiveWorkspaceReady} from '~/core/reducers/view.reducer';
 import {ApiModelsService} from '~/business-logic/api-services/models.service';
@@ -22,7 +24,7 @@ import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 export class ExperimentsCompareParamsEffects {
 
   constructor(private actions$: Actions,
-              private store: Store,
+              private store: Store<ExperimentCompareParamsState>,
               private tasksApi: ApiTasksService,
               private modelsApi: ApiModelsService,
               private experimentParamsReverter: ExperimentParamsReverterService,
@@ -52,7 +54,7 @@ export class ExperimentsCompareParamsEffects {
             map(experiments => action.ids.map(id => experiments.find(experiment => experiment.id === id))),
             mergeMap(experiments => [
               deactivateLoader(action.type),
-              paramsActions.setExperiments({experiments})
+              setExperiments({experiments})
             ]),
             catchError(error => [
                 requestFailed(error),
@@ -72,7 +74,7 @@ export class ExperimentsCompareParamsEffects {
       this.fetchEntity$(newExperimentIds, action.entity).pipe(
         mergeMap(experiments => [
           deactivateLoader(action.type),
-          paramsActions.setExperiments({experiments: experiments as ExperimentParams[]})
+          setExperiments({experiments: experiments as ExperimentParams[]})
         ]),
         catchError(error => [
           requestFailed(error),

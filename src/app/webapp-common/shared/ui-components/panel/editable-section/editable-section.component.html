@@ -15,8 +15,8 @@
     <ng-content select="[search-button]"></ng-content>
   </div>
   <ng-content formData></ng-content>
-  <div class="cancel-save action-button edit-mode" *ngIf="inEditMode && !disableInEditMode" >
-    <button class="btn btn-dark-fill cancel" (click)="cancelClickedEvent()" data-id="CancelButton">CANCEL</button>
+  <div class="cancel-save action-button edit-mode" *ngIf="inEditMode && !disableInEditMode" data-id="CancelButton">
+    <button class="btn btn-dark-fill cancel" (click)="cancelClickedEvent()">CANCEL</button>
     <sm-loading-button
       *ngIf="!hideSaveButton"
       [disabled]="disableSave" label="SAVE" data-id="SaveButton"
