@@ -21,7 +21,8 @@ import {selectSelectedProjectId} from '@common/core/reducers/projects.reducer';
 
 @Component({
   selector: 'sm-base-context-menu',
-  template: ''
+  template: '',
+  standalone: true
 })
 export class BaseContextMenuComponent implements OnDestroy{
   public position = {x: 0, y: 0};

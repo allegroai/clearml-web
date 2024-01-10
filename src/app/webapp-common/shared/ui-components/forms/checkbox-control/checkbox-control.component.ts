@@ -2,12 +2,21 @@ import {ChangeDetectionStrategy, Component, Input, AfterViewInit, ChangeDetector
 import {ImmutableFormField} from '../immutableFormField';
 import {isString} from 'lodash-es';
 import {TableSelectionState} from '@common/constants';
+import {NgIf} from '@angular/common';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 
 @Component({
   selector: 'sm-checkbox-control',
   templateUrl: './checkbox-control.component.html',
   styleUrls: ['./checkbox-control.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    TooltipDirective,
+    NgIf,
+    ShowTooltipIfEllipsisDirective
+  ],
+  standalone: true
 })
 export class CheckboxControlComponent extends ImmutableFormField implements AfterViewInit {
 
@@ -32,7 +41,7 @@ export class CheckboxControlComponent extends ImmutableFormField implements Afte
   }
 
   @HostListener('click', ['$event'])
-  override fieldValueChanged(event: Event) {
+  hostClicked(event: Event) {
     if (this.disabled) {
       return;
     }
@@ -40,9 +49,8 @@ export class CheckboxControlComponent extends ImmutableFormField implements Afte
     event.stopPropagation();
 
     if (!this.isReadonly) {
-      super.fieldValueChanged(!this.formData, event);
+      this.fieldValueChanged(!this.formData, event);
     }
-    // this.formDataChanged.emit({field: this.fieldName, value: !this.formData});
   }
 
   override formDataUpdated() {

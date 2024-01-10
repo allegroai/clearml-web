@@ -32,6 +32,9 @@ export class ColorHashService {
   }
 
   public initColor(label: string, initColor?: number[], lighten = false): number[] {
+    if (label === undefined) {
+      return [255, 255, 255];
+    }
     const colorCache = this._colorCache.getValue()?.[label];
     if (colorCache) {
       return colorCache;
@@ -84,13 +87,26 @@ export class ColorHashService {
     return new TinyColor({r: rgb[0], g: rgb[1], b: rgb[2], a: rgb[3]}).toHexString();
   }
 
-  public getRgbString(str, opacity = -1) {
-    const color = this.initColor(str);
+  public getRgbString(strings: string[], opacity = -1) {
+    const color = this.mixColors(strings);
     if (opacity !== -1) {
       return `rgba(${color[0]},${color[1]},${color[2]},${opacity})`;
     } else {
       return `rgb(${color[0]},${color[1]},${color[2]})`;
     }
+  }
+
+  public mixColors(colors: string[]): number[] {
+    const firstColor = this.initColor(colors[0]);
+    let tc = new TinyColor({r: firstColor[0], g: firstColor[1], b: firstColor[2]});
+    if (colors.length > 1) {
+      tc = tc.mix({r: 0, g: 0, b: 0}, 100 / colors.length)
+    }
+    colors.slice(1).forEach( (colorString, i) => {
+      const color = this.initColor(colorString);
+      tc = tc.mix({r: color[0], g: color[1], b: color[2]}, 100 / colors.length)
+    });
+    return [tc.r, tc.g, tc.b, tc.a];
   }
 }
 

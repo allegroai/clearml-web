@@ -1,12 +1,13 @@
 import {ChangeDetectionStrategy, Component, ElementRef, EventEmitter, forwardRef, Input, OnInit, Output, ViewChild} from '@angular/core';
-import {TemplateFormSectionBase} from '../../template-forms-ui/templateFormSectionBase';
-import {NG_VALUE_ACCESSOR, NgForm} from '@angular/forms';
+import {TemplateFormSectionBaseDirective} from '../../template-forms-ui/templateFormSectionBase';
+import {FormsModule, NG_VALUE_ACCESSOR, NgForm} from '@angular/forms';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
-import {MatAutocompleteSelectedEvent} from '@angular/material/autocomplete';
+import {MatAutocompleteModule, MatAutocompleteSelectedEvent} from '@angular/material/autocomplete';
 import {filter, map, startWith} from 'rxjs/operators';
-import {asyncScheduler} from 'rxjs';
-import {Observable} from 'rxjs/internal/Observable';
+import {Observable, asyncScheduler} from 'rxjs';
 import {MatOptionSelectionChange} from '@angular/material/core';
+import {MatInputModule} from '@angular/material/input';
+import {AsyncPipe, NgForOf, NgIf} from '@angular/common';
 
 
 export interface IOption {
@@ -20,6 +21,15 @@ export interface IOption {
   templateUrl: './select-autocomplete-for-template-forms.component.html',
   styleUrls: ['./select-autocomplete-for-template-forms.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    FormsModule,
+    MatInputModule,
+    MatAutocompleteModule,
+    AsyncPipe,
+    NgForOf,
+    NgIf
+  ],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -28,7 +38,7 @@ export interface IOption {
     }]
 })
 
-export class SelectAutocompleteForTemplateFormsComponent extends TemplateFormSectionBase implements OnInit {
+export class SelectAutocompleteForTemplateFormsComponent extends TemplateFormSectionBaseDirective implements OnInit {
   private _items: { label: string; value: string }[];
   private _focusIt: any;
   public loading = true;

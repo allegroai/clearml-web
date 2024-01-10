@@ -29,7 +29,7 @@
                (keydown.enter)="projectInput.control.markAsTouched()"
                smUniqueNameValidator
                [existingNames]="readOnlyProjects$ | async">
-        <span matSuffix *ngIf="(!isAutoCompleteOpen) && (!formData.project?.value) && formData.project && !(formData.project | stringIncludedInArray:projectsNames)"
+        <span matSuffix *ngIf="(!isAutoCompleteOpen) && (!$any(formData.project)?.value) && formData.project && !($any(formData.project) | stringIncludedInArray: projectsNames)"
               class="creat-new-suffix">(Create New)</span>
         <i matSuffix class="al-icon sm-md search-icon me-2" [ngClass]="formData.project? 'al-ico-dialog-x pointer' : 'al-ico-search'"
            (click)="formData.project && clear(); projectInputRef.focus()"
@@ -74,6 +74,12 @@
         />
         <mat-error *ngIf="cloneForm.controls?.ExperimentName?.errors?.required">Please provide a name</mat-error>
       </mat-form-field>
+      <mat-checkbox
+        *ngIf="type === 'experiment'"
+        name="forceParent"
+        [checked]="forceParent$ | async"
+        (change)="formData.forceParent = $event.checked"
+      >Set <b *ngIf="reference" [smTooltip]="reference.length > 80 ? reference : undefined">{{reference.length > 80 ? (reference | slice:0:77) + '...' : reference }}</b> <span style="white-space: nowrap">as parent</span> </mat-checkbox>
       <mat-form-field class="w-100" appearance="outline"
                       hideRequiredMarker="true">
         <mat-label>Description</mat-label>

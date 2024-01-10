@@ -13,12 +13,19 @@ import {selectAceReady} from '@common/core/reducers/view.reducer';
 import {filter} from 'rxjs/operators';
 import {addMessage} from '@common/core/actions/layout.actions';
 import {MESSAGES_SEVERITY} from '@common/constants';
+import {NgIf} from '@angular/common';
+import {ClipboardModule} from 'ngx-clipboard';
 
 @Component({
   selector: 'sm-code-editor',
   templateUrl: './code-editor.component.html',
   styleUrls: ['./code-editor.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    NgIf,
+    ClipboardModule
+  ]
 })
 export class CodeEditorComponent implements AfterViewInit {
   _mode: string = 'ace/mode/python';

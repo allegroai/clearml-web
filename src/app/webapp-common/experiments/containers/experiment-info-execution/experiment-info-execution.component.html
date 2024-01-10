@@ -52,18 +52,17 @@
       <sm-section-header *ngIf="minimized" label="UNCOMMITTED CHANGES"></sm-section-header>
       <sm-scroll-textarea
         class="form-section"
-        [editable]="editable && diffSection.inEditMode"
         [isInDev]="isInDev"
         [formData]="formData.diff"
         [showSpinner]="showExtraDataSpinner"
       >
         <button extra-buttons
                 *ngIf="formData.diff && editable && !showExtraDataSpinner"
-                class="btn btn-dark-fill terminal me-3 flex-1"
+                class="btn btn-dark-fill terminal flex-1"
                 (click)="diffSection.editModeChanged(true)" data-id="edit uncommitted changes">EDIT</button>
         <button extra-buttons
                 *ngIf="formData.diff && editable && !showExtraDataSpinner"
-                class="btn btn-dark-fill terminal me-3 flex-1"
+                class="btn btn-dark-fill terminal flex-1"
                 (click)="discardDiff()" data-id="Discard Diffs">
           DISCARD DIFFS
         </button>
@@ -74,26 +73,43 @@
                          class="grow"
                          *ngIf="minimized || currentLink === 'installed packages'"
                          [saving]="saving"
-                         [editable]="editable"
+                         [editable]="editable && editableRequirements"
                          [disableInEditMode]="true"
                          [disableSave]="false"
                          [hideEditButton]="!!formData?.requirements?.pip"
                          (cancelClicked)="cancelFormChange()"
                          (activateEditClicked)="activateEditChanged('source'); editInstallPackages()">
-      <sm-section-header *ngIf="minimized" label="INSTALLED PACKAGES"></sm-section-header>
+      <div class="requirements-header">
+        <sm-section-header *ngIf="minimized" label="INSTALLED PACKAGES"></sm-section-header>
+        <mat-form-field
+          *ngIf="requirementsOptions?.length > 1"
+          appearance="outline"
+          class="no-bottom requirements-selector"
+        >
+          <mat-select
+            [ngModel]="selectedRequirement"
+            (ngModelChange)="requirementChanged($event)"
+            name="selectedRequirement"
+            panelClass="light-theme"
+          >
+            <mat-option *ngFor="let req of requirementsOptions" [value]="req.value">{{req.label}}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
       <sm-scroll-textarea
         class="form-section"
         emptyMessage="Packages will be installed from projects requirements file"
-        [editable]="editable && requirementsSection.inEditMode"
         [isInDev]="isInDev"
-        [formData]="formData.requirements?.pip">
+        [formData]="formData.requirements?.[selectedRequirement]">
         <button extra-buttons
                 *ngIf="formData?.requirements?.pip && editable && !showExtraDataSpinner"
-                class="btn btn-dark-fill terminal me-3 flex-1"
+                [disabled]="!editableRequirements"
+                class="btn btn-dark-fill terminal flex-1"
                 (click)="requirementsSection.editModeChanged(true)" data-id="Edit Installed Packages">EDIT</button>
         <button extra-buttons
                 *ngIf="formData.requirements?.pip && editable && !showExtraDataSpinner"
-                class="btn btn-dark-fill terminal me-3 flex-1"
+                [disabled]="!editableRequirements"
+                class="btn btn-dark-fill terminal flex-1"
                 (click)="clearInstalledPackages()" data-id="Clear Installed Packages">
           CLEAR
         </button>
@@ -142,11 +158,11 @@
             [formData]="formData?.container?.setup_shell_script">
             <button extra-buttons
                     *ngIf="formData?.container?.setup_shell_script && editable && !showExtraDataSpinner"
-                    class="btn btn-dark-fill terminal me-3 flex-1"
+                    class="btn btn-dark-fill terminal flex-1"
                     (click)="containerSetupShellSection.editModeChanged(true)">EDIT</button>
             <button extra-buttons
                     *ngIf="formData.container?.setup_shell_script && editable && !showExtraDataSpinner"
-                    class="btn btn-dark-fill terminal me-3 flex-1"
+                    class="btn btn-dark-fill terminal flex-1"
                     (click)="clearSetupShellScript()">
               CLEAR
             </button>

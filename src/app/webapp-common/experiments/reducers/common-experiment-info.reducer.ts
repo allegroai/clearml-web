@@ -18,14 +18,19 @@ import {
   setSelectedPipelineStep,
   updateExperimentAtPath,
   getExperimentArtifacts,
+  downloadArtifacts,
   resetExperimentInfo,
   setExperimentInfoData,
   updateExperimentInfoData,
-  getExperimentUncommittedChanges, setExperimentUncommittedChanges, setExperimentArtifacts
+  getExperimentUncommittedChanges,
+  setExperimentUncommittedChanges,
+  setExperimentArtifacts,
+  downloadSuccess,
+  downloadFailed
 } from '../actions/common-experiments-info.actions';
 import {set} from 'lodash-es';
 import {setControllerForStartPipelineDialog} from '../actions/common-experiments-menu.actions';
-import {createReducer, on, ReducerTypes} from '@ngrx/store';
+import {ActionCreator, createReducer, on, ReducerTypes} from '@ngrx/store';
 
 
 export interface CommonExperimentInfoState {
@@ -41,6 +46,7 @@ export interface CommonExperimentInfoState {
   infoDataFreeze: IExperimentInfo;
   userKnowledge: Map<experimentSectionsEnum, boolean>;
   artifactsExperimentId: string;
+  downloading: boolean;
 }
 
 export const initialCommonExperimentInfoState: CommonExperimentInfoState = {
@@ -60,7 +66,8 @@ export const initialCommonExperimentInfoState: CommonExperimentInfoState = {
   userKnowledge: {
     [experimentSections.MODEL_INPUT]: false
   } as any,
-  artifactsExperimentId: null
+  artifactsExperimentId: null,
+  downloading: false,
 };
 
 export const commonExperimentInfoReducers = [
@@ -80,8 +87,10 @@ export const commonExperimentInfoReducers = [
   on(setExperimentSaving, (state, action): CommonExperimentInfoState => ({...state, saving: action.saving})),
   on( setSelectedPipelineStep, (state, action): CommonExperimentInfoState => ({...state, selectedPipelineStep: action.step})),
   on(setControllerForStartPipelineDialog, (state, action): CommonExperimentInfoState => ({...state, pipelineRunDialogTask: action.task})),
-  on(updateExperimentAtPath, (state, action): CommonExperimentInfoState => ({...state, infoData: set(state.infoData, action.value, action.path) as any})),
+  on(updateExperimentAtPath, (state, action): CommonExperimentInfoState => ({...state, infoData: set(state.infoData, action.value, action.path) as IExperimentInfo})),
   on(getExperimentArtifacts, (state): CommonExperimentInfoState => ({...state, saving: false})),
+  on(downloadArtifacts, (state): CommonExperimentInfoState => ({...state, downloading: true})),
+  on(downloadSuccess, downloadFailed, (state): CommonExperimentInfoState => ({...state, downloading: false})),
   on(setExperimentErrors, (state, action): CommonExperimentInfoState => ({...state, errors: {...state.errors, ...action}})),
   on(resetExperimentInfo, (state): CommonExperimentInfoState => ({...state, infoData: null})),
   on(setExperimentInfoData, (state, action): CommonExperimentInfoState => ({
@@ -115,7 +124,7 @@ export const commonExperimentInfoReducers = [
     },
     artifactsExperimentId: (action as ReturnType<typeof actions.setExperimentArtifacts>).experimentId
   }))
-] as ReducerTypes<CommonExperimentInfoState, any>[];
+] as ReducerTypes<CommonExperimentInfoState, ActionCreator[]>[];
 
 export const commonExperimentInfoReducer = createReducer(
   initialCommonExperimentInfoState,

@@ -14,8 +14,8 @@ import {MatSelectModule} from '@angular/material/select';
 import {MatInputModule} from '@angular/material/input';
 import {MatRadioModule} from '@angular/material/radio';
 import {LoginComponent} from '@common/login/login/login.component';
-import {SharedPipesModule} from '@common/shared/pipes/shared-pipes.module';
 import {NtkmeButtonModule} from '@ctrl/ngx-github-buttons';
+import {SafePipe} from '@common/shared/pipes/safe.pipe';
 
 @NgModule({
   declarations: [LoginComponent, SignupComponent],
@@ -32,8 +32,8 @@ import {NtkmeButtonModule} from '@ctrl/ngx-github-buttons';
     MatSelectModule,
     MatInputModule,
     MatRadioModule,
-    SharedPipesModule,
     NtkmeButtonModule,
+    SafePipe
   ]
 })
 export class LoginModule { }

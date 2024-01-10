@@ -1,3 +1,5 @@
+import packageJson from '../../../../../../../package.json';
+
 export interface CommercialContext {
   title?: string;
   subtitle?: string;
@@ -35,7 +37,7 @@ export interface Environment {
   baseUrl?: string;
   autoLogin?: boolean;
   whiteLabelLogo?: boolean;
-  whiteLabelLink?: any;
+  whiteLabelLink?: {logo: string; tooltip: string; link: string};
   whiteLabelLoginTitle?: string;
   whiteLabelLoginSubtitle?: string;
   whiteLabelSlogan?: string;
@@ -79,7 +81,7 @@ export const BASE_ENV: Environment = {
   autoLogin: false,
   apiBaseUrl: null,
   fileBaseUrl: null,
-  version: require('../../../../../../../package.json').version,
+  version: packageJson.version,
   baseUrl: 'https://app.allegro.ai',
   headerPrefix: 'X-Allegro',
   loginBanner: '',
@@ -92,10 +94,10 @@ export const BASE_ENV: Environment = {
   whiteLabelLoginTitle: null,
   whiteLabelLoginSubtitle: null,
   whiteLabelSlogan: null,
-  plotlyURL: 'app/webapp-common/assets/plotly-2.16.1.min.js',
+  plotlyURL: 'app/webapp-common/assets/plotly-2.25.2.min.js',
   docsLink: '/docs',
   useFilesProxy: true,
-  branding: {logo: '/assets/logo-white.svg?v=7', logoSmall: '/assets/c-logo.svg?=2'},
+  branding: {logo: 'assets/logo-white.svg?v=7', logoSmall: 'assets/c-logo.svg?=2'},
   serverDownMessage: 'The ClearML server is currently unavailable.<BR>' +
     'Please try to reload this page in a little while.',
   legal: {TOULink: 'https://clear.ml/legal-platform-tou/', pricingLink: 'https://clear.ml/pricing/'},

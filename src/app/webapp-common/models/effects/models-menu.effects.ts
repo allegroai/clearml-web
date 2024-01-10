@@ -36,28 +36,29 @@ export class ModelsMenuEffects {
     private apiTasks: ApiTasksService,
     private router: Router,
     private readonly route: ActivatedRoute
-  ) {}
+  ) {
+  }
 
-  activeLoader = createEffect( () => this.actions$.pipe(
+  activeLoader = createEffect(() => this.actions$.pipe(
     ofType(menuActions.archiveSelectedModels, menuActions.publishModelClicked,
       menuActions.restoreSelectedModels, menuActions.changeProjectRequested),
     map(action => activeLoader(action.type))));
 
 
-  publishModel$ = createEffect( () => this.actions$.pipe(
+  publishModel$ = createEffect(() => this.actions$.pipe(
     ofType(menuActions.publishModelClicked),
     concatLatestFrom(() => this.store.select(selectSelectedModel)),
     switchMap(([action, selectedModel]) => {
-      const ids = action.selectedEntities.map(model => model.id);
-      return this.apiModels.modelsPublishMany({ids})
+        const ids = action.selectedEntities.map(model => model.id);
+        return this.apiModels.modelsPublishMany({ids})
           .pipe(
             mergeMap(res => this.updateModelsSuccess(action, MenuItems.publish, ids, selectedModel, res, {ready: true})),
             catchError(error => this.publishModelFailedText(error, action.selectedEntities).pipe(
-              mergeMap(errorMessage => [
-                requestFailed(error),
-                deactivateLoader(action.type),
-                setServerError(error, null, errorMessage)
-              ])
+                mergeMap(errorMessage => [
+                  requestFailed(error),
+                  deactivateLoader(action.type),
+                  setServerError(error, null, errorMessage)
+                ])
               )
             )
           );
@@ -66,7 +67,7 @@ export class ModelsMenuEffects {
   ));
 
 
-  changeProject$ = createEffect( () => this.actions$.pipe(
+  changeProject$ = createEffect(() => this.actions$.pipe(
     ofType(menuActions.changeProjectRequested),
     concatLatestFrom(() => this.store.select(selectSelectedModel)),
     switchMap(
@@ -76,12 +77,13 @@ export class ModelsMenuEffects {
           ids: action.selectedModels.map(model => model.id),
           project: action.project.id,
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          project_name: action.project.name})
+          project_name: action.project.name
+        })
           .pipe(
             tap(res => this.route.snapshot.firstChild.data.setAllProject ?
               this.router.navigate([]) :
               this.router.navigate([
-                'projects', action.project.id? action.project.id : res.project_id ?? '*',
+                'projects', action.project.id ? action.project.id : res.project_id ?? '*',
                 'models', action.selectedModels.length === 1 ? action.selectedModels[0].id : ''
               ], {queryParamsHandling: 'merge'})),
             mergeMap(() => [
@@ -113,9 +115,9 @@ export class ModelsMenuEffects {
     }
   }
 
-  addTag$ = createEffect( () => this.actions$.pipe(
+  addTag$ = createEffect(() => this.actions$.pipe(
     ofType(addTag),
-    switchMap(action  => {
+    switchMap(action => {
       const ids = action.models.map(e => e.id);
       return this.apiModels.modelsUpdateTags({
         ids,
@@ -130,10 +132,12 @@ export class ModelsMenuEffects {
             if (res.updated === ids.length) {
               const updatedModels = models?.filter(exp => ids.includes(exp.id)) ?? action.models as unknown as TableModel[];
               return [
-                viewActions.updateManyModels({changeList: updatedModels.reduce((acc, model) => {
+                viewActions.updateManyModels({
+                  changeList: updatedModels.reduce((acc, model) => {
                     acc[model.id] = {tags: Array.from(new Set((model?.tags || []).concat([action.tag]))).sort()};
                     return acc;
-                  }, {})}),
+                  }, {})
+                }),
                 ...(ids.includes(selectedModelInfo?.id) ?
                   [infoActions.modelDetailsUpdated({
                     id: selectedModelInfo.id,
@@ -144,7 +148,7 @@ export class ModelsMenuEffects {
                 projectsActions.addCompanyTag({tag: action.tag}),
               ];
             } else {
-              return [addMessage(MESSAGES_SEVERITY.ERROR, 'Not all tags were applied')]
+              return [addMessage(MESSAGES_SEVERITY.ERROR, 'Not all tags were applied')];
             }
           }),
           catchError(() => [addMessage(MESSAGES_SEVERITY.ERROR, 'Failed to apply tags')])
@@ -152,7 +156,7 @@ export class ModelsMenuEffects {
     })
   ));
 
-  removeTag$ = createEffect( () => this.actions$.pipe(
+  removeTag$ = createEffect(() => this.actions$.pipe(
     ofType(removeTag),
     switchMap((action) =>
       action.models.map(model => {
@@ -233,17 +237,7 @@ export class ModelsMenuEffects {
     concatLatestFrom(() => [
       this.store.select(selectSelectedTableModel),
     ]),
-    tap(([action, selectedModel]) => {
-      if (this.isSelectedModelInCheckedModels(action.selectedEntities, selectedModel)) {
-        this.router.navigate([],
-          {
-            relativeTo: this.route,
-            queryParams: {archive: undefined},
-            queryParamsHandling: 'merge',
-          });
-      }
-    }),
-    switchMap(([action]) => this.apiModels.modelsUnarchiveMany({ids: action.selectedEntities.map((model) => model.id)})
+    switchMap(([action, selectedModel]) => this.apiModels.modelsUnarchiveMany({ids: action.selectedEntities.map((model) => model.id)})
       .pipe(
         concatLatestFrom(() => this.store.select(selectRouterConfig)),
         mergeMap(([res, routerConfig]: [ModelsUnarchiveManyResponse, RouterState['config']]) => {
@@ -267,6 +261,7 @@ export class ModelsMenuEffects {
             const successModels = models.map(model => model.id).filter(id => !failedIds.includes(id));
             actions = actions.concat([
               viewActions.removeModels({modelIds: successModels}),
+              ...(this.isSelectedModelInCheckedModels(action.selectedEntities, selectedModel) ? [viewActions.selectNextModel()] : []),
               viewActions.fetchModelsRequested()
             ]);
           }
@@ -284,16 +279,15 @@ export class ModelsMenuEffects {
 
   private updateModelsSuccess(action, operationName: MenuItems, ids: string[], selectedEntity, res: ModelsArchiveManyResponse, changes): Action[] {
     const actions = [
-        ...ids.map(id => viewActions.updateModel({id, changes})),
+      ...ids.map(id => viewActions.updateModel({id, changes})),
       deactivateLoader(action.type)
-      ] as Action[];
+    ] as Action[];
     if (ids.includes(selectedEntity?.id)) {
       actions.push(infoActions.setModelInfo({model: {...selectedEntity, ...changes}}));
     }
     actions.push(getNotificationAction(res, action, operationName, EntityTypeEnum.model));
     return actions;
   }
-
 
 
   isSelectedModelInCheckedModels(checkedModels, selectedModel) {

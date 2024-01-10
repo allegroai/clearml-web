@@ -64,7 +64,7 @@ export const selectS3BucketCredentialsBucketCredentials = createSelector(selectA
 export const selectShowLocalFilesPopUp = createSelector(selectAuth, state => state.showLocalFilePopup);
 export const selectDontShowAgainForBucketEndpoint = createSelector(selectAuth, state => state.dontShowAgainForBucketEndpoint);
 export const selectSignedUrls = createSelector(selectAuth, state => state.signedUrls);
-export const selectSignedUrl = url => createSelector(selectAuth, state => state.signedUrls[url]);
+export const selectSignedUrl = (url: string) => createSelector(selectAuth, state => state.signedUrls[url]);
 export const getSignedUrlOrOrigin$ = (url: string, store: Store) => store.pipe(
   select(selectSignedUrl(url)),
   filter(signed => !!signed?.signed),

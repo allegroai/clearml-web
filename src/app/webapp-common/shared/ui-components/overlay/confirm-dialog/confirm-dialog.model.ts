@@ -8,7 +8,7 @@ export interface ConfirmDialogConfig {
   template?: TemplateRef<any>;
   reference?: string;
   yes?: string;
-  no?: string;
+  no?: string | boolean;
   iconClass?: string; // the icon class (see icons.scss).
   iconData?: string; // the icon class (see icons.scss).
   codeSnippet?: string;

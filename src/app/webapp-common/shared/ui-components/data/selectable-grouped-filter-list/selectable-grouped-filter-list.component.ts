@@ -1,12 +1,36 @@
 import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
 import {isEqual} from 'lodash-es';
-import {GroupedList} from '@common/tasks/tasks.utils';
+import {GroupedList} from '@common/tasks/tasks.model';
+import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
+import {SearchComponent} from '@common/shared/ui-components/inputs/search/search.component';
+import {
+  GroupedSelectableListComponent
+} from '@common/shared/ui-components/data/grouped-selectable-list/grouped-selectable-list.component';
+
+
+export const buildMetricsList = (metrics: MetricVariantResult[]): GroupedList => {
+  return metrics.reduce((acc, curr) => {
+    const currMetric = curr.metric;
+    if (acc[currMetric]) {
+      acc[currMetric][curr.variant] = {};
+    } else {
+      acc[currMetric] = {[curr.variant]: {}};
+    }
+    return acc;
+  }, {} as {[metric: string]: {[variant: string]: any}});
+
+}
 
 @Component({
   selector: 'sm-selectable-grouped-filter-list',
   templateUrl: './selectable-grouped-filter-list.component.html',
   styleUrls: ['./selectable-grouped-filter-list.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    SearchComponent,
+    GroupedSelectableListComponent
+  ]
 })
 export class SelectableGroupedFilterListComponent {
   private _searchTerm: string;
@@ -68,10 +92,10 @@ export class SelectableGroupedFilterListComponent {
   }
 
   private hideChildrenForHiddenParent(list: GroupedList) {
-    const newHiddenList = [...this.checkedList];
+    const newHiddenList = this.checkedList ? [...this.checkedList] : [];
     let hiddenListChanged = false;
     Object.entries(list).forEach(([parent, children]) => {
-      if (this.checkedList.includes(parent) && Object.keys(children).length > 0) {
+      if (this.checkedList?.includes(parent) && Object.keys(children).length > 0) {
         hiddenListChanged = true;
         Array.prototype.push.apply(newHiddenList, (Object.keys(children).map(child => parent + child)));
       }
@@ -123,7 +147,7 @@ export class SelectableGroupedFilterListComponent {
         }
       });
     } else {
-      allValues = allValues.filter(i => i !== key);
+      allValues = allValues.filter(i => !i.startsWith(key));
       Object.keys(this.list[key]).forEach(itemKey => {
         const keyItemKey = key + itemKey;
         if (allValues.includes(keyItemKey)) {

@@ -1,18 +1,21 @@
 <div class="header-container" [class.login]="isLogin">
-  <sm-breadcrumbs
-    class="spacer"
-    [class.flex-grow-1]="!(userFocus)"
-    [class.user-focus]="userFocus "
-    [class.share-view]="isShareMode"
-    [activeWorkspace]="activeWorkspace">
-  </sm-breadcrumbs>
-  <div class="ms-3 d-flex align-items-center me-auto" *ngIf="userFocus">
-    <sm-show-only-user-work></sm-show-only-user-work>
+  <div class="d-flex">
+    <sm-breadcrumbs
+      class="spacer"
+      [class.flex-grow-1]="!(userFocus)"
+      [class.user-focus]="userFocus "
+      [class.share-view]="isShareMode"
+      [activeWorkspace]="activeWorkspace">
+    </sm-breadcrumbs>
+    <sm-show-only-user-work *ngIf="userFocus" class="ms-3"></sm-show-only-user-work>
   </div>
 
   <div *ngIf="showLogo && !isLogin" class="logo-full middle"
        [class.make-room-for-slogan]="(environment$ | async).whiteLabelSlogan">
-    <img *ngIf="!(environment$ | async).whiteLabelLogo; else: whiteLabel" alt="logo" [priority]="true" [ngSrc]="(environment$ | async).branding.logo" width="130" height="42">
+    <img *ngIf="!(environment$ | async).whiteLabelLogo; else: whiteLabel" alt="logo"
+         [priority]="true"
+         [ngSrc]="(environment$ | async).branding.logo"
+         width="130" height="42">
     <ng-template #whiteLabel>
       <div class="slogan">{{(environment$ | async).whiteLabelSlogan}}</div>
       <div *ngIf="isLogin" class="logo-full">
@@ -20,9 +23,13 @@
       </div>
     </ng-template>
   </div>
+  <sm-header-navbar-tabs
+    *ngIf="!showLogo && !isLogin"
+  ></sm-header-navbar-tabs>
+
   <div *ngIf="isLogin" class="spacer"></div>
 
-  <div class="right-buttons" data-id="rightSideHeaderpanel" >
+  <div class="right-buttons" data-id="rightSideHeaderpanel" *ngIf="!hideMenus">
     <sm-common-search #search [class.share-view]="isShareMode"></sm-common-search>
 
     <span class="d-flex pointer resources-trigger" [matMenuTriggerFor]="resourcesMenu">
@@ -41,6 +48,7 @@
     <mat-menu #profileMenu="matMenu" class="user-menu">
       <button mat-menu-item [routerLink]="'settings/' + (userNotificationPath$ | async)" data-id="Settings Button">
         <i class="al-icon icon sm-md" [class]="(userNotificationPath$ | async) ? 'al-ico-settings-alert' : 'al-ico-settings'">
+          <span class="path1"></span><span class="path2"></span>
         </i>Settings
       </button>
       <sm-header-user-menu-actions></sm-header-user-menu-actions>

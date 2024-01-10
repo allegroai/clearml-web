@@ -18,3 +18,6 @@ export function getSystemTags(experiment: ISelectedExperiment) {
   }
   return sysTags;
 }
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const getExtraHeaders = (workspace: string) => ({headers: {}});

@@ -1,4 +1,5 @@
-import {Task} from '../../business-logic/model/tasks/task';
+import {Task} from '~/business-logic/model/tasks/task';
+import {PlotData} from 'plotly.js';
 
 export interface ExperimentGraph {
   data?: unknown;
@@ -11,4 +12,8 @@ export interface ExperimentGraph {
   variant?: string;
   worker?: string;
   config?: {[key: string]: unknown};
+}
+
+export interface GroupedList {
+  [metric: string]: { [variant: string]: { [experimentId: string]: PlotData } };
 }

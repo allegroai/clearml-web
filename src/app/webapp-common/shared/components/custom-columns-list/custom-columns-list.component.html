@@ -1,4 +1,4 @@
-<div class="sm-menu-header">CUSTOMIZE COLUMNS</div>
+<div class="sm-menu-header">{{menuTitle}}</div>
 <div class="list-container">
   <sm-menu-item *ngFor="let col of tableCols; trackBy: trackById"
                 [itemLabel]="col.header"
@@ -7,6 +7,7 @@
                 [removable]="!!col.metric_hash || col.isParam || col.type==='metadata'  || col.type==='hdmd'"
                 [itemValue]="col.id"
                 [enableIcon]="false"
+                [enableTooltip]="true"
                 (removeItemClicked)="removeColFromList.emit($event)"
                 (itemClicked)="selectedTableColsChanged.emit(col)">
   </sm-menu-item>

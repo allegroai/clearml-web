@@ -1,8 +1,8 @@
 import {Injectable} from '@angular/core';
-import {Actions, createEffect, ofType} from '@ngrx/effects';
-import {select, Store} from '@ngrx/store';
+import {Actions, concatLatestFrom, createEffect, ofType} from '@ngrx/effects';
+import {Store} from '@ngrx/store';
 import {activeLoader, deactivateLoader, setServerError} from '../../core/actions/layout.actions';
-import {catchError, filter, map, mergeMap, switchMap, withLatestFrom} from 'rxjs/operators';
+import {catchError, filter, map, mergeMap, switchMap} from 'rxjs/operators';
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
 import {ExperimentParamsReverterService} from '../services/experiment-params-reverter.service';
 import {requestFailed} from '../../core/actions/http.actions';
@@ -37,15 +37,18 @@ export class ExperimentsCompareParamsEffects {
 
   updateExperimentsList$ = createEffect(() => this.actions$.pipe(
     ofType(paramsActions.experimentListUpdated),
-    switchMap((action) => this.store.select(selectActiveWorkspaceReady).pipe(
-      filter(ready => ready),
-      map(() => action))),
-    withLatestFrom(this.store.pipe(select(selectExperimentIdsParams))),
+    switchMap((action) => this.store.select(selectActiveWorkspaceReady)
+      .pipe(
+        filter(ready => ready),
+        map(() => action)
+      )
+    ),
+    concatLatestFrom(() => this.store.select(selectExperimentIdsParams)),
     switchMap(([action, oldExperimentIds]) => {
         const newExperimentIds = action.ids.filter(id => !oldExperimentIds.includes(id));
         return this.fetchEntity$(newExperimentIds, action.entity)
           .pipe(
-            withLatestFrom(this.store.pipe(select(selectExperimentsParams))),
+            concatLatestFrom(() => this.store.select(selectExperimentsParams)),
             // get only the relevant experiments
             map(([experiments, oldExperiments]: [ExperimentDetailBase[], ExperimentParams[]]) =>
               oldExperiments.filter(exp => action.ids.includes(exp.id)).concat(experiments as ExperimentParams[])),
@@ -67,7 +70,7 @@ export class ExperimentsCompareParamsEffects {
 
   refetchExperiment$ = createEffect(() => this.actions$.pipe(
     ofType(refetchExperimentRequested),
-    withLatestFrom(this.store.select(selectExperimentIdsParams)),
+    concatLatestFrom(() => this.store.select(selectExperimentIdsParams)),
     switchMap(([action, newExperimentIds]) =>
       this.fetchEntity$(newExperimentIds, action.entity).pipe(
         mergeMap(experiments => [

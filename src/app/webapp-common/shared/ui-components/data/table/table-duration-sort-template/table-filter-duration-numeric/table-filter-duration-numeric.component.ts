@@ -9,10 +9,21 @@ import {
   ImmediateErrorStateMatcher,
   TableDurationSortBaseComponent
 } from '../table-duration-sort-base.component';
-import {FormControl, FormGroup, Validators} from '@angular/forms';
+import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {distinctUntilChanged, debounceTime, filter} from 'rxjs/operators';
 import {Subscription} from 'rxjs';
 import {isNil} from 'lodash-es';
+import {
+  TableFilterDurationErrorComponent
+} from '@common/shared/ui-components/data/table/table-duration-sort-template/table-filter-duration-error/table-filter-duration-error.component';
+import {DividerComponent} from '@common/shared/ui-components/indicators/divider/divider.component';
+import {MatInputModule} from '@angular/material/input';
+import {NgIf} from '@angular/common';
+import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
+import {
+  KeydownStopPropagationDirective
+} from '@common/shared/ui-components/directives/keydown-stop-propagation.directive';
+import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
 
 const getDurationValue = (value: IDurationThan) => value.checked ? `${value.value}` : '';
 
@@ -21,7 +32,18 @@ const getDurationValue = (value: IDurationThan) => value.checked ? `${value.valu
   selector: 'sm-table-filter-duration-numeric',
   templateUrl: './table-filter-duration-numeric.component.html',
   styleUrls: ['./table-filter-duration-numeric.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    TableFilterDurationErrorComponent,
+    DividerComponent,
+    MatInputModule,
+    ReactiveFormsModule,
+    NgIf,
+    ClickStopPropagationDirective,
+    KeydownStopPropagationDirective,
+    LabeledFormFieldDirective
+  ],
+  standalone: true
 
 })
 export class TableFilterDurationNumericComponent extends TableDurationSortBaseComponent implements OnInit, OnDestroy {

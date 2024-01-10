@@ -1,14 +1,39 @@
 import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import {ISmCol} from '../table.consts';
 import {addOrRemoveFromArray} from '../../../../utils/shared-utils';
-import {MatMenuTrigger} from '@angular/material/menu';
+import {MatMenuModule, MatMenuTrigger} from '@angular/material/menu';
 import {trackByKey} from '@common/shared/utils/forms-track-by';
+import {NgForOf, NgIf, NgTemplateOutlet} from '@angular/common';
+import {MatInputModule} from '@angular/material/input';
+import {FormsModule} from '@angular/forms';
+import {
+  CheckboxThreeStateListComponent
+} from '@common/shared/ui-components/panel/checkbox-three-state-list/checkbox-three-state-list.component';
+import {filter} from 'rxjs/operators';
+import {MatListModule} from '@angular/material/list';
+import {MenuItemComponent} from '@common/shared/ui-components/panel/menu-item/menu-item.component';
+import {FilterPipe} from '@common/shared/pipes/filter.pipe';
+import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 
 @Component({
   selector: 'sm-table-card-filter-template',
   templateUrl: './table-card-filter-template.component.html',
   styleUrls: ['./table-card-filter-template.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    MatMenuModule,
+    NgTemplateOutlet,
+    MatInputModule,
+    FormsModule,
+    CheckboxThreeStateListComponent,
+    MatListModule,
+    NgIf,
+    MenuItemComponent,
+    NgForOf,
+    FilterPipe,
+    ClickStopPropagationDirective
+  ]
 })
 export class TableCardFilterTemplateComponent {
 
@@ -123,4 +148,6 @@ export class TableCardFilterTemplateComponent {
         .map(column => ({key: column.id, value: this.options[column.id]}));
     }
   }
+
+  protected readonly filter = filter;
 }

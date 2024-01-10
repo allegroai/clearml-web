@@ -1,17 +1,28 @@
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {Project} from '~/business-logic/model/projects/project';
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {ChangeDetectionStrategy, Component, ElementRef, Inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {NgForm} from '@angular/forms';
 import {Observable, Subscription} from 'rxjs';
-import {selectTablesFilterProjectsOptions} from '@common/core/reducers/projects.reducer';
+import {selectReadOnlyProjects, selectTablesFilterProjectsOptions} from '@common/core/reducers/projects.reducer';
 import {getTablesFilterProjectsOptions, resetTablesFilterProjectsOptions} from '@common/core/actions/projects.actions';
 import {filter, map, tap} from 'rxjs/operators';
-import {CloneForm} from '../../common-experiment-model.model';
+import {CloneExperimentPayload} from '../../common-experiment-model.model';
 import {isEqual} from 'lodash-es';
 import {isReadOnly} from '@common/shared/utils/is-read-only';
 import {rootProjectsPageSize} from '@common/constants';
 import {ProjectsGetAllResponseSingle} from '~/business-logic/model/projects/projectsGetAllResponseSingle';
+import {
+  IOption
+} from '@common/shared/ui-components/inputs/select-autocomplete-with-chips/select-autocomplete-with-chips.component';
+import {selectCloneForceParent} from '@common/experiments/reducers';
+export interface CloneDialogData {
+  type: string;
+  defaultProject: string;
+  defaultName: string;
+  defaultComment?: string;
+  extend?: boolean;
+}
 
 @Component({
   selector: 'sm-clone-dialog',
@@ -20,25 +31,25 @@ import {ProjectsGetAllResponseSingle} from '~/business-logic/model/projects/proj
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CloneDialogComponent implements OnInit, OnDestroy {
-
   public reference: string;
   public header: string;
   public type: string;
   public projects$: Observable<Project[]>;
+  public forceParent$ = this.store.select(selectCloneForceParent);
   public formData = {
     project: null,
     name: null,
-    comment: null
-  } as CloneForm;
+    comment: null,
+    forceParent: false
+  } as CloneExperimentPayload;
   public projects: { label: string; value: string }[];
 
   private readonly defaultProjectId: string;
   private subs = new Subscription();
   private readonly cloneNamePrefix: string;
 
-  @ViewChild('cloneForm', {static: true}) cloneForm: NgForm;
-  @ViewChild('cloneButton', {static: true}) cloneButton: ElementRef;
-  public filteredProjects: Observable<{ label: string; value: string }[]>;
+  @ViewChild('cloneForm') cloneForm: NgForm;
+  @ViewChild('cloneButton') cloneButton: ElementRef;
   isAutoCompleteOpen: boolean;
   public readOnlyProjects$: Observable<string[]>;
   public extend: boolean;
@@ -51,14 +62,7 @@ export class CloneDialogComponent implements OnInit, OnDestroy {
   constructor(
     private store: Store,
     public dialogRef: MatDialogRef<CloneDialogComponent>,
-    private cdr: ChangeDetectorRef,
-    @Inject(MAT_DIALOG_DATA) data: {
-      type: string;
-      defaultProject: string;
-      defaultName: string;
-      defaultComment: string;
-      extend: boolean;
-    },
+    @Inject(MAT_DIALOG_DATA) data: CloneDialogData,
   ) {
     this.defaultProjectId = data.defaultProject;
     this.header = `${data.extend ? 'Extend' : 'Clone'} ${data.type}`;
@@ -75,8 +79,7 @@ export class CloneDialogComponent implements OnInit, OnDestroy {
       };
     });
 
-    this.readOnlyProjects$ = this.store.select(selectTablesFilterProjectsOptions)
-      .pipe(map(projects => projects?.filter(project => isReadOnly(project)).map(project => project.name)));
+    this.readOnlyProjects$ = this.store.select(selectReadOnlyProjects);
     this.projects$ = this.store.select(selectTablesFilterProjectsOptions).pipe(
       tap(projects => this.allProjectsBeforeFilter = projects),
       filter(projects => !!projects),
@@ -133,8 +136,8 @@ export class CloneDialogComponent implements OnInit, OnDestroy {
 
   }
 
-  displayFn(project: any ): string {
-    return project && project.label ? project.label : project ;
+  displayFn(project: string | IOption ): string {
+    return typeof project === 'string' ? project : project?.label;
   }
 
   closeDialog(isConfirmed) {
@@ -149,7 +152,7 @@ export class CloneDialogComponent implements OnInit, OnDestroy {
   }
 
   clear() {
-    this.formData.project = '';
+    this.formData.project = null;
   }
 
   setIsAutoCompleteOpen(focus: boolean) {
@@ -160,7 +163,10 @@ export class CloneDialogComponent implements OnInit, OnDestroy {
 
   loadMore() {
     this.loading = true;
-    this.store.dispatch(getTablesFilterProjectsOptions({searchString: this.formData.project || '', loadMore: true,  allowPublic: false}));
+    this.store.dispatch(getTablesFilterProjectsOptions({
+      searchString: (typeof this.formData.project === 'string' ? this.formData.project : this.formData.project.value) ?? '',
+      loadMore: true,  allowPublic: false
+    }));
   }
 
   isFocused(locationRef: HTMLInputElement) {

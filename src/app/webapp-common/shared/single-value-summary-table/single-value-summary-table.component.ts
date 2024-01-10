@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
 import {EventsGetTaskSingleValueMetricsResponseValues} from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponseValues';
 import {download} from '../utils/download';
 import {NgForOf, NgIf} from '@angular/common';
@@ -15,7 +15,7 @@ import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
   ],
   standalone: true
 })
-export class SingleValueSummaryTableComponent implements OnInit {
+export class SingleValueSummaryTableComponent {
   @Input() data: Array<EventsGetTaskSingleValueMetricsResponseValues>;
   @Input() experimentName;
   @Input() darkTheme: boolean;
@@ -23,8 +23,6 @@ export class SingleValueSummaryTableComponent implements OnInit {
   public hover: boolean;
   constructor() { }
 
-  ngOnInit(): void {
-  }
   public downloadTableAsCSV() {
     const vals = this.data.map(item=>item.value) as number[];
     const headers = this.data.map(item=>item.variant);

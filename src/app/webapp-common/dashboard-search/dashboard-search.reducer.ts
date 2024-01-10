@@ -14,7 +14,7 @@ import {
 } from './dashboard-search.actions';
 import {SearchState} from '../common-search/common-search.reducer';
 import {ActiveSearchLink, activeSearchLink} from '~/features/dashboard-search/dashboard-search.consts';
-import {IReport} from "@common/reports/reports.consts";
+import {IReport} from '@common/reports/reports.consts';
 
 export interface DashboardSearchState {
   projects: Project[];

@@ -1,7 +1,8 @@
 import {Pipe, PipeTransform} from '@angular/core';
 
 @Pipe({
-  name: 'toExponential'
+  name: 'toExponential',
+  standalone: true
 })
 export class ToExponentialPipe implements PipeTransform {
 

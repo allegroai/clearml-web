@@ -1,11 +1,16 @@
 import {Component, OnInit} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
+import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
 
 @Component({
   selector: 'sm-markdown-cheat-sheet-dialog',
   templateUrl: './markdown-cheat-sheet-dialog.component.html',
-  styleUrls: ['./markdown-cheat-sheet-dialog.component.scss']
+  styleUrls: ['./markdown-cheat-sheet-dialog.component.scss'],
+  standalone: true,
+  imports: [
+    DialogTemplateComponent
+  ]
 })
 export class MarkdownCheatSheetDialogComponent implements OnInit {
   public mdCheatSheetHtmlFile: SafeHtml;

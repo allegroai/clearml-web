@@ -3,7 +3,8 @@ import {AbstractControl, NG_VALIDATORS, ValidationErrors, Validator, ValidatorFn
 
 @Directive({
   selector : '[smForceInvalidValidator]',
-  providers: [{provide: NG_VALIDATORS, useExisting: ForceInvalidValidatorDirective, multi: true}]
+  providers: [{provide: NG_VALIDATORS, useExisting: ForceInvalidValidatorDirective, multi: true}],
+  standalone: true,
 })
 export class ForceInvalidValidatorDirective implements Validator {
   @Input('forceInvalid') forceInvalid: boolean;

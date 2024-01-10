@@ -3,7 +3,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {Actions, concatLatestFrom, createEffect, ofType} from '@ngrx/effects';
 import {Action, Store} from '@ngrx/store';
 import {cloneDeep, flatten, isEqual} from 'lodash-es';
-import {EMPTY, interval, Observable, of} from 'rxjs';
+import {EMPTY, iif, interval, Observable, of} from 'rxjs';
 import {
   auditTime,
   catchError,
@@ -19,7 +19,6 @@ import {
 } from 'rxjs/operators';
 import {ApiProjectsService} from '~/business-logic/api-services/projects.service';
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
-import {BlTasksService} from '~/business-logic/services/tasks.service';
 import {GET_ALL_QUERY_ANY_FIELDS, INITIAL_EXPERIMENT_TABLE_COLS} from '~/features/experiments/experiments.consts';
 import {selectSelectedExperiment} from '~/features/experiments/reducers';
 import {excludeTypes, EXPERIMENTS_TABLE_COL_FIELDS} from '~/features/experiments/shared/experiments.const';
@@ -47,12 +46,12 @@ import {
 } from '../../shared/utils/tableParamEncode';
 import {autoRefreshExperimentInfo, getExperimentInfo} from '../actions/common-experiments-info.actions';
 import * as exActions from '../actions/common-experiments-view.actions';
-import {setActiveParentsFilter, setParents, updateManyExperiment} from '../actions/common-experiments-view.actions';
+import {getSelectedExperiments, setActiveParentsFilter, setParents, setSelectedExperiments, updateManyExperiment} from '../actions/common-experiments-view.actions';
 import * as exSelectors from '../reducers/index';
-import {selectHyperParamsFiltersPage, selectTableRefreshList} from '../reducers/index';
+import {selectHyperParamsFiltersPage, selectSelectedExperiments, selectTableRefreshList} from '../reducers/index';
 import {ITableExperiment} from '../shared/common-experiment-model.model';
 import {EXPERIMENTS_PAGE_SIZE} from '../shared/common-experiments.const';
-import {convertStopToComplete, encodeHyperParameter} from '../shared/common-experiments.utils';
+import {convertStopToComplete} from '../shared/common-experiments.utils';
 import {sortByField} from '../../tasks/tasks.utils';
 import {MODEL_TAGS} from '../../models/shared/models.const';
 import {emptyAction} from '~/app.constants';
@@ -106,6 +105,10 @@ import {ApiOrganizationService} from '~/business-logic/api-services/organization
 import {INITIAL_CONTROLLER_TABLE_COLS} from '@common/pipelines-controller/controllers.consts';
 import {prepareColsForDownload} from '@common/shared/utils/download';
 import {TasksGetAllExRequest} from '~/business-logic/model/tasks/tasksGetAllExRequest';
+import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
+import {ApiEventsService} from '~/business-logic/api-services/events.service';
+import {EventTypeEnum} from '~/business-logic/model/events/eventTypeEnum';
+import {EventsGetMultiTaskMetricsResponse} from '~/business-logic/model/events/eventsGetMultiTaskMetricsResponse';
 
 
 @Injectable()
@@ -113,7 +116,7 @@ export class CommonExperimentsViewEffects {
   /* eslint-disable @typescript-eslint/naming-convention */
   constructor(
     private actions$: Actions, private store: Store, private apiTasks: ApiTasksService,
-    private projectsApi: ApiProjectsService, private taskBl: BlTasksService, private router: Router,
+    private projectsApi: ApiProjectsService, private eventsApi: ApiEventsService, private router: Router,
     private route: ActivatedRoute, private orgApi: ApiOrganizationService
   ) {
   }
@@ -122,7 +125,7 @@ export class CommonExperimentsViewEffects {
     ofType(
       exActions.getNextExperiments, exActions.getExperiments, exActions.globalFilterChanged,
       compareAddDialogTableSortChanged, compareAddTableFilterChanged, setCompareAddTableViewArchived,
-      compareAddTableClearAllFilters, exActions.selectAllExperiments
+      compareAddTableClearAllFilters, exActions.selectAllExperiments, exActions.getCustomMetrics
     ),
     filter((action) => !(action as ReturnType<typeof exActions.refreshExperiments>).hideLoader),
     map(action => activeLoader(action.type))
@@ -380,9 +383,9 @@ export class CommonExperimentsViewEffects {
       this.store.select(selectRouterParams).pipe(map(params => params?.projectId)),
       this.store.select(selectTableMode)
     ]),
-    filter(([, , , , tableMode]) => tableMode === 'info'),
-    tap(([, routeConfig, tasks, projectId]) => this.navigateAfterExperimentSelectionChanged(tasks[0] as ITableExperiment, projectId, routeConfig)),
-    mergeMap(() => [exActions.setTableMode({mode: 'info'})])
+    filter(([, , , , tableMode]) => tableMode !== 'table'),
+    tap(([, routeConfig, tasks, projectId]) => this.navigateAfterExperimentSelectionChanged(tasks[0] as ITableExperiment, projectId, routeConfig, true)),
+    mergeMap(([, , tasks, , tableMode]) => [exActions.setTableMode({mode: tableMode}), exActions.setSelectedExperiments({experiments: []})])
   ));
 
 
@@ -490,7 +493,39 @@ export class CommonExperimentsViewEffects {
       })
         .pipe(
           mergeMap(res => [
-            exActions.setCustomMetrics({metrics: sortByField(res.metrics, 'metric')}),
+            exActions.setCustomMetrics({metrics: sortByField(res.metrics, 'metric'), projectId, compareView: EventTypeEnum.TrainingStatsScalar}),
+            deactivateLoader(action.type)
+          ]),
+          catchError(error => [
+            requestFailed(error),
+            deactivateLoader(action.type),
+            addMessage('warn', 'Fetch custom metrics failed', error?.meta && [{
+              name: 'More info',
+              actions: [setServerError(error, null, 'Fetch custom metrics failed')]
+            }]),
+            exActions.setCustomHyperParams({params: []})])
+        )
+    )
+  ));
+
+  getCustomMetricsPerType = createEffect(() => this.actions$.pipe(
+    ofType(exActions.getCustomMetricsPerType),
+    concatLatestFrom(() => [
+      this.store.select(selectRouterParams).pipe(map(params => params?.projectId)),
+    ]),
+    switchMap(([action, projectId]) => this.eventsApi.eventsGetMultiTaskMetrics({
+        tasks: action.ids,
+        ...(action.metricsType && {event_type: action.metricsType}),
+        model_events: action.isModel
+      })
+        .pipe(
+          map((res: EventsGetMultiTaskMetricsResponse) => [
+            // {metric: singleValueChartTitle, variant: '', metric_hash: singleValueChartTitle, variant_hash: singleValueChartTitle},
+            ...res.metrics.map(metric => metric.variants.map(variant => (
+              {metric: metric.metric.replace(/^Summary$/, ' Summary'), metric_hash: metric.metric, variant: variant, variant_hash: variant}))).flat(1)
+          ] as MetricVariantResult[]),
+          mergeMap(metrics => [
+            exActions.setCustomMetrics({metrics: sortByField(metrics, 'metric'), projectId, compareView: action.metricsType}),
             deactivateLoader(action.type)
           ]),
           catchError(error => [
@@ -543,10 +578,8 @@ export class CommonExperimentsViewEffects {
       this.store.select(selectHyperParamsFiltersPage),
     ]),
     switchMap(([action, isDeep, selectedProject, isCompare, page]) => {
-      const id = action.col.id;
-      const getter = Array.isArray(action.col.getter) ? action.col.getter[0] : action.col.getter;
       const projectId = action.col.projectId || selectedProject.id;
-      const {section, name} = decodeHyperParam(getter || id);
+      const {section, name} = decodeHyperParam(action.col);
       return this.projectsApi.projectsGetHyperparamValues({
         include_subprojects: isDeep,
         section,
@@ -615,6 +648,25 @@ export class CommonExperimentsViewEffects {
     ])
   ));
 
+  getSelectedExperiments = createEffect(() => this.actions$.pipe(
+    ofType(getSelectedExperiments),
+    concatLatestFrom(() => [
+      this.store.select(selectSelectedExperiments),
+      this.store.select(selectExperimentsList)
+    ]),
+    mergeMap(([action, selectedExperiments, experiments]) =>
+      iif(() => selectedExperiments.length > 0,
+        [setSelectedExperiments({experiments: selectedExperiments.slice(0, 100)})],
+        iif(() => {
+            const experimentsFromStore = experiments.filter(entity => action.ids.includes(entity.id))
+            return experimentsFromStore.length === action.ids.length
+          },
+          [setSelectedExperiments({experiments: experiments.filter(entity => action.ids.includes(entity.id)).slice(0, 100)})],
+          this.apiTasks.tasksGetAllEx({id: action.ids}).pipe(
+            map(res => setSelectedExperiments({experiments: res.tasks}))
+          ))))
+  ))
+
   setURLParams = createEffect(() => this.actions$.pipe(
     ofType(exActions.updateUrlParams, exActions.toggleColHidden),
     concatLatestFrom(() => [
@@ -639,7 +691,8 @@ export class CommonExperimentsViewEffects {
         filters,
         orders: sortFields,
         isArchived,
-        isDeep
+        isDeep,
+        update: true
       });
     })
   ));
@@ -706,14 +759,14 @@ export class CommonExperimentsViewEffects {
     const parentFilter = tableFilters?.[EXPERIMENTS_TABLE_COL_FIELDS.PARENT]?.value;
     const systemTags = tableFilters?.system_tags?.value as string[];
 
-    let systemTagsFilter = (showArchived ? [] : archived ? [MODEL_TAGS.HIDDEN] : [excludedKey, MODEL_TAGS.HIDDEN]);
-    if (systemTags) {
-      systemTagsFilter = systemTagsFilter.concat(systemTags);
-    }
+    let systemTagsFilter = (showArchived ? [] : archived ? ['__$and', MODEL_TAGS.HIDDEN] : [excludedKey, MODEL_TAGS.HIDDEN]);
     if (isDataset) {
-     systemTagsFilter.push('dataset');
+      systemTagsFilter.push('dataset');
     } else if (!isPipeline && !showHidden) {
       systemTagsFilter = systemTagsFilter.concat([excludedKey, 'pipeline', excludedKey, 'dataset', excludedKey, 'reports']);
+    }
+    if (systemTags) {
+      systemTagsFilter = systemTagsFilter.concat(systemTags);
     }
 
     let filters = createFiltersFromStore(tableFilters, true);
@@ -722,7 +775,7 @@ export class CommonExperimentsViewEffects {
       const col = [...metricCols, ...tableCols].find(c => c.id === colId);
       let key = col?.getter || colId;
       if (col?.isParam && typeof col.getter === 'string') {
-        key = encodeHyperParameter(col.getter);
+        key = col.getter;
       }
       if (Array.isArray(key)) {
         key = key[0];
@@ -735,7 +788,7 @@ export class CommonExperimentsViewEffects {
       let getter;
       const col = metricCols.find(c => c.id === field.field);
       if (col?.isParam && typeof col.getter === 'string') {
-        getter = encodeHyperParameter(col.getter);
+        getter = col.getter;
       } else {
         getter = Array.isArray(col?.getter) ? col.getter[0] : col?.getter;
       }
@@ -743,8 +796,7 @@ export class CommonExperimentsViewEffects {
     });
 
     const colsFilters = flatten(tableCols.filter(col => col.id !== 'selected' && !col.hidden).map(col => col.getter || col.id));
-    const metricColsFilters = metricCols ? flatten(metricCols.map(col =>
-      (col?.isParam && typeof col.getter === 'string') ? encodeHyperParameter(col.getter) : col.getter || col.id)) : [];
+    const metricColsFilters = metricCols ? flatten(metricCols.map(col => col.getter || col.id)) : [];
     const only_fields = [...new Set([...MINIMUM_ONLY_FIELDS, ...colsFilters, ...metricColsFilters]
       .concat(isPipeline || isDataset ? ['parent.name', 'runtime._pipeline_hash', 'runtime.version', 'execution.queue', 'type', 'hyperparams.properties.version'] : []))];
     delete filters['tags'];
@@ -778,7 +830,7 @@ export class CommonExperimentsViewEffects {
     };
   }
 
-  fetchExperiments$(scrollId1: string, refreshScroll = false, allProjects = false,  pageSize = EXPERIMENTS_PAGE_SIZE): Observable<TasksGetAllExResponse> {
+  fetchExperiments$(scrollId1: string, refreshScroll = false, allProjects = false, pageSize = EXPERIMENTS_PAGE_SIZE): Observable<TasksGetAllExResponse> {
     return of(scrollId1)
       .pipe(
         concatLatestFrom(() => [

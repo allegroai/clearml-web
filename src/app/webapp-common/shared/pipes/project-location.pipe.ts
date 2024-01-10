@@ -1,7 +1,8 @@
 import {Pipe, PipeTransform} from '@angular/core';
 
 @Pipe({
-  name: 'projectLocation'
+  name: 'projectLocation',
+  standalone: true
 })
 export class ProjectLocationPipe implements PipeTransform {
 

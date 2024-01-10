@@ -3,6 +3,7 @@ import {get} from 'lodash-es';
 
 @Pipe({
   name: 'replaceViaMapPipe',
+  standalone: true
 })
 export class ReplaceViaMapPipe implements PipeTransform {
 

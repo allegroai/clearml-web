@@ -28,8 +28,8 @@
         class="py-2" expandedHeight="42px" collapsedHeight="42px"
         (click)="expandedMetrics[metric[1][0].metric_hash] = !expandedMetrics[metric[1][0].metric_hash]"
       >
-        <mat-panel-title>
-          <span class="panel-title" data-id="metricType">{{metric[0]}}</span>
+        <mat-panel-title class="w-100">
+          <span class="panel-title ellipsis" data-id="metricType" [smTooltip]="metric[0]" smShowTooltipIfEllipsis>{{metric[0]}}</span>
         </mat-panel-title>
       </mat-expansion-panel-header>
       <ng-template matExpansionPanelContent>
@@ -37,12 +37,12 @@
           <ng-container *ngIf="multiSelect; else single">
             <div class="variant-label">
               <sm-checkbox-control #metricVariant
-                                   (formDataChanged)="toggleAllMetricsToDisplay(variant, metricVariant.formData)"
+                                   (formDataChanged)="!skipValueType ? toggleAllMetricsToDisplay(variant, metricVariant.formData) : toggleMetricToDisplay(variant, metricVariant.formData, 'value')"
                                    [formData]="metricsCols[variant.metric_hash + variant.variant_hash] !== undefined"
                                    [label]="variant.variant"
               ></sm-checkbox-control>
             </div>
-            <div *ngIf="metricVariant.formData" class="value-type">
+            <div *ngIf="metricVariant.formData && !skipValueType" class="value-type">
               <sm-checkbox-control #last label="LAST"
                                    [formData]="metricsCols[variant.metric_hash + variant.variant_hash]?.includes('value')"
                                    (formDataChanged)="toggleMetricToDisplay(variant, last.formData, 'value')"

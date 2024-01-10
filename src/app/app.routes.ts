@@ -1,6 +1,7 @@
 import {Routes} from '@angular/router';
 import {projectRedirectGuardGuard} from '@common/shared/guards/project-redirect.guard';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
+import {resetContextMenuGuard} from '@common/shared/guards/resetContextMenuGuard.guard';
 
 
 export const routes: Routes = [
@@ -33,10 +34,22 @@ export const routes: Routes = [
         children: [
           {path: '', pathMatch: 'full', children: [], canActivate: [projectRedirectGuardGuard]},
           {path: '', redirectTo: '*', pathMatch: 'full'},
-          {path: 'overview', loadChildren: () => import('./webapp-common/project-info/project-info.module').then(m => m.ProjectInfoModule)},
+          {
+            path: 'overview',
+            loadChildren: () => import('./webapp-common/project-info/project-info.module').then(m => m.ProjectInfoModule),
+            canDeactivate: [resetContextMenuGuard]
+          },
           {path: 'projects', loadChildren: () => import('./features/projects/projects.module').then(m => m.ProjectsModule)},
-          {path: 'experiments', loadChildren: () => import('./features/experiments/experiments.module').then(m => m.ExperimentsModule)},
-          {path: 'models', loadChildren: () => import('./webapp-common/models/models.module').then(m => m.ModelsModule)},
+          {
+            path: 'experiments',
+            loadChildren: () => import('./features/experiments/experiments.module').then(m => m.ExperimentsModule),
+            canDeactivate: [resetContextMenuGuard]
+          },
+          {
+            path: 'models',
+            loadChildren: () => import('./webapp-common/models/models.module').then(m => m.ModelsModule),
+            canDeactivate: [resetContextMenuGuard]
+          },
           {
             path: 'compare-experiments',
             loadChildren: () => import('./webapp-common/experiments-compare/experiments-compare.module').then(m => m.ExperimentsCompareModule),

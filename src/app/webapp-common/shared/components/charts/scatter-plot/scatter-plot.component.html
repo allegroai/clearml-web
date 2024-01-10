@@ -10,4 +10,13 @@
     <div class="text no-data">No data to show</div>
   </div>
 </div>
-<div #chart class="h-100 chart"></div>
+<div class="h-100 chart">
+  <canvas
+    #chart
+    baseChart
+    [data]="chartData"
+    [options]="scatterChartOptions"
+    [type]="scatterChartType"
+    (chartClick)="chartClicked($event.active)"
+  ></canvas>
+</div>

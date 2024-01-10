@@ -1,12 +1,16 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, forwardRef, HostListener} from '@angular/core';
-import {TemplateFormSectionBase} from '../../template-forms-ui/templateFormSectionBase';
-import {NG_VALUE_ACCESSOR} from '@angular/forms';
+import {TemplateFormSectionBaseDirective} from '../../template-forms-ui/templateFormSectionBase';
+import {FormsModule, NG_VALUE_ACCESSOR} from '@angular/forms';
 
 @Component({
   selector: 'sm-duration-input',
   templateUrl: './duration-input.component.html',
   styleUrls: ['./duration-input.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    FormsModule
+  ],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -14,7 +18,7 @@ import {NG_VALUE_ACCESSOR} from '@angular/forms';
       multi: true
     }]
 })
-export class DurationInputComponent extends TemplateFormSectionBase {
+export class DurationInputComponent extends TemplateFormSectionBaseDirective {
   public ms = '0';
   public seconds = '0';
   public minutes = '0';

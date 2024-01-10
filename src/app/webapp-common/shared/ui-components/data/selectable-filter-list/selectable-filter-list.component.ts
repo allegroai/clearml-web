@@ -1,11 +1,18 @@
 import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
 import {SelectableListItem} from '../selectable-list/selectable-list.model';
+import {SearchComponent} from '@common/shared/ui-components/inputs/search/search.component';
+import {SelectableListComponent} from '@common/shared/ui-components/data/selectable-list/selectable-list.component';
 
 @Component({
-  selector       : 'sm-selectable-filter-list',
-  templateUrl    : './selectable-filter-list.component.html',
-  styleUrls      : ['./selectable-filter-list.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  selector: 'sm-selectable-filter-list',
+  templateUrl: './selectable-filter-list.component.html',
+  styleUrls: ['./selectable-filter-list.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    SearchComponent,
+    SelectableListComponent
+  ]
 })
 export class SelectableFilterListComponent {
   private _searchTerm: string;

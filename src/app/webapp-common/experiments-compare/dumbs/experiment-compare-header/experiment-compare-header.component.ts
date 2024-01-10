@@ -4,7 +4,7 @@ import {Store} from '@ngrx/store';
 import {selectHideIdenticalFields, selectShowRowExtremes} from '../../reducers';
 import {Observable, Subscription} from 'rxjs';
 import {
-  refreshIfNeeded, setExportTable, setHideIdenticalFields, setShowGlobalLegend, setShowRowExtremes, setShowSearchExperimentsForCompare, toggleShowScalarOptions
+  refreshIfNeeded, setExportTable, setHideIdenticalFields, setShowGlobalLegend, setShowRowExtremes, setShowSearchExperimentsForCompare
 } from '../../actions/compare-header.actions';
 import {ActivatedRoute, Router} from '@angular/router';
 import {selectRouterParams, selectRouterQueryParams, selectRouterUrl} from '@common/core/reducers/router-reducer';
@@ -18,7 +18,7 @@ import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {paramsActions} from '@common/experiments-compare/actions/experiments-compare-params.actions';
 import {SelectModelComponent} from '@common/select-model/select-model.component';
 import { MatDialog } from '@angular/material/dialog';
-import {setArchive} from "@common/core/actions/projects.actions";
+import {setArchive} from '@common/core/actions/projects.actions';
 
 @Component({
   selector: 'sm-experiment-compare-header',
@@ -66,11 +66,13 @@ export class ExperimentCompareHeaderComponent implements OnInit, OnDestroy {
       .subscribe(() => this.store.dispatch(refreshIfNeeded({payload: true, autoRefresh: true, entityType: this.entityType})));
 
     this.routerSubscription = this.store.select(selectRouterUrl).subscribe(() => {
-      this.currentPage = this.route?.snapshot?.firstChild?.url?.[0]?.path;
-      this.viewMode = this.route?.snapshot?.firstChild?.url?.[1]?.path;
-      if (this.currentPage && this.viewMode) {
-        this.store.dispatch(paramsActions.setView({primary: this.currentPage, secondary: this.viewMode}))
+      const currentPage = this.route?.snapshot?.firstChild?.url?.[0]?.path;
+      const viewMode = this.route?.snapshot?.firstChild?.url?.[1]?.path;
+      if (currentPage && viewMode && (currentPage !== this.currentPage || viewMode !== this.viewMode)) {
+        this.store.dispatch(paramsActions.setView({primary: currentPage, secondary: viewMode}))
       }
+      this.currentPage = currentPage;
+      this.viewMode = viewMode;
       this.cdr.detectChanges();
     });
 
@@ -128,10 +130,6 @@ export class ExperimentCompareHeaderComponent implements OnInit, OnDestroy {
 
   showExtremesToggled(event: MatSlideToggleChange) {
     this.store.dispatch(setShowRowExtremes({payload: event.checked}));
-  }
-
-  toggleSettings() {
-    this.store.dispatch(toggleShowScalarOptions());
   }
 
   setAutoRefresh($event: boolean) {

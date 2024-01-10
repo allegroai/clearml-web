@@ -5,7 +5,8 @@ import {ExperimentCompareSettings} from '@common/experiments-compare/reducers/ex
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {EventsGetTaskSingleValueMetricsResponse} from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponse';
 import {EXPERIMENTS_COMPARE_SELECT_EXPERIMENT_} from '@common/experiments-compare/actions/compare-header.actions';
-import {ChartHoverModeEnum} from "@common/experiments/shared/common-experiments.const";
+import {ChartHoverModeEnum} from '@common/experiments/shared/common-experiments.const';
+import {MetricVariants} from '~/business-logic/model/events/metricVariants';
 
 
 export const EXPERIMENTS_COMPARE_METRICS_CHARTS_ = 'EXPERIMENTS_COMPARE_METRICS_CHARTS_';
@@ -14,17 +15,17 @@ export const SET_EXPERIMENT_PLOTS               = EXPERIMENTS_COMPARE_METRICS_CH
 
 export const getMultiScalarCharts = createAction(
   EXPERIMENTS_COMPARE_METRICS_CHARTS_ + 'GET_MULTI_SCALAR_CHARTS',
-  props<{ taskIds: string[]; entity: EntityTypeEnum; autoRefresh?: boolean; xAxisType: ScalarKeyEnum }>()
+  props<{ taskIds: string[]; entity: EntityTypeEnum; metrics: MetricVariants[]; autoRefresh?: boolean; xAxisType: ScalarKeyEnum }>()
 );
 
-export const getMultiSinleScalars = createAction(
+export const getMultiSingleScalars = createAction(
   EXPERIMENTS_COMPARE_METRICS_CHARTS_ + 'GET_MULTI_SINGLE_SCALAR_CHARTS',
-  props<{ taskIds: string[]; entity: EntityTypeEnum; autoRefresh?: boolean; cached?: boolean }>()
+  props<{ taskIds: string[]; entity: EntityTypeEnum; metrics: MetricVariants[]; autoRefresh?: boolean; cached?: boolean }>()
 );
 
 export const getMultiPlotCharts = createAction(
   EXPERIMENTS_COMPARE_METRICS_CHARTS_ + 'GET_MULTI_PLOT_CHARTS',
-  props<{ taskIds: Array<string>; entity: EntityTypeEnum; autoRefresh?: boolean }>()
+  props<{ taskIds: Array<string>; entity: EntityTypeEnum; metrics: MetricVariants[]; autoRefresh?: boolean }>()
 );
 
 export const setExperimentMultiScalarSingleValue = createAction(

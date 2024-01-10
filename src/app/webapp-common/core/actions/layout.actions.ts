@@ -4,12 +4,16 @@ import {omit} from 'lodash-es';
 import {HttpErrorResponse} from '@angular/common/http';
 import {Ace} from 'ace-builds';
 import {MessageSeverityEnum} from '@common/constants';
+import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 
 export const setAutoRefresh = createAction(
   VIEW_PREFIX + '[set auto refresh]',
   props<{ autoRefresh: boolean }>()
 );
-
+export const toggleCardsCollapsed = createAction(
+  VIEW_PREFIX + '[toggle table cards collapsed]',
+  props<{ entityType: EntityTypeEnum }>()
+);
 export const setCompareAutoRefresh = createAction(
   VIEW_PREFIX + '[set compare auto refresh]',
   props<{ autoRefresh: boolean }>()

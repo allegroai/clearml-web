@@ -18,18 +18,18 @@
 
       class="ellipsis menu-button"
       [class.active]="isSorted || isFiltered()">{{header}}</div>
-    <sm-menu #menu
-             smMenuClass="light-theme"
-             searchPlaceholder="Search"
-             [enableSearch]="enableSearch"
-             [fixedOptionsSubheader]="subOptions?.length ? fixedOptionsSubheader : ''"
-             [searchValue]="searchValue"
-             [buttonClass]="'table-filter-button ' + (isFiltered() ? 'active' : 'deactive')"
-             [iconClass]="'pointer icon ' + (isFiltered()? 'i-filter-on':'i-filter-off')"
-             [hasButtonClass]="false"
-             (searchValueChanged)="searching = true; searchValueChanged.emit({value: $any($event.target).value})"
-             (menuClosed)="onMenuClose()"
-             (menuOpened)="onMenuOpen()"
+    <sm-menu
+       smMenuClass="light-theme"
+       searchPlaceholder="Search"
+       [enableSearch]="enableSearch"
+       [fixedOptionsSubheader]="subOptions?.length ? fixedOptionsSubheader : ''"
+       [searchValue]="searchValue"
+       [buttonClass]="'table-filter-button ' + (isFiltered() ? 'active' : 'deactive')"
+       [iconClass]="'pointer icon ' + (isFiltered()? 'i-filter-on':'i-filter-off')"
+       [hasButtonClass]="false"
+       (searchValueChanged)="searching = true; searchValueChanged.emit({value: $any($event.target).value})"
+       (menuClosed)="onMenuClose()"
+       (menuOpened)="onMenuOpen()"
     >
       <ng-container [ngSwitch]="filterType">
         <sm-table-filter-duration

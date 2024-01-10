@@ -2,7 +2,8 @@ import {Pipe, PipeTransform} from '@angular/core';
 import {v4} from 'uuid';
 
 @Pipe({
-  name: 'uuid'
+  name: 'uuid',
+  standalone: true
 })
 export class UuidPipe implements PipeTransform {
 

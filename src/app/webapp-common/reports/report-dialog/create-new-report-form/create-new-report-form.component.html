@@ -58,7 +58,7 @@
         smShowTooltipIfEllipsis
         (onSelectionChange)="projectSelected($event)"
       >
-        <div [innerHTML]="project.label | highlightSearchText:projectInput.value"></div>
+        <div [smSearchText]="projectInput.value">{{project.label}}</div>
       </mat-option>
       <div *ngIf="projects === null" class="p-4 pe-none">
         <mat-spinner class="m-auto" [diameter]="32" [strokeWidth]="4" color="accent"></mat-spinner>

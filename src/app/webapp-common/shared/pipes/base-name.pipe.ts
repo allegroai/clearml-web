@@ -2,7 +2,8 @@ import {Pipe, PipeTransform} from '@angular/core';
 import {getBaseName} from '@common/shared/utils/shared-utils';
 
 @Pipe({
-  name: 'baseName'
+  name: 'baseName',
+  standalone: true
 })
 export class BaseNamePipe implements PipeTransform {
 

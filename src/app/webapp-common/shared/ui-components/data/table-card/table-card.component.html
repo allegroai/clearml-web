@@ -16,12 +16,12 @@
         </div>
         <div class="d-flex ms-auto">
           <ng-content select="sm-experiment-system-tags"></ng-content>
-          <ng-content select="sm-experiment-status-icon-label"></ng-content>
+          <ng-content select="sm-status-icon-label"></ng-content>
           <ng-content select="sm-model-tags"></ng-content>
         </div>
       </div>
       <div class="tags">
-        <ng-content select="sm-tag-list"></ng-content>
+        <ng-content select="[tags-list-container]"></ng-content>
       </div>
       <div class="data">
         <ng-content select="[compact-columns-data]"></ng-content>

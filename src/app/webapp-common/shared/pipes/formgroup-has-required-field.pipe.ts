@@ -1,7 +1,8 @@
 import {Pipe, PipeTransform} from '@angular/core';
 
 @Pipe({
-  name: 'formgroupHasRequiredField'
+  name: 'formgroupHasRequiredField',
+  standalone: true
 })
 export class FormgroupHasRequiredFieldPipe implements PipeTransform {
 

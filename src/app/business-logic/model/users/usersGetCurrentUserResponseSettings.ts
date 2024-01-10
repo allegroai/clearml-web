@@ -16,5 +16,5 @@ export interface UsersGetCurrentUserResponseSettings {
     /**
      * The maximum items downloaded for this user in csv file downloads
      */
-    max_download_items?: string;
+    max_download_items?: number;
 }

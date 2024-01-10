@@ -41,7 +41,7 @@ export class BaseLoginService {
   private _guestUser: { enabled: boolean; username: string; password: string };
   private environment: Environment;
   protected httpClient: HttpClient;
-  protected loginApi: ApiLoginService;
+  public loginApi: ApiLoginService;
   protected dialog: MatDialog;
   protected configService: ConfigurationService;
   protected store: Store;
@@ -83,8 +83,9 @@ export class BaseLoginService {
         this.openServerError();
         throw err;
       }),
-      switchMap(mode => mode === loginModes.simple ? this.httpClient.get('credentials.json') : of(fromEnv())),
-      catchError(() => of(fromEnv())),
+      switchMap(mode => mode === loginModes.simple ? this.httpClient.get('credentials.json').pipe(
+        catchError(() => of(fromEnv())),
+      ) : of(fromEnv())),
       tap((credentials: any) => {
         this.userKey = credentials.userKey;
         this.userSecret = credentials.userSecret;
@@ -130,7 +131,7 @@ export class BaseLoginService {
     }
     return this.loginApi.loginSupportedModes({
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      state: (state === '/' || state.startsWith('callback_') || state.startsWith('/callback_')) ? undefined : state
+      // state: (state === '/' || state.startsWith('callback_') || state.startsWith('/callback_')) ? undefined : state
     });
   }
 
@@ -188,7 +189,7 @@ export class BaseLoginService {
 
     // Mocking application header
     const imgElement = new Image();
-    imgElement.setAttribute('src', '/assets/logo-white.svg');
+    imgElement.setAttribute('src', 'assets/logo-white.svg');
     imgElement.setAttribute('style', 'width: 100%; height: 64px; background-color: #141822; padding: 15px;');
     document.body.appendChild(imgElement);
 
@@ -220,7 +221,7 @@ After the issue is resolved and Trains Server is up and running, reload this pag
   private openServerError() {
     // Mocking application header
     const imgElement = new Image();
-    imgElement.setAttribute('src', '/assets/logo-white.svg');
+    imgElement.setAttribute('src', 'assets/logo-white.svg');
     imgElement.setAttribute('style', 'width: 100%; height: 64px; background-color: #141822; padding: 15px;');
     document.body.appendChild(imgElement);
 

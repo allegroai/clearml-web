@@ -2,10 +2,7 @@ import {Injectable} from '@angular/core';
 import {Actions, concatLatestFrom, createEffect, ofType} from '@ngrx/effects';
 import {Action, Store} from '@ngrx/store';
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
-import {ApiAuthService} from '~/business-logic/api-services/auth.service';
-import {BlTasksService} from '~/business-logic/services/tasks.service';
-import {ApiEventsService} from '~/business-logic/api-services/events.service';
-import {ActivatedRoute, Router} from '@angular/router';
+import {Router} from '@angular/router';
 import {catchError, map, mergeMap, switchMap, tap} from 'rxjs/operators';
 import {
   activeLoader,
@@ -18,7 +15,6 @@ import * as menuActions from '../actions/common-experiments-menu.actions';
 import {stopClicked} from '../actions/common-experiments-menu.actions';
 import {Observable, of} from 'rxjs';
 import {requestFailed} from '../../core/actions/http.actions';
-import {ExperimentConverterService} from '~/features/experiments/shared/services/experiment-converter.service';
 import * as exSelectors from '../reducers';
 import {selectExperimentsList, selectTableMode} from '../reducers';
 import {selectSelectedExperiment} from '~/features/experiments/reducers';
@@ -27,7 +23,6 @@ import {autoRefreshExperimentInfo, experimentDetailsUpdated} from '../actions/co
 import {emptyAction} from '~/app.constants';
 import * as viewActions from '../actions/common-experiments-view.actions';
 import {IExperimentInfo, ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
-import {ApiProjectsService} from '~/business-logic/api-services/projects.service';
 import {TasksGetAllExResponse} from '~/business-logic/model/tasks/tasksGetAllExResponse';
 import {ITask} from '~/business-logic/model/al-task';
 import {RouterState, selectRouterConfig, selectRouterParams} from '../../core/reducers/router-reducer';
@@ -49,7 +44,7 @@ import {
 import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
 import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
 import {TasksCloneRequest} from '~/business-logic/model/tasks/tasksCloneRequest';
-import {WelcomeMessageComponent} from '@common/layout/welcome-message/welcome-message.component';
+import {WelcomeMessageComponent, WelcomeMessageData} from '@common/layout/welcome-message/welcome-message.component';
 import {selectNeverShowPopups} from '@common/core/reducers/view.reducer';
 import {MESSAGES_SEVERITY} from '@common/constants';
 import {TasksCloneResponse} from '~/business-logic/model/tasks/tasksCloneResponse';
@@ -59,6 +54,8 @@ import * as commonInfoActions from '@common/experiments/actions/common-experimen
 import {addProjectsTag} from '../actions/common-experiments-view.actions';
 import {ITableExperiment} from '@common/experiments/shared/common-experiment-model.model';
 import * as projectsActions from '@common/core/actions/projects.actions';
+import {PipelinesStartPipelineResponse} from '~/business-logic/model/pipelines/pipelinesStartPipelineResponse';
+import {selectSelectedProjectId} from '@common/core/reducers/projects.reducer';
 
 export const getChildrenExperiments = (tasksApi, parents, filters?: { [key: string]: any }): Observable<Task[]> =>
   tasksApi.tasksGetAllEx({
@@ -81,13 +78,7 @@ export class CommonExperimentsMenuEffects {
               private store: Store,
               private apiTasks: ApiTasksService,
               private pipelineApi: ApiPipelinesService,
-              private authApi: ApiAuthService,
-              private taskBl: BlTasksService,
-              private eventsApi: ApiEventsService,
-              private projectApi: ApiProjectsService,
-              private converter: ExperimentConverterService,
               private router: Router,
-              private route: ActivatedRoute,
               private dialog: MatDialog
   ) {}
 
@@ -132,9 +123,10 @@ export class CommonExperimentsMenuEffects {
     ofType(menuActions.openEmptyQueueMessage),
     concatLatestFrom(() => this.store.select(selectNeverShowPopups)),
     switchMap(([action, neverShowAgainPopups]) => !neverShowAgainPopups.includes('orphanedQueue') ?
-        this.dialog.open(WelcomeMessageComponent, {
+        this.dialog.open<WelcomeMessageComponent, WelcomeMessageData, boolean>(WelcomeMessageComponent, {
           data: {
             queue: action.queue,
+            entityName: action.entityName,
             step: 2
           }
         }).afterClosed() : of(null)
@@ -144,14 +136,16 @@ export class CommonExperimentsMenuEffects {
 
   startPipeline$ = createEffect(() => this.actions$.pipe(
     ofType(menuActions.startPipeline),
-    concatLatestFrom(() => this.store.select(selectRouterParams).pipe(map(params => params?.projectId))),
+    concatLatestFrom(() => this.store.select(selectSelectedProjectId)),
     switchMap(([action, projectId]) =>
       this.pipelineApi.pipelinesStartPipeline({
-          task: action.task, ...(action.queue && {queue: action.queue}),
-          args: action.args
-        })
+        task: action.task,
+        ...(action.queue && {queue: action.queue.id}),
+        args: action.args,
+        verify_watched_queue: true
+      })
         .pipe(
-          mergeMap(res => [
+          mergeMap((res: PipelinesStartPipelineResponse) => [
             viewActions.getExperiments(),
             viewActions.setSelectedExperiments({experiments: []}),
             viewActions.experimentSelectionChanged({
@@ -159,6 +153,7 @@ export class CommonExperimentsMenuEffects {
               project: projectId
             }),
             deactivateLoader(action.type),
+            ...(res.queue_watched === false ? [menuActions.openEmptyQueueMessage({queue: action.queue, entityName: 'Pipeline'})] : [])
           ]),
           catchError(error => [
             deactivateLoader(action.type),
@@ -182,8 +177,8 @@ export class CommonExperimentsMenuEffects {
         only_fields: PIPELINE_INFO_ONLY_FIELDS
         /* eslint-enable @typescript-eslint/naming-convention */
       }).pipe(
-        mergeMap((res: any) => [
-          menuActions.setControllerForStartPipelineDialog({task: res?.tasks[0]}),
+        mergeMap((res: TasksGetAllExResponse) => [
+          menuActions.setControllerForStartPipelineDialog({task: res?.tasks[0] as unknown as IExperimentInfo}),
           deactivateLoader(action.type)
         ]),
         catchError(error => [
@@ -217,15 +212,16 @@ export class CommonExperimentsMenuEffects {
     switchMap(([action, ]) => this.apiTasks.tasksClone({
         task: action.originExperiment.id,
         /* eslint-disable @typescript-eslint/naming-convention */
-        new_task_project: action.cloneData.project === ''? undefined : action.cloneData.project,
+        ...(action.cloneData?.project?.value && {new_task_project: action.cloneData.project.value}),
         new_task_comment: action.cloneData.comment,
         new_task_name: action.cloneData.name,
-        new_project_name: action.cloneData.newProjectName
+        new_project_name: action.cloneData.newProjectName,
+        ...(action.cloneData.forceParent && {new_task_parent: action.originExperiment.id})
         /* eslint-enable @typescript-eslint/naming-convention */
       } as TasksCloneRequest)
         .pipe(
           mergeMap((res: TasksCloneResponse) => {
-            this.router.navigate(['projects', action.cloneData.project || (res.new_project as any)?.id || '*', 'experiments', res.id]);
+            this.router.navigate(['projects', action.cloneData.project?.value || res.id || '*', 'experiments', res.id]);
             return [
               viewActions.getExperiments(),
               deactivateLoader(action.type),
@@ -413,9 +409,9 @@ export class CommonExperimentsMenuEffects {
     concatLatestFrom(() => [
       this.store.select(selectRouterParams),
       this.store.select(exSelectors.selectSelectedTableExperiment),
-      this.store.select(selectRouterConfig),
+      this.store.select(selectTableMode),
     ]),
-    switchMap(([action, routerParams, selectedExperiment]) => this.apiTasks.tasksArchiveMany({ids: action.selectedEntities.map(exp => exp.id)})
+    switchMap(([action, routerParams, selectedExperiment, tableMode]) => this.apiTasks.tasksArchiveMany({ids: action.selectedEntities.map(exp => exp.id)})
       .pipe(
         concatLatestFrom(() => this.store.select(selectRouterConfig)),
         mergeMap(([res, routerConfig]: [TasksArchiveManyResponse, RouterState['config']]) => {
@@ -453,7 +449,7 @@ export class CommonExperimentsMenuEffects {
               changes: {system_tags: [...(experiments[0]?.system_tags.filter(t => t !== 'shared') ?? []), 'archived'].sort()}
             }));
           }
-          if (this.isSelectedExpInCheckedExps(action.selectedEntities, selectedExperiment)) {
+          if (this.isSelectedExpInCheckedExps(action.selectedEntities, selectedExperiment) || tableMode === 'compare') {
             actions.push(viewActions.selectNextExperiment());
           }
           return actions;
@@ -473,13 +469,10 @@ export class CommonExperimentsMenuEffects {
     concatLatestFrom(() => [
       this.store.select(selectRouterParams),
       this.store.select(exSelectors.selectSelectedTableExperiment),
+      this.store.select(selectTableMode),
+
     ]),
-    tap(([action, , selectedExperiment]) => {
-      if (this.isSelectedExpInCheckedExps(action.selectedEntities, selectedExperiment)) {
-        this.router.navigate([], {relativeTo: this.route, queryParams: {archive: undefined}, queryParamsHandling: 'merge'});
-      }
-    }),
-    switchMap(([action, routerParams]) => this.apiTasks.tasksUnarchiveMany({ids: action.selectedEntities.map(exp => exp.id)})
+    switchMap(([action, routerParams, selectedExperiment, tableMode]) => this.apiTasks.tasksUnarchiveMany({ids: action.selectedEntities.map(exp => exp.id)})
       .pipe(
         concatLatestFrom(() => this.store.select(selectRouterConfig)),
         mergeMap(([res, routerConfig]: [TasksArchiveManyResponse, RouterState['config']]) => {
@@ -516,6 +509,9 @@ export class CommonExperimentsMenuEffects {
               // eslint-disable-next-line @typescript-eslint/naming-convention
               changes: {system_tags: experiments[0]?.system_tags.filter(tag => tag !== 'archived')}
             }));
+          }
+          if (this.isSelectedExpInCheckedExps(action.selectedEntities, selectedExperiment) || tableMode === 'compare') {
+            actions.push(viewActions.selectNextExperiment());
           }
           return actions;
         }),

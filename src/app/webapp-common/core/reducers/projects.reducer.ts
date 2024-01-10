@@ -4,25 +4,40 @@ import {TagColor} from '../actions/projects.actions';
 import {Project} from '~/business-logic/model/projects/project';
 import {getSystemTags} from '~/features/experiments/shared/experiments.utils';
 import {ITableExperiment} from '../../experiments/shared/common-experiment-model.model';
-import {MetricColumn} from '@common/shared/utils/tableParamEncode';
 import {User} from '~/business-logic/model/users/user';
 import {ProjectsGetAllResponseSingle} from '~/business-logic/model/projects/projectsGetAllResponseSingle';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {IBreadcrumbsLink, IBreadcrumbsOptions} from '@common/layout/breadcrumbs/breadcrumbs.component';
 import {selectProjectType} from '~/core/reducers/view.reducer';
 import {uniqBy} from 'lodash-es';
+import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
+import {map} from 'rxjs/operators';
+import {isReadOnly} from '@common/shared/utils/is-read-only';
 
 
-export interface ProjectStatsGraphData {
+export interface ScatterPlotPoint {
   id: string;
   x: number;
   y: number;
   name: string;
   type: string;
   status: string;
+  variant: string;
   user: string;
   title?: string;
   value: number;
+}
+
+export interface ScatterPlotSeries {
+  label?: string;
+  backgroundColor: string;
+  data: {
+    id: string;
+    x: number;
+    y: number;
+    name: string;
+    description?: string;
+  }[]
 }
 
 export interface RootProjects {
@@ -35,8 +50,8 @@ export interface RootProjects {
   systemTags: string[];
   tagsColors: { [tag: string]: TagColor };
   tagsFilterByProject: boolean;
-  graphVariant: { [project: string]: MetricColumn };
-  graphData: ProjectStatsGraphData[];
+  graphVariant: { [project: string]: ISmCol[] };
+  graphData: ScatterPlotPoint[];
   hiddenStates: { [state: string]: boolean };
   lastUpdate: string;
   users: User[];
@@ -111,7 +126,6 @@ export const selectSelectedMetricVariantForCurrProject = createSelector(
   selectSelectedProjectsMetricVariant, selectSelectedProjectId,
   (projectsVariant, projectId) => projectsVariant[projectId]);
 export const selectGraphData = createSelector(projects, state => state.graphData);
-export const selectGraphHiddenStates = createSelector(projects, state => state.hiddenStates);
 export const selectProjectUsers = createSelector(projects, state => state.extraUsers.length ?
   Array.from(new Set([...state.users, ...state.extraUsers])) :
   state.users
@@ -120,6 +134,14 @@ export const selectAllProjectsUsers = createSelector(projects, state => state.al
 export const selectSelectedProjectUsers = createSelector(selectSelectedProjectId, selectProjectUsers, selectAllProjectsUsers,
   (projectId, projectUsers, allUsers) => projectId === '*' ? allUsers : projectUsers);
 export const selectTablesFilterProjectsOptions = createSelector(projects, state => state.tablesFilterProjectsOptions);
+export const selectMyProjects = createSelector(selectTablesFilterProjectsOptions,
+  projects => projects?.filter(project => project?.company?.id)
+);
+
+export const selectReadOnlyProjects = createSelector(selectTablesFilterProjectsOptions,
+    projects => projects?.filter(project => isReadOnly(project))
+      .map(project => project.name)
+);
 
 export const projectsReducer = createReducer(
   initRootProjects,
@@ -202,7 +224,7 @@ export const projectsReducer = createReducer(
     tagsColors: {...state.tagsColors, [action.tag]: action.colors}
   })),
   on(projectsActions.setMetricVariant, (state, action): RootProjects => ({
-    ...state, graphVariant: {...state.graphVariant, [action.projectId]: action.col}
+    ...state, graphVariant: {...state.graphVariant, [action.projectId]: action.cols}
   })),
   on(projectsActions.setGraphData, (state, action): RootProjects => ({...state, graphData: action.stats})),
   on(projectsActions.toggleState, (state, action): RootProjects => ({

@@ -24,7 +24,6 @@ import {
   selectStatsTimeFrame
 } from '../../reducers/index.reducer';
 import {timeFrameOptions} from '@common/constants';
-import {LineChartData} from '@common/shared/components/charts/line-chart/line-chart.component';
 
 @Component({
   selector: 'sm-workers-graph',
@@ -73,13 +72,16 @@ export class WorkersStatsComponent implements OnInit, OnDestroy {
     /* eslint-enable @typescript-eslint/naming-convention */
   };
 
-  public chartData: LineChartData;
+  public chartData: Topic[];
 
   constructor(public store: Store, private cdr: ChangeDetectorRef) {
   }
 
   ngOnInit() {
-    this.chartParamSubscription = combineLatest([this.store.select(selectStatsTimeFrame), this.store.select(selectStatsParams)])
+    this.chartParamSubscription = combineLatest([
+      this.store.select(selectStatsTimeFrame),
+      this.store.select(selectStatsParams)
+    ])
       .pipe(filter(([timeFrame, param]) => !!timeFrame && !!param))
       .subscribe(([timeFrame, param]) => {
         this.currentParam = param;
@@ -92,7 +94,7 @@ export class WorkersStatsComponent implements OnInit, OnDestroy {
       (data) => {
         if (data) {
           this.refreshChart = false;
-          this.chartData = {dataByTopic: data, data: null};
+          this.chartData = data;
           this.cdr.detectChanges();
         }
       }

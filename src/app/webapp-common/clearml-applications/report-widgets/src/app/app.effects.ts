@@ -1,5 +1,6 @@
 import {Injectable} from '@angular/core';
-import {Actions, createEffect, ofType} from '@ngrx/effects';
+import {selectSignedUrl} from '@common/core/reducers/common-auth-reducer';
+import {Actions, concatLatestFrom, createEffect, ofType} from '@ngrx/effects';
 import {
   getParcoords,
   getPlot,
@@ -13,7 +14,6 @@ import {
 import {EMPTY, mergeMap, of, switchMap} from 'rxjs';
 import {Store} from '@ngrx/store';
 import {catchError, filter} from 'rxjs/operators';
-import {ReportsApiMultiplotsResponse, State} from './app.reducer';
 import {ApiReportsService} from '~/business-logic/api-services/reports.service';
 import {BaseAdminService} from '@common/settings/admin/base-admin.service';
 import {ReportsGetTaskDataResponse} from '~/business-logic/model/reports/reportsGetTaskDataResponse';
@@ -25,6 +25,7 @@ import {DebugSample} from '@common/shared/debug-sample/debug-sample.reducer';
 import {requestFailed} from '@common/core/actions/http.actions';
 import {Task} from '~/business-logic/model/tasks/task';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
+import {ReportsApiMultiplotsResponse} from '@common/constants';
 
 
 @Injectable()
@@ -156,7 +157,8 @@ export class AppEffects {
     filter(action => !!action.url),
     mergeMap(action =>
       of(action).pipe(
-        switchMap(() => this.adminService.signUrlIfNeeded(action.url, action.config)),
+        concatLatestFrom(() => this.store.select(selectSignedUrl(action.url))),
+        switchMap(([,prevSigned]) => this.adminService.signUrlIfNeeded(action.url, action.config, prevSigned)),
         filter(res => !!res),
         switchMap((res: SignResponse) => {
             switch (res.type) {

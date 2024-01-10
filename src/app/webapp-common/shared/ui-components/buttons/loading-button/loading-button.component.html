@@ -1,8 +1,5 @@
-<button class="btn btn-dark-fill ld-ext-right " [ngClass]="{'running': loading}" [disabled]="disabled">
-
+<button class="btn btn-dark-fill ld-ext-right " [class.running]="loading" [disabled]="disabled">
   <div class="button-label">{{label}}</div>
-
   <ng-content></ng-content>
-
   <div class="ld ld-ring ld-cycle"></div>
 </button>

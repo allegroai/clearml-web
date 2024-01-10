@@ -21,4 +21,5 @@ export interface PipelinesStartPipelineResponse {
      * True if the task was successfuly enqueued
      */
     enqueued?: boolean;
+    queue_watched?: boolean;
 }

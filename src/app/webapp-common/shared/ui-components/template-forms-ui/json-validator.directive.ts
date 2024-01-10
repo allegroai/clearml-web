@@ -3,12 +3,13 @@ import {AbstractControl, NG_VALIDATORS, Validator, ValidatorFn} from '@angular/f
 
 
 @Directive({
-  selector: '[jsonValidator]',
-  providers: [{provide: NG_VALIDATORS, useExisting: JsonValidatorDirective, multi: true}]
+  selector: '[smJsonValidator]',
+  providers: [{provide: NG_VALIDATORS, useExisting: JsonValidatorDirective, multi: true}],
+  standalone: true
 })
 
 export class JsonValidatorDirective implements Validator {
-  @Input('enableJsonValidator') enableJsonValidator;
+  @Input() enableJsonValidator: boolean;
 
   validate(control: AbstractControl): { [key: string]: any } | null {
     return (control.value && this.enableJsonValidator) ? jsonValidatorFunc(control.value)(control)

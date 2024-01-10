@@ -39,14 +39,37 @@ import {
   ModelMenuExtendedComponent
 } from '~/features/models/containers/model-menu-extended/model-menu-extended.component';
 import {createFiltersFromStore} from '@common/shared/utils/tableParamEncode';
-import {EXPERIMENTS_TABLE_COL_FIELDS} from '~/features/experiments/shared/experiments.const';
 import {getRoundedNumber} from '@common/experiments/shared/common-experiments.utils';
+import {animate, style, transition, trigger} from '@angular/animations';
 
 @Component({
   selector: 'sm-models-table',
   templateUrl: './models-table.component.html',
   styleUrls: ['./models-table.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [
+    trigger(
+      'inOutAnimation',
+      [
+        transition(
+          ':enter',
+          [
+            style({opacity: 0 }),
+            animate('0.25s ease-in',
+              style({opacity: 1 }))
+          ]
+        ),
+        transition(
+          ':leave',
+          [
+            style({opacity: 1 }),
+            animate('0.2s ease-in',
+              style({opacity: 0 }))
+          ]
+        )
+      ]
+    )
+  ]
 })
 export class ModelsTableComponent extends BaseTableView {
   readonly modelsTableColFields = MODELS_TABLE_COL_FIELDS;
@@ -359,8 +382,8 @@ export class ModelsTableComponent extends BaseTableView {
       this.store.dispatch(getModelsMetadataValuesForKey({col}));
     } else if (col.type === 'hyperparams') {
       this.store.dispatch(getCustomMetrics());
-    } else if (col.id === EXPERIMENTS_TABLE_COL_FIELDS.PROJECT) {
-      if (!this.filtersOptions[EXPERIMENTS_TABLE_COL_FIELDS.PROJECT]?.length) {
+    } else if (col.id === MODELS_TABLE_COL_FIELDS.PROJECT) {
+      if (!this.filtersOptions[MODELS_TABLE_COL_FIELDS.PROJECT]?.length) {
         this.filterSearchChanged.emit({colId: col.id, value: {value: ''}});
       }
     }

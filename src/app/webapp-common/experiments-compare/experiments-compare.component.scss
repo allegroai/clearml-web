@@ -30,7 +30,7 @@ $header-height: 60px;
 
     .experiment-compare-body {
       padding: 0;
-      height: calc(100% - #{$nav-height + $header-height});
+      height: calc(100% - #{$nav-height});
       display: flex;
       flex-direction: column;
     }

@@ -1,30 +1,28 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import {filesize} from 'filesize';
+import {filesize, FileSizeOptionsBase} from 'filesize';
 
 export const fileSizeConfigStorage = {
   base: 2,
   round: 2,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  symbols: {KiB: 'KB', kB: 'KB', k: 'K', B: 'B', MiB: 'MB', MB: 'MB', GiB: 'GB' }
-};
+  symbols: {KiB: 'KB', kB: 'KB', k: 'K', B: 'B', MiB: 'MB', MB: 'MB', GiB: 'GB' } as unknown
+} as FileSizeOptionsBase;
 
 export const fileSizeConfigCount = {
   base: 10,
   round: 2,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  symbols: {kB: 'K', k: 'K', B: ' ',  MB: 'M',  GB: 'G' }
-};
+  symbols: {kB: 'K', k: 'K', B: ' ',  MB: 'M',  GB: 'G' } as unknown
+} as FileSizeOptionsBase;
 
 @Pipe({
   name: 'filesize',
   standalone: true
 })
 export class FileSizePipe implements PipeTransform {
-  private static transformOne(value: number, options?: any): string {
+  private static transformOne(value: number, options?: FileSizeOptionsBase): string {
     return filesize(value, options) as string;
   }
 
-  transform(value: number, options?: Parameters<typeof filesize>[1]) {
+  transform(value: number, options?: FileSizeOptionsBase) {
     if (Array.isArray(value)) {
       return value.map(val => this.transform(val, options));
     }

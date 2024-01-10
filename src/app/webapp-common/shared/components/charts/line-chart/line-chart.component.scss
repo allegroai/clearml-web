@@ -7,85 +7,29 @@
   position: relative;
   background-color: var(--line-chart-background-color, $black);
 
-  .chart {
-    height: calc(100% - 46px);
-    margin-bottom: 6px;
-  }
-
   .overlay {
     position: absolute;
     top: 0;
     bottom: 0;
-    left: 0 ;
+    left: 0;
     right: 0;
     background-color: var(--line-chart-background-color, $black);
+
     .loading {
       display: flex;
       align-items: center;
       transform: translateY(#{-1 * $chart-bar-height * 0.5});
     }
+
     .text {
       font-size: 14px;
       margin-left: 12px;
-      &.no-data{
+
+      &.no-data {
         margin: 0;
         color: $blue-280;
         opacity: 0.5;
       }
     }
   }
-
-
-  ::ng-deep svg.britechart.line-chart {
-    overflow: visible;
-  }
-
-  ::ng-deep .masking-rectangle {
-    fill: $black;
-  }
-
-  ::ng-deep .extended-x-line {
-    stroke: $dark-grey-blue;
-  }
-
-  ::ng-deep .tick {
-    text {
-      fill: $light-periwinkle-two;
-    }
-  }
-
-  ::ng-deep .legend-entry-name {
-    fill: $light-periwinkle-two;
-  }
-
-  ::ng-deep rect.tooltip-background {
-    fill: black !important;
-    stroke: $blue-300 !important;
-  }
-
-  ::ng-deep .tooltip-title {
-    fill: $blue-200 !important;
-  }
-
-  ::ng-deep .tooltip-divider {
-    stroke: $blue-300 !important;
-    stroke-width: 0.5px;
-
-  }
-
-  ::ng-deep .tooltip-left-text, ::ng-deep .tooltip-right-text {
-    fill: $blue-200 !important;
-  }
-
-  ::ng-deep .grid {
-    .grid-line {
-      stroke: $dark-grey-blue;
-      stroke-dasharray: none;
-    }
-  }
 }
-
-::ng-deep .legend-circle.circle-hidden {
-  fill-opacity: 0.4;
-}
-

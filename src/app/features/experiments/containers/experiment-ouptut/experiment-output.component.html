@@ -1,7 +1,7 @@
 <sm-overlay [backdropActive]="backdropActive$|async"></sm-overlay>
-<sm-experiment-info-header-status-icon-label
+<sm-info-header-status-icon-label
   [status]=" (selectedExperiment)?.status || selectedExperiment?.status"
-></sm-experiment-info-header-status-icon-label>
+></sm-info-header-status-icon-label>
 <div class="experiment-output-container light-theme" [class.minimized]="minimized">
   <sm-experiment-info-header
     [experiment]="selectedExperiment"

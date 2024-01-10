@@ -6,12 +6,11 @@ import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/
   standalone: true
 })
 export class EllipsisMiddleDirective implements AfterViewInit {
-  private timeoutSubscription: NodeJS.Timer;
   @Input() smEllipsisMiddleDirective: string;
   @Input() delay: number;
   @Input() maxChars: number = Infinity;
   @Input() set triggerEllipsis(triggerEllipsis: number) {
-    this.el.nativeElement.innerHTML = this.smEllipsisMiddleDirective;
+    this.el.nativeElement.innerText = this.smEllipsisMiddleDirective;
     this.ngAfterViewInit();
   }
   constructor(private el: ElementRef, private matTooltip: TooltipDirective,) {
@@ -32,7 +31,7 @@ export class EllipsisMiddleDirective implements AfterViewInit {
 
     while (o.clientWidth > 10 && o.scrollWidth > o.clientWidth && txt.length > 0 || txt.length > this.maxChars) {
       txt = `${txt.substring(0, txt.length / 2 - 4)} ... ${txt.substring(txt.length / 2 + 4, txt.length)}`;
-      o.innerHTML = txt;
+      o.innerText = txt;
       ellipsised = true;
     }
 

@@ -1,7 +1,8 @@
 import {Pipe, PipeTransform} from '@angular/core';
 
 @Pipe({
-  name: 'filterInternal'
+  name: 'filterInternal',
+  standalone: true
 })
 export class FilterInternalPipe implements PipeTransform {
   transform(arr) {

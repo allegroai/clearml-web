@@ -7,7 +7,7 @@ import { Router } from '@angular/router';
 import {selectCurrentUser} from '../reducers/users-reducer';
 import {Store} from '@ngrx/store';
 import {GetCurrentUserResponseUserObject} from '~/business-logic/model/users/getCurrentUserResponseUserObject';
-import {setCurrentUser} from '~/core/actions/users.action';
+import {resetCurrentUser} from '~/core/actions/users.action';
 
 @Injectable()
 export class WebappInterceptor implements HttpInterceptor {
@@ -45,10 +45,9 @@ export class WebappInterceptor implements HttpInterceptor {
       !environment.autoLogin ||
       (environment.autoLogin && this.user)
     )) {
-      if (redirectUrl.indexOf('/signup') > -1) {
-      } else if (redirectUrl.indexOf('/login') === -1) {
+      if (redirectUrl.indexOf('/signup') === -1 && redirectUrl.indexOf('/login') === -1) {
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        this.store.dispatch(setCurrentUser({user: null, terms_of_use: null}));
+        this.store.dispatch(resetCurrentUser());
         this.router.navigate(['login'], {queryParams: {redirect: redirectUrl}, replaceUrl: true});
       }
       return throwError(() => err);

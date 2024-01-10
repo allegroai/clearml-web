@@ -5,21 +5,21 @@ import {combineLatestWith, distinctUntilChanged, distinctUntilKeyChanged, filter
 import {isEqual, mergeWith} from 'lodash-es';
 import {fromEvent, Observable, startWith, Subscription} from 'rxjs';
 import * as metricsValuesActions from '../../actions/experiments-compare-metrics-values.actions';
-import {selectCompareMetricsValuesExperiments, selectExportTable, selectSelectedSettingsHiddenScalar, selectShowRowExtremes} from '../../reducers';
-import {ActivatedRoute, Router} from '@angular/router';
+import {selectCompareMetricsValuesExperiments, selectExportTable, selectSelectedExperimentSettings, selectShowRowExtremes} from '../../reducers';
+import {ActivatedRoute} from '@angular/router';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {Task} from '~/business-logic/model/tasks/task';
 import {FormControl} from '@angular/forms';
 import {setExperimentSettings, setSelectedExperiments} from '@common/experiments-compare/actions/experiments-compare-charts.actions';
-import {GroupedList} from '@common/tasks/tasks.utils';
 import {ColorHashService} from '@common/shared/services/color-hash/color-hash.service';
 import {rgbList2Hex} from '@common/shared/services/color-hash/color-hash.utils';
 import {trackById} from '@common/shared/utils/forms-track-by';
-import {ExportToCsv, Options} from 'export-to-csv';
+import {mkConfig, download, generateCsv} from 'export-to-csv';
 import {setExportTable} from '@common/experiments-compare/actions/compare-header.actions';
 import {Table} from 'primeng/table';
-import {ExperimentCompareSettings} from "@common/experiments-compare/reducers/experiments-compare-charts.reducer";
+import {ExperimentCompareSettings} from '@common/experiments-compare/reducers/experiments-compare-charts.reducer';
+import {GroupedList} from '@common/tasks/tasks.model';
 
 interface ValueMode {
   key: string;
@@ -85,7 +85,6 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
   public selectShowRowExtremes$: Observable<boolean>;
   public listSearchTerm: string;
   public metricVariantList: GroupedList;
-  public listOfHidden$: Observable<string[]>;
   public filterOpen: boolean;
   public experimentsColor: { [name: string]: string };
 
@@ -98,16 +97,16 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
   private filterValue: string;
   public settings: ExperimentCompareSettings = {} as ExperimentCompareSettings;
   private initialSettings = {
-    hiddenMetricsScalar: []
+    selectedMetricsScalar: []
   } as ExperimentCompareSettings
   private originalSettings: string[];
+  private selectedMetrics$: Observable<ExperimentCompareSettings>;
 
-  @HostListener("window:beforeunload", ["$event"]) unloadHandler() {
+  @HostListener('window:beforeunload', ['$event']) unloadHandler() {
     this.saveSettingsState();
   }
 
   constructor(
-    private router: Router,
     private route: ActivatedRoute,
     public store: Store,
     private changeDetection: ChangeDetectorRef,
@@ -117,7 +116,7 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
     this.comparedTasks$ = this.store.select(selectCompareMetricsValuesExperiments);
     this.selectShowRowExtremes$ = this.store.select(selectShowRowExtremes);
     this.selectExportTable$ = this.store.select(selectExportTable).pipe(filter(e => !!e));
-    this.listOfHidden$ = this.store.select(selectSelectedSettingsHiddenScalar).pipe(distinctUntilChanged(isEqual));
+    this.selectedMetrics$ = this.store.select(selectSelectedExperimentSettings).pipe(distinctUntilChanged(isEqual));
   }
 
   ngOnInit() {
@@ -172,7 +171,7 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
         metricsValuesActions.getComparedExperimentsMetricsValues({taskIds: this.taskIds, entity: this.entityType, autoRefresh})
       )));
 
-    this.listOfHidden$.pipe(combineLatestWith(this.variantFilter.valueChanges.pipe(startWith('')))).subscribe(([, variantFilter]) => {
+    this.selectedMetrics$.pipe(combineLatestWith(this.variantFilter.valueChanges.pipe(startWith('')))).subscribe(([, variantFilter]) => {
       this.filterValue = variantFilter;
       this.filter(this.filterValue);
     });
@@ -191,9 +190,10 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
       this.store.dispatch(setExportTable({export: false}));
     }));
 
-    this.subs.add(this.listOfHidden$.pipe(take(1)).subscribe(hiddenScalars => {
-      this.originalSettings = hiddenScalars;
-      this.settings = hiddenScalars ? {...this.initialSettings, hiddenMetricsScalar: hiddenScalars} : {...this.initialSettings} as ExperimentCompareSettings;
+    this.subs.add(this.selectedMetrics$.pipe(take(1)).subscribe(settings => {
+      const selectedScalars = settings?.selectedMetricsScalar;
+      this.originalSettings = selectedScalars;
+      this.settings = settings ? {...this.initialSettings, selectedMetricsScalar: selectedScalars} : {...this.initialSettings} as ExperimentCompareSettings;
     }));
   }
 
@@ -228,7 +228,7 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
           ...experiments.reduce((acc, exp) => {
             acc.values[exp.id] = exp.last_metrics[metricId]?.[variantId] as Task['last_metrics'];
             if (!metric && !variant && exp.last_metrics[metricId]?.[variantId]) {
-              metric = metric ?? exp.last_metrics[metricId][variantId].metric;
+              metric = (metric ?? exp.last_metrics[metricId][variantId].metric).replace('Summary', ' Summary');
               variant = variant ?? exp.last_metrics[metricId][variantId].variant;
             }
             if (metric) {
@@ -249,7 +249,11 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
           }, {values: {}} as { metric, variant, firstMetricRow: boolean, min:  number, max: number, values: { [expId: string]: Task['last_metrics'] } })
         };
       })).flat(1);
-      this.dataTable = dataTable.sort((a) => a.metric.startsWith(':') ? 1 : -1);
+      dataTable.sort((a) => a.metric.startsWith(':') ? 1 : -1);
+      this.dataTable = dataTable.sort((a) => a.metric === ' Summary' ? -1 : 1);
+      if (!this.settings.selectedMetricsScalar || this.settings.selectedMetricsScalar?.length === 0) {
+        this.settings.selectedMetricsScalar = this.getFirstMetrics(10);
+      }
       this.filter(this.filterValue);
     }
   }
@@ -258,7 +262,7 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
     if (!this.dataTable) {
       return;
     }
-    this.dataTableFiltered = this.dataTable.filter(row => !this.settings.hiddenMetricsScalar?.includes(`${row.metric}${row.variant}`)).filter(row => row.metric.includes(value) || row.variant.includes(value));
+    this.dataTableFiltered = this.dataTable.filter(row => this.settings.selectedMetricsScalar?.includes(`${row.metric}${row.variant}`)).filter(row => row.metric.includes(value) || row.variant.includes(value));
     let previousMetric: string;
     this.dataTableFiltered.forEach(row => {
       row.firstMetricRow = row.metric !== previousMetric;
@@ -278,21 +282,23 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
     this.listSearchTerm = searchTerm;
   }
 
-  hiddenListChanged(hiddenList: string[]) {
-    this.settings = {...this.settings, hiddenMetricsScalar: hiddenList};
+  selectedMetricsChanged(selectedMetrics: string[]) {
+    this.settings = {...this.settings, selectedMetricsScalar: selectedMetrics};
     this.filter(this.filterValue);
   }
 
   exportToCSV() {
-    const options: Options = {
+    const options = mkConfig({
       filename: `Scalars compare table`,
-      showLabels: true,
-      headers: ['Metric', 'Variant'].concat(this.experiments.map(ex => ex.name))
-    };
-    const csvExporter = new ExportToCsv(options);
-    csvExporter.generateCsv(this.dataTableFiltered.map(row => {
-      return [row.metric, row.variant, ...Object.values(row.values).map(value => value?.[this.valuesMode.key] ?? '')];
-    }));
+      showColumnHeaders: true,
+      columnHeaders: ['Metric', 'Variant'].concat(this.experiments.map(ex => ex.name))
+    });
+    const csv = generateCsv(options)(this.dataTableFiltered.map(row => ({
+      Metric: row.metric,
+      Variant: row.variant,
+      ...Object.values(row.values).map(value => value?.[this.valuesMode.key] ?? '')
+    })));
+    download(options)(csv);
   }
 
   trackByFunction(index: number, item) {
@@ -300,13 +306,22 @@ export class ExperimentCompareMetricValuesComponent implements OnInit, OnDestroy
   }
 
   showAll() {
-    this.settings = {...this.settings, hiddenMetricsScalar: []};
+    const firstSelectedMetrics = this.getFirstMetrics(10);
+    this.settings = {...this.settings, selectedMetricsScalar: this.originalSettings.length > 0 ? this.originalSettings : firstSelectedMetrics};
     this.filter(this.filterValue);
   }
 
+  private getFirstMetrics(number: number) {
+    const sortedMetrics = Object.entries(this.metricVariantList).sort((a, b) => a[0] > b[0]? -1 : 1);
+    return sortedMetrics.map(([metric, variants]) => {
+      const sortedVariants = Object.keys(variants).sort();
+      return sortedVariants.map(variant => metric + variant)
+    }).flat().slice(0, number);
+  }
+
   private saveSettingsState() {
-    if (!isEqual(this.settings.hiddenMetricsScalar, this.originalSettings)) {
-      this.store.dispatch(setExperimentSettings({id: this.taskIds, changes: {hiddenMetricsScalar: this.settings.hiddenMetricsScalar}}));
+    if (!isEqual(this.settings.selectedMetricsScalar, this.originalSettings)) {
+      this.store.dispatch(setExperimentSettings({id: this.taskIds, changes: {selectedMetricsScalar: this.settings.selectedMetricsScalar}}));
     }
   }
 }

@@ -15,13 +15,13 @@ import {Axis, Color, ColorBar, ColorScale} from 'plotly.js';
 import {select} from 'd3-selection';
 import {ColorHashService} from '@common/shared/services/color-hash/color-hash.service';
 import {Task} from '~/business-logic/model/tasks/task';
-import {ChooseColorModule} from '@common/shared/ui-components/directives/choose-color/choose-color.module';
 import {sortCol} from '@common/shared/utils/sortCol';
 import {MetricValueType, SelectedMetric} from '@common/experiments-compare/experiments-compare.constants';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {trackById} from '@common/shared/utils/forms-track-by';
 import {GraphViewerComponent, GraphViewerData} from '@common/shared/single-graph/graph-viewer/graph-viewer.component';
 import {MatDialog} from '@angular/material/dialog';
+import {ChooseColorModule} from '@common/shared/ui-components/directives/choose-color/choose-color.module';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 declare let Plotly;
@@ -54,11 +54,11 @@ interface ParaPlotData {
   templateUrl: './parallel-coordinates-graph.component.html',
   styleUrls: ['./parallel-coordinates-graph.component.scss'],
   imports: [
-    ChooseColorModule,
     SlicePipe,
     TooltipDirective,
     NgForOf,
-    NgIf
+    NgIf,
+    ChooseColorModule
   ],
   standalone: true
 })
@@ -70,7 +70,7 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
   private _metric: SelectedMetric;
   public experimentsColors = {};
   public filteredExperiments = [];
-  private timer: NodeJS.Timer;
+  private timer: number;
   private _parameters: string[];
 
   @ViewChild('parallelGraph', {static: true}) parallelGraph: ElementRef;
@@ -83,15 +83,15 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
 
   @HostListener('window:resize')
   redrawChart() {
-    clearTimeout(this.timer);
-    this.timer = setTimeout(() => this.drawChart(), 75);
+    window.clearTimeout(this.timer);
+    this.timer = window.setTimeout(() => this.drawChart(), 75);
   }
 
   @Input() set metricValueType(metricValueType: MetricValueType) {
     this._metricValueType = metricValueType;
     if (this.experiments) {
-      clearTimeout(this.timer);
-      this.timer = setTimeout(() => this.prepareGraph(), 200);
+      window.clearTimeout(this.timer);
+      this.timer = window.setTimeout(() => this.prepareGraph(), 200);
     }
   }
 
@@ -104,7 +104,7 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
       this._metric = metric;
       if (this.experiments) {
         clearTimeout(this.timer);
-        this.timer = setTimeout(() => this.prepareGraph(), 200);
+        this.timer = window.setTimeout(() => this.prepareGraph(), 200);
       }
     }
   }
@@ -118,7 +118,7 @@ export class ParallelCoordinatesGraphComponent extends PlotlyGraphBaseComponent 
       this._parameters = parameters;
       if (this.experiments) {
         clearTimeout(this.timer);
-        this.timer = setTimeout(() => this.prepareGraph(), 200);
+        this.timer = window.setTimeout(() => this.prepareGraph(), 200);
       }
     }
   }

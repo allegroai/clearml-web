@@ -1,18 +1,13 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input} from '@angular/core';
 
 @Component({
   selector: 'sm-table-filter-duration-error',
   templateUrl: './table-filter-duration-error.component.html',
-  styleUrls: ['./table-filter-duration-error.component.scss']
+  styleUrls: ['./table-filter-duration-error.component.scss'],
+  standalone: true,
 })
-export class TableFilterDurationErrorComponent implements OnInit {
+export class TableFilterDurationErrorComponent {
 
   @Input() hasError: boolean;
   @Input() isFullWidth;
-
-  constructor() { }
-
-  ngOnInit(): void {
-  }
-
 }

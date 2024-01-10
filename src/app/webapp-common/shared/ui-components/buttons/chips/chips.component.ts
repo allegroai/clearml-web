@@ -6,12 +6,19 @@ import {Subscription} from 'rxjs';
 import {getCssTheme} from '../../../utils/shared-utils';
 import {invertRgb} from '../../../services/color-hash/color-hash.utils';
 import { TinyColor, mostReadable } from '@ctrl/tinycolor';
+import {NgIf} from '@angular/common';
+import {ChooseColorModule} from '@common/shared/ui-components/directives/choose-color/choose-color.module';
 
 @Component({
   selector: 'sm-chips',
   templateUrl: './chips.component.html',
   styleUrls: ['./chips.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    NgIf,
+    ChooseColorModule
+  ]
 })
 export class ChipsComponent implements OnInit, OnDestroy {
 

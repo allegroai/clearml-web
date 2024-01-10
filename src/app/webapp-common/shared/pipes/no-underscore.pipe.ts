@@ -1,7 +1,8 @@
 import {Pipe, PipeTransform} from '@angular/core';
 
 @Pipe({
-  name: 'noUnderscore'
+  name: 'noUnderscore',
+  standalone: true
 })
 export class NoUnderscorePipe implements PipeTransform {
 

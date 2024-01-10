@@ -49,7 +49,7 @@
         ></i>
         <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete" [displayWith]="displayFn" class="light-theme">
           <mat-option *ngFor="let queue of queues | filter:queueInput.value:'name'" [value]="queue">
-            <div [innerHTML]="queue.name | highlightSearchText:selectedQueue?.name"></div>
+            <div [smSearchText]="selectedQueue?.name">{{queue.name }}</div>
           </mat-option>
         </mat-autocomplete>
       </mat-form-field>

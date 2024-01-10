@@ -1,9 +1,10 @@
 <p-table
   *ngIf="columns?.length > 0"
   class="table"
+  [class.has-header]="!noHeader"
   dataKey="id"
   [style.--table-row-height]="rowHeight + 'px'"
-  [style.--card-height]="cardHeight + 'px'"
+  [style.--card-height]="(cardsCollapsed ? 56 : cardHeight) + 'px'"
   [filterDelay]="0"
   [globalFilterFields]="enableTableSearch? globalFilterFields: null"
   [scrollHeight]="'flex'"
@@ -18,6 +19,7 @@
   [columnResizeMode]="columnResizeMode"
   [scrollable]="scrollable || resizableColumns"
   [virtualScroll]="virtualScroll"
+  [virtualScrollOptions]="virtualScrollOptions"
   [virtualScrollItemSize]="minView ? cardHeight : rowHeight"
   [first]="first"
   [rowHover]="true"
@@ -50,19 +52,19 @@
     <tr class="header ui-state-default" *ngIf="!minView; else cardHeader">
       <th *ngFor="let col of columns; trackBy: trackByColFn"
           [attr.data-col-id]="col.id"
+          [class.disable-drag]="!reorderableColumns || col?.disableDrag"
+          [class.resize-disabled]="!resizableColumns"
+          [class.resize-enabled]="resizableColumns"
+          [class.selected-col-header]="col?.disablePointerEvents"
+          [frozen]="col.frozen"
+          [pReorderableColumnDisabled]="!reorderableColumns || col?.disableDrag"
+          [pResizableColumnDisabled]="col?.disableDrag"
+          [style.max-width]="col.style?.maxWidth ?? !resizableColumns && columnResizeMode === 'fit' && col.style?.width"
+          [style.min-width]="col.style?.minWidth"
+          [style.width]="col.style?.width"
+          pFrozenColumn
           pReorderableColumn
           smResizableColumn
-          [pResizableColumnDisabled]="col?.disableDrag"
-          [pReorderableColumnDisabled]="!reorderableColumns || col?.disableDrag"
-          pFrozenColumn
-          [frozen]="col.frozen"
-          [class.disable-drag]="!reorderableColumns || col?.disableDrag"
-          [class.resize-enabled]="resizableColumns"
-          [class.resize-disabled]="!resizableColumns"
-          [class.selected-col-header]="col?.disablePointerEvents"
-          [style.min-width]="col.style?.minWidth"
-          [style.max-width]="col.style?.maxWidth ?? !resizableColumns && columnResizeMode === 'fit' && col.style?.width"
-          [style.width]="col.style?.width"
       >
         <ng-container [ngSwitch]="col?.headerType">
           <ng-container *ngSwitchCase="colHeaderTypeEnum.sortFilter">
@@ -78,14 +80,15 @@
       </th>
     </tr>
     <ng-template #cardHeader>
-      <tr class="header">
+      <tr class="header card-header">
         <th>
           <div class="table-header" style="flex-basis:100%">
             <ng-container *ngTemplateOutlet="checkboxTemplate; context: {$implicit: columns?.[0]}"></ng-container>
-            <div class="table-header-title ellipsis">{{minimizedTableHeader}}</div>
+            <div class="table-header-title ellipsis" data-id="tableHeader">{{minimizedTableHeader}}</div>
+            <div class="collapse-button al-icon al-ico-compact-view sm-md" [class.active]="cardsCollapsed" (click)="cardsCollapsedToggle.emit()"></div>
             <div class="table-actions">
               <div class="recent-title">
-                <sm-menu header="SORTED BY " class="menu" panelClasses="light-theme">
+                <sm-menu header="SORTED BY " class="menu" panelClasses="light-theme" data-id="sortedByFilter">
                   <div *ngFor="let col of sortableCols; trackBy: trackByColFn">
                     <sm-menu-item [itemLabel]="col.header"
                                   [sortOrder]="getOrder(col.id)"
@@ -107,7 +110,7 @@
       [pSelectableRow]="rowData"
       [pContextMenuRow]="rowData"
       [pContextMenuRowDisabled] = !rowRightClick.observed
-      [style.height.px]="minView ? this.cardHeight : this.rowHeight"
+      [style.height.px]="minView ? (cardsCollapsed ? 56 : this.cardHeight) : this.rowHeight"
       [class.even]="(index + 1) % 2 === 0"
       [class.checked]="isRowSelected(rowData)"
       [class.simple]="simple"
@@ -142,9 +145,11 @@
      <ng-template #cardBody>
         <td class="pointer p-0" role="button">
           <div class="card-wrapper">
+          <div class="collapse-animation" [style.max-height.px]="cardsCollapsed? 54 : cardHeight">
             <ng-container
               *ngTemplateOutlet="cardTemplate;  context: {rowData: rowData, rowNumber: index, selected: isSelected(rowData)}">
             </ng-container>
+          </div>
           </div>
         </td>
       </ng-template>

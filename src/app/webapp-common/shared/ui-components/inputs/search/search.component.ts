@@ -10,13 +10,18 @@ import {
 } from '@angular/core';
 import {Subject, Subscription, timer} from 'rxjs';
 import {debounce, distinctUntilChanged, filter, tap} from 'rxjs/operators';
+import {NgIf} from '@angular/common';
 
 
 @Component({
   selector: 'sm-search',
   templateUrl: './search.component.html',
   styleUrls: ['./search.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    NgIf
+  ]
 })
 export class SearchComponent implements OnInit, OnChanges, OnDestroy {
 

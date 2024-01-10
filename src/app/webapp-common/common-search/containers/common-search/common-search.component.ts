@@ -30,7 +30,11 @@ export class CommonSearchComponent implements OnInit {
     this.router.events
       .pipe(
         filter(event => event instanceof NavigationEnd),
-        distinctUntilChanged((pe: NavigationEnd, ce: NavigationEnd) => pe.url?.split('?')[1] === ce.url?.split('?')[1])
+        distinctUntilChanged((pe: NavigationEnd, ce: NavigationEnd) => {
+          const pURL = new URLSearchParams(pe.url.split('?')?.[1]);
+          const cURL = new URLSearchParams(ce.url.split('?')?.[1]);
+          return pURL.get('q') === cURL.get('q') && pURL.get('qreg') === cURL.get('qreg');
+        })
       ).subscribe(() => {
       const query = this.route.snapshot.queryParams?.q ?? '';
       const qregex = this.route.snapshot.queryParams?.qreg === 'true';

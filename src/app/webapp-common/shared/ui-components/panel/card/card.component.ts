@@ -1,9 +1,16 @@
 import {Component, Input, OnInit} from '@angular/core';
+import {NgIf} from '@angular/common';
+import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 
 @Component({
   selector: 'sm-card',
   templateUrl: './card.component.html',
-  styleUrls: ['./card.component.scss']
+  styleUrls: ['./card.component.scss'],
+  standalone: true,
+  imports: [
+    NgIf,
+    ClickStopPropagationDirective
+  ]
 })
 export class CardComponent implements OnInit {
 

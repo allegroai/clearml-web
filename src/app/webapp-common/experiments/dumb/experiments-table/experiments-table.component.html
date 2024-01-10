@@ -20,7 +20,8 @@
     [keyboardControl]="true"
     [sortFields]="tableSortFields"
     [hasExperimentUpdate]="hasExperimentUpdate"
-    [cardHeight]="90"
+    [cardHeight]="cardHeight"
+    [cardsCollapsed]="cardsCollapsed"
     (rowSelectionChanged)="experimentSelectionChanged.emit({experiment: $any($event).data})"
     (rowClicked)="tableRowClicked($event)"
     (rowDoubleClicked)="experimentSelectionChanged.emit({experiment: $event.data, openInfo: true})"
@@ -29,6 +30,7 @@
     (colReordered)="columnsReordered.emit($event)"
     (sortChanged)="onSortChanged($event.isShift, $event.field)"
     (columnResized)="columnResized.emit($event)"
+    (cardsCollapsedToggle)="cardsCollapsedChanged.emit()"
   >
     <!--HEADER TEMPLATE-->
     <ng-template let-col pTemplate="cardFilter">
@@ -57,13 +59,15 @@
           (formDataChanged)="headerCheckboxClicked()"
           inputClassName="table-check-box select-col-checkbox"
         ></sm-checkbox-control>
-        <div class="al-icon al-ico-dropdown-arrow sm drop-down" data-id="Checkbox Dropdown" [matMenuTriggerFor]="selectionMenu"></div>
+        <div class="al-icon al-ico-dropdown-arrow sm drop-down" data-id="Checkbox Dropdown"
+             [matMenuTriggerFor]="selectionMenu"></div>
       </div>
       <mat-menu class="light-theme" #selectionMenu="matMenu">
         <div *ngIf="entityType === entityTypes.experiment" class="menu-title">Select from project</div>
         <button mat-menu-item data-id="All Option" (click)="selectAll()">All</button>
-        <button mat-menu-item data-id="None Option"  (click)="emitSelection([])">None</button>
-        <button mat-menu-item data-id="All Matching Filter Option"  (click)="selectAll(true)">All matching filter</button>
+        <button mat-menu-item data-id="None Option" (click)="emitSelection([])">None</button>
+        <button mat-menu-item data-id="All Matching Filter Option" (click)="selectAll(true)">All matching filter
+        </button>
       </mat-menu>
     </ng-template>
     <!--FILTER TEMPLATE-->
@@ -157,10 +161,10 @@
           </sm-checkbox-control>
         </ng-container>
         <ng-container *ngSwitchCase="experimentsTableColFields.STATUS">
-          <sm-experiment-status-icon-label
+          <sm-status-icon-label
             [status]="experiment?.status | replaceViaMapPipe:convertStatusMap"
             [progress]="experiment?.runtime?.progress"
-          ></sm-experiment-status-icon-label>
+          ></sm-status-icon-label>
         </ng-container>
         <ng-container *ngSwitchCase="experimentsTableColFields.PARENT">
           <span
@@ -205,26 +209,35 @@
       >
         <div sm-name-icon *ngIf="experiment?.system_tags?.includes('shared')"><i
           class="al-icon al-ico-link sm-md ms-2"></i></div>
-        <div sm-name-version *ngIf="experiment?.runtime?.version || experiment?.hyperparams?.properties?.version?.value" class="me-5">
+        <div sm-name-version *ngIf="experiment?.runtime?.version || experiment?.hyperparams?.properties?.version?.value"
+             class="me-5">
           <span class="dot">●</span>
           v {{experiment?.runtime?.version || experiment?.hyperparams?.properties?.version?.value}}
         </div>
-        <sm-tag-list *ngIf="!removeTag.observed; else tagsWithRemove" [sysTags]="getSystemTags(experiment)" [tags]="experiment?.tags"></sm-tag-list>
-        <ng-template #tagsWithRemove>
-          <sm-tag-list [sysTags]="getSystemTags(experiment)" [tags]="experiment?.tags" (remove)="removeTag.emit({experiment, tag: $event})"></sm-tag-list>
-        </ng-template>
-        <div class="d-flex justify-content-between compact-columns-data" compact-columns-data>
-          <span class="ellipsis">Updated {{experiment.last_update | timeAgo}}<span class="dot">●</span>Created by {{experiment.user?.name || 'Unknown User'}}
+        <span tags-list-container [@inOutAnimation] *ngIf="!cardsCollapsed">
+          <sm-tag-list *ngIf="!removeTag.observed; else tagsWithRemove" [sysTags]="getSystemTags(experiment)"
+                       [tags]="experiment?.tags"></sm-tag-list>
+          <ng-template #tagsWithRemove>
+            <sm-tag-list [sysTags]="getSystemTags(experiment)" [tags]="experiment?.tags"
+                         (remove)="removeTag.emit({experiment, tag: $event})"></sm-tag-list>
+          </ng-template>
+        </span>
+          <span compact-columns-data [@inOutAnimation] *ngIf="!cardsCollapsed">
+          <div class="d-flex justify-content-between compact-columns-data" compact-columns-data>
+          <span class="ellipsis">Updated {{experiment.last_update | timeAgo}}<span
+            class="dot">●</span>Created by {{experiment.user?.name || 'Unknown User'}}
           </span>
-          <ng-container *ngIf="experiment.last_iteration">
-            <span>{{experiment.last_iteration}} Iterations</span>
-          </ng-container>
-        </div>
-        <sm-experiment-type-icon-label *ngIf="entityType === entityTypes.experiment" [type]="experiment?.type" [showLabel]="false"></sm-experiment-type-icon-label>
-        <sm-experiment-status-icon-label
+            <ng-container *ngIf="experiment.last_iteration">
+              <span>{{experiment.last_iteration}} Iterations</span>
+            </ng-container>
+          </div>
+        </span>
+        <sm-experiment-type-icon-label *ngIf="entityType === entityTypes.experiment" [type]="experiment?.type"
+                                       [showLabel]="false"></sm-experiment-type-icon-label>
+        <sm-status-icon-label
           [status]="experiment?.status | replaceViaMapPipe:convertStatusMap"
           [progress]="experiment?.runtime?.progress"
-        ></sm-experiment-status-icon-label>
+        ></sm-status-icon-label>
         <sm-checkbox-control fieldName="selected" [formData]="isRowSelected(experiment)" class="checkbox-align-top"
                              (formDataChanged)="rowSelectedChanged($event, experiment)"
                              inputClassName="table-check-box table-body"

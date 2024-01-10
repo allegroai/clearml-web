@@ -1,13 +1,6 @@
-import {createSelector, Store} from '@ngrx/store';
+import {createSelector} from '@ngrx/store';
 import {ISmCol, TABLE_SORT_ORDER} from '../../shared/ui-components/data/table/table.consts';
-import {
-  experimentInfo,
-  experimentOutput,
-  experimentsView,
-  selectExperimentInfoData,
-  selectSelectedExperiment,
-  selectSelectedModelSettings,
-} from '~/features/experiments/reducers';
+import {experimentInfo, experimentOutput, experimentsView, selectExperimentInfoData, selectSelectedExperiment, selectSelectedModelSettings,} from '~/features/experiments/reducers';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 import {EXPERIMENTS_TABLE_COL_FIELDS, experimentSectionsEnum} from '~/features/experiments/shared/experiments.const';
 import {ExperimentSettings} from './experiment-output.reducer';
@@ -18,23 +11,16 @@ import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {ParamsItem} from '~/business-logic/model/tasks/paramsItem';
 import {selectRouterParams} from '../../core/reducers/router-reducer';
 import {experimentsViewInitialState} from '@common/experiments/reducers/experiments-view.reducer';
-import {
-  selectCompareAddTableFilters,
-  selectCompareAddTableSortFields,
-  selectIsCompare,
-  selectIsModels,
-} from '../../experiments-compare/reducers';
+import {selectCompareAddTableFilters, selectCompareAddTableSortFields, selectIsCompare, selectIsModels,} from '../../experiments-compare/reducers';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {SortMeta} from 'primeng/api';
-import {distinctUntilChanged, map} from 'rxjs/operators';
-import {combineLatest} from 'rxjs';
-import {
-  EventsGetTaskSingleValueMetricsResponseValues
-} from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponseValues';
+import {EventsGetTaskSingleValueMetricsResponseValues} from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponseValues';
 import {selectModelExperimentsTableFilters} from '@common/models/reducers';
 import {smoothTypeEnum, SmoothTypeEnum} from '@common/shared/single-graph/single-graph.utils';
 import {EXPERIMENT_COMMENT} from '@common/experiments/dumb/experiment-general-info/experiment-general-info.component';
 import {isReadOnly} from '@common/shared/utils/is-read-only';
+import {createMetricColumn} from '@common/shared/utils/tableParamEncode';
+import {selectIsDeepMode, selectSelectedProjectId} from '@common/core/reducers/projects.reducer';
 
 export const selectExperimentsList = createSelector(experimentsView, state => state.experiments);
 export const selectTableRefreshList = createSelector(experimentsView, state => !!state.refreshList);
@@ -44,6 +30,26 @@ export const selectExperimentsTableColsWidth = createSelector(experimentsView, s
   (state, params) => state.projectColumnsWidth?.[params?.projectId] ?? {});
 export const selectExperimentsHiddenTableCols = createSelector(experimentsView, selectRouterParams,
   (state, params) => state.hiddenProjectTableCols?.[params?.projectId] ?? experimentsViewInitialState.hiddenTableCols);
+export const selectMetricVariants = createSelector(experimentsView, state => state.metricVariants);
+export const selectMetricVariantsPlots = createSelector(experimentsView, state => state.metricVariantsPlots);
+export const selectCompareSelectedMetricsScalars = createSelector(experimentsView, selectRouterParams, (state, params) => state.compareSelectedMetrics?.[params?.projectId])
+export const selectCompareSelectedMetricsPlots = createSelector(experimentsView, selectRouterParams, (state, params) => state.compareSelectedMetricsPlots?.[params?.projectId])
+export const selectCompareSelectedMetrics = (viewMode: 'scalars' | 'plots') =>  createSelector(selectMetricVariants, selectMetricVariantsPlots, selectCompareSelectedMetricsScalars, selectCompareSelectedMetricsPlots,
+  (metricVariantsScalars, metricVariantsPlots, selectedMetricsScalars, selectedMetricsPlots): ISmCol[] => {
+    const selectedMetricsState = viewMode === 'scalars' ? selectedMetricsScalars : selectedMetricsPlots;
+    const metricVariants = viewMode === 'scalars' ? metricVariantsScalars : metricVariantsPlots;
+  const selectedMetrics = selectedMetricsState?.metrics.map(selectedMetric => {
+    const metricVariant = metricVariants.find(metric => selectedMetric.id === `last_metrics.${metric.metric_hash}.${metric.variant_hash}.value`);
+    return metricVariant ? {...metricVariant, ... selectedMetric} : null
+  }).filter(a => !!a);
+  return selectedMetrics?.map(selectedMetric => ({...createMetricColumn({
+    metric: selectedMetric.metric,
+    variant: selectedMetric.variant,
+    metricHash: selectedMetric.metric_hash,
+    variantHash: selectedMetric.variant_hash,
+    valueType: null
+  }, null), hidden: selectedMetric.hidden}));
+});
 export const selectRawExperimentsTableCols = createSelector(experimentsView, (state) => state.tableCols);
 export const selectExperimentsTableCols = createSelector(selectRawExperimentsTableCols, selectExperimentsHiddenTableCols, selectExperimentsTableColsWidth,
   (cols, hidden, colWidth) =>
@@ -69,29 +75,20 @@ export const selectExperimentsMetricsColsForProject = createSelector(experiments
       style: {...col.style, ...(colWidth[col.id] && {width: `${colWidth[col.id]}px`})}
     } as ISmCol))
 );
+export const selectCustomColumns = createSelector(selectSelectedProjectId,selectExperimentsMetricsCols, selectExperimentsHiddenTableCols, selectExperimentsTableColsWidth,
+  (projectId, custom, hidden, colWidth) => custom
+    .filter(metricCol => metricCol.projectId === projectId)
+    .map(col => ({
+      ...col,
+      hidden: !!hidden[col.id],
+      style: {...col.style, ...(colWidth[col.id] && {width: `${colWidth[col.id]}px`})}
+    } as ISmCol))
+);
 
-export const getCustomColumns$ = (store: Store) => combineLatest([
-  store.select(selectRouterParams)
-    .pipe(
-      map(params => params?.projectId),
-      distinctUntilChanged(),
-    ),
-  store.select(selectExperimentsMetricsCols),
-  store.select(selectExperimentsHiddenTableCols),
-  store.select(selectExperimentsTableColsWidth),
-])
-  .pipe(
-    map(([projectId, custom, hidden, colWidth]) =>
-      custom
-        .filter(metricCol => metricCol.projectId === projectId)
-        .map(col => ({
-          ...col,
-          hidden: !!hidden[col.id],
-          style: {...col.style, ...(colWidth[col.id] && {width: `${colWidth[col.id]}px`})}
-        } as ISmCol))
-    )
-  );
-
+export const selectFilteredTableCols = createSelector(selectExperimentsTableCols, selectCustomColumns, selectSelectedProjectId, selectIsDeepMode, (tableCols, metaCols, projectId, deep) =>
+  (deep || projectId === '*' ? tableCols : tableCols.filter(col => (col.id !== EXPERIMENTS_TABLE_COL_FIELDS.PROJECT)))
+    .concat(metaCols.map(col => ({...col, meta: true})))
+);
 export const selectHyperParamsFiltersPage = createSelector(experimentsView, state => state.hyperParamsFiltersPage);
 export const selectCurrentScrollId = createSelector(experimentsView, (state): string => state.scrollId);
 export const selectSplitSize = createSelector(experimentsView, (state): number => state.splitSize);
@@ -118,7 +115,8 @@ export const selectSelectedExperimentsDisableAvailable = createSelector(experime
 export const selectShowAllSelectedIsActive = createSelector(experimentsView, (state): boolean => state.showAllSelectedIsActive);
 export const selectNoMoreExperiments = createSelector(experimentsView, (state): boolean => state.noMoreExperiment);
 export const selectTableMode = createSelector(experimentsView, state => state.tableMode);
-
+export const selectShowCompareScalarSettings = createSelector(experimentsView, state => state.showCompareScalarSettings);
+export const selectCloneForceParent = createSelector(experimentsView, state => state.cloneForceParent);
 export const selectExperimentInfoDataFreeze = createSelector(experimentInfo, (state): IExperimentInfo => state.infoDataFreeze);
 export const selectExperimentInfoErrors = createSelector(experimentInfo, (state): CommonExperimentInfoState['errors'] => state.errors);
 
@@ -234,6 +232,7 @@ export const selectArtifactId = createSelector(selectRouterParams,
   params => decodeURIComponent(params?.artifactId || params?.modelId)
 );
 export const selectCurrentArtifactExperimentId = createSelector(experimentInfo, state => state.artifactsExperimentId);
+export const selectDownloadingArtifact = createSelector(experimentInfo, state => state.downloading);
 
 export const selectModelSettingsXAxisType = createSelector(selectSelectedModelSettings,
   settings => settings?.xAxisType ?? ScalarKeyEnum.Iter as ScalarKeyEnum);

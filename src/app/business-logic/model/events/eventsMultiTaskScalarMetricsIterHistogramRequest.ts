@@ -11,6 +11,7 @@
  */
 
 import { ScalarKeyEnum } from '././scalarKeyEnum';
+import { MetricVariants } from '././metricVariants';
 
 
 export interface EventsMultiTaskScalarMetricsIterHistogramRequest {
@@ -24,4 +25,8 @@ export interface EventsMultiTaskScalarMetricsIterHistogramRequest {
     samples?: number;
     key?: ScalarKeyEnum;
     model_events?: boolean;
+  /**
+   * List of metrics and variants
+   */
+  metrics?: Array<MetricVariants>;
 }

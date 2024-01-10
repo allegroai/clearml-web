@@ -76,7 +76,7 @@ export class DebugImageSnippetComponent implements OnDestroy{
   loadedMedia() {
     this.isLoading = false;
     if (this.video?.nativeElement?.videoHeight === 0) {
-      this.video.nativeElement.poster = '/app/webapp-common/assets/icons/audio.svg';
+      this.video.nativeElement.poster = 'app/webapp-common/assets/icons/audio.svg';
     }
   }
 

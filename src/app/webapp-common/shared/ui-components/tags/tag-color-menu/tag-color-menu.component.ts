@@ -12,11 +12,35 @@ import {
 import {deactivateEdit} from '@common/experiments/actions/common-experiments-info.actions';
 import {cancelModelEdit} from '@common/models/actions/models-info.actions';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
+import {MatInputModule} from '@angular/material/input';
+import {FormsModule} from '@angular/forms';
+import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
+import {MatMenuModule} from '@angular/material/menu';
+import {ColorPickerModule} from 'ngx-color-picker';
+import {CdkFixedSizeVirtualScroll, CdkVirtualForOf, CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
+import {AsyncPipe, NgIf} from '@angular/common';
+import {FilterPipe} from '@common/shared/pipes/filter.pipe';
+import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 
 @Component({
   selector: 'sm-tag-color-menu',
   templateUrl: './tag-color-menu.component.html',
-  styleUrls: ['./tag-color-menu.component.scss']
+  styleUrls: ['./tag-color-menu.component.scss'],
+  standalone: true,
+  imports: [
+    MatInputModule,
+    FormsModule,
+    DialogTemplateComponent,
+    MatMenuModule,
+    ColorPickerModule,
+    CdkVirtualScrollViewport,
+    CdkVirtualForOf,
+    NgIf,
+    AsyncPipe,
+    FilterPipe,
+    ClickStopPropagationDirective,
+    CdkFixedSizeVirtualScroll
+  ]
 })
 export class TagColorMenuComponent implements OnDestroy {
   filterText: string;

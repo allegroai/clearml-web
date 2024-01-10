@@ -1,7 +1,7 @@
 <div class="d-flex justify-content-center tabs-container" xmlns="http://www.w3.org/1999/html">
   <sm-navbar-item header="Experiments" [active]="activeTab==='experiments'"
-                  (click)="activeTab = 'experiments'"></sm-navbar-item>
-  <sm-navbar-item header="Workers" [active]="activeTab==='workers'" (click)="activeTab = 'workers'">
+                  (click)="activeTab = 'experiments'" class="small-nav"></sm-navbar-item>
+  <sm-navbar-item header="Workers" [active]="activeTab==='workers'" (click)="activeTab = 'workers'" class="small-nav">
   </sm-navbar-item>
   <div class="close pointer" (click)="deselectQueueClicked()">
     <i class="al-icon al-ico-dialog-x sm-md"></i>
@@ -44,7 +44,7 @@
   [showOverlay]="false"
   [showButton]="false"
   [openOnInit]="true"
-  (onMenuClosed)="menuClosed()"
+  (menuClosed)="menuClosed()"
 >
   <sm-menu-item itemLabel="Move to top"
                 [disabled]="selectedQueue.entries.length <= 0"

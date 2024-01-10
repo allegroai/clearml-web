@@ -1,7 +1,7 @@
 <div
   *ngIf="label"
   class="chips"
-  [ngStyle]="{maxWidth: maxWidth}"
+  [style.max-width]="maxWidth"
   (click)="$event.stopPropagation()"
   (mousedown)="$event.stopPropagation()"
 >
@@ -12,7 +12,7 @@
     <span *ngIf="!colorIsForced" class="dot-container">
       <span #dot class="dot pallete-cursor"
             data-id="colorDotButton"
-            [ngStyle]="{backgroundColor: color}"
+            [style.background-color]="color"
             [colorButtonRef]="dot"
             [smChooseColor]="color"
             [stringToColor]="label">

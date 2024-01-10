@@ -25,6 +25,7 @@ export interface ExtFrame extends Omit<plotly.Frame, 'data' | 'layout'> {
   layout: Partial<ExtLayout>;
   config: Partial<plotly.Config>;
   tags?: string[];
+  plot_str?: string;
 }
 
 export interface ExtLegend extends plotly.Legend {

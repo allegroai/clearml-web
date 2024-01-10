@@ -42,11 +42,15 @@ $credentialBaseHeight: 252px;
     &.small-popup {
       max-height: 0;
     }
-    .config-nav{
+    .config-nav {
       margin-top: 24px;
       display: flex;
       border-bottom: 1px solid $blue-100;
       justify-content: center;
+
+      sm-navbar-item {
+        height: 100%;
+      }
     }
   }
 

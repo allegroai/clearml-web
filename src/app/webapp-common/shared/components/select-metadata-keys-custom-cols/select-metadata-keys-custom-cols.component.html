@@ -12,15 +12,15 @@
     (valueChanged)="searchQ($event)"
   ></sm-search>
   <div *ngIf="metadataKeys?.length > 0; else noData " class="list-container">
-    <sm-menu-item *ngFor="let key of metadataKeys | simpleFilter: searchText"
-                  #metaKey
-                  [itemLabel]="key"
-                  [checked]="metadataColsIds.includes(key)"
-                  [selectable]="true"
-                  [itemValue]="key"
-                  (itemClicked)="addOrRemoveMetadataKeyFromColumns.emit({key, show: !metaKey.checked})"
-    >
-    </sm-menu-item>
+    <sm-menu-item
+      *ngFor="let key of metadataKeys | simpleFilter: searchText"
+      #metaKey
+      [itemLabel]="key"
+      [checked]="metadataColsIds.includes(key)"
+      [selectable]="true"
+      [itemValue]="key"
+      (itemClicked)="addOrRemoveMetadataKeyFromColumns.emit({key, show: !metaKey.checked})"
+    ></sm-menu-item>
   </div>
   <ng-template #noData>
     <div class="d-flex h-100 flex-1">

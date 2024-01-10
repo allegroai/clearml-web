@@ -42,10 +42,10 @@
   <ng-template #configStep>
     <div class="steps-content">
       <div class="text" *ngIf="queue">
-        Tasks have been enqueued on the <b>{{queue?.name}}</b> queue, which is currently not serviced by any worker. They will remain in the 'pending' state until a ClearML worker services this queue.
+        {{entityName}} have been enqueued on the <b>{{queue?.name}}</b> queue, which is currently not serviced by any worker. They will remain in the 'pending' state until a ClearML worker services this queue.
       </div>
       <ng-container *ngIf="!currentLink || currentLink === links[0]">
-        <div *ngFor="let step of steps; let i = index" class="step-container">
+        <div *ngFor="let step of steps; let i = index; trackBy: trackById" class="step-container">
           <div class="step-header">{{step.header}}</div>
           <div class="step">{{step.title}}</div>
           <nav class="config-nav" *ngIf="step.title==='2. Configure'">
@@ -90,7 +90,7 @@
   <span class="">{{'# ' + workspace.name}}</span></ng-container>
   <span class="variable">web_server</span><span class="operation">:</span> <span class="string">{{WEB_SERVER_URL}}</span>
   <span class="variable">api_server</span><span class="operation">:</span> <span class="string">{{displayedServerUrls?.apiServer || API_BASE_URL}}</span>
-<ng-container *ngIf="fileBaseUrl">  <span class="variable">files_server</span><span class="operation">:</span> <span class="string">{{displayedServerUrls?.filesServer || fileBaseUrl}}</span><ng-container *ngIf="credentialsLabel">
+<ng-container *ngIf="displayedServerUrls?.filesServer || fileBaseUrl">  <span class="variable">files_server</span><span class="operation">:</span> <span class="string">{{displayedServerUrls?.filesServer || fileBaseUrl}}</span><ng-container *ngIf="credentialsLabel">
   <span>{{'# ' + credentialsLabel}}</span></ng-container>
 </ng-container>  <span class="variable">credentials</span> {{ '{' }}
     <span class="string">"access_key"</span> <span class="operation">=</span> <span class="string">"{{accessKey}}"</span>

@@ -1,12 +1,17 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {User} from '../../../../../business-logic/model/users/user';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {User} from '~/business-logic/model/users/user';
+import {NgIf} from '@angular/common';
 
 @Component({
-  selector   : 'sm-update-notifier',
+  selector: 'sm-update-notifier',
   templateUrl: './update-notifier.component.html',
-  styleUrls  : ['./update-notifier.component.scss']
+  styleUrls: ['./update-notifier.component.scss'],
+  standalone: true,
+  imports: [
+    NgIf
+  ]
 })
-export class UpdateNotifierComponent implements OnInit {
+export class UpdateNotifierComponent {
   public active      = false;
   areAvailableUpdates = false;
   private _availableUpdates: any;
@@ -45,12 +50,6 @@ export class UpdateNotifierComponent implements OnInit {
 
   get availableUpdates() {
     return this._availableUpdates;
-  }
-
-  constructor() {
-  }
-
-  ngOnInit() {
   }
 
   dismiss() {

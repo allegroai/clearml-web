@@ -4,6 +4,7 @@ import {filter, map, take} from 'rxjs/operators';
 import {selectSignedUrl} from '../../core/reducers/common-auth-reducer';
 import {AdminService} from '~/shared/services/admin.service';
 import {getSignedUrl} from '../../core/actions/common-auth.actions';
+import {downloadArtifacts} from '@common/experiments/actions/common-experiments-info.actions';
 
 @Component({
   selector: 'sm-base-clickable-artifact',
@@ -19,9 +20,9 @@ export class BaseClickableArtifactComponent {
     this.store = inject(Store);
   }
 
-  artifactFilePathClicked(url: string) {
+  artifactFilePathClicked(url: string, inMemory = false) {
     this.signUrl(url)
-      .subscribe(signedUrl => window.open(signedUrl, '_blank'));
+      .subscribe(signedUrl => this.store.dispatch(downloadArtifacts({url: signedUrl, inMemory})));
   }
 
   protected signUrl(url: string) {

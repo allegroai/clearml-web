@@ -1,8 +1,7 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {Observable} from 'rxjs/internal/Observable';
-import {Subscription} from 'rxjs';
-import {filter, take, withLatestFrom} from 'rxjs/operators';
+import {combineLatest, Observable, Subscription} from 'rxjs';
+import {filter, take} from 'rxjs/operators';
 import 'ngx-markdown-editor';
 import {
   selectIsDeepMode,
@@ -12,6 +11,7 @@ import {
 import {setBreadcrumbsOptions, updateProject} from '../core/actions/projects.actions';
 import {Project} from '~/business-logic/model/projects/project';
 import {isExample} from '../shared/utils/shared-utils';
+import {ContextMenuService} from '@common/shared/services/context-menu.service';
 
 
 @Component({
@@ -34,7 +34,7 @@ export class ProjectInfoComponent implements OnInit, OnDestroy {
 
   private selectedVariantSub: Subscription;
 
-  constructor(private store: Store, private cdr: ChangeDetectorRef) {
+  constructor(private store: Store, private cdr: ChangeDetectorRef,private contextMenuService: ContextMenuService) {
     this.selectedProject$ = this.store.select(selectSelectedProject);
     this.loading = true;
   }
@@ -48,6 +48,7 @@ export class ProjectInfoComponent implements OnInit, OnDestroy {
         this.example = isExample(project);
         this.info = project.description;
         this.projectId = project.id;
+        this.contextMenuService.setupProjectContextMenu('overview', this.projectId);
         this.loading = false;
         this.cdr.markForCheck();
       });
@@ -73,9 +74,10 @@ export class ProjectInfoComponent implements OnInit, OnDestroy {
   }
 
   setupBreadcrumbsOptions() {
-    this.infoSubs.add(this.selectedProject$.pipe(
-      withLatestFrom(this.store.select(selectIsDeepMode))
-    ).subscribe(([selectedProject, isDeep]) => {
+    this.infoSubs.add(combineLatest([
+      this.selectedProject$,
+      this.store.select(selectIsDeepMode)
+    ]).subscribe(([selectedProject, isDeep]) => {
       this.store.dispatch(setBreadcrumbsOptions({
         breadcrumbOptions: {
           showProjects: !!selectedProject,

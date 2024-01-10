@@ -102,19 +102,8 @@
 
 }
 
-::ng-deep mat-option.compare-mat-option {
-  /*
-  color: $blue-400 !important;
-
-  &.mat-selected {
-    background-color: $white !important;
-
-    &:hover {
-      background-color: rgba(0, 0, 0, .04) !important;
-    }
-
-  }
-  */
+::ng-deep .light-theme .mat-mdc-option .mdc-list-item__primary-text {
+  white-space: nowrap;
 }
 
 ::ng-deep .mat-mdc-menu-content {

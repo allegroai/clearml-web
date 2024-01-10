@@ -11,14 +11,11 @@
     flex-direction: row-reverse;
     position: absolute;
     z-index: 100;
-    top: 8px;
-    right: 11px;
+    top: 16px;
+    right: 22px;
     display: none;
     background-color: $blue-900;
-
-    * {
-      margin: 0 6px;
-    }
+    gap: 12px;
 
     sm-search {
       border-radius: 4px;

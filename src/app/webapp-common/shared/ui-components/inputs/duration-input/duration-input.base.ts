@@ -1,11 +1,12 @@
-import {TemplateFormSectionBase} from '../../template-forms-ui/templateFormSectionBase';
+import {TemplateFormSectionBaseDirective} from '../../template-forms-ui/templateFormSectionBase';
 import {ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Input, Output} from '@angular/core';
 import {TIME_IN_MILLI} from '../../../utils/time-util';
 
 @Component({
-  template: ''
+  template: '',
+  standalone: true,
 })
-export abstract class DurationInputBase  extends TemplateFormSectionBase {
+export abstract class DurationInputBase  extends TemplateFormSectionBaseDirective {
   public ms = '000';
   public seconds = '00';
   public minutes = '00';

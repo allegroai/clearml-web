@@ -3,10 +3,11 @@ import {AbstractControl, NG_VALIDATORS, ValidationErrors, Validator, ValidatorFn
 
 @Directive({
   selector : '[smUniqueInListSyncValidator2]',
-  providers: [{provide: NG_VALIDATORS, useExisting: UniqueInListSync2ValidatorDirective, multi: true}]
+  providers: [{provide: NG_VALIDATORS, useExisting: UniqueInListSync2ValidatorDirective, multi: true}],
+  standalone: true
 })
 export class UniqueInListSync2ValidatorDirective implements Validator {
-  @Input('prefix2') prefix2: string;
+  @Input() prefix2: string;
 
   validate(control: AbstractControl): ValidationErrors | null {
     const existingNames = Object.keys(control.value).filter(key => key.startsWith(this.prefix2)).map(key => control.value[key]);

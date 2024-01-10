@@ -12,11 +12,18 @@ import {setBackdrop} from '@common/core/actions/layout.actions';
 import {MatDialog} from '@angular/material/dialog';
 import {fromEvent, Subscription} from 'rxjs';
 import {tap, throttleTime} from 'rxjs/operators';
+import {LoadingButtonComponent} from '@common/shared/ui-components/buttons/loading-button/loading-button.component';
+import {NgIf} from '@angular/common';
 
 @Component({
-  selector   : 'sm-editable-section',
+  selector: 'sm-editable-section',
   templateUrl: './editable-section.component.html',
-  styleUrls  : ['./editable-section.component.scss']
+  styleUrls: ['./editable-section.component.scss'],
+  standalone: true,
+  imports: [
+    LoadingButtonComponent,
+    NgIf
+  ]
 })
 export class EditableSectionComponent implements OnDestroy {
   public inEditMode = false;

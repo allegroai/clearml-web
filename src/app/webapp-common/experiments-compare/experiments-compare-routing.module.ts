@@ -1,7 +1,6 @@
 import {ExperimentsCompareComponent} from './experiments-compare.component';
 import {RouterModule, Routes} from '@angular/router';
 import {NgModule} from '@angular/core';
-import {SMSharedModule} from '../shared/shared.module';
 import {ExperimentCompareDetailsComponent} from './containers/experiment-compare-details/experiment-compare-details.component';
 import {ExperimentCompareMetricValuesComponent} from './containers/experiment-compare-metric-values/experiment-compare-metric-values.component';
 import {ExperimentCompareScalarChartsComponent} from './containers/experiment-compare-metric-charts/experiment-compare-scalar-charts.component';
@@ -28,6 +27,7 @@ export const routes: Routes = [
       {path: 'hyper-params', component: ExperimentCompareParamsComponent, pathMatch: 'full', canActivate: [compareNavigationGuard]},
       {path: 'hyper-params/values', component: ExperimentCompareParamsComponent, data: {mode: 'hyper-params', limit: true}},
       {path: 'hyper-params/graph', component: ExperimentCompareHyperParamsGraphComponent},
+      {path: 'hyper-params/scatter', component: ExperimentCompareHyperParamsGraphComponent, data: {scatter: true}},
       {path: 'scalars', component: ExperimentCompareMetricValuesComponent, canActivate: [compareNavigationGuard]},
       {path: 'scalars/values', component: ExperimentCompareMetricValuesComponent, data: {limit: true}},
       {path: 'scalars/max-values', component: ExperimentCompareMetricValuesComponent, data: {limit: true}},
@@ -41,7 +41,6 @@ export const routes: Routes = [
 
 @NgModule({
   imports: [
-    SMSharedModule,
     RouterModule.forChild(routes),
 
   ],

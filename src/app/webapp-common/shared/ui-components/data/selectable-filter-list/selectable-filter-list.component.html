@@ -10,12 +10,11 @@
   (valueChanged)="onSearchTermChanged($event)"
 ></sm-search>
 <div class="toggle-all-text">
-  <span (click)="toggleHideAll()">{{checkedList?.length > 0 ? 'Show all' : 'Hide all'}}</span>
+  <span (click)="toggleHideAll()">{{checkedList?.length === 0 ? 'Show all' : 'Hide all'}}</span>
 </div>
 <sm-selectable-list
   [list]="filteredList"
   [checkedList]="checkedList"
   (onItemSelect)="itemSelect.emit($event)"
   (onItemCheck)="toggleHide($event)"
->
-</sm-selectable-list>
+></sm-selectable-list>

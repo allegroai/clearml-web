@@ -2,7 +2,6 @@ import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import {ColHeaderTypeEnum, ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {get} from 'lodash-es';
 import {WORKERS_TABLE_COL_FIELDS} from '../../workers-and-queues.consts';
-import {TableComponent} from '@common/shared/ui-components/data/table/table.component';
 import {BaseTableView} from '@common/shared/ui-components/data/table/base-table-view';
 import {WorkerExt} from '@common/workers-and-queues/actions/workers.actions';
 

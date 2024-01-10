@@ -1,7 +1,7 @@
-
 <sm-experiment-artifact-item-view
   *ngIf="modelInfo$ | async"
   [artifact]="selectedArtifact"
-  [editable]="false">
-</sm-experiment-artifact-item-view>
+  [editable]="false"
+  [downloading]="downloadingArtifact$ | async"
+></sm-experiment-artifact-item-view>
 

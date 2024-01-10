@@ -18,8 +18,7 @@ import {ConfigurationService} from '../../shared/services/configuration.service'
 import {
   GetCurrentUserResponseUserObjectCompany
 } from '~/business-logic/model/users/getCurrentUserResponseUserObjectCompany';
-import {selectIsDeepMode, selectShowHiddenUserSelection} from '../../core/reducers/projects.reducer';
-import {selectIsSearching} from '../../common-search/common-search.reducer';
+import {selectShowHiddenUserSelection} from '../../core/reducers/projects.reducer';
 import {MESSAGES_SEVERITY} from '@common/constants';
 import {setBreadcrumbs} from '@common/core/actions/router.actions';
 import {selectBreadcrumbs} from '@common/core/reducers/view.reducer';
@@ -45,7 +44,7 @@ export enum CrumbTypeEnum {
 export interface IBreadcrumbsLink {
   name?: string;
   url?: string;
-  subCrumbs?: { name: string; url: string; hidden?: boolean }[];
+  subCrumbs?: { name?: string; url: string; hidden?: boolean }[];
   isProject?: boolean;
   type?: CrumbTypeEnum;
   hidden?: boolean;
@@ -94,11 +93,11 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
   public isCommunity: boolean;
   public archive: boolean;
   public workspaceNeutral: boolean;
-  public isDeep: boolean;
+  // public isDeep: boolean;
   public subProjectsMenuIsOpen: boolean;
   public shouldCollapse: boolean;
   private sub = new Subscription();
-  private isSearching$ = this.store.select(selectIsSearching);
+  // private isSearching$ = this.store.select(selectIsSearching);
 
   @Input() activeWorkspace: GetCurrentUserResponseUserObjectCompany;
   @ViewChild('container') private breadCrumbsContainer: ElementRef<HTMLDivElement>;
@@ -122,7 +121,6 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
       .pipe(debounceTime(100))
       .subscribe(() => {
         this.calcOverflowing();
-        this.cd.detectChanges();
       })
     );
 
@@ -132,30 +130,29 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
           (!breadcrumb.hidden) || (this.showHidden && this.projectFeature)
         ))
         .filter(breadcrumbsGroup => breadcrumbsGroup?.length > 0);
-      this.cd.detectChanges();
+      this.calcOverflowing();
+      // this.cd.detectChanges();
     }));
 
     this.sub.add(this.breadcrumbs$.pipe(debounceTime(100)).subscribe(() => {
       this.calcOverflowing();
-      this.cd.detectChanges();
     }));
 
-    this.sub.add(this.isSearching$.pipe(debounceTime(100)).subscribe(() => {
-        if (!this.shouldCollapse) {
-          this.calcOverflowing();
-          this.cd.detectChanges();
-        }
-      })
-    );
+    // this.sub.add(this.isSearching$.pipe(debounceTime(100)).subscribe(() => {
+    //     if (!this.shouldCollapse) {
+    //       this.calcOverflowing();
+    //     }
+    //   })
+    // );
 
     this.sub.add(this.configService.globalEnvironmentObservable.subscribe(env => this.isCommunity = env.communityServer));
 
-    // todo: check if needed
-    this.sub.add(this.store.select(selectIsDeepMode).subscribe(isDeep => {
-        this.isDeep = isDeep;
-        this.cd.detectChanges();
-      })
-    );
+    // // todo: check if needed
+    // this.sub.add(this.store.select(selectIsDeepMode).subscribe(isDeep => {
+    //     this.isDeep = isDeep;
+    //     this.cd.detectChanges();
+    //   })
+    // );
     this.sub.add(this.store.select(selectRouterConfig).subscribe(config => {
       let route = this.route.snapshot;
       while (route.firstChild) {
@@ -202,7 +199,7 @@ export class BreadcrumbsComponent implements OnInit, OnDestroy {
     const width = dummyContainer.offsetWidth;
     this.breadCrumbsContainer.nativeElement.removeChild(dummyContainer);
     this.shouldCollapse = lastCrumb.clientWidth < width;
-    this.cd.detectChanges();
+    this.cd.markForCheck();
   }
 
   ngOnDestroy() {

@@ -59,7 +59,7 @@ export interface ISelectedExperiment {
  * an object that will transfrom from the ISelectedExperiment response to more comfortable object to display.
  */
 export interface IExperimentInfo extends Omit<Task, 'id' | 'user' | 'project' | 'company' | 'execution' | 'container'|'output'> {
-  id?: string;
+  id: string;
   model?: IExperimentModelInfo;
   execution?: IExecutionForm;
   hyperParams?: IHyperParamsForm;

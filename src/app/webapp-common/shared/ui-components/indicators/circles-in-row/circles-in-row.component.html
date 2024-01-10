@@ -2,10 +2,10 @@
   <div *ngFor="let circle of data | slice : 0 : (limit || data?.length); let index=index; trackBy: trackBy"
        class="circle"
        [class.empty]="!circle.name"
-       [ngClass]="circle.class"
+       [class]="circle.class"
        [class.long]="circle.initials?.length > 4"
        [style.left.px]="-6 * index"
-       [smTooltip]="circle.name" 
+       [smTooltip]="circle.name"
   >
     <div class="inner-circle">{{circle.name ? circle.initials || (circle.name | initials) : ''}}</div>
   </div>
@@ -19,7 +19,7 @@
   <div class="circles" >
     <div *ngFor="let circle of staggerArray; let index = index; trackBy: trackBy"
          class="circle stagger"
-         [style.left.px]="-24 * index"
+         [style.left.px]="-27 * index"
          [style.zIndex]="staggerArray.length - index"
     >{{index === 0 ? stagger : ''}}</div>
   </div>

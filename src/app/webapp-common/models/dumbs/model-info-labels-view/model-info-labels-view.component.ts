@@ -1,25 +1,39 @@
-import {Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild} from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  Output,
+  QueryList,
+  ViewChildren
+} from '@angular/core';
+import {trackById} from '@common/shared/utils/forms-track-by';
 import {Model} from '~/business-logic/model/models/model';
 import {NgForm} from '@angular/forms';
-import {debounceTime} from 'rxjs/operators';
+import {debounceTime, filter, map, switchMap} from 'rxjs/operators';
 import {Subscription} from 'rxjs';
 import {SelectedModel} from '../../shared/models.model';
+import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 
 @Component({
   selector: 'sm-model-info-labels-view',
   templateUrl: './model-info-labels-view.component.html',
   styleUrls: ['./model-info-labels-view.component.scss']
 })
-export class ModelInfoLabelsViewComponent implements OnInit, OnDestroy {
+export class ModelInfoLabelsViewComponent implements AfterViewInit, OnDestroy {
   public formData: Array<{ label: string; id: number }> = [];
   public editable = false;
-  public cols = [{header: 'Label', class: ''}, {header: 'Id', class: ''}];
+  public columns: ISmCol[] = [
+    {id: 'label', header: 'Label'},
+    {id: 'id', header: 'Id'}
+  ];
 
-  private unsavedValue: any;
+  private unsavedValue: { label: string; id: number }[];
   private formChangesSubscription: Subscription;
   private _model: SelectedModel;
 
-  @ViewChild('labelsForm', {static: true}) labelsForm: NgForm;
+  @ViewChildren(NgForm) labelsFormList: QueryList<NgForm>;
 
   @Input() set model(model: SelectedModel) {
     if (model) {
@@ -41,12 +55,19 @@ export class ModelInfoLabelsViewComponent implements OnInit, OnDestroy {
   constructor() {
   }
 
-  ngOnInit(): void {
-    this.formChangesSubscription = this.labelsForm.valueChanges.pipe(debounceTime(10)).subscribe(formValue => {
-      if (this.editable) {
-        this.unsavedValue = this.formData;
-      }
-    });
+  ngAfterViewInit(): void {
+    this.formChangesSubscription = this.labelsFormList.changes
+      .pipe(
+        map(() => this.labelsFormList?.first),
+        filter(form => !!form),
+        switchMap(() => this.labelsFormList.first?.valueChanges),
+        debounceTime(10)
+      )
+      .subscribe(() => {
+        if (this.editable) {
+          this.unsavedValue = this.formData;
+        }
+      });
   }
 
   ngOnDestroy(): void {
@@ -92,4 +113,5 @@ export class ModelInfoLabelsViewComponent implements OnInit, OnDestroy {
     return obj;
   }
 
+  protected readonly trackById = trackById;
 }

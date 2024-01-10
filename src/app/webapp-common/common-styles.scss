@@ -2,7 +2,6 @@
 @import "angular-notifier/styles.scss";
 @import "angular-notifier/styles/themes/theme-material.scss";
 @import "shared/ui-components/styles/notifications";
-@import "britecharts/src/styles/britecharts";
 // @import "ngx-markdown-editor/assets/highlight.js/agate.min.css";
 @import "shared/ui-components/styles/material-palette";
 @import "assets/fonts/trains-icons.scss";
@@ -165,7 +164,7 @@ $sm-neon-theme: mat.define-dark-theme((
     --mdc-list-list-item-selected-label-text-color: white;
 
     .mat-mdc-list-item.selected {
-      .mdc-list-item__primary-text {
+      .mat-mdc-menu-item-text, .mdc-list-item__primary-text {
         color: white;
       }
     }
@@ -201,6 +200,10 @@ h4.al-header {
 
 h5.al-header {
   font-weight: normal;
+}
+
+.font-weight-bold {
+  font-weight: bold;
 }
 
 span.highlight-text {
@@ -400,6 +403,10 @@ button {
 
 .capital-case {
   text-transform: capitalize;
+}
+
+.upper-case {
+  text-transform: uppercase;
 }
 
 
@@ -610,7 +617,7 @@ html {
         --mat-menu-item-hover-state-layer-color: #{$blue-50};
       }
 
-      .mdc-list-item__primary-text {
+      .mat-mdc-menu-item-text, .mdc-list-item__primary-text {
         --mdc-list-list-item-label-text-color: rgba(0, 0, 0, 0.87);
       }
     }
@@ -630,7 +637,7 @@ html {
     padding: 0 32px 0 12px;
     border-radius: 4px;
 
-    .mdc-list-item__primary-text {
+    .mat-mdc-menu-item-text, .mdc-list-item__primary-text {
       --mat-menu-item-label-text-tracking: 0;
       display: flex;
       align-items: center;

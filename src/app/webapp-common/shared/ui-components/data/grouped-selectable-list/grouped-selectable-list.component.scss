@@ -6,6 +6,15 @@
   margin: 0;
   overflow: scroll;
 
+  mat-panel-title {
+    min-width: 0;
+    flex: 1 1 100%;
+  }
+
+  .header-container {
+    min-width: 0;
+  }
+
   mat-expansion-panel-header {
     padding: 0;
 
@@ -20,18 +29,6 @@
     &.has-children {
       .mat-content {
         padding-right: 12px;
-      }
-    }
-
-    .mat-content {
-      height: 100%;
-
-      .header-container {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        width: 100%;
       }
     }
   }
@@ -88,12 +85,12 @@
         color: $purple;
       }
     }
-    .al-ico-show {
+    .al-ico-hide {
       visibility: hidden;
     }
     &:hover {
       color: $blue-500;
-      .al-ico-show {
+      .al-ico-hide {
         visibility: visible;
       }
     }

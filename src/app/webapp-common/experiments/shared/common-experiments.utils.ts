@@ -27,7 +27,6 @@ export const downloadObjectAsJson = (exportObj, exportName) => {
 };
 
 export const encodeHyperParameter = (path: string) => {
-  const [prefix, section, ...rest] = path.split('.');
-  const param = rest.slice(0, -1);
-  return [prefix, section, rest.length > 0 ? param.join('%2E') : null, 'value'].filter(val => val !== null).join('.');
+  const [prefix, section, ...param] = path.split('.');
+  return [prefix, section, param.length > 0 ? param.join('%2E') : null, 'value'].filter(val => val !== null).join('.');
 };

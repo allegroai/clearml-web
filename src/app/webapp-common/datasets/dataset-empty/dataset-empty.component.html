@@ -8,18 +8,20 @@
       <div>
         Use ClearML Data from CLI or in your Python code.<br>
         Run these code snippets for a quick example (Requires ClearML 1.7 or above).<br>
-        For more details see the <a [class.dark]="showButton" href="https://clear.ml/docs/latest/docs/clearml_data" target="_blank">documentation</a>
+        For more details see the <a [class.dark]="showButton" href="https://clear.ml/docs/latest/docs/clearml_data" target="_blank" data-id="documentationLink">documentation</a>
       </div>
     </div>
     <div class="navbar">
       <sm-navbar-item
         direction="bottom"
         header="CLI"
+        data-id="CLITab"
         [active]="emptyStateTab==='cli'"
         (click)="emptyStateTabClicked('cli')"></sm-navbar-item>
       <sm-navbar-item
         direction="bottom"
         header="SDK"
+        data-id="SDKTab"
         [active]="emptyStateTab==='sdk'"
         (click)="emptyStateTabClicked('sdk')"
       ></sm-navbar-item>
@@ -32,6 +34,6 @@
       [showCopyButton]="true"
     ></sm-code-editor>
   </div>
-  <div class="diagram"><i class="i-datasets-empty-state"></i></div>
+  <div class="diagram"><i class="i-datasets-empty-state" data-id="emptyDataSetDiagram"></i></div>
 </div>
 </ng-template>

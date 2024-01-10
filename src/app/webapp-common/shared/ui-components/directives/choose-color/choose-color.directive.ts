@@ -13,7 +13,7 @@ export class ChooseColorDirective {
   readonly colorPickerHeight = 460 - this.colorTopOffset;
   @Input() colorButtonRef;
   @Input() colorButtonClass: string;
-  @Input() stringToColor: string;
+  @Input() stringToColor: string | string[];
   @Input() colorPickerWithAlpha: boolean = false;
   private _defaultColor: number[];
   private defaultColorString: string;
@@ -41,7 +41,7 @@ export class ChooseColorDirective {
   public onClick(event: MouseEvent): void {
     const elementsWithClass = this.colorButtonClass ? Array.from(this.el.nativeElement.querySelectorAll(this.colorButtonClass)) : [];
     const matchingEl        = elementsWithClass.find(el => el === event.target);
-    const matchingRef       = this.colorButtonRef && this.colorButtonRef.nativeElement ? this.colorButtonRef.nativeElement : this.colorButtonRef;
+    const matchingRef       = this.colorButtonRef?.nativeElement ? this.colorButtonRef.nativeElement : this.colorButtonRef;
 
     if (matchingEl || matchingRef === event.target) {
       event.stopPropagation();
@@ -66,7 +66,7 @@ export class ChooseColorDirective {
       left,
       theme: 'light',
       defaultColor: this.defaultColorString,
-      cacheKey: this.stringToColor,
+      cacheKey: Array.isArray(this.stringToColor) ? structuredClone(this.stringToColor).sort().join() : this.stringToColor,
       alpha: this.colorPickerWithAlpha
     }));
     event.stopPropagation();

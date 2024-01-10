@@ -9,12 +9,19 @@ import {
   SimpleChanges
 } from '@angular/core';
 import {SelectableListItem} from './selectable-list.model';
+import {NgForOf} from '@angular/common';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 
 @Component({
-  selector       : 'sm-selectable-list',
-  templateUrl    : './selectable-list.component.html',
-  styleUrls      : ['./selectable-list.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  selector: 'sm-selectable-list',
+  templateUrl: './selectable-list.component.html',
+  styleUrls: ['./selectable-list.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    NgForOf,
+    TooltipDirective
+  ]
 })
 export class SelectableListComponent implements OnChanges{
   public showList: SelectableListItem[] = [];
@@ -29,8 +36,10 @@ export class SelectableListComponent implements OnChanges{
 
   ngOnChanges(changes: SimpleChanges): void {
     if ((changes.list || changes.checkedList)) {
-      this.showList = this.list.map(item => ({...item, visible: !this.checkedList?.includes(item.name) } as SelectableListItem));
+      this.showList = this.list.map(item => ({...item, visible: this.checkedList?.includes(item.name) } as SelectableListItem));
       this.cdr.detectChanges();
     }
   }
+
+  trackByValue = (index: number, item) => item.value;
 }

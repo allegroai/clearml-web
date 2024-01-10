@@ -1,3 +1,4 @@
+
 export const QUEUES_TABLE_COL_FIELDS = {
   ID          : 'id',
   NAME        : 'name',

@@ -1,8 +1,11 @@
+import {HeaderNavbarTabConfig} from '@common/layout/header-navbar-tabs/header-navbar-tabs-config.types';
+
 export type MetricValueType = 'min_value' | 'max_value' | 'value';
 
 export interface SelectedMetric {
   name: string;
   path: string;
+  valueType?: 'min_value' | 'max_value' | 'value';
 }
 
 export interface DataDictionary {
@@ -86,3 +89,19 @@ export const COMPARE_DEBUG_IMAGES_ONLY_FIELDS = [
 ];
 
 export const LIMITED_VIEW_LIMIT = 10;
+
+export const EXPERIMENTS_COMPARE_ROUTES = [
+  {header: 'details', subHeader: ''},
+  {header: 'hyperparameters', subHeader: '', featureLink: 'hyper-params'},
+  {header: 'scalars', subHeader: ''},
+  {header: 'plots', subHeader: '', featureLink: 'metrics-plots'},
+  {header: 'debug samples', subHeader: '', featureLink: 'debug-images'},
+] as HeaderNavbarTabConfig[];
+
+
+export const MODELS_COMPARE_ROUTES = [
+  {header: 'details', subHeader: '', featureLink: 'models-details'},
+  {header: 'network', subHeader: ''},
+  {header: 'scalars', subHeader: ''},
+  {header: 'plots', subHeader: '', featureLink: 'metrics-plots'},
+] as HeaderNavbarTabConfig[];

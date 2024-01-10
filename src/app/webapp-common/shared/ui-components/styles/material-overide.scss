@@ -3,6 +3,8 @@
 
 .dark-theme, .light-theme {
 
+  --mat-form-field-outlined-label-text-populated-size: 12px;
+
   /* mat select */
   --mat-select-trigger-text-size: 14px;
   --mat-select-trigger-text-tracking: 0;
@@ -10,11 +12,17 @@
   --mat-option-label-text-tracking: 0;
   --mat-option-label-text-line-height: 32px;
 
+
+  mat-error {
+    font-size: 12px;
+  }
+
   .entity-context-menu .cdk-program-focused {
     background-color: transparent !important;
   }
 
   .mat-mdc-form-field {
+
     --mat-menu-item-label-text-size: 14px;
     --mat-menu-item-label-text-line-height: 16px;
 
@@ -80,7 +88,6 @@
       .mdc-floating-label--float-above {
         // --mat-mdc-form-field-label-transform: translate(-4px, -42.75px) scale(var(--mat-mdc-form-field-floating-label-scale, 0.75));
         --mat-mdc-form-field-label-transform: translate(-4px, -44px) scale(1);
-        font-size: 12px;
       }
     }
 
@@ -123,8 +130,8 @@
 .dark-theme {
   .mdc-text-field--outlined:not(.mdc-text-field--disabled) {
     .mdc-notched-outline__leading, .mdc-notched-outline__notch, .mdc-notched-outline__trailing {
+      --mdc-outlined-text-field-focus-outline-width: 1px;
       border-color: $blue-500;
-      border-width: 1px;
     }
 
     &:not(.mdc-text-field--focused):hover .mdc-notched-outline {
@@ -145,7 +152,7 @@
   }
   .mat-mdc-option {
     --mat-option-label-text-color: #{$blue-200};
-    &.mdc-list-item--selected:not(.mdc-list-item--disabled) .mdc-list-item__primary-text {
+    &.mdc-list-item--selected:not(.mdc-list-item--disabled) .mat-mdc-menu-item-text {
       --mat-option-selected-state-label-text-color: #{$blue-100};
     }
   }
@@ -168,6 +175,10 @@
 }
 
 .light-theme {
+
+  --mdc-filled-text-field-label-text-color: #{$blue-400};
+  --mdc-outlined-text-field-label-text-color: #{$blue-400};
+
   mat-option {
     --mat-option-hover-state-layer-color: #{$blue-50};
     --mat-option-focus-state-layer-color: #{$blue-100};
@@ -180,7 +191,7 @@
   }
   .mat-mdc-option {
     --mat-option-label-text-color: #{$blue-500};
-    &.mdc-list-item--selected:not(.mdc-list-item--disabled) .mdc-list-item__primary-text {
+    &.mdc-list-item--selected:not(.mdc-list-item--disabled) .mat-mdc-menu-item-text {
       --mat-option-selected-state-label-text-color: #{$blue-600};
     }
   }
@@ -213,8 +224,9 @@
 
     .mdc-text-field--outlined:not(.mdc-text-field--disabled) {
       .mdc-notched-outline__leading, .mdc-notched-outline__notch, .mdc-notched-outline__trailing {
+        --mdc-outlined-text-field-focus-outline-width: 1px;
         border-color: $cloudy-blue;
-        border-width: 1px;
+        //border-width: 1px;
       }
 
       &:not(.mdc-text-field--focused):hover .mdc-notched-outline {
@@ -236,7 +248,7 @@
 
     .mat-mdc-option {
       border-radius: 4px;
-      height: 40px;
+      //height: 40px;
       min-height: 40px;
       line-height: 40px;
       margin-bottom: 2px;
@@ -245,7 +257,7 @@
         margin-bottom: 0;
       }
 
-      .mdc-list-item__primary-text {
+      .mat-mdc-menu-item-text {
         display: inline-block;
         flex-grow: 1;
         overflow: hidden;
@@ -307,7 +319,7 @@ body.dark-theme .mat-mdc-autocomplete-panel.dark-outline {
     color: $blue-200;
   }
 
-  &.mat-primary .mat-mdc-option.mat-selected:not(.mat-option-disabled) .mdc-list-item__primary-text {
+  &.mat-primary .mat-mdc-option.mat-selected:not(.mat-option-disabled) .mat-mdc-menu-item-text {
     color: $blue-200;
   }
 
@@ -349,17 +361,14 @@ body.dark-theme .mat-mdc-autocomplete-panel.dark-outline {
   --mdc-switch-selected-hover-track-color: #{rgba($purple, 0.4)};
 }
 
-.mat-mdc-slide-toggle {
-  --mdc-switch-selected-icon-size: 8px;
-  --mdc-switch-unselected-icon-size: 8px;
-  --mdc-switch-handle-width: 14px;
-  --mdc-switch-handle-height: 14px;
-  --mdc-switch-track-width: 30px;
-  --mdc-switch-state-layer-size: 32px;
-
-  .mdc-switch {
+.mat-mdc-slide-toggle .mdc-switch {
     margin-right: 8px;
-  }
+    --mdc-switch-selected-icon-size: 8px;
+    --mdc-switch-unselected-icon-size: 8px;
+    --mdc-switch-handle-width: 14px;
+    --mdc-switch-handle-height: 14px;
+    --mdc-switch-track-width: 30px;
+    --mdc-switch-state-layer-size: 32px;
 }
 
 .light-theme .mat-mdc-slider.mat-primary {

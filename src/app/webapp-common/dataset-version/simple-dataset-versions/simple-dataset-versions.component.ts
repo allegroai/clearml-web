@@ -9,6 +9,7 @@ import {EXPERIMENTS_TABLE_COL_FIELDS} from '~/features/experiments/shared/experi
 import {take, withLatestFrom} from 'rxjs/operators';
 import {selectDefaultNestedModeForFeature} from '@common/core/reducers/projects.reducer';
 import {setBreadcrumbsOptions} from '@common/core/actions/projects.actions';
+import {setExperiment} from '@common/experiments/actions/common-experiments-info.actions';
 
 @Component({
   selector: 'sm-simple-dataset-versions',
@@ -45,6 +46,13 @@ export class SimpleDatasetVersionsComponent extends ControllersComponent impleme
           }
         }
       });
+
+    // No experiment's OnDestroy (that reset selected) running because info component always on.
+    this.sub.add(this.minimizedView$.subscribe(minimized => {
+      if (!minimized) {
+        this.store.dispatch(setExperiment({experiment: null}));
+      }
+    }))
   }
 
   override createFooterItems(config: {

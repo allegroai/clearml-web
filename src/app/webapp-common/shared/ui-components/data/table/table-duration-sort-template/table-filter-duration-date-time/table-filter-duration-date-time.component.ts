@@ -1,9 +1,24 @@
 import {ChangeDetectionStrategy, Component} from '@angular/core';
 import {DurationParameters, TableDurationSortBaseComponent} from '../table-duration-sort-base.component';
 import {TIME_IN_MILLI} from '../../../../../utils/time-util';
-import {MAT_DATE_FORMATS, MAT_DATE_LOCALE} from '@angular/material/core';
+import {MAT_DATE_FORMATS, MAT_DATE_LOCALE, MatNativeDateModule} from '@angular/material/core';
 import {isNil} from 'lodash-es';
 import {hasValue} from '../../../../../utils/helpers.util';
+import {FormsModule} from '@angular/forms';
+import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
+import {
+  KeydownStopPropagationDirective
+} from '@common/shared/ui-components/directives/keydown-stop-propagation.directive';
+import {MatDatepickerModule} from '@angular/material/datepicker';
+import {
+  DurationInputListComponent
+} from '@common/shared/ui-components/inputs/duraion-input-list/duration-input-list.component';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {NgIf} from '@angular/common';
+import {
+  TableFilterDurationErrorComponent
+} from '@common/shared/ui-components/data/table/table-duration-sort-template/table-filter-duration-error/table-filter-duration-error.component';
+import {MatInputModule} from '@angular/material/input';
 
 export const MY_DATE_FORMATS = {
   parse: {
@@ -58,12 +73,25 @@ export const getTimeInSecondsFromDate = (_date: number | Date): number => {
   selector: 'sm-table-filter-duration-date-time',
   templateUrl: './table-filter-duration-date-time.component.html',
   styleUrls: ['./table-filter-duration-date-time.component.scss'],
-  providers:[
-    { provide: MAT_DATE_LOCALE, useValue: 'en-GB' },
-    { provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS }
+  providers: [
+    {provide: MAT_DATE_LOCALE, useValue: 'en-GB'},
+    {provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS}
 
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    FormsModule,
+    ClickStopPropagationDirective,
+    KeydownStopPropagationDirective,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    DurationInputListComponent,
+    TooltipDirective,
+    NgIf,
+    TableFilterDurationErrorComponent,
+    MatInputModule
+  ]
 })
 export class TableFilterDurationDateTimeComponent  extends TableDurationSortBaseComponent {
   _selectedDate: Date;

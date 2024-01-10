@@ -1,7 +1,8 @@
 import {Directive, HostListener} from '@angular/core';
 
 @Directive({
-  selector: '[smKeyDownStopPropagation]'
+  selector: '[smKeyDownStopPropagation]',
+  standalone: true
 })
 export class KeydownStopPropagationDirective {
   @HostListener('keydown', ['$event'])

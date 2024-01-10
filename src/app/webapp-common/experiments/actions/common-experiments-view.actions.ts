@@ -13,6 +13,7 @@ import {
   OrganizationPrepareDownloadForGetAllRequest
 } from '~/business-logic/model/organization/organizationPrepareDownloadForGetAllRequest';
 import {ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
+import {EventTypeEnum} from '~/business-logic/model/events/eventTypeEnum';
 
 // COMMANDS:
 export const getExperiments = createAction(EXPERIMENTS_PREFIX + ' [get experiments]');
@@ -75,9 +76,17 @@ export const updateManyExperiment = createAction(
 
 export const setSelectedExperiments = createAction(
   EXPERIMENTS_PREFIX + ' [set selected experiments]',
-  props<{ experiments: ISelectedExperiment[] }>()
+  props<{ experiments: ISelectedExperiment[]; compareMode?: 'scalars' | 'plots'}>()
 );
 
+export const getSelectedExperimentsByIds = createAction(
+  EXPERIMENTS_PREFIX + ' [get selected experiments by id]',
+  props<{ experiments: ISelectedExperiment[] }>()
+);
+export const getSelectedExperiments = createAction(
+  EXPERIMENTS_PREFIX + ' [get selected experiments]',
+  props<{ ids: string[] }>()
+);
 export const updateUrlParams = createAction(EXPERIMENTS_PREFIX + '[update URL params from state]');
 
 export const setSelectedExperiment = createAction(
@@ -99,6 +108,11 @@ export const selectAllExperiments = createAction(
 export const toggleColHidden = createAction(
   EXPERIMENTS_PREFIX + ' [toggle column hidden state]',
   props<{ columnId: string; projectId: string }>()
+);
+
+export const toggleSelectedMetricCompare = createAction(
+  EXPERIMENTS_PREFIX + ' [toggle metric selected state]',
+  props<{ columnId: string; projectId: string; compareView: 'scalars' | 'plots' }>()
 );
 
 export const setVisibleColumnsForProject = createAction(
@@ -177,12 +191,19 @@ export const setHyperParamsFiltersPage = createAction(
   props<{ page: number }>()
 );
 export const resetExperiments = createAction(EXPERIMENTS_PREFIX + ' [reset experiments]');
-export const getCustomMetrics = createAction(EXPERIMENTS_PREFIX + ' [get custom metrics]');
+export const getCustomMetrics = createAction(
+  EXPERIMENTS_PREFIX + ' [get custom metrics]',
+  props<{hideLoader?: boolean}>()
+);
+export const getCustomMetricsPerType = createAction(
+  EXPERIMENTS_PREFIX + ' [get custom metrics per type]',
+  props<{ids?: string[]; metricsType?: EventTypeEnum; isModel?: boolean}>());
+
 export const getCustomHyperParams = createAction(EXPERIMENTS_PREFIX + ' [get custom hyper parameter]');
 
 export const setCustomMetrics = createAction(
   EXPERIMENTS_PREFIX + ' [set custom metrics]',
-  props<{ metrics: MetricVariantResult[] }>()
+  props<{ metrics: MetricVariantResult[], projectId: string; compareView: EventTypeEnum}>()
 );
 export const setCustomHyperParams = createAction(
   EXPERIMENTS_PREFIX + ' [set custom hyper params]',
@@ -195,13 +216,28 @@ export const setExtraColumns = createAction(
 );
 
 export const addColumn = createAction(
-  EXPERIMENTS_PREFIX + ' [ add column]',
+  EXPERIMENTS_PREFIX + ' [add column]',
   props<{ col: ISmCol }>()
+);
+
+export const addSelectedMetric = createAction(
+  EXPERIMENTS_PREFIX + ' [add selected metric scalars]',
+  props<{ col: Partial<ISmCol>; projectId: string; compareView: 'scalars' | 'plots' }>()
+);
+
+export const addSelectedMetricPlots = createAction(
+  EXPERIMENTS_PREFIX + ' [add selected metric plots]',
+  props<{ col: Partial<ISmCol>; projectId: string }>()
 );
 
 export const removeCol = createAction(
   EXPERIMENTS_PREFIX + ' [remove column]',
   props<{ id: string; projectId: string }>()
+);
+
+export const removeSelectedMetric = createAction(
+  EXPERIMENTS_PREFIX + ' [remove selected metric]',
+  props<{ id: string; projectId: string; compareView: 'scalars' | 'plots' }>()
 );
 
 export const setColumnWidth = createAction(
@@ -253,7 +289,10 @@ export const setSelectedExperimentsDisableAvailable = createAction(
 );
 export const setTableMode = createAction(
   EXPERIMENTS_PREFIX + '[set table view mode]',
-  props<{ mode: 'info' | 'table' }>()
+  props<{ mode: 'info' | 'table' | 'compare'}>()
+);
+export const toggleCompareScalarSettings = createAction(
+  EXPERIMENTS_PREFIX + '[toggle compare scalars settings]'
 );
 export const prepareTableForDownload = createAction(
   EXPERIMENTS_PREFIX + ' [prepareTableForDownload]',

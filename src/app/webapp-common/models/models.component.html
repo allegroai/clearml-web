@@ -8,7 +8,7 @@
     [tableFilters]="tableFilters$ | async"
     [metadataKeys]="metadataKeys$ | async"
     [metricVariants]="metricVariants$ | async"
-    [tableMode]="firstModel && (tableMode$ | async)"
+    [tableMode]="firstModel ? (tableMode$ | async) : 'table'"
     [hideNavigation]="modelsPage$| async"
     [rippleEffect]="tableModeAwareness$ | async"
     [noData]="!((models$ | async)?.length > 0)"
@@ -62,6 +62,7 @@
         [split]="selectSplitSize$ | async"
         [enableMultiSelect]="true"
         [entityType]="entityTypeEnum.model"
+        [cardsCollapsed]="cardsCollapsed$ | async"
         (columnsReordered)="columnsReordered($event)"
         (modelSelectionChanged)="modelSelectionChanged($event)"
         (modelsSelectionChanged)="modelsSelectionChanged($event)"
@@ -72,6 +73,7 @@
         (filterSearchChanged)="filterSearchChanged($event)"
         (loadMoreModels)="getNextModels()"
         (clearAllFilters)="clearTableFiltersHandler($event)"
+        (cardsCollapsedChanged)="cardsCollapsedToggle()"
       >
       </sm-models-table>
     </as-split-area>

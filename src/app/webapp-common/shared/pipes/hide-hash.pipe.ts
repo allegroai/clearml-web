@@ -2,7 +2,7 @@ import {Pipe, PipeTransform} from '@angular/core';
 
 @Pipe({
   name: 'hideHash',
-  pure: true
+  standalone: true
 })
 export class HideHashPipe implements PipeTransform {
 

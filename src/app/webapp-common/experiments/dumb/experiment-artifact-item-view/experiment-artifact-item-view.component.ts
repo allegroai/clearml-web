@@ -11,18 +11,27 @@ import {fileSizeConfigStorage} from '@common/shared/pipes/filesize.pipe';
 })
 export class ExperimentArtifactItemViewComponent extends BaseClickableArtifactComponent{
   public isLocalFile: boolean;
+  public isLinkable: boolean;
+  public fileSizeConfigStorage = fileSizeConfigStorage;
+  public inMemorySize: boolean;
   private _artifact: Artifact;
 
   @Input() editable: boolean;
-  public isLinkable: boolean;
-  public fileSizeConfigStorage = fileSizeConfigStorage;
+  @Input() downloading: boolean;
 
   @Input() set artifact(artifact: Artifact) {
     this._artifact = artifact;
     if(artifact){
       this.timestamp = artifact.timestamp;
+      this.inMemorySize = Number.isInteger(artifact?.content_size) && artifact.content_size < 500 * 1e6;
       this.isLocalFile = artifact.uri && this.adminService.isLocalFile(artifact.uri);
-      this.isLinkable = artifact.type_data && ['text/html'].includes(artifact.type_data.content_type);
+      try {
+        if (artifact?.uri && !this.isLocalFile && new URL(this.artifact.uri)) {
+          this.isLinkable = true;
+        }
+      } catch {
+        this.isLinkable = false;
+      }
     }
   }
 

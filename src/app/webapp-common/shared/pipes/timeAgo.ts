@@ -2,7 +2,8 @@ import {Pipe, PipeTransform, NgZone, ChangeDetectorRef, OnDestroy} from '@angula
 
 @Pipe({
   name: 'timeAgo',
-  pure: false
+  pure: false,
+  standalone: true
 })
 export class TimeAgoPipe implements PipeTransform, OnDestroy {
   private timer: number;

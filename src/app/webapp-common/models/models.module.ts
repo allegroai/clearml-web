@@ -1,7 +1,7 @@
+import {CdkFixedSizeVirtualScroll, CdkVirtualForOf, CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
 import {InjectionToken, NgModule} from '@angular/core';
 import {CommonModule, DatePipe} from '@angular/common';
 import {ModelSharedModule} from './shared/model-shared.module';
-import {SMSharedModule} from '../shared/shared.module';
 import {ModelRouterModule} from './models-routing.module';
 import {ModelInfoComponent} from './containers/model-info/model-info.component';
 import {ModelsComponent} from './models.component';
@@ -40,10 +40,58 @@ import { ModelInfoScalarsComponent } from './containers/model-info-scalars/model
 import {ExperimentGraphsModule} from '@common/shared/experiment-graphs/experiment-graphs.module';
 import {createUserPrefFeatureReducer} from '@common/core/meta-reducers/user-pref-reducer';
 import {UserPreferences} from '@common/user-preferences';
-import {SharedPipesModule} from '@common/shared/pipes/shared-pipes.module';
 import {ExperimentCompareSharedModule} from '@common/experiments-compare/shared/experiment-compare-shared.module';
 import {RouterTabNavBarComponent} from '@common/shared/components/router-tab-nav-bar/router-tab-nav-bar.component';
-import {ExperimentsModule} from '~/features/experiments/experiments.module';
+import {UuidPipe} from '@common/shared/pipes/uuid.pipe';
+import {NAPipe} from '@common/shared/pipes/na.pipe';
+import {
+  InfoHeaderStatusIconLabelComponent
+} from '@common/shared/experiment-info-header-status-icon-label/info-header-status-icon-label.component';
+import {MenuItemComponent} from '@common/shared/ui-components/panel/menu-item/menu-item.component';
+import {CopyClipboardComponent} from '@common/shared/ui-components/indicators/copy-clipboard/copy-clipboard.component';
+import {InlineEditComponent} from '@common/shared/ui-components/inputs/inline-edit/inline-edit.component';
+import {TagsMenuComponent} from '@common/shared/ui-components/tags/tags-menu/tags-menu.component';
+import {EntityFooterComponent} from '@common/shared/entity-page/entity-footer/entity-footer.component';
+import {SectionHeaderComponent} from '@common/shared/components/section-header/section-header.component';
+import {CustomColumnsListComponent} from '@common/shared/components/custom-columns-list/custom-columns-list.component';
+import {MenuComponent} from '@common/shared/ui-components/panel/menu/menu.component';
+import {
+  SelectMetadataKeysCustomColsComponent
+} from '@common/shared/components/select-metadata-keys-custom-cols/select-metadata-keys-custom-cols.component';
+import {
+  ClearFiltersButtonComponent
+} from '@common/shared/components/clear-filters-button/clear-filters-button.component';
+import {ScrollTextareaComponent} from '@common/shared/components/scroll-textarea/scroll-textarea.component';
+import {IdBadgeComponent} from '@common/shared/components/id-badge/id-badge.component';
+import {TagListComponent} from '@common/shared/ui-components/tags/tag-list/tag-list.component';
+import {MatInputModule} from '@angular/material/input';
+import {MatMenuModule} from '@angular/material/menu';
+import {MatSidenavModule} from '@angular/material/sidenav';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {
+  UniqueInListSync2ValidatorDirective
+} from '@common/shared/ui-components/template-forms-ui/unique-in-list-sync-validator-2.directive';
+import {TableComponent} from '@common/shared/ui-components/data/table/table.component';
+import {LabeledRowComponent} from '@common/shared/ui-components/data/labeled-row/labeled-row.component';
+import {ButtonToggleComponent} from '@common/shared/ui-components/inputs/button-toggle/button-toggle.component';
+import {SimpleTableComponent} from '@common/shared/ui-components/data/simple-table/simple-table.component';
+import {
+  SelectableFilterListComponent
+} from '@common/shared/ui-components/data/selectable-filter-list/selectable-filter-list.component';
+import {EditableSectionComponent} from '@common/shared/ui-components/panel/editable-section/editable-section.component';
+import {ToggleArchiveComponent} from '@common/shared/ui-components/buttons/toggle-archive/toggle-archive.component';
+import {
+  SelectableGroupedFilterListComponent
+} from '@common/shared/ui-components/data/selectable-grouped-filter-list/selectable-grouped-filter-list.component';
+import {OverlayComponent} from '@common/shared/ui-components/overlay/overlay/overlay.component';
+import {RefreshButtonComponent} from '@common/shared/components/refresh-button/refresh-button.component';
+import {TableModule} from 'primeng/table';
+import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
+import {CountLinesPipe} from '@common/shared/pipes/count-lines.pipe';
+import {FileSizePipe} from '@common/shared/pipes/filesize.pipe';
+import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+import {TimeAgoPipe} from '@common/shared/pipes/timeAgo';
+import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 
 export const modelSyncedKeys    = [
   'view.projectColumnsSortOrder',
@@ -86,29 +134,67 @@ const getInitState = (userPreferences: UserPreferences) => ({
 
 
 @NgModule({
-    imports: [
-        ExperimentSharedModule,
-        FormsModule,
-        ReactiveFormsModule,
-        CommonModule,
-        CommonLayoutModule,
-        ModelRouterModule,
-        ModelSharedModule,
-        ExperimentSharedModule,
-        CommonDeleteDialogModule,
-        SMSharedModule,
-        FeatureModelsModule,
-        AngularSplitModule,
-        StoreModule.forFeature(MODELS_STORE_KEY, reducers, MODELS_CONFIG_TOKEN),
-        EffectsModule.forFeature([ModelsViewEffects, ModelsInfoEffects, ModelsMenuEffects]),
-        FeatureModelsModule,
-        SharedModule,
-        SharedPipesModule,
-        ExperimentGraphsModule,
-        ExperimentCompareSharedModule,
-        RouterTabNavBarComponent,
-        ExperimentsModule,
-    ],
+  imports: [
+    ExperimentSharedModule,
+    FormsModule,
+    ReactiveFormsModule,
+    CommonModule,
+    CommonLayoutModule,
+    ModelRouterModule,
+    ModelSharedModule,
+    ExperimentSharedModule,
+    CommonDeleteDialogModule,
+    FeatureModelsModule,
+    AngularSplitModule,
+    StoreModule.forFeature(MODELS_STORE_KEY, reducers, MODELS_CONFIG_TOKEN),
+    EffectsModule.forFeature([ModelsViewEffects, ModelsInfoEffects, ModelsMenuEffects]),
+    FeatureModelsModule,
+    SharedModule,
+    ExperimentGraphsModule,
+    ExperimentCompareSharedModule,
+    RouterTabNavBarComponent,
+    UuidPipe,
+    NAPipe,
+    InfoHeaderStatusIconLabelComponent,
+    MenuItemComponent,
+    CopyClipboardComponent,
+    InlineEditComponent,
+    TagsMenuComponent,
+    EntityFooterComponent,
+    SectionHeaderComponent,
+    CustomColumnsListComponent,
+    MenuComponent,
+    SelectMetadataKeysCustomColsComponent,
+    ClearFiltersButtonComponent,
+    ScrollTextareaComponent,
+    IdBadgeComponent,
+    TagListComponent,
+    MatInputModule,
+    MatMenuModule,
+    MatSidenavModule,
+    TooltipDirective,
+    UniqueInListSync2ValidatorDirective,
+    TableComponent,
+    LabeledRowComponent,
+    ButtonToggleComponent,
+    SimpleTableComponent,
+    SelectableFilterListComponent,
+    EditableSectionComponent,
+    ToggleArchiveComponent,
+    SelectableGroupedFilterListComponent,
+    OverlayComponent,
+    RefreshButtonComponent,
+    TableModule,
+    ClickStopPropagationDirective,
+    CountLinesPipe,
+    FileSizePipe,
+    MatSlideToggleModule,
+    TimeAgoPipe,
+    ShowTooltipIfEllipsisDirective,
+    CdkVirtualScrollViewport,
+    CdkVirtualForOf,
+    CdkFixedSizeVirtualScroll
+  ],
     providers: [
         SmFormBuilderService, DatePipe,
         {provide: MODELS_CONFIG_TOKEN, useFactory: getInitState, deps: [UserPreferences]},

@@ -4,25 +4,13 @@ import {DebugSample} from '@common/shared/debug-sample/debug-sample.reducer';
 import {MetricsPlotEvent} from '~/business-logic/model/events/metricsPlotEvent';
 import {MetricValueType, SelectedMetric} from '@common/experiments-compare/experiments-compare.constants';
 import {Task} from '~/business-logic/model/tasks/task';
-import {  SingleValueTaskMetrics} from '~/business-logic/model/reports/singleValueTaskMetrics';
+import {SingleValueTaskMetrics} from '~/business-logic/model/reports/singleValueTaskMetrics';
+import {ReportsApiMultiplotsResponse} from '@common/constants';
 
 export interface ParCoords {
   metric: SelectedMetric;
   valueType: MetricValueType;
   parameters: string[];
-}
-
-export interface ReportsApiMultiplotsResponse {
-  [metric: string]: {
-    [variant: string]: {
-      [expId: string]: {
-        [iteration: string]: {
-          name: string;
-          plots: Array<MetricsPlotEvent>;
-        };
-      };
-    };
-  };
 }
 
 

@@ -59,7 +59,7 @@
                   [smTooltip]="projectName"
                   smShowTooltipIfEllipsis
                   (onSelectionChange)="optionSelected()">
-        <div [innerHTML]="projectName | highlightSearchText:projectInput.value"></div>
+        <div [smSearchText]="projectInput.value">{{projectName}}</div>
       </mat-option>
       <div *ngIf="projectsNames === null" class="p-4 pe-none">
         <mat-spinner class="m-auto" [diameter]="32" [strokeWidth]="4" color="accent"></mat-spinner>

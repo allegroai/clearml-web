@@ -1,7 +1,8 @@
 import {Pipe, PipeTransform} from '@angular/core';
 
 @Pipe({
-  name: 'cleanProjectPath'
+  name: 'cleanProjectPath',
+  standalone: true
 })
 export class CleanProjectPathPipe implements PipeTransform {
 

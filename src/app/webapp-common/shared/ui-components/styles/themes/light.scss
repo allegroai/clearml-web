@@ -124,9 +124,9 @@ $light-theme: (
     box-shadow: inset 0 -1px 0 0 $blue-300
   ),
   button-toggle-group: (
-    background-color-active: #e0e0e0,
-    background-color:#fff,
-    color-active: #000,
-    color: #222
+    color-active: white,
+    background-color-active: $purple,
+    color: $blue-400,
+    background-color: white
   )
 );

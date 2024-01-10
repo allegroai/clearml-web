@@ -21,9 +21,7 @@ import {CompareParamsState, experimentsCompareParamsReducer} from './experiments
 import {groupByCharts, GroupByCharts} from '../../experiments/reducers/experiment-output.reducer';
 import {selectSelectedProjectId} from '../../core/reducers/projects.reducer';
 import {selectRouterConfig} from '../../core/reducers/router-reducer';
-import {MetricValueType} from '@common/experiments-compare/experiments-compare.constants';
-import {experimentOutput} from "~/features/experiments/reducers";
-import {ChartHoverModeEnum} from "@common/experiments/shared/common-experiments.const";
+import {ChartHoverModeEnum} from '@common/experiments/shared/common-experiments.const';
 
 export const experimentsCompareReducers: ActionReducerMap<any, any> = {
   details: experimentsCompareDetailsReducer,
@@ -110,6 +108,13 @@ export const selectSelectedSettingsHiddenScalar = createSelector(selectSelectedE
 export const selectSelectedSettingsHiddenPlot = createSelector(selectSelectedExperimentSettings,
   (settings): Array<string> => settings?.hiddenMetricsPlot || []);
 
+export const selectSelectedMetricsSettingsScalar = createSelector(selectSelectedExperimentSettings,
+  (settings): Array<string> => settings?.selectedMetricsScalar || []);
+
+export const selectSelectedMetricsSettingsPlot = createSelector(selectSelectedExperimentSettings,
+  (settings): Array<string> => settings?.selectedMetricsPlot);
+
+
 export const selectExperimentMetricsSearchTerm = createSelector(compareCharts, (state) => state.searchTerm);
 
 export const selectCompareSelectedSettingsxAxisType = createSelector(selectSelectedExperimentSettings,
@@ -120,7 +125,7 @@ export const selectCompareSelectedSettingsGroupBy = createSelector(selectSelecte
 
 export const selectViewMode = (page: string) => createSelector(experimentsParams , state => state.viewMode[page]);
 
-export const selectScalarsGraph = createSelector(experimentsCompare, (state): ScalarsGraphState => state ? state.scalarsGraph : {});
+export const selectScalarsGraph = createSelector(experimentsCompare, (state): ScalarsGraphState => state?.scalarsGraph ?? {});
 export const selectScalarsGraphShowIdenticalHyperParams = createSelector(selectScalarsGraph, (state): boolean => state ? state.showIdenticalHyperParams : true);
 export const selectScalarsGraphMetrics = createSelector(selectScalarsGraph, (state): MetricOption[] => state.metrics);
 export const selectScalarsGraphHyperParams = createSelector(selectScalarsGraph, (state): GroupedHyperParams => state ? state.hyperParams : {});

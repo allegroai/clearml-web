@@ -3,6 +3,7 @@ import {get} from 'lodash-es';
 
 @Pipe({
   name: 'templateInjector',
+  standalone: true
 })
 export class TemplateInjectorPipe implements PipeTransform {
 

@@ -1,12 +1,26 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Input, OnDestroy, Output, Renderer2, ViewChild} from '@angular/core';
 import {ICONS} from '@common/constants';
-import {NgModel} from '@angular/forms';
+import {FormsModule, NgModel} from '@angular/forms';
+import {NgIf} from '@angular/common';
+import {
+  UniqueNameValidatorDirective
+} from '@common/shared/ui-components/template-forms-ui/unique-name-validator.directive';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 
 @Component({
   selector: 'sm-inline-edit',
   templateUrl: './inline-edit.component.html',
   styleUrls: ['./inline-edit.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    FormsModule,
+    NgIf,
+    UniqueNameValidatorDirective,
+    TooltipDirective,
+    ClickStopPropagationDirective
+  ]
 })
 export class InlineEditComponent implements OnDestroy {
   public readonly cancelButton = 'CANCEL_BUTTON';

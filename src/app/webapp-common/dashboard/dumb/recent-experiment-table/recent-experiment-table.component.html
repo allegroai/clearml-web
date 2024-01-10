@@ -38,7 +38,7 @@
         {{experiment.user?.name}}
       </ng-container>
       <ng-container *ngSwitchCase="RECENT_TASKS_TABLE_COL_FIELDS.STATUS">
-        <sm-experiment-status-icon-label [status]="experiment?.status"></sm-experiment-status-icon-label>
+        <sm-status-icon-label [status]="experiment?.status"></sm-status-icon-label>
       </ng-container>
       <ng-container *ngSwitchDefault>
         {{experiment[col.id]}}

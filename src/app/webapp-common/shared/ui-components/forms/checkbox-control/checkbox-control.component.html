@@ -1,5 +1,5 @@
 <span class="layout"
-      [ngClass]="inputClassName"
+      [class]="inputClassName"
       [class.disabled]="disabled"
 >
   <span
@@ -7,24 +7,27 @@
     role="button"
     data-id="Select All Loaded Experiment"
     class="purple-v"
-    [ngClass]="inputClassName"
+    [class]="inputClassName"
     [class.checked] = "state === 'All' || state === 'Partial'"
     [class.readonly] = "isReadonly"
     [smTooltip]="getCurrentError()"
     tooltipType='validation'
     [showTooltip]="showErrors"
   >
-    <i class="al-icon sm al-color white" [ngClass]="{
-    'al-ico-success': state === 'All',
-    spacer: state === 'None',
-    'al-ico-minus': state === 'Partial'
-    }">
+    <i class="al-icon sm al-color white"
+       [class.al-ico-success]="state === 'All'"
+       [class.spacer]="state === 'None'"
+       [class.al-ico-minus]="state === 'Partial'"
+    >
     </i>
   </span>
   <span
     *ngIf="label"
-    [class]="readonlyClassName + ' checkbox-label ellipsis'"
-    [ngClass]="isReadonly ? '' : 'pointer'"
+    class="checkbox-label ellipsis"
+    [class]="readonlyClassName"
+    [class.pointer]="isReadonly"
+    [smTooltip]="label"
+    smShowTooltipIfEllipsis
   >{{label}}
   </span>
 </span>

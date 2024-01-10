@@ -1,0 +1,33 @@
+:host {
+  display: block;
+  position: relative;
+  background-color: white;
+
+  &:hover .buttons {
+    opacity: 1;
+  }
+
+  .buttons {
+    display: flex;
+    position: absolute;
+    top: 42px;
+    right: 42px;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity ease-in-out 250ms;
+  }
+}
+.drawer {
+  height: 100%;
+}
+
+.side-nav {
+  width: 360px;
+  height: 100%;
+  padding: 24px;
+
+  input {
+    padding-left: 0;
+  }
+}

@@ -9,9 +9,15 @@ import {
   OnInit, Output, QueryList, SimpleChanges,
   ViewChildren
 } from '@angular/core';
-import {NG_VALUE_ACCESSOR} from '@angular/forms';
+import {FormsModule, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {DurationInputBase} from '../duration-input/duration-input.base';
 import {isUndefined} from 'lodash-es';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {MatInputModule} from '@angular/material/input';
+import {
+  KeydownStopPropagationDirective
+} from '@common/shared/ui-components/directives/keydown-stop-propagation.directive';
+import {NgForOf, NgIf} from '@angular/common';
 
 export type DURATION_INPUT_TYPE = 'hours' | 'seconds' | 'ms' | 'days' | 'minutes';
 
@@ -69,7 +75,16 @@ export function durationInputFactory(values: Array<DURATION_INPUT_TYPE | Duratio
       useExisting: forwardRef(() => DurationInputListComponent),
       multi: true
     }],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    TooltipDirective,
+    FormsModule,
+    MatInputModule,
+    KeydownStopPropagationDirective,
+    NgIf,
+    NgForOf
+  ]
 })
 export class DurationInputListComponent extends DurationInputBase implements OnInit, AfterViewInit, OnChanges {
   @ViewChildren('inputRef') private elReference: QueryList<ElementRef>;

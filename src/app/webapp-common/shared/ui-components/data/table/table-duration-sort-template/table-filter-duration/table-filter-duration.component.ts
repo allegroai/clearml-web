@@ -1,13 +1,38 @@
 import {ChangeDetectionStrategy, Component} from '@angular/core';
 import {DurationParameters, TableDurationSortBaseComponent} from '../table-duration-sort-base.component';
 import {isNil} from 'lodash-es';
+import {
+  DurationInputListComponent
+} from '@common/shared/ui-components/inputs/duraion-input-list/duration-input-list.component';
+import {NgIf} from '@angular/common';
+import {
+  TableFilterDurationErrorComponent
+} from '@common/shared/ui-components/data/table/table-duration-sort-template/table-filter-duration-error/table-filter-duration-error.component';
+import {FormsModule} from '@angular/forms';
+import {DividerComponent} from '@common/shared/ui-components/indicators/divider/divider.component';
+import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
+import {
+  KeydownStopPropagationDirective
+} from '@common/shared/ui-components/directives/keydown-stop-propagation.directive';
+import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
 
 @Component({
   selector: 'sm-table-filter-duration',
   templateUrl: './table-filter-duration.component.html',
   styleUrls: ['./table-filter-duration.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
 
+  imports: [
+    DurationInputListComponent,
+    NgIf,
+    TableFilterDurationErrorComponent,
+    FormsModule,
+    DividerComponent,
+    ClickStopPropagationDirective,
+    KeydownStopPropagationDirective,
+    LabeledFormFieldDirective
+  ]
 })
 export class TableFilterDurationComponent extends TableDurationSortBaseComponent {
 

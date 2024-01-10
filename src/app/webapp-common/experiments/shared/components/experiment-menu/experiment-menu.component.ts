@@ -7,13 +7,13 @@ import {Queue} from '~/business-logic/model/queues/queue';
 import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
 import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
 import {BlTasksService} from '~/business-logic/services/tasks.service';
-import {CloneForm, ITableExperiment} from '../../common-experiment-model.model';
+import {CloneExperimentPayload} from '../../common-experiment-model.model';
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {htmlTextShort} from '@common/shared/utils/shared-utils';
 import * as commonMenuActions from '../../../actions/common-experiments-menu.actions';
 import {abortAllChildren, archiveSelectedExperiments} from '../../../actions/common-experiments-menu.actions';
 import {ChangeProjectDialogComponent} from '../change-project-dialog/change-project-dialog.component';
-import {CloneDialogComponent} from '../clone-dialog/clone-dialog.component';
+import {CloneDialogComponent, CloneDialogData} from '../clone-dialog/clone-dialog.component';
 import {SelectQueueComponent} from '../select-queue/select-queue.component';
 import {IExperimentInfo, ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
 import {getQueuesForEnqueue} from '../select-queue/select-queue.actions';
@@ -46,6 +46,10 @@ import {
 import {resetOutput} from '@common/experiments/actions/common-experiment-output.actions';
 import {isReadOnly} from '@common/shared/utils/is-read-only';
 import {resetDebugImages} from '@common/debug-images/debug-images-actions';
+import {
+  IOption
+} from '@common/shared/ui-components/inputs/select-autocomplete-with-chips/select-autocomplete-with-chips.component';
+import {setContextMenu} from '@common/core/actions/router.actions';
 
 
 @Component({
@@ -74,6 +78,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
   @Input() numSelected = 0;
   @Input() activateFromMenuButton = true;
   @Input() useCurrentEntity = false;
+  @Input() isCompare = false;
 
   @Input() set experiment(experiment: ISelectedExperiment) {
     this._experiment = experiment;
@@ -142,6 +147,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
 
   toggleFullScreen(showFullScreen: boolean) {
     if (showFullScreen) {
+      this.store.dispatch(setContextMenu({contextMenu: null}));
       this.router.navigateByUrl(`projects/${this.projectId}/experiments/${this._experiment.id}/output/execution`);
     } else {
       const part = this.route.firstChild.routeConfig.path;
@@ -338,29 +344,28 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
   }
 
   clonePopup() {
-    const confirmDialogRef = this.dialog.open(CloneDialogComponent, {
+    this.dialog.open<CloneDialogComponent, CloneDialogData, CloneExperimentPayload>(CloneDialogComponent, {
       data: {
         type: 'Experiment',
         defaultProject: this._experiment?.project?.id,
         defaultName: this._experiment.name
       }
-    });
-
-    confirmDialogRef.afterClosed().pipe(
+    }).afterClosed().pipe(
+      take(1),
       filter(res => !!res),
-      take(1)
-    ).subscribe((res: CloneForm) => {
+    ).subscribe(res  => {
       this.cloneExperiment(res);
     });
   }
 
-  cloneExperiment(cloneData) {
+  cloneExperiment(cloneData: CloneExperimentPayload) {
+    const project = cloneData.project as IOption;
     this.store.dispatch(commonMenuActions.cloneExperimentClicked({
       originExperiment: this._experiment,
       cloneData: {
         ...cloneData,
-        project: cloneData.project.value,
-        newProjectName: cloneData.project.value ? undefined : cloneData.project.label
+        project: project,
+        ...(!project?.value && {newProjectName: project.label})
       }
     }));
   }

@@ -6,7 +6,8 @@ const isElementOverflow = ({clientWidth, clientHeight, scrollWidth, scrollHeight
   Math.abs(scrollHeight - clientHeight) > 10 || Math.abs(scrollWidth - clientWidth) > 10;
 
 @Directive({
-  selector: '[smOverflows]'
+  selector: '[smOverflows]',
+  standalone: true,
 })
 export class OverflowsDirective implements AfterViewInit, OnDestroy {
   @Output() smOverflows = new EventEmitter<boolean>();

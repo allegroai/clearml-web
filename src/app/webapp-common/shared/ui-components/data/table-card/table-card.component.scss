@@ -21,7 +21,7 @@
 
 .cbx { grid-area: cbx; margin-right: auto; }
 .type-icon { grid-area: type-icon; display: flex; justify-content: center; }
-.card-name { grid-area: card-name; display: flex; overflow: hidden;}
+.card-name { grid-area: card-name; display: flex; overflow: hidden; align-items: center;}
 .tags { grid-area: tags; overflow: hidden; }
 .data { grid-area: data; overflow: hidden; text-overflow: ellipsis; }
 

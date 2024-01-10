@@ -2,7 +2,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 import {isEmpty} from 'lodash-es';
 
 @Pipe({
-  name: 'isEmpty'
+  name: 'isEmpty',
+  standalone: true
 })
 export class IsEmptyPipe implements PipeTransform {
 

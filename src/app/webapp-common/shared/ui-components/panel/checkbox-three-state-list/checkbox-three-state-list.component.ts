@@ -1,6 +1,14 @@
 import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
 import {excludedKey} from '@common/shared/utils/tableParamEncode';
 import {addOrRemoveFromArray} from '@common/shared/utils/shared-utils';
+import {MatCheckboxChange, MatCheckboxModule} from '@angular/material/checkbox';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {
+  ShowTooltipIfEllipsisDirective
+} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {NgForOf, NgIf} from '@angular/common';
+import {MatMenuModule} from '@angular/material/menu';
 
 
 const separateValueAndExcludeFromFilters=(filters: string[])=> filters.reduce((state, currentFilter) => {
@@ -23,7 +31,17 @@ export enum CheckboxState {
   selector: 'sm-checkbox-three-state-list',
   templateUrl: './checkbox-three-state-list.component.html',
   styleUrls: ['./checkbox-three-state-list.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    MatCheckboxModule,
+    TooltipDirective,
+    ShowTooltipIfEllipsisDirective,
+    MatProgressSpinnerModule,
+    NgIf,
+    MatMenuModule,
+    NgForOf
+  ]
 })
 export class CheckboxThreeStateListComponent {
   @Input() options: Array<{ label: string; value: string; tooltip?: string }>;
@@ -66,7 +84,7 @@ export class CheckboxThreeStateListComponent {
   private _checkedList: string[];
   private _excludeList: string[];
 
-  onFilterChanged(val) {
+  onFilterChanged(val: MatCheckboxChange) {
     if (val) {
       if (this.supportExcludeFilter && val.source.value !== null) {
         this.checkIndeterminateStateAndEmit(val);
@@ -89,7 +107,7 @@ export class CheckboxThreeStateListComponent {
     return (this._excludeList || []).concat(exclude).filter(Boolean).map(_exclude => excludedKey + _exclude);
   }
 
-  private checkIndeterminateStateAndEmit(val) {
+  private checkIndeterminateStateAndEmit(val: MatCheckboxChange) {
     const value = val.source.value;
     const indeterminateCurrentState =
       this.indeterminateState[value] || (this.checkedList?.find(v => v === value) ? CheckboxState.checked : CheckboxState.empty);
@@ -111,7 +129,7 @@ export class CheckboxThreeStateListComponent {
       case CheckboxState.empty:
       default: {
         this.indeterminateState[value] = CheckboxState.checked;
-        const newValues = this.checkedList ? addOrRemoveFromArray(this.checkedList, value) : value;
+        const newValues: string[] = this.checkedList ? addOrRemoveFromArray(this.checkedList, value) : [value];
         this.emitFilterChanged(newValues);
       }
     }

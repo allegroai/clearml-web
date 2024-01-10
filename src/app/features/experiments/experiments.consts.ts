@@ -7,3 +7,11 @@ export const GET_ALL_QUERY_ANY_FIELDS = ['id', 'name', 'comment', 'system_tags',
 export const getExperimentInfoOnlyFields = (hasDataFeature: boolean) => EXPERIMENT_INFO_ONLY_FIELDS_BASE;
 
 export const DEFAULT_EXPERIMENT_TAB = 'execution';
+
+export const resourceToIconMap = {
+  project: 'projects-outlined',
+  task: 'projects-outlined',
+  model: 'projects-outlined',
+  dataset: 'datasets',
+  queue: 'workers'
+};

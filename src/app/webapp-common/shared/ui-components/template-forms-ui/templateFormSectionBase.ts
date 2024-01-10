@@ -1,21 +1,22 @@
 import { Input, ViewChild, Directive } from '@angular/core';
 import {ControlValueAccessor, NgForm} from '@angular/forms';
+import {isEqual} from 'lodash-es';
 
-@Directive()
-export class TemplateFormSectionBase implements ControlValueAccessor {
+@Directive({
+  selector: '[smTemplateFormSectionBase]',
+})
+export abstract class TemplateFormSectionBaseDirective implements ControlValueAccessor {
   @Input() public disabled: boolean;
   public val = null;
   public ngModelValue = null;
   protected valueFromInherit = true;
   @Input() inEditMode: boolean;
   @ViewChild('templateForm', {static: true}) templateForm: NgForm;
-  onChange: any = () => {
-  };
-  onTouch: any = () => {
-  };
+  onChange: (any) => void;
+  onTouch: (any) => void;
 
   set value(val) {  // this value is updated by programmatic changes if( ngModelValue !== undefined && this.ngModelValue !== ngModelValue){
-    if (this.valueFromInherit && val !== undefined && val !== this.val) {
+    if (this.valueFromInherit && val !== undefined && !isEqual(val, this.val)) {
       this.val = val;
       this.onChange(val);
       this.onTouch(val);

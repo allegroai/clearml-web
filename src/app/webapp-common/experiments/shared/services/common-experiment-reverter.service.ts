@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import {Injectable, OnDestroy} from '@angular/core';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 import {IExecutionForm, sourceTypesEnum} from '~/features/experiments/shared/experiment-execution.model';
 import {Task} from '~/business-logic/model/tasks/task';
@@ -6,22 +6,25 @@ import {Script} from '~/business-logic/model/tasks/script';
 import {IExperimentModelInfo} from '../common-experiment-model.model';
 import {Store} from '@ngrx/store';
 import {selectActiveWorkspace} from '@common/core/reducers/users-reducer';
-import {Observable, Subscription} from 'rxjs';
+import {Subscription} from 'rxjs';
 import {isExample} from '@common/shared/utils/shared-utils';
 import {ITask} from '~/business-logic/model/al-task';
 import {isSharedAndNotOwner} from '@common/shared/utils/is-shared-and-not-owner';
+import {camelCase} from 'lodash-es';
 
 @Injectable({providedIn: 'root'})
-export class CommonExperimentReverterService {
-  private activeWorkSpace$: Observable<any>;
+export class CommonExperimentReverterService implements OnDestroy {
   private activeWorkSpace: any;
   private activeWorkSpaceSubscription: Subscription;
 
   constructor(private store: Store) {
-    this.activeWorkSpace$ = this.store.select(selectActiveWorkspace);
-    this.activeWorkSpaceSubscription = this.activeWorkSpace$.subscribe(activeWorkSpace => {
+    this.activeWorkSpaceSubscription = this.store.select(selectActiveWorkspace).subscribe(activeWorkSpace => {
       this.activeWorkSpace = activeWorkSpace;
     });
+  }
+
+  ngOnDestroy(): void {
+    this.activeWorkSpaceSubscription?.unsubscribe();
   }
 
   public revertReadOnly(experiment): Task {
@@ -108,11 +111,11 @@ export class CommonExperimentReverterService {
   }
 
   private revertRequirements(script: Script) {
-    const pip = script?.requirements?.['pip'] ?? [];
-    return {
-      ...script.requirements,
-      pip: (Array.isArray(pip) ? pip.join('\n') : pip) || ''
-    };
+    return Object.entries(script?.requirements ?? {pip: ''}).reduce((acc, [key, value]: [string, string | string[]]) => {
+      const val = (Array.isArray(value) ? value.join('\n') : value) || '';
+      if (key === 'pip' || val.length > 0)
+      acc[camelCase(key)] = val
+      return acc;
+    }, {});
   }
-
 }

@@ -1,19 +1,54 @@
 import {
-  ChangeDetectionStrategy, ChangeDetectorRef,
+  ChangeDetectionStrategy,
   Component,
-  EventEmitter, inject,
+  EventEmitter,
   Input,
   Output
 } from '@angular/core';
 import {UntypedFormControl} from '@angular/forms';
 import {ColHeaderFilterTypeEnum, ISmCol, TABLE_SORT_ORDER, TableSortOrderEnum} from '../table.consts';
 import {addOrRemoveFromArray} from '../../../../utils/shared-utils';
+import {
+  CheckboxThreeStateListComponent
+} from '@common/shared/ui-components/panel/checkbox-three-state-list/checkbox-three-state-list.component';
+import {NgForOf, NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault} from '@angular/common';
+import {
+  TableFilterDurationNumericComponent
+} from '@common/shared/ui-components/data/table/table-duration-sort-template/table-filter-duration-numeric/table-filter-duration-numeric.component';
+import {
+  TableFilterDurationComponent
+} from '@common/shared/ui-components/data/table/table-duration-sort-template/table-filter-duration/table-filter-duration.component';
+import {MenuComponent} from '@common/shared/ui-components/panel/menu/menu.component';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {MenuItemComponent} from '@common/shared/ui-components/panel/menu-item/menu-item.component';
+import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
+import {
+  TableFilterDurationDateTimeComponent
+} from '@common/shared/ui-components/data/table/table-duration-sort-template/table-filter-duration-date-time/table-filter-duration-date-time.component';
+import {ScrollEndDirective} from '@common/shared/ui-components/directives/scroll-end.directive';
 
 @Component({
   selector: 'sm-table-filter-sort-template',
   templateUrl: './table-filter-sort-template.component.html',
   styleUrls: ['./table-filter-sort-template.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CheckboxThreeStateListComponent,
+    NgIf,
+    NgSwitchDefault,
+    NgSwitchCase,
+    TableFilterDurationNumericComponent,
+    TableFilterDurationComponent,
+    MenuComponent,
+    TooltipDirective,
+    NgSwitch,
+    MenuItemComponent,
+    ClickStopPropagationDirective,
+    NgForOf,
+    TableFilterDurationDateTimeComponent,
+    ScrollEndDirective
+  ]
 })
 export class TableFilterSortTemplateComponent {
 
@@ -41,7 +76,6 @@ export class TableFilterSortTemplateComponent {
   public filterPageSize: number;
   private previousSearchValue: { label: string; value: string; tooltip?: string } | undefined;
   private isOpen: boolean;
-  private cdr = inject(ChangeDetectorRef);
 
   @Input() set column(col: ISmCol) {
     this.header = col.header;

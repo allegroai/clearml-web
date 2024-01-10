@@ -11,5 +11,11 @@
     </div>
 </div>
 
-<div (window:resize)="onResize()" #chart class="chart"></div>
-<div #legend></div>
+<canvas
+  baseChart
+  class="chart"
+  [data]="chartData"
+  [options]="lineChartOptions"
+  [type]="lineChartType"
+  [plugins]="lineChartPlugins"
+></canvas>

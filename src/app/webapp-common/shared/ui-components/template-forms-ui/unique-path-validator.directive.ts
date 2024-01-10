@@ -8,7 +8,8 @@ export const uniqPathValidator = (names, currentName): ValidatorFn => (control: 
 
 @Directive({
   selector: '[smUniquePathValidator]',
-  providers: [{provide: NG_VALIDATORS, useExisting: UniquePathValidatorDirective, multi: true}]
+  providers: [{provide: NG_VALIDATORS, useExisting: UniquePathValidatorDirective, multi: true}],
+  standalone: true,
 })
 export class UniquePathValidatorDirective implements Validator {
   @Input() existingPaths: Array<string>;

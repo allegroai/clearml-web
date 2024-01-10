@@ -6,7 +6,6 @@ import {BusinessLogicModule} from './business-logic/business-logic.module';
 import {AppComponent} from './app.component';
 import {routes} from './app.routes';
 import {SMCoreModule} from './core/core.module';
-import {SMSharedModule} from '@common/shared/shared.module';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {CommonLayoutModule} from '@common/layout/layout.module';
 import {HTTP_INTERCEPTORS} from '@angular/common/http';
@@ -25,6 +24,9 @@ import {LoginService} from '~/shared/services/login.service';
 import {ExperimentSharedModule} from '~/features/experiments/shared/experiment-shared.module';
 import {loadUserAndPreferences} from '~/core/app-init';
 import {MAT_TOOLTIP_DEFAULT_OPTIONS, MatTooltipDefaultOptions} from '@angular/material/tooltip';
+import {UpdateNotifierComponent} from '@common/shared/ui-components/overlay/update-notifier/update-notifier.component';
+import {ChooseColorModule} from '@common/shared/ui-components/directives/choose-color/choose-color.module';
+import {SpinnerComponent} from '@common/shared/ui-components/overlay/spinner/spinner.component';
 
 @NgModule({
   declarations   : [AppComponent],
@@ -37,13 +39,12 @@ import {MAT_TOOLTIP_DEFAULT_OPTIONS, MatTooltipDefaultOptions} from '@angular/ma
     BrowserModule,
     SMCoreModule,
     BusinessLogicModule,
-    SMSharedModule,
     AngularSplitModule,
     RouterModule.forRoot(routes, {
-    preloadingStrategy: PreloadAllModules,
-    scrollPositionRestoration: 'top',
-    onSameUrlNavigation: 'reload'
-}),
+      preloadingStrategy: PreloadAllModules,
+      scrollPositionRestoration: 'top',
+      onSameUrlNavigation: 'reload'
+    }),
     NotifierModule.withConfig({
       theme: 'material',
       behaviour: {
@@ -57,6 +58,9 @@ import {MAT_TOOLTIP_DEFAULT_OPTIONS, MatTooltipDefaultOptions} from '@angular/ma
     CommonLayoutModule,
     LayoutModule,
     SharedModule,
+    UpdateNotifierComponent,
+    ChooseColorModule,
+    SpinnerComponent,
   ],
   providers      : [
     UserPreferences,

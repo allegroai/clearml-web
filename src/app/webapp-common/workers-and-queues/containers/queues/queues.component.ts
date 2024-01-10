@@ -39,6 +39,7 @@ export class QueuesComponent implements OnInit {
   private createQueueDialog: MatDialogRef<QueueCreateDialogComponent>;
   public tableSortOrder$: Observable<1 | -1>;
   public tableSortFields$: Observable<SortMeta[]>;
+  public queuesManager: boolean;
 
   get routerQueueId() {
     const url = new URL(window.location.href);
@@ -49,6 +50,8 @@ export class QueuesComponent implements OnInit {
     this.queues$ = this.store.select(selectQueues);
     this.selectedQueue$ = this.store.select(selectSelectedQueue);
     this.tableSortFields$ = this.store.select(selectQueuesTableSortFields);
+    this.queuesManager = route.snapshot.data.queuesManager;
+
 
   }
 
@@ -134,6 +137,17 @@ export class QueuesComponent implements OnInit {
 
   moveExperimentInQueue({task, count}) {
     this.store.dispatch(moveExperimentInQueue({task, count}));
+  }
+  addQueue() {
+    this.dialog.open(QueueCreateDialogComponent)
+      .afterClosed()
+      .pipe(
+        filter(queue => !!queue),
+        take(1)
+      )
+      .subscribe(() => {
+        this.store.dispatch(getQueues());
+      });
   }
 
 }

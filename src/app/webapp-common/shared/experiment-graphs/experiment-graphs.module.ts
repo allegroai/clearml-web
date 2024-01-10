@@ -8,7 +8,6 @@ import {ExperimentGraphsComponent} from './experiment-graphs.component';
 import {GraphSettingsBarComponent} from './graph-settings-bar/graph-settings-bar.component';
 import {GraphScalarDataToMetric} from './graph-scalar-data-to-metric.pipe';
 import {GraphPlotDataToMetric} from './graph-plot-data-to-metric.pipe';
-import {SharedPipesModule} from '../pipes/shared-pipes.module';
 import {SingleValueSummaryTableComponent} from '../single-value-summary-table/single-value-summary-table.component';
 import {SingleGraphModule} from '@common/shared/single-graph/single-graph.module';
 import {MatInputModule} from '@angular/material/input';
@@ -28,7 +27,6 @@ const declarations= [
     MatSelectModule,
     FormsModule,
     ResizableModule,
-    SharedPipesModule,
     SingleGraphModule,
     MatInputModule,
     SingleValueSummaryTableComponent

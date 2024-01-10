@@ -64,6 +64,8 @@ import {PlotSampleResponse} from '~/business-logic/model/events/plotSampleRespon
 import {EventsGetPlotSampleRequest} from '~/business-logic/model/events/eventsGetPlotSampleRequest';
 import {EventsGetTaskSingleValueMetricsRequest} from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsRequest';
 import {EventsGetTaskSingleValueMetricsResponse} from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponse';
+import {EventsGetMultiTaskMetricsResponse} from "~/business-logic/model/events/eventsGetMultiTaskMetricsResponse";
+import {EventsGetMultiTaskMetricsRequest} from "~/business-logic/model/events/eventsGetMultiTaskMetricsRequest";
 
 
 @Injectable()
@@ -503,6 +505,50 @@ export class ApiEventsService {
     );
   }
 
+  /**
+   *
+   * Get unique metrics and variants from the events of the specified type. Only   events reported for the passed task or model ids are analyzed.
+   * @param request request body
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   */
+  public eventsGetMultiTaskMetrics(request: EventsGetMultiTaskMetricsRequest, options?: any, observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+    if (request === null || request === undefined) {
+      throw new Error('Required parameter request was null or undefined when calling eventsGetMultiTaskMetrics.');
+    }
+
+    let headers = this.defaultHeaders;
+    if (options && options.async_enable) {
+      headers = headers.set(this.configuration.asyncHeader, '1');
+    }
+
+    // to determine the Accept header
+    const httpHeaderAccepts: string[] = [
+      'application/json'
+    ];
+    const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+    if (httpHeaderAcceptSelected != undefined) {
+      headers = headers.set("Accept", httpHeaderAcceptSelected);
+    }
+
+    // to determine the Content-Type header
+    const consumes: string[] = [
+    ];
+    const httpContentTypeSelected:string | undefined = this.configuration.selectHeaderContentType(consumes);
+    if (httpContentTypeSelected != undefined) {
+      headers = headers.set("Content-Type", httpContentTypeSelected);
+    }
+
+    return this.apiRequest.post<EventsGetMultiTaskMetricsResponse>(`${this.basePath}/events.get_multi_task_metrics`,
+      request,
+      {
+        withCredentials: this.configuration.withCredentials,
+        headers: headers,
+        observe: observe,
+        reportProgress: reportProgress
+      }
+    );
+  }
   /**
    *
    * Return the plot per metric and variant for the provided iteration

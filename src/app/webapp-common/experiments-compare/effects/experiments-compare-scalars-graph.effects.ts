@@ -1,16 +1,18 @@
 import {Injectable} from '@angular/core';
-import {Actions, createEffect, ofType} from '@ngrx/effects';
+import {Actions, concatLatestFrom, createEffect, ofType} from '@ngrx/effects';
 import {activeLoader, deactivateLoader, setServerError} from '../../core/actions/layout.actions';
 import {catchError, mergeMap, map} from 'rxjs/operators';
 import {requestFailed} from '../../core/actions/http.actions';
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
 import {getExperimentsHyperParams, setHyperParamsList, setMetricsList, setTasks} from '../actions/experiments-compare-scalars-graph.actions';
 import {GroupedHyperParams, HyperParams} from '../reducers/experiments-compare-charts.reducer';
+import {Store} from '@ngrx/store';
+import {selectSelectedSettingsMetric} from '@common/experiments-compare/reducers';
 
 @Injectable()
 export class ExperimentsCompareScalarsGraphEffects {
 
-  constructor(private actions$: Actions, public tasksApiService: ApiTasksService) {
+  constructor(private readonly store: Store, private actions$: Actions, public tasksApiService: ApiTasksService) {
   }
 
   activeLoader = createEffect(() => this.actions$.pipe(
@@ -20,10 +22,12 @@ export class ExperimentsCompareScalarsGraphEffects {
 
   loadMovies$ = createEffect(() => this.actions$.pipe(
     ofType(getExperimentsHyperParams),
-    mergeMap((action) => this.tasksApiService.tasksGetAllEx({
+    concatLatestFrom(() => this.store.select(selectSelectedSettingsMetric)),
+    mergeMap(([action, /*metric*/]) => this.tasksApiService.tasksGetAllEx({
       id: action.experimentsIds,
         // eslint-disable-next-line @typescript-eslint/naming-convention
-      only_fields: ['last_metrics', 'name', 'last_iteration', 'hyperparams']
+      only_fields: ['last_metrics', 'name', 'last_iteration', 'hyperparams'],
+      // ...(action.scatter && metric && {[`last_metrics.${metric.path}.value`]: [Number.MIN_VALUE, null]})
     })
       .pipe(
         // map(res => res.tasks)),

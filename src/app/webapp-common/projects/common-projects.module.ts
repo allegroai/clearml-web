@@ -1,7 +1,6 @@
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {CommonProjectsPageComponent} from './containers/projects-page/common-projects-page.component';
-import {SMSharedModule} from '../shared/shared.module';
 import {EffectsModule} from '@ngrx/effects';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ProjectsListComponent} from './dumb/projects-list/projects-list.component';
@@ -12,11 +11,11 @@ import {SharedModule} from '~/shared/shared.module';
 import {ProjectsEffects} from '~/features/projects/projects.effect';
 import {CommonProjectsEffects} from './common-projects.effects';
 import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
+import {ProjectCardComponent} from '@common/shared/ui-components/panel/project-card/project-card.component';
 
 @NgModule({
   imports: [
     CommonModule,
-    SMSharedModule,
     FormsModule,
     ReactiveFormsModule,
     ProjectDialogModule,
@@ -25,6 +24,7 @@ import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-f
     SharedModule,
     CommonLayoutModule,
     LabeledFormFieldDirective,
+    ProjectCardComponent,
   ],
   declarations: [CommonProjectsPageComponent, ProjectsListComponent],
   exports: [CommonProjectsPageComponent, ProjectsListComponent]

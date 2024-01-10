@@ -2,7 +2,6 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ProjectTypeEnum} from '@common/nested-project-view/nested-project-view-page/nested-project-view-page.component';
 import {CircleTypeEnum} from '~/shared/constants/non-common-consts';
 import {ProjectsSharedModule} from '~/features/projects/shared/projects-shared.module';
-import {SMSharedModule} from '@common/shared/shared.module';
 import {AsyncPipe, NgIf} from '@angular/common';
 import {CommonProjectsPageComponent} from '@common/projects/containers/projects-page/common-projects-page.component';
 import {DatasetEmptyComponent} from '@common/datasets/dataset-empty/dataset-empty.component';
@@ -21,6 +20,9 @@ import {
 import {combineLatest, Observable, Subscription} from 'rxjs';
 import {debounceTime, skip, withLatestFrom} from 'rxjs/operators';
 import {getAllProjectsPageProjects, resetProjects} from '@common/projects/common-projects.actions';
+import {CircleCounterComponent} from '@common/shared/ui-components/indicators/circle-counter/circle-counter.component';
+import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
+import {TagListComponent} from '@common/shared/ui-components/tags/tag-list/tag-list.component';
 
 @Component({
   selector: 'sm-nested-simple-datasets-page',
@@ -28,9 +30,11 @@ import {getAllProjectsPageProjects, resetProjects} from '@common/projects/common
   styleUrls: ['../../../webapp-common/nested-project-view/nested-project-view-page/nested-project-view-page.component.scss'],
   imports: [
     ProjectsSharedModule,
-    SMSharedModule,
     AsyncPipe,
-    NgIf
+    NgIf,
+    CircleCounterComponent,
+    ClickStopPropagationDirective,
+    TagListComponent
   ],
   standalone: true
 })

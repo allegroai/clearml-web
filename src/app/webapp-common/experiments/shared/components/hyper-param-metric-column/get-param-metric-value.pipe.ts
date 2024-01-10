@@ -19,7 +19,7 @@ export class GetParamMetricValuePipe implements PipeTransform {
 
   getHyperParam(params, col) {
     if (params) {
-      const {name, section} = decodeHyperParam(col.getter);
+      const {name, section} = decodeHyperParam(col);
       return params?.[section]?.[name]?.value;
     }
     return '';

@@ -1,7 +1,8 @@
 import {ContentChild, Directive, Input, TemplateRef} from '@angular/core';
 
 @Directive({
-  selector: '[templateAlias]'
+  selector: '[templateAlias]',
+  standalone: true,
 })
 export class TemplateAliasDirective {
   @Input('templateAlias') alias: string;

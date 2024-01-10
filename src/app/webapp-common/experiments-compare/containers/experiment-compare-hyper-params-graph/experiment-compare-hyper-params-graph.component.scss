@@ -32,6 +32,13 @@
     margin-top: 12px;
     padding-right: 24px;
   }
+
+  sm-compare-scatter-plot {
+    display: block;
+    height: 100%;
+    width: 100%;
+    padding: 24px;
+  }
 }
 
 .toggle-all {
@@ -174,7 +181,7 @@
   font-weight: 400;
 
   .no-data-title {
-    color: $blue-100; 
+    color: $blue-100;
   }
 }
 

@@ -12,7 +12,7 @@ import {
   selectShowSettings,
   selectSplitSize
 } from '../../reducers';
-import {Observable, Subscription} from 'rxjs';
+import {combineLatest, Observable, Subscription} from 'rxjs';
 import {Store} from '@ngrx/store';
 import {debounceTime, distinctUntilChanged, distinctUntilKeyChanged, filter, tap} from 'rxjs/operators';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
@@ -24,7 +24,7 @@ import {
   setExperimentSettings,
   toggleSettings
 } from '../../actions/common-experiment-output.actions';
-import {convertScalars, GroupedList} from '@common/tasks/tasks.utils';
+import {convertScalars} from '@common/tasks/tasks.utils';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {selectSelectedExperiment} from '~/features/experiments/reducers';
 import {GroupByCharts, groupByCharts} from '../../reducers/experiment-output.reducer';
@@ -35,6 +35,8 @@ import { EventsGetTaskSingleValueMetricsResponseValues } from '~/business-logic/
 import { ReportCodeEmbedService } from '~/shared/services/report-code-embed.service';
 import {SmoothTypeEnum} from '@common/shared/single-graph/single-graph.utils';
 import {singleValueChartTitle} from '@common/experiments/shared/common-experiments.const';
+import {GroupedList} from '@common/tasks/tasks.model';
+import {PlotData} from 'plotly.js';
 
 export const prepareScalarList = (metricsScalar: GroupedList): GroupedList =>
   Object.keys(metricsScalar || []).reduce((acc, curr) => {
@@ -94,6 +96,8 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
   protected reportEmbed: ReportCodeEmbedService;
   protected entitySelector: Observable<{ id?: string; name?: string }>;
   protected refreshService: RefreshService;
+  protected selectedMetrics: string[] = [];
+  private originalScalarList: { [p: string]: { [p: string]: { [p: string]: PlotData } }; [singleValueChartTitle]: {} };
 
   constructor() {
     this.store = inject(Store);
@@ -174,6 +178,10 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
       .subscribe(scalars => {
         this.refreshDisabled = false;
         this.scalars = scalars;
+        this.originalScalarList = {
+          ...(this.singleValueExists && {[singleValueChartTitle]: {}}),
+          ...prepareScalarList(this.splitScalars(scalars))
+        };
         this.prepareGraphsAndUpdate(scalars);
       })
     );
@@ -188,6 +196,10 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
         }
       })
     );
+
+    this.subs.add(combineLatest([this.listOfHidden$, this.scalars$]).subscribe(([hiddenList]) => {
+      this.selectedMetrics = hiddenList.length === 0 ? Object.keys(this.originalScalarList) : Object.keys(this.originalScalarList).filter(metric => !hiddenList.some( item => metric.startsWith(item)));
+    }));
   }
 
   private prepareGraphsAndUpdate(scalars: GroupedList) {
@@ -211,7 +223,7 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
 
 
   hiddenListChanged(hiddenList) {
-    this.store.dispatch(setExperimentSettings({id: this.experimentId, changes: {hiddenMetricsScalar: hiddenList}}));
+    this.store.dispatch(setExperimentSettings({id: this.experimentId, changes: {hiddenMetricsScalar: Object.keys(this.scalarList).filter(metric => !hiddenList.some( item => item.startsWith(metric)))}}));
   }
 
   refresh() {

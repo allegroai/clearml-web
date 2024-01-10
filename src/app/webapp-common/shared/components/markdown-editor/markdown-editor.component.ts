@@ -8,7 +8,12 @@ import {
   Renderer2,
   ViewChild
 } from '@angular/core';
-import {MarkdownEditorComponent as MDComponent, MdEditorOption, UploadResult} from 'ngx-markdown-editor';
+import {
+  LMarkdownEditorModule,
+  MarkdownEditorComponent as MDComponent,
+  MdEditorOption,
+  UploadResult
+} from 'ngx-markdown-editor';
 import {Ace} from 'ace-builds';
 import {MatDialog} from '@angular/material/dialog';
 import {
@@ -17,6 +22,12 @@ import {
 import {getBaseName} from '@common/shared/utils/shared-utils';
 import * as marked from 'marked';
 import * as DOMPurify from 'dompurify';
+import {NgClass, NgForOf, NgIf} from '@angular/common';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {FormsModule} from '@angular/forms';
+import {MatMenuModule} from '@angular/material/menu';
+import {BaseNamePipe} from '@common/shared/pipes/base-name.pipe';
+import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 
 const BREAK_POINT = 990;
 
@@ -24,7 +35,19 @@ const BREAK_POINT = 990;
 @Component({
   selector: 'sm-markdown-editor',
   templateUrl: './markdown-editor.component.html',
-  styleUrls: ['./markdown-editor.component.scss']
+  styleUrls: ['./markdown-editor.component.scss'],
+  standalone: true,
+  imports: [
+    NgIf,
+    TooltipDirective,
+    NgClass,
+    LMarkdownEditorModule,
+    FormsModule,
+    MatMenuModule,
+    BaseNamePipe,
+    ClickStopPropagationDirective,
+    NgForOf
+  ]
 })
 export class MarkdownEditorComponent {
   private originalInfo: string;

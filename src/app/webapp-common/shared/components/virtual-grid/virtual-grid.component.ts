@@ -12,16 +12,29 @@ import {
 import {BehaviorSubject, combineLatest, fromEvent, Observable} from 'rxjs';
 import {debounceTime, filter, map, startWith} from 'rxjs/operators';
 import {chunk} from 'lodash-es';
-import {CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
+import {CdkFixedSizeVirtualScroll, CdkVirtualForOf, CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
 import {Store} from '@ngrx/store';
 import {selectScaleFactor} from '@common/core/reducers/view.reducer';
+import {AsyncPipe, NgForOf, NgIf, NgTemplateOutlet} from '@angular/common';
+import {ScrollEndDirective} from '@common/shared/ui-components/directives/scroll-end.directive';
 
 
 @Component({
   selector: 'sm-virtual-grid',
   templateUrl: './virtual-grid.component.html',
   styleUrls: ['./virtual-grid.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CdkFixedSizeVirtualScroll,
+    CdkVirtualForOf,
+    CdkVirtualScrollViewport,
+    NgForOf,
+    NgTemplateOutlet,
+    NgIf,
+    ScrollEndDirective,
+    AsyncPipe
+  ]
 })
 export class VirtualGridComponent implements OnChanges{
   private items$ = new BehaviorSubject<any[]>(null);

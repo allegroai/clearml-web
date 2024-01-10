@@ -4,24 +4,24 @@ import {SimpleDatasetsComponent} from '@common/datasets/simple-datasets/simple-d
 import {CommonProjectsModule} from '@common/projects/common-projects.module';
 import {DatasetsRoutingModule} from '~/features/datasets/datasets-routing.module';
 import {DatasetsSharedModule} from '~/features/datasets/shared/datasets-shared.module';
-import {SharedPipesModule} from '@common/shared/pipes/shared-pipes.module';
-import {SMSharedModule} from '@common/shared/shared.module';
 import {NestedDatasetsPageComponent} from '~/features/datasets/nested-datasets-page/nested-datasets-page.component';
 import {ProjectsSharedModule} from '~/features/projects/shared/projects-shared.module';
 import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
+import {ButtonToggleComponent} from '@common/shared/ui-components/inputs/button-toggle/button-toggle.component';
+import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 
 
 @NgModule({
   imports: [
     CommonModule,
-    SMSharedModule,
     CommonProjectsModule,
     DatasetsRoutingModule,
     DatasetsSharedModule,
-    SharedPipesModule,
     NestedDatasetsPageComponent,
     ProjectsSharedModule,
     LabeledFormFieldDirective,
+    ButtonToggleComponent,
+    ShowTooltipIfEllipsisDirective
   ],
   declarations: [
     SimpleDatasetsComponent,

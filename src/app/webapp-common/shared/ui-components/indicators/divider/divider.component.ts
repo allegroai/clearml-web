@@ -5,7 +5,8 @@ import {Component, ElementRef, Input, Renderer2} from '@angular/core';
   template: `
     <span class="">{{label}}</span>
   `,
-  styleUrls: ['./divider.component.scss']
+  styleUrls: ['./divider.component.scss'],
+  standalone: true,
 })
 export class DividerComponent {
 

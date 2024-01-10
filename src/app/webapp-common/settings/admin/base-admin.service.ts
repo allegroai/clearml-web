@@ -27,15 +27,14 @@ const HTTP_REGEX = /^https?:\/\//;
 export class BaseAdminService {
   // bucketCredentials: Observable<any>;
   public s3Services: {[bucket: string]: S3Client} = {};
-  revokeSucceed: Observable<any>;
-  private readonly s3BucketCredentials: Observable<any>;
+  revokeSucceed: Observable<boolean>;
+  private readonly s3BucketCredentials: Observable<{ bucketCredentials: Credentials[] }>;
   private localServerWorking = false;
   private environment: Environment;
   private deleteS3FilesSubject: Subject<{ success: boolean; files: string[] }>;
-  private credentials: any[];
+  private credentials: Credentials[];
   protected store: Store;
   protected confService: ConfigurationService;
-  private gcsFirstAttempt = {};
 
   constructor() {
     this.store = inject(Store);
@@ -64,7 +63,7 @@ export class BaseAdminService {
     this.store.dispatch(showLocalFilePopUp({url}));
   }
 
-  signUrlIfNeeded(url: string, config?: { skipLocalFile?: boolean; skipFileServer?: boolean; disableCache?: number }):
+  signUrlIfNeeded(url: string, config?: { skipLocalFile?: boolean; skipFileServer?: boolean; disableCache?: number }, previousSignedUrl?: { signed: string; expires: number }):
     Observable<SignResponse> {
     config = {...{skipLocalFile: true, skipFileServer: this.confService.getStaticEnvironment().production, disableCache: null}, ...config};
 
@@ -110,8 +109,7 @@ export class BaseAdminService {
           unsignableHeaders: new Set(['x-amz-content-sha256', 'x-id']),
         }))
           .pipe(map(signed => ({type: 'sign', signed, expires: (new Date()).getTime() + FOUR_DAYS * 1000})));
-      } else if (isGoogleCloudUrl(url) && !this.gcsFirstAttempt?.[bucketKeyEndpoint.Bucket]) {
-        this.gcsFirstAttempt[bucketKeyEndpoint.Bucket] = true;
+      } else if (isGoogleCloudUrl(url) && !previousSignedUrl?.signed) {
         return of({type: 'sign', signed: this.signGoogleCloudUrl(url), expires: Number.MAX_VALUE});
       } else {
         delete bucketKeyEndpoint.Key;

@@ -42,12 +42,6 @@ export class ProjectMoveToFormComponent implements OnChanges, AfterViewInit, OnD
   public noMoreOptions: boolean;
   private previousLength: number | undefined;
 
-  constructor(
-    private shortProjectName: ShortProjectNamePipe,
-    private projectLocation: ProjectLocationPipe
-  ) {
-  }
-
   ngAfterViewInit(): void {
     setTimeout(() => {
       this.subs.add(this.moveToForm.controls['projectName'].valueChanges.subscribe(searchString => {
@@ -90,8 +84,8 @@ export class ProjectMoveToFormComponent implements OnChanges, AfterViewInit, OnD
     this.moveProject.emit({
       location: this.project.parent,
       name: this.newProjectName,
-      projectName: this.shortProjectName.transform(this.projectName),
-      fromName: this.projectLocation.transform(this.projectName),
+      projectName: new ShortProjectNamePipe().transform(this.projectName),
+      fromName: new ProjectLocationPipe().transform(this.projectName),
       toName: this.project.parent
     });
   }
@@ -122,7 +116,7 @@ export class ProjectMoveToFormComponent implements OnChanges, AfterViewInit, OnD
     this.dismissDialog.emit();
   }
 
-  createNewSelected($event: MatOptionSelectionChange<any>) {
+  createNewSelected($event: MatOptionSelectionChange<string>) {
     this.newProjectName = $event.source.value;
   }
 
@@ -130,7 +124,7 @@ export class ProjectMoveToFormComponent implements OnChanges, AfterViewInit, OnD
     this.newProjectName = null;
   }
 
-  searchChanged(searchString: any) {
+  searchChanged(searchString: string) {
     this.projectsNames = null;
     this.rootFiltered = !this.projectsRoot.includes(searchString);
     searchString !== null && this.filterSearchChanged.emit({value: searchString});

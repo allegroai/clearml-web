@@ -5,7 +5,7 @@ import {Task} from '~/business-logic/model/tasks/task';
 import {Model} from '~/business-logic/model/models/model';
 import {ActiveSearchLink} from '~/features/dashboard-search/dashboard-search.consts';
 import {DASHBOARD_PREFIX} from '@common/dashboard/common-dashboard.const';
-import {IReport} from "@common/reports/reports.consts";
+import {IReport} from '@common/reports/reports.consts';
 
 
 export const searchSetTerm = createAction(

@@ -29,7 +29,7 @@
                  [(ngModel)]="metadataItem.type"
                  placeholder="type"
                  required
-                 [name]="'metadataItemType-' |uuid"
+                 [name]="'metadataItemType-' | uuid"
                  matInput>
           <mat-error *ngIf="metadataItemType.touched && metadataItemType.invalid && metadataItemType?.errors?.required">
             Required
@@ -39,10 +39,10 @@
           <input #metadataItemKey="ngModel"
                  [(ngModel)]="metadataItem.value"
                  placeholder="value"
-                 [name]="'metadataItemValue-'|uuid"
+                 [name]="'metadataItemValue-'| uuid"
                  matInput>
         </mat-form-field>
-        <i (click)="removeRow(i)" class="al-icon al-ico-trash al-color blue-400 sm-md pointer flashing-icon mb-2" data-id="deleteIcon"></i>
+        <i (click)="removeRow(i)" class="remove-row al-icon al-ico-trash al-color blue-400 sm-md pointer flashing-icon" data-id="deleteIcon"></i>
       </div>
       <button class="btn btn-cml-primary plus mt-2" (click)="addRow()"  data-id="addMetaDataButton"><i
         class="al-icon al-color blue-400 sm al-ico-plus d-flex align-items-center"></i>

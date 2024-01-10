@@ -8,13 +8,13 @@ import {
   selectFilesFailedToDelete,
   selectNumberOfSourcesToDelete
 } from './common-delete-dialog.reducer';
-import {Observable} from 'rxjs/internal/Observable';
-import {Subject} from 'rxjs';
+import {Observable, Subject} from 'rxjs';
 import {deleteEntities, resetDeleteState} from './common-delete-dialog.actions';
 import {getDeleteProjectPopupStatsBreakdown} from '~/features/projects/projects-page.utils';
 import {EntityTypeEnum, hideDeleteArtifactsEntities} from '~/shared/constants/non-common-consts';
 import {takeUntil, tap} from 'rxjs/operators';
 import {CommonReadyForDeletion} from '@common/projects/common-projects.reducer';
+import DOMPurify from 'dompurify';
 
 
 @Component({
@@ -72,9 +72,10 @@ export class CommonDeleteDialogComponent implements OnInit, OnDestroy {
     this.entityType = data.entityType;
     this.hideDeleteArtifacts = hideDeleteArtifactsEntities.includes(data.entityType);
     this.numSelected = data.numSelected;
+    const name = DOMPurify.sanitize(data.entity.name);
     this.entityName = data.numSelected === 1 ?
       data.entityType === EntityTypeEnum.project ?
-        htmlTextShort(data.entity.name.split('/').pop()) : htmlTextShort(data.entity.name) :
+        htmlTextShort(name.split('/').pop()) : htmlTextShort(name) :
       `${data.numSelected} ${data.entityType}s`;
     this.header = `${data.resetMode ? 'Reset' : 'Delete'} ${data.entityType}${data.numSelected > 1 ? 's' : ''}`;
     this.bodyMessage = this.getMessageByEntity(data.entityType, data.projectStats);

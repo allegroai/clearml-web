@@ -1,3 +1,5 @@
+@import "variables";
+
 :host {
   display: block;
   max-width: 640px;
@@ -50,5 +52,11 @@
   .text-danger {
     display: block;
     position: absolute;
+  }
+
+  mat-checkbox {
+    --mdc-theme-text-primary-on-background: #{$blue-400};
+    white-space: break-spaces;
+    margin: 0 0 20px -6px;
   }
 }

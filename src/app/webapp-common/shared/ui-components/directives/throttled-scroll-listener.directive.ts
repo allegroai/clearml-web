@@ -1,7 +1,8 @@
 import {Directive, EventEmitter, HostListener, Input, Output} from '@angular/core';
 
 @Directive({
-  selector: '[smThrottledScrollListener]'
+  selector: '[smThrottledScrollListener]',
+  standalone: true,
 })
 export class ThrottledScrollListenerDirective {
   private isScrolling;

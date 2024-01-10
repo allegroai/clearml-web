@@ -9,18 +9,12 @@
       (toggleArchived)="onIsArchivedChanged($event)"></sm-toggle-archive>
     <sm-button-toggle
       class="ms-3"
-      [disabled]="!tableMode"
+      [disabled]="!tableMode || noData"
       [options]="[{label: 'Table view', value: 'table', icon: 'al-ico-table-view'}, {label: 'Details view', value: 'info', icon: 'al-ico-experiment-view'}]"
-      [value]="tableMode"
+      [value]="!noData && tableMode"
       [rippleEffect]="rippleEffect"
       (valueChanged)="tableModeChanged.emit($event)"></sm-button-toggle>
   </div>
-  <sm-project-context-navbar
-    *ngIf="!hideCreateNewButton && !hideNavigation"
-    [class.hide-item]="sharedView"
-    [activeFeature]="'models'"
-    [archivedMode]="isArchived">
-  </sm-project-context-navbar>
   <div class="d-flex justify-content-end align-items-center right-buttons">
     <sm-clear-filters-button
       *ngIf="!minimizedView"
@@ -38,6 +32,7 @@
       [metadataKeys]="metadataKeys"
       [metricVariants]="metricVariants"
       [tableCols]="tableCols"
+      [skipValueType]="tableMode === 'compare'"
       (removeColFromList)="removeColFromList.emit($event)"
       (selectedTableColsChanged)="selectedTableColsChanged.emit($event)"
       (selectMetadataKeysActiveChanged)="selectMetadataKeysActiveChanged.emit($event)"

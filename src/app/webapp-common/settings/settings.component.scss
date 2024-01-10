@@ -9,16 +9,23 @@
       width: 220px;
     }
     .mat-mdc-list-item {
+      padding-left: 24px;
       --mdc-list-list-item-label-text-color: #{$blue-200};
       --mdc-theme-text-primary-on-background: #{$blue-200};
-
-      padding-left: 24px;
-      &.active {
-        --mdc-list-list-item-container-color: #{$blue-500};
-        --mdc-theme-text-primary-on-background: white;
-      }
       &:hover {
         background-color: $blue-650;
+      }
+      &.active {
+        --mdc-list-list-item-label-text-color: #{$blue-50};
+        --mdc-list-list-item-container-color: #{$blue-500};
+        &:hover {
+         background-color: $blue-500;
+        }
+      }
+      &::before,
+      &:hover::before {
+        background-color: unset;
+        opacity: unset;
       }
     }
 

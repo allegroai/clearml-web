@@ -19,7 +19,7 @@
   <div class="graph-title">Hyperparameters Impact on {{metric?.name}}</div>
   <div #parallelGraph>
   </div>
-  <div #legend class="d-flex legend-container" [class.limit-height]="reportMode">
+  <div #legend class="d-flex legend-container">
     <div *ngFor="let experiment of experiments; trackBy: trackById" class="experiment-name">
       <span class="dot-container">
         <span #dot class="dot pallete-cursor"

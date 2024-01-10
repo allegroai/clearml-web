@@ -1,22 +1,32 @@
 <div class="d-flex h-100 p-4">
   <div class="donut-legend" data-id="annotationPieChart">
     <div
-      *ngFor="let slice of this.donutData; let index = index; trackBy: trackById"
+      *ngFor="let slice of donutData?.datasets[0].data; let index = index; trackBy: trackById"
       class="slice"
-      [class.highlight]="index + 1 === highlight"
+      [class.highlight]="index === highlight"
       [style.--sliceColor]="colors[index]"
-      (mouseenter)="hoverLegend(slice)"
-      (mouseleave)="leaveLegend(slice)"
+      (mouseenter)="hoverLegend(index)"
+      (mouseleave)="leaveLegend()"
     >
       <div
         #colorButton
         [smChooseColor]="colors[index]"
-        [stringToColor]="slice.name"
+        [stringToColor]="$any(donutData.labels[index])"
         [colorButtonRef]="colorButton"
         class="circle"
         data-id="annotationColorButton"
-      ></div>{{slice.name}}<span class="quantity" data-id="annotationCount">({{slice.quantity}})</span>
+      ></div>{{donutData.labels[index]}}<span class="quantity" data-id="annotationCount">({{slice}})</span>
     </div>
   </div>
-  <div class="donut-container"></div>
+  <div class="donut-container">
+    <canvas
+      baseChart
+      class="donut-container"
+      [data]="donutData"
+      [type]="doughnutChartType"
+      [options]="$any(donutOptions)"
+      (chartHover)="chartHovered($event)"
+    ></canvas>
+    <div class="percent" [style.opacity]="percent !== null ? 1 : null">{{percent}}%</div>
+  </div>
 </div>

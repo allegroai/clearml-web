@@ -1,5 +1,10 @@
-import {IOption} from '@common/shared/ui-components/inputs/select-autocomplete-with-chips/select-autocomplete-with-chips.component';
 import {TIME_INTERVALS} from '@common/workers-and-queues/workers-and-queues.consts';
+import {MetricsPlotEvent} from '~/business-logic/model/events/metricsPlotEvent';
+
+export interface IOption {
+  label: string;
+  value: string;
+}
 
 export type TableSelectionState = 'All' | 'Partial' | 'None';
 
@@ -123,3 +128,15 @@ export const timeFrameOptions: IOption[] = [
   {label: '1 Month', value: (TIME_INTERVALS.MONTH).toString()}
 ];
 
+export interface ReportsApiMultiplotsResponse {
+  [metric: string]: {
+    [variant: string]: {
+      [expId: string]: {
+        [iteration: string]: {
+          name: string;
+          plots: Array<MetricsPlotEvent>;
+        };
+      };
+    };
+  };
+}

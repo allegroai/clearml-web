@@ -35,6 +35,19 @@
     color: $blue-400;
   }
 
+  ::ng-deep mat-checkbox {
+    width: 100%;
+    .mdc-form-field {
+      width: 100%;
+
+      label {
+        width: 100%;
+      }
+    }
+    .ellipsis {
+      max-width: 94%;
+    }
+  }
 }
 
 .title {

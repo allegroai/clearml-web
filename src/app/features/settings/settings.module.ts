@@ -2,8 +2,6 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SettingsRoutingModule } from './settings-routing.module';
 import { SettingsComponent } from '../settings/settings.component';
-import {SMMaterialModule} from '@common/shared/material/material.module';
-import {SMSharedModule} from '@common/shared/shared.module';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {SharedModule} from '~/shared/shared.module';
 import {MatExpansionModule} from '@angular/material/expansion';
@@ -23,8 +21,22 @@ import {UsageStatsComponent} from '~/features/settings/containers/admin/usage-st
 import {CreateCredentialDialogComponent} from '~/features/settings/containers/admin/create-credential-dialog/create-credential-dialog.component';
 import {RedactedArgumentsDialogComponent} from '@common/settings/admin/redacted-arguments-dialog/redacted-arguments-dialog.component';
 import {LayoutModule} from '~/layout/layout.module';
-import {SharedPipesModule} from '@common/shared/pipes/shared-pipes.module';
 import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
+import {UuidPipe} from '@common/shared/pipes/uuid.pipe';
+import {MatInputModule} from '@angular/material/input';
+import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
+import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+import {InlineEditComponent} from '@common/shared/ui-components/inputs/inline-edit/inline-edit.component';
+import {CopyClipboardComponent} from '@common/shared/ui-components/indicators/copy-clipboard/copy-clipboard.component';
+import {NavbarItemComponent} from '@common/shared/ui-components/panel/navbar-item/navbar-item.component';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {MatSidenavModule} from '@angular/material/sidenav';
+import {MatListModule} from '@angular/material/list';
+import {FilterPipe} from '@common/shared/pipes/filter.pipe';
+import {MatButtonToggleModule} from '@angular/material/button-toggle';
+import {KeyValuePipe} from '@common/shared/pipes/key-value.pipe';
+import {ButtonToggleComponent} from '@common/shared/ui-components/inputs/button-toggle/button-toggle.component';
+import {LabelValuePipe} from '@common/shared/pipes/label-value.pipe';
 
 
 
@@ -50,15 +62,27 @@ import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-f
   imports: [
     CommonModule,
     SettingsRoutingModule,
-    SMMaterialModule,
-    SMSharedModule,
     ReactiveFormsModule,
     SharedModule,
     MatExpansionModule,
     FormsModule,
     LayoutModule,
     LabeledFormFieldDirective,
-    SharedPipesModule
+    UuidPipe,
+    MatInputModule,
+    DialogTemplateComponent,
+    MatSlideToggleModule,
+    InlineEditComponent,
+    CopyClipboardComponent,
+    NavbarItemComponent,
+    TooltipDirective,
+    MatSidenavModule,
+    MatListModule,
+    FilterPipe,
+    MatButtonToggleModule,
+    KeyValuePipe,
+    ButtonToggleComponent,
+    LabelValuePipe
   ],
   exports: [
     UserCredentialsComponent,

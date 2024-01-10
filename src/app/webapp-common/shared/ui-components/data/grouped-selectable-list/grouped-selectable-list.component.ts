@@ -1,7 +1,11 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, TrackByFunction} from '@angular/core';
-import {SelectableListItem} from './grouped-selectable-list.model';
-import {MatExpansionPanelHeader} from '@angular/material/expansion';
-import {GroupedList} from '@common/tasks/tasks.utils';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
+import {MatExpansionModule, MatExpansionPanelHeader} from '@angular/material/expansion';
+
+import {GroupedList} from '@common/tasks/tasks.model';
+import {KeyValuePipe, NgForOf} from '@angular/common';
+import {SortPipe} from '@common/shared/pipes/sort.pipe';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 
 
 interface GroupItem {
@@ -18,7 +22,16 @@ export interface GroupedVisibleList {
   selector: 'sm-grouped-selectable-list',
   templateUrl: './grouped-selectable-list.component.html',
   styleUrls: ['./grouped-selectable-list.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    MatExpansionModule,
+    NgForOf,
+    KeyValuePipe,
+    SortPipe,
+    TooltipDirective,
+    ShowTooltipIfEllipsisDirective
+  ]
 })
 export class GroupedSelectableListComponent implements OnChanges {
   private _list: GroupedList;
@@ -41,18 +54,18 @@ export class GroupedSelectableListComponent implements OnChanges {
     return this._list;
   }
 
-  @Input() checkedList: Array<any>;
-  @Output() onItemSelect = new EventEmitter<string>();
-  @Output() onItemCheck = new EventEmitter<{ pathString: string; parent: string }>();
-  @Output() onGroupCheck = new EventEmitter<any>();
+  @Input() checkedList: Array<string>;
+  @Output() itemSelect = new EventEmitter<string>();
+  @Output() itemCheck = new EventEmitter<{ pathString: string; parent: string }>();
+  @Output() groupChecked = new EventEmitter<{key: string; hide: boolean}>();
 
   constructor(private cdr: ChangeDetectorRef) {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if ((changes.list || changes.checkedList && this.list && this.checkedList)) {
+    if (((changes.list || changes.checkedList) && this.list && this.checkedList)) {
       this.showList = this.buildingNestedList();
-      this.cdr.detectChanges();
+      this.cdr.markForCheck();
     }
   }
 
@@ -63,7 +76,7 @@ export class GroupedSelectableListComponent implements OnChanges {
           acc2[child] = {data: children[child], visible: this.checkedList.includes(parent + child)};
           return acc2;
         }, {}),
-        visible: this.checkedList.includes(parent),
+        visible: this.checkedList.some( item => item.startsWith(parent)),
         hasChildren: Object.keys(children).length > 0
       };
       return acc;
@@ -78,18 +91,18 @@ export class GroupedSelectableListComponent implements OnChanges {
 
   isHideAllMode(parent: GroupItem) {
     const children = Object.values(parent.data);
-    return parent.hasChildren ? children.every(itemKey => itemKey.visible) : parent.visible;
+    return parent.hasChildren ? children.some(itemKey => itemKey.visible) : parent.visible;
   }
 
   trackByFn = (index, item) => index + item.key + item.value.hasChildren;
 
   groupCheck(item: { key: string; value: GroupItem}) {
-    this.onGroupCheck.emit({key: item.key, hide: !this.isHideAllMode(item.value)});
+    this.groupChecked.emit({key: item.key, hide: !this.isHideAllMode(item.value)});
   }
 
   selectedItem(item: { key: string; value: GroupItem}, panelH: MatExpansionPanelHeader) {
     if (!item.value.hasChildren) {
-      this.onItemSelect.emit(item.key);
+      this.itemSelect.emit(item.key);
       panelH._toggle();
     }
   }

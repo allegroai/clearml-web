@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
-import {Actions, createEffect, ofType} from '@ngrx/effects';
-import {debounceTime, filter, map, mergeMap, switchMap, withLatestFrom} from 'rxjs/operators';
+import {Actions, concatLatestFrom, createEffect, ofType} from '@ngrx/effects';
+import {debounceTime, filter, map, mergeMap, switchMap} from 'rxjs/operators';
 import {activeLoader, deactivateLoader} from '../../core/actions/layout.actions';
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
 import {
@@ -11,7 +11,7 @@ import {
   setExperimentsUpdateTime,
   setSearchExperimentsForCompareResults,
 } from '../actions/compare-header.actions';
-import {select, Store} from '@ngrx/store';
+import { Store} from '@ngrx/store';
 import {flatten, isEmpty} from 'lodash-es';
 import {selectExperimentsUpdateTime} from '../reducers';
 import {selectRouterParams} from '../../core/reducers/router-reducer';
@@ -30,7 +30,6 @@ import {LIMITED_VIEW_LIMIT} from '@common/experiments-compare/experiments-compar
 import {ActivatedRoute} from '@angular/router';
 import {ApiModelsService} from '~/business-logic/api-services/models.service';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
-import {encodeHyperParameter} from '@common/experiments/shared/common-experiments.utils';
 
 @Injectable()
 export class SelectCompareHeaderEffects {
@@ -52,11 +51,11 @@ export class SelectCompareHeaderEffects {
 
   refreshIfNeeded = createEffect(() => this.actions.pipe(
     ofType(refreshIfNeeded),
-    withLatestFrom(
+    concatLatestFrom(() => [
       this.store.select(selectAppVisible),
       this.store.select(selectRouterParams).pipe(map(params => params?.ids?.split(','))),
-      this.store.pipe(select(selectExperimentsUpdateTime)),
-    ),
+      this.store.select((selectExperimentsUpdateTime)),
+    ]),
     filter(([, isAppVisible, ,]) => isAppVisible),
     map(([...args]) => {
       let route = this.route.snapshot;
@@ -99,12 +98,12 @@ export class SelectCompareHeaderEffects {
 
   tableSortChange = createEffect(() => this.actions.pipe(
     ofType(compareAddDialogTableSortChanged),
-    withLatestFrom(
+    concatLatestFrom(() => [
       this.store.select(selectTableSortFields),
       this.store.select(selectSelectedProjectId),
       this.store.select(selectExperimentsTableCols),
       this.store.select(selectExperimentsMetricsCols),
-    ),
+    ]),
     switchMap(([action, oldOrders, projectId, tableCols, metricsCols]) => {
       const orders = addMultipleSortColumns(oldOrders, action.colId, action.isShift);
       const colIds = tableCols.map(col => col.id).concat(metricsCols.map(col => col.id));
@@ -114,18 +113,20 @@ export class SelectCompareHeaderEffects {
 
   searchExperimentsForCompare = createEffect(() => this.actions.pipe(
     ofType(getSelectedExperimentsForCompareAddDialog),
-    withLatestFrom(this.store.select(selectRouterParams).pipe(map(params => params?.ids?.split(','))),
+    concatLatestFrom(() => [
+      this.store.select(selectRouterParams).pipe(map(params => params?.ids?.split(','))),
       this.store.select(exSelectors.selectExperimentsTableCols),
-      this.store.select(exSelectors.selectExperimentsMetricsColsForProject)),
+      this.store.select(exSelectors.selectExperimentsMetricsColsForProject)
+    ]),
     debounceTime(500),
     switchMap(([action, tasksIds, cols, metricCols]) => this.experimentsApi.tasksGetAllEx({
         id: action.tasksIds ? action.tasksIds : tasksIds,
         // eslint-disable-next-line @typescript-eslint/naming-convention
         only_fields: [...new Set([...MINIMUM_ONLY_FIELDS,
           ...flatten((cols.length > 0 ? cols : INITIAL_EXPERIMENT_TABLE_COLS).filter(col => col.id !== 'selected' && !col.hidden).map(col => col.getter || col.id)),
-          ...(metricCols ? flatten(metricCols.map(col => (col?.isParam && typeof col.getter === 'string') ? encodeHyperParameter(col.getter) : col.getter || col.id)) : [])])] as string[]
+          ...(metricCols ? flatten(metricCols.map(col => col.getter || col.id)) : [])])] as string[]
       }).pipe(
-        mergeMap((res) => [setSearchExperimentsForCompareResults({payload: [...res?.tasks]}), deactivateLoader(action.type)]),
+        mergeMap((res) => [setSearchExperimentsForCompareResults({payload: [...res?.tasks ?? []]}), deactivateLoader(action.type)]),
       )
     )));
 }

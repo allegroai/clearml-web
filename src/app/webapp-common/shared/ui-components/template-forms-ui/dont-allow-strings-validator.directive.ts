@@ -3,7 +3,8 @@ import {AbstractControl, NG_VALIDATORS, ValidationErrors, Validator, ValidatorFn
 
 @Directive({
   selector : '[smNotAllowedStringsValidator]',
-  providers: [{provide: NG_VALIDATORS, useExisting: NotAllowedStringsValidatorValidatorDirective, multi: true}]
+  providers: [{provide: NG_VALIDATORS, useExisting: NotAllowedStringsValidatorValidatorDirective, multi: true}],
+  standalone: true,
 })
 export class NotAllowedStringsValidatorValidatorDirective implements Validator {
   @Input() smNotAllowedStringsValidator: Array<string>;

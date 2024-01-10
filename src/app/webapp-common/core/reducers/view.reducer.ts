@@ -1,9 +1,16 @@
-import {createReducer, createSelector, on, ReducerTypes} from '@ngrx/store';
+import {ActionCreator, createReducer, createSelector, on, ReducerTypes} from '@ngrx/store';
 import * as layoutActions from '../actions/layout.actions';
 import {apiRequest, requestFailed} from '@common/core/actions/http.actions';
 import {Ace} from 'ace-builds';
 import {IBreadcrumbsLink} from '@common/layout/breadcrumbs/breadcrumbs.component';
-import {setBreadcrumbs, setTypeBreadcrumbs} from '@common/core/actions/router.actions';
+import {
+  setBreadcrumbs,
+  setContextMenu,
+  setContextMenuActiveFeature,
+  setTypeBreadcrumbs
+} from '@common/core/actions/router.actions';
+import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
+import {HeaderNavbarTabConfig} from '@common/layout/header-navbar-tabs/header-navbar-tabs-config.types';
 
 export interface ViewState {
   loading: { [endpoint: string]: boolean };
@@ -27,6 +34,9 @@ export interface ViewState {
   hideRedactedArguments: boolean;
   showEmbedReportMenu: { show: boolean; position: { x: number; y: number } };
   breadcrumbs: IBreadcrumbsLink[][];
+  contextMenu: HeaderNavbarTabConfig[];
+  tableCardsCollapsed: {[entity: string]: boolean};
+  contextMenuActiveFeature: string;
 }
 
 export const initViewState: ViewState = {
@@ -54,6 +64,9 @@ export const initViewState: ViewState = {
   hideRedactedArguments: false,
   showEmbedReportMenu: {show: null, position: null},
   breadcrumbs: [[{}]],
+  tableCardsCollapsed: {},
+  contextMenu: null,
+  contextMenuActiveFeature: null
 };
 
 export const views = state => state.views as ViewState;
@@ -77,9 +90,14 @@ export const selectAceReady = createSelector(views, state => state.aceReady);
 export const selectAceCaretPosition = createSelector(views, state => state.aceCaretPosition);
 export const selectNeverShowPopups = createSelector(views, (state): string[] => state.neverShowPopupAgain);
 export const selectRedactedArguments = createSelector(views, (state): { key: string }[] => state.redactedArguments);
-export const selectHideRedactedArguments = createSelector(views, (state): { key: string }[] => state.hideRedactedArguments ? state.redactedArguments : null);
+export const selectHideRedactedArguments = createSelector(views, (state): {
+  key: string
+}[] => state.hideRedactedArguments ? state.redactedArguments : null);
 export const selectShowEmbedReportMenu = createSelector(views, state => state.showEmbedReportMenu);
 export const selectBreadcrumbs = createSelector(views, state => state && state.breadcrumbs);
+export const selectTableCardsCollapsed = (entityType: EntityTypeEnum) => createSelector(views, state => state.tableCardsCollapsed[entityType]);
+export const selectContextMenu = createSelector(views, state => state && state.contextMenu);
+export const selectActiveFeature = createSelector(views, state => state && state.contextMenuActiveFeature);
 
 
 export const viewReducers = [
@@ -120,6 +138,13 @@ export const viewReducers = [
   on(layoutActions.setNotificationDialog, (state, action) => ({...state, notification: action.notification})),
   on(layoutActions.setBackdrop, (state, action) => ({...state, backdropActive: action.active})),
   on(layoutActions.setAutoRefresh, (state, action) => ({...state, autoRefresh: action.autoRefresh})),
+  on(layoutActions.toggleCardsCollapsed, (state, action) => ({
+    ...state,
+    tableCardsCollapsed: {
+      ...state.tableCardsCollapsed,
+      [action.entityType]: ! state.tableCardsCollapsed[action.entityType]
+    }
+  })),
   on(layoutActions.setCompareAutoRefresh, (state, action) => ({...state, compareAutoRefresh: action.autoRefresh})),
   on(layoutActions.showEmbedReportMenu, (state, action) => ({
     ...state,
@@ -132,12 +157,18 @@ export const viewReducers = [
   on(setBreadcrumbs, (state, action) => ({
     ...state, breadcrumbs: action.breadcrumbs
   })),
+  on(setContextMenu, (state, action) => ({
+    ...state, contextMenu: action.contextMenu
+  })),
+  on(setContextMenuActiveFeature, (state, action) => ({
+    ...state, contextMenuActiveFeature: action.activeFeature
+  })),
   on(setTypeBreadcrumbs, (state, action) => ({
     ...state,
-    breadcrumbs: [...state.breadcrumbs?.map(breadcrumbGroup => [...breadcrumbGroup?.map(breadcrumb => breadcrumb.type === action.type ? action.breadcrumb : breadcrumb)
-    ])]
+    breadcrumbs: [...state.breadcrumbs?.map(breadcrumbGroup => [...breadcrumbGroup?.map(breadcrumb => breadcrumb.type === action.type ? action.breadcrumb : breadcrumb) ?? []
+    ]) ?? []]
   })),
-] as ReducerTypes<ViewState, any>[];
+] as ReducerTypes<ViewState, ActionCreator[]>[];
 
 export const viewReducer = createReducer(
   initViewState,

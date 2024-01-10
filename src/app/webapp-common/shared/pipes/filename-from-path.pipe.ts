@@ -1,7 +1,8 @@
 import {Pipe, PipeTransform} from '@angular/core';
 
 @Pipe({
-  name: 'FilenameFromPath'
+  name: 'FilenameFromPath',
+  standalone: true
 })
 export class FilenameFromPath implements PipeTransform {
 

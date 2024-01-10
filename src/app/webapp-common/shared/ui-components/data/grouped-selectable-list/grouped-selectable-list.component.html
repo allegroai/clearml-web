@@ -11,13 +11,13 @@
     (click)="selectedItem(item, panelH)"
   >
     <mat-panel-title>
-    <div class="header-container" [ngClass]="{'unchecked' : isHideAllMode(item.value) || item.value.visible}">
+    <div class="header-container" [class.unchecked]="!(isHideAllMode(item.value) || item.value.visible)">
       <div class="ellipsis item-key" [smTooltip]="item.key" [matTooltipShowDelay]="500"  smShowTooltipIfEllipsis>{{item.key}}</div>
     </div>
     </mat-panel-title>
     <mat-panel-description>
       <i (click)="groupCheck(item); $event.stopPropagation()"
-         [class]="(isHideAllMode(item.value) || item.value.visible? checkIcon[1] : checkIcon[0]) + ' al-icon sm'"
+         [class]="(isHideAllMode(item.value) || item.value.visible? checkIcon[0] : checkIcon[1]) + ' al-icon sm'"
       ></i>
     </mat-panel-description>
 
@@ -26,11 +26,11 @@
     <li
       *ngFor="let listItem of item.value.data | keyvalue; trackBy: trackByFn"
       class="list-item"
-      (click)="onItemSelect.emit(item.key + listItem.key)"
-      [ngClass]="{unchecked: $any(listItem.value).visible}"
+      (click)="itemSelect.emit(item.key + listItem.key)"
+      [class.unchecked]="!$any(listItem.value).visible"
     >
       <span class="pointer ellipsis w-100 list-item-key" [smTooltip]="listItem.key" [matTooltipShowDelay]="500"  smShowTooltipIfEllipsis>{{listItem.key}}</span>
-      <i (click)="onItemCheck.emit( {pathString: item.key+ listItem.key, parent: item.key}); $event.stopPropagation()" [class]="($any(listItem.value).visible ? checkIcon[1] : checkIcon[0]) + ' al-icon sm'"></i>
+      <i (click)="itemCheck.emit( {pathString: item.key+ listItem.key, parent: item.key}); $event.stopPropagation()" [class]="($any(listItem.value).visible ? checkIcon[0] : checkIcon[1]) + ' al-icon sm'"></i>
     </li>
   </ul>
 </mat-expansion-panel>

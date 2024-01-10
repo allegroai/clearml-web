@@ -40,7 +40,6 @@ import {selectGraphsPerRow} from '@common/experiments/reducers';
 import {setGraphsPerRow} from '@common/experiments/actions/common-experiment-output.actions';
 import {SmoothTypeEnum} from '@common/shared/single-graph/single-graph.utils';
 import {maxInArray} from '@common/shared/utils/helpers.util';
-import {Title} from "@angular/platform-browser";
 
 @Component({
   selector: 'sm-experiment-graphs',
@@ -70,7 +69,7 @@ export class ExperimentGraphsComponent implements OnDestroy {
   private minWidth: number = 350;
   private resizeTextElement: HTMLDivElement;
   private graphsNumberLimit: number;
-  public activeResizeElement: any;
+  public activeResizeElement: HTMLDivElement;
   private _hiddenList: string[];
   private maxUserHeight: number;
   private maxUserWidth: number;
@@ -311,8 +310,8 @@ export class ExperimentGraphsComponent implements OnDestroy {
       return;
     }
     this.timer = window.setTimeout(() => {
-      if (this.allGraphs) {
-        const containerWidth = this.el.nativeElement.clientWidth;
+      const containerWidth = this.el.nativeElement.clientWidth;
+      if (this.allGraphs && containerWidth) {
         while (containerWidth / this.graphsPerRow < this.minWidth && this.graphsPerRow > 1 || containerWidth / this.graphsPerRow < this.maxUserWidth) {
           this.graphsPerRow -= 1;
         }
@@ -376,11 +375,11 @@ export class ExperimentGraphsComponent implements OnDestroy {
     return Math.min(graphsPerRow, this.graphsNumberLimit);
   }
 
-  resizeStarted(metricGroup: HTMLDivElement, singleGraph?: any) {
+  resizeStarted(metricGroup: HTMLDivElement, singleGraph?: HTMLDivElement) {
     this.activeResizeElement = singleGraph;
     this.changeDetection.detectChanges();
     this.graphsNumberLimit = this.isGroupGraphs ? metricGroup.querySelectorAll(':not(.resize-ghost-element) > sm-single-graph').length : this.graphList.length;
-    this.resizeTextElement = singleGraph?.parentElement.querySelectorAll('.resize-ghost-element .resize-overlay-text')[0];
+    this.resizeTextElement = singleGraph?.parentElement.querySelectorAll<HTMLDivElement>('.resize-ghost-element .resize-overlay-text')[0];
   }
 
   onResizing($event: ResizeEvent) {
@@ -399,7 +398,7 @@ export class ExperimentGraphsComponent implements OnDestroy {
     const element = this.allMetrics.nativeElement.getElementsByClassName('graph-id')[EXPERIMENT_GRAPH_ID_PREFIX + id] as HTMLDivElement;
     if (element) {
       this.allMetrics.nativeElement.scrollTo({top: element.offsetTop, behavior: 'smooth'});
-    } else if (this.allMetrics.nativeElement.getElementsByClassName('single-value-summary-section')[0]){
+    } else if (this.allMetrics.nativeElement.getElementsByClassName('single-value-summary-section')[0]) {
       this.allMetrics.nativeElement.scrollTo({top: 0, behavior: 'smooth'});
     }
   }
@@ -419,7 +418,7 @@ export class ExperimentGraphsComponent implements OnDestroy {
 
   public generateIdentifier = (chartItem: any) => `${this.singleGraphidPrefix} ${this.experimentGraphidPrefix} ${chartItem.metric} ${chartItem.layout.title} ${chartItem.iter} ${chartItem.variant} ${(chartItem.layout.images && chartItem.layout.images[0]?.source)}`;
 
-  creatingEmbedCode(chartItem: any, {domRect, xaxis}: {xaxis: ScalarKeyEnum; domRect: DOMRect}) {
+  creatingEmbedCode(chartItem: any, {domRect, xaxis}: { xaxis: ScalarKeyEnum; domRect: DOMRect }) {
     if (!chartItem) {
       this.createEmbedCode.emit({xaxis, domRect});
       return;
@@ -441,11 +440,14 @@ export class ExperimentGraphsComponent implements OnDestroy {
         ...((xaxis || this.xAxisType) && {xaxis: xaxis ?? this.xAxisType}),
         ...(chartItem.data.length < 2 && {originalObject: chartItem.task}),
         ...(chartItem.data[0]?.seriesName && {seriesName: chartItem.data[0]?.seriesName}),
-        domRect});
+        domRect
+      });
     }
   }
 
   checkIfLegendToTitle(chartItem: ExtFrame) {
     return this.isGroupGraphs && chartItem.data?.length === 1 && (!chartItem.data[0].name || chartItem.data[0].name === chartItem.layout?.title) && ['scatter', 'scattergl', 'bar', 'scatter3d'].includes(chartItem?.data[0]?.type);
   }
+
+  inHiddenList = (metric: string) => !this.hiddenList?.some(m => m.startsWith(metric));
 }

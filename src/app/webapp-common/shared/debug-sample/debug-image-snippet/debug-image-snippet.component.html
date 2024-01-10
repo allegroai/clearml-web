@@ -9,7 +9,7 @@
             data-id="sourceImage"
             [src]="source"
             [alt]="source"
-            (error)="isFailed = true"
+            (error)="imageError.emit(); isFailed = true"
             (click)="imageClicked.emit({src: source})"
             (load)="loadedMedia()"
             [class.loading]="isLoading"

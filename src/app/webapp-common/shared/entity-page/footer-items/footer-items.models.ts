@@ -1,6 +1,5 @@
-import {Observable} from 'rxjs/internal/Observable';
 import {IconNames} from '@common/constants';
-import {of} from 'rxjs';
+import {Observable, of} from 'rxjs';
 import { MenuItemTextPipe } from '@common/shared/pipes/menu-item-text.pipe';
 
 export abstract class ItemFooterModel {

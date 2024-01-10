@@ -19,13 +19,13 @@ import {
   ViewChildren
 } from '@angular/core';
 import {get, isArray, isString} from 'lodash-es';
-import {MenuItem, PrimeTemplate, SortMeta} from 'primeng/api';
+import {MenuItem, PrimeTemplate, ScrollerOptions, SortMeta} from 'primeng/api';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
-import {ContextMenu} from 'primeng/contextmenu';
+import {ContextMenu, ContextMenuModule} from 'primeng/contextmenu';
 import {
   Table,
   TableColumnReorderEvent,
-  TableContextMenuSelectEvent,
+  TableContextMenuSelectEvent, TableModule,
   TableRowCollapseEvent,
   TableRowExpandEvent
 } from 'primeng/table';
@@ -37,8 +37,13 @@ import {Store} from '@ngrx/store';
 import {selectScaleFactor} from '@common/core/reducers/view.reducer';
 import {trackById} from '@common/shared/utils/forms-track-by';
 import {sortCol} from '@common/shared/utils/sortCol';
-import {ExportToCsv, Options} from 'export-to-csv';
+import {mkConfig, download, generateCsv} from 'export-to-csv';
 import {prepareColsForDownload} from '@common/shared/utils/download';
+import {NgForOf, NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault, NgTemplateOutlet} from '@angular/common';
+import {ResizableColumnDirective} from '@common/shared/ui-components/data/table/resizable-column.directive';
+import {MenuComponent} from '@common/shared/ui-components/panel/menu/menu.component';
+import {MenuItemComponent} from '@common/shared/ui-components/panel/menu-item/menu-item.component';
+import {ScrollEndDirective} from '@common/shared/ui-components/directives/scroll-end.directive';
 
 export interface TableContextMenuSelectEventExt extends Omit<TableContextMenuSelectEvent, 'index'> {
   single?: boolean;
@@ -49,7 +54,22 @@ export interface TableContextMenuSelectEventExt extends Omit<TableContextMenuSel
   selector: 'sm-table',
   templateUrl: './table.component.html',
   styleUrls: ['./table.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    NgIf,
+    NgForOf,
+    TableModule,
+    ResizableColumnDirective,
+    MenuComponent,
+    MenuItemComponent,
+    ScrollEndDirective,
+    ContextMenuModule,
+    NgSwitch,
+    NgSwitchCase,
+    NgTemplateOutlet,
+    NgSwitchDefault
+  ]
 })
 export class TableComponent<D extends {id: string}> implements AfterContentInit, AfterViewInit, OnInit, OnDestroy {
 
@@ -95,7 +115,7 @@ export class TableComponent<D extends {id: string}> implements AfterContentInit,
   @Input() initialColumns;
   private waitForClick: number;
 
-  @Input() set tableData(tableData: any) {
+  @Input() set tableData(tableData: D[]) {
     this.loading = false;
     this.rowsNumber = tableData ? tableData.length : 0;
     this._tableData = tableData;
@@ -133,7 +153,7 @@ export class TableComponent<D extends {id: string}> implements AfterContentInit,
   @Input() scrollable = false;
   @Input() sortOrder: TableSortOrderEnum;
   @Input() sortFields: SortMeta[];
-  @Input() selection: any;
+  @Input() selection: D;
   @Input() activeContextRow;
   @Input() contextMenuOpen = false;
   @Input() first = 0;
@@ -149,6 +169,7 @@ export class TableComponent<D extends {id: string}> implements AfterContentInit,
   @Input() simple = false;
   @Input() expandedRowKeys: { [s: string]: boolean } = {};
   @Input() rowExpandMode:  'multiple' | 'single' = 'multiple';
+  @Input() cardsCollapsed = false;
 
 
   @Input() set minimizedView(minView: boolean) {
@@ -173,6 +194,7 @@ export class TableComponent<D extends {id: string}> implements AfterContentInit,
   @Input() noDataMessage = 'No data to show';
   @Input() checkedItems = [];
   @Input() virtualScroll: boolean;
+  @Input() virtualScrollOptions: ScrollerOptions = {};
   @Input() globalFilterFields: string[];
   @Input() enableTableSearch = false;
   @Input() minimizedTableHeader: string;
@@ -189,6 +211,7 @@ export class TableComponent<D extends {id: string}> implements AfterContentInit,
   @Output() rowRightClick = new EventEmitter<{ e: Event; rowData; single?: boolean }>();
   @Output() colReordered = new EventEmitter();
   @Output() columnResized = new EventEmitter<{ columnId: string; widthPx: number }>();
+  @Output() cardsCollapsedToggle = new EventEmitter<boolean>();
   search: string;
 
   resize(delay: number = null) {
@@ -565,26 +588,24 @@ export class TableComponent<D extends {id: string}> implements AfterContentInit,
 
 
   downloadTableAsCSV(tableName?: string) {
-    const options: Options = {
+    const options = mkConfig({
       filename: `${tableName}${tableName ? '-' : ''}table`,
-      showLabels: true,
-      useKeysAsHeaders: true
-    };
+      showColumnHeaders: true,
+    });
 
     const downloadCols = prepareColsForDownload(this.columns);
-    options.headers = downloadCols.map(dCol=> dCol.name);
+    options.columnHeaders = downloadCols.map(dCol=> dCol.name);
     const rows = this.tableData.map(row =>
-      downloadCols.reduce((acc, col) => {
-        const key = col.field;
-        const val = get(row, key, '');
-        acc[col.name] = isArray(val) ? val.toString() : isString(val) ? val.replace(/\r?\n|\r/g
+      downloadCols.reduce((acc, dCol) => {
+        const val = get(row, dCol.field, '');
+        acc[dCol.name] = isArray(val) ? val.toString() : isString(val) ? val.replace(/\r?\n|\r/g
           , '') : val;
         return acc;
       }, {})
     );
 
-    const csvExporter = new ExportToCsv(options);
-    csvExporter.generateCsv(rows);
+    const csv = generateCsv(options)(rows);
+    download(options)(csv);
   }
 
   isSelected = (rowData: D) =>

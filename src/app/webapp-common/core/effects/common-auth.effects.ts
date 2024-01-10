@@ -4,7 +4,7 @@ import {ApiAuthService} from '~/business-logic/api-services/auth.service';
 import * as authActions from '../actions/common-auth.actions';
 import {requestFailed} from '../actions/http.actions';
 import {activeLoader, deactivateLoader, setServerError} from '../actions/layout.actions';
-import {catchError, filter, finalize, map, mergeMap, switchMap, throttleTime, withLatestFrom} from 'rxjs/operators';
+import {catchError, filter, finalize, map, mergeMap, switchMap, throttleTime} from 'rxjs/operators';
 import {AuthGetCredentialsResponse} from '~/business-logic/model/auth/authGetCredentialsResponse';
 import {Store} from '@ngrx/store';
 import {selectCurrentUser} from '../reducers/users-reducer';
@@ -18,7 +18,8 @@ import {
 } from '@common/layout/s3-access-resolver/s3-access-resolver.component';
 import {MatDialog} from '@angular/material/dialog';
 import {setCredentialLabel} from '../actions/common-auth.actions';
-import {SignResponse} from '@common/settings/admin/base-admin-utils';
+import {isGoogleCloudUrl, SignResponse} from '@common/settings/admin/base-admin-utils';
+import {isFileserverUrl} from '~/shared/utils/url';
 
 @Injectable()
 export class CommonAuthEffects {
@@ -107,11 +108,14 @@ export class CommonAuthEffects {
     mergeMap(action =>
       of(action).pipe(
         concatLatestFrom(() =>
-          this.store.select(state => selectSignedUrl(action.url)(state))
+          this.store.select(selectSignedUrl(action.url))
         ),
         switchMap(([, signedUrl]) =>
-          (!signedUrl?.expires || signedUrl.expires < (new Date()).getTime() || action.config?.disableCache) ?
-            this.adminService.signUrlIfNeeded(action.url, action.config) : of({type: 'none'})
+          (!signedUrl?.expires || signedUrl.expires < (new Date()).getTime() ||
+            (isFileserverUrl(action.url) && action.config?.disableCache) ||
+            (action.config?.error && isGoogleCloudUrl(action.url) && !signedUrl.signed.includes('X-Amz-Signature'))
+          ) ?
+            this.adminService.signUrlIfNeeded(action.url, action.config, signedUrl) : of({type: 'none'})
         ),
         filter(res => !!res),
         switchMap((res: SignResponse) => {

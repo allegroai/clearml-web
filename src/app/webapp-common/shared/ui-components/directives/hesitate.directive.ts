@@ -13,7 +13,8 @@ import {
 
 @Directive({
   selector: '[smHesitate]',
-  exportAs: 'hesitate'
+  exportAs: 'hesitate',
+  standalone: true
 })
 export class HesitateDirective implements AfterViewInit, OnDestroy {
   @Input() delay = 2000;

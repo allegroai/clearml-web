@@ -1,0 +1,11 @@
+@import "../../webapp-common/shared/ui-components/styles/variables";
+@import "../../webapp-common/layout/layout";
+
+:host {
+  .content {
+    overflow: auto;
+    height: 100%;
+    padding-top: 24px;
+  }
+}
+
