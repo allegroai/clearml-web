@@ -28,6 +28,7 @@ import {UsersGetInvitesResponseInvites} from '~/business-logic/model/users/users
 export class HeaderComponent implements OnInit, OnDestroy {
   @Input() isShareMode: boolean;
   @Input() isLogin: boolean;
+  @Input() hideMenus: boolean;
   showLogo: boolean;
   profile: boolean;
   userFocus: boolean;
@@ -49,6 +50,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private configService: ConfigurationService
   ) {
     this.url = this.store.select(selectRouterUrl);
+
     this.user = this.store.select(selectCurrentUser);
     this.userNotificationPath$ = this.store.select(selectUserSettingsNotificationPath);
     this.invitesPending$ = this.store.select(selectInvitesPending);

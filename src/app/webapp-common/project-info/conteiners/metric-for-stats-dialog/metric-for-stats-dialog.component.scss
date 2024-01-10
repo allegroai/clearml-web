@@ -5,6 +5,17 @@
   flex-direction: column;
   align-items: center;
 
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    height: 394px;
+    margin-bottom: 24px;
+    padding: 12px 0;
+    border: 1px solid $blue-100;
+    border-radius: 4px;
+  }
+
   i {
     color: $blue-400;
   }
@@ -20,6 +31,62 @@
     display: block;
     width: 350px;
     height: 370px;
-    margin-bottom: 24px;
+    border-right: 1px solid $blue-100;
+    padding-right: 16px;
+  }
+
+  .selected {
+    height: 370px;
+    overflow: auto;
+    padding: 0 12px 0 0;
+    &-head {
+      padding: 6px 0;
+      text-align: right;
+      border-bottom: 1px solid $blue-100;
+      a {
+        color: $purple;
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+
+  .metric {
+    display: flex;
+    height: 42px;
+    width: 100%;
+    align-items: center;
+    white-space: nowrap;
+    padding: 0 12px;
+    border-bottom: solid 1px $blue-100;
+    background-color: #ffffff;
+
+    .name {
+      font-size: 12px;
+      font-weight: 500;
+      color: $blue-800;
+      margin-right: 6px;
+      max-width: 276px;
+    }
+
+    .remove {
+      margin-left: auto;
+      cursor: pointer;
+      visibility: hidden;
+      opacity: 0;
+
+      &:hover {
+        color: $blue-500;
+        font-weight: 500;
+      }
+    }
+    &:first-child {
+      border-top: 1px solid $blue-100;
+    }
+    &:hover .remove {
+      visibility: visible;
+      opacity: 1;
+    }
   }
 }

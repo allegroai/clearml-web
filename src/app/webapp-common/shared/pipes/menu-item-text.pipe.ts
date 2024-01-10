@@ -1,7 +1,8 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-  name: 'menuItemText'
+  name: 'menuItemText',
+  standalone: true
 })
 export class MenuItemTextPipe implements PipeTransform {
 

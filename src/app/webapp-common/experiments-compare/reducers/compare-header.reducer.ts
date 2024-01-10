@@ -8,7 +8,7 @@ import {
   setHideIdenticalFields,
   setSearchExperimentsForCompareResults,
   setShowSearchExperimentsForCompare,
-  toggleShowScalarOptions, setShowRowExtremes, setExportTable, setShowGlobalLegend
+  setShowRowExtremes, setExportTable, setShowGlobalLegend
 } from '../actions/compare-header.actions';
 import {createReducer, on} from '@ngrx/store';
 import {Params} from '@angular/router';
@@ -24,7 +24,6 @@ export interface CompareHeaderState {
   showRowExtremes: boolean;
   showGlobalLegend: boolean;
   viewMode: string;
-  showScalarOptions: boolean;
   autoRefresh: boolean;
   navigationPreferences: Params;
   experimentsUpdateTime: { [key: string]: Date };
@@ -43,7 +42,6 @@ export const initialState: CompareHeaderState = {
   showRowExtremes: false,
   showGlobalLegend: false,
   viewMode: 'values',
-  showScalarOptions: false,
   autoRefresh: false,
   navigationPreferences: {},
   experimentsUpdateTime: {},
@@ -64,7 +62,6 @@ export const compareHeader = createReducer(
   })),
   on(setExperimentsUpdateTime, (state: CompareHeaderState, {payload}) => ({...state, experimentsUpdateTime: payload})),
   on(setShowSearchExperimentsForCompare, (state: CompareHeaderState, {payload}) => ({...state, showSearch: payload})),
-  on(toggleShowScalarOptions, (state: CompareHeaderState) => ({...state, showScalarOptions: !state.showScalarOptions})),
   on(resetSelectCompareHeader, (state, action) => ({
     ...initialState,
     ...(!action.fullReset && {

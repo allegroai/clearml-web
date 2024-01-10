@@ -5,6 +5,9 @@ import {Task} from '~/business-logic/model/tasks/task';
 import {Artifact} from '~/business-logic/model/tasks/artifact';
 import {ITask} from '~/business-logic/model/al-task';
 import {DataDictionary} from '@common/experiments-compare/experiments-compare.constants';
+import {
+  IOption
+} from '@common/shared/ui-components/inputs/select-autocomplete-with-chips/select-autocomplete-with-chips.component';
 
 export interface IModelInfo extends  Omit<Model, 'project' | 'task' | 'user'> {
   project?: Project;
@@ -95,18 +98,12 @@ export interface ITableExperiment {
   parent?: {id: string; name: string; project?: {id: string}};
 }
 
-export interface CloneForm {
-  project?: any;
-  name: string;
-  comment: string;
-  newProjectName?: string;
-}
-
 export interface CloneExperimentPayload {
-  project?: string ;
+  project?: IOption ;
   name: string;
   comment: string;
   newProjectName?: string;
+  forceParent?: boolean;
 }
 
 

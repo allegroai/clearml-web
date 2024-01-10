@@ -176,12 +176,14 @@ export class ImageViewerComponent extends BaseImageViewerComponent implements On
     this.begOfTimeSub = this.beginningOfTime$.subscribe(beg => {
       this.beginningOfTime = beg;
       if (beg) {
+        this.fitToScreen();
         this.imageLoaded = true;
       }
     });
     this.endOfTimeSub = this.endOfTime$.subscribe(end => {
       this.endOfTime = end;
       if (end) {
+        this.fitToScreen();
         this.imageLoaded = true;
       }
     });

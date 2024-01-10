@@ -62,4 +62,4 @@ export enum CustomColumnMode {
 
 export const NONE_USER_TASK_TYPES = ['-dataset_import', '-annotation', '-annotation_manual'];
 
-export const singleValueChartTitle = ' Summary';
+export const singleValueChartTitle = 'Summary';

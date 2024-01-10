@@ -1,8 +1,8 @@
 <sm-dialog-template [header]="alertMessage" [subHeader]="alertSubMessage" iconClass="i-alert">
   <div *ngIf="moreInfo || resultMessage" (click)="openToggle()" class="pointer">
-    <i class="more-info-icon fa fa-angle-right" [ngClass]="{'info-open': isOpen}"></i>More info
+    <i class="more-info-icon fa fa-angle-right" [class.info-open]="isOpen"></i>More info
   </div>
-  <div *ngIf="moreInfo || resultMessage" class="more-info" [ngClass]="{'info-open': isOpen}">
+  <div *ngIf="moreInfo || resultMessage" class="more-info" [class.info-open]="isOpen">
     <a></a>
     <div>{{resultMessage}}</div>
     <div *ngFor="let entityName of moreInfoEntities">

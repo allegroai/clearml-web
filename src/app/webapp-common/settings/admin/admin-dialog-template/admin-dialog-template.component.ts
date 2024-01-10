@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {guessAPIServerURL, HTTP} from '../../../../app.constants';
-import {CredentialKeyExt} from '../../../core/reducers/common-auth-reducer';
-import {ConfigurationService} from '../../../shared/services/configuration.service';
+import {guessAPIServerURL, HTTP} from '~/app.constants';
+import {CredentialKeyExt} from '@common/core/reducers/common-auth-reducer';
+import {ConfigurationService} from '@common/shared/services/configuration.service';
 
 
 @Component({
@@ -27,7 +27,7 @@ export class AdminDialogTemplateComponent implements OnInit {
 %env CLEARML_API_ACCESS_KEY=${cred?.access_key || `<You’re API access key>`}
 %env CLEARML_API_SECRET_KEY=${cred?.secret_key || `<You’re API secret key>`}`;
     this._newCredential = cred;
-  };
+  }
 
   get newCredential() {
     return this._newCredential;

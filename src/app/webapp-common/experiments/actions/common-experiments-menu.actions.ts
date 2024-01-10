@@ -4,7 +4,6 @@ import {Project} from '~/business-logic/model/projects/project';
 import {Queue} from '~/business-logic/model/queues/queue';
 import {CloneExperimentPayload, ITableExperiment} from '../shared/common-experiment-model.model';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
-import { PipelinesStartPipelineRequest } from '~/business-logic/model/pipelines/pipelinesStartPipelineRequest';
 
 export const EXPERIMENTS_INFO_PREFIX = '[EXPERIMENTS INFO] ';
 
@@ -20,7 +19,7 @@ export const stopClicked = createAction(
 );
 export const startPipeline = createAction(
   EXPERIMENTS_INFO_PREFIX + 'start pipeline',
-  props<PipelinesStartPipelineRequest>()
+  props<{ queue: Queue; args: {name: string; value: string}[]; task: string; }>()
 );
 
 export const getControllerForStartPipelineDialog = createAction(
@@ -79,7 +78,7 @@ export const enqueueClicked = createAction(
 );
 export const openEmptyQueueMessage = createAction(
   EXPERIMENTS_INFO_PREFIX + 'open empty queue message',
-  props<{ queue: Queue }>()
+  props<{ queue: Queue; entityName?: string }>()
 );
 
 export const archiveSelectedExperiments = createAction(

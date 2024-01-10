@@ -17,12 +17,12 @@
   >
     <button extra-buttons
       *ngIf="!model?.ready && model?.company?.id && !isSharedAndNotOwner"
-      class="btn btn-dark-fill terminal me-3 flex-1"
+      class="btn btn-dark-fill terminal flex-1"
       (click)="prototext.editModeChanged(true)"
     >EDIT</button>
     <button extra-buttons
             *ngIf="!model?.ready && model?.company?.id && !isSharedAndNotOwner && design"
-            class="btn btn-dark-fill terminal me-3 flex-1"
+            class="btn btn-dark-fill terminal flex-1"
             (click)="clearPrototext()"
     ><i class="p-1 fa fa-trash"></i>CLEAR</button>
   </sm-scroll-textarea>

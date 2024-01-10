@@ -10,12 +10,20 @@
  * Do not edit the class manually.
  */
 
+import { MetricVariants } from '././metricVariants';
 
 
 export interface EventsGetTaskSingleValueMetricsRequest {
-    /**
-     * List of task Task IDs
-     */
-    tasks: Array<string>;
-    model_events: boolean;
+  /**
+   * List of task Task IDs
+   */
+  tasks: Array<string>;
+  /**
+   * If set then the retrieving model events. Otherwise task events
+   */
+  model_events?: boolean;
+  /**
+   * List of metrics and variants
+   */
+  metrics?: Array<MetricVariants>;
 }

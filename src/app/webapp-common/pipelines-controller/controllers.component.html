@@ -7,7 +7,7 @@
   [minimizedView]="minimizedView"
   [isMetricsLoading]="metricLoading$ | async"
   [tableFilters]="tableFilters$ | async"
-  [tableMode]="firstExperiment && (tableMode$ | async)"
+  [tableMode]="firstExperiment ? (tableMode$ | async) : 'table'"
   [rippleEffect]="tableModeAwareness$ | async"
   [addButtonTemplate]="addButton"
   [noData]="!((experiments$ | async)?.length > 0)"
@@ -75,6 +75,8 @@
         [contextMenuActive]="contextMenuActive"
         [entityType]="entityType"
         [hasExperimentUpdate]="selectedExperimentsHasUpdate$ | async"
+        [cardsCollapsed]="cardsCollapsed$ | async"
+        [cardHeight]="112"
         (experimentSelectionChanged)="experimentSelectionChanged($event)"
         (experimentsSelectionChanged)="experimentsSelectionChanged($event)"
         (sortedChanged)="sortedChanged($event)"
@@ -87,6 +89,7 @@
         (openContextMenu)="onContextMenuOpen($event)"
         (removeTag)="removeTag($event)"
         (clearAllFilters)="clearTableFiltersHandler($event)"
+        (cardsCollapsedChanged)="cardsCollapsedToggle()"
       >
       </sm-experiments-table>
     </as-split-area>

@@ -42,6 +42,7 @@
   <sm-select-metric-for-custom-col *ngIf="customColumnMode === customColumnModeEnum.Metrics"
                                    [tableCols]="tableCols"
                                    [metricVariants]="metricVariants"
+                                   [skipValueType]="skipValueType"
                                    (goBack)="setCustomColumnMode(customColumnModeEnum.Standard)"
                                    (selectedMetricToShow)="selectedMetricToShow.emit($event)">
   </sm-select-metric-for-custom-col>

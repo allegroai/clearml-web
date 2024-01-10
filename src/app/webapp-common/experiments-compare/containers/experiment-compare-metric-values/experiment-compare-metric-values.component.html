@@ -4,9 +4,9 @@
     <div class="list-container mt-3">
       <sm-selectable-grouped-filter-list
           [list]="metricVariantList"
-          [checkedList]="settings.hiddenMetricsScalar"
+          [checkedList]="settings.selectedMetricsScalar"
           [searchTerm]="listSearchTerm"
-          (hiddenChanged)="hiddenListChanged($event)"
+          (hiddenChanged)="selectedMetricsChanged($event)"
           (searchTermChanged)="searchTermChanged($event)"
       >
       </sm-selectable-grouped-filter-list>

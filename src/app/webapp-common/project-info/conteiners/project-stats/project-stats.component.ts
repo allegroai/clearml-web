@@ -7,30 +7,30 @@ import {
   OnInit,
   ViewChild
 } from '@angular/core';
-import {Observable} from 'rxjs/internal/Observable';
-import {selectMetricVariants} from '~/features/experiments/reducers';
 import {Store} from '@ngrx/store';
-import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 import {getCustomMetrics} from '@common/experiments/actions/common-experiments-view.actions';
-import {fetchGraphData, setMetricVariant, toggleState} from '@common/core/actions/projects.actions';
+import {fetchGraphData, setMetricVariant} from '@common/core/actions/projects.actions';
 import {
-  ProjectStatsGraphData,
-  selectGraphData, selectGraphHiddenStates,
-  selectSelectedMetricVariantForCurrProject
+  ScatterPlotPoint,
+  ScatterPlotSeries, selectGraphData,
+  selectSelectedMetricVariantForCurrProject, selectSelectedProjectId
 } from '@common/core/reducers/projects.reducer';
 import {Project} from '~/business-logic/model/projects/project';
-import {debounceTime, filter, skip, take, tap} from 'rxjs/operators';
+import {debounceTime, filter, skip, switchMap, take, tap} from 'rxjs/operators';
 import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
-import {combineLatest, Subscription} from 'rxjs';
-import {createMetricColumn, MetricColumn} from '@common/shared/utils/tableParamEncode';
+import {Subscription} from 'rxjs';
 import {Router} from '@angular/router';
 import {MatDialog} from '@angular/material/dialog';
 import {
+  MetricForStatsData,
   MetricForStatsDialogComponent
 } from '@common/project-info/conteiners/metric-for-stats-dialog/metric-for-stats-dialog.component';
-import {MetricValueType} from '@common/experiments-compare/experiments-compare.constants';
 import {ScatterPlotComponent} from '@common/shared/components/charts/scatter-plot/scatter-plot.component';
-import { TinyColor } from '@ctrl/tinycolor';
+import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
+import {createMetricColumn, MetricColumn} from '@common/shared/utils/tableParamEncode';
+import {concatLatestFrom} from '@ngrx/effects';
+import {presetColors} from '@common/shared/ui-components/inputs/color-picker/color-picker-wrapper.component';
+import {selectMetricVariants} from '@common/experiments/reducers';
 
 @Component({
   selector: 'sm-project-stats',
@@ -41,11 +41,10 @@ import { TinyColor } from '@ctrl/tinycolor';
 export class ProjectStatsComponent implements OnInit, OnDestroy {
   private _project: Project;
 
-  public metricVariants$: Observable<MetricVariantResult[]>;
-  public selectedVariant: MetricColumn;
+  public selectedVariants: ISmCol[];
   public colors: string[];
   public metricVariantSelection = [];
-  public graphData = null as ProjectStatsGraphData[];
+  public graphData = null as ScatterPlotSeries[];
   public loading = true;
   public gotOptions;
   public variantDisplay: string = 'Select Metric & Variant';
@@ -55,7 +54,7 @@ export class ProjectStatsComponent implements OnInit, OnDestroy {
     {label: 'Published', type: TaskStatusEnum.Published},
     {label: 'Failed', type: TaskStatusEnum.Failed},
     {label: 'Running', type: TaskStatusEnum.InProgress}
-  ] as {label: string; type: TaskStatusEnum; color?: string}[];
+  ] as {label: string; type: string; color?: string}[];
 
   @Input() set project(proj: Project) {
     if (proj) {
@@ -74,87 +73,117 @@ export class ProjectStatsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.sub.add(this.store.select(selectSelectedMetricVariantForCurrProject)
-      .subscribe(data => {
-        this.selectedVariant = data;
-        this.variantDisplay = data && (data?.metric + ' \u203A ' +
-          data.variant + ' \u203A ' + this.getValueName(this.selectedVariant.valueType));
+      .pipe(concatLatestFrom(() => this.store.select(selectSelectedProjectId)))
+      .subscribe(([cols, projectId]) => {
+        if (cols && !Array.isArray(cols)) {
+          cols = [createMetricColumn(cols as unknown as MetricColumn, projectId)];
+        }
+        this.selectedVariants = cols;
+        if (cols?.length === 1) {
+          const data = cols[0];
+          this.variantDisplay = data?.header;
+        } else if (cols?.length > 1) {
+          this.variantDisplay = 'ADD METRICS'
+        }
         this.loading = true;
         this.store.dispatch(fetchGraphData());
-        this.metricVariantSelection = data ? [createMetricColumn(data, this.project.id)] : [];
+        this.metricVariantSelection = cols ?? [];
         this.cdr.detectChanges();
       })
     );
 
-    this.sub.add(combineLatest([
-      this.store.select(selectGraphData),
-      this.store.select(selectGraphHiddenStates)
-      ])
+    this.sub.add(this.store.select(selectGraphData)
         .pipe(
           debounceTime(0),
-          filter(([values]) => !!values)
+          filter((values) => !!values)
         )
-        .subscribe(([values, hidden]) => {
-          const filteredValues = values.filter(val => !hidden?.[val.status]);
-          this.colors = filteredValues.map(val => this.statusToColor(val.status, hidden?.[val.status]));
-          this.states = this.states.map(state => ({...state, color: this.statusToColor(state.type, hidden?.[state.type])}));
+        .subscribe(values => {
+          let grouped: {[group: string]: ScatterPlotPoint[]};
+          if (this.selectedVariants.length > 1) {
+            grouped = values.reduce((acc, point) => {
+              this.selectedVariants.find(v => v.id === point.variant);
+              if(acc[point.variant]) {
+                acc[point.variant].push(point);
+              } else {
+                acc[point.variant] = [point];
+              }
+              return acc;
+            }, {});
+          } else {
+            grouped = values.reduce((acc, point) => {
+              const status = [TaskStatusEnum.Stopped, TaskStatusEnum.Completed].includes(point.status as TaskStatusEnum) ? 'Completed or Stopped' : point.status;
+              if(acc[status]) {
+                acc[status].push(point);
+              } else {
+                acc[status] = [point];
+              }
+              return acc;
+            }, {});
+          }
           this.loading = false;
-          this.graphData = filteredValues
-            .map(val => ({
-            ...val,
-            title: val.name,
-            name: `Created By ${val.user}, Finished ${new Date(val.x).toLocaleString()}`,
-            value: val.y
-          }));
-          this.cdr.detectChanges();
-          this.plot?.onResize();
+          this.graphData = Object.entries(grouped).map(([group, points]) => ({
+            ...(this.selectedVariants.length > 1 ? {
+              label: this.selectedVariants.find(v => v.id === group).header,
+              backgroundColor: this.variantToColor(group)
+            } : {
+              label: group,
+              backgroundColor: this.statusToColor(group),
+            }),
+            data: points.map(point => ({
+              x: point.x,
+              y: point.y,
+              id: point.id,
+              name: point.name,
+              description: `Created By ${point.user}, Finished ${new Date(point.x).toLocaleString()}`,
+            })),
+          } as ScatterPlotSeries));
+          this.cdr.markForCheck();
         })
     );
   }
 
-  selectedMetricToShow(
-    event: { variant: MetricVariantResult; addCol: boolean; valueType: MetricValueType },
-  ) {
-    if (event === null) {
-      this.store.dispatch(setMetricVariant({projectId: this.project.id, col:null}));
-      return;
+  selectedMetricToShow(selection: ISmCol[]) {
+    if (selection === null || selection?.length === 0) {
+      this.store.dispatch(setMetricVariant({projectId: this.project.id, cols: null}));
+    } else {
+      this.store.dispatch(setMetricVariant({projectId: this.project.id, cols: selection}));
     }
-    if (!event?.valueType) {
-      return;
-    }
-
-    const col = {
-      metricHash: event.variant.metric_hash,
-      variantHash: event.variant.variant_hash,
-      valueType: event.valueType,
-      metric: event.variant.metric,
-      variant: event.variant.variant
-    };
-    this.store.dispatch(setMetricVariant({projectId: this.project.id, col}));
   }
 
   selectVariant() {
     if(!this.gotOptions) {
       this.gotOptions = false;
-      this.store.dispatch(getCustomMetrics());
+      this.store.dispatch(getCustomMetrics({}));
     }
     this.store.select(selectMetricVariants)
       .pipe(
         skip(this.gotOptions ? 0 : 1),
         tap(() => this.gotOptions !== undefined && (this.gotOptions = true)),
-        take(1)
+        take(1),
+        switchMap(variants => this.dialog.open<MetricForStatsDialogComponent, MetricForStatsData, ISmCol[]>(
+            MetricForStatsDialogComponent,
+            { data: {
+                variants,
+                metricVariantSelection: this.metricVariantSelection,
+                projectId: this.project.id
+              }}
+          ).afterClosed()
+        ),
+        filter(selection => !!selection)
       )
-      .subscribe(variants => this.dialog.open(
-          MetricForStatsDialogComponent,
-          {data: {variants, metricVariantSelection: this.metricVariantSelection}}
-        ).afterClosed().subscribe(selection => this.selectedMetricToShow(selection))
-      );
+      .subscribe(selection => this.selectedMetricToShow(selection));
   }
 
-  public statusToColor(status: string, hidden: boolean) {
+  public variantToColor(variantName: string) {
+    const index = this.selectedVariants.findIndex(v => v.id === variantName);
+    return presetColors[index % presetColors.length];
+  }
+
+  public statusToColor(status: string) {
     let color: string;
+
     switch (status) {
-      case TaskStatusEnum.Completed:
-      case TaskStatusEnum.Stopped:
+      case 'Completed or Stopped':
         color = '#009aff';
         break;
       case TaskStatusEnum.Failed:
@@ -170,9 +199,6 @@ export class ProjectStatsComponent implements OnInit, OnDestroy {
         color = '#50e3c2';
         break;
     }
-    if (hidden) {
-      return new TinyColor(color).darken(30).toHexString();
-    }
     return color;
   }
 
@@ -180,39 +206,13 @@ export class ProjectStatsComponent implements OnInit, OnDestroy {
     this.sub.unsubscribe();
   }
 
-  // private typeToIcon(type: string) {
-  //  switch (type) {
-  //    case TaskTypeEnum.Training:
-  //      return '\uea33';
-  //    case TaskTypeEnum.Testing:
-  //      return '\ueA32';
-  //    case TaskTypeEnum.DataProcessing:
-  //      return '\ueA2c';
-  //    case TaskTypeEnum.Qc:
-  //      return '\ueA30';
-  //    case TaskTypeEnum.Service:
-  //      return '\ueA31';
-  //    case TaskTypeEnum.Optimizer:
-  //      return '\ueA2F';
-  //    case TaskTypeEnum.Monitor:
-  //      return '\ueA2E';
-  //    case TaskTypeEnum.Inference:
-  //      return '\ueA2D';
-  //    case TaskTypeEnum.Application:
-  //      return '\ueA29';
-  //    case TaskTypeEnum.Controller:
-  //      return '\ueA2A';
-  //    default:
-  //      return '\ueA2B';
-  //  }
-  // }
   trackByType = (index: number, state) => state.type;
 
-  experimentClicked(event: ProjectStatsGraphData) {
+  experimentClicked(event: ScatterPlotPoint) {
     this.router.navigateByUrl(`/projects/${this.project.id}/experiments/${event.id}`);
   }
 
-  getValueName(valueType: MetricValueType) {
+  getValueName(valueType: string) {
     switch (valueType) {
       case 'max_value':
         return 'Max';
@@ -220,16 +220,6 @@ export class ProjectStatsComponent implements OnInit, OnDestroy {
         return 'Min';
       default:
         return 'Last';
-    }
-  }
-
-  toggleState(state: TaskStatusEnum) {
-    this.loading = true;
-    this.graphData = null;
-    this.cdr.detectChanges();
-    this.store.dispatch(toggleState({state}));
-    if(state === TaskStatusEnum.Completed) {
-      this.store.dispatch(toggleState({state: TaskStatusEnum.Stopped}));
     }
   }
 }

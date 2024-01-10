@@ -19,13 +19,9 @@
     }
 
     .line-chart-container {
-      height: calc(100% - 36px);
+      height: calc(100% - 48px);
       position: relative;
       z-index: 500;
-
-      sm-line-chart {
-        height: 100%;
-      }
     }
 
     .header {
@@ -34,6 +30,7 @@
       align-items: center;
       width: 100%;
       white-space: nowrap;
+      margin-bottom: 12px;
 
       .title {
         display: flex;

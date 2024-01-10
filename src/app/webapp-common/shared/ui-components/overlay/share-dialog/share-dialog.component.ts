@@ -5,11 +5,24 @@ import {addMessage} from '@common/core/actions/layout.actions';
 import {Store} from '@ngrx/store';
 import {shareSelectedExperiments} from '@common/experiments/actions/common-experiments-menu.actions';
 import {MESSAGES_SEVERITY} from '@common/constants';
+import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
+import {ClipboardModule} from 'ngx-clipboard';
+import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
+import {SaferPipe} from '@common/shared/pipes/safe.pipe';
+import {NgIf} from '@angular/common';
 
 @Component({
   selector: 'sm-share-dialog',
   templateUrl: './share-dialog.component.html',
-  styleUrls: ['./share-dialog.component.scss']
+  styleUrls: ['./share-dialog.component.scss'],
+  standalone: true,
+  imports: [
+    DialogTemplateComponent,
+    ClipboardModule,
+    ClickStopPropagationDirective,
+    SaferPipe,
+    NgIf
+  ]
 })
 export class ShareDialogComponent {
 
@@ -22,7 +35,7 @@ export class ShareDialogComponent {
   shared: boolean = false;
   public sharedSubtitle: string;
   public privateSubtitle: string;
-  private task: string;
+  private readonly task: string;
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: IShareDialogConfig,
               public dialogRef: MatDialogRef<ShareDialogComponent>,

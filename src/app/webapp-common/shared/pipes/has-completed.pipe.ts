@@ -2,7 +2,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { TaskStatusEnum } from '~/business-logic/model/tasks/taskStatusEnum';
 
 @Pipe({
-  name: 'hasCompleted'
+  name: 'hasCompleted',
+  standalone: true
 })
 export class HasCompletedPipe implements PipeTransform {
 

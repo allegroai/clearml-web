@@ -4,6 +4,9 @@
 $output-tabs-height: 64px;
 
 :host {
+  display: block;
+  height: 100%;
+
   .experiment-output-container {
     height: 100%;
     &.minimized{

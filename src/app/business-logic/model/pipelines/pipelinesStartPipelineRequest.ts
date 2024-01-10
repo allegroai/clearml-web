@@ -26,4 +26,5 @@ export interface PipelinesStartPipelineRequest {
      * Task arguments, name/value to be placed in the hyperparameters Args section
      */
     args?: Array<PipelinesStartPipelineRequestArgs>;
+    verify_watched_queue?: boolean;
 }

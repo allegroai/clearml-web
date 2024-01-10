@@ -1,16 +1,12 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input} from '@angular/core';
 
 @Component({
   selector: 'sm-compare-footer',
   templateUrl: './compare-footer.component.html',
-  styleUrls: ['./compare-footer.component.scss']
+  styleUrls: ['./compare-footer.component.scss'],
+  standalone: true,
 })
-export class CompareFooterComponent implements OnInit {
+export class CompareFooterComponent {
 
   @Input() visible = false;
-  constructor() { }
-
-  ngOnInit() {
-  }
-
 }

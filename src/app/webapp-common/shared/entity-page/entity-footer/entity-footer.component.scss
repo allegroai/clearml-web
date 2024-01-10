@@ -1,6 +1,13 @@
 @import "variables";
 
 :host {
+  position: fixed;
+  left: 0;
+  height: 48px;
+  width: 100%;
+  display: block;
+  background-color: #3a425c;
+
   .selected-number {
     padding-left: 12px;
   }

@@ -1,8 +1,9 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {CustomColumnMode} from '@common/experiments/shared/common-experiments.const';
-import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
-import {MetricValueType} from '@common/experiments-compare/experiments-compare.constants';
+import {
+  SelectionEvent
+} from '@common/experiments/dumb/select-metric-for-custom-col/select-metric-for-custom-col.component';
 
 @Component({
   selector: 'sm-model-custom-cols-menu',
@@ -18,15 +19,12 @@ export class ModelCustomColsMenuComponent {
   @Input() disabled: boolean;
   @Input() metadataKeys: string[];
   @Input() metricVariants;
+  @Input() skipValueType = false;
   @Output() removeColFromList = new EventEmitter<ISmCol['id']>();
   @Output() selectedTableColsChanged = new EventEmitter();
   @Output() selectMetadataKeysActiveChanged = new EventEmitter<{ customMode: CustomColumnMode }>();
   @Output() addOrRemoveMetadataKeyFromColumns = new EventEmitter<{ key: string; show: boolean }>();
-  @Output() selectedMetricToShow = new EventEmitter<{
-    variant: MetricVariantResult;
-    addCol: boolean;
-    valueType: MetricValueType;
-  }>();
+  @Output() selectedMetricToShow = new EventEmitter<SelectionEvent>();
 
   selectMetadataKeys(mode: CustomColumnMode) {
     this.selectMetadataKeysActiveChanged.emit({customMode: mode});

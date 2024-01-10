@@ -1,10 +1,42 @@
-import {ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges} from '@angular/core';
-import {combineLatest, Observable, Subscription} from 'rxjs';
-import {Store} from '@ngrx/store';
-import {selectS3BucketCredentials} from '../core/reducers/common-auth-reducer';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  Output,
+  SimpleChanges
+} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
+import {ActivatedRoute, Params} from '@angular/router';
+import {RefreshService} from '@common/core/services/refresh.service';
+import {DebugSampleEvent, DebugSamples} from '@common/debug-images/debug-images-types';
+import {LIMITED_VIEW_LIMIT} from '@common/experiments-compare/experiments-compare.constants';
+import {isGoogleCloudUrl} from '@common/settings/admin/base-admin-utils';
+import {selectBeginningOfTime} from '@common/shared/debug-sample/debug-sample.reducer';
+import {concatLatestFrom} from '@ngrx/effects';
+import {Store} from '@ngrx/store';
+import {isEqual} from 'lodash-es';
+import {combineLatest, Observable, Subscription} from 'rxjs';
+import {distinctUntilChanged, filter, map, take, withLatestFrom} from 'rxjs/operators';
+import {EventsDebugImagesResponse} from '~/business-logic/model/events/eventsDebugImagesResponse';
+import {TaskMetric} from '~/business-logic/model/events/taskMetric';
+import {Task} from '~/business-logic/model/tasks/task';
+import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
+import {selectSelectedExperiment} from '~/features/experiments/reducers';
+import {ReportCodeEmbedService} from '~/shared/services/report-code-embed.service';
+import {getSignedUrl} from '../core/actions/common-auth.actions';
+import {addMessage} from '../core/actions/layout.actions';
+import {selectS3BucketCredentials} from '../core/reducers/common-auth-reducer';
+import {selectRouterParams} from '../core/reducers/router-reducer';
+import {ImageViewerComponent} from '../shared/debug-sample/image-viewer/image-viewer.component';
 import * as  debugActions from './debug-images-actions';
 import {fetchExperiments, getDebugImagesMetrics, resetDebugImages} from './debug-images-actions';
+import {ALL_IMAGES} from './debug-images-effects';
 import {
   ITaskOptionalMetrics,
   selectDebugImages,
@@ -14,31 +46,12 @@ import {
   selectTaskNames,
   selectTimeIsNow
 } from './debug-images-reducer';
-import {selectRouterParams} from '../core/reducers/router-reducer';
-import {distinctUntilChanged, filter, map, withLatestFrom} from 'rxjs/operators';
-import {Task} from '~/business-logic/model/tasks/task';
-import {ActivatedRoute, Params} from '@angular/router';
-import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
-import {ImageViewerComponent} from '../shared/debug-sample/image-viewer/image-viewer.component';
-import {selectSelectedExperiment} from '~/features/experiments/reducers';
-import {TaskMetric} from '~/business-logic/model/events/taskMetric';
-import {isEqual} from 'lodash-es';
-import {ALL_IMAGES} from './debug-images-effects';
-import {getSignedUrl, removeSignedUrl} from '../core/actions/common-auth.actions';
-import {addMessage} from '../core/actions/layout.actions';
-import {RefreshService} from '@common/core/services/refresh.service';
-import {selectBeginningOfTime} from '@common/shared/debug-sample/debug-sample.reducer';
-import {LIMITED_VIEW_LIMIT} from '@common/experiments-compare/experiments-compare.constants';
-import {ReportCodeEmbedService} from '~/shared/services/report-code-embed.service';
-import {EventsDebugImagesResponse} from '~/business-logic/model/events/eventsDebugImagesResponse';
-import {DebugSampleEvent, DebugSamples} from '@common/debug-images/debug-images-types';
-import {concatLatestFrom} from '@ngrx/effects';
-import {isGoogleCloudUrl} from '@common/settings/admin/base-admin-utils';
 
 @Component({
   selector: 'sm-debug-images',
   templateUrl: './debug-images.component.html',
   styleUrls: ['./debug-images.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DebugImagesComponent implements OnInit, OnDestroy, OnChanges {
 
@@ -69,10 +82,6 @@ export class DebugImagesComponent implements OnInit, OnDestroy, OnChanges {
   public optionalMetrics$: Observable<ITaskOptionalMetrics[]>;
   public optionalMetrics: { [experimentId: string]: string };
   public selectedMetrics: { [taskId: string]: string } = {};
-  public beginningOfTime: boolean;
-  private beginningOfTimeSubscription: Subscription;
-  public timeIsNow: boolean;
-  private timeIsNowSubscription: Subscription;
   minimized: boolean;
   readonly allImages = ALL_IMAGES;
   private selectedMetric: string;
@@ -159,15 +168,6 @@ export class DebugImagesComponent implements OnInit, OnDestroy, OnChanges {
     const multipleExperiments = !!this.activeRoute.snapshot.routeConfig?.data?.multiple;
     this.minimized = this.activeRoute.snapshot.routeConfig?.data?.minimized;
 
-    this.beginningOfTimeSubscription = this.beginningOfTime$.subscribe(beginningOfTime => {
-      this.beginningOfTime = beginningOfTime;
-    });
-
-    this.timeIsNowSubscription = this.timeIsNow$.subscribe(timeIsNow => {
-      this.timeIsNow = timeIsNow;
-    });
-
-
     if (multipleExperiments) {
       this.routerParamsSubscription = this.routerParams$
         .subscribe(params => {
@@ -175,14 +175,16 @@ export class DebugImagesComponent implements OnInit, OnDestroy, OnChanges {
           this.experimentIds = (params.ids ? params.ids.split(',') : params.experimentId.split(','));
           this.store.dispatch(getDebugImagesMetrics({tasks: this.experimentIds.slice(0, LIMITED_VIEW_LIMIT)}));
           this.store.dispatch(fetchExperiments({tasks: this.experimentIds.slice(0, LIMITED_VIEW_LIMIT)}));
+          this.changeDetection.markForCheck();
         });
 
       this.taskNamesSubscription = this.tasks$
         .pipe(
-          filter(tasks => tasks?.length > 0)
+          filter(tasks => tasks?.length > 0),
+          withLatestFrom(this.beginningOfTime$)
         )
-        .subscribe((tasks) => {
-          if (this.isTaskRunning(tasks) && (Object.keys(this.debugImages || {}).length > 0 || this.beginningOfTime[this.experimentIds[0]])) {
+        .subscribe(([tasks, beginningOfTime]) => {
+          if (this.isTaskRunning(tasks) && (Object.keys(this.debugImages || {}).length > 0 || beginningOfTime[this.experimentIds[0]])) {
             this.store.dispatch(getDebugImagesMetrics({tasks: this.experimentIds}));
           }
           this.experiments = tasks;
@@ -194,7 +196,7 @@ export class DebugImagesComponent implements OnInit, OnDestroy, OnChanges {
               this.modifiedExperimentsNames[task.id] = Object.values(this.experimentNames).filter(name => name === task.name).length > 1 ? `${task.name}.${task.id.slice(0, 6)}` : task.name;
             }
           );
-          this.changeDetection.detectChanges();
+          this.changeDetection.markForCheck();
         });
 
     } else {
@@ -209,6 +211,7 @@ export class DebugImagesComponent implements OnInit, OnDestroy, OnChanges {
           this.experimentIds = [experiment.id];
           this.selectedMetrics[experiment.id] = metricForTask[experiment.id] ;
           this.store.dispatch(getDebugImagesMetrics({tasks: this.experimentIds}));
+          this.changeDetection.markForCheck();
         });
     }
 
@@ -236,25 +239,26 @@ export class DebugImagesComponent implements OnInit, OnDestroy, OnChanges {
         });
       });
 
-    this.optionalMetricsSubscription = this.optionalMetrics$.pipe(concatLatestFrom(()=> [this.store.select(selectSelectedMetricForTask)]))
+    this.optionalMetricsSubscription = this.optionalMetrics$
+      .pipe(concatLatestFrom(() => [this.store.select(selectSelectedMetricForTask)]))
       .subscribe(([optionalMetrics, selectedMetricForTask ]) => {
-      const optionalMetricsDic = {};
-      optionalMetrics.forEach(experimentMetrics => optionalMetricsDic[experimentMetrics.task] = experimentMetrics.metrics);
-      if ((!isEqual(this.optionalMetrics, optionalMetricsDic)) && optionalMetrics.length > 0) {
-        this.optionalMetrics = optionalMetricsDic;
-        if (!this.selectedMetric || !optionalMetrics?.[0].metrics.includes(this.selectedMetric)) {
-          optionalMetrics.forEach(optionalMetric => {
-            optionalMetric.metrics[0] && this.store.dispatch(debugActions.setSelectedMetric({
-              payload: {
-                task: optionalMetric.task,
-                metric: selectedMetricForTask[optionalMetric.task] ?? optionalMetric.metrics[0]
-              }
-            }));
-          });
+        const optionalMetricsDic = {};
+        optionalMetrics.forEach(experimentMetrics => optionalMetricsDic[experimentMetrics.task] = experimentMetrics.metrics);
+        if ((!isEqual(this.optionalMetrics, optionalMetricsDic)) && optionalMetrics.length > 0) {
+          this.optionalMetrics = optionalMetricsDic;
+          if (!this.selectedMetric || !optionalMetrics?.[0].metrics.includes(this.selectedMetric)) {
+            optionalMetrics.forEach(optionalMetric => {
+              optionalMetric.metrics[0] && this.store.dispatch(debugActions.setSelectedMetric({
+                payload: {
+                  task: optionalMetric.task,
+                  metric: selectedMetricForTask[optionalMetric.task] ?? optionalMetric.metrics[0]
+                }
+              }));
+            });
+          }
+          this.changeDetection.markForCheck();
         }
-        this.changeDetection.detectChanges();
-      }
-    });
+      });
   }
 
 
@@ -265,16 +269,13 @@ export class DebugImagesComponent implements OnInit, OnDestroy, OnChanges {
     this.refreshingSubscription?.unsubscribe();
     this.optionalMetricsSubscription?.unsubscribe();
     this.debugImagesSubscription?.unsubscribe();
-    this.beginningOfTimeSubscription?.unsubscribe();
-    this.timeIsNowSubscription?.unsubscribe();
     this.store.dispatch(resetDebugImages());
   }
 
   public urlError({frame}: { frame: DebugSampleEvent; experimentId: string }) {
     const url = frame.url;
     if (isGoogleCloudUrl(url)) {
-      this.store.dispatch(removeSignedUrl({url}));
-      this.store.dispatch(getSignedUrl({url}));
+      this.store.dispatch(getSignedUrl({url, config: {error: true}}));
     }
     // this.adminService.checkImgUrl(frame.oldSrc || frame.src);
   }
@@ -321,20 +322,22 @@ export class DebugImagesComponent implements OnInit, OnDestroy, OnChanges {
 
   nextBatch(taskMetric: TaskMetric) {
     if (this.bindNavigationMode) {
-      this.experimentIds.forEach(experimentId => {
-        if (!this.beginningOfTime[experimentId]) {
-          this.store.dispatch(debugActions.getNextBatch({
-            payload: {
-              task: experimentId,
-              metric: this.selectedMetrics[experimentId]
+      this.beginningOfTime$
+        .pipe(take(1))
+        .subscribe(beginningOfTime => {
+          this.experimentIds.forEach(experimentId => {
+            if (!beginningOfTime[experimentId]) {
+              this.store.dispatch(debugActions.getNextBatch({
+                payload: {
+                  task: experimentId,
+                  metric: this.selectedMetrics[experimentId]
+                }
+              }));
             }
-          }));
-        }
-      });
+          });
+        });
     } else {
-      if (!this.beginningOfTime[taskMetric.task]) {
-        this.store.dispatch(debugActions.getNextBatch({payload: taskMetric}));
-      }
+      this.store.dispatch(debugActions.getNextBatch({payload: taskMetric}));
     }
   }
 

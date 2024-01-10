@@ -3,7 +3,7 @@
 
 @font-face {
   font-family: '#{$icomoon-font-family}';
-  src: url('./#{$icomoon-font-family}.ttf?wj7mzq') format('truetype');
+  src: url('./#{$icomoon-font-family}.ttf?1skk4q') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -22,6 +22,13 @@
   /* Better Font Rendering =========== */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.al-ico-charts-view:before {
+  content: "\e9f9";
+}
+.al-ico-compact-view:before {
+  content: "\e9fa";
 }
 .al-ico-tune {
   &:before {

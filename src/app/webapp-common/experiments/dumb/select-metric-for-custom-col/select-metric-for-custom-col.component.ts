@@ -3,6 +3,11 @@ import {MetricVariantResult} from '~/business-logic/model/projects/metricVariant
 import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {MetricValueType} from '@common/experiments-compare/experiments-compare.constants';
 
+export interface SelectionEvent {
+  variant: MetricVariantResult;
+  addCol: boolean;
+  valueType: MetricValueType;
+}
 
 @Component({
   selector   : 'sm-select-metric-for-custom-col',
@@ -37,19 +42,16 @@ export class SelectMetricForCustomColComponent {
   @Input() set tableCols(tableCols) {
     this.metricsCols = {};
     tableCols.filter(tableCol => tableCol.metric_hash).forEach(tableCol => {
-      this.expandedMetrics[tableCol.metric_hash] = true;
+      this.expandedMetrics[tableCol.metric_hash] = this.expandedMetrics[tableCol.metric_hash] ?? true;
       this.metricsCols[tableCol.metric_hash + tableCol.variant_hash] ?
         this.metricsCols[tableCol.metric_hash + tableCol.variant_hash].push(tableCol.valueType) :
         this.metricsCols[tableCol.metric_hash + tableCol.variant_hash] = [tableCol.valueType];
     });
   }
-  @Input() multiSelect: boolean = true;
+  @Input() multiSelect = true;
+  @Input() skipValueType = false;
   @Output() getMetricsToDisplay  = new EventEmitter();
-  @Output() selectedMetricToShow = new EventEmitter<{
-    variant: MetricVariantResult;
-    addCol: boolean;
-    valueType: MetricValueType;
-  }>();
+  @Output() selectedMetricToShow = new EventEmitter<SelectionEvent>();
   @Output() goBack               = new EventEmitter();
 
   constructor(private changeDetectorRef: ChangeDetectorRef) {

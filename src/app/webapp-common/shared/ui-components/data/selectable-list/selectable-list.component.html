@@ -1,6 +1,6 @@
 <ul class="list">
   <li
-    *ngFor="let item of showList"
+    *ngFor="let item of showList; trackBy: trackByValue"
     class="item"
     [class.unchecked]="!item.visible"
     (click)="onItemSelect.emit(item.value)"

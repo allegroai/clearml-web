@@ -1,11 +1,15 @@
-import {Component, ElementRef} from '@angular/core';
+import {Component} from '@angular/core';
 import {ExperimentMenuComponent} from '@common/experiments/shared/components/experiment-menu/experiment-menu.component';
 import {selectionDisabledAbort, selectionDisabledContinue} from '@common/shared/entity-page/items.utils';
 import * as commonMenuActions from '@common/experiments/actions/common-experiments-menu.actions';
-import {RunPipelineControllerDialogComponent} from '../run-pipeline-controller-dialog/run-pipeline-controller-dialog.component';
+import {
+  RunPipelineControllerDialogComponent,
+  RunPipelineResult
+} from '../run-pipeline-controller-dialog/run-pipeline-controller-dialog.component';
 import {filter} from 'rxjs/operators';
 import {abortAllChildren} from '@common/experiments/actions/common-experiments-menu.actions';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
+import {ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
 
 
 @Component({
@@ -21,16 +25,17 @@ export class PipelineControllerMenuComponent extends ExperimentMenuComponent {
   }
 
   runPipelineController(runNew = false) {
-    const runPipelineDialog = this.dialog.open(RunPipelineControllerDialogComponent, {
+    this.dialog.open<RunPipelineControllerDialogComponent, {task: ISelectedExperiment}, RunPipelineResult>(RunPipelineControllerDialogComponent, {
       data: {task: runNew ? null : this._experiment}
-    });
-    runPipelineDialog.afterClosed().pipe(filter(res => !!res.confirmed)).subscribe((res) => {
-      this.store.dispatch(commonMenuActions.startPipeline({
-        task: res.task,
-        args: res.args,
-        queue: res.queue
-      }));
-    });
+    }).afterClosed()
+      .pipe(filter(res => !!res.confirmed))
+      .subscribe((res) => {
+        this.store.dispatch(commonMenuActions.startPipeline({
+          task: res.task,
+          args: res.args,
+          queue: res.queue
+        }));
+      });
   }
 
   continueController() {

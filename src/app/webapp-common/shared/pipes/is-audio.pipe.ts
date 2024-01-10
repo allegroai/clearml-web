@@ -2,7 +2,8 @@ import {Pipe, PipeTransform} from '@angular/core';
 import {last} from 'lodash-es';
 
 @Pipe({
-  name: 'isAudio'
+  name: 'isAudio',
+  standalone: true
 })
 export class IsAudioPipe implements PipeTransform {
   static audioExtensions = ['wav', 'mp3', 'flac', 'mid', 'au', 'ra', 'snd'];

@@ -4,13 +4,42 @@ import {CircleTypeEnum} from '~/shared/constants/non-common-consts';
 import {Project} from '~/business-logic/model/projects/project';
 import {ICONS} from '@common/constants';
 import {trackById} from '@common/shared/utils/forms-track-by';
+import {CdkFixedSizeVirtualScroll, CdkVirtualForOf, CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
+import {CardComponent} from '@common/shared/ui-components/panel/card/card.component';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {SaferPipe} from '@common/shared/pipes/safe.pipe';
+import {BreadcrumbsEllipsisPipe} from '@common/shared/pipes/breadcrumbs-ellipsis.pipe';
+import {InlineEditComponent} from '@common/shared/ui-components/inputs/inline-edit/inline-edit.component';
+import {
+  ShowTooltipIfEllipsisDirective
+} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {ProjectsSharedModule} from '~/features/projects/shared/projects-shared.module';
+import {CircleCounterComponent} from '@common/shared/ui-components/indicators/circle-counter/circle-counter.component';
+import {NgIf} from '@angular/common';
+import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 
 
 @Component({
   selector: 'sm-project-card',
   templateUrl: './project-card.component.html',
   styleUrls: ['./project-card.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CdkVirtualScrollViewport,
+    CardComponent,
+    TooltipDirective,
+    SaferPipe,
+    BreadcrumbsEllipsisPipe,
+    InlineEditComponent,
+    ShowTooltipIfEllipsisDirective,
+    ProjectsSharedModule,
+    CircleCounterComponent,
+    CdkFixedSizeVirtualScroll,
+    NgIf,
+    CdkVirtualForOf,
+    ClickStopPropagationDirective
+  ],
+  standalone: true
 })
 export class ProjectCardComponent {
   private _project: ProjectsGetAllResponseSingle;

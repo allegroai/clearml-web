@@ -9,7 +9,7 @@ export type TooltipTypeEnum = 'help' | 'validation' | 'error';
 @Directive({
   selector: '[smTooltip]',
   providers: [{ provide: MAT_TOOLTIP_SCROLL_STRATEGY, useFactory: scrollFactory, deps: [Overlay] },],
-  standalone: true
+  standalone: true,
 })
 export class TooltipDirective extends MatTooltip {
 

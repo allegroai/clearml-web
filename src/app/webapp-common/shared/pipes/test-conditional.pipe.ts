@@ -2,6 +2,7 @@ import {Pipe, PipeTransform} from '@angular/core';
 
 @Pipe({
   name: 'testConditional',
+  standalone: true
 })
 export class TestConditionalPipe implements PipeTransform {
 

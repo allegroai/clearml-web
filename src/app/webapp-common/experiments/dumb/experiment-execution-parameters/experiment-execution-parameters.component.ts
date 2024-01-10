@@ -20,6 +20,9 @@ import {Subscription} from 'rxjs';
 import {TableComponent} from '@common/shared/ui-components/data/table/table.component';
 import {isEqual} from 'lodash-es';
 import {MatInput} from '@angular/material/input';
+import {Store} from '@ngrx/store';
+import { navigateToDataset } from '@common/experiments/actions/common-experiments-info.actions';
+import {trackByIndex} from '@common/shared/utils/forms-track-by';
 
 export interface ExecutionParameter {
   name?: string;
@@ -43,7 +46,7 @@ export class ExperimentExecutionParametersComponent implements IExperimentInfoFo
   private clickedRow: number;
 
   public search = '';
-  public searchIndexList: {index: number; col: string}[];
+  public searchIndexList: {index: number; col: string}[] = [];
   public matchIndex = -1;
   public cols = [
     {id: 'name', style: {width: '300px'}},
@@ -89,6 +92,8 @@ export class ExperimentExecutionParametersComponent implements IExperimentInfoFo
   }
 
   @Input() searchedText: string;
+
+  constructor(private store: Store) {}
 
   ngAfterViewInit() {
     this.formContainersSub = this.formContainers.changes
@@ -185,4 +190,10 @@ export class ExperimentExecutionParametersComponent implements IExperimentInfoFo
     }
     window.setTimeout(()=> this.rows.get(index + 1)?.focus());
   }
+
+  navigateToDataset(datasetId: string) {
+    this.store.dispatch(navigateToDataset({datasetId}));
+  }
+
+  protected readonly trackByIndex = trackByIndex;
 }

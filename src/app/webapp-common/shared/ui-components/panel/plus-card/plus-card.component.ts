@@ -1,19 +1,18 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {CardComponent} from '@common/shared/ui-components/panel/card/card.component';
 
 @Component({
-  selector   : 'sm-plus-card',
+  selector: 'sm-plus-card',
   templateUrl: './plus-card.component.html',
-  styleUrls  : ['./plus-card.component.scss']
+  styleUrls: ['./plus-card.component.scss'],
+  standalone: true,
+  imports: [
+    CardComponent
+  ]
 })
-export class PlusCardComponent implements OnInit {
+export class PlusCardComponent {
   @Input() folder: boolean = false;
   @Output() plusCardClick = new EventEmitter();
-
-  constructor() {
-  }
-
-  ngOnInit() {
-  }
 
   public plusCardClicked() {
     this.plusCardClick.emit();

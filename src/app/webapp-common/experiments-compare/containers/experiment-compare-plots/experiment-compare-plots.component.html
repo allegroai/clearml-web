@@ -1,26 +1,28 @@
 <div class="d-flex h-100">
-  <div class="list-container">
+  <div *ngIf="!minimized" class="list-container">
     <sm-selectable-filter-list
       checkAllIcon="al-ico-show"
       placeholder="Find plots"
       [list]="graphList"
-      [checkedList]="settings.hiddenMetricsPlot"
+      [checkedList]="settings.selectedMetricsPlot"
       [searchTerm]="searchTerm$ | async"
       (itemSelect)="metricSelected($event)"
-      (hiddenChanged)="hiddenListChanged($event)"
+      (hiddenChanged)="selectedListChanged($event)"
       (searchTermChanged)="searchTermChanged($event)"
     >
     </sm-selectable-filter-list>
   </div>
-  <div class="graphs-container h-100">
+  <div class="graphs-container h-100 w-100">
     <sm-experiment-graphs
       [metrics]="graphs"
       [isCompare]="true"
       [isGroupGraphs]="true"
-      [hiddenList]="settings.hiddenMetricsPlot"
+      [hiddenList]="settings.selectedMetricsPlot"
       [exportForReport]="!modelsFeature"
+      [splitSize]="splitSize$ | async"
       (createEmbedCode)="createEmbedCode($event)"
       (resetGraphs)="resetMetrics()"
+      [hoverMode]="'x unified'"
     >
     </sm-experiment-graphs>
   </div>

@@ -88,7 +88,7 @@ export const BASE_ENV = {
   accountAdministration: false,
   useFilesProxy: false,
   legal: {TOULink: 'https://allegro.ai/legal-platform-tou/'},
-  plotlyURL: 'app/webapp-common/assets/plotly-2.16.1.min.js',
+  plotlyURL: 'app/webapp-common/assets/plotly-2.25.2.min.js',
   slackLink: 'https://joinslack.clear.ml',
   docsLink: 'https://clear.ml/docs',
   branding: {logo: 'assets/logo-white.svg?v=7', logoSmall: 'assets/c-logo.svg?=2'},

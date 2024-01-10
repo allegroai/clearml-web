@@ -70,6 +70,10 @@
       }
     }
   }
+
+  .al-icon.disabled {
+    pointer-events: none;
+  }
 }
 
 sm-debug-images-view {

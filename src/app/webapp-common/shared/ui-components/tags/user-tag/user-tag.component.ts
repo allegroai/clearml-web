@@ -1,5 +1,5 @@
 import {Component, Input, Output, EventEmitter} from '@angular/core';
-import {TagColor} from '../../../../core/actions/projects.actions';
+import {TagColor} from '@common/core/actions/projects.actions';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {NgIf} from '@angular/common';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
@@ -24,8 +24,6 @@ export class UserTagComponent {
   @Input() readonly: boolean = false;
   @Output() remove = new EventEmitter<string>();
   @Output() add = new EventEmitter<MouseEvent>();
-
-  constructor() { }
 
   onRemoveClicked(caption: string) {
     this.remove.emit(caption);

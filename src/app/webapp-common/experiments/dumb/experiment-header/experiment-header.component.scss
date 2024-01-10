@@ -46,5 +46,22 @@
     color: $blue-300;
   }
 
+  .al-ico-tune {
+    margin-right: 24px;
+    color: $blue-300;
+    cursor: pointer;
+
+
+    &.active,
+    &:hover {
+      color: $blue-200;
+
+    }
+  }
+
+  .compare-view-select {
+    margin-right: 24px;
+  }
+
 }
 

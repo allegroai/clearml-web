@@ -6,8 +6,16 @@
   gap: 24px;
   height: 100%;
 
+  .queues-header {
+    padding: 0 24px;
+
+    button {
+      margin-left: auto;
+    }
+  }
+
   sm-queue-stats {
-    margin: 0 48px;
+    margin: 0 24px;
   }
 }
 

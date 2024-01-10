@@ -9,7 +9,6 @@ import {StoreModule} from '@ngrx/store';
 import {appReducer} from './app.reducer';
 import {HttpClientModule} from '@angular/common/http';
 import {MatDialogModule} from '@angular/material/dialog';
-import {ChooseColorModule} from '@common/shared/ui-components/directives/choose-color/choose-color.module';
 import {SingleGraphModule} from '@common/shared/single-graph/single-graph.module';
 import {DebugSampleModule} from '@common/shared/debug-sample/debug-sample.module';
 import {ApiEventsService} from '~/business-logic/api-services/events.service';
@@ -35,7 +34,6 @@ if (!localStorage.getItem('_saved_state_')) {
         BrowserModule,
         HttpClientModule,
         MatDialogModule,
-        ChooseColorModule,
         SingleGraphModule,
         DebugSampleModule,
         ParallelCoordinatesGraphComponent,

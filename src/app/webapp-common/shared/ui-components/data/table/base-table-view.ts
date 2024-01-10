@@ -66,6 +66,7 @@ export abstract class BaseTableView implements AfterViewInit, OnDestroy {
   @Input() tableSortOrder: TableSortOrderEnum;
   @Input() minimizedView: boolean;
   @Input() hideSelectAll: boolean;
+  @Input() cardsCollapsed: boolean;
   @Input() set split(size: number) {
     this.table?.resize();
   }
@@ -74,6 +75,7 @@ export abstract class BaseTableView implements AfterViewInit, OnDestroy {
   @Output() filterSearchChanged = new EventEmitter() as EventEmitter<{ colId: string; value: {value: string; loadMore?: boolean} }>;
   @Output() filterChanged = new EventEmitter() as EventEmitter<{ col: ISmCol; value: any; andFilter?: boolean }>;
   @Output() columnsReordered = new EventEmitter<string[]>();
+  @Output() cardsCollapsedChanged = new EventEmitter();
   @ViewChildren(TableComponent) tables: QueryList<TableComponent<{id: string}>>;
 
   ngAfterViewInit(): void {

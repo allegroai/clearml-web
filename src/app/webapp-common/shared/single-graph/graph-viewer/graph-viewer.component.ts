@@ -2,8 +2,7 @@ import {AfterViewInit, ChangeDetectorRef, Component, HostListener, Inject, OnDes
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {ExtFrame, ExtLegend} from '../plotly-graph-base';
 import {Store} from '@ngrx/store';
-import {Observable} from 'rxjs/internal/Observable';
-import {Subject, Subscription} from 'rxjs';
+import {Observable, Subject, Subscription} from 'rxjs';
 import {cloneDeep} from 'lodash-es';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {MatSelectChange} from '@angular/material/select';
@@ -21,7 +20,7 @@ import {getSignedUrl} from '@common/core/actions/common-auth.actions';
 import {selectSignedUrl} from '@common/core/reducers/common-auth-reducer';
 import {AxisType} from 'plotly.js';
 import {SmoothTypeEnum, smoothTypeEnum} from '@common/shared/single-graph/single-graph.utils';
-import {SingleGraphComponent} from "@common/shared/single-graph/single-graph.component";
+import {ChartHoverModeEnum, SingleGraphComponent} from '@common/shared/single-graph/single-graph.component';
 
 export interface GraphViewerData {
   chart: ExtFrame;
@@ -30,10 +29,11 @@ export interface GraphViewerData {
   yAxisType?: AxisType;
   smoothWeight?: number;
   smoothType?: SmoothTypeEnum;
+  hoverMode?: ChartHoverModeEnum;
   darkTheme: boolean;
   isCompare: boolean;
   moveLegendToTitle: boolean;
-  embedFunction: (data: {xaxis: ScalarKeyEnum; domRect: DOMRect}) => null;
+  embedFunction: (data: {xaxis: ScalarKeyEnum; domRect: DOMRect}) => void;
   legendConfiguration: Partial<ExtLegend & { noTextWrap: boolean }>;
 }
 
@@ -58,12 +58,11 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
   public beginningOfTime$: Observable<boolean>;
   public endOfTime$: Observable<boolean>;
   public currentPlotEvent$: Observable<any>;
-  public currentPlotEvent: any;
   private iterationChanged$ = new Subject<number>();
   private isForward: boolean = true;
   private charts: ExtFrame[];
   public index: number = null;
-  public embedFunction: (data) => null;
+  public embedFunction: (data: {xaxis: ScalarKeyEnum; domRect: DOMRect}) => void;
   public yAxisType: AxisType;
   public showSmooth: boolean;
   protected readonly smoothTypeEnum = smoothTypeEnum;

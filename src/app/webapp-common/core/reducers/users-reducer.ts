@@ -1,4 +1,4 @@
-import {createSelector, on, ReducerTypes} from '@ngrx/store';
+import {ActionCreator, createSelector, on, ReducerTypes} from '@ngrx/store';
 import {
   logout,
   setFilterByUser,
@@ -13,6 +13,8 @@ import {
 import {
   OrganizationGetUserCompaniesResponseCompanies
 } from '~/business-logic/model/organization/organizationGetUserCompaniesResponseCompanies';
+import {GettingStarted} from '~/core/actions/users.action';
+import {UsersGetCurrentUserResponseSettings} from '~/business-logic/model/users/usersGetCurrentUserResponseSettings';
 
 export interface UsersState {
   currentUser: GetCurrentUserResponseUserObject;
@@ -22,8 +24,8 @@ export interface UsersState {
   workspaces: GetCurrentUserResponseUserObjectCompany[];
   showOnlyUserWork: boolean;
   serverVersions: { server: string; api: string };
-  gettingStarted: any;
-  settings: any;
+  gettingStarted: GettingStarted;
+  settings: UsersGetCurrentUserResponseSettings;
 }
 
 export const initUsers: UsersState = {
@@ -73,4 +75,4 @@ export const usersReducerFunctions = [
     return ({...state, showOnlyUserWork: action.showOnlyUserWork});
   }),
   on(setApiVersion, (state, action) => ({...state, serverVersions: action.serverVersions}))
-] as ReducerTypes<UsersState, any>[];
+] as ReducerTypes<UsersState, ActionCreator[]>[];

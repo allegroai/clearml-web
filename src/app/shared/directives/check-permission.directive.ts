@@ -1,11 +1,12 @@
 import {Directive, Input, OnDestroy, TemplateRef, ViewContainerRef} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {selectCurrentUser} from '../../webapp-common/core/reducers/users-reducer';
+import {selectCurrentUser} from '@common/core/reducers/users-reducer';
 import {Subscription} from 'rxjs';
-import {GetCurrentUserResponseUserObject} from "../../business-logic/model/users/getCurrentUserResponseUserObject";
+import {GetCurrentUserResponseUserObject} from '~/business-logic/model/users/getCurrentUserResponseUserObject';
 
 @Directive({
-  selector: '[smCheckPermission]'
+  selector: '[smCheckPermission]',
+  standalone: true,
 })
 export class CheckPermissionDirective implements OnDestroy{
   private userDataSubscription: Subscription;

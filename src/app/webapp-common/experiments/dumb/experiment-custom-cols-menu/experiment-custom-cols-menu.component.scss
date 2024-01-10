@@ -10,8 +10,7 @@
 .custom-column-buttons {
   display: flex;
   font-weight: 500;
-  color: $blue-400;
-  background: $faint-gray;
+  color: $purple;
   cursor: pointer;
   font-size: 14px;
 
@@ -24,10 +23,14 @@
     width: 50%;
     white-space: nowrap;
 
+    &.only-metrics {
+      width: 100%;
+    }
+
     .caption {
       margin-top: 4px;
     }
-    &:first-child {
+    &:first-child:not(.only-metrics) {
       border-right: 1px solid $blue-200;
     }
   }

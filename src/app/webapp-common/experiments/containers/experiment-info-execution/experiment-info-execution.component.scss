@@ -23,7 +23,6 @@
     text-decoration: none;
     color: $blue-400;
     font-size: 13px;
-    font-family: Heebo;
     font-weight: 500;
 
     &.selected {
@@ -117,5 +116,18 @@
         }
       }
     }
+  }
+  .terminal.toggle {
+    color: $neon-yellow;
+  }
+
+  .requirements-header {
+    display: flex;
+    gap: 24px;
+  }
+
+  .requirements-selector {
+    height: 20px;
+    margin-bottom: 24px;
   }
 }

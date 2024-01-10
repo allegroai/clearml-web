@@ -8,7 +8,8 @@ export const crossFieldsDuplicatesValidator = (control:AbstractControl, fieldNam
 
 @Directive({
   selector: '[smCrossFieldsDuplicatesValidator]',
-  providers: [{provide: NG_VALIDATORS, useExisting: ExistNameValidatorDirective, multi: true}]
+  providers: [{provide: NG_VALIDATORS, useExisting: ExistNameValidatorDirective, multi: true}],
+  standalone: true,
 })
 export class ExistNameValidatorDirective implements Validator {
   @Input('smCrossFieldsDuplicatesValidator') fieldsNames: string[] = [];

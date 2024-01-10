@@ -1,19 +1,13 @@
 import {
   Component,
-  OnInit,
   Input,
-  ChangeDetectionStrategy,
-  AfterViewInit,
-  OnDestroy,
-  ChangeDetectorRef
+  ChangeDetectionStrategy, ViewChild,
 } from '@angular/core';
-import {select, Selection} from 'd3-selection';
-import {ColorHashService} from '../../../services/color-hash/color-hash.service';
-import {donut} from 'britecharts';
-import {Store} from '@ngrx/store';
-import {BehaviorSubject, combineLatest, fromEvent, Subscription} from 'rxjs';
-import {debounceTime, filter, startWith} from 'rxjs/operators';
 import {trackById} from '@common/shared/utils/forms-track-by';
+import {ChartData, ChartEvent, ChartOptions, ChartType} from 'chart.js';
+import {BaseChartDirective, NgChartsModule} from 'ng2-charts';
+import {NgForOf} from '@angular/common';
+import {ChooseColorModule} from '@common/shared/ui-components/directives/choose-color/choose-color.module';
 
 export interface DonutChartData {
   name: string;
@@ -24,116 +18,84 @@ export interface DonutChartData {
 }
 
 @Component({
-  selector       : 'sm-donut',
-  templateUrl       : './donut.component.html',
-  styleUrls      : ['./donut.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  selector: 'sm-donut',
+  templateUrl: './donut.component.html',
+  styleUrls: ['./donut.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    NgChartsModule,
+    NgForOf,
+    ChooseColorModule,
+  ],
+  standalone: true
 })
-export class DonutComponent implements OnInit, AfterViewInit, OnDestroy {
+export class DonutComponent {
 
-  private donutContainer: Selection<SVGElement, DonutChartData, HTMLElement, any>;
-  private donutChart;
-  public donutData: DonutChartData[];
-
-  public readonly resize = new BehaviorSubject<string>(null);
-  public highlight: number;
-  private sub = new Subscription();
-  private _colors: string[];
+  public donutData: ChartData<'doughnut'>;
   trackById = trackById;
+  public doughnutChartType: ChartType = 'doughnut';
+  public percent: number = null;
+  private total: number;
+  private _colors: string[];
+
+  highlight: number = null;
+  donutOptions = {
+    maintainAspectRatio: false,
+    borderWidth: 0,
+    plugins: {
+      legend: {display: false}
+    }
+  } as ChartOptions<'doughnut'>;
 
   @Input() set data(data: DonutChartData[]) {
-    this.donutData = data;
-    if (this.donutContainer !== undefined) {
-      this.donutContainer.datum(data).call(this.donutChart);
-      this.donutChart.highlightSliceById(1);
-    }
-  }
-
-  @Input() set colors(colors: string[]) {
-    this._colors = colors;
-    if (this.donutContainer !== undefined) {
-      this.donutChart.colorSchema(colors);
-      if (this.donutData) {
-        this.redraw();
-      }
-    }
+    this.donutData = {
+      labels: data.map(slice => slice.name),
+      datasets: [{
+        data: data.map(slice => slice.quantity),
+        backgroundColor: this.colors,
+      }]
+    };
+    this.total = data.reduce((acc, slice) => acc + slice.quantity, 0)
   }
 
   get colors(): string[] {
     return this._colors;
   }
 
-  constructor(
-    private store: Store,
-    private colorHash: ColorHashService,
-    private cdr: ChangeDetectorRef,
-  ) {}
-
-  ngOnInit() {
-    this.donutChart = donut();
-    this.donutContainer = select('.donut-container');
-
-    this.sub.add(combineLatest([
-      this.resize,
-      fromEvent(window, 'resize').pipe(startWith(null))
-    ])
-      .pipe(
-        filter(source => source !== null),
-        debounceTime(50)
-      )
-      .subscribe(() => this.redraw()));
-  }
-
-  ngAfterViewInit(): void {
-    this.initDonutChart();
-    this.donutChart.highlightSliceById(1);
-  }
-
-  initDonutChart() {
-    const {width, height} = this.donutContainer.node().getBoundingClientRect();
-    const length = Math.min(width, height);
-    this.donutChart
-      .width(width)
-      .height(height)
-      .externalRadius(length / 2.5)
-      .internalRadius(length / 5)
-      .on('customMouseOver', (data) => {
-        this.highlight = data.data.id;
-        this.cdr.detectChanges();
-      })
-      .on('customMouseOut', () => {
-        this.highlight = null;
-        this.cdr.detectChanges();
-      });
-  }
-
-  redraw() {
-    this.donutContainer.select('svg').remove();
-    this.donutChart     = donut();
-    this._colors && this.donutChart.colorSchema(this._colors);
-    this.initDonutChart();
+  @Input() set colors(colors: string[]) {
+    this._colors = colors;
     if (this.donutData) {
-      this.donutContainer.datum(this.donutData).call(this.donutChart);
-      this.donutChart.highlightSliceById(1);
+      this.donutData = {...this.donutData, datasets: [{...this.donutData.datasets[0], backgroundColor: colors}]};
+      this.chart?.update();
     }
   }
 
-  hoverLegend(slice: DonutChartData) {
-    this.donutChart.highlightSliceById(slice.id);
-    this.donutContainer.datum(this.donutData).call(this.donutChart);
-    this.highlight = slice.id;
+  @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
+
+  public chartHovered({ active }: { event: ChartEvent; active: object[]; }): void {
+    this.highlight = (active?.[0] as {datasetIndex: number; index: number})?.index ?? null;
+    this.calcPercent();
   }
 
-  leaveLegend(slice: DonutChartData) {
-    if (this.donutChart.highlightSliceById() === slice.id) {
-      this.donutChart.highlightSliceById(null);
-      this.donutContainer.datum(this.donutData).call(this.donutChart);
+  private calcPercent() {
+    if (this.highlight !== null) {
+      this.percent = Math.round(this.donutData.datasets[0].data[this.highlight] / this.total * 100);
+    } else {
+      this.percent = null;
     }
+  }
+
+  hoverLegend(slice) {
+    this.highlight = slice;
+    this.calcPercent();
+  }
+
+  leaveLegend() {
     this.highlight = null;
+    this.calcPercent();
   }
 
-  ngOnDestroy(): void {
-    this.sub.unsubscribe();
+  resize() {
+    this.chart.update(30);
   }
-
 }

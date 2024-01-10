@@ -24,6 +24,9 @@ import {
 import {isUndefined} from 'lodash-es';
 import {ActivatedRoute} from '@angular/router';
 import {Container} from '~/business-logic/model/tasks/container';
+import {
+  IOption
+} from '@common/shared/ui-components/inputs/select-autocomplete-with-chips/select-autocomplete-with-chips.component';
 
 @Component({
   selector: 'sm-experiment-info-execution',
@@ -54,6 +57,15 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
   links = ['details', 'uncommitted changes', 'installed packages', 'container'];
   currentLink = 'details';
   public redactedArguments$: Observable<{ key: string }[]>;
+  public selectedRequirement = 'pip';
+  public editableRequirements = false;
+  private requirementLabels: IExecutionForm['requirements'] = {
+    pip: 'PIP',
+    orgPip: 'Original PIP',
+    conda: 'Conda',
+    orgConda: 'Original Conda'
+  };
+  public requirementsOptions: IOption[];
 
   constructor(
     private store: Store,
@@ -77,6 +89,18 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
 
     this.formDataSubscription = this.executionInfo$.subscribe(formData => {
       this.formData = formData;
+      if (formData) {
+        this.requirementsOptions = Object.keys(this.requirementLabels)
+          .filter(key => Object.hasOwn(formData?.requirements ?? {}, key))
+          .map(key => ({
+          value: key,
+          label: this.requirementLabels[key]
+        } as IOption));
+        if (!Object.hasOwn(formData?.requirements ?? {}, this.selectedRequirement)) {
+          this.selectedRequirement = 'pip';
+        }
+        this.editableRequirements = this.selectedRequirement === 'pip';
+      }
     });
   }
 
@@ -284,5 +308,10 @@ export class ExperimentInfoExecutionComponent implements OnInit, OnDestroy {
 
   showSection(selection: string) {
     this.currentLink = selection;
+  }
+
+  requirementChanged(type: string) {
+    this.selectedRequirement = type;
+    this.editableRequirements = this.selectedRequirement === 'pip';
   }
 }

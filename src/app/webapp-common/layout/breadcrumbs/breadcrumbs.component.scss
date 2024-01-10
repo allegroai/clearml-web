@@ -123,7 +123,7 @@ span {
   font-weight: 500;
   color: $blue-900;
 
-  ::ng-deep .mdc-list-item__primary-text {
+  ::ng-deep .mat-mdc-menu-item-text {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;

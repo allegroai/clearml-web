@@ -10,10 +10,11 @@ export function validatePrefix(invalidPrefix?: string): ValidatorFn {
 
 @Directive({
   selector: '[smInvalidPrefixValidator]',
-  providers: [{provide: NG_VALIDATORS, useExisting: InvalidPrefixValidatorDirective, multi: true}]
+  providers: [{provide: NG_VALIDATORS, useExisting: InvalidPrefixValidatorDirective, multi: true}],
+  standalone: true,
 })
 export class InvalidPrefixValidatorDirective implements Validator {
-  @Input('invalidPrefix') invalidPrefix: string;
+  @Input() invalidPrefix: string;
 
   validate(control: AbstractControl): ValidationErrors | null {
     return validatePrefix(this.invalidPrefix)(control);

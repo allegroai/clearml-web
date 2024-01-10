@@ -27,7 +27,7 @@ import {ChangeDetectorRef, Component, inject, OnDestroy, OnInit} from '@angular/
 import {ActivatedRoute, Router} from '@angular/router';
 import { selectShowOnlyUserWork } from '@common/core/reducers/users-reducer';
 import {IReport} from '@common/reports/reports.consts';
-import {isEqual} from "lodash-es";
+import {isEqual} from 'lodash-es';
 
 @Component({
   selector: 'sm-dashboard-search-base',
@@ -182,12 +182,12 @@ export class DashboardSearchBaseComponent implements OnInit, OnDestroy{
 
   setFirstActiveLink(resultsCount) {
     if (resultsCount[this.activeLink] > 0) {
-      this.router.navigate([], {queryParams: {tab: this.activeLink}, queryParamsHandling: "merge", replaceUrl: true})
+      this.router.navigate([], {queryParams: {tab: this.activeLink}, queryParamsHandling: 'merge', replaceUrl: true})
       this.store.dispatch(getCurrentPageResults({activeLink: this.activeLink}));
     } else {
       const firstTabIndex = activeLinksList.findIndex(activeLink => resultsCount[activeLink.name] > 0);
       if (firstTabIndex > -1) {
-        this.router.navigate([], {queryParams: {tab: activeLinksList[firstTabIndex].name}, queryParamsHandling: "merge"})
+        this.router.navigate([], {queryParams: {tab: activeLinksList[firstTabIndex].name}, queryParamsHandling: 'merge'})
         this.store.dispatch(getCurrentPageResults({activeLink: activeLinksList[firstTabIndex].name as ActiveSearchLink}));
       } else {
         this.store.dispatch(clearSearchResults());
@@ -200,6 +200,6 @@ export class DashboardSearchBaseComponent implements OnInit, OnDestroy{
   }
 
   changeActiveLink(tab: string) {
-    this.router.navigate([], {queryParams: {tab}, queryParamsHandling: "merge"})
+    this.router.navigate([], {queryParams: {tab}, queryParamsHandling: 'merge'})
   }
 }

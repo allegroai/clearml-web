@@ -2,14 +2,14 @@ import {Component} from '@angular/core';
 import {ProjectTypeEnum} from '@common/nested-project-view/nested-project-view-page/nested-project-view-page.component';
 import {CircleTypeEnum} from '~/shared/constants/non-common-consts';
 import {ProjectsSharedModule} from '~/features/projects/shared/projects-shared.module';
-import {SMSharedModule} from '@common/shared/shared.module';
 import {AsyncPipe, NgIf} from '@angular/common';
 import {ReportsPageComponent} from '@common/reports/reports-page/reports-page.component';
 import {getAllProjectsPageProjects, resetProjects, setProjectsOrderBy} from '@common/projects/common-projects.actions';
 import {setDefaultNestedModeForFeature} from '@common/core/actions/projects.actions';
-import {selectMainPageTagsFilter, selectMainPageTagsFilterMatchMode} from "@common/core/reducers/projects.reducer";
-import {combineLatest, Subscription} from "rxjs";
-import {debounceTime, skip} from "rxjs/operators";
+import {selectMainPageTagsFilter, selectMainPageTagsFilterMatchMode} from '@common/core/reducers/projects.reducer';
+import {combineLatest, Subscription} from 'rxjs';
+import {debounceTime, skip} from 'rxjs/operators';
+import {CircleCounterComponent} from '@common/shared/ui-components/indicators/circle-counter/circle-counter.component';
 
 @Component({
   selector: 'sm-nested-reports-page',
@@ -17,9 +17,9 @@ import {debounceTime, skip} from "rxjs/operators";
   styleUrls: ['../../nested-project-view/nested-project-view-page/nested-project-view-page.component.scss'],
   imports: [
     ProjectsSharedModule,
-    SMSharedModule,
     AsyncPipe,
-    NgIf
+    NgIf,
+    CircleCounterComponent
   ],
   standalone: true
 })

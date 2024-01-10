@@ -1,38 +1,47 @@
 <sm-editable-section
   [editable]=" ! model?.ready && model?.company?.id && !isSharedAndNotOwner"
   [saving]="saving"
-  [disableSave]="!labelsForm.valid"
+  [disableSave]="!labelsFormList?.first?.valid"
   (activateEditClicked)="activateEdit()"
   (saveClicked)="saveClicked()"
   (cancelClicked)="cancelEdit()"
 >
-  <ng-template #na>N/A</ng-template>
-    <sm-section-header label="LABELS"></sm-section-header>
-    <form [class.edit]="editable" #labelsForm="ngForm" [hidden]="!editable" smUniqueInListSyncValidator2 prefix2="labelPrefix-">
+  <sm-section-header label="LABELS"></sm-section-header>
+  <ng-container *ngIf="editable; else viewMode">
+    <form
+      #labelsForm="ngForm"
+      [class.edit]="editable"
+      *ngIf="editable"
+      smUniqueInListSyncValidator2
+      prefix2="labelPrefix-"
+    >
       <div class="body-container">
-      <div class="w-100 body">
-        <ng-container *ngFor="let parameter of formData; let i = index">
-          <mat-form-field appearance="outline" class="w-100">
-            <input #parameterLabel="ngModel"
-                   [(ngModel)]="parameter.label"
-                   [name]="'labelPrefix-' | uuid"
-                   data-id="parameterLabelField"
-                   required
-                   matInput>
-            <mat-error *ngIf="parameterLabel.invalid && parameterLabel?.errors?.required">
-              Required
+        <div class="w-100 body">
+          <ng-container *ngFor="let parameter of formData; let i = index">
+            <mat-form-field appearance="outline" class="w-100">
+              <input #parameterLabel="ngModel"
+                     [(ngModel)]="parameter.label"
+                     [name]="'labelPrefix-' | uuid"
+                     data-id="parameterLabelField"
+                     required
+                     matInput>
+              <mat-error *ngIf="parameterLabel.invalid && parameterLabel?.errors?.required">
+                Required
+              </mat-error>
+            </mat-form-field>
+            <mat-error *ngIf="labelsForm?.errors?.uniqueName" class='outside-error'>
+              Labels must be unique.
             </mat-error>
-          </mat-form-field>
-          <mat-error *ngIf="labelsForm?.errors?.uniqueName" class='outside-error'>
-            Labels must be unique.
-          </mat-error>
-          <span *ngIf="labelsForm?.errors?.uniqueName2 && labelsForm?.errors?.uniqueName2[i]" class="outside-error">Label must be unique.
+            <span *ngIf="labelsForm?.errors?.uniqueName2 && labelsForm?.errors?.uniqueName2[i]" class="outside-error">Label must be unique.
           </span>
 
             <mat-form-field [hintLabel]="parameterKey.invalid && parameterKey?.errors?.required? '*Required': ''" appearance="outline" class="w-100">
               <input #parameterKey="ngModel"
                      [(ngModel)]="parameter.id"
                      type="number"
+                     min="0"
+                     step="1"
+                     pattern="\d+"
                      [name]="('parameterId-' + parameter.label) | uuid"
                      data-id="parameterKeyField"
                      matInput
@@ -40,40 +49,34 @@
               <mat-error *ngIf="parameterKey.invalid && parameterKey?.errors?.required">
                 Required
               </mat-error>
-              <mat-error *ngIf="parameterKey.invalid && parameterKey?.errors?.smNotAllowedStringsValidator">
-                .(dot) $(dollar) and space are not allowed in parameter id.
+              <mat-error *ngIf="parameterKey.invalid && parameterKey?.errors?.pattern">
+                Only integers are allowed
               </mat-error>
             </mat-form-field>
 
-          <button class="btn btn-primary d-flex-center trash" (click)="$event.detail > 0 && removeRow(i)" data-id="deleteIcon" >
-            <i class="al-icon al-ico-trash sm pointer flashing-icon"></i>
-          </button>
-        </ng-container>
-      </div>
+            <button class="btn btn-primary d-flex-center trash" (click)="$event.detail > 0 && removeRow(i)" data-id="deleteIcon" >
+              <i class="al-icon al-ico-trash sm pointer flashing-icon"></i>
+            </button>
+          </ng-container>
+        </div>
       </div>
     </form>
     <div class="w-100">
-      <button *ngIf="editable" class="btn btn-cml-primary d-flex-center" (click)="addRow()" data-id="addParameterButton">
+      <button class="btn btn-cml-primary d-flex-center" (click)="addRow()" data-id="addParameterButton">
         <i class="al-icon sm-md al-ico-plus"></i>
       </button>
-  </div>
-    <div class="content" *ngIf="!editable">
-      <sm-simple-table-2 [cols]="cols" [rowsData]="formData">
-        <ng-template
-          let-col
-          let-i="rowIndex"
-          let-row="row">
-          <div class="body">
-            <div class="input-container0">
-              <b>{{row.label}}</b>
-            </div>
-            <div class="input-container">
-              <b>{{row.id}}</b>
-            </div>
-          </div>
-        </ng-template>
-      </sm-simple-table-2>
     </div>
+  </ng-container>
+  <ng-template #viewMode>
+    <div class="d-flex header">
+      <div *ngFor="let col of columns; trackBy: trackById" class="cell">{{col.header}}</div>
+    </div>
+    <cdk-virtual-scroll-viewport itemSize="48" class="table">
+      <div *cdkVirtualFor="let row of formData; trackBy: trackById" class="d-flex">
+        <div *ngFor="let col of columns; trackBy: trackById" class="cell">{{row[col.id]}}</div>
+      </div>
+    </cdk-virtual-scroll-viewport>
+  </ng-template>
 </sm-editable-section>
 
 

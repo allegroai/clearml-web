@@ -28,7 +28,6 @@ export const setShowRowExtremes = createAction(SET_SHOW_ROW_EXTREMES, props<{pay
 export const setShowGlobalLegend = createAction(SET_SHOW_GLOBAL_LEGEND);
 export const setExperimentsUpdateTime = createAction(SET_EXPERIMENTS_UPDATE_TIME, props<{ payload: {[key: string]: Date}}>());
 export const refreshIfNeeded = createAction(REFRESH_IF_NEEDED, props<{ payload: boolean; autoRefresh?: boolean; entityType: string }>());
-export const toggleShowScalarOptions = createAction(TOGGLE_SHOW_SACLARS_OPTIONS);
 export const setSearchExperimentsForCompareResults = createAction(SET_SELECT_EXPERIMENTS_FOR_COMPARE, props<{ payload: ITableExperiment[] }>());
 export const setShowSearchExperimentsForCompare = createAction(SET_SHOW_SEARCH_EXPERIMENTS_FOR_COMPARE, props<{ payload: boolean }>());
 export const resetSelectCompareHeader = createAction(RESET_SELECT_EXPERIMENT_FOR_COMPARE, props<{fullReset?: boolean}>());

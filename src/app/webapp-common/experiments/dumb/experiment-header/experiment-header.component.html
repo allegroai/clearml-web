@@ -10,19 +10,13 @@
       (toggleArchived)="isArchivedChanged.emit($event)"
     ></sm-toggle-archive>
     <sm-button-toggle
-      [disabled]="!tableMode"
+      [disabled]="!tableMode || noData"
       class="ms-3"
-      [options]="[{label: 'Table view', value: 'table', icon: 'al-ico-table-view'}, {label: 'Details view', value: 'info', icon: 'al-ico-experiment-view'}]"
-      [value]="tableMode"
+      [options]="toggleButtons"
+      [value]="!noData && tableMode"
       [rippleEffect]="rippleEffect"
       (valueChanged)="tableModeChanged.emit($event)"></sm-button-toggle>
   </div>
-  <sm-project-context-navbar
-    *ngIf="showNavbarLinks"
-    [class.hide-item]="sharedView"
-    [activeFeature]="'experiments'"
-    [archivedMode]="isArchived"
-  ></sm-project-context-navbar>
 
 
   <div class="d-flex justify-content-end align-items-center right-buttons">
@@ -31,19 +25,34 @@
       [tableFilters]="tableFilters"
       (clearTableFilters)="clearTableFilters.emit(tableFilters)"
     ></sm-clear-filters-button>
-    <sm-menu class="download-btn" buttonClass="al-icon al-ico-download pointer lm" panelClasses="light-theme"
+    <sm-menu *ngIf="tableMode !== 'compare'"
+      class="download-btn" buttonClass="al-icon al-ico-download pointer lm" panelClasses="light-theme"
              [showCart]="false" smTooltip="Download table as CSV" [disabled]="noData" data-id="downloadCSV">
       <sm-menu-item (itemClicked)="downloadTableAsCSV.emit()" itemLabel="Download on screen items"></sm-menu-item>
       <sm-menu-item (itemClicked)="downloadFullTableAsCSV.emit()"
                     [itemLabel]="'Download first '+ (maxDownloadItems$ | async) +' items'"></sm-menu-item>
     </sm-menu>
 
+    <mat-form-field *ngIf="tableMode === 'compare'" appearance="outline" class="dark-outline compare-view-select no-bottom">
+      <mat-select [(ngModel)]="compareView" name="compareView" panelClass="dark-outline" (ngModelChange)="compareViewChanged.emit($event)">
+        <mat-option value="scalars">Scalars</mat-option>
+        <mat-option value="plots">Plots</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <i class="al-icon al-ico-tune sm-md"
+       *ngIf="tableMode === 'compare' && compareView === 'scalars'"
+       [class.active]="showCompareScalarSettings"
+       (click)="toggleShowCompareSettings.emit()"></i>
+
     <sm-experiment-custom-cols-menu
-      *ngIf="!minimizedView"
+      *ngIf="!minimizedView || tableMode === 'compare'"
       [metricVariants]="metricVariants"
       [hyperParams]="hyperParams"
       [tableCols]="tableCols"
       [isLoading]="isMetricsLoading"
+      [skipValueType]="tableMode === 'compare'"
+      [disabled]="tableMode === 'compare' && metricVariants?.length === 0"
       (selectedMetricToShow)="selectedMetricToShow.emit($event)"
       (selectedHyperParamToShow)="selectedHyperParamToShow.emit($event)"
       (selectedTableColsChanged)="selectedTableColsChanged.emit($event)"

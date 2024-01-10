@@ -66,7 +66,8 @@
               "hocon-parser",
               "taira",
               "base-64",
-              "export-to-csv"
+              "export-to-csv",
+              "dompurify"
             ],
             "vendorChunk": true,
             "extractLicenses": false,

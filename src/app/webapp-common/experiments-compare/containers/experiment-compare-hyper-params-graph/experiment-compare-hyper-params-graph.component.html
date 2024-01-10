@@ -60,6 +60,7 @@
     [selectedItemsListMapper]="selectedItemsListMapper"
     selectedItemsListPrefix=""
     [limitSelection]="50"
+    [single]="scatter"
     (selectedItems)="selectedParamsChanged($event)"
     (clearSelection)="clearSelection()"
   >
@@ -71,21 +72,32 @@
 
 </div>
 <div class="graphs-container h-100">
-  <div *ngIf="plotlyReady$ | async" class="graph-container">
-    <sm-parallel-coordinates-graph
-      *ngIf="(experiments$ | async).length > 1 && selectedHyperParams?.length > 0 && !!selectedMetric; else no_data"
+  <ng-container
+    *ngIf="(experiments$ | async).length > 1 && selectedHyperParams?.length > 0 && !!selectedMetric; else no_data"
+  >
+    <sm-compare-scatter-plot
+      *ngIf="scatter; else parallel"
+      [params]="selectedHyperParams"
+      [metric]="selectedMetric.path + '.' + valueType"
+      [metricName]="selectedMetric.name"
       [experiments]="experiments$ | async"
-      [parameters]="selectedHyperParams"
-      [metric]="selectedMetric"
-      [metricValueType]="valueType"
-      (createEmbedCode)="createEmbedCode($event)"
-    ></sm-parallel-coordinates-graph>
-    <ng-template #no_data>
-      <div class="d-flex align-items-center justify-content-center flex-column h-100 no-data">
-        <div class="al-icon al-ico-no-data-graph"></div>
-        <h4 class="no-data-title">NO DATA TO SHOW</h4>
-        <div>Please select parameters & metric</div>
-      </div>
+    ></sm-compare-scatter-plot>
+    <ng-template #parallel>
+      <sm-parallel-coordinates-graph
+        *ngIf="plotlyReady$ | async"
+        [experiments]="experiments$ | async"
+        [parameters]="selectedHyperParams"
+        [metric]="selectedMetric"
+        [metricValueType]="valueType"
+        (createEmbedCode)="createEmbedCode($event)"
+      ></sm-parallel-coordinates-graph>
     </ng-template>
-  </div>
+  </ng-container>
+  <ng-template #no_data>
+    <div class="d-flex align-items-center justify-content-center flex-column h-100 no-data">
+      <div class="al-icon al-ico-no-data-graph"></div>
+      <h4 class="no-data-title">NO DATA TO SHOW</h4>
+      <div>Please select parameters & metric</div>
+    </div>
+  </ng-template>
 </div>

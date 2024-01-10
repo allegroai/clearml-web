@@ -1,34 +1,4 @@
 <div class="experiment-compare-container light-theme">
-  <nav class="d-flex justify-content-center">
-    <span *ngIf="entityType !== entityTypeEnum.model" [routerLink]="['details']" routerLinkActive="active" #rlaDetails="routerLinkActive" queryParamsHandling="preserve">
-      <sm-navbar-item direction="bottom" [header]="'details'" [active]="rlaDetails.isActive"></sm-navbar-item>
-    </span>
-    <span *ngIf="entityType === entityTypeEnum.model" [routerLink]="['models-details']" routerLinkActive="active" #rlaDetails="routerLinkActive" queryParamsHandling="preserve">
-      <sm-navbar-item direction="bottom" [header]="'details'" [active]="rlaDetails.isActive"></sm-navbar-item>
-    </span>
-    <span *ngIf="entityType !== entityTypeEnum.model; else network"
-          routerLink="hyper-params"
-          routerLinkActive="active"
-          #rlaHyperParams="routerLinkActive"
-          queryParamsHandling="preserve"
-    >
-      <sm-navbar-item direction="bottom" [header]="'hyperparameters'" [active]="rlaHyperParams.isActive"></sm-navbar-item>
-    </span>
-    <ng-template #network>
-      <span [routerLink]="['network']" routerLinkActive="active" #rlaNetwork="routerLinkActive" queryParamsHandling="preserve">
-      <sm-navbar-item direction="bottom" [header]="'network'" [active]="rlaNetwork.isActive"></sm-navbar-item>
-    </span>
-    </ng-template>
-    <span routerLink="scalars" routerLinkActive="active" #rlaScalarsGraph="routerLinkActive" queryParamsHandling="preserve">
-      <sm-navbar-item [active]="rlaScalarsGraph.isActive" header="Scalars" direction="bottom"></sm-navbar-item>
-    </span>
-    <span [routerLink]="['metrics-plots']" routerLinkActive="active" #rlaPlots="routerLinkActive" queryParamsHandling="preserve">
-      <sm-navbar-item header="Plots" [active]="rlaPlots.isActive" direction="bottom"></sm-navbar-item>
-    </span>
-    <span *ngIf="entityType !== entityTypeEnum.model" #rlaGeneral="routerLinkActive" [routerLink]="['debug-images']" routerLinkActive="active" queryParamsHandling="preserve">
-      <sm-navbar-item [active]="rlaGeneral.isActive" header="Debug Samples" direction="bottom"></sm-navbar-item>
-    </span>
-  </nav>
   <sm-experiment-compare-header
       [entityType]="entityType"
   ></sm-experiment-compare-header>
@@ -37,12 +7,13 @@
     <div class="global-legend-container" [class.show]="(showGlobalLegend$ | async)" data-id="globalLegendContainer">
       <div class="global-legend">
         <div data-id="experimentLegend" class="legend-experiment" *ngFor="let exp of globalLegendData$ | async; trackBy: trackById">
-        <span #dot class="experiment-color"
+          <span #dot class="experiment-color"
               data-id="experimentLegendColor"
               [style.background-color]="experimentsColor[exp.id]"
               [colorButtonRef]="dot"
               [smChooseColor]="experimentsColor[exp.id]"
-              [stringToColor]="exp.name + '-' + exp.id"></span>
+              [stringToColor]="exp.name + '-' + exp.id"
+          ></span>
           <span class="experiment-name"
                 [smTooltip]="duplicateNamesObject[exp.name] ? '' : exp.name" smShowTooltipIfEllipsis>
             <a class="ellipsis" [routerLink]="buildUrl(exp)" [queryParams]="{archive: exp.systemTags.includes('archived') || undefined}" [matTooltipShowDelay]="400" [smTooltip]="duplicateNamesObject[exp.name] ? exp.name + ' - ' + exp.id : ''">{{exp.name}}</a>
@@ -50,7 +21,7 @@
           <sm-tag-list [tags]="exp.tags"></sm-tag-list>
           <i *ngIf="(globalLegendData$ | async)?.length > 1" class="al-icon al-ico-dialog-x sm remove-experiment" (click)="removeExperiment(exp)" data-id="removeExperimentButton"></i>
         </div>
-<!--        <button class="btn btn-secondary legend-add" (click)="openAddExperimentSearch()"><i class="al-icon al-ico-plus" data-id="addExperimentToCompareButton"></i></button>-->
+        <!--        <button class="btn btn-secondary legend-add" (click)="openAddExperimentSearch()"><i class="al-icon al-ico-plus" data-id="addExperimentToCompareButton"></i></button>-->
       </div>
       <i class="al-icon al-ico-dialog-x close-legend" (click)="closeLegend()" data-id="closeLegend"></i>
     </div>

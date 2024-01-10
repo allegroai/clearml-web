@@ -1,14 +1,13 @@
 import {
   ChangeDetectorRef,
   Component,
-  ElementRef,
   EventEmitter,
   Inject,
   OnDestroy,
   OnInit,
   ViewChild
 } from '@angular/core';
-import {select, Store} from '@ngrx/store';
+import {Store} from '@ngrx/store';
 import {
   compareAddDialogTableSortChanged,
   compareAddTableClearAllFilters,
@@ -27,7 +26,7 @@ import {BehaviorSubject, combineLatest, Observable, Subscription} from 'rxjs';
 import {Task} from '~/business-logic/model/tasks/task';
 import {Params} from '@angular/router';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
-import {distinctUntilChanged, distinctUntilKeyChanged, filter, map, tap} from 'rxjs/operators';
+import {distinctUntilChanged, distinctUntilKeyChanged, filter, map, take, tap} from 'rxjs/operators';
 import {compareLimitations} from '@common/shared/entity-page/footer-items/compare-footer-item';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {ITableExperiment} from '@common/experiments/shared/common-experiment-model.model';
@@ -68,7 +67,7 @@ import {EXPERIMENTS_PAGE_SIZE} from '@common/experiments/shared/common-experimen
 import {setParents} from '@common/experiments/actions/common-experiments-view.actions';
 import {INITIAL_CONTROLLER_TABLE_COLS} from '@common/pipelines-controller/controllers.consts';
 import {EXPERIMENTS_TABLE_COL_FIELDS} from '~/features/experiments/shared/experiments.const';
-import {hyperParamSelectedExperiments, hyperParamSelectedInfoExperiments, setHyperParamsFiltersPage, setTableCols} from '../../../experiments/actions/common-experiments-view.actions';
+import {hyperParamSelectedExperiments, hyperParamSelectedInfoExperiments, setHyperParamsFiltersPage, setTableCols} from '@common/experiments/actions/common-experiments-view.actions';
 
 export const allowAddExperiment$ = (selectRouterParams$: Observable<Params>) => selectRouterParams$.pipe(
   distinctUntilKeyChanged('ids'),
@@ -95,8 +94,8 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
   public tableSortOrder$: Observable<TableSortOrderEnum>;
   private columns$: Observable<ISmCol[] | undefined>;
   private metricTableCols$: Observable<ISmCol[]>;
-  public tableCols$: Observable<any>;
-  public experiments$: Observable<any>;
+  public tableCols$: Observable<ISmCol[]>;
+  public experiments$: Observable<ITableExperiment[]>;
   private projectId: string;
   public users$: Observable<User[]>;
   public tableFilters$: Observable<{ [columnId: string]: FilterMetadata }>;
@@ -109,7 +108,7 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
   public parent$: Observable<ProjectsGetTaskParentsResponseParents[]>;
   public tableSortFields$: Observable<SortMeta[]>;
   public projects$: Observable<Project[]>;
-  selectedExperiment: any;
+  selectedExperiment: ITableExperiment;
   public reachedCompareLimit: boolean;
   public showArchived$: Observable<boolean>;
   private _resizedCols = {} as { [colId: string]: string };
@@ -123,7 +122,6 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
 
   constructor(
     private store: Store,
-    private eRef: ElementRef,
     private changedDetectRef: ChangeDetectorRef,
     public dialogRef: MatDialogRef<SelectExperimentsForCompareComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { entityType: EntityTypeEnum }
@@ -145,7 +143,7 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
         return union.map(e => ({...e, system_tags: e.system_tags?.map((t => t.replace('archive', ' archive')))}));
       })
     );
-    this.searchTerm$ = this.store.pipe(select(selectExperimentsForCompareSearchTerm));
+    this.searchTerm$ = this.store.select(selectExperimentsForCompareSearchTerm);
     this.tableColsOrder$ = this.store.select(selectExperimentsTableColsOrder);
     this.columns$ = this.store.select(selectExperimentsTableCols);
     this.metricTableCols$ = this.store.select(selectExperimentsMetricsColsForProject);
@@ -184,6 +182,9 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
             }),
           })
         )));
+    this.dialogRef.afterOpened()
+      .pipe(take(1))
+      .subscribe(() => this.table.split = 1);
   }
 
   public searchTermChanged(term: string) {
@@ -223,11 +224,12 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
     this.store.dispatch(resetTablesFilterProjectsOptions());
     this.store.dispatch(getProjectUsers({projectId: '*'}));
     window.setTimeout(() => this.table.table.rowRightClick = new EventEmitter());
-    this.paramsSubscription = this.store.pipe(
-      select(selectRouterParams),
-      map(params => [params && params['ids'], params?.projectId]),
-      filter(([experimentIds,]) => !!experimentIds),
-    ).subscribe(([experimentIds, projectId]) => {
+    this.paramsSubscription = this.store.select(selectRouterParams)
+      .pipe(
+        map(params => [params && params['ids'], params?.projectId]),
+        filter(([experimentIds,]) => !!experimentIds),
+      )
+      .subscribe(([experimentIds, projectId]) => {
       if (this.selectedExperimentsIds.length === 0) {
         this.selectedExperimentsIds = experimentIds.split(',');
         this.syncSelectedExperiments();
@@ -280,7 +282,7 @@ export class SelectExperimentsForCompareComponent implements OnInit, OnDestroy {
     this.store.dispatch(compareAddDialogTableSortChanged(event));
   }
 
-  filterChanged({col, value, andFilter}: { col: ISmCol; value: any; andFilter?: boolean }) {
+  filterChanged({col, value, andFilter}: { col: ISmCol; value: unknown; andFilter?: boolean }) {
     this.previousExperimentsLength = null;
     this.syncSelectedExperiments();
     this.store.dispatch(compareAddTableFilterChanged({

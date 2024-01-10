@@ -3,7 +3,8 @@ import {get} from 'lodash-es';
 import {ISmCol} from '../ui-components/data/table/table.consts';
 
 @Pipe({
-  name: 'colGetter'
+  name: 'colGetter',
+  standalone: true
 })
 export class ColGetterPipe implements PipeTransform {
 

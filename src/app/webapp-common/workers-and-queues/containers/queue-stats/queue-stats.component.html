@@ -9,7 +9,7 @@
     </div>
   </div>
   <div #waitchart class="line-chart-container">
-    <sm-line-chart [data]="waitChartData" [showLoadingOverlay]="refreshChart" [tooltipVerticalOffset]="-60"></sm-line-chart>
+    <sm-line-chart class="h-100" [data]="waitChartData" [showLoadingOverlay]="refreshChart"></sm-line-chart>
   </div>
 </div>
 <div class="chart-container right overflow-hidden">
@@ -29,7 +29,7 @@
       </mat-select>
     </mat-form-field>
   </div>
-  <div #lenchart class="line-chart-container" >
-    <sm-line-chart [data]="lenChartData" [showLoadingOverlay]="refreshChart" [tooltipVerticalOffset]="-60"></sm-line-chart>
+  <div class="line-chart-container">
+    <sm-line-chart class="h-100" [data]="lenChartData" [showLoadingOverlay]="refreshChart"></sm-line-chart>
   </div>
 </div>

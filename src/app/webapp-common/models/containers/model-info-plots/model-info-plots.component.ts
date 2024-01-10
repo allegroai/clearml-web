@@ -12,10 +12,9 @@ import {convertPlots, groupIterations, sortMetricsList} from '@common/tasks/task
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {getPlots, setPlots} from '@common/models/actions/models-info.actions';
 import {ExperimentGraphsComponent} from '@common/shared/experiment-graphs/experiment-graphs.component';
-import {selectModelSettingsHiddenPlot, selectModelSettingsHiddenScalar} from "@common/experiments/reducers";
-import {isEqual} from "lodash-es";
-import {setExperimentSettings} from "@common/experiments/actions/common-experiment-output.actions";
-import {selectSelectedSettingsHiddenPlot} from "@common/experiments-compare/reducers";
+import {selectModelSettingsHiddenPlot} from '@common/experiments/reducers';
+import {isEqual} from 'lodash-es';
+import {setExperimentSettings} from '@common/experiments/actions/common-experiment-output.actions';
 
 @Component({
   selector: 'sm-model-info-plot',

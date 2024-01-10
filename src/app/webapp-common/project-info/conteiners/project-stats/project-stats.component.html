@@ -1,32 +1,26 @@
-<div *ngIf="selectedVariant" class="header">
+<div *ngIf="selectedVariants" class="header">
   <button
-    class="btn btn-cml-primary"
-    [hidden]="!selectedVariant"
+    class="btn btn-cml-primary d-flex justify-content-between align-items-center"
+    [hidden]="!selectedVariants"
     (click)="selectVariant()"
     [smTooltip]="variantDisplay?.length > 30 ? variantDisplay : null"
-  >{{variantDisplay}}</button>
+  ><i class="al-icon al-ico-plus me-2"></i><span class="ellipsis">{{variantDisplay}}</span></button>
   <i class="al-icon al-ico-info-circle al-color blue-300 sm-md" smTooltip="Use the mouse wheel to zoom.
-Click and drag the graph to pan."></i>
+Shift + Click and drag the graph to pan."></i>
 </div>
-<div class="line-chart-container" *ngIf="selectedVariant; else noData">
+<div class="line-chart-container" *ngIf="selectedVariants; else noData">
   <sm-scatter-plot
+    theme="dark"
     [colors]="colors"
     [data]="graphData"
     [showLoadingOverlay]="loading"
+    xAxisType="time"
     (clicked)="experimentClicked($event)"
   ></sm-scatter-plot>
-  <div class="legend">
-      <span
-        *ngFor="let state of states; trackBy: trackByType"
-        [style.--color]="state.color"
-        class="entry"
-        (click)="toggleState(state.type)"
-      >{{state.label}}</span>
-  </div>
 </div>
 <ng-template #noData>
   <div class="flex-middle overview-placeholder">
     <i class="al-icon al-ico-no-scatter-graph xxl"></i>
-    <div class=" pointer no-data-title" (click)="selectVariant()">Select Metric & Variant</div>
+    <a href="" class="no-data-title" (click)="$event.preventDefault(); selectVariant()">Select Metric & Variant</a>
   </div>
 </ng-template>

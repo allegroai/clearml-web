@@ -12,26 +12,26 @@ import {FormsModule} from '@angular/forms';
 import {MatInputModule} from '@angular/material/input';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {TagListComponent} from '@common/shared/ui-components/tags/tag-list/tag-list.component';
 import {ChooseColorModule} from '@common/shared/ui-components/directives/choose-color/choose-color.module';
-import {TagListComponent} from "@common/shared/ui-components/tags/tag-list/tag-list.component";
 
 
 
 @NgModule({
   declarations: [SingleGraphComponent, GraphViewerComponent],
   exports: [SingleGraphComponent, GraphViewerComponent],
-    imports: [
-        CommonModule,
-        StoreModule.forFeature('singleGraph', singleGraphReducer),
-        EffectsModule.forFeature([SingleGraphEffects]),
-        MatSliderModule,
-        MatSelectModule,
-        FormsModule,
-        MatInputModule,
-        TooltipDirective,
-        MatProgressSpinnerModule,
-        ChooseColorModule,
-        TagListComponent,
-    ]
+  imports: [
+    CommonModule,
+    StoreModule.forFeature('singleGraph', singleGraphReducer),
+    EffectsModule.forFeature([SingleGraphEffects]),
+    MatSliderModule,
+    MatSelectModule,
+    FormsModule,
+    MatInputModule,
+    TooltipDirective,
+    MatProgressSpinnerModule,
+    TagListComponent,
+    ChooseColorModule,
+  ]
 })
 export class SingleGraphModule { }

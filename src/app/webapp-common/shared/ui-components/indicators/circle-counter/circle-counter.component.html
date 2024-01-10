@@ -9,7 +9,8 @@
           <div class="sub-label">{{subCounter.label}}</div>
         </div>
       </div>
-      <div *ngSwitchCase="'number'" class="counter">{{counter | filesize : fileSizeConfigCount}}</div>
+      <div *ngSwitchCase="'number'" class="counter">
+        {{counter | filesize: counter < 100000 ? fileSizeConfigCount : fileSizeConfigShortCount}}</div>
       <div *ngSwitchCase="'tags'" class="counter-tags">
       </div>
       <div *ngSwitchDefault class="counter">{{counter}}</div>

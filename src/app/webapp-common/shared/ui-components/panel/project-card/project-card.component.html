@@ -13,7 +13,7 @@
         smClickStopPropagation
         (click)="subProjectClicked(subProject.id)"
         [smTooltip]="subProject?.name"
-        [innerHTML]="subProject?.name | breadcrumbsEllipsis"
+        [innerHTML]="subProject?.name | purify | breadcrumbsEllipsis"
       ></a>
     </cdk-virtual-scroll-viewport>
   </div>

@@ -1,32 +1,40 @@
 import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  ElementRef,
-  EventEmitter,
-  Input,
-  NgZone,
-  Output,
-  Renderer2,
-  ViewChild
+    ChangeDetectionStrategy,
+    ChangeDetectorRef,
+    Component,
+    ElementRef,
+    EventEmitter,
+    Input,
+    NgZone,
+    Output,
+    Renderer2,
+    ViewChild
 } from '@angular/core';
+import {MatDialog} from '@angular/material/dialog';
+import {PALLET} from '@common/constants';
+import {ColorHashService} from '@common/shared/services/color-hash/color-hash.service';
+import {SmoothTypeEnum, getSmoothedLine} from '@common/shared/single-graph/single-graph.utils';
+import {attachColorChooser} from '@common/shared/ui-components/directives/choose-color/choose-color.directive';
+import {chooseTimeUnit} from '@common/shared/utils/choose-time-unit';
+import {download} from '@common/shared/utils/download';
+import {wordWrap} from '@common/tasks/tasks.utils';
+import {TinyColor} from '@ctrl/tinycolor';
 import {select} from 'd3-selection';
 import {cloneDeep, escape} from 'lodash-es';
 import plotly from 'plotly.js';
 import {Subject} from 'rxjs';
 import {debounceTime, filter} from 'rxjs/operators';
-import {TinyColor} from '@ctrl/tinycolor';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
-import {ColorHashService} from '@common/shared/services/color-hash/color-hash.service';
-import {wordWrap} from '@common/tasks/tasks.utils';
-import {attachColorChooser} from '@common/shared/ui-components/directives/choose-color/choose-color.directive';
-import {DARK_THEME_GRAPH_LINES_COLOR, DARK_THEME_GRAPH_TICK_COLOR, ExtData, ExtFrame, ExtLayout, ExtLegend, PlotlyGraphBaseComponent} from './plotly-graph-base';
-import {MatDialog} from '@angular/material/dialog';
-import {PALLET} from '@common/constants';
-import {download} from '@common/shared/utils/download';
-import {chooseTimeUnit} from '@common/shared/utils/choose-time-unit';
 import {GraphViewerComponent, GraphViewerData} from './graph-viewer/graph-viewer.component';
-import {getSmoothedLine} from '@common/shared/single-graph/single-graph.utils';
+import {
+    DARK_THEME_GRAPH_LINES_COLOR,
+    DARK_THEME_GRAPH_TICK_COLOR,
+    ExtData,
+    ExtFrame,
+    ExtLayout,
+    ExtLegend,
+    PlotlyGraphBaseComponent
+} from './plotly-graph-base';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 declare const Plotly;
@@ -52,12 +60,10 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
   private chartData: HTMLDivElement;
   private previousOffsetWidth: number;
   private modeBar: HTMLElement;
-  private previousHeight: number;
   private ratioEnable: boolean;
   private smooth$ = new Subject<number>();
   private _height: number;
   private _hoverMode: ChartHoverModeEnum;
-  private listeningToHoverMode = false;
   public singleColorKey: string;
   private drawGraph$ = new Subject<{ forceRedraw?: boolean; forceSkipReact?: boolean }>();
 
@@ -69,7 +75,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
   @Input() hideMaximize: 'show' | 'hide' | 'disabled' = 'show';
   @Input() legendConfiguration: Partial<ExtLegend & { noTextWrap: boolean }> = {};
   @Input() yAxisType: plotly.AxisType = 'linear';
-  private previousHoverMode: "x" | "y" | "closest" | false | "x unified" | "y unified";
+  private previousHoverMode: 'x' | 'y' | 'closest' | false | 'x unified' | 'y unified';
 
   @Input() set height(height: number) {
     this._height = height;
@@ -131,6 +137,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
     this._hoverMode = hoverMode;
     this.previousHoverMode = this.previousHoverMode ?? hoverMode;
     if (this.chart) {
+      this.updateHoverMode(this.plotlyContainer.nativeElement);
       this.drawGraph$.next({forceRedraw: true, forceSkipReact: false});
     }
   }
@@ -139,7 +146,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
     return this._hoverMode;
   }
 
-  @Input() set smoothType(smoothType: string) {
+  @Input() set smoothType(smoothType: SmoothTypeEnum) {
     this._smoothType = smoothType;
     this.isSmooth = this.smoothWeight > 0;
     if (this.alreadyDrawn) {
@@ -172,7 +179,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
   @ViewChild('drawHere', {static: true}) plotlyContainer: ElementRef;
   private chartElm;
   private _smoothWeight: number;
-  private _smoothType: string;
+  private _smoothType: SmoothTypeEnum;
 
 
   constructor(
@@ -234,7 +241,6 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
           }));
         }
         this.previousOffsetWidth = this.plotlyContainer.nativeElement.offsetWidth;
-        this.previousHeight = this.height;
 
         if (!skipReact) {
           this.zone.runOutsideAngular(() => (Plotly.react as typeof plotly.react)(root, data, layout, config).then(() => {
@@ -247,32 +253,10 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
           setTimeout(() => {
             this.subscribeColorButtons(container);
             this.updateLegend();
-            this.listenToHoverModeChange();
           });
         }
         this.alreadyDrawn = true;
       }));
-  }
-
-  listenToHoverModeChange() {
-    if (this.listeningToHoverMode) {
-      return;
-    }
-    this.plotlyContainer.nativeElement.querySelector('.chart')?.on('plotly_afterplot', () => {
-      const activeBtns = this.plotlyContainer.nativeElement.querySelectorAll('.modebar-btn.active');
-      if (activeBtns.length > 0) {
-        activeBtns.forEach((bt => {
-          if (bt.attributes['data-attr'].value === 'hovermode') {
-            if (bt.attributes['data-val'].value !== this.hoverMode && this.previousHoverMode === this.hoverMode) {
-              this._hoverMode = bt.attributes['data-val'].value;
-              this.hoverModeChanged.emit(bt.attributes['data-val'].value);
-            }
-          }
-        }));
-        this.previousHoverMode = this.hoverMode;
-      }
-    });
-    this.listeningToHoverMode = true;
   }
 
   drawPlotly(): [plotly.Root, plotly.Data[], Partial<ExtLayout>, Partial<plotly.Config>, Element] {
@@ -413,7 +397,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
         };
         layout.width = Math.max((data?.cells?.values?.length ?? 0) * 100, this.plotlyContainer.nativeElement.offsetWidth - 3);
         layout.title = {
-          ...layout.title as Record<string, any>,
+          ...layout.title as Record<string, string>,
           xanchor: 'left',
           xref: 'paper',
           x: 0
@@ -492,6 +476,31 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
     }
 
     const modeBarButtonsToAdd = ['v1hovermode', 'togglespikelines'] as undefined as plotly.ModeBarButton[];
+
+    modeBarButtonsToAdd.push({
+      name: 'Hover mode',
+      title: this.getHoverModeTitle(this.hoverMode),
+      icon: {
+        width: 24,
+        height: 24,
+        // fill: 'rgb(77, 102, 255)',
+        path: this.getHoverModePath(this.hoverMode),
+      },
+      click: (gd: plotly.PlotlyHTMLElement) => {
+        switch (this.hoverMode) {
+          case 'closest':
+            this.hoverMode = 'x';
+            break;
+          case 'x':
+            this.hoverMode = 'x unified';
+            break;
+          default:
+            this.hoverMode = 'closest';
+        }
+        this.hoverModeChanged.emit(this.hoverMode);
+        this.updateHoverMode(gd);
+      }
+    });
 
     if (['multiScalar', 'scalar'].includes(graph.layout.type)) {
       modeBarButtonsToAdd.push({
@@ -600,7 +609,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
     }
 
     const config = {
-      modeBarButtonsToRemove: (this.hideDownloadButtons ? ['sendDataToCloud', 'toImage'] : ['sendDataToCloud']) as plotly.ModeBarDefaultButtons[],
+      modeBarButtonsToRemove: ['sendDataToCloud', 'hoverClosestCartesian', 'hoverCompareCartesian'].concat(this.hideDownloadButtons ? ['toImage'] : []) as plotly.ModeBarDefaultButtons[],
       displaylogo: false,
       modeBarButtonsToAdd,
       toImageButtonOptions: {
@@ -610,6 +619,15 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
     } as plotly.Config;
 
     return [this.chartElm, graph.data, layout, config, this.chartData];
+  }
+
+  private updateHoverMode(gd: HTMLElement) {
+    const elm = gd.querySelectorAll('.modebar-btn[data-title^="Hover: "]')[0];
+    if (elm) {
+      elm.setAttribute('data-title', this.getHoverModeTitle(this.hoverMode));
+      const path = elm.querySelectorAll('svg path')[0];
+      path.setAttribute('d', this.getHoverModePath(this.hoverMode));
+    }
   }
 
   private getTitle(graph: ExtFrame) {
@@ -848,12 +866,10 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
 
   getToggleLegendIcon() {
     return {
-      width: 1000,
+      width: 24,
+      height: 24,
       fill: 'rgb(77, 102, 255)',
-      path: 'M200,250H50a50,50,0,0,1,0-100H200a50,50,0,0,1,0,100Zm800-50a50,50,0,0,0-50-50H400a50,50,0,0,0,0,100H950A50,50,0,0,0,1000,200ZM250,400a50,50,0,0,0-50-50H50a50,50,0,0,0,0,100H200A50,50,0,0,0,250,400Zm750,0a50,50,0,0,0-50-50H400a50,50,0,0,0,0,100H950A50,50,0,0,0,1000,400ZM250,600a50,50,0,0,0-50-50H50a50,50,0,0,0,0,100H200A50,50,0,0,0,250,600Zm750,0a50,50,0,0,0-50-50H400a50,50,0,0,0,0,100H950A50,50,0,0,0,1000,600ZM250,800a50,50,0,0,0-50-50H50a50,50,0,0,0,0,100H200A50,50,0,0,0,250,800Zm750,0a50,50,0,0,0-50-50H400a50,50,0,0,0,0,100H950A50,50,0,0,0,1000,800Z',
-      ascent: 1000,
-      descent: 0,
-      transform: 'translate(0, -100)'
+      path: 'm6,7h-3c-.55,0-1-.45-1-1s.45-1,1-1h3c.55,0,1,.45,1,1s-.45,1-1,1Zm16-1c0-.55-.45-1-1-1h-11c-.55,0-1,.45-1,1s.45,1,1,1h11c.55,0,1-.45,1-1Zm-15,4c0-.55-.45-1-1-1h-3c-.55,0-1,.45-1,1s.45,1,1,1h3c.55,0,1-.45,1-1Zm15,0c0-.55-.45-1-1-1h-11c-.55,0-1,.45-1,1s.45,1,1,1h11c.55,0,1-.45,1-1Zm-15,4c0-.55-.45-1-1-1h-3c-.55,0-1,.45-1,1s.45,1,1,1h3c.55,0,1-.45,1-1Zm15,0c0-.55-.45-1-1-1h-11c-.55,0-1,.45-1,1s.45,1,1,1h11c.55,0,1-.45,1-1Zm-15,4c0-.55-.45-1-1-1h-3c-.55,0-1,.45-1,1s.45,1,1,1h3c.55,0,1-.45,1-1Zm15,0c0-.55-.45-1-1-1h-11c-.55,0-1,.45-1,1s.45,1,1,1h11c.55,0,1-.45,1-1Z',
     };
   }
 
@@ -887,6 +903,13 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
     fill: 'rgb(77, 102, 255)',
     path: 'M22,0H2C.9,0,0,.9,0,2V22c0,1.1,.9,2,2,2H22c1.1,0,2-.9,2-2V2c0-1.1-.9-2-2-2ZM8.02,9.54l-2.59,2.59,2.59,2.58v2.83L2.6,12.13l5.42-5.42v2.83Zm3.11,11.59l-1.96-.4L12.91,3.13l1.96,.4-3.74,17.6Zm4.89-3.59v-2.83l2.59-2.58-2.59-2.59v-2.83l5.42,5.42-5.42,5.41Z',
   });
+
+  getHoverModePath = (mode: ChartHoverModeEnum) =>
+    mode === 'x'
+      ? 'm22,4v6c0,.55-.45,1-1,1H7c-.55,0-1-.45-1-1v-1.17l-3.83-1.83,3.83-1.83v-1.17c0-.55.45-1,1-1h14c.55,0,1,.45,1,1Zm0,10v6c0,.55-.45,1-1,1H7c-.55,0-1-.45-1-1v-1.17l-3.83-1.83,3.83-1.83v-1.17c0-.55.45-1,1-1h14c.55,0,1,.45,1,1Z' :
+      mode === 'x unified' ?
+        'm21,3H7c-.55,0-1,.45-1,1v5.17l-3.83,2.83,3.83,2.83v5.17c0,.55.45,1,1,1h14c.55,0,1-.45,1-1V4c0-.55-.45-1-1-1Zm-2,14h-10v-2h10v2Zm0-4h-10v-2h10v2Zm0-4h-10v-2h10v2Z' :
+        'm22,9v6c0,.55-.45,1-1,1H7c-.55,0-1-.45-1-1v-1.17l-3.83-1.83,3.83-1.83v-1.17c0-.55.45-1,1-1h14c.55,0,1,.45,1,1Z';
 
 
   getLogIcon(onOrOff: boolean) {
@@ -936,7 +959,7 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
   private maximizeGraph() {
     this.maximizeClicked.emit();
     this.zone.run(() => {
-      this.dialog.open(GraphViewerComponent, {
+      this.dialog.open<GraphViewerComponent, GraphViewerData>(GraphViewerComponent, {
         data: {
           ...(this.exportForReport && {embedFunction: (data) => this.createEmbedCode.emit({xaxis: data.xaxis, domRect: data.domRect})}),
           // signed url are updated after originChart was cloned - need to update images urls!
@@ -950,11 +973,12 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
           yAxisType: this.yAxisType,
           smoothWeight: this.smoothWeight,
           smoothType: this.smoothType,
+          hoverMode: this.hoverMode,
           darkTheme: this.isDarkTheme,
           isCompare: this.isCompare,
           moveLegendToTitle: this.moveLegendToTitle,
           legendConfiguration: this.legendConfiguration
-        } as GraphViewerData,
+        },
         panelClass: ['image-viewer-dialog', this.isDarkTheme ? 'dark-theme' : 'light-theme'],
         height: '100%',
         maxHeight: 'auto',
@@ -1011,5 +1035,15 @@ export class SingleGraphComponent extends PlotlyGraphBaseComponent {
         const graphPosition = node.selectAll('.angular').attr('transform');
         node.selectAll('.numbers').attr('transform', graphPosition);
       });
+  }
+
+  private getHoverModeTitle(hoverMode: 'x' | 'y' | 'closest' | false | 'x unified' | 'y unified') {
+    let mode: string;
+    if (typeof hoverMode === 'string') {
+       mode = hoverMode.charAt(0).toUpperCase() + hoverMode.slice(1);
+    } else {
+      mode = 'None';
+    }
+    return `Hover: ${mode}`
   }
 }

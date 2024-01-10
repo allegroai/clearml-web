@@ -14,6 +14,13 @@ import {
 import {selectStartPipelineDialogTask} from '../../experiments/reducers';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 
+export interface RunPipelineResult {
+  confirmed: boolean;
+  queue: Queue;
+  args: {name: string; value: string}[];
+  task: string;
+}
+
 @Component({
   selector: 'sm-run-pipeline-controller-dialog',
   templateUrl: './run-pipeline-controller-dialog.component.html',
@@ -65,10 +72,10 @@ export class RunPipelineControllerDialogComponent implements OnInit, OnDestroy {
   closeDialog(confirmed) {
     this.dialogRef.close({
       confirmed,
-      queue: this.selectedQueue?.id,
+      queue: this.selectedQueue,
       args: this.params?.map(param => ({name: param.name, value: param.value})),
       task: this.task.id
-    });
+    } as RunPipelineResult);
   }
 
   ngOnDestroy(): void {

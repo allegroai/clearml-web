@@ -179,7 +179,7 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
           }
           this.removeLines();
           this.drawLines();
-          this.cdr.detectChanges();
+          this.cdr.markForCheck();
         }, 0);
 
         if(this.selectedEntity) {
@@ -336,7 +336,9 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
         this.aceEditor?.getSession().setValue(this.stepDiff);
       } catch (e) {
         this.stepDiff = null;
-        this.detailsPanelMode = this.defaultDetailsMode;
+        if (this.defaultDetailsMode === StatusOption.code) {
+          this.detailsPanelMode = this.defaultDetailsMode;
+        }
       }
       const id = this.infoData.runtime._pipeline_hash ? (step?.data?.job_id) : null;
       if (id) {
@@ -408,7 +410,7 @@ export class PipelineControllerInfoComponent implements OnInit, AfterViewInit, O
       this.detailsPanelMode = null;
       window.setTimeout(() => {
         this.detailsPanelMode = StatusOption.content;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }, 450);
     }
   }

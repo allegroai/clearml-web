@@ -18,7 +18,7 @@ import {TIME_INTERVALS} from '../../workers-and-queues.consts';
 import {
   IOption
 } from '@common/shared/ui-components/inputs/select-autocomplete-with-chips/select-autocomplete-with-chips.component';
-import {LineChartData} from '@common/shared/components/charts/line-chart/line-chart.component';
+import {Topic} from '@common/shared/utils/statistics';
 
 @Component({
   selector: 'sm-queue-stats',
@@ -32,8 +32,8 @@ export class QueueStatsComponent implements OnInit, OnDestroy {
   public statsError$ = this.store.select(selectStatsErrorNotice);
   public selectedQueue: Queue;
   public refreshChart = true;
-  public waitChartData: LineChartData;
-  public lenChartData: LineChartData;
+  public waitChartData: Topic[];
+  public lenChartData: Topic[];
 
   public timeFrameOptions: IOption[] = [
     {label: '3 Hours', value: (3 * TIME_INTERVALS.HOUR).toString()},
@@ -44,7 +44,6 @@ export class QueueStatsComponent implements OnInit, OnDestroy {
     {label: '1 Month', value: (TIME_INTERVALS.MONTH).toString()}];
 
   @ViewChild('waitchart', {read: ViewContainerRef, static: true}) waitChartRef: ViewContainerRef;
-  @ViewChild('lenchart', {read: ViewContainerRef, static: true}) lenChartRef: ViewContainerRef;
   private intervaleHandle: number;
   public currentTimeFrame: string;
   public trackByFn = (index: number, option: IOption) => option.value;
@@ -71,8 +70,8 @@ export class QueueStatsComponent implements OnInit, OnDestroy {
       (data) => {
         if (data && (data.wait || data.length)) {
           this.refreshChart = false;
-          this.waitChartData = {dataByTopic: data.wait, data: null};
-          this.lenChartData = {dataByTopic: data.length, data: null};
+          this.waitChartData = data.wait;
+          this.lenChartData = data.length;
           this.cdr.detectChanges();
         }
       }
@@ -113,7 +112,7 @@ export class QueueStatsComponent implements OnInit, OnDestroy {
     return `${th}:${tm}:${ts}`;
   }
 
-  timeFrameChanged($event: any) {
-    this.store.dispatch(setStatsParams({timeFrame: $event}));
+  timeFrameChanged(value: string) {
+    this.store.dispatch(setStatsParams({timeFrame: value}));
   }
 }

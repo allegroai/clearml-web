@@ -39,6 +39,7 @@ import {extCoreModules} from '~/build-specifics';
 import {ReportCodeEmbedService} from '../shared/services/report-code-embed.service';
 import {recentTasksReducer} from '@common/core/reducers/recent-tasks-reducer';
 import {BreadcrumbsService} from '@common/shared/services/breadcrumbs.service';
+import {MatDialogModule} from '@angular/material/dialog';
 
 export const reducers = {
   auth: authReducer,
@@ -66,7 +67,8 @@ const syncedKeys = [
   'rootProjects.defaultNestedModeForFeature',
   'views.availableUpdates',
   'views.showSurvey',
-  'views.neverShowPopupAgain'
+  'views.neverShowPopupAgain',
+  'views.tableCardsCollapsed'
 ];
 const key = '_saved_state_';
 
@@ -130,6 +132,7 @@ const userPrefMetaFactory = (userPreferences: UserPreferences): MetaReducer[] =>
       ProjectsEffects,
       UserEffects,
     ]),
+    MatDialogModule,
     HttpClientModule,
     ...extCoreModules
   ],

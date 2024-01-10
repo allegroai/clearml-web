@@ -7,20 +7,24 @@ import {QueueCreateDialogEffects} from './queue-create-dialog.effects';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {QueueCreateDialogComponent} from './queue-create-dialog.component';
 import {CreateNewQueueFormComponent} from './create-new-queue-form/create-new-queue-form.component';
-import {UiComponentsModule} from '../ui-components/ui-components.module';
-import {SMMaterialModule} from '../material/material.module';
 import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
+import {
+  UniqueNameValidatorDirective
+} from '@common/shared/ui-components/template-forms-ui/unique-name-validator.directive';
+import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
+import {MatInputModule} from '@angular/material/input';
 
 @NgModule({
-  imports        : [
-    UiComponentsModule,
+  imports: [
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    SMMaterialModule,
     StoreModule.forFeature('queueCreateDialog', queueCreateDialogReducer),
     EffectsModule.forFeature([QueueCreateDialogEffects]),
     LabeledFormFieldDirective,
+    UniqueNameValidatorDirective,
+    DialogTemplateComponent,
+    MatInputModule,
   ],
   declarations   : [QueueCreateDialogComponent, CreateNewQueueFormComponent]
 })

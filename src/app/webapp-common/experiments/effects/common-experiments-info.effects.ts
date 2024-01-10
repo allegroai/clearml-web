@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
-import {Actions, createEffect, ofType} from '@ngrx/effects';
+import {Actions, concatLatestFrom, createEffect, ofType} from '@ngrx/effects';
 import {Store} from '@ngrx/store';
-import {catchError, filter, map, mergeMap, shareReplay, switchMap, take, tap, withLatestFrom} from 'rxjs/operators';
+import {catchError, filter, map, mergeMap, shareReplay, switchMap, take, tap} from 'rxjs/operators';
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
 import {getExperimentInfoOnlyFields} from '~/features/experiments/experiments.consts';
 import {
@@ -30,6 +30,7 @@ import {
   getExperimentConfigurationObj,
   getPipelineConfigurationObj,
   getSelectedPipelineStep,
+  navigateToDataset,
   saveExperiment,
   saveExperimentConfigObj,
   saveExperimentSection,
@@ -48,7 +49,7 @@ import {
 } from '../reducers';
 import {convertStopToComplete} from '../shared/common-experiments.utils';
 import {ExperimentConverterService} from '~/features/experiments/shared/services/experiment-converter.service';
-import {of} from 'rxjs';
+import {from, of} from 'rxjs';
 import {emptyAction} from '~/app.constants';
 import {ReplaceHyperparamsEnum} from '~/business-logic/model/tasks/replaceHyperparamsEnum';
 import {Router} from '@angular/router';
@@ -64,6 +65,11 @@ import {TasksGetByIdExResponse} from '~/business-logic/model/tasks/tasksGetByIdE
 import {ARTIFACTS_ONLY_FIELDS} from '@common/experiments/experiment.consts';
 import {ITask} from '~/business-logic/model/al-task';
 import {RefreshService} from '@common/core/services/refresh.service';
+import {selectActiveWorkspace} from '@common/core/reducers/users-reducer';
+import {fromFetch} from 'rxjs/fetch';
+import {isFileserverUrl} from '~/shared/utils/url';
+import {getExtraHeaders} from '~/features/experiments/shared/experiments.utils';
+import {MESSAGES_SEVERITY} from '@common/constants';
 
 
 @Injectable()
@@ -91,11 +97,11 @@ export class CommonExperimentsInfoEffects {
 
   getExperimentConfigurationNames$ = createEffect(() => this.actions$.pipe(
     ofType(getExperimentConfigurationNames),
-    withLatestFrom(
+    concatLatestFrom(() => [
       this.store.select(selectSelectedExperimentFromRouter),
       this.store.select(selectExperimentConfiguration),
       this.store.select(selectExperimentSelectedConfigObjectFromRoute)
-    ),
+    ]),
     filter(([, experimentId]) => !!experimentId),
     switchMap(([action, experimentId, configuration, selectedConfiguration]) => this.apiTasks.tasksGetConfigurationNames({tasks: [experimentId], skip_empty: false})
       .pipe(
@@ -135,18 +141,18 @@ export class CommonExperimentsInfoEffects {
 
   getExperimentConfigurationObj$ = createEffect(() => this.actions$.pipe(
     ofType(getExperimentConfigurationObj, getPipelineConfigurationObj),
-    withLatestFrom(
+    concatLatestFrom(() => [
       this.store.select(selectSelectedExperimentFromRouter),
       this.store.select(selectExperimentConfiguration),
       this.store.select(selectExperimentSelectedConfigObjectFromRoute)
-    ),
+    ]),
     filter(([action, , configuration, configObj]) => (configuration && configObj && (configObj in configuration)) || action.type === getPipelineConfigurationObj.type),
     switchMap(([action, experimentId, configuration, configObj]) => this.apiTasks.tasksGetConfigurations({
         tasks: [experimentId],
         names: [action.type === getPipelineConfigurationObj.type ? 'Pipeline' : configObj]
       })
       .pipe(
-        mergeMap((res: any) => {
+        mergeMap(res => {
           const configurationObj = {
             ...configuration,
             [action.type === getPipelineConfigurationObj.type ? 'Pipeline' : configObj]: res.configurations[0].configuration[0]
@@ -176,15 +182,15 @@ export class CommonExperimentsInfoEffects {
 
   getPipelineStep$ = createEffect(() => this.actions$.pipe(
     ofType(commonInfoActions.getSelectedPipelineStep),
-    withLatestFrom(
+    concatLatestFrom(() => [
       this.store.select(selectRouterConfig).pipe(map(config => !!config?.includes('pipelines')))
-    ),
+    ]),
     switchMap(([action, pipeline]) => this.apiTasks.tasksGetByIdEx({
       id: [action.id],
       // eslint-disable-next-line @typescript-eslint/naming-convention
       only_fields: pipeline ? PIPELINE_INFO_ONLY_FIELDS : ['name', 'comment', 'parent.name', 'parent.project.id', 'runtime', 'configuration', 'status']
     }).pipe(
-      mergeMap((res: any) =>
+      mergeMap(res =>
         [commonInfoActions.setSelectedPipelineStep({step: res?.tasks[0]}), deactivateLoader(action.type)]
       ),
       catchError(error => [
@@ -196,14 +202,14 @@ export class CommonExperimentsInfoEffects {
 
   getExperimentInfo$ = createEffect(() => this.actions$.pipe(
     ofType(commonInfoActions.getExperimentInfo, commonInfoActions.autoRefreshExperimentInfo, commonInfoActions.experimentUpdatedSuccessfully),
-    withLatestFrom(
+    concatLatestFrom(() => [
       this.store.select(selectSelectedTableExperiment),
       this.store.select(selectSelectedExperiment),
       this.store.select(selectSelectedFromTable ),
       this.store.select(selectExperimentInfoData),
       this.store.select(selectAppVisible),
       this.store.select(selectRouterConfig).pipe(map(config => !!config?.includes('pipelines') || !!config?.includes('datasets')))
-    ),
+    ]),
     switchMap(([action, tableSelected, selected,
                  selectedExperimentFromTable, infoData, visible, customView]) => {
       const currentSelected = tableSelected || selected;
@@ -255,10 +261,10 @@ export class CommonExperimentsInfoEffects {
       filter(project => !!project),
       take(1),
       map(() => action))),
-    withLatestFrom(
+    concatLatestFrom(() => [
       this.store.select(selectHasDataFeature),
       this.store.select(selectRouterConfig).pipe(map(config => !!config?.includes('pipelines') || !!config?.includes('datasets')))
-    ),
+    ]),
     switchMap(([action, hasDataFeature, graphView]) =>
       this.apiTasks.tasksGetByIdEx({
         id: [action.experimentId],
@@ -266,7 +272,7 @@ export class CommonExperimentsInfoEffects {
         only_fields: graphView ? PIPELINE_INFO_ONLY_FIELDS : getExperimentInfoOnlyFields(hasDataFeature)
       })
         .pipe(
-          withLatestFrom(this.store.select(selectPipelineSelectedStep)),
+          concatLatestFrom(() => this.store.select(selectPipelineSelectedStep)),
           mergeMap(([res, selectedStep]) => {
             let experiment = res.tasks[0];
             if (experiment) {
@@ -332,15 +338,60 @@ export class CommonExperimentsInfoEffects {
     )
   ));
 
+  downloadArtifact = createEffect(() => this.actions$.pipe(
+    ofType(commonInfoActions.downloadArtifacts),
+    filter(action => !!action.url),
+    concatLatestFrom(() => this.store.select(selectActiveWorkspace)),
+    switchMap(([action, workspace]) => action.inMemory ?
+      fromFetch(action.url,
+        {
+          ...getExtraHeaders(workspace?.id),
+          method: 'GET',
+          credentials: 'include',
+          mode: 'cors',
+        })
+        .pipe(
+          switchMap(res => from(res.blob()).pipe(
+            map(fileBlob => {
+              const url = window.URL.createObjectURL(fileBlob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.target = '_blank';
+              const header = res.headers.get('Content-Disposition');
+              const parts = header!.split(';');
+              a.download = parts[1].split('=')[1];
+              a.click();
+            })
+          )),
+          catchError(() => of(action.url)),
+        ) :
+      of(null)
+        .pipe(map(() => {
+          const src = new URL(action.url);
+          if (isFileserverUrl(action.url)) {
+            src.searchParams.set('download', '');
+          }
+          const a = document.createElement('a') as HTMLAnchorElement;
+          a.target = '_blank';
+          a.href = src.toString();
+          a.click();
+        }))
+    ),
+    catchError(() => of(commonInfoActions.downloadFailed())),
+    map((status: string) => status ?
+      commonInfoActions.downloadArtifacts({url: status}) :
+      commonInfoActions.downloadSuccess())
+  ), );
+
 
   // Changes fields which can be applied regardless of experiment draft state i.e name, comments, tags
   updateExperimentDetails$ = createEffect(() => this.actions$.pipe(
     ofType(experimentDetailsUpdated),
-    withLatestFrom(
+    concatLatestFrom(() => [
       this.store.select(selectExperimentInfoData),
       this.store.select(selectSelectedExperiment),
       this.store.select(selectExperimentFormValidity)
-    ),
+    ]),
     filter(([, , , valid]) => valid),
     mergeMap(([action, , selectedExperiment]) =>
       this.apiTasks.tasksUpdate({task: action.id, ...action.changes})
@@ -369,12 +420,12 @@ export class CommonExperimentsInfoEffects {
   saveExperimentData$ = createEffect(() => this.actions$.pipe(
     ofType(saveExperiment),
     // Changes fields which can be applied Only on draft mode experiment
-    withLatestFrom(
+    concatLatestFrom(() => [
       this.store.select(selectExperimentInfoData),
       this.store.select(selectSelectedExperiment),
       this.store.select(selectExperimentInfoDataFreeze),
       this.store.select(selectExperimentFormValidity),
-    ),
+    ]),
     filter(([, , , , valid]) => valid),
     switchMap(([, infoData, selectedExperiment, infoFreeze]) =>
       this.apiTasks.tasksEdit(this.converter.convertExperiment(infoData, selectedExperiment, infoFreeze))
@@ -396,7 +447,7 @@ export class CommonExperimentsInfoEffects {
 
   saveExperimentSectionData$ = createEffect(() => this.actions$.pipe(
     ofType(saveExperimentSection),
-    withLatestFrom(this.store.select(selectSelectedExperiment)),
+    concatLatestFrom(() => [this.store.select(selectSelectedExperiment)]),
     switchMap(([action, selectedExperiment]) => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const {type, parent, ...changes} = action;
@@ -423,11 +474,11 @@ export class CommonExperimentsInfoEffects {
 
   saveExperimentHyperParams$ = createEffect(() => this.actions$.pipe(
     ofType(saveHyperParamsSection),
-    withLatestFrom(
+    concatLatestFrom(() => [
       this.store.select(selectSelectedExperiment),
       this.store.select(selectExperimentFormValidity),
       this.store.select(selectExperimentHyperParamsSelectedSectionFromRoute)
-    ),
+    ]),
     filter(([, , valid]) => valid),
     switchMap(([action, selectedExperiment, , section]) =>
       this.apiTasks.tasksEditHyperParams({
@@ -453,9 +504,9 @@ export class CommonExperimentsInfoEffects {
 
   saveExperimentConfigObj$ = createEffect(() => this.actions$.pipe(
     ofType(saveExperimentConfigObj),
-    withLatestFrom(
+    concatLatestFrom(() => [
       this.store.select(selectSelectedExperimentFromRouter),
-    ),
+    ]),
     switchMap(([action, selectedExperiment]) =>
       this.apiTasks.tasksEditConfiguration({task: selectedExperiment, configuration: action.configuration})
         .pipe(
@@ -477,14 +528,14 @@ export class CommonExperimentsInfoEffects {
 
   deleteExperimentHyperParamsSection$ = createEffect(() => this.actions$.pipe(
     ofType(deleteHyperParamsSection),
-    withLatestFrom(
+    concatLatestFrom(() => [
       this.store.select(selectExperimentInfoData),
       this.store.select(selectSelectedExperiment),
       this.store.select(selectExperimentInfoDataFreeze),
       this.store.select(selectExperimentFormValidity),
       this.store.select(selectRouterParams).pipe(map(params => params?.projectId)),
       this.store.select(selectExperimentHyperParamsSelectedSectionFromRoute)
-    ),
+    ]),
     filter(([, , , , valid]) => valid),
     switchMap(([action, , selectedExperiment, , , , section]) =>
       this.apiTasks.tasksDeleteHyperParams({task: selectedExperiment.id, hyperparams: [{section: action.section}]})
@@ -504,4 +555,24 @@ export class CommonExperimentsInfoEffects {
     ),
   ));
 
+  navigateToDataset = createEffect(() => this.actions$.pipe(
+    ofType(navigateToDataset),
+    switchMap(action => this.apiTasks.tasksGetByIdEx({
+      id: [action.datasetId],
+      only_fields: ['project.id']
+    })),
+    map(res => {
+      if (res.tasks?.length > 0) {
+        const task = res.tasks[0];
+        const a = document.createElement('a');
+        a.href = `/datasets/simple/${task.project.id}/experiments/${task.id}`
+        a.target = '_blank';
+        a.click();
+        return {type: 'none'};
+      } else {
+        return addMessage(MESSAGES_SEVERITY.WARN, 'Dataset not found');
+      }
+    }),
+    catchError(() => of(addMessage(MESSAGES_SEVERITY.WARN, 'Dataset not found')))
+  ));
 }

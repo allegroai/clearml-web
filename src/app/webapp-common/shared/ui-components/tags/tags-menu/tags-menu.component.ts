@@ -15,13 +15,37 @@ import {activateModelEdit} from '@common/models/actions/models-info.actions';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {map} from 'rxjs/operators';
 import {Observable} from 'rxjs';
-import {MatMenu} from '@angular/material/menu';
+import {MatMenu, MatMenuModule} from '@angular/material/menu';
+import {MatInputModule} from '@angular/material/input';
+import {FormsModule} from '@angular/forms';
+import {AsyncPipe, NgForOf, NgIf} from '@angular/common';
+import {FilterPipe} from '@common/shared/pipes/filter.pipe';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
+import {A11yModule} from '@angular/cdk/a11y';
+import {
+  ShowTooltipIfEllipsisDirective
+} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 
 @Component({
   selector: 'sm-tags-menu',
   templateUrl: './tags-menu.component.html',
   styleUrls: ['./tags-menu.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    MatMenuModule,
+    MatInputModule,
+    FormsModule,
+    NgIf,
+    AsyncPipe,
+    NgForOf,
+    FilterPipe,
+    TooltipDirective,
+    ClickStopPropagationDirective,
+    A11yModule,
+    ShowTooltipIfEllipsisDirective
+  ]
 })
 export class TagsMenuComponent {
   public filterText: string;

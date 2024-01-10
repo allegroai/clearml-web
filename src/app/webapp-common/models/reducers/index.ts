@@ -1,20 +1,19 @@
 import {ActionReducerMap, createSelector} from '@ngrx/store';
-import {ModelsViewState, modelsInitialState, modelsViewReducer} from './models-view.reducer';
+import {modelsInitialState, modelsViewReducer, ModelsViewState} from './models-view.reducer';
 import {ModelInfoState, modelsInfoReducer} from './model-info.reducer';
-import {SelectedModel} from '../shared/models.model';
-import {CountAvailableAndIsDisableSelectedFiltered} from '@common/shared/entity-page/items.utils';
 import {MODELS_TABLE_COLS} from '@common/models/models.consts';
 import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {selectRouterConfig, selectRouterParams} from '@common/core/reducers/router-reducer';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
-import {selectSelectedProjectId} from '@common/core/reducers/projects.reducer';
+import {selectIsDeepMode, selectSelectedProjectId} from '@common/core/reducers/projects.reducer';
+import {MODELS_TABLE_COL_FIELDS} from '@common/models/shared/models.const';
 
 export interface ModelsState {
   view: ModelsViewState;
   info: ModelInfoState;
 }
 
-export const reducers: ActionReducerMap<ModelsState, any> = {
+export const reducers: ActionReducerMap<ModelsState> = {
   view: modelsViewReducer,
   info: modelsInfoReducer,
 };
@@ -64,6 +63,10 @@ export const selectMetadataColsForProject = createSelector(selectMetadataColumns
       hidden: !!hidden[col.id],
       style: {...col.style, ...(colWidth[col.id] && {width: `${colWidth[col.id]}px`})}
     } as ISmCol)));
+export const selectFilteredTableCols = createSelector(selectModelTableColumns, selectMetadataColsForProject, selectSelectedProjectId, selectIsDeepMode, (tableCols, metaCols, projectId, deep) =>
+  (deep || projectId === '*' ? tableCols : tableCols.filter(col => (col.id !== MODELS_TABLE_COL_FIELDS.PROJECT)))
+    .concat(metaCols.map(col => ({...col, meta: true})))
+);
 export const selectSplitSize = createSelector(selectModelsView, (state) => state.splitSize);
 export const selectTableMode = createSelector(selectModelsView, state => state.tableMode);
 

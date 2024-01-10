@@ -3,10 +3,10 @@ import {Task} from '~/business-logic/model/tasks/task';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import * as actions from '../actions/experiments-compare-charts.actions';
 import {ExperimentSettings} from '../../experiments/reducers/experiment-output.reducer';
-import {IMultiplot} from '@common/tasks/tasks.utils';
 import {SelectedMetric} from '@common/experiments-compare/experiments-compare.constants';
 import {EventsGetTaskSingleValueMetricsResponseTasks} from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponseTasks';
-import {ChartHoverModeEnum} from "@common/experiments/shared/common-experiments.const";
+import {ChartHoverModeEnum} from '@common/experiments/shared/common-experiments.const';
+import {ReportsApiMultiplotsResponse} from '@common/constants';
 
 export interface GroupedHyperParams {
   [section: string]: HyperParams;
@@ -31,7 +31,7 @@ export interface IExperimentCompareChartsState {
   metricsHistogramCharts: any;
   multiSingleValues: EventsGetTaskSingleValueMetricsResponseTasks[];
   cachedAxisType: ScalarKeyEnum;
-  metricsPlotsCharts: IMultiplot;
+  metricsPlotsCharts: ReportsApiMultiplotsResponse;
   settingsList: Array<ExperimentCompareSettings>;
   searchTerm: string;
   showSettingsBar: boolean;
@@ -56,7 +56,7 @@ export const initialState: IExperimentCompareChartsState = {
   showSettingsBar: false,
   selectedExperiments: [], // TODO: Move this to the general compare reducer
   globalLegendData: null,
-  scalarsHoverMode: "x"
+  scalarsHoverMode: 'x'
 };
 
 export const experimentsCompareChartsReducer = createReducer(
@@ -74,10 +74,10 @@ export const experimentsCompareChartsReducer = createReducer(
       const ids = sortedIds.join();
       const experimentExists = state.settingsList.find((setting) => setting.id?.join() === ids);
       const discardBefore = new Date();
-      discardBefore.setMonth(discardBefore.getMonth() - 6);
+      discardBefore.setMonth(discardBefore.getMonth() - 2);
       if (experimentExists) {
         newSettings = state.settingsList
-          .filter(setting => discardBefore < new Date(setting.lastModified || 1648771200000))
+          // .filter(setting => discardBefore < new Date(setting.lastModified || 1648771200000))
           .map(setting => setting.id?.join() === ids ? {...setting, ...changes} : setting);
       } else {
         newSettings = [

@@ -15,14 +15,6 @@
     pointer-events: none;
   }
 
-  .experiment-info-container {
-    transition: 0.3s;
-    &.hide-experiment-info {
-      width: 0 !important;
-      max-width: 0 !important;
-    }
-  }
-
   .button-label {
     margin-left: 12px;
   }

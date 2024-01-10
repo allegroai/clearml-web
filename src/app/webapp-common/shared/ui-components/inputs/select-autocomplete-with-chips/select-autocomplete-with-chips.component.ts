@@ -1,6 +1,6 @@
 import {
   AfterViewInit,
-  ChangeDetectionStrategy, ChangeDetectorRef,
+  ChangeDetectionStrategy,
   Component,
   ElementRef,
   EventEmitter,
@@ -10,18 +10,24 @@ import {
   Output,
   ViewChild
 } from '@angular/core';
-import {TemplateFormSectionBase} from '../../template-forms-ui/templateFormSectionBase';
-import {FormsModule, NG_VALUE_ACCESSOR, NgForm} from '@angular/forms';
+import {TemplateFormSectionBaseDirective} from '../../template-forms-ui/templateFormSectionBase';
+import {FormControl, FormsModule, NG_VALUE_ACCESSOR, ReactiveFormsModule} from '@angular/forms';
 import {COMMA, ENTER} from '@angular/cdk/keycodes';
-import {map, startWith} from 'rxjs/operators';
-import {fromEvent, Subscription} from 'rxjs';
-import {Observable} from 'rxjs/internal/Observable';
+import {filter, map, startWith} from 'rxjs/operators';
+import {Observable, fromEvent, Subscription} from 'rxjs';
 import {MatOptionModule, MatOptionSelectionChange} from '@angular/material/core';
-import {MatAutocompleteModule, MatAutocompleteTrigger} from '@angular/material/autocomplete';
-import {MatChipsModule} from '@angular/material/chips';
+import {
+  MatAutocompleteModule,
+  MatAutocompleteSelectedEvent,
+  MatAutocompleteTrigger
+} from '@angular/material/autocomplete';
+import {MatChipInputEvent, MatChipsModule} from '@angular/material/chips';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {AsyncPipe, NgFor, NgIf} from '@angular/common';
-import {ChipsModule} from '@common/shared/ui-components/buttons/chips/chips.module';
+import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
+import {ChipsComponent} from '@common/shared/ui-components/buttons/chips/chips.component';
+import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
+import {isArray} from 'lodash-es';
 
 
 export interface IOption {
@@ -41,16 +47,22 @@ export interface IOption {
       multi: true
     }],
   standalone: true,
-  imports: [FormsModule, NgIf, NgFor, AsyncPipe, MatChipsModule, MatOptionModule, MatFormFieldModule, MatAutocompleteModule, ChipsModule]
+  imports: [FormsModule, NgIf, NgFor, AsyncPipe, MatChipsModule, MatOptionModule, MatFormFieldModule, MatAutocompleteModule, ClickStopPropagationDirective, ChipsComponent, LabeledFormFieldDirective, ReactiveFormsModule]
 })
 
-export class SelectAutocompleteWithChipsComponent extends TemplateFormSectionBase implements OnDestroy, AfterViewInit {
+export class SelectAutocompleteWithChipsComponent extends TemplateFormSectionBaseDirective implements OnDestroy, AfterViewInit {
   private _items: { label: string; value: string }[];
-  private _focusIt: any;
+  private _focusIt: boolean;
   public loading = true;
   separatorKeysCodes: number[] = [ENTER, COMMA];
   filterText = '';
   isNewName = false;
+  public chipCtrl = new FormControl<string | null>(null);
+  public filteredItems$: Observable<{ label: string; value: string }[]>;
+  private keyDownSub: Subscription;
+
+  protected readonly trackByValue = (index: number, option: IOption) => option?.value ?? option;
+
   @Input() errorMsg: string;
   @Input() multiple = true;
   @Input() appearance: 'outline' | 'fill';
@@ -58,25 +70,22 @@ export class SelectAutocompleteWithChipsComponent extends TemplateFormSectionBas
   @Input() showSearchIcon = false;
   @Input() formFieldClass: string;
   @Output() customOptionAdded = new EventEmitter<MatOptionSelectionChange>();
-  public filteredItems: Observable<{ label: string; value: string }[]>;
-  private keyDownSub: Subscription;
-
-  @Input() set items(items: { label: string; value: string }[]) {
-    this.loading = false;
-    this._items = items;
-    this.autoSelectForm?.controls[this.name]?.setValue('');
-    this.cdr.detectChanges();
-  }
-
-  get items() {
-    return this._items || [];
-  }
-
   @Input() override disabled = false;
   @Input() clearable = true;
   @Input() placeholder = '';
   @Input() optionAddable = false;
   @Input() autofocus = false;
+
+  @Input() set items(items: { label: string; value: string }[]) {
+    this.loading = false;
+    this._items = Array.isArray(items) ? items : [items];
+    this.chipCtrl.setValue(null);
+    this.disabled ? this.chipCtrl.disable() : this.chipCtrl.enable();
+  }
+
+  get items() {
+    return this._items || [];
+  }
 
   @Input() set focusIt(isFocus) {
     if (isFocus && this.autofocus) {
@@ -91,43 +100,58 @@ export class SelectAutocompleteWithChipsComponent extends TemplateFormSectionBas
     return this._focusIt;
   }
 
-  @ViewChild('autoSelectForm', {static: true}) autoSelectForm: NgForm;
   @ViewChild('autocompleteInput') autocompleteInput: ElementRef<HTMLInputElement>;
   @ViewChild(MatAutocompleteTrigger) autocomplete: MatAutocompleteTrigger;
 
-  constructor(private cdr: ChangeDetectorRef) {
-    super();
+  override set value(val) {
+    super.value = !val || isArray(val) ? val : [val];
   }
+
   ngOnDestroy() {
     this.keyDownSub?.unsubscribe();
   }
 
   private _filter(value: string) {
     this.filterText = value;
-    const currentVal = Array.isArray(this.val) ? this.val : [this.val];
+    const currentVal = !this.val || Array.isArray(this.val) ? this.val : [this.val];
     const currLabels = currentVal?.map(item => item?.label || item) as string[] || [];
     const itemsLabels = this.items.map(item => item.label) as string[];
     this.isNewName = !itemsLabels.includes(value);
     const filterValue = value?.toLowerCase();
-    return this.items.filter((item: any) =>
-      item.label?.toLowerCase().includes(filterValue) &&
-      !currLabels.includes(item.label)
+    return  this.items.filter(item =>
+      item.label?.toLowerCase().includes(filterValue) && !currLabels.includes(item.label)
     );
   }
 
-  displayFn(item: any): string {
-    return item && item.label ? item.label : item;
+  displayFn(item: {label: string} | string): string {
+    return typeof item === 'string' ? item : item?.label;
   }
 
-  remove(item?: any) {
-    this.writeValue(this.multiple ? this.val.filter(it => it !== item) : undefined);
+  remove(item: IOption) {
+    this.value = this.val.filter(it => it.value !== item.value);
+    this.chipCtrl.setValue(null);
+    this.autocompleteInput.nativeElement.value = '';
   }
 
-  selected($event: any): void {
-    if (typeof $event === 'string') {
-      return;
+  clear() {
+    this.value = null;
+    this.chipCtrl.setValue(null);
+    this.autocompleteInput.nativeElement.value = '';
+  }
+
+  add(event: MatChipInputEvent) {
+    const value = (event.value || '').trim();
+    if (value) {
+      this.value = this.multiple ? this.val.concat([value]) : [value];
+      this.chipCtrl.setValue(null);
     }
-    this.writeValue(this.multiple ? this.val.concat([$event]) : $event);
+    event.chipInput!.clear();
+  }
+
+  selected(event: MatAutocompleteSelectedEvent) {
+    const value = event.option.value;
+    this.value = this.multiple ? this.val.concat([value]) : [value];
+    this.chipCtrl.setValue(null);
     this.autocompleteInput.nativeElement.value = '';
   }
 
@@ -152,19 +176,22 @@ export class SelectAutocompleteWithChipsComponent extends TemplateFormSectionBas
         }
       });
 
-      if (!this.autoSelectForm.controls[this.name]) {
-        return;
-      }
-      this.filteredItems = this.autoSelectForm.controls[this.name].valueChanges
+      this.filteredItems$ = this.chipCtrl.valueChanges
         .pipe(
           startWith(''),
-          map(value => typeof value === 'string' ? value : ''),
+          filter(value => typeof value !== 'object' || value === null),
+          map(value => value ?? ''),
           map(value => this._filter(value)),
         );
     }, 0);
   }
 
   trackByFn(index, item) {
-    return item.label;
+    return item?.label ?? item;
   }
+
+  openDropdown () {
+    this.autocomplete.panelOpen ? this.autocomplete.closePanel() : this.autocomplete.openPanel();
+  }
+
 }

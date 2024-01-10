@@ -9,11 +9,7 @@ import {ApiModelsService} from '~/business-logic/api-services/models.service';
 import {BlModelsService} from '~/business-logic/services/models.service';
 import {requestFailed} from '../../core/actions/http.actions';
 import {activeLoader, addMessage, deactivateLoader, setServerError} from '../../core/actions/layout.actions';
-import {
-  downloadForGetAll,
-  getFilteredUsers,
-  setProjectUsers
-} from '../../core/actions/projects.actions';
+import {downloadForGetAll, getFilteredUsers, setProjectUsers} from '../../core/actions/projects.actions';
 import {setURLParams} from '../../core/actions/router.actions';
 import {selectIsArchivedMode, selectIsDeepMode, selectSelectedProject} from '../../core/reducers/projects.reducer';
 import {selectRouterParams} from '../../core/reducers/router-reducer';
@@ -24,7 +20,13 @@ import * as actions from '../actions/models-view.actions';
 import {setMetadataKeys, setSelectedModelsDisableAvailable} from '../actions/models-view.actions';
 import {MODELS_PAGE_SIZE, MODELS_TABLE_COLS} from '../models.consts';
 import * as modelsSelectors from '../reducers';
-import {selectModelsList, selectSelectedModels, selectTableFilters, selectTableSortFields} from '../reducers';
+import {
+  selectModelsList,
+  selectSelectedModels,
+  selectTableFilters,
+  selectTableMode,
+  selectTableSortFields
+} from '../reducers';
 import {MODEL_TAGS, MODELS_ONLY_FIELDS, MODELS_TABLE_COL_FIELDS} from '../shared/models.const';
 import {SelectedModel} from '../shared/models.model';
 import {ModelsGetAllExRequest} from '~/business-logic/model/models/modelsGetAllExRequest';
@@ -49,7 +51,6 @@ import {hasValue} from '../../shared/utils/helpers.util';
 import {
   ProjectsGetModelMetadataValuesResponse
 } from '~/business-logic/model/projects/projectsGetModelMetadataValuesResponse';
-import {selectTableMode} from '../../experiments/reducers';
 import {selectActiveWorkspaceReady} from '~/core/reducers/view.reducer';
 import {escapeRegex} from '@common/shared/utils/escape-regex';
 import {MESSAGES_SEVERITY} from '@common/constants';
@@ -398,7 +399,7 @@ export class ModelsViewEffects {
 
   modelSelectionChanged = createEffect(() => this.actions$.pipe(
     ofType(actions.modelSelectionChanged),
-    tap(action => this.navigateAfterModelSelectionChanged(action.model)),
+    tap(action => this.navigateAfterModelSelectionChanged(action.model, action.project)),
     mergeMap(() => [actions.setTableMode({mode: 'info'})])
     // map(action => actions.setSelectedModel({model: action.model}))
   ));
@@ -406,11 +407,12 @@ export class ModelsViewEffects {
     ofType(actions.selectNextModel),
     concatLatestFrom(() => [
       this.store.select(selectModelsList),
+      this.store.select(selectRouterParams).pipe(map(params => params?.projectId)),
       this.store.select(selectTableMode)
     ]),
-    filter(([, , tableMode]) => tableMode === 'info'),
-    tap(([, models]) => this.navigateAfterModelSelectionChanged(models[0] as SelectedModel)),
-    mergeMap(() => [actions.setTableMode({mode: 'info'})])
+    filter(([, , , tableMode]) => tableMode === 'info'),
+    tap(([, models, projectId]) => this.navigateAfterModelSelectionChanged(models[0] as SelectedModel, projectId, true)),
+    mergeMap(([, models]) => [actions.setTableMode({mode: models.length > 0 ? 'info' : 'table'})])
   ));
 
   getReadyFilter(tableFilters) {
@@ -574,7 +576,7 @@ export class ModelsViewEffects {
     this.store.dispatch(setURLParams({filters, orders: sortFields, isArchived, columns, isDeep}));
   }
 
-  navigateAfterModelSelectionChanged(selectedModel: SelectedModel) {
+  navigateAfterModelSelectionChanged(selectedModel: SelectedModel, modelProject: string, replaceUrl = false) {
     let activeChild = this.route.snapshot;
     while (activeChild.firstChild) {
       activeChild = activeChild.firstChild;
@@ -589,7 +591,7 @@ export class ModelsViewEffects {
         queryParamsHandling: 'preserve',
         relativeTo: baseUrl
       }) :
-      this.router.navigate([], {queryParamsHandling: 'preserve', relativeTo: baseUrl});
+      this.router.navigate(['projects', modelProject, 'models'], {queryParamsHandling: 'preserve', replaceUrl});
   }
 
   isSelectedModelInCheckedModels(checkedModels, selectedModel) {

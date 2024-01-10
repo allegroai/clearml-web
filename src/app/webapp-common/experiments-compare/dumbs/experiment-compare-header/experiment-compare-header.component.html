@@ -23,6 +23,7 @@
              [ngClass]="{'fa-align-left': viewMode.endsWith('values'), 'fa-chart-area': viewMode === 'graph'}"></i>
           <ng-container [ngSwitch]="true">
             <span *ngSwitchCase="currentPage === 'hyper-params' && viewMode === 'graph'">Parallel Coordinates</span>
+            <span *ngSwitchCase="currentPage === 'hyper-params' && viewMode === 'scatter'"><i class="al-icon al-ico-no-scatter-graph sm me-2"></i>Scatter Plot</span>
             <span *ngSwitchCase="currentPage === 'scalars' && viewMode === 'graph'">Graph</span>
             <span *ngSwitchCase="currentPage === 'scalars' && viewMode === 'values'">Last Values</span>
             <span *ngSwitchDefault>{{(queryParamsViewMode$ | async) || viewMode | noUnderscore | titlecase}}</span>
@@ -47,13 +48,16 @@
         <mat-option value="graph" class="compare-mat-option">
           <i class="fas fa-chart-area me-2"></i>{{currentPage === 'hyper-params' ? 'Parallel Coordinates' : 'Graph'}}
         </mat-option>
+        <mat-option *ngIf="currentPage === 'hyper-params'" value="scatter" class="compare-mat-option">
+          <i class="al-icon al-ico-no-scatter-graph sm me-2"></i>Scatter Plot
+        </mat-option>
       </mat-select>
     </mat-form-field>
 
     <div id="nextDiff" class="next-diff"></div>
 
     <mat-slide-toggle
-      *ngIf="['hyper-params', 'details', 'models-details', 'network'].includes(currentPage) && viewMode !== 'graph'"
+      *ngIf="['hyper-params', 'details', 'models-details', 'network'].includes(currentPage) && viewMode !== 'graph' && viewMode !== 'scatter'"
       (change)="hideIdenticalFieldsToggled($event)"
       [checked]="selectHideIdenticalFields$ | async">Hide Identical Fields
     </mat-slide-toggle>

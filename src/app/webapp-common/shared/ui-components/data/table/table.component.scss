@@ -22,19 +22,21 @@
     z-index: 1000;
   }
 
-  ::ng-deep .p-datatable-scrollable, ::ng-deep .p-datatable {
-    &> .p-datatable-wrapper > .p-datatable-table > .p-datatable-thead {
-      z-index: 20;
+  .has-header {
+    ::ng-deep .p-datatable-scrollable, ::ng-deep .p-datatable {
+      & > .p-datatable-wrapper > .p-datatable-table > .p-datatable-thead {
+        z-index: 20;
 
-      &:after {
-        content: "";
-        position: absolute;
-        z-index: -1;
-        left: 0;
-        right: 0;
-        top: 0;
-        height: var(--table-row-height);
-        background-color: $blue-700;
+        &:after {
+          content: "";
+          position: absolute;
+          z-index: -1;
+          left: 0;
+          right: 0;
+          top: 0;
+          height: var(--table-row-height);
+          background-color: $blue-700;
+        }
       }
     }
   }
@@ -45,18 +47,36 @@
     }
   }
 
+  .card-header {
+    box-shadow: 0 0 12px 6px rgba($blue-800, 0.9);
+  }
+
   .table-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    box-shadow: 0 0 12px 6px rgba($blue-700, 0.9);
   }
 
   .table-header-title {
     font-weight: 500;
     text-transform: uppercase;
-    padding-left: 16px;
+    padding-left: 8px;
+    margin-right: 12px;
+  }
+
+  .collapse-button {
+    cursor: pointer;
     margin-right: auto;
+    margin-top: -2px;
+
+    &.active {
+      color: $neon-yellow;
+    }
+
+    &:hover:not(.active) {
+      color: $blue-200;
+    }
+
   }
 
   .table-actions {
@@ -261,8 +281,11 @@
         animation-name: expand;
         animation-duration: 0.35s;
         animation-timing-function: ease-in-out;
-      }
 
+        .collapse-animation {
+          transition: max-height 0.35s ease;
+        }
+      }
 
       &:first-child {
         .card-wrapper {
@@ -370,7 +393,7 @@
       }
     }
 
-    ::ng-deep .p-datatable-scrollable > .p-datatable-wrapper > .p-datatable-table > .p-datatable-thead {
+    .has-header ::ng-deep .p-datatable-scrollable > .p-datatable-wrapper > .p-datatable-table > .p-datatable-thead {
       &:after {
         background-color: $blue-50;
       }

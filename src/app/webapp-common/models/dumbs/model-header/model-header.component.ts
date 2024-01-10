@@ -3,7 +3,9 @@ import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
 import {BaseEntityHeaderComponent} from '@common/shared/entity-page/base-entity-header/base-entity-header.component';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
-import {MetricValueType} from '@common/experiments-compare/experiments-compare.constants';
+import {
+  SelectionEvent
+} from '@common/experiments/dumb/select-metric-for-custom-col/select-metric-for-custom-col.component';
 
 @Component({
   selector   : 'sm-model-header',
@@ -30,7 +32,7 @@ export class ModelHeaderComponent extends BaseEntityHeaderComponent {
   @Input() metadataKeys: string[];
   @Input() metricVariants: Array<MetricVariantResult>;
   @Input() isLoadingMetadataKeys: any;
-  @Input() tableMode: string;
+  @Input() tableMode: 'table' | 'info' | 'compare';
   @Input() rippleEffect: boolean;
   @Input() hideNavigation: boolean;
   @Output() isArchivedChanged = new EventEmitter<boolean>();
@@ -38,15 +40,11 @@ export class ModelHeaderComponent extends BaseEntityHeaderComponent {
   @Output() refreshListClicked       = new EventEmitter();
   @Output() setAutoRefresh           = new EventEmitter();
   @Output() selectedTableColsChanged = new EventEmitter();
-  @Output() selectedMetricToShow     = new EventEmitter<{
-    variant: MetricVariantResult;
-    addCol: boolean;
-    valueType: MetricValueType;
-  }>();
+  @Output() selectedMetricToShow     = new EventEmitter<SelectionEvent>();
   @Output() selectMetadataKeysActiveChanged = new EventEmitter();
   @Output() clearTableFilters        = new EventEmitter<{ [s: string]: FilterMetadata }>();
   @Output() addOrRemoveMetadataKeyFromColumns = new EventEmitter<{key: string; show: boolean}>();
-  @Output() tableModeChanged = new EventEmitter<'table' | 'info'>();
+  @Output() tableModeChanged = new EventEmitter<'table' | 'info' | 'compare'>();
   @Output() removeColFromList = new EventEmitter<ISmCol['id']>();
 
   onIsArchivedChanged(value: boolean) {

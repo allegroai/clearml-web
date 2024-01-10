@@ -1,7 +1,8 @@
 import {Pipe, PipeTransform} from '@angular/core';
 
 @Pipe({
-  name: 'safeUrlParameter'
+  name: 'safeUrlParameter',
+  standalone: true
 })
 export class safeAngularUrlParameterPipe implements PipeTransform {
 

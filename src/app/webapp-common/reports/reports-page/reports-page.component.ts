@@ -42,8 +42,8 @@ import {isEqual} from 'lodash-es';
 import {ClipboardService} from 'ngx-clipboard';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {CommonProjectsPageComponent} from '@common/projects/containers/projects-page/common-projects-page.component';
-import {EntityTypeEnum} from "~/shared/constants/non-common-consts";
-import {Project} from "~/business-logic/model/projects/project";
+import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
+import {Project} from '~/business-logic/model/projects/project';
 
 @Component({
   selector: 'sm-reports-page',

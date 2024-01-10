@@ -48,6 +48,8 @@ export interface ExperimentSettings {
   id: string;
   hiddenMetricsScalar: Array<string>;
   hiddenMetricsPlot: Array<string>;
+  selectedMetricsScalar: Array<string>;
+  selectedMetricsPlot: Array<string>;
   selectedHyperParams: Array<string>;
   selectedMetric: string;
   smoothWeight: number;
@@ -128,7 +130,7 @@ export const experimentOutputReducer = createReducer(
     const changes = {...action.changes, lastModified: (new Date()).getTime()} as ExperimentSettings;
     const experimentExists = state.settingsList.find(setting => setting.id === action.id);
     const discardBefore = new Date();
-    discardBefore.setMonth(discardBefore.getMonth() - 6);
+    discardBefore.setMonth(discardBefore.getMonth() - 2);
     if (experimentExists) {
       newSettings = state.settingsList
         .filter(setting => discardBefore < new Date(setting.lastModified || 1648771200000))

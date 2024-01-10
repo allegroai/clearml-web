@@ -1,6 +1,5 @@
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {SMSharedModule} from '@common/shared/shared.module';
 import {StoreModule} from '@ngrx/store';
 import {ProjectRouterModule} from './projects-routing.module';
 import {projectsReducer} from './projects.reducer';
@@ -12,7 +11,6 @@ export const projectSyncedKeys = ['showHidden', 'tableModeAwareness', 'orderBy',
 @NgModule({
   imports        : [
     CommonModule,
-    SMSharedModule,
     ProjectRouterModule,
     FormsModule,
     ReactiveFormsModule,

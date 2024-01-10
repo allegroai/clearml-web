@@ -2,7 +2,7 @@ import {Pipe, PipeTransform} from '@angular/core';
 
 @Pipe({
   name: 'durationFormater',
-  pure: true
+  standalone: true
 })
 export class DurationFormaterPipe implements PipeTransform {
 
@@ -57,7 +57,7 @@ export class DurationFormaterPipe implements PipeTransform {
         return `${hours}:${minutes}:${seconds}`;
 
       case 'ddhhmmss':
-        return `${days === '00' ? '' : days}${days === '00' ? '' : 'd'} 
+        return `${days === '00' ? '' : days}${days === '00' ? '' : 'd'}
         ${(days === '00' && hours === '00') ? '' : hours}${(days === '00' && hours === '00') ? '' : 'h'}
         ${(days === '00' && hours === '00' && minutes === '00') ? '' : minutes}${(days === '00' && hours === '00' && minutes === '00')?'':'m'}
         ${seconds}s`;

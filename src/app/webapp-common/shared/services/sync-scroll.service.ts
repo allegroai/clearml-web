@@ -12,7 +12,7 @@ interface SyncScrollData {
 export class SyncScrollService {
 
   private scrollSubject: Subject<SyncScrollData> = new Subject();
-  private timer: NodeJS.Timer;
+  private timer: number;
   public  originalTarget: EventTarget;
 
   setScroll(scroll: SyncScrollData) {
@@ -25,7 +25,7 @@ export class SyncScrollService {
 
   updateOriginalTarget(target: EventTarget) {
     this.originalTarget = this.originalTarget || target;
-    clearInterval(this.timer);
-    this.timer = setTimeout( () => this.originalTarget = null, 200);
+    window.clearInterval(this.timer);
+    this.timer = window.setTimeout( () => this.originalTarget = null, 200);
   }
 }

@@ -1,11 +1,16 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {NgIf} from '@angular/common';
 
 @Component({
   selector: 'sm-navbar-item',
   templateUrl: './navbar-item.component.html',
   styleUrls: ['./navbar-item.component.scss'],
+  standalone: true,
+  imports: [
+    NgIf
+  ]
 })
-export class NavbarItemComponent implements OnInit {
+export class NavbarItemComponent {
 
   @Input() header: string;
   @Input() active: boolean;
@@ -13,12 +18,5 @@ export class NavbarItemComponent implements OnInit {
   @Input() subHeader: string;
   @Input() multi: boolean = false;
   @Input() large: boolean = true;
-
   @Output() itemSelected = new EventEmitter<string>();
-
-  constructor() { }
-
-  ngOnInit() {
-  }
-
 }

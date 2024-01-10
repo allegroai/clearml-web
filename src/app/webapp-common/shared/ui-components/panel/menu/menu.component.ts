@@ -10,13 +10,29 @@ import {
   Renderer2,
   ViewChild
 } from '@angular/core';
-import {MatMenuTrigger} from '@angular/material/menu';
+import {MatMenuModule, MatMenuTrigger} from '@angular/material/menu';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {MatInputModule} from '@angular/material/input';
+import {FormsModule} from '@angular/forms';
+import {MatListModule} from '@angular/material/list';
+import {NgIf} from '@angular/common';
+import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 
 @Component({
-  selector       : 'sm-menu',
-  templateUrl    : './menu.component.html',
-  styleUrls      : ['./menu.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  selector: 'sm-menu',
+  templateUrl: './menu.component.html',
+  styleUrls: ['./menu.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    MatMenuModule,
+    TooltipDirective,
+    MatInputModule,
+    FormsModule,
+    MatListModule,
+    NgIf,
+    ClickStopPropagationDirective
+  ]
 })
 export class MenuComponent implements AfterViewInit {
   public isMenuOpen: boolean = false;
@@ -47,7 +63,6 @@ export class MenuComponent implements AfterViewInit {
     return this._position;
   }
   public _position;
-  @Output() onMenuClosed = new EventEmitter();
   @Output() menuClosed = new EventEmitter();
   @Output() menuOpened = new EventEmitter();
   @Output() searchValueChanged = new EventEmitter();

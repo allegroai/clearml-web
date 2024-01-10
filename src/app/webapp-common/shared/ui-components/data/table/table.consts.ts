@@ -43,6 +43,8 @@ export interface ISmCol {
   disablePointerEvents?: boolean; // Disable pointer events for this col header (for selection col)
   metric_hash?: string;
   variant_hash?: string;
+  metricName?: string;
+  variantName?: string;
   isParam?: boolean;
   valueType?: string;
   projectId?: string;

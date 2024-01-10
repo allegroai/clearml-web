@@ -8,21 +8,14 @@ import {experimentsCompareReducers} from './reducers';
 import {ExperimentsCompareDetailsEffects} from './effects/experiments-compare-details.effects';
 import {ExperimentsCompareChartsEffects} from './effects/experiments-compare-charts.effects';
 import {ExperimentsCompareMetricsValuesEffects} from './effects/experiments-compare-metrics-values.effects';
-import {SMSharedModule} from '../shared/shared.module';
 import {
   ExperimentCompareDetailsComponent
 } from './containers/experiment-compare-details/experiment-compare-details.component';
 import {
   ExperimentCompareMetricValuesComponent
 } from './containers/experiment-compare-metric-values/experiment-compare-metric-values.component';
-import {
-  ExperimentCompareScalarChartsComponent
-} from './containers/experiment-compare-metric-charts/experiment-compare-scalar-charts.component';
 import {ExperimentCompareHeaderComponent} from './dumbs/experiment-compare-header/experiment-compare-header.component';
 import {ExperimentSharedModule} from '~/features/experiments/shared/experiment-shared.module';
-import {
-  ExperimentComparePlotsComponent
-} from './containers/experiment-compare-plots/experiment-compare-plots.component';
 import {ExperimentGraphsModule} from '../shared/experiment-graphs/experiment-graphs.module';
 
 import {DebugImagesModule} from '../debug-images/debug-images.module';
@@ -54,23 +47,56 @@ import {
 } from './containers/experiment-compare-params/experiment-compare-params.component';
 import {ExperimentsCompareParamsEffects} from './effects/experiments-compare-params.effects';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {UiComponentsModule} from '../shared/ui-components/ui-components.module';
-import {SMMaterialModule} from '../shared/material/material.module';
-import {SharedPipesModule} from '@common/shared/pipes/shared-pipes.module';
 import {ModelCompareDetailsComponent} from '@common/experiments-compare/containers/model-compare-details/model-compare-details.component';
 import {IExperimentCompareChartsState} from '@common/experiments-compare/reducers/experiments-compare-charts.reducer';
 import {UserPreferences} from '@common/user-preferences';
 import {merge, pick} from 'lodash-es';
-import {EXPERIMENTS_PREFIX} from '@common/experiments/experiment.consts';
 import {createUserPrefFeatureReducer} from '@common/core/meta-reducers/user-pref-reducer';
 import {EXPERIMENTS_COMPARE_METRICS_CHARTS_} from '@common/experiments-compare/actions/experiments-compare-charts.actions';
 import {EXPERIMENTS_COMPARE_SELECT_EXPERIMENT_} from '@common/experiments-compare/actions/compare-header.actions';
 import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
 import {EllipsisMiddleDirective} from '@common/shared/ui-components/directives/ellipsis-middle.directive';
+import { CompareScatterPlotComponent } from './containers/compare-scatter-plot/compare-scatter-plot.component';
+import {ScatterPlotComponent} from '@common/shared/components/charts/scatter-plot/scatter-plot.component';
+import {NoUnderscorePipe} from '@common/shared/pipes/no-underscore.pipe';
+import {HideHashPipe} from '@common/shared/pipes/hide-hash.pipe';
+import {HideHashTitlePipe} from '@common/shared/pipes/hide-hash-title.pipe';
+import {IdToObjectsArrayPipe} from '@common/shared/pipes/idToObjectsArray.pipe';
+import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
+import {
+  ExperimentCompareGeneralDataComponent
+} from '@common/experiments-compare/dumbs/experiment-compare-general-data/experiment-compare-general-data.component';
+import {
+  ClearFiltersButtonComponent
+} from '@common/shared/components/clear-filters-button/clear-filters-button.component';
+import {SearchComponent} from '@common/shared/ui-components/inputs/search/search.component';
+import {TableModule} from 'primeng/table';
+import {TagListComponent} from '@common/shared/ui-components/tags/tag-list/tag-list.component';
+import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
+import {ChooseColorModule} from '@common/shared/ui-components/directives/choose-color/choose-color.module';
+import {PortalComponent} from '@common/shared/portal/portal.component';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {
+  GroupedCheckedFilterListComponent
+} from '@common/shared/ui-components/data/grouped-checked-filter-list/grouped-checked-filter-list.component';
+import {
+  SelectableFilterListComponent
+} from '@common/shared/ui-components/data/selectable-filter-list/selectable-filter-list.component';
+import {
+  SelectableGroupedFilterListComponent
+} from '@common/shared/ui-components/data/selectable-grouped-filter-list/selectable-grouped-filter-list.component';
+import {RefreshButtonComponent} from '@common/shared/components/refresh-button/refresh-button.component';
+import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+import {MatOptionModule} from '@angular/material/core';
+import {MatSelectModule} from '@angular/material/select';
+import {MatSidenavModule} from '@angular/material/sidenav';
+import {MatExpansionModule} from '@angular/material/expansion';
+import {MatInputModule} from '@angular/material/input';
+import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 
 export const COMPARE_STORE_KEY = 'experimentsCompare';
 export const COMPARE_CONFIG_TOKEN =
-  new InjectionToken<StoreConfig<IExperimentCompareChartsState, any>>('CompareConfigToken');
+  new InjectionToken<StoreConfig<IExperimentCompareChartsState>>('CompareConfigToken');
 
 export const compareSyncedKeys = [
 ];
@@ -106,8 +132,6 @@ export const getCompareConfig = (userPreferences: UserPreferences) => ({
     ModelCompareDetailsComponent,
     ExperimentCompareParamsComponent,
     ExperimentCompareMetricValuesComponent,
-    ExperimentCompareScalarChartsComponent,
-    ExperimentComparePlotsComponent,
     ExperimentCompareHeaderComponent,
     GetKeyValueArrayPipePipe,
     SelectExperimentsForCompareComponent,
@@ -115,43 +139,66 @@ export const getCompareConfig = (userPreferences: UserPreferences) => ({
     CompareCardBodyDirective,
     CompareCardExtraHeaderDirective,
     CompareCardHeaderDirective,
-    ExperimentCompareHyperParamsGraphComponent
+    ExperimentCompareHyperParamsGraphComponent,
+    CompareScatterPlotComponent
   ],
     exports: [
         GetKeyValueArrayPipePipe,
     ],
-    imports: [
-        CommonModule,
-        DragDropModule,
-        DebugImagesModule,
-        SMSharedModule,
-        SMMaterialModule,
-        UiComponentsModule,
-        TableDiffModule,
-        ScrollingModule,
-        CardModule,
-        DrawerModule,
-        ExperimentSharedModule,
-        ExperimentsCompareRoutingModule,
-        ExperimentGraphsModule,
-        ExperimentCompareSharedModule,
-        StoreModule.forFeature(COMPARE_STORE_KEY, experimentsCompareReducers, COMPARE_CONFIG_TOKEN),
-        EffectsModule.forFeature([
-            ExperimentsCompareDetailsEffects,
-            ExperimentsCompareParamsEffects,
-            ExperimentsCompareChartsEffects,
-            ExperimentsCompareMetricsValuesEffects,
-            SelectCompareHeaderEffects,
-            ExperimentsCompareScalarsGraphEffects
-        ]),
-        MatRadioModule,
-        FormsModule,
-        ParallelCoordinatesGraphComponent,
-        SharedPipesModule,
-        LabeledFormFieldDirective,
-        ReactiveFormsModule,
-        EllipsisMiddleDirective
-    ],
+  imports: [
+    CommonModule,
+    DragDropModule,
+    DebugImagesModule,
+    TableDiffModule,
+    ScrollingModule,
+    CardModule,
+    DrawerModule,
+    ExperimentSharedModule,
+    ExperimentsCompareRoutingModule,
+    ExperimentGraphsModule,
+    ExperimentCompareSharedModule,
+    StoreModule.forFeature(COMPARE_STORE_KEY, experimentsCompareReducers, COMPARE_CONFIG_TOKEN),
+    EffectsModule.forFeature([
+      ExperimentsCompareDetailsEffects,
+      ExperimentsCompareParamsEffects,
+      ExperimentsCompareChartsEffects,
+      ExperimentsCompareMetricsValuesEffects,
+      SelectCompareHeaderEffects,
+      ExperimentsCompareScalarsGraphEffects
+    ]),
+    MatRadioModule,
+    FormsModule,
+    ParallelCoordinatesGraphComponent,
+    LabeledFormFieldDirective,
+    ReactiveFormsModule,
+    EllipsisMiddleDirective,
+    ScatterPlotComponent,
+    NoUnderscorePipe,
+    HideHashPipe,
+    HideHashTitlePipe,
+    IdToObjectsArrayPipe,
+    ClickStopPropagationDirective,
+    ExperimentCompareGeneralDataComponent,
+    ClearFiltersButtonComponent,
+    SearchComponent,
+    TableModule,
+    TagListComponent,
+    DialogTemplateComponent,
+    ChooseColorModule,
+    PortalComponent,
+    TooltipDirective,
+    GroupedCheckedFilterListComponent,
+    SelectableFilterListComponent,
+    SelectableGroupedFilterListComponent,
+    RefreshButtonComponent,
+    MatSlideToggleModule,
+    MatOptionModule,
+    MatSelectModule,
+    MatSidenavModule,
+    MatExpansionModule,
+    MatInputModule,
+    ShowTooltipIfEllipsisDirective
+  ],
   providers: [
     {provide: COMPARE_CONFIG_TOKEN, useFactory: getCompareConfig, deps: [UserPreferences]},
   ],

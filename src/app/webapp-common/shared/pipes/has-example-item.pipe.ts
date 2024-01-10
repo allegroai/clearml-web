@@ -2,7 +2,8 @@ import {Pipe, PipeTransform} from '@angular/core';
 import {isReadOnly} from '@common/shared/utils/is-read-only';
 
 @Pipe({
-  name: 'hasExampleItem'
+  name: 'hasExampleItem',
+  standalone: true
 })
 export class HasExampleItemPipe implements PipeTransform {
 

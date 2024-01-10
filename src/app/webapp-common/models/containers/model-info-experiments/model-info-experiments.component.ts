@@ -1,13 +1,13 @@
 import {Component, ViewChild} from '@angular/core';
-import {Store} from "@ngrx/store";
-import {selectSelectedModel} from "@common/models/reducers";
-import {Observable} from "rxjs";
+import {Store} from '@ngrx/store';
+import {selectSelectedModel} from '@common/models/reducers';
+import {Observable} from 'rxjs';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
-import {ExperimentsTableComponent} from "@common/experiments/dumb/experiments-table/experiments-table.component";
-import {SelectedModel} from "@common/models/shared/models.model";
-import {map} from "rxjs/operators";
-import {get} from "lodash-es";
-import {addMessage} from "@common/core/actions/layout.actions";
+import {ExperimentsTableComponent} from '@common/experiments/dumb/experiments-table/experiments-table.component';
+import {SelectedModel} from '@common/models/shared/models.model';
+import {map} from 'rxjs/operators';
+import {get} from 'lodash-es';
+import {addMessage} from '@common/core/actions/layout.actions';
 
 
 @Component({

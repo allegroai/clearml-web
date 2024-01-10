@@ -20,9 +20,9 @@ export const initialState: ScalarsGraphState = {
 };
 
 export const scalarsGraphReducer = createReducer(initialState,
-  on(setShowIdenticalHyperParams, (state: ScalarsGraphState) => ({...state, showIdenticalHyperParams: !state.showIdenticalHyperParams})),
-  on(setMetricsList, (state: ScalarsGraphState, {metricsList}) => ({...state, metrics: metricsList})),
-  on(setHyperParamsList, (state: ScalarsGraphState, {hyperParams}) => ({...state, hyperParams})),
-  on(setTasks, (state: ScalarsGraphState, {tasks}) => ({...state, tasks})),
-  on(setvalueType, (state: ScalarsGraphState, {valueType}) => ({...state, valueType})),
+  on(setShowIdenticalHyperParams, (state): ScalarsGraphState => ({...state, showIdenticalHyperParams: !state.showIdenticalHyperParams})),
+  on(setMetricsList, (state, {metricsList}): ScalarsGraphState => ({...state, metrics: metricsList})),
+  on(setHyperParamsList, (state, {hyperParams}): ScalarsGraphState => ({...state, hyperParams})),
+  on(setTasks, (state, {tasks}): ScalarsGraphState => ({...state, tasks})),
+  on(setvalueType, (state, {valueType}): ScalarsGraphState => ({...state, valueType})),
 );

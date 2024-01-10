@@ -46,7 +46,7 @@
 
   sm-simple-table-2 ::ng-deep .headers {
     height: 39px;
-    color: $blue-400;
+    color: $blue-300;
     border-bottom-color: $blue-600 !important;
   }
 
@@ -54,8 +54,8 @@
 
   .tabs-container {
     position: relative;
-    height: 48px;
-    padding-top: 12px;
+    height: 41px;
+    background-color: $blue-700;
     border-bottom: 1px solid $dark-border;
 
     ::ng-deep .navbar-item {
@@ -120,7 +120,7 @@
   }
 
   .empty-state {
-    height: 100%;
+    flex-grow: 1;
     padding: 24px;
     display: flex;
     align-items: center;

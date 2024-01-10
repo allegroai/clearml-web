@@ -7,7 +7,7 @@ export const EXPERIMENTS_COMPARE_SCALARS_GRAPH = 'EXPERIMENTS_COMPARE_SCALARS_GR
 
 export const getExperimentsHyperParams = createAction(
   EXPERIMENTS_COMPARE_SCALARS_GRAPH + 'GET_EXPERIMENTS_PARAMS',
-  props<{ experimentsIds: string[]; autoRefresh?: boolean }>()
+  props<{ experimentsIds: string[]; autoRefresh?: boolean; scatter?: boolean }>()
 );
 export const setMetricsList = createAction(
   EXPERIMENTS_COMPARE_SCALARS_GRAPH + 'SET_METRICS_LIST',

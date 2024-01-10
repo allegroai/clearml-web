@@ -6,7 +6,6 @@ import {filter, map, switchMap, take} from 'rxjs/operators';
 import {Environment} from '../environments/base';
 import {getParcoords, getPlot, getSample, getScalar, getSingleValues, reportsPlotlyReady} from './app.actions';
 import {
-  ReportsApiMultiplotsResponse,
   selectNoPermissions,
   selectParallelCoordinateExperiments,
   selectPlotData,
@@ -14,7 +13,6 @@ import {
   selectSampleData,
   selectSignIsNeeded,
   selectSingleValuesData,
-  selectTaskData
 } from './app.reducer';
 import {ExtFrame} from '@common/shared/single-graph/plotly-graph-base';
 import {DebugSample} from '@common/shared/debug-sample/debug-sample.reducer';
@@ -33,6 +31,7 @@ import {MetricValueType, SelectedMetric} from '@common/experiments-compare/exper
 import {ExtraTask} from '@common/experiments-compare/dumbs/parallel-coordinates-graph/parallel-coordinates-graph.component';
 import {EventsGetTaskSingleValueMetricsResponseValues} from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponseValues';
 import {ScalarKeyEnum} from '~/business-logic/model/reports/scalarKeyEnum';
+import {ReportsApiMultiplotsResponse} from '@common/constants';
 
 
 type WidgetTypes = 'plot' | 'scalar' | 'sample' | 'parcoords' | 'single';
@@ -144,15 +143,6 @@ export class AppComponent implements OnInit {
         this.hideMaximize = 'disabled';
       }
     });
-
-    this.store.select(selectTaskData)
-      .pipe(
-        filter(taskData => !!taskData),
-        take(1))
-      .subscribe(({sourceProject, sourceTasks, appId}) => {
-        this.webappLink = appId ? this.buildAppLink(sourceTasks, appId) : this.buildSourceLink(this.searchParams, sourceProject, sourceTasks);
-        this.cdr.detectChanges();
-      });
   }
 
   /// Merging all variants of same metric to same graph. (single experiment)
@@ -188,7 +178,7 @@ export class AppComponent implements OnInit {
           const merged = this.mergeVariants(metricsPlots as ReportsApiMultiplotsResponse);
           this.plotData = Object.values(merged)[0].plotParsed;
         } else {
-          const {merged,} = prepareMultiPlots(metricsPlots);
+          const {merged,} = prepareMultiPlots(metricsPlots as ReportsApiMultiplotsResponse);
           const newGraphs = convertMultiPlots(merged);
           const originalObject = this.searchParams.get('objects');
           const series = this.searchParams.get('series');
@@ -451,11 +441,6 @@ ${this.getComparePath(this.type)}?metricPath=${metricPath}&metricName=lala${vari
       case 'sample':
         return 'debug-images';
     }
-  }
-
-  private buildAppLink(sourceTasks: string[], appId) {
-    const isAutoscaler = appId.includes('autoscaler');
-    return `${window.location.origin.replace('4201', '4200')}/${isAutoscaler ? 'workers-and-queues/autoscalers' : 'applications'}/${appId}/info;experimentId=${sourceTasks[0]}?instancesFilter=All`;
   }
 
   private waitForVisibility(): Promise<boolean> {

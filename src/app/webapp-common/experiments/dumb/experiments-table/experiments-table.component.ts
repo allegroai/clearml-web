@@ -38,6 +38,7 @@ import {getRoundedNumber} from '../../shared/common-experiments.utils';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {MAT_TOOLTIP_DEFAULT_OPTIONS, MatTooltipDefaultOptions} from '@angular/material/tooltip';
 import {IExperimentInfo, ISelectedExperiment} from '~/features/experiments/shared/experiment-info.model';
+import {animate, style, transition, trigger} from '@angular/animations';
 
 @Component({
   selector: 'sm-experiments-table',
@@ -47,7 +48,30 @@ import {IExperimentInfo, ISelectedExperiment} from '~/features/experiments/share
   providers: [{
     provide: MAT_TOOLTIP_DEFAULT_OPTIONS,
     useValue: {showDelay: 500, position: 'above'} as MatTooltipDefaultOptions,
-  }]
+  }],
+  animations: [
+    trigger(
+      'inOutAnimation',
+      [
+        transition(
+          ':enter',
+          [
+            style({opacity: 0 }),
+            animate('0.25s ease-in',
+              style({opacity: 1 }))
+          ]
+        ),
+        transition(
+          ':leave',
+          [
+            style({opacity: 1 }),
+            animate('0.2s ease-in',
+              style({opacity: 0 }))
+          ]
+        )
+      ]
+    )
+  ]
 })
 export class ExperimentsTableComponent extends BaseTableView implements OnInit, OnDestroy {
   readonly experimentsTableColFields = EXPERIMENTS_TABLE_COL_FIELDS;
@@ -163,7 +187,7 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit, 
     // under 4 letters assume an acronym and capitalize.
     this.filtersOptions[EXPERIMENTS_TABLE_COL_FIELDS.TYPE] = typesAndActiveFilter.map((type: string) =>
       ({
-        label: (type?.length < 4 ? type.toUpperCase() : this.titleCasePipe.transform(this.noUnderscorePipe.transform(type))),
+        label: (type?.length < 4 ? type.toUpperCase() : this.titleCasePipe.transform((new NoUnderscorePipe()).transform(type))),
         value: type
       })
     );
@@ -182,6 +206,7 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit, 
   }
 
   @Input() systemTags = [] as string[];
+  @Input() cardHeight = 90;
   @Input() reorderableColumns = true;
   @Input() selectionReachedLimit: boolean;
 
@@ -227,7 +252,6 @@ export class ExperimentsTableComponent extends BaseTableView implements OnInit, 
   constructor(
     private changeDetector: ChangeDetectorRef,
     private store: Store,
-    private noUnderscorePipe: NoUnderscorePipe,
     private router: Router
   ) {
     super();

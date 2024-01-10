@@ -1,0 +1,14 @@
+<div class="navbar-header-container">
+  <ng-container *ngFor="let route of contextNavbar$ | async; trackBy:trackByFn">
+    <sm-navbar-item
+      *smCheckPermission="route.permissionCheck"
+      direction="bottom"
+      [attr.data-id]="route?.id ?? route.header"
+      [header]="route.header"
+      [active]="route.isActive"
+      [routerLink] = "route.link"
+      [subHeader]="(archivedMode$ | async) && route.subHeader"
+      (click)="setFeature(route.featureName ?? route.header)"
+    ></sm-navbar-item>
+  </ng-container>
+</div>

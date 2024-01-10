@@ -1,18 +1,12 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input} from '@angular/core';
 
 @Component({
   selector   : 'sm-number-counter',
   templateUrl: './number-counter.component.html',
-  styleUrls  : ['./number-counter.component.scss']
+  styleUrls  : ['./number-counter.component.scss'],
+  standalone: true,
 })
-export class NumberCounterComponent implements OnInit {
+export class NumberCounterComponent {
   @Input() counter;
   @Input() label;
-  constructor() {
-  }
-
-
-  ngOnInit() {
-  }
-
 }

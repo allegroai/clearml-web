@@ -285,6 +285,16 @@
     }
   }
 
+  .no-output {
+    text-align: center;
+    color: $cloudy-blue-two;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateY(-50%) translateX(-50%);
+    display: block;
+  }
+
   .no-output h4 {
     color: $blue-100;
   }

@@ -10,6 +10,7 @@ import {hasValue} from './helpers.util';
 import {MetricValueType} from '@common/experiments-compare/experiments-compare.constants';
 import {sortCol} from '@common/shared/utils/sortCol';
 import {TasksGetAllExRequestFilters} from '~/business-logic/model/tasks/tasksGetAllExRequestFilters';
+import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 
 export interface TableFilter {
   col?: string;
@@ -27,7 +28,16 @@ export interface MetricColumn {
 
 export const excludedKey = '__$not';
 
-export const getValueTypeName = (valueType: string) => valueType.replace('_', '').replace('value', '').toUpperCase();
+const metricVariantDelimiter = '\u203A'
+
+const MetricValueTypeStrings = {
+  value: 'LAST',
+  max_value: 'MAX',
+  min_value: 'MIN',
+};
+
+export const getValueTypeName = (valueType: MetricValueType) => MetricValueTypeStrings[valueType] ?? valueType;
+
 export const getTagsFilters = (tagsFilterAnd: boolean, tagsFilter: (string | null)[]): TasksGetAllExRequestFilters => {
   return {
     [tagsFilterAnd ? 'all' : 'any']: {
@@ -81,6 +91,8 @@ export const decodeFilter = (filters: string): TableFilter[] => filters.split(',
 
 export const uniqueFilterValueAndExcluded = (arr1 = [], arr2 = []) => Array.from(new Set(arr1.concat((arr2).map(key => key ? key.replace(/^__\$not/, '') : key))));
 
+const encodeMetric = (name) => encodeURIComponent(name).replaceAll('.', '%2e');
+
 export const encodeColumns = (mainCols: ISmCol[] | any, hiddenCols = {}, metricsCols = [], colsOrder = []): string[] => {
   colsOrder = colsOrder.filter(col => !hiddenCols[col]);
   return mainCols
@@ -89,9 +101,7 @@ export const encodeColumns = (mainCols: ISmCol[] | any, hiddenCols = {}, metrics
     .sort((a, b) => sortCol(a.id, b.id, colsOrder))
     .map((col) => {
       if (col.metric_hash) {
-        const headerParts = col.header.trim().split(' > ');
-        const variant = headerParts[1]?.replace(` ${getValueTypeName(col.valueType)}`, '');
-        return `m.${col.metric_hash}.${col.variant_hash}.${col.valueType}.${headerParts[0]}.${variant}`;
+        return `m.${col.metric_hash}.${col.variant_hash}.${col.valueType}.${encodeMetric(col.metricName)}.${encodeMetric(col.variantName)}`;
       }
       if (col.type === 'metadata') {
         return `meta.${col.key}`;
@@ -113,13 +123,13 @@ export const decodeColumns = (columns: string[], tableCols: ISmCol[]): [string[]
   columns.forEach(col => {
     if (col.startsWith('m.')) {
       const colParts = col.split('.');
-      const [, metricHash, variantHash, valueType, metric, ...variant] = colParts;
+      const [, metricHash, variantHash, valueType, metric, variant] = colParts;
       metrics.push({
         metricHash,
         variantHash,
         valueType: valueType as MetricValueType,
-        metric,
-        variant: variant.join('.')
+        metric: decodeURIComponent(metric),
+        variant: decodeURIComponent(variant)
       });
       allIds.push(`last_metrics.${colParts[1]}.${colParts[2]}.${colParts[3]}`);
     } else if (col.startsWith('hyperparams.') && !tableCols.find(tableCol => tableCol.id === col)) {
@@ -144,21 +154,18 @@ export const decodeColumns = (columns: string[], tableCols: ISmCol[]): [string[]
 };
 
 
-export const decodeHyperParam = (param: string): { name: string; section: string } => {
-  const [section, ...rest] = param.replace('hyperparams.', '').split('.');
-  return {
-    name: rest.slice(0, -1).join('.'),
-    section
-  };
+export const decodeHyperParam = (col: ISmCol): { name: string; section: string } => {
+  const [section, ...name] = col.id.replace('hyperparams.', '').split('.');
+  return { section, name: name.join('.') };
 };
 
 export const createMetricColumn = (column: MetricColumn, projectId: string): ISmCol => ({
-  id: `last_metrics.${column.metricHash}.${column.variantHash}.${column.valueType}`,
+  id: `last_metrics.${column.metricHash}.${column.variantHash}.${column.valueType || 'value'}`,
   headerType: ColHeaderTypeEnum.sortFilter,
   sortable: true,
   filterable: true,
   filterType: ColHeaderFilterTypeEnum.durationNumeric,
-  header: `${column.metric} > ${column.variant} ${getValueTypeName(column.valueType)}`,
+  header: `${column.metric} ${metricVariantDelimiter} ${column.variant}${getValueTypeName(column.valueType) ? ' (' + getValueTypeName(column.valueType) + ')': ''}`,
   hidden: false,
   /* eslint-disable @typescript-eslint/naming-convention */
   metric_hash: column.metricHash,
@@ -167,6 +174,13 @@ export const createMetricColumn = (column: MetricColumn, projectId: string): ISm
   valueType: column.valueType,
   projectId,
   style: {width: '115px'},
+  metricName: column.metric,
+  variantName: column.variant
+});
+
+export const createCompareMetricColumn = (column:  MetricVariantResult): Partial<ISmCol> => ({
+  id: `last_metrics.${column.metric_hash}.${column.variant_hash}.value`,
+  hidden: false,
 });
 
 export const createMetadataCol = (key, projectId): ISmCol => ({

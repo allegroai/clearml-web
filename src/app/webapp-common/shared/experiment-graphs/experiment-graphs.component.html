@@ -1,10 +1,10 @@
-<div *ngIf="noGraphs && !(multipleSingleValueData?.data.length > 0) && !(singleValueData?.length > 0)" class="no-output" >
+<div *ngIf="hiddenList?.length === 0 || noGraphs && !(multipleSingleValueData?.data.length > 0) && !(singleValueData?.length > 0)" class="no-output" >
   <i class="icon no-output-icon" [ngClass]="isDarkTheme ? 'i-no-plots-dark' : 'i-no-plots'"></i>
   <h4>NO CHART DATA</h4>
 </div>
 
-<div #allMetrics class="metrics-section">
-  <div class="d-flex align-items-center justify-content-center summary-container" *ngIf="singleValueData?.length>0 && !hiddenList.includes(singleValueChartTitle)">
+<div #allMetrics class="metrics-section" [class.hidden]="hiddenList?.length === 0">
+  <div class="d-flex align-items-center justify-content-center summary-container" *ngIf="singleValueData?.length>0 && hiddenList.includes(singleValueChartTitle)">
     <sm-single-value-summary-table
       *ngIf="exportForReport; else: noEmbedCode"
       [data]="singleValueData"
@@ -22,7 +22,6 @@
   </div>
     <div
       *ngIf="multipleSingleValueData?.data.length > 0"
-      [class.hidden]="hiddenList.includes(singleValueChartTitle)"
       class="d-flex align-items-center justify-content-center summary-container"
     >
       <sm-single-graph
@@ -49,7 +48,7 @@
          #metricGroup
          [class.two-in-a-row]="!isGroupGraphs && graphList.length > 1 && isWidthBigEnough()"
          [style.height.percent]=""
-         [class.hidden]="hiddenList?.includes(metric)"
+         [class.hidden]="inHiddenList(metric)"
     >
       <div [id]="experimentGraphidPrefix + metric" class="graph-id">
         <div>

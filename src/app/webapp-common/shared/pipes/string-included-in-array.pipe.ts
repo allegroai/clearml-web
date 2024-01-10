@@ -1,7 +1,8 @@
 import {Pipe, PipeTransform} from '@angular/core';
 
 @Pipe({
-  name: 'stringIncludedInArray'
+  name: 'stringIncludedInArray',
+  standalone: true
 })
 export class StringIncludedInArrayPipe implements PipeTransform {
 

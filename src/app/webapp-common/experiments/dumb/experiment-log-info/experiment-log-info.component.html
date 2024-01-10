@@ -2,7 +2,7 @@
   class="viewport" tabindex="0" #LogContainer [class.dark-theme]="isDarkTheme">
   <div *cdkVirtualFor="let line of lines; trackBy: trackByTimestampFn" data-id="logLine" class="log-line" [class.separator]="line.separator">
     <div class="timestamp" data-id="timeStamp">{{line.timestamp | date:'y-MM-dd HH:mm:ss'}}</div>
-    <div data-id="resultEntry" class="entry" *ngIf="line.hasAnsi; else regularLine" [innerHTML]="line.entry | safe:'html'"></div>
+    <div data-id="resultEntry" class="entry" *ngIf="line.hasAnsi; else regularLine" [innerHTML]="line.entry | purify"></div>
     <ng-template #regularLine>
       <div class="entry">{{line.entry}}</div>
     </ng-template>

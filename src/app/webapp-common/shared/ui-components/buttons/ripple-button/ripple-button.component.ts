@@ -4,7 +4,8 @@ import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
   selector: 'sm-ripple-button',
   templateUrl: './ripple-button.component.html',
   styleUrls: ['./ripple-button.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
 })
 export class RippleButtonComponent {
   @Input() top = 0;

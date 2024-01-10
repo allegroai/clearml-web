@@ -1,12 +1,15 @@
   <sm-editable-section [disableInEditMode]="true" [editable]="false" *ngIf="artifact">
     <div>
       <sm-labeled-row label="FILE PATH" data-id="filePathId">
-        <a *ngIf="artifact?.uri && !isLocalFile && isLinkable" (click)="linkClicked($event)" href="">{{artifact?.uri}}</a>
+        <a href="" *ngIf="isLinkable" (click)="linkClicked($event)" href="">{{artifact?.uri}}</a>
         <span class="uri" *ngIf="!isLinkable">{{artifact?.uri}}</span>
-        <i *ngIf="artifact?.uri && !isLocalFile && !isLinkable"
-           class="pointer al-icon al-ico-download sm ms-1"
-           (click)="artifactFilePathClicked(artifact.uri)"
-        ></i>
+        <mat-spinner *ngIf="downloading; else: downloadButton" [diameter]="16" [strokeWidth]="2" color="accent"></mat-spinner>
+        <ng-template #downloadButton>
+          <i *ngIf="artifact?.uri"
+             class="pointer al-icon al-ico-download sm ms-1"
+             (click)="artifactFilePathClicked(artifact.uri, inMemorySize)"
+          ></i>
+        </ng-template>
         <sm-copy-clipboard *ngIf="artifact?.uri && isLocalFile"
                            label="" [clipboardText]="artifact.uri"
                            class="ps-2"

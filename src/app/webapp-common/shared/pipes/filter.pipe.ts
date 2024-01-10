@@ -3,6 +3,7 @@ import {get} from 'lodash-es';
 
 @Pipe({
   name: 'filter',
+  standalone: true
 })
 export class FilterPipe implements PipeTransform {
 

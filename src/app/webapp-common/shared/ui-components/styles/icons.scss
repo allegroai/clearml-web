@@ -26,6 +26,14 @@
     color: $blue-400;
   }
 
+  &.blue-500 {
+    color: $blue-500;
+  }
+
+  &.blue-600 {
+    color: $blue-600;
+  }
+
   &.blue-800 {
     color: $blue-800;
   }
@@ -543,6 +551,10 @@
 
 .i-move-to-project {
   @include icon('#{$assets-icons-path}/move-to-project.svg');
+}
+
+.i-access-key {
+  @include icon('#{$assets-icons-path}/ico-access-key.svg');
 }
 
 .i-google {

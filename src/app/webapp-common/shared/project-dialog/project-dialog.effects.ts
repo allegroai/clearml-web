@@ -21,8 +21,6 @@ export class ProjectDialogEffects {
     private projectsApiService: ApiProjectsService,
     private router: Router,
     private store: Store,
-    private shortProjectName: ShortProjectNamePipe,
-    private projectLocation: ProjectLocationPipe
   ) {
   }
 
@@ -46,7 +44,7 @@ export class ProjectDialogEffects {
             deactivateLoader(action.type),
             newProjectActions.setCreationStatus({status: CREATION_STATUS.SUCCESS}),
             getAllSystemProjects(),
-            addMessage(MESSAGES_SEVERITY.SUCCESS, `${this.shortProjectName.transform(action.req.name)} has been created successfully in ${this.projectLocation.transform(action.req.name)}`),
+            addMessage(MESSAGES_SEVERITY.SUCCESS, `${(new ShortProjectNamePipe()).transform(action.req.name)} has been created successfully in ${(new ProjectLocationPipe()).transform(action.req.name)}`),
           ]
         ),
         catchError(error => [deactivateLoader(action.type), requestFailed(error), addMessage(MESSAGES_SEVERITY.ERROR, 'Project Created Failed'), newProjectActions.setCreationStatus({status: CREATION_STATUS.FAILED})])

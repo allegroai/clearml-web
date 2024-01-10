@@ -2,7 +2,8 @@ import {Pipe, PipeTransform} from '@angular/core';
 import {sortByField} from '../../tasks/tasks.utils';
 
 @Pipe({
-  name: 'sort'
+  name: 'sort',
+  standalone: true
 })
 export class SortPipe implements PipeTransform {
 
@@ -12,7 +13,8 @@ export class SortPipe implements PipeTransform {
 }
 
 @Pipe({
-  name: 'sortHumanize'
+  name: 'sortHumanize',
+  standalone: true,
 })
 export class SortHumanizePipe implements PipeTransform {
   private collator = new Intl.Collator(undefined, {numeric: true, sensitivity: 'base'});

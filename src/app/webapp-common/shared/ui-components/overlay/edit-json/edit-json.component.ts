@@ -1,12 +1,13 @@
 import {AfterViewInit, Component, ElementRef, HostListener, Inject, NgZone, ViewChild} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {JsonPipe} from '@angular/common';
+import {JsonPipe, NgIf} from '@angular/common';
 import {Store} from '@ngrx/store';
 import {addMessage, saveAceCaretPosition} from '@common/core/actions/layout.actions';
 import {Ace} from 'ace-builds';
 import {selectAceCaretPosition} from '@common/core/reducers/view.reducer';
 import {filter, Observable} from 'rxjs';
 import {map, take} from 'rxjs/operators';
+import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
 
 declare const ace;
 export interface EditJsonData {
@@ -22,7 +23,12 @@ export interface EditJsonData {
   selector: 'sm-edit-json',
   templateUrl: './edit-json.component.html',
   styleUrls: ['./edit-json.component.scss'],
-  providers: [{provide: JsonPipe, useClass: JsonPipe}]
+  providers: [{provide: JsonPipe, useClass: JsonPipe}],
+  standalone: true,
+  imports: [
+    DialogTemplateComponent,
+    NgIf
+  ]
 })
 export class EditJsonComponent implements AfterViewInit{
   public errors: Map<string, boolean>;

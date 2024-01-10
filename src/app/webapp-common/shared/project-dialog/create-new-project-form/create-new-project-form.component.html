@@ -57,7 +57,7 @@
         *ngFor="let projectName of projectsNames"
         [value]="projectName" [smTooltip]="projectName"  smShowTooltipIfEllipsis
       >
-        <div [innerHTML]="projectName | highlightSearchText:targetFolder.value"></div>
+        <div [smSearchText]="targetFolder.value">{{projectName}}</div>
       </mat-option>
       <div *ngIf="!projects" class="p-4 pe-none">
         <mat-spinner class="m-auto" [diameter]="32" [strokeWidth]="4" color="accent"></mat-spinner>

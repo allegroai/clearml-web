@@ -1,8 +1,10 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { DomSanitizer, SafeHtml, SafeStyle, SafeScript, SafeUrl, SafeResourceUrl } from '@angular/platform-browser';
+import * as DOMPurify from 'dompurify';
 
 @Pipe({
-  name: 'safe'
+  name: 'safe',
+  standalone: true
 })
 export class SafePipe implements PipeTransform {
 
@@ -17,5 +19,18 @@ export class SafePipe implements PipeTransform {
       case 'resourceUrl': return this.sanitizer.bypassSecurityTrustResourceUrl(value);
       default: throw new Error(`Invalid safe type specified: ${type}`);
     }
+  }
+}
+
+@Pipe({
+  name: 'purify',
+  standalone: true
+})
+export class SaferPipe implements PipeTransform {
+
+  constructor(protected sanitizer: DomSanitizer) {}
+
+  public transform(value: string) {
+    return DOMPurify.sanitize(value);
   }
 }

@@ -19,13 +19,12 @@
       ></sm-graph-settings-bar>
       <sm-selectable-grouped-filter-list
         [list]="scalarList"
-        [checkedList]="listOfHidden$ | async"
+        [checkedList]="selectedMetrics"
         [searchTerm]="searchTerm$ | async"
         (itemSelect)="metricSelected($event)"
         (hiddenChanged)="hiddenListChanged($event)"
         (searchTermChanged)="searchTermChanged($event)"
-      >
-      </sm-selectable-grouped-filter-list>
+      ></sm-selectable-grouped-filter-list>
     </div>
   </mat-drawer>
   <mat-drawer-content class="overflow-hidden">
@@ -61,7 +60,7 @@
         [metrics]="graphs"
         [singleValueData]="singleValueData$ | async"
         [experimentName]="experimentName"
-        [hiddenList]="listOfHidden$ | async"
+        [hiddenList]="selectedMetrics"
         [smoothWeight]="smoothWeightDelayed$ | async"
         [smoothType]="smoothType$ | async"
         [legendStringLength]="minimized ? 14 : 19"

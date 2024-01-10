@@ -4,7 +4,8 @@ import {AbstractControl, NG_VALIDATORS, ValidationErrors, Validator} from '@angu
 
 @Directive({
   selector: '[smRequiredAutocompleteSelectionValidator]',
-  providers: [{provide: NG_VALIDATORS, useExisting: RequiredAutocompleteSelectionValidatorDirective, multi: true}]
+  providers: [{provide: NG_VALIDATORS, useExisting: RequiredAutocompleteSelectionValidatorDirective, multi: true}],
+  standalone: true,
 })
 export class RequiredAutocompleteSelectionValidatorDirective implements Validator {
 

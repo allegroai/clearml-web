@@ -1,7 +1,8 @@
 import {Directive, HostListener} from '@angular/core';
 
 @Directive({
-  selector: '[smPreventArrowKeysDirective]'
+  selector: '[smPreventArrowKeysDirective]',
+  standalone: true,
 })
 export class PreventArrowKeysDirective {
   @HostListener('keydown', ['$event'])

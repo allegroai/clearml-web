@@ -1,4 +1,4 @@
-<div class="refresh-wrapper d-flex flex-row-reverse align-items-center pointer" [ngClass]="{'allow-autorefresh': allowAutoRefresh}">
+<div class="refresh-wrapper d-flex flex-row-reverse align-items-center pointer" [class.allow-autorefresh]="allowAutoRefresh">
   <span
     *ngIf="allowAutoRefresh && autoRefreshState$ | async; else pause"
     class="al-icon al-ico-auto-refresh-play pointer"

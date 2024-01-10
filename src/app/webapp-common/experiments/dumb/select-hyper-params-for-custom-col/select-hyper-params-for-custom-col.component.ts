@@ -10,7 +10,7 @@ export class SelectHyperParamsForCustomColComponent {
 
   public metricsCols: string[];
 
-  @Input() hyperParams: {[section: string]: any[]};
+  @Input() hyperParams: any[];
   @Output() getMetricsToDisplay      = new EventEmitter();
   @Output() selectedHyperParamToShow = new EventEmitter<{param: string; addCol: boolean}>();
   @Output() goBack                   = new EventEmitter();

@@ -30,7 +30,7 @@ export class ImmutableFormField implements OnInit, OnDestroy, ImmutableForm {
   // a map of the error messages for each error when the key is the error key and the value is the error message.
   @Input() errorMessages;
 
-  @Output() formDataChanged = new EventEmitter<{ field: string; value: any; event: Event }>();
+  @Output() formDataChanged = new EventEmitter<{ field: string; value: boolean; event: Event }>();
   @Output() errorsChanged = new EventEmitter<{ field: string; errors: Map<string, boolean> }>();
 
   ngOnInit() {
@@ -44,7 +44,7 @@ export class ImmutableFormField implements OnInit, OnDestroy, ImmutableForm {
     this.errorsChanged.emit({field: this.fieldName, errors: null});
   }
 
-  fieldValueChanged(value, event) {
+  fieldValueChanged(value: boolean, event: Event) {
     this.checkValidity(value);
     this.formDataChanged.emit({field: this.fieldName, value, event});
   }

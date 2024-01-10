@@ -4,7 +4,7 @@ import {Store} from '@ngrx/store';
 import {combineLatest, Observable, Subscription} from 'rxjs';
 import {distinctUntilChanged, filter, map} from 'rxjs/operators';
 import {Artifact} from '~/business-logic/model/tasks/artifact';
-import {selectExperimentModelInfoData} from '../../reducers';
+import {selectDownloadingArtifact, selectExperimentModelInfoData} from '../../reducers';
 import {IExperimentModelInfo} from '../../shared/common-experiment-model.model';
 
 @Component({
@@ -20,6 +20,7 @@ export class ExperimentInfoArtifactItemComponent implements OnInit, OnDestroy {
   private artifactSubscription: Subscription;
   public selectedArtifact: Artifact;
   public artifactKey$: Observable<{key: string; mode: string}>;
+  public downloadingArtifact$ = this.store.select(selectDownloadingArtifact);
 
   constructor(private store: Store, private cdr: ChangeDetectorRef) {
     this.modelInfo$ = this.store.select(selectExperimentModelInfoData);

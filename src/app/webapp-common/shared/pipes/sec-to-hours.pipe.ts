@@ -2,7 +2,7 @@ import {Pipe, PipeTransform} from '@angular/core';
 
 @Pipe({
   name: 'secToHours',
-  pure: true
+  standalone: true
 })
 export class SecToHoursPipe implements PipeTransform {
 

@@ -3,6 +3,7 @@ import {maxInArray} from '@common/shared/utils/helpers.util';
 
 export interface DataPoint {
   date: string;
+  originalDate?: number;
   value: number;
 }
 

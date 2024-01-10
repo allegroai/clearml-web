@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {Store} from '@ngrx/store';
-import {Observable, Subscription} from 'rxjs';
+import {combineLatest, Observable, Subscription} from 'rxjs';
 import {ActivatedRoute, Router} from '@angular/router';
 import {selectGlobalLegendData, selectShowGlobalLegend} from './reducers';
 import {combineLatestWith, distinctUntilChanged, filter, withLatestFrom} from 'rxjs/operators';
@@ -14,13 +14,27 @@ import {resetSelectModelState} from '@common/select-model/select-model.actions';
 import {selectProjectType} from '~/core/reducers/view.reducer';
 import {ALL_PROJECTS_OBJECT} from '@common/core/effects/projects.effects';
 import {trackById} from '@common/shared/utils/forms-track-by';
-import {selectRouterParams} from '@common/core/reducers/router-reducer';
+import {selectRouterConfig, selectRouterParams} from '@common/core/reducers/router-reducer';
 import {getGlobalLegendData} from '@common/experiments-compare/actions/experiments-compare-charts.actions';
 import {rgbList2Hex} from '@common/shared/services/color-hash/color-hash.utils';
 import {ColorHashService} from '@common/shared/services/color-hash/color-hash.service';
 import {SelectModelComponent} from '@common/select-model/select-model.component';
-import {SelectExperimentsForCompareComponent} from '@common/experiments-compare/containers/select-experiments-for-compare/select-experiments-for-compare.component';
+import {
+  SelectExperimentsForCompareComponent
+} from '@common/experiments-compare/containers/select-experiments-for-compare/select-experiments-for-compare.component';
 import {MatDialog} from '@angular/material/dialog';
+import {ContextMenuService} from '@common/shared/services/context-menu.service';
+import {
+  EXPERIMENTS_COMPARE_ROUTES,
+  MODELS_COMPARE_ROUTES
+} from '@common/experiments-compare/experiments-compare.constants';
+import {setContextMenu} from '@common/core/actions/router.actions';
+import {isEqual} from 'lodash-es';
+
+const toCompareEntityType = {
+  [EntityTypeEnum.controller]: EntityTypeEnum.experiment,
+  [EntityTypeEnum.dataset]: EntityTypeEnum.experiment
+};
 
 @Component({
   selector: 'sm-experiments-compare',
@@ -36,10 +50,17 @@ export class ExperimentsCompareComponent implements OnInit, OnDestroy {
   private selectedProject$: Observable<Project>;
   private readonly modelsFeature: boolean;
   public showGlobalLegend$: Observable<boolean>;
-  public globalLegendData$: Observable<{ name: string; tags: string[]; systemTags: string[]; id: string, project: {id: string} }[]>;
+  public globalLegendData$: Observable<{
+    name: string;
+    tags: string[];
+    systemTags: string[];
+    id: string,
+    project: { id: string }
+  }[]>;
   public experimentsColor: { [p: string]: string };
   private ids: string[];
-  public duplicateNamesObject: {[name: string]: boolean};
+  public duplicateNamesObject: { [name: string]: boolean };
+  private routeConfig$: Observable<string[]>;
 
   constructor(private store: Store,
               private router: Router,
@@ -47,9 +68,12 @@ export class ExperimentsCompareComponent implements OnInit, OnDestroy {
               private titleCasePipe: TitleCasePipe,
               private colorHash: ColorHashService,
               private dialog: MatDialog,
-              private cdr: ChangeDetectorRef) {
+              private cdr: ChangeDetectorRef,
+              private contextMenuService: ContextMenuService
+  ) {
     // updating URL with store query params
     this.selectedProject$ = this.store.select(selectSelectedProject);
+    this.routeConfig$ = this.store.select(selectRouterConfig);
     this.entityType = this.activatedRoute.snapshot.data.entityType;
     this.modelsFeature = this.activatedRoute.snapshot.data?.setAllProject;
     this.showGlobalLegend$ = this.store.select(selectShowGlobalLegend);
@@ -62,6 +86,7 @@ export class ExperimentsCompareComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.subs.unsubscribe();
     this.store.dispatch(resetSelectCompareHeader({fullReset: true}));
+    this.store.dispatch(setContextMenu({contextMenu: null}));
     this.store.dispatch(resetSelectModelState({fullReset: true}));
   }
 
@@ -70,9 +95,15 @@ export class ExperimentsCompareComponent implements OnInit, OnDestroy {
       this.store.dispatch(setSelectedProject({project: ALL_PROJECTS_OBJECT}))
     ));
 
+    this.subs.add(combineLatest([this.routeConfig$,
+      this.store.select(selectRouterParams),
+      this.store.select(selectSelectedProject)]).pipe(filter(([conf, params, project]) => !!params.ids && !!project?.id)).subscribe(([conf, params, project]) => {
+      this.setupCompareContextMenu(toCompareEntityType[this.entityType] ?? this.entityType, conf[conf[0] === 'datasets' ? 4 : 3], project?.id, params.ids, conf[0]);
+    }));
+
     this.subs.add(this.store.select(selectRouterParams).pipe(
       filter(params => !!params.ids),
-      distinctUntilChanged()
+      distinctUntilChanged(isEqual)
     ).subscribe(params => {
       this.ids = params.ids.split(',');
       this.store.dispatch(getGlobalLegendData({ids: params.ids.split(','), entity: this.entityType}));
@@ -192,9 +223,21 @@ export class ExperimentsCompareComponent implements OnInit, OnDestroy {
       });
   }
 
-  buildUrl(target: { name: string; tags: string[]; systemTags: string[], id: string, project: {id: string} }) {
+  buildUrl(target: { name: string; tags: string[]; systemTags: string[], id: string, project: { id: string } }) {
     const projectOrPipeline = this.activatedRoute.root.firstChild.routeConfig.path.replace('datasets', 'datasets/simple/');
     const targetEntity = this.activatedRoute.snapshot.parent.data.entityType === EntityTypeEnum.model ? EntityTypeEnum.model : EntityTypeEnum.experiment;
     return [`/${projectOrPipeline}`, target.project?.id || '*', `${targetEntity}s`, target.id];
+  }
+
+  setupCompareContextMenu(comparedEntity, entitiesType, projectId, experiments, base) {
+    let contextMenu = comparedEntity === EntityTypeEnum.experiment ? EXPERIMENTS_COMPARE_ROUTES : MODELS_COMPARE_ROUTES;
+    contextMenu = contextMenu.map(route => {
+      return {
+        ...route,
+        link: route.header === entitiesType ? undefined : [base === 'datasets' ? 'datasets/simple': base === 'pipelines'? 'pipelines' : 'projects', projectId, `compare-${comparedEntity}s`, {ids: experiments}, route.featureLink ?? route.header],
+        isActive: ((route.featureLink ?? route.header) === entitiesType)
+      };
+    });
+    this.store.dispatch(setContextMenu({contextMenu}));
   }
 }

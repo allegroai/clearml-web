@@ -36,14 +36,14 @@
       align-items: center;
       line-height: normal !important;
       border-bottom: 1px solid $dark-border !important;
-      color: $blue-400;
+      color: $blue-300;
     }
   }
 
   sm-simple-table-2 ::ng-deep .headers, .body {
     width: 100%;
     display: grid !important;
-    grid-template-columns: 33% 50% 16%;
+    grid-template-columns: 30% 50% 15%;
     grid-gap: 12px;
     padding: 0 12px;
     line-height: 40px;
@@ -51,8 +51,8 @@
 
   .tabs-container {
     position: relative;
-    height: 48px;
-    padding-top: 12px;
+    height: 41px;
+    background-color: $blue-700;
     border-bottom: 1px solid $dark-border;
 
     ::ng-deep .navbar-item {
@@ -95,7 +95,7 @@
   }
 
   .empty-state {
-    height: 100%;
+    flex-grow: 1;
     padding: 24px;
     display: flex;
     align-items: center;

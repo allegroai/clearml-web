@@ -16,7 +16,7 @@ import {getSignedUrlOrOrigin$} from '@common/core/reducers/common-auth-reducer';
   selector: 'sm-image-viewer',
   template: ''
 })
-export class BaseImageViewerComponent implements OnInit, OnDestroy {
+export abstract class BaseImageViewerComponent implements OnInit, OnDestroy {
 
   public xCord: number;
   public yCord: number;
@@ -58,7 +58,7 @@ export class BaseImageViewerComponent implements OnInit, OnDestroy {
     @Inject(MAT_DIALOG_DATA) public data: {index: number; isAllMetrics: boolean; withoutNavigation: boolean; snippetsMetaData: Array<{task: string; metric: string; variant: string; iter: number}>},
     public dialogRef: MatDialogRef<BaseImageViewerComponent>,
     public changeDetector: ChangeDetectorRef,
-    public store: Store<any>
+    public store: Store
   ) {
     this.currentDebugImage$ = store.select(selectCurrentImageViewerDebugImage)
       .pipe(

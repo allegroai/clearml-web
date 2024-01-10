@@ -13,6 +13,9 @@ import {Project} from '~/business-logic/model/projects/project';
 import {trackByValue} from '@common/shared/utils/forms-track-by';
 import {MatOptionSelectionChange} from '@angular/material/core';
 import {rootProjectsPageSize} from '@common/constants';
+import {
+  IOption
+} from '@common/shared/ui-components/inputs/select-autocomplete-with-chips/select-autocomplete-with-chips.component';
 
 
 @Component({
@@ -54,7 +57,7 @@ export class CreateNewReportFormComponent implements OnChanges, OnInit, OnDestro
     this.previousLength = projects?.length;
     this._projects = projects;
     this.projectsOptions = [
-      ...(this.rootFiltered || !projects ? [] : [this.projectsRoot]),
+      ...((this.rootFiltered || projects === null) ? [] : [this.projectsRoot]),
       ...(projects ? projects.map(project => ({label: project.name, value: project.id})) : [])
     ];
     this.projectsNames = this.projectsOptions.map(project => project.label);
@@ -90,19 +93,19 @@ export class CreateNewReportFormComponent implements OnChanges, OnInit, OnDestro
     }
   }
 
-  createNewSelected($event: MatOptionSelectionChange<any>) {
+  createNewSelected($event: MatOptionSelectionChange) {
     this.report.project = {label: $event.source.value, value: null};
   }
 
-  projectSelected($event: MatOptionSelectionChange<any>) {
+  projectSelected($event: MatOptionSelectionChange) {
     this.report.project = {label: $event.source.value.label, value: $event.source.value.value};
   }
   setIsAutoCompleteOpen(focus: boolean) {
     this.isAutoCompleteOpen = focus;
   }
 
-  displayFn(project: any): string {
-    return project && project.label ? project.label : project;
+  displayFn(project: IOption | string) {
+    return typeof project === 'string' ? project : project?.label;
   }
 
   clear() {
@@ -116,7 +119,7 @@ export class CreateNewReportFormComponent implements OnChanges, OnInit, OnDestro
   searchChanged(searchString: string) {
     this.projectsOptions = null;
     this.projectsNames = null;
-    this.rootFiltered = !this.projectsRoot.label.includes(searchString);
+    this.rootFiltered = searchString && !this.projectsRoot.label.toLowerCase().includes(searchString.toLowerCase());
     searchString !== null && this.filterSearchChanged.emit({value: searchString, loadMore: false});
   }
 

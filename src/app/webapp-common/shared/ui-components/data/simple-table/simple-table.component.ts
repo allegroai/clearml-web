@@ -1,11 +1,20 @@
 import { Component, ContentChild, EventEmitter, Input, Output, TemplateRef } from '@angular/core';
-import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import {CdkDrag, CdkDragDrop, CdkDropList} from '@angular/cdk/drag-drop';
 import {FormsTrackBy, trackById} from '../../../utils/forms-track-by';
+import {NgForOf, NgIf, NgTemplateOutlet} from '@angular/common';
 
 @Component({
   selector: 'sm-simple-table-2',
   templateUrl: './simple-table.component.html',
   styleUrls: ['./simple-table.component.scss'],
+  standalone: true,
+  imports: [
+    NgIf,
+    NgForOf,
+    CdkDropList,
+    NgTemplateOutlet,
+    CdkDrag
+  ]
 })
 export class SimpleTableComponent extends FormsTrackBy {
 

@@ -2,7 +2,7 @@ import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Params} from '@angular/router';
 import {isEqual} from 'lodash-es';
 import {combineLatest, Observable} from 'rxjs';
-import {debounceTime, distinctUntilChanged, filter, map, skip, switchMap, withLatestFrom} from 'rxjs/operators';
+import {distinctUntilChanged, filter, map, skip, switchMap, withLatestFrom} from 'rxjs/operators';
 import {
   getCompanyTags,
   getTags,
@@ -15,7 +15,8 @@ import {SearchState, selectSearchQuery} from '../common-search/common-search.red
 import {resetAceCaretsPositions, setAutoRefresh} from '../core/actions/layout.actions';
 import {
   selectCompanyTags,
-  selectIsArchivedMode, selectIsDeepMode,
+  selectIsArchivedMode,
+  selectIsDeepMode,
   selectProjectSystemTags,
   selectProjectTags,
   selectSelectedProjectId,
@@ -36,13 +37,12 @@ import * as modelsActions from './actions/models-view.actions';
 import {MODELS_TABLE_COLS} from './models.consts';
 import * as modelsSelectors from './reducers';
 import {
-  selectMetadataColsForProject,
+  selectFilteredTableCols,
   selectMetadataColsOptions,
   selectMetadataKeys,
   selectMetricVariants,
   selectModelsFrameworks,
   selectModelsTags,
-  selectModelTableColumns,
   selectTableMode
 } from './reducers';
 import {SelectedModel, TableModel} from './shared/models.model';
@@ -62,9 +62,11 @@ import {HasReadOnlyFooterItem} from '../shared/entity-page/footer-items/has-read
 import {SelectedTagsFooterItem} from '../shared/entity-page/footer-items/selected-tags-footer-item';
 import {CompareFooterItem} from '@common/shared/entity-page/footer-items/compare-footer-item';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
-import {MetricValueType} from '@common/experiments-compare/experiments-compare.constants';
 import {CustomColumnMode} from '@common/experiments/shared/common-experiments.const';
 import {ALL_PROJECTS_OBJECT} from '@common/core/effects/projects.effects';
+import {
+  SelectionEvent
+} from '@common/experiments/dumb/select-metric-for-custom-col/select-metric-for-custom-col.component';
 
 
 @Component({
@@ -75,6 +77,7 @@ import {ALL_PROJECTS_OBJECT} from '@common/core/effects/projects.effects';
 export class ModelsComponent extends BaseEntityPageComponent implements OnInit, OnDestroy {
   public readonly originalTableColumns = MODELS_TABLE_COLS;
   public entityTypeEnum = EntityTypeEnum;
+  protected override entityType = EntityTypeEnum.model;
   public models$: Observable<TableModel[]>;
   public tableSortFields$: Observable<SortMeta[]>;
   public tableSortOrder$: Observable<TableSortOrderEnum>;
@@ -146,16 +149,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
     this.systemTags$ = this.store.select(selectProjectSystemTags);
     this.frameworks$ = this.store.select(selectModelsFrameworks);
     this.tableMode$ = this.store.select(selectTableMode);
-    this.filteredTableCols$ = combineLatest([
-      this.store.select(selectModelTableColumns).pipe(distinctUntilChanged(isEqual)),
-      this.store.select(selectMetadataColsForProject).pipe(distinctUntilChanged(isEqual))
-    ])
-      .pipe(
-        debounceTime(50),
-        map(([tableCols, metaCols]) =>
-          tableCols.concat(metaCols.map(col => ({...col, meta: true})))
-        ));
-
+    this.filteredTableCols$ = this.store.select(selectFilteredTableCols);
     let child = this.route.snapshot;
     while (child.firstChild && !child.data.setAllProject) {
       child = child.firstChild;
@@ -207,6 +201,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
             this.emptyUrlInit();
           } else {
             this.projectId = projectId;
+            this.setupContextMenu('models');
             if (params.order) {
               const orders = decodeOrder(params.order);
               this.store.dispatch(modelsActions.setTableSort({orders, projectId: this.projectId}));
@@ -495,7 +490,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
     }
   }
 
-  modeChanged(mode: 'info' | 'table') {
+  modeChanged(mode: 'table' | 'info' | 'compare') {
     if (mode === 'info') {
       this.store.dispatch(modelsActions.setTableMode({mode}));
       this.firstModel && this.store.dispatch(modelsActions.modelSelectionChanged({
@@ -508,7 +503,7 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
     }
   }
 
-  selectedMetricToShow(event: { variant: MetricVariantResult; addCol: boolean; valueType: MetricValueType }) {
+  selectedMetricToShow(event: SelectionEvent) {
     if (!event.valueType) {
       return;
     }
@@ -535,44 +530,46 @@ export class ModelsComponent extends BaseEntityPageComponent implements OnInit, 
   }
 
   override setupBreadcrumbsOptions() {
-    this.sub.add(this.selectedProject$.pipe(
-      withLatestFrom(this.store.select(selectIsDeepMode)),
-    ).subscribe(([selectedProject, isDeep]) => {
-      if (this.modelsFeature) {
-        this.store.dispatch(setBreadcrumbsOptions({
-          breadcrumbOptions: {
-            showProjects: false,
-            featureBreadcrumb: {name: 'Models'},
-          }
-        }));
-      } else {
-        this.store.dispatch(setBreadcrumbsOptions({
-          breadcrumbOptions: {
-            showProjects: !!selectedProject && !this.modelsFeature,
-            featureBreadcrumb: {
-              name: 'PROJECTS',
-              url: 'projects'
-            },
-            ...(isDeep && selectedProject?.id !== '*' && {
-              subFeatureBreadcrumb: {
-                name: 'All Models'
-              }
-            }),
-            projectsOptions: {
-              basePath: 'projects',
-              filterBaseNameWith: null,
-              compareModule: null,
-              showSelectedProject: selectedProject?.id !== '*',
-              ...(selectedProject && {
-                selectedProjectBreadcrumb: {
-                  name: selectedProject?.id === '*' ? 'All Models' : selectedProject?.basename,
-                  url: `projects/${selectedProject?.id}/projects`
-                }
-              })
+    this.sub.add(combineLatest([
+      this.selectedProject$,
+      this.store.select(selectIsDeepMode)
+    ])
+      .subscribe(([selectedProject, isDeep]) => {
+        if (this.modelsFeature) {
+          this.store.dispatch(setBreadcrumbsOptions({
+            breadcrumbOptions: {
+              showProjects: false,
+              featureBreadcrumb: {name: 'Models'},
             }
-          }
-        }));
-      }
-    }));
+          }));
+        } else {
+          this.store.dispatch(setBreadcrumbsOptions({
+            breadcrumbOptions: {
+              showProjects: !!selectedProject && !this.modelsFeature,
+              featureBreadcrumb: {
+                name: 'PROJECTS',
+                url: 'projects'
+              },
+              ...(isDeep && selectedProject?.id !== '*' && {
+                subFeatureBreadcrumb: {
+                  name: 'All Models'
+                }
+              }),
+              projectsOptions: {
+                basePath: 'projects',
+                filterBaseNameWith: null,
+                compareModule: null,
+                showSelectedProject: selectedProject?.id !== '*',
+                ...(selectedProject && {
+                  selectedProjectBreadcrumb: {
+                    name: selectedProject?.id === '*' ? 'All Models' : selectedProject?.basename,
+                    url: `projects/${selectedProject?.id}/projects`
+                  }
+                })
+              }
+            }
+          }));
+        }
+      }));
   }
 }

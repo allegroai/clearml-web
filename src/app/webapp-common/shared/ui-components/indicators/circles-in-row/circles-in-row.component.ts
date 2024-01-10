@@ -1,5 +1,9 @@
 import {ChangeDetectionStrategy, Component, Input, OnInit} from '@angular/core';
-import {trackByIndex} from "@common/shared/utils/forms-track-by";
+import {trackByIndex} from '@common/shared/utils/forms-track-by';
+import {NgForOf, NgIf, SlicePipe} from '@angular/common';
+import {slice} from 'lodash-es';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {InitialsPipe} from '@common/shared/pipes/initials.pipe';
 
 export interface CirclesInRowInterface {
   name?: string;
@@ -10,7 +14,15 @@ export interface CirclesInRowInterface {
   selector: 'sm-circles-in-row',
   templateUrl: './circles-in-row.component.html',
   styleUrls: ['./circles-in-row.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    NgIf,
+    NgForOf,
+    TooltipDirective,
+    InitialsPipe,
+    SlicePipe
+  ]
 })
 export class CirclesInRowComponent implements OnInit {
 
@@ -31,4 +43,5 @@ export class CirclesInRowComponent implements OnInit {
 
   ngOnInit(): void {}
 
+  protected readonly slice = slice;
 }

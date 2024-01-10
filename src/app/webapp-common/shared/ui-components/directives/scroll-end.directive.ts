@@ -7,6 +7,7 @@ export enum ScrollEndDirection {
 
 @Directive({
   selector: '[smScrollEnd]',
+  standalone: true,
 })
 export class ScrollEndDirective implements OnInit, OnDestroy {
   @Output() smScrollEnd: EventEmitter<any> = new EventEmitter();
@@ -51,6 +52,7 @@ export class ScrollEndDirective implements OnInit, OnDestroy {
 
 @Directive({
   selector: '[smScrollEndRoot]',
+  standalone: true,
 })
 export class ScrollEndRootDirective {
   constructor(

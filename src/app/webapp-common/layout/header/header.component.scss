@@ -12,7 +12,9 @@
   }
 
   .header-container {
-    display: flex;
+    display: inline-grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-gap: 32px;
     background-color: $header-backgroud;
     height: 100%;
     width: 100%;
@@ -33,21 +35,20 @@
       display: flex;
       align-items: center;
 
-    }
-  ;
+    };
 
     sm-breadcrumbs :not(.login) {
       width: 95%;
     }
 
-  .resources-trigger {
-    display: flex;
-    color: $blue-300;
-    &:hover {
-      text-decoration: none;
-      color: $blue-200;
+    .resources-trigger {
+      display: flex;
+      color: $blue-300;
+      &:hover {
+        text-decoration: none;
+        color: $blue-200;
+      }
     }
-  }
 
     sm-common-search,
     .resources-trigger {
@@ -98,10 +99,6 @@
     justify-content: space-around;
     align-items: center;
 
-    &.middle {
-      position: absolute;
-      left: calc(50% - 50px);
-    }
 
     &.make-room-for-slogan {
       justify-content: start;
@@ -117,7 +114,6 @@
   }
 
   .right-buttons {
-    padding-left: 6px;
     display: flex;
     align-items: center;
     justify-content: flex-end;

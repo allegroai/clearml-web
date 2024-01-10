@@ -1,12 +1,22 @@
 import {AfterViewInit, ChangeDetectionStrategy, Component, Inject, Input, ViewChild} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
+import {MatInputModule} from '@angular/material/input';
+import {FormsModule} from '@angular/forms';
+import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
 
 @Component({
   selector: 'sm-edit-credential-label-dialog',
   templateUrl: './edit-credential-label-dialog.component.html',
   styleUrls: ['./edit-credential-label-dialog.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    ConfirmDialogComponent,
+    MatInputModule,
+    FormsModule,
+    LabeledFormFieldDirective
+  ]
 })
 export class EditCredentialLabelDialogComponent implements AfterViewInit {
 

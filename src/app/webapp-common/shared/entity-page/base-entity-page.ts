@@ -1,24 +1,16 @@
 import {AfterViewInit, Component, inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ActionCreator, Store} from '@ngrx/store';
 import {combineLatest, Observable, of, Subject, Subscription, switchMap} from 'rxjs';
-import {
-  debounceTime,
-  filter,
-  map,
-  take,
-  takeUntil,
-  tap,
-  throttleTime,
-  withLatestFrom
-} from 'rxjs/operators';
+import {debounceTime,distinctUntilChanged, filter, map, take, takeUntil, tap, throttleTime, withLatestFrom} from 'rxjs/operators';
 import {Project} from '~/business-logic/model/projects/project';
 import {
-  selectSelectedProject, selectSelectedProjectUsers, selectTablesFilterProjectsOptions
+  selectSelectedProject,
+  selectSelectedProjectUsers,
+  selectTablesFilterProjectsOptions
 } from '../../core/reducers/projects.reducer';
 import {IOutputData} from 'angular-split/lib/interface';
 import {SplitComponent} from 'angular-split';
 import {selectRouterParams} from '../../core/reducers/router-reducer';
-import {ITableExperiment} from '../../experiments/shared/common-experiment-model.model';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {IFooterState, ItemFooterModel} from './footer-items/footer-items.models';
 import {
@@ -41,19 +33,27 @@ import {RefreshService} from '@common/core/services/refresh.service';
 import {selectTableModeAwareness} from '@common/projects/common-projects.reducer';
 import {setTableModeAwareness} from '@common/projects/common-projects.actions';
 import {User} from '~/business-logic/model/users/user';
-import {neverShowPopupAgain} from '../../core/actions/layout.actions';
-import {selectNeverShowPopups} from '../../core/reducers/view.reducer';
+import {neverShowPopupAgain, toggleCardsCollapsed} from '../../core/actions/layout.actions';
+import {selectNeverShowPopups, selectTableCardsCollapsed} from '../../core/reducers/view.reducer';
 import {isReadOnly} from '@common/shared/utils/is-read-only';
 import {setCustomMetrics} from '@common/models/actions/models-view.actions';
 import * as experimentsActions from '@common/experiments/actions/common-experiments-view.actions';
-import {hyperParamSelectedExperiments, hyperParamSelectedInfoExperiments, setHyperParamsFiltersPage, setParents} from '@common/experiments/actions/common-experiments-view.actions';
+import {
+  hyperParamSelectedExperiments,
+  hyperParamSelectedInfoExperiments,
+  setHyperParamsFiltersPage,
+  setParents
+} from '@common/experiments/actions/common-experiments-view.actions';
 import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
+import {ContextMenuService} from '@common/shared/services/context-menu.service';
 
 @Component({
   selector: 'sm-base-entity-page',
   template: ''
 })
 export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, OnDestroy {
+  protected entities = [];
+  protected entityType: EntityTypeEnum;
   public selectedProject$: Observable<Project>;
   protected setSplitSizeAction: ActionCreator<string, any>;
   protected addTag: ActionCreator<string, any>;
@@ -75,13 +75,16 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
   public users$: Observable<User[]>;
   public projectsOptions$: Observable<Project[]>;
   protected parents = [];
+  public compareViewMode: 'scalars' | 'plots';
 
   @ViewChild('split') split: SplitComponent;
   protected abstract inEditMode$: Observable<boolean>;
   public selectedProject: Project;
-  private currentSelection: {id: string}[];
+  private currentSelection: { id: string }[];
   public showAllSelectedIsActive$: Observable<boolean>;
   private allProjects: boolean;
+  public cardsCollapsed$: Observable<boolean>;
+  protected minimizedView$: Observable<boolean>;
 
   abstract onFooterHandler({emitValue, item}): void;
 
@@ -103,13 +106,15 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
   protected router: Router;
   protected dialog: MatDialog;
   protected refresh: RefreshService;
+  protected contextMenuService: ContextMenuService;
 
   protected constructor() {
-    this.store = inject( Store);
+    this.store = inject(Store);
     this.route = inject(ActivatedRoute);
     this.router = inject(Router);
     this.dialog = inject(MatDialog);
     this.refresh = inject(RefreshService);
+    this.contextMenuService = inject(ContextMenuService);
 
     this.users$ = this.store.select(selectSelectedProjectUsers);
     this.sub.add(this.store.select(selectSelectedProject).pipe(filter(p => !!p)).subscribe((project: Project) => {
@@ -119,21 +124,24 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
     }));
     this.projectsOptions$ = this.store.select(selectTablesFilterProjectsOptions);
 
+    this.minimizedView$ = this.store.select(selectRouterParams).pipe(
+      map(params => !!this.getParamId(params) || Object.hasOwn(params, 'ids'))
+    );
     this.tableModeAwareness$ = this.store.select(selectTableModeAwareness)
       .pipe(
         filter(featuresAwareness => featuresAwareness !== null && featuresAwareness !== undefined),
         tap(aware => this.tableModeAwareness = aware)
       );
+
   }
 
   ngOnInit() {
+    this.cardsCollapsed$ = this.store.select(selectTableCardsCollapsed(this.entityType)).pipe(distinctUntilChanged());
     this.selectedProject$ = this.store.select(selectSelectedProject);
     this.selectSplitSize$?.pipe(filter(x => !!x), take(1))
       .subscribe(x => this.splitInitialSize = x);
 
-    this.sub.add(this.store.select(selectRouterParams).subscribe(
-      params => {
-        const minimized = !!this.getParamId(params);
+    this.sub.add(this.minimizedView$.subscribe( minimized => {
         if (this.split && this.minimizedView === true && !minimized) {
           this.splitInitialSize = this.split.getVisibleAreaSizes()[1] as number;
         }
@@ -179,6 +187,14 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
     });
   }
 
+  protected compareView() {
+    const comparedEntities = this.selectedExperiments.length > 0 ? this.selectedExperiments : this.entities
+    return this.router.navigate(['compare', this.compareViewMode ?? 'scalars', {ids: comparedEntities.map(e => e.id).join(',')}], {
+      relativeTo: this.route,
+      queryParamsHandling: 'preserve'
+    });
+  }
+
   splitSizeChange(event: IOutputData) {
     if (this.setSplitSizeAction) {
       this.store.dispatch(this.setSplitSizeAction({splitSize: event.sizes[1] as number}));
@@ -200,7 +216,7 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
     }
   }
 
-  tagSelected({tags, emitValue}, entitiesType: 'models' | 'experiments' | 'dataviews') {
+  tagSelected({tags, emitValue}, entitiesType) {
     this.store.dispatch(this.addTag({
       tag: tags,
       [entitiesType]: emitValue
@@ -209,7 +225,7 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
 
   createFooterItems(config: {
     entitiesType: EntityTypeEnum;
-    selected$: Observable<{id: string}[]>;
+    selected$: Observable<{ id: string }[]>;
     showAllSelectedIsActive$: Observable<boolean>;
     data$?: Observable<Record<string, CountAvailableAndIsDisableSelectedFiltered>>;
     tags$?: Observable<string[]>;
@@ -227,7 +243,7 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
     );
   }
 
-  createFooterState<T extends {id: string}>(
+  createFooterState<T extends { id: string }>(
     selected$: Observable<T[]>,
     data$?: Observable<Record<string, CountAvailableAndIsDisableSelectedFiltered>>,
     showAllSelectedIsActive$?: Observable<boolean>,
@@ -289,7 +305,7 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
             return this.dialog.open(ConfirmDialogComponent, {
               data: {
                 title: 'Are you sure?',
-                body: 'Navigating between "Live" and "Archive" will deselect your selected data views.',
+                body: `Navigating between "Live" and "Archive" will deselect your selected ${this.entityType}s.`,
                 yes: 'Proceed',
                 no: 'Back',
                 iconClass: '',
@@ -342,10 +358,21 @@ export abstract class BaseEntityPageComponent implements OnInit, AfterViewInit, 
         this.store.dispatch(hyperParamSelectedInfoExperiments({col: {id: colId}, loadMore: false, values: null}));
         this.store.dispatch(setHyperParamsFiltersPage({page: 0}));
       }
-      this.store.dispatch(hyperParamSelectedExperiments({col: {id: colId, getter: `${colId}.value`}, searchValue: value.value}));
+      this.store.dispatch(hyperParamSelectedExperiments({
+        col: {id: colId, getter: `${colId}.value`},
+        searchValue: value.value
+      }));
     }
   }
 
   public setupBreadcrumbsOptions() {
+  }
+
+  public setupContextMenu(entitiesType) {
+    this.contextMenuService.setupProjectContextMenu(entitiesType, this.projectId);
+  }
+
+  cardsCollapsedToggle() {
+    this.store.dispatch(toggleCardsCollapsed({entityType: this.entityType}))
   }
 }

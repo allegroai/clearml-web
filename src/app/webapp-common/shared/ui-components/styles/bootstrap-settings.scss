@@ -94,11 +94,11 @@ $btn-font-family: $font-family-base;
       $disabled-border: $grey-purple,
       $disabled-color: $white
     );
+    --bs-btn-border-width: 0;
     height: 32px;
     font-size: 12px;
     font-weight: 500;
     text-align: center;
-    margin: 0 6px !important;
 
     &:disabled {
       cursor: auto;
@@ -246,10 +246,6 @@ $btn-font-family: $font-family-base;
 
   --bs-border-width: 1px;
 
-  label {
-    display: inline-flex;
-  }
-
   .btn {
     font-size: 12px;
     line-height: normal;
@@ -324,17 +320,17 @@ $btn-font-family: $font-family-base;
       $disabled-border: $grey-purple,
       $disabled-color: $white,
     );
+    --bs-btn-border-width: 0;
     height: 32px;
     font-size: 12px;
     font-weight: 500;
     text-align: center;
 
     &.terminal {
-      background-color: $blue-600;
+      --bs-btn-bg: #{$blue-600};
       color: $blue-280;
-      margin: 0 6px !important;
       padding: 0 12px;
-      &:hover:enabled {
+      &:hover.enabled {
         color: $blue-200;
       }
     }

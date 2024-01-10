@@ -1,9 +1,9 @@
 import {createAction, props} from '@ngrx/store';
 import {ExtFrame} from '@common/shared/single-graph/plotly-graph-base';
 import {DebugSample} from '@common/shared/debug-sample/debug-sample.reducer';
-import {ReportsApiMultiplotsResponse} from '@common/clearml-applications/report-widgets/src/app/app.reducer';
 import {Task} from '~/business-logic/model/tasks/task';
 import {SingleValueTaskMetrics} from '~/business-logic/model/reports/singleValueTaskMetrics';
+import {ReportsApiMultiplotsResponse} from '@common/constants';
 
 export const getPlot = createAction('[App] getPlot', props<{
   tasks: string[];

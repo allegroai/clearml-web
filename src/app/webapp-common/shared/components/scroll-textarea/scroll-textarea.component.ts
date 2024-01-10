@@ -1,11 +1,26 @@
 import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
-import {CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
+import {CdkFixedSizeVirtualScroll, CdkVirtualForOf, CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
+import {NgForOf, NgIf} from '@angular/common';
+import {CopyClipboardComponent} from '@common/shared/ui-components/indicators/copy-clipboard/copy-clipboard.component';
+import {SearchComponent} from '@common/shared/ui-components/inputs/search/search.component';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'sm-scroll-textarea',
   templateUrl: './scroll-textarea.component.html',
   styleUrls: ['./scroll-textarea.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    NgIf,
+    CopyClipboardComponent,
+    SearchComponent,
+    CdkVirtualScrollViewport,
+    CdkVirtualForOf,
+    NgForOf,
+    MatProgressSpinnerModule,
+    CdkFixedSizeVirtualScroll
+  ]
 })
 export class ScrollTextareaComponent {
 

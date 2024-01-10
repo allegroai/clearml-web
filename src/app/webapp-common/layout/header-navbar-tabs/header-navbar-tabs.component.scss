@@ -1,0 +1,10 @@
+@import "variables";
+
+:host {
+  .navbar-header-container {
+    min-height: $nav-bar-height;
+    display: flex;
+    justify-content: center;
+    gap: 2px;
+  }
+}

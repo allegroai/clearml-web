@@ -14,8 +14,8 @@ import {MatDialog} from '@angular/material/dialog';
 import {LoginService} from '~/shared/services/login.service';
 import {UserPreferences} from '../../user-preferences';
 import {Environment} from '../../../../environments/base';
-import {setBreadcrumbs} from "@common/core/actions/router.actions";
-import {CrumbTypeEnum} from "@common/layout/breadcrumbs/breadcrumbs.component";
+import {setBreadcrumbs} from '@common/core/actions/router.actions';
+import {CrumbTypeEnum} from '@common/layout/breadcrumbs/breadcrumbs.component';
 
 
 @Component({

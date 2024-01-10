@@ -49,7 +49,8 @@
       class="item"
       (click)="addTag(tag)"
       (keyup.arrowUp)="i === 0 && !createButtons.first && focus($event)"
-      [smTooltip]="tag"  smShowTooltipIfEllipsis
+      [smTooltip]="tag"
+      smShowTooltipIfEllipsis
     >{{tag}}</button>
   </div>
   <hr>

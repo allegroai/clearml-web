@@ -1,13 +1,42 @@
+@import "variables";
+
+
 :host {
-  sm-simple-table-2 ::ng-deep .headers, .body {
-    display: grid !important;
+  .body {
+    display: grid;
     grid-template-columns: 1fr 1fr auto;
     grid-gap: 12px;
+  }
+
+  .header {
+    margin-right: -24px;
+    .cell {
+      border-bottom: 2px solid $blue-100;
+    }
+  }
+
+  .table {
+    height: calc(100% - 16px);
+    margin-right: -24px;
+  }
+
+  .cell {
+    flex: 1;
+    height: 48px;
+    line-height: 48px;
+    border-bottom: 1px solid $blue-50;
+    font-weight: 500;
+
+    &:last-child {
+      margin-right: 24px;
+    }
   }
 
   .body-container {
     height: 100%;
     overflow: auto;
+    margin-right: -24px;
+    padding-right: 24px;
   }
 
   form.edit {

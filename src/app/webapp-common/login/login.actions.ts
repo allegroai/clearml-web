@@ -1,5 +1,5 @@
 import {createAction, props} from '@ngrx/store';
-import {User} from '../../business-logic/model/users/user';
+import {User} from '~/business-logic/model/users/user';
 
 
 export const setUserLoginState = createAction(

@@ -5,13 +5,10 @@ import {AngularSplitModule} from 'angular-split';
 import {ScrollingModule} from '@angular/cdk/scrolling';
 import {ExperimentGraphsModule} from '@common/shared/experiment-graphs/experiment-graphs.module';
 import {CommonDeleteDialogModule} from '@common/shared/entity-page/entity-delete/common-delete-dialog.module';
-import {SMMaterialModule} from '@common/shared/material/material.module';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ExperimentCompareSharedModule} from '@common/experiments-compare/shared/experiment-compare-shared.module';
 import {CommonLayoutModule} from '@common/layout/layout.module';
 import {ExperimentSharedModule} from '~/features/experiments/shared/experiment-shared.module';
-import {SMSharedModule} from '@common/shared/shared.module';
-import {SharedPipesModule} from '@common/shared/pipes/shared-pipes.module';
 import {RouterModule, Routes} from '@angular/router';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {SharedModule} from '~/shared/shared.module';
@@ -27,6 +24,27 @@ import {
     SimpleDatasetVersionPreviewComponent
 } from '@common/dataset-version/simple-dataset-version-preview/simple-dataset-version-preview.component';
 import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
+import {SearchTextDirective} from '@common/shared/ui-components/directives/searchText.directive';
+import {FilterPipe} from '@common/shared/pipes/filter.pipe';
+import {DurationPipe} from '@common/shared/pipes/duration.pipe';
+import {MenuItemTextPipe} from '@common/shared/pipes/menu-item-text.pipe';
+import {FileSizePipe} from '@common/shared/pipes/filesize.pipe';
+import {RegexPipe} from '@common/shared/pipes/filter-regex.pipe';
+import {FilterMonitorMetricPipe} from '@common/shared/pipes/filter-monitor-metric.pipe';
+import {TagsMenuComponent} from '@common/shared/ui-components/tags/tags-menu/tags-menu.component';
+import {EntityFooterComponent} from '@common/shared/entity-page/entity-footer/entity-footer.component';
+import {
+  ExperimentTypeIconLabelComponent
+} from '@common/shared/experiment-type-icon-label/experiment-type-icon-label.component';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
+import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
+import {IdBadgeComponent} from '@common/shared/components/id-badge/id-badge.component';
+import {ButtonToggleComponent} from '@common/shared/ui-components/inputs/button-toggle/button-toggle.component';
+import {OverlayComponent} from '@common/shared/ui-components/overlay/overlay/overlay.component';
+import {MatAutocompleteModule} from '@angular/material/autocomplete';
+import {MatInputModule} from '@angular/material/input';
+import {MatExpansionModule} from '@angular/material/expansion';
+import {MatMenuModule} from '@angular/material/menu';
 
 export const routes: Routes = [
   {
@@ -59,14 +77,11 @@ export const routes: Routes = [
     ScrollingModule,
     ExperimentGraphsModule,
     CommonDeleteDialogModule,
-    SMMaterialModule,
     FormsModule,
     ReactiveFormsModule,
     ExperimentCompareSharedModule,
     CommonLayoutModule,
     ExperimentSharedModule,
-    SMSharedModule,
-    SharedPipesModule,
     RouterModule,
     CommonModule,
     RouterModule.forChild(routes),
@@ -76,6 +91,25 @@ export const routes: Routes = [
     MatRadioModule,
     SimpleDatasetVersionPreviewComponent,
     LabeledFormFieldDirective,
+    SearchTextDirective,
+    FilterPipe,
+    DurationPipe,
+    MenuItemTextPipe,
+    FileSizePipe,
+    RegexPipe,
+    FilterMonitorMetricPipe,
+    TagsMenuComponent,
+    EntityFooterComponent,
+    ExperimentTypeIconLabelComponent,
+    TooltipDirective,
+    DialogTemplateComponent,
+    IdBadgeComponent,
+    ButtonToggleComponent,
+    OverlayComponent,
+    MatAutocompleteModule,
+    MatInputModule,
+    MatExpansionModule,
+    MatMenuModule,
   ],
   providers: [
     ControllersComponent,

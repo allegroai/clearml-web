@@ -205,6 +205,11 @@ nav {
   height: 36px;
   margin: 12px 0 16px;
   border-bottom: 1px solid $separator-line;
+
+  sm-navbar-item {
+    height: 100%;
+  }
+
   &.config-nav{
     margin: 0;
   }

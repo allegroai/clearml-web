@@ -1,14 +1,21 @@
 import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
 import {EXPERIMENTS_STATUS_LABELS} from '~/features/experiments/shared/experiments.const';
 import {TASKS_STATUS} from '@common/tasks/tasks.constants';
+import {NgIf} from '@angular/common';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 
 @Component({
-  selector   : 'sm-experiment-status-icon-label',
-  templateUrl: './experiment-status-icon-label.component.html',
-  styleUrls: ['./experiment-status-icon-label.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  selector: 'sm-status-icon-label',
+  templateUrl: './status-icon-label.component.html',
+  styleUrls: ['./status-icon-label.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    NgIf,
+    MatProgressSpinnerModule
+  ],
+  standalone: true
 })
-export class ExperimentStatusIconLabelComponent {
+export class StatusIconLabelComponent {
   public showSpinner: boolean;
   public experimentsStatusLabels = EXPERIMENTS_STATUS_LABELS;
   private _status: string;

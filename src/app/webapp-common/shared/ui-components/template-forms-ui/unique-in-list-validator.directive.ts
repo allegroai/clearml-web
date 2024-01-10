@@ -5,7 +5,8 @@ import {debounceTime, first, map} from 'rxjs/operators';
 
 @Directive({
   selector : '[smUniqueInListValidator][ngModel]',
-  providers: [{provide: NG_ASYNC_VALIDATORS, useExisting: UniqueInListValidatorDirective, multi: true}]
+  providers: [{provide: NG_ASYNC_VALIDATORS, useExisting: UniqueInListValidatorDirective, multi: true}],
+  standalone: true,
 })
 
 export class UniqueInListValidatorDirective implements AsyncValidator {

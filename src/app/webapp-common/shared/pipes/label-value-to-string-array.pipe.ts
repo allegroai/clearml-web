@@ -1,7 +1,8 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-  name: 'labelValueToStringArray'
+  name: 'labelValueToStringArray',
+  standalone: true
 })
 export class LabelValueToStringArrayPipe implements PipeTransform {
 transform(labelValArr: Array<{ label: string; value: string }>): string[] {

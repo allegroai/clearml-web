@@ -11,12 +11,32 @@ import {
 import {sortByArr} from '../../pipes/show-selected-first.pipe';
 import {cleanTag} from '@common/shared/utils/helpers.util';
 import {selectProjectType} from '~/core/reducers/view.reducer';
+import {MatMenuModule} from '@angular/material/menu';
+import {AsyncPipe, NgIf} from '@angular/common';
+import {MatInputModule} from '@angular/material/input';
+import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
+import {
+  CheckboxThreeStateListComponent
+} from '@common/shared/ui-components/panel/checkbox-three-state-list/checkbox-three-state-list.component';
+import {FilterPipe} from '@common/shared/pipes/filter.pipe';
+import {FormsModule} from '@angular/forms';
 
 @Component({
   selector: 'sm-main-pages-header-filter',
   templateUrl: './main-pages-header-filter.component.html',
   styleUrls: ['./main-pages-header-filter.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    MatMenuModule,
+    AsyncPipe,
+    MatInputModule,
+    ClickStopPropagationDirective,
+    CheckboxThreeStateListComponent,
+    FilterPipe,
+    FormsModule,
+    NgIf
+  ]
 })
 export class MainPagesHeaderFilterComponent implements OnInit, OnDestroy {
   public searchTerm: string;

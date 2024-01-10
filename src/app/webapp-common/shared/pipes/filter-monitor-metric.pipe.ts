@@ -2,7 +2,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 
 @Pipe({
-  name: 'filterMonitorMetric'
+  name: 'filterMonitorMetric',
+  standalone: true
 })
 export class FilterMonitorMetricPipe implements PipeTransform {
 

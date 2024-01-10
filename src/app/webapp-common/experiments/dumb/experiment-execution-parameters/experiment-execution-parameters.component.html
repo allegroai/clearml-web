@@ -60,6 +60,7 @@
     [noHeader]="true"
     [simple]="true"
     [scrollable]="true"
+    [virtualScrollOptions]="{ trackBy: trackByIndex, appendOnly: true, delay: 0, orientation: 'vertical', items: formData, itemSize: 32}"
     [virtualScroll]="true"
     [rowHeight]="32"
     (rowClicked)="rowActivated($event)"
@@ -68,27 +69,45 @@
                  let-col
                  let-i="rowIndex"
                  let-row="rowData">
-      <ng-container *ngIf="col.id === 'description'; else defaultRow">
+      <ng-container [ngSwitch]="col.id">
+        <ng-container *ngSwitchCase="'description'">
         <span *ngIf="row.type!=='legacy' && (row.description || row.type)"
               class="allow-multi-space pointer"
               customClass="hyper-parameters-tooltip parameter-tooltip"
               smTooltip="{{(row.type ? ('Type: '+ row.type+'\n') : '') + (row?.description|| '')}}"
               matTooltipPosition="before"
         ><i class="al-icon al-ico-description"></i></span>
-      </ng-container>
-      <ng-template #defaultRow>
-        <span class="ellipsis"
-              [class.name]="col.id==='name'"
+        </ng-container>
+        <span
+          *ngSwitchCase="'name'"
+          class="ellipsis name"
+          smShowTooltipIfEllipsis
+          matTooltipPosition="before"
+          [matTooltipShowDelay]="250"
+          [smTooltip]="row.name"
+          [smSearchText]="searchedText"
+          highlightClass="highlight-text"
+          [class.current-match]="searchIndexList[matchIndex]?.index===i && searchIndexList[matchIndex]?.col==='name'"
+        >{{row.name}}</span>
+        <ng-container *ngSwitchCase="'value'">
+          <a *ngIf="row.section === 'Datasets' && row.value.length === 32; else: noLink"
+             (click)="$event.preventDefault(); navigateToDataset(row.value)"
+             href="" target="_blank"
+          >{{row.value}}</a>
+          <ng-template #noLink>
+            <span
+              class="ellipsis"
               smShowTooltipIfEllipsis
               matTooltipPosition="before"
-              matTooltipShowDelay="250"
-              [smTooltip]="row[col.id]"
-        >
-          <span *ngFor="let part of (searchedText ? row[col.id].split(searchedText) : [row[col.id]]); let last=last"
-          >{{part}}<span class="highlight-text"
-                         [class.current-match]="searchIndexList[matchIndex]?.index===i && searchIndexList[matchIndex]?.col===col.id" *ngIf="!last"
-          >{{searchedText}}</span></span></span>
-      </ng-template>
+              [matTooltipShowDelay]="250"
+              [smTooltip]="row.value"
+              [smSearchText]="searchedText"
+              highlightClass="highlight-text"
+              [class.current-match]="searchIndexList[matchIndex]?.index===i && searchIndexList[matchIndex]?.col==='value'"
+            >{{row.value}}</span>
+          </ng-template>
+        </ng-container>
+      </ng-container>
     </ng-template>
   </sm-table>
 </div>

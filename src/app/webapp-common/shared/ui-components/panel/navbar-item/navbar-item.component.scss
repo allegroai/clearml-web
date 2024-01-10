@@ -1,17 +1,26 @@
-@import "../../styles/mixins/navbar-item";
-@import '../../styles/variables';
+@import "mixins/navbar-item";
 
 
 .navbar-item {
   display: flex;
+  height: 100%;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   font-size: 12px;
   font-weight: 500;
   letter-spacing: 0.03em;
   text-align: center;
   cursor: pointer;
-  padding: 22px;
+  padding: 0 22px;
+
+  .header {
+    white-space: nowrap;
+  }
+
+  .sub-header {
+    bottom: 7px;
+  }
 
   sm-menu {
     position: absolute;

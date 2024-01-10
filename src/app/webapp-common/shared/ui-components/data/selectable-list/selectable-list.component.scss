@@ -27,14 +27,14 @@ i.icon {
     font-size: 14px;
     border-radius: 4px;
 
-    .al-ico-show {
+    .al-ico-hide {
       visibility: hidden;
     }
 
     &:hover {
       background-color: $blue-50;
       transition: background-color 0.2s;
-      .al-ico-show {
+      .al-ico-hide {
         visibility: visible;
       }
     }

@@ -18,7 +18,7 @@ export class GraphSettingsBarComponent {
   public shortMode: boolean;
 
   @Input() set splitSize(splitSize: number) {
-    this.shortMode = this.el.nativeElement.clientWidth < 1130;
+    this.shortMode = this.el.nativeElement.clientWidth < 1200;
   }
 
   @Input() smoothWeight: number;

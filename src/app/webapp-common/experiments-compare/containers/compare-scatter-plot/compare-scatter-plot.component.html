@@ -1,0 +1,9 @@
+<div *ngIf="graphData?.length > 0" class="buttons">
+  <button class="btn btn-icon" (click)="downloadImage()"><i class="al-icon al-ico-download"></i></button>
+</div>
+<sm-scatter-plot
+  [xAxisType]="scalar ? 'linear' : 'category'"
+  [xAxisLabel]="params?.[0] ?? $any(params)"
+  [yAxisLabel]="metricName"
+  [data]="graphData"
+></sm-scatter-plot>

@@ -8,6 +8,22 @@ import {ColorPickerProps} from '@common/shared/ui-components/directives/choose-c
 import {ColorHashService} from '@common/shared/services/color-hash/color-hash.service';
 import { TinyColor } from '@ctrl/tinycolor';
 
+export const presetColors = [
+  '#1f77b4',  // muted blue
+  '#ff7f0e',  // safety orange
+  '#2ca02c',  // cooked asparagus green
+  '#d62728',  // brick red
+  '#9467bd',  // muted purple
+  '#8c564b',  // chestnut brown
+  '#e377c2',  // raspberry yogurt pink
+  '#7f7f7f',  // middle gray
+  '#bcbd22',  // curry yellow-green
+  '#17becf',   // blue-teal
+  '#af1d41',
+  '#d5d728',
+];
+
+
 @Component({
   selector: 'sm-color-picker-wrapper',
   templateUrl: './color-picker-wrapper.component.html',
@@ -17,21 +33,8 @@ import { TinyColor } from '@ctrl/tinycolor';
 export class ColorPickerWrapperComponent implements OnInit, OnDestroy {
 
   public defaultColor: string;
-  public presetColors = [
-    '#1f77b4',  // muted blue
-    '#ff7f0e',  // safety orange
-    '#2ca02c',  // cooked asparagus green
-    '#d62728',  // brick red
-    '#9467bd',  // muted purple
-    '#8c564b',  // chestnut brown
-    '#e377c2',  // raspberry yogurt pink
-    '#7f7f7f',  // middle gray
-    '#bcbd22',  // curry yellow-green
-    '#17becf',   // blue-teal
-    '#af1d41',
-    '#d5d728',
-  ];
-  public alphaPresetColors = [...this.presetColors,
+  public presetColors = presetColors;
+  public alphaPresetColors = [...presetColors,
     'rgba(0,0,0,0)'
   ];
 

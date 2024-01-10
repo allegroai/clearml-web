@@ -23,7 +23,6 @@ import {
 import {requestFailed} from '../actions/http.actions';
 import {activeLoader, deactivateLoader, setServerError} from '../actions/layout.actions';
 import {setSelectedModels} from '../../models/actions/models-view.actions';
-import {TagColorMenuComponent} from '../../shared/ui-components/tags/tag-color-menu/tag-color-menu.component';
 import {MatDialog} from '@angular/material/dialog';
 import {ApiOrganizationService} from '~/business-logic/api-services/organization.service';
 import {OrganizationGetTagsResponse} from '~/business-logic/model/organization/organizationGetTagsResponse';
@@ -32,6 +31,7 @@ import {EMPTY, forkJoin, Observable, of} from 'rxjs';
 import {ProjectsGetTaskTagsResponse} from '~/business-logic/model/projects/projectsGetTaskTagsResponse';
 import {ProjectsGetModelTagsResponse} from '~/business-logic/model/projects/projectsGetModelTagsResponse';
 import {
+  ScatterPlotPoint,
   selectAllProjectsUsers, selectIsDeepMode,
   selectMainPageTagsFilter,
   selectProjectsOptionsScrollId,
@@ -43,7 +43,7 @@ import {
   OperationErrorDialogComponent
 } from '@common/shared/ui-components/overlay/operation-error-dialog/operation-error-dialog.component';
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
-import {createMetricColumn, excludedKey} from '@common/shared/utils/tableParamEncode';
+import {createMetricColumn, excludedKey, MetricColumn} from '@common/shared/utils/tableParamEncode';
 import {ITask} from '~/business-logic/model/al-task';
 import {TasksGetAllExRequest} from '~/business-logic/model/tasks/tasksGetAllExRequest';
 import {setSelectedExperiments} from '../../experiments/actions/common-experiments-view.actions';
@@ -62,6 +62,7 @@ import {Params} from '@angular/router';
 import {selectCompareAddTableFilters} from '@common/experiments-compare/reducers';
 import {selectTableFilters} from '@common/models/reducers';
 import {selectSelectModelTableFilters} from '@common/select-model/select-model.reducer';
+import {TagColorMenuComponent} from '@common/shared/ui-components/tags/tag-color-menu/tag-color-menu.component';
 
 export const ALL_PROJECTS_OBJECT = {id: '*', name: 'All Experiments'};
 
@@ -86,7 +87,10 @@ export class ProjectsEffects {
   setDeep = createEffect(() => this.actions$.pipe(
     ofType(actions.setDeep),
     debounceTime(300),
-    withLatestFrom(this.store.select(selectSelectedProjectId), this.store.select(selectIsDeepMode)),
+    concatLatestFrom(() => [
+      this.store.select(selectSelectedProjectId),
+      this.store.select(selectIsDeepMode)
+    ]),
     distinctUntilChanged(([, , preIsDeep], [, , currIsDeep]) => preIsDeep === currIsDeep),
     map(([, projectId,]) => actions.getProjectUsers({projectId}))));
 
@@ -301,9 +305,11 @@ export class ProjectsEffects {
       this.store.select(selectSelectedMetricVariantForCurrProject),
     ]),
     filter(([, , variant]) => !!variant),
-    switchMap(([, projectId, variant]) => {
-      const col = createMetricColumn(variant, projectId);
-      return this.tasksApi.tasksGetAllEx({
+    switchMap(([, projectId, cols]) => {
+      if (cols && !Array.isArray(cols)) {
+        cols = [createMetricColumn(cols as unknown as MetricColumn, projectId)];
+      }
+      return forkJoin(cols.map(col => this.tasksApi.tasksGetAllEx({
         /* eslint-disable @typescript-eslint/naming-convention */
         project: [projectId],
         only_fields: ['started', 'last_iteration', 'user.name', 'type', 'name', 'status', 'active_duration', col.id],
@@ -316,22 +322,27 @@ export class ProjectsEffects {
         scroll_id: null,
         size: 1000
         /* eslint-enable @typescript-eslint/naming-convention */
-      } as unknown as TasksGetAllExRequest).pipe(
-        map((res) =>
+      } as unknown as TasksGetAllExRequest)
+        .pipe(map(({tasks}) => tasks))
+      ))
+      .pipe(
+        map(tasksList => tasksList.flat()),
+        map((tasks: ITask[]) =>
           actions.setGraphData({
-            stats: res.tasks.map((task: ITask) => {
+            stats: tasks.map((task: ITask) => {
               const started = new Date(task.started).getTime();
               const end = started + (task.active_duration ?? 0) * 1000;
-              return {
+              return cols.map(col => ({
                 id: task.id,
+                variant: col.id,
                 y: get(task, col.id), // col.id is a path (e.g.) last_metric.x.max_value, must use lodash get
                 x: end,
-                name: task.name,
+                name: `${task.name} (${task.id.slice(0, 6)})`,
                 status: task.status,
                 type: task.type,
                 user: task.user.name,
-              };
-            })
+              } as ScatterPlotPoint ));
+            }).flat().filter(point => point.y > 0)
           }))
       );
     })

@@ -15,6 +15,13 @@ import {ExperimentOutputPlotsComponent} from './containers/experiment-output-plo
 import {DebugImagesComponent} from '../debug-images/debug-images.component';
 import {ExperimentOutputLogComponent} from './containers/experiment-output-log/experiment-output-log.component';
 import {selectIsExperimentInEditMode} from '@common/experiments/reducers';
+import {ExperimentCompareScalarChartsComponent} from '@common/experiments-compare/containers/experiment-compare-metric-charts/experiment-compare-scalar-charts.component';
+import {COMPARE_CONFIG_TOKEN, COMPARE_STORE_KEY, getCompareConfig} from '@common/experiments-compare/experiments-compare.module';
+import {UserPreferences} from '@common/user-preferences';
+import {ExperimentComparePlotsComponent} from '@common/experiments-compare/containers/experiment-compare-plots/experiment-compare-plots.component';
+import {importProvidersFrom} from '@angular/core';
+import {StoreModule} from '@ngrx/store';
+import {experimentsCompareReducers} from '@common/experiments-compare/reducers';
 
 export const routes: Routes = [
   {
@@ -71,6 +78,25 @@ export const routes: Routes = [
           }
         ]
       },
+      {
+        path: 'compare/scalars',
+        component: ExperimentCompareScalarChartsComponent,
+        data: {minimized: true},
+        providers: [
+          {provide: COMPARE_CONFIG_TOKEN, useFactory: getCompareConfig, deps: [UserPreferences]},
+          importProvidersFrom(
+            StoreModule.forFeature(COMPARE_STORE_KEY, experimentsCompareReducers, COMPARE_CONFIG_TOKEN),
+          ),
+        ],
+      },
+      {
+        path: 'compare/plots',
+        component: ExperimentComparePlotsComponent,
+        data: {minimized: true},
+        providers: [
+          {provide: COMPARE_CONFIG_TOKEN, useFactory: getCompareConfig, deps: [UserPreferences]},
+        ],
+      }
     ]
   },
 
@@ -113,5 +139,5 @@ export const routes: Routes = [
       {path: 'debugImages', component: DebugImagesComponent},
       {path: 'log', component: ExperimentOutputLogComponent},
     ]
-  }
+  },
 ];

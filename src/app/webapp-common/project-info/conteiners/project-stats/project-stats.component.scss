@@ -1,4 +1,5 @@
 @import "variables";
+@import "mixins/link";
 @import "../../../layout/layout";
 
 :host{
@@ -18,52 +19,22 @@
 
     .btn {
       height: 32px;
-      width: 180px;
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
+      max-width: 230px;
     }
   }
 
   .line-chart-container {
-    height: calc(100% - 64px);
-  }
-
-  .legend {
-    margin-top: 12px;
-    text-align: center;
-    color: $blue-100;
-
-    .entry {
-      margin: 0 12px;
-
-      &:before {
-        content: ' ';
-        display: inline-block;
-        background-color: var(--color);
-        border-radius: 50%;
-        width: 12px;
-        height: 12px;
-        margin-right: 6px;
-      }
-    }
+    height: 100%;
+    padding-bottom: 24px;
   }
 
   .overview-placeholder {
     .no-data-title {
-      font-size: 14px;
-      color: $blue-100;
-      font-weight: normal;
       margin: 24px 0;
-      text-decoration: underline;
-
-      &:hover {
-        text-decoration: none;
-      }
     }
 
     .al-ico-no-scatter-graph {
-      color: $blue-600;
+      color: $blue-300;
     }
 
     .no-data-button {
@@ -72,6 +43,7 @@
       align-items: center;
     }
   }
+  @include link($neon-yellow);
 }
 
 .close-button {

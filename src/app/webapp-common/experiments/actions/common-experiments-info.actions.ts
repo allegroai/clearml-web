@@ -56,6 +56,13 @@ export const getExperimentArtifacts= createAction(
   props<{ experimentId: string; autoRefresh?: boolean }>()
 );
 
+export const downloadArtifacts= createAction(
+  EXPERIMENTS_INFO_PREFIX + '[download artifacts]',
+  props<{url: string; inMemory?: boolean}>()
+);
+export const downloadSuccess= createAction( EXPERIMENTS_INFO_PREFIX + '[download artifacts success]');
+export const downloadFailed= createAction( EXPERIMENTS_INFO_PREFIX + '[download artifacts failed]');
+
 export const setExperimentArtifacts = createAction(
   EXPERIMENTS_INFO_PREFIX + '[set artifacts]',
   props<{model: IExperimentModelInfo; experimentId: string}>()
@@ -140,4 +147,9 @@ export const deactivateEdit = createAction(EXPERIMENTS_INFO_PREFIX + 'DEACTIVATE
 export const setExperimentFormErrors = createAction(
   EXPERIMENTS_INFO_PREFIX + 'SET_EXPERIMENT_FORM_ERRORS',
   props<{errors: {[key: string]: any}}>()
+);
+
+export const navigateToDataset = createAction(
+  EXPERIMENTS_INFO_PREFIX + 'Navigate to open dataset',
+  props<{datasetId: string}>()
 );

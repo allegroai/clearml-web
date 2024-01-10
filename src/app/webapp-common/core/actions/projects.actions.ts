@@ -11,12 +11,11 @@ import {TasksArchiveManyResponse} from '~/business-logic/model/tasks/tasksArchiv
 import {TasksPublishManyResponse} from '~/business-logic/model/tasks/tasksPublishManyResponse';
 import {TasksStopManyResponse} from '~/business-logic/model/tasks/tasksStopManyResponse';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
-import {MetricColumn} from '@common/shared/utils/tableParamEncode';
-import {ProjectStatsGraphData} from '@common/core/reducers/projects.reducer';
+import {ScatterPlotPoint} from '@common/core/reducers/projects.reducer';
 import {User} from '~/business-logic/model/users/user';
 import {ProjectsGetAllResponseSingle} from '~/business-logic/model/projects/projectsGetAllResponseSingle';
-import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
 import {IBreadcrumbsLink, IBreadcrumbsOptions} from '@common/layout/breadcrumbs/breadcrumbs.component';
+import {ISmCol} from '@common/shared/ui-components/data/table/table.consts';
 
 export const PROJECTS_PREFIX = '[ROOT_PROJECTS] ';
 
@@ -158,18 +157,18 @@ export const openMoreInfoPopup = createAction(
 
 export const setMetricVariant = createAction(
   PROJECTS_PREFIX + '[set selected metric variant for graph]',
-  props<{ projectId: string; col: MetricColumn }>()
+  props<{ projectId: string; cols: ISmCol[] }>()
 );
 export const fetchGraphData = createAction(PROJECTS_PREFIX + '[fetch stats for project graph]');
 
 export const toggleState = createAction(
   PROJECTS_PREFIX + '[toggle state]',
-  props<{ state: TaskStatusEnum }>()
+  props<{ state: string }>()
 );
 
 export const setGraphData = createAction(
   PROJECTS_PREFIX + '[set project stats]',
-  props<{ stats: ProjectStatsGraphData[] }>()
+  props<{ stats: ScatterPlotPoint[] }>()
 );
 
 export const getProjectUsers = createAction(

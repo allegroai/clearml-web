@@ -1,7 +1,8 @@
-import { Pipe, PipeTransform } from "@angular/core";
+import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-  name: 'filterRegex'
+  name: 'filterRegex',
+  standalone: true
 })
 export class RegexPipe implements PipeTransform{
 
