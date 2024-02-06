@@ -13,6 +13,8 @@ export class PipelineCardMenuComponent {
   @Input() project: Project;
   @Input() allTags: string[];
   @Output() run = new EventEmitter();
+  @Output() edit = new EventEmitter();
+  @Output() runs = new EventEmitter();
   @Output() addTag = new EventEmitter<string>();
   @Output() rename = new EventEmitter();
   @Output() delete = new EventEmitter();

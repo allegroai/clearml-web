@@ -48,3 +48,6 @@ gen-code
 # System Files
 .DS_Store
 Thumbs.db
+
+# history
+/.history

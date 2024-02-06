@@ -64,6 +64,7 @@ export const ICONS = {
   METRICS: 'fa-chart-area',
   TOKEN: 'fa-key',
   EDIT: 'al-ico-edit',
+  EDIT2: 'fa-pen-to-square',
   EDITABLE: 'fa-pencil',
   RESET: 'al-ico-reset',
   CLONE: 'al-ico-clone',

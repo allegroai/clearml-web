@@ -38,6 +38,8 @@
       (addTag)="addTag(project, $event)"
       (removeTag)="removeTag(project, $event)"
       (delete)="deleteProject(project)"
+      (runs)="projectCardClicked($event)"
+      (edit)="pipelineEditClicked($event)"
     ></sm-pipeline-card>
   </ng-container>
 

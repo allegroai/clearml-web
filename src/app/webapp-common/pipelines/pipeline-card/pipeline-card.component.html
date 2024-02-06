@@ -47,6 +47,8 @@
         (run)="run.emit()"
         (rename)="editName.inlineActivated()"
         (addTag)="addTag.emit($event)"
+        (runs)="runs.emit(project)"
+        (edit)="edit.emit(project)"
         (delete)="delete.emit()"
         data-id="pipelineCardMenu"
       ></sm-pipeline-card-menu>

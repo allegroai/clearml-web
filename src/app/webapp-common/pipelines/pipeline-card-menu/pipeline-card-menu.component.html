@@ -2,6 +2,12 @@
      class="p-0 cell menu-button al-icon al-color blue-300 al-ico-bars-menu"
 ></div>
 <mat-menu #pipelinesMenu="matMenu">
+  <button mat-menu-item (click)="edit.emit()">
+    <i class="fa-solid al-icon sm-md" [class]="icons.EDIT2"></i>Edit
+  </button>
+  <button mat-menu-item (click)="runs.emit()">
+    <i class="al-icon sm-md" [class]="icons.RUN"></i>Runs
+  </button>
   <button mat-menu-item (click)="rename.emit()">
     <i class="al-icon sm-md" [class]="icons.EDIT"></i>Rename
   </button>

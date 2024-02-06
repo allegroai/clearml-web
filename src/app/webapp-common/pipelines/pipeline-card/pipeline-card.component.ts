@@ -44,6 +44,8 @@ import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indic
 export class PipelineCardComponent extends ProjectCardComponent {
   @Input() allTags: string[];
   @Output() run = new EventEmitter();
+  @Output() runs = new EventEmitter(); // view runs for pipeline
+  @Output() edit = new EventEmitter(); // edit pipeline
   @Output() addTag = new EventEmitter<string>();
   @Output() removeTag = new EventEmitter<string>();
   @Output() delete = new EventEmitter();
