@@ -1,5 +1,6 @@
+<router-outlet></router-outlet>
 <div class="sm-card-list-layout projects"
-     [class.in-empty-state]="!(((projectsList$ | async)?.length !== 0 && (!allExamples || (showExamples$ | async))) || searching)">
+[class.in-empty-state]="!(((projectsList$ | async)?.length !== 0 && (!allExamples || (showExamples$ | async))) || searching)">
   <sm-projects-header
     (orderByChanged)="orderByChanged($event)"
     [sortByField]="projectsOrderBy$ | async"

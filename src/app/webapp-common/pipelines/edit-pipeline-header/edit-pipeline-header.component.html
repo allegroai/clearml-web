@@ -1,0 +1,51 @@
+<!-- <div class="d-flex justify-content-between header-container align-items-center"
+     [ngClass]="{'archive-mode': isArchived}"> -->
+  <!-- <div class="d-flex-center"> -->
+  <div class="d-flex justify-content-end align-items-center right-buttons">
+    <sm-clear-filters-button
+      *ngIf="!minimizedView"
+      [tableFilters]="tableFilters"
+      (clearTableFilters)="clearTableFilters.emit(tableFilters)"
+    ></sm-clear-filters-button>
+    <sm-menu *ngIf="tableMode !== 'compare'"
+      class="download-btn" buttonClass="al-icon al-ico-download pointer lm" panelClasses="light-theme"
+             [showCart]="false" smTooltip="Download table as CSV" [disabled]="noData" data-id="downloadCSV">
+      <sm-menu-item (itemClicked)="downloadTableAsCSV.emit()" itemLabel="Download on screen items"></sm-menu-item>
+      <sm-menu-item (itemClicked)="downloadFullTableAsCSV.emit()"
+                    [itemLabel]="'Download first '+ (maxDownloadItems$ | async) +' items'"></sm-menu-item>
+    </sm-menu>
+
+    <!-- <mat-form-field *ngIf="tableMode === 'compare'" appearance="outline" class="dark-outline compare-view-select no-bottom">
+      <mat-select [(ngModel)]="compareView" name="compareView" panelClass="dark-outline" (ngModelChange)="compareViewChanged.emit($event)">
+        <mat-option value="scalars">Scalars</mat-option>
+        <mat-option value="plots">Plots</mat-option>
+      </mat-select>
+    </mat-form-field> -->
+
+    <!-- <i class="al-icon al-ico-tune sm-md"
+       *ngIf="tableMode === 'compare' && compareView === 'scalars'"
+       [class.active]="showCompareScalarSettings"
+       (click)="toggleShowCompareSettings.emit()"></i> -->
+
+    <sm-experiment-custom-cols-menu
+      *ngIf="!minimizedView || tableMode === 'compare'"
+      [metricVariants]="metricVariants"
+      [hyperParams]="hyperParams"
+      [tableCols]="tableCols"
+      [isLoading]="isMetricsLoading"
+      [skipValueType]="tableMode === 'compare'"
+      [disabled]="tableMode === 'compare' && metricVariants?.length === 0"
+      (selectedMetricToShow)="selectedMetricToShow.emit($event)"
+      (selectedHyperParamToShow)="selectedHyperParamToShow.emit($event)"
+      (selectedTableColsChanged)="selectedTableColsChanged.emit($event)"
+      (getMetricsToDisplay)="getMetricsToDisplay.emit($event)"
+      (removeColFromList)="removeColFromList.emit($event)"
+      (clearSelection)="clearSelection.emit()"
+    ></sm-experiment-custom-cols-menu>
+    <sm-refresh-button
+      [allowAutoRefresh]="true"
+      (setAutoRefresh)="setAutoRefresh.emit($event)"
+    >
+    </sm-refresh-button>
+  <!-- </div> -->
+<!-- </div> -->

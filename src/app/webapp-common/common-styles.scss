@@ -823,7 +823,7 @@ button.btn.button-outline-dark {
   grid-template-columns: repeat(auto-fit, 352px);
   grid-gap: 24px;
   padding: 0 24px 24px;
-  justify-content: center;
+  justify-content: space-between;
 
   .load-more {
     display: flex;
