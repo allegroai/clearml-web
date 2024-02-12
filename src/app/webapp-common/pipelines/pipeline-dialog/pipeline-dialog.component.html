@@ -1,0 +1,9 @@
+<sm-dialog-template iconClass="al-ico-pipelines" header="CREATE NEW PIPELINE">
+  <sm-create-new-pipeline-form
+    [projects]="projects$| async"
+    [readOnlyProjectsNames]="readOnlyProjectsNames$ | async"
+    [defaultProjectId]="data?.defaultProjectId"
+    (pipelineCreated)="createPipeline($event)"
+    (filterSearchChanged)="filterSearchChanged($event)"
+  ></sm-create-new-pipeline-form>
+</sm-dialog-template>

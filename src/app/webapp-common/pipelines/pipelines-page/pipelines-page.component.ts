@@ -27,11 +27,13 @@ import {
 import {ProjectsGetAllResponseSingle} from '~/business-logic/model/projects/projectsGetAllResponseSingle';
 import {selectShowPipelineExamples} from '@common/projects/common-projects.reducer';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
-import {
-  PipelinesEmptyStateComponent
-} from '@common/pipelines/pipelines-page/pipelines-empty-state/pipelines-empty-state.component';
+// import {
+//   PipelinesEmptyStateComponent
+// } from '@common/pipelines/pipelines-page/pipelines-empty-state/pipelines-empty-state.component';
 import {debounceTime, skip, withLatestFrom} from 'rxjs/operators';
 import {ProjectTypeEnum} from '@common/nested-project-view/nested-project-view-page/nested-project-view-page.component';
+import { PipelineDialogComponent } from '../pipeline-dialog/pipeline-dialog.component';
+import { createPipeline } from '../pipelines.actions';
 
 @Component({
   selector: 'sm-pipelines-page',
@@ -132,12 +134,25 @@ if __name__ == '__main__':
   }
 
   createPipeline() {
-    this.dialog.open(PipelinesEmptyStateComponent, {
-      data: {
-        pipelineCode: this.initPipelineCode
-      },
-      width: '1248px'
-    });
+
+    this.dialog.open(PipelineDialogComponent, {
+      data: {defaultProjectId: this.projectId},
+      panelClass: 'light-theme',
+      width: '640px'
+    })
+      .afterClosed()
+      .subscribe(pipeline => {
+        if (pipeline) {
+          this.store.dispatch(createPipeline({pipelinesCreateRequest: pipeline}));
+        }
+      });
+
+    // this.dialog.open(PipelineDialogComponent, {
+    //   data: {
+    //     panelClass: 'light-theme',
+    //   },
+    //   width: '640px'
+    // });
 
   }
 
