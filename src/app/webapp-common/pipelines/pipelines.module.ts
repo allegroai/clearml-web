@@ -37,7 +37,7 @@ import { TagListComponent } from "@common/shared/ui-components/tags/tag-list/tag
 import { DialogTemplateComponent } from "@common/shared/ui-components/overlay/dialog-template/dialog-template.component";
 import { ToggleArchiveComponent } from "@common/shared/ui-components/buttons/toggle-archive/toggle-archive.component";
 import { LabeledFormFieldDirective } from "@common/shared/directive/labeled-form-field.directive";
-import { EditPipelineComponent } from "./edit-pipeline/edit-pipeline.component";
+import { EditPipelinePageComponent } from "./edit-pipeline-page/edit-pipeline-page.component";
 import { EditPipelineHeaderComponent } from "./edit-pipeline-header/edit-pipeline-header.component";
 import { ClearFiltersButtonComponent } from "@common/shared/components/clear-filters-button/clear-filters-button.component";
 import { MenuComponent } from "@common/shared/ui-components/panel/menu/menu.component";
@@ -97,7 +97,7 @@ const getInitState = (userPreferences: UserPreferences) => ({
     PipelinesPageComponent,
     PipelineDialogComponent,
     CreateNewPipelineFormComponent,
-    EditPipelineComponent,
+    EditPipelinePageComponent,
     EditPipelineHeaderComponent,
   ],
   imports: [
@@ -142,7 +142,7 @@ const getInitState = (userPreferences: UserPreferences) => ({
     RefreshButtonComponent,
     LabeledFormFieldDirective,
   ],
-  exports: [PipelinesPageComponent, EditPipelineComponent],
+  exports: [PipelinesPageComponent, EditPipelinePageComponent],
   providers: [
     { provide: PIPELINES_CONFIG_TOKEN, useFactory: getPipelineConfig },
     {provide: PIPELINES_CONFIG_TOKEN_FOR_PIPELINE_SERVICE, useFactory: getInitState, deps: [UserPreferences]},

@@ -2,7 +2,7 @@ import {FeaturesEnum} from '~/business-logic/model/users/featuresEnum';
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 import {PipelinesPageComponent} from '@common/pipelines/pipelines-page/pipelines-page.component';
-import { EditPipelineComponent} from '@common/pipelines/edit-pipeline/edit-pipeline.component';
+import { EditPipelinePageComponent} from '@common/pipelines/edit-pipeline-page/edit-pipeline-page.component';
 import {CrumbTypeEnum} from '@common/layout/breadcrumbs/breadcrumbs.component';
 
 const routes = [  {
@@ -18,7 +18,7 @@ const routes = [  {
     },
     
     
-  },{ path: ':id/edit', component: EditPipelineComponent }] as Routes;
+  },{ path: ':id/edit', component: EditPipelinePageComponent }] as Routes;
 
 @NgModule({
   imports: [
