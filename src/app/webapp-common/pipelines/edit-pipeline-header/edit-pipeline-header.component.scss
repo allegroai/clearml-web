@@ -1,5 +1,13 @@
-.right-buttons{
+@import '../../../../webapp-common/shared/ui-components/styles/variables';
+@import '../../../../webapp-common/layout/layout.scss';
+
+.header-container{
     display: flex;
     flex-grow: 1;
     justify-content: end;
+    background-color: #333746;
+    height: $project-header-height;
+    gap: 24px;
+    padding-right: 28px;
+    transition: background-color 0.5s;
 }
