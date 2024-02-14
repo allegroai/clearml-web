@@ -1,13 +1,81 @@
 @import '../../../../webapp-common/shared/ui-components/styles/variables';
 @import '../../../../webapp-common/layout/layout.scss';
 
-.header-container{
-    display: flex;
-    flex-grow: 1;
-    justify-content: end;
-    background-color: #333746;
+// .header-container{
+//     display: flex;
+//     flex-grow: 1;
+//     justify-content: end;
+//     background-color: #333746;
+//     height: $project-header-height;
+//     gap: 24px;
+//     padding-right: 28px;
+//     transition: background-color 0.5s;
+// }
+
+
+
+
+:host {
+  display: block;
+  width: 100%;
+
+  .header-container {
+    padding-left: 24px;
     height: $project-header-height;
-    gap: 24px;
-    padding-right: 28px;
     transition: background-color 0.5s;
+    background-color: #1A1E2C;
+    .hide-item {
+      visibility: hidden;
+    }
+
+    &.archive-mode {
+      transition: background-color 0.5s;
+      background-color: #333746;
+
+      ::ng-deep button {
+        border-color: #636e97;
+        box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
+      }
+    }
+  }
+
+  .right-buttons {
+    margin-right: 28px;
+
+    sm-experiment-menu {
+      padding: 6px 0;
+    }
+  }
+
+  sm-experiment-custom-cols-menu {
+    margin-right: 25px;
+  }
+
+  sm-clear-filters-button {
+    margin-right: 24px;
+  }
+
+  .download-btn {
+    margin-right: 24px;
+    color: $blue-300;
+  }
+
+  .al-ico-tune {
+    margin-right: 24px;
+    color: $blue-300;
+    cursor: pointer;
+
+
+    &.active,
+    &:hover {
+      color: $blue-200;
+
+    }
+  }
+
+  .compare-view-select {
+    margin-right: 24px;
+  }
+
 }
+

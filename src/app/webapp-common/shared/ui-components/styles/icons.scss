@@ -599,3 +599,20 @@
 .i-fingers-white {
   @include icon('#{$assets-icons-path}/fingers-white.svg');
 }
+
+.i-pipeline-save {
+  @include icon('#{$assets-icons-path}/pipeline/pipeline-save.svg');
+}
+
+
+.i-pipeline-compile {
+  @include icon('#{$assets-icons-path}/pipeline/pipeline-compile.svg');
+}
+
+.i-pipeline-add-new-step {
+  @include icon('#{$assets-icons-path}/pipeline/pipeline-add-new-step.svg');
+}
+
+.i-play {
+  @include icon('#{$assets-icons-path}/play.svg');
+}
