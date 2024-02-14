@@ -55,9 +55,11 @@
     margin-right: 24px;
   }
 
-  .download-btn {
-    margin-right: 24px;
-    color: $blue-300;
+  .g-btn {
+    display: inherit;
+        margin-left: 12px;
+        gap: 12px;
+    // color: $blue-300;
   }
 
   .al-ico-tune {

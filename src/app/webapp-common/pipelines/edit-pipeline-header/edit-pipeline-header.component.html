@@ -1,10 +1,10 @@
 <div class="d-flex justify-content-end align-items-center header-container">
-    <!-- <sm-clear-filters-button
+  <!-- <sm-clear-filters-button
       *ngIf="!minimizedView"
       [tableFilters]="tableFilters"
       (clearTableFilters)="clearTableFilters.emit(tableFilters)"
     ></sm-clear-filters-button> -->
-    <!-- <sm-menu *ngIf="tableMode !== 'compare'"
+  <!-- <sm-menu *ngIf="tableMode !== 'compare'"
       class="download-btn" buttonClass="al-icon al-ico-download pointer lm" panelClasses="light-theme"
              [showCart]="false" smTooltip="Download table as CSV" [disabled]="noData" data-id="downloadCSV">
       <sm-menu-item (itemClicked)="downloadTableAsCSV.emit()" itemLabel="Download on screen items"></sm-menu-item>
@@ -13,7 +13,7 @@
     </sm-menu> -->
 
 
-    <!-- <sm-experiment-custom-cols-menu
+  <!-- <sm-experiment-custom-cols-menu
       *ngIf="!minimizedView || tableMode === 'compare'"
       [metricVariants]="metricVariants"
       [hyperParams]="hyperParams"
@@ -33,11 +33,32 @@
       (setAutoRefresh)="setAutoRefresh.emit($event)"
     >
     </sm-refresh-button> -->
-    <sm-menu class="download-btn" buttonClass="icon i-pipeline-save lm"  [showCart]="false" smTooltip="Download table as CSV" ></sm-menu>
-    <sm-menu class="download-btn" buttonClass="icon i-pipeline-compile lm"  [showCart]="false" smTooltip="Download table as CSV" ></sm-menu>
-    <sm-menu class="download-btn" buttonClass="icon i-pipeline-add-new-step lm"  [showCart]="false" smTooltip="Download table as CSV" ></sm-menu>
+  <button class="btn btn-icon g-btn" smTooltip="Save pipeline">
+    <i class="icon i-pipeline-save lm"></i>
+  </button>
+  <button class="btn btn-icon g-btn" smTooltip="Compile pipeline">
+    <i class="icon i-pipeline-compile lm"></i>
+  </button>
+  <button class="btn btn-icon g-btn" smTooltip="Add new step to pipeline">
+    <i class="icon i-pipeline-add-new-step lm"></i>
+  </button>
+  <button class="btn btn-icon g-btn" smTooltip="Run pipeline">
+    <i class="icon i-play lm"></i>
+  </button>
+  <button class="btn btn-icon g-btn" smTooltip="Pipeline settings">
+    <i class="al-icon al-ico-settings lm"></i>
+  </button>
 
-    <sm-menu class="download-btn" buttonClass="al-icon al-ico-settings pointer lm"  [showCart]="false" smTooltip="Download table as CSV" ></sm-menu>
-    <sm-menu class="download-btn" buttonClass="icon i-play lm"  [showCart]="false" smTooltip="Download table as CSV" ></sm-menu>
+
+<!--   <sm-menu class="download-btn" buttonClass="icon i-pipeline-save lm" [showCart]="false" [disabled]="noData"
+    smTooltip=""></sm-menu>
+  <sm-menu class="download-btn" buttonClass="icon i-pipeline-compile lm" [showCart]="false"
+    smTooltip=""></sm-menu>
+  <sm-menu class="download-btn" buttonClass="icon i-pipeline-add-new-step lm" [showCart]="false"
+    smTooltip=""></sm-menu>
+  <sm-menu class="download-btn" buttonClass="icon i-play lm" [showCart]="false" smTooltip=""></sm-menu>
+  <sm-menu class="download-btn" buttonClass="al-icon al-ico-settings pointer lm" [showCart]="false"
+    smTooltip=""></sm-menu>
+ -->
 
 </div>
