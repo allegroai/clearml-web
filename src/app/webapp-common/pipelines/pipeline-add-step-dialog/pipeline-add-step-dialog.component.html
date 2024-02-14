@@ -1,0 +1,9 @@
+<sm-dialog-template iconClass="al-ico-pipelines" header="CREATE NEW PIPELINE">
+  <sm-pipeline-add-step-form
+    [experiments]="experiments$| async"
+    [readOnlyExperimentsNames]="readOnlyExperimentsNames$ | async"
+    [defaultExperimentId]="data?.defaultExperimentId"
+    (stepCreated)="createStep($event)"
+    (filterSearchChanged)="filterSearchChanged($event)"
+  ></sm-pipeline-add-step-form>
+</sm-dialog-template>

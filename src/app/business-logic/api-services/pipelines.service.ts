@@ -34,7 +34,7 @@ import { BASE_PATH, COLLECTION_FORMATS } from "../variables";
 import { Configuration } from "../configuration";
 import { PipelinesDeleteRunsRequest } from "~/business-logic/model/pipelines/pipelinesDeleteRunsRequest";
 import { PipelinesDeleteRunsResponse } from "~/business-logic/model/pipelines/pipelinesDeleteRunsResponse";
-import { PipelinesCreateRequest, PipelinesCreateResponse } from "../model/pipelines/models";
+import { PipelinesCreateRequest, PipelinesCreateResponse, PipelinesCreateStepsRequest, PipelinesCreateStepsResponse } from "../model/pipelines/models";
 
 @Injectable()
 export class ApiPipelinesService {
@@ -225,4 +225,60 @@ export class ApiPipelinesService {
       }
     );
   }
+
+  
+  /**
+   *
+   * Create a new pipeline step
+   * @param request request body
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   */
+
+  public pipelinesCreateStep(
+    request: PipelinesCreateStepsRequest,
+    options?: any,
+    observe: any = "body",
+    reportProgress: boolean = false
+  ): Observable<any> {
+    if (request === null || request === undefined) {
+      throw new Error(
+        "Required parameter request was null or undefined when calling pipelinesCreate."
+      );
+    }
+
+    let headers = this.defaultHeaders;
+    if (options && options.async_enable) {
+      headers = headers.set(this.configuration.asyncHeader, "1");
+    }
+
+    // to determine the Accept header
+    const httpHeaderAccepts: string[] = ["application/json"];
+    const httpHeaderAcceptSelected: string | undefined =
+      this.configuration.selectHeaderAccept(httpHeaderAccepts);
+    if (httpHeaderAcceptSelected != undefined) {
+      headers = headers.set("Accept", httpHeaderAcceptSelected);
+    }
+
+    // to determine the Content-Type header
+    const consumes: string[] = [];
+    const httpContentTypeSelected: string | undefined =
+      this.configuration.selectHeaderContentType(consumes);
+    if (httpContentTypeSelected != undefined) {
+      headers = headers.set("Content-Type", httpContentTypeSelected);
+    }
+
+    return this.apiRequest.post<PipelinesCreateStepsResponse>(
+      `${this.basePath}/pipelines.create.step`,
+      request,
+      {
+        withCredentials: this.configuration.withCredentials,
+        headers: headers,
+        observe: observe,
+        reportProgress: reportProgress,
+      }
+    );
+  }
+
+  
 }

@@ -2,6 +2,8 @@ import {createAction, props} from '@ngrx/store';
 // import {ReportsGetAllExResponse} from '~/business-logic/model/reports/reportsGetAllExResponse';
 // import {IReport} from './reports.consts';
 import { Pipeline, PipelinesCreateRequest } from '~/business-logic/model/pipelines/models';
+import { PipelinesCreateStepsRequest } from '~/business-logic/model/pipelines/pipelinesCreateStepsRequest';
+import { Task } from '~/business-logic/model/tasks/task';
 
 export const PIPELINES_PREFIX = 'PIPELINES_';
 
@@ -10,7 +12,21 @@ export const createPipeline = createAction(
   props<{ pipelinesCreateRequest: PipelinesCreateRequest }>()
 );
 
+export const createPipelineStep = createAction(
+  PIPELINES_PREFIX + 'CREATE_PIPELINE_STEP',
+  props<{ pipelinesCreateStepRequest: PipelinesCreateStepsRequest }>()
+);
 
+export const getAllExperiments = createAction(
+  PIPELINES_PREFIX + 'GET_EXPERIMENTS',
+  props<{ query: string; regExp?: boolean }>()
+);
+
+
+export const setExperimentsResults = createAction(
+  PIPELINES_PREFIX + 'SET_EXPERIMENTS',
+  props<{ experiments: Task[]}>()
+);
 
 export const updateProject = createAction(
   PIPELINES_PREFIX + '[update pipeline]',

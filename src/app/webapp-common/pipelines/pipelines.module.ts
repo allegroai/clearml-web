@@ -51,6 +51,8 @@ import { PipelineState, pipelinesReducer, PIPELINES_KEY } from "./pipelines.redu
 import { UserPreferences } from "@common/user-preferences";
 import { createUserPrefFeatureReducer } from "@common/core/meta-reducers/user-pref-reducer";
 import { PIPELINES_PREFIX } from "./pipelines.actions";
+import { PipelineAddStepDialogComponent } from "./pipeline-add-step-dialog/pipeline-add-step-dialog.component";
+import { PipelineAddStepFormComponent } from "./pipeline-add-step-dialog/pipeline-add-step-form/pipeline-add-step-form.component";
 
 export const pipelinesSyncedKeys = ["projects.showPipelineExamples"];
 const pipelinesSyncedKeys2 = ['orderBy', 'sortOrder'];
@@ -96,7 +98,9 @@ const getInitState = (userPreferences: UserPreferences) => ({
   declarations: [
     PipelinesPageComponent,
     PipelineDialogComponent,
+    PipelineAddStepDialogComponent,
     CreateNewPipelineFormComponent,
+    PipelineAddStepFormComponent,
     EditPipelinePageComponent,
     EditPipelineHeaderComponent,
   ],

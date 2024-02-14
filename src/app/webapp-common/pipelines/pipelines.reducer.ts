@@ -8,6 +8,7 @@ import {
   resetPipelinesSearchQuery,
   resetReadyToDelete,
   setCurrentScrollId,
+  setExperimentsResults,
   setNoMorePipelines,
   setPipelinesOrderBy,
   setPipelinesSearchQuery,
@@ -18,7 +19,7 @@ import {
 } from './pipelines.actions';
 import {SearchState} from '../common-search/common-search.reducer';
 import { Pipeline } from '~/business-logic/model/pipelines/pipeline';
-
+import { Task } from '~/business-logic/model/tasks/task';
 
 
 export const PIPELINES_KEY = 'pipelines';
@@ -50,6 +51,7 @@ export interface PipelineState {
   tableModeAwareness: boolean;
   showPipelineExamples: boolean;
   showDatasetExamples: boolean;
+  experiments: Task[];
 }
 
 export const pipelinesInitState: PipelineState = {
@@ -67,6 +69,7 @@ export const pipelinesInitState: PipelineState = {
   tableModeAwareness: true,
   showPipelineExamples: false,
   showDatasetExamples: false,
+  experiments: null
 };
 
 const getCorrectSortingOrder = (currentSortOrder: TableSortOrderEnum, currentOrderField: string, nextOrderField: string) => {
@@ -132,7 +135,11 @@ export const pipelinesReducers = [
   on(setTableModeAwareness, (state, action) =>
     ({...state, tableModeAwareness: (action as ReturnType<typeof setTableModeAwareness>).awareness})),
   on(showExamplePipelines, state => ({...state, showPipelineExamples: true})),
-  on(showExampleDatasets, state => ({...state, showDatasetExamples: true}))
+  on(showExampleDatasets, state => ({...state, showDatasetExamples: true})),
+  on(setExperimentsResults, (state, action) => ({
+    ...state,
+    experiments: [...action.experiments],
+  })),
 ] as ReducerTypes<PipelineState, ActionCreator[]>[];
 export const pipelinesReducer = createReducer(pipelinesInitState, ...pipelinesReducers);
 
@@ -156,3 +163,4 @@ export const selectPipelinesScrollId = createSelector(pipelines, (state): string
 export const selectTableModeAwareness = createSelector(pipelines, state => state?.tableModeAwareness);
 export const selectShowPipelineExamples = createSelector(pipelines, state => state?.showPipelineExamples);
 export const selectShowDatasetExamples = createSelector(pipelines, state => state?.showDatasetExamples);
+export const selectExperiments = createSelector(pipelines, state => state?.experiments);

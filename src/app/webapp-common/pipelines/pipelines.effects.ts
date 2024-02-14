@@ -6,7 +6,7 @@ import {catchError, filter, map, mergeMap, switchMap, /* tap */} from 'rxjs/oper
 import {activeLoader, /* addMessage, */ deactivateLoader, setServerError} from '../core/actions/layout.actions';
 import {requestFailed} from '../core/actions/http.actions';
 import {
-  createPipeline
+  createPipeline, createPipelineStep, getAllExperiments, setExperimentsResults
 } from './pipelines.actions';
 // import {ApiReportsService} from '~/business-logic/api-services/reports.service';
 /* import {IReport, PAGE_SIZE} from './reports.consts';
@@ -30,10 +30,11 @@ import {
   selectSelectedProjectId
 } from '../core/reducers/projects.reducer';
 import {TABLE_SORT_ORDER} from '../shared/ui-components/data/table/table.consts';
-import {selectCurrentUser, selectShowOnlyUserWork} from '../core/reducers/users-reducer';
+
 import {escapeRegex} from '../shared/utils/escape-regex';
 import {MESSAGES_SEVERITY} from '../constants'; */
 import {MatDialog} from '@angular/material/dialog';
+import {selectCurrentUser} from '../core/reducers/users-reducer';
 /* import {
   ChangeProjectDialogComponent
 } from '@common/experiments/shared/components/change-project-dialog/change-project-dialog.component';
@@ -45,6 +46,8 @@ import {selectActiveWorkspaceReady} from '~/core/reducers/view.reducer';
 import {HttpClient} from '@angular/common/http';
 import { PipelinesCreateResponse } from '~/business-logic/model/pipelines/pipelinesCreateResponse';
 import { ApiPipelinesService } from '~/business-logic/api-services/pipelines.service';
+import { PipelinesCreateStepsResponse } from '~/business-logic/model/pipelines/pipelinesCreateStepsResponse';
+import { ApiTasksService } from '~/business-logic/api-services/tasks.service';
 /* import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {setMainPageTagsFilter} from '@common/core/actions/projects.actions';
 import {cleanTag} from '@common/shared/utils/helpers.util';
@@ -59,6 +62,7 @@ export class PipelinesEffects {
     private route: ActivatedRoute,
     private router: Router,
     private pipelinesApiService: ApiPipelinesService,
+    private experimentsApiService: ApiTasksService,
     private http: HttpClient,
     private matDialog: MatDialog,
     // public projectsApi: ApiProjectsService,
@@ -66,7 +70,7 @@ export class PipelinesEffects {
   }
 
   activeLoader = createEffect(() => this.actions.pipe(
-    ofType(/* getReports, getReport, */ createPipeline,/*  updateReport, restoreReport, archiveReport */),
+    ofType(/* getReports, getReport, */ createPipeline, createPipelineStep, getAllExperiments/*  updateReport, restoreReport, archiveReport */),
     filter(action => !action['refresh']),
     map(action => activeLoader(action.type))
   ));
@@ -86,6 +90,51 @@ export class PipelinesEffects {
           deactivateLoader(createPipeline.type),
         ]
       })))
+  ));
+
+
+  createPipelineStep$ = createEffect(() => this.actions.pipe(
+    ofType(createPipelineStep),
+    switchMap((action) => this.pipelinesApiService.pipelinesCreateStep(action.pipelinesCreateStepRequest)
+      .pipe(mergeMap((res: PipelinesCreateStepsResponse) => {
+        // eslint-disable-next-line no-console
+        console.log(res)
+        // this.router.navigate(['pipelines', res.id, 'edit']);
+        return [deactivateLoader(createPipeline.type)];
+      }),
+      catchError(err => {
+        return [
+          requestFailed(err),
+          setServerError(err, null, 'failed to create a new pipeline step'),
+          deactivateLoader(createPipelineStep.type),
+        ]
+      })))
+  ));
+
+
+
+  
+
+  getAllExperiments$ = createEffect(() => this.actions.pipe(
+    ofType(getAllExperiments),
+    switchMap((action) => this.experimentsApiService.tasksGetAllEx({
+      _any_: {
+        pattern: action.query ? action.query : '',
+        fields: ['name', 'id']
+      },
+      size: 20,
+      // user: this.store.select(selectCurrentUser)?.id,
+      only_fields:  ['name', 'created', 'status', 'type', 'user.name', 'id', 'company'],
+      // order_by: orderBy,
+      // type: [excludedKey, 'annotation_manual', excludedKey, 'annotation', excludedKey, 'dataset_import'],
+      // system_tags: ['-archived', '-pipeline', '-dataset'],
+      search_hidden: false,
+      /* eslint-enable @typescript-eslint/naming-convention */
+    }).pipe(
+      mergeMap(res => [setExperimentsResults({
+        experiments: res.tasks,
+      }), deactivateLoader(getAllExperiments.type)]),
+      catchError(error => [deactivateLoader(getAllExperiments.type), requestFailed(error)])))
   ));
 
   // activeLoader = createEffect(() => this.actions.pipe(

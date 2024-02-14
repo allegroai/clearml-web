@@ -1,4 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { PipelineAddStepDialogComponent } from '../pipeline-add-step-dialog/pipeline-add-step-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
+import { Store } from '@ngrx/store';
+import { createPipelineStep } from '../pipelines.actions';
 
 @Component({
   selector: 'sm-edit-pipeline-page',
@@ -6,5 +10,30 @@ import { Component } from '@angular/core';
   styleUrls: ['./edit-pipeline-page.component.scss']
 })
 export class EditPipelinePageComponent {
+  protected dialog = inject(MatDialog);
+  protected store = inject(Store);
+  
+  createPipeline() {
+
+    this.dialog.open(PipelineAddStepDialogComponent, {
+      data: {defaultExperimentId: ''},
+      panelClass: 'light-theme',
+      width: '640px'
+    })
+      .afterClosed()
+      .subscribe(pipeline => {
+        if (pipeline) {
+          this.store.dispatch(createPipelineStep({pipelinesCreateStepRequest: pipeline}));
+        }
+      });
+
+    // this.dialog.open(PipelineDialogComponent, {
+    //   data: {
+    //     panelClass: 'light-theme',
+    //   },
+    //   width: '640px'
+    // });
+
+  }
 
 }
