@@ -138,7 +138,7 @@ if __name__ == '__main__':
     this.dialog.open(PipelineDialogComponent, {
       data: {defaultProjectId: this.projectId},
       panelClass: 'light-theme',
-      width: '640px'
+      width: '690px'
     })
       .afterClosed()
       .subscribe(pipeline => {

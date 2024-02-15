@@ -1,5 +1,6 @@
 import {
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   EventEmitter,
   Input,
@@ -16,6 +17,9 @@ import {rootProjectsPageSize} from '@common/constants';
 import {
   IOption
 } from '@common/shared/ui-components/inputs/select-autocomplete-with-chips/select-autocomplete-with-chips.component';
+import { PipelinesParameter } from '~/business-logic/model/pipelines/pipelinesParameter';
+import { cloneDeep } from 'lodash-es';
+import { PipelineParametersComponent } from '@common/pipelines/pipeline-parameters/pipeline-parameters.component';
 
 
 @Component({
@@ -37,15 +41,28 @@ export class CreateNewPipelineFormComponent implements OnChanges, OnDestroy {
 
   public pipelinesNames: Array<string>;
   public projectsNames: Array<string>;
-  public pipeline: { name: string; description: string; project: { label: string; value: string }, parameters: Array<object>, tags: Array<string> } = {
+  public pipeline: { name: string; description: string; project: { label: string; value: string }, parameters: Array<PipelinesParameter>, tags: Array<string> } = {
     name: null,
     description: '',
     project: null,
-    parameters: [],
+    parameters: [{
+      name: "Paramter1",
+      value: ""
+    }, {
+      name: "Parameter2",
+      value: ""
+    }],
     tags: [],
   };
   filterText: string = '';
   isAutoCompleteOpen: boolean;
+
+  // for parameters
+  @ViewChild('pipelineParamsForm', {static: false}) pipelineParamsForm: PipelineParametersComponent;
+  public searchedText: string;
+  public searchResultsCount: number;
+  public scrollIndexCounter: number;
+  public size$: Observable<number>;
 
   @Input() readOnlyProjectsNames: string[];
   @Input() defaultProjectId: string;
@@ -64,6 +81,24 @@ export class CreateNewPipelineFormComponent implements OnChanges, OnDestroy {
       ...(projects ? projects.map(project => ({label: project.name, value: project.id})) : [])
     ];
     this.projectsNames = this.projectsOptions.map(project => project.label);
+  }
+
+  constructor(/* private store: Store, protected router: Router, */ private cdr: ChangeDetectorRef) {
+    // this.selectedSectionHyperParams$ = this.store.select(selectExperimentHyperParamsSelectedSectionParams);
+    // this.editable$ = this.store.select(selectIsExperimentEditable);
+    // this.selectedSection$ = this.store.select(selectExperimentHyperParamsSelectedSectionFromRoute);
+    // this.isInDev$ = this.store.select(selectIsSelectedExperimentInDev);
+    // this.saving$ = this.store.select(selectIsExperimentSaving);
+    // this.backdropActive$ = this.store.select(selectBackdropActive);
+    // this.routerConfig$ = this.store.select(selectRouterConfig);
+    // this.selectedExperiment$ = this.store.select(selectSelectedExperiment);
+    // this.size$ = this.store.select(selectSplitSize);
+
+    // this.store.dispatch(setExperimentFormErrors({errors: null}));
+    // this.selectedSectionSubscription = this.selectedSection$.subscribe(section => {
+    //   this.selectedSection = section;
+    //   this.propSection = section === 'properties';
+    // });
   }
 
   get projects() {
@@ -116,6 +151,9 @@ export class CreateNewPipelineFormComponent implements OnChanges, OnDestroy {
   }
 
   send() {
+    if (this.pipelineParamsForm.formData.length > 0) {
+     this.pipeline.parameters = cloneDeep(this.pipelineParamsForm.formData);
+    }
     this.pipelineCreated.emit(this.pipeline);
   }
 
@@ -133,6 +171,36 @@ export class CreateNewPipelineFormComponent implements OnChanges, OnDestroy {
 
   isFocused(locationRef: HTMLInputElement) {
     return document.activeElement === locationRef;
+  }
+
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  searchTable(value: string) {
+    // const searchBackward = value === null;
+    // if (this.searchedText !== value && !searchBackward) {
+    //   this.searchedText = value;
+    //   this.scrollIndexCounter = -1;
+    //   this.searchResultsCount = 0;
+    //   // this.executionParamsForm.resetIndex();
+    //   this.cdr.detectChanges();
+    // }
+    // // this.executionParamsForm.jumpToNextResult(!searchBackward);
+  }
+
+  searchCounterChanged(count: number) {
+    this.searchResultsCount = count;
+    this.cdr.detectChanges();
+  }
+
+  scrollIndexCounterReset() {
+    this.scrollIndexCounter = -1;
+    this.cdr.detectChanges();
+  }
+
+  onFormValuesChanged(event: { field: string; value: any }) {
+    // eslint-disable-next-line no-console
+    console.log(event);
+    // this.store.dispatch(updateExperimentAtPath({path: ('hyperparams.' + event.field), value: event.value}));
   }
 }
 

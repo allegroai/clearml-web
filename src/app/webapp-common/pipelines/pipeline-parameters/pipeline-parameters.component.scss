@@ -1,0 +1,80 @@
+@import "variables";
+@import "mixins/link";
+
+:host {
+  @include link();
+  form.editable, .table-container {
+    height: 100%;
+    padding-bottom: 6px;
+  }
+
+  form.editable {
+    padding-bottom: 6px;
+  }
+
+  .form-container {
+    height: 100%;
+    overflow: auto;
+
+    input.highlight-text {
+      background: $neon-yellow;
+      &.current-match {
+        background: #f5d655;
+      }
+    }
+  }
+
+  .param-row {
+    margin-bottom: 12px;
+  }
+
+  mat-form-field {
+    flex: 1;
+    padding-right: 12px;
+  }
+
+  ::ng-deep tr:hover {
+    cursor: auto !important;
+    transition: background-color 0.3s;
+  }
+
+  .separator {
+    width: 100%;
+    //border-bottom: solid 1px #dee1e9;
+  }
+
+  .remove-button {
+    margin-bottom: 22px;
+    padding: 0;
+  }
+
+  .param-row {
+    font-weight: 500;
+
+    & > div {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  .current-match .highlight-text{
+    background-color: #f5d655;
+  }
+
+  .name {
+    font-weight: 500;
+  }
+
+  .allow-multi-space {
+    white-space: pre;
+
+  }
+
+  .add-parameter {
+    border: 1px solid $grey-purple;
+    background-color: #ffffff;
+    color: $grey-purple;
+    transition: all ease-in-out 0.15s, border ease-in-out 0.15s;
+  }
+}

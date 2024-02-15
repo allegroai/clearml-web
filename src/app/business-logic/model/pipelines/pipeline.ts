@@ -1,6 +1,7 @@
 import {ProjectsGetAllResponseSingleSubProjects} from '~/business-logic/model/projects/projectsGetAllResponseSingleSubProjects';
 import {Stats} from '~/business-logic/model/projects/stats';
 import {ProjectsGetAllResponseSingleDatasetStats} from '~/business-logic/model/projects/projectsGetAllResponseSingleDatasetStats';
+import { PipelinesParameter } from './pipelinesParameter';
 
 /**
  * pipelines
@@ -69,5 +70,5 @@ export interface Pipeline {
     own_models?: number;
     hidden?: boolean;
 
-    parameters?: Array<object>
+    parameters?: Array<PipelinesParameter>
 }

@@ -53,6 +53,8 @@ import { createUserPrefFeatureReducer } from "@common/core/meta-reducers/user-pr
 import { PIPELINES_PREFIX } from "./pipelines.actions";
 import { PipelineAddStepDialogComponent } from "./pipeline-add-step-dialog/pipeline-add-step-dialog.component";
 import { PipelineAddStepFormComponent } from "./pipeline-add-step-dialog/pipeline-add-step-form/pipeline-add-step-form.component";
+import {SortPipe} from '@common/shared/pipes/sort.pipe';
+import { PipelineParametersComponent } from "./pipeline-parameters/pipeline-parameters.component";
 
 export const pipelinesSyncedKeys = ["projects.showPipelineExamples"];
 const pipelinesSyncedKeys2 = ['orderBy', 'sortOrder'];
@@ -103,6 +105,7 @@ const getInitState = (userPreferences: UserPreferences) => ({
     PipelineAddStepFormComponent,
     EditPipelinePageComponent,
     EditPipelineHeaderComponent,
+    PipelineParametersComponent,
   ],
   imports: [
     CommonModule,
@@ -145,6 +148,7 @@ const getInitState = (userPreferences: UserPreferences) => ({
     ExperimentSharedModule,
     RefreshButtonComponent,
     LabeledFormFieldDirective,
+    SortPipe,
   ],
   exports: [PipelinesPageComponent, EditPipelinePageComponent],
   providers: [

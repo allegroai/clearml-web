@@ -52,6 +52,34 @@
     <textarea class="pipeline-description" name="description" matInput [(ngModel)]="pipeline.description"
       #description="ngModel"></textarea>
   </mat-form-field>
+  <div class="parameters">
+    <div class="search">
+      <mat-label>Parameters</mat-label>
+      <sm-search search-button
+      #search
+      class="table-search"
+      [value]="searchedText"
+      [enableNavigation]="true"
+      [minimumChars]="1"
+      [debounceTime]="0"
+      [expandOnHover]="true"
+      [searchResultsCount]="searchResultsCount"
+      [searchCounterIndex]="pipelineParamsForm.matchIndex"
+      (valueChanged)="searchTable($event)"
+    ></sm-search>
+    </div>
+    <sm-pipeline-parameters
+    #pipelineParamsForm
+    class="form-section"
+    [section]=""
+    [formData]="pipeline?.parameters"
+    (formDataChanged)="onFormValuesChanged($event)"
+    (searchCounterChanged)="searchCounterChanged($event)"
+    (resetSearch)="search.clear(false)"
+    (scrollToResultCounterReset)="scrollIndexCounterReset()"
+  ></sm-pipeline-parameters>
+  </div>
+  
   <div class="w-100 create-pipeline-button">
     <button class="btn btn-dark-fill center" data-id="Create Pipeline" [disabled]="pipelineForm.invalid"
       (click)="send()">CREATE PIPELINE
