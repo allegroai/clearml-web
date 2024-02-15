@@ -52,6 +52,33 @@
     <textarea class="step-description" name="description" matInput [(ngModel)]="step.description"
       #description="ngModel"></textarea>
   </mat-form-field>
+  <div class="parameters">
+    <div class="search">
+      <mat-label>Parameters</mat-label>
+      <sm-search search-button
+      #search
+      class="table-search"
+      [value]="searchedText"
+      [enableNavigation]="true"
+      [minimumChars]="1"
+      [debounceTime]="0"
+      [expandOnHover]="true"
+      [searchResultsCount]="searchResultsCount"
+      [searchCounterIndex]="stepParamsForm.matchIndex"
+      (valueChanged)="searchTable($event)"
+    ></sm-search>
+    </div>
+    <sm-pipeline-parameters
+    #stepParamsForm
+    class="form-section"
+    [section]=""
+    [formData]="step?.parameters"
+    (formDataChanged)="onFormValuesChanged($event)"
+    (searchCounterChanged)="searchCounterChanged($event)"
+    (resetSearch)="search.clear(false)"
+    (scrollToResultCounterReset)="scrollIndexCounterReset()"
+  ></sm-pipeline-parameters>
+  </div>
   <div class="w-100 create-step-button">
     <button class="btn btn-dark-fill center" data-id="Create Step" [disabled]="pipelineForm.invalid"
       (click)="send()">ADD STEP

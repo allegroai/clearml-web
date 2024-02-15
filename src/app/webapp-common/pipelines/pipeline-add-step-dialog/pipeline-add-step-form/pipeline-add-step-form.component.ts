@@ -1,5 +1,6 @@
 import {
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   EventEmitter,
   Input,
@@ -16,6 +17,9 @@ import {
   IOption
 } from '@common/shared/ui-components/inputs/select-autocomplete-with-chips/select-autocomplete-with-chips.component';
 import { Task } from '~/business-logic/model/tasks/task';
+import { PipelineParametersComponent } from '@common/pipelines/pipeline-parameters/pipeline-parameters.component';
+import { PipelinesParameter } from '~/business-logic/model/pipelines/pipelinesParameter';
+import { cloneDeep } from 'lodash-es';
 
 
 @Component({
@@ -37,14 +41,45 @@ export class PipelineAddStepFormComponent implements OnChanges, OnDestroy {
 
   public pipelinesNames: Array<string>;
   public experimentsNames: Array<string>;
-  public step: { name: string; description: string; experiment: { label: string; value: string }, parameters: Array<object> } = {
+  public step: { name: string; description: string; experiment: { label: string; value: string }, parameters: Array<PipelinesParameter> } = {
     name: null,
     description: '',
     experiment: null,
-    parameters: [],
+    parameters: [{
+      name: "Paramter1",
+      value: ""
+    }, {
+      name: "Parameter2",
+      value: ""
+    }],
   };
   filterText: string = '';
   isAutoCompleteOpen: boolean;
+
+    // for parameters
+    @ViewChild('stepParamsForm', {static: false}) stepParamsForm: PipelineParametersComponent;
+    public searchedText: string;
+    public searchResultsCount: number;
+    public scrollIndexCounter: number;
+    public size$: Observable<number>;
+    constructor(/* private store: Store, protected router: Router, */ private cdr: ChangeDetectorRef) {
+      // this.selectedSectionHyperParams$ = this.store.select(selectExperimentHyperParamsSelectedSectionParams);
+      // this.editable$ = this.store.select(selectIsExperimentEditable);
+      // this.selectedSection$ = this.store.select(selectExperimentHyperParamsSelectedSectionFromRoute);
+      // this.isInDev$ = this.store.select(selectIsSelectedExperimentInDev);
+      // this.saving$ = this.store.select(selectIsExperimentSaving);
+      // this.backdropActive$ = this.store.select(selectBackdropActive);
+      // this.routerConfig$ = this.store.select(selectRouterConfig);
+      // this.selectedExperiment$ = this.store.select(selectSelectedExperiment);
+      // this.size$ = this.store.select(selectSplitSize);
+  
+      // this.store.dispatch(setExperimentFormErrors({errors: null}));
+      // this.selectedSectionSubscription = this.selectedSection$.subscribe(section => {
+      //   this.selectedSection = section;
+      //   this.propSection = section === 'properties';
+      // });
+    }
+
 
   @Input() readOnlyExperimentsNames: string[];
   @Input() defaultExperimentId: string;
@@ -115,6 +150,9 @@ export class PipelineAddStepFormComponent implements OnChanges, OnDestroy {
   }
 
   send() {
+    if (this.stepParamsForm.formData.length > 0) {
+      this.step.parameters = cloneDeep(this.stepParamsForm.formData);
+     }
     this.stepCreated.emit(this.step);
   }
 
@@ -132,6 +170,33 @@ export class PipelineAddStepFormComponent implements OnChanges, OnDestroy {
 
   isFocused(locationRef: HTMLInputElement) {
     return document.activeElement === locationRef;
+  }
+
+  // for parameters
+   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+   searchTable(value: string) {
+    // const searchBackward = value === null;
+    // if (this.searchedText !== value && !searchBackward) {
+    //   this.searchedText = value;
+    //   this.scrollIndexCounter = -1;
+    //   this.searchResultsCount = 0;
+    //   // this.executionParamsForm.resetIndex();
+    //   this.cdr.detectChanges();
+    // }
+    // // this.executionParamsForm.jumpToNextResult(!searchBackward);
+  }
+  searchCounterChanged(count: number) {
+    this.searchResultsCount = count;
+    this.cdr.detectChanges();
+  }
+  scrollIndexCounterReset() {
+    this.scrollIndexCounter = -1;
+    this.cdr.detectChanges();
+  }
+  onFormValuesChanged(event: { field: string; value: any }) {
+    // eslint-disable-next-line no-console
+    console.log(event);
+    // this.store.dispatch(updateExperimentAtPath({path: ('hyperparams.' + event.field), value: event.value}));
   }
 }
 

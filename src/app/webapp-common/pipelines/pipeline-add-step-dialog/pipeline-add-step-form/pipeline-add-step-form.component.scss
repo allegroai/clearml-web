@@ -1,6 +1,34 @@
+@import "variables";
+
 :host {
   .create-report-button {
     padding: 32px 12px 0;
+  }
+  .parameters {
+    display: block;
+    position: relative;
+    height: 100%;
+    margin-bottom: 50px;
+
+    sm-pipeline-parameters {
+      display: block;
+      height: 124px;
+    }
+
+    div.search {
+      display: flex;
+      flex-direction: row;
+      margin-bottom: 8px;
+      // padding-right: 4px;
+      justify-content: space-between;
+      align-items: center;
+      sm-search.table-search {
+        border-radius: 4px;
+        color: $blue-280 !important;
+        background-color: $blue-600 !important;
+      }
+    }
+
   }
   mat-form-field {
     width: 100%;
