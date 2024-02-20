@@ -55,6 +55,8 @@ import { PipelineAddStepDialogComponent } from "./pipeline-add-step-dialog/pipel
 import { PipelineAddStepFormComponent } from "./pipeline-add-step-dialog/pipeline-add-step-form/pipeline-add-step-form.component";
 import {SortPipe} from '@common/shared/pipes/sort.pipe';
 import { PipelineParametersComponent } from "./pipeline-parameters/pipeline-parameters.component";
+import { FlowEditorComponent } from "./edit-pipeline-page/flow-editor.component";
+
 
 export const pipelinesSyncedKeys = ["projects.showPipelineExamples"];
 const pipelinesSyncedKeys2 = ['orderBy', 'sortOrder'];
@@ -106,6 +108,7 @@ const getInitState = (userPreferences: UserPreferences) => ({
     EditPipelinePageComponent,
     EditPipelineHeaderComponent,
     PipelineParametersComponent,
+    FlowEditorComponent
   ],
   imports: [
     CommonModule,
@@ -127,6 +130,7 @@ const getInitState = (userPreferences: UserPreferences) => ({
     LabeledFormFieldDirective,
     SearchTextDirective,
     UniqueNameValidatorDirective,
+
 
     MarkdownEditorComponent,
     SearchComponent,
