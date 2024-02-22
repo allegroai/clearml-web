@@ -5,8 +5,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {catchError, filter, map, mergeMap, switchMap, /* tap */} from 'rxjs/operators';
 import {activeLoader, addMessage, /* addMessage, */ deactivateLoader, setServerError} from '../core/actions/layout.actions';
 import {requestFailed} from '../core/actions/http.actions';
-import {
-  createPipeline, createPipelineStep, getAllExperiments, setExperimentsResults, settingsPipelineAction,
+import {settingsPipelineAction,
   createPipeline, createPipelineStep, getAllExperiments, getExperimentById, getPipelineById, setExperimentsResults, setSelectedPipeline, updatePipeline, updatePipelineSuccess
 } from './pipelines.actions';
 // import {ApiReportsService} from '~/business-logic/api-services/reports.service';
