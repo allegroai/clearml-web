@@ -18,8 +18,9 @@ import {
 } from '@common/shared/ui-components/inputs/select-autocomplete-with-chips/select-autocomplete-with-chips.component';
 import { Task } from '~/business-logic/model/tasks/task';
 import { PipelineParametersComponent } from '@common/pipelines/pipeline-parameters/pipeline-parameters.component';
-import { PipelinesParameter } from '~/business-logic/model/pipelines/pipelinesParameter';
+
 import { cloneDeep } from 'lodash-es';
+import { ParamsItem } from '~/business-logic/model/tasks/paramsItem';
 
 
 @Component({
@@ -36,22 +37,16 @@ export class PipelineAddStepFormComponent implements OnChanges, OnDestroy {
   public panelHeight: number;
   private subs = new Subscription();
   private rootFiltered: boolean;
-  public readonly experimentsRoot = {label: 'My experiment', value: null};
+  public readonly experimentsRoot = {label: 'My experiment', value: null, parameters: []};
   @ViewChild('experimentInput') experimentInput: NgModel;
 
   public pipelinesNames: Array<string>;
   public experimentsNames: Array<string>;
-  public step: { name: string; description: string; experiment: { label: string; value: string }, parameters: Array<PipelinesParameter> } = {
+  public step: { name: string; description: string; experiment: { label: string; value: string }, parameters: Array<ParamsItem> } = {
     name: null,
     description: '',
     experiment: null,
-    parameters: [{
-      name: "Paramter1",
-      value: ""
-    }, {
-      name: "Parameter2",
-      value: ""
-    }],
+    parameters: [],
   };
   filterText: string = '';
   isAutoCompleteOpen: boolean;
@@ -95,7 +90,7 @@ export class PipelineAddStepFormComponent implements OnChanges, OnDestroy {
     this._experiments = experiments;
     this.experimentsOptions = [
       ...((this.rootFiltered || experiments === null) ? [] : [this.experimentsRoot]),
-      ...(experiments ? experiments.map(experiment => ({label: experiment.name, value: experiment.id})) : [])
+      ...(experiments ? experiments.map(experiment => ({label: experiment.name, value: experiment.id, parameters: experiment.hyperparams})) : [])
     ];
     this.experimentsNames = this.experimentsOptions.map(experiment => experiment.label);
   }
@@ -136,6 +131,25 @@ export class PipelineAddStepFormComponent implements OnChanges, OnDestroy {
 
   experimentSelected($event: MatOptionSelectionChange) {
     this.step.experiment = {label: $event.source.value.label, value: $event.source.value.value};
+    this.step.parameters = [];
+    for (const section in  $event.source?.value?.parameters) { 
+      for (const param in  $event.source?.value?.parameters[section]) { 
+        // eslint-disable-next-line no-console
+        console.log($event.source?.value?.parameters[section][param]);
+        this.step.parameters.push({
+        name: $event.source?.value?.parameters[section][param].name,
+        value: $event.source?.value?.parameters[section][param].value,
+        section: $event.source?.value?.parameters[section][param].section
+      })
+      }
+    }
+   //.map((paramSectionKey, paramSectionValue) => {
+      // eslint-disable-next-line no-console
+      
+    //  paramSec.forEach((paraKey, paramVal) => {
+    //   
+    //  })
+    //});
   }
   setIsAutoCompleteOpen(focus: boolean) {
     this.isAutoCompleteOpen = focus;

@@ -1,4 +1,7 @@
 <div class="d-flex justify-content-end align-items-center header-container">
+  <div class="pipeline-name">
+   Editing {{pipelineData?.name}}
+  </div>
   <!-- <sm-clear-filters-button
       *ngIf="!minimizedView"
       [tableFilters]="tableFilters"
@@ -31,7 +34,7 @@
       (setAutoRefresh)="setAutoRefresh.emit($event)"
     >
     </sm-refresh-button> -->
-  <button class="btn btn-icon g-btn" smTooltip="Save pipeline">
+  <button class="btn btn-icon g-btn" smTooltip="Save pipeline" (click)="savePipelineClicked()">
     <i class="icon i-pipeline-save lm"></i>
   </button>
   <button class="btn btn-icon g-btn" smTooltip="Compile pipeline">

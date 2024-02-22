@@ -29,6 +29,10 @@
       visibility: hidden;
     }
 
+    .pipeline-name {
+      color: white;
+      flex-grow: 1;
+    }
     &.archive-mode {
       transition: background-color 0.5s;
       background-color: #333746;

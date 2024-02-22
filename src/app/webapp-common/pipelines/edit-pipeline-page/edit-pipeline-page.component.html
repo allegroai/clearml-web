@@ -1,11 +1,13 @@
 <sm-edit-pipeline-header
-(createPipelineStep)="createPipeline()"
 (settingsPipelineAction)="settings()"
+(createPipelineStep)="createPipelineStep()"
+(savePipeline)="savePipeline()"
+[pipelineData]="selectedPipeline"
 >
 </sm-edit-pipeline-header>
 <div class="edit-pipeline-body">
   <!-- <div class="details"><i class="icon no-output-icon i-no-code-dark"></i>&nbsp;DETAILS</div> -->
-  <sm-flow-editor/>
+  <sm-flow-editor *ngIf="selectedPipeline?.flow_display?.nodes?.length" [pipelineData]="selectedPipeline" (nodesChangedInReactFlow)="nodesChangedInReactFlow($event)" (edgesChangedInReactFlow)="edgesChangedInReactFlow($event)" />
   <div class="pipeline-empty">
     <i class="icon i-fingers-white mx-auto xxl"></i>
     <br/>

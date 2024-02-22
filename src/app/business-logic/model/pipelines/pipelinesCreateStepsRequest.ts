@@ -1,6 +1,6 @@
 export interface PipelinesCreateStepsRequest {
     /**
-     * Pipeline name. Unique within the company.
+     * Pipeline step name. Unique within the company.
      */
     name: string;
     /**
@@ -10,5 +10,7 @@ export interface PipelinesCreateStepsRequest {
     
     experiment?: string;
 
-    parameters?: Array<object>
+    parameters?: Array<object>,
+
+    pipeline_id?: string;
 }

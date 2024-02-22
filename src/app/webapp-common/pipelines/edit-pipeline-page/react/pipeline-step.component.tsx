@@ -2,7 +2,8 @@ import React from "react";
 import { Handle, Position } from 'reactflow';
 /* import "./pipeline-step.css" */
 
-export default function PipelineStepComponent({ data }) {
+export default function PipelineStepComponent({ data, ...others }) {
+  //console.log("from reactstep", others)
   return (
     <div className="" style={{
         padding: "2px",
@@ -32,7 +33,7 @@ export default function PipelineStepComponent({ data }) {
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap"
             }
-        }>{data.name} test name</div>
+        }>{data.name}</div>
        
       </div>
       <div className="step-part step-footer queued" style={{
