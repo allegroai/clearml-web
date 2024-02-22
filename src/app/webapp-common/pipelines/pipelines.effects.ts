@@ -6,7 +6,7 @@ import {catchError, filter, map, mergeMap, switchMap, /* tap */} from 'rxjs/oper
 import {activeLoader, /* addMessage, */ deactivateLoader, setServerError} from '../core/actions/layout.actions';
 import {requestFailed} from '../core/actions/http.actions';
 import {
-  createPipeline, createPipelineStep, getAllExperiments, setExperimentsResults
+  createPipeline, createPipelineStep, getAllExperiments, setExperimentsResults, settingsPipelineAction
 } from './pipelines.actions';
 // import {ApiReportsService} from '~/business-logic/api-services/reports.service';
 /* import {IReport, PAGE_SIZE} from './reports.consts';
@@ -34,7 +34,7 @@ import {TABLE_SORT_ORDER} from '../shared/ui-components/data/table/table.consts'
 import {escapeRegex} from '../shared/utils/escape-regex';
 import {MESSAGES_SEVERITY} from '../constants'; */
 import {MatDialog} from '@angular/material/dialog';
-import {selectCurrentUser} from '../core/reducers/users-reducer';
+// import {selectCurrentUser} from '../core/reducers/users-reducer';
 /* import {
   ChangeProjectDialogComponent
 } from '@common/experiments/shared/components/change-project-dialog/change-project-dialog.component';
@@ -45,6 +45,7 @@ import {selectActiveWorkspaceReady} from '~/core/reducers/view.reducer';
 // import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import {HttpClient} from '@angular/common/http';
 import { PipelinesCreateResponse } from '~/business-logic/model/pipelines/pipelinesCreateResponse';
+import { pipelinesSettingsModel } from '~/business-logic/model/pipelines/pipelinesSettingsModel';
 import { ApiPipelinesService } from '~/business-logic/api-services/pipelines.service';
 import { PipelinesCreateStepsResponse } from '~/business-logic/model/pipelines/pipelinesCreateStepsResponse';
 import { ApiTasksService } from '~/business-logic/api-services/tasks.service';
@@ -70,7 +71,7 @@ export class PipelinesEffects {
   }
 
   activeLoader = createEffect(() => this.actions.pipe(
-    ofType(/* getReports, getReport, */ createPipeline, createPipelineStep, getAllExperiments/*  updateReport, restoreReport, archiveReport */),
+    ofType(/* getReports, getReport, */ createPipeline, createPipelineStep, getAllExperiments, settingsPipelineAction/*  updateReport, restoreReport, archiveReport */),
     filter(action => !action['refresh']),
     map(action => activeLoader(action.type))
   ));
@@ -107,6 +108,24 @@ export class PipelinesEffects {
           requestFailed(err),
           setServerError(err, null, 'failed to create a new pipeline step'),
           deactivateLoader(createPipelineStep.type),
+        ]
+      })))
+  ));
+  
+  settingsPipelineAction$ = createEffect(() => this.actions.pipe(
+    ofType(settingsPipelineAction),
+    switchMap((action) => this.pipelinesApiService.pipelinesSettingCall(action.pipelinesSettingsRequest)
+      .pipe(mergeMap((res: pipelinesSettingsModel) => {
+        // eslint-disable-next-line no-console
+        console.log(res)
+        // this.router.navigate(['pipelines', res.id, 'edit']);
+        return [deactivateLoader(settingsPipelineAction.type)];
+      }),
+      catchError(err => {
+        return [
+          requestFailed(err),
+          setServerError(err, null, 'failed to create a new pipeline step'),
+          deactivateLoader(settingsPipelineAction.type),
         ]
       })))
   ));

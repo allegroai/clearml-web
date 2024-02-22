@@ -15,10 +15,13 @@ import { ButtonToggleComponent } from "@common/shared/ui-components/inputs/butto
 
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { MatMenuModule } from "@angular/material/menu";
+import {MatCheckboxModule} from '@angular/material/checkbox';
 import { MatSidenavModule } from "@angular/material/sidenav";
 import { MatInputModule } from "@angular/material/input";
 import { PipelineDialogComponent } from "./pipeline-dialog/pipeline-dialog.component";
 import { CreateNewPipelineFormComponent } from "./pipeline-dialog/create-new-pipeline-form/create-new-pipeline-form.component";
+import { PipelineSettingComponent } from './pipeline-setting/pipeline-setting.component';
+import { PipelineSettingFormComponent } from './pipeline-setting/pipeline-setting-form/pipeline-setting-form.component';
 import { MatAutocompleteModule } from "@angular/material/autocomplete";
 import { ScrollEndDirective } from "@common/shared/ui-components/directives/scroll-end.directive";
 import { ClickStopPropagationDirective } from "@common/shared/ui-components/directives/click-stop-propagation.directive";
@@ -56,7 +59,6 @@ import { PipelineAddStepFormComponent } from "./pipeline-add-step-dialog/pipelin
 import {SortPipe} from '@common/shared/pipes/sort.pipe';
 import { PipelineParametersComponent } from "./pipeline-parameters/pipeline-parameters.component";
 import { FlowEditorComponent } from "./edit-pipeline-page/flow-editor.component";
-
 
 export const pipelinesSyncedKeys = ["projects.showPipelineExamples"];
 const pipelinesSyncedKeys2 = ['orderBy', 'sortOrder'];
@@ -108,7 +110,9 @@ const getInitState = (userPreferences: UserPreferences) => ({
     EditPipelinePageComponent,
     EditPipelineHeaderComponent,
     PipelineParametersComponent,
-    FlowEditorComponent
+    FlowEditorComponent,
+    PipelineSettingComponent,
+    PipelineSettingFormComponent,
   ],
   imports: [
     CommonModule,
@@ -153,6 +157,7 @@ const getInitState = (userPreferences: UserPreferences) => ({
     RefreshButtonComponent,
     LabeledFormFieldDirective,
     SortPipe,
+    MatCheckboxModule,
   ],
   exports: [PipelinesPageComponent, EditPipelinePageComponent],
   providers: [

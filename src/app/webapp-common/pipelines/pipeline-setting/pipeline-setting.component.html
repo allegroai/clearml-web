@@ -1,0 +1,10 @@
+<sm-dialog-template iconClass="al-ico-settings" header="SETTINGS">
+    <sm-pipeline-setting-form
+      [readOnlyintervalsNames]="readOnlyIntervalNames$ | async"
+      [defaultintervalId]="data?.defaultExperimentId"
+      (stepCreated)="settingsForm($event)"
+      (filterSearchChanged)="filterSearchChanged($event)"
+    >
+    </sm-pipeline-setting-form>
+  </sm-dialog-template>
+  

@@ -27,6 +27,7 @@ export class EditPipelineHeaderComponent extends BaseEntityHeaderComponent imple
   }
 
   @Output() createPipelineStep        = new EventEmitter();
+  @Output() settingsPipelineAction       = new EventEmitter();
   // @Output() selectedTableColsChanged = new EventEmitter<ISmCol>();
   // @Output() removeColFromList        = new EventEmitter<ISmCol['id']>();
   // @Output() getMetricsToDisplay      = new EventEmitter();
@@ -51,5 +52,8 @@ export class EditPipelineHeaderComponent extends BaseEntityHeaderComponent imple
 
   addNewStep() {
     this.createPipelineStep.emit();
+  }
+  settings() {
+    this.settingsPipelineAction.emit();
   }
 }

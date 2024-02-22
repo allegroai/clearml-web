@@ -3,6 +3,7 @@ import {createAction, props} from '@ngrx/store';
 // import {IReport} from './reports.consts';
 import { Pipeline, PipelinesCreateRequest } from '~/business-logic/model/pipelines/models';
 import { PipelinesCreateStepsRequest } from '~/business-logic/model/pipelines/pipelinesCreateStepsRequest';
+import { pipelinesSettingsModel } from '~/business-logic/model/pipelines/models';
 import { Task } from '~/business-logic/model/tasks/task';
 
 export const PIPELINES_PREFIX = 'PIPELINES_';
@@ -15,6 +16,10 @@ export const createPipeline = createAction(
 export const createPipelineStep = createAction(
   PIPELINES_PREFIX + 'CREATE_PIPELINE_STEP',
   props<{ pipelinesCreateStepRequest: PipelinesCreateStepsRequest }>()
+);
+export const settingsPipelineAction= createAction(
+  PIPELINES_PREFIX + 'SETTINGS_PIPELINE_ACTION',
+  props<{ pipelinesSettingsRequest: pipelinesSettingsModel }>()
 );
 
 export const getAllExperiments = createAction(

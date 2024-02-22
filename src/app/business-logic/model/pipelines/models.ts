@@ -4,5 +4,6 @@ export * from '././pipelinesCreateRequest';
 export * from '././pipelinesCreateResponse';
 export * from '././pipelinesCreateStepsRequest';
 export * from '././pipelinesCreateStepsResponse';
+export * from './pipelinesSettingsModel';
 
 export * from "././pipeline";

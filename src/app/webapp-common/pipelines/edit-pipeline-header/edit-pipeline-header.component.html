@@ -10,10 +10,8 @@
       <sm-menu-item (itemClicked)="downloadTableAsCSV.emit()" itemLabel="Download on screen items"></sm-menu-item>
       <sm-menu-item (itemClicked)="downloadFullTableAsCSV.emit()"
                     [itemLabel]="'Download first '+ (maxDownloadItems$ | async) +' items'"></sm-menu-item>
-    </sm-menu> -->
-
-
-  <!-- <sm-experiment-custom-cols-menu
+    </sm-menu>
+    <sm-experiment-custom-cols-menu
       *ngIf="!minimizedView || tableMode === 'compare'"
       [metricVariants]="metricVariants"
       [hyperParams]="hyperParams"
@@ -45,7 +43,7 @@
   <button class="btn btn-icon g-btn" smTooltip="Run pipeline">
     <i class="icon i-play lm"></i>
   </button>
-  <button class="btn btn-icon g-btn" smTooltip="Pipeline settings">
+  <button class="btn btn-icon g-btn" smTooltip="Pipeline settings" (click)="settings()">
     <i class="al-icon al-ico-settings lm"></i>
   </button>
 

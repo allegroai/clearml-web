@@ -1,0 +1,42 @@
+<form (ngSubmit)="send()" #settingsForm='ngForm' class="d-flex flex-column">
+  <mat-form-field appearance="outline" hideRequiredMarker class="mat-light">
+    <mat-label>Email List</mat-label>
+    <mat-error *ngIf="settingsForm.controls.emailList?.touched && settingsForm.controls.emailList.errors?.required">*Please add an email.</mat-error>
+    <input name="emailList" [(ngModel)]="settingFields.emailList" #emailList="ngModel" matInput autocomplete="off" required>
+  </mat-form-field>
+
+  <mat-checkbox name="emailAlert" [(ngModel)]="settingFields.emailAlert">Send email alert on failure</mat-checkbox>
+  <mat-checkbox name="scheduling" [(ngModel)]="settingFields.scheduling">Enable Scheduling</mat-checkbox>
+
+
+  <!-- <mat-form-field class="w-100" appearance="outline">
+    <mat-label>Schedule Interval</mat-label>
+    <mat-select [(ngModel)]="settingFields.interval" name="intervalName" required (selectionChange)="intervalSelected($event)">
+      <mat-option value="custom">Custom</mat-option>
+      <mat-option value="daily">Daily</mat-option>
+      <mat-option value="hourly">Hourly</mat-option>
+      <mat-option value="weekly">Weekly</mat-option>
+    </mat-select>
+  </mat-form-field> -->
+
+  <mat-form-field class="w-100" appearance="outline">
+    <mat-label>Schedule Interval</mat-label>
+    <input matInput placeholder="Search for existing intervals" [matAutocomplete]="auto" [(ngModel)]="settingFields.interval" name="intervalName" required>
+    <mat-autocomplete #auto="matAutocomplete" (optionSelected)="intervalSelected($event)">
+      <mat-option value="custom">Custom</mat-option>
+      <mat-option value="daily">Daily</mat-option>
+      <mat-option value="hourly">Hourly</mat-option>
+      <mat-option value="weekly">Weekly</mat-option>
+    </mat-autocomplete>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" hideRequiredMarker>
+    <mat-error *ngIf="expression?.touched && expression?.invalid">*Please add Cron Expression.</mat-error>
+    <mat-label>Cron Expression</mat-label>
+    <input class="step-expression" name="cronExpression" matInput [(ngModel)]="settingFields.expression" #expression="ngModel" required>
+  </mat-form-field>
+
+  <div class="w-100 create-step-button">
+    <button type="submit" class="btn btn-dark-fill center" [disabled]="settingsForm.invalid">Save</button>
+  </div>
+</form>

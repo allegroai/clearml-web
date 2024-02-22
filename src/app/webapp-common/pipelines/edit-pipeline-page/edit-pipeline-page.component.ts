@@ -1,8 +1,9 @@
 import { Component, inject } from '@angular/core';
 import { PipelineAddStepDialogComponent } from '../pipeline-add-step-dialog/pipeline-add-step-dialog.component';
+import { PipelineSettingComponent } from '../pipeline-setting/pipeline-setting.component';
 import { MatDialog } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
-import { createPipelineStep } from '../pipelines.actions';
+import { createPipelineStep,settingsPipelineAction} from '../pipelines.actions';
 
 @Component({
   selector: 'sm-edit-pipeline-page',
@@ -34,6 +35,19 @@ export class EditPipelinePageComponent {
     //   width: '640px'
     // });
 
+  }
+  settings() {
+    this.dialog.open(PipelineSettingComponent, {
+      data: {defaultExperimentId: ''},
+      panelClass: 'light-theme',
+      width: '640px'
+    })
+      .afterClosed()
+      .subscribe(pipeline => {
+        if (pipeline) {
+          this.store.dispatch(settingsPipelineAction({pipelinesSettingsRequest: pipeline}));
+        }
+      });
   }
 
 }
