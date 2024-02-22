@@ -17,7 +17,7 @@
       smUniqueNameValidator >
     <i matSuffix class="al-icon sm-md search-icon me-2"
       [ngClass]="experimentInput.value? 'al-ico-dialog-x pointer':'al-ico-search'"
-      (mousedown)="!isFocused(experimentInputRef) && experimentInput.value && clear(); experimentInput.reset(); experimentInputRef.focus()"
+      (mousedown)="!isFocused(experimentInputRef) && experimentInput.value && clear(); experimentInput.reset(); experimentInputRef.focus(); step.parameters = [];"
       smClickStopPropagation></i>
     <mat-error *ngIf="experimentInput?.errors?.existName">Please provide a experiment</mat-error>
     <mat-error *ngIf="experimentInput?.errors?.uniqueName && !readOnlyExperimentsNames.includes(step.experiment?.label)">Please
@@ -52,7 +52,7 @@
     <textarea class="step-description" name="description" matInput [(ngModel)]="step.description"
       #description="ngModel"></textarea>
   </mat-form-field>
-  <div class="parameters">
+  <div class="parameters" *ngIf="step?.parameters?.length">
     <div class="search">
       <mat-label>Parameters</mat-label>
       <sm-search search-button

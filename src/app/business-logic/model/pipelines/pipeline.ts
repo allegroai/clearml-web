@@ -15,7 +15,11 @@ import { PipelinesParameter } from './pipelinesParameter';
  * Do not edit the class manually.
  */
 
-
+interface FlowDisplay {
+    
+    nodes?: Array<unknown>;
+    edges?: Array<unknown>
+}
 
 export interface Pipeline {
     /**
@@ -70,5 +74,7 @@ export interface Pipeline {
     own_models?: number;
     hidden?: boolean;
 
-    parameters?: Array<PipelinesParameter>
+    parameters?: Array<PipelinesParameter>;
+
+    flow_display?: FlowDisplay;
 }

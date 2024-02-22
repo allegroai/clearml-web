@@ -12,6 +12,7 @@ import {
   setNoMorePipelines,
   setPipelinesOrderBy,
   setPipelinesSearchQuery,
+  setSelectedPipeline,
   setTableModeAwareness,
   showExampleDatasets,
   showExamplePipelines,
@@ -43,7 +44,7 @@ export interface PipelineState {
   pipelines: Pipeline[];
   pipelinesNonFilteredList: Pipeline[];
   selectedProjectId: string;
-  selectedProject: Pipeline;
+  selectedPipeline: Pipeline;
   projectReadyForDeletion: CommonReadyForDeletion;
   validatedProject: Pipeline;
   noMorePipelines: boolean;
@@ -57,7 +58,7 @@ export interface PipelineState {
 export const pipelinesInitState: PipelineState = {
   pipelines: null,
   selectedProjectId: '',
-  selectedProject: {},
+  selectedPipeline: {},
   orderBy: 'last_update',
   sortOrder: TABLE_SORT_ORDER.DESC,
   searchQuery: null,
@@ -88,12 +89,13 @@ export const pipelinesReducers = [
   on(setCurrentScrollId, (state, action) => ({...state, scrollId: action.scrollId})),
   on(setNoMorePipelines, (state, action) => ({...state, noMorePipelines: action.payload})),
   on(updatePipelineSuccess, (state, action) => ({
-    ...state, pipelines: state.pipelines?.map(pr => pr.id === action.id ? {
+    ...state, pipelines: state.pipelines?.map(pr => pr.id === action.changes.id ? {
       ...pr,
       ...action.changes,
       ...(!!action.changes?.name && {basename: action.changes?.name.split('/').at(-1)})
     } : pr)
   })),
+  on(setSelectedPipeline, (state, action) => ({...state, selectedPipeline: {...action.data}})),
   on(resetPipelines, state => ({
     ...state,
     scrollId: null,
@@ -140,6 +142,7 @@ export const pipelinesReducers = [
     ...state,
     experiments: [...action.experiments],
   })),
+
 ] as ReducerTypes<PipelineState, ActionCreator[]>[];
 export const pipelinesReducer = createReducer(pipelinesInitState, ...pipelinesReducers);
 
@@ -148,7 +151,7 @@ export const pipelines = state => state.pipelines as PipelineState;
 
 export const selectPipelines = createSelector(pipelines, state => state[PIPELINES_KEY]);
 export const selectNonFilteredPipelinesList = createSelector(pipelines, state => state?.pipelinesNonFilteredList || []);
-// export const selectSelectedProjectId = createSelector(selectRouterParams, (params: any) => params ? params.projectId : '');
+export const selectSelectedPipeline = createSelector(pipelines,  state => state?.selectedPipeline);
 export const selectPipelinesOrderBy = createSelector(pipelines, state => state?.orderBy || '');
 export const selectPipelinesSortOrder = createSelector(pipelines, state => state?.sortOrder || TABLE_SORT_ORDER.DESC);
 export const selectPipelinesSearchQuery = createSelector(pipelines, state => state?.searchQuery);

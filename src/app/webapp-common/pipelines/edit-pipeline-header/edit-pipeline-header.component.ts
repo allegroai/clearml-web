@@ -8,6 +8,7 @@ import {Option} from '@common/shared/ui-components/inputs/button-toggle/button-t
 import {trackByValue} from '@common/shared/utils/forms-track-by';
 import {resourceToIconMap} from '~/features/experiments/experiments.consts';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
+import { Pipeline } from '~/business-logic/model/pipelines/pipeline';
 
 
 
@@ -25,8 +26,9 @@ export class EditPipelineHeaderComponent extends BaseEntityHeaderComponent imple
   get tableCols() {
     return this._tableCols;
   }
-
+  @Input() pipelineData: Pipeline;
   @Output() createPipelineStep        = new EventEmitter();
+  @Output() savePipeline        = new EventEmitter();
   // @Output() selectedTableColsChanged = new EventEmitter<ISmCol>();
   // @Output() removeColFromList        = new EventEmitter<ISmCol['id']>();
   // @Output() getMetricsToDisplay      = new EventEmitter();
@@ -51,5 +53,8 @@ export class EditPipelineHeaderComponent extends BaseEntityHeaderComponent imple
 
   addNewStep() {
     this.createPipelineStep.emit();
+  }
+  savePipelineClicked() {
+    this.savePipeline.emit();
   }
 }

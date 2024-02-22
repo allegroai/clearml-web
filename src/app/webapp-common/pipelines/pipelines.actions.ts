@@ -1,8 +1,9 @@
 import {createAction, props} from '@ngrx/store';
 // import {ReportsGetAllExResponse} from '~/business-logic/model/reports/reportsGetAllExResponse';
 // import {IReport} from './reports.consts';
-import { Pipeline, PipelinesCreateRequest } from '~/business-logic/model/pipelines/models';
+import { Pipeline, PipelinesCreateRequest, PipelinesUpdateRequest, PipelinesUpdateResponse } from '~/business-logic/model/pipelines/models';
 import { PipelinesCreateStepsRequest } from '~/business-logic/model/pipelines/pipelinesCreateStepsRequest';
+import { TasksGetByIdRequest } from '~/business-logic/model/tasks/models';
 import { Task } from '~/business-logic/model/tasks/task';
 
 export const PIPELINES_PREFIX = 'PIPELINES_';
@@ -17,6 +18,31 @@ export const createPipelineStep = createAction(
   props<{ pipelinesCreateStepRequest: PipelinesCreateStepsRequest }>()
 );
 
+export const getPipelineById = createAction(
+  PIPELINES_PREFIX + '[GET_PIPELINE_BY_ID]',
+  props<{ id: string, name: string }>()
+);
+
+export const setSelectedPipeline = createAction(
+  PIPELINES_PREFIX + '[SET_SELECTED_PIPELINE]',
+  props<{ data: PipelinesUpdateResponse }>()
+);
+
+
+export const updatePipeline = createAction(
+  PIPELINES_PREFIX + '[update pipeline]',
+  props<{changes: Partial<PipelinesUpdateRequest>}>()
+);
+export const updatePipelineSuccess = createAction(
+  PIPELINES_PREFIX + '[update pipeline success]',
+  props<{changes: Partial<PipelinesUpdateResponse>}>()
+);
+
+export const getExperimentById = createAction(
+  PIPELINES_PREFIX + 'GET_EXPERIMENTS_BY_ID',
+  props<{ getExperimentByIdRequest: TasksGetByIdRequest }>()
+);
+
 export const getAllExperiments = createAction(
   PIPELINES_PREFIX + 'GET_EXPERIMENTS',
   props<{ query: string; regExp?: boolean }>()
@@ -28,14 +54,7 @@ export const setExperimentsResults = createAction(
   props<{ experiments: Task[]}>()
 );
 
-export const updateProject = createAction(
-  PIPELINES_PREFIX + '[update pipeline]',
-  props<{id: string; changes: Partial<Pipeline>}>()
-);
-export const updatePipelineSuccess = createAction(
-  PIPELINES_PREFIX + '[update pipeline success]',
-  props<{id: string; changes: Partial<Pipeline>}>()
-);
+
 export const getAllPipelinesPagePipelines = createAction(
   PIPELINES_PREFIX + 'GET_PIPELINES'
 );
@@ -108,10 +127,7 @@ export const showExampleDatasets = createAction(PIPELINES_PREFIX + '[show datase
 //   props<{ reports: IReport[]; scroll: ReportsGetAllExResponse['scroll_id']; noMoreReports: boolean }>()
 // );
 
-// export const getReport = createAction(
-//   PIPELINES_PREFIX + '[get report]',
-//   props<{ id: string }>()
-// );
+
 
 // export const setReport = createAction(
 //   PIPELINES_PREFIX + '[set report]',
@@ -130,7 +146,10 @@ export const showExampleDatasets = createAction(PIPELINES_PREFIX + '[show datase
 // );
 
 // export const moveReport = createAction(
-//   PIPELINES_PREFIX + '[move report]',
+//   The `setExperimentsResults` action is updating the state with a new array of experiments. It
+// takes in an action containing the new array of experiments and updates the `experiments` field
+// in the state with this new array.
+// PIPELINES_PREFIX + '[move report]',
 //   props<{ report: IReport }>()
 // );
 

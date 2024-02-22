@@ -1,12 +1,12 @@
 import {Injectable} from '@angular/core';
-import {Actions, /* concatLatestFrom, */ createEffect, ofType} from '@ngrx/effects';
+import {Actions, concatLatestFrom, /* concatLatestFrom, */ createEffect, ofType} from '@ngrx/effects';
 import {/* Action, */ Store} from '@ngrx/store';
 import {ActivatedRoute, Router} from '@angular/router';
 import {catchError, filter, map, mergeMap, switchMap, /* tap */} from 'rxjs/operators';
-import {activeLoader, /* addMessage, */ deactivateLoader, setServerError} from '../core/actions/layout.actions';
+import {activeLoader, addMessage, /* addMessage, */ deactivateLoader, setServerError} from '../core/actions/layout.actions';
 import {requestFailed} from '../core/actions/http.actions';
 import {
-  createPipeline, createPipelineStep, getAllExperiments, setExperimentsResults
+  createPipeline, createPipelineStep, getAllExperiments, getExperimentById, getPipelineById, setExperimentsResults, setSelectedPipeline, updatePipeline, updatePipelineSuccess
 } from './pipelines.actions';
 // import {ApiReportsService} from '~/business-logic/api-services/reports.service';
 /* import {IReport, PAGE_SIZE} from './reports.consts';
@@ -34,7 +34,7 @@ import {TABLE_SORT_ORDER} from '../shared/ui-components/data/table/table.consts'
 import {escapeRegex} from '../shared/utils/escape-regex';
 import {MESSAGES_SEVERITY} from '../constants'; */
 import {MatDialog} from '@angular/material/dialog';
-import {selectCurrentUser} from '../core/reducers/users-reducer';
+// import {selectCurrentUser} from '../core/reducers/users-reducer';
 /* import {
   ChangeProjectDialogComponent
 } from '@common/experiments/shared/components/change-project-dialog/change-project-dialog.component';
@@ -48,10 +48,58 @@ import { PipelinesCreateResponse } from '~/business-logic/model/pipelines/pipeli
 import { ApiPipelinesService } from '~/business-logic/api-services/pipelines.service';
 import { PipelinesCreateStepsResponse } from '~/business-logic/model/pipelines/pipelinesCreateStepsResponse';
 import { ApiTasksService } from '~/business-logic/api-services/tasks.service';
+import { PipelinesUpdateResponse } from '~/business-logic/model/pipelines/pipelinesUpdateResponse';
+import { selectSelectedPipeline } from './pipelines.reducer';
+import { cloneDeep } from 'lodash-es';
+import { MESSAGES_SEVERITY } from '@common/constants';
 /* import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {setMainPageTagsFilter} from '@common/core/actions/projects.actions';
 import {cleanTag} from '@common/shared/utils/helpers.util';
 import {excludedKey, getTagsFilters} from '@common/shared/utils/tableParamEncode'; */
+
+const checkIsBetween = (preNodePos: number, curNodePos: number, buffer1: number) => {
+  if (
+    preNodePos > curNodePos - buffer1 &&
+    preNodePos < curNodePos + buffer1
+  ) {
+    return true;
+  }
+  return false;
+};
+
+const checkOverlappingNodes = (allNodes, x, y, buffer) => {
+  const overlap = (nodes, x1, y1, buffer) => {
+ 
+
+    const isOverlap = nodes.filter((node) => {
+      const isCheckX = checkIsBetween(node?.position?.x, x1, buffer);
+      const isCheckY = checkIsBetween(node?.position?.y, y1, buffer);
+      return isCheckX && isCheckY;
+    });
+    if (isOverlap.length > 0) {
+      return true;
+    }
+    return false;
+  };
+
+  const overlapChecks = (nodes1, x, y, buffer) => {
+    let X1 = x;
+    let Y1 = y;
+    let resp = false;
+    if (nodes1) {
+      resp = overlap(nodes1, x, y, buffer);
+    }
+
+    if (resp === true) {
+      X1 += buffer;
+      Y1 += buffer;
+      return overlapChecks(nodes1, X1, Y1, buffer);
+    }
+    return { x: X1, y: Y1 };
+  };
+
+  return overlapChecks(allNodes, x, y, buffer);
+}
 
 @Injectable()
 export class PipelinesEffects {
@@ -69,6 +117,8 @@ export class PipelinesEffects {
   ) {
   }
 
+  
+
   activeLoader = createEffect(() => this.actions.pipe(
     ofType(/* getReports, getReport, */ createPipeline, createPipelineStep, getAllExperiments/*  updateReport, restoreReport, archiveReport */),
     filter(action => !action['refresh']),
@@ -79,11 +129,10 @@ export class PipelinesEffects {
     ofType(createPipeline),
     switchMap((action) => this.pipelinesApiService.pipelinesCreate(action.pipelinesCreateRequest)
       .pipe(mergeMap((res: PipelinesCreateResponse) => {
-        this.router.navigate(['pipelines', res.id, 'edit']);
-        return [deactivateLoader(createPipeline.type)];
+        this.router.navigate(['pipelines', res.project_id, 'edit']);
+        return [deactivateLoader(createPipeline.type), addMessage(MESSAGES_SEVERITY.SUCCESS, 'New pipeline created successfully. You can now start adding steps to it.')];
       }),
       catchError(err => {
-        // this.router.navigate(['pipelines', 'b2c6686fb12e4649a954991ca7c24518', 'edit']);
         return [
           requestFailed(err),
           setServerError(err, null, 'failed to create a new pipeline'),
@@ -95,12 +144,54 @@ export class PipelinesEffects {
 
   createPipelineStep$ = createEffect(() => this.actions.pipe(
     ofType(createPipelineStep),
-    switchMap((action) => this.pipelinesApiService.pipelinesCreateStep(action.pipelinesCreateStepRequest)
+    concatLatestFrom(() => [
+      this.store.select(selectSelectedPipeline)
+        ]),
+    switchMap(([action, selectedPipelineData]) => this.pipelinesApiService.pipelinesCreateStep(action.pipelinesCreateStepRequest)
       .pipe(mergeMap((res: PipelinesCreateStepsResponse) => {
         // eslint-disable-next-line no-console
         console.log(res)
         // this.router.navigate(['pipelines', res.id, 'edit']);
-        return [deactivateLoader(createPipeline.type)];
+        //this.pipelinesApiService.pipelinesGetById({pipeline: action.pipelinesCreateStepRequest.pipeline_id}).pipe()
+        //const selectedPipeline = 
+        if(res.id) {
+          const position = checkOverlappingNodes(selectedPipelineData?.flow_display?.nodes, 0, 0, 50);
+          const pipelineData = cloneDeep(selectedPipelineData);
+
+          const newNodeData = cloneDeep(action.pipelinesCreateStepRequest);
+          if (newNodeData) {
+            const newNode = {
+              id: String(res.id),
+              // type: 'consoleJobNode',
+              position,
+              data: {
+                ...newNodeData
+              },
+              sourcePosition: 'right',
+              targetPosition: 'left',
+              type: 'normal'
+            };
+            if (pipelineData?.flow_display?.nodes?.length) {
+              pipelineData.flow_display.nodes.push(newNode);
+              //setNodes([...nodes, newNode]);
+              //updatePipelineData([...nodes, newNode]);
+             
+            } else {
+              try {
+                pipelineData.flow_display.nodes = [newNode];
+              } catch(e) {
+                // eslint-disable-next-line no-console
+                console.log(e);
+              }
+             
+              //updatePipelineData([...nodes, newNode]);
+            }
+            this.store.dispatch(setSelectedPipeline({data: cloneDeep(pipelineData)}));
+            this.store.dispatch(updatePipeline({changes: pipelineData}))
+            // reactFlowInstance.addNodes(newNode);
+          }  
+        }
+        return [deactivateLoader(createPipelineStep.type), addMessage(MESSAGES_SEVERITY.SUCCESS, 'Added new step to pipeline')];
       }),
       catchError(err => {
         return [
@@ -111,8 +202,26 @@ export class PipelinesEffects {
       })))
   ));
 
-
-
+  // not using
+  getExperimentById$ = createEffect(() => this.actions.pipe(
+    ofType(getExperimentById),
+    switchMap((action) => this.experimentsApiService.tasksGetByIdEx({
+      ...action.getExperimentByIdRequest,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      only_fields: ['name', 'comment', 'parent.name', 'parent.project.id', 'runtime', 'configuration', 'status']
+    }).pipe(
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      mergeMap((res) => {
+        return [/* setSelectedPipelineStep({step: res?.tasks[0]}), */ deactivateLoader(getExperimentById.type)]
+      }
+        
+      ),
+      catchError(error => [
+        requestFailed(error),
+        deactivateLoader(action.type),
+      ])
+    ))
+  ));
   
 
   getAllExperiments$ = createEffect(() => this.actions.pipe(
@@ -124,7 +233,7 @@ export class PipelinesEffects {
       },
       size: 20,
       // user: this.store.select(selectCurrentUser)?.id,
-      only_fields:  ['name', 'created', 'status', 'type', 'user.name', 'id', 'company'],
+      only_fields:  ['name', 'status', 'type', 'user.name', 'id', 'hyperparams'],
       // order_by: orderBy,
       // type: [excludedKey, 'annotation_manual', excludedKey, 'annotation', excludedKey, 'dataset_import'],
       // system_tags: ['-archived', '-pipeline', '-dataset'],
@@ -142,22 +251,46 @@ export class PipelinesEffects {
   //   map(action => activeLoader(action.type))
   // ));
 
-  // updateProject = createEffect(() => this.actions.pipe(
-  //   ofType(updateProject),
-  //   mergeMap(action => this.projectsApi.projectsUpdate({project: action.id, ...action.changes})
-  //     .pipe(
-  //       mergeMap((res: ProjectsUpdateResponse) => [
-  //         deactivateLoader(action.type),
-  //         updateProjectSuccess({id: action.id, changes: res.fields})
-  //       ]),
-  //       catchError(error => [deactivateLoader(action.type), requestFailed(error),
-  //         setServerError(error, undefined, error?.error?.meta?.result_subcode === 800 ?
-  //           'Name should be 3 characters long' : error?.error?.meta?.result_subcode === 801 ? 'Name' +
-  //             ' already' +
-  //             ' exists in this project' : undefined)])
-  //     )
-  //   )
-  // ));
+  updatePipeline = createEffect(() => this.actions.pipe(
+    ofType(updatePipeline),
+    mergeMap(action => this.pipelinesApiService.pipelinesUpdate({...action.changes})
+      .pipe(
+        mergeMap((res: PipelinesUpdateResponse) => [
+          deactivateLoader(action.type),
+          updatePipelineSuccess({changes: res}),
+          addMessage(MESSAGES_SEVERITY.SUCCESS, 'Pipeline saved successfully')
+        ]),
+        catchError(error => [deactivateLoader(action.type), requestFailed(error),
+          setServerError(error, undefined, error?.error?.meta?.result_subcode === 800 ?
+            'Name should be 3 characters long' : error?.error?.meta?.result_subcode === 801 ? 'Name' +
+              ' already' +
+              ' exists in this pipeline' : undefined)])
+      )
+    )
+  ));
+
+  getPipelineById$ = createEffect(() => this.actions.pipe(
+    ofType(getPipelineById),
+    switchMap((action) => this.pipelinesApiService.pipelinesGetById({
+      pipeline: action.id,
+      pipeline_name: action.name,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      // only_fields: ['name', 'status', 'company.id', 'user.id', 'comment', 'report', 'tags', 'system_tags', 'report_assets', 'project.name']
+    }).pipe(
+       // eslint-disable-next-line @typescript-eslint/no-unused-vars
+       mergeMap((res) => {
+        return [setSelectedPipeline({data: res?.pipeline}), deactivateLoader(getPipelineById.type)]
+      }
+        
+      ),
+      catchError(error => [
+        requestFailed(error),
+        deactivateLoader(action.type),
+      ])
+    )),
+  ));
+
+
 
   // getAllProjects = createEffect(() => this.actions.pipe(
   //   ofType(getAllProjectsPageProjects),
