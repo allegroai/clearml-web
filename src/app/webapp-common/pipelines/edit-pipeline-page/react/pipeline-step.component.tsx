@@ -3,7 +3,7 @@ import { Handle, Position } from 'reactflow';
 /* import "./pipeline-step.css" */
 
 export default function PipelineStepComponent({ data, selected, ...others }) {
-  console.log("from reactstep", selected)
+  //console.log("from reactstep", selected)
   return (
     <div className="" style={{
         padding: "2px",
