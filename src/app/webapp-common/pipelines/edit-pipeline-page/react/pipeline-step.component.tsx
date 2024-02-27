@@ -2,15 +2,16 @@ import React from "react";
 import { Handle, Position } from 'reactflow';
 /* import "./pipeline-step.css" */
 
-export default function PipelineStepComponent({ data, ...others }) {
-  //console.log("from reactstep", others)
+export default function PipelineStepComponent({ data, selected, ...others }) {
+  console.log("from reactstep", selected)
   return (
     <div className="" style={{
         padding: "2px",
         borderRadius: "4px",
         background: "#1A1E2C",
         color: "#f2f4fc",
-        width: "198px"
+        width: "198px",
+        border: selected ? "solid": "unset"
     }}>
       <div className="step-part step-title queued" style={{
             borderRadius: "4px 4px 0 0",
