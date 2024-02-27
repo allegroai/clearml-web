@@ -42,11 +42,12 @@ export class PipelineAddStepFormComponent implements OnChanges, OnDestroy {
 
   public pipelinesNames: Array<string>;
   public experimentsNames: Array<string>;
-  public step: { name: string; description: string; experiment: { label: string; value: string }, parameters: Array<ParamsItem> } = {
+  public step: { name: string; description: string; experiment: { label: string; value: string }, experimentDetails: Task , parameters: Array<ParamsItem> } = {
     name: null,
     description: '',
     experiment: null,
     parameters: [],
+    experimentDetails: {}
   };
   filterText: string = '';
   isAutoCompleteOpen: boolean;
@@ -90,7 +91,7 @@ export class PipelineAddStepFormComponent implements OnChanges, OnDestroy {
     this._experiments = experiments;
     this.experimentsOptions = [
       ...((this.rootFiltered || experiments === null) ? [] : [this.experimentsRoot]),
-      ...(experiments ? experiments.map(experiment => ({label: experiment.name, value: experiment.id, parameters: experiment.hyperparams})) : [])
+      ...(experiments ? experiments.map(experiment => ({label: experiment.name, value: experiment.id, parameters: experiment.hyperparams, otherDetails: {...experiment}})) : [])
     ];
     this.experimentsNames = this.experimentsOptions.map(experiment => experiment.label);
   }
@@ -132,10 +133,13 @@ export class PipelineAddStepFormComponent implements OnChanges, OnDestroy {
   experimentSelected($event: MatOptionSelectionChange) {
     this.step.experiment = {label: $event.source.value.label, value: $event.source.value.value};
     this.step.parameters = [];
+    this.step.experimentDetails = {
+      ...cloneDeep($event.source?.value?.otherDetails)
+    };
     for (const section in  $event.source?.value?.parameters) { 
       for (const param in  $event.source?.value?.parameters[section]) { 
         // eslint-disable-next-line no-console
-        console.log($event.source?.value?.parameters[section][param]);
+        // console.log($event.source?.value?.parameters[section][param]);
         this.step.parameters.push({
         name: $event.source?.value?.parameters[section][param].name,
         value: $event.source?.value?.parameters[section][param].value,

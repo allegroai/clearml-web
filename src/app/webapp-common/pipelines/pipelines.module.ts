@@ -59,6 +59,13 @@ import { PipelineAddStepFormComponent } from "./pipeline-add-step-dialog/pipelin
 import {SortPipe} from '@common/shared/pipes/sort.pipe';
 import { PipelineParametersComponent } from "./pipeline-parameters/pipeline-parameters.component";
 import { FlowEditorComponent } from "./edit-pipeline-page/flow-editor.component";
+import { PipelineStepInfoComponent } from "./edit-pipeline-page/pipeline-step-info/pipeline-step-info.component";
+import { MatExpansionModule } from "@angular/material/expansion";
+import { IdBadgeComponent } from "@common/shared/components/id-badge/id-badge.component";
+import { FilterPipe } from "@common/shared/pipes/filter.pipe";
+import { FileSizePipe } from "@common/shared/pipes/filesize.pipe";
+import { RegexPipe } from "@common/shared/pipes/filter-regex.pipe";
+import { FilterMonitorMetricPipe } from "@common/shared/pipes/filter-monitor-metric.pipe";
 
 export const pipelinesSyncedKeys = ["projects.showPipelineExamples"];
 const pipelinesSyncedKeys2 = ['orderBy', 'sortOrder'];
@@ -113,6 +120,7 @@ const getInitState = (userPreferences: UserPreferences) => ({
     FlowEditorComponent,
     PipelineSettingComponent,
     PipelineSettingFormComponent,
+    PipelineStepInfoComponent,
   ],
   imports: [
     CommonModule,
@@ -158,6 +166,12 @@ const getInitState = (userPreferences: UserPreferences) => ({
     LabeledFormFieldDirective,
     SortPipe,
     MatCheckboxModule,
+    MatExpansionModule,
+    IdBadgeComponent,
+    FilterPipe,
+    FileSizePipe,
+    RegexPipe,
+    FilterMonitorMetricPipe
   ],
   exports: [PipelinesPageComponent, EditPipelinePageComponent],
   providers: [

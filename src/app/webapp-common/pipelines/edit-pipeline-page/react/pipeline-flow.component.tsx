@@ -23,7 +23,8 @@ export interface IMyComponentProps {
   initialNodes: any;
   initialEdges: any;
   onNodesDataChanged: Function,
-  onEdgesDataChanged: Function
+  onEdgesDataChanged: Function,
+  onNodeClicked: Function
 }
 
 const edgeOptions = {
@@ -97,6 +98,7 @@ export const PipelineFlowComponent: FunctionComponent<IMyComponentProps> = (
   const onNodeClick = (_event, node) => {
     //setIsShowNodeEditModal(true);
     // setNodeData(clone(node));
+    props.onNodeClicked(node);
   };
 
   const onPaneClick = () => {

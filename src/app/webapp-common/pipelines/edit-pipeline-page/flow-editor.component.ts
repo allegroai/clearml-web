@@ -24,6 +24,8 @@ export class FlowEditorComponent  implements OnChanges, OnDestroy, AfterViewInit
   @Input() public pipelineData: Pipeline;
   @Output() nodesChangedInReactFlow = new EventEmitter<Array<unknown>>();
   @Output() edgesChangedInReactFlow = new EventEmitter<Array<unknown>>();
+  @Output() nodeClicked = new EventEmitter<unknown>();
+  
 
   /* initialNodes = [
     { id: '1', position: { x: 0, y: 0 }, data: { label: '1' }, type: "normal" },
@@ -35,6 +37,7 @@ export class FlowEditorComponent  implements OnChanges, OnDestroy, AfterViewInit
     //this.handleDivClicked = this.handleDivClicked.bind(this);
     this.nodesDataChanged = this.nodesDataChanged.bind(this);
     this.edgesDataChanged = this.edgesDataChanged.bind(this);
+    this.onNodeClicked = this.onNodeClicked.bind(this);
     window.React = React;
   }
 
@@ -67,6 +70,9 @@ export class FlowEditorComponent  implements OnChanges, OnDestroy, AfterViewInit
     this.edgesChangedInReactFlow?.emit(edges)
   }
 
+  public onNodeClicked(nodeData) {
+    this.nodeClicked?.emit(nodeData);
+  }
 
 
 
@@ -80,7 +86,8 @@ export class FlowEditorComponent  implements OnChanges, OnDestroy, AfterViewInit
         initialNodes: this.pipelineData?.flow_display?.nodes,
         initialEdges: this.pipelineData?.flow_display?.edges,
         onNodesDataChanged: this.nodesDataChanged,
-        onEdgesDataChanged: this.edgesDataChanged
+        onEdgesDataChanged: this.edgesDataChanged,
+        onNodeClicked: this.onNodeClicked,
       })
     }));
   }

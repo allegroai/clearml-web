@@ -1,0 +1,152 @@
+@import "variables";
+
+:host {
+  ::ng-deep {
+    .mat-expansion-panel-body {
+      padding: 0;
+    }
+    .mat-expansion-panel-header {
+      padding: 0 16px;
+    }
+}
+
+  width: 260px;
+  z-index: 1;
+  border-radius: 4px;
+  background-color: $blue-700;
+
+  .expand-header {
+    height: 32px;
+    line-height: 34px;
+    color: $white;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .panel-body{
+    max-height: calc(70vh - 100px);
+    min-height: 350px;
+    overflow: auto;
+    padding: 0 16px;
+  }
+
+  .section {
+    margin-bottom: 24px;
+    &:first-child {
+      margin-top:12px;
+    }
+
+    .header {
+      color: $blue-200;
+      font-size: $font-size-small;
+      font-weight: 500;
+      display: flex;
+      justify-content: space-between;
+    }
+    .param {
+      display: flex;
+      align-items: center;
+      height: 32px;
+      font-size: 12px;
+      border-bottom: solid 1px $dark-border;
+
+      .key {
+        flex: 1 1 0;
+        color: $blue-300;
+        margin-right: 12px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .value {
+        flex: 1 1 0;
+        color: $blue-100;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+  }
+
+  header {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 6px 0;
+    grid-template-areas:
+      "icon name"
+      "icon status";
+    width: 100%;
+    margin: 12px 0 24px;
+    padding-bottom: 12px;
+    color: $blue-100;
+    .al-icon {
+      grid-area: icon;
+    }
+    .name {
+      grid-area: name;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  .status {
+    grid-area: status;
+    margin-right: auto;
+    height: 16px;
+    line-height: 16px;
+    padding: 0 6px;
+    border-radius: 2px;
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    background-color: $pipeline-pending;
+    &.queued {
+      background-color: $pipeline-queued;
+    }
+    &.skipped {
+      background-color: $pipeline-skipped;
+    }
+    &.cached {
+      background-color: $pipeline-cached;
+    }
+    &.executed {
+      background-color: $pipeline-executed;
+    }
+    &.running {
+      background-color: $pipeline-running;
+    }
+    &.failed {
+      background-color: $pipeline-failed;
+    }
+    &.aborted {
+      background-color: $pipeline-aborted;
+    }
+    &.completed {
+      background-color: $pipeline-completed;
+    }
+  }
+
+  .empty-msg {
+    text-align: center;
+    padding-top: 12px;
+    font-size: $font-size-small;
+    color: $blue-400;
+  }
+
+  footer {
+    @extend .fx-ctr;
+    height: 48px;
+    padding: 0 16px;
+    border-top: solid 1px $dark-border;
+    .arr-link {
+      i {
+        margin-left:4px;
+        transform: translateY(2px);
+        transition: margin-left 0.3s;
+      }
+      &:hover i {
+        margin-left: 8px;
+      }
+    }
+  }
+}

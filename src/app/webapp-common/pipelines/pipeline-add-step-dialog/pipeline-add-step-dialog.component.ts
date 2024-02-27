@@ -45,7 +45,8 @@ export class PipelineAddStepDialogComponent {
       name: stepForm.name,
       description: stepForm.description,
       experiment:stepForm.experiment.value,
-      parameters: stepForm.parameters
+      parameters: stepForm.parameters,
+      experimentDetails: stepForm.experimentDetails,
     };
   }
 

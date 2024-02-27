@@ -13,4 +13,6 @@ export interface PipelinesCreateStepsRequest {
     parameters?: Array<object>,
 
     pipeline_id?: string;
+
+    experimentDetails?:Task
 }

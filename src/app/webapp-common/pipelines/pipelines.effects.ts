@@ -252,7 +252,7 @@ export class PipelinesEffects {
       },
       size: 20,
       // user: this.store.select(selectCurrentUser)?.id,
-      only_fields:  ['name', 'status', 'type', 'user.name', 'id', 'hyperparams'],
+      only_fields:  ['name', 'status', 'type', 'user.name', 'id', 'hyperparams', 'execution', 'models', 'last_metrics'],
       // order_by: orderBy,
       // type: [excludedKey, 'annotation_manual', excludedKey, 'annotation', excludedKey, 'dataset_import'],
       // system_tags: ['-archived', '-pipeline', '-dataset'],

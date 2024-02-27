@@ -23,6 +23,7 @@ export class EditPipelinePageComponent implements OnInit, OnDestroy  {
   public selectedPipelineId$: Observable<string>;
   private selectedPipeline$: Observable<Pipeline>;
   public selectedPipeline: Pipeline;
+  public selectedStep;
   pipelineId: string;
   private reactFlowState = {nodes: [], edges: []};
 
@@ -142,6 +143,10 @@ export class EditPipelinePageComponent implements OnInit, OnDestroy  {
     // eslint-disable-next-line no-console
     console.log("edges changed", data);
     
+  }
+
+  public nodeSelected(data) {
+    this.selectedStep = {...data};
   }
 
 
