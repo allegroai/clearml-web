@@ -3,12 +3,12 @@ import { PipelineAddStepDialogComponent } from '../pipeline-add-step-dialog/pipe
 import { PipelineSettingComponent } from '../pipeline-setting/pipeline-setting.component';
 import { MatDialog } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
-import { createPipelineStep, settingsPipelineAction, getPipelineById, resetPipelines, resetPipelinesSearchQuery, updatePipeline } from '../pipelines.actions';
+import { createPipelineStep, settingsPipelineAction, getPipelineById, resetPipelines, resetPipelinesSearchQuery, updatePipeline, compilePipeline, runPipeline } from '../pipelines.actions';
 import { selectRouterParams } from '@common/core/reducers/router-reducer';
 import { Observable, Subscription, map } from 'rxjs';
 import { Params } from '@angular/router';
 import { selectSelectedPipeline } from '../pipelines.reducer';
-import { Pipeline } from '~/business-logic/model/pipelines/models';
+import { Pipeline, PipelinesCompileRequest } from '~/business-logic/model/pipelines/models';
 import { cloneDeep } from 'lodash-es';
 
 @Component({
@@ -67,6 +67,32 @@ export class EditPipelinePageComponent implements OnInit, OnDestroy  {
     pipelineState.flow_display.edges = this.reactFlowState.edges; 
     this.store.dispatch(updatePipeline({changes: {...pipelineState}}));
   }
+
+  compilePipeline () {
+    let requestPayload: PipelinesCompileRequest = {
+      pipeline_id: this.selectedPipeline.id,
+      steps: this.selectedPipeline.flow_display.nodes.map((nodeItem) => {
+        return {
+          nodeName: nodeItem?.id
+        }
+      }),
+      connections: this.selectedPipeline.flow_display.edges.map((edgeItem) => {
+        return {
+          startNodeName: edgeItem.source,
+          endNodeName: edgeItem.target,
+        }
+      })
+    }
+
+    this.store.dispatch(compilePipeline({data: requestPayload}))
+  }
+
+  runPipeline () {
+    this.store.dispatch(runPipeline({data: {
+      pipeline_id: this.selectedPipeline.id
+    }}))
+  }
+
   createPipelineStep() {
 
     this.dialog.open(PipelineAddStepDialogComponent, {
@@ -89,6 +115,7 @@ export class EditPipelinePageComponent implements OnInit, OnDestroy  {
     // });
 
   }
+
   settings() {
     this.dialog.open(PipelineSettingComponent, {
       data: {defaultExperimentId: ''},

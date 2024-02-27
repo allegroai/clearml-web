@@ -15,10 +15,19 @@ import { PipelinesParameter } from './pipelinesParameter';
  * Do not edit the class manually.
  */
 
+interface PipelineNode {
+    id?:string;
+}
+
+interface PipelineEdge {
+    source?: string;
+    target?: string
+}
+
 interface FlowDisplay {
     
-    nodes?: Array<unknown>;
-    edges?: Array<unknown>
+    nodes?: Array<PipelineNode>;
+    edges?: Array<PipelineEdge>
 }
 
 export interface Pipeline {

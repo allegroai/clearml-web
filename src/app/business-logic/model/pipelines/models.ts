@@ -9,5 +9,7 @@ export * from '././pipelinesGetByIdRequest';
 export * from '././pipelinesGetByIdResponse';
 export * from '././pipelinesUpdateRequest';
 export * from '././pipelinesUpdateResponse';
+export * from '././pipelinesCompileRequest';
+export * from '././pipelinesRunRequest';
 
 export * from "././pipeline";

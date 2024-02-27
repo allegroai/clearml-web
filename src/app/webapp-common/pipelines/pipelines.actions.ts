@@ -1,7 +1,7 @@
 import {createAction, props} from '@ngrx/store';
 // import {ReportsGetAllExResponse} from '~/business-logic/model/reports/reportsGetAllExResponse';
 // import {IReport} from './reports.consts';
-import { Pipeline, PipelinesCreateRequest, PipelinesUpdateRequest, PipelinesUpdateResponse, pipelinesSettingsModel } from '~/business-logic/model/pipelines/models';
+import { Pipeline, PipelinesCompileRequest, PipelinesCreateRequest, PipelinesRunRequest, PipelinesUpdateRequest, PipelinesUpdateResponse, pipelinesSettingsModel } from '~/business-logic/model/pipelines/models';
 import { PipelinesCreateStepsRequest } from '~/business-logic/model/pipelines/pipelinesCreateStepsRequest';
 import { TasksGetByIdRequest } from '~/business-logic/model/tasks/models';
 import { Task } from '~/business-logic/model/tasks/task';
@@ -40,6 +40,17 @@ export const updatePipeline = createAction(
 export const updatePipelineSuccess = createAction(
   PIPELINES_PREFIX + '[update pipeline success]',
   props<{changes: Partial<PipelinesUpdateResponse>}>()
+);
+
+
+export const compilePipeline = createAction(
+  PIPELINES_PREFIX + 'COMPILE_PIPELINE',
+  props<{data: Partial<PipelinesCompileRequest>}>()
+);
+
+export const runPipeline = createAction(
+  PIPELINES_PREFIX + 'RUN_PIPELINE',
+  props<{data: PipelinesRunRequest}>()
 );
 
 export const getExperimentById = createAction(

@@ -6,7 +6,7 @@ import {catchError, filter, map, mergeMap, switchMap, /* tap */} from 'rxjs/oper
 import {activeLoader, addMessage, /* addMessage, */ deactivateLoader, setServerError} from '../core/actions/layout.actions';
 import {requestFailed} from '../core/actions/http.actions';
 import {settingsPipelineAction,
-  createPipeline, createPipelineStep, getAllExperiments, getExperimentById, getPipelineById, setExperimentsResults, setSelectedPipeline, updatePipeline, updatePipelineSuccess
+  createPipeline, createPipelineStep, getAllExperiments, getExperimentById, getPipelineById, setExperimentsResults, setSelectedPipeline, updatePipeline, updatePipelineSuccess, compilePipeline, runPipeline
 } from './pipelines.actions';
 // import {ApiReportsService} from '~/business-logic/api-services/reports.service';
 /* import {IReport, PAGE_SIZE} from './reports.consts';
@@ -287,6 +287,45 @@ export class PipelinesEffects {
       )
     )
   ));
+
+  
+  compilePipeline = createEffect(() => this.actions.pipe(
+    ofType(compilePipeline),
+    mergeMap(action => this.pipelinesApiService.pipelinesCompile({...action.data})
+      .pipe(
+        // eslint-disable-next-line @ngrx/no-multiple-actions-in-effects
+        mergeMap(() => [
+          deactivateLoader(action.type),
+          addMessage(MESSAGES_SEVERITY.SUCCESS, 'Pipeline compiled successfully')
+        ]),
+        catchError(error => [deactivateLoader(action.type), requestFailed(error),
+          /* setServerError(error, undefined, error?.error?.meta?.result_subcode === 800 ?
+            'Name should be 3 characters long' : error?.error?.meta?.result_subcode === 801 ? 'Name' +
+              ' already' +
+              ' exists in this pipeline' : undefined) */])
+      )
+    )
+  ));
+
+
+  runPipeline = createEffect(() => this.actions.pipe(
+    ofType(runPipeline),
+    mergeMap(action => this.pipelinesApiService.pipelinesRun({...action.data})
+      .pipe(
+        // eslint-disable-next-line @ngrx/no-multiple-actions-in-effects
+        mergeMap(() => [
+          deactivateLoader(action.type),
+          addMessage(MESSAGES_SEVERITY.SUCCESS, 'Started running pipeline.')
+        ]),
+        catchError(error => [deactivateLoader(action.type), requestFailed(error),
+          /* setServerError(error, undefined, error?.error?.meta?.result_subcode === 800 ?
+            'Name should be 3 characters long' : error?.error?.meta?.result_subcode === 801 ? 'Name' +
+              ' already' +
+              ' exists in this pipeline' : undefined) */])
+      )
+    )
+  ));
+
 
   getPipelineById$ = createEffect(() => this.actions.pipe(
     ofType(getPipelineById),

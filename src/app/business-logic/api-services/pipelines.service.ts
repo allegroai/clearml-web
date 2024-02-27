@@ -44,6 +44,8 @@ import {
   PipelinesGetByIdResponse,
   PipelinesUpdateRequest,
   PipelinesUpdateResponse,
+  PipelinesCompileRequest,
+  PipelinesRunRequest,
 } from "../model/pipelines/models";
 
 @Injectable()
@@ -356,7 +358,7 @@ export class ApiPipelinesService {
   ): Observable<any> {
     if (request === null || request === undefined) {
       throw new Error(
-        "Required parameter request was null or undefined when calling projectsUpdate."
+        "Required parameter request was null or undefined when calling pipelinesUpdate."
       );
     }
 
@@ -392,6 +394,98 @@ export class ApiPipelinesService {
       }
     );
   }
+
+
+    public pipelinesCompile(
+      request: PipelinesCompileRequest,
+      options?: any,
+      observe: any = "body",
+      reportProgress: boolean = false
+    ): Observable<any> {
+      if (request === null || request === undefined) {
+        throw new Error(
+          "Required parameter request was null or undefined when calling pipelinesCompile."
+        );
+      }
+  
+      let headers = this.defaultHeaders;
+      if (options && options.async_enable) {
+        headers = headers.set(this.configuration.asyncHeader, "1");
+      }
+  
+      // to determine the Accept header
+      const httpHeaderAccepts: string[] = ["application/json"];
+      const httpHeaderAcceptSelected: string | undefined =
+        this.configuration.selectHeaderAccept(httpHeaderAccepts);
+      if (httpHeaderAcceptSelected != undefined) {
+        headers = headers.set("Accept", httpHeaderAcceptSelected);
+      }
+  
+      // to determine the Content-Type header
+      const consumes: string[] = [];
+      const httpContentTypeSelected: string | undefined =
+        this.configuration.selectHeaderContentType(consumes);
+      if (httpContentTypeSelected != undefined) {
+        headers = headers.set("Content-Type", httpContentTypeSelected);
+      }
+  
+      return this.apiRequest.post<unknown>(
+        `${this.basePath}/pipelines.compile`,
+        request,
+        {
+          withCredentials: this.configuration.withCredentials,
+          headers: headers,
+          observe: observe,
+          reportProgress: reportProgress,
+        }
+      );
+    }
+
+    public pipelinesRun(
+      request: PipelinesRunRequest,
+      options?: any,
+      observe: any = "body",
+      reportProgress: boolean = false
+    ): Observable<any> {
+      if (request === null || request === undefined) {
+        throw new Error(
+          "Required parameter request was null or undefined when calling pipelinesRun."
+        );
+      }
+  
+      let headers = this.defaultHeaders;
+      if (options && options.async_enable) {
+        headers = headers.set(this.configuration.asyncHeader, "1");
+      }
+  
+      // to determine the Accept header
+      const httpHeaderAccepts: string[] = ["application/json"];
+      const httpHeaderAcceptSelected: string | undefined =
+        this.configuration.selectHeaderAccept(httpHeaderAccepts);
+      if (httpHeaderAcceptSelected != undefined) {
+        headers = headers.set("Accept", httpHeaderAcceptSelected);
+      }
+  
+      // to determine the Content-Type header
+      const consumes: string[] = [];
+      const httpContentTypeSelected: string | undefined =
+        this.configuration.selectHeaderContentType(consumes);
+      if (httpContentTypeSelected != undefined) {
+        headers = headers.set("Content-Type", httpContentTypeSelected);
+      }
+  
+      return this.apiRequest.post<unknown>(
+        `${this.basePath}/pipelines.run`,
+        request,
+        {
+          withCredentials: this.configuration.withCredentials,
+          headers: headers,
+          observe: observe,
+          reportProgress: reportProgress,
+        }
+      );
+    }
+  
 
   /**
    *

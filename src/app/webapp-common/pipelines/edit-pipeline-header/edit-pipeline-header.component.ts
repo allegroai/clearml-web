@@ -30,8 +30,8 @@ export class EditPipelineHeaderComponent extends BaseEntityHeaderComponent imple
   @Output() createPipelineStep        = new EventEmitter();
   @Output() settingsPipelineAction       = new EventEmitter();
   @Output() savePipeline        = new EventEmitter();
-  // @Output() selectedTableColsChanged = new EventEmitter<ISmCol>();
-  // @Output() removeColFromList        = new EventEmitter<ISmCol['id']>();
+  @Output() compilePipeline = new EventEmitter();
+  @Output() runPipeline        = new EventEmitter();
   // @Output() getMetricsToDisplay      = new EventEmitter();
   // @Output() selectedMetricToShow     = new EventEmitter<SelectionEvent>();
   // @Output() selectedHyperParamToShow = new EventEmitter<{param: string; addCol: boolean}>();
@@ -60,5 +60,11 @@ export class EditPipelineHeaderComponent extends BaseEntityHeaderComponent imple
   }
   savePipelineClicked() {
     this.savePipeline.emit();
+  }
+  compile() {
+    this.compilePipeline.emit();
+  }
+  run() {
+    this.runPipeline.emit()
   }
 }
