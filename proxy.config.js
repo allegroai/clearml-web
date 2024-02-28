@@ -1,6 +1,6 @@
 const fs = require("fs");
 
-const targets = ["http://localhost:8008"];
+const targets = ["http://13.201.173.241:8008"];
 
 const PROXY_CONFIG = {
   "^/version.json$": {
