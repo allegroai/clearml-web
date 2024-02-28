@@ -6,7 +6,7 @@ import {catchError, filter, map, mergeMap, switchMap, /* tap */} from 'rxjs/oper
 import {activeLoader, addMessage, /* addMessage, */ deactivateLoader, setServerError} from '../core/actions/layout.actions';
 import {requestFailed} from '../core/actions/http.actions';
 import {pipelineSettings,
-  createPipeline, createPipelineStep, getAllExperiments, getExperimentById, getPipelineById, setExperimentsResults, setSelectedPipeline, updatePipeline, updatePipelineSuccess, compilePipeline, runPipeline
+  createPipeline, createPipelineStep, getAllExperiments, getExperimentById, getPipelineById, setExperimentsResults, setSelectedPipeline, updatePipeline, updatePipelineSuccess, compilePipeline, runPipeline, updatePipelineStep
 } from './pipelines.actions';
 // import {ApiReportsService} from '~/business-logic/api-services/reports.service';
 /* import {IReport, PAGE_SIZE} from './reports.consts';
@@ -199,6 +199,21 @@ export class PipelinesEffects {
           requestFailed(err),
           setServerError(err, null, 'failed to create a new pipeline step'),
           deactivateLoader(createPipelineStep.type),
+        ]
+      })))
+  ));
+
+  updatePipelineStep$ = createEffect(() => this.actions.pipe(
+    ofType(updatePipelineStep),
+    switchMap((action) => this.pipelinesApiService.pipelinesUpdateStep(action.changes)
+      .pipe(mergeMap(() => {
+        return [deactivateLoader(updatePipelineStep.type)];
+      }),
+      catchError(err => {
+        return [
+          requestFailed(err),
+          setServerError(err, null, 'failed to update a pipeline step'),
+          deactivateLoader(updatePipelineStep.type),
         ]
       })))
   ));

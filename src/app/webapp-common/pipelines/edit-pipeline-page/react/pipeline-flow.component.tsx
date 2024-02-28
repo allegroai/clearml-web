@@ -143,7 +143,7 @@ export const PipelineFlowComponent: FunctionComponent<IMyComponentProps> = (
         nodeTypes={nodeTypes}
       >
         {/* <Background variant={BackgroundVariant.Lines} gap={20} size={0.4} /> */}
-        <MiniMap nodeStrokeWidth={3} />
+       {/*  <MiniMap nodeStrokeWidth={3} /> */}
         <Controls />
       </ReactFlow>
       {/* <ReactFlow  nodes={nodes}

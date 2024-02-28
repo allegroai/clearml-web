@@ -29,12 +29,12 @@
                 matInput required  #optsInput="ngModel" />
                 <mat-autocomplete #auto="matAutocomplete" class="light-theme" [displayWith]="displayFn"
                 (opened)="setIsAutoCompleteOpen(true)" (closed)="setIsAutoCompleteOpen(false)" autoActiveFirstOption>
-                <mat-option *ngFor="let option of incommingInputOptions; trackBy: trackByValue" 
+                <mat-option *ngFor="let option of ioOptions; trackBy: trackByValue" 
                   [value]="option.value"
-                  [smTooltip]="option.label" 
-                  smShowTooltipIfEllipsis 
+                  [smTooltip]="option.label + ' (' + option.type + ')'" 
+                  class="option"
                   (onSelectionChange)="paramSelected($event)">
-                  <div [smSearchText]="optsInput.value">{{option.label}}</div>
+                  <div [smSearchText]="optsInput.value" style="text-overflow: ellipsis; overflow: hidden;">{{option.label}}</div>
                 </mat-option>
                 <mat-option disabled style="height: 0; min-height: 0;"></mat-option>
                 

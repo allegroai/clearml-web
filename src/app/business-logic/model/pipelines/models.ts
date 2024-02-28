@@ -11,5 +11,7 @@ export * from '././pipelinesUpdateRequest';
 export * from '././pipelinesUpdateResponse';
 export * from '././pipelinesCompileRequest';
 export * from '././pipelinesRunRequest';
+export * from '././pipelinesStepInputOutputMappingOptions';
+export * from '././pipelinesUpdateStepsRequest';
 
 export * from "././pipeline";

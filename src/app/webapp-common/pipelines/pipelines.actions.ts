@@ -1,7 +1,7 @@
 import {createAction, props} from '@ngrx/store';
 // import {ReportsGetAllExResponse} from '~/business-logic/model/reports/reportsGetAllExResponse';
 // import {IReport} from './reports.consts';
-import { Pipeline, PipelinesCompileRequest, PipelinesCreateRequest, PipelinesRunRequest, PipelinesUpdateRequest, PipelinesUpdateResponse, pipelinesSettingsModel } from '~/business-logic/model/pipelines/models';
+import { Pipeline, PipelinesCompileRequest, PipelinesCreateRequest, PipelinesRunRequest, PipelinesUpdateRequest, PipelinesUpdateResponse, PipelinesUpdateStepsRequest, pipelinesSettingsModel } from '~/business-logic/model/pipelines/models';
 import { PipelinesCreateStepsRequest } from '~/business-logic/model/pipelines/pipelinesCreateStepsRequest';
 import { TasksGetByIdRequest } from '~/business-logic/model/tasks/models';
 import { Task } from '~/business-logic/model/tasks/task';
@@ -17,6 +17,11 @@ export const createPipelineStep = createAction(
   PIPELINES_PREFIX + 'CREATE_PIPELINE_STEP',
   props<{ pipelinesCreateStepRequest: PipelinesCreateStepsRequest }>()
 );
+export const updatePipelineStep = createAction(
+  PIPELINES_PREFIX + 'UPDATE_PIPELINE_STEP',
+  props<{changes: Partial<PipelinesUpdateStepsRequest>}>()
+);
+
 export const pipelineSettings= createAction(
   PIPELINES_PREFIX + 'SETTINGS_PIPELINE_ACTION',
   props<{ pipelinesSettingsRequest: pipelinesSettingsModel }>()

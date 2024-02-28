@@ -1,16 +1,10 @@
 import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {Artifact} from '~/business-logic/model/tasks/artifact';
-import {
-  PipelineItem,
-  StepStatusEnum,
-  TreeStep
-} from '@common/pipelines-controller/pipeline-controller-info/pipeline-controller-info.component';
-import {TaskTypeEnum} from '~/business-logic/model/tasks/taskTypeEnum';
+
 import {addMessage} from '@common/core/actions/layout.actions';
 import {fileSizeConfigStorage} from '@common/shared/pipes/filesize.pipe';
 import {ICONS, IOption, MESSAGES_SEVERITY} from '@common/constants';
-import {IExperimentInfo} from '~/features/experiments/shared/experiment-info.model';
 import { MatOptionSelectionChange } from '@angular/material/core';
 import { NgModel } from '@angular/forms';
 import { trackByValue } from '@common/shared/utils/forms-track-by';
@@ -27,9 +21,25 @@ export class PipelineStepInfoComponent {
   public controller: boolean;
   public fileSizeConfigStorage = fileSizeConfigStorage;
   private _step;
+  private _ioOptions: Array<{ label: string; value: string, type: string }> ;
 
   @Output() deleteStep = new EventEmitter<unknown>();
   @Output() stepParamsChanged = new EventEmitter<unknown>();
+
+  @Input() set ioOptions(options: any) {
+    const opts = options.map((op) => {
+      return {
+        value: "${"+op.stepName+"."+op.key+"}",
+        label: `${op.stepName}.${op.key}`,
+        type: op.type
+      }
+    });
+
+    this._ioOptions = cloneDeep(opts);
+  }
+  get ioOptions() {
+    return this._ioOptions;
+  }
 
   @Input() set step(step) {
     this._step = step ? cloneDeep(step) : null;
@@ -42,9 +52,9 @@ export class PipelineStepInfoComponent {
   @ViewChild('optsInput') optsInput: NgModel;
   public trackByValue = trackByValue;
   isAutoCompleteOpen: boolean;
-  public incommingInputOptions: { label: string; value: string }[] = [
+/*   public incommingInputOptions: { label: string; value: string }[] = [
     {label: "test", value: "test1"}
-  ];
+  ]; */
   setIsAutoCompleteOpen(focus: boolean) {
     this.isAutoCompleteOpen = focus;
   }

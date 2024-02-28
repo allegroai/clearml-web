@@ -4,13 +4,18 @@ import { PipelineAddStepDialogComponent } from '../pipeline-add-step-dialog/pipe
 import { PipelineSettingDialogComponent } from '../pipeline-setting/pipeline-setting.dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
-import { createPipelineStep, pipelineSettings, getPipelineById, resetPipelines, resetPipelinesSearchQuery, updatePipeline, compilePipeline, runPipeline, setSelectedPipeline } from '../pipelines.actions';
+import { createPipelineStep, pipelineSettings, getPipelineById, resetPipelines, resetPipelinesSearchQuery, updatePipeline, compilePipeline, runPipeline, setSelectedPipeline, updatePipelineStep } from '../pipelines.actions';
 import { selectRouterParams } from '@common/core/reducers/router-reducer';
 import { Observable, Subscription, map } from 'rxjs';
 import { Params } from '@angular/router';
 import { selectSelectedPipeline } from '../pipelines.reducer';
-import { Pipeline, PipelinesCompileRequest } from '~/business-logic/model/pipelines/models';
+import { Pipeline, PipelinesCompileRequest, PipelinesStepInputOutputMappingOptions } from '~/business-logic/model/pipelines/models';
 import { cloneDeep } from 'lodash-es';
+import {  ArtifactModeEnum } from '~/business-logic/model/tasks/models';
+
+
+
+
 
 @Component({
   selector: 'sm-edit-pipeline-page',
@@ -23,19 +28,50 @@ export class EditPipelinePageComponent implements OnInit, OnDestroy  {
   public subs = new Subscription();
   public selectedPipelineId$: Observable<string>;
   private selectedPipeline$: Observable<Pipeline>;
-  public selectedPipeline: Pipeline;
-  public selectedStep;
+  public selectedPipeline: Pipeline; // do not update this variable, maintain it readonly.
+  private _selectedStep;
+  public selectedStepInputOutputOptions: Array<PipelinesStepInputOutputMappingOptions>;
   pipelineId: string;
-  private reactFlowState = {nodes: [], edges: []};
+
+  //// nodes and edges state should be managed here for local use
+  // changes will be propagated to store only after clicking on save.
+  private reactFlowState  = {nodes: [], edges: []}; 
+
 
   constructor() {
-   
     this.selectedPipelineId$ = this.store.select(selectRouterParams).pipe(map((params: Params) => {
-       // eslint-disable-next-line @ngrx/avoid-mapping-selectors
-      //console.log(params);
       return params?.id
     }));
     this.selectedPipeline$ = this.store.select(selectSelectedPipeline)
+  }
+
+  private recomputeSelectedStepInputOutputOptions() {
+    const incommingNodes = this.getIncomingNodesForNode(this._selectedStep, this.reactFlowState .nodes, this.reactFlowState .edges);
+    const options:Array<PipelinesStepInputOutputMappingOptions> = [];
+    incommingNodes.forEach((node) => {
+      if(node.data?.experimentDetails?.execution?.artifacts?.length) {
+        // for now we are using only artifacts of i/o mapping.
+        node.data.experimentDetails.execution.artifacts.forEach((artifact) => {
+          if(artifact.mode === ArtifactModeEnum.Output) {
+            options.push({
+              ...artifact,
+              stepName: node.data.name,
+            });
+          }
+        })
+      }
+    })
+    this.selectedStepInputOutputOptions = options;
+    console.log(options);
+  }
+
+  set selectedStep(data) {
+    this._selectedStep = data;
+    this.recomputeSelectedStepInputOutputOptions();
+   
+  }
+  get selectedStep() {
+    return this._selectedStep;
   }
 
   ngOnInit() {
@@ -134,35 +170,62 @@ export class EditPipelinePageComponent implements OnInit, OnDestroy  {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public nodesChangedInReactFlow(data) {
-    this.reactFlowState.nodes = data;
-    //console.log("nodes changed", data);
+    this.reactFlowState.nodes = cloneDeep(data);
+    this.recomputeSelectedStepInputOutputOptions();
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public edgesChangedInReactFlow(data) {
-    this.reactFlowState.edges = data;
-    // eslint-disable-next-line no-console
-    console.log("edges changed", data);
+    this.reactFlowState.edges = cloneDeep(data);
+    this.recomputeSelectedStepInputOutputOptions();
     
   }
 
   public nodeSelected(data) {
-    // eslint-disable-next-line no-console
-    console.log(this.selectedStep);
-    this.selectedStep = {...data};
+    this.selectedStep = cloneDeep(data);
   }
 
   public selectedStepParamsChanged(changedParams) {
-    const pipelineState = cloneDeep(this.selectedPipeline);
-    pipelineState.flow_display?.nodes.map((node) => {
+    this.reactFlowState.nodes.map((node, index) => {
       if(node.id === this.selectedStep.id) {
-        node.data.parameters = cloneDeep(changedParams)
+        this.reactFlowState.nodes[index].data.parameters = cloneDeep(changedParams)
       }
       return node;
     });
-    console.log(pipelineState);
-    this.store.dispatch(setSelectedPipeline({data: cloneDeep(pipelineState)}))
+
+    //update node API call here. Update silently.
+    this.store.dispatch(updatePipelineStep({changes: {
+      step: this.selectedStep.id,
+      parameters: cloneDeep(changedParams)
+    }}))
+
+    //console.log(pipelineState);
+    // pipelineState.flow_display?.nodes.map((node) => {
+    //   if(node.id === this.selectedStep.id) {
+    //     node.data.parameters = cloneDeep(changedParams)
+    //   }
+    //   return node;
+    // });
+    // console.log(pipelineState);
+    //this.store.dispatch(setSelectedPipeline({data: cloneDeep(pipelineState)}))
   }
+
+  /**
+ * @function getIncomingNodeIds
+ * @description It is used to get the incoming node ids.
+ * @param {object} node - Object of the node.
+ * @param {array} edges - list of all edges.
+ * @returns {array} list of incoming node ids.
+ */
+private getIncomingNodesForNode (node, nodes, edges) {
+  const incomingNodes = [];
+  edges.forEach((edge) => {
+    if (node?.id === edge.target) {
+      incomingNodes.push(nodes.find((node) => node.id == edge?.source));
+    }
+  });
+  return incomingNodes;
+}
 
 
 }

@@ -1,14 +1,25 @@
 @import "variables";
 
+::ng-deep {
+  .option {
+    background-color: red;
+
+    span {
+      overflow: hidden;
+    }
+  }
+}
+
 :host {
   ::ng-deep {
     .mat-expansion-panel-body {
       padding: 0;
     }
+
     .mat-expansion-panel-header {
       padding: 0 16px;
     }
-}
+  }
 
   width: 300px;
   z-index: 1;
@@ -23,7 +34,7 @@
     font-weight: 500;
   }
 
-  .panel-body{
+  .panel-body {
     max-height: calc(70vh - 100px);
     min-height: 350px;
     overflow: auto;
@@ -32,8 +43,9 @@
 
   .section {
     margin-bottom: 24px;
+
     &:first-child {
-      margin-top:12px;
+      margin-top: 12px;
     }
 
     .header {
@@ -43,6 +55,7 @@
       display: flex;
       justify-content: space-between;
     }
+
     .param {
       display: flex;
       align-items: center;
@@ -58,6 +71,7 @@
         text-overflow: ellipsis;
         white-space: nowrap;
       }
+
       .value {
         flex: 1 1 0;
         color: $blue-100;
@@ -79,9 +93,11 @@
     margin: 12px 0 24px;
     padding-bottom: 12px;
     color: $blue-100;
+
     .al-icon {
       grid-area: icon;
     }
+
     .name {
       grid-area: name;
       overflow: hidden;
@@ -100,27 +116,35 @@
     font-weight: 500;
     text-transform: uppercase;
     background-color: $pipeline-pending;
+
     &.queued {
       background-color: $pipeline-queued;
     }
+
     &.skipped {
       background-color: $pipeline-skipped;
     }
+
     &.cached {
       background-color: $pipeline-cached;
     }
+
     &.executed {
       background-color: $pipeline-executed;
     }
+
     &.running {
       background-color: $pipeline-running;
     }
+
     &.failed {
       background-color: $pipeline-failed;
     }
+
     &.aborted {
       background-color: $pipeline-aborted;
     }
+
     &.completed {
       background-color: $pipeline-completed;
     }
@@ -138,12 +162,14 @@
     height: 48px;
     padding: 0 16px;
     border-top: solid 1px $dark-border;
+
     .arr-link {
       i {
-        margin-left:4px;
+        margin-left: 4px;
         transform: translateY(2px);
         transition: margin-left 0.3s;
       }
+
       &:hover i {
         margin-left: 8px;
       }
