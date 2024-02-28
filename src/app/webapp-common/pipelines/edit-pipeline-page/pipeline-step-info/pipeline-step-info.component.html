@@ -4,13 +4,12 @@
   </mat-expansion-panel-header>
   <div class="panel-body" *ngIf="step">
     <header *ngIf="step; else controllerHeader">
-      <i
-      class="al-icon lg"
-      [class]="'al-ico-type-' + (step.data.experimentDetails?.type ? (step.data.experimentDetails.type.toString()).replace('_', '-') : 'training')"
-    ></i>
+      <i class="al-icon lg"
+        [class]="'al-ico-type-' + (step.data.experimentDetails?.type ? (step.data.experimentDetails.type.toString()).replace('_', '-') : 'training')"></i>
       <div class="name" [smTooltip]="step.data.name" smShowTooltipIfEllipsis>{{step.data?.name}}</div>
       <div class="d-flex justify-content-between">
-        <div class="status" [class]="step.data.experimentDetails?.status" data-id="infoStepStatus">{{step.data.experimentDetails?.status}}</div>
+        <div class="status" [class]="step.data.experimentDetails?.status" data-id="infoStepStatus">
+          {{step.data.experimentDetails?.status}}</div>
         <sm-id-badge class="ms-1" [id]="step.id" (copied)="copyToClipboard()"></sm-id-badge>
       </div>
     </header>
@@ -22,10 +21,30 @@
     <ng-container>
       <div class="section">
         <div class="header">PARAMETERS</div>
-        <ng-container *ngFor="let section of  step?.data?.parameters">
+        <ng-container *ngFor="let section of  step?.data?.parameters; let index= index">
           <div class="param">
             <div class="key" [smTooltip]="section.name" smShowTooltipIfEllipsis>{{section.name}}</div>
-            <div class="value" [smTooltip]="section.value" smShowTooltipIfEllipsis>{{section.value}}</div>
+            <div class="value">
+              <input [matAutocomplete]="auto" [(ngModel)]="section['value']" placeholder="Parameter" (ngModelChange)="paramsChanged()" name="parameterKey-{{section.name}}-{{index}}"
+                matInput required  #optsInput="ngModel" />
+                <mat-autocomplete #auto="matAutocomplete" class="light-theme" [displayWith]="displayFn"
+                (opened)="setIsAutoCompleteOpen(true)" (closed)="setIsAutoCompleteOpen(false)" autoActiveFirstOption>
+                <mat-option *ngFor="let option of incommingInputOptions; trackBy: trackByValue" 
+                  [value]="option.value"
+                  [smTooltip]="option.label" 
+                  smShowTooltipIfEllipsis 
+                  (onSelectionChange)="paramSelected($event)">
+                  <div [smSearchText]="optsInput.value">{{option.label}}</div>
+                </mat-option>
+                <mat-option disabled style="height: 0; min-height: 0;"></mat-option>
+                
+              </mat-autocomplete>
+            </div>
+
+
+
+
+            <!-- <div class="value" [smTooltip]="section.value" smShowTooltipIfEllipsis>{{section.value}}</div> -->
           </div>
         </ng-container>
       </div>
@@ -34,30 +53,30 @@
         <ng-container *ngIf="(step?.data?.experimentDetails?.last_metrics | keyvalue)?.length > 0; else emptyMsg">
           <ng-container *ngFor="let metric of step?.data?.experimentDetails.last_metrics | keyvalue">
             <div *ngFor="let variant of $any($any(metric.value) | keyvalue) | filterMonitorMetric" class="param">
-              <div class="key" [smTooltip]="$any(variant.value).metric" smShowTooltipIfEllipsis>{{$any(variant.value).metric}}/{{$any(variant.value).variant}}</div>
-              <div class="value" [smTooltip]="$any(variant.value).value" smShowTooltipIfEllipsis>{{$any(variant.value).value}}</div>
+              <div class="key" [smTooltip]="$any(variant.value).metric" smShowTooltipIfEllipsis>
+                {{$any(variant.value).metric}}/{{$any(variant.value).variant}}</div>
+              <div class="value" [smTooltip]="$any(variant.value).value" smShowTooltipIfEllipsis>
+                {{$any(variant.value).value}}</div>
             </div>
           </ng-container>
         </ng-container>
       </div>
-       <div class="section">
+      <div class="section">
         <div class="header">ARTIFACTS</div>
         <ng-container *ngIf="step?.data?.experimentDetails?.execution?.artifacts?.length > 0; else emptyMsg">
-          <div
-            *ngFor="let artifact of step?.data?.experimentDetails?.execution.artifacts; trackBy: trackByFn"
-            class="param"
-          >
+          <div *ngFor="let artifact of step?.data?.experimentDetails?.execution.artifacts; trackBy: trackByFn"
+            class="param">
             <div class="key" [smTooltip]="artifact.key" smShowTooltipIfEllipsis>{{artifact.key}}</div>
             <div class="value">{{(artifact?.content_size | filesize : fileSizeConfigStorage) || ''}}</div>
           </div>
         </ng-container>
       </div>
-       <div class="section">
+      <div class="section">
         <div class="header">MODELS</div>
         <ng-container *ngIf="step?.data?.experimentDetails?.models?.output?.length > 0; else emptyMsg">
           <div *ngFor="let model of step?.data?.experimentDetails?.models?.output" class="param">
-            <div class="key"><a [routerLink]="['/projects', model.model.project.id, 'models', model.model.id]" target="_blank"
-            >{{model.name || model.model.name}}</a></div>
+            <div class="key"><a [routerLink]="['/projects', model.model.project.id, 'models', model.model.id]"
+                target="_blank">{{model.name || model.model.name}}</a></div>
           </div>
         </ng-container>
       </div>

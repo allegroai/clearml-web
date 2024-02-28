@@ -10,7 +10,7 @@
     }
 }
 
-  width: 260px;
+  width: 300px;
   z-index: 1;
   border-radius: 4px;
   background-color: $blue-700;
@@ -51,7 +51,7 @@
       border-bottom: solid 1px $dark-border;
 
       .key {
-        flex: 1 1 0;
+        flex: 0.5 1 0;
         color: $blue-300;
         margin-right: 12px;
         overflow: hidden;

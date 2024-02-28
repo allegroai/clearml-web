@@ -17,6 +17,7 @@ import { PipelinesParameter } from './pipelinesParameter';
 
 interface PipelineNode {
     id?:string;
+    data?: any;
 }
 
 interface PipelineEdge {

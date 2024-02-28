@@ -1,9 +1,10 @@
+/* eslint-disable no-console */
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { PipelineAddStepDialogComponent } from '../pipeline-add-step-dialog/pipeline-add-step-dialog.component';
 import { PipelineSettingDialogComponent } from '../pipeline-setting/pipeline-setting.dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
-import { createPipelineStep, pipelineSettings, getPipelineById, resetPipelines, resetPipelinesSearchQuery, updatePipeline, compilePipeline, runPipeline } from '../pipelines.actions';
+import { createPipelineStep, pipelineSettings, getPipelineById, resetPipelines, resetPipelinesSearchQuery, updatePipeline, compilePipeline, runPipeline, setSelectedPipeline } from '../pipelines.actions';
 import { selectRouterParams } from '@common/core/reducers/router-reducer';
 import { Observable, Subscription, map } from 'rxjs';
 import { Params } from '@angular/router';
@@ -70,7 +71,7 @@ export class EditPipelinePageComponent implements OnInit, OnDestroy  {
   }
 
   compilePipeline () {
-    let requestPayload: PipelinesCompileRequest = {
+    const requestPayload: PipelinesCompileRequest = {
       pipeline_id: this.selectedPipeline.id,
       steps: this.selectedPipeline.flow_display.nodes.map((nodeItem) => {
         return {
@@ -146,7 +147,21 @@ export class EditPipelinePageComponent implements OnInit, OnDestroy  {
   }
 
   public nodeSelected(data) {
+    // eslint-disable-next-line no-console
+    console.log(this.selectedStep);
     this.selectedStep = {...data};
+  }
+
+  public selectedStepParamsChanged(changedParams) {
+    const pipelineState = cloneDeep(this.selectedPipeline);
+    pipelineState.flow_display?.nodes.map((node) => {
+      if(node.id === this.selectedStep.id) {
+        node.data.parameters = cloneDeep(changedParams)
+      }
+      return node;
+    });
+    console.log(pipelineState);
+    this.store.dispatch(setSelectedPipeline({data: cloneDeep(pipelineState)}))
   }
 
 
