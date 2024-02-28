@@ -10,5 +10,21 @@
         min-height: 68px;
       }
     }
+
+    .mat-mdc-checkbox{
+    margin-left: -5.5px;
+    margin-bottom: 10px;
   }
-  
+
+  }
+  ::ng-deep .dark-theme .mat-mdc-checkbox .mdc-checkbox {
+    --mdc-checkbox-selected-icon-color: #767d92;
+    --mdc-checkbox-selected-hover-icon-color: #767d92;
+    --mdc-checkbox-selected-focus-icon-color: #767d92;
+}
+::ng-deep .dark-theme .mat-mdc-option {
+  --mat-option-label-text-color: #767d92;
+}
+::ng-deep .dark-theme .mat-mdc-option.mdc-list-item:hover {
+  background-color: #dce0ee;
+}

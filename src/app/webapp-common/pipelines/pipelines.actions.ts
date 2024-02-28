@@ -17,7 +17,7 @@ export const createPipelineStep = createAction(
   PIPELINES_PREFIX + 'CREATE_PIPELINE_STEP',
   props<{ pipelinesCreateStepRequest: PipelinesCreateStepsRequest }>()
 );
-export const settingsPipelineAction= createAction(
+export const pipelineSettings= createAction(
   PIPELINES_PREFIX + 'SETTINGS_PIPELINE_ACTION',
   props<{ pipelinesSettingsRequest: pipelinesSettingsModel }>()
 );

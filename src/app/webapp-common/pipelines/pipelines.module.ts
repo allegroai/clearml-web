@@ -20,7 +20,7 @@ import { MatSidenavModule } from "@angular/material/sidenav";
 import { MatInputModule } from "@angular/material/input";
 import { PipelineDialogComponent } from "./pipeline-dialog/pipeline-dialog.component";
 import { CreateNewPipelineFormComponent } from "./pipeline-dialog/create-new-pipeline-form/create-new-pipeline-form.component";
-import { PipelineSettingComponent } from './pipeline-setting/pipeline-setting.component';
+import { PipelineSettingDialogComponent } from './pipeline-setting/pipeline-setting.dialog.component';
 import { PipelineSettingFormComponent } from './pipeline-setting/pipeline-setting-form/pipeline-setting-form.component';
 import { MatAutocompleteModule } from "@angular/material/autocomplete";
 import { ScrollEndDirective } from "@common/shared/ui-components/directives/scroll-end.directive";
@@ -118,7 +118,7 @@ const getInitState = (userPreferences: UserPreferences) => ({
     EditPipelineHeaderComponent,
     PipelineParametersComponent,
     FlowEditorComponent,
-    PipelineSettingComponent,
+    PipelineSettingDialogComponent,
     PipelineSettingFormComponent,
     PipelineStepInfoComponent,
   ],

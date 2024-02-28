@@ -28,7 +28,7 @@ export class EditPipelineHeaderComponent extends BaseEntityHeaderComponent imple
   }
   @Input() pipelineData: Pipeline;
   @Output() createPipelineStep        = new EventEmitter();
-  @Output() settingsPipelineAction       = new EventEmitter();
+  @Output() pipelineSettings       = new EventEmitter();
   @Output() savePipeline        = new EventEmitter();
   @Output() compilePipeline = new EventEmitter();
   @Output() runPipeline        = new EventEmitter();
@@ -56,7 +56,7 @@ export class EditPipelineHeaderComponent extends BaseEntityHeaderComponent imple
     this.createPipelineStep.emit();
   }
   settings() {
-    this.settingsPipelineAction.emit();
+    this.pipelineSettings.emit();
   }
   savePipelineClicked() {
     this.savePipeline.emit();

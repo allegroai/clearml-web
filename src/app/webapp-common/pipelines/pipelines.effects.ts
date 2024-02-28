@@ -5,7 +5,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {catchError, filter, map, mergeMap, switchMap, /* tap */} from 'rxjs/operators';
 import {activeLoader, addMessage, /* addMessage, */ deactivateLoader, setServerError} from '../core/actions/layout.actions';
 import {requestFailed} from '../core/actions/http.actions';
-import {settingsPipelineAction,
+import {pipelineSettings,
   createPipeline, createPipelineStep, getAllExperiments, getExperimentById, getPipelineById, setExperimentsResults, setSelectedPipeline, updatePipeline, updatePipelineSuccess, compilePipeline, runPipeline
 } from './pipelines.actions';
 // import {ApiReportsService} from '~/business-logic/api-services/reports.service';
@@ -121,7 +121,7 @@ export class PipelinesEffects {
   
 
   activeLoader = createEffect(() => this.actions.pipe(
-    ofType(/* getReports, getReport, */ createPipeline, createPipelineStep, getAllExperiments, settingsPipelineAction/*  updateReport, restoreReport, archiveReport */),
+    ofType(/* getReports, getReport, */ createPipeline, createPipelineStep, getAllExperiments, pipelineSettings/*  updateReport, restoreReport, archiveReport */),
     filter(action => !action['refresh']),
     map(action => activeLoader(action.type))
   ));
@@ -203,20 +203,20 @@ export class PipelinesEffects {
       })))
   ));
   
-  settingsPipelineAction$ = createEffect(() => this.actions.pipe(
-    ofType(settingsPipelineAction),
+  pipelineSettings$ = createEffect(() => this.actions.pipe(
+    ofType(pipelineSettings),
     switchMap((action) => this.pipelinesApiService.pipelinesSettingCall(action.pipelinesSettingsRequest)
       .pipe(mergeMap((res: pipelinesSettingsModel) => {
         // eslint-disable-next-line no-console
         console.log(res)
         // this.router.navigate(['pipelines', res.id, 'edit']);
-        return [deactivateLoader(settingsPipelineAction.type)];
+        return [deactivateLoader(pipelineSettings.type)];
       }),
       catchError(err => {
         return [
           requestFailed(err),
           setServerError(err, null, 'failed to create a new pipeline step'),
-          deactivateLoader(settingsPipelineAction.type),
+          deactivateLoader(pipelineSettings.type),
         ]
       })))
   ));

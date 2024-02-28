@@ -15,16 +15,16 @@ import { getAllExperiments } from '../pipelines.actions';
 
 @Component({
   selector: 'sm-pipeline-setting',
-  templateUrl: './pipeline-setting.component.html',
-  styleUrls: ['./pipeline-setting.component.scss']
+  templateUrl: './pipeline-setting.dialog.component.html',
+  styleUrls: ['./pipeline-setting.dialog.component.scss']
 })
-export class PipelineSettingComponent {
+export class PipelineSettingDialogComponent {
   // public experiments$: Observable<Task[]>;
   public readOnlyIntervalNames$: Observable<string[]>;
 
   constructor(
     private store: Store,
-    private matDialogRef: MatDialogRef<PipelineSettingComponent>,
+    private matDialogRef: MatDialogRef<PipelineSettingDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { defaultExperimentId: string}
   ) {
     // this.experiments$ = this.store.select(selectExperiments);

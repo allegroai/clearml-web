@@ -1,9 +1,9 @@
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { PipelineAddStepDialogComponent } from '../pipeline-add-step-dialog/pipeline-add-step-dialog.component';
-import { PipelineSettingComponent } from '../pipeline-setting/pipeline-setting.component';
+import { PipelineSettingDialogComponent } from '../pipeline-setting/pipeline-setting.dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
-import { createPipelineStep, settingsPipelineAction, getPipelineById, resetPipelines, resetPipelinesSearchQuery, updatePipeline, compilePipeline, runPipeline } from '../pipelines.actions';
+import { createPipelineStep, pipelineSettings, getPipelineById, resetPipelines, resetPipelinesSearchQuery, updatePipeline, compilePipeline, runPipeline } from '../pipelines.actions';
 import { selectRouterParams } from '@common/core/reducers/router-reducer';
 import { Observable, Subscription, map } from 'rxjs';
 import { Params } from '@angular/router';
@@ -118,7 +118,7 @@ export class EditPipelinePageComponent implements OnInit, OnDestroy  {
   }
 
   settings() {
-    this.dialog.open(PipelineSettingComponent, {
+    this.dialog.open(PipelineSettingDialogComponent, {
       data: {defaultExperimentId: ''},
       panelClass: 'light-theme',
       width: '640px'
@@ -126,7 +126,7 @@ export class EditPipelinePageComponent implements OnInit, OnDestroy  {
       .afterClosed()
       .subscribe(pipeline => {
         if (pipeline) {
-          this.store.dispatch(settingsPipelineAction({pipelinesSettingsRequest: pipeline}));
+          this.store.dispatch(pipelineSettings({pipelinesSettingsRequest: pipeline}));
         }
       });
   }

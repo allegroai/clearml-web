@@ -8,20 +8,9 @@
   <mat-checkbox name="emailAlert" [(ngModel)]="settingFields.emailAlert">Send email alert on failure</mat-checkbox>
   <mat-checkbox name="scheduling" [(ngModel)]="settingFields.scheduling">Enable Scheduling</mat-checkbox>
 
-
-  <!-- <mat-form-field class="w-100" appearance="outline">
-    <mat-label>Schedule Interval</mat-label>
-    <mat-select [(ngModel)]="settingFields.interval" name="intervalName" required (selectionChange)="intervalSelected($event)">
-      <mat-option value="custom">Custom</mat-option>
-      <mat-option value="daily">Daily</mat-option>
-      <mat-option value="hourly">Hourly</mat-option>
-      <mat-option value="weekly">Weekly</mat-option>
-    </mat-select>
-  </mat-form-field> -->
-
   <mat-form-field class="w-100" appearance="outline">
     <mat-label>Schedule Interval</mat-label>
-    <input matInput placeholder="Search for existing intervals" [matAutocomplete]="auto" [(ngModel)]="settingFields.interval" name="intervalName" required>
+    <input matInput placeholder="Search for existing intervals" [matAutocomplete]="auto" [(ngModel)]="settingFields.interval" name="intervalName">
     <mat-autocomplete #auto="matAutocomplete" (optionSelected)="intervalSelected($event)">
       <mat-option value="custom">Custom</mat-option>
       <mat-option value="daily">Daily</mat-option>
