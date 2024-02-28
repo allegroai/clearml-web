@@ -13,8 +13,6 @@ import {
   styleUrls: ['./pipeline-setting-form.component.scss']
 })
 export class PipelineSettingFormComponent implements OnDestroy {
-  public readonly intervalsRoot = {label: 'My interval', value: null};
-  @ViewChild('intervalInput') intervalInput: NgModel;
   @ViewChild('emailList') emailList: ElementRef;
   @ViewChild('expression') expression: NgModel;
 
@@ -31,67 +29,50 @@ export class PipelineSettingFormComponent implements OnDestroy {
     interval: null,
     expression: ''
   };
-
   intervalsOptions: { label: string; value: string }[];
   intervalsNames: string[];
-  rootFiltered = false;
-  isAutoCompleteOpen = false;
-  loading = false;
-  noMoreOptions = false;
+
 
   private subs = new Subscription();
 
   constructor() {}
 
-  ngOnInit(): void {
-    this.searchChanged(['*', null].includes(this.defaultintervalId) ? '' : this.defaultintervalId);
-    setTimeout(() => {
-      this.subs.add(this.intervalInput.valueChanges.subscribe(searchString => {
-        if (searchString !== this.settingFields.interval) {
-          this.searchChanged(searchString?.label || searchString || '');
-        }
-      }));
-    });
-  }
+  ngOnInit(): void {}
 
   ngOnDestroy(): void {
     this.subs.unsubscribe();
   }
-
+  intervalOptions: string[] = ['custom', 'daily', 'hourly', 'weekly', 'monthly', 'yearly'];
+  cronExpressions: { [key: string]: string } = {
+    'custom': '',
+    'daily': '0 0 * * *',
+    'hourly': '0 * * * *',
+    'weekly': '0 0 * * 0',
+    'monthly': '0 0 1 * *',
+    'yearly': '0 0 1 1 *'
+  };
 
   intervalSelected(event: MatAutocompleteSelectedEvent): void {
-    this.settingFields.interval = event.option.viewValue;
-  }
-  setIsAutoCompleteOpen(focus: boolean) {
-    this.isAutoCompleteOpen = focus;
-  }
-
-  displayFn(interval: IOption | string) {
-    return typeof interval === 'string' ? interval : interval?.label;
+    const selectedInterval = event.option.value;
+    this.settingFields.interval = selectedInterval;
+    this.settingFields.expression = this.cronExpressions[selectedInterval];
   }
 
-  clear() {
-    this.intervalInput.control.setValue('');
+  checkCronExpression(): void {
+    const enteredExpression = this.settingFields.expression.trim();
+    const matchingInterval = Object.entries(this.cronExpressions).find(([interval, expression]) => expression === enteredExpression);
+    if (matchingInterval) {
+      this.settingFields.interval = matchingInterval[0];
+    } else {
+      this.settingFields.interval = 'custom';
+    }
   }
 
+  navigateToWebsite(): void {
+    window.open('https://en.wikipedia.org/wiki/Cron', '_blank');
+  }
   send() {
     this.stepCreated.emit(this.settingFields);
-  }
-
-  searchChanged(searchString: string) {
-    this.intervalsOptions = null;
-    this.intervalsNames = null;
-    this.rootFiltered = searchString && !this.intervalsRoot.label.toLowerCase().includes(searchString.toLowerCase());
-    searchString !== null && this.filterSearchChanged.emit({ value: searchString, loadMore: false });
-  }
-
-  loadMore(searchString) {
-    this.loading = true;
-    this.filterSearchChanged.emit({ value: searchString || '', loadMore: true });
-  }
-
-  isFocused(locationRef: HTMLInputElement) {
-    return document.activeElement === locationRef;
   }
 }
 

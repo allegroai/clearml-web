@@ -28,3 +28,11 @@
 ::ng-deep .dark-theme .mat-mdc-option.mdc-list-item:hover {
   background-color: #dce0ee;
 }
+.cron-expression-field .mat-form-field-flex {
+  display: flex;
+}
+
+.cron-expression-field .input-container {
+  display: flex;
+  align-items: center;
+}

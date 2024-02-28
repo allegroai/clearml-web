@@ -215,7 +215,7 @@ export class PipelinesEffects {
       catchError(err => {
         return [
           requestFailed(err),
-          setServerError(err, null, 'failed to create a new pipeline step'),
+          setServerError(err, null, 'failed to make changes in settings'),
           deactivateLoader(pipelineSettings.type),
         ]
       })))

@@ -26,16 +26,9 @@ export class PipelineSettingDialogComponent {
     private store: Store,
     private matDialogRef: MatDialogRef<PipelineSettingDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { defaultExperimentId: string}
-  ) {
-    // this.experiments$ = this.store.select(selectExperiments);
-    // this.readOnlyIntervalNames$ = this.store.select(selectExperiments)
-    //   .pipe(map(experiments => experiments?.filter(experiment => isReadOnly(experiment)).map(experiment=> experiment.name)));
-    // this.store.dispatch(resetTablesFilterProjectsOptions());
-  }
+  ) {}
 
   public settingsForm(pipelineForm) {
-    // eslint-disable-next-line no-console
-    console.log("i am form", pipelineForm)
     const pipeline = this.convertFormToPipeline(pipelineForm);
     this.matDialogRef.close(pipeline);
   }

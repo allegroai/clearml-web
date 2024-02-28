@@ -1,4 +1,4 @@
-<form (ngSubmit)="send()" #settingsForm='ngForm' class="d-flex flex-column">
+<form (ngSubmit)="send()" #settingsForm='ngForm' class="d-flex flex-column" (click)="$event.stopPropagation()">
   <mat-form-field appearance="outline" hideRequiredMarker class="mat-light">
     <mat-label>Email List</mat-label>
     <mat-error *ngIf="settingsForm.controls.emailList?.touched && settingsForm.controls.emailList.errors?.required">*Please add an email.</mat-error>
@@ -12,19 +12,20 @@
     <mat-label>Schedule Interval</mat-label>
     <input matInput placeholder="Search for existing intervals" [matAutocomplete]="auto" [(ngModel)]="settingFields.interval" name="intervalName">
     <mat-autocomplete #auto="matAutocomplete" (optionSelected)="intervalSelected($event)">
-      <mat-option value="custom">Custom</mat-option>
-      <mat-option value="daily">Daily</mat-option>
-      <mat-option value="hourly">Hourly</mat-option>
-      <mat-option value="weekly">Weekly</mat-option>
+      <mat-option *ngFor="let option of intervalOptions" [value]="option"> {{ option.charAt(0).toUpperCase() + option.slice(1) }}</mat-option>
     </mat-autocomplete>
   </mat-form-field>
-
-  <mat-form-field appearance="outline" hideRequiredMarker>
+  
+  <mat-form-field appearance="outline" hideRequiredMarker class="cron-expression-field">
     <mat-error *ngIf="expression?.touched && expression?.invalid">*Please add Cron Expression.</mat-error>
     <mat-label>Cron Expression</mat-label>
-    <input class="step-expression" name="cronExpression" matInput [(ngModel)]="settingFields.expression" #expression="ngModel" required>
+    <div class="input-container">
+      <input class="step-expression" name="cronExpression" matInput [(ngModel)]="settingFields.expression" #expression="ngModel" (input)="checkCronExpression()">
+      <button type="button" class="btn btn-icon g-btn" (click)="navigateToWebsite()">
+        <i class="icon i-alert-purple"></i>
+      </button>
+    </div>
   </mat-form-field>
-
   <div class="w-100 create-step-button">
     <button type="submit" class="btn btn-dark-fill center" [disabled]="settingsForm.invalid">Save</button>
   </div>
