@@ -29,7 +29,7 @@ export class PipelineStepInfoComponent {
   @Input() set ioOptions(options: any) {
     const opts = options.map((op) => {
       return {
-        value: "${"+op.stepName+"."+op.key+"}",
+        value: "${"+op.stepName+".id}."+op.key,
         label: `${op.stepName}.${op.key}`,
         type: op.type
       }
