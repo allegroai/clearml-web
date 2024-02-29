@@ -84,65 +84,96 @@ const getCorrectSortingOrder = (currentSortOrder: TableSortOrderEnum, currentOrd
 export const pipelinesReducers = [
   on(addToPipelinesList, (state, action) => ({
     ...state,
-    pipelines: action.reset ? action.pipelines : [...(state.pipelines || []), ...action.pipelines]
+    pipelines: action.reset
+      ? action.pipelines
+      : [...(state.pipelines || []), ...action.pipelines],
   })),
-  on(setCurrentScrollId, (state, action) => ({...state, scrollId: action.scrollId})),
-  on(setNoMorePipelines, (state, action) => ({...state, noMorePipelines: action.payload})),
+  on(setCurrentScrollId, (state, action) => ({
+    ...state,
+    scrollId: action.scrollId,
+  })),
+  on(setNoMorePipelines, (state, action) => ({
+    ...state,
+    noMorePipelines: action.payload,
+  })),
   on(updatePipelineSuccess, (state, action) => ({
-    ...state, pipelines: state.pipelines?.map(pr => pr.id === action.changes.id ? {
-      ...pr,
-      ...action.changes,
-      ...(!!action.changes?.name && {basename: action.changes?.name.split('/').at(-1)})
-    } : pr)
+    ...state,
+    pipelines: state.pipelines?.map((pr) =>
+      pr.id === action.changes.id
+        ? {
+            ...pr,
+            ...action.changes,
+            ...(!!action.changes?.name && {
+              basename: action.changes?.name.split("/").at(-1),
+            }),
+          }
+        : pr
+    ),
+    selectedPipeline:
+      state.selectedPipeline.id === action.changes.id
+        ? { ...state.selectedPipeline, ...action.changes }
+        : state.selectedPipeline,
   })),
-  on(setSelectedPipeline, (state, action) => ({...state, selectedPipeline: {...action.data}})),
-  on(resetPipelines, state => ({
+  on(setSelectedPipeline, (state, action) => ({
+    ...state,
+    selectedPipeline: { ...action.data },
+  })),
+  on(resetPipelines, (state) => ({
     ...state,
     scrollId: null,
     noMorePipelines: pipelinesInitState.noMorePipelines,
-    pipelines: pipelinesInitState.pipelines
+    pipelines: pipelinesInitState.pipelines,
   })),
   on(setPipelinesOrderBy, (state, action) => ({
     ...state,
     orderBy: action.orderBy,
-    sortOrder: getCorrectSortingOrder(state.sortOrder, state.orderBy, action.orderBy),
+    sortOrder: getCorrectSortingOrder(
+      state.sortOrder,
+      state.orderBy,
+      action.orderBy
+    ),
     scrollId: null,
     noMorePipelines: pipelinesInitState.noMorePipelines,
-    pipelines: pipelinesInitState.pipelines
+    pipelines: pipelinesInitState.pipelines,
   })),
   on(setPipelinesSearchQuery, (state, action) => ({
     ...state,
-    searchQuery: (action as ReturnType<typeof setPipelinesSearchQuery>),
+    searchQuery: action as ReturnType<typeof setPipelinesSearchQuery>,
     scrollId: null,
     noMorePipelines: pipelinesInitState.noMorePipelines,
-    pipelines: pipelinesInitState.pipelines
+    pipelines: pipelinesInitState.pipelines,
   })),
-  on(resetPipelinesSearchQuery, state => ({
+  on(resetPipelinesSearchQuery, (state) => ({
     ...state,
     // searchQuery: pipelinesInitState.searchQuery,
     scrollId: null,
     noMorePipelines: pipelinesInitState.noMorePipelines,
-    pipelines: pipelinesInitState.pipelines
+    pipelines: pipelinesInitState.pipelines,
   })),
   on(checkPipelineForDeletion, (state, action) => ({
     ...state,
     validatedProject: action.pipeline,
-    projectReadyForDeletion: pipelinesInitState.projectReadyForDeletion
+    projectReadyForDeletion: pipelinesInitState.projectReadyForDeletion,
   })),
-  on(resetReadyToDelete, state => ({
+  on(resetReadyToDelete, (state) => ({
     ...state,
     projectReadyForDeletion: pipelinesInitState.projectReadyForDeletion,
-    validatedProject: pipelinesInitState.validatedProject
+    validatedProject: pipelinesInitState.validatedProject,
   })),
-  on(setTableModeAwareness, (state, action) =>
-    ({...state, tableModeAwareness: (action as ReturnType<typeof setTableModeAwareness>).awareness})),
-  on(showExamplePipelines, state => ({...state, showPipelineExamples: true})),
-  on(showExampleDatasets, state => ({...state, showDatasetExamples: true})),
+  on(setTableModeAwareness, (state, action) => ({
+    ...state,
+    tableModeAwareness: (action as ReturnType<typeof setTableModeAwareness>)
+      .awareness,
+  })),
+  on(showExamplePipelines, (state) => ({
+    ...state,
+    showPipelineExamples: true,
+  })),
+  on(showExampleDatasets, (state) => ({ ...state, showDatasetExamples: true })),
   on(setExperimentsResults, (state, action) => ({
     ...state,
     experiments: [...action.experiments],
   })),
-
 ] as ReducerTypes<PipelineState, ActionCreator[]>[];
 export const pipelinesReducer = createReducer(pipelinesInitState, ...pipelinesReducers);
 

@@ -6,7 +6,7 @@ import {catchError, filter, map, mergeMap, switchMap, /* tap */} from 'rxjs/oper
 import {activeLoader, addMessage, /* addMessage, */ deactivateLoader, setServerError} from '../core/actions/layout.actions';
 import {requestFailed} from '../core/actions/http.actions';
 import {pipelineSettings,
-  createPipeline, createPipelineStep, getAllExperiments, getExperimentById, getPipelineById, setExperimentsResults, setSelectedPipeline, updatePipeline, updatePipelineSuccess, compilePipeline, runPipeline, updatePipelineStep
+  createPipeline, createPipelineStep, getAllExperiments, getExperimentById, getPipelineById, setExperimentsResults, setSelectedPipeline, updatePipeline, updatePipelineSuccess, compilePipeline, runPipeline, updatePipelineStep, deletePipelineStep
 } from './pipelines.actions';
 // import {ApiReportsService} from '~/business-logic/api-services/reports.service';
 /* import {IReport, PAGE_SIZE} from './reports.consts';
@@ -53,6 +53,7 @@ import { PipelinesUpdateResponse } from '~/business-logic/model/pipelines/pipeli
 import { selectSelectedPipeline } from './pipelines.reducer';
 import { cloneDeep } from 'lodash-es';
 import { MESSAGES_SEVERITY } from '@common/constants';
+import { ConfirmDialogComponent } from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 /* import {selectRouterParams} from '@common/core/reducers/router-reducer';
 import {setMainPageTagsFilter} from '@common/core/actions/projects.actions';
 import {cleanTag} from '@common/shared/utils/helpers.util';
@@ -217,6 +218,25 @@ export class PipelinesEffects {
         ]
       })))
   ));
+
+
+  deletePipelineStep$ = createEffect(() => this.actions.pipe(
+    ofType(deletePipelineStep),
+    switchMap((action) => this.pipelinesApiService.pipelinesDeleteStep({step: action.stepId}).pipe(
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      mergeMap((res) => {
+        return [ deactivateLoader(action.type),
+          addMessage(MESSAGES_SEVERITY.SUCCESS, 'Pipeline step deleted successfully')]
+      }
+        
+      ),
+      catchError(error => [
+        requestFailed(error),
+        deactivateLoader(action.type),
+        setServerError(error, null, 'Failed to delete pipeline step.')
+      ])
+    ))
+  ));
   
   pipelineSettings$ = createEffect(() => this.actions.pipe(
     ofType(pipelineSettings),
@@ -289,11 +309,15 @@ export class PipelinesEffects {
     ofType(updatePipeline),
     mergeMap(action => this.pipelinesApiService.pipelinesUpdate({...action.changes})
       .pipe(
-        mergeMap((res: PipelinesUpdateResponse) => [
-          deactivateLoader(action.type),
-          updatePipelineSuccess({changes: res}),
-          addMessage(MESSAGES_SEVERITY.SUCCESS, 'Pipeline saved successfully')
-        ]),
+        mergeMap((res: any) => {
+         /*  // eslint-disable-next-line no-console
+          console.log("response from update pipeline",res); */
+          return [
+            deactivateLoader(action.type),
+            updatePipelineSuccess({changes: res?.pipelines}),
+            addMessage(MESSAGES_SEVERITY.SUCCESS, 'Pipeline saved successfully')
+          ]
+        }),
         catchError(error => [deactivateLoader(action.type), requestFailed(error),
           setServerError(error, undefined, error?.error?.meta?.result_subcode === 800 ?
             'Name should be 3 characters long' : error?.error?.meta?.result_subcode === 801 ? 'Name' +
@@ -870,38 +894,7 @@ export class PipelinesEffects {
   //   )
   // ));
 
-  // deleteReport = createEffect(() => this.actions.pipe(
-  //   ofType(deleteReport),
-  //   switchMap(action => this.matDialog.open(
-  //     ConfirmDialogComponent,
-  //     {
-  //       data: {
-  //         title: 'DELETE',
-  //         body: '<p class="text-center">Permanently Delete Report</p>',
-  //         yes: 'Delete',
-  //         no: 'Cancel',
-  //         iconClass: 'al-ico-trash',
-  //         width: 430
-  //       }
-  //     }).afterClosed().pipe(
-  //     filter(confirm => !!confirm),
-  //     switchMap(() => this.pipelinesApiService.reportsDelete({task: action.report.id})),
-  //     mergeMap(() => {
-  //       this.router.navigate(['reports'], {queryParamsHandling: 'merge'});
-  //       return [
-  //         removeReport({id: action.report.id}),
-  //         getReports(),
-  //         deactivateLoader(action.type),
-  //         addMessage(MESSAGES_SEVERITY.SUCCESS, 'Report deleted successfully')
-  //       ];
-  //     }),
-  //     catchError(error => [
-  //       requestFailed(error),
-  //       deactivateLoader(action.type),
-  //       setServerError(error, null, 'Failed To delete reports')
-  //     ])
-  //   )),
-  // ));
+
 
   // deleteResource = createEffect(() => this.actions.pipe(
   //   ofType(deleteResource),

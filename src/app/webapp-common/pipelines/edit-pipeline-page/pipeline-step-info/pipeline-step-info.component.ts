@@ -9,6 +9,8 @@ import { MatOptionSelectionChange } from '@angular/material/core';
 import { NgModel } from '@angular/forms';
 import { trackByValue } from '@common/shared/utils/forms-track-by';
 import { cloneDeep } from 'lodash-es';
+import { ConfirmDialogComponent } from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'sm-pipeline-step-info',
@@ -23,7 +25,7 @@ export class PipelineStepInfoComponent {
   private _step;
   private _ioOptions: Array<{ label: string; value: string, type: string }> ;
 
-  @Output() deleteStep = new EventEmitter<unknown>();
+  @Output() deleteStep = new EventEmitter<any>();
   @Output() stepParamsChanged = new EventEmitter<unknown>();
 
   @Input() set ioOptions(options: any) {
@@ -37,6 +39,8 @@ export class PipelineStepInfoComponent {
 
     this._ioOptions = cloneDeep(opts);
   }
+
+
   get ioOptions() {
     return this._ioOptions;
   }
@@ -82,11 +86,29 @@ export class PipelineStepInfoComponent {
 
   @Input() project: string;
 
-  constructor(private store: Store) {
+  constructor(private store: Store, private matDialog: MatDialog) {
   }
 
   public deleteClicked() {
-    this.deleteStep.emit(this._step);
+    this.matDialog
+    .open(ConfirmDialogComponent, {
+      data: {
+        title: "DELETE",
+        body: '<p class="text-center">Are you sure you want to delete the step?</p>',
+        yes: "Delete",
+        no: "Cancel",
+        iconClass: "al-ico-trash",
+        width: 430,
+      },
+    })
+    .afterClosed().subscribe((data) => {
+      // eslint-disable-next-line no-console
+      console.log(data);
+      if(data?.isConfirmed) {
+          this.deleteStep.emit(this._step);
+      }
+    })
+   
     /* setTimeout(() => {
       // eslint-disable-next-line no-console
       console.log(this._step);

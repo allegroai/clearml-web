@@ -22,6 +22,12 @@ export const updatePipelineStep = createAction(
   props<{changes: Partial<PipelinesUpdateStepsRequest>}>()
 );
 
+export const deletePipelineStep = createAction(
+  PIPELINES_PREFIX + 'DELETE_PIPELINE_STEP',
+  props<{stepId: string}>()
+);
+
+
 export const pipelineSettings= createAction(
   PIPELINES_PREFIX + 'SETTINGS_PIPELINE_ACTION',
   props<{ pipelinesSettingsRequest: pipelinesSettingsModel }>()
@@ -39,11 +45,11 @@ export const setSelectedPipeline = createAction(
 
 
 export const updatePipeline = createAction(
-  PIPELINES_PREFIX + '[update pipeline]',
+  PIPELINES_PREFIX + '[UPDATE_PIPELINE]',
   props<{changes: Partial<PipelinesUpdateRequest>}>()
 );
 export const updatePipelineSuccess = createAction(
-  PIPELINES_PREFIX + '[update pipeline success]',
+  PIPELINES_PREFIX + '[UPDATE_PIPELINE_SUCCESS]',
   props<{changes: Partial<PipelinesUpdateResponse>}>()
 );
 
@@ -218,10 +224,6 @@ export const showExampleDatasets = createAction(PIPELINES_PREFIX + '[show datase
 //   props<{ query: string; regExp?: boolean }>()
 // );
 
-// export const deleteResource = createAction(
-//   PIPELINES_PREFIX + 'DELETE_RESOURCE',
-//   props<{resource: string}>()
-// );
 
 // export const setEditMode = createAction(
 //   PIPELINES_PREFIX + 'Set Edit Mode',

@@ -168,7 +168,7 @@ export class PipelineAddStepFormComponent implements OnChanges, OnDestroy {
   }
 
   send() {
-    if (this.stepParamsForm.formData.length > 0) {
+    if (this.stepParamsForm?.formData?.length > 0) {
       this.step.parameters = cloneDeep(this.stepParamsForm.formData);
      }
     this.stepCreated.emit(this.step);

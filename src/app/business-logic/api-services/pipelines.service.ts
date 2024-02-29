@@ -345,6 +345,52 @@ export class ApiPipelinesService {
       );
     }
 
+
+    public pipelinesDeleteStep(
+      request: {step: string},
+      options?: any,
+      observe: any = "body",
+      reportProgress: boolean = false
+    ): Observable<any> {
+      if (request === null || request === undefined) {
+        throw new Error(
+          "Required parameter request was null or undefined when calling pipelinesDeleteStep."
+        );
+      }
+  
+      let headers = this.defaultHeaders;
+      if (options && options.async_enable) {
+        headers = headers.set(this.configuration.asyncHeader, "1");
+      }
+  
+      // to determine the Accept header
+      const httpHeaderAccepts: string[] = ["application/json"];
+      const httpHeaderAcceptSelected: string | undefined =
+        this.configuration.selectHeaderAccept(httpHeaderAccepts);
+      if (httpHeaderAcceptSelected != undefined) {
+        headers = headers.set("Accept", httpHeaderAcceptSelected);
+      }
+  
+      // to determine the Content-Type header
+      const consumes: string[] = [];
+      const httpContentTypeSelected: string | undefined =
+        this.configuration.selectHeaderContentType(consumes);
+      if (httpContentTypeSelected != undefined) {
+        headers = headers.set("Content-Type", httpContentTypeSelected);
+      }
+  
+      return this.apiRequest.post<any>(
+        `${this.basePath}/pipelines.delete_step`,
+        request,
+        {
+          withCredentials: this.configuration.withCredentials,
+          headers: headers,
+          observe: observe,
+          reportProgress: reportProgress,
+        }
+      );
+    }
+
   /**
    *
    * Create a new pipeline step
