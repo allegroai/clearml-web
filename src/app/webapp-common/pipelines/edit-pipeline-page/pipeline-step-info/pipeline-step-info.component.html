@@ -75,8 +75,10 @@
         <div class="header">MODELS</div>
         <ng-container *ngIf="step?.data?.experimentDetails?.models?.output?.length > 0; else emptyMsg">
           <div *ngFor="let model of step?.data?.experimentDetails?.models?.output" class="param">
-            <div class="key"><a [routerLink]="['/projects', model.model.project.id, 'models', model.model.id]"
-                target="_blank">{{model.name || model.model.name}}</a></div>
+            <div class="key">
+              {{model.name || model.model.name}}
+              <!-- <a [routerLink]="['/projects', model.model.project.id, 'models', model.model.id]"
+                target="_blank">{{model.name || model.model.name}}</a> --></div>
           </div>
         </ng-container>
       </div>
