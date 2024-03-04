@@ -112,7 +112,7 @@ export class PipelineStepInfoComponent {
     })
     .afterClosed().subscribe((data) => {
       // eslint-disable-next-line no-console
-      console.log(data);
+      //console.log(data);
       if(data?.isConfirmed) {
           this.deleteStep.emit(this._step);
       }

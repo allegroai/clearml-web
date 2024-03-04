@@ -28,7 +28,7 @@ export default function PipelineStepComponent({ data, selected, ...others }) {
         ></i>
         <div className="title" title={data?.name} style={{
                 flex: 1,
-                maxWidth: "108px",
+                maxWidth: "inherit",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap"
@@ -42,6 +42,7 @@ export default function PipelineStepComponent({ data, selected, ...others }) {
     justifyContent: "space-between",
     height: "26px"
       }}>
+       {/*  <p>{data?.experimentDetails?.name}</p> */}
         {/*  <i *ngIf="step.data.status !== 'pending'" class="al-icon sm-md" [class]="'al-ico-status-' + step.data.status" data-id="stepStatusIcon"></i> */}
         {/* <div *ngIf="step?.data?.job_started">
       {{runTime | duration}}

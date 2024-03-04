@@ -152,7 +152,7 @@ export class PipelinesEffects {
     switchMap(([action, selectedPipelineData]) => this.pipelinesApiService.pipelinesCreateStep(action.pipelinesCreateStepRequest)
       .pipe(mergeMap((res: PipelinesCreateStepsResponse) => {
         // eslint-disable-next-line no-console
-        console.log(res)
+        //console.log(res)
         // this.router.navigate(['pipelines', res.id, 'edit']);
         //this.pipelinesApiService.pipelinesGetById({pipeline: action.pipelinesCreateStepRequest.pipeline_id}).pipe()
         //const selectedPipeline = 
@@ -243,7 +243,7 @@ export class PipelinesEffects {
     switchMap((action) => this.pipelinesApiService.pipelinesSettingCall(action.pipelinesSettingsRequest)
       .pipe(mergeMap((res: pipelinesSettingsModel) => {
         // eslint-disable-next-line no-console
-        console.log(res)
+        // console.log(res)
         // this.router.navigate(['pipelines', res.id, 'edit']);
         return [deactivateLoader(pipelineSettings.type)];
       }),

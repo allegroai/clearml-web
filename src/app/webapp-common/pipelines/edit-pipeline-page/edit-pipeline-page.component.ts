@@ -117,7 +117,7 @@ export class EditPipelinePageComponent implements OnInit, OnDestroy {
     }
 
     this.selectedStepInputOutputOptions = options;
-    console.log(options);
+    // console.log(options);
   }
 
   set selectedStep(data) {
@@ -142,7 +142,7 @@ export class EditPipelinePageComponent implements OnInit, OnDestroy {
       this.selectedPipeline$.pipe().subscribe((pipelineData) => {
         this.selectedPipeline = pipelineData;
         // eslint-disable-next-line no-console
-        console.log(pipelineData);
+        //console.log(pipelineData);
       })
     );
 

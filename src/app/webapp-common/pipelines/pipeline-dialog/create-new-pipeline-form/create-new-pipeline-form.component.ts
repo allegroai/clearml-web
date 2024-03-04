@@ -197,9 +197,10 @@ export class CreateNewPipelineFormComponent implements OnChanges, OnDestroy {
     this.cdr.detectChanges();
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onFormValuesChanged(event: { field: string; value: any }) {
     // eslint-disable-next-line no-console
-    console.log(event);
+    // console.log(event);
     // this.store.dispatch(updateExperimentAtPath({path: ('hyperparams.' + event.field), value: event.value}));
   }
 }
