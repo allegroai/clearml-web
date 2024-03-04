@@ -23,10 +23,9 @@ export default function PipelineStepComponent({ data, selected, ...others }) {
             background: "#1A1E2C"
       }}>
          <i
-          className="al-icon sm-md al-ico-console"
+          className={"al-icon sm-md al-ico-type-" + (data.experimentDetails?.type ? (data.experimentDetails.type.toString()).replace('_', '-') : 'training')}
           data-id="stepResultButton"
         ></i>
-        {/*  <sm-experiment-type-icon-label [type]="step.data?.job_type" [showLabel]="false"></sm-experiment-type-icon-label> */}
         <div className="title" style={{
                 flex: 1,
                 maxWidth: "108px",
