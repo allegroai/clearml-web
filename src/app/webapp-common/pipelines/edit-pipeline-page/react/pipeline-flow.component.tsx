@@ -130,7 +130,7 @@ export const PipelineFlowComponent: FunctionComponent<IMyComponentProps> = (
         onEdgeUpdateEnd={onEdgeUpdateEnd}
         onEdgeUpdateStart={onEdgeUpdateStart}
         defaultViewport={{ x: 0, y: 0, zoom: 1 }}
-        maxZoom={1.5}
+        maxZoom={1}
         onConnect={onConnect}
         onEdgeUpdate={onEdgeUpdate}
         fitView

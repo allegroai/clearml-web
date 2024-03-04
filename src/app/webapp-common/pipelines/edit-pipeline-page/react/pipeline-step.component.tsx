@@ -26,14 +26,14 @@ export default function PipelineStepComponent({ data, selected, ...others }) {
           className={"al-icon sm-md al-ico-type-" + (data.experimentDetails?.type ? (data.experimentDetails.type.toString()).replace('_', '-') : 'training')}
           data-id="stepResultButton"
         ></i>
-        <div className="title" style={{
+        <div className="title" title={data?.name} style={{
                 flex: 1,
                 maxWidth: "108px",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap"
             }
-        }>{data.name}</div>
+        }>{data?.name}</div>
        
       </div>
       <div className="step-part step-footer queued" style={{
