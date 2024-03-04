@@ -139,12 +139,12 @@ if __name__ == '__main__':
     this.router.navigate([pipeline.id, /* pipeline.basename, */ "edit"], {
       relativeTo: this.projectId ? this.route.parent.parent.parent : this.route,
     });
-    this.store.dispatch(
+    /* this.store.dispatch(
       setSelectedProjectId({
         projectId: pipeline.id,
         example: isExample(pipeline),
       })
-    );
+    ); */
   }
 
   protected override getName() {

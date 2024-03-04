@@ -13,12 +13,11 @@ import {
   updatePipeline,
   compilePipeline,
   runPipeline,
-  setSelectedPipeline,
   updatePipelineStep,
   deletePipelineStep,
 } from "../pipelines.actions";
 import { selectRouterParams } from "@common/core/reducers/router-reducer";
-import { Observable, Subscription, map } from "rxjs";
+import { Observable, Subscription, combineLatest, map } from "rxjs";
 import { Params } from "@angular/router";
 import { selectSelectedPipeline } from "../pipelines.reducer";
 import {
@@ -28,6 +27,14 @@ import {
 } from "~/business-logic/model/pipelines/models";
 import { cloneDeep } from "lodash-es";
 import { ArtifactModeEnum } from "~/business-logic/model/tasks/models";
+import {
+  selectSelectedProject,
+} from "@common/core/reducers/projects.reducer";
+import {
+  setBreadcrumbsOptions,
+  setTags,
+} from "@common/core/actions/projects.actions";
+import { Project } from "~/business-logic/model/projects/project";
 
 @Component({
   selector: "sm-edit-pipeline-page",
@@ -44,6 +51,9 @@ export class EditPipelinePageComponent implements OnInit, OnDestroy {
   private _selectedStep;
   public selectedStepInputOutputOptions: Array<PipelinesStepInputOutputMappingOptions>;
   pipelineId: string;
+
+  // for breadcrumb
+  public selectedProject$: Observable<Project>;
 
   //// nodes and edges state should be managed here for local use
   // changes will be propagated to store only after clicking on save.
@@ -65,7 +75,7 @@ export class EditPipelinePageComponent implements OnInit, OnDestroy {
       this.reactFlowState.edges
     );
     const options: Array<PipelinesStepInputOutputMappingOptions> = [];
-    
+
     // add outputs from incomming nodes.
     incommingNodes.forEach((node) => {
       if (node.data?.experimentDetails?.execution?.artifacts?.length) {
@@ -80,30 +90,30 @@ export class EditPipelinePageComponent implements OnInit, OnDestroy {
         });
       }
 
-      if(node.data?.experimentDetails?.models?.output?.length) {
-      // models i/o mapping.
-      node.data.experimentDetails.models.output.forEach((model) => {
-        options.push({
-          ...model,
-          stepName: node.data.name,
-          id: model.model.id,
-          type: "model",
-          key: model.name
+      if (node.data?.experimentDetails?.models?.output?.length) {
+        // models i/o mapping.
+        node.data.experimentDetails.models.output.forEach((model) => {
+          options.push({
+            ...model,
+            stepName: node.data.name,
+            id: model.model.id,
+            type: "model",
+            key: model.name,
+          });
         });
-      });
       }
     });
 
     // add pipeline parameters
-    if(this.selectedPipeline?.parameters?.length) {
+    if (this.selectedPipeline?.parameters?.length) {
       this.selectedPipeline.parameters.forEach((param) => {
         options.push({
           ...param,
           stepName: this.selectedPipeline.name,
           type: "pipeline_parameter",
-          key: param.name
+          key: param.name,
         });
-      })
+      });
     }
 
     this.selectedStepInputOutputOptions = options;
@@ -135,12 +145,50 @@ export class EditPipelinePageComponent implements OnInit, OnDestroy {
         console.log(pipelineData);
       })
     );
+
+    this.selectedProject$ = this.store.select(selectSelectedProject);
+
+    this.setupBreadcrumbsOptions();
+  }
+
+  setupBreadcrumbsOptions() {
+    this.subs.add(
+      combineLatest([this.selectedPipeline$, this.selectedProject$]).subscribe(
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        ([selectedPipeline, selectedProject]) => {
+          this.store.dispatch(
+            setBreadcrumbsOptions({
+              breadcrumbOptions: {
+                showProjects: false,
+                featureBreadcrumb: {
+                  name: "PIPELINES",
+                  url: "pipelines",
+                },
+                subFeatureBreadcrumb: {
+                  name: "Edit",
+                },
+                projectsOptions: {
+                  basePath: "pipelines",
+                  filterBaseNameWith: [".pipelines"],
+                  compareModule: null,
+                  showSelectedProject: true,
+                  selectedProjectBreadcrumb: {
+                    name: selectedPipeline.name,
+                  },
+                },
+              },
+            })
+          );
+        }
+      )
+    );
   }
 
   ngOnDestroy() {
     this.subs.unsubscribe();
     this.store.dispatch(resetPipelines());
     this.store.dispatch(resetPipelinesSearchQuery());
+    this.store.dispatch(setTags({ tags: [] }));
   }
 
   savePipeline() {
@@ -253,7 +301,7 @@ export class EditPipelinePageComponent implements OnInit, OnDestroy {
     this.reactFlowState.nodes = cloneDeep(filteredNodes);
     this.reactFlowState.edges = cloneDeep(filteredEdges);
     console.log(this.reactFlowState);
-    setTimeout(() => this.savePipeline(), 1000)
+    setTimeout(() => this.savePipeline(), 1000);
     this.selectedStep = null;
   }
 

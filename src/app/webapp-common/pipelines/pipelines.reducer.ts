@@ -123,6 +123,8 @@ export const pipelinesReducers = [
     scrollId: null,
     noMorePipelines: pipelinesInitState.noMorePipelines,
     pipelines: pipelinesInitState.pipelines,
+    selectedProjectId: pipelinesInitState.selectedProjectId,
+    selectedPipeline: pipelinesInitState.selectedPipeline
   })),
   on(setPipelinesOrderBy, (state, action) => ({
     ...state,
