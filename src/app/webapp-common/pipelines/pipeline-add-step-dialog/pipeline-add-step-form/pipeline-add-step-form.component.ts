@@ -19,7 +19,7 @@ import {
 import { Task } from '~/business-logic/model/tasks/task';
 import { PipelineParametersComponent } from '@common/pipelines/pipeline-parameters/pipeline-parameters.component';
 
-import { cloneDeep } from 'lodash-es';
+import { cloneDeep, upperCase } from 'lodash-es';
 import { ParamsItem } from '~/business-logic/model/tasks/paramsItem';
 
 
@@ -91,7 +91,7 @@ export class PipelineAddStepFormComponent implements OnChanges, OnDestroy {
     this._experiments = experiments;
     this.experimentsOptions = [
       ...((this.rootFiltered || experiments === null) ? [] : [this.experimentsRoot]),
-      ...(experiments ? experiments.map(experiment => ({label: experiment.name, value: experiment.id, parameters: experiment.hyperparams, otherDetails: {...experiment}})) : [])
+      ...(experiments ? experiments.map(experiment => ({label: experiment.name +  " ("+ upperCase(experiment?.status) + ")", value: experiment.id, parameters: experiment.hyperparams, otherDetails: {...experiment}})) : [])
     ];
     this.experimentsNames = this.experimentsOptions.map(experiment => experiment.label);
   }

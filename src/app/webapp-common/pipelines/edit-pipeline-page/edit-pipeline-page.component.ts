@@ -65,6 +65,8 @@ export class EditPipelinePageComponent implements OnInit, OnDestroy {
       this.reactFlowState.edges
     );
     const options: Array<PipelinesStepInputOutputMappingOptions> = [];
+    
+    // add outputs from incomming nodes.
     incommingNodes.forEach((node) => {
       if (node.data?.experimentDetails?.execution?.artifacts?.length) {
         // for now we are using only artifacts of i/o mapping.
@@ -77,7 +79,33 @@ export class EditPipelinePageComponent implements OnInit, OnDestroy {
           }
         });
       }
+
+      if(node.data?.experimentDetails?.models?.output?.length) {
+      // models i/o mapping.
+      node.data.experimentDetails.models.output.forEach((model) => {
+        options.push({
+          ...model,
+          stepName: node.data.name,
+          id: model.model.id,
+          type: "model",
+          key: model.name
+        });
+      });
+      }
     });
+
+    // add pipeline parameters
+    if(this.selectedPipeline?.parameters?.length) {
+      this.selectedPipeline.parameters.forEach((param) => {
+        options.push({
+          ...param,
+          stepName: this.selectedPipeline.name,
+          type: "pipeline_parameter",
+          key: param.name
+        });
+      })
+    }
+
     this.selectedStepInputOutputOptions = options;
     console.log(options);
   }
@@ -96,7 +124,7 @@ export class EditPipelinePageComponent implements OnInit, OnDestroy {
         this.pipelineId = pipelineId;
         setTimeout(() => {
           this.store.dispatch(getPipelineById({ id: pipelineId, name: "" }));
-        }, 1000);
+        });
       })
     );
 

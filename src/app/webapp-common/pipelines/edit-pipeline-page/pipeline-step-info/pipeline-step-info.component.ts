@@ -30,11 +30,20 @@ export class PipelineStepInfoComponent {
 
   @Input() set ioOptions(options: any) {
     const opts = options.map((op) => {
-      return {
-        value: "${"+op.stepName+".id}."+op.key,
-        label: `${op.stepName}.${op.key}`,
-        type: op.type
+      if(op.type === "pipeline_parameter") {
+        return {
+          value: "${pipeline." + op.key +"}",
+          label: `${op.stepName}.${op.key}`,
+          type: op.type
+        }
+      } else {
+        return {
+          value: "${"+op.stepName+".id}."+op.key,
+          label: `${op.stepName}.${op.key}`,
+          type: op.type
+        }
       }
+     
     });
 
     this._ioOptions = cloneDeep(opts);
