@@ -6,11 +6,11 @@ import {
   updatePipeline,
 } from "../pipelines.actions";
 @Component({
-  selector: 'sm-details-dialog',
-  templateUrl: './details-dialog.component.html',
-  styleUrls: ['./details-dialog.component.scss']
+  selector: 'sm-pipeline-details-drawer',
+  templateUrl: './pipeline-details-drawer.component.html',
+  styleUrls: ['./pipeline-details-drawer.component.scss']
 })
-export class DetailsDialogComponent implements OnInit {
+export class PipelineDetailsDrawerComponent implements OnInit {
   @ViewChild('drawer') drawer: MatDrawer;
   @Input() pipelineId: string;
   @Input() pipelineData: any;

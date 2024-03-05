@@ -8,7 +8,7 @@
   [ioOptions]="selectedStepInputOutputOptions"
   (stepParamsChanged)="selectedStepParamsChanged($event)"/>
   <sm-pipeline-step-info [step]="selectedStep" *ngIf="selectedStep" (stepParamsChanged)="selectedStepParamsChanged($event)"/>
-  <sm-details-dialog [pipelineId]="pipelineId" [pipelineData]="selectedPipeline"></sm-details-dialog>
+  <sm-pipeline-details-drawer [pipelineId]="pipelineId" [pipelineData]="selectedPipeline"></sm-pipeline-details-drawer>
   <sm-flow-editor *ngIf="selectedPipeline?.flow_display?.nodes?.length" [pipelineData]="selectedPipeline"
     (nodesChangedInReactFlow)="nodesChangedInReactFlow($event)"
     (nodeClicked)="nodeSelected($event)"
