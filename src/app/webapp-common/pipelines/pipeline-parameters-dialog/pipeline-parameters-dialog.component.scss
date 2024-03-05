@@ -1,0 +1,33 @@
+@import "variables";
+.dialog-content {
+  max-height: 400px;
+  overflow-y: auto;
+}
+.param {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 10px;
+
+  .key {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: 10px;
+    font-weight: bold; /* Making label bold */
+    font-size: 16px; /* Increasing font size */
+  }
+
+  .value {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+  }
+
+  input {
+    width: 100%;
+    border: 1px solid $grey-purple; /* Adding border around input field */
+    padding: 8px; /* Adding padding to input field */
+  }
+}
