@@ -608,6 +608,9 @@
 .i-pipeline-compile {
   @include icon('#{$assets-icons-path}/pipeline/pipeline-compile.svg');
 }
+.i-pipeline-no-code {
+  @include icon('#{$assets-icons-path}/pipeline/pipeline-no-code.svg');
+}
 
 .i-pipeline-add-new-step {
   @include icon('#{$assets-icons-path}/pipeline/pipeline-add-new-step.svg');

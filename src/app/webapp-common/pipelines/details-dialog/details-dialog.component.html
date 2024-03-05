@@ -1,0 +1,57 @@
+    <div class="console-button">
+      <button class="btn btn-cml-primary d-flex align-items-center" (click)="openDetailsDrawer()">
+        <i class="al-icon al-ico-console sm me-3"></i>DETAILS
+      </button>
+    </div>
+    
+    <mat-drawer #drawer mode="over" position="end" class="drawer-container" [ngClass]="{'maximized': isMaximized, 'closing': isDrawerClosing }">
+      <div class="header">
+        <div class="left-section">
+          <span></span>
+        </div>
+        <div class="center-section">
+          <button class="toggle-button" [class.active]="currentTab === 'parameter'" (click)="toggleTab('parameter')">PARAMETERS</button>
+          <button class="toggle-button" [class.active]="currentTab === 'code'" (click)="toggleTab('code')">CODE</button>
+        </div>
+        <div class="right-section">
+          <button type="button" class="btn btn-icon g-btn" (click)="toggleMaximize()">
+            <i tabindex="1002" class="al-icon pointer" [class]="isMaximized ? 'al-ico-min-panel' : 'al-ico-max-panel'"></i>
+          </button>
+          <button type="button" class="btn btn-icon g-btn" (click)="close()">
+            <i class="al-icon al-ico-dialog-x sm-md"></i>
+          </button>
+        </div>
+      </div>
+      <div class="tabs-content">
+        <div *ngIf="currentTab === 'parameter' && pipelineData?.parameters.length > 0; else noParameterContent">
+          <div *ngFor="let parameter of pipelineData.parameters">
+            <div class="parameter-data"><p>Name:&nbsp; {{ parameter.name }}</p>
+              <div class="parameter-input">Value:&nbsp;
+                <input class="full-width-textarea" type="text" 
+                       [ngModel]="parameter.value" 
+                       [placeholder]="!parameter.value ? 'Enter value' : ''" 
+                       (ngModelChange)="onInputChange($event, parameter)" 
+                        (blur)="updateParameterValue(parameter)">
+              </div></div>
+            
+          </div>
+        </div>
+        <ng-template #noParameterContent>
+          <div *ngIf="currentTab === 'parameter' && !pipelineParameters" class="no-data-container">
+            <i class="icon i-pipeline-no-code mx-auto xxl no-data-icon"></i>
+            <span class="no-data-text">NO PARAMETER</span>
+          </div>
+        </ng-template>
+    
+        <div *ngIf="currentTab === 'code' && pipelineCode; else noCodeContent">
+          {{ pipelineCode }}
+        </div>
+        <ng-template #noCodeContent>
+          <div *ngIf="currentTab === 'code' && !pipelineCode" class="no-data-container">
+            <i class="icon i-pipeline-no-code mx-auto xxl no-data-icon"></i>
+            <span class="no-data-text">NO CODE</span>
+          </div>
+        </ng-template>
+      </div>
+    </mat-drawer>
+    

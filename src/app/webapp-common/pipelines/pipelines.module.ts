@@ -16,12 +16,13 @@ import { ButtonToggleComponent } from "@common/shared/ui-components/inputs/butto
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { MatMenuModule } from "@angular/material/menu";
 import {MatCheckboxModule} from '@angular/material/checkbox';
-import { MatSidenavModule } from "@angular/material/sidenav";
+import { MatSidenavModule  } from "@angular/material/sidenav";
 import { MatInputModule } from "@angular/material/input";
 import { PipelineDialogComponent } from "./pipeline-dialog/pipeline-dialog.component";
 import { CreateNewPipelineFormComponent } from "./pipeline-dialog/create-new-pipeline-form/create-new-pipeline-form.component";
 import { PipelineSettingDialogComponent } from './pipeline-setting/pipeline-setting.dialog.component';
 import { PipelineSettingFormComponent } from './pipeline-setting/pipeline-setting-form/pipeline-setting-form.component';
+import { SimpleDatasetVersionPreviewComponent } from "@common/dataset-version/simple-dataset-version-preview/simple-dataset-version-preview.component";
 import { MatAutocompleteModule } from "@angular/material/autocomplete";
 import { ScrollEndDirective } from "@common/shared/ui-components/directives/scroll-end.directive";
 import { ClickStopPropagationDirective } from "@common/shared/ui-components/directives/click-stop-propagation.directive";
@@ -46,6 +47,10 @@ import { ClearFiltersButtonComponent } from "@common/shared/components/clear-fil
 import { MenuComponent } from "@common/shared/ui-components/panel/menu/menu.component";
 import { MenuItemComponent } from "@common/shared/ui-components/panel/menu-item/menu-item.component";
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from "@angular/material/form-field";
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDialogModule } from '@angular/material/dialog';
+import {MatButtonToggleModule} from '@angular/material/button-toggle';
 import { RefreshButtonComponent } from "@common/shared/components/refresh-button/refresh-button.component";
 import { ExperimentSharedModule } from "~/features/experiments/shared/experiment-shared.module";
 import { EffectsModule } from "@ngrx/effects";
@@ -66,6 +71,7 @@ import { FilterPipe } from "@common/shared/pipes/filter.pipe";
 import { FileSizePipe } from "@common/shared/pipes/filesize.pipe";
 import { RegexPipe } from "@common/shared/pipes/filter-regex.pipe";
 import { FilterMonitorMetricPipe } from "@common/shared/pipes/filter-monitor-metric.pipe";
+import { DetailsDialogComponent } from './details-dialog/details-dialog.component';
 
 export const pipelinesSyncedKeys = ["projects.showPipelineExamples"];
 const pipelinesSyncedKeys2 = ['orderBy', 'sortOrder'];
@@ -121,6 +127,7 @@ const getInitState = (userPreferences: UserPreferences) => ({
     PipelineSettingDialogComponent,
     PipelineSettingFormComponent,
     PipelineStepInfoComponent,
+    DetailsDialogComponent,
   ],
   imports: [
     CommonModule,
@@ -142,8 +149,10 @@ const getInitState = (userPreferences: UserPreferences) => ({
     LabeledFormFieldDirective,
     SearchTextDirective,
     UniqueNameValidatorDirective,
-
-
+    MatTabsModule,
+    MatIconModule,
+    MatDialogModule,
+    MatButtonToggleModule,
     MarkdownEditorComponent,
     SearchComponent,
     TagListComponent,
@@ -171,7 +180,8 @@ const getInitState = (userPreferences: UserPreferences) => ({
     FilterPipe,
     FileSizePipe,
     RegexPipe,
-    FilterMonitorMetricPipe
+    FilterMonitorMetricPipe,
+    SimpleDatasetVersionPreviewComponent,
   ],
   exports: [PipelinesPageComponent, EditPipelinePageComponent],
   providers: [
