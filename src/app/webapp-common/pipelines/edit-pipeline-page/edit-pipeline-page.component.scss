@@ -3,30 +3,19 @@
 }
 
 .edit-pipeline-body {
-    // display: flex;
-    // flex-grow: 1;
-    // padding: 30px;
-    // justify-content: flex-start;
-    // height: 100%;
     position: relative;
     width: 100%;
     height: calc(100% - 66px);
     transition: height 0.3s;
     background-color: #0D0E15;
 
-    // .details {
-    //     display: flex;
-    //     width: 144px;
-    //     height: 45px;
-
-    //     align-items: center;
-    //     justify-content: center;
-    //     border-radius: 5px;
-
-    //     .icon {
-    //         margin-right: 20px;
-    //     }
-    // }
+    .console-button {
+        display: block;
+        position: absolute;
+        left: 24px;
+        top: 24px;
+        z-index: 2;
+      }
     sm-pipeline-step-info {
         display: block;
         position: absolute;
@@ -41,10 +30,5 @@
         align-items: center;
         height: 100svh;
         justify-content: center;
-
-        .icon {
-            // width: 107px;
-            // height: 107px;
-        }
     }
 }
