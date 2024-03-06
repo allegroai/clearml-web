@@ -23,7 +23,7 @@
         </div>
       </div>
       <div class="tabs-content">
-        <div *ngIf="currentTab === 'parameter' && pipelineData?.parameters.length > 0; else noParameterContent">
+        <div *ngIf="currentTab === 'parameter' && pipelineData?.parameters?.length > 0; else noParameterContent">
           <div *ngFor="let parameter of pipelineData.parameters">
             <div class="parameter-data"><p>Name:&nbsp; {{ parameter.name }}</p>
               <div class="parameter-input">Value:&nbsp;

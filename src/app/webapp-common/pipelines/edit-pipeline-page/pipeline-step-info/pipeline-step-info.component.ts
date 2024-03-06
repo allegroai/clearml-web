@@ -1,21 +1,28 @@
-import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
-import {Store} from '@ngrx/store';
-import {Artifact} from '~/business-logic/model/tasks/artifact';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  ViewChild,
+} from "@angular/core";
+import { Store } from "@ngrx/store";
+import { Artifact } from "~/business-logic/model/tasks/artifact";
 
-import {addMessage} from '@common/core/actions/layout.actions';
-import {fileSizeConfigStorage} from '@common/shared/pipes/filesize.pipe';
-import {ICONS, IOption, MESSAGES_SEVERITY} from '@common/constants';
-import { MatOptionSelectionChange } from '@angular/material/core';
-import { NgModel } from '@angular/forms';
-import { trackByValue } from '@common/shared/utils/forms-track-by';
-import { cloneDeep } from 'lodash-es';
-import { ConfirmDialogComponent } from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
-import { MatDialog } from '@angular/material/dialog';
+import { addMessage } from "@common/core/actions/layout.actions";
+import { fileSizeConfigStorage } from "@common/shared/pipes/filesize.pipe";
+import { ICONS, IOption, MESSAGES_SEVERITY } from "@common/constants";
+import { MatOptionSelectionChange } from "@angular/material/core";
+import { NgModel } from "@angular/forms";
+import { trackByValue } from "@common/shared/utils/forms-track-by";
+import { cloneDeep } from "lodash-es";
+import { ConfirmDialogComponent } from "@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component";
+import { MatDialog } from "@angular/material/dialog";
+import { PipelineParametersDialogComponent } from "@common/pipelines/pipeline-parameters-dialog/pipeline-parameters-dialog.component";
 
 @Component({
-  selector: 'sm-pipeline-step-info',
-  templateUrl: './pipeline-step-info.component.html',
-  styleUrls: ['./pipeline-step-info.component.scss']
+  selector: "sm-pipeline-step-info",
+  templateUrl: "./pipeline-step-info.component.html",
+  styleUrls: ["./pipeline-step-info.component.scss"],
 })
 export class PipelineStepInfoComponent {
   readonly icons = ICONS;
@@ -23,32 +30,30 @@ export class PipelineStepInfoComponent {
   public controller: boolean;
   public fileSizeConfigStorage = fileSizeConfigStorage;
   private _step;
-  private _ioOptions: Array<{ label: string; value: string, type: string }> ;
+  private _ioOptions: Array<{ label: string; value: string; type: string }>;
 
   @Output() deleteStep = new EventEmitter<any>();
   @Output() stepParamsChanged = new EventEmitter<unknown>();
 
   @Input() set ioOptions(options: any) {
     const opts = options.map((op) => {
-      if(op.type === "pipeline_parameter") {
+      if (op.type === "pipeline_parameter") {
         return {
-          value: "${pipeline." + op.key +"}",
+          value: "${pipeline." + op.key + "}",
           label: `${op.stepName}.${op.key}`,
-          type: op.type
-        }
+          type: op.type,
+        };
       } else {
         return {
-          value: "${"+op.stepName+".id}."+op.key,
+          value: "${" + op.stepName + ".id}." + op.key,
           label: `${op.stepName}.${op.key}`,
-          type: op.type
-        }
+          type: op.type,
+        };
       }
-     
     });
 
     this._ioOptions = cloneDeep(opts);
   }
-
 
   get ioOptions() {
     return this._ioOptions;
@@ -62,22 +67,20 @@ export class PipelineStepInfoComponent {
   }
 
   // for auto complete
-  @ViewChild('optsInput') optsInput: NgModel;
+  @ViewChild("optsInput") optsInput: NgModel;
   public trackByValue = trackByValue;
   isAutoCompleteOpen: boolean;
-/*   public incommingInputOptions: { label: string; value: string }[] = [
+  /*   public incommingInputOptions: { label: string; value: string }[] = [
     {label: "test", value: "test1"}
   ]; */
   setIsAutoCompleteOpen(focus: boolean) {
     this.isAutoCompleteOpen = focus;
   }
   displayFn(opt: IOption | string) {
-    return typeof opt === 'string' ? opt : opt?.label;
+    return typeof opt === "string" ? opt : opt?.label;
   }
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  paramSelected($event: MatOptionSelectionChange) {
-    
-  }
+  paramSelected($event: MatOptionSelectionChange) {}
   /* @Input() set entity(task: IExperimentInfo) {
     this._entity = task;
     this.controller = task?.type === TaskTypeEnum.Controller;
@@ -87,46 +90,62 @@ export class PipelineStepInfoComponent {
   } */
 
   paramsChanged() {
-    setTimeout(()=> {
+    setTimeout(() => {
       this.stepParamsChanged.emit(this._step.data.parameters);
-    }, 2000)
+    }, 2000);
   }
-
 
   @Input() project: string;
 
-  constructor(private store: Store, private matDialog: MatDialog) {
-  }
+  constructor(private store: Store, private matDialog: MatDialog) {}
 
   public deleteClicked() {
     this.matDialog
-    .open(ConfirmDialogComponent, {
-      data: {
-        title: "DELETE",
-        body: '<p class="text-center">Are you sure you want to delete the step?</p>',
-        yes: "Delete",
-        no: "Cancel",
-        iconClass: "al-ico-trash",
-        width: 430,
-      },
-    })
-    .afterClosed().subscribe((data) => {
-      // eslint-disable-next-line no-console
-      //console.log(data);
-      if(data?.isConfirmed) {
+      .open(ConfirmDialogComponent, {
+        data: {
+          title: "DELETE",
+          body: '<p class="text-center">Are you sure you want to delete the step?</p>',
+          yes: "Delete",
+          no: "Cancel",
+          iconClass: "al-ico-trash",
+          width: 430,
+        },
+      })
+      .afterClosed()
+      .subscribe((data) => {
+        // eslint-disable-next-line no-console
+        //console.log(data);
+        if (data?.isConfirmed) {
           this.deleteStep.emit(this._step);
-      }
-    })
-   
+        }
+      });
+
     /* setTimeout(() => {
       // eslint-disable-next-line no-console
       console.log(this._step);
     }, 3000) */
   }
-
-  trackByFn = (index: number, artifact: Artifact) => artifact.hash || artifact.uri;
+  public showMoreClicked(parameters: any[]) {
+    this.matDialog.open(PipelineParametersDialogComponent, {
+      data: {
+        parameters: parameters,
+        paramsChanged: this.paramsChanged.bind(this),
+        setIsAutoCompleteOpen: this.setIsAutoCompleteOpen.bind(this),
+        displayFn: this.displayFn.bind(this),
+        paramSelected: this.paramSelected.bind(this),
+        ioOptions: this.ioOptions,
+        trackByValue: this.trackByValue,
+      },
+      panelClass: "light-theme",
+      width: "600px",
+    });
+  }
+  trackByFn = (index: number, artifact: Artifact) =>
+    artifact.hash || artifact.uri;
 
   copyToClipboard() {
-    this.store.dispatch(addMessage(MESSAGES_SEVERITY.SUCCESS, 'ID copied successfully'));
+    this.store.dispatch(
+      addMessage(MESSAGES_SEVERITY.SUCCESS, "ID copied successfully")
+    );
   }
 }

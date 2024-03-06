@@ -55,13 +55,17 @@ import { RefreshButtonComponent } from "@common/shared/components/refresh-button
 import { ExperimentSharedModule } from "~/features/experiments/shared/experiment-shared.module";
 import { EffectsModule } from "@ngrx/effects";
 import { PipelinesEffects } from "./pipelines.effects";
-import { PipelineState, pipelinesReducer, PIPELINES_KEY } from "./pipelines.reducer";
+import {
+  PipelineState,
+  pipelinesReducer,
+  PIPELINES_KEY,
+} from "./pipelines.reducer";
 import { UserPreferences } from "@common/user-preferences";
 import { createUserPrefFeatureReducer } from "@common/core/meta-reducers/user-pref-reducer";
 import { PIPELINES_PREFIX } from "./pipelines.actions";
 import { PipelineAddStepDialogComponent } from "./pipeline-add-step-dialog/pipeline-add-step-dialog.component";
 import { PipelineAddStepFormComponent } from "./pipeline-add-step-dialog/pipeline-add-step-form/pipeline-add-step-form.component";
-import {SortPipe} from '@common/shared/pipes/sort.pipe';
+import { SortPipe } from "@common/shared/pipes/sort.pipe";
 import { PipelineParametersComponent } from "./pipeline-parameters/pipeline-parameters.component";
 import { FlowEditorComponent } from "./edit-pipeline-page/flow-editor.component";
 import { PipelineStepInfoComponent } from "./edit-pipeline-page/pipeline-step-info/pipeline-step-info.component";
@@ -71,10 +75,11 @@ import { FilterPipe } from "@common/shared/pipes/filter.pipe";
 import { FileSizePipe } from "@common/shared/pipes/filesize.pipe";
 import { RegexPipe } from "@common/shared/pipes/filter-regex.pipe";
 import { FilterMonitorMetricPipe } from "@common/shared/pipes/filter-monitor-metric.pipe";
+import { PipelineParametersDialogComponent } from "./pipeline-parameters-dialog/pipeline-parameters-dialog.component";
 import { PipelineDetailsDrawerComponent } from './details-dialog/pipeline-details-drawer.component';
 
 export const pipelinesSyncedKeys = ["projects.showPipelineExamples"];
-const pipelinesSyncedKeys2 = ['orderBy', 'sortOrder'];
+const pipelinesSyncedKeys2 = ["orderBy", "sortOrder"];
 // export const REPORTS_STORE_CONFIG_TOKEN =
 //   new InjectionToken<StoreConfig<ReportsState, any>>('DatasetsConfigToken');
 
@@ -82,9 +87,9 @@ export const PIPELINES_CONFIG_TOKEN = new InjectionToken<
   StoreConfig<ProjectsState, any>
 >("PipelineConfigToken");
 
-
-export const PIPELINES_CONFIG_TOKEN_FOR_PIPELINE_SERVICE =
-  new InjectionToken<StoreConfig<PipelineState, any>>('PipelineConfigToken');
+export const PIPELINES_CONFIG_TOKEN_FOR_PIPELINE_SERVICE = new InjectionToken<
+  StoreConfig<PipelineState, any>
+>("PipelineConfigToken");
 
 const localStorageKey = "_saved_pipeline_state_";
 
@@ -105,12 +110,17 @@ const getPipelineConfig = () => ({
   ],
 });
 
-
 const getInitState = (userPreferences: UserPreferences) => ({
   metaReducers: [
     (reducer: ActionReducer<any>) =>
-      createUserPrefFeatureReducer(PIPELINES_KEY, pipelinesSyncedKeys2, [PIPELINES_PREFIX], userPreferences, reducer),
-  ]
+      createUserPrefFeatureReducer(
+        PIPELINES_KEY,
+        pipelinesSyncedKeys2,
+        [PIPELINES_PREFIX],
+        userPreferences,
+        reducer
+      ),
+  ],
 });
 
 @NgModule({
@@ -127,6 +137,7 @@ const getInitState = (userPreferences: UserPreferences) => ({
     PipelineSettingDialogComponent,
     PipelineSettingFormComponent,
     PipelineStepInfoComponent,
+    PipelineParametersDialogComponent,
     PipelineDetailsDrawerComponent,
   ],
   imports: [
@@ -138,7 +149,11 @@ const getInitState = (userPreferences: UserPreferences) => ({
     PipelinesRouterModule,
     StoreModule.forFeature("projects", projectsReducer, PIPELINES_CONFIG_TOKEN),
     EffectsModule.forFeature([PipelinesEffects]),
-    StoreModule.forFeature(PIPELINES_KEY, pipelinesReducer, PIPELINES_CONFIG_TOKEN_FOR_PIPELINE_SERVICE),
+    StoreModule.forFeature(
+      PIPELINES_KEY,
+      pipelinesReducer,
+      PIPELINES_CONFIG_TOKEN_FOR_PIPELINE_SERVICE
+    ),
     PipelineCardComponent,
     ButtonToggleComponent,
     SharedModule,
@@ -186,7 +201,11 @@ const getInitState = (userPreferences: UserPreferences) => ({
   exports: [PipelinesPageComponent, EditPipelinePageComponent],
   providers: [
     { provide: PIPELINES_CONFIG_TOKEN, useFactory: getPipelineConfig },
-    {provide: PIPELINES_CONFIG_TOKEN_FOR_PIPELINE_SERVICE, useFactory: getInitState, deps: [UserPreferences]},
+    {
+      provide: PIPELINES_CONFIG_TOKEN_FOR_PIPELINE_SERVICE,
+      useFactory: getInitState,
+      deps: [UserPreferences],
+    },
     {
       provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
       useValue: { floatLabel: "always" },
