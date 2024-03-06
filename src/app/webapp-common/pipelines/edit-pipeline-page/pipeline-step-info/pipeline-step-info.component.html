@@ -4,31 +4,20 @@
   </mat-expansion-panel-header>
   <div class="panel-body" *ngIf="step">
     <header *ngIf="step; else controllerHeader">
-      <i
-        class="al-icon lg"
-        [class]="
+      <i class="al-icon lg" [class]="
           'al-ico-type-' +
           (step.data.experimentDetails?.type
             ? step.data.experimentDetails.type.toString().replace('_', '-')
             : 'training')
-        "
-      ></i>
+        "></i>
       <div class="name" [smTooltip]="step.data.name" smShowTooltipIfEllipsis>
         {{ step.data?.name }}
       </div>
       <div class="d-flex justify-content-between">
-        <div
-          class="status"
-          [class]="step.data.experimentDetails?.status"
-          data-id="infoStepStatus"
-        >
+        <div class="status" [class]="step.data.experimentDetails?.status" data-id="infoStepStatus">
           {{ step.data.experimentDetails?.status }}
         </div>
-        <sm-id-badge
-          class="ms-1"
-          [id]="step.id"
-          (copied)="copyToClipboard()"
-        ></sm-id-badge>
+        <sm-id-badge class="ms-1" [id]="step.id" (copied)="copyToClipboard()"></sm-id-badge>
       </div>
     </header>
     <ng-template #controllerHeader>
@@ -39,103 +28,61 @@
     <ng-container>
       <div class="section">
         <div class="header">PARAMETERS</div>
-        <ng-container
-          *ngFor="
+        <ng-container *ngFor="
             let section of step?.data?.parameters.slice(0, 7);
             let index = index
-          "
-        >
+          ">
           <div class="param">
             <div class="key" [smTooltip]="section.name" smShowTooltipIfEllipsis>
               {{ section.name }}
             </div>
             <div class="value">
-              <input
-                [matAutocomplete]="auto"
-                [(ngModel)]="section['value']"
-                placeholder="Parameter"
-                (ngModelChange)="paramsChanged()"
-                name="parameterKey-{{ section.name }}-{{ index }}"
-                matInput
-                required
-                #optsInput="ngModel"
-              />
-              <mat-autocomplete
-                #auto="matAutocomplete"
-                class="light-theme"
-                [displayWith]="displayFn"
-                (opened)="setIsAutoCompleteOpen(true)"
-                (closed)="setIsAutoCompleteOpen(false)"
-                autoActiveFirstOption
-              >
-                <mat-option
-                  *ngFor="let option of ioOptions; trackBy: trackByValue"
-                  [value]="option.value"
-                  [smTooltip]="option.label + ' (' + option.type + ')'"
-                  class="option"
-                  (onSelectionChange)="paramSelected($event)"
-                >
-                  <div
-                    [smSearchText]="optsInput.value"
-                    style="text-overflow: ellipsis; overflow: hidden"
-                  >
+              <input [matAutocomplete]="auto" [(ngModel)]="section['value']" placeholder="Parameter"
+                (ngModelChange)="paramsChanged()" name="parameterKey-{{ section.name }}-{{ index }}" matInput required
+                #optsInput="ngModel" />
+              <mat-autocomplete #auto="matAutocomplete" class="light-theme" [displayWith]="displayFn"
+                (opened)="setIsAutoCompleteOpen(true)" (closed)="setIsAutoCompleteOpen(false)" autoActiveFirstOption>
+                <mat-option *ngFor="let option of ioOptions; trackBy: trackByValue" [value]="option.value"
+                  [smTooltip]="option.label + ' (' + option.type + ')'" class="option"
+                  [matTooltipPosition]="'after'"
+                  (onSelectionChange)="paramSelected($event)">
+                  <div [smSearchText]="optsInput.value" style="text-overflow: ellipsis; overflow: hidden">
                     {{ option.label }}
                   </div>
                 </mat-option>
-                <mat-option
-                  disabled
-                  style="height: 0; min-height: 0"
-                ></mat-option>
+                <mat-option disabled style="height: 0; min-height: 0"></mat-option>
               </mat-autocomplete>
             </div>
 
             <!-- <div class="value" [smTooltip]="section.value" smShowTooltipIfEllipsis>{{section.value}}</div> -->
           </div>
         </ng-container>
-        <div
-          *ngIf="step?.data?.parameters?.length > 7"
-          class="show-more-text"
-          (click)="showMoreClicked(step?.data?.parameters)"
-        >
+        <div *ngIf="step?.data?.parameters?.length > 7" class="show-more-text"
+          (click)="showMoreClicked(step?.data?.parameters)">
           show more
         </div>
       </div>
       <div class="section">
         <div class="header">METRICS</div>
-        <ng-container
-          *ngIf="
+        <ng-container *ngIf="
             (step?.data?.experimentDetails?.last_metrics | keyvalue)?.length >
               0;
             else emptyMsg
-          "
-        >
-          <ng-container
-            *ngFor="
+          ">
+          <ng-container *ngFor="
               let metric of step?.data?.experimentDetails.last_metrics
                 | keyvalue
-            "
-          >
-            <div
-              *ngFor="
+            ">
+            <div *ngFor="
                 let variant of $any($any(metric.value) | keyvalue)
                   | filterMonitorMetric
-              "
-              class="param"
-            >
-              <div
-                class="key"
-                [smTooltip]="$any(variant.value).metric"
-                smShowTooltipIfEllipsis
-              >
+              " class="param">
+              <div class="key" [smTooltip]="$any(variant.value).metric" smShowTooltipIfEllipsis>
                 {{ $any(variant.value).metric }}/{{
-                  $any(variant.value).variant
+                $any(variant.value).variant
                 }}
               </div>
-              <div
-                class="value"
-                [smTooltip]="$any(variant.value).value"
-                smShowTooltipIfEllipsis
-              >
+              <div class="value" [smTooltip]="$any(variant.value).value" smShowTooltipIfEllipsis>
                 {{ $any(variant.value).value }}
               </div>
             </div>
@@ -144,27 +91,22 @@
       </div>
       <div class="section">
         <div class="header">ARTIFACTS</div>
-        <ng-container
-          *ngIf="
+        <ng-container *ngIf="
             step?.data?.experimentDetails?.execution?.artifacts?.length > 0;
             else emptyMsg
-          "
-        >
-          <div
-            *ngFor="
+          ">
+          <div *ngFor="
               let artifact of step?.data?.experimentDetails?.execution
                 .artifacts;
               trackBy: trackByFn
-            "
-            class="param"
-          >
+            " class="param">
             <div class="key" [smTooltip]="artifact.key" smShowTooltipIfEllipsis>
               {{ artifact.key }}
             </div>
             <div class="value">
               {{
-                (artifact?.content_size | filesize : fileSizeConfigStorage) ||
-                  ""
+              (artifact?.content_size | filesize : fileSizeConfigStorage) ||
+              ""
               }}
             </div>
           </div>
@@ -172,16 +114,11 @@
       </div>
       <div class="section">
         <div class="header">MODELS</div>
-        <ng-container
-          *ngIf="
+        <ng-container *ngIf="
             step?.data?.experimentDetails?.models?.output?.length > 0;
             else emptyMsg
-          "
-        >
-          <div
-            *ngFor="let model of step?.data?.experimentDetails?.models?.output"
-            class="param"
-          >
+          ">
+          <div *ngFor="let model of step?.data?.experimentDetails?.models?.output" class="param">
             <div class="key">
               {{ model.name || model.model.name }}
               <!-- <a [routerLink]="['/projects', model.model.project.id, 'models', model.model.id]"
@@ -197,11 +134,7 @@
     </ng-template>
   </div>
   <footer *ngIf="step?.id">
-    <button
-      class="btn btn-icon g-btn d-flex align-items-center"
-      smTooltip="Delete step"
-      (click)="deleteClicked()"
-    >
+    <button class="btn btn-icon g-btn d-flex align-items-center" smTooltip="Delete step" (click)="deleteClicked()">
       <i [class]="'al-icon me-2 ' + icons.REMOVE + ' sm-md'"></i>
       DELETE STEP
     </button>

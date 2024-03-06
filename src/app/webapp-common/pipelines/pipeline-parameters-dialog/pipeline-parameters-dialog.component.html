@@ -2,44 +2,21 @@
 <!-- eslint-disable @angular-eslint/template/label-has-associated-control -->
 <sm-dialog-template header="PARAMETERS">
   <div class="dialog-content">
-    <ng-container
-      *ngFor="let section of parameters; let index = index"
-      class="w-100 d-flex"
-    >
+    <ng-container *ngFor="let section of parameters; let index = index" class="w-100 d-flex">
       <div class="param">
         <div class="key" [smTooltip]="section.name" smShowTooltipIfEllipsis>
           {{ section.name }}
         </div>
         <div class="value">
-          <input
-            [matAutocomplete]="auto"
-            [(ngModel)]="section['value']"
-            placeholder="Parameter"
-            (ngModelChange)="paramsChanged()"
-            name="parameterKey-{{ section.name }}-{{ index }}"
-            matInput
-            required
-            #optsInput="ngModel"
-          />
-          <mat-autocomplete
-            #auto="matAutocomplete"
-            class="light-theme"
-            [displayWith]="displayFn"
-            (opened)="setIsAutoCompleteOpen(true)"
-            (closed)="setIsAutoCompleteOpen(false)"
-            autoActiveFirstOption
-          >
-            <mat-option
-              *ngFor="let option of ioOptions; trackBy: trackByValue"
-              [value]="option.value"
-              [smTooltip]="option.label + ' (' + option.type + ')'"
-              class="option"
-              (onSelectionChange)="paramSelected($event)"
-            >
-              <div
-                [smSearchText]="optsInput.value"
-                style="text-overflow: ellipsis; overflow: hidden"
-              >
+          <input class="form-control" [matAutocomplete]="auto" [(ngModel)]="section['value']" placeholder="Parameter"
+            (ngModelChange)="paramsChanged()" name="parameterKey-{{ section.name }}-{{ index }}" matInput required
+            #optsInput="ngModel" />
+          <mat-autocomplete #auto="matAutocomplete" class="light-theme" [displayWith]="displayFn"
+            (opened)="setIsAutoCompleteOpen(true)" (closed)="setIsAutoCompleteOpen(false)" autoActiveFirstOption>
+            <mat-option *ngFor="let option of ioOptions; trackBy: trackByValue" [value]="option.value"
+              [smTooltip]="option.label + ' (' + option.type + ')'" [matTooltipPosition]="'after'" class="option"
+              (onSelectionChange)="paramSelected($event)">
+              <div [smSearchText]="optsInput.value" style="text-overflow: ellipsis; overflow: hidden">
                 {{ option.label }}
               </div>
             </mat-option>

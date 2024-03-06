@@ -2,6 +2,8 @@
 .dialog-content {
   max-height: 400px;
   overflow-y: auto;
+  padding-left: 14px;
+  padding-right: 14px;
 }
 .param {
   display: flex;
@@ -15,8 +17,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     margin-right: 10px;
-    font-weight: bold; /* Making label bold */
-    font-size: 16px; /* Increasing font size */
+   
   }
 
   .value {
@@ -25,9 +26,9 @@
     flex-direction: column;
   }
 
-  input {
-    width: 100%;
-    border: 1px solid $grey-purple; /* Adding border around input field */
-    padding: 8px; /* Adding padding to input field */
-  }
+  // input {
+  //   width: 100%;
+  //   border: 1px solid $grey-purple; /* Adding border around input field */
+  //   padding: 8px; /* Adding padding to input field */
+  // }
 }
