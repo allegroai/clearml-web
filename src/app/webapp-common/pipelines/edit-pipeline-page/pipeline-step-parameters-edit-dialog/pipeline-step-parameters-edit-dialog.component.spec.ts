@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { PipelineParametersDialogComponent } from './pipeline-parameters-dialog.component';
+import { PipelineParametersDialogComponent } from './pipeline-step-parameters-edit-dialog.component';
 
 describe('PipelineParametersDialogComponent', () => {
   let component: PipelineParametersDialogComponent;

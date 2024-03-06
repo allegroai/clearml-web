@@ -2,11 +2,11 @@ import { Component, Inject } from "@angular/core";
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 
 @Component({
-  selector: "sm-pipeline-parameters-dialog",
-  templateUrl: "./pipeline-parameters-dialog.component.html",
-  styleUrls: ["./pipeline-parameters-dialog.component.scss"],
+  selector: "sm-pipeline-step-parameters-edit-dialog",
+  templateUrl: "./pipeline-step-parameters-edit-dialog.component.html",
+  styleUrls: ["./pipeline-step-parameters-edit-dialog.component.scss"],
 })
-export class PipelineParametersDialogComponent {
+export class PipelineStepParametersEditDialogComponent {
   parameters: any[];
   paramsChanged: () => void;
   setIsAutoCompleteOpen: (focus: boolean) => void;
@@ -16,7 +16,7 @@ export class PipelineParametersDialogComponent {
   trackByValue: any;
 
   constructor(
-    private matDialogRef: MatDialogRef<PipelineParametersDialogComponent>,
+    private matDialogRef: MatDialogRef<PipelineStepParametersEditDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
     this.parameters = data.parameters;

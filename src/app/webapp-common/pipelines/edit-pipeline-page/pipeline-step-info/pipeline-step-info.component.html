@@ -57,10 +57,10 @@
             <!-- <div class="value" [smTooltip]="section.value" smShowTooltipIfEllipsis>{{section.value}}</div> -->
           </div>
         </ng-container>
-        <div *ngIf="step?.data?.parameters?.length > 7" class="show-more-text"
+        <button *ngIf="step?.data?.parameters?.length > 7" class="btn btn-link float-end pe-0"
           (click)="showMoreClicked(step?.data?.parameters)">
           show more
-        </div>
+        </button>
       </div>
       <div class="section">
         <div class="header">METRICS</div>

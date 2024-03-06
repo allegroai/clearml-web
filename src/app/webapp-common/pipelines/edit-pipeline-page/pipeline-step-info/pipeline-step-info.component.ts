@@ -17,7 +17,7 @@ import { trackByValue } from "@common/shared/utils/forms-track-by";
 import { cloneDeep } from "lodash-es";
 import { ConfirmDialogComponent } from "@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component";
 import { MatDialog } from "@angular/material/dialog";
-import { PipelineParametersDialogComponent } from "@common/pipelines/pipeline-parameters-dialog/pipeline-parameters-dialog.component";
+import { PipelineStepParametersEditDialogComponent } from "@common/pipelines/edit-pipeline-page/pipeline-step-parameters-edit-dialog/pipeline-step-parameters-edit-dialog.component";
 
 @Component({
   selector: "sm-pipeline-step-info",
@@ -126,7 +126,7 @@ export class PipelineStepInfoComponent {
     }, 3000) */
   }
   public showMoreClicked(parameters: any[]) {
-    this.matDialog.open(PipelineParametersDialogComponent, {
+    this.matDialog.open(PipelineStepParametersEditDialogComponent, {
       data: {
         parameters: parameters,
         paramsChanged: this.paramsChanged.bind(this),

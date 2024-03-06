@@ -75,7 +75,7 @@ import { FilterPipe } from "@common/shared/pipes/filter.pipe";
 import { FileSizePipe } from "@common/shared/pipes/filesize.pipe";
 import { RegexPipe } from "@common/shared/pipes/filter-regex.pipe";
 import { FilterMonitorMetricPipe } from "@common/shared/pipes/filter-monitor-metric.pipe";
-import { PipelineParametersDialogComponent } from "./pipeline-parameters-dialog/pipeline-parameters-dialog.component";
+import { PipelineStepParametersEditDialogComponent } from "./edit-pipeline-page/pipeline-step-parameters-edit-dialog/pipeline-step-parameters-edit-dialog.component";
 import { PipelineDetailsDrawerComponent } from './details-dialog/pipeline-details-drawer.component';
 
 export const pipelinesSyncedKeys = ["projects.showPipelineExamples"];
@@ -137,7 +137,7 @@ const getInitState = (userPreferences: UserPreferences) => ({
     PipelineSettingDialogComponent,
     PipelineSettingFormComponent,
     PipelineStepInfoComponent,
-    PipelineParametersDialogComponent,
+    PipelineStepParametersEditDialogComponent,
     PipelineDetailsDrawerComponent,
   ],
   imports: [
