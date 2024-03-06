@@ -1,4 +1,9 @@
 @import "variables";
+.dummy {
+  opacity: 0;
+  position: absolute;
+  left: -9999px;
+}
 .dialog-content {
   max-height: 400px;
   overflow-y: auto;
@@ -17,7 +22,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
     margin-right: 10px;
-   
   }
 
   .value {

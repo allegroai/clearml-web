@@ -2,6 +2,7 @@
 <!-- eslint-disable @angular-eslint/template/label-has-associated-control -->
 <sm-dialog-template header="PARAMETERS">
   <div class="dialog-content">
+    <input class="dummy" type="text">
     <ng-container *ngFor="let section of parameters; let index = index" class="w-100 d-flex">
       <div class="param">
         <div class="key" [smTooltip]="section.name" smShowTooltipIfEllipsis>
