@@ -73,6 +73,7 @@ export interface Arrow {
 export enum StatusOption {
   code = 'Code',
   parameters = 'Parameters',
+  content = 'Content',
 }
 
 
@@ -434,14 +435,14 @@ export class PipelineDetailsDrawerComponent implements OnInit, AfterViewInit, On
     });
   }
   toggleResultSize() {
-    // this.maximizeResults = ! this.maximizeResults;
-    // if (this.detailsPanelMode === StatusOption.content) {
-    //   this.detailsPanelMode = null;
-    //   window.setTimeout(() => {
-    //     this.detailsPanelMode = StatusOption.content;
-    //     this.cdr.markForCheck();
-    //   }, 450);
-    // }
+    this.maximizeResults = ! this.maximizeResults;
+    if (this.detailsPanelMode === StatusOption.content) {
+      this.detailsPanelMode = null;
+      window.setTimeout(() => {
+        this.detailsPanelMode = StatusOption.content;
+        this.cdr.markForCheck();
+      }, 450);
+    }
   }
 
 

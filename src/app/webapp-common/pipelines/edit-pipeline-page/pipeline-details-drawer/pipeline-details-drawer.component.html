@@ -46,7 +46,7 @@
     <div class="header toggle" >
       <div class="log-name">
         <i class="al-icon al-ico-console me-2"></i>
-        <span>{{(selected$ | async)?.name}}</span>
+        <span>{{pipelineData?.name}}</span>
       </div>
       <sm-button-toggle
         [value]="detailsPanelMode"
