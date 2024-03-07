@@ -12,7 +12,7 @@
     (nodesChangedInReactFlow)="nodesChangedInReactFlow($event)"
     (nodeClicked)="nodeSelected($event)"
     (edgesChangedInReactFlow)="edgesChangedInReactFlow($event)" />
-  <div class="pipeline-empty">
+  <div *ngIf="!selectedPipeline?.flow_display?.nodes?.length" class="pipeline-empty">
     <i class="icon i-fingers-white mx-auto xxl"></i>
     <br />
     <div class="sub-title">
