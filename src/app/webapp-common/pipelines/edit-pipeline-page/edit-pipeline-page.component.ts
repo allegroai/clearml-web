@@ -15,6 +15,7 @@ import {
   runPipeline,
   updatePipelineStep,
   deletePipelineStep,
+  setSelectedPipeline,
 } from "../pipelines.actions";
 import { selectRouterParams } from "@common/core/reducers/router-reducer";
 import { Observable, Subscription, combineLatest, map } from "rxjs";
@@ -335,6 +336,13 @@ export class EditPipelinePageComponent implements OnInit, OnDestroy {
     //this.store.dispatch(setSelectedPipeline({data: cloneDeep(pipelineState)}))
   }
 
+  public pipelineParamsChanged(changedParams) {
+    const pipelineState = cloneDeep(this.selectedPipeline);
+    pipelineState.flow_display.nodes = this.reactFlowState.nodes;
+    pipelineState.flow_display.edges = this.reactFlowState.edges;
+    pipelineState.parameters = cloneDeep(changedParams);
+    this.store.dispatch(setSelectedPipeline({data: pipelineState}))
+  }
   /**
    * @function getIncomingNodeIds
    * @description It is used to get the incoming node ids.

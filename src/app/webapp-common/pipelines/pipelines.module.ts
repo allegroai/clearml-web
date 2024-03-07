@@ -76,7 +76,7 @@ import { FileSizePipe } from "@common/shared/pipes/filesize.pipe";
 import { RegexPipe } from "@common/shared/pipes/filter-regex.pipe";
 import { FilterMonitorMetricPipe } from "@common/shared/pipes/filter-monitor-metric.pipe";
 import { PipelineStepParametersEditDialogComponent } from "./edit-pipeline-page/pipeline-step-parameters-edit-dialog/pipeline-step-parameters-edit-dialog.component";
-import { PipelineDetailsDrawerComponent } from './details-dialog/pipeline-details-drawer.component';
+import { PipelineDetailsDrawerComponent } from './edit-pipeline-page/pipeline-details-drawer/pipeline-details-drawer.component';
 
 export const pipelinesSyncedKeys = ["projects.showPipelineExamples"];
 const pipelinesSyncedKeys2 = ["orderBy", "sortOrder"];

@@ -9,13 +9,21 @@
     transition: height 0.3s;
     background-color: #0D0E15;
 
+    sm-flow-editor {
+        position: absolute;
+        top: 0;
+        width: 100%;
+        bottom: 0;
+    }
+
     .console-button {
         display: block;
         position: absolute;
         left: 24px;
         top: 24px;
         z-index: 2;
-      }
+    }
+
     sm-pipeline-step-info {
         display: block;
         position: absolute;
