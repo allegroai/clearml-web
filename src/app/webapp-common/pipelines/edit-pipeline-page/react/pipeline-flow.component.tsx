@@ -134,6 +134,7 @@ export const PipelineFlowComponent: FunctionComponent<IMyComponentProps> = (
         onConnect={onConnect}
         onEdgeUpdate={onEdgeUpdate}
         fitView
+        deleteKeyCode={[]}
         /* style={{
                  backgroundColor: "#1a1e2c"
               }} */
