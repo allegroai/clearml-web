@@ -385,7 +385,7 @@ export class PipelineDetailsDrawerComponent implements OnInit, AfterViewInit, On
       this.selectedEntity = step;
       this.highlightArrows();
     } else if (!this.dragging) {
-      this.stepDiff = null;
+      this.stepDiff = this.pipelineData?.code ? this.pipelineData?.code : null;
       this.detailsPanelMode = this.defaultDetailsMode;
       this.store.dispatch(setSelectedPipelineStep({step: null}));
       this.selectedEntity = null;
