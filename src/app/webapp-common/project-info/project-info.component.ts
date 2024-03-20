@@ -12,6 +12,7 @@ import {setBreadcrumbsOptions, updateProject} from '../core/actions/projects.act
 import {Project} from '~/business-logic/model/projects/project';
 import {isExample} from '../shared/utils/shared-utils';
 import {ContextMenuService} from '@common/shared/services/context-menu.service';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 
 
 @Component({
@@ -22,7 +23,6 @@ import {ContextMenuService} from '@common/shared/services/context-menu.service';
 })
 export class ProjectInfoComponent implements OnInit, OnDestroy {
   private selectedProject$: Observable<Project>;
-  private infoSubs: Subscription;
   public info: string;
   public editMode: boolean;
   public loading: boolean;
@@ -37,13 +37,12 @@ export class ProjectInfoComponent implements OnInit, OnDestroy {
   constructor(private store: Store, private cdr: ChangeDetectorRef,private contextMenuService: ContextMenuService) {
     this.selectedProject$ = this.store.select(selectSelectedProject);
     this.loading = true;
-  }
-
-  ngOnInit(): void {
-    this.infoSubs = this.selectedProject$
+    this.selectedProject$
       .pipe(
+        takeUntilDestroyed(),
         filter(project => !!project?.id)
-      ).subscribe(project => {
+      )
+      .subscribe(project => {
         this.project = project;
         this.example = isExample(project);
         this.info = project.description;
@@ -52,17 +51,23 @@ export class ProjectInfoComponent implements OnInit, OnDestroy {
         this.loading = false;
         this.cdr.markForCheck();
       });
-    this.selectedVariantSub = this.store.select(selectSelectedMetricVariantForCurrProject).pipe(filter(data => !!data), take(1))
+    this.setupBreadcrumbsOptions();
+  }
+
+  ngOnInit() {
+    this.selectedVariantSub = this.store.select(selectSelectedMetricVariantForCurrProject)
+      .pipe(
+        filter(data => !!data),
+        take(1)
+      )
       .subscribe(() => {
         this.setMetricsPanel(true);
         this.cdr.markForCheck();
       });
-    this.setupBreadcrumbsOptions();
   }
 
   ngOnDestroy() {
-    this.infoSubs.unsubscribe();
-    this.selectedVariantSub.unsubscribe();
+    this.selectedVariantSub?.unsubscribe();
   }
 
   setMetricsPanel(open: boolean) {
@@ -74,36 +79,38 @@ export class ProjectInfoComponent implements OnInit, OnDestroy {
   }
 
   setupBreadcrumbsOptions() {
-    this.infoSubs.add(combineLatest([
+    combineLatest([
       this.selectedProject$,
       this.store.select(selectIsDeepMode)
-    ]).subscribe(([selectedProject, isDeep]) => {
-      this.store.dispatch(setBreadcrumbsOptions({
-        breadcrumbOptions: {
-          showProjects: !!selectedProject,
-          featureBreadcrumb: {
-            name: 'PROJECTS',
-            url: 'projects'
-          },
-          ...(isDeep && selectedProject?.id !== '*' && {
-            subFeatureBreadcrumb: {
-              name: 'All Experiments'
-            }
-          }),
-          projectsOptions: {
-            basePath: 'projects',
-            filterBaseNameWith: null,
-            compareModule: null,
-            showSelectedProject: selectedProject?.id !== '*',
-            ...(selectedProject && {
-              selectedProjectBreadcrumb: {
-                name: selectedProject?.id === '*' ? 'All Experiments' : selectedProject?.basename,
-                url: `projects/${selectedProject?.id}/projects`
+    ])
+      .pipe(takeUntilDestroyed())
+      .subscribe(([selectedProject, isDeep]) => this.store.dispatch(
+        setBreadcrumbsOptions({
+          breadcrumbOptions: {
+            showProjects: !!selectedProject,
+            featureBreadcrumb: {
+              name: 'PROJECTS',
+              url: 'projects'
+            },
+            ...(isDeep && selectedProject?.id !== '*' && {
+              subFeatureBreadcrumb: {
+                name: 'All Experiments'
               }
-            })
+            }),
+            projectsOptions: {
+              basePath: 'projects',
+              filterBaseNameWith: null,
+              compareModule: null,
+              showSelectedProject: selectedProject?.id !== '*',
+              ...(selectedProject && {
+                selectedProjectBreadcrumb: {
+                  name: selectedProject?.id === '*' ? 'All Experiments' : selectedProject?.basename,
+                  url: `projects/${selectedProject?.id}/projects`
+                }
+              })
+            }
           }
-        }
-      }));
-    }));
+        })
+      ));
   }
 }

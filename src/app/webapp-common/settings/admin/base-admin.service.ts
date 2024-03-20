@@ -168,7 +168,7 @@ export class BaseAdminService {
   }
 
   public getAllCredentials() {
-    this.store.dispatch(getAllCredentials());
+    this.store.dispatch(getAllCredentials({}));
   }
 
   private onRevokeSucceed = (bool) => bool ? this.getAllCredentials() : false;

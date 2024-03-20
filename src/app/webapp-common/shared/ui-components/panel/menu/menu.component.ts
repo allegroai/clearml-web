@@ -43,10 +43,9 @@ export class MenuComponent implements AfterViewInit {
   @Input() hasButtonClass = true;
   @Input() smMenuClass: string;
   @Input() panelClasses: string;
-  @Input() iconClass: string = 'al-icon al-ico-dropdown-arrow sm';
+  @Input() iconClass: string = 'al-icon al-ico-dropdown-arrow';
   @Input() showCart: boolean = true;
   @Input() openOnInit: boolean = false;
-  @Input() showButton: boolean = true;
   @Input() showOverlay: boolean = true;
   @Input() enableSearch: boolean = false;
   @Input() searchValue: string;
@@ -89,7 +88,7 @@ export class MenuComponent implements AfterViewInit {
     }
   }
 
-  openMenu() {
+  public openMenu() {
     this.isMenuOpen = true;
     this.trigger.openMenu();
   }

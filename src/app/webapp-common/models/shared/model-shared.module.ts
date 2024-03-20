@@ -3,12 +3,9 @@ import {CommonModule} from '@angular/common';
 import {ModelTypeIconLabelComponent} from './model-type-icon-label/model-type-icon-label.component';
 import {ModelStatusIconLabelComponent} from './model-status-icon-label/model-status-icon-label.component';
 import {ModelsTableComponent} from './models-table/models-table.component';
-import {ModelTagsComponent} from './model-tags/model-tags.component';
 import {LayoutModule} from '~/layout/layout.module';
 import {SelectModelHeaderComponent} from './select-model-header/select-model-header.component';
-import {CommonLayoutModule} from '../../layout/layout.module';
 import {FeatureModelsModule} from '~/features/models/feature-models.module';
-import {SharedModule} from '~/shared/shared.module';
 import {HyperParamMetricColumnComponent} from '@common/experiments/shared/components/hyper-param-metric-column/hyper-param-metric-column.component';
 import {FilterPipe} from '@common/shared/pipes/filter.pipe';
 import {NoUnderscorePipe} from '@common/shared/pipes/no-underscore.pipe';
@@ -35,17 +32,16 @@ import {
 import {TableCardComponent} from '@common/shared/ui-components/data/table-card/table-card.component';
 import {TableModule} from 'primeng/table';
 import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 
 
-const DECLERATIONS = [ModelTypeIconLabelComponent, ModelStatusIconLabelComponent, SelectModelHeaderComponent, ModelsTableComponent, ModelTagsComponent];
+const DECLERATIONS = [ModelTypeIconLabelComponent, ModelStatusIconLabelComponent, SelectModelHeaderComponent, ModelsTableComponent];
 
 @NgModule({
   imports: [
     LayoutModule,
     CommonModule,
-    CommonLayoutModule,
     FeatureModelsModule,
-    SharedModule,
     HyperParamMetricColumnComponent,
     FilterPipe,
     NoUnderscorePipe,
@@ -65,7 +61,8 @@ const DECLERATIONS = [ModelTypeIconLabelComponent, ModelStatusIconLabelComponent
     TableCardFilterTemplateComponent,
     TableCardComponent,
     TableModule,
-    ShowTooltipIfEllipsisDirective
+    ShowTooltipIfEllipsisDirective,
+    ClickStopPropagationDirective
   ],
   declarations: DECLERATIONS,
   exports     : DECLERATIONS

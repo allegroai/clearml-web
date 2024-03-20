@@ -1,8 +1,6 @@
 import {InjectionToken, NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {EffectsModule} from '@ngrx/effects';
-import {CommonLayoutModule} from '../layout/layout.module';
-import {SharedModule} from '~/shared/shared.module';
 import {ReportsEffects} from './reports.effects';
 import {ReportsPageComponent} from './reports-page/reports-page.component';
 import {ActionReducer, StoreConfig, StoreModule} from '@ngrx/store';
@@ -16,7 +14,6 @@ import {CreateNewReportFormComponent} from './report-dialog/create-new-report-fo
 import {ReportComponent} from './report/report.component';
 import {NgxPrintModule} from 'ngx-print';
 import {ScrollingModule} from '@angular/cdk/scrolling';
-import {ReportsSharedModule} from '@common/reports/reports-shared.module';
 import {ExistNameValidatorDirective} from '@common/shared/ui-components/template-forms-ui/exist-name-validator.directive';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
@@ -47,15 +44,18 @@ import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import {ScrollEndDirective} from '@common/shared/ui-components/directives/scroll-end.directive';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {DotsLoadMoreComponent} from '@common/shared/ui-components/indicators/dots-load-more/dots-load-more.component';
+import {ReportCardComponent} from '@common/reports/report-card/report-card.component';
+import {CommonProjectsModule} from '@common/projects/common-projects.module';
 
 
 const reportsSyncedKeys = ['orderBy', 'sortOrder'];
 export const REPORTS_STORE_CONFIG_TOKEN =
-  new InjectionToken<StoreConfig<ReportsState, any>>('DatasetsConfigToken');
+  new InjectionToken<StoreConfig<ReportsState>>('DatasetsConfigToken');
 
 const getInitState = (userPreferences: UserPreferences) => ({
   metaReducers: [
-    (reducer: ActionReducer<any>) =>
+    (reducer: ActionReducer<ReportsState>) =>
       createUserPrefFeatureReducer(REPORTS_KEY, reportsSyncedKeys, [REPORTS_PREFIX], userPreferences, reducer),
   ]
 });
@@ -66,12 +66,10 @@ const getInitState = (userPreferences: UserPreferences) => ({
     ReactiveFormsModule,
     EffectsModule.forFeature([ReportsEffects]),
     StoreModule.forFeature(REPORTS_KEY, reportsReducer, REPORTS_STORE_CONFIG_TOKEN),
-    SharedModule,
-    CommonLayoutModule,
     ReportsRoutingModule,
     NgxPrintModule,
     ScrollingModule,
-    ReportsSharedModule,
+    ReportCardComponent,
     ExistNameValidatorDirective,
     MatProgressSpinnerModule,
     LabeledFormFieldDirective,
@@ -92,9 +90,11 @@ const getInitState = (userPreferences: UserPreferences) => ({
     MatSidenavModule,
     MatInputModule,
     MatAutocompleteModule,
+    CommonProjectsModule,
     ScrollEndDirective,
     ClickStopPropagationDirective,
-    ShowTooltipIfEllipsisDirective
+    ShowTooltipIfEllipsisDirective,
+    DotsLoadMoreComponent
   ],
   declarations: [ReportsPageComponent, ReportsListComponent, ReportsHeaderComponent, ReportDialogComponent,
     CreateNewReportFormComponent, ReportComponent],

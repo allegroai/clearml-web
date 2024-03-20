@@ -180,7 +180,7 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
 
   dequeuePopup() {
     const selectedExperiments = this.selectedExperiments ? selectionDisabledDequeue(this.selectedExperiments).selectedFiltered : [this._experiment];
-    const getBody = (queueName: string) => `<b>${selectedExperiments.length === 1 ? htmlTextShort(this._experiment.name) : selectedExperiments.length + 'experiments'}</b> will be removed from the ${queueName ? '<b>' + queueName + '</b> ' : ''}execution queue.`;
+    const getBody = (queueName: string) => `<b>${selectedExperiments.length === 1 ? htmlTextShort(selectedExperiments[0].name) : selectedExperiments.length + 'experiments'}</b> will be removed from the ${queueName ? '<b>' + queueName + '</b> ' : ''}execution queue.`;
     this.store.dispatch(getQueuesForEnqueue());
     const confirmDialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
@@ -191,11 +191,11 @@ export class ExperimentMenuComponent extends BaseContextMenuComponent implements
         iconClass: 'i-alert',
       }
     });
-    confirmDialogRef.afterClosed().subscribe((confirmed) => {
-      if (confirmed) {
-        this.dequeueExperiment(selectedExperiments);
-      }
-    });
+
+    confirmDialogRef.afterClosed()
+      .pipe(filter(response => response))
+      .subscribe(() => this.dequeueExperiment(selectedExperiments));
+
     this.store.select(selectQueuesList)
       .pipe(filter(qs => !!qs), take(2))
       .subscribe((queues: Queue[]) => {

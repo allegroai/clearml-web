@@ -62,6 +62,7 @@ export interface PipelineItem extends DagModelItem {
 
 export interface Arrow {
   path: string;
+  path2?: string;
   headTransform: string;
   selected: boolean;
   targetId: string;

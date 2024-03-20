@@ -56,7 +56,15 @@
 
       <div class="html-snippet" *ngSwitchCase="'html'">
         <div class="html-wrap" [class.loading]="isLoading">
-          <iframe (load)="iframeLoaded($event)" class="html-viewer" data-id="htmlViewer" width="400" height="400" referrerpolicy="origin-when-cross-origin" [src]="source | safe:'url'"></iframe>
+          <iframe
+            class="html-viewer"
+            data-id="htmlViewer"
+            width="400" height="400"
+            referrerpolicy="origin-when-cross-origin"
+            sandbox="allow-scripts sallow-popups allow-same-origin allow-storage-access-by-user-activation"
+            [src]="source | safe: 'url'"
+            (load)="iframeLoaded($event)"
+          ></iframe>
         </div>
         <div *ngIf="!noHoverEffects" class="toolbar">
           <div class="clickable-icon d-flex align-items-center justify-content-center pointer"

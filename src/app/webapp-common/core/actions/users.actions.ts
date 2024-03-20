@@ -33,8 +33,6 @@ export const setFilterByUser =  createAction(
 );
 
 export const setUserWorkspacesFromUser = createAction(USERS_PREFIX + ' set user workspaces from current user');
-
-export const setAccountAdministrationPage = createAction(`${USERS_PREFIX} route to account-administration`  );
 export const getApiVersion = createAction(`${USERS_PREFIX} get api version`  );
 export const setApiVersion = createAction(`${USERS_PREFIX} set api version`, props<{serverVersions: {server: string; api: string}}>());
 

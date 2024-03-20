@@ -6,10 +6,8 @@ import {projectDialogReducer} from './project-dialog.reducer';
 import {ProjectDialogEffects} from './project-dialog.effects';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ProjectDialogComponent} from './project-dialog.component';
-import {CreateNewProjectFormComponent} from './create-new-project-form/create-new-project-form.component';
 import {ProjectMoveToFormComponent} from './project-move-to-form/project-move-to-form.component';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
-import {UniqueProjectValidator} from '@common/shared/project-dialog/unique-project.validator';
 import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
 import {SearchTextDirective} from '@common/shared/ui-components/directives/searchText.directive';
 import {StringIncludedInArrayPipe} from '@common/shared/pipes/string-included-in-array.pipe';
@@ -34,6 +32,7 @@ import {ClickStopPropagationDirective} from '@common/shared/ui-components/direct
 import {
   ShowTooltipIfEllipsisDirective
 } from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {CreateNewProjectFormComponent} from '@common/shared/project-dialog/create-new-project-form/create-new-project-form.component';
 
 @NgModule({
   imports: [
@@ -59,7 +58,9 @@ import {
     ScrollEndDirective,
     ClickStopPropagationDirective,
     ShowTooltipIfEllipsisDirective,
+    CreateNewProjectFormComponent,
+    ProjectMoveToFormComponent
   ],
-  declarations: [ProjectDialogComponent, CreateNewProjectFormComponent, ProjectMoveToFormComponent, UniqueProjectValidator]
+  declarations: [ProjectDialogComponent]
 })
 export class ProjectDialogModule { }

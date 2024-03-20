@@ -1,49 +1,27 @@
-<div class="title">{{titleText}}</div>
-<sm-search
-  [value]="searchText"
-  [minimumChars]="0"
-  [debounceTime]="0"
-  placeholder="Search parameters"
-  data-id="searchParamterField"
-  class="underline-search"
-  (valueChanged)="searchQ($event)"
-></sm-search>
+<div class="title">{{ titleText }}</div>
+<sm-search [value]="searchText" [minimumChars]="0" [debounceTime]="0" placeholder="Search parameters" data-id="searchParamterField" class="underline-search" (valueChanged)="searchQ($event)"></sm-search>
+@if (itemsList && Object.keys(itemsList)?.length === 0) {
+  <div class="empty-state">No data to show</div>
+}
 <div class="actions">
-  <div data-id="Clear Selection" class="pointer" (click)="onClearSelection()">Clear Selection</div>
+  @if (selectedItemsList?.length > 0) {
+    <div data-id="Clear Selection" class="pointer" (click)="onClearSelection()">Clear Selection</div>
+  }
   <ng-content></ng-content>
+
 </div>
 <div class="list">
-  <mat-expansion-panel
-    *ngFor="let category of (itemsObjectList | keyvalue: compareByKey); trackBy: trackByKeyFn"
-    [expanded]="searchText?.length > 0"
-    [hidden]="(category.value | advancedFilter:searchText).length === 0"
-    togglePosition="before"
-  >
+  <mat-expansion-panel *ngFor="let category of (itemsObjectList | keyvalue: compareByKey); trackBy: trackByKeyFn" [expanded]="searchText?.length > 0" [hidden]="(category.value | advancedFilter:searchText).length === 0" togglePosition="before">
     <mat-expansion-panel-header expandedHeight="40px" collapsedHeight="40px" (click)="toggleExpand(category.key)">
       <div class="ellipsis item-key" [smTooltip]="renameMap[category.key] || category.key" [matTooltipShowDelay]="500" smShowTooltipIfEllipsis>
-        {{renameMap[category.key] || category.key}}
+        {{ renameMap[category.key] || category.key }}
       </div>
     </mat-expansion-panel-header>
     <ng-template matExpansionPanelContent>
-      <div *ngFor="let item of category.value | filter:searchText:'value'; trackBy: trackByValFn"
-         class="item pointer"
-         [class.disabled]="selectionLimitReached && !item.checked"
-         [smTooltip]="!item.checked && selectionLimitReached? 'You can only select up to ' + limitSelection + ' parameters' : ''"
-         customClass="parameter-tooltip"
-         (click)="(!selectionLimitReached || item.checked) && toggleParamToDisplay(category.key, item.value, item.checked)">
-        <mat-checkbox
-          *ngIf="!single"
-          smClickStopPropagation
-          [checked]="item.checked"
-          (change)="toggleParamToDisplay(category.key, item.value, item.checked)"
-        ><div class="ellipsis" [smTooltip]="item.value" smShowTooltipIfEllipsis >{{item.value}}</div></mat-checkbox>
-        <mat-radio-button
-          *ngIf="single"
-          smClickStopPropagation
-          [checked]="item.checked"
-          [disabled]="selectionLimitReached && !item.checked"
-          (change)="toggleParamToDisplay(category.key, item.value, item.checked)"
-        >{{item.value}}</mat-radio-button>
+      <div *ngFor="let item of category.value | filter:searchText:'value'; trackBy: trackByValFn" class="item pointer" [class.disabled]="selectionLimitReached && !item.checked" [smTooltip]="!item.checked && selectionLimitReached? 'You can only select up to ' + limitSelection + ' parameters' : ''" customClass="parameter-tooltip" (click)="(!selectionLimitReached || item.checked) && toggleParamToDisplay(category.key, item.value, item.checked)">
+        <mat-checkbox smClickStopPropagation [checked]="item.checked" (change)="(!selectionLimitReached || item.checked) && toggleParamToDisplay(category.key, item.value, item.checked)">
+          <div class="ellipsis" [smTooltip]="item.value" smShowTooltipIfEllipsis>{{ item.value }}</div>
+        </mat-checkbox>
       </div>
     </ng-template>
   </mat-expansion-panel>

@@ -1,0 +1,52 @@
+@if (!single) {
+  <div class="d-flex align-items-center title-container" (click)="paramSelect.openMenu()">
+    <span class="param-selector-title pointer">{{ title }}</span>
+    <sm-menu #paramSelect iconClass="al-icon al-ico-dropdown-arrow pointer" (menuClosed)="checklist.searchQ('')"
+             buttonTooltip="Select parameter" smMenuClass="light-theme custom-columns">
+      <sm-grouped-checked-filter-list
+        #checklist
+        smClickStopPropagation class="filtered-list"
+        [itemsList]="itemsList"
+        [selectedItemsList]="selectedHyperParams"
+        [selectFilteredItems]="selectFilteredItems"
+        [selectedItemsListMapper]="selectedItemsListMapper"
+        selectedItemsListPrefix=""
+        [limitSelection]="50"
+        [single]="false"
+        (selectedItems)="selectedItems.emit($event)"
+        (clearSelection)="clearSelection.emit()"></sm-grouped-checked-filter-list>
+    </sm-menu>
+  </div>
+  @if (selectedHyperParams?.length > 0) {
+    <div>
+      @for (hyperParam of selectedHyperParams; track trackByIndex($index)) {
+        <div class="selected-parameter">
+          <span class="ellipsis parameter-name" smShowTooltipIfEllipsis [smTooltip]="hyperParam">{{ hyperParam }}</span>
+          <i class="al-icon sm al-ico-dialog-x pointer" (click)="removeHyperParam(hyperParam)"></i></div>
+      }
+    </div>
+  } @else {
+    <div class="no-data">No parameters selected</div>
+  }
+} @else {
+  <button class="btn btn-outline d-flex justify-content-between align-items-center" (click)="paramSelect.openMenu()">
+    <span class="ellipsis select" smShowTooltipIfEllipsis [smTooltip]="selectedHyperParams?.[0] ?? ''">{{ selectedHyperParams?.[0] ?? 'Select Parameter' }}</span>
+    <sm-menu #paramSelect
+             (menuClosed)="checklist.searchQ('')"
+             iconClass="al-icon al-ico-dropdown-arrow pointer al-color blue-400"
+             buttonTooltip="Select parameter"
+             smMenuClass="light-theme custom-columns">
+      <sm-grouped-checked-filter-list #checklist
+                                      smClickStopPropagation
+                                      class="filtered-list"
+                                      [itemsList]="itemsList"
+                                      [selectedItemsList]="selectedHyperParams"
+                                      [selectFilteredItems]="selectFilteredItems"
+                                      [selectedItemsListMapper]="selectedItemsListMapper"
+                                      selectedItemsListPrefix=""
+                                      [single]="true"
+                                      (selectedItems)="selectedItems.emit($event)"
+                                      (clearSelection)="clearSelection.emit()"></sm-grouped-checked-filter-list>
+    </sm-menu>
+  </button>
+}

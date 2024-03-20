@@ -9,7 +9,7 @@ import {catchError, expand, map, mergeMap, reduce, switchMap, withLatestFrom} fr
 import {activeLoader, deactivateLoader, setServerError} from '../../core/actions/layout.actions';
 import {requestFailed} from '../../core/actions/http.actions';
 import * as outputActions from '../actions/common-experiment-output.actions';
-import {setExperimentScalarSingleValue} from '../actions/common-experiment-output.actions';
+import {Log, setExperimentScalarSingleValue} from '../actions/common-experiment-output.actions';
 import {LOG_BATCH_SIZE} from '../shared/common-experiments.const';
 import {selectExperimentHistogramCacheAxisType, selectPipelineSelectedStep, selectSelectedSettingsxAxisType} from '../reducers';
 import {refreshExperiments} from '../actions/common-experiments-view.actions';
@@ -53,7 +53,7 @@ export class CommonExperimentOutputEffects {
           ...([pipeStep?.id, selectedTask.id].includes(action.id ) ?
               [
                 outputActions.setExperimentLog({
-                  events: res.events,
+                  events: res.events.map((e: Log) => ({...e, msg: e.msg?.replace(/\0/g, '')})),
                   total: res.total,
                   direction: action.direction,
                   refresh: action.refresh

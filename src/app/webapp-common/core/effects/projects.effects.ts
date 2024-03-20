@@ -96,59 +96,58 @@ export class ProjectsEffects {
 
 
   getTablesFilterProjectsOptions$ = createEffect(() => this.actions$.pipe(
-      ofType(actions.getTablesFilterProjectsOptions),
-      debounceTime(300),
-      concatLatestFrom(() => [
-        this.store.select(selectShowHidden),
-        this.store.select(selectProjectsOptionsScrollId),
-        this.getRelevantTableFilters(this.store.select(selectRouterConfig))
-      ]),
-      switchMap(([action, showHidden, scrollId, filters]) => forkJoin([
+    ofType(actions.getTablesFilterProjectsOptions),
+    debounceTime(300),
+    concatLatestFrom(() => [
+      this.store.select(selectShowHidden),
+      this.store.select(selectProjectsOptionsScrollId),
+      this.getRelevantTableFilters(this.store.select(selectRouterConfig))
+    ]),
+    switchMap(([action, showHidden, scrollId, filters]) => forkJoin([
+        this.projectsApi.projectsGetAllEx({
+          /* eslint-disable @typescript-eslint/naming-convention */
+          allow_public: action.allowPublic,
+          page_size: rootProjectsPageSize,
+          size: rootProjectsPageSize,
+          order_by: ['name'],
+          only_fields: ['name', 'company'],
+          search_hidden: showHidden,
+            _any_: {pattern: escapeRegex(action.searchString), fields: ['name']},
+          scroll_id: !!action.loadMore && scrollId ? scrollId : null
+        } as ProjectsGetAllExRequest),
+        !action.loadMore && action.searchString?.length > 2 ?
           this.projectsApi.projectsGetAllEx({
-            /* eslint-disable @typescript-eslint/naming-convention */
-            allow_public: action.allowPublic,
-            page_size: rootProjectsPageSize,
-            size: rootProjectsPageSize,
-            order_by: ['name'],
+            page_size: 1,
             only_fields: ['name', 'company'],
             search_hidden: showHidden,
-            _any_: {pattern: escapeRegex(action.searchString), fields: ['name']},
-            scroll_id: !!action.loadMore && scrollId
-          } as ProjectsGetAllExRequest),
-          !action.loadMore && action.searchString?.length > 2 ?
-            this.projectsApi.projectsGetAllEx({
-              page_size: 1,
-              only_fields: ['name', 'company'],
-              search_hidden: showHidden,
               _any_: {pattern: `^${escapeRegex(action.searchString)}$`, fields: ['name', 'id']},
-              /* eslint-enable @typescript-eslint/naming-convention */
-            } as ProjectsGetAllExRequest).pipe(map(res => res.projects)) :
-            of([]),
-          !action.loadMore && filters['project.name']?.value.length ?
-            this.projectsApi.projectsGetAllEx({
-              id: filters['project.name']?.value,
-              only_fields: ['name', 'company'],
-              /* eslint-enable @typescript-eslint/naming-convention */
-            } as ProjectsGetAllExRequest).pipe(map(res => res.projects)) :
-            of([]),
-        ])
-          .pipe(map(([allProjects, specificProjects, selectedProjects]) => ({
-              projects: [
-                ...(specificProjects.length > 0 && allProjects.projects.some(project => project.id === specificProjects[0]?.id) ? [] : specificProjects),
-                ...allProjects.projects,
-                ...selectedProjects
-              ],
-              scrollId: allProjects.scroll_id,
-              loadMore: action.loadMore
-            })
-          ))
-      ),
-      mergeMap((projects: {
-        projects: ProjectsGetAllResponseSingle[];
-        scrollId: string;
-      }) => [setTablesFilterProjectsOptions({...projects})])
-    )
-  );
+            /* eslint-enable @typescript-eslint/naming-convention */
+          } as ProjectsGetAllExRequest).pipe(map(res => res.projects)) :
+          of([]),
+        !action.loadMore && filters['project.name']?.value.length ?
+          this.projectsApi.projectsGetAllEx({
+            id: filters['project.name']?.value,
+            only_fields: ['name', 'company'],
+            /* eslint-enable @typescript-eslint/naming-convention */
+          } as ProjectsGetAllExRequest).pipe(map(res => res.projects)) :
+          of([]),
+      ])
+        .pipe(map(([allProjects, specificProjects, selectedProjects]) => ({
+            projects: [
+              ...(specificProjects.length > 0 && allProjects.projects.some(project => project.id === specificProjects[0]?.id) ? [] : specificProjects),
+              ...allProjects.projects,
+              ...selectedProjects
+            ],
+            scrollId: allProjects.scroll_id,
+            loadMore: action.loadMore
+          })
+        ))
+    ),
+    mergeMap((projects: {
+      projects: ProjectsGetAllResponseSingle[];
+      scrollId: string;
+    }) => [setTablesFilterProjectsOptions({...projects})])
+  ));
 
 
   resetProjects$ = createEffect(() => this.actions$.pipe(
@@ -362,7 +361,7 @@ export class ProjectsEffects {
       /* eslint-disable @typescript-eslint/naming-convention */
       include_subprojects: true
       /* eslint-enable @typescript-eslint/naming-convention */
-    }, null, 'body', true).pipe(
+    }, {adminQuery: true}).pipe(
       mergeMap(res => [actions.setAllProjectUsers(res)]),
       catchError(error => [
         requestFailed(error),
@@ -381,7 +380,7 @@ export class ProjectsEffects {
         projects: [action.projectId],
         // eslint-disable-next-line @typescript-eslint/naming-convention
         include_subprojects: isDeep
-      }, null, 'body', true)).pipe(
+      }, {adminQuery: true})).pipe(
       mergeMap(res => [actions.setProjectUsers(res)]),
       catchError(error => [
         requestFailed(error),
@@ -398,7 +397,7 @@ export class ProjectsEffects {
       only_fields: ['name'],
       id: action.filteredUsers || []
       /* eslint-enable @typescript-eslint/naming-convention */
-    }, null, 'body', true).pipe(
+    }, {adminQuery: true}).pipe(
       mergeMap(res => [
         actions.setProjectExtraUsers(res),
         deactivateLoader(action.type)

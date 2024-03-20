@@ -66,13 +66,11 @@ export const routes: Routes = [
   },
   {
     path: 'pipelines',
-    // canActivate: [RolePermissionsGuard],
     data: {search: true},
     loadChildren: () => import('@common/pipelines/pipelines.module').then(m => m.PipelinesModule),
   },
   {
     path: 'pipelines',
-    // canActivate: [RolePermissionsGuard],
     data: {search: true},
     children: [
       {

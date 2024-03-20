@@ -10,14 +10,16 @@
       "projectType": "application",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:browser",
+          "builder": "@angular-devkit/build-angular:browser-esbuild",
           "options": {
             "preserveSymlinks": true,
             "outputPath": "build",
             "index": "src/index.html",
             "main": "src/main.ts",
             "tsConfig": "src/tsconfig.app.json",
-            "polyfills": "src/polyfills.ts",
+            "polyfills": [
+              "zone.js"
+            ],
             "stylePreprocessorOptions": {
               "includePaths": [
                 "src/app/webapp-common/shared/ui-components/styles/"
@@ -57,9 +59,9 @@
               "@aws-crypto/crc32",
               "@aws-crypto/sha1-browser",
               "@aws-crypto/crc32c",
+              "bowser",
               "filesize/lib/filesize.es6",
               "hex-rgb",
-              "britecharts",
               "localforage",
               "dom-to-image",
               "ace-builds",
@@ -67,9 +69,9 @@
               "taira",
               "base-64",
               "export-to-csv",
-              "dompurify"
+              "dompurify",
+              "hammerjs"
             ],
-            "vendorChunk": true,
             "extractLicenses": false,
             "buildOptimizer": false,
             "sourceMap": true,
@@ -89,7 +91,6 @@
               "sourceMap": false,
               "namedChunks": false,
               "extractLicenses": true,
-              "vendorChunk": false,
               "buildOptimizer": true,
               "fileReplacements": [
                 {
@@ -110,7 +111,6 @@
               "sourceMap": false,
               "namedChunks": false,
               "extractLicenses": true,
-              "vendorChunk": false,
               "buildOptimizer": true,
               "fileReplacements": [
                 {
@@ -129,27 +129,27 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "trains-webapp:build",
-            "proxyConfig": "proxy.config.js",
+            "proxyConfig": "./proxy.config.mjs",
             "liveReload": false,
-            "port": 4300
+            "port": 4300,
+            "buildTarget": "trains-webapp:build"
           },
           "configurations": {
             "appdev": {
-              "browserTarget": "trains-webapp:build:appdev"
+              "buildTarget": "trains-webapp:build:appdev"
             },
             "staging": {
-              "browserTarget": "trains-webapp:build:demo"
+              "buildTarget": "trains-webapp:build:demo"
             },
             "production": {
-              "browserTarget": "trains-webapp:build:production"
+              "buildTarget": "trains-webapp:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "trains-webapp:build"
+            "buildTarget": "trains-webapp:build"
           }
         },
         "test": {
@@ -157,7 +157,10 @@
           "options": {
             "main": "src/test.ts",
             "karmaConfig": "./karma.conf.js",
-            "polyfills": "src/polyfills.ts",
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
             "stylePreprocessorOptions": {
               "includePaths": [
                 "src/app/webapp-common/shared/ui-components/styles/"
@@ -198,14 +201,16 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:browser",
+          "builder": "@angular-devkit/build-angular:browser-esbuild",
           "options": {
             "preserveSymlinks": true,
             "outputPath": "dist/report-widgets",
             "baseHref": "widgets",
             "index": "src/app/webapp-common/clearml-applications/report-widgets/src/index.html",
             "main": "src/app/webapp-common/clearml-applications/report-widgets/src/main.ts",
-            "polyfills": "src/app/webapp-common/clearml-applications/report-widgets/src/polyfills.ts",
+            "polyfills": [
+              "zone.js"
+            ],
             "tsConfig": "src/app/webapp-common/clearml-applications/report-widgets/tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
@@ -226,7 +231,20 @@
                 "inject": false
               }
             ],
-            "scripts": []
+            "scripts": [],
+            "allowedCommonJsDependencies": [
+              "string-to-color",
+              "dom-to-image",
+              "dompurify",
+              "url",
+              "taira",
+              "@aws-crypto/crc32",
+              "@aws-crypto/crc32c",
+              "@aws-crypto/sha1-browser",
+              "@aws-crypto/sha256-browser",
+              "fast-xml-parser",
+              "bowser"
+            ]
           },
           "configurations": {
             "production": {
@@ -253,7 +271,6 @@
             "development": {
               "buildOptimizer": false,
               "optimization": false,
-              "vendorChunk": true,
               "extractLicenses": false,
               "sourceMap": true,
               "namedChunks": true
@@ -265,13 +282,13 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "report-widgets:build:production",
               "headers": {
                 "Content-Security-Policy": "frame-ancestors *"
-              }
+              },
+              "buildTarget": "report-widgets:build:production"
             },
             "development": {
-              "browserTarget": "report-widgets:build:development"
+              "buildTarget": "report-widgets:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -279,14 +296,17 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "report-widgets:build"
+            "buildTarget": "report-widgets:build"
           }
         },
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
             "main": "src/app/webapp-common/clearml-applications/report-widgets/src/test.ts",
-            "polyfills": "src/app/webapp-common/clearml-applications/report-widgets/src/polyfills.ts",
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
             "tsConfig": "src/app/webapp-common/clearml-applications/report-widgets/tsconfig.spec.json",
             "karmaConfig": "src/app/webapp-common/clearml-applications/report-widgets/karma.conf.js",
             "inlineStyleLanguage": "scss",

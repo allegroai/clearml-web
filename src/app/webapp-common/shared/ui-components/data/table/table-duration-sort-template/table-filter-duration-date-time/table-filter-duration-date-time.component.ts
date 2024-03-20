@@ -14,7 +14,7 @@ import {
   DurationInputListComponent
 } from '@common/shared/ui-components/inputs/duraion-input-list/duration-input-list.component';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
-import {NgIf} from '@angular/common';
+
 import {
   TableFilterDurationErrorComponent
 } from '@common/shared/ui-components/data/table/table-duration-sort-template/table-filter-duration-error/table-filter-duration-error.component';
@@ -88,10 +88,9 @@ export const getTimeInSecondsFromDate = (_date: number | Date): number => {
     MatNativeDateModule,
     DurationInputListComponent,
     TooltipDirective,
-    NgIf,
     TableFilterDurationErrorComponent,
     MatInputModule
-  ]
+]
 })
 export class TableFilterDurationDateTimeComponent  extends TableDurationSortBaseComponent {
   _selectedDate: Date;

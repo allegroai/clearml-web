@@ -1,5 +1,5 @@
 import * as actions from '../actions/common-experiment-output.actions';
-import {HistogramCharts} from '../actions/common-experiment-output.actions';
+import {GroupByCharts, HistogramCharts, Log} from '../actions/common-experiment-output.actions';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {sortBy} from 'lodash-es';
 import {LOG_BATCH_SIZE} from '../shared/common-experiments.const';
@@ -8,24 +8,6 @@ import {EventsGetTaskSingleValueMetricsResponseValues} from '~/business-logic/mo
 import {createReducer, on} from '@ngrx/store';
 import {SmoothTypeEnum} from '@common/shared/single-graph/single-graph.utils';
 
-
-export type GroupByCharts = 'metric' | 'none';
-
-export const groupByCharts = {
-  metric: 'metric' as GroupByCharts,
-  none: 'none' as GroupByCharts
-};
-
-export interface Log {
-  timestamp: number;
-  type: 'log';
-  task: string;
-  level: 'debug' | 'info' | 'warning' | 'error' | 'critical';
-  worker: string;
-  msg: string;
-  metric: string;
-  variant: string;
-}
 
 export interface ExperimentOutputState {
   metricsMultiScalarsCharts: any;
@@ -57,7 +39,7 @@ export interface ExperimentSettings {
   xAxisType: ScalarKeyEnum;
   groupBy: GroupByCharts;
   lastModified?: number;
-  valueType?: "min_value" | "max_value" | "value"
+  valueType?: 'min_value' | 'max_value' | 'value'
 }
 
 export const experimentOutputInitState: ExperimentOutputState = {

@@ -90,7 +90,7 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
   public experimentTags: { [experimentId: string]: string[] } = {};
   private timeoutIndex: number;
   private originalScrolledElement: EventTarget;
-  private treeCardBody: HTMLDivElement;
+  protected treeCardBody: HTMLDivElement;
   protected entityType = EntityTypeEnum.experiment;
   protected router: Router;
   protected store: Store;
@@ -112,7 +112,7 @@ export abstract class ExperimentCompareBase extends ExperimentCompareDetailsBase
   afterResize() {
     window.setTimeout(() => {
       this.nativeWidth = Math.max(this.treeCardBody?.getBoundingClientRect().width, 410);
-      this.cdr.detectChanges();
+      this.cdr.markForCheck();
     });
   }
 

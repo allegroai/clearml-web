@@ -1,19 +1,18 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, OnInit, ViewChild} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  HostListener,
+  inject,
+  OnInit,
+  ViewChild
+} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {MatDialog} from '@angular/material/dialog';
-import {Observable} from 'rxjs';
 import {filter, map, switchMap, take} from 'rxjs/operators';
 import {Environment} from '../environments/base';
 import {getParcoords, getPlot, getSample, getScalar, getSingleValues, reportsPlotlyReady} from './app.actions';
-import {
-  selectNoPermissions,
-  selectParallelCoordinateExperiments,
-  selectPlotData,
-  selectReportsPlotlyReady,
-  selectSampleData,
-  selectSignIsNeeded,
-  selectSingleValuesData,
-} from './app.reducer';
+import {appFeature} from './app.reducer';
 import {ExtFrame} from '@common/shared/single-graph/plotly-graph-base';
 import {DebugSample} from '@common/shared/debug-sample/debug-sample.reducer';
 import {getSignedUrl, setS3Credentials} from '@common/core/actions/common-auth.actions';
@@ -28,22 +27,48 @@ import {SingleGraphComponent} from '@common/shared/single-graph/single-graph.com
 import {setCurrentDebugImage} from '@common/shared/debug-sample/debug-sample.actions';
 import {isFileserverUrl} from '~/shared/utils/url';
 import {MetricValueType, SelectedMetric} from '@common/experiments-compare/experiments-compare.constants';
-import {ExtraTask} from '@common/experiments-compare/dumbs/parallel-coordinates-graph/parallel-coordinates-graph.component';
+import {
+  ExtraTask,
+  ParallelCoordinatesGraphComponent
+} from '@common/experiments-compare/dumbs/parallel-coordinates-graph/parallel-coordinates-graph.component';
 import {EventsGetTaskSingleValueMetricsResponseValues} from '~/business-logic/model/events/eventsGetTaskSingleValueMetricsResponseValues';
 import {ScalarKeyEnum} from '~/business-logic/model/reports/scalarKeyEnum';
 import {ReportsApiMultiplotsResponse} from '@common/constants';
+import {SingleGraphModule} from '@common/shared/single-graph/single-graph.module';
+import {DebugSampleModule} from '@common/shared/debug-sample/debug-sample.module';
+import {
+  SingleValueSummaryTableComponent
+} from '@common/shared/single-value-summary-table/single-value-summary-table.component';
+import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
+import {SingleGraphStateModule} from '@common/shared/single-graph/single-graph-state.module';
 
 
 type WidgetTypes = 'plot' | 'scalar' | 'sample' | 'parcoords' | 'single';
 
+export interface SelectedMetricVariant extends MetricVariantResult {
+  valueType?: 'min_value' | 'max_value' | 'value';
+}
+
 @Component({
-  selector: 'sm-app-root',
+  selector: 'sm-widget-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    SingleGraphStateModule,
+    SingleGraphModule,
+    DebugSampleModule,
+    ParallelCoordinatesGraphComponent,
+    SingleValueSummaryTableComponent
+  ]
 })
 export class AppComponent implements OnInit {
-  title = 'report-widgets';
+  private store = inject(Store);
+  private configService = inject(ConfigurationService);
+  private dialog = inject(MatDialog);
+  private cdr = inject(ChangeDetectorRef);
+  protected title = 'report-widgets';
   public plotData: ExtFrame;
   public frame: DebugSample;
   public plotLoaded: boolean;
@@ -54,11 +79,11 @@ export class AppComponent implements OnInit {
   public type: WidgetTypes;
   public singleGraphHeight;
   public hideMaximize: 'show' | 'hide' | 'disabled' = 'show';
-  public signIsNeeded$: Observable<boolean>;
-  public noPermissions$: Observable<boolean>;
+  protected signIsNeeded$ = this.store.selectSignal(appFeature.selectSignIsNeeded);
+  protected noPermissions$ = this.store.selectSignal(appFeature.selectNoPermissions);
   public isDarkTheme: boolean;
   public externalTool: boolean = false;
-  public parcoordsData: { experiments: ExtraTask[]; params: string[]; metric: SelectedMetric; valueType: MetricValueType };
+  public parcoordsData: { experiments: ExtraTask[]; params: string[]; metrics: SelectedMetricVariant[] };
   @ViewChild(SingleGraphComponent) 'singleGraph': SingleGraphComponent;
   public singleValueData: EventsGetTaskSingleValueMetricsResponseValues[];
   public webappLink: string;
@@ -69,16 +94,10 @@ export class AppComponent implements OnInit {
     this.singleGraph?.redrawPlot();
   }
 
-  constructor(
-    private store: Store,
-    private configService: ConfigurationService,
-    private dialog: MatDialog,
-    private cdr: ChangeDetectorRef) {
+  constructor() {
     this.configService.globalEnvironmentObservable.subscribe(env => {
       this.environment = env;
     });
-    this.signIsNeeded$ = store.select(selectSignIsNeeded);
-    this.noPermissions$ = store.select(selectNoPermissions);
     this.searchParams = new URLSearchParams(window.location.search);
     this.type = this.searchParams.get('type') as WidgetTypes;
     this.webappLink = this.buildSourceLink(this.searchParams, '*', null);
@@ -154,6 +173,9 @@ export class AppComponent implements OnInit {
           const metric = plot.metric;
           groupedPlots[metric] = cloneDeep(groupedPlots[metric]) || null;
           const plotParsed = tryParseJson(plot.plot_str);
+          if (plotParsed.data[0] && !plotParsed.data[0].name) {
+            plotParsed.data[0].name = plot.variant;
+          }
           if (groupedPlots[metric] && ['scatter', 'bar'].includes(plotParsed?.data?.[0]?.type) && previousPlotIsMergable) {
             groupedPlots[metric].plotParsed = {...groupedPlots[metric].plotParsed, data: _mergeVariants(groupedPlots[metric].plotParsed.data, plotParsed.data)};
           } else {
@@ -167,18 +189,18 @@ export class AppComponent implements OnInit {
   };
 
   private getPlotData() {
-    this.store.select(selectReportsPlotlyReady).pipe(
+    this.store.select(appFeature.selectPlotlyReady).pipe(
       filter(ready => !!ready),
-      switchMap(() => this.store.select(selectPlotData)),
+      switchMap(() => this.store.select(appFeature.selectPlotData)),
       filter(plot => !!plot),
       take(1))
       .subscribe((metricsPlots) => {
         this.plotLoaded = true;
         if (this.isSingleExperiment(metricsPlots)) {
           const merged = this.mergeVariants(metricsPlots as ReportsApiMultiplotsResponse);
-          this.plotData = Object.values(merged)[0].plotParsed;
+          this.plotData = {...Object.values(merged)[0], ...Object.values(merged)[0].plotParsed};
         } else {
-          const {merged,} = prepareMultiPlots(metricsPlots as ReportsApiMultiplotsResponse);
+          const {merged} = prepareMultiPlots(metricsPlots as ReportsApiMultiplotsResponse);
           const newGraphs = convertMultiPlots(merged);
           const originalObject = this.searchParams.get('objects');
           const series = this.searchParams.get('series');
@@ -213,7 +235,7 @@ export class AppComponent implements OnInit {
 
 
       });
-  };
+  }
 
   private isSingleExperiment(metricsPlots: any) {
     try {
@@ -224,9 +246,9 @@ export class AppComponent implements OnInit {
   }
 
   private getScalars() {
-    this.store.select(selectReportsPlotlyReady).pipe(
+    this.store.select(appFeature.selectPlotlyReady).pipe(
       filter(ready => !!ready),
-      switchMap(() => this.store.select(selectPlotData)),
+      switchMap(() => this.store.select(appFeature.selectPlotData)),
       filter(plot => !!plot),
       take(1))
       .subscribe(metrics => {
@@ -240,16 +262,24 @@ export class AppComponent implements OnInit {
   }
 
   private getParallelCoordinate() {
-    this.store.select(selectReportsPlotlyReady).pipe(
+    this.store.select(appFeature.selectPlotlyReady).pipe(
       filter(ready => !!ready),
-      switchMap(() => this.store.select(selectParallelCoordinateExperiments)),
+      switchMap(() => this.store.select(appFeature.selectParallelCoordinateData)),
       filter(experiments => !!experiments),
       take(1))
       .subscribe(experiments => {
         this.parcoordsData = {
           experiments,
-          valueType: this.searchParams.get('value_type') as MetricValueType,
-          metric: {path: this.searchParams.get('metrics'), name: this.findMetricName(this.searchParams.get('metrics'), experiments)},
+          metrics: this.searchParams.getAll('metrics').map(metric => {
+            const [metricHash, variantHash, valueType] = metric.split('.');
+            const path = `${metricHash}.${variantHash}`;
+            return {
+              metric_hash: metricHash,
+              variant_hash: variantHash,
+              ...this.findMetricName(path, experiments),
+              valueType: valueType ?? this.searchParams.get('value_type')
+            } as SelectedMetricVariant;
+          }),
           params: this.searchParams.getAll('variants')
         };
         this.cdr.detectChanges();
@@ -258,7 +288,7 @@ export class AppComponent implements OnInit {
 
 
   private getSample() {
-    this.store.select(selectSampleData)
+    this.store.select(appFeature.selectSampleData)
       .pipe(filter(sample => !!sample))
       .subscribe(sample => {
         const url = new URL(sample.url);
@@ -281,7 +311,7 @@ export class AppComponent implements OnInit {
   }
 
   private getSingleValues() {
-    this.store.select(selectSingleValuesData)
+    this.store.select(appFeature.selectSingleValuesData)
       .pipe(
         filter(singleValueData => !!singleValueData),
         take(1)
@@ -383,14 +413,14 @@ export class AppComponent implements OnInit {
   private findMetricName(metric: string, experiments: ExtraTask[]) {
     const experimentWithCurrentMetric = experiments.find(exp => get(exp.last_metrics, metric));
     const lastMetric = get(experimentWithCurrentMetric.last_metrics, metric) as ExtraTask['last_metrics'];
-    return `${lastMetric.metric}/${lastMetric.variant}`;
+    return {metric: lastMetric.metric, variant: lastMetric.variant};
   }
 
   private buildSourceLink(searchParams: URLSearchParams, project: string, tasks: string[]): string {
     const isModels = searchParams.has('models') || this.searchParams.get('objectType') === 'model';
     const objects = searchParams.getAll('objects');
     const variants = searchParams.getAll('variants');
-    const metricPath = searchParams.get('metrics') || '';
+    const metricsPath = searchParams.getAll('metrics');
     let entityIds = objects.length > 0 ? objects : searchParams.getAll(isModels ? 'models' : 'tasks');
     if (entityIds.length === 0 && tasks?.length > 0) {
       entityIds = tasks;
@@ -398,8 +428,8 @@ export class AppComponent implements OnInit {
     const isCompare = entityIds.length > 1;
     let url = `${window.location.origin.replace('4201', '4200')}/projects/${project ?? '*'}/`;
     if (isCompare) {
-      url += `${isModels ? 'compare-models;ids=' : 'compare-experiments;ids='}${entityIds.filter(id => !!id).join(',')}/
-${this.getComparePath(this.type)}?metricPath=${metricPath}&metricName=lala${variants.map(par => `&params=${par}`).join('')}`;
+      url += `${isModels ? 'compare-models;ids=' : 'compare-experiments;ids='}${entityIds.filter(id => !!id).join(',')}/${
+        this.getComparePath(this.type)}?metricVariants=${encodeURIComponent(metricsPath.join(','))}&metricName=${variants.map(par => `&params=${encodeURIComponent(par)}`).join('')}`;
     } else {
       url += `${isModels ? 'models/' : 'experiments/'}${entityIds}/${this.getOutputPath(isModels, this.type)}`;
     }

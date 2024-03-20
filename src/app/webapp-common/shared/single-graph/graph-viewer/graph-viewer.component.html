@@ -1,136 +1,155 @@
 <div class="modal-container" [class.dark-theme]="darkTheme" #modalContainer>
   <div class="graph-viewer-header">
-    <div class="chart-title ellipsis">
-      <span #dot
-            *ngIf="singleGraph && data.moveLegendToTitle && chart"
-            [style.background-color]="singleGraph.chart?.data[0]?.line?.color"
-            [colorButtonRef]="dot"
-            [smChooseColor]="$any(singleGraph.chart?.data[0]?.line?.color)"
-            [stringToColor]="singleGraph.singleColorKey"
-            class="title-color">
-    </span>
-      <span *ngIf="chart?.metric && !darkTheme">{{chart?.metric}} - </span>{{chart?.variants?.length > 1 ? chart.variants.join(', ') : chart?.layout?.title || chart?.metric}}
+    <div class="chart-title ellipsis"
+      [class.w-100]="!(minMaxIterations$ | async)?.minIteration"
+      [smTooltip]="title" smShowTooltipIfEllipsis>
+      @if (singleGraph && data.moveLegendToTitle && chart) {
+        <span #dot
+          [style.background-color]="singleGraph.chart?.data[0]?.line?.color"
+          [colorButtonRef]="dot"
+          [smChooseColor]="$any(singleGraph.chart?.data[0]?.line?.color)"
+          [stringToColor]="singleGraph.singleColorKey"
+          class="title-color">
+        </span>
+      }
+      <span>{{title}}</span>
       <sm-tag-list [tags]="chart?.tags"></sm-tag-list>
     </div>
     <input #fakeInput name="Don't remove - it take the autofocus from slider" style="opacity: 0; height: 0; width: 0">
-    <div *ngIf="!darkTheme" class="viewer-iteration">
-      <div *ngIf="minMaxIterations$ | async as minMaxIterations">
-        <span *ngIf="minMaxIterations.maxIteration !== minMaxIterations.minIteration || minMaxIterations.minIteration > 0">
-          Iteration <span class="number">{{iteration}}</span>
-        </span>
-        <mat-slider
-          *ngIf="minMaxIterations.maxIteration !== minMaxIterations.minIteration"
-          [max]="minMaxIterations.maxIteration"
-          [min]="minMaxIterations.minIteration"
-          [step]="1"
-          discrete
-          class="indicator-position-bottom"
-          (mouseup)="fakeInput.focus()"
-        >
-          <input matSliderThumb
-                 [ngModel]="iteration"
-                 (ngModelChange)="changeIteration(ngSliderThumb.value)"
-                 #ngSliderThumb="matSliderThumb" />
-        </mat-slider>
+    @if (!darkTheme) {
+      <div class="viewer-iteration">
+        @if (minMaxIterations$ | async; as minMaxIterations) {
+          <div>
+            @if (minMaxIterations.maxIteration !== minMaxIterations.minIteration || minMaxIterations.minIteration > 0) {
+              <span>
+                Iteration <span class="number">{{iteration}}</span>
+              </span>
+            }
+            @if (minMaxIterations.maxIteration !== minMaxIterations.minIteration) {
+              <mat-slider
+                [max]="minMaxIterations.maxIteration"
+                [min]="minMaxIterations.minIteration"
+                [step]="1"
+                discrete
+                class="indicator-position-bottom"
+                (mouseup)="fakeInput.focus()"
+                >
+                <input matSliderThumb
+                  [ngModel]="iteration"
+                  (ngModelChange)="changeIteration(ngSliderThumb.value)"
+                  #ngSliderThumb="matSliderThumb" />
+              </mat-slider>
+            }
+          </div>
+        }
       </div>
-    </div>
+    }
     <div class="header-actions">
       <div [class.load-spinner]="(isFetchingData$ | async) || !plotLoaded" class="d-flex align-items-center me-3"></div>
-      <div class="pointer d-flex align-items-center me-3" *ngIf="(isFetchingData$ | async) === false && isFullDetailsMode" smTooltip="Refresh" matTooltipPosition="below" (click)="refresh()"><i class="al-icon al-ico-refresh"></i></div>
+      @if ((isFetchingData$ | async) === false && isFullDetailsMode) {
+        <div class="pointer d-flex align-items-center me-3" smTooltip="Refresh" matTooltipPosition="below" (click)="refresh()"><i class="al-icon al-ico-refresh"></i></div>
+      }
       <div (click)="closeGraphViewer()" matTooltipPosition="below" smTooltip="Close" class="icon-container pointer d-flex align-items-center">
         <i class="al-icon al-ico-dialog-x al-color blue-300"></i>
       </div>
     </div>
 
   </div>
-  <div class="graph-controls" *ngIf="showSmooth || smoothWeight">
-
-    <div class="d-flex field"  *ngIf="!isCompare">
-      <span class="label-text axis-text-margin-left">Horizontal Axis</span>
-      <mat-form-field appearance="outline" class="axis-type-field no-bottom" [class.black]="darkTheme">
-        <mat-select
-          [value]="xAxisType$ | async" (selectionChange)="xAxisTypeChanged($event)"
-          [panelClass]="darkTheme ? 'dark-theme dark-outline' : 'light-theme'"
-          [disabled]="isFetchingData$ | async"
-        >
-          <mat-option *ngFor="let type of xAxisTypeOption" [value]="type.value">{{type.name}}</mat-option>
-        </mat-select>
-      </mat-form-field>
-    </div>
-
-    <div class="d-flex field smooth-options" [class.separator]="!isCompare">
-      <span class="label-text">Smoothing</span>
-      <div class="smooth-fields">
-        <mat-slider
-          [max]="smoothType === smoothTypeEnum.exponential ? 0.999 : 100"
-          [min]="smoothType === smoothTypeEnum.exponential ? 0 : 1"
-          [step]="smoothType === smoothTypeEnum.exponential ? 0.001 : 1"
-          [disabled]="smoothType === smoothTypeEnum.any"
-        ><input matSliderThumb [(ngModel)]="smoothWeight"/>
-        </mat-slider>
-
-        <mat-form-field appearance="outline" class="smooth-input no-bottom" [class.black]="darkTheme">
-          <input
-            matInput
-            name="minCount"
-            type="number"
-            title=""
-            [min]="smoothType === smoothTypeEnum.exponential ? 0 : 1"
-            [step]="smoothType === smoothTypeEnum.exponential ? 0.05 : 1"
+  @if (showSmooth || smoothWeight) {
+    <div class="graph-controls">
+      @if (!isCompare) {
+        <div class="d-flex field" >
+          <span class="label-text axis-text-margin-left">Horizontal Axis</span>
+          <mat-form-field appearance="outline" class="axis-type-field no-bottom" [class.black]="darkTheme">
+            <mat-select
+              [value]="xAxisType$ | async" (selectionChange)="xAxisTypeChanged($event)"
+              [panelClass]="darkTheme ? 'dark-theme dark-outline' : 'light-theme'"
+              [disabled]="isFetchingData$ | async"
+              >
+              @for (type of xAxisTypeOption; track type.value) {
+                <mat-option [value]="type.value">{{type.name}}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+      }
+      <div class="d-flex field smooth-options" [class.separator]="!isCompare">
+        <span class="label-text">Smoothing</span>
+        <div class="smooth-fields">
+          <mat-slider
             [max]="smoothType === smoothTypeEnum.exponential ? 0.999 : 100"
+            [min]="smoothType === smoothTypeEnum.exponential ? 0 : 1"
+            [step]="smoothType === smoothTypeEnum.exponential ? 0.001 : 1"
             [disabled]="smoothType === smoothTypeEnum.any"
-            [(ngModel)]="smoothWeight"
-            (ngModelChange)="changeWeight($any($event))"
-            (blur)="smoothWeight === null && changeWeight(-1)"
-          />
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="smooth-selector no-bottom" [class.black]="darkTheme">
-          <mat-select [panelClass]="darkTheme ? 'dark-theme dark-outline' : 'light-theme'" [value]="smoothType" (selectionChange)="selectSmoothType($event)">
-            <mat-option *ngFor="let smoothTypeOption of smoothTypeEnum | keyvalue" [value]="smoothTypeOption.value">
-              {{smoothTypeOption.value}}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
+            ><input matSliderThumb [(ngModel)]="smoothWeight"/>
+          </mat-slider>
+          <mat-form-field appearance="outline" class="smooth-input no-bottom" [class.black]="darkTheme">
+            <input
+              matInput
+              name="minCount"
+              type="number"
+              title=""
+              [min]="smoothType === smoothTypeEnum.exponential ? 0 : 1"
+              [step]="smoothType === smoothTypeEnum.exponential ? 0.05 : 1"
+              [max]="smoothType === smoothTypeEnum.exponential ? 0.999 : 100"
+              [disabled]="smoothType === smoothTypeEnum.any"
+              [(ngModel)]="smoothWeight"
+              (ngModelChange)="changeWeight($any($event))"
+              (blur)="smoothWeight === null && changeWeight(-1)"
+              />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="smooth-selector no-bottom" [class.black]="darkTheme">
+            <mat-select [panelClass]="darkTheme ? 'dark-theme dark-outline' : 'light-theme'" [value]="smoothType" (selectionChange)="selectSmoothType($event)">
+              @for (smoothTypeOption of smoothTypeEnum | keyvalue; track smoothTypeOption.key) {
+                <mat-option [value]="smoothTypeOption.value">
+                  {{smoothTypeOption.value}}
+                </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
       </div>
     </div>
+  }
 
-  </div>
-
-  <div *ngIf="chart" class="graph-container">
-    <sm-single-graph
-      #singleGraph
-      [class.less-padding]="true"
-      [class.two-in-a-row]="false"
-      [chart]="chart"
-      [smoothWeight]="smoothWeight"
-      [smoothType]="smoothType"
-      [hoverMode]="data.hoverMode"
-      [hideTitle]="true"
-      [hideMaximize]="'hide'"
-      [height]="height"
-      [width]="width"
-      [id]="id"
-      [identifier]="id"
-      [isCompare]="isCompare"
-      [xAxisType]="xAxisType"
-      [yAxisType]="yAxisType"
-      [moveLegendToTitle]="data.moveLegendToTitle && !chart.layout.showlegend"
-      [legendConfiguration]="this.data.legendConfiguration || {}"
-      [isDarkTheme]="darkTheme"
-      [graphsNumber]="9999"
-      [exportForReport]="!!embedFunction"
-      (createEmbedCode)="embedFunction($event)"
-    >
-    </sm-single-graph>
-    <div *ngIf="!isFullDetailsMode && !isCompare && !darkTheme" class="navigation">
-      <div class="icon-container controller d-flex flex-column justify-content-around align-items-center next"
-           (click)="canGoNext() && next()" [class.disabled]="endOfTime">
-        <i class="al-icon al-ico-next al-color blue-300"></i></div>
-      <div class="icon-container controller d-flex flex-column justify-content-around align-items-center previous"
-           (click)="canGoBack() && previous()" [class.disabled]="beginningOfTime">
-        <i class="al-icon al-ico-previous al-color blue-300"></i></div>
+  @if (chart) {
+    <div class="graph-container">
+      <sm-single-graph
+        #singleGraph
+        [class.less-padding]="true"
+        [class.two-in-a-row]="false"
+        [chart]="chart"
+        [smoothWeight]="smoothWeight"
+        [smoothType]="smoothType"
+        [hoverMode]="data.hoverMode"
+        [hideTitle]="true"
+        [hideMaximize]="'hide'"
+        [height]="height"
+        [width]="width"
+        [id]="id"
+        [identifier]="id"
+        [isCompare]="isCompare"
+        [xAxisType]="xAxisType"
+        [yAxisType]="yAxisType"
+        [moveLegendToTitle]="data.moveLegendToTitle && !chart.layout.showlegend"
+        [legendConfiguration]="this.data.legendConfiguration || {}"
+        [isDarkTheme]="darkTheme"
+        [graphsNumber]="9999"
+        [exportForReport]="!!embedFunction"
+        (createEmbedCode)="embedFunction($event)"
+        >
+      </sm-single-graph>
+      @if (!isFullDetailsMode && !isCompare && !darkTheme) {
+        <div class="navigation">
+          <div class="icon-container controller d-flex flex-column justify-content-around align-items-center next"
+            (click)="canGoNext() && next()" [class.disabled]="endOfTime">
+            <i class="al-icon al-ico-next al-color blue-300"></i></div>
+            <div class="icon-container controller d-flex flex-column justify-content-around align-items-center previous"
+              (click)="canGoBack() && previous()" [class.disabled]="beginningOfTime">
+              <i class="al-icon al-ico-previous al-color blue-300"></i></div>
+            </div>
+          }
+        </div>
+      }
     </div>
-  </div>
-</div>
 

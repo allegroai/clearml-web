@@ -77,6 +77,7 @@ import {ClickStopPropagationDirective} from '@common/shared/ui-components/direct
 import {FilterPipe} from '@common/shared/pipes/filter.pipe';
 import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 import {MatCheckboxModule} from '@angular/material/checkbox';
+import {DotsLoadMoreComponent} from '@common/shared/ui-components/indicators/dots-load-more/dots-load-more.component';
 
 export const experimentSyncedKeys = [
   'view.projectColumnsSortOrder',
@@ -107,7 +108,12 @@ export const getExperimentsConfig = (userPreferences: UserPreferences) => ({
           return merge({}, nextState, savedState);
         }
         if (action.type.startsWith(EXPERIMENTS_PREFIX)) {
-          localStorage.setItem(localStorageKey, JSON.stringify(pick(nextState, ['view.tableMode', 'view.compareSelectedMetrics', 'view.compareSelectedMetricsPlots'])));
+          localStorage.setItem(localStorageKey, JSON.stringify(pick(nextState, [
+            'view.tableMode',
+            'view.tableCompareView',
+            'view.compareSelectedMetrics',
+            'view.compareSelectedMetricsPlots'
+          ])));
         }
         return nextState;
       };
@@ -189,6 +195,7 @@ const DECLARATIONS = [
     FilterPipe,
     ShowTooltipIfEllipsisDirective,
     MatCheckboxModule,
+    DotsLoadMoreComponent,
   ],
   declarations   : [...DECLARATIONS],
   providers      : [

@@ -13,9 +13,14 @@
     color: $blue-400;
   }
 
-  .menu-button, .menu-button &:hover, .menu-button &:focus {
-    cursor: pointer;
+  .menu-button, 
+  .menu-button &:hover, 
+  .menu-button &:focus {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     text-decoration: none;
+    cursor: pointer;
   }
 
   .hidden-button {

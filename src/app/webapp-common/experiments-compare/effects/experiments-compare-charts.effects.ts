@@ -20,7 +20,7 @@ import {selectCompareHistogramCacheAxisType} from '../reducers';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {selectActiveWorkspaceReady} from '~/core/reducers/view.reducer';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
-import {EMPTY, iif} from 'rxjs';
+import {EMPTY, iif, of} from 'rxjs';
 import {merge} from 'lodash-es';
 import {ApiModelsService} from '~/business-logic/api-services/models.service';
 import {setAxisCache, setGlobalLegendData} from '../actions/experiments-compare-charts.actions';
@@ -117,33 +117,38 @@ export class ExperimentsCompareChartsEffects {
   getMultiPlotCharts = createEffect(() => this.actions$.pipe(
       ofType(chartActions.getMultiPlotCharts),
       debounceTime(200),
-      switchMap(action => this.eventsApi.eventsGetMultiTaskPlots({
-        tasks: action.taskIds,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        model_events: action.entity === EntityTypeEnum.model,
-        metrics: action.metrics,
-        last_iters_per_task_metric: true,
-        iters: 1
-      }).pipe(
-        map((res: EventsGetMultiTaskPlotsResponse) => [res.returned, res] as [number, EventsGetMultiTaskPlotsResponse]),
-        expand(([plotsLength, data]) => (data.total < 10000 && data.returned > 0)
+      switchMap(action => { if(action.taskIds.length > 0 ){
+        return this.eventsApi.eventsGetMultiTaskPlots({
+          tasks: action.taskIds,
           // eslint-disable-next-line @typescript-eslint/naming-convention
-          ? this.eventsApi.eventsGetMultiTaskPlots({
-            tasks: action.taskIds,
+          model_events: action.entity === EntityTypeEnum.model,
+          metrics: action.metrics,
+          last_iters_per_task_metric: true,
+          iters: 1
+        }).pipe(
+          map((res: EventsGetMultiTaskPlotsResponse) => [res.returned, res] as [number, EventsGetMultiTaskPlotsResponse]),
+          expand(([plotsLength, data]) => (data.total < 10000 && data.returned > 0)
             // eslint-disable-next-line @typescript-eslint/naming-convention
-            model_events: action.entity === EntityTypeEnum.model,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            scroll_id: data.scroll_id,
-            metrics: action.metrics,
-            last_iters_per_task_metric: true,
-            iters: 1
-          }).pipe(
-            map((res: EventsGetMultiTaskPlotsResponse) => [plotsLength + res.returned, res] as [number, EventsGetTaskPlotsResponse])
-          )
-          : EMPTY
-        ),
-        reduce((acc, [, data]) => merge(acc, data.plots), {})
-      )),
+            ? this.eventsApi.eventsGetMultiTaskPlots({
+              tasks: action.taskIds,
+              // eslint-disable-next-line @typescript-eslint/naming-convention
+              model_events: action.entity === EntityTypeEnum.model,
+              // eslint-disable-next-line @typescript-eslint/naming-convention
+              scroll_id: data.scroll_id,
+              metrics: action.metrics,
+              last_iters_per_task_metric: true,
+              iters: 1
+            }).pipe(
+              map((res: EventsGetMultiTaskPlotsResponse) => [plotsLength + res.returned, res] as [number, EventsGetTaskPlotsResponse])
+            )
+            : EMPTY
+          ),
+          reduce((acc, [, data]) => merge(acc, data.plots), {})
+        )
+      } else {
+        return of({plots:[]})
+      }
+      }),
       mergeMap(plots => [
         chartActions.setExperimentPlots({plots}),
         deactivateLoader(chartActions.getMultiPlotCharts.type)]),

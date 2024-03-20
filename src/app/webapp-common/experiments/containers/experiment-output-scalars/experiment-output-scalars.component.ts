@@ -24,10 +24,10 @@ import {
   setExperimentSettings,
   toggleSettings
 } from '../../actions/common-experiment-output.actions';
-import {convertScalars} from '@common/tasks/tasks.utils';
+import {convertScalars, sortMetricsList} from '@common/tasks/tasks.utils';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {selectSelectedExperiment} from '~/features/experiments/reducers';
-import {GroupByCharts, groupByCharts} from '../../reducers/experiment-output.reducer';
+import {GroupByCharts, groupByCharts} from '../../actions/common-experiment-output.actions';
 import {ExtFrame} from '@common/shared/single-graph/plotly-graph-base';
 import {ExperimentGraphsComponent} from '@common/shared/experiment-graphs/experiment-graphs.component';
 import {isEqual} from 'lodash-es';
@@ -39,7 +39,7 @@ import {GroupedList} from '@common/tasks/tasks.model';
 import {PlotData} from 'plotly.js';
 
 export const prepareScalarList = (metricsScalar: GroupedList): GroupedList =>
-  Object.keys(metricsScalar || []).reduce((acc, curr) => {
+  sortMetricsList(Object.keys(metricsScalar || [])).reduce((acc, curr) => {
     acc[curr] = {};
     return acc;
   }, {});
@@ -183,6 +183,7 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
           ...prepareScalarList(this.splitScalars(scalars))
         };
         this.prepareGraphsAndUpdate(scalars);
+        this.changeDetection.markForCheck();
       })
     );
 
@@ -198,7 +199,9 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
     );
 
     this.subs.add(combineLatest([this.listOfHidden$, this.scalars$]).subscribe(([hiddenList]) => {
-      this.selectedMetrics = hiddenList.length === 0 ? Object.keys(this.originalScalarList) : Object.keys(this.originalScalarList).filter(metric => !hiddenList.some( item => metric.startsWith(item)));
+      const selectedMetric = hiddenList.length === 0 ? Object.keys(this.originalScalarList) : Object.keys(this.originalScalarList).filter(metric => !hiddenList.some( item => metric.startsWith(item)));
+      const metricsWithoutVariants = selectedMetric.map(m => m.split(' / ')[0]).filter(m => !!m)
+      this.selectedMetrics = Array.from(new Set([...selectedMetric, ...metricsWithoutVariants]));
     }));
   }
 
@@ -223,7 +226,9 @@ export class ExperimentOutputScalarsComponent implements OnInit, OnDestroy {
 
 
   hiddenListChanged(hiddenList) {
-    this.store.dispatch(setExperimentSettings({id: this.experimentId, changes: {hiddenMetricsScalar: Object.keys(this.scalarList).filter(metric => !hiddenList.some( item => item.startsWith(metric)))}}));
+    this.store.dispatch(setExperimentSettings({
+      id: this.experimentId,
+      changes: {hiddenMetricsScalar: Object.keys(this.scalarList).filter(metric => !hiddenList.some( item => item.startsWith(metric)))}}));
   }
 
   refresh() {

@@ -1,10 +1,15 @@
 <div class="search-container">
   <div class="d-flex-center tabs">
     <div class="ps-3 py-3">
-      <ng-container *ngFor="let searchTab of activeLinksList">
-          <span [class.active]="activeLink === searchTab.name" class="pointer category-link"
-                (click)="activeLinkChanged.emit(searchTab.name)">{{searchTab.label}} ({{resultsCount?.[searchTab.name]}})  </span>
-      </ng-container>
+      @for (searchTab of activeLinksList; track searchTab.name) {
+        <span
+          class="pointer category-link"
+          [class.active]="activeLink === searchTab.name"
+          [tabindex]="$count"
+          (click)="activeLinkChanged.emit(searchTab.name)"
+          (keyup)="activeLinkChanged.emit(searchTab.name)"
+        >{{searchTab.label}} ({{resultsCount?.[searchTab.name]}})</span>
+      }
     </div>
   </div>
   <div class="page-container">

@@ -7,11 +7,9 @@ import {ExperimentGraphsModule} from '@common/shared/experiment-graphs/experimen
 import {CommonDeleteDialogModule} from '@common/shared/entity-page/entity-delete/common-delete-dialog.module';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ExperimentCompareSharedModule} from '@common/experiments-compare/shared/experiment-compare-shared.module';
-import {CommonLayoutModule} from '@common/layout/layout.module';
 import {ExperimentSharedModule} from '~/features/experiments/shared/experiment-shared.module';
 import {RouterModule, Routes} from '@angular/router';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
-import {SharedModule} from '~/shared/shared.module';
 import {ExperimentOutputLogModule} from '@common/experiments/shared/experiment-output-log/experiment-output-log.module';
 import {MatRadioModule} from '@angular/material/radio';
 import {PipelineControllerInfoComponent} from './pipeline-controller-info/pipeline-controller-info.component';
@@ -45,6 +43,9 @@ import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import {MatInputModule} from '@angular/material/input';
 import {MatExpansionModule} from '@angular/material/expansion';
 import {MatMenuModule} from '@angular/material/menu';
+import {
+  ShowTooltipIfEllipsisDirective
+} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 
 export const routes: Routes = [
   {
@@ -80,13 +81,11 @@ export const routes: Routes = [
     FormsModule,
     ReactiveFormsModule,
     ExperimentCompareSharedModule,
-    CommonLayoutModule,
     ExperimentSharedModule,
     RouterModule,
     CommonModule,
     RouterModule.forChild(routes),
     MatProgressSpinnerModule,
-    SharedModule,
     ExperimentOutputLogModule,
     MatRadioModule,
     SimpleDatasetVersionPreviewComponent,
@@ -110,6 +109,7 @@ export const routes: Routes = [
     MatInputModule,
     MatExpansionModule,
     MatMenuModule,
+    ShowTooltipIfEllipsisDirective
   ],
   providers: [
     ControllersComponent,

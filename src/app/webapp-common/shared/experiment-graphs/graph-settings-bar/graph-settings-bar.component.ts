@@ -1,7 +1,7 @@
 import {ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, inject, Input, Output} from '@angular/core';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {MatSelectChange} from '@angular/material/select';
-import {GroupByCharts} from '@common/experiments/reducers/experiment-output.reducer';
+import {GroupByCharts} from '@common/experiments/actions/common-experiment-output.actions';
 import {SmoothTypeEnum, smoothTypeEnum} from '@common/shared/single-graph/single-graph.utils';
 
 @Component({

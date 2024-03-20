@@ -1,19 +1,18 @@
-<div class="d-flex justify-content-start align-items-center button-container" [smTooltip]="buttonTooltip">
-  <i [class]="prefixIconClass" *ngIf="prefixIconClass" (click)="trigger.openMenu()"></i>
   <div mat-button
        smClickStopPropagation
        [matMenuTriggerFor]="menu"
        class=" p-0 cell menu-button"
        [class]="buttonClass"
        [class.btn]="hasButtonClass"
-       [class.hidden-button]="!showButton"
        [class.disabled-menu-btn]="disabled"
+       [smTooltip]="buttonTooltip"
        (menuOpened)="menuOpened.emit()"
   >
+    <i [class]="prefixIconClass" *ngIf="prefixIconClass"></i>
     {{header}}
+     <i *ngIf="showCart" [class]="iconClass" data-id="OpenMenu"></i>
   </div>
-  <i *ngIf="showCart" [class]="iconClass" data-id="OpenMenu" (click)="trigger.openMenu()"></i>
-</div>
+ 
 <mat-menu
   #menu="matMenu"
   class="sm-menu"

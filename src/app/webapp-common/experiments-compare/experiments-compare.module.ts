@@ -32,7 +32,6 @@ import {CompareCardExtraHeaderDirective} from './dumbs/compare-card-extra-header
 import {CompareCardHeaderDirective} from './dumbs/compare-card-header.directive';
 import {TableDiffModule} from '../shared/ui-components/data/table-diff/table-diff.module';
 import {CardModule} from '../shared/ui-components/panel/card2';
-import {DrawerModule} from '../shared/ui-components/panel/drawer';
 import {
   ParallelCoordinatesGraphComponent
 } from './dumbs/parallel-coordinates-graph/parallel-coordinates-graph.component';
@@ -47,16 +46,20 @@ import {
 } from './containers/experiment-compare-params/experiment-compare-params.component';
 import {ExperimentsCompareParamsEffects} from './effects/experiments-compare-params.effects';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {ModelCompareDetailsComponent} from '@common/experiments-compare/containers/model-compare-details/model-compare-details.component';
+import {
+  ModelCompareDetailsComponent
+} from '@common/experiments-compare/containers/model-compare-details/model-compare-details.component';
 import {IExperimentCompareChartsState} from '@common/experiments-compare/reducers/experiments-compare-charts.reducer';
 import {UserPreferences} from '@common/user-preferences';
 import {merge, pick} from 'lodash-es';
 import {createUserPrefFeatureReducer} from '@common/core/meta-reducers/user-pref-reducer';
-import {EXPERIMENTS_COMPARE_METRICS_CHARTS_} from '@common/experiments-compare/actions/experiments-compare-charts.actions';
+import {
+  EXPERIMENTS_COMPARE_METRICS_CHARTS_
+} from '@common/experiments-compare/actions/experiments-compare-charts.actions';
 import {EXPERIMENTS_COMPARE_SELECT_EXPERIMENT_} from '@common/experiments-compare/actions/compare-header.actions';
 import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
 import {EllipsisMiddleDirective} from '@common/shared/ui-components/directives/ellipsis-middle.directive';
-import { CompareScatterPlotComponent } from './containers/compare-scatter-plot/compare-scatter-plot.component';
+import {CompareScatterPlotComponent} from './containers/compare-scatter-plot/compare-scatter-plot.component';
 import {ScatterPlotComponent} from '@common/shared/components/charts/scatter-plot/scatter-plot.component';
 import {NoUnderscorePipe} from '@common/shared/pipes/no-underscore.pipe';
 import {HideHashPipe} from '@common/shared/pipes/hide-hash.pipe';
@@ -92,7 +95,17 @@ import {MatSelectModule} from '@angular/material/select';
 import {MatSidenavModule} from '@angular/material/sidenav';
 import {MatExpansionModule} from '@angular/material/expansion';
 import {MatInputModule} from '@angular/material/input';
-import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {
+  MetricVariantSelectorComponent
+} from '@common/experiments-compare/dumbs/metric-param-selector/metric-variant-selector.component';
+import {ParamSelectorComponent} from '@common/experiments-compare/dumbs/param-selector/param-selector.component';
+import {
+  ShowTooltipIfEllipsisDirective
+} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {MetricVariantToPathPipe} from '@common/shared/pipes/metric-variant-to-path.pipe';
+import {MetricResultToSelectedMetricPipe} from '@common/shared/pipes/metric-result-to-selected-metric.pipe';
+import {MetricVariantToNamePipe} from '@common/shared/pipes/metric-variant-to-name.pipe';
+import {DrawerComponent} from '@common/shared/ui-components/panel/drawer/drawer.component';
 
 export const COMPARE_STORE_KEY = 'experimentsCompare';
 export const COMPARE_CONFIG_TOKEN =
@@ -115,7 +128,7 @@ export const getCompareConfig = (userPreferences: UserPreferences) => ({
           return merge({}, nextState, savedState);
         }
         if (action.type.startsWith('EXPERIMENTS_COMPARE_')) {
-          localStorage.setItem(localStorageKey, JSON.stringify(pick(nextState, ['charts.settingsList', 'charts.scalarsHoverMode'])));
+          localStorage.setItem(localStorageKey, JSON.stringify(pick(nextState, ['charts.settingsList', 'charts.scalarsHoverMode', 'compareHeader.hideIdenticalRows'])));
         }
         return nextState;
       };
@@ -152,7 +165,6 @@ export const getCompareConfig = (userPreferences: UserPreferences) => ({
     TableDiffModule,
     ScrollingModule,
     CardModule,
-    DrawerModule,
     ExperimentSharedModule,
     ExperimentsCompareRoutingModule,
     ExperimentGraphsModule,
@@ -197,7 +209,14 @@ export const getCompareConfig = (userPreferences: UserPreferences) => ({
     MatSidenavModule,
     MatExpansionModule,
     MatInputModule,
-    ShowTooltipIfEllipsisDirective
+    MetricVariantSelectorComponent,
+    ParamSelectorComponent,
+    MatInputModule,
+    ShowTooltipIfEllipsisDirective,
+    MetricVariantToPathPipe,
+    MetricResultToSelectedMetricPipe,
+    MetricVariantToNamePipe,
+    DrawerComponent,
   ],
   providers: [
     {provide: COMPARE_CONFIG_TOKEN, useFactory: getCompareConfig, deps: [UserPreferences]},

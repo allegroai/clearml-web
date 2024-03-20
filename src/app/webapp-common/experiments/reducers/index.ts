@@ -9,7 +9,7 @@ import {TaskStatusEnum} from '~/business-logic/model/tasks/taskStatusEnum';
 import {CommonExperimentInfoState} from './common-experiment-info.reducer';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {ParamsItem} from '~/business-logic/model/tasks/paramsItem';
-import {selectRouterParams} from '../../core/reducers/router-reducer';
+import {selectRouterConfig, selectRouterParams} from '../../core/reducers/router-reducer';
 import {experimentsViewInitialState} from '@common/experiments/reducers/experiments-view.reducer';
 import {selectCompareAddTableFilters, selectCompareAddTableSortFields, selectIsCompare, selectIsModels,} from '../../experiments-compare/reducers';
 import {FilterMetadata} from 'primeng/api/filtermetadata';
@@ -32,9 +32,15 @@ export const selectExperimentsHiddenTableCols = createSelector(experimentsView, 
   (state, params) => state.hiddenProjectTableCols?.[params?.projectId] ?? experimentsViewInitialState.hiddenTableCols);
 export const selectMetricVariants = createSelector(experimentsView, state => state.metricVariants);
 export const selectMetricVariantsPlots = createSelector(experimentsView, state => state.metricVariantsPlots);
+export const selectExperimentViewMode = createSelector(selectRouterConfig,
+    config => config.at(-2) === 'compare' ? 'compare' : config.includes(':experimentId') ? 'info' : 'table');
+export const selectTableCompareView = createSelector(experimentsView, state => state.tableCompareView);
+export const selectMetricVariantForView = createSelector(selectExperimentViewMode, selectTableCompareView, selectMetricVariants, selectMetricVariantsPlots,
+  (viewMode, compareView, scalarVars, plotVars) => viewMode === 'compare' && compareView === 'plots' ? plotVars : scalarVars);
 export const selectCompareSelectedMetricsScalars = createSelector(experimentsView, selectRouterParams, (state, params) => state.compareSelectedMetrics?.[params?.projectId])
 export const selectCompareSelectedMetricsPlots = createSelector(experimentsView, selectRouterParams, (state, params) => state.compareSelectedMetricsPlots?.[params?.projectId])
-export const selectCompareSelectedMetrics = (viewMode: 'scalars' | 'plots') =>  createSelector(selectMetricVariants, selectMetricVariantsPlots, selectCompareSelectedMetricsScalars, selectCompareSelectedMetricsPlots,
+export const selectCompareSelectedMetrics = (viewMode: 'scalars' | 'plots') =>  createSelector(selectMetricVariants,
+  selectMetricVariantsPlots, selectCompareSelectedMetricsScalars, selectCompareSelectedMetricsPlots,
   (metricVariantsScalars, metricVariantsPlots, selectedMetricsScalars, selectedMetricsPlots): ISmCol[] => {
     const selectedMetricsState = viewMode === 'scalars' ? selectedMetricsScalars : selectedMetricsPlots;
     const metricVariants = viewMode === 'scalars' ? metricVariantsScalars : metricVariantsPlots;
@@ -48,7 +54,7 @@ export const selectCompareSelectedMetrics = (viewMode: 'scalars' | 'plots') =>  
     metricHash: selectedMetric.metric_hash,
     variantHash: selectedMetric.variant_hash,
     valueType: null
-  }, null), hidden: selectedMetric.hidden}));
+  }, null) as ISmCol, hidden: selectedMetric.hidden}));
 });
 export const selectRawExperimentsTableCols = createSelector(experimentsView, (state) => state.tableCols);
 export const selectExperimentsTableCols = createSelector(selectRawExperimentsTableCols, selectExperimentsHiddenTableCols, selectExperimentsTableColsWidth,
@@ -115,6 +121,10 @@ export const selectSelectedExperimentsDisableAvailable = createSelector(experime
 export const selectShowAllSelectedIsActive = createSelector(experimentsView, (state): boolean => state.showAllSelectedIsActive);
 export const selectNoMoreExperiments = createSelector(experimentsView, (state): boolean => state.noMoreExperiment);
 export const selectTableMode = createSelector(experimentsView, state => state.tableMode);
+export const selectTableCompareUrlParts = createSelector(
+  selectTableCompareView, selectSelectedExperiments, selectExperimentsList, selectRouterConfig,
+  (view, selected, experiments, routeConfig) => ({
+    view, selected: (selected.map(e=>e.id)) , experiments: experiments.map(e=>e.id), routeConfig }));
 export const selectShowCompareScalarSettings = createSelector(experimentsView, state => state.showCompareScalarSettings);
 export const selectCloneForceParent = createSelector(experimentsView, state => state.cloneForceParent);
 export const selectExperimentInfoDataFreeze = createSelector(experimentInfo, (state): IExperimentInfo => state.infoDataFreeze);

@@ -1,14 +1,11 @@
-import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit,} from '@angular/core';
-import {select, Store} from '@ngrx/store';
+import {AfterViewInit, ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
 import {experimentListUpdated} from '../../actions/experiments-compare-details.actions';
 import {selectModelsDetails} from '../../reducers';
 import {filter, tap} from 'rxjs/operators';
-import {ExperimentCompareTree,} from '~/features/experiments-compare/experiments-compare-models';
+import {ExperimentCompareTree} from '~/features/experiments-compare/experiments-compare-models';
 import {convertmodelsArrays, getAllKeysEmptyObject, isDetailsConverted} from '../../jsonToDiffConvertor';
 import {ExperimentCompareBase} from '../experiment-compare-base';
-import {ActivatedRoute, Router} from '@angular/router';
 import {ConfigurationItem} from '~/business-logic/model/tasks/configurationItem';
-import {RefreshService} from '@common/core/services/refresh.service';
 import {LIMITED_VIEW_LIMIT} from '@common/experiments-compare/experiments-compare.constants';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
 import {ModelDetail} from '@common/experiments-compare/shared/experiments-compare-details.model';
@@ -50,6 +47,7 @@ export class ModelCompareDetailsComponent extends ExperimentCompareBase implemen
 
       this.resetComponentState(models);
       this.calculateTree(models);
+      this.nativeWidth = Math.max(this.treeCardBody?.getBoundingClientRect().width, 410);
     });
   }
 
@@ -72,6 +70,7 @@ export class ModelCompareDetailsComponent extends ExperimentCompareBase implemen
       general: this.buildSectionTree(experiment, 'general', mergedExperiment),
       labels: this.buildSectionTree(experiment, 'labels', mergedExperiment),
       metadata: this.buildSectionTree(experiment, 'metadata', mergedExperiment),
+      lineage: this.buildSectionTree(experiment, 'lineage', mergedExperiment),
     };
   }
 }

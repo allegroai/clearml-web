@@ -1,58 +1,86 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {guessAPIServerURL, HTTP} from '~/app.constants';
+import {ChangeDetectionStrategy, Component, EventEmitter, inject, Input, Output} from '@angular/core';
 import {CredentialKeyExt} from '@common/core/reducers/common-auth-reducer';
 import {ConfigurationService} from '@common/shared/services/configuration.service';
+import {NavbarItemComponent} from '@common/shared/ui-components/panel/navbar-item/navbar-item.component';
+import {CopyClipboardComponent} from '@common/shared/ui-components/indicators/copy-clipboard/copy-clipboard.component';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatInputModule} from '@angular/material/input';
+import {FormsModule} from '@angular/forms';
 
 
 @Component({
   selector: 'sm-admin-dialog-template',
   templateUrl: './admin-dialog-template.component.html',
   styleUrls: ['./admin-dialog-template.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    NavbarItemComponent,
+    CopyClipboardComponent,
+    MatFormFieldModule,
+    MatInputModule,
+    FormsModule
+  ]
 })
-export class AdminDialogTemplateComponent implements OnInit {
+export class AdminDialogTemplateComponent {
+  protected configService = inject(ConfigurationService);
+
   public clipboardText: string;
   public label: string;
 
-  API_BASE_URL = HTTP.API_BASE_URL_NO_VERSION;
-  fileBaseUrl = HTTP.FILE_BASE_URL;
   WEB_SERVER_URL = window.location.origin;
   jupyterCode: string;
-  private _newCredential: CredentialKeyExt;
 
-  @Input() set newCredential(cred: CredentialKeyExt) {
-    this.jupyterCode =         `%env CLEARML_WEB_HOST=${this.WEB_SERVER_URL }
-%env CLEARML_API_HOST=${this.displayedServerUrls?.apiServer || this.API_BASE_URL }
-%env CLEARML_FILES_HOST=${this.displayedServerUrls?.filesServer || this.fileBaseUrl}${cred?.label? ('\n# ' + cred?.label):''}
-%env CLEARML_API_ACCESS_KEY=${cred?.access_key || `<You’re API access key>`}
-%env CLEARML_API_SECRET_KEY=${cred?.secret_key || `<You’re API secret key>`}`;
-    this._newCredential = cred;
-  }
-
-  get newCredential() {
-    return this._newCredential;
-  }
+  @Input() credentialName: string;
+  @Input() newCredential: CredentialKeyExt;
+  @Input() credentialsComment: string;
+  @Input() serviceUserMode: boolean;
 
   @Output() updateLabel = new EventEmitter<{ credential: CredentialKeyExt; label: string }>();
-  public displayedServerUrls: { apiServer?: string; filesServer?: string };
   isJupyter: boolean;
-
-  constructor(private configService: ConfigurationService) {
-    if (this.API_BASE_URL === '/api') {
-      this.API_BASE_URL = guessAPIServerURL();
-    }
-  }
 
   onUpdateLabel() {
     this.updateLabel.emit({credential: this.newCredential, label: this.label});
   }
 
-  ngOnInit(): void {
-    this.displayedServerUrls = this.configService.getStaticEnvironment().displayedServerUrls;
-
-  }
-
   setIsJupyter(jupyter: boolean) {
     this.isJupyter = jupyter;
+  }
+
+  getCopyContent() {
+    let res =  'api {\n';
+    if (this.credentialsComment) {
+      res += `  ${this.credentialsComment}\n`;
+    }
+    res += `  web_server: ${this.WEB_SERVER_URL}
+  api_server: ${this.configService.apiServerUrl()}\n`;
+    const filesServer = this.configService.fileServerUrl();
+    if (filesServer) {
+      res += `  files_server: ${filesServer}\n`;
+    }
+    if (this.newCredential.label) {
+      res += `  # ${this.newCredential.label}\n`;
+    }
+    res += `  credentials {
+    "access_key" = "${this.newCredential.access_key}"
+    "secret_key" = "${this.newCredential.secret_key}"
+  }
+}`;
+    return res;
+  }
+
+  getJupiterCode() {
+    let res = `%env CLEARML_WEB_HOST=${this.WEB_SERVER_URL}
+%env CLEARML_API_HOST=${this.configService.apiServerUrl()}\n`;
+    const filesServer = this.configService.fileServerUrl();
+    if (filesServer) {
+      res += `%env CLEARML_FILES_HOST=${filesServer}\n`;
+    }
+    if(this.newCredential.label) {
+      res += `# ${this.newCredential.label}\n`;
+    }
+    res += `%env CLEARML_API_ACCESS_KEY=${this.newCredential?.access_key || '<You\'re API access key>'}
+%env CLEARML_API_SECRET_KEY=${this.newCredential?.secret_key || '<You\'re API secret key>'}`;
+    return res;
   }
 }

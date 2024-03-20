@@ -33,7 +33,7 @@ export interface GraphViewerData {
   darkTheme: boolean;
   isCompare: boolean;
   moveLegendToTitle: boolean;
-  embedFunction: (data: {xaxis: ScalarKeyEnum; domRect: DOMRect}) => void;
+  embedFunction: (data: { xaxis: ScalarKeyEnum; domRect: DOMRect }) => void;
   legendConfiguration: Partial<ExtLegend & { noTextWrap: boolean }>;
 }
 
@@ -62,11 +62,13 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
   private isForward: boolean = true;
   private charts: ExtFrame[];
   public index: number = null;
-  public embedFunction: (data: {xaxis: ScalarKeyEnum; domRect: DOMRect}) => void;
+  public embedFunction: (data: { xaxis: ScalarKeyEnum; domRect: DOMRect }) => void;
   public yAxisType: AxisType;
   public showSmooth: boolean;
   protected readonly smoothTypeEnum = smoothTypeEnum;
   public smoothType: SmoothTypeEnum;
+  private _chart: ExtFrame;
+  public title: string;
 
   @HostListener('document:keydown', ['$event'])
   onKeyDown(e: KeyboardEvent) {
@@ -93,7 +95,15 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
     this.height = this.modalContainer.nativeElement.clientHeight - 80;
   }
 
-  public chart: ExtFrame;
+  public set chart(chart: ExtFrame) {
+    this._chart = chart;
+    this.title = this.getTitle(chart);
+  }
+
+  get chart() {
+    return this._chart;
+  }
+
   public id: string;
   public darkTheme: boolean;
   public chart$: Observable<ExtFrame>;
@@ -113,14 +123,14 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
     {
       name: 'Wall time',
       value: ScalarKeyEnum.IsoTime
-    },
+    }
   ];
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: GraphViewerData,
     public dialogRef: MatDialogRef<GraphViewerComponent>,
     private store: Store,
-    private cdr: ChangeDetectorRef,
+    private cdr: ChangeDetectorRef
   ) {
     this.chart$ = this.store.select(selectFullScreenChart);
     this.currentPlotEvent$ = this.store.select(selectCurrentPlotViewer);
@@ -163,7 +173,7 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
     if (this.isFullDetailsMode) {
       this.store.dispatch(getGraphDisplayFullDetailsScalars({
         task: this.data.chart.data[0].task,
-        metric: {metric: (this.data.chart.data[0].originalMetric ?? this.data.chart.metric)},
+        metric: {metric: (this.data.chart.data[0].originalMetric ?? this.data.chart.metric)}
       }));
     }
     this.sub.add(this.xAxisType$.subscribe((xType) => this.xAxisType = xType));
@@ -179,9 +189,9 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
         parsingError && this.store.dispatch(addMessage('warn', `Couldn't read all plots. Please make sure all plots are properly formatted (NaN & Inf aren't supported).`, [], true));
         Object.values(graphs).forEach((graphss: ExtFrame[]) => {
           graphss.forEach((graph: ExtFrame) => {
-            graph.data?.forEach((d, i) => d.visible = this.data.chart.data[i]?.visible)
+            graph.data?.forEach((d, i) => d.visible = this.data.chart.data[i]?.visible);
             // if (this.data.chart?.layout?.showlegend === false) {
-              graph.layout.showlegend = this.data.chart?.layout?.showlegend ?? false;
+            graph.layout.showlegend = this.data.chart?.layout?.showlegend ?? false;
             // }
             if ((graph?.layout?.images?.length ?? 0) > 0) {
               graph.layout.images.forEach((image: Plotly.Image) => {
@@ -245,7 +255,6 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
           this.singleGraph.shouldRefresh = true;
         }
         this.chart = cloneDeep(chart);
-        console.log(this.chart?.data[0].line?.color);
         this.cdr.detectChanges();
       }));
     this.sub.add(this.iterationChanged$
@@ -382,5 +391,25 @@ export class GraphViewerComponent implements AfterViewInit, OnInit, OnDestroy {
   selectSmoothType($event: MatSelectChange) {
     this.smoothWeight = [smoothTypeEnum.exponential, smoothTypeEnum.any].includes($event.value) ? 0 : 10;
     this.smoothType = $event.value;
+  }
+
+  private getTitle(chart: ExtFrame) {
+    if (!chart?.layout) {
+      return '';
+    }
+    if (this.isCompare) {
+      if (this.showSmooth && this.data.id !== 'report-widget') {
+        return chart.layout.title as string;
+      }
+      return `${chart.metric ?? ''}${chart.metric !== chart.layout.title ? (chart.metric && chart.layout.title ? ' - ' : '') + chart.layout.title : ''}
+      ${chart.variants?.length > 0 ? '' : chart.variant ? ' - ' + chart.variant : ''}`;
+    } else {
+      if (this.darkTheme) {
+        return chart?.variants?.length > 1 ? chart.variants.join(', ') : chart?.layout?.title as string || chart?.metric;
+      } else {
+        return `${chart.metric}${chart.metric !== chart.layout.title ? (chart.metric && chart.layout.title ? ' - ' : '') + chart.layout.title : ''}
+      ${chart.variants?.length > 1 ? ' - ' + chart.variants.join(', ') : ''}`;
+      }
+    }
   }
 }

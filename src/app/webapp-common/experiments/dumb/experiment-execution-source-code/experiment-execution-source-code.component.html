@@ -1,94 +1,124 @@
 <ng-form #sourceCodeForm="ngForm">
   <div [class.source-code-container]="editable">
     <sm-labeled-row label="REPOSITORY">
-      <div *ngIf="!editable">{{formData?.repository}}</div>
-      <mat-form-field appearance="outline" *ngIf="editable" class="w-100 no-bottom">
-        <input matInput [ngModel]="formData?.repository" name="repository">
-      </mat-form-field>
+      @if (!editable) {
+        <div>{{formData?.repository}}</div>
+      }
+      @if (editable) {
+        <mat-form-field appearance="outline" class="w-100 no-bottom">
+          <input matInput [ngModel]="formData?.repository" name="repository">
+        </mat-form-field>
+      }
     </sm-labeled-row>
     <sm-labeled-row [label]="editable ? 'COMMIT' : (formData?.scriptType| replaceViaMapPipe:flagNameMap)">
-      <div *ngIf="!editable">
-        <div [ngSwitch]="formData?.scriptType">
-          <div *ngSwitchCase="sourceTypesEnum.VersionNum">
-            {{formData?.version_num}} {{formData?.branch ? ' (in branch ' + formData?.branch + ')' : ''}}
-          </div>
-          <div *ngSwitchCase="sourceTypesEnum.Branch">
-            {{formData?.branch ? 'Latest in branch ' + formData?.branch : '' }}
-          </div>
-          <div *ngSwitchCase="sourceTypesEnum.Tag">
-            <ng-container *ngIf="formData?.version_num; else: onlyTag">{{formData?.tag}} (commit id {{formData?.version_num}})</ng-container>
-            <ng-template #onlyTag>{{formData?.tag}}</ng-template>
+      @if (!editable) {
+        <div>
+          <div>
+            @switch (formData?.scriptType) {
+              @case (sourceTypesEnum.VersionNum) {
+                <div>
+                  {{formData?.version_num}} {{formData?.branch ? ' (in branch ' + formData?.branch + ')' : ''}}
+                </div>
+              }
+              @case (sourceTypesEnum.Branch) {
+                <div>
+                  {{formData?.branch ? 'Latest in branch ' + formData?.branch : '' }}
+                </div>
+              }
+              @case (sourceTypesEnum.Tag) {
+                <div>
+                  @if (formData?.version_num) {
+                    {{formData?.tag}} (commit id {{formData?.version_num}})
+                  } @else {
+                    {{formData?.tag}}
+                  }
+                </div>
+              }
+            }
           </div>
         </div>
-      </div>
-      <div class="d-flex w-100" *ngIf="editable" style="gap: 12px">
-        <mat-form-field appearance="outline" class="flex-grow-1">
-          <mat-label>Type</mat-label>
-          <mat-select #scriptType [ngModel]="formData?.scriptType" panelClass="light-theme" name="scriptType">
-            <mat-option *ngFor="let type of scriptTypeOptions" [value]="type.value">{{type.label}}</mat-option>
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline"
-                        [class.d-none]="scriptType.value !== sourceTypesEnum.VersionNum" class="flex-grow-1">
-          <mat-error>Required</mat-error>
-          <mat-label>Commit ID</mat-label>
-          <input matInput type="text"
-                 name="version_num"
-                 (blur)="resetOtherScriptParameters(sourceTypesEnum.VersionNum)"
-                 [ngModel]="formData?.version_num"
-                 [required]="(!!formData?.repository) && scriptType.value === sourceTypesEnum.VersionNum"
-                 [placeholder]="scriptPlaceHolders[sourceTypesEnum.VersionNum]">
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" [class.d-none]="scriptType.value !== sourceTypesEnum.Branch" class="flex-grow-1">
-          <mat-label>Branch</mat-label>
-          <mat-error>Required</mat-error>
-          <input matInput type="text"
-                 name="branch"
-                 (blur)="resetOtherScriptParameters(sourceTypesEnum.Branch)"
-                 [ngModel]="formData?.branch"
-                 [required]="(!!formData?.repository) && scriptType.value === sourceTypesEnum.Branch"
-                 [placeholder]="scriptPlaceHolders[sourceTypesEnum.Branch]">
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" [class.d-none]="scriptType.value !== sourceTypesEnum.Tag" class="flex-grow-1">
-          <mat-error>Required</mat-error>
-          <mat-label>Tag</mat-label>
-          <input matInput type="text"
-                 name="tag"
-                 (blur)="resetOtherScriptParameters(sourceTypesEnum.Tag)"
-                 [ngModel]="formData?.tag"
-                 [required]="(!!formData?.repository) && scriptType.value === sourceTypesEnum.Tag"
-                 [placeholder]="scriptPlaceHolders[sourceTypesEnum.Tag]">
-        </mat-form-field>
-
-      </div>
+      }
+      @if (editable) {
+        <div class="d-flex w-100" style="gap: 12px">
+          <mat-form-field appearance="outline" class="flex-grow-1">
+            <mat-label>Type</mat-label>
+            <mat-select #scriptType [ngModel]="formData?.scriptType" panelClass="light-theme" name="scriptType">
+              @for (type of scriptTypeOptions; track type) {
+                <mat-option [value]="type.value">{{type.label}}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline"
+            [class.d-none]="scriptType.value !== sourceTypesEnum.VersionNum" class="flex-grow-1">
+            <mat-error>Required</mat-error>
+            <mat-label>Commit ID</mat-label>
+            <input matInput type="text"
+              name="version_num"
+              (blur)="resetOtherScriptParameters(sourceTypesEnum.VersionNum)"
+              [ngModel]="formData?.version_num"
+              [required]="(!!formData?.repository) && scriptType.value === sourceTypesEnum.VersionNum"
+              [placeholder]="scriptPlaceHolders[sourceTypesEnum.VersionNum]">
+          </mat-form-field>
+          <mat-form-field appearance="outline" [class.d-none]="scriptType.value !== sourceTypesEnum.Branch" class="flex-grow-1">
+            <mat-label>Branch</mat-label>
+            <mat-error>Required</mat-error>
+            <input matInput type="text"
+              name="branch"
+              (blur)="resetOtherScriptParameters(sourceTypesEnum.Branch)"
+              [ngModel]="formData?.branch"
+              [required]="(!!formData?.repository) && scriptType.value === sourceTypesEnum.Branch"
+              [placeholder]="scriptPlaceHolders[sourceTypesEnum.Branch]">
+          </mat-form-field>
+          <mat-form-field appearance="outline" [class.d-none]="scriptType.value !== sourceTypesEnum.Tag" class="flex-grow-1">
+            <mat-error>Required</mat-error>
+            <mat-label>Tag</mat-label>
+            <input matInput type="text"
+              name="tag"
+              (blur)="resetOtherScriptParameters(sourceTypesEnum.Tag)"
+              [ngModel]="formData?.tag"
+              [required]="(!!formData?.repository) && scriptType.value === sourceTypesEnum.Tag"
+              [placeholder]="scriptPlaceHolders[sourceTypesEnum.Tag]">
+          </mat-form-field>
+        </div>
+      }
     </sm-labeled-row>
     <sm-labeled-row label="SCRIPT PATH">
-      <div *ngIf="!editable">{{formData?.entry_point}}</div>
-      <mat-form-field appearance="outline" *ngIf="editable" class="w-100 no-bottom">
-        <input matInput type="text" [ngModel]="formData?.entry_point" name="entry_point">
-      </mat-form-field>
+      @if (!editable) {
+        <div>{{formData?.entry_point}}</div>
+      }
+      @if (editable) {
+        <mat-form-field appearance="outline" class="w-100 no-bottom">
+          <input matInput type="text" [ngModel]="formData?.entry_point" name="entry_point">
+        </mat-form-field>
+      }
     </sm-labeled-row>
     <sm-labeled-row label="WORKING DIRECTORY">
-      <div *ngIf="!editable">{{formData?.working_dir}}</div>
-      <mat-form-field appearance="outline" *ngIf="editable" class="w-100 no-bottom">
-        <input matInput type="text" [ngModel]="formData?.working_dir" name="working_dir">
-      </mat-form-field>
+      @if (!editable) {
+        <div>{{formData?.working_dir}}</div>
+      }
+      @if (editable) {
+        <mat-form-field appearance="outline" class="w-100 no-bottom">
+          <input matInput type="text" [ngModel]="formData?.working_dir" name="working_dir">
+        </mat-form-field>
+      }
     </sm-labeled-row>
     <sm-labeled-row label="BINARY">
-      <div *ngIf="!editable" class="d-flex align-items-center">
-        {{formData?.binary}}
-        <i
-          *ngIf="formData?.binary && !formData?.binary?.match(pythonRegexp)"
-          class="al-icon al-ico-alert-outline sm ms-2"
-          smTooltip="Please make sure this is a valid python interpreter binary"
-        ></i>
-      </div>
-      <mat-form-field appearance="outline" *ngIf="editable" class="col-24 no-bottom">
-        <input matInput type="text" [ngModel]="formData?.binary" name="binary">
-      </mat-form-field>
+      @if (!editable) {
+        <div class="d-flex align-items-center">
+          {{formData?.binary}}
+          @if (formData?.binary && !formData?.binary?.match(pythonRegexp)) {
+            <i
+              class="al-icon al-ico-alert-outline sm ms-2"
+              smTooltip="Please make sure this is a valid python interpreter binary"
+            ></i>
+          }
+        </div>
+      }
+      @if (editable) {
+        <mat-form-field appearance="outline" class="col-24 no-bottom">
+          <input matInput type="text" [ngModel]="formData?.binary" name="binary">
+        </mat-form-field>
+      }
     </sm-labeled-row>
   </div>
 </ng-form>

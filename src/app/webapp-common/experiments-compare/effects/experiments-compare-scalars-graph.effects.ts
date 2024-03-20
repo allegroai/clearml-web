@@ -4,10 +4,17 @@ import {activeLoader, deactivateLoader, setServerError} from '../../core/actions
 import {catchError, mergeMap, map} from 'rxjs/operators';
 import {requestFailed} from '../../core/actions/http.actions';
 import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
-import {getExperimentsHyperParams, setHyperParamsList, setMetricsList, setTasks} from '../actions/experiments-compare-scalars-graph.actions';
+import {
+  getExperimentsHyperParams,
+  setHyperParamsList,
+  setMetricsList,
+  setMetricsResults,
+  setTasks
+} from '../actions/experiments-compare-scalars-graph.actions';
 import {GroupedHyperParams, HyperParams} from '../reducers/experiments-compare-charts.reducer';
 import {Store} from '@ngrx/store';
 import {selectSelectedSettingsMetric} from '@common/experiments-compare/reducers';
+import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 
 @Injectable()
 export class ExperimentsCompareScalarsGraphEffects {
@@ -20,33 +27,68 @@ export class ExperimentsCompareScalarsGraphEffects {
     map(action => activeLoader(action.type))
   ));
 
-  loadMovies$ = createEffect(() => this.actions$.pipe(
+  getExperimentsHyperParams$ = createEffect(() => this.actions$.pipe(
     ofType(getExperimentsHyperParams),
     concatLatestFrom(() => this.store.select(selectSelectedSettingsMetric)),
     mergeMap(([action, /*metric*/]) => this.tasksApiService.tasksGetAllEx({
-      id: action.experimentsIds,
+        id: action.experimentsIds,
         // eslint-disable-next-line @typescript-eslint/naming-convention
-      only_fields: ['last_metrics', 'name', 'last_iteration', 'hyperparams'],
-      // ...(action.scatter && metric && {[`last_metrics.${metric.path}.value`]: [Number.MIN_VALUE, null]})
-    })
-      .pipe(
-        // map(res => res.tasks)),
-        mergeMap(res => {
-          const metricsList = this.getMetricOptions(res.tasks);
-          const paramsHasDiffs = this.getParametersHasDiffs(res.tasks);
-          return [
-            setTasks({tasks: res.tasks}),
-            setMetricsList({metricsList}),
-            setHyperParamsList({hyperParams: paramsHasDiffs}),
-            deactivateLoader(action.type)];
-        }),
-        catchError(error => [
-          requestFailed(error), deactivateLoader(action.type),
-          setServerError(error, null, 'Failed to get Compared Experiments')
-        ])
-      )
+        only_fields: ['last_metrics', 'name', 'last_iteration', 'hyperparams'],
+        // ...(action.scatter && metric && {[`last_metrics.${metric.path}.value`]: [Number.MIN_VALUE, null]})
+      })
+        .pipe(
+          // map(res => res.tasks)),
+          mergeMap(res => {
+            const metricsList = this.getMetricOptions(res.tasks);
+            const metricVariantsResults = this.getMetricResults(res.tasks);
+            const paramsHasDiffs = this.getParametersHasDiffs(res.tasks);
+            return [
+              setTasks({tasks: res.tasks}),
+              setMetricsList({metricsList}),
+              setMetricsResults({metricVariantsResults: metricVariantsResults}),
+              setHyperParamsList({hyperParams: paramsHasDiffs}),
+              deactivateLoader(action.type)];
+          }),
+          catchError(error => [
+            requestFailed(error), deactivateLoader(action.type),
+            setServerError(error, null, 'Failed to get Compared Experiments')
+          ])
+        )
     ))
   );
+
+  getMetricResults(tasks): Array<MetricVariantResult> {
+    const metrics = [];
+    for (const task of tasks) {
+      for (const metric in task.last_metrics) {
+        for (const variant in task.last_metrics[metric]) {
+          const metricName = task.last_metrics[metric][variant].metric;
+          const variantName = task.last_metrics[metric][variant].variant;
+          metrics.push({
+            metric: metricName,
+            metric_hash: metric,
+            variant: variantName,
+            variant_hash: variant
+          });
+
+          //     !metrics[metricName] && (metrics[metricName] = {});
+          //     if (!metrics[metricName][variantName]) {
+          //       metrics[metricName][variantName] = {};
+          //       metrics[metricName][variantName]['name'] = `${metricName}/${variantName}`;
+          //       metrics[metricName][variantName]['path'] = `${metric}.${variant}`;
+        }
+      }
+    }
+
+    // return Object.keys(metrics).sort((a, b) => a.toLowerCase() > b.toLowerCase() ? 1 : -1).map(metricName => ({
+    //   metricName,
+    //   variants: Object.keys(metrics[metricName]).sort().map(variant => ({
+    //     name: variant,
+    //     value: metrics[metricName][variant]
+    //   }))
+    // }));
+    return metrics;
+  }
 
   getMetricOptions(tasks) {
     const metrics = {};

@@ -9,7 +9,9 @@ import {FilterPipe} from '@common/shared/pipes/filter.pipe';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatRadioModule} from '@angular/material/radio';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
-import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
+import {
+  ShowTooltipIfEllipsisDirective
+} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 
 export type HyperParams<T> = ReadonlyMap<string, T[]>;
 
@@ -31,7 +33,7 @@ export type HyperParams<T> = ReadonlyMap<string, T[]>;
     MatRadioModule,
     NgIf,
     ClickStopPropagationDirective,
-    ShowTooltipIfEllipsisDirective
+    ShowTooltipIfEllipsisDirective,
   ]
 })
 export class GroupedCheckedFilterListComponent {
@@ -68,7 +70,7 @@ export class GroupedCheckedFilterListComponent {
   @Input() filterItemsLabel: string;
   @Input() selectFilteredItems: boolean;
 
-  @Input() set itemsList(itemsList) {
+  @Input() set itemsList(itemsList: { [section: string]: any }) {
     this._itemsList = itemsList;
     if (this.selectedItemsList && itemsList) {
       this.itemsObjectList = this.getItemsObjectList(itemsList);
@@ -79,7 +81,7 @@ export class GroupedCheckedFilterListComponent {
     return this._itemsList;
   }
 
-  private getItemsObjectList = (itemsList: any[]) =>
+  private getItemsObjectList = (itemsList: { [section: string]: any }) =>
     Object.entries(itemsList).reduce((acc, [section, params]) => {
       acc[section] = Object.entries(params).map(([paramKey,]) => {
         const search = `${this.selectedItemsListPrefix}${section}.${paramKey}`;
@@ -125,4 +127,5 @@ export class GroupedCheckedFilterListComponent {
     this.expanded[name] = !this.expanded[name];
   }
 
+  protected readonly Object = Object;
 }

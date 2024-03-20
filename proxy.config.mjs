@@ -1,7 +1,7 @@
-const fs = require('fs');
+import * as fs from 'fs';
 
 const targets = [
-  'https://api.trains-master.hosted.allegro.ai',            // 1
+  'http://localhost:8081',     // 1
 ];
 
 const PROXY_CONFIG = {
@@ -30,15 +30,17 @@ const PROXY_CONFIG = {
 };
 
 targets.forEach((target, i) => {
-  const path = `/service/${i+1}/api`;
-  PROXY_CONFIG[path + '/*'] = {
+  const path = `/service/${i + 1}/api`;
+  PROXY_CONFIG[path] = {
     target: target,
-    secure: false,
+    secure: true,
     changeOrigin: true,
+    cookieDomainRewrite: 'localhost',
+    logLevel: 'debug',
     pathRewrite: {
-      [path]: ''
+      [`^${path}`]: ''
     }
   };
 });
 
-module.exports = PROXY_CONFIG;
+export default PROXY_CONFIG;

@@ -1,6 +1,7 @@
 import {createAction, props} from '@ngrx/store';
 import {GroupedHyperParams, MetricOption} from '../reducers/experiments-compare-charts.reducer';
-import {MetricValueType} from '@common/experiments-compare/experiments-compare.constants';
+import {MetricValueType, SelectedMetricVariant} from '@common/experiments-compare/experiments-compare.constants';
+import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 
 export const EXPERIMENTS_COMPARE_SCALARS_GRAPH = 'EXPERIMENTS_COMPARE_SCALARS_GRAPH_';
 
@@ -13,13 +14,28 @@ export const setMetricsList = createAction(
   EXPERIMENTS_COMPARE_SCALARS_GRAPH + 'SET_METRICS_LIST',
   props<{ metricsList: MetricOption[] }>()
 );
+
+export const setMetricsResults = createAction(
+  EXPERIMENTS_COMPARE_SCALARS_GRAPH + 'SET_METRICS_RESULTS',
+  props<{   metricVariantsResults: Array<MetricVariantResult> }>()
+);
 export const setTasks = createAction(
   EXPERIMENTS_COMPARE_SCALARS_GRAPH + 'SET_TASKS',
   props<{ tasks: any }>()
 );
-export const setvalueType = createAction(
+export const setValueType = createAction(
   EXPERIMENTS_COMPARE_SCALARS_GRAPH + 'SET_VALUE_TYPE',
   props<{ valueType: MetricValueType }>()
+);
+
+export const setParamsHoverInfo = createAction(
+  EXPERIMENTS_COMPARE_SCALARS_GRAPH + 'SET_PARAMS_HOVER_INFO',
+  props<{ paramsHoverInfo: string[] }>()
+);
+
+export const setMetricsHoverInfo = createAction(
+  EXPERIMENTS_COMPARE_SCALARS_GRAPH + 'SET_METRICS_HOVER_INFO',
+  props<{ metricsHoverInfo: SelectedMetricVariant[] }>()
 );
 export const setHyperParamsList = createAction(
   EXPERIMENTS_COMPARE_SCALARS_GRAPH + 'SET_PARAMS_LIST',

@@ -37,6 +37,6 @@ export class ExperimentArtifactsNavbarComponent implements OnChanges{
   }
 
   ngOnChanges(): void {
-    this.noItemsMode = this.outputModels?.length === 0 && this.inputModels?.length === 0 && this.dataAuditArtifacts?.length === 0 && this.otherArtifacts?.length === 0;
+    this.noItemsMode = this.outputModels?.length === 0 && this.inputModels?.length === 0 ;
   }
 }

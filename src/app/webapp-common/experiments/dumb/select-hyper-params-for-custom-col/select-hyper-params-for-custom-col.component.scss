@@ -1,5 +1,8 @@
 @import "variables";
-
+:host-context(.normal-size){
+  display: block;
+  height: 480px;
+}
 :host {
   display: block;
   height: 640px;

@@ -2,7 +2,7 @@ import {
   ChangeDetectorRef,
   Component,
   EventEmitter,
-  HostListener,
+  HostListener, inject,
   Input,
   Output,
   Renderer2,
@@ -21,13 +21,14 @@ import {
 } from '@common/shared/components/markdown-editor/markdown-cheat-sheet-dialog/markdown-cheat-sheet-dialog.component';
 import {getBaseName} from '@common/shared/utils/shared-utils';
 import * as marked from 'marked';
-import * as DOMPurify from 'dompurify';
+import DOMPurify from 'dompurify';
 import {NgClass, NgForOf, NgIf} from '@angular/common';
 import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 import {FormsModule} from '@angular/forms';
 import {MatMenuModule} from '@angular/material/menu';
 import {BaseNamePipe} from '@common/shared/pipes/base-name.pipe';
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
+import {ReportCodeEmbedBaseService} from '@common/shared/services/report-code-embed-base.service';
 
 const BREAK_POINT = 990;
 
@@ -50,6 +51,10 @@ const BREAK_POINT = 990;
   ]
 })
 export class MarkdownEditorComponent {
+  private reportService = inject(ReportCodeEmbedBaseService);
+  private renderer = inject( Renderer2);
+  protected cdr = inject( ChangeDetectorRef);
+  protected dialog = inject( MatDialog);
   private originalInfo: string;
   private ready: boolean = false;
   private preview: Element;
@@ -75,7 +80,7 @@ export class MarkdownEditorComponent {
   public isExpand: boolean = false;
   public duplicateNames: boolean;
   public postRender = (dirty: string): string => {
-    return DOMPurify.sanitize(dirty, { ADD_TAGS: ["iframe"], ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling'] })
+    return DOMPurify.sanitize(dirty, { ADD_TAGS: ['iframe'], ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling'], FORBID_ATTR: ['action'] })
   };
 
 
@@ -125,13 +130,21 @@ export class MarkdownEditorComponent {
     }
   }
 
-  constructor(
-    private renderer: Renderer2,
-    protected cdr: ChangeDetectorRef,
-    protected dialog: MatDialog,
-  ) {
+  constructor() {
     window['marked'] = marked.marked;
     this.editMode = false;
+
+    const widgetOrigin = this.reportService.getUrl().toString()
+    DOMPurify.addHook(
+      'uponSanitizeElement',
+      (currentNode, hookEvent) => {
+        const iframe = currentNode as HTMLIFrameElement;
+        if (hookEvent.tagName === 'iframe' && !iframe.src.startsWith(widgetOrigin)) {
+          iframe.src = '';
+        }
+        return currentNode;
+      }
+    );
   }
 
   save() {

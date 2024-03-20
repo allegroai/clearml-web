@@ -42,4 +42,19 @@
     top: 1px;
     left: -2px;
   }
+
+  .btn-delete {
+    background-color: $strong-red;
+    color: #fff;
+
+    &:hover {
+      background-color: darken($strong-red, 10%);
+      color: #fff;
+    }
+
+    &.disabled-button {
+      pointer-events: none;
+      opacity: 0.4;
+    }
+  }
 }

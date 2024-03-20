@@ -1,5 +1,32 @@
 import {AfterViewInit, ChangeDetectionStrategy, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {selectActiveParentsFilter, selectCompareSelectedMetrics, selectCustomColumns, selectExperimentsList, selectExperimentsParents, selectExperimentsTableColsOrder, selectExperimentsTags, selectExperimentsTypes, selectFilteredTableCols, selectHyperParamsOptions, selectHyperParamsVariants, selectIsExperimentInEditMode, selectMetricVariants, selectMetricVariantsPlots, selectNoMoreExperiments, selectSelectedExperiments, selectSelectedExperimentsDisableAvailable, selectSelectedTableExperiment, selectShowAllSelectedIsActive, selectShowCompareScalarSettings, selectSplitSize, selectTableFilters, selectTableMode, selectTableRefreshList, selectTableSortFields} from './reducers';
+import {
+  selectActiveParentsFilter,
+  selectCompareSelectedMetrics,
+  selectCustomColumns,
+  selectExperimentsList,
+  selectExperimentsParents,
+  selectExperimentsTableColsOrder,
+  selectExperimentsTags,
+  selectExperimentsTypes,
+  selectFilteredTableCols,
+  selectHyperParamsOptions,
+  selectHyperParamsVariants,
+  selectIsExperimentInEditMode,
+  selectMetricVariantForView,
+  selectMetricVariants,
+  selectMetricVariantsPlots,
+  selectNoMoreExperiments,
+  selectSelectedExperiments,
+  selectSelectedExperimentsDisableAvailable,
+  selectSelectedTableExperiment,
+  selectShowAllSelectedIsActive,
+  selectShowCompareScalarSettings,
+  selectSplitSize, selectTableCompareView,
+  selectTableFilters,
+  selectTableMode,
+  selectTableRefreshList,
+  selectTableSortFields
+} from './reducers';
 import {selectCompanyTags, selectIsArchivedMode, selectIsDeepMode, selectProjectSystemTags, selectSelectedProjectId, selectTagsFilterByProject} from '../core/reducers/projects.reducer';
 import {ColHeaderTypeEnum, ISmCol, TableSortOrderEnum} from '../shared/ui-components/data/table/table.consts';
 import {Params} from '@angular/router';
@@ -13,7 +40,14 @@ import {SearchState, selectSearchQuery} from '../common-search/common-search.red
 import {ITableExperiment} from './shared/common-experiment-model.model';
 import {selectIsSharedAndNotOwner, selectMetricsLoading, selectSelectedExperiment} from '~/features/experiments/reducers';
 import * as experimentsActions from './actions/common-experiments-view.actions';
-import {addProjectsTag, getSelectedExperiments, setTableCols, tableFilterChanged, toggleCompareScalarSettings} from './actions/common-experiments-view.actions';
+import {
+  addProjectsTag,
+  getSelectedExperiments,
+  setCompareView,
+  setTableCols,
+  tableFilterChanged,
+  toggleCompareScalarSettings
+} from './actions/common-experiments-view.actions';
 import {MetricVariantResult} from '~/business-logic/model/projects/metricVariantResult';
 import {resetAceCaretsPositions, setAutoRefresh} from '../core/actions/layout.actions';
 import {setArchive as setProjectArchive, setBreadcrumbsOptions, setDeep} from '../core/actions/projects.actions';
@@ -77,9 +111,8 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
   public filteredTableCols$: Observable<ISmCol[]>;
   public tableCols$: Observable<ISmCol[]>;
   public metricVariants$: Observable<MetricVariantResult[]>;
-  public metricVariantsPlots$: Observable<MetricVariantResult[]>;
-  public compareSelectedMetricsPlots$: Observable<MetricVariantResult[]>;
-  public compareSelectedMetricsScalars$: Observable<MetricVariantResult[]>;
+  public compareSelectedMetricsPlots$: Observable<ISmCol[]>;
+  public compareSelectedMetricsScalars$: Observable<ISmCol[]>;
   public hyperParams$: Observable<any[]>;
   public hyperParamsOptions$: Observable<Record<ISmCol['id'], string[]>>;
   public selectedTableExperiment$ = this.store.select(selectSelectedTableExperiment);
@@ -118,6 +151,8 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
   @ViewChild('contextMenuExtended') contextMenuExtended: ExperimentMenuExtendedComponent;
   public tableMode: 'table' | 'info' | 'compare';
   public showCompareScalarSettings$: Observable<boolean>;
+  public metricsVariants$ = this.store.selectSignal(selectMetricVariantForView);
+  public tableCompareView$ = this.store.selectSignal(selectTableCompareView);
 
 
   constructor() {
@@ -154,7 +189,6 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
     this.currentUser$ = this.store.select(selectCurrentUser);
     this.tableColsOrder$ = this.store.select(selectExperimentsTableColsOrder);
     this.metricVariants$ = this.store.select(selectMetricVariants);
-    this.metricVariantsPlots$ = this.store.select(selectMetricVariantsPlots);
     this.metricLoading$ = this.store.select(selectMetricsLoading);
     this.hyperParamsOptions$ = this.store.select(selectHyperParamsOptions);
     this.hyperParams$ = this.store.select(selectHyperParamsVariants).pipe(
@@ -183,11 +217,6 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
 
   override ngOnInit() {
     super.ngOnInit();
-    if (this.route.snapshot.firstChild?.routeConfig.path.startsWith('compare/')) {
-      this.compareViewMode = this.route.snapshot.firstChild?.routeConfig.path.replace(/compare\//, '') as 'scalars' | 'plots' || 'scalars';
-    } else {
-      this.compareViewMode = 'scalars';
-    }
     this.store.dispatch(setTableCols({cols: this.tableCols}));
     let prevQueryParams: Params;
     this.sub.add(this.store.select(selectRouterParams).pipe(map(params => this.getParamId(params))).subscribe(() =>
@@ -210,7 +239,7 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
           })
         )
         .subscribe(([projectId, params]) => {
-          if (projectId != this.projectId && Object.keys(params || {}).length === 0) {
+          if (projectId !== this.projectId && Object.keys(params || {}).length === 0) {
             this.emptyUrlInit();
           } else {
             this.projectId = projectId;
@@ -443,7 +472,7 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
   }
 
   public getTableModeFromURL() {
-    return this.route.snapshot.firstChild?.routeConfig.path.includes('compare/') ? 'compare' :
+    return this.route.snapshot.firstChild?.url[0].path === 'compare' ? 'compare' :
       this.route.snapshot.firstChild?.routeConfig.path === undefined ? 'table' : 'info';
   }
 
@@ -452,10 +481,9 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
   }
 
   experimentsSelectionChanged(experiments: Array<ITableExperiment>) {
-    this.store.dispatch(experimentsActions.setSelectedExperiments({experiments, compareMode: this.compareViewMode}));
+    this.store.dispatch(experimentsActions.setSelectedExperiments({experiments}));
     if (this.getTableModeFromURL() === 'compare') {
-      this.router.navigate(['compare', this.compareViewMode, {ids: experiments.map(ex => ex.id)}],
-        {relativeTo: this.route, queryParamsHandling: 'preserve'});
+      this.router.navigate(['compare'], {relativeTo: this.route, queryParamsHandling: 'preserve'});
     }
   }
 
@@ -502,7 +530,7 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
   }
 
   toggleSelectedMetricHidden(col: ISmCol) {
-    this.store.dispatch(experimentsActions.toggleSelectedMetricCompare({columnId: col.id, projectId: this.projectId, compareView: this.compareViewMode}));
+    this.store.dispatch(experimentsActions.toggleSelectedMetricCompare({columnId: col.id, projectId: this.projectId }));
   }
 
   getMetricsToDisplay() {
@@ -534,9 +562,9 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
   compareSelectedMetricToShow(event: SelectionEvent) {
     const variantCol = createCompareMetricColumn(event.variant);
     if (event.addCol) {
-      this.store.dispatch(experimentsActions.addSelectedMetric({col: variantCol, projectId: this.projectId, compareView: this.compareViewMode}));
+      this.store.dispatch(experimentsActions.addSelectedMetric({col: variantCol, projectId: this.projectId}));
     } else {
-      this.store.dispatch(experimentsActions.removeSelectedMetric({id: variantCol.id, projectId: this.projectId, compareView: this.compareViewMode}));
+      this.store.dispatch(experimentsActions.removeSelectedMetric({id: variantCol.id, projectId: this.projectId}));
     }
   }
 
@@ -578,7 +606,7 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
   }
 
   compareRemoveColFromList(colId: string) {
-    this.store.dispatch(experimentsActions.removeSelectedMetric({id: colId, projectId: this.projectId, compareView: this.compareViewMode}));
+    this.store.dispatch(experimentsActions.removeSelectedMetric({id: colId, projectId: this.projectId}));
   }
 
   columnResized(event: { columnId: string; widthPx: number }) {
@@ -730,11 +758,7 @@ export class ExperimentsComponent extends BaseEntityPageComponent implements OnI
   }
 
   compareViewChanged(compareView: 'scalars' | 'plots') {
-    this.compareViewMode = compareView;
-    this.router.navigate(['compare', compareView, {ids: this.selectedExperiments.map(ex => ex.id)}], {
-      relativeTo: this.route,
-      queryParamsHandling: 'preserve'
-    });
-    setTimeout(() => this.compareViewMode = this.route.snapshot.firstChild?.routeConfig.path.replace(/compare\//, '') as 'scalars' | 'plots' || 'scalars');
+    this.store.dispatch(setCompareView({mode: compareView}));
+    return this.router.navigate(['compare'], {relativeTo: this.route, queryParamsHandling: 'preserve'});
   }
 }

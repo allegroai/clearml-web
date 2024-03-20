@@ -8,7 +8,6 @@ import {combineLatest, Observable, Subscription} from 'rxjs';
 import {SearchState, selectSearchQuery} from '../common-search/common-search.reducer';
 import {Store} from '@ngrx/store';
 import {
-  selectActiveSearch,
   selectDatasetsResults,
   selectExperimentsResults,
   selectModelsResults,
@@ -28,37 +27,19 @@ import {ActivatedRoute, Router} from '@angular/router';
 import { selectShowOnlyUserWork } from '@common/core/reducers/users-reducer';
 import {IReport} from '@common/reports/reports.consts';
 import {isEqual} from 'lodash-es';
+import { Task } from '~/business-logic/model/tasks/task';
 
 @Component({
   selector: 'sm-dashboard-search-base',
-  template: `<sm-search-results-page
-    *ngIf="activeSearch$ | async"
-    (projectSelected)="projectCardClicked($event)"
-    (experimentSelected)="taskSelected($event)"
-    (modelSelected)="modelSelected($event)"
-    (pipelineSelected)="pipelineSelected($event)"
-    (activeLinkChanged)="changeActiveLink($event)"
-    (reportSelected)="reportSelected($event)"
-    (openDatasetSelected)="openDatasetCardClicked($event)"
-    (loadMoreClicked)="loadMore()"
-    [projectsList]="projectsResults$ | async"
-    [pipelinesList]="pipelinesResults$ | async"
-    [datasetsList]="datasetsResults$ | async"
-    [experimentsList]="experimentsResults$ | async"
-    [modelsList]="modelsResults$ | async"
-    [reportsList]="reportsResults$ | async"
-    [activeLink]="activeLink"
-    [resultsCount]="resultsCount$ | async">
-  </sm-search-results-page>`,
+  template: '',
 })
-export class DashboardSearchBaseComponent implements OnInit, OnDestroy{
+export abstract class DashboardSearchBaseComponent implements OnInit, OnDestroy{
   public activeLink = 'projects' as ActiveSearchLink;
   private searchSubs;
   public searchQuery$: Observable<SearchState['searchQuery']>;
-  public activeSearch$: Observable<boolean>;
   public modelsResults$: Observable<Array<Model>>;
   public projectsResults$: Observable<Array<Project>>;
-  public experimentsResults$: Observable<any>;
+  public experimentsResults$: Observable<Task[]>;
   public searchTerm$: Observable<SearchState['searchQuery']>;
   public pipelinesResults$: Observable<Project[]>;
   public datasetsResults$: Observable<Project[]>;
@@ -73,7 +54,6 @@ export class DashboardSearchBaseComponent implements OnInit, OnDestroy{
   constructor() {
     this.cdr = inject(ChangeDetectorRef);
     this.searchQuery$        = this.store.select(selectSearchQuery);
-    this.activeSearch$       = this.store.select(selectActiveSearch);
     this.modelsResults$      = this.store.select(selectModelsResults);
     this.reportsResults$      = this.store.select(selectReportsResults);
     this.pipelinesResults$   = this.store.select(selectPipelinesResults);

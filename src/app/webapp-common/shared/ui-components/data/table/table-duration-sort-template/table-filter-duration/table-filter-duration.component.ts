@@ -4,7 +4,7 @@ import {isNil} from 'lodash-es';
 import {
   DurationInputListComponent
 } from '@common/shared/ui-components/inputs/duraion-input-list/duration-input-list.component';
-import {NgIf} from '@angular/common';
+
 import {
   TableFilterDurationErrorComponent
 } from '@common/shared/ui-components/data/table/table-duration-sort-template/table-filter-duration-error/table-filter-duration-error.component';
@@ -25,14 +25,13 @@ import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-f
 
   imports: [
     DurationInputListComponent,
-    NgIf,
     TableFilterDurationErrorComponent,
     FormsModule,
     DividerComponent,
     ClickStopPropagationDirective,
     KeydownStopPropagationDirective,
     LabeledFormFieldDirective
-  ]
+]
 })
 export class TableFilterDurationComponent extends TableDurationSortBaseComponent {
 

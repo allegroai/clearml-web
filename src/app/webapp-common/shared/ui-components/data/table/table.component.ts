@@ -39,11 +39,13 @@ import {trackById} from '@common/shared/utils/forms-track-by';
 import {sortCol} from '@common/shared/utils/sortCol';
 import {mkConfig, download, generateCsv} from 'export-to-csv';
 import {prepareColsForDownload} from '@common/shared/utils/download';
-import {NgForOf, NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault, NgTemplateOutlet} from '@angular/common';
+import {NgTemplateOutlet} from '@angular/common';
 import {ResizableColumnDirective} from '@common/shared/ui-components/data/table/resizable-column.directive';
 import {MenuComponent} from '@common/shared/ui-components/panel/menu/menu.component';
 import {MenuItemComponent} from '@common/shared/ui-components/panel/menu-item/menu-item.component';
 import {ScrollEndDirective} from '@common/shared/ui-components/directives/scroll-end.directive';
+import {DotsLoadMoreComponent} from '@common/shared/ui-components/indicators/dots-load-more/dots-load-more.component';
+import {TooltipDirective} from '@common/shared/ui-components/indicators/tooltip/tooltip.directive';
 
 export interface TableContextMenuSelectEventExt extends Omit<TableContextMenuSelectEvent, 'index'> {
   single?: boolean;
@@ -57,30 +59,27 @@ export interface TableContextMenuSelectEventExt extends Omit<TableContextMenuSel
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
-    NgIf,
-    NgForOf,
     TableModule,
     ResizableColumnDirective,
     MenuComponent,
     MenuItemComponent,
     ScrollEndDirective,
     ContextMenuModule,
-    NgSwitch,
-    NgSwitchCase,
     NgTemplateOutlet,
-    NgSwitchDefault
+    DotsLoadMoreComponent,
+    TooltipDirective
   ]
 })
-export class TableComponent<D extends {id: string}> implements AfterContentInit, AfterViewInit, OnInit, OnDestroy {
+export class TableComponent<D extends { id: string }> implements AfterContentInit, AfterViewInit, OnInit, OnDestroy {
 
   public active = false;
-  public bodyTemplate: TemplateRef<{$implicit: ISmCol; rowData: D; rowIndex: number; expanded: boolean}>;
-  public cardTemplate: TemplateRef<{rowData: D; rowNumber: number; selected: boolean}>;
-  public footerTemplate: TemplateRef<{$implicit: ISmCol}>;
-  public rowExpansionTemplate: TemplateRef<{$implicit: D; lastFrame: boolean}>;
+  public bodyTemplate: TemplateRef<{ $implicit: ISmCol; rowData: D; rowIndex: number; expanded: boolean }>;
+  public cardTemplate: TemplateRef<{ rowData: D; rowNumber: number; selected: boolean }>;
+  public footerTemplate: TemplateRef<{ $implicit: ISmCol }>;
+  public rowExpansionTemplate: TemplateRef<{ $implicit: D; lastFrame: boolean }>;
   public cardHeaderTemplate: TemplateRef<null>;
-  public checkboxTemplate: TemplateRef<{$implicit: ISmCol}>;
-  public sortFilterTemplate: TemplateRef<{$implicit: ISmCol}>;
+  public checkboxTemplate: TemplateRef<{ $implicit: ISmCol }>;
+  public sortFilterTemplate: TemplateRef<{ $implicit: ISmCol }>;
   public trackByColFn: TrackByFunction<ISmCol> = trackById;
   private loadMoreSubscription: Subscription;
   private loadMoreDebouncer: Subject<null>;
@@ -104,7 +103,7 @@ export class TableComponent<D extends {id: string}> implements AfterContentInit,
   public loading: boolean;
   private scaleFactor: number;
   private waiting: boolean;
-  private scrollContainer: HTMLDivElement;
+  public scrollContainer: HTMLDivElement;
   private resize$ = new BehaviorSubject<number>(null);
   private sub = new Subscription();
 
@@ -168,7 +167,7 @@ export class TableComponent<D extends {id: string}> implements AfterContentInit,
   @Input() noHeader = false;
   @Input() simple = false;
   @Input() expandedRowKeys: { [s: string]: boolean } = {};
-  @Input() rowExpandMode:  'multiple' | 'single' = 'multiple';
+  @Input() rowExpandMode: 'multiple' | 'single' = 'multiple';
   @Input() cardsCollapsed = false;
 
 
@@ -483,7 +482,11 @@ export class TableComponent<D extends {id: string}> implements AfterContentInit,
 
   loadMore() {
     this.loading = true;
-    this.loadMoreDebouncer.next(null);
+    if (this.autoLoadMore) {
+      this.loadMoreClicked.emit();
+    } else {
+      this.loadMoreDebouncer.next(null);
+    }
   }
 
   onColReorder($event: TableColumnReorderEvent) {
@@ -594,7 +597,7 @@ export class TableComponent<D extends {id: string}> implements AfterContentInit,
     });
 
     const downloadCols = prepareColsForDownload(this.columns);
-    options.columnHeaders = downloadCols.map(dCol=> dCol.name);
+    options.columnHeaders = downloadCols.map(dCol => dCol.name);
     const rows = this.tableData.map(row =>
       downloadCols.reduce((acc, dCol) => {
         const val = get(row, dCol.field, '');

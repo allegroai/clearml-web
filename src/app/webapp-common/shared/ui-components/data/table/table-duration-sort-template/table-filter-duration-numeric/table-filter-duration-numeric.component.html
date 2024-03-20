@@ -7,11 +7,11 @@
       formControlName="greaterThan"
       data-id="Equals Or GreaterThan"
       [errorStateMatcher]="immediate"
-    >
+      >
     <i matSuffix
-       data-id="cross button"
-       class="al-icon al-ico-dialog-x sm me-2"
-       (click)="iterationsForm.get('greaterThan').setValue(null)"
+      data-id="cross button"
+      class="al-icon al-ico-dialog-x sm me-2"
+      (click)="iterationsForm.get('greaterThan').setValue(null)"
     ></i>
   </mat-form-field>
   <sm-divider [label]="'and'"></sm-divider>
@@ -24,12 +24,14 @@
       data-id="Equals Or LessThan"
       name="greaterThan"
       [errorStateMatcher]="immediate"
-    >
+      >
     <i matSuffix
-       data-id="cross button"
-       class="al-icon al-ico-dialog-x sm me-2"
-       (click)="iterationsForm.get('lessThan').setValue(null)"
+      data-id="cross button"
+      class="al-icon al-ico-dialog-x sm me-2"
+      (click)="iterationsForm.get('lessThan').setValue(null)"
     ></i>
   </mat-form-field>
 </form>
-<sm-table-filter-duration-error *ngIf="hasTimeError"  [isFullWidth]="true"></sm-table-filter-duration-error>
+@if (hasTimeError) {
+  <sm-table-filter-duration-error  [isFullWidth]="true"></sm-table-filter-duration-error>
+}

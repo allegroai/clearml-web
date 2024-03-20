@@ -7,10 +7,9 @@ import {ApiTasksService} from '~/business-logic/api-services/tasks.service';
 import {ExperimentDetailsReverterService} from '../services/experiment-details-reverter.service';
 import {requestFailed} from '../../core/actions/http.actions';
 import {selectExperimentIdsDetails, selectExperimentsDetails, selectModelIdsDetails} from '../reducers';
-import {Observable, of} from 'rxjs';
+import {forkJoin, Observable, of} from 'rxjs';
 import {IExperimentDetail} from '~/features/experiments-compare/experiments-compare-models';
 import {REFETCH_EXPERIMENT_REQUESTED, refetchExperimentRequested} from '../actions/compare-header.actions';
-import {ExperimentCompareDetailsState} from '../reducers/experiments-compare-details.reducer';
 import {experimentListUpdated, setExperiments, setModels} from '../actions/experiments-compare-details.actions';
 import {getCompareDetailsOnlyFields} from '~/features/experiments-compare/experiments-compare-consts';
 import {selectHasDataFeature} from '~/core/reducers/users.reducer';
@@ -105,14 +104,19 @@ export class ExperimentsCompareDetailsEffects {
       : of([]);
   }
 
-  fetchModelDetails$(ids): Observable<Array<IExperimentDetail>> {
+  fetchModelDetails$(ids: string[]): Observable<Array<IExperimentDetail>> {
     return ids.length > 0 ?
-      this.modelsApi.modelsGetAllEx({
+      forkJoin([
+        this.modelsApi.modelsGetAllEx({
         id: ids,
         // eslint-disable-next-line @typescript-eslint/naming-convention
         only_fields: ['company', 'created', 'last_update', 'last_iteration', 'framework', 'id', 'labels', 'name', 'ready', 'tags', 'system_tags', 'task.name', 'task.project', 'uri', 'user.name', 'parent', 'project.name', 'metadata']
-      }).pipe(
-        map(res => this.modelDetailsReverter.revertModels(ids, res.models))
+      }),
+        this.tasksApi.tasksGetAllEx({
+          'models.input.model': ids,
+          only_fields: ['name', 'models.input.model']} as any)
+      ]).pipe(
+        map(([modelsRes, tasksRes]) => this.modelDetailsReverter.revertModels(ids, modelsRes.models, tasksRes.tasks))
       )
       : of([]);
   }

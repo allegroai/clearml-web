@@ -10,6 +10,17 @@ $tab-width: 15vw;
   overflow: auto;
   // padding-top: 20px;
  // background-color: $blue-700;
+
+
+  header {
+    padding: 20px 24px;
+  }
+
+  .main {
+    padding: 0 24px;
+  }
+
+
   .vault {
     height: calc(100% - 36px);
     min-height: 110px;
@@ -70,17 +81,12 @@ $tab-width: 15vw;
     align-items: center;
     color: $white;
     font-size: 16px;
-    text-transform: uppercase;
     i {
       color: $blue-300;
       &:hover {
         color: $blue-200;
       }
     }
-    &.first {
-      margin-top: 0;
-    }
-
   }
 
   .section {

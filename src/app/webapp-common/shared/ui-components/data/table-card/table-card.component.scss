@@ -4,7 +4,7 @@
   display: grid;
   grid-template-columns: 20px 32px 1fr;
   align-items: center;
-  gap: 12px 6px;
+  gap: 0 6px;
   padding: 16px;
   grid-template-areas:
     "cbx type-icon card-name"
@@ -22,8 +22,17 @@
 .cbx { grid-area: cbx; margin-right: auto; }
 .type-icon { grid-area: type-icon; display: flex; justify-content: center; }
 .card-name { grid-area: card-name; display: flex; overflow: hidden; align-items: center;}
-.tags { grid-area: tags; overflow: hidden; }
-.data { grid-area: data; overflow: hidden; text-overflow: ellipsis; }
+.tags {
+  grid-area: tags;
+  overflow: hidden;
+  margin-top: 12px;
+}
+.data {
+  grid-area: data;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 12px;
+}
 
 
 .name-container {
@@ -43,11 +52,4 @@
 .content-row {
   padding: 2px;
   color: $cloudy-blue-two;
-}
-
-
-
-::ng-deep sm-model-tags .tag {
-  margin-left: 0px !important;
-  margin-right: 5px;
 }

@@ -1,16 +1,18 @@
 @import "variables";
 
 :host {
-  height: 16px;
+  height: 18px;
   user-select: none;
-  display: inline-flex;
+  display: flex;
 
   .id-number {
+    display: flex;
+    align-items: center;
     color: $blue-250;
     background-color: $blue-600;
-    border-radius: 2px;
+    border-radius: 4px;
     white-space: nowrap;
-    line-height: 1;
+    overflow: hidden;
 
     .hash {
       padding: 0 6px;
@@ -30,6 +32,12 @@
     .id-text {
       fill: $blue-600;
     }
+
+    &:hover {
+      .id-rect {
+        fill: $blue-250;
+      }
+    }
   }
 }
 
@@ -45,6 +53,11 @@
 
       .id-text {
         fill: $blue-50;
+      }
+      &:hover {
+        .id-rect {
+          fill: $blue-500;
+        }
       }
     }
   }

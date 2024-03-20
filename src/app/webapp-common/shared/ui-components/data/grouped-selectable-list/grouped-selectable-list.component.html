@@ -1,36 +1,28 @@
-<mat-expansion-panel *ngFor="let item of showList | keyvalue | sort:'key'; trackBy: trackByFn"
-                     [expanded]="expanded[item.key]"
-                     [hideToggle]="!item.value.hasChildren"
-                     togglePosition="before"
-                     [class.no-children]="!item.value.hasChildren">
-  <mat-expansion-panel-header
-    #panelH
-    expandedHeight="40px"
-    collapsedHeight="40px"
-    [class.has-children]="item.value.hasChildren"
-    (click)="selectedItem(item, panelH)"
-  >
-    <mat-panel-title>
-    <div class="header-container" [class.unchecked]="!(isHideAllMode(item.value) || item.value.visible)">
-      <div class="ellipsis item-key" [smTooltip]="item.key" [matTooltipShowDelay]="500"  smShowTooltipIfEllipsis>{{item.key}}</div>
-    </div>
-    </mat-panel-title>
-    <mat-panel-description>
-      <i (click)="groupCheck(item); $event.stopPropagation()"
-         [class]="(isHideAllMode(item.value) || item.value.visible? checkIcon[0] : checkIcon[1]) + ' al-icon sm'"
-      ></i>
-    </mat-panel-description>
-
-  </mat-expansion-panel-header>
-  <ul class="list">
-    <li
-      *ngFor="let listItem of item.value.data | keyvalue; trackBy: trackByFn"
-      class="list-item"
-      (click)="itemSelect.emit(item.key + listItem.key)"
-      [class.unchecked]="!$any(listItem.value).visible"
-    >
-      <span class="pointer ellipsis w-100 list-item-key" [smTooltip]="listItem.key" [matTooltipShowDelay]="500"  smShowTooltipIfEllipsis>{{listItem.key}}</span>
-      <i (click)="itemCheck.emit( {pathString: item.key+ listItem.key, parent: item.key}); $event.stopPropagation()" [class]="($any(listItem.value).visible ? checkIcon[0] : checkIcon[1]) + ' al-icon sm'"></i>
-    </li>
-  </ul>
-</mat-expansion-panel>
+<mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
+<!--  CHILDREN NODES-->
+  <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding [matTreeNodePaddingIndent]="24">
+    <span [class]="node.parent ? 'child-node' : 'parent-node'"
+          [class.last-child]="node.lastChild">
+      <span class="ellipsis flex-grow-1"
+            [class.unchecked]="node.parent ? !(node.parent + node.name | stringIncludedInArray: checkedList) : !(node.name | stringStartsWithInArray: checkedList)"
+            [smTooltip]="node.name" [matTooltipShowDelay]="500" smShowTooltipIfEllipsis
+            (click)="itemSelect.emit(node.parent + node.name)">{{ node.name }}</span>
+      <i (click)="node.parent ? itemCheck.emit( {pathString: node.parent + node.name, parent: node.parent}) :
+         groupCheck(node); $event.stopPropagation()"
+         [class]="((node.parent ? (node.parent + node.name | stringIncludedInArray: checkedList) : node.name | stringStartsWithInArray: checkedList) ? checkIcon[0] : checkIcon[1]) + ' al-icon sm'">
+      </i>
+    </span>
+  </mat-tree-node>
+  <!--  PARENTS NODES-->
+  <mat-tree-node *matTreeNodeDef="let node; when: hasChild" matTreeNodePadding class="parent">
+    <span matTreeNodeToggle class="parent-node"
+          [class.expanded]="treeControl.isExpanded(node)"
+          [class.unchecked]="!(node.children | arrayIncludedInArray:checkedList)">
+      <i class="al-icon al-ico-caret-right toggle-icon"></i>
+      <span class="ellipsis flex-grow-1" [smTooltip]="node.name" [matTooltipShowDelay]="500" smShowTooltipIfEllipsis>{{ node.name }}</span>
+    </span>
+    <i (click)="groupCheck(node); $event.stopPropagation()"
+       [class]="((node.children | arrayIncludedInArray:checkedList)? checkIcon[0] : checkIcon[1]) + ' al-icon sm'">
+    </i>
+  </mat-tree-node>
+</mat-tree>

@@ -1,42 +1,45 @@
-<div class="actions" *ngIf="!darkTheme">
-  <button
-    (click)="maximize()"
-    class="btn btn-icon"
-    smTooltip="Maximize"
-  ><i class="al-icon al-ico-fit sm-md"></i></button>
-  <button
-    (click)="creatingEmbedCode($any($event.target).getBoundingClientRect())"
-    class="btn btn-icon"
-    smTooltip="Copy embed code"
-  ><i class="al-icon al-ico-code sm-md"></i></button>
-  <button
-    (click)="downloadImage()"
-    class="btn btn-icon"
-    smTooltip="Download as PNG"
-  ><i class="al-icon al-ico-download sm-md"></i></button>
-</div>
-<div #container class="graph-container" [class.dark-theme]="darkTheme">
-  <div class="graph-title">Hyperparameters Impact on {{metric?.name}}</div>
-  <div #parallelGraph>
-  </div>
-  <div #legend class="d-flex legend-container">
-    <div *ngFor="let experiment of experiments; trackBy: trackById" class="experiment-name">
-      <span class="dot-container">
-        <span #dot class="dot pallete-cursor"
-              [style.background-color]="experimentsColors[experiment.id]"
-              [colorButtonRef]="dot"
-              [smChooseColor]="experimentsColors[getExperimentNameForColor(experiment)]"
-              [stringToColor]="getExperimentNameForColor(experiment)">
-        </span>
-      </span>
-      <span
-        class="task-name pointer"
-        (click)="toggleHideExperiment(experiment.id)"
-        (mouseover)="highlightExperiment(experiment)"
-        (mouseout)="removeHighlightExperiment()"
-        [class.hide]="experiment.hidden">
-        {{experiment.name + (experiment.duplicateName ? ('.' + (experiment.id|slice:0:5)) : '')}}
-      </span>
-    </div>
-  </div>
-</div>
+@if (!darkTheme && !reportMode) {
+  <div class="actions">
+    <button
+      (click)="maximize()"
+      class="btn btn-icon"
+      smTooltip="Maximize"
+      ><i class="al-icon al-ico-fit sm-md"></i></button>
+      <button
+        (click)="creatingEmbedCode($any($event.target).getBoundingClientRect())"
+        class="btn btn-icon"
+        smTooltip="Copy embed code"
+        ><i class="al-icon al-ico-code sm-md"></i></button>
+        <button
+          (click)="downloadImage()"
+          class="btn btn-icon"
+          smTooltip="Download as PNG"
+          ><i class="al-icon al-ico-download sm-md"></i></button>
+        </div>
+      }
+      <div #container class="graph-container" [class.dark-theme]="darkTheme">
+        <div #parallelGraph>
+        </div>
+        <div #legend class="d-flex legend-container">
+          @for (experiment of experiments; track experiment.id) {
+            <div class="experiment-name">
+              <span class="dot-container">
+                <span #dot class="dot pallete-cursor"
+                  [style.background-color]="experimentsColors[experiment.id]"
+                  [colorButtonRef]="dot"
+                  [smChooseColor]="experimentsColors[getExperimentNameForColor(experiment)]"
+                  [stringToColor]="getExperimentNameForColor(experiment)">
+                </span>
+              </span>
+              <span
+                class="task-name pointer"
+                (click)="toggleHideExperiment(experiment.id)"
+                (mouseover)="highlightExperiment(experiment)"
+                (mouseout)="removeHighlightExperiment()"
+                [class.hide]="experiment.hidden">
+                {{experiment.name + (experiment.duplicateName ? ('.' + (experiment.id|slice:0:5)) : '')}}
+              </span>
+            </div>
+          }
+        </div>
+      </div>

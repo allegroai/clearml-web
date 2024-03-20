@@ -1,5 +1,5 @@
-import {Component, Input, OnInit} from '@angular/core';
-import {NgIf} from '@angular/common';
+import {Component, Input} from '@angular/core';
+
 import {ClickStopPropagationDirective} from '@common/shared/ui-components/directives/click-stop-propagation.directive';
 
 @Component({
@@ -8,11 +8,10 @@ import {ClickStopPropagationDirective} from '@common/shared/ui-components/direct
   styleUrls: ['./card.component.scss'],
   standalone: true,
   imports: [
-    NgIf,
     ClickStopPropagationDirective
-  ]
+]
 })
-export class CardComponent implements OnInit {
+export class CardComponent {
 
   @Input() header: string;
   @Input() height: number;
@@ -23,7 +22,7 @@ export class CardComponent implements OnInit {
   @Input() fixedSize = false;
   @Input() overflowVisible = false;
   @Input() cardSign = '';
-  @Input() showSeperator = true;
+  @Input() showSeparator = true;
   @Input() whiteHeader = false;
   @Input() whiterHeader = false;
   @Input() isExample = false;
@@ -36,12 +35,6 @@ export class CardComponent implements OnInit {
   public showSecondTab = false;
   public secondTabIsHovered: boolean;
   public highlightFirstTab: boolean;
-
-  constructor() {
-  }
-
-  ngOnInit() {
-  }
 
   setShowSecondTab(show: boolean) {
     this.showSecondTab = show;

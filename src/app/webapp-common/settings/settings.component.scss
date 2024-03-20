@@ -1,6 +1,44 @@
 @import "variables";
 
 :host {
+
+  .settings-container mat-nav-list {
+    --mat-expansion-header-text-color: #{$blue-200};
+    --mdc-list-list-item-label-text-color: #{$blue-200};
+
+    .mat-expansion-panel {
+      margin: 0 12px 2px;
+      border-radius: 4px;
+      &.mat-expanded {
+        margin-bottom: 12px;
+      }
+    }
+
+    .mat-expansion-panel-header {
+      height: 40px;
+      font-weight: 400;
+      padding: 0 16px 0 12px;
+      &:hover {
+        background-color: $blue-650;
+      }
+    }
+
+    ::ng-deep .mat-expansion-panel-body {
+      padding: 0;
+
+      .mat-mdc-list-item {
+        padding-left: 24px;
+        margin: 0 0 2px 0;
+      }
+    }
+
+    .mat-divider {
+      --mat-divider-color: #{$blue-500};
+      --mat-divider-width: 1px;
+      margin-top: 12px;
+    }
+  }
+
   .settings-container {
     height: 100%;
 
@@ -8,20 +46,28 @@
       border-right: 1px solid $blue-500;
       width: 220px;
     }
+
     .mat-mdc-list-item {
-      padding-left: 24px;
+      width: auto;
+      margin: 0 12px 2px;
+      padding-left: 12px;
+      border-radius: 4px;
       --mdc-list-list-item-label-text-color: #{$blue-200};
       --mdc-theme-text-primary-on-background: #{$blue-200};
+
       &:hover {
         background-color: $blue-650;
       }
+
       &.active {
         --mdc-list-list-item-label-text-color: #{$blue-50};
         --mdc-list-list-item-container-color: #{$blue-500};
+
         &:hover {
-         background-color: $blue-500;
+          background-color: $blue-500;
         }
       }
+
       &::before,
       &:hover::before {
         background-color: unset;
@@ -35,14 +81,33 @@
       height: 100%;
 
       .section {
-        padding: 20px 24px;
+        padding: 0;
         height: calc(100% - 64px);
         overflow: auto;
+
         .content {
           height: 100%;
           width: 100%;
         }
       }
     }
+  }
+
+  .mat-expanded,
+  .mat-expanded .expanded {
+    color: white;
+    ::ng-deep .mat-expansion-indicator {
+      --mat-expansion-header-indicator-color: white;
+    }
+  }
+}
+
+.title {
+  font-size: 11px;
+  font-weight: 500;
+  color: $blue-300;
+  margin: 12px 0 6px 24px;
+  &:not(:first-child) {
+    margin-top: 24px;
   }
 }

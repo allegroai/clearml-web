@@ -14,7 +14,7 @@ export class ShowTooltipIfEllipsisDirective {
   @Output() smShowTooltipIfEllipsis = new EventEmitter<boolean>();
   @HostListener('mouseenter', ['$event'])
   setTooltipState(): void {
-    if(this.showAlwaysTooltip) {
+    if (this.showAlwaysTooltip) {
       return;
     }
     const element = this.elementRef.nativeElement;

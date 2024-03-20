@@ -20,6 +20,9 @@
     <div *ngIf="filteredMetricTree && filteredMetricTree.length === 0" class="d-flex h-100">
       <div class="empty-state">No data to show</div>
     </div>
+    @if (enableClearSelection && !(metricsCols| isEmpty)) {
+      <div class="actions pointer" (click)="clearSelection.emit()">Clear Selection</div>
+    }
     <mat-expansion-panel
       *ngFor="let metric of filteredMetricTree; trackBy: trackByMetric"
       [expanded]="searchText?.length > 0 || expandedMetrics[metric[1][0].metric_hash]"
@@ -29,7 +32,7 @@
         (click)="expandedMetrics[metric[1][0].metric_hash] = !expandedMetrics[metric[1][0].metric_hash]"
       >
         <mat-panel-title class="w-100">
-          <span class="panel-title ellipsis" data-id="metricType" [smTooltip]="metric[0]" smShowTooltipIfEllipsis>{{metric[0]}}</span>
+          <span class="panel-title ellipsis" data-id="metricType" [smTooltip]="metric[0]" smShowTooltipIfEllipsis>{{ metric[0] }}</span>
         </mat-panel-title>
       </mat-expansion-panel-header>
       <ng-template matExpansionPanelContent>
@@ -64,7 +67,8 @@
                 #metricVariant
                 (change)="toggleAllMetricsToDisplay(variant, false)"
                 [checked]="metricsCols[variant.metric_hash + variant.variant_hash] !== undefined"
-              >{{variant.variant}}</mat-radio-button>
+              >{{ variant.variant }}
+              </mat-radio-button>
             </div>
             <div *ngIf="metricVariant.checked" class="value-type">
               <mat-radio-group
@@ -80,6 +84,6 @@
         </div>
       </ng-template>
     </mat-expansion-panel>
-    <div class="more-results" *ngIf="moreResults > 0">And {{moreResults}} more, use search to narrow selection</div>
+    <div class="more-results" *ngIf="moreResults > 0">And {{ moreResults }} more, use search to narrow selection</div>
   </div>
 </div>

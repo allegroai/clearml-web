@@ -6,8 +6,6 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ProjectsListComponent} from './dumb/projects-list/projects-list.component';
 import {ProjectDialogModule} from '../shared/project-dialog/project-dialog.module';
 import {ProjectsSharedModule} from '~/features/projects/shared/projects-shared.module';
-import {CommonLayoutModule} from '../layout/layout.module';
-import {SharedModule} from '~/shared/shared.module';
 import {ProjectsEffects} from '~/features/projects/projects.effect';
 import {CommonProjectsEffects} from './common-projects.effects';
 import {LabeledFormFieldDirective} from '@common/shared/directive/labeled-form-field.directive';
@@ -21,8 +19,6 @@ import {ProjectCardComponent} from '@common/shared/ui-components/panel/project-c
     ProjectDialogModule,
     ProjectsSharedModule,
     EffectsModule.forFeature([ProjectsEffects, CommonProjectsEffects]),
-    SharedModule,
-    CommonLayoutModule,
     LabeledFormFieldDirective,
     ProjectCardComponent,
   ],

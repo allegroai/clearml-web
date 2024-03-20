@@ -4,22 +4,28 @@
       <button class="btn btn-link view-all" (click)="router.navigateByUrl('/projects')">VIEW ALL</button>
     </div>
     <div>
-      <button *ngIf="(recentProjectsList$ | async).length >= cardsInRow || overflow"
-              class="btn btn-cml-primary d-flex align-items-center"
-              data-id="New Project"
-              (click)="openCreateProjectDialog()">
-        <i class="al-icon sm al-ico-add me-2"></i>NEW PROJECT
-      </button>
+      @if (recentProjectsListCount$() >= cardsInRow || overflow) {
+        <button
+          class="btn btn-cml-primary d-flex align-items-center"
+          data-id="New Project"
+          (click)="openCreateProjectDialog()">
+          <i class="al-icon sm al-ico-add me-2"></i>NEW PROJECT
+        </button>
+      }
     </div>
   </div>
-  <sm-project-card
-    *ngFor="let project of recentProjectsList$ | async; trackBy: trackById"
-    [project]="project" (projectCardClicked)="projectCardClicked($event)"
-    [hideMenu]="true"
-  ></sm-project-card>
-  <sm-plus-card
-    *ngIf="(recentProjectsList$ | async).length < cardsInRow"
-    [folder]="true"
-    (plusCardClick)="openCreateProjectDialog()"
-  ></sm-plus-card>
+  @if (recentProjectsList$(); as recentProjectsList) {
+    @for(project of recentProjectsList; track project.id) {
+      <sm-project-card
+        [project]="project" (projectCardClicked)="projectCardClicked($event)"
+        [hideMenu]="true"
+      ></sm-project-card>
+    }
+    @if (recentProjectsList.length < cardsInRow) {
+      <sm-plus-card
+        [folder]="true"
+        (plusCardClick)="openCreateProjectDialog()"
+      ></sm-plus-card>
+    }
+  }
 </div>

@@ -31,7 +31,6 @@ import {
   skip,
   take,
   tap,
-  withLatestFrom
 } from 'rxjs/operators';
 import {ConfirmDialogComponent} from '@common/shared/ui-components/overlay/confirm-dialog/confirm-dialog.component';
 import * as coreProjectsActions from '@common/core/actions/projects.actions';
@@ -53,6 +52,7 @@ import {isExample} from '@common/shared/utils/shared-utils';
 import {selectSelectedProject} from '@common/core/reducers/projects.reducer';
 import {selectActiveWorkspaceReady} from '~/core/reducers/view.reducer';
 import {EntityTypeEnum} from '~/shared/constants/non-common-consts';
+import {concatLatestFrom} from '@ngrx/effects';
 
 @Component({
   selector: 'sm-common-projects-page',
@@ -114,12 +114,12 @@ export class CommonProjectsPageComponent implements OnInit, OnDestroy {
       this.store.select(selectSelectedProject)
     ]).pipe(
       debounceTime(50),
-      withLatestFrom(this.selectedProjectId$, this.searchQuery$, this.store.select(selectRouterConfig)),
+      concatLatestFrom(()=> [this.selectedProjectId$, this.searchQuery$, this.store.select(selectRouterConfig)]),
       map(([[projectsList, selectedProject = {} as Project], selectedProjectId, searchQuery, config]) => {
         this.searching = searchQuery?.query.length > 0;
         this.allExamples = projectsList?.length > 0 && projectsList?.every(project => isExample(project));
-        if (projectsList === null) {
-          return null;
+        if (!projectsList) {
+          return projectsList;
         }
         if ((searchQuery?.query || searchQuery?.regExp)) {
           return projectsList;

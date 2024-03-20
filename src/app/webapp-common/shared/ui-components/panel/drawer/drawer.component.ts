@@ -13,7 +13,8 @@ import {
   selector       : 'al-drawer',
   templateUrl    : './drawer.component.html',
   styleUrls      : ['./drawer.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
 })
 export class DrawerComponent {
 

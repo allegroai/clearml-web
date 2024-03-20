@@ -13,6 +13,7 @@
     [minimizedView]="minimizedView"
     minimizedTableHeader="{{entityType.replace('ripeline ', '')}}S LIST"
     [noMoreData]="noMoreExperiments"
+    [autoLoadMore]="true"
     [selection]="selectedExperiment"
     [activeContextRow]="contextExperiment"
     [contextMenuOpen]="contextMenuActive"
@@ -59,7 +60,7 @@
           (formDataChanged)="headerCheckboxClicked()"
           inputClassName="table-check-box select-col-checkbox"
         ></sm-checkbox-control>
-        <div class="al-icon al-ico-dropdown-arrow sm drop-down" data-id="Checkbox Dropdown"
+        <div class="al-icon al-ico-dropdown-arrow drop-down" data-id="Checkbox Dropdown"
              [matMenuTriggerFor]="selectionMenu"></div>
       </div>
       <mat-menu class="light-theme" #selectionMenu="matMenu">
@@ -119,7 +120,7 @@
           </div>
         </ng-container>
         <ng-container *ngSwitchCase="experimentsTableColFields.VERSION">
-          {{experiment?.runtime?.version || experiment?.hyperparams?.properties?.version?.value}}
+          {{entityType === 'version' ? experiment?.runtime?.version || experiment?.hyperparams?.properties?.version?.value : experiment?.hyperparams?.properties?.version?.value}}
         </ng-container>
         <ng-container *ngSwitchCase="experimentsTableColFields.TAGS">
           <sm-tag-list [tags]="experiment.tags" [sysTags]="getSystemTags(experiment)"></sm-tag-list>
@@ -162,6 +163,7 @@
         </ng-container>
         <ng-container *ngSwitchCase="experimentsTableColFields.STATUS">
           <sm-status-icon-label
+            [enableSpinner]="true"
             [status]="experiment?.status | replaceViaMapPipe:convertStatusMap"
             [progress]="experiment?.runtime?.progress"
           ></sm-status-icon-label>
@@ -204,6 +206,8 @@
         [activeContextRow]="contextExperiment"
         [contextMenuOpen]="contextMenuActive"
         [entityType]="entityType"
+        [tagsTemplate]="tagList"
+        [compactColDataTemplate]="compactCol"
         [class.no-tags]="getSystemTags(experiment).length === 0 && experiment?.tags.length === 0"
         (click)="selected && onContextMenu({e: $event, rowData: experiment, backdrop: true})"
       >
@@ -212,29 +216,12 @@
         <div sm-name-version *ngIf="experiment?.runtime?.version || experiment?.hyperparams?.properties?.version?.value"
              class="me-5">
           <span class="dot">●</span>
-          v {{experiment?.runtime?.version || experiment?.hyperparams?.properties?.version?.value}}
+          v {{entityType === 'version' ? experiment?.runtime?.version || experiment?.hyperparams?.properties?.version?.value : experiment?.hyperparams?.properties?.version?.value}}
         </div>
-        <span tags-list-container [@inOutAnimation] *ngIf="!cardsCollapsed">
-          <sm-tag-list *ngIf="!removeTag.observed; else tagsWithRemove" [sysTags]="getSystemTags(experiment)"
-                       [tags]="experiment?.tags"></sm-tag-list>
-          <ng-template #tagsWithRemove>
-            <sm-tag-list [sysTags]="getSystemTags(experiment)" [tags]="experiment?.tags"
-                         (remove)="removeTag.emit({experiment, tag: $event})"></sm-tag-list>
-          </ng-template>
-        </span>
-          <span compact-columns-data [@inOutAnimation] *ngIf="!cardsCollapsed">
-          <div class="d-flex justify-content-between compact-columns-data" compact-columns-data>
-          <span class="ellipsis">Updated {{experiment.last_update | timeAgo}}<span
-            class="dot">●</span>Created by {{experiment.user?.name || 'Unknown User'}}
-          </span>
-            <ng-container *ngIf="experiment.last_iteration">
-              <span>{{experiment.last_iteration}} Iterations</span>
-            </ng-container>
-          </div>
-        </span>
         <sm-experiment-type-icon-label *ngIf="entityType === entityTypes.experiment" [type]="experiment?.type"
                                        [showLabel]="false"></sm-experiment-type-icon-label>
         <sm-status-icon-label
+          [enableSpinner]="true"
           [status]="experiment?.status | replaceViaMapPipe:convertStatusMap"
           [progress]="experiment?.runtime?.progress"
         ></sm-status-icon-label>
@@ -243,6 +230,28 @@
                              inputClassName="table-check-box table-body"
         ></sm-checkbox-control>
       </sm-table-card>
+      <ng-template #tagList>
+        <span tags-list-container [@inOutAnimation] *ngIf="!cardsCollapsed">
+          <sm-tag-list *ngIf="!removeTag.observed; else tagsWithRemove" [sysTags]="getSystemTags(experiment)"
+                       [tags]="experiment?.tags"></sm-tag-list>
+          <ng-template #tagsWithRemove>
+            <sm-tag-list [sysTags]="getSystemTags(experiment)" [tags]="experiment?.tags"
+                         (remove)="removeTag.emit({experiment, tag: $event})"></sm-tag-list>
+          </ng-template>
+        </span>
+      </ng-template>
+      <ng-template #compactCol>
+          <span [@inOutAnimation] *ngIf="!cardsCollapsed">
+          <div class="d-flex justify-content-between compact-columns-data">
+          <span class="ellipsis">Updated {{experiment.last_update | timeAgo}}<span
+            class="dot">●</span>Created by {{experiment.user?.name || 'Unknown User'}}
+          </span>
+            <ng-container *ngIf="experiment.last_iteration">
+              <span>{{experiment.last_iteration}} Iterations</span>
+            </ng-container>
+          </div>
+        </span>
+      </ng-template>
     </ng-template>
   </sm-table>
 </div>

@@ -11,6 +11,7 @@ import {GraphPlotDataToMetric} from './graph-plot-data-to-metric.pipe';
 import {SingleValueSummaryTableComponent} from '../single-value-summary-table/single-value-summary-table.component';
 import {SingleGraphModule} from '@common/shared/single-graph/single-graph.module';
 import {MatInputModule} from '@angular/material/input';
+import {SingleGraphStateModule} from '@common/shared/single-graph/single-graph-state.module';
 
 const declarations= [
   ExperimentGraphsComponent,
@@ -28,6 +29,7 @@ const declarations= [
     FormsModule,
     ResizableModule,
     SingleGraphModule,
+    SingleGraphStateModule,
     MatInputModule,
     SingleValueSummaryTableComponent
   ]

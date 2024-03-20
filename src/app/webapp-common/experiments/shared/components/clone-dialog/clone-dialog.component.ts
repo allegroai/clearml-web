@@ -6,7 +6,7 @@ import {NgForm} from '@angular/forms';
 import {Observable, Subscription} from 'rxjs';
 import {selectReadOnlyProjects, selectTablesFilterProjectsOptions} from '@common/core/reducers/projects.reducer';
 import {getTablesFilterProjectsOptions, resetTablesFilterProjectsOptions} from '@common/core/actions/projects.actions';
-import {filter, map, tap} from 'rxjs/operators';
+import {filter, tap} from 'rxjs/operators';
 import {CloneExperimentPayload} from '../../common-experiment-model.model';
 import {isEqual} from 'lodash-es';
 import {isReadOnly} from '@common/shared/utils/is-read-only';
@@ -58,6 +58,7 @@ export class CloneDialogComponent implements OnInit, OnDestroy {
   public noMoreOptions: boolean;
   private previousLength: number | undefined;
   private allProjectsBeforeFilter: Partial<ProjectsGetAllResponseSingle>[];
+  private defaultProject: { label: string; value: string };
 
   constructor(
     private store: Store,
@@ -83,7 +84,7 @@ export class CloneDialogComponent implements OnInit, OnDestroy {
     this.projects$ = this.store.select(selectTablesFilterProjectsOptions).pipe(
       tap(projects => this.allProjectsBeforeFilter = projects),
       filter(projects => !!projects),
-      map(projects => projects?.filter(project => !isReadOnly(project))));
+    );
   }
 
 
@@ -91,7 +92,9 @@ export class CloneDialogComponent implements OnInit, OnDestroy {
     this.projects = null;
     // this.rootFiltered = !this.projectRoot.includes(searchString);
     !searchString.loadMore && this.store.dispatch(resetTablesFilterProjectsOptions());
-    this.store.dispatch(getTablesFilterProjectsOptions({searchString: searchString.value, loadMore: searchString.loadMore}));
+    this.store.dispatch(getTablesFilterProjectsOptions({
+      searchString: searchString.value, loadMore: searchString.loadMore, allowPublic: false
+    }));
   }
 
   ngOnDestroy(): void {
@@ -104,6 +107,13 @@ export class CloneDialogComponent implements OnInit, OnDestroy {
       this.loading = false;
       this.noMoreOptions = this.allProjectsBeforeFilter?.length === this.previousLength || this.allProjectsBeforeFilter?.length < rootProjectsPageSize;
       this.previousLength = this.allProjectsBeforeFilter?.length;
+      if (projects?.length === 1 && isReadOnly(projects[0])) {
+        const label = `${projects[0].name} (read only)`;
+        this.projects = [{value: null, label}];
+        this.projectsNames = [label];
+        this.formData.project = label as unknown as IOption;
+        return;
+      }
       const projectList = [
         // ...(this.rootFiltered ? [] : [{value: null, label: this.projectRoot}]),
         ...projects.map(project => ({value: project.id, label: project.name}))
@@ -111,13 +121,10 @@ export class CloneDialogComponent implements OnInit, OnDestroy {
       if (!isEqual(projectList, this.projects)) {
         this.projects = projectList;
         this.projectsNames = projectList.map(p => p.label);
-        const defaultProjectIndex = this.projects.findIndex(project => project.value === this.defaultProjectId);
-        // setTimeout(() => {
-          if (this.formData.project === null) {
-            this.formData.project = (defaultProjectIndex > -1 && projects[defaultProjectIndex].company?.id) ? this.projects[defaultProjectIndex] : projects[0] ? this.projects[0] : null;
-            // this.cdr.detectChanges();
-          }
-        // }, 0);
+        if (this.formData.project === null && !this.defaultProject) {
+          this.defaultProject = this.projects.find(project => project.value === this.defaultProjectId) ?? this.projects[0] ?? null;
+          this.formData.project = this.defaultProject;
+        }
       }
     }));
     setTimeout(() => {
@@ -126,7 +133,7 @@ export class CloneDialogComponent implements OnInit, OnDestroy {
       }
       this.subs.add(this.cloneForm.controls['projectName'].valueChanges
         .subscribe(searchString => {
-            if (typeof searchString === 'string') {
+            if (searchString === null || typeof searchString === 'string') {
               this.searchChanged({value: searchString || ''});
               this.previousLength = 0;
             }
@@ -151,9 +158,7 @@ export class CloneDialogComponent implements OnInit, OnDestroy {
     }
   }
 
-  clear() {
-    this.formData.project = null;
-  }
+
 
   setIsAutoCompleteOpen(focus: boolean) {
     this.isAutoCompleteOpen = focus;
@@ -164,8 +169,9 @@ export class CloneDialogComponent implements OnInit, OnDestroy {
   loadMore() {
     this.loading = true;
     this.store.dispatch(getTablesFilterProjectsOptions({
-      searchString: (typeof this.formData.project === 'string' ? this.formData.project : this.formData.project.value) ?? '',
-      loadMore: true,  allowPublic: false
+      searchString: (typeof this.formData.project === 'string' ? this.formData.project : this.formData.project?.value) ?? '',
+      loadMore: true,
+      allowPublic: false
     }));
   }
 

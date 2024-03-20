@@ -1,37 +1,39 @@
 import {NgModule} from '@angular/core';
-import {CommonModule} from '@angular/common';
+import {AsyncPipe} from '@angular/common';
 import {StoreModule} from '@ngrx/store';
 import {EffectsModule} from '@ngrx/effects';
 import {DashboardSearchEffects as commonDashboardSearchEffects } from '@common/dashboard-search/dashboard-search.effects';
-import {DashboardSearchEffects} from '~/features/dashboard/dashboard-search/dashboard-search.effects';
-import {ProjectsSharedModule} from '../../projects/shared/projects-shared.module';
-import {SharedModule} from '~/shared/shared.module';
+import {DashboardSearchEffects} from '~/features/dashboard-search/dashboard-search.effects';
 import {dashboardSearchReducer} from '@common/dashboard-search/dashboard-search.reducer';
-import {ReportsSharedModule} from '../../../webapp-common/reports/reports-shared.module';
-import {ScrollingModule} from '@angular/cdk/scrolling';
 import {ModelCardComponent} from '@common/shared/ui-components/panel/model-card/model-card.component';
 import {ExperimentCardComponent} from '@common/shared/ui-components/panel/experiment-card/experiment-card.component';
 import {CheckPermissionDirective} from '~/shared/directives/check-permission.directive';
 import {ProjectCardComponent} from '@common/shared/ui-components/panel/project-card/project-card.component';
 import {PipelineCardComponent} from '@common/pipelines/pipeline-card/pipeline-card.component';
 import {VirtualGridComponent} from '@common/shared/components/virtual-grid/virtual-grid.component';
+import {SearchResultsPageComponent} from '~/features/dashboard-search/containers/search-results-page/search-results-page.component';
+import {DashboardSearchComponent} from '~/features/dashboard-search/containers/dashboard-search/dashboard-search.component';
+import {DatasetsSharedModule} from '~/features/datasets/shared/datasets-shared.module';
+import {ReportCardComponent} from '@common/reports/report-card/report-card.component';
+import {DashboardSearchRoutingModule} from '~/features/dashboard-search/dashboard-search-routing.module';
 
 @NgModule({
-  imports     : [
-    CommonModule,
-    ProjectsSharedModule,
-    ReportsSharedModule,
+  imports: [
     StoreModule.forFeature('search', dashboardSearchReducer),
     EffectsModule.forFeature([DashboardSearchEffects, commonDashboardSearchEffects]),
-    SharedModule,
-    ScrollingModule,
-    ModelCardComponent,
-    ExperimentCardComponent,
+    DashboardSearchRoutingModule,
+    AsyncPipe,
+    VirtualGridComponent,
     CheckPermissionDirective,
     ProjectCardComponent,
+    ExperimentCardComponent,
+    ModelCardComponent,
     PipelineCardComponent,
-    VirtualGridComponent
+    DatasetsSharedModule,
+    ReportCardComponent,
   ],
+  declarations:[
+    SearchResultsPageComponent, DashboardSearchComponent
+  ]
 })
-export class DashboardSearchModule {
-}
+export class DashboardSearchModule {}

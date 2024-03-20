@@ -31,7 +31,7 @@ export const EXPERIMENTS_METRICS_TYPES = {
   SCALAR: 'scalar',
   PLOTS : 'plots'
 };
-export const EXPERIMENTS_PAGE_SIZE = 15;
+export const EXPERIMENTS_PAGE_SIZE = 30;
 export const EXPERIMENT_TABLE_ONLY_FIELDS = ['id', 'type', 'name', 'started', 'completed', 'status', 'system_tags', 'user.name', 'last_metrics', 'last_update', 'active_duration'];
 
 export const FILTERED_EXPERIMENTS_STATUS_OPTIONS = (isDataset) => Object.entries(EXPERIMENTS_STATUS_LABELS)

@@ -22,7 +22,7 @@ export class ModelDetailsReverterService {
     this.locale = locale;
   }
 
-  revertModels(modelIds: Array<string>, models: Array<IModelInfo>): ModelDetail[] {
+  revertModels(modelIds: Array<string>, models: Array<IModelInfo>, tasks: Array<ITask>): ModelDetail[] {
     // map the experiment ids to keep the user order.
     return modelIds.map(id => {
       const model = models.find(ex => ex.id === id);
@@ -37,6 +37,7 @@ export class ModelDetailsReverterService {
         general: this.revertGeneral(model),
         labels: this.revertLabels(model),
         metadata: this.revertMetadata(model),
+        lineage: this.revertLineage(model, tasks.filter(task => task.models.input.find( input => input.model.id === id))),
       };
     });
   }
@@ -68,7 +69,6 @@ export class ModelDetailsReverterService {
         dataValue: model.uri,
       },
       user: model.user.name || NA,
-      'creating experiment': (model.parent as unknown as ITask)?.name || NA,
       archive: model.system_tags.includes(TAGS.HIDDEN) ? 'Yes' : 'No',
       project: model.project?.name || NA,
     };
@@ -87,5 +87,15 @@ export class ModelDetailsReverterService {
 
   private revertMetadata(model: IModelInfo) {
     return model.metadata;
+  }
+
+  private revertLineage(model: IModelInfo, tasks: Array<ITask>) {
+    return {
+      'created by': `${model.task.name} (${model.task.id})`,
+      'Used by': tasks.reduce((acc, curr) => {
+        acc[`hash_${curr.name}${curr.id}`] = `${curr.name} : ${curr.id}`;
+        return acc;
+      }, {} as {id: string; name: string})
+    }
   }
 }

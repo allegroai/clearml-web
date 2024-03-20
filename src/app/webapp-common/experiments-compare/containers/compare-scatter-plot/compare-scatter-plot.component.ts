@@ -1,12 +1,14 @@
-import {Component, ElementRef, inject, Input, OnChanges} from '@angular/core';
+import {Component, ElementRef, inject, Input, OnChanges, SimpleChanges} from '@angular/core';
 import {ScatterPlotSeries} from '@common/core/reducers/projects.reducer';
 import {
   ExtraTask
 } from '@common/experiments-compare/dumbs/parallel-coordinates-graph/parallel-coordinates-graph.component';
-import {get} from 'lodash-es';
+import {get, isEqual} from 'lodash-es';
 import {from} from 'rxjs';
 import domtoimage from 'dom-to-image';
 import {take} from 'rxjs/operators';
+import {SelectedMetricVariant} from '@common/experiments-compare/experiments-compare.constants';
+import {MetricVariantToPathPipe} from '@common/shared/pipes/metric-variant-to-path.pipe';
 
 
 @Component({
@@ -15,22 +17,24 @@ import {take} from 'rxjs/operators';
   styleUrls: ['./compare-scatter-plot.component.scss']
 })
 export class CompareScatterPlotComponent implements OnChanges {
-
+  public metricVariantToPathPipe = new MetricVariantToPathPipe;
   public graphData: ScatterPlotSeries[];
   public scalar: boolean;
 
   @Input() metric: string;
   @Input() metricName!: string;
   @Input() params: string | string[];
+  @Input() extraHoverInfoParams: string[] = [];
+  @Input() extraHoverInfoMetrics: SelectedMetricVariant[] = [];
   @Input() experiments: ExtraTask[];
 
   private ref = inject(ElementRef);
 
 
-  ngOnChanges(): void {
+  ngOnChanges(changes:SimpleChanges): void {
     this.scalar = true;
     if (this.experiments && this.params && this.metric) {
-      this.graphData = [{
+      const newGraphData = [{
         label: '',
         backgroundColor: '#14aa8c',
         data: this.experiments
@@ -46,9 +50,18 @@ export class CompareScatterPlotComponent implements OnChanges {
               y: get(point.last_metrics, this.metric),
               id: point.id,
               name: point.name,
+              extraParamsHoverInfo: this.extraHoverInfoParams.map(param => `${param}: ${get(point.hyperparams, param)?.value}`).concat(
+                this.extraHoverInfoMetrics.map(metric => {
+                  const metricVar = get(point.last_metrics, this.metricVariantToPathPipe.transform(metric));
+                  return `${metric?.metric}/${metric?.variant}: value: ${metricVar?.value}, min: ${metricVar?.min_value}, max: ${metricVar?.max_value}`;
+                })
+              )
             };
           }),
       } as ScatterPlotSeries];
+      if (!isEqual(newGraphData, this.graphData)  || (changes.metricName?.currentValue!== changes.metricName?.previousValue) || (changes.params?.currentValue!== changes.params?.previousValue)) {
+        this.graphData = newGraphData;
+      }
     }
   }
 

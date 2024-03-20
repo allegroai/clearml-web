@@ -22,7 +22,7 @@ import {
 } from '../../experiments/shared/common-experiments.const';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
 import {AdminService} from '~/shared/services/admin.service';
-import {GroupByCharts, groupByCharts} from '../../experiments/reducers/experiment-output.reducer';
+import {GroupByCharts, groupByCharts} from '../../experiments/actions/common-experiment-output.actions';
 import {Store} from '@ngrx/store';
 import {selectPlotlyReady} from '../../core/reducers/view.reducer';
 import {ResizeEvent} from 'angular-resizable-element';
@@ -252,7 +252,7 @@ export class ExperimentGraphsComponent implements OnDestroy {
       const el = entity.target as HTMLElement;
       const singleGraphComponent = this.allGraphs?.find(graphComp => graphComp.identifier === el.id);
       if (this.plotlyReady && (!singleGraphComponent?.alreadyDrawn || singleGraphComponent?.shouldRefresh)) {
-        const currentGraphData = Object.values(this.graphsData).flat(1).find(g => g.id === el.id);
+        const currentGraphData = Object.values(this.graphsData || {}).flat(1).find(g => g.id === el.id);
         if (currentGraphData) {
           currentGraphData.visible = true;
           this.visibleGraphsData[this.generateIdentifier(currentGraphData)] = true;
@@ -449,5 +449,5 @@ export class ExperimentGraphsComponent implements OnDestroy {
     return this.isGroupGraphs && chartItem.data?.length === 1 && (!chartItem.data[0].name || chartItem.data[0].name === chartItem.layout?.title) && ['scatter', 'scattergl', 'bar', 'scatter3d'].includes(chartItem?.data[0]?.type);
   }
 
-  inHiddenList = (metric: string) => !this.hiddenList?.some(m => m.startsWith(metric));
+  inHiddenList = (metric: string) => this.isCompare ? !this.hiddenList?.some(m => m.startsWith(metric)) : !this.hiddenList?.includes(metric);
 }

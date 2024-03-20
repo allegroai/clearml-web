@@ -23,7 +23,7 @@ export class ProfileNameComponent implements OnInit {
     this.currentUser$
       .pipe(filter(user => !!user), take(1))
       .subscribe(() => {
-        this.store.dispatch(getAllCredentials());
+        this.store.dispatch(getAllCredentials({}));
       });
   }
 

@@ -106,7 +106,7 @@ export class BaseLoginService {
     if (this._loginMode !== undefined) {
       return of(this._loginMode);
     } else {
-      return this.getLoginSupportedModes(this.signupMode && 'signup')
+      return this.getLoginSupportedModes()
         .pipe(
           // for testing: map(res => ({...res, server_errors: {missed_es_upgrade: true}}) ),
           tap(res => (res?.server_errors && this.shouldOpenServerError(res.server_errors)) && this.openEs7MessageDialog(res.server_errors)),
@@ -121,18 +121,8 @@ export class BaseLoginService {
     }
   }
 
-  public getLoginSupportedModes(additionalState = ''): Observable<LoginModeResponse> {
-    const url = new URL(window.location.href);
-    let state = url.searchParams.get('redirect') ?? (url.pathname === '/login' ? '/' : url.pathname + url.search);
-    if (additionalState && state) {
-      const stateUrl = new URL(`http://aaa${state}`);
-      stateUrl.searchParams.append(additionalState, '');
-      state = stateUrl.pathname + stateUrl.search;
-    }
-    return this.loginApi.loginSupportedModes({
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      // state: (state === '/' || state.startsWith('callback_') || state.startsWith('/callback_')) ? undefined : state
-    });
+  public getLoginSupportedModes(): Observable<LoginModeResponse> {
+    return this.loginApi.loginSupportedModes({});
   }
 
   getUsers() {

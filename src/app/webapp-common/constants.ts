@@ -76,6 +76,8 @@ export const ICONS = {
   ARROW_UP: 'al-ico-ico-chevron-up',
   RUN: 'al-ico-run',
   METADATA: 'al-ico-metadata',
+  ID: 'al-ico-id',
+  CHECK: 'al-ico-success'
 };
 
 export type IconNames = keyof typeof ICONS;

@@ -1,4 +1,4 @@
-import {flattenDeep, last} from 'lodash-es';
+import {last} from 'lodash-es';
 import {maxInArray} from '@common/shared/utils/helpers.util';
 
 export interface DataPoint {
@@ -46,7 +46,6 @@ export function addStats(current: Topic[], data, maxPoints: number,
     dataByTopic = [];
   }
 
-  const allDates = [...new Set(flattenDeep(data.map(d => d.metrics ? d.metrics.map((topic: Topic) => topic.dates) : [])))] as number[];
   const shouldAddEntity = data.length > 1;
   data.forEach(entityData => {
     const entity = entityData[entityParamName];
@@ -66,7 +65,7 @@ export function addStats(current: Topic[], data, maxPoints: number,
           topic = {topicName, topicID, topic: topicIDs[topicID], dates: [] as DataPoint[]};
           dataByTopic.push(topic);
         }
-        const tplList = allDates
+        const tplList = dates
           .filter(date => {
             if (topic.dates.length === 0) {
               return true;

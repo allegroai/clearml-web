@@ -1,29 +1,34 @@
 <div class="table-card" data-id="cardPanel"
      [class.two-columns]="!hasTypeIcon"
-     [ngClass]="{'selected':selected, 'checked':checked, 'contexted': activeContextRow?.id ===rowData?.id && contextMenuOpen}">
+     [class]="{'selected':selected, 'checked':checked, 'contexted': activeContextRow?.id ===rowData?.id && contextMenuOpen}">
 
-      <div class="cbx">
-        <ng-content select="sm-checkbox-control"></ng-content>
-      </div>
-      <div class="type-icon" *ngIf="hasTypeIcon">
-        <ng-content select="sm-experiment-type-icon-label"></ng-content>
-      </div>
-      <div class="card-name">
-        <div class="name-container">
-          <div class="name">{{cardName}}</div>
-          <ng-content select="[sm-name-icon]"></ng-content>
-          <ng-content select="[sm-name-version]"></ng-content>
-        </div>
-        <div class="d-flex ms-auto">
-          <ng-content select="sm-experiment-system-tags"></ng-content>
-          <ng-content select="sm-status-icon-label"></ng-content>
-          <ng-content select="sm-model-tags"></ng-content>
-        </div>
-      </div>
-      <div class="tags">
-        <ng-content select="[tags-list-container]"></ng-content>
-      </div>
-      <div class="data">
-        <ng-content select="[compact-columns-data]"></ng-content>
-      </div>
+  <div class="cbx">
+    <ng-content select="sm-checkbox-control"></ng-content>
+  </div>
+  @if(hasTypeIcon) {
+    <div class="type-icon">
+      <ng-content select="sm-experiment-type-icon-label"></ng-content>
+    </div>
+  }
+  <div class="card-name">
+    <div class="name-container">
+      <div class="name">{{cardName}}</div>
+      <ng-content select="[sm-name-icon]"></ng-content>
+      <ng-content select="[sm-name-version]"></ng-content>
+    </div>
+    <div class="d-flex ms-auto">
+      <ng-content select="sm-experiment-system-tags"></ng-content>
+      <ng-content select="sm-status-icon-label"></ng-content>
+    </div>
+  </div>
+  @if(tagsTemplate) {
+    <div class="tags">
+      <ng-container *ngTemplateOutlet="tagsTemplate"></ng-container>
+    </div>
+  }
+  @if(compactColDataTemplate) {
+    <div class="data">
+      <ng-container *ngTemplateOutlet="compactColDataTemplate"></ng-container>
+    </div>
+  }
 </div>

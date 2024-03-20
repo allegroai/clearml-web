@@ -1,4 +1,5 @@
-import {Injectable} from '@angular/core';
+import {LocationStrategy} from '@angular/common';
+import {inject, Injectable} from '@angular/core';
 import {Router} from '@angular/router';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {ApiUsersService} from '~/business-logic/api-services/users.service';
@@ -9,7 +10,7 @@ import {
   setApiVersion, setCurrentUserName,
   setUserWorkspacesFromUser, updateCurrentUser
 } from '../actions/users.actions';
-import {catchError, map, mergeMap} from 'rxjs/operators';
+import {catchError, filter, map, mergeMap} from 'rxjs/operators';
 import {addMessage} from '../actions/layout.actions';
 import {ApiLoginService} from '~/business-logic/api-services/login.service';
 import {LoginLogoutResponse} from '~/business-logic/model/login/loginLogoutResponse';
@@ -21,6 +22,7 @@ import {MESSAGES_SEVERITY} from '@common/constants';
 
 @Injectable()
 export class CommonUserEffects {
+  private locationStrategy = inject(LocationStrategy);
 
   constructor(
     private actions: Actions, private userService: ApiUsersService,
@@ -34,7 +36,7 @@ export class CommonUserEffects {
     ofType(logout),
     mergeMap(action => this.loginApi.loginLogout({
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      redirect_url: window.location.origin + '/login',
+      redirect_url: window.location.origin + (this.locationStrategy.getBaseHref() === '/' ? '' : this.locationStrategy.getBaseHref()) + '/login',
       ...(action.provider && {provider: action.provider})
     }).pipe(
       map((res: LoginLogoutResponse) => {
@@ -62,7 +64,8 @@ ${this.errorService.getErrorMsg(err?.error)}`)])
   updateCurrentUser = createEffect(() => this.actions.pipe(
     ofType(updateCurrentUser),
     mergeMap(({user}) => this.userService.usersUpdate({...user}).pipe(
-      mergeMap((res: UsersUpdateResponse) => res.updated ? [setCurrentUserName({name: user.name})] : [])
+      filter((res: UsersUpdateResponse) => res.updated > 0),
+      map(() => setCurrentUserName({name: user.name}))
     )),
     catchError(err => [addMessage(MESSAGES_SEVERITY.ERROR, `Update User Failed ${this.errorService.getErrorMsg(err?.error)}`)])
   ));

@@ -1,15 +1,14 @@
-<ng-container *ngIf="activated; else placeHolder" [ngSwitch]="type">
-  <ng-container *ngIf="(signIsNeeded$ | async) === false; else signIsNeededTemplate">
-    <ng-container *ngIf="(noPermissions$ | async) === false; else noPermissionsTemplate">
-
+@if (activated) {
+  @if (signIsNeeded$() === false) {
+    @if (noPermissions$() === false) {
       <a class="webapp-link" [href]="webappLink" target="_blank" [class.dark-theme]="isDarkTheme">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
           <path d="m2.67,14.66c-.74,0-1.33-.6-1.33-1.33h0V2.67c0-.74.6-1.33,1.33-1.33h5.33v1.33H2.67v10.67h10.67v-5.33h1.34v5.33c0,.74-.6,1.33-1.34,1.33H2.67Zm4.86-7.14l4.86-4.86h-1.72v-1.33h4v4h-1.33v-1.72l-4.86,4.86-.95-.94Z" fill="#8492c2"/>
         </svg>
         <span class="webapp-link_tooltip">View original resource</span>
       </a>
-      <ng-container [ngSwitch]="type">
-        <ng-container *ngSwitchCase="type === 'plot' || type === 'scalar' ? type : ''">
+      @switch (type) {
+        @case (type === 'plot' || type === 'scalar' ? type : '') {
           <sm-single-graph
             [hideDownloadButtons]="externalTool"
             [class.less-padding]="false"
@@ -17,10 +16,10 @@
             [graphsNumber]="1"
             [height]="singleGraphHeight"
             [chart]="plotData"
-            [id]="'lala'"
+            [id]="'report-widget'"
             [isDarkTheme]="isDarkTheme"
             [showLoaderOnDraw]="false"
-            [identifier]="'lala'"
+            [identifier]="'report-widget'"
             [width]="400"
             [xAxisType]="xaxis"
             [isCompare]="true"
@@ -29,63 +28,60 @@
             [hideMaximize]="hideMaximize"
             (maximizeClicked)="maximize()">
           </sm-single-graph>
-        </ng-container>
-
-        <ng-container *ngSwitchCase="'sample'">
-          <sm-debug-image-snippet
-            *ngIf="frame?.url"
-            class="d-flex-center h-100"
-            [frame]="frame"
-            [noHoverEffects]="true"
-            (imageClicked)="hideMaximize === 'show' && sampleClicked($event)">
-          </sm-debug-image-snippet>
-        </ng-container>
-
-        <ng-container *ngSwitchCase="'parcoords'">
-          <sm-parallel-coordinates-graph
-            *ngIf="parcoordsData"
-            [experiments]="parcoordsData.experiments"
-            [parameters]="parcoordsData.params"
-            [metric]="parcoordsData.metric"
-            [metricValueType]="parcoordsData.valueType"
-            [darkTheme]="isDarkTheme"
-            [reportMode]="true"
-          ></sm-parallel-coordinates-graph>
-        </ng-container>
-
-        <div *ngSwitchCase="'single'" class="single-value-summary-section">
-          <sm-single-value-summary-table
-            *ngIf="singleValueData && singleValueData[0]"
-            [data]="singleValueData"
-            [experimentName]="singleValueData[0]?.metric"
-            [darkTheme]="isDarkTheme"
-          ></sm-single-value-summary-table>
-        </div>
-      </ng-container>
-
-    </ng-container>
-  </ng-container>
-</ng-container>
-<ng-template #placeHolder>
+        }
+        @case ('sample') {
+          @if (frame?.url) {
+            <sm-debug-image-snippet
+              class="d-flex-center h-100"
+              [frame]="frame"
+              [noHoverEffects]="true"
+              (imageClicked)="hideMaximize === 'show' && sampleClicked($event)">
+            </sm-debug-image-snippet>
+          }
+        }
+        @case ('parcoords') {
+          @if (parcoordsData) {
+            <sm-parallel-coordinates-graph
+              [experiments]="parcoordsData.experiments"
+              [parameters]="parcoordsData.params"
+              [metrics]="parcoordsData.metrics"
+              [darkTheme]="isDarkTheme"
+              [reportMode]="true"
+            ></sm-parallel-coordinates-graph>
+          }
+        }
+        @case ('single') {
+          <div class="single-value-summary-section">
+            @if (singleValueData && singleValueData[0]) {
+              <sm-single-value-summary-table
+                [data]="singleValueData"
+                [experimentName]="singleValueData[0]?.metric"
+                [darkTheme]="isDarkTheme"
+              ></sm-single-value-summary-table>
+            }
+          </div>
+        }
+      }
+    } @else {
+      <div class="placeholder">Missing permissions to view this item.
+      </div>
+    }
+  } @else {
+    <div class="container" [class.dark-theme]="isDarkTheme">
+      <div class="s3message">
+        Missing S3 credentials. Please verify credentials in <a target="_blank" href="/settings/webapp-configuration">WEB APP CLOUD ACCESS</a> in clearml app.
+      </div>
+    </div>
+  }
+} @else {
   <div class="placeholder">
     <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
       <path
         d="M43.29,43.65H5.29c-.55,0-1-.45-1-1h0c0-.55,.45-1,1-1H43.29c.55,0,1,.45,1,1h0c0,.55-.45,1-1,1h0Zm1-27v-2h-3.5V5.65h-1V14.79l-8.5,5.04-4.5-5.12V5.65h-1V14.49l-4.7,8.48h-4.3V5.65h-1V22.97h-2.42l-4.58-12.22V5.65h-1v5.1h-3.5v2h3.12l.38,1.02v9.2h-3.5v2h3.5v14.68h1v-14.68h3.18l3.82,10.2v4.48h1v-4.84l5.5-9.84h3.54v14.68h1v-14.82l4-2.42,8.92,10.18v7.06h1v-7h3.54v-2h-3.5v-14h3.5ZM8.79,22.97v-6.52l2.44,6.52h-2.44Zm5.32,2h1.68v4.48l-1.68-4.48Zm2.68,5.72v-5.72h3.18l-3.18,5.72Zm6.58-7.72l2.42-4.36v4.36h-2.42Zm3.42-.46v-4.76l2.74,3.12-2.74,1.64Zm5.84-1.14l7.16-4.26v12.54l-7.16-8.28Z"
         fill="#5a658e"/>
     </svg>
-    <span class="show-text" (click)="activate()">Show preview</span>
+    <span class="show-text" tabindex="1" (click)="activate()" (keyup)="activate()">Show preview</span>
   </div>
-</ng-template>
+}
 
-<ng-template #signIsNeededTemplate>
-  <div class="container" [class.dark-theme]="isDarkTheme">
-    <div class="s3message">
-      Missing S3 credentials. Please verify credentials in <a target="_blank" href="/settings/webapp-configuration">WEB APP CLOUD ACCESS</a> in clearml app.
-    </div>
-  </div>
-</ng-template>
 
-<ng-template #noPermissionsTemplate>
-  <div class="placeholder">Missing permissions to view this item.
-  </div>
-</ng-template>

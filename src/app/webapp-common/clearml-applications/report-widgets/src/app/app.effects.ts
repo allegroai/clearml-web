@@ -14,7 +14,6 @@ import {
 import {EMPTY, mergeMap, of, switchMap} from 'rxjs';
 import {Store} from '@ngrx/store';
 import {catchError, filter} from 'rxjs/operators';
-import {ApiReportsService} from '~/business-logic/api-services/reports.service';
 import {BaseAdminService} from '@common/settings/admin/base-admin.service';
 import {ReportsGetTaskDataResponse} from '~/business-logic/model/reports/reportsGetTaskDataResponse';
 import {getSignedUrl, setSignedUrl} from '@common/core/actions/common-auth.actions';
@@ -37,7 +36,6 @@ export class AppEffects {
     private httpClient: HttpClient,
     private store: Store,
     private actions$: Actions,
-    private reportsApi: ApiReportsService,
     private adminService: BaseAdminService) {
   }
 

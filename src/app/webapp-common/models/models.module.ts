@@ -21,13 +21,11 @@ import {ModelInfoLabelsViewComponent} from './dumbs/model-info-labels-view/model
 import {ExperimentSharedModule} from '~/features/experiments/shared/experiment-shared.module';
 import {ModelsMenuEffects} from './effects/models-menu.effects';
 import {AngularSplitModule} from 'angular-split';
-import {CommonLayoutModule} from '../layout/layout.module';
 import {FeatureModelsModule} from '~/features/models/feature-models.module';
 import {SmFormBuilderService} from '../core/services/sm-form-builder.service';
 import {MODELS_PREFIX_INFO, MODELS_PREFIX_MENU, MODELS_PREFIX_VIEW, MODELS_STORE_KEY} from './models.consts';
 import {ModelCustomColsMenuComponent} from './dumbs/model-custom-cols-menu/model-custom-cols-menu.component';
 import {ModelHeaderComponent} from '~/webapp-common/models/dumbs/model-header/model-header.component';
-import {SharedModule} from '~/shared/shared.module';
 import {CommonDeleteDialogModule} from '../shared/entity-page/entity-delete/common-delete-dialog.module';
 import {ModelInfoMetadataComponent} from './containers/model-info-metadata/model-info-metadata.component';
 import {merge, pick} from 'lodash-es';
@@ -103,7 +101,7 @@ export const modelSyncedKeys    = [
 ];
 
 export const MODELS_CONFIG_TOKEN =
-  new InjectionToken<StoreConfig<ModelsState, any>>('ModelsConfigToken');
+  new InjectionToken<StoreConfig<ModelsState>>('ModelsConfigToken');
 
 const localStorageKey = '_saved_models_state_';
 
@@ -124,7 +122,7 @@ const getInitState = (userPreferences: UserPreferences) => ({
         return nextState;
       };
     },
-    (reducer: ActionReducer<any>) =>
+    (reducer: ActionReducer<ModelsState>) =>
       createUserPrefFeatureReducer(
         MODELS_STORE_KEY, modelSyncedKeys, [MODELS_PREFIX_INFO, MODELS_PREFIX_MENU, MODELS_PREFIX_VIEW],
         userPreferences, reducer
@@ -139,7 +137,6 @@ const getInitState = (userPreferences: UserPreferences) => ({
     FormsModule,
     ReactiveFormsModule,
     CommonModule,
-    CommonLayoutModule,
     ModelRouterModule,
     ModelSharedModule,
     ExperimentSharedModule,
@@ -149,7 +146,6 @@ const getInitState = (userPreferences: UserPreferences) => ({
     StoreModule.forFeature(MODELS_STORE_KEY, reducers, MODELS_CONFIG_TOKEN),
     EffectsModule.forFeature([ModelsViewEffects, ModelsInfoEffects, ModelsMenuEffects]),
     FeatureModelsModule,
-    SharedModule,
     ExperimentGraphsModule,
     ExperimentCompareSharedModule,
     RouterTabNavBarComponent,

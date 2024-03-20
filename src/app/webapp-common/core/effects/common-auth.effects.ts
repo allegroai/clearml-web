@@ -2,6 +2,7 @@ import {Injectable} from '@angular/core';
 import {Actions, concatLatestFrom, createEffect, ofType} from '@ngrx/effects';
 import {ApiAuthService} from '~/business-logic/api-services/auth.service';
 import * as authActions from '../actions/common-auth.actions';
+import {setCredentialLabel} from '../actions/common-auth.actions';
 import {requestFailed} from '../actions/http.actions';
 import {activeLoader, deactivateLoader, setServerError} from '../actions/layout.actions';
 import {catchError, filter, finalize, map, mergeMap, switchMap, throttleTime} from 'rxjs/operators';
@@ -12,14 +13,11 @@ import {GetCurrentUserResponseUserObject} from '~/business-logic/model/users/get
 import {AdminService} from '~/shared/services/admin.service';
 import {selectDontShowAgainForBucketEndpoint, selectS3BucketCredentialsBucketCredentials, selectSignedUrl} from '@common/core/reducers/common-auth-reducer';
 import {EMPTY, of} from 'rxjs';
-import {
-  S3AccessDialogData,
-  S3AccessResolverComponent
-} from '@common/layout/s3-access-resolver/s3-access-resolver.component';
+import {S3AccessDialogData, S3AccessResolverComponent} from '@common/layout/s3-access-resolver/s3-access-resolver.component';
 import {MatDialog} from '@angular/material/dialog';
-import {setCredentialLabel} from '../actions/common-auth.actions';
 import {isGoogleCloudUrl, SignResponse} from '@common/settings/admin/base-admin-utils';
 import {isFileserverUrl} from '~/shared/utils/url';
+import {selectRouterQueryParams} from '@common/core/reducers/router-reducer';
 
 @Injectable()
 export class CommonAuthEffects {
@@ -32,7 +30,8 @@ export class CommonAuthEffects {
     private store: Store,
     private adminService: AdminService,
     private matDialog: MatDialog
-  ) {}
+  ) {
+  }
 
   activeLoader = createEffect(() => this.actions.pipe(
     ofType(authActions.getAllCredentials, authActions.createCredential),
@@ -41,7 +40,8 @@ export class CommonAuthEffects {
 
   getAllCredentialsEffect = createEffect(() => this.actions.pipe(
     ofType(authActions.getAllCredentials),
-    switchMap(action => this.credentialsApi.authGetCredentials({}).pipe(
+    switchMap(action => this.credentialsApi.authGetCredentials({},
+      {userId: action.userId}).pipe(
       concatLatestFrom(() => this.store.select(selectCurrentUser)),
       mergeMap(([res, user]: [AuthGetCredentialsResponse, GetCurrentUserResponseUserObject]) => [
         authActions.updateAllCredentials({credentials: res.credentials, extra: res?.['additional_credentials'], workspace: user.company.id}),
@@ -53,9 +53,15 @@ export class CommonAuthEffects {
 
   revokeCredential = createEffect(() => this.actions.pipe(
     ofType(authActions.credentialRevoked),
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    mergeMap(action => this.credentialsApi.authRevokeCredentials({access_key: action.accessKey}).pipe(
-      mergeMap(() => [authActions.removeCredential(action), deactivateLoader(action.type)]),
+    concatLatestFrom(() => [
+      this.store.select(selectRouterQueryParams).pipe(map(params => params.userId)),
+    ]),
+    mergeMap(([action, userId]) => this.credentialsApi.authRevokeCredentials(
+      {access_key: action.accessKey}, {userId}).pipe(
+      mergeMap(() => [
+        authActions.removeCredential(action),
+        deactivateLoader(action.type)
+      ]),
       catchError(error => [
         requestFailed(error),
         deactivateLoader(action.type),
@@ -66,32 +72,40 @@ export class CommonAuthEffects {
 
   createCredential = createEffect(() => this.actions.pipe(
     ofType(authActions.createCredential),
-    mergeMap(action => this.credentialsApi.authCreateCredentials({label: action.label}).pipe(
-      mergeMap(({credentials}) => [
-        authActions.addCredential({newCredential: credentials, workspaceId: action.workspace?.id}),
-        deactivateLoader(action.type)
-      ]),
-      catchError(error => [
-        requestFailed(error),
-        setServerError(error, null, 'Unable to create credentials'),
-        authActions.addCredential({newCredential: {}, workspaceId: action.workspace?.id}),
-        deactivateLoader(action.type)])
-    ))
+    concatLatestFrom(() => [
+      this.store.select(selectRouterQueryParams).pipe(map(params => params.userId)),
+    ]),
+    mergeMap(([action, userId]) =>
+      this.credentialsApi.authCreateCredentials({label: action.label},
+        {userId}).pipe(
+        mergeMap(({credentials}) => [
+          authActions.addCredential({newCredential: credentials, workspaceId: action.workspace?.id}),
+          deactivateLoader(action.type)
+        ]),
+        catchError(error => [
+          requestFailed(error),
+          setServerError(error, null, 'Unable to create credentials'),
+          authActions.addCredential({newCredential: {}, workspaceId: action.workspace?.id}),
+          deactivateLoader(action.type)])
+      ))
   ));
 
   updateCredentialLabel = createEffect(() => this.actions.pipe(
     ofType(authActions.updateCredentialLabel),
+    concatLatestFrom(() => this.store.select(selectRouterQueryParams).pipe(map(params => params.userId))),
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    mergeMap(action => this.credentialsApi.authEditCredentials({access_key: action.credential.access_key, label: action.label}).pipe(
-      mergeMap(() => [
-        setCredentialLabel({credential: action.credential, label: action.label}),
-        deactivateLoader(action.type)
-      ]),
-      catchError(error => [
-        requestFailed(error),
-        setServerError(error, null, 'Unable to update credentials'),
-        deactivateLoader(action.type)])
-    ))
+    mergeMap(([action, userId]) =>
+      this.credentialsApi.authEditCredentials({access_key: action.credential.access_key, label: action.label},
+        {userId}).pipe(
+        mergeMap(() => [
+          setCredentialLabel({credential: action.credential, label: action.label}),
+          deactivateLoader(action.type)
+        ]),
+        catchError(error => [
+          requestFailed(error),
+          setServerError(error, null, 'Unable to update credentials'),
+          deactivateLoader(action.type)])
+      ))
   ));
 
   refresh = createEffect(() => this.actions.pipe(
@@ -129,8 +143,8 @@ export class CommonAuthEffects {
                 return EMPTY;
             }
           }
-        ),
-      ),
+        )
+      )
     )
   ));
 

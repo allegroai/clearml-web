@@ -1,0 +1,79 @@
+@import "variables";
+
+:host {
+  display: flex;
+  flex-direction: column;
+
+  .btn.btn-outline {
+    color: $blue-500;
+    border: 1px solid $cloudy-blue;
+    font-size: 14px;
+    font-weight: normal;
+    &:hover {
+      border-color: $blue-250;
+    }
+  }
+
+  sm-menu {
+    height: 24px;
+    width: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 4px;
+  }
+  .multi-selected-parameter{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background-color: transparent;
+    &:hover {
+      background-color: $blue-50;
+    }
+
+    .multi-selected-parameter-name{
+      max-width: 280px;
+    }
+    .al-ico-dialog-x {
+      visibility: hidden
+    }
+
+    &:hover {
+      .al-ico-dialog-x {
+        visibility: visible;
+
+      }
+  }
+
+  .selected-parameter {
+    align-items: center;
+    justify-content: space-between;
+    max-width: 260px;
+    }
+  }
+
+  .title-container {
+    margin-bottom: 12px;
+    border-bottom: 1px solid $cloudy-blue;
+    padding: 6px 12px 6px 0;
+    &:hover {
+      border-color: $blue-250;
+      cursor: pointer;
+    }
+
+    .param-selector-title {
+      color: $blue-500;
+      font-size: 14px;
+    }
+
+    sm-menu {
+      margin-left: auto;
+    }
+  }
+  .no-data{
+    text-align: center;
+    color: $blue-300;
+  }
+}

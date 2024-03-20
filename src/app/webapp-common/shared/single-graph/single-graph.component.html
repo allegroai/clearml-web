@@ -1,23 +1,28 @@
 <div #drawHere
-     [style.height.px]="height"
-     [class.whitebg]="!isDarkTheme"
-     [class.dark-theme]="isDarkTheme"
-     [class.loading]="loading"
-     [class.whitebg-table]="type?.[0] === 'table'"
-     [class.move-title]="type?.[0] !== 'parcoords'"
-     (scroll)="repositionModeBar($event.target)"
->
+  [style.height.px]="height"
+  [class.whitebg]="!isDarkTheme"
+  [class.dark-theme]="isDarkTheme"
+  [class.loading]="loading"
+  [class.whitebg-table]="type?.[0] === 'table'"
+  [class.move-title]="type?.[0] !== 'parcoords'"
+  (scroll)="repositionModeBar($event.target)"
+  >
   <div class="graph-title" [class.table-title]="type?.[0] === 'table'">
-    <span #dot
-          *ngIf="moveLegendToTitle && chart && title"
-          [style.background-color]="chart?.data[0].line?.color"
-          [colorButtonRef]="dot"
-          [smChooseColor]="$any(chart?.data[0].line?.color)"
-          [stringToColor]="singleColorKey"
-          class="title-color">
-    </span>
+    @if (moveLegendToTitle && chart && title) {
+      <span #dot
+        [style.background-color]="chart?.data[0].line?.color"
+        [colorButtonRef]="dot"
+        [smChooseColor]="$any(chart?.data[0].line?.color)"
+        [stringToColor]="singleColorKey"
+        class="title-color">
+      </span>
+    }
     <div #graphTitle class="ellipsis" [title]="graphTitle.scrollWidth <= graphTitle.clientWidth ? '' : title" (mouseenter)="changeDetector.detectChanges()" data-id="graphTitleName">{{title}}</div>
-    <sm-tag-list *ngIf="title" [tags]="chart.tags?.slice(0,3)"></sm-tag-list>
+    @if (title) {
+      <sm-tag-list [tags]="chart.tags?.slice(0,3)"></sm-tag-list>
+    }
   </div>
-  <mat-spinner [diameter]="32" [strokeWidth]="4" color="accent" *ngIf="loading" class="plot-loader"></mat-spinner>
+  @if (loading) {
+    <mat-spinner [diameter]="32" [strokeWidth]="4" color="accent" class="plot-loader"></mat-spinner>
+  }
 </div>

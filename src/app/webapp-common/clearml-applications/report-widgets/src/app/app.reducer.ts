@@ -1,4 +1,4 @@
-import {createReducer, createSelector, on} from '@ngrx/store';
+import {createFeature, createReducer, on} from '@ngrx/store';
 import {reportsPlotlyReady, setNoPermissions, setParallelCoordinateExperiments, setPlotData, setSampleData, setSignIsNeeded, setSingleValues, setTaskData} from './app.actions';
 import {DebugSample} from '@common/shared/debug-sample/debug-sample.reducer';
 import {MetricsPlotEvent} from '~/business-logic/model/events/metricsPlotEvent';
@@ -44,32 +44,21 @@ export const initialState: State = {
   taskData: null
 };
 
-export const appReducer = createReducer(
-  initialState,
-  on(reportsPlotlyReady, (state) => ({...state, plotlyReady: true})),
-  on(setPlotData, (state, action) => ({...state, plotData: action.data as ReportsApiMultiplotsResponse})),
-  on(setSampleData, (state, action) => ({...state, sampleData: action.data})),
-  on(setSingleValues, (state, action) => ({...state, singleValuesData: action.data})),
-  on(setParallelCoordinateExperiments, (state, action) => ({...state, parallelCoordinateData: action.data})),
-  on(setSignIsNeeded, (state) => ({...state, signIsNeeded: true})),
-  on(setNoPermissions, (state) => ({...state, noPermissions: true})),
-  on(setTaskData, (state, action) => ({...state, taskData:
-      {appId: action.appId, sourceTasks: action.sourceTasks, sourceProject: action.sourceProject}})
+export const appFeature = createFeature({
+  name: 'app',
+  reducer: createReducer(
+    initialState,
+    on(reportsPlotlyReady, (state): State => ({...state, plotlyReady: true})),
+    on(setPlotData, (state, action): State => ({...state, plotData: action.data as ReportsApiMultiplotsResponse})),
+    on(setSampleData, (state, action): State => ({...state, sampleData: action.data})),
+    on(setSingleValues, (state, action): State => ({...state, singleValuesData: action.data})),
+    on(setParallelCoordinateExperiments, (state, action): State => ({...state, parallelCoordinateData: action.data})),
+    on(setSignIsNeeded, (state): State => ({...state, signIsNeeded: true})),
+    on(setNoPermissions, (state): State => ({...state, noPermissions: true})),
+    on(setTaskData, (state, action): State => ({
+        ...state, taskData:
+          {appId: action.appId, sourceTasks: action.sourceTasks, sourceProject: action.sourceProject}
+      })
+    ),
   ),
-);
-
-export const selectFeature = state => state.appReducer as State;
-
-export const selectScaleFactor = createSelector(selectFeature, state => state.scaleFactor);
-export const selectReportsPlotlyReady = createSelector(selectFeature, state => state.plotlyReady);
-export const selectPlotData = createSelector(selectFeature, state => state.plotData);
-export const selectSampleData = createSelector(selectFeature, state => state.sampleData);
-export const selectSingleValuesData = createSelector(selectFeature, state => state.singleValuesData);
-export const selectParallelCoordinateExperiments = createSelector(selectFeature, state => state.parallelCoordinateData);
-export const selectSignIsNeeded = createSelector(selectFeature, state => state.signIsNeeded);
-export const selectNoPermissions = createSelector(selectFeature, state => state.noPermissions);
-export const selectTaskData = createSelector(selectFeature, (state): {
-  sourceProject: string;
-  sourceTasks: string[];
-  appId: string;
-} => state.taskData);
+});

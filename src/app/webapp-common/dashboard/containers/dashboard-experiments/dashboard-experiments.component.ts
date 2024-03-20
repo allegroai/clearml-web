@@ -1,10 +1,10 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, inject, Input} from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { IRecentTask} from '../../common-dashboard.reducer';
 import {getRecentExperiments} from '../../common-dashboard.actions';
-import { ITask } from '../../../../business-logic/model/al-task';
-import {selectCurrentUser} from '../../../core/reducers/users-reducer';
+import { ITask } from '~/business-logic/model/al-task';
+import {selectCurrentUser} from '@common/core/reducers/users-reducer';
 import {filter, take} from 'rxjs/operators';
 
 @Component({
@@ -12,22 +12,20 @@ import {filter, take} from 'rxjs/operators';
   templateUrl: './dashboard-experiments.component.html',
   styleUrls: ['./dashboard-experiments.component.scss']
 })
-export class DashboardExperimentsComponent implements OnInit {
+export class DashboardExperimentsComponent {
+  private store = inject(Store);
+  private router = inject(Router);
   @Input() recentTasks: IRecentTask[];
 
-  constructor(private store: Store, private router: Router) {
-  }
-
-  ngOnInit() {
+  constructor() {
     this.store.select(selectCurrentUser)
       .pipe(filter(user => !!user), take(1))
       .subscribe(() => this.store.dispatch((getRecentExperiments())));
   }
 
   public taskSelected(task: IRecentTask | ITask) {
-    // TODO ADD task.id to route
     const projectId = task.project ? task.project.id : '*';
-    return this.router.navigateByUrl('projects/' + projectId + '/experiments/' + task.id);
+    return this.router.navigate(['projects', projectId, 'experiments', task.id]);
   }
 
 }

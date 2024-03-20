@@ -37,6 +37,7 @@ export interface ScatterPlotSeries {
     y: number;
     name: string;
     description?: string;
+    extraParamsHoverInfo?: string[];
   }[]
 }
 
@@ -115,7 +116,7 @@ export const selectMainPageTagsFilterMatchMode = createSelector(projects, select
 export const selectCompanyTags = createSelector(projects, state => state.companyTags);
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const selectProjectSystemTags = createSelector(projects, state => getSystemTags({system_tags: state.systemTags} as ITableExperiment));
-export const selectTagsColors = createSelector(projects, state => state.tagsColors);
+export const selectTagsColors = createSelector(projects, state => state?.tagsColors);
 export const selectLastUpdate = createSelector(projects, state => state.lastUpdate);
 export const selectTagColors = createSelector(selectTagsColors,
   (tagsColors, props: { tag: string }) => tagsColors[props.tag]);

@@ -36,7 +36,7 @@ export class SimpleDatasetVersionContentComponent {
   @Input() set data(csv: string) {
     const lines = csv?.trimEnd().split('\n') ?? [];
     const header = lines.splice(0, 1)[0] ?? '';
-    const colWidth = (this.ref.nativeElement.getBoundingClientRect().width - 150) / 2 ?? 300;
+    const colWidth = (this.ref.nativeElement.getBoundingClientRect().width - 150) / 2;
     this.columns = header.split(/, ?/)
       .map((caption, index) => {
         const width = this.colSizes?.[columnIds[index]] ? `${this.colSizes[columnIds[index]]}px` : null;

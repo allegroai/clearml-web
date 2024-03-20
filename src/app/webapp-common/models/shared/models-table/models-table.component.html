@@ -39,6 +39,7 @@
     [minimizedTableHeader]="'MODEL LIST'"
     [sortFields]="tableSortFields"
     [keyboardControl]="true"
+    [autoLoadMore]="true"
     (colReordered)="columnsReordered.emit($event)"
     (rowSelectionChanged)="onRowSelectionChanged($event)"
     (rowClicked)="tableRowClicked($event)"
@@ -75,13 +76,13 @@
           (formDataChanged)="headerCheckboxClicked()"
           inputClassName="table-check-box select-col-checkbox">
         </sm-checkbox-control>
-        <div class="al-icon al-ico-dropdown-arrow sm drop-down" [matMenuTriggerFor]="selectionMenu"></div>
+        <div class="al-icon al-ico-dropdown-arrow drop-down" data-id="Checkbox Dropdown" [matMenuTriggerFor]="selectionMenu"></div>
       </div>
       <mat-menu class="light-theme" #selectionMenu="matMenu">
         <div class="menu-title">Select from project</div>
-        <button mat-menu-item (click)="selectAll()">All</button>
-        <button mat-menu-item (click)="emitSelection([])">None</button>
-        <button mat-menu-item (click)="selectAll(true)">All matching filter</button>
+        <button mat-menu-item data-id="All Option" (click)="selectAll()">All</button>
+        <button mat-menu-item data-id="None Option" (click)="emitSelection([])">None</button>
+        <button mat-menu-item data-id="All Matching Filter Option" (click)="selectAll(true)">All matching filter</button>
       </mat-menu>
     </ng-template>
 
@@ -177,22 +178,28 @@
         [activeContextRow]="contextModel"
         [contextMenuOpen]="contextMenuActive"
         [entityType]="entityType"
+        [tagsTemplate]="tagList"
+        [compactColDataTemplate]="compactCol"
         [class.no-tags]="getSysTags(model).length === 0 && model?.tags.length === 0"
         (click)="selected && openContextMenu({e: $event, rowData: model, backdrop: true})"
       >
         <div sm-name-icon><i *ngIf="model?.system_tags.includes('shared')" class="al-icon al-ico-link sm-md ms-2"></i>
         </div>
-          <sm-tag-list tags-list-container [@inOutAnimation] *ngIf="!cardsCollapsed" [sysTags]="getSysTags(model)" [tags]="model?.tags"></sm-tag-list>
-          <div [@inOutAnimation] *ngIf="!cardsCollapsed" class="ellipsis compact-columns-data" compact-columns-data>
-            Updated {{model.last_update | timeAgo}} by {{model.user?.name || 'Unknown User'}}
-            <ng-container *ngIf="model.task"><span class="dot">●</span>{{model.task.name}}</ng-container>
-          </div>
         <sm-status-icon-label
           [status]="model?.ready? 'published': 'created'"></sm-status-icon-label>
         <sm-checkbox-control fieldName="selected" [formData]="isRowSelected(model)"
                              (formDataChanged)="rowSelectedChanged($event, model)"
                              inputClassName="table-check-box table-body"></sm-checkbox-control>
       </sm-table-card>
+      <ng-template #tagList>
+        <sm-tag-list [@inOutAnimation] *ngIf="!cardsCollapsed" [sysTags]="getSysTags(model)" [tags]="model?.tags"></sm-tag-list>
+      </ng-template>
+      <ng-template #compactCol>
+        <div [@inOutAnimation] *ngIf="!cardsCollapsed" class="ellipsis compact-columns-data">
+          Updated {{model.last_update | timeAgo}} by {{model.user?.name || 'Unknown User'}}
+          <ng-container *ngIf="model.task"><span class="dot">●</span>{{model.task.name}}</ng-container>
+        </div>
+      </ng-template>
     </ng-template>
   </sm-table>
 </div>

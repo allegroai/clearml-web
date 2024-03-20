@@ -12,7 +12,6 @@ import {ProfilePreferencesComponent} from '@common/settings/admin/profile-prefer
 import {ProfileNameComponent} from '@common/settings/admin/profile-name/profile-name.component';
 import {AdminFooterComponent} from '@common/settings/admin/admin-footer/admin-footer.component';
 import {S3AccessComponent} from '@common/settings/admin/s3-access/s3-access.component';
-import {AdminDialogTemplateComponent} from '@common/settings/admin/admin-dialog-template/admin-dialog-template.component';
 import {AdminCredentialTableComponent} from '@common/settings/admin/admin-credential-table/admin-credential-table.component';
 import {AdminFooterActionsComponent} from '~/features/settings/containers/admin/admin-footer-actions/admin-footer-actions.component';
 import {UserCredentialsComponent} from '~/features/settings/containers/admin/user-credentials/user-credentials.component';
@@ -37,6 +36,9 @@ import {MatButtonToggleModule} from '@angular/material/button-toggle';
 import {KeyValuePipe} from '@common/shared/pipes/key-value.pipe';
 import {ButtonToggleComponent} from '@common/shared/ui-components/inputs/button-toggle/button-toggle.component';
 import {LabelValuePipe} from '@common/shared/pipes/label-value.pipe';
+import {AdminDialogTemplateComponent} from '@common/settings/admin/admin-dialog-template/admin-dialog-template.component';
+import {TimeAgoPipe} from '@common/shared/pipes/timeAgo';
+import {ShowTooltipIfEllipsisDirective} from '@common/shared/ui-components/indicators/tooltip/show-tooltip-if-ellipsis.directive';
 
 
 
@@ -48,7 +50,6 @@ import {LabelValuePipe} from '@common/shared/pipes/label-value.pipe';
     UserCredentialsComponent,
     AdminFooterActionsComponent,
     AdminCredentialTableComponent,
-    AdminDialogTemplateComponent,
     S3AccessComponent,
     CreateCredentialDialogComponent,
     AdminFooterComponent,
@@ -82,7 +83,10 @@ import {LabelValuePipe} from '@common/shared/pipes/label-value.pipe';
     MatButtonToggleModule,
     KeyValuePipe,
     ButtonToggleComponent,
-    LabelValuePipe
+    LabelValuePipe,
+    AdminDialogTemplateComponent,
+    TimeAgoPipe,
+    ShowTooltipIfEllipsisDirective,
   ],
   exports: [
     UserCredentialsComponent,

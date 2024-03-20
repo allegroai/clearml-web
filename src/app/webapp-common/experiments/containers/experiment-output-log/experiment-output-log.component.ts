@@ -25,7 +25,7 @@ import {
 import {ExperimentLogInfoComponent} from '../../dumb/experiment-log-info/experiment-log-info.component';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {activeLoader} from '@common/core/actions/layout.actions';
-import {Log} from '@common/experiments/reducers/experiment-output.reducer';
+import {Log} from '@common/experiments/actions/common-experiment-output.actions';
 
 @Component({
   selector: 'sm-experiment-output-log',

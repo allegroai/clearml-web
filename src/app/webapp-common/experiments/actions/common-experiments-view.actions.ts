@@ -76,7 +76,7 @@ export const updateManyExperiment = createAction(
 
 export const setSelectedExperiments = createAction(
   EXPERIMENTS_PREFIX + ' [set selected experiments]',
-  props<{ experiments: ISelectedExperiment[]; compareMode?: 'scalars' | 'plots'}>()
+  props<{ experiments: ISelectedExperiment[]}>()
 );
 
 export const getSelectedExperimentsByIds = createAction(
@@ -112,7 +112,7 @@ export const toggleColHidden = createAction(
 
 export const toggleSelectedMetricCompare = createAction(
   EXPERIMENTS_PREFIX + ' [toggle metric selected state]',
-  props<{ columnId: string; projectId: string; compareView: 'scalars' | 'plots' }>()
+  props<{ columnId: string; projectId: string }>()
 );
 
 export const setVisibleColumnsForProject = createAction(
@@ -222,7 +222,7 @@ export const addColumn = createAction(
 
 export const addSelectedMetric = createAction(
   EXPERIMENTS_PREFIX + ' [add selected metric scalars]',
-  props<{ col: Partial<ISmCol>; projectId: string; compareView: 'scalars' | 'plots' }>()
+  props<{ col: Partial<ISmCol>; projectId: string }>()
 );
 
 export const addSelectedMetricPlots = createAction(
@@ -237,7 +237,7 @@ export const removeCol = createAction(
 
 export const removeSelectedMetric = createAction(
   EXPERIMENTS_PREFIX + ' [remove selected metric]',
-  props<{ id: string; projectId: string; compareView: 'scalars' | 'plots' }>()
+  props<{ id: string; projectId: string }>()
 );
 
 export const setColumnWidth = createAction(
@@ -291,6 +291,11 @@ export const setTableMode = createAction(
   EXPERIMENTS_PREFIX + '[set table view mode]',
   props<{ mode: 'info' | 'table' | 'compare'}>()
 );
+export const setCompareView= createAction(
+  EXPERIMENTS_PREFIX + '[set table compare view]',
+  props<{ mode: 'scalars' | 'plots' }>()
+);
+
 export const toggleCompareScalarSettings = createAction(
   EXPERIMENTS_PREFIX + '[toggle compare scalars settings]'
 );

@@ -7,10 +7,11 @@ import {Pipe, PipeTransform} from '@angular/core';
 export class TestConditionalPipe implements PipeTransform {
 
   transform(form: any, groupedApplicationForm: [string, any[]][], conditional: {
-    op: string; entries: [{
+    op: string;
+    entries: {
       name: string;
       value: string;
-    }];
+    }[];
   }, groupIndex: number = 0): boolean {
     const conditions = [];
     const flatForm2Levels = groupedApplicationForm.reduce((acc, group) => {

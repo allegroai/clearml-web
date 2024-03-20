@@ -6,15 +6,18 @@ import {filter} from 'rxjs/operators';
 import {Store} from '@ngrx/store';
 import {createCredential, resetCredential} from '@common/core/actions/common-auth.actions';
 import {selectNewCredential} from '@common/core/reducers/common-auth-reducer';
-import {guessAPIServerURL, HTTP} from '~/app.constants';
 import {ConfigurationService} from '@common/shared/services/configuration.service';
 import {
   GetCurrentUserResponseUserObjectCompany
 } from '~/business-logic/model/users/getCurrentUserResponseUserObjectCompany';
 import {Queue} from '~/business-logic/model/queues/queue';
 import {GettingStartedContext} from '../../../../environments/base';
-import {trackById, trackByIndex} from '@common/shared/utils/forms-track-by';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {DialogTemplateComponent} from '@common/shared/ui-components/overlay/dialog-template/dialog-template.component';
+import {NavbarItemComponent} from '@common/shared/ui-components/panel/navbar-item/navbar-item.component';
+import {CopyClipboardComponent} from '@common/shared/ui-components/indicators/copy-clipboard/copy-clipboard.component';
+import {YouTubePlayerModule} from '@angular/youtube-player';
+import {CheckboxControlComponent} from '@common/shared/ui-components/forms/checkbox-control/checkbox-control.component';
 
 
 interface StepObject {
@@ -38,20 +41,25 @@ export interface WelcomeMessageData {
   selector: 'sm-welcome-message',
   templateUrl: './welcome-message.component.html',
   styleUrls: ['./welcome-message.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    DialogTemplateComponent,
+    NavbarItemComponent,
+    CopyClipboardComponent,
+    YouTubePlayerModule,
+    CheckboxControlComponent
+  ]
 })
 export class WelcomeMessageComponent {
   public step: number = 1;
   accessKey: string;
   secretKey: string;
   credentialsCreated = false;
-  protected readonly trackById = trackById;
 
   public workspace: GetCurrentUserResponseUserObjectCompany;
 
 
-  API_BASE_URL = HTTP.API_BASE_URL_NO_VERSION;
-  fileBaseUrl = HTTP.FILE_BASE_URL;
   WEB_SERVER_URL = window.location.origin;
   GETTING_STARTED_STEPS: StepObject[] = [{
     id: 1,
@@ -90,17 +98,16 @@ export class WelcomeMessageComponent {
   public currentLink: string;
   public showTabs: boolean;
   public src: string;
-  public trackByFn = trackByIndex;
-  public displayedServerUrls: { apiServer?: string; filesServer?: string };
   public isJupyter: boolean = false;
   public community: boolean;
   public entityName: string;
+  credentialsComment: string;
 
   constructor(
     private store: Store,
     private dialogRef: MatDialogRef<WelcomeMessageComponent>,
     @Inject(MAT_DIALOG_DATA) public data: WelcomeMessageData,
-    private configService: ConfigurationService,
+    protected configService: ConfigurationService,
     private cdr: ChangeDetectorRef
   ) {
     this.dialogRef.beforeClosed().subscribe(res =>
@@ -117,7 +124,6 @@ export class WelcomeMessageComponent {
         this.gettingStartedContext = env.gettingStartedContext;
         this.docsLink = env.docsLink;
         this.community = env.communityServer;
-        this.displayedServerUrls = env.displayedServerUrls;
         this.cdr.markForCheck();
       });
     this.showTabs = data?.showTabs;
@@ -134,9 +140,6 @@ export class WelcomeMessageComponent {
       this.steps[0].header = null;
     }
     this.host = `${window.location.protocol}//${window.location.hostname}`;
-    if (this.API_BASE_URL === '/api') {
-      this.API_BASE_URL = guessAPIServerURL();
-    }
 
     this.store.select(selectActiveWorkspace)
       .pipe(
@@ -145,6 +148,7 @@ export class WelcomeMessageComponent {
       )
       .subscribe(active => {
         this.workspace = active;
+        this.credentialsComment = this.community && this.workspace.name
         this.cdr.markForCheck();
       });
 
@@ -214,12 +218,16 @@ export class WelcomeMessageComponent {
     this.isJupyter = isJupyter;
     if (isJupyter) {
       this.steps[this.queue ? 2 : 1].code =
-        `%env CLEARML_WEB_HOST=${this.WEB_SERVER_URL }
-%env CLEARML_API_HOST=${this.displayedServerUrls?.apiServer || this.API_BASE_URL }
-%env CLEARML_FILES_HOST=${this.displayedServerUrls?.filesServer || this.fileBaseUrl}${this.credentialsLabel? ('\n# ' + this.credentialsLabel):''}
-%env CLEARML_API_ACCESS_KEY=${this.accessKey || `<You’re API access key>`}
-%env CLEARML_API_SECRET_KEY=${this.secretKey ||  `<You’re API secret key>`}`;
-
+        `%env CLEARML_WEB_HOST=${this.WEB_SERVER_URL}
+%env CLEARML_API_HOST=${this.configService.apiServerUrl()}\n`;
+      if (this.configService.fileServerUrl()) {
+       this.steps[this.queue ? 2 : 1].code += `%env CLEARML_FILES_HOST=${this.configService.fileServerUrl()}\n`;
+      }
+      if(this.credentialsLabel) {
+        this.steps[this.queue ? 2 : 1].code += `# ${this.credentialsLabel}\n`;
+      }
+      this.steps[this.queue ? 2 : 1].code += `%env CLEARML_API_ACCESS_KEY=${this.accessKey || '<Your API access key>'}
+%env CLEARML_API_SECRET_KEY=${this.secretKey ||  '<Your API secret key>'}`;
     } else {
       if (this.queue) {
         this.steps[2].code = `clearml-agent init`;
@@ -229,4 +237,43 @@ export class WelcomeMessageComponent {
     }
   }
 
+  getCopyConfig() {
+    let res =  'api {\n';
+    if (this.credentialsComment) {
+      res += `  ${this.credentialsComment}\n`;
+    }
+    res += `  web_server: ${this.WEB_SERVER_URL}
+  api_server: ${this.configService.apiServerUrl()}\n`;
+    const filesServer = this.configService.fileServerUrl();
+    if (filesServer) {
+      res += `  files_server: ${filesServer}\n`;
+    }
+    res += `  credentials {
+    "access_key" = "${this.accessKey}"
+    "secret_key" = "${this.secretKey}"
+  }
+}`;
+    return res;
+  }
+
+  getCopyPython() {
+    if(this.showTabs) {
+      return `import numpy as np
+import matplotlib.pyplot as plt
+# Add the following two lines to your code, to have ClearML automatically log your experiment
+from ${this.gettingStartedContext?.packageName || 'clearml'} import Task
+
+task = Task.init(project_name='My Project', task_name='My Experiment')
+# Create a plot using matplotlib, or you can also use plotly
+plt.scatter(np.random.rand(50), np.random.rand(50), c=np.random.rand(50), alpha=0.5)
+# Plot will be reported automatically to clearml
+plt.show()
+
+# Report some scalars
+for i in range(100):
+  task.get_logger().report_scalar(title="graph title", series="linear", value=i*2, iteration=i)`;
+    }
+    return `from ${this.gettingStartedContext?.packageName || 'clearml'} import Task
+task = Task.init(project_name="my project", task_name="my task")`;
+  }
 }

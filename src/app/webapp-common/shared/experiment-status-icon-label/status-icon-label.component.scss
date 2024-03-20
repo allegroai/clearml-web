@@ -1,4 +1,55 @@
-@import "src/app/webapp-common/shared/ui-components/styles/variables";
+@import "variables";
+
+:host {
+  display: grid;
+  grid-template-columns: 14px 70px;
+  align-items: center;
+  grid-gap: 4px;
+
+  &.show-spinner {
+    grid-template-columns: 14px 70px 18px;
+  }
+
+  &.hide-label {
+    grid-template-columns: 14px;
+  }
+
+  &.created, &.queued {
+    color: $grey-purple
+  }
+
+  &.completed, &.Final {
+    color: $completed-blue;
+
+  }
+  &.aborted {
+    color: $completed-blue;
+  }
+  &.running {
+    color: $running-green;
+  }
+
+  &.failed {
+    color: $strong-red;
+  }
+
+  &.in_progress, &.Uploading {
+    color: $running-green;
+  }
+
+  &.published {
+    color: $neon-yellow;
+    line-height: 23px;
+  }
+
+  &.closed {
+    color: $blue-sky;
+  }
+
+  &.stopped {
+    color: $blue-sky;
+  }
+}
 
 .icon {
   min-width: 10px;
@@ -6,35 +57,12 @@
 
 .label {
   line-height: 18px;
-  margin-left: 5px;
 
   &.with-spinner {
     min-width: 50px;
   }
 }
 
-.created, .queued {
-  color: $grey-purple
-}
-
-.completed, .Final {
-  color: $completed-blue;
-
-}
-.aborted {
-  color: $completed-blue;
-}
-.running {
-  color: $running-green;
-}
-
-.failed {
-  color: $strong-red;
-}
-
-.in_progress, .Uploading {
-  color: $running-green;
-}
 :host-context(.light-theme) {
   .published {
     color: darken($neon-yellow, 10%);
@@ -43,42 +71,22 @@
     }
   }
 }
-.published {
-  color: $neon-yellow;
-  line-height: 23px;
-}
 
-.closed {
-  color: $blue-sky;
-}
-
-.stopped {
-  color: $blue-sky;
-}
-
-::ng-deep .ui-state-highlight{
-  sm-status-icon-label, sm-experiment-type-icon-label {
-    .published, .created, .in_progress, .queued, .failed, .stopped, .training, .testing, .completed, .aborted{
-      color: $blue-50;
-      filter: brightness(0) invert(1);
-    }
-  }
-}
-
-::ng-deep .selected {
-  sm-status-icon-label, sm-experiment-type-icon-label {
-    .published, .created, .in_progress, .queued, .failed, .stopped, .training, .testing, .completed, .aborted{
-      color: $blue-50;
-      filter: brightness(0) invert(1);
-    }
+:host-context(.selected) {
+  :host {
+    color: $blue-50;
+    filter: brightness(0) invert(1);
   }
 }
 
 .middle {
   height: 14px;
-  margin-top: 2px
 }
 
 .spinner {
-  margin: -2px 0 0 6px;
+  opacity: 0;
+
+  .show {
+    opacity: 1;
+  }
 }

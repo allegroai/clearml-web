@@ -7,7 +7,7 @@ import {createMultiSingleValuesChart, mergeMultiMetrics, mergeMultiMetricsGroupe
 import {getMultiScalarCharts, getMultiSingleScalars, resetExperimentMetrics, setExperimentMetricsSearchTerm, setExperimentSettings, setScalarsHoverMode, setSelectedExperiments} from '../../actions/experiments-compare-charts.actions';
 import {selectCompareTasksScalarCharts, selectExperimentMetricsSearchTerm, selectMultiSingleValues, selectScalarsHoverMode, selectSelectedExperiments, selectSelectedExperimentSettings} from '../../reducers';
 import {ScalarKeyEnum} from '~/business-logic/model/events/scalarKeyEnum';
-import {GroupByCharts, groupByCharts} from '@common/experiments/reducers/experiment-output.reducer';
+import {GroupByCharts, groupByCharts} from '@common/experiments/actions/common-experiment-output.actions';
 import {ExtFrame} from '@common/shared/single-graph/plotly-graph-base';
 import {RefreshService} from '@common/core/services/refresh.service';
 import {selectRouterParams} from '@common/core/reducers/router-reducer';
@@ -81,7 +81,7 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
     smoothType: smoothTypeEnum.exponential,
     xAxisType: ScalarKeyEnum.Iter,
     selectedMetricsScalar: []
-  }
+  };
   private originalSettings: ExperimentCompareSettings;
   public minimized = false;
   public splitSize$: Observable<number>;
@@ -115,7 +115,7 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
       distinctUntilChanged()
     );
     this.routerParams$ = this.store.select(selectRouterParams).pipe(
-      filter(params => !!params.ids),
+      filter(params => params.ids !== undefined),
       distinctUntilChanged()
     );
 
@@ -135,7 +135,7 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
 
         if (singleValues) {
           const visibles = this.graphsComponent?.singleValueGraph.first?.chart.data.reduce((curr, data) => {
-            curr[data.task] = data.visible
+            curr[data.task] = data.visible;
             return curr;
           }, {}) ?? {};
           const singleValuesData = createMultiSingleValuesChart(singleValues, visibles);
@@ -150,15 +150,15 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
         this.store.select(selectMetricVariants),
         this.store.select(selectSelectedExperiments)))
       .subscribe(([params, metrics, selectedExperiments]) => {
-      if (!this.taskIds || this.taskIds.join(',') !== params.ids) {
-        const previousTaskIds = this.taskIds;
-        this.taskIds = params.ids.split(',').sort();
-        this.store.dispatch(setSelectedExperiments({selectedExperiments: this.taskIds}));
-        if (metrics.length === 0 || (metrics.length > 0 && previousTaskIds !== undefined) || !isEqual(selectedExperiments, this.taskIds)) {
-          this.store.dispatch(getCustomMetricsPerType({ids: this.taskIds, metricsType: EventTypeEnum.TrainingStatsScalar, isModel: this.entityType === EntityTypeEnum.model}));
+        if (!this.taskIds || this.taskIds.join(',') !== params.ids) {
+          const previousTaskIds = this.taskIds;
+          this.taskIds = params.ids.split(',').sort().filter(id => !!id);
+          this.store.dispatch(setSelectedExperiments({selectedExperiments: this.taskIds}));
+          if ((metrics.length === 0 || (metrics.length > 0 && previousTaskIds !== undefined) || !isEqual(selectedExperiments, this.taskIds))) {
+            this.store.dispatch(getCustomMetricsPerType({ids: this.taskIds, metricsType: EventTypeEnum.TrainingStatsScalar, isModel: this.entityType === EntityTypeEnum.model}));
+          }
         }
-      }
-    }));
+      }));
 
     this.subs.add(this.store.select(selectCompareSelectedMetrics('scalars'))
       .pipe(
@@ -178,7 +178,7 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
         const newSelectedMetricsScalar = selectedMetrics.filter(m => !m.hidden).map(m => m.metricName + m.variantName);
         const VariantWasAdded = newSelectedMetricsScalar?.length > this.settings.selectedMetricsScalar?.length;
         this.settings.selectedMetricsScalar = newSelectedMetricsScalar;
-        const variants = Object.entries(metricsVariants).map(([metricName, variants]) => ({metric: metricName, variants}))
+        const variants = Object.entries(metricsVariants).map(([metricName, variants]) => ({metric: metricName, variants}));
         this.selectedVariants = variants;
         if (variants.length > 0) {
           if (this.firstTime || VariantWasAdded && this.missingVariantGraphInStore()) {
@@ -218,8 +218,8 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
             selectedMetricsCols = metrics.filter(metric => this.settings.selectedMetricsScalar.includes(metric.metric + metric.variant) || this.settings.selectedMetricsScalar.includes(metric.metric));
           } else {
             if (this.settings.groupBy === 'metric') {
-              const uniqueMetrics = Array.from( new Set(metrics.map(a => a.metric)))
-              const FifthMetric = uniqueMetrics[5] ?? uniqueMetrics.at(-1)
+              const uniqueMetrics = Array.from(new Set(metrics.map(a => a.metric)));
+              const FifthMetric = uniqueMetrics[5] ?? uniqueMetrics.at(-1);
               selectedMetricsCols = metrics.slice(0, metrics.findIndex(metric => metric.metric === FifthMetric) ?? 5);
 
             } else {
@@ -250,8 +250,8 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
       return acc;
     }, {} as { [metric: string]: string[] });
 
-    return Object.entries(selectedMetricsVariants).map(([metricName, variants]) => ({metric: metricName, variants}))
-  }
+    return Object.entries(selectedMetricsVariants).map(([metricName, variants]) => ({metric: metricName, variants}));
+  };
 
   private prepareGraphsAndUpdate(metrics, singleValues) {
     if (metrics || singleValues) {
@@ -298,7 +298,7 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
     }
     this.settings = {...this.settings, selectedMetricsScalar: selectedList ?? []};
     if (!this.minimized) {
-      const selectedMetricsCols = this.originMetrics.filter(metric => this.settings.selectedMetricsScalar.includes(metric.metric + metric.variant) || this.settings.selectedMetricsScalar.includes(metric.metric))
+      const selectedMetricsCols = this.originMetrics.filter(metric => this.settings.selectedMetricsScalar.includes(metric.metric + metric.variant) || this.settings.selectedMetricsScalar.includes(metric.metric));
       this.selectedVariants = this.buildMetricVariants(selectedMetricsCols);
       if (this.selectedVariants.length > 0) {
         this.store.dispatch(getMultiScalarCharts({taskIds: this.taskIds, entity: this.entityType, metrics: this.selectedVariants, xAxisType: this.settings.xAxisType}));
@@ -372,6 +372,6 @@ export class ExperimentCompareScalarChartsComponent implements OnInit, OnDestroy
 
   private missingVariantGraphInStore() {
     const graphs = this.graphs ? Object.keys(this.graphs) : [];
-    return this.settings.selectedMetricsScalar.filter(metric => !metric.startsWith(' Summary')).some( graph => !graphs.includes(graph));
+    return this.settings.selectedMetricsScalar.filter(metric => !metric.startsWith(' Summary')).some(graph => !graphs.includes(graph));
   }
 }

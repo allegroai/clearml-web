@@ -1,4 +1,4 @@
-import {createFeatureSelector, createSelector, ReducerTypes, on, createReducer} from '@ngrx/store';
+import {createFeatureSelector, createSelector, ReducerTypes, on, createReducer, ActionCreator} from '@ngrx/store';
 import {Project} from '~/business-logic/model/projects/project';
 import {User} from '~/business-logic/model/users/user';
 import {Task} from '~/business-logic/model/tasks/task';
@@ -15,6 +15,7 @@ import {
 import {SearchState} from '../common-search/common-search.reducer';
 import {ActiveSearchLink, activeSearchLink} from '~/features/dashboard-search/dashboard-search.consts';
 import {IReport} from '@common/reports/reports.consts';
+import {setFilterByUser} from '@common/core/actions/users.actions';
 
 export interface DashboardSearchState {
   projects: Project[];
@@ -48,8 +49,8 @@ export const searchInitialState: DashboardSearchState = {
 };
 
 export const dashboardSearchReducers = [
-  on(searchActivate, (state) => ({...state, active: true})),
-  on(searchDeactivate, (state) => ({
+  on(searchActivate, (state): DashboardSearchState => ({...state, active: true})),
+  on(searchDeactivate, (state): DashboardSearchState => ({
     ...state,
     active: false,
     term: searchInitialState.term,
@@ -57,47 +58,49 @@ export const dashboardSearchReducers = [
     scrollIds: null,
     resultsCount: null
   })),
-  on(searchSetTerm, (state, action) => ({...state, term: action, forceSearch: action.force, scrollIds: null})),
-  on(setProjectsResults, (state, action) => ({
+  on(searchSetTerm, (state, action): DashboardSearchState => ({...state, term: action, forceSearch: action.force, scrollIds: null})),
+  on(setFilterByUser, (state): DashboardSearchState => ({...state, scrollIds: null})),
+
+  on(setProjectsResults, (state, action): DashboardSearchState => ({
     ...state,
     projects: action.scrollId === state.scrollIds?.[activeSearchLink.projects] ? state.projects.concat(action.projects) : action.projects,
     scrollIds: {...state.scrollIds, [activeSearchLink.projects]: action.scrollId}
   })),
-  on(setPipelinesResults, (state, action) => ({
+  on(setPipelinesResults, (state, action): DashboardSearchState => ({
     ...state,
     pipelines: action.scrollId === state.scrollIds?.[activeSearchLink.pipelines] ? state.pipelines.concat(action.pipelines) : action.pipelines,
     scrollIds: {...state.scrollIds, [activeSearchLink.pipelines]: action.scrollId}
   })),
-  on(setOpenDatasetsResults, (state, action) => ({
+  on(setOpenDatasetsResults, (state, action): DashboardSearchState => ({
     ...state,
     openDatasets: action.scrollId === state.scrollIds?.[activeSearchLink.openDatasets] ? state.openDatasets.concat(action.openDatasets) : action.openDatasets,
     scrollIds: {...state.scrollIds, [activeSearchLink.openDatasets]: action.scrollId}
   })),
-  on(setExperimentsResults, (state, action) => ({
+  on(setExperimentsResults, (state, action): DashboardSearchState => ({
     ...state,
     experiments: action.scrollId === state.scrollIds?.[activeSearchLink.experiments] ? state.experiments.concat(action.experiments) : action.experiments,
     scrollIds: {...state.scrollIds, [activeSearchLink.experiments]: action.scrollId}
   })),
-  on(setModelsResults, (state, action) => ({
+  on(setModelsResults, (state, action): DashboardSearchState => ({
     ...state,
     models: action.scrollId === state.scrollIds?.[activeSearchLink.models] ? state.models.concat(action.models) : action.models,
     scrollIds: {...state.scrollIds, [activeSearchLink.models]: action.scrollId}
   })),
-  on(setReportsResults, (state, action) => ({
+  on(setReportsResults, (state, action): DashboardSearchState => ({
     ...state,
     reports: action.scrollId === state.scrollIds?.[activeSearchLink.reports] ? state.reports.concat(action.reports) : action.reports,
     scrollIds: {...state.scrollIds, [activeSearchLink.reports]: action.scrollId}
   })),
-  on(setResultsCount, (state, action) => ({...state, resultsCount: action.counts})),
-  on(clearSearchResults, (state) => ({
+  on(setResultsCount, (state, action): DashboardSearchState => ({...state, resultsCount: action.counts})),
+  on(clearSearchResults, (state): DashboardSearchState => ({
     ...state,
     [activeSearchLink.models]: [],
     [activeSearchLink.experiments]: [],
     [activeSearchLink.pipelines]: [],
     [activeSearchLink.projects]: [],
   })),
-  on(searchClear, (state) => ({...state, ...searchInitialState})),
-] as ReducerTypes<DashboardSearchState, any>[];
+  on(searchClear, (state): DashboardSearchState => ({...state, ...searchInitialState})),
+] as ReducerTypes<DashboardSearchState, ActionCreator[]>[];
 
 export const dashboardSearchReducer = createReducer(
   searchInitialState,

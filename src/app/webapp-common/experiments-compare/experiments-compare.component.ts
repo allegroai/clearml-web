@@ -15,7 +15,7 @@ import {selectProjectType} from '~/core/reducers/view.reducer';
 import {ALL_PROJECTS_OBJECT} from '@common/core/effects/projects.effects';
 import {trackById} from '@common/shared/utils/forms-track-by';
 import {selectRouterConfig, selectRouterParams} from '@common/core/reducers/router-reducer';
-import {getGlobalLegendData} from '@common/experiments-compare/actions/experiments-compare-charts.actions';
+import {getGlobalLegendData, setGlobalLegendData} from '@common/experiments-compare/actions/experiments-compare-charts.actions';
 import {rgbList2Hex} from '@common/shared/services/color-hash/color-hash.utils';
 import {ColorHashService} from '@common/shared/services/color-hash/color-hash.service';
 import {SelectModelComponent} from '@common/select-model/select-model.component';
@@ -61,11 +61,11 @@ export class ExperimentsCompareComponent implements OnInit, OnDestroy {
   private ids: string[];
   public duplicateNamesObject: { [name: string]: boolean };
   private routeConfig$: Observable<string[]>;
+  private titleCasePipe = new TitleCasePipe();
 
   constructor(private store: Store,
               private router: Router,
               private activatedRoute: ActivatedRoute,
-              private titleCasePipe: TitleCasePipe,
               private colorHash: ColorHashService,
               private dialog: MatDialog,
               private cdr: ChangeDetectorRef,
@@ -86,6 +86,7 @@ export class ExperimentsCompareComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.subs.unsubscribe();
     this.store.dispatch(resetSelectCompareHeader({fullReset: true}));
+    this.store.dispatch(setGlobalLegendData({data: null}));
     this.store.dispatch(setContextMenu({contextMenu: null}));
     this.store.dispatch(resetSelectModelState({fullReset: true}));
   }
@@ -97,7 +98,7 @@ export class ExperimentsCompareComponent implements OnInit, OnDestroy {
 
     this.subs.add(combineLatest([this.routeConfig$,
       this.store.select(selectRouterParams),
-      this.store.select(selectSelectedProject)]).pipe(filter(([conf, params, project]) => !!params.ids && !!project?.id)).subscribe(([conf, params, project]) => {
+      this.store.select(selectSelectedProject)]).pipe(filter(([, params, project]) => !!params.ids && !!project?.id)).subscribe(([conf, params, project]) => {
       this.setupCompareContextMenu(toCompareEntityType[this.entityType] ?? this.entityType, conf[conf[0] === 'datasets' ? 4 : 3], project?.id, params.ids, conf[0]);
     }));
 
@@ -216,7 +217,7 @@ export class ExperimentsCompareComponent implements OnInit, OnDestroy {
 
   updateUrl(ids: string[]) {
     this.router.navigate(
-      [{ids}, ...this.activatedRoute.firstChild?.snapshot.url.map(segment => segment.path)],
+      [{ids}, ...(this.activatedRoute.firstChild?.snapshot.url.map(segment => segment.path) ?? [])],
       {
         queryParamsHandling: 'preserve',
         relativeTo: this.activatedRoute,

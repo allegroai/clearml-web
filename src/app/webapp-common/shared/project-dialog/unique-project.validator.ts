@@ -7,7 +7,8 @@ import {ProjectsGetAllExResponse} from '~/business-logic/model/projects/projects
 
 @Directive({
   selector: '[smUniqueProjectValidator]',
-  providers: [{provide: NG_ASYNC_VALIDATORS, useExisting: UniqueProjectValidator, multi: true}]
+  providers: [{provide: NG_ASYNC_VALIDATORS, useExisting: UniqueProjectValidator, multi: true}],
+  standalone: true
 })
 export class UniqueProjectValidator implements AsyncValidator {
   @Input() parent: string;

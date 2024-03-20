@@ -1,8 +1,8 @@
 <sm-overlay [backdropActive]="backdropActive$|async"></sm-overlay>
 <sm-experiment-header
-  [tableCols]="(tableMode$ | async) === 'compare' ? (compareViewMode === 'plots' ? (compareSelectedMetricsPlots$ | async) : (compareSelectedMetricsScalars$ | async)) : (filteredTableCols$| async)"
+  [tableCols]="(tableMode$ | async) === 'compare' ? (tableCompareView$() === 'plots' ? (compareSelectedMetricsPlots$ | async) : (compareSelectedMetricsScalars$ | async)) : (filteredTableCols$| async)"
   [isArchived]="isArchived$ | async"
-  [metricVariants]="compareViewMode === 'scalars' ? (metricVariants$ | async) : (metricVariantsPlots$ | async)"
+  [metricVariants]="metricsVariants$()"
   [hyperParams]="(tableMode$ | async) === 'compare' ? null : hyperParams$ | async"
   [minimizedView]="minimizedView"
   [isMetricsLoading]="metricLoading$ | async"
@@ -10,7 +10,7 @@
   [showNavbarLinks]="(isPipeline$ | async) === false"
   [tableMode]="tableMode$ | async"
   [showCompareScalarSettings]="showCompareScalarSettings$ | async"
-  [compareView]="compareViewMode"
+  [compareView]="tableCompareView$()"
   [rippleEffect]="tableModeAwareness$ | async"
   [addButtonTemplate]="addButton"
   [noData]="!((experiments$ | async)?.length > 0)"

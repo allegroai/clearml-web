@@ -206,10 +206,8 @@ export class ProjectStatsComponent implements OnInit, OnDestroy {
     this.sub.unsubscribe();
   }
 
-  trackByType = (index: number, state) => state.type;
-
-  experimentClicked(event: ScatterPlotPoint) {
-    this.router.navigateByUrl(`/projects/${this.project.id}/experiments/${event.id}`);
+  experimentClicked(experimentId: string) {
+    this.router.navigateByUrl(`/projects/${this.project.id}/experiments/${experimentId}`);
   }
 
   getValueName(valueType: string) {

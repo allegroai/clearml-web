@@ -13,7 +13,7 @@
 
 ### Development
 During development, the development server will need to proxy an API server. to achieve that:
-* in [proxy.config.js](proxy.config.js) update the list of targets in line 3 with a working API server URI.
+* in [proxy.config.mjs](proxy.config.mjs) update the list of targets in line 3 with a working API server URI.
 * Angular is already configured to use this proxy configuration
 * If more than 1 API server is configured `apiBaseUrl` should be updated with the server enumeration in [environment.ts](src%2Fenvironments%2Fenvironment.ts) 
 
